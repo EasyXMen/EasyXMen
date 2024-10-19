@@ -3,7 +3,7 @@ ENTRY(_start)
 
 SECTIONS
 {
-	. = 0x60200000;
+	. = 0x80400000;
 
 	PROVIDE(_fw_start = .);
 

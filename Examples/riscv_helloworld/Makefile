@@ -26,11 +26,13 @@ ${TARGET}.elf: start.o RV_PortASM.o *.o
 %.o: $(CC_COMPILE)
 	$(CC) -mcmodel=medlow ${CFLAGS} -g -c $^ $(CC_INCLUDE)
 
+ASM_FLAG := $(CC_INCLUDE) -D__ASSEMBLY__
+
 start.o: $(CURDIR)/Startup/start.S
-	$(CC) ${CFLAGS} -g -c $^
+	$(CC) ${CFLAGS} -g -c $^ $(ASM_FLAG)
 
 RV_PortASM.o: $(CURDIR)/../../RTOS/Portable/Processor/riscv/RV_PortASM.S
-	$(CC) ${CFLAGS} -g -c $^
+	$(CC) ${CFLAGS} -g -c $^ $(ASM_FLAG)
 
 clean:
 	-rm -rf *.o *.bin *.elf *.asm
