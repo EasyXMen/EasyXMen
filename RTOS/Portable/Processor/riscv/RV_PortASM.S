@@ -32,6 +32,8 @@
  **                                                                            **
  *******************************************************************************/
 
+#include <csr.h>
+
 .extern Os_ArchTempSp
 .extern Os_SwitchTask
 .extern OS_GetTaskStackPointer
@@ -44,219 +46,200 @@
 .global rv_trap_handler
 .weak rv_trap_handler
 rv_trap_handler:
-    addi sp, sp, -(29 * 4)
-    sw x1,  1  * 4(sp)
-    sw x5,  2  * 4(sp)
-    sw x6,  3  * 4(sp)
-    sw x7,  4  * 4(sp)
-    sw x8,  5  * 4(sp)
-    sw x9,  6  * 4(sp)
-    sw x10, 7  * 4(sp)
-    sw x11, 8  * 4(sp)
-    sw x12, 9  * 4(sp)
-    sw x13, 10 * 4(sp)
-    sw x14, 11 * 4(sp)
-    sw x15, 12 * 4(sp)
-    sw x16, 13 * 4(sp)
-    sw x17, 14 * 4(sp)
-    sw x18, 15 * 4(sp)
-    sw x19, 16 * 4(sp)
-    sw x20, 17 * 4(sp)
-    sw x21, 18 * 4(sp)
-    sw x22, 19 * 4(sp)
-    sw x23, 20 * 4(sp)
-    sw x24, 21 * 4(sp)
-    sw x25, 22 * 4(sp)
-    sw x26, 23 * 4(sp)
-    sw x27, 24 * 4(sp)
-    sw x28, 25 * 4(sp)
-    sw x29, 26 * 4(sp)
-    sw x30, 27 * 4(sp)
-    sw x31, 28 * 4(sp)
-    
-    /* push mstatus*/
-    /*
-    csrr t0, mstatus
-    sw t0,  29 * 4(sp)
-    */
+	addi sp, sp, -(29 * SZREG)
+	REG_S x1,  1  * SZREG(sp)
+	REG_S x5,  2  * SZREG(sp)
+	REG_S x6,  3  * SZREG(sp)
+	REG_S x7,  4  * SZREG(sp)
+	REG_S x8,  5  * SZREG(sp)
+	REG_S x9,  6  * SZREG(sp)
+	REG_S x10, 7  * SZREG(sp)
+	REG_S x11, 8  * SZREG(sp)
+	REG_S x12, 9  * SZREG(sp)
+	REG_S x13, 10 * SZREG(sp)
+	REG_S x14, 11 * SZREG(sp)
+	REG_S x15, 12 * SZREG(sp)
+	REG_S x16, 13 * SZREG(sp)
+	REG_S x17, 14 * SZREG(sp)
+	REG_S x18, 15 * SZREG(sp)
+	REG_S x19, 16 * SZREG(sp)
+	REG_S x20, 17 * SZREG(sp)
+	REG_S x21, 18 * SZREG(sp)
+	REG_S x22, 19 * SZREG(sp)
+	REG_S x23, 20 * SZREG(sp)
+	REG_S x24, 21 * SZREG(sp)
+	REG_S x25, 22 * SZREG(sp)
+	REG_S x26, 23 * SZREG(sp)
+	REG_S x27, 24 * SZREG(sp)
+	REG_S x28, 25 * SZREG(sp)
+	REG_S x29, 26 * SZREG(sp)
+	REG_S x30, 27 * SZREG(sp)
+	REG_S x31, 28 * SZREG(sp)
 
-    /* push mepc */
-    # csrr t0, mepc
-    sw t0, 0(sp)
-    /* save sp */
-    mv t0, sp
-    la t1, Os_ArchTempSp
-    sw t0, 0(t1)
+	/* push status*/
+	csrr t0, CSR_STATUS
+	REG_S t0,  29 * SZREG(sp)
 
-    /*meip*/
-    # csrr a0, mip
-    li  a1, 0x00000800u
-    and a2, a1, a0
-    bnez a2, plic_irq
+	/* push epc */
+	csrr t0, CSR_EPC
+	REG_S t0, 0(sp)
 
-    /*mtip*/  
-    # csrr a0, mip
-    li  a1, 0x00000080u
-    and a2, a1, a0
-    bnez a2, systick
+	/* save sp */
+	mv t0, sp
+	la t1, Os_ArchTempSp
+#if __SIZEOF_POINTER__ == 8
+	sd t0, 0(t1)
+#else
+	sw t0, 0(t1)
+#endif
 
-    /*other*/
-    # csrr a0, mip
-    li  a1, 0xfffff777u
-    and a2, a1, a0
-    bnez a2, cpu_irq
+	/* CSR TIMER */
+	csrr a0, CSR_IP
+	li  a1, 0x00000020u
+	and a2, a1, a0
+	bnez a2, systick
 
-    /*msip*/
-    # csrr a0, mip
-    li  a1, 0x00000008u
-    and a2, a1, a0
-    bnez a2, dispatch
-    j resume
+	/*other*/
+	csrr a0, CSR_IP
+	li  a1, 0xfffffdddu
+	and a2, a1, a0
+	bnez a2, cpu_irq
 
-plic_irq:
-    jal Os_PLIC_Handler
-    j resume
+	/* Soft Interrupt */
+	csrr a0, CSR_IP
+	li  a1, 0x00000002u
+	and a2, a1, a0
+	bnez a2, dispatch
+	j resume
 
 systick:
-    # csrc mip, a1
-    jal Os_SysTick_Handler0
-    j resume
+	csrc CSR_IP, a1
+	jal Os_SysTick_Handler0
+	j resume
 
 cpu_irq:
-    jal Os_CPU_Handler
-    j resume
+	jal Os_CPU_Handler
+	j resume
 
 dispatch:
-    # csrc mip, a1
+	csrc CSR_IP, a1
 
-    jal OS_SaveTaskStackPointer
-    
-    /* Store sp to system stack */
-    jal OS_GetSystemStackPointer
-    lw t0, Os_ArchTempSp
-    mv sp, t0
+	jal OS_SaveTaskStackPointer
 
-    jal Os_SwitchTask
-    
-    jal OS_GetTaskStackPointer
+	/* Store sp to system stack */
+	jal OS_GetSystemStackPointer
+#if __SIZEOF_POINTER__ == 8
+	ld t0, Os_ArchTempSp
+#else
+	lwu t0, Os_ArchTempSp
+#endif
+	mv sp, t0
+
+	jal Os_SwitchTask
+
+	jal OS_GetTaskStackPointer
 
 resume:
-    /* resume sp*/
-    
-    lw t0, Os_ArchTempSp
-    mv sp, t0   
-              
-    /* pop mepc */
-    lw t0,  0  * 4(sp)
-    # csrw mepc, t0
-    /* pop mstatus*/
-    /*
-    lw t0,  29 * 4(sp)
-    csrw mstatus, t0
-    */
+	/* resume sp*/
+#if __SIZEOF_POINTER__ == 8
+	ld t0, Os_ArchTempSp
+#else
+	lwu t0, Os_ArchTempSp
+#endif
+	mv sp, t0
 
-    lw x1,  1  * 4(sp)
-    lw x5,  2  * 4(sp)
-    lw x6,  3  * 4(sp)
-    lw x7,  4  * 4(sp)
-    lw x8,  5  * 4(sp)
-    lw x9,  6  * 4(sp)
-    lw x10, 7  * 4(sp)
-    lw x11, 8  * 4(sp)
-    lw x12, 9  * 4(sp)
-    lw x13, 10 * 4(sp)
-    lw x14, 11 * 4(sp)
-    lw x15, 12 * 4(sp)
-    lw x16, 13 * 4(sp)
-    lw x17, 14 * 4(sp)
-    lw x18, 15 * 4(sp)
-    lw x19, 16 * 4(sp)
-    lw x20, 17 * 4(sp)
-    lw x21, 18 * 4(sp)
-    lw x22, 19 * 4(sp)
-    lw x23, 20 * 4(sp)
-    lw x24, 21 * 4(sp)
-    lw x25, 22 * 4(sp)
-    lw x26, 23 * 4(sp)
-    lw x27, 24 * 4(sp)
-    lw x28, 25 * 4(sp)
-    lw x29, 26 * 4(sp)
-    lw x30, 27 * 4(sp)
-    lw x31, 28 * 4(sp)
+	/* pop epc */
+	lwu t0,  0  * SZREG(sp)
+	csrw CSR_EPC, t0
 
-    addi sp, sp, (29 * 4)
-    mret
+	/* pop status*/
+	REG_L t0,  29 * SZREG(sp)
+	csrw CSR_STATUS, t0
 
+	REG_L x1,  1  * SZREG(sp)
+	REG_L x5,  2  * SZREG(sp)
+	REG_L x6,  3  * SZREG(sp)
+	REG_L x7,  4  * SZREG(sp)
+	REG_L x8,  5  * SZREG(sp)
+	REG_L x9,  6  * SZREG(sp)
+	REG_L x10, 7  * SZREG(sp)
+	REG_L x11, 8  * SZREG(sp)
+	REG_L x12, 9  * SZREG(sp)
+	REG_L x13, 10 * SZREG(sp)
+	REG_L x14, 11 * SZREG(sp)
+	REG_L x15, 12 * SZREG(sp)
+	REG_L x16, 13 * SZREG(sp)
+	REG_L x17, 14 * SZREG(sp)
+	REG_L x18, 15 * SZREG(sp)
+	REG_L x19, 16 * SZREG(sp)
+	REG_L x20, 17 * SZREG(sp)
+	REG_L x21, 18 * SZREG(sp)
+	REG_L x22, 19 * SZREG(sp)
+	REG_L x23, 20 * SZREG(sp)
+	REG_L x24, 21 * SZREG(sp)
+	REG_L x25, 22 * SZREG(sp)
+	REG_L x26, 23 * SZREG(sp)
+	REG_L x27, 24 * SZREG(sp)
+	REG_L x28, 25 * SZREG(sp)
+	REG_L x29, 26 * SZREG(sp)
+	REG_L x30, 27 * SZREG(sp)
+	REG_L x31, 28 * SZREG(sp)
 
-/* Default Handler for Exceptions / Interrupts */
-default_handler:
-    # csrc mip, a1
-    1:
-        j 1b
-
-
+	addi sp, sp, (29 * SZREG)
+	sret
 
 .align 8
 .global Os_StartUpResumeContext
 .weak Os_StartUpResumeContext
 Os_StartUpResumeContext:
-    lw t0, Os_ArchTempSp
-    mv sp, t0
+#if __SIZEOF_POINTER__ == 8
+	ld t0, Os_ArchTempSp
+#else
+	lwu t0, Os_ArchTempSp
+#endif
+	mv sp, t0
 
-    /* Pop PC from stack and set MEPC */
-    lw t0,  0  * 4(sp)
-    # csrw mepc, t0    
-    /* Pop mstatus from stack and set it */
-    /*
-    lw t0,  29  * 4(sp)
-    csrw mstatus, t0
-    */
+	/* Pop PC from stack and set MEPC */
+	REG_L t0,  0  * SZREG(sp)
+	csrw CSR_EPC, t0
 
-    /* Restore Registers from Stack */
-    lw x1,  1  * 4(sp)    /* RA */
-    lw x5,  2  * 4(sp)
-    lw x6,  3  * 4(sp)
-    lw x7,  4  * 4(sp)
-    lw x8,  5  * 4(sp)
-    lw x9,  6  * 4(sp)
-    lw x10, 7  * 4(sp)
-    lw x11, 8  * 4(sp)
-    lw x12, 9  * 4(sp)
-    lw x13, 10 * 4(sp)
-    lw x14, 11 * 4(sp)
-    lw x15, 12 * 4(sp)
-    lw x16, 13 * 4(sp)
-    lw x17, 14 * 4(sp)
-    lw x18, 15 * 4(sp)
-    lw x19, 16 * 4(sp)
-    lw x20, 17 * 4(sp)
-    lw x21, 18 * 4(sp)
-    lw x22, 19 * 4(sp)
-    lw x23, 20 * 4(sp)
-    lw x24, 21 * 4(sp)
-    lw x25, 22 * 4(sp)
-    lw x26, 23 * 4(sp)
-    lw x27, 24 * 4(sp)
-    lw x28, 25 * 4(sp)
-    lw x29, 26 * 4(sp)
-    lw x30, 27 * 4(sp)
-    lw x31, 28 * 4(sp)
+	/* Pop mstatus from stack and set it */
+	REG_L t0,  29  * SZREG(sp)
+	csrw CSR_STATUS, t0
 
-    addi sp, sp, (29 * 4)
-    /*enble isr*/
-    # csrrsi  zero, mstatus, 0x8
+	/* Restore Registers from Stack */
+	REG_L x1,  1  * SZREG(sp)    /* RA */
+	REG_L x5,  2  * SZREG(sp)
+	REG_L x6,  3  * SZREG(sp)
+	REG_L x7,  4  * SZREG(sp)
+	REG_L x8,  5  * SZREG(sp)
+	REG_L x9,  6  * SZREG(sp)
+	REG_L x10, 7  * SZREG(sp)
+	REG_L x11, 8  * SZREG(sp)
+	REG_L x12, 9  * SZREG(sp)
+	REG_L x13, 10 * SZREG(sp)
+	REG_L x14, 11 * SZREG(sp)
+	REG_L x15, 12 * SZREG(sp)
+	REG_L x16, 13 * SZREG(sp)
+	REG_L x17, 14 * SZREG(sp)
+	REG_L x18, 15 * SZREG(sp)
+	REG_L x19, 16 * SZREG(sp)
+	REG_L x20, 17 * SZREG(sp)
+	REG_L x21, 18 * SZREG(sp)
+	REG_L x22, 19 * SZREG(sp)
+	REG_L x23, 20 * SZREG(sp)
+	REG_L x24, 21 * SZREG(sp)
+	REG_L x25, 22 * SZREG(sp)
+	REG_L x26, 23 * SZREG(sp)
+	REG_L x27, 24 * SZREG(sp)
+	REG_L x28, 25 * SZREG(sp)
+	REG_L x29, 26 * SZREG(sp)
+	REG_L x30, 27 * SZREG(sp)
+	REG_L x31, 28 * SZREG(sp)
 
-    mret
+	addi sp, sp, (29 * SZREG)
 
+	/*enble isr*/
+	csrrsi  zero, CSR_STATUS, 0x2
 
-
-
-
-
-
-
-
-
-
-
-
+	sret
