@@ -53,7 +53,7 @@ int sbi_console_getchar(void)
 	return ret.error;
 }
 
-static void __sbi_set_timer_v02(u64 stime_value)
+void sbi_set_timer(u64 stime_value)
 {
 #if __riscv_xlen == 32
 	sbi_ecall(SBI_EXT_TIME, SBI_EXT_TIME_SET_TIMER, stime_value,

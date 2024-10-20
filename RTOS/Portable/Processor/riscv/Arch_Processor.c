@@ -94,7 +94,7 @@ P2VAR(uint32, AUTOMATIC, OS_VAR)       Os_IsrNestPcxStack;/* PRQA S 3432 */ /* M
 
 #define OS_START_SEC_VAR_CLEARED_CLONE_PTR
 #include "Os_MemMap.h"
-P2VAR(uint32, AUTOMATIC, OS_VAR)            Os_ArchTopStkPtr;
+P2VAR(uint64, AUTOMATIC, OS_VAR)            Os_ArchTopStkPtr;
 #define OS_STOP_SEC_VAR_CLEARED_CLONE_PTR
 #include "Os_MemMap.h"
 
@@ -175,14 +175,14 @@ FUNC(void, OS_CODE) Os_MultiCoreInitProcessor(void)
 #include "Os_MemMap.h"
 FUNC(void, OS_CODE) Os_ArchFirstEnterTask(void)
 {
-    Os_ArchTopStkPtr = (uint32 *)Os_SCB.sysRunningTCB->taskTop;
+    Os_ArchTopStkPtr = (uint64 *)Os_SCB.sysRunningTCB->taskTop;
 
-    /*mpp | fs | mpie*/
-    // *(--Os_ArchTopStkPtr) = 0x00001800 | 0x00002000 | 0x00000080;/*machine mode*/
+    /* spp | fs | spie */
+    *(--Os_ArchTopStkPtr) = 0x00000100 | 0x00002000 | 0x00000020; /* supervisor mode */
 
     Os_ArchTopStkPtr -= 28;
-    *(Os_ArchTopStkPtr) = (uint32)Os_TaskErrBack;    /*LP*/
-    *(--Os_ArchTopStkPtr) = (uint32)Os_TaskCfg[Os_SCB.sysRunningTaskID].osTaskEntry;    /*PC*/
+    *(Os_ArchTopStkPtr) = (uint64)(uint32)Os_TaskErrBack;    /*LP*/
+    *(--Os_ArchTopStkPtr) = (uint64)(uint32)Os_TaskCfg[Os_SCB.sysRunningTaskID].osTaskEntry;    /*PC*/
 
     Os_TaskCBExt[Os_SCB.sysRunningTaskID] = (uint32)Os_ArchTopStkPtr;
 }
@@ -226,7 +226,7 @@ FUNC(void, OS_CODE) Os_ArchSyscall(void)
 /*****************************************************************************/
 FUNC(void, OS_CODE) Os_ArchDispatch(void)
 {
-    OS_SET_CSR(mip,0x8U);    
+    csr_set(CSR_IP, 0x2U);
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"

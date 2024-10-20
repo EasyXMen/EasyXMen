@@ -261,6 +261,7 @@ long sbi_get_marchid(void);
 long sbi_get_mimpid(void);
 long sbi_probe_extension(int ext);
 void sbi_console_putchar(int ch);
+void sbi_set_timer(u64 stime_value);
 
 /* Check if current SBI specification version is 0.1 or not */
 static inline int sbi_spec_is_0_1(void)

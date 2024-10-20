@@ -36,6 +36,8 @@
 
 /*=======[I N C L U D E S]====================================================*/
 #include "Os_Internal.h"
+#include <csr.h>
+#include <sbi.h>
 
 /*=======[M A C R O S]========================================================*/
 
@@ -87,7 +89,13 @@ FUNC(void, OS_CODE) Os_ArchInitSystemTimer(void)
 /******************************************************************************/
 FUNC(void, OS_CODE) Os_SystickIsrClearFlag(void)
 {
+	csr_clear(CSR_IE, IE_TIE);
 
+	u64 next_tval =	csr_read(CSR_TIME) + 0x10000000000;
+
+	sbi_set_timer(next_tval);
+
+	csr_set(CSR_IE, IE_TIE);
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"

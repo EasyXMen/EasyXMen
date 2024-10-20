@@ -40,6 +40,8 @@
 #include "Os.h"
 #include "Arch_Irq.h"
 #include "Arch_Mpu.h"
+#include <csr.h>
+#include <sbi.h>
 
 /*=======[M A C R O S]========================================================*/
 /* OS ISR */
@@ -64,9 +66,9 @@
 #define CHECK_STACK_USAGE             1u
 #define OS_ARCH_STACK_ALIGN(addr)   ((addr) & 0xFFFFFFFCu)/*4-byte alignment*/
 /* DD_1_0335, Disables global interrupt. */
-#define Os_ArchDisableInt()
+#define Os_ArchDisableInt()	csr_clear(CSR_STATUS, SR_IE);
 /* DD_1_0336, Enables global interrupt. */
-#define Os_ArchEnableInt()
+#define Os_ArchEnableInt()	csr_set(CSR_STATUS, SR_IE);
 #define OS_ARCH_DECLARE_CRITICAL()  Os_ArchMsrType msr      /* DD_1_0338, Declares the variables that hold the interrupt control register. */
 #define OS_ARCH_ENTRY_CRITICAL()    Os_ArchSuspendInt(&msr) /* DD_1_0339, Save the variables that hold the interrupt control register. */
 #define OS_ARCH_EXIT_CRITICAL()     Os_ArchRestoreInt(msr)  /* DD_1_0340, Resume the variables that hold the interrupt control register. */
