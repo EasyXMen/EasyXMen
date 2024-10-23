@@ -46,7 +46,7 @@
 .global rv_trap_handler
 .weak rv_trap_handler
 rv_trap_handler:
-	addi sp, sp, -(29 * SZREG)
+	addi sp, sp, -(30 * SZREG)
 	REG_S x1,  1  * SZREG(sp)
 	REG_S x5,  2  * SZREG(sp)
 	REG_S x6,  3  * SZREG(sp)
@@ -185,7 +185,7 @@ resume:
 	REG_L x30, 27 * SZREG(sp)
 	REG_L x31, 28 * SZREG(sp)
 
-	addi sp, sp, (29 * SZREG)
+	addi sp, sp, (30 * SZREG)
 	sret
 
 .align 8
@@ -237,7 +237,7 @@ Os_StartUpResumeContext:
 	REG_L x30, 27 * SZREG(sp)
 	REG_L x31, 28 * SZREG(sp)
 
-	addi sp, sp, (29 * SZREG)
+	addi sp, sp, (30 * SZREG)
 
 	/*enble isr*/
 	csrrsi  zero, CSR_STATUS, 0x2

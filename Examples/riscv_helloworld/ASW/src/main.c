@@ -19,7 +19,7 @@ int main(void)
 	sbi_console_putchar('2');
 	sbi_console_putchar('\n');
 
-	StartOS(1);
+	StartOS(OSDEFAULTAPPMODE);
 
 	return 0;
 }

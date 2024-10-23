@@ -41,12 +41,20 @@
 
 /*=======[M A C R O S]========================================================*/
 /* Register operations */
-#define OS_WRITE_SP(val)
-#define OS_READ_SP(val)
-#define OS_WRITE_CSR(csr, val)
-#define OS_READ_CSR(csr) 0U
-#define OS_SET_CSR(csr, val)
-#define OS_CLEAR_CSR(csr, val)
+#define OS_WRITE_SP(val) {                 \
+    uint32  v = (uint32)(val);             \
+    __asm volatile("mv sp, %0"             \
+            :                              \
+            :"r"(v)                        \
+            :"memory");                    \
+}
+#define OS_READ_SP(val) ({                 \
+    __asm volatile("mv %0, sp"             \
+            :"=r"(val)                     \
+            :                              \
+            :"memory");                    \
+    val;                                   \
+})
 
 /*=======[T Y P E   D E F I N I T I O N S]====================================*/
 typedef struct

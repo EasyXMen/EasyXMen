@@ -61,7 +61,7 @@ CONST (OsPeripheralAreaCfgType, OS_CONST) Os_PeriAreaCfg[CFG_PERIPHERAL_MAX] =
 
 #define OS_START_SEC_VAR_STACK_CORE0
 #include "Os_MemMap.h"
-static VAR(Os_StackDataType, OS_VAR) Os_TaskStack_Idle_Core0[128];
+static VAR(Os_StackDataType, OS_VAR) Os_TaskStack_Idle_Core0[512];
 #define OS_STOP_SEC_VAR_STACK_CORE0
 #include "Os_MemMap.h"
 
@@ -219,7 +219,7 @@ static CONST(Os_StackType, OS_CONST) Os_SystemStackCore0 =
 /* ++ OsIsr Configuration ++ */
 #define OS_START_SEC_VAR_STACK_CORE0
 #include "Os_MemMap.h"
-static VAR(Os_StackDataType, OS_VAR) Os_SysTimer_Stack_Core0[128];/*system timer*/
+static VAR(Os_StackDataType, OS_VAR) Os_SysTimer_Stack_Core0[512];/*system timer*/
 #define OS_STOP_SEC_VAR_STACK_CORE0
 #include "Os_MemMap.h"
 #define OS_START_SEC_VAR_STACK_CORE0

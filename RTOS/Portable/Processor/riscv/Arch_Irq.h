@@ -80,7 +80,7 @@ typedef void (*IntFun)(void);
 
 /* Type of the variable to save the mcu status registration. */
 /* DD_1_0051 */
-typedef uint32 Os_ArchMsrType; 
+typedef uint64 Os_ArchMsrType; 
 
 /*=======[E X T E R N A L   D A T A]==========================================*/
 extern VAR(uint32, OS_VAR)             Os_Isr1NestSp[CFG_ISR_MAX_CORE0];

@@ -78,9 +78,9 @@
 #define     CFG_SYSTEM_TIMER_ENABLE_CORE1           FALSE
 #define     CFG_SYSTEM_TIMER_ENABLE_CORE2           FALSE
 /* System timer register value define */
-#define     CFG_REG_OSTIMER_VALUE_CORE0             100000U
-#define     CFG_REG_OSTIMER_VALUE_CORE1             100000U
-#define     CFG_REG_OSTIMER_VALUE_CORE2             100000U
+#define     CFG_REG_OSTIMER_VALUE_CORE0             10000U
+#define     CFG_REG_OSTIMER_VALUE_CORE1             10000U
+#define     CFG_REG_OSTIMER_VALUE_CORE2             10000U
 
 /* Timing Protection */
 #define     CFG_TIMING_PROTECTION_ENABLE            FALSE

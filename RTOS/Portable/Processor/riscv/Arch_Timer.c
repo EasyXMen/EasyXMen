@@ -66,6 +66,13 @@
 /******************************************************************************/
 FUNC(void, OS_CODE) Os_ArchInitSystemTimer(void)
 {
+	csr_clear(CSR_IE, IE_TIE);
+
+	u64 next_tval =	csr_read(CSR_TIME) + CFG_REG_OSTIMER_VALUE_CORE0;
+
+	sbi_set_timer(next_tval);
+
+	csr_set(CSR_IE, IE_TIE);
 
 }
 #define OS_STOP_SEC_CODE
@@ -91,7 +98,7 @@ FUNC(void, OS_CODE) Os_SystickIsrClearFlag(void)
 {
 	csr_clear(CSR_IE, IE_TIE);
 
-	u64 next_tval =	csr_read(CSR_TIME) + 0x10000000000;
+	u64 next_tval =	csr_read(CSR_TIME) + CFG_REG_OSTIMER_VALUE_CORE0;
 
 	sbi_set_timer(next_tval);
 

@@ -51,16 +51,11 @@ TASK(OsTask_init)
 {
     /* please insert your code here ... */
     /*alarm*/
-	SetRelAlarm(OsAlarm_1ms,1,1);
     SetRelAlarm(OsAlarm_5ms,2,5);
 	SetRelAlarm(OsAlarm_10ms,3,10);
     SetRelAlarm(OsAlarm_100ms,4,100);
     SetRelAlarm(OsAlarm_1s,5,1000);
 
-    /*scheduletabe*/
-    StartScheduleTableRel(OsScheduleTable_0,500);
-    /*activate task*/
-    ActivateTask(OsTask_event);
     if (E_OK != TerminateTask())
     {
         while (1)
@@ -139,12 +134,6 @@ TASK(OsTask_1s)
 TASK(OsTask_event)
 {
     /* please insert your code here ... */
-    while(1)
-    {
-        WaitEvent(OsEvent_0);
-        ClearEvent(OsEvent_0);
-        /* . . . */
-    }
     if (E_OK != TerminateTask())
     {
         while (1)

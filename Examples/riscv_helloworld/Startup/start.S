@@ -1,6 +1,7 @@
 #include <csr.h>
 
 .extern main
+.extern rv_trap_handler
 
 .section .entry, "ax", %progbits
 .align 3
@@ -21,6 +22,10 @@ clear_bss:
 clear_bss_done:
 
 	la sp, _stack_end
+
+	/* Intialize vector */
+	la t0,rv_trap_handler
+	csrw CSR_STVEC,t0
 
 	/* Go to C code */
 	tail main
