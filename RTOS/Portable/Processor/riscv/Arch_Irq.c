@@ -80,7 +80,7 @@ VAR(uint32, OS_VAR)             Os_Isr2NestSp[CFG_ISR_MAX_CORE0];
 /******************************************************************************/
 FUNC(void, OS_CODE) Os_ArchSuspendInt(Os_ArchMsrType* msr) /* PRQA S 3006 */ /* MISRA Rule 4.3 */
 {
-
+    *msr = csr_read_clear(CSR_STATUS, 0x2u);
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
@@ -104,7 +104,8 @@ FUNC(void, OS_CODE) Os_ArchSuspendInt(Os_ArchMsrType* msr) /* PRQA S 3006 */ /* 
 /******************************************************************************/
 FUNC(void, OS_CODE) Os_ArchRestoreInt(Os_ArchMsrType msr) /* PRQA S 3006 */ /* MISRA Rule 4.3 */
 {
-
+    VAR(Os_ArchMsrType,OS_VAR) csr = msr & 0x2u;
+    csr_set(CSR_STATUS, csr);
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
@@ -407,7 +408,7 @@ FUNC(void, OS_CODE) Os_InterruptInstall(uint32 irqId, uint8 prio, IntFun pFun)
 /******************************************************************************/
 FUNC(void, OS_CODE) Os_InterruptInit(void)
 {
-
+    csr_set(CSR_IE, 0xffffffffffffffffU);
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"

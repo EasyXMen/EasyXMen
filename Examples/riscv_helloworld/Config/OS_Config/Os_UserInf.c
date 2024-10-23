@@ -50,12 +50,30 @@
 TASK(OsTask_init)
 {
     /* please insert your code here ... */
-    /*alarm*/
-    SetRelAlarm(OsAlarm_5ms,2,5);
-	SetRelAlarm(OsAlarm_10ms,3,10);
-    SetRelAlarm(OsAlarm_100ms,4,100);
-    SetRelAlarm(OsAlarm_1s,5,1000);
+    myprintf("                                                                                   \n");
+    myprintf("-----------------------------------------------------------------------------------\n");
+    myprintf("                                                                                   \n");
+    myprintf("Hello, EasyXMen!                                                                   \n");
 
+    myprintf("                                                                                   \n");
+    myprintf("  ________                         __       __ _         _                         \n");
+    myprintf(" |  ______|                        \\ \\     / /| \\       / |                     \n");
+    myprintf(" | |         ____    ____   _    _  \\ \\   / / |  \\     /  |  ____   ______      \n");
+    myprintf(" | |______  / _  \\  / ___| | |  | |  \\ \\ / /  | \\ \\   / / | / __ \\ |  __  |  \n");
+    myprintf(" |  ______|| / \\  || (___  | |  | |   > _ <   | |\\ \\ / /| || (__) || |  | |     \n");
+    myprintf(" | |       ||   | | \\ __ \\ | |__| |  / / \\ \\  | | \\_v_/ | ||  ___/ | |  | |   \n");
+    myprintf(" | |______ | \\__| |  ___) | \\___, | / /   \\ \\ | |       | || (____ | |  | |    \n");
+    myprintf(" |________| \\__/|_| |___ /      | |/_/     \\ \\|_|       |_| \\_____||_|  |_|    \n");
+    myprintf("                            __ /  |                                                \n");
+    myprintf("                           |_____/                                                 \n");
+    myprintf("                                                                                   \n");
+    myprintf("                                                                                   \n");
+
+
+
+
+    /*activate task*/
+    ActivateTask(OsTask_100ms);
     if (E_OK != TerminateTask())
     {
         while (1)
@@ -69,6 +87,8 @@ TASK(OsTask_init)
 TASK(OsTask_1ms)
 {
     /* please insert your code here ... */
+    myprintf("Enter task D\n");
+    myprintf("Exit  task D\n");
     if (E_OK != TerminateTask())
     {
         while (1)
@@ -82,6 +102,9 @@ TASK(OsTask_1ms)
 TASK(OsTask_5ms)
 {
     /* please insert your code here ... */
+    myprintf("Enter 5ms task C\n");
+    ActivateTask(OsTask_1ms);
+    myprintf("Exit 5ms task C\n");
     if (E_OK != TerminateTask())
     {
         while (1)
@@ -95,6 +118,9 @@ TASK(OsTask_5ms)
 TASK(OsTask_10ms)
 {
     /* please insert your code here ... */
+    myprintf("Enter task B\n");
+    ActivateTask(OsTask_5ms);
+    myprintf("Exit task B\n");
     if (E_OK != TerminateTask())
     {
         while (1)
@@ -108,6 +134,14 @@ TASK(OsTask_10ms)
 TASK(OsTask_100ms)
 {
     /* please insert your code here ... */
+    myprintf("Start task switch\n");
+    myprintf("enter task A\n");
+    ActivateTask(OsTask_10ms);
+    myprintf("exit task A\n");
+    myprintf("End task switch\n\n");
+
+    myprintf("Start periodic task\n");
+    SetRelAlarm(OsAlarm_1s,1000,2000);
     if (E_OK != TerminateTask())
     {
         while (1)
@@ -121,6 +155,7 @@ TASK(OsTask_100ms)
 TASK(OsTask_1s)
 {
     /* please insert your code here ... */
+    myprintf("Hello, EasyXMen! \n");
     if (E_OK != TerminateTask())
     {
         while (1)
