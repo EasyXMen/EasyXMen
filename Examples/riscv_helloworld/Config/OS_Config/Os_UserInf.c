@@ -54,6 +54,17 @@ TASK(OsTask_init)
     myprintf("-----------------------------------------------------------------------------------\n");
     myprintf("                                                                                   \n");
     myprintf("Hello, EasyXMen!                                                                   \n");
+    myprintf("                                                                                   \n");
+#if __riscv_xlen == 32
+    myprintf("ISA: rv32                                                                          \n");
+#else
+    myprintf("ISA: rv64                                                                          \n");
+#endif
+#if __SIZEOF_POINTER__ == 8
+    myprintf("ABI: lp64                                                                          \n");
+#else
+    myprintf("ABI: ilp32                                                                         \n");
+#endif
 
     myprintf("                                                                                   \n");
     myprintf("  ________                         __       __ _         _                         \n");
@@ -66,6 +77,9 @@ TASK(OsTask_init)
     myprintf(" |________| \\__/|_| |___ /      | |/_/     \\ \\|_|       |_| \\_____||_|  |_|    \n");
     myprintf("                            __ /  |                                                \n");
     myprintf("                           |_____/                                                 \n");
+    myprintf("                                                                                   \n");
+    myprintf("                                                                                   \n");
+    myprintf("-----------------------------------------------------------------------------------\n");
     myprintf("                                                                                   \n");
     myprintf("                                                                                   \n");
 
