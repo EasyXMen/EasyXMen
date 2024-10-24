@@ -101,8 +101,8 @@ TASK(OsTask_init)
 TASK(OsTask_1ms)
 {
     /* please insert your code here ... */
-    myprintf("Enter task D\n");
-    myprintf("Exit  task D\n");
+    myprintf("| | | Enter task D\n");
+    myprintf("| | | Exit  task D\n");
     if (E_OK != TerminateTask())
     {
         while (1)
@@ -116,9 +116,9 @@ TASK(OsTask_1ms)
 TASK(OsTask_5ms)
 {
     /* please insert your code here ... */
-    myprintf("Enter 5ms task C\n");
+    myprintf("| | Enter task C\n");
     ActivateTask(OsTask_1ms);
-    myprintf("Exit 5ms task C\n");
+    myprintf("| | Exit  task C\n");
     if (E_OK != TerminateTask())
     {
         while (1)
@@ -132,9 +132,9 @@ TASK(OsTask_5ms)
 TASK(OsTask_10ms)
 {
     /* please insert your code here ... */
-    myprintf("Enter task B\n");
+    myprintf("| Enter task B\n");
     ActivateTask(OsTask_5ms);
-    myprintf("Exit task B\n");
+    myprintf("| Exit  task B\n");
     if (E_OK != TerminateTask())
     {
         while (1)
@@ -149,10 +149,10 @@ TASK(OsTask_100ms)
 {
     /* please insert your code here ... */
     myprintf("Start task switch\n");
-    myprintf("enter task A\n");
+    myprintf("Enter task A\n");
     ActivateTask(OsTask_10ms);
-    myprintf("exit task A\n");
-    myprintf("End task switch\n\n");
+    myprintf("Exit  task A\n");
+    myprintf("End   task switch\n\n");
 
     myprintf("Start periodic task\n");
     SetRelAlarm(OsAlarm_1s,1000,2000);
