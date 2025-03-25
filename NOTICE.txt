@@ -1,6 +1,6 @@
 This project incorporates components from the Open Source Software below. 
 The original copyright notices and the licenses under which we received such components are set forth below for informational purposes. 
-
+By using EasyXmen, all users agree to respect the intellectual property rights of others and comply with the requirements of all relevant third-party licenses, including but not limited to the AUTOSAR license. It is the user's responsibility to ensure that their usage, modification, or distribution of the project does not infringe upon the intellectual property rights of others or violate any applicable licenses.
 
 lwip STABLE-2.1.3_RELEASE
 
