@@ -68,7 +68,7 @@ https://atomgit.com/easyxmen/XMen
 
 # 运行条件
 
-协议栈静态代码需要结合开发工具进行使用，可通过[官方入口](https://register.easyxmen.com/welcome.html?channel=3)进行开发工具链免费申请。 各模块配置、工具使用方法，可参考模块用户手册； 基于特定芯片平台Demo工程，可通过配置工具获取使用。
+协议栈静态代码需要结合开发工具进行使用，可通过[官方入口](https://register.easyxmen.com/welcome.html?channel=3)进行开发工具链免费申请。 各模块配置、工具使用方法，可参考模块用户手册（详见工具链界面- Help -Open Reference Manual Folder）； 基于特定芯片平台Demo工程，可通过配置工具获取使用。
 
 ## 项目状态
 
