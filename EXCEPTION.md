@@ -6,8 +6,6 @@ Additionally, when using <ORIENTAIS Studio> to generate application code, some c
 
 Except for this special exception, all provisions of LGPL-2.1 continue to apply fully to this Library. If you modify this Library, you may choose to apply this exception to your version, but you are not obligated to do so. If you choose not to apply this exception, you should remove this exception statement from your version. Please note that this exception does not modify any license terms applicable to the Application, with which you must still comply.
 
-
-
 **例外声明参考译文如下（因LGPL原文为英文，因此如存在中英不一致之处，仍需以英文为准）：**
 
 虽然本项目通常受 LGPL-2.1 许可协议的约束，但该许可协议不适用于通过专门为此目的提供的头文件中定义的接口来使用本项目服务的“独立”应用程序。此类使用被视为正常使用，不构成 LGPL-2.1 条款下的“衍生作品”。
