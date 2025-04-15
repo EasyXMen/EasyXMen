@@ -1,7 +1,0 @@
-Although this project is generally covered by the LGPL-2.1 license, this license does not apply to "standalone" applications that utilize this project's services through the interfaces defined in the header files provided specifically for this purpose. Such use is considered normal and does not constitute a "derived work" under the terms of LGPL-2.1.
-
-The header files listed in the ./HEADER.MD file define the interface of this project. Including these unmodified header files in another file is also considered normal use and does not constitute a "derived work" under LGPL-2.1.
-
-Additionally, when using <ORIENTAIS Studio> to generate application code, some code from this project may be included. As a special exception, the copyright holders grant you permission to convey to a third party a Combined Work that links statically or dynamically to this project using <ORIENTAIS Studio> without adhering to the requirements set out in section 6a of LGPL-2.1, provided that you comply with all other provisions of LGPL-2.1 and that the terms and conditions of the license(s) governing the Application are met.
-
-Except for this special exception, all provisions of LGPL-2.1 continue to apply fully to this Library. If you modify this Library, you may choose to apply this exception to your version, but you are not obligated to do so. If you choose not to apply this exception, you should remove this exception statement from your version. Please note that this exception does not modify any license terms applicable to the Application, with which you must still comply.
