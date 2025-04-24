@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Xcp_Pgm.c                                                   **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : qinchun.yang                                                **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Implementation of the XCP_Pgm command                       **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Xcp_Pgm.c                                                   **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : qinchun.yang                                                **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Implementation of the XCP_Pgm command                       **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 /*=======[I N C L U D E S]====================================================*/
 #include "Xcp_Internal.h"
 
@@ -79,6 +80,13 @@
 #define XCP_GER_SECTOR_INFO_MOD_STAD 0u
 #define XCP_GER_SECTOR_INFO_MOD_LEN  1u
 #define XCP_GER_SECTOR_INFO_MOD_NAME 2u
+
+/*Address Position & Size check wheather in ROM RP*/
+/* PRQA S 3472 ++ */ /* MISRA Dir 4.9 */
+#define CHECK_XCP_FLASH_ROM_MEM(addr, size, sectorNum)   \
+    (((addr) >= Xcp_SectorInfo[sectorNum].progStartAddr) \
+     && (((addr) + (size)) <= (Xcp_SectorInfo[sectorNum].progStartAddr + Xcp_SectorInfo[sectorNum].progDataSize)))
+/* PRQA S 3472 -- */ /* MISRA Dir 4.9 */
 
 /*=======[T Y P E   D E F I N I T I O N S]====================================*/
 typedef enum
@@ -220,7 +228,7 @@ static FUNC(void, XCP_CODE) Xcp_FlsProgramTask(void);
 static FUNC(void, XCP_CODE) Xcp_FlsBlockProgramPending(void);
 
 static FUNC(void, XCP_CODE) Xcp_FlsBlockProgramTask(void);
-#endif
+#endif /*XCP_MASTER_BLOCK_MODE == STD_ON*/
 
 /*
  * Complex Command Handler
@@ -283,17 +291,17 @@ static FUNC(Std_ReturnType, XCP_CODE)
     Xcp_FlsReq(uint8 Mode, Xcp_FlsAddressType u4Address, Xcp_FlsLengthType u4Size, const uint8* pu1DataPtr)
 {
     Std_ReturnType ret = E_NOT_OK;
-    Xcp_FlsAddressType flsAddr;
-
-    flsAddr = u4Address - XCP_FLS_BASEADDR;
+    /* PRQA S 1338 ++ */ /* MISRA Rule 17.8 */
+    u4Address = u4Address - XCP_FLS_BASEADDR;
+    /* PRQA S 1338 -- */ /* MISRA Rule 17.8 */
     switch (Mode)
     {
     case XCP_FLS_WRITE:
-        ret = Xcp_FlsFuncPtr.flsWrite(flsAddr, pu1DataPtr, u4Size);
+        ret = Xcp_FlsFuncPtr.flsWrite(u4Address, pu1DataPtr, u4Size);
         break;
 
     case XCP_FLS_ERASE:
-        ret = Xcp_FlsFuncPtr.flsErase(flsAddr, u4Size);
+        ret = Xcp_FlsFuncPtr.flsErase(u4Address, u4Size);
         break;
 
     default:
@@ -501,10 +509,10 @@ static FUNC(Xcp_SeqCheckType, XCP_CODE)
                 Xcp_FlsBufferSize = 0;
                 ret = SEQ_ERROR;
             }
-            else if ((((*startAddr) >= Xcp_SectorInfo[sectorNum].progStartAddr)
-                      && (((*startAddr) + (noOfBytes))
-                          <= (Xcp_SectorInfo[sectorNum].progStartAddr + Xcp_SectorInfo[sectorNum].progDataSize))))
+            /* PRQA S 3469 ++ */ /* MISRA Dir 4.9 */
+            else if (CHECK_XCP_FLASH_ROM_MEM(*startAddr, noOfBytes, sectorNum))
             {
+                /* PRQA S 3469 -- */ /* MISRA Dir 4.9 */
                 ret = SEQ_OK;
                 /* Clear the area range flag cause we already find it */
                 XCP_FlashAreaSelect &= ~(uint32)rangType;
@@ -2037,6 +2045,6 @@ FUNC(void, XCP_CODE) Xcp_ProgramVerify(void)
 #define XCP_STOP_SEC_CODE
 #include "Xcp_MemMap.h"
 
-#endif /* (XCP_PL_PGM == (XCP_PL_PGM&XCP_RESOURCE)) */ /* PRQA S 2053 */ /* MISRA Rule 18.8, Dir 4.4 */
+#endif /*XCP_PL_PGM == XCP_PL_PGM&XCP_RESOURCE*/
 
 /*=======[E N D   O F   F I L E]==============================================*/

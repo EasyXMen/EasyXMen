@@ -18,21 +18,22 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Os_Resource.c                                               **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      :  i-soft-os                                                  **
- **  Vendor      :                                                             **
- **  DESCRIPTION : resource manager                                            **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
- **  Version :   AUTOSAR classic Platform R19--Function Safety                 **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Os_Resource.c                                               **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      :  i-soft-os                                                  **
+**  Vendor      :                                                             **
+**  DESCRIPTION : resource manager                                            **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
+**  Version :   AUTOSAR classic Platform R19--Function Safety                 **
+**                                                                            **
+*******************************************************************************/
 
 /*=======[I N C L U D E S]====================================================*/
 #include "Os_Internal.h"
@@ -42,39 +43,39 @@
 
 /*=======[I N T E R N A L   D A T A]==========================================*/
 /* PRQA S 0791 ++ */ /* MISRA Rule 5.4 */ /*OS_RESOURCE_SEGMENTNAME_SIMILAR_004*/
-#define OS_START_SEC_VAR_CLEARED_CLONE_16
+#define OS_START_SEC_VAR_CLONE_16
 #include "Os_MemMap.h"
 /* PRQA S 3218 ++ */ /* MISRA Rule 8.9 */ /*OS_RESOURCE_TYPE_009*/
 static VAR(uint16, OS_VAR) Os_CfgStdResourceMax;
 /* PRQA S 3218 -- */ /* MISRA Rule 8.9 */
-#define OS_STOP_SEC_VAR_CLEARED_CLONE_16
+#define OS_STOP_SEC_VAR_CLONE_16
 #include "Os_MemMap.h"
 
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
-#define OS_START_SEC_VAR_CLEARED_CLONE_PTR
+#define OS_START_SEC_VAR_CLONE_PTR
 #include "Os_MemMap.h"
 /* PRQA S 3678 ++ */ /* MISRA Rule 8.13 */ /*OS_RESOURCE_LACK_CONST_005*/
 static P2CONST(uint16*, OS_VAR, OS_CONST) Os_TaskResourceAccessMask;
 /* PRQA S 3678 -- */ /* MISRA Rule 8.13 */
-#define OS_STOP_SEC_VAR_CLEARED_CLONE_PTR
+#define OS_STOP_SEC_VAR_CLONE_PTR
 #include "Os_MemMap.h"
 
-#define OS_START_SEC_VAR_CLEARED_CLONE_PTR
+#define OS_START_SEC_VAR_CLONE_PTR
 #include "Os_MemMap.h"
 /* PRQA S 3678 ++ */ /* MISRA Rule 8.13 */ /*OS_RESOURCE_LACK_CONST_005*/
 static P2CONST(uint16*, OS_VAR, OS_CONST) Os_IsrResourceAccessMask;
 /* PRQA S 3678 -- */ /* MISRA Rule 8.13 */
-#define OS_STOP_SEC_VAR_CLEARED_CLONE_PTR
+#define OS_STOP_SEC_VAR_CLONE_PTR
 #include "Os_MemMap.h"
 #endif /* OS_STATUS_EXTENDED == CFG_STATUS */
 
 #if (CFG_INTERNAL_RESOURCE_MAX > 0U)
-#define OS_START_SEC_VAR_CLEARED_CLONE_PTR
+#define OS_START_SEC_VAR_CLONE_PTR
 #include "Os_MemMap.h"
 /* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */ /* OS_RESOURCE_COMPILER_001 */
 static P2VAR(Os_PriorityType, AUTOMATIC, OS_VAR) Os_OccupyInterRes;
 /* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
-#define OS_STOP_SEC_VAR_CLEARED_CLONE_PTR
+#define OS_STOP_SEC_VAR_CLONE_PTR
 #include "Os_MemMap.h"
 /* PRQA S 0791-- */ /* MISRA Rule 5.4 */
 #endif              /* CFG_INTERNAL_RESOURCE_MAX > 0U */
@@ -110,7 +111,7 @@ FUNC(void, OS_CODE) Os_InitResource(void)
     VAR(Os_ResourceType, OS_VAR) resId;
     /* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */ /* OS_RESOURCE_COMPILER_001 */
     P2VAR(Os_RCBType, AUTOMATIC, OS_VAR) pRcb;
-/* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
+    /* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
 #endif
     VAR(uint16, OS_VAR) vCoreId = Os_SCB.sysCore;
 
@@ -129,7 +130,7 @@ FUNC(void, OS_CODE) Os_InitResource(void)
         /*OS_RESOURCE_CAST_TYPE_006*/
         Os_TaskResourceAccessMask = (const uint16**)((void**)Os_TaskResourceAccessMask_Inf[vCoreId]);
         Os_IsrResourceAccessMask = (const uint16**)((void**)Os_IsrResourceAccessMask_Inf[vCoreId]);
-/* PRQA S 0311,0310 -- */ /* MISRA Rule 11.8,11.3 */
+        /* PRQA S 0311,0310 -- */ /* MISRA Rule 11.8,11.3 */
 #endif
 
         Os_ResourceCfg = Os_ResourceCfg_Inf[vCoreId];
@@ -312,7 +313,7 @@ inline static FUNC(void, OS_CODE) Os_SaveResourceByIsr2Order(Os_ICBType* pICB, R
     pICB->IsrC2ResCount = pICB->IsrC2ResCount + 1u;
     /* PRQA S 4461 ++ */ /* MISRA Rule 10.3 */ /* OS_RESOURCE_TYPE_CAST_003 */
     Os_RCB[ResID].saveCount = pICB->IsrC2ResCount;
-/* PRQA S 4461 -- */ /* MISRA Rule 10.3 */
+    /* PRQA S 4461 -- */ /* MISRA Rule 10.3 */
 /* Multi core res and spinlock should together release as
  * LIFO order*/
 #if (CFG_SPINLOCK_MAX > 0U)
@@ -400,7 +401,7 @@ static FUNC(void, OS_CODE) Os_GetResourceByTask(Os_TCBType* pTCB, ResourceType R
     }
 
     Os_RCB[ResID].savePrio = savePrioTemp;
-/* AutoSar SC2: Timing protection, resource lock. */
+    /* AutoSar SC2: Timing protection, resource lock. */
 #if (TRUE == CFG_TIMING_PROTECTION_ENABLE)
     if (Os_TaskCfg[Os_SCB.sysRunningTaskID].osTaskTmProtCfgRef != NULL_PTR)
     {
@@ -444,7 +445,7 @@ static FUNC(void, OS_CODE) Os_GetResourceByTaskOrInterrupt(Os_TCBType* pTCB, Res
     Os_SCB.sysDispatchLocker = Os_SCB.sysDispatchLocker + 1u;
 
     Os_RCB[ResID].savePrio = savePrioTemp;
-/* AutoSar SC2: Timing protection, resource lock. */
+    /* AutoSar SC2: Timing protection, resource lock. */
 #if (TRUE == CFG_TIMING_PROTECTION_ENABLE)
     if (Os_TaskCfg[Os_SCB.sysRunningTaskID].osTaskTmProtCfgRef != NULL_PTR)
     {
@@ -699,6 +700,10 @@ FUNC(StatusType, OS_CODE) GetResource(ResourceType ResID)
     OS_ENTER_KERNEL();
     VAR(StatusType, OS_VAR) err = E_OK;
 
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceEnter(OSServiceId_GetResource);
+#endif /* TRUE == CFG_TRACE_ENABLE */
+
     OS_ARCH_DECLARE_CRITICAL();
 
     /* PRQA S 3469 ++ */ /* MISRA Dir 4.9 */ /* OS_RESOURCE_MACRO_TO_FUNCTION_007 */
@@ -781,6 +786,10 @@ FUNC(StatusType, OS_CODE) GetResource(ResourceType ResID)
     }
 #endif
 
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceExit(OSServiceId_GetResource);
+#endif /* TRUE == CFG_TRACE_ENABLE */
+
     OS_EXIT_KERNEL(); /* PRQA S 3469 */ /* MISRA Dir 4.9 */ /* OS_RESOURCE_MACRO_TO_FUNCTION_007 */
     return err;
 }
@@ -821,7 +830,7 @@ FUNC(StatusType, OS_CODE) Os_GetResource(ResourceType ResID)
     ResID = Os_GetObjLocalId(ResID);
     prio = Os_ResourceCfg[ResID].ceiling;
 
-    OS_ARCH_ENTRY_CRITICAL();
+    OS_ARCH_SUSPEND_ALLINT();
     /* PRQA S 3469,1338 -- */ /* MISRA Dir 4.9,17.8 */
     switch (Os_ResourceCfg[ResID].resourceOccupyType)
     {
@@ -839,6 +848,9 @@ FUNC(StatusType, OS_CODE) Os_GetResource(ResourceType ResID)
 #endif /* OS_STATUS_EXTENDED == CFG_STATUS */
         {
             Os_GetResourceByTask(pTCB, ResID);
+#if (TRUE == CFG_TRACE_ENABLE)
+            Os_TraceResourceTaskGet(ResID, Os_SCB.sysRunningTaskID);
+#endif /* TRUE == CFG_TRACE_ENABLE */
         }
         break;
 
@@ -850,15 +862,24 @@ FUNC(StatusType, OS_CODE) Os_GetResource(ResourceType ResID)
         if (OS_LEVEL_TASK == Os_SCB.sysOsLevel)
         {
             Os_GetResourceByTaskOrInterrupt(pTCB, ResID);
+#if (TRUE == CFG_TRACE_ENABLE)
+            Os_TraceResourceTaskGet(ResID, Os_SCB.sysRunningTaskID);
+#endif /* TRUE == CFG_TRACE_ENABLE */
         }
         else
         {
             Os_GetResourceByInterrupt(pICB, ResID);
+#if (TRUE == CFG_TRACE_ENABLE)
+            Os_TraceResourceIsrGet(ResID, Os_SCB.sysRunningIsrCat2Id);
+#endif /* TRUE == CFG_TRACE_ENABLE */
         }
         break;
 
     case OCCUPIED_BY_INTERRUPT:
         Os_GetResourceByInterrupt(pICB, ResID);
+#if (TRUE == CFG_TRACE_ENABLE)
+        Os_TraceResourceIsrGet(ResID, Os_SCB.sysRunningIsrCat2Id);
+#endif /* TRUE == CFG_TRACE_ENABLE */
         break;
 
     default:
@@ -866,7 +887,7 @@ FUNC(StatusType, OS_CODE) Os_GetResource(ResourceType ResID)
         break;
     }
     /* PRQA S 3469 ++ */ /* MISRA Dir 4.9 */ /* OS_RESOURCE_MACRO_TO_FUNCTION_007 */
-    OS_ARCH_EXIT_CRITICAL();
+    OS_ARCH_RESTORE_ALLINT();
     /* PRQA S 3469 -- */ /* MISRA Dir 4.9 */
 
     return err;
@@ -898,6 +919,10 @@ FUNC(StatusType, OS_CODE) ReleaseResource(ResourceType ResID)
 {
     OS_ENTER_KERNEL();
     VAR(StatusType, OS_VAR) err = E_OK;
+
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceEnter(OSServiceId_ReleaseResource);
+#endif /* TRUE == CFG_TRACE_ENABLE */
 
     OS_ARCH_DECLARE_CRITICAL();
     /* PRQA S 3469 ++ */ /* MISRA Dir 4.9 */ /* OS_RESOURCE_MACRO_TO_FUNCTION_007 */
@@ -957,6 +982,10 @@ FUNC(StatusType, OS_CODE) ReleaseResource(ResourceType ResID)
     }
 #endif
 
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceExit(OSServiceId_ReleaseResource);
+#endif /* TRUE == CFG_TRACE_ENABLE */
+
     OS_EXIT_KERNEL(); /* PRQA S 3469 */ /* MISRA Dir 4.9 */ /* OS_RESOURCE_MACRO_TO_FUNCTION_007 */
 
     return err;
@@ -998,27 +1027,43 @@ FUNC(StatusType, OS_CODE) Os_ReleaseResource(ResourceType ResID)
     /* OS_RESOURCE_PARAM_MACRO_008 */
     ResID = Os_GetObjLocalId(ResID);
 
-    OS_ARCH_ENTRY_CRITICAL();
+    OS_ARCH_SUSPEND_ALLINT();
     /* PRQA S 3469,1338 -- */ /* MISRA Dir 4.9,17.8 */
     switch (Os_ResourceCfg[ResID].resourceOccupyType)
     {
     case OCCUPIED_BY_TASK:
         err = Os_ReleaseResourceByTask(pTCB, ResID);
+
+#if (TRUE == CFG_TRACE_ENABLE)
+        Os_TraceResourceRelease(ResID);
+#endif /* TRUE == CFG_TRACE_ENABLE */
         break;
 
     case OCCUPIED_BY_TASK_OR_INTERRUPT:
         if (OS_LEVEL_TASK == Os_RCB[ResID].saveLevel)
         {
             err = Os_ReleaseResourceByTaskOrInterrupt(pTCB, ResID);
+
+#if (TRUE == CFG_TRACE_ENABLE)
+            Os_TraceResourceRelease(ResID);
+#endif /* TRUE == CFG_TRACE_ENABLE */
         }
         else
         {
             err = Os_ReleaseResourceByInterrupt(pICB, ResID);
+
+#if (TRUE == CFG_TRACE_ENABLE)
+            Os_TraceResourceRelease(ResID);
+#endif /* TRUE == CFG_TRACE_ENABLE */
         }
         break;
 
     case OCCUPIED_BY_INTERRUPT:
         err = Os_ReleaseResourceByInterrupt(pICB, ResID);
+
+#if (TRUE == CFG_TRACE_ENABLE)
+        Os_TraceResourceRelease(ResID);
+#endif /* TRUE == CFG_TRACE_ENABLE */
         break;
 
     default: /* Nothing to do. */
@@ -1042,6 +1087,14 @@ FUNC(StatusType, OS_CODE) Os_ReleaseResource(ResourceType ResID)
         {
             if (0u == Os_SCB.sysDispatchLocker)
             {
+#if (TRUE == CFG_TRACE_ENABLE)
+                Os_TraceTaskSwitch(
+                    Os_SCB.sysRunningTaskID,
+                    Os_SCB.sysHighTaskID,
+                    OS_TRACE_TASK_SWITCH_REASON_RELEASE_RES_READY,
+                    OS_TRACE_TASK_SWITCH_REASON_RELEASE_RES_ACTIVE);
+#endif
+
                 OS_START_DISPATCH();
                 /* PRQA S 3469 ++ */ /* MISRA Dir 4.9 */ /* OS_RESOURCE_MACRO_TO_FUNCTION_007 */
                 Os_Dispatch();
@@ -1051,7 +1104,7 @@ FUNC(StatusType, OS_CODE) Os_ReleaseResource(ResourceType ResID)
 #endif
     }
     /* PRQA S 3469 ++ */ /* MISRA Dir 4.9 */ /* OS_RESOURCE_MACRO_TO_FUNCTION_007 */
-    OS_ARCH_EXIT_CRITICAL();
+    OS_ARCH_RESTORE_ALLINT();
     /* PRQA S 3469 -- */ /* MISRA Dir 4.9 */
 
     return err;

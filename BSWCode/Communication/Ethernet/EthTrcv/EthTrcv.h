@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : EthTrcv.h                                                   **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : wanglili                                                    **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : EthTrcv.h                                                   **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : wanglili                                                    **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 #ifndef ETHTRCV_H_
 #define ETHTRCV_H_
 /*******************************************************************************
@@ -87,7 +88,7 @@
 
 #if (ETHTRCV_WAKEUP_SUPPORT != ETHTRCV_WAKEUP_NOT_SUPPORTED)
 #define ETHTRCV_CFG_WAKEUP_MAP(trcvIdx, reasonIdx) (EthTrcv_TrcvPbCfg[trcvIdx].EthTrcvWakeupMapCfgPtr[reasonIdx])
-#endif /* ETHTRCV_WAKEUP_SUPPORT != ETHTRCV_WAKEUP_NOT_SUPPORTED */
+#endif
 
 /* Diagnostic Event Manager */
 #if (ETHTRCV_USED_DEM_MODULE == STD_ON)
@@ -98,15 +99,9 @@
     }
 #else
 #define ETHTRCV_DEM_REPORT(TrcvIdx, EventId)
-#endif /* ETHTRCV_USED_DEM_MODULE == STD_ON */
+#endif
 
-#if (42u == ETHTRCV_MAJORVERSION)
-extern VAR(EthTrcv_ModeType, ETHTRCV_VAR_NOINIT) EthIf_ReqTrcvMode[ETHTRCV_TRCVS_NUM];
-#elif (44u == ETHTRCV_MAJORVERSION)
-extern VAR(EthTrcv_ModeType, ETHTRCV_VAR_NOINIT) EthIf_ReqTrcvMode[ETHTRCV_TRCVS_NUM];
-#elif (19u == ETHTRCV_MAJORVERSION)
 extern VAR(Eth_ModeType, ETHTRCV_VAR_NOINIT) EthIf_ReqTrcvMode[ETHTRCV_TRCVS_NUM];
-#endif /* 42u == ETHTRCV_MAJORVERSION */
 /* declaration of EthTrcv configuration data */
 extern CONST(EthTrcv_ConfigType, ETHTRCV_CONST) EthTrcv_CfgData[ETHTRCV_TRCVS_NUM];
 extern CONST(EthTrcv_GlobalType, ETHTRCV_CONST) EthTrcv_GlobalCfg;
@@ -151,14 +146,8 @@ extern FUNC(void, ETHTRCV_CODE) EthTrcv_Init(P2CONST(EthTrcv_ConfigType, ETHTRCV
  * Return              E_OK: Service accepted  E_NOT_OK: Service denied
  */
 /******************************************************************************/
-#if (42u == ETHTRCV_MAJORVERSION)
-extern FUNC(Std_ReturnType, ETHTRCV_CODE) EthTrcv_SetTransceiverMode(uint8 TrcvIdx, EthTrcv_ModeType CtrlMode);
-#elif (44u == ETHTRCV_MAJORVERSION)
-extern FUNC(Std_ReturnType, ETHTRCV_CODE) EthTrcv_SetTransceiverMode(uint8 TrcvIdx, EthTrcv_ModeType CtrlMode);
-#elif (19u == ETHTRCV_MAJORVERSION)
 extern FUNC(Std_ReturnType, ETHTRCV_CODE) EthTrcv_SetTransceiverMode(uint8 TrcvIdx, Eth_ModeType TrcvMode);
-#endif /* 42u == ETHTRCV_MAJORVERSION */
-#endif /* ETHTRCV_SET_TRCV_MODE == STD_ON */
+#endif /* ETHTRCV_SET_TRCV_MODE */
 
 #if (ETHTRCV_GET_TRCV_MODE == STD_ON)
 /******************************************************************************/
@@ -175,17 +164,9 @@ extern FUNC(Std_ReturnType, ETHTRCV_CODE) EthTrcv_SetTransceiverMode(uint8 TrcvI
  * Return              E_OK: success E_NOT_OK: transceiver could not be initialized
  */
 /******************************************************************************/
-#if (42u == ETHTRCV_MAJORVERSION)
-extern FUNC(Std_ReturnType, ETHTRCV_CODE)
-    EthTrcv_GetTransceiverMode(uint8 TrcvIdx, P2VAR(EthTrcv_ModeType, AUTOMATIC, ETHTRCV_APPL_DATA) TrcvModePtr);
-#elif (44u == ETHTRCV_MAJORVERSION)
-extern FUNC(Std_ReturnType, ETHTRCV_CODE)
-    EthTrcv_GetTransceiverMode(uint8 TrcvIdx, P2VAR(EthTrcv_ModeType, AUTOMATIC, ETHTRCV_APPL_DATA) TrcvModePtr);
-#elif (19u == ETHTRCV_MAJORVERSION)
 extern FUNC(Std_ReturnType, ETHTRCV_CODE)
     EthTrcv_GetTransceiverMode(uint8 TrcvIdx, P2VAR(Eth_ModeType, AUTOMATIC, ETHTRCV_APPL_DATA) TrcvModePtr);
-#endif /* 42u == ETHTRCV_MAJORVERSION */
-#endif /* ETHTRCV_GET_TRCV_MODE == STD_ON */
+#endif /* ETHTRCV_GET_TRCV_MODE */
 
 #if (ETHTRCV_START_AUTO_NEG == STD_ON)
 /******************************************************************************/
@@ -204,7 +185,7 @@ extern FUNC(Std_ReturnType, ETHTRCV_CODE)
  */
 /******************************************************************************/
 extern FUNC(Std_ReturnType, ETHTRCV_CODE) EthTrcv_StartAutoNegotiation(uint8 TrcvIdx);
-#endif /* ETHTRCV_START_AUTO_NEG == STD_ON */
+#endif /* ETHTRCV_START_AUTO_NEG */
 
 /******************************************************************************/
 /*
@@ -245,7 +226,7 @@ FUNC(Std_ReturnType, ETHTRCV_CODE) EthTrcv_TransceiverLinkStateRequest(uint8 Trc
 /******************************************************************************/
 extern FUNC(Std_ReturnType, ETHTRCV_CODE)
     EthTrcv_GetLinkState(uint8 TrcvIdx, P2VAR(EthTrcv_LinkStateType, AUTOMATIC, AUTOMATIC) LinkStatePtr);
-#endif /* ETHTRCV_GET_LINK_STATE == STD_ON */
+#endif /* ETHTRCV_GET_LINK_STATE */
 
 #if (ETHTRCV_GET_BAUD_RATE == STD_ON)
 /******************************************************************************/
@@ -267,7 +248,7 @@ extern FUNC(Std_ReturnType, ETHTRCV_CODE)
 /******************************************************************************/
 extern FUNC(Std_ReturnType, ETHTRCV_CODE)
     EthTrcv_GetBaudRate(uint8 TrcvIdx, P2VAR(EthTrcv_BaudRateType, AUTOMATIC, ETHTRCV_APPL_DATA) BaudRatePtr);
-#endif /* ETHTRCV_GET_BAUD_RATE == STD_ON */
+#endif /* ETHTRCV_GET_BAUD_RATE */
 
 /******************************************************************************/
 /*
@@ -287,7 +268,7 @@ extern FUNC(Std_ReturnType, ETHTRCV_CODE)
 #if (ETHTRCV_GET_DUPLEX_MODE == STD_ON)
 extern FUNC(Std_ReturnType, ETHTRCV_CODE)
     EthTrcv_GetDuplexMode(uint8 TrcvIdx, P2VAR(EthTrcv_DuplexModeType, AUTOMATIC, AUTOMATIC) DuplexModePtr);
-#endif /* ETHTRCV_GET_DUPLEX_MODE == STD_ON */
+#endif /* ETHTRCV_GET_DUPLEX_MODE */
 
 #if (ETHTRCV_WAKEUP_NOT_SUPPORTED != ETHTRCV_WAKEUP_SUPPORT)
 /******************************************************************************/
@@ -330,7 +311,7 @@ extern FUNC(Std_ReturnType, ETHTRCV_CODE)
 /******************************************************************************/
 extern FUNC(Std_ReturnType, ETHTRCV_CODE) EthTrcv_GetTransceiverWakeupMode(
     uint8 TrcvIdx,
-    P2VAR(EthTrcv_WakeupModeType, AUTOMATIC, _APPL_DATA) TrcvWakeupModePtr);
+    P2VAR(EthTrcv_WakeupModeType, AUTOMATIC, ETHTRCV_APPL_DATA) TrcvWakeupModePtr);
 
 /******************************************************************************/
 /*
@@ -368,7 +349,7 @@ extern FUNC(Std_ReturnType, ETHTRCV_CODE) EthTrcv_CheckWakeup(uint8 TrcvIdx);
  */
 /******************************************************************************/
 FUNC(Std_ReturnType, ETHTRCV_CODE) EthTrcv_SetPhyTestMode(uint8 TrcvIdx, EthTrcv_PhyTestModeType Mode);
-#endif /* STD_ON == ETHTRCV_SET_PHYTESTMODE_API */
+#endif /* STD_ON == ETHTRCV_SET_PHYTESTMODE_API*/
 
 /******************************************************************************/
 /*
@@ -443,7 +424,7 @@ FUNC(Std_ReturnType, ETHTRCV_CODE) EthTrcv_SetPhyTxMode(uint8 TrcvIdx, EthTrcv_P
  */
 /******************************************************************************/
 FUNC(Std_ReturnType, ETHTRCV_CODE) EthTrcv_RunCableDiagnostic(uint8 TrcvIdx);
-#endif /* STD_ON == ETHTRCV_ENABLE_CABLEDIAGNOSTIC_API */
+#endif /* STD_ON == ETHTRCV_ENABLE_CABLEDIAGNOSTIC_API*/
 
 #if (STD_ON == ETHTRCV_GET_CABLEDIAGNOSTICS_RESULT_API)
 /******************************************************************************/
@@ -464,7 +445,7 @@ FUNC(Std_ReturnType, ETHTRCV_CODE) EthTrcv_RunCableDiagnostic(uint8 TrcvIdx);
 /******************************************************************************/
 FUNC(Std_ReturnType, ETHTRCV_CODE)
 EthTrcv_GetCableDiagnosticsResult(uint8 TrcvIdx, EthTrcv_CableDiagResultType* ResultPtr);
-#endif /* STD_ON == ETHTRCV_GET_CABLEDIAGNOSTICS_RESULT_API */
+#endif /* STD_ON == ETHTRCV_GET_CABLEDIAGNOSTICS_RESULT_API*/
 
 #if (STD_ON == ETHTRCV_GET_PHYIDENTIFIER_API)
 /******************************************************************************/
@@ -491,7 +472,21 @@ EthTrcv_GetCableDiagnosticsResult(uint8 TrcvIdx, EthTrcv_CableDiagResultType* Re
 /******************************************************************************/
 FUNC(Std_ReturnType, ETHTRCV_CODE)
 EthTrcv_GetPhyIdentifier(uint8 TrcvIdx, uint32* OrgUniqueIdPtr, uint8* ModelNrPtr, uint8* RevisionNrPtr);
-#endif /* STD_ON == ETHTRCV_GET_PHYIDENTIFIER_API */
+#endif /* STD_ON == ETHTRCV_GET_PHYIDENTIFIER_API*/
+
+/******************************************************************************/
+/*
+ * Brief               Used for polling state changes and wakeup reasons.
+ * ServiceId           0x0c
+ * Sync/Async          Synchronous
+ * Reentrancy          NA
+ * Param-Name[in]      NA
+ * Param-Name[out]     NA
+ * Param-Name[in/out]  NA
+ * Return              NA
+ */
+/******************************************************************************/
+extern FUNC(void, ETHTRCV_CODE) EthTrcv_MainFunction(void);
 
 #if (ETHTRCV_VERSION_INFO_API == STD_ON)
 /******************************************************************************/
@@ -507,7 +502,7 @@ EthTrcv_GetPhyIdentifier(uint8 TrcvIdx, uint32* OrgUniqueIdPtr, uint8* ModelNrPt
  */
 /******************************************************************************/
 extern FUNC(void, ETHTRCV_CODE)
-    EthTrcv_GetVersionInfo(P2VAR(Std_VersionInfoType, AUTOMATIC, _APPL_DATA) VersionInfoPtr);
+    EthTrcv_GetVersionInfo(P2VAR(Std_VersionInfoType, AUTOMATIC, ETHTRCV_APPL_DATA) VersionInfoPtr);
 #endif /* ETHTRCV_VERSION_INFO_API == STD_ON */
 
 #endif /* ETHTRCV_H_ */

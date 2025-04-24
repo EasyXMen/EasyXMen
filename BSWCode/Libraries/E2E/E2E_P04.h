@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : E2E_P04.h                                                   **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : YangBo                                                      **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : E2E_P04.h                                                   **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : YangBo                                                      **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 #ifndef E2E_P04_H_
 #define E2E_P04_H_
 
@@ -130,11 +131,13 @@ extern "C"
      *
      */
 
+    /* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
     extern FUNC(Std_ReturnType, E2E_CODE) E2E_P04Protect(
         P2CONST(E2E_P04ConfigType, AUTOMATIC, E2E_APPL_DATA) ConfigPtr,
         P2VAR(E2E_P04ProtectStateType, AUTOMATIC, E2E_APPL_DATA) StatePtr,
         P2VAR(uint8, AUTOMATIC, E2E_APPL_DATA) DataPtr,
         uint16 Length);
+    /* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
 
     /**
      * Initializes the protection state.
@@ -148,8 +151,10 @@ extern "C"
      *
      */
 
+    /* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
     extern FUNC(Std_ReturnType, E2E_CODE)
         E2E_P04ProtectInit(P2VAR(E2E_P04ProtectStateType, AUTOMATIC, E2E_APPL_DATA) StatePtr);
+    /* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
 
     /**
      * Checks the Data received using the E2E profile 4.
@@ -166,11 +171,13 @@ extern "C"
      *
      */
 
+    /* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
     extern FUNC(Std_ReturnType, E2E_CODE) E2E_P04Check(
         P2CONST(E2E_P04ConfigType, AUTOMATIC, E2E_APPL_DATA) ConfigPtr,
         P2VAR(E2E_P04CheckStateType, AUTOMATIC, E2E_APPL_DATA) StatePtr,
         P2CONST(uint8, AUTOMATIC, E2E_APPL_DATA) DataPtr,
         uint16 Length);
+    /* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
 
     /**
      * Initializes the check state
@@ -184,8 +191,10 @@ extern "C"
      *
      */
 
+    /* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
     extern FUNC(Std_ReturnType, E2E_CODE)
         E2E_P04CheckInit(P2VAR(E2E_P04CheckStateType, AUTOMATIC, E2E_APPL_DATA) StatePtr);
+    /* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
 
     /**
      * The function maps the check status of Profile 4 to a generic check status, which can be used by E2E state machine

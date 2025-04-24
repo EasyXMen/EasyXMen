@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : LinSM_Cbk.h                                                 **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : HuRongbo                                                    **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Callback declaration supplied by LinSM                      **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : LinSM_Cbk.h                                                 **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : HuRongbo                                                    **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Callback declaration supplied by LinSM                      **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 /*******************************************************************************
 **                      Revision Control History                              **
 *******************************************************************************/
@@ -77,7 +78,7 @@
 FUNC(void, LINSM_CODE)
 LinSM_ScheduleRequestConfirmation(NetworkHandleType network, LinIf_SchHandleType schedule);
 
-#endif /* LINSM_MASTER_NODE_SUPPORT == STD_ON */
+#endif
 
 #if (LINSM_SLAVE_NODE_SUPPORT == STD_ON)
 
@@ -98,7 +99,7 @@ LinSM_ScheduleRequestConfirmation(NetworkHandleType network, LinIf_SchHandleType
 FUNC(void, LINSM_CODE)
 LinSM_GotoSleepIndication(NetworkHandleType network);
 
-#endif /* LINSM_SLAVE_NODE_SUPPORT == STD_ON */
+#endif
 
 /******************************************************************************/
 /*

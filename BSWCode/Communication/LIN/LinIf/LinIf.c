@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : LinIf.c                                                     **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : HuRongbo                                                    **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Implementation for LinIf                                    **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : LinIf.c                                                     **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : HuRongbo                                                    **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Implementation for LinIf                                    **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 /*******************************************************************************
 **                      Revision Control History                              **
 *******************************************************************************/
@@ -72,33 +73,35 @@
  *    1> Bug fix CPT-6932.
  *       It's necessary to add a macro switch When referencing the Master/Slave header file.
  *    2> Adjust header file references.
- *    3> QAC check,code update.
  * V2.0.7      20230920   ZhaoTong
  *    1> Bug fix CPT-6946.add two macro for Master/Slave of TP separately.
- * V2.0.8      20231123   ZhaoTong
- *    1> CPD-33590.Code Execution Optimization.
- *             20231128   ZhaoTong   Compile warning clean.(CPT-7666)
- * V2.0.9      20240229   ZhaoTong
- *    1> Replace standard library functions to iSoft library functions
- *    2> QAC check issue fix
- * V2.0.10     20240522   ZhaoTong
- *    Add macro LINIF_LIN_AUTOSAR_VERSION to select driver version.
- * V2.0.11     20240625   ZhaoTong
+ * V2.0.8      20231007   ZhaoTong   Adaptation of different AutoSar versions of lin driver, currently supporting
+ versions 4.2.2, 4.3.1, 4.4.0
+ * V2.0.9      20231128   ZhaoTong
+ *    1> Compile warning clean.(CPT-7666)
+ *    2> Delete dummy API LinIf_CancelTransmit.(JIRA:CPT-7688)
+ * V2.1.0      20240105   ZhaoTong   Muliticore adapt
+ * V2.1.1      20240625   ZhaoTong   fix bug CPT-9224
  *    The uncondicational frame associated with an event triggered frame shall resever the first data field its
  PID(anyway)
- * V2.0.12     20240705   ZhaoTong
+ * V2.1.2      20240705   ZhaoTong
  *    Add macro condition for the call to API BswM_LinTp_RequestMode.
- * V2.0.13     20240718   ZhaoTong
- *    Resolve build warnings
- * V2.0.14     20240828   ZhaoTong   fix bug CPT-10353
+ * V2.1.3      20240828   ZhaoTong   fix bug CPT-10353
  *    Modify driver Api type (LinGetStatus and LinSendFrame).
- * V2.0.15     20240919   ZouZhiJia  fix bug CPT-10515
+ * V2.1.4      20240913   ZouZhiJia  fix bug CPT-10515
+ * V2.1.5      20241111   ZouZhiJia  fix bug CPT-11235
+ * V2.1.6      20241122   ZhaoTong   fix bug CPT-10904
+ * V2.1.7      20250103   ZouZhiJia  fix bug CPT-12260
+ * V2.1.8      20250113   ZouZhiJia  fix bug CPT-12414
  *******************************************************************************/
 
 /**
   \page ISOFT_MISRA_Exceptions  MISRA-C:2012 Compliance Exceptions
     ModeName:LinIf<br>
-  RuleSorce:puhua-rule2024-2.rcf
+  RuleSorce:puhua-rule.rcf 2.3.1
+
+    \li PRQA S 3432 MISRA Rule 20.7 .<br>
+    Reason:Function-like macros are used to allow more efficient code.
 
     \li PRQA S 1532 MISRA Rule 8.7 .<br>
     Reason:In order to make the module code structure clear, the functions are classified.
@@ -126,13 +129,15 @@
     Reason:Variables are used in different configurations due to complex precompilation logic.
 
     \li PRQA S 3673 MISRA Rule 8.13 .<br>
-    Reason:Following the AUTOSAR standard,the external interfaces defined.
-
-    \li PRQA S 3678 MISRA Rule 8.13 .<br>
-    Reason:variant usage may be different in other Configuration projects.
+    Reason:A pointer should point to a const-qualified type whenever possible.
 
     \li PRQA S 0432 MISRA Rule 1.1 .<br>
     Reason:The function parameter type is by design purpose.
+
+    \li  PRQA S 0771  MISRA Rule 15.4 .<br>
+    Reason:The code design requires reducing the number of loop executions.
+
+
  */
 
 /*******************************************************************************
@@ -143,26 +148,29 @@
 #define LINIF_C_AR_RELEASE_REVISION_VERSION 0U
 
 #define LINIF_C_SW_MAJOR_VERSION            2U
-#define LINIF_C_SW_MINOR_VERSION            0U
-#define LINIF_C_SW_PATCH_VERSION            15U
+#define LINIF_C_SW_MINOR_VERSION            1U
+#define LINIF_C_SW_PATCH_VERSION            8U
 
 /*******************************************************************************
 **                               Includes                                     **
 *******************************************************************************/
 #include "LinIf_Cfg.h"
 #include "LinIf_Cbk.h"
+#if (LINIF_TP_SUPPORTED == STD_ON)
+#include "LinTp_Cfg.h"
+#endif /*LINIF_TP_SUPPORTED == STD_ON*/
 #if (STD_ON == LINIF_MASTER_SUPPORT)
 #include "LinIf_Master.h"
 #if ((LINIF_TP_SUPPORTED == STD_ON) && (LINTP_MASTER_SUPPORT == STD_ON))
 #include "LinTp_Master.h"
-#endif /* LINIF_TP_SUPPORTED == STD_ON && LINTP_MASTER_SUPPORT == STD_ON */
-#endif /* STD_ON == LINIF_MASTER_SUPPORT */
+#endif
+#endif
 #if (STD_ON == LINIF_SLAVE_SUPPORT)
 #include "LinIf_Slave.h"
 #if ((LINIF_TP_SUPPORTED == STD_ON) && (STD_ON == LINTP_SLAVE_SUPPORT))
 #include "LinTp_Slave.h"
-#endif /* LINIF_TP_SUPPORTED == STD_ON && STD_ON == LINTP_SLAVE_SUPPORT */
-#endif /* STD_ON == LINIF_SLAVE_SUPPORT */
+#endif
+#endif
 
 /*******************************************************************************
 **                             Version Check                                  **
@@ -208,11 +216,11 @@ static FUNC(Std_ReturnType, LINIF_CODE) LinIf_CheckTxPduId(PduIdType TxPduId);
 static FUNC(NetworkHandleType, LINIF_CODE) LinIf_GetLinIfChannel(NetworkHandleType channel);
 
 #if (STD_ON == LINIF_MASTER_SUPPORT)
-static FUNC(void, LINIF_CODE) LinIf_MasterMainHandle(void);
+static void LinIf_MasterMainHandle(NetworkHandleType ch);
 #endif
 
 #if (STD_ON == LINIF_SLAVE_SUPPORT)
-static FUNC(void, LINIF_CODE) LinIf_SlaveMainHandle(void);
+static void LinIf_SlaveMainHandle(NetworkHandleType ch);
 
 static FUNC(NetworkHandleType, LINIF_CODE) LinIf_GetLinIfChannelByDriverChId(NetworkHandleType channel);
 #endif
@@ -255,9 +263,10 @@ LinIf_ConfigPtr = NULL_PTR;
  * Return              None
  */
 /******************************************************************************/
+/* PRQA S 1532 ++ */ /* MISRA Rule 8.7 */
 FUNC(void, LINIF_CODE)
-LinIf_Init /* PRQA S 1503 */
-    (P2CONST(LinIf_ConfigType, AUTOMATIC, LINIF_APPL_CONST) ConfigPtr)
+LinIf_Init(P2CONST(LinIf_ConfigType, AUTOMATIC, LINIF_APPL_CONST) ConfigPtr)
+/* PRQA S 1532 -- */ /* MISRA Rule 8.7 */
 {
 #if (LINIF_DEV_ERROR_DETECT == STD_ON)
     boolean detNoErr = TRUE;
@@ -267,7 +276,7 @@ LinIf_Init /* PRQA S 1503 */
         detNoErr = FALSE;
     }
     if (TRUE == detNoErr)
-#endif /* LINIF_DEV_ERROR_DETECT == STD_ON */
+#endif
     {
         /*@req <SWS_LinIf_00371>,<SWS_LinIf_00373>*/
         LinIf_ConfigPtr = ConfigPtr;
@@ -328,10 +337,12 @@ LinIf_Transmit /* PRQA S 1503,1532 */ /* MISRA Rule 2.1,8.7 */
         detNoErr = FALSE;
     }
     if (TRUE == detNoErr)
-#endif /* LINIF_DEV_ERROR_DETECT == STD_ON */
+#endif
     {
         P2CONST(LinIf_SubstitutionFramesType, AUTOMATIC, LINIF_APPL_CONST)
         subPtr = LinIf_GetSubstitution(LinTxPduId);
+        uint16 frameIdx;
+        NetworkHandleType ch;
 
         if (NULL_PTR == subPtr)
         {
@@ -344,15 +355,14 @@ LinIf_Transmit /* PRQA S 1503,1532 */ /* MISRA Rule 2.1,8.7 */
         }
         else
         {
-            uint8 ch;
-            uint16 frameIdx = subPtr->LinIfSubstitutionFrameRef;
-            const LinIf_ChannelType* chCfgPtr = &LINIF_GET_CHANNEL(0);
+            frameIdx = subPtr->LinIfSubstitutionFrameRef;
+
             for (ch = 0; ch < LINIF_NUMBER_OF_CHANNELS; ch++)
             {
-                if ((frameIdx >= chCfgPtr->LinIfFrameIndexOffset)
-                    && (frameIdx < (chCfgPtr->LinIfNumOfFrame + chCfgPtr->LinIfFrameIndexOffset)))
+                if ((frameIdx >= LINIF_GET_FRAME_OFS(ch))
+                    && (frameIdx < (LINIF_GET_FRAME_NUM(ch) + LINIF_GET_FRAME_OFS(ch))))
                 {
-                    if (LINIF_MASTER == chCfgPtr->LinIfNodeType->LinIfNodeType)
+                    if (LINIF_MASTER == LINIF_GET_NODETYPE(ch))
                     {
 #if (STD_ON == LINIF_MASTER_SUPPORT)
                         ret = LinIf_MasterTransmit(ch, frameIdx);
@@ -364,13 +374,13 @@ LinIf_Transmit /* PRQA S 1503,1532 */ /* MISRA Rule 2.1,8.7 */
                         ret = LinIf_SlaveTransmit(frameIdx);
 #endif
                     }
+
                     break;
                 }
                 else
                 {
                     /* Only for MISRA-C */
                 }
-                chCfgPtr++;
             }
         }
     }
@@ -418,7 +428,7 @@ LinIf_ScheduleRequest /* PRQA S 1503 */                      /* PRQA S 1532 */
         detNoErr = FALSE;
     }
     if (TRUE == detNoErr)
-#endif /* LINIF_DEV_ERROR_DETECT == STD_ON */
+#endif
     {
         ret = LinIf_MasterScheduleRequest(ch, Schedule);
     }
@@ -465,7 +475,7 @@ LinIf_GotoSleep /* PRQA S 1503 */ /* PRQA S 1532 */
         detNoErr = FALSE;
     }
     if (TRUE == detNoErr)
-#endif /* LINIF_DEV_ERROR_DETECT == STD_ON */
+#endif
     {
         if (LINIF_MASTER == LINIF_GET_NODETYPE(ch))
         {
@@ -522,7 +532,7 @@ LinIf_Wakeup /* PRQA S 1503 */ /* PRQA S 1532 */
         detNoErr = FALSE;
     }
     if (TRUE == detNoErr)
-#endif /* LINIF_DEV_ERROR_DETECT == STD_ON */
+#endif
     {
         if (LINIF_MASTER == LINIF_GET_NODETYPE(ch))
         {
@@ -588,7 +598,7 @@ LinIf_SetTrcvMode /* PRQA S 1503 */
         detNoErr = FALSE;
     }
     if (TRUE == detNoErr)
-#endif /* LINIF_DEV_ERROR_DETECT == STD_ON */
+#endif
     {
         /*@req <SWS_LinIf_00536>,<SWS_LinIf_00537>,<SWS_LinIf_00538>*/
         linChannel = LINIF_GET_LIN_CHANNEL_ID(ch);
@@ -617,7 +627,9 @@ LinIf_SetTrcvMode /* PRQA S 1503 */
 /******************************************************************************/
 FUNC(Std_ReturnType, LINIF_CODE)
 LinIf_GetTrcvMode /* PRQA S 1503 */
-    (NetworkHandleType Channel, P2VAR(LinTrcv_TrcvModeType, AUTOMATIC, LINIF_APPL_DATA) TransceiverModePtr)
+    (NetworkHandleType Channel,
+     P2VAR(LinTrcv_TrcvModeType, AUTOMATIC, LINIF_APPL_DATA) TransceiverModePtr /* PRQA S 3432 */
+    )
 {
     Std_ReturnType ret = E_NOT_OK;
     NetworkHandleType ch = LinIf_GetLinIfChannel(Channel);
@@ -644,7 +656,7 @@ LinIf_GetTrcvMode /* PRQA S 1503 */
         detNoErr = FALSE;
     }
     if (TRUE == detNoErr)
-#endif /* LINIF_DEV_ERROR_DETECT == STD_ON */
+#endif
     {
         /*@req <SWS_LinIf_00541>*/
         linChannel = LINIF_GET_LIN_CHANNEL_ID(ch);
@@ -674,7 +686,9 @@ LinIf_GetTrcvMode /* PRQA S 1503 */
 /******************************************************************************/
 FUNC(Std_ReturnType, LINIF_CODE)
 LinIf_GetTrcvWakeupReason /* PRQA S 1503 */
-    (NetworkHandleType Channel, P2VAR(LinTrcv_TrcvWakeupReasonType, AUTOMATIC, LINIF_APPL_DATA) TrcvWuReasonPtr)
+    (NetworkHandleType Channel,
+     P2VAR(LinTrcv_TrcvWakeupReasonType, AUTOMATIC, LINIF_APPL_DATA) /* PRQA S 3432 */
+     TrcvWuReasonPtr)
 {
     Std_ReturnType ret = E_NOT_OK;
     NetworkHandleType ch = LinIf_GetLinIfChannel(Channel);
@@ -713,7 +727,7 @@ LinIf_GetTrcvWakeupReason /* PRQA S 1503 */
         }
     }
     if (TRUE == detNoErr)
-#endif /* LINIF_DEV_ERROR_DETECT == STD_ON */
+#endif
     {
         /*@req <SWS_LinIf_00548>*/
         linChannel = LINIF_GET_LIN_CHANNEL_ID(ch);
@@ -771,7 +785,7 @@ LinIf_SetTrcvWakeupMode /* PRQA S 1503 */
         detNoErr = FALSE;
     }
     if (TRUE == detNoErr)
-#endif /* LINIF_DEV_ERROR_DETECT == STD_ON */
+#endif
     {
         /*@req <SWS_LinIf_00551>*/
         linChannel = LINIF_GET_LIN_CHANNEL_ID(ch);
@@ -779,42 +793,6 @@ LinIf_SetTrcvWakeupMode /* PRQA S 1503 */
     }
 
     return ret;
-}
-#endif
-
-#if (LINIF_CANCEL_TRANSMIT_SUPPORTED == STD_ON)
-/******************************************************************************/
-/*
- * Brief               A dummy method introduced for interface compatibility.
- * ServiceId           0x0c
- * Sync/Async          Synchronous
- * Reentrancy          Non Reentrant
- * Param-Name[in]      LinTxPduId: Upper layer identification of the LIN frame
- *                                 for which a cancellation should be done.
- * Param-Name[in/out]  None
- * Param-Name[out]     None
- * Return              E_NOT_OK: Cancel Transmit request has not been accepted.
- */
-/******************************************************************************/
-FUNC(Std_ReturnType, LINIF_CODE)
-LinIf_CancelTransmit /* PRQA S 1503 */
-    (PduIdType LinTxPduId)
-{
-#if (LINIF_DEV_ERROR_DETECT == STD_ON)
-    if (LINIF_UNINIT == LinIf_Status)
-    {
-        /*@req <SWS_LinIf_00535>*/
-        LinIf_Det_ReportError(LINIF_CANCELTRANSMIT_ID, LINIF_E_UNINIT);
-    }
-    if (E_NOT_OK == LinIf_CheckTxPduId(LinTxPduId))
-    {
-        /*@req <SWS_LinIf_00594>*/
-        LinIf_Det_ReportError(LINIF_CANCELTRANSMIT_ID, LINIF_E_PARAMETER);
-    }
-#endif
-
-    /*@req <SWS_LinIf_00649>*/
-    return E_NOT_OK;
 }
 #endif
 
@@ -830,22 +808,26 @@ LinIf_CancelTransmit /* PRQA S 1503 */
  * Return              None
  */
 /******************************************************************************/
-FUNC(void, LINIF_CODE) LinIf_MainFunction(void) /* PRQA S 1503,1532 */ /* MISRA Rule 2.1,8.7 */
+void LinIf_ChannelMainFunction(NetworkHandleType ch)
 {
-
     if ((LINIF_INIT == LinIf_Status)
 #if (LINIF_TP_SUPPORTED == STD_ON)
         && (LINTP_INIT == LinTp_Status)
 #endif /* LINIF_TP_SUPPORTED == STD_ON */
     )
     {
+        if (LINIF_MASTER == LINIF_GET_NODETYPE(ch))
+        {
 #if (STD_ON == LINIF_MASTER_SUPPORT)
-        LinIf_MasterMainHandle();
-#endif
-
+            LinIf_MasterMainHandle(ch);
+#endif /* STD_ON == LINIF_MASTER_SUPPORT */
+        }
+        else
+        {
 #if (STD_ON == LINIF_SLAVE_SUPPORT)
-        LinIf_SlaveMainHandle();
-#endif
+            LinIf_SlaveMainHandle(ch);
+#endif /* STD_ON == LINIF_SLAVE_SUPPORT */
+        }
     }
 }
 #define LINIF_STOP_SEC_CODE
@@ -870,9 +852,10 @@ FUNC(void, LINIF_CODE) LinIf_MainFunction(void) /* PRQA S 1503,1532 */ /* MISRA 
  *                               API or invalid WakeupSource.
  */
 /******************************************************************************/
+/* PRQA S 1532 ++ */ /* MISRA Rule 8.7 */
 FUNC(Std_ReturnType, LINIF_CODE)
-LinIf_CheckWakeup /* PRQA S 1503 */
-    (EcuM_WakeupSourceType WakeupSource)
+LinIf_CheckWakeup(EcuM_WakeupSourceType WakeupSource)
+/* PRQA S 1532 -- */ /* MISRA Rule 8.7 */
 {
     Std_ReturnType ret = E_NOT_OK;
 
@@ -887,7 +870,7 @@ LinIf_CheckWakeup /* PRQA S 1503 */
     }
     else
     {
-        for (int ch = 0; ch < LINIF_NUMBER_OF_CHANNELS; ch++)
+        for (NetworkHandleType ch = 0; ch < LINIF_NUMBER_OF_CHANNELS; ch++)
         {
             if (WakeupSource == LINIF_GET_LIN_DRIVER_WAKEUP_SOURCE(ch))
             {
@@ -907,15 +890,17 @@ LinIf_CheckWakeup /* PRQA S 1503 */
     if (TRUE == detNoErr)
 #endif
     {
-#if (LINIF_WAKEUP_SUPPORT == STD_ON)
-        uint8 ch;
+        NetworkHandleType ch;
+        uint8 linDriver;
+        uint8 linChannel;
         EcuM_WakeupSourceType wakeupSource;
-        const LinIf_LinDriverChannelRef* ChRefPtr;
-        const LinIf_ChannelType* chCfgPtr = &LINIF_GET_CHANNEL(0);
+
+#if (LINIF_WAKEUP_SUPPORT == STD_ON)
         /*check all Lin driver channel to find the wake-up source*/
         for (ch = 0; ch < LINIF_NUMBER_OF_CHANNELS; ch++)
         {
 #if (LINIF_LIN_TRCV_WAKEUP_SUPPORT == STD_ON)
+            P2CONST(LinIf_ChannelType, AUTOMATIC, LINIF_APPL_CONST) chCfgPtr = &LINIF_GET_CHANNEL(ch);
             if (NULL_PTR != chCfgPtr->LinIfTransceiverDrvConfig)
             {
                 wakeupSource = LINIF_GET_LIN_TRCV_WAKEUP_SOURCE(ch);
@@ -929,16 +914,16 @@ LinIf_CheckWakeup /* PRQA S 1503 */
             else
 #endif
             {
-                ChRefPtr = chCfgPtr->LinIfChannelRef;
-                wakeupSource = ChRefPtr->WakeUpSource;
+                wakeupSource = LINIF_GET_LIN_DRIVER_WAKEUP_SOURCE(ch);
                 if (0u != (WakeupSource & wakeupSource))
                 {
                     /*@req <SWS_LinIf_00503>*/
-                    ret = Lin_DriverApi[ChRefPtr->LinDriverId].LinCheckWakeup(ChRefPtr->LinChannelIdRef);
+                    linDriver = LINIF_GET_LIN_DRIVER_ID(ch);
+                    linChannel = LINIF_GET_LIN_CHANNEL_ID(ch);
+                    ret = Lin_DriverApi[linDriver].LinCheckWakeup(linChannel);
                     break;
                 }
             }
-            chCfgPtr++;
         }
 #endif
     }
@@ -981,7 +966,7 @@ LinIf_WakeupConfirmation /* PRQA S 1503,1532 */ /* MISRA Rule 2.1,8.7 */
     }
     else
     {
-        for (int ch = 0; ch < LINIF_NUMBER_OF_CHANNELS; ch++)
+        for (NetworkHandleType ch = 0; ch < LINIF_NUMBER_OF_CHANNELS; ch++)
         {
             if (WakeupSource == LINIF_GET_LIN_DRIVER_WAKEUP_SOURCE(ch))
             {
@@ -1012,7 +997,7 @@ LinIf_WakeupConfirmation /* PRQA S 1503,1532 */ /* MISRA Rule 2.1,8.7 */
 }
 #define LINIF_STOP_SEC_LINIFWAKEUPCONFIRMATION_CALLBACK_CODE
 #include "LinIf_MemMap.h"
-#endif /* LINIF_WAKEUP_SUPPORT == STD_ON */
+#endif
 
 #if (STD_ON == LINIF_SLAVE_SUPPORT)
 #define LINIF_START_SEC_CODE
@@ -1042,8 +1027,9 @@ LinIf_GetPIDTable(/* PRQA S 1503 */
                   NetworkHandleType Channel,
                   P2VAR(Lin_FramePidType, AUTOMATIC, LINIF_APPL_DATA) PidBuffer,
                   /* PRQA S 3673 ++ */ /* MISRA Rule 8.13 */
-                  P2VAR(uint8, AUTOMATIC, LINIF_APPL_DATA) PidBufferLength)
-/* PRQA S 3673 -- */ /* MISRA Rule 8.13 */
+                  P2VAR(uint8, AUTOMATIC, LINIF_APPL_DATA) PidBufferLength
+                  /* PRQA S 3673 -- */ /* MISRA Rule 8.13 */
+)
 {
     Std_ReturnType ret = E_NOT_OK; /* PRQA S 2981 */ /* MISRA Rule 2.2 */
     NetworkHandleType ch = LinIf_GetLinIfChannel(Channel);
@@ -1107,9 +1093,9 @@ LinIf_GetPIDTable(/* PRQA S 1503 */
 FUNC(Std_ReturnType, LINIF_CODE)
 LinIf_SetPIDTable(/* PRQA S 1503 */
                   NetworkHandleType Channel,
-                  /* PRQA S 3673 ++ */ /* MISRA Rule 8.13 */
-                  P2VAR(Lin_FramePidType, AUTOMATIC, LINIF_APPL_DATA) PidBuffer,
-                  /* PRQA S 3673 -- */ /* MISRA Rule 8.13 */
+                  /* PRQA S 3673 ++ */                                           /* MISRA Rule 8.13 */
+                  P2VAR(Lin_FramePidType, AUTOMATIC, LINIF_APPL_DATA) PidBuffer, /* PRQA S 3432 */
+                  /* PRQA S 3673 -- */                                           /* MISRA Rule 8.13 */
                   uint8 PidBufferLength)
 {
     Std_ReturnType ret = E_NOT_OK; /* PRQA S 2981 */ /* MISRA Rule 2.2 */
@@ -1138,9 +1124,14 @@ LinIf_SetPIDTable(/* PRQA S 1503 */
     if (TRUE == detNoErr)
 #endif
     {
+        /* Locked */
+        SchM_Enter_LinIf_ExclusiveArea_Channel();
+
         /*@req <SWS_LinIf_00823>*/
         LinIf_SlaveSetPIDTable(ch, PidBuffer);
 
+        /* Unlocked */
+        SchM_Exit_LinIf_ExclusiveArea_Channel();
         ret = E_OK;
     }
     LINIF_NOUSED(PidBufferLength);
@@ -1166,7 +1157,8 @@ LinIf_SetPIDTable(/* PRQA S 1503 */
 FUNC(Std_ReturnType, LINIF_CODE)
 LinIf_GetConfiguredNAD(/* PRQA S 1503 */
                        NetworkHandleType Channel,
-                       P2VAR(uint8, AUTOMATIC, LINIF_APPL_DATA) Nad)
+                       P2VAR(uint8, AUTOMATIC, LINIF_APPL_DATA) Nad /* PRQA S 3432 */
+)
 {
     Std_ReturnType ret = E_NOT_OK; /* PRQA S 2981 */ /* MISRA Rule 2.2 */
     NetworkHandleType ch = LinIf_GetLinIfChannel(Channel);
@@ -1189,7 +1181,7 @@ LinIf_GetConfiguredNAD(/* PRQA S 1503 */
 #endif
     {
         /*@req <SWS_LinIf_00830>*/
-        LinIf_SlaveGetConfiguredNAD(ch, Nad);
+        (void)LinIf_SlaveGetConfiguredNAD(ch, Nad);
 
         ret = E_OK;
     }
@@ -1273,10 +1265,10 @@ LinIf_SetConfiguredNAD(/* PRQA S 1503 */
  *                               production error occurred.
  */
 /******************************************************************************/
+/* PRQA S 1532,3432 ++ */ /* MISRA Rule 8.7,20.7 */
 FUNC(Std_ReturnType, LINIF_CODE)
-LinIf_HeaderIndication(/* PRQA S 1503 */
-                       NetworkHandleType Channel,
-                       P2VAR(Lin_PduType, AUTOMATIC, LINIF_APPL_DATA) PduPtr)
+LinIf_HeaderIndication(NetworkHandleType Channel, P2VAR(Lin_PduType, AUTOMATIC, LINIF_APPL_DATA) PduPtr)
+/* PRQA S 1532,3432 -- */ /* MISRA Rule 8.7,20.7 */
 {
     Std_ReturnType ret = E_NOT_OK; /* PRQA S 2981 */ /* MISRA Rule 2.2 */
     NetworkHandleType ch = LinIf_GetLinIfChannelByDriverChId(Channel);
@@ -1327,10 +1319,10 @@ LinIf_HeaderIndication(/* PRQA S 1503 */
  * Return              None
  */
 /******************************************************************************/
+/* PRQA S 1532,3432 ++ */ /* MISRA Rule 8.7,20.7 */
 FUNC(void, LINIF_CODE)
-LinIf_RxIndication(/* PRQA S 1503 */
-                   NetworkHandleType Channel,
-                   P2VAR(uint8, AUTOMATIC, LINIF_APPL_DATA) Lin_SduPtr)
+LinIf_RxIndication(NetworkHandleType Channel, P2VAR(uint8, AUTOMATIC, LINIF_APPL_DATA) Lin_SduPtr)
+/* PRQA S 1532,3432 -- */ /* MISRA Rule 8.7,20.7 */
 {
     NetworkHandleType ch = LinIf_GetLinIfChannelByDriverChId(Channel);
 
@@ -1373,9 +1365,10 @@ LinIf_RxIndication(/* PRQA S 1503 */
  * Return              None
  */
 /******************************************************************************/
+/* PRQA S 1532 ++ */ /* MISRA Rule 8.7 */
 FUNC(void, LINIF_CODE)
-LinIf_TxConfirmation(/* PRQA S 1503 */
-                     NetworkHandleType Channel)
+LinIf_TxConfirmation(NetworkHandleType Channel)
+/* PRQA S 1532 -- */ /* MISRA Rule 8.7 */
 {
     NetworkHandleType ch = LinIf_GetLinIfChannelByDriverChId(Channel);
 
@@ -1411,10 +1404,10 @@ LinIf_TxConfirmation(/* PRQA S 1503 */
  * Return              None
  */
 /******************************************************************************/
+/* PRQA S 1532 ++ */ /* MISRA Rule 8.7 */
 FUNC(void, LINIF_CODE)
-LinIf_LinErrorIndication(/* PRQA S 1503 */
-                         NetworkHandleType Channel,
-                         Lin_SlaveErrorType ErrorStatus)
+LinIf_LinErrorIndication(NetworkHandleType Channel, Lin_SlaveErrorType ErrorStatus)
+/* PRQA S 1532 -- */ /* MISRA Rule 8.7 */
 {
     NetworkHandleType ch = LinIf_GetLinIfChannelByDriverChId(Channel);
 
@@ -1450,15 +1443,12 @@ static FUNC(NetworkHandleType, LINIF_CODE) LinIf_GetLinIfChannelByDriverChId(Net
 
     if (LINIF_INIT == LinIf_Status)
     {
-        const LinIf_ChannelType* chCfgPtr = &LINIF_GET_CHANNEL(0);
-
         for (idx = 0; idx < LINIF_NUMBER_OF_CHANNELS; idx++)
         {
-            if (chCfgPtr->LinIfChannelRef->LinChannelIdRef == channel)
+            if (LINIF_GET_LIN_CHANNEL_ID(idx) == channel)
             {
-                break;
+                return idx;
             }
-            chCfgPtr++;
         }
     }
 
@@ -1487,21 +1477,19 @@ static FUNC(P2CONST(LinIf_SubstitutionFramesType, AUTOMATIC, LINIF_CONST), LINIF
     LinIf_GetSubstitution(PduIdType TxPduId)
 {
     P2CONST(LinIf_TxPduType, AUTOMATIC, LINIF_APPL_CONST) txPduPtr;
+    P2CONST(LinIf_SubstitutionFramesType, AUTOMATIC, LINIF_APPL_CONST) subPtr;
     uint16 idx, frameIdx;
-    uint16 subFrmNum = LINIF_GET_SUB_NUM();
-    const LinIf_SubstitutionFramesType* subFrmPtr = &LINIF_GET_SUB_FRAME(0);
-    const LinIf_FrameType* frmPtr = &LINIF_GET_GLOBAL_FRAME(0);
 
-    for (idx = 0; idx < subFrmNum; idx++)
+    for (idx = 0; idx < LINIF_GET_SUB_NUM(); idx++)
     {
-        frameIdx = subFrmPtr->LinIfSubstitutionFrameRef;
-        txPduPtr = frmPtr[frameIdx].LinIfPduDirection->LinIfTxPdu;
+        subPtr = &LINIF_GET_SUB_FRAME(idx);
+        frameIdx = subPtr->LinIfSubstitutionFrameRef;
+        txPduPtr = LINIF_GET_GLOBAL_FRAME(frameIdx).LinIfPduDirection->LinIfTxPdu;
 
         if (txPduPtr->LinIfTxPduId == TxPduId)
         {
-            return subFrmPtr;
+            return subPtr;
         }
-        subFrmPtr++;
     }
 
     return NULL_PTR;
@@ -1522,22 +1510,19 @@ static FUNC(P2CONST(LinIf_SubstitutionFramesType, AUTOMATIC, LINIF_CONST), LINIF
 static FUNC(Std_ReturnType, LINIF_CODE) LinIf_CheckTxPduId(PduIdType TxPduId)
 /* PRQA S 3219 -- */ /* MISRA Rule 2.1 */
 {
-    Std_ReturnType ret = E_NOT_OK; /* PRQA S 2981 */ /* MISRA Rule 2.2 */
+    P2CONST(LinIf_TxPduType, AUTOMATIC, LINIF_APPL_CONST) txPduPtr;
     uint16 idx;
-    uint16 linIfNumOfPdu = LINIF_GET_TXPDU_NUM();
-    const LinIf_TxPduType* linIfTxPdu = &LINIF_GET_TXPDU(0);
 
-    for (idx = 0; idx < linIfNumOfPdu; idx++)
+    for (idx = 0; idx < LINIF_GET_TXPDU_NUM(); idx++)
     {
-        if (linIfTxPdu->LinIfTxPduId == TxPduId)
+        txPduPtr = &LINIF_GET_TXPDU(idx);
+        if (txPduPtr->LinIfTxPduId == TxPduId)
         {
-            ret = E_OK;
-            break;
+            return E_OK;
         }
-        linIfTxPdu++;
     }
 
-    return ret;
+    return E_NOT_OK;
 }
 
 /******************************************************************************/
@@ -1581,38 +1566,33 @@ static FUNC(NetworkHandleType, LINIF_CODE) LinIf_GetLinIfChannel(NetworkHandleTy
  */
 /******************************************************************************/
 #if (STD_ON == LINIF_MASTER_SUPPORT)
-static FUNC(void, LINIF_CODE) LinIf_MasterMainHandle(void)
+static void LinIf_MasterMainHandle(NetworkHandleType ch)
 {
-    uint8 ch;
+    LinIf_SlotTimer(ch);
+    LinIf_WakeUpProcess(ch);
+    LinIf_SleepProcess(ch);
 
-    for (ch = 0u; ch < LINIF_MASTER_CHANNEL_NUMBER; ch++) /* PRQA S 2877 */ /* MISRA Rule 4.1 */
+    if (LINIF_CHANNEL_OPERATIONAL == LinIf_GetChannelState(ch))
     {
-        LinIf_SlotTimer(ch);
-        LinIf_WakeUpProcess(ch);
-        LinIf_SleepProcess(ch);
-
-        if (LINIF_CHANNEL_OPERATIONAL == LinIf_GetChannelState(ch))
+        if (TRUE == LinIf_IsEntryDelayTimeout(ch))
         {
-            if (LinIf_IsEntryDelayTimeout(ch))
-            {
-                LinIf_PrevTransmit(ch);
-            }
+            LinIf_PrevTransmit(ch);
+        }
 
 #if ((LINIF_TP_SUPPORTED == STD_ON) && (LINTP_MASTER_SUPPORT == STD_ON))
-            LinTp_RxProcess(ch);
-            LinTp_TxProcess(ch);
-            LinTp_HandleTimers(ch);
-#endif /* LINIF_TP_SUPPORTED == STD_ON && LINTP_MASTER_SUPPORT == STD_ON */
+        LinTp_RxProcess(ch);
+        LinTp_TxProcess(ch);
+        LinTp_HandleTimers(ch);
+#endif
 
-            if (LinIf_IsEntryDelayTimeout(ch))
-            {
+        if (TRUE == LinIf_IsEntryDelayTimeout(ch))
+        {
 #if ((LINIF_TP_SUPPORTED == STD_ON) && (LINTP_MASTER_SUPPORT == STD_ON))
-                if (!LinTp_IsWaitEventSet(ch))
-#endif /* LINIF_TP_SUPPORTED == STD_ON && LINTP_MASTER_SUPPORT == STD_ON */
-                {
-                    LinIf_UpdateSchedule(ch);
-                    LinIf_NextTransmit(ch);
-                }
+            if (FALSE == LinTp_IsWaitEventSet(ch))
+#endif
+            {
+                LinIf_UpdateSchedule(ch);
+                LinIf_NextTransmit(ch);
             }
         }
     }
@@ -1631,20 +1611,14 @@ static FUNC(void, LINIF_CODE) LinIf_MasterMainHandle(void)
  */
 /******************************************************************************/
 #if (STD_ON == LINIF_SLAVE_SUPPORT)
-static FUNC(void, LINIF_CODE) LinIf_SlaveMainHandle(void)
+static void LinIf_SlaveMainHandle(NetworkHandleType ch)
 {
-    uint8 ch;
-
-    for (ch = LINIF_MASTER_CHANNEL_NUMBER; ch < LINIF_NUMBER_OF_CHANNELS; ch++) /* PRQA S 2877 */ /* MISRA Rule 4.1 */
-    {
-        LinIf_SlaveMainFunction(ch);
-
+    LinIf_SlaveMainFunction(ch);
 #if (LINTP_SLAVE_SUPPORT == STD_ON)
-        LinTp_SlaveMainFunction(ch);
-#endif /* LINTP_SLAVE_SUPPORT == STD_ON */
-    }
+    LinTp_SlaveMainFunction(ch);
+#endif
 }
-#endif /* STD_ON == LINIF_SLAVE_SUPPORT */
+#endif
 
 #define LINIF_STOP_SEC_CODE
 #include "LinIf_MemMap.h"

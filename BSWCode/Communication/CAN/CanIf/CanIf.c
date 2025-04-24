@@ -18,21 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : CanIf.c                                                     **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : zhengfei.li                                                 **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Implementation for CANIF                                    **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR Classic Platform 4.2.2                       **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
-
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : CanIf.c                                                     **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : zhengfei.li                                                 **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Implementation for CANIF                                    **
+**                                                                            **
+**  SPECIFICATION(S) : AUTOSAR Classic Platform 4.2.2 and R19-11              **
+**                                                                            **
+*******************************************************************************/
 /*******************************************************************************
 **                      REVISION   HISTORY                                    **
 *******************************************************************************/
@@ -41,36 +41,36 @@
  *  (Upgrade according to the R19_11 standards)
  *  V2.0.1    20210408  zhengfei.li   Optimize wake-up source detection,
  *  Modify the bug of API CanIf_CheckTrcvWakeFlag when the DET is STD_OFF.
- *  V2.0.2    20230526  tong.zhao     fix Bug CPT-459
+ *  V2.1.0    20211217  zhengfei.li   PB/PC configuration parameter split
+ *  V2.1.1    20230526  tong.zhao     fix Bug CPT-459
  *    Modify the bug of invalid address access in API CanIf_RxIndicationHandle,
  *    when meta is not support and ReadRxPdu is support.
- *  V2.0.3    20230825  tong.zhao     fix Bug CPT-6391
- *    In order to optimize the code execution efficiency, modify.
- *  V2.0.4    20231009  tong.zhao     fix Bug CPT-7113
- *    Add condication for CanIf_MetaDataToCanId and CanIf_CanIdToMetaData.
- *  V2.0.5    20231115  tong.zhao     fix Bug CPT-7511
- *    Modify the bug of Can_IdType may be defined as uint16 in only Standard frame,
- *    at AUTOSAR Driver version 422.
- *            20231124  tong.zhao     CPD-33590
- *    Code Execution Optimization.
- *  V2.0.6    20240229  ZhaoTong
- *    1> Replace standard library functions to iSoft library functions
- *    2> QAC check issue fix
- *  V2.0.7    20240329  tong.zhao     fix Bug CPT-8618
+ *  V2.1.2    20231009  tong.zhao     fix Bug CPT-7169
+ *    1> Add condication for CanIf_MetaDataToCanId and CanIf_CanIdToMetaData.
+ *    2> Change Version  Check.
+ *  V2.1.3    20231007  tong.zhao     CPP-419
+      1> Adaptation of different AutoSar versions of can driver, currently supporting
+ *       versions 4.2.2, 4.3.1, 4.4.0
+ *  V2.1.4    20231031  xiaojian.liang Add feauture CanIfRxPduDataLengthCheck.
+ *  V2.1.5    20231116  tong.zhao     CPT-7511
+ *    1> Modify the bug of Can_IdType may be defined as uint16 in only Standard frame,
+ *       at AUTOSAR Driver version 422.
+ *  V2.1.6    20240401  tong.zhao     fix Bug CPT-8618
  *    In order to ensure that ControllerId and TransciverId in CanIf does not rely on CanDrv and CanTransciver index
- *  V2.0.8    20240411  tong.zhao
- *    Critical area protection position changes.(fix Bug CPT-8719)
- *    Optimize code in CanIf_RxIndication and CanIf_TxConfirmation.
- *  V2.0.9    20240606  tong.zhao
- *    Critical area protection position changes.(fix Bug CPT-9165)
- *  V2.0.10    20240604  tong.zhao
- *    Add binary search method for software filtering.
- ******************************************************************************/
-
+ *  V2.2.0    20240524  tong.zhao     CPD-33700         Muliticore adapt
+ *  V2.2.1    20240606  tong.zhao     CPT-9165
+ *    Modify exclusivearea in Api CanIf_TransmitHandle.
+ *  V2.2.2    20240628  tong.zhao     Optimize flash
+ *  V2.2.3    20240705  tong.zhao     Add binary search method for software filtering.
+ *            20240705  tong.zhao     Compatible with 16-bit addressable CPU
+ */
 /**
   \page ISOFT_MISRA_Exceptions  MISRA-C:2012 Compliance Exceptions
     ModeName:CanIf<br>
-  RuleSorce:puhua-rule2024-2.rcf
+  RuleSorce:puhua-rule.rcf 2.3.1
+
+    \li PRQA S 3432 MISRA Rule 20.7 .<br>
+    Reason:Function-like macros are used to allow more efficient code.
 
     \li PRQA S 1532 MISRA Rule 8.7 .<br>
     Reason:In order to make the module code structure clear, the functions are classified.
@@ -83,139 +83,136 @@
 
     \li PRQA S 2880 MISRA Rule 2.1.<br>
     Reason:Storage mapping design is required.
+
+    \li PRQA S 0791 MISRA Rule 5.4 .<br>
+    Reason:Macro definition, design needs, namelength set to 63 in C99.
  */
 
 /*******************************************************************************
 **                      Includes                                              **
 *******************************************************************************/
-#include "CanIf_Cbk.h"
-#include "SchM_CanIf.h"
+#include "CanIf_Internal.h"
 #if (STD_ON == CANIF_PUBLIC_ICOM_SUPPORT)
 #include "CanSM_Cbk.h"
 #endif
 #include "Det.h"
-#include "istd_lib.h"
-
+#include "CanIf_Cbk.h"
 /*******************************************************************************
 **                       Version  Check                                       **
 *******************************************************************************/
-#if (                                                                                                     \
-    (CANIF_H_AR_MAJOR_VERSION != CANIF_CFG_H_AR_MAJOR_VERSION)                                            \
-    || (CANIF_H_AR_MINOR_VERSION != CANIF_CFG_H_AR_MINOR_VERSION)                                         \
-    || (CANIF_H_AR_PATCH_VERSION != CANIF_CFG_H_AR_PATCH_VERSION) || (2u != CANIF_CFG_H_SW_MAJOR_VERSION) \
-    || (0u != CANIF_CFG_H_SW_MINOR_VERSION) || (2u != CANIF_CFG_H_SW_PATCH_VERSION))
+/*check version information with CanIf*/
+#if (                                                                                 \
+    (CANIF_AR_RELEASE_MAJOR_VERSION != CANIF_CFG_H_AR_RELEASE_MAJOR_VERSION)          \
+    || (CANIF_AR_RELEASE_MINOR_VERSION != CANIF_CFG_H_AR_RELEASE_MINOR_VERSION)       \
+    || (CANIF_AR_RELEASE_REVISION_VERSION != CANIF_CFG_H_AR_RELEASE_REVISION_VERSION) \
+    || (2u != CANIF_CFG_H_SW_MAJOR_VERSION) || (2u != CANIF_CFG_H_SW_MINOR_VERSION)   \
+    || (2u != CANIF_CFG_H_SW_PATCH_VERSION))
 #error " CanIf cfg file version mismatching with CanIf"
 #endif
-
 /*******************************************************************************
 **                      Private Macro Definitions                             **
 *******************************************************************************/
-#define CANIF_TXPDU(TxPdu_Index)                  CanIf_ConfigStd->CanIfTxPduConfigRef[(TxPdu_Index)]
-#define CANIF_TXBUFFER_SIZE(TxBuffer_Index)       CanIf_ConfigStd->CanIfBufferSize[(TxBuffer_Index)]
-#define CANIF_HTH(Hth_Index)                      CanIf_ConfigStd->CanIfHthCfgRef[(Hth_Index)]
-#define CANIF_RXPDU(RxPdu_Index)                  CanIf_ConfigStd->CanIfRxPduConfigRef[(RxPdu_Index)]
-#define CANIF_HRH(Hrh_Index)                      CanIf_ConfigStd->CanIfHrhCfgRef[(Hrh_Index)]
+/*Service ID*/
+#define CANIF_CHECKWAKEUP_ID  (0x11u)
+#define CANIF_TRANSMIT_ID     (0x05u)
+#define CANIF_RXINDICATION_ID (0x14u)
+#if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
+#define CANIF_INIT_ID                        (0x01u)
+#define CANIF_SETCONTROLLER_MODE_ID          (0x03u)
+#define CANIF_GETCONTROLLER_MODE_ID          (0x04u)
+#define CANIF_READRXPDUDATA_ID               (0x06u)
+#define CANIF_READTXNOTIFSTATUS_ID           (0x07u)
+#define CANIF_READRXNOTIFSTATUS_ID           (0x08u)
+#define CANIF_SETPDUMODE_ID                  (0x09u)
+#define CANIF_GETPDUMODE_ID                  (0x0Au)
+#define CANIF_GETVERSIONINFO_ID              (0x0Bu)
+#define CANIF_SETDYNAMICTXID_ID              (0x0Cu)
+#define CANIF_SETTRCVMODE_ID                 (0x0Du)
+#define CANIF_GETTRCVMODE_ID                 (0x0Eu)
+#define CANIF_GETTRCVWAKEUPREASON_ID         (0x0Fu)
+#define CANIF_SETTRCVWAKEUPMODE_ID           (0x10u)
+#define CANIF_CHECKVALIDATION_ID             (0x12u)
+#define CANIF_GETTXCONFIRMATIONSTATE         (0x19u)
+#define CANIF_CLEARTRCVWUFFLAG_ID            (0x1Eu)
+#define CANIF_CHECKTRCVWAKEFLAG_ID           (0x1Fu)
+#define CANIF_SETBAUDRATE_ID                 (0x27u)
+#define CANIF_SETICOMCONFIGURATION_ID        (0x25u)
+#define CANIF_TRIGGERTRANSMIT_ID             (0x41u)
+#define CANIF_TXCONFIRMATION_ID              (0x13u)
+#define CANIF_CONTROLLERBUSOFF_ID            (0x16u)
+#define CANIF_CONFIRMPNAVAILABILITY_ID       (0x1Au)
+#define CANIF_CLEARTRCVWUFFLAGINDICATION_ID  (0x20u)
+#define CANIF_CHECKTRCVWAKEFLAGINDICATION_ID (0x21u)
+#define CANIF_CONTROLLERMODEINDICATION_ID    (0x17u)
+#define CANIF_TRCVMODEINDICATION_ID          (0x22u)
+#define CANIF_CURRENTICOMCONFIGURATION_ID    (0x26u)
 
-#define CANIF_CONTROLLER_DRV_ID(Controller_Index) CanIf_CtrlCfgData[(Controller_Index)].CanDriverId
+/* Error detection */
+#define CANIF_E_PARAM_CANID          (10u)
+#define CANIF_E_PARAM_HOH            (12u)
+#define CANIF_E_PARAM_LPDU           (13u)
+#define CANIF_E_PARAM_CONTROLLERID   (15u)
+#define CANIF_E_PARAM_WAKEUPSOURCE   (16u)
+#define CANIF_E_PARAM_TRCV           (17u)
+#define CANIF_E_PARAM_TRCVMODE       (18u)
+#define CANIF_E_PARAM_TRCVWAKEUPMODE (19u)
+#define CANIF_E_PARAM_CTRLMODE       (21u)
+#define CANIF_E_PARAM_PDU_MODE       (22u)
+#define CANIF_E_PARAM_POINTER        (20u)
+#define CANIF_E_UNINIT               (30u)
+#define CANIF_E_INVALID_TXPDUID      (50u)
+#define CANIF_E_INVALID_RXPDUID      (60u)
+#define CANIF_E_INIT_FAILED          (80u)
+#endif /*STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT*/
+#define CANIF_E_INVALID_DLC                   (61u)
+#define CANIF_E_DATA_LENGTH_MISMATCH          (62u)
+#define CANIF_E_STOPPED                       (70u)
+#define CANIF_E_NOT_SLEEP                     (71u)
 
-#if (STD_ON == CANIF_META_DATA_SUPPORT)
-#if (LOW_BYTE_FIRST == CPU_BYTE_ORDER)
-static inline void CANIF_METADATATOCANID(CanIf_IdType* CanId, const uint8* MetaDataPtr)
-{
-    *CanId = ((CanIf_IdType)(MetaDataPtr[0u])) | ((CanIf_IdType)(MetaDataPtr[1u]) << 8u)
-             | ((CanIf_IdType)(MetaDataPtr[2u]) << 16u) | ((CanIf_IdType)(MetaDataPtr[3u]) << 24u);
-}
+#define CanIf_Det_ReportError(apiId, errorId) (void)Det_ReportError(CANIF_MODULE_ID, 0u, (apiId), (errorId))
+#define CanIf_Det_ReportRuntimeError(apiId, errorId) \
+    (void)Det_ReportRuntimeError(CANIF_MODULE_ID, 0u, (apiId), (errorId))
 
-#define CANIF_CANIDTOMETADATA(CanId, MetaDataPtr) \
-    do                                            \
-    {                                             \
-        MetaDataPtr[0u] = (uint8)(CanId);         \
-        MetaDataPtr[1u] = (uint8)(CanId >> 8u);   \
-        MetaDataPtr[2u] = (uint8)(CanId >> 16u);  \
-        MetaDataPtr[3u] = (uint8)(CanId >> 24u);  \
-    } while (0)
-#else
-static inline void CANIF_METADATATOCANID(CanIf_IdType* CanId, const uint8* MetaDataPtr)
-{
-    *CanId = ((CanIf_IdType)(MetaDataPtr[0u]) << 24u) | ((CanIf_IdType)(MetaDataPtr[1u]) << 16u)
-             | ((CanIf_IdType)(MetaDataPtr[2u]) << 8u) | ((CanIf_IdType)(MetaDataPtr[3u]));
-}
-
-#define CANIF_CANIDTOMETADATA(CanId, MetaDataPtr) \
-    do                                            \
-    {                                             \
-        MetaDataPtr[0u] = (uint8)(CanId >> 24u);  \
-        MetaDataPtr[1u] = (uint8)(CanId >> 16u);  \
-        MetaDataPtr[2u] = (uint8)(CanId >> 8u);   \
-        MetaDataPtr[3u] = (uint8)(CanId);         \
-    } while (0)
-#endif /* LOW_BYTE_FIRST == CPU_BYTE_ORDER */
-#endif /* STD_ON == CANIF_META_DATA_SUPPORT */
 /*******************************************************************************
 **                      Private Variable Definitions                          **
 *******************************************************************************/
 /* Canif init status, at first define it as CANIF_UNINIT */
 #define CANIF_START_SEC_VAR_INIT_8
 #include "CanIf_MemMap.h"
-static VAR(CanIf_InitStatusType, CANIF_VAR_POWER_ON_INIT) CanIf_InitStatus = CANIF_UNINIT;
+CANIF_LOCAL VAR(CanIf_InitStatusType, CANIF_VAR_POWER_ON_INIT) CanIf_InitStatus = CANIF_UNINIT;
 #define CANIF_STOP_SEC_VAR_INIT_8
 #include "CanIf_MemMap.h"
 
 #define CANIF_START_SEC_VAR_INIT_PTR
 #include "CanIf_MemMap.h"
-static P2CONST(CanIf_ConfigType, CANIF_VAR, CANIF_CONST) CanIf_ConfigStd = NULL_PTR;
+P2CONST(CanIf_ConfigType, CANIF_VAR, CANIF_CONST) CanIf_ConfigStd = NULL_PTR;
 #define CANIF_STOP_SEC_VAR_INIT_PTR
 #include "CanIf_MemMap.h"
-
-/* define Tx notification status and Rx notification status*/
-#if (CANIF_TXNOTIFYSTATUS_BUFFER > 0u)
-#define CANIF_START_SEC_VAR_NO_INIT_8
-#include "CanIf_MemMap.h"
-static VAR(CanIf_NotifStatusType, CANIF_VAR) CanIf_TxNotifStatus[CANIF_TXNOTIFYSTATUS_BUFFER];
-#define CANIF_STOP_SEC_VAR_NO_INIT_8
-#include "CanIf_MemMap.h"
-#endif
-
-#if (CANIF_RXNOTIFYSTATUS_BUFFER > 0u)
-#define CANIF_START_SEC_VAR_NO_INIT_8
-#include "CanIf_MemMap.h"
-static VAR(CanIf_NotifStatusType, CANIF_VAR) CanIf_RxNotifStatus[CANIF_RXNOTIFYSTATUS_BUFFER];
-#define CANIF_STOP_SEC_VAR_NO_INIT_8
-#include "CanIf_MemMap.h"
-#endif
 
 #if (STD_ON == CANIF_PUBLIC_TX_CONFIRM_POLLING_SUPPORT)
 #define CANIF_START_SEC_VAR_NO_INIT_8
 #include "CanIf_MemMap.h"
-static VAR(CanIf_NotifStatusType, CANIF_VAR) CanIf_TxConfirmationState[CANIF_CANCONTROLLER_NUMBER];
+CANIF_LOCAL VAR(CanIf_NotifStatusType, CANIF_VAR) CanIf_TxConfirmationState[CANIF_CANCONTROLLER_NUMBER];
 #define CANIF_STOP_SEC_VAR_NO_INIT_8
-#include "CanIf_MemMap.h"
-#endif
-
-#if (CANIF_DYNAMIC_TXPDU_NUMBER > 0u)
-#define CANIF_START_SEC_VAR_NO_INIT_32
-#include "CanIf_MemMap.h"
-static VAR(CanIf_IdType, CANIF_VAR) CanIf_TxPduDynamicCanIds[CANIF_DYNAMIC_TXPDU_NUMBER];
-#define CANIF_STOP_SEC_VAR_NO_INIT_32
 #include "CanIf_MemMap.h"
 #endif
 
 #define CANIF_START_SEC_VAR_NO_INIT_8
 #include "CanIf_MemMap.h"
-static VAR(CanIf_PduModeType, CANIF_VAR) CanIf_PduMode[CANIF_CANCONTROLLER_NUMBER];
+CANIF_LOCAL VAR(CanIf_PduModeType, CANIF_VAR) CanIf_PduMode[CANIF_CANCONTROLLER_NUMBER];
 #define CANIF_STOP_SEC_VAR_NO_INIT_8
 #include "CanIf_MemMap.h"
 
 #define CANIF_START_SEC_VAR_NO_INIT_8
 #include "CanIf_MemMap.h"
-static VAR(CanIf_ControllerModeType, CANIF_VAR) CanIf_ControllerMode[CANIF_CANCONTROLLER_NUMBER];
+CANIF_LOCAL VAR(Can_ControllerStateType, CANIF_VAR) CanIf_ControllerMode[CANIF_CANCONTROLLER_NUMBER];
 #define CANIF_STOP_SEC_VAR_NO_INIT_8
 #include "CanIf_MemMap.h"
 
 #if (STD_ON == CANIF_PUBLIC_PN_SUPPORT)
 #define CANIF_START_SEC_VAR_NO_INIT_BOOLEAN
 #include "CanIf_MemMap.h"
-static VAR(boolean, CANIF_VAR) CanIf_PnTxFilter[CANIF_CANCONTROLLER_NUMBER];
+CANIF_LOCAL VAR(boolean, CANIF_VAR) CanIf_PnTxFilter[CANIF_CANCONTROLLER_NUMBER];
 #define CANIF_STOP_SEC_VAR_NO_INIT_BOOLEAN
 #include "CanIf_MemMap.h"
 #endif
@@ -223,7 +220,7 @@ static VAR(boolean, CANIF_VAR) CanIf_PnTxFilter[CANIF_CANCONTROLLER_NUMBER];
 #if (STD_ON == CANIF_PUBLIC_WAKEUP_CHECK_VALID_SUPPORT)
 #define CANIF_START_SEC_VAR_NO_INIT_BOOLEAN
 #include "CanIf_MemMap.h"
-static VAR(boolean, CANIF_VAR) CanIf_FirstCallRxInd[CANIF_CANCONTROLLER_NUMBER];
+CANIF_LOCAL VAR(boolean, CANIF_VAR) CanIf_FirstCallRxInd[CANIF_CANCONTROLLER_NUMBER];
 #define CANIF_STOP_SEC_VAR_NO_INIT_BOOLEAN
 #include "CanIf_MemMap.h"
 #endif
@@ -236,10 +233,6 @@ static FUNC(void, CANIF_CODE) CanIf_FreeBufInStopped(uint8 Controller);
 
 static FUNC(void, CANIF_CODE) CanIf_InitAllBuffer(VAR(void, AUTOMATIC));
 
-#if (CANIF_DYNAMIC_TXPDU_NUMBER > 0u)
-static FUNC(void, CANIF_CODE) CanIf_InitDynamicTxPduCanIds(uint8 Controller);
-#endif
-
 static FUNC(Std_ReturnType, CANIF_CODE) CanIf_SetControllStarted(uint8 Controller);
 
 static FUNC(Std_ReturnType, CANIF_CODE) CanIf_SetControllSleep(uint8 Controller);
@@ -250,12 +243,6 @@ static FUNC(void, CANIF_CODE) CanIf_PduPack(
     PduIdType CanTxPduId,
     P2CONST(PduInfoType, AUTOMATIC, CANIF_APPL_DATA) PduInfoPtr,
     P2VAR(Can_PduType, AUTOMATIC, AUTOMATIC) canPdu);
-
-#if (CANIF_TXBUFFER_NUMBER > 0u)
-static FUNC(void, CANIF_CODE) CanIf_FreeControllerTxBuffer(uint8 Controller);
-
-static FUNC(Std_ReturnType, CANIF_CODE) CanIf_TxBusyHandle(P2CONST(Can_PduType, AUTOMATIC, CANIF_APPL_DATA) pduPtr);
-#endif /* CANIF_TXBUFFER_NUMBER > 0u */
 
 static FUNC(Std_ReturnType, CANIF_CODE)
     CanIf_CanIdRangCheck(Can_HwHandleType hrhId, CanIf_IdType canId, P2VAR(PduIdType, AUTOMATIC, AUTOMATIC) pduIdIndex);
@@ -272,15 +259,8 @@ static FUNC(Std_ReturnType, CANIF_CODE) CanIf_RxPduHrhSearchByBinary(
     P2VAR(PduIdType, AUTOMATIC, AUTOMATIC) rxPduIndex);
 #endif /* CANIF_SOFTWARE_FILTER_TYPE == CANIF_SOFTWARE_FILTER_BINARY */
 
-static FUNC(Std_ReturnType, CANIF_CODE) CanIf_GetPduHrh(PduIdType pduIdIndex, CanIf_IdType CanId);
-
-#if ((CANIF_TXNOTIFYSTATUS_BUFFER > 0u) || (CANIF_RXNOTIFYSTATUS_BUFFER > 0u))
-static FUNC(void, CANIF_CODE) CanIf_FreeRxTxNotifyStatus(uint8 Controller);
-#endif
-
-#if (0u < CANIF_RXBUFFER_NUMBER)
-static FUNC(void, CANIF_CODE) CanIf_InitRxBuffer(uint8 Controller);
-#endif
+static FUNC(Std_ReturnType, CANIF_CODE)
+    CanIf_GetPduHrh(PduIdType pduIdIndex, CanIf_IdType CanId, P2VAR(PduIdType, AUTOMATIC, AUTOMATIC) rxPduIndex);
 
 static FUNC(void, CANIF_CODE) CanIf_RxIndicationHandle(
     PduIdType pduIdIndex,
@@ -327,14 +307,24 @@ CanIf_Init(P2CONST(CanIf_ConfigType, AUTOMATIC, CANIF_CONST_PBCFG) ConfigPtr)
 {
     uint8 canLoop;
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
-    boolean detNoErr = TRUE;
     /* for post build,report error if NULL_PTR */
     if (NULL_PTR == ConfigPtr)
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_INIT_ID, CANIF_E_PARAM_POINTER);
-        detNoErr = FALSE;
+        CanIf_Det_ReportError(CANIF_INIT_ID, CANIF_E_PARAM_POINTER);
     }
-    if (detNoErr)
+#if defined CANIF_RXPDU_MAX
+    else if (ConfigPtr->CanIfRxPduNumber > CANIF_RXPDU_MAX)
+    {
+        CanIf_Det_ReportError(CANIF_INIT_ID, CANIF_E_INIT_FAILED);
+    }
+#endif /* defined CANIF_RXPDU_MAX */
+#if defined CANIF_TXPDU_MAX
+    else if (ConfigPtr->CanIfTxPduNumber > CANIF_TXPDU_MAX)
+    {
+        CanIf_Det_ReportError(CANIF_INIT_ID, CANIF_E_INIT_FAILED);
+    }
+#endif /* defined CANIF_TXPDU_MAX */
+    else
 #endif /* STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT */
     {
         /* CanIf Module has not been initialized */
@@ -347,7 +337,7 @@ CanIf_Init(P2CONST(CanIf_ConfigType, AUTOMATIC, CANIF_CONST_PBCFG) ConfigPtr)
             /* set controller mode to STOPPED */
             for (canLoop = 0u; canLoop < CANIF_CANCONTROLLER_NUMBER; canLoop++)
             {
-                CanIf_ControllerMode[canLoop] = CANIF_CS_STOPPED;
+                CanIf_ControllerMode[canLoop] = CAN_CS_STOPPED;
                 CanIf_PduMode[canLoop] = CANIF_OFFLINE;
 #if (STD_ON == CANIF_PUBLIC_WAKEUP_CHECK_VALID_SUPPORT)
                 /* Init the first call rxindication event flag */
@@ -370,7 +360,6 @@ CanIf_Init(P2CONST(CanIf_ConfigType, AUTOMATIC, CANIF_CONST_PBCFG) ConfigPtr)
             CanIf_InitAllBuffer();
         }
     }
-    return;
 }
 /*************************************************************************/
 /*
@@ -394,7 +383,6 @@ CanIf_DeInit(VAR(void, AUTOMATIC))
         CanIf_ConfigStd = NULL_PTR;
         CanIf_InitStatus = CANIF_UNINIT;
     }
-    return;
 }
 /*************************************************************************/
 /*
@@ -417,7 +405,7 @@ CanIf_DeInit(VAR(void, AUTOMATIC))
 /*************************************************************************/
 FUNC(Std_ReturnType, CANIF_CODE)
 /* PRQA S 1532++ */ /* MISRA Rule 8.7 */
-CanIf_SetControllerMode(uint8 ControllerId, CanIf_ControllerModeType ControllerMode)
+CanIf_SetControllerMode(uint8 ControllerId, Can_ControllerStateType ControllerMode)
 /* PRQA S 1532-- */ /* MISRA Rule 8.7 */
 {
     Std_ReturnType result = E_NOT_OK;
@@ -426,21 +414,17 @@ CanIf_SetControllerMode(uint8 ControllerId, CanIf_ControllerModeType ControllerM
     /* check whether module been initialized */
     if (CANIF_INITED != CanIf_InitStatus)
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_SETCONTROLLER_MODE_ID, CANIF_E_UNINIT);
+        CanIf_Det_ReportError(CANIF_SETCONTROLLER_MODE_ID, CANIF_E_UNINIT);
         detNoErr = FALSE;
     }
     if (detNoErr && (ControllerId >= CANIF_CANCONTROLLER_NUMBER))
     {
-        (void)Det_ReportError(
-            CANIF_MODULE_ID,
-            CANIF_INSTANCE_ID,
-            CANIF_SETCONTROLLER_MODE_ID,
-            CANIF_E_PARAM_CONTROLLERID);
+        CanIf_Det_ReportError(CANIF_SETCONTROLLER_MODE_ID, CANIF_E_PARAM_CONTROLLERID);
         detNoErr = FALSE;
     }
-    if (detNoErr && ((ControllerMode > CANIF_CS_SLEEP) || (ControllerMode <= CANIF_CS_UNINIT)))
+    if (detNoErr && ((ControllerMode > CAN_CS_SLEEP) || (ControllerMode <= CAN_CS_UNINIT)))
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_SETCONTROLLER_MODE_ID, CANIF_E_PARAM_CTRLMODE);
+        CanIf_Det_ReportError(CANIF_SETCONTROLLER_MODE_ID, CANIF_E_PARAM_CTRLMODE);
         detNoErr = FALSE;
     }
     if (detNoErr)
@@ -449,13 +433,13 @@ CanIf_SetControllerMode(uint8 ControllerId, CanIf_ControllerModeType ControllerM
         /* check the ControllerMode to be set*/
         switch (ControllerMode)
         {
-        case CANIF_CS_STARTED:
+        case CAN_CS_STARTED:
             result = CanIf_SetControllStarted(ControllerId);
             break;
-        case CANIF_CS_SLEEP:
+        case CAN_CS_SLEEP:
             result = CanIf_SetControllSleep(ControllerId);
             break;
-        case CANIF_CS_STOPPED:
+        case CAN_CS_STOPPED:
             result = CanIf_SetControllStopped(ControllerId);
             break;
         /* invalid controller mode */
@@ -487,7 +471,7 @@ CanIf_SetControllerMode(uint8 ControllerId, CanIf_ControllerModeType ControllerM
 FUNC(Std_ReturnType, CANIF_CODE)
 CanIf_GetControllerMode(
     uint8 ControllerId,
-    P2VAR(CanIf_ControllerModeType, AUTOMATIC, CANIF_APPL_DATA) ControllerModePtr)
+    P2VAR(Can_ControllerStateType, AUTOMATIC, CANIF_APPL_DATA) ControllerModePtr)
 {
     Std_ReturnType result = E_NOT_OK;
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
@@ -495,23 +479,19 @@ CanIf_GetControllerMode(
     /* check whether module been initialized */
     if (CANIF_INITED != CanIf_InitStatus)
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_GETCONTROLLER_MODE_ID, CANIF_E_UNINIT);
+        CanIf_Det_ReportError(CANIF_GETCONTROLLER_MODE_ID, CANIF_E_UNINIT);
         detNoErr = FALSE;
     }
     /* check whether controller is over range */
     if (detNoErr && (ControllerId >= CANIF_CANCONTROLLER_NUMBER))
     {
-        (void)Det_ReportError(
-            CANIF_MODULE_ID,
-            CANIF_INSTANCE_ID,
-            CANIF_GETCONTROLLER_MODE_ID,
-            CANIF_E_PARAM_CONTROLLERID);
+        CanIf_Det_ReportError(CANIF_GETCONTROLLER_MODE_ID, CANIF_E_PARAM_CONTROLLERID);
         detNoErr = FALSE;
     }
     /* check whether controller is over range */
     if (detNoErr && (NULL_PTR == ControllerModePtr))
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_GETCONTROLLER_MODE_ID, CANIF_E_PARAM_POINTER);
+        CanIf_Det_ReportError(CANIF_GETCONTROLLER_MODE_ID, CANIF_E_PARAM_POINTER);
         detNoErr = FALSE;
     }
     if (detNoErr)
@@ -550,30 +530,25 @@ CanIf_Transmit(PduIdType CanIfTxSduId, P2CONST(PduInfoType, AUTOMATIC, CANIF_APP
     Std_ReturnType result = E_NOT_OK;
     const CanIf_TxPduConfigType* txPduConfigPtr = &CANIF_TXPDU(CanIfTxSduId);
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
-    boolean detNoErr = TRUE;
     /* check whether module been initialized */
     if (CANIF_INITED != CanIf_InitStatus)
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_TRANSMIT_ID, CANIF_E_UNINIT);
-        detNoErr = FALSE;
+        CanIf_Det_ReportError(CANIF_TRANSMIT_ID, CANIF_E_UNINIT);
     }
     /* check NULL_PTR */
-    if (detNoErr && (NULL_PTR == PduInfoPtr))
+    else if (NULL_PTR == PduInfoPtr)
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_TRANSMIT_ID, CANIF_E_PARAM_POINTER);
-        detNoErr = FALSE;
+        CanIf_Det_ReportError(CANIF_TRANSMIT_ID, CANIF_E_PARAM_POINTER);
     }
-    if (detNoErr && (CanIfTxSduId >= CANIF_TXPDU_NUMBER))
+    else if (CanIfTxSduId >= CanIf_ConfigStd->CanIfTxPduNumber)
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_TRANSMIT_ID, CANIF_E_INVALID_TXPDUID);
-        detNoErr = FALSE;
+        CanIf_Det_ReportError(CANIF_TRANSMIT_ID, CANIF_E_INVALID_TXPDUID);
     }
-    if (detNoErr && (txPduConfigPtr->TxMetaDataEnable) && (NULL_PTR == PduInfoPtr->MetaDataPtr))
+    else if ((txPduConfigPtr->TxMetaDataEnable) && (NULL_PTR == PduInfoPtr->MetaDataPtr))
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_TRANSMIT_ID, CANIF_E_PARAM_POINTER);
-        detNoErr = FALSE;
+        CanIf_Det_ReportError(CANIF_TRANSMIT_ID, CANIF_E_PARAM_POINTER);
     }
-    if (detNoErr)
+    else
 #endif /* STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT */
     {
         boolean pduLengthValid = TRUE;
@@ -616,47 +591,11 @@ CanIf_Transmit(PduIdType CanIfTxSduId, P2CONST(PduInfoType, AUTOMATIC, CANIF_APP
         }
         else
         {
-            (void)Det_ReportRuntimeError(
-                CANIF_MODULE_ID,
-                CANIF_INSTANCE_ID,
-                CANIF_TRANSMIT_ID,
-                CANIF_E_DATA_LENGTH_MISMATCH);
+            CanIf_Det_ReportRuntimeError(CANIF_TRANSMIT_ID, CANIF_E_DATA_LENGTH_MISMATCH);
         }
     }
     return result;
 }
-#if (STD_ON == CANIF_PUBLIC_CANCEL_TRANSMIT_SUPPORT)
-/*************************************************************************/
-/*
- * Brief               This is a dummy method introduced for interface compatibility.
- * ServiceId           0x18
- * Sync/Async          Synchronous
- * Reentrancy          Non Reentrant
- * Param-Name[in]      CanIfTxSduId: L-SDU handle to be transmitted.This handle specifies the
- *                     corresponding CAN LSDU ID and implicitly the CAN Driver instance as well
- *                     as the corresponding CAN controller device.
- * Param-Name[out]     None
- * Param-Name[in/out]  None
- * Return              Std_ReturnType
- *                     Always return E_OK
- * PreCondition        CANIF_PUBLIC_CANCEL_TRANSMIT_SUPPORT is TRUE
- * CallByAPI           Up layer
- */
-/*************************************************************************/
-FUNC(Std_ReturnType, CANIF_CODE)
-CanIf_CancelTransmit(PduIdType CanIfTxSduId)
-{
-    Std_ReturnType result = E_OK;
-#if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
-    if (CanIfTxSduId >= CANIF_TXPDU_NUMBER)
-    {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_CANCELTRANSMIT_ID, CANIF_E_INVALID_TXPDUID);
-        result = E_NOT_OK;
-    }
-#endif /* STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT */
-    return result;
-}
-#endif /* STD_ON == CANIF_PUBLIC_CANCEL_TRANSMIT_SUPPORT */
 #if (STD_ON == CANIF_PUBLIC_READ_RX_PDU_DATA_API)
 /*************************************************************************/
 /*
@@ -681,55 +620,46 @@ CanIf_ReadRxPduData(PduIdType CanIfRxSduId, P2VAR(PduInfoType, AUTOMATIC, CANIF_
 {
     Std_ReturnType result = E_NOT_OK;
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
-    boolean detNoErr = TRUE;
     /* check whether module been initialized */
     if (CANIF_INITED != CanIf_InitStatus)
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_READRXPDUDATA_ID, CANIF_E_UNINIT);
-        detNoErr = FALSE;
+        CanIf_Det_ReportError(CANIF_READRXPDUDATA_ID, CANIF_E_UNINIT);
     }
     /* check NULL PTR*/
-    if (detNoErr && ((NULL_PTR == CanIfRxInfoPtr) || (NULL_PTR == CanIfRxInfoPtr->SduDataPtr)))
+    else if ((NULL_PTR == CanIfRxInfoPtr) || (NULL_PTR == CanIfRxInfoPtr->SduDataPtr))
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_READRXPDUDATA_ID, CANIF_E_PARAM_POINTER);
-        detNoErr = FALSE;
+        CanIf_Det_ReportError(CANIF_READRXPDUDATA_ID, CANIF_E_PARAM_POINTER);
     }
-    if (detNoErr && (CanIfRxSduId >= CANIF_RXPDU_NUMBER))
+    else if (CanIfRxSduId >= CanIf_ConfigStd->CanIfRxPduNumber)
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_READRXPDUDATA_ID, CANIF_E_INVALID_RXPDUID);
-        detNoErr = FALSE;
+        CanIf_Det_ReportError(CANIF_READRXPDUDATA_ID, CANIF_E_INVALID_RXPDUID);
     }
-    if (detNoErr)
-#endif /* STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT */
+    else
+#endif /*STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT*/
 #if (0u < CANIF_RXBUFFER_NUMBER)
     {
-        uint8 controllerId;
-        Can_HwHandleType hrhIndex;
-        CanIf_RxBufferNumType rxPduBufferIndex;
-        CanIf_RxPduBufferType* rxPduBuffer;
         const CanIf_RxPduConfigType* rxPduConfigPtr = &CANIF_RXPDU(CanIfRxSduId);
-        hrhIndex = rxPduConfigPtr->CanIfRxPduHrhId;
-        controllerId = CANIF_HRH(hrhIndex).CanIfHrhCanCtrlId;
-        if ((CANIF_CS_STARTED == CanIf_ControllerMode[controllerId])
-            && ((CANIF_OFFLINE != CanIf_PduMode[controllerId])))
+        Can_HwHandleType hrhIndex = rxPduConfigPtr->CanIfRxPduHrhId;
+        uint8 controllerId = CANIF_HRH(hrhIndex).CanIfHrhCanCtrlId;
+        if ((CAN_CS_STARTED == CanIf_ControllerMode[controllerId]) && ((CANIF_OFFLINE != CanIf_PduMode[controllerId])))
         {
-            SchM_Enter_CanIf();
-            rxPduBufferIndex = rxPduConfigPtr->CanIf_RxBufferIndex;
+            SchM_Enter_CanIf_ExclusiveArea_Channel();
+            CanIf_RxBufferNumType rxPduBufferIndex = rxPduConfigPtr->CanIf_RxBufferIndex;
             if (rxPduBufferIndex < CANIF_RXBUFFER_NUMBER)
             {
-                rxPduBuffer = &CanIf_RxBuffer[rxPduBufferIndex];
+                CanIf_RxPduBufferType* rxPduBuffer = &CanIf_RxBuffer[rxPduBufferIndex];
                 /*copy rx buffer data to CanIfRxInfoPtr*/
                 CanIfRxInfoPtr->SduLength = (PduLengthType)rxPduBuffer->length;
                 (void)ILib_memcpy(CanIfRxInfoPtr->SduDataPtr, rxPduBuffer->data, CanIfRxInfoPtr->SduLength);
 #if (STD_ON == CANIF_META_DATA_SUPPORT)
                 if (rxPduConfigPtr->RxMetaDataEnable)
                 {
-                    CANIF_CANIDTOMETADATA(rxPduBuffer->metaData, CanIfRxInfoPtr->MetaDataPtr);
+                    CanIf_CanIdToMetaData(rxPduBuffer->metaData, CanIfRxInfoPtr->MetaDataPtr);
                 }
 #endif
                 result = E_OK;
             }
-            SchM_Exit_CanIf();
+            SchM_Exit_CanIf_ExclusiveArea_Channel();
         }
     }
 #endif /* 0u < CANIF_RXBUFFER_NUMBER */
@@ -757,32 +687,21 @@ CanIf_ReadTxNotifStatus(PduIdType CanIfTxSduId)
 {
     CanIf_NotifStatusType result = CANIF_NO_NOTIFICATION;
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
-    boolean detNoErr = TRUE;
     /* check initiation */
     if (CANIF_INITED != CanIf_InitStatus)
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_READTXNOTIFSTATUS_ID, CANIF_E_UNINIT);
-        detNoErr = FALSE;
+        CanIf_Det_ReportError(CANIF_READTXNOTIFSTATUS_ID, CANIF_E_UNINIT);
     }
-    if (detNoErr && ((CanIfTxSduId >= CANIF_TXPDU_NUMBER) || (!CANIF_TXPDU(CanIfTxSduId).CanIfTxPduReadNotifyStatus)))
+    else if (
+        (CanIfTxSduId >= CanIf_ConfigStd->CanIfTxPduNumber)
+        || (FALSE == CANIF_TXPDU(CanIfTxSduId).CanIfTxPduReadNotifyStatus))
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_READTXNOTIFSTATUS_ID, CANIF_E_INVALID_TXPDUID);
-        detNoErr = FALSE;
+        CanIf_Det_ReportError(CANIF_READTXNOTIFSTATUS_ID, CANIF_E_INVALID_TXPDUID);
     }
-    if (detNoErr)
+    else
 #endif
     {
-#if (CANIF_TXNOTIFYSTATUS_BUFFER > 0u)
-        const CanIf_TxPduConfigType* txPduConfigPtr = &CANIF_TXPDU(CanIfTxSduId);
-        if (txPduConfigPtr->CanIfTxPduReadNotifyStatus)
-        {
-            SchM_Enter_CanIf();
-            result = CanIf_TxNotifStatus[txPduConfigPtr->CanIfTxNotifyIndex];
-            /* clear STATUS */
-            CanIf_TxNotifStatus[txPduConfigPtr->CanIfTxNotifyIndex] = CANIF_NO_NOTIFICATION;
-            SchM_Exit_CanIf();
-        }
-#endif
+        result = CanIf_ReadTxNotifStatusHandle(CanIfTxSduId);
     }
     return result;
 }
@@ -813,28 +732,27 @@ CanIf_ReadRxNotifStatus(PduIdType CanIfRxSduId)
     /* check initiation */
     if (CANIF_INITED != CanIf_InitStatus)
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_READRXNOTIFSTATUS_ID, CANIF_E_UNINIT);
+        CanIf_Det_ReportError(CANIF_READRXNOTIFSTATUS_ID, CANIF_E_UNINIT);
         detNoErr = FALSE;
     }
-    if (detNoErr && ((CanIfRxSduId >= CANIF_RXPDU_NUMBER) || (!CANIF_RXPDU(CanIfRxSduId).CanIfRxPduReadNotifyStatus)))
-    {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_READRXNOTIFSTATUS_ID, CANIF_E_INVALID_RXPDUID);
-        detNoErr = FALSE;
-    }
-    if (detNoErr)
-#endif /* STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT */
-    {
-#if (CANIF_RXNOTIFYSTATUS_BUFFER > 0u)
-        const CanIf_RxPduConfigType* rxPduConfigPtr = &CANIF_RXPDU(CanIfRxSduId);
-        if (rxPduConfigPtr->CanIfRxPduReadNotifyStatus)
-        {
-            SchM_Enter_CanIf();
-            result = CanIf_RxNotifStatus[rxPduConfigPtr->CanIfRxNotifyIndex];
-            /* clear STATUS */
-            CanIf_RxNotifStatus[rxPduConfigPtr->CanIfRxNotifyIndex] = CANIF_NO_NOTIFICATION;
-            SchM_Exit_CanIf();
-        }
+    if ((TRUE == detNoErr)
+#if (0u < CANIF_RXPDU_MAX)
+        && ((CanIfRxSduId >= CANIF_RXPDU_MAX) || (CanIfRxSduId >= CanIf_ConfigStd->CanIfRxPduNumber))
 #endif
+    )
+    {
+        CanIf_Det_ReportError(CANIF_READRXNOTIFSTATUS_ID, CANIF_E_INVALID_RXPDUID);
+        detNoErr = FALSE;
+    }
+    if ((TRUE == detNoErr) && (FALSE == CANIF_RXPDU(CanIfRxSduId).CanIfRxPduReadNotifyStatus))
+    {
+        CanIf_Det_ReportError(CANIF_READRXNOTIFSTATUS_ID, CANIF_E_INVALID_RXPDUID);
+        detNoErr = FALSE;
+    }
+    if (TRUE == detNoErr)
+#endif /*TRUE == CANIF_PUBLIC_DEV_ERROR_DETECT*/
+    {
+        result = CanIf_ReadRxNotifStatusHandle(CanIfRxSduId);
     }
     return result;
 }
@@ -864,37 +782,32 @@ CanIf_SetPduMode(uint8 ControllerId, CanIf_PduModeType PduModeRequest)
 {
     Std_ReturnType result = E_NOT_OK;
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
-    boolean detNoErr = TRUE;
     /* check whether module been initialized */
     if (CANIF_INITED != CanIf_InitStatus)
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_SETPDUMODE_ID, CANIF_E_UNINIT);
-        detNoErr = FALSE;
+        CanIf_Det_ReportError(CANIF_SETPDUMODE_ID, CANIF_E_UNINIT);
     }
-    if (detNoErr && (ControllerId >= CANIF_CANCONTROLLER_NUMBER))
+    else if (ControllerId >= CANIF_CANCONTROLLER_NUMBER)
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_SETPDUMODE_ID, CANIF_E_PARAM_CONTROLLERID);
-        detNoErr = FALSE;
+        CanIf_Det_ReportError(CANIF_SETPDUMODE_ID, CANIF_E_PARAM_CONTROLLERID);
     }
 #if (STD_ON == CANIF_TX_OFFLINE_ACTIVE_SUPPORT)
-    if (detNoErr && (PduModeRequest > CANIF_ONLINE))
-    {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_SETPDUMODE_ID, CANIF_E_PARAM_PDU_MODE);
-        detNoErr = FALSE;
-    }
+    else if (PduModeRequest > CANIF_ONLINE))
+        {
+            CanIf_Det_ReportError(CANIF_SETPDUMODE_ID, CANIF_E_PARAM_PDU_MODE);
+        }
 #else
-    if (detNoErr && ((PduModeRequest > CANIF_ONLINE) || (PduModeRequest == CANIF_TX_OFFLINE_ACTIVE)))
+    else if ((PduModeRequest > CANIF_ONLINE) || (PduModeRequest == CANIF_TX_OFFLINE_ACTIVE))
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_SETPDUMODE_ID, CANIF_E_PARAM_PDU_MODE);
-        detNoErr = FALSE;
+        CanIf_Det_ReportError(CANIF_SETPDUMODE_ID, CANIF_E_PARAM_PDU_MODE);
     }
 #endif /* STD_ON == CANIF_TX_OFFLINE_ACTIVE_SUPPORT */
-    if (detNoErr)
+    else
 #endif /* STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT */
     {
-        if (CANIF_CS_STARTED == CanIf_ControllerMode[ControllerId])
+        if (CAN_CS_STARTED == CanIf_ControllerMode[ControllerId])
         {
-            SchM_Enter_CanIf();
+            SchM_Enter_CanIf_ExclusiveArea_Channel();
             switch (PduModeRequest)
             {
             case CANIF_OFFLINE:
@@ -926,7 +839,7 @@ CanIf_SetPduMode(uint8 ControllerId, CanIf_PduModeType PduModeRequest)
                 result = E_NOT_OK;
                 break;
             }
-            SchM_Exit_CanIf();
+            SchM_Exit_CanIf_ExclusiveArea_Channel();
         }
     }
     return result;
@@ -954,25 +867,21 @@ CanIf_GetPduMode(uint8 ControllerId, P2VAR(CanIf_PduModeType, AUTOMATIC, CANIF_A
 {
     Std_ReturnType result = E_NOT_OK;
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
-    boolean detNoErr = TRUE;
     /* check whether module been initialized */
     if (CANIF_INITED != CanIf_InitStatus)
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_GETPDUMODE_ID, CANIF_E_UNINIT);
-        detNoErr = FALSE;
+        CanIf_Det_ReportError(CANIF_GETPDUMODE_ID, CANIF_E_UNINIT);
     }
-    if (detNoErr && (ControllerId >= CANIF_CANCONTROLLER_NUMBER))
+    else if (ControllerId >= CANIF_CANCONTROLLER_NUMBER)
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_GETPDUMODE_ID, CANIF_E_PARAM_CONTROLLERID);
-        detNoErr = FALSE;
+        CanIf_Det_ReportError(CANIF_GETPDUMODE_ID, CANIF_E_PARAM_CONTROLLERID);
     }
     /* check NULL PTR*/
-    if (NULL_PTR == PduModePtr)
+    else if (NULL_PTR == PduModePtr)
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_GETPDUMODE_ID, CANIF_E_PARAM_POINTER);
-        detNoErr = FALSE;
+        CanIf_Det_ReportError(CANIF_GETPDUMODE_ID, CANIF_E_PARAM_POINTER);
     }
-    if (detNoErr)
+    else
 #endif /* STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT */
     {
         /* get current pdu mode */
@@ -1010,13 +919,14 @@ CanIf_SetDynamicTxId(PduIdType CanIfTxSduId, Can_IdType CanId)
     /* check initiation */
     if (CANIF_INITED != CanIf_InitStatus)
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_SETDYNAMICTXID_ID, CANIF_E_UNINIT);
+        CanIf_Det_ReportError(CANIF_SETDYNAMICTXID_ID, CANIF_E_UNINIT);
         detNoErr = FALSE;
     }
     /* check CanTxPduId valid */
-    if (detNoErr && ((CanIfTxSduId >= CANIF_TXPDU_NUMBER) || (CANID_DYNAMIC != txPduCfgPtr->CanIfTxPduType)))
+    if (detNoErr
+        && ((CanIfTxSduId >= CanIf_ConfigStd->CanIfTxPduNumber) || (CANID_DYNAMIC != txPduCfgPtr->CanIfTxPduType)))
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_SETDYNAMICTXID_ID, CANIF_E_INVALID_TXPDUID);
+        CanIf_Det_ReportError(CANIF_SETDYNAMICTXID_ID, CANIF_E_INVALID_TXPDUID);
         detNoErr = FALSE;
     }
     if (detNoErr)
@@ -1065,18 +975,8 @@ CanIf_SetDynamicTxId(PduIdType CanIfTxSduId, Can_IdType CanId)
     if (detNoErr)
 #endif /* STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT */
     {
-#if (CANIF_DYNAMIC_TXPDU_NUMBER > 0u)
-        const CanIf_TxPduConfigType* txPduConfigPtr = &CANIF_TXPDU(CanIfTxSduId);
-        if (CANID_DYNAMIC == txPduConfigPtr->CanIfTxPduType)
-        {
-            SchM_Enter_CanIf();
-            /*CanId:no FD and EXTENDED flag*/
-            CanIf_TxPduDynamicCanIds[txPduConfigPtr->CanIfDynamicCanIdIndex] = (CanIf_IdType)CanId;
-            SchM_Exit_CanIf();
-        }
-#endif /* CANIF_DYNAMIC_TXPDU_NUMBER > 0u */
+        CanIf_SetDynamicTxIdHandle(CanIfTxSduId, CanId);
     }
-    return;
 }
 #endif /* STD_ON == CANIF_PUBLIC_SET_DYNAMIC_TX_ID_API */
 #if (CANIF_TRCV_NUMBER > 0u)
@@ -1106,24 +1006,20 @@ CanIf_SetTrcvMode(uint8 TransceiverId, CanTrcv_TrcvModeType TransceiverMode)
 {
     Std_ReturnType result = E_NOT_OK;
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
-    boolean detNoErr = TRUE;
     /* check whether module been initialized */
     if (CANIF_INITED != CanIf_InitStatus)
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_SETTRCVMODE_ID, CANIF_E_UNINIT);
-        detNoErr = FALSE;
+        CanIf_Det_ReportError(CANIF_SETTRCVMODE_ID, CANIF_E_UNINIT);
     }
-    if (detNoErr && (TransceiverId >= CANIF_TRCV_NUMBER))
+    else if (TransceiverId >= CANIF_TRCV_NUMBER)
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_SETTRCVMODE_ID, CANIF_E_PARAM_TRCV);
-        detNoErr = FALSE;
+        CanIf_Det_ReportError(CANIF_SETTRCVMODE_ID, CANIF_E_PARAM_TRCV);
     }
-    if (detNoErr && (TransceiverMode > CANTRCV_TRCVMODE_STANDBY))
+    else if (TransceiverMode > CANTRCV_TRCVMODE_STANDBY)
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_SETTRCVMODE_ID, CANIF_E_PARAM_TRCVMODE);
-        detNoErr = FALSE;
+        CanIf_Det_ReportError(CANIF_SETTRCVMODE_ID, CANIF_E_PARAM_TRCVMODE);
     }
-    if (detNoErr)
+    else
 #endif /* STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT */
     {
         const CanIf_TrcvCfgType* trcvConfigPtr = &CanIf_TrcvCfgData[TransceiverId];
@@ -1151,29 +1047,27 @@ CanIf_SetTrcvMode(uint8 TransceiverId, CanTrcv_TrcvModeType TransceiverMode)
  */
 /*************************************************************************/
 FUNC(Std_ReturnType, CANIF_CODE)
-CanIf_GetTrcvMode(P2VAR(CanTrcv_TrcvModeType, AUTOMATIC, CANIF_APPL_DATA) TransceiverModePtr, uint8 TransceiverId)
+CanIf_GetTrcvMode(                                                                            /* PRQA S 1503 */
+                  P2VAR(CanTrcv_TrcvModeType, AUTOMATIC, CANIF_APPL_DATA) TransceiverModePtr, /* PRQA S 3432 */
+                  uint8 TransceiverId)
 {
     Std_ReturnType result = E_NOT_OK;
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
-    boolean detNoErr = TRUE;
     /* check whether module been initialized */
     if (CANIF_INITED != CanIf_InitStatus)
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_GETTRCVMODE_ID, CANIF_E_UNINIT);
-        detNoErr = FALSE;
+        CanIf_Det_ReportError(CANIF_GETTRCVMODE_ID, CANIF_E_UNINIT);
     }
-    if (detNoErr && (TransceiverId >= CANIF_TRCV_NUMBER))
+    else if (TransceiverId >= CANIF_TRCV_NUMBER)
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_GETTRCVMODE_ID, CANIF_E_PARAM_TRCV);
-        detNoErr = FALSE;
+        CanIf_Det_ReportError(CANIF_GETTRCVMODE_ID, CANIF_E_PARAM_TRCV);
     }
     /* check NULL PTR*/
-    if (NULL_PTR == TransceiverModePtr)
+    else if (NULL_PTR == TransceiverModePtr)
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_GETTRCVMODE_ID, CANIF_E_PARAM_POINTER);
-        detNoErr = FALSE;
+        CanIf_Det_ReportError(CANIF_GETTRCVMODE_ID, CANIF_E_PARAM_POINTER);
     }
-    if (detNoErr)
+    else
 #endif /* STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT */
     {
         const CanIf_TrcvCfgType* trcvConfigPtr = &CanIf_TrcvCfgData[TransceiverId];
@@ -1209,25 +1103,21 @@ CanIf_GetTrcvWakeupReason(
 {
     Std_ReturnType result = E_NOT_OK;
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
-    boolean detNoErr = TRUE;
     /* check whether module been initialized */
     if (CANIF_INITED != CanIf_InitStatus)
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_GETTRCVWAKEUPREASON_ID, CANIF_E_UNINIT);
-        detNoErr = FALSE;
+        CanIf_Det_ReportError(CANIF_GETTRCVWAKEUPREASON_ID, CANIF_E_UNINIT);
     }
-    if (detNoErr && (TransceiverId >= CANIF_TRCV_NUMBER))
+    else if (TransceiverId >= CANIF_TRCV_NUMBER)
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_GETTRCVWAKEUPREASON_ID, CANIF_E_PARAM_TRCV);
-        detNoErr = FALSE;
+        CanIf_Det_ReportError(CANIF_GETTRCVWAKEUPREASON_ID, CANIF_E_PARAM_TRCV);
     }
     /* check NULL PTR*/
-    if (NULL_PTR == TrcvWuReasonPtr)
+    else if (NULL_PTR == TrcvWuReasonPtr)
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_GETTRCVWAKEUPREASON_ID, CANIF_E_PARAM_POINTER);
-        detNoErr = FALSE;
+        CanIf_Det_ReportError(CANIF_GETTRCVWAKEUPREASON_ID, CANIF_E_PARAM_POINTER);
     }
-    if (detNoErr)
+    else
 #endif /* STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT */
     {
         const CanIf_TrcvCfgType* trcvConfigPtr = &CanIf_TrcvCfgData[TransceiverId];
@@ -1262,28 +1152,20 @@ CanIf_SetTrcvWakeupMode(uint8 TransceiverId, CanTrcv_TrcvWakeupModeType TrcvWake
 {
     Std_ReturnType result = E_NOT_OK;
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
-    boolean detNoErr = TRUE;
     /* check whether module been initialized */
     if (CANIF_INITED != CanIf_InitStatus)
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_SETTRCVWAKEUPMODE_ID, CANIF_E_UNINIT);
-        detNoErr = FALSE;
+        CanIf_Det_ReportError(CANIF_SETTRCVWAKEUPMODE_ID, CANIF_E_UNINIT);
     }
-    if (detNoErr && (TransceiverId >= CANIF_TRCV_NUMBER))
+    else if (TransceiverId >= CANIF_TRCV_NUMBER)
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_SETTRCVWAKEUPMODE_ID, CANIF_E_PARAM_TRCV);
-        detNoErr = FALSE;
+        CanIf_Det_ReportError(CANIF_SETTRCVWAKEUPMODE_ID, CANIF_E_PARAM_TRCV);
     }
-    if (detNoErr && (TrcvWakeupMode > CANTRCV_WUMODE_CLEAR))
+    else if (TrcvWakeupMode > CANTRCV_WUMODE_CLEAR)
     {
-        (void)Det_ReportError(
-            CANIF_MODULE_ID,
-            CANIF_INSTANCE_ID,
-            CANIF_SETTRCVWAKEUPMODE_ID,
-            CANIF_E_PARAM_TRCVWAKEUPMODE);
-        detNoErr = FALSE;
+        CanIf_Det_ReportError(CANIF_SETTRCVWAKEUPMODE_ID, CANIF_E_PARAM_TRCVWAKEUPMODE);
     }
-    if (detNoErr)
+    else
 #endif /* STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT */
     {
         const CanIf_TrcvCfgType* trcvConfigPtr = &CanIf_TrcvCfgData[TransceiverId];
@@ -1317,21 +1199,18 @@ CanIf_CheckWakeup(EcuM_WakeupSourceType WakeupSource)
 {
     Std_ReturnType result = E_NOT_OK;
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
-    boolean detNoErr = TRUE;
     /* CanIf not initialized */
     if (CANIF_INITED != CanIf_InitStatus)
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_CHECKWAKEUP_ID, CANIF_E_UNINIT);
-        detNoErr = FALSE;
+        CanIf_Det_ReportError(CANIF_CHECKWAKEUP_ID, CANIF_E_UNINIT);
     }
     /*ECUM_WKSOURCE_POWER: bit 0,ECUM_WKSOURCE_RESET: bit 1,ECUM_WKSOURCE_INTERNAL_RESET:bit 2,
      * ECUM_WKSOURCE_INTERNAL_WDG:bit 3,ECUM_WKSOURCE_EXTERNAL_WDG:bit 4*/
-    if (detNoErr && (WakeupSource > CANIF_WAKEUPSOURCE_MAX))
+    else if (WakeupSource > CANIF_WAKEUPSOURCE_MAX)
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_CHECKWAKEUP_ID, CANIF_E_PARAM_WAKEUPSOURCE);
-        detNoErr = FALSE;
+        CanIf_Det_ReportError(CANIF_CHECKWAKEUP_ID, CANIF_E_PARAM_WAKEUPSOURCE);
     }
-    if (detNoErr)
+    else
 #endif /* STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT */
     {
 /*all controller and Trcv need to check*/
@@ -1352,7 +1231,7 @@ CanIf_CheckWakeup(EcuM_WakeupSourceType WakeupSource)
                 wakeupSource = controllerPtr->CanIfWakeUpSource;
                 if (0u != (WakeupSource & wakeupSource))
                 {
-                    if (CANIF_CS_SLEEP != CanIf_ControllerMode[index])
+                    if (CAN_CS_SLEEP != CanIf_ControllerMode[index])
                     {
                         controllerNotSleep = TRUE;
                         break;
@@ -1401,7 +1280,7 @@ CanIf_CheckWakeup(EcuM_WakeupSourceType WakeupSource)
         /* PRQA S 2992,2996,2880 ++ */ /* MISRA Rule 14.3,2.2,2.1 */
         if (controllerNotSleep)
         {
-            (void)Det_ReportRuntimeError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_CHECKWAKEUP_ID, CANIF_E_NOT_SLEEP);
+            CanIf_Det_ReportRuntimeError(CANIF_CHECKWAKEUP_ID, CANIF_E_NOT_SLEEP);
         }
         /* PRQA S 2992,2996,2880 -- */ /* MISRA Rule 14.3,2.2,2.1 */
 #endif
@@ -1436,23 +1315,22 @@ CanIf_CheckValidation(EcuM_WakeupSourceType WakeupSource)
     /* check initiation */
     if (CANIF_INITED != CanIf_InitStatus)
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_CHECKVALIDATION_ID, CANIF_E_UNINIT);
+        CanIf_Det_ReportError(CANIF_CHECKVALIDATION_ID, CANIF_E_UNINIT);
         detNoErr = FALSE;
     }
     /*ECUM_WKSOURCE_POWER: bit 0,ECUM_WKSOURCE_RESET: bit 1,ECUM_WKSOURCE_INTERNAL_RESET:bit 2,
      * ECUM_WKSOURCE_INTERNAL_WDG:bit 3,ECUM_WKSOURCE_EXTERNAL_WDG:bit 4*/
-    if (detNoErr && (WakeupSource > CANIF_WAKEUPSOURCE_MAX))
+    if ((TRUE == detNoErr) && (WakeupSource > CANIF_WAKEUPSOURCE_MAX))
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_CHECKVALIDATION_ID, CANIF_E_PARAM_WAKEUPSOURCE);
+        CanIf_Det_ReportError(CANIF_CHECKVALIDATION_ID, CANIF_E_PARAM_WAKEUPSOURCE);
         detNoErr = FALSE;
     }
-    if (detNoErr)
+    if (TRUE == detNoErr)
 #endif /* STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT */
     {
         uint8 controllerIndex;
         EcuM_WakeupSourceType wakeupSource;
         const CanIf_ControllerCfgType* ctrlCfgPtr = &CanIf_CtrlCfgData[0];
-
         /*check all can controllers to find the wake-up source*/
         for (controllerIndex = 0u; controllerIndex < CANIF_CANCONTROLLER_NUMBER; controllerIndex++)
         {
@@ -1461,7 +1339,7 @@ CanIf_CheckValidation(EcuM_WakeupSourceType WakeupSource)
             if (0u != (WakeupSource & wakeupSource))
             {
                 /* do check up Validation action */
-                if ((CANIF_CS_STARTED == CanIf_ControllerMode[controllerIndex])
+                if ((CAN_CS_STARTED == CanIf_ControllerMode[controllerIndex])
                     && (CanIf_FirstCallRxInd[controllerIndex]))
                 {
                     if (NULL_PTR != CanIf_DispatchConfigData.CanIfDispatchUserValidateWakeupEventName)
@@ -1506,27 +1384,23 @@ CanIf_GetTxConfirmationState(uint8 ControllerId)
     /* check initiation */
     if (CANIF_INITED != CanIf_InitStatus)
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_GETTXCONFIRMATIONSTATE, CANIF_E_UNINIT);
+        CanIf_Det_ReportError(CANIF_GETTXCONFIRMATIONSTATE, CANIF_E_UNINIT);
         detNoErr = FALSE;
     }
-    if (detNoErr && (ControllerId >= CANIF_CANCONTROLLER_NUMBER))
+    if ((TRUE == detNoErr) && (ControllerId >= CANIF_CANCONTROLLER_NUMBER))
     {
-        (void)Det_ReportError(
-            CANIF_MODULE_ID,
-            CANIF_INSTANCE_ID,
-            CANIF_GETTXCONFIRMATIONSTATE,
-            CANIF_E_PARAM_CONTROLLERID);
+        CanIf_Det_ReportError(CANIF_GETTXCONFIRMATIONSTATE, CANIF_E_PARAM_CONTROLLERID);
         detNoErr = FALSE;
     }
-    if (detNoErr)
+    if (TRUE == detNoErr)
 #endif /* STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT */
     {
-        SchM_Enter_CanIf();
+        SchM_Enter_CanIf_ExclusiveArea_Channel();
         /* get the  TX confirmation state of the corresponding controller */
         result = CanIf_TxConfirmationState[ControllerId];
         /* clear the state */
         CanIf_TxConfirmationState[ControllerId] = CANIF_NO_NOTIFICATION;
-        SchM_Exit_CanIf();
+        SchM_Exit_CanIf_ExclusiveArea_Channel();
     }
     return result;
 }
@@ -1555,19 +1429,16 @@ CanIf_ClearTrcvWufFlag(uint8 TransceiverId)
 {
     Std_ReturnType result = E_NOT_OK;
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
-    boolean detNoErr = TRUE;
     /* check initiation */
     if (CANIF_INITED != CanIf_InitStatus)
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_CLEARTRCVWUFFLAG_ID, CANIF_E_UNINIT);
-        detNoErr = FALSE;
+        CanIf_Det_ReportError(CANIF_CLEARTRCVWUFFLAG_ID, CANIF_E_UNINIT);
     }
-    if (detNoErr && (TransceiverId >= CANIF_TRCV_NUMBER))
+    else if (TransceiverId >= CANIF_TRCV_NUMBER)
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_CLEARTRCVWUFFLAG_ID, CANIF_E_PARAM_TRCV);
-        detNoErr = FALSE;
+        CanIf_Det_ReportError(CANIF_CLEARTRCVWUFFLAG_ID, CANIF_E_PARAM_TRCV);
     }
-    if (detNoErr)
+    else
 #endif /* STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT */
     {
         const CanIf_TrcvCfgType* trcvConfigPtr = &CanIf_TrcvCfgData[TransceiverId];
@@ -1598,19 +1469,16 @@ CanIf_CheckTrcvWakeFlag(uint8 TransceiverId)
 {
     Std_ReturnType result = E_NOT_OK;
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
-    boolean detNoErr = TRUE;
     /* check initiation */
     if (CANIF_INITED != CanIf_InitStatus)
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_CHECKTRCVWAKEFLAG_ID, CANIF_E_UNINIT);
-        detNoErr = FALSE;
+        CanIf_Det_ReportError(CANIF_CHECKTRCVWAKEFLAG_ID, CANIF_E_UNINIT);
     }
-    if (detNoErr && (TransceiverId >= CANIF_TRCV_NUMBER))
+    else if (TransceiverId >= CANIF_TRCV_NUMBER)
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_CHECKTRCVWAKEFLAG_ID, CANIF_E_PARAM_TRCV);
-        detNoErr = FALSE;
+        CanIf_Det_ReportError(CANIF_CHECKTRCVWAKEFLAG_ID, CANIF_E_PARAM_TRCV);
     }
-    if (detNoErr)
+    else
 #endif /* STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT */
     {
         const CanIf_TrcvCfgType* trcvConfigPtr = &CanIf_TrcvCfgData[TransceiverId];
@@ -1643,19 +1511,16 @@ CanIf_SetBaudrate(uint8 ControllerId, uint16 BaudRateConfigID)
 {
     Std_ReturnType result = E_NOT_OK;
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
-    boolean detNoErr = TRUE;
     /* check initiation */
     if (CANIF_INITED != CanIf_InitStatus)
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_SETBAUDRATE_ID, CANIF_E_UNINIT);
-        detNoErr = FALSE;
+        CanIf_Det_ReportError(CANIF_SETBAUDRATE_ID, CANIF_E_UNINIT);
     }
-    if (detNoErr && (ControllerId >= CANIF_CANCONTROLLER_NUMBER))
+    else if (ControllerId >= CANIF_CANCONTROLLER_NUMBER)
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_SETBAUDRATE_ID, CANIF_E_PARAM_CONTROLLERID);
-        detNoErr = FALSE;
+        CanIf_Det_ReportError(CANIF_SETBAUDRATE_ID, CANIF_E_PARAM_CONTROLLERID);
     }
-    if (detNoErr)
+    else
 #endif /* STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT */
     {
         const CanIf_ControllerCfgType* controllerPtr = &CanIf_CtrlCfgData[ControllerId];
@@ -1688,23 +1553,16 @@ CanIf_SetIcomConfiguration(uint8 ControllerId, IcomConfigIdType ConfigurationId)
 {
     Std_ReturnType result = E_NOT_OK;
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
-    boolean detNoErr = TRUE;
     /* check initiation */
     if (CANIF_INITED != CanIf_InitStatus)
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_SETICOMCONFIGURATION_ID, CANIF_E_UNINIT);
-        detNoErr = FALSE;
+        CanIf_Det_ReportError(CANIF_SETICOMCONFIGURATION_ID, CANIF_E_UNINIT);
     }
-    if (detNoErr && (ControllerId >= CANIF_CANCONTROLLER_NUMBER))
+    else if (ControllerId >= CANIF_CANCONTROLLER_NUMBER)
     {
-        (void)Det_ReportError(
-            CANIF_MODULE_ID,
-            CANIF_INSTANCE_ID,
-            CANIF_SETICOMCONFIGURATION_ID,
-            CANIF_E_PARAM_CONTROLLERID);
-        detNoErr = FALSE;
+        CanIf_Det_ReportError(CANIF_SETICOMCONFIGURATION_ID, CANIF_E_PARAM_CONTROLLERID);
     }
-    if (detNoErr)
+    else
 #endif /* STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT */
     {
         const CanIf_ControllerCfgType* controllerPtr = &CanIf_CtrlCfgData[ControllerId];
@@ -1750,14 +1608,27 @@ FUNC(Std_ReturnType, CANIF_CODE)
 CanIf_TriggerTransmit(PduIdType TxPduId, P2VAR(PduInfoType, AUTOMATIC, CANIF_APPL_DATA) PduInfoPtr)
 {
     Std_ReturnType result = E_NOT_OK;
-    const CanIf_TxPduConfigType* txPduConfigPtr = &CANIF_TXPDU(TxPduId);
-    if (txPduConfigPtr->CanIfTxPduTriggerTransmit)
+#if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
+    if (CANIF_INITED != CanIf_InitStatus)
     {
-        if (NULL_PTR != CanIf_UpTriggerTransmitArray[txPduConfigPtr->CanIfUpTxTrigApiIndex])
+        CanIf_Det_ReportError(CANIF_TRIGGERTRANSMIT_ID, CANIF_E_UNINIT);
+    }
+    else if (TxPduId >= CanIf_ConfigStd->CanIfTxPduNumber)
+    {
+        CanIf_Det_ReportError(CANIF_TRIGGERTRANSMIT_ID, CANIF_E_INVALID_TXPDUID);
+    }
+    else
+#endif /* STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT */
+    {
+        const CanIf_TxPduConfigType* txPduConfigPtr = &CANIF_TXPDU(TxPduId);
+        if (txPduConfigPtr->CanIfTxPduTriggerTransmit)
         {
-            result = CanIf_UpTriggerTransmitArray[txPduConfigPtr->CanIfUpTxTrigApiIndex](
-                txPduConfigPtr->CanIfUpPduId,
-                PduInfoPtr);
+            if (NULL_PTR != CanIf_UpTriggerTransmitArray[txPduConfigPtr->CanIfUpTxTrigApiIndex])
+            {
+                result = CanIf_UpTriggerTransmitArray[txPduConfigPtr->CanIfUpTxTrigApiIndex](
+                    txPduConfigPtr->CanIfUpPduId,
+                    PduInfoPtr);
+            }
         }
     }
     return result;
@@ -1790,102 +1661,50 @@ CanIf_TxConfirmation(PduIdType CanTxPduId)
     /* check initiation */
     if (CANIF_INITED != CanIf_InitStatus)
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_TXCONFIRMATION_ID, CANIF_E_UNINIT);
+        CanIf_Det_ReportError(CANIF_TXCONFIRMATION_ID, CANIF_E_UNINIT);
     }
     /* check parameter valid */
-    else if (CanTxPduId >= CANIF_TXPDU_NUMBER)
+    else if (CanTxPduId >= CanIf_ConfigStd->CanIfTxPduNumber)
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_TXCONFIRMATION_ID, CANIF_E_PARAM_LPDU);
+        CanIf_Det_ReportError(CANIF_TXCONFIRMATION_ID, CANIF_E_PARAM_LPDU);
     }
     else
 #endif /* STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT */
     {
         const CanIf_TxPduConfigType* txPduConfigPtr = &CANIF_TXPDU(CanTxPduId);
-#if (                                                                                   \
-    (CANIF_TXBUFFER_NUMBER > 0u) || (STD_ON == CANIF_PUBLIC_TX_CONFIRM_POLLING_SUPPORT) \
-    || (STD_ON == CANIF_PUBLIC_PN_SUPPORT))
+#if ((STD_ON == CANIF_PUBLIC_TX_CONFIRM_POLLING_SUPPORT) || (STD_ON == CANIF_PUBLIC_PN_SUPPORT))
         Can_HwHandleType hthIndex = txPduConfigPtr->CanIfTxPduHthId;
-        const CanIfHthCfgType* hthPtr = &CANIF_HTH(hthIndex);
-        uint8 controllerId = hthPtr->CanIfHthCanCtrlId;
-        const CanIf_ControllerCfgType* ctrlCfgPtr = &CanIf_CtrlCfgData[controllerId];
-#endif /* CANIF_TXBUFFER_NUMBER > 0u || STD_ON == CANIF_PUBLIC_TX_CONFIRM_POLLING_SUPPORT || STD_ON == \
-          CANIF_PUBLIC_PN_SUPPORT */
-        SchM_Enter_CanIf();
-#if (CANIF_TXBUFFER_NUMBER > 0u)
-        PduIdType txBufIndex = txPduConfigPtr->TxBufferIdndex;
-        if ((txBufIndex < CANIF_TXBUFFER_NUMBER) && (0u < CANIF_TXBUFFER_SIZE(txBufIndex)))
-        {
-            Can_IdType canIdValue;
-            Can_IdType canIdValueMin;
-            uint8 txBufSize = CANIF_TXBUFFER_SIZE(txBufIndex);
-            uint8 txIndex = CANIF_UNUSED_UINT8;
-            CanIf_TxPduBufferType* txPduBufferPtr = CanIf_TxBuffer[txBufIndex].CanIf_TxPduBufferRef;
-
-            for (uint8 index = 0u; index < txBufSize; index++)
-            {
-                if (txPduBufferPtr[index].used)
-                {
-                    canIdValue = (txPduBufferPtr[index].canId) & CANIF_EXTENDED_CANID_MAX;
-                    if (CANIF_UNUSED_UINT8 == txIndex)
-                    {
-                        canIdValueMin = canIdValue;
-                        txIndex = index;
-                    }
-                    else
-                    {
-                        if (canIdValueMin > canIdValue)
-                        {
-                            canIdValueMin = canIdValue;
-                            txIndex = index;
-                        }
-                    }
-                }
-            }
-            if (CANIF_UNUSED_UINT8 != txIndex)
-            {
-                Can_PduType canPdu;
-                Can_HwHandleType hthId = hthPtr->CanObjectId;
-                canPdu.length = txPduBufferPtr[txIndex].length;
-                canPdu.sdu = txPduBufferPtr[txIndex].data;
-                canPdu.swPduHandle = txPduBufferPtr[txIndex].TxPduIndex;
-                canPdu.id = txPduBufferPtr[txIndex].canId;
-                if (CAN_OK == Can_DriverApi[ctrlCfgPtr->CanDriverId].CanWriteApi(hthId, &canPdu))
-                {
-                    txPduBufferPtr[txIndex].used = FALSE;
-                }
-            }
-        }
-#endif /* CANIF_TXBUFFER_NUMBER > 0u */
+        Can_HwHandleType controllerId = CANIF_HTH(hthIndex).CanIfHthCanCtrlId;
+#endif
+#if (STD_ON == CANIF_PUBLIC_TX_BUFFERING)
+        CanIf_TransmitBufferedPdu(CanTxPduId);
+#endif
 /* enable notify status */
-#if (CANIF_TXNOTIFYSTATUS_BUFFER > 0u)
-        if (txPduConfigPtr->CanIfTxPduReadNotifyStatus)
-        {
-            /* change to notify status */
-            CanIf_TxNotifStatus[txPduConfigPtr->CanIfTxNotifyIndex] = CANIF_TX_RX_NOTIFICATION;
-        }
-#endif /* CANIF_TXNOTIFYSTATUS_BUFFER > 0u */
+#if (STD_ON == CANIF_PUBLIC_READ_TX_PDU_NOTIFY_STATUS_API)
+        CanIf_SetTxNotifStatusHandle(CanTxPduId);
+#endif /* STD_ON == CANIF_PUBLIC_READ_TX_PDU_NOTIFY_STATUS_API */
 #if (STD_ON == CANIF_PUBLIC_TX_CONFIRM_POLLING_SUPPORT)
-        if (CANIF_CS_STARTED == CanIf_ControllerMode[controllerId])
+        if (CAN_CS_STARTED == CanIf_ControllerMode[controllerId])
         {
+            SchM_Enter_CanIf_ExclusiveArea_Channel();
             CanIf_TxConfirmationState[controllerId] = CANIF_TX_RX_NOTIFICATION;
+            SchM_Exit_CanIf_ExclusiveArea_Channel();
         }
 #endif /* STD_ON == CANIF_PUBLIC_TX_CONFIRM_POLLING_SUPPORT */
-        SchM_Exit_CanIf();
         if (NULL_PTR != CanIf_UpTxConfirmationArray[txPduConfigPtr->CanIfUpTxConfApiIndex])
         {
             /* call upper layer function,feedback to upper layer*/
             CanIf_UpTxConfirmationArray[txPduConfigPtr->CanIfUpTxConfApiIndex](txPduConfigPtr->CanIfUpPduId);
         }
 #if (STD_ON == CANIF_PUBLIC_PN_SUPPORT)
-        if (ctrlCfgPtr->CanIfPnFilter)
+        if (CanIf_CtrlCfgData[controllerId].CanIfPnFilter)
         {
-            SchM_Enter_CanIf();
+            SchM_Enter_CanIf_ExclusiveArea_Channel();
             CanIf_PnTxFilter[controllerId] = FALSE;
-            SchM_Exit_CanIf();
+            SchM_Exit_CanIf_ExclusiveArea_Channel();
         }
 #endif /* STD_ON == CANIF_PUBLIC_PN_SUPPORT */
     }
-    return;
 }
 #define CANIF_STOP_SEC_CANIFTXCONFIRMATION_CALLBACK_CODE
 #include "CanIf_MemMap.h"
@@ -1918,12 +1737,11 @@ CanIf_RxIndication(
     /* check initiation */
     if (CANIF_INITED != CanIf_InitStatus)
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_RXINDICATION_ID, CANIF_E_UNINIT);
+        CanIf_Det_ReportError(CANIF_RXINDICATION_ID, CANIF_E_UNINIT);
     }
-    /* check parameter valid */
     else if ((NULL_PTR == Mailbox) || (NULL_PTR == PduInfoPtr))
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_RXINDICATION_ID, CANIF_E_PARAM_CANID);
+        CanIf_Det_ReportError(CANIF_RXINDICATION_ID, CANIF_E_PARAM_POINTER);
     }
 #if (CANIF_CANID_UINT16 == CANIF_CAN_IDTYPE)
     else if (0x0000u != (Mailbox->CanId & 0xb800u)) /*Standard frame*/
@@ -1933,7 +1751,7 @@ CanIf_RxIndication(
                                         : (0x00000000u != (Mailbox->CanId & 0xbffff800u))) /*Standard frame*/
 #endif /* CANIF_CANID_UINT16 == CANIF_CAN_IDTYPE */
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_RXINDICATION_ID, CANIF_E_PARAM_CANID);
+        CanIf_Det_ReportError(CANIF_RXINDICATION_ID, CANIF_E_PARAM_CANID);
     }
     else
 #endif /* STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT */
@@ -1943,11 +1761,12 @@ CanIf_RxIndication(
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
         if (controllerId >= CANIF_CANCONTROLLER_NUMBER)
         {
-            (void)
-                Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_RXINDICATION_ID, CANIF_E_PARAM_CONTROLLERID);
+            CanIf_Det_ReportError(CANIF_RXINDICATION_ID, CANIF_E_PARAM_CONTROLLERID);
         }
 #if (STD_ON == CANIF_RXINDICATION_AUTOSAR_PARAMETER)
-        else if ((Mailbox->Hoh >= CANIF_HRH_NUMBER) || (CANIF_HRH(Mailbox->Hoh).CanIfHrhCanCtrlId != controllerId))
+        else if (
+            (Mailbox->Hoh >= CanIf_ConfigStd->CanIfHrhNumber)
+            || (CANIF_HRH(Mailbox->Hoh).CanIfHrhCanCtrlId != controllerId))
 #else
         else if (
             (Mailbox->Hoh >= CanIf_CanHoh2Hrh[CANIF_CONTROLLER_DRV_ID(controllerId)].CanIfCanHohLen)
@@ -1955,7 +1774,7 @@ CanIf_RxIndication(
                 == CANIF_UNUSED_UINT16))
 #endif /* STD_ON == CANIF_RXINDICATION_AUTOSAR_PARAMETER */
         {
-            (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_RXINDICATION_ID, CANIF_E_PARAM_HOH);
+            CanIf_Det_ReportError(CANIF_RXINDICATION_ID, CANIF_E_PARAM_HOH);
         }
         else
 #endif /* STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT */
@@ -1977,15 +1796,12 @@ CanIf_RxIndication(
             PduIdType rxPduIndex;
             if (E_OK == CanIf_CanIdRangCheck(canIfHrhId, canId, &rxPduIndex))
             {
-/* DLC check enabled */
+                /* DLC check enabled */
 #if (STD_ON == CANIF_PRIVATE_DLC_CHECK)
-                if (PduInfoPtr->SduLength < (CANIF_RXPDU(rxPduIndex).CanIfRxPduDlc))
+                if (CANIF_RXPDU(rxPduIndex).CanIfRxPduDataLengthCheck
+                    && (PduInfoPtr->SduLength < (CANIF_RXPDU(rxPduIndex).CanIfRxPduDlc)))
                 {
-                    (void)Det_ReportRuntimeError(
-                        CANIF_MODULE_ID,
-                        CANIF_INSTANCE_ID,
-                        CANIF_RXINDICATION_ID,
-                        CANIF_E_INVALID_DLC);
+                    CanIf_Det_ReportRuntimeError(CANIF_RXINDICATION_ID, CANIF_E_INVALID_DLC);
                 }
                 else
 #endif /* STD_ON == CANIF_PRIVATE_DLC_CHECK */
@@ -1997,8 +1813,8 @@ CanIf_RxIndication(
 #endif
                         PduInfoPtr);
                 }
+                SchM_Enter_CanIf_ExclusiveArea_Channel();
 #if (STD_ON == CANIF_PUBLIC_WAKEUP_CHECK_VALID_SUPPORT)
-                SchM_Enter_CanIf();
 #if (STD_ON == CANIF_PUBLIC_WAKEUP_CHECK_VALID_BY_NM)
                 if (CANIF_RXPDU(rxPduIndex).CanIfRxPduForNM)
                 {
@@ -2009,8 +1825,15 @@ CanIf_RxIndication(
                 /* set first call rxindication event flag */
                 CanIf_FirstCallRxInd[controllerId] = TRUE;
 #endif /* STD_ON == CANIF_PUBLIC_WAKEUP_CHECK_VALID_BY_NM */
-                SchM_Exit_CanIf();
 #endif /* STD_ON == CANIF_PUBLIC_WAKEUP_CHECK_VALID_SUPPORT */
+
+#if (STD_ON == CANIF_PUBLIC_PN_SUPPORT)
+                if (TRUE == CanIf_CtrlCfgData[controllerId].CanIfPnFilter)
+                {
+                    CanIf_PnTxFilter[controllerId] = FALSE;
+                }
+#endif /* STD_ON == CANIF_PUBLIC_PN_SUPPORT */
+                SchM_Exit_CanIf_ExclusiveArea_Channel();
             }
         }
     }
@@ -2043,7 +1866,7 @@ CanIf_ControllerBusOff(uint8 ControllerId)
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
     if (CANIF_INITED != CanIf_InitStatus)
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_CONTROLLERBUSOFF_ID, CANIF_E_UNINIT);
+        CanIf_Det_ReportError(CANIF_CONTROLLERBUSOFF_ID, CANIF_E_UNINIT);
     }
     else
 #endif /* STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT */
@@ -2053,35 +1876,30 @@ CanIf_ControllerBusOff(uint8 ControllerId)
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
         if (controllerId == CANIF_CANCONTROLLER_NUMBER)
         {
-            (void)Det_ReportError(
-                CANIF_MODULE_ID,
-                CANIF_INSTANCE_ID,
-                CANIF_CONTROLLERBUSOFF_ID,
-                CANIF_E_PARAM_CONTROLLERID);
+            CanIf_Det_ReportError(CANIF_CONTROLLERBUSOFF_ID, CANIF_E_PARAM_CONTROLLERID);
         }
         else
 #endif /* STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT */
         {
-            SchM_Enter_CanIf();
+            SchM_Enter_CanIf_ExclusiveArea_Channel();
 #if (STD_ON == CANIF_PUBLIC_TX_CONFIRM_POLLING_SUPPORT)
             CanIf_TxConfirmationState[controllerId] = CANIF_NO_NOTIFICATION;
 #endif
             /* set controller to STOP status */
-            CanIf_ControllerMode[controllerId] = CANIF_CS_STOPPED;
+            CanIf_ControllerMode[controllerId] = CAN_CS_STOPPED;
             /*set the PDU channel mode of the corresponding channel to CANIF_TX_OFFLINE*/
             CanIf_PduMode[controllerId] = CANIF_TX_OFFLINE;
-            SchM_Exit_CanIf();
 /* free tx buffer if enabled */
-#if (CANIF_TXBUFFER_NUMBER > 0u)
+#if (STD_ON == CANIF_PUBLIC_TX_BUFFERING)
             CanIf_FreeControllerTxBuffer(controllerId);
 #endif
+            SchM_Exit_CanIf_ExclusiveArea_Channel();
             if (NULL_PTR != CanIf_DispatchConfigData.CanIfDispatchUserCtrlBusOffName)
             {
                 CanIf_DispatchConfigData.CanIfDispatchUserCtrlBusOffName(controllerId);
             }
         }
     }
-    return;
 }
 #define CANIF_STOP_SEC_CANIFCONTROLLERBUSOFF_CALLBACK_CODE
 #include "CanIf_MemMap.h"
@@ -2113,7 +1931,7 @@ CanIf_ConfirmPnAvailability(uint8 TransceiverId)
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
     if (CANIF_INITED != CanIf_InitStatus)
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_CONFIRMPNAVAILABILITY_ID, CANIF_E_UNINIT);
+        CanIf_Det_ReportError(CANIF_CONFIRMPNAVAILABILITY_ID, CANIF_E_UNINIT);
     }
     else
 #endif /* STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT */
@@ -2123,8 +1941,7 @@ CanIf_ConfirmPnAvailability(uint8 TransceiverId)
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
         if (transceiverId == CANIF_TRCV_NUMBER)
         {
-            (void)
-                Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_CONFIRMPNAVAILABILITY_ID, CANIF_E_PARAM_TRCV);
+            CanIf_Det_ReportError(CANIF_CONFIRMPNAVAILABILITY_ID, CANIF_E_PARAM_TRCV);
         }
         else
 #endif /* STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT */
@@ -2135,7 +1952,6 @@ CanIf_ConfirmPnAvailability(uint8 TransceiverId)
             }
         }
     }
-    return;
 }
 #define CANIF_STOP_SEC_CANIFCONFIRMPNAVAILABILITY_CALLBACK_CODE
 #include "CanIf_MemMap.h"
@@ -2165,7 +1981,7 @@ CanIf_ClearTrcvWufFlagIndication(uint8 TransceiverId)
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
     if (CANIF_INITED != CanIf_InitStatus)
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_CLEARTRCVWUFFLAGINDICATION_ID, CANIF_E_UNINIT);
+        CanIf_Det_ReportError(CANIF_CLEARTRCVWUFFLAGINDICATION_ID, CANIF_E_UNINIT);
     }
     else
 #endif /* STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT */
@@ -2175,11 +1991,7 @@ CanIf_ClearTrcvWufFlagIndication(uint8 TransceiverId)
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
         if (transceiverId == CANIF_TRCV_NUMBER)
         {
-            (void)Det_ReportError(
-                CANIF_MODULE_ID,
-                CANIF_INSTANCE_ID,
-                CANIF_CLEARTRCVWUFFLAGINDICATION_ID,
-                CANIF_E_PARAM_TRCV);
+            CanIf_Det_ReportError(CANIF_CLEARTRCVWUFFLAGINDICATION_ID, CANIF_E_PARAM_TRCV);
         }
         else
 #endif /* STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT */
@@ -2190,7 +2002,6 @@ CanIf_ClearTrcvWufFlagIndication(uint8 TransceiverId)
             }
         }
     }
-    return;
 }
 #define CANIF_STOP_SEC_CANIFCLEARTRCVWUFFLAGINDICATION_CALLBACK_CODE
 #include "CanIf_MemMap.h"
@@ -2222,7 +2033,7 @@ CanIf_CheckTrcvWakeFlagIndication(uint8 TransceiverId)
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
     if (CANIF_INITED != CanIf_InitStatus)
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_CHECKTRCVWAKEFLAGINDICATION_ID, CANIF_E_UNINIT);
+        CanIf_Det_ReportError(CANIF_CHECKTRCVWAKEFLAGINDICATION_ID, CANIF_E_UNINIT);
     }
     else
 #endif /* STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT */
@@ -2232,11 +2043,7 @@ CanIf_CheckTrcvWakeFlagIndication(uint8 TransceiverId)
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
         if (transceiverId == CANIF_TRCV_NUMBER)
         {
-            (void)Det_ReportError(
-                CANIF_MODULE_ID,
-                CANIF_INSTANCE_ID,
-                CANIF_CHECKTRCVWAKEFLAGINDICATION_ID,
-                CANIF_E_PARAM_TRCV);
+            CanIf_Det_ReportError(CANIF_CHECKTRCVWAKEFLAGINDICATION_ID, CANIF_E_PARAM_TRCV);
         }
         else
 #endif /* STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT */
@@ -2247,7 +2054,6 @@ CanIf_CheckTrcvWakeFlagIndication(uint8 TransceiverId)
             }
         }
     }
-    return;
 }
 #define CANIF_STOP_SEC_CANIFCHECKTRCVWAKEFLAGINDICATION_CALLBACK_CODE
 #include "CanIf_MemMap.h"
@@ -2272,14 +2078,12 @@ CanIf_CheckTrcvWakeFlagIndication(uint8 TransceiverId)
 #define CANIF_START_SEC_CANIFCONTROLLERMODEINDICATION_CALLBACK_CODE /* PRQA S 0791 */ /* MISRA Rule 5.4 */
 #include "CanIf_MemMap.h"
 FUNC(void, CANIF_CODE)
-/* PRQA S 1532 ++ */ /* MISRA Rule 8.7 */
-CanIf_ControllerModeIndication(uint8 ControllerId, CanIf_ControllerModeType ControllerMode)
-/* PRQA S 1532 -- */ /* MISRA Rule 8.7 */
+CanIf_ControllerModeIndication(uint8 ControllerId, Can_ControllerStateType ControllerMode) /* PRQA S 1532 */
 {
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
     if (CANIF_INITED != CanIf_InitStatus)
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_CONTROLLERMODEINDICATION_ID, CANIF_E_UNINIT);
+        CanIf_Det_ReportError(CANIF_CONTROLLERMODEINDICATION_ID, CANIF_E_UNINIT);
     }
     else
 #endif /* STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT */
@@ -2289,26 +2093,21 @@ CanIf_ControllerModeIndication(uint8 ControllerId, CanIf_ControllerModeType Cont
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
         if (controllerId == CANIF_CANCONTROLLER_NUMBER)
         {
-            (void)Det_ReportError(
-                CANIF_MODULE_ID,
-                CANIF_INSTANCE_ID,
-                CANIF_CONTROLLERMODEINDICATION_ID,
-                CANIF_E_PARAM_CONTROLLERID);
+            CanIf_Det_ReportError(CANIF_CONTROLLERMODEINDICATION_ID, CANIF_E_PARAM_CONTROLLERID);
         }
         else
 #endif /* STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT */
         /* store controller status */
         {
-            SchM_Enter_CanIf();
+            SchM_Enter_CanIf_ExclusiveArea_Channel();
             CanIf_ControllerMode[controllerId] = ControllerMode;
-            SchM_Exit_CanIf();
+            SchM_Exit_CanIf_ExclusiveArea_Channel();
             if (NULL_PTR != CanIf_DispatchConfigData.CanIfDispatchUserCtrlModeIndicationName)
             {
                 CanIf_DispatchConfigData.CanIfDispatchUserCtrlModeIndicationName(controllerId, ControllerMode);
             }
         }
     }
-    return;
 }
 
 #define CANIF_STOP_SEC_CANIFCONTROLLERMODEINDICATION_CALLBACK_CODE
@@ -2341,7 +2140,7 @@ CanIf_TrcvModeIndication(uint8 TransceiverId, CanTrcv_TrcvModeType TransceiverMo
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
     if (CANIF_INITED != CanIf_InitStatus)
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_TRCVMODEINDICATION_ID, CANIF_E_UNINIT);
+        CanIf_Det_ReportError(CANIF_TRCVMODEINDICATION_ID, CANIF_E_UNINIT);
     }
     else
 #endif /* STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT */
@@ -2351,7 +2150,7 @@ CanIf_TrcvModeIndication(uint8 TransceiverId, CanTrcv_TrcvModeType TransceiverMo
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
         if (transceiverId == CANIF_TRCV_NUMBER)
         {
-            (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_TRCVMODEINDICATION_ID, CANIF_E_PARAM_TRCV);
+            CanIf_Det_ReportError(CANIF_TRCVMODEINDICATION_ID, CANIF_E_PARAM_TRCV);
         }
         else
 #endif /* STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT */
@@ -2362,7 +2161,6 @@ CanIf_TrcvModeIndication(uint8 TransceiverId, CanTrcv_TrcvModeType TransceiverMo
             }
         }
     }
-    return;
 }
 #define CANIF_STOP_SEC_CANIFTRCVMODEINDICATION_CALLBACK_CODE
 #include "CanIf_MemMap.h"
@@ -2396,22 +2194,17 @@ CanIf_CurrentIcomConfiguration(uint8 ControllerId, IcomConfigIdType Configuratio
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
     if (CANIF_INITED != CanIf_InitStatus)
     {
-        (void)Det_ReportError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_CURRENTICOMCONFIGURATION_ID, CANIF_E_UNINIT);
+        CanIf_Det_ReportError(CANIF_CURRENTICOMCONFIGURATION_ID, CANIF_E_UNINIT);
     }
     else
 #endif /* STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT */
     {
-
         uint8 controllerId;
         CanIf_GetCanIfCtrlId(&controllerId, ControllerId);
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
         if (controllerId == CANIF_CANCONTROLLER_NUMBER)
         {
-            (void)Det_ReportError(
-                CANIF_MODULE_ID,
-                CANIF_INSTANCE_ID,
-                CANIF_CURRENTICOMCONFIGURATION_ID,
-                CANIF_E_PARAM_CONTROLLERID);
+            CanIf_Det_ReportError(CANIF_CURRENTICOMCONFIGURATION_ID, CANIF_E_PARAM_CONTROLLERID);
         }
         else
 #endif /* STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT */
@@ -2419,7 +2212,6 @@ CanIf_CurrentIcomConfiguration(uint8 ControllerId, IcomConfigIdType Configuratio
             CanSM_CurrentIcomConfiguration(controllerId, ConfigurationId, Error);
         }
     }
-    return;
 }
 #define CANIF_STOP_SEC_CANIFCURRENTICOMCONFIGURATION_CALLBACK_CODE
 #include "CanIf_MemMap.h"
@@ -2451,7 +2243,11 @@ static FUNC(Std_ReturnType, CANIF_CODE) CanIf_SetControllStarted(uint8 Controlle
     uint8 canDriverId = controllerPtr->CanDriverId;
     /* get Can controller Id,defined in Can Driver */
     uint8 controllerId = controllerPtr->CanCtrlId;
+#if (CANIF_CAN_AUTOSAR_VERSION >= CANIF_CAN_AUTOSAR_431)
+    if (CAN_OK == Can_DriverApi[canDriverId].CanSetControllerModeApi(controllerId, CAN_CS_STARTED))
+#else  /*The default version of can driver is 4.2.2*/
     if (CAN_OK == Can_DriverApi[canDriverId].CanSetControllerModeApi(controllerId, CAN_T_START))
+#endif /* CANIF_CAN_AUTOSAR_VERSION >= CANIF_CAN_AUTOSAR_431 */
     {
         result = E_OK;
     }
@@ -2479,28 +2275,30 @@ static FUNC(Std_ReturnType, CANIF_CODE) CanIf_SetControllSleep(uint8 Controller)
     uint8 canDriverId = controllerPtr->CanDriverId;
     /* get Can controller Id,defined in Can Driver */
     uint8 controllerId = controllerPtr->CanCtrlId;
+#if (CANIF_CAN_AUTOSAR_VERSION >= CANIF_CAN_AUTOSAR_431)
+    if (CAN_OK == Can_DriverApi[canDriverId].CanSetControllerModeApi(controllerId, CAN_CS_SLEEP))
+#else  /*The default version of can driver is 4.2.2*/
     if (CAN_OK == Can_DriverApi[canDriverId].CanSetControllerModeApi(controllerId, CAN_T_SLEEP))
+#endif /* CANIF_CAN_AUTOSAR_VERSION >= CANIF_CAN_AUTOSAR_431 */
     {
-        SchM_Enter_CanIf();
+        SchM_Enter_CanIf_ExclusiveArea_Channel();
 #if (STD_ON == CANIF_PUBLIC_WAKEUP_CHECK_VALID_SUPPORT)
         /* Clear first call rxindication event flag While Sleep */
         CanIf_FirstCallRxInd[Controller] = FALSE;
 #endif
         /*set the PDU channel mode of the corresponding channel to CANIF_OFFLINE*/
         CanIf_PduMode[Controller] = CANIF_OFFLINE;
-        SchM_Exit_CanIf();
 /* free tx buffer if enabled */
-#if (CANIF_TXBUFFER_NUMBER > 0u)
+#if (STD_ON == CANIF_PUBLIC_TX_BUFFERING)
         CanIf_FreeControllerTxBuffer(Controller);
 #endif
 #if (STD_ON == CANIF_PUBLIC_PN_SUPPORT)
         if (controllerPtr->CanIfPnFilter)
         {
-            SchM_Enter_CanIf();
             CanIf_PnTxFilter[Controller] = TRUE;
-            SchM_Exit_CanIf();
         }
 #endif
+        SchM_Exit_CanIf_ExclusiveArea_Channel();
         result = E_OK;
     }
     return result;
@@ -2528,28 +2326,36 @@ static FUNC(Std_ReturnType, CANIF_CODE) CanIf_SetControllStopped(uint8 Controlle
     /* get Can controller Id,defined in Can Driver */
     uint8 controllerId = controllerPtr->CanCtrlId;
     /* current mode is SLEEP */
-    if (CANIF_CS_SLEEP == CanIf_ControllerMode[Controller])
+    if (CAN_CS_SLEEP == CanIf_ControllerMode[Controller])
     {
         /* wake up the controller */
+#if (CANIF_CAN_AUTOSAR_VERSION >= CANIF_CAN_AUTOSAR_431)
+        if (CAN_OK == Can_DriverApi[canDriverId].CanSetControllerModeApi(controllerId, CAN_CS_STOPPED))
+#else  /*The default version of can driver is 4.2.2*/
         if (CAN_OK == Can_DriverApi[canDriverId].CanSetControllerModeApi(controllerId, CAN_T_WAKEUP))
+#endif /* CANIF_CAN_AUTOSAR_VERSION >= CANIF_CAN_AUTOSAR_431 */
         {
             /*set the PDU channel mode of the corresponding channel to CANIF_TX_OFFLINE*/
-            SchM_Enter_CanIf();
+            SchM_Enter_CanIf_ExclusiveArea_Channel();
             CanIf_PduMode[Controller] = CANIF_TX_OFFLINE;
-            SchM_Exit_CanIf();
+            SchM_Exit_CanIf_ExclusiveArea_Channel();
             result = E_OK;
         }
     }
     else
     {
         /* set controller mode STOP */
+#if (CANIF_CAN_AUTOSAR_VERSION >= CANIF_CAN_AUTOSAR_431)
+        if (CAN_OK == Can_DriverApi[canDriverId].CanSetControllerModeApi(controllerId, CAN_CS_STOPPED))
+#else  /*The default version of can driver is 4.2.2*/
         if (CAN_OK == Can_DriverApi[canDriverId].CanSetControllerModeApi(controllerId, CAN_T_STOP))
+#endif /* CANIF_CAN_AUTOSAR_VERSION >= CANIF_CAN_AUTOSAR_431 */
         {
             CanIf_FreeBufInStopped(Controller);
             /*set the PDU channel mode of the corresponding channel to CANIF_TX_OFFLINE*/
-            SchM_Enter_CanIf();
+            SchM_Enter_CanIf_ExclusiveArea_Channel();
             CanIf_PduMode[Controller] = CANIF_TX_OFFLINE;
-            SchM_Exit_CanIf();
+            SchM_Exit_CanIf_ExclusiveArea_Channel();
             result = E_OK;
         }
     }
@@ -2624,214 +2430,6 @@ static FUNC(Std_ReturnType, CANIF_CODE)
     }
     return result;
 }
-#if (CANIF_TXBUFFER_NUMBER > 0u)
-/*************************************************************************/
-/*
- * Brief               free the txbuffer
- * ServiceId           None
- * Sync/Async          Synchronous
- * Reentrancy          Non Reentrant
- * Param-Name[in]      controller: the id of Can Controller
- * Param-Name[out]     None
- * Param-Name[in/out]  None
- * Return              None
- * PreCondition        CANIF_TXBUFFER_NUMBER > 0u
- * CallByAPI           CanIf_FreeBufInStopped
- */
-/*************************************************************************/
-static FUNC(void, CANIF_CODE) CanIf_FreeControllerTxBuffer(uint8 Controller)
-{
-    PduIdType txBufferIndex;
-    Can_HwHandleType hthId;
-    uint8 controllerId;
-    uint8 index;
-    const uint8* txBufferSizePtr = &CANIF_TXBUFFER_SIZE(0);
-    CanIf_TxPduBufferType* txPduBufferPtr;
-    SchM_Enter_CanIf();
-    for (txBufferIndex = 0u; txBufferIndex < CANIF_TXBUFFER_NUMBER; txBufferIndex++)
-    {
-        txPduBufferPtr = &CanIf_TxBuffer[txBufferIndex].CanIf_TxPduBufferRef[0];
-        for (index = 0u; index < *txBufferSizePtr; index++)
-        {
-            /* polling txbuffer, find the one already be used */
-            if (txPduBufferPtr->used)
-            {
-                hthId = CANIF_TXPDU(txPduBufferPtr->TxPduIndex).CanIfTxPduHthId;
-                controllerId = CANIF_HTH(hthId).CanIfHthCanCtrlId;
-                /* check this txbuffer whether used for this controller */
-                if (Controller == controllerId)
-                {
-                    /* set the used flag False so that this buffer can save new pdu */
-                    txPduBufferPtr->used = FALSE;
-                }
-            }
-            txPduBufferPtr++;
-        }
-        txBufferSizePtr++;
-    }
-    SchM_Exit_CanIf();
-    return;
-}
-/*************************************************************************/
-/*
- * Brief               CanIf call can_write which return CAN_BSUY,then set the write requece and data to tx buffer
- * ServiceId           None
- * Sync/Async          Synchronous
- * Reentrancy          Non Reentrant
- * Param-Name[in]      pduPtr: CAN L-PDU to be transmitted
- * Param-Name[out]     None
- * Param-Name[in/out]  None
- * Return              Std_ReturnType
- *                     E_OK:Busy Handle,pdu saved successful
- *                     E_NOT_OK:Busy Handle,pdu saved failure
- * PreCondition        CANIF_TXBUFFER_NUMBER > 0u
- * CallByAPI           CanIf_Transmit
- */
-/*************************************************************************/
-static FUNC(Std_ReturnType, CANIF_CODE) CanIf_TxBusyHandle(P2CONST(Can_PduType, AUTOMATIC, CANIF_APPL_DATA) pduPtr)
-{
-    PduIdType txBufIndex;
-    Std_ReturnType result = E_NOT_OK;
-    uint8 index;
-    uint8 idleBufferIndex = CANIF_UNUSED_UINT8;
-    uint8 txBufferSize;
-    const CanIf_TxPduConfigType* txPduConfigPtr = &CANIF_TXPDU(pduPtr->swPduHandle);
-    CanIf_TxPduBufferType* txPduBufferPtr;
-    txBufIndex = txPduConfigPtr->TxBufferIdndex;
-    /*the pdu support Txbuffer*/
-    if (txBufIndex < CANIF_TXBUFFER_NUMBER)
-    {
-        txBufferSize = CANIF_TXBUFFER_SIZE(txBufIndex);
-        txPduBufferPtr = CanIf_TxBuffer[txBufIndex].CanIf_TxPduBufferRef;
-        for (index = 0u; (index < txBufferSize) && (E_NOT_OK == result); index++)
-        {
-            if (txPduBufferPtr[index].TxPduIndex == pduPtr->swPduHandle)
-            {
-                txPduBufferPtr[index].canId = pduPtr->id;
-#if (STD_ON == CANIF_TRIGGER_TRANSMIT_SUPPORT)
-                if (txPduConfigPtr->CanIfTxPduTriggerTransmit)
-                {
-                    txPduBufferPtr[index].length = 0u;
-                }
-                else
-#endif /* STD_ON == CANIF_TRIGGER_TRANSMIT_SUPPORT */
-                {
-                    txPduBufferPtr[index].length = pduPtr->length;
-                    (void)ILib_memcpy(txPduBufferPtr[index].data, pduPtr->sdu, (PduLengthType)pduPtr->length);
-                }
-                txPduBufferPtr[index].used = TRUE;
-                result = E_OK;
-            }
-            if ((CANIF_UNUSED_UINT8 == idleBufferIndex) && (!txPduBufferPtr[index].used))
-            {
-                idleBufferIndex = index;
-            }
-        }
-        if ((E_NOT_OK == result) && (CANIF_UNUSED_UINT8 != idleBufferIndex))
-        {
-            txPduBufferPtr[idleBufferIndex].canId = pduPtr->id;
-            txPduBufferPtr[idleBufferIndex].TxPduIndex = pduPtr->swPduHandle;
-#if (STD_ON == CANIF_TRIGGER_TRANSMIT_SUPPORT)
-            if (txPduConfigPtr->CanIfTxPduTriggerTransmit)
-            {
-                txPduBufferPtr[idleBufferIndex].length = 0u;
-            }
-            else
-#endif /* STD_ON == CANIF_TRIGGER_TRANSMIT_SUPPORT */
-            {
-                txPduBufferPtr[idleBufferIndex].length = pduPtr->length;
-                (void)ILib_memcpy(txPduBufferPtr[idleBufferIndex].data, pduPtr->sdu, (PduLengthType)pduPtr->length);
-            }
-            txPduBufferPtr[idleBufferIndex].used = TRUE;
-            result = E_OK;
-        }
-    }
-    return result;
-}
-#endif /* CANIF_TXBUFFER_NUMBER > 0u */
-#if (0u < CANIF_RXBUFFER_NUMBER)
-/*************************************************************************/
-/*
- * Brief               init the Receive Buffer
- * ServiceId           None
- * Sync/Async          Synchronous
- * Reentrancy          Non Reentrant
- * Param-Name[in]      Controller:the id of can controller
- * Param-Name[out]     None
- * Param-Name[in/out]  None
- * Return              None
- * PreCondition        CANIF_PUBLIC_READ_RX_PDU_DATA_API is TRUE
- * CallByAPI           CanIf_FreeBufInStopped
- */
-/*************************************************************************/
-static FUNC(void, CANIF_CODE) CanIf_InitRxBuffer(uint8 Controller)
-{
-    PduIdType rxPduIndex;
-    Can_HwHandleType hrhId;
-    CanIf_RxPduBufferType* rxPduBuffer;
-    CanIf_RxBufferNumType rxBufferIndex;
-    const CanIf_RxPduConfigType* rxPduConfigPtr;
-    SchM_Enter_CanIf();
-    for (rxPduIndex = 0u; rxPduIndex < CANIF_RXPDU_NUMBER; rxPduIndex++)
-    {
-        rxPduConfigPtr = &CANIF_RXPDU(rxPduIndex);
-        rxBufferIndex = rxPduConfigPtr->CanIf_RxBufferIndex;
-
-        if (rxBufferIndex < CANIF_RXBUFFER_NUMBER)
-        {
-            rxPduBuffer = &CanIf_RxBuffer[rxBufferIndex];
-            hrhId = rxPduConfigPtr->CanIfRxPduHrhId;
-            if (Controller == CANIF_HRH(hrhId).CanIfHrhCanCtrlId)
-            {
-                /* init the RxBuf, set length to 0. */
-                rxPduBuffer->length = 0u;
-            }
-        }
-    }
-    SchM_Exit_CanIf();
-    return;
-}
-#endif /* 0u < CANIF_RXBUFFER_NUMBER */
-#if (CANIF_DYNAMIC_TXPDU_NUMBER > 0u)
-/*************************************************************************/
-/*
- * Brief               init the Dynamic Transmit CanId
- * ServiceId           None
- * Sync/Async          Synchronous
- * Reentrancy          Non Reentrant
- * Param-Name[in]      Controller: the id of can controller
- * Param-Name[out]     None
- * Param-Name[in/out]  None
- * Return              void
- * PreCondition        CANIF_PUBLIC_SET_DYNAMIC_TX_ID_API is STD_ON
- * CallByAPI           CanIf_FreeBufInStopped
- */
-/*************************************************************************/
-static FUNC(void, CANIF_CODE) CanIf_InitDynamicTxPduCanIds(uint8 Controller)
-{
-    PduIdType txPduIndex;
-    Can_HwHandleType hthId;
-    uint8 controllerId;
-    const CanIf_TxPduConfigType* txPduConfigPtr;
-    SchM_Enter_CanIf();
-    for (txPduIndex = 0u; txPduIndex < CANIF_TXPDU_NUMBER; txPduIndex++)
-    {
-        txPduConfigPtr = &CANIF_TXPDU(txPduIndex);
-        hthId = txPduConfigPtr->CanIfTxPduHthId;
-        controllerId = CANIF_HTH(hthId).CanIfHthCanCtrlId;
-        if (Controller == controllerId)
-        {
-            if (CANID_DYNAMIC == txPduConfigPtr->CanIfTxPduType)
-            {
-                /* init the DynamicTxPduCanId with the configured canId */
-                CanIf_TxPduDynamicCanIds[txPduConfigPtr->CanIfDynamicCanIdIndex] = txPduConfigPtr->CanIfTxPduCanId;
-            }
-        }
-    }
-    SchM_Exit_CanIf();
-    return;
-}
-#endif /* CANIF_DYNAMIC_TXPDU_NUMBER > 0u */
 /*************************************************************************/
 /*
  * Brief               Can pdu pack for transmit
@@ -2853,43 +2451,15 @@ static FUNC(void, CANIF_CODE) CanIf_PduPack(
     P2CONST(PduInfoType, AUTOMATIC, CANIF_APPL_DATA) PduInfoPtr,
     P2VAR(Can_PduType, AUTOMATIC, AUTOMATIC) canPdu)
 {
-    CanIf_TxPduCanIdMode canIdMode;
-    const CanIf_TxPduConfigType* txPduConfigPtr = &CANIF_TXPDU(CanTxPduId);
     CanIf_IdType canId;
-#if (CANIF_DYNAMIC_TXPDU_NUMBER > 0u)
-    CanIf_IdType baseId;
+    const CanIf_TxPduConfigType* txPduConfigPtr = &CANIF_TXPDU(CanTxPduId);
+    CanIf_TxPduCanIdMode canIdMode = txPduConfigPtr->CanIfTxPduCanIdType;
+    CanIf_GetBaseCanIdHandle(
+        CanTxPduId,
 #if (STD_ON == CANIF_META_DATA_SUPPORT)
-    CanIf_IdType metaData;
-    CanIf_IdType canIdMask;
-#endif /* STD_ON == CANIF_META_DATA_SUPPORT */
-#endif /* CANIF_DYNAMIC_TXPDU_NUMBER > 0u */
-    canIdMode = txPduConfigPtr->CanIfTxPduCanIdType;
-#if (CANIF_DYNAMIC_TXPDU_NUMBER > 0u)
-    if (CANID_DYNAMIC == txPduConfigPtr->CanIfTxPduType)
-    {
-        baseId = CanIf_TxPduDynamicCanIds[txPduConfigPtr->CanIfDynamicCanIdIndex];
-#if (STD_ON == CANIF_META_DATA_SUPPORT)
-        if (txPduConfigPtr->TxMetaDataEnable)
-        {
-            canIdMask = txPduConfigPtr->CanIfTxPduCanIdMask;
-            CANIF_METADATATOCANID(&metaData, PduInfoPtr->MetaDataPtr);
-            canId = (baseId & canIdMask) | (metaData & (~canIdMask));
-        }
-        else
-        {
-            canId = baseId;
-        }
-#else  /* STD_ON == CANIF_META_DATA_SUPPORT */
-        canId = baseId;
-#endif /* STD_ON == CANIF_META_DATA_SUPPORT */
-    }
-    else
-    {
-        canId = txPduConfigPtr->CanIfTxPduCanId;
-    }
-#else  /* CANIF_DYNAMIC_TXPDU_NUMBER > 0u */
-    canId = txPduConfigPtr->CanIfTxPduCanId;
-#endif /* CANIF_DYNAMIC_TXPDU_NUMBER > 0u */
+        PduInfoPtr,
+#endif
+        &canId);
     /*set the 2 bits of highest CanId base the CanIf_TxPduCanIdMode*/
     switch (canIdMode)
     {
@@ -2926,15 +2496,14 @@ static FUNC(void, CANIF_CODE) CanIf_PduPack(
 #endif /* CANIF_CANID_UINT16 == CANIF_CAN_IDTYPE */
     /* get PDU length */
     canPdu->length = (uint8)PduInfoPtr->SduLength;
-    if ((canPdu->length) > txPduConfigPtr->CanIfTxPduDlc)
+    if (((PduLengthType)canPdu->length) > txPduConfigPtr->CanIfTxPduDlc)
     {
-        canPdu->length = txPduConfigPtr->CanIfTxPduDlc;
+        canPdu->length = (uint8)txPduConfigPtr->CanIfTxPduDlc;
     }
     /* get PDU handle */
     canPdu->swPduHandle = CanTxPduId;
     /* get SDU */
     canPdu->sdu = PduInfoPtr->SduDataPtr;
-    return;
 }
 /*************************************************************************/
 /*
@@ -2953,28 +2522,24 @@ static FUNC(void, CANIF_CODE) CanIf_PduPack(
 static FUNC(void, CANIF_CODE) CanIf_FreeBufInStopped(uint8 Controller)
 {
     /* free tx buffer if enabled */
-#if (CANIF_TXBUFFER_NUMBER > 0u)
+    SchM_Enter_CanIf_ExclusiveArea_Channel();
+#if (STD_ON == CANIF_PUBLIC_TX_BUFFERING)
     CanIf_FreeControllerTxBuffer(Controller);
 #endif
-/* (re-)init the rx Buffer */
-#if (0u < CANIF_RXBUFFER_NUMBER)
-    /* Init CanIf RxBuffer */
-    CanIf_InitRxBuffer(Controller);
+/* Init CanIf RxBuffer */
+#if (STD_ON == CANIF_PUBLIC_READ_RX_PDU_DATA_API)
+    CanIf_FreeControllerRxBuffer(Controller);
 #endif
-#if ((CANIF_TXNOTIFYSTATUS_BUFFER > 0u) || (CANIF_RXNOTIFYSTATUS_BUFFER > 0u))
-    /* set the rx and tx Notify status buffer Of this controller */
+/* set the rx and tx Notify status buffer Of this controller */
+#if ((STD_ON == CANIF_PUBLIC_READ_RX_PDU_NOTIFY_STATUS_API) || (STD_ON == CANIF_PUBLIC_READ_TX_PDU_NOTIFY_STATUS_API))
     CanIf_FreeRxTxNotifyStatus(Controller);
 #endif
 #if (STD_ON == CANIF_PUBLIC_TX_CONFIRM_POLLING_SUPPORT)
-    SchM_Enter_CanIf();
     CanIf_TxConfirmationState[Controller] = CANIF_NO_NOTIFICATION;
-    SchM_Exit_CanIf();
 #endif
-#if (CANIF_DYNAMIC_TXPDU_NUMBER > 0u)
     /* init dynamic CAN ID array */
-    CanIf_InitDynamicTxPduCanIds(Controller);
-#endif
-    return;
+    CanIf_FreeDynamicTxPduCanIds(Controller);
+    SchM_Exit_CanIf_ExclusiveArea_Channel();
 }
 /*************************************************************************/
 /*
@@ -2993,59 +2558,20 @@ static FUNC(void, CANIF_CODE) CanIf_FreeBufInStopped(uint8 Controller)
 static FUNC(void, CANIF_CODE) CanIf_InitAllBuffer(VAR(void, AUTOMATIC))
 {
 /* free tx buffer if enabled */
-#if (0u < CANIF_TXBUFFER_NUMBER)
-    PduIdType txBufferIndex;
-    uint8 index;
-    const uint8* bufferSizePtr = &CANIF_TXBUFFER_SIZE(0);
-    for (txBufferIndex = 0u; txBufferIndex < CANIF_TXBUFFER_NUMBER; txBufferIndex++)
-    {
-        /* polling txbuffer, find the one already be used */
-        for (index = 0u; index < *bufferSizePtr; index++)
-        {
-            CanIf_TxBuffer[txBufferIndex].CanIf_TxPduBufferRef[index].used = FALSE;
-        }
-        bufferSizePtr++;
-    }
+#if (STD_ON == CANIF_PUBLIC_TX_BUFFERING)
+    CanIf_InitTxBuffer();
 #endif
 /* (re-)init the rx Buffer */
-#if (0u < CANIF_RXBUFFER_NUMBER)
-    PduIdType rxBufferIndex;
-    for (rxBufferIndex = 0u; rxBufferIndex < CANIF_RXBUFFER_NUMBER; rxBufferIndex++)
-    {
-        /* init the RxBuf, set length to 0. */
-        CanIf_RxBuffer[rxBufferIndex].length = 0u;
-    }
+#if (STD_ON == CANIF_PUBLIC_READ_RX_PDU_DATA_API)
+    CanIf_InitRxBuffer();
 #endif
 /* re-init the txNotifStatus Of this controller */
-#if (0u < CANIF_TXNOTIFYSTATUS_BUFFER)
-    PduIdType txNotifyStatusIndex;
-    for (txNotifyStatusIndex = 0u; txNotifyStatusIndex < CANIF_TXNOTIFYSTATUS_BUFFER; txNotifyStatusIndex++)
-    {
-        CanIf_TxNotifStatus[txNotifyStatusIndex] = CANIF_NO_NOTIFICATION;
-    }
-#endif
 /* re-init the rxNotifStatus Of this controller */
-#if (0u < CANIF_RXNOTIFYSTATUS_BUFFER)
-    PduIdType rxNotifyStatusIndex;
-    for (rxNotifyStatusIndex = 0u; rxNotifyStatusIndex < CANIF_RXNOTIFYSTATUS_BUFFER; rxNotifyStatusIndex++)
-    {
-        CanIf_RxNotifStatus[rxNotifyStatusIndex] = CANIF_NO_NOTIFICATION;
-    }
+#if ((STD_ON == CANIF_PUBLIC_READ_RX_PDU_NOTIFY_STATUS_API) || (STD_ON == CANIF_PUBLIC_READ_TX_PDU_NOTIFY_STATUS_API))
+    CanIf_InitRxTxNotifyStatus();
 #endif
-/* init the DynamicTxPduCanId with the configured canId */
-#if (0u < CANIF_DYNAMIC_TXPDU_NUMBER)
-    PduIdType txPduIndex;
-    const CanIf_TxPduConfigType* txPduCfgPtr = &CANIF_TXPDU(0);
-    for (txPduIndex = 0u; txPduIndex < CANIF_TXPDU_NUMBER; txPduIndex++)
-    {
-        if (CANID_DYNAMIC == txPduCfgPtr->CanIfTxPduType)
-        {
-            CanIf_TxPduDynamicCanIds[txPduCfgPtr->CanIfDynamicCanIdIndex] = txPduCfgPtr->CanIfTxPduCanId;
-        }
-        txPduCfgPtr++;
-    }
-#endif
-    return;
+    /* init the DynamicTxPduCanId with the configured canId */
+    CanIf_InitDynamicTxPduCanId();
 }
 /*************************************************************************/
 /*
@@ -3080,10 +2606,9 @@ static FUNC(Std_ReturnType, CANIF_CODE) CanIf_RxPduHrhSearchByLinear(
         rxPduConfigPtr = &CANIF_RXPDU(pduIdIndex);
         if (rxPduConfigPtr->CanIfRxPduCanIdMasked == (rxPduConfigPtr->CanIfRxPduCanIdMask & CanId))
         {
-            result = CanIf_GetPduHrh(pduIdIndex, CanId);
+            result = CanIf_GetPduHrh(pduIdIndex, CanId, rxPduIndex);
             if (E_OK == result)
             {
-                *rxPduIndex = pduIdIndex;
                 break;
             }
         }
@@ -3129,11 +2654,7 @@ static FUNC(Std_ReturnType, CANIF_CODE) CanIf_RxPduHrhSearchByBinary(
         rxPduCfgCanIdMasked = CANIF_RXPDU(midPduIdIndex).CanIfRxPduCanIdMasked;
         if (hrhCanIdMasked == rxPduCfgCanIdMasked)
         {
-            result = CanIf_GetPduHrh(midPduIdIndex, CanId);
-            if (E_OK == result)
-            {
-                *rxPduIndex = midPduIdIndex;
-            }
+            result = CanIf_GetPduHrh(midPduIdIndex, CanId, rxPduIndex);
             break;
         }
         else if (hrhCanIdMasked > rxPduCfgCanIdMasked)
@@ -3158,7 +2679,7 @@ static FUNC(Std_ReturnType, CANIF_CODE) CanIf_RxPduHrhSearchByBinary(
  * Param-Name[in]      pduIdIndex: ID of the pdu
  *                     CanId: Standard/Extended CAN ID of CAN L-PDU that
  *                     has been successfully received
- * Param-Name[out]     None
+ * Param-Name[out]     rxPduIndex: the rx pdu that receive the can message
  * Param-Name[in/out]  None
  * Return              Std_ReturnType
  * PreCondition        None
@@ -3166,11 +2687,11 @@ static FUNC(Std_ReturnType, CANIF_CODE) CanIf_RxPduHrhSearchByBinary(
  *
  */
 /*************************************************************************/
-static FUNC(Std_ReturnType, CANIF_CODE) CanIf_GetPduHrh(PduIdType pduIdIndex, CanIf_IdType CanId)
+static FUNC(Std_ReturnType, CANIF_CODE)
+    CanIf_GetPduHrh(PduIdType pduIdIndex, CanIf_IdType CanId, P2VAR(PduIdType, AUTOMATIC, AUTOMATIC) rxPduIndex)
 {
     Std_ReturnType result = E_NOT_OK;
     const CanIf_RxPduConfigType* rxPduConfigPtr = &CANIF_RXPDU(pduIdIndex);
-
 #if (STD_ON == CANIF_RXPDU_CANID_RANGE_SUPPORT)
     if ((rxPduConfigPtr->CanIfRxCanIdRangeRef == NULL_PTR)
         || ((rxPduConfigPtr->CanIfRxCanIdRangeRef != NULL_PTR)
@@ -3185,6 +2706,7 @@ static FUNC(Std_ReturnType, CANIF_CODE) CanIf_GetPduHrh(PduIdType pduIdIndex, Ca
             if (CanId >= 0x80000000u)
             {
                 result = E_OK;
+                *rxPduIndex = pduIdIndex;
             }
             break;
 #endif /* STD_ON == CANIF_RX_EXTENDED_CAN_SUPPORT */
@@ -3193,6 +2715,7 @@ static FUNC(Std_ReturnType, CANIF_CODE) CanIf_GetPduHrh(PduIdType pduIdIndex, Ca
             if (CanId >= 0xc0000000u)
             {
                 result = E_OK;
+                *rxPduIndex = pduIdIndex;
             }
             break;
 #endif /* STD_ON == CANIF_RX_EXTENDED_FD_CAN_SUPPORT */
@@ -3201,6 +2724,7 @@ static FUNC(Std_ReturnType, CANIF_CODE) CanIf_GetPduHrh(PduIdType pduIdIndex, Ca
             if ((CanId >= 0x80000000u) && (CanId < 0xc0000000u))
             {
                 result = E_OK;
+                *rxPduIndex = pduIdIndex;
             }
             break;
 #endif /* STD_ON == CANIF_RX_EXTENDED_NO_FD_CAN_SUPPORT */
@@ -3209,6 +2733,7 @@ static FUNC(Std_ReturnType, CANIF_CODE) CanIf_GetPduHrh(PduIdType pduIdIndex, Ca
             if (CanId < 0x80000000u)
             {
                 result = E_OK;
+                *rxPduIndex = pduIdIndex;
             }
             break;
 #endif /* STD_ON == CANIF_RX_STANDARD_CAN_SUPPORT */
@@ -3217,6 +2742,7 @@ static FUNC(Std_ReturnType, CANIF_CODE) CanIf_GetPduHrh(PduIdType pduIdIndex, Ca
             if ((CanId < 0x80000000u) && (CanId >= 0x40000000u))
             {
                 result = E_OK;
+                *rxPduIndex = pduIdIndex;
             }
             break;
 #endif /* STD_ON == CANIF_RX_STANDARD_FD_CAN_SUPPORT */
@@ -3225,6 +2751,7 @@ static FUNC(Std_ReturnType, CANIF_CODE) CanIf_GetPduHrh(PduIdType pduIdIndex, Ca
             if (CanId < 0x40000000u)
             {
                 result = E_OK;
+                *rxPduIndex = pduIdIndex;
             }
             break;
 #endif /* STD_ON == CANIF_RX_STANDARD_NO_FD_CAN_SUPPORT */
@@ -3261,36 +2788,30 @@ static FUNC(void, CANIF_CODE) CanIf_RxIndicationHandle(
 #endif
     P2CONST(PduInfoType, AUTOMATIC, CANIF_APPL_DATA) PduInfoPtr)
 {
+#if (STD_ON == CANIF_PUBLIC_READ_RX_PDU_NOTIFY_STATUS_API)
+    CanIf_SetRxNotifStatusHandle(pduIdIndex);
+#endif /* STD_ON == CANIF_PUBLIC_READ_RX_PDU_NOTIFY_STATUS_API */
+
     PduInfoType pduInfo = *PduInfoPtr;
     const CanIf_RxPduConfigType* rxPduConfigPtr = &CANIF_RXPDU(pduIdIndex);
-#if (                            \
-    (0u < CANIF_RXBUFFER_NUMBER) \
+#if (                                             \
+    (STD_ON == CANIF_PUBLIC_READ_RX_PDU_DATA_API) \
     || ((STD_OFF == CANIF_RXINDICATION_AUTOSAR_PARAMETER) && (STD_ON == CANIF_META_DATA_SUPPORT)))
     boolean metaDataEnable;
     CanIf_IdType metaData;
-#endif /* 0u < CANIF_RXBUFFER_NUMBER) || ((STD_OFF == CANIF_RXINDICATION_AUTOSAR_PARAMETER) && \
-          (STD_ON == CANIF_META_DATA_SUPPORT */
-    /* rx status notify enabled */
-#if (CANIF_RXNOTIFYSTATUS_BUFFER > 0u)
-    if (rxPduConfigPtr->CanIfRxPduReadNotifyStatus)
-    {
-        SchM_Enter_CanIf();
-        /* set rx status to CANIF_TX_RX_NOTIFICATION */
-        CanIf_RxNotifStatus[rxPduConfigPtr->CanIfRxNotifyIndex] = CANIF_TX_RX_NOTIFICATION;
-        SchM_Exit_CanIf();
-    }
-#endif /* CANIF_RXNOTIFYSTATUS_BUFFER > 0 */
+#endif
+
 #if ((STD_ON == CANIF_RXINDICATION_AUTOSAR_PARAMETER) || (STD_OFF == CANIF_META_DATA_SUPPORT))
-#if (0u < CANIF_RXBUFFER_NUMBER)
+#if (STD_ON == CANIF_PUBLIC_READ_RX_PDU_DATA_API)
 #if (STD_ON == CANIF_META_DATA_SUPPORT)
     metaDataEnable = (NULL_PTR != PduInfo.MetaDataPtr);
     if (metaDataEnable)
     {
-        CANIF_METADATATOCANID(&metaData, PduInfo.MetaDataPtr);
+        metaData = CanIf_MetaDataToCanId(PduInfo.MetaDataPtr);
     }
 #endif /* STD_ON == CANIF_META_DATA_SUPPORT */
-#endif /* 0u < CANIF_RXBUFFER_NUMBER */
-#else  /* STD_ON == CANIF_RXINDICATION_AUTOSAR_PARAMETER) || (STD_OFF == CANIF_META_DATA_SUPPORT */
+#endif /* STD_ON == CANIF_PUBLIC_READ_RX_PDU_DATA_API */
+#else
     metaDataEnable = rxPduConfigPtr->RxMetaDataEnable;
     if (metaDataEnable)
     {
@@ -3301,121 +2822,58 @@ static FUNC(void, CANIF_CODE) CanIf_RxIndicationHandle(
     {
         pduInfo.MetaDataPtr = NULL_PTR;
     }
-#endif /* STD_ON == CANIF_RXINDICATION_AUTOSAR_PARAMETER || STD_OFF == CANIF_META_DATA_SUPPORT */
-#if (0u < CANIF_RXBUFFER_NUMBER)
+#endif /* STD_ON == CANIF_RXINDICATION_AUTOSAR_PARAMETER) || (STD_OFF == CANIF_META_DATA_SUPPORT */
+
+#if (STD_ON == CANIF_PUBLIC_READ_RX_PDU_DATA_API)
     CanIf_RxBufferNumType rxPduBufferIndex = rxPduConfigPtr->CanIf_RxBufferIndex;
     CanIf_RxPduBufferType* rxPduBuffer;
     if (rxPduBufferIndex < CANIF_RXBUFFER_NUMBER)
     {
-        SchM_Enter_CanIf();
+        SchM_Enter_CanIf_ExclusiveArea_Channel();
         rxPduBuffer = &CanIf_RxBuffer[rxPduBufferIndex];
         rxPduBuffer->length = (uint8)pduInfo.SduLength;
         /* save sdu */
         (void)ILib_memcpy(rxPduBuffer->data, pduInfo.SduDataPtr, pduInfo.SduLength);
-        if (metaDataEnable)
+        if (TRUE == metaDataEnable)
         {
             rxPduBuffer->metaData = metaData;
         }
-        SchM_Exit_CanIf();
+        SchM_Exit_CanIf_ExclusiveArea_Channel();
     }
-#endif /* 0u < CANIF_RXBUFFER_NUMBER */
+#endif /* STD_ON == CANIF_PUBLIC_READ_RX_PDU_DATA_API */
     /* inform upper layer */
     if (NULL_PTR != CanIf_UpRxIndicationArray[rxPduConfigPtr->CanIfUpRxIndicationApiIndex])
     {
         CanIf_UpRxIndicationArray[rxPduConfigPtr->CanIfUpRxIndicationApiIndex](rxPduConfigPtr->CanIfUpPduId, &pduInfo);
     }
 }
-#if ((CANIF_TXNOTIFYSTATUS_BUFFER > 0u) || (CANIF_RXNOTIFYSTATUS_BUFFER > 0u))
-/*************************************************************************/
-/*
- * Brief               Re-init rxNotifyStatus and txNotifyStatus
- * ServiceId           None
- * Sync/Async          Synchronous
- * Reentrancy          Non Reentrant
- * Param-Name[in]      Controller: the id of can controller
- * Param-Name[out]     None
- * Param-Name[in/out]  None
- * Return              None
- * PreCondition        CANIF_PUBLIC_READ_TX_PDU_NOTIFY_STATUS_API is TRUE or
- *                     CANIF_PUBLIC_READ_RX_PDU_NOTIFY_STATUS_API is TRUE
- * CallByAPI           CanIf_FreeBufInStopped
- */
-/*************************************************************************/
-static FUNC(void, CANIF_CODE) CanIf_FreeRxTxNotifyStatus(uint8 Controller)
-{
-#if (CANIF_TXNOTIFYSTATUS_BUFFER > 0u)
-    PduIdType txPduId;
-    Can_HwHandleType hthId;
-    PduIdType txNotifyIndex;
-    const CanIf_TxPduConfigType* txPduConfigPtr;
-#endif
-#if (CANIF_RXNOTIFYSTATUS_BUFFER > 0u)
-    PduIdType rxPduId;
-    Can_HwHandleType hrhId;
-    PduIdType rxNotifyIndex;
-    const CanIf_RxPduConfigType* rxPduConfigPtr;
-#endif
-    uint8 controllerId;
-    SchM_Enter_CanIf();
-#if (CANIF_TXNOTIFYSTATUS_BUFFER > 0u)
-    /* re-init the txNotifStatus Of this controller */
-    for (txPduId = 0u; txPduId < CANIF_TXPDU_NUMBER; txPduId++)
-    {
-        txPduConfigPtr = &CANIF_TXPDU(txPduId);
-        hthId = txPduConfigPtr->CanIfTxPduHthId;
-        controllerId = CANIF_HTH(hthId).CanIfHthCanCtrlId;
-        if ((txPduConfigPtr->CanIfTxPduReadNotifyStatus) && (Controller == controllerId))
-        {
-            txNotifyIndex = txPduConfigPtr->CanIfTxNotifyIndex;
-            CanIf_TxNotifStatus[txNotifyIndex] = CANIF_NO_NOTIFICATION;
-        }
-    }
-#endif
-#if (CANIF_RXNOTIFYSTATUS_BUFFER > 0u)
-    /* re-init the rxNotifStatus Of this controller */
-    for (rxPduId = 0u; rxPduId < CANIF_RXPDU_NUMBER; rxPduId++)
-    {
-        rxPduConfigPtr = &CANIF_RXPDU(rxPduId);
-        hrhId = rxPduConfigPtr->CanIfRxPduHrhId;
-        controllerId = CANIF_HRH(hrhId).CanIfHrhCanCtrlId;
-        if ((rxPduConfigPtr->CanIfRxPduReadNotifyStatus) && (Controller == controllerId))
-        {
-            rxNotifyIndex = rxPduConfigPtr->CanIfRxNotifyIndex;
-            CanIf_RxNotifStatus[rxNotifyIndex] = CANIF_NO_NOTIFICATION;
-        }
-    }
-#endif
-    SchM_Exit_CanIf();
-    return;
-}
-#endif /* CANIF_TXNOTIFYSTATUS_BUFFER > 0u || CANIF_RXNOTIFYSTATUS_BUFFER > 0u */
 
 static FUNC(Std_ReturnType, CANIF_CODE)
     CanIf_TransmitHandle(PduIdType CanIfTxSduId, P2CONST(PduInfoType, AUTOMATIC, CANIF_APPL_DATA) PduInfoPtr)
 {
     Std_ReturnType result = E_NOT_OK;
+#if (CANIF_CAN_AUTOSAR_VERSION >= CANIF_CAN_AUTOSAR_431)
+    Std_ReturnType retVal = E_NOT_OK;
+#else
     Can_ReturnType retVal = CAN_NOT_OK;
-    Can_HwHandleType hthConfigIndex;
-    uint8 canControllerId;
-    uint8 canDriver;
+#endif /* CANIF_CAN_AUTOSAR_VERSION >= CANIF_CAN_AUTOSAR_431 */
     const CanIf_TxPduConfigType* txPduConfigPtr = &CANIF_TXPDU(CanIfTxSduId);
-    const CanIfHthCfgType* hthPtr;
     /* Get the hth config Index */
-    hthConfigIndex = txPduConfigPtr->CanIfTxPduHthId;
+    Can_HwHandleType hthConfigIndex = txPduConfigPtr->CanIfTxPduHthId;
     /* Get the hth config */
-    hthPtr = &CANIF_HTH(hthConfigIndex);
+    const CanIfHthCfgType* hthPtr = &CANIF_HTH(hthConfigIndex);
     /* get controller ID */
-    canControllerId = hthPtr->CanIfHthCanCtrlId;
-    if (CANIF_CS_STARTED == CanIf_ControllerMode[canControllerId])
+    uint8 canControllerId = hthPtr->CanIfHthCanCtrlId;
+    if (CAN_CS_STARTED == CanIf_ControllerMode[canControllerId])
     {
         if (CANIF_ONLINE == CanIf_PduMode[canControllerId])
         {
             Can_PduType canPdu;
             const CanIf_ControllerCfgType* controllerPtr = &CanIf_CtrlCfgData[canControllerId];
-            SchM_Enter_CanIf();
+            SchM_Enter_CanIf_ExclusiveArea_Channel();
             CanIf_PduPack(CanIfTxSduId, PduInfoPtr, &canPdu);
             /* call lower layer CAN driver API,and get return value */
-            canDriver = controllerPtr->CanDriverId;
+            uint8 canDriver = controllerPtr->CanDriverId;
 #if (STD_ON == CANIF_PUBLIC_PN_SUPPORT)
             if ((controllerPtr->CanIfPnFilter) && (CanIf_PnTxFilter[canControllerId]))
             {
@@ -3434,42 +2892,34 @@ static FUNC(Std_ReturnType, CANIF_CODE)
                 result = E_OK;
             }
 /* if CAN_BUSY and buffer enabled */
-#if (CANIF_TXBUFFER_NUMBER > 0u)
+#if (STD_ON == CANIF_PUBLIC_TX_BUFFERING)
             else if (CAN_BUSY == retVal)
             {
                 result = CanIf_TxBusyHandle(&canPdu);
                 if ((E_OK == result) && ((PduInfoPtr->SduLength) > (PduLengthType)(canPdu.length)))
                 {
-                    (void)Det_ReportRuntimeError(
-                        CANIF_MODULE_ID,
-                        CANIF_INSTANCE_ID,
-                        CANIF_TRANSMIT_ID,
-                        CANIF_E_DATA_LENGTH_MISMATCH);
+                    CanIf_Det_ReportRuntimeError(CANIF_TRANSMIT_ID, CANIF_E_DATA_LENGTH_MISMATCH);
                 }
             }
-#endif /* CANIF_TXBUFFER_NUMBER > 0 */
+#endif /* STD_ON == CANIF_PUBLIC_TX_BUFFERING */
             else
             {
                 result = E_NOT_OK;
             }
-            SchM_Exit_CanIf();
+            SchM_Exit_CanIf_ExclusiveArea_Channel();
         }
 #if (STD_ON == CANIF_TX_OFFLINE_ACTIVE_SUPPORT)
         else if (CANIF_TX_OFFLINE_ACTIVE == CanIf_PduMode[canControllerId])
         {
             /* check notify enable */
-            SchM_Enter_CanIf();
-#if (CANIF_TXNOTIFYSTATUS_BUFFER > 0u)
-            if (txPduConfigPtr->CanIfTxPduReadNotifyStatus)
-            {
-                /* change status of the coressponding CanIf_TxNotifStatus */
-                CanIf_TxNotifStatus[txPduConfigPtr->CanIfTxNotifyIndex] = CANIF_TX_RX_NOTIFICATION;
-            }
-#endif
+#if (STD_ON == CANIF_PUBLIC_READ_TX_PDU_NOTIFY_STATUS_API)
+            CanIf_SetTxNotifStatusHandle(CanIfTxSduId);
+#endif /* STD_ON == CANIF_PUBLIC_READ_TX_PDU_NOTIFY_STATUS_API */
 #if (STD_ON == CANIF_PUBLIC_TX_CONFIRM_POLLING_SUPPORT)
+            SchM_Enter_CanIf_ExclusiveArea_Channel();
             CanIf_TxConfirmationState[canControllerId] = CANIF_TX_RX_NOTIFICATION;
+            SchM_Exit_CanIf_ExclusiveArea_Channel();
 #endif
-            SchM_Exit_CanIf();
             if (NULL_PTR != CanIf_UpTxConfirmationArray[txPduConfigPtr->CanIfUpTxConfApiIndex])
             {
                 /* call call-back function,feedback to upper layer */
@@ -3480,12 +2930,12 @@ static FUNC(Std_ReturnType, CANIF_CODE)
 #endif /* STD_ON == CANIF_TX_OFFLINE_ACTIVE_SUPPORT */
         else
         {
-            (void)Det_ReportRuntimeError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_TRANSMIT_ID, CANIF_E_STOPPED);
+            CanIf_Det_ReportRuntimeError(CANIF_TRANSMIT_ID, CANIF_E_STOPPED);
         }
     }
-    else /* Not CANIF_CS_STARTED mode */
+    else /* Not CAN_CS_STARTED mode */
     {
-        (void)Det_ReportRuntimeError(CANIF_MODULE_ID, CANIF_INSTANCE_ID, CANIF_TRANSMIT_ID, CANIF_E_STOPPED);
+        CanIf_Det_ReportRuntimeError(CANIF_TRANSMIT_ID, CANIF_E_STOPPED);
     }
     return result;
 }

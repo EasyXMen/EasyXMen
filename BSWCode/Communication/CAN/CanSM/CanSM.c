@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : CanSM.c                                                     **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : Wanglili                                                    **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : CanSM.c                                                     **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : Wanglili                                                    **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 /*******************************************************************************
 **                      REVISION   HISTORY                                    **
 *******************************************************************************/
@@ -68,6 +69,7 @@
  *    2. Fixed CPT-472, Transition with best effort instead of at most one transition
  *  V2.0.13    2023-08-11  xiaojian.liang
  *    1. Fixed CPT-6413, The busoff event is lost in the S_TX_OFF state and can not be automatically recovered
+ *    2. Fixed CPT-6482, ModeRequestRepetitionTime, BorTimeTxEnsured, BorTimeL2 and BorTimeL1 counts incorrectly
  *  V2.0.14    2023-11-29  xiaojian.liang
  *    1. Performance optimization.
  *    2. Fixed CPT-7745, Unable to retry if CanIf_SetControllerMode return E_NOT_OK
@@ -76,6 +78,7 @@
  *    2. CPT-8723  CanSM_DeInit still detect the CANSM_NO_COMMUNICATION error if CanSMDevErrorDetect is false.
  *    3. Removed Pretended Networking.
  *    4. Compilation error if CanIfPublicTxConfirmPollingSupport is set to true.
+ *    5. Support multiple partition feature.
  */
 
 /**
@@ -103,6 +106,7 @@
 *******************************************************************************/
 #include "CanIf.h"
 #include "CanSM.h"
+#include "SchM_CanSM.h"
 #include "ComM_BusSM.h"
 #include "BswM_CanSM.h"
 #if (STD_ON == CANSM_CANNM_CONF_PN_AVA)
@@ -111,6 +115,12 @@
 #include "Det.h"
 #include "CanSM_Cbk.h"
 #include "CanSM_TxTimeoutException.h"
+
+#if CANSM_MULTIPLE_PARTITION_USED == STD_ON
+#include "ComM.h"
+#include "Os.h"
+#endif
+
 /*******************************************************************************
 **                       Version  Check                                       **
 *******************************************************************************/
@@ -139,23 +149,17 @@
 
 #define BUS_OFF_COUNTER_UP_LIMIT 255u
 
-/* get network handle of assigned configuration index */
-#define CANSM_NETWORK_HANDLE(NetworkHandle_Index) \
-    CanSM_ConfigPtr->CanSMManagerNetworkRef[NetworkHandle_Index].CanSMComMNetworkHandleRef
-
-#define CANSM_NETWORK_CONFIGURATION(NetworkHandle_Index) CanSM_ConfigPtr->CanSMManagerNetworkRef[NetworkHandle_Index]
-
 #define CANSM_NETWORK_CONTROLLER(NetworkHandle_Index) \
-    CanSM_ConfigPtr->CanSMManagerNetworkRef[NetworkHandle_Index].ControllerRef
-
-#define CANSM_NETWORK_TRANSCEIVER(NetworkHandle_Index) \
-    CanSM_ConfigPtr->CanSMManagerNetworkRef[NetworkHandle_Index].TrcvRef
+    (CanSM_ConfigPtr->CanSMManagerNetworkRef[NetworkHandle_Index].ControllerRef)
 
 #define CANSM_MODEREQREPEAT_MAINFUNCTIONTIME CanSM_ConfigPtr->CanSMModeRequestRepetitionTime
 
-#if CANSM_DEV_ERROR_DETECT == STD_ON
+#if (STD_ON == CANSM_DEV_ERROR_DETECT)
 CANSM_LOCAL boolean CanSM_ValidateAllNetworksNoCom(void);
 #endif
+
+#define CANSM_DET_REPORTRUNTIMEERROR(ApiId, ErrorId) \
+    ((void)Det_ReportRuntimeError(CANSM_MODULE_ID, CANSM_INSTANCE_ID, (ApiId), (ErrorId)))
 
 #if CANSM_MULTIPLE_CONTROLLER_SUPPORT == STD_ON
 #define CANSM_FOREACH_NETWORK_CONTROLLER_START(networkIndex, controllerId)                                   \
@@ -174,7 +178,7 @@ CANSM_LOCAL boolean CanSM_ValidateAllNetworksNoCom(void);
     }                                          \
     while (0)                                  \
         ;
-#endif
+#endif /* CANSM_MULTIPLE_CONTROLLER_SUPPORT == STD_ON */
 
 /*******************************************************************************
 **                      Private Type Definitions                              **
@@ -322,15 +326,16 @@ static void CanSM_EBusOffAction(uint8 netID);
 static void CanSM_SetControllerModeRepeat(
     uint8 netID,
     CanSM_NetWorkRunTimeType* networkPtr,
-    CanIf_ControllerModeType requestContorllerMode);
+    Can_ControllerStateType requestContorllerMode);
 
-CANSM_LOCAL boolean CanSM_CheckNetworkAllControllerMode(uint8 netID, CanIf_ControllerModeType controllerMode);
+CANSM_LOCAL boolean CanSM_CheckNetworkAllControllerMode(uint8 netID, Can_ControllerStateType controllerMode);
 CANSM_LOCAL void CanSM_ModeRequestTimeout(uint8 netID);
 
 static FUNC(void, CANSM_CODE) CanSM_TimerHandler(CanSM_NetWorkRunTimeType* networkPtr);
 
 CANSM_LOCAL CanSM_NetworkIndexType CanSM_FindNetworkIndex(NetworkHandleType networkHandle);
 
+CANSM_LOCAL void CanSM_ComMModeIndication(uint8 netID, ComM_ModeType ComMode, CanSM_RequestModeType RequestedComMode);
 #define CANSM_STOP_SEC_CODE
 #include "CanSM_MemMap.h"
 /*******************************************************************************
@@ -351,7 +356,7 @@ static P2CONST(CanSM_ConfigType, AUTOMATIC, CANSM_CONFIG_DATA) CanSM_ConfigPtr;
 #define CANSM_START_SEC_VAR_CLEARED_UNSPECIFIED
 #include "CanSM_MemMap.h"
 static VAR(CanSM_NetWorkRunTimeType, CANSM_VAR) CanSM_NetWorkRunTime[CANSM_NETWORK_NUM];
-static VAR(CanIf_ControllerModeType, CANSM_VAR) CanSM_ControllerMode[CANIF_CANCONTROLLER_NUMBER];
+static VAR(Can_ControllerStateType, CANSM_VAR) CanSM_ControllerMode[CANIF_CANCONTROLLER_NUMBER];
 #define CANSM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
 #include "CanSM_MemMap.h"
 
@@ -406,9 +411,9 @@ CanSM_Init(P2CONST(CanSM_ConfigType, AUTOMATIC, CANSM_CONFIG_DATA) ConfigPtr) /*
             for (netLoop = 0u; netLoop < CANSM_NETWORK_NUM; netLoop++) /* PRQA S 2877 */ /* MISRA Dir 4.1 */
             {
 #if (STD_ON == CANSM_PNC_SUPPORT)
-                const CanSM_ManagerNetworkType* managerNetwork = &CanSM_ConfigPtr->CanSMManagerNetworkRef[netLoop];
-                if ((NULL_PTR != managerNetwork->TrcvRef)
-                    && ((boolean)TRUE == managerNetwork->TrcvRef->CanSMCanTrcvPnEnabled))
+                if ((NULL_PTR != CanSM_ConfigPtr->CanSMManagerNetworkRef[netLoop].TrcvRef)
+                    && ((boolean)TRUE
+                        == CanSM_ConfigPtr->CanSMManagerNetworkRef[netLoop].TrcvRef->CanSMCanTrcvPnEnabled))
                 {
                     CanSM_NetWorkRunTime[netLoop].curBsmState = CANSM_BSM_DEINITPNSUPPORTED;
                     CanSM_NetWorkRunTime[netLoop].deinitPnSupportedState = DEINITPN_S_PN_CLEAR_WUF;
@@ -442,7 +447,7 @@ CanSM_Init(P2CONST(CanSM_ConfigType, AUTOMATIC, CANSM_CONFIG_DATA) ConfigPtr) /*
             for (controller = 0u; controller < (uint8)CANIF_CANCONTROLLER_NUMBER; controller++)
             /* PRQA S 2877 -- */ /* MISRA Dir 4.1 */
             {
-                CanSM_ControllerMode[controller] = CANIF_CS_UNINIT;
+                CanSM_ControllerMode[controller] = CAN_CS_UNINIT;
             }
         }
     }
@@ -557,8 +562,18 @@ CanSM_SetBaudrate(NetworkHandleType Network, uint16 BaudRateConfigID)
                 SERVICE_ID_CANSM_SETBAUDRATE,
                 CANSM_E_INVALID_NETWORK_HANDLE);
         }
+#if CANSM_MULTIPLE_PARTITION_USED == STD_ON
+        else if (GetApplicationID() != ComM_GetChannelApplicationID(Network))
+        {
+            (void)Det_ReportError(
+                CANSM_MODULE_ID,
+                CANSM_INSTANCE_ID,
+                SERVICE_ID_CANSM_SETBAUDRATE,
+                CANSM_E_INVALID_PARTITION_CONTEXT);
+        }
+#endif /* CANSM_MULTIPLE_PARTITION_USED == STD_ON */
         else
-#endif
+#endif /* CANSM_DEV_ERROR_DETECT == STD_ON */
         {
             networkPtr = &CanSM_NetWorkRunTime[networkIndex];
             if ((CANSM_BSM_S_FULLCOM == networkPtr->curBsmState) && (FULLCOM_S_NO_BUS_OFF == networkPtr->fullComState))
@@ -670,7 +685,7 @@ CANSM_LOCAL CanSM_NetworkIndexType CanSM_FindNetworkIndex(NetworkHandleType netw
     CanSM_NetworkIndexType networkIndex = 0u;
     for (; networkIndex < CANSM_NETWORK_NUM; ++networkIndex)
     {
-        if (networkHandle == CANSM_NETWORK_HANDLE(networkIndex))
+        if (networkHandle == CanSM_ConfigPtr->CanSMManagerNetworkRef[networkIndex].CanSMComMNetworkHandleRef)
         {
             break;
         }
@@ -678,6 +693,13 @@ CANSM_LOCAL CanSM_NetworkIndexType CanSM_FindNetworkIndex(NetworkHandleType netw
     return networkIndex;
 }
 
+CANSM_LOCAL void CanSM_ComMModeIndication(uint8 netID, ComM_ModeType ComMode, CanSM_RequestModeType RequestedComMode)
+{
+    if (RequestedComMode != CANSM_NO_REQUEST)
+    {
+        ComM_BusSM_ModeIndication(CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].CanSMComMNetworkHandleRef, ComMode);
+    }
+}
 /******************************************************************************/
 /*
  * Brief               Scheduled function of the CanSM
@@ -709,16 +731,30 @@ void CanSM_MainFunction(void) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
         CanSM_BsmSSilentComBor,
     };
 
-    if (CanSM_Status == CANSM_INITED)
+    if (CANSM_UNINITED == CanSM_Status)
     {
-        for (uint8 netLoop = 0u; netLoop < CANSM_NETWORK_NUM; netLoop++) /* PRQA S 2877 */ /* MISRA Dir 4.1 */
+        return;
+    }
+
+#if CANSM_MULTIPLE_PARTITION_USED == STD_ON
+    ApplicationType applicationID = GetApplicationID();
+#endif /* CANSM_MULTIPLE_PARTITION_USED == STD_ON */
+
+    for (uint8 netLoop = 0u; netLoop < CANSM_NETWORK_NUM; netLoop++) /* PRQA S 2877 */ /* MISRA Dir 4.1 */
+    {
+#if CANSM_MULTIPLE_PARTITION_USED == STD_ON
+        if (ComM_GetChannelApplicationID(CanSM_ConfigPtr->CanSMManagerNetworkRef[netLoop].CanSMComMNetworkHandleRef)
+            != applicationID)
         {
-            CanSM_NetWorkRunTimeType* netRTPtr = &CanSM_NetWorkRunTime[netLoop];
-            CanSM_TimerHandler(netRTPtr);
-            while (CanSM_DoBehaviors[netRTPtr->curBsmState](netLoop))
-            {
-                ;
-            }
+            continue;
+        }
+#endif /* CANSM_MULTIPLE_PARTITION_USED == STD_ON */
+
+        CanSM_NetWorkRunTimeType* netRTPtr = &CanSM_NetWorkRunTime[netLoop];
+        CanSM_TimerHandler(netRTPtr);
+        while (CanSM_DoBehaviors[netRTPtr->curBsmState](netLoop))
+        {
+            ;
         }
     }
 }
@@ -748,8 +784,18 @@ Std_ReturnType CanSM_RequestComMode(NetworkHandleType network, ComM_ModeType com
                 SERVICE_ID_CANSM_REQUESTCOMMODE,
                 CANSM_E_INVALID_NETWORK_HANDLE);
         }
+#if CANSM_MULTIPLE_PARTITION_USED == STD_ON
+        else if (GetApplicationID() != ComM_GetChannelApplicationID(network))
+        {
+            (void)Det_ReportError(
+                CANSM_MODULE_ID,
+                CANSM_INSTANCE_ID,
+                SERVICE_ID_CANSM_REQUESTCOMMODE,
+                CANSM_E_INVALID_PARTITION_CONTEXT);
+        }
+#endif /* CANSM_MULTIPLE_PARTITION_USED == STD_ON */
         else
-#endif
+#endif /* CANSM_DEV_ERROR_DETECT == STD_ON */
         {
             CanSM_NetWorkRunTimeType* networkPtr = &CanSM_NetWorkRunTime[networkIndex];
 
@@ -852,8 +898,18 @@ Std_ReturnType CanSM_GetCurrentComMode(NetworkHandleType network, ComM_ModeType*
                 SERVICE_ID_CANSM_GETCURRENTCOMMODE,
                 CANSM_E_INVALID_NETWORK_HANDLE);
         }
+#if CANSM_MULTIPLE_PARTITION_USED == STD_ON
+        else if (GetApplicationID() != ComM_GetChannelApplicationID(network))
+        {
+            (void)Det_ReportError(
+                CANSM_MODULE_ID,
+                CANSM_INSTANCE_ID,
+                SERVICE_ID_CANSM_GETCURRENTCOMMODE,
+                CANSM_E_INVALID_PARTITION_CONTEXT);
+        }
+#endif /* CANSM_MULTIPLE_PARTITION_USED == STD_ON */
         else
-#endif
+#endif /* CANSM_DEV_ERROR_DETECT == STD_ON */
         {
             *comMModePtr = CanSM_NetWorkRunTime[networkIndex].curComMode;
             ret = E_OK;
@@ -897,11 +953,21 @@ CanSM_StartWakeupSource(NetworkHandleType network) /* PRQA S 1532 */ /* MISRA Ru
             (void)Det_ReportError(
                 CANSM_MODULE_ID,
                 CANSM_INSTANCE_ID,
-                SERVICE_ID_CANSM_SETICOMCONFIGURATION,
+                SERVICE_ID_CANSM_STARTWAKEUPSOURCE,
                 CANSM_E_INVALID_NETWORK_HANDLE);
         }
+#if CANSM_MULTIPLE_PARTITION_USED == STD_ON
+        else if (GetApplicationID() != ComM_GetChannelApplicationID(network))
+        {
+            (void)Det_ReportError(
+                CANSM_MODULE_ID,
+                CANSM_INSTANCE_ID,
+                SERVICE_ID_CANSM_STARTWAKEUPSOURCE,
+                CANSM_E_INVALID_PARTITION_CONTEXT);
+        }
+#endif /* CANSM_MULTIPLE_PARTITION_USED == STD_ON */
         else
-#endif
+#endif /* CANSM_DEV_ERROR_DETECT == STD_ON */
         {
             networkPtr = &CanSM_NetWorkRunTime[networkIndex];
             if ((CANSM_BSM_DEINITPNNOTSUPPORTED <= networkPtr->curBsmState)
@@ -909,7 +975,7 @@ CanSM_StartWakeupSource(NetworkHandleType network) /* PRQA S 1532 */ /* MISRA Ru
             {
                 networkPtr->curBsmState = CANSM_BSM_WUVALIDATION;
 #if (CANSM_TRCV_NUM > 0)
-                if (NULL_PTR != CANSM_NETWORK_TRANSCEIVER(networkIndex))
+                if (NULL_PTR != CanSM_ConfigPtr->CanSMManagerNetworkRef[networkIndex].TrcvRef)
                 {
                     networkPtr->wuValidationState = WUVALIDATION_S_TRCV_NORMAL;
                 }
@@ -964,16 +1030,26 @@ CanSM_StopWakeupSource(NetworkHandleType network) /* PRQA S 1532 */ /* MISRA Rul
                 SERVICE_ID_CANSM_STOPWAKEUPSOURCE,
                 CANSM_E_INVALID_NETWORK_HANDLE);
         }
+#if CANSM_MULTIPLE_PARTITION_USED == STD_ON
+        else if (GetApplicationID() != ComM_GetChannelApplicationID(network))
+        {
+            (void)Det_ReportError(
+                CANSM_MODULE_ID,
+                CANSM_INSTANCE_ID,
+                SERVICE_ID_CANSM_STOPWAKEUPSOURCE,
+                CANSM_E_INVALID_PARTITION_CONTEXT);
+        }
+#endif /* CANSM_MULTIPLE_PARTITION_USED == STD_ON */
         else
-#endif
+#endif /* CANSM_DEV_ERROR_DETECT == STD_ON */
         {
             networkPtr = &CanSM_NetWorkRunTime[networkIndex];
             if (CANSM_BSM_WUVALIDATION == networkPtr->curBsmState)
             {
 #if (STD_ON == CANSM_PNC_SUPPORT)
-                const CanSM_ManagerNetworkType* managerNetwork = &CanSM_ConfigPtr->CanSMManagerNetworkRef[networkIndex];
-                if ((NULL_PTR != managerNetwork->TrcvRef)
-                    && ((boolean)TRUE == managerNetwork->TrcvRef->CanSMCanTrcvPnEnabled))
+                if ((NULL_PTR != CanSM_ConfigPtr->CanSMManagerNetworkRef[networkIndex].TrcvRef)
+                    && ((boolean)TRUE
+                        == CanSM_ConfigPtr->CanSMManagerNetworkRef[networkIndex].TrcvRef->CanSMCanTrcvPnEnabled))
                 {
                     networkPtr->curBsmState = CANSM_BSM_DEINITPNSUPPORTED;
                     networkPtr->deinitPnSupportedState = DEINITPN_S_PN_CLEAR_WUF;
@@ -1008,9 +1084,9 @@ void CanSM_ControllerBusOff(uint8 ControllerId) /* PRQA S 1532 */ /* MISRA Rule 
     if ((boolean)TRUE == detNoErr)
 #endif
     {
-        Std_ReturnType ret = E_NOT_OK;
+        boolean findController = FALSE;
         /* PRQA S 2877 ++ */ /* MISRA Dir 4.1 */
-        for (uint8 netLoop = 0u; (netLoop < CANSM_NETWORK_NUM) && ((uint8)E_NOT_OK == ret); netLoop++)
+        for (uint8 netLoop = 0u; (netLoop < CANSM_NETWORK_NUM) && !findController; netLoop++)
         /* PRQA S 2877 -- */ /* MISRA Dir 4.1 */
         {
             uint8 controllerId;
@@ -1018,16 +1094,31 @@ void CanSM_ControllerBusOff(uint8 ControllerId) /* PRQA S 1532 */ /* MISRA Rule 
             {
                 if (ControllerId == controllerId)
                 {
-                    ret = E_OK;
-                    CanSM_ControllerMode[controllerId] = CANIF_CS_STOPPED;
-                    CanSM_NetWorkRunTime[netLoop].busOffEvent = TRUE;
+                    findController = TRUE;
+#if CANSM_DEV_ERROR_DETECT == STD_ON && CANSM_MULTIPLE_PARTITION_USED == STD_ON
+                    if (GetApplicationID()
+                        != ComM_GetChannelApplicationID(
+                            CanSM_ConfigPtr->CanSMManagerNetworkRef[netLoop].CanSMComMNetworkHandleRef))
+                    {
+                        (void)Det_ReportError(
+                            CANSM_MODULE_ID,
+                            CANSM_INSTANCE_ID,
+                            SERVICE_ID_CANSM_CONTROLLERBUSOFF,
+                            CANSM_E_INVALID_PARTITION_CONTEXT);
+                    }
+                    else
+#endif /* CANSM_DEV_ERROR_DETECT == STD_ON && CANSM_MULTIPLE_PARTITION_USED == STD_ON */
+                    {
+                        CanSM_ControllerMode[controllerId] = CAN_CS_STOPPED;
+                        CanSM_NetWorkRunTime[netLoop].busOffEvent = TRUE;
+                    }
                     break;
                 }
             }
             CANSM_FOREACH_NETWORK_CONTROLLER_END()
         }
 #if (STD_ON == CANSM_DEV_ERROR_DETECT)
-        if (ret != E_OK)
+        if (!findController)
         {
             (void)Det_ReportError(
                 CANSM_MODULE_ID,
@@ -1044,11 +1135,10 @@ void CanSM_ControllerBusOff(uint8 ControllerId) /* PRQA S 1532 */ /* MISRA Rule 
 #define CANSM_START_SEC_CANSM_CONTROLLERMODEINDICATION_CALLBACK_CODE
 #include "CanSM_MemMap.h"
 /* PRQA S 1532 ++ */ /* MISRA Rule 8.7 */
-void CanSM_ControllerModeIndication(uint8 ControllerId, CanIf_ControllerModeType ControllerMode)
+void CanSM_ControllerModeIndication(uint8 ControllerId, Can_ControllerStateType ControllerMode)
 /* PRQA S 1532 -- */ /* MISRA Rule 8.7 */
 {
     uint8 networkIndex;
-    Std_ReturnType ret = E_NOT_OK;
 #if (STD_ON == CANSM_DEV_ERROR_DETECT)
     boolean detNoErr = TRUE;
     if (CANSM_UNINITED == CanSM_Status)
@@ -1063,8 +1153,9 @@ void CanSM_ControllerModeIndication(uint8 ControllerId, CanIf_ControllerModeType
     if ((boolean)TRUE == detNoErr)
 #endif
     {
+        boolean findController = FALSE;
         /* PRQA S 2877 ++ */ /* MISRA Dir 4.1 */
-        for (networkIndex = 0u; (networkIndex < CANSM_NETWORK_NUM) && ((uint8)E_NOT_OK == ret); ++networkIndex)
+        for (networkIndex = 0u; (networkIndex < CANSM_NETWORK_NUM) && !findController; ++networkIndex)
         /* PRQA S 2877 -- */ /* MISRA Dir 4.1 */
         {
             uint8 controllerId;
@@ -1072,19 +1163,30 @@ void CanSM_ControllerModeIndication(uint8 ControllerId, CanIf_ControllerModeType
             {
                 if (ControllerId == controllerId)
                 {
-                    ret = E_OK;
-                    CanSM_ControllerMode[ControllerId] = ControllerMode;
+                    findController = TRUE;
+#if CANSM_DEV_ERROR_DETECT == STD_ON && CANSM_MULTIPLE_PARTITION_USED == STD_ON
+                    if (GetApplicationID()
+                        != ComM_GetChannelApplicationID(
+                            CanSM_ConfigPtr->CanSMManagerNetworkRef[networkIndex].CanSMComMNetworkHandleRef))
+                    {
+                        (void)Det_ReportError(
+                            CANSM_MODULE_ID,
+                            CANSM_INSTANCE_ID,
+                            SERVICE_ID_CANSM_CONTROLLERMODEINDICATION,
+                            CANSM_E_INVALID_PARTITION_CONTEXT);
+                    }
+                    else
+#endif /* CANSM_DEV_ERROR_DETECT == STD_ON && CANSM_MULTIPLE_PARTITION_USED == STD_ON */
+                    {
+                        CanSM_ControllerMode[ControllerId] = ControllerMode;
+                    }
+                    break;
                 }
             }
             CANSM_FOREACH_NETWORK_CONTROLLER_END()
-
-            if (ret == E_OK)
-            {
-                break;
-            }
         }
 #if (STD_ON == CANSM_DEV_ERROR_DETECT)
-        if (ret != E_OK)
+        if (!findController)
         {
             (void)Det_ReportError(
                 CANSM_MODULE_ID,
@@ -1115,13 +1217,10 @@ void CanSM_ControllerModeIndication(uint8 ControllerId, CanIf_ControllerModeType
  */
 /******************************************************************************/
 /* PRQA S 1532 ++ */ /* MISRA Rule 8.7 */
-FUNC(void, CANSM_TRANSCEIVERMODEINDICATION_CODE)
-CanSM_TransceiverModeIndication(uint8 TransceiverId, CanTrcv_TrcvModeType TransceiverMode)
+void CanSM_TransceiverModeIndication(uint8 TransceiverId, CanTrcv_TrcvModeType TransceiverMode)
 /* PRQA S 1532 -- */ /* MISRA Rule 8.7 */
 {
-    uint8 netLoop;
-    Std_ReturnType ret = E_NOT_OK;
-    CanSM_NetWorkRunTimeType* networkPtr;
+    CanSM_NetWorkRunTimeType* networkPtr = NULL_PTR;
 #if (STD_ON == CANSM_DEV_ERROR_DETECT)
     boolean detNoErr = TRUE;
     if (CANSM_UNINITED == CanSM_Status)
@@ -1137,19 +1236,35 @@ CanSM_TransceiverModeIndication(uint8 TransceiverId, CanTrcv_TrcvModeType Transc
 #endif
     {
         /* PRQA S 2877 ++ */ /* MISRA Dir 4.1 */
-        for (netLoop = 0u; (netLoop < CANSM_NETWORK_NUM) && ((uint8)E_NOT_OK == ret); netLoop++)
+        for (uint8 netLoop = 0u; netLoop < CANSM_NETWORK_NUM; netLoop++)
         /* PRQA S 2877 -- */ /* MISRA Dir 4.1 */
         {
-            if (NULL_PTR != CANSM_NETWORK_TRANSCEIVER(netLoop))
+            if (NULL_PTR != CanSM_ConfigPtr->CanSMManagerNetworkRef[netLoop].TrcvRef)
             {
-                if (TransceiverId == CANSM_NETWORK_TRANSCEIVER(netLoop)->CanSMTransceiverId)
+                if (TransceiverId == CanSM_ConfigPtr->CanSMManagerNetworkRef[netLoop].TrcvRef->CanSMTransceiverId)
                 {
-                    ret = E_OK;
-                    networkPtr = &CanSM_NetWorkRunTime[netLoop];
+#if CANSM_DEV_ERROR_DETECT == STD_ON && CANSM_MULTIPLE_PARTITION_USED == STD_ON
+                    if (GetApplicationID()
+                        != ComM_GetChannelApplicationID(
+                            CanSM_ConfigPtr->CanSMManagerNetworkRef[netLoop].CanSMComMNetworkHandleRef))
+                    {
+                        (void)Det_ReportError(
+                            CANSM_MODULE_ID,
+                            CANSM_INSTANCE_ID,
+                            SERVICE_ID_CANSM_TRANCEIVERMODEINDICATION,
+                            CANSM_E_INVALID_PARTITION_CONTEXT);
+                    }
+                    else
+#endif /* CANSM_DEV_ERROR_DETECT == STD_ON && CANSM_MULTIPLE_PARTITION_USED == STD_ON */
+                    {
+                        networkPtr = &CanSM_NetWorkRunTime[netLoop];
+                    }
+                    break;
                 }
             }
         }
-        if ((uint8)E_OK == ret)
+
+        if (networkPtr != NULL_PTR)
         {
             switch (TransceiverMode)
             {
@@ -1175,7 +1290,6 @@ CanSM_TransceiverModeIndication(uint8 TransceiverId, CanTrcv_TrcvModeType Transc
         }
 #endif
     }
-    return;
 }
 #define CANSM_STOP_SEC_CANSM_TRANSCEIVERMODEINDICATION_CALLBACK_CODE
 #include "CanSM_MemMap.h"
@@ -1222,8 +1336,18 @@ CanSM_TxTimeoutException(NetworkHandleType Channel) /* PRQA S 1532 */ /* MISRA R
                 SERVICE_ID_CANSM_TXTIMEOUTEXCEPTION,
                 CANSM_E_INVALID_NETWORK_HANDLE);
         }
+#if CANSM_MULTIPLE_PARTITION_USED == STD_ON
+        else if (GetApplicationID() != ComM_GetChannelApplicationID(Channel))
+        {
+            (void)Det_ReportError(
+                CANSM_MODULE_ID,
+                CANSM_INSTANCE_ID,
+                SERVICE_ID_CANSM_TXTIMEOUTEXCEPTION,
+                CANSM_E_INVALID_PARTITION_CONTEXT);
+        }
+#endif /* CANSM_MULTIPLE_PARTITION_USED == STD_ON */
         else
-#endif
+#endif /* CANSM_DEV_ERROR_DETECT == STD_ON */
         {
             networkPtr = &CanSM_NetWorkRunTime[networkIndex];
             if ((CANSM_BSM_S_FULLCOM == networkPtr->curBsmState) && (FULLCOM_S_NO_BUS_OFF == networkPtr->fullComState))
@@ -1256,11 +1380,8 @@ CanSM_TxTimeoutException(NetworkHandleType Channel) /* PRQA S 1532 */ /* MISRA R
 FUNC(void, CANSM_CLEARTRCVWUFFLAGINDICATION_CODE)
 CanSM_ClearTrcvWufFlagIndication(uint8 Transceiver) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
 {
-    uint8 netLoop;
-    Std_ReturnType ret = E_NOT_OK;
-    CanSM_NetWorkRunTimeType* networkPtr;
+    CanSM_NetWorkRunTimeType* networkPtr = NULL_PTR;
 #if (STD_ON == CANSM_DEV_ERROR_DETECT)
-    boolean detNoErr = TRUE;
     if (CANSM_UNINITED == CanSM_Status)
     {
         (void)Det_ReportError(
@@ -1268,23 +1389,37 @@ CanSM_ClearTrcvWufFlagIndication(uint8 Transceiver) /* PRQA S 1532 */ /* MISRA R
             CANSM_INSTANCE_ID,
             SERVICE_ID_CANSM_CLEARTRCVWUFFLAGINDICATION,
             CANSM_E_UNINIT);
-        detNoErr = FALSE;
     }
-    if ((boolean)TRUE == detNoErr)
+    else
 #endif
     {
-        for (netLoop = 0u; (netLoop < CANSM_NETWORK_NUM) && ((uint8)E_NOT_OK == ret); netLoop++)
+        for (uint8 netLoop = 0u; netLoop < CANSM_NETWORK_NUM; netLoop++)
         {
-            if (NULL_PTR != CANSM_NETWORK_TRANSCEIVER(netLoop))
+            if (NULL_PTR != CanSM_ConfigPtr->CanSMManagerNetworkRef[netLoop].TrcvRef)
             {
-                if (Transceiver == CANSM_NETWORK_TRANSCEIVER(netLoop)->CanSMTransceiverId)
+                if (Transceiver == CanSM_ConfigPtr->CanSMManagerNetworkRef[netLoop].TrcvRef->CanSMTransceiverId)
                 {
-                    ret = E_OK;
-                    networkPtr = &CanSM_NetWorkRunTime[netLoop];
+#if CANSM_DEV_ERROR_DETECT == STD_ON && CANSM_MULTIPLE_PARTITION_USED == STD_ON
+                    if (GetApplicationID()
+                        != ComM_GetChannelApplicationID(
+                            CanSM_ConfigPtr->CanSMManagerNetworkRef[netLoop].CanSMComMNetworkHandleRef))
+                    {
+                        (void)Det_ReportError(
+                            CANSM_MODULE_ID,
+                            CANSM_INSTANCE_ID,
+                            SERVICE_ID_CANSM_CLEARTRCVWUFFLAGINDICATION,
+                            CANSM_E_INVALID_PARTITION_CONTEXT);
+                    }
+                    else
+#endif /* CANSM_DEV_ERROR_DETECT == STD_ON && CANSM_MULTIPLE_PARTITION_USED == STD_ON */
+                    {
+                        networkPtr = &CanSM_NetWorkRunTime[netLoop];
+                    }
+                    break;
                 }
             }
         }
-        if ((uint8)E_OK == ret)
+        if (networkPtr != NULL_PTR)
         {
             networkPtr->canIfIndicated = T_CLEAR_WUF_INDICATED;
         }
@@ -1299,7 +1434,6 @@ CanSM_ClearTrcvWufFlagIndication(uint8 Transceiver) /* PRQA S 1532 */ /* MISRA R
         }
 #endif
     }
-    return;
 }
 #define CANSM_STOP_SEC_CANSM_CLEARTRCVWUFFLAGINDICATION_CALLBACK_CODE
 #include "CanSM_MemMap.h"
@@ -1322,9 +1456,7 @@ CanSM_ClearTrcvWufFlagIndication(uint8 Transceiver) /* PRQA S 1532 */ /* MISRA R
 FUNC(void, CANSM_CHECKTRANSCEIVERWAKEFLAGINDICATION_CODE)
 CanSM_CheckTransceiverWakeFlagIndication(uint8 Transceiver) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
 {
-    uint8 netLoop;
-    Std_ReturnType ret = E_NOT_OK;
-    CanSM_NetWorkRunTimeType* networkPtr;
+    CanSM_NetWorkRunTimeType* networkPtr = NULL_PTR;
 #if (STD_ON == CANSM_DEV_ERROR_DETECT)
     boolean detNoErr = TRUE;
     if (CANSM_UNINITED == CanSM_Status)
@@ -1339,18 +1471,33 @@ CanSM_CheckTransceiverWakeFlagIndication(uint8 Transceiver) /* PRQA S 1532 */ /*
     if ((boolean)TRUE == detNoErr)
 #endif
     {
-        for (netLoop = 0u; (netLoop < CANSM_NETWORK_NUM) && ((uint8)E_NOT_OK == ret); netLoop++)
+        for (uint8 netLoop = 0u; netLoop < CANSM_NETWORK_NUM; netLoop++)
         {
-            if (NULL_PTR != CANSM_NETWORK_TRANSCEIVER(netLoop))
+            if (NULL_PTR != CanSM_ConfigPtr->CanSMManagerNetworkRef[netLoop].TrcvRef)
             {
-                if (Transceiver == CANSM_NETWORK_TRANSCEIVER(netLoop)->CanSMTransceiverId)
+                if (Transceiver == CanSM_ConfigPtr->CanSMManagerNetworkRef[netLoop].TrcvRef->CanSMTransceiverId)
                 {
-                    ret = E_OK;
-                    networkPtr = &CanSM_NetWorkRunTime[netLoop];
+#if CANSM_DEV_ERROR_DETECT == STD_ON && CANSM_MULTIPLE_PARTITION_USED == STD_ON
+                    if (GetApplicationID()
+                        != ComM_GetChannelApplicationID(
+                            CanSM_ConfigPtr->CanSMManagerNetworkRef[netLoop].CanSMComMNetworkHandleRef))
+                    {
+                        (void)Det_ReportError(
+                            CANSM_MODULE_ID,
+                            CANSM_INSTANCE_ID,
+                            SERVICE_ID_CANSM_CHECKTRANSCEIVERWAKEFLAGINDICATION,
+                            CANSM_E_INVALID_PARTITION_CONTEXT);
+                    }
+                    else
+#endif /* CANSM_DEV_ERROR_DETECT == STD_ON && CANSM_MULTIPLE_PARTITION_USED == STD_ON */
+                    {
+                        networkPtr = &CanSM_NetWorkRunTime[netLoop];
+                    }
+                    break;
                 }
             }
         }
-        if ((uint8)E_OK == ret)
+        if (networkPtr != NULL_PTR)
         {
             networkPtr->canIfIndicated = T_CHECK_WFLAG_INDICATED;
         }
@@ -1365,7 +1512,6 @@ CanSM_CheckTransceiverWakeFlagIndication(uint8 Transceiver) /* PRQA S 1532 */ /*
         }
 #endif
     }
-    return;
 }
 #define CANSM_STOP_SEC_CANSM_CHECKTRANSCEIVERWAKEFLAGINDICATION_CALLBACK_CODE
 #include "CanSM_MemMap.h"
@@ -1390,8 +1536,6 @@ FUNC(void, CANSM_CONFIRMPNAVAILABILITY_CODE)
 CanSM_ConfirmPnAvailability(uint8 TransceiverId) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
 {
     uint8 netLoop;
-    uint8 netID;
-    Std_ReturnType ret = E_NOT_OK;
 #if (STD_ON == CANSM_DEV_ERROR_DETECT)
     boolean detNoErr = TRUE;
     if (CANSM_UNINITED == CanSM_Status)
@@ -1403,25 +1547,38 @@ CanSM_ConfirmPnAvailability(uint8 TransceiverId) /* PRQA S 1532 */ /* MISRA Rule
     if ((boolean)TRUE == detNoErr)
 #endif
     {
-        for (netLoop = 0u; (netLoop < CANSM_NETWORK_NUM) && ((uint8)E_NOT_OK == ret); netLoop++)
+        for (netLoop = 0u; netLoop < CANSM_NETWORK_NUM; netLoop++)
         {
-            if (NULL_PTR != CANSM_NETWORK_TRANSCEIVER(netLoop))
+            if (NULL_PTR != CanSM_ConfigPtr->CanSMManagerNetworkRef[netLoop].TrcvRef)
             {
-                if (TransceiverId == CANSM_NETWORK_TRANSCEIVER(netLoop)->CanSMTransceiverId)
+                if (TransceiverId == CanSM_ConfigPtr->CanSMManagerNetworkRef[netLoop].TrcvRef->CanSMTransceiverId)
                 {
-                    ret = E_OK;
-                    netID = netLoop;
+#if CANSM_DEV_ERROR_DETECT == STD_ON && CANSM_MULTIPLE_PARTITION_USED == STD_ON
+                    if (GetApplicationID()
+                        != ComM_GetChannelApplicationID(
+                            CanSM_ConfigPtr->CanSMManagerNetworkRef[netLoop].CanSMComMNetworkHandleRef))
+                    {
+                        (void)Det_ReportError(
+                            CANSM_MODULE_ID,
+                            CANSM_INSTANCE_ID,
+                            SERVICE_ID_CANSM_CONFIRMPNAVAILABILITY,
+                            CANSM_E_INVALID_PARTITION_CONTEXT);
+                    }
+                    else
+#endif /* CANSM_DEV_ERROR_DETECT == STD_ON && CANSM_MULTIPLE_PARTITION_USED == STD_ON */
+#if CANSM_CANNM_CONF_PN_AVA == STD_ON
+                    {
+                        CanNm_ConfirmPnAvailability(
+                            CanSM_ConfigPtr->CanSMManagerNetworkRef[netLoop].CanSMComMNetworkHandleRef);
+                    }
+#endif /* CANSM_CANNM_CONF_PN_AVA == STD_ON */
+                    break;
                 }
             }
         }
-        if ((uint8)E_OK == ret)
-        {
-#if (STD_ON == CANSM_CANNM_CONF_PN_AVA)
-            CanNm_ConfirmPnAvailability(CANSM_NETWORK_HANDLE(netID));
-#endif
-        }
+
 #if (STD_ON == CANSM_DEV_ERROR_DETECT)
-        else
+        if (netLoop >= CANSM_NETWORK_NUM)
         {
             (void)Det_ReportError(
                 CANSM_MODULE_ID,
@@ -1431,7 +1588,6 @@ CanSM_ConfirmPnAvailability(uint8 TransceiverId) /* PRQA S 1532 */ /* MISRA Rule
         }
 #endif
     }
-    return;
 }
 #define CANSM_STOP_SEC_CANSM_CONFIRMPNAVAILABILITY_CALLBACK_CODE
 #include "CanSM_MemMap.h"
@@ -1456,7 +1612,7 @@ CanSM_ConfirmPnAvailability(uint8 TransceiverId) /* PRQA S 1532 */ /* MISRA Rule
 static FUNC(void, CANSM_CODE) CanSM_PnNot_CC_Stopped(uint8 netID, CanSM_NetWorkRunTimeType* networkPtr)
 {
     /*set all controllers of the network to request mode repeat*/
-    CanSM_SetControllerModeRepeat(netID, networkPtr, CANIF_CS_STOPPED);
+    CanSM_SetControllerModeRepeat(netID, networkPtr, CAN_CS_STOPPED);
 
     /*enter DEINITPNNOT_S_CC_STOPPED_WAIT state*/
     networkPtr->deinitPnNotSupportedState = DEINITPNNOT_S_CC_STOPPED_WAIT;
@@ -1476,7 +1632,7 @@ static FUNC(void, CANSM_CODE) CanSM_PnNot_CC_Stopped(uint8 netID, CanSM_NetWorkR
 /******************************************************************************/
 static FUNC(void, CANSM_CODE) CanSM_PnNot_CC_Stopped_Wait(uint8 netID, CanSM_NetWorkRunTimeType* networkPtr)
 {
-    if (CanSM_CheckNetworkAllControllerMode(netID, CANIF_CS_STOPPED))
+    if (CanSM_CheckNetworkAllControllerMode(netID, CAN_CS_STOPPED))
     {
         networkPtr->deinitPnNotSupportedState = DEINITPNNOT_S_CC_SLEEP;
         networkPtr->waitCanIfIndicatedStartTime = 0;
@@ -1507,7 +1663,7 @@ static FUNC(void, CANSM_CODE) CanSM_PnNot_CC_Stopped_Wait(uint8 netID, CanSM_Net
 static FUNC(void, CANSM_CODE) CanSM_PnNot_CC_Sleep(uint8 netID, CanSM_NetWorkRunTimeType* networkPtr)
 {
     /*set all controllers of the network to request mode repeat*/
-    CanSM_SetControllerModeRepeat(netID, networkPtr, CANIF_CS_SLEEP);
+    CanSM_SetControllerModeRepeat(netID, networkPtr, CAN_CS_SLEEP);
 
     /*enter DEINITPNNOT_S_CC_SLEEP_WAIT state*/
     networkPtr->deinitPnNotSupportedState = DEINITPNNOT_S_CC_SLEEP_WAIT;
@@ -1528,10 +1684,10 @@ static FUNC(void, CANSM_CODE) CanSM_PnNot_CC_Sleep(uint8 netID, CanSM_NetWorkRun
 static FUNC(void, CANSM_CODE) CanSM_PnNot_CC_Sleep_Wait(uint8 netID, CanSM_NetWorkRunTimeType* networkPtr)
 {
     ComM_ModeType ComMode;
-    if (CanSM_CheckNetworkAllControllerMode(netID, CANIF_CS_SLEEP))
+    if (CanSM_CheckNetworkAllControllerMode(netID, CAN_CS_SLEEP))
     {
 #if (CANSM_TRCV_NUM > 0)
-        if (NULL_PTR != CANSM_NETWORK_TRANSCEIVER(netID))
+        if (NULL_PTR != CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].TrcvRef)
         {
             networkPtr->deinitPnNotSupportedState = DEINITPNNOT_S_TRCV_NORMAL;
         }
@@ -1541,7 +1697,7 @@ static FUNC(void, CANSM_CODE) CanSM_PnNot_CC_Sleep_Wait(uint8 netID, CanSM_NetWo
             networkPtr->curBsmState = CANSM_BSM_S_NOCOM;
             ComMode = COMM_NO_COMMUNICATION;
             /*do E_NOCOM action*/
-            ComM_BusSM_ModeIndication(CANSM_NETWORK_HANDLE(netID), ComMode);
+            CanSM_ComMModeIndication(netID, ComMode, networkPtr->requestComMode);
         }
         networkPtr->waitCanIfIndicatedStartTime = 0u;
         networkPtr->repeatCounter = 0u;
@@ -1575,7 +1731,9 @@ static FUNC(void, CANSM_CODE) CanSM_PnNot_Trcv_Normal(uint8 netID, CanSM_NetWork
     if ((0u == networkPtr->ModeRequestRepetitionTime)
         && (networkPtr->repeatCounter <= CanSM_ConfigPtr->CanSMModeRequestRepetitionMax))
     {
-        ret = CanIf_SetTrcvMode(CANSM_NETWORK_TRANSCEIVER(netID)->CanSMTransceiverId, CANTRCV_TRCVMODE_NORMAL);
+        ret = CanIf_SetTrcvMode(
+            CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].TrcvRef->CanSMTransceiverId,
+            CANTRCV_TRCVMODE_NORMAL);
         if ((uint8)E_NOT_OK == ret)
         {
             networkPtr->ModeRequestRepetitionTime = CANSM_MODEREQREPEAT_MAINFUNCTIONTIME;
@@ -1597,13 +1755,13 @@ static FUNC(void, CANSM_CODE) CanSM_PnNot_Trcv_Normal(uint8 netID, CanSM_NetWork
         {
             networkPtr->repeatCounter = 0u;
 #if (STD_ON == CANSM_DEM_SUPPORT)
-            const CanSM_ManagerNetworkType* managerNetwork = &CanSM_ConfigPtr->CanSMManagerNetworkRef[netID];
-            if (NULL_PTR != managerNetwork->CanSMDemEventParameterRefs)
+            if (NULL_PTR != CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].CanSMDemEventParameterRefs)
             {
-                if (NULL_PTR != managerNetwork->CanSMDemEventParameterRefs->ModeReqTimeoutPara)
+                if (NULL_PTR
+                    != CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].CanSMDemEventParameterRefs->ModeReqTimeoutPara)
                 {
                     Dem_ReportErrorStatus(
-                        *managerNetwork->CanSMDemEventParameterRefs->ModeReqTimeoutPara,
+                        *CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].CanSMDemEventParameterRefs->ModeReqTimeoutPara,
                         DEM_EVENT_STATUS_PREFAILED);
                 }
             }
@@ -1674,7 +1832,9 @@ static FUNC(void, CANSM_CODE) CanSM_PnNot_Trcv_Standby(uint8 netID, CanSM_NetWor
     if ((0u == networkPtr->ModeRequestRepetitionTime)
         && (networkPtr->repeatCounter <= CanSM_ConfigPtr->CanSMModeRequestRepetitionMax))
     {
-        ret = CanIf_SetTrcvMode(CANSM_NETWORK_TRANSCEIVER(netID)->CanSMTransceiverId, CANTRCV_TRCVMODE_STANDBY);
+        ret = CanIf_SetTrcvMode(
+            CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].TrcvRef->CanSMTransceiverId,
+            CANTRCV_TRCVMODE_STANDBY);
         if ((uint8)E_NOT_OK == ret)
         {
             networkPtr->ModeRequestRepetitionTime = CANSM_MODEREQREPEAT_MAINFUNCTIONTIME;
@@ -1688,7 +1848,7 @@ static FUNC(void, CANSM_CODE) CanSM_PnNot_Trcv_Standby(uint8 netID, CanSM_NetWor
         networkPtr->curBsmState = CANSM_BSM_S_NOCOM;
         ComMode = COMM_NO_COMMUNICATION;
         /*do E_NOCOM action*/
-        ComM_BusSM_ModeIndication(CANSM_NETWORK_HANDLE(netID), ComMode);
+        CanSM_ComMModeIndication(netID, ComMode, networkPtr->requestComMode);
         networkPtr->repeatCounter = 0u;
         networkPtr->ModeRequestRepetitionTime = 0u;
     }
@@ -1699,12 +1859,13 @@ static FUNC(void, CANSM_CODE) CanSM_PnNot_Trcv_Standby(uint8 netID, CanSM_NetWor
         {
             networkPtr->repeatCounter = 0u;
 #if (STD_ON == CANSM_DEM_SUPPORT)
-            if (NULL_PTR != CANSM_NETWORK_CONFIGURATION(netID).CanSMDemEventParameterRefs)
+            if (NULL_PTR != CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].CanSMDemEventParameterRefs)
             {
-                if (NULL_PTR != CANSM_NETWORK_CONFIGURATION(netID).CanSMDemEventParameterRefs->ModeReqTimeoutPara)
+                if (NULL_PTR
+                    != CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].CanSMDemEventParameterRefs->ModeReqTimeoutPara)
                 {
                     Dem_ReportErrorStatus(
-                        *CANSM_NETWORK_CONFIGURATION(netID).CanSMDemEventParameterRefs->ModeReqTimeoutPara,
+                        *CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].CanSMDemEventParameterRefs->ModeReqTimeoutPara,
                         DEM_EVENT_STATUS_PREFAILED);
                 }
             }
@@ -1746,7 +1907,7 @@ static FUNC(void, CANSM_CODE) CanSM_PnNot_Trcv_Standby_Wait(uint8 netID, CanSM_N
         networkPtr->curBsmState = CANSM_BSM_S_NOCOM;
         ComMode = COMM_NO_COMMUNICATION;
         /*do E_NOCOM action*/
-        ComM_BusSM_ModeIndication(CANSM_NETWORK_HANDLE(netID), ComMode);
+        CanSM_ComMModeIndication(netID, ComMode, networkPtr->requestComMode);
         networkPtr->waitCanIfIndicatedStartTime = 0;
         networkPtr->repeatCounter = 0u;
     }
@@ -1842,7 +2003,7 @@ static FUNC(void, CANSM_CODE) CanSM_Pn_S_Pn_Clear_WUF(uint8 netID, CanSM_NetWork
     if ((0u == networkPtr->ModeRequestRepetitionTime)
         && (networkPtr->repeatCounter <= CanSM_ConfigPtr->CanSMModeRequestRepetitionMax))
     {
-        ret = CanIf_ClearTrcvWufFlag(CANSM_NETWORK_TRANSCEIVER(netID)->CanSMTransceiverId);
+        ret = CanIf_ClearTrcvWufFlag(CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].TrcvRef->CanSMTransceiverId);
         if ((uint8)E_NOT_OK == ret)
         {
             networkPtr->ModeRequestRepetitionTime = CANSM_MODEREQREPEAT_MAINFUNCTIONTIME;
@@ -1863,12 +2024,13 @@ static FUNC(void, CANSM_CODE) CanSM_Pn_S_Pn_Clear_WUF(uint8 netID, CanSM_NetWork
         {
             networkPtr->repeatCounter = 0u;
 #if (STD_ON == CANSM_DEM_SUPPORT)
-            if (NULL_PTR != CANSM_NETWORK_CONFIGURATION(netID).CanSMDemEventParameterRefs)
+            if (NULL_PTR != CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].CanSMDemEventParameterRefs)
             {
-                if (NULL_PTR != CANSM_NETWORK_CONFIGURATION(netID).CanSMDemEventParameterRefs->ModeReqTimeoutPara)
+                if (NULL_PTR
+                    != CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].CanSMDemEventParameterRefs->ModeReqTimeoutPara)
                 {
                     Dem_ReportErrorStatus(
-                        *CANSM_NETWORK_CONFIGURATION(netID).CanSMDemEventParameterRefs->ModeReqTimeoutPara,
+                        *CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].CanSMDemEventParameterRefs->ModeReqTimeoutPara,
                         DEM_EVENT_STATUS_PREFAILED);
                 }
             }
@@ -1934,7 +2096,7 @@ static FUNC(void, CANSM_CODE) CanSM_Pn_S_Pn_Clear_WUF_Wait(CanSM_NetWorkRunTimeT
 static FUNC(void, CANSM_CODE) CanSM_Pn_S_Pn_CC_Stopped(uint8 netID, CanSM_NetWorkRunTimeType* networkPtr)
 {
     /*set all controllers of the network to request mode repeat*/
-    CanSM_SetControllerModeRepeat(netID, networkPtr, CANIF_CS_STOPPED);
+    CanSM_SetControllerModeRepeat(netID, networkPtr, CAN_CS_STOPPED);
 
     /*enter DEINITPN_S_CC_STOPPED_WAIT state*/
     networkPtr->deinitPnSupportedState = DEINITPN_S_CC_STOPPED_WAIT;
@@ -1954,7 +2116,7 @@ static FUNC(void, CANSM_CODE) CanSM_Pn_S_Pn_CC_Stopped(uint8 netID, CanSM_NetWor
 /******************************************************************************/
 static FUNC(void, CANSM_CODE) CanSM_Pn_S_Pn_CC_Stopped_Wait(uint8 netID, CanSM_NetWorkRunTimeType* networkPtr)
 {
-    if (CanSM_CheckNetworkAllControllerMode(netID, CANIF_CS_STOPPED))
+    if (CanSM_CheckNetworkAllControllerMode(netID, CAN_CS_STOPPED))
     {
         networkPtr->deinitPnSupportedState = DEINITPN_S_TRCV_NORMAL;
         networkPtr->waitCanIfIndicatedStartTime = 0u;
@@ -1988,7 +2150,9 @@ static FUNC(void, CANSM_CODE) CanSM_Pn_S_Trcv_Normal(uint8 netID, CanSM_NetWorkR
     if ((0u == networkPtr->ModeRequestRepetitionTime)
         && (networkPtr->repeatCounter <= CanSM_ConfigPtr->CanSMModeRequestRepetitionMax))
     {
-        ret = CanIf_SetTrcvMode(CANSM_NETWORK_TRANSCEIVER(netID)->CanSMTransceiverId, CANTRCV_TRCVMODE_NORMAL);
+        ret = CanIf_SetTrcvMode(
+            CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].TrcvRef->CanSMTransceiverId,
+            CANTRCV_TRCVMODE_NORMAL);
         if ((uint8)E_NOT_OK == ret)
         {
             networkPtr->ModeRequestRepetitionTime = CANSM_MODEREQREPEAT_MAINFUNCTIONTIME;
@@ -2009,12 +2173,13 @@ static FUNC(void, CANSM_CODE) CanSM_Pn_S_Trcv_Normal(uint8 netID, CanSM_NetWorkR
         {
             networkPtr->repeatCounter = 0u;
 #if (STD_ON == CANSM_DEM_SUPPORT)
-            if (NULL_PTR != CANSM_NETWORK_CONFIGURATION(netID).CanSMDemEventParameterRefs)
+            if (NULL_PTR != CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].CanSMDemEventParameterRefs)
             {
-                if (NULL_PTR != CANSM_NETWORK_CONFIGURATION(netID).CanSMDemEventParameterRefs->ModeReqTimeoutPara)
+                if (NULL_PTR
+                    != CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].CanSMDemEventParameterRefs->ModeReqTimeoutPara)
                 {
                     Dem_ReportErrorStatus(
-                        *CANSM_NETWORK_CONFIGURATION(netID).CanSMDemEventParameterRefs->ModeReqTimeoutPara,
+                        *CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].CanSMDemEventParameterRefs->ModeReqTimeoutPara,
                         DEM_EVENT_STATUS_PREFAILED);
                 }
             }
@@ -2083,7 +2248,9 @@ static FUNC(void, CANSM_CODE) CanSM_Pn_S_Trcv_Standby(uint8 netID, CanSM_NetWork
     if ((0u == networkPtr->ModeRequestRepetitionTime)
         && (networkPtr->repeatCounter <= CanSM_ConfigPtr->CanSMModeRequestRepetitionMax))
     {
-        ret = CanIf_SetTrcvMode(CANSM_NETWORK_TRANSCEIVER(netID)->CanSMTransceiverId, CANTRCV_TRCVMODE_STANDBY);
+        ret = CanIf_SetTrcvMode(
+            CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].TrcvRef->CanSMTransceiverId,
+            CANTRCV_TRCVMODE_STANDBY);
         if ((uint8)E_NOT_OK == ret)
         {
             networkPtr->ModeRequestRepetitionTime = CANSM_MODEREQREPEAT_MAINFUNCTIONTIME;
@@ -2104,12 +2271,13 @@ static FUNC(void, CANSM_CODE) CanSM_Pn_S_Trcv_Standby(uint8 netID, CanSM_NetWork
         {
             networkPtr->repeatCounter = 0u;
 #if (STD_ON == CANSM_DEM_SUPPORT)
-            if (NULL_PTR != CANSM_NETWORK_CONFIGURATION(netID).CanSMDemEventParameterRefs)
+            if (NULL_PTR != CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].CanSMDemEventParameterRefs)
             {
-                if (NULL_PTR != CANSM_NETWORK_CONFIGURATION(netID).CanSMDemEventParameterRefs->ModeReqTimeoutPara)
+                if (NULL_PTR
+                    != CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].CanSMDemEventParameterRefs->ModeReqTimeoutPara)
                 {
                     Dem_ReportErrorStatus(
-                        *CANSM_NETWORK_CONFIGURATION(netID).CanSMDemEventParameterRefs->ModeReqTimeoutPara,
+                        *CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].CanSMDemEventParameterRefs->ModeReqTimeoutPara,
                         DEM_EVENT_STATUS_PREFAILED);
                 }
             }
@@ -2175,7 +2343,7 @@ static FUNC(void, CANSM_CODE) CanSM_Pn_S_Trcv_Standby_Wait(CanSM_NetWorkRunTimeT
 static FUNC(void, CANSM_CODE) CanSM_Pn_S_CC_Sleep(uint8 netID, CanSM_NetWorkRunTimeType* networkPtr)
 {
     /*set all controllers of the network to request mode repeat*/
-    CanSM_SetControllerModeRepeat(netID, networkPtr, CANIF_CS_SLEEP);
+    CanSM_SetControllerModeRepeat(netID, networkPtr, CAN_CS_SLEEP);
 
     /*enter DEINITPN_S_CC_SLEEP_WAIT state*/
     networkPtr->deinitPnSupportedState = DEINITPN_S_CC_SLEEP_WAIT;
@@ -2195,7 +2363,7 @@ static FUNC(void, CANSM_CODE) CanSM_Pn_S_CC_Sleep(uint8 netID, CanSM_NetWorkRunT
 /******************************************************************************/
 static FUNC(void, CANSM_CODE) CanSM_Pn_S_CC_Sleep_Wait(uint8 netID, CanSM_NetWorkRunTimeType* networkPtr)
 {
-    if (CanSM_CheckNetworkAllControllerMode(netID, CANIF_CS_SLEEP))
+    if (CanSM_CheckNetworkAllControllerMode(netID, CAN_CS_SLEEP))
     {
         networkPtr->deinitPnSupportedState = DEINITPN_S_CHECK_WFLAG_IN_CC_SLEEP;
         networkPtr->waitCanIfIndicatedStartTime = 0;
@@ -2231,7 +2399,7 @@ static FUNC(void, CANSM_CODE) CanSM_Pn_Check_Wflag_InCCSleep(uint8 netID, CanSM_
     if ((0u == networkPtr->ModeRequestRepetitionTime)
         && (networkPtr->repeatCounter <= CanSM_ConfigPtr->CanSMModeRequestRepetitionMax))
     {
-        ret = CanIf_CheckTrcvWakeFlag(CANSM_NETWORK_TRANSCEIVER(netID)->CanSMTransceiverId);
+        ret = CanIf_CheckTrcvWakeFlag(CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].TrcvRef->CanSMTransceiverId);
         if ((uint8)E_NOT_OK == ret)
         {
             networkPtr->ModeRequestRepetitionTime = CANSM_MODEREQREPEAT_MAINFUNCTIONTIME;
@@ -2244,7 +2412,7 @@ static FUNC(void, CANSM_CODE) CanSM_Pn_Check_Wflag_InCCSleep(uint8 netID, CanSM_
         networkPtr->curBsmState = CANSM_BSM_S_NOCOM;
         ComMode = COMM_NO_COMMUNICATION;
         /*do E_NOCOM action*/
-        ComM_BusSM_ModeIndication(CANSM_NETWORK_HANDLE(netID), ComMode);
+        CanSM_ComMModeIndication(netID, ComMode, networkPtr->requestComMode);
         networkPtr->repeatCounter = 0u;
         networkPtr->ModeRequestRepetitionTime = 0u;
     }
@@ -2255,12 +2423,13 @@ static FUNC(void, CANSM_CODE) CanSM_Pn_Check_Wflag_InCCSleep(uint8 netID, CanSM_
         {
             networkPtr->repeatCounter = 0u;
 #if (STD_ON == CANSM_DEM_SUPPORT)
-            if (NULL_PTR != CANSM_NETWORK_CONFIGURATION(netID).CanSMDemEventParameterRefs)
+            if (NULL_PTR != CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].CanSMDemEventParameterRefs)
             {
-                if (NULL_PTR != CANSM_NETWORK_CONFIGURATION(netID).CanSMDemEventParameterRefs->ModeReqTimeoutPara)
+                if (NULL_PTR
+                    != CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].CanSMDemEventParameterRefs->ModeReqTimeoutPara)
                 {
                     Dem_ReportErrorStatus(
-                        *CANSM_NETWORK_CONFIGURATION(netID).CanSMDemEventParameterRefs->ModeReqTimeoutPara,
+                        *CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].CanSMDemEventParameterRefs->ModeReqTimeoutPara,
                         DEM_EVENT_STATUS_PREFAILED);
                 }
             }
@@ -2302,7 +2471,7 @@ static FUNC(void, CANSM_CODE) CanSM_Pn_Check_Wflag_InCCSleepWait(uint8 netID, Ca
         networkPtr->curBsmState = CANSM_BSM_S_NOCOM;
         ComMode = COMM_NO_COMMUNICATION;
         /*do E_NOCOM action*/
-        ComM_BusSM_ModeIndication(CANSM_NETWORK_HANDLE(netID), ComMode);
+        CanSM_ComMModeIndication(netID, ComMode, networkPtr->requestComMode);
         networkPtr->waitCanIfIndicatedStartTime = 0u;
         networkPtr->repeatCounter = 0u;
     }
@@ -2333,7 +2502,7 @@ static FUNC(void, CANSM_CODE) CanSM_Pn_CheckWflag_InNotCCSleep(uint8 netID, CanS
     if ((0u == networkPtr->ModeRequestRepetitionTime)
         && (networkPtr->repeatCounter <= CanSM_ConfigPtr->CanSMModeRequestRepetitionMax))
     {
-        ret = CanIf_CheckTrcvWakeFlag(CANSM_NETWORK_TRANSCEIVER(netID)->CanSMTransceiverId);
+        ret = CanIf_CheckTrcvWakeFlag(CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].TrcvRef->CanSMTransceiverId);
         if ((uint8)E_NOT_OK == ret)
         {
             networkPtr->ModeRequestRepetitionTime = CANSM_MODEREQREPEAT_MAINFUNCTIONTIME;
@@ -2354,12 +2523,13 @@ static FUNC(void, CANSM_CODE) CanSM_Pn_CheckWflag_InNotCCSleep(uint8 netID, CanS
         {
             networkPtr->repeatCounter = 0u;
 #if (STD_ON == CANSM_DEM_SUPPORT)
-            if (NULL_PTR != CANSM_NETWORK_CONFIGURATION(netID).CanSMDemEventParameterRefs)
+            if (NULL_PTR != CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].CanSMDemEventParameterRefs)
             {
-                if (NULL_PTR != CANSM_NETWORK_CONFIGURATION(netID).CanSMDemEventParameterRefs->ModeReqTimeoutPara)
+                if (NULL_PTR
+                    != CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].CanSMDemEventParameterRefs->ModeReqTimeoutPara)
                 {
                     Dem_ReportErrorStatus(
-                        *CANSM_NETWORK_CONFIGURATION(netID).CanSMDemEventParameterRefs->ModeReqTimeoutPara,
+                        *CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].CanSMDemEventParameterRefs->ModeReqTimeoutPara,
                         DEM_EVENT_STATUS_PREFAILED);
                 }
             }
@@ -2506,7 +2676,7 @@ static boolean CanSM_BsmSNoCom(uint8 netID)
         CanSM_NetWorkRunTime[netID].curBsmState = CANSM_BSM_S_PRE_FULLCOM;
 #if (CANSM_TRCV_NUM > 0)
         /*enter sub PREFULLCOM_S_TRCV_NORMAL state*/
-        if (NULL_PTR != CANSM_NETWORK_TRANSCEIVER(netID))
+        if (NULL_PTR != CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].TrcvRef)
         {
             CanSM_NetWorkRunTime[netID].preFullComState = PREFULLCOM_S_TRCV_NORMAL;
             CanSM_NetWorkRunTime[netID].repeatCounter = 0u;
@@ -2540,7 +2710,9 @@ static FUNC(void, CANSM_CODE) CanSM_WUVAL_S_Trcv_Normal(uint8 netID, CanSM_NetWo
     if ((0u == networkPtr->ModeRequestRepetitionTime)
         && (networkPtr->repeatCounter <= CanSM_ConfigPtr->CanSMModeRequestRepetitionMax))
     {
-        ret = CanIf_SetTrcvMode(CANSM_NETWORK_TRANSCEIVER(netID)->CanSMTransceiverId, CANTRCV_TRCVMODE_NORMAL);
+        ret = CanIf_SetTrcvMode(
+            CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].TrcvRef->CanSMTransceiverId,
+            CANTRCV_TRCVMODE_NORMAL);
         if ((uint8)E_NOT_OK == ret)
         {
             networkPtr->ModeRequestRepetitionTime = CANSM_MODEREQREPEAT_MAINFUNCTIONTIME;
@@ -2561,12 +2733,13 @@ static FUNC(void, CANSM_CODE) CanSM_WUVAL_S_Trcv_Normal(uint8 netID, CanSM_NetWo
         {
             networkPtr->repeatCounter = 0u;
 #if (STD_ON == CANSM_DEM_SUPPORT)
-            if (NULL_PTR != CANSM_NETWORK_CONFIGURATION(netID).CanSMDemEventParameterRefs)
+            if (NULL_PTR != CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].CanSMDemEventParameterRefs)
             {
-                if (NULL_PTR != CANSM_NETWORK_CONFIGURATION(netID).CanSMDemEventParameterRefs->ModeReqTimeoutPara)
+                if (NULL_PTR
+                    != CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].CanSMDemEventParameterRefs->ModeReqTimeoutPara)
                 {
                     Dem_ReportErrorStatus(
-                        *CANSM_NETWORK_CONFIGURATION(netID).CanSMDemEventParameterRefs->ModeReqTimeoutPara,
+                        *CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].CanSMDemEventParameterRefs->ModeReqTimeoutPara,
                         DEM_EVENT_STATUS_PREFAILED);
                 }
             }
@@ -2632,7 +2805,7 @@ static FUNC(void, CANSM_CODE) CanSM_WUVAL_S_Trcv_Normal_Wait(CanSM_NetWorkRunTim
 /******************************************************************************/
 static FUNC(void, CANSM_CODE) CanSM_WUVAL_S_CC_Stopped(uint8 netID, CanSM_NetWorkRunTimeType* networkPtr)
 {
-    CanSM_SetControllerModeRepeat(netID, networkPtr, CANIF_CS_STOPPED);
+    CanSM_SetControllerModeRepeat(netID, networkPtr, CAN_CS_STOPPED);
 
     /*enter WUVALIDATION_S_CC_STOPPED_WAIT state*/
     networkPtr->wuValidationState = WUVALIDATION_S_CC_STOPPED_WAIT;
@@ -2652,7 +2825,7 @@ static FUNC(void, CANSM_CODE) CanSM_WUVAL_S_CC_Stopped(uint8 netID, CanSM_NetWor
 /******************************************************************************/
 static FUNC(void, CANSM_CODE) CanSM_WUVAL_S_CC_Stopped_Wait(uint8 netID, CanSM_NetWorkRunTimeType* networkPtr)
 {
-    if (CanSM_CheckNetworkAllControllerMode(netID, CANIF_CS_STOPPED))
+    if (CanSM_CheckNetworkAllControllerMode(netID, CAN_CS_STOPPED))
     {
         networkPtr->wuValidationState = WUVALIDATION_S_CC_STARTED;
         networkPtr->waitCanIfIndicatedStartTime = 0;
@@ -2683,7 +2856,7 @@ static FUNC(void, CANSM_CODE) CanSM_WUVAL_S_CC_Stopped_Wait(uint8 netID, CanSM_N
 static FUNC(void, CANSM_CODE) CanSM_WUVAL_S_CC_Started(uint8 netID, CanSM_NetWorkRunTimeType* networkPtr)
 {
     /*set all controllers of the network to request mode repeat*/
-    CanSM_SetControllerModeRepeat(netID, networkPtr, CANIF_CS_STARTED);
+    CanSM_SetControllerModeRepeat(netID, networkPtr, CAN_CS_STARTED);
 
     /*enter WUVALIDATION_S_CC_STARTED_WAIT state*/
     networkPtr->wuValidationState = WUVALIDATION_S_CC_STARTED_WAIT;
@@ -2703,7 +2876,7 @@ static FUNC(void, CANSM_CODE) CanSM_WUVAL_S_CC_Started(uint8 netID, CanSM_NetWor
 /******************************************************************************/
 static FUNC(void, CANSM_CODE) CanSM_WUVAL_S_CC_Started_Wait(uint8 netID, CanSM_NetWorkRunTimeType* networkPtr)
 {
-    if (CanSM_CheckNetworkAllControllerMode(netID, CANIF_CS_STARTED))
+    if (CanSM_CheckNetworkAllControllerMode(netID, CAN_CS_STARTED))
     {
         networkPtr->wuValidationState = WUVALIDATION_WAIT_WUVALIDATION_LEAVE;
         networkPtr->waitCanIfIndicatedStartTime = 0;
@@ -2742,7 +2915,7 @@ static boolean CanSM_BsmWuValidation(uint8 netID)
         networkPtr->curBsmState = CANSM_BSM_S_PRE_FULLCOM;
 #if (CANSM_TRCV_NUM > 0)
         /*enter sub PREFULLCOM_S_TRCV_NORMAL state*/
-        if (NULL_PTR != CANSM_NETWORK_TRANSCEIVER(netID))
+        if (NULL_PTR != CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].TrcvRef)
         {
             networkPtr->preFullComState = PREFULLCOM_S_TRCV_NORMAL;
             networkPtr->repeatCounter = 0u;
@@ -2809,7 +2982,9 @@ static FUNC(void, CANSM_CODE) CanSM_Prefullcom_S_Trcv_Normal(uint8 netID, CanSM_
     if ((0u == networkPtr->ModeRequestRepetitionTime)
         && (networkPtr->repeatCounter <= CanSM_ConfigPtr->CanSMModeRequestRepetitionMax))
     {
-        ret = CanIf_SetTrcvMode(CANSM_NETWORK_TRANSCEIVER(netID)->CanSMTransceiverId, CANTRCV_TRCVMODE_NORMAL);
+        ret = CanIf_SetTrcvMode(
+            CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].TrcvRef->CanSMTransceiverId,
+            CANTRCV_TRCVMODE_NORMAL);
         if ((uint8)E_NOT_OK == ret)
         {
             networkPtr->ModeRequestRepetitionTime = CANSM_MODEREQREPEAT_MAINFUNCTIONTIME;
@@ -2830,12 +3005,13 @@ static FUNC(void, CANSM_CODE) CanSM_Prefullcom_S_Trcv_Normal(uint8 netID, CanSM_
         {
             networkPtr->repeatCounter = 0u;
 #if (STD_ON == CANSM_DEM_SUPPORT)
-            if (NULL_PTR != CANSM_NETWORK_CONFIGURATION(netID).CanSMDemEventParameterRefs)
+            if (NULL_PTR != CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].CanSMDemEventParameterRefs)
             {
-                if (NULL_PTR != CANSM_NETWORK_CONFIGURATION(netID).CanSMDemEventParameterRefs->ModeReqTimeoutPara)
+                if (NULL_PTR
+                    != CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].CanSMDemEventParameterRefs->ModeReqTimeoutPara)
                 {
                     Dem_ReportErrorStatus(
-                        *CANSM_NETWORK_CONFIGURATION(netID).CanSMDemEventParameterRefs->ModeReqTimeoutPara,
+                        *CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].CanSMDemEventParameterRefs->ModeReqTimeoutPara,
                         DEM_EVENT_STATUS_PREFAILED);
                 }
             }
@@ -2903,7 +3079,7 @@ static FUNC(void, CANSM_CODE) CanSM_Prefullcom_S_Trcv_Normal_Wait(CanSM_NetWorkR
 static FUNC(void, CANSM_CODE) CanSM_Prefullcom_S_CC_Stopped(uint8 netID, CanSM_NetWorkRunTimeType* networkPtr)
 {
     /*set all controllers of the network to request mode repeat*/
-    CanSM_SetControllerModeRepeat(netID, networkPtr, CANIF_CS_STOPPED);
+    CanSM_SetControllerModeRepeat(netID, networkPtr, CAN_CS_STOPPED);
 
     /*enter PREFULLCOM_S_CC_STOPPED_WAIT state*/
     networkPtr->preFullComState = PREFULLCOM_S_CC_STOPPED_WAIT;
@@ -2924,7 +3100,7 @@ static FUNC(void, CANSM_CODE) CanSM_Prefullcom_S_CC_Stopped(uint8 netID, CanSM_N
 static FUNC(void, CANSM_CODE) CanSM_Prefullcom_S_CC_Stopped_Wait(uint8 netID, CanSM_NetWorkRunTimeType* networkPtr)
 {
     /*enter PREFULLCOM_S_CC_STARTED state*/
-    if (CanSM_CheckNetworkAllControllerMode(netID, CANIF_CS_STOPPED))
+    if (CanSM_CheckNetworkAllControllerMode(netID, CAN_CS_STOPPED))
     {
         networkPtr->preFullComState = PREFULLCOM_S_CC_STARTED;
         networkPtr->waitCanIfIndicatedStartTime = 0u;
@@ -2955,7 +3131,7 @@ static FUNC(void, CANSM_CODE) CanSM_Prefullcom_S_CC_Stopped_Wait(uint8 netID, Ca
 static FUNC(void, CANSM_CODE) CanSM_Prefullcom_S_CC_Started(uint8 netID, CanSM_NetWorkRunTimeType* networkPtr)
 {
     /*set all controllers of the network to request mode repeat*/
-    CanSM_SetControllerModeRepeat(netID, networkPtr, CANIF_CS_STARTED);
+    CanSM_SetControllerModeRepeat(netID, networkPtr, CAN_CS_STARTED);
 
     /*enter PREFULLCOM_S_CC_STARTED_WAIT state*/
     networkPtr->preFullComState = PREFULLCOM_S_CC_STARTED_WAIT;
@@ -2976,7 +3152,7 @@ static FUNC(void, CANSM_CODE) CanSM_Prefullcom_S_CC_Started(uint8 netID, CanSM_N
 static FUNC(void, CANSM_CODE) CanSM_Prefullcom_S_CC_Started_Wait(uint8 netID, CanSM_NetWorkRunTimeType* networkPtr)
 {
     /*do E_FULL_COM action,enter CANSM_BSM_S_FULLCOM,sub FULLCOM_S_BUS_OFF_CHECK state*/
-    if (CanSM_CheckNetworkAllControllerMode(netID, CANIF_CS_STARTED))
+    if (CanSM_CheckNetworkAllControllerMode(netID, CAN_CS_STARTED))
     {
         CanSM_EFullComAction(netID);
         networkPtr->waitCanIfIndicatedStartTime = 0;
@@ -3062,7 +3238,7 @@ static FUNC(void, CANSM_CODE) CanSM_FullCom_S_Bus_off_Check(uint8 netID, CanSM_N
 
 #if CANSM_BOR_TIME_TX_ENSURED_ENABLED == STD_ON
 #if CANSM_BOR_TX_CONFIRMATION_POLLING_ENABLED == STD_ON
-        if (!CANSM_NETWORK_CONFIGURATION(netID).CanSMBorTxConfirmationPolling)
+        if (!CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].CanSMBorTxConfirmationPolling)
 #endif
         {
             if (networkPtr->borTimeTxEnsuredTime > 0u)
@@ -3080,7 +3256,7 @@ static FUNC(void, CANSM_CODE) CanSM_FullCom_S_Bus_off_Check(uint8 netID, CanSM_N
 
 #if CANSM_BOR_TX_CONFIRMATION_POLLING_ENABLED == STD_ON
 #if CANSM_BOR_TIME_TX_ENSURED_ENABLED == STD_ON
-        if (CANSM_NETWORK_CONFIGURATION(netID).CanSMBorTxConfirmationPolling)
+        if (CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].CanSMBorTxConfirmationPolling)
 #endif
         {
             uint8 controllerId;
@@ -3098,12 +3274,12 @@ static FUNC(void, CANSM_CODE) CanSM_FullCom_S_Bus_off_Check(uint8 netID, CanSM_N
         if (busOffPassive)
         {
 #if (STD_ON == CANSM_DEM_SUPPORT)
-            if (NULL_PTR != CANSM_NETWORK_CONFIGURATION(netID).CanSMDemEventParameterRefs)
+            if (NULL_PTR != CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].CanSMDemEventParameterRefs)
             {
-                if (NULL_PTR != CANSM_NETWORK_CONFIGURATION(netID).CanSMDemEventParameterRefs->BusOffPara)
+                if (NULL_PTR != CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].CanSMDemEventParameterRefs->BusOffPara)
                 {
                     Dem_ReportErrorStatus(
-                        *CANSM_NETWORK_CONFIGURATION(netID).CanSMDemEventParameterRefs->BusOffPara,
+                        *CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].CanSMDemEventParameterRefs->BusOffPara,
                         DEM_EVENT_STATUS_PASSED);
                 }
             }
@@ -3137,7 +3313,7 @@ static void CanSM_FullCom_S_No_Bus_Off(uint8 netID, const CanSM_NetWorkRunTimeTy
 static FUNC(void, CANSM_CODE) CanSM_FullCom_S_CC_Stopped(uint8 netID, CanSM_NetWorkRunTimeType* networkPtr)
 {
     /*set all controllers of the network to request mode repeat*/
-    CanSM_SetControllerModeRepeat(netID, networkPtr, CANIF_CS_STOPPED);
+    CanSM_SetControllerModeRepeat(netID, networkPtr, CAN_CS_STOPPED);
 
     /*enter FULLCOM_S_CC_STOPPED_WAIT state*/
     networkPtr->fullComState = FULLCOM_S_CC_STOPPED_WAIT;
@@ -3159,7 +3335,7 @@ static FUNC(void, CANSM_CODE) CanSM_FullCom_S_CC_Stopped(uint8 netID, CanSM_NetW
 static FUNC(void, CANSM_CODE) CanSM_FullCom_S_CC_Stopped_Wait(uint8 netID, CanSM_NetWorkRunTimeType* networkPtr)
 {
     /*enter FULLCOM_S_CC_STARTED state*/
-    if (CanSM_CheckNetworkAllControllerMode(netID, CANIF_CS_STOPPED))
+    if (CanSM_CheckNetworkAllControllerMode(netID, CAN_CS_STOPPED))
     {
         networkPtr->fullComState = FULLCOM_S_CC_STARTED;
         networkPtr->waitCanIfIndicatedStartTime = 0;
@@ -3191,7 +3367,7 @@ static FUNC(void, CANSM_CODE) CanSM_FullCom_S_CC_Stopped_Wait(uint8 netID, CanSM
 static FUNC(void, CANSM_CODE) CanSM_FullCom_S_CC_Started(uint8 netID, CanSM_NetWorkRunTimeType* networkPtr)
 {
     /*set all controllers of the network to request mode repeat*/
-    CanSM_SetControllerModeRepeat(netID, networkPtr, CANIF_CS_STARTED);
+    CanSM_SetControllerModeRepeat(netID, networkPtr, CAN_CS_STARTED);
 
     /*enter FULLCOM_S_CC_STARTED_WAIT state*/
     networkPtr->fullComState = FULLCOM_S_CC_STARTED_WAIT;
@@ -3213,7 +3389,7 @@ static FUNC(void, CANSM_CODE) CanSM_FullCom_S_CC_Started(uint8 netID, CanSM_NetW
 static FUNC(void, CANSM_CODE) CanSM_FullCom_S_CC_Started_Wait(uint8 netID, CanSM_NetWorkRunTimeType* networkPtr)
 {
     /*enter FULLCOM_S_BUS_OFF_CHECK state,clear BusOff counter*/
-    if (CanSM_CheckNetworkAllControllerMode(netID, CANIF_CS_STARTED))
+    if (CanSM_CheckNetworkAllControllerMode(netID, CAN_CS_STARTED))
     {
         networkPtr->fullComState = FULLCOM_S_NO_BUS_OFF;
         networkPtr->busOffCounter = 0u;
@@ -3253,7 +3429,7 @@ static FUNC(void, CANSM_CODE) CanSM_FullCom_S_CC_Started_Wait(uint8 netID, CanSM
 static FUNC(void, CANSM_CODE) CanSM_FullCom_S_Restart_CC(uint8 netID, CanSM_NetWorkRunTimeType* networkPtr)
 {
     /*set all controllers of the network to request mode repeat*/
-    CanSM_SetControllerModeRepeat(netID, networkPtr, CANIF_CS_STARTED);
+    CanSM_SetControllerModeRepeat(netID, networkPtr, CAN_CS_STARTED);
 
     /*enter FULLCOM_S_RESTART_CC_WAIT state*/
     networkPtr->fullComState = FULLCOM_S_RESTART_CC_WAIT;
@@ -3275,7 +3451,7 @@ static FUNC(void, CANSM_CODE) CanSM_FullCom_S_Restart_CC(uint8 netID, CanSM_NetW
 static FUNC(void, CANSM_CODE) CanSM_FullCom_S_Restart_CC_Wait(uint8 netID, CanSM_NetWorkRunTimeType* networkPtr)
 {
     /*enter FULLCOM_S_TX_OFF state*/
-    if (CanSM_CheckNetworkAllControllerMode(netID, CANIF_CS_STARTED))
+    if (CanSM_CheckNetworkAllControllerMode(netID, CAN_CS_STARTED))
     {
         networkPtr->fullComState = FULLCOM_S_TX_OFF;
         networkPtr->waitCanIfIndicatedStartTime = 0;
@@ -3308,7 +3484,7 @@ static FUNC(void, CANSM_CODE) CanSM_FullCom_S_Tx_Off(uint8 netID, CanSM_NetWorkR
 {
     uint32 busOffContinueTime;
     networkPtr->busOffEventStartTime++;
-    const CanSM_ManagerNetworkType* managerNetworkConfig = &CANSM_NETWORK_CONFIGURATION(netID);
+    const CanSM_ManagerNetworkType* managerNetworkConfig = &CanSM_ConfigPtr->CanSMManagerNetworkRef[netID];
     if (networkPtr->busOffCounter >= managerNetworkConfig->CanSMBorCounterL1ToL2)
     {
         busOffContinueTime = managerNetworkConfig->CanSMBorTimeL2
@@ -3349,9 +3525,11 @@ static FUNC(void, CANSM_CODE) CanSM_FullCom_S_Tx_Off(uint8 netID, CanSM_NetWorkR
             }
             CANSM_FOREACH_NETWORK_CONTROLLER_END()
         }
-        BswM_CanSM_CurrentState(CANSM_NETWORK_HANDLE(netID), CANSM_BSWM_FULL_COMMUNICATION);
+        BswM_CanSM_CurrentState(
+            CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].CanSMComMNetworkHandleRef,
+            CANSM_BSWM_FULL_COMMUNICATION);
         networkPtr->curComMode = COMM_FULL_COMMUNICATION;
-        ComM_BusSM_ModeIndication(CANSM_NETWORK_HANDLE(netID), networkPtr->curComMode);
+        CanSM_ComMModeIndication(netID, networkPtr->curComMode, networkPtr->requestComMode);
         /*enter FULLCOM_S_BUS_OFF_CHECK state*/
         networkPtr->fullComState = FULLCOM_S_BUS_OFF_CHECK;
         if (networkPtr->busOffCounter < BUS_OFF_COUNTER_UP_LIMIT)
@@ -3501,7 +3679,7 @@ static FUNC(void, CANSM_CODE) CanSM_ChangeBR_Change_BR_Sync(uint8 netID, CanSM_N
 static FUNC(void, CANSM_CODE) CanSM_ChangeBR_S_CC_Stopped(uint8 netID, CanSM_NetWorkRunTimeType* networkPtr)
 {
     /*set all controllers of the network to request mode repeat*/
-    CanSM_SetControllerModeRepeat(netID, networkPtr, CANIF_CS_STOPPED);
+    CanSM_SetControllerModeRepeat(netID, networkPtr, CAN_CS_STOPPED);
 
     /*enter CHANGEBR_S_CC_STOPPED_WAIT state*/
     networkPtr->changeBaudrateState = CHANGEBR_S_CC_STOPPED_WAIT;
@@ -3524,12 +3702,12 @@ static FUNC(void, CANSM_CODE) CanSM_ChangeBR_S_CC_Stopped_Wait(uint8 netID, CanS
 {
     ComM_ModeType ComMode;
     /*enter CHANGEBR_S_CC_STARTED state*/
-    if (CanSM_CheckNetworkAllControllerMode(netID, CANIF_CS_STOPPED))
+    if (CanSM_CheckNetworkAllControllerMode(netID, CAN_CS_STOPPED))
     {
         networkPtr->changeBaudrateState = CHANGEBR_S_CC_STARTED;
         ComMode = COMM_NO_COMMUNICATION;
         /*do E_CHANGE_BAUDRATE action*/
-        ComM_BusSM_ModeIndication(CANSM_NETWORK_HANDLE(netID), ComMode);
+        CanSM_ComMModeIndication(netID, ComMode, networkPtr->requestComMode);
 
         uint8 controllerId;
         CANSM_FOREACH_NETWORK_CONTROLLER_START(netID, controllerId)
@@ -3567,7 +3745,7 @@ static FUNC(void, CANSM_CODE) CanSM_ChangeBR_S_CC_Stopped_Wait(uint8 netID, CanS
 static FUNC(void, CANSM_CODE) CanSM_ChangeBR_S_CC_Started(uint8 netID, CanSM_NetWorkRunTimeType* networkPtr)
 {
     /*set all controllers of the network to request mode repeat*/
-    CanSM_SetControllerModeRepeat(netID, networkPtr, CANIF_CS_STARTED);
+    CanSM_SetControllerModeRepeat(netID, networkPtr, CAN_CS_STARTED);
 
     /*enter CHANGEBR_S_CC_STARTED_WAIT state*/
     networkPtr->changeBaudrateState = CHANGEBR_S_CC_STARTED_WAIT;
@@ -3589,7 +3767,7 @@ static FUNC(void, CANSM_CODE) CanSM_ChangeBR_S_CC_Started(uint8 netID, CanSM_Net
 static FUNC(void, CANSM_CODE) CanSM_ChangeBR_S_CC_Started_Wait(uint8 netID, CanSM_NetWorkRunTimeType* networkPtr)
 {
     /*exit CANSM_BSM_S_CHANGE_BAUDRATE state*/
-    if (CanSM_CheckNetworkAllControllerMode(netID, CANIF_CS_STARTED))
+    if (CanSM_CheckNetworkAllControllerMode(netID, CAN_CS_STARTED))
     {
         if (CANSM_NO_COMMUNICATION == networkPtr->requestComMode)
         {
@@ -3716,7 +3894,7 @@ static boolean CanSM_BsmSSilentComBor(uint8 netID)
         {
         case SILENTBOR_S_RESTART_CC:
             /*set all controllers of the network to request mode repeat*/
-            CanSM_SetControllerModeRepeat(netID, networkPtr, CANIF_CS_STARTED);
+            CanSM_SetControllerModeRepeat(netID, networkPtr, CAN_CS_STARTED);
 
             /*enter SILENTBOR_S_RESTART_CC_WAIT state*/
             networkPtr->silentComBORState = SILENTBOR_S_RESTART_CC_WAIT;
@@ -3724,7 +3902,7 @@ static boolean CanSM_BsmSSilentComBor(uint8 netID)
             break;
         case SILENTBOR_S_RESTART_CC_WAIT:
             /*exit CANSM_BSM_S_SILENTCOM_BOR state,enter CANSM_BSM_S_SILENTCOM state*/
-            if (CanSM_CheckNetworkAllControllerMode(netID, CANIF_CS_STARTED))
+            if (CanSM_CheckNetworkAllControllerMode(netID, CAN_CS_STARTED))
             {
                 networkPtr->curBsmState = CANSM_BSM_S_SILENTCOM;
                 networkPtr->waitCanIfIndicatedStartTime = 0;
@@ -3785,13 +3963,15 @@ static FUNC(void, CANSM_CODE) CanSM_EFullComAction(uint8 netID)
         CANSM_FOREACH_NETWORK_CONTROLLER_END()
     }
     ComMode = COMM_FULL_COMMUNICATION;
-    ComM_BusSM_ModeIndication(CANSM_NETWORK_HANDLE(netID), ComMode);
-    BswM_CanSM_CurrentState(CANSM_NETWORK_HANDLE(netID), CANSM_BSWM_FULL_COMMUNICATION);
+    CanSM_ComMModeIndication(netID, ComMode, networkPtr->requestComMode);
+    BswM_CanSM_CurrentState(
+        CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].CanSMComMNetworkHandleRef,
+        CANSM_BSWM_FULL_COMMUNICATION);
     /*enter CANSM_BSM_S_FULLCOM,sub FULLCOM_S_BUS_OFF_CHECK state*/
     networkPtr->curBsmState = CANSM_BSM_S_FULLCOM;
     networkPtr->fullComState = FULLCOM_S_BUS_OFF_CHECK;
 #if CANSM_BOR_TIME_TX_ENSURED_ENABLED == STD_ON
-    const CanSM_ManagerNetworkType* managerNetworkConfig = &CANSM_NETWORK_CONFIGURATION(netID);
+    const CanSM_ManagerNetworkType* managerNetworkConfig = &CanSM_ConfigPtr->CanSMManagerNetworkRef[netID];
 #if CANSM_BOR_TX_CONFIRMATION_POLLING_ENABLED == STD_ON
     if ((boolean)FALSE == managerNetworkConfig->CanSMBorTxConfirmationPolling)
 #endif
@@ -3821,7 +4001,9 @@ static FUNC(void, CANSM_CODE) CanSM_EFullToSilentComAction(uint8 netID)
     /*enter CANSM_BSM_S_SILENTCOM state*/
     networkPtr->curBsmState = CANSM_BSM_S_SILENTCOM;
     /*do the E_FULL_TO_SILENT_COM action*/
-    BswM_CanSM_CurrentState(CANSM_NETWORK_HANDLE(netID), CANSM_BSWM_SILENT_COMMUNICATION);
+    BswM_CanSM_CurrentState(
+        CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].CanSMComMNetworkHandleRef,
+        CANSM_BSWM_SILENT_COMMUNICATION);
 
     uint8 controllerId;
     CANSM_FOREACH_NETWORK_CONTROLLER_START(netID, controllerId)
@@ -3831,7 +4013,7 @@ static FUNC(void, CANSM_CODE) CanSM_EFullToSilentComAction(uint8 netID)
     CANSM_FOREACH_NETWORK_CONTROLLER_END()
 
     ComMode = COMM_SILENT_COMMUNICATION;
-    ComM_BusSM_ModeIndication(CANSM_NETWORK_HANDLE(netID), ComMode);
+    CanSM_ComMModeIndication(netID, ComMode, networkPtr->requestComMode);
     networkPtr->curComMode = COMM_SILENT_COMMUNICATION;
 }
 
@@ -3851,8 +4033,8 @@ static FUNC(void, CANSM_CODE) CanSM_EPreNoComAction(uint8 netID)
     CanSM_NetWorkRunTimeType* networkPtr = &CanSM_NetWorkRunTime[netID];
 /*enter CANSM_BSM_S_PRE_NOCOM state*/
 #if (STD_ON == CANSM_PNC_SUPPORT)
-    const CanSM_ManagerNetworkType* managerNetwork = &CanSM_ConfigPtr->CanSMManagerNetworkRef[netID];
-    if ((NULL_PTR != managerNetwork->TrcvRef) && ((boolean)TRUE == managerNetwork->TrcvRef->CanSMCanTrcvPnEnabled))
+    if ((NULL_PTR != CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].TrcvRef)
+        && ((boolean)TRUE == CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].TrcvRef->CanSMCanTrcvPnEnabled))
     {
         networkPtr->curBsmState = CANSM_BSM_DEINITPNSUPPORTED;
         networkPtr->deinitPnSupportedState = DEINITPN_S_PN_CLEAR_WUF;
@@ -3865,29 +4047,31 @@ static FUNC(void, CANSM_CODE) CanSM_EPreNoComAction(uint8 netID)
     }
     networkPtr->repeatCounter = 0u;
     /*do the E_PRE_NOCOM action*/
-    BswM_CanSM_CurrentState(CANSM_NETWORK_HANDLE(netID), CANSM_BSWM_NO_COMMUNICATION);
+    BswM_CanSM_CurrentState(
+        CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].CanSMComMNetworkHandleRef,
+        CANSM_BSWM_NO_COMMUNICATION);
     networkPtr->curComMode = COMM_NO_COMMUNICATION;
 }
 
 static void CanSM_EBusOffAction(uint8 netID)
 {
     CanSM_NetWorkRunTimeType* networkPtr = &CanSM_NetWorkRunTime[netID];
-#if (CANSM_GET_BUSOFF_DELAY_FUNCTION_USED == STD_ON) || (CANSM_DEM_SUPPORT == STD_ON)
-    const CanSM_ManagerNetworkType* managerNetwork = &CanSM_ConfigPtr->CanSMManagerNetworkRef[netID];
-#endif
-
     if (networkPtr->curBsmState == CANSM_BSM_S_FULLCOM)
     {
-        BswM_CanSM_CurrentState(CANSM_NETWORK_HANDLE(netID), CANSM_BSWM_BUS_OFF);
+        BswM_CanSM_CurrentState(
+            CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].CanSMComMNetworkHandleRef,
+            CANSM_BSWM_BUS_OFF);
         networkPtr->curComMode = COMM_SILENT_COMMUNICATION;
-        ComM_BusSM_ModeIndication(CANSM_NETWORK_HANDLE(netID), networkPtr->curComMode);
+        CanSM_ComMModeIndication(netID, networkPtr->curComMode, networkPtr->requestComMode);
         networkPtr->fullComState = FULLCOM_S_RESTART_CC;
 
 #if (STD_ON == CANSM_GET_BUSOFF_DELAY_FUNCTION_USED)
-        if (TRUE == managerNetwork->CanSMEnableBusOffDelay)
+        if (TRUE == CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].CanSMEnableBusOffDelay)
         {
             uint8 delayCycleNum = 0u;
-            CANSM_GET_BUSOFF_DELAY_FUNCTION(CANSM_NETWORK_HANDLE(netID), &delayCycleNum);
+            CANSM_GET_BUSOFF_DELAY_FUNCTION(
+                CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].CanSMComMNetworkHandleRef,
+                &delayCycleNum);
             networkPtr->busOffDelayTime = (uint16)delayCycleNum;
         }
 #endif /*STD_ON == CANSM_GET_BUSOFF_DELAY_FUNCTION_USED*/
@@ -3902,11 +4086,13 @@ static void CanSM_EBusOffAction(uint8 netID)
     networkPtr->repeatCounter = 0u;
 
 #if (STD_ON == CANSM_DEM_SUPPORT)
-    if (NULL_PTR != managerNetwork->CanSMDemEventParameterRefs)
+    if (NULL_PTR != CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].CanSMDemEventParameterRefs)
     {
-        if (NULL_PTR != managerNetwork->CanSMDemEventParameterRefs->BusOffPara)
+        if (NULL_PTR != CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].CanSMDemEventParameterRefs->BusOffPara)
         {
-            Dem_ReportErrorStatus(*managerNetwork->CanSMDemEventParameterRefs->BusOffPara, DEM_EVENT_STATUS_PREFAILED);
+            Dem_ReportErrorStatus(
+                *CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].CanSMDemEventParameterRefs->BusOffPara,
+                DEM_EVENT_STATUS_PREFAILED);
         }
     }
 #endif
@@ -3927,7 +4113,7 @@ static void CanSM_EBusOffAction(uint8 netID)
 static void CanSM_SetControllerModeRepeat(
     uint8 netID,
     CanSM_NetWorkRunTimeType* networkPtr,
-    CanIf_ControllerModeType requestContorllerMode)
+    Can_ControllerStateType requestContorllerMode)
 {
     networkPtr->busOffEvent = FALSE;
 
@@ -3942,7 +4128,7 @@ static void CanSM_SetControllerModeRepeat(
     CANSM_FOREACH_NETWORK_CONTROLLER_END()
 }
 
-CANSM_LOCAL boolean CanSM_CheckNetworkAllControllerMode(uint8 netID, CanIf_ControllerModeType controllerMode)
+CANSM_LOCAL boolean CanSM_CheckNetworkAllControllerMode(uint8 netID, Can_ControllerStateType controllerMode)
 {
     const CanSM_ControllerRefType* controllerRef = CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].ControllerRef;
     const uint8* controllerId = controllerRef->CanSMControllerId;
@@ -3951,10 +4137,10 @@ CANSM_LOCAL boolean CanSM_CheckNetworkAllControllerMode(uint8 netID, CanIf_Contr
     {
         if (CanSM_ControllerMode[*controllerId] != controllerMode)
         {
-            break;
+            return FALSE;
         }
     }
-    return controllerId == controllerIdEnd;
+    return TRUE;
 }
 
 CANSM_LOCAL void CanSM_ModeRequestTimeout(uint8 netID)
@@ -3964,8 +4150,8 @@ CANSM_LOCAL void CanSM_ModeRequestTimeout(uint8 netID)
     {
         networkPtr->repeatCounter = 0u;
 #if CANSM_DEM_SUPPORT == STD_ON
-        const CanSM_ManagerNetworkType* managerNetwork = &CanSM_ConfigPtr->CanSMManagerNetworkRef[netID];
-        const CanSM_DemEventParameterRefType* demEventParameterRef = managerNetwork->CanSMDemEventParameterRefs;
+        const CanSM_DemEventParameterRefType* demEventParameterRef =
+            CanSM_ConfigPtr->CanSMManagerNetworkRef[netID].CanSMDemEventParameterRefs;
         if (demEventParameterRef != NULL_PTR)
         {
             if (demEventParameterRef->ModeReqTimeoutPara != NULL_PTR)

@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                           **
- **  FILENAME    : CanTp.c                                                    **
- **                                                                           **
- **  Created on  : 2021/7/30 14:29:43                                         **
- **  Author      : tao.yu                                                     **
- **  Vendor      :                                                            **
- **  DESCRIPTION : Public functions implementation                            **
- **                                                                           **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                     **
- **                                                                           **
- **************************************************************************** */
+ */
 /* PRQA S 3108-- */
+/*
+**************************************************************************** **
+**                                                                           **
+**  FILENAME    : CanTp.c                                                    **
+**                                                                           **
+**  Created on  : 2021/7/30 14:29:43                                         **
+**  Author      : tao.yu                                                     **
+**  Vendor      :                                                            **
+**  DESCRIPTION : Public functions implementation                            **
+**                                                                           **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                     **
+**                                                                           **
+**************************************************************************** */
 /**
   \page ISOFT_MISRA_Exceptions  MISRA-C:2012 Compliance Exceptions
     ModeName:CanTp<br>
@@ -79,9 +80,6 @@ P2CONST(CanTp_ConfigType, AUTOMATIC, CANTP_APPL_CONST) CanTp_ConfigPtr = NULL_PT
 #define CANTP_STOP_SEC_VAR_POWER_ON_INIT_UNSPECIFIED /* PRQA S 0791 */ /* MISRA Rule 5.4 */
 #include "CanTp_MemMap.h"
 
-/*=======[E X T E R N A L   F U N C T I O N   D E C L A R A T I O N S]========*/
-
-/*=======[I N T E R N A L   D A T A]==========================================*/
 #if (STD_ON == CANTP_TIME_MAINFUNCTION_ENABLED)
 #define CANTP_START_SEC_VAR_POWER_ON_INIT_32
 #include "CanTp_MemMap.h"
@@ -90,10 +88,13 @@ VAR(uint32, CANTP_VAR_POWER_ON_INIT) CanTp_Timer = 0u;
 #include "CanTp_MemMap.h"
 #endif /* STD_ON == CANTP_TIME_MAINFUNCTION_ENABLED */
 
+/*=======[E X T E R N A L   F U N C T I O N   D E C L A R A T I O N S]========*/
+
+/*=======[I N T E R N A L   D A T A]==========================================*/
 #if (STD_ON == CANTP_RX_QUEUE)
 #define CANTP_START_SEC_VAR_NO_INIT_8
 #include "CanTp_MemMap.h"
-CANTP_LOCAL VAR(uint8, CANTP_VAR_NO_INIT) CanTp_RxQueue[CANTP_CHANNEL_NUMBER];
+CANTP_LOCAL VAR(uint8, CANTP_VAR_NOINIT) CanTp_RxQueue[CANTP_CHANNEL_NUMBER];
 #define CANTP_STOP_SEC_VAR_NO_INIT_8
 #include "CanTp_MemMap.h"
 #endif /* STD_ON == CANTP_RX_QUEUE */
@@ -188,9 +189,6 @@ CANTP_LOCAL FUNC(P2CONST(CanTp_RxNSduType, AUTOMATIC, CANTP_CONST), CANTP_CODE)
 /*Handle TX event occurred to the specific channel.*/
 CANTP_LOCAL FUNC(void, CANTP_CODE) CanTp_DispatchTxEvent(CanTp_ConnectionChannelType* connectionChannel);
 
-/*handling for SF transmitting.*/
-CANTP_LOCAL FUNC(void, CANTP_CODE) CanTp_TxHandleSFStart(CanTp_ConnectionChannelType* connectionChannel);
-
 /*Get TX-SDU configuration by TX-NSduId.*/
 CANTP_LOCAL FUNC(P2CONST(CanTp_TxNSduType, AUTOMATIC, CANTP_CONST), CANTP_CODE)
     CanTp_GetTxSduCfgByTxSduId(PduIdType TxSduId, uint8* ChannelId);
@@ -220,8 +218,6 @@ CANTP_LOCAL CANTP_INLINE FUNC(boolean, CANTP_CODE)
     CanTP_CheckRxChangeParameter(TPParameterType canTpParam, uint16 value);
 #endif /* CANTP_CHANGE_PARAMETER == STD_ON && STD_ON == CANTP_DEV_ERROR_DETECT*/
 
-/* handling for large SDU transmitting, trying to get TX buffer.*/
-CANTP_LOCAL FUNC(void, CANTP_CODE) CanTp_TxHandleLargeStart(CanTp_ConnectionChannelType* connectionChannel);
 #if (STD_ON == CANTP_RX_QUEUE)
 CANTP_LOCAL FUNC(void, CANTP_CODE) CanTp_AddRxQueue(uint8* buffer, uint8 ChannelId, uint8* accIndex);
 #endif /* STD_ON == CANTP_RX_QUEUE */
@@ -231,7 +227,7 @@ CANTP_LOCAL FUNC(void, CANTP_CODE) CanTp_AddRxQueue(uint8* buffer, uint8 Channel
 #define CANTP_START_SEC_CANTPTXCONFIRMATION_CALLBACK_CODE
 #include "CanTp_MemMap.h"
 CANTP_LOCAL FUNC(void, CANTP_APPL_CODE) CanTp_SFCFTxConfirmationSubDealWith(
-    CanTp_ConnectionType* TxSubchannelPtr,
+    CanTp_ConnectionChannelType* ChannelPtr,
     P2CONST(CanTp_TxNSduType, AUTOMATIC, CANTP_CONST) txNSduCfgPtr);
 
 CANTP_LOCAL FUNC(void, CANTP_APPL_CODE) CanTp_FCTxConfirmationSubDealWith(PduIdType TxPduId);
@@ -270,15 +266,15 @@ CanTp_Init(P2CONST(CanTp_ConfigType, AUTOMATIC, CANTP_APPL_CONST) CfgPtr)
     else
 #endif /* STD_ON == CANTP_DEV_ERROR_DETECT */
     {
-        SchM_Enter_CanTp(CANTP_INSTANCE_ID, CANTP_EXCLUSIVE_AREA_STATE); /*lock state*/
+        SchM_Enter_CanTp_ExclusiveArea(); /*lock state*/
         /*if the module is working, turn off it, then it can not receive or transmit new N-SDUs*/
         if (CANTP_ON == CanTp_ModuleState)
         {
             CanTp_ModuleState = CANTP_OFF;
         }
-        SchM_Exit_CanTp(CANTP_INSTANCE_ID, CANTP_EXCLUSIVE_AREA_STATE); /*unlock state*/
-
         CanTp_ConfigPtr = CfgPtr;
+        SchM_Exit_CanTp_ExclusiveArea(); /*unlock state*/
+
         /*Initialize all the channels to stop all the working channels*/
         for (ChannelId = 0; ChannelId < CANTP_CHANNEL_NUMBER; ChannelId++)
         {
@@ -287,11 +283,8 @@ CanTp_Init(P2CONST(CanTp_ConfigType, AUTOMATIC, CANTP_APPL_CONST) CfgPtr)
             CANTP_TXSUBCHANNEL(ChannelId)->ChannelId = ChannelId;
             CanTp_InitTxChannel(CANTP_TXSUBCHANNEL(ChannelId));
         }
-        /*turn the switch of module state on*/
-        SchM_Enter_CanTp(CANTP_INSTANCE_ID, CANTP_EXCLUSIVE_AREA_STATE); /*lock state*/
         /*CanTp start to work*/
         CanTp_ModuleState = CANTP_ON;
-        SchM_Exit_CanTp(CANTP_INSTANCE_ID, CANTP_EXCLUSIVE_AREA_STATE); /*unlock state*/
     }
 }
 #define CANTP_STOP_SEC_CODE
@@ -313,10 +306,8 @@ CanTp_Init(P2CONST(CanTp_ConfigType, AUTOMATIC, CANTP_APPL_CONST) CfgPtr)
 #include "CanTp_MemMap.h"
 FUNC(void, CANTP_APPL_CODE) CanTp_Shutdown(void)
 {
-    SchM_Enter_CanTp(CANTP_INSTANCE_ID, CANTP_EXCLUSIVE_AREA_STATE); /*lock state*/
     /*CanTp stops working*/
     CanTp_ModuleState = CANTP_OFF;
-    SchM_Exit_CanTp(CANTP_INSTANCE_ID, CANTP_EXCLUSIVE_AREA_STATE); /*unlock state*/
 }
 #define CANTP_STOP_SEC_CODE
 #include "CanTp_MemMap.h"
@@ -347,7 +338,6 @@ CanTp_Transmit(PduIdType TxPduId, P2CONST(PduInfoType, AUTOMATIC, CANTP_APPL_CON
     uint8 ChannelId;
     CanTp_ConnectionType* TxSubchannelPtr;
     const CanTp_ConnectionType* RxchannelPtr;
-    CanTp_ChannelTimerType* channelTimer;
 
 #if (STD_ON == CANTP_DEV_ERROR_DETECT)
     /*check module state, handle the request only when module started*/
@@ -376,7 +366,6 @@ CanTp_Transmit(PduIdType TxPduId, P2CONST(PduInfoType, AUTOMATIC, CANTP_APPL_CON
                 /*check if the channel is free*/
                 TxSubchannelPtr = CANTP_TXSUBCHANNEL(ChannelId);
                 RxchannelPtr = CANTP_RXCHANNEL(ChannelId);
-                SchM_Enter_CanTp(CANTP_INSTANCE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL); /*lock channel*/
 #if (CANTP_DIAG_GW_RES_ENABLE == STD_ON)
                 CanTp_TxConnectionType* TxchannelPtr = CANTP_TXCHANNEL(ChannelId);
                 TxchannelPtr->NeedRes.Started =
@@ -387,30 +376,38 @@ CanTp_Transmit(PduIdType TxPduId, P2CONST(PduInfoType, AUTOMATIC, CANTP_APPL_CON
                         || ((RxchannelPtr->RootState == CANTP_IDLE) || (RxchannelPtr->RootState == CANTP_OCCUPIED))))
                 {
                     /*channel is free, and no event happened to it*/
+                    SchM_Enter_CanTp_ExclusiveArea(); /*lock channel*/
                     TxSubchannelPtr->NSduId = TxNSduCfgPtr->TxNSduId;
                     TxSubchannelPtr->SduDataRemaining = PduInfoPtr->SduLength;
                     TxSubchannelPtr->SduDataTotalCount = PduInfoPtr->SduLength;
+                    SchM_Exit_CanTp_ExclusiveArea(); /*unlock channel*/
 #if (CANTP_DYN_ID_SUPPORT == STD_ON)
                     CanTp_SaveTxMetaDataInfo(TxSubchannelPtr, TxNSduCfgPtr, PduInfoPtr);
-#endif /* CANTP_DYN_ID_SUPPORT == STD_ON */
+#endif              /* CANTP_DYN_ID_SUPPORT == STD_ON */
                     /*set channel as sender to avoid unexpected PDU reception,here can not make sure
                      * of SF*/
+#if (CANTP_SYNCHRONOUS_TRANSMIT == STD_ON)
+                    CanTp_TxHandleTransmitReq(TxSubchannelPtr, TxNSduCfgPtr, ChannelId);
+#else
                     CanTp_TxHandleTransmitReq(TxSubchannelPtr, TxNSduCfgPtr);
                     /*start CS timer*/
-                    channelTimer = &TxSubchannelPtr->ChannelTimer;
+                    CanTp_ChannelTimerType* channelTimer = &TxSubchannelPtr->ChannelTimer;
                     if (TxNSduCfgPtr->Ncs != NULL_PTR)
                     {
+                        SchM_Enter_CanTp_ExclusiveArea(); /*lock channel*/
                         channelTimer->EnabledTimer = CANTP_NC;
                         channelTimer->RemainTime = *(TxNSduCfgPtr->Ncs);
+                        SchM_Exit_CanTp_ExclusiveArea(); /*unlock channel*/
                         CanTp_ResetTime(&(channelTimer->StartTime));
                     }
                     else
                     {
                         channelTimer->EnabledTimer = CANTP_TIMER_NONE;
                     }
+
+#endif
                     result = E_OK;
                 }
-                SchM_Exit_CanTp(CANTP_INSTANCE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL); /*unlock channel*/
             }
 #if (STD_ON == CANTP_RUNTIME_ERROR_DETECT)
             else
@@ -439,7 +436,7 @@ CanTp_Transmit(PduIdType TxPduId, P2CONST(PduInfoType, AUTOMATIC, CANTP_APPL_CON
  *                     CAN N-SDUs. The connection is identified by CanTpTxPduId.
  * ServiceId           0x08
  * Sync/Async          Synchronous
- * Reentrancy          Reentrant
+ * Reentrancy          Non Reentrant
  * Param-Name[in]      CanTpTxSduId ID of the CAN N-SDU to be canceled.
  *                     CanTpCancelReason The reason for cancelation.
  * Param-Name[out]     N/A
@@ -517,8 +514,8 @@ FUNC(Std_ReturnType, CANTP_APPL_CODE) CanTp_CancelTransmit(PduIdType TxPduId)
  * Brief               This service is used to cancel the reception of an ongoing N-SDU.
  * ServiceId           0x09
  * Sync/Async          Synchronous
- * Reentrancy          Reentrant
- * Param-Name[in]      This parameter contains the unique CanTp module identifier
+ * Reentrancy          Non Reentrant
+ * Param-Name[in]      RxPduId This parameter contains the unique CanTp module identifier
  *                     of the N-SDU to be cancelled for transmission.
  *                     Range: 0..(maximum number of L-PDU IDs received ) - 1
  * Param-Name[out]     N/A
@@ -788,6 +785,9 @@ FUNC(void, CANTP_APPL_CODE) CanTp_MainFunction(void)
     /*check module state, handle only when module started*/
     if (CANTP_ON == CanTp_ModuleState)
     {
+#if (STD_ON == CANTP_RX_QUEUE)
+        uint8 ChannelId;
+#endif /* STD_ON == CANTP_RX_QUEUE */
 #if (STD_ON == CANTP_TIME_MAINFUNCTION_ENABLED)
         if (CanTp_Timer < (CANTP_TIME_OVERFLOW - CANTP_MAIN_FUNCTION_PERIOD))
         {
@@ -799,10 +799,9 @@ FUNC(void, CANTP_APPL_CODE) CanTp_MainFunction(void)
         }
 #endif /* STD_ON == CANTP_TIME_MAINFUNCTION_ENABLED */
 #if (STD_ON == CANTP_RX_QUEUE)
-        uint8 ChannelId;
         if (CanTp_RxQueueCurrentIndex > 1u)
         {
-            SchM_Enter_CanTp(CANTP_MODULE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL); /*lock channel*/
+            SchM_Enter_CanTp_ExclusiveArea(); /*lock channel*/
             for (index = 0; index < CanTp_RxQueueCurrentIndex; index++)
             {
                 tempQueue[index] = CanTp_RxQueue[index];
@@ -810,7 +809,7 @@ FUNC(void, CANTP_APPL_CODE) CanTp_MainFunction(void)
             }
             tempQueueIndex = tempQueueSize;
             CanTp_RxQueueCurrentIndex = 0u;
-            SchM_Exit_CanTp(CANTP_MODULE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL); /*unlock channel*/
+            SchM_Exit_CanTp_ExclusiveArea(); /*unlock channel*/
             for (ChannelId = 0; ChannelId < CanTp_ConfigPtr->ChannelNum; ChannelId++)
             {
                 CanTp_AddRxQueue(tempQueue, ChannelId, &tempQueueIndex);
@@ -818,8 +817,8 @@ FUNC(void, CANTP_APPL_CODE) CanTp_MainFunction(void)
         }
         for (ChannelId = 0; ChannelId < CanTp_ConfigPtr->ChannelNum; ChannelId++)
         {
-            connectionChannel = &CanTp_Channels[ChannelId];
             index = (tempQueueSize > 0u) ? tempQueue[ChannelId] : ChannelId;
+            connectionChannel = &CanTp_Channels[index];
 #else  /* STD_ON == CANTP_RX_QUEUE */
         for (index = 0; index < CanTp_ConfigPtr->ChannelNum; index++)
         {
@@ -889,12 +888,11 @@ CanTp_GetVersionInfo(P2VAR(Std_VersionInfoType, AUTOMATIC, CANTP_APPL_DATA) vers
 /*
  * Brief               This function is called by the CAN Interface after a successful
  *                     reception of a RX CAN L-PDU.
- * ServiceId           0x04
+ * ServiceId           0x42
  * Sync/Async          Synchronous
- * Reentrancy          Reentrant
- * Param-Name[in]      CanTpRxPduId the received N-PDU ID
- *                     CanTpRxPduPtr indicator of structure with received
- *                                   L-SDU(payload) and data length
+ * Reentrancy          Reentrant for different PduIds. Non reentrant for the same PduId.
+ * Param-Name[in]      RxPduId the received N-PDU ID
+ *                     PduInfoPtr indicator of structure with received L-SDU(payload) and data length
  * Param-Name[out]     N/A
  * Param-Name[in/out]  N/A
  * Return              N/A
@@ -931,10 +929,10 @@ CanTp_RxIndication(PduIdType RxPduId, P2CONST(PduInfoType, AUTOMATIC, CANTP_APPL
 /*
  * Brief               All transmitted CAN frames belonging to the CAN Transport
  *                     Layer will be confirmed by this function.
- * ServiceId           0x05
+ * ServiceId           0x40
  * Sync/Async          Synchronous
- * Reentrancy          Reentrant
- * Param-Name[in]      CanTpTxPduId ID of CAN L-PDU that has been transmitted
+ * Reentrancy          Reentrant for different PduIds. Non reentrant for the same PduId.
+ * Param-Name[in]      TxPduId ID of CAN L-PDU that has been transmitted
  * Param-Name[out]     N/A
  * Param-Name[in/out]  N/A
  * Return              N/A
@@ -970,7 +968,7 @@ FUNC(void, CANTP_APPL_CODE) CanTp_TxConfirmation(PduIdType TxPduId)
                  || (CANTP_TX_LARGE_V4DATA_CFM == TxSubchannelPtr->Substate))
                 && (txNSduCfgPtr->TxNSduId == TxSubchannelPtr->NSduId))
             {
-                CanTp_SFCFTxConfirmationSubDealWith(TxSubchannelPtr, txNSduCfgPtr);
+                CanTp_SFCFTxConfirmationSubDealWith(&CanTp_Channels[ChannelId], txNSduCfgPtr);
             }
             else
             {
@@ -993,12 +991,12 @@ FUNC(void, CANTP_APPL_CODE) CanTp_TxConfirmation(PduIdType TxPduId)
 #define CANTP_START_SEC_CANTPTXCONFIRMATION_CALLBACK_CODE
 #include "CanTp_MemMap.h"
 CANTP_LOCAL FUNC(void, CANTP_APPL_CODE) CanTp_SFCFTxConfirmationSubDealWith(
-    CanTp_ConnectionType* TxSubchannelPtr,
+    CanTp_ConnectionChannelType* ChannelPtr,
     P2CONST(CanTp_TxNSduType, AUTOMATIC, CANTP_CONST) txNSduCfgPtr)
 {
     CanTp_ChannelTimerType* channelTimer;
     CanTp_STminType* STminTimer;
-
+    CanTp_ConnectionType* TxSubchannelPtr = &ChannelPtr->TxConnection.Connection;
     /*A data frame transmit confirmed*/
     if (CANTP_TX_SF_V4SF_CFM == TxSubchannelPtr->Substate)
     {
@@ -1082,6 +1080,13 @@ CANTP_LOCAL FUNC(void, CANTP_APPL_CODE) CanTp_SFCFTxConfirmationSubDealWith(
                     STminTimer->Started = TRUE;
                     STminTimer->RemainTime = STminTimer->FcSTMin;
                     CanTp_ResetTime(&(STminTimer->StartTime));
+#if (CANTP_STMIN_IMMEDIATE_TX_CONFIRMATION == STD_ON)
+                    if (STminTimer->FcSTMin == 0u)
+                    {
+
+                        CanTp_TxHandleLargeStart(ChannelPtr);
+                    }
+#endif
                 }
             } /*ENDOF whole SDU transmitting not finished*/
         }     /*END OF confirmation for CF*/
@@ -1090,7 +1095,7 @@ CANTP_LOCAL FUNC(void, CANTP_APPL_CODE) CanTp_SFCFTxConfirmationSubDealWith(
 
 CANTP_LOCAL FUNC(void, CANTP_APPL_CODE) CanTp_FCTxConfirmationSubDealWith(PduIdType TxPduId)
 {
-    uint8 ChannelId;
+    uint8 ChannelId = 0u;
     const CanTp_RxNSduType* rxNSduCfgPtr = CanTp_GetRxSduCfgByTxFCNPdu(TxPduId, &ChannelId);
     CanTp_ConnectionType* RxchannelPtr;
     CanTp_ChannelTimerType* channelTimer;
@@ -1158,8 +1163,7 @@ CANTP_LOCAL FUNC(void, CANTP_CODE)
 /* PRQA S 3432-- */ /* MISRA Rule 20.7 */
 {
     CanTp_STminType* STminTimer = &SubchannelPtr->STminTimer;
-
-    SchM_Enter_CanTp(CANTP_MODULE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL); /*lock channel*/
+    SchM_Enter_CanTp_ExclusiveArea(); /*lock channel*/
     /*initialize channel state information of RxConnection*/
     SubchannelPtr->RootState = CANTP_IDLE;
     SubchannelPtr->Substate = CANTP_SUBSTATE_NONE;
@@ -1195,7 +1199,7 @@ CANTP_LOCAL FUNC(void, CANTP_CODE)
     SubchannelPtr->MetaDataN_AE = 0;
     SubchannelPtr->MetaDataLength = 0;
 #endif /* CANTP_GENERIC_CONNECTION_SUPPORT == STD_ON) || (CANTP_DYN_ID_SUPPORT == STD_ON */
-    SchM_Exit_CanTp(CANTP_INSTANCE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL); /*unlock channel*/
+    SchM_Exit_CanTp_ExclusiveArea(); /*unlock channel*/
 }
 
 /*Initialize the Tx specific channel.*/
@@ -1326,7 +1330,6 @@ CANTP_LOCAL FUNC(void, CANTP_CODE)
 
     if (NULL_PTR != rxNSduCfgPtr)
     {
-        SchM_Enter_CanTp(CANTP_INSTANCE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL); /*lock channel*/
         switch (FrameType)
         {
         case CANTP_FTYPE_CF:
@@ -1342,7 +1345,6 @@ CANTP_LOCAL FUNC(void, CANTP_CODE)
             /*this will never happen*/
             break;
         }
-        SchM_Exit_CanTp(CANTP_INSTANCE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL); /*unlock channel*/
     }
 
     if (CANTP_FTYPE_RESEVED == FrameType)
@@ -1411,41 +1413,50 @@ CANTP_LOCAL FUNC(void, CANTP_CODE) CanTp_RxSubDealWithFC(
 #endif /* CANTP_DYN_ID_SUPPORT == STD_ON */
                 {
                     CanTp_GetChannelFCInfo(TxNSduCfgPtr, PduInfoPtr, &fcInfo);
-                    SchM_Enter_CanTp(CANTP_INSTANCE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL); /*lock channel*/
+
                     switch (fcInfo.FcFs)
                     {
                     case CANTP_FC_FS_CTS:
                         /*Clear to send. Get the channel ready to send CF, and make STmin timer timeout*/
+                        SchM_Enter_CanTp_ExclusiveArea(); /*unlock channel*/
                         TxSubchannelPtr->CurrentBs = fcInfo.FcBS;
                         TxSubchannelPtr->HandledCfCount = 0;
                         STminTimer = &TxSubchannelPtr->STminTimer;
                         STminTimer->Started = TRUE;
                         STminTimer->RemainTime = fcInfo.FcSTMin;
-                        CanTp_ResetTime(&(STminTimer->StartTime));
                         STminTimer->FcSTMin = fcInfo.FcSTMin;
                         channelTimer = &TxSubchannelPtr->ChannelTimer;
+                        CanTp_ResetTime(&(STminTimer->StartTime));
+                        SchM_Exit_CanTp_ExclusiveArea(); /*unlock channel*/
+
                         /*transit to state SENDCF*/
                         if (TxNSduCfgPtr->Ncs != NULL_PTR)
                         {
+                            SchM_Enter_CanTp_ExclusiveArea(); /*unlock channel*/
                             channelTimer->EnabledTimer = CANTP_NC;
                             channelTimer->RemainTime = *(TxNSduCfgPtr->Ncs);
                             CanTp_ResetTime(&(channelTimer->StartTime));
+                            SchM_Exit_CanTp_ExclusiveArea(); /*unlock channel*/
                         }
                         else
                         {
                             channelTimer->EnabledTimer = CANTP_TIMER_NONE;
                         }
+                        SchM_Enter_CanTp_ExclusiveArea();
                         TxSubchannelPtr->HandleType = CANTP_FTYPE_CF;
                         TxSubchannelPtr->Substate = CANTP_TX_LARGE_START;
+                        SchM_Exit_CanTp_ExclusiveArea();
                         break;
                     case CANTP_FC_FS_WT:
                         channelTimer = &TxSubchannelPtr->ChannelTimer;
                         /*reset the BS timer*/
                         if (TxNSduCfgPtr->Nbs != NULL_PTR)
                         {
+                            SchM_Enter_CanTp_ExclusiveArea();
                             channelTimer->EnabledTimer = CANTP_NB;
                             channelTimer->RemainTime = *(TxNSduCfgPtr->Nbs);
                             CanTp_ResetTime(&(channelTimer->StartTime));
+                            SchM_Exit_CanTp_ExclusiveArea();
                         }
                         else
                         {
@@ -1462,8 +1473,7 @@ CANTP_LOCAL FUNC(void, CANTP_CODE) CanTp_RxSubDealWithFC(
                         /*notify upper with NO_BUFFER*/
                         PduR_CanTpTxConfirmation(TxNSduCfgPtr->TxIPduId, E_NOT_OK);
                         break;
-                    }                                                                 /*ENDOF switch (fcInfo.FcFs)*/
-                    SchM_Exit_CanTp(CANTP_INSTANCE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL); /*unlock channel*/
+                    } /*ENDOF switch (fcInfo.FcFs)*/
                 }
             }
         }
@@ -1589,7 +1599,7 @@ CANTP_LOCAL FUNC(void, CANTP_CODE) CanTp_RxSubDealWithCFToUp(
     /*It is the expected CF*/
     CanTp_RxGetCFOffset(RxNSduCfgPtr, &dataoffset, &pcioffset);
     DataLength = PduInfoPtr->SduLength - dataoffset;
-    SchM_Enter_CanTp(CANTP_MODULE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL); /*lock channel*/
+    SchM_Enter_CanTp_ExclusiveArea(); /*lock channel*/
     RxchannelPtr->HandleType = CANTP_FTYPE_CF;
     channelTimer->EnabledTimer = CANTP_TIMER_NONE;
     if (0xFFu > RxchannelPtr->HandledCfCount)
@@ -1601,7 +1611,7 @@ CANTP_LOCAL FUNC(void, CANTP_CODE) CanTp_RxSubDealWithCFToUp(
     {
         DataLength = RxchannelPtr->SduDataRemaining;
     }
-    SchM_Exit_CanTp(CANTP_MODULE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL); /*unlock channel*/
+    SchM_Exit_CanTp_ExclusiveArea(); /*unlock channel*/
 
     upperpduInfo.SduDataPtr = &(PduInfoPtr->SduDataPtr[dataoffset]);
     upperpduInfo.SduLength = DataLength;
@@ -1614,9 +1624,7 @@ CANTP_LOCAL FUNC(void, CANTP_CODE) CanTp_RxSubDealWithCFToUp(
     }
     else
     {
-        SchM_Enter_CanTp(CANTP_MODULE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL); /*lock channel*/
         RxchannelPtr->SduDataRemaining -= DataLength;
-        SchM_Exit_CanTp(CANTP_MODULE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL); /*unlock channel*/
         if (((DataLength < (PduLengthType)((PduLengthType)8u - (PduLengthType)dataoffset))
 #if (STD_ON == CANTP_FD)
              || (PduInfoPtr->SduLength != RxchannelPtr->FDDlc)
@@ -1643,7 +1651,6 @@ CANTP_LOCAL FUNC(void, CANTP_CODE) CanTp_RxSubDealWithCFToUp(
                 else
 #endif /* STD_ON == CANTP_FD */
                 {
-                    SchM_Enter_CanTp(CANTP_MODULE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL); /*lock channel*/
 #if (STD_ON == CANTP_SYNCHRONOUS_RXINDICATION)
                     RxchannelPtr->RootState = CANTP_OCCUPIED;
                     PduR_CanTpRxIndication(RxNSduCfgPtr->RxIPduId, E_OK);
@@ -1657,7 +1664,6 @@ CANTP_LOCAL FUNC(void, CANTP_CODE) CanTp_RxSubDealWithCFToUp(
                     CanTp_AddRxQueue(CanTp_RxQueue, RxchannelPtr->ChannelId, &CanTp_RxQueueCurrentIndex);
 #endif /* STD_ON == CANTP_RX_QUEUE */
 #endif /* STD_ON == CANTP_SYNCHRONOUS_RXINDICATION */
-                    SchM_Exit_CanTp(CANTP_MODULE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL); /*unlock channel*/
                 }
             }
             else
@@ -1670,15 +1676,15 @@ CANTP_LOCAL FUNC(void, CANTP_CODE) CanTp_RxSubDealWithCFToUp(
                     if (E_NOT_OK == result)
                     {
                         /*the upper buffer is not enough to store the next block,so need to get more buffer*/
-                        SchM_Enter_CanTp(CANTP_MODULE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL); /*lock channel*/
+                        SchM_Enter_CanTp_ExclusiveArea(); /*lock channel*/
                         RxchannelPtr->Substate = CANTP_RX_LARGE_START;
-#if (STD_ON == CANTP_RX_QUEUE)
-                        CanTp_AddRxQueue(CanTp_RxQueue, RxchannelPtr->ChannelId, &CanTp_RxQueueCurrentIndex);
-#endif /* STD_ON == CANTP_RX_QUEUE */
                         channelTimer->EnabledTimer = CANTP_NB;
                         channelTimer->RemainTime = RxNSduCfgPtr->Nbr;
                         CanTp_ResetTime(&(channelTimer->StartTime));
-                        SchM_Exit_CanTp(CANTP_MODULE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL); /*unlock channel*/
+                        SchM_Exit_CanTp_ExclusiveArea(); /*unlock channel*/
+#if (STD_ON == CANTP_RX_QUEUE)
+                        CanTp_AddRxQueue(CanTp_RxQueue, RxchannelPtr->ChannelId, &CanTp_RxQueueCurrentIndex);
+#endif /* STD_ON == CANTP_RX_QUEUE */
                     }
                     else
                     {
@@ -1695,25 +1701,24 @@ CANTP_LOCAL FUNC(void, CANTP_CODE) CanTp_RxSubDealWithCFToUp(
                 else
                 {
                     /*continue to wait another CF*/
-                    SchM_Enter_CanTp(CANTP_MODULE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL); /*lock channel*/
+
                     RxchannelPtr->Substate = CANTP_RX_LARGE_V4CF;
                     if (RxNSduCfgPtr->Ncr != NULL_PTR)
                     {
+                        SchM_Enter_CanTp_ExclusiveArea();
                         N_Cr = *(RxNSduCfgPtr->Ncr);
                         channelTimer->EnabledTimer = CANTP_NC;
                         channelTimer->RemainTime = N_Cr;
                         CanTp_ResetTime(&(channelTimer->StartTime));
+                        SchM_Exit_CanTp_ExclusiveArea();
                     }
                     else
                     {
                         channelTimer->EnabledTimer = CANTP_TIMER_NONE;
                     }
-                    SchM_Exit_CanTp(CANTP_MODULE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL); /*unlock channel*/
                 }
                 /*update SN,expect next CF*/
-                SchM_Enter_CanTp(CANTP_MODULE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL); /*lock channel*/
                 RxchannelPtr->CurrentCfSn = (RxchannelPtr->CurrentCfSn + 1u) & CANTP_CF_SN_MASK;
-                SchM_Exit_CanTp(CANTP_MODULE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL); /*unlock channel*/
             } /*END OF SDU whole reception not finished*/
         }
     } /*END OF if (BUFREQ_E_NOT_OK == bufRslt)*/
@@ -1801,16 +1806,10 @@ CANTP_LOCAL FUNC(void, CANTP_CODE) CanTp_RxSubDealWithFF(
                         PduR_CanTpRxIndication(RxNSduCfgPtr->RxIPduId, E_NOT_OK);
                     }
                     /*update channel runtime information*/
-                    SchM_Enter_CanTp(CANTP_MODULE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL); /*lock channel*/
+                    SchM_Enter_CanTp_ExclusiveArea(); /*lock channel*/
                     RxchannelPtr->RootState = CANTP_LARGE_RECEIVING;
                     RxchannelPtr->Substate = CANTP_RX_FF_START;
                     RxchannelPtr->NSduId = RxNSduCfgPtr->RxNSduId;
-                    channelTimer = &RxchannelPtr->ChannelTimer;
-                    /*SWS_CanTp_00166,the CanTp module shall start a
-                    time-out N_Br before calling PduR_CanTpStartOfReception*/
-                    channelTimer->EnabledTimer = CANTP_NB;
-                    channelTimer->RemainTime = RxNSduCfgPtr->Nbr;
-                    CanTp_ResetTime(&(channelTimer->StartTime));
                     RxchannelPtr->HandleType = CANTP_FTYPE_FF;
                     RxchannelPtr->SduDataRemaining = frameDl;
                     RxchannelPtr->SduDataTotalCount = frameDl;
@@ -1822,7 +1821,14 @@ CANTP_LOCAL FUNC(void, CANTP_CODE) CanTp_RxSubDealWithFF(
                     RxchannelPtr->CurrentCfSn = 0;
                     RxchannelPtr->HandledCfCount = 0;
                     RxchannelPtr->SentWftCount = 0;
-                    SchM_Exit_CanTp(CANTP_MODULE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL); /*unlock channel*/
+                    channelTimer = &RxchannelPtr->ChannelTimer;
+                    /*SWS_CanTp_00166,the CanTp module shall start a
+                    time-out N_Br before calling PduR_CanTpStartOfReception*/
+                    channelTimer->EnabledTimer = CANTP_NB;
+                    channelTimer->RemainTime = RxNSduCfgPtr->Nbr;
+                    CanTp_ResetTime(&(channelTimer->StartTime));
+                    SchM_Exit_CanTp_ExclusiveArea();
+
                     CanTp_RxSubDealWithFFToUp(PduInfoPtr, RxNSduCfgPtr, connectionChannel);
                 }
 #if ((CANTP_DYN_ID_SUPPORT == STD_ON) && (CANTP_GENERIC_CONNECTION_SUPPORT == STD_ON))
@@ -1883,8 +1889,7 @@ CANTP_LOCAL FUNC(void, CANTP_CODE) CanTp_RxSubDealWithFFToUp(
 
     upperpduInfo.MetaDataPtr = data;
     if (((RxNSduCfgPtr->CanTpPduFlag & CANTP_METADATA_LENGTH_MASK) > 0u)
-        && ((CANTP_ADDRESS_EXTENSION_8_MASK == (RxNSduCfgPtr->CanTpPduFlag & CANTP_ADDRESS_EXTENSION_8_MASK))
-            || (CANTP_SA16_AND_TA16_MASK == (RxNSduCfgPtr->CanTpPduFlag & CANTP_SA16_AND_TA16_MASK))))
+        && (CANTP_SA16_AND_TA16_MASK == (RxNSduCfgPtr->CanTpPduFlag & CANTP_SA16_AND_TA16_MASK)))
     {
         CanTp_ConstructForwardRxMetaData(RxchannelPtr, RxNSduCfgPtr, upperpduInfoPtr);
     }
@@ -1907,11 +1912,8 @@ CANTP_LOCAL FUNC(void, CANTP_CODE) CanTp_RxSubDealWithFFToUp(
         {
 #if (CANTP_DIAG_GW_RES_ENABLE == STD_ON)
             CanTp_TxConnectionType* TxchannelPtr = &connectionChannel->TxConnection;
-            SchM_Enter_CanTp(CANTP_INSTANCE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL); /*lock channel*/
             TxchannelPtr->NeedRes.Sid = upperpduInfo.SduDataPtr[0];
-            SchM_Exit_CanTp(CANTP_INSTANCE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL); /*unlock channel*/
-#endif                                                                        /* CANTP_DIAG_GW_RES_ENABLE == STD_ON */
-            SchM_Enter_CanTp(CANTP_MODULE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL);  /*lock channel*/
+#endif /* CANTP_DIAG_GW_RES_ENABLE == STD_ON */
             RxchannelPtr->SduDataRemaining -= (PduInfoPtr->SduLength - (PduLengthType)Offset);
             /*calculate block size*/
             CanTp_CalcBS(RxNSduCfgPtr, RxchannelPtr);
@@ -1919,15 +1921,17 @@ CANTP_LOCAL FUNC(void, CANTP_CODE) CanTp_RxSubDealWithFFToUp(
             result = CanTp_CompareBufferWithBs(RxNSduCfgPtr, RxchannelPtr, bufferSize);
             if (E_NOT_OK == result)
             {
+                SchM_Enter_CanTp_ExclusiveArea();
                 /*the upper buffer is not enough to store the next block, so need to get more buffer*/
                 RxchannelPtr->Substate = CANTP_RX_LARGE_START;
-#if (STD_ON == CANTP_RX_QUEUE)
-                CanTp_AddRxQueue(CanTp_RxQueue, RxchannelPtr->ChannelId, &CanTp_RxQueueCurrentIndex);
-#endif /* STD_ON == CANTP_RX_QUEUE */
                 ChannelTimer = &RxchannelPtr->ChannelTimer;
                 ChannelTimer->EnabledTimer = CANTP_NB;
                 ChannelTimer->RemainTime = RxNSduCfgPtr->Nbr;
                 CanTp_ResetTime(&(ChannelTimer->StartTime));
+                SchM_Exit_CanTp_ExclusiveArea();
+#if (STD_ON == CANTP_RX_QUEUE)
+                CanTp_AddRxQueue(CanTp_RxQueue, RxchannelPtr->ChannelId, &CanTp_RxQueueCurrentIndex);
+#endif /* STD_ON == CANTP_RX_QUEUE */
             }
             else
             {
@@ -1939,12 +1943,9 @@ CANTP_LOCAL FUNC(void, CANTP_CODE) CanTp_RxSubDealWithFFToUp(
                     CanTp_ReleaseRxChannel(RxchannelPtr);
                 }
             }
-            SchM_Exit_CanTp(CANTP_MODULE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL); /*unlock channel*/
         }
         /*update expected next SN*/
-        SchM_Enter_CanTp(CANTP_MODULE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL); /*lock channel*/
         RxchannelPtr->CurrentCfSn = (uint8)(RxchannelPtr->CurrentCfSn + 1u) & CANTP_CF_SN_MASK;
-        SchM_Exit_CanTp(CANTP_MODULE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL); /*unlock channel*/
         break;
     case BUFREQ_E_NOT_OK:
         CanTp_InitSubChannel(RxchannelPtr);
@@ -1956,9 +1957,7 @@ CANTP_LOCAL FUNC(void, CANTP_CODE) CanTp_RxSubDealWithFFToUp(
         CanTp_FC.FcFs = CANTP_FC_FS_OVFLW;
         CanTp_FC.FcBS = 0;
         CanTp_FC.FcSTMin = 0;
-        SchM_Enter_CanTp(CANTP_MODULE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL); /*lock channel*/
         (void)CanTp_SendFC(RxNSduCfgPtr, RxchannelPtr, CanTp_FC);
-        SchM_Exit_CanTp(CANTP_MODULE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL); /*unlock channel*/
         /*release resource of the channel*/
         CanTp_ReleaseRxChannel(RxchannelPtr);
         break;
@@ -2124,8 +2123,7 @@ CANTP_LOCAL FUNC(void, CANTP_CODE) CanTp_RxSubDealWithSFToUp(
             }
 #if (CANTP_GENERIC_CONNECTION_SUPPORT == STD_ON)
             if (((RxNSduCfgPtr->CanTpPduFlag & CANTP_METADATA_LENGTH_MASK) > 0u)
-                && ((CANTP_ADDRESS_EXTENSION_8_MASK == (RxNSduCfgPtr->CanTpPduFlag & CANTP_ADDRESS_EXTENSION_8_MASK))
-                    || (CANTP_SA16_AND_TA16_MASK == (RxNSduCfgPtr->CanTpPduFlag & CANTP_SA16_AND_TA16_MASK))))
+                && (CANTP_SA16_AND_TA16_MASK == (RxNSduCfgPtr->CanTpPduFlag & CANTP_SA16_AND_TA16_MASK)))
             {
                 CanTp_ConstructForwardRxMetaData(RxchannelPtr, RxNSduCfgPtr, upperpduInfoPtr);
             }
@@ -2151,16 +2149,15 @@ CANTP_LOCAL FUNC(void, CANTP_CODE) CanTp_RxSubDealWithSFToUp(
                     else
                     {
 #if (CANTP_DIAG_GW_RES_ENABLE == STD_ON)
-                        SchM_Enter_CanTp(CANTP_INSTANCE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL); /*lock channel*/
                         connectionChannel->TxConnection.NeedRes.Sid = upperpduInfo.SduDataPtr[0];
-                        SchM_Exit_CanTp(CANTP_INSTANCE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL); /*unlock channel*/
-#endif /* CANTP_DIAG_GW_RES_ENABLE == STD_ON */
-                        SchM_Enter_CanTp(CANTP_INSTANCE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL); /*lock channel*/
+#endif                                                    /* CANTP_DIAG_GW_RES_ENABLE == STD_ON */
+                        SchM_Enter_CanTp_ExclusiveArea(); /*lock channel*/
                         /*update channel runtime information*/
                         RxchannelPtr->RootState = CANTP_SF_RECEIVING;
                         RxchannelPtr->Substate = CANTP_RX_SF_START;
                         RxchannelPtr->NSduId = RxNSduCfgPtr->RxNSduId;
                         RxchannelPtr->HandleType = CANTP_FTYPE_SF;
+                        SchM_Exit_CanTp_ExclusiveArea(); /*unlock channel*/
 #if (STD_ON == CANTP_SYNCHRONOUS_RXINDICATION)
                         RxchannelPtr->RootState = CANTP_OCCUPIED;
                         PduR_CanTpRxIndication(RxNSduCfgPtr->RxIPduId, E_OK);
@@ -2174,7 +2171,6 @@ CANTP_LOCAL FUNC(void, CANTP_CODE) CanTp_RxSubDealWithSFToUp(
                     CanTp_AddRxQueue(CanTp_RxQueue, RxchannelPtr->ChannelId, &CanTp_RxQueueCurrentIndex);
 #endif /* STD_ON == CANTP_RX_QUEUE */
 #endif /* STD_ON == CANTP_SYNCHRONOUS_RXINDICATION */
-                        SchM_Exit_CanTp(CANTP_INSTANCE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL); /*unlock channel*/
                     }
                 }
                 else
@@ -2324,27 +2320,30 @@ CANTP_LOCAL FUNC(Std_ReturnType, CANTP_CODE) CanTp_RxBlockStart(
         stMin = (RxNSduCfgPtr->STmin != NULL_PTR) ? (*(RxNSduCfgPtr->STmin)) : 0u;
     }
     /*send FC_CTS*/
+    SchM_Enter_CanTp_ExclusiveArea(); /*lock channel*/
     CanTp_FC.FcFs = CANTP_FC_FS_CTS;
     CanTp_FC.FcBS = RxchannelPtr->CurrentBs;
     CanTp_FC.FcSTMin = stMin;
-    SchM_Enter_CanTp(CANTP_MODULE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL); /*lock channel*/
     /*transit to waiting for confirmation of FC_CTS*/
     RxchannelPtr->Substate = CANTP_RX_LARGE_V4FCCTS_CFM;
+    RxchannelPtr->SentWftCount = 0;
+    RxchannelPtr->HandledCfCount = 0;
     if (RxNSduCfgPtr->Nar != NULL_PTR)
     {
         N_Ar = *(RxNSduCfgPtr->Nar);
         channelTimer->EnabledTimer = CANTP_NA;
         channelTimer->RemainTime = N_Ar;
         CanTp_ResetTime(&(channelTimer->StartTime));
+        SchM_Exit_CanTp_ExclusiveArea();
     }
     else
     {
         channelTimer->EnabledTimer = CANTP_TIMER_NONE;
+        SchM_Exit_CanTp_ExclusiveArea();
     }
-    RxchannelPtr->SentWftCount = 0;
-    RxchannelPtr->HandledCfCount = 0;
+
     ret = CanTp_SendFC(RxNSduCfgPtr, RxchannelPtr, CanTp_FC);
-    SchM_Exit_CanTp(CANTP_INSTANCE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL); /*unlock channel*/
+
     return ret;
 }
 
@@ -2458,11 +2457,11 @@ CANTP_LOCAL FUNC(void, CANTP_CODE) CanTp_DispatchRxEventSubDeal(
                 }
                 else
                 {
+                    SchM_Enter_CanTp_ExclusiveArea(); /*lock channel*/
                     /*Send FC_WAIT and then wait for the confirmation*/
                     CanTp_FC.FcFs = CANTP_FC_FS_WT;
                     CanTp_FC.FcBS = 0;
                     CanTp_FC.FcSTMin = 0;
-                    SchM_Enter_CanTp(CANTP_MODULE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL);
                     /*send FC OK*/
                     RxchannelPtr->SentWftCount++;
                     /*transit to waiting for confirmation of FC_WAIT*/
@@ -2472,13 +2471,14 @@ CANTP_LOCAL FUNC(void, CANTP_CODE) CanTp_DispatchRxEventSubDeal(
                         channelTimer->EnabledTimer = CANTP_NA;
                         channelTimer->RemainTime = *(RxNSduCfgPtr->Nar);
                         CanTp_ResetTime(&(channelTimer->StartTime));
+                        SchM_Exit_CanTp_ExclusiveArea(); /*unlock channel*/
                     }
                     else
                     {
                         channelTimer->EnabledTimer = CANTP_TIMER_NONE;
+                        SchM_Exit_CanTp_ExclusiveArea(); /*unlock channel*/
                     }
                     ret = CanTp_SendFC(RxNSduCfgPtr, RxchannelPtr, CanTp_FC);
-                    SchM_Exit_CanTp(CANTP_MODULE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL);
                 }
             } /*END OF try to send FC_WAIT*/
         }
@@ -2517,7 +2517,7 @@ CANTP_LOCAL FUNC(void, CANTP_CODE) CanTp_DispatchTxEvent(CanTp_ConnectionChannel
 }
 
 /*handling for SF transmitting.*/
-CANTP_LOCAL FUNC(void, CANTP_CODE) CanTp_TxHandleSFStart(CanTp_ConnectionChannelType* connectionChannel)
+FUNC(void, CANTP_CODE) CanTp_TxHandleSFStart(CanTp_ConnectionChannelType* connectionChannel)
 {
     CanTp_TxConnectionType* TxchannelPtr = &connectionChannel->TxConnection;
     CanTp_ConnectionType* TxSubchannelPtr = &TxchannelPtr->Connection;
@@ -2561,13 +2561,14 @@ CANTP_LOCAL FUNC(void, CANTP_CODE) CanTp_TxHandleSFStart(CanTp_ConnectionChannel
 #endif /* CANTP_DYN_ID_SUPPORT == STD_ON */
                 /*pduInfo.SduLength will be set in the api below, if padding*/
                 CanTp_TxSFPadding(TxSubchannelPtr, txSduCfgPtr, &pduInfo);
-                SchM_Enter_CanTp(CANTP_MODULE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL);
+                SchM_Enter_CanTp_ExclusiveArea(); /*lock channel*/
                 /*Transit channel to wait for confirmation of SF*/
                 TxSubchannelPtr->Substate = CANTP_TX_SF_V4SF_CFM;
                 channelTimer = &TxSubchannelPtr->ChannelTimer;
                 channelTimer->EnabledTimer = CANTP_NA;
                 channelTimer->RemainTime = txSduCfgPtr->Nas;
                 CanTp_ResetTime(&(channelTimer->StartTime));
+                SchM_Exit_CanTp_ExclusiveArea(); /*unlock channel*/
                 /*Request CANIF to transmit the SF frame*/
                 rslt = CanIf_Transmit(txSduCfgPtr->TxLPduId, &pduInfo);
                 if (E_NOT_OK == rslt)
@@ -2579,11 +2580,6 @@ CANTP_LOCAL FUNC(void, CANTP_CODE) CanTp_TxHandleSFStart(CanTp_ConnectionChannel
                     /*Notify the upper*/
                     PduR_CanTpTxConfirmation(txSduCfgPtr->TxIPduId, E_NOT_OK);
                 }
-                else
-                {
-                    /* do nothing */
-                }
-                SchM_Exit_CanTp(CANTP_MODULE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL);
             } /*END OF SF data copy finished*/
             break;
         } /*ENDOF case BUFREQ_OK*/
@@ -2605,7 +2601,7 @@ CANTP_LOCAL FUNC(void, CANTP_CODE) CanTp_TxHandleSFStart(CanTp_ConnectionChannel
 }
 
 /* handling for large SDU transmitting, trying to get TX buffer.*/
-CANTP_LOCAL FUNC(void, CANTP_CODE) CanTp_TxHandleLargeStart(CanTp_ConnectionChannelType* connectionChannel)
+FUNC(void, CANTP_CODE) CanTp_TxHandleLargeStart(CanTp_ConnectionChannelType* connectionChannel)
 {
     CanTp_TxConnectionType* TxchannelPtr = &connectionChannel->TxConnection;
     CanTp_ConnectionType* TxSubchannelPtr = &TxchannelPtr->Connection;
@@ -2687,14 +2683,15 @@ CANTP_LOCAL FUNC(void, CANTP_CODE) CanTp_TxHandleLargeStart(CanTp_ConnectionChan
                 pduInfo.SduLength += totalOffset;
 #if (CANTP_DYN_ID_SUPPORT == STD_ON)
                 CanTp_ConstructTxMetaDataInfo(TxSubchannelPtr, txSduCfgPtr, &pduInfo);
-#endif /* CANTP_DYN_ID_SUPPORT == STD_ON */
-                SchM_Enter_CanTp(CANTP_MODULE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL);
+#endif                                            /* CANTP_DYN_ID_SUPPORT == STD_ON */
+                SchM_Enter_CanTp_ExclusiveArea(); /*lock channel*/
                 /*Transit channel to wait for confirmation of FF*/
                 TxSubchannelPtr->Substate = CANTP_TX_LARGE_V4DATA_CFM;
                 channelTimer = &TxSubchannelPtr->ChannelTimer;
                 channelTimer->EnabledTimer = CANTP_NA;
                 channelTimer->RemainTime = txSduCfgPtr->Nas;
                 CanTp_ResetTime(&(channelTimer->StartTime));
+                SchM_Exit_CanTp_ExclusiveArea(); /*unlock channel*/
                 rslt = CanIf_Transmit(txSduCfgPtr->TxLPduId, &pduInfo);
                 /*Clear CopyandWaitStminFlg*/
                 /* PRQA S 3432++ */ /* MISRA Rule 20.7 */
@@ -2707,7 +2704,6 @@ CANTP_LOCAL FUNC(void, CANTP_CODE) CanTp_TxHandleLargeStart(CanTp_ConnectionChan
                     /*Notify the upper*/
                     PduR_CanTpTxConfirmation(txSduCfgPtr->TxIPduId, E_NOT_OK);
                 }
-                SchM_Exit_CanTp(CANTP_MODULE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL);
             }
             else /*handle the CF transmitting data copy*/
             {
@@ -2728,7 +2724,7 @@ CANTP_LOCAL FUNC(void, CANTP_CODE) CanTp_TxHandleLargeStart(CanTp_ConnectionChan
                         CanTp_MemorySet(
                             &pduInfo.SduDataPtr[pduInfo.SduLength],
                             CANTP_PADDING_BYTE,
-                            (CAN_DL - pduInfo.SduLength));
+                            (uint16)(CAN_DL - pduInfo.SduLength));
                         pduInfo.SduLength = CAN_DL;
                     }
 #if (CANTP_DYN_ID_SUPPORT == STD_ON)
@@ -2789,6 +2785,7 @@ CANTP_LOCAL FUNC(void, CANTP_CODE) CanTp_TxHandleLargeStart(CanTp_ConnectionChan
 /* Add new request to Rx Queue */
 CANTP_LOCAL FUNC(void, CANTP_CODE) CanTp_AddRxQueue(uint8* buffer, uint8 ChannelId, uint8* accIndex)
 {
+    SchM_Enter_CanTp_ExclusiveArea(); /*lock channel*/
     uint8 index;
     boolean find = FALSE;
     for (index = 0; index < *accIndex; index++)
@@ -2804,6 +2801,7 @@ CANTP_LOCAL FUNC(void, CANTP_CODE) CanTp_AddRxQueue(uint8* buffer, uint8 Channel
         buffer[*accIndex] = ChannelId;
         (*accIndex)++;
     }
+    SchM_Exit_CanTp_ExclusiveArea();
 }
 #endif /* STD_ON == CANTP_RX_QUEUE */
 
@@ -2892,8 +2890,9 @@ CANTP_LOCAL FUNC(void, CANTP_CODE) CanTp_HandleTimers(CanTp_ConnectionChannelTyp
     uint32 elapsedTick;
     uint8 unusedchannelId;
     CanTp_ChannelTimerType* channelTimer;
+    boolean timeOut = FALSE;
 
-    SchM_Enter_CanTp(CANTP_INSTANCE_ID, CANTP_EXCLUSIVE_AREA_STATE);
+    SchM_Enter_CanTp_ExclusiveArea(); /*lock channel*/
     if (CANTP_LARGE_RECEIVING == RxchannelPtr->RootState)
     {
         channelTimer = &RxchannelPtr->ChannelTimer;
@@ -2912,10 +2911,7 @@ CANTP_LOCAL FUNC(void, CANTP_CODE) CanTp_HandleTimers(CanTp_ConnectionChannelTyp
                     /*CANTP_NB deal in CanTp_DispatchRxEvent*/
                     if (CANTP_NB != channelTimer->EnabledTimer)
                     {
-                        /*notify upper,receiving failed*/
-                        PduR_CanTpRxIndication(RxNSduCfgPtr->RxIPduId, E_NOT_OK);
-                        /*release resource of channel*/
-                        CanTp_ReleaseRxChannel(RxchannelPtr);
+                        timeOut = TRUE;
                     }
                     /*report development error*/
                     CANTP_DET_REPORTRUNTIMEERROR(CANTP_SERVICEID_MAINFUNCTION, CANTP_E_COM);
@@ -2923,7 +2919,14 @@ CANTP_LOCAL FUNC(void, CANTP_CODE) CanTp_HandleTimers(CanTp_ConnectionChannelTyp
             }
         }
     }
-    SchM_Exit_CanTp(CANTP_INSTANCE_ID, CANTP_EXCLUSIVE_AREA_STATE);
+    SchM_Exit_CanTp_ExclusiveArea();
+    if (TRUE == timeOut)
+    {
+        /*notify upper,receiving failed*/
+        PduR_CanTpRxIndication(RxNSduCfgPtr->RxIPduId, E_NOT_OK);
+        /*release resource of channel*/
+        CanTp_ReleaseRxChannel(RxchannelPtr);
+    }
     CanTp_HandleTxTimers(TxSubchannelPtr);
 }
 
@@ -2935,8 +2938,9 @@ CANTP_LOCAL FUNC(void, CANTP_CODE) CanTp_HandleTxTimers(CanTp_ConnectionType* Tx
     uint8 unusedchannelId;
     CanTp_ChannelTimerType* channelTimer;
     CanTp_STminType* STminTimer;
+    boolean timeOut = FALSE;
 
-    SchM_Enter_CanTp(CANTP_INSTANCE_ID, CANTP_EXCLUSIVE_AREA_STATE);
+    SchM_Enter_CanTp_ExclusiveArea(); /*lock channel*/
     if ((CANTP_SF_TRANSIMITTING == TxSubchannelPtr->RootState)
         || (CANTP_LARGE_TRANSMITTING == TxSubchannelPtr->RootState))
     {
@@ -2967,13 +2971,7 @@ CANTP_LOCAL FUNC(void, CANTP_CODE) CanTp_HandleTxTimers(CanTp_ConnectionType* Tx
                     /*CANTP_NC deal in LargeStart*/
                     if (CANTP_NC != channelTimer->EnabledTimer)
                     {
-                        /* change tx RootState to idle , avoid
-                        release call the txconfiramation with E_NOT_OK*/
-                        TxSubchannelPtr->RootState = CANTP_IDLE;
-                        /*release resource of channel*/
-                        CanTp_ReleaseTxChannel(TxSubchannelPtr);
-                        /*notify upper,transmitting failed*/
-                        PduR_CanTpTxConfirmation(TxSduCfgPtr->TxIPduId, E_NOT_OK);
+                        timeOut = TRUE;
                     }
                     /*report development error*/
                     CANTP_DET_REPORTRUNTIMEERROR(CANTP_SERVICEID_MAINFUNCTION, CANTP_E_COM);
@@ -2981,7 +2979,17 @@ CANTP_LOCAL FUNC(void, CANTP_CODE) CanTp_HandleTxTimers(CanTp_ConnectionType* Tx
             }
         }
     }
-    SchM_Exit_CanTp(CANTP_INSTANCE_ID, CANTP_EXCLUSIVE_AREA_STATE);
+    if (TRUE == timeOut)
+    {
+        /* change tx RootState to idle , avoid
+        release call the txconfiramation with E_NOT_OK*/
+        TxSubchannelPtr->RootState = CANTP_IDLE;
+        /*release resource of channel*/
+        CanTp_ReleaseTxChannel(TxSubchannelPtr);
+        /*notify upper,transmitting failed*/
+        PduR_CanTpTxConfirmation(TxSduCfgPtr->TxIPduId, E_NOT_OK);
+    }
+    SchM_Exit_CanTp_ExclusiveArea();
 }
 
 /*

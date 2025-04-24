@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Ea.c                                                        **
- **                                                                            **
- **  Created on  : 2022/02/15                                                  **
- **  Author      : tao.yu                                                      **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Ea source description                                       **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Ea.c                                                        **
+**                                                                            **
+**  Created on  : 2022/02/15                                                  **
+**  Author      : tao.yu                                                      **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Ea source description                                       **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 
 /**
   \page ISOFT_MISRA_Exceptions  MISRA-C:2012 Compliance Exceptions
@@ -57,6 +58,9 @@
 
     \li PRQA S 1531 MISRA Rule 8.7 .<br>
     Reason:Configuration parameters, design requirements
+
+    \li PRQA S 3332 MISRA Rule 20.9 .<br>
+    Reason:Applicable to 16-bit platforms, design requirements
  */
 /*******************************************************************************
 **                      Include Section                                       **
@@ -64,7 +68,7 @@
 #include "Ea.h"
 #include "Ea_Cfg.h"
 #include "Det.h"
-#include "SchM_Ea.h"
+
 /*******************************************************************************
 **                       Version  Check                                       **
 *******************************************************************************/
@@ -140,8 +144,12 @@ static inline void Ea_DetReportRuntime(uint8 ApiId, uint8 ErrorId)
  *
  *  total header size: 14byte
  * */
-
+/* PRQA S 3332++ */ /* MISRA Rule 20.9 */
+#if (CPU_32_WITH_16_ADR == TRUE)
+#define EA_TOTAL_HEADER_LENGTH (10u + (sizeof(Eep_AddressType) * 2u))
+#else
 #define EA_TOTAL_HEADER_LENGTH (10u + sizeof(Eep_AddressType))
+#endif
 
 #define EA_HEADER_ALIGNMENT_LENGTH \
     (((EA_TOTAL_HEADER_LENGTH + (EA_VIRTUAL_PAGE_SIZE - 1U)) / EA_VIRTUAL_PAGE_SIZE) * EA_VIRTUAL_PAGE_SIZE)
@@ -150,6 +158,28 @@ static inline void Ea_DetReportRuntime(uint8 ApiId, uint8 ErrorId)
     Ea_BlockInfo[blockIndex].IsOperated = isOperated;         \
     Ea_BlockInfo[blockIndex].BlockVaild = blockVaild;
 
+#if (CPU_32_WITH_16_ADR == TRUE)
+#define EA_SERIALIZE(ParamVal, pSerialPtr, ParamType)        \
+    do                                                       \
+    {                                                        \
+        for (uint8 i = 0; i < (sizeof(ParamType) * 2u); i++) \
+        {                                                    \
+            pSerialPtr[i] = (uint8)(ParamVal >> (i * 8u));   \
+        }                                                    \
+        pSerialPtr = &pSerialPtr[sizeof(ParamType) * 2u];    \
+    } while (0);
+
+#define EA_DESERIALIZE(pDeserialPtr, ParamVal, ParamType)                              \
+    do                                                                                 \
+    {                                                                                  \
+        ParamVal = 0;                                                                  \
+        for (uint8 i = 0; i < (sizeof(ParamType) * 2u); i++)                           \
+        {                                                                              \
+            ParamVal = ParamVal | (ParamType)((ParamType)pDeserialPtr[i] << (i * 8u)); \
+        }                                                                              \
+        pDeserialPtr = &pDeserialPtr[sizeof(ParamType) * 2u];                          \
+    } while (0);
+#else
 #define EA_SERIALIZE(ParamVal, pSerialPtr, ParamType)      \
     do                                                     \
     {                                                      \
@@ -170,7 +200,8 @@ static inline void Ea_DetReportRuntime(uint8 ApiId, uint8 ErrorId)
         }                                                                              \
         pDeserialPtr = &pDeserialPtr[sizeof(ParamType)];                               \
     } while (0);
-
+#endif
+/* PRQA S 3332-- */ /* MISRA Rule 20.9 */
 /*******************************************************************************
 **                      Private Type Definitions                              **
 *******************************************************************************/

@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : DoIP.c                                                      **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : YB                                                          **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : DoIP.c                                                      **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : YB                                                          **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 
 /**
   \page ISOFT_MISRA_Exceptions  MISRA-C:2012 Compliance Exceptions
@@ -81,13 +82,19 @@
     Reason:Design required type conversions.
 
     \li PRQA S 3451 MISRA Rule 8.5 .<br>
-    Reason:Different configurations produce variations.
+    Reason:Different configurations produce variations;Compatible with multiple scenarios.
 
     \li PRQA S 3449 MISRA Rule 8.5 .<br>
-    Reason:Different configurations produce variations.
+    Reason:Different configurations produce variations;Compatible with multiple scenarios.
 
     \li PRQA S 3219 MISRA Rule 2.1 .<br>
     Reason:Design required.
+
+    \li PRQA S 3678 MISRA Rule 8.13 .<br>
+    Reason:Realize required.
+
+    \li PRQA S 0624 MISRA Rule 8.13 .<br>
+    Reason:Compatible with multiple scenarios.
  */
 
 /*******************************************************************************
@@ -95,7 +102,6 @@
 *******************************************************************************/
 #include "DoIP_Cbk.h"
 #include "DoIP_Internal.h"
-#include "SchM_DoIP.h"
 /*******************************************************************************
 **                       Version  Check                                       **
 *******************************************************************************/
@@ -157,7 +163,6 @@ FUNC(void, DOIP_CODE) DoIP_Init(P2CONST(DoIP_ConfigType, AUTOMATIC, DOIP_APPL_CO
     {
         DoIP_PBCfgPtr = DoIPConfigPtr;
 #if (DOIP_ROLE_SERVER_SUPPORT == TRUE)
-        DoIP_ActivationLineStatus = DOIP_ACTIVATION_LINE_INACTIVE;
         DoIP_CurrentTcpSocketNbr = 0u;
         DoIP_ResetPendingRoutingActiveMsg();
 #endif /*DOIP_ROLE_SERVER_SUPPORT == TRUE*/
@@ -997,7 +1002,6 @@ DoIP_SoAdTpTxConfirmation(VAR(PduIdType, AUTOMATIC) id, VAR(Std_ReturnType, AUTO
     uint8 bufferId;
     SoAd_SoConIdType socketId;
     DoIP_TcpInnerBufferType* pBuffer;
-    const DoIP_TcpConnStatusType* tcpConnStatus;
 #if (DOIP_ROLE_GATEWAY_SUPPORT == TRUE)
     DoIP_GatewayCtrlType* gwCtrl;
 #endif /* DOIP_ROLE_GATEWAY_SUPPORT == TRUE */
@@ -1010,7 +1014,9 @@ DoIP_SoAdTpTxConfirmation(VAR(PduIdType, AUTOMATIC) id, VAR(Std_ReturnType, AUTO
         if ((E_OK == DoIP_GetTcpConnIdxByTxPduId(id, &i))
             && (DOIP_INVALID_UINT8 != DoIP_TcpConnStatus[i].bufferId)) /*there may be a bug, should have get bufferid*/
         {
-            tcpConnStatus = &DoIP_TcpConnStatus[i];
+            /* PRQA S 3678++ */ /* MISRA Dir 8.13 */
+            DoIP_TcpConnStatusType* tcpConnStatus = &DoIP_TcpConnStatus[i];
+            /* PRQA S 3678-- */ /* MISRA Dir 8.13 */
             bufferId = tcpConnStatus->bufferId;
             pBuffer = &DoIP_TcpInnerBuf[bufferId];
             txCtrl = &pBuffer->txCtrl;
@@ -1073,7 +1079,6 @@ DoIP_SoAdTpTxConfirmation(VAR(PduIdType, AUTOMATIC) id, VAR(Std_ReturnType, AUTO
 #endif /*DOIP_ROLE_SERVER_SUPPORT == TRUE*/
                 /*Here cannot close waiting tcp connection,*/
                 (void)SoAd_CloseSoCon(socketId, TRUE);
-                DoIP_ResetTcpInnerBuf(bufferId);
 #if (STD_ON == DOIP_SOCKET_AUTO_OPEN)
                 (void)SoAd_OpenSoCon(socketId);
 #endif
@@ -1325,13 +1330,13 @@ FUNC(Std_ReturnType, DOIP_CODE) DoIP_IfCancelTransmit(VAR(PduIdType, AUTOMATIC) 
  * Return              None
  *
  */
-FUNC(void, DOIP_CODE) DoIP_ActivationLineSwitch(void)
+FUNC(void, DOIP_CODE) DoIP_ActivationLineSwitch(boolean* Active)
 {
-    DoIP_ActivationLineType pre_status;
     boolean det_status = TRUE;
     boolean assinment;
     uint8 cnnIdx;
     uint16 txPduId;
+    Std_ReturnType result = E_OK;
 
 #if (STD_ON == DOIP_DEV_ERROR_DETECT)
     /*SWS_DoIP_00285*/
@@ -1343,70 +1348,71 @@ FUNC(void, DOIP_CODE) DoIP_ActivationLineSwitch(void)
     if (TRUE == det_status)
 #endif /*STD_ON == DOIP_DEV_ERROR_DETECT*/
     {
-        pre_status = DoIP_ActivationLineStatus;
-        /* PRQA S 4342++ */ /* MISRA Rule 10.5 */
-        DoIP_ActivationLineStatus = (DoIP_ActivationLineType)
-            Rte_Mode_DoIP_DoIPActivationLineSwitchNotification_currentDoIPActivationLineStatus();
-        /* PRQA S 4342-- */ /* MISRA Rule 10.5 */
-
-        if ((DOIP_ACTIVATION_LINE_INACTIVE == pre_status) && (DOIP_ACTIVATION_LINE_ACTIVE == DoIP_ActivationLineStatus))
+        if (TRUE == *Active)
         {
 
             for (cnnIdx = DoIP_PBCfgPtr->DoIPConnections->DoIPClientUdpConnectionNbr;
-                 cnnIdx < DoIP_PBCfgPtr->DoIPConnections->DoIPAllUdpConnectionNbr;
+                 (cnnIdx < DoIP_PBCfgPtr->DoIPConnections->DoIPAllUdpConnectionNbr) && (result == E_OK);
                  cnnIdx++)
             {
                 txPduId = DOIP_UDPCON_CFG(cnnIdx)->DoIPSoAdTxPdu->DoIPSoAdLowerlayerTxPduId;
                 assinment = DOIP_UDPCON_CFG(cnnIdx)->DoIPRequestAddressAssignment;
-                (void)DoIP_SwitchOnOneLine(txPduId, assinment);
+                result = DoIP_SwitchOnOneLine(txPduId, assinment);
             }
 
             for (cnnIdx = DoIP_PBCfgPtr->DoIPConnections->DoIPClientTcpConnectionNbr;
-                 cnnIdx < DoIP_PBCfgPtr->DoIPConnections->DoIPAllTcpConnectionNbr;
+                 (cnnIdx < DoIP_PBCfgPtr->DoIPConnections->DoIPAllTcpConnectionNbr) && (result == E_OK);
                  cnnIdx++)
             {
                 txPduId = DOIP_TCPCON_CFG(cnnIdx)->DoIPSoAdTxPdu->DoIPSoAdLowerlayerTxPduId;
                 assinment = DOIP_TCPCON_CFG(cnnIdx)->DoIPRequestAddressAssignment;
-                (void)DoIP_SwitchOnOneLine(txPduId, assinment);
+                result = DoIP_SwitchOnOneLine(txPduId, assinment);
             }
 
             for (cnnIdx = DoIP_PBCfgPtr->DoIPConnections->DoIPClientVehicleAnnouncementConnectionNbr;
-                 cnnIdx < DoIP_PBCfgPtr->DoIPConnections->DoIPAllVehicleAnnouncementConnectionNbr;
+                 (cnnIdx < DoIP_PBCfgPtr->DoIPConnections->DoIPAllVehicleAnnouncementConnectionNbr) && (result == E_OK);
                  cnnIdx++)
             {
                 txPduId = DOIP_ANCCON_CFG(cnnIdx)->DoIPSoAdTxPdu->DoIPSoAdLowerlayerTxPduId;
                 assinment = DOIP_ANCCON_CFG(cnnIdx)->DoIPRequestAddressAssignment;
-                (void)DoIP_SwitchOnOneLine(txPduId, assinment);
+                result = DoIP_SwitchOnOneLine(txPduId, assinment);
+            }
+            if (result != E_OK)
+            {
+                *Active = FALSE;
             }
         }
-        else if (
-            (DOIP_ACTIVATION_LINE_ACTIVE == pre_status) && (DOIP_ACTIVATION_LINE_INACTIVE == DoIP_ActivationLineStatus))
+        else if (FALSE == *Active)
         {
             for (cnnIdx = DoIP_PBCfgPtr->DoIPConnections->DoIPClientUdpConnectionNbr;
-                 cnnIdx < DoIP_PBCfgPtr->DoIPConnections->DoIPAllUdpConnectionNbr;
+                 (cnnIdx < DoIP_PBCfgPtr->DoIPConnections->DoIPAllUdpConnectionNbr) && (result == E_OK);
                  cnnIdx++)
             {
                 txPduId = DOIP_UDPCON_CFG(cnnIdx)->DoIPSoAdTxPdu->DoIPSoAdLowerlayerTxPduId;
                 assinment = DOIP_UDPCON_CFG(cnnIdx)->DoIPRequestAddressAssignment;
-                (void)DoIP_SwitchOffOneLine(txPduId, assinment);
+                result = DoIP_SwitchOffOneLine(txPduId, assinment);
             }
 
             for (cnnIdx = DoIP_PBCfgPtr->DoIPConnections->DoIPClientTcpConnectionNbr;
-                 cnnIdx < DoIP_PBCfgPtr->DoIPConnections->DoIPAllTcpConnectionNbr;
+                 (cnnIdx < DoIP_PBCfgPtr->DoIPConnections->DoIPAllTcpConnectionNbr) && (result == E_OK);
                  cnnIdx++)
             {
                 txPduId = DOIP_TCPCON_CFG(cnnIdx)->DoIPSoAdTxPdu->DoIPSoAdLowerlayerTxPduId;
                 assinment = DOIP_TCPCON_CFG(cnnIdx)->DoIPRequestAddressAssignment;
-                (void)DoIP_SwitchOffOneLine(txPduId, assinment);
+                result = DoIP_SwitchOffOneLine(txPduId, assinment);
             }
 
             for (cnnIdx = DoIP_PBCfgPtr->DoIPConnections->DoIPClientVehicleAnnouncementConnectionNbr;
-                 cnnIdx < DoIP_PBCfgPtr->DoIPConnections->DoIPAllVehicleAnnouncementConnectionNbr;
+                 (cnnIdx < DoIP_PBCfgPtr->DoIPConnections->DoIPAllVehicleAnnouncementConnectionNbr) && (result == E_OK);
                  cnnIdx++)
             {
                 txPduId = DOIP_ANCCON_CFG(cnnIdx)->DoIPSoAdTxPdu->DoIPSoAdLowerlayerTxPduId;
                 assinment = DOIP_ANCCON_CFG(cnnIdx)->DoIPRequestAddressAssignment;
-                (void)DoIP_SwitchOffOneLine(txPduId, assinment);
+                result = DoIP_SwitchOffOneLine(txPduId, assinment);
+            }
+            if (result != E_OK)
+            {
+                *Active = TRUE;
             }
         }
         else

@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : LinTp.h                                                     **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : HuRongbo                                                    **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19_11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : LinTp.h                                                     **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : HuRongbo                                                    **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19_11                      **
+**                                                                            **
+*******************************************************************************/
 
 #ifndef LINTP_H
 #define LINTP_H
@@ -47,7 +48,7 @@
 *******************************************************************************/
 #define LINTP_H_SW_MAJOR_VERSION 2U
 #define LINTP_H_SW_MINOR_VERSION 0U
-#define LINTP_H_SW_PATCH_VERSION 13U
+#define LINTP_H_SW_PATCH_VERSION 14U
 
 #if (LINIF_DEV_ERROR_DETECT == STD_ON)
 #define LINTP_INIT_ID            (uint8)0x40
@@ -55,8 +56,6 @@
 #define LINTP_GETVERSIONINFO_ID  (uint8)0x42
 #define LINTP_SHUTDOWN_ID        (uint8)0x43
 #define LINTP_CHANGEPARAMETER_ID (uint8)0x44
-#define LINTP_CANCELTRANSMIT_ID  (uint8)0x46
-#define LINTP_CANCELRECEIVE_ID   (uint8)0x47
 #endif
 
 #define LINTP_NOUSED(paramter) (void)(paramter)
@@ -151,9 +150,9 @@ LinTp_Transmit(PduIdType LinTpTxSduId, P2CONST(PduInfoType, AUTOMATIC, LINIF_APP
         (versionInfo)->sw_minor_version = LINTP_H_SW_MINOR_VERSION; \
         (versionInfo)->sw_patch_version = LINTP_H_SW_PATCH_VERSION; \
     } while (0)
-#endif /* STD_ON == LINIF_DEV_ERROR_DETECT */
+#endif
 
-#endif /* STD_ON == LINTP_VERSION_INFO_API */
+#endif
 
 /******************************************************************************/
 /*
@@ -168,23 +167,6 @@ LinTp_Transmit(PduIdType LinTpTxSduId, P2CONST(PduInfoType, AUTOMATIC, LINIF_APP
  */
 /******************************************************************************/
 FUNC(void, LINIF_CODE) LinTp_Shutdown(void);
-
-/******************************************************************************/
-/*
- * Brief               A dummy method introduced for interface compatibility
- * ServiceId           0x46
- * Sync/Async          Synchronous
- * Reentrancy          Non Reentrant
- * Param-Name[in]      LinTpTxSduId: This parameter contains the Lin TP instance
- *                                   unique identifier of the Lin N-SDU which
- *                                   transfer has to be cancelled
- * Param-Name[in/out]  None
- * Param-Name[out]     None
- * Return              E_NOT_OK: Cancellation request of the transfer of the
- *                               specified Lin N-SDU is rejected
- */
-/******************************************************************************/
-FUNC(Std_ReturnType, LINIF_CODE) LinTp_CancelTransmit(PduIdType LinTpTxSduId);
 
 /******************************************************************************/
 /*
@@ -204,25 +186,6 @@ FUNC(Std_ReturnType, LINIF_CODE) LinTp_CancelTransmit(PduIdType LinTpTxSduId);
 /******************************************************************************/
 FUNC(Std_ReturnType, LINIF_CODE) LinTp_ChangeParameter(PduIdType id, TPParameterType parameter, uint16 value);
 
-/******************************************************************************/
-/*
- * Brief               A dummy method introduced for interface compatibility
- * ServiceId           0x47
- * Sync/Async          Synchronous
- * Reentrancy          Non Reentrant
- * Param-Name[in]      LinTpRxSduId: This parameter contains the Lin TP instance
- *                                   unique identifier of the Lin N-SDU
-.*                                   reception of which has to be cancelled.
- * Param-Name[in/out]  None
- * Param-Name[out]     None
- * Return              E_NOT_OK: Cancellation request of the reception of the
- *                               specified Lin N-SDU is rejected
- */
-/******************************************************************************/
-#if (LINIF_CANCEL_TRANSMIT_SUPPORTED == STD_ON)
-FUNC(Std_ReturnType, LINIF_CODE) LinTp_CancelReceive(PduIdType LinTpRxSduId);
 #endif
-
-#endif /* LINIF_TP_SUPPORTED == STD_ON */
 
 #endif /* LINTP_H */

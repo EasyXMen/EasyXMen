@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                           **
- **  FILENAME    : LdCom.h                                                    **
- **                                                                           **
- **  Created on  :                                                            **
- **  Author      : zhengfei.li                                                **
- **  Vendor      :                                                            **
- **  DESCRIPTION :                                                            **
- **                                                                           **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                      **
- **                                                                           **
- **************************************************************************** */
+ */
 /* PRQA S 3108-- */
+/*
+**************************************************************************** **
+**                                                                           **
+**  FILENAME    : LdCom.h                                                    **
+**                                                                           **
+**  Created on  :                                                            **
+**  Author      : zhengfei.li                                                **
+**  Vendor      :                                                            **
+**  DESCRIPTION :                                                            **
+**                                                                           **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                      **
+**                                                                           **
+**************************************************************************** */
 #ifndef LDCOM_H_
 #define LDCOM_H_
 /******************************************************************************
@@ -46,8 +47,8 @@
 #define LDCOM_INSTANCE_ID 0u
 /*Published information elements*/
 #define LDCOM_H_AR_MAJOR_VERSION 4u
-#define LDCOM_H_AR_MINOR_VERSION 2u
-#define LDCOM_H_AR_PATCH_VERSION 2u
+#define LDCOM_H_AR_MINOR_VERSION 5u
+#define LDCOM_H_AR_PATCH_VERSION 0u
 #define LDCOM_H_SW_MAJOR_VERSION 2u
 #define LDCOM_H_SW_MINOR_VERSION 0u
 #define LDCOM_H_SW_PATCH_VERSION 6u

@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                           **
- **  FILENAME    : IpduM.h                                                    **
- **                                                                           **
- **  Created on  :                                                            **
- **  Author      : darren.zhang                                               **
- **  Vendor      :                                                            **
- **  DESCRIPTION : IpduM                                                      **
- **                                                                           **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                      **
- **                                                                           **
- **************************************************************************** */
+ */
 /* PRQA S 3108-- */
+/*
+**************************************************************************** **
+**                                                                           **
+**  FILENAME    : IpduM.h                                                    **
+**                                                                           **
+**  Created on  :                                                            **
+**  Author      : darren.zhang                                               **
+**  Vendor      :                                                            **
+**  DESCRIPTION : IpduM                                                      **
+**                                                                           **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                      **
+**                                                                           **
+**************************************************************************** */
 #ifndef IPDUM_H_
 #define IPDUM_H_
 /******************************************************************************
@@ -46,8 +47,8 @@
 ******************************************************************************/
 /*Published information elements*/
 #define IPDUM_H_AR_MAJOR_VERSION 4u
-#define IPDUM_H_AR_MINOR_VERSION 2u
-#define IPDUM_H_AR_PATCH_VERSION 2u
+#define IPDUM_H_AR_MINOR_VERSION 5u
+#define IPDUM_H_AR_PATCH_VERSION 0u
 
 /* Development Errors */
 #define IPDUM_E_PARAM         (0x10u)
@@ -65,7 +66,8 @@
 #define IPDUM_SERVICE_ID_RXINDICATION    (0x42u)
 #define IPDUM_SERVICE_ID_TXCONFIRMATION  (0x40u)
 #define IPDUM_SERVICE_ID_TRIGGERTRANSMIT (0x41u)
-#define IPDUM_SERVICE_ID_MAINFUNCTION    (0x10u)
+#define IPDUM_SERVICE_ID_MAINFUNCTIONRX  (0x11u)
+#define IPDUM_SERVICE_ID_MAINFUNCTIONTX  (0x12u)
 
 /* ipdum rreference pdu data typedef */
 typedef struct
@@ -80,7 +82,16 @@ typedef uint16 SegmentCntType;
 /* multiplexer  ipdu include part number typedef */
 typedef uint16 IpduM_PartCntType;
 
+/* mainfunction type */
+typedef uint8 IpduM_MainFunctionType;
+
 /* Post-build configuration parameter type definitions */
+
+typedef enum
+{
+    IPDUM_UNINIT = 0u,
+    IPDUM_INIT
+} IpduM_StatusType;
 
 /* This parameter defines the ByteOrder for all segments
 and for the selectorField within the MultiplexedPdu. */
@@ -227,6 +238,9 @@ typedef struct
     /* tx static part point */
     P2CONST(IpduM_TxPartType, AUTOMATIC, IPDUM_APPL_CONST) IpduMTxStaticPartPtr;
 #endif /* STD_ON == IPDUM_STATIC_PART_EXISTS */
+#if (STD_ON == IPDUM_MULTIPLE_PARTITION_USED)
+    uint16 IpduMTxRequestPartition;
+#endif
 } IpduMTxRequestType;
 
 /* This container contains the configuration for the dynamic part of incoming
@@ -437,6 +451,9 @@ typedef struct
     IpduM_RxPduType RxIndType;
     /* seach index */
     uint8 Index;
+#if (STD_ON == IPDUM_MULTIPLE_PARTITION_USED)
+    uint16 IpduMRxPduPartition;
+#endif
 } IpduM_LoRxPduType;
 
 /* ipdum received tx confirmation pathway type */
@@ -471,6 +488,12 @@ typedef struct
     P2CONST(IpduMTxRequestType, AUTOMATIC, IPDUM_APPL_CONST) IpduMTxRequestPtr;
     /* includes information about all rx indication multiplexed I-PDUs */
     P2CONST(IpduMRxIndicationType, AUTOMATIC, IPDUM_APPL_CONST) IpduMRxIndicationPtr;
+    const uint16* IpduMMainFunctionRxRange;
+    const uint16* IpduMMainFunctionTxRange;
+#if (STD_ON == IPDUM_MULTIPLE_PARTITION_USED)
+    const uint16* IpduMMainFuncRxPartitionRange;
+    const uint16* IpduMMainFuncTxPartitionRange;
+#endif
 } IpduM_ConfigType;
 /*******************************************************************************
 **                      Global Data                                           **
@@ -519,7 +542,32 @@ extern FUNC(void, IPDUM_CODE) IpduM_Init(P2CONST(IpduM_ConfigType, AUTOMATIC, IP
 extern FUNC(void, IPDUM_CODE) IpduM_GetVersionInfo(P2VAR(Std_VersionInfoType, AUTOMATIC, IPDUM_APPL_DATA) versioninfo);
 /* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
 #endif               /* STD_ON == IPDUM_VERSION_INFO_API */
-
+/**
+ * Performs the processes of the activities that are not directly
+    initiated by the calls from PDU-R.
+ * Service ID: 0x11
+ * Sync/Async: Synchronous
+ * Reentrancy: Reentrant for different instances. Non reentrant for the same instance.
+ * Parameters(IN): TNA
+ * Parameters(INOUT):  NA
+ * Parameters(OUT): NA
+ * Return value: NA
+ *  @SWS_IpduM_91001
+ */
+extern FUNC(void, IPDUM_CODE) IpduM_MainFunctionRx(IpduM_MainFunctionType mainFunctionId);
+/**
+ * Performs the processes of the activities that are not directly
+    initiated by the calls from PDU-R.
+ * Service ID: 0x12
+ * Sync/Async: Synchronous
+ * Reentrancy: Reentrant for different instances. Non reentrant for the same instance.
+ * Parameters(IN): TNA
+ * Parameters(INOUT):  NA
+ * Parameters(OUT): NA
+ * Return value: NA
+ *  @SWS_IpduM_91002
+ */
+extern FUNC(void, IPDUM_CODE) IpduM_MainFunctionTx(IpduM_MainFunctionType mainFunctionId);
 /**
  * Service is called by the PDU-Router to request a transmission.
  * Service ID: 0x03

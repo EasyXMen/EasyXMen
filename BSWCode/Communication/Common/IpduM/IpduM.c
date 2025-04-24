@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                           **
- **  FILENAME    : IpduM.c                                                    **
- **                                                                           **
- **  Created on  :                                                            **
- **  Author      : darren.zhang                                               **
- **  Vendor      :                                                            **
- **  DESCRIPTION : IDPUM                                                      **
- **                                                                           **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                      **
- **                                                                           **
- **************************************************************************** */
+ */
 /* PRQA S 3108-- */
+/*
+**************************************************************************** **
+**                                                                           **
+**  FILENAME    : IpduM.c                                                    **
+**                                                                           **
+**  Created on  :                                                            **
+**  Author      : darren.zhang                                               **
+**  Vendor      :                                                            **
+**  DESCRIPTION : IDPUM                                                      **
+**                                                                           **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                      **
+**                                                                           **
+**************************************************************************** */
 
 /***********************************************************************************************************************
 **                                          REVISION   HISTORY                                                        **
@@ -41,7 +42,8 @@
  *                                        reset containedCnt of the container, Resolve the containedCnt of container
  *                                        increase when IpduM_Transmit() is called again.
  *  V2.0.2    [20231207]  [shengnan.sun]  Handle frame loss.
- *  v2.0.3    [20240227]  [shengnan.sun]  QAC_PH_2024 check.
+ *  V2.0.3    [20240229]  [shengnan.sun]  QAC_PH_2024 check.
+ *  V2.0.4    [20240309]  [shengnan.sun]  Support multiple partition feature.
  *
  **********************************************************************************************************************/
 
@@ -61,9 +63,6 @@
 
     \li PRQA S 0488 MISRA Rule 18.4 .<br>
     Reason:The offending items are array pointer operations,no effect and reserved
-
-    \li PRQA S 1338 MISRA Rule 17.8 .<br>
-    Reason:It is necessary to modify the value of this parameter.
  */
 
 /******************************************************************************
@@ -73,13 +72,16 @@
 #if (STD_ON == IPDUM_RX_DIRECT_COM_INVOCATION)
 #include "Com_Cbk.h"
 #endif
+#if (STD_ON == IPDUM_MULTIPLE_PARTITION_USED)
+#include "Os.h"
+#endif
 #include "Det.h"
 /******************************************************************************
 **                      Imported Compiler Switch Check                       **
 ******************************************************************************/
 #define IPDUM_C_AR_MAJOR_VERSION 4u
-#define IPDUM_C_AR_MINOR_VERSION 2u
-#define IPDUM_C_AR_PATCH_VERSION 2u
+#define IPDUM_C_AR_MINOR_VERSION 5u
+#define IPDUM_C_AR_PATCH_VERSION 0u
 #define IPDUM_C_SW_MAJOR_VERSION 2u
 #define IPDUM_C_SW_MINOR_VERSION 0u
 #define IPDUM_C_SW_PATCH_VERSION 3u
@@ -129,7 +131,7 @@ typedef uint32 IpduM_uintx;
 /*Module initialize status, TRUE initialized, FALSE not initialized*/
 #define IPDUM_START_SEC_VAR_INIT_BOOLEAN
 #include "IpduM_MemMap.h"
-static VAR(boolean, IPDUM_VAR_POWER_ON_INIT) IpduM_InitStauts = FALSE;
+static VAR(IpduM_StatusType, IPDUM_VAR_POWER_ON_INIT) IpduM_InitStauts = IPDUM_UNINIT;
 #define IPDUM_STOP_SEC_VAR_INIT_BOOLEAN
 #include "IpduM_MemMap.h"
 
@@ -247,7 +249,7 @@ static FUNC(void, IPDUM_CODE)
     IpduM_RxMultiplexHandle(IpduM_uintx rxIndIndex, P2CONST(PduInfoType, AUTOMATIC, IPDUM_APPL_DATA) PduInfoPtr);
 /* Multiplexer RX indiation pdu find select value */
 static FUNC(Std_ReturnType, IPDUM_CODE) IpduM_MultiplexFindSelectVal(
-    IpduM_ByteOrderType byteOrd,
+    IpduM_ByteOrderType byteOrder,
     P2CONST(PduInfoType, AUTOMATIC, IPDUM_APPL_DATA) pduInfoPtr,
     P2CONST(IpduMSelectorFieldType, AUTOMATIC, IPDUM_APPL_DATA) selectFieldPtr,
     /* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
@@ -332,7 +334,7 @@ static FUNC(Std_ReturnType, IPDUM_CODE)
     /* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
     IpudM_SegmentCopy(P2CONST(IpduM_PduTranslateType, AUTOMATIC, IPDUM_APPL_DATA) pduTransPtr);
 /* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
-#endif               /* IPDUM_RX_INDICA_NUMBER_MAX > 0u||IPDUM_TX_REQUEST_NUMBER_MAX > 0u */
+#endif
 
 #define IPDUM_STOP_SEC_CODE
 #include "IpduM_MemMap.h"
@@ -362,7 +364,7 @@ static FUNC(Std_ReturnType, IPDUM_CODE)
 #define IPDUM_START_SEC_CODE
 #include "IpduM_MemMap.h"
 FUNC(void, IPDUM_CODE)
-IpduM_Init(P2CONST(IpduM_ConfigType, AUTOMATIC, IPDUM_APPL_DATA) configPtr)
+IpduM_Init(P2CONST(IpduM_ConfigType, AUTOMATIC, IPDUM_APPL_DATA) configPtr) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
 {
     IpduM_uintx index;
 #if (IPDUM_CONTAINER_TX_NUMBER_MAX > 0u)
@@ -373,7 +375,7 @@ IpduM_Init(P2CONST(IpduM_ConfigType, AUTOMATIC, IPDUM_APPL_DATA) configPtr)
 #if (STD_ON == IPDUM_DEV_ERROR_DETECT)
     boolean errFlg = FALSE;
 #if (STD_ON == IPDUM_REINIT_CHECK)
-    if (FALSE != IpduM_InitStauts)
+    if (IPDUM_UNINIT != IpduM_InitStauts)
     {
         errFlg = TRUE;
         (void)Det_ReportError(IPDUM_MODULE_ID, IPDUM_INSTANCE_ID, IPDUM_SERVICE_ID_INIT, IPDUM_E_INIT_FAILED);
@@ -454,7 +456,7 @@ IpduM_Init(P2CONST(IpduM_ConfigType, AUTOMATIC, IPDUM_APPL_DATA) configPtr)
             IpduM_InnerContainerRx[index].writePoint = 0x0u;
         }
 #endif /* IPDUM_CONTAINER_RX_NUMBER_MAX > 0u */
-        IpduM_InitStauts = TRUE;
+        IpduM_InitStauts = IPDUM_INIT;
     }
     return;
 }
@@ -524,7 +526,7 @@ IpduM_Transmit(PduIdType PdumTxPduId, P2CONST(PduInfoType, AUTOMATIC, IPDUM_APPL
 {
     Std_ReturnType ret = E_NOT_OK;
 #if (STD_ON == IPDUM_DEV_ERROR_DETECT)
-    if (TRUE != IpduM_InitStauts)
+    if (IPDUM_INIT != IpduM_InitStauts)
     {
         (void)Det_ReportError(IPDUM_MODULE_ID, IPDUM_INSTANCE_ID, IPDUM_SERVICE_ID_TRANSMIT, IPDUM_E_UNINIT);
     }
@@ -545,6 +547,7 @@ IpduM_Transmit(PduIdType PdumTxPduId, P2CONST(PduInfoType, AUTOMATIC, IPDUM_APPL
 #endif /* STD_ON == IPDUM_STATIC_PART_EXISTS */
             (IPDUM_TRANSMIT_TPYE_DYNAMIC == IpduM_CfgPtr->IpduMUpTxPduPtr[PdumTxPduId].TxReqType))
         {
+#if (IPDUM_TX_REQUEST_NUMBER_MAX > 0u)
 #if (STD_ON == IPDUM_DEV_ERROR_DETECT)
             if ((IPDUM_TX_REQUEST_NUMBER_MAX <= IpduM_CfgPtr->IpduMUpTxPduPtr[PdumTxPduId].Index)
                 || (NULL_PTR == IpduM_CfgPtr->IpduMTxRequestPtr))
@@ -554,13 +557,13 @@ IpduM_Transmit(PduIdType PdumTxPduId, P2CONST(PduInfoType, AUTOMATIC, IPDUM_APPL
             else
 #endif /* STD_ON == IPDUM_DEV_ERROR_DETECT */
             {
-#if (IPDUM_TX_REQUEST_NUMBER_MAX > 0u)
                 ret = IpduM_TransmitMultiplexLoadData(&IpduM_CfgPtr->IpduMUpTxPduPtr[PdumTxPduId], PduInfoPtr);
-#endif /* IPDUM_TX_REQUEST_NUMBER_MAX > 0u */
             }
+#endif /* IPDUM_TX_REQUEST_NUMBER_MAX > 0u */
         }
         else if (IPDUM_TRANSMIT_TYPE_CONTAINED == IpduM_CfgPtr->IpduMUpTxPduPtr[PdumTxPduId].TxReqType)
         {
+#if (IPDUM_CONTAINED_TX_NUMBER_MAX > 0u)
 #if (STD_ON == IPDUM_DEV_ERROR_DETECT)
             if ((IPDUM_CONTAINED_TX_NUMBER_MAX <= IpduM_CfgPtr->IpduMUpTxPduPtr[PdumTxPduId].Index)
                 || (NULL_PTR == IpduM_CfgPtr->IpduMContainedTxPduPtr))
@@ -570,10 +573,9 @@ IpduM_Transmit(PduIdType PdumTxPduId, P2CONST(PduInfoType, AUTOMATIC, IPDUM_APPL
             else
 #endif /* STD_ON == IPDUM_DEV_ERROR_DETECT */
             {
-#if (IPDUM_CONTAINED_TX_NUMBER_MAX > 0u)
                 ret = IpduM_TransmitContained(IpduM_CfgPtr->IpduMUpTxPduPtr[PdumTxPduId].Index, PduInfoPtr);
-#endif /* IPDUM_CONTAINED_TX_NUMBER_MAX > 0u */
             }
+#endif /* IPDUM_CONTAINED_TX_NUMBER_MAX > 0u */
         }
         else
         {
@@ -609,7 +611,7 @@ IpduM_RxIndication(PduIdType RxPduId, P2CONST(PduInfoType, AUTOMATIC, IPDUM_APPL
 /* PRQA S 1532 -- */ /* MISRA Rule 8.7 */
 {
 #if (STD_ON == IPDUM_DEV_ERROR_DETECT)
-    if (TRUE != IpduM_InitStauts)
+    if (IPDUM_INIT != IpduM_InitStauts)
     {
         (void)Det_ReportError(IPDUM_MODULE_ID, IPDUM_INSTANCE_ID, IPDUM_SERVICE_ID_RXINDICATION, IPDUM_E_UNINIT);
     }
@@ -626,6 +628,7 @@ IpduM_RxIndication(PduIdType RxPduId, P2CONST(PduInfoType, AUTOMATIC, IPDUM_APPL
     {
         if (IPDUM_RXIND_TYPE_MULT == IpduM_CfgPtr->IpduMRxPduPtr[RxPduId].RxIndType)
         {
+#if (IPDUM_RX_INDICA_NUMBER_MAX > 0u)
 #if (STD_ON == IPDUM_DEV_ERROR_DETECT)
             if ((IPDUM_RX_INDICA_NUMBER_MAX <= IpduM_CfgPtr->IpduMRxPduPtr[RxPduId].Index)
                 || (NULL_PTR == IpduM_CfgPtr->IpduMRxIndicationPtr))
@@ -635,13 +638,13 @@ IpduM_RxIndication(PduIdType RxPduId, P2CONST(PduInfoType, AUTOMATIC, IPDUM_APPL
             else
 #endif /* STD_ON == IPDUM_DEV_ERROR_DETECT */
             {
-#if (IPDUM_RX_INDICA_NUMBER_MAX > 0u)
                 IpduM_RxMultiplexHandle(IpduM_CfgPtr->IpduMRxPduPtr[RxPduId].Index, PduInfoPtr);
-#endif /* IPDUM_RX_INDICA_NUMBER_MAX > 0u */
             }
+#endif /* IPDUM_RX_INDICA_NUMBER_MAX > 0u */
         }
         else if (IPDUM_RXIND_TYPE_CONTAINER == IpduM_CfgPtr->IpduMRxPduPtr[RxPduId].RxIndType)
         {
+#if (IPDUM_CONTAINER_RX_NUMBER_MAX > 0u)
 #if (STD_ON == IPDUM_DEV_ERROR_DETECT)
             if ((IPDUM_CONTAINER_RX_NUMBER_MAX <= IpduM_CfgPtr->IpduMRxPduPtr[RxPduId].Index)
                 || (NULL_PTR == IpduM_CfgPtr->IpduMContainerRxPduPtr))
@@ -651,10 +654,9 @@ IpduM_RxIndication(PduIdType RxPduId, P2CONST(PduInfoType, AUTOMATIC, IPDUM_APPL
             else
 #endif /* STD_ON == IPDUM_DEV_ERROR_DETECT */
             {
-#if (IPDUM_CONTAINER_RX_NUMBER_MAX > 0u)
                 IpduM_ContainerRxIndication(IpduM_CfgPtr->IpduMRxPduPtr[RxPduId].Index, PduInfoPtr);
-#endif /* IPDUM_CONTAINER_RX_NUMBER_MAX > 0u */
             }
+#endif /* IPDUM_CONTAINER_RX_NUMBER_MAX > 0u */
         }
         else
         {
@@ -684,7 +686,7 @@ FUNC(void, IPDUM_TXCONFIRMATION_CODE)
 IpduM_TxConfirmation(PduIdType TxPduId) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
 {
 #if (STD_ON == IPDUM_DEV_ERROR_DETECT)
-    if (TRUE != IpduM_InitStauts)
+    if (IPDUM_INIT != IpduM_InitStauts)
     {
         (void)Det_ReportError(IPDUM_MODULE_ID, IPDUM_INSTANCE_ID, IPDUM_SERVICE_ID_TXCONFIRMATION, IPDUM_E_UNINIT);
     }
@@ -697,6 +699,7 @@ IpduM_TxConfirmation(PduIdType TxPduId) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
     {
         if (IPDUM_TXCONF_TYPE_MULT == IpduM_CfgPtr->IpduMTxPduPtr[TxPduId].txConfPduType)
         {
+#if (IPDUM_TX_REQUEST_NUMBER_MAX > 0u)
 #if (STD_ON == IPDUM_DEV_ERROR_DETECT)
             if ((IPDUM_TX_REQUEST_NUMBER_MAX <= IpduM_CfgPtr->IpduMTxPduPtr[TxPduId].Index)
                 || (NULL_PTR == IpduM_CfgPtr->IpduMTxRequestPtr))
@@ -705,15 +708,15 @@ IpduM_TxConfirmation(PduIdType TxPduId) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
                     Det_ReportError(IPDUM_MODULE_ID, IPDUM_INSTANCE_ID, IPDUM_SERVICE_ID_TXCONFIRMATION, IPDUM_E_PARAM);
             }
             else
-#endif /* STD_ON == IPDUM_DEV_ERROR_DETECT */
+#endif /* STD_ON == IPDUM_DEV_ERROR_DETECT  */
             {
-#if (IPDUM_TX_REQUEST_NUMBER_MAX > 0u)
                 IpduM_TxConfOfMultiplex(IpduM_CfgPtr->IpduMTxPduPtr[TxPduId].Index);
-#endif /* IPDUM_TX_REQUEST_NUMBER_MAX > 0u */
             }
+#endif /* IPDUM_TX_REQUEST_NUMBER_MAX > 0u */
         }
         else if (IPDUM_TXCONF_TYPE_CONTAINER == IpduM_CfgPtr->IpduMTxPduPtr[TxPduId].txConfPduType)
         {
+#if (IPDUM_CONTAINER_TX_NUMBER_MAX > 0u)
 #if (STD_ON == IPDUM_DEV_ERROR_DETECT)
             if ((IPDUM_CONTAINER_TX_NUMBER_MAX <= IpduM_CfgPtr->IpduMTxPduPtr[TxPduId].Index)
                 || (NULL_PTR == IpduM_CfgPtr->IpduMContainerTxPduPtr))
@@ -724,10 +727,9 @@ IpduM_TxConfirmation(PduIdType TxPduId) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
             else
 #endif /* STD_ON == IPDUM_DEV_ERROR_DETECT */
             {
-#if (IPDUM_CONTAINER_TX_NUMBER_MAX > 0u)
                 IpduM_TxConfOfContainer(IpduM_CfgPtr->IpduMTxPduPtr[TxPduId].Index);
-#endif /* IPDUM_CONTAINER_TX_NUMBER_MAX >0u */
             }
+#endif /* IPDUM_CONTAINER_TX_NUMBER_MAX >0u */
         }
         else
         {
@@ -761,7 +763,7 @@ IpduM_TriggerTransmit(PduIdType TxPduId, P2VAR(PduInfoType, AUTOMATIC, IPDUM_APP
 {
     Std_ReturnType ret = E_NOT_OK;
 #if (STD_ON == IPDUM_DEV_ERROR_DETECT)
-    if (TRUE != IpduM_InitStauts)
+    if (IPDUM_INIT != IpduM_InitStauts)
     {
         (void)Det_ReportError(IPDUM_MODULE_ID, IPDUM_INSTANCE_ID, IPDUM_SERVICE_ID_TRIGGERTRANSMIT, IPDUM_E_UNINIT);
     }
@@ -782,6 +784,7 @@ IpduM_TriggerTransmit(PduIdType TxPduId, P2VAR(PduInfoType, AUTOMATIC, IPDUM_APP
     {
         if (IPDUM_TXCONF_TYPE_MULT == IpduM_CfgPtr->IpduMTxPduPtr[TxPduId].txConfPduType)
         {
+#if (IPDUM_TX_REQUEST_NUMBER_MAX > 0u)
 #if (STD_ON == IPDUM_DEV_ERROR_DETECT)
             if ((IPDUM_TX_REQUEST_NUMBER_MAX <= IpduM_CfgPtr->IpduMTxPduPtr[TxPduId].Index)
                 || (NULL_PTR == IpduM_CfgPtr->IpduMTxRequestPtr))
@@ -795,7 +798,7 @@ IpduM_TriggerTransmit(PduIdType TxPduId, P2VAR(PduInfoType, AUTOMATIC, IPDUM_APP
             else
 #endif /* STD_ON == IPDUM_DEV_ERROR_DETECT */
             {
-#if (IPDUM_TX_REQUEST_NUMBER_MAX > 0u)
+
                 PduLengthType cnt;
                 IpduM_uintx txRequestIndex = (IpduM_uintx)IpduM_CfgPtr->IpduMTxPduPtr[TxPduId].Index;
                 const IpduMTxRequestType* txRequstPtr = &IpduM_CfgPtr->IpduMTxRequestPtr[txRequestIndex];
@@ -809,6 +812,7 @@ IpduM_TriggerTransmit(PduIdType TxPduId, P2VAR(PduInfoType, AUTOMATIC, IPDUM_APP
                 }
                 if (E_OK == ret)
                 {
+                    SchM_Enter_IpduM_Context();
                     PduInfoPtr->SduLength = txRequstPtr->IpduMOutgoingPduRef->PduLen;
                     for (cnt = 0u; cnt < PduInfoPtr->SduLength; cnt++)
                     {
@@ -817,12 +821,14 @@ IpduM_TriggerTransmit(PduIdType TxPduId, P2VAR(PduInfoType, AUTOMATIC, IPDUM_APP
 #if (STD_ON == IPUDM_TRIG_MULT_SUPPORT_TXCONF)
                     IpduM_InnerTxReq[txRequestIndex].txConfTimer = txRequstPtr->IpduMTxConfirmationTimeout;
 #endif /* STD_ON == IPUDM_TRIG_MULT_SUPPORT_TXCONF */
+                    SchM_Exit_IpduM_Context();
                 }
-#endif /* IPDUM_TX_REQUEST_NUMBER_MAX > 0u */
             }
+#endif /* IPDUM_TX_REQUEST_NUMBER_MAX > 0u */
         }
         else if (IPDUM_TXCONF_TYPE_CONTAINER == IpduM_CfgPtr->IpduMTxPduPtr[TxPduId].txConfPduType)
         {
+#if (IPDUM_CONTAINER_TX_NUMBER_MAX > 0u)
 #if (STD_ON == IPDUM_DEV_ERROR_DETECT)
             if ((IPDUM_CONTAINER_TX_NUMBER_MAX <= IpduM_CfgPtr->IpduMTxPduPtr[TxPduId].Index)
                 || (NULL_PTR == IpduM_CfgPtr->IpduMContainerTxPduPtr))
@@ -836,10 +842,9 @@ IpduM_TriggerTransmit(PduIdType TxPduId, P2VAR(PduInfoType, AUTOMATIC, IPDUM_APP
             else
 #endif /* STD_ON == IPDUM_DEV_ERROR_DETECT */
             {
-#if (IPDUM_CONTAINER_TX_NUMBER_MAX > 0u)
                 ret = IpduM_TransmitContainer(IpduM_CfgPtr->IpduMTxPduPtr[TxPduId].Index, PduInfoPtr);
-#endif /* IPDUM_CONTAINER_TX_NUMBER_MAX >0u */
             }
+#endif /* IPDUM_CONTAINER_TX_NUMBER_MAX >0u */
         }
         else
         {
@@ -857,70 +862,143 @@ Scheduled functions
 /**
  * Performs the processes of the activities that are not directly
     initiated by the calls from PDU-R.
- * Service ID: 0x10
- * Sync/Async: NA
- * Reentrancy: NA
+ * Service ID: 0x12
+ * Sync/Async: Synchronous
+ * Reentrancy: Reentrant for different instances. Non reentrant for the same instance.
  * Parameters(IN): TNA
  * Parameters(INOUT):  NA
  * Parameters(OUT): NA
  * Return value: NA
- *  @SWS_IpduM_00101
+ *  @SWS_IpduM_91002
  */
 #define IPDUM_START_SEC_CODE
 #include "IpduM_MemMap.h"
 FUNC(void, IPDUM_CODE)
-IpduM_MainFunction(void) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
+IpduM_MainFunctionTx(IpduM_MainFunctionType mainFunctionId) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
 {
-#if ((IPDUM_TX_REQUEST_NUMBER_MAX > 0u) || (IPDUM_CONTAINER_TX_NUMBER_MAX > 0u) || (IPDUM_CONTAINER_RX_NUMBER_MAX > 0u))
-    IpduM_uintx index;
-#endif
-    if (TRUE == IpduM_InitStauts)
+    if ((IPDUM_INIT == IpduM_InitStauts) && (mainFunctionId < IPDUM_MAINFUNCTION_TX_NUM_MAX))
     {
+#if (STD_ON == IPDUM_DEV_ERROR_DETECT) && (STD_ON == IPDUM_MULTIPLE_PARTITION_USED)
+        ApplicationType applicationID = GetApplicationID();
+        if (applicationID != IpduM_CfgPtr->IpduMMainFuncTxPartitionRange[mainFunctionId])
+        {
+            (void)Det_ReportError(IPDUM_MODULE_ID, IPDUM_INSTANCE_ID, IPDUM_SERVICE_ID_MAINFUNCTIONTX, IPDUM_E_PARAM);
+        }
+        else
+#endif
+        {
+#if ((IPDUM_TX_REQUEST_NUMBER_MAX > 0u) || (IPDUM_CONTAINER_TX_NUMBER_MAX > 0u))
+            IpduM_uintx index;
+#endif
+            if (IPDUM_INIT == IpduM_InitStauts)
+            {
 /* Multiplexer tx transmit handle */
 #if (IPDUM_TX_REQUEST_NUMBER_MAX > 0u)
-        for (index = 0u; (index < IPDUM_TX_REQUEST_NUMBER_MAX); index++) /* PRQA S 2877 */ /* MISRA Rule 4.1 */
-        {
-            if (TRUE == IpduM_InnerTxReq[index].isTrigFlg)
-            {
-                if (E_OK == IpduM_MultiplexTxTrigLoadData(index))
+#if (STD_ON == IPDUM_DEV_ERROR_DETECT) && (STD_ON == IPDUM_MULTIPLE_PARTITION_USED)
+                const IpduMTxRequestType* txRequstPtr = &IpduM_CfgPtr->IpduMTxRequestPtr[0];
+#endif
+                for (index = 0u; (index < IPDUM_TX_REQUEST_NUMBER_MAX); index++) /* PRQA S 2877 */ /* MISRA Rule 4.1 */
                 {
-                    if (E_OK == IpduM_MultiplexTxSendPdu(index))
+#if (STD_ON == IPDUM_DEV_ERROR_DETECT) && (STD_ON == IPDUM_MULTIPLE_PARTITION_USED)
+                    if (applicationID != txRequstPtr[index].IpduMTxRequestPartition)
                     {
-                        IpduM_InnerTxReq[index].isTrigFlg = FALSE;
+                        if (index == (IPDUM_TX_REQUEST_NUMBER_MAX - 1u))
+                        {
+                            (void)Det_ReportError(
+                                IPDUM_MODULE_ID,
+                                IPDUM_INSTANCE_ID,
+                                IPDUM_SERVICE_ID_MAINFUNCTIONTX,
+                                IPDUM_E_PARAM);
+                        }
+                        continue;
                     }
+#endif
+                    if (TRUE == IpduM_InnerTxReq[index].isTrigFlg)
+                    {
+                        if (E_OK == IpduM_MultiplexTxTrigLoadData(index))
+                        {
+                            if (E_OK == IpduM_MultiplexTxSendPdu(index))
+                            {
+                                IpduM_InnerTxReq[index].isTrigFlg = FALSE;
+                            }
+                        }
+                        /* consider go wrong when trig get part i-pdu,shall clear trig */
+                        else
+                        {
+                            IpduM_InnerTxReq[index].isTrigFlg = FALSE;
+                        }
+                    }
+                    /* @SWS_IpduM_0023
+                    allow new transmission for this special ipdu
+                    after timeout is elapsed */
+                    SchM_Enter_IpduM_Context();
+                    if (0u < IpduM_InnerTxReq[index].txConfTimer)
+                    {
+                        IpduM_InnerTxReq[index].txConfTimer--;
+                    }
+                    SchM_Exit_IpduM_Context();
                 }
-                /* consider go wrong when trig get part i-pdu,shall clear trig */
-                else
-                {
-                    IpduM_InnerTxReq[index].isTrigFlg = FALSE;
-                }
-            }
-            /* @SWS_IpduM_0023
-            allow new transmission for this special ipdu
-            after timeout is elapsed */
-            if (0u < IpduM_InnerTxReq[index].txConfTimer)
-            {
-                IpduM_InnerTxReq[index].txConfTimer--;
-            }
-        }
 #endif /* IPDUM_TX_REQUEST_NUMBER_MAX > 0u */
 #if (IPDUM_CONTAINER_TX_NUMBER_MAX > 0u)
-        for (index = 0u; index < IPDUM_CONTAINER_TX_NUMBER_MAX; index++) /* PRQA S 2877 */ /* MISRA Rule 4.1 */
-        {
-            IpduM_ContainerTxHandle(index);
-        }
+                index = IpduM_GetStartOfMainFunctionTx(mainFunctionId);
+                for (; index < IpduM_GetEndOfMainFunctionTx(mainFunctionId);
+                     index++) /* PRQA S 2877 */ /* MISRA Rule 4.1 */
+                {
+                    IpduM_ContainerTxHandle(index);
+                }
 #endif /* IPDUM_CONTAINER_TX_NUMBER_MAX > 0u */
-#if (IPDUM_CONTAINER_RX_NUMBER_MAX > 0u)
-        for (index = 0u; index < IPDUM_CONTAINER_RX_NUMBER_MAX; index++) /* PRQA S 2877 */ /* MISRA Rule 4.1 */
-        {
-            if (0x0u < IpduM_InnerContainerRx[index].queueCnt)
-            {
-                IpduM_ContainerRxHandle(index);
             }
         }
-#endif /* IPDUM_CONTAINER_RX_NUMBER_MAX > 0u */
+        return;
     }
-    return;
+}
+#define IPDUM_STOP_SEC_CODE
+#include "IpduM_MemMap.h"
+
+/*
+Scheduled functions
+*/
+/**
+ * Performs the processes of the activities that are not directly
+    initiated by the calls from PDU-R.
+ * Service ID: 0x11
+ * Sync/Async: Synchronous
+ * Reentrancy: Reentrant for different instances. Non reentrant for the same instance.
+ * Parameters(IN): TNA
+ * Parameters(INOUT):  NA
+ * Parameters(OUT): NA
+ * Return value: NA
+ *  @SWS_IpduM_91001
+ */
+#define IPDUM_START_SEC_CODE
+#include "IpduM_MemMap.h"
+FUNC(void, IPDUM_CODE)
+IpduM_MainFunctionRx(IpduM_MainFunctionType mainFunctionId) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
+{
+    if ((IPDUM_INIT == IpduM_InitStauts) && (mainFunctionId < IPDUM_MAINFUNCTION_RX_NUM_MAX))
+    {
+#if (STD_ON == IPDUM_DEV_ERROR_DETECT) && (STD_ON == IPDUM_MULTIPLE_PARTITION_USED)
+        ApplicationType applicationID = GetApplicationID();
+        if (applicationID != IpduM_CfgPtr->IpduMMainFuncRxPartitionRange[mainFunctionId])
+        {
+            (void)Det_ReportError(IPDUM_MODULE_ID, IPDUM_INSTANCE_ID, IPDUM_SERVICE_ID_MAINFUNCTIONRX, IPDUM_E_PARAM);
+        }
+        else
+#endif
+        {
+#if (IPDUM_CONTAINER_RX_NUMBER_MAX > 0u)
+            IpduM_uintx index = IpduM_GetStartOfMainFunctionRx(mainFunctionId);
+            for (; index < IpduM_GetEndOfMainFunctionRx(mainFunctionId); index++) /* PRQA S 2877 */ /* MISRA Rule 4.1 */
+            {
+                if (0x0u < IpduM_InnerContainerRx[index].queueCnt)
+                {
+                    IpduM_ContainerRxHandle(index);
+                }
+            }
+#endif /* IPDUM_CONTAINER_RX_NUMBER_MAX > 0u */
+        }
+        return;
+    }
 }
 #define IPDUM_STOP_SEC_CODE
 #include "IpduM_MemMap.h"
@@ -972,11 +1050,13 @@ static FUNC(Std_ReturnType, IPDUM_CODE) IpduM_TransmitMultiplexLoadData(
     {
         /* @SWS_IpduM_00015
         merge corresponding a apart i-pdu to tx request */
+        SchM_Enter_IpduM_Context();
         outPdu.SduDataPtr = &IpduM_DtaBuf[txReqPtr->IpduMBufIndex];
         outPdu.SduLength = (PduLengthType)txReqPtr->IpduMOutgoingPduRef->PduLen;
         pduTrans.byteOrd = txReqPtr->IpduMByteOrder;
         pduTrans.inputPduPtr = PduInfoPtr;
         pduTrans.outputPduPtr = &outPdu;
+        SchM_Exit_IpduM_Context();
         pduTrans.segmentCnt = txPartPtr->IpduMTxSegmentCnt;
         pduTrans.segmentPtr = txPartPtr->IpduMTxSegmentPtr;
         ret = IpudM_SegmentCopy(&pduTrans);
@@ -1013,7 +1093,6 @@ static FUNC(Std_ReturnType, IPDUM_CODE)
     IpduM_TransmitContainer(IpduM_uintx containerIndex, P2VAR(PduInfoType, AUTOMATIC, IPDUM_APPL_DATA) PduInfoPtr)
 /* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
 {
-    SchM_Enter_IpduM_MsgContext();
     Std_ReturnType ret = E_NOT_OK;
     const IpduMContainerTxPduType* containerTxCfgPtr = &IpduM_CfgPtr->IpduMContainerTxPduPtr[containerIndex];
     IpduM_InnerContainerTxType* innerContainerPtr = &IpduM_InnerContainerTx[containerIndex];
@@ -1027,8 +1106,10 @@ static FUNC(Std_ReturnType, IPDUM_CODE)
     PduLengthType index;
     /* @SWS_IpduM_00192
     fill the pduInfo*/
+    SchM_Enter_IpduM_Context();
     PduInfo.SduDataPtr = &IpduM_DtaBuf[bufIndex];
     PduInfo.SduLength = incIndexPtr->payloadSize;
+    SchM_Exit_IpduM_Context();
     /* @SWS_IpduM_00194
     IPDUM_TRIGGERTRANSMIT copy old instance in queue,if queue is not empty,
     shall return E_NOT_OK */
@@ -1061,11 +1142,13 @@ static FUNC(Std_ReturnType, IPDUM_CODE)
             PduLengthType cnt;
             uint8 cnt1;
             /* point data to trigger call */
+            SchM_Enter_IpduM_Context();
             PduInfoPtr->SduLength = incIndexPtr->payloadSize;
             for (cnt = 0u; cnt < PduInfoPtr->SduLength; cnt++)
             {
                 PduInfoPtr->SduDataPtr[cnt] = IpduM_DtaBuf[bufIndex + cnt];
             }
+            SchM_Exit_IpduM_Context();
             /*store the TxPending Contained*/
             incIndexPtr->containedTxConfirmStartPos = incIndexPtr->containedStartPos;
             incIndexPtr->containedTxConfirmCnt = incIndexPtr->containedCnt;
@@ -1085,6 +1168,7 @@ static FUNC(Std_ReturnType, IPDUM_CODE)
         /* reset payload size of the container */
         incIndexPtr->payloadSize = 0x0u;
         /* queue handle */
+        SchM_Enter_IpduM_Context();
         if (0u < innerContainerPtr->queueCnt)
         {
             innerContainerPtr->transReadPoint++;
@@ -1095,12 +1179,14 @@ static FUNC(Std_ReturnType, IPDUM_CODE)
         }
         /* transmit timer handle */
         innerContainerPtr->transTimer = 0x0u;
+        SchM_Exit_IpduM_Context();
 /* tx conf timer handle */
 #if (STD_ON != IPUDM_TRIG_CONTAINER_SUPPORT_TXCONF)
         /* when container supprt tx conf,need fill txConfTimer otherwise,txconf timer equal 0*/
         if (IPDUM_DIRECT == containerTxCfgPtr->IpduMContainerTxTriggerMode)
 #endif /* STD_ON != IPUDM_TRIG_SUPPORT_TXCONF */
         {
+            SchM_Enter_IpduM_Context();
             if (NULL_PTR != containerTxCfgPtr->IpduMContainerTxConfirmationTimeout)
             {
                 innerContainerPtr->txConfTimer = *(containerTxCfgPtr->IpduMContainerTxConfirmationTimeout);
@@ -1109,6 +1195,7 @@ static FUNC(Std_ReturnType, IPDUM_CODE)
             {
                 innerContainerPtr->txConfTimer = IPDUM_CONTAINER_DEFAULT_TXCONFTIMER;
             }
+            SchM_Exit_IpduM_Context();
         }
         /* trigger transmit fill output data */
         if ((NULL_PTR != PduInfoPtr) && (IPDUM_TRIGGERTRANSMIT == containerTxCfgPtr->IpduMContainerTxTriggerMode))
@@ -1140,14 +1227,15 @@ static FUNC(Std_ReturnType, IPDUM_CODE)
             next analysis header is unknow */
             if (IPDUM_DIRECT == containerTxCfgPtr->IpduMContainerTxTriggerMode)
             {
+                SchM_Enter_IpduM_Context();
                 for (index = 0u; (index < PduInfo.SduLength); index++)
                 {
                     PduInfo.SduDataPtr[index] = 0x0u;
                 }
+                SchM_Exit_IpduM_Context();
             }
         }
     }
-    SchM_Exit_IpduM_MsgContext();
     return ret;
 }
 #define IPDUM_STOP_SEC_CODE
@@ -1227,7 +1315,7 @@ static FUNC(Std_ReturnType, IPDUM_CODE)
                 innerContainerPtr->trigFlg = TRUE;
             }
         }
-        SchM_Enter_IpduM_MsgContext();
+        SchM_Enter_IpduM_Context();
         if (NULL_PTR != containerTxCfgPtr->IpduMContainerTxSendTimeout)
         {
             if (0x0u == innerContainerPtr->transTimer)
@@ -1240,22 +1328,21 @@ static FUNC(Std_ReturnType, IPDUM_CODE)
                 innerContainerPtr->transTimer = *(containedTxCfgPtr->IpduMContainedTxPduSendTimeout);
             }
         }
-        SchM_Exit_IpduM_MsgContext();
+        SchM_Exit_IpduM_Context();
     }
     return ret;
 }
 #define IPDUM_STOP_SEC_CODE
 #include "IpduM_MemMap.h"
 #endif /* IPDUM_CONTAINED_TX_NUMBER_MAX > 0u */
+
 /* this Function shall be realize by Macro */
 #if (IPDUM_TX_REQUEST_NUMBER_MAX > 0u)
 /* Multiplexer pdu data info handle by segment */
 #define IPDUM_START_SEC_CODE
 #include "IpduM_MemMap.h"
 static FUNC(Std_ReturnType, IPDUM_CODE)
-    /* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
     IpudM_SegmentCopy(P2CONST(IpduM_PduTranslateType, AUTOMATIC, IPDUM_APPL_DATA) pduTransPtr)
-/* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
 {
     /* motolora big_endian
     eg: 13bit signal
@@ -1301,7 +1388,9 @@ static FUNC(Std_ReturnType, IPDUM_CODE)
         bitCnt = pduTransPtr->segmentPtr[i].IpduMSegmentLength;
         while ((bitCnt != 0u) && (E_OK == ret))
         {
+            SchM_Enter_IpduM_Context();
             intTmp = pduTransPtr->inputPduPtr->SduDataPtr[bitPos >> 3u];
+            SchM_Exit_IpduM_Context();
             byteBitStartPos = (uint8)(bitPos & 0x07u);
             /* calculated end copy bit position in byte */
             if (0x8u > (byteBitStartPos + bitCnt))
@@ -1322,7 +1411,9 @@ static FUNC(Std_ReturnType, IPDUM_CODE)
                 HoldBitInSection(intTmp, byteBitStartPos, byteBitEndPos);
                 ClearBitInSection(outTmp, byteBitStartPos, byteBitEndPos);
                 outTmp |= intTmp;
+                SchM_Enter_IpduM_Context();
                 pduTransPtr->outputPduPtr->SduDataPtr[bitPos >> 3u] = outTmp;
+                SchM_Exit_IpduM_Context();
                 /* restart calculated bit position */
                 if ((byteBitEndPos == 0x07u) && (IPDUM_BYTE_ORDER_BIG_ENDIAN == pduTransPtr->byteOrd))
                 {
@@ -1340,7 +1431,9 @@ static FUNC(Std_ReturnType, IPDUM_CODE)
             {
                 onCoBitCnt = 8u;
                 /* byte data copy */
+                SchM_Enter_IpduM_Context();
                 pduTransPtr->outputPduPtr->SduDataPtr[bitPos >> 3u] = intTmp;
+                SchM_Exit_IpduM_Context();
                 /* different endian bit position calculated */
                 if (IPDUM_BYTE_ORDER_BIG_ENDIAN == pduTransPtr->byteOrd)
                 {
@@ -1367,6 +1460,7 @@ static FUNC(Std_ReturnType, IPDUM_CODE)
 #define IPDUM_STOP_SEC_CODE
 #include "IpduM_MemMap.h"
 #endif /* IPDUM_TX_REQUEST_NUMBER_MAX > 0u */
+
 #if (IPDUM_TX_REQUEST_NUMBER_MAX > 0u)
 /* Multiplexer assemble part pdu to tx request */
 #define IPDUM_START_SEC_CODE
@@ -1393,7 +1487,9 @@ static FUNC(Std_ReturnType, IPDUM_CODE) IpduM_MultiplexTxTrigLoadData(IpduM_uint
             if (TRUE == txPartPtr->IpduMJitUpdate)
             {
 #if (IPDUM_MAX_PDU_BUF_SIZE > 0u)
+                SchM_Enter_IpduM_Context();
                 trigGetPdu.SduDataPtr = IpduM_PduBuf;
+                SchM_Exit_IpduM_Context();
 #else
                 trigGetPdu.SduDataPtr = NULL_PTR;
 #endif /* IPDUM_MAX_PDU_BUF_SIZE > 0u */
@@ -1401,6 +1497,7 @@ static FUNC(Std_ReturnType, IPDUM_CODE) IpduM_MultiplexTxTrigLoadData(IpduM_uint
                 ret = PduR_IpduMTriggerTransmit(txPartPtr->IpduMTxPduRef->PduId, &trigGetPdu);
                 if (E_OK == ret)
                 {
+                    SchM_Enter_IpduM_Context();
                     outPdu.SduDataPtr = &IpduM_DtaBuf[txRequstPtr->IpduMBufIndex];
                     outPdu.SduLength = (PduLengthType)txRequstPtr->IpduMOutgoingPduRef->PduLen;
                     pduTrans.byteOrd = txRequstPtr->IpduMByteOrder;
@@ -1408,6 +1505,7 @@ static FUNC(Std_ReturnType, IPDUM_CODE) IpduM_MultiplexTxTrigLoadData(IpduM_uint
                     pduTrans.outputPduPtr = &outPdu;
                     pduTrans.segmentCnt = (uint8)(txPartPtr->IpduMTxSegmentCnt);
                     pduTrans.segmentPtr = txPartPtr->IpduMTxSegmentPtr;
+                    SchM_Exit_IpduM_Context();
                     ret = IpudM_SegmentCopy(&pduTrans);
                 }
             }
@@ -1422,7 +1520,9 @@ static FUNC(Std_ReturnType, IPDUM_CODE) IpduM_MultiplexTxTrigLoadData(IpduM_uint
         if (TRUE == txPartPtr->IpduMJitUpdate)
         {
 #if (IPDUM_MAX_PDU_BUF_SIZE > 0u)
+            SchM_Enter_IpduM_Context();
             trigGetPdu.SduDataPtr = IpduM_PduBuf;
+            SchM_Exit_IpduM_Context();
 #else
             trigGetPdu.SduDataPtr = NULL_PTR;
 #endif /* IPDUM_MAX_PDU_BUF_SIZE > 0u */
@@ -1430,6 +1530,7 @@ static FUNC(Std_ReturnType, IPDUM_CODE) IpduM_MultiplexTxTrigLoadData(IpduM_uint
             ret = PduR_IpduMTriggerTransmit(txPartPtr->IpduMTxPduRef->PduId, &trigGetPdu);
             if (E_OK == ret)
             {
+                SchM_Enter_IpduM_Context();
                 outPdu.SduDataPtr = &IpduM_DtaBuf[txRequstPtr->IpduMBufIndex];
                 outPdu.SduLength = (PduLengthType)txRequstPtr->IpduMOutgoingPduRef->PduLen;
                 pduTrans.byteOrd = txRequstPtr->IpduMByteOrder;
@@ -1437,6 +1538,7 @@ static FUNC(Std_ReturnType, IPDUM_CODE) IpduM_MultiplexTxTrigLoadData(IpduM_uint
                 pduTrans.outputPduPtr = &outPdu;
                 pduTrans.segmentCnt = (uint8)(txPartPtr->IpduMTxSegmentCnt);
                 pduTrans.segmentPtr = txPartPtr->IpduMTxSegmentPtr;
+                SchM_Exit_IpduM_Context();
                 ret = IpudM_SegmentCopy(&pduTrans);
             }
         }
@@ -1453,6 +1555,7 @@ static FUNC(Std_ReturnType, IPDUM_CODE) IpduM_MultiplexTxTrigLoadData(IpduM_uint
 #define IPDUM_STOP_SEC_CODE
 #include "IpduM_MemMap.h"
 #endif /* IPDUM_TX_REQUEST_NUMBER_MAX > 0u */
+
 #if (IPDUM_TX_REQUEST_NUMBER_MAX > 0u)
 /* Multiplexer tx request transmit */
 #define IPDUM_START_SEC_CODE
@@ -1463,18 +1566,23 @@ static FUNC(Std_ReturnType, IPDUM_CODE) IpduM_MultiplexTxSendPdu(IpduM_uintx txR
     PduInfoType trigGetPdu;
     const IpduMTxRequestType* txRequstPtr = &IpduM_CfgPtr->IpduMTxRequestPtr[txReqIndex];
     IpduM_InnerTxRequtstType* innerTxReqPtr = &IpduM_InnerTxReq[txReqIndex];
+    SchM_Enter_IpduM_Context();
     trigGetPdu.SduDataPtr = &IpduM_DtaBuf[txRequstPtr->IpduMBufIndex];
     trigGetPdu.SduLength = (PduLengthType)txRequstPtr->IpduMOutgoingPduRef->PduLen;
+    SchM_Exit_IpduM_Context();
     ret = PduR_IpduMTransmit(txRequstPtr->IpduMOutgoingPduRef->PduId, &trigGetPdu);
     if (E_OK == ret)
     {
+        SchM_Enter_IpduM_Context();
         innerTxReqPtr->txConfTimer = txRequstPtr->IpduMTxConfirmationTimeout;
+        SchM_Exit_IpduM_Context();
     }
     return ret;
 }
 #define IPDUM_STOP_SEC_CODE
 #include "IpduM_MemMap.h"
 #endif /* IPDUM_TX_REQUEST_NUMBER_MAX > 0u */
+
 #if (IPDUM_TX_REQUEST_NUMBER_MAX > 0u)
 /* Multiplexer handle tx confirmation */
 #define IPDUM_START_SEC_CODE
@@ -1493,13 +1601,18 @@ static FUNC(void, IPDUM_CODE) IpduM_TxConfOfMultiplex(IpduM_uintx txReqIndex)
     /* @SWS_IpduM_00024
     if a previously request transmit has been timed out,but is confirm now
         then shall discard */
-    if ((0x0u != innerTxReqPtr->txConfTimer)
+    SchM_Enter_IpduM_Context();
+    uint16 txConfTim = innerTxReqPtr->txConfTimer;
+    SchM_Exit_IpduM_Context();
+    if ((0x0u != txConfTim) || (0x0u == txRequstPtr->IpduMTxConfirmationTimeout)
 #if (STD_ON == IPUDM_TRIG_MULT_SUPPORT_TXCONF)
         || (IPDUM_TRIGGER_MODE_NONE == txRequstPtr->IpduMTxTriggerMode)
 #endif /* STD_ON == IPUDM_TRIG_MULT_SUPPORT_TXCONF */
     )
     {
+        SchM_Enter_IpduM_Context();
         innerTxReqPtr->txConfTimer = 0x0u;
+        SchM_Exit_IpduM_Context();
 #if (STD_ON == IPDUM_STATIC_PART_EXISTS)
         if (NULL_PTR != txRequstPtr->IpduMTxStaticPartPtr)
         {
@@ -1543,7 +1656,9 @@ static FUNC(void, IPDUM_CODE)
     uint16 selcetVal = 0x0u;
     boolean findFlg = FALSE;
     /* Variable init */
+    SchM_Enter_IpduM_Context();
     outputPdu.SduDataPtr = PduInfoPtr->SduDataPtr;
+    SchM_Exit_IpduM_Context();
 #if (STD_ON == IPDUM_STATIC_PART_EXISTS)
     /*
     @SWS_IpduM_00041
@@ -1589,12 +1704,13 @@ static FUNC(void, IPDUM_CODE)
 #define IPDUM_STOP_SEC_CODE
 #include "IpduM_MemMap.h"
 #endif /* IPDUM_RX_INDICA_NUMBER_MAX > 0u */
+
 #if (IPDUM_RX_INDICA_NUMBER_MAX > 0u)
 /* Multiplexer RX indiation pdu find select value */
 #define IPDUM_START_SEC_CODE
 #include "IpduM_MemMap.h"
 static FUNC(Std_ReturnType, IPDUM_CODE) IpduM_MultiplexFindSelectVal(
-    IpduM_ByteOrderType byteOrd,
+    IpduM_ByteOrderType byteOrder,
     P2CONST(PduInfoType, AUTOMATIC, IPDUM_APPL_DATA) pduInfoPtr,
     P2CONST(IpduMSelectorFieldType, AUTOMATIC, IPDUM_APPL_DATA) selectFieldPtr,
     /* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
@@ -1614,14 +1730,16 @@ static FUNC(Std_ReturnType, IPDUM_CODE) IpduM_MultiplexFindSelectVal(
     /*check parameters*/
     Std_ReturnType ret = E_OK;
     /* inner function is not need parameters check */
-    uint8 tmp;
+    uint8 tmp, onByteCopyBits;
     uint8 byteBitStartPos, byteBitEndPos;
     uint8 bitCnt = selectFieldPtr->IpduMSelectorFieldLength;
     uint16 bitPos = selectFieldPtr->IpduMSelectorFieldPosition;
     uint16 outSeletVal = 0x0u;
     while (0x0u != bitCnt)
     {
+        SchM_Enter_IpduM_Context();
         tmp = pduInfoPtr->SduDataPtr[bitPos >> 3u];
+        SchM_Exit_IpduM_Context();
         byteBitStartPos = (uint8)(bitPos & 0x07u);
         /* calculated end copy bit position in byte */
         if (0x8u > (byteBitStartPos + bitCnt))
@@ -1637,7 +1755,7 @@ static FUNC(Std_ReturnType, IPDUM_CODE) IpduM_MultiplexFindSelectVal(
             /* bit data copy: copy start position is greath then now position*/
             ExtractBitInSection(tmp, byteBitStartPos, byteBitEndPos);
             /* restart calculated bit position */
-            if ((byteBitEndPos == 0x07u) && (IPDUM_BYTE_ORDER_BIG_ENDIAN == byteOrd))
+            if ((byteBitEndPos == 0x07u) && (IPDUM_BYTE_ORDER_BIG_ENDIAN == byteOrder))
             {
                 if (bitPos >= 8u)
                 {
@@ -1649,15 +1767,24 @@ static FUNC(Std_ReturnType, IPDUM_CODE) IpduM_MultiplexFindSelectVal(
                 bitPos += ((uint16)byteBitEndPos - (uint16)byteBitStartPos + 1u);
             }
             /* calculate bit count */
-            bitCnt = bitCnt - (byteBitEndPos - byteBitStartPos + 1u);
+            onByteCopyBits = (byteBitEndPos - byteBitStartPos + 1u);
         }
         else
         {
-            if (bitPos >= 8u)
+            onByteCopyBits = 8u;
+            if (IPDUM_BYTE_ORDER_BIG_ENDIAN == byteOrder)
             {
-                bitCnt -= 8u;
+                if (bitPos >= 8u)
+                {
+                    bitPos = bitPos - 0x8u;
+                }
+            }
+            else
+            {
+                bitPos = bitPos + 0x8u;
             }
         }
+        bitCnt -= onByteCopyBits;
         if (bitPos > (uint16)((pduInfoPtr->SduLength) << 3u))
         {
             ret = E_NOT_OK;
@@ -1671,12 +1798,15 @@ static FUNC(Std_ReturnType, IPDUM_CODE) IpduM_MultiplexFindSelectVal(
     }
     /* remove lsb fill not used data */
     outSeletVal >>= (16u - selectFieldPtr->IpduMSelectorFieldLength);
+    SchM_Enter_IpduM_Context();
     *selcetValPtr = outSeletVal;
+    SchM_Exit_IpduM_Context();
     return ret;
 }
 #define IPDUM_STOP_SEC_CODE
 #include "IpduM_MemMap.h"
 #endif /* IPDUM_RX_INDICA_NUMBER_MAX > 0u */
+
 #if (IPDUM_CONTAINER_RX_NUMBER_MAX > 0u)
 /* in rx indiation handle container */
 #define IPDUM_START_SEC_CODE
@@ -1697,8 +1827,8 @@ static FUNC(void, IPDUM_CODE)
         IpduM_uintx bufIndex = (IpduM_uintx)containerRxPtr->IpduMBufIndex
                                + ((IpduM_uintx)innerContainerRxPtr->writePoint
                                   * (IpduM_uintx)containerRxPtr->IpduMContainerRxPduRef->PduLen);
+        SchM_Enter_IpduM_Context();
         uint8* dtaBufPtr = &IpduM_DtaBuf[bufIndex];
-        SchM_Enter_IpduM_MsgContext();
         for (index = 0u; (index < PduInfoPtr->SduLength); index++)
         {
             dtaBufPtr[index] = PduInfoPtr->SduDataPtr[index];
@@ -1728,7 +1858,7 @@ static FUNC(void, IPDUM_CODE)
                 IPDUM_SERVICE_ID_RXINDICATION,
                 IPDUM_E_QUEUEOVFL);
         }
-        SchM_Exit_IpduM_MsgContext();
+        SchM_Exit_IpduM_Context();
         /* @SWS_IpduM_00211
             IPDUM_PROCESSING_DEFERRED shall be queue
             next mainfunction handle */
@@ -1742,6 +1872,7 @@ static FUNC(void, IPDUM_CODE)
 #define IPDUM_STOP_SEC_CODE
 #include "IpduM_MemMap.h"
 #endif /* IPDUM_CONTAINER_RX_NUMBER_MAX >0u */
+
 #if (IPDUM_CONTAINER_RX_NUMBER_MAX > 0u)
 #define IPDUM_START_SEC_CODE
 #include "IpduM_MemMap.h"
@@ -1757,8 +1888,8 @@ static FUNC(void, IPDUM_CODE) IpduM_ContainerRxHandle(IpduM_uintx containerIndex
         (IpduM_uintx)containerRxPtr->IpduMBufIndex
         + ((IpduM_uintx)innerContainerRxPtr->readPoint * (IpduM_uintx)containerRxPtr->IpduMContainerRxPduRef->PduLen);
     IpduM_ContainedRxExtractedHandle(containerIndex, &IpduM_DtaBuf[bufIndex], inhIndexRxPtr->payloadSize);
+    SchM_Enter_IpduM_Context();
     /*queue handle*/
-    SchM_Enter_IpduM_MsgContext();
     if (0u < innerContainerRxPtr->queueCnt)
     {
         innerContainerRxPtr->readPoint++;
@@ -1768,12 +1899,13 @@ static FUNC(void, IPDUM_CODE) IpduM_ContainerRxHandle(IpduM_uintx containerIndex
         }
         innerContainerRxPtr->queueCnt--;
     }
-    SchM_Exit_IpduM_MsgContext();
+    SchM_Exit_IpduM_Context();
     return;
 }
 #define IPDUM_STOP_SEC_CODE
 #include "IpduM_MemMap.h"
 #endif /* IPDUM_CONTAINER_RX_NUMBER_MAX >0u */
+
 #if (IPDUM_CONTAINER_RX_NUMBER_MAX > 0u)
 /* extracted contained in container rx pdu*/
 #define IPDUM_START_SEC_CODE
@@ -1791,70 +1923,73 @@ static FUNC(void, IPDUM_CODE) IpduM_ContainedRxExtractedHandle(
     IpduM_uintx index = 0x0u, loop;
     uint32 headerId, headerDlc;
     PduInfoType outPdu;
-    /* PRQA S 1338 ++ */ /* MISRA Rule 17.8 */
+    P2VAR(uint8, AUTOMATIC, IPDUM_APPL_DATA) localDataPtr = dtaPtr;
     while ((index < lstlen) && (FALSE == stopFlg))
     {
+        SchM_Enter_IpduM_Context();
 #if (IPDUM_BIG_ENDIAN == IPDUM_HEADER_BYTE_ORDER)
-        headerId = (uint32)(*dtaPtr);
-        dtaPtr++;
+        headerId = (uint32)(*localDataPtr);
+        localDataPtr++;
         headerId <<= 8u;
-        headerId |= (uint32)(*dtaPtr);
-        dtaPtr++;
+        headerId |= (uint32)(*localDataPtr);
+        localDataPtr++;
         headerId <<= 8u;
-        headerId |= (uint32)(*dtaPtr);
-        dtaPtr++;
+        headerId |= (uint32)(*localDataPtr);
+        localDataPtr++;
         index += 3u;
         if (IPDUM_HEADERTYPE_LONG == containerRxPtr->IpduMContainerHeaderSize)
         {
             headerId <<= 8u;
-            headerId |= (uint32)(*dtaPtr);
-            dtaPtr++;
+            headerId |= (uint32)(*localDataPtr);
+            localDataPtr++;
             index++;
         }
-        headerDlc = (uint32)(*dtaPtr);
-        dtaPtr++;
+        headerDlc = (uint32)(*localDataPtr);
+        localDataPtr++;
         index++;
         if (IPDUM_HEADERTYPE_LONG == containerRxPtr->IpduMContainerHeaderSize)
         {
             headerDlc <<= 8u;
-            headerDlc |= (uint32)(*dtaPtr);
-            dtaPtr++;
+            headerDlc |= (uint32)(*localDataPtr);
+            localDataPtr++;
             headerDlc <<= 8u;
-            headerDlc |= (uint32)(*dtaPtr);
-            dtaPtr++;
+            headerDlc |= (uint32)(*localDataPtr);
+            localDataPtr++;
             headerDlc <<= 8u;
-            headerDlc |= (uint32)(*dtaPtr);
-            dtaPtr++;
+            headerDlc |= (uint32)(*localDataPtr);
+            localDataPtr++;
             index += 3u;
         }
 #else  /* IPDUM_LITTLE_ENDIAN */
-        headerId = (uint32)(*dtaPtr);
-        dtaPtr++;
-        headerId |= (uint32)(((uint32)(*dtaPtr)) << 8u);
-        dtaPtr++;
-        headerId |= (uint32)(((uint32)(*dtaPtr)) << 16u);
-        dtaPtr++;
+
+        headerId = (uint32)(*localDataPtr);
+        localDataPtr++;
+        headerId |= (uint32)(((uint32)(*localDataPtr)) << 8u);
+        localDataPtr++;
+        headerId |= (uint32)(((uint32)(*localDataPtr)) << 16u);
+        localDataPtr++;
         index += 3u;
         if (IPDUM_HEADERTYPE_LONG == containerRxPtr->IpduMContainerHeaderSize)
         {
-            headerId |= (uint32)(((uint32)(*dtaPtr)) << 24u);
-            dtaPtr++;
+            headerId |= (uint32)(((uint32)(*localDataPtr)) << 24u);
+            localDataPtr++;
             index++;
         }
-        headerDlc = (uint32)(*dtaPtr);
-        dtaPtr++;
+        headerDlc = (uint32)(*localDataPtr);
+        localDataPtr++;
         index++;
         if (IPDUM_HEADERTYPE_LONG == containerRxPtr->IpduMContainerHeaderSize)
         {
-            headerDlc |= (uint32)(((uint32)(*dtaPtr)) << 8u);
-            dtaPtr++;
-            headerDlc |= (uint32)(((uint32)(*dtaPtr)) << 16u);
-            dtaPtr++;
-            headerDlc |= (uint32)(((uint32)(*dtaPtr)) << 24u);
-            dtaPtr++;
+            headerDlc |= (uint32)(((uint32)(*localDataPtr)) << 8u);
+            localDataPtr++;
+            headerDlc |= (uint32)(((uint32)(*localDataPtr)) << 16u);
+            localDataPtr++;
+            headerDlc |= (uint32)(((uint32)(*localDataPtr)) << 24u);
+            localDataPtr++;
             index += 3u;
         }
 #endif /* IPDUM_BIG_ENDIAN == IPDUM_HEADER_BYTE_ORDER */
+        SchM_Exit_IpduM_Context();
         if ((0x0u != headerId) && (0x0u != headerDlc))
         {
             findFlg = FALSE;
@@ -1894,8 +2029,10 @@ static FUNC(void, IPDUM_CODE) IpduM_ContainedRxExtractedHandle(
                     {
                         /* @SWS_IpduM_00209
                         notify PDUR */
-                        outPdu.SduDataPtr = dtaPtr;
+                        SchM_Enter_IpduM_Context();
+                        outPdu.SduDataPtr = localDataPtr;
                         outPdu.SduLength = (PduLengthType)headerDlc;
+                        SchM_Exit_IpduM_Context();
                         PduR_IpduMRxIndication(containedRxPtr->IpduMContainedRxPduRef->PduId, &outPdu);
                     }
                 }
@@ -1903,7 +2040,7 @@ static FUNC(void, IPDUM_CODE) IpduM_ContainedRxExtractedHandle(
             /* @SWS_IpduM_00207
             not match,shall be discarded silently */
             index += headerDlc;
-            dtaPtr += headerDlc; /* PRQA S 0488 */ /* MISRA Rule 18.4 */
+            localDataPtr += headerDlc; /* PRQA S 0488 */ /* MISRA Rule 18.4 */
         }
         else
         {
@@ -1913,12 +2050,12 @@ static FUNC(void, IPDUM_CODE) IpduM_ContainedRxExtractedHandle(
             stopFlg = TRUE;
         }
     }
-    /* PRQA S 1338 -- */ /* MISRA Rule 17.8 */
     return;
 }
 #define IPDUM_STOP_SEC_CODE
 #include "IpduM_MemMap.h"
 #endif /* IPDUM_CONTAINER_RX_NUMBER_MAX >0u */
+
 #if (IPDUM_CONTAINER_TX_NUMBER_MAX > 0u)
 /* container tx confirmation handle */
 #define IPDUM_START_SEC_CODE
@@ -1934,13 +2071,18 @@ static FUNC(void, IPDUM_CODE) IpduM_TxConfOfContainer(IpduM_uintx containerIndex
     IpduM_InnerContainerTxQueueHandleType* incIndexPtr = &IpduM_InnerContainerTxQueueRecode[queueIndex];
     /* @SWS_IpduM_00198
      discard unexpected tx confirmation */
-    if (((0x0u < innerContainerPtr->txConfTimer) && (IPDUM_DIRECT == containerTxCfgPtr->IpduMContainerTxTriggerMode))
+    SchM_Enter_IpduM_Context();
+    uint16 txConfTim = innerContainerPtr->txConfTimer;
+    SchM_Exit_IpduM_Context();
+    if (((0x0u < txConfTim) && (IPDUM_DIRECT == containerTxCfgPtr->IpduMContainerTxTriggerMode))
 #if (STD_ON == IPUDM_TRIG_CONTAINER_SUPPORT_TXCONF)
         || (IPDUM_TRIGGERTRANSMIT == containerTxCfgPtr->IpduMContainerTxTriggerMode)
 #endif /* STD_ON == IPUDM_TRIG_SUPPORT_TXCONF */
     )
     {
+        SchM_Enter_IpduM_Context();
         innerContainerPtr->txConfTimer = 0x0u;
+        SchM_Exit_IpduM_Context();
         for (index = 0; index < incIndexPtr->containedTxConfirmCnt; index++)
         {
             containedIndex = IpduM_InnerContainedIndexRecode[incIndexPtr->containedTxConfirmStartPos + index];
@@ -1958,7 +2100,7 @@ static FUNC(void, IPDUM_CODE) IpduM_TxConfOfContainer(IpduM_uintx containerIndex
             IpduM_ContainedPendingTxConfirmation[incIndexPtr->containedTxConfirmStartPos + index] = IPDUM_UNUSED_UINT8;
             IpduM_InnerContainedIndexRecode[incIndexPtr->containedTxConfirmStartPos + index] = IPDUM_UNUSED_UINT8;
         }
-        SchM_Enter_IpduM_MsgContext();
+        SchM_Enter_IpduM_Context();
         incIndexPtr->containedTxConfirmStartPos = containerTxCfgPtr->IpduMContainerIncContainedStartPosIndex;
         incIndexPtr->containedTxConfirmCnt = 0u;
         /* queue handle */
@@ -1971,7 +2113,7 @@ static FUNC(void, IPDUM_CODE) IpduM_TxConfOfContainer(IpduM_uintx containerIndex
             }
             innerContainerPtr->queueCnt--;
         }
-        SchM_Exit_IpduM_MsgContext();
+        SchM_Exit_IpduM_Context();
     }
     return;
 }
@@ -1986,6 +2128,7 @@ static FUNC(void, IPDUM_CODE) IpduM_ContainerTxHandle(IpduM_uintx index)
     IpduM_InnerContainerTxType* innerContainerTxPtr;
     const IpduMContainerTxPduType* containerTxCfgPtr;
 
+    SchM_Enter_IpduM_Context();
     innerContainerTxPtr = &IpduM_InnerContainerTx[index];
     containerTxCfgPtr = &IpduM_CfgPtr->IpduMContainerTxPduPtr[index];
     if (0x0u < innerContainerTxPtr->txConfTimer)
@@ -2009,6 +2152,7 @@ static FUNC(void, IPDUM_CODE) IpduM_ContainerTxHandle(IpduM_uintx index)
             container shall be trigger */
         }
     }
+    SchM_Exit_IpduM_Context();
     if (TRUE == innerContainerTxPtr->trigFlg)
     {
         /* @SWS_IpduM_00185
@@ -2071,7 +2215,7 @@ the contained shall be add to a new instance of the container */
             (void)IpduM_TransmitContainer(containedTxCfgPtr->ContainedTxInContainerPduRef, NULL_PTR);
 #endif
         }
-        SchM_Enter_IpduM_MsgContext();
+        SchM_Enter_IpduM_Context();
         innerContainerPtr->writePoint++;
         if (innerContainerPtr->writePoint >= containerTxCfgPtr->IpduMContainerQueueSize)
         {
@@ -2100,11 +2244,11 @@ the contained shall be add to a new instance of the container */
         incIndexTxPtr->containedStartPos = (uint8)index;
         incIndexTxPtr->containedCnt = 0x0u;
         incIndexTxPtr->payloadSize = 0x0u;
-        SchM_Exit_IpduM_MsgContext();
+        SchM_Exit_IpduM_Context();
     }
     /* next handle */
     /* this hande shall be complete add contained */
-    SchM_Enter_IpduM_MsgContext();
+    SchM_Enter_IpduM_Context();
     bufIndex =
         ((IpduM_uintx)containerTxCfgPtr->IpduMBufIndex
          + ((IpduM_uintx)innerContainerPtr->writePoint * (IpduM_uintx)containerTxCfgPtr->IpduMContainerTxPduRef->PduLen)
@@ -2117,12 +2261,13 @@ the contained shall be add to a new instance of the container */
     {
         innerContainerPtr->queueCnt = 1u;
     }
-    SchM_Exit_IpduM_MsgContext();
+    SchM_Exit_IpduM_Context();
     return E_OK;
 }
 #define IPDUM_STOP_SEC_CODE
 #include "IpduM_MemMap.h"
-#endif /* IPDUM_CONTAINER_TX_NUMBER_MAX >0u */
+#endif /* IPDUM_CONTAINED_TX_NUMBER_MAX >0u */
+
 #if (IPDUM_CONTAINED_TX_NUMBER_MAX > 0u)
 /* contained is LAST_IS_BEST shall find position in container queue buffer */
 #define IPDUM_START_SEC_CODE
@@ -2186,7 +2331,8 @@ static FUNC(Std_ReturnType, IPDUM_CODE) IpduM_ContainedFindLastIsBestInBufPos(
 }
 #define IPDUM_STOP_SEC_CODE
 #include "IpduM_MemMap.h"
-#endif /* IPDUM_CONTAINER_TX_NUMBER_MAX >0u */
+#endif /* IPDUM_CONTAINED_TX_NUMBER_MAX >0u */
+
 #if (IPDUM_CONTAINED_TX_NUMBER_MAX > 0u)
 /* LAST_IS_BEST contained need get pdu date by triggertransmit handle */
 #define IPDUM_START_SEC_CODE
@@ -2220,8 +2366,10 @@ static FUNC(Std_ReturnType, IPDUM_CODE) IpduM_ContainedTxTrigHandle(IpduM_uintx 
             {
                 /* @SWS_IpduM_00220,IPDUM_COLLECT_LAST_IS_BEST
                 call PduR_IpduMTriggerTransmit */
+                SchM_Enter_IpduM_Context();
                 pduInfo.SduDataPtr = IpduM_PduBuf;
                 pduInfo.SduLength = containedTxCfgPtr->IpduMContainedTxPduRef->PduLen;
+                SchM_Exit_IpduM_Context();
                 ret = PduR_IpduMTriggerTransmit(containedTxCfgPtr->IpduMContainedTxPduRef->PduId, &pduInfo);
                 if ((E_OK != ret) || (pduInfo.SduLength != containedTxCfgPtr->IpduMContainedTxPduRef->PduLen))
                 {
@@ -2232,10 +2380,8 @@ static FUNC(Std_ReturnType, IPDUM_CODE) IpduM_ContainedTxTrigHandle(IpduM_uintx 
                         containedTxCfgPtr,
                         bufIndex,
                         incIndexPtr->payloadSize);
-                    SchM_Enter_IpduM_MsgContext();
                     IpduM_InnerContainedIndexRecode[index] = IPDUM_UNUSED_UINT8;
                     incIndexPtr->payloadSize -= (uint16)pduInfo.SduLength;
-                    SchM_Exit_IpduM_MsgContext();
                 }
                 else
                 {
@@ -2268,7 +2414,8 @@ static FUNC(Std_ReturnType, IPDUM_CODE) IpduM_ContainedTxTrigHandle(IpduM_uintx 
 }
 #define IPDUM_STOP_SEC_CODE
 #include "IpduM_MemMap.h"
-#endif /* IPDUM_CONTAINER_TX_NUMBER_MAX >0u */
+#endif /* IPDUM_CONTAINED_TX_NUMBER_MAX >0u */
+
 #if (IPDUM_CONTAINED_TX_NUMBER_MAX > 0u)
 /* delete contained in container queue buf */
 #define IPDUM_START_SEC_CODE
@@ -2286,7 +2433,9 @@ static FUNC(uint16, IPDUM_CODE) IpduM_ContainedDeleteInBuf(
          + ((IpduM_uintx)innerContainerPtr->transReadPoint
             * (IpduM_uintx)containerTxCfgPtr->IpduMContainerTxPduRef->PduLen));
     IpduM_uintx copyLen;
+    SchM_Enter_IpduM_Context();
     uint8* dtaBuf = &IpduM_DtaBuf[bufIndex];
+    SchM_Exit_IpduM_Context();
     uint16 deleteLen = 0x4u + containedTxPtr->IpduMContainedTxPduRef->PduLen;
     IpduM_uintx index;
     if (IPDUM_HEADERTYPE_LONG == containerTxCfgPtr->IpduMContainerHeaderSize)
@@ -2294,17 +2443,17 @@ static FUNC(uint16, IPDUM_CODE) IpduM_ContainedDeleteInBuf(
         deleteLen += 0x4u;
     }
     copyLen = (txQueueLen - (bufIndex - startPos + deleteLen));
-    SchM_Enter_IpduM_MsgContext();
+    SchM_Enter_IpduM_Context();
     for (index = 0u; (index < copyLen); index++)
     {
         dtaBuf[index] = dtaBuf[index + deleteLen];
     }
-    SchM_Exit_IpduM_MsgContext();
+    SchM_Exit_IpduM_Context();
     return deleteLen;
 }
 #define IPDUM_STOP_SEC_CODE
 #include "IpduM_MemMap.h"
-#endif /* IPDUM_CONTAINER_TX_NUMBER_MAX >0u */
+#endif /* IPDUM_CONTAINED_TX_NUMBER_MAX >0u */
 
 #if (IPDUM_CONTAINED_TX_NUMBER_MAX > 0u)
 /* fill contained data to container buf */
@@ -2317,11 +2466,11 @@ static FUNC(void, IPDUM_CODE) IpduM_ContainedFillToContainer(
 {
     const IpduMContainerTxPduType* containerTxPtr =
         &IpduM_CfgPtr->IpduMContainerTxPduPtr[containedTxPtr->ContainedTxInContainerPduRef];
+    SchM_Enter_IpduM_Context();
     uint8* destBufPtr = &IpduM_DtaBuf[bufIndex];
     uint32 headerId = containedTxPtr->IpduMContainedPduHeaderId;
     uint32 headerDlc = containedTxPtr->IpduMContainedTxPduRef->PduLen;
     IpduM_uintx index;
-    SchM_Enter_IpduM_MsgContext();
 /* IPDUM_BYTE_ORDER_BIG_ENDIAN:
 0x11223344
 0x11 0x22 0x33 0x44
@@ -2389,12 +2538,12 @@ low ----------> high
     {
         destBufPtr[index] = PduInfoPtr->SduDataPtr[index];
     }
-    SchM_Exit_IpduM_MsgContext();
+    SchM_Exit_IpduM_Context();
     return;
 }
 #define IPDUM_STOP_SEC_CODE
 #include "IpduM_MemMap.h"
-#endif /* IPDUM_CONTAINER_TX_NUMBER_MAX >0u */
+#endif /* IPDUM_CONTAINED_TX_NUMBER_MAX >0u */
 
 #if (IPDUM_CONTAINER_TX_NUMBER_MAX > 0u)
 /* container tx confirmation handle */
@@ -2417,7 +2566,6 @@ static FUNC(boolean, IPDUM_CODE) IpduM_ContainerCheckQueueIsExit(IpduM_uintx con
         queueIndex = (IpduM_uintx)innerContainerPtr->txCofReadPoint
                      + (IpduM_uintx)containerTxCfgPtr->IpduMContainerTxQueueStartPosIndex;
         incIndexPtr = &IpduM_InnerContainerTxQueueRecode[queueIndex];
-        SchM_Enter_IpduM_MsgContext();
         /* reset payload size of the container */
         incIndexPtr->payloadSize = 0x0u;
         incIndexPtr->containedStartPos = (uint8)(containerTxCfgPtr->IpduMContainerIncContainedStartPosIndex);
@@ -2432,7 +2580,6 @@ static FUNC(boolean, IPDUM_CODE) IpduM_ContainerCheckQueueIsExit(IpduM_uintx con
             }
             innerContainerPtr->queueCnt--;
         }
-        SchM_Exit_IpduM_MsgContext();
     }
     /* check queue exit not send container */
     queueIndex = (IpduM_uintx)innerContainerPtr->transReadPoint

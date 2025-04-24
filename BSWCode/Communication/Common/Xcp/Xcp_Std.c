@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Xcp_Std.c                                                   **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : qinchun.yang                                                **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Implementation of the XCP_Std command                       **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Xcp_Std.c                                                   **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : qinchun.yang                                                **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Implementation of the XCP_Std command                       **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 /*=======[I N C L U D E S]====================================================*/
 #include "Xcp_Internal.h"
 #if (XCP_ON_CAN_ENABLE == STD_ON)
@@ -49,7 +50,7 @@
 #define XCP_KEY_MAX_LENGTH       0x20u
 #define XCP_GET_SEED_DATA_OFFSET 0x02u
 #define XCP_UNLOCK_DATA_OFFSET   0x02u
-#endif
+#endif /*XCP_SEED_AND_UNLOCK == STD_ON*/
 
 /*
  * SET_REQUEST CMD
@@ -60,7 +61,7 @@
 #define XCP_REQ_DAQ_NO_RESUME 0x02
 #define XCP_REQ_DAQ_RESUME    0x04
 #define XCP_REQ_DAQ_CLEAR     0x08
-#endif
+#endif /*XCP_SET_REQUEST == STD_ON*/
 /*=======[T Y P E   D E F I N I T I O N S]====================================*/
 #if (XCP_ON_CAN_ENABLE == STD_ON)
 #if (XCP_GET_SLAVE_ID == STD_ON)
@@ -80,7 +81,7 @@ typedef enum
 VAR(Xcp_AddressType, XCP_VAR_INIT_UNSPECIFIED) Xcp_MTA = {0, 0};
 #define XCP_STOP_SEC_VAR_INIT_UNSPECIFIED
 #include "Xcp_MemMap.h"
-#endif
+#endif /*XCP_SET_MTA == STD_ON*/
 
 #define XCP_START_SEC_VAR_SAVED_ZONE_16
 #include "Xcp_MemMap.h"
@@ -119,7 +120,7 @@ static VAR(uint8, XCP_VAR_NO_INIT_8) Xcp_KeyBuffer[XCP_KEY_MAX_LENGTH]; /*PRQA S
 #define XCP_STOP_SEC_VAR_CLEARED_8
 #include "Xcp_MemMap.h"
 
-#endif
+#endif /*XCP_SEED_AND_UNLOCK == STD_ON*/
 /*=======[I N T E R N A L   F U N C T I O N   D E C L A R A T I O N S]========*/
 /*
  * Complex Command Handler
@@ -131,7 +132,7 @@ static FUNC(void, XCP_CODE) Xcp_CopySeedIntoFrame(void);
 static FUNC(void, XCP_CODE) Xcp_GetSeedHal(void);
 static FUNC(void, XCP_CODE) Xcp_KeyHandler(uint8 len);
 
-#endif
+#endif /*XCP_SEED_AND_UNLOCK == STD_ON*/
 
 #if (XCP_UPLOAD == STD_ON)
 static FUNC(void, XCP_CODE) Xcp_UploadHal(void);
@@ -426,7 +427,7 @@ FUNC(void, XCP_CODE) Xcp_GetCommModeInfo(void) /* PRQA S 1532 */ /* MISRA Rule 8
 #elif (XCP_INTERLEAVED_MODE == STD_ON)
         Xcp_RespBuffer[2u] = 0x02u;
         Xcp_RespBuffer[6u] = XCP_QUEUE_SIZE;
-#endif
+#endif /*XCP_INTERLEAVED_MODE == STD_ON*/
         /* XCP Driver Version Number */
         Xcp_RespBuffer[7u] = ((uint8)((XCP_H_SW_MAJOR_VERSION & 0x0fu) << 4u)) | (XCP_H_SW_MINOR_VERSION & 0x0fu);
         Xcp_RespLength = 0x08u;
@@ -503,7 +504,7 @@ FUNC(void, XCP_CODE) Xcp_GetId(void)
     Xcp_SendResp();
     return;
 }
-#endif
+#endif /*STD_ON == XCP_GET_ID*/
 
 #if (XCP_SET_REQUEST == STD_ON)
 /******************************************************************************/
@@ -525,7 +526,7 @@ FUNC(void, XCP_CODE) Xcp_SetRequest(void)
 #if (STD_ON == XCP_RESUME_SUPPORT)
     P2VAR(Xcp_DaqType, AUTOMATIC, XCP_VAR_CLEARED_32) daqPtr;
     uint16 daqIdx = 0;
-#endif
+#endif /*STD_ON == XCP_RESUME_SUPPORT*/
 
 #if ((STD_OFF == XCP_CAN_MAX_DLC_REQUIRED) && (STD_ON == XCP_ON_CAN_ENABLE))
     if ((Xcp_CmdLength != 4u) && (Xcp_CmdLength != XCP_CAN_MAX_DLC))
@@ -565,7 +566,7 @@ FUNC(void, XCP_CODE) Xcp_SetRequest(void)
                 }
             }
             break;
-#endif
+#endif /*STD_ON == XCP_RESUME_SUPPORT*/
         case XCP_REQ_DAQ_CLEAR:
             /*
              * clear daq
@@ -860,7 +861,7 @@ Xcp_Unlock(void) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
     if ((Xcp_CmdLength != (len + 2u))
 #if (XCP_MAX_CTO > 8u)
         && (Xcp_CmdLength != (len + 4u))
-#endif
+#endif /*XCP_MAX_CTO > 8u*/
         && (Xcp_CmdLength != XCP_CAN_MAX_DLC))
     {
         Xcp_SetErrorCode(XCP_ERR_CMD_SYNTAX);
@@ -985,7 +986,7 @@ Xcp_SetMta(void) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
         Xcp_SetErrorCode(XCP_ERR_OUT_OF_RANGE);
         Xcp_RespLength = 0x02u;
     }
-#endif
+#endif /*XCP_PL_CAL == XCP_PL_CAL&XCP_RESOURCE*/
     Xcp_SendResp();
     return;
 }
@@ -995,7 +996,7 @@ FUNC(uint32, XCP_CODE) Xcp_Mta2Ptr(const uint8 u1AddExt, const uint32 u4Add)
     (void)u1AddExt;
     return u4Add;
 }
-#endif /* (STD_ON == XCP_SET_MTA) */ /* PRQA S 2053 */ /* MISRA Rule 18.8, Dir 4.4 */
+#endif /*STD_ON == XCP_SET_MTA*/
 
 #if (STD_ON == XCP_UPLOAD)
 /******************************************************************************/
@@ -1034,7 +1035,7 @@ FUNC(void, XCP_CODE) Xcp_Upload(void) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
             Xcp_SetErrorCode(XCP_ERR_PGM_ACTIVE);
             Xcp_RespLength = 0x02u;
         }
-#endif
+#endif /*XCP_PL_PGM == XCP_PL_PGM & XCP_RESOURCE*/
         else
         {
             Xcp_UploadHal();
@@ -1058,8 +1059,8 @@ static FUNC(void, XCP_CODE) Xcp_UploadHal(void)
 #if ((STD_ON == XCP_MEASUREMENT_POLLING_SUPPORT) && (XCP_POLL_MEA_BY_UP == XCP_MEASUREMENT_POLLING_BY))
     boolean pollingflag =
         Xcp_CheckAddress(Xcp_Mta2Ptr(Xcp_MTA.extensionAddr, Xcp_MTA.transferAddr), ((uint32)len * XCP_AG), XCP_MEM_MEA);
-#endif
-#endif /*0 != (XCP_PL_CAL & XCP_RESOURCE)*/ /* PRQA S 2053 */ /* MISRA Rule 18.8, Dir 4.4 */
+#endif /*STD_ON == XCP_MEASUREMENT_POLLING_SUPPORT) && (XCP_POLL_MEA_BY_UP == XCP_MEASUREMENT_POLLING_BY*/
+#endif /*XCP_PL_CAL & XCP_RESOURCE*/
 #if (0 != (XCP_PL_PGM & XCP_RESOURCE))
     boolean pgmflag =
         Xcp_CheckAddress(Xcp_Mta2Ptr(Xcp_MTA.extensionAddr, Xcp_MTA.transferAddr), ((uint32)len * XCP_AG), XCP_MEM_PGM);
@@ -1080,14 +1081,14 @@ static FUNC(void, XCP_CODE) Xcp_UploadHal(void)
         || ((boolean)TRUE == calflag) /* PRQA S 4558 */ /* MISRA Rule 10.1 */
 #if ((STD_ON == XCP_MEASUREMENT_POLLING_SUPPORT) && (XCP_POLL_MEA_BY_UP == XCP_MEASUREMENT_POLLING_BY))
         || ((boolean)TRUE == pollingflag)
-#endif
-#endif /*0 != (XCP_PL_CAL & XCP_RESOURCE)*/ /* PRQA S 2053 */ /* MISRA Rule 18.8, Dir 4.4 */
+#endif /*STD_ON == XCP_MEASUREMENT_POLLING_SUPPORT) && (XCP_POLL_MEA_BY_UP == XCP_MEASUREMENT_POLLING_BY*/
+#endif /*XCP_PL_CAL & XCP_RESOURCE*/
 #if (0 != (XCP_PL_PGM & XCP_RESOURCE))
         || ((boolean)TRUE == pgmflag)
-#endif
+#endif /*XCP_PL_PGM & XCP_RESOURCE*/
 #if ((XCP_GET_ID == STD_ON) || (XCP_GET_DAQ_EVENT_INFO == STD_ON) || (XCP_GET_SECTOR_INFO == STD_ON))
         || (len <= Xcp_UploadInfoLen)
-#endif
+#endif /*XCP_GET_ID == STD_ON || XCP_GET_DAQ_EVENT_INFO == STD_ON || XCP_GET_SECTOR_INFO == STD_ON*/
     )
     {
 #if (XCP_SLAVE_BLOCK_MODE == STD_ON)
@@ -1122,10 +1123,10 @@ static FUNC(void, XCP_CODE) Xcp_UploadHal(void)
         Xcp_SetErrorCode(XCP_ERR_ACCESS_DENIED);
         Xcp_RespLength = 0x02u;
     }
-#endif
+#endif /*XCP_PL_CAL == XCP_PL_CAL&XCP_RESOURCE*/
     return;
 }
-#endif /* (STD_ON == XCP_UPLOAD) */ /* PRQA S 2053 */ /* MISRA Rule 18.8, Dir 4.4 */
+#endif /*STD_ON == XCP_UPLOAD*/
 
 #if (STD_ON == XCP_SHORT_UPLOAD)
 /******************************************************************************/
@@ -1192,8 +1193,8 @@ static FUNC(void, XCP_CODE) Xcp_ShortUploadHal(void)
     boolean calflag = Xcp_CheckAddress(Xcp_Mta2Ptr(extAddr, Addr), ((uint32)len * XCP_AG), XCP_MEM_CAL_ALL);
 #if ((STD_ON == XCP_MEASUREMENT_POLLING_SUPPORT) && (XCP_POLL_MEA_BY_SHORT_UP == XCP_MEASUREMENT_POLLING_BY))
     boolean pollingflag = Xcp_CheckAddress(Xcp_Mta2Ptr(extAddr, Addr), ((uint32)len * XCP_AG), XCP_MEM_MEA);
-#endif
-#endif /*0 != (XCP_PL_CAL & XCP_RESOURCE)*/ /* PRQA S 2053 */ /* MISRA Rule 18.8, Dir 4.4 */
+#endif /*STD_ON == XCP_MEASUREMENT_POLLING_SUPPORT) && (XCP_POLL_MEA_BY_SHORT_UP == XCP_MEASUREMENT_POLLING_BY*/
+#endif /*XCP_PL_CAL & XCP_RESOURCE*/
 #if (0 != (XCP_PL_PGM & XCP_RESOURCE))
     boolean pgmflag = Xcp_CheckAddress(Xcp_Mta2Ptr(extAddr, Addr), ((uint32)len * XCP_AG), XCP_MEM_PGM);
 #endif
@@ -1208,11 +1209,11 @@ static FUNC(void, XCP_CODE) Xcp_ShortUploadHal(void)
         || ((boolean)TRUE == calflag) /* PRQA S 4558 */ /* MISRA Rule 10.1 */
 #if ((STD_ON == XCP_MEASUREMENT_POLLING_SUPPORT) && (XCP_POLL_MEA_BY_SHORT_UP == XCP_MEASUREMENT_POLLING_BY))
         || ((boolean)TRUE == pollingflag)
-#endif
-#endif /*0 != (XCP_PL_CAL & XCP_RESOURCE)*/ /* PRQA S 2053 */ /* MISRA Rule 18.8, Dir 4.4 */
+#endif /*STD_ON == XCP_MEASUREMENT_POLLING_SUPPORT) && (XCP_POLL_MEA_BY_SHORT_UP == XCP_MEASUREMENT_POLLING_BY*/
+#endif /*XCP_PL_CAL & XCP_RESOURCE*/
 #if (0 != (XCP_PL_PGM & XCP_RESOURCE))
         || ((boolean)TRUE == pgmflag)
-#endif
+#endif /*XCP_PL_PGM & XCP_RESOURCE*/
     )
     {
         /* Set MTA */
@@ -1237,10 +1238,10 @@ static FUNC(void, XCP_CODE) Xcp_ShortUploadHal(void)
         Xcp_SetErrorCode(XCP_ERR_ACCESS_DENIED);
         Xcp_RespLength = 0x02u;
     }
-#endif
+#endif /*(XCP_PL_CAL | XCP_PL_PGM) & XCP_RESOURCE*/
     return;
 }
-#endif /* (XCP_SHORT_UPLOAD == STD_ON) */ /* PRQA S 2053 */ /* MISRA Rule 18.8, Dir 4.4 */
+#endif /*XCP_SHORT_UPLOAD == STD_ON*/
 
 #if (XCP_BUILD_CHECKSUM == STD_ON)
 /******************************************************************************/
@@ -1300,7 +1301,7 @@ Xcp_BuildChecksum(void) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
             Xcp_SetErrorCode(XCP_ERR_ACCESS_DENIED);
             Xcp_RespLength = 0x02u;
         }
-#endif
+#endif /*XCP_PL_CAL == XCP_PL_CAL&XCP_RESOURCE*/
         else
         {
             /* set checksum type */
@@ -1315,7 +1316,7 @@ Xcp_BuildChecksum(void) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
     Xcp_SendResp();
     return;
 }
-#endif /* (XCP_BUILD_CHECKSUM == STD_ON) */ /* PRQA S 2053 */ /* MISRA Rule 18.8, Dir 4.4 */
+#endif /*XCP_BUILD_CHECKSUM == STD_ON*/
 
 /* Transport Layer Command */
 #if (XCP_GET_SLAVE_ID == STD_ON)
@@ -1481,22 +1482,22 @@ Xcp_CheckAddress(uint32 addr, uint32 size, Xcp_MemAddrType type)
         result = Xcp_CheckMeaMem(addr, size);
         break;
     }
-#endif                                                               /*STD_ON == XCP_MEASUREMENT_POLLING_SUPPORT*/
-#endif /*XCP_PL_CAL == (XCP_PL_CAL&XCP_RESOURCE)*/ /* PRQA S 2053 */ /* MISRA Rule 18.8, Dir 4.4 */
+#endif /*STD_ON == XCP_MEASUREMENT_POLLING_SUPPORT*/
+#endif /*XCP_PL_CAL == XCP_PL_CAL&XCP_RESOURCE*/
 
 #if (XCP_PL_PGM == (XCP_PL_PGM & XCP_RESOURCE))
     case XCP_MEM_PGM: {
         result = Xcp_CheckPgmMem(addr, size);
         break;
     }
-#endif
+#endif /*XCP_PL_PGM == XCP_PL_PGM & XCP_RESOURCE*/
     default:
         /*Do nothing.*/
         break;
     }
     return result;
 }
-#endif /*0 != ((XCP_PL_CAL | XCP_PL_PGM) & XCP_RESOURCE)*/ /* PRQA S 2053 */ /* MISRA Rule 18.8, Dir 4.4 */
+#endif /*XCP_PL_CAL | XCP_PL_PGM & XCP_RESOURCE*/
 
 #if (STD_ON == XCP_SET_MTA)
 /******************************************************************************/
@@ -1533,6 +1534,6 @@ Xcp_UpdateMTA(uint32 u4Length)
 #endif
     return;
 }
-#endif /* (STD_ON == XCP_SET_MTA) */ /* PRQA S 2053 */ /* MISRA Rule 18.8, Dir 4.4 */
+#endif /*STD_ON == XCP_SET_MTA*/
 #define XCP_STOP_SEC_CODE
 #include "Xcp_MemMap.h"

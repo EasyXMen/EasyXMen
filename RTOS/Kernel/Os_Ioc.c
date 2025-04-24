@@ -18,27 +18,28 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Os_Ioc.c                                                    **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : i-soft-os                                                   **
- **  Vendor      :                                                             **
- **  DESCRIPTION : IOC manager                                                 **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
- **  Version :   AUTOSAR classic Platform R19--Function Safety                 **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Os_Ioc.c                                                    **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : i-soft-os                                                   **
+**  Vendor      :                                                             **
+**  DESCRIPTION : IOC manager                                                 **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
+**  Version :   AUTOSAR classic Platform R19--Function Safety                 **
+**                                                                            **
+*******************************************************************************/
 
 /*=======[I N C L U D E S]====================================================*/
 #include "Os_Internal.h"
 #if (CFG_IOC_MAX > 0u)
 /*=======[M A C R O S]========================================================*/
-#if (OS_AUTOSAR_CORES > 0U)
+#if (OS_AUTOSAR_CORES > 1U)
 #define IOC_LOCK(com)                                                \
     if (CROSS_CORE_COM == Os_IocCommunicationCfg[com].IocCfgComMark) \
     {                                                                \
@@ -98,17 +99,21 @@ static FUNC(boolean, OS_CODE) Os_IocUseQueue(Os_IocComIdType comId);
 /******************************************************************************/
 FUNC(void, OS_CODE) Os_InitIoc(void)
 {
-    P2CONST(Os_IocCommunicationCfgType, OS_VAR, OS_CONST) pIocComCfg = Os_IocCommunicationCfg;
-    VAR(Os_IocU16Type, OS_VAR) loop;
-
-    for (loop = 0U; loop < CFG_IOC_MAX; loop++)
+    if (OS_CORE_ID_MASTER == Os_SCB.sysCore)
     {
-        Os_IocCB[loop].IocBlockPtr = pIocComCfg[loop].IocBlockPtr;
-        Os_IocCB[loop].IocBlockLength = pIocComCfg[loop].IocBlockCnt;
-        Os_IocCB[loop].IocBufferPtr = pIocComCfg[loop].IocBufferPtr;
-        Os_IocCB[loop].IocDataElementSizeWithHeader =
-            (uint16)(pIocComCfg[loop].IocDataTotalLength + (pIocComCfg[loop].IocDataNumber * OS_IOC_DATA_HEAD_SIZE));
-        (void)Os_IocEmpty(loop);
+        P2CONST(Os_IocCommunicationCfgType, OS_VAR, OS_CONST) pIocComCfg = Os_IocCommunicationCfg;
+        VAR(Os_IocU16Type, OS_VAR) loop;
+
+        for (loop = 0U; loop < CFG_IOC_MAX; loop++)
+        {
+            Os_IocCB[loop].IocBlockPtr = pIocComCfg[loop].IocBlockPtr;
+            Os_IocCB[loop].IocBlockLength = pIocComCfg[loop].IocBlockCnt;
+            Os_IocCB[loop].IocBufferPtr = pIocComCfg[loop].IocBufferPtr;
+            Os_IocCB[loop].IocDataElementSizeWithHeader =
+                (uint16)(pIocComCfg[loop].IocDataTotalLength
+                         + (pIocComCfg[loop].IocDataNumber * OS_IOC_DATA_HEAD_SIZE));
+            (void)Os_IocEmpty(loop);
+        }
     }
 }
 #define OS_STOP_SEC_CODE
@@ -173,8 +178,8 @@ static FUNC(Os_IocBlockIdType, OS_CODE) Os_IocGetBlock(Os_IocComIdType comId)
     {
         /* remove from free block list. */
         vBlockId = pIocCom->IocBlockFreeHead;
-        pIocCom->IocBlockFreeHead = pBlockBase[vBlockId].IocBlockNext;
-        pBlockBase[vBlockId].IocBlockNext = OS_OBJECT_INVALID;
+        pIocCom->IocBlockFreeHead = pBlockBase[vBlockId].IocBlockLink.IocBlockNext;
+        pBlockBase[vBlockId].IocBlockLink.IocBlockNext = OS_OBJECT_INVALID;
 
         /* modify the block state */
         pBlockBase[vBlockId].IocBlockState = BLOCK_WRITING;
@@ -217,7 +222,7 @@ static FUNC(void, OS_CODE) Os_IocReleaseBlock(Os_IocComIdType comId, Os_IocBlock
         IOC_LOCK(comId);
 
         /* add to free block list. */
-        pBlockBase[blockId].IocBlockNext = pIocCom->IocBlockFreeHead;
+        pBlockBase[blockId].IocBlockLink.IocBlockNext = pIocCom->IocBlockFreeHead;
 
         /* set new head */
         pIocCom->IocBlockFreeHead = blockId;
@@ -274,8 +279,15 @@ static FUNC(void, OS_CODE) Os_IocWriteDataToBlock(
         {
             /* write data element header */
             length = pData[loop].IocDataLenth;
-            pBufferBase[offset + 0U] = (Os_IocBufferType)(length >> 8U);
-            pBufferBase[offset + 1U] = (Os_IocBufferType)(length & 0xFFU);
+            if (1U == OS_IOC_DATA_HEAD_SIZE)
+            {
+                pBufferBase[offset + 0U] = (Os_IocBufferType)(length);
+            }
+            else
+            {
+                pBufferBase[offset + 0U] = (Os_IocBufferType)(length >> 8U);
+                pBufferBase[offset + 1U] = (Os_IocBufferType)(length & 0xFFU);
+            }
             offset = (uint16)(offset + OS_IOC_DATA_HEAD_SIZE);
             /* write data element */
             /* PRQA S 0488 ++ */ /* MISRA Rule 18.4 */ /* OS_IOC_PTR_OPERATIONS_002 */
@@ -331,8 +343,15 @@ static FUNC(void, OS_CODE) Os_IocReadDataFromBlock(
         for (loop = 0U; loop < paraNum; loop++)
         {
             /* read data element header */
-            length = pBufferBase[offset + 0U];
-            length = pBufferBase[offset + 1U] + (length << 8U);
+            if (1U == OS_IOC_DATA_HEAD_SIZE)
+            {
+                length = pBufferBase[offset + 0U];
+            }
+            else
+            {
+                length = pBufferBase[offset + 0U];
+                length = pBufferBase[offset + 1U] + (length << 8U);
+            }
             if (length <= pIocData[loop].IocDataTypeLength)
             {
                 /* check the ptr is valid */
@@ -447,7 +466,7 @@ static FUNC(void, OS_CODE) Os_IocAppendReadyBlock(Os_IocComIdType comId, Os_IocB
     {
         vBlockTail = pIocCom->IocBlockTail;
 
-        pBlockBase[vBlockTail].IocBlockNext = vBlockId;
+        pBlockBase[vBlockTail].IocBlockLink.IocBlockNext = vBlockId;
         pIocCom->IocBlockTail = vBlockId;
     }
 
@@ -497,8 +516,8 @@ static FUNC(Os_IocBlockIdType, OS_CODE) Os_IocRemoveReadyBlock(Os_IocComIdType c
         }
         else
         {
-            pIocCom->IocBlockHead = pBlockBase[vBlockHead].IocBlockNext;
-            pBlockBase[vBlockReady].IocBlockNext = OS_OBJECT_INVALID;
+            pIocCom->IocBlockHead = pBlockBase[vBlockHead].IocBlockLink.IocBlockNext;
+            pBlockBase[vBlockReady].IocBlockLink.IocBlockNext = OS_OBJECT_INVALID;
         }
 
         pBlockBase[vBlockReady].IocBlockState = BLOCK_READING;
@@ -637,7 +656,7 @@ static FUNC(Os_IocU16Type, OS_CODE) Os_IocGetSenderBlock(Os_IocComIdType comId, 
     P2VAR(Os_IocBlockType, OS_VAR, OS_VAR) pBlockBase = pIocCom->IocBlockPtr;
     /* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
 
-    vBlockId = pBlockBase[senderId].IocBlockCurrent;
+    vBlockId = pBlockBase[senderId].IocBlockLink.IocBlockCurrent;
     if (BLOCK_WRITING != pBlockBase[vBlockId].IocBlockState)
     {
         pBlockBase[vBlockId].IocBlockState = BLOCK_WRITING;
@@ -678,7 +697,7 @@ static FUNC(void, OS_CODE)
     IOC_LOCK(comId);
     if (pBlockBase[blockId].IocBlockState == BLOCK_WRITING)
     {
-        pBlockBase[senderId].IocBlockCurrent = pIocCom->IocBlockRead;
+        pBlockBase[senderId].IocBlockLink.IocBlockCurrent = pIocCom->IocBlockRead;
         pIocCom->IocBlockRead = blockId;
         pBlockBase[blockId].IocBlockState = BLOCK_READY;
     }
@@ -791,11 +810,15 @@ static FUNC(boolean, OS_CODE) Os_IocGetLostDataFlag(Os_IocComIdType comId)
  * REQ ID               <None>
  */
 /******************************************************************************/
-static FUNC(void, OS_CODE)
-    Os_IocTriggerReceiveCallBack(Os_IocComIdType comId, Os_IocU16Type vReceiverId, Os_CoreIdType vReceiverCoreId)
+static FUNC(void, OS_CODE) Os_IocTriggerReceiveCallBack(
+    Os_IocComIdType comId,
+    Os_IocU16Type vReceiverId,
+    Os_CoreIdType vReceiverCoreId,
+    Os_ApplicationType vRecAppId)
 {
     VAR(Os_IocCallbackType, OS_VAR) pCallBackFunc;
     P2CONST(Os_IocCommunicationCfgType, OS_VAR, OS_CONST) pIocComCfg = Os_IocCommunicationCfg;
+    VAR(Os_ApplicationType, OS_VAR) bakappID = Os_SCB.sysRunningAppID;
 
 #if (OS_AUTOSAR_CORES > 1)
     VAR(uint16, OS_VAR) vCoreId = Os_SCB.sysCore;
@@ -807,7 +830,7 @@ static FUNC(void, OS_CODE)
             .serviceId = OSServiceId_IocCallBackNotify,
             .srvPara0 = (uint32)comId,
             .srvPara1 = (uint32)vReceiverId,
-            .srvPara2 = (uint32)NULL_PARA,
+            .srvPara2 = (uint32)vRecAppId,
         };
 
         (void)Os_RpcCallService(&rpcData);
@@ -816,11 +839,63 @@ static FUNC(void, OS_CODE)
 #endif /* OS_AUTOSAR_CORES > 1 */
     {
         pCallBackFunc = pIocComCfg[comId].IocReceiverProperties[vReceiverId].IocCallBackFunc;
+        OS_ARCH_DECLARE_CRITICAL();
+
+        OS_ARCH_ENTRY_CRITICAL();
+#if (CFG_OSAPPLICATION_MAX > 0U)
+        Os_SCB.sysRunningAppID = vRecAppId;
+#endif
+        OS_ARCH_EXIT_CRITICAL();
+
+        Os_SCB.sysDispatchLocker = Os_SCB.sysDispatchLocker + 1u;
         pCallBackFunc();
+        Os_SCB.sysDispatchLocker = Os_SCB.sysDispatchLocker - 1u;
+
+        OS_ARCH_ENTRY_CRITICAL();
+#if (CFG_OSAPPLICATION_MAX > 0U)
+        Os_SCB.sysRunningAppID = bakappID;
+#endif
+        OS_ARCH_EXIT_CRITICAL();
     }
     UNUSED_PARAMETER(vReceiverCoreId);
 }
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
 
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/******************************************************************************/
+/*
+ * Brief                <IOC cross-core remote callback function>
+ * Service ID           <None>
+ * Sync/Async           <Synchronous>
+ * Reentrancy           <Non Reentrant>
+ * return               <None>
+ * PreCondition         <None>
+ * CallByAPI            <>
+ * REQ ID               <None>
+ */
+/******************************************************************************/
+FUNC(StatusType, OS_CODE)
+Os_IocRemoteCallBack(Os_IocComIdType comId, Os_IocU16Type vReceiverId, Os_ApplicationType vRecAppId)
+{
+    P2CONST(Os_IocCommunicationCfgType, OS_VAR, OS_CONST) iocComCfgPtr;
+    VAR(Os_ApplicationType, OS_VAR) bakappID = Os_SCB.sysRunningAppID;
+    iocComCfgPtr = &Os_IocCommunicationCfg[comId];
+    OS_ARCH_DECLARE_CRITICAL();
+
+    OS_ARCH_ENTRY_CRITICAL();
+    Os_SCB.sysRunningAppID = vRecAppId;
+    OS_ARCH_EXIT_CRITICAL();
+
+    iocComCfgPtr->IocReceiverProperties[vReceiverId].IocCallBackFunc();
+
+    OS_ARCH_ENTRY_CRITICAL();
+    Os_SCB.sysRunningAppID = bakappID;
+    OS_ARCH_EXIT_CRITICAL();
+
+    return IOC_E_OK;
+}
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
 
@@ -923,12 +998,7 @@ Os_IocTransmit(Os_IocComIdType comId, Os_IocSendDataSourceType* pData, Os_IocU16
             {
                 vRecAppId = pIocComCfg[comId].IocReceiverProperties[loop].IocReceiverApplicationRef;
                 vReceiverCoreId = Os_AppCoreMap[vRecAppId];
-                VAR(Os_ApplicationType, OS_VAR) bakappID = Os_SCB.sysRunningAppID;
-                OS_ARCH_ENTRY_CRITICAL(); /* PRQA S 3469 */ /* MISRA  Dir-4.9*/ /* OS_IOC_MACRO_004 */
-                Os_SCB.sysRunningAppID = Os_SCB.sysAppId;
-                Os_IocTriggerReceiveCallBack(comId, loop, vReceiverCoreId);
-                Os_SCB.sysRunningAppID = bakappID;
-                OS_ARCH_EXIT_CRITICAL(); /* PRQA S 3469 */ /* MISRA  Dir-4.9*/ /* OS_IOC_MACRO_004 */
+                Os_IocTriggerReceiveCallBack(comId, loop, vReceiverCoreId, vRecAppId);
             }
         }
     }
@@ -1066,10 +1136,10 @@ FUNC(StatusType, OS_CODE) Os_IocEmpty(Os_IocComIdType comId)
         {
             for (loop = 0U; loop < vIocBlockCnt; loop++)
             {
-                pBlockBase[loop].IocBlockNext = loop + 1U;
+                pBlockBase[loop].IocBlockLink.IocBlockNext = loop + 1U;
                 pBlockBase[loop].IocBlockState = BLOCK_IDLE;
             }
-            pBlockBase[vIocBlockCnt - 1U].IocBlockNext = OS_OBJECT_INVALID;
+            pBlockBase[vIocBlockCnt - 1U].IocBlockLink.IocBlockNext = OS_OBJECT_INVALID;
             pIocCom->IocBlockHead = OS_OBJECT_INVALID;
             pIocCom->IocBlockTail = OS_OBJECT_INVALID;
             pIocCom->IocBlockFreeHead = 0U;
@@ -1078,7 +1148,7 @@ FUNC(StatusType, OS_CODE) Os_IocEmpty(Os_IocComIdType comId)
         {
             for (loop = 0; loop < vIocBlockCnt; loop++)
             {
-                pBlockBase[loop].IocBlockCurrent = loop;
+                pBlockBase[loop].IocBlockLink.IocBlockCurrent = loop;
                 pBlockBase[loop].IocBlockState = BLOCK_IDLE;
             }
             pIocCom->IocBlockRead = pIocComCfg[comId].IocSenderNumber;
@@ -1088,8 +1158,15 @@ FUNC(StatusType, OS_CODE) Os_IocEmpty(Os_IocComIdType comId)
             for (loop = 0U; loop < paraNum; loop++)
             {
                 length = pIocData[loop].IocDataTypeLength;
-                pBufferBase[offset + 0U] = (Os_IocBufferType)(length >> 8U);
-                pBufferBase[offset + 1U] = (Os_IocBufferType)(length & 0xFFU);
+                if (1U == OS_IOC_DATA_HEAD_SIZE)
+                {
+                    pBufferBase[offset + 0U] = (Os_IocBufferType)(length);
+                }
+                else
+                {
+                    pBufferBase[offset + 0U] = (Os_IocBufferType)(length >> 8U);
+                    pBufferBase[offset + 1U] = (Os_IocBufferType)(length & 0xFFU);
+                }
                 offset = (uint16)(offset + OS_IOC_DATA_HEAD_SIZE);
                 if (TRUE == pIocData[loop].IocInitValueEnable)
                 {

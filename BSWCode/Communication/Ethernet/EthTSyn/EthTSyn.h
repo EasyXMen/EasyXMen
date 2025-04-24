@@ -18,20 +18,20 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : EthTSyn.h                                                   **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : yuzhe.zhang                                                 **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Implementation header for EthTSyn                           **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*********************************************************************************
+**                                                                            **
+**  FILENAME    : EthTSyn.h                                                   **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : yuzhe.zhang                                                 **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Implementation header for EthTSyn                           **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 /******************************************************************************
 **                      Revision Control History                             **
 ******************************************************************************/
@@ -56,7 +56,7 @@
 #define ETHTSYN_H_AR_PATCH_VERSION 0U
 #define ETHTSYN_H_SW_MAJOR_VERSION 2U
 #define ETHTSYN_H_SW_MINOR_VERSION 0U
-#define ETHTSYN_H_SW_PATCH_VERSION 17U
+#define ETHTSYN_H_SW_PATCH_VERSION 18U
 
 #if (ETHTSYN_DEV_ERROR_DETECT == STD_ON)
 /*Development errors used by the EthTSyn module*/
@@ -106,7 +106,7 @@ extern const EthTSyn_ConfigType EthTSyn_Config;
  * Return value: NA
  */
 void EthTSyn_Init(const EthTSyn_ConfigType* configPtr);
-#if (STD_ON == ETHTSYN_VERSION_INFO_API)
+#if (ETHTSYN_VERSION_INFO_API == STD_ON)
 /**
  * Returns the version information of this module.
  * Service ID: 0x02
@@ -169,7 +169,7 @@ void EthTSyn_RxIndication(
  * @retval        E_OK     The transmission was successful
  * @retval        E_NOT_OK The transmission failed
  */
-void EthTSyn_TxConfirmation(uint8 CtrlIdx, Eth_BufIdxType BufIdx);
+void EthTSyn_TxConfirmation(uint8 CtrlIdx, Eth_BufIdxType BufIdx, Std_ReturnType Result);
 
 /**
  * Allows resetting state machine in case of unexpected Link loss to avoid

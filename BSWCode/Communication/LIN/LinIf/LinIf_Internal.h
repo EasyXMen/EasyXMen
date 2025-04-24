@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : LinIf.c                                                     **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : HuRongbo                                                    **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Implementation for LinIf                                    **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : LinIf.c                                                     **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : HuRongbo                                                    **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Implementation for LinIf                                    **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 #ifndef LINIF_INTERNAL_H
 #define LINIF_INTERNAL_H
 
@@ -51,6 +52,7 @@
 #if (LINIF_TRCV_DRIVER_SUPPORTED == STD_ON)
 #include "LinTrcv.h"
 #endif
+#include "istd_lib.h"
 #include "LinIf.h"
 
 /*******************************************************************************
@@ -63,6 +65,7 @@
 #define LINIF_GET_TXPDU(idx)                               LinIf_ConfigPtr->LinIfTxPdu[idx]
 #define LINIF_GET_TXPDU_NUM()                              LinIf_ConfigPtr->LinIfNumOfTxPdu
 #define LINIF_GET_GLOBAL_FRAME(idx)                        LinIf_ConfigPtr->LinIfFrame[idx]
+#define LINIF_GET_LIN_CHANNEL_SLEEPDELAY(ch)               LINIF_GET_CHANNEL(ch).LinIfSleepModeFrameDelayCnt
 #define LINIF_GET_SCHEDULE_NUM(ch)                         LINIF_GET_CHANNEL(ch).LinIfNumOfSchedule
 #define LINIF_GET_FRAME_NUM(ch)                            LINIF_GET_CHANNEL(ch).LinIfNumOfFrame
 #define LINIF_GET_SCHEDULE_OFS(ch)                         LINIF_GET_CHANNEL(ch).LinIfScheduleIndexOffset
@@ -81,6 +84,9 @@
 #define USER_GOTO_SLEEP_CONFIRMATION(ch, channel, success) LINIF_GET_CHANNEL(ch).GotoSleepConfirmation(channel, success)
 #define USER_SCHEDULE_REQUEST_CONFIRMATION(ch, channel, schedule) \
     LINIF_GET_CHANNEL(ch).ScheduleRequestConfirmation(channel, schedule)
+
+/* Check whether the tail of entry */
+#define LINIF_IS_ENTRY_TAIL(ch) (chPtr->CurEntryIndex >= chPtr->CurSchedule->LinIfNumOfEntry)
 
 /* Handle events of LINIF */
 #define LINIF_EVENT_MASK            0xFFFFu
@@ -108,7 +114,7 @@
 #define LINIF_MIN(a, b) ((a) < (b)) ? (a) : (b)
 
 /* Return the highest priority of schedule */
-#define LINIF_HIGH_PRIORITY(a, b) (((a)->LinIfSchedulePriority <= (b)->LinIfSchedulePriority) ? (a) : (b))
+#define LINIF_HIGH_PRIORITY(a, b) ((a)->LinIfSchedulePriority <= (b)->LinIfSchedulePriority) ? (a) : (b)
 
 #if (LINIF_DEV_ERROR_DETECT == STD_ON)
 #define LinIf_Det_ReportError(ApiId, ErrorId) (void)Det_ReportError(LINIF_MODULE_ID, LINIF_INSTANCE_ID, ApiId, ErrorId);

@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : SecOC.h                                                     **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : HuRongbo                                                    **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : SecOC.h                                                     **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : HuRongbo                                                    **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 
 /*******************************************************************************
 **                      Revision Control History                              **
@@ -67,8 +68,8 @@
 #define SECOC_H_AR_MINOR_VERSION 5u
 #define SECOC_H_AR_PATCH_VERSION 0u
 #define SECOC_H_SW_MAJOR_VERSION 2u
-#define SECOC_H_SW_MINOR_VERSION 0u
-#define SECOC_H_SW_PATCH_VERSION 16u
+#define SECOC_H_SW_MINOR_VERSION 1u
+#define SECOC_H_SW_PATCH_VERSION 13u
 
 /* Service Id */
 #define SECOC_INIT_ID                                 0x01u

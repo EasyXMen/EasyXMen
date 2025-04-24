@@ -1,3 +1,4 @@
+
 /* PRQA S 3108++ */
 /**
  * Copyright (C) 2024 Isoft Infrastructure Software Co., Ltd.
@@ -18,8 +19,11 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
+ */
+/* PRQA S 3108-- */
+/*
  ********************************************************************************
+ ************************************************************************************************************************
  ** **
  **  @file               : ComM_Types.h **
  **  @version            : V1.0.0 **
@@ -30,7 +34,6 @@
  **  @specification(s)   : AUTOSAR classic Platform R19-11                                                **
  ** **
  ***********************************************************************************************************************/
-/* PRQA S 3108-- */
 
 #ifndef COMM_TYPES_H_
 #define COMM_TYPES_H_
@@ -39,11 +42,6 @@
 #include "Rte_ComM_Type.h"
 
 /*====================================================[macros]========================================================*/
-
-#if !defined(RTE_COMM_TYPE_LOCAL)
-#define RTE_COMM_TYPE_LOCAL 0
-#endif
-
 /* comm Std_ReturnType */
 /** @ref SWS_ComM_91027 [draft]*/
 /* Function call has been successful but mode can not be granted because of mode inhibition */
@@ -84,7 +82,4 @@ typedef uint8 ComM_PncModeType;
 #define COMM_PNC_NO_COMMUNICATION              0x03u
 #define COMM_PNC_REQUESTED_WITH_WAKEUP_REQUEST 0x04u
 
-#if (!RTE_COMM_TYPE_LOCAL)
-typedef uint8 ComM_InhibitionStatusType;
-#endif
 #endif

@@ -18,21 +18,22 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                           **
- **  FILENAME   : Can_GeneralTypes.h                                          **
- **                                                                           **
- **  AUTHOR      :                                                            **
- **                                                                           **
- **  VENDOR      :                                                            **
- **                                                                           **
- **  DESCRIPTION :General type definitions for CAN bus                        **
- **                                                                           **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                      **
- **                                                                           **
- ******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+*******************************************************************************
+**                                                                           **
+**  FILENAME   : Can_GeneralTypes.h                                          **
+**                                                                           **
+**  AUTHOR      :                                                            **
+**                                                                           **
+**  VENDOR      :                                                            **
+**                                                                           **
+**  DESCRIPTION :General type definitions for CAN bus                        **
+**                                                                           **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                      **
+**                                                                           **
+******************************************************************************/
 
 #ifndef CAN_GENERALTYPES
 #define CAN_GENERALTYPES

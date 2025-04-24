@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : SD_Types.h                                                  **
- **                                                                            **
- **  Created on  : 2019-03-11                                                  **
- **  Author      : HuRongbo                                                    **
- **  Vendor      : iSoft                                                       **
- **  DESCRIPTION : Type definitions of SD                                      **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : SD_Types.h                                                  **
+**                                                                            **
+**  Created on  : 2019-03-11                                                  **
+**  Author      : HuRongbo                                                    **
+**  Vendor      : iSoft                                                       **
+**  DESCRIPTION : Type definitions of SD                                      **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 #ifndef SD_TYPES_H
 #define SD_TYPES_H
 

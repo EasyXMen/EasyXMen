@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                           **
- **  FILENAME    : SoAd.c                                                     **
- **                                                                           **
- **  Created on  :                                                            **
- **  Author      : zhengfei.li                                                **
- **  Vendor      :                                                            **
- **  DESCRIPTION : none                                                       **
- **                                                                           **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2 and R19_11           **
- **                                                                           **
- **************************************************************************** */
+ */
 /* PRQA S 3108-- */
+/*
+**************************************************************************** **
+**                                                                           **
+**  FILENAME    : SoAd.c                                                     **
+**                                                                           **
+**  Created on  :                                                            **
+**  Author      : zhengfei.li                                                **
+**  Vendor      :                                                            **
+**  DESCRIPTION : none                                                       **
+**                                                                           **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2 and R19_11           **
+**                                                                           **
+**************************************************************************** */
 /*******************************************************************************
 **                      REVISION   HISTORY                                    **
 *******************************************************************************/
@@ -68,9 +69,17 @@
  *                                      times.
  *                                    2.When the received IF UDP data with multiple headerid is processing, the
  *                                      release of the remote address should be locked.
- *  V2.0.13   20240828  fupeng.yu     Add exception handling for SoAd_RxBufCfgIndexPtr in
+ *  V2.0.13   20240726  fupeng.yu     1.add feature of udp which release state of txconfirmation when The same pdu is
+ *                                      sent multiple times and <up_>txconfirmation is not configured.
+ *  V2.0.14   20240828  fupeng.yu     Add exception handling for SoAd_RxBufCfgIndexPtr in
  *                                    SoAd_HeaderEnableTcpSoConRxHandle
- ******************************************************************************/
+ *  V2.0.15   20240830  fupeng.yu     Resolve compilation errors when no SocketRoute is configured.
+ *  V2.0.16   20250110  fupeng.yu     Resolve compilation errors.CPT-12341
+ *  V2.0.17   20250113  fupeng.yu     add SoAdPduRouteDest reference SoAdSocketConnectionGroup
+ *  V2.0.18   20250331  fupeng.yu     Add specific soConId handling for SoAd_PduRouteDestControl
+ *  V2.0.19   20250417  fupeng.yu     To resolve the transmission failure issue of SocketConnectionGroup referencing
+ *                                    PduRouteDest in SoAd_IfSpecificRoutingGroupTransmit.
+ * ******************************************************************************/
 /**
   \page ISOFT_MISRA_Exceptions  MISRA-C:2012 Compliance Exceptions
     ModeName:SoAd<br>
@@ -92,21 +101,21 @@
 * 2) needed interfaces from external units
 * 3) internal and external interfaces from this unit
 ============================================================================*/
-#include <istd_lib.h>
+#include "istd_lib.h"
 #include "SoAd.h"
 #include "SoAd_Cbk.h"
 #include "Det.h"
-#include "SchM_SoAd.h"
+
 /*===========================================================================
 *                              SOURCE FILE VERSION INFORMATION
 ============================================================================*/
 #define SOAD_VENDOR_ID_C        62u
 #define SOAD_C_AR_MAJOR_VERSION 4u
-#define SOAD_C_AR_MINOR_VERSION 2u
-#define SOAD_C_AR_PATCH_VERSION 2u
+#define SOAD_C_AR_MINOR_VERSION 5u
+#define SOAD_C_AR_PATCH_VERSION 0u
 #define SOAD_C_SW_MAJOR_VERSION 2u
 #define SOAD_C_SW_MINOR_VERSION 0u
-#define SOAD_C_SW_PATCH_VERSION 13u
+#define SOAD_C_SW_PATCH_VERSION 17u
 /*==========================================================================
 *                                     FILE VERSION CHECKS
 ===========================================================================*/
@@ -121,6 +130,9 @@
     || (SOAD_C_AR_PATCH_VERSION != SOAD_H_AR_PATCH_VERSION))
 #error "AutoSar Version Numbers of SoAd.c and SoAd.h are different"
 #endif
+
+/* line of socket need to close for debug */
+#define SOAD_SET_SOCKET_NEED_CLOSE_DEBUG STD_OFF
 
 /*==============================================================================
 *                          LOCAL TYPEDEFS (STRUCTURES, UNIONS, ENUMS).
@@ -170,6 +182,9 @@ typedef struct
     TcpIp_SockAddrType RemoteAddr;
     boolean TcpIpSocketValid;
     SoAd_SocketCloseType SocketNeedClose;
+#if (STD_ON == SOAD_SET_SOCKET_NEED_CLOSE_DEBUG)
+    uint32 SetSocketNeedCloseLine;
+#endif /* STD_ON == SOAD_SET_SOCKET_NEED_CLOSE_DEBUG */
     SoAd_SoConModeType SoAd_SoConMode;
     SoAd_SoConRequestType SoCon_Request[2u];
     PduIdType ActiveSoAdPduRouteId;
@@ -207,7 +222,7 @@ typedef struct
 
 typedef struct
 {
-    boolean PduRouteDestEnable;
+    uint8 PduRouteDestRefSoConEnable[SOAD_SO_CON_MAX / 8u + 1];
     /*the PduRouteDest TCP not ACK position of all TCP not ACK data*/
     PduLengthType TxPendingLength;
 } SoAd_PduRouteDestInnerManagerType;
@@ -331,8 +346,9 @@ SOAD_LOCAL_INLINE boolean SOAD_EQ_IPADDR(TcpIp_SockAddrType IpAddr1, TcpIp_SockA
 {
     return (IpAddr1.addr[0u] == IpAddr2.addr[0u]);
 }
+
 #if (0x100u > SOAD_SO_CON_MAX)
-#define SOAD_METADATATOSOCONID(SoConId, MetaDataPtr) ((SoConId) = (MetaDataPtr)[0u])
+#define SOAD_METADATATOSOCONID(SoConId, MetaDataPtr) (SoConId) = (MetaDataPtr)[0u]
 #else
 #if (LOW_BYTE_FIRST == CPU_BYTE_ORDER)
 #define SOAD_METADATATOSOCONID(SoConId, MetaDataPtr)  (  \
@@ -517,6 +533,7 @@ static FUNC(void, SOAD_CODE) SoAd_TxBufferInit(SoAd_uintx TxBufferId);
 static FUNC(void, SOAD_CODE) SoAd_RxBufferInit(SoAd_uintx RxBufferId);
 #endif
 
+#if (0u < SOAD_SOCKET_ROUTE_DEST_MAX)
 #if (0u < SOAD_RXBUFFER_NUM)
 #if (STD_ON == SOAD_SUPPORT_HEADERID)
 static FUNC(void, SOAD_CODE)
@@ -599,6 +616,7 @@ static FUNC(void, SOAD_CODE) SoAd_HeaderDisableSoConRxIfPduHandle(
     VAR(SoAd_uintx, AUTOMATIC) SocketRouteId,
     VAR(PduLengthType, AUTOMATIC) RxMessageLength,
     P2VAR(uint8, AUTOMATIC, SOAD_APPL_DATA) DataPtr);
+#endif /*0u < SOAD_SOCKET_ROUTE_DEST_MAX*/
 
 #if (0u < SOAD_SOCKET_ROUTE_DEST_MAX)
 static FUNC(boolean, SOAD_CODE) SoAd_FindTheValidSoCon(
@@ -705,6 +723,12 @@ static FUNC(void, SOAD_CODE) SoAd_TxConfirmationHandle(
 static boolean SoAd_FindHeaderIDAndSocketRouteId(SoAd_SoConIdType SoConId, uint32 HeaderId, SoAd_uintx* SocketRouteID);
 #endif /* STD_ON == SOAD_SUPPORT_HEADERID */
 
+static void SoAd_PduRouteDestControl(
+    SoAd_PduRouteDestInnerManagerType* pduRouteDestMPtr,
+    SoAd_uintx pduRouteDestId,
+    boolean enFlag,
+    SoAd_SoConIdType specificSoConId);
+static boolean SoAd_PduRouteDestIsEnable(SoAd_uintx pduRouteDestId, SoAd_SoConIdType soConId);
 #define SOAD_STOP_SEC_CODE
 #include "SoAd_MemMap.h"
 /*===============================================================================
@@ -779,6 +803,9 @@ SoAd_Init(P2CONST(SoAd_ConfigType, AUTOMATIC, SOAD_APPL_CONST) SoAdConfigPtr)
             soadSoConMPtr->ActiveSoAdPduRouteId = SOAD_UNUSED_UINT16;
             soadSoConMPtr->SoConCloseAbort = FALSE;
             soadSoConMPtr->SocketNeedClose = SOAD_SOCKET_CLOSE_NONE;
+#if (STD_ON == SOAD_SET_SOCKET_NEED_CLOSE_DEBUG)
+            soadSoConMPtr->SetSocketNeedCloseLine = __LINE__;
+#endif /* STD_ON == SOAD_SET_SOCKET_NEED_CLOSE_DEBUG */
             soadSoConMPtr->TcpIpSocketValid = FALSE;
             soadSoConMPtr->TcpIpSocketId = (TcpIp_SocketIdType)SOAD_UNUSED_UINT16;
             soadSoConMPtr->TpPduTransmitting = FALSE;
@@ -861,7 +888,7 @@ SoAd_GetSoConId(VAR(PduIdType, AUTOMATIC) TxPduId, P2VAR(SoAd_SoConIdType, AUTOM
         {
             SoAd_uintx pduRouteDestId;
             pduRouteDestId = SOAD_PDUROUTE_CFG(TxPduId).SoAd_PduRouteDestIndex[0u];
-            *SoConIdPtr = SOAD_PDUROTDEST_CFG(pduRouteDestId).SoAd_SoConId;
+            *SoConIdPtr = SOAD_PDUROTDEST_CFG(pduRouteDestId).SoAd_TxSocketConRefIndexPtr[0];
             result = E_OK;
         }
     }
@@ -947,7 +974,6 @@ SoAd_IfTransmit(
         /*the TxPdu is transmitting,refuse the new transmit request*/
         if (SOAD_UNUSED_UINT8 == soadPduRoutMPtr->TxPendingNum)
         {
-            SchM_Enter_SoAd(SOAD_INSTANCE, SOAD_AREA_MSGCONTEXT);
             /*1.get pdu data from up module*/
             if ((NULL_PTR == SoAdSrcPduInfoPtr) || (NULL_PTR == SoAdSrcPduInfoPtr->SduDataPtr))
             {
@@ -957,10 +983,12 @@ SoAd_IfTransmit(
             {
                 if (SoAdSrcPduInfoPtr->SduLength <= (SOAD_MAX_IF_PDU_SIZE - SOAD_HEADER_SIZE))
                 {
+                    SchM_Enter_SoAd_ExclusiveArea();
                     (void)ILib_memcpy(
                         &SoAd_IfPduBuffer[SOAD_HEADER_SIZE],
                         SoAdSrcPduInfoPtr->SduDataPtr,
                         SoAdSrcPduInfoPtr->SduLength);
+                    SchM_Exit_SoAd_ExclusiveArea();
                     soadPduRoutMPtr->PduDataPtr = &SoAd_IfPduBuffer[SOAD_HEADER_SIZE];
                     soadPduRoutMPtr->PduLength = SoAdSrcPduInfoPtr->SduLength;
 #if (STD_ON == SOAD_PDU_ROUTE_METADATA_SUPPORT)
@@ -984,38 +1012,50 @@ SoAd_IfTransmit(
                 SoAd_uintx txSuccessCnt = 0u;
                 SoAd_uintx txFailCnt = 0u;
                 const SoAd_InnerSocketManageType* soadSoConMPtr;
+                SoAd_uintx soConGroupId;
+                SoAd_SoConIdType soceketConNum;
 
                 pduRouteDestNum = SOAD_PDUROUT_CFG(SoAdSrcPduId).SoAd_PduRouteDestNum;
                 for (cnt = 0u; (cnt < pduRouteDestNum) && (0u == txFailCnt); cnt++)
                 {
                     pduRouteDestId = SOAD_PDUROT_DESTINDEX_CFG(SoAdSrcPduId, cnt);
-                    if (SoAd_PduRouteDestManager[pduRouteDestId].PduRouteDestEnable)
+                    soceketConNum = SOAD_PDUROTDEST_CFG(pduRouteDestId).SoAd_TxPduRouteDestSocketConRefNum;
+                    /* SWS_SoAd_00722 */
+                    for (SoAd_SoConIdType soConCnt = 0u; (soConCnt < soceketConNum) && (0u == txFailCnt); soConCnt++)
                     {
-                        SoAd_SoConIdType soConId;
-                        boolean tpPduTcpTransmitting = FALSE;
-                        soConId = SOAD_PDUROTDEST_CFG(pduRouteDestId).SoAd_SoConId;
-                        soadSoConMPtr = &SoAd_SoConManager[soConId];
-                        if ((TCPIP_IPPROTO_TCP == SOAD_SOCON_CFG(soConId).SoAd_TcpUdpProtocol)
-                            && soadSoConMPtr->TpPduTransmitting)
+                        boolean pduRouteDestEnable = FALSE;
+                        SoAd_SoConIdType soConId =
+                            SOAD_PDUROTDEST_CFG(pduRouteDestId).SoAd_TxSocketConRefIndexPtr[soConCnt];
+
+                        if (SoAd_PduRouteDestIsEnable(pduRouteDestId, soConId))
                         {
-                            tpPduTcpTransmitting = TRUE;
-                        }
-                        if (((NO_TXMETADATA == soadPduRoutMPtr->TxSoConId) || (soConId == soadPduRoutMPtr->TxSoConId))
-                            && ((SOAD_SOCON_ONLINE == soadSoConMPtr->SoAd_SoConMode)
-                                && (SOAD_SOCKET_CLOSE_NONE == soadSoConMPtr->SocketNeedClose)
-                                && (!tpPduTcpTransmitting)))
-                        {
-                            if (E_OK == SoAd_IfTransmitSoCon(SoAdSrcPduId, pduRouteDestId, soConId))
+                            boolean tpPduTcpTransmitting = FALSE;
+
+                            soadSoConMPtr = &SoAd_SoConManager[soConId];
+                            if ((TCPIP_IPPROTO_TCP == SOAD_SOCON_CFG(soConId).SoAd_TcpUdpProtocol)
+                                && soadSoConMPtr->TpPduTransmitting)
                             {
-                                txSuccessCnt++;
+                                tpPduTcpTransmitting = TRUE;
                             }
-                            else
+                            if (((NO_TXMETADATA == soadPduRoutMPtr->TxSoConId)
+                                 || (soConId == soadPduRoutMPtr->TxSoConId))
+                                && ((SOAD_SOCON_ONLINE == soadSoConMPtr->SoAd_SoConMode)
+                                    && (SOAD_SOCKET_CLOSE_NONE == soadSoConMPtr->SocketNeedClose)
+                                    && (!tpPduTcpTransmitting)))
                             {
-                                txFailCnt++;
+                                if (E_OK == SoAd_IfTransmitSoCon(SoAdSrcPduId, pduRouteDestId, soConId))
+                                {
+                                    txSuccessCnt++;
+                                }
+                                else
+                                {
+                                    txFailCnt++;
+                                }
                             }
                         }
                     }
                 }
+
                 if ((txSuccessCnt > 0u) && (0u == txFailCnt))
                 {
                     result = E_OK;
@@ -1025,7 +1065,6 @@ SoAd_IfTransmit(
                     result = E_NOT_OK;
                 }
             }
-            SchM_Exit_SoAd(SOAD_INSTANCE, SOAD_AREA_MSGCONTEXT);
         }
     }
 #endif /*0u < SOAD_MAX_IF_PDU_SIZE*/
@@ -1077,44 +1116,54 @@ SoAd_IfRoutingGroupTransmit(VAR(SoAd_RoutingGroupIdType, AUTOMATIC) id)
         const SoAd_RoutingGroupType* soadRoutGroupPtr = &SOAD_ROUTGROUP_CFG(id);
 
         pduRouteDestNum = soadRoutGroupPtr->SoAd_PduRouteDestNum;
-        SchM_Enter_SoAd(SOAD_INSTANCE, SOAD_AREA_MSGCONTEXT);
+        SchM_Enter_SoAd_ExclusiveArea();
         for (cnt = 0u; cnt < pduRouteDestNum; cnt++)
         {
-            PduIdType pduRouteId;
             pduRouteDestId = soadRoutGroupPtr->SoAd_PduRouteDestIndexPtr[cnt];
-            pduRouteId = SOAD_PDUROTDEST_CFG(pduRouteDestId).SoAd_PduRouteIndex;
+            PduIdType pduRouteId = SOAD_PDUROTDEST_CFG(pduRouteDestId).SoAd_PduRouteIndex;
             soadPduRoutMPtr = &SoAd_PduRoutManager[pduRouteId];
-            if ((SOAD_UPPER_LAYER_IF == SOAD_PDUROUT_CFG(pduRouteId).SoAd_TxUpperLayerType)
-                && (SOAD_UNUSED_UINT8 == soadPduRoutMPtr->TxPendingNum)
-                && SoAd_PduRouteDestManager[pduRouteDestId].PduRouteDestEnable)
-            {
-                SoAd_SoConIdType soConId;
-                boolean tpPduTcpTransmitting = FALSE;
 
-                soConId = SOAD_PDUROTDEST_CFG(pduRouteDestId).SoAd_SoConId;
-                soadSoConMPtr = &SoAd_SoConManager[soConId];
-                if ((TCPIP_IPPROTO_TCP == SOAD_SOCON_CFG(soConId).SoAd_TcpUdpProtocol)
-                    && soadSoConMPtr->TpPduTransmitting)
+            if ((SOAD_UPPER_LAYER_IF == SOAD_PDUROUT_CFG(pduRouteId).SoAd_TxUpperLayerType)
+                && (SOAD_UNUSED_UINT8 == soadPduRoutMPtr->TxPendingNum))
+            {
+                SoAd_uintx soConGroupId;
+                SoAd_SoConIdType socketConNum;
+                SoAd_SoConIdType soConId;
+                /* SWS_SoAd_00722 */
+                socketConNum = SOAD_PDUROTDEST_CFG(pduRouteDestId).SoAd_TxPduRouteDestSocketConRefNum;
+                for (SoAd_SoConIdType soConCnt = 0u; soConCnt < socketConNum; soConCnt++)
                 {
-                    tpPduTcpTransmitting = TRUE;
-                }
-                if ((SOAD_SOCON_ONLINE == soadSoConMPtr->SoAd_SoConMode)
-                    && (SOAD_SOCKET_CLOSE_NONE == soadSoConMPtr->SocketNeedClose) && (!tpPduTcpTransmitting))
-                {
-                    if (txPduId != pduRouteId)
+                    soConId = SOAD_PDUROTDEST_CFG(pduRouteDestId).SoAd_TxSocketConRefIndexPtr[soConCnt];
+                    if (SoAd_PduRouteDestIsEnable(pduRouteDestId, soConId))
                     {
-                        (void)SoAd_GetIfPduData(pduRouteId);
-                        txPduId = pduRouteId;
-                    }
-                    if ((NULL_PTR != soadPduRoutMPtr->PduDataPtr)
-                        && ((NO_TXMETADATA == soadPduRoutMPtr->TxSoConId) || (soConId == soadPduRoutMPtr->TxSoConId)))
-                    {
-                        (void)SoAd_IfTransmitSoCon(pduRouteId, pduRouteDestId, soConId);
+                        boolean tpPduTcpTransmitting = FALSE;
+                        soadSoConMPtr = &SoAd_SoConManager[soConId];
+                        if ((TCPIP_IPPROTO_TCP == SOAD_SOCON_CFG(soConId).SoAd_TcpUdpProtocol)
+                            && soadSoConMPtr->TpPduTransmitting)
+                        {
+                            tpPduTcpTransmitting = TRUE;
+                        }
+                        if ((SOAD_SOCON_ONLINE == soadSoConMPtr->SoAd_SoConMode)
+                            && (SOAD_SOCKET_CLOSE_NONE == soadSoConMPtr->SocketNeedClose) && (!tpPduTcpTransmitting))
+                        {
+                            if (txPduId != pduRouteId)
+                            {
+                                (void)SoAd_GetIfPduData(pduRouteId);
+                                txPduId = pduRouteId;
+                            }
+                            if ((NULL_PTR != soadPduRoutMPtr->PduDataPtr)
+                                && ((NO_TXMETADATA == soadPduRoutMPtr->TxSoConId)
+                                    || (soConId == soadPduRoutMPtr->TxSoConId)))
+                            {
+                                (void)SoAd_IfTransmitSoCon(pduRouteId, pduRouteDestId, soConId);
+                            }
+                        }
                     }
                 }
             }
         }
-        SchM_Exit_SoAd(SOAD_INSTANCE, SOAD_AREA_MSGCONTEXT);
+
+        SchM_Exit_SoAd_ExclusiveArea();
         if (0xFFFFu != txPduId)
         {
             result = E_OK;
@@ -1171,46 +1220,62 @@ SoAd_IfSpecificRoutingGroupTransmit(
         const SoAd_PduRoutInnerManageType* soadPduRoutMPtr;
         const SoAd_InnerSocketManageType* soadSoConMPtr;
         const SoAd_RoutingGroupType* soadRoutGroupPtr = &SOAD_ROUTGROUP_CFG(id);
+        const SoAd_PduRouteDestType* soadPduRouteDestCfgPtr;
 
         pduRouteDestNum = soadRoutGroupPtr->SoAd_PduRouteDestNum;
-        SchM_Enter_SoAd(SOAD_INSTANCE, SOAD_AREA_MSGCONTEXT);
+        SchM_Enter_SoAd_ExclusiveArea();
         for (cnt = 0u; cnt < pduRouteDestNum; cnt++)
         {
             PduIdType pduRouteId;
             pduRouteDestId = soadRoutGroupPtr->SoAd_PduRouteDestIndexPtr[cnt];
-            pduRouteId = SOAD_PDUROTDEST_CFG(pduRouteDestId).SoAd_PduRouteIndex;
+            soadPduRouteDestCfgPtr = &SOAD_PDUROTDEST_CFG(pduRouteDestId);
+            pduRouteId = soadPduRouteDestCfgPtr->SoAd_PduRouteIndex;
             soadPduRoutMPtr = &SoAd_PduRoutManager[pduRouteId];
             if ((SOAD_UPPER_LAYER_IF == SOAD_PDUROUT_CFG(pduRouteId).SoAd_TxUpperLayerType)
                 && (SOAD_UNUSED_UINT8 == soadPduRoutMPtr->TxPendingNum)
-                && SoAd_PduRouteDestManager[pduRouteDestId].PduRouteDestEnable)
+                && SoAd_PduRouteDestIsEnable(pduRouteDestId, SoConId))
             {
                 SoAd_SoConIdType soConId;
                 boolean tpPduTcpTransmitting = FALSE;
 
-                soConId = SOAD_PDUROTDEST_CFG(pduRouteDestId).SoAd_SoConId;
-                soadSoConMPtr = &SoAd_SoConManager[soConId];
-                if ((TCPIP_IPPROTO_TCP == SOAD_SOCON_CFG(soConId).SoAd_TcpUdpProtocol)
-                    && (soadSoConMPtr->TpPduTransmitting))
+                SoAd_SoConIdType refConNum = soadPduRouteDestCfgPtr->SoAd_TxPduRouteDestSocketConRefNum;
+                boolean vaild = FALSE;
+                for (SoAd_SoConIdType index = 0u; index < refConNum; index++)
                 {
-                    tpPduTcpTransmitting = TRUE;
-                }
-                if ((SoConId == soConId) && (SOAD_SOCON_ONLINE == soadSoConMPtr->SoAd_SoConMode)
-                    && (SOAD_SOCKET_CLOSE_NONE == soadSoConMPtr->SocketNeedClose) && (!tpPduTcpTransmitting))
-                {
-                    (void)SoAd_GetIfPduData(pduRouteId);
-                    if ((NULL_PTR != soadPduRoutMPtr->PduDataPtr)
-                        && ((NO_TXMETADATA == soadPduRoutMPtr->TxSoConId) || (soConId == soadPduRoutMPtr->TxSoConId)))
+                    soConId = soadPduRouteDestCfgPtr->SoAd_TxSocketConRefIndexPtr[index];
+                    if (SoConId == soConId)
                     {
-                        (void)SoAd_IfTransmitSoCon(pduRouteId, pduRouteDestId, soConId);
+                        vaild = TRUE;
+                        break;
                     }
-                    if (E_NOT_OK == result)
+                }
+                if (vaild)
+                {
+                    soadSoConMPtr = &SoAd_SoConManager[soConId];
+                    if ((TCPIP_IPPROTO_TCP == SOAD_SOCON_CFG(soConId).SoAd_TcpUdpProtocol)
+                        && (soadSoConMPtr->TpPduTransmitting))
                     {
-                        result = E_OK;
+                        tpPduTcpTransmitting = TRUE;
+                    }
+                    if ((SoConId == soConId) && (SOAD_SOCON_ONLINE == soadSoConMPtr->SoAd_SoConMode)
+                        && (SOAD_SOCKET_CLOSE_NONE == soadSoConMPtr->SocketNeedClose) && (!tpPduTcpTransmitting))
+                    {
+                        (void)SoAd_GetIfPduData(pduRouteId);
+                        if ((NULL_PTR != soadPduRoutMPtr->PduDataPtr)
+                            && ((NO_TXMETADATA == soadPduRoutMPtr->TxSoConId)
+                                || (soConId == soadPduRoutMPtr->TxSoConId)))
+                        {
+                            (void)SoAd_IfTransmitSoCon(pduRouteId, pduRouteDestId, soConId);
+                        }
+                        if (E_NOT_OK == result)
+                        {
+                            result = E_OK;
+                        }
                     }
                 }
             }
         }
-        SchM_Exit_SoAd(SOAD_INSTANCE, SOAD_AREA_MSGCONTEXT);
+        SchM_Exit_SoAd_ExclusiveArea();
     }
 #endif /* 0u < SOAD_ROUTING_GROUP_MAX && 0u < SOAD_MAX_IF_PDU_SIZE */
     SOAD_NOUSED(id);
@@ -1261,12 +1326,15 @@ SoAd_TpCancelTransmit(VAR(PduIdType, AUTOMATIC) PduId)
 
         /*TP PDU just reference one PduRouteDest(one SoCon),TP transmit just support 1:1*/
         pduRotDestIndex = SOAD_PDUROT_DESTINDEX_CFG(PduId, 0u);
-        soConId = SOAD_PDUROTDEST_CFG(pduRotDestIndex).SoAd_SoConId;
+        soConId = SOAD_PDUROTDEST_CFG(pduRotDestIndex).SoAd_TxSocketConRefIndexPtr[0];
         soadSoConMPtr = &SoAd_SoConManager[soConId];
         if (soadSoConMPtr->TpPduTransmitting && (PduId == soadSoConMPtr->ActiveSoAdPduRouteId))
         {
             result = E_OK;
             soadSoConMPtr->SocketNeedClose = SOAD_SOCKET_CLOSE_IMMEDIATE;
+#if (STD_ON == SOAD_SET_SOCKET_NEED_CLOSE_DEBUG)
+            SoAd_SoConManager[soConId].SetSocketNeedCloseLine = __LINE__;
+#endif /* STD_ON == SOAD_SET_SOCKET_NEED_CLOSE_DEBUG */
         }
 #endif /*0u < SOAD_TXBUFFER_NUM*/
     }
@@ -1334,12 +1402,18 @@ SoAd_TpCancelReceive(VAR(PduIdType, AUTOMATIC) PduId)
                     && (SoAd_SoRxBufMan[bufferId].ExitPduResidueLength > 0u))
                 {
                     soadSoConMPtr->SocketNeedClose = SOAD_SOCKET_CLOSE_IMMEDIATE;
+#if (STD_ON == SOAD_SET_SOCKET_NEED_CLOSE_DEBUG)
+                    SoAd_SoConManager[soConId].SetSocketNeedCloseLine = __LINE__;
+#endif /* STD_ON == SOAD_SET_SOCKET_NEED_CLOSE_DEBUG */
                     result = E_OK;
                 }
             }
             else
             {
                 soadSoConMPtr->SocketNeedClose = SOAD_SOCKET_CLOSE_IMMEDIATE;
+#if (STD_ON == SOAD_SET_SOCKET_NEED_CLOSE_DEBUG)
+                SoAd_SoConManager[soConId].SetSocketNeedCloseLine = __LINE__;
+#endif /* STD_ON == SOAD_SET_SOCKET_NEED_CLOSE_DEBUG */
                 result = E_OK;
             }
         }
@@ -1404,12 +1478,10 @@ SoAd_TpTransmit(
         if ((SOAD_UNUSED_UINT8 == SoAd_PduRoutManager[SoAdSrcPduId].TxPendingNum)
             && (0u < SoAdSrcPduInfoPtr->SduLength))
         {
-            SoAd_uintx pduRouteDestId;
-            pduRouteDestId = SOAD_PDUROT_DESTINDEX_CFG(SoAdSrcPduId, 0u);
-            if (SoAd_PduRouteDestManager[pduRouteDestId].PduRouteDestEnable)
+            SoAd_uintx pduRouteDestId = SOAD_PDUROT_DESTINDEX_CFG(SoAdSrcPduId, 0u);
+            SoAd_SoConIdType soConId = SOAD_PDUROTDEST_CFG(pduRouteDestId).SoAd_TxSocketConRefIndexPtr[0];
+            if (SoAd_PduRouteDestIsEnable(pduRouteDestId, soConId))
             {
-                SoAd_SoConIdType soConId;
-                soConId = SOAD_PDUROTDEST_CFG(pduRouteDestId).SoAd_SoConId;
                 soadSoConMPtr = &SoAd_SoConManager[soConId];
                 if ((SOAD_SOCON_ONLINE == soadSoConMPtr->SoAd_SoConMode)
                     && (SOAD_SOCKET_CLOSE_NONE == soadSoConMPtr->SocketNeedClose)
@@ -2520,11 +2592,11 @@ SoAd_RxIndication(
     if (TRUE == detNoErr)
 #endif /* STD_ON == SOAD_DEV_ERROR_DETECT */
     {
+#if (0u < SOAD_SOCKET_ROUTE_DEST_MAX)
 #if (STD_ON == SOAD_SUPPORT_UDP)
         parameter.RemoteAddr = &oldRemoteAddr;
         parameter.RemoteAddrChanged = &remoteAddrChanged;
 #endif
-#if (0u < SOAD_SOCKET_ROUTE_DEST_MAX)
         /*find the valid Socket Connection*/
         socketIdValid = SoAd_FindTheValidSoCon(
             SocketId,
@@ -2714,7 +2786,7 @@ SoAd_CopyTxData(
                           .Tp_CopyTxData_FuncPtr(soadPduRoutePtr->SoAd_UpPduId, &PduInfo, NULL_PTR, &validDataLength);
                 if (BUFREQ_OK == ret)
                 {
-                    SchM_Enter_SoAd(SOAD_INSTANCE, SOAD_AREA_MSGCONTEXT);
+                    SchM_Enter_SoAd_ExclusiveArea();
                     soadSoTxBufMPrt = &SoAd_SoTxBufMan[txBufferId];
                     soadSoTxBufMPrt->upCopyLength += BufLength;
                     if (SOAD_SOCONGROUP_TCPIMME_TXCONF(SOAD_SOCKET_LINKGORUP(soConId))
@@ -2733,7 +2805,7 @@ SoAd_CopyTxData(
                     soadSoConMPtr->TxNoAckLength += BufLength;
                     pduRouteDestId = soadPduRoutePtr->SoAd_PduRouteDestIndex[0];
                     SoAd_PduRouteDestManager[pduRouteDestId].TxPendingLength = soadSoConMPtr->TxNoAckLength;
-                    SchM_Exit_SoAd(SOAD_INSTANCE, SOAD_AREA_MSGCONTEXT);
+                    SchM_Exit_SoAd_ExclusiveArea();
                 }
                 else
                 {
@@ -2741,7 +2813,7 @@ SoAd_CopyTxData(
                     ret = BUFREQ_E_NOT_OK;
                 }
             }
-#endif /* (SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u */
+#endif /* SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u */
         }
 #endif /*0u < SOAD_TXBUFFER_NUM*/
     }
@@ -3123,12 +3195,17 @@ SoAd_TcpIpEvent(VAR(TcpIp_SocketIdType, AUTOMATIC) SocketId, VAR(TcpIp_EventType
                         {
                             if (soadSoConMPtr->SocketNeedClose != SOAD_SOCKET_CLOSE_DEFERRED)
                             {
+#if (0u < SOAD_RXBUFFER_NUM)
                                 if (SoAd_CheckRxTpPduDataHandle(soConId))
                                 {
                                     /*rx tp data not copy to UL, need delay close socket*/
                                     soadSoConMPtr->SocketNeedClose = SOAD_SOCKET_CLOSE_DEFERRED;
+#if (STD_ON == SOAD_SET_SOCKET_NEED_CLOSE_DEBUG)
+                                    soadSoConMPtr->SetSocketNeedCloseLine = __LINE__;
+#endif /* STD_ON == SOAD_SET_SOCKET_NEED_CLOSE_DEBUG */
                                 }
                                 else
+#endif
                                 {
                                     SoAd_SoConCloseHandle(soConId, soConGroupId, TRUE);
                                 }
@@ -3236,6 +3313,9 @@ SoAd_LocalIpAddrAssignmentChg(
                         && (TCPIP_IPADDR_STATE_UNASSIGNED == State))
                     {
                         SoAd_SoConManager[soConId].SocketNeedClose = SOAD_SOCKET_CLOSE_IMMEDIATE;
+#if (STD_ON == SOAD_SET_SOCKET_NEED_CLOSE_DEBUG)
+                        SoAd_SoConManager[soConId].SetSocketNeedCloseLine = __LINE__;
+#endif /* STD_ON == SOAD_SET_SOCKET_NEED_CLOSE_DEBUG */
                     }
                     SoAd_SoConLocalIpAddrAssignmentChg(soConId, cnt0);
                 }
@@ -3278,7 +3358,7 @@ SoAd_MainFunction(VAR(void, AUTOMATIC))
              * SoAdSocketAutomaticSoConSetup) socket connections;
              * handle the Disconnection and recovery of SoCon*/
             SoAd_SoConModeChangeHandle(soConCnt);
-#if (0u < SOAD_RXBUFFER_NUM)
+#if ((0u < SOAD_SOCKET_ROUTE_DEST_MAX) && (0u < SOAD_RXBUFFER_NUM))
             /*copy the PDU data(in the Rx Buffer) to the Up module*/
             SoAd_SoConRxDataMainFunctionHandle(soConCnt);
 #endif /*0u < SOAD_RXBUFFER_NUM*/
@@ -3315,6 +3395,9 @@ static FUNC(void, SOAD_CODE) SoAd_SocnTransmitAutomaticSoConSetupHandle(
             if (TCPIP_IPPROTO_TCP == Protocol)
             {
                 SoAd_SoConManager[SoConId].SocketNeedClose = SOAD_SOCKET_CLOSE_IMMEDIATE;
+#if (STD_ON == SOAD_SET_SOCKET_NEED_CLOSE_DEBUG)
+                SoAd_SoConManager[SoConId].SetSocketNeedCloseLine = __LINE__;
+#endif /* STD_ON == SOAD_SET_SOCKET_NEED_CLOSE_DEBUG */
             }
 #endif /* STD_ON == SOAD_SUPPORT_TCP */
 #if (STD_ON == SOAD_SUPPORT_UDP)
@@ -3343,26 +3426,22 @@ static FUNC(void, SOAD_CODE) SoAd_PduRouteManagerInit(PduIdType TxPduId)
 
 static FUNC(void, SOAD_CODE) SoAd_RoutingGroupInit(void)
 {
-/*init all RouteGroup enable state*/
-#if (0u < SOAD_SOCKET_ROUTE_DEST_MAX)
-    SoAd_uintx cnt1;
-    SoAd_SocketRouteDestInnerManagerType* socketRoutDestMPtr;
-#endif
-#if (0u < SOAD_PDU_ROUTE_DEST_MAX)
-    SoAd_uintx cnt2;
-    SoAd_PduRouteDestInnerManagerType* pduRouteDestMPtr;
-#endif
-#if (0u < SOAD_ROUTING_GROUP_MAX)
-    SoAd_RoutingGroupIdType cnt0;
     SoAd_RoutingGroupIdType routeGroupId;
+    SoAd_RoutingGroupIdType cnt0;
+
+    /* init all RouteGroup enable state */
+#if (0u < SOAD_ROUTING_GROUP_MAX)
     for (cnt0 = 0u; cnt0 < SOAD_ROUTING_GROUP_NUM; cnt0++)
     {
         SoAd_RoutGroupManager[cnt0].RoutGroupEnable = SOAD_ROUTGROUP_CFG(cnt0).SoAd_RoutingGroupIsEnabledAtInit;
     }
 #endif /*0u < SOAD_ROUTING_GROUP_MAX*/
-/*init all SocketRouteDest enable state*/
+
+    /* init all SocketRouteDest enable state */
 #if (0u < SOAD_SOCKET_ROUTE_DEST_MAX)
-    for (cnt1 = 0u; cnt1 < SOAD_SOCKET_ROUTE_DEST_NUM; cnt1++)
+    SoAd_SocketRouteDestInnerManagerType* socketRoutDestMPtr;
+
+    for (SoAd_uintx cnt1 = 0u; cnt1 < SOAD_SOCKET_ROUTE_DEST_NUM; cnt1++)
     {
         socketRoutDestMPtr = &SoAd_SocketRouteDestManager[cnt1];
         if (0u == SOAD_SRDEST_CFG(cnt1).SoAd_RxRoutingGroupRefNum)
@@ -3387,35 +3466,49 @@ static FUNC(void, SOAD_CODE) SoAd_RoutingGroupInit(void)
 #endif /*0u < SOAD_ROUTING_GROUP_MAX*/
     }
 #endif /*0u < SOAD_SOCKET_ROUTE_DEST_MAX*/
-/*init all PduRouteDest enable state*/
+
+    /*init all PduRouteDest enable state*/
 #if (0u < SOAD_PDU_ROUTE_DEST_MAX)
+    SoAd_PduRouteDestInnerManagerType* pduRouteDestMPtr;
     SoAd_RoutingGroupIdType txRoutGroupRefNum;
 
-    for (cnt2 = 0u; cnt2 < SOAD_PDU_ROUTE_DEST_NUM; cnt2++)
+    for (SoAd_uintx cnt2 = 0u; cnt2 < SOAD_PDU_ROUTE_DEST_NUM; cnt2++)
     {
         pduRouteDestMPtr = &SoAd_PduRouteDestManager[cnt2];
         pduRouteDestMPtr->TxPendingLength = 0u;
         if (0u == SOAD_PDUROTDEST_CFG(cnt2).SoAd_TxRoutingGroupRefNum)
         {
-            pduRouteDestMPtr->PduRouteDestEnable = TRUE;
+            SoAd_PduRouteDestControl(pduRouteDestMPtr, cnt2, TRUE, NO_TXMETADATA);
         }
 #if (0u < SOAD_ROUTING_GROUP_MAX)
         else
         {
             txRoutGroupRefNum = SOAD_PDUROTDEST_CFG(cnt2).SoAd_TxRoutingGroupRefNum;
-            for (cnt0 = 0u; (cnt0 < txRoutGroupRefNum) && (FALSE == pduRouteDestMPtr->PduRouteDestEnable); cnt0++)
+
+            SoAd_SoConIdType refSoConNum = SOAD_PDUROTDEST_CFG(cnt2).SoAd_TxPduRouteDestSocketConRefNum;
+            boolean pduRouteDestEnable = TRUE;
+            for (SoAd_SoConIdType cnt = 0u; cnt < refSoConNum; cnt++)
+            {
+                SoAd_SoConIdType soConId = SOAD_PDUROTDEST_CFG(cnt2).SoAd_TxSocketConRefIndexPtr[cnt];
+                if (!SoAd_PduRouteDestIsEnable(cnt2, soConId))
+                {
+                    pduRouteDestEnable = FALSE;
+                    break;
+                }
+            }
+
+            for (cnt0 = 0u; (cnt0 < txRoutGroupRefNum) && (FALSE == pduRouteDestEnable); cnt0++)
             {
                 routeGroupId = SOAD_PDUROTDEST_CFG(cnt2).SoAd_TxRoutingGroupRefPtr[cnt0];
                 if (SoAd_RoutGroupManager[routeGroupId].RoutGroupEnable)
                 {
-                    pduRouteDestMPtr->PduRouteDestEnable = TRUE;
+                    SoAd_PduRouteDestControl(pduRouteDestMPtr, cnt2, TRUE, NO_TXMETADATA);
                 }
             }
         }
 #endif /*0u < SOAD_ROUTING_GROUP_MAX*/
     }
 #endif /*0u < SOAD_PDU_ROUTE_DEST_MAX*/
-    return;
 }
 
 #if (0u < SOAD_MAX_IF_PDU_SIZE)
@@ -3447,11 +3540,10 @@ static FUNC(Std_ReturnType, SOAD_CODE) SoAd_GetIfPduData(PduIdType TxPduId)
         }
         result = SOAD_UPPERLAY_PCCFG(upModule).If_TriggerTransmit_FuncPtr(soadPduRouteCfgPtr->SoAd_UpPduId, &pduInfo);
     }
-#endif /* (SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u */
+#endif /* SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u */
+    SoAd_PduRoutInnerManageType* soadPduRoutMPtr = &SoAd_PduRoutManager[TxPduId];
     if (E_OK == result)
     {
-        SoAd_PduRoutInnerManageType* soadPduRoutMPtr = &SoAd_PduRoutManager[TxPduId];
-
         soadPduRoutMPtr->PduDataPtr = &SoAd_IfPduBuffer[SOAD_HEADER_SIZE];
         soadPduRoutMPtr->PduLength = pduInfo.SduLength;
 #if (STD_ON == SOAD_PDU_ROUTE_METADATA_SUPPORT)
@@ -3464,6 +3556,10 @@ static FUNC(Std_ReturnType, SOAD_CODE) SoAd_GetIfPduData(PduIdType TxPduId)
         {
             soadPduRoutMPtr->TxSoConId = NO_TXMETADATA;
         }
+    }
+    else
+    {
+        soadPduRoutMPtr->PduDataPtr = NULL_PTR;
     }
     return result;
 }
@@ -3558,8 +3654,7 @@ static FUNC(void, SOAD_CODE) SoAd_ReleaseRemoteAddrMainFunctionHandle(SoAd_SoCon
     }
     return;
 }
-/* soad local memcpy function,imitation lib memcpy */
-
+#if (0u < SOAD_SOCKET_ROUTE_DEST_MAX)
 #if (0u < SOAD_RXBUFFER_NUM)
 
 #if (STD_ON == SOAD_SUPPORT_HEADERID)
@@ -3586,7 +3681,7 @@ static FUNC(void, SOAD_CODE)
     bufferStartPos = SOAD_SOCKETBUFFER_CFG(BufferManageId + SOAD_TXBUFFER_NUM).bufPos;
     if (exitPos < enterPos)
     {
-        bufferedDataLength = (enterPos - exitPos);
+        bufferedDataLength = enterPos - exitPos;
     }
     else
     {
@@ -3670,8 +3765,11 @@ static FUNC(void, SOAD_CODE)
                     else
                     {
                         SoAd_SoConManager[SoConId].SocketNeedClose = SOAD_SOCKET_CLOSE_IMMEDIATE;
+#if (STD_ON == SOAD_SET_SOCKET_NEED_CLOSE_DEBUG)
+                        SoAd_SoConManager[SoConId].SetSocketNeedCloseLine = __LINE__;
+#endif /* STD_ON == SOAD_SET_SOCKET_NEED_CLOSE_DEBUG */
                     }
-#endif /* (SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u */
+#endif /* SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u */
                 }
             }
         }
@@ -3764,8 +3862,11 @@ static FUNC(void, SOAD_CODE)
                 SOAD_SRDEST_CFG(socketRouteId).SoAd_UpPduId,
                 E_NOT_OK);
             SoAd_SoConManager[SoConId].SocketNeedClose = SOAD_SOCKET_CLOSE_IMMEDIATE;
+#if (STD_ON == SOAD_SET_SOCKET_NEED_CLOSE_DEBUG)
+            SoAd_SoConManager[SoConId].SetSocketNeedCloseLine = __LINE__;
+#endif /* STD_ON == SOAD_SET_SOCKET_NEED_CLOSE_DEBUG */
         }
-#endif /* (SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u */
+#endif /* SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u */
     }
     return;
 }
@@ -3798,11 +3899,11 @@ static FUNC(void, SOAD_CODE)
 
     if (soadSoRxBuffMPtr->ExitPosition < soadSoRxBuffMPtr->EnterPosition)
     {
-        copyToUpLength = (soadSoRxBuffMPtr->EnterPosition - soadSoRxBuffMPtr->ExitPosition);
+        copyToUpLength = soadSoRxBuffMPtr->EnterPosition - soadSoRxBuffMPtr->ExitPosition;
     }
     else
     {
-        copyToUpLength = (bufferLength - soadSoRxBuffMPtr->ExitPosition);
+        copyToUpLength = bufferLength - soadSoRxBuffMPtr->ExitPosition;
     }
     if (copyToUpLength > UpBufferSize)
     {
@@ -3852,8 +3953,11 @@ static FUNC(void, SOAD_CODE)
         {
             SOAD_UPPERLAY_PCCFG(upModule).Tp_RxIndication_FuncPtr(upPduId, E_NOT_OK);
             SoAd_SoConManager[SoConId].SocketNeedClose = SOAD_SOCKET_CLOSE_IMMEDIATE;
+#if (STD_ON == SOAD_SET_SOCKET_NEED_CLOSE_DEBUG)
+            SoAd_SoConManager[SoConId].SetSocketNeedCloseLine = __LINE__;
+#endif /* STD_ON == SOAD_SET_SOCKET_NEED_CLOSE_DEBUG */
         }
-#endif /* (SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u */
+#endif /* SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u */
     }
     return;
 }
@@ -3917,27 +4021,27 @@ static FUNC(void, SOAD_CODE)
 
         if (destPos > bufferLength)
         {
-            SchM_Enter_SoAd(SOAD_INSTANCE, SOAD_AREA_MSGCONTEXT);
+            SchM_Enter_SoAd_ExclusiveArea();
             /*SoAd_IfPduBuffer is used for IF TCP receive buffer*/
             PduLengthType copyLength = bufferLength - exitPos;
             (void)ILib_memcpy(&SoAd_IfPduBuffer[0u], &SoAd_PduBuffer[srcPos], copyLength);
             (void)ILib_memcpy(
                 &SoAd_IfPduBuffer[copyLength],
                 &SoAd_PduBuffer[bufferStartPos],
-                ((uint32)destPos - (uint32)bufferLength));
+                (PduLengthType)(destPos - bufferLength));
             pduInfo.SduDataPtr = &SoAd_IfPduBuffer[0u];
             SOAD_UPPERLAY_PCCFG(upModule).If_RxIndication_FuncPtr(upPduId, &pduInfo);
-            SchM_Exit_SoAd(SOAD_INSTANCE, SOAD_AREA_MSGCONTEXT);
+            SchM_Exit_SoAd_ExclusiveArea();
         }
         else
         {
             pduInfo.SduDataPtr = &SoAd_PduBuffer[srcPos];
             SOAD_UPPERLAY_PCCFG(upModule).If_RxIndication_FuncPtr(upPduId, &pduInfo);
         }
-#endif /* (SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u */
+#endif /* SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u */
         /*IF PDU used Rx Buffer must be TCP.
         SWS_SoAd_00564:SoAd shall confirm the reception of all data*/
-        (void)TcpIp_TcpReceived(SoAd_SoConManager[SoConId].TcpIpSocketId, soadSoRxBuffMPtr->ExitPduResidueLength);
+        (void)TcpIp_TcpReceived(SoAd_SoConManager[SoConId].TcpIpSocketId, exitPduResidueLen);
         soadSoRxBuffMPtr->ExitPosition = destPos;
         if (soadSoRxBuffMPtr->ExitPosition >= bufferLength)
         {
@@ -3949,9 +4053,7 @@ static FUNC(void, SOAD_CODE)
 }
 #endif /*STD_ON == SOAD_SUPPORT_HEADERID*/
 #endif /*0u < SOAD_MAX_IF_PDU_SIZE*/
-#endif /*0u < SOAD_RXBUFFER_NUM*/
 
-#if (0u < SOAD_RXBUFFER_NUM)
 static FUNC(void, SOAD_CODE) SoAd_RxDataMainFunctionHeaderDisableHandle(
     VAR(SoAd_SoConIdType, AUTOMATIC) SoConId,
     VAR(SoAd_uintx, AUTOMATIC) BufferManageId)
@@ -4024,14 +4126,20 @@ static FUNC(void, SOAD_CODE) SoAd_RxDataMainFunctionHeaderDisableHandle(
             else
             {
                 SoAd_SoConManager[SoConId].SocketNeedClose = SOAD_SOCKET_CLOSE_IMMEDIATE;
+#if (STD_ON == SOAD_SET_SOCKET_NEED_CLOSE_DEBUG)
+                SoAd_SoConManager[SoConId].SetSocketNeedCloseLine = __LINE__;
+#endif /* STD_ON == SOAD_SET_SOCKET_NEED_CLOSE_DEBUG */
             }
         }
     }
     else
     {
         SoAd_SoConManager[SoConId].SocketNeedClose = SOAD_SOCKET_CLOSE_IMMEDIATE;
+#if (STD_ON == SOAD_SET_SOCKET_NEED_CLOSE_DEBUG)
+        SoAd_SoConManager[SoConId].SetSocketNeedCloseLine = __LINE__;
+#endif /* STD_ON == SOAD_SET_SOCKET_NEED_CLOSE_DEBUG */
     }
-#endif /* (SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u */
+#endif /* SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u */
     return;
 }
 
@@ -4082,13 +4190,16 @@ static FUNC(void, SOAD_CODE) SoAd_SoConRxDataMainFunctionHandle(VAR(SoAd_SoConId
             if (SoAd_SoConManager[SoConId].SocketNeedClose == SOAD_SOCKET_CLOSE_DEFERRED)
             {
                 SoAd_SoConManager[SoConId].SocketNeedClose = SOAD_SOCKET_CLOSE_IMMEDIATE;
+#if (STD_ON == SOAD_SET_SOCKET_NEED_CLOSE_DEBUG)
+                SoAd_SoConManager[SoConId].SetSocketNeedCloseLine = __LINE__;
+#endif /* STD_ON == SOAD_SET_SOCKET_NEED_CLOSE_DEBUG */
             }
         }
     }
     return;
 }
 #endif /*0u < SOAD_RXBUFFER_NUM*/
-
+#endif /*0u < SOAD_SOCKET_ROUTE_DEST_MAX)*/
 #if (STD_ON == SOAD_SOCKET_ROUTE_METADATA_SUPPORT)
 static FUNC(void, SOAD_CODE)
     SoAd_MetaDataFillHandle(VAR(SoAd_SoConIdType, AUTOMATIC) SoConId, P2VAR(uint8, AUTOMATIC, SOAD_APPL_DATA) DataPtr)
@@ -4111,6 +4222,7 @@ static FUNC(void, SOAD_CODE)
 }
 #endif /* STD_ON == SOAD_SOCKET_ROUTE_METADATA_SUPPORT */
 
+#if (0u < SOAD_SOCKET_ROUTE_DEST_MAX)
 #if (STD_ON == SOAD_SUPPORT_UDP)
 #if (STD_ON == SOAD_SUPPORT_HEADERID)
 #if (0u < SOAD_RXBUFFER_NUM)
@@ -4211,7 +4323,7 @@ static FUNC(boolean, SOAD_CODE) SoAd_HeaderEnableUdpSoConRxTpPduHandle(
                     }
                 }
             }
-#endif /* (SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u */
+#endif /* SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u */
         }
         else
         {
@@ -4290,7 +4402,7 @@ static FUNC(boolean, SOAD_CODE) SoAd_HeaderEnableUdpSoConRxHandle(
                         SOAD_UPPERLAY_PCCFG(upModule).If_RxIndication_FuncPtr(
                             soadSoRouteDestPtr->SoAd_UpPduId,
                             &pduInfo);
-#endif /* (SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u */
+#endif /* SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u */
                         dataPosition = remainLen;
                     }
                     else
@@ -4385,6 +4497,9 @@ static FUNC(void, SOAD_CODE) SoAd_HeaderEnableTcpSoConRxTpPduHandle(
         {
             SOAD_UPPERLAY_PCCFG(upModule).Tp_RxIndication_FuncPtr(upPduId, E_NOT_OK);
             SoAd_SoConManager[SoConId].SocketNeedClose = SOAD_SOCKET_CLOSE_IMMEDIATE;
+#if (STD_ON == SOAD_SET_SOCKET_NEED_CLOSE_DEBUG)
+            SoAd_SoConManager[SoConId].SetSocketNeedCloseLine = __LINE__;
+#endif /* STD_ON == SOAD_SET_SOCKET_NEED_CLOSE_DEBUG */
         }
         else
         {
@@ -4434,6 +4549,9 @@ static FUNC(void, SOAD_CODE) SoAd_HeaderEnableTcpSoConRxTpPduHandle(
                     {
                         SOAD_UPPERLAY_PCCFG(upModule).Tp_RxIndication_FuncPtr(upPduId, E_NOT_OK);
                         SoAd_SoConManager[SoConId].SocketNeedClose = SOAD_SOCKET_CLOSE_IMMEDIATE;
+#if (STD_ON == SOAD_SET_SOCKET_NEED_CLOSE_DEBUG)
+                        SoAd_SoConManager[SoConId].SetSocketNeedCloseLine = __LINE__;
+#endif /* STD_ON == SOAD_SET_SOCKET_NEED_CLOSE_DEBUG */
                     }
                 }
                 else
@@ -4451,8 +4569,11 @@ static FUNC(void, SOAD_CODE) SoAd_HeaderEnableTcpSoConRxTpPduHandle(
     else
     {
         SoAd_SoConManager[SoConId].SocketNeedClose = SOAD_SOCKET_CLOSE_IMMEDIATE;
+#if (STD_ON == SOAD_SET_SOCKET_NEED_CLOSE_DEBUG)
+        SoAd_SoConManager[SoConId].SetSocketNeedCloseLine = __LINE__;
+#endif /* STD_ON == SOAD_SET_SOCKET_NEED_CLOSE_DEBUG */
     }
-#endif /* (SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u */
+#endif /* SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u */
     return;
 }
 
@@ -4508,8 +4629,11 @@ static FUNC(void, SOAD_CODE)
         {
             SOAD_UPPERLAY_PCCFG(upModule).Tp_RxIndication_FuncPtr(upPduId, E_NOT_OK);
             SoAd_SoConManager[Parameter->SoConId].SocketNeedClose = SOAD_SOCKET_CLOSE_IMMEDIATE;
+#if (STD_ON == SOAD_SET_SOCKET_NEED_CLOSE_DEBUG)
+            SoAd_SoConManager[Parameter->SoConId].SetSocketNeedCloseLine = __LINE__;
+#endif /* STD_ON == SOAD_SET_SOCKET_NEED_CLOSE_DEBUG */
         }
-#endif /* (SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u */
+#endif /* SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u */
     }
     else if (upBufferSize > 0u)
     {
@@ -4536,8 +4660,11 @@ static FUNC(void, SOAD_CODE)
         {
             SOAD_UPPERLAY_PCCFG(upModule).Tp_RxIndication_FuncPtr(upPduId, E_NOT_OK);
             SoAd_SoConManager[Parameter->SoConId].SocketNeedClose = SOAD_SOCKET_CLOSE_IMMEDIATE;
+#if (STD_ON == SOAD_SET_SOCKET_NEED_CLOSE_DEBUG)
+            SoAd_SoConManager[Parameter->SoConId].SetSocketNeedCloseLine = __LINE__;
+#endif /* STD_ON == SOAD_SET_SOCKET_NEED_CLOSE_DEBUG */
         }
-#endif /* (SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u */
+#endif /* SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u */
     }
     else
     {
@@ -4624,13 +4751,19 @@ static FUNC(void, SOAD_CODE) SoAd_HeaderDisableSoConRxTpPduHandle(
             else
             {
                 SoAd_SoConManager[SoConId].SocketNeedClose = SOAD_SOCKET_CLOSE_IMMEDIATE;
+#if (STD_ON == SOAD_SET_SOCKET_NEED_CLOSE_DEBUG)
+                SoAd_SoConManager[SoConId].SetSocketNeedCloseLine = __LINE__;
+#endif /* STD_ON == SOAD_SET_SOCKET_NEED_CLOSE_DEBUG */
             }
         }
         else
         {
             SoAd_SoConManager[SoConId].SocketNeedClose = SOAD_SOCKET_CLOSE_IMMEDIATE;
+#if (STD_ON == SOAD_SET_SOCKET_NEED_CLOSE_DEBUG)
+            SoAd_SoConManager[SoConId].SetSocketNeedCloseLine = __LINE__;
+#endif /* STD_ON == SOAD_SET_SOCKET_NEED_CLOSE_DEBUG */
         }
-#endif /* (SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u */
+#endif /* SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u */
     }
     /*SWS_SoAd_00568:
       if the SoAd receive buffer already contains TP data for this socket connection
@@ -4656,7 +4789,7 @@ static FUNC(void, SOAD_CODE) SoAd_HeaderEnableTcpSoConRxHandle(
 #if (STD_ON == SOAD_SOCKET_ROUTE_METADATA_SUPPORT)
     uint8 metaData[2];
 #endif /* STD_ON == SOAD_SOCKET_ROUTE_METADATA_SUPPORT */
-#endif
+#endif /* 0u < SOAD_MAX_IF_PDU_SIZE */
     SoAd_uintx socketRouteId;
     boolean findValidSocketRoute = FALSE;
     SoAd_uintx bufferId;
@@ -4718,7 +4851,7 @@ static FUNC(void, SOAD_CODE) SoAd_HeaderEnableTcpSoConRxHandle(
                         SOAD_UPPERLAY_PCCFG(upModule).If_RxIndication_FuncPtr(
                             soadSoRouteDestPtr->SoAd_UpPduId,
                             &pduInfo);
-#endif /* (SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u */
+#endif /* SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u */
 
                         /*SWS_SoAd_00564:SoAd shall confirm the reception of all data*/
                         (void)TcpIp_TcpReceived(SoAd_SoConManager[SoConId].TcpIpSocketId, pduLength);
@@ -4816,7 +4949,7 @@ static FUNC(boolean, SOAD_CODE) SoAd_CopyDataToRxBuffer(
                     (void)ILib_memcpy(
                         &SoAd_PduBuffer[bufferPosition],
                         &DataPtr[copyLength],
-                        ((uint32)destPos - (uint32)bufferLength));
+                        (PduLengthType)(destPos - bufferLength));
                     soadSoRxBuffMPtr->EnterPosition = destPos - bufferLength;
                 }
                 /*SWS_SoAd_00693:larger than the remaining available buffer size */
@@ -4846,6 +4979,9 @@ static FUNC(boolean, SOAD_CODE) SoAd_CopyDataToRxBuffer(
         if (!copyDataOk)
         {
             SoAd_SoConManager[SoConId].SocketNeedClose = SOAD_SOCKET_CLOSE_IMMEDIATE;
+#if (STD_ON == SOAD_SET_SOCKET_NEED_CLOSE_DEBUG)
+            SoAd_SoConManager[SoConId].SetSocketNeedCloseLine = __LINE__;
+#endif /* STD_ON == SOAD_SET_SOCKET_NEED_CLOSE_DEBUG */
             (void)Det_ReportRuntimeError(SOAD_MODULE_ID, SOAD_INSTANCE, SOAD_SID_RXINDICATION, SOAD_E_NOBUFS);
         }
     }
@@ -4885,7 +5021,7 @@ static FUNC(void, SOAD_CODE) SoAd_HeaderDisableSoConRxIfPduHandle(
     {
         SOAD_UPPERLAY_PCCFG(upModule).If_RxIndication_FuncPtr(SOAD_SRDEST_CFG(SocketRouteId).SoAd_UpPduId, &pduInfo);
     }
-#endif /* (SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u */
+#endif /* SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u */
 
     if (TCPIP_IPPROTO_TCP == SOAD_SOCON_CFG(SoConId).SoAd_TcpUdpProtocol)
     {
@@ -5027,6 +5163,7 @@ static FUNC(boolean, SOAD_CODE) SoAd_FindTheValidSoCon(
     return socketIdValid;
 }
 #endif /*0u < SOAD_SOCKET_ROUTE_DEST_MAX*/
+#endif /*0u < SOAD_SOCKET_ROUTE_DEST_MAX */
 
 #if (STD_ON == SOAD_SUPPORT_UDP)
 #if (STD_ON == SOAD_SUPPORT_HEADERID)
@@ -5200,7 +5337,7 @@ static FUNC(void, SOAD_CODE) SoAd_ChangeSocketParameter(
     {
         (void)TcpIp_ChangeParameter(SocketId, TCPIP_PARAMID_SOCKET_VLAN, soadSoConGruCfgPtr->SoAdSocketVlan);
     }
-#endif /* (SOAD_SOCKET_VLAN == STD_ON */
+#endif /* SOAD_SOCKET_VLAN == STD_ON */
 #if (STD_ON == SOAD_SUPPORT_TCP)
     /*In case of a TCP socket*/
     if (SocketProtocolIsTcp)
@@ -5344,7 +5481,7 @@ static FUNC(void, SOAD_CODE) SoAd_SoConModeChgNotificationAndTpStartOfReception(
             {
                 SOAD_UPPERLAY_PCCFG(upModule).SoConModeChg_FuncPtr(SoConId, soadSoConMPtr->SoAd_SoConMode);
             }
-#endif /* (SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u */
+#endif /* SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u */
         }
     }
     if (SOAD_SOCON_ONLINE == soadSoConMPtr->SoAd_SoConMode)
@@ -5374,13 +5511,19 @@ static FUNC(void, SOAD_CODE) SoAd_SoConModeChgNotificationAndTpStartOfReception(
                             &bufferSize))
                     {
                         soadSoConMPtr->SocketNeedClose = SOAD_SOCKET_CLOSE_IMMEDIATE;
+#if (STD_ON == SOAD_SET_SOCKET_NEED_CLOSE_DEBUG)
+                        SoAd_SoConManager[SoConId].SetSocketNeedCloseLine = __LINE__;
+#endif /* STD_ON == SOAD_SET_SOCKET_NEED_CLOSE_DEBUG */
                     }
                 }
                 else
                 {
                     soadSoConMPtr->SocketNeedClose = SOAD_SOCKET_CLOSE_IMMEDIATE;
+#if (STD_ON == SOAD_SET_SOCKET_NEED_CLOSE_DEBUG)
+                    SoAd_SoConManager[SoConId].SetSocketNeedCloseLine = __LINE__;
+#endif /* STD_ON == SOAD_SET_SOCKET_NEED_CLOSE_DEBUG */
                 }
-#endif /* (SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u */
+#endif /* SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u */
             }
         }
     }
@@ -5410,7 +5553,7 @@ static FUNC(void, SOAD_CODE)
                     SoConId,
                     SoAd_SoConGroupManager[SoConGroup].LocalIpAddrState);
             }
-#endif /* (SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u */
+#endif /* SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u */
         }
     }
     return;
@@ -5688,7 +5831,7 @@ static FUNC(void, SOAD_CODE) SoAd_CloseRxTpPduHandle(VAR(SoAd_SoConIdType, AUTOM
         {
             SOAD_UPPERLAY_PCCFG(upModule).Tp_RxIndication_FuncPtr(pduId, E_NOT_OK);
         }
-#endif /* (SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u */
+#endif /* SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u */
     }
     /*clear the SoCon Rx Buffer*/
     SoAd_RxBufferInit(rxBufferId);
@@ -5775,7 +5918,7 @@ static FUNC(void, SOAD_CODE) SoAd_SoConCloseHandle(
                     SOAD_PDUROUT_CFG(pduRouteId).SoAd_UpPduId,
                     E_NOT_OK);
             }
-#endif /* (SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u */
+#endif /* SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u */
         }
     }
 #if (0u < SOAD_TXBUFFER_NUM)
@@ -5840,6 +5983,9 @@ static FUNC(void, SOAD_CODE) SoAd_SoConCloseHandle(
     /*clear the SoAd_SoConManager parameters*/
     soadSoConMPtr->SoConCloseAbort = FALSE;
     soadSoConMPtr->SocketNeedClose = SOAD_SOCKET_CLOSE_NONE;
+#if (STD_ON == SOAD_SET_SOCKET_NEED_CLOSE_DEBUG)
+    SoAd_SoConManager[SoConId].SetSocketNeedCloseLine = 0;
+#endif /* STD_ON == SOAD_SET_SOCKET_NEED_CLOSE_DEBUG */
     soadSoConMPtr->TpPduTransmitting = FALSE;
     soadSoConMPtr->TxNoAckLength = 0u;
 #if (STD_ON == SOAD_SUPPORT_UDP)
@@ -5990,7 +6136,7 @@ static FUNC(Std_ReturnType, SOAD_CODE) SoAd_RoutingGroupControl(
                 routeGroupId = pduRouDestCfgPtr->SoAd_TxRoutingGroupRefPtr[routeGroupCnt];
                 if (id == routeGroupId)
                 {
-                    SoAd_PduRouteDestManager[routeDestId].PduRouteDestEnable = enFlag;
+                    SoAd_PduRouteDestControl(&SoAd_PduRouteDestManager[routeDestId], routeDestId, enFlag, *soConIdPtr);
                     flagSet = TRUE;
                 }
             }
@@ -6039,7 +6185,7 @@ static FUNC(Std_ReturnType, SOAD_CODE) SoAd_RoutingGroupControl(
                     flagSet = TRUE;
                 }
             }
-            SoAd_PduRouteDestManager[routeDestId].PduRouteDestEnable = flagSet;
+            SoAd_PduRouteDestControl(&SoAd_PduRouteDestManager[routeDestId], routeDestId, flagSet, NO_TXMETADATA);
         }
 #endif
     }
@@ -6118,7 +6264,7 @@ static FUNC(void, SOAD_CODE) SoAd_MainFunctionTxConfirmationHandle(void)
             {
                 SOAD_UPPERLAY_PCCFG(upModule).If_TxConfirmation_FuncPtr(SOAD_PDUROUT_CFG(txPduId).SoAd_UpPduId);
             }
-#endif /* (SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u */
+#endif /* SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u */
 
             SoAd_PduRouteManagerInit(txPduId);
         }
@@ -6320,7 +6466,14 @@ static FUNC(Std_ReturnType, SOAD_CODE)
 #endif /* STD_ON == SOAD_UDP_SOCON_IMMEDIATE_TXCONFIRMATION */
                     if (SOAD_UNUSED_UINT8 == soadPduRouteMPtr->TxPendingNum)
                     {
-                        soadPduRouteMPtr->TxPendingNum = 0u;
+#if (SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u)
+                        SoAd_UpLayerModuleType upModule = SOAD_PDUROUT_CFG(TxPduId).SoAd_RefModule;
+                        /* Return immediately without configuration TxConfirmation for Udp */
+                        if (NULL_PTR != SOAD_UPPERLAY_PCCFG(upModule).If_TxConfirmation_FuncPtr)
+#endif
+                        {
+                            soadPduRouteMPtr->TxPendingNum = 0u;
+                        }
                     }
             }
             SoAd_SocnTransmitAutomaticSoConSetupHandle(SoConId, TCPIP_IPPROTO_UDP);
@@ -6367,7 +6520,7 @@ static FUNC(void, SOAD_CODE) SoAd_MainFunctionTpTransmitHandle(SoAd_SoConIdType 
             if ((BUFREQ_OK == result)
                 && (soadSoTxBufMPtr->txPduTotalLength >= (soadSoTxBufMPtr->upCopyLength + validDataLength)))
             {
-                SchM_Enter_SoAd(SOAD_INSTANCE, SOAD_AREA_MSGCONTEXT);
+                SchM_Enter_SoAd_ExclusiveArea();
                 if ((TCPIP_IPPROTO_TCP == SOAD_SOCON_CFG(SoConId).SoAd_TcpUdpProtocol)
                     && (SOAD_SOCKET_CLOSE_NONE == soadSoConMPtr->SocketNeedClose))
                 {
@@ -6410,7 +6563,7 @@ static FUNC(void, SOAD_CODE) SoAd_MainFunctionTpTransmitHandle(SoAd_SoConIdType 
                         }
                     }
                 }
-                SchM_Exit_SoAd(SOAD_INSTANCE, SOAD_AREA_MSGCONTEXT);
+                SchM_Exit_SoAd_ExclusiveArea();
             }
             else
             {
@@ -6421,7 +6574,7 @@ static FUNC(void, SOAD_CODE) SoAd_MainFunctionTpTransmitHandle(SoAd_SoConIdType 
         {
             SoAd_TpPduTxErrorHandle(SoConId, txBufferId, upModule, upPduId);
         }
-#endif /* (SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u */
+#endif /* SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u */
     }
     return;
 }
@@ -6437,6 +6590,9 @@ static FUNC(void, SOAD_CODE) SoAd_TpPduTxErrorHandle(
     if (TCPIP_IPPROTO_TCP == SOAD_SOCON_CFG(SoConId).SoAd_TcpUdpProtocol)
     {
         SoAd_SoConManager[SoConId].SocketNeedClose = SOAD_SOCKET_CLOSE_IMMEDIATE;
+#if (STD_ON == SOAD_SET_SOCKET_NEED_CLOSE_DEBUG)
+        SoAd_SoConManager[SoConId].SetSocketNeedCloseLine = __LINE__;
+#endif /* STD_ON == SOAD_SET_SOCKET_NEED_CLOSE_DEBUG */
     }
     else
     {
@@ -6448,7 +6604,7 @@ static FUNC(void, SOAD_CODE) SoAd_TpPduTxErrorHandle(
         {
             SOAD_UPPERLAY_PCCFG(UpModule).Tp_TxConfirmation_FuncPtr(UpPduId, E_NOT_OK);
         }
-#endif /* (SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u */
+#endif /* SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u */
     }
     return;
 }
@@ -6598,7 +6754,7 @@ static FUNC(void, SOAD_CODE) SoAd_TxConfirmationHandle(
                             SOAD_PDUROUT_CFG(pduRouteId).SoAd_UpPduId,
                             E_OK);
                     }
-#endif /* (SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u */
+#endif /* SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u */
                     SoAd_SoTxBufMan[txBufferId].txPduTotalLength = 0u;
                     SoAd_SoTxBufMan[txBufferId].upCopyLength = 0u;
                     SoAd_SoConManager[soConId].TpPduTransmitting = FALSE;
@@ -6623,7 +6779,7 @@ static FUNC(void, SOAD_CODE) SoAd_TxConfirmationHandle(
                         SOAD_UPPERLAY_PCCFG(upModule).If_TxConfirmation_FuncPtr(
                             SOAD_PDUROUT_CFG(pduRouteId).SoAd_UpPduId);
                     }
-#endif /* (SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u */
+#endif /* SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u */
                     SoAd_PduRouteManagerInit(pduRouteId);
                     SoAd_SocnTransmitAutomaticSoConSetupHandle(soConId, TCPIP_IPPROTO_TCP);
                 }
@@ -6661,5 +6817,34 @@ static boolean SoAd_FindHeaderIDAndSocketRouteId(SoAd_SoConIdType SoConId, uint3
 }
 #endif /* SOAD_SUPPORT_HEADERID */
 
+static void SoAd_PduRouteDestControl(
+    SoAd_PduRouteDestInnerManagerType* pduRouteDestMPtr,
+    SoAd_uintx pduRouteDestId,
+    boolean enFlag,
+    SoAd_SoConIdType specificSoConId)
+{
+    SoAd_SoConIdType refSoConNum = SOAD_PDUROTDEST_CFG(pduRouteDestId).SoAd_TxPduRouteDestSocketConRefNum;
+    for (SoAd_SoConIdType cnt = 0u; cnt < refSoConNum; cnt++)
+    {
+        SoAd_SoConIdType soConId = SOAD_PDUROTDEST_CFG(pduRouteDestId).SoAd_TxSocketConRefIndexPtr[cnt];
+        if ((specificSoConId == NO_TXMETADATA) || ((specificSoConId != NO_TXMETADATA) && (specificSoConId == soConId)))
+        {
+            if (enFlag)
+            {
+                pduRouteDestMPtr->PduRouteDestRefSoConEnable[soConId / 8] |= (uint8)(0x01 << (soConId % 8u));
+            }
+            else
+            {
+                pduRouteDestMPtr->PduRouteDestRefSoConEnable[soConId / 8] &= (uint8)(~(0x01 << (soConId % 8u)));
+            }
+        }
+    }
+}
+
+static boolean SoAd_PduRouteDestIsEnable(SoAd_uintx pduRouteDestId, SoAd_SoConIdType soConId)
+{
+    uint8 enable = SoAd_PduRouteDestManager[pduRouteDestId].PduRouteDestRefSoConEnable[soConId / 8];
+    return ((enable & (uint8)(0x01 << (soConId % 8))) > 0);
+}
 #define SOAD_STOP_SEC_CODE
 #include "SoAd_MemMap.h"

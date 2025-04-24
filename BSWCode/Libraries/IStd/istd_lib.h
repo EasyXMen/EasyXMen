@@ -18,25 +18,25 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- ** **
- **  FILENAME    : istd_lib.h **
- ** **
- **  Created on  : 12/12/23 **
- **  Author      : darren.zhang **
- **  Vendor      : **
- **  DESCRIPTION :  stand lib header file **
- ** **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform **
- ** **
- ***********************************************************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*************************************************************************************************************************
+**                                                                                                                    **
+**  FILENAME    : istd_lib.h                                                                                          **
+**                                                                                                                    **
+**  Created on  : 12/12/23                                                                                            **
+**  Author      : darren.zhang                                                                                        **
+**  Vendor      :                                                                                                     **
+**  DESCRIPTION :  stand lib header file                                                                              **
+**                                                                                                                    **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform                                                                     **
+**                                                                                                                    **
+***********************************************************************************************************************/
 /***********************************************************************************************************************
 **                                               Revision Control History                                             **
 ***********************************************************************************************************************/
 /* <VERSION> <DATE> <AUTHOR> <REVISION LOG>
- * V2.0.0 [2024/9/11] [QinmeiChen] fix compile error when macro BSW_NOT_USED_STDLIB is 0.
+ * V2.0.0 [2024/9/10] [QinmeiChen] fix compile error when macro BSW_NOT_USED_STDLIB is 0.
  */
 /*===================================================================================================================*/
 #ifndef ISOFT_STD_LIB_H_
@@ -62,7 +62,7 @@
 #define ILIB_RESTRICT __restrict__
 #else
 #define ILIB_RESTRICT
-#endif /* BSW_ILIB_PARA_USED_RESTRICT */
+#endif
 
 #if !defined(MEMHEAP_STATISTIC)
 #define MEMHEAP_STATISTIC STD_ON
@@ -114,7 +114,7 @@ END_C_DECLS
 #define ILib_memcmp memcmp
 #endif
 
-#endif
+#endif /* BSW_NOT_USED_STDLIB */
 
 /* MemHeap Error Code */
 #define MEMHEAP_OK            0U

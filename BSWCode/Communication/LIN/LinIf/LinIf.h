@@ -18,20 +18,20 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : LinIf.h                                                     **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : HuRongbo                                                    **
- **  Vendor      :                                                             **
- **  DESCRIPTION : API declaration and type definitions of LinIf               **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*********************************************************************************
+**                                                                            **
+**  FILENAME    : LinIf.h                                                     **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : HuRongbo                                                    **
+**  Vendor      :                                                             **
+**  DESCRIPTION : API declaration and type definitions of LinIf               **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 
 #ifndef LINIF_H
 #define LINIF_H
@@ -55,8 +55,8 @@
 #define LINIF_H_AR_RELEASE_REVISION_VERSION 0U
 
 #define LINIF_H_SW_MAJOR_VERSION            2U
-#define LINIF_H_SW_MINOR_VERSION            0U
-#define LINIF_H_SW_PATCH_VERSION            15U
+#define LINIF_H_SW_MINOR_VERSION            1U
+#define LINIF_H_SW_PATCH_VERSION            8U
 
 /*instance id*/
 #define LINIF_INSTANCE_ID (uint8)0x00
@@ -113,7 +113,6 @@
 extern CONST(Lin_DriverApiType, LINIF_CONST) Lin_DriverApi[LINIF_NUMBER_OF_DRIVERS];
 
 extern CONST(LinIf_ConfigType, LINIF_CONST) LinIf_PCConfig;
-
 /*******************************************************************************
 **                      Global Functions                                      **
 *******************************************************************************/
@@ -174,9 +173,9 @@ extern FUNC(void, LINIF_CODE) LinIf_Init(P2CONST(LinIf_ConfigType, AUTOMATIC, LI
         (versionInfo)->sw_minor_version = LINIF_H_SW_MINOR_VERSION; \
         (versionInfo)->sw_patch_version = LINIF_H_SW_PATCH_VERSION; \
     } while (0)
-#endif /* STD_ON == LINIF_DEV_ERROR_DETECT */
+#endif
 
-#endif /* STD_ON == LINTP_VERSION_INFO_API */
+#endif
 
 /******************************************************************************/
 /*
@@ -339,23 +338,7 @@ extern FUNC(Std_ReturnType, LINIF_CODE)
     LinIf_SetTrcvWakeupMode(NetworkHandleType Channel, LinTrcv_TrcvWakeupModeType LinTrcvWakeupMode);
 #endif
 
-#if (LINIF_CANCEL_TRANSMIT_SUPPORTED == STD_ON)
-/******************************************************************************/
-/*
- * Brief               A dummy method introduced for interface compatibility.
- * ServiceId           0x0c
- * Sync/Async          Synchronous
- * Reentrancy          Non Reentrant
- * Param-Name[in]      LinTxPduId: Upper layer identification of the LIN frame
- *                                 for which a cancellation should be done.
- * Param-Name[in/out]  None
- * Param-Name[out]     None
- * Return              E_NOT_OK: Cancel Transmit request has not been accepted.
- *
- */
-/******************************************************************************/
-extern FUNC(Std_ReturnType, LINIF_CODE) LinIf_CancelTransmit(PduIdType LinTxPduId);
-#endif
+extern void LinIf_ChannelMainFunction(NetworkHandleType ch);
 
 #if (LINIF_WAKEUP_SUPPORT == STD_ON)
 /******************************************************************************/
@@ -406,6 +389,7 @@ LinIf_GetPIDTable(
     /* PRQA S 3673 ++ */ /* MISRA Rule 8.13 */
     P2VAR(uint8, AUTOMATIC, LINIF_APPL_DATA) PidBufferLength);
 /* PRQA S 3673 -- */ /* MISRA Rule 8.13 */
+
 /******************************************************************************/
 /*
  * Brief               Sets all assigned PID values. The order is congruent to
@@ -426,6 +410,7 @@ LinIf_GetPIDTable(
  *                               production error occurred.
  */
 /******************************************************************************/
+/* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
 FUNC(Std_ReturnType, LINIF_CODE)
 LinIf_SetPIDTable(
     NetworkHandleType Channel,
@@ -433,6 +418,7 @@ LinIf_SetPIDTable(
     P2VAR(Lin_FramePidType, AUTOMATIC, LINIF_APPL_DATA) PidBuffer,
     /* PRQA S 3673 -- */ /* MISRA Rule 8.13 */
     uint8 PidBufferLength);
+/* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
 /******************************************************************************/
 /*
  * Brief               Reports the current configured NAD.
@@ -449,7 +435,9 @@ LinIf_SetPIDTable(
  */
 /******************************************************************************/
 FUNC(Std_ReturnType, LINIF_CODE)
+/* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
 LinIf_GetConfiguredNAD(NetworkHandleType Channel, P2VAR(uint8, AUTOMATIC, LINIF_APPL_DATA) Nad);
+/* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
 
 /******************************************************************************/
 /*
@@ -469,6 +457,6 @@ LinIf_GetConfiguredNAD(NetworkHandleType Channel, P2VAR(uint8, AUTOMATIC, LINIF_
 /******************************************************************************/
 FUNC(Std_ReturnType, LINIF_CODE) LinIf_SetConfiguredNAD(NetworkHandleType Channel, uint8 Nad);
 
-#endif /* STD_ON == LINIF_SLAVE_SUPPORT */
+#endif
 
-#endif /* ifndef LINIF_H */
+#endif

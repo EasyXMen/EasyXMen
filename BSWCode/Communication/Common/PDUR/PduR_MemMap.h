@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : PduR_MemMap.h                                               **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : <Auto generated>                                            **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Memory mapping abstraction declaration of PduR              **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                       **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : PduR_MemMap.h                                               **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : <Auto generated>                                            **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Memory mapping abstraction declaration of PduR              **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                       **
+**                                                                            **
+*******************************************************************************/
 /*******************************************************************************
 **                      Revision Control History                              **
 *******************************************************************************/
@@ -57,7 +58,7 @@
 /* PRQA S 0883,0791++ */ /* MISAR Dir-4.10,Rule-5.4 */
 #define MEMMAP_ERROR
 
-/* Total section items: 18 */
+/* Total section items: 23 */
 #if defined(START_WITH_IF)
 #undef MEMMAP_ERROR
 
@@ -186,7 +187,82 @@
 #endif
 #define STOP_SEC_CALLBACK_CODE
 
-/*Index:5  Section name :PBCONFIG_DATA_16*/
+/*Index:5  Section name :CONFIG_DATA_16*/
+#elif defined PDUR_START_SEC_CONFIG_DATA_16
+#undef PDUR_START_SEC_CONFIG_DATA_16
+#undef MEMMAP_ERROR
+#ifndef MEMMAP_ERROR_SEC_NO_MATCH
+#define MEMMAP_ERROR_SEC_NO_MATCH
+#else
+#error "PduR_MemMap.h, section is used consecutively many times."
+#endif
+#define PDUR_START_SEC_CONFIG_DATA_16_NO_MATCH
+#define START_SEC_CONFIG_DATA_16
+
+#elif defined PDUR_STOP_SEC_CONFIG_DATA_16
+#undef PDUR_STOP_SEC_CONFIG_DATA_16
+#undef MEMMAP_ERROR
+#ifdef PDUR_START_SEC_CONFIG_DATA_16_NO_MATCH
+#undef PDUR_START_SEC_CONFIG_DATA_16_NO_MATCH
+#else
+#error "PduR_MemMap.h, no matching section was used."
+#endif
+#ifdef MEMMAP_ERROR_SEC_NO_MATCH
+#undef MEMMAP_ERROR_SEC_NO_MATCH
+#endif
+#define STOP_SEC_CONFIG_DATA_16
+
+/*Index:6  Section name :CONFIG_DATA_UNSPECIFIED*/
+#elif defined PDUR_START_SEC_CONFIG_DATA_UNSPECIFIED
+#undef PDUR_START_SEC_CONFIG_DATA_UNSPECIFIED
+#undef MEMMAP_ERROR
+#ifndef MEMMAP_ERROR_SEC_NO_MATCH
+#define MEMMAP_ERROR_SEC_NO_MATCH
+#else
+#error "PduR_MemMap.h, section is used consecutively many times."
+#endif
+#define PDUR_START_SEC_CONFIG_DATA_UNSPECIFIED_NO_MATCH
+#define START_SEC_CONFIG_DATA_UNSPECIFIED
+
+#elif defined PDUR_STOP_SEC_CONFIG_DATA_UNSPECIFIED
+#undef PDUR_STOP_SEC_CONFIG_DATA_UNSPECIFIED
+#undef MEMMAP_ERROR
+#ifdef PDUR_START_SEC_CONFIG_DATA_UNSPECIFIED_NO_MATCH
+#undef PDUR_START_SEC_CONFIG_DATA_UNSPECIFIED_NO_MATCH
+#else
+#error "PduR_MemMap.h, no matching section was used."
+#endif
+#ifdef MEMMAP_ERROR_SEC_NO_MATCH
+#undef MEMMAP_ERROR_SEC_NO_MATCH
+#endif
+#define STOP_SEC_CONFIG_DATA_UNSPECIFIED
+
+/*Index:7  Section name :PBCONFIG_DATA_8*/
+#elif defined PDUR_START_SEC_PBCONFIG_DATA_8
+#undef PDUR_START_SEC_PBCONFIG_DATA_8
+#undef MEMMAP_ERROR
+#ifndef MEMMAP_ERROR_SEC_NO_MATCH
+#define MEMMAP_ERROR_SEC_NO_MATCH
+#else
+#error "PduR_MemMap.h, section is used consecutively many times."
+#endif
+#define PDUR_START_SEC_PBCONFIG_DATA_8_NO_MATCH
+#define START_SEC_PBCONFIG_DATA_8
+
+#elif defined PDUR_STOP_SEC_PBCONFIG_DATA_8
+#undef PDUR_STOP_SEC_PBCONFIG_DATA_8
+#undef MEMMAP_ERROR
+#ifdef PDUR_START_SEC_PBCONFIG_DATA_8_NO_MATCH
+#undef PDUR_START_SEC_PBCONFIG_DATA_8_NO_MATCH
+#else
+#error "PduR_MemMap.h, no matching section was used."
+#endif
+#ifdef MEMMAP_ERROR_SEC_NO_MATCH
+#undef MEMMAP_ERROR_SEC_NO_MATCH
+#endif
+#define STOP_SEC_PBCONFIG_DATA_8
+
+/*Index:8  Section name :PBCONFIG_DATA_16*/
 #elif defined PDUR_START_SEC_PBCONFIG_DATA_16
 #undef PDUR_START_SEC_PBCONFIG_DATA_16
 #undef MEMMAP_ERROR
@@ -211,7 +287,7 @@
 #endif
 #define STOP_SEC_PBCONFIG_DATA_16
 
-/*Index:6  Section name :PBCONFIG_DATA_UNSPECIFIED*/
+/*Index:9  Section name :PBCONFIG_DATA_UNSPECIFIED*/
 #elif defined PDUR_START_SEC_PBCONFIG_DATA_UNSPECIFIED
 #undef PDUR_START_SEC_PBCONFIG_DATA_UNSPECIFIED
 #undef MEMMAP_ERROR
@@ -236,7 +312,7 @@
 #endif
 #define STOP_SEC_PBCONFIG_DATA_UNSPECIFIED
 
-/*Index:7  Section name :TPCOPYRXDATA_CALLBACK_CODE*/
+/*Index:10  Section name :TPCOPYRXDATA_CALLBACK_CODE*/
 #elif defined PDUR_START_SEC_TPCOPYRXDATA_CALLBACK_CODE
 #undef PDUR_START_SEC_TPCOPYRXDATA_CALLBACK_CODE
 #undef MEMMAP_ERROR
@@ -261,7 +337,7 @@
 #endif
 #define STOP_SEC_CALLBACK_CODE
 
-/*Index:8  Section name :TPCOPYTXDATA_CALLBACK_CODE*/
+/*Index:11  Section name :TPCOPYTXDATA_CALLBACK_CODE*/
 #elif defined PDUR_START_SEC_TPCOPYTXDATA_CALLBACK_CODE
 #undef PDUR_START_SEC_TPCOPYTXDATA_CALLBACK_CODE
 #undef MEMMAP_ERROR
@@ -286,7 +362,7 @@
 #endif
 #define STOP_SEC_CALLBACK_CODE
 
-/*Index:9  Section name :TPRXINDICATION_CALLBACK_CODE*/
+/*Index:12  Section name :TPRXINDICATION_CALLBACK_CODE*/
 #elif defined PDUR_START_SEC_TPRXINDICATION_CALLBACK_CODE
 #undef PDUR_START_SEC_TPRXINDICATION_CALLBACK_CODE
 #undef MEMMAP_ERROR
@@ -311,7 +387,7 @@
 #endif
 #define STOP_SEC_CALLBACK_CODE
 
-/*Index:10  Section name :TPSTARTOFRECEPTION_CALLBACK_CODE*/
+/*Index:13  Section name :TPSTARTOFRECEPTION_CALLBACK_CODE*/
 #elif defined PDUR_START_SEC_TPSTARTOFRECEPTION_CALLBACK_CODE
 #undef PDUR_START_SEC_TPSTARTOFRECEPTION_CALLBACK_CODE
 #undef MEMMAP_ERROR
@@ -336,7 +412,7 @@
 #endif
 #define STOP_SEC_CALLBACK_CODE
 
-/*Index:11  Section name :TPTXCONFIRMATION_CALLBACK_CODE*/
+/*Index:14  Section name :TPTXCONFIRMATION_CALLBACK_CODE*/
 #elif defined PDUR_START_SEC_TPTXCONFIRMATION_CALLBACK_CODE
 #undef PDUR_START_SEC_TPTXCONFIRMATION_CALLBACK_CODE
 #undef MEMMAP_ERROR
@@ -361,7 +437,7 @@
 #endif
 #define STOP_SEC_CALLBACK_CODE
 
-/*Index:12  Section name :VAR_INIT_8*/
+/*Index:15  Section name :VAR_INIT_8*/
 #elif defined PDUR_START_SEC_VAR_INIT_8
 #undef PDUR_START_SEC_VAR_INIT_8
 #undef MEMMAP_ERROR
@@ -386,7 +462,7 @@
 #endif
 #define STOP_SEC_VAR_INIT_8
 
-/*Index:13  Section name :VAR_INIT_PTR*/
+/*Index:16  Section name :VAR_INIT_PTR*/
 #elif defined PDUR_START_SEC_VAR_INIT_PTR
 #undef PDUR_START_SEC_VAR_INIT_PTR
 #undef MEMMAP_ERROR
@@ -411,7 +487,7 @@
 #endif
 #define STOP_SEC_VAR_INIT_PTR
 
-/*Index:14  Section name :VAR_INIT_UNSPECIFIED*/
+/*Index:17  Section name :VAR_INIT_UNSPECIFIED*/
 #elif defined PDUR_START_SEC_VAR_INIT_UNSPECIFIED
 #undef PDUR_START_SEC_VAR_INIT_UNSPECIFIED
 #undef MEMMAP_ERROR
@@ -436,7 +512,7 @@
 #endif
 #define STOP_SEC_VAR_INIT_UNSPECIFIED
 
-/*Index:15  Section name :VAR_NO_INIT_8*/
+/*Index:18  Section name :VAR_NO_INIT_8*/
 #elif defined PDUR_START_SEC_VAR_NO_INIT_8
 #undef PDUR_START_SEC_VAR_NO_INIT_8
 #undef MEMMAP_ERROR
@@ -461,7 +537,7 @@
 #endif
 #define STOP_SEC_VAR_NO_INIT_8
 
-/*Index:16  Section name :VAR_NO_INIT_BOOLEAN*/
+/*Index:19  Section name :VAR_NO_INIT_BOOLEAN*/
 #elif defined PDUR_START_SEC_VAR_NO_INIT_BOOLEAN
 #undef PDUR_START_SEC_VAR_NO_INIT_BOOLEAN
 #undef MEMMAP_ERROR
@@ -486,7 +562,7 @@
 #endif
 #define STOP_SEC_VAR_NO_INIT_BOOLEAN
 
-/*Index:17  Section name :VAR_NO_INIT_UNSPECIFIED*/
+/*Index:20  Section name :VAR_NO_INIT_UNSPECIFIED*/
 #elif defined PDUR_START_SEC_VAR_NO_INIT_UNSPECIFIED
 #undef PDUR_START_SEC_VAR_NO_INIT_UNSPECIFIED
 #undef MEMMAP_ERROR
@@ -510,6 +586,81 @@
 #undef MEMMAP_ERROR_SEC_NO_MATCH
 #endif
 #define STOP_SEC_VAR_NO_INIT_UNSPECIFIED
+
+/*Index:21  Section name :VAR_CLEARED_8*/
+#elif defined PDUR_START_SEC_VAR_CLEARED_8
+#undef PDUR_START_SEC_VAR_CLEARED_8
+#undef MEMMAP_ERROR
+#ifndef MEMMAP_ERROR_SEC_NO_MATCH
+#define MEMMAP_ERROR_SEC_NO_MATCH
+#else
+#error "PduR_MemMap.h, section is used consecutively many times."
+#endif
+#define PDUR_START_SEC_VAR_CLEARED_8_NO_MATCH
+#define START_SEC_VAR_CLEARED_8
+
+#elif defined PDUR_STOP_SEC_VAR_CLEARED_8
+#undef PDUR_STOP_SEC_VAR_CLEARED_8
+#undef MEMMAP_ERROR
+#ifdef PDUR_START_SEC_VAR_CLEARED_8_NO_MATCH
+#undef PDUR_START_SEC_VAR_CLEARED_8_NO_MATCH
+#else
+#error "PduR_MemMap.h, no matching section was used."
+#endif
+#ifdef MEMMAP_ERROR_SEC_NO_MATCH
+#undef MEMMAP_ERROR_SEC_NO_MATCH
+#endif
+#define STOP_SEC_VAR_CLEARED_8
+
+/*Index:22  Section name :VAR_CLEARED_BOOLEAN*/
+#elif defined PDUR_START_SEC_VAR_CLEARED_BOOLEAN
+#undef PDUR_START_SEC_VAR_CLEARED_BOOLEAN
+#undef MEMMAP_ERROR
+#ifndef MEMMAP_ERROR_SEC_NO_MATCH
+#define MEMMAP_ERROR_SEC_NO_MATCH
+#else
+#error "PduR_MemMap.h, section is used consecutively many times."
+#endif
+#define PDUR_START_SEC_VAR_CLEARED_BOOLEAN_NO_MATCH
+#define START_SEC_VAR_CLEARED_BOOLEAN
+
+#elif defined PDUR_STOP_SEC_VAR_CLEARED_BOOLEAN
+#undef PDUR_STOP_SEC_VAR_CLEARED_BOOLEAN
+#undef MEMMAP_ERROR
+#ifdef PDUR_START_SEC_VAR_CLEARED_BOOLEAN_NO_MATCH
+#undef PDUR_START_SEC_VAR_CLEARED_BOOLEAN_NO_MATCH
+#else
+#error "PduR_MemMap.h, no matching section was used."
+#endif
+#ifdef MEMMAP_ERROR_SEC_NO_MATCH
+#undef MEMMAP_ERROR_SEC_NO_MATCH
+#endif
+#define STOP_SEC_VAR_CLEARED_BOOLEAN
+
+/*Index:22  Section name :VAR_CLEARED_PTR*/
+#elif defined PDUR_START_SEC_VAR_CLEARED_PTR
+#undef PDUR_START_SEC_VAR_CLEARED_PTR
+#undef MEMMAP_ERROR
+#ifndef MEMMAP_ERROR_SEC_NO_MATCH
+#define MEMMAP_ERROR_SEC_NO_MATCH
+#else
+#error "PduR_MemMap.h, section is used consecutively many times."
+#endif
+#define PDUR_START_SEC_VAR_CLEARED_PTR_NO_MATCH
+#define START_SEC_VAR_CLEARED_PTR
+
+#elif defined PDUR_STOP_SEC_VAR_CLEARED_PTR
+#undef PDUR_STOP_SEC_VAR_CLEARED_PTR
+#undef MEMMAP_ERROR
+#ifdef PDUR_START_SEC_VAR_CLEARED_PTR_NO_MATCH
+#undef PDUR_START_SEC_VAR_CLEARED_PTR_NO_MATCH
+#else
+#error "PduR_MemMap.h, no matching section was used."
+#endif
+#ifdef MEMMAP_ERROR_SEC_NO_MATCH
+#undef MEMMAP_ERROR_SEC_NO_MATCH
+#endif
+#define STOP_SEC_VAR_CLEARED_PTR
 
 #endif /* START_WITH_IF */
 

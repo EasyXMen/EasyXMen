@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Bfx_Version.c                                               **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : stanleyluo                                                  **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Implementation for get version information                  **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                       **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Bfx_Version.c                                               **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : stanleyluo                                                  **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Implementation for get version information                  **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                       **
+**                                                                            **
+*******************************************************************************/
 
 /*******************************************************************************
 **                      Includes                                              **

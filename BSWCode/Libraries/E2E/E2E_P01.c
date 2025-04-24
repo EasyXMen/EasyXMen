@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : E2E_P01.c                                                   **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : YangBo                                                      **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : E2E_P01.c                                                   **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : YangBo                                                      **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 /*******************************************************************************
 **                      Revision Control History                              **
 *******************************************************************************/
@@ -41,7 +42,6 @@
  * V2.0.2 [2021/5/11] [wanglili]
  *    1.In the nibble mode in E2E_P01Check, the logic change of the comparison
  *    between ReceivedDataIDNibble and the configured dataid
- * V2.0.3 [2024/03/11] [darren] QAC Fixed
  */
 /*******************************************************************************
 **                      Include Section                                       **
@@ -61,8 +61,6 @@
 **                      Private Macro Definitions                             **
 *******************************************************************************/
 #define E2E_P01_MAX_COUNTER_VALUE 14u
-
-#define E2E_P01_Min(a, b)         (((a) <= (b)) ? (a) : (b)) /* PRQA S 3472 */ /* MISRA Dir-4.9 */
 /*******************************************************************************
 **                      Private Type Definitions                              **
 *******************************************************************************/
@@ -70,7 +68,7 @@
 /*******************************************************************************
 **                      Private Function Declarations                         **
 *******************************************************************************/
-/* PRQA S 3432,0488,4491 ++ */ /* MISRA Rule 20.7,Rule 18.4, Rule 10.6 */
+/* PRQA S 3432,0488,4491,1503,1505 ++ */ /* MISRA Rule 20.7,Rule 18.4, Rule 10.6 ,Rule 8.7,Rule 2.1*/
 #define E2E_START_SEC_CODE
 #include "E2E_MemMap.h"
 static FUNC(Std_ReturnType, E2E_CODE)
@@ -260,9 +258,7 @@ E2E_P01Check(
         uint8 ReceivedCRC;
         uint8 ReceivedDataIDNibble;
         uint8 CalculatedCRC;
-        /* PRQA S 3469++ */ /* MISRA Dir-4.9 */
         State->MaxDeltaCounter = E2E_P01_Min(((State->MaxDeltaCounter) + 1u), (14u));
-        /* PRQA S 3469-- */ /* MISRA Dir-4.9 */
 
         if (TRUE == State->NewDataAvailable)
         {
@@ -399,39 +395,62 @@ E2E_P01MapStatusToSM(Std_ReturnType CheckReturn, E2E_P01CheckStatusType Status, 
     {
         Ret = E2E_P_ERROR;
     }
-    else
+    /*@SWS_E2E_00383*/
+    else if ((boolean)1 == ProfileBehavior)
     {
-        /*@SWS_E2E_00383 SWS_E2E_00476*/
-        if ((Status == E2E_P01STATUS_OK) || (Status == E2E_P01STATUS_OKSOMELOST)
-            || (ProfileBehavior && (Status == E2E_P01STATUS_SYNC))
-            || ((ProfileBehavior == FALSE) && (Status == E2E_P01STATUS_INITIAL)))
+        switch (Status)
         {
+        case E2E_P01STATUS_OK:
+        case E2E_P01STATUS_OKSOMELOST:
+        case E2E_P01STATUS_SYNC:
             Ret = E2E_P_OK;
-        }
-        else if (Status == E2E_P01STATUS_REPEATED)
-        {
+            break;
+        case E2E_P01STATUS_WRONGCRC:
+            Ret = E2E_P_ERROR;
+            break;
+        case E2E_P01STATUS_REPEATED:
             Ret = E2E_P_REPEATED;
-        }
-        else if (Status == E2E_P01STATUS_WRONGCRC)
-        {
-            Ret = E2E_P_ERROR;
-        }
-        else if (
-            (Status == E2E_P01STATUS_WRONGSEQUENCE) || (ProfileBehavior && (Status == E2E_P01STATUS_INITIAL))
-            || ((ProfileBehavior == FALSE) && (Status == E2E_P01STATUS_SYNC)))
-        {
-            Ret = E2E_P_WRONGSEQUENCE;
-        }
-        else if (Status == E2E_P01STATUS_NONEWDATA)
-        {
+            break;
+        case E2E_P01STATUS_NONEWDATA:
             Ret = E2E_P_NONEWDATA;
-        }
-        else
-        {
+            break;
+        case E2E_P01STATUS_WRONGSEQUENCE:
+        case E2E_P01STATUS_INITIAL:
+            Ret = E2E_P_WRONGSEQUENCE;
+            break;
+        default:
             Ret = E2E_P_ERROR;
+            break;
         }
     }
-
+    /*@SWS_E2E_00476*/
+    else
+    {
+        switch (Status)
+        {
+        case E2E_P01STATUS_OK:
+        case E2E_P01STATUS_OKSOMELOST:
+        case E2E_P01STATUS_INITIAL:
+            Ret = E2E_P_OK;
+            break;
+        case E2E_P01STATUS_WRONGCRC:
+            Ret = E2E_P_ERROR;
+            break;
+        case E2E_P01STATUS_REPEATED:
+            Ret = E2E_P_REPEATED;
+            break;
+        case E2E_P01STATUS_NONEWDATA:
+            Ret = E2E_P_NONEWDATA;
+            break;
+        case E2E_P01STATUS_WRONGSEQUENCE:
+        case E2E_P01STATUS_SYNC:
+            Ret = E2E_P_WRONGSEQUENCE;
+            break;
+        default:
+            Ret = E2E_P_ERROR;
+            break;
+        }
+    }
     return Ret;
 }
 #define E2E_STOP_SEC_CODE
@@ -704,5 +723,6 @@ static void E2E_P01Check_Seqence(
         State->Status = E2E_P01STATUS_WRONGSEQUENCE;
     }
 }
+/* PRQA S 3432,0488,4491,1503,1505 -- */ /* MISRA Rule 20.7,Rule 18.4, Rule 10.6 ,Rule 8.7,Rule 2.1*/
 #define E2E_STOP_SEC_CODE
 #include "E2E_MemMap.h"

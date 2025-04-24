@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : BswM_Dcm.c                                                  **
- **                                                                            **
- **  Created on  : 2020-03-24                                                  **
- **  Author      : qinchun.yang                                                **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : BswM_Dcm.c                                                  **
+**                                                                            **
+**  Created on  : 2020-03-24                                                  **
+**  Author      : qinchun.yang                                                **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 
 /*******************************************************************************
 **                      Include Section                                       **
@@ -69,7 +70,6 @@ BswM_InitDcmRequestPorts(void)
 {
     P2CONST(BswM_ModeRqstPortPCCfgType, AUTOMATIC, BSWM_CONST) modeRqstPCfgPtr;
     P2CONST(BswM_ModeRqstPortRuntimeType, AUTOMATIC, BSWM_VAR_CLEARED) modeRqstPtr;
-    P2CONST(BswM_PartitionPCCfgType, TYPEDEF, BSWM_CONST) bswmPartPCCfgs;
     NetworkHandleType numOfDcmCh;
     NetworkHandleType idx;
     ApplicationType partIdx;
@@ -78,9 +78,8 @@ BswM_InitDcmRequestPorts(void)
     result = BswM_GetPartitionIdx(&partIdx);
     if ((boolean)TRUE == result)
     {
-        bswmPartPCCfgs = &(BswM_RuntimeStatus.bswmPartPCCfgs[partIdx]);
-        modeRqstPCfgPtr = bswmPartPCCfgs->modeRqstPCCfg;
-        modeRqstPtr = bswmPartPCCfgs->modeRqstPortRunPtr;
+        modeRqstPCfgPtr = BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].modeRqstPCCfg;
+        modeRqstPtr = BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].modeRqstPortRunPtr;
         numOfDcmCh = modeRqstPCfgPtr->numOfDcmComModeReq;
         for (idx = 0u; idx < numOfDcmCh; idx++)
         {
@@ -99,7 +98,7 @@ BswM_InitDcmRequestPorts(void)
     {
         (void)Det_ReportError(BSWM_MODULE_ID, BSWM_INSTANCE_ID, BSWM_API_ID_INIT, BSWM_E_INIT_FAILED);
     }
-#endif /* BSWM_DEV_ERROR_DETECT == STD_ON */
+#endif /*BSWM_DEV_ERROR_DETECT == STD_ON*/
 }
 
 /**
@@ -121,8 +120,6 @@ BswM_Dcm_ApplicationUpdated(void)
     P2VAR(BswM_EventRquestPortRuntimeType, AUTOMATIC, BSWM_VAR_CLEARED) evRqstPtr;
     /* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
     P2CONST(BswM_RuleLcCfgType, AUTOMATIC, BSWM_CONST) ruleLCfgPtr;
-    P2CONST(BswM_PartitionPCCfgType, TYPEDEF, BSWM_CONST) bswmPartPCCfgs;
-    P2CONST(BswM_PartitionLCfgType, TYPEDEF, BSWM_CONST) bswmPartLCfgs;
     BswM_RuleIndexType numOfRules;
     BswM_RuleIndexType idx;
     BswM_RuleIndexType ruleIdx;
@@ -132,21 +129,19 @@ BswM_Dcm_ApplicationUpdated(void)
 
 #if (BSWM_DEV_ERROR_DETECT == STD_ON)
     if ((Std_ReturnType)E_OK == BswM_DetChkDcmUpdate())
-#endif /* BSWM_DEV_ERROR_DETECT == STD_ON */
+#endif /*BSWM_DEV_ERROR_DETECT == STD_ON*/
     {
         result = BswM_GetPartitionIdx(&partIdx);
         if ((boolean)TRUE == result)
         {
-            bswmPartPCCfgs = &(BswM_RuntimeStatus.bswmPartPCCfgs[partIdx]);
-            bswmPartLCfgs = &(BswM_RuntimeStatus.bswmPartLCfgs[partIdx]);
-            evRqstPtr = bswmPartPCCfgs->eventRqstPortRunPtr;
-            evIdx = *(bswmPartPCCfgs->evRqstPCCfg->dcmAppUpdateIndIdxPtr);
+            evRqstPtr = BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].eventRqstPortRunPtr;
+            evIdx = *(BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].evRqstPCCfg->dcmAppUpdateIndIdxPtr);
             evRqstPtr[evIdx] = BSWM_EVENT_IS_SET;
-            evRqstLCfgPtr = bswmPartLCfgs->evRqstLCfg;
+            evRqstLCfgPtr = BswM_RuntimeStatus.bswmPartLCfgs[partIdx].evRqstLCfg;
             if (BSWM_IMMEDIATE == evRqstLCfgPtr->dcmAppUpdate->process)
             {
                 numOfRules = evRqstLCfgPtr->dcmAppUpdate->belongToRlueNum;
-                ruleLCfgPtr = bswmPartLCfgs->ruleLCfg;
+                ruleLCfgPtr = BswM_RuntimeStatus.bswmPartLCfgs[partIdx].ruleLCfg;
                 for (idx = 0u; idx < numOfRules; idx++)
                 {
                     ruleIdx = evRqstLCfgPtr->dcmAppUpdate->belongToRlue[idx];
@@ -159,7 +154,7 @@ BswM_Dcm_ApplicationUpdated(void)
             }
         }
     }
-#endif /* BSWM_EVENT_RQSTPORT_ENABLE == STD_ON */
+#endif /*BSWM_EVENT_RQSTPORT_ENABLE == STD_ON*/
 }
 
 /**
@@ -182,8 +177,6 @@ BswM_Dcm_CommunicationMode_CurrentState(NetworkHandleType Network, Dcm_Communica
     P2CONST(BswM_ModeRqstPortLCfgType, AUTOMATIC, BSWM_CONST) modeRqstLCfgPtr;
     P2CONST(BswM_ModeRqstPortRuntimeType, AUTOMATIC, BSWM_VAR_CLEARED) modeRqstPtr;
     P2CONST(BswM_RuleLcCfgType, AUTOMATIC, BSWM_CONST) ruleLCfgPtr;
-    P2CONST(BswM_PartitionPCCfgType, TYPEDEF, BSWM_CONST) bswmPartPCCfgs;
-    P2CONST(BswM_PartitionLCfgType, TYPEDEF, BSWM_CONST) bswmPartLCfgs;
     BswM_RuleIndexType numOfRules;
     BswM_RuleIndexType idx;
     BswM_RuleIndexType ruleIdx;
@@ -194,26 +187,24 @@ BswM_Dcm_CommunicationMode_CurrentState(NetworkHandleType Network, Dcm_Communica
 
 #if (BSWM_DEV_ERROR_DETECT == STD_ON)
     if ((Std_ReturnType)E_OK == BswM_DetChkDcmModeCurState(RequestedMode))
-#endif /* BSWM_DEV_ERROR_DETECT == STD_ON */
+#endif /*BSWM_DEV_ERROR_DETECT == STD_ON*/
     {
         result = BswM_GetPartitionIdx(&partIdx);
         if ((boolean)TRUE == result)
         {
-            bswmPartPCCfgs = &(BswM_RuntimeStatus.bswmPartPCCfgs[partIdx]);
-            bswmPartLCfgs = &(BswM_RuntimeStatus.bswmPartLCfgs[partIdx]);
-            modeRqstPCfgPtr = bswmPartPCCfgs->modeRqstPCCfg;
-            modeRqstLCfgPtr = bswmPartLCfgs->modeRqstLCfg;
+            modeRqstPCfgPtr = BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].modeRqstPCCfg;
+            modeRqstLCfgPtr = BswM_RuntimeStatus.bswmPartLCfgs[partIdx].modeRqstLCfg;
             numOfDcmCh = modeRqstPCfgPtr->numOfDcmComModeReq;
             for (chIdx = 0u; chIdx < numOfDcmCh; chIdx++)
             {
                 if (Network == modeRqstLCfgPtr->dcmChRef[chIdx])
                 {
-                    modeRqstPtr = bswmPartPCCfgs->modeRqstPortRunPtr;
+                    modeRqstPtr = BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].modeRqstPortRunPtr;
                     modeRqstPtr->dcmComModeReqStatus[chIdx] = RequestedMode;
                     if (BSWM_IMMEDIATE == modeRqstLCfgPtr->dcmComModeRqst[chIdx].process)
                     {
                         numOfRules = modeRqstLCfgPtr->dcmComModeRqst[chIdx].belongToRlueNum;
-                        ruleLCfgPtr = bswmPartLCfgs->ruleLCfg;
+                        ruleLCfgPtr = BswM_RuntimeStatus.bswmPartLCfgs[partIdx].ruleLCfg;
                         for (idx = 0u; idx < numOfRules; idx++)
                         {
                             ruleIdx = modeRqstLCfgPtr->dcmComModeRqst[chIdx].belongToRlue[idx];
@@ -231,13 +222,12 @@ BswM_Dcm_CommunicationMode_CurrentState(NetworkHandleType Network, Dcm_Communica
     }
 }
 
-#if (BSWM_EVENT_RQSTPORT_ENABLE == STD_ON)
 /*Get BswM_Dcm_ApplicationUpdated status*/
 FUNC(BswM_EventRquestPortRuntimeType, BSWM_DCM_CODE)
 BswM_GetDcmAppUpdatedStatus(void)
 {
-    P2CONST(BswM_PartitionPCCfgType, TYPEDEF, BSWM_CONST) bswmPartPCCfgs;
     BswM_EventRquestPortRuntimeType dcmAppStatus = BSWM_INVALID_U8;
+#if (BSWM_EVENT_RQSTPORT_ENABLE == STD_ON)
     BswM_EventRqstPortIdxType evIdx;
     ApplicationType partIdx;
     boolean result;
@@ -245,13 +235,12 @@ BswM_GetDcmAppUpdatedStatus(void)
     result = BswM_GetPartitionIdx(&partIdx);
     if ((boolean)TRUE == result)
     {
-        bswmPartPCCfgs = &(BswM_RuntimeStatus.bswmPartPCCfgs[partIdx]);
-        evIdx = *(bswmPartPCCfgs->evRqstPCCfg->dcmAppUpdateIndIdxPtr);
-        dcmAppStatus = bswmPartPCCfgs->eventRqstPortRunPtr[evIdx];
+        evIdx = *(BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].evRqstPCCfg->dcmAppUpdateIndIdxPtr);
+        dcmAppStatus = BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].eventRqstPortRunPtr[evIdx];
     }
+#endif /*BSWM_EVENT_RQSTPORT_ENABLE == STD_ON*/
     return dcmAppStatus;
 }
-#endif /* BSWM_EVENT_RQSTPORT_ENABLE == STD_ON */
 
 /*Get BswM_Dcm_CommunicationMode_CurrentState status*/
 FUNC(Dcm_CommunicationModeType, BSWM_DCM_CODE)
@@ -274,4 +263,4 @@ BswM_GetDcmCurModeStatus(NetworkHandleType dcmChIdx)
 **                      Private Function Definitions                          **
 *******************************************************************************/
 
-#endif /* BSWM_DCM_ENABLED == STD_ON */
+#endif /*BSWM_DCM_ENABLED == STD_ON*/

@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : CanTrcv.c                                                   **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : Xinrun.Wang                                                 **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Public functions implementation by CanTrcv module           **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : CanTrcv.c                                                   **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : Xinrun.Wang                                                 **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Public functions implementation by CanTrcv module           **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 /*******************************************************************************
 **                      Revision Control History                              **
 *******************************************************************************/
@@ -40,9 +41,18 @@
  *  V2.0.1    20210408  Xinrun.Wang   Bugs Fixed
  *  V2.0.2    20230704  tong.zhao     Modify the conditions for CanTrcv_SetOpMode
  *                                    to call CanIf_ConfirmPnAvailability
- *  V2.0.3    20231123  tong.zhao     Code Execution Optimization.(JIRA: CPD-33590)
  *
  ******************************************************************************/
+
+/**
+  \page ISOFT_MISRA_Exceptions  MISRA-C:2012 Compliance Exceptions
+    ModeName:CanTrcv<br>
+  RuleSorce:puhua-rule.rcf 2.3.1
+
+    \li PRQA S 3432 MISRA Rule 20.7 .<br>
+    Reason:Function-like macros are used to allow more efficient code.
+
+ */
 
 /*******************************************************************************
 **                      Include Section                                       **
@@ -60,7 +70,7 @@
 #define CANTRCV_C_AR_PATCH_VERSION 0U
 #define CANTRCV_C_SW_MAJOR_VERSION 2U
 #define CANTRCV_C_SW_MINOR_VERSION 0U
-#define CANTRCV_C_SW_PATCH_VERSION 3U
+#define CANTRCV_C_SW_PATCH_VERSION 2U
 
 /*******************************************************************************
 **                       Version  Check                                       **
@@ -197,26 +207,27 @@ FUNC(void, CANTRCV_CODE) CanTrcv_Init(P2CONST(CanTrcv_ConfigType, AUTOMATIC, CAN
 #endif /* STD_ON == CANTRCV_DEV_ERROR_DETECT */
     {
         CanTrcv_ConfigPtr = ConfigPtr;
-        const CanTrcv_ChannelType* trcvChPtr = &CANTRCV_CHANNEL(0);
 
         /* initialize every channel */
-        for (index = 0u; index < CANTRCV_MAX_CHANNELS; index++)
+        for (index = 0; index < CANTRCV_MAX_CHANNELS; index++)
         {
-            if (trcvChPtr->CanTrcvChannelUsed)
+            if (TRUE == CANTRCV_CHANNEL(index).CanTrcvChannelUsed)
             {
                 /* initialize global variables */
                 CanTrcv_WakeupReason[index] = CANTRCV_WU_RESET;
                 CanTrcv_WakeupMode[index] = CANTRCV_WUMODE_ENABLE;
 #if (STD_ON == CANTRCV_HWPN_SUPPORT)
-                if (trcvChPtr->CanTrcvHwPnSupport)
+                if (TRUE == CANTRCV_CHANNEL(index).CanTrcvHwPnSupport)
                 {
                     CanTrcv_PNActivation = PN_ENABLED;
                 }
 #endif /* STD_ON == CANTRCV_HWPN_SUPPORT */
 
-                if ((NULL_PTR != trcvChPtr->CanTrcvPartialNetwork) && (trcvChPtr->CanTrcvHwPnSupport))
+                if ((NULL_PTR != CANTRCV_CHANNEL(index).CanTrcvPartialNetwork)
+                    && (TRUE == CANTRCV_CHANNEL(index).CanTrcvHwPnSupport))
                 {
-                    if (trcvChPtr->CanTrcvMaxBaudrate < trcvChPtr->CanTrcvPartialNetwork->CanTrcvBaudRate)
+                    if (CANTRCV_CHANNEL(index).CanTrcvMaxBaudrate
+                        < CANTRCV_CHANNEL(index).CanTrcvPartialNetwork->CanTrcvBaudRate)
                     {
 #if (STD_ON == CANTRCV_DEV_ERROR_DETECT)
                         CANTRCV_DET_REPORT(CANTRCV_INIT_ID, CANTRCV_E_BAUDRATE_NOT_SUPPORTED);
@@ -229,39 +240,40 @@ FUNC(void, CANTRCV_CODE) CanTrcv_Init(P2CONST(CanTrcv_ConfigType, AUTOMATIC, CAN
                 {
                     /* initialize CanTrcv driver */
                     result = CanTrcv_Driver_Init(index);
-                    if (E_OK == result)
-                    {
-                        result = CanTrcv_HandleWakeupEvents(index);
-                    }
+                }
+
+                if (E_OK == result)
+                {
+                    result = CanTrcv_HandleWakeupEvents(index);
                 }
 
 #if (STD_ON == CANTRCV_HWPN_SUPPORT)
 #if (STD_ON == CANTRCV_POWER_ON_FLAG)
-                if ((E_OK == result) && (trcvChPtr->CanTrcvHwPnSupport)
-                    && (NULL_PTR != trcvChPtr->CanTrcvPartialNetwork))
+                if ((E_OK == result) && (TRUE == CANTRCV_CHANNEL(index).CanTrcvHwPnSupport)
+                    && (NULL_PTR != CANTRCV_CHANNEL(index).CanTrcvPartialNetwork))
                 {
-                    if (trcvChPtr->CanTrcvPartialNetwork->CanTrcvPowerOnFlag)
+                    if (TRUE == CANTRCV_CHANNEL(index).CanTrcvPartialNetwork->CanTrcvPowerOnFlag)
                     {
                         result = CanTrcv_Driver_ReadStatus(index, CANTRCV_DRIVER_POR, &isPorSet);
 
                         if ((E_OK == result) && (CANTRCV_FLAG_SET == isPorSet)
-                            && (NULL_PTR != trcvChPtr->CanTrcvPorWakeupSourceRef))
+                            && (NULL_PTR != CANTRCV_CHANNEL(index).CanTrcvPorWakeupSourceRef))
                         {
                             CanTrcv_WakeupReason[index] = CANTRCV_WU_POWER_ON;
-                            EcuM_SetWakeupEvent(*(trcvChPtr->CanTrcvPorWakeupSourceRef));
+                            EcuM_SetWakeupEvent(*(CANTRCV_CHANNEL(index).CanTrcvPorWakeupSourceRef));
                             result = CanTrcv_Driver_PNWKSetup(index);
                             result += CanTrcv_Driver_ClearStatus(index, CANTRCV_DRIVER_POR);
                         }
                     }
-                    if ((E_OK == result) && (trcvChPtr->CanTrcvPartialNetwork->CanTrcvPowerOnFlag))
+                    if ((E_OK == result) && (TRUE == CANTRCV_CHANNEL(index).CanTrcvPartialNetwork->CanTrcvPowerOnFlag))
                     {
                         result = CanTrcv_Driver_ReadStatus(index, CANTRCV_DRIVER_SYSERR, &isSyserrSet);
 
                         if ((E_OK == result) && (CANTRCV_FLAG_SET == isSyserrSet)
-                            && (NULL_PTR != trcvChPtr->CanTrcvSyserrWakeupSourceRef))
+                            && (NULL_PTR != CANTRCV_CHANNEL(index).CanTrcvSyserrWakeupSourceRef))
                         {
                             CanTrcv_WakeupReason[index] = CANTRCV_WU_BY_SYSERR;
-                            EcuM_SetWakeupEvent(*(trcvChPtr->CanTrcvSyserrWakeupSourceRef));
+                            EcuM_SetWakeupEvent(*(CANTRCV_CHANNEL(index).CanTrcvSyserrWakeupSourceRef));
                         }
                     }
                 }
@@ -270,7 +282,7 @@ FUNC(void, CANTRCV_CODE) CanTrcv_Init(P2CONST(CanTrcv_ConfigType, AUTOMATIC, CAN
 
                 if (E_OK == result)
                 {
-                    result = CanTrcv_Driver_SetOpMode(index, trcvChPtr->CanTrcvInitState);
+                    result = CanTrcv_Driver_SetOpMode(index, CANTRCV_CHANNEL(index).CanTrcvInitState);
                 }
                 else
                 {
@@ -278,7 +290,6 @@ FUNC(void, CANTRCV_CODE) CanTrcv_Init(P2CONST(CanTrcv_ConfigType, AUTOMATIC, CAN
                     break;
                 }
             }
-            trcvChPtr++;
         }
 
         if (E_OK == result)
@@ -312,7 +323,6 @@ FUNC(Std_ReturnType, CANTRCV_CODE) CanTrcv_SetOpMode(uint8 Transceiver, CanTrcv_
     CanTrcv_TrcvModeType curOpMode;
     Std_ReturnType result = E_OK;
     boolean isDet = FALSE;
-    const CanTrcv_ChannelType* trcvChPtr = &CANTRCV_CHANNEL(Transceiver);
 #if (STD_ON == CANTRCV_HWPN_SUPPORT)
 #if (STD_ON == CANTRCV_POWER_ON_FLAG)
     CanTrcv_TrcvFlagStateType isPorSet;
@@ -324,7 +334,7 @@ FUNC(Std_ReturnType, CANTRCV_CODE) CanTrcv_SetOpMode(uint8 Transceiver, CanTrcv_
     result = CanTrcv_DetCheck(Transceiver, CANTRCV_SETOPMODE_ID);
 #endif /* (STD_ON == CANTRCV_DEV_ERROR_DETECT) */
 
-    if (!trcvChPtr->CanTrcvChannelUsed)
+    if (FALSE == CANTRCV_CHANNEL(Transceiver).CanTrcvChannelUsed)
     {
         result = E_NOT_OK;
     }
@@ -337,17 +347,6 @@ FUNC(Std_ReturnType, CANTRCV_CODE) CanTrcv_SetOpMode(uint8 Transceiver, CanTrcv_
         {
             switch (OpMode)
             {
-            case CANTRCV_TRCVMODE_NORMAL:
-                result = CanTrcv_Driver_SetNormalMode(Transceiver);
-                if (E_OK == result)
-                {
-                    CanTrcv_WakeupReason[Transceiver] = CANTRCV_WU_INTERNALLY;
-                    if (NULL_PTR != trcvChPtr->CanTrcvIcuChannelRef)
-                    {
-                        Icu_DisableNotification(*(trcvChPtr->CanTrcvIcuChannelRef));
-                    }
-                }
-                break;
             case CANTRCV_TRCVMODE_SLEEP:
                 /* check whether in normal state */
                 if (CANTRCV_TRCVMODE_NORMAL == curOpMode)
@@ -383,10 +382,21 @@ FUNC(Std_ReturnType, CANTRCV_CODE) CanTrcv_SetOpMode(uint8 Transceiver, CanTrcv_
                     if (E_OK == result)
                     {
                         CanTrcv_WakeupReason[Transceiver] = CANTRCV_WU_ERROR;
-                        if (NULL_PTR != trcvChPtr->CanTrcvIcuChannelRef)
+                        if (NULL_PTR != CANTRCV_CHANNEL(Transceiver).CanTrcvIcuChannelRef)
                         {
-                            Icu_EnableNotification(*(trcvChPtr->CanTrcvIcuChannelRef));
+                            Icu_EnableNotification(*(CANTRCV_CHANNEL(Transceiver).CanTrcvIcuChannelRef));
                         }
+                    }
+                }
+                break;
+            case CANTRCV_TRCVMODE_NORMAL:
+                result = CanTrcv_Driver_SetNormalMode(Transceiver);
+                if (E_OK == result)
+                {
+                    CanTrcv_WakeupReason[Transceiver] = CANTRCV_WU_INTERNALLY;
+                    if (NULL_PTR != CANTRCV_CHANNEL(Transceiver).CanTrcvIcuChannelRef)
+                    {
+                        Icu_DisableNotification(*(CANTRCV_CHANNEL(Transceiver).CanTrcvIcuChannelRef));
                     }
                 }
                 break;
@@ -403,13 +413,14 @@ FUNC(Std_ReturnType, CANTRCV_CODE) CanTrcv_SetOpMode(uint8 Transceiver, CanTrcv_
 
 #if (STD_ON == CANTRCV_HWPN_SUPPORT)
 #if (STD_ON == CANTRCV_POWER_ON_FLAG)
-        if ((trcvChPtr->CanTrcvHwPnSupport) && (NULL_PTR != trcvChPtr->CanTrcvPartialNetwork))
+        if ((TRUE == CANTRCV_CHANNEL(Transceiver).CanTrcvHwPnSupport)
+            && (NULL_PTR != CANTRCV_CHANNEL(Transceiver).CanTrcvPartialNetwork))
         {
-            if ((E_OK == result) && (trcvChPtr->CanTrcvPartialNetwork->CanTrcvPowerOnFlag))
+            if ((E_OK == result) && (TRUE == CANTRCV_CHANNEL(Transceiver).CanTrcvPartialNetwork->CanTrcvPowerOnFlag))
             {
                 result = CanTrcv_Driver_ReadStatus(Transceiver, CANTRCV_DRIVER_POR, &isPorSet);
             }
-            if ((E_OK == result) && (trcvChPtr->CanTrcvPartialNetwork->CanTrcvPowerOnFlag)
+            if ((E_OK == result) && (TRUE == CANTRCV_CHANNEL(Transceiver).CanTrcvPartialNetwork->CanTrcvPowerOnFlag)
                 && (CANTRCV_FLAG_SET == isPorSet))
             {
                 result = CanTrcv_Driver_PNWKSetup(Transceiver);
@@ -426,16 +437,17 @@ FUNC(Std_ReturnType, CANTRCV_CODE) CanTrcv_SetOpMode(uint8 Transceiver, CanTrcv_
             result = CanTrcv_Driver_ReadStatus(Transceiver, CANTRCV_DRIVER_SYSERR, &isSyserrSet);
         }
         if ((E_OK == result) && (CANTRCV_FLAG_CLEARED == isSyserrSet) && (CANTRCV_TRCVMODE_NORMAL == OpMode)
-            && (trcvChPtr->CanTrcvHwPnSupport) && (NULL_PTR != trcvChPtr->CanIfCanTrcvIdRef))
+            && (TRUE == CANTRCV_CHANNEL(Transceiver).CanTrcvHwPnSupport)
+            && (NULL_PTR != CANTRCV_CHANNEL(Transceiver).CanIfCanTrcvIdRef))
         {
-            CanIf_ConfirmPnAvailability(*(trcvChPtr->CanIfCanTrcvIdRef));
+            CanIf_ConfirmPnAvailability(*(CANTRCV_CHANNEL(Transceiver).CanIfCanTrcvIdRef));
         }
 #endif /* STD_ON == CANTRCV_HWPN_SUPPORT */
 
-        if ((E_OK == result) && (NULL_PTR != trcvChPtr->CanIfCanTrcvIdRef))
+        if ((E_OK == result) && (NULL_PTR != CANTRCV_CHANNEL(Transceiver).CanIfCanTrcvIdRef))
         {
             /* modify current opmode and notify CanIf */
-            CanIf_TrcvModeIndication(*(trcvChPtr->CanIfCanTrcvIdRef), OpMode);
+            CanIf_TrcvModeIndication(*(CANTRCV_CHANNEL(Transceiver).CanIfCanTrcvIdRef), OpMode);
         }
         else
         {
@@ -473,7 +485,7 @@ CanTrcv_GetOpMode(uint8 Transceiver, P2VAR(CanTrcv_TrcvModeType, AUTOMATIC, CANT
     result = CanTrcv_DetCheck(Transceiver, CANTRCV_GETOPMODE_ID);
 #endif /* (STD_ON == CANTRCV_DEV_ERROR_DETECT) */
 
-    if (!CANTRCV_CHANNEL(Transceiver).CanTrcvChannelUsed)
+    if (FALSE == CANTRCV_CHANNEL(Transceiver).CanTrcvChannelUsed)
     {
         result = E_NOT_OK;
     }
@@ -525,7 +537,7 @@ CanTrcv_GetBusWuReason(uint8 Transceiver, P2VAR(CanTrcv_TrcvWakeupReasonType, AU
     result = CanTrcv_DetCheck(Transceiver, CANTRCV_GETBUSWUREASON_ID);
 #endif /* (STD_ON == CANTRCV_DEV_ERROR_DETECT) */
 
-    if (!CANTRCV_CHANNEL(Transceiver).CanTrcvChannelUsed)
+    if (FALSE == CANTRCV_CHANNEL(Transceiver).CanTrcvChannelUsed)
     {
         result = E_NOT_OK;
     }
@@ -617,12 +629,12 @@ FUNC(Std_ReturnType, CANTRCV_CODE) CanTrcv_SetWakeupMode(uint8 Transceiver, CanT
     result = CanTrcv_DetCheck(Transceiver, CANTRCV_SETWAKEUPMODE_ID);
 #endif /* (STD_ON == CANTRCV_DEV_ERROR_DETECT) */
 
-    if (!CANTRCV_CHANNEL(Transceiver).CanTrcvChannelUsed)
+    if (FALSE == CANTRCV_CHANNEL(Transceiver).CanTrcvChannelUsed)
     {
         result = E_NOT_OK;
     }
 
-    if ((E_OK == result) && (CANTRCV_CHANNEL(Transceiver).CanTrcvWakeupByBusUsed))
+    if ((E_OK == result) && (TRUE == CANTRCV_CHANNEL(Transceiver).CanTrcvWakeupByBusUsed))
     {
         switch (TrcvWakeupMode)
         {
@@ -655,7 +667,7 @@ FUNC(Std_ReturnType, CANTRCV_CODE) CanTrcv_SetWakeupMode(uint8 Transceiver, CanT
             break;
         }
 
-        if ((E_OK != result) && (!isDet))
+        if ((E_OK != result) && (FALSE == isDet))
         {
             CANTRCV_DET_REPORT_RUNTIME(CANTRCV_SETWAKEUPMODE_ID, CANTRCV_E_NO_TRCV_CONTROL);
         }
@@ -685,13 +697,13 @@ FUNC(void, CANTRCV_CODE) CanTrcv_MainFunction(void)
     uint8 index;
     CanTrcv_TrcvModeType OpMode;
     Std_ReturnType result = E_OK;
-    const CanTrcv_ChannelType* trcvChPtr = &CANTRCV_CHANNEL(0);
 
     if (CANTRCV_ACTIVE == CanTrcv_State)
     {
         for (index = 0; index < CANTRCV_MAX_CHANNELS; index++)
         {
-            if ((E_OK == result) && (trcvChPtr->CanTrcvWakeupByBusUsed) && (trcvChPtr->CanTrcvChannelUsed))
+            if ((E_OK == result) && (TRUE == CANTRCV_CHANNEL(index).CanTrcvWakeupByBusUsed)
+                && (TRUE == CANTRCV_CHANNEL(index).CanTrcvChannelUsed))
             {
                 result = CanTrcv_Driver_GetOpMode(index, &OpMode);
                 if ((E_OK == result) && (CANTRCV_TRCVMODE_NORMAL != OpMode))
@@ -705,7 +717,6 @@ FUNC(void, CANTRCV_CODE) CanTrcv_MainFunction(void)
                     break;
                 }
             }
-            trcvChPtr++;
         }
     }
 }
@@ -735,7 +746,7 @@ FUNC(Std_ReturnType, CANTRCV_CODE) CanTrcv_CheckWakeup(uint8 Transceiver)
     result = CanTrcv_DetCheck(Transceiver, CANTRCV_CHECKWAKEUP_ID);
 #endif /* (STD_ON == CANTRCV_DEV_ERROR_DETECT) */
 
-    if (!CANTRCV_CHANNEL(Transceiver).CanTrcvChannelUsed)
+    if (FALSE == CANTRCV_CHANNEL(Transceiver).CanTrcvChannelUsed)
     {
         result = E_NOT_OK;
     }
@@ -774,7 +785,6 @@ FUNC(void, CANTRCV_CODE) CanTrcv_MainFunctionDiagnostics(void)
     uint8 index;
     Std_ReturnType result = E_OK;
     CanTrcv_TrcvFlagStateType flagState;
-    const CanTrcv_ChannelType* trcvChPtr = &CANTRCV_CHANNEL(0);
 
     for (index = 0; index < CANTRCV_MAX_CHANNELS; index++)
     {
@@ -783,9 +793,10 @@ FUNC(void, CANTRCV_CODE) CanTrcv_MainFunctionDiagnostics(void)
         if (E_OK == result)
 #endif /* STD_ON == CANTRCV_DEV_ERROR_DETECT */
         {
-            if ((trcvChPtr->CanTrcvChannelUsed) && (trcvChPtr->CanTrcvHwPnSupport)
-                && (NULL_PTR != trcvChPtr->CanTrcvPartialNetwork)
-                && (trcvChPtr->CanTrcvPartialNetwork->CanTrcvBusErrFlag))
+            if ((TRUE == CANTRCV_CHANNEL(index).CanTrcvChannelUsed)
+                && (TRUE == CANTRCV_CHANNEL(index).CanTrcvHwPnSupport)
+                && (NULL_PTR != CANTRCV_CHANNEL(index).CanTrcvPartialNetwork)
+                && (TRUE == CANTRCV_CHANNEL(index).CanTrcvPartialNetwork->CanTrcvBusErrFlag))
             {
                 result = CanTrcv_Driver_ReadStatus(index, CANTRCV_DRIVER_BUSERR, &flagState);
                 if (E_OK == result)
@@ -807,7 +818,6 @@ FUNC(void, CANTRCV_CODE) CanTrcv_MainFunctionDiagnostics(void)
                 }
             }
         }
-        trcvChPtr++;
     }
 }
 #define CANTRCV_STOP_SEC_CODE
@@ -833,14 +843,13 @@ FUNC(void, CANTRCV_CODE) CanTrcv_DeInit(void)
     uint8 index;
     Std_ReturnType result = E_OK;
     CanTrcv_TrcvModeType curOpMode;
-    const CanTrcv_ChannelType* trcvChPtr = &CANTRCV_CHANNEL(0);
 
     for (index = 0; index < CANTRCV_MAX_CHANNELS; index++)
     {
 #if (STD_ON == CANTRCV_DEV_ERROR_DETECT)
         result = CanTrcv_DetCheck(index, CANTRCV_DEINIT_ID);
 #endif /* STD_ON == CANTRCV_DEV_ERROR_DETECT */
-        if ((E_OK == result) && (trcvChPtr->CanTrcvChannelUsed))
+        if ((E_OK == result) && (TRUE == CANTRCV_CHANNEL(index).CanTrcvChannelUsed))
         {
             result = CanTrcv_Driver_GetOpMode(index, &curOpMode);
 
@@ -867,7 +876,6 @@ FUNC(void, CANTRCV_CODE) CanTrcv_DeInit(void)
         {
             break;
         }
-        trcvChPtr++;
     }
 
     if (E_OK == result)
@@ -899,19 +907,19 @@ FUNC(Std_ReturnType, CANTRCV_CODE)
 CanTrcv_GetTrcvSystemData(uint8 Transceiver, P2VAR(uint32, AUTOMATIC, CANTRCV_CONST) TrcvSysData)
 {
     Std_ReturnType result = E_OK;
-    const CanTrcv_ChannelType* trcvChPtr = &CANTRCV_CHANNEL(Transceiver);
 
 #if (STD_ON == CANTRCV_DEV_ERROR_DETECT)
     result = CanTrcv_DetCheck(Transceiver, CANTRCV_GETTRCVSYSTEMDATA_ID);
 #endif /* (STD_ON == CANTRCV_DEV_ERROR_DETECT) */
 
-    if (!trcvChPtr->CanTrcvChannelUsed)
+    if (FALSE == CANTRCV_CHANNEL(Transceiver).CanTrcvChannelUsed)
     {
         result = E_NOT_OK;
     }
 
-    if ((E_OK == result) && (PN_ENABLED == CanTrcv_PNActivation) && (trcvChPtr->CanTrcvWakeupByBusUsed)
-        && (trcvChPtr->CanTrcvHwPnSupport))
+    if ((E_OK == result) && (PN_ENABLED == CanTrcv_PNActivation)
+        && (TRUE == CANTRCV_CHANNEL(Transceiver).CanTrcvWakeupByBusUsed)
+        && (TRUE == CANTRCV_CHANNEL(Transceiver).CanTrcvHwPnSupport))
     {
 #if (STD_ON == CANTRCV_DEV_ERROR_DETECT)
         if (NULL_PTR == TrcvSysData)
@@ -952,19 +960,19 @@ CanTrcv_GetTrcvSystemData(uint8 Transceiver, P2VAR(uint32, AUTOMATIC, CANTRCV_CO
 FUNC(Std_ReturnType, CANTRCV_CODE) CanTrcv_ClearTrcvWufFlag(uint8 Transceiver)
 {
     Std_ReturnType result = E_OK;
-    const CanTrcv_ChannelType* trcvChPtr = &CANTRCV_CHANNEL(Transceiver);
 
 #if (STD_ON == CANTRCV_DEV_ERROR_DETECT)
     result = CanTrcv_DetCheck(Transceiver, CANTRCV_CLEARTRCVWUFFLAG_ID);
 #endif /* (STD_ON == CANTRCV_DEV_ERROR_DETECT) */
 
-    if (!trcvChPtr->CanTrcvChannelUsed)
+    if (FALSE == CANTRCV_CHANNEL(Transceiver).CanTrcvChannelUsed)
     {
         result = E_NOT_OK;
     }
 
-    if ((E_OK == result) && (PN_ENABLED == CanTrcv_PNActivation) && (trcvChPtr->CanTrcvWakeupByBusUsed)
-        && (trcvChPtr->CanTrcvHwPnSupport))
+    if ((E_OK == result) && (PN_ENABLED == CanTrcv_PNActivation)
+        && (TRUE == CANTRCV_CHANNEL(Transceiver).CanTrcvWakeupByBusUsed)
+        && (TRUE == CANTRCV_CHANNEL(Transceiver).CanTrcvHwPnSupport))
     {
 
         result = CanTrcv_Driver_ClearStatus(Transceiver, CANTRCV_DRIVER_WUF);
@@ -977,9 +985,9 @@ FUNC(Std_ReturnType, CANTRCV_CODE) CanTrcv_ClearTrcvWufFlag(uint8 Transceiver)
     {
         result = E_NOT_OK;
     }
-    if ((E_OK == result) && (NULL_PTR != trcvChPtr->CanIfCanTrcvIdRef))
+    if ((E_OK == result) && (NULL_PTR != CANTRCV_CHANNEL(Transceiver).CanIfCanTrcvIdRef))
     {
-        CanIf_ClearTrcvWufFlagIndication(*(trcvChPtr->CanIfCanTrcvIdRef));
+        CanIf_ClearTrcvWufFlagIndication(*(CANTRCV_CHANNEL(Transceiver).CanIfCanTrcvIdRef));
     }
     return result;
 }
@@ -1004,19 +1012,19 @@ FUNC(Std_ReturnType, CANTRCV_CODE)
 CanTrcv_ReadTrcvTimeoutFlag(uint8 Transceiver, P2VAR(CanTrcv_TrcvFlagStateType, AUTOMATIC, CANTRCV_APPL_DATA) FlagState)
 {
     Std_ReturnType result = E_OK;
-    const CanTrcv_ChannelType* trcvChPtr = &CANTRCV_CHANNEL(Transceiver);
 
 #if (STD_ON == CANTRCV_DEV_ERROR_DETECT)
     result = CanTrcv_DetCheck(Transceiver, CANTRCV_READTRCVTIMEOUTFLAG_ID);
 #endif /* (STD_ON == CANTRCV_DEV_ERROR_DETECT) */
 
-    if (!trcvChPtr->CanTrcvChannelUsed)
+    if (FALSE == CANTRCV_CHANNEL(Transceiver).CanTrcvChannelUsed)
     {
         result = E_NOT_OK;
     }
 
-    if ((E_OK == result) && (PN_ENABLED == CanTrcv_PNActivation) && (trcvChPtr->CanTrcvWakeupByBusUsed)
-        && (trcvChPtr->CanTrcvHwPnSupport))
+    if ((E_OK == result) && (PN_ENABLED == CanTrcv_PNActivation)
+        && (TRUE == CANTRCV_CHANNEL(Transceiver).CanTrcvWakeupByBusUsed)
+        && (TRUE == CANTRCV_CHANNEL(Transceiver).CanTrcvHwPnSupport))
     {
 #if (STD_ON == CANTRCV_DEV_ERROR_DETECT)
         if (NULL_PTR == FlagState)
@@ -1061,19 +1069,19 @@ CanTrcv_ReadTrcvTimeoutFlag(uint8 Transceiver, P2VAR(CanTrcv_TrcvFlagStateType, 
 FUNC(Std_ReturnType, CANTRCV_CODE) CanTrcv_ClearTrcvTimeoutFlag(uint8 Transceiver)
 {
     Std_ReturnType result = E_OK;
-    const CanTrcv_ChannelType* trcvChPtr = &CANTRCV_CHANNEL(Transceiver);
 
 #if (STD_ON == CANTRCV_DEV_ERROR_DETECT)
     result = CanTrcv_DetCheck(Transceiver, CANTRCV_CLEARTRCVTIMEOUTFLAG_ID);
 #endif /* (STD_ON == CANTRCV_DEV_ERROR_DETECT) */
 
-    if (!trcvChPtr->CanTrcvChannelUsed)
+    if (FALSE == CANTRCV_CHANNEL(Transceiver).CanTrcvChannelUsed)
     {
         result = E_NOT_OK;
     }
 
-    if ((E_OK == result) && (PN_ENABLED == CanTrcv_PNActivation) && (trcvChPtr->CanTrcvWakeupByBusUsed)
-        && (trcvChPtr->CanTrcvHwPnSupport))
+    if ((E_OK == result) && (PN_ENABLED == CanTrcv_PNActivation)
+        && (TRUE == CANTRCV_CHANNEL(Transceiver).CanTrcvWakeupByBusUsed)
+        && (TRUE == CANTRCV_CHANNEL(Transceiver).CanTrcvHwPnSupport))
     {
         result = CanTrcv_Driver_ClearStatus(Transceiver, CANTRCV_DRIVER_CANTO);
         if (E_OK != result)
@@ -1109,19 +1117,19 @@ FUNC(Std_ReturnType, CANTRCV_CODE)
 CanTrcv_ReadTrcvSilenceFlag(uint8 Transceiver, P2VAR(CanTrcv_TrcvFlagStateType, AUTOMATIC, CANTRCV_APPL_DATA) FlagState)
 {
     Std_ReturnType result = E_OK;
-    const CanTrcv_ChannelType* trcvChPtr = &CANTRCV_CHANNEL(Transceiver);
 
 #if (STD_ON == CANTRCV_DEV_ERROR_DETECT)
     result = CanTrcv_DetCheck(Transceiver, CANTRCV_READTRCVSILENCEFLAG_ID);
 #endif /* (STD_ON == CANTRCV_DEV_ERROR_DETECT) */
 
-    if (!trcvChPtr->CanTrcvChannelUsed)
+    if (FALSE == CANTRCV_CHANNEL(Transceiver).CanTrcvChannelUsed)
     {
         result = E_NOT_OK;
     }
 
-    if ((E_OK == result) && (PN_ENABLED == CanTrcv_PNActivation) && (trcvChPtr->CanTrcvWakeupByBusUsed)
-        && (trcvChPtr->CanTrcvHwPnSupport))
+    if ((E_OK == result) && (PN_ENABLED == CanTrcv_PNActivation)
+        && (TRUE == CANTRCV_CHANNEL(Transceiver).CanTrcvWakeupByBusUsed)
+        && (TRUE == CANTRCV_CHANNEL(Transceiver).CanTrcvHwPnSupport))
     {
 #if (STD_ON == CANTRCV_DEV_ERROR_DETECT)
         if (NULL_PTR == FlagState)
@@ -1166,13 +1174,12 @@ CanTrcv_ReadTrcvSilenceFlag(uint8 Transceiver, P2VAR(CanTrcv_TrcvFlagStateType, 
 FUNC(Std_ReturnType, CANTRCV_CODE) CanTrcv_CheckWakeFlag(uint8 Transceiver)
 {
     Std_ReturnType result = E_OK;
-    const CanTrcv_ChannelType* trcvChPtr = &CANTRCV_CHANNEL(Transceiver);
 
 #if (STD_ON == CANTRCV_DEV_ERROR_DETECT)
     result = CanTrcv_DetCheck(Transceiver, CANTRCV_CHECKWAKEFLAG_ID);
 #endif /* (STD_ON == CANTRCV_DEV_ERROR_DETECT) */
 
-    if (!trcvChPtr->CanTrcvChannelUsed)
+    if (FALSE == CANTRCV_CHANNEL(Transceiver).CanTrcvChannelUsed)
     {
         result = E_NOT_OK;
     }
@@ -1186,9 +1193,9 @@ FUNC(Std_ReturnType, CANTRCV_CODE) CanTrcv_CheckWakeFlag(uint8 Transceiver)
         }
     }
 
-    if ((E_OK == result) && (NULL_PTR != trcvChPtr->CanIfCanTrcvIdRef))
+    if ((E_OK == result) && (NULL_PTR != CANTRCV_CHANNEL(Transceiver).CanIfCanTrcvIdRef))
     {
-        CanIf_CheckTrcvWakeFlagIndication(*(trcvChPtr->CanIfCanTrcvIdRef));
+        CanIf_CheckTrcvWakeFlagIndication(*(CANTRCV_CHANNEL(Transceiver).CanIfCanTrcvIdRef));
     }
 
     return result;
@@ -1215,7 +1222,6 @@ FUNC(Std_ReturnType, CANTRCV_CODE) CanTrcv_SetPNActivationState(CanTrcv_PNActiva
 {
     Std_ReturnType result = E_OK;
     uint8 index;
-    const CanTrcv_ChannelType* trcvChPtr = &CANTRCV_CHANNEL(0);
 
 #if (STD_ON == CANTRCV_DEV_ERROR_DETECT)
     if (CANTRCV_NOT_ACTIVE == CanTrcv_State) /* check module state */
@@ -1229,8 +1235,9 @@ FUNC(Std_ReturnType, CANTRCV_CODE) CanTrcv_SetPNActivationState(CanTrcv_PNActiva
         CanTrcv_PNActivation = ActivationState;
         for (index = 0; index < CANTRCV_MAX_CHANNELS; index++)
         {
-            if ((trcvChPtr->CanTrcvWakeupByBusUsed) && (trcvChPtr->CanTrcvChannelUsed)
-                && (trcvChPtr->CanTrcvHwPnSupport))
+            if ((TRUE == CANTRCV_CHANNEL(index).CanTrcvWakeupByBusUsed)
+                && (TRUE == CANTRCV_CHANNEL(index).CanTrcvChannelUsed)
+                && (TRUE == CANTRCV_CHANNEL(index).CanTrcvHwPnSupport))
             {
                 if (PN_ENABLED == ActivationState)
                 {
@@ -1247,7 +1254,6 @@ FUNC(Std_ReturnType, CANTRCV_CODE) CanTrcv_SetPNActivationState(CanTrcv_PNActiva
                     break;
                 }
             }
-            trcvChPtr++;
         }
     }
     return result;
@@ -1316,12 +1322,11 @@ static FUNC(Std_ReturnType, CANTRCV_CODE) CanTrcv_HandleWakeupEvents(uint8 Trans
 {
     Std_ReturnType result = E_OK;
     CanTrcv_TrcvFlagStateType FlagState;
-    const CanTrcv_ChannelType* trcvChPtr = &CANTRCV_CHANNEL(Transceiver);
 
-    if (trcvChPtr->CanTrcvWakeupByBusUsed)
+    if (TRUE == CANTRCV_CHANNEL(Transceiver).CanTrcvWakeupByBusUsed)
     {
 #if (STD_ON == CANTRCV_HWPN_SUPPORT)
-        if ((trcvChPtr->CanTrcvHwPnSupport) && (PN_ENABLED == CanTrcv_PNActivation))
+        if ((TRUE == CANTRCV_CHANNEL(Transceiver).CanTrcvHwPnSupport) && (PN_ENABLED == CanTrcv_PNActivation))
         {
             result = CanTrcv_Driver_ReadStatus(Transceiver, CANTRCV_DRIVER_WUF, &FlagState);
         }
@@ -1331,12 +1336,13 @@ static FUNC(Std_ReturnType, CANTRCV_CODE) CanTrcv_HandleWakeupEvents(uint8 Trans
             result = CanTrcv_Driver_ReadStatus(Transceiver, CANTRCV_DRIVER_WUP, &FlagState);
         }
 
-        if ((E_OK == result) && (CANTRCV_FLAG_SET == FlagState) && (NULL_PTR != trcvChPtr->CanTrcvWakeupSourceRef))
+        if ((E_OK == result) && (CANTRCV_FLAG_SET == FlagState)
+            && (NULL_PTR != CANTRCV_CHANNEL(Transceiver).CanTrcvWakeupSourceRef))
         {
             CanTrcv_WakeupReason[Transceiver] = CANTRCV_WU_BY_BUS;
             if (CANTRCV_WUMODE_DISABLE != CanTrcv_WakeupMode[Transceiver])
             {
-                EcuM_SetWakeupEvent(*(trcvChPtr->CanTrcvWakeupSourceRef));
+                EcuM_SetWakeupEvent(*(CANTRCV_CHANNEL(Transceiver).CanTrcvWakeupSourceRef));
             }
         }
     }

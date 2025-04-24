@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : LinIf_Master.h                                              **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : HuRongbo                                                    **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : LinIf_Master.h                                              **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : HuRongbo                                                    **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 #ifndef LINIF_MASTER_H
 #define LINIF_MASTER_H
 
@@ -262,7 +263,9 @@ FUNC(void, LINIF_CODE) LinIf_SetEvent(NetworkHandleType ch, uint16 event);
  */
 /******************************************************************************/
 FUNC(Std_ReturnType, LINIF_CODE)
+/* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
 LinIf_GetCurFrameType(NetworkHandleType ch, P2VAR(LinIf_FrameTypeType, AUTOMATIC, LINIF_APPL_DATA) frameType);
+/* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
 
 /******************************************************************************/
 /*
@@ -290,6 +293,6 @@ FUNC(boolean, LINIF_CODE) LinIf_IsEntryDelayTimeout(NetworkHandleType ch);
 /******************************************************************************/
 FUNC(LinIf_ChannelStateType, LINIF_CODE) LinIf_GetChannelState(NetworkHandleType ch);
 
-#endif /* STD_ON == LINIF_MASTER_SUPPORT */
+#endif
 
 #endif /* LINIF_SLAVE_H */

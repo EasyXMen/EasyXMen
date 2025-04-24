@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : E2E_P01.h                                                   **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : YangBo                                                      **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : E2E_P01.h                                                   **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : YangBo                                                      **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 #ifndef E2E_P01_H_
 #define E2E_P01_H_
 
@@ -47,6 +48,14 @@ extern "C"
 **                      Include Section                                       **
 *******************************************************************************/
 #include "E2E.h"
+
+    /*******************************************************************************
+    **                      Private Macro Definitions                             **
+    *******************************************************************************/
+    static inline uint8 E2E_P01_Min(uint8 a, uint8 b)
+    {
+        return (((a) <= (b)) ? (a) : (b));
+    }
     /*******************************************************************************
     **                      Global Symbols                                        **
     *******************************************************************************/
@@ -197,11 +206,12 @@ extern "C"
      * Return value: Std_ReturnType,E2E_E_INPUTERR_NULL E2E_E_INPUTERR_WRONG E2E_E_INTERR E2E_E_OK.
      *
      */
-
+    /* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
     extern FUNC(Std_ReturnType, E2E_CODE) E2E_P01Protect(
         P2CONST(E2E_P01ConfigType, AUTOMATIC, E2E_APPL_DATA) ConfigPtr,
         P2VAR(E2E_P01ProtectStateType, AUTOMATIC, E2E_APPL_DATA) StatePtr,
         P2VAR(uint8, AUTOMATIC, E2E_APPL_DATA) DataPtr);
+    /* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
 
     /**
      * Initializes the protection state.
@@ -214,9 +224,10 @@ extern "C"
      * Return value: Std_ReturnType,E2E_E_INPUTERR_NULL E2E_E_OK.
      *
      */
-
+    /* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
     extern FUNC(Std_ReturnType, E2E_CODE)
         E2E_P01ProtectInit(P2VAR(E2E_P01ProtectStateType, AUTOMATIC, E2E_APPL_DATA) StatePtr);
+    /* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
 
     /**
      * Checks the Data received using the E2E profile 1.
@@ -231,11 +242,12 @@ extern "C"
      * Return value: Std_ReturnType,E2E_E_INPUTERR_NULL E2E_E_INPUTERR_WRONG E2E_E_INTERR E2E_E_OK.
      *
      */
-
+    /* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
     extern FUNC(Std_ReturnType, E2E_CODE) E2E_P01Check(
         P2CONST(E2E_P01ConfigType, AUTOMATIC, E2E_APPL_DATA) Config,
         P2VAR(E2E_P01CheckStateType, AUTOMATIC, E2E_APPL_DATA) State,
         P2CONST(uint8, AUTOMATIC, E2E_APPL_DATA) Data);
+    /* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
 
     /**
      * Initializes the check state
@@ -248,9 +260,10 @@ extern "C"
      * Return value: Std_ReturnType,E2E_E_INPUTERR_NULL E2E_E_OK.
      *
      */
-
+    /* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
     extern FUNC(Std_ReturnType, E2E_CODE)
         E2E_P01CheckInit(P2VAR(E2E_P01CheckStateType, AUTOMATIC, E2E_APPL_DATA) State);
+    /* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
 
     /**
      * The function maps the check status of Profile 1 to a generic check status, which can be used by E2E state machine

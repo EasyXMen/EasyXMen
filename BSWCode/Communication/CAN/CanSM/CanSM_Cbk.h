@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : CanSM_Cbk.h                                                 **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : Wanglili                                                    **
- **  Vendor      :                                                             **
- **  DESCRIPTION : A list of functions provided for other modules              **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : CanSM_Cbk.h                                                 **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : Wanglili                                                    **
+**  Vendor      :                                                             **
+**  DESCRIPTION : A list of functions provided for other modules              **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 /*******************************************************************************
 **                      REVISION   HISTORY                                    **
 *******************************************************************************/
@@ -78,8 +79,7 @@ extern void CanSM_ControllerBusOff(uint8 ControllerId);
  * @param[in]     ControllerId   CAN controller, whose mode has changed
  * @param[in]     ControllerMode Notified CAN controller mode
  */
-/******************************************************************************/
-extern void CanSM_ControllerModeIndication(uint8 ControllerId, CanIf_ControllerModeType ControllerMode);
+extern void CanSM_ControllerModeIndication(uint8 ControllerId, Can_ControllerStateType ControllerMode);
 
 /******************************************************************************/
 /*

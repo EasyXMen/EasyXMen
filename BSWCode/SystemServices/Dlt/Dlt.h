@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Dlt.c                                                       **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : tao.yu                                                      **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Public extern FUNCtions declared of Dlt                     **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Dlt.c                                                       **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : tao.yu                                                      **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Public extern FUNCtions declared of Dlt                     **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 #ifndef RTE_DLT_H_
 #define RTE_DLT_H_
 
@@ -56,7 +57,6 @@ rules caused by SWC are not configured
  * V2.0.12      2024-07-04  haibin.shao update data type for cunit-big-end
  * V2.0.13      2024-08-13  haibin.shao Append QAC remarks and remove main function declarations from header files
  * V2.0.14      2024-09-12  haibin.shao Adjust the interface condition judgment
- *              2024-09-27  xue.han     QAC
 
 ============================================================================*/
 /*==============================================================================

@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Crypto_Types.h                                                 **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : yuhao.ge                                                    **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Type header for CSM                                         **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Crypto_Types.h                                                 **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : yuhao.ge                                                    **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Type header for CSM                                         **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 
 #ifndef CRYPTO_TYPES_H
 #define CRYPTO_TYPES_H
@@ -41,7 +42,7 @@
 *******************************************************************************/
 #include "Std_Types.h"
 #include "Crypto_GeneralTypes.h"
-#include "Crypto_Cfg.h"
+#include "Crypto_ISoft_Cfg.h"
 /*******************************************************************************
 **                      Global Symbols                                        **
 *******************************************************************************/
@@ -113,23 +114,23 @@ typedef enum
 typedef struct
 {
     /** @brief   Enable or disable writing and reading the key element with data smaller than the size of the element */
-    VAR(boolean, CRY_VAR) CryptoKeyElementAllowPartialAccess;
+    VAR(boolean, CRYPTO_VAR) CryptoKeyElementAllowPartialAccess;
     /** @brief   Defines the format for the key element  */
-    VAR(CryptoKeyElementFormat, CRY_VAR) CryptoKeyElementFormat;
+    VAR(CryptoKeyElementFormat, CRYPTO_VAR) CryptoKeyElementFormat;
     /** @brief   Holds the Identifier of the CRYPTO Key element */
-    VAR(uint32, CRY_VAR) CryptoKeyElementId;
+    VAR(uint32, CRYPTO_VAR) CryptoKeyElementId;
     /** @brief   Holds the Value which will be used to fill the key element during startup */
-    P2VAR(uint8, AUTOMATIC, CRY_APPL_DATA) CryptoKeyElementInitValue;
+    P2VAR(uint8, AUTOMATIC, CRYPTO_APPL_DATA) CryptoKeyElementInitValue;
     /** @brief   Enable or disable persisting of the key element in non-volatile storage  */
-    VAR(boolean, CRY_VAR) CryptoKeyElementPersist;
+    VAR(boolean, CRYPTO_VAR) CryptoKeyElementPersist;
     /** @brief   Define the reading access rights of the key element.  */
-    VAR(Crypto_KeyElemReadAccessType, CRY_VAR) CryptoKeyElementReadAccess;
+    VAR(Crypto_KeyElemReadAccessType, CRYPTO_VAR) CryptoKeyElementReadAccess;
     /** @brief   Holds the Maximum Size size of a CRYPTO key element in bytes */
-    VAR(uint32, CRY_VAR) CryptoKeyElementSize;
+    VAR(uint32, CRYPTO_VAR) CryptoKeyElementSize;
     /** @brief   Define the writing access rights of the key element  */
-    VAR(Crypto_KeyElemWriteAccessType, CRY_VAR) CryptoKeyElementWriteAccess;
+    VAR(Crypto_KeyElemWriteAccessType, CRYPTO_VAR) CryptoKeyElementWriteAccess;
     /** @brief   Define the writing access rights of the key element  */
-    P2VAR(uint32, AUTOMATIC, CRY_APPL_DATA) CryptoKeyElementLength;
+    P2VAR(uint32, AUTOMATIC, CRYPTO_APPL_DATA) CryptoKeyElementLength;
 } Crypto_KeyElementCfgType;
 
 /**
@@ -138,17 +139,17 @@ typedef struct
 typedef struct
 {
     /** @brief  the Number of KeyElement  */
-    VAR(uint8, CRY_VAR) KeyElementNum;
+    VAR(uint8, CRYPTO_VAR) KeyElementNum;
     /** @brief   Refers to a pointer in the CRYPTOCrypto Key Element  */
-    P2CONST(Crypto_KeyElementCfgType, AUTOMATIC, CRY_APPL_DATA) CryptoKeyElementRef;
+    P2CONST(Crypto_KeyElementCfgType, AUTOMATIC, CRYPTO_APPL_DATA) CryptoKeyElementRef;
 } Crypto_KeyTypeCfgType;
 
 typedef struct
 {
     /** @brief   Holds the Identifier of the CRYPTO Key  */
-    VAR(uint32, CRY_VAR) CryptoKeyId;
+    VAR(uint32, CRYPTO_VAR) CryptoKeyId;
     /** @brief   Refers to a pointer in the CRYPTOCrypto Key Element  */
-    P2CONST(Crypto_KeyTypeCfgType, AUTOMATIC, CRY_APPL_DATA) CryptoKeyTypeRef;
+    P2CONST(Crypto_KeyTypeCfgType, AUTOMATIC, CRYPTO_APPL_DATA) CryptoKeyTypeRef;
 } Crypto_KeyCfgType;
 
 #endif /* CRYPTO_MAXKEY_CONFIGURED > 0 */

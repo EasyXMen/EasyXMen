@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : CanSM.h                                                     **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : Wanglili                                                    **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : CanSM.h                                                     **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : Wanglili                                                    **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 
 #ifndef CANSM_H
 #define CANSM_H
@@ -41,6 +42,7 @@
 #include "ComM_Types.h"
 #include "CanSM_Cfg.h"
 #include "CanSM_BswM.h"
+
 #if (STD_ON == CANSM_DEM_SUPPORT)
 #include "Dem.h"
 #endif
@@ -56,13 +58,14 @@
 #define CANSM_INSTANCE_ID                (0U)
 
 /* error code from specification */
-#define CANSM_E_NO_ERROR               0x00u
-#define CANSM_E_UNINIT                 0x01u
-#define CANSM_E_PARAM_POINTER          0x02u
-#define CANSM_E_INVALID_NETWORK_HANDLE 0x03u
-#define CANSM_E_PARAM_CONTROLLER       0x04u
-#define CANSM_E_PARAM_TRANSCEIVER      0x05u
-#define CANSM_E_NOT_IN_NO_COM          0x0Bu
+#define CANSM_E_NO_ERROR                  (0x00u)
+#define CANSM_E_UNINIT                    (0x01u)
+#define CANSM_E_PARAM_POINTER             (0x02u)
+#define CANSM_E_INVALID_NETWORK_HANDLE    (0x03u)
+#define CANSM_E_PARAM_CONTROLLER          (0x04u)
+#define CANSM_E_PARAM_TRANSCEIVER         (0x05u)
+#define CANSM_E_INVALID_PARTITION_CONTEXT (0x06u)
+#define CANSM_E_NOT_IN_NO_COM             (0x0Bu)
 /*Run time error*/
 #define CANSM_E_MODE_REQUEST_TIMEOUT 0x0A
 /* Service IDs */
@@ -491,19 +494,5 @@ CanSM_StartWakeupSource(NetworkHandleType network);
 /******************************************************************************/
 FUNC(Std_ReturnType, CANSM_ECUM_CODE)
 CanSM_StopWakeupSource(NetworkHandleType network);
-
-/******************************************************************************/
-/*
- * Brief               Scheduled function of the CanSM
- * ServiceId           0x05
- * Sync/Async          Synchronous
- * Reentrancy          Non Reentrant
- * Param-Name[in]      NA
- * Param-Name[out]     NA
- * Param-Name[in/out]  NA
- * Return              NA
- */
-/******************************************************************************/
-void CanSM_MainFunction(void);
 
 #endif /* CANSM_H */

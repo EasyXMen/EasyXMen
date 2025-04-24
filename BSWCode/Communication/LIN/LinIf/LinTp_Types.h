@@ -18,26 +18,30 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : LinTp_Types.h                                               **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : HuRongbo                                                    **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Type definitions of LinTp                                   **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : LinTp_Types.h                                               **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : HuRongbo                                                    **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Type definitions of LinTp                                   **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 
 #ifndef LINTP_TYPES_H
 #define LINTP_TYPES_H
 
 #include "ComStack_Types.h"
 #include "LinIf_Cfg.h"
+#if (LINIF_TP_SUPPORTED == STD_ON)
+#include "LinTp_Cfg.h"
+#endif /*LINIF_TP_SUPPORTED == STD_ON*/
 
 /*******************************************************************************
 **                      Global Symbols                                        **
@@ -57,17 +61,20 @@ typedef enum
 
 typedef struct
 {
-    uint8 LinTpLinIfChannelRef; /* Refer to LinIf channel */
+    NetworkHandleType LinTpLinIfChannelRef; /* Refer to LinIf channel */
     boolean LinTpDropNotRequestedNad;
 #if (STD_ON == LINTP_SCHEDULE_CHANGE_DIAG_SUPPORT)
     boolean LinTpScheduleChangeDiag;
 #endif                                 /* STD_ON == LINTP_SCHEDULE_CHANGE_DIAG_SUPPORT */
     NetworkHandleType LinTpChannelRef; /* Refer to ComM */
+    uint16 LinTpMaxNumberOfRespPendingFrames;
+    uint16 LinTpP2MaxCnt;
+    uint16 LinTpP2TimingCnt;
 } LinTp_ChannelConfigType;
 
 typedef struct
 {
-    uint8 LinTpLinIfChannelRef; /* Refer to LinIf channel */
+    NetworkHandleType LinTpLinIfChannelRef; /* Refer to LinIf channel */
     uint16 LinTpNcrCnt;
     PduIdType LinTpRxNSduId;
     uint8 LinTpRxNSduNad;
@@ -77,7 +84,7 @@ typedef struct
 
 typedef struct
 {
-    uint8 LinTpLinIfChannelRef; /* Refer to LinIf channel */
+    NetworkHandleType LinTpLinIfChannelRef; /* Refer to LinIf channel */
     uint8 LinTpMaxBufReq;
     uint16 LinTpNasCnt;
     uint16 LinTpNcsCnt;
@@ -89,13 +96,10 @@ typedef struct
 
 typedef struct
 {
-    uint16 LinTpMaxNumberOfRespPendingFrames;
     uint16 LinTpMaxRxNSduCnt;
     uint16 LinTpNumOfRxNSdu;
     uint16 LinTpMaxTxNSduCnt;
     uint16 LinTpNumOfTxNSdu;
-    uint16 LinTpP2MaxCnt;
-    uint16 LinTpP2TimingCnt;
     P2CONST(LinTp_ChannelConfigType, AUTOMATIC, LINIF_APPL_CONST) LinTpChannelConfig;
     P2CONST(LinTp_RxNSduType, AUTOMATIC, LINIF_APPL_CONST) LinTpRxNSdu;
     P2CONST(LinTp_TxNSduType, AUTOMATIC, LINIF_APPL_CONST) LinTpTxNSdu;

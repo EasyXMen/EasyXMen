@@ -18,21 +18,22 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Os_Hook.h                                                   **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : i-soft-os                                                   **
- **  Vendor      :                                                             **
- **  DESCRIPTION : AutoSar Hook Managment                                      **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
- **  Version :   AUTOSAR classic Platform R19--Function Safety                 **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Os_Hook.h                                                   **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : i-soft-os                                                   **
+**  Vendor      :                                                             **
+**  DESCRIPTION : AutoSar Hook Managment                                      **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
+**  Version :   AUTOSAR classic Platform R19--Function Safety                 **
+**                                                                            **
+*******************************************************************************/
 
 #ifndef OS_HOOK_H
 #define OS_HOOK_H
@@ -55,12 +56,12 @@
 #endif
 
 #if (CFG_ERRORHOOK == TRUE)
-/* PRQA S 3472 ++ */ /* MISRA  Dir-4.9*/ /* OS_HOOK_MACRO_001 */
+/* PRQA S 3472 ++*/ /* MISRA  Dir-4.9*/ /* OS_HOOK_MACRO_001 */
 #define Os_ErrorHook(err)      \
     {                          \
         Os_CallErrorHook(err); \
     }
-/* PRQA S 3472 -- */ /* MISRA  Dir-4.9*/
+/* PRQA S 3472 --*/ /* MISRA  Dir-4.9*/
 #else
 #define Os_ErrorHook(err)
 #endif
@@ -75,34 +76,28 @@
 #endif
 
 #if (TRUE == CFG_POSTTASKHOOK)
-/* PRQA S 3472 ++ */ /* MISRA  Dir-4.9*/ /* OS_HOOK_MACRO_001 */
 #define Os_PostTaskHook()      \
     {                          \
         Os_CallPostTaskHook(); \
-    }
-/* PRQA S 3472 -- */ /* MISRA  Dir-4.9*/
+    } /* PRQA S 3472 */ /* MISRA  Dir-4.9*/ /* OS_HOOK_MACRO_001 */
 #else
 #define Os_PostTaskHook()
 #endif
 
 #if (TRUE == CFG_PRETASKHOOK)
-/* PRQA S 3472 ++ */ /* MISRA  Dir-4.9*/ /* OS_HOOK_MACRO_001 */
 #define Os_PreTaskHook()      \
     {                         \
         Os_CallPreTaskHook(); \
-    }
-/* PRQA S 3472 -- */ /* MISRA  Dir-4.9*/
+    } /* PRQA S 3472 */ /* MISRA  Dir-4.9*/ /* OS_HOOK_MACRO_001 */
 #else
 #define Os_PreTaskHook()
 #endif
 
 #if (TRUE == CFG_STARTUPHOOK)
-/* PRQA S 3472 ++ */ /* MISRA  Dir-4.9*/ /* OS_HOOK_MACRO_004 */
 #define Os_StartupHook()      \
     {                         \
         Os_CallStartupHook(); \
-    }
-/* PRQA S 3472 -- */ /* MISRA  Dir-4.9*/
+    } /* PRQA S 3472 */ /* MISRA  Dir-4.9*/ /* OS_HOOK_MACRO_004 */
 #else
 #define Os_StartupHook()
 #endif

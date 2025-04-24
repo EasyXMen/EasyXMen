@@ -18,20 +18,20 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : EthTSyn.c                                                   **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : yuzhe.zhang                                                 **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Implementation for EthTSyn                                  **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*********************************************************************************
+**                                                                            **
+**  FILENAME    : EthTSyn.c                                                   **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : yuzhe.zhang                                                 **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Implementation for EthTSyn                                  **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 /******************************************************************************
 **                      Revision Control History                             **
 ******************************************************************************/
@@ -76,11 +76,17 @@
  *                                  t1.nanosecond < t2.nanosecond.
  *          20240429 shuangyang.fu  CPT-8448 can not synchronize when HW stamp on master enabling.
  *          20240509 shuangyang.fu  CPT-8976 can not synchronize when crc checking enabling.
+ *          20240511 han.li         CPT-8986 add the ETHTRCV_LINK_STATE_ACTIVE condition judgment for sending Sync and
+ * Pdelay_Req msg.
  *          20240513 shuangyang.fu  CPT-9012 The sending order of TLV is inconsistent with the document.
  *          20240516 shuangyang.fu  CPT-8980 Invalid first actual argument of StbM_GetOffset.
  *          20240523 shuangyang.fu  CPT-9071 The configuration of the CRC checksum field(eg. CRCMessageLength
  * EthTSynCrcDomainNumber etc.) at the receiver end is not being used.
- *          20240704 shuangyang.fu  CPD-55289 package the DET Interface
+ *          20240627 shuangyang.fu  CPD-55289 package the DET Interface
+ *  V2.0.18 20241017 xiongfei.shi   CPT-10256 Implementing a time synchronization policy in case of invalid local
+ * timestamp
+ *          20231109 xiongfei.shi   CPT-10601 Support for multiple EthTSynPortConfig configured under one
+ * EthTSyncGlobalTimeDomain
  */
 
 /**
@@ -117,7 +123,7 @@
 #define ETHTSYN_C_AR_PATCH_VERSION 0U
 #define ETHTSYN_C_SW_MAJOR_VERSION 2U
 #define ETHTSYN_C_SW_MINOR_VERSION 0U
-#define ETHTSYN_C_SW_PATCH_VERSION 17U
+#define ETHTSYN_C_SW_PATCH_VERSION 18U
 
 /*******************************************************************************
 **                       Version  Check                                       **
@@ -200,7 +206,7 @@ static Std_ReturnType EthTSyn_TlvScanAndCRCValidation(
 #endif
 #if (ETHTSYN_HARDWARE_TIMESTAMP_SUPPORT == STD_ON)
 ETHTSYN_LOCAL_INLINE boolean EthTSyn_StbmUseEthHW(uint16 PortId);
-#endif /* STD_ON == ETHTSYN_HARDWARE_TIMESTAMP_SUPPORT */
+#endif
 
 static void EthTSyn_timeoptimal(EthTSyn_TimeStampType* timestamp);
 ETHTSYN_LOCAL EthTSyn_TimeStampType EthTSyn_timeadd(EthTSyn_TimeStampType time1, EthTSyn_TimeStampType time2);
@@ -210,15 +216,15 @@ ETHTSYN_LOCAL void EthTSyn_TimeStampSub(EthTSyn_TimeStampType t1, EthTSyn_TimeSt
 static boolean EthTSyn_IsPortIdentityEqual(const uint8* portIdentityA, const uint8* portIdentityB);
 static EthTSynPortType* EthTSyn_FindPort(uint8 ctrlIdx);
 static EthTSynMessageType EthTSyn_MainFunctionMaster(uint8 portIndex);
-static void EthTSyn_InitPortStatus(EthTSynPortType* port);
 #if (ETHTSYN_DEV_ERROR_DETECT == STD_ON)
 static boolean EthTSyn_ValidatePointer(uint8 apiId, const void* pointer);
 static boolean EthTSyn_ValidateCtrlIdx(uint8 apiId, uint8 ctrlIdx);
 static boolean EthTSyn_ValidateInitStatus(uint8 apiId);
 static boolean EthTSyn_ValidateInit(const EthTSyn_ConfigType* configPtr);
-static boolean EthTSyn_ValidateRxindication(uint8 ctrlIdx, const void* pointer1, const void* pointer2);
+static boolean EthTSyn_ValidateRxindication(uint8 ctrlIdx, const void* pointer);
 static boolean EthTSyn_ValidateTransmissionMode(uint8 ctrlIdx, EthTSyn_TransmissionModeType Mode);
 #endif
+static void EthTSyn_InitPortStatus(EthTSynPortType* port);
 #define ETHTSYN_STOP_SEC_CODE
 #include "EthTSyn_MemMap.h"
 /*******************************************************************************
@@ -279,7 +285,7 @@ void EthTSyn_Init(const EthTSyn_ConfigType* configPtr) /* PRQA S 1532 */ /* MISR
                 port->timedomainid = TIMEDOMIN_CFG(i).EthTSynGlobalTimeDomainId;
                 port->CtrlId = PORT_CFG(i, j).EthTSynGlobalTimeEthIfRef;
                 port->EthTSynSCHysteresisCount = 255u;
-                port->PortRoleType = (PORT_CFG(i, j).EthTSynPortRole.EthTSynGlobalTimeMaster != NULL_PTR)
+                port->PortRoleType = (NULL_PTR != PORT_CFG(i, j).EthTSynPortRole.EthTSynGlobalTimeMaster)
                                          ? ETHTSYN_MASTER
                                          : ETHTSYN_SLAVE;
                 EthTSyn_InitPortStatus(port);
@@ -360,7 +366,7 @@ void EthTSyn_GetVersionInfo(P2VAR(Std_VersionInfoType, AUTOMATIC, ETHTSYN_VAR) v
         versioninfo->sw_patch_version = ETHTSYN_H_SW_PATCH_VERSION;
     }
 }
-#endif /* ETHTSYN_VERSION_INFO_API = STD_ON */
+#endif
 
 /**
  * This API is used to turn on and off the TX capabilities of the EthTSyn.
@@ -424,21 +430,24 @@ void EthTSyn_RxIndication(
 
     ETHTSYN_UNUSED(IsBroadcast);
     ETHTSYN_UNUSED(PhysAddrPtr);
-#if (ETHTSYN_CRC_SUPPORT == STD_OFF)
+#if ((ETHTSYN_CRC_SUPPORT == STD_OFF) || (ETHTSYN_MESSAGE_COMPLIANCE == STD_ON))
     ETHTSYN_UNUSED(LenByte);
 #endif
-
 #if (ETHTSYN_DEV_ERROR_DETECT == STD_ON)
-    if (EthTSyn_ValidateRxindication(CtrlIdx, PhysAddrPtr, DataPtr))
+    if (EthTSyn_ValidateRxindication(CtrlIdx, DataPtr))
 #endif
     {
         EthTSynPortType* port = EthTSyn_FindPort(CtrlIdx);
-        if ((FrameType == 0x88F7u) && (port->EthtrcvLinkState == ETHTRCV_LINK_STATE_ACTIVE)
+        if ((port != NULL_PTR) && (FrameType == 0x88F7u) && (port->EthtrcvLinkState == ETHTRCV_LINK_STATE_ACTIVE)
             && (port->timedomainid == DataPtr[4]))
         {
             uint8 i = port->index;
             EthTSyn_TimeStampType TVnow;
-            (void)EthTSyn_GetIngressTV(CtrlIdx, i, DataPtr, &TVnow);
+            boolean isValidIngressTime = FALSE;
+            if (EthTSyn_GetIngressTV(CtrlIdx, i, DataPtr, &TVnow) == E_OK)
+            {
+                isValidIngressTime = TRUE;
+            }
             SchM_Exit_EthTSyn_Context();
             schMExited = TRUE;
             EthTSynMessageType EthTSynMessage = (DataPtr[0] & 0x0Fu);
@@ -479,9 +488,10 @@ void EthTSyn_RxIndication(
                             port->EthTSynSCHysteresisCount = 0u;
                         }
 
-                        if (((sequenceCounterJump > 0u) && (sequenceCounterJump <= sequenceCounterJumpWidth))
-                            || (sequenceCounterJumpWidth == 0u) || !port->hasReceivedSyncReq
-                            || ((timeBaseStatus & STBM_TIMEBASE_STATUS_TIMEOUT) != 0u))
+                        if (isValidIngressTime
+                            && (((sequenceCounterJump > 0u) && (sequenceCounterJump <= sequenceCounterJumpWidth))
+                                || (sequenceCounterJumpWidth == 0u) || !port->hasReceivedSyncReq
+                                || ((timeBaseStatus & STBM_TIMEBASE_STATUS_TIMEOUT) != 0u)))
                         {
                             port->hasReceivedSyncReq = TRUE;
                             port->T1vlt = TVnow;
@@ -492,7 +502,7 @@ void EthTSyn_RxIndication(
                     }
                 }
 #if (ETHTSYN_MASTER_SLAVE_CONFLICT_DETECTION == STD_ON)
-                else /* port->PortRoleType == ETHTSYN_MASTER */
+                else
                 {
                     (void)Det_ReportRuntimeError(
                         ETHTSYN_MODULE_ID,
@@ -514,6 +524,12 @@ void EthTSyn_RxIndication(
                 {
                     uint64 Timeout = globalTimeSlaveCfgPtr->EthTSynGlobalTimeFollowUpTimeout;
                     EthTSyn_TimeStampType td;
+                    if (!isValidIngressTime)
+                    {
+                        port->SyncStatusType = WAITFOR_SYNC;
+                        break;
+                    }
+
                     EthTSyn_TimeStampSub(TVnow, port->T1vlt, &td);
                     if ((Timeout != 0u) && !EthTSyn_timeless(td, Timeout))
                     {
@@ -525,8 +541,8 @@ void EthTSyn_RxIndication(
                     uint8 SGWByte = 0u;
                     uint8 OFSByte = 0u;
 #if (ETHTSYN_MESSAGE_COMPLIANCE == STD_OFF)
-                    CrcValidatedType ValidatedType = globalTimeSlaveCfgPtr->EthTSynRxCrcValidated;
 #if (ETHTSYN_CRC_SUPPORT == STD_ON)
+                    CrcValidatedType ValidatedType = globalTimeSlaveCfgPtr->EthTSynRxCrcValidated;
                     ret = EthTSyn_TlvScanAndCRCValidation(
                         i,
                         ValidatedType,
@@ -556,25 +572,48 @@ void EthTSyn_RxIndication(
                     }
                     if (port->EthTSynSCHysteresisCount
                         > globalTimeSlaveCfgPtr->EthTSynGlobalTimeSequenceCounterHysteresis)
-#endif /* STD_OFF == ETHTSYN_MESSAGE_COMPLIANCE */
+#endif
                     {
                         port->SyncStatusType = WAITFOR_SYNC;
                         EthTSyn_TimeStampType T2vlt;
+                        EthTSyn_TimeStampType T3vlt;
 #if (ETHTSYN_HARDWARE_TIMESTAMP_SUPPORT == STD_OFF)
                         /* SWS_EthTSyn_00179 */
-                        T2vlt = TVnow;
+                        StbM_VirtualLocalTimeType VirtualLocalTime;
+                        ret = StbM_GetCurrentVirtualLocalTime(
+                            PORT_TOCFGDOMIN(i).EthTSynSynchronizedTimeBaseRef,
+                            &VirtualLocalTime);
+                        if (E_OK == ret)
+                        {
+                            T2vlt = EthTSyn_VTToGT(VirtualLocalTime);
+                            T3vlt.nanoseconds = T2vlt.nanoseconds;
+                            T3vlt.seconds = T2vlt.seconds;
+                            T3vlt.secondsHi = T2vlt.secondsHi;
+                        }
+                        else
+                        {
+                            break;
+                        }
 #else
+                        Eth_TimeStampQualType timeQualPtr = ETH_INVALID;
+                        Eth_TimeStampType timeStampPtr;
+                        ret = EthIf_GetCurrentTime(CtrlIdx, &timeQualPtr, &timeStampPtr);
+                        if ((E_OK == ret) && (ETH_VALID == timeQualPtr))
+                        {
+                            T3vlt.nanoseconds = timeStampPtr.nanoseconds;
+                            T3vlt.seconds = timeStampPtr.seconds;
+                            T3vlt.secondsHi = timeStampPtr.secondsHi;
+                        }
+                        else
+                        {
+                            break;
+                        }
+
                         if (EthTSyn_StbmUseEthHW(i))
                         {
-                            Eth_TimeStampQualType timeQualPtr;
-                            Eth_TimeStampType timeStampPtr;
-                            ret = EthIf_GetCurrentTime(CtrlIdx, &timeQualPtr, &timeStampPtr);
-                            if ((ret == E_OK) && (timeQualPtr == ETH_VALID))
-                            {
-                                T2vlt.nanoseconds = timeStampPtr.nanoseconds;
-                                T2vlt.seconds = timeStampPtr.seconds;
-                                T2vlt.secondsHi = timeStampPtr.secondsHi;
-                            }
+                            T2vlt.nanoseconds = T3vlt.nanoseconds;
+                            T2vlt.seconds = T3vlt.seconds;
+                            T2vlt.secondsHi = T3vlt.secondsHi;
                         }
                         else
                         {
@@ -585,6 +624,10 @@ void EthTSyn_RxIndication(
                             if (ret == E_OK)
                             {
                                 T2vlt = EthTSyn_VTToGT(VirtualLocalTime);
+                            }
+                            else
+                            {
+                                break;
                             }
                         }
 #endif
@@ -598,7 +641,7 @@ void EthTSyn_RxIndication(
                         }
                         globalTime.timeBaseStatus = timeBaseStatus;
                         userDataPtr = port->userData;
-                        EthTSyn_TimeStampSub(T2vlt, port->T1vlt, &Syncreceptiondelay);
+                        EthTSyn_TimeStampSub(T3vlt, port->T1vlt, &Syncreceptiondelay);
                         EthTSyn_TimeStampType TG;
                         if (PORT_TOCFGDOMIN(i).EthTSynSynchronizedTimeBaseRef < 16u)
                         {
@@ -643,13 +686,20 @@ void EthTSyn_RxIndication(
                         }
                     }
                 }
+                else
+                {
+                    /* Intentionally Empty */
+                }
             }
             break;
             case PDELAY_REQ:
-                port->pdelayResponderTimestamp.pdelayReqEventIngressTimestamp = TVnow;
-                port->PdelayRXStatusType = SEND_PDELAY_RESP;
-                port->ReceivedPdelayReqSequenceId = SequenceId;
-                (void)ILib_memcpy(&EthTSyn_ReceivedPdelayReqSourcePortId[i][0], &DataPtr[20], 10u);
+                if (isValidIngressTime)
+                {
+                    port->pdelayResponderTimestamp.pdelayReqEventIngressTimestamp = TVnow;
+                    port->PdelayRXStatusType = SEND_PDELAY_RESP;
+                    port->ReceivedPdelayReqSequenceId = SequenceId;
+                    (void)ILib_memcpy(&EthTSyn_ReceivedPdelayReqSourcePortId[i][0], &DataPtr[20], 10u);
+                }
                 break;
             case PDELAY_RESP: {
                 if (port->PdelayTXStatusType != WAITFOR_PDELAY_RESP)
@@ -659,7 +709,8 @@ void EthTSyn_RxIndication(
 
                 /* CODE_EthTSyn_00001 */
                 const uint8* requestingPortIdentity = &DataPtr[ETHTSYN_PDELAY_RESP_REQUESTING_PORT_IDENTITY_OFFSET];
-                if ((SequenceId != port->PdelayReqSequenceId)
+                if (!isValidIngressTime
+                    || (SequenceId != port->PdelayReqSequenceId)
                     /* PRQA S 3415 ++ */ /* MISRA Rule 13.5 */
                     || !EthTSyn_IsPortIdentityEqual(requestingPortIdentity, port->thisPortIdentity))
                 /* PRQA S 3415 -- */ /* MISRA Rule 13.5 */
@@ -692,7 +743,8 @@ void EthTSyn_RxIndication(
 
                 /* CODE_EthTSyn_00002 */
                 const uint8* requestingPortIdentity = &DataPtr[ETHTSYN_PDELAY_RESP_REQUESTING_PORT_IDENTITY_OFFSET];
-                if ((SequenceId != port->PdelayReqSequenceId)
+                if (!isValidIngressTime
+                    || (SequenceId != port->PdelayReqSequenceId)
                     /* PRQA S 3415 ++ */ /* MISRA Rule 13.5 */
                     || !EthTSyn_IsPortIdentityEqual(requestingPortIdentity, port->thisPortIdentity))
                 /* PRQA S 3415 -- */ /* MISRA Rule 13.5 */
@@ -747,7 +799,6 @@ void EthTSyn_RxIndication(
             }
         }
     }
-
     if (!schMExited)
     {
         SchM_Exit_EthTSyn_Context();
@@ -768,15 +819,15 @@ void EthTSyn_RxIndication(
  * @retval        E_NOT_OK The transmission failed
  */
 /* clang-format off */
-void EthTSyn_TxConfirmation(uint8 CtrlIdx, Eth_BufIdxType BufIdx) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
+void EthTSyn_TxConfirmation(uint8 CtrlIdx, Eth_BufIdxType BufIdx, Std_ReturnType Result) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
 /* clang-format on */
 {
-    Std_ReturnType ret;
+    ETHTSYN_UNUSED(Result);
+
     StbM_VirtualLocalTimeType VirtualLocalTime;
 
     SchM_Enter_EthTSyn_Context();
     boolean schMExited = FALSE;
-
 #if (ETHTSYN_DEV_ERROR_DETECT == STD_ON)
     if (EthTSyn_ValidateCtrlIdx(ETHTSYN_SID_TXCONFIRMATION, CtrlIdx))
 #endif
@@ -786,12 +837,21 @@ void EthTSyn_TxConfirmation(uint8 CtrlIdx, Eth_BufIdxType BufIdx) /* PRQA S 1532
         {
             uint8 i = port->index;
             EthTSyn_TimeStampType t2vlt = {0u, 0u, 0u};
-            (void)EthTSyn_GetEgressTV(CtrlIdx, i, &t2vlt, BufIdx);
+            boolean isValidEgressTime = FALSE;
+            if (EthTSyn_GetEgressTV(CtrlIdx, i, &t2vlt, BufIdx) == E_OK)
+            {
+                isValidEgressTime = TRUE;
+            }
             SchM_Exit_EthTSyn_Context();
             schMExited = TRUE;
-            (void)StbM_GetCurrentVirtualLocalTime(PORT_TOCFGDOMIN(i).EthTSynSynchronizedTimeBaseRef, &VirtualLocalTime);
+            boolean isValidVT = FALSE;
+            if (StbM_GetCurrentVirtualLocalTime(PORT_TOCFGDOMIN(i).EthTSynSynchronizedTimeBaseRef, &VirtualLocalTime)
+                == E_OK)
+            {
+                isValidVT = TRUE;
+            }
             uint64 timenow = (((uint64)VirtualLocalTime.nanosecondsHi) << 32u) + VirtualLocalTime.nanosecondsLo;
-            if ((timenow - port->Txconfirmation) >= ETHTSYN_TX_CONFIRMATION)
+            if (!isValidVT || ((timenow - port->Txconfirmation) >= ETHTSYN_TX_CONFIRMATION))
             {
                 switch (port->TranssmitMessageType)
                 {
@@ -819,14 +879,27 @@ void EthTSyn_TxConfirmation(uint8 CtrlIdx, Eth_BufIdxType BufIdx) /* PRQA S 1532
 #if (ETHTSYN_HARDWARE_TIMESTAMP_SUPPORT == STD_OFF)
                     /* SWS_EthTSyn_00189 */
                     EthTSyn_TimeStampType T4vlt;
-                    (void)StbM_GetCurrentVirtualLocalTime(
-                        PORT_TOCFGDOMIN(i).EthTSynSynchronizedTimeBaseRef,
-                        &VirtualLocalTime);
-                    T4vlt = EthTSyn_VTToGT(VirtualLocalTime);
-                    EthTSyn_TimeStampType td;
-                    EthTSyn_TimeStampSub(T4vlt, T0vlt, &td); /* preciseOriginTimestamp = T0 + t4vlt - t0vlt */
-                    port->preciseOriginTimestamp = EthTSyn_timeadd(td, T0);
+                    if (StbM_GetCurrentVirtualLocalTime(
+                            PORT_TOCFGDOMIN(i).EthTSynSynchronizedTimeBaseRef,
+                            &VirtualLocalTime)
+                        == E_OK)
+                    {
+                        T4vlt = EthTSyn_VTToGT(VirtualLocalTime);
+                        EthTSyn_TimeStampType td;
+                        EthTSyn_TimeStampSub(T4vlt, T0vlt, &td); /* preciseOriginTimestamp = T0 + t4vlt - t0vlt */
+                        port->preciseOriginTimestamp = EthTSyn_timeadd(td, T0);
+                    }
+                    else
+                    {
+                        port->SyncStatusType = SEND_SYNC;
+                        break;
+                    }
 #else
+                    if (!isValidEgressTime)
+                    {
+                        port->SyncStatusType = SEND_SYNC;
+                        break;
+                    }
 
                     if (EthTSyn_StbmUseEthHW(i))
                     {
@@ -838,49 +911,77 @@ void EthTSyn_TxConfirmation(uint8 CtrlIdx, Eth_BufIdxType BufIdx) /* PRQA S 1532
                     }
                     else
                     {
+                        Std_ReturnType ret;
+
                         /* SWS_EthTSyn_00017 */
                         EthTSyn_TimeStampType T3vlt = {0u, 0u, 0u};
                         EthTSyn_TimeStampType T4vlt;
-                        Eth_TimeStampQualType timeQual;
+                        Eth_TimeStampQualType timeQual = ETH_INVALID;
                         Eth_TimeStampType timeStamp;
                         ret = EthIf_GetCurrentTime(CtrlIdx, &timeQual, &timeStamp);
-                        if ((ret == E_OK) && (timeQual == ETH_VALID))
+                        if (!((ret == E_OK) && (timeQual == ETH_VALID)))
                         {
-                            T3vlt.nanoseconds = timeStamp.nanoseconds;
-                            T3vlt.seconds = timeStamp.seconds;
-                            T3vlt.secondsHi = timeStamp.secondsHi;
-
-                            (void)StbM_GetCurrentVirtualLocalTime(
-                                PORT_TOCFGDOMIN(i).EthTSynSynchronizedTimeBaseRef,
-                                &VirtualLocalTime);
-                            T4vlt = EthTSyn_VTToGT(VirtualLocalTime);
-
-                            EthTSyn_TimeStampType td32vlt;
-                            EthTSyn_TimeStampSub(T3vlt, t2vlt, &td32vlt); /* td32vlt = t3vlt - t2vlt */
-                            EthTSyn_TimeStampType td40vlt;
-                            EthTSyn_TimeStampSub(T4vlt, T0vlt, &td40vlt); /* td40vlt = t4vlt - t0vlt */
-                            if (EthTSyn_TimeStampCmp(td40vlt, td32vlt) >= 0)
-                            {
-                                EthTSyn_TimeStampType tdTemp;
-                                EthTSyn_TimeStampSub(td40vlt, td32vlt, &tdTemp);
-                                /* preciseOriginTimestamp = T0 - (T3VLT - T2VLT) + (T4VLT - T0VLT)
-                                 * (SWS_EthTSyn_00017) */
-                                port->preciseOriginTimestamp = EthTSyn_timeadd(tdTemp, T0);
-                            }
+                            port->SyncStatusType = SEND_SYNC;
+                            break;
                         }
+
+                        T3vlt.nanoseconds = timeStamp.nanoseconds;
+                        T3vlt.seconds = timeStamp.seconds;
+                        T3vlt.secondsHi = timeStamp.secondsHi;
+
+                        if (StbM_GetCurrentVirtualLocalTime(
+                                PORT_TOCFGDOMIN(i).EthTSynSynchronizedTimeBaseRef,
+                                &VirtualLocalTime)
+                            != E_OK)
+                        {
+                            port->SyncStatusType = SEND_SYNC;
+                            break;
+                        }
+
+                        T4vlt = EthTSyn_VTToGT(VirtualLocalTime);
+                        EthTSyn_TimeStampType td32vlt;
+                        EthTSyn_TimeStampSub(T3vlt, t2vlt, &td32vlt); /* td32vlt = t3vlt - t2vlt */
+                        EthTSyn_TimeStampType td40vlt;
+                        EthTSyn_TimeStampSub(T4vlt, T0vlt, &td40vlt); /* td40vlt = t4vlt - t0vlt */
+                        if (EthTSyn_TimeStampCmp(td40vlt, td32vlt) < 0)
+                        {
+                            port->SyncStatusType = SEND_SYNC;
+                            break;
+                        }
+
+                        EthTSyn_TimeStampType tdTemp;
+                        EthTSyn_TimeStampSub(td40vlt, td32vlt, &tdTemp);
+                        /** [SWS_EthTSyn_00017]
+                         *  preciseOriginTimestamp = T0 - (T3VLT - T2VLT) + (T4VLT - T0VLT)
+                         */
+                        port->preciseOriginTimestamp = EthTSyn_timeadd(tdTemp, T0);
                     }
 #endif
                     port->SyncStatusType = SEND_FOLLOWUP;
                 }
                 break;
                 case PDELAY_REQ: {
-                    port->PdelayTXStatusType = WAITFOR_PDELAY_RESP;
-                    port->t1 = t2vlt;
+                    if (isValidEgressTime)
+                    {
+                        port->PdelayTXStatusType = WAITFOR_PDELAY_RESP;
+                        port->t1 = t2vlt;
+                    }
+                    else
+                    {
+                        port->PdelayTXStatusType = SEND_PDELAY_REQ;
+                    }
                 }
                 break;
                 case PDELAY_RESP: {
-                    port->pdelayResponderTimestamp.pdelayRespEventEgressTimestamp = t2vlt;
-                    port->PdelayRXStatusType = SEND_PDELAY_RESP_FOLLOWUP;
+                    if (isValidEgressTime)
+                    {
+                        port->pdelayResponderTimestamp.pdelayRespEventEgressTimestamp = t2vlt;
+                        port->PdelayRXStatusType = SEND_PDELAY_RESP_FOLLOWUP;
+                    }
+                    else
+                    {
+                        port->PdelayTXStatusType = SEND_PDELAY_REQ;
+                    }
                 }
                 break;
                 case PDELAY_RESP_FOLLOW_UP: {
@@ -924,28 +1025,31 @@ Std_ReturnType EthTSyn_TrcvLinkStateChg(
 {
     Std_ReturnType ret = E_NOT_OK;
 #if (ETHTSYN_DEV_ERROR_DETECT == STD_ON)
-    if (EthTSyn_ValidateCtrlIdx(ETHTSYN_SID_TRCVLINKSTATECHG, CtrlIdx))
+    if (EthTSyn_ValidateInitStatus(ETHTSYN_SID_TRCVLINKSTATECHG))
 #endif
     {
         EthTSynPortType* port = EthTSyn_FindPort(CtrlIdx);
-        if ((port->EthtrcvLinkState == ETHTRCV_LINK_STATE_ACTIVE) && (TrcvLinkState == ETHTRCV_LINK_STATE_DOWN))
+        if (port != NULL_PTR)
         {
-            /*[SWS_EthTSyn_00019]*/
-            EthTSyn_InitPortStatus(port);
-        }
-        if ((port->EthtrcvLinkState == ETHTRCV_LINK_STATE_DOWN) && (TrcvLinkState == ETHTRCV_LINK_STATE_ACTIVE))
-        {
-            /*[SWS_EthTSyn_00020]*/
-            port->EthtrcvLinkState = ETHTRCV_LINK_STATE_ACTIVE;
-        }
-        ret = E_OK;
+            if ((port->EthtrcvLinkState == ETHTRCV_LINK_STATE_ACTIVE) && (TrcvLinkState == ETHTRCV_LINK_STATE_DOWN))
+            {
+                /*[SWS_EthTSyn_00019]*/
+                EthTSyn_InitPortStatus(port);
+            }
+            if ((port->EthtrcvLinkState == ETHTRCV_LINK_STATE_DOWN) && (TrcvLinkState == ETHTRCV_LINK_STATE_ACTIVE))
+            {
+                /*[SWS_EthTSyn_00020]*/
+                port->EthtrcvLinkState = ETHTRCV_LINK_STATE_ACTIVE;
+            }
+            ret = E_OK;
 #if (ETHTSYN_DEST_PHY_ADDR_MULTICAST == STD_ON)
-        Eth_FilterActionType filterAction =
-            (TrcvLinkState == ETHTRCV_LINK_STATE_ACTIVE) ? ETH_ADD_TO_FILTER : ETH_REMOVE_FROM_FILTER;
-        (void)EthIf_UpdatePhysAddrFilter(CtrlIdx, EthTSynDestPhyAddr, filterAction);
-#endif /* ETHTSYN_DEST_PHY_ADDR_MULTICAST == STD_ON */
+            Eth_FilterActionType filterAction =
+                (TrcvLinkState == ETHTRCV_LINK_STATE_ACTIVE) ? ETH_ADD_TO_FILTER : ETH_REMOVE_FROM_FILTER;
+            (void)EthIf_UpdatePhysAddrFilter(CtrlIdx, EthTSynDestPhyAddr, filterAction);
+#endif
+        }
+        return ret;
     }
-    return ret;
 }
 #define ETHTSYN_STOP_SEC_ETHTSYNTRCVLINKSTATECHG_CALLBACK_CODE
 #include "EthTSyn_MemMap.h"
@@ -995,8 +1099,9 @@ void EthTSyn_MainFunction(void) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
                         }
                     }
                 }
+
                 uint64 debounceCounter = portCfg->EthTSynGlobalTimeDebounceTime * ETHTSYN_MAIN_FUNCTION_PERIOD;
-                if (SEND_PDELAY_RESP == port->PdelayRXStatusType)
+                if (port->PdelayRXStatusType == SEND_PDELAY_RESP)
                 {
                     if (portCfg->EthTSynPdelayConfig.EthTSynGlobalTimePdelayRespEnable)
                     {
@@ -1007,7 +1112,7 @@ void EthTSyn_MainFunction(void) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
                         }
                     }
                 }
-                else if (SEND_PDELAY_RESP_FOLLOWUP == port->PdelayRXStatusType)
+                else if (port->PdelayRXStatusType == SEND_PDELAY_RESP_FOLLOWUP)
                 {
                     if (port->PdelaydebounceCounter <= ETHTSYN_MAIN_FUNCTION_PERIOD)
                     {
@@ -1035,6 +1140,7 @@ void EthTSyn_MainFunction(void) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
         }
     }
 }
+
 #define ETHTSYN_STOP_SEC_CODE
 #include "EthTSyn_MemMap.h"
 
@@ -1058,7 +1164,7 @@ static Std_ReturnType EthTSyn_GetIngressTV(uint8 CtrlIdx, uint8 PortId, const ui
     }
 #else
     ETHTSYN_UNUSED(PortId);
-    Eth_TimeStampQualType timeQualPtr;
+    Eth_TimeStampQualType timeQualPtr = ETH_INVALID;
     Eth_TimeStampType timeStampPtr;
     ret = EthIf_GetIngressTimeStamp(CtrlIdx, (const Eth_DataType*)DataPtr, &timeQualPtr, &timeStampPtr);
     if ((ret == E_OK) && (timeQualPtr == ETH_VALID))
@@ -1066,6 +1172,10 @@ static Std_ReturnType EthTSyn_GetIngressTV(uint8 CtrlIdx, uint8 PortId, const ui
         TV->nanoseconds = timeStampPtr.nanoseconds;
         TV->seconds = timeStampPtr.seconds;
         TV->secondsHi = timeStampPtr.secondsHi;
+    }
+    else
+    {
+        ret = E_NOT_OK;
     }
 #endif
     return ret;
@@ -1086,7 +1196,7 @@ static Std_ReturnType EthTSyn_GetEgressTV(uint8 CtrlIdx, uint8 PortId, EthTSyn_T
     }
 #else
     ETHTSYN_UNUSED(PortId);
-    Eth_TimeStampQualType timeQualPtr;
+    Eth_TimeStampQualType timeQualPtr = ETH_INVALID;
     Eth_TimeStampType timeStampPtr;
     ret = EthIf_GetEgressTimeStamp(CtrlIdx, BufIdx, &timeQualPtr, &timeStampPtr);
     if ((ret == E_OK) && (timeQualPtr == ETH_VALID))
@@ -1094,6 +1204,10 @@ static Std_ReturnType EthTSyn_GetEgressTV(uint8 CtrlIdx, uint8 PortId, EthTSyn_T
         TV->nanoseconds = timeStampPtr.nanoseconds;
         TV->seconds = timeStampPtr.seconds;
         TV->secondsHi = timeStampPtr.secondsHi;
+    }
+    else
+    {
+        ret = E_NOT_OK;
     }
 #endif
     return ret;
@@ -1304,10 +1418,12 @@ static void EthTSyn_TranssmitMessage(EthTSynMessageType EthTSynMessage, uint16 P
             Data[85] = 0x76u;
             Data[3] += 10u;
             DataLen += 10U;
+#if (ETHTSYN_CRC_SUPPORT == STD_ON)
             uint8 DataID = PORT_TOCFGDOMIN(PortId)
                                .EthTSynGlobalTimeFollowUpDataIDList
                                ->EthTSynGlobalTimeFollowUpDataIDListElement[(port->SyncSequenceId) % 16u]
                                .EthTSynGlobalTimeFollowUpDataIDListValue;
+#endif
             /* Sub-TLV: Time Secured */
             if (MasterCfg.EthTSynTLVFollowUpTimeSubTLV)
             {
@@ -1323,8 +1439,8 @@ static void EthTSyn_TranssmitMessage(EthTSynMessageType EthTSynMessage, uint16 P
                     /* CRC_Time_Flags */
                     Data[DataLen + 2u] = 0u;
                     EthTSynCrcTimeFlagsTxSecuredCfgType CrcTimeFlags = *(MasterCfg.EthTSynCrcTimeFlagsTxSecured);
-                    uint8 CrcData0[24u] = {0u};
-                    uint8 CrcData1[16u] = {0u};
+                    uint8 CrcData0[24u] = {0};
+                    uint8 CrcData1[16u] = {0};
                     uint8 CrcData0length = 1u;
                     uint8 CrcData1length = 1u;
                     if (CrcTimeFlags.EthTSynCrcMessageLength)
@@ -1514,7 +1630,7 @@ static void EthTSyn_TranssmitMessage(EthTSynMessageType EthTSynMessage, uint16 P
                 Data[3] -= 10u;
                 DataLen -= 10U;
             }
-#endif /* STD_OFF == ETHTSYN_MESSAGE_COMPLIANCE */
+#endif
             break;
         case PDELAY_REQ:
             /*messageLength */
@@ -1593,6 +1709,14 @@ static void EthTSyn_TranssmitMessage(EthTSynMessageType EthTSynMessage, uint16 P
         {
             return;
         }
+
+        StbM_VirtualLocalTimeType VirtualLocalTime;
+        if (StbM_GetCurrentVirtualLocalTime(PORT_TOCFGDOMIN(PortId).EthTSynSynchronizedTimeBaseRef, &VirtualLocalTime)
+            != E_OK)
+        {
+            return;
+        }
+
         Length = DataLen;
         BufReq_ReturnType ret = EthIf_ProvideTxBuffer(CtrlIdx, FrameType, Priority, &BufId, &DataBuf, &Length);
         if ((ret == BUFREQ_OK) && (DataBuf != NULL_PTR) && (Length >= DataLen))
@@ -1605,10 +1729,6 @@ static void EthTSyn_TranssmitMessage(EthTSynMessageType EthTSynMessage, uint16 P
             }
 #endif
             (void)ILib_memcpy(DataBuf, Data, DataLen);
-            StbM_VirtualLocalTimeType VirtualLocalTime;
-            (void)StbM_GetCurrentVirtualLocalTime(
-                PORT_TOCFGDOMIN(PortId).EthTSynSynchronizedTimeBaseRef,
-                &VirtualLocalTime);
             port->Txconfirmation = (((uint64)VirtualLocalTime.nanosecondsHi) << 32u) + VirtualLocalTime.nanosecondsLo;
             port->TranssmitMessageType = EthTSynMessage;
             (void)EthIf_Transmit(CtrlIdx, BufId, FrameType, TRUE, DataLen, &EthTSynDestPhyAddr[0]);
@@ -1843,7 +1963,7 @@ static Std_ReturnType EthTSyn_TlvScanAndCRCValidation(
 #if (ETHTSYN_HARDWARE_TIMESTAMP_SUPPORT == STD_ON)
 ETHTSYN_LOCAL_INLINE boolean EthTSyn_StbmUseEthHW(uint16 PortId)
 {
-    return PORT_TOCFGDOMIN(PortId).SynchronizedTimeBaseUseEthFreerunning;
+    return PORT_TOCFGPORT(PortId).SynchronizedTimeBaseUseEthFreerunning;
 }
 #endif
 
@@ -1940,14 +2060,13 @@ ETHTSYN_LOCAL sint8 EthTSyn_TimeStampCmp(EthTSyn_TimeStampType t1, EthTSyn_TimeS
 
 ETHTSYN_LOCAL void EthTSyn_TimeStampSub(EthTSyn_TimeStampType t1, EthTSyn_TimeStampType t2, EthTSyn_TimeStampType* td)
 {
-    EthTSyn_TimeStampType t1Temp = t1;
-    EthTSyn_TimeStampType t2Temp = t2;
-    EthTSyn_timeoptimal(&t1Temp);
-    EthTSyn_timeoptimal(&t2Temp);
-
-    uint64 tdSeconds = (((uint64)t1Temp.secondsHi << 32) | (uint64)t1Temp.seconds)
-                       - (((uint64)t2Temp.secondsHi << 32) | (uint64)t2Temp.seconds);
-    sint32 tdNanoseconds = (sint32)t1Temp.nanoseconds - (sint32)t2Temp.nanoseconds;
+    /* PRQA S 1339 ++ */ /* VL_EthTSyn_1339 */
+    EthTSyn_timeoptimal(&t1);
+    EthTSyn_timeoptimal(&t2);
+    /* PRQA S 1339 -- */
+    uint64 tdSeconds =
+        (((uint64)t1.secondsHi << 32) | (uint64)t1.seconds) - (((uint64)t2.secondsHi << 32) | (uint64)t2.seconds);
+    sint32 tdNanoseconds = (sint32)t1.nanoseconds - (sint32)t2.nanoseconds;
 
     if (tdNanoseconds < 0)
     {
@@ -2059,6 +2178,7 @@ static void EthTSyn_InitPortStatus(EthTSynPortType* port)
 }
 
 #if (ETHTSYN_DEV_ERROR_DETECT == STD_ON)
+
 static boolean EthTSyn_ValidatePointer(uint8 apiId, const void* pointer)
 {
     boolean valid = pointer != NULL_PTR;
@@ -2108,11 +2228,10 @@ static boolean EthTSyn_ValidateCtrlIdx(uint8 apiId, uint8 ctrlIdx)
     return valid;
 }
 
-static boolean EthTSyn_ValidateRxindication(uint8 ctrlIdx, const void* pointer1, const void* pointer2)
+static boolean EthTSyn_ValidateRxindication(uint8 ctrlIdx, const void* pointer)
 {
     return EthTSyn_ValidateCtrlIdx(ETHTSYN_SID_RXINDICATION, ctrlIdx)
-           && EthTSyn_ValidatePointer(ETHTSYN_SID_RXINDICATION, pointer1)
-           && EthTSyn_ValidatePointer(ETHTSYN_SID_RXINDICATION, pointer2);
+           && EthTSyn_ValidatePointer(ETHTSYN_SID_RXINDICATION, pointer);
 }
 
 static boolean EthTSyn_ValidateTransmissionMode(uint8 ctrlIdx, EthTSyn_TransmissionModeType Mode)
@@ -2125,6 +2244,7 @@ static boolean EthTSyn_ValidateTransmissionMode(uint8 ctrlIdx, EthTSyn_Transmiss
     }
     return valid;
 }
+
 #endif
 #define ETHTSYN_STOP_SEC_CODE
 #include "EthTSyn_MemMap.h"

@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Bfx_Bit16.c                                                 **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : stanleyluo                                                  **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Implementation for APIs of 16-bit data                      **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                       **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Bfx_Bit16.c                                                 **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : stanleyluo                                                  **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Implementation for APIs of 16-bit data                      **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                       **
+**                                                                            **
+*******************************************************************************/
 
 /*******************************************************************************
 **                      Includes                                              **
@@ -80,7 +81,7 @@
 #define BFX_START_SEC_CODE
 #include "Bfx_MemMap.h"
 /**
- * Set the request bit position of the input data to 1
+ * set logical status of input data as '1' at the requested bit position.
  * Service ID: 0x02
  * Sync/Async: Synchronous
  * Reentrancy: Reentrant
@@ -96,7 +97,7 @@ Bfx_SetBit_u16u8(P2VAR(uint16, AUTOMATIC, BFX_APPL_DATA) data, uint8 bitPn)
 }
 
 /**
- * Set the request bit position of the input data to 0.
+ * clear the logical status of the input data to '0' at the requested bit position.
  * Service ID: 0x07
  * Sync/Async: Synchronous
  * Reentrancy: Reentrant
@@ -112,7 +113,7 @@ Bfx_ClrBit_u16u8(P2VAR(uint16, AUTOMATIC, BFX_APPL_DATA) data, uint8 bitPn)
 }
 
 /**
- * return the logical level of the input data at the requested bit position.
+ * return the logical status of the input data for the requested bit position.
  * Service ID: 0x0b
  * Sync/Async: Synchronous
  * Reentrancy: Reentrant
@@ -135,8 +136,8 @@ Bfx_GetBit_u16u8_u8(uint16 data, uint8 bitPn)
 }
 
 /**
- * Set the input data to "1" or "0" based on the "Status"
- * data from "BitStartPn" to "BitStartPn+BitLn".
+ * set the input data as '1' or '0' as per 'Status' value starting from
+ * 'BitStartPn' for the length 'BitLn'.
  * Service ID: 0x21
  * Sync/Async: Synchronous
  * Reentrancy: Reentrant

@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : E2E_P07.c                                                   **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : YangBo                                                      **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : E2E_P07.c                                                   **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : YangBo                                                      **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 /*******************************************************************************
 **                      Revision Control History                              **
 *******************************************************************************/
@@ -58,7 +59,7 @@
 /*******************************************************************************
 **                      Private Type Definitions                              **
 *******************************************************************************/
-/* PRQA S 3432,4491 ++ */ /* MISRA Rule 20.7, Rule 10.6 */
+/* PRQA S 3432,4491,1503 ++ */ /* MISRA Rule 20.7, Rule 10.6 ,Rule 2.1*/
 /*******************************************************************************
 **                      Private Function Declarations                         **
 *******************************************************************************/
@@ -469,5 +470,6 @@ static void E2E_P07Check_Seqence(
     }
     StatePtr->Counter = ReceivedCounter;
 }
+/* PRQA S 3432,4491,1503 -- */ /* MISRA Rule 20.7, Rule 10.6 ,Rule 2.1*/
 #define E2E_STOP_SEC_CODE
 #include "E2E_MemMap.h"

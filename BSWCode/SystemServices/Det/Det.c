@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Det.c                                                       **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : Haibin.shao                                                 **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Type definition and API declaration for DET                 **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                       **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Det.c                                                       **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : Haibin.shao                                                 **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Type definition and API declaration for DET                 **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                       **
+**                                                                            **
+*******************************************************************************/
 /*******************************************************************************
 **                      Revision Control History                              **
 *******************************************************************************/
@@ -83,9 +84,6 @@
 #ifndef DET_AR_RELEASE_PATCH_VERSION
 #error " DET version miss"
 #endif
-#if ((1 != DET_CFG_SW_MAJOR_VERSION) || (0 != DET_CFG_SW_MINOR_VERSION) || (1 != DET_CFG_SW_PATCH_VERSION))
-#error " cfg version mismatching"
-#endif
 
 /*******************************************************************************
 **                      Private Data Definitions                              **
@@ -93,6 +91,12 @@
 #ifndef DET_LOCAL
 #define DET_LOCAL static
 #endif
+
+/* PRQA S 2053,3472++ */ /* MISRA Rule 18.8, Dir 4.9 */
+#ifndef DET_UNUSED
+#define DET_UNUSED(a) ((void)(a))
+#endif                   /* #ifndef NVM_UNUSED */
+/* PRQA S 2053,3472-- */ /* MISRA Rule 18.8, Dir 4.9 */
 
 #define DET_START_SEC_VAR_POWER_ON_INIT_BOOLEAN
 #include "Det_MemMap.h"
@@ -389,7 +393,7 @@ DET_LOCAL FUNC(boolean, DET_CODE)
 /******************************************************************************/
 FUNC(void, DET_CODE) Det_Init(P2CONST(Det_ConfigType, AUTOMATIC, DET_APPL_CONST) ConfigPtr)
 {
-    (void)(ConfigPtr);
+    DET_UNUSED(ConfigPtr); /* PRQA S 3472,3469 */ /* MISRA Dir 4.9 */
 #if (STD_ON == DET_USE_EXTENDED_DEBUG_SUPPORT)
 #if (DET_SIZE_OF_ERROR_HOOK_TABLE > 0)
     for (uint32 iloop = 0; iloop < DET_SIZE_OF_ERROR_HOOK_TABLE; iloop++)
@@ -548,7 +552,7 @@ FUNC(void, DET_CODE) Det_InitMemory(void)
                        ErrorId: ID of detected development error
  * Param-Name[out]     None:
  * Param-Name[in/out]  None:
- * Return              Std_ReturnType: E_OK (always)
+ * Return              Std_ReturnType: E_OK always
  */
 /******************************************************************************/
 FUNC(Std_ReturnType, DET_CODE)
@@ -571,10 +575,12 @@ Det_ReportError(
     detInfo.mApiId = ApiId;
     detInfo.mErrorId = ErrorId;
 #else
-    (void)(ModuleId);
-    (void)(InstanceId);
-    (void)(ApiId);
-    (void)(ErrorId);
+    /* PRQA S 3472,3469++ */ /* MISRA Dir 4.9 */
+    DET_UNUSED(ModuleId);
+    DET_UNUSED(InstanceId);
+    DET_UNUSED(ApiId);
+    DET_UNUSED(ErrorId);
+    /* PRQA S 3472,3469-- */ /* MISRA Dir 4.9 */
 #endif /* STD_ON == DET_USE_EXTENDED_DEBUG_SUPPORT */
     /* if DET is initialized: in case of call to uninitialized DET return */
     if ((boolean)TRUE == detModuleInit)
@@ -693,7 +699,7 @@ Det_ReportError(
                        ErrorId: ID of detected development error
  * Param-Name[out]     None:
  * Param-Name[in/out]  None:
- * Return              Std_ReturnType: E_OK (always)
+ * Return              Std_ReturnType: E_OK always
  */
 /******************************************************************************/
 FUNC(Std_ReturnType, DET_CODE)
@@ -715,10 +721,12 @@ Det_ReportRuntimeError(
     detInfo.mApiId = ApiId;
     detInfo.mErrorId = ErrorId;
 #else
-    (void)(ModuleId);
-    (void)(InstanceId);
-    (void)(ApiId);
-    (void)(ErrorId);
+    /* PRQA S 3472,3469++ */ /* MISRA Dir 4.9 */
+    DET_UNUSED(ModuleId);
+    DET_UNUSED(InstanceId);
+    DET_UNUSED(ApiId);
+    DET_UNUSED(ErrorId);
+    /* PRQA S 3472,3469-- */ /* MISRA Dir 4.9 */
 #endif /* STD_ON == DET_USE_EXTENDED_DEBUG_SUPPORT */
     /* if DET is initialized: in case of call to uninitialized DET return */
     if ((boolean)TRUE == detModuleInit)
@@ -834,10 +842,12 @@ Det_ReportTransientFault(
     detInfo.mApiId = ApiId;
     detInfo.mErrorId = FaultId;
 #else
-    (void)(ModuleId);
-    (void)(InstanceId);
-    (void)(ApiId);
-    (void)(FaultId);
+    /* PRQA S 3472,3469++ */ /* MISRA Dir 4.9 */
+    DET_UNUSED(ModuleId);
+    DET_UNUSED(InstanceId);
+    DET_UNUSED(ApiId);
+    DET_UNUSED(FaultId);
+    /* PRQA S 3472,3469-- */ /* MISRA Dir 4.9 */
 #endif /* STD_ON == DET_USE_EXTENDED_DEBUG_SUPPORT */
     /* if DET is initialized: in case of call to uninitialized DET return */
     if ((boolean)TRUE == detModuleInit)

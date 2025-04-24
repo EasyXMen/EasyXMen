@@ -18,21 +18,22 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    :  Os_Extened.h                                               **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      :  i-soft-os                                                  **
- **  Vendor      :                                                             **
- **  DESCRIPTION :  Extended functions                                         **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
- **  Version :   AUTOSAR classic Platform R19--Function Safety                 **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    :  Os_Extened.h                                               **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      :  i-soft-os                                                  **
+**  Vendor      :                                                             **
+**  DESCRIPTION :  Extended functions                                         **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
+**  Version :   AUTOSAR classic Platform R19--Function Safety                 **
+**                                                                            **
+*******************************************************************************/
 
 #ifndef OS_EXTEND_H
 #define OS_EXTEND_H
@@ -59,71 +60,48 @@ typedef enum
 /*=======[F U N C T I O N   D E C L A R A T I O N S]========*/
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <Provide Version information to user.>
- * Service ID           <0xfd>
- * Sync/Async           <none>
- * Reentrancy           <Yes>
- * param-eventId[in]    <Versioninfo>
- * Param-Name[out]      <no>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * REQ ID               <None>
+/**
+ * @brief           Provide Version information to user.
+ * @param[out]      osVerInfoPtr: pointer for getting OS version
+ * @synchronous     TRUE
+ * @reentrant       Non Reentrant
+ * @trace           -
  */
-/********************************************************************/
-FUNC(void, OS_CODE) OSGetVersionInfo(Std_VersionInfoType* osVerInfoPtr);
+void OSGetVersionInfo(Std_VersionInfoType* osVerInfoPtr);
 
 #if (CHECK_STACK_USAGE > 0)
-/********************************************************************/
-/*
- * Brief                <Get max usage of system,task,ISR2 stack.>
- * Service ID           <0xfe>
- * Sync/Async           <none>
- * Reentrancy           <Yes>
- * param-eventId[in]    <id>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <osStackUsageType>
- * PreCondition         <None>
- * REQ ID               <None>
+/**
+ * @brief           Get max usage of system,task,ISR2 stack.
+ * @param[in]       stack: Stack type
+ * @param[in]       id: Object ID
+ * @return          osStackUsageType
+ * @retval          uint32: Max usage of stack
+ * @synchronous     TRUE
+ * @reentrant       Non Reentrant
+ * @trace           -
  */
-/********************************************************************/
-FUNC(osStackUsageType, OS_CODE) OSGetStackUsage(osStackObject stack, uint16 id);
+osStackUsageType OSGetStackUsage(osStackObject stack, uint16 id);
 #endif
 
-/********************************************************************/
-/*
- * Brief                <check ISR source>
- * Service ID           <0xd8>
- * Sync/Async           <none>
- * Reentrancy           <Yes>
- * param-eventId[in]    <None>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <StatusType>
- * PreCondition         <None>
- * REQ ID               <None>
+/**
+ * @brief           OSCheckISRSource is used to check the interrupt source.
+ * @param[in]       Source: Isr source
+ * @return          StatusType
+ * @retval          TRUE: current triggered interrupt.
+ * @retval          FALSE: not current triggered interrupt.
+ * @synchronous     TRUE
+ * @reentrant       Non Reentrant
+ * @trace           -
  */
-/********************************************************************/
-extern FUNC(StatusType, OS_CODE) OSCheckISRSource(uint32 Source);
+StatusType OSCheckISRSource(uint32 Source);
 
-/********************************************************************/
-/*
- * Brief                <check whether CPU information is correct.>
- * Service ID           <0xff>
- * Sync/Async           <none>
- * Reentrancy           <Yes>
- * param-eventId[in]    <None>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <StatusType>
- * PreCondition         <None>
- * REQ ID               <None>
+/**
+ * @brief           OSCheckCPUInformation is used to check if the CPU information is correct.
+ * @synchronous     TRUE
+ * @reentrant       Non Reentrant
+ * @trace           -
  */
-/********************************************************************/
-FUNC(void, OS_CODE) OSCheckCPUInformation(void);
+void OSCheckCPUInformation(void);
 
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"

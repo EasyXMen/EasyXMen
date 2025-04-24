@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- ** **
- **  FILENAME    : EthSwt.h **
- ** **
- **  Created on  : 2021-10-13 **
- **  Author      : zhiqiang.huang **
- **  Vendor      : **
- **  DESCRIPTION : none **
- ** **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11 **
- ** **
- ***********************************************************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+************************************************************************************************************************
+**                                                                                                                    **
+**  FILENAME    : EthSwt.h                                                                                            **
+**                                                                                                                    **
+**  Created on  : 2021-10-13                                                                                          **
+**  Author      : zhiqiang.huang                                                                                      **
+**  Vendor      :                                                                                                     **
+**  DESCRIPTION : none                                                                                                **
+**                                                                                                                    **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                                                              **
+**                                                                                                                    **
+***********************************************************************************************************************/
 #ifndef ETHSWT_H_
 #define ETHSWT_H_
 
@@ -348,7 +349,7 @@ FUNC(Std_ReturnType, ETHSWT_CODE) EthSwt_GetPortMacAddr(uint8 SwitchIdx, const u
 #if (STD_ON == ETHSWT_ENABLE_VLAN_API)
 FUNC(Std_ReturnType, ETHSWT_CODE)
 EthSwt_EnableVlan(uint8 SwitchIdx, uint8 SwitchPortIdx, uint16 VlanId, boolean Enable);
-#endif /*STD_ON == ETHSWT_ENABLE_VLAN_API*/
+#endif /* STD_ON == ETHSWT_ENABLE_VLAN_API */
 
 /***********************************************************************************************************************
  * Service ID[hex]:     0x15
@@ -370,7 +371,7 @@ EthSwt_EnableVlan(uint8 SwitchIdx, uint8 SwitchPortIdx, uint16 VlanId, boolean E
 #if (STD_ON == ETHSWT_SET_MAC_LEARNING_MODE_API)
 FUNC(Std_ReturnType, ETHSWT_CODE)
 EthSwt_SetMacLearningMode(uint8 SwitchIdx, uint8 SwitchPortIdx, EthSwt_MacLearningType MacLearningMode);
-#endif /*STD_ON == ETHSWT_SET_MAC_LEARNING_MODE_API*/
+#endif /* STD_ON == ETHSWT_SET_MAC_LEARNING_MODE_API */
 
 /***********************************************************************************************************************
  * Service ID[hex]:     0x16
@@ -391,7 +392,7 @@ EthSwt_SetMacLearningMode(uint8 SwitchIdx, uint8 SwitchPortIdx, EthSwt_MacLearni
 #if (STD_ON == ETHSWT_GET_MAC_LEARNING_MODE_API)
 FUNC(Std_ReturnType, ETHSWT_CODE)
 EthSwt_GetMacLearningMode(uint8 SwitchIdx, uint8 SwitchPortIdx, EthSwt_MacLearningType* MacLearningMode);
-#endif /*STD_ON == ETHSWT_GET_MAC_LEARNING_MODE_API*/
+#endif /* STD_ON == ETHSWT_GET_MAC_LEARNING_MODE_API */
 
 /***********************************************************************************************************************
  * Service ID[hex]:     0x32
@@ -408,7 +409,7 @@ EthSwt_GetMacLearningMode(uint8 SwitchIdx, uint8 SwitchPortIdx, EthSwt_MacLearni
  ***********************************************************************************************************************/
 #if (STD_ON == ETHSWT_SET_FORWARDING_MODE_API)
 FUNC(Std_ReturnType, ETHSWT_CODE) EthSwt_SetForwardingMode(uint8 SwitchIdx, boolean mode);
-#endif /*STD_ON == ETHSWT_SET_FORWARDING_MODE_API*/
+#endif /* STD_ON == ETHSWT_SET_FORWARDING_MODE_API */
 
 /***********************************************************************************************************************
  * Service ID[hex]:     0x3c
@@ -426,7 +427,7 @@ FUNC(Std_ReturnType, ETHSWT_CODE) EthSwt_SetForwardingMode(uint8 SwitchIdx, bool
  ***********************************************************************************************************************/
 #if (STD_ON == ETHSWT_SET_PORT_TX_MODE_API)
 FUNC(Std_ReturnType, ETHSWT_CODE) EthSwt_SetPortTxMode(uint8 SwitchIdx, uint8 PortIdx, EthTrcv_PhyTxModeType Mode);
-#endif /*STD_ON == ETHSWT_SET_PORT_TX_MODE_API*/
+#endif /* STD_ON == ETHSWT_SET_PORT_TX_MODE_API */
 
 /***********************************************************************************************************************
  * Service ID[hex]:     0x36
@@ -451,7 +452,7 @@ FUNC(Std_ReturnType, ETHSWT_CODE)
 EthSwt_WritePortMirrorConfiguration(
     uint8 MirroredSwitchIdx,
     const EthSwt_PortMirrorCfgType* PortMirrorConfigurationPtr);
-#endif /*STD_ON == ETHSWT_WRITE_PORT_MIRROR_CONFIGURATION_API*/
+#endif /* STD_ON == ETHSWT_WRITE_PORT_MIRROR_CONFIGURATION_API */
 
 /***********************************************************************************************************************
  * Service ID[hex]:     0x37
@@ -470,7 +471,7 @@ EthSwt_WritePortMirrorConfiguration(
 #if (STD_ON == ETHSWT_READ_PORT_MIRROR_CONFIGURATION_API)
 FUNC(Std_ReturnType, ETHSWT_CODE)
 EthSwt_ReadPortMirrorConfiguration(uint8 MirroredSwitchIdx, EthSwt_PortMirrorCfgType* PortMirrorConfigurationPtr);
-#endif /*STD_ON == ETHSWT_READ_PORT_MIRROR_CONFIGURATION_API*/
+#endif /* STD_ON == ETHSWT_READ_PORT_MIRROR_CONFIGURATION_API */
 
 /***********************************************************************************************************************
  * Service ID[hex]:     0x4A
@@ -487,7 +488,7 @@ EthSwt_ReadPortMirrorConfiguration(uint8 MirroredSwitchIdx, EthSwt_PortMirrorCfg
 ***********************************************************************************************************************/
 #if (STD_ON == ETHSWT_DELETE_PORT_MIRROR_CONFIGURATION_API)
 FUNC(Std_ReturnType, ETHSWT_CODE) EthSwt_DeletePortMirrorConfiguration(uint8 MirroredSwitchIdx);
-#endif /*STD_ON == ETHSWT_DELETE_PORT_MIRROR_CONFIGURATION_API*/
+#endif /* STD_ON == ETHSWT_DELETE_PORT_MIRROR_CONFIGURATION_API */
 
 /***********************************************************************************************************************
  * Service ID[hex]:     0x38
@@ -507,7 +508,7 @@ FUNC(Std_ReturnType, ETHSWT_CODE) EthSwt_DeletePortMirrorConfiguration(uint8 Mir
 #if (STD_ON == ETHSWT_GET_PORT_MIRROR_STATE_API)
 FUNC(Std_ReturnType, ETHSWT_CODE)
 EthSwt_GetPortMirrorState(uint8 SwitchIdx, uint8 PortIdx, EthSwt_PortMirrorStateType* PortMirrorStatePtr);
-#endif /*STD_ON == ETHSWT_GET_PORT_MIRROR_STATE_API*/
+#endif /* STD_ON == ETHSWT_GET_PORT_MIRROR_STATE_API */
 
 /***********************************************************************************************************************
  * Service ID[hex]:     0x39
@@ -531,8 +532,19 @@ EthSwt_GetPortMirrorState(uint8 SwitchIdx, uint8 PortIdx, EthSwt_PortMirrorState
 #if (STD_ON == ETHSWT_SET_PORT_MIRROR_STATE_API)
 FUNC(Std_ReturnType, ETHSWT_CODE)
 EthSwt_SetPortMirrorState(uint8 MirroredSwitchIdx, EthSwt_PortMirrorStateType PortMirrorState);
-#endif /*STD_ON == ETHSWT_SET_PORT_MIRROR_STATE_API*/
+#endif /* STD_ON == ETHSWT_SET_PORT_MIRROR_STATE_API */
 
+/***********************************************************************************************************************
+ * Service ID[hex]:     0x1c
+ * Sync/Async:          Synchronous
+ * Reentrancy:          Non Reentrant
+ * Parameters (in):     None
+ * Parameters(inout):   None
+ * Parameters (out):    None.
+ * Return value:        None
+ * Description:         Service to support asynchronous behavior of API calls.
+ ***********************************************************************************************************************/
+FUNC(void, ETHSWT_CODE) EthSwt_MainFunction(void);
 /***********************************************************************************************************************
  * Service ID[hex]:     0x46
  * Sync/Async:          Synchronous
@@ -545,18 +557,6 @@ EthSwt_SetPortMirrorState(uint8 MirroredSwitchIdx, EthSwt_PortMirrorStateType Po
  ***********************************************************************************************************************/
 FUNC(void, ETHSWT_CODE) EthSwt_BackgroundTask(void);
 
-/***********************************************************************************************************************
- * Service ID[hex]:     0x1c
- * Sync/Async:          Synchronous
- * Reentrancy:          Non Reentrant
- * Parameters (in):     None
- * Parameters(inout):   None
- * Parameters (out):    None.
- * Return value:        None
- * Description:         Service to support asynchronous behavior of API calls.
- ***********************************************************************************************************************/
-
-FUNC(void, ETHSWT_CODE) EthSwt_MainFunction(void);
 /***********************************************************************************************************************
  *  GLOBAL data declaration
  **********************************************************************************************************************/

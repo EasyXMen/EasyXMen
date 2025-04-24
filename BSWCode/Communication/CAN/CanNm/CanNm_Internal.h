@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : CanNm_Internal.h                                            **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : Wanglili                                                    **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : CanNm_Internal.h                                            **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : Wanglili                                                    **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 /*******************************************************************************
 **                      Revision Control History                              **
 *******************************************************************************/
@@ -68,24 +69,6 @@
  * in one of the channels.
  */
 #define CANNM_EIRA_HANDLE_CHANNEL           (0u)
-
-#define CanNm_GetChannelConfig(ch)          (CanNm_CfgPtr->ChannelConfig[ch])
-
-#define CanNm_GetBusLoadReduceEnabled(ch)   (CanNm_GetChannelConfig(ch).BusLoadReductionActive)
-
-#define CanNm_GetCarWakeUpRxEnabled(ch)     (CanNm_GetChannelConfig(ch).CarWakeUpRxEnabled)
-
-#define CanNm_GetCarWakeUpFilterEnabled(ch) (CanNm_GetChannelConfig(ch).CarWakeUpFilterEnabled)
-
-#define CanNm_GetCarWakeUpFilterNodeId(ch)  (CanNm_GetChannelConfig(ch).CarWakeUpFilterNodeId)
-
-#if CANNM_NODE_ID_ENABLED == STD_ON
-#define CanNm_GetNodeIdEnabled(ch) (CanNm_GetChannelConfig(ch).NodeIdEnabled)
-#endif /* CANNM_NODE_ID_ENABLED == STD_ON */
-
-#if CANNM_NODE_DETECTION_ENABLED == STD_ON
-#define CanNm_GetNodeDetectionEnabled(ch) (CanNm_GetChannelConfig(ch).NodeDetectionEnabled)
-#endif /* CANNM_NODE_DETECTION_ENABLED == STD_ON */
 
 #define CanNm_SetTxPduCbvBit(chIndex, mask) /* PRQA S 3472 */ /* MISRA Rule Dir 4.9 */                                \
     do                                                                                                                \
@@ -179,8 +162,11 @@ typedef struct
 
     uint16 msgTimeoutTimer;
 
+#if CANNM_RETRY_FIRST_MESSAGE_REQUEST == STD_ON
     /* First NM Pdu send,if need retry */
     boolean retrySendMsgFlag;
+#endif
+
     boolean msgToutFlg;
     boolean sendNmMsgFlg;
     /* Indicate if CanNm_NetworkRequest was called within two MainFunction */

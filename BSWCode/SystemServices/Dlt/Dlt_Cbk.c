@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Dlt_Cbk.h                                                   **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : tao.yu                                                      **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Callback functions define of Dlt                            **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Dlt_Cbk.h                                                   **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : tao.yu                                                      **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Callback functions define of Dlt                            **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 
 #include "Dlt_Cbk.h"
 #include "Dlt_internal.h"
@@ -2816,7 +2817,7 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
 static FUNC(Std_ReturnType, DLT_APPL_CODE)
     Dlt_ServiceSyncTimeStamp(uint16 offset, const uint8* Data, uint16 Length, Dlt_DealRxDataTypes DealRxData)
 {
-    Std_ReturnType ret;
+    Std_ReturnType ret = E_NOT_OK;
 #if ((DLT_CHANNEL_NUM > 0) && (DLT_CHANNEL_MAX_BUFFER_LENGTH > 0))
 #if (DLT_TIME_STAMP_SUPPORT == STD_OFF)
     /* The response message is service unsupported */
@@ -3084,9 +3085,7 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
     else if (ServiceID >= 0x00000FFFu)
     {
         /* Service responses are handled by SWC injection control */
-        /* PRQA S 0431++ */ /* MISRA Rule 1.1 */
         ret = Dlt_ServiceDealWithInjection(loffset, Data, Length, DealRxData);
-        /* PRQA S 0431-- */ /* MISRA Rule 1.1 */
     }
 #endif
     /* Check if the value of the service identifier is within the invalid range */

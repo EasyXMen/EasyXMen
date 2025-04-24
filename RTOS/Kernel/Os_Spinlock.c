@@ -18,21 +18,22 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    :  Os_Spinlock.c                                              **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      :  i-soft-os                                                  **
- **  Vendor      :                                                             **
- **  DESCRIPTION :  Spinlock manager                                           **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
- **  Version :   AUTOSAR classic Platform R19--Function Safety                 **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    :  Os_Spinlock.c                                              **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      :  i-soft-os                                                  **
+**  Vendor      :                                                             **
+**  DESCRIPTION :  Spinlock manager                                           **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
+**  Version :   AUTOSAR classic Platform R19--Function Safety                 **
+**                                                                            **
+*******************************************************************************/
 
 /*=======[I N C L U D E S]====================================================*/
 #include "Os_Internal.h"
@@ -230,7 +231,7 @@ FUNC(StatusType, OS_CODE) GetSpinlock(SpinlockIdType SpinlockId)
     else
 #endif /* OS_STATUS_EXTENDED == CFG_STATUS */
 
-/*service protection*/
+    /*service protection*/
 #if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
         if (Os_WrongContext(OS_CONTEXT_GET_SPINLOCK) != TRUE)
     {
@@ -458,6 +459,7 @@ FUNC(void, OS_CODE) Os_ReleaseSpinlock(SpinlockIdType SpinlockId)
                     /* PRQA S 1338 -- */ /* MISRA Dir 17.8  */
                     if ((boolean)TRUE == Os_SLCB[SpinlockId].occupied)
                     {
+                        pTCB->taskCurrentSpinlockOccupyLevel = SpinlockId;
                         break;
                     }
                 }
@@ -468,7 +470,6 @@ FUNC(void, OS_CODE) Os_ReleaseSpinlock(SpinlockIdType SpinlockId)
                     break;
                 }
             }
-            pTCB->taskCurrentSpinlockOccupyLevel = SpinlockId;
         }
         else
         {
@@ -503,6 +504,7 @@ FUNC(void, OS_CODE) Os_ReleaseSpinlock(SpinlockIdType SpinlockId)
                     /* PRQA S 1338 -- */ /* MISRA Dir 17.8  */
                     if ((boolean)TRUE == Os_SLCB[SpinlockId].occupied)
                     {
+                        pICB->isrCurrentSpinlockOccupyLevel = SpinlockId;
                         break;
                     }
                 }
@@ -851,10 +853,6 @@ FUNC(StatusType, OS_CODE) Os_SpinlockSafetyCheck(void)
             if ((Os_GetObjLocalId(obj_id) == Os_SCB.sysRunningTaskID) && (Os_SCB.sysCore == Os_GetObjCoreId(obj_id)))
             /* PRQA S 3469 -- */ /* MISRA Dir 4.9 */
             {
-#if (TRUE == CFG_PROTECTIONHOOK)
-                (void)Os_CallProtectionHook(E_OS_SPINLOCK, OS_NO_CARE);
-#endif
-
                 status = E_OS_SPINLOCK;
                 break;
             }
@@ -925,4 +923,5 @@ FUNC(void, OS_CODE) Os_ReleaseInternalSpinlock(Os_SpinlockRefType spinlock)
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
 #endif /* OS_AUTOSAR_CORES > 1U || CFG_SPINLOCK_MAX > 0U */
+
 /*=======[E N D   O F   F I L E]==============================================*/

@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : BswM_DetCheck.c                                             **
- **                                                                            **
- **  Created on  : 2020-03-24                                                  **
- **  Author      : qinchun.yang                                                **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : BswM_DetCheck.c                                             **
+**                                                                            **
+**  Created on  : 2020-03-24                                                  **
+**  Author      : qinchun.yang                                                **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 
 /*******************************************************************************
 **                      Include Section                                       **
@@ -71,8 +72,8 @@ BswM_ChkBswMInitStatus(uint8 sid)
     if (BSWM_INITED != BswM_RuntimeStatus.bswmInitState)
     {
         ret = E_NOT_OK;
-        /*report DET error BSWM_E_NO_INIT*/
-        (void)Det_ReportError(BSWM_MODULE_ID, BSWM_INSTANCE_ID, sid, BSWM_E_NO_INIT);
+        /*report DET error BSWM_E_UNINIT*/
+        (void)Det_ReportError(BSWM_MODULE_ID, BSWM_INSTANCE_ID, sid, BSWM_E_UNINIT);
     }
     return ret;
 }
@@ -89,7 +90,7 @@ BswM_DetChkParRestart(void)
     }
     return ret;
 }
-#endif /* BSWM_MULTI_PARTITION_ENABLED == STD_ON */
+#endif /*BSWM_MULTI_PARTITION_ENABLED == STD_ON*/
 
 #if (BSWM_CANSM_ENABLED == STD_ON)
 FUNC(Std_ReturnType, BSWM_CODE)
@@ -104,7 +105,7 @@ BswM_DetChkCanSMInd(CanSM_BswMCurrentStateType CurrentState)
     else if (CurrentState > CANSM_BSWM_CHANGE_BAUDRATE)
     {
         ret = E_NOT_OK;
-        /*report DET error BSWM_E_NO_INIT*/
+        /*report DET error BSWM_E_UNINIT*/
         (void)Det_ReportError(
             BSWM_MODULE_ID,
             BSWM_INSTANCE_ID,
@@ -131,8 +132,8 @@ BswM_DetChkCanSMIcom(NetworkHandleType Network)
     }
     return ret;
 }
-#endif /* BSWM_CANSM_ICOM_ENABLED == STD_ON */
-#endif /* BSWM_CANSM_ENABLED == STD_ON */
+#endif /*BSWM_CANSM_ICOM_ENABLED == STD_ON*/
+#endif /*BSWM_CANSM_ENABLED == STD_ON*/
 
 #if (BSWM_COMM_ENABLED == STD_ON)
 FUNC(Std_ReturnType, BSWM_CODE)
@@ -189,8 +190,8 @@ BswM_DetChkComMPnc(ComM_PncModeType CurrentPncMode)
     }
     return ret;
 }
-#endif /* BSWM_COMM_PNC_ENABLED == STD_ON */
-#endif /* BSWM_COMM_ENABLED == STD_ON */
+#endif /*BSWM_COMM_PNC_ENABLED == STD_ON*/
+#endif /*BSWM_COMM_ENABLED == STD_ON*/
 
 #if (BSWM_COMM_ENABLED == STD_ON)
 FUNC(Std_ReturnType, BSWM_CODE)
@@ -204,7 +205,7 @@ BswM_DetChkComMInitRst(void)
     }
     return ret;
 }
-#endif /* BSWM_COMM_ENABLED == STD_ON */
+#endif /*BSWM_COMM_ENABLED == STD_ON*/
 
 #if (BSWM_DCM_ENABLED == STD_ON)
 FUNC(Std_ReturnType, BSWM_CODE)
@@ -228,7 +229,7 @@ BswM_DetChkDcmModeCurState(Dcm_CommunicationModeType RequestedMode)
     {
         ret = E_NOT_OK;
     }
-    /* Dcm_CommunicationModeType range:0x00(DCM_ENABLE_RX_TX_NORM)~0x0b(DCM_DISABLE_RX_TX_NORM_NM */
+    /*Dcm_CommunicationModeType range:0x00(DCM_ENABLE_RX_TX_NORM)~0x0b(DCM_DISABLE_RX_TX_NORM_NM)*/
     else if (RequestedMode > 0x0bu)
     {
         ret = E_NOT_OK;
@@ -244,7 +245,7 @@ BswM_DetChkDcmModeCurState(Dcm_CommunicationModeType RequestedMode)
     }
     return ret;
 }
-#endif /* BSWM_DCM_ENABLED == STD_ON */
+#endif /*BSWM_DCM_ENABLED == STD_ON*/
 
 #if (BSWM_ECUM_ENABLED == STD_ON)
 FUNC(Std_ReturnType, BSWM_CODE)
@@ -261,7 +262,7 @@ BswM_DetChkEcuMCurWakeUp(EcuM_WakeupStatusType state)
         && (state != ECUM_WKSTATUS_EXPIRED)
 #if (BSWM_ECUM_VERSION == BSWM_V_4_2_2)
         && (state != ECUM_WKSTATUS_ENABLED)
-#endif /* BSWM_ECUM_VERSION == BSWM_V_4_2_2 */
+#endif /*BSWM_ECUM_VERSION == BSWM_V_4_2_2*/
     )
     {
         ret = E_NOT_OK;
@@ -322,7 +323,7 @@ BswM_DetChkEcuMCurState(void)
     }
     return ret;
 }
-#endif /* BSWM_ECUM_ENABLED == STD_ON */
+#endif /*BSWM_ECUM_ENABLED == STD_ON*/
 
 #if (BSWM_ETHIF_ENABLED == STD_ON)
 FUNC(Std_ReturnType, BSWM_CODE)
@@ -349,7 +350,7 @@ BswM_DetChkEthIfPortGru(EthTrcv_LinkStateType PortGroupState)
     }
     return ret;
 }
-#endif /* BSWM_ETHIF_ENABLED == STD_ON */
+#endif /*BSWM_ETHIF_ENABLED == STD_ON*/
 
 #if (BSWM_ETHSM_ENABLED == STD_ON)
 FUNC(Std_ReturnType, BSWM_CODE)
@@ -376,7 +377,7 @@ BswM_DetChkEthSMInd(EthSM_NetworkModeStateType CurrentState)
     }
     return ret;
 }
-#endif /* BSWM_ETHSM_ENABLED == STD_ON */
+#endif /*BSWM_ETHSM_ENABLED == STD_ON*/
 
 #if (BSWM_FRSM_ENABLED == STD_ON)
 FUNC(Std_ReturnType, BSWM_CODE)
@@ -403,7 +404,7 @@ BswM_DetChkFrSMInd(FrSM_BswM_StateType CurrentState)
     }
     return ret;
 }
-#endif /* BSWM_FRSM_ENABLED == STD_ON */
+#endif /*BSWM_FRSM_ENABLED == STD_ON*/
 
 #if (BSWM_J1939DCM_ENABLED == STD_ON)
 FUNC(Std_ReturnType, BSWM_CODE)
@@ -417,7 +418,7 @@ BswM_DetChkJ1939DcmBroad(void)
     }
     return ret;
 }
-#endif /* BSWM_J1939DCM_ENABLED == STD_ON */
+#endif /*BSWM_J1939DCM_ENABLED == STD_ON*/
 
 #if (BSWM_J1939NM_ENABLED == STD_ON)
 FUNC(Std_ReturnType, BSWM_CODE)
@@ -431,7 +432,7 @@ BswM_DetChkJ1939NmInd(void)
     }
     return ret;
 }
-#endif /* BSWM_J1939NM_ENABLED == STD_ON */
+#endif /*BSWM_J1939NM_ENABLED == STD_ON*/
 
 #if (BSWM_LINSM_ENABLED == STD_ON)
 FUNC(Std_ReturnType, BSWM_CODE)
@@ -470,7 +471,7 @@ BswM_DetChkLinSMInd(LinSM_ModeType CurrentState)
     }
     return ret;
 }
-#endif /* BSWM_LINSM_ENABLED == STD_ON */
+#endif /*BSWM_LINSM_ENABLED == STD_ON*/
 
 #if (BSWM_LINTP_ENABLED == STD_ON)
 FUNC(Std_ReturnType, BSWM_CODE)
@@ -499,7 +500,7 @@ BswM_DetChkLinTpRqst(LinTp_Mode LinTpRequestedMode)
     }
     return ret;
 }
-#endif /* BSWM_LINTP_ENABLED == STD_ON */
+#endif /*BSWM_LINTP_ENABLED == STD_ON*/
 
 #if (BSWM_NM_ENABLED == STD_ON)
 FUNC(Std_ReturnType, BSWM_CODE)
@@ -513,7 +514,7 @@ BswM_DetChkNmCarWkUp(void)
     }
     return ret;
 }
-#endif /* BSWM_NM_ENABLED == STD_ON */
+#endif /*BSWM_NM_ENABLED == STD_ON*/
 
 #if (BSWM_NVM_ENABLED == STD_ON)
 FUNC(Std_ReturnType, BSWM_CODE)
@@ -568,7 +569,7 @@ BswM_DetChkCurNvmJobMode(NvM_MultiBlockRequestType MultiBlockRequest)
     }
     return ret;
 }
-#endif /* BSWM_NVM_ENABLED == STD_ON */
+#endif /*BSWM_NVM_ENABLED == STD_ON*/
 
 #if (BSWM_GENERIC_REQUEST_ENABLED == STD_ON)
 FUNC(Std_ReturnType, BSWM_CODE)
@@ -614,7 +615,7 @@ BswM_DetChkGenericRqst(BswM_UserType requestingUser)
     }
     return ret;
 }
-#endif /* BSWM_GENERIC_REQUEST_ENABLED == STD_ON */
+#endif /*BSWM_GENERIC_REQUEST_ENABLED == STD_ON*/
 
 #if (BSWM_SD_ENABLED == STD_ON)
 FUNC(Std_ReturnType, BSWM_CODE)
@@ -693,7 +694,7 @@ BswM_DetChkEvHandlerCurState(Sd_EventHandlerCurrentStateType EventHandlerStatus)
     }
     return ret;
 }
-#endif /* BSWM_SD_ENABLED == STD_ON */
+#endif /*BSWM_SD_ENABLED == STD_ON*/
 
 #if (BSWM_WDGM_ENABLED == STD_ON)
 FUNC(Std_ReturnType, BSWM_CODE)
@@ -707,11 +708,11 @@ BswM_DetChkWgmParRst(void)
     }
     return ret;
 }
-#endif /* BSWM_WDGM_ENABLED == STD_ON */
+#endif /*BSWM_WDGM_ENABLED == STD_ON*/
 #define BSWM_STOP_SEC_CODE
 #include "BswM_MemMap.h"
 /*******************************************************************************
 **                      Private Function Definitions                          **
 *******************************************************************************/
 
-#endif /* BSWM_DEV_ERROR_DETECT == STD_ON */
+#endif /*BSWM_DEV_ERROR_DETECT == STD_ON*/

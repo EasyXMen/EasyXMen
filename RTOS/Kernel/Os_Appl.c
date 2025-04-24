@@ -18,21 +18,22 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Os_Appl.c                                                   **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : i-soft-os                                                   **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
- **  Version :   AUTOSAR classic Platform R19--Function Safety                 **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Os_Appl.c                                                   **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : i-soft-os                                                   **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
+**  Version :   AUTOSAR classic Platform R19--Function Safety                 **
+**                                                                            **
+*******************************************************************************/
 
 /*=======[I N C L U D E S]====================================================*/
 #include "Os_Internal.h"
@@ -41,7 +42,7 @@
 #if ((OS_SC3 == CFG_SC) || (OS_SC4 == CFG_SC))
 /* The size of the minimum access bit unit for one application */
 /* DD_1_0176 */
-#define OS_APPACCBITUNIT_SIZE (sizeof(ApplicationType) << 3u)
+#define OS_APPACCBITUNIT_SIZE (sizeof(ApplicationType) * CHAR_BIT)
 
 /*the access application bit position based on the access bit unit size*/
 #define OS_APPGETACCESS_BP(osAppId) ((osAppId) % OS_APPACCBITUNIT_SIZE)
@@ -272,7 +273,7 @@ static FUNC(void, OS_CODE) Os_AppTerminateIsrKernelProc(Os_IsrType OsIsrID)
 #if ((TRUE == CFG_TIMING_PROTECTION_ENABLE) || (CFG_STD_RESOURCE_MAX > 0) || (CFG_SPINLOCK_MAX > 0U))
     /* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */ /* OS_APPL_COMPILER_002 */
     P2VAR(Os_ICBType, AUTOMATIC, OS_VAR) pOsICB;
-/* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
+    /* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
 #endif
 
 #if (CFG_SPINLOCK_MAX > 0U)
@@ -391,12 +392,12 @@ static FUNC(void, OS_CODE)
     {
         for (OsIsrLoopi = 0u; OsIsrLoopi < OsAppIsrCnt; OsIsrLoopi++)
         {
-/* MISRA-C: 17.4  Array subscripting applied to an object of pointer type.
-   pOsAppIsrRef is pointor of static_cfg_array, OsAppIsrCnt is the size of array,
-   it must be used like below. */
+            /* MISRA-C: 17.4  Array subscripting applied to an object of pointer type.
+            pOsAppIsrRef is pointor of static_cfg_array, OsAppIsrCnt is the size of array,
+            it must be used like below. */
 
-/* PRQA S 3469 ++ */ /* MISRA  Dir-4.9*/ /* OS_APPL_MACRO_006 */
-/* Arch platform related process. */
+            /* PRQA S 3469 ++ */ /* MISRA  Dir-4.9*/ /* OS_APPL_MACRO_006 */
+                                                     /* Arch platform related process. */
 #if (TRUE == CFG_INT_NEST_ENABLE)
             Os_ArchAppTerminateIsrProc(Os_GetObjLocalId(pOsAppIsrRef[OsIsrLoopi]));
 #endif
@@ -896,6 +897,11 @@ FUNC(ApplicationType, OS_CODE) GetCurrentApplicationID(void)
     OS_ENTER_KERNEL();
     VAR(ApplicationType, OS_VAR) ApplID = INVALID_OSAPPLICATION;
     VAR(StatusType, OS_VAR) status = E_OK;
+
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceEnter(OSServiceId_GetApplicationID);
+#endif /* TRUE == CFG_TRACE_ENABLE */
+
     OS_ARCH_DECLARE_CRITICAL();
 
 /*service protection*/
@@ -936,6 +942,10 @@ FUNC(ApplicationType, OS_CODE) GetCurrentApplicationID(void)
         Os_TraceErrorHook(OSError_Save_GetCurrentApplicationID(), OSServiceId_GetCurrentApplicationID, status);
     }
 #endif
+
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceExit(OSServiceId_GetApplicationID);
+#endif /* TRUE == CFG_TRACE_ENABLE */
 
     OS_EXIT_KERNEL(); /* PRQA S 3469 */ /* MISRA  Dir-4.9*/ /* OS_APPL_MACRO_006 */
     UNUSED_PARAMETER(status);
@@ -1094,9 +1104,14 @@ CheckObjectAccess(ApplicationType ApplID, ObjectTypeType ObjectType, AppObjectId
     VAR(ObjectAccessType, OS_VAR) err = NO_ACCESS;
     VAR(StatusType, OS_VAR) Status = E_OK;
 
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceEnter(OSServiceId_CheckObjectAccess);
+#endif /* TRUE == CFG_TRACE_ENABLE */
+
     /* PRQA S 3469 ++ */ /* MISRA  Dir-4.9 */ /* OS_APPL_MACRO_006 */
     pObjectIDMaxTableRef = Os_ObjectIDMaxTable_Inf[Os_GetObjCoreId(ObjectID)];
-/* PRQA S 3469 -- */ /* MISRA  Dir-4.9 */
+    /* PRQA S 3469 -- */ /* MISRA  Dir-4.9 */
+
 /*service protection*/
 #if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
     if (Os_WrongContext(OS_CONTEXT_CHECK_OBJECT_ACCESS) != TRUE)
@@ -1140,6 +1155,10 @@ CheckObjectAccess(ApplicationType ApplID, ObjectTypeType ObjectType, AppObjectId
     }
 #endif
 
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceExit(OSServiceId_CheckObjectAccess);
+#endif /* TRUE == CFG_TRACE_ENABLE */
+
     OS_EXIT_KERNEL(); /* PRQA S 3469 */ /* MISRA  Dir-4.9*/ /* OS_APPL_MACRO_006 */
 
     UNUSED_PARAMETER(Status);
@@ -1170,6 +1189,10 @@ FUNC(StatusType, OS_CODE) TerminateApplication(ApplicationType Application, Rest
     OS_ENTER_KERNEL();
 
     VAR(StatusType, OS_VAR) err = E_OK;
+
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceEnter(OSServiceId_TerminateApplication);
+#endif /* TRUE == CFG_TRACE_ENABLE */
 
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
     /*SWS_Os_00493*/
@@ -1246,6 +1269,10 @@ FUNC(StatusType, OS_CODE) TerminateApplication(ApplicationType Application, Rest
     }
 #endif
 
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceExit(OSServiceId_TerminateApplication);
+#endif /* TRUE == CFG_TRACE_ENABLE */
+
     OS_EXIT_KERNEL(); /* PRQA S 3469 */ /* MISRA  Dir-4.9*/ /* OS_APPL_MACRO_006 */
     return err;
 }
@@ -1285,7 +1312,7 @@ FUNC(void, OS_CODE) Os_TerminateApplication(ApplicationType Application, Restart
     posCurAppCfg = &Os_AppCfg[Application];
     OS_ARCH_EXIT_CRITICAL(); /* PRQA S 3469 */ /* MISRA  Dir-4.9*/ /* OS_APPL_MACRO_006 */
 
-    OS_ARCH_ENTRY_CRITICAL(); /* PRQA S 3469 */ /* MISRA  Dir-4.9*/ /* OS_APPL_MACRO_006 */
+    OS_ARCH_SUSPEND_ALLINT(); /* PRQA S 3469 */ /* MISRA  Dir-4.9*/ /* OS_APPL_MACRO_006 */
     if (APPLICATION_ACCESSIBLE != Os_AppCB[Application].appState)
     {
         /* nothing to do */
@@ -1349,7 +1376,7 @@ FUNC(void, OS_CODE) Os_TerminateApplication(ApplicationType Application, Restart
                  * so Os_SwitchTask must be called in OS_ARCH_ISR2_EPILOGUE. */
                 /*If called context is in ISR2, Now Exit */
                 /* PRQA S 3469 ++ */ /* MISRA  Dir-4.9*/ /* OS_APPL_MACRO_006 */
-                OS_ARCH_EXIT_CRITICAL();
+                OS_ARCH_RESTORE_ALLINT();
                 /* PRQA S 3469 -- */ /* MISRA  Dir-4.9*/
                 /* !!!0306-MISRA Rule 4.3 */
                 /* !!!0303-MISRA Rule 11.4 */
@@ -1364,13 +1391,21 @@ FUNC(void, OS_CODE) Os_TerminateApplication(ApplicationType Application, Restart
                 Os_SCB.sysOsLevel = OS_LEVEL_TASK;
                 Os_SCB.sysDispatchLocker = 0u;
 
+#if (TRUE == CFG_TRACE_ENABLE)
+                Os_TraceTaskSwitch(
+                    Os_SCB.sysRunningTaskID,
+                    Os_SCB.sysHighTaskID,
+                    OS_TRACE_TASK_SWITCH_REASON_APP_TERMINATE,
+                    OS_TRACE_TASK_SWITCH_REASON_APP_TERMINATE_ACTIVE);
+#endif
+
                 OS_START_DISPATCH();
                 Os_Dispatch(); /* PRQA S 3469 */ /* MISRA  Dir-4.9*/ /* OS_APPL_MACRO_006 */
             }
         }
     }
 
-    OS_ARCH_EXIT_CRITICAL(); /* PRQA S 3469 */ /* MISRA  Dir-4.9*/ /* OS_APPL_MACRO_006 */
+    OS_ARCH_RESTORE_ALLINT(); /* PRQA S 3469 */ /* MISRA  Dir-4.9*/ /* OS_APPL_MACRO_006 */
     return;
 }
 #define OS_STOP_SEC_CODE
@@ -1645,6 +1680,10 @@ FUNC(ApplicationType, OS_CODE) CheckObjectOwnership(ObjectTypeType ObjectType, A
     VAR(ApplicationType, OS_VAR) ApplID = INVALID_OSAPPLICATION;
     VAR(StatusType, OS_VAR) Status = E_OK;
 
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceEnter(OSServiceId_CheckObjectOwnership);
+#endif /* TRUE == CFG_TRACE_ENABLE */
+
 /*service protection*/
 #if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
     if (Os_WrongContext(OS_CONTEXT_CHECK_OBJECT_OWNERSHIP) != TRUE)
@@ -1670,6 +1709,10 @@ FUNC(ApplicationType, OS_CODE) CheckObjectOwnership(ObjectTypeType ObjectType, A
             Status);
     }
 #endif
+
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceExit(OSServiceId_CheckObjectOwnership);
+#endif /* TRUE == CFG_TRACE_ENABLE */
 
     OS_EXIT_KERNEL(); /* PRQA S 3469 */ /* MISRA  Dir-4.9*/ /* OS_APPL_MACRO_006 */
     UNUSED_PARAMETER(Status);

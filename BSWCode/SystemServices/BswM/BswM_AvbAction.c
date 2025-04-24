@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : BswM_AvbAction.c                                            **
- **                                                                            **
- **  Created on  : 2020-03-24                                                  **
- **  Author      : qinchun.yang                                                **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : BswM_AvbAction.c                                            **
+**                                                                            **
+**  Created on  : 2020-03-24                                                  **
+**  Author      : qinchun.yang                                                **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 
 /*******************************************************************************
 **                      Include Section                                       **
@@ -39,13 +40,13 @@
 #include "BswM_Internal.h"
 #if (BSWM_NM_ENABLED == STD_ON)
 #include "Nm.h"
-#endif /* BSWM_NM_ENABLED == STD_ON */
+#endif /*BSWM_NM_ENABLED == STD_ON*/
 #if (BSWM_COMM_ENABLED == STD_ON)
 #include "ComM_BswM.h"
-#endif /* BSWM_COMM_ENABLED == STD_ON */
+#endif /*BSWM_COMM_ENABLED == STD_ON*/
 #if (BSWM_RTE_ENABLED == STD_ON)
 #include "Rte_Main.h"
-#endif /* BSWM_RTE_ENABLED == STD_ON */
+#endif /*BSWM_RTE_ENABLED == STD_ON*/
 /*******************************************************************************
 **                      Private Macro Definitions                             **
 *******************************************************************************/
@@ -71,6 +72,8 @@
 *******************************************************************************/
 #define BSWM_START_SEC_CODE
 #include "BswM_MemMap.h"
+
+#if (BSWM_ACTION_CLEAREVENTREQUEST_ENABLED == STD_ON)
 /*Action: Clear event request port*/
 FUNC(Std_ReturnType, BSWM_CODE)
 BswM_DoClrEventRqst(ApplicationType partIdx, uint8 actionIdx)
@@ -84,8 +87,9 @@ BswM_DoClrEventRqst(ApplicationType partIdx, uint8 actionIdx)
     BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].eventRqstPortRunPtr[clrEvIdx] = BSWM_EVENT_IS_CLEARED;
     return ret;
 }
+#endif /*BSWM_ACTION_CLEAREVENTREQUEST_ENABLED == STD_ON*/
 
-#if (BSWM_COMM_ENABLED == STD_ON)
+#if (BSWM_ACTION_COMMALLOWCOM_ENABLED == STD_ON)
 /*Action: ComM Allow COM*/
 FUNC(Std_ReturnType, BSWM_CODE)
 BswM_DoComMAllowCom(ApplicationType partIdx, uint8 actionIdx)
@@ -99,8 +103,9 @@ BswM_DoComMAllowCom(ApplicationType partIdx, uint8 actionIdx)
         actionLCfgPtr->comMAllowComActions[actionIdx].comAllowed);
     return ret;
 }
+#endif /*BSWM_ACTION_COMMALLOWCOM_ENABLED == STD_ON*/
 
-#if (BSWM_COMM_MODE_LIMITATION_ENABLED == STD_ON)
+#if (BSWM_ACTION_COMMMODELIMITATION_ENABLED == STD_ON)
 /*Action: ComM Mode limitation*/
 FUNC(Std_ReturnType, BSWM_CODE)
 BswM_DoComMModeLimit(ApplicationType partIdx, uint8 actionIdx)
@@ -115,8 +120,9 @@ BswM_DoComMModeLimit(ApplicationType partIdx, uint8 actionIdx)
 
     return ret;
 }
-#endif /* BSWM_COMM_MODE_LIMITATION_ENABLED == STD_ON */
+#endif /*BSWM_ACTION_COMMMODELIMITATION_ENABLED == STD_ON*/
 
+#if (BSWM_ACTION_COMMMODESWITCH_ENABLED == STD_ON)
 /*Action: ComM Mode Switch*/
 FUNC(Std_ReturnType, BSWM_CODE)
 BswM_DoComMModeSwitch(ApplicationType partIdx, uint8 actionIdx)
@@ -131,9 +137,8 @@ BswM_DoComMModeSwitch(ApplicationType partIdx, uint8 actionIdx)
 
     return ret;
 }
-#endif /*  (BSWM_COMM_ENABLED == STD_ON */
+#endif /*BSWM_ACTION_COMMMODESWITCH_ENABLED == STD_ON*/
 
-#if (BSWM_ECUM_ENABLED == STD_ON)
 #if (BSWM_ECUM_VERSION == BSWM_V_4_2_2)
 /*Action: EcuM Go Down*/
 FUNC(Std_ReturnType, BSWM_CODE)
@@ -170,7 +175,8 @@ BswM_DoEcuMGoPoll(ApplicationType partIdx, uint8 actionIdx)
     ret = EcuM_GoPoll();
     return ret;
 }
-#else  /* BSWM_ECUM_VERSION == BSWM_V_R19_11 */
+#else /*BSWM_ECUM_VERSION == BSWM_V_R19_11*/
+#if (BSWM_ACTION_ECUMGODOWNHALTPOLL_ENABLED == STD_ON)
 /*Action: BswMEcuMGoDownHaltPoll*/
 FUNC(Std_ReturnType, BSWM_CODE)
 BswM_DoEcuMGoDownHaltPoll(ApplicationType partIdx, uint8 actionIdx)
@@ -182,8 +188,10 @@ BswM_DoEcuMGoDownHaltPoll(ApplicationType partIdx, uint8 actionIdx)
     ret = EcuM_GoDownHaltPoll(actionLCfgPtr->ecuMGoDownHaltPollActions[actionIdx].goDownUser);
     return ret;
 }
-#endif /* BSWM_ECUM_VERSION == BSWM_V_4_2_2 */
+#endif /*BSWM_ACTION_ECUMGODOWNHALTPOLL_ENABLED == STD_ON*/
+#endif /*BSWM_ECUM_VERSION == BSWM_V_4_2_2*/
 
+#if (BSWM_ACTION_ECUMDRIVERINITLIST_ENABLED == STD_ON)
 /*Action: BswMEcuMDriverInitListBswM*/
 FUNC(Std_ReturnType, BSWM_CODE)
 BswM_DoEcuMInitBswM(ApplicationType partIdx, uint8 actionIdx)
@@ -195,7 +203,9 @@ BswM_DoEcuMInitBswM(ApplicationType partIdx, uint8 actionIdx)
     EcuM_AL_DriverInitBswM(actionLCfgPtr->ecuMDrvInitListActions[actionIdx].ecumDrvInitList);
     return ret;
 }
+#endif /*BSWM_ACTION_ECUMDRIVERINITLIST_ENABLED == STD_ON*/
 
+#if (BSWM_ACTION_ECUMSELECTSHUTDOWNTARGET_ENABLED == STD_ON)
 /*Action: EcuM Select Shut Down Target*/
 FUNC(Std_ReturnType, BSWM_CODE)
 BswM_DoEcuMSelectShutTgt(ApplicationType partIdx, uint8 actionIdx)
@@ -209,7 +219,9 @@ BswM_DoEcuMSelectShutTgt(ApplicationType partIdx, uint8 actionIdx)
         actionLCfgPtr->ecuMSelectShutTgtActions[actionIdx].mode);
     return ret;
 }
+#endif /*BSWM_ACTION_ECUMSELECTSHUTDOWNTARGET_ENABLED == STD_ON*/
 
+#if (BSWM_ACTION_ECUMSTATESWITCH_ENABLED == STD_ON)
 /*Action: EcuM State Switch*/
 FUNC(Std_ReturnType, BSWM_CODE)
 BswM_DoEcuMStateSwitch(ApplicationType partIdx, uint8 actionIdx)
@@ -221,9 +233,9 @@ BswM_DoEcuMStateSwitch(ApplicationType partIdx, uint8 actionIdx)
     EcuM_SetState(actionLCfgPtr->ecuMStateSwitchActions[actionIdx].ecuMState);
     return ret;
 }
-#endif /* BSWM_ECUM_ENABLED == STD_ON */
+#endif /*BSWM_ACTION_ECUMSTATESWITCH_ENABLED == STD_ON*/
 
-#if (BSWM_ETHIF_ENABLED == STD_ON)
+#if (BSWM_ACTION_ETHIFSWITCHPORTGROUPREQUESTMODE_ENABLED == STD_ON)
 /*Action: EthIf switch port group link state*/
 FUNC(Std_ReturnType, BSWM_CODE)
 BswM_DoEthIfSwiPortGruRqst(ApplicationType partIdx, uint8 actionIdx)
@@ -237,9 +249,9 @@ BswM_DoEthIfSwiPortGruRqst(ApplicationType partIdx, uint8 actionIdx)
         actionLCfgPtr->ethifSwiPortGruRqstActions[actionIdx].ethTrcvMode);
     return ret;
 }
-#endif /* BSWM_ETHIF_ENABLED == STD_ON */
+#endif /*BSWM_ACTION_ETHIFSWITCHPORTGROUPREQUESTMODE_ENABLED == STD_ON*/
 
-#if (BSWM_FRSM_ENABLED == STD_ON)
+#if (BSWM_ACTION_FRSMALLSLOTS_ENABLED == STD_ON)
 /*Action: FrSM All Slots*/
 FUNC(Std_ReturnType, BSWM_CODE)
 BswM_DoFrSMAllSlots(ApplicationType partIdx, uint8 actionIdx)
@@ -251,9 +263,9 @@ BswM_DoFrSMAllSlots(ApplicationType partIdx, uint8 actionIdx)
     ret = FrSm_AllSlots(actionLCfgPtr->frSMAllSlotsActions[actionIdx].channel);
     return ret;
 }
-#endif /* BSWM_FRSM_ENABLED == STD_ON */
+#endif /*BSWM_ACTION_FRSMALLSLOTS_ENABLED == STD_ON*/
 
-#if (BSWM_J1939DCM_ENABLED == STD_ON)
+#if (BSWM_ACTION_J1939DCMSTATESWITCH_ENABLED == STD_ON)
 /*Action: J1939Dcm State Switch*/
 FUNC(Std_ReturnType, BSWM_CODE)
 BswM_DoJ1939DcmStateSwitch(ApplicationType partIdx, uint8 actionIdx)
@@ -268,7 +280,7 @@ BswM_DoJ1939DcmStateSwitch(ApplicationType partIdx, uint8 actionIdx)
         actionLCfgPtr->j1939DcmStateSwitchActions[actionIdx].state);
     return ret;
 }
-#endif /* BSWM_J1939DCM_ENABLED == STD_ON */
+#endif /*BSWM_ACTION_J1939DCMSTATESWITCH_ENABLED == STD_ON*/
 
 #if (BSWM_ACTION_LINSCHEDULESWITCH_ENABLED == STD_ON)
 /*Action: Lin Schedule Switch*/
@@ -285,9 +297,9 @@ BswM_DoLinScheduleSwitch(ApplicationType partIdx, uint8 actionIdx)
         actionLCfgPtr->linSchdlSwitchActionLCfgs[actionIdx].schedule);
     return ret;
 }
-#endif /* BSWM_ACTION_LINSCHEDULESWITCH_ENABLED == STD_ON */
+#endif /*BSWM_ACTION_LINSCHEDULESWITCH_ENABLED == STD_ON*/
 
-#if (BSWM_SD_ENABLED == STD_ON)
+#if (BSWM_ACTION_SDCLIENTSERVICEMODEREQUEST_ENABLED == STD_ON)
 /*Action: SD Client Service Mode Request*/
 FUNC(Std_ReturnType, BSWM_CODE)
 BswM_DoSdCliServiceModeReq(ApplicationType partIdx, uint8 actionIdx)
@@ -302,7 +314,9 @@ BswM_DoSdCliServiceModeReq(ApplicationType partIdx, uint8 actionIdx)
         actionLCfgPtr->sdCliServiceModeReqActions[actionIdx].state);
     return ret;
 }
+#endif /*BSWM_ACTION_SDCLIENTSERVICEMODEREQUEST_ENABLED == STD_ON*/
 
+#if (BSWM_ACTION_SDCONSUMEDEVENTGROUPMODEREQUEST_ENABLED == STD_ON)
 /*Action: SD Consumed Event Group Mode Request*/
 FUNC(Std_ReturnType, BSWM_CODE)
 BswM_DoSdEvGrpModeReq(ApplicationType partIdx, uint8 actionIdx)
@@ -317,7 +331,9 @@ BswM_DoSdEvGrpModeReq(ApplicationType partIdx, uint8 actionIdx)
         actionLCfgPtr->sdConsumedEvGrpModeReqActions[actionIdx].state);
     return ret;
 }
+#endif /*BSWM_ACTION_SDCONSUMEDEVENTGROUPMODEREQUEST_ENABLED == STD_ON*/
 
+#if (BSWM_ACTION_SDSERVERSERVICEMODEREQUEST_ENABLED == STD_ON)
 /*Action: SD Server Service Mode Request*/
 FUNC(Std_ReturnType, BSWM_CODE)
 BswM_DoSdSvrServiceModeReq(ApplicationType partIdx, uint8 actionIdx)
@@ -332,9 +348,9 @@ BswM_DoSdSvrServiceModeReq(ApplicationType partIdx, uint8 actionIdx)
         actionLCfgPtr->sdServerServiceModeReqActions[actionIdx].state);
     return ret;
 }
-#endif /* BSWM_SD_ENABLED == STD_ON */
+#endif /*BSWM_ACTION_SDSERVERSERVICEMODEREQUEST_ENABLED == STD_ON*/
 
-#if (BSWM_NM_ENABLED == STD_ON)
+#if (BSWM_ACTION_NMCONTROL_ENABLED == STD_ON)
 /*ACtion: NM control*/
 FUNC(Std_ReturnType, BSWM_CODE) BswM_DoNMControl(ApplicationType partIdx, uint8 actionIdx)
 {
@@ -352,29 +368,26 @@ FUNC(Std_ReturnType, BSWM_CODE) BswM_DoNMControl(ApplicationType partIdx, uint8 
     }
     return ret;
 }
-#endif /* BSWM_NM_ENABLED == STD_ON */
+#endif /*BSWM_ACTION_NMCONTROL_ENABLED == STD_ON*/
 
-#if (BSWM_COM_ENABLED == STD_ON)
+#if (BSWM_ACTION_DEADLINEMONITORINGCONTROL_ENABLED == STD_ON)
 /*Action: COM deadline monitor control*/
 FUNC(Std_ReturnType, BSWM_CODE)
 BswM_DoDMControl(ApplicationType partIdx, uint8 actionIdx)
 {
     P2CONST(BswM_ActionItemsLCfgType, AUTOMATIC, BSWM_CONST) actionLCfgPtr;
-    P2CONST(BswM_PartitionPCCfgType, TYPEDEF, BSWM_CONST) bswmPartPCCfgs;
     Std_ReturnType ret = E_OK;
     BswM_ComIpduGruType numOfEnableRecDmGru;
     BswM_ComIpduGruType numOfDisableRecDmGru;
     BswM_ComIpduGruType gruIdx;
 
-    bswmPartPCCfgs = &(BswM_RuntimeStatus.bswmPartPCCfgs[partIdx]);
     actionLCfgPtr = BswM_RuntimeStatus.bswmPartLCfgs[partIdx].acItemsLCfg;
     numOfEnableRecDmGru = actionLCfgPtr->dmCtrlActionLCfgs[actionIdx].numOfEnableRecDmGru;
     for (gruIdx = 0; gruIdx < numOfEnableRecDmGru; gruIdx++)
     {
         /* PRQA S 2784 ++ */ /* MISRA Rule 17.5 */
         Com_SetIpduGroup(
-
-            *(bswmPartPCCfgs->comRxDmIpduGroupVector),
+            *(BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].comRxDmIpduGroupVector),
             actionLCfgPtr->dmCtrlActionLCfgs[actionIdx].enableRecDmGruId[gruIdx],
             TRUE);
         /* PRQA S 2784 -- */ /* MISRA Rule 17.5 */
@@ -384,38 +397,38 @@ BswM_DoDMControl(ApplicationType partIdx, uint8 actionIdx)
     {
         /* PRQA S 2784 ++ */ /* MISRA Rule 17.5 */
         Com_SetIpduGroup(
-            *(bswmPartPCCfgs->comRxDmIpduGroupVector),
+            *(BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].comRxDmIpduGroupVector),
             actionLCfgPtr->dmCtrlActionLCfgs[actionIdx].disableRecDmGruId[gruIdx],
             FALSE);
         /* PRQA S 2784 -- */ /* MISRA Rule 17.5 */
     }
     /* PRQA S 2784 ++ */ /* MISRA Rule 17.5 */
-    Com_ReceptionDMControl(*(bswmPartPCCfgs->comRxDmIpduGroupVector));
+    Com_ReceptionDMControl(*(BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].comRxDmIpduGroupVector));
     /* PRQA S 2784 -- */ /* MISRA Rule 17.5 */
 
     return ret;
 }
+#endif /*BSWM_ACTION_DEADLINEMONITORINGCONTROL_ENABLED == STD_ON*/
 
+#if (BSWM_ACTION_PDUGROUPSWITCH_ENABLED == STD_ON)
 /*Action: PDU Group Switch*/
 FUNC(Std_ReturnType, BSWM_CODE)
 BswM_DoPduGrpSwitch(ApplicationType partIdx, uint8 actionIdx)
 {
     P2CONST(BswM_ActionItemsLCfgType, AUTOMATIC, BSWM_CONST) actionLCfgPtr;
-    P2CONST(BswM_PartitionPCCfgType, TYPEDEF, BSWM_CONST) bswmPartPCCfgs;
     Std_ReturnType ret = E_OK;
     BswM_ComIpduGruType numOfEnableIpduGru;
     BswM_ComIpduGruType numOfDisableIpduGru;
     BswM_ComIpduGruType gruIdx;
     uint32 index;
 
-    bswmPartPCCfgs = &(BswM_RuntimeStatus.bswmPartPCCfgs[partIdx]);
     actionLCfgPtr = BswM_RuntimeStatus.bswmPartLCfgs[partIdx].acItemsLCfg;
     numOfEnableIpduGru = actionLCfgPtr->pduGrpSwitchActionLCfgs[actionIdx].numOfEnableIpduGru;
     for (gruIdx = 0; gruIdx < numOfEnableIpduGru; gruIdx++)
     {
         /* PRQA S 2784 ++ */ /* MISRA Rule 17.5 */
         Com_SetIpduGroup(
-            *(bswmPartPCCfgs->ipduGroupAllVecotr),
+            *(BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].ipduGroupAllVecotr),
             actionLCfgPtr->pduGrpSwitchActionLCfgs[actionIdx].enableIpduGruId[gruIdx],
             TRUE);
         /* PRQA S 2784 -- */ /* MISRA Rule 17.5 */
@@ -423,7 +436,7 @@ BswM_DoPduGrpSwitch(ApplicationType partIdx, uint8 actionIdx)
         {
             /* PRQA S 2784 ++ */ /* MISRA Rule 17.5 */
             Com_SetIpduGroup(
-                *(bswmPartPCCfgs->ipduGroupReinitVecotr),
+                *(BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].ipduGroupReinitVecotr),
                 actionLCfgPtr->pduGrpSwitchActionLCfgs[actionIdx].enableIpduGruId[gruIdx],
                 TRUE);
             /* PRQA S 2784 -- */ /* MISRA Rule 17.5 */
@@ -434,31 +447,33 @@ BswM_DoPduGrpSwitch(ApplicationType partIdx, uint8 actionIdx)
     {
         /* PRQA S 2784 ++ */ /* MISRA Rule 17.5 */
         Com_SetIpduGroup(
-            *(bswmPartPCCfgs->ipduGroupAllVecotr),
+            *(BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].ipduGroupAllVecotr),
             actionLCfgPtr->pduGrpSwitchActionLCfgs[actionIdx].disableIpduGruId[gruIdx],
             FALSE);
 
         Com_SetIpduGroup(
-            *(bswmPartPCCfgs->ipduGroupReinitVecotr),
+            *(BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].ipduGroupReinitVecotr),
             actionLCfgPtr->pduGrpSwitchActionLCfgs[actionIdx].disableIpduGruId[gruIdx],
             FALSE);
         /* PRQA S 2784 -- */ /* MISRA Rule 17.5 */
     }
     /*1.First call of Com_IpduGroupControl, the vector for BswMPduGroupSwitchReinit == true*/
     /* PRQA S 2784 ++ */ /* MISRA Rule 17.5 */
-    Com_IpduGroupControl(*(bswmPartPCCfgs->ipduGroupReinitVecotr), TRUE);
+    Com_IpduGroupControl(*(BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].ipduGroupReinitVecotr), TRUE);
     /*2.For the second call of Com_IpduGroupControl, the other vector shall be used*/
-    Com_IpduGroupControl(*(bswmPartPCCfgs->ipduGroupAllVecotr), FALSE);
+    Com_IpduGroupControl(*(BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].ipduGroupAllVecotr), FALSE);
     /* PRQA S 2784 -- */ /* MISRA Rule 17.5 */
     /*3.the vector for BswMPduGroupSwitchReinit == true shall be overwritten with the value of the other vector.*/
     for (index = 0u; index < sizeof(Com_IpduGroupVector); index++)
     {
-        ((uint8*)(bswmPartPCCfgs->ipduGroupReinitVecotr))[index] =
-            ((uint8*)(bswmPartPCCfgs->ipduGroupAllVecotr))[index];
+        ((uint8*)(BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].ipduGroupReinitVecotr))[index] =
+            ((uint8*)(BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].ipduGroupAllVecotr))[index];
     }
     return ret;
 }
+#endif /*BSWM_ACTION_PDUGROUPSWITCH_ENABLED == STD_ON*/
 
+#if (BSWM_ACTION_SWITCHIPDUMODE_ENABLED == STD_ON)
 /*Action: Switch IPDU Mode*/
 FUNC(Std_ReturnType, BSWM_CODE)
 BswM_DoSwitchIpduMode(ApplicationType partIdx, uint8 actionIdx)
@@ -473,7 +488,9 @@ BswM_DoSwitchIpduMode(ApplicationType partIdx, uint8 actionIdx)
 
     return ret;
 }
+#endif /*BSWM_ACTION_SWITCHIPDUMODE_ENABLED == STD_ON*/
 
+#if (BSWM_ACTION_TRIGGERIPDUSEND_ENABLED == STD_ON)
 /*Action: Trigger IPDU Send*/
 FUNC(Std_ReturnType, BSWM_CODE)
 BswM_DoTriggerIpduSend(ApplicationType partIdx, uint8 actionIdx)
@@ -497,9 +514,9 @@ BswM_DoTriggerIpduSend(ApplicationType partIdx, uint8 actionIdx)
 
     return ret;
 }
-#endif /* BSWM_COM_ENABLED == STD_ON */
+#endif /*BSWM_ACTION_TRIGGERIPDUSEND_ENABLED == STD_ON*/
 
-#if (BSWM_J1939RM_ENABLED == STD_ON)
+#if (BSWM_ACTION_J1939RMSTATESWITCH_ENABLED == STD_ON)
 /*Action: J1939Rm State Switch*/
 FUNC(Std_ReturnType, BSWM_CODE)
 BswM_DoJ1939RmStateSwitch(ApplicationType partIdx, uint8 actionIdx)
@@ -514,9 +531,9 @@ BswM_DoJ1939RmStateSwitch(ApplicationType partIdx, uint8 actionIdx)
         actionLCfgPtr->j1939RmStateSwitchActions[actionIdx].state);
     return ret;
 }
-#endif /* BSWM_J1939RM_ENABLED == STD_ON */
+#endif /*BSWM_ACTION_J1939RMSTATESWITCH_ENABLED == STD_ON*/
 
-#if (BSWM_PDUR_ENABLED == STD_ON)
+#if (BSWM_ACTION_PDUROUTERCONTROL_ENABLED == STD_ON)
 /*Action: PDU Router Control*/
 FUNC(Std_ReturnType, BSWM_CODE)
 BswM_DoPduRouterControl(ApplicationType partIdx, uint8 actionIdx)
@@ -547,9 +564,10 @@ BswM_DoPduRouterControl(ApplicationType partIdx, uint8 actionIdx)
     }
     return ret;
 }
-#endif /* BSWM_PDUR_ENABLED == STD_ON */
+#endif /*BSWM_ACTION_PDUROUTERCONTROL_ENABLED == STD_ON*/
 
 #if (BSWM_MAX_NUM_CORE > 1u)
+#if (BSWM_ACTION_COREHALTMODE_ENABLED == STD_ON)
 FUNC(Std_ReturnType, BSWM_CODE)
 BswM_DoCoreHaltMode(ApplicationType partIdx, uint8 actionIdx)
 {
@@ -567,8 +585,10 @@ BswM_DoCoreHaltMode(ApplicationType partIdx, uint8 actionIdx)
     }
     return ret;
 }
-#endif /* BSWM_MAX_NUM_CORE > 1 */
+#endif /*BSWM_ACTION_COREHALTMODE_ENABLED == STD_ON*/
+#endif /*BSWM_MAX_NUM_CORE > 1*/
 
+#if (BSWM_ACTION_USERCALLOUT_ENABLED == STD_ON)
 /*Action: Call user function*/
 FUNC(Std_ReturnType, BSWM_CODE)
 BswM_DoUserCallout(ApplicationType partIdx, uint8 actionIdx)
@@ -580,8 +600,9 @@ BswM_DoUserCallout(ApplicationType partIdx, uint8 actionIdx)
     actionLCfgPtr->userCalloutActions[actionIdx].userCalloutFctPtr();
     return ret;
 }
+#endif /*BSWM_ACTION_USERCALLOUT_ENABLED == STD_ON*/
 
-#if (BSWM_RTE_ENABLED == STD_ON)
+#if (BSWM_ACTION_RTEMODEREQUEST_ENABLED == STD_ON)
 /*Action: RTE Mode Request*/
 FUNC(Std_ReturnType, BSWM_CODE)
 BswM_DoRteModeRequest(ApplicationType partIdx, uint8 actionIdx)
@@ -594,7 +615,9 @@ BswM_DoRteModeRequest(ApplicationType partIdx, uint8 actionIdx)
         actionLCfgPtr->rteModeRequestActions[actionIdx].mode);
     return ret;
 }
+#endif /*BSWM_ACTION_RTEMODEREQUEST_ENABLED == STD_ON*/
 
+#if (BSWM_ACTION_RTESWITCH_ENABLED == STD_ON)
 /*Action: RTE Switch*/
 FUNC(Std_ReturnType, BSWM_CODE)
 BswM_DoRteSwitch(ApplicationType partIdx, uint8 actionIdx)
@@ -606,25 +629,25 @@ BswM_DoRteSwitch(ApplicationType partIdx, uint8 actionIdx)
     ret = actionLCfgPtr->rteSwitchActions[actionIdx].rteSwitchFctPtr(actionLCfgPtr->rteSwitchActions[actionIdx].mode);
     return ret;
 }
+#endif /*BSWM_ACTION_RTESWITCH_ENABLED == STD_ON*/
 
+#if (BSWM_ACTION_RTESTART_ENABLED == STD_ON)
 FUNC(Std_ReturnType, BSWM_CODE)
-BswM_DoRteStart(ApplicationType partIdx, uint8 actionIdx)
+BswM_DoRteStart(void)
 {
-    BSWM_PARA_UNUSED(partIdx);
-    BSWM_PARA_UNUSED(actionIdx);
     return Rte_Start();
 }
+#endif /*BSWM_ACTION_RTESTART_ENABLED == STD_ON*/
 
+#if (BSWM_ACTION_RTESTOP_ENABLED == STD_ON)
 FUNC(Std_ReturnType, BSWM_CODE)
-BswM_DoRteStop(ApplicationType partIdx, uint8 actionIdx)
+BswM_DoRteStop(void)
 {
-    BSWM_PARA_UNUSED(partIdx);
-    BSWM_PARA_UNUSED(actionIdx);
     return Rte_Stop();
 }
-#endif /* BSWM_RTE_ENABLED == STD_ON */
+#endif /*BSWM_ACTION_RTESTOP_ENABLED == STD_ON*/
 
-#if (BSWM_SCHM_ENABLED == STD_ON)
+#if (BSWM_ACTION_SCHMSWITCH_ENABLED == STD_ON)
 /*ACtion: SchM Switch*/
 FUNC(Std_ReturnType, BSWM_CODE)
 BswM_DoSchMSwitch(ApplicationType partIdx, uint8 actionIdx)
@@ -637,9 +660,9 @@ BswM_DoSchMSwitch(ApplicationType partIdx, uint8 actionIdx)
         actionLCfgPtr->schMSwitchActions[actionIdx].schMSwitchFctPtr(actionLCfgPtr->schMSwitchActions[actionIdx].mode);
     return ret;
 }
-#endif /* BSWM_SCHM_ENABLED == STD_ON */
+#endif /*BSWM_ACTION_SCHMSWITCH_ENABLED == STD_ON*/
 
-#if (BSWM_TIMER_ENABLED == STD_ON)
+#if (BSWM_ACTION_TIMERCONTROL_ENABLED == STD_ON)
 /*Action: Timer control*/
 FUNC(Std_ReturnType, BSWM_CODE) BswM_DoTimerControl(ApplicationType partIdx, uint8 actionIdx)
 {
@@ -667,7 +690,8 @@ FUNC(Std_ReturnType, BSWM_CODE) BswM_DoTimerControl(ApplicationType partIdx, uin
     }
     return E_OK;
 }
-#endif /* BSWM_TIMER_ENABLED == STD_ON */
+#endif /*BSWM_ACTION_TIMERCONTROL_ENABLED == STD_ON*/
+
 #define BSWM_STOP_SEC_CODE
 #include "BswM_MemMap.h"
 /*******************************************************************************

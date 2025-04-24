@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : EthTSyn_Types.h                                             **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : yuzhe.zhang                                                 **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Type header for EthTSyn                                     **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : EthTSyn_Types.h                                             **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : yuzhe.zhang                                                 **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Type header for EthTSyn                                     **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 
 #ifndef ETHTSYN_TYPES_H
 #define ETHTSYN_TYPES_H
@@ -149,6 +150,8 @@ typedef struct
     /* This represents the reference to the Ethernet interface taken to fetch the
     global time information. */
     uint8 EthTSynGlobalTimeEthIfRef;
+    /* Stbm if use EthFreerunning */
+    boolean SynchronizedTimeBaseUseEthFreerunning;
     /* Configuration of cyclic propagation delay measurement. */
     EthTSynPdelayConfigCfgType EthTSynPdelayConfig;
     /* Specifying the Role of the EthTSyn-Port (Master or Slave). */
@@ -178,8 +181,6 @@ typedef struct
     uint8 EthTSynGlobalTimeDomainId;
     /* Mandatory reference to the required synchronized time-base. */
     uint8 EthTSynSynchronizedTimeBaseRef;
-    /* Stbm if use EthFreerunning */
-    boolean SynchronizedTimeBaseUseEthFreerunning;
     /* The DataIDList for Follow_Up message ensures the identification of data elements due to CRC
 calculation and message authentication process. */
     const EthTSynGlobalTimeFollowUpDataIDListCfgType* EthTSynGlobalTimeFollowUpDataIDList;
@@ -334,4 +335,4 @@ typedef struct
 
 #define ETHTSYN_NANOSECOND_TO_SECOND 0x3B9ACA00u
 
-#endif /* ETHTSYN_TYPES_H */
+#endif

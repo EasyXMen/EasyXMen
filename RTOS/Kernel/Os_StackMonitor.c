@@ -18,21 +18,22 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    :  Os_StackMonitor.c                                          **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      :  i-soft-os                                                  **
- **  Vendor      :                                                             **
- **  DESCRIPTION :  Stack Monitor                                              **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
- **  Version :   AUTOSAR classic Platform R19--Function Safety                 **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    :  Os_StackMonitor.c                                          **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      :  i-soft-os                                                  **
+**  Vendor      :                                                             **
+**  DESCRIPTION :  Stack Monitor                                              **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
+**  Version :   AUTOSAR classic Platform R19--Function Safety                 **
+**                                                                            **
+*******************************************************************************/
 
 /*=======[I N C L U D E S]====================================================*/
 #include "Os_Internal.h"
@@ -89,7 +90,7 @@ FUNC(void, OS_CODE) Os_InitSystemStack(void)
  * REQ ID               <None>
  */
 /******************************************************************************/
-/* PRQA S 3673 ++ */ /* MISRA Dir 8.13 */ /* OS_STACKMONITOR_POINTER_CONST_002 */
+/* PRQA S 3673 ++ */ /* MISRA Dir 8.13 */ /* OS_STACKMONITOR_POINTER_CONST_2 */
 FUNC(void, OS_CODE) Os_StackMonitor(Os_StackPtrType pStack)
 /* PRQA S 3673 -- */ /* MISRA Dir 8.13 */
 {

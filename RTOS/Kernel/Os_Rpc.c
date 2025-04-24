@@ -18,21 +18,22 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Os_Rpc.c                                                   **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : i-soft-os                                                   **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
- **  Version :   AUTOSAR classic Platform R19--Function Safety                 **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Os_Rpc.c                                                   **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : i-soft-os                                                   **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
+**  Version :   AUTOSAR classic Platform R19--Function Safety                 **
+**                                                                            **
+*******************************************************************************/
 
 /*=======[I N C L U D E S]====================================================*/
 #include "Os_Internal.h"
@@ -577,10 +578,13 @@ static FUNC(void, OS_CODE) Os_RpcServiceAction(srvNodeRefType srvNode)
 #endif /* CFG_TASK_MAX > 0U */
 
 #if (CFG_EXTENDED_TASK_MAX > 0)
-        case OSServiceId_SetEvent:
+        case OSServiceId_SetEvent: {
+            Os_EventMaskType EventLow = (Os_EventMaskType)(srvNode->interParameter[1]);
+            Os_EventMaskType EventHigh = ((Os_EventMaskType)(srvNode->interParameter[2]) << 32u);
             srvNode->retValue =
-                Os_SetEvent((Os_TaskType)srvNode->interParameter[0], (Os_EventMaskType)srvNode->interParameter[1]);
+                Os_SetEvent((Os_TaskType)srvNode->interParameter[0], (Os_EventMaskType)(EventLow | EventHigh));
             break;
+        }
 #endif /* CFG_EXTENDED_TASK_MAX > 0 */
 
         case OSServiceId_GetCounterValue:
@@ -665,10 +669,10 @@ static FUNC(void, OS_CODE) Os_RpcServiceAction(srvNodeRefType srvNode)
             /* PRQA S 4461 ++ */ /* MISRA Rule 10.3 */ /* OS_RPC_TYPE_CAST_005 */
             Os_IocComIdType comId = srvNode->interParameter[0];
             Os_IocU16Type vReceiverId = srvNode->interParameter[1];
+            Os_ApplicationType vRecAppId = srvNode->interParameter[2];
             /* PRQA S 4461 -- */ /* MISRA Rule 10.3 */
-            P2CONST(Os_IocCommunicationCfgType, OS_VAR, OS_CONST) iocComCfgPtr;
-            iocComCfgPtr = &Os_IocCommunicationCfg[comId];
-            iocComCfgPtr->IocReceiverProperties[vReceiverId].IocCallBackFunc();
+
+            srvNode->retValue = Os_IocRemoteCallBack(comId, vReceiverId, vRecAppId);
             break;
         }
 #endif /* CFG_IOC_MAX > 0u */

@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                           **
- **  FILENAME    : NvM_Types.h                                                **
- **                                                                           **
- **  Created on  : 2020/5/9 15:21:52                                          **
- **  Author      : tao.yu                                                     **
- **  Vendor      :                                                            **
- **  DESCRIPTION : Providing the types for the NvM module                     **
- **                                                                           **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                     **
- **                                                                           **
- **************************************************************************** */
+ */
 /* PRQA S 3108-- */
+/*
+**************************************************************************** **
+**                                                                           **
+**  FILENAME    : NvM_Types.h                                                **
+**                                                                           **
+**  Created on  : 2020/5/9 15:21:52                                          **
+**  Author      : tao.yu                                                     **
+**  Vendor      :                                                            **
+**  DESCRIPTION : Providing the types for the NvM module                     **
+**                                                                           **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                     **
+**                                                                           **
+**************************************************************************** */
 #ifndef NVM_TYPES_H
 #define NVM_TYPES_H
 
@@ -120,37 +121,6 @@ typedef enum
     NVM_CANCEL_WRITE_ALL /*NvM_CancelWriteAll was performed*/
 } NvM_MultiBlockRequestType;
 
-#ifndef _DEFINED_TYPEDEF_FOR_NvM_InitBlockRequestType_
-typedef enum
-{
-    /*NvM_ReadBlock/ NvM_ReadPRAMBlock is requested on the block*/
-    NVM_INIT_READ_BLOCK,
-    /*NvM_RestoreBlockDefaults/ NvM_RestorePRAMBlockDefaults is requested on the block*/
-    NVM_INIT_RESTORE_BLOCK_DEFAULTS,
-    /*NvM_ReadAll is processing this block*/
-    NVM_INIT_READ_ALL_BLOCK,
-    /*NvM_FirstInitAll is processing this block*/
-    NVM_INIT_FIRST_INIT_ALL
-} NvM_InitBlockRequestType;
-#endif
-
-#ifndef _DEFINED_TYPEDEF_FOR_NvM_BlockRequestType_
-typedef enum
-{
-    /*NvM_ReadBlock/ NvM_ReadPRAMBlock was performed on the block*/
-    NVM_READ_BLOCK,
-    /*NvM_WriteBlock/ NvM_WritePRAMBlock was performed on the block*/
-    NVM_WRITE_BLOCK,
-    /*NvM_RestoreBlockDefaults/ NvM_RestorePRAMBlockDefaults was performed on the block*/
-    NVM_RESTORE_BLOCK_DEFAULTS,
-    /*NvM_EraseNvBlock was performed on the block*/
-    NVM_ERASE_NV_BLOCK,
-    /*NvM_InvalidateNvBlock was performed on the block*/
-    NVM_INVALIDATE_NV_BLOCK,
-    /*NvM_ReadAll has finished processing this block*/
-    NVM_READ_ALL_BLOCK
-} NvM_BlockRequestType;
-#endif
 /*
  * Brief    Per block callback routine which shall be called by the NvM module to
  *          copy default data to a RAM block if a ROM block isn't configured.

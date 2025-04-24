@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : E2E_P05.c                                                   **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : YangBo                                                      **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : E2E_P05.c                                                   **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : YangBo                                                      **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 /*******************************************************************************
 **                      Revision Control History                              **
 *******************************************************************************/
@@ -54,7 +55,7 @@
 /*******************************************************************************
 **                      Private Macro Definitions                             **
 *******************************************************************************/
-
+#define E2E_P05_MAX_COUNTER_VALUE 0xFFU
 /*******************************************************************************
 **                      Private Type Definitions                              **
 *******************************************************************************/
@@ -78,7 +79,7 @@
 /*******************************************************************************
 **                      Private Variable Definitions                          **
 *******************************************************************************/
-/* PRQA S 3432,4391 ++ */ /* MISRA Rule 20.7, Rule 10.8 */
+/* PRQA S 3432,4391,1503 ++ */ /* MISRA Rule 20.7, Rule 10.8,Rule 2.1 */
 /*******************************************************************************
 **                      Global Function Definitions                           **
 *******************************************************************************/
@@ -217,7 +218,7 @@ E2E_P05Check(
     uint8 ReceivedCounter;
     uint16 ReceivedCRC;
     uint16 ComputedCRC;
-    sint8 DeltaCounter;
+    uint8 DeltaCounter;
     uint8 DataID_Hbyte;
     uint8 DataID_Lbyte;
 
@@ -285,12 +286,15 @@ E2E_P05Check(
             if (ReceivedCRC == ComputedCRC)
             {
                 /*taking into wrap around 0xFF*/
-                DeltaCounter = (sint8)ReceivedCounter - (sint8)StatePtr->Counter;
-                if ((DeltaCounter <= (sint8)ConfigPtr->MaxDeltaCounter) && (DeltaCounter >= 0))
+                DeltaCounter =
+                    (ReceivedCounter >= StatePtr->Counter)
+                        ? (uint8)(ReceivedCounter - StatePtr->Counter)
+                        : (uint8)((uint8)(E2E_P05_MAX_COUNTER_VALUE - StatePtr->Counter) + ReceivedCounter + 1U);
+                if (DeltaCounter <= ConfigPtr->MaxDeltaCounter)
                 {
-                    if (DeltaCounter > 0)
+                    if (DeltaCounter > 0u)
                     {
-                        if (1 == DeltaCounter)
+                        if (1u == DeltaCounter)
                         {
                             StatePtr->Status = E2E_P05STATUS_OK;
                         }
@@ -379,32 +383,31 @@ FUNC(E2E_PCheckStatusType, E2E_CODE) E2E_P05MapStatusToSM(Std_ReturnType CheckRe
     /*@SWS_E2E_00453*/
     else
     {
-        if ((Status == E2E_P05STATUS_OK) || (Status == E2E_P05STATUS_OKSOMELOST))
+        switch (Status)
         {
+        case E2E_P05STATUS_OK:
+        case E2E_P05STATUS_OKSOMELOST:
             Ret = E2E_P_OK;
-        }
-        else if (Status == E2E_P05STATUS_REPEATED)
-        {
+            break;
+        case E2E_P05STATUS_ERROR:
+            Ret = E2E_P_ERROR;
+            break;
+        case E2E_P05STATUS_REPEATED:
             Ret = E2E_P_REPEATED;
-        }
-        else if (Status == E2E_P05STATUS_ERROR)
-        {
-            Ret = E2E_P_ERROR;
-        }
-        else if (Status == E2E_P05STATUS_WRONGSEQUENCE)
-        {
-            Ret = E2E_P_WRONGSEQUENCE;
-        }
-        else if (Status == E2E_P05STATUS_NONEWDATA)
-        {
+            break;
+        case E2E_P05STATUS_NONEWDATA:
             Ret = E2E_P_NONEWDATA;
-        }
-        else
-        {
+            break;
+        case E2E_P05STATUS_WRONGSEQUENCE:
+            Ret = E2E_P_WRONGSEQUENCE;
+            break;
+        default:
             Ret = E2E_P_ERROR;
+            break;
         }
     }
     return Ret;
 }
+/* PRQA S 3432,4391,1503 -- */ /* MISRA Rule 20.7, Rule 10.8,Rule 2.1 */
 #define E2E_STOP_SEC_CODE
 #include "E2E_MemMap.h"

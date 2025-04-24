@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- ** **
- **  FILENAME    : TcpIp.c **
- ** **
- **  Created on  : 03/12/18 **
- **  Author      : darren.zhang **
- **  Vendor      : **
- **  DESCRIPTION : none **
- ** **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11 **
- ** **
- ***********************************************************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+************************************************************************************************************************
+**                                                                                                                    **
+**  FILENAME    : TcpIp.c                                                                                             **
+**                                                                                                                    **
+**  Created on  : 03/12/18                                                                                            **
+**  Author      : darren.zhang                                                                                        **
+**  Vendor      :                                                                                                     **
+**  DESCRIPTION : none                                                                                                **
+**                                                                                                                    **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                                                              **
+**                                                                                                                    **
+***********************************************************************************************************************/
 
 /***********************************************************************************************************************
 **                                          REVISION   HISTORY                                                        **
@@ -79,7 +80,10 @@
  *  V2.0.16   [20230828]  [fupeng.yu]     1. TcpIp_Internal.c Modify the judgment conditions of netif->name[1] in
  *                                           TCPIP_CHECK_NETIF_ETHIF_CTRLINDEX
  *                                        2. TcpIp.c Add mapping EthIf CtrlIdx to TcpIp CtrlIdx
- *  V2.0.17   [20230925]  [darren.zhang]  1.tcp tc8 empty ack modify
+ *  V2.0.17   [20230925]  [darren.zhang]  1.support ipref2
+ *                                        2.tcp tc8 empty ack modify
+ *                                        3.delete half close tcp macro define
+ *                                        4.support ip header set df bit
  *  V2.0.18   [20231207]  [fupeng.yu]     1. TcpIp_Internal.c Check the validity of the IP address when clearing
  *                                        the local IP address in TcpIp_ClearLocalAdrIpVar
  *                                        2. TcpIp_Internal.c Check the validity of IP address when forcibly
@@ -89,13 +93,16 @@
  *                                        bind() is ERR_USE in TcpIp_InnerBind
  *  V2.0.20   [20240129]  [fupeng.yu]     1. supported localAddrId is TCPIP_LOCALADDRID_ANY for tcpip_bind()
  *  V2.0.21   [20240502]  [fupeng.yu]     1.support configuration of static arp table
- *  V2.0.22   [20240624]  [fupeng.yu]     TcpIp_Internal.c resolve incorrect calculation of netmask in
+ *  V2.0.22   [20240509]  [fupeng.yu]     Remove nesting of the same exclusive area
+ *  V2.0.23   [20240618]  [darren.zhang]  modify bsd tcpip used schm
+ *  V2.0.24   [20240624]  [fupeng.yu]     TcpIp_Internal.c resolve incorrect calculation of netmask in
  *                                        TcpIp_NetMaskInnerToExt
- *  V2.0.23   [20240725]  [fupeng.yu]     check the configuration of static ARP during initialization
- *  V2.0.24   [20240729]  [fupeng.yu]     move the posiition of the TCPIP_LOCALADR_CLR_IPVALID in
+ *  V2.0.25   [20240712]  [fupeng.yu]     Modify obtaining TCP closed status for TC8 test
+ *  V2.0.26   [20240725]  [fupeng.yu]     check the configuration of static ARP during initialization
+ *  V2.0.27   [20240729]  [fupeng.yu]     move the posiition of the TCPIP_LOCALADR_CLR_IPVALID in
  *                                        TcpIp_ClearLocalAdrIpVar
- *  V2.0.25   [20240814]  [fupeng.yu]     modify transmission of TP for the TcpTransmit
- *  V2.0.26   [20240914]  [fupeng.yu]     Modify the pre-compilation condition for fast transmission of TCP data.
+ *  V2.0.28   [20240814]  [fupeng.yu]     modify transmission of TP for the TcpTransmit
+ *  V2.0.29   [20240914]  [fupeng.yu]     Modify the pre-compilation condition for fast transmission of TCP data.
  **********************************************************************************************************************/
 /**
  \page ISOFT_MISRA_Exceptions  MISRA-C:2012 Compliance Exceptions
@@ -106,7 +113,7 @@
    Reason:No impact was assessed and the status quo was maintained.
 
    \li PRQA S 3469,3472 MISRA Dir 4.9 .<br>
-   Reason: Function-like macro are used to Improve maintainability code.
+   Reason: Function-like macro are used to improve maintainability code.
 
 */
 /***********************************************************************************************************************
@@ -117,7 +124,6 @@
 #if (STD_ON == TCPIP_DEM_SUPPORT)
 #include "Dem.h"
 #endif /*STD_ON == TCPIP_DEM_SUPPORT*/
-#include "SchM_TcpIp.h"
 #include "TcpIp_PBcfg.h"
 #if (STD_ON == TCPIP_BSDSOCKET_SUPPORT)
 #include "TcpIp_BsdInternal.h"
@@ -161,7 +167,7 @@ TCPIP_LOCAL P2CONST(TcpIp_ConfigType, AUTOMATIC, TCPIP_VAR) TcpIp_PbCfgPtr;
 #define TCPIP_C_AR_PATCH_VERSION       0
 #define TCPIP_C_SW_MAJOR_VERSION       2
 #define TCPIP_C_SW_MINOR_VERSION       0
-#define TCPIP_C_SW_PATCH_VERSION       26
+#define TCPIP_C_SW_PATCH_VERSION       29
 #define TCPIP_SW_CFG_DEP_MAJOR_VERSION 2
 #define TCPIP_SW_CFG_DEP_MINOR_VERSION 0
 #define TCPIP_SW_CFG_DEP_PATCH_VERSION 0
@@ -238,6 +244,9 @@ TcpIp_Init(P2CONST(TcpIp_ConfigType, AUTOMATIC, TCPIP_APPL_CONST) ConfigPtr)
         TcpIp_SocketInit(TCPIP_SOCKET_NUM);
 #endif /* TCPIP_SOCKET_NUM > 0u */
         TcpIp_PeriodTimerInit();
+#if (STD_ON == TCPIP_TCP_TLS_ENABLED)
+        TcpIp_TlsInit(TcpIp_PbCfgPtr->TlsCfgPtr);
+#endif /* STD_ON == TCPIP_TCP_TLS_ENABLED */
 #if (TCPIP_LOCAL_ADR_NUM > 0u)
         TcpIp_LocalAdrInit(TcpIp_PbCfgPtr->localAdrNum, TcpIp_PbCfgPtr->LocalAdrPtr);
 #endif /* TCPIP_LOCAL_ADR_NUM > 0u */
@@ -540,7 +549,10 @@ TcpIp_RequestComMode(uint8 CtrlIdx, TcpIp_StateType State)
 #if (TCPIP_CONTROLLER_NUM > 0u)
     else if (
         (CtrlIdx > TcpIp_PbCfgPtr->ethIfCtrlMax)
-        || (TcpIp_PbCfgPtr->EthIfCtrlRefMapping[CtrlIdx] == TCPIP_CTRLIDX_INVALID))
+#if (TCPIP_CONTROLLER_NUM > 1u)
+        || (TcpIp_PbCfgPtr->EthIfCtrlRefMapping[CtrlIdx] >= TCPIP_CONTROLLER_NUM)
+#endif /* TCPIP_CONTROLLER_NUM > 1u */
+    )
     {
         TCPIP_DET(TCPIP_SID_GETREMOTEPHYSADDR, TCPIP_E_INV_ARG);
     }
@@ -550,9 +562,17 @@ TcpIp_RequestComMode(uint8 CtrlIdx, TcpIp_StateType State)
     {
 #if (TCPIP_CONTROLLER_NUM > 0u)
 #if (STD_ON == TCPIP_BSDSOCKET_SUPPORT)
+#if (TCPIP_CONTROLLER_NUM == 1u)
+        ret = TcpIp_BsdRequestComMode(0u, State);
+#else
         ret = TcpIp_BsdRequestComMode(TcpIp_PbCfgPtr->EthIfCtrlRefMapping[CtrlIdx], State);
+#endif /* TCPIP_CONTROLLER_NUM == 1u */
 #else  /* STD_ON != TCPIP_BSDSOCKET_SUPPORT */
+#if (TCPIP_CONTROLLER_NUM == 1u)
+        ret = TcpIp_InnerRequestComMode(0u, State);
+#else
         ret = TcpIp_InnerRequestComMode(TcpIp_PbCfgPtr->EthIfCtrlRefMapping[CtrlIdx], State);
+#endif /* TCPIP_CONTROLLER_NUM == 1u */
 #endif /* STD_ON == TCPIP_BSDSOCKET_SUPPORT */
 #endif /* TCPIP_CONTROLLER_NUM > 0 */
     }
@@ -1288,7 +1308,10 @@ TcpIp_GetRemotePhysAddr(uint8 CtrlIdx, const TcpIp_SockAddrType* IpAddrPtr, uint
 #if (TCPIP_CONTROLLER_NUM > 0u)
     else if (
         (CtrlIdx > TcpIp_PbCfgPtr->ethIfCtrlMax)
-        || (TcpIp_PbCfgPtr->EthIfCtrlRefMapping[CtrlIdx] == TCPIP_CTRLIDX_INVALID))
+#if (TCPIP_CONTROLLER_NUM > 1u)
+        || (TcpIp_PbCfgPtr->EthIfCtrlRefMapping[CtrlIdx] >= TCPIP_CONTROLLER_NUM)
+#endif /* TCPIP_CONTROLLER_NUM > 1u */
+    )
     {
         TCPIP_DET(TCPIP_SID_GETREMOTEPHYSADDR, TCPIP_E_INV_ARG);
     }
@@ -1307,12 +1330,16 @@ TcpIp_GetRemotePhysAddr(uint8 CtrlIdx, const TcpIp_SockAddrType* IpAddrPtr, uint
         {
 #if ((TCPIP_SC1 == TCPIP_SCALABILITY_CLASS) || (TCPIP_SC3 == TCPIP_SCALABILITY_CLASS))
             /* used arp */
+#if (TCPIP_CONTROLLER_NUM == 1u)
+            ret = TcpIp_GetRemotePhysAddrByArp(0u, IpAddrPtr, PhysAddrPtr, initRes);
+#else
             ret = TcpIp_GetRemotePhysAddrByArp(
                 TcpIp_PbCfgPtr->EthIfCtrlRefMapping[CtrlIdx],
                 IpAddrPtr,
                 PhysAddrPtr,
                 initRes);
-#endif /* TCPIP_SC1 == TCPIP_SCALABILITY_CLASS || (TCPIP_SC3 == TCPIP_SCALABILITY_CLASS */
+#endif /* TCPIP_CONTROLLER_NUM == 1u */
+#endif /* TCPIP_SC1 == TCPIP_SCALABILITY_CLASS || TCPIP_SC3 == TCPIP_SCALABILITY_CLASS */
         }
 
 #if (TCPIP_SC3 == TCPIP_SCALABILITY_CLASS)
@@ -1503,23 +1530,27 @@ TcpIp_RxIndication(
     else
 #endif /* STD_ON == TCPIP_DEV_ERROR_DETECT */
     {
+#if (TCPIP_CONTROLLER_NUM > 0u)
 #if (STD_ON == TCPIP_BSDSOCKET_SUPPORT)
 
 #else /* STD_ON != TCPIP_BSDSOCKET_SUPPORT */
         uint8 flag = (((boolean)TRUE == IsBroadcast) ? PBUF_FLAG_LLBCAST : 0u);
-
+        uint8 TcpIpCtrlIdx = 0u;
+#if (TCPIP_CONTROLLER_NUM == 1u)
 #if defined(TCPIP_PARA_CHECK)
-        uint8 TcpIpCtrlIdx;
+        if (CtrlIdx == TcpIp_PbCfgPtr->ethIfCtrlMax)
+#endif /* defined TCPIP_PARA_CHECK */
+#else  /* TCPIP_CONTROLLER_NUM > 1u */
         TcpIpCtrlIdx = TcpIp_PbCfgPtr->EthIfCtrlRefMapping[CtrlIdx];
-        if ((CtrlIdx <= TcpIp_PbCfgPtr->ethIfCtrlMax) && (TcpIpCtrlIdx != TCPIP_CTRLIDX_INVALID))
+#if defined(TCPIP_PARA_CHECK)
+        if (TcpIpCtrlIdx < TCPIP_CONTROLLER_NUM)
+#endif /* defined(TCPIP_PARA_CHECK) */
+#endif /* TCPIP_CONTROLLER_NUM == 1u */
         {
-
             TcpIp_InnerRxIndication(TcpIpCtrlIdx, FrameType, flag, DataPtr, LenByte);
         }
-#else
-        TcpIp_InnerRxIndication(TcpIp_PbCfgPtr->EthIfCtrlRefMapping[CtrlIdx], FrameType, flag, DataPtr, LenByte);
-#endif /* defined(TCPIP_PARA_CHECK) */
 #endif /* STD_ON == TCPIP_BSDSOCKET_SUPPORT */
+#endif /* TCPIP_CONTROLLER_NUM > 0u */
     }
 }
 

@@ -18,8 +18,9 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
+ */
+/* PRQA S 3108-- */
+/* ********************************************************************************
  **                                                                            **
  **  FILENAME    : KeyM_Certificate.c                                          **
  **                                                                            **
@@ -31,7 +32,6 @@
  **  SPECIFICATION(S) :   AUTOSAR classic Platform R21-11                      **
  **                                                                            **
  *******************************************************************************/
-/* PRQA S 3108-- */
 
 /******************************************************************************
 **                      Revision Control History                             **
@@ -1594,6 +1594,7 @@ KEYM_LOCAL FUNC(Std_ReturnType, KEYM_CODE) KeyM_CheckGeneralParam(
     }
     else
     {
+        (void)ApiId;
         if ((CertId >= KEYM_CERT_NUM) || (CertElementId > KeyM_CertPCfg[CertId].numOfCertEle))
         {
             ret = KEYM_E_PARAMETER_MISMATCH;
@@ -1900,7 +1901,9 @@ KEYM_LOCAL FUNC(Std_ReturnType, KEYM_CODE) KeyM_CertGetSerialVersion(
     uint8 objType = KEYM_CERT_ASN1_INTEGER;
     Std_ReturnType ret;
 
-    if (((cerE - *cerS) < KEYM_CONST_1) || (**cerS != KEYM_CERT_ASN1_INTEGER)) /* PRQA S 1822 */ /* MISRA Rule 10.4 */
+    /* PRQA S 1822  ++ */ /* MISRA Rule 10.4 */
+    if (((cerE - *cerS) < KEYM_CONST_1) || (**cerS != KEYM_CERT_ASN1_INTEGER))
+    /* PRQA S 1822  -- */ /* MISRA Rule 10.4 */
     {
         ret = E_NOT_OK;
     }
@@ -2296,6 +2299,7 @@ KEYM_LOCAL FUNC(Std_ReturnType, KEYM_CODE) KeyM_CertHandleGetTime(
                 certEle.certEleMaxLen = (uint16)len;
                 certEle.certEleObjType = &timeTag;
                 certEle.certEleStruct = eleStrut;
+                certEle.certEleObjId = NULL_PTR;
                 ret = KeyM_CertEleHandle(certId, &certEle, *cerS, timeTag);
                 if (ret == E_OK)
                 {
@@ -2723,7 +2727,9 @@ KeyM_HandleCertcVerify(
     uint32 sigVerJob;
     uint32 tarKey;
     uint16 CertId = certCfgPtr->certId;
+#if (KEYM_NVM_BLOCK_NUM > 0)
     uint16 nvmRefBloId;
+#endif
     Crypto_VerifyResultType verifyRes = CRYPTO_E_VER_NOT_OK;
     Std_ReturnType ret;
 

@@ -18,21 +18,22 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Os_Alarm.c                                                  **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : i-soft-os                                                   **
- **  Vendor      :                                                             **
- **  DESCRIPTION : alarm manager                                               **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
- **  Version :   AUTOSAR classic Platform R19--Function Safety                 **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Os_Alarm.c                                                  **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : i-soft-os                                                   **
+**  Vendor      :                                                             **
+**  DESCRIPTION : alarm manager                                               **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
+**  Version :   AUTOSAR classic Platform R19--Function Safety                 **
+**                                                                            **
+*******************************************************************************/
 
 /*=======[I N C L U D E S]====================================================*/
 #include "Os_Internal.h"
@@ -47,18 +48,18 @@
 /*=======[I N T E R N A L   D A T A]==========================================*/
 #if (CFG_ALARM_MAX > 0)
 /* PRQA S 0791++ */ /* MISRA Rule 5.4 */ /*OS_ALARM_SEGMENTNAME_SIMILAR_004*/
-#define OS_START_SEC_VAR_CLEARED_CLONE_PTR
+#define OS_START_SEC_VAR_CLONE_PTR
 #include "Os_MemMap.h"
 static P2CONST(Os_AlarmCfgType, AUTOMATIC, OS_VAR) Os_AlarmCfg;
-#define OS_STOP_SEC_VAR_CLEARED_CLONE_PTR
+#define OS_STOP_SEC_VAR_CLONE_PTR
 #include "Os_MemMap.h"
 
-#define OS_START_SEC_VAR_CLEARED_CLONE_PTR
+#define OS_START_SEC_VAR_CLONE_PTR
 #include "Os_MemMap.h"
 /* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */ /* OS_ALARM_COMPILER_001 */
 static P2VAR(Os_ACBType, AUTOMATIC, OS_VAR) Os_ACB;
 /* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
-#define OS_STOP_SEC_VAR_CLEARED_CLONE_PTR
+#define OS_STOP_SEC_VAR_CLONE_PTR
 #include "Os_MemMap.h"
 /* PRQA S 0791-- */ /* MISRA Rule 5.4 */
 
@@ -175,7 +176,7 @@ FUNC(StatusType, OS_CODE) Os_GetAlarm(AlarmType AlarmID, TickRefType Tick)
 #if (OS_AUTOSAR_CORES > 1)
     /* PRQA S 3469, 1338 ++ */ /* MISRA  Dir-4.9,Rule-17.8*/ /* OS_ALARM_MACRO_004 */
     AlarmID = Os_GetObjLocalId(AlarmID);
-/* PRQA S 3469, 1338 -- */ /* MISRA  Dir-4.9,Rule-17.8*/
+    /* PRQA S 3469, 1338 -- */ /* MISRA  Dir-4.9,Rule-17.8*/
 #endif
 
     OS_ARCH_ENTRY_CRITICAL(); /* PRQA S 3469 */ /* MISRA  Dir-4.9*/ /* OS_ALARM_MACRO_004 */
@@ -384,6 +385,10 @@ static FUNC(void, OS_CODE) Os_InsertAlarm(Os_AlarmType alarmid, Os_AlarmRefType 
         }
     }
 
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceAlarmStart(alarmid);
+#endif /* TRUE == CFG_TRACE_ENABLE */
+
     return;
 }
 #define OS_STOP_SEC_CODE
@@ -438,6 +443,10 @@ static FUNC(void, OS_CODE) Os_DeleteAlarm(Os_AlarmType alarmid, Os_AlarmRefType 
         Os_ACB[alarmid].alarmNext = alarmid;
     }
 
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceAlarmStop(alarmid);
+#endif /* TRUE == CFG_TRACE_ENABLE */
+
     return;
 }
 #define OS_STOP_SEC_CODE
@@ -471,7 +480,7 @@ FUNC(StatusType, OS_CODE) Os_CancelAlarm(AlarmType AlarmID)
 #if (OS_AUTOSAR_CORES > 1)
     /* PRQA S 3469, 1338 ++ */ /* MISRA  Dir-4.9,Rule-17.8*/ /* OS_ALARM_MACRO_004 */
     AlarmID = Os_GetObjLocalId(AlarmID);
-/* PRQA S 3469, 1338 -- */ /* MISRA  Dir-4.9,Rule-17.8*/
+    /* PRQA S 3469, 1338 -- */ /* MISRA  Dir-4.9,Rule-17.8*/
 #endif
 
     /* Standard Status */
@@ -531,7 +540,7 @@ FUNC(StatusType, OS_CODE) Os_SetAbsAlarm(AlarmType AlarmID, TickType start, Tick
 #if (OS_AUTOSAR_CORES > 1)
     /* PRQA S 3469, 1338 ++ */ /* MISRA  Dir-4.9,Rule-17.8*/ /* OS_ALARM_MACRO_004 */
     AlarmID = Os_GetObjLocalId(AlarmID);
-/* PRQA S 3469, 1338 -- */ /* MISRA  Dir-4.9,Rule-17.8*/
+    /* PRQA S 3469, 1338 -- */ /* MISRA  Dir-4.9,Rule-17.8*/
 #endif
 
     alarmCounter = Os_AlarmCfg[AlarmID].osAlarmCounter;
@@ -614,9 +623,8 @@ FUNC(void, OS_CODE) Os_GetAlarmBase(AlarmType AlarmID, AlarmBaseRefType Info)
 #if (OS_AUTOSAR_CORES > 1)
     /* PRQA S 3469, 1338 ++ */ /* MISRA  Dir-4.9,Rule-17.8*/ /* OS_ALARM_MACRO_004 */
     AlarmID = Os_GetObjLocalId(AlarmID);
-/* PRQA S 3469, 1338 -- */ /* MISRA  Dir-4.9,Rule-17.8*/
+    /* PRQA S 3469, 1338 -- */ /* MISRA  Dir-4.9,Rule-17.8*/
 #endif
-
     alarmCounter = Os_AlarmCfg[AlarmID].osAlarmCounter;
 
     Info->maxallowedvalue = Os_CounterCfg[alarmCounter].osCounterMaxAllowedValue;
@@ -659,7 +667,7 @@ FUNC(StatusType, OS_CODE) Os_SetRelAlarm(AlarmType AlarmID, TickType increment, 
 #if (OS_AUTOSAR_CORES > 1)
     /* PRQA S 3469, 1338 ++ */ /* MISRA  Dir-4.9,Rule-17.8*/ /* OS_ALARM_MACRO_004 */
     AlarmID = Os_GetObjLocalId(AlarmID);
-/* PRQA S 3469, 1338 -- */ /* MISRA  Dir-4.9,Rule-17.8*/
+    /* PRQA S 3469, 1338 -- */ /* MISRA  Dir-4.9,Rule-17.8*/
 #endif
 
     /*
@@ -746,6 +754,10 @@ FUNC(StatusType, OS_CODE) GetAlarm(AlarmType AlarmID, TickRefType Tick)
     OS_ENTER_KERNEL();
     VAR(StatusType, OS_VAR) err = E_OK;
 
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceEnter(OSServiceId_GetAlarm);
+#endif /* TRUE == CFG_TRACE_ENABLE */
+
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
     if (NULL_PTR == Tick)
     {
@@ -816,6 +828,10 @@ FUNC(StatusType, OS_CODE) GetAlarm(AlarmType AlarmID, TickRefType Tick)
     }
 #endif
 
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceExit(OSServiceId_GetAlarm);
+#endif /* TRUE == CFG_TRACE_ENABLE */
+
     OS_EXIT_KERNEL(); /* PRQA S 3469 */ /* MISRA  Dir-4.9*/ /* OS_ALARM_MACRO_004 */
 
     return err;
@@ -846,6 +862,10 @@ FUNC(StatusType, OS_CODE) GetAlarmBase(AlarmType AlarmID, AlarmBaseRefType Info)
 {
     OS_ENTER_KERNEL();
     VAR(StatusType, OS_VAR) err = E_OK;
+
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceEnter(OSServiceId_GetAlarmBase);
+#endif /* TRUE == CFG_TRACE_ENABLE */
 
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
     if (NULL_PTR == Info)
@@ -917,6 +937,10 @@ FUNC(StatusType, OS_CODE) GetAlarmBase(AlarmType AlarmID, AlarmBaseRefType Info)
     }
 #endif
 
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceExit(OSServiceId_GetAlarmBase);
+#endif /* TRUE == CFG_TRACE_ENABLE */
+
     OS_EXIT_KERNEL(); /* PRQA S 3469 */ /* MISRA  Dir-4.9*/ /* OS_ALARM_MACRO_004 */
     return err;
 }
@@ -944,6 +968,10 @@ FUNC(StatusType, OS_CODE) CancelAlarm(AlarmType AlarmID)
 {
     OS_ENTER_KERNEL();
     VAR(StatusType, OS_VAR) err = E_OK;
+
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceEnter(OSServiceId_CancelAlarm);
+#endif /* TRUE == CFG_TRACE_ENABLE */
 
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
     /* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */ /* OS_ALARM_MACRO_005 */
@@ -1002,6 +1030,10 @@ FUNC(StatusType, OS_CODE) CancelAlarm(AlarmType AlarmID)
     }
 #endif
 
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceExit(OSServiceId_CancelAlarm);
+#endif /* TRUE == CFG_TRACE_ENABLE */
+
     OS_EXIT_KERNEL(); /* PRQA S 3469 */ /* MISRA  Dir-4.9*/ /* OS_ALARM_MACRO_004 */
     return err;
 }
@@ -1037,6 +1069,10 @@ FUNC(StatusType, OS_CODE) SetRelAlarm(AlarmType AlarmID, TickType increment, Tic
     OS_ENTER_KERNEL();
 
     VAR(StatusType, OS_VAR) err = E_OK;
+
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceEnter(OSServiceId_SetRelAlarm);
+#endif /* TRUE == CFG_TRACE_ENABLE */
 
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
     /* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */ /* OS_ALARM_MACRO_005 */
@@ -1095,6 +1131,10 @@ FUNC(StatusType, OS_CODE) SetRelAlarm(AlarmType AlarmID, TickType increment, Tic
     }
 #endif
 
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceExit(OSServiceId_SetRelAlarm);
+#endif /* TRUE == CFG_TRACE_ENABLE */
+
     OS_EXIT_KERNEL(); /* PRQA S 3469 */ /* MISRA  Dir-4.9*/ /* OS_ALARM_MACRO_004 */
     return err;
 }
@@ -1130,6 +1170,10 @@ FUNC(StatusType, OS_CODE) SetAbsAlarm(AlarmType AlarmID, TickType start, TickTyp
     OS_ENTER_KERNEL();
 
     VAR(StatusType, OS_VAR) err = E_OK;
+
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceEnter(OSServiceId_SetAbsAlarm);
+#endif /* TRUE == CFG_TRACE_ENABLE */
 
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
     /* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */ /* OS_ALARM_MACRO_005 */
@@ -1167,7 +1211,7 @@ FUNC(StatusType, OS_CODE) SetAbsAlarm(AlarmType AlarmID, TickType start, TickTyp
             RpcInputType rpcData = {
                 .sync = RPC_SYNC,
                 .remoteCoreId = coreId,
-                .serviceId = OSServiceId_SetRelAlarm,
+                .serviceId = OSServiceId_SetAbsAlarm,
                 .srvPara0 = (uint32)AlarmID,
                 .srvPara1 = (uint32)start,
                 .srvPara2 = (uint32)cycle,
@@ -1187,6 +1231,10 @@ FUNC(StatusType, OS_CODE) SetAbsAlarm(AlarmType AlarmID, TickType start, TickTyp
         Os_TraceErrorHook(OSError_Save_SetAbsAlarm(AlarmID, start, cycle), OSServiceId_SetAbsAlarm, err);
     }
 #endif
+
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceExit(OSServiceId_SetAbsAlarm);
+#endif /* TRUE == CFG_TRACE_ENABLE */
 
     OS_EXIT_KERNEL(); /* PRQA S 3469 */ /* MISRA  Dir-4.9*/ /* OS_ALARM_MACRO_004 */
     return err;

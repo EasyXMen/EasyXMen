@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Nm.c                                                        **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : Wanglili                                                    **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Nm.c                                                        **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : Wanglili                                                    **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 /*******************************************************************************
 **                      REVISION   HISTORY                                    **
 *******************************************************************************/
@@ -113,6 +114,7 @@
 /*******************************************************************************
 **                      Private Macro Definitions                             **
 *******************************************************************************/
+#define NM_UNUSED(x) (void)(x)
 /*******************************************************************************
 **                      Private Type Definitions                              **
 *******************************************************************************/
@@ -180,19 +182,19 @@ static FUNC(Std_ReturnType, NM_CODE) Nm_BusNmSetSleepReadyBit(uint8 chIndex, boo
 #endif /* STD_ON == NM_COORDINATOR_SYNC_SUPPORT */
 
 #if NM_DEV_ERROR_DETECT == STD_ON
-static boolean Nm_ValidateNetworkHandle(uint8 apiId, NetworkHandleType networkHandle);
-static boolean Nm_ValidatePointer(uint8 apiId, const void* pointer);
-static boolean Nm_ValidateNetworkHandleAndPointer(uint8 apiId, NetworkHandleType networkHandle, const void* pointer);
-static boolean Nm_ValidateNetworkHandleAndPointerPointer(
-    uint8 apiId,
-    NetworkHandleType networkHandle,
-    const void* pointer1,
-    const void* pointer2);
 
 #ifdef QAC_ANALYZE
 #pragma PRQA_NO_SIDE_EFFECTS Nm_ValidatePointer
 #endif
 
+static boolean Nm_ValidateNetworkHandle(uint8 apiId, NetworkHandleType networkHandle);
+static boolean Nm_ValidatePointer(uint8 apiId, const void* pointer);
+static boolean Nm_ValidateNetworkHandleAndPointer(uint8 apiId, NetworkHandleType networkHandle, const void* pointer);
+static boolean Nm_ValidateNetworkHandlePointerAndPointer(
+    uint8 apiId,
+    NetworkHandleType networkHandle,
+    const void* pointer1,
+    const void* pointer2);
 #endif
 #define NM_STOP_SEC_CODE
 #include "Nm_MemMap.h"
@@ -545,8 +547,10 @@ Nm_EnableCommunication(NetworkHandleType NetworkHandle) /* PRQA S 1532 */ /* MIS
  *                     E_NOT_OK:  Setting of user data has failed
  */
 /******************************************************************************/
+/* PRQA S 1532 ++ */ /* MISRA Rule 8.7 */
 FUNC(Std_ReturnType, NM_CODE)
 Nm_SetUserData(NetworkHandleType NetworkHandle, P2CONST(uint8, AUTOMATIC, NM_APPL_DATA) nmUserDataPtr)
+/* PRQA S 1532 -- */ /* MISRA Rule 8.7 */
 {
     Std_ReturnType ret = E_NOT_OK;
 
@@ -585,8 +589,10 @@ Nm_SetUserData(NetworkHandleType NetworkHandle, P2CONST(uint8, AUTOMATIC, NM_APP
  *                     E_NOT_OK: Getting of user data has failed
  */
 /******************************************************************************/
+/* PRQA S 1532 ++ */ /* MISRA Rule 8.7 */
 FUNC(Std_ReturnType, NM_CODE)
 Nm_GetUserData(NetworkHandleType NetworkHandle, uint8* nmUserDataPtr)
+/* PRQA S 1532 -- */ /* MISRA Rule 8.7 */
 {
     Std_ReturnType ret = E_NOT_OK;
 
@@ -759,7 +765,7 @@ Nm_GetState(NetworkHandleType nmNetworkHandle, Nm_StateType* nmStatePtr, Nm_Mode
     Std_ReturnType ret = E_NOT_OK;
 
 #if NM_DEV_ERROR_DETECT == STD_ON
-    if (Nm_ValidateNetworkHandleAndPointerPointer(NM_SERVICE_ID_GETSTATE, nmNetworkHandle, nmStatePtr, nmModePtr))
+    if (Nm_ValidateNetworkHandlePointerAndPointer(NM_SERVICE_ID_GETSTATE, nmNetworkHandle, nmStatePtr, nmModePtr))
 #endif
     {
         Nm_ChannelIndexType chIndex = Nm_FindChannelIndex(nmNetworkHandle);
@@ -1228,18 +1234,18 @@ Nm_CoordReadyToSleepCancellation(NetworkHandleType nmChannelHandle)
 FUNC(void, NM_CODE)
 Nm_SynchronizeMode(NetworkHandleType nmNetworkHandle)
 {
-#if NM_DEV_ERROR_DETECT == STD_ON
+#if (NM_DEV_ERROR_DETECT == STD_ON)
     if (Nm_ValidateNetworkHandle(NM_SERVICE_ID_SYNCHRONIZEMODE, nmNetworkHandle))
 #endif
     {
-#if (STD_ON == NM_COORDINATOR_SUPPORT_ENABLED)
+#if (NM_COORDINATOR_SUPPORT_ENABLED == STD_ON)
         Nm_ChannelIndexType chIndex = Nm_FindChannelIndex(nmNetworkHandle);
         /* clear All inner varilable */
         Nm_InnerChannel[chIndex].lowLayBusSyncPoint = FALSE;
         Nm_InnerChannel[chIndex].busAwakeFlg = FALSE;
         Nm_InnerChannel[chIndex].remoteSleepIndFlg = FALSE;
 
-#if (STD_ON == NM_COORDINATOR_SYNC_SUPPORT)
+#if (NM_COORDINATOR_SYNC_SUPPORT == STD_ON)
         Nm_InnerChannel[chIndex].coorRSB = FALSE;
 #endif
 
@@ -1256,7 +1262,9 @@ Nm_SynchronizeMode(NetworkHandleType nmNetworkHandle)
             }
         }
 #endif
-#endif /* STD_ON == NM_COORDINATOR_SUPPORT_ENABLED */
+#else
+        NM_UNUSED(nmNetworkHandle);
+#endif
     }
 }
 #define NM_STOP_SEC_NM_SYNCHRONIZEMODE_CALLBACK_CODE
@@ -1456,6 +1464,12 @@ Nm_MainFunction(void)
 {
     if (Nm_InitStatus)
     {
+#if NM_DEV_ERROR_DETECT == STD_ON && NM_MULTIPLE_PARTITION_USED == STD_ON
+        if (GetApplicationID() != Nm_ApplicationID)
+        {
+            NM_DET_REPORT(NM_SERVICE_ID_MAINFUNCTION, NM_E_INVALID_PARTITION_CONTEXT);
+        }
+#endif
 #if (0u < NM_NUMBER_OF_CLUSTERS)
         uintx clusterIndex;
         for (clusterIndex = 0u; clusterIndex < NM_NUMBER_OF_CLUSTERS; clusterIndex++)
@@ -2125,7 +2139,6 @@ static boolean Nm_ValidateNetworkHandle(uint8 apiId, NetworkHandleType networkHa
 #if NM_PASSIVE_MODE_ENABLED == STD_ON
         switch (apiId)
         {
-
         case NM_SERVICE_ID_NETWORKREQUEST:
         case NM_SERVICE_ID_NETWORKRELEASE:
         case NM_SERVICE_ID_DISABLECOMMUNICATION:
@@ -2135,7 +2148,6 @@ static boolean Nm_ValidateNetworkHandle(uint8 apiId, NetworkHandleType networkHa
         case NM_SERVICE_ID_CHECKREMOTESLEEPINDICATION:
             error = NM_E_INVALID_CHANNEL;
             break;
-
         default:
 #endif
             if (Nm_FindChannelIndex(networkHandle) >= NM_NUMBER_OF_CHANNELS)
@@ -2147,7 +2159,6 @@ static boolean Nm_ValidateNetworkHandle(uint8 apiId, NetworkHandleType networkHa
         }
 #endif
     }
-
     if (error != NM_E_NO_ERROR)
     {
         (void)Det_ReportError(NM_MODULE_ID, NM_INSTANCE_ID, apiId, error);
@@ -2173,7 +2184,7 @@ static boolean Nm_ValidateNetworkHandleAndPointer(uint8 apiId, NetworkHandleType
     return Nm_ValidateNetworkHandle(apiId, networkHandle) && Nm_ValidatePointer(apiId, pointer);
 }
 
-static boolean Nm_ValidateNetworkHandleAndPointerPointer(
+static boolean Nm_ValidateNetworkHandlePointerAndPointer(
     uint8 apiId,
     NetworkHandleType networkHandle,
     const void* pointer1,

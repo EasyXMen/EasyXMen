@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : EthTrcv.c                                                   **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : wanglili                                                    **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : EthTrcv.c                                                   **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : wanglili                                                    **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 /*******************************************************************************
 **                      Revision Control History                              **
 *******************************************************************************/
@@ -43,6 +44,12 @@
  *      1.Modification after integration test
  *  V2.0.3       2021-06-17  wanglili
  *      1.Add configuration item EthTrcvSetPhyTxModeApi
+ *  V2.0.4       2023-9-1   shaoqiangLiang
+ *    Modify  to configure registers
+ *  V2.0.5       2023-10-07  zhaotong
+ *    Delete 422 and 440 version code,only R19 code reserve
+ *  V2.0.6       2024-04-25 fupeng.yu
+ *    add the judgment of module initialization fo EthTrcv_MainFunction<XX>
  */
 
 /**
@@ -52,12 +59,6 @@
 
     \li PRQA S 2877 MISRA Dir 4.1 .<br>
     Reason:ETHTRCV_TRCVS_NUM follows configuration changes.
-
-    \li PRQA S 1503 MISRA Dir 2.1 .<br>
-    Reason:No impact was assessed and the status quo was maintained.
-
-    \li PRQA S 1531 MISRA Rule 8.7 .<br>
-    Reason:Global configuration parameters structure definition (EthTrcv_CfgData).
 
     \li PRQA S 3218 MISRA Rule 8.9 .<br>
     Reason:That a variable is used by more than one function is a matter of configuration (EthTrcv_ModuleState).
@@ -72,11 +73,12 @@
 #define ETHTRCV_C_AR_RELEASE_PATCH_VERSION 0u
 #define ETHTRCV_C_SW_MAJOR_VERSION         2u
 #define ETHTRCV_C_SW_MINOR_VERSION         0u
-#define ETHTRCV_C_SW_PATCH_VERSION         3u
+#define ETHTRCV_C_SW_PATCH_VERSION         5u
 /*******************************************************************************
 **                      Include Section                                       **
 *******************************************************************************/
 #include "EthTrcv_Internal.h"
+#include "EthTrcv.h"
 #include "EthIf_Cbk.h"
 #if (STD_ON == ETHTRCV_DEV_ERROR_DETECT)
 #include "Det.h"
@@ -109,7 +111,7 @@
 static FUNC(void, ETHTRCV_CODE) EthTrcv_SetTrcvModeActive(uint8 TrcvIdx, Std_ReturnType* retVal);
 
 static FUNC(void, ETHTRCV_CODE) EthTrcv_SetTrcvModeDown(uint8 TrcvIdx, Std_ReturnType* retVal);
-#endif /* ETHTRCV_SET_TRCV_MODE */
+#endif /* ETHTRCV_SET_TRCV_MODE == STD_ON */
 
 static FUNC(Std_ReturnType, ETHTRCV_CODE) EthTrcv_LinkStateRequest(uint8 TrcvIdx, EthTrcv_LinkStateType LinkState);
 /*******************************************************************************
@@ -125,26 +127,14 @@ static VAR(EthTrcv_StateType, ETHTRCV_VAR_ZERO_INIT) EthTrcv_ModuleState = ETHTR
 
 #define ETHTRCV_START_SEC_VAR_NO_INIT_8
 #include "EthTrcv_MemMap.h"
-#if (42u == ETHTRCV_MAJORVERSION)
-static VAR(EthTrcv_ModeType, ETHTRCV_VAR_NOINIT) EthTrcv_TrcvMode[ETHTRCV_TRCVS_NUM];
-#elif (44u == ETHTRCV_MAJORVERSION)
-static VAR(EthTrcv_ModeType, ETHTRCV_VAR_NOINIT) EthTrcv_TrcvMode[ETHTRCV_TRCVS_NUM];
-#elif (19u == ETHTRCV_MAJORVERSION)
 static VAR(Eth_ModeType, ETHTRCV_VAR_NOINIT) EthTrcv_TrcvMode[ETHTRCV_TRCVS_NUM];
-#endif /* 42u == ETHTRCV_MAJORVERSION */
 static VAR(EthTrcv_LinkStateType, ETHTRCV_VAR_NOINIT) EthTrcv_LinkState[ETHTRCV_TRCVS_NUM];
 
 #if (ETHTRCV_WAKEUP_SUPPORT != ETHTRCV_WAKEUP_NOT_SUPPORTED)
 static VAR(EthTrcv_WakeupModeType, ETHTRCV_VAR_NOINIT) EthTrcv_WakeupMode[ETHTRCV_TRCVS_NUM];
 #endif /*ETHTRCV_WAKEUP_SUPPORT != ETHTRCV_WAKEUP_NOT_SUPPORTED*/
 
-#if (42u == ETHTRCV_MAJORVERSION)
-VAR(EthTrcv_ModeType, ETHTRCV_VAR_NOINIT) EthIf_ReqTrcvMode[ETHTRCV_TRCVS_NUM];
-#elif (44u == ETHTRCV_MAJORVERSION)
-VAR(EthTrcv_ModeType, ETHTRCV_VAR_NOINIT) EthIf_ReqTrcvMode[ETHTRCV_TRCVS_NUM];
-#elif (19u == ETHTRCV_MAJORVERSION)
 VAR(Eth_ModeType, ETHTRCV_VAR_NOINIT) EthIf_ReqTrcvMode[ETHTRCV_TRCVS_NUM];
-#endif /* 42u == ETHTRCV_MAJORVERSION */
 #define ETHTRCV_STOP_SEC_VAR_NO_INIT_8
 #include "EthTrcv_MemMap.h"
 /*******************************************************************************
@@ -184,6 +174,10 @@ FUNC(void, ETHTRCV_CODE)
 EthTrcv_Init(P2CONST(EthTrcv_ConfigType, ETHTRCV_CONST, ETHTRCV_CONST) CfgPtr)
 {
     uint8 trcvIdx;
+    /*for mii Register operation*/
+    uint8 CtrlIdx;
+    uint8 MiiIdx;
+
 #if (ETHTRCV_WAKEUP_SUPPORT != ETHTRCV_WAKEUP_NOT_SUPPORTED)
     EcuM_WakeupSourceType wakeupSourceValue;
 #endif /*ETHTRCV_WAKEUP_SUPPORT != ETHTRCV_WAKEUP_NOT_SUPPORTED*/
@@ -199,13 +193,7 @@ EthTrcv_Init(P2CONST(EthTrcv_ConfigType, ETHTRCV_CONST, ETHTRCV_CONST) CfgPtr)
         EthTrcv_TrcvPbCfg = CfgPtr;
         for (trcvIdx = 0; trcvIdx < ETHTRCV_TRCVS_NUM; trcvIdx++) /* PRQA S 2877 */ /* MISRA Dir 4.1 */
         {
-#if (42u == ETHTRCV_MAJORVERSION)
-            EthTrcv_TrcvMode[trcvIdx] = ETHTRCV_MODE_DOWN;
-#elif (44u == ETHTRCV_MAJORVERSION)
-            EthTrcv_TrcvMode[trcvIdx] = ETHTRCV_MODE_DOWN;
-#elif (19u == ETHTRCV_MAJORVERSION)
             EthTrcv_TrcvMode[trcvIdx] = ETH_MODE_DOWN;
-#endif /* 42u == ETHTRCV_MAJORVERSION */
             EthTrcv_LinkState[trcvIdx] = ETHTRCV_LINK_STATE_DOWN;
 #if (STD_ON == ETHTRCV_ENABLE_CABLEDIAGNOSTIC_API)
             EthTrcv_CableDiagState[trcvIdx].CableDiagState = ETHTRCV_CABLEDIAG_OK;
@@ -213,11 +201,13 @@ EthTrcv_Init(P2CONST(EthTrcv_ConfigType, ETHTRCV_CONST, ETHTRCV_CONST) CfgPtr)
             EthTrcv_CableDiagState[trcvIdx].PendingTrcvLinkStateReq = FALSE;
 #endif /* STD_ON == ETHTRCV_ENABLE_CABLEDIAGNOSTIC_API*/
             /*@req <SWS_EthTrcv_00040>*/
-            if (EthTrcv_IsTrcvAccessOk(trcvIdx) == (boolean)TRUE)
+            CtrlIdx = EthTrcv_TrcvPbCfg[trcvIdx].EthTrcvMgmtInterface->EthTrcvMiiInterface->EthTrcvCtrlIdx;
+            MiiIdx = EthTrcv_TrcvPbCfg[trcvIdx].EthTrcvMgmtInterface->EthTrcvMiiInterface->EthTrcvMiiIdx;
+            if (EthTrcv_IsTrcvAccessOk(CtrlIdx, MiiIdx) == E_OK)
             {
                 ETHTRCV_DEM_REPORT(trcvIdx, DEM_EVENT_STATUS_PREPASSED);
                 /*Based on configuration parameters,Init transceiver Register*/
-                EthTrcv_InitCfgHandle(trcvIdx);
+                EthTrcv_InitCfgHandle(&EthTrcv_TrcvPbCfg[trcvIdx]);
 #if (ETHTRCV_WAKEUP_SUPPORT != ETHTRCV_WAKEUP_NOT_SUPPORTED)
                 EthTrcv_WakeupMode[trcvIdx] = ETHTRCV_WUM_ENABLE;
                 if ((uint8)E_OK == EthTrcv_GetWakeupReasonHandle(trcvIdx, &wakeupSourceValue))
@@ -260,15 +250,13 @@ EthTrcv_Init(P2CONST(EthTrcv_ConfigType, ETHTRCV_CONST, ETHTRCV_CONST) CfgPtr)
  */
 /******************************************************************************/
 #if (STD_ON == ETHTRCV_SET_TRCV_MODE)
-#if (42u == ETHTRCV_MAJORVERSION)
-FUNC(Std_ReturnType, ETHTRCV_CODE) EthTrcv_SetTransceiverMode(uint8 TrcvIdx, EthTrcv_ModeType CtrlMode)
-#elif (44u == ETHTRCV_MAJORVERSION)
-FUNC(Std_ReturnType, ETHTRCV_CODE) EthTrcv_SetTransceiverMode(uint8 TrcvIdx, EthTrcv_ModeType CtrlMode)
-#elif (19u == ETHTRCV_MAJORVERSION)
 FUNC(Std_ReturnType, ETHTRCV_CODE) EthTrcv_SetTransceiverMode(uint8 TrcvIdx, Eth_ModeType TrcvMode)
-#endif /* 42u == ETHTRCV_MAJORVERSION */
 {
     Std_ReturnType retVal = E_NOT_OK;
+    /*for mii Register operation*/
+    uint8 CtrlIdx;
+    uint8 MiiIdx;
+
 #if (STD_ON == ETHTRCV_DEV_ERROR_DETECT)
     uint8 errorId = ETHTRCV_E_NO_ERROR;
     if (EthTrcv_ModuleState == ETHTRCV_STATE_UNINIT)
@@ -288,18 +276,14 @@ FUNC(Std_ReturnType, ETHTRCV_CODE) EthTrcv_SetTransceiverMode(uint8 TrcvIdx, Eth
     {
         /* check the access to the Ethernet transceiver */
         /*@req <SWS_EthTrcv_00104>*/
-        if (EthTrcv_IsTrcvAccessOk(TrcvIdx) == (boolean)TRUE)
+        CtrlIdx = EthTrcv_TrcvPbCfg[TrcvIdx].EthTrcvMgmtInterface->EthTrcvMiiInterface->EthTrcvCtrlIdx;
+        MiiIdx = EthTrcv_TrcvPbCfg[TrcvIdx].EthTrcvMgmtInterface->EthTrcvMiiInterface->EthTrcvMiiIdx;
+        if (EthTrcv_IsTrcvAccessOk(CtrlIdx, MiiIdx) == E_OK)
         {
             ETHTRCV_DEM_REPORT(TrcvIdx, DEM_EVENT_STATUS_PREPASSED)
-/* the transceiver is already in the requested mode*/
-/*@req <SWS_EthTrcv_00094>*/
-#if (42u == ETHTRCV_MAJORVERSION)
-            if (CtrlMode == EthTrcv_TrcvMode[TrcvIdx])
-#elif (44u == ETHTRCV_MAJORVERSION)
-            if (CtrlMode == EthTrcv_TrcvMode[TrcvIdx])
-#elif (19u == ETHTRCV_MAJORVERSION)
+            /* the transceiver is already in the requested mode*/
+            /*@req <SWS_EthTrcv_00094>*/
             if (TrcvMode == EthTrcv_TrcvMode[TrcvIdx])
-#endif /* 42u == ETHTRCV_MAJORVERSION */
             {
                 retVal = E_OK;
             }
@@ -318,16 +302,8 @@ FUNC(Std_ReturnType, ETHTRCV_CODE) EthTrcv_SetTransceiverMode(uint8 TrcvIdx, Eth
 #endif /* STD_ON == ETHTRCV_GET_CABLEDIAGNOSTICS_RESULT_API*/
                 {
 
-#if (42u == ETHTRCV_MAJORVERSION)
-                    EthIf_ReqTrcvMode[TrcvIdx] = CtrlMode;
-                    if (CtrlMode == ETHTRCV_MODE_ACTIVE)
-#elif (44u == ETHTRCV_MAJORVERSION)
-                    EthIf_ReqTrcvMode[TrcvIdx] = CtrlMode;
-                    if (CtrlMode == ETHTRCV_MODE_ACTIVE)
-#elif (19u == ETHTRCV_MAJORVERSION)
                     EthIf_ReqTrcvMode[TrcvIdx] = TrcvMode;
                     if (TrcvMode == ETH_MODE_ACTIVE)
-#endif /* 42u == ETHTRCV_MAJORVERSION */
                     {
                         EthTrcv_SetTrcvModeActive(TrcvIdx, &retVal);
                     }
@@ -369,18 +345,14 @@ FUNC(Std_ReturnType, ETHTRCV_CODE) EthTrcv_SetTransceiverMode(uint8 TrcvIdx, Eth
  */
 /******************************************************************************/
 #if (STD_ON == ETHTRCV_GET_TRCV_MODE)
-#if (42u == ETHTRCV_MAJORVERSION)
-FUNC(Std_ReturnType, ETHTRCV_CODE)
-EthTrcv_GetTransceiverMode(uint8 TrcvIdx, P2VAR(EthTrcv_ModeType, AUTOMATIC, ETHTRCV_APPL_DATA) TrcvModePtr)
-#elif (44u == ETHTRCV_MAJORVERSION)
-FUNC(Std_ReturnType, ETHTRCV_CODE)
-EthTrcv_GetTransceiverMode(uint8 TrcvIdx, P2VAR(EthTrcv_ModeType, AUTOMATIC, ETHTRCV_APPL_DATA) TrcvModePtr)
-#elif (19u == ETHTRCV_MAJORVERSION)
 FUNC(Std_ReturnType, ETHTRCV_CODE)
 EthTrcv_GetTransceiverMode(uint8 TrcvIdx, P2VAR(Eth_ModeType, AUTOMATIC, ETHTRCV_APPL_DATA) TrcvModePtr)
-#endif /* 42u == ETHTRCV_MAJORVERSION */
 {
     Std_ReturnType retVal;
+    /*for mii Register operation*/
+    uint8 CtrlIdx;
+    uint8 MiiIdx;
+
 #if (STD_ON == ETHTRCV_DEV_ERROR_DETECT)
     uint8 errorId = ETHTRCV_E_NO_ERROR;
     if (EthTrcv_ModuleState == ETHTRCV_STATE_UNINIT)
@@ -398,9 +370,10 @@ EthTrcv_GetTransceiverMode(uint8 TrcvIdx, P2VAR(Eth_ModeType, AUTOMATIC, ETHTRCV
     else
 #endif
     {
-        retVal = EthTrcv_GetTrcvModeHandle(TrcvIdx, TrcvModePtr);
+        CtrlIdx = EthTrcv_TrcvPbCfg[TrcvIdx].EthTrcvMgmtInterface->EthTrcvMiiInterface->EthTrcvCtrlIdx;
+        MiiIdx = EthTrcv_TrcvPbCfg[TrcvIdx].EthTrcvMgmtInterface->EthTrcvMiiInterface->EthTrcvMiiIdx;
+        retVal = EthTrcv_GetTrcvModeHandle(CtrlIdx, MiiIdx, TrcvModePtr);
     }
-
 #if (STD_ON == ETHTRCV_DEV_ERROR_DETECT)
     if (errorId != ETHTRCV_E_NO_ERROR)
     {
@@ -431,6 +404,11 @@ EthTrcv_GetTransceiverMode(uint8 TrcvIdx, P2VAR(Eth_ModeType, AUTOMATIC, ETHTRCV
 FUNC(Std_ReturnType, ETHTRCV_CODE) EthTrcv_StartAutoNegotiation(uint8 TrcvIdx)
 {
     Std_ReturnType retVal = E_NOT_OK;
+
+    /*for mii Register operation*/
+    uint8 CtrlIdx;
+    uint8 MiiIdx;
+
 #if (STD_ON == ETHTRCV_DEV_ERROR_DETECT)
     uint8 errorId = ETHTRCV_E_NO_ERROR;
     if (EthTrcv_ModuleState == ETHTRCV_STATE_UNINIT)
@@ -448,12 +426,14 @@ FUNC(Std_ReturnType, ETHTRCV_CODE) EthTrcv_StartAutoNegotiation(uint8 TrcvIdx)
     if (ETHTRCV_E_NO_ERROR == errorId)
 #endif
     {
+        CtrlIdx = EthTrcv_TrcvPbCfg[TrcvIdx].EthTrcvMgmtInterface->EthTrcvMiiInterface->EthTrcvCtrlIdx;
+        MiiIdx = EthTrcv_TrcvPbCfg[TrcvIdx].EthTrcvMgmtInterface->EthTrcvMiiInterface->EthTrcvMiiIdx;
 /*@req <SWS_EthTrcv_00056>*/
 #if (STD_ON == ETHTRCV_ENABLE_CABLEDIAGNOSTIC_API)
         if (ETHTRCV_CABLEDIAG_PENDING != EthTrcv_CableDiagState[TrcvIdx].CableDiagState)
 #endif /* STD_ON == ETHTRCV_GET_CABLEDIAGNOSTICS_RESULT_API*/
         {
-            retVal = EthTrcv_StartAutoNegotiationHandle(TrcvIdx);
+            retVal = EthTrcv_StartAutoNegotiationHandle(CtrlIdx, MiiIdx);
         }
     }
 
@@ -551,12 +531,19 @@ EthTrcv_TransceiverLinkStateRequest(uint8 TrcvIdx, EthTrcv_LinkStateType LinkSta
 #if (STD_ON == ETHTRCV_GET_LINK_STATE)
 FUNC(Std_ReturnType, ETHTRCV_CODE)
 EthTrcv_GetLinkState(
-    uint8 TrcvIdx, /* PRQA S 1503 */
-    P2VAR(EthTrcv_LinkStateType, AUTOMATIC, ETHTRCV_APPL_DATA) LinkStatePtr)
+    uint8 TrcvIdx,
+    P2VAR(EthTrcv_LinkStateType, AUTOMATIC, ETHTRCV_APPL_DATA) LinkStatePtr
+
+)
 
 {
     Std_ReturnType retVal;
     boolean result;
+
+    /*for mii Register operation*/
+    uint8 CtrlIdx;
+    uint8 MiiIdx;
+
 #if (STD_ON == ETHTRCV_DEV_ERROR_DETECT)
     uint8 errorId = ETHTRCV_E_NO_ERROR;
     if (EthTrcv_ModuleState == ETHTRCV_STATE_UNINIT)
@@ -574,16 +561,12 @@ EthTrcv_GetLinkState(
     else
 #endif
     {
-#if (42u == ETHTRCV_MAJORVERSION)
-        if (ETHTRCV_MODE_ACTIVE == EthTrcv_TrcvMode[TrcvIdx])
-#elif (44u == ETHTRCV_MAJORVERSION)
-        if (ETHTRCV_MODE_ACTIVE == EthTrcv_TrcvMode[TrcvIdx])
-#elif (19u == ETHTRCV_MAJORVERSION)
+        CtrlIdx = EthTrcv_TrcvPbCfg[TrcvIdx].EthTrcvMgmtInterface->EthTrcvMiiInterface->EthTrcvCtrlIdx;
+        MiiIdx = EthTrcv_TrcvPbCfg[TrcvIdx].EthTrcvMgmtInterface->EthTrcvMiiInterface->EthTrcvMiiIdx;
         if (ETH_MODE_ACTIVE == EthTrcv_TrcvMode[TrcvIdx])
-#endif /* 42u == ETHTRCV_MAJORVERSION */
         {
             /* get the PHY link state*/
-            retVal = EthTrcv_GetLinkStateHandle(TrcvIdx, &result);
+            retVal = EthTrcv_GetLinkStateHandle(CtrlIdx, MiiIdx, &result);
             if (retVal == (uint8)E_OK)
             {
                 if (result == (boolean)TRUE)
@@ -638,6 +621,11 @@ FUNC(Std_ReturnType, ETHTRCV_CODE)
 EthTrcv_GetBaudRate(uint8 TrcvIdx, P2VAR(EthTrcv_BaudRateType, AUTOMATIC, ETHTRCV_APPL_DATA) BaudRatePtr)
 {
     Std_ReturnType retVal = E_NOT_OK;
+
+    /*for mii Register operation*/
+    uint8 CtrlIdx;
+    uint8 MiiIdx;
+
 #if (STD_ON == ETHTRCV_DEV_ERROR_DETECT)
     uint8 errorId = ETHTRCV_E_NO_ERROR;
     if (EthTrcv_ModuleState == ETHTRCV_STATE_UNINIT)
@@ -655,7 +643,9 @@ EthTrcv_GetBaudRate(uint8 TrcvIdx, P2VAR(EthTrcv_BaudRateType, AUTOMATIC, ETHTRC
     else
 #endif
     {
-        retVal = EthTrcv_GetBaudRateHandle(TrcvIdx, BaudRatePtr);
+        CtrlIdx = EthTrcv_TrcvPbCfg[TrcvIdx].EthTrcvMgmtInterface->EthTrcvMiiInterface->EthTrcvCtrlIdx;
+        MiiIdx = EthTrcv_TrcvPbCfg[TrcvIdx].EthTrcvMgmtInterface->EthTrcvMiiInterface->EthTrcvMiiIdx;
+        retVal = EthTrcv_GetBaudRateHandle(CtrlIdx, MiiIdx, BaudRatePtr);
     }
 
 #if (STD_ON == ETHTRCV_DEV_ERROR_DETECT)
@@ -689,6 +679,11 @@ FUNC(Std_ReturnType, ETHTRCV_CODE)
 EthTrcv_GetDuplexMode(uint8 TrcvIdx, P2VAR(EthTrcv_DuplexModeType, AUTOMATIC, ETHTRCV_APPL_DATA) DuplexModePtr)
 {
     Std_ReturnType retVal = E_NOT_OK;
+
+    /*for mii Register operation*/
+    uint8 CtrlIdx;
+    uint8 MiiIdx;
+
 #if (STD_ON == ETHTRCV_DEV_ERROR_DETECT)
     uint8 errorId = ETHTRCV_E_NO_ERROR;
     if (EthTrcv_ModuleState == ETHTRCV_STATE_UNINIT)
@@ -706,7 +701,9 @@ EthTrcv_GetDuplexMode(uint8 TrcvIdx, P2VAR(EthTrcv_DuplexModeType, AUTOMATIC, ET
     else
 #endif
     {
-        retVal = EthTrcv_GetDuplexModeHandle(TrcvIdx, DuplexModePtr);
+        CtrlIdx = EthTrcv_TrcvPbCfg[TrcvIdx].EthTrcvMgmtInterface->EthTrcvMiiInterface->EthTrcvCtrlIdx;
+        MiiIdx = EthTrcv_TrcvPbCfg[TrcvIdx].EthTrcvMgmtInterface->EthTrcvMiiInterface->EthTrcvMiiIdx;
+        retVal = EthTrcv_GetDuplexModeHandle(CtrlIdx, MiiIdx, DuplexModePtr);
     }
 
 #if (STD_ON == ETHTRCV_DEV_ERROR_DETECT)
@@ -743,6 +740,10 @@ FUNC(Std_ReturnType, ETHTRCV_CODE)
 EthTrcv_SetTransceiverWakeupMode(uint8 TrcvIdx, EthTrcv_WakeupModeType TrcvWakeupMode)
 {
     Std_ReturnType retVal = E_NOT_OK;
+    /*for mii Register operation*/
+    uint8 CtrlIdx;
+    uint8 MiiIdx;
+
 #if (STD_ON == ETHTRCV_DEV_ERROR_DETECT)
     uint8 errorId = ETHTRCV_E_NO_ERROR;
     if (EthTrcv_ModuleState == ETHTRCV_STATE_UNINIT)
@@ -756,6 +757,8 @@ EthTrcv_SetTransceiverWakeupMode(uint8 TrcvIdx, EthTrcv_WakeupModeType TrcvWakeu
     else
 #endif
     {
+        CtrlIdx = EthTrcv_TrcvPbCfg[TrcvIdx].EthTrcvMgmtInterface->EthTrcvMiiInterface->EthTrcvCtrlIdx;
+        MiiIdx = EthTrcv_TrcvPbCfg[TrcvIdx].EthTrcvMgmtInterface->EthTrcvMiiInterface->EthTrcvMiiIdx;
 #if (STD_ON == ETHTRCV_ENABLE_CABLEDIAGNOSTIC_API)
         /*@req <SWS_EthTrcv_00120> <SWS_EthTrcv_00121> <SWS_EthTrcv_00164>*/
         if (ETHTRCV_CABLEDIAG_PENDING != EthTrcv_CableDiagState[TrcvIdx].CableDiagState)
@@ -769,7 +772,7 @@ EthTrcv_SetTransceiverWakeupMode(uint8 TrcvIdx, EthTrcv_WakeupModeType TrcvWakeu
                 retVal = E_OK;
                 break;
             case ETHTRCV_WUM_CLEAR:
-                retVal = EthTrcv_ClearWakeupReasonsHandle(TrcvIdx);
+                retVal = EthTrcv_ClearWakeupReasonsHandle(CtrlIdx, MiiIdx);
                 break;
             default:
                 /*nothing*/
@@ -810,6 +813,7 @@ EthTrcv_GetTransceiverWakeupMode(
     P2VAR(EthTrcv_WakeupModeType, AUTOMATIC, ETHTRCV_APPL_DATA) TrcvWakeupModePtr)
 {
     Std_ReturnType retVal = E_NOT_OK;
+
 #if (STD_ON == ETHTRCV_DEV_ERROR_DETECT)
     uint8 errorId = ETHTRCV_E_NO_ERROR;
     if (EthTrcv_ModuleState == ETHTRCV_STATE_UNINIT)
@@ -860,6 +864,10 @@ FUNC(Std_ReturnType, ETHTRCV_CODE) EthTrcv_CheckWakeup(uint8 TrcvIdx)
 {
     Std_ReturnType retVal = E_NOT_OK;
     EcuM_WakeupSourceType wakeupSourceValue;
+    /*for mii Register operation*/
+    uint8 CtrlIdx;
+    uint8 MiiIdx;
+
 #if (STD_ON == ETHTRCV_DEV_ERROR_DETECT)
     uint8 errorId = ETHTRCV_E_NO_ERROR;
     if (EthTrcv_ModuleState == ETHTRCV_STATE_UNINIT)
@@ -873,10 +881,12 @@ FUNC(Std_ReturnType, ETHTRCV_CODE) EthTrcv_CheckWakeup(uint8 TrcvIdx)
     else
 #endif
     {
+        CtrlIdx = EthTrcv_TrcvPbCfg[TrcvIdx].EthTrcvMgmtInterface->EthTrcvMiiInterface->EthTrcvCtrlIdx;
+        MiiIdx = EthTrcv_TrcvPbCfg[TrcvIdx].EthTrcvMgmtInterface->EthTrcvMiiInterface->EthTrcvMiiIdx;
         if (ETHTRCV_WUM_ENABLE == EthTrcv_WakeupMode[TrcvIdx])
         {
             /*check the wakeup reason and report to EcuM*/
-            retVal = EthTrcv_GetWakeupReasonHandle(TrcvIdx, &wakeupSourceValue);
+            retVal = EthTrcv_GetWakeupReasonHandle(CtrlIdx, MiiIdx, &wakeupSourceValue);
             if ((uint8)E_OK == retVal)
             {
                 EcuM_SetWakeupEvent(wakeupSourceValue);
@@ -921,6 +931,11 @@ FUNC(Std_ReturnType, ETHTRCV_CODE) EthTrcv_CheckWakeup(uint8 TrcvIdx)
 FUNC(Std_ReturnType, ETHTRCV_CODE) EthTrcv_SetPhyTestMode(uint8 TrcvIdx, EthTrcv_PhyTestModeType Mode)
 {
     Std_ReturnType retVal = E_NOT_OK;
+
+    /*for mii Register operation*/
+    uint8 CtrlIdx;
+    uint8 MiiIdx;
+
 #if (STD_ON == ETHTRCV_DEV_ERROR_DETECT)
     uint8 errorId = ETHTRCV_E_NO_ERROR;
     if (EthTrcv_ModuleState == ETHTRCV_STATE_UNINIT)
@@ -934,14 +949,16 @@ FUNC(Std_ReturnType, ETHTRCV_CODE) EthTrcv_SetPhyTestMode(uint8 TrcvIdx, EthTrcv
     else
 #endif
     {
+        CtrlIdx = EthTrcv_TrcvPbCfg[TrcvIdx].EthTrcvMgmtInterface->EthTrcvMiiInterface->EthTrcvCtrlIdx;
+        MiiIdx = EthTrcv_TrcvPbCfg[TrcvIdx].EthTrcvMgmtInterface->EthTrcvMiiInterface->EthTrcvMiiIdx;
 /*@req <SWS_EthTrcv_00166>*/
 #if (STD_ON == ETHTRCV_ENABLE_CABLEDIAGNOSTIC_API)
         if (ETHTRCV_CABLEDIAG_PENDING != EthTrcv_CableDiagState[TrcvIdx].CableDiagState)
 #endif /* STD_ON == ETHTRCV_GET_CABLEDIAGNOSTICS_RESULT_API*/
         {
-            if ((uint8)E_OK == EthTrcv_CheckPhyTestModeSupport(TrcvIdx, Mode))
+            if ((uint8)E_OK == EthTrcv_CheckPhyTestModeSupport(CtrlIdx, MiiIdx, Mode))
             {
-                retVal = EthTrcv_SetPhyTestModeHandle(TrcvIdx, Mode);
+                retVal = EthTrcv_SetPhyTestModeHandle(CtrlIdx, MiiIdx, Mode);
             }
             else
             {
@@ -986,6 +1003,11 @@ FUNC(Std_ReturnType, ETHTRCV_CODE)
 EthTrcv_SetPhyLoopbackMode(uint8 TrcvIdx, EthTrcv_PhyLoopbackModeType Mode)
 {
     Std_ReturnType retVal = E_NOT_OK;
+
+    /*for mii Register operation*/
+    uint8 CtrlIdx;
+    uint8 MiiIdx;
+
 #if (STD_ON == ETHTRCV_DEV_ERROR_DETECT)
     uint8 errorId = ETHTRCV_E_NO_ERROR;
     if (EthTrcv_ModuleState == ETHTRCV_STATE_UNINIT)
@@ -999,14 +1021,16 @@ EthTrcv_SetPhyLoopbackMode(uint8 TrcvIdx, EthTrcv_PhyLoopbackModeType Mode)
     else
 #endif
     {
+        CtrlIdx = EthTrcv_TrcvPbCfg[TrcvIdx].EthTrcvMgmtInterface->EthTrcvMiiInterface->EthTrcvCtrlIdx;
+        MiiIdx = EthTrcv_TrcvPbCfg[TrcvIdx].EthTrcvMgmtInterface->EthTrcvMiiInterface->EthTrcvMiiIdx;
 /*@req <SWS_EthTrcv_00167>*/
 #if (STD_ON == ETHTRCV_ENABLE_CABLEDIAGNOSTIC_API)
         if (ETHTRCV_CABLEDIAG_PENDING != EthTrcv_CableDiagState[TrcvIdx].CableDiagState)
 #endif /* STD_ON == ETHTRCV_GET_CABLEDIAGNOSTICS_RESULT_API*/
         {
-            if ((uint8)E_OK == EthTrcv_CheckPhyLoopBackSupport(TrcvIdx, Mode))
+            if ((uint8)E_OK == EthTrcv_CheckPhyLoopBackSupport(CtrlIdx, MiiIdx, Mode))
             {
-                retVal = EthTrcv_SetPhyLoopBackModeHandle(TrcvIdx, Mode);
+                retVal = EthTrcv_SetPhyLoopBackModeHandle(CtrlIdx, MiiIdx, Mode);
             }
             else
             {
@@ -1051,6 +1075,11 @@ EthTrcv_SetPhyLoopbackMode(uint8 TrcvIdx, EthTrcv_PhyLoopbackModeType Mode)
 FUNC(Std_ReturnType, ETHTRCV_CODE) EthTrcv_GetPhySignalQuality(uint8 TrcvIdx, uint32* SignalQualityPtr)
 {
     Std_ReturnType retVal = E_NOT_OK;
+
+    /*for mii Register operation*/
+    uint8 CtrlIdx;
+    uint8 MiiIdx;
+
 #if (STD_ON == ETHTRCV_DEV_ERROR_DETECT)
     uint8 errorId = ETHTRCV_E_NO_ERROR;
     if (EthTrcv_ModuleState == ETHTRCV_STATE_UNINIT)
@@ -1064,7 +1093,9 @@ FUNC(Std_ReturnType, ETHTRCV_CODE) EthTrcv_GetPhySignalQuality(uint8 TrcvIdx, ui
     else
 #endif
     {
-        retVal = EthTrcv_GetPhySQHandle(TrcvIdx, SignalQualityPtr);
+        CtrlIdx = EthTrcv_TrcvPbCfg[TrcvIdx].EthTrcvMgmtInterface->EthTrcvMiiInterface->EthTrcvCtrlIdx;
+        MiiIdx = EthTrcv_TrcvPbCfg[TrcvIdx].EthTrcvMgmtInterface->EthTrcvMiiInterface->EthTrcvMiiIdx;
+        retVal = EthTrcv_GetPhySQHandle(CtrlIdx, MiiIdx, SignalQualityPtr);
     }
 
 #if (STD_ON == ETHTRCV_DEV_ERROR_DETECT)
@@ -1097,6 +1128,10 @@ FUNC(Std_ReturnType, ETHTRCV_CODE) EthTrcv_GetPhySignalQuality(uint8 TrcvIdx, ui
 FUNC(Std_ReturnType, ETHTRCV_CODE) EthTrcv_SetPhyTxMode(uint8 TrcvIdx, EthTrcv_PhyTxModeType Mode)
 {
     Std_ReturnType retVal = E_NOT_OK;
+    /*for mii Register operation*/
+    uint8 CtrlIdx;
+    uint8 MiiIdx;
+
 #if (STD_ON == ETHTRCV_DEV_ERROR_DETECT)
     uint8 errorId = ETHTRCV_E_NO_ERROR;
     if (EthTrcv_ModuleState == ETHTRCV_STATE_UNINIT)
@@ -1110,14 +1145,16 @@ FUNC(Std_ReturnType, ETHTRCV_CODE) EthTrcv_SetPhyTxMode(uint8 TrcvIdx, EthTrcv_P
     else
 #endif
     {
+        CtrlIdx = EthTrcv_TrcvPbCfg[TrcvIdx].EthTrcvMgmtInterface->EthTrcvMiiInterface->EthTrcvCtrlIdx;
+        MiiIdx = EthTrcv_TrcvPbCfg[TrcvIdx].EthTrcvMgmtInterface->EthTrcvMiiInterface->EthTrcvMiiIdx;
 /*@req <SWS_EthTrcv_00168>*/
 #if (STD_ON == ETHTRCV_ENABLE_CABLEDIAGNOSTIC_API)
         if (ETHTRCV_CABLEDIAG_PENDING != EthTrcv_CableDiagState[TrcvIdx].CableDiagState)
 #endif /* STD_ON == ETHTRCV_GET_CABLEDIAGNOSTICS_RESULT_API*/
         {
-            if ((uint8)E_OK == EthTrcv_CheckPhyTxModeSupport(TrcvIdx, Mode))
+            if ((uint8)E_OK == EthTrcv_CheckPhyTxModeSupport(CtrlIdx, MiiIdx, Mode))
             {
-                retVal = EthTrcv_SetPhyTxModeHandle(TrcvIdx, Mode);
+                retVal = EthTrcv_SetPhyTxModeHandle(CtrlIdx, MiiIdx, Mode);
             }
             else
             {
@@ -1162,6 +1199,11 @@ FUNC(Std_ReturnType, ETHTRCV_CODE) EthTrcv_SetPhyTxMode(uint8 TrcvIdx, EthTrcv_P
 FUNC(Std_ReturnType, ETHTRCV_CODE) EthTrcv_RunCableDiagnostic(uint8 TrcvIdx)
 {
     Std_ReturnType retVal = E_NOT_OK;
+
+    /*for mii Register operation*/
+    uint8 CtrlIdx;
+    uint8 MiiIdx;
+
 #if (STD_ON == ETHTRCV_DEV_ERROR_DETECT)
     uint8 errorId = ETHTRCV_E_NO_ERROR;
     if (EthTrcv_ModuleState == ETHTRCV_STATE_UNINIT)
@@ -1175,13 +1217,15 @@ FUNC(Std_ReturnType, ETHTRCV_CODE) EthTrcv_RunCableDiagnostic(uint8 TrcvIdx)
     else
 #endif
     {
+        CtrlIdx = EthTrcv_TrcvPbCfg[TrcvIdx].EthTrcvMgmtInterface->EthTrcvMiiInterface->EthTrcvCtrlIdx;
+        MiiIdx = EthTrcv_TrcvPbCfg[TrcvIdx].EthTrcvMgmtInterface->EthTrcvMiiInterface->EthTrcvMiiIdx;
         /*@req SWS_EthTrcv_00159*/
         if ((ETHTRCV_CABLEDIAG_PENDING != EthTrcv_CableDiagState[TrcvIdx].CableDiagState)
             && (EthTrcv_TrcvMode[TrcvIdx] == ETH_MODE_ACTIVE)
             && (EthTrcv_LinkState[TrcvIdx] == ETHTRCV_LINK_STATE_DOWN))
         {
             EthTrcv_CableDiagState[TrcvIdx].CableDiagState = ETHTRCV_CABLEDIAG_PENDING;
-            retVal = EthTrcv_RunCableDiagHandle(TrcvIdx);
+            retVal = EthTrcv_RunCableDiagHandle(CtrlIdx, MiiIdx);
         }
     }
 
@@ -1216,6 +1260,11 @@ FUNC(Std_ReturnType, ETHTRCV_CODE)
 EthTrcv_GetCableDiagnosticsResult(uint8 TrcvIdx, EthTrcv_CableDiagResultType* ResultPtr)
 {
     Std_ReturnType retVal = E_NOT_OK;
+
+    /*for mii Register operation*/
+    uint8 CtrlIdx;
+    uint8 MiiIdx;
+
 #if (STD_ON == ETHTRCV_DEV_ERROR_DETECT)
     uint8 errorId = ETHTRCV_E_NO_ERROR;
     if (EthTrcv_ModuleState == ETHTRCV_STATE_UNINIT)
@@ -1229,10 +1278,12 @@ EthTrcv_GetCableDiagnosticsResult(uint8 TrcvIdx, EthTrcv_CableDiagResultType* Re
     else
 #endif
     {
+        CtrlIdx = EthTrcv_TrcvPbCfg[TrcvIdx].EthTrcvMgmtInterface->EthTrcvMiiInterface->EthTrcvCtrlIdx;
+        MiiIdx = EthTrcv_TrcvPbCfg[TrcvIdx].EthTrcvMgmtInterface->EthTrcvMiiInterface->EthTrcvMiiIdx;
         if (ETHTRCV_CABLEDIAG_PENDING == EthTrcv_CableDiagState[TrcvIdx].CableDiagState)
         {
             EthTrcv_CableDiagResultType cableDiagResult;
-            retVal = EthTrcv_GetCableDiagRsHandle(TrcvIdx, &cableDiagResult);
+            retVal = EthTrcv_GetCableDiagRsHandle(CtrlIdx, MiiIdx, &cableDiagResult);
             if (E_OK == retVal)
             {
                 EthTrcv_CableDiagState[TrcvIdx].CableDiagState = cableDiagResult;
@@ -1300,6 +1351,11 @@ FUNC(Std_ReturnType, ETHTRCV_CODE)
 EthTrcv_GetPhyIdentifier(uint8 TrcvIdx, uint32* OrgUniqueIdPtr, uint8* ModelNrPtr, uint8* RevisionNrPtr)
 {
     Std_ReturnType retVal = E_NOT_OK;
+
+    /*for mii Register operation*/
+    uint8 CtrlIdx;
+    uint8 MiiIdx;
+
 #if (STD_ON == ETHTRCV_DEV_ERROR_DETECT)
     uint8 errorId = ETHTRCV_E_NO_ERROR;
     if (EthTrcv_ModuleState == ETHTRCV_STATE_UNINIT)
@@ -1317,7 +1373,9 @@ EthTrcv_GetPhyIdentifier(uint8 TrcvIdx, uint32* OrgUniqueIdPtr, uint8* ModelNrPt
     else
 #endif
     {
-        retVal = EthTrcv_GetPhyIDHandle(TrcvIdx, OrgUniqueIdPtr, ModelNrPtr, RevisionNrPtr);
+        CtrlIdx = EthTrcv_TrcvPbCfg[TrcvIdx].EthTrcvMgmtInterface->EthTrcvMiiInterface->EthTrcvCtrlIdx;
+        MiiIdx = EthTrcv_TrcvPbCfg[TrcvIdx].EthTrcvMgmtInterface->EthTrcvMiiInterface->EthTrcvMiiIdx;
+        retVal = EthTrcv_GetPhyIDHandle(CtrlIdx, MiiIdx, OrgUniqueIdPtr, ModelNrPtr, RevisionNrPtr);
     }
 
 #if (STD_ON == ETHTRCV_DEV_ERROR_DETECT)
@@ -1342,56 +1400,58 @@ EthTrcv_GetPhyIdentifier(uint8 TrcvIdx, uint32* OrgUniqueIdPtr, uint8* ModelNrPt
  * Return              NA
  */
 /******************************************************************************/
-FUNC(void, ETHTRCV_CODE) EthTrcv_MainFunction(void) /* PRQA S 3408 */ /* MISRA Rule 8.4 */
+FUNC(void, ETHTRCV_CODE) EthTrcv_MainFunction(void)
 {
-    uint8 trcvIdx;
-    Std_ReturnType retVal;
-#if (42u == ETHTRCV_MAJORVERSION)
-    EthTrcv_ModeType trcvModeValue;
-#elif (44u == ETHTRCV_MAJORVERSION)
-    EthTrcv_ModeType trcvModeValue;
-#elif (19u == ETHTRCV_MAJORVERSION)
-    Eth_ModeType trcvModeValue;
-#endif /* 42u == ETHTRCV_MAJORVERSION */
+    if (EthTrcv_ModuleState == ETHTRCV_STATE_INIT)
+    {
+        uint8 trcvIdx;
+        Std_ReturnType retVal;
+        /*for mii Register operation*/
+        uint8 CtrlIdx;
+        uint8 MiiIdx;
+        Eth_ModeType trcvModeValue;
 
 #if (ETHTRCV_WAKEUP_BY_POLLING == ETHTRCV_WAKEUP_SUPPORT)
-    EcuM_WakeupSourceType wakeupSourceValue;
+        EcuM_WakeupSourceType wakeupSourceValue;
 #endif
 #if (STD_ON == ETHTRCV_DEV_ERROR_DETECT)
-    uint8 errorId = ETHTRCV_E_NO_ERROR;
-    if (EthTrcv_ModuleState == ETHTRCV_STATE_UNINIT)
-    {
-        errorId = ETHTRCV_E_UNINIT;
-    }
-    else
-#endif
-    {
-        for (trcvIdx = 0; trcvIdx < ETHTRCV_TRCVS_NUM; trcvIdx++) /*PRQA S 2877*/ /* MISRA Dir 4.1 */
+        uint8 errorId = ETHTRCV_E_NO_ERROR;
+        if (EthTrcv_ModuleState == ETHTRCV_STATE_UNINIT)
         {
-            retVal = EthTrcv_GetTrcvModeHandle(trcvIdx, &trcvModeValue);
-            if (((uint8)E_OK == retVal) && (EthTrcv_TrcvMode[trcvIdx] != trcvModeValue))
+            errorId = ETHTRCV_E_UNINIT;
+        }
+        else
+#endif
+        {
+            for (trcvIdx = 0; trcvIdx < ETHTRCV_TRCVS_NUM; trcvIdx++) /*PRQA S 2877*/ /* MISRA Dir 4.1 */
             {
-                EthTrcv_TrcvMode[trcvIdx] = trcvModeValue;
-                /*@req <SWS_EthTrcv_00043>*/
-                EthIf_TrcvModeIndication(EthTrcv_TrcvPbCfg[trcvIdx].EthTrcvRefCtrlIdxInEthIf, trcvModeValue);
-            }
+                CtrlIdx = EthTrcv_TrcvPbCfg[trcvIdx].EthTrcvMgmtInterface->EthTrcvMiiInterface->EthTrcvCtrlIdx;
+                MiiIdx = EthTrcv_TrcvPbCfg[trcvIdx].EthTrcvMgmtInterface->EthTrcvMiiInterface->EthTrcvMiiIdx;
+                retVal = EthTrcv_GetTrcvModeHandle(CtrlIdx, MiiIdx, &trcvModeValue);
+                if (((uint8)E_OK == retVal) && (EthTrcv_TrcvMode[trcvIdx] != trcvModeValue))
+                {
+                    EthTrcv_TrcvMode[trcvIdx] = trcvModeValue;
+                    /*@req <SWS_EthTrcv_00043>*/
+                    EthIf_TrcvModeIndication(EthTrcv_TrcvPbCfg[trcvIdx].EthTrcvRefCtrlIdxInEthIf, trcvModeValue);
+                }
 /*  Wakeup by polling is enabled */
 #if (ETHTRCV_WAKEUP_BY_POLLING == ETHTRCV_WAKEUP_SUPPORT)
-            retVal = EthTrcv_GetWakeupReasonHandle(trcvIdx, &wakeupSourceValue);
-            if ((uint8)E_OK == retVal)
-            {
-                EcuM_SetWakeupEvent(wakeupSourceValue);
-            }
+                retVal = EthTrcv_GetWakeupReasonHandle(trcvIdx, &wakeupSourceValue);
+                if ((uint8)E_OK == retVal)
+                {
+                    EcuM_SetWakeupEvent(wakeupSourceValue);
+                }
 #endif /* ETHTRCV_WAKEUP_BY_POLLING == ETHTRCV_WAKEUP_SUPPORT */
+            }
         }
-    }
 
 #if (STD_ON == ETHTRCV_DEV_ERROR_DETECT)
-    if (errorId != ETHTRCV_E_NO_ERROR)
-    {
-        (void)Det_ReportError(ETHTRCV_MODULE_ID, ETHTRCV_INSTANCE, ETHTRCV_SID_MAIN_FUNCTION, errorId);
-    }
+        if (errorId != ETHTRCV_E_NO_ERROR)
+        {
+            (void)Det_ReportError(ETHTRCV_MODULE_ID, ETHTRCV_INSTANCE, ETHTRCV_SID_MAIN_FUNCTION, errorId);
+        }
 #endif /* STD_ON == ETHTRCV_DEV_ERROR_DETECT  */
+    }
 }
 
 /******************************************************************************/
@@ -1497,6 +1557,12 @@ EthTrcv_WriteMiiIndication(uint8 CtrlIdx, uint8 TrcvIdx, uint8 RegIdx)
 #if (ETHTRCV_SET_TRCV_MODE == STD_ON)
 static FUNC(void, ETHTRCV_CODE) EthTrcv_SetTrcvModeActive(uint8 TrcvIdx, Std_ReturnType* retVal)
 {
+    /*for mii Register operation*/
+    uint8 CtrlIdx;
+    uint8 MiiIdx;
+    CtrlIdx = EthTrcv_TrcvPbCfg[TrcvIdx].EthTrcvMgmtInterface->EthTrcvMiiInterface->EthTrcvCtrlIdx;
+    MiiIdx = EthTrcv_TrcvPbCfg[TrcvIdx].EthTrcvMgmtInterface->EthTrcvMiiInterface->EthTrcvMiiIdx;
+
 #if (ETHTRCV_WAKEUP_SUPPORT != ETHTRCV_WAKEUP_NOT_SUPPORTED)
     EcuM_WakeupSourceType wakeupSourceValue;
 #endif /*ETHTRCV_WAKEUP_SUPPORT != ETHTRCV_WAKEUP_NOT_SUPPORTED*/
@@ -1508,25 +1574,25 @@ static FUNC(void, ETHTRCV_CODE) EthTrcv_SetTrcvModeActive(uint8 TrcvIdx, Std_Ret
         /*@req <SWS_EthTrcv_00118>*/
         /*Active wake up the PHY*/
         EthTrcv_LocalWakeupHandle(TrcvIdx);
-        if ((boolean)FALSE == EthTrcv_PhyModeIsSleep(TrcvIdx))
+        if ((boolean)FALSE == EthTrcv_PhyModeIsSleep(CtrlIdx，MiiIdx))
         {
             /*check the wakeup reason (EcuM wakeup source)*/
-            if ((uint8)E_OK == EthTrcv_GetWakeupReasonHandle(TrcvIdx, &wakeupSourceValue))
+            if ((uint8)E_OK == EthTrcv_GetWakeupReasonHandle(CtrlIdx, MiiIdx, &wakeupSourceValue))
             {
                 EcuM_SetWakeupEvent(wakeupSourceValue);
             }
             /*call the configuration API WakeUpCallout*/
-            if (NULL_PTR != EthTrcv_TrcvPbCfg[TrcvIdx].EthTrcvWakeUpCallout)
+            if (NULL_PTR != ETHTRCV_CFG_DATA(TrcvIdx).EthTrcvWakeUpCallout)
             {
-                EthTrcv_TrcvPbCfg[TrcvIdx].EthTrcvWakeUpCallout(TrcvIdx);
+                ETHTRCV_CFG_DATA(TrcvIdx).EthTrcvWakeUpCallout(TrcvIdx);
             }
             /*request change the PHY mode to normal mode*/
-            EthTrcv_SetTrcvModeHandle(TrcvIdx, ECR_NORMAL_MODE);
-/*@req <SWS_EthTrcv_00112>*/
+            EthTrcv_SetTrcvModeHandle(CtrlIdx, MiiIdx, ECR_NORMAL_MODE);
+            /*@req <SWS_EthTrcv_00112>*/
 #if (ETHTRCV_USED_ICU_MODULE == STD_ON)
-            if (ICU_CHANNEL_ID_INVALID != EthTrcv_TrcvPbCfg[TrcvIdx].EthTrcvRefChannelIdx)
+            if (ICU_CHANNEL_ID_INVALID != ETHTRCV_CFG_DATA(TrcvIdx).EthTrcvRefChannelIdx)
             {
-                Icu_DisableNotification(EthTrcv_TrcvPbCfg[TrcvIdx].EthTrcvRefChannelIdx);
+                Icu_DisableNotification(ETHTRCV_CFG_DATA(TrcvIdx).EthTrcvRefChannelIdx);
             }
 #endif /*ETHTRCV_USED_ICU_MODULE == STD_ON*/
             *retVal = E_OK;
@@ -1534,39 +1600,46 @@ static FUNC(void, ETHTRCV_CODE) EthTrcv_SetTrcvModeActive(uint8 TrcvIdx, Std_Ret
     }
     else
     {
-        EthTrcv_SetTrcvModeHandle(TrcvIdx, ECR_NORMAL_MODE);
+        EthTrcv_SetTrcvModeHandle(CtrlIdx, MiiIdx, ECR_NORMAL_MODE);
         *retVal = E_OK;
     }
 #else  /*ETHTRCV_WAKEUP_SUPPORT != ETHTRCV_WAKEUP_NOT_SUPPORTED*/
-    EthTrcv_SetTrcvModeHandle(TrcvIdx, ECR_NORMAL_MODE);
+    EthTrcv_SetTrcvModeHandle(CtrlIdx, MiiIdx, ECR_NORMAL_MODE);
     *retVal = E_OK;
 #endif /*ETHTRCV_WAKEUP_SUPPORT != ETHTRCV_WAKEUP_NOT_SUPPORTED*/
 }
 
 static FUNC(void, ETHTRCV_CODE) EthTrcv_SetTrcvModeDown(uint8 TrcvIdx, Std_ReturnType* retVal)
 {
+    /*for mii Register operation*/
+    uint8 CtrlIdx;
+    uint8 MiiIdx;
+    CtrlIdx = EthTrcv_TrcvPbCfg[TrcvIdx].EthTrcvMgmtInterface->EthTrcvMiiInterface->EthTrcvCtrlIdx;
+    MiiIdx = EthTrcv_TrcvPbCfg[TrcvIdx].EthTrcvMgmtInterface->EthTrcvMiiInterface->EthTrcvMiiIdx;
+
 /*set the PHY mode to sleep or standby*/
 #if (ETHTRCV_WAKEUP_SUPPORT != ETHTRCV_WAKEUP_NOT_SUPPORTED)
+    /*@req <SWS_EthTrcv_00117>*/
     if (ETHTRCV_WUM_ENABLE == EthTrcv_WakeupMode[TrcvIdx])
     {
         /*set the PHY mode to sleep mode*/
-        EthTrcv_SetTrcvModeHandle(TrcvIdx, ECR_SLEEP_REQUEST_MODE);
+        EthTrcv_SetTrcvModeHandle(CtrlIdx, MiiIdx, ECR_SLEEP_REQUEST_MODE);
 /*@req <SWS_EthTrcv_00111>*/
 #if (ETHTRCV_USED_ICU_MODULE == STD_ON)
-        if (ICU_CHANNEL_ID_INVALID != EthTrcv_TrcvPbCfg[TrcvIdx].EthTrcvRefChannelIdx)
+        if (ICU_CHANNEL_ID_INVALID != ETHTRCV_CFG_DATA(TrcvIdx).EthTrcvRefChannelIdx)
         {
-            Icu_EnableNotification(EthTrcv_TrcvPbCfg[TrcvIdx].EthTrcvRefChannelIdx);
+            Icu_EnableNotification(ETHTRCV_CFG_DATA(TrcvIdx).EthTrcvRefChannelIdx);
         }
 #endif /*ETHTRCV_USED_ICU_MODULE == STD_ON*/
     }
     else
     {
         /*set the PHY mode to standby mode*/
-        EthTrcv_SetTrcvModeHandle(TrcvIdx, ECR_STANDBY_MODE);
+        EthTrcv_SetTrcvModeHandle(CtrlIdx, MiiIdx, ECR_STANDBY_MODE);
     }
 #else  /*ETHTRCV_WAKEUP_SUPPORT != ETHTRCV_WAKEUP_NOT_SUPPORTED*/
     /*set the PHY mode to standby mode*/
-    EthTrcv_SetTrcvModeHandle(TrcvIdx, ECR_STANDBY_MODE);
+    EthTrcv_SetTrcvModeHandle(CtrlIdx, MiiIdx, ECR_STANDBY_MODE);
 #endif /*ETHTRCV_WAKEUP_SUPPORT != ETHTRCV_WAKEUP_NOT_SUPPORTED*/
     *retVal = E_OK;
 }
@@ -1575,13 +1648,19 @@ static FUNC(void, ETHTRCV_CODE) EthTrcv_SetTrcvModeDown(uint8 TrcvIdx, Std_Retur
 static FUNC(Std_ReturnType, ETHTRCV_CODE) EthTrcv_LinkStateRequest(uint8 TrcvIdx, EthTrcv_LinkStateType LinkState)
 {
     Std_ReturnType retVal = E_NOT_OK;
+    /*for mii Register operation*/
+    uint8 CtrlIdx;
+    uint8 MiiIdx;
+    CtrlIdx = EthTrcv_TrcvPbCfg[TrcvIdx].EthTrcvMgmtInterface->EthTrcvMiiInterface->EthTrcvCtrlIdx;
+    MiiIdx = EthTrcv_TrcvPbCfg[TrcvIdx].EthTrcvMgmtInterface->EthTrcvMiiInterface->EthTrcvMiiIdx;
+
     if (ETHTRCV_LINK_STATE_ACTIVE == LinkState)
     {
         /*@req <SWS_EthTrcv_00151>*/
         if ((TRCV_CONN_NEG_AUTO == EthTrcv_TrcvPbCfg[TrcvIdx].EthTrcvConnNeg)
             || (TRCV_CONN_NEG_MASTER == EthTrcv_TrcvPbCfg[TrcvIdx].EthTrcvConnNeg))
         {
-            retVal = EthTrcv_LinkStateActiveHandle(TrcvIdx);
+            retVal = EthTrcv_LinkStateActiveHandle(CtrlIdx, MiiIdx);
         }
     }
     else
@@ -1590,7 +1669,7 @@ static FUNC(Std_ReturnType, ETHTRCV_CODE) EthTrcv_LinkStateRequest(uint8 TrcvIdx
         if ((TRCV_CONN_NEG_AUTO == EthTrcv_TrcvPbCfg[TrcvIdx].EthTrcvConnNeg)
             || (TRCV_CONN_NEG_MASTER == EthTrcv_TrcvPbCfg[TrcvIdx].EthTrcvConnNeg))
         {
-            retVal = EthTrcv_LinkStateDownHandle(TrcvIdx);
+            retVal = EthTrcv_LinkStateDownHandle(CtrlIdx, MiiIdx);
         }
     }
     if ((uint8)E_OK == retVal)

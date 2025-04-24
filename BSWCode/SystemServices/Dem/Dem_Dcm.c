@@ -18,53 +18,30 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Dem_Dcm.c                                                   **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : tao.yu                                                      **
- **  Vendor      : i-soft                                                      **
- **  DESCRIPTION : API definitions of DEM for DCM                              **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                       **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Dem_Dcm.c                                                   **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : tao.yu                                                      **
+**  Vendor      : i-soft                                                      **
+**  DESCRIPTION : API definitions of DEM for DCM                              **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                       **
+**                                                                            **
+*******************************************************************************/
 
 /*******************************************************************************
 **                      Includes                                              **
 *******************************************************************************/
 #include "Dem_Internal.h"
-#include "Dem_Dcm.h"
 
 /*******************************************************************************
 **                      Global Variable Definitions                           **
 *******************************************************************************/
-
-/* FreezeFrameRecordFilter */
-typedef struct
-{
-    /* Filter */
-    Dem_DTCFormatType DTCFormat;
-    /* Result */
-    uint16 NumberOfFilteredRecords;
-    uint16 GetNum;
-    uint8 EntryIndex;
-    uint8 FFIndex;
-} Dem_FreezeFrameRecordFilterInfoType;
-
-typedef struct
-{
-    /* All Group */
-    boolean AllGroupIsEnabled;
-    Dem_DTCKindType DTCKind;
-#if (DEM_GROUP_OF_DTC_NUM > 0)
-    uint8 DTCGroupStatus[DEM_GROUP_OF_DTC_NUM_BYTE];
-#endif
-} Dem_DTCSettingInfoType;
-
 typedef struct
 {
     uint16 DTCIndex;
@@ -79,7 +56,7 @@ VAR(Dem_DTCFilterInfoType, AUTOMATIC) DemDTCFilterInfo;
 
 #define DEM_START_SEC_VAR_NO_INIT_UNSPECIFIED
 #include "Dem_MemMap.h"
-DEM_LOCAL VAR(Dem_DTCSettingInfoType, AUTOMATIC) DemDTCSettingInfo;
+VAR(Dem_DTCSettingInfoType, AUTOMATIC) DemDTCSettingInfo;
 #define DEM_STOP_SEC_VAR_NO_INIT_UNSPECIFIED
 #include "Dem_MemMap.h"
 
@@ -97,7 +74,7 @@ DEM_LOCAL VAR(Dem_DTCRecordUpdateStatusInfoType, AUTOMATIC) DTCRecordUpdateStatu
 
 #define DEM_START_SEC_VAR_NO_INIT_UNSPECIFIED
 #include "Dem_MemMap.h"
-DEM_LOCAL VAR(Dem_FreezeFrameRecordFilterInfoType, AUTOMATIC) DemFreezeFrameRecordFilterInfo;
+VAR(Dem_FreezeFrameRecordFilterInfoType, AUTOMATIC) DemFreezeFrameRecordFilterInfo;
 #define DEM_STOP_SEC_VAR_NO_INIT_UNSPECIFIED
 #include "Dem_MemMap.h"
 
@@ -116,56 +93,24 @@ DEM_LOCAL VAR(boolean, AUTOMATIC) Dem_DTCDisable = FALSE;
 /*******************************************************************************
 **                      Private Function Definitions                         **
 *******************************************************************************/
-
 #define DEM_START_SEC_CODE
 #include "Dem_MemMap.h"
-DEM_LOCAL FUNC(void, DEM_CODE) Dem_SetDTCSettingProcess(void);
+
 #if (DEM_RESET_CONFIRMED_BIT_ON_OVERFLOW == STD_ON)
 DEM_LOCAL FUNC(uint8, DEM_CODE) Dem_CheckEventInternalMemDest(Dem_DTCOriginType DTCOrigin, uint16 IntId);
 #endif
 DEM_LOCAL FUNC(boolean, DEM_CODE) Dem_CheckDTCFormat(uint8 dtcFormat, uint16 dtcRef);
-#define DEM_STOP_SEC_CODE
-#include "Dem_MemMap.h"
+DEM_LOCAL FUNC(Dem_ReturnGetNextFilteredElementType, DEM_CODE) Dem_DcmCheckDTCFilterStatus(
+    /* PRQA S 3432++ */ /* MISRA Rule 20.7 */
+    P2CONST(uint32, AUTOMATIC, DEM_APPL_DATA) DTC,
+    P2CONST(Dem_UdsStatusByteType, AUTOMATIC, DEM_APPL_DATA) DTCStatus);
+/* PRQA S 3432-- */ /* MISRA Rule 20.7 */
+DEM_LOCAL FUNC(Dem_ReturnClearDTCType, DEM_CODE)
+    Dem_DcmSubClearDTC(uint32 DTC, Dem_DTCFormatType DTCFormat, Dem_DTCOriginType DTCOrigin);
 
 /*******************************************************************************
 **                      Global Function Definitions                           **
 *******************************************************************************/
-/*************************************************************************/
-/*
- * Brief               BRIEF DESCRIPTION
- * ServiceId           --
- * Sync/Async          Synchronous
- * Reentrancy          Reentrant/Non Reentrant
- * Param-Name[in]      none
- * Param-Name[out]     none
- * Param-Name[in/out]  none
- * Return              none
- */
-/*************************************************************************/
-#define DEM_START_SEC_CODE
-#include "Dem_MemMap.h"
-FUNC(void, DEM_CODE) Dem_DcmInit(void) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
-{
-    Dem_DTCStatusChangedInd = TRUE;
-    DemDTCSettingInfo.AllGroupIsEnabled = TRUE;
-#if (DEM_GROUP_OF_DTC_NUM > 0)
-    Dem_MemSet((uint8*)&DemDTCSettingInfo.DTCGroupStatus, 0xFFu, DEM_GROUP_OF_DTC_NUM_BYTE);
-#endif
-    Dem_MemSet((uint8*)&DemDTCFilterInfo, 0x00u, sizeof(Dem_DTCFilterInfoType));
-    Dem_MemSet((uint8*)&DemFreezeFrameRecordFilterInfo, 0x00u, sizeof(Dem_FreezeFrameRecordFilterInfoType));
-
-    DemDTCByOccurrenceTimeInfo.FirstDtcConfirmed = DEM_EVENT_PARAMETER_INVALID;
-    DemDTCByOccurrenceTimeInfo.FirstFailed = DEM_EVENT_PARAMETER_INVALID;
-    DemDTCByOccurrenceTimeInfo.MostRecDtcConfirmed = DEM_EVENT_PARAMETER_INVALID;
-    DemDTCByOccurrenceTimeInfo.MostRecentFailed = DEM_EVENT_PARAMETER_INVALID;
-
-    DemClearDTCInfo.ClearAllGroup = FALSE;
-    DemClearDTCInfo.DTCGroupIndex = DEM_GROUP_OF_DTC_INVALID;
-    DemClearDTCInfo.DTCIndex = DEM_DTC_REF_INVALID;
-    DemClearDTCInfo.memDest = DEM_MEM_DEST_INVALID;
-}
-#define DEM_STOP_SEC_CODE
-#include "Dem_MemMap.h"
 
 /*************************************************************************/
 /*
@@ -180,21 +125,14 @@ FUNC(void, DEM_CODE) Dem_DcmInit(void) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
  *                              different DTC formats is not possible.
  */
 /*************************************************************************/
-#define DEM_START_SEC_CODE
-#include "Dem_MemMap.h"
-FUNC(Dem_DTCTranslationFormatType, DEM_CODE)
-Dem_DcmGetTranslationType(void) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
+FUNC(Dem_DTCTranslationFormatType, DEM_CODE) Dem_DcmGetTranslationType(void) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
 {
-#if (STD_ON == DEM_DEV_ERROR_DETECT)
     if (Dem_InitState != DEM_STATE_INIT)
     {
         DEM_DET_REPORT(DEM_SID_DCMGETTRANSLATIONTYPE, DEM_E_UNINIT);
     }
-#endif /* STD_ON == DEM_DEV_ERROR_DETECT */
     return DEM_TYPE_OF_DTCSUPPORTED;
 }
-#define DEM_STOP_SEC_CODE
-#include "Dem_MemMap.h"
 
 /*************************************************************************/
 /*
@@ -210,16 +148,13 @@ Dem_DcmGetTranslationType(void) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
  *                       E_NOT_OK: get of DTC status mask failed
  */
 /*************************************************************************/
-#define DEM_START_SEC_CODE
-#include "Dem_MemMap.h"
 FUNC(Std_ReturnType, DEM_CODE)
-/* PRQA S 1532,3432++ */ /* MISRA Rule 8.7,20.7 */
+/* PRQA S 3432,1532++ */ /* MISRA Rule 20.7,8.7 */
 Dem_DcmGetDTCStatusAvailabilityMask(P2VAR(Dem_UdsStatusByteType, AUTOMATIC, DEM_APPL_DATA) DTCStatusMask)
-/* PRQA S 1532,3432-- */ /* MISRA Rule 8.7,20.7 */
+/* PRQA S 3432,1532-- */ /* MISRA Rule 20.7,8.7 */
 {
-    Std_ReturnType ret;
-#if (STD_ON == DEM_DEV_ERROR_DETECT)
-    ret = E_NOT_OK;
+    Std_ReturnType retVal = E_NOT_OK;
+
     if (Dem_InitState != DEM_STATE_INIT)
     {
         DEM_DET_REPORT(DEM_SID_DCMGETDTCSTATUSAVAILABILITYMASK, DEM_E_UNINIT);
@@ -229,15 +164,12 @@ Dem_DcmGetDTCStatusAvailabilityMask(P2VAR(Dem_UdsStatusByteType, AUTOMATIC, DEM_
         DEM_DET_REPORT(DEM_SID_DCMGETDTCSTATUSAVAILABILITYMASK, DEM_E_PARAM_POINTER);
     }
     else
-#endif /* STD_ON == DEM_DEV_ERROR_DETECT */
     {
         *DTCStatusMask = DEM_DTC_STATUS_AVAILABILITY_MASK;
-        ret = E_OK;
+        retVal = E_OK;
     }
-    return ret;
+    return retVal;
 }
-#define DEM_STOP_SEC_CODE
-#include "Dem_MemMap.h"
 
 /*************************************************************************/
 /*
@@ -257,16 +189,15 @@ Dem_DcmGetDTCStatusAvailabilityMask(P2VAR(Dem_UdsStatusByteType, AUTOMATIC, DEM_
  * Return              Status of the operation of type Dem_ReturnGetStatusOfDTCType.
  */
 /*************************************************************************/
-#define DEM_START_SEC_CODE
-#include "Dem_MemMap.h"
 FUNC(Dem_ReturnGetStatusOfDTCType, DEM_CODE)
 /* PRQA S 3432,1532++ */ /* MISRA Rule 20.7,8.7 */
 Dem_DcmGetStatusOfDTC(uint32 DTC, Dem_DTCOriginType DTCOrigin, P2VAR(uint8, AUTOMATIC, DEM_APPL_DATA) DTCStatus)
 /* PRQA S 3432,1532-- */ /* MISRA Rule 20.7,8.7 */
 {
-    Dem_ReturnGetStatusOfDTCType ret;
-#if (STD_ON == DEM_DEV_ERROR_DETECT)
-    ret = DEM_STATUS_FAILED;
+    uint8 memDest;
+    uint16 dtcIndex;
+    Dem_ReturnGetStatusOfDTCType ret = DEM_STATUS_FAILED;
+
     if (Dem_InitState != DEM_STATE_INIT)
     {
         DEM_DET_REPORT(DEM_SID_DCMGETSTATUSOFDTC, DEM_E_UNINIT);
@@ -276,28 +207,35 @@ Dem_DcmGetStatusOfDTC(uint32 DTC, Dem_DTCOriginType DTCOrigin, P2VAR(uint8, AUTO
         DEM_DET_REPORT(DEM_SID_DCMGETSTATUSOFDTC, DEM_E_PARAM_POINTER);
     }
     else
-#endif /* STD_ON == DEM_DEV_ERROR_DETECT */
     {
-        /*SWS_Dem_01100*/
-        uint16 dtcIndex = Dem_GetDTCIndex(DTC, DEM_DTC_FORMAT_UDS);
-        if ((dtcIndex != DEM_DTC_REF_INVALID) && (DemDTCGeneralStatus[dtcIndex].SuppressionStatus == FALSE))
-        {
-            /* return status of DTC which not been stored */
-            /* PRQA S 2985++ */ /* MISRA Rule 2.2 */
-            *DTCStatus = (DemDTCGeneralStatus[dtcIndex].CbUdsStatus & DEM_DTC_STATUS_AVAILABILITY_MASK);
-            /* PRQA S 2985-- */ /* MISRA Rule 2.2 */
-            ret = DEM_STATUS_OK;
-        }
-        else
+        /* req SWS_Dem_01100 */
+        dtcIndex = Dem_GetDTCIndex(DTC, DEM_DTC_FORMAT_UDS);
+        if (dtcIndex == DEM_DTC_REF_INVALID)
         {
             ret = DEM_STATUS_WRONG_DTC;
         }
-        DEM_UNUSED(DTCOrigin);
+        else if (DemDTCGeneralStatus[dtcIndex].SuppressionStatus == TRUE)
+        {
+            ret = DEM_STATUS_WRONG_DTC;
+        }
+        else
+        {
+            memDest = Dem_GetInternalMemDest(DTCOrigin);
+            if (memDest == DEM_MEM_DEST_INVALID)
+            {
+                ret = DEM_STATUS_WRONG_DTCORIGIN;
+            }
+            else
+            {
+                /* PRQA S 2985++ */ /* MISRA Rule 2.2 */
+                *DTCStatus = (DemDTCGeneralStatus[dtcIndex].CbUdsStatus & DEM_DTC_STATUS_AVAILABILITY_MASK);
+                /* PRQA S 2985-- */ /* MISRA Rule 2.2 */
+                ret = DEM_STATUS_OK;
+            }
+        }
     }
     return ret;
 }
-#define DEM_STOP_SEC_CODE
-#include "Dem_MemMap.h"
 
 /*************************************************************************/
 /*
@@ -313,15 +251,13 @@ Dem_DcmGetStatusOfDTC(uint32 DTC, Dem_DTCOriginType DTCOrigin, P2VAR(uint8, AUTO
  * Return              Status of the operation of type Dem_ReturnGetSeverityOfDTCType.
  */
 /*************************************************************************/
-#define DEM_START_SEC_CODE
-#include "Dem_MemMap.h"
 FUNC(Dem_ReturnGetSeverityOfDTCType, DEM_CODE)
 /* PRQA S 3432++ */ /* MISRA Rule 20.7 */
 Dem_DcmGetSeverityOfDTC(uint32 DTC, P2VAR(Dem_DTCSeverityType, AUTOMATIC, DEM_APPL_DATA) DTCSeverity)
 /* PRQA S 3432-- */ /* MISRA Rule 20.7 */
 {
+    uint16 dtcIndex;
     Dem_ReturnGetSeverityOfDTCType ret = DEM_GET_SEVERITYOFDTC_WRONG_DTC;
-#if (STD_ON == DEM_DEV_ERROR_DETECT)
     if (Dem_InitState != DEM_STATE_INIT)
     {
         DEM_DET_REPORT(DEM_SID_DCMGETSEVERITYOFDTC, DEM_E_UNINIT);
@@ -331,9 +267,9 @@ Dem_DcmGetSeverityOfDTC(uint32 DTC, P2VAR(Dem_DTCSeverityType, AUTOMATIC, DEM_AP
         DEM_DET_REPORT(DEM_SID_DCMGETSEVERITYOFDTC, DEM_E_PARAM_POINTER);
     }
     else
-#endif /* STD_ON == DEM_DEV_ERROR_DETECT */
-    {  /*SWS_Dem_01100*/
-        uint16 dtcIndex = Dem_GetDTCIndex(DTC, DEM_DTC_FORMAT_UDS);
+    {
+        /* req SWS_Dem_01100 */
+        dtcIndex = Dem_GetDTCIndex(DTC, DEM_DTC_FORMAT_UDS);
         if ((dtcIndex != DEM_DTC_REF_INVALID) && (DemDTCGeneralStatus[dtcIndex].SuppressionStatus == FALSE))
         {
             *DTCSeverity = DemPbCfgPtr->DemDTC[dtcIndex].DemDTCSeverity;
@@ -342,8 +278,6 @@ Dem_DcmGetSeverityOfDTC(uint32 DTC, P2VAR(Dem_DTCSeverityType, AUTOMATIC, DEM_AP
     }
     return ret;
 }
-#define DEM_STOP_SEC_CODE
-#include "Dem_MemMap.h"
 
 /*************************************************************************/
 /*
@@ -357,16 +291,13 @@ Dem_DcmGetSeverityOfDTC(uint32 DTC, P2VAR(Dem_DTCSeverityType, AUTOMATIC, DEM_AP
  * Return              Status of the operation of type Dem_ReturnGetFunctionalUnitOfDTCType.
  */
 /*************************************************************************/
-#define DEM_START_SEC_CODE
-#include "Dem_MemMap.h"
 FUNC(Dem_ReturnGetFunctionalUnitOfDTCType, DEM_CODE)
 /* PRQA S 3432++ */ /* MISRA Rule 20.7 */
 Dem_DcmGetFunctionalUnitOfDTC(uint32 DTC, P2VAR(uint8, AUTOMATIC, DEM_APPL_DATA) DTCFunctionalUnit)
 /* PRQA S 3432-- */ /* MISRA Rule 20.7 */
 {
-    Dem_ReturnGetFunctionalUnitOfDTCType ret;
-#if (STD_ON == DEM_DEV_ERROR_DETECT)
-    ret = DEM_GET_FUNCTIONALUNITOFDTC_WRONG_DTC;
+    uint16 dtcIndex;
+    Dem_ReturnGetFunctionalUnitOfDTCType ret = DEM_GET_FUNCTIONALUNITOFDTC_WRONG_DTC;
     if (Dem_InitState != DEM_STATE_INIT)
     {
         DEM_DET_REPORT(DEM_SID_DCMGETFUNCTIONALUNITOFDTC, DEM_E_UNINIT);
@@ -376,20 +307,18 @@ Dem_DcmGetFunctionalUnitOfDTC(uint32 DTC, P2VAR(uint8, AUTOMATIC, DEM_APPL_DATA)
         DEM_DET_REPORT(DEM_SID_DCMGETFUNCTIONALUNITOFDTC, DEM_E_PARAM_POINTER);
     }
     else
-#endif /* STD_ON == DEM_DEV_ERROR_DETECT */
     {
-        /*SWS_Dem_00593*/ /*SWS_Dem_01100*/
-        uint16 dtcIndex = Dem_GetDTCIndex(DTC, DEM_DTC_FORMAT_UDS);
+        /* req SWS_Dem_01100 */
+        dtcIndex = Dem_GetDTCIndex(DTC, DEM_DTC_FORMAT_UDS);
         if ((dtcIndex != DEM_DTC_REF_INVALID) && (DemDTCGeneralStatus[dtcIndex].SuppressionStatus == FALSE))
         {
+            /* req SWS_Dem_00593 */
             *DTCFunctionalUnit = DemPbCfgPtr->DemDTC[dtcIndex].DemDTCFunctionalUnit;
             ret = DEM_GET_FUNCTIONALUNITOFDTC_OK;
         }
     }
     return ret;
 }
-#define DEM_STOP_SEC_CODE
-#include "Dem_MemMap.h"
 
 /*************************************************************************/
 /*
@@ -414,8 +343,6 @@ Dem_DcmGetFunctionalUnitOfDTC(uint32 DTC, P2VAR(uint8, AUTOMATIC, DEM_APPL_DATA)
  * Return              Status of the operation to (re-)set a DTC filter.
  */
 /*************************************************************************/
-#define DEM_START_SEC_CODE
-#include "Dem_MemMap.h"
 FUNC(Dem_ReturnSetFilterType, DEM_CODE)
 Dem_DcmSetDTCFilter(
     Dem_UdsStatusByteType DTCStatusMask,
@@ -426,10 +353,8 @@ Dem_DcmSetDTCFilter(
     Dem_DTCSeverityType DTCSeverityMask,
     boolean FilterForFaultDetectionCounter)
 {
-    Dem_ReturnSetFilterType ret;
-    Dem_DTCOriginType lDTCOrigin = Dem_GetInternalMemDest(DTCOrigin);
-#if (STD_ON == DEM_DEV_ERROR_DETECT)
-    ret = DEM_WRONG_FILTER;
+    Dem_ReturnSetFilterType ret = DEM_WRONG_FILTER;
+    uint8 memDest = Dem_GetInternalMemDest(DTCOrigin);
     if (Dem_InitState != DEM_STATE_INIT)
     {
         DEM_DET_REPORT(DEM_SID_DCMSETDTCFILTER, DEM_E_UNINIT);
@@ -438,22 +363,21 @@ Dem_DcmSetDTCFilter(
         ((DEM_DTC_FORMAT_OBD == DTCFormat) && (DEM_OBD_SUPPORT == DEM_OBD_NO_OBD_SUPPORT))
         || ((DEM_DTC_FORMAT_J1939 == DTCFormat) && (DEM_J1939_SUPPORT == STD_OFF))
         || ((DEM_DTC_REF_EMISSION_NUM == 0u) && (DTCKind == DEM_DTC_KIND_EMISSION_REL_DTCS))
-        || (lDTCOrigin == DEM_MEM_DEST_INVALID))
+        || (memDest == DEM_MEM_DEST_INVALID))
     {
         DEM_DET_REPORT(DEM_SID_DCMSETDTCFILTER, DEM_E_WRONG_CONFIGURATION);
     }
     else
-#endif /* STD_ON == DEM_DEV_ERROR_DETECT */
     {
+        /* req SWS_Dem_01058 */
         /* PRQA S 2985++ */ /* MISRA Rule 2.2 */
         DemDTCFilterInfo.DTCStatusMask = (0u == DTCStatusMask) ? (0xFFu & DEM_DTC_STATUS_AVAILABILITY_MASK)
                                                                : (DTCStatusMask & DEM_DTC_STATUS_AVAILABILITY_MASK);
         /* PRQA S 2985-- */ /* MISRA Rule 2.2 */
         DemDTCFilterInfo.RequestDTCStatusMask = DTCStatusMask;
-        /* SWS_Dem_01058 */
         DemDTCFilterInfo.DTCKind = DTCKind;
         DemDTCFilterInfo.DTCFormat = DTCFormat;
-        DemDTCFilterInfo.DTCOrigin = lDTCOrigin;
+        DemDTCFilterInfo.DTCOrigin = memDest;
         DemDTCFilterInfo.FilterWithSeverity = FilterWithSeverity;
         DemDTCFilterInfo.DTCSeverityMask = DTCSeverityMask;
         DemDTCFilterInfo.FilterForFaultDetectionCounter = FilterForFaultDetectionCounter;
@@ -473,33 +397,23 @@ Dem_DcmSetDTCFilter(
     }
     return ret;
 }
-#define DEM_STOP_SEC_CODE
-#include "Dem_MemMap.h"
 
 /*************************************************************************/
 /*
  * Brief               Gets the number of a filtered DTC.
- *                      (((statusOfDTC & DTCStatusMask) != 0) && ((severity & DTCSeverityMask) != 0)) == TRUE
- * ServiceId           0x17
- * Sync/Async          Asynchronous
- * Reentrancy          Non Reentrant
- * Param-Name[in]      none
- * Param-Name[out]     NumberOfFilteredDTC:The number of DTCs matching the defined status mask.
- * Param-Name[in/out]  none
- * Return              Status of the operation to retrieve a number of DTC from the Dem
+ *                      (((statusOfDTC & DTCStatusMask) != 0) && ((severity & DTCSeverityMask) !=
+ * 0)) == TRUE ServiceId           0x17 Sync/Async          Asynchronous Reentrancy          Non
+ * Reentrant Param-Name[in]      none Param-Name[out]     NumberOfFilteredDTC:The number of DTCs
+ * matching the defined status mask. Param-Name[in/out]  none Return              Status of the
+ * operation to retrieve a number of DTC from the Dem
  */
 /*************************************************************************/
-#define DEM_START_SEC_CODE
-#include "Dem_MemMap.h"
 FUNC(Dem_ReturnGetNumberOfFilteredDTCType, DEM_CODE)
-/* PRQA S 3432,1532++ */ /* MISRA Rule 20.7,8.7 */
+/* PRQA S 1532,3432++ */ /* MISRA Rule 8.7,20.7 */
 Dem_DcmGetNumberOfFilteredDTC(P2VAR(uint16, AUTOMATIC, DEM_APPL_DATA) NumberOfFilteredDTC)
-/* PRQA S 3432,1532-- */ /* MISRA Rule 20.7,8.7 */
+/* PRQA S 1532,3432-- */ /* MISRA Rule 8.7,20.7 */
 {
-    Dem_DTCFilterInfoType* pFilter = &DemDTCFilterInfo;
     Dem_ReturnGetNumberOfFilteredDTCType ret = DEM_NUMBER_FAILED;
-
-#if (STD_ON == DEM_DEV_ERROR_DETECT)
     if (Dem_InitState != DEM_STATE_INIT)
     {
         DEM_DET_REPORT(DEM_SID_DCMGETNUMBEROFFILTEREDDTC, DEM_E_UNINIT);
@@ -508,9 +422,14 @@ Dem_DcmGetNumberOfFilteredDTC(P2VAR(uint16, AUTOMATIC, DEM_APPL_DATA) NumberOfFi
     {
         DEM_DET_REPORT(DEM_SID_DCMGETNUMBEROFFILTEREDDTC, DEM_E_PARAM_POINTER);
     }
-    else
-#endif /* STD_ON == DEM_DEV_ERROR_DETECT */
+    else if (DemDTCFilterInfo.IsSet == FALSE)
     {
+        /* idle */
+    }
+    else
+    {
+        Dem_DTCFilterInfoType* pFilter = &DemDTCFilterInfo;
+
         if (DemDTCFilterInfo.IsSet == TRUE)
         {
             const Dem_DTCType* pDemDTC = DemPbCfgPtr->DemDTC;
@@ -540,25 +459,28 @@ Dem_DcmGetNumberOfFilteredDTC(P2VAR(uint16, AUTOMATIC, DEM_APPL_DATA) NumberOfFi
                     {
                         for (uint8 index = 0; index < EntryNum; index++)
                         {
-                            const Dem_EventRelateInformationType* pEvent =
-                                Dem_GetEventInfo(Dem_GetEventInternalId(pEntry->EventId));
-                            uint16 DTCRef = DemPbCfgPtr->DemEventParameter[pEvent->IntId].DemDTCRef;
-                            if ((DEM_MEM_DEST_INVALID
-                                 != Dem_CheckEventInternalMemDest(pFilter->DTCOrigin, pEvent->IntId))
-                                && (iloop == DTCRef))
+                            if (pEntry->EventId != 0u)
                             {
-                                dtcflag = TRUE;
-                                Dem_DTCReportByTimeOrderType* pDTCTimeOrder =
-                                    &pFilter->DemDTCReportByTimeOrder[pFilter->DemDTCTimeOrderNum];
-                                pDTCTimeOrder->DtcRef = iloop;
-                                /* get max Abstime */
-                                if (pDTCTimeOrder->DtcAbsTime < pEntry->AbsTime)
+                                const Dem_EventRelateInformationType* pEvent =
+                                    Dem_GetEventInfo(Dem_GetEventInternalId(pEntry->EventId));
+                                uint16 DTCRef = DemPbCfgPtr->DemEventParameter[pEvent->IntId].DemDTCRef;
+                                if ((DEM_MEM_DEST_INVALID
+                                     != Dem_CheckEventInternalMemDest(pFilter->DTCOrigin, pEvent->IntId))
+                                    && (iloop == DTCRef))
                                 {
-                                    pDTCTimeOrder->DtcAbsTime = pEntry->AbsTime;
-                                }
+                                    dtcflag = TRUE;
+                                    Dem_DTCReportByTimeOrderType* pDTCTimeOrder =
+                                        &pFilter->DemDTCReportByTimeOrder[pFilter->DemDTCTimeOrderNum];
+                                    pDTCTimeOrder->DtcRef = iloop;
+                                    /* get max Abstime */
+                                    if (pDTCTimeOrder->DtcAbsTime < pEntry->AbsTime)
+                                    {
+                                        pDTCTimeOrder->DtcAbsTime = pEntry->AbsTime;
+                                    }
 #if ((DEM_EVENT_COMBINATION_SUPPORT == DEM_EVCOMB_ONSTORAGE) || (DEM_EVENT_COMBINATION_SUPPORT == DEM_EVCOMB_DISABLED))
-                                break;
+                                    break;
 #endif
+                                }
                             }
                             pEntry++;
                         }
@@ -584,7 +506,7 @@ Dem_DcmGetNumberOfFilteredDTC(P2VAR(uint16, AUTOMATIC, DEM_APPL_DATA) NumberOfFi
 #if (DEM_RESET_CONFIRMED_BIT_ON_OVERFLOW == STD_ON)
             /* SWS_Dem_00411 */
             /* Arrange Dtc index in chronological order */ /* insertion sort */
-            for (uint16 index = 1; index < pFilter->DemDTCTimeOrderNum; index++)
+            for (uint16 index = 1u; index < pFilter->DemDTCTimeOrderNum; index++)
             {
                 Dem_DTCReportByTimeOrderType* pDTCTimeOrder = pFilter->DemDTCReportByTimeOrder;
                 if (pDTCTimeOrder[index].DtcAbsTime > pDTCTimeOrder[index - 1u].DtcAbsTime)
@@ -609,8 +531,6 @@ Dem_DcmGetNumberOfFilteredDTC(P2VAR(uint16, AUTOMATIC, DEM_APPL_DATA) NumberOfFi
     }
     return ret;
 }
-#define DEM_STOP_SEC_CODE
-#include "Dem_MemMap.h"
 
 /*************************************************************************/
 /*
@@ -627,8 +547,6 @@ Dem_DcmGetNumberOfFilteredDTC(P2VAR(uint16, AUTOMATIC, DEM_APPL_DATA) NumberOfFi
  * Return              Status of the operation to retrieve a DTC from the Dem.
  */
 /*************************************************************************/
-#define DEM_START_SEC_CODE
-#include "Dem_MemMap.h"
 FUNC(Dem_ReturnGetNextFilteredElementType, DEM_CODE)
 Dem_DcmGetNextFilteredDTC(
     /* PRQA S 3432++ */ /* MISRA Rule 20.7 */
@@ -636,44 +554,48 @@ Dem_DcmGetNextFilteredDTC(
     P2VAR(Dem_UdsStatusByteType, AUTOMATIC, DEM_APPL_DATA) DTCStatus)
 /* PRQA S 3432-- */ /* MISRA Rule 20.7 */
 {
-    Dem_ReturnGetNextFilteredElementType ret = DEM_FILTERED_NO_MATCHING_ELEMENT;
+    Dem_ReturnGetNextFilteredElementType ret;
     Dem_DTCFilterInfoType* pFilter = &DemDTCFilterInfo;
-#if (STD_ON == DEM_DEV_ERROR_DETECT)
-    if (Dem_InitState != DEM_STATE_INIT)
+
+    ret = Dem_DcmCheckDTCFilterStatus(DTC, DTCStatus);
+    if (ret == DEM_FILTERED_OK)
     {
-        DEM_DET_REPORT(DEM_SID_DCMGETNEXTFILTEREDDTC, DEM_E_UNINIT);
-    }
-    else if ((DTCStatus == NULL_PTR) || (DTC == NULL_PTR))
-    {
-        DEM_DET_REPORT(DEM_SID_DCMGETNEXTFILTEREDDTC, DEM_E_PARAM_POINTER);
-    }
-    else
-#endif /* STD_ON == DEM_DEV_ERROR_DETECT */
-    {
-        if ((pFilter->DTCKind == DEM_DTC_KIND_EMISSION_REL_DTCS)
-            && ((pFilter->DTCStatusMask == DEM_UDS_STATUS_CDTC) || (pFilter->DTCStatusMask == DEM_UDS_STATUS_PDTC)
-                || (pFilter->DTCOrigin == DEM_DTC_ORIGIN_PERMANENT_MEMORY)))
+        ret = DEM_FILTERED_NO_MATCHING_ELEMENT;
+#if (DEM_RESET_CONFIRMED_BIT_ON_OVERFLOW == STD_ON)
+        for (; pFilter->CurrentIndex < pFilter->DemDTCTimeOrderNum; pFilter->CurrentIndex++)
         {
-            /*idle*/
-        }
-        else
-        {
-            if (Dem_Pending == TRUE)
+            if (ret != DEM_FILTERED_OK)
             {
-                ret = DEM_FILTERED_PENDING;
+                uint16 dtcRef = pFilter->DemDTCReportByTimeOrder[pFilter->CurrentIndex].DtcRef;
+                /*get DTCValue */
+                Dem_GetEventDTC(dtcRef, pFilter->DTCFormat, DTC);
+                *DTCStatus = DemDTCGeneralStatus[dtcRef].CbUdsStatus & DEM_DTC_STATUS_AVAILABILITY_MASK;
+                if (0u != *DTC)
+                {
+                    ret = DEM_FILTERED_OK;
+                }
+            }
+            else
+            {
+                break;
             }
         }
-        if (ret == DEM_FILTERED_NO_MATCHING_ELEMENT)
+        if (pFilter->CurrentIndex >= pFilter->DemDTCTimeOrderNum)
+#endif
         {
-#if (DEM_RESET_CONFIRMED_BIT_ON_OVERFLOW == STD_ON)
-            for (; pFilter->CurrentIndex < pFilter->DemDTCTimeOrderNum; pFilter->CurrentIndex++)
+            for (; pFilter->CurrentIndex < pFilter->NumberOfFilteredDTC; pFilter->CurrentIndex++)
             {
                 if (ret != DEM_FILTERED_OK)
                 {
-                    uint16 dtcRef = pFilter->DemDTCReportByTimeOrder[pFilter->CurrentIndex].DtcRef;
+#if (DEM_RESET_CONFIRMED_BIT_ON_OVERFLOW == STD_ON)
+                    uint16 index = pFilter->CurrentIndex - pFilter->DemDTCTimeOrderNum;
+#else
+                    uint16 index = pFilter->CurrentIndex;
+#endif
                     /*get DTCValue */
-                    Dem_GetEventDTC(dtcRef, pFilter->DTCFormat, DTC);
-                    *DTCStatus = DemDTCGeneralStatus[dtcRef].CbUdsStatus & DEM_DTC_STATUS_AVAILABILITY_MASK;
+                    Dem_GetEventDTC(pFilter->DemDTCReport[index], pFilter->DTCFormat, DTC);
+                    *DTCStatus = DemDTCGeneralStatus[pFilter->DemDTCReport[index]].CbUdsStatus
+                                 & DEM_DTC_STATUS_AVAILABILITY_MASK;
                     if (0u != *DTC)
                     {
                         ret = DEM_FILTERED_OK;
@@ -684,39 +606,10 @@ Dem_DcmGetNextFilteredDTC(
                     break;
                 }
             }
-            if (pFilter->CurrentIndex >= pFilter->DemDTCTimeOrderNum)
-#endif
-            {
-                for (; pFilter->CurrentIndex < pFilter->NumberOfFilteredDTC; pFilter->CurrentIndex++)
-                {
-                    if (ret != DEM_FILTERED_OK)
-                    {
-#if (DEM_RESET_CONFIRMED_BIT_ON_OVERFLOW == STD_ON)
-                        uint16 index = pFilter->CurrentIndex - pFilter->DemDTCTimeOrderNum;
-#else
-                        uint16 index = pFilter->CurrentIndex;
-#endif
-                        /*get DTCValue */
-                        Dem_GetEventDTC(pFilter->DemDTCReport[index], pFilter->DTCFormat, DTC);
-                        *DTCStatus = DemDTCGeneralStatus[pFilter->DemDTCReport[index]].CbUdsStatus
-                                     & DEM_DTC_STATUS_AVAILABILITY_MASK;
-                        if (0u != *DTC)
-                        {
-                            ret = DEM_FILTERED_OK;
-                        }
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-            }
         }
     }
     return ret;
 }
-#define DEM_STOP_SEC_CODE
-#include "Dem_MemMap.h"
 
 /*************************************************************************/
 /*
@@ -734,8 +627,6 @@ Dem_DcmGetNextFilteredDTC(
  * Return              Status of the operation to retrieve a DTC from the Dem.
  */
 /*************************************************************************/
-#define DEM_START_SEC_CODE
-#include "Dem_MemMap.h"
 FUNC(Dem_ReturnGetNextFilteredElementType, DEM_CODE)
 Dem_DcmGetNextFilteredDTCAndFDC(
     /* PRQA S 3432++ */ /* MISRA Rule 20.7 */
@@ -745,7 +636,7 @@ Dem_DcmGetNextFilteredDTCAndFDC(
 {
     Dem_ReturnGetNextFilteredElementType ret = DEM_FILTERED_NO_MATCHING_ELEMENT;
     Dem_DTCFilterInfoType* pFilter = &DemDTCFilterInfo;
-#if (STD_ON == DEM_DEV_ERROR_DETECT)
+    uint16 dtcRef;
     if (Dem_InitState != DEM_STATE_INIT)
     {
         DEM_DET_REPORT(DEM_SID_DCMGETNEXTFILTEREDDTCANDFDC, DEM_E_UNINIT);
@@ -755,21 +646,28 @@ Dem_DcmGetNextFilteredDTCAndFDC(
         DEM_DET_REPORT(DEM_SID_DCMGETNEXTFILTEREDDTCANDFDC, DEM_E_PARAM_POINTER);
     }
     else
-#endif /* STD_ON == DEM_DEV_ERROR_DETECT */
     {
-        for (; pFilter->CurrentIndex < DEM_DTC_NUM; pFilter->CurrentIndex++)
+        /* PRQA S 2463++ */ /* MISRA Rule 14.2 */
+        for (; (ret != DEM_FILTERED_OK) && (pFilter->CurrentIndex < DEM_DTC_NUM); pFilter->CurrentIndex++)
+        /* PRQA S 2463-- */ /* MISRA Rule 14.2 */
         {
-            if (ret != DEM_FILTERED_OK)
+            dtcRef = pFilter->CurrentIndex;
+            if (dtcRef != DEM_DTC_REF_INVALID)
             {
-                uint16 dtcRef = pFilter->CurrentIndex;
-                /*SWS_Dem_01101*/
-                if ((dtcRef != DEM_DTC_REF_INVALID) && (DemDTCGeneralStatus[dtcRef].SuppressionStatus == FALSE)
-                    && (TRUE == Dem_CheckDTCFormat(pFilter->DTCFormat, dtcRef)))
+                /* req SWS_Dem_01101 */
+                /* PRQA S 3415++ */ /* MISRA Rule 13.5 */
+                if ((DemDTCGeneralStatus[dtcRef].SuppressionStatus == TRUE)
+                    || (FALSE == Dem_CheckDTCFormat(pFilter->DTCFormat, dtcRef)))
+                /* PRQA S 3415-- */ /* MISRA Rule 13.5 */
                 {
-                    /*guarantee the event index the new dtc */
+                    ret = DEM_FILTERED_NO_MATCHING_ELEMENT; /* PRQA S 2469 */ /* MISRA Rule 14.2 */
+                }
+                else
+                {
+                    /* guarantee the event index the new dtc */
                     Dem_GetEventDTC(dtcRef, pFilter->DTCFormat, DTC);
+                    /* req SWS_Dem_00788 req SWS_Dem_00789 req SWS_Dem_00792 req SWS_Dem_00793*/
                     *DTCFaultDetectionCounter = FDCInfo[dtcRef].FDC;
-                    /*SWS_Dem_00788 SWS_Dem_00789 SWS_Dem_00792 SWS_Dem_00793*/
                     /* PRQA S 2985++ */ /* MISRA Rule 2.2 */
                     if ((0u
                          != (DemDTCGeneralStatus[dtcRef].CbUdsStatus & DEM_DTC_STATUS_AVAILABILITY_MASK
@@ -777,20 +675,14 @@ Dem_DcmGetNextFilteredDTCAndFDC(
                         && (0u != *DTC))
                     /* PRQA S 2985-- */ /* MISRA Rule 2.2 */
                     {
-                        ret = DEM_FILTERED_OK;
+                        ret = DEM_FILTERED_OK; /* PRQA S 2469 */ /* MISRA Rule 14.2 */
                     }
                 }
-            }
-            else
-            {
-                break;
             }
         }
     }
     return ret;
 }
-#define DEM_STOP_SEC_CODE
-#include "Dem_MemMap.h"
 
 /*************************************************************************/
 /*
@@ -821,8 +713,6 @@ Dem_DcmGetNextFilteredDTCAndFDC(
  * Return              Status of the operation to retrieve a DTC from the Dem.
  */
 /*************************************************************************/
-#define DEM_START_SEC_CODE
-#include "Dem_MemMap.h"
 FUNC(Dem_ReturnGetNextFilteredElementType, DEM_CODE)
 Dem_DcmGetNextFilteredDTCAndSeverity(
     /* PRQA S 3432++ */ /* MISRA Rule 20.7 */
@@ -834,7 +724,8 @@ Dem_DcmGetNextFilteredDTCAndSeverity(
 {
     Dem_ReturnGetNextFilteredElementType ret = DEM_FILTERED_NO_MATCHING_ELEMENT;
     Dem_DTCFilterInfoType* pFilter = &DemDTCFilterInfo;
-#if (STD_ON == DEM_DEV_ERROR_DETECT)
+    uint16 dtcRef;
+
     if (Dem_InitState != DEM_STATE_INIT)
     {
         DEM_DET_REPORT(DEM_SID_DCMGETNEXTFILTEREDDTCANDSEVERITY, DEM_E_UNINIT);
@@ -845,41 +736,41 @@ Dem_DcmGetNextFilteredDTCAndSeverity(
         DEM_DET_REPORT(DEM_SID_DCMGETNEXTFILTEREDDTCANDSEVERITY, DEM_E_PARAM_POINTER);
     }
     else
-#endif /* STD_ON == DEM_DEV_ERROR_DETECT */
     {
-        for (; pFilter->CurrentIndex < DEM_DTC_NUM; pFilter->CurrentIndex++)
+        /* PRQA S 2463++ */ /* MISRA Rule 14.2 */
+        for (; (ret != DEM_FILTERED_OK) && (pFilter->CurrentIndex < DEM_DTC_NUM); pFilter->CurrentIndex++)
+        /* PRQA S 2463-- */ /* MISRA Rule 14.2 */
         {
-            if (ret != DEM_FILTERED_OK)
+            dtcRef = pFilter->CurrentIndex;
+            if (dtcRef != DEM_DTC_REF_INVALID)
             {
-                uint16 dtcRef = pFilter->CurrentIndex;
-                /*SWS_Dem_01101*/
-                if ((dtcRef != DEM_DTC_REF_INVALID) && (DemDTCGeneralStatus[dtcRef].SuppressionStatus == FALSE)
-                    && (TRUE == Dem_CheckDTCFormat(pFilter->DTCFormat, dtcRef)))
+                /* req SWS_Dem_01101 */
+                /* PRQA S 3415++ */ /* MISRA Rule 13.5 */
+                if ((DemDTCGeneralStatus[dtcRef].SuppressionStatus == TRUE)
+                    || (FALSE == Dem_CheckDTCFormat(pFilter->DTCFormat, dtcRef)))
+                /* PRQA S 3415-- */ /* MISRA Rule 13.5 */
                 {
-                    const Dem_DTCType* pDemDTC = &DemPbCfgPtr->DemDTC[dtcRef];
-                    /*guarantee the event index the new dtc */
+                    ret = DEM_FILTERED_NO_MATCHING_ELEMENT; /* PRQA S 2469 */ /* MISRA Rule 14.2 */
+                }
+                else
+                {
+                    /* guarantee the event index the new dtc */
                     Dem_GetEventDTC(dtcRef, pFilter->DTCFormat, DTC);
                     /* PRQA S 2985++ */ /* MISRA Rule 2.2 */
-                    *DTCStatus = DemDTCGeneralStatus[dtcRef].CbUdsStatus & DEM_DTC_STATUS_AVAILABILITY_MASK;
+                    *DTCStatus = (DemDTCGeneralStatus[dtcRef].CbUdsStatus & DEM_DTC_STATUS_AVAILABILITY_MASK);
                     /* PRQA S 2985-- */ /* MISRA Rule 2.2 */
-                    *DTCSeverity = pDemDTC->DemDTCSeverity;
-                    *DTCFunctionalUnit = pDemDTC->DemDTCFunctionalUnit;
+                    *DTCSeverity = DemPbCfgPtr->DemDTC[dtcRef].DemDTCSeverity;
+                    *DTCFunctionalUnit = DemPbCfgPtr->DemDTC[dtcRef].DemDTCFunctionalUnit;
                     if ((0u != (*DTCStatus & pFilter->DTCStatusMask)) && (0u != *DTC))
                     {
-                        ret = DEM_FILTERED_OK;
+                        ret = DEM_FILTERED_OK; /* PRQA S 2469 */ /* MISRA Rule 14.2 */
                     }
                 }
-            }
-            else
-            {
-                break;
             }
         }
     }
     return ret;
 }
-#define DEM_STOP_SEC_CODE
-#include "Dem_MemMap.h"
 
 /*************************************************************************/
 /*
@@ -895,18 +786,15 @@ Dem_DcmGetNextFilteredDTCAndSeverity(
  * Return              Status of the operation to (re-)set a freeze frame record filter.
  */
 /*************************************************************************/
-#define DEM_START_SEC_CODE
-#include "Dem_MemMap.h"
 FUNC(Dem_ReturnSetFilterType, DEM_CODE)
 Dem_DcmSetFreezeFrameRecordFilter(
     Dem_DTCFormatType DTCFormat,
-    P2VAR(uint16, AUTOMATIC, DEM_APPL_DATA) NumberOfFilteredRecords) /* PRQA S 3432 */ /* MISRA Rule 20.7 */
+    /* PRQA S 3432++ */ /* MISRA Rule 20.7 */
+    P2VAR(uint16, AUTOMATIC, DEM_APPL_DATA) NumberOfFilteredRecords)
+/* PRQA S 3432-- */ /* MISRA Rule 20.7 */
 {
     Dem_ReturnSetFilterType ret = DEM_WRONG_FILTER;
-#if (DEM_FREEZE_FRAME_CLASS_NUM > 0u)
-    Dem_FreezeFrameRecordFilterInfoType* pFilter = &DemFreezeFrameRecordFilterInfo;
-#if (STD_ON == DEM_DEV_ERROR_DETECT)
-    ret = DEM_WRONG_FILTER;
+
     if (Dem_InitState != DEM_STATE_INIT)
     {
         DEM_DET_REPORT(DEM_SID_DCMSETFREEZEFRAMERECORDFILTER, DEM_E_UNINIT);
@@ -920,37 +808,11 @@ Dem_DcmSetFreezeFrameRecordFilter(
         DEM_DET_REPORT(DEM_SID_DCMSETFREEZEFRAMERECORDFILTER, DEM_E_PARAM_POINTER);
     }
     else
-#endif /* STD_ON == DEM_DEV_ERROR_DETECT */
     {
-        Dem_DTCOriginType DTCOrigin = Dem_GetInternalMemDest(DEM_DTC_ORIGIN_PRIMARY_MEMORY);
-        const Dem_MemDestConfigType* pDemMemDestCfg = &DemMemDestCfg[DTCOrigin];
-        const Dem_EventMemEntryType* pEntry = pDemMemDestCfg->EntryList; /*SWS_Dem_00210*/
-        const uint8 EntryNum = pDemMemDestCfg->EntryNum;
-        *NumberOfFilteredRecords = 0;
-        for (uint8 iloop = 0; iloop < EntryNum; iloop++)
-        {
-            if (pEntry->EventId != 0x00u)
-            {
-                *NumberOfFilteredRecords += pEntry->FFNum;
-            }
-            pEntry++;
-        }
-        pFilter->DTCFormat = DTCFormat;
-        pFilter->GetNum = 0;
-        pFilter->EntryIndex = 0;
-        pFilter->FFIndex = 0;
-        pFilter->NumberOfFilteredRecords = *NumberOfFilteredRecords;
-        ret = DEM_FILTER_ACCEPTED;
+        ret = Dem_InterDcmSetFreezeFrameRecordFilter(DTCFormat, NumberOfFilteredRecords);
     }
-#else
-    DEM_UNUSED(DTCFormat);
-    DEM_UNUSED(NumberOfFilteredRecords);
-    ret = DEM_WRONG_FILTER;
-#endif /* DEM_FREEZE_FRAME_CLASS_NUM > 0u */
     return ret;
 }
-#define DEM_STOP_SEC_CODE
-#include "Dem_MemMap.h"
 
 /*************************************************************************/
 /*
@@ -969,8 +831,6 @@ Dem_DcmSetFreezeFrameRecordFilter(
  *                          snapshot record number from the Dem.
  */
 /*************************************************************************/
-#define DEM_START_SEC_CODE
-#include "Dem_MemMap.h"
 FUNC(Dem_ReturnGetNextFilteredElementType, DEM_CODE)
 Dem_DcmGetNextFilteredRecord(
     /* PRQA S 3432++ */ /* MISRA Rule 20.7 */
@@ -978,11 +838,7 @@ Dem_DcmGetNextFilteredRecord(
     P2VAR(uint8, AUTOMATIC, DEM_APPL_DATA) RecordNumber)
 /* PRQA S 3432-- */ /* MISRA Rule 20.7 */
 {
-    Dem_ReturnGetNextFilteredElementType ret;
-#if (DEM_FREEZE_FRAME_CLASS_NUM > 0)
-    Dem_FreezeFrameRecordFilterInfoType* pFilter = &DemFreezeFrameRecordFilterInfo;
-#if (STD_ON == DEM_DEV_ERROR_DETECT)
-    ret = DEM_FILTERED_NO_MATCHING_ELEMENT;
+    Dem_ReturnGetNextFilteredElementType ret = DEM_FILTERED_NO_MATCHING_ELEMENT;
     if (Dem_InitState != DEM_STATE_INIT)
     {
         DEM_DET_REPORT(DEM_SID_DCMGETNEXTFILTEREDRECORD, DEM_E_UNINIT);
@@ -996,60 +852,11 @@ Dem_DcmGetNextFilteredRecord(
         DEM_DET_REPORT(DEM_SID_DCMGETNEXTFILTEREDRECORD, DEM_E_PARAM_POINTER);
     }
     else
-#endif /* STD_ON == DEM_DEV_ERROR_DETECT */
     {
-        Dem_DTCOriginType DTCOrigin = Dem_GetInternalMemDest(DEM_DTC_ORIGIN_PRIMARY_MEMORY);
-        const uint8 EntryNum = DemMemDestCfg[DTCOrigin].EntryNum;
-        boolean find = FALSE;
-        for (; ((pFilter->GetNum < pFilter->NumberOfFilteredRecords) && (find == FALSE));)
-        {
-            if (pFilter->EntryIndex >= EntryNum) /*SWS_Dem_00210*/
-            {
-                pFilter->EntryIndex = 0;
-                pFilter->FFIndex = 0;
-            }
-            else
-            {
-                const Dem_EventMemEntryType* pEntry = &DemMemDestCfg[DTCOrigin].EntryList[pFilter->EntryIndex];
-                if (pFilter->FFIndex >= DEM_MAX_NUMBER_FF_RECORDS)
-                {
-                    pFilter->FFIndex = 0;
-                    pFilter->EntryIndex++;
-                }
-                else
-                {
-                    if (pEntry->FFList[pFilter->FFIndex].RecordNum != 0xFFu)
-                    {
-                        /*SWS_Dem_01101*/
-                        Dem_EventIdType IntId = Dem_GetEventInternalId(pEntry->EventId);
-                        uint16 DTCRef = DemPbCfgPtr->DemEventParameter[IntId].DemDTCRef;
-                        if ((DTCRef != DEM_DTC_REF_INVALID) && (DemDTCGeneralStatus[DTCRef].SuppressionStatus == TRUE))
-                        {
-                            ret = DEM_FILTERED_NO_MATCHING_ELEMENT;
-                        }
-                        else
-                        {
-                            Dem_GetEventDTC(DTCRef, pFilter->DTCFormat, DTC);
-                            *RecordNumber = pEntry->FFList[pFilter->FFIndex].RecordNum;
-                            ret = DEM_FILTERED_OK;
-                            find = TRUE; /* PRQA S 2469 */ /* MISRA Rule 14.2 */
-                        }
-                        pFilter->GetNum++;
-                    }
-                    pFilter->FFIndex++;
-                }
-            }
-        }
+        ret = Dem_InterDcmGetNextFilteredRecord(DTC, RecordNumber);
     }
-#else
-    DEM_UNUSED(DTC);
-    DEM_UNUSED(RecordNumber);
-    ret = DEM_FILTERED_NO_MATCHING_ELEMENT;
-#endif
     return ret;
 }
-#define DEM_STOP_SEC_CODE
-#include "Dem_MemMap.h"
 
 /*************************************************************************/
 /*
@@ -1063,16 +870,14 @@ Dem_DcmGetNextFilteredRecord(
  * Return              Status of the operation of type Dem_ReturnGetDTCByOccurrenceTimeType.
  */
 /*************************************************************************/
-#define DEM_START_SEC_CODE
-#include "Dem_MemMap.h"
-FUNC(Dem_ReturnGetDTCByOccurrenceTimeType, DEM_CODE)
 /* PRQA S 3432,1532++ */ /* MISRA Rule 20.7,8.7 */
+FUNC(Dem_ReturnGetDTCByOccurrenceTimeType, DEM_CODE)
 Dem_DcmGetDTCByOccurrenceTime(Dem_DTCRequestType DTCRequest, P2VAR(uint32, AUTOMATIC, DEM_APPL_DATA) DTC)
 /* PRQA S 3432,1532-- */ /* MISRA Rule 20.7,8.7 */
 {
     Dem_EventIdType IntId;
     Dem_ReturnGetDTCByOccurrenceTimeType ret = DEM_OCCURR_NOT_AVAILABLE;
-#if (STD_ON == DEM_DEV_ERROR_DETECT)
+
     if (Dem_InitState != DEM_STATE_INIT)
     {
         DEM_DET_REPORT(DEM_SID_DCMGETDTCBYOCCURRENCETIME, DEM_E_UNINIT);
@@ -1082,7 +887,6 @@ Dem_DcmGetDTCByOccurrenceTime(Dem_DTCRequestType DTCRequest, P2VAR(uint32, AUTOM
         DEM_DET_REPORT(DEM_SID_DCMGETDTCBYOCCURRENCETIME, DEM_E_PARAM_POINTER);
     }
     else
-#endif /* STD_ON == DEM_DEV_ERROR_DETECT */
     {
         switch (DTCRequest)
         {
@@ -1102,21 +906,20 @@ Dem_DcmGetDTCByOccurrenceTime(Dem_DTCRequestType DTCRequest, P2VAR(uint32, AUTOM
             IntId = DEM_EVENT_PARAMETER_INVALID;
             break;
         }
-        if (IntId != DEM_EVENT_PARAMETER_INVALID)
+        if ((IntId != DEM_EVENT_PARAMETER_INVALID)
+            && (DemPbCfgPtr->DemEventParameter[IntId].DemDTCRef != DEM_DTC_REF_INVALID))
         {
             uint16 DTCRef = DemPbCfgPtr->DemEventParameter[IntId].DemDTCRef;
-            /*SWS_Dem_01101*/
-            if ((DTCRef != DEM_DTC_REF_INVALID) && (DemDTCGeneralStatus[DTCRef].SuppressionStatus == FALSE))
+            /* req SWS_Dem_01101 */
+            if (DemDTCGeneralStatus[DTCRef].SuppressionStatus == FALSE)
             {
                 Dem_GetEventDTC(DTCRef, DEM_DTC_FORMAT_UDS, DTC);
-                ret = DEM_OCCURR_OK;
             }
+            ret = DEM_OCCURR_OK;
         }
     }
     return ret;
 }
-#define DEM_STOP_SEC_CODE
-#include "Dem_MemMap.h"
 
 /*************************************************************************/
 /*
@@ -1131,20 +934,14 @@ Dem_DcmGetDTCByOccurrenceTime(Dem_DTCRequestType DTCRequest, P2VAR(uint32, AUTOM
  * Return              none
  */
 /*************************************************************************/
-#define DEM_START_SEC_CODE
-#include "Dem_MemMap.h"
 FUNC(void, DEM_CODE) Dem_DcmControlDTCStatusChangedNotification(boolean TriggerNotification)
 {
-#if (STD_ON == DEM_DEV_ERROR_DETECT)
     if (Dem_InitState != DEM_STATE_INIT)
     {
         DEM_DET_REPORT(DEM_SID_DCMCONTROLDTCSTATUSCHANGEDNOTIFICATION, DEM_E_UNINIT);
     }
-#endif /* STD_ON == DEM_DEV_ERROR_DETECT */
     Dem_DTCStatusChangedInd = TriggerNotification;
 }
-#define DEM_STOP_SEC_CODE
-#include "Dem_MemMap.h"
 
 /*******************************************************************************
 **      Access extended data records and FreezeFrame data                     **
@@ -1167,13 +964,13 @@ FUNC(void, DEM_CODE) Dem_DcmControlDTCStatusChangedNotification(boolean TriggerN
  *                          update of a specific DTC.
  */
 /*************************************************************************/
-#define DEM_START_SEC_CODE
-#include "Dem_MemMap.h"
+/* PRQA S 1532++ */ /* MISRA Rule 8.7 */
 FUNC(Dem_ReturnDisableDTCRecordUpdateType, DEM_CODE)
-Dem_DcmDisableDTCRecordUpdate(uint32 DTC, Dem_DTCOriginType DTCOrigin) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
+Dem_DcmDisableDTCRecordUpdate(uint32 DTC, Dem_DTCOriginType DTCOrigin)
+/* PRQA S 1532-- */ /* MISRA Rule 8.7 */
 {
+    uint16 dtcIndex;
     Dem_ReturnDisableDTCRecordUpdateType ret = DEM_DISABLE_DTCRECUP_WRONG_DTC;
-#if (STD_ON == DEM_DEV_ERROR_DETECT)
     if (Dem_InitState != DEM_STATE_INIT)
     {
         DEM_DET_REPORT(DEM_SID_DCMDISABLEDTCRECORDUPDATE, DEM_E_UNINIT);
@@ -1181,32 +978,32 @@ Dem_DcmDisableDTCRecordUpdate(uint32 DTC, Dem_DTCOriginType DTCOrigin) /* PRQA S
     else if (Dem_DTCDisable == TRUE)
     {
         DEM_DET_REPORT(DEM_SID_DCMDISABLEDTCRECORDUPDATE, DEM_E_WRONG_CONDITION);
+        ret = E_NOT_OK;
     }
     else
-#endif /* STD_ON == DEM_DEV_ERROR_DETECT */
     {
-        uint16 dtcIndex = Dem_GetDTCIndex(DTC, DEM_DTC_FORMAT_UDS);
-        if (dtcIndex != DEM_DTC_REF_INVALID)
+        dtcIndex = Dem_GetDTCIndex(DTC, DEM_DTC_FORMAT_UDS);
+        uint8 memDest = Dem_GetInternalMemDest(DTCOrigin);
+        if (dtcIndex == DEM_DTC_REF_INVALID)
         {
-            Dem_DTCOriginType InOrigin = Dem_GetInternalMemDest(DTCOrigin);
-            if (InOrigin == DEM_MEM_DEST_INVALID)
-            {
-                ret = DEM_DISABLE_DTCRECUP_WRONG_DTCORIGIN;
-            }
-            else
-            {
-                Dem_DTCDisable = TRUE;
-                DTCRecordUpdateStatusInfo.DTCIndex = dtcIndex;
-                DTCRecordUpdateStatusInfo.DTCOrigin = InOrigin;
-                DEM_BITS_SET(DemMemDestInfo[InOrigin].DisableDTCRecordUpdate, dtcIndex);
-                ret = DEM_DISABLE_DTCRECUP_OK;
-            }
+            /*idle*/
+        }
+        else if (memDest == DEM_MEM_DEST_INVALID)
+        {
+            ret = DEM_DISABLE_DTCRECUP_WRONG_DTCORIGIN;
+        }
+        else
+        {
+            Dem_DTCDisable = TRUE;
+            DTCRecordUpdateStatusInfo.DTCIndex = dtcIndex;
+            DTCRecordUpdateStatusInfo.DTCOrigin = memDest;
+            DEM_BITS_SET(DemMemDestInfo[memDest].DisableDTCRecordUpdate, dtcIndex);
+            ret = DEM_DISABLE_DTCRECUP_OK;
         }
     }
     return ret;
 }
-#define DEM_STOP_SEC_CODE
-#include "Dem_MemMap.h"
+
 /*************************************************************************/
 /*
  * Brief               Enables the event memory update of the DTC disabled by
@@ -1220,19 +1017,14 @@ Dem_DcmDisableDTCRecordUpdate(uint32 DTC, Dem_DTCOriginType DTCOrigin) /* PRQA S
  * Return              Always E_OK is returned.
  */
 /*************************************************************************/
-#define DEM_START_SEC_CODE
-#include "Dem_MemMap.h"
 FUNC(Std_ReturnType, DEM_CODE) Dem_DcmEnableDTCRecordUpdate(void) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
 {
-    Std_ReturnType ret;
-#if (STD_ON == DEM_DEV_ERROR_DETECT)
-    ret = E_NOT_OK;
+    Std_ReturnType ret = E_NOT_OK;
     if (Dem_InitState != DEM_STATE_INIT)
     {
         DEM_DET_REPORT(DEM_SID_DCMENABLEDTCRECORDUPDATE, DEM_E_UNINIT);
     }
     else
-#endif /* STD_ON == DEM_DEV_ERROR_DETECT */
     {
         Dem_DTCDisable = FALSE;
         DEM_BITS_CLR(
@@ -1242,8 +1034,6 @@ FUNC(Std_ReturnType, DEM_CODE) Dem_DcmEnableDTCRecordUpdate(void) /* PRQA S 1532
     }
     return ret;
 }
-#define DEM_STOP_SEC_CODE
-#include "Dem_MemMap.h"
 
 /*************************************************************************/
 /*
@@ -1266,10 +1056,8 @@ FUNC(Std_ReturnType, DEM_CODE) Dem_DcmEnableDTCRecordUpdate(void) /* PRQA S 1532
  * Return              Status of the operation to retrieve freeze frame data by DTC.
  */
 /*************************************************************************/
-#define DEM_START_SEC_CODE
-#include "Dem_MemMap.h"
-FUNC(Dem_ReturnGetFreezeFrameDataByDTCType, DEM_CODE)
 /* PRQA S 3432,1532++ */ /* MISRA Rule 20.7,8.7 */
+FUNC(Dem_ReturnGetFreezeFrameDataByDTCType, DEM_CODE)
 Dem_DcmGetFreezeFrameDataByDTC(
     uint32 DTC,
     Dem_DTCOriginType DTCOrigin,
@@ -1278,129 +1066,46 @@ Dem_DcmGetFreezeFrameDataByDTC(
     P2VAR(uint16, AUTOMATIC, DEM_APPL_DATA) BufSize)
 /* PRQA S 3432,1532-- */ /* MISRA Rule 20.7,8.7 */
 {
+    uint8 memDest;
+    uint16 dtcIndex;
     Dem_ReturnGetFreezeFrameDataByDTCType ret = DEM_GET_FFDATABYDTC_WRONG_DTC;
-#if ((DEM_FREEZE_FRAME_CLASS_NUM > 0u) && (DEM_DID_CLASS_NUM > 0u))
-#if (STD_ON == DEM_DEV_ERROR_DETECT)
+    uint16 memDestAndRecordNumber;
+
     if (Dem_InitState != DEM_STATE_INIT)
     {
         DEM_DET_REPORT(DEM_SID_DCMGETFREEZEFRAMEDATABYDTC, DEM_E_UNINIT);
     }
-    else if ((DestBuffer == NULL_PTR) || (BufSize == NULL_PTR))
-    {
-        DEM_DET_REPORT(DEM_SID_DCMGETFREEZEFRAMEDATABYDTC, DEM_E_PARAM_POINTER);
-    }
-    else if (RecordNumber == 0xFFu)
-    {
-        DEM_DET_REPORT(DEM_SID_DCMGETFREEZEFRAMEDATABYDTC, DEM_E_PARAM_DATA);
-        ret = DEM_GET_FFDATABYDTC_WRONG_RECORDNUMBER;
-    }
     else
-#endif /* STD_ON == DEM_DEV_ERROR_DETECT */
     {
-        /*SWS_Dem_01100 SWS_Dem_01101*/
-        uint16 dtcIndex = Dem_GetDTCIndex(DTC, DEM_DTC_FORMAT_UDS);
-        if ((dtcIndex != DEM_DTC_REF_INVALID) && (DemDTCGeneralStatus[dtcIndex].SuppressionStatus == FALSE))
+        dtcIndex = Dem_GetDTCIndex(DTC, DEM_DTC_FORMAT_UDS);
+        memDest = Dem_GetInternalMemDest(DTCOrigin);
+        if ((DestBuffer == NULL_PTR) || (BufSize == NULL_PTR))
         {
-            uint8 memDest = Dem_GetInternalMemDest(DTCOrigin);
+            DEM_DET_REPORT(DEM_SID_DCMGETFREEZEFRAMEDATABYDTC, DEM_E_PARAM_POINTER);
+        }
+        else if (RecordNumber == 0xFFu)
+        {
+            DEM_DET_REPORT(DEM_SID_DCMGETFREEZEFRAMEDATABYDTC, DEM_E_PARAM_DATA);
+            ret = DEM_GET_FFDATABYDTC_WRONG_RECORDNUMBER;
+        }
+        /* req SWS_Dem_01100 req SWS_Dem_01101*/
+        else if ((dtcIndex == DEM_DTC_REF_INVALID) || (DemDTCGeneralStatus[dtcIndex].SuppressionStatus == TRUE))
+        {
+            /*idle*/
+        }
+        else if (memDest == DEM_MEM_DEST_INVALID)
+        {
             ret = DEM_GET_FFDATABYDTC_WRONG_DTCORIGIN;
-            if (memDest != DEM_MEM_DEST_INVALID)
-            {
-                const Dem_DTCType* pDemDTC = &DemPbCfgPtr->DemDTC[dtcIndex];
-#if (DEM_ONEDTCMAPPINGMUTILEVENT == STD_ON)
-                const Dem_EventIdType EventRefNum = pDemDTC->EventRefNum;
-#endif /* DEM_ONEDTCMAPPINGMUTILEVENT == STD_ON */
-                const Dem_EventIdType EventRefStart = pDemDTC->EventRefStart;
-                const Dem_EventIdType* pDTCMapping = &DemPbCfgPtr->DemDTCMapping[EventRefStart];
-                *BufSize = 0u;
-                ret = DEM_GET_FFDATABYDTC_WRONG_RECORDNUMBER;
-#if (DEM_ONEDTCMAPPINGMUTILEVENT == STD_ON)
-                for (uint16 iloop = 0; iloop < EventRefNum; iloop++)
-#endif /* DEM_ONEDTCMAPPINGMUTILEVENT == STD_ON */
-                {
-                    const Dem_DTCAttributesType* pDTCAttrCfg = Dem_EventDTCAttributesCfg(*pDTCMapping);
-                    if (pDTCAttrCfg != NULL_PTR)
-                    {
-                        uint16 FFClassRef = pDTCAttrCfg->DemFreezeFrameClassRef;
-                        if (FFClassRef != DEM_FREEZE_FRAME_INVALID)
-                        {
-#if (DEM_TYPE_OF_FREEZE_FRAME_RECORD_NUMERATION == DEM_FF_RECNUM_CONFIGURED)
-                            boolean Find = FALSE;
-                            const Dem_FreezeFrameRecNumClassType* PDemFFRecNumClass =
-                                &DemFreezeFrameRecNumClass[pDTCAttrCfg->DemFreezeFrameRecNumClassRef];
-                            const uint8 RefNum = PDemFFRecNumClass->RefNum;
-                            const uint8* pFFRecordIndex = &DemFreezeFrameRecordClassRef[PDemFFRecNumClass->StartIndex];
-                            for (uint8 index = 0u; (index < RefNum) && (Find == FALSE); index++)
-                            {
-                                if (((*pFFRecordIndex) != DEM_FREEZE_FRAME_RECORD_INVALID)
-                                    && (DemFreezeFrameRecordClass[*pFFRecordIndex].DemFreezeFrameRecordNumber
-                                        == RecordNumber))
-                                {
-                                    Find = TRUE;
-                                }
-                                pFFRecordIndex++;
-                            }
-                            if (Find == TRUE)
-                            {
-#endif /* DEM_TYPE_OF_FREEZE_FRAME_RECORD_NUMERATION == DEM_FF_RECNUM_CONFIGURED */
-                                Dem_EventMemEntryType* pEntry =
-                                    Dem_MemEntryGet(Dem_GetEventExternalId(*pDTCMapping), memDest);
-                                ret = DEM_GET_FFDATABYDTC_FAILED;
-                                if (pEntry != NULL_PTR)
-                                {
-                                    const Dem_FreezeFrameInfoType* pFF =
-                                        Dem_FreezeFrameGetByRecordNum(pEntry, RecordNumber);
-                                    if (pFF != NULL_PTR)
-                                    {
-                                        const Dem_FreezeFrameClassType* pFFClass = &DemFreezeFrameClass[FFClassRef];
-                                        const uint8* pFFData = pFF->Data;
-                                        uint16 offset = 0;
-                                        const uint16* pDidIndex = &DemDidClassRef[pFFClass->StartIndex];
-                                        const uint8 FFRefNum = pFFClass->RefNum;
-                                        DestBuffer[*BufSize] = FFRefNum;
-                                        (*BufSize) += 1u;
-                                        for (uint8 didRefNum = 0u; didRefNum < FFRefNum; didRefNum++)
-                                        {
-                                            const Dem_DidClassType* pDid = &DemDidClass[*pDidIndex];
-                                            /* DemIdentifier */
-                                            DestBuffer[*BufSize] = (uint8)((pDid->DemDidIdentifier) >> 8u);
-                                            (*BufSize) += 1u;
-                                            DestBuffer[*BufSize] = (uint8)(pDid->DemDidIdentifier);
-                                            (*BufSize) += 1u;
-#if (DEM_DATA_ELEMENT_CLASS_NUM > 0u)
-                                            uint16 dataSize = pDid->DataSize;
-                                            Dem_MemCopy(&DestBuffer[*BufSize], &pFFData[offset], dataSize);
-                                            offset += dataSize;
-                                            (*BufSize) += dataSize;
-#endif /* DEM_DATA_ELEMENT_CLASS_NUM > 0u */
-                                            pDidIndex++;
-                                        }
-                                        ret = DEM_GET_FFDATABYDTC_OK;
-#if (DEM_ONEDTCMAPPINGMUTILEVENT == STD_ON)
-                                        break;
-#endif /* DEM_ONEDTCMAPPINGMUTILEVENT == STD_ON */
-                                    }
-                                }
-                            }
-                        }
-                    }
-#if (DEM_ONEDTCMAPPINGMUTILEVENT == STD_ON)
-                    pDTCMapping++;
-#endif /* DEM_ONEDTCMAPPINGMUTILEVENT == STD_ON */
-                }
-            }
+        }
+        else
+        {
+            memDestAndRecordNumber = (uint16)(((uint16)memDest << 8u) | (uint16)RecordNumber);
+            ret = Dem_InterDcmGetFreezeFrameDataByDTC(DTC, memDestAndRecordNumber, DestBuffer, BufSize);
         }
     }
-#else
-    DEM_UNUSED(DTC);
-    DEM_UNUSED(DTCOrigin);
-    DEM_UNUSED(RecordNumber);
-    DEM_UNUSED(DestBuffer);
-    DEM_UNUSED(BufSize);
-#endif
     return ret;
 }
-#define DEM_STOP_SEC_CODE
-#include "Dem_MemMap.h"
+
 /*************************************************************************/
 /*
  * Brief               Gets the size of freeze frame data by DTC.
@@ -1418,18 +1123,19 @@ Dem_DcmGetFreezeFrameDataByDTC(
  * Return              none
  */
 /*************************************************************************/
-#define DEM_START_SEC_CODE
-#include "Dem_MemMap.h"
 FUNC(Dem_ReturnGetSizeOfDataByDTCType, DEM_CODE)
 Dem_DcmGetSizeOfFreezeFrameByDTC(
     uint32 DTC,
     Dem_DTCOriginType DTCOrigin,
     uint8 RecordNumber,
-    P2VAR(uint16, AUTOMATIC, DEM_APPL_DATA) SizeOfFreezeFrame) /* PRQA S 3432 */ /* MISRA Rule 20.7 */
+    /* PRQA S 3432++ */ /* MISRA Rule 20.7 */
+    P2VAR(uint16, AUTOMATIC, DEM_APPL_DATA) SizeOfFreezeFrame)
+/* PRQA S 3432-- */ /* MISRA Rule 20.7 */
 {
     Dem_ReturnGetSizeOfDataByDTCType ret = DEM_GETSIZEBYDTC_WRONG_DTC;
-#if (DEM_FREEZE_FRAME_CLASS_NUM > 0u)
-#if (STD_ON == DEM_DEV_ERROR_DETECT)
+    uint16 dtcRef;
+    uint8 memDest;
+
     if (Dem_InitState != DEM_STATE_INIT)
     {
         DEM_DET_REPORT(DEM_SID_DCMGETSIZEOFFREEZEFRAMEBYDTC, DEM_E_UNINIT);
@@ -1439,76 +1145,26 @@ Dem_DcmGetSizeOfFreezeFrameByDTC(
         DEM_DET_REPORT(DEM_SID_DCMGETSIZEOFFREEZEFRAMEBYDTC, DEM_E_PARAM_POINTER);
     }
     else
-#endif /* STD_ON == DEM_DEV_ERROR_DETECT */
-    {  /*SWS_Dem_01100 SWS_Dem_01101 */
-        uint16 dtcRef = Dem_GetDTCIndex(DTC, DEM_DTC_FORMAT_UDS);
-        if ((dtcRef != DEM_DTC_REF_INVALID) && (DemDTCGeneralStatus[dtcRef].SuppressionStatus == FALSE))
+    {
+        /*SWS_Dem_01100 SWS_Dem_01101 */
+        dtcRef = Dem_GetDTCIndex(DTC, DEM_DTC_FORMAT_UDS);
+        memDest = Dem_GetInternalMemDest(DTCOrigin);
+        if ((dtcRef == DEM_DTC_REF_INVALID) || (DemDTCGeneralStatus[dtcRef].SuppressionStatus == TRUE))
         {
-            uint8 memDest = Dem_GetInternalMemDest(DTCOrigin);
+            /*idle*/
+        }
+        else if (memDest == DEM_MEM_DEST_INVALID)
+        {
             ret = DEM_GETSIZEBYDTC_WRONG_DTCORIGIN;
-            if (memDest != DEM_MEM_DEST_INVALID)
-            {
-                const Dem_DTCType* pDemDTC = &DemPbCfgPtr->DemDTC[dtcRef];
-#if (DEM_ONEDTCMAPPINGMUTILEVENT == STD_ON)
-                const Dem_EventIdType EventRefNum = pDemDTC->EventRefNum;
-#endif /* DEM_ONEDTCMAPPINGMUTILEVENT == STD_ON */
-                const Dem_EventIdType EventRefStart = pDemDTC->EventRefStart;
-                const Dem_EventIdType* pDTCMapping = &DemPbCfgPtr->DemDTCMapping[EventRefStart];
-                *SizeOfFreezeFrame = 0u;
-#if (DEM_ONEDTCMAPPINGMUTILEVENT == STD_ON)
-                for (uint16 iloop = 0u; iloop < EventRefNum; iloop++)
-#endif /* DEM_ONEDTCMAPPINGMUTILEVENT == STD_ON */
-                {
-                    const Dem_EventMemEntryType* pEntry =
-                        Dem_MemEntryGet(Dem_GetEventExternalId(*pDTCMapping), memDest);
-                    if (pEntry != NULL_PTR)
-                    {
-                        const Dem_DTCAttributesType* pDTCAttr = Dem_EventDTCAttributesCfg(*pDTCMapping);
-                        uint16 DataSize = DemFreezeFrameClass[pDTCAttr->DemFreezeFrameClassRef].DataSize;
-                        if (RecordNumber == 0xFFu)
-                        {
-                            const Dem_FreezeFrameInfoType* FFList = pEntry->FFList;
-#if (DEM_TYPE_OF_FREEZE_FRAME_RECORD_NUMERATION == DEM_FF_RECNUM_CONFIGURED)
-                            const uint8 RefNum =
-                                DemFreezeFrameRecNumClass[pDTCAttr->DemFreezeFrameRecNumClassRef].RefNum;
-                            for (uint8 index = 0; index < RefNum; index++)
-#else
-                            for (uint8 index = 0; index < pDTCAttr->DemMaxNumberFreezeFrameRecords; index++)
-#endif /* DEM_TYPE_OF_FREEZE_FRAME_RECORD_NUMERATION == DEM_FF_RECNUM_CONFIGURED */
-                            {
-                                if (FFList->RecordNum != 0xFFu)
-                                {
-                                    *SizeOfFreezeFrame += DataSize;
-                                }
-                                FFList++;
-                            }
-                        }
-                        else
-                        {
-                            *SizeOfFreezeFrame += DataSize;
-                        }
-                        ret = DEM_GETSIZEBYDTC_OK;
-#if (DEM_ONEDTCMAPPINGMUTILEVENT == STD_ON)
-                        break;
-#endif /* DEM_ONEDTCMAPPINGMUTILEVENT == STD_ON */
-                    }
-#if (DEM_ONEDTCMAPPINGMUTILEVENT == STD_ON)
-                    pDTCMapping++;
-#endif /* DEM_ONEDTCMAPPINGMUTILEVENT == STD_ON */
-                }
-            }
+        }
+        else
+        {
+            *SizeOfFreezeFrame = 0u;
+            ret = Dem_InterDcmGetSizeOfFreezeFrameByDTC(DTC, DTCOrigin, RecordNumber, SizeOfFreezeFrame);
         }
     }
-#else
-    DEM_UNUSED(DTC);
-    DEM_UNUSED(DTCOrigin);
-    DEM_UNUSED(RecordNumber);
-    DEM_UNUSED(SizeOfFreezeFrame);
-#endif /* DEM_FREEZE_FRAME_CLASS_NUM > 0u */
     return ret;
 }
-#define DEM_STOP_SEC_CODE
-#include "Dem_MemMap.h"
 
 /*************************************************************************/
 /*
@@ -1531,22 +1187,23 @@ Dem_DcmGetSizeOfFreezeFrameByDTC(
  * Return              Status of the operation to retrieve extended data by DTC.
  */
 /*************************************************************************/
-#define DEM_START_SEC_CODE
-#include "Dem_MemMap.h"
-FUNC(Dem_ReturnGetExtendedDataRecordByDTCType, DEM_CODE)
 /* PRQA S 3432,1532++ */ /* MISRA Rule 20.7,8.7 */
+FUNC(Dem_ReturnGetExtendedDataRecordByDTCType, DEM_CODE)
 Dem_DcmGetExtendedDataRecordByDTC(
     uint32 DTC,
     Dem_DTCOriginType DTCOrigin,
     uint8 ExtendedDataNumber,
     P2VAR(uint8, AUTOMATIC, DEM_APPL_DATA) DestBuffer,
     P2VAR(uint16, AUTOMATIC, DEM_APPL_DATA) BufSize)
-/* PRQA S 3432,1532-- */ /* MISRA Rule 20.7,8.7 */
+/* PRQA S 3432,1532++ */ /* MISRA Rule 20.7,8.7 */
 {
-    const Dem_EventMemEntryType* pEntry = NULL_PTR;
+    uint8 memDest;
     Dem_ReturnGetExtendedDataRecordByDTCType ret = DEM_RECORD_WRONG_DTC;
-#if (DEM_EXTENDED_DATA_CLASS_NUM > 0u)
-#if (STD_ON == DEM_DEV_ERROR_DETECT)
+    const Dem_ExtendedDataRecordClassType* pExtDataCfg;
+    uint16 dtcRef;
+    const Dem_DTCAttributesType* pDTCAttrCfg;
+    uint16 memDestAndExtendedDataNumber;
+
     if (Dem_InitState != DEM_STATE_INIT)
     {
         DEM_DET_REPORT(DEM_SID_DCMGETEXTENDEDDATARECORDBYDTC, DEM_E_UNINIT);
@@ -1558,86 +1215,45 @@ Dem_DcmGetExtendedDataRecordByDTC(
     else if (ExtendedDataNumber >= 0xFEu)
     {
         DEM_DET_REPORT(DEM_SID_DCMGETEXTENDEDDATARECORDBYDTC, DEM_E_PARAM_DATA);
+        ret = DEM_RECORD_WRONG_NUMBER;
     }
     else
-#endif /* STD_ON == DEM_DEV_ERROR_DETECT */
     {
-        uint16 dtcRef = Dem_GetDTCIndex(DTC, DEM_DTC_FORMAT_UDS); /*SWS_Dem_01100 SWS_Dem_01101*/
-        if ((dtcRef != DEM_DTC_REF_INVALID) && (DemDTCGeneralStatus[dtcRef].SuppressionStatus == FALSE))
+        memDest = Dem_GetInternalMemDest(DTCOrigin);
+        pExtDataCfg = Dem_GetExtendedDataRecordCfg(ExtendedDataNumber);
+        /* req SWS_Dem_01100 req SWS_Dem_01101 */
+        dtcRef = Dem_GetDTCIndex(DTC, DEM_DTC_FORMAT_UDS);
+        pDTCAttrCfg = &DemPbCfgPtr->DemDTCAttributes[DemPbCfgPtr->DemDTC[dtcRef].DemDTCAttributesRef];
+        if (memDest == DEM_MEM_DEST_INVALID)
         {
-            uint8 memDest = Dem_GetInternalMemDest(DTCOrigin);
-            ret = DEM_RECORD_WRONG_DTCORIGIN; /*SWS_Dem_00171*/
-            if (memDest != DEM_MEM_DEST_INVALID)
-            {
-                const Dem_DTCAttributesType* pDTCAttrCfg =
-                    &DemPbCfgPtr->DemDTCAttributes[DemPbCfgPtr->DemDTC[dtcRef].DemDTCAttributesRef];
-                const uint16 EDClassRef = pDTCAttrCfg->DemExtendedDataClassRef;
-                ret = DEM_RECORD_WRONG_NUMBER;
-                if (DEM_EXTENDED_DATA_INVALID != EDClassRef)
-                {
-                    ret = DEM_RECORD_OK;
-                    const Dem_DTCType* pDemDTC = &DemPbCfgPtr->DemDTC[dtcRef];
-#if (DEM_ONEDTCMAPPINGMUTILEVENT == STD_ON)
-                    const Dem_EventIdType EventRefNum = pDemDTC->EventRefNum;
-#endif /* DEM_ONEDTCMAPPINGMUTILEVENT == STD_ON */
-                    const Dem_EventIdType EventRefStart = pDemDTC->EventRefStart;
-                    const Dem_EventIdType* pDTCMapping = &DemPbCfgPtr->DemDTCMapping[EventRefStart];
-#if (DEM_ONEDTCMAPPINGMUTILEVENT == STD_ON)
-                    boolean Find = FALSE;
-                    for (uint16 iloop = 0; iloop < EventRefNum; iloop++, pDTCMapping++)
-                    {
-                        pEntry = Dem_MemEntryGet(Dem_GetEventExternalId(*pDTCMapping), memDest);
-                        if (pEntry != NULL_PTR)
-                        {
-                            Find = TRUE;
-                            break;
-                        }
-                    }
-
-                    if (Find == TRUE)
-#else
-                    pEntry = Dem_MemEntryGet(Dem_GetEventExternalId(*pDTCMapping), memDest);
-                    if (pEntry != NULL_PTR)
-#endif /* DEM_ONEDTCMAPPINGMUTILEVENT == STD_ON */
-                    {
-                        ret = Dem_ExtendedDataGetFromEntry(pEntry, ExtendedDataNumber, DestBuffer, BufSize);
-                    }
-                    else
-                    {
-                        *BufSize = 0u;
-                        ret = DEM_RECORD_WRONG_NUMBER;
-                        const Dem_ExtendedDataClassType* pEDClass = &DemExtendedDataClass[EDClassRef];
-                        uint8 RefNum = pEDClass->RefNum;
-                        const uint8* pExtIndex = &DemExtendedDataRecordClassRef[pEDClass->StartIndex];
-                        for (uint8 index = 0; index < RefNum; index++)
-                        {
-                            if (*pExtIndex != DEM_EXTENDED_DATA_RECORD_INVALID)
-                            {
-                                const Dem_ExtendedDataRecordClassType* pExtRecord =
-                                    &DemExtendedDataRecordClass[*pExtIndex];
-                                if (pExtRecord->DemExtendedDataRecordNumber == ExtendedDataNumber)
-                                {
-                                    ret = DEM_RECORD_OK;
-                                    break;
-                                }
-                            }
-                            pExtIndex++;
-                        }
-                    }
-                }
-            }
+            /* req SWS_Dem_00171 */
+            ret = DEM_RECORD_WRONG_DTCORIGIN;
+        }
+        else if (pExtDataCfg == NULL_PTR)
+        {
+            ret = DEM_RECORD_WRONG_NUMBER;
+        }
+        else if (*BufSize < pExtDataCfg->DataSize)
+        {
+            ret = DEM_RECORD_WRONG_BUFFERSIZE;
+        }
+        else if (DEM_EXTENDED_DATA_INVALID == pDTCAttrCfg->DemExtendedDataClassRef)
+        {
+            ret = DEM_RECORD_WRONG_NUMBER;
+        }
+        else if ((dtcRef != DEM_DTC_REF_INVALID) && (DemDTCGeneralStatus[dtcRef].SuppressionStatus == FALSE))
+        {
+            *BufSize = 0u;
+            memDestAndExtendedDataNumber = (uint16)(((uint16)memDest << 8u) | (uint16)ExtendedDataNumber);
+            ret = Dem_GetExtendedRecordDataLoop(DTC, memDestAndExtendedDataNumber, DestBuffer, BufSize);
+        }
+        else
+        {
+            /*idle*/
         }
     }
-#else
-    DEM_UNUSED(DTC);
-    DEM_UNUSED(DTCOrigin);
-    DEM_UNUSED(RecordNumber);
-    DEM_UNUSED(SizeOfFreezeFrame);
-#endif
     return ret;
 }
-#define DEM_STOP_SEC_CODE
-#include "Dem_MemMap.h"
 
 /*************************************************************************/
 /*
@@ -1657,18 +1273,19 @@ Dem_DcmGetExtendedDataRecordByDTC(
  * Return              Status of the operation to retrieve the size of extended data.
  */
 /*************************************************************************/
-#define DEM_START_SEC_CODE
-#include "Dem_MemMap.h"
 FUNC(Dem_ReturnGetSizeOfDataByDTCType, DEM_CODE)
 Dem_DcmGetSizeOfExtendedDataRecordByDTC(
     uint32 DTC,
     Dem_DTCOriginType DTCOrigin,
     uint8 ExtendedDataNumber,
-    P2VAR(uint16, AUTOMATIC, DEM_APPL_DATA) SizeOfExtendedDataRecord) /* PRQA S 3432 */ /* MISRA Rule 20.7 */
+    /* PRQA S 3432++ */ /* MISRA Rule 20.7 */
+    P2VAR(uint16, AUTOMATIC, DEM_APPL_DATA) SizeOfExtendedDataRecord)
+/* PRQA S 3432++ */ /* MISRA Rule 20.7 */
 {
     Dem_ReturnGetSizeOfDataByDTCType ret = DEM_GETSIZEBYDTC_WRONG_DTC;
-#if (DEM_EXTENDED_DATA_CLASS_NUM > 0u)
-#if (STD_ON == DEM_DEV_ERROR_DETECT)
+    uint8 memDest;
+    uint16 dtcRef;
+
     if (Dem_InitState != DEM_STATE_INIT)
     {
         DEM_DET_REPORT(DEM_SID_DCMGETSIZEOFEXTENDEDDATARECORDBYDTC, DEM_E_UNINIT);
@@ -1678,86 +1295,29 @@ Dem_DcmGetSizeOfExtendedDataRecordByDTC(
         DEM_DET_REPORT(DEM_SID_DCMGETSIZEOFEXTENDEDDATARECORDBYDTC, DEM_E_PARAM_POINTER);
     }
     else
-#endif /* STD_ON == DEM_DEV_ERROR_DETECT */
-    {  /*SWS_Dem_01100 SWS_Dem_01101*/
-        uint16 dtcRef = Dem_GetDTCIndex(DTC, DEM_DTC_FORMAT_UDS);
-        if ((dtcRef != DEM_DTC_REF_INVALID) && (DemDTCGeneralStatus[dtcRef].SuppressionStatus == FALSE))
+    {
+        dtcRef = Dem_GetDTCIndex(DTC, DEM_DTC_FORMAT_UDS);
+        memDest = Dem_GetInternalMemDest(DTCOrigin);
+        /* req SWS_Dem_01100 req SWS_Dem_01101*/
+        if ((dtcRef == DEM_DTC_REF_INVALID) || (DemDTCGeneralStatus[dtcRef].SuppressionStatus == TRUE))
         {
-            uint8 memDest = Dem_GetInternalMemDest(DTCOrigin);
+            /*idle*/
+        }
+        else if (memDest == DEM_MEM_DEST_INVALID)
+        {
             ret = DEM_GETSIZEBYDTC_WRONG_DTCORIGIN;
-            if (memDest != DEM_MEM_DEST_INVALID)
-            {
-                *SizeOfExtendedDataRecord = 0;
-                uint8 Start;
-                uint8 End;
-                if (ExtendedDataNumber == 0xFEu)
-                {
-                    Start = 0x90u;
-                    End = 0xEFu;
-                }
-                else if (ExtendedDataNumber == 0xFFu)
-                {
-                    Start = 0x01u;
-                    End = 0xEFu;
-                }
-                else
-                {
-                    Start = ExtendedDataNumber;
-                    End = ExtendedDataNumber + 1u;
-                }
-                ret = DEM_GETSIZEBYDTC_OK;
-                for (; (Start < End) && (DEM_GETSIZEBYDTC_OK == ret); Start++)
-                {
-                    const Dem_ExtendedDataRecordClassType* pExtDataCfg = NULL_PTR;
-                    const Dem_DTCType* pDemDTC = &DemPbCfgPtr->DemDTC[dtcRef];
-#if (DEM_ONEDTCMAPPINGMUTILEVENT == STD_ON)
-                    const Dem_EventIdType EventRefNum = pDemDTC->EventRefNum;
-#endif /* DEM_ONEDTCMAPPINGMUTILEVENT == STD_ON */
-                    const Dem_EventIdType EventRefStart = pDemDTC->EventRefStart;
-                    const Dem_EventIdType* pDTCMapping = &DemPbCfgPtr->DemDTCMapping[EventRefStart];
-                    /* PRQA S 2877++ */ /* MISRA Dir 4.1 */
-                    for (uint8 iloop = 0; iloop < DEM_EXTENDED_DATA_RECORD_CLASS_NUM; iloop++)
-                    /* PRQA S 2877-- */ /* MISRA Dir 4.1 */
-                    {
-                        if (DemExtendedDataRecordClass[iloop].DemExtendedDataRecordNumber == ExtendedDataNumber)
-                        {
-                            pExtDataCfg = &(DemExtendedDataRecordClass[iloop]);
-                            break;
-                        }
-                    }
-                    if (pExtDataCfg == NULL_PTR)
-                    {
-                        ret = DEM_GETSIZEBYDTC_WRONG_RECNUM;
-                    }
-#if (DEM_ONEDTCMAPPINGMUTILEVENT == STD_ON)
-                    for (uint16 iloop = 0u; iloop < EventRefNum; iloop++)
-#endif /* DEM_ONEDTCMAPPINGMUTILEVENT == STD_ON */
-                    {
-                        const Dem_EventMemEntryType* pEntry =
-                            Dem_MemEntryGet(Dem_GetEventExternalId(*pDTCMapping), memDest);
-                        if (pEntry != NULL_PTR)
-                        {
-                            *SizeOfExtendedDataRecord += pExtDataCfg->DataSize;
-                        }
-#if (DEM_ONEDTCMAPPINGMUTILEVENT == STD_ON)
-                        pDTCMapping++;
-#endif /* DEM_ONEDTCMAPPINGMUTILEVENT == STD_ON */
-                    }
-                }
-            }
+        }
+        else
+        {
+            ret = Dem_InterDcmGetSizeOfExtendedDataRecordByDTC(
+                DTC,
+                DTCOrigin,
+                ExtendedDataNumber,
+                SizeOfExtendedDataRecord);
         }
     }
-#else
-    DEM_UNUSED(DTC);
-    DEM_UNUSED(DTCOrigin);
-    DEM_UNUSED(ExtendedDataNumber);
-    DEM_UNUSED(SizeOfExtendedDataRecord);
-#endif /* DEM_EXTENDED_DATA_CLASS_NUM > 0u */
     return ret;
 }
-#define DEM_STOP_SEC_CODE
-#include "Dem_MemMap.h"
-/********[DTC storage]*********/
 
 /*************************************************************************/
 /*
@@ -1785,63 +1345,54 @@ Dem_DcmGetSizeOfExtendedDataRecordByDTC(
 with clear parameters
  */
 /*************************************************************************/
-#define DEM_START_SEC_CODE
-#include "Dem_MemMap.h"
-FUNC(Dem_ReturnClearDTCType, DEM_CODE)
 /* PRQA S 1532++ */ /* MISRA Rule 8.7 */
+FUNC(Dem_ReturnClearDTCType, DEM_CODE)
 Dem_DcmCheckClearParameter(uint32 DTC, Dem_DTCFormatType DTCFormat, Dem_DTCOriginType DTCOrigin)
 /* PRQA S 1532-- */ /* MISRA Rule 8.7 */
 {
     Dem_ReturnClearDTCType ret = DEM_CLEAR_FAILED;
-#if (STD_ON == DEM_DEV_ERROR_DETECT)
+#if (DEM_CLEAR_DTCBEHAVIOR == DEM_CLRRESP_NONVOLATILE_FINISH)
+    Dem_ClearDTCInfoType* pClr = &DemClearDTCInfo;
+#endif
     if (Dem_InitState != DEM_STATE_INIT)
     {
         DEM_DET_REPORT(DEM_SID_DCMCHECKCLEARPARAMETER, DEM_E_UNINIT);
     }
-    else
-#endif /* STD_ON == DEM_DEV_ERROR_DETECT */
-        if (Dem_ClearDTCLock == DEM_CLEAR_LOCK)
-        {
-            ret = DEM_CLEAR_PENDING;
-        }
-        else
-        {
-            ret = DEM_CLEAR_WRONG_DTCORIGIN;
-            if (DEM_DTC_ORIGIN_PRIMARY_MEMORY == DTCOrigin)
-            {
-                ret = DEM_CLEAR_WRONG_DTC;
-                /* PRQA S 3415++ */ /* MISRA Rule 13.5 */
-                if ((DTC == DEM_DTC_GROUP_ALL_DTCS)
+    else if (Dem_ClearDTCLock == DEM_CLEAR_LOCK)
+    {
+        ret = DEM_CLEAR_PENDING;
+    }
+    else if (DEM_DTC_ORIGIN_PRIMARY_MEMORY != DTCOrigin)
+    {
+        ret = DEM_CLEAR_WRONG_DTCORIGIN;
+    }
+    /* PRQA S 3415++ */ /* MISRA Rule 13.5 */
+    else if (
+        (DTC != DEM_DTC_GROUP_ALL_DTCS)
 #if (DEM_CLEAR_DTCLIMITATION != DEM_ONLY_CLEAR_ALL_DTCS)
-                    || (Dem_GetDTCIndex(DTC, DTCFormat) != DEM_DTC_REF_INVALID)
-                /* PRQA S 3415-- */ /* MISRA Rule 13.5 */
+        && (Dem_GetDTCIndex(DTC, DTCFormat) == DEM_DTC_REF_INVALID)
 #if (DEM_GROUP_OF_DTC_NUM > 0u)
-                    /* PRQA S 3415++ */ /* MISRA Rule 13.5 */
-                    || (DEM_GROUP_OF_DTC_INVALID != Dem_GetDTCGroupIndex(DTC))
-                /* PRQA S 3415-- */ /* MISRA Rule 13.5 */
-#endif                              /* DEM_GROUP_OF_DTC_NUM > 0u */
-#endif                              /* DEM_CLEAR_DTCLIMITATION == DEM_ONLY_CLEAR_ALL_DTCS */
-                )
-                {
-                    /*SWS_Dem_00570*/
-                    ret = DEM_CLEAR_OK;
-                }
-            }
-        }
-#if ((DEM_CLEAR_DTCLIMITATION != DEM_ONLY_CLEAR_ALL_DTCS) && (DEM_CLEAR_DTCBEHAVIOR != DEM_CLRRESP_NONVOLATILE_FINISH))
-    DEM_UNUSED(DTCFormat);
-#endif /* DEM_CLEAR_DTCLIMITATION != DEM_ONLY_CLEAR_ALL_DTCS && DEM_CLEAR_DTCBEHAVIOR != \
-          DEM_CLRRESP_NONVOLATILE_FINISH */
+        && (DEM_GROUP_OF_DTC_INVALID == Dem_GetDTCGroupIndex(DTC))
+#endif /* DEM_GROUP_OF_DTC_NUM > 0u */
+#endif /* DEM_CLEAR_DTCLIMITATION != DEM_ONLY_CLEAR_ALL_DTCS */
+    )
+    /* PRQA S 3415-- */ /* MISRA Rule 13.5 */
+    {
+        ret = DEM_CLEAR_WRONG_DTC;
+    }
+    else
+    {
+        ret = DEM_CLEAR_OK;
+    }
     return ret;
 }
-#define DEM_STOP_SEC_CODE
-#include "Dem_MemMap.h"
 
 /*************************************************************************/
 /*
  * Brief               Clears single DTCs, as well as groups of DTCs. This API is intended
                        for the Dcm. It can only be used through the RTE (due to work-around
-                       described below SWS_Dem_00009), and therefore no declaration is exported via Dem_Dcm.h.
+                       described below SWS_Dem_00009), and therefore no declaration is exported via
+ Dem_Dcm.h.
  * ServiceId           0x22
  * Sync/Async          Asynchronous
  * Reentrancy          Reentrant
@@ -1857,162 +1408,100 @@ Dem_DcmCheckClearParameter(uint32 DTC, Dem_DTCFormatType DTCFormat, Dem_DTCOrigi
  * Return              Status of the operation of type Dem_ReturnClearDTCType.
  */
 /*************************************************************************/
-#define DEM_START_SEC_CODE
-#include "Dem_MemMap.h"
 /* PRQA S 0624++ */ /* MISRA Rule 8.3 */
 FUNC(Dem_ReturnClearDTCType, DEM_CODE)
 Dem_DcmClearDTC(uint32 DTC, Dem_DTCFormatType DTCFormat, Dem_DTCOriginType DTCOrigin)
 /* PRQA S 0624-- */ /* MISRA Rule 8.3 */
 {
-    Dem_ReturnClearDTCType ret = DEM_CLEAR_WRONG_DTCORIGIN;
-#if (STD_ON == DEM_DEV_ERROR_DETECT)
+    Dem_ClearDTCInfoType* pClr = &DemClearDTCInfo;
+    Dem_ReturnClearDTCType ret = DEM_CLEAR_FAILED;
+    uint16 dtcRef = Dem_GetDTCIndex(DTC, DTCFormat);
+
     if (Dem_InitState != DEM_STATE_INIT)
     {
         DEM_DET_REPORT(DEM_SID_DCMCLEARDTC, DEM_E_UNINIT);
-        ret = DEM_CLEAR_FAILED;
+    }
+    else if (DEM_DTC_ORIGIN_PRIMARY_MEMORY != DTCOrigin)
+    {
+        ret = DEM_CLEAR_WRONG_DTCORIGIN;
     }
     else
-#endif /* STD_ON == DEM_DEV_ERROR_DETECT */
-        if (DEM_DTC_ORIGIN_PRIMARY_MEMORY == DTCOrigin)
+    {
+        if ((DTC == DEM_DTC_GROUP_ALL_DTCS) && (DEM_DTC_FORMAT_OBD == DTCFormat))
         {
-#if (DEM_DTR_NUM > 0u)
-            if ((DTC == DEM_DTC_GROUP_ALL_DTCS) && (DEM_DTC_FORMAT_OBD == DTCFormat))
+            Dem_ClearDTRInfoByEventId(DEM_EVENT_PARAMETER_INVALID);
+        }
+        if (Dem_ClearDTCLock == DEM_CLEAR_LOCK)
+        {
+            if ((pClr->SaveDTCIndex == dtcRef) && (pClr->SaveDTCFormat == DTCFormat)
+                && (pClr->SaveDTCOrigin == DTCOrigin) && (pClr->SID == DEM_SID_DCMCLEARDTC))
             {
-                const DTRType* pDTR = DemPbCfgPtr->DTR;
-                for (uint16 iloop = 0; iloop < DEM_DTR_NUM; iloop++) /* PRQA S 2877 */ /* MISRA Dir 4.1 */
-                {
-                    if (pDTR[iloop].DemDtrEventRef == DEM_EVENT_PARAMETER_INVALID)
-                    {
-                        Dem_ClearDTRInfoByDTRID(iloop); /*SWS_Dem_00764*/
-                    }
-                }
-            }
-#endif /* DEM_DTR_NUM > 0u */
-            Dem_ClearDTCInfoType* pClr = &DemClearDTCInfo;
-            uint16 dtcRef = Dem_GetDTCIndex(DTC, DTCFormat);
-            boolean ProcessOn = TRUE;
-            if (Dem_ClearDTCLock == DEM_CLEAR_LOCK)
-            {
-                /*SWS_Dem_00662 SWS_Dem_00664*/
-                ret = DEM_CLEAR_BUSY;
-                if ((pClr->SaveDTCIndex == dtcRef) && (pClr->SaveDTCFormat == DTCFormat)
-                    && (pClr->SaveDTCOrigin == DTCOrigin) && (pClr->SID == DEM_SID_DCMCLEARDTC))
-                {
-                    /*SWS_Dem_00663*/
 #if (DEM_CLEAR_DTCBEHAVIOR == DEM_CLRRESP_NONVOLATILE_FINISH)
-                    if (Dem_ClearNonvolatileStatus == DEM_ClEAR_NONVOLATILE_FINISHED)
-                    {
-                        /* SWS_Dem_00572 */
-                        Dem_ClearNonvolatileStatus = DEM_ClEAR_NONVOLATILE_INIT;
-                        Dem_ResetDemClearDTCInfo();
-                        Dem_ClearDTCLock = DEM_CLEAR_NOT_LOCK;
-                        ret = DEM_CLEAR_OK;
-                    }
-                    else if (Dem_ClearNonvolatileStatus == DEM_ClEAR_NONVOLATILE_FAILED)
-                    {
-                        /*SWS_Dem_01057*/
-                        Dem_ClearNonvolatileStatus = DEM_ClEAR_NONVOLATILE_INIT;
-                        Dem_ResetDemClearDTCInfo();
-                        Dem_ClearDTCLock = DEM_CLEAR_NOT_LOCK;
-                        ret = DEM_CLEAR_MEMORY_ERROR;
-                    }
-                    else
-                    {
-                        /* req SWS_Dem_00663 */
-                        ret = DEM_CLEAR_PENDING;
-                    }
-#endif
+                if (Dem_ClearNonvolatileStatus == DEM_ClEAR_NONVOLATILE_FINISHED)
+                {
+                    /* SWS_Dem_00572 */
+                    Dem_ClearNonvolatileStatus = DEM_ClEAR_NONVOLATILE_INIT;
+                    Dem_ResetDemClearDTCInfo();
+                    Dem_ClearDTCLock = DEM_CLEAR_NOT_LOCK;
+                    ret = DEM_CLEAR_OK;
                 }
-                ProcessOn = FALSE;
-            }
-            else if (Dem_ClearDTCLock == DEM_CLEAR_NOT_LOCK)
-            {
-                Dem_ClearDTCLock = DEM_CLEAR_LOCK; /*SWS_Dem_00661*/
-                pClr->DTCIndex = dtcRef;
-                pClr->DTCFormat = DTCFormat;
-                pClr->DTCOrigin = DTCOrigin;
-                pClr->SaveDTCIndex = dtcRef;
-                pClr->SaveDTCFormat = DTCFormat;
-                pClr->SaveDTCOrigin = DTCOrigin;
-                pClr->SID = DEM_SID_DCMCLEARDTC;
+                else if (Dem_ClearNonvolatileStatus == DEM_ClEAR_NONVOLATILE_FAILED)
+                {
+                    /*SWS_Dem_01057*/
+                    Dem_ClearNonvolatileStatus = DEM_ClEAR_NONVOLATILE_INIT;
+                    Dem_ResetDemClearDTCInfo();
+                    Dem_ClearDTCLock = DEM_CLEAR_NOT_LOCK;
+                    ret = DEM_CLEAR_MEMORY_ERROR;
+                }
+                else
+                {
+                    /* req SWS_Dem_00663 */
+                    ret = DEM_CLEAR_PENDING;
+                }
+#endif
             }
             else
             {
-                /*idle*/
-            }
-            /*SWS_Dem_00670] */
-            if (ProcessOn == TRUE)
-            {
-#if (DEM_CLEAR_DTCLIMITATION == DEM_ONLY_CLEAR_ALL_DTCS)
-                if (DTCFormat != DEM_DTC_FORMAT_UDS || DTC != DEM_DTC_GROUP_ALL_DTCS)
-                {
-                    ret = DEM_CLEAR_WRONG_DTC;
-                }
-                else
-#endif /* DEM_CLEAR_DTCLIMITATION == DEM_ONLY_CLEAR_ALL_DTCS */
-                {
-                    ret = DEM_CLEAR_WRONG_DTCORIGIN;
-                    if (Dem_GetInternalMemDest(DTCOrigin) != DEM_MEM_DEST_INVALID)
-                    {
-                        ProcessOn = TRUE;
-                        if (DTC == DEM_DTC_GROUP_ALL_DTCS)
-                        {
-                            pClr->ClearAllGroup = TRUE;
-                        }
-#if (DEM_CLEAR_DTCLIMITATION == DEM_ALL_SUPPORTED_DTCS)
-                        else
-                        {
-                            ret = DEM_CLEAR_WRONG_DTC;
-                            pClr->ClearAllGroup = FALSE;
-#if (DEM_GROUP_OF_DTC_NUM > 0u)
-                            pClr->DTCGroupIndex = Dem_GetDTCGroupIndex(DTC);
-                            if ((DEM_GROUP_OF_DTC_INVALID == pClr->DTCGroupIndex)
-                                && ((dtcRef == DEM_DTC_REF_INVALID)
-                                    || (DemDTCGeneralStatus[dtcRef].SuppressionStatus == TRUE)))
-#else
-                            if ((dtcRef == DEM_DTC_REF_INVALID)
-                                || (DemDTCGeneralStatus[dtcRef].SuppressionStatus == TRUE))
-#endif /* DEM_GROUP_OF_DTC_NUM > 0u */
-                            {
-                                Dem_ResetDemClearDTCInfo();
-                                ProcessOn = FALSE;
-                            }
-                        }
-                        if (ProcessOn == TRUE)
-#endif /* DEM_CLEAR_DTCLIMITATION == DEM_ALL_SUPPORTED_DTCS */
-                        {
-                            pClr->memDest = Dem_GetInternalMemDest(DTCOrigin);
-                            Dem_Pending = TRUE;
-                            Dem_ClearDTCProcess();
-#if (DEM_CLEAR_DTCBEHAVIOR == DEM_CLRRESP_VOLATILE)
-                            /*SWS_Dem_00570*/
-                            Dem_ResetDemClearDTCInfo();
-                            ret = DEM_CLEAR_OK;
-#elif (DEM_CLEAR_DTCBEHAVIOR == DEM_CLRRESP_NONVOLATILE_TRIGGER)
-                        /*SWS_Dem_00571*/
-                        Dem_ClearNonvolatileStatus = DEM_CLEAR_NONVOLATILE_START;
-                        Dem_ResetDemClearDTCInfo();
-                        ret = DEM_CLEAR_OK;
-#elif (DEM_CLEAR_DTCBEHAVIOR == DEM_CLRRESP_NONVOLATILE_FINISH)
-                        /*SWS_Dem_00663*/
-                        Dem_ClearNonvolatileStatus = DEM_CLEAR_NONVOLATILE_START;
-                        ret = DEM_CLEAR_PENDING;
-#endif /* DEM_CLEAR_DTCBEHAVIOR == DEM_CLRRESP_VOLATILE */
-                        }
-                    }
-                }
+                /* req SWS_Dem_00662 req SWS_Dem_00664*/
+                ret = DEM_CLEAR_BUSY;
             }
         }
-#if (STD_ON == DEM_DEV_ERROR_DETECT)
+        else if (Dem_ClearDTCLock == DEM_CLEAR_NOT_LOCK)
+        {
+            /* req SWS_Dem_00661 */
+            Dem_ClearDTCLock = DEM_CLEAR_LOCK;
+            pClr->DTCIndex = dtcRef;
+            pClr->DTCFormat = DTCFormat;
+            pClr->DTCOrigin = DTCOrigin;
+            pClr->SaveDTCIndex = dtcRef;
+            pClr->SaveDTCFormat = DTCFormat;
+            pClr->SaveDTCOrigin = DTCOrigin;
+            pClr->SID = DEM_SID_DCMCLEARDTC;
+        }
         else
         {
             /*idle*/
         }
+        /* req SWS_Dem_00670 */
+#if (DEM_CLEAR_DTCLIMITATION == DEM_ONLY_CLEAR_ALL_DTCS)
+        if ((ret == DEM_CLEAR_FAILED) && (DTCFormat != DEM_DTC_FORMAT_UDS || (DTC & 0xFFFFFFUL) != 0xFFFFFFUL))
+        {
+            ret = DEM_CLEAR_WRONG_DTC;
+        }
 #endif
+        uint8 memDest = Dem_GetInternalMemDest(DTCOrigin);
+        if ((ret == DEM_CLEAR_FAILED) && (memDest == DEM_MEM_DEST_INVALID))
+        {
+            ret = DEM_CLEAR_WRONG_DTCORIGIN;
+        }
+        if (ret == DEM_CLEAR_FAILED)
+        {
+            ret = Dem_DcmSubClearDTC(DTC, DTCFormat, memDest);
+        }
+    }
     return ret;
 }
-#define DEM_STOP_SEC_CODE
-#include "Dem_MemMap.h"
+
 /*************************************************************************/
 /*
  * Brief               Disables the DTC setting for a DTC group.
@@ -2028,66 +1517,22 @@ Dem_DcmClearDTC(uint32 DTC, Dem_DTCFormatType DTCFormat, Dem_DTCOriginType DTCOr
  * Return              Returns status of the operation>
  */
 /*************************************************************************/
-#define DEM_START_SEC_CODE
-#include "Dem_MemMap.h"
+/* PRQA S 1532++ */ /* MISRA Rule 8.7 */
 FUNC(Dem_ReturnControlDTCSettingType, DEM_CODE)
-Dem_DcmDisableDTCSetting(uint32 DTCGroup, Dem_DTCKindType DTCKind) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
+Dem_DcmDisableDTCSetting(uint32 DTCGroup, Dem_DTCKindType DTCKind)
+/* PRQA S 1532-- */ /* MISRA Rule 8.7 */
 {
-    Dem_ReturnControlDTCSettingType ret;
-#if (STD_ON == DEM_DEV_ERROR_DETECT)
+    Dem_ReturnControlDTCSettingType ret = DEM_CONTROL_DTC_SETTING_N_OK;
     if (Dem_InitState != DEM_STATE_INIT)
     {
         DEM_DET_REPORT(DEM_SID_DCMDISABLEDTCSETTING, DEM_E_UNINIT);
-        ret = DEM_CONTROL_DTC_SETTING_N_OK;
     }
     else
-#endif /* STD_ON == DEM_DEV_ERROR_DETECT */
     {
-#if (DEM_GROUP_OF_DTC_NUM > 0u)
-        ret = DEM_CONTROL_DTC_SETTING_OK;
-        if (DTCGroup == DEM_DTC_GROUP_ALL_DTCS)
-        {
-            DemDTCSettingInfo.AllGroupIsEnabled = FALSE;
-            Dem_MemSet(DemDTCSettingInfo.DTCGroupStatus, 0x00u, DEM_GROUP_OF_DTC_NUM_BYTE);
-        }
-        else
-        {
-            uint8 Group = Dem_GetDTCGroupIndex(DTCGroup);
-            if (Group == DEM_GROUP_OF_DTC_INVALID)
-            {
-                ret = DEM_CONTROL_DTC_WRONG_DTCGROUP;
-            }
-            else
-            {
-                DEM_BITS_CLR(DemDTCSettingInfo.DTCGroupStatus, Group);
-            }
-        }
-        if (DEM_CONTROL_DTC_SETTING_OK == ret)
-        {
-            DemDTCSettingInfo.DTCKind = DTCKind;
-            Dem_SetDTCSettingProcess();
-        }
-#else
-#if (STD_ON == DEM_DEV_ERROR_DETECT)
-        if (DTCGroup != DEM_DTC_GROUP_ALL_DTCS)
-        {
-            DEM_DET_REPORT(DEM_SID_DCMDISABLEDTCSETTING, DEM_E_WRONG_CONFIGURATION);
-            ret = DEM_CONTROL_DTC_WRONG_DTCGROUP;
-        }
-        else
-#endif /* STD_ON == DEM_DEV_ERROR_DETECT */
-        {
-            DemDTCSettingInfo.AllGroupIsEnabled = FALSE;
-            DemDTCSettingInfo.DTCKind = DTCKind;
-            Dem_SetDTCSettingProcess();
-            ret = DEM_CONTROL_DTC_SETTING_OK;
-        }
-#endif /* DEM_GROUP_OF_DTC_NUM > 0u */
+        ret = Dem_InterDcmDisableDTCSetting(DTCGroup, DTCKind);
     }
     return ret;
 }
-#define DEM_STOP_SEC_CODE
-#include "Dem_MemMap.h"
 
 /*************************************************************************/
 /*
@@ -2107,139 +1552,138 @@ Dem_DcmDisableDTCSetting(uint32 DTCGroup, Dem_DTCKindType DTCKind) /* PRQA S 153
  * Return              Returns the status of the operation
  */
 /*************************************************************************/
-#define DEM_START_SEC_CODE
-#include "Dem_MemMap.h"
-/* PRQA S 0624++ */ /* MISRA Rule 8.3 */
+/* PRQA S 1532,0624++ */ /* MISRA Rule 8.7,8.3 */
 FUNC(Dem_ReturnControlDTCSettingType, DEM_CODE)
-Dem_DcmEnableDTCSetting(uint32 DTCGroup, Dem_DTCKindType DTCKind) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
-/* PRQA S 0624-- */                                                                 /* MISRA Rule 8.3 */
+Dem_DcmEnableDTCSetting(uint32 DTCGroup, Dem_DTCKindType DTCKind)
+/* PRQA S 1532,0624-- */ /* MISRA Rule 8.7,8.3 */
 {
-    Dem_ReturnControlDTCSettingType ret;
-#if (STD_ON == DEM_DEV_ERROR_DETECT)
+    Dem_ReturnControlDTCSettingType ret = DEM_CONTROL_DTC_SETTING_N_OK;
     if (Dem_InitState != DEM_STATE_INIT)
     {
         DEM_DET_REPORT(DEM_SID_DCMENABLEDTCSETTING, DEM_E_UNINIT);
-        ret = DEM_CONTROL_DTC_SETTING_N_OK;
     }
     else
-#endif /* STD_ON == DEM_DEV_ERROR_DETECT */
     {
-#if (DEM_GROUP_OF_DTC_NUM > 0)
-        ret = DEM_CONTROL_DTC_SETTING_OK;
-        if (DTCGroup == DEM_DTC_GROUP_ALL_DTCS)
-        {
-            DemDTCSettingInfo.AllGroupIsEnabled = TRUE;
-            Dem_MemSet(DemDTCSettingInfo.DTCGroupStatus, 0xFFu, DEM_GROUP_OF_DTC_NUM_BYTE);
-        }
-        else
-        {
-            uint8 Group = Dem_GetDTCGroupIndex(DTCGroup);
-            if (Group == DEM_GROUP_OF_DTC_INVALID)
-            {
-                ret = DEM_CONTROL_DTC_WRONG_DTCGROUP;
-            }
-            else
-            {
-                DEM_BITS_SET(DemDTCSettingInfo.DTCGroupStatus, Group);
-            }
-        }
-        if (DEM_CONTROL_DTC_SETTING_OK == ret)
-        {
-            DemDTCSettingInfo.DTCKind = DTCKind;
-            Dem_SetDTCSettingProcess();
-        }
-#else
-#if (STD_ON == DEM_DEV_ERROR_DETECT)
-        if (DTCGroup != DEM_DTC_GROUP_ALL_DTCS)
-        {
-            DEM_DET_REPORT(DEM_SID_DCMENABLEDTCSETTING, DEM_E_WRONG_CONFIGURATION);
-            ret = DEM_CONTROL_DTC_WRONG_DTCGROUP;
-        }
-        else
-#endif /* STD_ON == DEM_DEV_ERROR_DETECT */
-        {
-            DemDTCSettingInfo.AllGroupIsEnabled = TRUE;
-            DemDTCSettingInfo.DTCKind = DTCKind;
-            Dem_SetDTCSettingProcess();
-            ret = DEM_CONTROL_DTC_SETTING_OK;
-        }
-#endif
+        ret = Dem_InterDcmEnableDTCSetting(DTCGroup, DTCKind);
     }
     return ret;
 }
-#define DEM_STOP_SEC_CODE
-#include "Dem_MemMap.h"
+
+/*************************************************************************/
+/*
+ * Brief               Gets the DTC Severity availability mask.
+ * ServiceId           0xb2
+ * Sync/Async          Synchronous
+ * Reentrancy          Non Reentrant
+ * Param-Name[in]      none
+ * Param-Name[out]     DTCSeverityMask:The value DTCSeverityMask indicates the
+ *                      supported DTC severity bits from the Dem.
+ * Param-Name[in/out]  none
+ * Return              E_OK: get of DTC severity mask was successful
+                        E_NOT_OK: get of DTC severity mask failed
+ */
+/*************************************************************************/
+FUNC(Dem_ReturnClearDTCType, DEM_CODE)
+/* PRQA S 3432++ */ /* MISRA Rule 20.7 */
+Dem_DcmGetDTCSeverityAvailabilityMask(P2VAR(Dem_DTCSeverityType, AUTOMATIC, DEM_VAR) DTCSeverityMask)
+/* PRQA S 3432-- */ /* MISRA Rule 8207 */
+{
+    Dem_ReturnClearDTCType ret = E_NOT_OK;
+    if (DEM_STATE_INIT != Dem_InitState)
+    {
+        DEM_DET_REPORT(DEM_SID_DCMGETDTCSEVERITYAVAILABILITYMASK, DEM_E_UNINIT);
+    }
+    else if (NULL_PTR == DTCSeverityMask)
+    {
+        DEM_DET_REPORT(DEM_SID_DCMGETDTCSEVERITYAVAILABILITYMASK, DEM_E_PARAM_POINTER);
+    }
+    else
+    {
+        *DTCSeverityMask = DemDTCFilterInfo.DTCSeverityMask;
+        ret = E_OK;
+    }
+    return ret;
+}
 
 /*******************************************************************************
 **                      Private Function Definitions                         **
 *******************************************************************************/
-#define DEM_START_SEC_CODE
-#include "Dem_MemMap.h"
-DEM_LOCAL FUNC(void, DEM_CODE) Dem_SetDTCSettingProcess(void)
+
+/*************************************************************************/
+/*
+ * Brief               Dem_SetDTCSettingProcess
+ * ServiceId           --
+ * Sync/Async          Synchronous
+ * Reentrancy          Reentrant/Non Reentrant
+ * Param-Name[in]      none
+ * Param-Name[out]     none
+ * Param-Name[in/out]  none
+ * Return              none
+ */
+/*************************************************************************/
+FUNC(void, DEM_CODE) Dem_SetDTCSettingProcess(void) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
 {
-    const Dem_EventParameterType* pEventCfg = DemPbCfgPtr->DemEventParameter;
-    const Dem_DTCType* pDemDTC = DemPbCfgPtr->DemDTC;
-    for (uint16 iloop = 0; iloop < DEM_EVENT_PARAMETER_NUM; iloop++)
+    uint16 iloop;
+    Dem_EventRelateInformationType* pEvent;
+    const Dem_EventParameterType* pEventCfg;
+
+    for (iloop = 0; iloop < DemPbCfgPtr->DemEventNum; iloop++)
     {
-        Dem_EventRelateInformationType* pEvent = Dem_GetEventInfo(iloop);
-        uint16 DemDTCRef = pEventCfg->DemDTCRef;
-        if (DemDTCRef != DEM_DTC_REF_INVALID)
+        pEventCfg = &DemPbCfgPtr->DemEventParameter[iloop];
+        pEvent = Dem_GetEventInfo(iloop);
+        if ((pEventCfg->DemDTCRef != DEM_DTC_REF_INVALID)
+            && (DemDTCSettingInfo.DTCKind == DemPbCfgPtr->DemDTC[pEventCfg->DemDTCRef].DTCKind))
         {
-            if ((DemDTCSettingInfo.DTCKind == pDemDTC[DemDTCRef].DTCKind)
-                || (DEM_DTC_KIND_ALL_DTCS == DemDTCSettingInfo.DTCKind))
+            if (DemPbCfgPtr->DemDTC[pEventCfg->DemDTCRef].GroupRef != DEM_GROUP_OF_DTC_INVALID)
             {
 #if (DEM_GROUP_OF_DTC_NUM > 0)
-                uint8 GroupRef = pDemDTC[DemDTCRef].GroupRef;
-                if (GroupRef != DEM_GROUP_OF_DTC_INVALID)
+                if (DEM_BITS_ISNSET(
+                        DemDTCSettingInfo.DTCGroupStatus,
+                        DemPbCfgPtr->DemDTC[pEventCfg->DemDTCRef].GroupRef))
                 {
-                    if (DEM_BITS_ISNSET(DemDTCSettingInfo.DTCGroupStatus, GroupRef))
-                    {
-                        DEM_FLAGS_CLR(pEvent->Status, DEM_EVENT_STATUS_DTC_SETTING);
-                        Dem_DebounceFreeze(iloop); /*SWS_Dem_00678*/
-                    }
-                    else
-                    {
-                        if (0u == DEM_FLAGS_ISSET(pEvent->Status, DEM_EVENT_STATUS_DTC_SETTING))
-                        {
-                            const Dem_CallbackInitMForEType InitMForE = pEventCfg->DemCallbackInitMForE;
-                            DEM_FLAGS_SET(pEvent->Status, DEM_EVENT_STATUS_DTC_SETTING);
-                            /* req SWS_Dem_00682 Monitor re-initialization  */
-                            if (InitMForE != NULL_PTR)
-                            {
-                                (*InitMForE)(DEM_INIT_MONITOR_REENABLED);
-                            }
-                        }
-                    }
+                    DEM_FLAGS_CLR(pEvent->Status, DEM_EVENT_STATUS_DTC_SETTING);
+                    /* req SWS_Dem_00678 */
+                    Dem_DebounceFreeze(iloop);
                 }
                 else
 #endif
                 {
-                    if (DemDTCSettingInfo.AllGroupIsEnabled == FALSE)
+                    if (0x00u == DEM_FLAGS_ISSET(pEvent->Status, DEM_EVENT_STATUS_DTC_SETTING))
                     {
-                        DEM_FLAGS_CLR(pEvent->Status, DEM_EVENT_STATUS_DTC_SETTING); /* ControlDTCSetting is disabled*/
-                        Dem_DebounceFreeze(iloop);                                   /*SWS_Dem_00678*/
-                    }
-                    else
-                    {
-                        if (0x00u == DEM_FLAGS_ISSET(pEvent->Status, DEM_EVENT_STATUS_DTC_SETTING))
+                        DEM_FLAGS_SET(pEvent->Status, DEM_EVENT_STATUS_DTC_SETTING);
+                        /* req SWS_Dem_00682 Monitor re-initialization  */
+                        if (DemPbCfgPtr->DemEventParameter[iloop].DemCallbackInitMForE != NULL_PTR)
                         {
-                            const Dem_CallbackInitMForEType InitMForE = pEventCfg->DemCallbackInitMForE;
-                            DEM_FLAGS_SET(pEvent->Status, DEM_EVENT_STATUS_DTC_SETTING);
-                            /* req SWS_Dem_00682 Monitor re-initialization  */
-                            if (InitMForE != NULL_PTR)
-                            {
-                                (*InitMForE)(DEM_INIT_MONITOR_REENABLED);
-                            }
+                            DemPbCfgPtr->DemEventParameter[iloop].DemCallbackInitMForE(DEM_INIT_MONITOR_REENABLED);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                if (DemDTCSettingInfo.AllGroupIsEnabled == FALSE)
+                {
+                    /* ControlDTCSetting is disabled*/
+                    DEM_FLAGS_CLR(pEvent->Status, DEM_EVENT_STATUS_DTC_SETTING);
+                    /* req SWS_Dem_00678 */
+                    Dem_DebounceFreeze(iloop);
+                }
+                else
+                {
+                    if (0x00u == DEM_FLAGS_ISSET(pEvent->Status, DEM_EVENT_STATUS_DTC_SETTING))
+                    {
+                        DEM_FLAGS_SET(pEvent->Status, DEM_EVENT_STATUS_DTC_SETTING);
+                        /* req SWS_Dem_00682 Monitor re-initialization  */
+                        if (DemPbCfgPtr->DemEventParameter[iloop].DemCallbackInitMForE != NULL_PTR)
+                        {
+                            DemPbCfgPtr->DemEventParameter[iloop].DemCallbackInitMForE(DEM_INIT_MONITOR_REENABLED);
                         }
                     }
                 }
             }
         }
-        pEventCfg++;
     }
 }
-#define DEM_STOP_SEC_CODE
-#include "Dem_MemMap.h"
 
 /*************************************************************************/
 /*
@@ -2253,11 +1697,9 @@ DEM_LOCAL FUNC(void, DEM_CODE) Dem_SetDTCSettingProcess(void)
  * Return              none
  */
 /*************************************************************************/
-#define DEM_START_SEC_CODE
-#include "Dem_MemMap.h"
 FUNC(void, DEM_CODE)
 /* PRQA S 3432++ */ /* MISRA Rule 20.7 */
-Dem_GetEventDTC(uint16 DTCRef, Dem_DTCFormatType DTCFormat, P2VAR(uint32, AUTOMATIC, DEM_VAR) DTC)
+Dem_GetEventDTC(uint16 DTCRef, Dem_DTCFormatType DTCFormat, P2VAR(uint32, AUTOMATIC, DEM_APPL_DATA) DTC)
 /* PRQA S 3432-- */ /* MISRA Rule 20.7 */
 {
     uint16 DemObdDTCRef;
@@ -2275,6 +1717,10 @@ Dem_GetEventDTC(uint16 DTCRef, Dem_DTCFormatType DTCFormat, P2VAR(uint32, AUTOMA
             {
                 *DTC = DemDtcValue;
             }
+            else
+            {
+                *DTC = 0x00UL;
+            }
             break;
         case DEM_DTC_FORMAT_J1939:
             DemObdDTCRef = pDemDTC[DTCRef].DemObdDTCRef;
@@ -2282,6 +1728,10 @@ Dem_GetEventDTC(uint16 DTCRef, Dem_DTCFormatType DTCFormat, P2VAR(uint32, AUTOMA
                 && (pDemObdDTC[DemObdDTCRef].DemJ1939DTCValue != DEM_J1939_DTC_CFG_INVALID))
             {
                 *DTC = pDemObdDTC[DemObdDTCRef].DemJ1939DTCValue;
+            }
+            else
+            {
+                *DTC = 0x00UL;
             }
             break;
         case DEM_DTC_FORMAT_OBD:
@@ -2291,6 +1741,10 @@ Dem_GetEventDTC(uint16 DTCRef, Dem_DTCFormatType DTCFormat, P2VAR(uint32, AUTOMA
             {
                 *DTC = (uint32)pDemObdDTC[DemObdDTCRef].DemDtcValue;
             }
+            else
+            {
+                *DTC = 0x00UL;
+            }
             break;
         default:
             /*idle*/
@@ -2298,8 +1752,153 @@ Dem_GetEventDTC(uint16 DTCRef, Dem_DTCFormatType DTCFormat, P2VAR(uint32, AUTOMA
         }
     }
 }
-#define DEM_STOP_SEC_CODE
-#include "Dem_MemMap.h"
+
+/*************************************************************************/
+/*
+ * Brief               BRIEF DESCRIPTION
+ * ServiceId           --
+ * Sync/Async          Synchronous
+ * Reentrancy          Reentrant/Non Reentrant
+ * Param-Name[in]      IntId && Status
+ * Param-Name[out]     none
+ * Param-Name[in/out]  none
+ * Return              none
+ */
+/*************************************************************************/
+DEM_LOCAL FUNC(Dem_ReturnGetNextFilteredElementType, DEM_CODE) Dem_DcmCheckDTCFilterStatus(
+    /* PRQA S 3432++ */ /* MISRA Rule 20.7 */
+    P2CONST(uint32, AUTOMATIC, DEM_APPL_DATA) DTC,
+    P2CONST(Dem_UdsStatusByteType, AUTOMATIC, DEM_APPL_DATA) DTCStatus)
+/* PRQA S 3432-- */ /* MISRA Rule 20.7 */
+{
+    Dem_ReturnGetNextFilteredElementType ret = DEM_FILTERED_NO_MATCHING_ELEMENT;
+    const Dem_DTCFilterInfoType* pFilter = &DemDTCFilterInfo;
+
+    if (Dem_InitState != DEM_STATE_INIT)
+    {
+        DEM_DET_REPORT(DEM_SID_DCMGETNEXTFILTEREDDTC, DEM_E_UNINIT);
+    }
+    else if ((DTCStatus == NULL_PTR) || (DTC == NULL_PTR))
+    {
+        DEM_DET_REPORT(DEM_SID_DCMGETNEXTFILTEREDDTC, DEM_E_PARAM_POINTER);
+    }
+    /* req SWS_Dem_00653 */
+    else if (
+        (pFilter->DTCKind == DEM_DTC_KIND_EMISSION_REL_DTCS)
+        && ((pFilter->DTCStatusMask == DEM_UDS_STATUS_CDTC) || (pFilter->DTCStatusMask == DEM_UDS_STATUS_PDTC)
+            || (pFilter->DTCOrigin == DEM_DTC_ORIGIN_PERMANENT_MEMORY)))
+    {
+        ret = DEM_FILTERED_OK;
+    }
+    else
+    {
+        if (Dem_Pending == TRUE)
+        {
+            ret = DEM_FILTERED_PENDING;
+        }
+        else
+        {
+            ret = DEM_FILTERED_OK;
+        }
+    }
+    return ret;
+}
+
+/*************************************************************************/
+/*
+ * Brief               Clears single DTCs, as well as groups of DTCs. This API is intended
+                       for the Dcm. It can only be used through the RTE (due to work-around
+                       described below SWS_Dem_00009), and therefore no declaration is exported via
+ Dem_Dcm.h.
+ * ServiceId           none
+ * Sync/Async          Asynchronous
+ * Reentrancy          Reentrant
+ * Param-Name[in]      DTC:Defines the DTC in respective format, that shall be
+ *                          cleared from the event memory. If the DTC fits to a
+ *                          DTC group number, all DTCs of the group shall be cleared.
+ *                       DTCFormat:Defines the input-format of the provided DTC value.
+ *                       DTCOrigin:If the Dem supports more than one event memory
+ *                          this parameter is used to select the source memory
+ *                          the DTCs shall be read from.
+ * Param-Name[out]     none
+ * Param-Name[in/out]  none
+ * Return              Status of the operation of type Dem_ReturnClearDTCType.
+ */
+/*************************************************************************/
+DEM_LOCAL FUNC(Dem_ReturnClearDTCType, DEM_CODE)
+    Dem_DcmSubClearDTC(uint32 DTC, Dem_DTCFormatType DTCFormat, Dem_DTCOriginType DTCOrigin)
+{
+    Dem_ClearDTCInfoType* pClr = &DemClearDTCInfo;
+    uint16 dtcRef;
+    Dem_ReturnClearDTCType ret = DEM_CLEAR_FAILED;
+
+    if (0xFFFFFFUL == (DTC & 0xFFFFFFUL))
+    {
+        pClr->ClearAllGroup = TRUE;
+    }
+#if (DEM_CLEAR_DTCLIMITATION == DEM_ALL_SUPPORTED_DTCS)
+    else
+    {
+        /* req SWS_Dem_01100 */
+        dtcRef = Dem_GetDTCIndex(DTC, DTCFormat);
+        /* PRQA S 3415++ */ /* MISRA Rule 13.5 */
+        if (DEM_DTC_REF_INVALID == dtcRef)
+        /* PRQA S 3415-- */ /* MISRA Rule 13.5 */
+        {
+#if (DEM_GROUP_OF_DTC_NUM > 0)
+            if (DEM_GROUP_OF_DTC_INVALID == Dem_GetDTCGroupIndex(DTC))
+#endif
+            {
+                Dem_ResetDemClearDTCInfo();
+                ret = DEM_CLEAR_WRONG_DTC;
+            }
+        }
+        else
+        {
+            if (DemDTCGeneralStatus[dtcRef].SuppressionStatus == TRUE)
+            {
+                Dem_ResetDemClearDTCInfo();
+                ret = DEM_CLEAR_WRONG_DTC;
+            }
+        }
+        if (DEM_CLEAR_FAILED == ret)
+        {
+            pClr->ClearAllGroup = FALSE;
+            pClr->DTCGroupIndex = Dem_GetDTCGroupIndex(DTC);
+            if (pClr->DTCGroupIndex == DEM_GROUP_OF_DTC_INVALID)
+            {
+                pClr->DTCIndex = Dem_GetDTCIndex(DTC, DTCFormat);
+                if (pClr->DTCIndex == DEM_DTC_REF_INVALID)
+                {
+                    Dem_ResetDemClearDTCInfo();
+                    ret = DEM_CLEAR_WRONG_DTC;
+                }
+            }
+        }
+    }
+#endif
+    if (DEM_CLEAR_FAILED == ret)
+    {
+        pClr->memDest = DTCOrigin;
+        Dem_Pending = TRUE;
+        Dem_ClearDTCProcess();
+#if (DEM_CLEAR_DTCBEHAVIOR == DEM_CLRRESP_VOLATILE)
+        /*req SWS_Dem_00570 */
+        Dem_ResetDemClearDTCInfo();
+        ret = DEM_CLEAR_OK;
+#elif (DEM_CLEAR_DTCBEHAVIOR == DEM_CLRRESP_NONVOLATILE_TRIGGER)
+        /* req SWS_Dem_00571 */
+        Dem_ClearNonvolatileStatus = DEM_CLEAR_NONVOLATILE_START;
+        Dem_ResetDemClearDTCInfo();
+        ret = DEM_CLEAR_OK;
+#elif (DEM_CLEAR_DTCBEHAVIOR == DEM_CLRRESP_NONVOLATILE_FINISH)
+        /* req SWS_Dem_00663 */
+        Dem_ClearNonvolatileStatus = DEM_CLEAR_NONVOLATILE_START;
+        ret = DEM_CLEAR_PENDING;
+#endif
+    }
+    return ret;
+}
 
 #if (DEM_RESET_CONFIRMED_BIT_ON_OVERFLOW == STD_ON)
 /*************************************************************************/
@@ -2314,29 +1913,30 @@ Dem_GetEventDTC(uint16 DTCRef, Dem_DTCFormatType DTCFormat, P2VAR(uint32, AUTOMA
  * Return              uint8
  */
 /*************************************************************************/
-#define DEM_START_SEC_CODE
-#include "Dem_MemMap.h"
 DEM_LOCAL FUNC(uint8, DEM_CODE) Dem_CheckEventInternalMemDest(Dem_DTCOriginType DTCOrigin, uint16 IntId)
 {
-    uint8 ret = DEM_MEM_DEST_INVALID;
-    const Dem_DTCAttributesType* pDTCAttrCfg = Dem_EventDTCAttributesCfg(IntId);
+    uint8 iloop = 0;
+    Std_ReturnType ret = DEM_MEM_DEST_INVALID;
+    P2CONST(Dem_DTCAttributesType, AUTOMATIC, DEM_CONST)
+    pDTCAttrCfg = Dem_EventDTCAttributesCfg(IntId);
+
     if (pDTCAttrCfg != NULL_PTR)
     {
-        const uint8* pRef = pDTCAttrCfg->DemMemoryDestinationRef;
-        for (uint8 iloop = 0; iloop < DEM_MEM_DEST_TOTAL_NUM; iloop++)
+        while (iloop < DEM_MEM_DEST_MAX_NUM_OF_DTC) /* PRQA S 2877 */ /* MISRA Dir 4.1 */
         {
-            if (pRef[iloop] == DTCOrigin)
+            if (pDTCAttrCfg->DemMemoryDestinationRef[iloop] == DTCOrigin)
             {
                 ret = iloop;
                 break;
             }
+            iloop++;
         }
     }
+
     return ret;
 }
-#define DEM_STOP_SEC_CODE
-#include "Dem_MemMap.h"
 #endif
+
 /*************************************************************************/
 /*
  * Brief               Dem_CheckDTCFormat
@@ -2349,8 +1949,6 @@ DEM_LOCAL FUNC(uint8, DEM_CODE) Dem_CheckEventInternalMemDest(Dem_DTCOriginType 
  * Return              uint8
  */
 /*************************************************************************/
-#define DEM_START_SEC_CODE
-#include "Dem_MemMap.h"
 DEM_LOCAL FUNC(boolean, DEM_CODE) Dem_CheckDTCFormat(uint8 dtcFormat, uint16 dtcRef)
 {
     boolean ret = FALSE;
@@ -2383,8 +1981,783 @@ DEM_LOCAL FUNC(boolean, DEM_CODE) Dem_CheckDTCFormat(uint8 dtcFormat, uint16 dtc
     }
     return ret;
 }
+
+/*************************************************************************/
+/*
+ * Brief               Dem_EventTestFailed
+ * ServiceId           --
+ * Sync/Async          Synchronous
+ * Reentrancy          Reentrant
+ * Param-Name[in]      IntId && pEventBuffer
+ * Param-Name[out]     None
+ * Param-Name[in/out]  None
+ * Return              None
+ */
+/*************************************************************************/
+/* PRQA S 3432,1532++ */ /* MISRA Rule 20.7,8.7 */
+FUNC(void, DEM_CODE) Dem_EventTestFailed(Dem_EventIdType IntId)
+/* PRQA S 3432,1532-- */ /* MISRA Rule 20.7,8.7 */
+{
+    const Dem_EventParameterType* pEventCfg = &DemPbCfgPtr->DemEventParameter[IntId];
+    Dem_EventRelateInformationType* pEvent = &DemEventRelateInformation[IntId];
+    uint16 DTCRef = DemPbCfgPtr->DemEventParameter[IntId].DemDTCRef;
+    const Dem_DTCAttributesType* pDTCAttr = Dem_EventDTCAttributesCfg(IntId);
+#if (DEM_OCCURRENCE_COUNTER_PROCESSING == DEM_PROCESS_OCCCTR_CDTC)
+    Dem_EventMemEntryType* Entry;
+#endif
+    uint8 MemDestMaxNumOfDtc = Dem_GetMemDestMaxNumOfDtc();
+
+    if (0x00u == (pEvent->UdsStatus & DEM_UDS_STATUS_TF))
+    {
+        for (uint8 iloop = 0; iloop < MemDestMaxNumOfDtc; iloop++)
+        {
+            uint8 pMemDest = pDTCAttr->DemMemoryDestinationRef[iloop];
+            if ((DEM_MEM_DEST_INVALID != pMemDest) && (DemMemDestCfg[pMemDest].ExtId == DEM_DTC_ORIGIN_PRIMARY_MEMORY))
+            {
+                /* req SWS_Dem_00219 */
+                Dem_SetOccurrenceEvent(pEvent->IntId, DEM_UDS_STATUS_TF);
+            }
+        }
+        DEM_FLAGS_SET(pEvent->Status, DEM_EVENT_STATUS_TFBITCHANGE);
+    }
+    /* req SWS_Dem_00036 */
+    /* bit 0 1 5*/
+    DEM_FLAGS_SET(pEvent->UdsStatus, DEM_UDS_STATUS_TF | DEM_UDS_STATUS_TFTOC | DEM_UDS_STATUS_TFSLC);
+    /*bit4 6 */
+    DEM_FLAGS_CLR(pEvent->UdsStatus, DEM_UDS_STATUS_TNCTOC | DEM_UDS_STATUS_TNCSLC);
+    DEM_FLAGS_SET(pEvent->Status, DEM_EVENT_STATUS_ACTIVE);
+
+#if (DEM_STATUSINDICATOR30ENABLE == STD_ON)
+    /*The bit is set to 1 when the FDC10 reach a value in the range[unconfirmedDTCLimit, +127]*/
+    DEM_FLAGS_SET(
+        pEvent->StatusIndicator30,
+        DEM_SI30_DTC_UC | DEM_SI30_DTC_UCTOC | DEM_SI30_DTC_UCSLC | DEM_SI30_DTC_SSLC); /*bit 0,1,2,4*/
+    /*bit 7: The bit is set to 1 when the FDC10 reach the value +127.*/
+    DEM_FLAGS_SET(pEvent->StatusIndicator30, DEM_SI30_DTC_TSFLC);
+#endif /* DEM_STATUSINDICATOR30ENABLE == STD_ON */
+
+#if ((DEM_OCC6EANLE == STD_ON) || (DEM_OCC4EANLE == STD_ON))
+    if (0x00u == DEM_FLAGS_ISSET(pEvent->EventStatusFlag, DEM_EVENT_FLAGS_THISOPISFAILED))
+    {
+        DEM_FLAGS_SET(pEvent->EventStatusFlag, DEM_EVENT_FLAGS_THISOPISFAILED);
+#if (DEM_OCC6EANLE == STD_ON)
+        /* In each operation cycle the counter shall be incremented as soon as FDC10 has reached the value +127 for the
+         * ﬁrst time. */
+        if (pEvent->OCC6 < 0xFFu)
+        {
+            pEvent->OCC6++;
+        }
+        /* Do not clear OCC6 in this cycle if fail occured. */
+        DEM_FLAGS_CLR(pEvent->EventStatusFlag, DEM_EVENT_FLAGS_OCC6CLR);
+#endif /* DEM_OCC6EANLE == STD_ON */
+#if (DEM_OCC4EANLE == STD_ON)
+        /* In each operaƟon cycle the counter shall be incremented as soon as FDC10 has reached a value that is equal to
+         * or greater than its unconﬁrmedDTCLimit for the ﬁrst Ɵme. */
+        if (pEvent->OCC4 < 0xFFu)
+        {
+            pEvent->OCC4++;
+        }
+#endif /* DEM_OCC4EANLE == STD_ON */
+    }
+#endif /*DEM_OCC6EANLE == STD_ON) || (DEM_OCC4EANLE == STD_ON */
+
+    Dem_EventTestFailedProcessOfComponent(pEvent, pEventCfg);
+#if (DEM_TRIGGERONTESTFAILEDEANLE == STD_ON)
+    if (DEM_FLAGS_ISSET(pEvent->Status, DEM_EVENT_STATUS_TFBITCHANGE) != 0x00u)
+    {
+        Dem_EventDataStorageTrigger(IntId, DEM_TRIGGER_ON_TEST_FAILED);
+    }
+#endif /* DEM_TRIGGERONTESTFAILEDEANLE == STD_ON */
+
+#if (DEM_OCCURRENCE_COUNTER_PROCESSING == DEM_PROCESS_OCCCTR_TF)
+    /*SWS_Dem_00524 SWS_Dem_00625 */
+    if (((NULL_PTR != Dem_CheckEventMemEntryExistsAlready(IntId)) && (pEvent->OccurrenceCounter < 0xFFu))
+        && ((DEM_FLAGS_ISSET(pEvent->UdsStatus, DEM_UDS_STATUS_TF) != 0u)
+            && (DEM_FLAGS_ISSET(pEvent->Status, DEM_EVENT_STATUS_TFBITCHANGE) != 0u)))
+    {
+        pEvent->OccurrenceCounter++;
+    }
+#elif (DEM_OCCURRENCE_COUNTER_PROCESSING == DEM_PROCESS_OCCCTR_TFTOC)
+    if ((pEvent->OccurrenceCounter < 0xFFu) && (NULL_PTR != Dem_CheckEventMemEntryExistsAlready(IntId))
+        && ((DEM_FLAGS_ISSET(pEvent->UdsStatus, DEM_UDS_STATUS_TFTOC) != 0u)
+            && (DEM_FLAGS_ISSET(pEvent->Status, DEM_EVENT_STATUS_TFBITCHANGE) != 0u)))
+    {
+        pEvent->OccurrenceCounter++;
+    }
+#endif
+    /* if event failed clear anging counter*/
+    pEvent->AgingCounter = 0;
+#if (DEM_STATUSINDICATOR30ENABLE == STD_ON)
+    /*The bit is reset to 0 when the aged DTC reoccurs*/
+    if (0x00u != DEM_FLAGS_ISSET(pEvent->StatusIndicator30, DEM_SI30_DTC_AGED))
+    {
+        DEM_FLAGS_CLR(pEvent->StatusIndicator30, DEM_SI30_DTC_AGED);
+    }
+#endif /* DEM_STATUSINDICATOR30ENABLE == STD_ON */
+    /* Check PendingDTC bit */
+    if (0x00u == DEM_FLAGS_ISSET(pEvent->UdsStatus, DEM_UDS_STATUS_PDTC))
+    {
+        /* req SWS_Dem_00784 req SWS_Dem_00801 req SWS_Dem_00813  bit 2*/
+        DEM_FLAGS_SET(pEvent->UdsStatus, DEM_UDS_STATUS_PDTC);
+
+#if (DEM_TRIGGERONPENDINGEDEANLE == STD_ON)
+        Dem_EventDataStorageTrigger(IntId, DEM_TRIGGER_ON_PENDING);
+#endif /* DEM_TRIGGERONPENDINGEDEANLE == STD_ON */
+    }
+#if (DEM_TRIGGER_ON_PENDING == DEM_EVENT_MEMORY_ENTRY_STORAGE_TRIGGER)
+#if (DEM_TRIGGERONPENDINGEDEANLE == STD_ON)
+    else
+    {
+        /* req SWS_Dem_00922 */
+        if (DEM_FLAGS_ISSET(pEvent->Status, DEM_EVENT_STATUS_TFBITCHANGE) != 0x00u)
+        {
+            Dem_EventDataStorageTrigger(IntId, DEM_TRIGGER_ON_PENDING);
+        }
+    }
+#endif /* DEM_TRIGGERONPENDINGEDEANLE == STD_ON */
+#endif /* DEM_TRIGGER_ON_PENDING == DEM_EVENT_MEMORY_ENTRY_STORAGE_TRIGGER */
+    /* confirmedLevel reached? */
+    if (0x00u == DEM_FLAGS_ISSET(pEvent->UdsStatus, DEM_UDS_STATUS_CDTC))
+    {
+        /* req SWS_Dem_00528 */
+        if ((pEvent->FailureCounter + 1u) >= pEventCfg->DemEventFailureCycleCounterThreshold)
+        {
+#if (DEM_EVENT_COMBINATION_SUPPORT == DEM_EVCOMB_ONSTORAGE)
+            boolean Find = FALSE;
+            const Dem_EventParameterType* pEventParameter = DemPbCfgPtr->DemEventParameter;
+            if (DEM_DTC_REF_INVALID != DTCRef)
+            {
+                const Dem_DTCType* pDemDTC = &DemPbCfgPtr->DemDTC[DTCRef];
+#if (DEM_ONEDTCMAPPINGMUTILEVENT == STD_ON)
+                const Dem_EventIdType EventRefNum = pDemDTC->EventRefNum;
+#endif /* DEM_ONEDTCMAPPINGMUTILEVENT == STD_ON */
+                const Dem_EventIdType EventRefStart = pDemDTC->EventRefStart;
+                const Dem_EventIdType* pDTCMapping = &DemPbCfgPtr->DemDTCMapping[EventRefStart];
+#if (DEM_ONEDTCMAPPINGMUTILEVENT == STD_ON)
+                for (uint16 iloop = 0u; (iloop < EventRefNum) && (Find == FALSE); iloop++)
+#endif /* DEM_ONEDTCMAPPINGMUTILEVENT == STD_ON */
+                {
+                    if ((DTCRef == pEventParameter[*pDTCMapping].DemDTCRef)
+                        && (DEM_FLAGS_ISSET(DemEventRelateInformation[*pDTCMapping].UdsStatus, DEM_UDS_STATUS_CDTC)
+                            != 0x00u))
+                    {
+                        Find = TRUE;
+                    }
+#if (DEM_ONEDTCMAPPINGMUTILEVENT == STD_ON)
+                    pDTCMapping++;
+#endif /* DEM_ONEDTCMAPPINGMUTILEVENT == STD_ON */
+                }
+            }
+            if (Find == FALSE)
+#endif /* DEM_EVENT_COMBINATION_SUPPORT == DEM_EVCOMB_ONSTORAGE */
+            {
+                if ((DEM_DTC_REF_INVALID != DTCRef) && (pDTCAttr != NULL_PTR))
+                {
+                    const uint8* pMemDest = pDTCAttr->DemMemoryDestinationRef;
+#if (DEM_MEM_DEST_MAX_NUM_OF_DTC > 1u)
+                    for (uint8 index = 0; index < DEM_MEM_DEST_MAX_NUM_OF_DTC; index++)
+#else
+                    uint8 index = 0;
+#endif /* DEM_MEM_DEST_MAX_NUM_OF_DTC > 1u */
+                    {
+                        if ((pMemDest[index] != DEM_MEM_DEST_INVALID)
+                            && (DemMemDestCfg[pMemDest[index]].ExtId == DEM_DTC_ORIGIN_PRIMARY_MEMORY))
+                        {
+                            Dem_SetOccurrenceEvent(IntId, DEM_UDS_STATUS_CDTC); /* SWS_Dem_00219 */
+                        }
+                    }
+                }
+                /* req SWS_Dem_00700 */
+                if ((DEM_BITS_ISNSET(DemOperationCycleStatus, pEventCfg->DemOperationCycleRef))
+                    && (DemPbCfgPtr->DemOperationCycle[pEventCfg->DemOperationCycleRef].DemOperationCycleType
+                        == DEM_OPCYC_OBD_DCY))
+                {
+                    /*idle*/
+                }
+                else
+                {
+                    /* bit 3 */
+                    DEM_FLAGS_SET(pEvent->UdsStatus, DEM_UDS_STATUS_CDTC);
+#if (DEM_OCC6EANLE == STD_ON)
+                    /*  The counter may also be cleared when the conﬁrmedDTCLimit is reached. */
+                    pEvent->OCC6 = 0;
+#endif /* DEM_OCC6EANLE == STD_ON */
+                }
+#if (DEM_TRIGGERONCONFIRMEDEDEANLE == STD_ON)
+                /* req SWS_Dem_00785 SWS_Dem_00802 SWS_Dem_00814*/
+                Dem_EventDataStorageTrigger(IntId, DEM_TRIGGER_ON_CONFIRMED);
+#endif /* DEM_TRIGGERONCONFIRMEDEDEANLE == STD_ON */
+            }
+        }
+    }
+    else
+    {
+#if (DEM_TRIGGERONCONFIRMEDEDEANLE == STD_ON)
+#if (                                                                    \
+    (DEM_TRIGGER_ON_CONFIRMED == DEM_EVENT_MEMORY_ENTRY_STORAGE_TRIGGER) \
+    && (DEM_RESET_CONFIRMED_BIT_ON_OVERFLOW == STD_OFF))
+        /* req SWS_Dem_00923 */
+        if (DEM_FLAGS_ISSET(pEvent->Status, DEM_EVENT_STATUS_TFBITCHANGE) != 0x00u)
+        {
+            Dem_EventDataStorageTrigger(IntId, DEM_TRIGGER_ON_CONFIRMED);
+        }
+#endif
+#endif /* DEM_TRIGGERONCONFIRMEDEDEANLE == STD_ON */
+    }
+#if (DEM_OCCURRENCE_COUNTER_PROCESSING == DEM_PROCESS_OCCCTR_CDTC)
+    /* req SWS_Dem_00580 req SWS_Dem_00625 */
+    if ((pEvent->OccurrenceCounter < 0xFFu) && (NULL_PTR != Dem_CheckEventMemEntryExistsAlready(IntId))
+        && ((DEM_FLAGS_ISSET(pEvent->UdsStatus, DEM_UDS_STATUS_TF) != 0)
+            && (DEM_FLAGS_ISSET(pEvent->Status, DEM_EVENT_STATUS_TFBITCHANGE) != 0))
+        && (DEM_FLAGS_ISSET(pEvent->UdsStatus, DEM_UDS_STATUS_CDTC) != 0))
+    {
+        /*  occurrence counter counter by one ,trigger by TF bit transition from 0 to 1
+         * if CDTC is set */
+        pEvent->OccurrenceCounter++;
+    }
+#endif /* DEM_OCCURRENCE_COUNTER_PROCESSING == DEM_PROCESS_OCCCTR_CDTC */
+    /* Check WarningIndicatorOnCondition */
+    if (TRUE == Dem_CheckWIROn(pEvent, pEventCfg))
+    {
+        /* bit 7 */
+        DEM_FLAGS_SET(pEvent->UdsStatus, DEM_UDS_STATUS_WIR);
+#if (DEM_STATUSINDICATOR30ENABLE == STD_ON)
+        /*The bit is set to 1 when DTC status bit no 7 is set to 1. In all cases, FDC10 has reached the value +127,
+         * since DTC information was latest cleared, before the bit is set to 1 and warring indicator is requested*/
+        if (0x00u != DEM_FLAGS_ISSET(pEvent->UdsStatus, DEM_UDS_STATUS_TF))
+        {
+            DEM_FLAGS_SET(pEvent->StatusIndicator30, DEM_SI30_DTC_WIRSLC); /*bit 5*/
+        }
+#endif /* DEM_STATUSINDICATOR30ENABLE == STD_ON */
+    }
+    if (DEM_FLAGS_ISSET(pEvent->Status, DEM_EVENT_STATUS_TFBITCHANGE) != 0x00u)
+    {
+        DEM_FLAGS_CLR(pEvent->Status, DEM_EVENT_STATUS_TFBITCHANGE);
+    }
+    /* update the combination event dtc status*/
+    Dem_UpdateCombinedDtcStatus(IntId);
+    Dem_ResponseOnDtcStatusChange(IntId);
+}
+
+/*************************************************************************/
+/*
+ * Brief               Dem_EventTestPassed
+ * ServiceId           --
+ * Sync/Async          Synchronous
+ * Reentrancy          Reentrant
+ * Param-Name[in]      IntId && pEventBuffer
+ * Param-Name[out]     None
+ * Param-Name[in/out]  None
+ * Return              None
+ */
+/*************************************************************************/
+/* PRQA S 3432,1532++ */ /* MISRA Rule 20.7,8.7 */
+FUNC(void, DEM_CODE) Dem_EventTestPassed(Dem_EventIdType IntId)
+/* PRQA S 3432,1532-- */ /* MISRA Rule 20.7,8.7 */
+{
+    Dem_EventRelateInformationType* pEvent = &DemEventRelateInformation[IntId];
+    uint16 TempRef = DemPbCfgPtr->DemEventParameter[IntId].DemDTCRef;
+
+    if (0x00u != DEM_FLAGS_ISSET(pEvent->UdsStatus, DEM_UDS_STATUS_TF))
+    {
+        DEM_FLAGS_SET(pEvent->Status, DEM_EVENT_STATUS_TFBITCHANGE);
+    }
+#if (DEM_OCC6EANLE == STD_ON)
+    if (0x00u == DEM_FLAGS_ISSET(pEvent->EventStatusFlag, DEM_EVENT_FLAGS_THISOPISFAILED))
+    {
+        if (0x00u != DEM_FLAGS_ISSET(pEvent->EventStatusFlag, DEM_EVENT_FLAGS_OCC6CLR))
+        {
+            /* The counter shall be cleared in the beginning of the operation cycle following an operation
+             * cycle where FDC10 did not reach the value +127 at any time but -128 (the counter shall
+             * maintain its value if did not reach the value -128). */
+            pEvent->OCC6 = 0;
+        }
+    }
+#endif /* DEM_OCC6EANLE == STD_ON */
+#if (DEM_STATUSINDICATOR30ENABLE == STD_ON)
+    /*The bit is reset to 0 when the FDC10 reach the value -128.*/
+    DEM_FLAGS_CLR(pEvent->StatusIndicator30, DEM_SI30_DTC_UC); /*bit 0*/
+#endif                                                         /* DEM_STATUSINDICATOR30ENABLE == STD_ON */
+    /* bit 0 6 4*/
+    DEM_FLAGS_CLR(pEvent->UdsStatus, DEM_UDS_STATUS_TF | DEM_UDS_STATUS_TNCTOC | DEM_UDS_STATUS_TNCSLC);
+    DEM_FLAGS_CLR(pEvent->Status, DEM_EVENT_STATUS_ACTIVE);
+    Dem_InterEventTestPassed(IntId);
+    if (TempRef != DEM_DTC_REF_INVALID)
+    {
+        /* req SWS_Dem_00698 */
+#if (DEM_RESET_CONFIRMED_BIT_ON_OVERFLOW == STD_OFF)
+        Dem_CDTCOverFlowCheck(IntId);
+#endif
+        /* update the combination event dtc status*/
+        Dem_UpdateCombinedDtcStatus(IntId);
+        Dem_ResponseOnDtcStatusChange(IntId);
+#if (DEM_MAX_NUMBER_PRESTORED_FF > 0)
+        /* req SWS_Dem_00465 */
+        (void)Dem_InterClearPrestoredFreezeFrame(IntId);
+#endif
+    }
+}
+
+/*************************************************************************/
+/*
+ * Brief               Dem_EntryChronologicalOrderUpdate
+ * ServiceId           --
+ * Sync/Async          Synchronous
+ * Reentrancy          Reentrant
+ * Param-Name[in]      IntId
+ * Param-Name[out]     None
+ * Param-Name[in/out]  None
+ * Return              None
+ */
+/*************************************************************************/
+/* PRQA S 3432,1532++ */ /* MISRA Rule 20.7,8.7 */
+DEM_LOCAL FUNC(void, DEM_CODE) Dem_EntryChronologicalOrderUpdate(
+    Dem_EventIdType IntId,
+    uint8 memDest,
+    P2VAR(Dem_EventMemEntryType, AUTOMATIC, DEM_APPL_DATA) pEntry)
+/* PRQA S 3432,1532-- */ /* MISRA Rule 20.7,8.7 */
+{
+    uint8 index;
+    uint8 iloop;
+    uint8 EntryNum = DemMemDestCfg[memDest].EntryNum;
+    Dem_EventMemEntryType* EntryList = DemMemDestCfg[memDest].EntryList;
+
+    for (iloop = 0; iloop < EntryNum; iloop++)
+    {
+#if (DEM_EVENT_COMBINATION_SUPPORT == DEM_EVCOMB_ONSTORAGE)
+        const Dem_EventParameterType* pEventParameter = DemPbCfgPtr->DemEventParameter;
+        if ((EntryList[iloop].EventId != 0u)
+            && (pEventParameter[Dem_GetEventInternalId(EntryList[iloop].EventId)].DemDTCRef
+                == pEventParameter[Dem_GetEventInternalId(pEntry->EventId)].DemDTCRef))
+#else
+        if (pEntry->EventId == EntryList[iloop].EventId)
+#endif
+        {
+            for (index = 0; index < EntryNum; index++)
+            {
+                if (pEntry->AbsTime < EntryList[index].AbsTime)
+                {
+                    EntryList[index].AbsTime--;
+                }
+            }
+            pEntry->AbsTime = DemMemDestInfo[memDest].RecordNum;
+#if (DEM_EVENT_COMBINATION_SUPPORT == DEM_EVCOMB_ONSTORAGE)
+            /*Update the DEM_EVENT_COMBINATION event new ID*/
+            pEntry->EventId = Dem_GetEventExternalId(IntId);
+#endif
+            break;
+        }
+    }
+#if (DEM_EVENT_COMBINATION_SUPPORT != DEM_EVCOMB_ONSTORAGE)
+    DEM_UNUSED(IntId);
+#endif
+}
+
+/*************************************************************************/
+/*
+ * Brief               Dem_MemEntryAllocate
+ * ServiceId           --
+ * Sync/Async          Synchronous
+ * Reentrancy          Reentrant
+ * Param-Name[in]      IntId && MemDestIndex
+ * Param-Name[out]     None
+ * Param-Name[in/out]  None
+ * Return              Dem_EventMemEntryType*
+ */
+/*************************************************************************/
+/* PRQA S 3432++ */ /* MISRA Rule 20.7 */
+FUNC(P2VAR(Dem_EventMemEntryType, AUTOMATIC, DEM_APPL_DATA), DEM_CODE)
+/* PRQA S 3432-- */ /* MISRA Rule 20.7 */
+Dem_MemEntryAllocate(Dem_EventIdType IntId, uint8 memDest)
+{
+    Dem_EventMemEntryType* pEntry = NULL_PTR;
+    Dem_MemDestInfoType* pMem = &DemMemDestInfo[memDest];
+    Dem_EventRelateInformationType* pEvent = &DemEventRelateInformation[IntId];
+
+    /* req SWS_Dem_01130 */
+    if ((E_OK != Dem_CheckEntryAlreadyAllocated(IntId, memDest, &pEntry))
+        || (DEM_FLAGS_ISSET(pEvent->Status, DEM_EVENT_STATUS_CONSECUTIVE_FAULT) != 0x00u))
+    {
+        pEntry = NULL_PTR;
+    }
+    else if (
+        (0x00u == DEM_FLAGS_ISSET(pEvent->Status, DEM_EVENT_STATUS_STORAGE_CONDICTION))
+        && (DEM_FLAGS_ISSET(pEvent->Status, DEM_EVENT_STATUS_TFBITCHANGE) != 0x00u))
+    {
+        /*SWS_Dem_00458 SWS_Dem_00455 SWS_Dem_00591 */
+        DEM_FLAGS_CLR(pEvent->Status, DEM_EVENT_STATUS_TFBITCHANGE);
+        pEntry = NULL_PTR;
+    }
+    /* req SWS_Dem_00242 Defines the group of DTC that shall be disabled to store in event memory*/
+    else if (0x00u == DEM_FLAGS_ISSET(pEvent->Status, DEM_EVENT_STATUS_DTC_SETTING))
+    {
+        /* idle */
+    }
+    /* Entry already stored */
+    else if (pEntry == NULL_PTR)
+    {
+        /*return NULL_PTR means no idle memory*/
+        pEntry = Dem_MemEntryGet(0x00, memDest);
+        if (pEntry == NULL_PTR)
+        {
+            pMem->OverFlow = TRUE;
+#if (DEM_EVENT_DISPLACEMENT_STRATEGY != DEM_DISPLACEMENT_NONE)
+            /* SWS_Dem_00401 SWS_Dem_00402 SWS_Dem_00407 */
+            pEntry = Dem_EventDisplacementProcess(IntId, memDest);
+#endif
+        }
+        else
+        {
+            /* req SWS_Dem_00475 */
+            Dem_CallDataChangedOfMemEntryAllocate(IntId);
+        }
+        if (pEntry != NULL_PTR)
+        {
+            if (pMem->RecordNum < DemMemDestCfg[memDest].EntryNum)
+            {
+                pMem->RecordNum++;
+            }
+            pEntry->EventId = Dem_GetEventExternalId(IntId);
+            /* SWS_Dem_00412 search the time order,give the newer time order*/
+            pEntry->AbsTime = pMem->RecordNum;
+#if ((DEM_FREEZE_FRAME_CLASS_NUM > 0u) || (DEM_J1939_FREEZE_FRAME_CLASS_NUM > 0u) || (DEM_PID_CLASS_NUM > 0u))
+            pEntry->FFNum = 0;
+            pEntry->LatestFF = 0;
+#endif /* DEM_FREEZE_FRAME_CLASS_NUM > 0u || DEM_J1939_FREEZE_FRAME_CLASS_NUM > 0u || DEM_PID_CLASS_NUM > 0u */
+            /* req SWS_Dem_00523 */
+            pEvent->OccurrenceCounter = 0;
+#if (DEM_CYCLESSINCEFRISTFAILEDEANLE == STD_ON)
+            pEvent->CyclesSinceFirstFailed = 0; /* SWS_Dem_00776 */
+#endif                                          /* DEM_CYCLESSINCEFRISTFAILEDEANLE == STD_ON */
+#if ((DEM_CYCLESSINCEFRISTFAILEDEANLE == STD_ON) || (DEM_CYCLESSINCELASTFAILEDEANLE == STD_ON))
+            DEM_FLAGS_SET(pEvent->EventStatusFlag, DEM_EVENT_FLAGS_CYCLECOUNTER);
+#endif /* DEM_CYCLESSINCEFRISTFAILEDEANLE == STD_ON|| DEM_CYCLESSINCELASTFAILEDEANLE == STD_ON */
+#if (DEM_CYCLESSINCELASTFAILEDEANLE == STD_ON)
+            pEvent->CyclesSinceLastFailed = 0; /* SWS_Dem_00771 */
+#endif
+            pEvent->FailureCounter = 0; /*SWS_Dem_00780*/
+        }
+    }
+    else
+    {
+        /* req SWS_Dem_00787 */
+        if (DEM_FLAGS_ISSET(pEvent->Status, DEM_EVENT_STATUS_TFBITCHANGE) != 0x00u)
+        {
+#if (DEM_CYCLESSINCELASTFAILEDEANLE == STD_ON)
+            /* SWS_Dem_00772 */
+            pEvent->CyclesSinceLastFailed = 0;
+#endif /* DEM_CYCLESSINCELASTFAILEDEANLE == STD_ON */
+            /*Update the time order*/
+            Dem_EntryChronologicalOrderUpdate(IntId, memDest, pEntry);
+        }
+    }
+    return pEntry;
+}
+
+#if (DEM_NVRAM_BLOCKID_NUM > 0)
+/*************************************************************************/
+/*
+ * Brief               Dem_CopyInfoFromInfo
+ * ServiceId           --
+ * Sync/Async          Synchronous
+ * Reentrancy          Reentrant
+ * Param-Name[in]      None
+ * Param-Name[out]     None
+ * Param-Name[in/out]  pEvent
+ * Return              None
+ */
+/*************************************************************************/
+DEM_LOCAL FUNC(void, DEM_CODE) Dem_CopyInfoFromInfo(
+    /* PRQA S 3432++ */ /* MISRA Rule 20.7 */
+    P2CONST(Dem_EventRelateInformationType, AUTOMATIC, DEM_APPL_DATA) Info,
+    P2VAR(Dem_EventMemEntryType, AUTOMATIC, DEM_APPL_DATA) Entry)
+/* PRQA S 3432-- */ /* MISRA Rule 20.7 */
+{
+    Entry->UdsStatus = Info->UdsStatus;
+    Entry->AgingCounter = Info->AgingCounter;
+    Entry->OccurrenceCounter = Info->OccurrenceCounter;
+    Entry->HealingCounter = Info->HealingCounter;
+    Entry->FailureCounter = Info->FailureCounter;
+#if (DEM_OCC6EANLE == STD_ON)
+    Entry->OCC6 = Info->OCC6;
+#endif /* DEM_OCC6EANLE == STD_ON */
+#if (DEM_OCC4EANLE == STD_ON)
+    Entry->OCC4 = Info->OCC4;
+#endif /* DEM_OCC4EANLE == STD_ON */
+#if (DEM_CYCLESSINCEFRISTFAILEDEANLE == STD_ON)
+    Entry->CyclesSinceFirstFailed = Info->CyclesSinceFirstFailed;
+#endif /* DEM_CYCLESSINCEFRISTFAILEDEANLE == STD_ON */
+#if (DEM_CYCLESSINCELASTFAILEDEANLE == STD_ON)
+    Entry->CyclesSinceLastFailed = Info->CyclesSinceLastFailed;
+#endif /* DEM_CYCLESSINCELASTFAILEDEANLE == STD_ON */
+#if ((DEM_CYCLESSINCEFRISTFAILEDEANLE == STD_ON) || (DEM_CYCLESSINCELASTFAILEDEANLE == STD_ON))
+    Entry->EventStatusFlag = Info->EventStatusFlag;
+#endif /* DEM_CYCLESSINCEFRISTFAILEDEANLE == STD_ON || DEM_CYCLESSINCELASTFAILEDEANLE == STD_ON */
+#if (DEM_STATUSINDICATOR30ENABLE == STD_ON)
+    Entry->StatusIndicator30 = Info->StatusIndicator30;
+#endif /* DEM_STATUSINDICATOR30ENABLE == STD_ON */
+#if (DEM_AGEDCOUNT_SAIC == STD_ON)
+    Entry->AgedCounter = Info->AgedCounter;
+#endif /* DEM_AGEDCOUNT_SAIC == STD_ON */
+}
+
+#if (DEM_NVRAM_DIVADED == STD_ON)
+/*************************************************************************/
+/*
+ * Brief               Dem_IntWriteOneNvRAM
+ * ServiceId           --
+ * Sync/Async          Synchronous
+ * Reentrancy          Reentrant
+ * Param-Name[in]      None
+ * Param-Name[out]     None
+ * Param-Name[in/out]  pEvent
+ * Return              None
+ */
+/*************************************************************************/
+FUNC(void, DEM_CODE) Dem_IntWriteOneNvRAM(uint16 IntId)
+{
+    uint16 blockRef;
+    uint8 DemMemDestindex;
+    uint16 iloop = 0;
+    uint16 tempEventId = 0;
+    uint16 blockIndex = 0;
+    for (DemMemDestindex = 0; DemMemDestindex < DEM_MEM_DEST_TOTAL_NUM; DemMemDestindex++)
+    {
+        if (DemMemDestCfg[DemMemDestindex].ExtId == DEM_DTC_ORIGIN_PRIMARY_MEMORY)
+        {
+            for (iloop = 0; iloop < DEM_MAX_NUMBER_EVENT_ENTRY_PRIMARY; iloop++)
+            {
+                tempEventId = DemMemDestCfg[DemMemDestindex].EntryList[iloop].EventId;
+                if (tempEventId != 0u)
+                {
+                    tempEventId = tempEventId - 1u;
+                    if (IntId == tempEventId)
+                    {
+                        Dem_CopyInfoFromInfo(
+                            &DemEventRelateInformation[tempEventId],
+                            &DemMemDestCfg[DemMemDestindex].EntryList[iloop]);
+                        blockRef = DemNvRamBlockId[blockIndex];
+                        Dem_MemCopy(
+                            NvM_BlockDescriptor[blockRef - 1u].NvmRamBlockDataAddress,
+                            (const uint8*)&DemMemDestCfg[DemMemDestindex].EntryList[iloop],
+                            ENTRY_STORAGE_LEN);
+                        (void)NvM_CancelJobs(blockRef);
+                        (void)NvM_WriteBlock(blockRef, NULL_PTR);
+                        break;
+                    }
+                }
+                blockIndex++;
+            }
+            break;
+        }
+    }
+#if (DEM_MAX_NUMBER_EVENT_ENTRY_PERMANENT > 0)
+    for (DemMemDestindex = 0; DemMemDestindex < DEM_MEM_DEST_TOTAL_NUM; DemMemDestindex++)
+    {
+        if (DemMemDestCfg[DemMemDestindex].ExtId == DEM_DTC_ORIGIN_PERMANENT_MEMORY)
+        {
+            for (iloop = 0; iloop < DEM_MAX_NUMBER_EVENT_ENTRY_PERMANENT; iloop++)
+            {
+                tempEventId = DemMemDestCfg[DemMemDestindex].EntryList[iloop].EventId;
+                if (tempEventId != 0u)
+                {
+                    tempEventId = tempEventId - 1u;
+                    if (IntId == tempEventId)
+                    {
+                        Dem_CopyInfoFromInfo(
+                            &DemEventRelateInformation[tempEventId],
+                            &DemMemDestCfg[DemMemDestindex].EntryList[iloop]);
+                        blockRef = DemNvRamBlockId[blockIndex];
+                        Dem_MemCopy(
+                            NvM_BlockDescriptor[blockRef - 1u].NvmRamBlockDataAddress,
+                            (const uint8*)&DemMemDestCfg[DemMemDestindex].EntryList[iloop],
+                            ENTRY_STORAGE_LEN);
+                        (void)NvM_CancelJobs(blockRef);
+                        (void)NvM_WriteBlock(blockRef, NULL_PTR);
+                        break;
+                    }
+                }
+                blockIndex++;
+            }
+            break;
+        }
+    }
+#endif
+}
+#endif /* DEM_NVRAM_DIVADED == STD_ON */
+/*************************************************************************/
+/*
+ * Brief               Dem_IntWriteNvRAM
+ * ServiceId           --
+ * Sync/Async          Synchronous
+ * Reentrancy          Reentrant
+ * Param-Name[in]      None
+ * Param-Name[out]     None
+ * Param-Name[in/out]  pEvent
+ * Return              None
+ */
+/*************************************************************************/
+FUNC(void, DEM_CODE) Dem_IntWriteNvRAM(void)
+{
+    uint16 blockRef;
+    uint8 DemMemDestindex;
+    uint16 iloop;
+    uint16 tempEventId = 0;
+    uint16 blockIndex = 0;
+#if (DEM_NVRAM_DIVADED == STD_ON)
+    for (DemMemDestindex = 0; DemMemDestindex < DEM_MEM_DEST_TOTAL_NUM; DemMemDestindex++)
+    {
+        if (DemMemDestCfg[DemMemDestindex].ExtId == DEM_DTC_ORIGIN_PRIMARY_MEMORY)
+        {
+            for (iloop = 0; iloop < DEM_MAX_NUMBER_EVENT_ENTRY_PRIMARY; iloop++)
+            {
+                tempEventId = DemMemDestCfg[DemMemDestindex].EntryList[iloop].EventId;
+                if (tempEventId != 0u)
+                {
+                    tempEventId = tempEventId - 1u;
+                    Dem_CopyInfoFromInfo(
+                        &DemEventRelateInformation[tempEventId],
+                        &DemMemDestCfg[DemMemDestindex].EntryList[iloop]);
+                }
+                blockRef = DemNvRamBlockId[blockIndex];
+                blockIndex++;
+                Dem_MemCopy(
+                    NvM_BlockDescriptor[blockRef - 1u].NvmRamBlockDataAddress,
+                    (const uint8*)&DemMemDestCfg[DemMemDestindex].EntryList[iloop],
+                    ENTRY_STORAGE_LEN);
+                (void)NvM_CancelJobs(blockRef);
+                (void)NvM_WriteBlock(blockRef, NULL_PTR);
+            }
+            break;
+        }
+    }
+#if (DEM_MAX_NUMBER_EVENT_ENTRY_PERMANENT > 0)
+    for (DemMemDestindex = 0; DemMemDestindex < DEM_MEM_DEST_TOTAL_NUM; DemMemDestindex++)
+    {
+        if (DemMemDestCfg[DemMemDestindex].ExtId == DEM_DTC_ORIGIN_PERMANENT_MEMORY)
+        {
+            for (iloop = 0; iloop < DEM_MAX_NUMBER_EVENT_ENTRY_PERMANENT; iloop++)
+            {
+                tempEventId = DemMemDestCfg[DemMemDestindex].EntryList[iloop].EventId;
+                if (tempEventId != 0u)
+                {
+                    tempEventId = tempEventId - 1u;
+                    Dem_CopyInfoFromInfo(
+                        &DemEventRelateInformation[tempEventId],
+                        &DemMemDestCfg[DemMemDestindex].EntryList[iloop]);
+                }
+                blockRef = DemNvRamBlockId[blockIndex];
+                blockIndex++;
+                Dem_MemCopy(
+                    NvM_BlockDescriptor[blockRef - 1u].NvmRamBlockDataAddress,
+                    (const uint8*)&DemMemDestCfg[DemMemDestindex].EntryList[iloop],
+                    ENTRY_STORAGE_LEN);
+                (void)NvM_CancelJobs(blockRef);
+                (void)NvM_WriteBlock(blockRef, NULL_PTR);
+            }
+            break;
+        }
+    }
+#endif
+#else
+    for (iloop = 0; iloop < DEM_MAX_NUMBER_EVENT_ENTRY_PRIMARY; iloop++)
+    {
+        /* PRQA S 2877++ */ /* MISRA Dir 4.1 */
+        for (DemMemDestindex = 0; DemMemDestindex < DEM_MEM_DEST_TOTAL_NUM; DemMemDestindex++)
+        /* PRQA S 2877-- */ /* MISRA Dir 4.1 */
+        {
+            if (DemMemDestCfg[DemMemDestindex].ExtId == DEM_DTC_ORIGIN_PRIMARY_MEMORY)
+            {
+                DemEventMemoryEntryStorage[iloop] = DemMemDestCfg[DemMemDestindex].EntryList[iloop];
+                tempEventId = DemMemDestCfg[DemMemDestindex].EntryList[iloop].EventId;
+            }
+        }
+        if (tempEventId != 0u)
+        {
+            tempEventId = tempEventId - 1u;
+            Dem_CopyInfoFromInfo(&DemEventRelateInformation[tempEventId], &DemEventMemoryEntryStorage[iloop]);
+        }
+    }
+#if (DEM_MAX_NUMBER_EVENT_ENTRY_PERMANENT > 0)
+    for (; iloop < ENTRY_STORAGE_NUM; iloop++)
+    {
+        for (DemMemDestindex = 0; DemMemDestindex < DEM_MEM_DEST_TOTAL_NUM; DemMemDestindex++)
+        {
+            if (DemMemDestCfg[DemMemDestindex].ExtId == DEM_DTC_ORIGIN_PERMANENT_MEMORY)
+            {
+                DemEventMemoryEntryStorage[iloop] =
+                    DemMemDestCfg[DemMemDestindex].EntryList[iloop - DEM_MAX_NUMBER_EVENT_ENTRY_PRIMARY];
+                tempEventId =
+                    DemMemDestCfg[DemMemDestindex].EntryList[iloop - DEM_MAX_NUMBER_EVENT_ENTRY_PRIMARY].EventId;
+            }
+        }
+        if (tempEventId != 0u)
+        {
+            tempEventId = tempEventId - 1u;
+            Dem_CopyInfoFromInfo(&DemEventRelateInformation[tempEventId], &DemEventMemoryEntryStorage[iloop]);
+        }
+    }
+#endif
+    blockRef = DemNvRamBlockId[blockIndex];
+    blockIndex++;
+    (void)NvM_CancelJobs(blockRef);
+    (void)NvM_WriteBlock(blockRef, NULL_PTR);
+#endif
+
+    /* req SWS_Dem_00525 SWS_Dem_00389 SWS_Dem_01183 SWS_Dem_00391 SWS_Dem_00392 SWS_Dem_00393
+     * SWS_Dem_00394 SWS_Dem_00395*/
+    for (iloop = 0; iloop < DemPbCfgPtr->DemEventNum; iloop++)
+    {
+        DemEventRelateInformationStorage.UdsStatus[iloop] = DemEventRelateInformation[iloop].UdsStatus;
+#if (DEM_STATUSINDICATOR30ENABLE == STD_ON)
+        DemEventRelateInformationStorage.StatusIndicator30[iloop] = DemEventRelateInformation[iloop].StatusIndicator30;
+#endif /* DEM_STATUSINDICATOR30ENABLE == STD_ON */
+#if (DEM_AGEDCOUNT_SAIC == STD_ON)
+        DemEventRelateInformationStorage.AgedCounter[iloop] = DemEventRelateInformation[iloop].AgedCounter;
+#endif /* DEM_AGEDCOUNT_SAIC == STD_ON */
+        Dem_InterIntWriteNvRAM(iloop, &DemEventRelateInformationStorage);
+    }
+#if (DEM_MAXFDCSINCELASTCLEAR_EANLE == STD_ON)
+    for (iloop = 0; iloop < DEM_DTC_NUM; iloop++)
+    {
+        DemEventRelateInformationStorage.MaxFDCSinceLastClear[iloop] = FDCInfo[iloop].MaxFDCSinceLastClear;
+    }
+#endif /*DEM_MAXFDCSINCELASTCLEAR_EANLE == STD_ON  */
+#if (DEM_OPERATION_CYCLE_STATUS_STORAGE == STD_ON)
+    /* req SWS_Dem_00577*/
+    for (iloop = 0; iloop < DEM_BITS_TO_BYTE(DemPbCfgPtr->DemOperationCycleNum); iloop++)
+    {
+        DemEventRelateInformationStorage.DemOperationCycleStatus[iloop] = DemOperationCycleStatus[iloop];
+    }
+#endif
+    DemEventRelateInformationStorage.FirstDtcConfirmed = DemDTCByOccurrenceTimeInfo.FirstDtcConfirmed;
+    DemEventRelateInformationStorage.FirstFailed = DemDTCByOccurrenceTimeInfo.FirstFailed;
+    DemEventRelateInformationStorage.MostRecDtcConfirmed = DemDTCByOccurrenceTimeInfo.MostRecDtcConfirmed;
+    DemEventRelateInformationStorage.MostRecentFailed = DemDTCByOccurrenceTimeInfo.MostRecentFailed;
+
+    blockRef = DemNvRamBlockId[blockIndex];
+    (void)NvM_CancelJobs(blockRef);
+    (void)NvM_WriteBlock(blockRef, NULL_PTR);
+
+#if (DEM_OBD_SUPPORT != DEM_OBD_NO_OBD_SUPPORT)
+    DemOBDDataStorage.IgnUpCycleCounter = IgnUpCycleCounter;
+    DemOBDDataStorage.ContinuousMICounter = ContinuousMICounter;
+    DemOBDDataStorage.WarmUpCycleCounter = WarmUpCycleCounter;
+    DemOBDDataStorage.OBDDistanceMILOn = OBDDistanceMILOn;
+    DemOBDDataStorage.DistSinceDtcCleared = DistSinceDtcCleared;
+    DemOBDDataStorage.OBDTimeMILOn = OBDTimeMILOn;
+    DemOBDDataStorage.OBDTimeDTCClear = OBDTimeDTCClear;
+    DemOBDDataStorage.OBDB1Counter = OBDB1Counter;
+#if (DEM_OBD_SUPPORT == DEM_OBD_MASTER_ECU)
+    DemOBDDataStorage.MasterContinuousMICounter = MasterContinuousMICounter;
+#endif
+    blockIndex++;
+    blockRef = DemNvRamBlockId[blockIndex];
+    (void)NvM_CancelJobs(blockRef);
+    (void)NvM_WriteBlock(blockRef, NULL_PTR);
+#endif
+}
+#endif /* DEM_NVRAM_BLOCKID_NUM > 0 */
+
 #define DEM_STOP_SEC_CODE
 #include "Dem_MemMap.h"
-/*******************************************************************************
-**                      end of file                                           **
-*******************************************************************************/

@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Dlt.c                                                       **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : tao.yu                                                      **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Public functions implementation of Dlt                      **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Dlt.c                                                       **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : tao.yu                                                      **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Public functions implementation of Dlt                      **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 
 /**
   \page ISOFT_MISRA_Exceptions  MISRA-C:2012 Compliance Exceptions
@@ -3507,7 +3508,6 @@ static FUNC(void, DLT_CODE) Dlt_CreateExtendedHeader(const Dlt_CreateExtendedHea
             message_type = (uint8)(CreateExtendedHeader->logInfo->options.Dlt_Bits.message_type);
             /* Specify field fill "MSTP" to the DLT message buffer */
             MessageInfo |= (uint8)((uint8)message_type << 1u);
-            Dlt_MessageLogLevelType logLevel = (uint8)(CreateExtendedHeader->logInfo->logLevel);
             /* Specify field fill "MTIN" to the DLT message buffer */
             MessageInfo |= (uint8)((uint8)CreateExtendedHeader->logInfo->logLevel << 4u);
             /* PRQA S 4442-- */ /* MISRA Rule 10.3 */

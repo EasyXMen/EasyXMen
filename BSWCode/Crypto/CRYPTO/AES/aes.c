@@ -1,34 +1,3 @@
-/* PRQA S 3108++ */
-/**
- * Copyright (C) 2024 Isoft Infrastructure Software Co., Ltd.
- * SPDX-License-Identifier: LGPL-2.1-only-with-exception OR  LicenseRef-Commercial-License
- *
- * This library is free software; you can redistribute it and/or modify it under the terms of the
- * GNU Lesser General Public License as published by the Free Software Foundation; version 2.1.
- * This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Lesser General Public License for more details.
- * You should have received a copy of the GNU Lesser General Public License along with this library;
- * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
- * or see <https://www.gnu.org/licenses/>.
- *
- * Alternatively, this file may be used under the terms of the Isoft Infrastructure Software Co., Ltd.
- * Commercial License, in which case the provisions of the Isoft Infrastructure Software Co., Ltd.
- * Commercial License shall apply instead of those of the GNU Lesser General Public License.
- *
- * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
- * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- *  @file               : aes.c
- *  @version            : V1.0.0
- *  @author             : qinchun.yang
- *  @date               : 2018/10/13
- *  @vendor             : isoft
- *  @description        : Implementation for Crypto
- *  @specification(s)   : AUTOSAR classic Platform R19-11
- *
- */
-/* PRQA S 3108-- */
 /* PRQA S 0342 ++ */                    /* MISRA Rule 20.10 */
 /* PRQA S 3432 ++ */                    /* MISRA Rule 20.7 */
 /* PRQA S 0488 ++ */                    /* MISRA Rule 18.4 */
@@ -50,8 +19,8 @@
 #define CRYPTO_START_SEC_CODE
 #include "Crypto_MemMap.h"
 #if (CRYPTO_ALGORITHM_AES == STD_ON)
-FUNC(Std_ReturnType, CRY_CODE) internal_aes_encrypt(Crypto_AESData* ctx, const uint8 input[16], uint8 output[16]);
-FUNC(Std_ReturnType, CRY_CODE) internal_aes_decrypt(Crypto_AESData* ctx, const uint8 input[16], uint8 output[16]);
+FUNC(Std_ReturnType, CRYPTO_CODE) internal_aes_encrypt(Crypto_AESData* ctx, const uint8 input[16], uint8 output[16]);
+FUNC(Std_ReturnType, CRYPTO_CODE) internal_aes_decrypt(Crypto_AESData* ctx, const uint8 input[16], uint8 output[16]);
 
 #define GET_UINT32_LE(n, b, i)                                                                \
     {                                                                                         \
@@ -89,92 +58,79 @@ static const uint8 FSb[256] = {
 /*
  * Forward tables
  */
-#define FT                                                                                                             \
-                                                                                                                       \
-    ISoft(A5, 63, 63, C6), ISoft(84, 7C, 7C, F8), ISoft(99, 77, 77, EE), ISoft(8D, 7B, 7B, F6), ISoft(0D, F2, F2, FF), \
-        ISoft(BD, 6B, 6B, D6), ISoft(B1, 6F, 6F, DE), ISoft(54, C5, C5, 91), ISoft(50, 30, 30, 60),                    \
-        ISoft(03, 01, 01, 02), ISoft(A9, 67, 67, CE), ISoft(7D, 2B, 2B, 56), ISoft(19, FE, FE, E7),                    \
-        ISoft(62, D7, D7, B5), ISoft(E6, AB, AB, 4D), ISoft(9A, 76, 76, EC), ISoft(45, CA, CA, 8F),                    \
-        ISoft(9D, 82, 82, 1F), ISoft(40, C9, C9, 89), ISoft(87, 7D, 7D, FA), ISoft(15, FA, FA, EF),                    \
-        ISoft(EB, 59, 59, B2), ISoft(C9, 47, 47, 8E), ISoft(0B, F0, F0, FB), ISoft(EC, AD, AD, 41),                    \
-        ISoft(67, D4, D4, B3), ISoft(FD, A2, A2, 5F), ISoft(EA, AF, AF, 45), ISoft(BF, 9C, 9C, 23),                    \
-        ISoft(F7, A4, A4, 53), ISoft(96, 72, 72, E4), ISoft(5B, C0, C0, 9B), ISoft(C2, B7, B7, 75),                    \
-        ISoft(1C, FD, FD, E1), ISoft(AE, 93, 93, 3D), ISoft(6A, 26, 26, 4C), ISoft(5A, 36, 36, 6C),                    \
-        ISoft(41, 3F, 3F, 7E), ISoft(02, F7, F7, F5), ISoft(4F, CC, CC, 83), ISoft(5C, 34, 34, 68),                    \
-        ISoft(F4, A5, A5, 51), ISoft(34, E5, E5, D1), ISoft(08, F1, F1, F9), ISoft(93, 71, 71, E2),                    \
-        ISoft(73, D8, D8, AB), ISoft(53, 31, 31, 62), ISoft(3F, 15, 15, 2A), ISoft(0C, 04, 04, 08),                    \
-        ISoft(52, C7, C7, 95), ISoft(65, 23, 23, 46), ISoft(5E, C3, C3, 9D), ISoft(28, 18, 18, 30),                    \
-        ISoft(A1, 96, 96, 37), ISoft(0F, 05, 05, 0A), ISoft(B5, 9A, 9A, 2F), ISoft(09, 07, 07, 0E),                    \
-        ISoft(36, 12, 12, 24), ISoft(9B, 80, 80, 1B), ISoft(3D, E2, E2, DF), ISoft(26, EB, EB, CD),                    \
-        ISoft(69, 27, 27, 4E), ISoft(CD, B2, B2, 7F), ISoft(9F, 75, 75, EA), ISoft(1B, 09, 09, 12),                    \
-        ISoft(9E, 83, 83, 1D), ISoft(74, 2C, 2C, 58), ISoft(2E, 1A, 1A, 34), ISoft(2D, 1B, 1B, 36),                    \
-        ISoft(B2, 6E, 6E, DC), ISoft(EE, 5A, 5A, B4), ISoft(FB, A0, A0, 5B), ISoft(F6, 52, 52, A4),                    \
-        ISoft(4D, 3B, 3B, 76), ISoft(61, D6, D6, B7), ISoft(CE, B3, B3, 7D), ISoft(7B, 29, 29, 52),                    \
-        ISoft(3E, E3, E3, DD), ISoft(71, 2F, 2F, 5E), ISoft(97, 84, 84, 13), ISoft(F5, 53, 53, A6),                    \
-        ISoft(68, D1, D1, B9), ISoft(00, 00, 00, 00), ISoft(2C, ED, ED, C1), ISoft(60, 20, 20, 40),                    \
-        ISoft(1F, FC, FC, E3), ISoft(C8, B1, B1, 79), ISoft(ED, 5B, 5B, B6), ISoft(BE, 6A, 6A, D4),                    \
-        ISoft(46, CB, CB, 8D), ISoft(D9, BE, BE, 67), ISoft(4B, 39, 39, 72), ISoft(DE, 4A, 4A, 94),                    \
-        ISoft(D4, 4C, 4C, 98), ISoft(E8, 58, 58, B0), ISoft(4A, CF, CF, 85), ISoft(6B, D0, D0, BB),                    \
-        ISoft(2A, EF, EF, C5), ISoft(E5, AA, AA, 4F), ISoft(16, FB, FB, ED), ISoft(C5, 43, 43, 86),                    \
-        ISoft(D7, 4D, 4D, 9A), ISoft(55, 33, 33, 66), ISoft(94, 85, 85, 11), ISoft(CF, 45, 45, 8A),                    \
-        ISoft(10, F9, F9, E9), ISoft(06, 02, 02, 04), ISoft(81, 7F, 7F, FE), ISoft(F0, 50, 50, A0),                    \
-        ISoft(44, 3C, 3C, 78), ISoft(BA, 9F, 9F, 25), ISoft(E3, A8, A8, 4B), ISoft(F3, 51, 51, A2),                    \
-        ISoft(FE, A3, A3, 5D), ISoft(C0, 40, 40, 80), ISoft(8A, 8F, 8F, 05), ISoft(AD, 92, 92, 3F),                    \
-        ISoft(BC, 9D, 9D, 21), ISoft(48, 38, 38, 70), ISoft(04, F5, F5, F1), ISoft(DF, BC, BC, 63),                    \
-        ISoft(C1, B6, B6, 77), ISoft(75, DA, DA, AF), ISoft(63, 21, 21, 42), ISoft(30, 10, 10, 20),                    \
-        ISoft(1A, FF, FF, E5), ISoft(0E, F3, F3, FD), ISoft(6D, D2, D2, BF), ISoft(4C, CD, CD, 81),                    \
-        ISoft(14, 0C, 0C, 18), ISoft(35, 13, 13, 26), ISoft(2F, EC, EC, C3), ISoft(E1, 5F, 5F, BE),                    \
-        ISoft(A2, 97, 97, 35), ISoft(CC, 44, 44, 88), ISoft(39, 17, 17, 2E), ISoft(57, C4, C4, 93),                    \
-        ISoft(F2, A7, A7, 55), ISoft(82, 7E, 7E, FC), ISoft(47, 3D, 3D, 7A), ISoft(AC, 64, 64, C8),                    \
-        ISoft(E7, 5D, 5D, BA), ISoft(2B, 19, 19, 32), ISoft(95, 73, 73, E6), ISoft(A0, 60, 60, C0),                    \
-        ISoft(98, 81, 81, 19), ISoft(D1, 4F, 4F, 9E), ISoft(7F, DC, DC, A3), ISoft(66, 22, 22, 44),                    \
-        ISoft(7E, 2A, 2A, 54), ISoft(AB, 90, 90, 3B), ISoft(83, 88, 88, 0B), ISoft(CA, 46, 46, 8C),                    \
-        ISoft(29, EE, EE, C7), ISoft(D3, B8, B8, 6B), ISoft(3C, 14, 14, 28), ISoft(79, DE, DE, A7),                    \
-        ISoft(E2, 5E, 5E, BC), ISoft(1D, 0B, 0B, 16), ISoft(76, DB, DB, AD), ISoft(3B, E0, E0, DB),                    \
-        ISoft(56, 32, 32, 64), ISoft(4E, 3A, 3A, 74), ISoft(1E, 0A, 0A, 14), ISoft(DB, 49, 49, 92),                    \
-        ISoft(0A, 06, 06, 0C), ISoft(6C, 24, 24, 48), ISoft(E4, 5C, 5C, B8), ISoft(5D, C2, C2, 9F),                    \
-        ISoft(6E, D3, D3, BD), ISoft(EF, AC, AC, 43), ISoft(A6, 62, 62, C4), ISoft(A8, 91, 91, 39),                    \
-        ISoft(A4, 95, 95, 31), ISoft(37, E4, E4, D3), ISoft(8B, 79, 79, F2), ISoft(32, E7, E7, D5),                    \
-        ISoft(43, C8, C8, 8B), ISoft(59, 37, 37, 6E), ISoft(B7, 6D, 6D, DA), ISoft(8C, 8D, 8D, 01),                    \
-        ISoft(64, D5, D5, B1), ISoft(D2, 4E, 4E, 9C), ISoft(E0, A9, A9, 49), ISoft(B4, 6C, 6C, D8),                    \
-        ISoft(FA, 56, 56, AC), ISoft(07, F4, F4, F3), ISoft(25, EA, EA, CF), ISoft(AF, 65, 65, CA),                    \
-        ISoft(8E, 7A, 7A, F4), ISoft(E9, AE, AE, 47), ISoft(18, 08, 08, 10), ISoft(D5, BA, BA, 6F),                    \
-        ISoft(88, 78, 78, F0), ISoft(6F, 25, 25, 4A), ISoft(72, 2E, 2E, 5C), ISoft(24, 1C, 1C, 38),                    \
-        ISoft(F1, A6, A6, 57), ISoft(C7, B4, B4, 73), ISoft(51, C6, C6, 97), ISoft(23, E8, E8, CB),                    \
-        ISoft(7C, DD, DD, A1), ISoft(9C, 74, 74, E8), ISoft(21, 1F, 1F, 3E), ISoft(DD, 4B, 4B, 96),                    \
-        ISoft(DC, BD, BD, 61), ISoft(86, 8B, 8B, 0D), ISoft(85, 8A, 8A, 0F), ISoft(90, 70, 70, E0),                    \
-        ISoft(42, 3E, 3E, 7C), ISoft(C4, B5, B5, 71), ISoft(AA, 66, 66, CC), ISoft(D8, 48, 48, 90),                    \
-        ISoft(05, 03, 03, 06), ISoft(01, F6, F6, F7), ISoft(12, 0E, 0E, 1C), ISoft(A3, 61, 61, C2),                    \
-        ISoft(5F, 35, 35, 6A), ISoft(F9, 57, 57, AE), ISoft(D0, B9, B9, 69), ISoft(91, 86, 86, 17),                    \
-        ISoft(58, C1, C1, 99), ISoft(27, 1D, 1D, 3A), ISoft(B9, 9E, 9E, 27), ISoft(38, E1, E1, D9),                    \
-        ISoft(13, F8, F8, EB), ISoft(B3, 98, 98, 2B), ISoft(33, 11, 11, 22), ISoft(BB, 69, 69, D2),                    \
-        ISoft(70, D9, D9, A9), ISoft(89, 8E, 8E, 07), ISoft(A7, 94, 94, 33), ISoft(B6, 9B, 9B, 2D),                    \
-        ISoft(22, 1E, 1E, 3C), ISoft(92, 87, 87, 15), ISoft(20, E9, E9, C9), ISoft(49, CE, CE, 87),                    \
-        ISoft(FF, 55, 55, AA), ISoft(78, 28, 28, 50), ISoft(7A, DF, DF, A5), ISoft(8F, 8C, 8C, 03),                    \
-        ISoft(F8, A1, A1, 59), ISoft(80, 89, 89, 09), ISoft(17, 0D, 0D, 1A), ISoft(DA, BF, BF, 65),                    \
-        ISoft(31, E6, E6, D7), ISoft(C6, 42, 42, 84), ISoft(B8, 68, 68, D0), ISoft(C3, 41, 41, 82),                    \
-        ISoft(B0, 99, 99, 29), ISoft(77, 2D, 2D, 5A), ISoft(11, 0F, 0F, 1E), ISoft(CB, B0, B0, 7B),                    \
-        ISoft(FC, 54, 54, A8), ISoft(D6, BB, BB, 6D), ISoft(3A, 16, 16, 2C)
+#define FT                                                                                                            \
+                                                                                                                      \
+    V(A5, 63, 63, C6), V(84, 7C, 7C, F8), V(99, 77, 77, EE), V(8D, 7B, 7B, F6), V(0D, F2, F2, FF), V(BD, 6B, 6B, D6), \
+        V(B1, 6F, 6F, DE), V(54, C5, C5, 91), V(50, 30, 30, 60), V(03, 01, 01, 02), V(A9, 67, 67, CE),                \
+        V(7D, 2B, 2B, 56), V(19, FE, FE, E7), V(62, D7, D7, B5), V(E6, AB, AB, 4D), V(9A, 76, 76, EC),                \
+        V(45, CA, CA, 8F), V(9D, 82, 82, 1F), V(40, C9, C9, 89), V(87, 7D, 7D, FA), V(15, FA, FA, EF),                \
+        V(EB, 59, 59, B2), V(C9, 47, 47, 8E), V(0B, F0, F0, FB), V(EC, AD, AD, 41), V(67, D4, D4, B3),                \
+        V(FD, A2, A2, 5F), V(EA, AF, AF, 45), V(BF, 9C, 9C, 23), V(F7, A4, A4, 53), V(96, 72, 72, E4),                \
+        V(5B, C0, C0, 9B), V(C2, B7, B7, 75), V(1C, FD, FD, E1), V(AE, 93, 93, 3D), V(6A, 26, 26, 4C),                \
+        V(5A, 36, 36, 6C), V(41, 3F, 3F, 7E), V(02, F7, F7, F5), V(4F, CC, CC, 83), V(5C, 34, 34, 68),                \
+        V(F4, A5, A5, 51), V(34, E5, E5, D1), V(08, F1, F1, F9), V(93, 71, 71, E2), V(73, D8, D8, AB),                \
+        V(53, 31, 31, 62), V(3F, 15, 15, 2A), V(0C, 04, 04, 08), V(52, C7, C7, 95), V(65, 23, 23, 46),                \
+        V(5E, C3, C3, 9D), V(28, 18, 18, 30), V(A1, 96, 96, 37), V(0F, 05, 05, 0A), V(B5, 9A, 9A, 2F),                \
+        V(09, 07, 07, 0E), V(36, 12, 12, 24), V(9B, 80, 80, 1B), V(3D, E2, E2, DF), V(26, EB, EB, CD),                \
+        V(69, 27, 27, 4E), V(CD, B2, B2, 7F), V(9F, 75, 75, EA), V(1B, 09, 09, 12), V(9E, 83, 83, 1D),                \
+        V(74, 2C, 2C, 58), V(2E, 1A, 1A, 34), V(2D, 1B, 1B, 36), V(B2, 6E, 6E, DC), V(EE, 5A, 5A, B4),                \
+        V(FB, A0, A0, 5B), V(F6, 52, 52, A4), V(4D, 3B, 3B, 76), V(61, D6, D6, B7), V(CE, B3, B3, 7D),                \
+        V(7B, 29, 29, 52), V(3E, E3, E3, DD), V(71, 2F, 2F, 5E), V(97, 84, 84, 13), V(F5, 53, 53, A6),                \
+        V(68, D1, D1, B9), V(00, 00, 00, 00), V(2C, ED, ED, C1), V(60, 20, 20, 40), V(1F, FC, FC, E3),                \
+        V(C8, B1, B1, 79), V(ED, 5B, 5B, B6), V(BE, 6A, 6A, D4), V(46, CB, CB, 8D), V(D9, BE, BE, 67),                \
+        V(4B, 39, 39, 72), V(DE, 4A, 4A, 94), V(D4, 4C, 4C, 98), V(E8, 58, 58, B0), V(4A, CF, CF, 85),                \
+        V(6B, D0, D0, BB), V(2A, EF, EF, C5), V(E5, AA, AA, 4F), V(16, FB, FB, ED), V(C5, 43, 43, 86),                \
+        V(D7, 4D, 4D, 9A), V(55, 33, 33, 66), V(94, 85, 85, 11), V(CF, 45, 45, 8A), V(10, F9, F9, E9),                \
+        V(06, 02, 02, 04), V(81, 7F, 7F, FE), V(F0, 50, 50, A0), V(44, 3C, 3C, 78), V(BA, 9F, 9F, 25),                \
+        V(E3, A8, A8, 4B), V(F3, 51, 51, A2), V(FE, A3, A3, 5D), V(C0, 40, 40, 80), V(8A, 8F, 8F, 05),                \
+        V(AD, 92, 92, 3F), V(BC, 9D, 9D, 21), V(48, 38, 38, 70), V(04, F5, F5, F1), V(DF, BC, BC, 63),                \
+        V(C1, B6, B6, 77), V(75, DA, DA, AF), V(63, 21, 21, 42), V(30, 10, 10, 20), V(1A, FF, FF, E5),                \
+        V(0E, F3, F3, FD), V(6D, D2, D2, BF), V(4C, CD, CD, 81), V(14, 0C, 0C, 18), V(35, 13, 13, 26),                \
+        V(2F, EC, EC, C3), V(E1, 5F, 5F, BE), V(A2, 97, 97, 35), V(CC, 44, 44, 88), V(39, 17, 17, 2E),                \
+        V(57, C4, C4, 93), V(F2, A7, A7, 55), V(82, 7E, 7E, FC), V(47, 3D, 3D, 7A), V(AC, 64, 64, C8),                \
+        V(E7, 5D, 5D, BA), V(2B, 19, 19, 32), V(95, 73, 73, E6), V(A0, 60, 60, C0), V(98, 81, 81, 19),                \
+        V(D1, 4F, 4F, 9E), V(7F, DC, DC, A3), V(66, 22, 22, 44), V(7E, 2A, 2A, 54), V(AB, 90, 90, 3B),                \
+        V(83, 88, 88, 0B), V(CA, 46, 46, 8C), V(29, EE, EE, C7), V(D3, B8, B8, 6B), V(3C, 14, 14, 28),                \
+        V(79, DE, DE, A7), V(E2, 5E, 5E, BC), V(1D, 0B, 0B, 16), V(76, DB, DB, AD), V(3B, E0, E0, DB),                \
+        V(56, 32, 32, 64), V(4E, 3A, 3A, 74), V(1E, 0A, 0A, 14), V(DB, 49, 49, 92), V(0A, 06, 06, 0C),                \
+        V(6C, 24, 24, 48), V(E4, 5C, 5C, B8), V(5D, C2, C2, 9F), V(6E, D3, D3, BD), V(EF, AC, AC, 43),                \
+        V(A6, 62, 62, C4), V(A8, 91, 91, 39), V(A4, 95, 95, 31), V(37, E4, E4, D3), V(8B, 79, 79, F2),                \
+        V(32, E7, E7, D5), V(43, C8, C8, 8B), V(59, 37, 37, 6E), V(B7, 6D, 6D, DA), V(8C, 8D, 8D, 01),                \
+        V(64, D5, D5, B1), V(D2, 4E, 4E, 9C), V(E0, A9, A9, 49), V(B4, 6C, 6C, D8), V(FA, 56, 56, AC),                \
+        V(07, F4, F4, F3), V(25, EA, EA, CF), V(AF, 65, 65, CA), V(8E, 7A, 7A, F4), V(E9, AE, AE, 47),                \
+        V(18, 08, 08, 10), V(D5, BA, BA, 6F), V(88, 78, 78, F0), V(6F, 25, 25, 4A), V(72, 2E, 2E, 5C),                \
+        V(24, 1C, 1C, 38), V(F1, A6, A6, 57), V(C7, B4, B4, 73), V(51, C6, C6, 97), V(23, E8, E8, CB),                \
+        V(7C, DD, DD, A1), V(9C, 74, 74, E8), V(21, 1F, 1F, 3E), V(DD, 4B, 4B, 96), V(DC, BD, BD, 61),                \
+        V(86, 8B, 8B, 0D), V(85, 8A, 8A, 0F), V(90, 70, 70, E0), V(42, 3E, 3E, 7C), V(C4, B5, B5, 71),                \
+        V(AA, 66, 66, CC), V(D8, 48, 48, 90), V(05, 03, 03, 06), V(01, F6, F6, F7), V(12, 0E, 0E, 1C),                \
+        V(A3, 61, 61, C2), V(5F, 35, 35, 6A), V(F9, 57, 57, AE), V(D0, B9, B9, 69), V(91, 86, 86, 17),                \
+        V(58, C1, C1, 99), V(27, 1D, 1D, 3A), V(B9, 9E, 9E, 27), V(38, E1, E1, D9), V(13, F8, F8, EB),                \
+        V(B3, 98, 98, 2B), V(33, 11, 11, 22), V(BB, 69, 69, D2), V(70, D9, D9, A9), V(89, 8E, 8E, 07),                \
+        V(A7, 94, 94, 33), V(B6, 9B, 9B, 2D), V(22, 1E, 1E, 3C), V(92, 87, 87, 15), V(20, E9, E9, C9),                \
+        V(49, CE, CE, 87), V(FF, 55, 55, AA), V(78, 28, 28, 50), V(7A, DF, DF, A5), V(8F, 8C, 8C, 03),                \
+        V(F8, A1, A1, 59), V(80, 89, 89, 09), V(17, 0D, 0D, 1A), V(DA, BF, BF, 65), V(31, E6, E6, D7),                \
+        V(C6, 42, 42, 84), V(B8, 68, 68, D0), V(C3, 41, 41, 82), V(B0, 99, 99, 29), V(77, 2D, 2D, 5A),                \
+        V(11, 0F, 0F, 1E), V(CB, B0, B0, 7B), V(FC, 54, 54, A8), V(D6, BB, BB, 6D), V(3A, 16, 16, 2C)
 
-#define ISoft(a, b, c, d) 0x##a##b##c##d##u
+#define V(a, b, c, d) 0x##a##b##c##d##u
 static const uint32 FT0[256] = {FT};
-#undef ISoft
+#undef V
 
-#if !defined(CRYPTO_AES_FEWER_TABLES)
+#if !defined(MBEDTLS_AES_FEWER_TABLES)
 
-#define ISoft(a, b, c, d) 0x##b##c##d##a##u
+#define V(a, b, c, d) 0x##b##c##d##a##u
 static const uint32 FT1[256] = {FT};
-#undef ISoft
+#undef V
 
-#define ISoft(a, b, c, d) 0x##c##d##a##b##u
+#define V(a, b, c, d) 0x##c##d##a##b##u
 static const uint32 FT2[256] = {FT};
-#undef ISoft
+#undef V
 
-#define ISoft(a, b, c, d) 0x##d##a##b##c##u
+#define V(a, b, c, d) 0x##d##a##b##c##u
 static const uint32 FT3[256] = {FT};
-#undef ISoft
+#undef V
 
-#endif /* !CRYPTO_AES_FEWER_TABLES */
+#endif /* !MBEDTLS_AES_FEWER_TABLES */
 
 #undef FT
 
@@ -200,92 +156,79 @@ static const uint8 RSb[256] = {
 /*
  * Reverse tables
  */
-#define RT                                                                                                             \
-                                                                                                                       \
-    ISoft(50, A7, F4, 51), ISoft(53, 65, 41, 7E), ISoft(C3, A4, 17, 1A), ISoft(96, 5E, 27, 3A), ISoft(CB, 6B, AB, 3B), \
-        ISoft(F1, 45, 9D, 1F), ISoft(AB, 58, FA, AC), ISoft(93, 03, E3, 4B), ISoft(55, FA, 30, 20),                    \
-        ISoft(F6, 6D, 76, AD), ISoft(91, 76, CC, 88), ISoft(25, 4C, 02, F5), ISoft(FC, D7, E5, 4F),                    \
-        ISoft(D7, CB, 2A, C5), ISoft(80, 44, 35, 26), ISoft(8F, A3, 62, B5), ISoft(49, 5A, B1, DE),                    \
-        ISoft(67, 1B, BA, 25), ISoft(98, 0E, EA, 45), ISoft(E1, C0, FE, 5D), ISoft(02, 75, 2F, C3),                    \
-        ISoft(12, F0, 4C, 81), ISoft(A3, 97, 46, 8D), ISoft(C6, F9, D3, 6B), ISoft(E7, 5F, 8F, 03),                    \
-        ISoft(95, 9C, 92, 15), ISoft(EB, 7A, 6D, BF), ISoft(DA, 59, 52, 95), ISoft(2D, 83, BE, D4),                    \
-        ISoft(D3, 21, 74, 58), ISoft(29, 69, E0, 49), ISoft(44, C8, C9, 8E), ISoft(6A, 89, C2, 75),                    \
-        ISoft(78, 79, 8E, F4), ISoft(6B, 3E, 58, 99), ISoft(DD, 71, B9, 27), ISoft(B6, 4F, E1, BE),                    \
-        ISoft(17, AD, 88, F0), ISoft(66, AC, 20, C9), ISoft(B4, 3A, CE, 7D), ISoft(18, 4A, DF, 63),                    \
-        ISoft(82, 31, 1A, E5), ISoft(60, 33, 51, 97), ISoft(45, 7F, 53, 62), ISoft(E0, 77, 64, B1),                    \
-        ISoft(84, AE, 6B, BB), ISoft(1C, A0, 81, FE), ISoft(94, 2B, 08, F9), ISoft(58, 68, 48, 70),                    \
-        ISoft(19, FD, 45, 8F), ISoft(87, 6C, DE, 94), ISoft(B7, F8, 7B, 52), ISoft(23, D3, 73, AB),                    \
-        ISoft(E2, 02, 4B, 72), ISoft(57, 8F, 1F, E3), ISoft(2A, AB, 55, 66), ISoft(07, 28, EB, B2),                    \
-        ISoft(03, C2, B5, 2F), ISoft(9A, 7B, C5, 86), ISoft(A5, 08, 37, D3), ISoft(F2, 87, 28, 30),                    \
-        ISoft(B2, A5, BF, 23), ISoft(BA, 6A, 03, 02), ISoft(5C, 82, 16, ED), ISoft(2B, 1C, CF, 8A),                    \
-        ISoft(92, B4, 79, A7), ISoft(F0, F2, 07, F3), ISoft(A1, E2, 69, 4E), ISoft(CD, F4, DA, 65),                    \
-        ISoft(D5, BE, 05, 06), ISoft(1F, 62, 34, D1), ISoft(8A, FE, A6, C4), ISoft(9D, 53, 2E, 34),                    \
-        ISoft(A0, 55, F3, A2), ISoft(32, E1, 8A, 05), ISoft(75, EB, F6, A4), ISoft(39, EC, 83, 0B),                    \
-        ISoft(AA, EF, 60, 40), ISoft(06, 9F, 71, 5E), ISoft(51, 10, 6E, BD), ISoft(F9, 8A, 21, 3E),                    \
-        ISoft(3D, 06, DD, 96), ISoft(AE, 05, 3E, DD), ISoft(46, BD, E6, 4D), ISoft(B5, 8D, 54, 91),                    \
-        ISoft(05, 5D, C4, 71), ISoft(6F, D4, 06, 04), ISoft(FF, 15, 50, 60), ISoft(24, FB, 98, 19),                    \
-        ISoft(97, E9, BD, D6), ISoft(CC, 43, 40, 89), ISoft(77, 9E, D9, 67), ISoft(BD, 42, E8, B0),                    \
-        ISoft(88, 8B, 89, 07), ISoft(38, 5B, 19, E7), ISoft(DB, EE, C8, 79), ISoft(47, 0A, 7C, A1),                    \
-        ISoft(E9, 0F, 42, 7C), ISoft(C9, 1E, 84, F8), ISoft(00, 00, 00, 00), ISoft(83, 86, 80, 09),                    \
-        ISoft(48, ED, 2B, 32), ISoft(AC, 70, 11, 1E), ISoft(4E, 72, 5A, 6C), ISoft(FB, FF, 0E, FD),                    \
-        ISoft(56, 38, 85, 0F), ISoft(1E, D5, AE, 3D), ISoft(27, 39, 2D, 36), ISoft(64, D9, 0F, 0A),                    \
-        ISoft(21, A6, 5C, 68), ISoft(D1, 54, 5B, 9B), ISoft(3A, 2E, 36, 24), ISoft(B1, 67, 0A, 0C),                    \
-        ISoft(0F, E7, 57, 93), ISoft(D2, 96, EE, B4), ISoft(9E, 91, 9B, 1B), ISoft(4F, C5, C0, 80),                    \
-        ISoft(A2, 20, DC, 61), ISoft(69, 4B, 77, 5A), ISoft(16, 1A, 12, 1C), ISoft(0A, BA, 93, E2),                    \
-        ISoft(E5, 2A, A0, C0), ISoft(43, E0, 22, 3C), ISoft(1D, 17, 1B, 12), ISoft(0B, 0D, 09, 0E),                    \
-        ISoft(AD, C7, 8B, F2), ISoft(B9, A8, B6, 2D), ISoft(C8, A9, 1E, 14), ISoft(85, 19, F1, 57),                    \
-        ISoft(4C, 07, 75, AF), ISoft(BB, DD, 99, EE), ISoft(FD, 60, 7F, A3), ISoft(9F, 26, 01, F7),                    \
-        ISoft(BC, F5, 72, 5C), ISoft(C5, 3B, 66, 44), ISoft(34, 7E, FB, 5B), ISoft(76, 29, 43, 8B),                    \
-        ISoft(DC, C6, 23, CB), ISoft(68, FC, ED, B6), ISoft(63, F1, E4, B8), ISoft(CA, DC, 31, D7),                    \
-        ISoft(10, 85, 63, 42), ISoft(40, 22, 97, 13), ISoft(20, 11, C6, 84), ISoft(7D, 24, 4A, 85),                    \
-        ISoft(F8, 3D, BB, D2), ISoft(11, 32, F9, AE), ISoft(6D, A1, 29, C7), ISoft(4B, 2F, 9E, 1D),                    \
-        ISoft(F3, 30, B2, DC), ISoft(EC, 52, 86, 0D), ISoft(D0, E3, C1, 77), ISoft(6C, 16, B3, 2B),                    \
-        ISoft(99, B9, 70, A9), ISoft(FA, 48, 94, 11), ISoft(22, 64, E9, 47), ISoft(C4, 8C, FC, A8),                    \
-        ISoft(1A, 3F, F0, A0), ISoft(D8, 2C, 7D, 56), ISoft(EF, 90, 33, 22), ISoft(C7, 4E, 49, 87),                    \
-        ISoft(C1, D1, 38, D9), ISoft(FE, A2, CA, 8C), ISoft(36, 0B, D4, 98), ISoft(CF, 81, F5, A6),                    \
-        ISoft(28, DE, 7A, A5), ISoft(26, 8E, B7, DA), ISoft(A4, BF, AD, 3F), ISoft(E4, 9D, 3A, 2C),                    \
-        ISoft(0D, 92, 78, 50), ISoft(9B, CC, 5F, 6A), ISoft(62, 46, 7E, 54), ISoft(C2, 13, 8D, F6),                    \
-        ISoft(E8, B8, D8, 90), ISoft(5E, F7, 39, 2E), ISoft(F5, AF, C3, 82), ISoft(BE, 80, 5D, 9F),                    \
-        ISoft(7C, 93, D0, 69), ISoft(A9, 2D, D5, 6F), ISoft(B3, 12, 25, CF), ISoft(3B, 99, AC, C8),                    \
-        ISoft(A7, 7D, 18, 10), ISoft(6E, 63, 9C, E8), ISoft(7B, BB, 3B, DB), ISoft(09, 78, 26, CD),                    \
-        ISoft(F4, 18, 59, 6E), ISoft(01, B7, 9A, EC), ISoft(A8, 9A, 4F, 83), ISoft(65, 6E, 95, E6),                    \
-        ISoft(7E, E6, FF, AA), ISoft(08, CF, BC, 21), ISoft(E6, E8, 15, EF), ISoft(D9, 9B, E7, BA),                    \
-        ISoft(CE, 36, 6F, 4A), ISoft(D4, 09, 9F, EA), ISoft(D6, 7C, B0, 29), ISoft(AF, B2, A4, 31),                    \
-        ISoft(31, 23, 3F, 2A), ISoft(30, 94, A5, C6), ISoft(C0, 66, A2, 35), ISoft(37, BC, 4E, 74),                    \
-        ISoft(A6, CA, 82, FC), ISoft(B0, D0, 90, E0), ISoft(15, D8, A7, 33), ISoft(4A, 98, 04, F1),                    \
-        ISoft(F7, DA, EC, 41), ISoft(0E, 50, CD, 7F), ISoft(2F, F6, 91, 17), ISoft(8D, D6, 4D, 76),                    \
-        ISoft(4D, B0, EF, 43), ISoft(54, 4D, AA, CC), ISoft(DF, 04, 96, E4), ISoft(E3, B5, D1, 9E),                    \
-        ISoft(1B, 88, 6A, 4C), ISoft(B8, 1F, 2C, C1), ISoft(7F, 51, 65, 46), ISoft(04, EA, 5E, 9D),                    \
-        ISoft(5D, 35, 8C, 01), ISoft(73, 74, 87, FA), ISoft(2E, 41, 0B, FB), ISoft(5A, 1D, 67, B3),                    \
-        ISoft(52, D2, DB, 92), ISoft(33, 56, 10, E9), ISoft(13, 47, D6, 6D), ISoft(8C, 61, D7, 9A),                    \
-        ISoft(7A, 0C, A1, 37), ISoft(8E, 14, F8, 59), ISoft(89, 3C, 13, EB), ISoft(EE, 27, A9, CE),                    \
-        ISoft(35, C9, 61, B7), ISoft(ED, E5, 1C, E1), ISoft(3C, B1, 47, 7A), ISoft(59, DF, D2, 9C),                    \
-        ISoft(3F, 73, F2, 55), ISoft(79, CE, 14, 18), ISoft(BF, 37, C7, 73), ISoft(EA, CD, F7, 53),                    \
-        ISoft(5B, AA, FD, 5F), ISoft(14, 6F, 3D, DF), ISoft(86, DB, 44, 78), ISoft(81, F3, AF, CA),                    \
-        ISoft(3E, C4, 68, B9), ISoft(2C, 34, 24, 38), ISoft(5F, 40, A3, C2), ISoft(72, C3, 1D, 16),                    \
-        ISoft(0C, 25, E2, BC), ISoft(8B, 49, 3C, 28), ISoft(41, 95, 0D, FF), ISoft(71, 01, A8, 39),                    \
-        ISoft(DE, B3, 0C, 08), ISoft(9C, E4, B4, D8), ISoft(90, C1, 56, 64), ISoft(61, 84, CB, 7B),                    \
-        ISoft(70, B6, 32, D5), ISoft(74, 5C, 6C, 48), ISoft(42, 57, B8, D0)
+#define RT                                                                                                            \
+                                                                                                                      \
+    V(50, A7, F4, 51), V(53, 65, 41, 7E), V(C3, A4, 17, 1A), V(96, 5E, 27, 3A), V(CB, 6B, AB, 3B), V(F1, 45, 9D, 1F), \
+        V(AB, 58, FA, AC), V(93, 03, E3, 4B), V(55, FA, 30, 20), V(F6, 6D, 76, AD), V(91, 76, CC, 88),                \
+        V(25, 4C, 02, F5), V(FC, D7, E5, 4F), V(D7, CB, 2A, C5), V(80, 44, 35, 26), V(8F, A3, 62, B5),                \
+        V(49, 5A, B1, DE), V(67, 1B, BA, 25), V(98, 0E, EA, 45), V(E1, C0, FE, 5D), V(02, 75, 2F, C3),                \
+        V(12, F0, 4C, 81), V(A3, 97, 46, 8D), V(C6, F9, D3, 6B), V(E7, 5F, 8F, 03), V(95, 9C, 92, 15),                \
+        V(EB, 7A, 6D, BF), V(DA, 59, 52, 95), V(2D, 83, BE, D4), V(D3, 21, 74, 58), V(29, 69, E0, 49),                \
+        V(44, C8, C9, 8E), V(6A, 89, C2, 75), V(78, 79, 8E, F4), V(6B, 3E, 58, 99), V(DD, 71, B9, 27),                \
+        V(B6, 4F, E1, BE), V(17, AD, 88, F0), V(66, AC, 20, C9), V(B4, 3A, CE, 7D), V(18, 4A, DF, 63),                \
+        V(82, 31, 1A, E5), V(60, 33, 51, 97), V(45, 7F, 53, 62), V(E0, 77, 64, B1), V(84, AE, 6B, BB),                \
+        V(1C, A0, 81, FE), V(94, 2B, 08, F9), V(58, 68, 48, 70), V(19, FD, 45, 8F), V(87, 6C, DE, 94),                \
+        V(B7, F8, 7B, 52), V(23, D3, 73, AB), V(E2, 02, 4B, 72), V(57, 8F, 1F, E3), V(2A, AB, 55, 66),                \
+        V(07, 28, EB, B2), V(03, C2, B5, 2F), V(9A, 7B, C5, 86), V(A5, 08, 37, D3), V(F2, 87, 28, 30),                \
+        V(B2, A5, BF, 23), V(BA, 6A, 03, 02), V(5C, 82, 16, ED), V(2B, 1C, CF, 8A), V(92, B4, 79, A7),                \
+        V(F0, F2, 07, F3), V(A1, E2, 69, 4E), V(CD, F4, DA, 65), V(D5, BE, 05, 06), V(1F, 62, 34, D1),                \
+        V(8A, FE, A6, C4), V(9D, 53, 2E, 34), V(A0, 55, F3, A2), V(32, E1, 8A, 05), V(75, EB, F6, A4),                \
+        V(39, EC, 83, 0B), V(AA, EF, 60, 40), V(06, 9F, 71, 5E), V(51, 10, 6E, BD), V(F9, 8A, 21, 3E),                \
+        V(3D, 06, DD, 96), V(AE, 05, 3E, DD), V(46, BD, E6, 4D), V(B5, 8D, 54, 91), V(05, 5D, C4, 71),                \
+        V(6F, D4, 06, 04), V(FF, 15, 50, 60), V(24, FB, 98, 19), V(97, E9, BD, D6), V(CC, 43, 40, 89),                \
+        V(77, 9E, D9, 67), V(BD, 42, E8, B0), V(88, 8B, 89, 07), V(38, 5B, 19, E7), V(DB, EE, C8, 79),                \
+        V(47, 0A, 7C, A1), V(E9, 0F, 42, 7C), V(C9, 1E, 84, F8), V(00, 00, 00, 00), V(83, 86, 80, 09),                \
+        V(48, ED, 2B, 32), V(AC, 70, 11, 1E), V(4E, 72, 5A, 6C), V(FB, FF, 0E, FD), V(56, 38, 85, 0F),                \
+        V(1E, D5, AE, 3D), V(27, 39, 2D, 36), V(64, D9, 0F, 0A), V(21, A6, 5C, 68), V(D1, 54, 5B, 9B),                \
+        V(3A, 2E, 36, 24), V(B1, 67, 0A, 0C), V(0F, E7, 57, 93), V(D2, 96, EE, B4), V(9E, 91, 9B, 1B),                \
+        V(4F, C5, C0, 80), V(A2, 20, DC, 61), V(69, 4B, 77, 5A), V(16, 1A, 12, 1C), V(0A, BA, 93, E2),                \
+        V(E5, 2A, A0, C0), V(43, E0, 22, 3C), V(1D, 17, 1B, 12), V(0B, 0D, 09, 0E), V(AD, C7, 8B, F2),                \
+        V(B9, A8, B6, 2D), V(C8, A9, 1E, 14), V(85, 19, F1, 57), V(4C, 07, 75, AF), V(BB, DD, 99, EE),                \
+        V(FD, 60, 7F, A3), V(9F, 26, 01, F7), V(BC, F5, 72, 5C), V(C5, 3B, 66, 44), V(34, 7E, FB, 5B),                \
+        V(76, 29, 43, 8B), V(DC, C6, 23, CB), V(68, FC, ED, B6), V(63, F1, E4, B8), V(CA, DC, 31, D7),                \
+        V(10, 85, 63, 42), V(40, 22, 97, 13), V(20, 11, C6, 84), V(7D, 24, 4A, 85), V(F8, 3D, BB, D2),                \
+        V(11, 32, F9, AE), V(6D, A1, 29, C7), V(4B, 2F, 9E, 1D), V(F3, 30, B2, DC), V(EC, 52, 86, 0D),                \
+        V(D0, E3, C1, 77), V(6C, 16, B3, 2B), V(99, B9, 70, A9), V(FA, 48, 94, 11), V(22, 64, E9, 47),                \
+        V(C4, 8C, FC, A8), V(1A, 3F, F0, A0), V(D8, 2C, 7D, 56), V(EF, 90, 33, 22), V(C7, 4E, 49, 87),                \
+        V(C1, D1, 38, D9), V(FE, A2, CA, 8C), V(36, 0B, D4, 98), V(CF, 81, F5, A6), V(28, DE, 7A, A5),                \
+        V(26, 8E, B7, DA), V(A4, BF, AD, 3F), V(E4, 9D, 3A, 2C), V(0D, 92, 78, 50), V(9B, CC, 5F, 6A),                \
+        V(62, 46, 7E, 54), V(C2, 13, 8D, F6), V(E8, B8, D8, 90), V(5E, F7, 39, 2E), V(F5, AF, C3, 82),                \
+        V(BE, 80, 5D, 9F), V(7C, 93, D0, 69), V(A9, 2D, D5, 6F), V(B3, 12, 25, CF), V(3B, 99, AC, C8),                \
+        V(A7, 7D, 18, 10), V(6E, 63, 9C, E8), V(7B, BB, 3B, DB), V(09, 78, 26, CD), V(F4, 18, 59, 6E),                \
+        V(01, B7, 9A, EC), V(A8, 9A, 4F, 83), V(65, 6E, 95, E6), V(7E, E6, FF, AA), V(08, CF, BC, 21),                \
+        V(E6, E8, 15, EF), V(D9, 9B, E7, BA), V(CE, 36, 6F, 4A), V(D4, 09, 9F, EA), V(D6, 7C, B0, 29),                \
+        V(AF, B2, A4, 31), V(31, 23, 3F, 2A), V(30, 94, A5, C6), V(C0, 66, A2, 35), V(37, BC, 4E, 74),                \
+        V(A6, CA, 82, FC), V(B0, D0, 90, E0), V(15, D8, A7, 33), V(4A, 98, 04, F1), V(F7, DA, EC, 41),                \
+        V(0E, 50, CD, 7F), V(2F, F6, 91, 17), V(8D, D6, 4D, 76), V(4D, B0, EF, 43), V(54, 4D, AA, CC),                \
+        V(DF, 04, 96, E4), V(E3, B5, D1, 9E), V(1B, 88, 6A, 4C), V(B8, 1F, 2C, C1), V(7F, 51, 65, 46),                \
+        V(04, EA, 5E, 9D), V(5D, 35, 8C, 01), V(73, 74, 87, FA), V(2E, 41, 0B, FB), V(5A, 1D, 67, B3),                \
+        V(52, D2, DB, 92), V(33, 56, 10, E9), V(13, 47, D6, 6D), V(8C, 61, D7, 9A), V(7A, 0C, A1, 37),                \
+        V(8E, 14, F8, 59), V(89, 3C, 13, EB), V(EE, 27, A9, CE), V(35, C9, 61, B7), V(ED, E5, 1C, E1),                \
+        V(3C, B1, 47, 7A), V(59, DF, D2, 9C), V(3F, 73, F2, 55), V(79, CE, 14, 18), V(BF, 37, C7, 73),                \
+        V(EA, CD, F7, 53), V(5B, AA, FD, 5F), V(14, 6F, 3D, DF), V(86, DB, 44, 78), V(81, F3, AF, CA),                \
+        V(3E, C4, 68, B9), V(2C, 34, 24, 38), V(5F, 40, A3, C2), V(72, C3, 1D, 16), V(0C, 25, E2, BC),                \
+        V(8B, 49, 3C, 28), V(41, 95, 0D, FF), V(71, 01, A8, 39), V(DE, B3, 0C, 08), V(9C, E4, B4, D8),                \
+        V(90, C1, 56, 64), V(61, 84, CB, 7B), V(70, B6, 32, D5), V(74, 5C, 6C, 48), V(42, 57, B8, D0)
 
-#define ISoft(a, b, c, d) 0x##a##b##c##d##u
+#define V(a, b, c, d) 0x##a##b##c##du
 static const uint32 RT0[256] = {RT};
-#undef ISoft
+#undef V
 
-#if !defined(CRYPTO_AES_FEWER_TABLES)
+#if !defined(MBEDTLS_AES_FEWER_TABLES)
 
-#define ISoft(a, b, c, d) 0x##b##c##d##a##u
+#define V(a, b, c, d) 0x##b##c##d##au
 static const uint32 RT1[256] = {RT};
-#undef ISoft
+#undef V
 
-#define ISoft(a, b, c, d) 0x##c##d##a##b##u
+#define V(a, b, c, d) 0x##c##d##a##bu
 static const uint32 RT2[256] = {RT};
-#undef ISoft
+#undef V
 
-#define ISoft(a, b, c, d) 0x##d##a##b##c##u
+#define V(a, b, c, d) 0x##d##a##b##cu
 static const uint32 RT3[256] = {RT};
-#undef ISoft
+#undef V
 
-#endif /* !CRYPTO_AES_FEWER_TABLES */
+#endif /* !MBEDTLS_AES_FEWER_TABLES */
 
 #undef RT
 
@@ -314,19 +257,12 @@ static const uint32 RCON[10] = {
 #define AES_FT2(idx) FT2[idx]
 #define AES_FT3(idx) FT3[idx]
 
-/******************************************************************************/
 /*
- * Brief               Generate round keys for encryption.
- *
- * Param-Name[in]      key: The original key for encryption.
- *                     keybits: The length of input key in bit.
- * Param-Name[in/out]  ctx: The context of AES.
- * Param-Name[out]     None
- * Return              Std_ReturnType
+ * AES key schedule(encryption)
  */
-/******************************************************************************/
-FUNC(Std_ReturnType, CRY_CODE)
-Crypto_aes_setkey_enc(Crypto_AESData* ctx, P2VAR(uint8, AUTOMATIC, CRY_APPL_DATA) key, uint16 keybits)
+
+FUNC(Std_ReturnType, CRYPTO_CODE)
+Crypto_aes_setkey_enc(Crypto_AESData* ctx, P2VAR(uint8, AUTOMATIC, CRYPTO_APPL_DATA) key, uint16 keybits)
 {
     uint16 i;
     uint32* RK;
@@ -334,16 +270,15 @@ Crypto_aes_setkey_enc(Crypto_AESData* ctx, P2VAR(uint8, AUTOMATIC, CRY_APPL_DATA
     switch (keybits)
     {
     case 128:
-        ctx->nr = 10u;
+        ctx->nr = 10;
         break;
     case 192:
-        ctx->nr = 12u;
+        ctx->nr = 12;
         break;
     case 256:
-        ctx->nr = 14u;
+        ctx->nr = 14;
         break;
     default:
-        ret = E_NOT_OK;
         break;
     }
 
@@ -408,28 +343,20 @@ Crypto_aes_setkey_enc(Crypto_AESData* ctx, P2VAR(uint8, AUTOMATIC, CRY_APPL_DATA
     return ret;
 }
 
-/******************************************************************************/
 /*
- * Brief               Generate round keys for encryption.
- *
- * Param-Name[in]      key: The original key for encryption.
- *                     keybits: The length of input key in bit.
- * Param-Name[in/out]  ctx: The context of AES.
- * Param-Name[out]     None
- * Return              Std_ReturnType
+ * AES key schedule(decryption)
  */
-/******************************************************************************/
 
-FUNC(Std_ReturnType, CRY_CODE)
-Crypto_aes_setkey_dec(Crypto_AESData* ctx, P2VAR(uint8, AUTOMATIC, CRY_APPL_DATA) key, uint16 keybits)
+FUNC(Std_ReturnType, CRYPTO_CODE)
+Crypto_aes_setkey_dec(Crypto_AESData* ctx, P2VAR(uint8, AUTOMATIC, CRYPTO_APPL_DATA) key, uint16 keybits)
 {
     int i, j;
     Crypto_AESData cty;
     uint32* RK;
     uint32* SK;
     Std_ReturnType ret;
-    (void)ILib_memset(&cty, 0u, sizeof(Crypto_AESData));
-    (void)ILib_memset(&cty, 0u, sizeof(Crypto_AESData));
+    Crypto_memset(&cty, sizeof(Crypto_AESData));
+    Crypto_memset(&cty, sizeof(Crypto_AESData));
     ctx->rk = RK = ctx->buf;
 
     /* Also checks keybits */
@@ -492,22 +419,11 @@ Crypto_aes_setkey_dec(Crypto_AESData* ctx, P2VAR(uint8, AUTOMATIC, CRY_APPL_DATA
                ^ AES_RT3(((Y0) >> 24) & 0xFF);                                                             \
     } while (0)
 
-/******************************************************************************/
 /*
- * Brief               Inner AES encryption on a 128 bits block, so you do not
- *                     need to care about the group mode.
- *
- * Param-Name[in]      ctx: The context of AES.
- *                     input: Buffer filled with 128 bits plaintext.
- * Param-Name[in/out]  None
- * Param-Name[out]     output: Buffer filled with ciphertext corresponded with
- *                             the input.
- * Return              Std_ReturnType:  E_OK: State accepted
- *                                      E_NOT_OK: State not accepted
+ * AES-ECB block encryption
  */
-/******************************************************************************/
 
-FUNC(Std_ReturnType, CRY_CODE) internal_aes_encrypt(Crypto_AESData* ctx, const uint8 input[16], uint8 output[16])
+FUNC(Std_ReturnType, CRYPTO_CODE) internal_aes_encrypt(Crypto_AESData* ctx, const uint8 input[16], uint8 output[16])
 {
     int i;
     Std_ReturnType ret = E_OK;
@@ -550,37 +466,25 @@ FUNC(Std_ReturnType, CRY_CODE) internal_aes_encrypt(Crypto_AESData* ctx, const u
     PUT_UINT32_LE(X2, output, 8);
     PUT_UINT32_LE(X3, output, 12);
 
-    (void)ILib_memset(&X0, 0u, sizeof(X0));
-    (void)ILib_memset(&X1, 0u, sizeof(X1));
-    (void)ILib_memset(&X2, 0u, sizeof(X2));
-    (void)ILib_memset(&X3, 0u, sizeof(X3));
+    Crypto_memset(&X0, sizeof(X0));
+    Crypto_memset(&X1, sizeof(X1));
+    Crypto_memset(&X2, sizeof(X2));
+    Crypto_memset(&X3, sizeof(X3));
 
-    (void)ILib_memset(&Y0, 0u, sizeof(Y0));
-    (void)ILib_memset(&Y1, 0u, sizeof(Y1));
-    (void)ILib_memset(&Y2, 0u, sizeof(Y2));
-    (void)ILib_memset(&Y3, 0u, sizeof(Y3));
+    Crypto_memset(&Y0, sizeof(Y0));
+    Crypto_memset(&Y1, sizeof(Y1));
+    Crypto_memset(&Y2, sizeof(Y2));
+    Crypto_memset(&Y3, sizeof(Y3));
 
-    (void)ILib_memset(&RK, 0u, sizeof(RK));
+    Crypto_memset(&RK, sizeof(RK));
 
     return ret;
 }
 /*
-/******************************************************************************/
-/*
- * Brief               Inner AES decryption on a 128 bits block, so you do not
- *                     need to care about the group mode.
- *
- * Param-Name[in]      ctx: The context of AES.
- *                     input: Buffer filled with 128 bits ciphertext.
- * Param-Name[in/out]  None
- * Param-Name[out]     output: Buffer filled with plaintext corresponded with
- *                             the input.
- * Return              Std_ReturnType:  E_OK: State accepted
- *                                      E_NOT_OK: State not accepted
+ * AES-ECB block decryption
  */
-/******************************************************************************/
 
-FUNC(Std_ReturnType, CRY_CODE) internal_aes_decrypt(Crypto_AESData* ctx, const uint8 input[16], uint8 output[16])
+FUNC(Std_ReturnType, CRYPTO_CODE) internal_aes_decrypt(Crypto_AESData* ctx, const uint8 input[16], uint8 output[16])
 {
     int i;
     Std_ReturnType ret = E_OK;
@@ -622,17 +526,17 @@ FUNC(Std_ReturnType, CRY_CODE) internal_aes_decrypt(Crypto_AESData* ctx, const u
     PUT_UINT32_LE(X2, output, 8);
     PUT_UINT32_LE(X3, output, 12);
 
-    (void)ILib_memset(&X0, 0u, sizeof(X0));
-    (void)ILib_memset(&X1, 0u, sizeof(X1));
-    (void)ILib_memset(&X2, 0u, sizeof(X2));
-    (void)ILib_memset(&X3, 0u, sizeof(X3));
+    Crypto_memset(&X0, sizeof(X0));
+    Crypto_memset(&X1, sizeof(X1));
+    Crypto_memset(&X2, sizeof(X2));
+    Crypto_memset(&X3, sizeof(X3));
 
-    (void)ILib_memset(&Y0, 0u, sizeof(Y0));
-    (void)ILib_memset(&Y1, 0u, sizeof(Y1));
-    (void)ILib_memset(&Y2, 0u, sizeof(Y2));
-    (void)ILib_memset(&Y3, 0u, sizeof(Y3));
+    Crypto_memset(&Y0, sizeof(Y0));
+    Crypto_memset(&Y1, sizeof(Y1));
+    Crypto_memset(&Y2, sizeof(Y2));
+    Crypto_memset(&Y3, sizeof(Y3));
 
-    (void)ILib_memset(&RK, 0u, sizeof(RK));
+    Crypto_memset(&RK, sizeof(RK));
 
     return ret;
 }
@@ -640,7 +544,7 @@ FUNC(Std_ReturnType, CRY_CODE) internal_aes_decrypt(Crypto_AESData* ctx, const u
 /*
  * AES-ECB block encryption/decryption
  */
-FUNC(Std_ReturnType, CRY_CODE)
+FUNC(Std_ReturnType, CRYPTO_CODE)
 Crypto_aes_crypt_ecb(Crypto_AESData* ctx, uint8 mode, const uint8 input[16], uint8 output[16])
 {
     if (mode == AES_ENCRYPT)
@@ -649,34 +553,17 @@ Crypto_aes_crypt_ecb(Crypto_AESData* ctx, uint8 mode, const uint8 input[16], uin
         return (internal_aes_decrypt(ctx, input, output));
 }
 
-/******************************************************************************/
 /*
- * Brief               This function is used to perform AES with CBC group mode
- *                     on input.
- *
- * Param-Name[in]      ctx: The context of AES.
- *                     mode: The AES operation: CRYPTO_MODE_DECRYPT or
- *                           CRYPTO_MODE_ENCRYPT.
- *                     length: The length of input, calculated in byte.
- *                     iv: The Initialization vector. It must be a readable and
- *                         writeable buffer of 16 Bytes.
- *                     input: The plaintext needed to be encrypted, or the ciphertext
- *                            needed to be decrypted, depending on the mode.
- * Param-Name[in/out]  None
- * Param-Name[out]     output: The ciphertext or the plaintext corresponded with
- *                             input.
- * Return              Std_ReturnType:  E_OK: State accepted
- *                                      E_NOT_OK: State not accepted
+ * AES-CBC buffer encryption/decryption
  */
-/******************************************************************************/
-FUNC(Std_ReturnType, CRY_CODE)
+FUNC(Std_ReturnType, CRYPTO_CODE)
 Crypto_aes_crypt_cbc(
     Crypto_AESData* ctx,
     uint8 mode,
     uint8 length,
     uint8 iv[16],
-    P2VAR(uint8, AUTOMATIC, CRY_APPL_DATA) input,
-    P2VAR(uint8, AUTOMATIC, CRY_APPL_DATA) output)
+    P2VAR(uint8, AUTOMATIC, CRYPTO_APPL_DATA) input,
+    P2VAR(uint8, AUTOMATIC, CRYPTO_APPL_DATA) output)
 {
     int i;
     uint8 temp[16];
@@ -686,15 +573,13 @@ Crypto_aes_crypt_cbc(
     {
         while (length > 0)
         {
-            (void)ILib_memcpy(temp, input, 16);
+            Crypto_memcpy(temp, input, 16);
             ret = internal_aes_decrypt(ctx, input, output); /* PRQA S 2784 */ /* MISRA Rule 17.5 */
 
             for (i = 0; i < 16; i++)
-            {
                 output[i] = (uint8)(input[i] ^ iv[i]);
-            }
 
-            (void)ILib_memcpy(iv, temp, 16);
+            Crypto_memcpy(iv, temp, 16);
 
             input += 16;
             output += 16;
@@ -706,13 +591,11 @@ Crypto_aes_crypt_cbc(
         while (length > 0)
         {
             for (i = 0; i < 16; i++)
-            {
                 output[i] = (uint8)(input[i] ^ iv[i]);
-            }
 
             ret = internal_aes_encrypt(ctx, output, output); /* PRQA S 2784 */ /* MISRA Rule 17.5 */
 
-            (void)ILib_memcpy(iv, output, 16);
+            Crypto_memcpy(iv, output, 16);
 
             input += 16;
             output += 16;
@@ -721,44 +604,32 @@ Crypto_aes_crypt_cbc(
     }
     return ret;
 }
-/******************************************************************************/
-/*
- * Brief               This function is used to perform AES on input, as a part
- *                     of CMAC calculation.
- *
- * Param-Name[in]      ctx: The context of AES.
- *                     mode: The AES operation: CRYPTO_MODE_DECRYPT or
- *                           CRYPTO_MODE_ENCRYPT.
- *                     length: The length of input, calculated in byte.
- *                     input: The message needs to be encrypted or decrypted.
- * Param-Name[in/out]  None
- * Param-Name[out]     output: The cipheretxt or plaintext corresponded with input.
- * Return              Std_ReturnType:  E_OK: State accepted
- *                                      E_NOT_OK: State not accepted
- */
-/******************************************************************************/
-FUNC(Std_ReturnType, CRY_CODE)
+
+FUNC(Std_ReturnType, CRYPTO_CODE)
 Crypto_aes_crypt_cbc_CMAC(
     Crypto_AESData* ctx,
     uint8 mode,
     uint8 length,
     uint8 iv[16],
-    P2VAR(uint8, AUTOMATIC, CRY_APPL_DATA) input,
-    P2VAR(uint8, AUTOMATIC, CRY_APPL_DATA) output)
+    P2VAR(uint8, AUTOMATIC, CRYPTO_APPL_DATA) input,
+    P2VAR(uint8, AUTOMATIC, CRYPTO_APPL_DATA) output)
 {
     int i;
     uint8 temp[16];
     Std_ReturnType ret = E_NOT_OK;
+
     if (mode == AES_DECRYPT)
     {
         while (length > 0)
         {
-            (void)ILib_memcpy(temp, input, 16);
+            Crypto_memcpy(temp, input, 16);
             ret = internal_aes_decrypt(ctx, input, output); /* PRQA S 2784 */ /* MISRA Rule 17.5 */
+
             for (i = 0; i < 16; i++)
-            {
                 output[i] = input[i]; //^ iv[i]);
-            }
+
+            // Crypto_memcpy(iv, temp, 16);
+
             input += 16;
             output += 16;
             length = (length >= 16) ? (length - 16) : 0;
@@ -769,10 +640,12 @@ Crypto_aes_crypt_cbc_CMAC(
         while (length > 0)
         {
             for (i = 0; i < 16; i++)
-            {
                 output[i] = input[i]; //^ iv[i]);
-            }
+
             ret = internal_aes_encrypt(ctx, output, output); /* PRQA S 2784 */ /* MISRA Rule 17.5 */
+
+            // Crypto_memcpy(iv, output, 16);
+
             input += 16;
             output += 16;
             length = (length >= 16) ? (length - 16) : 0;
@@ -780,64 +653,59 @@ Crypto_aes_crypt_cbc_CMAC(
     }
     return ret;
 }
+
 /*
  * Checkup routine
  */
 
-FUNC(Std_ReturnType, CRY_CODE) Crypto_AESEncryptECB(P2VAR(uint8, AUTOMATIC, CRY_APPL_DATA) key, uint8 buf[64])
+FUNC(Std_ReturnType, CRYPTO_CODE) Crypto_AESEncryptECB(P2VAR(uint8, AUTOMATIC, CRYPTO_APPL_DATA) key, uint8 buf[64])
 {
     Crypto_AESData ctx;
     Std_ReturnType ret;
-    (void)ILib_memset(&ctx, 0u, sizeof(Crypto_AESData));
+    Crypto_memset(&ctx, sizeof(Crypto_AESData));
     ret = Crypto_aes_setkey_enc(&ctx, key, 128);
-    if (E_OK == ret)
-    {
-        ret = internal_aes_encrypt(&ctx, buf, buf);
-    }
+
+    ret = internal_aes_encrypt(&ctx, buf, buf);
     return ret;
 }
 
-FUNC(Std_ReturnType, CRY_CODE) Crypto_AESDecryptECB(P2VAR(uint8, AUTOMATIC, CRY_APPL_DATA) key, uint8 buf[64])
+FUNC(Std_ReturnType, CRYPTO_CODE) Crypto_AESDecryptECB(P2VAR(uint8, AUTOMATIC, CRYPTO_APPL_DATA) key, uint8 buf[64])
 {
     Crypto_AESData ctx;
     Std_ReturnType ret;
-    (void)ILib_memset(&ctx, 0u, sizeof(Crypto_AESData));
+    Crypto_memset(&ctx, sizeof(Crypto_AESData));
 
     ret = Crypto_aes_setkey_dec(&ctx, key, 128);
-    if (E_OK == ret)
-    {
-        ret = internal_aes_decrypt(&ctx, buf, buf);
-    }
+
+    ret = internal_aes_decrypt(&ctx, buf, buf);
     return ret;
 }
 
-FUNC(Std_ReturnType, CRY_CODE)
-Crypto_AESEncryptCBC(P2VAR(uint8, AUTOMATIC, CRY_APPL_DATA) key, uint8 buf[64], uint8 iv[16], uint8 inputlength)
+FUNC(Std_ReturnType, CRYPTO_CODE)
+Crypto_AESEncryptCBC(P2VAR(uint8, AUTOMATIC, CRYPTO_APPL_DATA) key, uint8 buf[64], uint8 iv[16], uint8 inputlength)
 {
     Crypto_AESData ctx;
     Std_ReturnType ret;
     uint8 prv[16];
     uint8 tmp[16];
-    (void)ILib_memset(&ctx, 0u, sizeof(Crypto_AESData));
-    (void)ILib_memset(prv, 0u, 16);
-    (void)ILib_memset(tmp, 0u, 16);
+    Crypto_memset(&ctx, sizeof(Crypto_AESData));
+    Crypto_memset(prv, 16);
+    Crypto_memset(tmp, 16);
 
     ret = Crypto_aes_setkey_enc(&ctx, key, 128);
-    if (E_OK == ret)
-    {
-        ret = Crypto_aes_crypt_cbc(&ctx, AES_ENCRYPT, inputlength, iv, buf, buf);
-    }
+
+    ret = Crypto_aes_crypt_cbc(&ctx, AES_ENCRYPT, inputlength, iv, buf, buf);
     return ret;
 }
 
-FUNC(Std_ReturnType, CRY_CODE)
-Crypto_AESDecryptCBC(P2VAR(uint8, AUTOMATIC, CRY_APPL_DATA) key, uint8 buf[64], uint8 iv[16], uint8 inputlength)
+FUNC(Std_ReturnType, CRYPTO_CODE)
+Crypto_AESDecryptCBC(P2VAR(uint8, AUTOMATIC, CRYPTO_APPL_DATA) key, uint8 buf[64], uint8 iv[16], uint8 inputlength)
 {
     Crypto_AESData ctx;
     Std_ReturnType ret;
     uint8 prv[16];
-    (void)ILib_memset(&ctx, 0u, sizeof(Crypto_AESData));
-    (void)ILib_memset(prv, 0u, 16);
+    Crypto_memset(&ctx, sizeof(Crypto_AESData));
+    Crypto_memset(prv, 16);
 
     ret = Crypto_aes_setkey_dec(&ctx, key, 128);
     if (E_OK == ret)
@@ -848,21 +716,18 @@ Crypto_AESDecryptCBC(P2VAR(uint8, AUTOMATIC, CRY_APPL_DATA) key, uint8 buf[64], 
     return ret;
 }
 
-FUNC(Std_ReturnType, CRY_CODE)
-Crypto_AESEncryptCTR(P2VAR(uint8, AUTOMATIC, CRY_APPL_DATA) key, uint8 buf[64], uint8 iv[16])
+FUNC(Std_ReturnType, CRYPTO_CODE)
+Crypto_AESEncryptCTR(P2VAR(uint8, AUTOMATIC, CRYPTO_APPL_DATA) key, uint8 buf[64], uint8 iv[16])
 {
 
     Crypto_AESData ctx;
     Std_ReturnType ret;
     uint8 j;
-    (void)ILib_memset(&ctx, 0u, sizeof(Crypto_AESData));
+    Crypto_memset(&ctx, sizeof(Crypto_AESData));
 
     ret = Crypto_aes_setkey_dec(&ctx, key, 128);
 
-    if (E_OK == ret)
-    {
-        ret = internal_aes_encrypt(&ctx, iv, iv);
-    }
+    ret = internal_aes_encrypt(&ctx, iv, iv);
 
     for (j = 0; j < 16; j++)
     {
@@ -872,21 +737,19 @@ Crypto_AESEncryptCTR(P2VAR(uint8, AUTOMATIC, CRY_APPL_DATA) key, uint8 buf[64], 
     return ret;
 }
 
-FUNC(Std_ReturnType, CRY_CODE)
-Crypto_AESDecryptCTR(P2VAR(uint8, AUTOMATIC, CRY_APPL_DATA) key, uint8 buf[64], uint8 iv[16])
+FUNC(Std_ReturnType, CRYPTO_CODE)
+Crypto_AESDecryptCTR(P2VAR(uint8, AUTOMATIC, CRYPTO_APPL_DATA) key, uint8 buf[64], uint8 iv[16])
 {
 
     Crypto_AESData ctx;
     Std_ReturnType ret;
     uint8 j;
-    (void)ILib_memset(&ctx, 0u, sizeof(Crypto_AESData));
+    Crypto_memset(&ctx, sizeof(Crypto_AESData));
 
     ret = Crypto_aes_setkey_dec(&ctx, key, 128);
 
-    if (E_OK == ret)
-    {
-        ret = internal_aes_encrypt(&ctx, iv, iv);
-    }
+    ret = internal_aes_encrypt(&ctx, iv, iv);
+
     for (j = 0; j < 16; j++)
     {
         buf[j] = buf[j] ^ iv[j];

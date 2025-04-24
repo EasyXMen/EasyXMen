@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Xcp_Internal.c                                              **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : qinchun.yang                                                **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Internal Implementation for XCP                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Xcp_Internal.c                                              **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : qinchun.yang                                                **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Internal Implementation for XCP                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 #ifndef XCP_INTERNAL_H_
 #define XCP_INTERNAL_H_
 
@@ -40,7 +41,6 @@
 #if (XCP_PL_PGM == (XCP_PL_PGM & XCP_RESOURCE))
 #include XCP_FLS_HEADER
 #endif
-
 #if (XCP_ON_CAN_ENABLE == STD_ON)
 #include "CanIf.h"
 #include "XcpOnCan_Cbk.h"
@@ -263,11 +263,11 @@
 #define XCP_PROGRAM_DATA_OFFSET 0x04u
 #endif
 #if (XCP_ADDR_GRANULARITY != XCP_AG_DWORD)
-#define XCP_PROGRAM_SIZE ((XCP_MAX_CTO_PGM - 2u) / XCP_AG) /* (XCP_MAX_CTO_PGM - 2u)/XCP_AG */
+#define XCP_PROGRAM_SIZE ((XCP_MAX_CTO_PGM - 2u) / XCP_AG)
 #else
-#define XCP_PROGRAM_SIZE ((XCP_MAX_CTO_PGM / XCP_AG) - 0x01u) /* (XCP_MAX_CTO_PGM/XCP_AG) - 0x01u */
+#define XCP_PROGRAM_SIZE ((XCP_MAX_CTO_PGM / XCP_AG) - 0x01u)
 #endif
-#define XCP_PROGRAM_NEXT_SIZE   (XCP_PROGRAM_SIZE * XCP_MAX_BS_PGM) /* XCP_PROGRAM_SIZE*XCP_MAX_BS_PGM */
+#define XCP_PROGRAM_NEXT_SIZE   (XCP_PROGRAM_SIZE * XCP_MAX_BS_PGM)
 #define XCP_PROGRAM_MAX_SIZE    ((XCP_MAX_CTO_PGM / XCP_AG) - 0x01u)
 
 #define XCP_DOWNLOAD_LEN_OFFSET 0x01u
@@ -277,17 +277,17 @@
 #define XCP_DOWNLOAD_DATA_OFFSET 0X04u
 #endif
 
-#define XCP_DOWNLOADMAX_SIZE    ((XCP_MAX_CTO / XCP_AG) - 0x01u) /* (XCP_MAX_CTO/XCP_AG) - 0x01u */
+#define XCP_DOWNLOADMAX_SIZE    ((XCP_MAX_CTO / XCP_AG) - 0x01u)
 #define XCP_SHORT_DOWNLOAD_SIZE ((XCP_MAX_CTO - 8u) / XCP_AG)
 
 #if (XCP_ADDR_GRANULARITY != XCP_AG_DWORD)
-#define XCP_DOWNLOAD_SIZE ((XCP_MAX_CTO - 2u) / XCP_AG) /* (XCP_MAX_CTO - 2u)/XCP_AG */
+#define XCP_DOWNLOAD_SIZE ((XCP_MAX_CTO - 2u) / XCP_AG)
 #else
-#define XCP_DOWNLOAD_SIZE ((XCP_MAX_CTO / XCP_AG) - 0x01u) /* (XCP_MAX_CTO/XCP_AG) - 0x01u */
+#define XCP_DOWNLOAD_SIZE ((XCP_MAX_CTO / XCP_AG) - 0x01u)
 #endif
-#define XCP_DOWNLOAD_NEXT_SIZE (XCP_DOWNLOAD_SIZE * XCP_MAX_BS) /* XCP_DOWNLOAD_SIZE*XCP_MAX_BS */
+#define XCP_DOWNLOAD_NEXT_SIZE (XCP_DOWNLOAD_SIZE * XCP_MAX_BS)
 #define XCP_DOWNLOAD_MAX_SIZE  ((XCP_MAX_CTO / XCP_AG) - 0x01u)
-#define XCP_UPLOAD_SIZE        ((XCP_MAX_CTO / XCP_AG) - 0x01u) /* (XCP_MAX_CTO / XCP_AG) - 0x01u */
+#define XCP_UPLOAD_SIZE        ((XCP_MAX_CTO / XCP_AG) - 0x01u)
 /*=======[T Y P E   D E F I N I T I O N S]====================================*/
 #if (XCP_PL_DAQ == (XCP_PL_DAQ & XCP_RESOURCE))
 typedef struct
@@ -324,8 +324,8 @@ typedef struct
     uint32 bufferSize;
     uint32 bufferPos;
 } Xcp_DynamicalDaqQueueType;
-#endif /* XCP_DAQ_DYNAMIC == XCP_DAQ_CONFIG_TYPE */
-#endif /* XCP_PL_DAQ EQL XCP_PL_DAQ&XCP_RESOURCE */
+#endif /*XCP_DAQ_DYNAMIC == XCP_DAQ_CONFIG_TYPE*/
+#endif /*XCP_PL_DAQ == XCP_PL_DAQ&XCP_RESOURCE*/
 typedef enum
 {
     XCP_MEM_CAL_RAM = 0u,
@@ -357,7 +357,7 @@ typedef struct
     uint8 posHead;
     uint8 posRear;
 } Xcp_InterlevModeCtrlType;
-#endif /* XCP_INTERLEAVED_MODE == STD_ON */
+#endif /*XCP_INTERLEAVED_MODE == STD_ON*/
 
 /*=======[E X T E R N A L   D A T A]==========================================*/
 extern VAR(uint16, XCP_VAR) Xcp_EthRxCounter;
@@ -368,14 +368,20 @@ extern VAR(uint16, XCP_VAR) Xcp_EthTxCounter;
  * */
 #if (XCP_MASTER_BLOCK_MODE == STD_ON)
 extern VAR(Xcp_AGType, XCP_VAR) Xcp_BlockBuffer[XCP_BLOCK_BUFFER_SIZE];
-#endif /* XCP_MASTER_BLOCK_MODE == STD_ON */
+#endif /*XCP_MASTER_BLOCK_MODE == STD_ON*/
 
 #if ((XCP_MASTER_BLOCK_MODE == STD_ON) || (XCP_SLAVE_BLOCK_MODE == STD_ON)) /* Var for Block transfer */
 extern VAR(Xcp_BlockBufIndxType, XCP_VAR) Xcp_BlockBufferPos;
 extern VAR(Xcp_BlockBufIndxType, XCP_VAR) Xcp_BlockBufferLen;
-#endif /* XCP_MASTER_BLOCK_MODE == STD_ON)||(XCP_SLAVE_BLOCK_MODE == STD_ON */
+#endif /*XCP_MASTER_BLOCK_MODE == STD_ON || XCP_SLAVE_BLOCK_MODE == STD_ON*/
 
 extern VAR(uint16, XCP_VAR) Xcp_SessionCfgId;
+
+#if (XCP_TIMESTAMP_TYPE != XCP_TS_NO_TS)
+
+extern uint32 Xcp_ReadOutMS(void);
+
+#endif /*XCP_TIMESTAMP_TYPE != XCP_TS_NO_TS*/
 
 extern VAR(uint8, XCP_VAR_NO_INIT_8) Xcp_CmdBuffer[XCP_MAX_CTO];
 extern VAR(uint8, XCP_VAR_NO_INIT_8) Xcp_RespBuffer[XCP_MAX_CTO];
@@ -394,6 +400,12 @@ extern VAR(uint8, XCP_VAR) Xcp_TransferTimeOutCnt;
 
 extern VAR(Xcp_StatusType, XCP_VAR_INIT_UNSPECIFIED) Xcp_Status;
 extern VAR(Xcp_CommandStatusType, XCP_VAR_INIT_UNSPECIFIED) Xcp_CommandStatus;
+
+#if (XCP_TIMESTAMP_TYPE != XCP_TS_NO_TS)
+
+extern uint32 Xcp_ReadOutMS(void);
+
+#endif /*XCP_TIMESTAMP_TYPE != XCP_TS_NO_TS*/
 
 #if (XCP_SET_MTA == STD_ON)
 extern VAR(Xcp_AddressType, XCP_VAR_INIT_UNSPECIFIED) Xcp_MTA;
@@ -418,7 +430,7 @@ extern VAR(Xcp_DaqType, XCP_VAR) Xcp_Daq[XCP_MAX_DAQ];
 extern VAR(uint32, XCP_VAR) Xcp_RxTimeStamp;
 #endif /* XCP_GET_DAQ_CLOCK == STD_ON */
 
-#endif /* XCP_PL_DAQ EQL XCP_PL_DAQ & XCP_RESOURCE */
+#endif /*XCP_PL_DAQ == XCP_PL_DAQ & XCP_RESOURCE*/
 
 #if ((XCP_GET_ID == STD_ON) || (XCP_GET_DAQ_EVENT_INFO == STD_ON) || (XCP_GET_SECTOR_INFO == STD_ON))
 extern VAR(uint32, XCP_VAR) Xcp_UploadInfoLen;
@@ -441,25 +453,19 @@ extern VAR(uint8, XCP_VAR) Xcp_ActivPagNum[XCP_MAX_SEGMENT];
  * */
 #if (XCP_PL_PGM == (XCP_PL_PGM & XCP_RESOURCE))
 extern VAR(Xcp_PgmStautsType, XCP_VAR) Xcp_PgmStauts;
-#endif /* XCP_PL_PGM EQL XCP_PL_PGM&XCP_RESOURCE */
+#endif /*XCP_PL_PGM == XCP_PL_PGM&XCP_RESOURCE*/
 
 /*=======[E X T E R N A L   F U N C T I O N   D E C L A R A T I O N S]========*/
 
 /*Check the validity of the address range*/
 XCP_LOCAL_INLINE FUNC(boolean, XCP_CODE) Xcp_CheckMemVaild(uint32 addr, uint32 size, uint32 start, uint32 end)
 {
-    return (addr >= start) && (addr <= end) && (size <= (end - addr + 1u));
+    return ((addr >= start) && (addr <= end) && (size <= (end - addr + 1u)));
 }
 
 /*
  * common services
  */
-
-#if (XCP_TIMESTAMP_TYPE != XCP_TS_NO_TS)
-
-extern uint32 Xcp_ReadOutMS(void);
-
-#endif /*XCP_TIMESTAMP_TYPE != XCP_TS_NO_TS*/
 
 extern FUNC(void, XCP_CODE) Xcp_CommandInit(void);
 extern FUNC(void, XCP_CODE) Xcp_ClearStatus(void);
@@ -608,7 +614,7 @@ extern FUNC(void, XCP_CODE) Xcp_FreeDaq(void);
 extern FUNC(void, XCP_CODE) Xcp_AllocDaq(void);
 extern FUNC(void, XCP_CODE) Xcp_AllocOdt(void);
 extern FUNC(void, XCP_CODE) Xcp_AllocOdtEntry(void);
-#endif /* XCP_DAQ_CONFIG_TYPE == XCP_DAQ_STATIC */
+#endif /*XCP_DAQ_CONFIG_TYPE == XCP_DAQ_STATIC*/
 
 /*
  * DAQ optional
@@ -631,7 +637,7 @@ extern FUNC(void, XCP_CODE) Xcp_GetDaqEventInfo(void);
 #if (XCP_READ_DAQ == STD_ON)
 extern FUNC(void, XCP_CODE) Xcp_ReadDaq(void);
 #endif
-#endif /* XCP_PL_DAQ EQL XCP_PL_DAQ & XCP_RESOURCE */
+#endif /*XCP_PL_DAQ == XCP_PL_DAQ & XCP_RESOURCE*/
 
 /*
  * PGM
@@ -674,5 +680,5 @@ extern FUNC(void, XCP_CODE) Xcp_ProgramVerify(void);
 /*
  * End of PGM
  */
-#endif /* XCP_PL_PGM EQL XCP_PL_PGM & XCP_RESOURCE */
+#endif /*XCP_PL_PGM == XCP_PL_PGM & XCP_RESOURCE*/
 #endif /* XCP_INTERNAL_H_ */

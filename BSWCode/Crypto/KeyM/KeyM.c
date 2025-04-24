@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : KeyM.c                                                      **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : qinchun.yang                                                **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Implement KeyM general functions                            **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R21-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : KeyM.c                                                      **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : qinchun.yang                                                **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Implement KeyM general functions                            **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R21-11                      **
+**                                                                            **
+*******************************************************************************/
 
 /******************************************************************************
 **                      Revision Control History                             **
@@ -54,7 +55,10 @@
  *  V2.1.5     2023-09-05     jie.gu         CPT-6810,modify data element judge condition
  *  V2.1.6     2023-11-20     jie.gu         CPD-33582 add nvmblock length check，fix return value check
  *  V2.1.7     2024-01-31     jie.gu         CPD-33716 update code for misra c rules check
- *  V2.1.8     2024-06-21     jie.gu         Add const memory section
+ *  V2.1.8     2024-05-27     jie.gu         CPD-33710 add exclusive areas for keym
+ *  V2.1.9     2024-06-21     jie.gu         Add const memory section
+ *  V2.1.10    2024-08-20     jie.gu         Clear Compile warning
+ *  V2.1.11    2024-11-23     jian.jiang     modify for QAC MISRAC Test
  */
 
 /**
@@ -73,6 +77,9 @@
 
    \li PRQA S 3432 MISRA Dir 4.1 .<br>
    Reason:Loop can be executed more than once in actual projects
+
+   \li PRQA S 3673 MISRA Rule 8.13 .<br>
+   Reason: Parameters not used because configuration is not turned on
 */
 
 /*=======[V E R S I O N  I N F O R M A T I O N]===============================*/
@@ -81,7 +88,7 @@
 #define KEYM_C_AR_PATCH_VERSION 0u
 #define KEYM_C_SW_MAJOR_VERSION 2u
 #define KEYM_C_SW_MINOR_VERSION 1u
-#define KEYM_C_SW_PATCH_VERSION 8u
+#define KEYM_C_SW_PATCH_VERSION 11u
 /*******************************************************************************
 **                      Include Section                                       **
 *******************************************************************************/

@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Com_Internal.c                                              **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : zhengfei.li                                                 **
- **  Vendor      :                                                             **
- **  DESCRIPTION : COM internal API definitions                                **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                       **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Com_Internal.c                                              **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : zhengfei.li                                                 **
+**  Vendor      :                                                             **
+**  DESCRIPTION : COM internal API definitions                                **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                       **
+**                                                                            **
+*******************************************************************************/
 
 /*******************************************************************************
 **                      Includes                                              **
@@ -79,7 +80,6 @@ VAR(boolean, COM_VAR) Com_MaskNewDifferMaskOldTimeOut[COM_RXMASKNEWDIFFERMASKOLD
 #define COM_STOP_SEC_VAR_NO_INIT_BOOLEAN
 #include "Com_MemMap.h"
 #endif
-
 /*******************************************************************************
 **                      Private Function Declarations                         **
 *******************************************************************************/
@@ -200,8 +200,8 @@ Com_TxSignalGroupTriggerFlagInit(void)
 FUNC(void, COM_CODE)
 Com_InitSignalBuffer(Com_SignalType SignalType, uint16 SignalInitValueId, uint16 SignalLength)
 {
-    SchM_Enter_Com_Context(); /* PRQA S 3469 */ /* MISRA Rule Dir 4.9 */
-    /* PRQA S 3315 ++ */                        /* MISRA Rule 16.6 */
+    SchM_Enter_Com_Context();
+    /* PRQA S 3315 ++ */ /* MISRA Rule 16.6 */
     switch (SignalType)
     {
 /*According to the signal type,
@@ -248,8 +248,8 @@ Com_InitSignalBuffer(Com_SignalType SignalType, uint16 SignalInitValueId, uint16
         /*do nothing*/
         break;
     }
-    SchM_Exit_Com_Context(); /* PRQA S 3469 */ /* MISRA Rule Dir 4.9 */
-    /* PRQA S 3315 -- */                       /* MISRA Rule 16.6 */
+    SchM_Exit_Com_Context();
+    /* PRQA S 3315 -- */ /* MISRA Rule 16.6 */
     COM_NOUSED(SignalInitValueId);
     COM_NOUSED(SignalLength);
 }
@@ -291,9 +291,8 @@ Com_SignalUnPackHandle(
     const Com_TxGroupSignalType* txGroupSignalPtr;
 #endif
     uint64 signalValue = 0u;
-    uint8* bufPtr = (uint8*)&signalValue;
-    uint16 destStartIdx;
     uint16 srcStartIdx;
+    uint16 destStartIdx = 0u;
     Com_SignalPositionType sigLsbBytePos;
     uint8 lsbPosInByte;
     uint8 signalByteLength;
@@ -354,34 +353,47 @@ Com_SignalUnPackHandle(
     if (isTrue)
     {
 
-        uint8 signalByteLen = (signalByteLength > 8u) ? 8u : signalByteLength;
-
-#if (CPU_BYTE_ORDER == LOW_BYTE_FIRST) /* Little endian byte order */
-        destStartIdx = 0u;
-#else
-        destStartIdx = 8u - signalByteLen;
-#endif /* CPU_BYTE_ORDER == LOW_BYTE_FIRST */
+        uint8 tSignalByteLength = (signalByteLength > 8u) ? 8u : signalByteLength;
+#if (TRUE == CPU_32_WITH_16_ADR)
+        uint8 bufPtr[8u] = {0u};
+#elif (FALSE == CPU_32_WITH_16_ADR)
+        uint8* bufPtr = (uint8*)&signalValue;
+#if (CPU_BYTE_ORDER == HIGH_BYTE_FIRST)
+        destStartIdx = (uint16)(8u - tSignalByteLength);
+#endif
+#endif
         srcStartIdx = (COM_BIG_ENDIAN == signalEndianness)
-                          ? ((uint16)sigLsbBytePos - (uint16)signalByteLen + (uint16)1u)
+                          ? ((uint16)sigLsbBytePos - (uint16)tSignalByteLength + (uint16)1u)
                           : (uint16)sigLsbBytePos;
 
-        /* PRQA S 3469 ++ */ /* MISRA Rule Dir 4.9 */
         SchM_Enter_Com_Context();
-        (void)ILib_memcpy(&bufPtr[destStartIdx], &IPduBufferPtr[srcStartIdx], signalByteLen);
+        (void)ILib_memcpy(&bufPtr[destStartIdx], &IPduBufferPtr[srcStartIdx], tSignalByteLength);
         SchM_Exit_Com_Context();
-        /* PRQA S 3469 -- */ /* MISRA Rule Dir 4.9 */
 
+#if (TRUE == CPU_32_WITH_16_ADR)
+        if (COM_BIG_ENDIAN == signalEndianness)
+        {
+            Com_EndianSwap(&bufPtr[destStartIdx], tSignalByteLength);
+        }
+        for (uint8 i = ((uint16)tSignalByteLength - 1u); i > 0u; --i)
+        {
+            signalValue |= (uint64)bufPtr[i];
+            signalValue = signalValue << 8u;
+        }
+        signalValue |= (uint64)(bufPtr[0u]);
+#elif (FALSE == CPU_32_WITH_16_ADR)
 #if (CPU_BYTE_ORDER == LOW_BYTE_FIRST) /* Little endian byte order */
         if (COM_BIG_ENDIAN == signalEndianness)
         {
-            Com_EndianSwap(&bufPtr[destStartIdx], signalByteLen);
+            Com_EndianSwap(&bufPtr[destStartIdx], tSignalByteLength);
         }
 #else
-        if (COM_LITTLE_ENDIAN == SignalEndianness)
+        if (COM_LITTLE_ENDIAN == signalEndianness)
         {
-            Com_EndianSwap(&bufPtr[destStartIdx], signalByteLen);
+            Com_EndianSwap(&bufPtr[destStartIdx], tSignalByteLength);
         }
 #endif /* CPU_BYTE_ORDER == LOW_BYTE_FIRST */
+#endif
 
         signalValue = (signalValue >> lsbPosInByte) & (COM_UNUSED_UINT64 >> (64u - bitSize));
 
@@ -390,12 +402,10 @@ Com_SignalUnPackHandle(
         {
             /* Handle MSB byte, MSB Byte is byte 0(BigEndian) or byte 8(LittleEndian) */
             uint8 msbByteBitSize = (uint8)(lsbPosInByte + (bitSize & 0x07u));
-            /* PRQA S 3469 ++ */ /* MISRA Rule Dir 4.9 */
             SchM_Enter_Com_Context();
             uint64 msbByteValue =
                 (COM_BIG_ENDIAN == signalEndianness) ? IPduBufferPtr[sigLsbBytePos - 8u] : IPduBufferPtr[sigLsbBytePos];
             SchM_Exit_Com_Context();
-            /* PRQA S 3469 -- */ /* MISRA Rule Dir 4.9 */
             msbByteValue &= ((uint64)COM_UNUSED_UINT8 >> (8u - msbByteBitSize));
             signalValue |= (msbByteValue << (bitSize - msbByteBitSize));
         }
@@ -447,13 +457,12 @@ Com_TxSignalPackHandle(
 #if (0u < COM_GW_DESTINATION_DESCRIPTION_NUMBER)
     const Com_GwDestSignalType* gwDestSignalPtr;
 #endif
-    uint64 msbByteValue = TxValue;
+    uint8 msbByteValue;
     Com_SignalPositionType sigLsbBytePos;
+    uint16 srcStartIdx = 0u;
     uint16 destStartIdx;
-    uint16 srcStartIdx;
     uint8 lsbPosInByte;
     uint64 signalValue;
-    uint8* bufPtr;
     uint8 msbByteBitSize;
     uint8 msbByteHighBitMask;
     uint8 signalByteLength;
@@ -504,60 +513,74 @@ Com_TxSignalPackHandle(
     if (isTrue)
     {
         signalValue = TxValue << lsbPosInByte;
-        bufPtr = (uint8*)&signalValue;
+#if (TRUE == CPU_32_WITH_16_ADR)
+        uint8 bufPtr[8u] = {0u};
+        for (uint8 i = 0u; i < tSignalByteLength; ++i)
+        {
+            bufPtr[i] = (uint8)(signalValue & COM_UNUSED_UINT8);
+            signalValue = signalValue >> 8u;
+        }
+#elif (FALSE == CPU_32_WITH_16_ADR)
+        uint8* bufPtr = (uint8*)&signalValue;
+#endif
         uint16 sigMsbBytePosBE = 1u + (uint16)sigLsbBytePos - (uint16)signalByteLength;
         uint16 sigMsbBytePosOt = (uint16)sigLsbBytePos + (uint16)signalByteLength - 1u;
         uint16 sigMsbBytePos = (COM_BIG_ENDIAN == signalEndianness) ? sigMsbBytePosBE : sigMsbBytePosOt;
-        /* PRQA S 3469 ++ */ /* MISRA Rule Dir 4.9 */
-        SchM_Enter_Com_Context();
-        /* LSB Byte */
+        uint8 tSignalByteLength = (signalByteLength < 9u) ? signalByteLength : 8u;
+
+/* LSB Byte */
+#if (CPU_BYTE_ORDER == LOW_BYTE_FIRST) /* Little endian byte order */
         bufPtr[0u] |= (IPduBufferPtr[sigLsbBytePos] & (COM_UNUSED_UINT8 >> (8u - lsbPosInByte)));
-        SchM_Exit_Com_Context();
+#else
+        bufPtr[7u] |= (IPduBufferPtr[sigLsbBytePos] & (COM_UNUSED_UINT8 >> (8u - lsbPosInByte)));
+#endif /* CPU_BYTE_ORDER == LOW_BYTE_FIRST */
         /* MSB Byte*/
-        msbByteBitSize = (uint8)(lsbPosInByte + (bitSize & 0x07u));
+        msbByteBitSize = (uint8)((lsbPosInByte + bitSize) & 0x07u);
         if (0u != msbByteBitSize)
         {
             msbByteHighBitMask = (uint8)(COM_UNUSED_UINT8 << msbByteBitSize);
             /* SignalByteLength range 1..9 */
             if (signalByteLength < 9u)
             {
-                SchM_Enter_Com_Context();
+#if (CPU_BYTE_ORDER == LOW_BYTE_FIRST) /* Little endian byte order */
                 bufPtr[signalByteLength - 1u] |= (IPduBufferPtr[sigMsbBytePos] & msbByteHighBitMask);
-                SchM_Exit_Com_Context();
+#else
+                bufPtr[8 - signalByteLength] |= (IPduBufferPtr[sigMsbBytePos] & msbByteHighBitMask);
+#endif
             }
             else
             {
-                msbByteValue = msbByteValue >> (bitSize - msbByteBitSize);
-                SchM_Enter_Com_Context();
+                msbByteValue = (uint8)(TxValue >> (bitSize - msbByteBitSize));
                 IPduBufferPtr[sigMsbBytePos] =
                     (IPduBufferPtr[sigMsbBytePos] & msbByteHighBitMask) | (uint8)msbByteValue;
-                SchM_Exit_Com_Context();
             }
         }
-        /* PRQA S 3469 -- */ /* MISRA Rule Dir 4.9 */
-
-        uint8 SignalByteLen = (signalByteLength > 8u) ? 8u : signalByteLength;
-#if (CPU_BYTE_ORDER == LOW_BYTE_FIRST) /* Little endian byte order */
-        srcStartIdx = 0u;
+#if (TRUE == CPU_32_WITH_16_ADR)
         if (COM_BIG_ENDIAN == signalEndianness)
         {
-            Com_EndianSwap(&bufPtr[srcStartIdx], SignalByteLen);
+            Com_EndianSwap(&bufPtr[srcStartIdx], tSignalByteLength);
+        }
+#elif (FALSE == CPU_32_WITH_16_ADR)
+#if (CPU_BYTE_ORDER == LOW_BYTE_FIRST) /* Little endian byte order */
+        if (COM_BIG_ENDIAN == signalEndianness)
+        {
+            Com_EndianSwap(&bufPtr[srcStartIdx], tSignalByteLength);
         }
 #else
-        srcStartIdx = 8u - SignalByteLen;
+        srcStartIdx = 8u - tSignalByteLength;
         if (COM_LITTLE_ENDIAN == signalEndianness)
         {
-            Com_EndianSwap(&bufPtr[srcStartIdx], SignalByteLen);
+            Com_EndianSwap(&bufPtr[srcStartIdx], tSignalByteLength);
         }
 #endif /* CPU_BYTE_ORDER == LOW_BYTE_FIRST */
+#endif
         destStartIdx = (COM_BIG_ENDIAN == signalEndianness)
-                           ? ((uint16)1u + (uint16)sigLsbBytePos - (uint16)SignalByteLen)
+                           ? ((uint16)1u + (uint16)sigLsbBytePos - (uint16)tSignalByteLength)
                            : (uint16)sigLsbBytePos;
-        /* PRQA S 3469 ++ */ /* MISRA Rule Dir 4.9 */
+
         SchM_Enter_Com_Context();
-        (void)ILib_memcpy(&IPduBufferPtr[destStartIdx], &bufPtr[srcStartIdx], SignalByteLen);
+        (void)ILib_memcpy(&IPduBufferPtr[destStartIdx], &bufPtr[srcStartIdx], tSignalByteLength);
         SchM_Exit_Com_Context();
-        /* PRQA S 3469 -- */ /* MISRA Rule Dir 4.9 */
     }
 #endif
 }
@@ -638,6 +661,117 @@ Com_NewIsWInWOtFilterCalculate(
     }
 
     return Within == IsWith;
+}
+#endif
+
+#if (0u < COM_TMCTXSIGNAL_NUMBER)
+/******************************************************************************/
+/*
+ * Brief               Called by Com_GwNotArraySignal.
+ *                     calculate dest signal/group signal/description signal TMC
+ * ServiceId
+ * Sync/Async          Synchronous
+ * Reentrancy          Non Reentrant
+ * Param-Name[in]      SignalType,ComFilter,NewSignalValue,OldSignalValue
+ * Param-Name[out]     None
+ * Param-Name[in/out]  None
+ * Return              boolean
+ */
+/******************************************************************************/
+FUNC(boolean, COM_CODE)
+Com_DestSignalTMCCalculate(
+    Com_SignalType SignalType,
+    Com_FilterAlgorithmType FilterType,
+    Com_SignalIdType ComFilterIndex,
+#if (COM_TXMASKNEWDIFFERMASKOLD_NUMBER > 0u)
+    uint64 OldSignalValue,
+#endif
+    uint64 NewSignalValue)
+{
+    boolean ret = FALSE;
+#if (COM_TXMASKNEWEQUALSX_NUMBER > 0u) || (COM_TXMASKNEWDIFFERX_NUMBER > 0u) || (COM_TXMASKNEWDIFFERMASKOLD_NUMBER > 0u)
+    Com_FilterMaskType ComFilterMask;
+    Com_FilterXType ComFilterX;
+#endif
+#if (COM_TXNEWISWITHIN_NUMBER > 0u) || (COM_TXNEWISOUTSIDE_NUMBER > 0u)
+    Com_FilterMaxType ComFilterMax;
+    Com_FilterMinType ComFilterMin;
+#endif
+#if (COM_ONEEVERYNFILTERSIGNAL_NUMBER > 0u)
+    Com_SignalIdType ComFilterOffset;
+    Com_SignalIdType ComFilterPeriod;
+#endif
+
+    switch (FilterType)
+    {
+    case COM_ALWAYS:
+        ret = TRUE;
+        break;
+#if (COM_TXMASKNEWEQUALSX_NUMBER > 0u)
+    case COM_MASKED_NEW_EQUALS_X:
+        ComFilterMask = Com_TxMaskedNewEqualsX[ComFilterIndex].ComFilterMask;
+        ComFilterX = Com_TxMaskedNewEqualsX[ComFilterIndex].ComFilterX;
+        if ((NewSignalValue & ComFilterMask) == ComFilterX)
+        {
+            ret = TRUE;
+        }
+        break;
+#endif
+#if (COM_TXMASKNEWDIFFERX_NUMBER > 0u)
+    case COM_MASKED_NEW_DIFFERS_X:
+        ComFilterMask = Com_TxMaskedNewDiffersX[ComFilterIndex].ComFilterMask;
+        ComFilterX = Com_TxMaskedNewDiffersX[ComFilterIndex].ComFilterX;
+        if ((NewSignalValue & ComFilterMask) != ComFilterX)
+        {
+            ret = TRUE;
+        }
+        break;
+#endif
+        /*COM_BOOLEAN not support WITHIN and WITHOUT*/
+#if (COM_TXNEWISWITHIN_NUMBER > 0u)
+    case COM_NEW_IS_WITHIN:
+        ComFilterMax = Com_TxNewIsWithin[ComFilterIndex].ComFilterMax;
+        ComFilterMin = Com_TxNewIsWithin[ComFilterIndex].ComFilterMin;
+        ret = Com_NewIsWInWOtFilterCalculate(SignalType, NewSignalValue, ComFilterMax, ComFilterMin, TRUE);
+        break;
+#endif
+        /*COM_BOOLEAN not support WITHIN and WITHOUT*/
+#if (COM_TXNEWISOUTSIDE_NUMBER > 0u)
+    case COM_NEW_IS_OUTSIDE:
+        ComFilterMax = Com_TxNewIsOutside[ComFilterIndex].ComFilterMax;
+        ComFilterMin = Com_TxNewIsOutside[ComFilterIndex].ComFilterMin;
+        ret = Com_NewIsWInWOtFilterCalculate(SignalType, NewSignalValue, ComFilterMax, ComFilterMin, FALSE);
+        break;
+#endif
+#if (COM_ONEEVERYNFILTERSIGNAL_NUMBER > 0u)
+    case COM_ONE_EVERY_N:
+        ComFilterOffset = Com_FilterOneEveryN[ComFilterIndex].ComFilterOffset;
+        ComFilterPeriod = Com_FilterOneEveryN[ComFilterIndex].ComFilterPeriod;
+        if (ComFilterPeriod == Com_OneEveryNcnt[ComFilterIndex])
+        {
+            Com_OneEveryNcnt[ComFilterIndex] = 0u;
+        }
+        if (ComFilterOffset == Com_OneEveryNcnt[ComFilterIndex])
+        {
+            ret = TRUE;
+        }
+        Com_OneEveryNcnt[ComFilterIndex]++;
+        break;
+#endif
+#if (COM_TXMASKNEWDIFFERMASKOLD_NUMBER > 0u)
+    case COM_MASKED_NEW_DIFFERS_MASKED_OLD:
+        ComFilterMask = Com_TxMaskedNewDiffersMaskedOld[ComFilterIndex];
+        if ((NewSignalValue & ComFilterMask) != (OldSignalValue & ComFilterMask))
+        {
+            ret = TRUE;
+        }
+        break;
+#endif
+    default:
+        /*do nothing*/
+        break;
+    }
+    return ret;
 }
 #endif
 
@@ -1048,8 +1182,8 @@ Com_SubstituteSignalBuffer(
     uint16 SignalLength,
     uint16 SignalSubstituteValueId)
 {
-    SchM_Enter_Com_Context(); /* PRQA S 3469 */ /* MISRA Rule Dir 4.9 */
-    /* PRQA S 3315 ++ */                        /* MISRA Rule 16.6 */
+    SchM_Enter_Com_Context();
+    /* PRQA S 3315 ++ */ /* MISRA Rule 16.6 */
     switch (SignalType)
     {
 /*According to the signal type,
@@ -1096,14 +1230,15 @@ Com_SubstituteSignalBuffer(
         /*do nothing*/
         break;
     }
-    /* PRQA S 3315 -- */                       /* MISRA Rule 16.6 */
-    SchM_Exit_Com_Context(); /* PRQA S 3469 */ /* MISRA Rule Dir 4.9 */
+    /* PRQA S 3315 -- */ /* MISRA Rule 16.6 */
+    SchM_Exit_Com_Context();
     COM_NOUSED(SignalType);
     COM_NOUSED(SignalInitValueId);
     COM_NOUSED(SignalLength);
     COM_NOUSED(SignalSubstituteValueId);
 }
-#endif
+#endif /* STD_ON == COM_RX_SIGNAL_TIMEOUT_ACTION_SUBSTITUTE_ENABLE \
+    || STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ACTION_SUBSTITUTE_ENABLE */
 
 #define COM_STOP_SEC_CODE
 #include "Com_MemMap.h"

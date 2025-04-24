@@ -18,31 +18,34 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : EthSM.c                                                     **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : HuRongbo                                                    **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : EthSM.c                                                     **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : HuRongbo                                                    **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 /*******************************************************************************
 **                      Revision Control History                              **
 *******************************************************************************/
-/* <VERSION> <DATE>   <AUTHOR>       <REVISION LOG>
- * V2.0.0    20200527 HuRongbo       Initial version
- * V2.0.1    20210513 HuRongbo       Bug fix
- * V2.0.2    20220711 HuRongbo       QAC check issue fix
- * V2.0.3    20220921 HuRongbo
+/* <VERSION>   <DATE>     <AUTHOR>       <REVISION LOG>
+ * V2.0.0      20200527   HuRongbo       Initial version
+ * V2.0.1      20210513   HuRongbo       Bug fix
+ * V2.0.2      20220711   HuRongbo       QAC check issue fix
+ * V2.0.3      20220921   HuRongbo
  *   1> Add check if module initialized in EthSM_MainFunction()
- * V2.0.4    20231123 xiaojian.liang Performance optimization
- * V2.0.5    20240227 QAC_PH_2024 check.
+ * V2.0.4      20231123 xiaojian.liang Performance optimization
+ * V2.0.5      20240229 shengnan.sun   QAC_PH_2024 check.
+ *                                   EthSM is UNINIT,NetworkHandle is NULL_PTR.
+ * V2.0.6      20240309   SunShengnan    Support multiple partition feature.
  */
 
 /**
@@ -65,7 +68,7 @@
 #define ETHSM_C_AR_PATCH_VERSION 0
 #define ETHSM_C_SW_MAJOR_VERSION 2
 #define ETHSM_C_SW_MINOR_VERSION 0
-#define ETHSM_C_SW_PATCH_VERSION 5
+#define ETHSM_C_SW_PATCH_VERSION 6
 
 /*******************************************************************************
 **                      Include Section                                       **
@@ -75,6 +78,11 @@
 /*If it hasnot the Runtime det error*/
 #if (STD_ON == ETHSM_DEV_ERROR_DETECT)
 #include "Det.h"
+/* Multiple partition check. */
+#include "Os.h"
+#if (STD_ON == ETHSM_MULTIPLE_PARTITION_USED)
+#include "ComM.h"
+#endif
 #endif /* STD_ON == ETHSM_DEV_ERROR_DETECT */
 #if (STD_ON == ETHSM_DEM_SUPPORT)
 #include "Dem.h"
@@ -228,7 +236,7 @@ static VAR(EthSM_StateType, ETHSM_VAR_POWER_ON_INIT) EthSM_Status = ETHSM_UNINIT
 FUNC(void, ETHSM_CODE) EthSM_Init(void) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
 {
     uint8 ch;
-
+    SchM_Enter_EthSM_Context();
     /* Initialize run time structure variable for every network */
     for (ch = 0u; ch < ETHSM_CHANNEL_NUM; ch++) /* PRQA S 2877 */ /* MISRA Dir 4.1 */
     {
@@ -247,8 +255,8 @@ FUNC(void, ETHSM_CODE) EthSM_Init(void) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
 
     /* Initialize config data pointer*/
     EthSM_ConfigPtr = &EthSM_Config;
-
     EthSM_Status = ETHSM_INIT;
+    SchM_Exit_EthSM_Context();
 }
 
 /******************************************************************************/
@@ -307,6 +315,10 @@ EthSM_RequestComMode(NetworkHandleType NetworkHandle, ComM_ModeType ComM_Mode) /
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == ETHSM_DEV_ERROR_DETECT)
+    /* Multiple partition check. */
+#if (STD_ON == ETHSM_MULTIPLE_PARTITION_USED)
+    ApplicationType applicationID = GetApplicationID();
+#endif
     if (ETHSM_UNINITED == EthSM_Status)
     {
         /* @req SWS_EthSM_00054 */
@@ -335,22 +347,32 @@ EthSM_RequestComMode(NetworkHandleType NetworkHandle, ComM_ModeType ComM_Mode) /
                 ETHSM_E_INVALID_NETWORK_HANDLE);
         }
         else
+#if (STD_ON == ETHSM_MULTIPLE_PARTITION_USED)
+            /* Multiple partition check. */
+            if (applicationID != ComM_GetChannelApplicationID(NetworkHandle))
+            {
+                (void)Det_ReportError(ETHSM_MODULE_ID, ETHSM_INSTANCE_ID, ETHSM_SID_REQUESTCOMMODE, ETHSM_E_PARTITION);
+            }
+            else
+#endif
 #endif /* STD_ON == ETHSM_DEV_ERROR_DETECT */
-        {
+            {
 /* @req ECUC_EthSM_00079 */
 #if (STD_OFF == ETHSM_DUMMY_MODE)
-            /* @req SWS_EthSM_00053 */
-            /*Store the communication mode for the network handle except SilentCom*/
-            if (COMM_SILENT_COMMUNICATION != ComM_Mode)
-            {
-                EthSM_RTData[ch].requestComMode = ComM_Mode;
-            }
+                /* @req SWS_EthSM_00053 */
+                /*Store the communication mode for the network handle except SilentCom*/
+                if (COMM_SILENT_COMMUNICATION != ComM_Mode)
+                {
+                    SchM_Enter_EthSM_Context();
+                    EthSM_RTData[ch].requestComMode = ComM_Mode;
+                    SchM_Exit_EthSM_Context();
+                }
 #endif /* STD_OFF == ETHSM_DUMMY_MODE */
-            /* @req SWS_EthSM_00051,SWS_EthSM_00199 */
-            ret = E_OK;
-        }
-    }
 
+                /* @req SWS_EthSM_00051,SWS_EthSM_00199 */
+                ret = E_OK;
+            }
+    }
     return ret;
 }
 
@@ -388,6 +410,10 @@ EthSM_GetCurrentComMode(NetworkHandleType NetworkHandle, ComM_ModeType* ComM_Mod
     {
         NetworkHandleType ch = EthSM_GetChannelByNetworkHandle(NetworkHandle);
 #if (STD_ON == ETHSM_DEV_ERROR_DETECT)
+/* Multiple partition check. */
+#if (STD_ON == ETHSM_MULTIPLE_PARTITION_USED)
+        ApplicationType applicationID = GetApplicationID();
+#endif
         if (ch >= ETHSM_CHANNEL_NUM)
         {
             /* @req SWS_EthSM_00058 */
@@ -398,26 +424,35 @@ EthSM_GetCurrentComMode(NetworkHandleType NetworkHandle, ComM_ModeType* ComM_Mod
                 ETHSM_E_INVALID_NETWORK_HANDLE);
         }
         else
-#endif /* STD_ON == ETHSM_DEV_ERROR_DETECT */
-        {
-            /* @req SWS_EthSM_00057,SWS_EthSM_00059 */
-            /* Output the current communication mode for the network handle */
-            switch (EthSM_RTData[ch].curBsmState)
+#if (STD_ON == ETHSM_MULTIPLE_PARTITION_USED)
+            /* Multiple partition check. */
+            if (applicationID != ComM_GetChannelApplicationID(NetworkHandle))
             {
-            case ETHSM_STATE_ONLINE:
-            case ETHSM_STATE_ONHOLD:
-            case ETHSM_STATE_WAIT_OFFLINE:
-                *ComM_ModePtr = COMM_FULL_COMMUNICATION;
-                break;
-            default:
-                *ComM_ModePtr = COMM_NO_COMMUNICATION;
-                break;
+                (void)
+                    Det_ReportError(ETHSM_MODULE_ID, ETHSM_INSTANCE_ID, ETHSM_SID_GETCURRENTCOMMODE, ETHSM_E_PARTITION);
             }
-            /* @req SWS_EthSM_00057 */
-            ret = E_OK;
-        }
-    }
+            else
 
+#endif
+#endif /* STD_ON == ETHSM_DEV_ERROR_DETECT */
+            {
+                /* @req SWS_EthSM_00057,SWS_EthSM_00059 */
+                /* Output the current communication mode for the network handle */
+                switch (EthSM_RTData[ch].curBsmState)
+                {
+                case ETHSM_STATE_ONLINE:
+                case ETHSM_STATE_ONHOLD:
+                case ETHSM_STATE_WAIT_OFFLINE:
+                    *ComM_ModePtr = COMM_FULL_COMMUNICATION;
+                    break;
+                default:
+                    *ComM_ModePtr = COMM_NO_COMMUNICATION;
+                    break;
+                }
+                /* @req SWS_EthSM_00057 */
+                ret = E_OK;
+            }
+    }
     return ret;
 }
 #define ETHSM_STOP_SEC_CODE
@@ -465,7 +500,9 @@ EthSM_CtrlModeIndication(uint8 CtrlIdx, Eth_ModeType CtrlMode) /* PRQA S 1532 */
         else
 #endif /* STD_ON == ETHSM_DEV_ERROR_DETECT */
         {
+            SchM_Enter_EthSM_Context();
             EthSM_RTData[ch].ctrlMode = CtrlMode;
+            SchM_Exit_EthSM_Context();
         }
     }
 }
@@ -518,7 +555,9 @@ EthSM_TrcvLinkStateChg(uint8 CtrlIdx, EthTrcv_LinkStateType TransceiverLinkState
         {
             /* @req SWS_EthSM_00114 */
             /* Store the transceiver link state for the affected network handle */
+            SchM_Enter_EthSM_Context();
             EthSM_RTData[ch].trcvLinkState = TransceiverLinkState;
+            SchM_Exit_EthSM_Context();
         }
     }
 }
@@ -582,7 +621,9 @@ EthSM_TcpIpModeIndication(uint8 CtrlIdx, TcpIp_StateType TcpIpState) /* PRQA S 1
         {
             /* @req SWS_EthSM_00119 */
             /* Store the TcpIp state for the affected network handle */
+            SchM_Enter_EthSM_Context();
             EthSM_RTData[ch].tcpipState = TcpIpState;
+            SchM_Exit_EthSM_Context();
         }
     }
 }
@@ -606,12 +647,16 @@ EthSM_TcpIpModeIndication(uint8 CtrlIdx, TcpIp_StateType TcpIpState) /* PRQA S 1
 FUNC(void, ETHSM_CODE) EthSM_MainFunction(void) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
 {
     NetworkHandleType ch;
+    EthSM_NetworkModeStateType curBsmSt;
 
     if (ETHSM_INIT == EthSM_Status)
     {
         for (ch = 0u; ch < ETHSM_CHANNEL_NUM; ch++) /* PRQA S 2877 */ /* MISRA Dir 4.1 */
         {
-            switch (EthSM_RTData[ch].curBsmState)
+            SchM_Enter_EthSM_Context();
+            curBsmSt = EthSM_RTData[ch].curBsmState;
+            SchM_Exit_EthSM_Context();
+            switch (curBsmSt)
             {
             case ETHSM_STATE_OFFLINE:
                 EthSM_StateOffline(ch);
@@ -659,30 +704,41 @@ FUNC(void, ETHSM_CODE) EthSM_MainFunction(void) /* PRQA S 1532 */ /* MISRA Rule 
 /******************************************************************************/
 static FUNC(void, ETHSM_CODE) EthSM_StateOffline(NetworkHandleType ch)
 {
+    SchM_Enter_EthSM_Context();
     EthSM_RunTimeType* chPtr = &EthSM_RTData[ch];
+    EthSM_SubState subState = chPtr->subState;
+    ComM_ModeType requestComMode = chPtr->requestComMode;
+    Eth_ModeType ctrlMode = chPtr->ctrlMode;
+    SchM_Exit_EthSM_Context();
+    Std_ReturnType ret;
     NetworkHandleType network;
     uint8 ctrlIdx;
 
-    if (ETHSM_SUBSTATE_NONE == chPtr->subState)
+    if (ETHSM_SUBSTATE_NONE == subState)
     {
         /* @req SWS_EthSM_00026 */
         /* Transition from substate OFFLINE to WAIT_TRCVLINK */
-        if (COMM_FULL_COMMUNICATION == chPtr->requestComMode)
+        if (COMM_FULL_COMMUNICATION == requestComMode)
         {
             /* @req SWS_EthSM_00088 */
             ctrlIdx = EthSM_GetEthIfControllerId(ch);
-            if (E_OK == EthIf_SetControllerMode(ctrlIdx, ETH_MODE_ACTIVE))
+            ret = EthIf_SetControllerMode(ctrlIdx, ETH_MODE_ACTIVE);
+            if (E_OK == ret)
             {
+                SchM_Enter_EthSM_Context();
                 chPtr->subState = ETHSM_SUBSTATE_WAIT_CTRL_ACTIVE;
+                SchM_Exit_EthSM_Context();
             }
         }
     }
-    else if (ETHSM_SUBSTATE_WAIT_CTRL_ACTIVE == chPtr->subState)
+    else if (ETHSM_SUBSTATE_WAIT_CTRL_ACTIVE == subState)
     {
-        if (ETH_MODE_ACTIVE == chPtr->ctrlMode)
+        if (ETH_MODE_ACTIVE == ctrlMode)
         {
+            SchM_Enter_EthSM_Context();
             chPtr->curBsmState = ETHSM_STATE_WAIT_TRCVLINK;
             chPtr->subState = ETHSM_SUBSTATE_NONE;
+            SchM_Exit_EthSM_Context();
 
             /* @req SWS_EthSM_00097 */
             network = EthSM_GetComMNetworkId(ch);
@@ -708,35 +764,46 @@ static FUNC(void, ETHSM_CODE) EthSM_StateOffline(NetworkHandleType ch)
 /******************************************************************************/
 static FUNC(void, ETHSM_CODE) EthSM_StateWaitTrcvLink(NetworkHandleType ch)
 {
+    SchM_Enter_EthSM_Context();
     EthSM_RunTimeType* chPtr = &EthSM_RTData[ch];
+    EthSM_SubState subState = chPtr->subState;
+    ComM_ModeType requestComMode = chPtr->requestComMode;
+    EthTrcv_LinkStateType trcvLinkState = chPtr->trcvLinkState;
+    Eth_ModeType ctrlMode = chPtr->ctrlMode;
+    SchM_Exit_EthSM_Context();
     Std_ReturnType ret;
     NetworkHandleType network = EthSM_GetComMNetworkId(ch);
     uint8 ctrlIdx = EthSM_GetEthIfControllerId(ch);
 
-    if (ETHSM_SUBSTATE_NONE == chPtr->subState)
+    if (ETHSM_SUBSTATE_NONE == subState)
     {
         /* @req SWS_EthSM_00127 */
         /* Transition from substate WAIT_TRCVLINK to OFFLINE */
-        if (COMM_NO_COMMUNICATION == chPtr->requestComMode)
+        if (COMM_NO_COMMUNICATION == requestComMode)
         {
             /* @req SWS_EthSM_00128 */
             ret = EthIf_SetControllerMode(ctrlIdx, ETH_MODE_DOWN);
             if (E_OK == ret)
             {
+                SchM_Enter_EthSM_Context();
                 chPtr->subState = ETHSM_SUBSTATE_WAIT_CTRL_DOWN;
+                SchM_Exit_EthSM_Context();
             }
         }
         else
         {
             /* @req SWS_EthSM_00132 */
             /* Transition from substate WAIT_TRCVLINK to WAIT_ONLINE */
-            if (ETHTRCV_LINK_STATE_ACTIVE == chPtr->trcvLinkState)
+            if (ETHTRCV_LINK_STATE_ACTIVE == trcvLinkState)
             {
                 /* @req SWS_EthSM_00133 */
                 ret = TcpIp_RequestComMode(ctrlIdx, TCPIP_STATE_ONLINE);
+
                 if (E_OK == ret)
                 {
+                    SchM_Enter_EthSM_Context();
                     chPtr->curBsmState = ETHSM_STATE_WAIT_ONLINE;
+                    SchM_Exit_EthSM_Context();
 
                     /* @req SWS_EthSM_00134 */
                     BswM_EthSM_CurrentState(network, ETHSM_STATE_WAIT_ONLINE);
@@ -744,12 +811,14 @@ static FUNC(void, ETHSM_CODE) EthSM_StateWaitTrcvLink(NetworkHandleType ch)
             }
         }
     }
-    else if (ETHSM_SUBSTATE_WAIT_CTRL_DOWN == chPtr->subState)
+    else if (ETHSM_SUBSTATE_WAIT_CTRL_DOWN == subState)
     {
-        if (ETH_MODE_DOWN == chPtr->ctrlMode)
+        if (ETH_MODE_DOWN == ctrlMode)
         {
+            SchM_Enter_EthSM_Context();
             chPtr->curBsmState = ETHSM_STATE_OFFLINE;
             chPtr->subState = ETHSM_SUBSTATE_NONE;
+            SchM_Exit_EthSM_Context();
 
             /* @req SWS_EthSM_00130 */
             BswM_EthSM_CurrentState(network, ETHSM_STATE_OFFLINE);
@@ -774,26 +843,39 @@ static FUNC(void, ETHSM_CODE) EthSM_StateWaitTrcvLink(NetworkHandleType ch)
 /******************************************************************************/
 static FUNC(void, ETHSM_CODE) EthSM_StateWaitOnline(NetworkHandleType ch)
 {
+    SchM_Enter_EthSM_Context();
     EthSM_RunTimeType* chPtr = &EthSM_RTData[ch];
+    EthSM_SubState subState = chPtr->subState;
+    ComM_ModeType requestComMode = chPtr->requestComMode;
+    EthTrcv_LinkStateType trcvLinkState = chPtr->trcvLinkState;
+    Eth_ModeType ctrlMode = chPtr->ctrlMode;
+    TcpIp_StateType tcpipState = chPtr->tcpipState;
+    SchM_Exit_EthSM_Context();
+    Std_ReturnType ret;
+    Std_ReturnType ret2;
     NetworkHandleType network = EthSM_GetComMNetworkId(ch);
     uint8 ctrlIdx = EthSM_GetEthIfControllerId(ch);
-    Std_ReturnType ret;
-
-    switch (chPtr->subState)
+    switch (subState)
     {
+
     case ETHSM_SUBSTATE_NONE:
         /* @req SWS_EthSM_00140*/
         /* Transition from substate WAIT_ONLINE to OFFLINE */
-        if (COMM_NO_COMMUNICATION == chPtr->requestComMode)
+        if (COMM_NO_COMMUNICATION == requestComMode)
         {
-            /* @req SWS_EthSM_00141,SWS_EthSM_00143 */
-            ret = TcpIp_RequestComMode(ctrlIdx, TCPIP_STATE_OFFLINE);
-            if ((E_OK == EthIf_SetControllerMode(ctrlIdx, ETH_MODE_DOWN)) && (E_OK == ret))
+            /* @req SWS_EthSM_00141 */
+            ret = EthIf_SetControllerMode(ctrlIdx, ETH_MODE_DOWN);
+
+            /* @req SWS_EthSM_00143 */
+            ret2 = TcpIp_RequestComMode(ctrlIdx, TCPIP_STATE_OFFLINE);
+            if ((E_OK == ret) && (E_OK == ret2))
             {
+                SchM_Enter_EthSM_Context();
                 chPtr->subState = ETHSM_SUBSTATE_WAIT_CTRL_TCPIP_CLOSE;
+                SchM_Exit_EthSM_Context();
             }
         }
-        else if (ETHTRCV_LINK_STATE_DOWN == chPtr->trcvLinkState)
+        else if (ETHTRCV_LINK_STATE_DOWN == trcvLinkState)
         {
             /* @req SWS_EthSM_00136 */
             /* Transition from substate WAIT_ONLINE to WAIT_TRCVLINK */
@@ -802,14 +884,18 @@ static FUNC(void, ETHSM_CODE) EthSM_StateWaitOnline(NetworkHandleType ch)
             ret = TcpIp_RequestComMode(ctrlIdx, TCPIP_STATE_OFFLINE);
             if (E_OK == ret)
             {
+                SchM_Enter_EthSM_Context();
                 chPtr->subState = ETHSM_SUBSTATE_WAIT_TCPIP_OFFLINE;
+                SchM_Exit_EthSM_Context();
             }
         }
-        else if (TCPIP_STATE_ONLINE == chPtr->tcpipState)
+        else if (TCPIP_STATE_ONLINE == tcpipState)
         {
             /* @req SWS_EthSM_00146 */
             /* Transition from substate WAIT_ONLINE to ONLINE */
+            SchM_Enter_EthSM_Context();
             chPtr->curBsmState = ETHSM_STATE_ONLINE;
+            SchM_Exit_EthSM_Context();
 
             /* @req SWS_EthSM_00148 */
             BswM_EthSM_CurrentState(network, ETHSM_STATE_ONLINE);
@@ -822,19 +908,23 @@ static FUNC(void, ETHSM_CODE) EthSM_StateWaitOnline(NetworkHandleType ch)
         }
         break;
     case ETHSM_SUBSTATE_WAIT_CTRL_TCPIP_CLOSE:
-        if ((ETH_MODE_DOWN == chPtr->ctrlMode) && (TCPIP_STATE_OFFLINE == chPtr->tcpipState))
+        if ((ETH_MODE_DOWN == ctrlMode) && (TCPIP_STATE_OFFLINE == tcpipState))
         {
+            SchM_Enter_EthSM_Context();
             chPtr->subState = ETHSM_SUBSTATE_NONE;
             chPtr->curBsmState = ETHSM_STATE_OFFLINE;
+            SchM_Exit_EthSM_Context();
             /* @req SWS_EthSM_00144 */
             BswM_EthSM_CurrentState(network, ETHSM_STATE_OFFLINE);
         }
         break;
     case ETHSM_SUBSTATE_WAIT_TCPIP_OFFLINE:
-        if (TCPIP_STATE_OFFLINE == chPtr->tcpipState)
+        if (TCPIP_STATE_OFFLINE == tcpipState)
         {
+            SchM_Enter_EthSM_Context();
             chPtr->subState = ETHSM_SUBSTATE_NONE;
             chPtr->curBsmState = ETHSM_STATE_WAIT_TRCVLINK;
+            SchM_Exit_EthSM_Context();
             /* @req SWS_EthSM_00138 */
             BswM_EthSM_CurrentState(network, ETHSM_STATE_WAIT_TRCVLINK);
         }
@@ -858,7 +948,13 @@ static FUNC(void, ETHSM_CODE) EthSM_StateWaitOnline(NetworkHandleType ch)
 /******************************************************************************/
 static FUNC(void, ETHSM_CODE) EthSM_StateOnline(NetworkHandleType ch)
 {
+    SchM_Enter_EthSM_Context();
     EthSM_RunTimeType* chPtr = &EthSM_RTData[ch];
+    EthSM_SubState subState = chPtr->subState;
+    ComM_ModeType requestComMode = chPtr->requestComMode;
+    EthTrcv_LinkStateType trcvLinkState = chPtr->trcvLinkState;
+    TcpIp_StateType tcpipState = chPtr->tcpipState;
+    SchM_Exit_EthSM_Context();
     Std_ReturnType ret;
     NetworkHandleType network = EthSM_GetComMNetworkId(ch);
     uint8 ctrlIdx = EthSM_GetEthIfControllerId(ch);
@@ -866,23 +962,25 @@ static FUNC(void, ETHSM_CODE) EthSM_StateOnline(NetworkHandleType ch)
     P2CONST(EthSM_DemEventParameterRefType, AUTOMATIC, ETHSM_CONST) demEventPtr;
 #endif /* STD_ON == ETHSM_DEM_SUPPORT */
 
-    if (ETHSM_SUBSTATE_NONE == chPtr->subState)
+    if (ETHSM_SUBSTATE_NONE == subState)
     {
         /* @req SWS_EthSM_00155 */
         /* Transition from substate ONLINE to WAIT_OFFLINE */
-        if (COMM_NO_COMMUNICATION == chPtr->requestComMode)
+        if (COMM_NO_COMMUNICATION == requestComMode)
         {
             /* @req SWS_EthSM_00157 */
             ret = TcpIp_RequestComMode(ctrlIdx, TCPIP_STATE_OFFLINE);
             if (E_OK == ret)
             {
+                SchM_Enter_EthSM_Context();
                 chPtr->curBsmState = ETHSM_STATE_WAIT_OFFLINE;
+                SchM_Exit_EthSM_Context();
 
                 /* @req SWS_EthSM_00158 */
                 BswM_EthSM_CurrentState(network, ETHSM_STATE_WAIT_OFFLINE);
             }
         }
-        else if (ETHTRCV_LINK_STATE_DOWN == chPtr->trcvLinkState)
+        else if (ETHTRCV_LINK_STATE_DOWN == trcvLinkState)
         {
             /* @req SWS_EthSM_00166 */
             /* Transition from substate ONLINE to ONHOLD */
@@ -891,14 +989,18 @@ static FUNC(void, ETHSM_CODE) EthSM_StateOnline(NetworkHandleType ch)
             ret = TcpIp_RequestComMode(ctrlIdx, TCPIP_STATE_ONHOLD);
             if (E_OK == ret)
             {
+                SchM_Enter_EthSM_Context();
                 chPtr->subState = ETHSM_SUBSTATE_WAIT_TCPIP_ONHOLD;
+                SchM_Exit_EthSM_Context();
             }
         }
-        else if (TCPIP_STATE_OFFLINE == chPtr->tcpipState)
+        else if (TCPIP_STATE_OFFLINE == tcpipState)
         {
             /* @req SWS_EthSM_00151 */
             /* Transition from substate ONLINE to WAIT_ONLINE */
+            SchM_Enter_EthSM_Context();
             chPtr->curBsmState = ETHSM_STATE_WAIT_ONLINE;
+            SchM_Exit_EthSM_Context();
 
             /* @req SWS_EthSM_00152 */
             BswM_EthSM_CurrentState(network, ETHSM_STATE_WAIT_ONLINE);
@@ -910,13 +1012,14 @@ static FUNC(void, ETHSM_CODE) EthSM_StateOnline(NetworkHandleType ch)
             /* Do nothing,Just for MISRA-C check */
         }
     }
-    else if (ETHSM_SUBSTATE_WAIT_TCPIP_ONHOLD == chPtr->subState)
+    else if (ETHSM_SUBSTATE_WAIT_TCPIP_ONHOLD == subState)
     {
-        if (TCPIP_STATE_ONHOLD == chPtr->tcpipState)
+        if (TCPIP_STATE_ONHOLD == tcpipState)
         {
+            SchM_Enter_EthSM_Context();
             chPtr->subState = ETHSM_SUBSTATE_NONE;
-
             chPtr->curBsmState = ETHSM_STATE_ONHOLD;
+            SchM_Exit_EthSM_Context();
             /* @req SWS_EthSM_00168 */
             BswM_EthSM_CurrentState(network, ETHSM_STATE_ONHOLD);
 
@@ -949,28 +1052,42 @@ static FUNC(void, ETHSM_CODE) EthSM_StateOnline(NetworkHandleType ch)
 /******************************************************************************/
 static FUNC(void, ETHSM_CODE) EthSM_StateOnhold(NetworkHandleType ch)
 {
+    SchM_Enter_EthSM_Context();
     EthSM_RunTimeType* chPtr = &EthSM_RTData[ch];
+    EthSM_SubState subState = chPtr->subState;
+    ComM_ModeType requestComMode = chPtr->requestComMode;
+    EthTrcv_LinkStateType trcvLinkState = chPtr->trcvLinkState;
+    Eth_ModeType ctrlMode = chPtr->ctrlMode;
+    TcpIp_StateType tcpipState = chPtr->tcpipState;
+    SchM_Exit_EthSM_Context();
+    Std_ReturnType ret;
+    Std_ReturnType ret2;
     NetworkHandleType network = EthSM_GetComMNetworkId(ch);
     uint8 ctrlIdx = EthSM_GetEthIfControllerId(ch);
-    Std_ReturnType ret;
 #if (STD_ON == ETHSM_DEM_SUPPORT)
     P2CONST(EthSM_DemEventParameterRefType, AUTOMATIC, ETHSM_CONST) demEventPtr;
-#endif /* STD_ON == ETHSM_DEM_SUPPORT */
-    switch (chPtr->subState)
+#endif
+    switch (subState)
     {
+
     case ETHSM_SUBSTATE_NONE:
         /* @req SWS_EthSM_00178 */
         /* Transition from substate ONHOLD to OFFLINE */
-        if (COMM_NO_COMMUNICATION == chPtr->requestComMode)
+        if (COMM_NO_COMMUNICATION == requestComMode)
         {
-            /* @req SWS_EthSM_00179,SWS_EthSM_00181 */
-            ret = TcpIp_RequestComMode(ctrlIdx, TCPIP_STATE_OFFLINE);
-            if ((E_OK == EthIf_SetControllerMode(ctrlIdx, ETH_MODE_DOWN)) && (E_OK == ret))
+            /* @req SWS_EthSM_00179 */
+            ret = EthIf_SetControllerMode(ctrlIdx, ETH_MODE_DOWN);
+
+            /* @req SWS_EthSM_00181 */
+            ret2 = TcpIp_RequestComMode(ctrlIdx, TCPIP_STATE_OFFLINE);
+            if ((E_OK == ret) && (E_OK == ret2))
             {
+                SchM_Enter_EthSM_Context();
                 chPtr->subState = ETHSM_SUBSTATE_WAIT_CTRL_TCPIP_CLOSE;
+                SchM_Exit_EthSM_Context();
             }
         }
-        else if (ETHTRCV_LINK_STATE_ACTIVE == chPtr->trcvLinkState)
+        else if (ETHTRCV_LINK_STATE_ACTIVE == trcvLinkState)
         {
             /* @req SWS_EthSM_00170 */
             /* Transition from substate ONHOLD to ONLINE */
@@ -979,14 +1096,18 @@ static FUNC(void, ETHSM_CODE) EthSM_StateOnhold(NetworkHandleType ch)
             ret = TcpIp_RequestComMode(ctrlIdx, TCPIP_STATE_ONLINE);
             if (E_OK == ret)
             {
+                SchM_Enter_EthSM_Context();
                 chPtr->subState = ETHSM_SUBSTATE_WAIT_TCPIP_ONLINE;
+                SchM_Exit_EthSM_Context();
             }
         }
-        else if (TCPIP_STATE_OFFLINE == chPtr->tcpipState)
+        else if (TCPIP_STATE_OFFLINE == tcpipState)
         {
             /* @req SWS_EthSM_00174 */
             /* Transition from substate ONHOLD to WAIT_TRCVLINK */
+            SchM_Enter_EthSM_Context();
             chPtr->curBsmState = ETHSM_STATE_WAIT_TRCVLINK;
+            SchM_Exit_EthSM_Context();
 
             /* @req SWS_EthSM_00175 */
             BswM_EthSM_CurrentState(network, ETHSM_STATE_WAIT_TRCVLINK);
@@ -999,11 +1120,12 @@ static FUNC(void, ETHSM_CODE) EthSM_StateOnhold(NetworkHandleType ch)
         }
         break;
     case ETHSM_SUBSTATE_WAIT_CTRL_TCPIP_CLOSE:
-        if ((ETH_MODE_DOWN == chPtr->ctrlMode) && (TCPIP_STATE_OFFLINE == chPtr->tcpipState))
+        if ((ETH_MODE_DOWN == ctrlMode) && (TCPIP_STATE_OFFLINE == tcpipState))
         {
+            SchM_Enter_EthSM_Context();
             chPtr->subState = ETHSM_SUBSTATE_NONE;
-
             chPtr->curBsmState = ETHSM_STATE_OFFLINE;
+            SchM_Exit_EthSM_Context();
             /* @req SWS_EthSM_00182 */
             BswM_EthSM_CurrentState(network, ETHSM_STATE_OFFLINE);
             /* @req SWS_EthSM_00184 */
@@ -1011,11 +1133,12 @@ static FUNC(void, ETHSM_CODE) EthSM_StateOnhold(NetworkHandleType ch)
         }
         break;
     case ETHSM_SUBSTATE_WAIT_TCPIP_ONLINE:
-        if (TCPIP_STATE_ONLINE == chPtr->tcpipState)
+        if (TCPIP_STATE_ONLINE == tcpipState)
         {
+            SchM_Enter_EthSM_Context();
             chPtr->subState = ETHSM_SUBSTATE_NONE;
-
             chPtr->curBsmState = ETHSM_STATE_ONLINE;
+            SchM_Exit_EthSM_Context();
             /* @req SWS_EthSM_00172 */
             BswM_EthSM_CurrentState(network, ETHSM_STATE_ONLINE);
 
@@ -1048,32 +1171,40 @@ static FUNC(void, ETHSM_CODE) EthSM_StateOnhold(NetworkHandleType ch)
 /******************************************************************************/
 static FUNC(void, ETHSM_CODE) EthSM_StateWaitOffline(NetworkHandleType ch)
 {
+    SchM_Enter_EthSM_Context();
     EthSM_RunTimeType* chPtr = &EthSM_RTData[ch];
+    EthSM_SubState subState = chPtr->subState;
+    Eth_ModeType ctrlMode = chPtr->ctrlMode;
+    TcpIp_StateType tcpipState = chPtr->tcpipState;
+    SchM_Exit_EthSM_Context();
     Std_ReturnType ret;
     NetworkHandleType network = EthSM_GetComMNetworkId(ch);
     uint8 ctrlIdx = EthSM_GetEthIfControllerId(ch);
 
-    if (ETHSM_SUBSTATE_NONE == chPtr->subState)
+    if (ETHSM_SUBSTATE_NONE == subState)
     {
         /* @req SWS_EthSM_00160 */
         /* Transition from substate WAIT_OFFLINE to OFFLINE */
-        if (TCPIP_STATE_OFFLINE == chPtr->tcpipState)
+        if (TCPIP_STATE_OFFLINE == tcpipState)
         {
             /* @req SWS_EthSM_00161 */
             ret = EthIf_SetControllerMode(ctrlIdx, ETH_MODE_DOWN);
             if (E_OK == ret)
             {
+                SchM_Enter_EthSM_Context();
                 chPtr->subState = ETHSM_SUBSTATE_WAIT_CTRL_DOWN;
+                SchM_Exit_EthSM_Context();
             }
         }
     }
-    else if (ETHSM_SUBSTATE_WAIT_CTRL_DOWN == chPtr->subState)
+    else if (ETHSM_SUBSTATE_WAIT_CTRL_DOWN == subState)
     {
-        if (ETH_MODE_DOWN == chPtr->ctrlMode)
+        if (ETH_MODE_DOWN == ctrlMode)
         {
+            SchM_Enter_EthSM_Context();
             chPtr->subState = ETHSM_SUBSTATE_NONE;
-
             chPtr->curBsmState = ETHSM_STATE_OFFLINE;
+            SchM_Exit_EthSM_Context();
             /* @req SWS_EthSM_00163 */
             BswM_EthSM_CurrentState(network, ETHSM_STATE_OFFLINE);
             /* @req SWS_EthSM_00165 */

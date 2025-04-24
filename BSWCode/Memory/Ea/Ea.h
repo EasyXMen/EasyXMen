@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Ea.h                                                        **
- **                                                                            **
- **  Created on  : 2022/02/15                                                  **
- **  Author      : tao.yu                                                      **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Ea header description                                       **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Ea.h                                                        **
+**                                                                            **
+**  Created on  : 2022/02/15                                                  **
+**  Author      : tao.yu                                                      **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Ea header description                                       **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 
 /*******************************************************************************
 **                      Revision Control History                              **
@@ -45,7 +46,6 @@
  *  V2.0.3     2024-01-22     tao.yu         QAC
  *  V2.0.4     2024-05-14     haibin.shao    adj Det restriction and Storage algorithm
  *             2024-06-15     tao.yu         update memmap
- *             2024-09-27     xue.han        QAC
 
  */
 #ifndef EA_H
@@ -280,5 +280,19 @@ extern FUNC(void, EA_PUBLIC_CODE) Ea_JobEndNotification(void);
  */
 /******************************************************************************/
 extern FUNC(void, EA_PUBLIC_CODE) Ea_JobErrorNotification(void);
+
+/******************************************************************************/
+/*
+ * Brief               Service to handle the requested jobs and the internal management operations.
+ * ServiceId           0x12
+ * Sync/Async          --
+ * Reentrancy          --
+ * Param-Name[in]      None:
+ * Param-Name[out]     None:
+ * Param-Name[in/out]  None:
+ * Return              None:
+ */
+/******************************************************************************/
+extern FUNC(void, EA_PUBLIC_CODE) Ea_MainFunction(void);
 
 #endif /* EA_H */

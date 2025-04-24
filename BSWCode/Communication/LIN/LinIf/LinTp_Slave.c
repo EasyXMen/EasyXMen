@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : LinTp_Slave.c                                               **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : HuRongbo                                                    **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : LinTp_Slave.c                                               **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : HuRongbo                                                    **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 /*******************************************************************************
 **                      Revision Control History                              **
 *******************************************************************************/
@@ -44,13 +45,15 @@
 **                      Include Section                                       **
 *******************************************************************************/
 #include "LinIf_Cfg.h"
+#if (LINIF_TP_SUPPORTED == STD_ON)
+#include "LinTp_Cfg.h"
 
 #if (LINTP_SLAVE_SUPPORT == STD_ON)
 #include "LinTp_Slave.h"
 #include "LinIf_Internal.h"
 #include "PduR_LinTp.h"
-#include "istd_lib.h"
 #include "LinIf_Slave.h"
+
 /*******************************************************************************
 **                       Version  Check                                       **
 *******************************************************************************/
@@ -71,16 +74,18 @@
 
 static FUNC(void, LINIF_CODE) LinTp_SlaveSFRxHandle(
     NetworkHandleType tpCh,
-    P2CONST(uint8, AUTOMATIC, LINIF_APPL_DATA) Lin_SduPtr,
+    P2CONST(uint8, AUTOMATIC, LINIF_APPL_DATA) Lin_SduPtr, /* PRQA S 3432 */
     P2CONST(LinTp_RxNSduType, AUTOMATIC, LINIF_CONST) rxNSdu);
 
 static FUNC(void, LINIF_CODE) LinTp_SlaveFFRxHandle(
     NetworkHandleType tpCh,
-    P2CONST(uint8, AUTOMATIC, LINIF_APPL_DATA) Lin_SduPtr,
+    P2CONST(uint8, AUTOMATIC, LINIF_APPL_DATA) Lin_SduPtr, /* PRQA S 3432 */
     P2CONST(LinTp_RxNSduType, AUTOMATIC, LINIF_CONST) rxNSdu);
 
-static FUNC(void, LINIF_CODE)
-    LinTp_SlaveCFRxHandle(NetworkHandleType tpCh, P2CONST(uint8, AUTOMATIC, LINIF_APPL_DATA) Lin_SduPtr);
+static FUNC(void, LINIF_CODE) LinTp_SlaveCFRxHandle(
+    NetworkHandleType tpCh,
+    P2CONST(uint8, AUTOMATIC, LINIF_APPL_DATA) Lin_SduPtr /* PRQA S 3432 */
+);
 
 static FUNC(void, LINIF_CODE) LinTp_SlaveSFRxMainHandle(NetworkHandleType tpCh);
 
@@ -88,15 +93,22 @@ static FUNC(void, LINIF_CODE) LinTp_SlaveFFRxMainHandle(NetworkHandleType tpCh);
 
 static FUNC(void, LINIF_CODE) LinTp_SlaveCFRxMainHandle(NetworkHandleType tpCh);
 
-static FUNC(void, LINIF_CODE)
-    LinTp_SlaveSFTxHandle(NetworkHandleType ch, P2VAR(Lin_PduType, AUTOMATIC, LINIF_APPL_DATA) PduPtr);
+static FUNC(void, LINIF_CODE) LinTp_SlaveSFTxHandle(
+    NetworkHandleType ch,
+    P2VAR(Lin_PduType, AUTOMATIC, LINIF_APPL_DATA) PduPtr /* PRQA S 3432 */
+);
 
-static FUNC(void, LINIF_CODE)
-    LinTp_SlaveFFTxHandle(NetworkHandleType ch, P2VAR(Lin_PduType, AUTOMATIC, LINIF_APPL_DATA) PduPtr);
+static FUNC(void, LINIF_CODE) LinTp_SlaveFFTxHandle(
+    NetworkHandleType ch,
+    P2VAR(Lin_PduType, AUTOMATIC, LINIF_APPL_DATA) PduPtr /* PRQA S 3432 */
+);
 
-static FUNC(void, LINIF_CODE)
-    LinTp_SlaveCFTxHandle(NetworkHandleType ch, P2VAR(Lin_PduType, AUTOMATIC, LINIF_APPL_DATA) PduPtr);
+static FUNC(void, LINIF_CODE) LinTp_SlaveCFTxHandle(
+    NetworkHandleType ch,
+    P2VAR(Lin_PduType, AUTOMATIC, LINIF_APPL_DATA) PduPtr /* PRQA S 3432 */
+);
 
+/* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
 static FUNC(void, LINIF_CODE)
     LinTp_SlaveAbortTxRxAndNotifyFailToUpper(P2VAR(LinTp_SlaveRuntimeType, AUTOMATIC, LINIF_VAR) tpSlaveRTPtr);
 
@@ -105,6 +117,7 @@ static FUNC(NetworkHandleType, LINIF_CODE) LinTp_SlaveGetLinTpChannel(NetworkHan
 static FUNC(void, LINIF_CODE) LinTp_SlaveTimerHandle(P2VAR(LinTp_SlaveRuntimeType, AUTOMATIC, LINIF_VAR) tpSlaveRTPtr);
 
 static FUNC(void, LINIF_CODE) LinTp_SlaveResetRtData(P2VAR(LinTp_SlaveRuntimeType, AUTOMATIC, LINIF_VAR) tpSlaveRTPtr);
+/* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
 
 #define LINIF_STOP_SEC_CODE
 #include "LinIf_MemMap.h"
@@ -145,7 +158,7 @@ LINTP_LOCAL VAR(LinTp_SlaveRuntimeType, LINIF_VAR) LinTp_SlaveRTData[LINTP_SLAVE
 /******************************************************************************/
 FUNC(void, LINIF_CODE) LinTp_SlaveInit(void) /* PRQA S 1532 */
 {
-    P2VAR(LinTp_SlaveRuntimeType, AUTOMATIC, LINIF_VAR)
+    P2VAR(LinTp_SlaveRuntimeType, AUTOMATIC, LINIF_VAR) /* PRQA S 3432 */
     tpSlaveRTPtr = &LinTp_SlaveRTData[0u];
     uint8 idx = LINTP_SLAVE_CHANNEL_NUMBER;
 
@@ -156,6 +169,27 @@ FUNC(void, LINIF_CODE) LinTp_SlaveInit(void) /* PRQA S 1532 */
 
         tpSlaveRTPtr++; /* PRQA S 2983 */
         idx--;
+    }
+}
+/******************************************************************************/
+/*
+ * Brief               LinTp slave node runtime data init and cancel TP process on going
+ * Sync/Async          Synchronous
+ * Reentrancy          Reentrant
+ * Param-Name[in]      None
+ * Param-Name[out]     None
+ * Param-Name[in/out]  None
+ * Return              None
+ */
+/******************************************************************************/
+FUNC(void, LINIF_CODE) LinTp_SlavePreInit(NetworkHandleType ch)
+{
+    P2VAR(LinTp_SlaveRuntimeType, AUTOMATIC, LINIF_VAR) /* PRQA S 3432 */
+    tpSlaveRTPtr = &LinTp_SlaveRTData[ch];
+    if (LINTP_CHANNEL_BUSY == tpSlaveRTPtr->channelState)
+    {
+        LinTp_SlaveAbortTxRxAndNotifyFailToUpper(tpSlaveRTPtr);
+        LinTp_SlaveResetRtData(tpSlaveRTPtr);
     }
 }
 
@@ -175,7 +209,8 @@ FUNC(void, LINIF_CODE) LinTp_SlaveInit(void) /* PRQA S 1532 */
 FUNC(void, LINIF_CODE)
 LinTp_SlaveMRFIndication(/* PRQA S 1532 */
                          NetworkHandleType ch,
-                         P2CONST(uint8, AUTOMATIC, LINIF_APPL_DATA) Lin_SduPtr)
+                         P2CONST(uint8, AUTOMATIC, LINIF_APPL_DATA) Lin_SduPtr /* PRQA S 3432 */
+)
 {
     uint8 pciType = Lin_SduPtr[LINTP_PDU_OFS_PCI] & LINTP_PDU_PCI_MASK;
     P2CONST(LinTp_RxNSduType, AUTOMATIC, LINIF_CONST) rxNSdu = LinTp_GetRxNSduByNad(ch, Lin_SduPtr[LINTP_PDU_OFS_NAD]);
@@ -230,8 +265,10 @@ LinTp_SlaveTransmit(/* PRQA S 1532 */
                     P2CONST(PduInfoType, AUTOMATIC, LINIF_APPL_CONST) LinTpTxInfoPtr)
 {
     NetworkHandleType tpCh = LinTp_SlaveGetLinTpChannel(txNSdu->LinTpTxNSduChannelRef);
+    /* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
     P2VAR(LinTp_SlaveRuntimeType, AUTOMATIC, LINIF_VAR)
     tpSlaveRTPtr = LINTP_GET_SLAVE_RTDATA_PTR(tpCh);
+    /* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
     Std_ReturnType ret = E_NOT_OK;
 
     /*@req <SWS_LinIf_00321>*/
@@ -311,11 +348,14 @@ LinTp_SlaveSetFunctionAddressFlag(NetworkHandleType ch, boolean functionAddressF
 FUNC(void, LINIF_CODE)
 LinTp_SlaveSRFIndication(/* PRQA S 1532 */
                          NetworkHandleType ch,
-                         P2VAR(Lin_PduType, AUTOMATIC, LINIF_APPL_DATA) PduPtr)
+                         P2VAR(Lin_PduType, AUTOMATIC, LINIF_APPL_DATA) PduPtr /* PRQA S 3432 */
+)
 {
     NetworkHandleType tpCh = LinTp_SlaveGetLinTpChannel(LINIF_GET_COMM_NETWORK(ch));
+    /* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
     P2VAR(LinTp_SlaveRuntimeType, AUTOMATIC, LINIF_VAR)
     tpSlaveRTPtr = LINTP_GET_SLAVE_RTDATA_PTR(tpCh);
+    /* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
 
     /*@req <SWS_LinIf_00803>*/
     /* Stop N_Cs timer */
@@ -360,11 +400,14 @@ LinTp_SlaveSRFIndication(/* PRQA S 1532 */
 FUNC(void, LINIF_CODE)
 LinTp_SlaveTxConfirmation(/* PRQA S 1532 */
                           NetworkHandleType ch,
-                          P2VAR(boolean, AUTOMATIC, LINIF_APPL_DATA) isTpTxFinish)
+                          P2VAR(boolean, AUTOMATIC, LINIF_APPL_DATA) isTpTxFinish /* PRQA S 3432 */
+)
 {
     NetworkHandleType tpCh = LinTp_SlaveGetLinTpChannel(LINIF_GET_COMM_NETWORK(ch));
+    /* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
     P2VAR(LinTp_SlaveRuntimeType, AUTOMATIC, LINIF_VAR)
     tpSlaveRTPtr = LINTP_GET_SLAVE_RTDATA_PTR(tpCh);
+    /* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
 
     if (LINTP_SLAVE_TX_WAIT_CONFIRM == tpSlaveRTPtr->TxStage)
     {
@@ -404,12 +447,10 @@ LinTp_SlaveTxConfirmation(/* PRQA S 1532 */
  * Return              None
  */
 /******************************************************************************/
-FUNC(void, LINIF_CODE)
-LinTp_SlaveMainFunction(/* PRQA S 1532 */
-                        NetworkHandleType ch)
+void LinTp_SlaveMainFunction(NetworkHandleType ch)
 {
     NetworkHandleType tpCh = LinTp_SlaveGetLinTpChannel(LINIF_GET_COMM_NETWORK(ch));
-    P2VAR(LinTp_SlaveRuntimeType, AUTOMATIC, LINIF_VAR) tpSlaveRTPtr;
+    P2VAR(LinTp_SlaveRuntimeType, AUTOMATIC, LINIF_VAR) tpSlaveRTPtr; /* PRQA S 3432 */
 
     if (tpCh < LINTP_NUMBER_OF_CHANNELS)
     {
@@ -457,11 +498,13 @@ LinTp_SlaveMainFunction(/* PRQA S 1532 */
 /******************************************************************************/
 static FUNC(void, LINIF_CODE) LinTp_SlaveSFRxHandle(
     NetworkHandleType tpCh,
-    P2CONST(uint8, AUTOMATIC, LINIF_APPL_DATA) Lin_SduPtr,
+    P2CONST(uint8, AUTOMATIC, LINIF_APPL_DATA) Lin_SduPtr, /* PRQA S 3432 */
     P2CONST(LinTp_RxNSduType, AUTOMATIC, LINIF_CONST) rxNSdu)
 {
+    /* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
     P2VAR(LinTp_SlaveRuntimeType, AUTOMATIC, LINIF_VAR)
     tpSlaveRTPtr = LINTP_GET_SLAVE_RTDATA_PTR(tpCh);
+    /* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
     uint16 sduSize = (uint16)Lin_SduPtr[LINTP_PDU_OFS_PCI] & LINTP_PDU_PCI_DL_MASK;
     boolean ignoreFlag = FALSE;
 
@@ -483,8 +526,11 @@ static FUNC(void, LINIF_CODE) LinTp_SlaveSFRxHandle(
 
     /* @req <SWS_LinIf_00652> */
     /* Rx message error check*/
-    if ((!ignoreFlag) && (sduSize > LINTP_LENGTH_SF_MIN) && (sduSize <= LINTP_LENGTH_SF_MAX))
+    if ((FALSE == ignoreFlag) && (sduSize > LINTP_LENGTH_SF_MIN) && (sduSize <= LINTP_LENGTH_SF_MAX))
     {
+        /* Locked */
+        SchM_Enter_LinTp_ExclusiveArea_Channel();
+
         tpSlaveRTPtr->RxNSduPtr = rxNSdu;
         tpSlaveRTPtr->channelState = LINTP_CHANNEL_BUSY;
         tpSlaveRTPtr->SduSize = sduSize;
@@ -495,7 +541,7 @@ static FUNC(void, LINIF_CODE) LinTp_SlaveSFRxHandle(
         tpSlaveRTPtr->ChCfgPtr = &LINTP_GET_CHANNEL_CONFIG(tpCh);
         tpSlaveRTPtr->RxStage = LINTP_SLAVE_RX_SF;
         tpSlaveRTPtr->SduSN = 0u;
-
+        /* Reset functional addressing flag */
         if (tpSlaveRTPtr->FunctionAddressFlag)
         {
             tpSlaveRTPtr->FunctionAddressFlag = FALSE;
@@ -505,6 +551,9 @@ static FUNC(void, LINIF_CODE) LinTp_SlaveSFRxHandle(
             /* Functional addressing flag set */
             tpSlaveRTPtr->FunctionAddressFlag = TRUE;
         }
+
+        /* Unlocked */
+        SchM_Exit_LinTp_ExclusiveArea_Channel();
     }
 }
 
@@ -521,11 +570,13 @@ static FUNC(void, LINIF_CODE) LinTp_SlaveSFRxHandle(
 /******************************************************************************/
 static FUNC(void, LINIF_CODE) LinTp_SlaveFFRxHandle(
     NetworkHandleType tpCh,
-    P2CONST(uint8, AUTOMATIC, LINIF_APPL_DATA) Lin_SduPtr,
+    P2CONST(uint8, AUTOMATIC, LINIF_APPL_DATA) Lin_SduPtr, /* PRQA S 3432 */
     P2CONST(LinTp_RxNSduType, AUTOMATIC, LINIF_CONST) rxNSdu)
 {
+    /* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
     P2VAR(LinTp_SlaveRuntimeType, AUTOMATIC, LINIF_VAR)
     tpSlaveRTPtr = LINTP_GET_SLAVE_RTDATA_PTR(tpCh);
+    /* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
     uint16 sduSize;
     boolean ignoreFlag = FALSE;
 
@@ -552,6 +603,9 @@ static FUNC(void, LINIF_CODE) LinTp_SlaveFFRxHandle(
     sduSize = sduSize | Lin_SduPtr[LINTP_PDU_OFS_LEN];
     if ((FALSE == ignoreFlag) && (sduSize >= LINTP_LENGTH_FF_MIN))
     {
+        /* Locked */
+        SchM_Enter_LinTp_ExclusiveArea_Channel();
+
         tpSlaveRTPtr->RxNSduPtr = rxNSdu;
         tpSlaveRTPtr->channelState = LINTP_CHANNEL_BUSY;
         tpSlaveRTPtr->SduSize = sduSize;
@@ -566,6 +620,9 @@ static FUNC(void, LINIF_CODE) LinTp_SlaveFFRxHandle(
         /* @req <SWS_LinIf_00652> */
         /* Start the N_Cr timer */
         tpSlaveRTPtr->NcrTimer = tpSlaveRTPtr->RxNSduPtr->LinTpNcrCnt;
+
+        /* Unlocked */
+        SchM_Exit_LinTp_ExclusiveArea_Channel();
     }
 }
 
@@ -580,45 +637,57 @@ static FUNC(void, LINIF_CODE) LinTp_SlaveFFRxHandle(
  * Return              None
  */
 /******************************************************************************/
-static FUNC(void, LINIF_CODE)
-    LinTp_SlaveCFRxHandle(NetworkHandleType tpCh, P2CONST(uint8, AUTOMATIC, LINIF_APPL_DATA) Lin_SduPtr)
+static FUNC(void, LINIF_CODE) LinTp_SlaveCFRxHandle(
+    NetworkHandleType tpCh,
+    P2CONST(uint8, AUTOMATIC, LINIF_APPL_DATA) Lin_SduPtr /* PRQA S 3432 */
+)
 {
+    /* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
     P2VAR(LinTp_SlaveRuntimeType, AUTOMATIC, LINIF_VAR)
     tpSlaveRTPtr = LINTP_GET_SLAVE_RTDATA_PTR(tpCh);
+    /* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
 
     if (LINTP_CHANNEL_BUSY == tpSlaveRTPtr->channelState)
     {
-        if (LINTP_SLAVE_RX_REQ_BUF == tpSlaveRTPtr->RxStage)
+        if (Lin_SduPtr[LINTP_PDU_OFS_NAD] != LINTP_FUNCTIONAL_REQ_NAD)
         {
-            /* @req <SWS_LinIf_00795> */
-            LinTp_SlaveAbortTxRxAndNotifyFailToUpper(tpSlaveRTPtr);
-        }
-        else if (LINTP_SLAVE_RX_WAIT_CF == tpSlaveRTPtr->RxStage)
-        {
-            /* Rx message error check*/
-            tpSlaveRTPtr->SduSN++;
-            tpSlaveRTPtr->SduSN = tpSlaveRTPtr->SduSN % 0x10u;
-            if ((Lin_SduPtr[LINTP_PDU_OFS_PCI] & LINTP_PDU_PCI_SN_MASK) == tpSlaveRTPtr->SduSN)
+            if (LINTP_SLAVE_RX_REQ_BUF == tpSlaveRTPtr->RxStage)
             {
-                /* Data copy */
-                (void)ILib_memcpy(tpSlaveRTPtr->SduBuf, Lin_SduPtr, LINTP_FRAME_LEN_MAX);
-                tpSlaveRTPtr->LastFrameType = LINTP_FRAMETYPE_CF;
-                tpSlaveRTPtr->RxStage = LINTP_SLAVE_RX_CF;
+                /* @req <SWS_LinIf_00795> */
+                LinTp_SlaveAbortTxRxAndNotifyFailToUpper(tpSlaveRTPtr);
+            }
+            else if (LINTP_SLAVE_RX_WAIT_CF == tpSlaveRTPtr->RxStage)
+            {
+                /* Locked */
+                SchM_Enter_LinTp_ExclusiveArea_Channel();
 
-                /* @req <SWS_LinIf_00652> */
-                /* Restart the N_Cr timer */
-                tpSlaveRTPtr->NcrTimer = tpSlaveRTPtr->RxNSduPtr->LinTpNcrCnt;
+                /* Rx message error check*/
+                tpSlaveRTPtr->SduSN++;
+                tpSlaveRTPtr->SduSN = tpSlaveRTPtr->SduSN % 0x10u;
+                if ((Lin_SduPtr[LINTP_PDU_OFS_PCI] & LINTP_PDU_PCI_SN_MASK) == tpSlaveRTPtr->SduSN)
+                {
+                    /* Data copy */
+                    (void)ILib_memcpy(tpSlaveRTPtr->SduBuf, Lin_SduPtr, LINTP_FRAME_LEN_MAX);
+                    tpSlaveRTPtr->LastFrameType = LINTP_FRAMETYPE_CF;
+                    tpSlaveRTPtr->RxStage = LINTP_SLAVE_RX_CF;
+
+                    /* @req <SWS_LinIf_00652> */
+                    /* Restart the N_Cr timer */
+                    tpSlaveRTPtr->NcrTimer = tpSlaveRTPtr->RxNSduPtr->LinTpNcrCnt;
+                }
+                else
+                {
+                    /* @req <SWS_LinIf_00079>,<SWS_LinIf_00081> */
+                    LinTp_SlaveAbortTxRxAndNotifyFailToUpper(tpSlaveRTPtr);
+                }
+                /* Unlocked */
+                SchM_Exit_LinTp_ExclusiveArea_Channel();
             }
             else
             {
-                /* @req <SWS_LinIf_00079>,<SWS_LinIf_00081> */
-                LinTp_SlaveAbortTxRxAndNotifyFailToUpper(tpSlaveRTPtr);
+                /* Wrong stage,ignore */
+                /* @req <SWS_LinIf_00696> */
             }
-        }
-        else
-        {
-            /* Wrong stage,ignore */
-            /* @req <SWS_LinIf_00696> */
         }
     }
     else
@@ -641,8 +710,10 @@ static FUNC(void, LINIF_CODE)
 /******************************************************************************/
 static FUNC(void, LINIF_CODE) LinTp_SlaveSFRxMainHandle(NetworkHandleType tpCh)
 {
+    /* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
     P2VAR(LinTp_SlaveRuntimeType, AUTOMATIC, LINIF_VAR)
     tpSlaveRTPtr = LINTP_GET_SLAVE_RTDATA_PTR(tpCh);
+    /* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
     PduInfoType pduInfo;
     BufReq_ReturnType bufRslt;
     PduIdType upLayerPduId;
@@ -650,7 +721,7 @@ static FUNC(void, LINIF_CODE) LinTp_SlaveSFRxMainHandle(NetworkHandleType tpCh)
     uint8 data[5] = {0};
 
     pduInfo.MetaDataPtr = data;
-    pduInfo.SduLength = 0u;
+    pduInfo.SduLength = 0;
     /*@req <SWS_LinIf_00075>*/
     /* Notify PduR prepare to receive data */
     bufRslt = PduR_LinTpStartOfReception(
@@ -717,8 +788,10 @@ static FUNC(void, LINIF_CODE) LinTp_SlaveSFRxMainHandle(NetworkHandleType tpCh)
 /******************************************************************************/
 static FUNC(void, LINIF_CODE) LinTp_SlaveFFRxMainHandle(NetworkHandleType tpCh)
 {
+    /* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
     P2VAR(LinTp_SlaveRuntimeType, AUTOMATIC, LINIF_VAR)
     tpSlaveRTPtr = LINTP_GET_SLAVE_RTDATA_PTR(tpCh);
+    /* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
     PduInfoType pduInfo;
     BufReq_ReturnType bufRslt;
     PduLengthType nextCFLen;
@@ -726,7 +799,7 @@ static FUNC(void, LINIF_CODE) LinTp_SlaveFFRxMainHandle(NetworkHandleType tpCh)
     uint8 data[5] = {0};
 
     pduInfo.MetaDataPtr = data;
-    pduInfo.SduLength = 0u;
+    pduInfo.SduLength = 0;
     /*@req <SWS_LinIf_00075>*/
     /* Notify PduR prepare to receive data */
     bufRslt = PduR_LinTpStartOfReception(
@@ -795,8 +868,10 @@ static FUNC(void, LINIF_CODE) LinTp_SlaveFFRxMainHandle(NetworkHandleType tpCh)
 /******************************************************************************/
 static FUNC(void, LINIF_CODE) LinTp_SlaveCFRxMainHandle(NetworkHandleType tpCh)
 {
+    /* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
     P2VAR(LinTp_SlaveRuntimeType, AUTOMATIC, LINIF_VAR)
     tpSlaveRTPtr = LINTP_GET_SLAVE_RTDATA_PTR(tpCh);
+    /* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
     PduInfoType pduInfo;
     BufReq_ReturnType bufRslt;
     PduLengthType nextCFLen;
@@ -864,19 +939,23 @@ static FUNC(void, LINIF_CODE) LinTp_SlaveCFRxMainHandle(NetworkHandleType tpCh)
  * Return              None
  */
 /******************************************************************************/
-static FUNC(void, LINIF_CODE)
-    LinTp_SlaveSFTxHandle(NetworkHandleType ch, P2VAR(Lin_PduType, AUTOMATIC, LINIF_APPL_DATA) PduPtr)
+static FUNC(void, LINIF_CODE) LinTp_SlaveSFTxHandle(
+    NetworkHandleType ch,
+    P2VAR(Lin_PduType, AUTOMATIC, LINIF_APPL_DATA) PduPtr /* PRQA S 3432 */
+)
 {
     NetworkHandleType tpCh = LinTp_SlaveGetLinTpChannel(LINIF_GET_COMM_NETWORK(ch));
+    /* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
     P2VAR(LinTp_SlaveRuntimeType, AUTOMATIC, LINIF_VAR)
     tpSlaveRTPtr = LINTP_GET_SLAVE_RTDATA_PTR(tpCh);
+    /* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
     PduInfoType pduInfo;
     BufReq_ReturnType bufRslt;
 
     if (tpSlaveRTPtr->RetryCopyCnt <= tpSlaveRTPtr->TxNSduPtr->LinTpMaxBufReq)
     {
         /* Set buffer value to padding data(0xFF) */
-        (void)ILib_memset(tpSlaveRTPtr->SduBuf, (sint32)LINTP_PADDING_VALUE, LINTP_FRAME_LEN_MAX);
+        (void)ILib_memset(tpSlaveRTPtr->SduBuf, LINTP_PADDING_VALUE, LINTP_FRAME_LEN_MAX);
         /* Set destination buffer pointer and he number of bytes to be copied */
         pduInfo.SduDataPtr = &(tpSlaveRTPtr->SduBuf[LINTP_PDU_OFS_SF_DATA]);
         pduInfo.SduLength = tpSlaveRTPtr->SduRemaining;
@@ -891,7 +970,7 @@ static FUNC(void, LINIF_CODE)
         switch (bufRslt)
         {
         case BUFREQ_OK:
-            (void)LinIf_SlaveGetConfigedNAD(ch, &tpSlaveRTPtr->SduBuf[LINTP_PDU_OFS_NAD]);
+            (void)LinIf_SlaveGetConfiguredNAD(ch, &tpSlaveRTPtr->SduBuf[LINTP_PDU_OFS_NAD]);
             tpSlaveRTPtr->SduBuf[LINTP_PDU_OFS_PCI] = LINTP_PDU_PCI_SF | (uint8)pduInfo.SduLength; /* PRQA S 2986 */
             /* Reset retry counter */
             tpSlaveRTPtr->RetryCopyCnt = 0u;
@@ -960,19 +1039,23 @@ static FUNC(void, LINIF_CODE)
  * Return              None
  */
 /******************************************************************************/
-static FUNC(void, LINIF_CODE)
-    LinTp_SlaveFFTxHandle(NetworkHandleType ch, P2VAR(Lin_PduType, AUTOMATIC, LINIF_APPL_DATA) PduPtr)
+static FUNC(void, LINIF_CODE) LinTp_SlaveFFTxHandle(
+    NetworkHandleType ch,
+    P2VAR(Lin_PduType, AUTOMATIC, LINIF_APPL_DATA) PduPtr /* PRQA S 3432 */
+)
 {
     NetworkHandleType tpCh = LinTp_SlaveGetLinTpChannel(LINIF_GET_COMM_NETWORK(ch));
+    /* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
     P2VAR(LinTp_SlaveRuntimeType, AUTOMATIC, LINIF_VAR)
     tpSlaveRTPtr = LINTP_GET_SLAVE_RTDATA_PTR(tpCh);
+    /* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
     PduInfoType pduInfo;
     BufReq_ReturnType bufRslt;
 
     if (tpSlaveRTPtr->RetryCopyCnt <= tpSlaveRTPtr->TxNSduPtr->LinTpMaxBufReq)
     {
         /* Set buffer value to padding data(0xFF) */
-        (void)ILib_memset(tpSlaveRTPtr->SduBuf, (sint32)LINTP_PADDING_VALUE, LINTP_FRAME_LEN_MAX);
+        (void)ILib_memset(tpSlaveRTPtr->SduBuf, LINTP_PADDING_VALUE, LINTP_FRAME_LEN_MAX);
         /* Set destination buffer pointer and he number of bytes to be copied */
         pduInfo.SduDataPtr = &(tpSlaveRTPtr->SduBuf[LINTP_PDU_OFS_FF_DATA]);
         pduInfo.SduLength = LINTP_FF_DATA_LEN;
@@ -987,7 +1070,7 @@ static FUNC(void, LINIF_CODE)
         switch (bufRslt)
         {
         case BUFREQ_OK:
-            (void)LinIf_SlaveGetConfigedNAD(ch, &tpSlaveRTPtr->SduBuf[LINTP_PDU_OFS_NAD]);
+            (void)LinIf_SlaveGetConfiguredNAD(ch, &tpSlaveRTPtr->SduBuf[LINTP_PDU_OFS_NAD]);
             tpSlaveRTPtr->SduBuf[LINTP_PDU_OFS_PCI] = LINTP_PDU_PCI_FF | (uint8)(tpSlaveRTPtr->SduRemaining >> 8u);
             tpSlaveRTPtr->SduBuf[LINTP_PDU_OFS_LEN] = (uint8)(tpSlaveRTPtr->SduRemaining);
             tpSlaveRTPtr->SduRemaining -= pduInfo.SduLength;
@@ -1049,12 +1132,16 @@ static FUNC(void, LINIF_CODE)
  * Return              None
  */
 /******************************************************************************/
-static FUNC(void, LINIF_CODE)
-    LinTp_SlaveCFTxHandle(NetworkHandleType ch, P2VAR(Lin_PduType, AUTOMATIC, LINIF_APPL_DATA) PduPtr)
+static FUNC(void, LINIF_CODE) LinTp_SlaveCFTxHandle(
+    NetworkHandleType ch,
+    P2VAR(Lin_PduType, AUTOMATIC, LINIF_APPL_DATA) PduPtr /* PRQA S 3432 */
+)
 {
     NetworkHandleType tpCh = LinTp_SlaveGetLinTpChannel(LINIF_GET_COMM_NETWORK(ch));
+    /* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
     P2VAR(LinTp_SlaveRuntimeType, AUTOMATIC, LINIF_VAR)
     tpSlaveRTPtr = LINTP_GET_SLAVE_RTDATA_PTR(tpCh);
+    /* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
     PduInfoType pduInfo;
     BufReq_ReturnType bufRslt;
 
@@ -1070,7 +1157,7 @@ static FUNC(void, LINIF_CODE)
         if (tpSlaveRTPtr->RetryCopyCnt <= tpSlaveRTPtr->TxNSduPtr->LinTpMaxBufReq)
         {
             /* Set buffer value to padding data(0xFF) */
-            (void)ILib_memset(tpSlaveRTPtr->SduBuf, (sint32)LINTP_PADDING_VALUE, LINTP_FRAME_LEN_MAX);
+            (void)ILib_memset(tpSlaveRTPtr->SduBuf, LINTP_PADDING_VALUE, LINTP_FRAME_LEN_MAX);
             /* Set destination buffer pointer and he number of bytes to be copied */
             pduInfo.SduDataPtr = &(tpSlaveRTPtr->SduBuf[LINTP_PDU_OFS_CF_DATA]);
             pduInfo.SduLength = LINIF_MIN(tpSlaveRTPtr->SduRemaining, LINTP_CF_DATA_LEN_MAX);
@@ -1085,7 +1172,7 @@ static FUNC(void, LINIF_CODE)
             switch (bufRslt)
             {
             case BUFREQ_OK:
-                (void)LinIf_SlaveGetConfigedNAD(ch, &tpSlaveRTPtr->SduBuf[LINTP_PDU_OFS_NAD]);
+                (void)LinIf_SlaveGetConfiguredNAD(ch, &tpSlaveRTPtr->SduBuf[LINTP_PDU_OFS_NAD]);
                 tpSlaveRTPtr->SduSN++;
                 tpSlaveRTPtr->SduSN = tpSlaveRTPtr->SduSN % 16u;
                 tpSlaveRTPtr->SduBuf[LINTP_PDU_OFS_PCI] = LINTP_PDU_PCI_CF | tpSlaveRTPtr->SduSN;
@@ -1156,8 +1243,10 @@ static FUNC(void, LINIF_CODE)
  * Return              None
  */
 /******************************************************************************/
+/* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
 static FUNC(void, LINIF_CODE)
     LinTp_SlaveAbortTxRxAndNotifyFailToUpper(P2VAR(LinTp_SlaveRuntimeType, AUTOMATIC, LINIF_VAR) tpSlaveRTPtr)
+/* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
 {
     if (NULL_PTR != tpSlaveRTPtr->TxNSduPtr)
     {
@@ -1222,7 +1311,9 @@ static FUNC(NetworkHandleType, LINIF_CODE) LinTp_SlaveGetLinTpChannel(NetworkHan
  * Return              LinTp channel id
  */
 /******************************************************************************/
-static FUNC(void, LINIF_CODE) LinTp_SlaveTimerHandle(P2VAR(LinTp_SlaveRuntimeType, AUTOMATIC, LINIF_VAR) tpSlaveRTPtr)
+static FUNC(void, LINIF_CODE)
+    LinTp_SlaveTimerHandle(P2VAR(LinTp_SlaveRuntimeType, AUTOMATIC, LINIF_VAR) tpSlaveRTPtr /* PRQA S 3432 */
+    )
 {
     if (tpSlaveRTPtr->NcrTimer > 0u)
     {
@@ -1269,7 +1360,9 @@ static FUNC(void, LINIF_CODE) LinTp_SlaveTimerHandle(P2VAR(LinTp_SlaveRuntimeTyp
  * Return              None
  */
 /******************************************************************************/
-static FUNC(void, LINIF_CODE) LinTp_SlaveResetRtData(P2VAR(LinTp_SlaveRuntimeType, AUTOMATIC, LINIF_VAR) tpSlaveRTPtr)
+static FUNC(void, LINIF_CODE)
+    LinTp_SlaveResetRtData(P2VAR(LinTp_SlaveRuntimeType, AUTOMATIC, LINIF_VAR) tpSlaveRTPtr /* PRQA S 3432 */
+    )
 {
     tpSlaveRTPtr->ChCfgPtr = NULL_PTR;
     tpSlaveRTPtr->TxNSduPtr = NULL_PTR;
@@ -1294,3 +1387,4 @@ static FUNC(void, LINIF_CODE) LinTp_SlaveResetRtData(P2VAR(LinTp_SlaveRuntimeTyp
 #include "LinIf_MemMap.h"
 
 #endif /* LINTP_SLAVE_SUPPORT == STD_ON */
+#endif /* LINIF_TP_SUPPORTED == STD_ON */

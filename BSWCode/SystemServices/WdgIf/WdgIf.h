@@ -18,20 +18,20 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : WdgIf.h                                                     **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : haibin.shao                                                 **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S):   AUTOSAR classic Platform R19-11                       **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*********************************************************************************
+**                                                                            **
+**  FILENAME    : WdgIf.h                                                     **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : haibin.shao                                                 **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S):   AUTOSAR classic Platform R19-11                       **
+**                                                                            **
+*******************************************************************************/
 #ifndef WDGIF_H
 #define WDGIF_H
 /*===========================[R E V I S I O N   H I S T O R Y]====================================*/
@@ -42,8 +42,8 @@
 #define WDGIF_H_AR_MINOR_VERSION 5u /*DD_2_218, Autosar Minor Version*/
 #define WDGIF_H_AR_PATCH_VERSION 0u /*DD_2_219, Autosar Patch Version*/
 #define WDGIF_H_SW_MAJOR_VERSION 2u /*DD_2_214, Major Version*/
-#define WDGIF_H_SW_MINOR_VERSION 0u /*DD_2_215, Minor Version*/
-#define WDGIF_H_SW_PATCH_VERSION 1u /*DD_2_216, Patch Version*/
+#define WDGIF_H_SW_MINOR_VERSION 1u /*DD_2_215, Minor Version*/
+#define WDGIF_H_SW_PATCH_VERSION 2u /*DD_2_216, Patch Version*/
 
 /*===========================VENDOR   I N F O R M A T I O N]==============*/
 #define WDGIF_VENDOR_ID 62U /* Replace with a symbolic name once available*/

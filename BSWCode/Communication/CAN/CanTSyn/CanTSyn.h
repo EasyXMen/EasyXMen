@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : CanTSyn.h                                                   **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : Xinrun Wang                                                 **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Public interfaces declared by CanTSyn module                **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : CanTSyn.h                                                   **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : Xinrun Wang                                                 **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Public interfaces declared by CanTSyn module                **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 /*******************************************************************************
 **                      Revision Control History                              **
 *******************************************************************************/
@@ -45,11 +46,14 @@
 #include "ComStack_Types.h"
 #include "StbM.h"
 #include "CanTSyn_Cfg.h"
-#if (STD_ON == CANTSYN_CRC_SUPPORT)
+#if (CANTSYN_CRC_SUPPORT == STD_ON)
 #include "Crc.h"
 #endif
 #include "CanTSyn_Cbk.h"
 
+#if CANTSYN_MULTIPLE_PARTITION_ENABLED == STD_ON
+#include "Os.h"
+#endif
 /*******************************************************************************
 **                      Global Symbols                                        **
 *******************************************************************************/
@@ -65,7 +69,7 @@
 #define CANTSYN_H_SW_PATCH_VERSION 8U
 
 /* DET ERROR CODE */
-#if (STD_ON == CANTSYN_DEV_ERROR_DETECT)
+#if (CANTSYN_DEV_ERROR_DETECT == STD_ON)
 #define CANTSYN_E_INVALID_PDUID ((uint8)0x01)
 #define CANTSYN_E_UNINIT        ((uint8)0x02)
 #define CANTSYN_E_NULL_POINTER  ((uint8)0x03)
@@ -218,20 +222,23 @@ typedef struct CanTSyn_GlobalTimeDomain_T
     uint8 CanTSynGlobalTimeDomainId;
     /* Switches support CAN FD on or off */
     boolean CanTSynUseExtendedMsgFormat;
+#if CANTSYN_MULTIPLE_PARTITION_ENABLED == STD_ON
+    ApplicationType applicationID;
+#endif
     /* Reference to time-base */
     StbM_SynchronizedTimeBaseType CanTSynSynchronizedTimeBaseId;
     /* The DataIDList for SYNC messages */
-    P2CONST(CanTSyn_DataIDListElementType, TYPEDEF, CANTSYN_CONST) CanTSynGlobalTimeSyncDataIDList;
+    const CanTSyn_DataIDListElementType* CanTSynGlobalTimeSyncDataIDList;
     /* The DataIDList for FUP messages */
-    P2CONST(CanTSyn_DataIDListElementType, TYPEDEF, CANTSYN_CONST) CanTSynGlobalTimeFupDataIDList;
+    const CanTSyn_DataIDListElementType* CanTSynGlobalTimeFupDataIDList;
     /* The DataIDList for OFS messages */
-    P2CONST(CanTSyn_DataIDListElementType, TYPEDEF, CANTSYN_CONST) CanTSynGlobalTimeOfsDataIDList;
+    const CanTSyn_DataIDListElementType* CanTSynGlobalTimeOfsDataIDList;
     /* The DataIDList for OFNS messages */
-    P2CONST(CanTSyn_DataIDListElementType, TYPEDEF, CANTSYN_CONST) CanTSynGlobalTimeOfnsDataIDList;
+    const CanTSyn_DataIDListElementType* CanTSynGlobalTimeOfnsDataIDList;
     /* Configuration of the global time master */
-    P2CONST(CanTSynGlobalTimeMasterType, TYPEDEF, CANTSYN_CONST) CanTSynGlobalTimeMaster;
+    const CanTSynGlobalTimeMasterType* CanTSynGlobalTimeMaster;
     /* Configuration of the global time slave */
-    P2CONST(CanTSynGlobalTimeSlaveType, TYPEDEF, CANTSYN_CONST) CanTSynGlobalTimeSlave;
+    const CanTSynGlobalTimeSlaveType* CanTSynGlobalTimeSlave;
 } CanTSyn_GlobalTimeDomainType;
 
 /* store the time information for a time slave */
@@ -262,7 +269,7 @@ typedef struct CanTSyn_SlaveTimeInfo_T
  */
 typedef struct
 {
-    P2CONST(CanTSyn_GlobalTimeDomainType, TYPEDEF, CANTSYN_CONST) CanTSynGlobalTimeDomain;
+    const CanTSyn_GlobalTimeDomainType* CanTSynGlobalTimeDomain;
 } CanTSyn_ConfigType;
 
 /*******************************************************************************
@@ -290,8 +297,7 @@ extern CONST(CanTSyn_ConfigType, CANTSYN_CONST_PBCFG) CanTSyn_config;
  *
  */
 
-extern FUNC(void, CANTSYN_CODE)
-    CanTSyn_GetVersionInfo(P2VAR(Std_VersionInfoType, AUTOMATIC, CANTSYN_APPL_DATA) versioninfo);
+extern void CanTSyn_GetVersionInfo(P2VAR(Std_VersionInfoType, AUTOMATIC, CANTSYN_APPL_DATA) versioninfo);
 
 #endif
 
@@ -307,7 +313,7 @@ extern FUNC(void, CANTSYN_CODE)
  *
  */
 
-extern FUNC(void, CANTSYN_CODE) CanTSyn_Init(P2CONST(CanTSyn_ConfigType, AUTOMATIC, CANTSYN_CONST_PBCFG) configPtr);
+extern void CanTSyn_Init(const CanTSyn_ConfigType* configPtr);
 
 /**
  * This API is used to turn on and off the TX capabilities of the CanTSyn.
@@ -321,5 +327,5 @@ extern FUNC(void, CANTSYN_CODE) CanTSyn_Init(P2CONST(CanTSyn_ConfigType, AUTOMAT
  * Return value: NA
  *
  */
-extern FUNC(void, CANTSYN_CODE) CanTSyn_SetTransmissionMode(uint8 CtrlIdx, CanTSyn_TransmissionModeType Mode);
+extern void CanTSyn_SetTransmissionMode(uint8 CtrlIdx, CanTSyn_TransmissionModeType Mode);
 #endif /* CANTSYN_H_ */

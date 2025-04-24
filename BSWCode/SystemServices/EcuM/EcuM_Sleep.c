@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : EcuM_Sleep.c                                                **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : qinchun.yang                                                **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Implement code for SLEEP phase of EcuM.                     **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : EcuM_Sleep.c                                                **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : qinchun.yang                                                **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Implement code for SLEEP phase of EcuM.                     **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 
 /*******************************************************************************
 **                      Revision Control History                              **
@@ -45,8 +46,9 @@
 **                      Include Section                                       **
 *******************************************************************************/
 #include "EcuM_Internal.h"
-#include "EcuM_Cbk.h"
+#if (ECUM_COMM_PNC_ENABLED == STD_ON) || (ECUM_COMM_CHANNEL_ENABLED == STD_ON)
 #include "ComM_EcuM.h"
+#endif /* ECUM_COMM_PNC_ENABLED == STD_ON */
 /*******************************************************************************
 **                      Private Macro Definitions                             **
 *******************************************************************************/
@@ -82,7 +84,7 @@ static FUNC(void, ECUM_CODE) EcuM_WakeupRestart(void);
 #if (ECUM_MAX_MCU_CORE_NUM > 1)
 /*Used to determine whether the slave core is all ready for sleep*/
 static FUNC(boolean, ECUM_CODE) EcuM_JudgeSleep(void);
-#endif /* ECUM_MAX_MCU_CORE_NUM > 1 */
+#endif /*ECUM_MAX_MCU_CORE_NUM > 1*/
 
 #if (ECUM_MAX_MCU_CORE_NUM > 1)
 /*Clear slave ready sleep flag.*/
@@ -90,7 +92,7 @@ static FUNC(void, ECUM_CODE) EcuM_ClrSlaveReadySleepFlag(void);
 
 /*Set slave ready sleep flag.*/
 static FUNC(void, ECUM_CODE) EcuM_SetSlaveReadySleepFlag(void);
-#endif /* ECUM_MAX_MCU_CORE_NUM > 1 */
+#endif /*ECUM_MAX_MCU_CORE_NUM > 1*/
 
 /*After the wake-up event is verified, the action of other modules needs to be notified*/
 static FUNC(void, ECUM_CODE) EcuM_ValidateWkEvAction(uint8 wkSrcIdx);
@@ -109,7 +111,7 @@ static FUNC(Std_ReturnType, ECUM_CODE) EcuM_DoSleepPhase(void);
 static volatile VAR(boolean, ECUM_CLEARED) EcuM_SlaveReadySleepFlag[ECUM_SLAVE_CORE_NUM];
 #define ECUM_STOP_SEC_VAR_CLEARED_SHARE_BOOLEAN
 #include "EcuM_MemMap.h"
-#endif /* ECUM_MAX_MCU_CORE_NUM > 1 */
+#endif /*ECUM_MAX_MCU_CORE_NUM > 1*/
 /*******************************************************************************
 **                      Global Variable Definitions                          **
 *******************************************************************************/
@@ -145,7 +147,7 @@ FUNC(Std_ReturnType, ECUM_CODE) EcuM_GoDownHaltPoll(uint16 caller)
         ret = E_NOT_OK;
     }
     else
-#endif /* ECUM_DEV_ERROR_DETECT == STD_ON */
+#endif /*ECUM_DEV_ERROR_DETECT == STD_ON*/
     {
         switch (EcuMRunData.SdtgNext.Target)
         {
@@ -167,7 +169,7 @@ FUNC(Std_ReturnType, ECUM_CODE) EcuM_GoDownHaltPoll(uint16 caller)
                 ECUM_INSTANCE_ID,
                 ECUM_SID_GODOWNHALTPOLL,
                 ECUM_E_STATE_PAR_OUT_OF_RANGE);
-#endif /* ECUM_DEV_ERROR_DETECT == STD_ON */
+#endif /*ECUM_DEV_ERROR_DETECT == STD_ON*/
             break;
         }
     }
@@ -195,12 +197,12 @@ FUNC(EcuM_WakeupSourceType, ECUM_CODE) EcuM_GetPendingWakeupEvents(void)
         (void)Det_ReportError(ECUM_MODULE_ID, ECUM_INSTANCE_ID, ECUM_SID_GETPENDINGWAKEUPEVENT, ECUM_E_UNINIT);
     }
     else
-#endif /* ECUM_DEV_ERROR_DETECT == STD_ON */
+#endif /*ECUM_DEV_ERROR_DETECT == STD_ON*/
     {
         /*Enter critical protection zone*/
-        SchM_Enter_EcuM_GetPendingWkEv();
-        wks = EcuMRunData.Wks.Pending;
-        SchM_Eixt_EcuM_GetPendingWkEv();
+        SchM_Enter_EcuM_WkEv();
+        wks = EcuMWksPending;
+        SchM_Exit_EcuM_WkEv();
     }
     return wks;
 }
@@ -224,15 +226,14 @@ FUNC(void, ECUM_CODE) EcuM_ClearWakeupEvent(EcuM_WakeupSourceType sources)
         (void)Det_ReportError(ECUM_MODULE_ID, ECUM_INSTANCE_ID, ECUM_SID_CLEARWAKEUPEVENT, ECUM_E_UNINIT);
     }
     else
-#endif /* ECUM_DEV_ERROR_DETECT == STD_ON */
+#endif /*ECUM_DEV_ERROR_DETECT == STD_ON*/
     {
         /*Enter critical protection zone*/
-        SchM_Enter_EcuM_ClrWkEv();
-        EcuMRunData.Wks.Pending = (EcuM_WakeupSourceType)(EcuMRunData.Wks.Pending & (~sources));
-        EcuMRunData.Wks.Validated = (EcuM_WakeupSourceType)(EcuMRunData.Wks.Validated & (~sources));
-        EcuMRunData.Wks.Expired = (EcuM_WakeupSourceType)(EcuMRunData.Wks.Expired & (~sources));
-        SchM_Eixt_EcuM_ClrWkEv();
-        /*Notify BswM*/
+        SchM_Enter_EcuM_WkEv();
+        EcuMWksPending = (EcuM_WakeupSourceType)(EcuMWksPending & (~sources));
+        EcuMWksValidated = (EcuM_WakeupSourceType)(EcuMWksValidated & (~sources));
+        EcuMWksExpired = (EcuM_WakeupSourceType)(EcuMWksExpired & (~sources));
+        SchM_Exit_EcuM_WkEv();
         BswM_EcuM_CurrentWakeup(sources, ECUM_WKSTATUS_NONE);
     }
     return;
@@ -259,12 +260,12 @@ FUNC(EcuM_WakeupSourceType, ECUM_CODE) EcuM_GetValidatedWakeupEvents(void)
         (void)Det_ReportError(ECUM_MODULE_ID, ECUM_INSTANCE_ID, ECUM_SID_GETVALIDATEDWAKEUPEVENT, ECUM_E_UNINIT);
     }
     else
-#endif /* ECUM_DEV_ERROR_DETECT == STD_ON */
+#endif /*ECUM_DEV_ERROR_DETECT == STD_ON*/
     {
         /*Enter critical protection zone*/
-        SchM_Enter_EcuM_GetValidWkEv();
-        wks = EcuMRunData.Wks.Validated;
-        SchM_Exit_EcuM_GetValidWkEv();
+        SchM_Enter_EcuM_WkEv();
+        wks = (*EcuMRunData.Wks.Validated);
+        SchM_Exit_EcuM_WkEv();
     }
     return wks;
 }
@@ -292,12 +293,12 @@ FUNC(EcuM_WakeupSourceType, ECUM_CODE) EcuM_GetExpiredWakeupEvents(void)
         (void)Det_ReportError(ECUM_MODULE_ID, ECUM_INSTANCE_ID, ECUM_SID_GETEXPIREDWAKEUPEVENT, ECUM_E_UNINIT);
     }
     else
-#endif /* ECUM_DEV_ERROR_DETECT == STD_ON */
+#endif /*ECUM_DEV_ERROR_DETECT == STD_ON*/
     {
         /*Enter critical protection zone*/
-        SchM_Enter_EcuM_GetExpiredWkEv();
-        wks = EcuMRunData.Wks.Expired;
-        SchM_Exit_EcuM_GetExpiredWkEv();
+        SchM_Enter_EcuM_WkEv();
+        wks = (*EcuMRunData.Wks.Expired);
+        SchM_Exit_EcuM_WkEv();
     }
     return wks;
 }
@@ -330,7 +331,7 @@ FUNC(void, ECUM_SETWAKEUPEVENT_CODE) EcuM_SetWakeupEvent(EcuM_WakeupSourceType s
     uint8 wksIdx;
 #if (ECUM_USE_TIMER == ECUM_TIMER_USE_GPT)
     Std_ReturnType ret;
-#endif /* ECUM_USE_TIMER == ECUM_TIMER_USE_GPT */
+#endif /*ECUM_USE_TIMER == ECUM_TIMER_USE_GPT*/
 
 #if (ECUM_DEV_ERROR_DETECT == STD_ON)
     /* Init Check */
@@ -346,7 +347,7 @@ FUNC(void, ECUM_SETWAKEUPEVENT_CODE) EcuM_SetWakeupEvent(EcuM_WakeupSourceType s
         (void)Det_ReportError(ECUM_MODULE_ID, ECUM_INSTANCE_ID, ECUM_SID_SETWAKEUPEVENT, ECUM_E_UNKNOWN_WAKEUP_SOURCE);
     }
     else
-#endif /* ECUM_DEV_ERROR_DETECT == STD_ON */
+#endif /*ECUM_DEV_ERROR_DETECT == STD_ON*/
     {
         /*SWS_EcuM_04138
          * Ignore all events passed in the sources parameter that are not associated
@@ -354,9 +355,9 @@ FUNC(void, ECUM_SETWAKEUPEVENT_CODE) EcuM_SetWakeupEvent(EcuM_WakeupSourceType s
         sleepModeId = pRt->SdtgNext.Mode;
         if ((sources & EcuM_SleepModeCfgs[sleepModeId].wkMask) != ECUM_WKSOURCE_NONE)
         {
-            SchM_Enter_EcuM_SetWkEv();
-            pRt->Wks.Pending |= sources;
-            SchM_Exit_EcuM_SetWkEv();
+            SchM_Enter_EcuM_WkEv();
+            (*pRt->Wks.Pending) |= sources;
+            SchM_Exit_EcuM_WkEv();
 
             /*Calculate config wake up index.*/
             wksIdx = EcuM_WkSrcMap2CfgWkIdx(sources);
@@ -368,22 +369,24 @@ FUNC(void, ECUM_SETWAKEUPEVENT_CODE) EcuM_SetWakeupEvent(EcuM_WakeupSourceType s
                     ret = Tm_GetTimeSpan100us32bit(&(pRt->Wks.wkTime[wksIdx]), &spanTime);
 #else
                     spanTime = EcuM_CalculateElapsedMS(pRt->Wks.wkTime[wksIdx]);
-#endif /* ECUM_USE_TIMER == ECUM_TIMER_USE_GPT */
+#endif /*ECUM_USE_TIMER == ECUM_TIMER_USE_GPT*/
                     if ((EcuM_WkSourceCfgs[wksIdx].checkWkupTimeout < spanTime)
 #if (ECUM_USE_TIMER == ECUM_TIMER_USE_GPT)
                         || (ret != E_OK)
-#endif /* ECUM_USE_TIMER == ECUM_TIMER_USE_GPT */
+#endif /*ECUM_USE_TIMER == ECUM_TIMER_USE_GPT*/
                     )
                     {
                         /*Check wake-up timeout.*/
-                        pRt->Wks.Pending &= ~(sources);
-                        /* Update internal variable(record expired wake up source. */
-                        pRt->Wks.Expired |= sources;
+                        (*pRt->Wks.Pending) &= ~(sources);
+                        /*Update internal variable(record expired wake up source.)*/
+                        (*pRt->Wks.Expired) |= sources;
                         /*notify BSWM for expired wake up source*/
                         BswM_EcuM_CurrentWakeup(sources, ECUM_WKSTATUS_EXPIRED);
                         /*stop wake up source*/
                         EcuM_StopWakeupSources(sources);
-                        goto SET_WAKEUP_EVENT; /* PRQA S 2001 */ /* MISRA Rule 15.1 */
+                        /* PRQA S 2001 ++ */ /* MISRA Rule 15.1 */
+                        goto SET_WAKEUP_EVENT;
+                        /* PRQA S 2001 -- */ /* MISRA Rule 15.1 */
                     }
                 }
                 if (EcuM_WkSourceCfgs[wksIdx].validationTimeout != 0u)
@@ -397,12 +400,12 @@ FUNC(void, ECUM_SETWAKEUPEVENT_CODE) EcuM_SetWakeupEvent(EcuM_WakeupSourceType s
                     (void)Tm_ResetTimer100us32bit(&(pRt->Wks.wkTime[wksIdx]));
 #else  /*Use Os counter.*/
                     pRt->Wks.wkTime[wksIdx] = EcuM_CurrentTimestampMS();
-#endif /* ECUM_USE_TIMER == ECUM_TIMER_USE_GPT */
+#endif /*ECUM_USE_TIMER == ECUM_TIMER_USE_GPT*/
                 }
                 else /*No validation.*/
                 {
-                    pRt->Wks.Pending &= ~sources;
-                    pRt->Wks.Validated |= sources;
+                    (*pRt->Wks.Pending) &= ~sources;
+                    (*pRt->Wks.Validated) |= sources;
                     if (EcuMRunData.State >= ECUM_STATE_STARTUP)
                     {
                         EcuM_ValidateWkEvAction(wksIdx);
@@ -434,7 +437,7 @@ SET_WAKEUP_EVENT:
  */
 FUNC(void, ECUM_VALIDATEWAKEUPEVENT_CODE) EcuM_ValidateWakeupEvent(EcuM_WakeupSourceType sources)
 {
-    P2VAR(EcuM_RunTimeType, AUTOMATIC, ECUM_VAR) pRt = &EcuMRunData; /* PRQA S 3432 */ /* MISRA Rule 20.7 */
+    P2CONST(EcuM_RunTimeType, AUTOMATIC, ECUM_CONST) pRt = &EcuMRunData; /* PRQA S 3432 */ /* MISRA Rule 20.7 */
     uint8 wkIdx;
 
 #if (ECUM_DEV_ERROR_DETECT == STD_ON)
@@ -455,15 +458,15 @@ FUNC(void, ECUM_VALIDATEWAKEUPEVENT_CODE) EcuM_ValidateWakeupEvent(EcuM_WakeupSo
             ECUM_E_UNKNOWN_WAKEUP_SOURCE);
     }
     else
-#endif /* ECUM_DEV_ERROR_DETECT == STD_ON */
+#endif /*ECUM_DEV_ERROR_DETECT == STD_ON*/
     {
         /*SWS_EcuM_02790*/
         if (ECUM_STATE_RUN == (pRt->State & ECUM_STATE_RUN))
         {
-            SchM_Enter_EcuM_ValidWkEv();
-            pRt->Wks.Pending &= ~(sources);
-            pRt->Wks.Validated |= sources;
-            SchM_Exit_EcuM_ValidWkEv();
+            SchM_Enter_EcuM_WkEv();
+            (*pRt->Wks.Pending) &= ~(sources);
+            (*pRt->Wks.Validated) |= sources;
+            SchM_Exit_EcuM_WkEv();
             wkIdx = EcuM_WkSrcMap2CfgWkIdx(sources);
             if (wkIdx != (uint8)ECUM_MAX_WAKE_UP_SOURCE_NUM)
             {
@@ -503,7 +506,7 @@ static FUNC(void, ECUM_CODE) EcuM_GoSleep(void)
 #if (ECUM_MAX_MCU_CORE_NUM > 1)
     CoreIdType coreId;
     uint8 slaveIdx;
-#endif /* ECUM_MAX_MCU_CORE_NUM > 1 */
+#endif /*ECUM_MAX_MCU_CORE_NUM > 1*/
     StatusType osRet = E_OK;
     uint8 index;
     EcuM_ShutdownModeType sleepModeId;
@@ -550,6 +553,7 @@ static FUNC(void, ECUM_CODE) EcuM_GoSleep(void)
         }
 #endif /*ECUM_MAX_MCU_CORE_NUM > 1*/
         /*Enter in SLEEP mode.*/
+        EcuMRunData.State = ECUM_STATE_SLEEP;
         BswM_EcuM_CurrentState(ECUM_STATE_SLEEP);
     }
     if ((StatusType)E_OK != osRet)
@@ -562,6 +566,8 @@ static FUNC(void, ECUM_CODE) EcuM_GoSleep(void)
 static FUNC(void, ECUM_CODE) EcuM_HaltSequence(void)
 {
     EcuM_ShutdownModeType sleepModeId;
+    EcuM_WakeupSourceType pendWks;
+    EcuM_WakeupSourceType ValidatedWks;
 
 #if (ECUM_MAX_MCU_CORE_NUM > 1)
     CoreIdType coreId;
@@ -573,9 +579,17 @@ static FUNC(void, ECUM_CODE) EcuM_HaltSequence(void)
     coreId = GetCoreID();
     if (ECUM_MASTER_CORE_ID == coreId)
     {
-        /* Wait for all Slave cores to be ready to sleep( */
+        /*Wait for all Slave cores to be ready to sleep()*/
         while (FALSE == EcuM_JudgeSleep())
-            ;
+        {
+            /* Waiting for a wake-up to occur from when the core is dormant */
+            pendWks = EcuM_GetPendingWakeupEvents();
+            ValidatedWks = EcuM_GetValidatedWakeupEvents();
+            if (((ECUM_ALL_WKSOURCE & pendWks) != 0u) || ((ECUM_ALL_WKSOURCE & ValidatedWks) != 0u))
+            {
+                break;
+            }
+        }
     }
     else /*Slave core*/
     {
@@ -593,30 +607,32 @@ ECUM_HALT_SEQ:
     {
         EcuM_ErrorHook(ECUM_E_CALL_OS_FAILED);
     }
-#endif /* ECUM_MAX_MCU_CORE_NUM > 1 */
+#endif /*ECUM_MAX_MCU_CORE_NUM > 1*/
     /*Disable all interrupts*/
     DisableAllInterrupts();
 #if (ECUM_MAX_MCU_CORE_NUM > 1)
     if (ECUM_MASTER_CORE_ID == coreId)
-#endif /* ECUM_MAX_MCU_CORE_NUM > 1 */
+#endif /*ECUM_MAX_MCU_CORE_NUM > 1*/
     {
         EcuM_GenerateRamHash();
     }
-    sleepModeId = EcuMRunData.SdtgLast.Mode;
-    /*Enter in halt mode,ECU Manager module does not execute any code.*/
     /* When a wakeup occurs and is not pending or validated, EcuM continues to sleep */
     while (TRUE)
     {
-        if (((ECUM_ALL_WKSOURCE & EcuMRunData.Wks.Pending) == 0u)
-            && ((ECUM_ALL_WKSOURCE & EcuMRunData.Wks.Validated) == 0u))
+        pendWks = EcuM_GetPendingWakeupEvents();
+        ValidatedWks = EcuM_GetValidatedWakeupEvents();
+        if (((ECUM_ALL_WKSOURCE & pendWks) == 0u) && ((ECUM_ALL_WKSOURCE & ValidatedWks) == 0u))
         {
             sleepModeId = EcuMRunData.SdtgLast.Mode;
             /*Enter in halt mode,ECU Manager module does not execute any code.*/
-            Mcu_SetMode(EcuM_SleepModeCfgs[sleepModeId].mcuMode);
+            EcuM_McuSetMode(EcuM_SleepModeCfgs[sleepModeId].mcuMode);
+            /*Enable all interrupts*/
             EnableAllInterrupts();
         }
         else
         {
+            /*Enable all interrupts*/
+            EnableAllInterrupts();
             break;
         }
     }
@@ -634,13 +650,13 @@ static FUNC(void, ECUM_CODE) EcuM_PollSequence(void)
     CoreIdType coreId;
     uint8 slaveIdx;
     StatusType osRet = E_OK;
-#endif /* ECUM_MAX_MCU_CORE_NUM > 1 */
+#endif /*ECUM_MAX_MCU_CORE_NUM > 1*/
 
     DisableAllInterrupts();
     sleepModeId = EcuMRunData.SdtgNext.Mode;
-    /*Mcu_SetMode() puts the microcontroller in some power saving mode.
+    /*EcuM_McuSetMode() puts the microcontroller in some power saving mode.
      * In this mode software execution continues, but with reduced clock speed. */
-    Mcu_SetMode(EcuM_SleepModeCfgs[sleepModeId].mcuMode);
+    EcuM_McuSetMode(EcuM_SleepModeCfgs[sleepModeId].mcuMode);
     EnableAllInterrupts();
     do
     {
@@ -659,14 +675,14 @@ static FUNC(void, ECUM_CODE) EcuM_PollSequence(void)
         pendingWkup = EcuM_GetPendingWakeupEvents();
 #if (ECUM_ALARM_CLOCK_PRESENT == STD_ON)
         /*Get the expired wakeup sources*/
-        if ((ECUM_WKSOURCE_ALARMCLOCK == ((EcuMRunData.Wks.Validated) & ECUM_WKSOURCE_ALARMCLOCK))
+        if ((ECUM_WKSOURCE_ALARMCLOCK == (((*EcuMRunData.Wks.Validated)) & ECUM_WKSOURCE_ALARMCLOCK))
             || (EcuMRunData.GlobalClock >= EcuMRunData.MasterAlarm))
         {
             /*Additional Confidition to Loop: While (AlarmClockService Present AND EcuM_AlarmClock
              *  only pending event AND Alarm not expired)*/
             break;
         }
-#endif /* ECUM_ALARM_CLOCK_PRESENT == STD_ON */
+#endif /*ECUM_ALARM_CLOCK_PRESENT == STD_ON*/
     } while (0u == (ECUM_ALL_WKSOURCE & pendingWkup));
     EcuM_SleepNotifyBswM();
 #if (ECUM_MAX_MCU_CORE_NUM > 1)
@@ -696,7 +712,7 @@ static FUNC(void, ECUM_CODE) EcuM_PollSequence(void)
             EcuM_ErrorHook(ECUM_E_CALL_OS_FAILED);
         }
     }
-#endif /* ECUM_MAX_MCU_CORE_NUM > 1 */
+#endif /*ECUM_MAX_MCU_CORE_NUM > 1*/
 }
 
 /*Resume form halt sequence*/
@@ -704,19 +720,17 @@ static FUNC(void, ECUM_CODE) EcuM_HaltSequenceExit(void)
 {
 #if (ECUM_ALARM_CLOCK_PRESENT == STD_ON)
     uint8 sleepModeId;
-#endif /* ECUM_ALARM_CLOCK_PRESENT == STD_ON */
+#endif /*ECUM_ALARM_CLOCK_PRESENT == STD_ON*/
     uint8 ramHash;
 #if (ECUM_MAX_MCU_CORE_NUM > 1)
     CoreIdType coreId;
     uint8 slaveIdx;
-#endif /* ECUM_MAX_MCU_CORE_NUM > 1 */
+#endif /*ECUM_MAX_MCU_CORE_NUM > 1*/
 
-    /*Enable all interrupts*/
-    EnableAllInterrupts();
 #if (ECUM_MAX_MCU_CORE_NUM > 1)
     coreId = GetCoreID();
     if (ECUM_MASTER_CORE_ID == coreId)
-#endif /* ECUM_MAX_MCU_CORE_NUM > 1 */
+#endif /*ECUM_MAX_MCU_CORE_NUM > 1*/
     {
 #if (ECUM_ALARM_CLOCK_PRESENT == STD_ON)
         /*Condition:
@@ -728,10 +742,10 @@ static FUNC(void, ECUM_CODE) EcuM_HaltSequenceExit(void)
             EcuM_GenerateRamHash();
             sleepModeId = EcuMRunData.SdtgNext.Mode;
             /*Enter in halt mode,ECU Manager module does not execute any code.*/
-            Mcu_SetMode(EcuM_SleepModeCfgs[sleepModeId].mcuMode);
+            EcuM_McuSetMode(EcuM_SleepModeCfgs[sleepModeId].mcuMode);
             EnableAllInterrupts();
         }
-#endif /* ECUM_ALARM_CLOCK_PRESENT == STD_ON */
+#endif /*ECUM_ALARM_CLOCK_PRESENT == STD_ON*/
 
         /*returned from halt, check RAM hash*/
         ramHash = EcuM_CheckRamHash();
@@ -756,7 +770,7 @@ static FUNC(void, ECUM_CODE) EcuM_HaltSequenceExit(void)
         while (TRUE == EcuM_SlaveReadySleepFlag[slaveIdx])
             ;
     }
-#endif /* ECUM_MAX_MCU_CORE_NUM > 1 */
+#endif /*ECUM_MAX_MCU_CORE_NUM > 1*/
 }
 
 /*In sleep phase,notify Ecum wake up status to BSWM.*/
@@ -767,10 +781,10 @@ static FUNC(void, ECUM_CODE) EcuM_SleepNotifyBswM(void)
 
     for (index = 0; index < (uint8)ECUM_MAX_WAKE_UP_SOURCE_NUM; index++)
     {
-        if ((EcuM_WkSourceCfgs[index].wkSource & pRt->Wks.Pending) != 0u)
+        if ((EcuM_WkSourceCfgs[index].wkSource & (*pRt->Wks.Pending)) != 0u)
         {
             /*wakeup validation needed or not*/
-            if (((EcuM_WkSourceCfgs[index].wkSource & pRt->Wks.Validated) != 0u)
+            if (((EcuM_WkSourceCfgs[index].wkSource & (*pRt->Wks.Validated)) != 0u)
                 && (EcuM_WkSourceCfgs[index].validationTimeout > 0u))
             {
                 /*validation needed*/
@@ -802,16 +816,16 @@ static FUNC(void, ECUM_CODE) EcuM_WakeupRestart(void)
 #if (ECUM_ALARM_CLOCK_PRESENT == STD_ON)
     /*Cancelled alarms.*/
     EcuM_CancellAlarms();
-#endif /* ECUM_ALARM_CLOCK_PRESENT == STD_ON */
+#endif /*ECUM_ALARM_CLOCK_PRESENT == STD_ON*/
     /*Edit by yqc,
      * 2020/08/28
-     * Some MCU don't need to call Mcu_SetMode to reach normal mode.*/
+     * Some MCU don't need to call EcuM_McuSetMode to reach normal mode.*/
     if (EcuM_NormalMcuModeCfg != ECUM_DAFULT_MCU_NORMAL_MODE)
     {
         DisableAllInterrupts();
         /*Restore MCU normal mode
          * Selected MCU mode is configured in the configuration parameter EcuMNormalMcuModeRef*/
-        Mcu_SetMode(EcuM_NormalMcuModeCfg);
+        EcuM_McuSetMode(EcuM_NormalMcuModeCfg);
         EnableAllInterrupts();
     }
 
@@ -875,7 +889,7 @@ static FUNC(boolean, ECUM_CODE) EcuM_JudgeSleep(void)
     }
     return ret;
 }
-#endif /* ECUM_MAX_MCU_CORE_NUM > 1 */
+#endif /*ECUM_MAX_MCU_CORE_NUM > 1*/
 
 #if (ECUM_MAX_MCU_CORE_NUM > 1)
 /*Clear slave ready sleep flag.*/
@@ -923,23 +937,24 @@ ECUM_SET_SLEEP_FLAG:
         EcuM_ErrorHook(ECUM_E_CALL_OS_FAILED);
     }
 }
-#endif /* ECUM_MAX_MCU_CORE_NUM > 1 */
+#endif /*ECUM_MAX_MCU_CORE_NUM > 1*/
 
 /*After the wake-up event is verified, the action of other modules needs to be notified*/
 static FUNC(void, ECUM_CODE) EcuM_ValidateWkEvAction(uint8 wkSrcIdx)
 {
     P2CONST(EcuM_WakeupSourceCfgType, AUTOMATIC, ECUM_CONST) pWks;
-#if (ECWM_COMM_PNC_ENABLED == STD_ON)
+#if (ECUM_COMM_PNC_ENABLED == STD_ON)
     PNCHandleType pncIdx;
-#endif /*ECWM_COMM_PNC_ENABLED == STD_ON*/
+#endif /*ECUM_COMM_PNC_ENABLED == STD_ON*/
 
     pWks = &(EcuM_WkSourceCfgs[wkSrcIdx]);
-
+#if (ECUM_COMM_CHANNEL_ENABLED == STD_ON)
     if (NULL_PTR != pWks->comMChnl)
     {
         ComM_EcuM_WakeUpIndication(*(pWks->comMChnl));
     }
-#if (ECWM_COMM_PNC_ENABLED == STD_ON)
+#endif /* ECUM_COMM_CHANNEL_ENABLED == STD_ON */
+#if (ECUM_COMM_PNC_ENABLED == STD_ON)
     if (NULL_PTR != pWks->pnc)
     {
         /*notify COMM for PNC wake up*/
@@ -948,7 +963,7 @@ static FUNC(void, ECUM_CODE) EcuM_ValidateWkEvAction(uint8 wkSrcIdx)
             ComM_EcuM_PNCWakeUpIndication(pWks->pnc[pncIdx]);
         }
     }
-#endif /*ECWM_COMM_PNC_ENABLED == STD_ON*/
+#endif /*ECUM_COMM_PNC_ENABLED == STD_ON*/
     BswM_EcuM_CurrentWakeup(pWks->wkSource, ECUM_WKSTATUS_VALIDATED);
 }
 

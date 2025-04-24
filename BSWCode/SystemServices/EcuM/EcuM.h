@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : EcuM.h                                                      **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : qinchun.yang                                                **
- **  Vendor      :                                                             **
- **  DESCRIPTION : This file is partly ECU dependent.                          **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11.                     **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : EcuM.h                                                      **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : qinchun.yang                                                **
+**  Vendor      :                                                             **
+**  DESCRIPTION : This file is partly ECU dependent.                          **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11.                     **
+**                                                                            **
+*******************************************************************************/
 
 /******************************************************************************
 **                      Revision Control History                             **
@@ -47,8 +48,10 @@
 #define ECUM_H_
 
 #include "EcuM_Cfg.h"
+#include "EcuM_Cbk.h"
 #include "EcuM_Types.h"
 #include "Os.h"
+#include "Mcu.h"
 
 /*******************************************************************************
 **                      Global Symbols                                        **
@@ -63,7 +66,7 @@
 
 #define ECUM_SW_MAJOR_VERSION         2u
 #define ECUM_SW_MINOR_VERSION         1u
-#define ECUM_SW_PATCH_VERSION         7u
+#define ECUM_SW_PATCH_VERSION         16u
 
 #define ECUM_SID_GETVERSION           0x00u
 
@@ -119,13 +122,13 @@
 /*Post build configuration root type definition*/
 typedef struct
 {
-    uint32 configConsistencyHash;                      /*Configuration consistency hash code for
-                                                       pre-compile and link time configure*/
-    AppModeType defaultAppMode;                        /*EcuMDefaultAppMode*/
-    EcuM_DefaultShutdownTargetType defaultShutdownTgt; /*EcuMDefaultState*/
-    EcuM_ShutdownModeType defaultShutdownMode;         /*EcuMDefaultResetMode or
-                                                         EcuMDefaultSleepMode*/
-    const EcuM_GenBSWPbCfgType* modulePBCfg;           /*PB CFG data pointer for modules*/
+    uint32 configConsistencyHash;               /*Configuration consistency hash code for
+                                                pre-compile and link time configure*/
+    AppModeType defaultAppMode;                 /*EcuMDefaultAppMode*/
+    EcuM_ShutdownTargetType defaultShutdownTgt; /*EcuMDefaultState*/
+    EcuM_ShutdownModeType defaultShutdownMode;  /*EcuMDefaultResetMode or
+                                                  EcuMDefaultSleepMode*/
+    const EcuM_GenBSWPbCfgType* modulePBCfg;    /*PB CFG data pointer for modules*/
 } EcuM_ConfigType;
 /*******************************************************************************
 **                      Global Data Declaration                               **
@@ -147,7 +150,7 @@ extern CONST(uint32, ECUM_CONST) EcuM_ConfigConsistencyHash;
  * Return value: NA
  */
 FUNC(void, ECUM_CODE) EcuM_GetVersionInfo(P2VAR(Std_VersionInfoType, AUTOMATIC, ECUM_APPL_DATA) versioninfo);
-#endif /* ECUM_VERSION_INFO_API == STD_ON */
+#endif /*ECUM_VERSION_INFO_API == STD_ON*/
 
 /**
  * Instructs the ECU State Manager module to go into a sleep mode, Reset or OFF
@@ -278,8 +281,8 @@ FUNC(Std_ReturnType, ECUM_CODE) EcuM_RequestPOST_RUN(EcuM_UserType user);
  *               E_NOT_OK: The release request was not accepted by EcuM,
  *                         a detailed error condition was sent to DET (see Error Codes).
  */
-FUNC(Std_ReturnType, ECUM_COE) EcuM_ReleasePOST_RUN(EcuM_UserType user);
-#endif /* STD_ON == ECUM_MODE_HANDING */
+FUNC(Std_ReturnType, ECUM_CODE) EcuM_ReleasePOST_RUN(EcuM_UserType user);
+#endif /*STD_ON == ECUM_MODE_HANDING*/
 
 /**
  * EcuM_SelectShutdownTarget selects the shutdown target.
@@ -566,6 +569,6 @@ FUNC(Std_ReturnType, ECUM_CODE) EcuM_SelectBootTarget(EcuM_BootTargetType target
 FUNC(Std_ReturnType, ECUM_CODE) EcuM_GetBootTarget(P2VAR(EcuM_BootTargetType, AUTOMATIC, ECUM_APPL_DATA) target);
 /* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
 
-FUNC(void, ECUM_AL_DRIVERINITBSWM_0_CODE)
+FUNC(void, ECUM_AL_DRIVERINITBSWM_CODE)
 EcuM_AL_DriverInitBswM(uint8 drvInitIdx);
 #endif /*ECUM_H_*/

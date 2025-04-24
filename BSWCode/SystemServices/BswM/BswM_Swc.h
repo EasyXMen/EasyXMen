@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : BswM_Swc.h                                                  **
- **                                                                            **
- **  Created on  : 2020-03-24                                                  **
- **  Author      : qinchun.yang                                                **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : BswM_Swc.h                                                  **
+**                                                                            **
+**  Created on  : 2020-03-24                                                  **
+**  Author      : qinchun.yang                                                **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 
 #ifndef BSWM_SWC_H
 #define BSWM_SWC_H
@@ -41,7 +42,7 @@
 *******************************************************************************/
 #include "BswM_Internal.h"
 #if (BSWM_RTE_ENABLED == STD_ON)
-#include "Rte_BswM.h"
+
 /*******************************************************************************
 **                      Global Symbols                                        **
 *******************************************************************************/
@@ -103,5 +104,5 @@ BswM_SwcModeNotification(BswM_ModeGroupType modeGroup, BswM_ModeType mode);
 FUNC(void, BSWM_SWC_CODE)
 BswM_SwcModeRequest(BswM_ModeGroupType modeGroup, BswM_ModeType mode);
 
-#endif /* BSWM_RTE_ENABLED == STD_ON */
+#endif /*BSWM_RTE_ENABLED == STD_ON*/
 #endif /* BSWM_SWC_H */

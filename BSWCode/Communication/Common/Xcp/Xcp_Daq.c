@@ -18,24 +18,25 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Xcp_Daq.c                                                   **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : qinchun.yang                                                **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Implementation of the XCP_Daq command                       **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Xcp_Daq.c                                                   **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : qinchun.yang                                                **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Implementation of the XCP_Daq command                       **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 /*=======[I N C L U D E S]====================================================*/
 #include "Xcp_Internal.h"
 #include "Xcp_Interface.h"
-
+#include "SchM_Xcp.h"
 #if (XCP_PL_DAQ == (XCP_PL_DAQ & XCP_RESOURCE))
 /*=======[M A C R O S]========================================================*/
 /* XCP start stop mode */
@@ -60,7 +61,7 @@
 #elif (XCP_IDENTIFICATION_FIELD_TYPE == XCP_PID_RELATIVE_WORD_ALIGNED)
 #define XCP_DAQ_NUM_OFFSET 0x02u
 #define XCP_DATA_OFFSET    0x04u
-#endif /* (XCP_IDENTIFICATION_FIELD_TYPE == XCP_PID_ABSOLUTE) */ /* PRQA S 2053 */ /* MISRA Rule 18.8, Dir 4.4 */
+#endif /*XCP_IDENTIFICATION_FIELD_TYPE == XCP_PID_ABSOLUTE*/
 
 /*=======[I N T E R N A L   D A T A]==========================================*/
 
@@ -133,7 +134,7 @@ static VAR(uint8, XCP_VAR) Xcp_DynDaqBuffer[XCP_DYNAMIC_DAQ_BUFFER_SIZE];
 /* PRQA S 3678 -- */ /* MISRA Rule 8.13 */
 #define XCP_STOP_SEC_VAR_CLEARED_8
 #include "Xcp_MemMap.h"
-#endif
+#endif /*XCP_DAQ_CONFIG_TYPE == XCP_DAQ_DYNAMIC*/
 
 #define XCP_START_SEC_VAR_CLEARED_16
 #include "Xcp_MemMap.h"
@@ -147,14 +148,14 @@ static VAR(Xcp_DaqNumType, XCP_VAR) Xcp_DaqListQueue[XCP_MAX_DAQ];
 static VAR(Xcp_DynamicalDaqQueueType, XCP_VAR) Xcp_DynamicalDaqQueue = {XCP_DYNAMIC_DAQ_BUFFER_SIZE, 0};
 #define XCP_STOP_SEC_VAR_INIT_UNSPECIFIED
 #include "Xcp_MemMap.h"
-#endif
+#endif /*XCP_DAQ_CONFIG_TYPE == XCP_DAQ_DYNAMIC*/
 
 #define XCP_START_SEC_VAR_CLEARED_32
 #include "Xcp_MemMap.h"
 static VAR(uint32, XCP_VAR) Xcp_EvChBufferUsage[XCP_MAX_EVENT_CHANNEL];
 #define XCP_STOP_SEC_VAR_CLEARED_32
 #include "Xcp_MemMap.h"
-#endif /* (XCP_PL_DAQ == (XCP_PL_DAQ & XCP_RESOURCE)) */ /* PRQA S 2053 */ /* MISRA Rule 18.8, Dir 4.4 */
+#endif /*XCP_PL_DAQ == XCP_PL_DAQ & XCP_RESOURCE*/
 
 /*=======[I N T E R N A L   F U N C T I O N   D E C L A R A T I O N S]========*/
 #define XCP_START_SEC_CODE
@@ -165,11 +166,8 @@ static FUNC(void, XCP_CODE) Xcp_ClearAllDaq(void);
 static FUNC(void, XCP_CODE) Xcp_ClearDaq(Xcp_DaqNumType daqNum);
 static FUNC(void, XCP_CODE) Xcp_ClearDaqOdt(Xcp_DaqNumType daqNum);
 
-#if (XCP_DAQ_PRIORITY_SUPPORT == STD_ON)
-static FUNC(void, XCP_CODE) Xcp_SortDaqbypriority(void);
-#endif
 /* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
-static FUNC(void, XCP_CODE) Xcp_FillEventBuffer(P2CONST(Xcp_DaqType, AUTOMATIC, AUTOMATIC) daqPtr);
+static FUNC(void, XCP_CODE) Xcp_FillEventBuffer(P2VAR(Xcp_DaqType, AUTOMATIC, AUTOMATIC) daqPtr);
 /* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
 static FUNC(void, XCP_CODE) Xcp_EventChannelDaqHal(uint16 eventNum, const Xcp_DaqNumType daqNum);
 /* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
@@ -273,10 +271,10 @@ static FUNC(void, XCP_CODE) Xcp_DaqCfgBufferInit(void)
         Xcp_Daq[Num].firstPid = daqCfgRef[Num].XcpDto->XcpDtoPid;
 #else
         Xcp_Daq[Num].firstPid = 0u;
-#endif /*(XCP_DAQ_CONFIG_TYPE == XCP_DAQ_STATIC)*/ /* PRQA S 2053 */ /* MISRA Rule 18.8, Dir 4.4 */
+#endif /*XCP_DAQ_CONFIG_TYPE == XCP_DAQ_STATIC*/
 #else
         Xcp_Daq[Num].firstPid = 0;
-#endif /*(XCP_IDENTIFICATION_FIELD_TYPE == XCP_PID_ABSOLUTE)*/ /* PRQA S 2053 */ /* MISRA Rule 18.8, Dir 4.4 */
+#endif /*XCP_IDENTIFICATION_FIELD_TYPE == XCP_PID_ABSOLUTE*/
     }
     return;
 }
@@ -413,9 +411,9 @@ static FUNC(void, XCP_CODE) Xcp_ClearDaqOdt(Xcp_DaqNumType daqNum)
  * @return              <None>
  */
 /******************************************************************************/
-/* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
-static FUNC(void, XCP_CODE) Xcp_FillEventBuffer(P2CONST(Xcp_DaqType, AUTOMATIC, AUTOMATIC) daqPtr)
-/* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
+/* PRQA S 3673 ++ */ /* MISRA Rule 8.13 */
+static FUNC(void, XCP_CODE) Xcp_FillEventBuffer(P2VAR(Xcp_DaqType, AUTOMATIC, AUTOMATIC) daqPtr)
+/* PRQA S 3673 -- */ /* MISRA Rule 8.13 */
 {
     P2CONST(Xcp_EntryType, AUTOMATIC, AUTOMATIC) entryPtr;
     uint8 odtNum;           /* odt counter */
@@ -489,6 +487,7 @@ static FUNC(Std_ReturnType, XCP_CODE) Xcp_SendDaqFrame(P2VAR(Xcp_DaqType, AUTOMA
     uint16 destCnt = 0u;                                             /* dest Position counter */
     PduIdType pduId;
 
+    SchM_Enter_Xcp_Exclusive_Daq();
     /* set PID Num*/
     if ((boolean)TRUE == overLoad)
     { /* to pid overflow indication flag */
@@ -594,6 +593,7 @@ static FUNC(Std_ReturnType, XCP_CODE) Xcp_SendDaqFrame(P2VAR(Xcp_DaqType, AUTOMA
             daqPtr->eventBufferPos += elementCnt;
         }
     }
+    SchM_Exit_Xcp_Exclusive_Daq();
     if (Xcp_GlobalCfgPtr->XcpDaqList[DaqNum].XcpDto != NULL_PTR)
     {
         pduId = (PduIdType)Xcp_GlobalCfgPtr->XcpDaqList[DaqNum].XcpDto->XcpDto2PduMapping->XcpTxPdu->LowLayerTxPduId;
@@ -835,10 +835,10 @@ FUNC(void, XCP_CODE) Xcp_RxStimHal(P2CONST(uint8, AUTOMATIC, XCP_APPL_DATA) data
 #elif (XCP_IDENTIFICATION_FIELD_TYPE == XCP_PID_RELATIVE_BYTE)
     daqNum = dataPtr[XCP_DAQ_NUM_OFFSET];
     pos = XCP_DATA_OFFSET;
-#else /*XCP_PID_RELATIVE_WORD & XCP_PID_RELATIVE_WORD_ALIGNED*/
+#else  /*XCP_PID_RELATIVE_WORD & XCP_PID_RELATIVE_WORD_ALIGNED*/
     Xcp_CopyU1BufferToU2(&(dataPtr[XCP_DAQ_NUM_OFFSET]), &daqNum, CPU_BYTE_ORDER);
     pos = XCP_DATA_OFFSET;
-#endif /*(XCP_IDENTIFICATION_FIELD_TYPE == XCP_PID_ABSOLUTE)*/ /* PRQA S 2053 */ /* MISRA Rule 18.8, Dir 4.4 */
+#endif /*XCP_IDENTIFICATION_FIELD_TYPE == XCP_PID_ABSOLUTE*/
     if (XCP_MAX_DAQ >= daqNum)
     {
         daqPtr = &(Xcp_Daq[daqNum]);
@@ -861,7 +861,7 @@ FUNC(void, XCP_CODE) Xcp_RxStimHal(P2CONST(uint8, AUTOMATIC, XCP_APPL_DATA) data
             {
                 pos += XCP_TIMESTAMP_TYPE;
             }
-#endif
+#endif /*XCP_TIMESTAMP_TYPE != XCP_TS_NO_TS*/
             for (entryIdx = 0; entryIdx < odtPtr->XcpOdtEntryCount; entryIdx++)
             {
                 entryPtr = &(odtPtr->XcpOdtEntry[entryIdx]);
@@ -888,7 +888,7 @@ XCP_PROCESS_STIM_EXIT:
     }
     return;
 }
-#endif /*XCP_PL_STIM == (XCP_PL_STIM & XCP_RESOURCE)*/ /* PRQA S 2053 */ /* MISRA Rule 18.8, Dir 4.4 */
+#endif /*XCP_PL_STIM == XCP_PL_STIM & XCP_RESOURCE*/
 /******************************************************************************/
 /*
  * @brief      <begin a DAQ list sending trigered by fixed eventchannel>
@@ -941,32 +941,6 @@ static FUNC(void, XCP_CODE) Xcp_EventChannelDaqHal(uint16 eventNum, const Xcp_Da
     return;
 }
 
-#if (XCP_DAQ_PRIORITY_SUPPORT == STD_ON)
-/* sort daq by priority */
-static FUNC(void, XCP_CODE) Xcp_SortDaqbypriority(void)
-{
-    /*Now don't support daq priority*/
-#if 0
-    Xcp_DaqNumType tdaqnum = 0;
-    uint8 loop;
-    uint8 cnt;
-
-    for(loop = 0u; loop < Xcp_DaqListQueueLength; loop++)
-    {
-        for(cnt = loop + 1u; cnt < Xcp_DaqListQueueLength; cnt++)
-        {
-            if(Xcp_Daq[Xcp_DaqListQueue[loop]].priority < Xcp_Daq[Xcp_DaqListQueue[cnt]].priority)
-            {
-                tdaqnum = Xcp_DaqListQueue[loop];
-                Xcp_DaqListQueue[loop] = Xcp_DaqListQueue[cnt];
-                Xcp_DaqListQueue[cnt] = tdaqnum;
-            }
-        }
-    }
-#endif
-}
-#endif
-
 /******************************************************************************/
 /*
  * @brief      < Event Channel triggered indication >
@@ -987,8 +961,13 @@ Xcp_EventIndication(uint16 eventNum) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
     uint16 cnt; /* loop counter */
     Xcp_DaqNumType daqNum;
     boolean SenddaqFlag = FALSE;
-    const Xcp_EvChConfigType* eventPtr = &Xcp_GlobalCfgPtr->XcpEvCh[eventNum];
+    const Xcp_EvChConfigType* eventPtr;
 
+    if (Xcp_Status == XCP_UINIT)
+    {
+        return;
+    }
+    eventPtr = &Xcp_GlobalCfgPtr->XcpEvCh[eventNum];
     if (0u == (Xcp_SendStatus & XCP_DAQ_REQUEST))
     {
         Xcp_DaqListQueuePos = 0;
@@ -1002,7 +981,7 @@ Xcp_EventIndication(uint16 eventNum) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
         if ((XCP_DAQ_MOD_RUNNING == (XCP_DAQ_MOD_RUNNING & Xcp_Daq[daqNum].mode))
             && (eventNum == Xcp_Daq[daqNum].eventChannelNum))
         {
-
+            SchM_Enter_Xcp_Exclusive_Daq();
 #if (XCP_PRESCALER_SUPPORTED == STD_ON)
             Xcp_Daq[daqNum].prescalerCnt++; /* to prescaler */
             if (Xcp_Daq[daqNum].prescalerCnt >= Xcp_Daq[daqNum].prescaler)
@@ -1017,13 +996,7 @@ Xcp_EventIndication(uint16 eventNum) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
 #if (XCP_PRESCALER_SUPPORTED == STD_ON)
             }
 #endif
-        }
-        if ((eventPtr->XcpEvChMaxDaqList == (cnt + 1u)) && (Xcp_DaqListQueueLength > 0u))
-        {
-#if (XCP_DAQ_PRIORITY_SUPPORT == STD_ON)
-            /* if enable the priority,so Sort according to the priority of DAQ */
-            Xcp_SortDaqbypriority();
-#endif
+            SchM_Exit_Xcp_Exclusive_Daq();
         }
     }
     if (((boolean)TRUE == SenddaqFlag) && (0u == (Xcp_SendStatus & XCP_DAQ_REQUEST)))
@@ -1310,7 +1283,7 @@ static FUNC(void, XCP_CODE) Xcp_WriteDaqHal(void)
         Xcp_SetErrorCode(XCP_ERR_OUT_OF_RANGE);
         Xcp_RespLength = 0x02u;
     }
-#endif
+#endif /*XCP_CHECK_MEA_ADDR == STD_ON*/
     /* check ptr whether valid */
     else if (
         (Xcp_PtrOdt >= Xcp_Daq[Xcp_PtrDaq].daqListSize)
@@ -1428,15 +1401,8 @@ static FUNC(void, XCP_CODE) Xcp_SetDaqListModeHal(void)
         || (0u == transRatePrescaler) /*with prescaler,the Prescaler must >= 1*/
 #endif
 #if (STD_OFF == XCP_DAQ_PRIORITY_SUPPORT)
-#if (XCP_ON_CAN_ENABLE == STD_ON)
         || (daqPriority > 0u)
-#else
-        /*Note:Yqc 2020/03/18
-         * This violates the specification, just to satisfy the Canape test XcpOnEth.
-         * */
-        || (daqPriority > 1u)
-#endif /*(XCP_ON_CAN_ENABLE == STD_ON)*/ /* PRQA S 2053 */         /* MISRA Rule 18.8, Dir 4.4 */
-#endif /*(STD_OFF == XCP_DAQ_PRIORITY_SUPPORT)*/ /* PRQA S 2053 */ /* MISRA Rule 18.8, Dir 4.4 */
+#endif /*STD_OFF == XCP_DAQ_PRIORITY_SUPPORT*/
     )
     {
         Xcp_SetErrorCode(XCP_ERR_OUT_OF_RANGE);
@@ -1834,7 +1800,7 @@ Xcp_ReadDaq(void) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
 
     return;
 }
-#endif /* (STD_ON == XCP_READ_DAQ) */ /* PRQA S 2053 */ /* MISRA Rule 18.8, Dir 4.4 */
+#endif /*STD_ON == XCP_READ_DAQ*/
 
 /******************************************************************************/
 /*
@@ -1884,9 +1850,7 @@ Xcp_GetDaqClock(void)
     Xcp_SendResp();
     return;
 }
-#endif /* ((STD_ON == XCP_GET_DAQ_CLOCK ) && (XCP_TIMESTAMP_TYPE != XCP_TS_NO_TS)) */ /* PRQA S 2053 */ /* MISRA      \
-                                                                                                           Rule 18.8, \
-                                                                                                           Dir 4.4 */
+#endif
 
 #if (STD_ON == XCP_GET_DAQ_PROCESSOR_INFO)
 /******************************************************************************/
@@ -1936,21 +1900,21 @@ Xcp_GetDaqProcessorInfo(void) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
                 (XCP_DAQ_CONFIG_TYPE
 #if (XCP_PRESCALER_SUPPORTED == STD_ON)
                  | (0x02u)
-#endif
+#endif /*XCP_PRESCALER_SUPPORTED == STD_ON*/
 #if (XCP_RESUME_SUPPORT == STD_ON)
                  | (0x04u)
-#endif
+#endif /*XCP_RESUME_SUPPORT == STD_ON*/
 #if (XCP_BIT_STIM_SUPPORT == STD_ON)
                  | (0x08u)
-#endif
+#endif /*XCP_BIT_STIM_SUPPORT == STD_ON*/
 #if (XCP_PID_OFF_SUPPORT == STD_ON)
                  | (0x20u)
-#endif
+#endif /*XCP_PID_OFF_SUPPORT == STD_ON*/
                  | ((uint8)(XCP_DAQ_OVL_INDICATION << 6u)));
 /* TIMESTAMP_SUPPORTED */
 #if (XCP_TIMESTAMP_TYPE != XCP_TS_NO_TS)
             daqProperties |= 0x10u;
-#endif
+#endif /*XCP_TIMESTAMP_TYPE != XCP_TS_NO_TS*/
 
             Xcp_RespBuffer[1u] = daqProperties;
             Xcp_CopyU2ToU1Buffer((uint16)XCP_MAX_DAQ, &Xcp_RespBuffer[2u], CPU_BYTE_ORDER);
@@ -1968,7 +1932,7 @@ Xcp_GetDaqProcessorInfo(void) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
     Xcp_SendResp();
     return;
 }
-#endif /* (STD_ON == XCP_GET_DAQ_PROCESSOR_INFO ) */ /* PRQA S 2053 */ /* MISRA Rule 18.8, Dir 4.4 */
+#endif /*STD_ON == XCP_GET_DAQ_PROCESSOR_INFO*/
 
 #if (STD_ON == XCP_GET_DAQ_RESOLUTION_INFO)
 /******************************************************************************/
@@ -2030,7 +1994,7 @@ Xcp_GetDaqResolutionInfo(void) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
     Xcp_SendResp();
     return;
 }
-#endif /* (STD_ON == XCP_GET_DAQ_RESOLUTION_INFO) */ /* PRQA S 2053 */ /* MISRA Rule 18.8, Dir 4.4 */
+#endif /*STD_ON == XCP_GET_DAQ_RESOLUTION_INFO*/
 
 #if (STD_ON == XCP_GET_DAQ_LIST_MODE)
 /******************************************************************************/
@@ -2108,7 +2072,7 @@ Xcp_GetDaqListMode(void) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
     Xcp_SendResp();
     return;
 }
-#endif /* (STD_ON == XCP_GET_DAQ_LIST_MODE) */ /* PRQA S 2053 */ /* MISRA Rule 18.8, Dir 4.4 */
+#endif /*STD_ON == XCP_GET_DAQ_LIST_MODE*/
 
 #if (STD_ON == XCP_GET_DAQ_EVENT_INFO)
 /******************************************************************************/
@@ -2187,7 +2151,7 @@ FUNC(void, XCP_CODE) Xcp_GetDaqEventInfo(void) /* PRQA S 1532 */ /* MISRA Rule 8
     Xcp_SendResp();
     return;
 }
-#endif /* (XCP_GET_DAQ_EVENT_INFO == STD_ON) */ /* PRQA S 2053 */ /* MISRA Rule 18.8, Dir 4.4 */
+#endif /*XCP_GET_DAQ_EVENT_INFO == STD_ON*/
 
 #if (XCP_DAQ_STATIC == XCP_DAQ_CONFIG_TYPE)
 /******************************************************************************/
@@ -2363,7 +2327,6 @@ Xcp_GetDaqListInfo(void)
             }
             case 0x01u: { /* EVENT_FIXED */
                 Xcp_RespBuffer[1u] |= 0x02u;
-                Xcp_CopyU2ToU1Buffer(fixedEvent, &Xcp_RespBuffer[4u], CPU_BYTE_ORDER);
                 Xcp_RespLength = 0x06u;
                 break;
             }
@@ -2382,7 +2345,7 @@ Xcp_GetDaqListInfo(void)
     Xcp_SendResp();
     return;
 }
-#endif /* (XCP_GET_DAQ_LIST_INFO == STD_ON) */ /* PRQA S 2053 */ /* MISRA Rule 18.8, Dir 4.4 */
+#endif /*XCP_GET_DAQ_LIST_INFO == STD_ON*/
 /*
  * DYNAMIC CONFIG COMMAND
  */
@@ -2432,6 +2395,7 @@ Xcp_FreeDaq(void) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
         }
         else
         {
+            SchM_Enter_Xcp_Exclusive_Daq();
             for (cnt = 0; cnt < XCP_MAX_DAQ; cnt++)
             {
                 Xcp_Daq[cnt].mode &= (uint8)(~XCP_DAQ_MOD_RUNNING);
@@ -2445,6 +2409,7 @@ Xcp_FreeDaq(void) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
             Xcp_ClearAllDaq();
             /* The XCP_DAQ_CFG_FREE state must be modified after FREE_DAQ is successful*/
             Xcp_DaqCfgSeqStat = XCP_DAQ_CFG_FREE;
+            SchM_Exit_Xcp_Exclusive_Daq();
         }
     Xcp_SendResp();
     return;
@@ -2520,6 +2485,7 @@ static FUNC(void, XCP_CODE) Xcp_AllocDaqHal(void)
     }
     else
     {
+        SchM_Enter_Xcp_Exclusive_Daq();
         uint16 allocDaqNum = XCP_MIN_DAQ + daqCount;
         for (daqNum = XCP_MIN_DAQ; daqNum < allocDaqNum; daqNum++)
         {
@@ -2534,6 +2500,7 @@ static FUNC(void, XCP_CODE) Xcp_AllocDaqHal(void)
         Xcp_DynamicDaqFirstPIDCnt = 0;
 #endif
         Xcp_DaqCfgSeqStat = XCP_DAQ_CFG_DAQ;
+        SchM_Exit_Xcp_Exclusive_Daq();
     }
     return;
 }
@@ -2623,6 +2590,7 @@ static FUNC(void, XCP_CODE) Xcp_AllocOdtHal(void)
     }
     else
     {
+        SchM_Enter_Xcp_Exclusive_Daq();
         Xcp_Daq[daqListNo].daqListSize = odtCount;
 
 #if (XCP_IDENTIFICATION_FIELD_TYPE == XCP_PID_ABSOLUTE)
@@ -2639,14 +2607,15 @@ static FUNC(void, XCP_CODE) Xcp_AllocOdtHal(void)
         {
             Xcp_DynamicalDaqQueue.bufferPos++;
         }
-
-        /* PRQA S 0310,3305 ++ */ /* MISRA Rule 11.3 */
         /*
          * Note:Ignore the warning, the problem has been solved by code.
          * */
+        /* PRQA S 3305,0310 ++ */ /* MISRA Rule 11.3 */
         Xcp_Daq[daqListNo].odt = (Xcp_OdtType*)&Xcp_DynDaqBuffer[Xcp_DynamicalDaqQueue.bufferPos];
-        /* PRQA S 0310,3305 ++ */ /* MISRA Rule 11.3 */
+        /* PRQA S 3305,0310 -- */ /* MISRA Rule 11.3 */
         Xcp_DynamicalDaqQueue.bufferPos += odtCount * sizeof(Xcp_OdtType);
+        /* PRQA S 0310 -- */ /* MISRA Rule 20.7 */
+        /* PRQA S 3305 -- */ /* MISRA Rule 20.7 */
         do
         {
             odtCount--;
@@ -2654,6 +2623,7 @@ static FUNC(void, XCP_CODE) Xcp_AllocOdtHal(void)
         } while (odtCount != 0x00u);
         Xcp_Daq[daqListNo].DynaCfgStatus = XCP_DAQ_CFG_ODT;
         Xcp_DaqCfgSeqStat = XCP_DAQ_CFG_ODT;
+        SchM_Exit_Xcp_Exclusive_Daq();
     }
     return;
 }
@@ -2725,7 +2695,7 @@ static FUNC(void, XCP_CODE) Xcp_AllocOdtEntryHal(void)
     if ((daqListNo >= XCP_MAX_DAQ) || (entryCount > XCP_ODTENTRY_COUNT)
 #if (0u != XCP_MIN_DAQ)
         || (daqListNo < XCP_MIN_DAQ)
-#endif                                                                  /*0u != XCP_MIN_DAQ*/
+#endif /*0u != XCP_MIN_DAQ*/
     )
     {
         Xcp_SetErrorCode(XCP_ERR_OUT_OF_RANGE);
@@ -2746,25 +2716,23 @@ static FUNC(void, XCP_CODE) Xcp_AllocOdtEntryHal(void)
     else
     {
         Xcp_Daq[daqListNo].odt[odtNum].XcpOdtEntryCount = entryCount;
-        /*Add by Qinchun.yang
-         * 2020/05/08
-         * Pointer access requires four-byte alignment
-         * */
+
         /* PRQA S 0306 ++ */ /* MISRA Rule 11.4 */
         while (((uint32)(&Xcp_DynDaqBuffer[Xcp_DynamicalDaqQueue.bufferPos]) % 4u) != 0u)
         /* PRQA S 0306 -- */ /* MISRA Rule 11.4 */
         {
             Xcp_DynamicalDaqQueue.bufferPos++;
         }
-        /*
-         * Note:Ignore the warning, the problem has been solved by code.
-         * */
+        /* PRQA S 3305,0310 ++ */ /* MISRA Rule 11.3 */
         Xcp_Daq[daqListNo].odt[odtNum].XcpOdtEntry = (Xcp_EntryType*)&Xcp_DynDaqBuffer[Xcp_DynamicalDaqQueue.bufferPos];
+        /* PRQA S 3305,0310 -- */ /* MISRA Rule 11.3 */
         Xcp_DynamicalDaqQueue.bufferPos += entryCount * sizeof(Xcp_EntryType);
         do
         {
             entryCount--;
+            /* PRQA S 3305 ++ */ /* MISRA Rule 11.3 */
             Xcp_Daq[daqListNo].odt[odtNum].XcpOdtEntry[entryCount].XcpOdtEntryLength = 0u;
+            /* PRQA S 3305 -- */ /* MISRA Rule 11.3 */
         } while (entryCount != 0x00u);
         Xcp_Daq[daqListNo].DynaCfgStatus = XCP_DAQ_CFG_ENTRY;
         Xcp_DaqCfgSeqStat = XCP_DAQ_CFG_ENTRY;
@@ -2784,8 +2752,8 @@ static FUNC(void, XCP_CODE) Xcp_AllocOdtEntryHal(void)
     }
     return;
 }
-#endif /* (XCP_DAQ_STATIC == XCP_DAQ_CONFIG_TYPE ) */ /* PRQA S 2053 */ /* MISRA Rule 18.8, Dir 4.4 */
+#endif /*XCP_DAQ_STATIC == XCP_DAQ_CONFIG_TYPE*/
 #define XCP_STOP_SEC_CODE
 #include "Xcp_MemMap.h"
 
-#endif /* (XCP_PL_DAQ == (XCP_PL_DAQ&XCP_RESOURCE)) */ /* PRQA S 2053 */ /* MISRA Rule 18.8, Dir 4.4 */
+#endif /*XCP_PL_DAQ == XCP_PL_DAQ&XCP_RESOURCE*/

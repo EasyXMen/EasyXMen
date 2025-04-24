@@ -18,20 +18,26 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : ComStack_Types.h                                            **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      :                                                             **
- **  Vendor      :                                                             **
- **  DESCRIPTION :This file is partly ECU dependent.                           **
- **               Implemented SWS: Communication Stack Types (ComStackTypes)   **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                       **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+*******************************************************************************
+**                                                                           **
+**  $FILENAME   : ComStack_Types.h $                                         **
+**                                                                           **
+**  AUTHOR      :                                                            **
+**                                                                           **
+**  VENDOR      :                                                            **
+**                                                                           **
+**  DESCRIPTION :This file is partly ECU dependent.                          **
+**               Implemented SWS: Communication Stack Types (ComStackTypes)  **
+**                                                                           **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                      **
+**                                                                           **
+******************************************************************************/
+/* <VERSION> <DATE> <AUTHOR> <REVISION LOG>
+ * V1.0.0 [2020/05/08][YangBo] Initial version
+ */
 #ifndef COMSTACK_TYPES_H
 #define COMSTACK_TYPES_H
 
@@ -43,12 +49,9 @@
  * and the corresponding length of the SDU in bytes.*/
 typedef struct
 {
-    uint8* SduDataPtr; /*Pointer to the SDU (i.e. payload data) of the PDU. The type of this pointer depends on the
-                          memory model being used at compile time.*/
-    PduLengthType SduLength; /*Length of the SDU in bytes.*/
-    uint8* MetaDataPtr; /*Pointer to the meta data (e.g. CAN ID, socket ID, diagnostic addresses) of the PDU, consisting
-                           of a sequence of meta data items. The length and type of the meta data items is statically
-                           configured for each PDU. Meta data items with more than 8 bits use platform byte order.*/
+    P2VAR(uint8, TYPEDEF, TYPEDEF) SduDataPtr;
+    P2VAR(uint8, TYPEDEF, TYPEDEF) MetaDataPtr;
+    PduLengthType SduLength;
 } PduInfoType;
 
 /*Used to store the identifier of a partial network cluster.*/

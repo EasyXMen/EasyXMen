@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : SecOC.c                                                     **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : HuRongbo                                                    **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : SecOC.c                                                     **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : HuRongbo                                                    **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 /*******************************************************************************
 **                      Revision Control History                              **
 *******************************************************************************/
@@ -47,21 +48,24 @@
  * V2.0.4      20230620   Jian.Jiang  Solve the problem of recycling wrong configuration
  *                                    values in the functions SecOC_CopyTxData and SecOC_TpTxConfirmation
  * V2.0.5      20230712   Jian.Jiang  Solve the problem when delivering discovered SecOC using TP.
- * V2.0.6      20230803   Jian.Jiang  1. QAC rectification
- * V2.0.7      20230927   Jian.Jiang   Add macro definition control to reference the interface function of CSM module
- * V2.0.8      20231120   Jian.Jiang   Code execution efficiency optimization, replacing remainder and division in the
- * code
- * V2.0.9      20231123   Jian.Jiang   Optimize the code and delete the size judgment value and big and small endian
- * functions
- * V2.0.10     20240103   Jian.Jiang   1. QAC rectification
- * V2.0.11     20240110   Jian.Jiang  Solve the problem that the function of SecOCIgnoreVerificationResult is invalid
+ * V2.1.0      20230718   Jian.jiang  CP2.1 Release Version.
+ * V2.1.1      20230926   Jian.Jiang  Add macro definition control to reference the interface function of CSM module
+ * V2.1.2      20231027   Jian.jiang  Solve the problem that when building and sending secure I-PDU fails, the upper
+ * layer should be notified of the building failure.
+ * V2.1.3      20231101   Jian.Jiang  An error occurred when modifying the SecOC parsing truncation freshness value
+ * V2.1.4      20231121   Jian.Jiang  Optimize code and resolve some compilation warning issues
+ * V2.1.4      20231127   Jian.Jiang  QAC check issue fix
+ * V2.1.5      20240110   Jian.Jiang  Solve the problem that the function of SecOCIgnoreVerificationResult is invalid
  * after opening it
- * V2.0.12     20240227   Jian.Jiang   1. Rectification of QAC based on new rule sets
- * V2.0.13     20240408   Jian.Jiang  Solving the problem of unused bits not being set to zero
- * V2.0.14     20240422   Jian.Jiang  Solve the problem of abnormal clearing of unused bits when sending.
- * V2.0.15     20240510   Jian.Jiang  Solve the problem of compilation error after opening Det.
- * V2.0.16     20240531   Jian.Jiang  Solve the problem that the return value of function SecOC_DataOutQueue does not
- * have an initial value
+ * V2.1.6      20240201   Jian.Jiang  Modify the configuration parameter SecOCIgnoreVerificationResult generation rule
+ * to variable
+ * V2.1.7      20240408    Jian.Jiang  Solving the problem of unused bits not being set to zero
+ * V2.1.8      20240410    Jian.Jiang  Solve the problem of sending out security messages with less data
+ * V2.1.9      20240412    Jian.Jiang  Solve the problem of abnormal clearing of unused bits when sending.
+ * V2.1.10     20240524    Jian.Jiang  Increase in exclusive areas
+ * V2.1.11     20240813    Jian.Jiang  QAC check issue fix
+ * V2.1.12     20240820    Jian.Jiang  Resolves the header Det contain exception problem
+ * V2.1.13     20240826    Jian.Jiang  It solves the problem of data storage error of encrypted sent message
  */
 
 /**
@@ -97,19 +101,17 @@
 #define SECOC_C_AR_MINOR_VERSION 5
 #define SECOC_C_AR_PATCH_VERSION 0
 #define SECOC_C_SW_MAJOR_VERSION 2
-#define SECOC_C_SW_MINOR_VERSION 0
-#define SECOC_C_SW_PATCH_VERSION 16
+#define SECOC_C_SW_MINOR_VERSION 1
+#define SECOC_C_SW_PATCH_VERSION 13
 
 /*******************************************************************************
 **                      Include Section                                       **
 *******************************************************************************/
-#include "SecOC.h"
 #include "SecOC_Internal.h"
 #include "PduR_SecOC.h"
 #include "Det.h"
 #include "Csm.h"
-#include <string.h>
-#include "SecOC_Types.h"
+#include "istd_lib.h"
 /*******************************************************************************
 **                       Version  Check                                       **
 *******************************************************************************/
@@ -168,11 +170,11 @@ static FUNC(void, SECOC_CODE) SecOC_TxBroadcastAuthenticIPDU(uint16 index);
 
 static FUNC(void, SECOC_CODE) SecOC_TxBroadcastCryptographicIPDU(uint16 index);
 
-static void SECOC_SET_TX_EVENT(uint16 i, uint16 e);
+static FUNC(void, SECOC_CODE) SECOC_SET_TX_EVENT(uint16 i, uint16 e);
 
-static void SECOC_CLR_TX_EVENT(uint16 i, uint16 e);
+static FUNC(void, SECOC_CODE) SECOC_CLR_TX_EVENT(uint16 i, uint16 e);
 
-static boolean SECOC_IS_TX_EVENT(uint16 i, uint16 e);
+static FUNC(boolean, SECOC_CODE) SECOC_IS_TX_EVENT(uint16 i, uint16 e);
 
 static P2CONST(SecOC_TxPduProcessingType, TYPEDEF, SECOC_CONST) SecOC_GetTxPduProcessingPtr(uint16 idx);
 
@@ -198,11 +200,11 @@ static FUNC(void, SECOC_CODE) SecOC_TxChannelReset(uint16 index);
 #endif /* SECOC_TX_PDU_NUM > 0u */
 
 #if (SECOC_RX_PDU_NUM > 0u)
-static void SECOC_SET_RX_EVENT(uint16 i, uint16 e);
+static FUNC(void, SECOC_CODE) SECOC_SET_RX_EVENT(uint16 i, uint16 e);
 
-static void SECOC_CLR_RX_EVENT(uint16 i, uint16 e);
+static FUNC(void, SECOC_CODE) SECOC_CLR_RX_EVENT(uint16 i, uint16 e);
 
-static boolean SECOC_IS_RX_EVENT(uint16 i, uint16 e);
+static FUNC(boolean, SECOC_CODE) SECOC_IS_RX_EVENT(uint16 i, uint16 e);
 
 static P2CONST(SecOC_RxPduProcessingType, TYPEDEF, SECOC_CONST) SecOC_GetRxPduProcessingPtr(uint16 idx);
 
@@ -343,7 +345,7 @@ static inline void SECOC_DET_REPORT_RUNTIMEERROR(uint8 ApiId, uint8 ErrorId);
 #else
 #define SECOC_DET_REPORT(ApiId, ErrorId)
 #define SECOC_DET_REPORT_RUNTIMEERROR(ApiId, ErrorId)
-#endif /* STD_ON == SECOC_DEV_ERROR_DET */
+#endif
 
 #define SECOC_STOP_SEC_CODE
 #include "SecOC_MemMap.h"
@@ -574,14 +576,17 @@ SecOC_IfTransmit(PduIdType TxPduId, P2CONST(PduInfoType, AUTOMATIC, SECOC_APPL_C
         /* Not use sameBufferCollection */
         if ((NULL_PTR == sameBufferPtr) && (txPduProcessingPtr->SecOCAuthenticPduBuffLength >= PduInfoPtr->SduLength))
         {
-            (void)memcpy(txPduProcessingPtr->SecOCAuthenticPduBufferRef, PduInfoPtr->SduDataPtr, PduInfoPtr->SduLength);
+            (void)ILib_memcpy(
+                txPduProcessingPtr->SecOCAuthenticPduBufferRef,
+                PduInfoPtr->SduDataPtr,
+                PduInfoPtr->SduLength);
             result = E_OK;
         }
         else if (
             (NULL_PTR != sameBufferPtr) && (FALSE == sameBufferPtr->SecOCSameBufferInUse[0u])
             && (sameBufferPtr->SecOCAuthenticPduBuffLength >= PduInfoPtr->SduLength))
         {
-            (void)memcpy(sameBufferPtr->SecOCAuthenticPduBufferRef, PduInfoPtr->SduDataPtr, PduInfoPtr->SduLength);
+            (void)ILib_memcpy(sameBufferPtr->SecOCAuthenticPduBufferRef, PduInfoPtr->SduDataPtr, PduInfoPtr->SduLength);
             sameBufferPtr->SecOCSameBufferInUse[0u] = TRUE;
 
             result = E_OK;
@@ -593,11 +598,13 @@ SecOC_IfTransmit(PduIdType TxPduId, P2CONST(PduInfoType, AUTOMATIC, SECOC_APPL_C
 
         if (E_OK == result)
         {
+            SchM_Enter_SecOC_TxData();
             SecOC_TxRtData[TxPduId].txPduStatus = SECOC_TX_CALC;
             SECOC_SET_TX_EVENT(TxPduId, SECOC_TX_REQUEST | SECOC_TX_DATA_ACQUIRED);
             SecOC_TxRtData[TxPduId].txPduLength = PduInfoPtr->SduLength;
             /* @req SWS_SecOC_00225,SWS_SecOC_00226 */
             SecOC_TxRtData[TxPduId].txAuthBuildCnt = 0u;
+            SchM_Exit_SecOC_TxData();
         }
 #endif /* SECOC_TX_IF_PDU_NUM > 0u */
     }
@@ -666,11 +673,13 @@ SecOC_TpTransmit(PduIdType TxPduId, P2CONST(PduInfoType, AUTOMATIC, SECOC_APPL_C
 
         if (result == E_OK)
         {
+            SchM_Enter_SecOC_TxData();
             SecOC_TxRtData[TxPduId].txPduStatus = SECOC_TX_CALC;
             SECOC_SET_TX_EVENT(TxPduId, SECOC_TX_REQUEST);
             SecOC_TxRtData[TxPduId].txPduLength = PduInfoPtr->SduLength;
             /* @req SWS_SecOC_00225,SWS_SecOC_00226 */
             SecOC_TxRtData[TxPduId].txAuthBuildCnt = 0u;
+            SchM_Exit_SecOC_TxData();
         }
 #else
         (void)(TxPduId);
@@ -952,7 +961,7 @@ SecOC_VerifyStatusOverride(uint16 ValueID, SecOC_OverrideStatusType overrideStat
         P2VAR(SecOC_RxPduRTType, AUTOMATIC, SECOC_APPL_DATA) /* PRQA S 3432 */ /* MISRA Rule 20.7 */
         rxRtPtr = &SecOC_RxRtData[0u];
         uint16 index;
-
+        SchM_Enter_SecOC_RxData();
         for (index = 0u; index < SECOC_RX_PDU_NUM; index++)
         {
 #if (STD_ON == SECOC_OVERRIDE_STATUS_WITH_DATA_ID)
@@ -975,6 +984,7 @@ SecOC_VerifyStatusOverride(uint16 ValueID, SecOC_OverrideStatusType overrideStat
             rxPduProcessingPtr++;
             rxRtPtr++;
         }
+        SchM_Exit_SecOC_RxData();
     }
 
     return ret;
@@ -1017,6 +1027,7 @@ SecOC_SendDefaultAuthenticationInformation(uint16 FreshnessValueID, boolean send
     {
         P2CONST(SecOC_TxPduProcessingType, AUTOMATIC, SECOC_CONST)
         txPduProcessingPtr = SecOC_GetTxPduProcessingPtr(0u);
+        SchM_Enter_SecOC_TxData();
         P2VAR(SecOC_TxPduRTType, AUTOMATIC, SECOC_APPL_DATA) /* PRQA S 3432 */ /* MISRA Rule 20.7 */
         txRtPtr = &SecOC_TxRtData[0u];
         uint16 index;
@@ -1031,6 +1042,7 @@ SecOC_SendDefaultAuthenticationInformation(uint16 FreshnessValueID, boolean send
             txPduProcessingPtr++;
             txRtPtr++;
         }
+        SchM_Exit_SecOC_TxData();
     }
 
     return ret;
@@ -1165,6 +1177,8 @@ SecOC_TpRxIndication(PduIdType id, Std_ReturnType result)
 #endif
     {
 #if (SECOC_RX_TP_PDU_NUM > 0u)
+
+        SchM_Enter_SecOC_RxData();
         P2VAR(SecOC_RxPduRTType, AUTOMATIC, SECOC_APPL_DATA) /* PRQA S 3432 */ /* MISRA Rule 20.7 */
         rxRtPtr = &SecOC_RxRtData[SECOC_RX_IF_PDU_NUM];
         uint16 index;
@@ -1178,16 +1192,19 @@ SecOC_TpRxIndication(PduIdType id, Std_ReturnType result)
 
             rxRtPtr++;
         }
+        SchM_Exit_SecOC_RxData();
 
         if ((index < SECOC_RX_PDU_NUM) && (SECOC_IS_RX_EVENT(index, SECOC_RX_TP_DATA_FROM_LOWER))
             && (0u == rxRtPtr->sduRemaining))
         {
             if (E_OK == result)
             {
+                SchM_Enter_SecOC_RxData();
                 /* @req SWS_SecOC_00085 */
                 SECOC_CLR_RX_EVENT(index, SECOC_RX_TP_DATA_FROM_LOWER);
                 SECOC_SET_RX_EVENT(index, SECOC_RX_INDICATION);
                 rxRtPtr->rxPduStatus = SECOC_RX_CALC;
+                SchM_Exit_SecOC_RxData();
             }
             else
             {
@@ -1258,7 +1275,7 @@ SecOC_TxConfirmation(PduIdType TxPduId)
         PduIdType upLayerPduId;
         uint16 index;
         boolean txPduTag = FALSE;
-
+        SchM_Enter_SecOC_TxData();
         for (index = 0u; index < SECOC_TX_IF_PDU_NUM; index++)
         {
             txSecuredPduPtr = SecOC_GetTxSecuredPduPtr(index);
@@ -1319,6 +1336,7 @@ SecOC_TxConfirmation(PduIdType TxPduId)
             /* Clear tx event */
             SECOC_CLR_TX_EVENT(index, SECOC_EVENT_TX_ALL);
         }
+        SchM_Exit_SecOC_TxData();
 #endif /* SECOC_TX_IF_PDU_NUM > 0u */
     }
 }
@@ -1378,7 +1396,7 @@ SecOC_TpTxConfirmation(PduIdType id, Std_ReturnType result)
         PduIdType upLayerPduId;
         uint16 index;
         boolean txPduTag = FALSE;
-
+        SchM_Enter_SecOC_TxData();
         for (index = SECOC_TX_IF_PDU_NUM; index < SECOC_TX_PDU_NUM; index++)
         {
             if (NULL_PTR != txSecuredPduPtr)
@@ -1413,6 +1431,7 @@ SecOC_TpTxConfirmation(PduIdType id, Std_ReturnType result)
             txSecuredPduPtr++;
             txRtPtr++;
         }
+        SchM_Exit_SecOC_TxData();
 
         if (index < SECOC_TX_PDU_NUM)
         {
@@ -1434,7 +1453,7 @@ SecOC_TpTxConfirmation(PduIdType id, Std_ReturnType result)
                 {
                     PduR_SecOCTpTxConfirmation(upLayerPduId, result);
                 }
-
+                SchM_Enter_SecOC_TxData();
                 /* Free the buffer that contains the Secured I-PDU */
                 txRtPtr = &SecOC_TxRtData[index];
                 txRtPtr->txPduReady = FALSE;
@@ -1448,6 +1467,7 @@ SecOC_TpTxConfirmation(PduIdType id, Std_ReturnType result)
                 txRtPtr->txAuthBuildCnt = 0u;
                 /* Clear tx event */
                 SECOC_CLR_TX_EVENT(index, SECOC_EVENT_TX_ALL);
+                SchM_Exit_SecOC_TxData();
             }
         }
 #else
@@ -1586,8 +1606,10 @@ SecOC_TriggerTransmit(
             if (TRUE == txSecuredPduFlag)
             {
                 headerLenInBytes = txSecuredPduPtr->SecOCAuthPduHeaderLength;
-                securedPduLength = (uint16)((uint16)headerLenInBytes + txRtPtr->txPduLength
-                                            + (uint16)SECOC_BIT_TO_BYTE(authInfoTxLength + fvTruncLenInBits));
+                SchM_Enter_SecOC_TxData();
+                securedPduLength =
+                    headerLenInBytes + txRtPtr->txPduLength + SECOC_BIT_TO_BYTE(authInfoTxLength + fvTruncLenInBits);
+                SchM_Exit_SecOC_TxData();
                 if (NULL_PTR != txPduProcessingPtr->SecOCSameBufferPduRef)
                 {
                     srcPtr = txPduProcessingPtr->SecOCSameBufferPduRef->SecOCSecuredPduBufferRef;
@@ -1600,7 +1622,9 @@ SecOC_TriggerTransmit(
             else if (TRUE == txAuthenticPduFlag)
             {
                 headerLenInBytes = txAuthenticPduPtr->SecOCAuthPduHeaderLength;
-                securedPduLength = (uint16)(headerLenInBytes + txRtPtr->txPduLength);
+                SchM_Enter_SecOC_TxData();
+                securedPduLength = headerLenInBytes + txRtPtr->txPduLength;
+                SchM_Exit_SecOC_TxData();
                 if (NULL_PTR != txPduProcessingPtr->SecOCSameBufferPduRef)
                 {
                     srcPtr = txPduProcessingPtr->SecOCSameBufferPduRef->SecOCAuthenticPduBufferRef;
@@ -1636,7 +1660,7 @@ SecOC_TriggerTransmit(
             {
                 /* @req SWS_SecOC_00068 */
                 /* Copy the Secured I-PDU to the lower layer*/
-                (void)memcpy(PduInfoPtr->SduDataPtr, srcPtr, securedPduLength);
+                (void)ILib_memcpy(PduInfoPtr->SduDataPtr, srcPtr, securedPduLength);
                 PduInfoPtr->SduLength = securedPduLength;
 
                 result = E_OK;
@@ -1722,6 +1746,7 @@ SecOC_CopyRxData(
 #endif
     {
 #if (SECOC_RX_TP_PDU_NUM > 0)
+        SchM_Enter_SecOC_RxData();
         P2VAR(SecOC_RxPduRTType, AUTOMATIC, SECOC_APPL_DATA) /* PRQA S 3432 */ /* MISRA Rule 20.7 */
         rxRtPtr = &SecOC_RxRtData[SECOC_RX_IF_PDU_NUM];
         uint16 index;
@@ -1750,7 +1775,10 @@ SecOC_CopyRxData(
                 if (rxRtPtr->sduRemaining >= info->SduLength)
                 {
                     /* @req SWS_SecOC_00083 */
-                    (void)memcpy(&rxRtPtr->tpRxDestBufPtr[rxRtPtr->tpRxPduOffset], info->SduDataPtr, info->SduLength);
+                    (void)ILib_memcpy(
+                        &rxRtPtr->tpRxDestBufPtr[rxRtPtr->tpRxPduOffset],
+                        info->SduDataPtr,
+                        info->SduLength);
                     rxRtPtr->tpRxPduOffset += info->SduLength;
                     rxRtPtr->sduRemaining -= info->SduLength;
                     *bufferSizePtr = rxRtPtr->sduRemaining;
@@ -1762,6 +1790,7 @@ SecOC_CopyRxData(
         {
             /* Not find coresponding runtime data,return BUFREQ_E_NOT_OK */
         }
+        SchM_Exit_SecOC_RxData();
 #else
         (void)(id);
         (void)(info);
@@ -1955,9 +1984,11 @@ SecOC_CopyTxData(
 
         if ((info->SduLength > 0u) && (NULL_PTR != srcPtr))
         {
+            SchM_Enter_SecOC_TxData();
             /* @req SWS_SecOC_00073 */
-            (void)memcpy(info->SduDataPtr, &srcPtr[txRtPtr->tpTxPduOffset], info->SduLength);
+            (void)ILib_memcpy(info->SduDataPtr, &srcPtr[txRtPtr->tpTxPduOffset], info->SduLength);
             txRtPtr->tpTxPduOffset += info->SduLength;
+            SchM_Exit_SecOC_TxData();
         }
         *availableDataPtr = dataLength - txRtPtr->tpTxPduOffset;
 
@@ -2203,6 +2234,7 @@ SecOC_CsmVerifyJobFinishedIndication(P2CONST(Crypto_JobType, AUTOMATIC, SECOC_AP
             {
                 if (E_OK == result)
                 {
+                    SchM_Enter_SecOC_RxData();
                     if (SECOC_IS_RX_EVENT(index, SECOC_RX_VERIFY_FINISH_IND_WAITING))
                     {
                         SECOC_SET_RX_EVENT(index, SECOC_RX_VERIFY_FINISH_IND_CONFIRMED);
@@ -2212,6 +2244,7 @@ SecOC_CsmVerifyJobFinishedIndication(P2CONST(Crypto_JobType, AUTOMATIC, SECOC_AP
                     /* Verification of the authenticator successfully executed,
                      * the authentication build counter shall be set to 0. */
                     rxRtPtr->rxAuthBuildAttempts = 0u;
+                    SchM_Exit_SecOC_RxData();
                 }
                 else if (CRYPTO_E_BUSY == result)
                 {
@@ -2227,8 +2260,10 @@ SecOC_CsmVerifyJobFinishedIndication(P2CONST(Crypto_JobType, AUTOMATIC, SECOC_AP
                         || ((SECOC_OVERRIDE_PASS_UNTIL_LIMIT == rxRtPtr->rxOverrideStatus)
                             && (rxRtPtr->rxBakNumOfMsgToOverride > 0u)))
                     {
+                        SchM_Enter_SecOC_RxData();
                         /* Continue to send authentic I-PDU to upper layer */
                         SECOC_SET_RX_EVENT(index, SECOC_RX_VERIFY_FINISH_IND_CONFIRMED);
+                        SchM_Exit_SecOC_RxData();
                     }
                     else
                     {
@@ -2369,56 +2404,196 @@ FUNC(void, SECOC_CODE) SecOC_MainFunctionTx(void)
 
 #if (SECOC_TX_PDU_NUM > 0u)
 
-static void SECOC_SET_TX_EVENT(uint16 i, uint16 e)
+/******************************************************************************/
+/*
+ * Description         This function is used to set a specific transmit event.
+ * ServiceId           N/A
+ * Sync/Async          Synchronous
+ * Reentrancy          Non-reentrant
+ * Param-Name[in]      i: Index of the event.
+ *                     e: Event to be set.
+ * Param-Name[out]     None
+ * Param-Name[in/out]  None
+ * Return              None
+ */
+/******************************************************************************/
+static FUNC(void, SECOC_CODE) SECOC_SET_TX_EVENT(uint16 i, uint16 e)
 {
     (SecOC_TxEvent[i] |= (e));
 }
 
-static void SECOC_CLR_TX_EVENT(uint16 i, uint16 e)
+/******************************************************************************/
+/*
+ * Description         This function is used to clear a specific transmit event.
+ * ServiceId           N/A
+ * Sync/Async          Synchronous
+ * Reentrancy          Non-reentrant
+ * Param-Name[in]      i: Index of the event.
+ *                     e: Event to be cleared.
+ * Param-Name[out]     None
+ * Param-Name[in/out]  None
+ * Return              None
+ */
+/******************************************************************************/
+static FUNC(void, SECOC_CODE) SECOC_CLR_TX_EVENT(uint16 i, uint16 e)
 {
     (SecOC_TxEvent[i] &= ~(e));
 }
 
-static boolean SECOC_IS_TX_EVENT(uint16 i, uint16 e)
+/******************************************************************************/
+/*
+ * Description         This function is used to check if a specific event is a transmit event.
+ * ServiceId           N/A
+ * Sync/Async          Synchronous
+ * Reentrancy          Non-reentrant
+ * Param-Name[in]      i: Index of the event.
+ *                     e: Event to be checked.
+ * Param-Name[out]     None
+ * Param-Name[in/out]  None
+ * Return              boolean: TRUE if the event is a transmit event, FALSE otherwise.
+ */
+/******************************************************************************/
+static FUNC(boolean, SECOC_CODE) SECOC_IS_TX_EVENT(uint16 i, uint16 e)
 {
     return ((SecOC_TxEvent[i] & (e)) != 0u) ? TRUE : FALSE;
 }
 
+/******************************************************************************/
+/*
+ * Description         This function is used to retrieve the pointer to the transmit PDU Processing for a specific
+ * index.
+ * ServiceId           N/A
+ * Sync/Async          Synchronous
+ * Reentrancy          Non-reentrant
+ * Param-Name[in]      idx:Index for which the pointer to the transmit PDU Processing is requested.
+ * Param-Name[out]     None
+ * Param-Name[in/out]  None
+ * Return              SecOC_TxPduProcessingType: Pointer to the transmit PDU Processing.
+ */
+/******************************************************************************/
 static P2CONST(SecOC_TxPduProcessingType, TYPEDEF, SECOC_CONST) SecOC_GetTxPduProcessingPtr(uint16 idx)
 {
     return (&SecOC_ConfigPtr->SecOCTxPduProcessing[idx]);
 }
 
+/******************************************************************************/
+/*
+ * Description         This function is used to retrieve the pointer to the transmit Authentic PDU Layer for a specific
+ * index.
+ * ServiceId           N/A
+ * Sync/Async          Synchronous
+ * Reentrancy          Non-reentrant
+ * Param-Name[in]      idx:Index for which the pointer to the transmit Authentic PDU Layer is requested.
+ * Param-Name[out]     None
+ * Param-Name[in/out]  None
+ * Return              SecOC_TxAuthenticPduLayerType: Pointer to the transmit Authentic PDU Layer.
+ */
+/******************************************************************************/
 static P2CONST(SecOC_TxAuthenticPduLayerType, AUTOMATIC, SECOC_CONST) SecOC_GetTxAuthenticPduLayerPtr(uint16 idx)
 {
     return (SecOC_GetTxPduProcessingPtr(idx)->SecOCTxAuthenticPduLayer);
 }
 
+/******************************************************************************/
+/*
+ * Description         This function is used to retrieve the pointer to the transmit Secured PDU Layer for a specific
+ * index.
+ * ServiceId           N/A
+ * Sync/Async          Synchronous
+ * Reentrancy          Non-reentrant
+ * Param-Name[in]      idx: Index for which the pointer to the transmit Secured PDU Layer is requested.
+ * Param-Name[out]     None
+ * Param-Name[in/out]  None
+ * Return              SecOC_TxSecuredPduLayerType: Pointer to the transmit Secured PDU Layer.
+ */
+/******************************************************************************/
 static P2CONST(SecOC_TxSecuredPduLayerType, TYPEDEF, SECOC_CONST) SecOC_GetTxSecuredPduLayerPtr(uint16 idx)
 {
     return (SecOC_GetTxPduProcessingPtr(idx)->SecOCTxSecuredPduLayer);
 }
 
+/******************************************************************************/
+/*
+ * Description         This function is used to retrieve the pointer to the transmit Secured PDU for a specific index.
+ * ServiceId           N/A
+ * Sync/Async          Synchronous
+ * Reentrancy          Non-reentrant
+ * Param-Name[in]      idx: Index for which the pointer to the transmit Secured PDU is requested.
+ * Param-Name[out]     None
+ * Param-Name[in/out]  None
+ * Return              SecOC_TxSecuredPduType: Pointer to the transmit Secured PDU.
+ */
+/******************************************************************************/
 static P2CONST(SecOC_TxSecuredPduType, AUTOMATIC, SECOC_CONST) SecOC_GetTxSecuredPduPtr(uint16 idx)
 {
     return (SecOC_GetTxSecuredPduLayerPtr(idx)->SecOCTxSecuredPdu);
 }
 
+/******************************************************************************/
+/*
+ * Description         This function returns a pointer to the Secured PDU collection based on the provided index.
+ * ServiceId           N/A
+ * Sync/Async          Synchronous
+ * Reentrancy          Non-reentrant
+ * Param-Name[in]      idx: Index representing the Secured PDU collection.
+ * Param-Name[out]     None
+ * Param-Name[in/out]  None
+ * Return              SecOC_TxSecuredPduCollectionType: Pointer to the Secured PDU collection.
+ */
+/******************************************************************************/
 static P2CONST(SecOC_TxSecuredPduCollectionType, TYPEDEF, SECOC_CONST) SecOC_GetTxSecuredPduCollectionPtr(uint16 idx)
 {
     return (SecOC_GetTxSecuredPduLayerPtr(idx)->SecOCTxSecuredPduCollection);
 }
 
+/******************************************************************************/
+/*
+ * Description         This function is used to retrieve the pointer to the transmit Authentic PDU for a specific index.
+ * ServiceId           N/A
+ * Sync/Async          Synchronous
+ * Reentrancy          Non-reentrant
+ * Param-Name[in]      idx: Index for which the pointer to the transmit Authentic PDU is requested.
+ * Param-Name[out]     None
+ * Param-Name[in/out]  None
+ * Return              SecOC_TxAuthenticPduType: Pointer to the transmit Authentic PDU.
+ */
+/******************************************************************************/
 static P2CONST(SecOC_TxAuthenticPduType, AUTOMATIC, SECOC_CONST) SecOC_GetTxAuthenticPduPtr(uint16 idx)
 {
     return (SecOC_GetTxSecuredPduCollectionPtr(idx)->SecOCTxAuthenticPdu);
 }
 
+/******************************************************************************/
+/*
+ * Description         This function is used to retrieve the pointer to the transmit Cryptographic PDU for a specific
+ * index.
+ * ServiceId           N/A
+ * Sync/Async          Synchronous
+ * Reentrancy          Non-reentrant
+ * Param-Name[in]      idx: Index for which the pointer to the transmit Cryptographic PDU is requested.
+ * Param-Name[out]     None
+ * Param-Name[in/out]  None
+ * Return              SecOC_TxCryptographicPduType: Pointer to the transmit Cryptographic PDU.
+ */
+/******************************************************************************/
 static P2CONST(SecOC_TxCryptographicPduType, AUTOMATIC, SECOC_CONST) SecOC_GetTxCryptographicPduPtr(uint16 idx)
 {
     return (SecOC_GetTxSecuredPduCollectionPtr(idx)->SecOCTxCryptographicPdu);
 }
 
+/******************************************************************************/
+/*
+ * Description         This function is used to retrieve the pointer to the transmit Use Message Link for a specific
+ * index.
+ * ServiceId           N/A
+ * Sync/Async          Synchronous
+ * Reentrancy          Non-reentrant
+ * Param-Name[in]      idx:Index for which the pointer to the transmit Use Message Link is requested.
+ * Param-Name[out]     None
+ * Param-Name[in/out]  None
+ * Return              SecOC_UseMessageLinkType: Pointer to the transmit Use Message Link.
+ */
+/******************************************************************************/
 static P2CONST(SecOC_UseMessageLinkType, AUTOMATIC, SECOC_CONST) SecOC_GetTxUseMessageLinkPtr(uint16 idx)
 {
     return (SecOC_GetTxSecuredPduCollectionPtr(idx)->SecOCUseMessageLink);
@@ -2427,6 +2602,7 @@ static P2CONST(SecOC_UseMessageLinkType, AUTOMATIC, SECOC_CONST) SecOC_GetTxUseM
 /******************************************************************************/
 /*
  * Brief               Generate authenticator used to create Secured I-PDU
+ * ServiceId           N/A
  * Sync/Async          Synchronous
  * Reentrancy          Reentrant
  * Param-Name[in]      index: SECOC Channel
@@ -2490,6 +2666,7 @@ static FUNC(void, SECOC_CODE) SecOC_TxGenerateAuthenticator(uint16 index)
 
             if (E_OK == ret)
             {
+                SchM_Enter_SecOC_TxData();
                 SECOC_CLR_TX_EVENT(index, SECOC_TX_REQUEST | SECOC_TX_DATA_ACQUIRED);
                 if (SECOC_CRYPTO_PROCESSING_SYNC == jobPtr->SecOCCryptoProcessingType)
                 {
@@ -2499,6 +2676,7 @@ static FUNC(void, SECOC_CODE) SecOC_TxGenerateAuthenticator(uint16 index)
                 {
                     SECOC_SET_TX_EVENT(index, SECOC_TX_GENERATE_FINISH_IND_WAITING);
                 }
+                SchM_Exit_SecOC_TxData();
             }
             else if (CRYPTO_E_BUSY == ret)
             {
@@ -2539,6 +2717,7 @@ static FUNC(void, SECOC_CODE) SecOC_TxGenerateAuthenticator(uint16 index)
 /******************************************************************************/
 /*
  * Brief               Calculate the length of DataToAuthenticator
+ * ServiceId           N/A
  * Sync/Async          Synchronous
  * Reentrancy          Reentrant
  * Param-Name[in]      index: SECOC Channel
@@ -2564,8 +2743,10 @@ static FUNC(uint32, SECOC_CODE) SecOC_TxCalcDataToAuthenticatorLength(uint16 ind
     }
     else
     {
+        SchM_Enter_SecOC_TxData();
         /* Use the complete Authentic I-PDU to construct DataToAuthenticator*/
         dataLength = dataLength + txRtPtr->txPduLength;
+        SchM_Exit_SecOC_TxData();
     }
 
     dataLength += SECOC_BIT_TO_BYTE((uint16)txPduProcessingPtr->SecOCFreshnessValueLength);
@@ -2576,6 +2757,7 @@ static FUNC(uint32, SECOC_CODE) SecOC_TxCalcDataToAuthenticatorLength(uint16 ind
 /******************************************************************************/
 /*
  * Brief               Construct the DataToAuthenticator
+ * ServiceId           N/A
  * Sync/Async          Synchronous
  * Reentrancy          Reentrant
  * Param-Name[in]      index: SECOC Channel
@@ -2601,7 +2783,9 @@ static FUNC(Std_ReturnType, SECOC_CODE) SecOC_TxConstructDataToAuthenticator(uin
     uint16 dataId;
     Std_ReturnType ret;
 
-    (void)memset(SecOC_DataToAuthenticator, 0, SECOC_DATA_TO_AUTHENTICATOR_LENGTH);
+    SchM_Enter_SecOC_Authentication();
+
+    (void)ILib_memset(SecOC_DataToAuthenticator, 0, SECOC_DATA_TO_AUTHENTICATOR_LENGTH);
 
     /* @req SWS_SecOC_00034 */
     /*
@@ -2615,7 +2799,7 @@ static FUNC(Std_ReturnType, SECOC_CODE) SecOC_TxConstructDataToAuthenticator(uin
 
     SecOC_EndianSwap((uint8*)&dataId, sizeof(dataId));
 #endif /* CPU_BYTE_ORDER == LOW_BYTE_FIRST */
-    (void)memcpy(&SecOC_DataToAuthenticator[0u], (uint8*)&dataId, SECOC_DATAID_LEN);
+    (void)ILib_memcpy(&SecOC_DataToAuthenticator[0u], (uint8*)&dataId, SECOC_DATAID_LEN);
 
     /* Secured part of the Authentic */
     if (NULL_PTR == txPduProcessingPtr->SecOCSameBufferPduRef)
@@ -2640,11 +2824,15 @@ static FUNC(Std_ReturnType, SECOC_CODE) SecOC_TxConstructDataToAuthenticator(uin
         securedIPDUOffset = 0u;
     }
 
-    (void)memcpy(&SecOC_DataToAuthenticator[SECOC_DATAID_LEN], &authenticPduPtr[securedIPDUOffset], securedIPDULength);
+    (void)ILib_memcpy(
+        &SecOC_DataToAuthenticator[SECOC_DATAID_LEN],
+        &authenticPduPtr[securedIPDUOffset],
+        securedIPDULength);
 
     /* Complete Freshness Value */
     freshnessValueLen = txPduProcessingPtr->SecOCFreshnessValueLength;
     freshnessValueTruncLen = txPduProcessingPtr->SecOCFreshnessValueTruncLength;
+    SchM_Exit_SecOC_Authentication();
 #if (SECOC_CFUNC == SECOC_QUERY_FRESHNESS_VALUE)
     if (TRUE == txPduProcessingPtr->SecOCProvideTxTruncatedFreshnessValue)
     {
@@ -2684,15 +2872,16 @@ static FUNC(Std_ReturnType, SECOC_CODE) SecOC_TxConstructDataToAuthenticator(uin
             &freshnessValueLen);
     }
 #endif
-
+    SchM_Enter_SecOC_Authentication();
     if (E_OK == ret)
     {
         freshnessValueLen = SECOC_BIT_TO_BYTE((uint16)txPduProcessingPtr->SecOCFreshnessValueLength);
-        (void)memcpy(
+        (void)ILib_memcpy(
             &SecOC_DataToAuthenticator[SECOC_DATAID_LEN + securedIPDULength],
             txRtPtr->txFreshnessValue,
             freshnessValueLen);
     }
+    SchM_Exit_SecOC_Authentication();
 
     return ret;
 }
@@ -2700,6 +2889,7 @@ static FUNC(Std_ReturnType, SECOC_CODE) SecOC_TxConstructDataToAuthenticator(uin
 /******************************************************************************/
 /*
  * Brief               Generate Authenticator retry process
+ * ServiceId           N/A
  * Sync/Async          Synchronous
  * Reentrancy          Reentrant
  * Param-Name[in]      index: SECOC Channel
@@ -2717,9 +2907,11 @@ static FUNC(void, SECOC_CODE) SecOC_TxGenerateAuthenticatorRetry(uint16 index)
 
     if (txRtPtr->txAuthBuildCnt < txPduProcessingPtr->SecOCAuthenticationBuildAttempts)
     {
+        SchM_Enter_SecOC_TxData();
         /* @req SWS_SecOC_00227,SWS_SecOC_00228 */
         txRtPtr->txAuthBuildCnt++;
         txRtPtr->txPduStatus = SECOC_TX_RETRY;
+        SchM_Exit_SecOC_TxData();
     }
     else
     {
@@ -2736,6 +2928,7 @@ static FUNC(void, SECOC_CODE) SecOC_TxGenerateAuthenticatorRetry(uint16 index)
 /******************************************************************************/
 /*
  * Brief               Build Authenticator fail process
+ * ServiceId           N/A
  * Sync/Async          Synchronous
  * Reentrancy          Reentrant
  * Param-Name[in]      index: SECOC Channel
@@ -2758,15 +2951,16 @@ static FUNC(void, SECOC_CODE) SecOC_TxBuildAuthenticatorFailHandle(uint16 index)
     PduIdType upLayerPduId = txAuthenticPduLayerPtr->SecOCTxPduRAsUpLayerId;
 /* @req SWS_SecOC_00229 */
 #if defined(SECOC_DEFAULT_AUTHENTICATION_INFORMATION_PATTERN)
+    SchM_Enter_SecOC_TxData();
     if (TRUE == txRtPtr->txDefaultAuthInfoEnable)
     {
         /* Use SecOCDefaultAuthenticationInformationPattern as Freshness Value
          * and Authenticator. */
-        (void)memset(
+        (void)ILib_memset(
             txRtPtr->txFreshnessValue,
             SECOC_DEFAULT_AUTHENTICATION_INFORMATION_PATTERN,
             sizeof(txRtPtr->txFreshnessValue));
-        (void)memset(
+        (void)ILib_memset(
             txRtPtr->txResultBuffer,
             SECOC_DEFAULT_AUTHENTICATION_INFORMATION_PATTERN,
             SECOC_MAX_AUTHENTICATOR_LEN);
@@ -2778,6 +2972,7 @@ static FUNC(void, SECOC_CODE) SecOC_TxBuildAuthenticatorFailHandle(uint16 index)
         /* Cancel transmission */
         cancelFlag = TRUE;
     }
+    SchM_Exit_SecOC_TxData();
 #else
     /*  Cancel transmission */
     cancelFlag = TRUE;
@@ -2785,18 +2980,21 @@ static FUNC(void, SECOC_CODE) SecOC_TxBuildAuthenticatorFailHandle(uint16 index)
 
     if (TRUE == cancelFlag)
     {
+        SchM_Enter_SecOC_TxData();
         /*  Cancel transmission */
         SECOC_CLR_TX_EVENT(index, SECOC_EVENT_TX_ALL);
         txRtPtr->txPduStatus = SECOC_TX_NONE;
         txRtPtr->txAuthBuildCnt = 0u;
+        SchM_Exit_SecOC_TxData();
 
         if (txAuthenticPduLayerPtr->SecOCPduType == SECOC_TPPDU)
         {
             PduR_SecOCTpTxConfirmation(upLayerPduId, E_NOT_OK);
         }
-
+        SchM_Enter_SecOC_TxData();
         /* Free the buffer that contains the Secured I-PDU */
         txRtPtr->txPduReady = FALSE;
+        SchM_Exit_SecOC_TxData();
         if (NULL_PTR != sameBufferPtr)
         {
             *(sameBufferPtr->SecOCSameBufferInUse) = FALSE;
@@ -2807,6 +3005,7 @@ static FUNC(void, SECOC_CODE) SecOC_TxBuildAuthenticatorFailHandle(uint16 index)
 /******************************************************************************/
 /*
  * Brief               Send Secured I-PDU
+ * ServiceId           N/A
  * Sync/Async          Synchronous
  * Reentrancy          Reentrant
  * Param-Name[in]      index: SecOC Channel index
@@ -2867,6 +3066,7 @@ static FUNC(void, SECOC_CODE) SecOC_TxSendSecuredIPDU(uint16 index)
 /******************************************************************************/
 /*
  * Brief               Construct the Secured IPDU to be transmit
+ * ServiceId           N/A
  * Sync/Async          Synchronous
  * Reentrancy          Reentrant
  * Param-Name[in]      index: SecOC Channel index
@@ -2897,17 +3097,18 @@ static FUNC(void, SECOC_CODE) SecOC_TxConstructSecuredIPDU(uint16 index)
     uint8 authInfoShiftBits;
     uint16 fvOffsetBits = 0u;
 
+    SchM_Enter_SecOC_TxData();
     if (NULL_PTR == sameBufferPtr)
     {
         destPtr = txSecuredPduPtr->SecOCTxSecuredPduBufferRef;
         srcPtr = txPduProcessingPtr->SecOCAuthenticPduBufferRef;
-        (void)memset(destPtr, 0x00, txSecuredPduPtr->SecOCTxSecuredPduBuffLength);
+        (void)ILib_memset(destPtr, 0x00, txSecuredPduPtr->SecOCTxSecuredPduBuffLength);
     }
     else
     {
         destPtr = sameBufferPtr->SecOCSecuredPduBufferRef;
         srcPtr = sameBufferPtr->SecOCAuthenticPduBufferRef;
-        (void)memset(destPtr, 0x00, sameBufferPtr->SecOCSecuredPduBuffLength);
+        (void)ILib_memset(destPtr, 0x00, sameBufferPtr->SecOCSecuredPduBuffLength);
     }
 
     /* Construct Secured I-PDU */
@@ -2925,12 +3126,12 @@ static FUNC(void, SECOC_CODE) SecOC_TxConstructSecuredIPDU(uint16 index)
 #if (CPU_BYTE_ORDER == LOW_BYTE_FIRST)
         SecOC_EndianSwap((uint8*)&pduLength, sizeof(pduLength));
 #endif /* CPU_BYTE_ORDER == LOW_BYTE_FIRST */
-        (void)memcpy(&destPtr[offset], (uint8*)&pduLength, sizeof(pduLength));
+        (void)ILib_memcpy(&destPtr[offset], (uint8*)&pduLength, sizeof(pduLength));
         offset += sizeof(pduLength);
     }
 
     /* Authentic I-PDU */
-    (void)memcpy(&destPtr[offset], srcPtr, txRtPtr->txPduLength);
+    (void)ILib_memcpy(&destPtr[offset], srcPtr, txRtPtr->txPduLength);
     offset += txRtPtr->txPduLength;
 
     /* Freshness value */
@@ -2939,17 +3140,17 @@ static FUNC(void, SECOC_CODE) SecOC_TxConstructSecuredIPDU(uint16 index)
     {
         fvLenInBits = txPduProcessingPtr->SecOCFreshnessValueLength;
         fvTruncLenInBits = txPduProcessingPtr->SecOCFreshnessValueTruncLength;
-        fvLenInBytes = (uint8)SECOC_BIT_TO_BYTE((uint16)fvLenInBits);
-        fvTruncLenInBytes = (uint8)SECOC_BIT_TO_BYTE((uint16)fvTruncLenInBits);
-
+        fvLenInBytes = (uint8)SECOC_BIT_TO_BYTE(fvLenInBits);
+        fvTruncLenInBytes = (uint8)SECOC_BIT_TO_BYTE(fvTruncLenInBits);
         if (0u != (SECOC_MOD_FROM_EIGHT((fvLenInBits))))
         {
             fvOffsetBits = 8u - (uint16)SECOC_MOD_FROM_EIGHT(fvLenInBits);
         }
+
         fvOffsetBits = ((uint16)fvLenInBits - (uint16)fvTruncLenInBits) + fvOffsetBits;
 
         SecOC_ArrayShiftLeft(txRtPtr->txFreshnessValue, fvLenInBytes, fvOffsetBits);
-        (void)memcpy(&destPtr[offset], txRtPtr->txFreshnessValue, fvTruncLenInBytes);
+        (void)ILib_memcpy(&destPtr[offset], txRtPtr->txFreshnessValue, fvTruncLenInBytes);
         if (0u != (SECOC_MOD_FROM_EIGHT((fvTruncLenInBits))))
         {
             offset += ((uint32)fvTruncLenInBytes - 1u);
@@ -2974,11 +3175,13 @@ static FUNC(void, SECOC_CODE) SecOC_TxConstructSecuredIPDU(uint16 index)
         authInfoTruncLenInBytes,
         SECOC_MOD_FROM_EIGHT((txPduProcessingPtr->SecOCAuthInfoTruncLength + fvTruncLenInBits)));
     SecOC_ArrayOrOp(&destPtr[offset], &txRtPtr->txResultBuffer[0u], authInfoTruncLenInBytes);
+    SchM_Exit_SecOC_TxData();
 }
 
 /******************************************************************************/
 /*
  * Brief               Construct Authentic IPDU to be transmit
+ * ServiceId           N/A
  * Sync/Async          Synchronous
  * Reentrancy          Reentrant
  * Param-Name[in]      index: SecOC channel index
@@ -3002,17 +3205,18 @@ static FUNC(void, SECOC_CODE) SecOC_TxConstructAuthenticIPDU(uint16 index)
     uint32 offset = 0u;
     PduLengthType pduLength;
 
+    SchM_Enter_SecOC_TxData();
     if (NULL_PTR == sameBufferPtr)
     {
         destPtr = txAuthenticPduPtr->SecOCTxColAuthenticPduBufferRef;
         srcPtr = txPduProcessingPtr->SecOCAuthenticPduBufferRef;
-        (void)memset(destPtr, 0x00, txAuthenticPduPtr->SecOCTxColAuthenticPduBuffLength);
+        (void)ILib_memset(destPtr, 0x00, txAuthenticPduPtr->SecOCTxColAuthenticPduBuffLength);
     }
     else
     {
         destPtr = sameBufferPtr->SecOCColAuthenticPduBufferRef;
         srcPtr = sameBufferPtr->SecOCAuthenticPduBufferRef;
-        (void)memset(destPtr, 0x00, sameBufferPtr->SecOCColAuthenticPduBuffLength);
+        (void)ILib_memset(destPtr, 0x00, sameBufferPtr->SecOCColAuthenticPduBuffLength);
     }
 
     /* Construct Orignal Authentic I-PDU */
@@ -3025,17 +3229,19 @@ static FUNC(void, SECOC_CODE) SecOC_TxConstructAuthenticIPDU(uint16 index)
         SecOC_EndianSwap((uint8*)&pduLength, sizeof(pduLength));
 #endif /* CPU_BYTE_ORDER == LOW_BYTE_FIRST */
 
-        (void)memcpy(&destPtr[offset], (uint8*)&pduLength, sizeof(pduLength));
+        (void)ILib_memcpy(&destPtr[offset], (uint8*)&pduLength, sizeof(pduLength));
         offset += sizeof(pduLength);
     }
 
     /* Authentic I-PDU */
-    (void)memcpy(&destPtr[offset], srcPtr, txRtPtr->txPduLength);
+    (void)ILib_memcpy(&destPtr[offset], srcPtr, txRtPtr->txPduLength);
+    SchM_Exit_SecOC_TxData();
 }
 
 /******************************************************************************/
 /*
  * Brief               Construct Cryptographic IPDU to be transmit
+ * ServiceId           N/A
  * Sync/Async          Synchronous
  * Reentrancy          Reentrant
  * Param-Name[in]      index: SecOC channel index
@@ -3075,13 +3281,13 @@ static FUNC(void, SECOC_CODE) SecOC_TxConstructCryptographicIPDU(uint16 index)
     {
         destPtr = txCryptographicPduPtr->SecOCTxCryptographicPduBufferRef;
         srcPtr = txPduProcessingPtr->SecOCAuthenticPduBufferRef;
-        (void)memset(destPtr, 0x00, txCryptographicPduPtr->SecOCTxCryptographicPduBuffLength);
+        (void)ILib_memset(destPtr, 0x00, txCryptographicPduPtr->SecOCTxCryptographicPduBuffLength);
     }
     else
     {
         destPtr = sameBufferPtr->SecOCCryptographicPduBufferRef;
         srcPtr = sameBufferPtr->SecOCAuthenticPduBufferRef;
-        (void)memset(destPtr, 0x00, sameBufferPtr->SecOCCryptographicPduBuffLength);
+        (void)ILib_memset(destPtr, 0x00, sameBufferPtr->SecOCCryptographicPduBuffLength);
     }
 
     /* @req SWS_SecOC_00209 */
@@ -3089,13 +3295,23 @@ static FUNC(void, SECOC_CODE) SecOC_TxConstructCryptographicIPDU(uint16 index)
     /* Freshness value */
     if (txPduProcessingPtr->SecOCFreshnessValueTruncLength > 0u)
     {
+        uint16 fvOffsetBits = 0u;
         fvLenInBits = txPduProcessingPtr->SecOCFreshnessValueLength;
         fvTruncLenInBits = txPduProcessingPtr->SecOCFreshnessValueTruncLength;
         fvLenInBytes = (uint8)SECOC_BIT_TO_BYTE((uint16)fvLenInBits);
         fvTruncLenInBytes = (uint8)SECOC_BIT_TO_BYTE((uint16)fvTruncLenInBits);
 
-        SecOC_ArrayShiftLeft(txRtPtr->txFreshnessValue, fvLenInBytes, ((uint16)fvLenInBits - (uint16)fvTruncLenInBits));
-        (void)memcpy(&destPtr[offset], txRtPtr->txFreshnessValue, fvTruncLenInBytes);
+        if (0u != (SECOC_MOD_FROM_EIGHT((fvLenInBits))))
+        {
+            fvOffsetBits = 8u - (uint16)SECOC_MOD_FROM_EIGHT(fvLenInBits);
+        }
+
+        fvOffsetBits = ((uint16)fvLenInBits - (uint16)fvTruncLenInBits) + fvOffsetBits;
+
+        SchM_Enter_SecOC_TxData();
+        SecOC_ArrayShiftLeft(txRtPtr->txFreshnessValue, fvLenInBytes, fvOffsetBits);
+        (void)ILib_memcpy(&destPtr[offset], txRtPtr->txFreshnessValue, fvTruncLenInBytes);
+        SchM_Exit_SecOC_TxData();
         if (0u != (SECOC_MOD_FROM_EIGHT((fvTruncLenInBits))))
         {
             offset = ((uint16)fvTruncLenInBytes - 1u);
@@ -3106,7 +3322,7 @@ static FUNC(void, SECOC_CODE) SecOC_TxConstructCryptographicIPDU(uint16 index)
             offset = fvTruncLenInBytes;
         }
     }
-
+    SchM_Enter_SecOC_TxData();
     /* Authenticator */
     authInfoShiftBits = SECOC_MOD_FROM_EIGHT((fvTruncLenInBits));
     authInfoTruncLenInBits = txPduProcessingPtr->SecOCAuthInfoTruncLength;
@@ -3117,10 +3333,10 @@ static FUNC(void, SECOC_CODE) SecOC_TxConstructCryptographicIPDU(uint16 index)
         authInfoTruncLenInBytes,
         SECOC_MOD_FROM_EIGHT((txPduProcessingPtr->SecOCAuthInfoTruncLength + fvTruncLenInBits)));
     SecOC_ArrayOrOp(&destPtr[offset], &txRtPtr->txResultBuffer[0u], authInfoTruncLenInBytes);
-    if (0u != (SECOC_MOD_FROM_EIGHT((authInfoTruncLenInBits))))
+    if (0u != (SECOC_MOD_FROM_EIGHT((authInfoTruncLenInBits + fvTruncLenInBits))))
     {
         offset += (authInfoTruncLenInBytes - 1u);
-        destPtr[offset] &= (0xFFu << (8u - (SECOC_MOD_FROM_EIGHT((authInfoTruncLenInBits)))));
+        destPtr[offset] &= (0xFFu << (8u - (SECOC_MOD_FROM_EIGHT((authInfoTruncLenInBits + fvTruncLenInBits)))));
     }
     else
     {
@@ -3139,11 +3355,13 @@ static FUNC(void, SECOC_CODE) SecOC_TxConstructCryptographicIPDU(uint16 index)
         SecOC_ArrayShiftRight(srcPtr, msgLinkLenInBytes, msgLinkShiftBits);
         SecOC_ArrayOrOp(&destPtr[offset], srcPtr, msgLinkLenInBytes);
     }
+    SchM_Exit_SecOC_TxData();
 }
 
 /******************************************************************************/
 /*
  * Brief               Broadcast Secured I-PDU to lower layer
+ * ServiceId           N/A
  * Sync/Async          Synchronous
  * Reentrancy          Reentrant
  * Param-Name[in]      index: SecOC channel index
@@ -3166,6 +3384,7 @@ static FUNC(void, SECOC_CODE) SecOC_TxBroadcastSecuredIPDU(uint16 index)
     uint8 fvTruncLenInBits = txPduProcessingPtr->SecOCFreshnessValueTruncLength;
     uint8 headerLenInBytes = txSecuredPduPtr->SecOCAuthPduHeaderLength;
 
+    SchM_Enter_SecOC_TxData();
     uint16 SecuredIpduLength =
         headerLenInBytes + txRtPtr->txPduLength + SECOC_BIT_TO_BYTE(authInfoTxLength + fvTruncLenInBits);
     if (SecuredIpduLength < txSecuredPduPtr->SecOCTxSecuredPduBuffLength)
@@ -3176,6 +3395,7 @@ static FUNC(void, SECOC_CODE) SecOC_TxBroadcastSecuredIPDU(uint16 index)
     {
         pduInfo.SduLength = SecuredIpduLength;
     }
+    SchM_Exit_SecOC_TxData();
 
     if (NULL_PTR == txPduProcessingPtr->SecOCSameBufferPduRef)
     {
@@ -3189,6 +3409,7 @@ static FUNC(void, SECOC_CODE) SecOC_TxBroadcastSecuredIPDU(uint16 index)
     /* Transmit Secured I-PDU to lower layer */
     (void)PduR_SecOCTransmit(pduId, &pduInfo);
 
+    SchM_Enter_SecOC_TxData();
     txRtPtr->txSecuredPduLen = pduInfo.SduLength;
     txRtPtr->txPduReady = TRUE;
     txRtPtr->txPduStatus = SECOC_TX_TRANS;
@@ -3200,11 +3421,13 @@ static FUNC(void, SECOC_CODE) SecOC_TxBroadcastSecuredIPDU(uint16 index)
         txRtPtr->tpTxPduOffset = 0u;
     }
 #endif
+    SchM_Exit_SecOC_TxData();
 }
 
 /******************************************************************************/
 /*
  * Brief               Broadcast Authentic I-PDU to lower layer
+ * ServiceId           N/A
  * Sync/Async          Synchronous
  * Reentrancy          Reentrant
  * Param-Name[in]      index: SecOC channel index
@@ -3224,8 +3447,9 @@ static FUNC(void, SECOC_CODE) SecOC_TxBroadcastAuthenticIPDU(uint16 index)
     PduIdType pduId = txAuthenticPduPtr->SecOCTxPduRAsLowerLayerId;
     PduInfoType pduInfo;
     uint8 headerLenInBytes = txAuthenticPduPtr->SecOCAuthPduHeaderLength;
-
+    SchM_Enter_SecOC_TxData();
     pduInfo.SduLength = headerLenInBytes + txRtPtr->txPduLength;
+    SchM_Exit_SecOC_TxData();
     if (NULL_PTR == txPduProcessingPtr->SecOCSameBufferPduRef)
     {
         pduInfo.SduDataPtr = txAuthenticPduPtr->SecOCTxColAuthenticPduBufferRef;
@@ -3238,6 +3462,7 @@ static FUNC(void, SECOC_CODE) SecOC_TxBroadcastAuthenticIPDU(uint16 index)
     /* Transmit Secured I-PDU to lower layer */
     (void)PduR_SecOCTransmit(pduId, &pduInfo);
 
+    SchM_Enter_SecOC_TxData();
     txRtPtr->txAuthenticPduLen = pduInfo.SduLength;
     txRtPtr->txPduReady = TRUE;
     txRtPtr->txPduStatus = SECOC_TX_TRANS;
@@ -3249,11 +3474,13 @@ static FUNC(void, SECOC_CODE) SecOC_TxBroadcastAuthenticIPDU(uint16 index)
         txRtPtr->tpTxPduOffset = 0u;
     }
 #endif
+    SchM_Exit_SecOC_TxData();
 }
 
 /******************************************************************************/
 /*
  * Brief               Broadcast Cryptographic I-PDU to lower layer
+ * ServiceId           N/A
  * Sync/Async          Synchronous
  * Reentrancy          Reentrant
  * Param-Name[in]      index: SecOC channel index
@@ -3299,6 +3526,7 @@ static FUNC(void, SECOC_CODE) SecOC_TxBroadcastCryptographicIPDU(uint16 index)
     /* Transmit Secured I-PDU to lower layer */
     (void)PduR_SecOCTransmit(pduId, &pduInfo);
 
+    SchM_Enter_SecOC_TxData();
     txRtPtr->txCryptographicPduLen = pduInfo.SduLength;
     txRtPtr->txPduReady = TRUE;
     txRtPtr->txPduStatus = SECOC_TX_TRANS;
@@ -3310,12 +3538,14 @@ static FUNC(void, SECOC_CODE) SecOC_TxBroadcastCryptographicIPDU(uint16 index)
         txRtPtr->tpTxPduOffset = 0u;
     }
 #endif
+    SchM_Exit_SecOC_TxData();
 }
 
 #if (SECOC_TX_TP_PDU_NUM > 0u)
 /******************************************************************************/
 /*
  * Brief               Acquire TP data from upper layer
+ * ServiceId           N/A
  * Sync/Async          Synchronous
  * Reentrancy          Reentrant
  * Param-Name[in]      index: SecOC channel index
@@ -3346,7 +3576,9 @@ static FUNC(void, SECOC_CODE) SecOC_TxTpAcquireData(uint16 index)
         {
             pduInfo.SduDataPtr = txPduProcessingPtr->SecOCSameBufferPduRef->SecOCAuthenticPduBufferRef;
         }
+        SchM_Enter_SecOC_TxData();
         pduInfo.SduLength = txRtPtr->txPduLength;
+        SchM_Exit_SecOC_TxData();
 
         /* @req SWS_SecOC_00254 */
         /* Copy data from upper layer */
@@ -3374,21 +3606,10 @@ static FUNC(void, SECOC_CODE) SecOC_TxTpAcquireData(uint16 index)
 }
 #endif
 
-#if (STD_ON == SECOC_DEV_ERROR_DETECT)
-static inline void SECOC_DET_REPORT(uint8 ApiId, uint8 ErrorId)
-{
-    (void)Det_ReportError(SECOC_MODULE_ID, SECOC_INSTANCE_ID, (ApiId), (ErrorId));
-}
-static inline void SECOC_DET_REPORT_RUNTIMEERROR(uint8 ApiId, uint8 ErrorId)
-{
-    (void)Det_ReportRuntimeError(SECOC_MODULE_ID, SECOC_INSTANCE_ID, (ApiId), (ErrorId));
-}
-
-#endif /* STD_ON == SECOC_DEV_ERROR_DETECT */
-
 /******************************************************************************/
 /*
  * Brief               Reset the runtime data to default value
+ * ServiceId           N/A
  * Sync/Async          Synchronous
  * Reentrancy          Reentrant
  * Param-Name[in]      index: SecOC channel index
@@ -3404,15 +3625,16 @@ static FUNC(void, SECOC_CODE) SecOC_TxChannelReset(uint16 index)
     P2VAR(SecOC_TxPduRTType, AUTOMATIC, SECOC_APPL_DATA) /* PRQA S 3432 */ /* MISRA Rule 20.7 */
     txRtPtr = &SecOC_TxRtData[index];
 
+    SchM_Enter_SecOC_TxData();
     txRtPtr->txPduStatus = SECOC_TX_NONE;
     txRtPtr->txPduLength = 0u;
     txRtPtr->txSecuredPduLen = 0u;
     txRtPtr->txAuthenticPduLen = 0u;
     txRtPtr->txCryptographicPduLen = 0u;
-    (void)memset(txRtPtr->txFreshnessValue, 0, SECOC_MAX_FRESHNESS_SIZE);
+    (void)ILib_memset(txRtPtr->txFreshnessValue, 0, SECOC_MAX_FRESHNESS_SIZE);
     txRtPtr->txPduReady = FALSE;
     txRtPtr->txAuthBuildCnt = 0u;
-    (void)memset(txRtPtr->txResultBuffer, 0, SECOC_MAX_AUTHENTICATOR_LEN);
+    (void)ILib_memset(txRtPtr->txResultBuffer, 0, SECOC_MAX_AUTHENTICATOR_LEN);
     txRtPtr->txResultLength = 0u;
     txRtPtr->txDefaultAuthInfoEnable = FALSE;
 #if (SECOC_TX_TP_PDU_NUM > 0u)
@@ -3427,56 +3649,183 @@ static FUNC(void, SECOC_CODE) SecOC_TxChannelReset(uint16 index)
 
     /* Clear tx event */
     SECOC_CLR_TX_EVENT(index, SECOC_EVENT_TX_ALL);
+    SchM_Exit_SecOC_TxData();
 }
 #endif /* SECOC_TX_PDU_NUM > 0u */
 
 #if (SECOC_RX_PDU_NUM > 0u)
-
-static void SECOC_SET_RX_EVENT(uint16 i, uint16 e)
+/******************************************************************************/
+/*
+ * Description         Macro function to set the receive event for a specific index.
+ * ServiceId           N/A
+ * Sync/Async          Synchronous
+ * Reentrancy          Non-reentrant
+ * Param-Name[in]      i: Index for which the receive event needs to be set.
+ *                     e: Event value to set.
+ * Param-Name[out]     None
+ * Param-Name[in/out]  None
+ * Return              None
+ */
+/******************************************************************************/
+static FUNC(void, SECOC_CODE) SECOC_SET_RX_EVENT(uint16 i, uint16 e)
 {
     (SecOC_RxEvent[i] |= (e));
 }
 
-static void SECOC_CLR_RX_EVENT(uint16 i, uint16 e)
+/******************************************************************************/
+/*
+ * Description         This function is used to clear a specific receive event.
+ * ServiceId           N/A
+ * Sync/Async          Synchronous
+ * Reentrancy          Non-reentrant
+ * Param-Name[in]      i: Index of the event.
+ *                     e: Event to be cleared.
+ * Param-Name[out]     None
+ * Param-Name[in/out]  None
+ * Return              None
+ */
+/******************************************************************************/
+static FUNC(void, SECOC_CODE) SECOC_CLR_RX_EVENT(uint16 i, uint16 e)
 {
     (SecOC_RxEvent[i] &= ~(e));
 }
 
-static boolean SECOC_IS_RX_EVENT(uint16 i, uint16 e)
+/******************************************************************************/
+/*
+ * Description         This function is used to check if a specific event is a receive event.
+ * ServiceId           N/A
+ * Sync/Async          Synchronous
+ * Reentrancy          Non-reentrant
+ * Param-Name[in]      i: Index of the event.
+ *                     e: Event to be checked.
+ * Param-Name[out]     None
+ * Param-Name[in/out]  None
+ * Return              boolean: TRUE if the event is a receive event, FALSE otherwise.
+ */
+/******************************************************************************/
+static FUNC(boolean, SECOC_CODE) SECOC_IS_RX_EVENT(uint16 i, uint16 e)
 {
     return ((SecOC_RxEvent[i] & (e)) != 0u) ? TRUE : FALSE;
 }
 
+/******************************************************************************/
+/*
+ * Description         This function is used to retrieve the pointer to the receive PDU Processing for a specific index.
+ * ServiceId           N/A
+ * Sync/Async          Synchronous
+ * Reentrancy          Non-reentrant
+ * Param-Name[in]      idx: Index for which the pointer to the receive PDU Processing is requested.
+ * Param-Name[out]     None
+ * Param-Name[in/out]  None
+ * Return              SecOC_RxPduProcessingType: Pointer to the receive PDU Processing.
+ */
+/******************************************************************************/
 static P2CONST(SecOC_RxPduProcessingType, TYPEDEF, SECOC_CONST) SecOC_GetRxPduProcessingPtr(uint16 idx)
 {
     return &SecOC_ConfigPtr->SecOCRxPduProcessing[idx];
 }
 
+/******************************************************************************/
+/*
+ * Description         This function is used to retrieve the pointer to the receive Authentic PDU Layer for a specific
+ * index.
+ * ServiceId           N/A
+ * Sync/Async          Synchronous
+ * Reentrancy          Non-reentrant
+ * Param-Name[in]      idx:Index for which the pointer to the receive Authentic PDU Layer is requested.
+ * Param-Name[out]     None
+ * Param-Name[in/out]  None
+ * Return              SecOC_RxAuthenticPduLayerType: Pointer to the receive Authentic PDU Layer.
+ */
+/******************************************************************************/
 static P2CONST(SecOC_RxAuthenticPduLayerType, AUTOMATIC, SECOC_APPL_DATA) SecOC_GetRxAuthenticPduLayerPtr(uint16 idx)
 {
     return (SecOC_GetRxPduProcessingPtr(idx)->SecOCRxAuthenticPduLayer);
 }
 
+/******************************************************************************/
+/*
+ * Description         This function is used to retrieve the pointer to the receive Secured PDU Layer for a specific
+ * index.
+ * ServiceId           N/A
+ * Sync/Async          Synchronous
+ * Reentrancy          Non-reentrant
+ * Param-Name[in]      idx: Index for which the pointer to the receive Secured PDU Layer is requested.
+ * Param-Name[out]     None
+ * Param-Name[in/out]  None
+ * Return              SecOC_RxSecuredPduLayerType: Pointer to the receive Secured PDU Layer.
+ */
+/******************************************************************************/
 static P2CONST(SecOC_RxSecuredPduLayerType, TYPEDEF, SECOC_CONST) SecOC_GetRxSecuredPduLayerPtr(uint16 idx)
 {
     return (SecOC_GetRxPduProcessingPtr(idx)->SecOCRxSecuredPduLayer);
 }
 
+/******************************************************************************/
+/*
+ * Description         This function is used to retrieve the pointer to the receive secured PDU for a specific index.
+ * ServiceId           N/A
+ * Sync/Async          Synchronous
+ * Reentrancy          Non-reentrant
+ * Param-Name[in]      idx: Index for which the pointer to the receive secured PDU is requested.
+ * Param-Name[out]     None
+ * Param-Name[in/out]  None
+ * Return              SecOC_RxSecuredPduType: Pointer to the receive secured PDU.
+ */
+/******************************************************************************/
 static P2CONST(SecOC_RxSecuredPduType, AUTOMATIC, SECOC_CONST) SecOC_GetRxSecuredPduPtr(uint16 idx)
 {
     return (SecOC_GetRxSecuredPduLayerPtr(idx)->SecOCRxSecuredPdu);
 }
 
+/******************************************************************************/
+/*
+ * Description         This function is used to retrieve the pointer to the receive Secured PDU Collection for a
+ * specific index.
+ * ServiceId           N/A
+ * Sync/Async          Synchronous
+ * Reentrancy          Non-reentrant
+ * Param-Name[in]      idx: Index for which the pointer to the receive Secured PDU Collection is requested.
+ * Param-Name[out]     None
+ * Param-Name[in/out]  None
+ * Return              SecOC_RxSecuredPduCollectionType: Pointer to the receive Secured PDU Collection.
+ */
+/******************************************************************************/
 static P2CONST(SecOC_RxSecuredPduCollectionType, AUTOMATIC, SECOC_CONST) SecOC_GetRxSecuredPduCollectionPtr(uint16 idx)
 {
     return (SecOC_GetRxSecuredPduLayerPtr(idx)->SecOCRxSecuredPduCollection);
 }
 
+/******************************************************************************/
+/*
+ * Description         This function is used to retrieve the pointer to the receive Authentic PDU for a specific index.
+ * ServiceId           N/A
+ * Sync/Async          Synchronous
+ * Reentrancy          Non-reentrant
+ * Param-Name[in]      idx: Index for which the pointer to the receive Authentic PDU is requested.
+ * Param-Name[out]     None
+ * Param-Name[in/out]  None
+ * Return              SecOC_RxAuthenticPduType: Pointer to the receive Authentic PDU.
+ */
+/******************************************************************************/
 static P2CONST(SecOC_RxAuthenticPduType, AUTOMATIC, SECOC_CONST) SecOC_GetRxAuthenticPduPtr(uint16 idx)
 {
     return (SecOC_GetRxSecuredPduCollectionPtr(idx)->SecOCRxAuthenticPdu);
 }
 
+/******************************************************************************/
+/*
+ * Description         This function is used to retrieve the pointer to the receive Cryptographic PDU for a specific
+ * index.
+ * ServiceId           N/A
+ * Sync/Async          Synchronous
+ * Reentrancy          Non-reentrant
+ * Param-Name[in]      idx:Index for which the pointer to the receive Cryptographic PDU is requested.
+ * Param-Name[out]     None
+ * Param-Name[in/out]  None
+ * Return              SecOC_RxCryptographicPduType: Pointer to the receive Cryptographic PDU.
+ */
+/******************************************************************************/
 static P2CONST(SecOC_RxCryptographicPduType, AUTOMATIC, SECOC_CONST) SecOC_GetRxCryptographicPduPtr(uint16 idx)
 {
     return (SecOC_GetRxSecuredPduCollectionPtr(idx)->SecOCRxCryptographicPdu);
@@ -3486,6 +3835,7 @@ static P2CONST(SecOC_RxCryptographicPduType, AUTOMATIC, SECOC_CONST) SecOC_GetRx
 /******************************************************************************/
 /*
  * Brief               Secured IPDU receive indication process
+ * ServiceId           N/A
  * Sync/Async          Synchronous
  * Reentrancy          Reentrant
  * Param-Name[in]      index: SecOC channel index
@@ -3574,7 +3924,8 @@ static FUNC(void, SECOC_CODE) SecOC_RxIfSecuredPduIndication(
             {
                 if ((NULL_PTR == sameBufferPtr) || (FALSE == sameBufferPtr->SecOCSameBufferInUse[0u]))
                 {
-                    (void)memcpy(destPtr, pduInfo.SduDataPtr, pduInfo.SduLength);
+                    SchM_Enter_SecOC_RxData();
+                    (void)ILib_memcpy(destPtr, pduInfo.SduDataPtr, pduInfo.SduLength);
 
                     SECOC_SET_RX_EVENT(index, SECOC_RX_INDICATION);
                     SECOC_SET_RX_EVENT(index, SECOC_RX_SECURED_PDU);
@@ -3587,6 +3938,7 @@ static FUNC(void, SECOC_CODE) SecOC_RxIfSecuredPduIndication(
                     {
                         sameBufferPtr->SecOCSameBufferInUse[0u] = TRUE;
                     }
+                    SchM_Exit_SecOC_RxData();
                 }
             }
         }
@@ -3601,10 +3953,10 @@ static FUNC(void, SECOC_CODE) SecOC_RxIfSecuredPduIndication(
 /******************************************************************************/
 /*
  * Brief               Authentic IPDU receive indication process
+ * ServiceId           N/A
  * Sync/Async          Synchronous
  * Reentrancy          Reentrant
  * Param-Name[in]      index: SecOC channel index
- *                     RxPduId: ID of the received PDU.
  *                     PduInfoPtr: Contains the length (SduLength) of the
  *                                 received PDU,a pointer to a buffer
  *                                 (SduDataPtr)containing the PDU.
@@ -3685,7 +4037,8 @@ static FUNC(void, SECOC_CODE)
             {
                 if ((NULL_PTR == sameBufferPtr) || (FALSE == sameBufferPtr->SecOCSameBufferInUse[0u]))
                 {
-                    (void)memcpy(destPtr, pduInfo.SduDataPtr, pduInfo.SduLength);
+                    SchM_Enter_SecOC_RxData();
+                    (void)ILib_memcpy(destPtr, pduInfo.SduDataPtr, pduInfo.SduLength);
 
                     /* @req SWS_SecOC_00203,SWS_SecOC_00208 */
                     SECOC_SET_RX_EVENT(index, SECOC_RX_INDICATION);
@@ -3700,6 +4053,7 @@ static FUNC(void, SECOC_CODE)
                     {
                         sameBufferPtr->SecOCSameBufferInUse[0u] = TRUE;
                     }
+                    SchM_Exit_SecOC_RxData();
                 }
             }
         }
@@ -3714,10 +4068,10 @@ static FUNC(void, SECOC_CODE)
 /******************************************************************************/
 /*
  * Brief               Cryptographic IPDU receive indication process
+ * ServiceId           N/A
  * Sync/Async          Synchronous
  * Reentrancy          Reentrant
  * Param-Name[in]      index: SecOC channel index
- *                     RxPduId: ID of the received PDU.
  *                     PduInfoPtr: Contains the length (SduLength) of the
  *                                 received PDU,a pointer to a buffer
  *                                 (SduDataPtr)containing the PDU.
@@ -3730,13 +4084,13 @@ static FUNC(void, SECOC_CODE)
     SecOC_RxIfCryptographicPduIndication(uint16 index, P2CONST(PduInfoType, AUTOMATIC, SECOC_APPL_CONST) PduInfoPtr)
 {
     P2CONST(SecOC_RxPduProcessingType, AUTOMATIC, SECOC_CONST)
-    rxPduProcessingPtr = SecOC_GetRxPduProcessingPtr(0u);
+    rxPduProcessingPtr = SecOC_GetRxPduProcessingPtr(index);
     P2CONST(SecOC_SameBufferPduCollectionType, AUTOMATIC, SECOC_CONST)
     sameBufferPtr = rxPduProcessingPtr->SecOCSameBufferPduRef;
     P2CONST(SecOC_RxCryptographicPduType, AUTOMATIC, SECOC_CONST)
     rxCryptographicPduPtr;
     P2VAR(SecOC_RxPduRTType, AUTOMATIC, SECOC_APPL_DATA) /* PRQA S 3432 */ /* MISRA Rule 20.7 */
-    rxRtPtr = &SecOC_RxRtData[0u];
+    rxRtPtr = &SecOC_RxRtData[index];
     P2VAR(uint8, AUTOMATIC, SECOC_APPL_DATA) destPtr; /* PRQA S 3432 */ /* MISRA Rule 20.7 */
     PduLengthType interBufLen;
     PduInfoType pduInfo;
@@ -3799,7 +4153,8 @@ static FUNC(void, SECOC_CODE)
             {
                 if ((NULL_PTR == sameBufferPtr) || (FALSE == sameBufferPtr->SecOCSameBufferInUse[0u]))
                 {
-                    (void)memcpy(destPtr, pduInfo.SduDataPtr, pduInfo.SduLength);
+                    SchM_Enter_SecOC_RxData();
+                    (void)ILib_memcpy(destPtr, pduInfo.SduDataPtr, pduInfo.SduLength);
 
                     /* @req SWS_SecOC_00203,SWS_SecOC_00208 */
                     SECOC_SET_RX_EVENT(index, SECOC_RX_INDICATION);
@@ -3814,6 +4169,7 @@ static FUNC(void, SECOC_CODE)
                     {
                         sameBufferPtr->SecOCSameBufferInUse[0u] = TRUE;
                     }
+                    SchM_Exit_SecOC_RxData();
                 }
             }
         }
@@ -3829,6 +4185,7 @@ static FUNC(void, SECOC_CODE)
 /******************************************************************************/
 /*
  * Brief               Parse the received Secured I-PDU
+ * ServiceId           N/A
  * Sync/Async          Synchronous
  * Reentrancy          Reentrant
  * Param-Name[in]      index: SecOC channel index
@@ -3928,12 +4285,13 @@ static FUNC(void, SECOC_CODE) SecOC_RxParseSecuredIpdu(uint16 index)
 
                 if (FALSE == dropMsgFlag)
                 {
+                    SchM_Enter_SecOC_RxData();
                     offset = headerLen;
                     /* Parse Authentic PDU */
-                    (void)memcpy(rxRtPtr->rxParsedAuthPduBufPtr, &rxSecuredPduBufPtr[offset], authPduLen);
+                    (void)ILib_memcpy(rxRtPtr->rxParsedAuthPduBufPtr, &rxSecuredPduBufPtr[offset], authPduLen);
                     offset += authPduLen;
                     /* Parse Freshness value */
-                    (void)memcpy(
+                    (void)ILib_memcpy(
                         rxRtPtr->rxParsedFreshnessValue,
                         &rxSecuredPduBufPtr[offset],
                         SECOC_BIT_TO_BYTE((uint16)rxPduProcessingPtr->SecOCFreshnessValueTruncLength));
@@ -3949,10 +4307,11 @@ static FUNC(void, SECOC_CODE) SecOC_RxParseSecuredIpdu(uint16 index)
                         &rxSecuredPduBufPtr[offset],
                         rxPduProcessingPtr->SecOCAuthFrsInfoLength,
                         rxPduProcessingPtr->SecOCFreshnessValueTruncLength);
-                    (void)memcpy(
+                    (void)ILib_memcpy(
                         rxRtPtr->rxParsedAuthenticator,
                         &rxSecuredPduBufPtr[offset],
-                        SECOC_BIT_TO_BYTE(rxPduProcessingPtr->SecOCAuthInfoTruncLength));
+                        (uint32)SECOC_BIT_TO_BYTE((uint16)rxPduProcessingPtr->SecOCAuthInfoTruncLength));
+                    SchM_Exit_SecOC_RxData();
                 }
             }
             else
@@ -4008,13 +4367,14 @@ static FUNC(void, SECOC_CODE) SecOC_RxParseSecuredIpdu(uint16 index)
                 if (FALSE == dropMsgFlag)
                 {
                     offset = headerLen;
+                    SchM_Enter_SecOC_RxData();
                     /* Parse Authentic PDU */
-                    (void)memcpy(rxRtPtr->rxParsedAuthPduBufPtr, &rxAuthenticPduBufPtr[offset], authPduLen);
+                    (void)ILib_memcpy(rxRtPtr->rxParsedAuthPduBufPtr, &rxAuthenticPduBufPtr[offset], authPduLen);
 
                     if (SECOC_IS_RX_EVENT(index, SECOC_RX_CRYPTOGRAPHIC_PDU))
                     {
                         /* Parse Freshness value */
-                        (void)memcpy(
+                        (void)ILib_memcpy(
                             rxRtPtr->rxParsedFreshnessValue,
                             rxCryptographicPduBufPtr,
                             SECOC_BIT_TO_BYTE((uint16)rxPduProcessingPtr->SecOCFreshnessValueTruncLength));
@@ -4030,16 +4390,18 @@ static FUNC(void, SECOC_CODE) SecOC_RxParseSecuredIpdu(uint16 index)
                             rxCryptographicPduBufPtr,
                             rxPduProcessingPtr->SecOCAuthFrsInfoLength,
                             rxPduProcessingPtr->SecOCFreshnessValueTruncLength);
-                        (void)memcpy(
+                        (void)ILib_memcpy(
                             rxRtPtr->rxParsedAuthenticator,
                             rxCryptographicPduBufPtr,
                             SECOC_BIT_TO_BYTE((uint16)rxPduProcessingPtr->SecOCAuthInfoTruncLength));
                     }
+                    SchM_Exit_SecOC_RxData();
                 }
             }
             /* Save Parsed Authentic Pdu Length */
             rxRtPtr->rxParsedAuthPduLen = authPduLen;
 
+            SchM_Enter_SecOC_RxData();
             if (TRUE == securedRxPduVerification)
             {
                 SECOC_SET_RX_EVENT(index, SECOC_RX_PARSED_MESSAGE);
@@ -4050,6 +4412,7 @@ static FUNC(void, SECOC_CODE) SecOC_RxParseSecuredIpdu(uint16 index)
                 /* SecOC extract the Authentic I-PDU without Authentication*/
                 SECOC_SET_RX_EVENT(index, SECOC_RX_VERIFY_FINISH_IND_CONFIRMED);
             }
+            SchM_Exit_SecOC_RxData();
         }
 #if (SECOC_MAX_MSG_LINK_LEN > 0u)
         else
@@ -4067,8 +4430,9 @@ static FUNC(void, SECOC_CODE) SecOC_RxParseSecuredIpdu(uint16 index)
             /* Channel reset */
             SecOC_RxChannelReset(index);
         }
-
+        SchM_Enter_SecOC_RxData();
         SECOC_CLR_RX_EVENT(index, SECOC_RX_INDICATION);
+        SchM_Exit_SecOC_RxData();
     }
     else
     {
@@ -4079,6 +4443,7 @@ static FUNC(void, SECOC_CODE) SecOC_RxParseSecuredIpdu(uint16 index)
 /******************************************************************************/
 /*
  * Brief               Verify process
+ * ServiceId           N/A
  * Sync/Async          Synchronous
  * Reentrancy          Reentrant
  * Param-Name[in]      index: SecOC channel index
@@ -4137,6 +4502,7 @@ static FUNC(void, SECOC_CODE) SecOC_RxVerifyProcee(uint16 index)
 /******************************************************************************/
 /*
  * Brief               Verify the received Secured I-PDU
+ * ServiceId           N/A
  * Sync/Async          Synchronous
  * Reentrancy          Reentrant
  * Param-Name[in]      index: SecOC channel index
@@ -4248,6 +4614,7 @@ static FUNC(void, SECOC_CODE) SecOC_RxVerifyAuthenticationInfo(uint16 index)
 /******************************************************************************/
 /*
  * Brief               Calculate the length of DataToAuthenticator
+ * ServiceId           N/A
  * Sync/Async          Synchronous
  * Reentrancy          Reentrant
  * Param-Name[in]      index: SecOC channel index
@@ -4283,6 +4650,7 @@ static FUNC(uint32, SECOC_CODE) SecOC_RxCalcDataToAuthenticatorLength(uint16 ind
 /******************************************************************************/
 /*
  * Brief               Construct DataToAuthenticator
+ * ServiceId           N/A
  * Sync/Async          Synchronous
  * Reentrancy          Reentrant
  * Param-Name[in]      index: SecOC channel index
@@ -4312,7 +4680,9 @@ static FUNC(Std_ReturnType, SECOC_CODE) SecOC_RxConstructDataToAuthenticator(uin
     uint8 headerLen;
     Std_ReturnType ret;
 
-    (void)memset(SecOC_DataToAuthenticator, 0, SECOC_DATA_TO_AUTHENTICATOR_LENGTH);
+    SchM_Enter_SecOC_Authentication();
+
+    (void)ILib_memset(SecOC_DataToAuthenticator, 0, SECOC_DATA_TO_AUTHENTICATOR_LENGTH);
     /* @req SWS_SecOC_00046 */
     /*
      * DataToAuthenticator = Data Identifier | secured part of the Authentic
@@ -4324,7 +4694,7 @@ static FUNC(Std_ReturnType, SECOC_CODE) SecOC_RxConstructDataToAuthenticator(uin
 #if (CPU_BYTE_ORDER == LOW_BYTE_FIRST)
     SecOC_EndianSwap((uint8*)&dataId, sizeof(dataId));
 #endif /* CPU_BYTE_ORDER == LOW_BYTE_FIRST */
-    (void)memcpy(&SecOC_DataToAuthenticator[0], (uint8*)&dataId, SECOC_DATAID_LEN);
+    (void)ILib_memcpy(&SecOC_DataToAuthenticator[0], (uint8*)&dataId, SECOC_DATAID_LEN);
 
     /* Secured part of the Authentic */
     if (NULL_PTR != rxPduProcessingPtr->SecOCRxPduSecuredArea)
@@ -4341,11 +4711,12 @@ static FUNC(Std_ReturnType, SECOC_CODE) SecOC_RxConstructDataToAuthenticator(uin
         securedIPDUOffset = 0u;
     }
 
-    (void)memcpy(
+    (void)ILib_memcpy(
         &SecOC_DataToAuthenticator[SECOC_DATAID_LEN],
         &rxRtPtr->rxParsedAuthPduBufPtr[securedIPDUOffset],
         securedIPDULength);
 
+    SchM_Exit_SecOC_Authentication();
     /* Complete Freshness Value */
     /* @req SWS_SecOC_00219 */
     /* SecOC use a part of the Authentic I-PDU as freshness */
@@ -4442,11 +4813,13 @@ static FUNC(Std_ReturnType, SECOC_CODE) SecOC_RxConstructDataToAuthenticator(uin
 
     if (E_OK == ret)
     {
-        freshnessValueLen = SECOC_BIT_TO_BYTE((uint16)rxPduProcessingPtr->SecOCFreshnessValueLength);
-        (void)memcpy(
+        SchM_Enter_SecOC_Authentication();
+        freshnessValueLen = (uint32)SECOC_BIT_TO_BYTE((uint16)rxPduProcessingPtr->SecOCFreshnessValueLength);
+        (void)ILib_memcpy(
             &SecOC_DataToAuthenticator[SECOC_DATAID_LEN + securedIPDULength],
             rxRtPtr->rxFreshnessValue,
             freshnessValueLen);
+        SchM_Exit_SecOC_Authentication();
     }
     else if (E_BUSY == ret)
     {
@@ -4470,6 +4843,7 @@ static FUNC(Std_ReturnType, SECOC_CODE) SecOC_RxConstructDataToAuthenticator(uin
 /******************************************************************************/
 /*
  * Brief               Build DataToAuthenticator retry process
+ * ServiceId           N/A
  * Sync/Async          Synchronous
  * Reentrancy          Reentrant
  * Param-Name[in]      index: SecOC channel index
@@ -4488,8 +4862,10 @@ static FUNC(void, SECOC_CODE) SecOC_RxAuthenticationBuildRetry(uint16 index)
     /* @req SWS_SecOC_00236,SWS_SecOC_00237,SWS_SecOC_00238 */
     if (rxRtPtr->rxAuthBuildAttempts < rxPduProcessingPtr->SecOCAuthenticationBuildAttempts)
     {
+        SchM_Enter_SecOC_RxData();
         rxRtPtr->rxAuthBuildAttempts++;
         rxRtPtr->rxPduStatus = SECOC_RX_RETRY;
+        SchM_Exit_SecOC_RxData();
     }
     else
     {
@@ -4498,13 +4874,17 @@ static FUNC(void, SECOC_CODE) SecOC_RxAuthenticationBuildRetry(uint16 index)
             || ((SECOC_OVERRIDE_PASS_UNTIL_LIMIT == rxRtPtr->rxOverrideStatus)
                 && (rxRtPtr->rxBakNumOfMsgToOverride > 0u)))
         {
+            SchM_Enter_SecOC_RxData();
             /* According override setup, send authentic IPDU to upper layer */
             SECOC_SET_RX_EVENT(index, SECOC_RX_VERIFY_FINISH_IND_CONFIRMED);
+            SchM_Exit_SecOC_RxData();
         }
         else
         {
+            SchM_Enter_SecOC_RxData();
             /* @req SWS_SecOC_00240 */
             rxRtPtr->rxVeryfyResult = SECOC_AUTHENTICATIONBUILDFAILURE;
+            SchM_Exit_SecOC_RxData();
             /* Report verify status */
             SecOC_RxReportVerifyStatus(index);
 
@@ -4516,9 +4896,11 @@ static FUNC(void, SECOC_CODE) SecOC_RxAuthenticationBuildRetry(uint16 index)
             }
             else
             {
+                SchM_Enter_SecOC_RxData();
                 /* Use SecOCRxSecuredPduCollection,Authentication build may
                  * success when Authentic I-PDU or Cryptographic PDU Update */
                 SECOC_CLR_RX_EVENT(index, SECOC_RX_PARSED_MESSAGE);
+                SchM_Exit_SecOC_RxData();
             }
         }
 
@@ -4533,6 +4915,7 @@ static FUNC(void, SECOC_CODE) SecOC_RxAuthenticationBuildRetry(uint16 index)
 /******************************************************************************/
 /*
  * Brief               Verify Authentication information retry process
+ * ServiceId           N/A
  * Sync/Async          Synchronous
  * Reentrancy          Reentrant
  * Param-Name[in]      index: SecOC channel index
@@ -4551,8 +4934,10 @@ static FUNC(void, SECOC_CODE) SecOC_RxVerifyAuthenticInfoRetry(uint16 index)
     /* @req SWS_SecOC_00239 */
     if (rxRtPtr->rxVerifyAttempts < rxPduProcessingPtr->SecOCAuthenticationVerifyAttempts)
     {
+        SchM_Enter_SecOC_RxData();
         rxRtPtr->rxVerifyAttempts++;
         rxRtPtr->rxPduStatus = SECOC_RX_RETRY;
+        SchM_Exit_SecOC_RxData();
     }
     else
     {
@@ -4560,13 +4945,17 @@ static FUNC(void, SECOC_CODE) SecOC_RxVerifyAuthenticInfoRetry(uint16 index)
             || ((SECOC_OVERRIDE_PASS_UNTIL_LIMIT == rxRtPtr->rxOverrideStatus)
                 && (rxRtPtr->rxBakNumOfMsgToOverride > 0u)))
         {
+            SchM_Enter_SecOC_RxData();
             /* Continue to send authentic I-PDU to upper layer */
             SECOC_SET_RX_EVENT(index, SECOC_RX_VERIFY_FINISH_IND_CONFIRMED);
+            SchM_Exit_SecOC_RxData();
         }
         else
         {
+            SchM_Enter_SecOC_RxData();
             /* @req SWS_SecOC_00241 */
             rxRtPtr->rxVeryfyResult = SECOC_VERIFICATIONFAILURE;
+            SchM_Exit_SecOC_RxData();
             /* Report verify status */
             SecOC_RxReportVerifyStatus(index);
 
@@ -4578,9 +4967,11 @@ static FUNC(void, SECOC_CODE) SecOC_RxVerifyAuthenticInfoRetry(uint16 index)
             }
             else
             {
+                SchM_Enter_SecOC_RxData();
                 /* Use SecOCRxSecuredPduCollection,Verify authentication may
                    success when Authentic I-PDU or Cryptographic PDU Update */
                 SECOC_CLR_RX_EVENT(index, SECOC_RX_PARSED_MESSAGE);
+                SchM_Exit_SecOC_RxData();
             }
         }
     }
@@ -4588,6 +4979,18 @@ static FUNC(void, SECOC_CODE) SecOC_RxVerifyAuthenticInfoRetry(uint16 index)
 
 #if (SECOC_MAX_MSG_LINK_LEN > 0u)
 
+/******************************************************************************/
+/*
+ * Description         This function is used to get the pointer to the use message link structure for a specific index.
+ * ServiceId           N/A
+ * Sync/Async          Synchronous
+ * Reentrancy          Non-reentrant
+ * Param-Name[in]      idx: Index for which the pointer to the use message link structure is requested.
+ * Param-Name[out]     None
+ * Param-Name[in/out]  None
+ * Return              SecOC_UseMessageLinkType: Pointer to the use message link structure.
+ */
+/******************************************************************************/
 static P2CONST(SecOC_UseMessageLinkType, AUTOMATIC, SECOC_CONST) SecOC_GetRxUseMessageLinkPtr(uint16 idx)
 {
     return (SecOC_GetRxSecuredPduCollectionPtr(idx)->SecOCUseMessageLink);
@@ -4596,12 +4999,14 @@ static P2CONST(SecOC_UseMessageLinkType, AUTOMATIC, SECOC_CONST) SecOC_GetRxUseM
 /******************************************************************************/
 /*
  * Brief               Authentic Pdu and Cryptographic Pdu message link check
+ * ServiceId           N/A
  * Sync/Async          Synchronous
  * Reentrancy          Reentrant
  * Param-Name[in]      index: SecOC channel index
  * Param-Name[out]     None
  * Param-Name[in/out]  None
- * Return              None
+ * Return              E_OK: Message Link Check success
+ *                     E_NOT_OK: Message Link Check fail
  */
 /******************************************************************************/
 static FUNC(Std_ReturnType, SECOC_CODE) SecOC_RxMessageLinkCheck(uint16 index)
@@ -4620,7 +5025,7 @@ static FUNC(Std_ReturnType, SECOC_CODE) SecOC_RxMessageLinkCheck(uint16 index)
     rxCryptographicPduPtr;
     P2VAR(uint8, AUTOMATIC, SECOC_APPL_DATA) tBufPtr; /* PRQA S 3432 */      /* MISRA Rule 20.7 */
     P2VAR(uint8, AUTOMATIC, SECOC_APPL_DATA) cryptoPduPtr; /* PRQA S 3432 */ /* MISRA Rule 20.7 */
-    uint8 msgLinkArray[SECOC_MAX_MSG_LINK_LEN] = {0u};
+    uint8 msgLinkArray[SECOC_MAX_MSG_LINK_LEN] = {0};
     uint16 offsetBits;
     uint16 authPduLen;
     uint16 msgLinkStartPos;
@@ -4630,6 +5035,7 @@ static FUNC(Std_ReturnType, SECOC_CODE) SecOC_RxMessageLinkCheck(uint16 index)
 
     if ((NULL_PTR != rxSecuredPduCollectionPtr))
     {
+        SchM_Enter_SecOC_RxData();
         msgLinkPtr = SecOC_GetRxUseMessageLinkPtr(index);
         if ((NULL_PTR != msgLinkPtr) && SECOC_IS_RX_EVENT(index, SECOC_RX_INDICATION)
             && SECOC_IS_RX_EVENT(index, SECOC_RX_AUTHENTIC_PDU) && SECOC_IS_RX_EVENT(index, SECOC_RX_CRYPTOGRAPHIC_PDU))
@@ -4643,19 +5049,19 @@ static FUNC(Std_ReturnType, SECOC_CODE) SecOC_RxMessageLinkCheck(uint16 index)
             if (NULL_PTR == sameBufferPtr)
             {
                 tBufPtr = rxPduProcessingPtr->SecOCAuthenticPduBufferRef;
-                (void)memcpy(tBufPtr, &rxAuthenticPduPtr->SecOCRxColAuthenticPduBufferRef[headerLen], authPduLen);
+                (void)ILib_memcpy(tBufPtr, &rxAuthenticPduPtr->SecOCRxColAuthenticPduBufferRef[headerLen], authPduLen);
                 cryptoPduPtr = rxCryptographicPduPtr->SecOCRxCryptographicPduBufferRef;
             }
             else
             {
                 tBufPtr = sameBufferPtr->SecOCAuthenticPduBufferRef;
-                (void)memcpy(tBufPtr, &sameBufferPtr->SecOCColAuthenticPduBufferRef[headerLen], authPduLen);
+                (void)ILib_memcpy(tBufPtr, &sameBufferPtr->SecOCColAuthenticPduBufferRef[headerLen], authPduLen);
                 cryptoPduPtr = sameBufferPtr->SecOCCryptographicPduBufferRef;
             }
 
             offsetBits = ((uint16)headerLen * 8u) + msgLinkPtr->SecOCMessageLinkPos;
             SecOC_ArrayShiftLeft(tBufPtr, authPduLen, offsetBits);
-            (void)memcpy(msgLinkArray, tBufPtr, authPduLen);
+            (void)ILib_memcpy(msgLinkArray, tBufPtr, authPduLen);
 
             /* Pickup message link from Cryptographic Pdu */
             offsetBits =
@@ -4668,7 +5074,7 @@ static FUNC(Std_ReturnType, SECOC_CODE) SecOC_RxMessageLinkCheck(uint16 index)
             {
                 msgLinkStartPos = rxPduProcessingPtr->SecOCAuthFrsInfoLength - 1u;
             }
-            (void)memcpy(
+            (void)ILib_memcpy(
                 tBufPtr,
                 &cryptoPduPtr[msgLinkStartPos],
                 ((uint32)rxRtPtr->rxCryptographicPduLen - (uint32)msgLinkStartPos));
@@ -4679,11 +5085,12 @@ static FUNC(Std_ReturnType, SECOC_CODE) SecOC_RxMessageLinkCheck(uint16 index)
 
             /* Compare message link */
             msgLinkLenInByte = SECOC_BIT_TO_BYTE(msgLinkPtr->SecOCMessageLinkLen);
-            if (0 != memcmp(tBufPtr, msgLinkArray, msgLinkLenInByte))
+            if (0 != ILib_memcmp(tBufPtr, msgLinkArray, msgLinkLenInByte))
             {
                 ret = E_NOT_OK;
             }
         }
+        SchM_Exit_SecOC_RxData();
     }
 
     return ret;
@@ -4693,6 +5100,7 @@ static FUNC(Std_ReturnType, SECOC_CODE) SecOC_RxMessageLinkCheck(uint16 index)
 /******************************************************************************/
 /*
  * Brief               Send Authentic pdu to upper layer
+ * ServiceId           N/A
  * Sync/Async          Synchronous
  * Reentrancy          Reentrant
  * Param-Name[in]      index: SecOC channel index
@@ -4728,9 +5136,11 @@ static FUNC(void, SECOC_CODE) SecOC_RxPassAuthenticPduToUpperLayer(uint16 index)
             || (CRYPTO_E_VER_OK == rxRtPtr->rxVerifyResult)
             || (*SecOC_ConfigPtr->SecOCIgnoreVerificationResultRef == TRUE))
         {
+            SchM_Enter_SecOC_RxData();
             /* I-PDU is sent to upper layer*/
             pduInfo.SduLength = rxRtPtr->rxParsedAuthPduLen;
             pduInfo.SduDataPtr = rxRtPtr->rxParsedAuthPduBufPtr;
+            SchM_Exit_SecOC_RxData();
             pduId = rxAuthenticPduLayerPtr->SecOCRxPduRAsUpLayerId;
             /* @req SWS_SecOC_00050,SWS_SecOC_00080 */
             if (SECOC_IFPDU == rxAuthenticPduLayerPtr->SecOCPduType)
@@ -4746,12 +5156,16 @@ static FUNC(void, SECOC_CODE) SecOC_RxPassAuthenticPduToUpperLayer(uint16 index)
             {
                 /* @req SWS_SecOC_00082 */
                 /* Upper layer is TP pdu,Notify upper layer start of reception*/
+                SchM_Enter_SecOC_RxData();
                 rxRtPtr->upLayerBufSize = 0u;
                 rxRtPtr->sduRemaining = rxRtPtr->rxParsedAuthPduLen;
+                SchM_Exit_SecOC_RxData();
                 bufReqRet = PduR_SecOCTpStartOfReception(pduId, NULL_PTR, pduInfo.SduLength, &rxRtPtr->upLayerBufSize);
                 if ((BUFREQ_OK == bufReqRet) && (rxRtPtr->upLayerBufSize > 0u))
                 {
+                    SchM_Enter_SecOC_RxData();
                     SECOC_SET_RX_EVENT(index, SECOC_RX_TRANS_TP_DATA_TO_UPPER);
+                    SchM_Exit_SecOC_RxData();
                 }
                 else
                 {
@@ -4770,7 +5184,7 @@ static FUNC(void, SECOC_CODE) SecOC_RxPassAuthenticPduToUpperLayer(uint16 index)
              * verification failed. */
             SecOC_RxVerifyAuthenticInfoRetry(index);
         }
-
+        SchM_Enter_SecOC_RxData();
         if (CRYPTO_E_VER_OK == rxRtPtr->rxVerifyResult)
         {
             /* @req SWS_SecOC_00242 */
@@ -4789,6 +5203,7 @@ static FUNC(void, SECOC_CODE) SecOC_RxPassAuthenticPduToUpperLayer(uint16 index)
                 rxRtPtr->rxVeryfyResult = SECOC_VERIFICATIONFAILURE;
             }
         }
+        SchM_Exit_SecOC_RxData();
         /* Report verify status */
         SecOC_RxReportVerifyStatus(index);
     }
@@ -4798,6 +5213,7 @@ static FUNC(void, SECOC_CODE) SecOC_RxPassAuthenticPduToUpperLayer(uint16 index)
 /******************************************************************************/
 /*
  * Brief               Send Authentic pdu(TP) to upper layer
+ * ServiceId           N/A
  * Sync/Async          Synchronous
  * Reentrancy          Reentrant
  * Param-Name[in]      index: SecOC channel index
@@ -4823,17 +5239,21 @@ static FUNC(void, SECOC_CODE) SecOC_RxTransTpDataToUpperLayer(uint16 index)
 
     if (SECOC_IS_RX_EVENT(index, SECOC_RX_TRANS_TP_DATA_TO_UPPER))
     {
-        pduLen = SECOC_MIN(rxRtPtr->sduRemaining, rxRtPtr->upLayerBufSize); /* PRQA S 3469  */ /* MISRA Dir 4.9 */
+        SchM_Enter_SecOC_RxData();
+        pduLen = SECOC_MIN(rxRtPtr->sduRemaining, rxRtPtr->upLayerBufSize);
         pduId = rxAuthenticPduLayerPtr->SecOCRxPduRAsUpLayerId;
 
         /* @req SWS_SecOC_00086 */
         /* Copy data to upper layer complete */
         pduInfo.SduDataPtr = &rxRtPtr->rxParsedAuthPduBufPtr[offset];
         pduInfo.SduLength = pduLen;
+        SchM_Exit_SecOC_RxData();
         bufReqRet = PduR_SecOCTpCopyRxData(pduId, &pduInfo, &rxRtPtr->upLayerBufSize);
         if (BUFREQ_OK == bufReqRet)
         {
+            SchM_Enter_SecOC_RxData();
             rxRtPtr->sduRemaining -= pduLen;
+            SchM_Exit_SecOC_RxData();
             if (0u == rxRtPtr->sduRemaining)
             {
                 /* Notify upper layer data copy finished */
@@ -4872,6 +5292,7 @@ static FUNC(void, SECOC_CODE) SecOC_RxTransTpDataToUpperLayer(uint16 index)
 /******************************************************************************/
 /*
  * Brief               Start to receive Secured TP pdu process
+ * ServiceId           N/A
  * Sync/Async          Synchronous
  * Reentrancy          Reentrant
  * Param-Name[in]      index: SecOC channel index
@@ -4934,7 +5355,7 @@ static FUNC(BufReq_ReturnType, SECOC_CODE) SecOC_RxTpSecuredPduStartOfReception(
                 break;
             }
         }
-
+        SchM_Enter_SecOC_RxData();
         if (SECOC_RX_NONE == rxRtPtr->rxPduStatus)
         {
             rxSecuredPduPtr = SecOC_GetRxSecuredPduPtr(index);
@@ -4957,7 +5378,7 @@ static FUNC(BufReq_ReturnType, SECOC_CODE) SecOC_RxTpSecuredPduStartOfReception(
                     rxRtPtr->tpRxPduOffset = 0u;
                     if (NULL_PTR != info)
                     {
-                        (void)memcpy(destPtr, info->SduDataPtr, info->SduLength);
+                        (void)ILib_memcpy(destPtr, info->SduDataPtr, info->SduLength);
                         rxRtPtr->sduRemaining -= info->SduLength;
                         rxRtPtr->tpRxPduOffset += info->SduLength;
                     }
@@ -4988,6 +5409,7 @@ static FUNC(BufReq_ReturnType, SECOC_CODE) SecOC_RxTpSecuredPduStartOfReception(
                 bufReqRet = BUFREQ_E_OVFL;
             }
         }
+        SchM_Exit_SecOC_RxData();
     }
     else
     {
@@ -5004,6 +5426,7 @@ static FUNC(BufReq_ReturnType, SECOC_CODE) SecOC_RxTpSecuredPduStartOfReception(
 /******************************************************************************/
 /*
  * Brief               Start to receive Authentic TP pdu process
+ * ServiceId           N/A
  * Sync/Async          Synchronous
  * Reentrancy          Reentrant
  * Param-Name[in]      index: SecOC channel index
@@ -5066,7 +5489,7 @@ static FUNC(BufReq_ReturnType, SECOC_CODE) SecOC_RxTpAuthenticPduStartOfReceptio
                 break;
             }
         }
-
+        SchM_Enter_SecOC_RxData();
         if (SECOC_RX_NONE == rxRtPtr->rxPduStatus)
         {
             rxAuthenticPduPtr = SecOC_GetRxAuthenticPduPtr(index);
@@ -5089,7 +5512,7 @@ static FUNC(BufReq_ReturnType, SECOC_CODE) SecOC_RxTpAuthenticPduStartOfReceptio
                     rxRtPtr->tpRxPduOffset = 0u;
                     if (NULL_PTR != info)
                     {
-                        (void)memcpy(destPtr, info->SduDataPtr, info->SduLength);
+                        (void)ILib_memcpy(destPtr, info->SduDataPtr, info->SduLength);
                         rxRtPtr->sduRemaining -= info->SduLength;
                         rxRtPtr->tpRxPduOffset += info->SduLength;
                     }
@@ -5120,6 +5543,7 @@ static FUNC(BufReq_ReturnType, SECOC_CODE) SecOC_RxTpAuthenticPduStartOfReceptio
                 bufReqRet = BUFREQ_E_OVFL;
             }
         }
+        SchM_Exit_SecOC_RxData();
     }
     else
     {
@@ -5136,6 +5560,7 @@ static FUNC(BufReq_ReturnType, SECOC_CODE) SecOC_RxTpAuthenticPduStartOfReceptio
 /******************************************************************************/
 /*
  * Brief               Start to receive Cryptographic TP pdu process
+ * ServiceId           N/A
  * Sync/Async          Synchronous
  * Reentrancy          Reentrant
  * Param-Name[in]      index: SecOC channel index
@@ -5213,7 +5638,7 @@ static FUNC(BufReq_ReturnType, SECOC_CODE) SecOC_RxTpCryptographicPduStartOfRece
                 destPtr = sameBufferPtr->SecOCCryptographicPduBufferRef;
                 interBufLen = sameBufferPtr->SecOCCryptographicPduBuffLength;
             }
-
+            SchM_Enter_SecOC_RxData();
             if (interBufLen >= TpSduLength)
             {
                 if ((NULL_PTR == sameBufferPtr) || (FALSE == sameBufferPtr->SecOCSameBufferInUse[0u]))
@@ -5221,7 +5646,7 @@ static FUNC(BufReq_ReturnType, SECOC_CODE) SecOC_RxTpCryptographicPduStartOfRece
                     rxRtPtr->sduRemaining = TpSduLength;
                     rxRtPtr->tpRxPduOffset = 0u;
 
-                    (void)memcpy(destPtr, info->SduDataPtr, info->SduLength);
+                    (void)ILib_memcpy(destPtr, info->SduDataPtr, info->SduLength);
                     rxRtPtr->sduRemaining -= info->SduLength;
                     rxRtPtr->tpRxPduOffset += info->SduLength;
 
@@ -5250,6 +5675,7 @@ static FUNC(BufReq_ReturnType, SECOC_CODE) SecOC_RxTpCryptographicPduStartOfRece
             {
                 bufReqRet = BUFREQ_E_OVFL;
             }
+            SchM_Exit_SecOC_RxData();
         }
     }
     else
@@ -5268,6 +5694,7 @@ static FUNC(BufReq_ReturnType, SECOC_CODE) SecOC_RxTpCryptographicPduStartOfRece
 /******************************************************************************/
 /*
  * Brief               Load the queued pdu to start process
+ * ServiceId           N/A
  * Sync/Async          Synchronous
  * Reentrancy          Reentrant
  * Param-Name[in]      index: SecOC channel index
@@ -5298,6 +5725,7 @@ static FUNC(void, SECOC_CODE) SecOC_RxLoadQueuedPdu(uint16 index)
 /*
  * Brief               Report verify status to other module,use configured
  *                     callout function
+ * ServiceId           N/A
  * Sync/Async          Synchronous
  * Reentrancy          Reentrant
  * Param-Name[in]      index: SecOC channel index
@@ -5322,6 +5750,7 @@ static FUNC(void, SECOC_CODE) SecOC_RxReportVerifyStatus(uint16 index)
      * received Secured I-PDU */
     if (SECOC_NONE != rxPduProcessingPtr->SecOCVerificationStatusPropagationMode)
     {
+        SchM_Enter_SecOC_RxData();
         verificationStatus.freshnessValueID = rxPduProcessingPtr->SecOCFreshnessValueId;
         verificationStatus.verificationStatus = rxRtPtr->rxVeryfyResult;
         verificationStatus.secOCDataId = rxPduProcessingPtr->SecOCDataId;
@@ -5345,6 +5774,7 @@ static FUNC(void, SECOC_CODE) SecOC_RxReportVerifyStatus(uint16 index)
         {
             /* No AuthenticationStatus is propagated to SWC */
         }
+        SchM_Exit_SecOC_RxData();
 
         if (TRUE == notifyFlag)
         {
@@ -5362,6 +5792,7 @@ static FUNC(void, SECOC_CODE) SecOC_RxReportVerifyStatus(uint16 index)
 /******************************************************************************/
 /*
  * Brief               Reset the channel runtime data to default value
+ * ServiceId           N/A
  * Sync/Async          Synchronous
  * Reentrancy          Reentrant
  * Param-Name[in]      index: SecOC channel index
@@ -5372,6 +5803,7 @@ static FUNC(void, SECOC_CODE) SecOC_RxReportVerifyStatus(uint16 index)
 /******************************************************************************/
 static FUNC(void, SECOC_CODE) SecOC_RxChannelReset(uint16 index)
 {
+    SchM_Enter_SecOC_RxData();
     P2CONST(SecOC_RxPduProcessingType, AUTOMATIC, SECOC_CONST)
     rxPduProcessingPtr = SecOC_GetRxPduProcessingPtr(index);
     P2VAR(SecOC_RxPduRTType, AUTOMATIC, SECOC_APPL_DATA) /* PRQA S 3432 */ /* MISRA Rule 20.7 */
@@ -5388,12 +5820,12 @@ static FUNC(void, SECOC_CODE) SecOC_RxChannelReset(uint16 index)
     rxRtPtr->queueManage.freeQueStartIdx = 0u;
     rxRtPtr->queueManage.queueFrameCnt = 0u;
     rxRtPtr->queueManage.queueInfoIdx = 0u;
-    (void)memset(rxRtPtr->rxParsedFreshnessValue, 0, 8u);
-    (void)memset(rxRtPtr->rxParsedAuthenticator, 0, SECOC_MAX_AUTHENTICATOR_LEN);
+    (void)ILib_memset(rxRtPtr->rxParsedFreshnessValue, 0, 8u);
+    (void)ILib_memset(rxRtPtr->rxParsedAuthenticator, 0, SECOC_MAX_AUTHENTICATOR_LEN);
     rxRtPtr->rxParsedAuthPduBufPtr = NULL_PTR;
     rxRtPtr->rxAuthBuildAttempts = 0u;
     rxRtPtr->rxVerifyAttempts = 0u;
-    (void)memset(rxRtPtr->rxFreshnessValue, 0, sizeof(rxRtPtr->rxFreshnessValue));
+    (void)ILib_memset(rxRtPtr->rxFreshnessValue, 0, sizeof(rxRtPtr->rxFreshnessValue));
     rxRtPtr->rxVeryfyResult = SECOC_VERIFICATIONFAILURE;
 #if (SECOC_RX_TP_PDU_NUM > 0)
     rxRtPtr->tpRxDestBufPtr = NULL_PTR;
@@ -5407,6 +5839,7 @@ static FUNC(void, SECOC_CODE) SecOC_RxChannelReset(uint16 index)
     {
         rxPduProcessingPtr->SecOCSameBufferPduRef->SecOCSameBufferInUse[0] = FALSE;
     }
+    SchM_Exit_SecOC_RxData();
 
     /* Clear rx event */
     SECOC_CLR_RX_EVENT(index, SECOC_EVENT_RX_ALL);
@@ -5415,6 +5848,7 @@ static FUNC(void, SECOC_CODE) SecOC_RxChannelReset(uint16 index)
 /******************************************************************************/
 /*
  * Brief               Calculate runtime pdu length
+ * ServiceId           N/A
  * Sync/Async          Synchronous
  * Reentrancy          Reentrant
  * Param-Name[in]      headerLength: Header length(runtime pdu length in header)
@@ -5432,7 +5866,7 @@ static FUNC(PduLengthType, SECOC_CODE) SecOC_RxGetPduLength(
     uint32 pduLength = 0u;
     P2VAR(uint8, AUTOMATIC, SECOC_APPL_DATA) ptr = (uint8*)&pduLength; /* PRQA S 3432 */ /* MISRA Rule 20.7 */
 
-    (void)memcpy(&ptr[4u - headerLength], headerPtr, headerLength);
+    (void)ILib_memcpy(&ptr[4u - headerLength], headerPtr, headerLength);
 #if (CPU_BYTE_ORDER == LOW_BYTE_FIRST)
     SecOC_EndianSwap(ptr, 4u);
 #endif /* CPU_BYTE_ORDER == LOW_BYTE_FIRST */
@@ -5444,6 +5878,7 @@ static FUNC(PduLengthType, SECOC_CODE) SecOC_RxGetPduLength(
 /******************************************************************************/
 /*
  * Brief               Switch data byte order
+ * ServiceId           N/A
  * Sync/Async          Synchronous
  * Reentrancy          Reentrant
  * Param-Name[in]      dataPtr: Pointer to data to be convert
@@ -5477,6 +5912,7 @@ static FUNC(void, SECOC_CODE) SecOC_EndianSwap(
 /******************************************************************************/
 /*
  * Brief               Array shift left N bits
+ * ServiceId           N/A
  * Sync/Async          Synchronous
  * Reentrancy          Reentrant
  * Param-Name[in]      numLen: Array length in Byte
@@ -5521,6 +5957,7 @@ static FUNC(void, SECOC_CODE) SecOC_ArrayShiftLeft(
 /******************************************************************************/
 /*
  * Brief               Array shift right N bits
+ * ServiceId           N/A
  * Sync/Async          Synchronous
  * Reentrancy          Reentrant
  * Param-Name[in]      numLen: Array length in Byte
@@ -5565,6 +6002,7 @@ static FUNC(void, SECOC_CODE) SecOC_ArrayShiftRight(
 /******************************************************************************/
 /*
  * Brief               Array or operation
+ * ServiceId           N/A
  * Sync/Async          Synchronous
  * Reentrancy          Reentrant
  * Param-Name[in]      numLen: Array length in Byte
@@ -5622,6 +6060,7 @@ static FUNC(void, SECOC_CODE) SecOC_ClearLowBit(
 /******************************************************************************/
 /*
  * Brief               Save the input PduInfo to queue
+ * ServiceId           N/A
  * Sync/Async          Synchronous
  * Reentrancy          Reentrant
  * Param-Name[in]      index: SECOC Channel index
@@ -5653,7 +6092,8 @@ static FUNC(void, SECOC_CODE)
     uint8 queInfoSize = sizeof(SecOC_QueueInfoType);
 
     /* @req SWS_SecOC_00216 */
-    needBufSize = (uint16)PduInfoPtr->SduLength + queInfoSize;
+    needBufSize = PduInfoPtr->SduLength + queInfoSize;
+    SchM_Enter_SecOC_RxData();
     if (queueManagePtr->freeQueSize >= needBufSize)
     {
         /* Build queue information */
@@ -5664,30 +6104,30 @@ static FUNC(void, SECOC_CODE)
         /* Sequence buffer enough,not need turn-back */
         if ((queueSize - offset) >= queInfoSize)
         {
-            (void)memcpy(&rxQueueBufPtr[offset], (uint8*)&queInfo, queInfoSize);
+            (void)ILib_memcpy(&rxQueueBufPtr[offset], (uint8*)&queInfo, queInfoSize);
             offset += queInfoSize;
         }
         else
         {
             part1Len = queueSize - offset;
-            (void)memcpy(&rxQueueBufPtr[offset], (uint8*)&queInfo, part1Len);
+            (void)ILib_memcpy(&rxQueueBufPtr[offset], (uint8*)&queInfo, part1Len);
             part2Len = queInfoSize - part1Len;
-            (void)memcpy(&rxQueueBufPtr[0u], ((uint8*)&queInfo + part1Len), part2Len); /* PRQA S 0488 */
+            (void)ILib_memcpy(&rxQueueBufPtr[0u], ((uint8*)&queInfo + part1Len), part2Len); /* PRQA S 0488 */
             offset = part2Len;
         }
 
         /* Save received Secured I-PDU to ReceptionQueueBuffer */
         if ((queueSize - offset) >= (uint16)PduInfoPtr->SduLength)
         {
-            (void)memcpy(&rxQueueBufPtr[offset], PduInfoPtr->SduDataPtr, PduInfoPtr->SduLength);
+            (void)ILib_memcpy(&rxQueueBufPtr[offset], PduInfoPtr->SduDataPtr, PduInfoPtr->SduLength);
             offset += queInfoSize;
         }
         else
         {
             part1Len = queueSize - offset;
-            (void)memcpy(&rxQueueBufPtr[offset], PduInfoPtr->SduDataPtr, part1Len);
+            (void)ILib_memcpy(&rxQueueBufPtr[offset], PduInfoPtr->SduDataPtr, part1Len);
             part2Len = (uint16)PduInfoPtr->SduLength - part1Len;
-            (void)memcpy(&rxQueueBufPtr[0u], &PduInfoPtr->SduDataPtr[part1Len], part2Len);
+            (void)ILib_memcpy(&rxQueueBufPtr[0u], &PduInfoPtr->SduDataPtr[part1Len], part2Len);
             offset = part2Len;
         }
 
@@ -5700,11 +6140,13 @@ static FUNC(void, SECOC_CODE)
     {
         /* Free buffer not enough,rejecte the Secured I-PDU */
     }
+    SchM_Exit_SecOC_RxData();
 }
 
 /******************************************************************************/
 /*
  * Brief               Output the queued info to 'RxPduIdPtr' and 'PduInfoPtr'
+ * ServiceId           N/A
  * Sync/Async          Synchronous
  * Reentrancy          Reentrant
  * Param-Name[in]      index: SECOC Channel index
@@ -5741,20 +6183,21 @@ static FUNC(Std_ReturnType, SECOC_CODE) SecOC_DataOutQueue(
     uint8 queInfoSize = sizeof(SecOC_QueueInfoType);
     Std_ReturnType ret = E_NOT_OK;
 
+    SchM_Enter_SecOC_RxData();
     if (queueManagePtr->queueFrameCnt > 0u)
     {
         /* Recover QueueInfo from Queue */
         if ((queueSize - offset) >= queInfoSize)
         {
-            (void)memcpy((uint8*)&queInfo, &rxQueueBufPtr[offset], queInfoSize);
+            (void)ILib_memcpy((uint8*)&queInfo, &rxQueueBufPtr[offset], queInfoSize);
             offset += queInfoSize;
         }
         else
         {
             part1Len = queueSize - offset;
-            (void)memcpy((uint8*)&queInfo, &rxQueueBufPtr[offset], part1Len);
+            (void)ILib_memcpy((uint8*)&queInfo, &rxQueueBufPtr[offset], part1Len);
             part2Len = queInfoSize - offset;
-            (void)memcpy(((uint8*)&queInfo + part1Len), &rxQueueBufPtr[0u], part2Len); /* PRQA S 0488 */
+            (void)ILib_memcpy(((uint8*)&queInfo + part1Len), &rxQueueBufPtr[0u], part2Len); /* PRQA S 0488 */
             offset = part2Len;
         }
         *RxPduIdPtr = queInfo.pduId;
@@ -5768,15 +6211,15 @@ static FUNC(Std_ReturnType, SECOC_CODE) SecOC_DataOutQueue(
             PduInfoPtr->SduLength = queInfo.pduLength;
             if ((queueSize - offset) >= (uint16)PduInfoPtr->SduLength)
             {
-                (void)memcpy(PduInfoPtr->SduDataPtr, &rxQueueBufPtr[offset], PduInfoPtr->SduLength);
+                (void)ILib_memcpy(PduInfoPtr->SduDataPtr, &rxQueueBufPtr[offset], PduInfoPtr->SduLength);
                 offset += (uint16)PduInfoPtr->SduLength;
             }
             else
             {
                 part1Len = queueSize - offset;
-                (void)memcpy(PduInfoPtr->SduDataPtr, &rxQueueBufPtr[offset], part1Len);
+                (void)ILib_memcpy(PduInfoPtr->SduDataPtr, &rxQueueBufPtr[offset], part1Len);
                 part2Len = (uint16)PduInfoPtr->SduLength - offset;
-                (void)memcpy(&PduInfoPtr->SduDataPtr[part1Len], &rxQueueBufPtr[0u], part2Len);
+                (void)ILib_memcpy(&PduInfoPtr->SduDataPtr[part1Len], &rxQueueBufPtr[0u], part2Len);
                 offset = part2Len;
             }
 
@@ -5788,10 +6231,28 @@ static FUNC(Std_ReturnType, SECOC_CODE) SecOC_DataOutQueue(
 
             ret = E_OK;
         }
+        else
+        {
+            /* Buffer not enough, return with E_NOT_OK */
+            /* Return to E_NOT_OK; */
+        }
     }
+    SchM_Exit_SecOC_RxData();
 
     return ret;
 }
+
+#if (STD_ON == SECOC_DEV_ERROR_DETECT)
+static inline void SECOC_DET_REPORT(uint8 ApiId, uint8 ErrorId)
+{
+    (void)Det_ReportError(SECOC_MODULE_ID, SECOC_INSTANCE_ID, (ApiId), (ErrorId));
+}
+static inline void SECOC_DET_REPORT_RUNTIMEERROR(uint8 ApiId, uint8 ErrorId)
+{
+    (void)Det_ReportRuntimeError(SECOC_MODULE_ID, SECOC_INSTANCE_ID, (ApiId), (ErrorId));
+}
+
+#endif /* STD_ON == SECOC_DEV_ERROR_DETECT */
 
 #define SECOC_STOP_SEC_CODE
 #include "SecOC_MemMap.h"

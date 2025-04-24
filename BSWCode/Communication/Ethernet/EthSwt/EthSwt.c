@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- ** **
- **  FILENAME    : EthSwt.c **
- ** **
- **  Created on  : 2021-10-13 **
- **  Author      : zhiqiang.huang **
- **  Vendor      : **
- **  DESCRIPTION : none **
- ** **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11 **
- ** **
- ***********************************************************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+************************************************************************************************************************
+**                                                                                                                    **
+**  FILENAME    : EthSwt.c                                                                                            **
+**                                                                                                                    **
+**  Created on  : 2021-10-13                                                                                          **
+**  Author      : zhiqiang.huang                                                                                      **
+**  Vendor      :                                                                                                     **
+**  DESCRIPTION : none                                                                                                **
+**                                                                                                                    **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                                                              **
+**                                                                                                                    **
+***********************************************************************************************************************/
 
 /***********************************************************************************************************************
 **                                          REVISION   HISTORY                                                        **
@@ -39,6 +40,7 @@
 /* <VERSION>    <DATE>       <AUTHOR>        <REVISION LOG>
  *  V1.0.0    [20211013]  [zhiqiang.huang]   Initial version
  *  V2.0.0    [20230206]  [zhiqiang.huang]   Fix version number
+ *  V2.0.1    [20240702]  [zhiqiang.huang]   Modify the det judgment conditions for the EthSwt_MainFunction
  **********************************************************************************************************************/
 
 /**
@@ -90,7 +92,7 @@ static P2CONST(EthSwt_ConfigType, AUTOMATIC, ETHSWT_VAR) EthSwt_PbCfgPtr = NULL_
 #define ETHSWT_C_AR_PATCH_VERSION 0u
 #define ETHSWT_C_SW_MAJOR_VERSION 2u
 #define ETHSWT_C_SW_MINOR_VERSION 0u
-#define ETHSWT_C_SW_PATCH_VERSION 0u
+#define ETHSWT_C_SW_PATCH_VERSION 1u
 /***********************************************************************************************************************
  *  VERSION CHECK
  ***********************************************************************************************************************/
@@ -182,8 +184,7 @@ FUNC(void, ETHSWT_CODE) EthSwt_Init(P2CONST(EthSwt_ConfigType, AUTOMATIC, ETHSWT
  * Description:         Returns the version information.
  ***********************************************************************************************************************/
 #if (STD_ON == ETHSWT_VERSION_INFO_API)
-FUNC(void, ETHSWT_CODE)
-EthSwt_GetVersionInfo(P2VAR(Std_VersionInfoType, AUTOMATIC, ETHSWT_APPL_DATA) versioninfo)
+FUNC(void, ETHSWT_CODE) EthSwt_GetVersionInfo(P2VAR(Std_VersionInfoType, AUTOMATIC, ETHSWT_APPL_DATA) versioninfo)
 {
 #if (STD_ON == ETHSWT_DEV_ERROR_DETECT)
     if (NULL_PTR == versioninfo)
@@ -218,8 +219,7 @@ EthSwt_GetVersionInfo(P2VAR(Std_VersionInfoType, AUTOMATIC, ETHSWT_APPL_DATA) ve
  * Description:         Enables/disables the indexed switch port.
  ***********************************************************************************************************************/
 #if (STD_ON == ETHSWT_SET_SWITCH_PORT_MODE_API)
-FUNC(Std_ReturnType, ETHSWT_CODE)
-EthSwt_SetSwitchPortMode(uint8 SwitchIdx, uint8 SwitchPortIdx, Eth_ModeType PortMode)
+FUNC(Std_ReturnType, ETHSWT_CODE) EthSwt_SetSwitchPortMode(uint8 SwitchIdx, uint8 SwitchPortIdx, Eth_ModeType PortMode)
 {
     Std_ReturnType retVal = E_NOT_OK;
     uint8 cfgPortIdx;
@@ -510,8 +510,7 @@ EthSwt_GetBaudRate(uint8 SwitchIdx, uint8 SwitchPortIdx, EthTrcv_BaudRateType* B
  * Description:         Starts the auto-negotiation of the indexed switch port.
  ***********************************************************************************************************************/
 #if (STD_ON == ETHSWT_START_SWITCH_PORT_AUTO_NEGOTIATION_API)
-FUNC(Std_ReturnType, ETHSWT_CODE)
-EthSwt_StartSwitchPortAutoNegotiation(uint8 SwitchIdx, uint8 SwitchPortIdx)
+FUNC(Std_ReturnType, ETHSWT_CODE) EthSwt_StartSwitchPortAutoNegotiation(uint8 SwitchIdx, uint8 SwitchPortIdx)
 {
     Std_ReturnType retVal = E_NOT_OK;
     uint8 cfgPortIdx;
@@ -682,8 +681,7 @@ EthSwt_GetSwitchPortWakeupReason(uint8 SwitchIdx, uint8 SwitchPortIdx, EthTrcv_W
  *                      of this switch. If multiple ports were found the API returns E_NOT_OK.
 ***********************************************************************************************************************/
 #if (STD_ON == ETHSWT_GET_PORT_MAC_ADDR_API)
-FUNC(Std_ReturnType, ETHSWT_CODE)
-EthSwt_GetPortMacAddr(uint8 SwitchIdx, const uint8* MacAddrPtr, uint8* PortIdxPtr)
+FUNC(Std_ReturnType, ETHSWT_CODE) EthSwt_GetPortMacAddr(uint8 SwitchIdx, const uint8* MacAddrPtr, uint8* PortIdxPtr)
 {
     Std_ReturnType retVal = E_NOT_OK;
     EthSwt_AtuOpInfoType atuInfo;
@@ -740,8 +738,7 @@ EthSwt_GetPortMacAddr(uint8 SwitchIdx, const uint8* MacAddrPtr, uint8* PortIdxPt
  * Description:         Enables or disables a pre-configured VLAN at a certain port of a switch.
  ***********************************************************************************************************************/
 #if (STD_ON == ETHSWT_ENABLE_VLAN_API)
-FUNC(Std_ReturnType, ETHSWT_CODE)
-EthSwt_EnableVlan(uint8 SwitchIdx, uint8 SwitchPortIdx, uint16 VlanId, boolean Enable)
+FUNC(Std_ReturnType, ETHSWT_CODE) EthSwt_EnableVlan(uint8 SwitchIdx, uint8 SwitchPortIdx, uint16 VlanId, boolean Enable)
 {
     Std_ReturnType retVal = E_NOT_OK;
 
@@ -945,8 +942,7 @@ FUNC(Std_ReturnType, ETHSWT_CODE) EthSwt_SetForwardingMode(uint8 SwitchIdx, bool
  * Description:         Activates a given transmission mode of the indexed Ethernet switch port.
  ***********************************************************************************************************************/
 #if (STD_ON == ETHSWT_SET_PORT_TX_MODE_API)
-FUNC(Std_ReturnType, ETHSWT_CODE)
-EthSwt_SetPortTxMode(uint8 SwitchIdx, uint8 PortIdx, EthTrcv_PhyTxModeType Mode)
+FUNC(Std_ReturnType, ETHSWT_CODE) EthSwt_SetPortTxMode(uint8 SwitchIdx, uint8 PortIdx, EthTrcv_PhyTxModeType Mode)
 {
     Std_ReturnType retVal = E_NOT_OK;
     uint8 cfgPortIdx;
@@ -1264,13 +1260,7 @@ EthSwt_SetPortMirrorState(uint8 MirroredSwitchIdx, EthSwt_PortMirrorStateType Po
  ***********************************************************************************************************************/
 FUNC(void, ETHSWT_CODE) EthSwt_MainFunction(void)
 {
-#if (STD_ON == ETHSWT_DEV_ERROR_DETECT)
-    if (ETHSWT_STATE_INIT > EthSwt_InitState)
-    {
-        ETHSWT_DET(ETHSWT_SID_MAINFUNCTION, ETHSWT_E_UNINIT);
-    }
-    else
-#endif /* STD_ON == ETHSWT_DEV_ERROR_DETECT */
+    if (ETHSWT_STATE_INIT <= EthSwt_InitState)
     {
         /*ETHSWT_MAIN_FUNCTION_PERIOD*/
         /*SWS_EthSwt_00398*/

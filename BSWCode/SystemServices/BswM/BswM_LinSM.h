@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : BswM_LinSM.h                                                **
- **                                                                            **
- **  Created on  : 2020-03-24                                                  **
- **  Author      : qinchun.yang                                                **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : BswM_LinSM.h                                                **
+**                                                                            **
+**  Created on  : 2020-03-24                                                  **
+**  Author      : qinchun.yang                                                **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 
 #ifndef BSWM_LINSM_H
 #define BSWM_LINSM_H
@@ -88,5 +89,5 @@ BswM_LinSM_CurrentSchedule(NetworkHandleType Network, LinIf_SchHandleType Curren
 FUNC(void, BSWM_LINSM_CODE)
 BswM_LinSM_CurrentState(NetworkHandleType Network, LinSM_ModeType CurrentState);
 
-#endif /* BSWM_LINSM_ENABLED == STD_ON */
+#endif /*BSWM_LINSM_ENABLED == STD_ON*/
 #endif /* BSWM_LINSM_H */

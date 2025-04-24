@@ -18,28 +18,27 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Com_TxInternal.c                                            **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : zhengfei.li                                                 **
- **  Vendor      :                                                             **
- **  DESCRIPTION : internal implementation for COM transmit                    **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                       **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Com_TxInternal.c                                            **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : zhengfei.li                                                 **
+**  Vendor      :                                                             **
+**  DESCRIPTION : internal implementation for COM transmit                    **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                       **
+**                                                                            **
+*******************************************************************************/
 
 /*******************************************************************************
 **                      Includes                                              **
 *******************************************************************************/
 #include "Com_Internal.h"
-#if (STD_ON == COM_DEV_ERROR_DETECT)
 #include "Det.h"
-#endif
 /*******************************************************************************
 **                      Private Function Declarations                         **
 *******************************************************************************/
@@ -80,7 +79,7 @@ static FUNC(uint64, COM_CODE) Com_GetTxSignalValue(
 /* called by Com_UpdateTxBufferAndCalculateTMCOfEveryGroupSignal.
  * update the uint8_n signal value*/
 #if ((STD_ON == COM_ENABLE_SIGNAL_GROUP_ARRAY_API) && (COM_TXSIGNALGROUP_NUMBER > 0u))
-#if ((0u < COM_TXIPDUBUFF_SIZE) && (0u < COM_SIGNAL_8BITBUFF_SIZE))
+#if ((STD_ON == COM_TX_GRP_SIGNAL_TYPE_UINT8_N_ENABLE) && (0u < COM_TXIPDUBUFF_SIZE) && (0u < COM_SIGNAL_8BITBUFF_SIZE))
 static FUNC(boolean, COM_CODE) Com_TxGroupSignalUpdateUint8N(
     Com_TxIpduBufIdType TxIPduBufferId,
     Com_SignalIdType GroupSignalId,
@@ -102,14 +101,64 @@ static FUNC(void, COM_CODE) Com_SendSignalGroupArrayInternalHandle(
 static FUNC(Std_ReturnType, COM_CODE) Com_TriggerIPDUSendInternalHandle(PduIdType TxIpduId);
 #endif
 
+#if (STD_ON == COM_MDT_ENABLE)
+static FUNC(void, COM_CODE)
+    Com_ResetTxIpduMDT(Com_TxIPduRunTimeStateType* TxIpduStatePtr, const Com_TxIPduType* TxIpduPtr);
+#endif
+
 static void Com_GetTxModeOffset(
     Com_TxIPduRunTimeStateType* TxIpduStatePtr,
     const Com_TxIPduType* TxIpduPtr,
     boolean TMS);
+
+/* called by Com_MainFunctionTx.
+ * tx pdu DM timeout notification*/
+#if (STD_ON == COM_TX_SIGNAL_TIMEOUT_NOTIFICATION_ENABLE) || (STD_ON == COM_TX_SIG_GROUP_TIMEOUT_NOTIFICATION_ENABLE)
+static FUNC(void, COM_CODE) Com_TxDMTimeOutNotification(const Com_TxIPduType* TxIpduPtr);
+#endif
+
+/* called by Com_MainFunctionTx.
+ * the handle of Com_MainFunctionTx,when the tx mode is direct.
+ * return the boolean value for the tx pdu need to transmit or not*/
+#if (0u < COM_TX_MODE_TRUE_DIRECT_NUMBER) || (0u < COM_TX_MODE_FALSE_DIRECT_NUMBER)                              \
+    || (0u < COM_TX_MODE_TRUE_DIRECT_NOREPETITION_NUMBER) || (0u < COM_TX_MODE_FALSE_DIRECT_NOREPETITION_NUMBER) \
+    || ((0u < COM_TX_MODE_TRUE_MIXED_NUMBER) || (0u < COM_TX_MODE_FALSE_MIXED_NUMBER)                            \
+        || (0u < COM_TX_MODE_TRUE_MIXED_NOREPETITION_NUMBER) || (0u < COM_TX_MODE_FALSE_MIXED_NOREPETITION_NUMBER))
+static FUNC(boolean, COM_CODE)
+    Com_MainFuncTxDirect(Com_TxIPduRunTimeStateType* TxIpduStatePtr, const Com_TxIPduType* TxIpduPtr, boolean MDTRun);
+#endif
+/* called by Com_MainFunctionTx.
+ * the handle of Com_MainFunctionTx,when the tx mode is period.
+ * return the boolean value for the tx pdu need to transmit or not*/
+#if (0u < COM_TX_MODE_TRUE_PERIOD_NUMBER) || (0u < COM_TX_MODE_FALSE_PERIOD_NUMBER)  \
+    || (0u < COM_TX_MODE_TRUE_MIXED_NUMBER) || (0u < COM_TX_MODE_FALSE_MIXED_NUMBER) \
+    || (0u < COM_TX_MODE_TRUE_MIXED_NOREPETITION_NUMBER) || (0u < COM_TX_MODE_FALSE_MIXED_NOREPETITION_NUMBER)
+static FUNC(boolean, COM_CODE)
+    Com_MainFuncTxPeriod(Com_TxIPduRunTimeStateType* TxIpduStatePtr, const Com_TxIPduType* TxIpduPtr, boolean MDTRun);
+#endif
+/* called by Com_MainFunctionTx.
+ * the handle of Com_MainFunctionTx,when the tx mode is mixed.
+ * return the boolean value for the tx pdu need to transmit or not*/
+#if (0u < COM_TX_MODE_TRUE_MIXED_NUMBER) || (0u < COM_TX_MODE_FALSE_MIXED_NUMBER) \
+    || (0u < COM_TX_MODE_TRUE_MIXED_NOREPETITION_NUMBER) || (0u < COM_TX_MODE_FALSE_MIXED_NOREPETITION_NUMBER)
+static FUNC(boolean, COM_CODE)
+    Com_MainFuncTxMixed(Com_TxIPduRunTimeStateType* TxIpduStatePtr, const Com_TxIPduType* TxIpduPtr, boolean MDTRun);
+#endif
 /* called by Com_TriggerTransmit,Com_TriggerIPDUSend,Com_TriggerIPDUSendWithMetaData,Com_TxIpduController.
  * It is called in case the transmission is not possible because the corresponding I-PDU group is stopped.*/
 #if (STD_ON == COM_TX_SIGNAL_ERROR_NOTIFICATION_ENABLE) || (STD_ON == COM_TX_SIG_GROUP_ERROR_NOTIFICATION_ENABLE)
 static FUNC(void, COM_CODE) Com_InvokeErrorNotification(PduIdType IpduId);
+#endif
+
+/*Send the tx pdu in Com_MainFunctionTx*/
+#if (0u < COM_TXIPDU_NUMBER)
+static FUNC(void, COM_CODE) Com_MainFunction_SendPdu(PduIdType TxIpduId);
+#endif
+/* called by Com_MainFunctionTx,Com_TriggerIPDUSend,Com_TriggerIPDUSendWithMetaData.
+ * Pack the counter value in the pdu buffer*/
+#if (STD_ON == COM_TX_IPDU_COUNTER_ENABLE)
+static FUNC(void, COM_CODE)
+    Com_PackCounterValue(const Com_TxIPduRunTimeStateType* TxIpduStatePtr, const Com_TxIPduType* TxIpduPtr);
 #endif
 /*called by Com_SendSignal.
  * the tx signal value change,calculate the new TMC and TMS*/
@@ -125,7 +174,7 @@ static FUNC(void, COM_CODE) Com_TxSignalTMHandle(
 #endif
 /* called by Com_SendSignal,Com_SendTxGroupSignalHandle.
  * set Tx signal(not dynamic signal) to signalbuffer,return the buffer value is changed or not*/
-#if ((COM_TXSIGNALGROUP_NUMBER > 0u) || (0u < COM_TXSIGNAL_NUMBER))
+#if ((COM_TXGROUPSIGNAL_NUMBER > 0u) || (0u < COM_TXSIGNAL_NUMBER))
 static FUNC(boolean, COM_CODE) Com_SetTxSignalBuff(
     Com_SignalType SignalType,
     uint16 SignalLength,
@@ -149,11 +198,12 @@ static FUNC(uint8, COM_CODE) Com_SendTxSignalHandle(
 #endif /*0u < COM_TXSIGNAL_NUMBER*/
 /* called by Com_SendSignal,Com_InvalidateSignalGroup.
  * send Tx group signal handle*/
-#if (COM_TXSIGNALGROUP_NUMBER > 0u)
+#if (COM_TXGROUPSIGNAL_NUMBER > 0u)
 static FUNC(uint8, COM_CODE) Com_SendTxGroupSignalHandle(
     Com_SignalIdType TxGroupSignalId,
     P2CONST(void, AUTOMATIC, COM_APPL_CONST) SignalDataPtr);
 #endif
+
 /* called by Com_SendDynSignal.
  * set Tx dynamic signal to signalbuffer,return the buffer value is changed or not*/
 #if (                                                                                        \
@@ -181,6 +231,13 @@ static FUNC(boolean, COM_CODE) Com_UpdateTxBufferAndCalculateTMCOfEveryGroupSign
     Com_SignalGroupIdType TxSignalGroupId,
     Com_TxGroupSignalIdType GroupSignalNumber,
     Com_TxIpduBufIdType TxIPduBufferId);
+#endif
+/* called by Com_TriggerIPDUSend,Com_TriggerIPDUSendWithMetaData,Com_TriggerTransmit,
+ * Com_TxConfirmation,Com_TpTxConfirmation,Com_MainFunctionTx,Com_TxIpduController.
+ * clear all signal group/signal/dest description signal update bit of the Tx Pdu*/
+#if (STD_ON == COM_TX_SIG_GROUP_UPDATE_BIT_ENABLE) || (STD_ON == COM_TX_SIGNAL_UPDATE_BIT_ENABLE) \
+    || (STD_ON == COM_GW_DEST_SIG_UPDATE_BIT_ENABLE)
+static FUNC(void, COM_CODE) Com_ClearTxIPduUpdates(const Com_TxIPduType* TxIpduPtr);
 #endif
 #define COM_STOP_SEC_CODE
 #include "Com_MemMap.h"
@@ -305,7 +362,6 @@ static FUNC(void, COM_CODE) Com_ResetTxOccurrenceOfPduFilter(PduIdType IpduId)
 }
 #endif
 
-/* PRQA S 3469 ++ */ /* MISRA Rule Dir 4.9 */
 #if (COM_IPDUGROUP_NUMBER > 0u)
 /******************************************************************************/
 /*
@@ -580,8 +636,12 @@ static FUNC(boolean, COM_CODE) Com_TxSignalTMCCalculate(
 {
     boolean ret = FALSE;
 #if (COM_TXSIGNAL_FILTERTYPE_MAX_NUMBER > 0u) || (COM_TXGRPSIG_FILTERTYPE_MAX_NUMBER > 0u)
+#if (COM_TXSIGNAL_FILTERTYPE_MAX_NUMBER > 0u)
     const Com_TxSignalType* txSignalPtr;
+#endif
+#if (COM_TXGRPSIG_FILTERTYPE_MAX_NUMBER > 0u)
     const Com_TxGroupSignalType* txGroupSignalPtr;
+#endif
     uint64 signalNewValue;
     Com_SignalType signalType;
     Com_FilterAlgorithmType filterType;
@@ -769,7 +829,9 @@ static FUNC(void, COM_CODE) Com_SendSignalGroupArrayInternalHandle(
     /* PRQA S 3206 -- */ /* MISRA Rule 2.7 */
     uint16 RptNum)
 {
+#if (STD_ON == COM_TX_SIG_GROUP_TIMEOUT_ENABLE)
     const Com_TxIPduType* txIpduPtr = &Com_ConfigStd->ComTxIPdu[IpduRef];
+#endif
     Com_TxModeModeType ipduTxMode = TxIpduStatePtr->ipduTxMode;
     boolean initDMCnt = FALSE;
 /*the signal group configuration timeout,the DM timer isn't start by other signals/signal groups,Tx Mode isn't
@@ -858,6 +920,7 @@ static FUNC(void, COM_CODE) Com_SendSignalGroupArrayInternalHandle(
     COM_NOUSED(RptNum);
     COM_NOUSED(TriggerOnChange);
     COM_NOUSED(initDMCnt);
+    COM_NOUSED(IpduRef);
     return;
 }
 #endif
@@ -982,6 +1045,365 @@ COM_GW_DEST_SIG_UPDATE_BIT_ENABLE */
 }
 #endif
 
+#if (STD_ON == COM_MDT_ENABLE)
+/******************************************************************************/
+/*
+ * Brief               Reset the counter of tx Ipdu MDT.
+ * ServiceId
+ * Sync/Async          Synchronous
+ * Reentrancy          Non Reentrant
+ * Param-Name[in]      TxIpduId
+ * Param-Name[out]     None
+ * Param-Name[in/out]  None
+ * Return              None
+ */
+/******************************************************************************/
+/* PRQA S 3673 ++ */ /* MISRA Rule 8.13 */
+static FUNC(void, COM_CODE)
+    Com_ResetTxIpduMDT(Com_TxIPduRunTimeStateType* TxIpduStatePtr, const Com_TxIPduType* TxIpduPtr)
+/* PRQA S 3673 -- */ /* MISRA Rule 8.13 */
+{
+#if (STD_ON == COM_ENABLE_MDT_FOR_CYCLIC_TRANSMISSION)
+    TxIpduStatePtr->MDTCnt = TxIpduPtr->ComMinimumDelayTime;
+#elif (0u < COM_TX_MODE_TRUE_DIRECT_NUMBER) || (0u < COM_TX_MODE_FALSE_DIRECT_NUMBER) \
+    || (0u < COM_TX_MODE_TRUE_DIRECT_NOREPETITION_NUMBER) || (0u < COM_TX_MODE_FALSE_DIRECT_NOREPETITION_NUMBER)
+    if ((COM_TX_MODE_DIRECT == ipduTxMode) || (COM_TX_MODE_DIRECT_WITHOUT_REPETITION == ipduTxMode))
+    {
+        if (TxIpduStatePtr->RptNum <= 1u)
+        {
+            TxIpduStatePtr->MDTCnt = TxIpduPtr->ComMinimumDelayTime;
+        }
+    }
+#endif
+    COM_NOUSED(TxIpduPtr);
+    COM_NOUSED(TxIpduStatePtr);
+}
+#endif
+
+#if (STD_ON == COM_TX_SIGNAL_TIMEOUT_NOTIFICATION_ENABLE) || (STD_ON == COM_TX_SIG_GROUP_TIMEOUT_NOTIFICATION_ENABLE)
+/******************************************************************************/
+/*
+ * Brief               Called by Com_MainFunctionTx.
+ *                     tx pdu DM timeout notification.
+ * ServiceId
+ * Sync/Async          Synchronous
+ * Reentrancy          Non Reentrant
+ * Param-Name[in]      TxIpduPtr
+ * Param-Name[out]     None
+ * Param-Name[in/out]  None
+ * Return              None
+ */
+/******************************************************************************/
+static FUNC(void, COM_CODE) Com_TxDMTimeOutNotification(const Com_TxIPduType* TxIpduPtr)
+{
+#if (STD_ON == COM_TX_SIGNAL_TIMEOUT_NOTIFICATION_ENABLE)
+    Com_TxSignalIdType txSignalNumber, cnt;
+    const Com_TxSignalType* txSignalPtr;
+    txSignalNumber = TxIpduPtr->ComIPduSignalsRefNumber;
+    cnt = TxIpduPtr->ComIpduSignalRefStartId;
+    Com_TxSignalTimeoutIdType txSigTimeoutIndex;
+    for (; cnt < txSignalNumber; ++cnt)
+    {
+        txSignalPtr = &Com_ConfigStd->ComTxSignal[cnt];
+        txSigTimeoutIndex = txSignalPtr->ComTimeoutIndex;
+        if ((txSigTimeoutIndex != COM_UNUSED_TXSIGNALTIMEOUTID)
+            && (NULL_PTR != Com_TxSignalTimeoutNotificationCfg[txSigTimeoutIndex]))
+        {
+            Com_TxSignalTimeoutNotificationCfg[txSigTimeoutIndex]();
+        }
+    }
+#endif /* STD_ON == COM_TX_SIGNAL_TIMEOUT_NOTIFICATION_ENABLE */
+#if (STD_ON == COM_TX_SIG_GROUP_TIMEOUT_NOTIFICATION_ENABLE)
+    Com_TxSignalGroupIdType signalGroupNumber, signalGroupId;
+    signalGroupNumber = TxIpduPtr->ComIPduSignalGroupsRefNumber;
+    signalGroupId = TxIpduPtr->ComIPduSignalGroupsRefStartId;
+    const Com_TxSignalGroupType* txSignalGroupPtr;
+    Com_TxSigGrpTimeoutIdType timeoutIndex;
+    for (; signalGroupId < signalGroupNumber; ++signalGroupId)
+    {
+        txSignalGroupPtr = &Com_ConfigStd->ComTxSignalGroup[signalGroupId];
+        timeoutIndex = txSignalGroupPtr->ComTimeoutIndex;
+        if ((timeoutIndex != COM_UNUSED_TXSIGGRPTIMEOUTID)
+            && (NULL_PTR != Com_TxSigGrpTimeoutNotificationCfg[timeoutIndex]))
+        {
+            Com_TxSigGrpTimeoutNotificationCfg[timeoutIndex]();
+        }
+    }
+#endif /* STD_ON == COM_TX_SIG_GROUP_TIMEOUT_NOTIFICATION_ENABLE */
+    return;
+}
+#endif
+
+#if (0u < COM_TX_MODE_TRUE_DIRECT_NUMBER) || (0u < COM_TX_MODE_FALSE_DIRECT_NUMBER)                              \
+    || (0u < COM_TX_MODE_TRUE_DIRECT_NOREPETITION_NUMBER) || (0u < COM_TX_MODE_FALSE_DIRECT_NOREPETITION_NUMBER) \
+    || ((0u < COM_TX_MODE_TRUE_MIXED_NUMBER) || (0u < COM_TX_MODE_FALSE_MIXED_NUMBER)                            \
+        || (0u < COM_TX_MODE_TRUE_MIXED_NOREPETITION_NUMBER) || (0u < COM_TX_MODE_FALSE_MIXED_NOREPETITION_NUMBER))
+/******************************************************************************/
+/*
+ * Brief               Called by Com_MainFunctionTx.
+ *                     the handle of Com_MainFunctionTx,when the tx mode is direct.
+ *                     return the boolean value for the tx pdu need to transmit or not.
+ * ServiceId
+ * Sync/Async          Synchronous
+ * Reentrancy          Non Reentrant
+ * Param-Name[in]      TxIpduStatePtr,TxIpduPtr,MDTRun
+ * Param-Name[out]     None
+ * Param-Name[in/out]  None
+ * Return              None
+ */
+/******************************************************************************/
+static FUNC(boolean, COM_CODE)
+    Com_MainFuncTxDirect(Com_TxIPduRunTimeStateType* TxIpduStatePtr, const Com_TxIPduType* TxIpduPtr, boolean MDTRun)
+{
+    boolean ret = FALSE;
+    /* PRQA S 2983,2995 ++ */ /* MISRA Rule 2.2*/
+    PduIdType txModeIndex;
+    Com_TxModeModeType txMode;
+    uint8 TxDelay = TxIpduStatePtr->TxIpduRTStFlag & Com_TX_DELAY_EN;
+
+#if (0u < COM_TX_MODE_TRUE_DIRECT_NUMBER) || (0u < COM_TX_MODE_TRUE_MIXED_NUMBER) \
+    || (0u < COM_TX_MODE_FALSE_DIRECT_NUMBER) || (0u < COM_TX_MODE_FALSE_MIXED_NUMBER)
+    Com_TxModeNumberOfRepetitionsType numOfRepetition;
+    if ((!MDTRun) && (Com_TX_DELAY_EN == TxDelay))
+    {
+        TxIpduStatePtr->NTimeCnt = 0u;
+    }
+    if (TxIpduStatePtr->NTimeCnt > 0u)
+    {
+        (TxIpduStatePtr->NTimeCnt) -= 1u;
+    }
+#endif
+    uint8 Transmiting = TxIpduStatePtr->TxIpduRTStFlag & Com_TX_TRANSMITING_EN;
+    if ((0u == TxIpduStatePtr->NTimeCnt) && (TxIpduStatePtr->RptNum > 0u) && (Com_TX_TRANSMITING_EN != Transmiting))
+    {
+/*delay transmit of the MDT */
+#if (STD_ON == COM_MDT_ENABLE)
+        if (MDTRun)
+        {
+            TxIpduStatePtr->TxIpduRTStFlag |= Com_TX_DELAY_EN;
+        }
+        else
+#endif /* STD_ON == COM_MDT_ENABLE */
+        {
+            ret = TRUE;
+        }
+
+#if (STD_ON == COM_TMS_ENABLE)
+        uint8 TMS = TxIpduStatePtr->TxIpduRTStFlag & Com_TX_TMS_EN;
+        if (TMS != Com_TX_TMS_EN)
+        {
+            txModeIndex = TxIpduPtr->ComTxModeFalseRefId;
+            txMode = TxIpduPtr->ComTxFalseModeMode;
+            switch (txMode)
+            {
+            case COM_TX_MODE_DIRECT:
+#if (0u < COM_TX_MODE_FALSE_DIRECT_NUMBER)
+                numOfRepetition = Com_TxModeFalseDirectRepetitions[txModeIndex].ComTxModeNumberOfRepetitions;
+                if (numOfRepetition <= 1u)
+#endif
+                {
+                    TxIpduStatePtr->RptNum = 0u;
+                }
+#if (0u < COM_TX_MODE_FALSE_DIRECT_NUMBER)
+                else
+                {
+                    TxIpduStatePtr->NTimeCnt = Com_TxModeFalseDirectRepetitions[txModeIndex].ComTxModeRepetitionPeriod;
+                }
+#endif
+                break;
+            case COM_TX_MODE_MIXED:
+#if (0u < COM_TX_MODE_FALSE_MIXED_NUMBER)
+                numOfRepetition = Com_TxModeFalseMixedRepetitions[txModeIndex].ComTxModeNumberOfRepetitions;
+                if (numOfRepetition <= 1u)
+#endif
+                {
+                    TxIpduStatePtr->RptNum = 0u;
+                }
+#if (0u < COM_TX_MODE_FALSE_MIXED_NUMBER)
+                else
+                {
+                    TxIpduStatePtr->NTimeCnt = Com_TxModeFalseMixedRepetitions[txModeIndex].ComTxModeRepetitionPeriod;
+                }
+#endif
+                break;
+            default:
+                /* do nothing */
+                break;
+            }
+        }
+        else
+#endif
+        {
+            txModeIndex = TxIpduPtr->ComTxModeTrueRefId;
+            txMode = TxIpduPtr->ComTxTrueModeMode;
+            switch (txMode)
+            {
+            case COM_TX_MODE_DIRECT:
+#if (0u < COM_TX_MODE_TRUE_DIRECT_NUMBER)
+                numOfRepetition = Com_TxModeTrueDirectRepetitions[txModeIndex].ComTxModeNumberOfRepetitions;
+                if (numOfRepetition <= 1u)
+#endif
+                {
+                    TxIpduStatePtr->RptNum = 0u;
+                }
+#if (0u < COM_TX_MODE_TRUE_DIRECT_NUMBER)
+                else
+                {
+                    TxIpduStatePtr->NTimeCnt = Com_TxModeTrueDirectRepetitions[txModeIndex].ComTxModeRepetitionPeriod;
+                }
+#endif
+                break;
+            case COM_TX_MODE_MIXED:
+#if (0u < COM_TX_MODE_TRUE_MIXED_NUMBER)
+                numOfRepetition = Com_TxModeTrueMixedRepetitions[txModeIndex].ComTxModeNumberOfRepetitions;
+                if (numOfRepetition <= 1u)
+#endif
+                {
+                    TxIpduStatePtr->RptNum = 0u;
+                }
+#if (0u < COM_TX_MODE_TRUE_MIXED_NUMBER)
+                else
+                {
+                    TxIpduStatePtr->NTimeCnt = Com_TxModeTrueMixedRepetitions[txModeIndex].ComTxModeRepetitionPeriod;
+                }
+#endif
+                break;
+            default:
+                /* do nothing */
+                break;
+            }
+        }
+    }
+    if ((!MDTRun) && (Com_TX_DELAY_EN == TxDelay))
+    {
+        ret = TRUE;
+    }
+    /* PRQA S 2983,2995 -- */ /* MISRA Rule 2.2*/
+    return ret;
+}
+#endif
+
+#if (0u < COM_TX_MODE_TRUE_PERIOD_NUMBER) || (0u < COM_TX_MODE_FALSE_PERIOD_NUMBER)  \
+    || (0u < COM_TX_MODE_TRUE_MIXED_NUMBER) || (0u < COM_TX_MODE_FALSE_MIXED_NUMBER) \
+    || (0u < COM_TX_MODE_TRUE_MIXED_NOREPETITION_NUMBER) || (0u < COM_TX_MODE_FALSE_MIXED_NOREPETITION_NUMBER)
+/******************************************************************************/
+/*
+ * Brief               Called by Com_MainFunctionTx.
+ *                     the handle of Com_MainFunctionTx,when the tx mode is period.
+ *                     return the boolean value for the tx pdu need to transmit or not.
+ * ServiceId
+ * Sync/Async          Synchronous
+ * Reentrancy          Non Reentrant
+ * Param-Name[in]      TxIpduStatePtr,TxIpduPtr,MDTRun
+ * Param-Name[out]     None
+ * Param-Name[in/out]  None
+ * Return              None
+ */
+/******************************************************************************/
+static FUNC(boolean, COM_CODE)
+    Com_MainFuncTxPeriod(Com_TxIPduRunTimeStateType* TxIpduStatePtr, const Com_TxIPduType* TxIpduPtr, boolean MDTRun)
+{
+    boolean ret = FALSE;
+    PduIdType txModeIndex;
+    if (TxIpduStatePtr->PeriodCnt > 0u)
+    {
+        (TxIpduStatePtr->PeriodCnt) -= 1u;
+    }
+    if (0u == TxIpduStatePtr->PeriodCnt)
+    {
+/*delay transmit of the MDT */
+#if (STD_ON == COM_MDT_ENABLE)
+        if (MDTRun)
+        {
+            TxIpduStatePtr->TxIpduRTStFlag |= Com_TX_DELAY_EN;
+        }
+        else
+#endif /* STD_ON == COM_MDT_ENABLE */
+        {
+            ret = TRUE;
+        }
+
+#if (STD_ON == COM_TMS_ENABLE)
+        uint8 TMS = (TxIpduStatePtr->TxIpduRTStFlag & Com_TX_TMS_EN);
+        if (TMS != Com_TX_TMS_EN)
+        {
+            txModeIndex = TxIpduPtr->ComTxModeFalseRefId;
+            if (COM_TX_MODE_MIXED == TxIpduStatePtr->ipduTxMode)
+            {
+#if (0u < COM_TX_MODE_FALSE_MIXED_NUMBER)
+                TxIpduStatePtr->PeriodCnt = Com_TxModeFalseMixedRepetitions[txModeIndex].ComTxModeTimePeriod;
+#endif
+            }
+            else
+            {
+#if ((0u < COM_TX_MODE_FALSE_PERIOD_NUMBER) || (0u < COM_TX_MODE_FALSE_MIXED_NOREPETITION_NUMBER))
+                TxIpduStatePtr->PeriodCnt = Com_TxModeFalsePeriod[txModeIndex].ComTxModeTimePeriod;
+#endif
+            }
+        }
+        else
+#endif
+        {
+            txModeIndex = TxIpduPtr->ComTxModeTrueRefId;
+            if (COM_TX_MODE_MIXED == TxIpduStatePtr->ipduTxMode)
+            {
+#if (0u < COM_TX_MODE_TRUE_MIXED_NUMBER)
+                TxIpduStatePtr->PeriodCnt = Com_TxModeTrueMixedRepetitions[txModeIndex].ComTxModeTimePeriod;
+#endif
+            }
+            else
+            {
+#if (0u < COM_TX_MODE_TRUE_PERIOD_NUMBER) || (0u < COM_TX_MODE_TRUE_MIXED_NOREPETITION_NUMBER)
+                TxIpduStatePtr->PeriodCnt = Com_TxModeTruePeriod[txModeIndex].ComTxModeTimePeriod;
+#endif
+            }
+        }
+    }
+    uint8 TxDelay = TxIpduStatePtr->TxIpduRTStFlag & Com_TX_DELAY_EN;
+    if ((!MDTRun) && (Com_TX_DELAY_EN == TxDelay))
+    {
+        ret = TRUE;
+    }
+    if (ret && (0u == TxIpduStatePtr->DMCnt))
+    {
+        /*reset the tx MD counter*/
+        TxIpduStatePtr->DMCnt = TxIpduPtr->ComTxIpduDM;
+    }
+    return ret;
+}
+#endif
+
+#if (0u < COM_TX_MODE_TRUE_MIXED_NUMBER) || (0u < COM_TX_MODE_FALSE_MIXED_NUMBER) \
+    || (0u < COM_TX_MODE_TRUE_MIXED_NOREPETITION_NUMBER) || (0u < COM_TX_MODE_FALSE_MIXED_NOREPETITION_NUMBER)
+/******************************************************************************/
+/*
+ * Brief               Called by Com_MainFunctionTx.
+ *                     the handle of Com_MainFunctionTx,when the tx mode is mixed.
+ *                     return the boolean value for the tx pdu need to transmit or not
+ * ServiceId
+ * Sync/Async          Synchronous
+ * Reentrancy          Non Reentrant
+ * Param-Name[in]      TxIpduStatePtr,TxIpduPtr,MDTRun
+ * Param-Name[out]     None
+ * Param-Name[in/out]  None
+ * Return              None
+ */
+/******************************************************************************/
+static FUNC(boolean, COM_CODE)
+    Com_MainFuncTxMixed(Com_TxIPduRunTimeStateType* TxIpduStatePtr, const Com_TxIPduType* TxIpduPtr, boolean MDTRun)
+{
+    boolean transmitRequest = FALSE;
+    boolean directTransmitRequest = Com_MainFuncTxDirect(TxIpduStatePtr, TxIpduPtr, MDTRun);
+    boolean periodTransmitRequest = Com_MainFuncTxPeriod(TxIpduStatePtr, TxIpduPtr, MDTRun);
+
+    if (directTransmitRequest || periodTransmitRequest)
+    {
+        transmitRequest = TRUE;
+    }
+    return transmitRequest;
+}
+#endif
+
 #if (STD_ON == COM_TX_SIGNAL_ERROR_NOTIFICATION_ENABLE) || (STD_ON == COM_TX_SIG_GROUP_ERROR_NOTIFICATION_ENABLE)
 /******************************************************************************/
 /*
@@ -1038,6 +1460,169 @@ static FUNC(void, COM_CODE) Com_InvokeErrorNotification(PduIdType IpduId)
 }
 #endif
 
+#if (0u < COM_TXIPDU_NUMBER)
+/******************************************************************************/
+/*
+ * Brief               Send the tx pdu in Com_MainFunctionTx
+ * ServiceId
+ * Sync/Async          Synchronous
+ * Reentrancy          Non Reentrant
+ * Param-Name[in]      txIpduId
+ * Param-Name[out]     None
+ * Param-Name[in/out]  None
+ * Return              None
+ */
+/******************************************************************************/
+static FUNC(void, COM_CODE) Com_MainFunction_SendPdu(PduIdType TxIpduId)
+{
+    Com_TxIPduRunTimeStateType* txIpduStatePtr = &Com_TxIPduRunTimeState[TxIpduId];
+    const Com_TxIPduType* txIpduPtr = &Com_ConfigStd->ComTxIPdu[TxIpduId];
+    PduInfoType pduInfo;
+    Com_TxIpduBufIdType ipduBufferId = txIpduPtr->ComTxIPduBufIndex;
+    uint16 ipduLength = txIpduStatePtr->TxIpduLength;
+
+#if (STD_ON == COM_TX_IPDU_COUNTER_ENABLE)
+    uint8 txPduCounter = 0u;
+    if (COM_UNUSED_TXIPDUCOUNTERID != txIpduPtr->ComIPduCounterIndex)
+    {
+        /*Pack the counter value in the pdu buffer*/
+        Com_PackCounterValue(txIpduStatePtr, txIpduPtr);
+        /*recover the active counter value if the transmit is E_NOT_OK*/
+        txPduCounter = txIpduStatePtr->TxIpduCounter;
+        /*Increase the counter value by +1*/
+        Com_PduCounterIncrease(TRUE, TxIpduId);
+    }
+#endif /* STD_ON == COM_TX_IPDU_COUNTER_ENABLE */
+    pduInfo.SduDataPtr = &Com_TxIPduRuntimeBuff[ipduBufferId];
+    pduInfo.SduLength = ipduLength;
+#if (STD_ON == COM_METADATA_SUPPORT)
+    uint8 metaDataLength = txIpduPtr->MetaDataLength;
+    if (0u < metaDataLength)
+    {
+        PduLengthType metaDataPos =
+            txIpduPtr->IPduNoDynSignalLength + txIpduPtr->IPduMaxDynSignalLength + (PduLengthType)ipduBufferId;
+        pduInfo.MetaDataPtr = &Com_TxIPduRuntimeBuff[metaDataPos];
+    }
+    else
+#endif
+    {
+        pduInfo.MetaDataPtr = NULL_PTR;
+    }
+#if (STD_ON == COM_TX_IPDU_CALLOUT_ENABLE)
+    boolean ret = TRUE;
+    /*invoke the callout API*/
+    if (NULL_PTR != txIpduPtr->ComIPduCallout)
+    {
+        ret = txIpduPtr->ComIPduCallout(TxIpduId + COM_RXIPDU_NUMBER, &pduInfo);
+    }
+    if (ret)
+#endif /* STD_ON == COM_TX_IPDU_CALLOUT_ENABLE */
+    {
+#if (STD_ON == COM_TXTPPDU_SUPPORT)
+        if (COM_PDU_TP == txIpduPtr->ComIPduType)
+        {
+            pduInfo.SduDataPtr = NULL_PTR;
+        }
+#endif /* STD_ON == COM_TXTPPDU_SUPPORT */
+        /*Set the Transmiting flag before call PduR_Transmit,
+         *avoid the TxConfirmation come before set the Transmiting flag*/
+        txIpduStatePtr->TxIpduRTStFlag |= Com_TX_TRANSMITING_EN;
+        if (E_OK == PduR_ComTransmit(txIpduPtr->ComPduIdRef, &pduInfo))
+        {
+            uint8 TxDelay = txIpduStatePtr->TxIpduRTStFlag & Com_TX_DELAY_EN;
+            if (Com_TX_DELAY_EN == TxDelay)
+            {
+                txIpduStatePtr->TxIpduRTStFlag &= Com_TX_DELAY_DIS;
+            }
+/*Reset Tx_IPduMDT*/
+#if (STD_ON == COM_MDT_ENABLE)
+            Com_ResetTxIpduMDT(txIpduStatePtr, txIpduPtr);
+#endif
+#if (STD_ON == COM_TX_SIG_GROUP_UPDATE_BIT_ENABLE) || (STD_ON == COM_TX_SIGNAL_UPDATE_BIT_ENABLE) \
+    || (STD_ON == COM_GW_DEST_SIG_UPDATE_BIT_ENABLE)
+            if (COM_TRANSMIT == txIpduPtr->ComTxIPduClearUpdateBit)
+            {
+                /*clear all signal group/signal/dest description signal update bit of the Tx Pdu*/
+                Com_ClearTxIPduUpdates(txIpduPtr);
+            }
+#endif /* STD_ON == COM_TX_SIG_GROUP_UPDATE_BIT_ENABLE) || (STD_ON == COM_TX_SIGNAL_UPDATE_BIT_ENABLE) || (STD_ON == \
+COM_GW_DEST_SIG_UPDATE_BIT_ENABLE */
+            txIpduStatePtr->TxOffset = 0u;
+        }
+        else
+        {
+            txIpduStatePtr->TxIpduRTStFlag &= Com_TX_TRANSMITING_DIS;
+#if (STD_ON == COM_TX_IPDU_COUNTER_ENABLE)
+            if (COM_UNUSED_TXIPDUCOUNTERID != txIpduPtr->ComIPduCounterIndex)
+            {
+                /*transmit not OK,recover the old counter value*/
+                txIpduStatePtr->TxIpduCounter = txPduCounter;
+            }
+#endif /* STD_ON == COM_TX_IPDU_COUNTER_ENABLE */
+/*ComRetryFailedTransmitRequests*/
+#if (STD_ON == COM_RETRY_FAILED_TRANSMIT_REQUESTS)
+            txIpduStatePtr->TxIpduRTStFlag |= Com_TX_DELAY_EN;
+#else
+/*Reset Tx_IPduMDT*/
+#if (STD_ON == COM_MDT_ENABLE)
+            Com_ResetTxIpduMDT(txIpduStatePtr, txIpduPtr);
+#endif
+#endif /*STD_ON == COM_RETRY_FAILED_TRANSMIT_REQUESTS*/
+        }
+    }
+#if (STD_ON == COM_TX_IPDU_CALLOUT_ENABLE) && (STD_ON == COM_TX_IPDU_COUNTER_ENABLE)
+    else
+    {
+        if (COM_UNUSED_TXIPDUCOUNTERID != txIpduPtr->ComIPduCounterIndex)
+        {
+            /*transmit not OK,recover the old counter value*/
+            txIpduStatePtr->TxIpduCounter = txPduCounter;
+        }
+    }
+#endif /* STD_ON == COM_TX_IPDU_CALLOUT_ENABLE && STD_ON == COM_TX_IPDU_COUNTER_ENABLE */
+    return;
+}
+#endif
+
+#if (STD_ON == COM_TX_IPDU_COUNTER_ENABLE)
+/******************************************************************************/
+/*
+ * Brief               Called by Com_MainFunctionTx,Com_TriggerIPDUSend,
+ *                     Com_TriggerIPDUSendWithMetaData.
+ *                     Pack the counter value in the pdu buffer.
+ * ServiceId
+ * Sync/Async          Synchronous
+ * Reentrancy          Non Reentrant
+ * Param-Name[in]      TxIpduStatePtr,TxIpduPtr
+ * Param-Name[out]     None
+ * Param-Name[in/out]  None
+ * Return              None
+ */
+/******************************************************************************/
+static FUNC(void, COM_CODE)
+    Com_PackCounterValue(const Com_TxIPduRunTimeStateType* TxIpduStatePtr, const Com_TxIPduType* TxIpduPtr)
+{
+#if (0u < COM_TXIPDUBUFF_SIZE)
+    uint8 txCounter;
+    Com_TxIpduBufIdType ipduBufferIndex = TxIpduPtr->ComTxIPduBufIndex;
+    Com_TxIPduCounterIdType ipduCounterId = TxIpduPtr->ComIPduCounterIndex;
+    uint32 bitPosition = Com_TxIPduCounter[ipduCounterId].ComIPduCounterStartPosition;
+    uint8 bitSize = Com_TxIPduCounter[ipduCounterId].ComIPduCounterSize;
+    uint8 bitPosInByte = (uint8)(bitPosition & 0x07u);
+
+    ipduBufferIndex = ipduBufferIndex + (Com_TxIpduBufIdType)(bitPosition >> 3u);
+    /* Align LSB of txData and signal_value in IPdu */
+    txCounter = TxIpduStatePtr->TxIpduCounter << bitPosInByte;
+    /*Clear corresponding bits in IPdu*/
+    Com_TxIPduRuntimeBuff[ipduBufferIndex] &=
+        (COM_UNUSED_UINT8 >> (8u - bitPosInByte)) | (uint8)(COM_UNUSED_UINT8 << (bitPosInByte + bitSize));
+    /*write corresponding bits to IPdu buffer*/
+    Com_TxIPduRuntimeBuff[ipduBufferIndex] |= ((COM_UNUSED_UINT8 >> (8u - (bitPosInByte + bitSize))) & txCounter);
+#endif
+    return;
+}
+#endif
+
 #if (0u < COM_TMCTXSIGNAL_NUMBER) && (STD_ON == COM_TMS_ENABLE)
 static FUNC(uint64, COM_CODE) Com_GetOldSignalValue(Com_SignalType SignalType, uint16 SignalBufferId)
 {
@@ -1084,7 +1669,6 @@ static FUNC(uint64, COM_CODE) Com_GetOldSignalValue(Com_SignalType SignalType, u
     return oldValue;
 }
 #endif
-
 #if (0u < COM_TXSIGNAL_NUMBER) && (STD_ON == COM_TMS_ENABLE)
 /******************************************************************************/
 /*
@@ -1115,6 +1699,7 @@ static FUNC(void, COM_CODE) Com_TxSignalTMHandle(
             Com_TxSignalTMCCalculate(COM_TX_SIGNAL, TxSignalDataPtr, txSignalPtr, oldValue);
     }
 #endif
+
     uint8 oldTMS = TxIpduStatePtr->TxIpduRTStFlag & Com_TX_TMS_EN;
     boolean TMS = Com_TxIpduTMSCalculate(TxIpduPtr);
     if (!TMS && (Com_TX_TMS_EN == oldTMS))
@@ -1125,7 +1710,6 @@ static FUNC(void, COM_CODE) Com_TxSignalTMHandle(
             || (COM_TX_MODE_MIXED_WITHOUT_REPETITION == TxIpduStatePtr->ipduTxMode)
             || (COM_TX_MODE_PERIODIC == TxIpduStatePtr->ipduTxMode))
         {
-
             Com_GetTxModeOffset(TxIpduStatePtr, TxIpduPtr, FALSE);
         }
     }
@@ -1150,7 +1734,7 @@ static FUNC(void, COM_CODE) Com_TxSignalTMHandle(
 }
 #endif
 
-#if ((COM_TXSIGNALGROUP_NUMBER > 0u) || (0u < COM_TXSIGNAL_NUMBER))
+#if ((COM_TXGROUPSIGNAL_NUMBER > 0u) || (0u < COM_TXSIGNAL_NUMBER))
 /******************************************************************************/
 /*
  * Brief               Called by Com_SendSignal,Com_SendTxGroupSignalHandle.
@@ -1267,7 +1851,6 @@ static FUNC(boolean, COM_CODE) Com_SetTxSignalBuff(
     return ret;
 }
 #endif
-
 #if (0u < COM_TXSIGNAL_NUMBER)
 /******************************************************************************/
 /*
@@ -1290,19 +1873,17 @@ static FUNC(void, COM_CODE) Com_TxSignalPack(Com_SignalIdType TxSignalId)
     Com_TxIpduBufIdType ipduBufferIndex = Com_ConfigStd->ComTxIPdu[txIpduId].ComTxIPduBufIndex;
     uint16 signalBufferId = txSignalPtr->ComSignalInitValueId;
     uint64 txData;
-#if (                                                                                          \
-    (0u < COM_TXIPDUBUFF_SIZE)                                                                 \
-    && (((0u < COM_SIGNAL_8BITBUFF_SIZE) && (STD_ON == COM_TX_GRP_SIGNAL_TYPE_UINT8_N_ENABLE)) \
+#if (                                                                                      \
+    (0u < COM_TXIPDUBUFF_SIZE)                                                             \
+    && (((0u < COM_SIGNAL_8BITBUFF_SIZE) && (STD_ON == COM_TX_SIGNAL_TYPE_UINT8_N_ENABLE)) \
         || (0u < COM_SIGNAL_BOOLBUFF_SIZE)))
     Com_TxIpduBufIdType ipduBuffPos = ipduBufferIndex + (Com_TxIpduBufIdType)(txSignalPtr->ComSigLsbBytePos);
     uint8* iPduBufferPtr = &Com_TxIPduRuntimeBuff[ipduBuffPos];
-#endif /* 0u < COM_TXIPDUBUFF_SIZE) &&                                                          \
-        (((0u < COM_SIGNAL_8BITBUFF_SIZE) && (STD_ON == COM_TX_GRP_SIGNAL_TYPE_UINT8_N_ENABLE)) \
-            || (0u < COM_SIGNAL_BOOLBUFF_SIZE */
+#endif
 
     if (COM_UINT8_N == signalType)
     {
-#if ((0u < COM_SIGNAL_8BITBUFF_SIZE) && (0u < COM_TXIPDUBUFF_SIZE) && (STD_ON == COM_TX_GRP_SIGNAL_TYPE_UINT8_N_ENABLE))
+#if ((0u < COM_SIGNAL_8BITBUFF_SIZE) && (0u < COM_TXIPDUBUFF_SIZE) && (STD_ON == COM_TX_SIGNAL_TYPE_UINT8_N_ENABLE))
         /*pack COM_UINT8_N type group signal*/
         uint16 signalLength = txSignalPtr->ComSignalLength;
         SchM_Enter_Com_Context();
@@ -1365,6 +1946,7 @@ static FUNC(void, COM_CODE) Com_TxSignalPack(Com_SignalIdType TxSignalId)
     }
 }
 #endif
+
 #if (0u < COM_TXSIGNAL_NUMBER)
 /******************************************************************************/
 /*
@@ -1515,7 +2097,8 @@ static FUNC(uint8, COM_CODE) Com_SendTxSignalHandle(
     return E_OK;
 }
 #endif
-#if (COM_TXSIGNALGROUP_NUMBER > 0u)
+
+#if (COM_TXGROUPSIGNAL_NUMBER > 0u)
 /******************************************************************************/
 /*
  * Brief               Called by Com_SendSignal,Com_InvalidateSignalGroup.
@@ -1536,6 +2119,7 @@ static FUNC(uint8, COM_CODE)
         P2CONST(void, AUTOMATIC, COM_APPL_CONST) SignalDataPtr)
 /* PRQA S 1532 -- */ /* MISRA Rule 8.7 */
 {
+    boolean valueChanged;
     const Com_TxGroupSignalType* txGroupSignalPtr = &Com_ConfigStd->ComTxGroupSignal[TxGroupSignalId];
     Com_TxSignalGroupIdType signalGroupId = txGroupSignalPtr->ComSignalGroupRef;
     const Com_TxSignalGroupType* txSignalGroupPtr = &Com_ConfigStd->ComTxSignalGroup[signalGroupId];
@@ -1569,9 +2153,9 @@ static FUNC(uint8, COM_CODE)
         }
 #endif /* 0u < COM_TXGRPSIG_FILTERTYPE_MAX_NUMBER) && (STD_ON == COM_TMS_ENABLE */
         /*groupSignalLength is used when the signal type is COM_UINT8_N*/
-        uint16 groupSignalLength = txGroupSignalPtr->ComSignalLength;
         /*update tx signal buffer and check if the sending signal value changed*/
-        boolean valueChanged = Com_SetTxSignalBuff(
+        uint16 groupSignalLength = txGroupSignalPtr->ComSignalLength;
+        valueChanged = Com_SetTxSignalBuff(
             groupSignalType,
             groupSignalLength,
             txGroupSignalPtr->ComSignalInitValueId,
@@ -1625,9 +2209,145 @@ static FUNC(uint8, COM_CODE)
         /* PRQA S 3315 -- */ /* MISRA Rule 16.6*/
         ret = E_OK;
     }
+    COM_NOUSED(SignalDataPtr);
+    COM_NOUSED(valueChanged);
     return ret;
 }
 #endif
+
+#if (COM_IPDUGROUP_MAX > 0u) && (COM_TXIPDUGROUP_NUMBER > 0u)
+/******************************************************************************/
+/*
+ * Brief               used to handle all Tx Ipdu state change or not.
+ * ServiceId
+ * Sync/Async          Synchronous
+ * Reentrancy          Non Reentrant
+ * Param-Name[in]      initialize
+ * Param-Name[out]     None
+ * Param-Name[in/out]  None
+ * Return              None
+ */
+/******************************************************************************/
+/* PRQA S 1532 ++ */ /* MISRA Rule 8.7 */
+FUNC(void, COM_CODE)
+Com_TxIpduController(boolean initialize)
+/* PRQA S 1532 -- */ /* MISRA Rule 8.7 */
+{
+    Com_TxIPduRunTimeStateType* txIpduStatePtr;
+    const Com_TxIPduType* txIpduPtr;
+    Com_TxIpduGroupIdType ipduGroupRefNumber;
+    Com_TxIpduGroupIdType ipduGroupRefIndex;
+    Com_TxIpduGroupIdType ipduGroupId;
+    PduIdType ipduCnt;
+    uint8 activeEnable;
+    Com_TxModeModeType ipduTxMode;
+    for (ipduCnt = 0u; ipduCnt < COM_TXIPDU_NUMBER; ++ipduCnt)
+    {
+#if (STD_ON == COM_DEV_ERROR_DETECT) && (STD_ON == COM_MULTIPLE_PARTITION_USED)
+        if (Com_GetTxIPduPartitionId(ipduCnt) == GetApplicationID())
+#endif
+        {
+            txIpduPtr = &Com_ConfigStd->ComTxIPdu[ipduCnt];
+            ipduGroupRefNumber = txIpduPtr->ComIPduGroupsRefNumber;
+            /*if the Pdu not included in any Ipdu Group,the state is always start*/
+            if (ipduGroupRefNumber > 0u)
+            {
+                ipduGroupRefIndex = txIpduPtr->ComIPduGroupsRefStartId;
+                SchM_Enter_Com_MultiCore_Lock();
+                txIpduStatePtr = &Com_TxIPduRunTimeState[ipduCnt];
+                ipduTxMode = txIpduStatePtr->ipduTxMode;
+                activeEnable = txIpduStatePtr->TxIpduRTStFlag & Com_TX_ACTIVE_EN;
+                SchM_Exit_Com_MultiCore_Lock();
+                for (; ipduGroupRefIndex < ipduGroupRefNumber; ++ipduGroupRefIndex)
+                {
+                    ipduGroupId = Com_TxIPduGroupsRef[ipduGroupRefIndex];
+                    if (Com_IpduGroupEnable[ipduGroupId])
+                    {
+                        break;
+                    }
+                }
+                /*at least one Ipdu Group is start,the Pdu shall be active*/
+                if (ipduGroupRefIndex < ipduGroupRefNumber)
+                {
+                    if (Com_TX_ACTIVE_EN != activeEnable)
+                    {
+                        SchM_Enter_Com_MultiCore_Lock();
+                        txIpduStatePtr->TxIpduRTStFlag |= Com_TX_ACTIVE_EN;
+                        SchM_Exit_Com_MultiCore_Lock();
+#if (STD_ON == COM_MDT_ENABLE)
+                        /*reset ComMinimumDelayTime of I-PDUs in transmission*/
+                        txIpduStatePtr->MDTCnt = 0u;
+                        /*reset Tx time out counter*/
+                        if ((COM_UNUSED_UINT16 == txIpduPtr->ComTxModeFalseRefId)
+                            && (COM_TX_MODE_NONE == txIpduPtr->ComTxTrueModeMode))
+                        {
+                            txIpduStatePtr->DMCnt = txIpduPtr->ComTxIpduDM;
+                        }
+                        else
+                        {
+                            txIpduStatePtr->DMCnt = 0u;
+                        }
+#endif
+                        /*clear all signal/signal group/dest description signal's update bit of the tx Ipdu*/
+#if (STD_ON == COM_TX_SIG_GROUP_UPDATE_BIT_ENABLE) || (STD_ON == COM_TX_SIGNAL_UPDATE_BIT_ENABLE) \
+    || (STD_ON == COM_GW_DEST_SIG_UPDATE_BIT_ENABLE)
+                        Com_ClearTxIPduUpdates(txIpduPtr);
+#endif /* STD_ON == COM_TX_SIG_GROUP_UPDATE_BIT_ENABLE || STD_ON == COM_TX_SIGNAL_UPDATE_BIT_ENABLE || STD_ON == \
+          COM_GW_DEST_SIG_UPDATE_BIT_ENABLE */
+#if (COM_ONEEVERYNFILTERSIGNAL_NUMBER > 0u)
+                        /*reset OCCURRENCE of filter with ComFilterAlgorithm ONE_EVERY_N*/
+                        Com_ResetTxOccurrenceOfPduFilter(ipduCnt);
+#endif
+                        if (initialize)
+                        {
+                            /*init the tx ipdu buffer,all signal buffer(included in the ipdu) and init the TMC,TMS*/
+                            Com_ResetTxPduBufferAndSignalBuffer(ipduCnt);
+                            if ((COM_TX_MODE_MIXED == ipduTxMode) || (COM_TX_MODE_PERIODIC == ipduTxMode)
+                                || (COM_TX_MODE_MIXED_WITHOUT_REPETITION == ipduTxMode))
+                            {
+                                boolean TMS = (Com_TX_TMS_EN == (txIpduStatePtr->TxIpduRTStFlag & Com_TX_TMS_EN));
+                                Com_GetTxModeOffset(txIpduStatePtr, txIpduPtr, TMS);
+                            }
+#if (COM_TXIPDU_COUNTER_NUMBER > 0u)
+                            if (COM_UNUSED_TXIPDUCOUNTERID != txIpduPtr->ComIPduCounterIndex)
+                            {
+                                /*set the I-PDU counter to 0 for I-PDUs with ComIPduDirection configured to SEND*/
+                                txIpduStatePtr->TxIpduCounter = 0u;
+                            }
+#endif
+                        }
+                    }
+                }
+                else
+                {
+                    if (Com_TX_ACTIVE_EN == activeEnable)
+                    {
+                        SchM_Enter_Com_MultiCore_Lock();
+                        txIpduStatePtr->TxIpduRTStFlag &= Com_TX_ACTIVE_DIS;
+                        SchM_Exit_Com_MultiCore_Lock();
+                        uint8 Transmiting = txIpduStatePtr->TxIpduRTStFlag & Com_TX_TRANSMITING_EN;
+                        if (Com_TX_TRANSMITING_EN == Transmiting)
+                        {
+#if (STD_ON == COM_TX_SIGNAL_ERROR_NOTIFICATION_ENABLE) || (STD_ON == COM_TX_SIG_GROUP_ERROR_NOTIFICATION_ENABLE)
+                            Com_InvokeErrorNotification(ipduCnt);
+#endif
+#if (STD_ON == COM_CANCELLATION_SUPPORT)
+                            if (txIpduPtr->ComIPduCancellationSupport)
+                            {
+                                (void)PduR_ComCancelTransmit(txIpduPtr->ComPduIdRef);
+                            }
+#endif
+                            txIpduStatePtr->TxIpduRTStFlag &= Com_TX_TRANSMITING_DIS;
+                        }
+                        txIpduStatePtr->DMCnt = 0u;
+                    }
+                }
+            }
+        }
+    }
+}
+#endif
+
 #if (                                                                                        \
     ((0u < COM_TXSIGNALGROUP_NUMBER) && (STD_ON == COM_TX_GRP_SIGNAL_TYPE_UINT8_DYN_ENABLE)) \
     || ((0u < COM_TXSIGNAL_NUMBER) && (STD_ON == COM_TX_SIGNAL_TYPE_UINT8_DYN_ENABLE)))
@@ -1784,12 +2504,13 @@ static FUNC(void, COM_CODE) Com_TxSignalGroupPack(Com_SignalGroupIdType SignalGr
  * Return              boolean
  */
 /******************************************************************************/
-/* PRQA S 1532 ++ */ /* MISRA Rule 8.7 */
-static FUNC(boolean, COM_CODE) Com_UpdateTxBufferAndCalculateTMCOfEveryGroupSignal(
-    /* PRQA S 1532 -- */ /* MISRA Rule 8.7 */
-    Com_SignalGroupIdType TxSignalGroupId,
-    Com_TxGroupSignalIdType GroupSignalNumber,
-    Com_TxIpduBufIdType TxIPduBufferId)
+static FUNC(boolean, COM_CODE)
+    /* PRQA S 1532 ++ */ /* MISRA Rule 8.7 */
+    Com_UpdateTxBufferAndCalculateTMCOfEveryGroupSignal(
+        /* PRQA S 1532 -- */ /* MISRA Rule 8.7 */
+        Com_SignalGroupIdType TxSignalGroupId,
+        Com_TxGroupSignalIdType GroupSignalNumber,
+        Com_TxIpduBufIdType TxIPduBufferId)
 {
     boolean triggerOnChange = FALSE;
     Com_SignalType groupSignalType;
@@ -1909,6 +2630,87 @@ static FUNC(boolean, COM_CODE) Com_UpdateTxBufferAndCalculateTMCOfEveryGroupSign
     return triggerOnChange;
 }
 #endif
+
+#if (STD_ON == COM_TX_SIG_GROUP_UPDATE_BIT_ENABLE) || (STD_ON == COM_TX_SIGNAL_UPDATE_BIT_ENABLE) \
+    || (STD_ON == COM_GW_DEST_SIG_UPDATE_BIT_ENABLE)
+/******************************************************************************/
+/*
+ * Brief               Called by Com_TriggerIPDUSend,Com_TriggerIPDUSendWithMetaData,
+ *                     Com_TriggerTransmit,Com_TxConfirmation,Com_TpTxConfirmation,
+ *                     Com_MainFunctionTx,Com_TxIpduController.
+ *                     clear all signal group/signal/dest description signal
+ *                     update bit of the Tx Pdu
+ * ServiceId
+ * Sync/Async          Synchronous
+ * Reentrancy          Non Reentrant
+ * Param-Name[in]      TxIpduPtr
+ * Param-Name[out]     None
+ * Param-Name[in/out]  None
+ * Return              None
+ */
+/******************************************************************************/
+static FUNC(void, COM_CODE) Com_ClearTxIPduUpdates(const Com_TxIPduType* TxIpduPtr)
+{
+#if (0u < COM_TXIPDUBUFF_SIZE)
+#if (STD_ON == COM_TX_SIG_GROUP_UPDATE_BIT_ENABLE) || (STD_ON == COM_TX_SIGNAL_UPDATE_BIT_ENABLE) \
+    || (STD_ON == COM_GW_DEST_SIG_UPDATE_BIT_ENABLE)
+    Com_TxIpduBufIdType ipduBufferIndex = TxIpduPtr->ComTxIPduBufIndex;
+    Com_SignalPositionType updateBitPosition;
+#endif
+
+#if (STD_ON == COM_TX_SIG_GROUP_UPDATE_BIT_ENABLE)
+    Com_TxSignalGroupIdType signalGroupNumber, signalGroupId;
+    signalGroupNumber = TxIpduPtr->ComIPduSignalGroupsRefNumber;
+    signalGroupId = TxIpduPtr->ComIPduSignalGroupsRefStartId;
+    const Com_TxSignalGroupType* txSignalGroupPtr;
+    for (; signalGroupId < signalGroupNumber; ++signalGroupId)
+    {
+        txSignalGroupPtr = &Com_ConfigStd->ComTxSignalGroup[signalGroupId];
+        updateBitPosition = txSignalGroupPtr->ComUpdateLsbBytePos;
+        if (COM_UNUSED_SIGNALPOSITION != updateBitPosition)
+        {
+            Com_TxIPduRuntimeBuff[ipduBufferIndex + (Com_TxIpduBufIdType)updateBitPosition] &=
+                (uint8)(~(txSignalGroupPtr->ComUpdateBitMask));
+        }
+    }
+#endif /* STD_ON == COM_TX_SIG_GROUP_UPDATE_BIT_ENABLE */
+#if (STD_ON == COM_TX_SIGNAL_UPDATE_BIT_ENABLE)
+    Com_TxSignalIdType txSignalNumber, cnt;
+    txSignalNumber = TxIpduPtr->ComIPduSignalsRefNumber;
+    cnt = TxIpduPtr->ComIpduSignalRefStartId;
+    const Com_TxSignalType* txSignalPtr;
+    for (; cnt < txSignalNumber; ++cnt)
+    {
+        txSignalPtr = &Com_ConfigStd->ComTxSignal[cnt];
+        updateBitPosition = txSignalPtr->ComUpdateLsbBytePos;
+        if (COM_UNUSED_SIGNALPOSITION != updateBitPosition)
+        {
+            Com_TxIPduRuntimeBuff[ipduBufferIndex + (Com_TxIpduBufIdType)updateBitPosition] &=
+                (uint8)(~(txSignalPtr->ComUpdateBitMask));
+        }
+    }
+#endif /* STD_ON == COM_TX_SIGNAL_UPDATE_BIT_ENABLE */
+#if (STD_ON == COM_GW_DEST_SIG_UPDATE_BIT_ENABLE)
+    Com_GwDestinationDescriptionIdType destSignalNumber, destSignalId;
+    destSignalNumber = TxIpduPtr->ComIPduDespSignalsRefNumber;
+    destSignalId = TxIpduPtr->ComIPduDespSignalsRefStartId;
+    const Com_GwDestSignalType* gwDestSignalPtr;
+    for (; destSignalId < destSignalNumber; ++destSignalId)
+    {
+        gwDestSignalPtr = &Com_ConfigStd->ComDestSignal[destSignalId];
+        updateBitPosition = gwDestSignalPtr->ComUpdateLsbBytePos;
+        if (COM_UNUSED_SIGNALPOSITION != updateBitPosition)
+        {
+            Com_TxIPduRuntimeBuff[ipduBufferIndex + (Com_TxIpduBufIdType)updateBitPosition] &=
+                (uint8)(~(gwDestSignalPtr->ComUpdateBitMask));
+        }
+    }
+#endif /* STD_ON == COM_GW_DEST_SIG_UPDATE_BIT_ENABLE */
+#endif
+    COM_NOUSED(TxIpduPtr);
+    return;
+}
+#endif
 #define COM_STOP_SEC_CODE
 #include "Com_MemMap.h"
 /*******************************************************************************
@@ -1916,44 +2718,6 @@ static FUNC(boolean, COM_CODE) Com_UpdateTxBufferAndCalculateTMCOfEveryGroupSign
 *******************************************************************************/
 #define COM_START_SEC_CODE
 #include "Com_MemMap.h"
-#if (STD_ON == COM_TX_IPDU_COUNTER_ENABLE)
-/******************************************************************************/
-/*
- * Brief               Called by Com_MainFunctionTx,Com_TriggerIPDUSend,
- *                     Com_TriggerIPDUSendWithMetaData.
- *                     Pack the counter value in the pdu buffer.
- * ServiceId
- * Sync/Async          Synchronous
- * Reentrancy          Non Reentrant
- * Param-Name[in]      TxIpduStatePtr,TxIpduPtr
- * Param-Name[out]     None
- * Param-Name[in/out]  None
- * Return              None
- */
-/******************************************************************************/
-FUNC(void, COM_CODE)
-Com_PackCounterValue(const Com_TxIPduRunTimeStateType* TxIpduStatePtr, const Com_TxIPduType* TxIpduPtr)
-{
-#if (0u < COM_TXIPDUBUFF_SIZE)
-    uint8 txCounter;
-    Com_TxIpduBufIdType ipduBufferIndex = TxIpduPtr->ComTxIPduBufIndex;
-    Com_TxIPduCounterIdType ipduCounterId = TxIpduPtr->ComIPduCounterIndex;
-    uint32 bitPosition = Com_TxIPduCounter[ipduCounterId].ComIPduCounterStartPosition;
-    uint8 bitSize = Com_TxIPduCounter[ipduCounterId].ComIPduCounterSize;
-    uint8 bitPosInByte = (uint8)(bitPosition & 0x07u);
-
-    ipduBufferIndex = ipduBufferIndex + (Com_TxIpduBufIdType)(bitPosition >> 3u);
-    /* Align LSB of txData and signal_value in IPdu */
-    txCounter = TxIpduStatePtr->TxIpduCounter << bitPosInByte;
-    /*Clear corresponding bits in IPdu*/
-    Com_TxIPduRuntimeBuff[ipduBufferIndex] &=
-        (COM_UNUSED_UINT8 >> (8u - bitPosInByte)) | (uint8)(COM_UNUSED_UINT8 << (bitPosInByte + bitSize));
-    /*write corresponding bits to IPdu buffer*/
-    Com_TxIPduRuntimeBuff[ipduBufferIndex] |= ((COM_UNUSED_UINT8 >> (8u - (bitPosInByte + bitSize))) & txCounter);
-#endif
-    return;
-}
-#endif
 #if (STD_ON == COM_ENABLE_SIGNAL_GROUP_ARRAY_API) && (0u < COM_TXSIGNALGROUP_NUMBER) && (0u < COM_TXIPDU_NUMBER)
 /******************************************************************************/
 /*
@@ -2054,134 +2818,6 @@ Com_SendSignalGroupArrayHandle(
     COM_NOUSED(SignalGroupId);
     COM_NOUSED(SignalGroupArrayPtr);
     return ret;
-}
-#endif
-
-#if (COM_TXIPDUGROUP_NUMBER > 0u)
-/******************************************************************************/
-/*
- * Brief               used to handle all Tx Ipdu state change or not.
- * ServiceId
- * Sync/Async          Synchronous
- * Reentrancy          Non Reentrant
- * Param-Name[in]      initialize
- * Param-Name[out]     None
- * Param-Name[in/out]  None
- * Return              None
- */
-/******************************************************************************/
-/* PRQA S 1532 ++ */ /* MISRA Rule 8.7 */
-FUNC(void, COM_CODE)
-Com_TxIpduController(boolean initialize)
-/* PRQA S 1532 -- */ /* MISRA Rule 8.7 */
-{
-    Com_TxIPduRunTimeStateType* txIpduStatePtr;
-    const Com_TxIPduType* txIpduPtr;
-    Com_TxIpduGroupIdType ipduGroupRefNumber;
-    Com_TxIpduGroupIdType ipduGroupRefIndex;
-    Com_TxIpduGroupIdType ipduGroupId;
-    PduIdType ipduCnt;
-    uint8 activeEnable;
-    Com_TxModeModeType ipduTxMode;
-    for (ipduCnt = 0u; ipduCnt < COM_TXIPDU_NUMBER; ++ipduCnt)
-    {
-        txIpduPtr = &Com_ConfigStd->ComTxIPdu[ipduCnt];
-        ipduGroupRefNumber = txIpduPtr->ComIPduGroupsRefNumber;
-        /*if the Pdu not included in any Ipdu Group,the state is always start*/
-        if (ipduGroupRefNumber > 0u)
-        {
-            ipduGroupRefIndex = txIpduPtr->ComIPduGroupsRefStartId;
-            SchM_Enter_Com_MultiCore_Lock();
-            txIpduStatePtr = &Com_TxIPduRunTimeState[ipduCnt];
-            ipduTxMode = txIpduStatePtr->ipduTxMode;
-            activeEnable = txIpduStatePtr->TxIpduRTStFlag & Com_TX_ACTIVE_EN;
-            SchM_Exit_Com_MultiCore_Lock();
-            for (; ipduGroupRefIndex < ipduGroupRefNumber; ++ipduGroupRefIndex)
-            {
-                ipduGroupId = Com_TxIPduGroupsRef[ipduGroupRefIndex];
-                if (Com_IpduGroupEnable[ipduGroupId])
-                {
-                    break;
-                }
-            }
-            /*at least one Ipdu Group is start,the Pdu shall be active*/
-            if (ipduGroupRefIndex < ipduGroupRefNumber)
-            {
-                if (Com_TX_ACTIVE_EN != activeEnable)
-                {
-                    SchM_Enter_Com_MultiCore_Lock();
-                    txIpduStatePtr->TxIpduRTStFlag |= Com_TX_ACTIVE_EN;
-                    SchM_Exit_Com_MultiCore_Lock();
-#if (STD_ON == COM_MDT_ENABLE)
-                    /*reset ComMinimumDelayTime of I-PDUs in transmission*/
-                    txIpduStatePtr->MDTCnt = 0u;
-                    /*reset Tx time out counter*/
-                    if ((COM_UNUSED_UINT16 == txIpduPtr->ComTxModeFalseRefId)
-                        && (COM_TX_MODE_NONE == txIpduPtr->ComTxTrueModeMode))
-                    {
-                        txIpduStatePtr->DMCnt = txIpduPtr->ComTxIpduDM;
-                    }
-                    else
-                    {
-                        txIpduStatePtr->DMCnt = 0u;
-                    }
-#endif
-                    /*clear all signal/signal group/dest description signal's update bit of the tx Ipdu*/
-#if (STD_ON == COM_TX_SIG_GROUP_UPDATE_BIT_ENABLE) || (STD_ON == COM_TX_SIGNAL_UPDATE_BIT_ENABLE) \
-    || (STD_ON == COM_GW_DEST_SIG_UPDATE_BIT_ENABLE)
-                    Com_ClearTxIPduUpdates(txIpduPtr);
-#endif /* STD_ON == COM_TX_SIG_GROUP_UPDATE_BIT_ENABLE || STD_ON == COM_TX_SIGNAL_UPDATE_BIT_ENABLE || STD_ON == \
-          COM_GW_DEST_SIG_UPDATE_BIT_ENABLE */
-#if (COM_ONEEVERYNFILTERSIGNAL_NUMBER > 0u)
-                    /*reset OCCURRENCE of filter with ComFilterAlgorithm ONE_EVERY_N*/
-                    Com_ResetTxOccurrenceOfPduFilter(ipduCnt);
-#endif
-                    if (initialize)
-                    {
-                        /*init the tx ipdu buffer,all signal buffer(included in the ipdu) and init the TMC,TMS*/
-                        Com_ResetTxPduBufferAndSignalBuffer(ipduCnt);
-                        if ((COM_TX_MODE_MIXED == ipduTxMode) || (COM_TX_MODE_PERIODIC == ipduTxMode)
-                            || (COM_TX_MODE_MIXED_WITHOUT_REPETITION == ipduTxMode))
-                        {
-                            boolean TMS = (Com_TX_TMS_EN == (txIpduStatePtr->TxIpduRTStFlag & Com_TX_TMS_EN));
-                            Com_GetTxModeOffset(txIpduStatePtr, txIpduPtr, TMS);
-                        }
-#if (COM_TXIPDU_COUNTER_NUMBER > 0u)
-                        if (COM_UNUSED_TXIPDUCOUNTERID != txIpduPtr->ComIPduCounterIndex)
-                        {
-                            /*set the I-PDU counter to 0 for I-PDUs with ComIPduDirection configured to SEND*/
-                            txIpduStatePtr->TxIpduCounter = 0u;
-                        }
-#endif
-                    }
-                }
-            }
-            else
-            {
-                if (Com_TX_ACTIVE_EN == activeEnable)
-                {
-                    txIpduStatePtr->TxIpduRTStFlag &= Com_TX_ACTIVE_DIS;
-                    uint8 Transmiting = txIpduStatePtr->TxIpduRTStFlag & Com_TX_TRANSMITING_EN;
-                    if (Com_TX_TRANSMITING_EN == Transmiting)
-                    {
-#if (STD_ON == COM_TX_SIGNAL_ERROR_NOTIFICATION_ENABLE) || (STD_ON == COM_TX_SIG_GROUP_ERROR_NOTIFICATION_ENABLE)
-                        Com_InvokeErrorNotification(ipduCnt);
-#endif
-#if (STD_ON == COM_CANCELLATION_SUPPORT)
-                        if (txIpduPtr->ComIPduCancellationSupport)
-                        {
-                            (void)PduR_ComCancelTransmit(txIpduPtr->ComPduIdRef);
-                        }
-#endif
-                        SchM_Enter_Com_MultiCore_Lock();
-                        txIpduStatePtr->TxIpduRTStFlag &= Com_TX_TRANSMITING_DIS;
-                        SchM_Exit_Com_MultiCore_Lock();
-                    }
-                    txIpduStatePtr->DMCnt = 0u;
-                }
-            }
-        }
-    }
 }
 #endif
 
@@ -2445,7 +3081,7 @@ Com_SendSignalHandle(Com_SignalIdType SignalId, P2CONST(void, AUTOMATIC, COM_APP
                         Com_TxSignalErrorAndNotification[txSignalPtr->ComTxSignalErrAndNotifyFncId]();
                     }
                 }
-#endif
+#endif /* STD_ON == COM_TX_SIGNAL_ERROR_NOTIFICATION_ENABLE */
             }
         }
 #endif /*0u < COM_TXSIGNAL_NUMBER*/
@@ -2566,7 +3202,7 @@ Com_SendDynSignalHandle(
                             Com_TxSignalErrorAndNotification[txSignalPtr->ComTxSignalErrAndNotifyFncId]();
                         }
                     }
-#endif
+#endif /* STD_ON == COM_TX_SIGNAL_ERROR_NOTIFICATION_ENABLE */
                 }
             }
         }
@@ -2606,7 +3242,9 @@ Com_SendSignalGroupHandle(Com_SignalGroupIdType SignalGroupId)
     uint8 ret = COM_SERVICE_NOT_AVAILABLE;
     PduIdType ipduRef;
     uint16 rptNum = 1u;
+#if (STD_ON == COM_TX_SIG_GROUP_TIMEOUT_ENABLE)
     boolean initDMCnt = FALSE;
+#endif
 #if (STD_ON == COM_TX_SIG_GROUP_UPDATE_BIT_ENABLE)
     Com_SignalPositionType updateBitPosition;
     uint8 updateBitMask;
@@ -2665,6 +3303,7 @@ Com_SendSignalGroupHandle(Com_SignalGroupIdType SignalGroupId)
                     initDMCnt = TRUE;
                 }
 #endif
+
 #if (0u < COM_TX_MODE_TRUE_DIRECT_NUMBER) || (0u < COM_TX_MODE_TRUE_MIXED_NUMBER)                              \
     || (0u < COM_TX_MODE_FALSE_DIRECT_NUMBER) || (0u < COM_TX_MODE_FALSE_MIXED_NUMBER)                         \
     || (0u < COM_TX_MODE_TRUE_DIRECT_NOREPETITION_NUMBER) || (0u < COM_TX_MODE_TRUE_MIXED_NOREPETITION_NUMBER) \
@@ -2831,11 +3470,7 @@ Com_InvalidateSignalGroupHandle(Com_SignalGroupIdType SignalGroupId)
 {
     uint8 ret;
     PduIdType ipduRef;
-    Com_TxGroupSignalIdType groupSignalNumber, groupSignalId;
-    Com_SignalType signalType;
-    uint16 invalidValueId;
     const Com_TxSignalGroupType* txSignalGroupPtr = &Com_ConfigStd->ComTxSignalGroup[SignalGroupId];
-    const Com_TxGroupSignalType* txGroupSignalPtr;
 #if (0u < COM_SIGNAL_8BIT_INVALID_SIZE) && (STD_ON == COM_TX_GRP_SIGNAL_TYPE_UINT8_DYN_ENABLE)
     uint16 invalidValueLength;
 #endif /* 0u < COM_SIGNAL_8BIT_INVALID_SIZE && STD_ON == COM_TX_GRP_SIGNAL_TYPE_UINT8_DYN_ENABLE */
@@ -2858,13 +3493,14 @@ Com_InvalidateSignalGroupHandle(Com_SignalGroupIdType SignalGroupId)
 #endif /* STD_ON == COM_TXTPPDU_SUPPORT */
         {
 #if (STD_ON == COM_TX_GRP_SIGNAL_INVALID_DATA_ENABLE)
+            Com_TxGroupSignalIdType groupSignalNumber, groupSignalId;
             groupSignalNumber = txSignalGroupPtr->ComGroupSignalRefNumber;
             groupSignalId = txSignalGroupPtr->ComGroupSignalRefStartId;
             for (; groupSignalId < groupSignalNumber; ++groupSignalId)
             {
-                txGroupSignalPtr = &Com_ConfigStd->ComTxGroupSignal[groupSignalId];
-                signalType = txGroupSignalPtr->ComSignalType;
-                invalidValueId = txGroupSignalPtr->ComSignalInvalidBuffRefId;
+                const Com_TxGroupSignalType* txGroupSignalPtr = &Com_ConfigStd->ComTxGroupSignal[groupSignalId];
+                Com_SignalType signalType = txGroupSignalPtr->ComSignalType;
+                uint16 invalidValueId = txGroupSignalPtr->ComSignalInvalidBuffRefId;
                 if (COM_UNUSED_UINT16 != invalidValueId)
                 {
 #if (STD_ON == COM_TX_GRP_SIGNAL_TYPE_UINT8_DYN_ENABLE)
@@ -3109,17 +3745,143 @@ Com_SwitchIpduTxModeHandle(PduIdType PduId, boolean Mode)
         && ((COM_TX_MODE_MIXED == txIpduStatePtr->ipduTxMode) || (COM_TX_MODE_PERIODIC == txIpduStatePtr->ipduTxMode)
             || (COM_TX_MODE_MIXED_WITHOUT_REPETITION == txIpduStatePtr->ipduTxMode)))
     {
-        if (Mode && (Com_TX_TMS_EN != TMS))
+        if ((Mode && (Com_TX_TMS_EN != TMS)) || (!Mode && (Com_TX_TMS_EN == TMS)))
         {
-            Com_GetTxModeOffset(txIpduStatePtr, txIpduPtr, FALSE);
+            Com_GetTxModeOffset(txIpduStatePtr, txIpduPtr, Mode);
         }
-        else if (!Mode && (Com_TX_TMS_EN == TMS))
+    }
+}
+#endif
+
+#if (0u < COM_TXIPDU_NUMBER)
+/******************************************************************************/
+/*
+ * Brief               TxPdu MainFunction handle
+ * ServiceId
+ * Sync/Async          Synchronous
+ * Reentrancy          Non Reentrant
+ * Param-Name[in]      None
+ * Param-Name[out]     None
+ * Param-Name[in/out]  None
+ * Return              None
+ */
+/******************************************************************************/
+FUNC(void, COM_CODE)
+Com_MainFunctionTxHandle(Com_MainFunctionType mainFunctionId) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
+{
+    PduIdType txIpduId;
+    const Com_TxIPduType* txIpduPtr;
+    Com_TxIPduRunTimeStateType* txIpduStatePtr;
+    uint8 activeEnable;
+    uint8 Transmiting;
+
+    for (txIpduId = Com_GetStartOfMainFunctionTx(mainFunctionId); txIpduId < Com_GetEndOfMainFunctionTx(mainFunctionId);
+         ++txIpduId)
+    {
+        txIpduStatePtr = &Com_TxIPduRunTimeState[txIpduId];
+        activeEnable = txIpduStatePtr->TxIpduRTStFlag & Com_TX_ACTIVE_EN;
+        if (Com_TX_ACTIVE_EN == activeEnable)
         {
-            Com_GetTxModeOffset(txIpduStatePtr, txIpduPtr, TRUE);
-        }
-        else
-        {
-            /* do nothing */
+            txIpduPtr = &Com_ConfigStd->ComTxIPdu[txIpduId];
+            boolean ipduMDTRun = FALSE;
+            boolean txSendFlag = FALSE;
+            /*Tx notification for all signals/signal groups of the Tx Pdu is DEFERRED in the MainFunctionTx*/
+#if (STD_ON == COM_TX_SIGNAL_NOTIFICATION_ENABLE) || (STD_ON == COM_TX_SIG_GROUP_NOTIFICATION_ENABLE)
+            uint8 TxConfirm = txIpduStatePtr->TxIpduRTStFlag & Com_TX_CONFIRM_EN;
+            if (Com_TX_CONFIRM_EN == TxConfirm)
+            {
+                /*Tx notification for all signals/signal groups of the Tx Pdu*/
+                Com_ConfirmationProcess(txIpduPtr);
+                txIpduStatePtr->TxIpduRTStFlag &= Com_TX_CONFIRM_DIS;
+            }
+#endif      /* STD_ON == COM_TX_SIGNAL_NOTIFICATION_ENABLE) || (STD_ON == COM_TX_SIG_GROUP_NOTIFICATION_ENABLE */
+            /* Calculate DM, if DM > 0u, DM-- every mainfunction */
+#if (STD_ON == COM_TX_SIGNAL_TIMEOUT_ENABLE) || (STD_ON == COM_TX_SIG_GROUP_TIMEOUT_ENABLE)
+            if (txIpduStatePtr->DMCnt > 0u)
+            {
+                (txIpduStatePtr->DMCnt) -= 1u;
+                /* DM_TimeOut */
+                if (0u == txIpduStatePtr->DMCnt)
+                {
+#if (STD_ON == COM_TX_SIGNAL_TIMEOUT_NOTIFICATION_ENABLE) || (STD_ON == COM_TX_SIG_GROUP_TIMEOUT_NOTIFICATION_ENABLE)
+                    /* ToutNotification*/
+                    Com_TxDMTimeOutNotification(txIpduPtr);
+#endif /* STD_ON == COM_TX_SIGNAL_TIMEOUT_NOTIFICATION_ENABLE || STD_ON == \
+          COM_TX_SIG_GROUP_TIMEOUT_NOTIFICATION_ENABLE */
+                    /* CancelTx(Direct/N component */
+                    txIpduStatePtr->RptNum = 0u;
+                    txIpduStatePtr->NTimeCnt = 0u;
+                    txIpduStatePtr->TxIpduRTStFlag &= Com_TX_TRANSMITING_DIS;
+/*cancel the transmitting tx pdu*/
+#if (STD_ON == COM_CANCELLATION_SUPPORT)
+                    if (txIpduPtr->ComIPduCancellationSupport)
+                    {
+                        (void)PduR_ComCancelTransmit(txIpduPtr->ComPduIdRef);
+                    }
+#endif
+                }
+            }
+#endif /* STD_ON == COM_TX_SIGNAL_TIMEOUT_ENABLE || STD_ON == COM_TX_SIG_GROUP_TIMEOUT_ENABLE */
+#if (STD_ON == COM_MDT_ENABLE)
+            /* Calculate MDT, if MDT > 0u, MDT-- every mainfunction  */
+            if (txIpduStatePtr->MDTCnt > 0u)
+            {
+                (txIpduStatePtr->MDTCnt) -= 1u;
+                /* MDT Timer > 0u, set MDT running flag */
+                if (txIpduStatePtr->MDTCnt != 0u)
+                {
+                    ipduMDTRun = TRUE;
+                }
+            }
+#endif /* STD_ON == COM_MDT_ENABLE */
+            switch (txIpduStatePtr->ipduTxMode)
+            {
+#if (0u < COM_TX_MODE_TRUE_DIRECT_NUMBER) || (0u < COM_TX_MODE_FALSE_DIRECT_NUMBER) \
+    || (0u < COM_TX_MODE_TRUE_DIRECT_NOREPETITION_NUMBER) || (0u < COM_TX_MODE_FALSE_DIRECT_NOREPETITION_NUMBER)
+            case COM_TX_MODE_DIRECT:
+            case COM_TX_MODE_DIRECT_WITHOUT_REPETITION:
+                txSendFlag = Com_MainFuncTxDirect(txIpduStatePtr, txIpduPtr, ipduMDTRun);
+                break;
+#endif
+#if (0u < COM_TX_MODE_TRUE_MIXED_NUMBER) || (0u < COM_TX_MODE_FALSE_MIXED_NUMBER) \
+    || (0u < COM_TX_MODE_TRUE_MIXED_NOREPETITION_NUMBER) || (0u < COM_TX_MODE_FALSE_MIXED_NOREPETITION_NUMBER)
+            case COM_TX_MODE_MIXED:
+            case COM_TX_MODE_MIXED_WITHOUT_REPETITION:
+                txSendFlag = Com_MainFuncTxMixed(txIpduStatePtr, txIpduPtr, ipduMDTRun);
+                break;
+#endif
+#if (0u < COM_TX_MODE_TRUE_PERIOD_NUMBER) || (0u < COM_TX_MODE_FALSE_PERIOD_NUMBER)  \
+    || (0u < COM_TX_MODE_TRUE_MIXED_NUMBER) || (0u < COM_TX_MODE_FALSE_MIXED_NUMBER) \
+    || (0u < COM_TX_MODE_TRUE_MIXED_NOREPETITION_NUMBER) || (0u < COM_TX_MODE_FALSE_MIXED_NOREPETITION_NUMBER)
+            case COM_TX_MODE_PERIODIC:
+                txSendFlag = Com_MainFuncTxPeriod(txIpduStatePtr, txIpduPtr, ipduMDTRun);
+                break;
+#endif
+            default:
+                /*do nothing*/
+                break;
+            }
+            if (txSendFlag)
+            {
+#if (STD_ON == COM_TXTPPDU_SUPPORT)
+                Transmiting = txIpduStatePtr->TxIpduRTStFlag & Com_TX_TRANSMITING_EN;
+                if ((COM_PDU_TP == txIpduPtr->ComIPduType) && (Com_TX_TRANSMITING_EN == Transmiting))
+                {
+                    /* in case a large I-PDU is currently transmitted and the same I-PDU is triggered for
+                     * transmission again*/
+                    (void)Det_ReportRuntimeError(
+                        COM_MODULE_ID,
+                        COM_INSTANCE_ID,
+                        COM_MAINFUNCTIONTX_ID,
+                        COM_E_SKIPPED_TRANSMISSION);
+                }
+                /*this MainFunctionTx need send the tx ipdu */
+                else
+#endif /* STD_ON == COM_TXTPPDU_SUPPORT */
+                {
+                    Com_MainFunction_SendPdu(txIpduId);
+                }
+            }
         }
     }
 }
@@ -3143,7 +3905,6 @@ Com_TriggerTransmitHandle(PduIdType TxPduId, P2VAR(PduInfoType, AUTOMATIC, COM_A
 /* PRQA S 1532,3432 -- */ /* MISRA Rule 8.7,20.7 */
 {
     Std_ReturnType returnValue = E_NOT_OK;
-    PduInfoType pduInfo;
     PduIdType txIpduId = TxPduId - COM_RXIPDU_NUMBER;
     Com_TxIPduRunTimeStateType* txIpduStatePtr = &Com_TxIPduRunTimeState[txIpduId];
     uint16 txIPduLength = txIpduStatePtr->TxIpduLength;
@@ -3181,6 +3942,7 @@ Com_TriggerTransmitHandle(PduIdType TxPduId, P2VAR(PduInfoType, AUTOMATIC, COM_A
 #if (COM_TXIPDU_TIGGERTRANSMIT_CALLOUT_ENABLE > 0u)
             if (NULL_PTR != txIpduPtr->ComIPduTriggerTransmitCallout)
             {
+                PduInfoType pduInfo;
                 pduInfo.SduDataPtr = &Com_TxIPduRuntimeBuff[ipduBufferId];
                 pduInfo.SduLength = txIPduLength;
 #if (STD_ON == COM_METADATA_SUPPORT)
@@ -3233,14 +3995,9 @@ Com_TriggerTransmitHandle(PduIdType TxPduId, P2VAR(PduInfoType, AUTOMATIC, COM_A
  * Return              None
  */
 /******************************************************************************/
-/* PRQA S 1532 ++ */ /* MISRA Rule 8.7 */
 FUNC(void, COM_CODE)
-Com_TxConfirmationHandle(PduIdType TxPduId)
-/* PRQA S 1532 -- */ /* MISRA Rule 8.7 */
+Com_TxConfirmationHandle(PduIdType TxPduId) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
 {
-#if (STD_ON == COM_TX_IPDU_SIGNAL_PROCESS_IMMEDIATE_ENABLE)
-    Com_IPduSignalProcessingType ipduSignalProcessing;
-#endif /* STD_ON == COM_TX_IPDU_SIGNAL_PROCESS_IMMEDIATE_ENABLE */
     PduIdType comTxPduId = TxPduId - COM_RXIPDU_NUMBER;
     const Com_TxIPduType* txIpduPtr = &Com_ConfigStd->ComTxIPdu[comTxPduId];
     Com_TxIPduRunTimeStateType* txIpduStatePtr = &Com_TxIPduRunTimeState[comTxPduId];
@@ -3277,7 +4034,7 @@ Com_TxConfirmationHandle(PduIdType TxPduId)
         if (0u == txIpduStatePtr->RptNum)
         {
 #if (STD_ON == COM_TX_IPDU_SIGNAL_PROCESS_IMMEDIATE_ENABLE)
-            ipduSignalProcessing = txIpduPtr->ComIPduSignalProcessing;
+            Com_IPduSignalProcessingType ipduSignalProcessing = txIpduPtr->ComIPduSignalProcessing;
             /*signal/signal group TxConfirmation handle is made immediate*/
             if (COM_IMMEDIATE == ipduSignalProcessing)
             {
@@ -3459,123 +4216,6 @@ Com_CopyTxDataHandle(
         }
     }
     return bufReq;
-}
-#endif
-/* PRQA S 3472 -- */ /* MISRA Rule Dir 4.9 */
-
-#if (STD_ON == COM_MDT_ENABLE)
-/******************************************************************************/
-/*
- * Brief               Reset the counter of tx Ipdu MDT.
- * ServiceId
- * Sync/Async          Synchronous
- * Reentrancy          Non Reentrant
- * Param-Name[in]      TxIpduId
- * Param-Name[out]     None
- * Param-Name[in/out]  None
- * Return              None
- */
-/******************************************************************************/
-/* PRQA S 3673 ++ */ /* MISRA Rule 8.13 */
-FUNC(void, COM_CODE)
-Com_ResetTxIpduMDT(Com_TxIPduRunTimeStateType* TxIpduStatePtr, const Com_TxIPduType* TxIpduPtr)
-/* PRQA S 3673 -- */ /* MISRA Rule 8.13 */
-{
-#if (STD_ON == COM_ENABLE_MDT_FOR_CYCLIC_TRANSMISSION)
-    TxIpduStatePtr->MDTCnt = TxIpduPtr->ComMinimumDelayTime;
-#elif (0u < COM_TX_MODE_TRUE_DIRECT_NUMBER) || (0u < COM_TX_MODE_FALSE_DIRECT_NUMBER) \
-    || (0u < COM_TX_MODE_TRUE_DIRECT_NOREPETITION_NUMBER) || (0u < COM_TX_MODE_FALSE_DIRECT_NOREPETITION_NUMBER)
-    if ((COM_TX_MODE_DIRECT == ipduTxMode) || (COM_TX_MODE_DIRECT_WITHOUT_REPETITION == ipduTxMode))
-    {
-        if (TxIpduStatePtr->RptNum <= 1u)
-        {
-            TxIpduStatePtr->MDTCnt = TxIpduPtr->ComMinimumDelayTime;
-        }
-    }
-#endif
-    COM_NOUSED(TxIpduPtr);
-    COM_NOUSED(TxIpduStatePtr);
-}
-#endif
-
-#if (STD_ON == COM_TX_SIG_GROUP_UPDATE_BIT_ENABLE) || (STD_ON == COM_TX_SIGNAL_UPDATE_BIT_ENABLE) \
-    || (STD_ON == COM_GW_DEST_SIG_UPDATE_BIT_ENABLE)
-/******************************************************************************/
-/*
- * Brief               Called by Com_TriggerIPDUSend,Com_TriggerIPDUSendWithMetaData,
- *                     Com_TriggerTransmit,Com_TxConfirmation,Com_TpTxConfirmation,
- *                     Com_MainFunctionTx,Com_TxIpduController.
- *                     clear all signal group/signal/dest description signal
- *                     update bit of the Tx Pdu
- * ServiceId
- * Sync/Async          Synchronous
- * Reentrancy          Non Reentrant
- * Param-Name[in]      TxIpduPtr
- * Param-Name[out]     None
- * Param-Name[in/out]  None
- * Return              None
- */
-/******************************************************************************/
-FUNC(void, COM_CODE) Com_ClearTxIPduUpdates(const Com_TxIPduType* TxIpduPtr)
-{
-#if (0u < COM_TXIPDUBUFF_SIZE)
-#if (STD_ON == COM_TX_SIG_GROUP_UPDATE_BIT_ENABLE) || (STD_ON == COM_TX_SIGNAL_UPDATE_BIT_ENABLE) \
-    || (STD_ON == COM_GW_DEST_SIG_UPDATE_BIT_ENABLE)
-    Com_TxIpduBufIdType ipduBufferIndex = TxIpduPtr->ComTxIPduBufIndex;
-    Com_SignalPositionType updateBitPosition;
-#endif
-
-#if (STD_ON == COM_TX_SIG_GROUP_UPDATE_BIT_ENABLE)
-    Com_TxSignalGroupIdType signalGroupNumber, signalGroupId;
-    signalGroupNumber = TxIpduPtr->ComIPduSignalGroupsRefNumber;
-    signalGroupId = TxIpduPtr->ComIPduSignalGroupsRefStartId;
-    const Com_TxSignalGroupType* txSignalGroupPtr;
-    for (; signalGroupId < signalGroupNumber; ++signalGroupId)
-    {
-        txSignalGroupPtr = &Com_ConfigStd->ComTxSignalGroup[signalGroupId];
-        updateBitPosition = txSignalGroupPtr->ComUpdateLsbBytePos;
-        if (COM_UNUSED_SIGNALPOSITION != updateBitPosition)
-        {
-            Com_TxIPduRuntimeBuff[ipduBufferIndex + (Com_TxIpduBufIdType)updateBitPosition] &=
-                (uint8)(~(txSignalGroupPtr->ComUpdateBitMask));
-        }
-    }
-#endif /* STD_ON == COM_TX_SIG_GROUP_UPDATE_BIT_ENABLE */
-#if (STD_ON == COM_TX_SIGNAL_UPDATE_BIT_ENABLE)
-    Com_TxSignalIdType txSignalNumber, cnt;
-    txSignalNumber = TxIpduPtr->ComIPduSignalsRefNumber;
-    cnt = TxIpduPtr->ComIpduSignalRefStartId;
-    const Com_TxSignalType* txSignalPtr;
-    for (; cnt < txSignalNumber; ++cnt)
-    {
-        txSignalPtr = &Com_ConfigStd->ComTxSignal[cnt];
-        updateBitPosition = txSignalPtr->ComUpdateLsbBytePos;
-        if (COM_UNUSED_SIGNALPOSITION != updateBitPosition)
-        {
-            Com_TxIPduRuntimeBuff[ipduBufferIndex + (Com_TxIpduBufIdType)updateBitPosition] &=
-                (uint8)(~(txSignalPtr->ComUpdateBitMask));
-        }
-    }
-#endif /* STD_ON == COM_TX_SIGNAL_UPDATE_BIT_ENABLE */
-#if (STD_ON == COM_GW_DEST_SIG_UPDATE_BIT_ENABLE)
-    Com_GwDestinationDescriptionIdType destSignalNumber, destSignalId;
-    destSignalNumber = TxIpduPtr->ComIPduDespSignalsRefNumber;
-    destSignalId = TxIpduPtr->ComIPduDespSignalsRefStartId;
-    const Com_GwDestSignalType* gwDestSignalPtr;
-    for (; destSignalId < destSignalNumber; ++destSignalId)
-    {
-        gwDestSignalPtr = &Com_ConfigStd->ComDestSignal[destSignalId];
-        updateBitPosition = gwDestSignalPtr->ComUpdateLsbBytePos;
-        if (COM_UNUSED_SIGNALPOSITION != updateBitPosition)
-        {
-            Com_TxIPduRuntimeBuff[ipduBufferIndex + (Com_TxIpduBufIdType)updateBitPosition] &=
-                (uint8)(~(gwDestSignalPtr->ComUpdateBitMask));
-        }
-    }
-#endif /* STD_ON == COM_GW_DEST_SIG_UPDATE_BIT_ENABLE */
-#endif
-    COM_NOUSED(TxIpduPtr);
-    return;
 }
 #endif
 #define COM_STOP_SEC_CODE

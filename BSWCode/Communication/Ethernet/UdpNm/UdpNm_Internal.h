@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : UdpNm_Internal.h                                            **
- **                                                                            **
- **  Created on  : 25/07/19                                                    **
- **  Author      : lili.wang                                                   **
- **  Vendor      :                                                             **
- **  DESCRIPTION : UdpNm internal use                                          **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : UdpNm_Internal.h                                            **
+**                                                                            **
+**  Created on  : 25/07/19                                                    **
+**  Author      : lili.wang                                                   **
+**  Vendor      :                                                             **
+**  DESCRIPTION : UdpNm internal use                                          **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 #ifndef UDPNM_INTERNAL_H_
 #define UDPNM_INTERNAL_H_
 
@@ -60,22 +61,20 @@
  * Note: EIRA is related to all channels, but only needs to handle the timer
  * in one of the channels.
  */
-#define UDPNM_EIRA_HANDLE_CHANNEL  (0u)
+#define UDPNM_EIRA_HANDLE_CHANNEL (0u)
 
-#define UdpNm_GetChannelConfig(ch) (UdpNm_CfgPtr->ChannelConfig[ch])
+#if (STD_ON == UDPNM_DEV_ERROR_DETECT)
+#define UDPNM_DET_REPORT(ApiId, ErrorId) ((void)Det_ReportError(UDPNM_MODULE_ID, UDPNM_INSTANCE_ID, (ApiId), (ErrorId)))
+#else
+#define UDPNM_DET_REPORT(ApiId, ErrorId)
+#endif /* STD_ON == UDPNM_DEV_ERROR_DETECT */
 
 #ifdef UDPNM_VER_4_2_2
-#define UdpNm_GetCarWakeUpRxEnabled(ch)     (UDPNM_CAR_WAKEUP_RX_ENABLED == STD_ON)
+#define UdpNm_GetCarWakeUpRxEnabled(ch)     UDPNM_CAR_WAKEUP_RX_ENABLED
 
 #define UdpNm_GetCarWakeUpFilterEnabled(ch) UDPNM_CAR_WAKEUP_FILTER_ENABLED
 
 #define UdpNm_GetCarWakeUpFilterNodeId(ch)  UDPNM_CAR_WAKEUP_FILTER_NODE_ID
-#else
-#define UdpNm_GetCarWakeUpRxEnabled(ch)     (UdpNm_GetChannelConfig(ch).CarWakeUpRxEnabled)
-
-#define UdpNm_GetCarWakeUpFilterEnabled(ch) (UdpNm_GetChannelConfig(ch).CarWakeUpFilterEnabled)
-
-#define UdpNm_GetCarWakeUpFilterNodeId(ch)  (UdpNm_GetChannelConfig(ch).CarWakeUpFilterNodeId)
 #endif
 
 #define UdpNm_SetTxPduCbvBit(chIndex, mask) /* PRQA S 3472 */ /* MISRA Rule Dir 4.9 */                         \
@@ -166,9 +165,10 @@ typedef struct
 #if (STD_OFF == UDPNM_PASSIVE_MODE_ENABLED)
     /* tx message cycle timer */
     uint16 msgTxCylceTimer;
+#if UDPNM_RETRY_FIRST_MESSAGE_REQUEST == STD_ON
     /* First NM Pdu send,if need retry */
     boolean retrySendMsgFlag;
-
+#endif
     uint16 msgTimeoutTimer;
     boolean msgToutFlg;
 

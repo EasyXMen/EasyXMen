@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                           **
- **  FILENAME    : CanTp.h                                                    **
- **                                                                           **
- **  Created on  : 2021/7/30 14:29:43                                         **
- **  Author      : tao.yu                                                     **
- **  Vendor      :                                                            **
- **  DESCRIPTION : Public interfaces declared by CanTp module                 **
- **                                                                           **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                     **
- **                                                                           **
- **************************************************************************** */
+ */
 /* PRQA S 3108-- */
+/*
+**************************************************************************** **
+**                                                                           **
+**  FILENAME    : CanTp.h                                                    **
+**                                                                           **
+**  Created on  : 2021/7/30 14:29:43                                         **
+**  Author      : tao.yu                                                     **
+**  Vendor      :                                                            **
+**  DESCRIPTION : Public interfaces declared by CanTp module                 **
+**                                                                           **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                     **
+**                                                                           **
+**************************************************************************** */
 
 /*=======[R E V I S I O N   H I S T O R Y]====================================*/
 /*  <VERSION>    <DATE>    <AUTHOR>    <REVISION LOG>
@@ -67,15 +68,29 @@
  *               2023-12-27  xinrun.wang  Add protection for timer checks
  *  V2.1.19      2024-01-03  xinrun.wang  Fix pointer use in gatewayResp Code
  *  V2.1.20      2024-01-22  tao.yu       QAC
+ *               2024-02-02  xue.han      QAC
  *               2024-03-11  peng.wu      Fix the Bs value, CPT-8423
  *  V2.1.21      2024-03-22  xinrun.wang  Fix CanTp_ChangeParameter's channelId when detReport disabled
+ *               2024-03-26  tao.yu       fix schm
  *               2024-04-26  xinrun.wang  Add macro to match ISO15765 2004 standard
  *               2024-04-29  xinrun.wang  validate sdulength for non-fd communication
  *               2024-05-16  xue.han      Fix the Bs value if NULL_PTR, CPT-8423
  *               2024-05-24  tao.yu       CPT-9061 , fix generic connection (N-PDU with MetaData)
  *  V2.1.22      2024-06-03  hao.wen      Fix calculation currentBS error, CPT-9136
+ *               2024-07-03  xue.han      Fix CanTp_TxConfirmation Det error, CPT-9163
+ *                                        Fix TA when EXTENDED CanTpRxAddressingFormat,CPT-9169
+ *               2024-08-13  xue.han      QAC
  *               2024-09-24  xue.han      CPT-10450，fix PduR_CanTpTxConfirmation call repeated
  *                                        CPT-10075，fix STmin range from 0 to 127
+ *               2024-10-24  xue.han      CPT-10607, fix metadata transmition
+ *               2024-11-04  xue.han      CPT-10654, fix CanTp exclusiveArea
+ *               2024-11-19  xue.han      CPT-10784, Synchronize Compile warning
+ *               2024-12-03  xue.han      CPT-11771, fix CanTp QueueProcess
+ *               2024-12-11  xue.han      CPT-11918, Add ExclusiveArea when CanTpMainFunction process timer
+ *               2024-12-17  xue.han      CPT-11945, Support to directly process SF/FF transmition in CanTp_Transmit()
+ *               2024-01-10  xue.han      Adjust CanTp ExclusiveArea
+ *               2025-02-25  xue.han      SF/FF transmissions can be configured to synchronous or asynchronous modes
+ *               2025-03-12  xue.han      CPT-12764,support transmission immediately during the confirmation
  */
 /*============================================================================*/
 
@@ -157,9 +172,8 @@ extern FUNC(Std_ReturnType, CANTP_APPL_CODE)
  *                     CAN N-SDUs. The connection is identified by CanTpTxPduId.
  * ServiceId           0x08
  * Sync/Async          Synchronous
- * Reentrancy          Reentrant
- * Param-Name[in]      CanTpTxSduId ID of the CAN N-SDU to be canceled.
- *                     CanTpCancelReason The reason for cancelation.
+ * Reentrancy          Non Reentrant
+ * Param-Name[in]      TxPduId ID of the CAN N-SDU to be canceled.
  * Param-Name[out]     N/A
  * Param-Name[in/out]  N/A
  * Return              E_OK:Cancelation request is accepted
@@ -173,8 +187,8 @@ extern FUNC(Std_ReturnType, CANTP_APPL_CODE) CanTp_CancelTransmit(PduIdType TxPd
  * Brief               This service is used to cancel the reception of an ongoing N-SDU.
  * ServiceId           0x09
  * Sync/Async          Synchronous
- * Reentrancy          Reentrant
- * Param-Name[in]      This parameter contains the unique CanTp module identifier
+ * Reentrancy          Non Reentrant
+ * Param-Name[in]      RxPduId This parameter contains the unique CanTp module identifier
  *                     of the N-SDU to be cancelled for transmission.
  *                     Range: 0..(maximum number of L-PDU IDs received ) - 1
  * Param-Name[out]     N/A
@@ -210,7 +224,10 @@ extern FUNC(Std_ReturnType, CANTP_APPL_CODE)
 #if (CANTP_READ_PARAMETER == STD_ON)
 /*
  * Brief               This service is used to read the current value of reception parameters BS and STmin for a
- * specified N-SDU. ServiceId           0x0b Sync/Async          Synchronous Reentrancy          Non Reentrant
+ *                     specified N-SDU.
+ * ServiceId           0x0b
+ * Sync/Async          Synchronous
+ * Reentrancy          Non Reentrant
  * Param-Name[in]      id:Identification of the PDU which the parameter change shall affect.
  *                     parameter:ID of the parameter that shall be changed.
  * Param-Name[out]     value:Pointer where the parameter value will be provided.

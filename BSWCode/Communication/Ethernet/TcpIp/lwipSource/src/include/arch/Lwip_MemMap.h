@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- ** **
- **  FILENAME    : Lwip_MemMap.h **
- ** **
- **  Created on  : 10/03/21 **
- **  Author      : darren.zhang **
- **  Vendor      : **
- **  DESCRIPTION : lwip large memory mapping **
- ** **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11 **
- ** **
- ***********************************************************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+************************************************************************************************************************
+**                                                                                                                    **
+**  FILENAME    : Lwip_MemMap.h                                                                                       **
+**                                                                                                                    **
+**  Created on  : 10/03/21                                                                                            **
+**  Author      : darren.zhang                                                                                        **
+**  Vendor      :                                                                                                     **
+**  DESCRIPTION : lwip large memory mapping                                                                           **
+**                                                                                                                    **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                                                              **
+**                                                                                                                    **
+***********************************************************************************************************************/
 
 /***********************************************************************************************************************
 **                                          REVISION   HISTORY                                                        **

@@ -18,21 +18,22 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Os_MemMap.h                                                 **
- **                                                                            **
- **  Created on  : 2018-08-12                                                  **
- **  Author      : i-soft-os                                                   **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Memory mapping abstraction declaration of OS                **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
- **  Version :   AUTOSAR classic Platform R19--Function Safety                 **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Os_MemMap.h                                                 **
+**                                                                            **
+**  Created on  : 2018-08-12                                                  **
+**  Author      : i-soft-os                                                   **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Memory mapping abstraction declaration of OS                **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
+**  Version :   AUTOSAR classic Platform R19--Function Safety                 **
+**                                                                            **
+*******************************************************************************/
 
 /*=======[M A C R O S]========================================================*/
 #define MEMMAP_ERROR
@@ -165,104 +166,104 @@
 #define STOP_SEC_VAR_CLEARED_GLOBAL_UNSPECIFIED
 
 /*Index:5  Section name :VAR_CLEARED_CLONE_PTR*/
-#elif defined OS_START_SEC_VAR_CLEARED_CLONE_PTR
-#undef OS_START_SEC_VAR_CLEARED_CLONE_PTR
+#elif defined OS_START_SEC_VAR_CLONE_PTR
+#undef OS_START_SEC_VAR_CLONE_PTR
 #undef MEMMAP_ERROR
 #ifndef MEMMAP_ERROR_SEC_NO_MATCH
 #define MEMMAP_ERROR_SEC_NO_MATCH
 #else
 #error "Os_MemMap.h, section is used consecutively many times."
 #endif
-#define OS_START_SEC_VAR_CLEARED_CLONE_PTR_NO_MATCH
-#define START_SEC_VAR_CLEARED_CLONE_PTR
+#define OS_START_SEC_VAR_CLONE_PTR_NO_MATCH
+#define START_SEC_VAR_CLONE_PTR
 
-#elif defined OS_STOP_SEC_VAR_CLEARED_CLONE_PTR
-#undef OS_STOP_SEC_VAR_CLEARED_CLONE_PTR
+#elif defined OS_STOP_SEC_VAR_CLONE_PTR
+#undef OS_STOP_SEC_VAR_CLONE_PTR
 #undef MEMMAP_ERROR
-#ifdef OS_START_SEC_VAR_CLEARED_CLONE_PTR_NO_MATCH
-#undef OS_START_SEC_VAR_CLEARED_CLONE_PTR_NO_MATCH
+#ifdef OS_START_SEC_VAR_CLONE_PTR_NO_MATCH
+#undef OS_START_SEC_VAR_CLONE_PTR_NO_MATCH
 #else
 #error "Os_MemMap.h, no matching section was used."
 #endif
 #ifdef MEMMAP_ERROR_SEC_NO_MATCH
 #undef MEMMAP_ERROR_SEC_NO_MATCH
 #endif
-#define STOP_SEC_VAR_CLEARED_CLONE_PTR
+#define STOP_SEC_VAR_CLONE_PTR
 
 /*Index:6  Section name :VAR_CLEARED_CLONE_32*/
-#elif defined OS_START_SEC_VAR_CLEARED_CLONE_32
-#undef OS_START_SEC_VAR_CLEARED_CLONE_32
+#elif defined OS_START_SEC_VAR_CLONE_32
+#undef OS_START_SEC_VAR_CLONE_32
 #undef MEMMAP_ERROR
 #ifndef MEMMAP_ERROR_SEC_NO_MATCH
 #define MEMMAP_ERROR_SEC_NO_MATCH
 #else
 #error "Os_MemMap.h, section is used consecutively many times."
 #endif
-#define OS_START_SEC_VAR_CLEARED_CLONE_32_NO_MATCH
-#define START_SEC_VAR_CLEARED_CLONE_32
+#define OS_START_SEC_VAR_CLONE_32_NO_MATCH
+#define START_SEC_VAR_CLONE_32
 
-#elif defined OS_STOP_SEC_VAR_CLEARED_CLONE_32
-#undef OS_STOP_SEC_VAR_CLEARED_CLONE_32
+#elif defined OS_STOP_SEC_VAR_CLONE_32
+#undef OS_STOP_SEC_VAR_CLONE_32
 #undef MEMMAP_ERROR
-#ifdef OS_START_SEC_VAR_CLEARED_CLONE_32_NO_MATCH
-#undef OS_START_SEC_VAR_CLEARED_CLONE_32_NO_MATCH
+#ifdef OS_START_SEC_VAR_CLONE_32_NO_MATCH
+#undef OS_START_SEC_VAR_CLONE_32_NO_MATCH
 #else
 #error "Os_MemMap.h, no matching section was used."
 #endif
 #ifdef MEMMAP_ERROR_SEC_NO_MATCH
 #undef MEMMAP_ERROR_SEC_NO_MATCH
 #endif
-#define STOP_SEC_VAR_CLEARED_CLONE_32
+#define STOP_SEC_VAR_CLONE_32
 
 /*Index:7  Section name :VAR_CLEARED_CLONE_16*/
-#elif defined OS_START_SEC_VAR_CLEARED_CLONE_16
-#undef OS_START_SEC_VAR_CLEARED_CLONE_16
+#elif defined OS_START_SEC_VAR_CLONE_16
+#undef OS_START_SEC_VAR_CLONE_16
 #undef MEMMAP_ERROR
 #ifndef MEMMAP_ERROR_SEC_NO_MATCH
 #define MEMMAP_ERROR_SEC_NO_MATCH
 #else
 #error "Os_MemMap.h, section is used consecutively many times."
 #endif
-#define OS_START_SEC_VAR_CLEARED_CLONE_16_NO_MATCH
-#define START_SEC_VAR_CLEARED_CLONE_16
+#define OS_START_SEC_VAR_CLONE_16_NO_MATCH
+#define START_SEC_VAR_CLONE_16
 
-#elif defined OS_STOP_SEC_VAR_CLEARED_CLONE_16
-#undef OS_STOP_SEC_VAR_CLEARED_CLONE_16
+#elif defined OS_STOP_SEC_VAR_CLONE_16
+#undef OS_STOP_SEC_VAR_CLONE_16
 #undef MEMMAP_ERROR
-#ifdef OS_START_SEC_VAR_CLEARED_CLONE_16_NO_MATCH
-#undef OS_START_SEC_VAR_CLEARED_CLONE_16_NO_MATCH
+#ifdef OS_START_SEC_VAR_CLONE_16_NO_MATCH
+#undef OS_START_SEC_VAR_CLONE_16_NO_MATCH
 #else
 #error "Os_MemMap.h, no matching section was used."
 #endif
 #ifdef MEMMAP_ERROR_SEC_NO_MATCH
 #undef MEMMAP_ERROR_SEC_NO_MATCH
 #endif
-#define STOP_SEC_VAR_CLEARED_CLONE_16
+#define STOP_SEC_VAR_CLONE_16
 
 /*Index:8  Section name :VAR_CLEARED_CLONE_8*/
-#elif defined OS_START_SEC_VAR_CLEARED_CLONE_8
-#undef OS_START_SEC_VAR_CLEARED_CLONE_8
+#elif defined OS_START_SEC_VAR_CLONE_8
+#undef OS_START_SEC_VAR_CLONE_8
 #undef MEMMAP_ERROR
 #ifndef MEMMAP_ERROR_SEC_NO_MATCH
 #define MEMMAP_ERROR_SEC_NO_MATCH
 #else
 #error "Os_MemMap.h, section is used consecutively many times."
 #endif
-#define OS_START_SEC_VAR_CLEARED_CLONE_8_NO_MATCH
-#define START_SEC_VAR_CLEARED_CLONE_8
+#define OS_START_SEC_VAR_CLONE_8_NO_MATCH
+#define START_SEC_VAR_CLONE_8
 
-#elif defined OS_STOP_SEC_VAR_CLEARED_CLONE_8
-#undef OS_STOP_SEC_VAR_CLEARED_CLONE_8
+#elif defined OS_STOP_SEC_VAR_CLONE_8
+#undef OS_STOP_SEC_VAR_CLONE_8
 #undef MEMMAP_ERROR
-#ifdef OS_START_SEC_VAR_CLEARED_CLONE_8_NO_MATCH
-#undef OS_START_SEC_VAR_CLEARED_CLONE_8_NO_MATCH
+#ifdef OS_START_SEC_VAR_CLONE_8_NO_MATCH
+#undef OS_START_SEC_VAR_CLONE_8_NO_MATCH
 #else
 #error "Os_MemMap.h, no matching section was used."
 #endif
 #ifdef MEMMAP_ERROR_SEC_NO_MATCH
 #undef MEMMAP_ERROR_SEC_NO_MATCH
 #endif
-#define STOP_SEC_VAR_CLEARED_CLONE_8
+#define STOP_SEC_VAR_CLONE_8
 
 /*Index:9  Section name :VAR_CONFIG_DATA_UNSPECIFIED*/
 #elif defined OS_START_SEC_VAR_CONFIG_DATA_UNSPECIFIED
@@ -290,29 +291,29 @@
 #define STOP_SEC_VAR_CONFIG_DATA_UNSPECIFIED
 
 /*Index:28  Section name :VAR_CONFIG_DATA_UNSPECIFIED*/
-#elif defined OS_START_SEC_VAR_CLEARED_CLONE_UNSPECIFIED
-#undef OS_START_SEC_VAR_CLEARED_CLONE_UNSPECIFIED
+#elif defined OS_START_SEC_VAR_CLONE_UNSPECIFIED
+#undef OS_START_SEC_VAR_CLONE_UNSPECIFIED
 #undef MEMMAP_ERROR
 #ifndef MEMMAP_ERROR_SEC_NO_MATCH
 #define MEMMAP_ERROR_SEC_NO_MATCH
 #else
 #error "Os_MemMap.h, section is used consecutively many times."
 #endif
-#define OS_START_SEC_VAR_CLEARED_CLONE_UNSPECIFIED_NO_MATCH
-#define START_SEC_VAR_CLEARED_CLONE_UNSPECIFIED
+#define OS_START_SEC_VAR_CLONE_UNSPECIFIED_NO_MATCH
+#define START_SEC_VAR_CLONE_UNSPECIFIED
 
-#elif defined OS_STOP_SEC_VAR_CLEARED_CLONE_UNSPECIFIED
-#undef OS_STOP_SEC_VAR_CLEARED_CLONE_UNSPECIFIED
+#elif defined OS_STOP_SEC_VAR_CLONE_UNSPECIFIED
+#undef OS_STOP_SEC_VAR_CLONE_UNSPECIFIED
 #undef MEMMAP_ERROR
-#ifdef OS_START_SEC_VAR_CLEARED_CLONE_UNSPECIFIED_NO_MATCH
-#undef OS_START_SEC_VAR_CLEARED_CLONE_UNSPECIFIED_NO_MATCH
+#ifdef OS_START_SEC_VAR_CLONE_UNSPECIFIED_NO_MATCH
+#undef OS_START_SEC_VAR_CLONE_UNSPECIFIED_NO_MATCH
 #else
 #error "Os_MemMap.h, no matching section was used."
 #endif
 #ifdef MEMMAP_ERROR_SEC_NO_MATCH
 #undef MEMMAP_ERROR_SEC_NO_MATCH
 #endif
-#define STOP_SEC_VAR_CLEARED_CLONE_UNSPECIFIED
+#define STOP_SEC_VAR_CLONE_UNSPECIFIED
 
 /*Index:29  Section name :VAR_CONFIG_DATA_UNSPECIFIED*/
 #elif defined OS_START_SEC_CODE_FAST
@@ -338,6 +339,31 @@
 #undef MEMMAP_ERROR_SEC_NO_MATCH
 #endif
 #define STOP_SEC_CODE_FAST
+
+/*Index:30  Section name :VAR_POWER_ON_CLEARED*/
+#elif defined OS_START_SEC_VAR_POWER_ON_CLEARED
+#undef OS_START_SEC_VAR_POWER_ON_CLEARED
+#undef MEMMAP_ERROR
+#ifndef MEMMAP_ERROR_SEC_NO_MATCH
+#define MEMMAP_ERROR_SEC_NO_MATCH
+#else
+#error "Os_MemMap.h, section is used consecutively many times."
+#endif
+#define OS_START_SEC_VAR_POWER_ON_CLEARED_NO_MATCH
+#define START_SEC_VAR_POWER_ON_CLEARED
+
+#elif defined OS_STOP_SEC_VAR_POWER_ON_CLEARED
+#undef OS_STOP_SEC_VAR_POWER_ON_CLEARED
+#undef MEMMAP_ERROR
+#ifdef OS_START_SEC_VAR_POWER_ON_CLEARED_NO_MATCH
+#undef OS_START_SEC_VAR_POWER_ON_CLEARED_NO_MATCH
+#else
+#error "Os_MemMap.h, no matching section was used."
+#endif
+#ifdef MEMMAP_ERROR_SEC_NO_MATCH
+#undef MEMMAP_ERROR_SEC_NO_MATCH
+#endif
+#define STOP_SEC_VAR_POWER_ON_CLEARED
 
 #endif /* START_WITH_IF */
 #include "Os_MemmapImp.h"

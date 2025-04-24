@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- ** **
- **  FILENAME    : TcpIp_Internal.h **
- ** **
- **  Created on  : 03/12/18 **
- **  Author      : darren.zhang **
- **  Vendor      : **
- **  DESCRIPTION : internal type definition for TcpIp **
- ** **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11 **
- ** **
- ***********************************************************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+************************************************************************************************************************
+**                                                                                                                    **
+**  FILENAME    : TcpIp_Internal.h                                                                                    **
+**                                                                                                                    **
+**  Created on  : 03/12/18                                                                                            **
+**  Author      : darren.zhang                                                                                        **
+**  Vendor      :                                                                                                     **
+**  DESCRIPTION : internal type definition for TcpIp                                                                  **
+**                                                                                                                    **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                                                              **
+**                                                                                                                    **
+***********************************************************************************************************************/
 #ifndef TCPIP_INTERNAL_H_
 #define TCPIP_INTERNAL_H_
 
@@ -64,6 +65,9 @@
 #if LWIP_RAW
 #include "lwip/raw.h"
 #endif /* LWIP_RAW */
+#if LWIP_TCP_IPERF
+#include "lwip/apps/lwiperf.h"
+#endif /* LWIP_TCP_IPERF */
 
 #if (STD_ON == TCPIP_ARP_ENABLED)
 #include "lwip/etharp.h"
@@ -76,11 +80,15 @@
 #include "lwip/dhcp.h"
 #endif /* STD_ON == TCPIP_DHCP_CLIENT_ENABLED */
 
+#if (STD_ON == TCPIP_TCP_TLS_ENABLED)
+#include "TcpIp_TlsBase.h"
+#endif /* STD_ON == TCPIP_TCP_TLS_ENABLED */
 #if (STD_ON == TCIP_USED_MOUDLE_DET)
 #include "Det.h"
 #endif /* STD_ON == TCIP_USED_MOUDLE_DET */
 #include "Eth_GeneralTypes.h"
 #include "TcpIp.h"
+
 /***********************************************************************************************************************
  *  VERSION
  ***********************************************************************************************************************/
@@ -135,14 +143,6 @@ typedef size_t uintx;
 #if !defined(TCPIP_SUPPORT_WRITE_MORE)
 #define TCPIP_SUPPORT_WRITE_MORE 0
 #endif /* !defined TCPIP_SUPPORT_WRITE_MORE */
-/* tcp socket half close
- * TCPIP_TCP_HALFCLOSE=0,tcp close shall not allow any transmit and receiver data,
- * otherwise allow continue receiver data after FIN send,but not allow transmit data
- * warring:this switch not care when tls support
- */
-#if !defined(TCPIP_TCP_HALFCLOSE)
-#define TCPIP_TCP_HALFCLOSE 0
-#endif /* !defind TCPIP_TCP_HALTCLOSE */
 
 #if !defined(TCPIP_LWIP_HOOKS)
 #define TCPIP_LWIP_HOOKS 0
@@ -180,6 +180,28 @@ typedef size_t uintx;
 #define TCPIP_HOOK_VLAN_SET 1
 #endif /* !defined TCPIP_HOOK_VLAN_SET */
 
+/* tcp iperf,need lwip support */
+#if !defined(TCPIP_TCP_IPERF_SUPPORT)
+#define TCPIP_TCP_IPERF_SUPPORT 0
+#endif
+
+/* iperf used default tcp port */
+#if !defined(TCPIP_TCP_IPERF_PORT_DEFAULT)
+#define TCPIP_TCP_IPERF_PORT_DEFAULT LWIPERF_TCP_PORT_DEFAULT
+#endif
+
+#if defined(TCPIP_SPPORT_TC8_TEST)
+#if !defined(TCPIP_ARP_SUPPORT_DYNAMIC_TIMEOUT_CHANGE)
+#define TCPIP_ARP_SUPPORT_DYNAMIC_TIMEOUT_CHANGE ETHARP_SUPPORT_DYNAMIC_TIMEOUT_CHANGE
+#endif
+#endif /* defined TCPIP_SPPORT_TC8_TEST */
+
+#if defined(TCPIP_SPPORT_TC8_TEST)
+#if !defined(TCPIP_ARP_SUPPORT_STATIC_ENTRIES)
+#define TCPIP_ARP_SUPPORT_STATIC_ENTRIES ETHARP_SUPPORT_STATIC_ENTRIES
+#endif
+#endif /* defined TCPIP_SPPORT_TC8_TEST */
+
 typedef uint8 TcpIp_InitStateType;
 #define TCPIP_STATE_UNINIT 0x0u
 #define TCPIP_STATE_INIT   0x1u
@@ -202,10 +224,8 @@ static inline void TCPIP_DETRUNTIME(uint8 api, uint8 error)
 
 #if (STD_ON == TCPIP_TCP_ENABLED)
 /* socket event handle */
-#define TCP_FLAG_PENDING_EVENT (uint8)(0x04u)
-/* PRQA S 3472++*/ /* MISRA Dir 4.9 */
-#define TCPIP_TCP_IS_PENDINGEVENT(sockPtr) ((((sockPtr)->socketFlag) & TCP_FLAG_PENDING_EVENT) != 0u)
-/* PRQA S 3472--*/ /* MISRA Dir 4.9 */
+#define TCP_FLAG_PENDING_EVENT              (uint8)(0x04u)
+#define TCPIP_TCP_IS_PENDINGEVENT(sockPtr)  (((sockPtr)->socketFlag) & TCP_FLAG_PENDING_EVENT) != 0u
 #define TCPIP_TCP_SET_PENDINGEVENT(sockPtr) ((sockPtr)->socketFlag) |= TCP_FLAG_PENDING_EVENT
 #define TCPIP_TCP_CLR_PENDINGEVENT(sockPtr) ((sockPtr)->socketFlag) &= (uint8)(~TCP_FLAG_PENDING_EVENT)
 #endif /* STD_ON == TCPIP_TCP_ENABLED */
@@ -325,6 +345,10 @@ typedef struct
     P2CONST(TcpIp_SocketOwnerLCfgType, TYPEDEF, TCPIP_CONST) ownerCfgPtr;
     /* struct point loader lwip pcb */
     P2VAR(void, TYPEDEF, TCPIP_CONST) pcbPtr;
+#if (STD_ON == TCPIP_TCP_TLS_ENABLED)
+    VAR(TcpIp_SocketIdType, TCPIP_VAR) listenSocketId;
+    P2VAR(TcpIp_TlsSocketDataType, TYPEDEF, TCPIP_CONST) tlsPtr;
+#endif /* STD_ON == TCPIP_TCP_TLS_ENABLED */
     /* link next socket id */
     VAR(TcpIp_SocketIdType, TCPIP_VAR) nextSocketId;
     /* socket Protocol type,udp or tcp */
@@ -411,7 +435,7 @@ typedef struct
 FUNC(void, TCPIP_CODE)
 TcpIp_ControllerInit(VAR(uint32, AUTOMATIC) ctrlCnt, P2CONST(TcpIp_CtrlType, AUTOMATIC, TCPIP_APPL_DATA) ctrlCfgPtr);
 
-#ifdef QAC_ANALYZER
+#ifdef QAC_ANALYZE
 #pragma PRQA_NO_SIDE_EFFECTS TcpIp_GetControlState
 #endif
 FUNC(TcpIp_StateType, TCPIP_CODE) TcpIp_GetControlState(VAR(uintx, AUTOMATIC) ctrlIndex);
@@ -556,6 +580,13 @@ TcpIp_NetMaskInnerToExt(
     P2CONST(uint32, AUTOMATIC, TCPIP_APPL_VAR) inNteMaskArry,
     P2VAR(uint8, AUTOMATIC, TCPIP_APPL_VAR) outNetMaskNumPtr);
 
+#if (STD_ON == TCPIP_TCP_TLS_ENABLED)
+FUNC(void, TCPIP_CODE)
+TcpIp_EventNotifyUpLayer(
+    P2VAR(TcpIp_SocketHandleType, AUTOMATIC, TCPIP_APPL_VAR) socketMngPtr,
+    VAR(TcpIp_EventType, AUTOMATIC) event);
+#endif /* STD_ON == TCPIP_TCP_TLS_ENABLED */
+
 #if (STD_ON == TCPIP_TCP_ENABLED)
 
 FUNC(void, TCPIP_CODE)
@@ -572,9 +603,7 @@ TcpIp_TcpAcceptNofiyUplayer(
     P2CONST(TcpIp_SocketHandleType, AUTOMATIC, TCPIP_APPL_VAR) socketMngPtr);
 
 FUNC(err_t, TCPIP_CODE)
-TcpIp_TcpRxIndNotifyUpLayer(
-    P2CONST(TcpIp_SocketHandleType, AUTOMATIC, TCPIP_APPL_VAR) socketMngPtr,
-    P2VAR(struct pbuf, AUTOMATIC, TCPIP_APPL_VAR) buf);
+TcpIp_TcpRxIndNotifyUpLayer(const TcpIp_SocketHandleType* socketMngPtr, struct pbuf* buf);
 #endif /* STD_ON == TCPIP_TCP_ENABLED */
 
 #if (STD_ON == TCPIP_DHCP_CLIENT_ENABLED)
@@ -630,9 +659,51 @@ TcpIp_ArpRemoveStaticEntry(
 #endif /* ETHARP_SUPPORT_STATIC_ENTRIES */
 #endif /* STD_ON == TCPIP_ARP_ENABLED */
 
+#if (STD_ON == TCPIP_TCP_TLS_ENABLED)
+
+FUNC(void, TCPIP_CODE) TcpIp_TlsInit(P2CONST(TcpIp_TlsConfigType, AUTOMATIC, TCPIP_APPL_DATA) tlsCfgPtr);
+
+FUNC(void, TCPIP_CODE)
+TcpIp_TlsSocketDeInit(P2VAR(TcpIp_SocketHandleType, AUTOMATIC, TCPIP_APPL_VAR) socketMngPtr);
+
+FUNC(err_t, TCPIP_CODE)
+TcpIp_TlsWrite(
+    P2VAR(TcpIp_SocketHandleType, AUTOMATIC, TCPIP_APPL_VAR) socketMngPtr,
+    P2CONST(void, AUTOMATIC, TCPIP_APPL_VAR) dataptr,
+    VAR(uint16, AUTOMATIC) len);
+
+FUNC(Std_ReturnType, TCPIP_CODE)
+TcpIp_TlsRecved(P2VAR(TcpIp_SocketHandleType, AUTOMATIC, TCPIP_APPL_VAR) socketMngPtr, VAR(uint16, AUTOMATIC) len);
+
+FUNC(err_t, TCPIP_CODE)
+TcpIp_TlsConnet(
+    P2VAR(struct tcp_pcb, AUTOMATIC, TCPIP_APPL_VAR) tpcb,
+    P2CONST(ip_addr_t, AUTOMATIC, TCPIP_APPL_VAR) ipaddr,
+    VAR(uint16, AUTOMATIC) port);
+
+FUNC(Std_ReturnType, TCPIP_CODE)
+TcpIp_TlsBaseDynamicConnect(
+    P2VAR(TcpIp_SocketHandleType, AUTOMATIC, TCPIP_APPL_VAR) socketMngPtr,
+    VAR(uint8, AUTOMATIC) tlsConnetId);
+
+#if (TCPIP_TCP_TLS_CONNECTION_NUM > 0u)
+FUNC(void, TCPIP_CODE)
+TcpIp_TlsBaseStaticConnect(
+    P2VAR(TcpIp_SocketHandleType, AUTOMATIC, TCPIP_APPL_VAR) socketMngPtr,
+    P2CONST(TcpIp_SockAddrType, AUTOMATIC, TCPIP_APPL_CONST) remoteAddrPtr,
+    VAR(TcpIp_TlsConnectionInitStateType, AUTOMATIC) connType);
+
+#endif /* TCPIP_TCP_TLS_CONNECTION_NUM > 0u */
+#endif /* STD_ON == TCPIP_TCP_TLS_ENABLED */
+
 #if defined(TCPIP_SUUPORT_CTRL_MAINHANDLE)
 FUNC(void, TCPIP_CODE) TcpIp_ControlPollMainHandle(void);
 #endif /* defined(TCPIP_SUUPORT_CTRL_MAINHANDLE) */
+
+#if TCPIP_TCP_IPERF_SUPPORT
+void* TcpIp_IperfStartTcp(const TcpIp_SockAddrType* socketAddrPtr, uint8 test_mode, boolean is_server);
+void TcpIp_IperfStopSession(void* session_ptr);
+#endif /* TCPIP_TCP_IPERF_SUPPORT */
 
 END_C_DECLS
 

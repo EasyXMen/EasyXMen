@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Dem_Types.h                                                 **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : tao.yu                                                      **
- **  Vendor      : i-soft                                                      **
- **  DESCRIPTION : Type definitions of DEM                                     **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                       **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Dem_Types.h                                                 **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : tao.yu                                                      **
+**  Vendor      : i-soft                                                      **
+**  DESCRIPTION : Type definitions of DEM                                     **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                       **
+**                                                                            **
+*******************************************************************************/
 
 #ifndef DEM_TYPES_H_
 #define DEM_TYPES_H_
@@ -39,17 +40,24 @@
 /*******************************************************************************
 **                      Includes                                              **
 *******************************************************************************/
+#include "Dem_Cfg.h"
 #include "Rte_Dem_Type.h"
 
 /*******************************************************************************
 **                      macros                                                **
 *******************************************************************************/
+#ifndef DEM_UNUSED
+#define DEM_UNUSED(a) (void)(a)
+#endif
+
 #define DEM_DTC_GROUP_ALL_DTCS 0xFFFFFFUL
 
-typedef uint16 Dem_ComponentIdType; /*Internal identifier of a monitored component. Remark: 0 is not a valid value*/
+/*Internal identifier of a monitored component. Remark: 0 is not a valid value*/
+typedef uint16 Dem_ComponentIdType;
 
-typedef uint16 Dem_RatioIdType; /*OBD specific ratio Id (related to a specific event, a FID, and an IUMPR group). This
-                                   type depends on the Dem configuration.*/
+/*OBD specific ratio Id (related to a specific event, a FID, and an IUMPR group). This type depends
+ * on the Dem configuration.*/
+typedef uint16 Dem_RatioIdType;
 
 typedef uint8 Dem_DTCRequestType;
 #define DEM_FIRST_FAILED_DTC           0x01u
@@ -71,10 +79,11 @@ typedef uint8 Dem_DTCSeverityType;
 #define DEM_SEVERITY_WWHOBD_CLASS_B1       0x04u
 #define DEM_SEVERITY_WWHOBD_CLASS_B2       0x08u
 #define DEM_SEVERITY_WWHOBD_CLASS_C        0x10u
-#define DTC_CLASS                          0x1fu /*Selects one of the defined DTC classes (or "NO_CLASS")*/
-#define DEM_SEVERITY_MAINTENANCE_ONLY      0x20u
-#define DEM_SEVERITY_CHECK_AT_NEXT_HALT    0x40u
-#define DEM_SEVERITY_CHECK_IMMEDIATELY     0x80u
+/*Selects one of the defined DTC classes (or "NO_CLASS")*/
+#define DTC_CLASS                       0x1fu
+#define DEM_SEVERITY_MAINTENANCE_ONLY   0x20u
+#define DEM_SEVERITY_CHECK_AT_NEXT_HALT 0x40u
+#define DEM_SEVERITY_CHECK_IMMEDIATELY  0x80u
 
 /* DemIUMPRDenGroup */
 typedef uint8 Dem_IUMPRDenGroupType;
@@ -136,6 +145,7 @@ typedef uint16 Dem_J1939DcmLampStatusType;
  * bits 2-1    Flash Protect Lamp
  */
 
+/*This structure represents all data elemets of the DM05 message*/
 typedef struct
 {
     uint8 ActiveTroubleCodes;                     /*Number of active DTCs*/
@@ -144,10 +154,11 @@ typedef struct
     uint8
         ContinuouslyMonitoredSystemsSupport_Status; /*Identifies the continuously monitored system support and status*/
     uint16 NonContinuouslyMonitoredSystemsSupport;  /*Identifies the non-continuously monitored systems support*/
-    uint16 NonContinuouslyMonitoredSystemsStatus; /* PRQA S 0779 */ /* MISRA Rule 5.2 */
     /*Identifies the non-continuously monitored systems status*/
-} Dem_J1939DcmDiagnosticReadiness1Type; /*This structure represents all data elemets of the DM05 message*/
+    uint16 NonContinuouslyMonitoredSystemsStatus; /* PRQA S 0779 */ /* MISRA Rule 5.2 */
+} Dem_J1939DcmDiagnosticReadiness1Type; /* PRQA S 0779 */           /* MISRA Rule 5.2 */
 
+/*This structure represents all data elemets of the DM21 message*/
 typedef struct
 {
     uint16 DistanceTraveledWhileMILisActivated;    /*The kilometers accumulated while the MIL is activated*/
@@ -156,8 +167,8 @@ typedef struct
     uint16 TimeSinceDiagnosticTroubleCodesCleared; /*Engine running time accumulated since emission related DTCs were
                                                       cleared*/
 } Dem_J1939DcmDiagnosticReadiness2Type; /* PRQA S 0779 */ /* MISRA Rule 5.2 */
-/*This structure represents all data elemets of the DM21 message*/
 
+/*This structure represents all data elemets of the DM26 message*/
 typedef struct
 {
     uint16 TimeSinceEngineStart;                             /*Time since key-on that the engine has been running*/
@@ -166,14 +177,14 @@ typedef struct
                                                                 enable/completed support and status*/
     uint16
         NonContinuouslyMonitoredSystemsEnableStatus; /*Enable status of noncontinuous monitors this monitoring cycle*/
-    uint16 NonContinuouslyMonitoredSystems; /* PRQA S 0779 */ /* MISRA Rule 5.2 */
     /*Completion status of noncontinuous monitors this monitoring cycle*/
-} Dem_J1939DcmDiagnosticReadiness3Type; /* PRQA S 0779 */ /* MISRA Rule 5.2 */
-/*This structure represents all data elemets of the DM26 message*/
+    uint16 NonContinuouslyMonitoredSystems; /* PRQA S 0779 */ /* MISRA Rule 5.2 */
+} Dem_J1939DcmDiagnosticReadiness3Type; /* PRQA S 0779 */     /* MISRA Rule 5.2 */
 
 /*******************************************************************************
 **                      Dem return types                                      **
 *******************************************************************************/
+
 typedef uint8 Dem_ReturnGetStatusOfDTCType; /*Used to return the status of Dem_DcmGetStatusOfDTC.*/
 #define DEM_STATUS_OK              0x00u    /*Status of DTC is OK*/
 #define DEM_STATUS_WRONG_DTC       0x01u    /*DTC value not existing (in this format)*/
@@ -210,7 +221,7 @@ typedef uint8 Dem_ReturnGetNextFilteredElementType; /*Used to return the status 
 #define DEM_FILTERED_NO_MATCHING_ELEMENT 0x01u      /*No further element (matching the filter criteria) found*/
 #define DEM_FILTERED_PENDING                                                                                          \
     0x02u /*The requested value is calculated asynchronously and currently not available. The caller can retry later. \
-           Only used by asynchronous interfaces.*/
+             Only used by asynchronous interfaces.*/
 #define DEM_FILTERED_BUFFER_TOO_SMALL 0x03u /*Buffer in the BufSize parameter is not huge enough*/
 
 typedef uint8 Dem_ReturnGetDTCByOccurrenceTimeType; /*Used to return the status of Dem_DtcGetDTCByOccurrenceTime*/
@@ -247,14 +258,16 @@ typedef uint8
              later.*/
 #define DEM_RECORD_FAILED 0x06u /*failed to get ,because there is no event failed */
 
-typedef uint8 Dem_ReturnGetSizeOfDataByDTCType; /*Used to return the status of Dem_DcmGetSizeOfFreezeFrameByDTC and
+typedef uint8 Dem_ReturnGetSizeOfDataByDTCType; /*Used to return the status of
+                                                   Dem_DcmGetSizeOfFreezeFrameByDTC and
                                                    Dem_DcmGetSizeOfExtendedDataRecordByDTC.*/
 #define DEM_GETSIZEBYDTC_OK              0x00u  /*Size successfully returned*/
 #define DEM_GETSIZEBYDTC_WRONG_DTC       0x01u  /*DTC value not existing (in UDS format)*/
 #define DEM_GETSIZEBYDTC_WRONG_DTCORIGIN 0x02u  /*Wrong DTC origin*/
 #define DEM_GETSIZEBYDTC_WRONG_RECNUM    0x03u /*Record number is not supported by configuration and therefore invalid*/
-#define DEM_GETSIZEBYDTC_PENDING \
-    0x04u /*The requested value is calculated asynchronously and currently not available. The caller can retry later*/
+#define DEM_GETSIZEBYDTC_PENDING                                                              \
+    0x04u /*The requested value is calculated asynchronously and currently not available. The \
+             caller can retry later*/
 
 typedef uint8 Dem_ReturnClearDTCType; /*Used to return the status of Dem_<...>ClearDTC.*/
 #define DEM_CLEAR_OK 0x00u            /*DTC successfully cleared*/
@@ -281,19 +294,6 @@ typedef uint8 Dem_ReturnClearDTCType; /*Used to return the status of Dem_<...>Cl
     0x06u /*An error occurred during erasing a memory location (e.g. if DemClearDTCBehavior in Dem is \
            set to DEM_CLRRESP_NONVOLATILE_FINISH and erasing of non-volatile-block failed)*/
 #endif    /* DEM_CLEAR_MEMORY_ERROR */
-
-#if 0
-typedef enum
-{
-    DEM_CLEAR_OK = 0,
-    DEM_CLEAR_WRONG_DTC,
-    DEM_CLEAR_WRONG_DTCORIGIN,
-    DEM_CLEAR_FAILED,
-    DEM_CLEAR_PENDING,
-    DEM_CLEAR_BUSY,
-
-}Dem_ClearDTCReturnType;
-#endif
 
 typedef uint8 Dem_ReturnControlDTCSettingType; /*Used to return the status of Dem_DcmDisableDTCSetting and
                                                   Dem_DcmEnableDTCSetting*/
@@ -447,10 +447,218 @@ typedef uint8 Dem_ReturnControlDTCSettingType; /*Used to return the status of De
 #define DEM_SID_GETB1COUNTER                           0xb4u
 #define DEM_SID_SETDTR                                 0xa2u
 
+/* DemTypeOfFreezeFrameRecordNumeration  */
+#define DEM_FF_RECNUM_CALCULATED 1u
+#define DEM_FF_RECNUM_CONFIGURED 2u
+
 /*******************************************************************************
 **                      Global Variable declaration                           **
 *******************************************************************************/
+typedef struct
+{
+    Dem_EventIdType IntId;
+    uint8 Status;
+    uint8 EventStatusFlag;
+    uint8 UdsStatus;
+    uint8 OldUdsStatus;
+    /* Counters */
+    uint8 OccurrenceCounter; /*SWS_Dem_00011] */
+    uint8 FailureCounter;
+#if (DEM_OCC6EANLE == STD_ON)
+    uint8 OCC6;
+#endif /* DEM_OCC6EANLE == STD_ON */
+#if (DEM_OCC4EANLE == STD_ON)
+    uint8 OCC4;
+#endif /* DEM_OCC4EANLE == STD_ON */
+    uint8 AgingCounter;
+    uint8 HealingCounter;
+#if (DEM_AGEDCOUNT_SAIC == STD_ON)
+    uint8 AgedCounter;
+#endif /* DEM_AGEDCOUNT_SAIC == STD_ON */
+    /* Operation Cycle Counter */
+#if (DEM_CYCLESSINCEFRISTFAILEDEANLE == STD_ON)
+    uint8 CyclesSinceFirstFailed;
+#endif /* DEM_CYCLESSINCEFRISTFAILEDEANLE == STD_ON */
+#if (DEM_CYCLESSINCELASTFAILEDEANLE == STD_ON)
+    uint8 CyclesSinceLastFailed;
+#endif /* DEM_CYCLESSINCELASTFAILEDEANLE == STD_ON */
+#if (DEM_STATUSINDICATOR30ENABLE == STD_ON)
+    uint8 StatusIndicator30;
+#endif /* DEM_STATUSINDICATOR30ENABLE == STD_ON */
+} Dem_EventRelateInformationType;
 
+typedef struct
+{
+    boolean IUMPRDenStatus;
+    boolean IUMPRNumStatus;
+    uint16 Denominator; /*the number of times the vehicle operation conditions have been fulfilled */
+    uint16 Numerator;   /*the number of times a fault could have been found*/
+    uint16 General_Denominator;
+} IUMPRType;
+
+typedef struct
+{
+    sint32 TestResult;
+    sint32 LowerLimit;
+    sint32 UpperLimit;
+} DTRInfoType;
+
+/* DTC Filter */
+typedef struct
+{
+    Dem_J1939DcmDTCStatusFilterType DTCStatusFilter;
+    Dem_DTCKindType DemJ1939DTCFilterInfo;
+    uint8 node;
+    Dem_DTCOriginType DTCOrigin;
+    /* Result */
+    boolean IsSet;
+    uint16 NumberOfFilteredDTC;
+    uint8 GetNum;
+    uint8 CurrentIndex;
+} Dem_J1939DTCFilterInfoType;
+
+/* Freeze Frame Filter */
+typedef struct
+{
+    Dem_J1939DcmSetFreezeFrameFilterType FreezeFrameKind;
+    uint8 node;
+    uint8 CurrentIndex;
+    boolean IsSet;
+    uint16 SPNIndex;
+    uint8 SPNCounter;
+    boolean IsFind;
+    boolean IsOK;
+} Dem_J1939DcmFreezeFrameFilterType;
+
+typedef struct
+{
+    uint8 node;
+    uint8 CurrentIndex;
+    boolean IsSet;
+} Dem_J1939DcmRatioFilterType;
+
+/* Dem InitState Define  */
+typedef enum
+{
+    DEM_STATE_UNINIT = 0u,
+    DEM_STATE_PRE_INIT,
+    DEM_STATE_INIT,
+    DEM_STATE_SHUTDOWN
+} Dem_StateType;
+
+typedef enum
+{
+    DEM_CLEAR_LOCK = 0u,
+    DEM_CLEAR_NOT_LOCK
+} Dem_ClearLockStatus;
+
+typedef enum
+{
+    DEM_ClEAR_NONVOLATILE_FINISHED = 0u,
+    DEM_ClEAR_NONVOLATILE_FAILED,
+    DEM_ClEAR_NONVOLATILE_INIT,
+    DEM_CLEAR_NONVOLATILE_PROCESSING,
+    DEM_CLEAR_NONVOLATILE_START
+} Dem_ClearNonvolatileStatusType;
+
+typedef struct
+{
+    uint16 DTCIndex;
+    uint16 SaveDTCIndex;
+    boolean ClearAllGroup;
+    uint8 DTCGroupIndex;
+    uint8 memDest;
+    uint32 DTC;
+    Dem_DTCFormatType DTCFormat;
+    Dem_DTCFormatType SaveDTCFormat;
+    Dem_DTCOriginType DTCOrigin;
+    Dem_DTCOriginType SaveDTCOrigin;
+    uint16 SID;
+    Dem_J1939DcmSetClearFilterType DTCTypeFilter;
+    uint8 node;
+} Dem_ClearDTCInfoType;
+
+typedef struct
+{
+    uint8 Occctr;
+    uint8 AgingUpCnt;
+    uint8 AgingDownCnt;
+    uint8 Ovflind;
+    uint8 Significance;
+    uint8 CurrentFDC;
+#if (DEM_MAXFDCSINCELASTCLEAR_EANLE == STD_ON)
+    uint8 MaxFDCSinceLastClear;
+#endif /* DEM_MAXFDCSINCELASTCLEAR_EANLE == STD_ON */
+    uint8 MaxFDCDuringCurrentCycle;
+#if (DEM_CYCLESSINCELASTFAILEDEANLE == STD_ON)
+    uint8 CyclesSinceLastFailed;
+#endif /* DEM_CYCLESSINCELASTFAILEDEANLE == STD_ON */
+#if (DEM_CYCLESSINCEFRISTFAILEDEANLE == STD_ON)
+    uint8 CyclesSinceFirstFailed;
+#endif /* DEM_CYCLESSINCEFRISTFAILEDEANLE == STD_ON */
+    uint8 FailedCycles;
+#if (DEM_OCC6EANLE == STD_ON)
+    uint8 OCC6;
+#endif /* DEM_OCC6EANLE == STD_ON */
+#if (DEM_OCC4EANLE == STD_ON)
+    uint8 OCC4;
+#endif /* DEM_OCC4EANLE == STD_ON */
+#if (DEM_STATUSINDICATOR30ENABLE == STD_ON)
+    uint8 StatusIndicator30;
+#endif /* DEM_STATUSINDICATOR30ENABLE == STD_ON */
+#if (DEM_FAILURE_PENGDING_SAIC == STD_ON)
+    uint8 FaultPendingCounter;
+#endif /* DEM_FAILURE_PENGDING_SAIC == STD_ON */
+#if (DEM_AGEDCOUNT_SAIC == STD_ON)
+    uint8 AgedCounter;
+#endif /* DEM_AGEDCOUNT_SAIC == STD_ON */
+} Dem_InternalDataType;
+
+typedef struct
+{
+    uint8 CbUdsStatus;
+    boolean SuppressionStatus;
+} Dem_DTCGeneralStatusType;
+
+typedef struct
+{
+    boolean Status;
+    uint8 FailurePriority;
+    boolean availability;
+} DemComponentStatusType;
+
+/* Debounce Counter Base Info Define */
+typedef struct
+{
+    sint16 InternalDebounceCounter;
+    Dem_EventStatusType CurStatus;
+} Dem_DebounceCounterInfoType;
+
+typedef struct
+{
+    sint8 FDC;
+    uint8 MaxFDCSinceLastClear;
+    uint8 MaxFDCDuringCurrentCycle;
+} FDCInfoType;
+
+/* FreezeFrameRecordFilter */
+typedef struct
+{
+    /* Filter */
+    Dem_DTCFormatType DTCFormat;
+    /* Result */
+    uint16 NumberOfFilteredRecords;
+    uint16 GetNum;
+    uint8 EntryIndex;
+    uint8 FFIndex;
+} Dem_FreezeFrameRecordFilterInfoType;
+
+typedef struct
+{
+    uint8 node;
+    uint8 CurrentIndex;
+    boolean IsSet;
+} DemJ1939DTCGetNodeType;
 /*******************************************************************************
 **                      Global Function declaration                           **
 *******************************************************************************/

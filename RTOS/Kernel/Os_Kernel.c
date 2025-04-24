@@ -18,21 +18,22 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Os_Kernel.c                                                 **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : i-soft-os                                                   **
- **  Vendor      :                                                             **
- **  DESCRIPTION : code about priority processing and ready queue              **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
- **  Version :   AUTOSAR classic Platform R19--Function Safety                 **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Os_Kernel.c                                                 **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : i-soft-os                                                   **
+**  Vendor      :                                                             **
+**  DESCRIPTION : code about priority processing and ready queue              **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
+**  Version :   AUTOSAR classic Platform R19--Function Safety                 **
+**                                                                            **
+*******************************************************************************/
 
 /*=======[I N C L U D E S]====================================================*/
 #include "Os_Internal.h"
@@ -69,16 +70,16 @@
 
 /*=======[I N T E R N A L   D A T A]==========================================*/
 /* PRQA S 0791++ */ /* MISRA Rule 5.4 */ /*OS_KERNEL_SEGMENTNAME_SIMILAR_004*/
-#define OS_START_SEC_VAR_CLEARED_CLONE_16
+#define OS_START_SEC_VAR_CLONE_16
 #include "Os_MemMap.h"
 static VAR(uint16, OS_VAR) Os_ReadyMapSize;
-#define OS_STOP_SEC_VAR_CLEARED_CLONE_16
+#define OS_STOP_SEC_VAR_CLONE_16
 #include "Os_MemMap.h"
 
-#define OS_START_SEC_VAR_CLEARED_CLONE_8
+#define OS_START_SEC_VAR_CLONE_8
 #include "Os_MemMap.h"
 static VAR(uint8, OS_VAR) Os_CfgPriorityGroup;
-#define OS_STOP_SEC_VAR_CLEARED_CLONE_8
+#define OS_STOP_SEC_VAR_CLONE_8
 #include "Os_MemMap.h"
 /* PRQA S 0791-- */ /* MISRA Rule 5.4 */
 /*=======[I N T E R N A L   F U N C T I O N   D E C L A R A T I O N S]========*/
@@ -170,6 +171,10 @@ FUNC(void, OS_CODE) StartOS(AppModeType Mode)
         /* 04. Init kernel. */
         Os_MultiCoreInitKernel();
 
+#if (TRUE == CFG_TRACE_ENABLE)
+        Os_InitTrace();
+#endif
+
 /* 05. init system stack and switch to system stack */
 #if (TRUE == CFG_STACK_CHECK)
         Os_InitSystemStack();
@@ -187,10 +192,7 @@ FUNC(void, OS_CODE) StartOS(AppModeType Mode)
 
 /* 09. Init IOC. */
 #if (CFG_IOC_MAX > 0U)
-        if (OS_CORE_ID_MASTER == Os_SCB.sysCore)
-        {
-            Os_InitIoc();
-        }
+        Os_InitIoc();
 #endif
 
 /* 010. Init memory protection. */
@@ -346,6 +348,10 @@ FUNC(void, OS_CODE) ShutdownOS(StatusType Error)
 
     StatusType err = E_OK;
 
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceEnter(OSServiceId_ShutdownOS);
+#endif /* TRUE == CFG_TRACE_ENABLE */
+
 #if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
     if (Os_WrongContext(OS_CONTEXT_SHUTDOWN_OS) != TRUE)
     {
@@ -372,6 +378,10 @@ FUNC(void, OS_CODE) ShutdownOS(StatusType Error)
         Os_TraceErrorHook(OSError_Save_ShutDownOs(Error), OSServiceId_ShutdownOS, err);
     }
 #endif
+
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceExit(OSServiceId_ShutdownOS);
+#endif /* TRUE == CFG_TRACE_ENABLE */
 
     OS_EXIT_KERNEL(); /* PRQA S 3469 */ /* MISRA  Dir-4.9*/ /* OS_KERNEL_MACRO_004 */
     UNUSED_PARAMETER(err);
@@ -461,7 +471,7 @@ static FUNC(void, OS_CODE) Os_InitSystem(void)
 
     /*02.Init Os_CoreCB, OS_CORE_ID_MASTER is auto start, don't by means of
      * StartCore.*/
-    if (OS_CORE_ID_MASTER == Os_GetCorePhyID(Os_SCB.sysCore))
+    if (OS_CORE_ID_MASTER == Os_SCB.sysCore)
     {
         Os_CoreCB.coreStateActive |= (uint8)(1u << OS_CORE_ID_MASTER);
         Os_CoreCB.coreStatus[OS_CORE_ID_MASTER] = OS_RUN;
@@ -530,6 +540,10 @@ static FUNC(void, OS_CODE) Os_InitSystem(void)
     Os_InitRpc();
 #endif
 
+/* 16.Init OS monitor. */
+#if (TRUE == CFG_OS_MONITOR_ENABLE)
+    Os_InitOsMonitor(Os_SCB.sysCore);
+#endif
     return;
 }
 #define OS_STOP_SEC_CODE
@@ -859,6 +873,9 @@ FUNC(Os_TaskType, OS_CODE) Os_ReadyQueueGetFirst(Os_PriorityType prio)
 FUNC(void, OS_CODE) Os_SwitchTask(void)
 {
     Os_TaskStateType tempState;
+#if (TRUE == CFG_LOAD_RATIO_CALC_ENABLE)
+    VAR(uint32, OS_VAR) curTicks;
+#endif /* TRUE == CFG_LOAD_RATIO_CALC_ENABLE */
     Os_SCB.sysPrevTaskID = Os_SCB.sysRunningTaskID;
 #if (TRUE == CFG_STACK_CHECK)
     Os_StackPtrType StackPtr;
@@ -882,6 +899,9 @@ FUNC(void, OS_CODE) Os_SwitchTask(void)
 
     Os_SCB.sysRunningTaskID = Os_SCB.sysHighTaskID;
     Os_SCB.sysRunningTCB = &Os_TCB[Os_SCB.sysRunningTaskID];
+#if (TRUE == CFG_SCHEDULE_COUNT_MONITOR)
+    Os_IncrementTaskScheduleCount();
+#endif
     /*Writing the running ApplID and Object */
 
 #if (CFG_OSAPPLICATION_MAX > 0U)
@@ -923,6 +943,10 @@ FUNC(void, OS_CODE) Os_SwitchTask(void)
 #endif
 
         Os_ArchFirstEnterTask();
+
+#if (TRUE == CFG_TASK_RESPONSE_TIME_ENABLE)
+        Os_TaskRecordStartTick(Os_SCB.sysRunningTaskID);
+#endif /* TRUE == CFG_TASK_RESPONSE_TIME_ENABLE */
     }
     else
     {
@@ -930,6 +954,15 @@ FUNC(void, OS_CODE) Os_SwitchTask(void)
         Os_MemProtTaskCat2Map();
 #endif
     }
+
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceTaskRun(Os_SCB.sysRunningTaskID);
+#endif
+
+#if (TRUE == CFG_LOAD_RATIO_CALC_ENABLE)
+    curTicks = Os_ExitTaskRecordTick(Os_SCB.sysPrevTaskID);
+    Os_EnterTaskRecordTick(Os_SCB.sysRunningTaskID, curTicks);
+#endif /* TRUE == CFG_LOAD_RATIO_CALC_ENABLE */
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
@@ -1117,7 +1150,9 @@ static FUNC(void, OS_CODE) Os_MultiCoreInitKernel(void)
     VAR(uint16, OS_VAR) vCoreId = Os_SCB.sysCore;
 
     Os_SCB.sysIsrNestQueue = Os_SysIsrNestQueue_Inf[vCoreId];
+    /* PRQA S 3469 ++*/ /* MISRA Dir 4.9 */ /* OS_KERNEL_MACRO_004 */
     Os_ReadyMapSize = READY_MAP_SIZE((Os_CfgPriorityMax_Inf[vCoreId]));
+    /* PRQA S 3469 --*/ /* MISRA Dir 4.9 */ /* OS_KERNEL_MACRO_004 */
     Os_CfgPriorityMax = Os_CfgPriorityMax_Inf[vCoreId];
     Os_ReadyMap = Os_ReadyMap_Inf[vCoreId];
 #if ((OS_BCC1 == CFG_CC) || (OS_ECC1 == CFG_CC))
@@ -1161,7 +1196,7 @@ FUNC(void, OS_CODE) Os_SynPoint(uint8 point)
     {
     /* Multi core state Synchronous point0 ,for check start os appmode. */
     case 0:
-        Os_CoreCB.coreStateSynPoint0[vCoreId] = TRUE; /* PRQA S 4404 */ /* MISRA Rule 10.3 */ /*OS_KERNEL_TYPE_007*/
+        Os_CoreCB.coreStateSynPoint0[vCoreId] = TRUE; /* PRQA S 4404 */ /* MISRA Rule 10.3 */ /* OS_KERNEL_TYPE_007 */
         while (coreId < OS_AUTOSAR_CORES)
         {
             /* PRQA S 1881 ++*/ /* MISRA Rule 10.4 */ /* OS_KERNEL_TYPE_008 */
@@ -1175,7 +1210,7 @@ FUNC(void, OS_CODE) Os_SynPoint(uint8 point)
 
     /* SWS_Os_00580:synchronize before the global StartupHook. */
     case 1:
-        Os_CoreCB.coreStateSynPoint1[vCoreId] = TRUE; /* PRQA S 4404 */ /* MISRA Rule 10.3 */ /*OS_KERNEL_TYPE_007*/
+        Os_CoreCB.coreStateSynPoint1[vCoreId] = TRUE; /* PRQA S 4404 */ /* MISRA Rule 10.3 */ /* OS_KERNEL_TYPE_007 */
         while (coreId < OS_AUTOSAR_CORES)
         {
             /* PRQA S 1881 ++*/ /* MISRA Rule 10.4 */ /* OS_KERNEL_TYPE_008 */
@@ -1189,7 +1224,7 @@ FUNC(void, OS_CODE) Os_SynPoint(uint8 point)
 
         /* SWS_Os_00579:synchronize after the global StartupHook. */
     case 2:
-        Os_CoreCB.coreStateSynPoint2[vCoreId] = TRUE; /* PRQA S 4404 */ /* MISRA Rule 10.3 */ /*OS_KERNEL_TYPE_007*/
+        Os_CoreCB.coreStateSynPoint2[vCoreId] = TRUE; /* PRQA S 4404 */ /* MISRA Rule 10.3 */ /* OS_KERNEL_TYPE_007 */
         while (coreId < OS_AUTOSAR_CORES)
         {
             /* PRQA S 1881 ++*/ /* MISRA Rule 10.4 */ /* OS_KERNEL_TYPE_008 */
@@ -1203,7 +1238,7 @@ FUNC(void, OS_CODE) Os_SynPoint(uint8 point)
 
         /* SWS_Os_00587:synchronize before calling the global ShutdownHook. */
     case 3:
-        Os_CoreCB.coreStateSynPoint3[vCoreId] = TRUE; /* PRQA S 4404 */ /* MISRA Rule 10.3 */ /*OS_KERNEL_TYPE_007*/
+        Os_CoreCB.coreStateSynPoint3[vCoreId] = TRUE; /* PRQA S 4404 */ /* MISRA Rule 10.3 */ /* OS_KERNEL_TYPE_007 */
         while (coreId < OS_AUTOSAR_CORES)
         {
             /* PRQA S 1881 ++*/ /* MISRA Rule 10.4 */ /* OS_KERNEL_TYPE_008 */
@@ -1324,7 +1359,7 @@ FUNC(void, OS_CODE) Os_DeInitCoreInfo(void)
 {
     VAR(uint16, OS_VAR) vCoreId = Os_SCB.sysCore;
 
-/*clear the CoreCB info*/
+    /*clear the CoreCB info*/
 #if (OS_AUTOSAR_CORES > 1U)
     Os_GetInternalSpinlock(&Os_SpinlockSync);
 #endif

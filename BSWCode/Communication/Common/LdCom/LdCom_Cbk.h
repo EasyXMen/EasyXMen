@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                           **
- **  FILENAME    : LdCom_Cbk.h                                                **
- **                                                                           **
- **  Created on  :                                                            **
- **  Author      : zhengfei.li                                                **
- **  Vendor      :                                                            **
- **  DESCRIPTION :                                                            **
- **                                                                           **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                      **
- **                                                                           **
- **************************************************************************** */
+ */
 /* PRQA S 3108-- */
+/*
+**************************************************************************** **
+**                                                                           **
+**  FILENAME    : LdCom_Cbk.h                                                **
+**                                                                           **
+**  Created on  :                                                            **
+**  Author      : zhengfei.li                                                **
+**  Vendor      :                                                            **
+**  DESCRIPTION :                                                            **
+**                                                                           **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                      **
+**                                                                           **
+**************************************************************************** */
 #ifndef LDCOM_CBK_H_
 #define LDCOM_CBK_H_
 /******************************************************************************
@@ -43,8 +44,8 @@
 *******************************************************************************/
 /*Published information elements*/
 #define LDCOM_CBK_H_AR_RELEASE_MAJOR_VERSION    4u
-#define LDCOM_CBK_H_AR_RELEASE_MINOR_VERSION    2u
-#define LDCOM_CBK_H_AR_RELEASE_REVISION_VERSION 2u
+#define LDCOM_CBK_H_AR_RELEASE_MINOR_VERSION    5u
+#define LDCOM_CBK_H_AR_RELEASE_REVISION_VERSION 0u
 
 #define LDCOM_CBK_H_SW_MAJOR_VERSION            2u
 #define LDCOM_CBK_H_SW_MINOR_VERSION            0u

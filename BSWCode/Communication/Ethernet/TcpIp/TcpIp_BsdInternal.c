@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- ** **
- **  FILENAME    : TcpIp_BsdInternal.c **
- ** **
- **  Created on  : 2022/11/14 **
- **  Author      : fupeng.yu **
- **  Vendor      : **
- **  DESCRIPTION : internal function for BsdTcpIp **
- ** **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11  base on linux **
- ** **
- ***********************************************************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+************************************************************************************************************************
+**                                                                                                                    **
+**  FILENAME    : TcpIp_BsdInternal.c                                                                                 **
+**                                                                                                                    **
+**  Created on  : 2022/11/14                                                                                          **
+**  Author      : fupeng.yu                                                                                           **
+**  Vendor      :                                                                                                     **
+**  DESCRIPTION : internal function for BsdTcpIp                                                                      **
+**                                                                                                                    **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11  base on linux                                               **
+**                                                                                                                    **
+***********************************************************************************************************************/
 
 /***********************************************************************************************************************
  *  INCLUDES
@@ -60,7 +61,7 @@
 #include <pthread.h>
 #if (STD_ON == TCIP_USED_MOUDLE_DET)
 #include "Det.h"
-#endif /* STD_ON == TCIP_USED_MOUDLE_DET */
+#endif /* (STD_ON == TCIP_USED_MOUDLE_DET) */
 
 /***********************************************************************************************************************
 **                                              Version                                                               **
@@ -93,16 +94,16 @@
 
 #if !defined(TCPIP_SOCKET_NONBLOCK)
 #define TCPIP_SOCKET_NONBLOCK 1
-#endif /* !defined TCPIP_SOCKET_NONBLOCK */
+#endif /* !defined(TCPIP_SOCKET_NONBLOCK) */
 
 #if !defined(TCPIP_FUNC_CHECK_OUTPUT)
 #include "func_trace.h"
 #define TCPIP_FUNC_CHECK_OUTPUT(...) FuncCheckOutput(__VA_ARGS__)
-#endif /* !defined TCPIP_FUNC_CHECK_OUTPUT */
+#endif /* !defined(TCPIP_FUNC_CHECK_OUTPUT) */
 
 #if !defined(TCPIP_ENABLE_DEBUG)
 #define TCPIP_ENABLE_DEBUG 0
-#endif /* !defined TCPIP_ENABLE_DEBUG */
+#endif /* !defined(TCPIP_ENABLE_DEBUG) */
 
 #if TCPIP_ENABLE_DEBUG
 #define TCPIP_DEBUG(...)         \
@@ -135,14 +136,14 @@
 #define TCPIP_LINUX_POLL  2
 
 #if !defined(TCPIP_IO_MULTPLEXING_METHOD)
-// #define TCPIP_IO_MULTPLEXING_METHOD TCPIP_LINUX_EPOLL
+/* #define TCPIP_IO_MULTPLEXING_METHOD TCPIP_LINUX_EPOLL */
 #define TCPIP_IO_MULTPLEXING_METHOD TCPIP_LINUX_POLL
-#endif /* !defined(TCPIP_IO_MULTPLEXING_METHOD */
+#endif /* !defined(TCPIP_IO_MULTPLEXING_METHOD) */
 #if (TCPIP_IO_MULTPLEXING_METHOD == TCPIP_LINUX_EPOLL)
 #include <sys/epoll.h>
 #elif (TCPIP_IO_MULTPLEXING_METHOD == TCPIP_LINUX_POLL)
 #include <poll.h>
-#endif /* TCPIP_IO_MULTPLEXING_METHOD == TCPIP_LINUX_EPOLL */
+#endif /* (TCPIP_IO_MULTPLEXING_METHOD == TCPIP_LINUX_EPOLL) */
 
 #define TCPIP_MAX_BUF_LEN 1500u
 
@@ -162,7 +163,7 @@
 #define TCPIP_CTRL_NUM (TCPIP_CONTROLLER_NUM + TCPIP_SPPORT_SCAN_NETIF_NUMBER)
 #else
 #define TCPIP_CTRL_NUM 0
-#endif /* TCPIP_CONTROLLER_NUM > 1 */
+#endif /* (TCPIP_CONTROLLER_NUM > 1) */
 #endif /* TCPIP_CTRL_NUM */
 
 /**All socket communications use separate network interfaces. You need to enable this function
@@ -187,20 +188,24 @@
 #define TCPIP_AREA_RX  (1)
 #define TCPIP_AREA_ALL (2)
 
-#ifndef SchM_Enter_TcpIp
-#define SchM_Enter_TcpIp(Instance, Exclusive_Area) \
-    do                                             \
-    {                                              \
-        Schm_TcpIp_BsdLock();                      \
+#ifndef SchM_Enter_TcpIp_ExclusiveArea
+#define SchM_Enter_TcpIp_ExclusiveArea() \
+    do                                   \
+    {                                    \
+        Schm_TcpIp_BsdLock();            \
     } while (0)
+#define SchM_Enter_TcpIp_ExclusiveArea_Tx SchM_Enter_TcpIp_ExclusiveArea
+#define SchM_Enter_TcpIp_ExclusiveArea_Rx SchM_Enter_TcpIp_ExclusiveArea
 #endif
 
-#ifndef SchM_Exit_TcpIp
-#define SchM_Exit_TcpIp(Instance, Exclusive_Area) \
-    do                                            \
-    {                                             \
-        Schm_TcpIp_BsdUnlock();                   \
+#ifndef SchM_Exit_TcpIp_ExclusiveArea
+#define SchM_Exit_TcpIp_ExclusiveArea() \
+    do                                  \
+    {                                   \
+        Schm_TcpIp_BsdUnlock();         \
     } while (0)
+#define SchM_Exit_TcpIp_ExclusiveArea_Tx SchM_Exit_TcpIp_ExclusiveArea_Tx
+#define SchM_Exit_TcpIp_ExclusiveArea_Rx SchM_Enter_TcpIp_ExclusiveArea_Rx
 #endif
 
 /***********************************************************************************************************************
@@ -231,7 +236,7 @@ typedef struct
 #define TCPIP_SOCKET_SET_FLAG(sockPtr, flg) ((sockPtr)->flag |= (flg))
 #define TCPIP_SOCKET_CLR_FLAG(sockPtr, flg) ((sockPtr)->flag &= (uint32) ~(flg))
 #define TCPIP_SOCKET_IS_FLAG(sockPtr, flg)  ((sockPtr)->flag & (flg))
-#endif /* TCPIP_TCP_SOCKET_MAX > 0 || TCPIP_TCP_SOCKET_MAX */
+#endif /* ((TCPIP_TCP_SOCKET_MAX > 0) || TCPIP_TCP_SOCKET_MAX) */
 
 typedef struct TcpIp_SocketMangeDataTag
 {
@@ -245,7 +250,7 @@ typedef struct TcpIp_SocketMangeDataTag
     TcpIp_ProtocolType protocol;
 #if (TCPIP_CTRL_NUM > 0)
     uint32 netIfIndex;
-#endif /* TCPIP_CTRL_NUM > 0 */
+#endif /* (TCPIP_CTRL_NUM > 0) */
     uint32 flag;
 #if TCPIP_SUPPORT_MULTICAST
     const TcpIp_LocalAdrHandleType* localAdtPtr;
@@ -256,13 +261,13 @@ typedef struct TcpIp_SocketMangeDataTag
     struct TcpIp_SocketMangeDataTag* next;
 #if (TCPIP_IO_MULTPLEXING_METHOD == TCPIP_LINUX_POLL)
     int pollEvtIndex;
-#endif /* TCPIP_IO_MULTPLEXING_METHOD == TCPIP_LINUX_POLL */
+#endif /* (TCPIP_IO_MULTPLEXING_METHOD == TCPIP_LINUX_POLL) */
 #if TCPIP_SUPPORT_MULTICAST
     /* multicast shall be link normal socket */
     struct TcpIp_SocketMangeDataTag* linkOther;
 #endif /* TCPIP_SUPPORT_MULTICAST */
 } TcpIp_SocketMangeDataType;
-#endif /* TCPIP_SOCKET_NUM > 0u */
+#endif /* (TCPIP_SOCKET_NUM > 0u) */
 
 /***********************************************************************************************************************
  *  LOCAL DATA
@@ -273,7 +278,7 @@ typedef uint8 TcpIp_InitStateType;
 #define TCPIP_STATE_INIT   0x1u
 TCPIP_LOCAL VAR(TcpIp_InitStateType, TCPIP_VAR_ZERO_INIT) TcpIp_InitState = TCPIP_STATE_UNINIT;
 
-#endif /* STD_ON == TCPIP_INITIALIZATION_AVAILABL */
+#endif /* (STD_ON == TCPIP_INITIALIZATION_AVAILABLE) */
 
 TCPIP_LOCAL P2CONST(TcpIp_ConfigType, AUTOMATIC, TCPIP_VAR) TcpIp_PbCfgPtr;
 
@@ -286,7 +291,7 @@ TCPIP_LOCAL CONST(TcpIp_SocketParaHandleType, TCPIP_VAR) TcpIp_SocketParaHandleT
     {TCPIP_PARAMID_FRAMEPRIO, NULL_PTR},
 #if (STD_ON == TCPIP_TCP_ENABLED)
     {TCPIP_PARAMID_TCP_NAGLE, TcpIp_BsdChanegeSocketTcpNagle},
-#endif /* STD_ON == TCPIP_TCP_ENABLED */
+#endif /* (STD_ON == TCPIP_TCP_ENABLED) */
     {TCPIP_PARAMID_TTL, NULL_PTR},
 #if (STD_ON == TCPIP_TCP_ENABLED)
     {TCPIP_PARAMID_TCP_RXWND_MAX, NULL_PTR},
@@ -295,13 +300,16 @@ TCPIP_LOCAL CONST(TcpIp_SocketParaHandleType, TCPIP_VAR) TcpIp_SocketParaHandleT
     {TCPIP_PARAMID_TCP_KEEPALIVE_PROBES_MAX, NULL_PTR},
     {TCPIP_PARAMID_TCP_KEEPALIVE_INTERVAL, NULL_PTR},
     {TCPIP_PARAMID_TCP_OPTIONFILTER, NULL_PTR},
-#endif /* STD_ON == TCPIP_TCP_ENABLED */
+#endif /* (STD_ON == TCPIP_TCP_ENABLED) */
+#if (STD_ON == TCPIP_TCP_TLS_ENABLED)
+    {TCPIP_PARAMID_TLS_CONNECTION_ASSIGNMENT, NULL_PTR},
+#endif /* (STD_ON == TCPIP_TCP_TLS_ENABLED) */
     {TCPIP_PARAMID_PATHMTU_ENABLE, NULL_PTR},
     {TCPIP_PARAMID_FLOWLABEL, NULL_PTR},
     {TCPIP_PARAMID_DSCP, NULL_PTR},
 #if (STD_ON == TCPIP_UDP_ENABLED)
     {TCPIP_PARAMID_UDP_CHECKSUM, NULL_PTR},
-#endif /* STD_ON == TCPIP_UDP_ENABLED */
+#endif /* (STD_ON == TCPIP_UDP_ENABLED) */
     {TCPIP_PARAMID_VENDOR_SPECIFIC, NULL_PTR},
 };
 
@@ -309,32 +317,32 @@ TcpIp_SocketMangeDataType* TcpIp_SocketMngHeaderPtr = NULL;
 
 #if (TCPIP_TCP_SOCKET_MAX > 0)
 TCPIP_LOCAL VAR(TcpIp_SocketIdType, TCPIP_VAR) Tcp_SocketUsedNum;
-#endif /* TCPIP_TCP_SOCKET_MAX > 0 */
+#endif /* (TCPIP_TCP_SOCKET_MAX > 0) */
 
 #if (TCPIP_UDP_SOCKET_MAX > 0)
 TCPIP_LOCAL VAR(TcpIp_SocketIdType, TCPIP_VAR) Udp_SocketUsedNum;
-#endif /* TCPIP_UDP_SOCKET_MAX > 0 */
+#endif /* (TCPIP_UDP_SOCKET_MAX > 0) */
 
 #if (TCPIP_LOCAL_ADR_NUM > 0)
 TCPIP_LOCAL VAR(TcpIp_LocalAdrHandleType, TCPIP_VAR) TcpIp_LocalAdrTable[TCPIP_LOCAL_ADR_NUM];
-#endif /* TCPIP_LOCAL_ADR_NUM > 0 */
+#endif /* (TCPIP_LOCAL_ADR_NUM > 0) */
 
 #if (TCPIP_IO_MULTPLEXING_METHOD == TCPIP_LINUX_EPOLL)
 TCPIP_LOCAL int TcpIp_epfd = -1;
 #define TCPIP_EPOLL_MAXEVENTS TCPIP_SOCKET_NUM
 #define TCPIP_EPOLL_WAITTIME  (0)
 TCPIP_LOCAL struct epoll_event* TcpIp_EpollEvntsPtr = NULL;
-#endif /* TCPIP_IO_MULTPLEXING_METHOD == TCPIP_LINUX_EPOLL */
+#endif /* (TCPIP_IO_MULTPLEXING_METHOD == TCPIP_LINUX_EPOLL) */
 
 #if (TCPIP_IO_MULTPLEXING_METHOD == TCPIP_LINUX_POLL)
 TCPIP_LOCAL struct pollfd TcpIp_PollEvent[TCPIP_SOCKET_NUM];
 #define TCPIP_POLL_WAITTIME (0)
-#endif /* TCPIP_IO_MULTPLEXING_METHOD == TCPIP_LINUX_POLL */
+#endif /* (TCPIP_IO_MULTPLEXING_METHOD == TCPIP_LINUX_POLL) */
 
 #if (TCPIP_CTRL_NUM > 0)
 TCPIP_LOCAL struct ifreq TcpIp_IfReq[TCPIP_CTRL_NUM];
 TCPIP_LOCAL uint32 TcpIp_NumIf = 0;
-#endif /* TCPIP_CTRL_NUM > 0 */
+#endif /* (TCPIP_CTRL_NUM > 0) */
 
 TCPIP_LOCAL pthread_mutex_t* mutexPtr = NULL;
 /***********************************************************************************************************************
@@ -396,7 +404,7 @@ TCPIP_LOCAL_INLINE FUNC(int, TCPIP_CODE)
             &((struct sockaddr_in*)sa2)->sin_addr,
             sizeof(struct in_addr));
     }
-#endif /* TCPIP_SCALABILITY_CLASS == TCPIP_SC1) || (TCPIP_SCALABILITY_CLASS == TCPIP_SC3 */
+#endif /* (TCPIP_SCALABILITY_CLASS == TCPIP_SC1) || (TCPIP_SCALABILITY_CLASS == TCPIP_SC3) */
 #if (TCPIP_SCALABILITY_CLASS == TCPIP_SC2) || (TCPIP_SCALABILITY_CLASS == TCPIP_SC3)
     if (sa1->sa_family == AF_INET6)
     {
@@ -405,7 +413,7 @@ TCPIP_LOCAL_INLINE FUNC(int, TCPIP_CODE)
             &((struct sockaddr_in6*)sa2)->sin6_addr,
             sizeof(struct in6_addr));
     }
-#endif /* TCPIP_SCALABILITY_CLASS == TCPIP_SC2) || (TCPIP_SCALABILITY_CLASS == TCPIP_SC3 */
+#endif /* (TCPIP_SCALABILITY_CLASS == TCPIP_SC2) || (TCPIP_SCALABILITY_CLASS == TCPIP_SC3) */
     return (-1);
 }
 
@@ -458,22 +466,22 @@ TCPIP_LOCAL FUNC(ssize_t, TCPIP_CODE) TcpIp_BsdUdpTransmitBySpecNetIf(
 #if (TCPIP_SCALABILITY_CLASS == TCPIP_SC3)
 
     if (sockMngPtr->domain == TCPIP_AF_INET)
-#endif /* TCPIP_SCALABILITY_CLASS == TCPIP_SC3 */
+#endif /* (TCPIP_SCALABILITY_CLASS == TCPIP_SC3) */
     {
 #if (TCPIP_SCALABILITY_CLASS == TCPIP_SC1) || (TCPIP_SCALABILITY_CLASS == TCPIP_SC3)
         pktlen = sizeof(struct in_pktinfo);
 
-#endif /* TCPIP_SCALABILITY_CLASS == TCPIP_SC1) || (TCPIP_SCALABILITY_CLASS == TCPIP_SC3 */
+#endif /* (TCPIP_SCALABILITY_CLASS == TCPIP_SC1) || (TCPIP_SCALABILITY_CLASS == TCPIP_SC3) */
     }
 #if (TCPIP_SCALABILITY_CLASS == TCPIP_SC3)
 
     else
-#endif /* TCPIP_SCALABILITY_CLASS == TCPIP_SC3 */
+#endif /* (TCPIP_SCALABILITY_CLASS == TCPIP_SC3) */
     {
 #if (TCPIP_SCALABILITY_CLASS == TCPIP_SC2) || (TCPIP_SCALABILITY_CLASS == TCPIP_SC3)
         pktlen = sizeof(struct in6_pktinfo);
 
-#endif /* TCPIP_SCALABILITY_CLASS == TCPIP_SC2) || (TCPIP_SCALABILITY_CLASS == TCPIP_SC3 */
+#endif /* (TCPIP_SCALABILITY_CLASS == TCPIP_SC2) || (TCPIP_SCALABILITY_CLASS == TCPIP_SC3) */
     }
 
     size_t cmsglen = CMSG_SPACE(pktlen);
@@ -490,7 +498,7 @@ TCPIP_LOCAL FUNC(ssize_t, TCPIP_CODE) TcpIp_BsdUdpTransmitBySpecNetIf(
 #if (TCPIP_SCALABILITY_CLASS == TCPIP_SC3)
 
     if (sockMngPtr->domain == TCPIP_AF_INET)
-#endif /* TCPIP_SCALABILITY_CLASS == TCPIP_SC3 */
+#endif /* (TCPIP_SCALABILITY_CLASS == TCPIP_SC3) */
     {
 #if (TCPIP_SCALABILITY_CLASS == TCPIP_SC1) || (TCPIP_SCALABILITY_CLASS == TCPIP_SC3)
         cmptr->cmsg_level = IPPROTO_IP;
@@ -499,12 +507,12 @@ TCPIP_LOCAL FUNC(ssize_t, TCPIP_CODE) TcpIp_BsdUdpTransmitBySpecNetIf(
 
         struct in_pktinfo* pktptr = (struct in_pktinfo*)CMSG_DATA(cmptr);
         pktptr->ipi_ifindex = (int)netIfIndex;
-#endif /* TCPIP_SCALABILITY_CLASS == TCPIP_SC1) || (TCPIP_SCALABILITY_CLASS == TCPIP_SC3 */
+#endif /* (TCPIP_SCALABILITY_CLASS == TCPIP_SC1) || (TCPIP_SCALABILITY_CLASS == TCPIP_SC3) */
     }
 #if (TCPIP_SCALABILITY_CLASS == TCPIP_SC3)
 
     else
-#endif /* TCPIP_SCALABILITY_CLASS == TCPIP_SC3 */
+#endif /* (TCPIP_SCALABILITY_CLASS == TCPIP_SC3) */
 
     {
 #if (TCPIP_SCALABILITY_CLASS == TCPIP_SC2) || (TCPIP_SCALABILITY_CLASS == TCPIP_SC3)
@@ -514,14 +522,14 @@ TCPIP_LOCAL FUNC(ssize_t, TCPIP_CODE) TcpIp_BsdUdpTransmitBySpecNetIf(
 
         struct in6_pktinfo* pktptr = (struct in6_pktinfo*)CMSG_DATA(cmptr);
         pktptr->ipi6_ifindex = netIfIndex;
-#endif /* TCPIP_SCALABILITY_CLASS == TCPIP_SC2) || (TCPIP_SCALABILITY_CLASS == TCPIP_SC3 */
+#endif /* (TCPIP_SCALABILITY_CLASS == TCPIP_SC2) || (TCPIP_SCALABILITY_CLASS == TCPIP_SC3) */
     }
     ssize_t rln = sendmsg(sockMngPtr->socket_fd, &msg, 0);
     free(msgctl);
     return rln;
 }
-#endif /* STD_ON == TCPIP_UDP_ENABLED && !TCPIP_MULTIP_DIRECT_MAP */
-#endif /* TCPIP_CTRL_NUM > 0 */
+#endif /* (STD_ON == TCPIP_UDP_ENABLED) && !(TCPIP_MULTIP_DIRECT_MAP) */
+#endif /* (TCPIP_CTRL_NUM > 0) */
 
 #if (STD_ON == TCPIP_UDP_ENABLED) && (TCPIP_USED_RAW_SEND_UDP)
 /** \brief only support qnx transmit DF =1 udp message */
@@ -580,7 +588,7 @@ TCPIP_LOCAL FUNC(ssize_t, TCPIP_CODE) TcpIp_BsdUdpTransmitByRawSocket(
         close(raw_socket);
         return rln;
     }
-#endif /* TCPIP_SUPPORT_MULTICAST && defined TCPIP_MULTICAST_USED_UNICAST_INDEX */
+#endif /* TCPIP_SUPPORT_MULTICAST && defined(TCPIP_MULTICAST_USED_UNICAST_INDEX) */
     /* malloc data used fill data */
     size_t tr_len = sizeof(struct ip) + sizeof(struct udphdr) + dataLen;
     uint8* dataTmpPtr = (uint8*)malloc(tr_len);
@@ -639,7 +647,7 @@ TCPIP_LOCAL FUNC(ssize_t, TCPIP_CODE) TcpIp_BsdUdpTransmitByRawSocket(
     free(dataTmpPtr);
     return dataLen;
 }
-#endif /* STD_ON == TCPIP_UDP_ENABLED && TCPIP_USED_RAW_SEND_UDP */
+#endif /* (STD_ON == TCPIP_UDP_ENABLED) && (TCPIP_USED_RAW_SEND_UDP) */
 
 TCPIP_LOCAL FUNC(ssize_t, TCPIP_CODE) TcpIp_BsdUdpRxPreHandle(
     P2VAR(TcpIp_SocketIdType, AUTOMATIC, TCPIP_APPL_VAR) socketIdPtr,
@@ -653,7 +661,7 @@ TCPIP_LOCAL FUNC(ssize_t, TCPIP_CODE) TcpIp_BsdUdpRxPreHandle(
     TcpIp_SocketIdType socketId = *socketIdPtr;
     struct iovec iov[1];
     /* The array length should be greater than CMSG_SPACE(sizeof(struct
-     * in6_pktinfo)) .*/
+     * in6_pktinfo)) */
     char cmbuf[128] = {0};
     msg.msg_name = ipAddrPtr;
     msg.msg_namelen = adrLen;
@@ -682,10 +690,10 @@ TCPIP_LOCAL FUNC(ssize_t, TCPIP_CODE) TcpIp_BsdUdpRxPreHandle(
 
 #if (TCPIP_SCALABILITY_CLASS == TCPIP_SC1) || (TCPIP_SCALABILITY_CLASS == TCPIP_SC3)
     struct in_pktinfo* pktptr = NULL;
-#endif /* TCPIP_SCALB ILITY_CLASS == TCPIP_SC1) || (TCPIP_SCALABILITY_CLASS == TCPIP_SC3 */
+#endif /* (TCPIP_SCALB ILITY_CLASS == TCPIP_SC1) || (TCPIP_SCALABILITY_CLASS == TCPIP_SC3) */
 #if (TCPIP_SCALABILITY_CLASS == TCPIP_SC2) || (TCPIP_SCALABILITY_CLASS == TCPIP_SC3)
     struct in6_pktinfo* in6_pktptr = NULL;
-#endif /* TCPIP_SCALABILITY_CLASS == TCPIP_SC2) ||  (TCPIP_SCALABILITY_CLASS ==  TCPIP_SC3 */
+#endif /* (TCPIP_SCALABILITY_CLASS == TCPIP_SC2) ||  (TCPIP_SCALABILITY_CLASS ==  TCPIP_SC3) */
 
     for (struct cmsghdr* cmptr = CMSG_FIRSTHDR(&msg); cmptr != NULL; cmptr = CMSG_NXTHDR(&msg, cmptr))
     {
@@ -697,7 +705,7 @@ TCPIP_LOCAL FUNC(ssize_t, TCPIP_CODE) TcpIp_BsdUdpRxPreHandle(
             break;
         }
 
-#endif /* TCPIP_SCALABILITY_CLASS == TCPIP_SC1) || (TCPIP_SCALABILITY_CLASS == TCPIP_SC3 */
+#endif /* (TCPIP_SCALABILITY_CLASS == TCPIP_SC1) || (TCPIP_SCALABILITY_CLASS == TCPIP_SC3) */
 #if (TCPIP_SCALABILITY_CLASS == TCPIP_SC2) || (TCPIP_SCALABILITY_CLASS == TCPIP_SC3)
 
         if (cmptr->cmsg_level == IPPROTO_IPV6 && cmptr->cmsg_type == IPV6_PKTINFO)
@@ -707,13 +715,13 @@ TCPIP_LOCAL FUNC(ssize_t, TCPIP_CODE) TcpIp_BsdUdpRxPreHandle(
             break;
         }
 
-#endif /* TCPIP_SCALABILITY_CLASS == TCPIP_SC2) || (TCPIP_SCALABILITY_CLASS == TCPIP_SC3 */
+#endif /* (TCPIP_SCALABILITY_CLASS == TCPIP_SC2) || (TCPIP_SCALABILITY_CLASS == TCPIP_SC3) */
     }
 
 #if (TCPIP_SCALABILITY_CLASS == TCPIP_SC3)
 
     if (sockMngPtr->domain == TCPIP_AF_INET)
-#endif /* TCPIP_SCALABIL IT Y_CLASS == TCPIP_SC3 */
+#endif /* (TCPIP_SCALABIL IT Y_CLASS == TCPIP_SC3) */
     {
 #if (TCPIP_SCALABILITY_CLASS == TCPIP_SC1) || (TCPIP_SCALABILITY_CLASS == TCPIP_SC3)
         if (pktptr == NULL)
@@ -721,11 +729,11 @@ TCPIP_LOCAL FUNC(ssize_t, TCPIP_CODE) TcpIp_BsdUdpRxPreHandle(
             TCPIP_FUNC_CHECK_OUTPUT("socket:%d recvmsg not find IP_PKTINFO\n", socketId);
             return len;
         }
-#endif /* TCPIP_SCALABILITY_CLASS == TCPIP_SC1) || (TCPIP_SCALABILITY_CLASS == TCPIP_SC3 */
+#endif /* (TCPIP_SCALABILITY_CLASS == TCPIP_SC1) || (TCPIP_SCALABILITY_CLASS == TCPIP_SC3) */
     }
 #if (TCPIP_SCALABILITY_CLASS == TCPIP_SC3)
     else
-#endif /* TCPIP_SCALABILITY_CLASS == TCPIP_SC3 */
+#endif /* (TCPIP_SCALABILITY_CLASS == TCPIP_SC3) */
     {
 #if (TCPIP_SCALABILITY_CLASS == TCPIP_SC2) || (TCPIP_SCALABILITY_CLASS == TCPIP_SC3)
         if (in6_pktptr == NULL)
@@ -733,7 +741,7 @@ TCPIP_LOCAL FUNC(ssize_t, TCPIP_CODE) TcpIp_BsdUdpRxPreHandle(
             TCPIP_FUNC_CHECK_OUTPUT("socket:%d recvmsg not find IPV6_PKTINFO\n", socketId);
             return len;
         }
-#endif /* TCPIP_SCALABILITY_CLASS == TCPIP_SC2) ||  (TCPIP_SCALABILITY_CLASS == TCPIP_SC3 */
+#endif /* (TCPIP_SCALABILITY_CLASS == TCPIP_SC2) ||  (TCPIP_SCALABILITY_CLASS == TCPIP_SC3) */
     }
 /* multicast only support sc1 */
 #if TCPIP_SUPPORT_MULTICAST && (TCPIP_SCALABILITY_CLASS == TCPIP_SC1)
@@ -755,7 +763,7 @@ TCPIP_LOCAL FUNC(ssize_t, TCPIP_CODE) TcpIp_BsdUdpRxPreHandle(
         TCPIP_DEBUG("this is multicast udp socket:%d\n", *socketIdPtr);
     }
     else
-#endif /* TCPIP_SUPPORT_MULTICAST && (TCPIP_SCALABILITY_CLASS == TCPIP_SC1 */
+#endif /* TCPIP_SUPPORT_MULTICAST && (TCPIP_SCALABILITY_CLASS == TCPIP_SC1) */
     {
 #if (TCPIP_CTRL_NUM > 0)
 
@@ -768,7 +776,7 @@ TCPIP_LOCAL FUNC(ssize_t, TCPIP_CODE) TcpIp_BsdUdpRxPreHandle(
             }
         }
 
-#endif /* TCPIP_CTRL_NUM > 0 */
+#endif /* (TCPIP_CTRL_NUM > 0) */
     }
 
     return len;
@@ -795,7 +803,7 @@ TCPIP_LOCAL FUNC_P2VAR(TcpIp_SocketMangeDataType, AUTOMATIC, TCPIP_CODE)
 TCPIP_LOCAL FUNC(void, TCPIP_CODE) TcpIp_BsdFreeSocketMngData(const TcpIp_SocketMangeDataType* sockMngPtr)
 {
     TCPIP_DEBUG("free socket mng data:%d\n", sockMngPtr->socket_fd);
-    SchM_Enter_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+    SchM_Enter_TcpIp_ExclusiveArea_Tx();
 #if (TCPIP_TCP_SOCKET_MAX > 0)
 
     if ((sockMngPtr->protocol == TCPIP_IPPROTO_TCP) && (Tcp_SocketUsedNum > 0))
@@ -803,7 +811,7 @@ TCPIP_LOCAL FUNC(void, TCPIP_CODE) TcpIp_BsdFreeSocketMngData(const TcpIp_Socket
         Tcp_SocketUsedNum--;
     }
 
-#endif /* TCPIP_TCP_SOCKET_MAX > 0 */
+#endif /* (TCPIP_TCP_SOCKET_MAX > 0) */
 #if (TCPIP_UDP_SOCKET_MAX > 0)
 
     if ((sockMngPtr->protocol == TCPIP_IPPROTO_UDP) && (Udp_SocketUsedNum > 0))
@@ -811,7 +819,7 @@ TCPIP_LOCAL FUNC(void, TCPIP_CODE) TcpIp_BsdFreeSocketMngData(const TcpIp_Socket
         Udp_SocketUsedNum--;
     }
 
-#endif /* TCPIP_UDP_SOCKET_MAX > 0 */
+#endif /* (TCPIP_UDP_SOCKET_MAX > 0) */
 
     /* prev handle */
     if (sockMngPtr->prev != NULL)
@@ -837,8 +845,8 @@ TCPIP_LOCAL FUNC(void, TCPIP_CODE) TcpIp_BsdFreeSocketMngData(const TcpIp_Socket
         TCPIP_DEBUG("clear poll index:%d\n", sockMngPtr->pollEvtIndex);
     }
 
-#endif /* TCPIP_IO_MULTPLEXING_METHOD == TCPIP_LINUX_POLL */
-    SchM_Exit_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+#endif /* (TCPIP_IO_MULTPLEXING_METHOD == TCPIP_LINUX_POLL) */
+    SchM_Exit_TcpIp_ExclusiveArea_Tx();
     free((void*)sockMngPtr);
 }
 
@@ -857,7 +865,7 @@ TCPIP_LOCAL FUNC_P2VAR(TcpIp_SocketMangeDataType, AUTOMATIC, TCPIP_CODE)
     memset(socketMngPtr, 0, sizeof(TcpIp_SocketMangeDataType));
     socketMngPtr->socket_fd = socketId;
     /* add list header */
-    SchM_Enter_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+    SchM_Enter_TcpIp_ExclusiveArea_Tx();
     TcpIp_SocketMangeDataType* itemPtr = TcpIp_SocketMngHeaderPtr;
 
     if (itemPtr != NULL)
@@ -894,16 +902,16 @@ TCPIP_LOCAL FUNC_P2VAR(TcpIp_SocketMangeDataType, AUTOMATIC, TCPIP_CODE)
     {
         TCPIP_FUNC_CHECK_OUTPUT("find valid poll error:%d\n", socketId);
         free(socketMngPtr);
-        SchM_Exit_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+        SchM_Exit_TcpIp_ExclusiveArea_Tx();
         return NULL;
     }
 
-#endif /* TCPIP_IO_MULTPLEXING_METHOD == TCPIP_LINUX_POLL */
+#endif /* (TCPIP_IO_MULTPLEXING_METHOD == TCPIP_LINUX_POLL) */
 #if TCPIP_SUPPORT_MULTICAST
     /* link other shall be set nullptr in init state */
     socketMngPtr->linkOther = NULL;
 #endif /* TCPIP_SUPPORT_MULTICAST */
-    SchM_Exit_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+    SchM_Exit_TcpIp_ExclusiveArea_Tx();
     return socketMngPtr;
 }
 TCPIP_LOCAL FUNC(Std_ReturnType, TCPIP_CODE) TcpIp_BsdCloseSocket(VAR(TcpIp_SocketIdType, AUTOMATIC) socketId)
@@ -920,7 +928,7 @@ TCPIP_LOCAL FUNC(Std_ReturnType, TCPIP_CODE) TcpIp_BsdCloseSocket(VAR(TcpIp_Sock
         return ret;
     }
 
-#endif /* TCPIP_IO_MULTPLEXING_METHOD == TCPIP_LINUX_EPOLL */
+#endif /* (TCPIP_IO_MULTPLEXING_METHOD == TCPIP_LINUX_EPOLL) */
     /* step2:close socket */
     res = close(socketId);
 
@@ -1010,7 +1018,7 @@ TCPIP_LOCAL FUNC(Std_ReturnType, TCPIP_CODE) TcpIp_BsdChanegeSocketTcpNagle(
 
     return ret;
 }
-#endif /* STD_ON == TCPIP_TCP_ENABLED */
+#endif /* (STD_ON == TCPIP_TCP_ENABLED) */
 TCPIP_LOCAL_INLINE FUNC(void, TCPIP_CODE) TcpIp_BsdAddrChangeBswToBsd(
     P2CONST(TcpIp_SockAddrType, AUTOMATIC, TCPIP_APPL_CONST) bswAddrPtr,
     struct sockaddr* bsdSockAdrPtr,
@@ -1019,7 +1027,7 @@ TCPIP_LOCAL_INLINE FUNC(void, TCPIP_CODE) TcpIp_BsdAddrChangeBswToBsd(
 #if (TCPIP_SCALABILITY_CLASS == TCPIP_SC3)
 
     if (bswAddrPtr->domain == TCPIP_AF_INET)
-#endif /* TCPIP_SCALABILITY_CLASS == TCPIP_SC3 */
+#endif /* (TCPIP_SCALABILITY_CLASS == TCPIP_SC3) */
     {
 #if (TCPIP_SCALABILITY_CLASS == TCPIP_SC1) || (TCPIP_SCALABILITY_CLASS == TCPIP_SC3)
         struct sockaddr_in s_localAdr = {0};
@@ -1029,12 +1037,12 @@ TCPIP_LOCAL_INLINE FUNC(void, TCPIP_CODE) TcpIp_BsdAddrChangeBswToBsd(
         s_localAdr.sin_port = htons(bswAddrPtr->port);
         *sockLenPtr = sizeof(s_localAdr);
         *bsdSockAdrPtr = *((struct sockaddr*)&s_localAdr);
-#endif /* TCPIP_SCALABILITY_CLASS == TCPIP_SC1) || (TCPIP_SCALABILITY_CLASS == TCPIP_SC3 */
+#endif /* (TCPIP_SCALABILITY_CLASS == TCPIP_SC1) || (TCPIP_SCALABILITY_CLASS == TCPIP_SC3) */
     }
 
 #if (TCPIP_SCALABILITY_CLASS == TCPIP_SC3)
     else
-#endif /* TCPIP_SCALABILITY_CLASS == TCPIP_SC3 */
+#endif /* (TCPIP_SCALABILITY_CLASS == TCPIP_SC3) */
     {
 #if (TCPIP_SCALABILITY_CLASS == TCPIP_SC2) || (TCPIP_SCALABILITY_CLASS == TCPIP_SC3)
         struct sockaddr_in6 sv6_localAdr = {0};
@@ -1048,7 +1056,7 @@ TCPIP_LOCAL_INLINE FUNC(void, TCPIP_CODE) TcpIp_BsdAddrChangeBswToBsd(
 
         *sockLenPtr = sizeof(sv6_localAdr);
         *bsdSockAdrPtr = *((struct sockaddr*)&sv6_localAdr);
-#endif /* TCPIP_SCALABILITY_CLASS == TCPIP_SC2) || (TCPIP_SCALABILITY_CLASS == TCPIP_SC3 */
+#endif /* (TCPIP_SCALABILITY_CLASS == TCPIP_SC2) || (TCPIP_SCALABILITY_CLASS == TCPIP_SC3) */
     }
 }
 TCPIP_LOCAL_INLINE FUNC(void, TCPIP_CODE)
@@ -1058,19 +1066,19 @@ TCPIP_LOCAL_INLINE FUNC(void, TCPIP_CODE)
 #if (TCPIP_SCALABILITY_CLASS == TCPIP_SC3)
 
     if (bsdSockAdrPtr->sa_family == AF_INET)
-#endif /* TCPIP_SCALABILITY_CLASS == TCPIP_SC3 */
+#endif /* (TCPIP_SCALABILITY_CLASS == TCPIP_SC3) */
     {
 #if (TCPIP_SCALABILITY_CLASS == TCPIP_SC1) || (TCPIP_SCALABILITY_CLASS == TCPIP_SC3)
         const struct sockaddr_in* socketV4Ptr = (const struct sockaddr_in*)bsdSockAdrPtr;
         bswAddrPtr->domain = TCPIP_AF_INET;
         bswAddrPtr->addr[0] = socketV4Ptr->sin_addr.s_addr;
         bswAddrPtr->port = ntohs(socketV4Ptr->sin_port);
-#endif /* TCPIP_SCALABILITY_CLASS == TCPIP_SC1) || (TCPIP_SCALABILITY_CLASS == TCPIP_SC3 */
+#endif /* (TCPIP_SCALABILITY_CLASS == TCPIP_SC1) || (TCPIP_SCALABILITY_CLASS == TCPIP_SC3) */
     }
 
 #if (TCPIP_SCALABILITY_CLASS == TCPIP_SC3)
     else if (bsdSockAdrPtr->sa_family == AF_INET6)
-#endif /* TCPIP_SCALABILITY_CLASS == TCPIP_SC3 */
+#endif /* (TCPIP_SCALABILITY_CLASS == TCPIP_SC3) */
     {
 #if (TCPIP_SCALABILITY_CLASS == TCPIP_SC2) || (TCPIP_SCALABILITY_CLASS == TCPIP_SC3)
         const struct sockaddr_in6* socketV6Ptr = (const struct sockaddr_in6*)bsdSockAdrPtr;
@@ -1082,12 +1090,12 @@ TCPIP_LOCAL_INLINE FUNC(void, TCPIP_CODE)
             bswAddrPtr->addr[i] = socketV6Ptr->sin6_addr.__u6_addr32[i];
         }
 
-#endif /* TCPIP_SCALABILITY_CLASS == TCPIP_SC2) || (TCPIP_SCALABILITY_CLASS == TCPIP_SC3 */
+#endif /* (TCPIP_SCALABILITY_CLASS == TCPIP_SC2) || (TCPIP_SCALABILITY_CLASS == TCPIP_SC3) */
     }
 
 #if (TCPIP_SCALABILITY_CLASS == TCPIP_SC3)
     else
-#endif /* TCPIP_SCALABILITY_CLASS == TCPIP_SC3 */
+#endif /* (TCPIP_SCALABILITY_CLASS == TCPIP_SC3) */
     {
     }
 }
@@ -1116,23 +1124,23 @@ TCPIP_LOCAL_INLINE FUNC(void, TCPIP_CODE) TcpIp_BsdNotifyEvent(
 TCPIP_LOCAL FUNC(void, TCPIP_CODE) TcpIp_BsdNetMaskExtToInner(
     VAR(uint8, AUTOMATIC) inNetMaskNum,
     VAR(TcpIp_DomainType, AUTOMATIC) domainType,
-    P2VAR(uint32, AUTOMATIC, TCPIP_APPL_VAR) outNteMaskArry)
+    P2VAR(uint32, AUTOMATIC, TCPIP_APPL_VAR) outNteMaskArry) /* PRQA S 3432 */
 {
     TCPIP_UNUSED_ARG(domainType);
 #if (TCPIP_SC3 == TCPIP_SCALABILITY_CLASS)
 
     if (TCPIP_AF_INET == domainType)
-#endif /* TCPIP_SC3 == TCPIP_SCALABILITY_CLASS */
+#endif /* (TCPIP_SC3 == TCPIP_SCALABILITY_CLASS) */
     {
 #if (TCPIP_SC1 == TCPIP_SCALABILITY_CLASS) || (TCPIP_SC3 == TCPIP_SCALABILITY_CLASS)
         /* ipv4 32bit*/
         outNteMaskArry[0] = (uint32)(0xffffffffUL << (32u - inNetMaskNum));
-#endif /* TCPIP_SC1 == TCPIP_SCALABILITY_CLASS || TCPIP_SC3 == TCPIP_SCALABILITY_CLASS */
+#endif /* (TCPIP_SC1 == TCPIP_SCALABILITY_CLASS) || (TCPIP_SC3 == TCPIP_SCALABILITY_CLASS) */
     }
 
 #if (TCPIP_SC3 == TCPIP_SCALABILITY_CLASS)
     else
-#endif /* TCPIP_SC3 == TCPIP_SCALABILITY_CLASS */
+#endif /* (TCPIP_SC3 == TCPIP_SCALABILITY_CLASS) */
     {
 #if (TCPIP_SC2 == TCPIP_SCALABILITY_CLASS) || (TCPIP_SC3 == TCPIP_SCALABILITY_CLASS)
         /* ipv6 128bit*/
@@ -1144,7 +1152,7 @@ TCPIP_LOCAL FUNC(void, TCPIP_CODE) TcpIp_BsdNetMaskExtToInner(
         outNteMaskArry[1] = (uint32)(0xffffffffUL << ((inNetMaskNum < 64u) ? (64u - inNetMaskNum) & 0x1f : 0u));
         /* (128u - inNetMaskNum)%32  */
         outNteMaskArry[0] = (uint32)(0xffffffffUL << ((128u - inNetMaskNum) & 0x1f));
-#endif /* TCPIP_SC2 == TCPIP_SCALABILITY_CLASS || TCPIP_SC3 == TCPIP_SCALABILITY_CLASS */
+#endif /* (TCPIP_SC2 == TCPIP_SCALABILITY_CLASS) || (TCPIP_SC3 == TCPIP_SCALABILITY_CLASS) */
     }
 }
 /**
@@ -1157,14 +1165,14 @@ TCPIP_LOCAL FUNC(void, TCPIP_CODE) TcpIp_BsdNetMaskExtToInner(
 TCPIP_LOCAL FUNC(void, TCPIP_CODE) TcpIp_BsdNetMaskInnerToExt(
     VAR(TcpIp_DomainType, AUTOMATIC) domainType,
     P2CONST(uint32, AUTOMATIC, TCPIP_APPL_VAR) inNteMaskArry,
-    P2VAR(uint8, AUTOMATIC, TCPIP_APPL_VAR) outNetMaskNumPtr)
+    P2VAR(uint8, AUTOMATIC, TCPIP_APPL_VAR) outNetMaskNumPtr) /* PRQA S 3432 */
 {
     uint8 cnt = 0u;
     TCPIP_UNUSED_ARG(domainType);
 #if (TCPIP_SC3 == TCPIP_SCALABILITY_CLASS)
 
     if (TCPIP_AF_INET == domainType)
-#endif /* TCPIP_SC3 == TCPIP_SCALABILITY_CLASS */
+#endif /* (TCPIP_SC3 == TCPIP_SCALABILITY_CLASS) */
     {
 #if (TCPIP_SC1 == TCPIP_SCALABILITY_CLASS) || (TCPIP_SC3 == TCPIP_SCALABILITY_CLASS)
         uint32 vlu = inNteMaskArry[0];
@@ -1175,12 +1183,12 @@ TCPIP_LOCAL FUNC(void, TCPIP_CODE) TcpIp_BsdNetMaskInnerToExt(
             vlu <<= 1;
         }
 
-#endif /* TCPIP_SC1 == TCPIP_SCALABILITY_CLASS) || (TCPIP_SC3 == TCPIP_SCALABILITY_CLASS */
+#endif /* (TCPIP_SC1 == TCPIP_SCALABILITY_CLASS) || (TCPIP_SC3 == TCPIP_SCALABILITY_CLASS) */
     }
 
 #if (TCPIP_SC3 == TCPIP_SCALABILITY_CLASS)
     else
-#endif /* TCPIP_SC3 == TCPIP_SCALABILITY_CLASS */
+#endif /* (TCPIP_SC3 == TCPIP_SCALABILITY_CLASS) */
     {
 #if (TCPIP_SC2 == TCPIP_SCALABILITY_CLASS) || (TCPIP_SC3 == TCPIP_SCALABILITY_CLASS)
         uint32 vlu = inNteMaskArry[0];
@@ -1196,7 +1204,7 @@ TCPIP_LOCAL FUNC(void, TCPIP_CODE) TcpIp_BsdNetMaskInnerToExt(
             }
         }
 
-#endif /* TCPIP_SC2 == TCPIP_SCALABILITY_CLASS) || (TCPIP_SC3 == TCPIP_SCALABILITY_CLASS */
+#endif /* (TCPIP_SC2 == TCPIP_SCALABILITY_CLASS) || (TCPIP_SC3 == TCPIP_SCALABILITY_CLASS) */
     }
 
     *outNetMaskNumPtr = cnt;
@@ -1214,15 +1222,15 @@ TCPIP_LOCAL FUNC(void, TCPIP_CODE) TcpIp_BsdNotfiyUpperLayerIpAdrChange(
 #if defined(TCPIP_CHECK)
 
     if ((TcpIp_LCfg.SocketOwnerNum > 0u) && (TcpIp_LCfg.SocketOwnerLCfgPtr != NULL_PTR))
-#endif /* defined TCPIP_CHECK */
+#endif /* defined(TCPIP_CHECK) */
     {
 #if (STD_ON == TCPIP_MUILT_SOCKET_OWNERCFG)
 
         for (uint32 index = 0; index < TcpIp_LCfg.SocketOwnerNum; index++)
-#else /* STD_ON != TCPIP_MUILT_SOCKET_OWNERCFG */
+#else /* (STD_ON != TCPIP_MUILT_SOCKET_OWNERCFG) */
             uint32 index = 0;
 
-#endif /* STD_ON == TCPIP_MUILT_SOCKET_OWNERCFG */
+#endif /* (STD_ON == TCPIP_MUILT_SOCKET_OWNERCFG) */
         {
             TcpIp_Up_LocalIpAddrAssignmentChgType localNotifyFuncPtr =
                 TcpIp_LCfg.SocketOwnerLCfgPtr[index].Up_LocalIpAddrAssignmentChgFuncPtr;
@@ -1242,7 +1250,7 @@ TCPIP_LOCAL FUNC(void, TCPIP_CODE) TcpIp_BsdNotfiyUpperLayerIpAdrChange(
         TCPIP_FUNC_CHECK_OUTPUT("link timer config not have socker owner\n");
     }
 
-#endif /* defined TCPIP_CHECK */
+#endif /* defined(TCPIP_CHECK) */
 }
 TCPIP_LOCAL FUNC(Std_ReturnType, TCPIP_CODE) TcpIp_BsdLocalIpAddrAssignHandle(
     uint32 localAdrIndex,
@@ -1259,10 +1267,10 @@ TCPIP_LOCAL FUNC(Std_ReturnType, TCPIP_CODE) TcpIp_BsdLocalIpAddrAssignHandle(
 #if (TCPIP_LOCALADDR_MUILT_ASSIGNMENT == STD_ON)
 
         for (uint32 index = 0u; index < localAdrCfgPtr->AddrAssignmentNum; index++)
-#else /* TCPIP_LOCALADDR_MUILT_ASSIGNMENT != STD_ON */
+#else /* (TCPIP_LOCALADDR_MUILT_ASSIGNMENT != STD_ON) */
             uint32 index = 0u;
 
-#endif /* TCPIP_LOCALADDR_MUILT_ASSIGNMENT == STD_ON */
+#endif /* (TCPIP_LOCALADDR_MUILT_ASSIGNMENT == STD_ON) */
         {
             const TcpIp_AddrAssignmentType* addAssCfgPtr = &localAdrCfgPtr->AddrAssignmentCfgPtr[index];
             const TcpIp_StaticIpAddressConfigType* localIpAdrPtr = localAdrCfgPtr->StaticIpAddressCfgPtr;
@@ -1291,7 +1299,7 @@ TCPIP_LOCAL FUNC(Std_ReturnType, TCPIP_CODE) TcpIp_BsdLocalIpAddrAssignHandle(
 #if (TCPIP_SCALABILITY_CLASS == TCPIP_SC3)
 
                     if (localAdtCfgPtr->DomainType == TCPIP_AF_INET)
-#endif /* TCPIP_SCALABILITY_CLASS == TCPIP_SC3 */
+#endif /* (TCPIP_SCALABILITY_CLASS == TCPIP_SC3) */
                     {
 #if (TCPIP_SCALABILITY_CLASS == TCPIP_SC1) || (TCPIP_SCALABILITY_CLASS == TCPIP_SC3)
                         lcaPtr->ipAdrSrc.domain = TCPIP_AF_INET;
@@ -1319,12 +1327,12 @@ TCPIP_LOCAL FUNC(Std_ReturnType, TCPIP_CODE) TcpIp_BsdLocalIpAddrAssignHandle(
                             lcaPtr->defaultrouter.addr[0] = localIpAdrPtr->DefaultRouterPtr[0];
                         }
 
-#endif /* TCPIP_SCALABILITY_CLASS == TCPIP_SC1) || (TCPIP_SCALABILITY_CLASS == TCPIP_SC3 */
+#endif /* (TCPIP_SCALABILITY_CLASS == TCPIP_SC1) || (TCPIP_SCALABILITY_CLASS == TCPIP_SC3) */
                     }
 
 #if (TCPIP_SCALABILITY_CLASS == TCPIP_SC3)
                     else
-#endif /* TCPIP_SCALABILITY_CLASS == TCPIP_SC3 */
+#endif /* (TCPIP_SCALABILITY_CLASS == TCPIP_SC3) */
                     {
 #if (TCPIP_SCALABILITY_CLASS == TCPIP_SC2) || (TCPIP_SCALABILITY_CLASS == TCPIP_SC3)
                         lcaPtr->ipAdrSrc.domain = TCPIP_AF_INET6;
@@ -1354,7 +1362,7 @@ TCPIP_LOCAL FUNC(Std_ReturnType, TCPIP_CODE) TcpIp_BsdLocalIpAddrAssignHandle(
                             }
                         }
 
-#endif /* TCPIP_SCALABILITY_CLASS == TCPIP_SC2 || TCPIP_SCALABILITY_CLASS == TCPIP_SC3 */
+#endif /* (TCPIP_SCALABILITY_CLASS == TCPIP_SC2) || (TCPIP_SCALABILITY_CLASS == TCPIP_SC3) */
                     }
 
                     ret = E_OK;
@@ -1375,7 +1383,7 @@ TCPIP_LOCAL FUNC(Std_ReturnType, TCPIP_CODE) TcpIp_BsdLocalIpAddrAssignHandle(
                     TcpIp_BsdNotfiyUpperLayerIpAdrChange(localAdrIndex, TCPIP_IPADDR_STATE_ASSIGNED);
 #if (TCPIP_LOCALADDR_MUILT_ASSIGNMENT == STD_ON)
                     break;
-#endif /* TCPIP_LOCALADDR_MUILT_ASSIGNMENT == STD_ON */
+#endif /* (TCPIP_LOCALADDR_MUILT_ASSIGNMENT == STD_ON) */
                 }
             }
         }
@@ -1392,7 +1400,7 @@ TCPIP_LOCAL FUNC(Std_ReturnType, TCPIP_CODE) TcpIp_BsdLocalIpAddrUnAssignHandle(
     TcpIp_BsdNotfiyUpperLayerIpAdrChange(localAdrIndex, TCPIP_IPADDR_STATE_UNASSIGNED);
     return E_OK;
 }
-#endif /* TCPIP_LOCAL_ADR_NUM > 0 */
+#endif /* (TCPIP_LOCAL_ADR_NUM > 0) */
 
 TCPIP_LOCAL FUNC(uint32, TCPIP_CODE) TcpIp_BsdTcpWriteData(
     VAR(TcpIp_SocketIdType, AUTOMATIC) socketId,
@@ -1451,7 +1459,7 @@ TCPIP_LOCAL FUNC(void, TCPIP_CODE) TcpIp_BsdUdpJoinMultCast(
 #if (TCPIP_SCALABILITY_CLASS == TCPIP_SC3)
 
     if (localAdtCfgPtr->DomainType == TCPIP_AF_INET)
-#endif /* TCPIP_SCALABILITY_CLASS == TCPIP_SC3 */
+#endif /* (TCPIP_SCALABILITY_CLASS == TCPIP_SC3) */
     {
 #if (TCPIP_SCALABILITY_CLASS == TCPIP_SC1) || (TCPIP_SCALABILITY_CLASS == TCPIP_SC3)
         struct ip_mreq multiCast = {0};
@@ -1484,12 +1492,12 @@ TCPIP_LOCAL FUNC(void, TCPIP_CODE) TcpIp_BsdUdpJoinMultCast(
             ret = setsockopt(socketId, IPPROTO_IP, IP_DROP_MEMBERSHIP, (char*)&multiCast, sizeof(multiCast));
         }
 
-#endif /* TCPIP_SCALABILITY_CLASS == TCPIP_SC1 || TCPIP_SCALABILITY_CLASS == TCPIP_SC3 */
+#endif /* (TCPIP_SCALABILITY_CLASS == TCPIP_SC1) || (TCPIP_SCALABILITY_CLASS == TCPIP_SC3) */
     }
 
 #if (TCPIP_SCALABILITY_CLASS == TCPIP_SC3)
     else
-#endif /* TCPIP_SCALABILITY_CLASS == TCPIP_SC3 */
+#endif /* (TCPIP_SCALABILITY_CLASS == TCPIP_SC3) */
     {
 #if (TCPIP_SCALABILITY_CLASS == TCPIP_SC2) || (TCPIP_SCALABILITY_CLASS == TCPIP_SC3)
         struct ipv6_mreq multiCastV6 = {0};
@@ -1510,7 +1518,7 @@ TCPIP_LOCAL FUNC(void, TCPIP_CODE) TcpIp_BsdUdpJoinMultCast(
             ret = setsockopt(socketId, IPPROTO_IP, IPV6_LEAVE_GROUP, (char*)&multiCastV6, sizeof(multiCastV6));
         }
 
-#endif /* TCPIP_SCALABILITY_CLASS == TCPIP_SC2 || TCPIP_SCALABILITY_CLASS == TCPIP_SC3 */
+#endif /* (TCPIP_SCALABILITY_CLASS == TCPIP_SC2) || (TCPIP_SCALABILITY_CLASS == TCPIP_SC3) */
     }
     if (ret != 0)
     {
@@ -1588,7 +1596,7 @@ TCPIP_LOCAL FUNC(void, TCPIP_CODE) TcpIp_BsdReadHandle(
         cnt = read(SocketId, buf, sizeof(buf));
     }
 
-#endif /* TCPIP_TCP_ENABLED == STD_ON */
+#endif /* (TCPIP_TCP_ENABLED == STD_ON) */
 #if (TCPIP_UDP_ENABLED == STD_ON)
 
     if (sockMngPtr->protocol == TCPIP_IPPROTO_UDP)
@@ -1609,14 +1617,14 @@ TCPIP_LOCAL FUNC(void, TCPIP_CODE) TcpIp_BsdReadHandle(
 #endif /* TCPIP_SUPPORT_MULTICAST */
         }
         else
-#endif /* TCPIP_SUPPORT_MULTICAST || TCPIP_CTRL_NUM > 0 */
+#endif /* TCPIP_SUPPORT_MULTICAST||(TCPIP_CTRL_NUM > 0) */
 
         {
             cnt = recvfrom(SocketId, buf, sizeof(buf), MSG_DONTWAIT, &bsdReAddr, &bsdReAddrLen);
         }
     }
 
-#endif /* TCPIP_UDP_ENABLED == STD_ON */
+#endif /* (TCPIP_UDP_ENABLED == STD_ON) */
 
     if (cnt > 0)
     {
@@ -1634,7 +1642,7 @@ TCPIP_LOCAL FUNC(void, TCPIP_CODE) TcpIp_BsdReadHandle(
             }
         }
 
-#endif /* TCPIP_TCP_ENABLED == STD_ON */
+#endif /* (TCPIP_TCP_ENABLED == STD_ON) */
         TcpIp_SockAddrType bswReAdr = {0};
         TcpIp_BsdAddrChangeBsdToBsw(&bsdReAddr, bsdReAddrLen, &bswReAdr);
         TCPIP_DEBUG("tcpip socket:%d rx data from:%x,len:%ld\n", SocketId, bswReAdr.addr[0], cnt);
@@ -1653,7 +1661,7 @@ TCPIP_LOCAL FUNC(void, TCPIP_CODE) TcpIp_BsdReadHandle(
         {
             TcpIp_BsdNotifyEvent(sockMngPtr, TCPIP_TCP_FIN_RECEIVED);
         }
-#endif /* TCPIP_TCP_SOCKET_MAX > 0 */
+#endif /* (TCPIP_TCP_SOCKET_MAX > 0) */
     }
     else if (errno == ECONNRESET)
     {
@@ -1665,13 +1673,13 @@ TCPIP_LOCAL FUNC(void, TCPIP_CODE) TcpIp_BsdReadHandle(
             TcpIp_BsdNotifyEvent(sockMngPtr, TCPIP_TCP_RESET);
         }
         else
-#endif /* TCPIP_TCP_SOCKET_MAX > 0 */
+#endif /* (TCPIP_TCP_SOCKET_MAX > 0) */
 #if (TCPIP_UDP_SOCKET_MAX > 0)
         {
             TcpIp_BsdNotifyEvent(sockMngPtr, TCPIP_UDP_CLOSED);
         }
 
-#endif /* TCPIP_UDP_SOCKET_MAX > 0 */
+#endif /* (TCPIP_UDP_SOCKET_MAX > 0) */
         (void)TcpIp_BsdCloseSocket(SocketId);
     }
 #if (TCPIP_TCP_SOCKET_MAX > 0)
@@ -1683,7 +1691,7 @@ TCPIP_LOCAL FUNC(void, TCPIP_CODE) TcpIp_BsdReadHandle(
         TcpIp_BsdNotifyEvent(sockMngPtr, TCPIP_TCP_RESET);
         (void)TcpIp_BsdCloseSocket(SocketId);
     }
-#endif /* TCPIP_TCP_SOCKET_MAX > 0 */
+#endif /* (TCPIP_TCP_SOCKET_MAX > 0) */
 
     else
     {
@@ -1753,7 +1761,7 @@ TCPIP_LOCAL FUNC(void, TCPIP_CODE) TcpIp_BsdTcpListenAcceptHandle(
                     ret = E_NOT_OK;
                 }
 
-#endif /* TCPIP_IO_MULTPLEXING_METHOD == TCPIP_LINUX_EPOLL */
+#endif /* (TCPIP_IO_MULTPLEXING_METHOD == TCPIP_LINUX_EPOLL) */
             }
             else
             {
@@ -1769,13 +1777,13 @@ TCPIP_LOCAL FUNC(void, TCPIP_CODE) TcpIp_BsdTcpListenAcceptHandle(
 
         if (E_OK == ret)
         {
-            SchM_Enter_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+            SchM_Enter_TcpIp_ExclusiveArea_Tx();
             Tcp_SocketUsedNum++;
-            SchM_Exit_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+            SchM_Exit_TcpIp_ExclusiveArea_Tx();
         }
     }
 }
-#endif /* TCPIP_TCP_SOCKET_MAX > 0 */
+#endif /* (TCPIP_TCP_SOCKET_MAX > 0) */
 
 /***********************************************************************************************************************
  *  GLOBAL FUNCTIONS
@@ -1806,7 +1814,7 @@ TcpIp_BsdInit(P2CONST(TcpIp_ConfigType, AUTOMATIC, TCPIP_APPL_CONST) ConfigPtr)
         exit(-2);
     }
 
-#endif /* TCPIP_IO_MULTPLEXING_METHOD == TCPIP_LINUX_EPOLL */
+#endif /* (TCPIP_IO_MULTPLEXING_METHOD == TCPIP_LINUX_EPOLL) */
 #if (TCPIP_IO_MULTPLEXING_METHOD == TCPIP_LINUX_POLL)
 
     for (int i = 0; i < TCPIP_SOCKET_NUM; i++)
@@ -1815,11 +1823,11 @@ TcpIp_BsdInit(P2CONST(TcpIp_ConfigType, AUTOMATIC, TCPIP_APPL_CONST) ConfigPtr)
         TcpIp_PollEvent[i].events = 0;
     }
 
-#endif /* TCPIP_IO_MULTPLEXING_METHOD == TCPIP_LINUX_POLL */
+#endif /* (TCPIP_IO_MULTPLEXING_METHOD == TCPIP_LINUX_POLL) */
     TcpIp_PbCfgPtr = ConfigPtr;
 #if (TCPIP_CTRL_NUM > 0)
     TcpIp_BsdInitNetIf();
-#endif /* TCPIP_CTRL_NUM > 0 */
+#endif /* (TCPIP_CTRL_NUM > 0) */
 }
 
 /**
@@ -1844,7 +1852,7 @@ TcpIp_BsdDeInit(void)
         TcpIp_EpollEvntsPtr = NULL;
     }
 
-#endif /* TCPIP_IO_MULTPLEXING_METHOD == TCPIP_LINUX_EPOLL */
+#endif /* (TCPIP_IO_MULTPLEXING_METHOD == TCPIP_LINUX_EPOLL) */
 #if (TCPIP_IO_MULTPLEXING_METHOD == TCPIP_LINUX_POLL)
 
     for (int i = 0; i < TCPIP_SOCKET_NUM; i++)
@@ -1852,16 +1860,16 @@ TcpIp_BsdDeInit(void)
         TcpIp_PollEvent[i].fd = -1;
     }
 
-#endif /* TCPIP_IO_MULTPLEXING_METHOD == TCPIP_LINUX_POLL */
+#endif /* (TCPIP_IO_MULTPLEXING_METHOD == TCPIP_LINUX_POLL) */
 #if (STD_ON == TCPIP_INITIALIZATION_AVAILABLE)
     TcpIp_InitState = TCPIP_STATE_UNINIT;
-#endif /* STD_ON == TCPIP_INITIALIZATION_AVAILABL */
+#endif /* (STD_ON == TCPIP_INITIALIZATION_AVAILABLE) */
 #if (TCPIP_TCP_SOCKET_MAX > 0)
     TCPIP_DEBUG("residue tcp socket num:%d\n", Tcp_SocketUsedNum);
-#endif /* TCPIP_TCP_SOCKET_MAX > 0 */
+#endif /* (TCPIP_TCP_SOCKET_MAX > 0) */
 #if (TCPIP_UDP_SOCKET_MAX > 0)
     TCPIP_DEBUG("residue udp socket num:%d\n", Udp_SocketUsedNum);
-#endif /* TCPIP_UDP_SOCKET_MAX > 0 */
+#endif /* (TCPIP_UDP_SOCKET_MAX > 0) */
 }
 /**
  * @ingroup TcpIp_BsdCloseSocketHandle
@@ -1889,11 +1897,11 @@ TcpIp_BsdCloseSocketHandle(VAR(TcpIp_SocketIdType, AUTOMATIC) SocketId, VAR(bool
             TcpIp_BsdNotifyEvent(sockMngPtr, TCPIP_TCP_CLOSED);
         }
         else
-#endif /* TCPIP_TCP_SOCKET_MAX > 0u */
+#endif /* (TCPIP_TCP_SOCKET_MAX > 0u) */
         {
 #if (TCPIP_UDP_SOCKET_MAX > 0u)
             TcpIp_BsdNotifyEvent(sockMngPtr, TCPIP_UDP_CLOSED);
-#endif /* TCPIP_UDP_SOCKET_MAX > 0u */
+#endif /* (TCPIP_UDP_SOCKET_MAX > 0u) */
         }
     }
 
@@ -1927,7 +1935,7 @@ FUNC(Std_ReturnType, TCPIP_CODE)
 TcpIp_BsdBind(
     VAR(TcpIp_SocketIdType, AUTOMATIC) socketId,
     VAR(TcpIp_LocalAddrIdType, AUTOMATIC) localAddrId,
-    P2VAR(uint16, AUTOMATIC, TCPIP_APPL_DATA) portPtr)
+    P2VAR(uint16, AUTOMATIC, TCPIP_APPL_DATA) portPtr) /* PRQA S 3432 */
 {
     Std_ReturnType ret = E_NOT_OK;
 
@@ -2043,24 +2051,24 @@ TcpIp_BsdBind(
             ret = E_NOT_OK;
         }
 
-#endif /* TCPIP_MULTIP_DIRECT_MAP && TCPIP_CTRL_NUM > 0 */
+#endif /* (TCPIP_MULTIP_DIRECT_MAP && (TCPIP_CTRL_NUM > 0)) */
         /* option IP_PKTINFO used find receiver udp socket dest ip addr and transmit boardcast specify the IP */
         int enable = 1;
 #if (TCPIP_SCALABILITY_CLASS == TCPIP_SC3)
         if (localAdtCfgPtr->DomainType == TCPIP_AF_INET)
-#endif /* TCPIP_SCALABILITY_CLASS == TCPIP_SC3 */
+#endif /* (TCPIP_SCALABILITY_CLASS == TCPIP_SC3) */
         {
 #if (TCPIP_SCALABILITY_CLASS == TCPIP_SC1) || (TCPIP_SCALABILITY_CLASS == TCPIP_SC3)
             res = setsockopt(socketId, IPPROTO_IP, IP_PKTINFO, &enable, sizeof(enable));
-#endif /* TCPIP_SCALABILITY_CLASS == TCPIP_SC1 || TCPIP_SCALABILITY_CLASS == TCPIP_SC3 */
+#endif /* (TCPIP_SCALABILITY_CLASS == TCPIP_SC1) || (TCPIP_SCALABILITY_CLASS == TCPIP_SC3) */
         }
 #if (TCPIP_SCALABILITY_CLASS == TCPIP_SC3)
         else
-#endif /* TCPIP_SCALABILITY_CLASS == TCPIP_SC3 */
+#endif /* (TCPIP_SCALABILITY_CLASS == TCPIP_SC3) */
         {
 #if (TCPIP_SCALABILITY_CLASS == TCPIP_SC2) || (TCPIP_SCALABILITY_CLASS == TCPIP_SC3)
             res = setsockopt(socketId, IPPROTO_IPV6, IPV6_PKTINFO, &enable, sizeof(enable));
-#endif /* TCPIP_SCALABILITY_CLASS == TCPIP_SC2 || TCPIP_SCALABILITY_CLASS == TCPIP_SC3 */
+#endif /* (TCPIP_SCALABILITY_CLASS == TCPIP_SC2) || (TCPIP_SCALABILITY_CLASS == TCPIP_SC3) */
         }
         if (res < 0)
         {
@@ -2070,8 +2078,8 @@ TcpIp_BsdBind(
     }
 #if (TCPIP_CTRL_NUM > 0)
     sockMngPtr->netIfIndex = localAdtCfgPtr->CtrlRef;
-#endif /* TCPIP_CTRL_NUM > 0 */
-#endif /* TCPIP_CTRL_NUM > 0 || TCPIP_SUPPORT_MULTICAST */
+#endif /* (TCPIP_CTRL_NUM > 0) */
+#endif /* (TCPIP_CTRL_NUM > 0) || TCPIP_SUPPORT_MULTICAST */
 #if (TCPIP_UDP_SOCKET_MAX > 0u)
 
 #if TCPIP_SUPPORT_MULTICAST
@@ -2106,13 +2114,13 @@ TcpIp_BsdBind(
             ret = E_NOT_OK;
         }
 
-#endif /* TCPIP_IO_MULTPLEXING_METHOD == TCPIP_LINUX_EPOLL */
+#endif /* (TCPIP_IO_MULTPLEXING_METHOD == TCPIP_LINUX_EPOLL) */
     }
 
-#endif /* TCPIP_UDP_SOCKET_MAX > 0u */
+#endif /* (TCPIP_UDP_SOCKET_MAX > 0u) */
     return ret;
 }
-#endif /* TCPIP_LOCAL_ADR_NUM > 0u && TCPIP_SOCKET_NUM > 0u */
+#endif /* ((TCPIP_LOCAL_ADR_NUM > 0u)&&(TCPIP_SOCKET_NUM > 0u)) */
 
 /**
  * @ingroup TcpIp_BsdTcpConnect
@@ -2204,10 +2212,10 @@ TcpIp_BsdTcpConnect(
             {
                 ret = E_NOT_OK;
             }
-#endif /* TCPIP_IO_MULTPLEXING_METHOD == TCPIP_LINUX_EPOLL */
+#endif /* (TCPIP_IO_MULTPLEXING_METHOD == TCPIP_LINUX_EPOLL) */
     }
 
-#endif /* TCPIP_TCP_SOCKET_MAX > 0 */
+#endif /* (TCPIP_TCP_SOCKET_MAX > 0) */
     return ret;
 }
 
@@ -2255,9 +2263,9 @@ TcpIp_BsdTcpListen(VAR(TcpIp_SocketIdType, AUTOMATIC) socketId, VAR(uint8, AUTOM
         return ret;
     }
 
-#endif /* TCPIP_IO_MULTPLEXING_METHOD == TCPIP_LINUX_EPOLL */
+#endif /* (TCPIP_IO_MULTPLEXING_METHOD == TCPIP_LINUX_EPOLL) */
     ret = E_OK;
-#endif /* TCPIP_TCP_SOCKET_MAX > 0 */
+#endif /* (TCPIP_TCP_SOCKET_MAX > 0) */
     return ret;
 }
 
@@ -2323,10 +2331,10 @@ TcpIp_BsdRequestComMode(VAR(uint8, AUTOMATIC) ctrlIdx, VAR(TcpIp_StateType, AUTO
         break;
     }
 
-#endif /* TCPIP_LOCAL_ADR_NUM > 0 */
+#endif /* (TCPIP_LOCAL_ADR_NUM > 0) */
     return ret;
 }
-#endif /* TCPIP_CONTROLLER_NUM > 0 */
+#endif /* (TCPIP_CONTROLLER_NUM > 0) */
 
 /**
  * @ingroup TcpIp_BsdRequestIpAddrAssignment
@@ -2354,9 +2362,9 @@ TcpIp_BsdRequestIpAddrAssignment(
     {
 #if (TCPIP_SC1 == TCPIP_SCALABILITY_CLASS)
         uint32 netMask[1] = {0};
-#else  /* TCPIP_SC1 != TCPIP_SCALABILITY_CLASS */
+#else  /* (TCPIP_SC1 != TCPIP_SCALABILITY_CLASS) */
             uint32 netMask[4] = {0};
-#endif /* TCPIP_SC1 == TCPIP_SCALABILITY_CLASS */
+#endif /* (TCPIP_SC1 == TCPIP_SCALABILITY_CLASS) */
         TcpIp_BsdNetMaskExtToInner(Netmask, TcpIp_PbCfgPtr->LocalAdrPtr[localAddrId].DomainType, netMask);
         /* function input parameter as local address var */
         TcpIp_StaticIpAddressConfigType ipAdr = {0};
@@ -2375,7 +2383,7 @@ TcpIp_BsdRequestIpAddrAssignment(
         ret = TcpIp_BsdLocalIpAddrAssignHandle(localAddrId, TCPIP_MANUAL, type, NULL_PTR);
     }
 
-#endif /* TCPIP_LOCAL_ADR_NUM > 0 */
+#endif /* (TCPIP_LOCAL_ADR_NUM > 0) */
     return ret;
 }
 
@@ -2391,7 +2399,7 @@ TcpIp_BsdReleaseIpAddrAssignment(VAR(TcpIp_LocalAddrIdType, AUTOMATIC) localAddr
     Std_ReturnType ret = E_NOT_OK;
 #if (TCPIP_LOCAL_ADR_NUM > 0)
     ret = TcpIp_BsdLocalIpAddrUnAssignHandle(localAddrId);
-#endif /* TCPIP_LOCAL_ADR_NUM > 0 */
+#endif /* (TCPIP_LOCAL_ADR_NUM > 0) */
     return ret;
 }
 
@@ -2444,9 +2452,9 @@ TcpIp_BsdChangeParameter(
 FUNC(Std_ReturnType, TCPIP_CODE)
 TcpIp_BsdGetIpAddr(
     VAR(TcpIp_LocalAddrIdType, AUTOMATIC) localAdrIndx,
-    P2VAR(TcpIp_SockAddrType, AUTOMATIC, TCPIP_APPL_DATA) ipAddrPtr,
-    P2VAR(uint8, AUTOMATIC, TCPIP_APPL_DATA) netmaskPtr,
-    P2VAR(TcpIp_SockAddrType, AUTOMATIC, TCPIP_APPL_DATA) defaultRouterPtr)
+    P2VAR(TcpIp_SockAddrType, AUTOMATIC, TCPIP_APPL_DATA) ipAddrPtr,        /* PRQA S 3432 */
+    P2VAR(uint8, AUTOMATIC, TCPIP_APPL_DATA) netmaskPtr,                    /* PRQA S 3432 */
+    P2VAR(TcpIp_SockAddrType, AUTOMATIC, TCPIP_APPL_DATA) defaultRouterPtr) /* PRQA S 3432 */
 {
     Std_ReturnType ret = E_NOT_OK;
 
@@ -2499,7 +2507,7 @@ TcpIp_BsdUdpTransmit(
 #if (TCPIP_CTRL_NUM > 0) && !(TCPIP_MULTIP_DIRECT_MAP)
 
         if (!TCPIP_SOCKET_IS_FLAG(sockMngPtr, TCPIP_SOCKET_IS_BINDANY))
-#endif /* TCPIP_CTRL_NUM > 0 && !TCPIP_MULTIP_DIRECT_MAP */
+#endif /* (TCPIP_CTRL_NUM > 0) && !(TCPIP_MULTIP_DIRECT_MAP) */
         {
 #if TCPIP_USED_RAW_SEND_UDP
             res = TcpIp_BsdUdpTransmitByRawSocket(sockMngPtr, dataPtr, trLen, &bsdSockAdr, socklen);
@@ -2514,7 +2522,7 @@ TcpIp_BsdUdpTransmit(
             res = TcpIp_BsdUdpTransmitBySpecNetIf(sockMngPtr, dataPtr, trLen, &bsdSockAdr, socklen);
         }
 
-#endif /* TCPIP_CTRL_NUM > 0) && !TCPIP_MULTIP_DIRECT_MAP */
+#endif /* (TCPIP_CTRL_NUM > 0) && !(TCPIP_MULTIP_DIRECT_MAP) */
 
         if (res == trLen)
         {
@@ -2541,7 +2549,7 @@ TcpIp_BsdUdpTransmit(
                 ssize_t res;
 #if (TCPIP_CTRL_NUM > 0) && !(TCPIP_MULTIP_DIRECT_MAP)
                 if (!TCPIP_SOCKET_IS_FLAG(sockMngPtr, TCPIP_SOCKET_IS_BINDANY))
-#endif /* TCPIP_CTRL_NUM > 0 && !TCPIP_MULTIP_DIRECT_MAP */
+#endif /* (TCPIP_CTRL_NUM > 0) && !(TCPIP_MULTIP_DIRECT_MAP) */
                 {
 #if TCPIP_USED_RAW_SEND_UDP
                     res = TcpIp_BsdUdpTransmitByRawSocket(sockMngPtr, dataPtr, trLen, &bsdSockAdr, socklen);
@@ -2554,7 +2562,7 @@ TcpIp_BsdUdpTransmit(
                 {
                     res = TcpIp_BsdUdpTransmitBySpecNetIf(sockMngPtr, dataPtr, trLen, &bsdSockAdr, socklen);
                 }
-#endif /* TCPIP_CTRL_NUM > 0 && !TCPIP_MULTIP_DIRECT_MAP */
+#endif /* (TCPIP_CTRL_NUM > 0) && !(TCPIP_MULTIP_DIRECT_MAP) */
 
                 if (res == trLen)
                 {
@@ -2570,11 +2578,11 @@ TcpIp_BsdUdpTransmit(
             free(buf);
         }
     }
-#endif /* TCPIP_UDP_SOCKET_MAX > 0 */
+#endif /* (TCPIP_UDP_SOCKET_MAX > 0) */
 
     return ret;
 }
-#endif /* STD_ON == TCPIP_UDP_ENABLED */
+#endif /* (STD_ON == TCPIP_UDP_ENABLED) */
 
 #if (STD_ON == TCPIP_TCP_ENABLED)
 /**
@@ -2671,7 +2679,7 @@ TcpIp_BsdTcpTransmit(
     return ret;
 }
 
-#endif /* STD_ON == TCPIP_TCP_ENABLED */
+#endif /* (STD_ON == TCPIP_TCP_ENABLED) */
 
 /**
  * @ingroup TcpIp_BsdMainFunction
@@ -2704,7 +2712,7 @@ TcpIp_BsdMainFunction(void)
                 TcpIp_BsdTcpListenAcceptHandle(socketId, sockMngPtr);
             }
             else
-#endif /* TCPIP_TCP_SOCKET_MAX > 0 */
+#endif /* (TCPIP_TCP_SOCKET_MAX > 0) */
             {
                 if (TcpIp_EpollEvntsPtr[i].events & EPOLLIN)
                 {
@@ -2721,7 +2729,7 @@ TcpIp_BsdMainFunction(void)
 
                 if (res < 0)
                 {
-                    TCPIP_FUNC_CHECK_OUTPUT("socket：%d,epoll_ctl modify return error%d\n", socketId, errno);
+                    TCPIP_FUNC_CHECK_OUTPUT("socket:%d,epoll_ctl modify return error%d\n", socketId, errno);
                     return;
                 }
 
@@ -2754,13 +2762,13 @@ TcpIp_BsdMainFunction(void)
                     TcpIp_BsdNotifyEvent(sockMngPtr, TCPIP_TCP_RESET);
                 }
                 else
-#endif /* TCPIP_TCP_SOCKET_MAX > 0 */
+#endif /* (TCPIP_TCP_SOCKET_MAX > 0) */
 #if (TCPIP_UDP_SOCKET_MAX > 0)
                 {
                     TcpIp_BsdNotifyEvent(sockMngPtr, TCPIP_UDP_CLOSED);
                 }
 
-#endif /* TCPIP_UDP_SOCKET_MAX > 0 */
+#endif /* (TCPIP_UDP_SOCKET_MAX > 0) */
                 (void)TcpIp_BsdCloseSocket(socketId);
             }
         }
@@ -2769,7 +2777,7 @@ TcpIp_BsdMainFunction(void)
         }
     }
 
-#endif /* TCPIP_IO_MULTPLEXING_METHOD == TCPIP_LINUX_EPOLL */
+#endif /* (TCPIP_IO_MULTPLEXING_METHOD == TCPIP_LINUX_EPOLL) */
 #if (TCPIP_IO_MULTPLEXING_METHOD == TCPIP_LINUX_POLL)
     nfds_t pollSize = TCPIP_SOCKET_NUM;
     int nready = poll(TcpIp_PollEvent, pollSize, TCPIP_POLL_WAITTIME);
@@ -2823,13 +2831,13 @@ TcpIp_BsdMainFunction(void)
                 }
                 else
                 {
-                    TCPIP_DEBUG("socket:%d,connect failed errno：%d\n", socketId, errno);
+                    TCPIP_DEBUG("socket:%d,connect failed errno:%d\n", socketId, errno);
                     TcpIp_BsdNotifyEvent(sockMngPtr, TCPIP_TCP_RESET);
                     (void)TcpIp_BsdCloseSocket(socketId);
                 }
             }
             else
-#endif /* TCPIP_TCP_SOCKET_MAX > 0 */
+#endif /* (TCPIP_TCP_SOCKET_MAX > 0) */
             {
                 if (pollEvtPtr->revents & (POLLIN | POLLERR))
                 {
@@ -2841,7 +2849,7 @@ TcpIp_BsdMainFunction(void)
         }
     }
 
-#endif /* TCPIP_IO_MULTPLEXING_METHOD == TCPIP_LINUX_POLL */
+#endif /* (TCPIP_IO_MULTPLEXING_METHOD == TCPIP_LINUX_POLL) */
 }
 
 /**
@@ -2858,8 +2866,8 @@ TcpIp_BsdGetSocket(
     VAR(TcpIp_ProtocolType, AUTOMATIC) protocol,
 #if (STD_ON == TCPIP_MUILT_SOCKET_OWNERCFG)
     VAR(uint8, AUTOMATIC) socketOwnererId,
-#endif /* STD_ON == TCPIP_MUILT_SOCKET_OWNERCFG */
-    P2VAR(TcpIp_SocketIdType, AUTOMATIC, TCPIP_APPL_DATA) socketIdPtr)
+#endif /* (STD_ON == TCPIP_MUILT_SOCKET_OWNERCFG) */
+    P2VAR(TcpIp_SocketIdType, AUTOMATIC, TCPIP_APPL_DATA) socketIdPtr) /* PRQA S 3432 */ /* MISRA Rule 20.7 */
 {
     Std_ReturnType ret = E_NOT_OK;
 
@@ -2872,49 +2880,49 @@ TcpIp_BsdGetSocket(
         if (AF_INET6 != domain)
 #else                                        /* TCPIP_SCALABILITY_CLASS == TCPIP_SC3 */
         if ((AF_INET6 != domain) && (AF_INET != domain))
-#endif                                       /* TCPIP_SCALABILITY_CLASS == TCPIP_SC1 */
+#endif                                       /* (TCPIP_SCALABILITY_CLASS == TCPIP_SC1) */
     {
         TCPIP_FUNC_CHECK_OUTPUT("domain check error\n");
         return ret;
     }
 
     int t_type = (protocol == TCPIP_IPPROTO_TCP) ? SOCK_STREAM : SOCK_DGRAM;
-    SchM_Enter_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+    SchM_Enter_TcpIp_ExclusiveArea_Tx();
 
     /* check config allow diff protocol */
     if (TCPIP_IPPROTO_UDP == protocol)
     {
 #if (TCPIP_UDP_SOCKET_MAX > 0)
         if (Udp_SocketUsedNum >= TCPIP_UDP_SOCKET_MAX)
-#endif /* TCPIP_UDP_SOCKET_MAX > 0 */
+#endif /* (TCPIP_UDP_SOCKET_MAX > 0) */
         {
             TCPIP_FUNC_CHECK_OUTPUT("not create udp socket\n");
-            SchM_Exit_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+            SchM_Exit_TcpIp_ExclusiveArea_Tx();
             return ret;
         }
 
 #if (TCPIP_UDP_SOCKET_MAX > 0)
         Udp_SocketUsedNum++;
-#endif /* TCPIP_UDP_SOCKET_MAX > 0 */
+#endif /* (TCPIP_UDP_SOCKET_MAX > 0) */
     }
 
     if (TCPIP_IPPROTO_TCP == protocol)
     {
 #if (TCPIP_TCP_SOCKET_MAX > 0)
         if (Tcp_SocketUsedNum >= TCPIP_TCP_SOCKET_MAX)
-#endif /* TCPIP_TCP_SOCKET_MAX > 0 */
+#endif /* (TCPIP_TCP_SOCKET_MAX > 0 ) */
         {
             TCPIP_FUNC_CHECK_OUTPUT("not create tcp socket\n");
-            SchM_Exit_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+            SchM_Exit_TcpIp_ExclusiveArea_Tx();
             return ret;
         }
 
 #if (TCPIP_TCP_SOCKET_MAX > 0)
         Tcp_SocketUsedNum++;
-#endif /* TCPIP_TCP_SOCKET_MAX > 0 */
+#endif /* (TCPIP_TCP_SOCKET_MAX > 0 ) */
     }
 
-    SchM_Exit_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+    SchM_Exit_TcpIp_ExclusiveArea_Tx();
     int t_protocol = 0;
     TcpIp_SocketIdType socket_fd = socket(t_domian, t_type, t_protocol);
 
@@ -2937,9 +2945,9 @@ TcpIp_BsdGetSocket(
     socketMngPtr->protocol = protocol;
 #if (STD_ON == TCPIP_MUILT_SOCKET_OWNERCFG)
     socketMngPtr->socketOwnerCfgPtr = &TcpIp_LCfg.SocketOwnerLCfgPtr[socketOwnererId];
-#else  /* STD_ON != TCPIP_MUILT_SOCKET_OWNERCFG */
+#else  /* (STD_ON != TCPIP_MUILT_SOCKET_OWNERCFG) */
         socketMngPtr->socketOwnerCfgPtr = &TcpIp_LCfg.SocketOwnerLCfgPtr[0];
-#endif /* STD_ON == TCPIP_MUILT_SOCKET_OWNERCFG */
+#endif /* (STD_ON == TCPIP_MUILT_SOCKET_OWNERCFG) */
 #if TCPIP_SOCKET_NONBLOCK
     /* no block all socket */
     int socketFlgs = fcntl(socket_fd, F_GETFL, 0);
@@ -2953,10 +2961,10 @@ TcpIp_BsdGetSocket(
         TCPIP_FUNC_CHECK_OUTPUT("malloc socket:%d setsockopt err:%d\n", socket_fd, errno);
         return ret;
     }
-#endif /* TCPIP_SOCKET_NUM > 0u */
+#endif /* (TCPIP_SOCKET_NUM > 0u) */
     ret = E_OK;
 
     return ret;
 }
 
-#endif /* STD_ON == TCPIP_BSDSOCKET_SUPPORT */
+#endif /* #if (STD_ON == TCPIP_BSDSOCKET_SUPPORT) */

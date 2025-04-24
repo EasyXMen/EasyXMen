@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : CanIf.h                                                     **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : zhengfei.li                                                 **
- **  Vendor      :                                                             **
- **  DESCRIPTION : API declaration and type definitions of CANIF               **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR Classic Platform 4.2.2                       **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : CanIf.h                                                     **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : zhengfei.li                                                 **
+**  Vendor      :                                                             **
+**  DESCRIPTION : API declaration and type definitions of CANIF               **
+**                                                                            **
+**  SPECIFICATION(S) : AUTOSAR Classic Platform 4.2.2 and R19-11              **
+**                                                                            **
+*******************************************************************************/
 /*******************************************************************************
 **                      Revision Control History                              **
 *******************************************************************************/
@@ -47,86 +48,23 @@
 /*******************************************************************************
 **                      Global Symbols                                        **
 *******************************************************************************/
-#define CANIF_MODULE_ID          60u
-#define CANIF_H_VENDOR_ID        62u
-#define CANIF_H_AR_MAJOR_VERSION 4u
-#define CANIF_H_AR_MINOR_VERSION 2u
-#define CANIF_H_AR_PATCH_VERSION 2u
-#define CANIF_H_SW_MAJOR_VERSION 2u
-#define CANIF_H_SW_MINOR_VERSION 0u
-#define CANIF_H_SW_PATCH_VERSION 10u
+/* Published information */
+#if !defined(CANIF_PUBLISHED_INFORMATION)
+#define CANIF_PUBLISHED_INFORMATION
+#define CANIF_MODULE_ID                   60u
+#define CANIF_VENDOR_ID                   62u
+#define CANIF_AR_RELEASE_MAJOR_VERSION    4u
+#define CANIF_AR_RELEASE_MINOR_VERSION    5u
+#define CANIF_AR_RELEASE_REVISION_VERSION 0u
+#define CANIF_SW_MAJOR_VERSION            2u
+#define CANIF_SW_MINOR_VERSION            2u
+#define CANIF_SW_PATCH_VERSION            3u
+#elif ((CANIF_SW_MAJOR_VERSION != 2u) || (CANIF_SW_MINOR_VERSION != 2u) || (CANIF_SW_PATCH_VERSION != 3u))
+#error "CanIf: Mismatch in Software Version"
+#endif
 
-#define CANIF_INSTANCE_ID        (0u)
+#define CANIF_INSTANCE_ID (0u)
 
-/*Service ID*/
-#define CANIF_CHECKWAKEUP_ID  (0x11u)
-#define CANIF_TRANSMIT_ID     (0x05u)
-#define CANIF_RXINDICATION_ID (0x14u)
-#if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
-#define CANIF_INIT_ID                        (0x01u)
-#define CANIF_SETCONTROLLER_MODE_ID          (0x03u)
-#define CANIF_GETCONTROLLER_MODE_ID          (0x04u)
-#define CANIF_CANCELTRANSMIT_ID              (0x18u)
-#define CANIF_READRXPDUDATA_ID               (0x06u)
-#define CANIF_READTXNOTIFSTATUS_ID           (0x07u)
-#define CANIF_READRXNOTIFSTATUS_ID           (0x08u)
-#define CANIF_SETPDUMODE_ID                  (0x09u)
-#define CANIF_GETPDUMODE_ID                  (0x0Au)
-#define CANIF_GETVERSIONINFO_ID              (0x0Bu)
-#define CANIF_SETDYNAMICTXID_ID              (0x0Cu)
-#define CANIF_SETTRCVMODE_ID                 (0x0Du)
-#define CANIF_GETTRCVMODE_ID                 (0x0Eu)
-#define CANIF_GETTRCVWAKEUPREASON_ID         (0x0Fu)
-#define CANIF_SETTRCVWAKEUPMODE_ID           (0x10u)
-#define CANIF_CHECKVALIDATION_ID             (0x12u)
-#define CANIF_GETTXCONFIRMATIONSTATE         (0x19u)
-#define CANIF_CLEARTRCVWUFFLAG_ID            (0x1Eu)
-#define CANIF_CHECKTRCVWAKEFLAG_ID           (0x1Fu)
-#define CANIF_SETBAUDRATE_ID                 (0x27u)
-#define CANIF_SETICOMCONFIGURATION_ID        (0x25u)
-#define CANIF_TRIGGERTRANSMIT_ID             (0x41u)
-#define CANIF_TXCONFIRMATION_ID              (0x13u)
-#define CANIF_CONTROLLERBUSOFF_ID            (0x16u)
-#define CANIF_CONFIRMPNAVAILABILITY_ID       (0x1Au)
-#define CANIF_CLEARTRCVWUFFLAGINDICATION_ID  (0x20u)
-#define CANIF_CHECKTRCVWAKEFLAGINDICATION_ID (0x21u)
-#define CANIF_CONTROLLERMODEINDICATION_ID    (0x17u)
-#define CANIF_TRCVMODEINDICATION_ID          (0x22u)
-#define CANIF_CURRENTICOMCONFIGURATION_ID    (0x26u)
-/* Error detection */
-#define CANIF_E_PARAM_CANID          (10u)
-#define CANIF_E_PARAM_HOH            (12u)
-#define CANIF_E_PARAM_LPDU           (13u)
-#define CANIF_E_PARAM_CONTROLLERID   (15u)
-#define CANIF_E_PARAM_WAKEUPSOURCE   (16u)
-#define CANIF_E_PARAM_TRCV           (17u)
-#define CANIF_E_PARAM_TRCVMODE       (18u)
-#define CANIF_E_PARAM_TRCVWAKEUPMODE (19u)
-#define CANIF_E_PARAM_CTRLMODE       (21u)
-#define CANIF_E_PARAM_PDU_MODE       (22u)
-#define CANIF_E_PARAM_POINTER        (20u)
-#define CANIF_E_UNINIT               (30u)
-#define CANIF_E_INVALID_TXPDUID      (50u)
-#define CANIF_E_INVALID_RXPDUID      (60u)
-#define CANIF_E_INIT_FAILED          (80u)
-#endif /*STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT*/
-#define CANIF_E_INVALID_DLC          (61u)
-#define CANIF_E_DATA_LENGTH_MISMATCH (62u)
-#define CANIF_E_STOPPED              (70u)
-#define CANIF_E_NOT_SLEEP            (71u)
-
-/* max extended can id */
-#define CANIF_EXTENDED_CANID_MAX (0x1FFFFFFFu)
-/* max standard can id */
-#define CANIF_STANDARD_CANID_MAX (0x7FFu)
-/* Can Fd flag frame mask */
-#define CANIF_CANID16_CANFD_MASK (0x4000u)
-#define CANIF_CANID32_CANFD_MASK (0x40000000u)
-/* Can extended frame mask */
-#define CANIF_CANID_EXTENDED_MASK (0x80000000u)
-
-#define CANIF_UNUSED_UINT16       (0xFFFFu)
-#define CANIF_UNUSED_UINT8        (0xFFu)
 /*Set according to the situation,when integrating project*/
 #define CANIF_RXINDICATION_AUTOSAR_PARAMETER STD_OFF
 /*******************************************************************************
@@ -137,39 +75,6 @@ extern CONST(CanIf_ConfigType, CANIF_CONST_PBCFG) CanIf_InitCfgSet;
 #if (STD_OFF == CANIF_RXINDICATION_AUTOSAR_PARAMETER)
 extern CONST(CanIf_CanHOH2HRHType, CANIF_CONST) CanIf_CanHoh2Hrh[CANIF_CANDRIVER_NUMBER];
 #endif /*STD_OFF == CANIF_RXINDICATION_AUTOSAR_PARAMETER*/
-
-/* Callout functions with respect to the upper layers. */
-extern CONST(CanIf_DispatchConfigType, CANIF_CONST) CanIf_DispatchConfigData;
-
-/*Can Controller Configuration*/
-extern CONST(CanIf_ControllerCfgType, CANIF_CONST) CanIf_CtrlCfgData[CANIF_CANCONTROLLER_NUMBER];
-
-/*Can Driver API*/
-extern CONST(Can_DriverApiType, CANIF_CONST) Can_DriverApi[CANIF_CANDRIVER_NUMBER];
-
-/*Can Trcv Configuration*/
-#if (CANIF_TRCV_NUMBER > 0u)
-extern CONST(CanIf_TrcvCfgType, CANIF_CONST) CanIf_TrcvCfgData[CANIF_TRCV_NUMBER];
-#endif
-
-/*Can Trcv API*/
-#if (CANIF_TRCVDRIVER_NUMBER > 0u)
-extern CONST(Can_TrcvApiType, CANIF_CONST) Can_TrcvApi[CANIF_TRCVDRIVER_NUMBER];
-#endif
-
-#if (CANIF_TXBUFFER_NUMBER > 0u)
-extern VAR(CanIf_TxBufferType, CANIF_VAR) CanIf_TxBuffer[CANIF_TXBUFFER_NUMBER];
-#endif
-
-#if (CANIF_RXBUFFER_NUMBER > 0u)
-extern VAR(CanIf_RxPduBufferType, CANIF_VAR) CanIf_RxBuffer[CANIF_RXBUFFER_NUMBER];
-#endif
-
-extern CanIfRxPduUserRxIndicationNameApiType CanIf_UpRxIndicationArray[CANIF_RXINDICATION_FUNC_NUMBER];
-extern CanIfTxPduUserTxConfirmationNameApiType CanIf_UpTxConfirmationArray[CANIF_TXCONFIRMATION_FUNC_NUMBER];
-#if (STD_ON == CANIF_TRIGGER_TRANSMIT_SUPPORT)
-extern CanIfTxPduUserTriggerTransmitNameApiType CanIf_UpTriggerTransmitArray[CANIF_TRIGGER_TRANSMIT_FUNC_NUMBER];
-#endif /* STD_ON == CANIF_TRIGGER_TRANSMIT_SUPPORT */
 /*******************************************************************************
 **                      Global Functions                                      **
 *******************************************************************************/
@@ -200,20 +105,20 @@ extern CanIfTxPduUserTriggerTransmitNameApiType CanIf_UpTriggerTransmitArray[CAN
         {                                                                                                        \
             (VersionInfo)->vendorID = CANIF_H_VENDOR_ID;                                                         \
             (VersionInfo)->moduleID = CANIF_MODULE_ID;                                                           \
-            (VersionInfo)->sw_major_version = CANIF_H_SW_MAJOR_VERSION;                                          \
-            (VersionInfo)->sw_minor_version = CANIF_H_SW_MINOR_VERSION;                                          \
-            (VersionInfo)->sw_patch_version = CANIF_H_SW_PATCH_VERSION;                                          \
+            (VersionInfo)->sw_major_version = CANIF_SW_MAJOR_VERSION;                                            \
+            (VersionInfo)->sw_minor_version = CANIF_SW_MINOR_VERSION;                                            \
+            (VersionInfo)->sw_patch_version = CANIF_SW_PATCH_VERSION;                                            \
         }                                                                                                        \
     } while (0)
 #else
-#define CanIf_GetVersionInfo(VersionInfo)                           \
-    do                                                              \
-    {                                                               \
-        (VersionInfo)->vendorID = CANIF_H_VENDOR_ID;                \
-        (VersionInfo)->moduleID = CANIF_MODULE_ID;                  \
-        (VersionInfo)->sw_major_version = CANIF_H_SW_MAJOR_VERSION; \
-        (VersionInfo)->sw_minor_version = CANIF_H_SW_MINOR_VERSION; \
-        (VersionInfo)->sw_patch_version = CANIF_H_SW_PATCH_VERSION; \
+#define CanIf_GetVersionInfo(VersionInfo)                         \
+    do                                                            \
+    {                                                             \
+        (VersionInfo)->vendorID = CANIF_H_VENDOR_ID;              \
+        (VersionInfo)->moduleID = CANIF_MODULE_ID;                \
+        (VersionInfo)->sw_major_version = CANIF_SW_MAJOR_VERSION; \
+        (VersionInfo)->sw_minor_version = CANIF_SW_MINOR_VERSION; \
+        (VersionInfo)->sw_patch_version = CANIF_SW_PATCH_VERSION; \
     } while (0)
 #endif /* STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT */
 #endif /* STD_ON == CANIF_PUBLIC_VERSION_INFO_API */
@@ -264,7 +169,7 @@ extern FUNC(void, CANIF_CODE) CanIf_DeInit(VAR(void, AUTOMATIC));
  */
 /*************************************************************************/
 extern FUNC(Std_ReturnType, CANIF_CODE)
-    CanIf_SetControllerMode(uint8 ControllerId, CanIf_ControllerModeType ControllerMode);
+    CanIf_SetControllerMode(uint8 ControllerId, Can_ControllerStateType ControllerMode);
 /*************************************************************************/
 /*
  * Brief               This service reports about the current status of the requested CAN controller.
@@ -285,7 +190,7 @@ extern FUNC(Std_ReturnType, CANIF_CODE)
 /*************************************************************************/
 extern FUNC(Std_ReturnType, CANIF_CODE) CanIf_GetControllerMode(
     uint8 ControllerId,
-    P2VAR(CanIf_ControllerModeType, AUTOMATIC, CANIF_APPL_DATA) ControllerModePtr);
+    P2VAR(Can_ControllerStateType, AUTOMATIC, CANIF_APPL_DATA) ControllerModePtr);
 /*************************************************************************/
 /*
  * Brief               This service initiates a request for transmission of the CAN L-PDU
@@ -309,26 +214,6 @@ extern FUNC(Std_ReturnType, CANIF_CODE) CanIf_GetControllerMode(
 /*************************************************************************/
 extern FUNC(Std_ReturnType, CANIF_CODE)
     CanIf_Transmit(PduIdType CanIfTxSduId, P2CONST(PduInfoType, AUTOMATIC, CANIF_APPL_DATA) PduInfoPtr);
-#if (STD_ON == CANIF_PUBLIC_CANCEL_TRANSMIT_SUPPORT)
-/*************************************************************************/
-/*
- * Brief               This is a dummy method introduced for interface compatibility.
- * ServiceId           0x18
- * Sync/Async          Synchronous
- * Reentrancy          Non Reentrant
- * Param-Name[in]      CanIfTxSduId: L-SDU handle to be transmitted.This handle specifies the
- *                     corresponding CAN LSDU ID and implicitly the CAN Driver instance as well
- *                     as the corresponding CAN controller device.
- * Param-Name[out]     None
- * Param-Name[in/out]  None
- * Return              Std_ReturnType
- *                     Always return E_OK
- * PreCondition        CANIF_PUBLIC_CANCEL_TRANSMIT_SUPPORT is TRUE
- * CallByAPI           Up layer
- */
-/*************************************************************************/
-extern FUNC(Std_ReturnType, CANIF_CODE) CanIf_CancelTransmit(PduIdType CanIfTxSduId);
-#endif /*STD_ON == CANIF_PUBLIC_CANCEL_TRANSMIT_SUPPORT*/
 #if (STD_ON == CANIF_PUBLIC_READ_RX_PDU_DATA_API)
 /*************************************************************************/
 /*
@@ -661,4 +546,34 @@ extern FUNC(Std_ReturnType, CANIF_CODE)
     CanIf_SetIcomConfiguration(uint8 ControllerId, IcomConfigIdType ConfigurationId);
 #endif /*STD_ON == CANIF_PUBLIC_ICOM_SUPPORT*/
 
+#if (STD_ON == CANIF_TRIGGER_TRANSMIT_SUPPORT)
+/*************************************************************************/
+/*
+ * Brief               Within this API, the upper layer module (called module) shall check
+ *                     whether the available data fits into the buffer size reported by PduInfoPtr-
+ *                     >SduLength. If it fits, it shall copy its data into the buffer provided by
+ *                     PduInfoPtr->SduDataPtr and update the length of the actual copied data in
+ *                     PduInfoPtr->SduLength. If not, it returns E_NOT_OK without changing PduInfoPtr.
+ * ServiceId           0x41
+ * Sync/Async          Synchronous
+ * Reentrancy          Reentrant for different PduIds. Non reentrant for the same PduId.
+ * Param-Name[in]      TxPduId: ID of the SDU that is requested to be transmitted.
+ * Param-Name[out]     None
+ * Param-Name[in/out]  PduInfoPtr: Contains a pointer to a buffer (SduDataPtr) to where the SDU data
+ *                     shall be copied, and the available buffer size in SduLengh.On return, the
+ *                     service will indicate the length of the copied SDU data in SduLength.
+ * Return              Std_ReturnType
+ *                     E_OK: SDU has been copied and SduLength indicates the number of copied bytes.
+ *                     E_NOT_OK: No SDU data has been copied. PduInfoPtr must not be used since it may
+ *                     contain a NULL pointer or point to invalid data.
+ * PreCondition        CANIF_TRIGGER_TRANSMIT_SUPPORT is TRUE
+ * CallByAPI           Lo layer
+ */
+/*************************************************************************/
+extern FUNC(Std_ReturnType, CANIF_CODE)
+    CanIf_TriggerTransmit(PduIdType TxPduId, P2VAR(PduInfoType, AUTOMATIC, CANIF_APPL_DATA) PduInfoPtr);
+#endif /*STD_ON == CANIF_TRIGGER_TRANSMIT_SUPPORT*/
 #endif /* end of CANIF_H */
+/*******************************************************************************
+**                      End of file                                           **
+*******************************************************************************/

@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : CanTrcv_TLE9255W.c                                          **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : Xinrun.Wang                                                 **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Public functions implementation by CanTrcv_TLE9255W module  **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : CanTrcv_TLE9255W.c                                          **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : Xinrun.Wang                                                 **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Public functions implementation by CanTrcv_TLE9255W module  **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 /*******************************************************************************
 **                      Revision Control History                              **
 *******************************************************************************/
@@ -1057,7 +1058,7 @@ static FUNC(Std_ReturnType, CANTRCV_CODE)
     if (FALSE == CANTRCV_CHANNEL(Transceiver).CanTrcvSpiAccessSynchronous)
     {
         /* Asynchronous transmission */
-        //      result = Spi_AsyncTransmit(CANTRCV_SPI_SEQUENCE(Transceiver));
+        /* result = Spi_AsyncTransmit(CANTRCV_SPI_SEQUENCE(Transceiver)); */
     }
     else
     {

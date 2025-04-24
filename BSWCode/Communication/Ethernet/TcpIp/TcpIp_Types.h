@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- ** **
- **  FILENAME    : TcpIp_Types.h **
- ** **
- **  Created on  : 03/12/18 **
- **  Author      : darren.zhang **
- **  Vendor      : **
- **  DESCRIPTION :  type definition for TcpIp **
- ** **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11 **
- ** **
- ***********************************************************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+************************************************************************************************************************
+**                                                                                                                    **
+**  FILENAME    : TcpIp_Types.h                                                                                       **
+**                                                                                                                    **
+**  Created on  : 03/12/18                                                                                            **
+**  Author      : darren.zhang                                                                                        **
+**  Vendor      :                                                                                                     **
+**  DESCRIPTION :  type definition for TcpIp                                                                          **
+**                                                                                                                    **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                                                              **
+**                                                                                                                    **
+***********************************************************************************************************************/
 
 #ifndef TCPIP_TYPES_H_
 #define TCPIP_TYPES_H_
@@ -64,6 +65,10 @@ typedef uint8 TcpIp_LocalAddrIdType;
 TCPIP_SOCKETID_INVALID shall specify an invalid socket handle.
 Type:uint8 or uint16,here is defined uint8*/
 typedef uint8 TcpIp_SocketIdType;
+
+/*TLS connection identifier type for unique identification of a TLS connection.
+TCPIP_TLSCONNECTIONID_INVALID shall specify an invalid TLS connection handle.*/
+typedef uint16 TcpIp_TlsConnectionIdType;
 
 #else
 typedef uint16 TcpIp_SocketIdType;
@@ -144,6 +149,26 @@ typedef TcpIp_LocalAddrIdType TcpIpLocalAddrIdWildcardType;
  *                                             ENUMS
  ***********************************************************************************************************************/
 #if defined(TCPIP_SPPORT_ENUM_TYPE)
+typedef enum
+{
+    TLS_CLIENT,
+    TLS_SERVER
+} TcpIp_TlsConnectionInitStateType;
+
+typedef enum
+{
+    TLS_VERSION_V12,
+    TLS_VERSION_V13
+} TcpIp_TlsVersionType;
+
+typedef enum
+{
+    TLS_PRF_CSM_FULL_SUPPORT,
+    TLS_PRF_CSM_INOUT_REDIRECT_SUPPORT,
+    TLS_PRF_CSM_NO_SUPPORT,
+    TLS_PRF_NO_SUPPORT
+} TcpIp_TlsCsmPRFSupportType;
+
 /*Specifies the TcpIp state for a specific EthIf controller*/
 typedef enum
 {
@@ -191,7 +216,20 @@ typedef enum
     TCPIP_E_PHYS_ADDR_MISS
 } TcpIp_ReturnType;
 
-#else /* defined(TCPIP_SPPORT_ENUM_TYPE) */
+#else /* !defined (TCPIP_SPPORT_ENUM_TYPE */
+typedef uint8 TcpIp_TlsConnectionInitStateType;
+#define TLS_CLIENT                             ((TcpIp_TlsConnectionInitStateType)(0x0u))
+#define TLS_SERVER                             ((TcpIp_TlsConnectionInitStateType)(0x1u))
+
+typedef uint8 TcpIp_TlsVersionType;
+#define TLS_VERSION_V12                        ((TcpIp_TlsVersionType)(0x0u))
+#define TLS_VERSION_V13                        ((TcpIp_TlsVersionType)(0x1u))
+
+typedef uint8 TcpIp_TlsCsmPRFSupportType;
+#define TLS_PRF_CSM_FULL_SUPPORT               ((TcpIp_TlsCsmPRFSupportType)(0x0u))
+#define TLS_PRF_CSM_INOUT_REDIRECT_SUPPORT     ((TcpIp_TlsCsmPRFSupportType)(0x1u))
+#define TLS_PRF_CSM_NO_SUPPORT                 ((TcpIp_TlsCsmPRFSupportType)(0x2u))
+#define TLS_PRF_NO_SUPPORT                     ((TcpIp_TlsCsmPRFSupportType)(0x3u))
 
 /* Specifies the TcpIp state for a specific EthIf controller */
 typedef uint8 TcpIp_StateType;
@@ -220,7 +258,7 @@ typedef uint8 TcpIp_IpAddrAssignmentType;
 #define TCPIP_IPADDR_ASSIGNMENT_STATIC         ((TcpIp_IpAddrAssignmentType)(0x0u))
 #define TCPIP_IPADDR_ASSIGNMENT_LINKLOCAL_DOIP ((TcpIp_IpAddrAssignmentType)(0x1u))
 #define TCPIP_IPADDR_ASSIGNMENT_DHCP           ((TcpIp_IpAddrAssignmentType)(0x2u))
-#define TCPIP_IPADDR_ASSIGNMENT_LINKLOCAL      ((TcpIp_IpAddrAssignmentType)(0x3u)) /* PRQA S 0791 */
+#define TCPIP_IPADDR_ASSIGNMENT_LINKLOCAL      ((TcpIp_IpAddrAssignmentType)(0x3u))
 #define TCPIP_IPADDR_ASSIGNMENT_IPV6_ROUTER    ((TcpIp_IpAddrAssignmentType)(0x4u))
 #define TCPIP_IPADDR_ASSIGNMENT_ALL            ((TcpIp_IpAddrAssignmentType)(0x5u))
 
@@ -262,7 +300,7 @@ typedef struct
 via a cast to the specific struct type.) */
 #if (TCPIP_SC1 == TCPIP_SCALABILITY_CLASS)
 typedef TcpIp_SockAddrInetType TcpIp_SockAddrType;
-#else  /* TCPIP_SC1 == TCPIP_SCALABILITY_CLASS */
+#else  /* TCPIP_SC1 != TCPIP_SCALABILITY_CLASS */
 typedef TcpIp_SockAddrInet6Type TcpIp_SockAddrType;
 #endif /* TCPIP_SC1 == TCPIP_SCALABILITY_CLASS */
 

@@ -18,6 +18,10 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
+ */
+/* PRQA S 3108-- */
+/*
+ ********************************************************************************
  ************************************************************************************************************************
  ** **
  **  @file               : ComM.c **
@@ -29,7 +33,6 @@
  **  @specification(s)   : AUTOSAR classic Platform R19-11 **
  ** **
  ***********************************************************************************************************************/
-/* PRQA S 3108-- */
 
 /*======================================================================================================================
  *                                       REVISION HISTORY
@@ -127,6 +130,13 @@
  *   V2.1.13  20240122 xiaojian.liang
  *      1.CPT-8068 - Crash in function ComM_PncProcessTimer if ComMPncSupport is true but ComMPncEnabled is false.
  *      2.CPT-7917 - Compile error using GHS compiler with [-Werror, -Wparentheses-equality].
+ *      3.Support multiple partition feature.
+ *   V2.1.14  20241127 shuangyang.fu
+ *      1.CPT-8386 - reconstruct the mainfunction of pnc.
+ *      2.CPT-10596 - Ensure that reqCnt does not change during the state transition process.
+ *      3.CPT-10864 - reconstruct the implementation of ComM_ChGetMaxAllowMode.
+ *      4.CPT-11330 - Remove the state transition that was originally performed in the interface, and instead,
+ *  centralize the state transition in the main function.
  */
 
 /**
@@ -139,6 +149,9 @@
 
     \li PRQA S 1504, 1505 MISRA Rule 8.7 .<br>
     Reason:ComM_UserReqMode and ComM_HandleUserReqest will be used in ComM_Ch.c when enable wake up inhibition.
+
+    \li PRQA S 0777 MISRA Rule 5.4 .<br>
+    Reason:Function name, design needs, namelength set to 31 in C99.
  */
 
 /*=================================================[inclusions]=======================================================*/
@@ -164,6 +177,7 @@
 #if defined(COMM_GLOBAL_NVM_BLOCK_DESCRIPTOR)
 #include "NvM.h"
 #endif
+
 /*======================================================================================================================
  *                                                      Version
 ======================================================================================================================*/
@@ -297,7 +311,7 @@ Std_ReturnType ComM_HandleUserReqest(ComM_UserHandleType User, ComM_ModeType Com
         ret =
             ComM_ChRequstCommModeLimitCheck(userCfgPtr->directChList[index], userCfgPtr->userInChIdex[index], ComMode);
         if (ret == E_OK)
-#endif /* (COMM_MODE_LIMITATION_ENABLED == STD_ON)  || (COMM_WAKEUP_INHIBITION_ENABLED == STD_ON */
+#endif
         {
             ret = ComM_ChRequstCommMode(userCfgPtr->directChList[index], userCfgPtr->userInChIdex[index], ComMode);
         }
@@ -477,14 +491,14 @@ ComM_RequestComMode(ComM_UserHandleType User, ComM_ModeType ComMode)
         SchM_Exit_ComM_COMM_EXCLUSIVE_AREA_0();
 #else
         ComM_UserReqMode[User] = ComMode;
-#endif /* (COMM_MODE_LIMITATION_ENABLED == STD_ON) || (COMM_WAKEUP_INHIBITION_ENABLED == STD_ON */
+#endif
         ret = ComM_HandleUserReqest(User, ComMode);
 #if ((COMM_MODE_LIMITATION_ENABLED == STD_ON) || (COMM_WAKEUP_INHIBITION_ENABLED == STD_ON))
         if ((ret == COMM_E_MODE_LIMITATION) && (ComM_StoreData.inhibitCnt < 0xffffu))
         {
             ComM_StoreData.inhibitCnt++;
         }
-#endif /* (COMM_MODE_LIMITATION_ENABLED == STD_ON) || (COMM_WAKEUP_INHIBITION_ENABLED == STD_ON */
+#endif
     }
     return ret;
 }
@@ -510,10 +524,10 @@ ComM_GetMaxComMode(ComM_UserHandleType User, ComM_ModeType* ComMode)
         ret = E_OK;
         const ComM_UserConfigType* userCfgPtr = &ComM_ConfigPtr->userCfgPtr[User];
         *ComMode = COMM_FULL_COMMUNICATION;
-        ComM_ModeType chMode;
+
         for (uintx index = 0u; index < userCfgPtr->mapAllChListNum; index++)
         {
-            ComM_ChGetMaxAllowMode(userCfgPtr->mapAllChList[index], &chMode);
+            ComM_ModeType chMode = ComM_ChGetMaxAllowMode(userCfgPtr->mapAllChList[index]);
             *ComMode = chMode;
             if (chMode == COMM_NO_COMMUNICATION)
             {
@@ -846,7 +860,7 @@ FUNC(Std_ReturnType, COMM_CODE) ComM_PreventWakeUp(NetworkHandleType Channel, bo
     if (ComM_ValidateChannel(COMM_SID_PREVENTWAKEUP, Channel))
 #endif
     {
-        if (0u != (ComM_StoreData.ecuGroupClass & COMM_ECU_GROUP_CLS_WAKEUP_LIMIT))
+        if (0u != (ComM_StoreData.ecuGroupClass & COMM_WAKEUP_INHIBITION_ACTIVE_BflMask))
         {
             ComM_ChLimitWakeUp(Channel, Status);
             ret = E_OK;
@@ -857,7 +871,7 @@ FUNC(Std_ReturnType, COMM_CODE) ComM_PreventWakeUp(NetworkHandleType Channel, bo
 
 #endif /* COMM_WAKEUP_INHIBITION_ENABLED == STD_ON */
 
-#if (COMM_MODE_LIMITATION_ENABLED == STD_ON) && (COMM_RESET_AFTER_FORCING_NOCOMM == STD_ON)
+#if COMM_MODE_LIMITATION_ENABLED == STD_ON
 /**
  * @ingroup ComM
  * @brief Changes the inhibition status for the channel for changing from COMM_NO_COMMUNICATION to a higher
@@ -868,15 +882,14 @@ FUNC(Std_ReturnType, COMM_CODE) ComM_PreventWakeUp(NetworkHandleType Channel, bo
  * @return E_OK: Successfully changed inhibition status for the channel
  *         E_NOT_OK: Change of inhibition status for the channel failed
  */
-FUNC(Std_ReturnType, COMM_CODE)
-ComM_LimitChannelToNoComMode(NetworkHandleType Channel, boolean Status)
+Std_ReturnType ComM_LimitChannelToNoComMode(NetworkHandleType Channel, boolean Status)
 {
     Std_ReturnType ret = E_NOT_OK;
 #if COMM_DEV_ERROR_DETECT == STD_ON
     if (ComM_ValidateChannel(COMM_SID_LIMITCHANNELTONOCOMMODE, Channel))
 #endif
     {
-        if (0u != (ComM_StoreData.ecuGroupClass & COMM_ECU_GROUP_CLS_NOMODE_LIMIT))
+        if (0u != (ComM_StoreData.ecuGroupClass & COMM_LIMITED_TO_NO_COM_BflMask))
         {
             ComM_ChLimitNoCom(Channel, Status);
             ret = E_OK;
@@ -893,14 +906,14 @@ ComM_LimitChannelToNoComMode(NetworkHandleType Channel, boolean Status)
  * @return E_OK: Successfully changed inhibition status for the ECU
  *         E_NOT_OK: Change of inhibition status for the channel ECU
  */
-FUNC(Std_ReturnType, COMM_CODE) ComM_LimitECUToNoComMode(boolean Status)
+Std_ReturnType ComM_LimitECUToNoComMode(boolean Status)
 {
     Std_ReturnType ret = E_NOT_OK;
 #if COMM_DEV_ERROR_DETECT == STD_ON
     if (ComM_ValidateInitStatus(COMM_SID_LIMITECUTONOCOMMODE))
 #endif
     {
-        if (0u != (ComM_StoreData.ecuGroupClass & COMM_ECU_GROUP_CLS_NOMODE_LIMIT))
+        if (0u != (ComM_StoreData.ecuGroupClass & COMM_LIMITED_TO_NO_COM_BflMask))
         {
             for (uintx chIdex = 0u; chIdex < COMM_CHANNEL_NUMBER; chIdex++)
             {
@@ -911,7 +924,7 @@ FUNC(Std_ReturnType, COMM_CODE) ComM_LimitECUToNoComMode(boolean Status)
     }
     return ret;
 }
-#endif /* COMM_MODE_LIMITATION_ENABLED == STD_ON && COMM_RESET_AFTER_FORCING_NOCOMM == STD_ON */
+#endif
 
 #if (COMM_MODE_LIMITATION_ENABLED == STD_ON) && defined(COMM_GLOBAL_NVM_BLOCK_DESCRIPTOR)
 /**
@@ -986,7 +999,7 @@ FUNC(void, COMM_CODE) ComM_Nm_NetworkMode(NetworkHandleType Channel) /* PRQA S 1
     if (ComM_ValidateChannel(COMM_SID_NM_NETWORKMODE, Channel))
 #endif
     {
-        ComM_ChNmModeInd(Channel, COMM_NM_IND_NETWORK_MODE);
+        ComM_ChannelNmModeIndication(Channel, COMM_NM_IND_NETWORK_MODE);
     }
 }
 
@@ -1002,7 +1015,7 @@ FUNC(void, COMM_CODE) ComM_Nm_PrepareBusSleepMode(NetworkHandleType Channel) /* 
     if (ComM_ValidateChannel(COMM_SID_NM_PREPAREBUSSLEEPMODE, Channel))
 #endif
     {
-        ComM_ChNmModeInd(Channel, COMM_NM_IND_PREPARE_BUSSLEEP);
+        ComM_ChannelNmModeIndication(Channel, COMM_NM_IND_PREPARE_BUSSLEEP);
     }
 }
 
@@ -1018,7 +1031,7 @@ FUNC(void, COMM_CODE) ComM_Nm_BusSleepMode(NetworkHandleType Channel) /* PRQA S 
     if (ComM_ValidateChannel(COMM_SID_NM_BUSSLEEPMODE, Channel))
 #endif
     {
-        ComM_ChNmModeInd(Channel, COMM_NM_IND_BUS_SLEEP);
+        ComM_ChannelNmModeIndication(Channel, COMM_NM_IND_BUS_SLEEP);
     }
 }
 /**
@@ -1446,6 +1459,27 @@ COMM_LOCAL boolean ComM_ValidatePnc(uint8 apiId, PNCHandleType pnc)
     return valid;
 }
 #endif
+#endif
+
+#if COMM_MULTIPLE_PARTITION_ENABLED == STD_ON
+/**
+ * @brief         Returns the ApplicationID of a ComM channel.
+ * @id            0x70
+ * @synchronous   Synchronous
+ * @reentrancy    Reentrant
+ * @retval        The ApplicationID of a ComM channel
+ */
+ApplicationType ComM_GetChannelApplicationID(NetworkHandleType Channel)
+{
+    ApplicationType applicationID = INVALID_OSAPPLICATION;
+#if COMM_DEV_ERROR_DETECT == STD_ON
+    if (ComM_ValidateChannel(COMM_SID_GETCHANNELAPPLICATIONID, Channel))
+#endif
+    {
+        applicationID = ComM_ChannelApplicationID[Channel];
+    }
+    return applicationID;
+}
 #endif
 #define COMM_STOP_SEC_CODE
 #include "ComM_MemMap.h"

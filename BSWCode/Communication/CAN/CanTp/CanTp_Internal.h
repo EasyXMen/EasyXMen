@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                           **
- **  FILENAME    : CanTp_Internal.h                                           **
- **                                                                           **
- **  Created on  : 2021/7/30 14:29:43                                         **
- **  Author      : tao.yu                                                     **
- **  Vendor      :                                                            **
- **  DESCRIPTION : Internal header file of CanTp module.                      **
- **                                                                           **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                     **
- **                                                                           **
- **************************************************************************** */
+ */
 /* PRQA S 3108-- */
+/*
+**************************************************************************** **
+**                                                                           **
+**  FILENAME    : CanTp_Internal.h                                           **
+**                                                                           **
+**  Created on  : 2021/7/30 14:29:43                                         **
+**  Author      : tao.yu                                                     **
+**  Vendor      :                                                            **
+**  DESCRIPTION : Internal header file of CanTp module.                      **
+**                                                                           **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                     **
+**                                                                           **
+**************************************************************************** */
 
 #ifndef CANTP_INTERNAL_H
 #define CANTP_INTERNAL_H
@@ -67,6 +68,13 @@
 
 #if !defined(CANTP_UNUSED)
 #define CANTP_UNUSED(a) (void)(a)
+#endif
+
+/** This macro definition specifies whether the Consecutive Frame (CF) should be transmitted immediately during the
+ * confirmation phase, without waiting for the completion of a main function cycle, when the STmin value in the received
+ * Flow Control (FC) frame is 0. */
+#ifndef CANTP_STMIN_IMMEDIATE_TX_CONFIRMATION
+#define CANTP_STMIN_IMMEDIATE_TX_CONFIRMATION STD_ON /**< Whether transmitted immediately during the confirmation  */
 #endif
 
 /*****************************Development error values ***********************/
@@ -306,28 +314,31 @@ typedef uint8 CanTp_FramePCIType;
 #define CANTP_AE_OFFSET_META_MIX 0u
 /*mix29 meta data AE*/
 #define CANTP_AE_OFFSET_META_MIX29 0u
+
 #if (CPU_BYTE_ORDER == HIGH_BYTE_FIRST)
-/*normal fix meta data SA and TA*/
-#define CANTP_SA_OFFSET_META_NF_MSB 3u
-#define CANTP_TA_OFFSET_META_NF_MSB 2u
-/*mix29 meta data SA and TA*/
-#define CANTP_SA_OFFSET_META_MIX29_MSB 3u
-#define CANTP_TA_OFFSET_META_MIX29_MSB 2u
-
-#define CANTP_SA_FOR_DCM_MSB           1u
-#define CANTP_TA_FOR_DCM_MSB           3u
+#define CANTP_SA_OFFSET_META_IF 3u
+#define CANTP_TA_OFFSET_META_IF 2u
 #else
-/*normal fix meta data SA and TA*/
-#define CANTP_SA_OFFSET_META_NF_LSB    0u
-#define CANTP_TA_OFFSET_META_NF_LSB    1u
-/*mix29 meta data SA and TA*/
-#define CANTP_SA_OFFSET_META_MIX29_LSB 0u
-#define CANTP_TA_OFFSET_META_MIX29_LSB 1u
-
-#define CANTP_SA_FOR_DCM_LSB           0u
-#define CANTP_TA_FOR_DCM_LSB           2u
+#define CANTP_SA_OFFSET_META_IF 0u
+#define CANTP_TA_OFFSET_META_IF 1u
 #endif
-#define CANTP_AE_FOR_DCM 4u
+
+#if (CPU_BYTE_ORDER == HIGH_BYTE_FIRST)
+#define CANTP_SA_OFFSET_META_UPPER 1u
+#define CANTP_TA_OFFSET_META_UPPER 3u
+#else
+#define CANTP_SA_OFFSET_META_UPPER 0u
+#define CANTP_TA_OFFSET_META_UPPER 2u
+#endif
+
+#if (CPU_BYTE_ORDER == HIGH_BYTE_FIRST)
+#define CANTP_SA_OFFSET_META_UPPER 1u
+#define CANTP_TA_OFFSET_META_UPPER 3u
+#else
+
+#define CANTP_SA_OFFSET_META_UPPER 0u
+#define CANTP_TA_OFFSET_META_UPPER 2u
+#endif
 
 /*Event flags*/
 #define CANTP_EVENT_RXBSCHANGED      (uint8)0x01
@@ -846,7 +857,18 @@ extern FUNC(void, CANTP_CODE) CanTp_SaveTxMetaDataInfo(
  */
 extern FUNC(void, CANTP_CODE) CanTp_TxHandleTransmitReq(
     CanTp_ConnectionType* TxSubchannelPtr,
-    P2CONST(CanTp_TxNSduType, AUTOMATIC, CANTP_CONST) TxNSduCfgPtr);
+    P2CONST(CanTp_TxNSduType, AUTOMATIC, CANTP_CONST) TxNSduCfgPtr
+#if (CANTP_SYNCHRONOUS_TRANSMIT == STD_ON)
+    ,
+    uint8 ChannelId
+#endif
+);
+
+/*handling for SF transmitting.*/
+extern FUNC(void, CANTP_CODE) CanTp_TxHandleSFStart(CanTp_ConnectionChannelType* connectionChannel);
+
+/* handling for large SDU transmitting, trying to get TX buffer.*/
+extern FUNC(void, CANTP_CODE) CanTp_TxHandleLargeStart(CanTp_ConnectionChannelType* connectionChannel);
 
 /*construct SF PCI information in local buffer for channel.*/
 extern FUNC(void, CANTP_CODE) CanTp_ConstructSFPci(
@@ -872,7 +894,6 @@ CanTp_ConstructFFPci(
     uint8* dataPtr,
     uint8* totalOffset);
 /* PRQA S 3432-- */ /* MISRA Rule 20.7 */
-
 #if (CANTP_DYN_ID_SUPPORT == STD_ON)
 /*
  * Brief               Construct Tx meta data info.

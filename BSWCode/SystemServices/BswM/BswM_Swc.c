@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : BswM_Swc.c                                                  **
- **                                                                            **
- **  Created on  : 2020-03-24                                                  **
- **  Author      : qinchun.yang                                                **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : BswM_Swc.c                                                  **
+**                                                                            **
+**  Created on  : 2020-03-24                                                  **
+**  Author      : qinchun.yang                                                **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 
 /*******************************************************************************
 **                      Include Section                                       **
@@ -65,7 +66,6 @@
 #define BSWM_START_SEC_CODE
 #include "BswM_MemMap.h"
 
-#if (BSWM_EVENT_RQSTPORT_ENABLE == STD_ON)
 /**
  * This is a notification that an error occurred because the partition containing
  * the mode users of the Mode Declaration Group Prototype was restarted by the
@@ -83,11 +83,10 @@
 FUNC(void, BSWM_SWC_CODE)
 BswM_SwcModeSwitchErrorNotification(uint16 portId)
 {
+#if (BSWM_EVENT_RQSTPORT_ENABLE == STD_ON)
     P2CONST(BswM_EventRqstPortLCfgType, AUTOMATIC, BSWM_CONST) evRqstLCfgPtr;
     P2VAR(BswM_EventRquestPortRuntimeType, AUTOMATIC, BSWM_VAR_CLEARED) evRqstPtr;
     P2CONST(BswM_RuleLcCfgType, AUTOMATIC, BSWM_CONST) ruleLCfgPtr;
-    P2CONST(BswM_PartitionPCCfgType, TYPEDEF, BSWM_CONST) bswmPartPCCfgs;
-    P2CONST(BswM_PartitionLCfgType, TYPEDEF, BSWM_CONST) bswmPartLCfgs;
     BswM_RuleIndexType numOfRules;
     BswM_RuleIndexType idx;
     BswM_RuleIndexType ruleIdx;
@@ -102,21 +101,19 @@ BswM_SwcModeSwitchErrorNotification(uint16 portId)
         result = BswM_GetPartitionIdx(&partIdx);
         if ((boolean)TRUE == result)
         {
-            bswmPartPCCfgs = &(BswM_RuntimeStatus.bswmPartPCCfgs[partIdx]);
-            bswmPartLCfgs = &(BswM_RuntimeStatus.bswmPartLCfgs[partIdx]);
-            numOfModeSwiErrEv = bswmPartPCCfgs->evRqstPCCfg->numOfModeSwiErrEv;
-            evRqstLCfgPtr = bswmPartLCfgs->evRqstLCfg;
+            numOfModeSwiErrEv = BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].evRqstPCCfg->numOfModeSwiErrEv;
+            evRqstLCfgPtr = BswM_RuntimeStatus.bswmPartLCfgs[partIdx].evRqstLCfg;
             for (swcIdx = 0u; swcIdx < numOfModeSwiErrEv; swcIdx++)
             {
                 if (portId == evRqstLCfgPtr->modeSwiErrPort[swcIdx])
                 {
-                    evIdx = bswmPartPCCfgs->evRqstPCCfg->modeSwiErrEvPtr[swcIdx];
-                    evRqstPtr = bswmPartPCCfgs->eventRqstPortRunPtr;
+                    evIdx = BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].evRqstPCCfg->modeSwiErrEvPtr[swcIdx];
+                    evRqstPtr = BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].eventRqstPortRunPtr;
                     evRqstPtr[evIdx] = BSWM_EVENT_IS_SET;
                     if (BSWM_IMMEDIATE == evRqstLCfgPtr->modeSwiErr[swcIdx].process)
                     {
                         numOfRules = evRqstLCfgPtr->modeSwiErr[swcIdx].belongToRlueNum;
-                        ruleLCfgPtr = bswmPartLCfgs->ruleLCfg;
+                        ruleLCfgPtr = BswM_RuntimeStatus.bswmPartLCfgs[partIdx].ruleLCfg;
                         for (idx = 0u; idx < numOfRules; idx++)
                         {
                             ruleIdx = evRqstLCfgPtr->modeSwiErr[swcIdx].belongToRlue[idx];
@@ -132,8 +129,10 @@ BswM_SwcModeSwitchErrorNotification(uint16 portId)
             }
         }
     }
+#else
+    BSWM_PARA_UNUSED(portId);
+#endif /*BSWM_EVENT_RQSTPORT_ENABLE == STD_ON*/
 }
-#endif /* BSWM_EVENT_RQSTPORT_ENABLE == STD_ON */
 
 /*Initialize swc related request port*/
 FUNC(void, BSWM_SWC_CODE)
@@ -141,7 +140,6 @@ BswM_InitSwcRequestPorts(void)
 {
     P2CONST(BswM_ModeRqstPortPCCfgType, AUTOMATIC, BSWM_CONST) modeRqstPCfgPtr;
     P2CONST(BswM_ModeRqstPortRuntimeType, AUTOMATIC, BSWM_VAR_CLEARED) modeRqstPtr;
-    P2CONST(BswM_PartitionPCCfgType, TYPEDEF, BSWM_CONST) bswmPartPCCfgs;
     ApplicationType partIdx;
     boolean result;
     BswM_ModeGroupType numOfSwcModeNoti;
@@ -151,9 +149,8 @@ BswM_InitSwcRequestPorts(void)
     result = BswM_GetPartitionIdx(&partIdx);
     if ((boolean)TRUE == result)
     {
-        bswmPartPCCfgs = &(BswM_RuntimeStatus.bswmPartPCCfgs[partIdx]);
-        modeRqstPCfgPtr = bswmPartPCCfgs->modeRqstPCCfg;
-        modeRqstPtr = bswmPartPCCfgs->modeRqstPortRunPtr;
+        modeRqstPCfgPtr = BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].modeRqstPCCfg;
+        modeRqstPtr = BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].modeRqstPortRunPtr;
         numOfSwcModeNoti = modeRqstPCfgPtr->numOfSwcModeNoti;
         numOfSwcModeReq = modeRqstPCfgPtr->numOfSwcModeReq;
         for (idx = 0u; idx < numOfSwcModeNoti; idx++)
@@ -184,7 +181,7 @@ BswM_InitSwcRequestPorts(void)
     {
         (void)Det_ReportError(BSWM_MODULE_ID, BSWM_INSTANCE_ID, BSWM_API_ID_INIT, BSWM_E_INIT_FAILED);
     }
-#endif /* BSWM_DEV_ERROR_DETECT == STD_ON */
+#endif /*BSWM_DEV_ERROR_DETECT == STD_ON*/
 }
 
 /**
@@ -205,8 +202,6 @@ BswM_SwcModeNotification(BswM_ModeGroupType modeGroup, BswM_ModeType mode)
     P2CONST(BswM_ModeRqstPortLCfgType, AUTOMATIC, BSWM_CONST) modeRqstLCfgPtr;
     P2CONST(BswM_ModeRqstPortRuntimeType, AUTOMATIC, BSWM_VAR_CLEARED) modeRqstPtr;
     P2CONST(BswM_RuleLcCfgType, AUTOMATIC, BSWM_CONST) ruleLCfgPtr;
-    P2CONST(BswM_PartitionPCCfgType, TYPEDEF, BSWM_CONST) bswmPartPCCfgs;
-    P2CONST(BswM_PartitionLCfgType, TYPEDEF, BSWM_CONST) bswmPartLCfgs;
     BswM_RuleIndexType numOfRules;
     BswM_RuleIndexType idx;
     BswM_RuleIndexType ruleIdx;
@@ -220,21 +215,19 @@ BswM_SwcModeNotification(BswM_ModeGroupType modeGroup, BswM_ModeType mode)
         result = BswM_GetPartitionIdx(&partIdx);
         if ((boolean)TRUE == result)
         {
-            bswmPartPCCfgs = &(BswM_RuntimeStatus.bswmPartPCCfgs[partIdx]);
-            bswmPartLCfgs = &(BswM_RuntimeStatus.bswmPartLCfgs[partIdx]);
-            modeRqstPCfgPtr = bswmPartPCCfgs->modeRqstPCCfg;
-            modeRqstLCfgPtr = bswmPartLCfgs->modeRqstLCfg;
+            modeRqstPCfgPtr = BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].modeRqstPCCfg;
+            modeRqstLCfgPtr = BswM_RuntimeStatus.bswmPartLCfgs[partIdx].modeRqstLCfg;
             numOfSwcModeNoti = modeRqstPCfgPtr->numOfSwcModeNoti;
             for (swcIdx = 0u; swcIdx < numOfSwcModeNoti; swcIdx++)
             {
                 if (modeGroup == modeRqstLCfgPtr->swcModeNotisRef[swcIdx])
                 {
-                    modeRqstPtr = bswmPartPCCfgs->modeRqstPortRunPtr;
+                    modeRqstPtr = BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].modeRqstPortRunPtr;
                     modeRqstPtr->swcModeNotiStatus[swcIdx] = mode;
                     if (BSWM_IMMEDIATE == modeRqstLCfgPtr->swcModeNoti[swcIdx].process)
                     {
                         numOfRules = modeRqstLCfgPtr->swcModeNoti[swcIdx].belongToRlueNum;
-                        ruleLCfgPtr = bswmPartLCfgs->ruleLCfg;
+                        ruleLCfgPtr = BswM_RuntimeStatus.bswmPartLCfgs[partIdx].ruleLCfg;
                         for (idx = 0u; idx < numOfRules; idx++)
                         {
                             ruleIdx = modeRqstLCfgPtr->swcModeNoti[swcIdx].belongToRlue[idx];
@@ -270,8 +263,6 @@ BswM_SwcModeRequest(BswM_ModeGroupType modeGroup, BswM_ModeType mode)
     P2CONST(BswM_ModeRqstPortLCfgType, AUTOMATIC, BSWM_CONST) modeRqstLCfgPtr;
     P2CONST(BswM_ModeRqstPortRuntimeType, AUTOMATIC, BSWM_VAR_CLEARED) modeRqstPtr;
     P2CONST(BswM_RuleLcCfgType, AUTOMATIC, BSWM_CONST) ruleLCfgPtr;
-    P2CONST(BswM_PartitionPCCfgType, TYPEDEF, BSWM_CONST) bswmPartPCCfgs;
-    P2CONST(BswM_PartitionLCfgType, TYPEDEF, BSWM_CONST) bswmPartLCfgs;
     BswM_RuleIndexType numOfRules;
     BswM_RuleIndexType idx;
     BswM_RuleIndexType ruleIdx;
@@ -285,21 +276,19 @@ BswM_SwcModeRequest(BswM_ModeGroupType modeGroup, BswM_ModeType mode)
         result = BswM_GetPartitionIdx(&partIdx);
         if ((boolean)TRUE == result)
         {
-            bswmPartPCCfgs = &(BswM_RuntimeStatus.bswmPartPCCfgs[partIdx]);
-            bswmPartLCfgs = &(BswM_RuntimeStatus.bswmPartLCfgs[partIdx]);
-            modeRqstPCfgPtr = bswmPartPCCfgs->modeRqstPCCfg;
-            modeRqstLCfgPtr = bswmPartLCfgs->modeRqstLCfg;
+            modeRqstPCfgPtr = BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].modeRqstPCCfg;
+            modeRqstLCfgPtr = BswM_RuntimeStatus.bswmPartLCfgs[partIdx].modeRqstLCfg;
             numOfSwcModeReq = modeRqstPCfgPtr->numOfSwcModeReq;
             for (swcIdx = 0u; swcIdx < numOfSwcModeReq; swcIdx++)
             {
                 if (modeGroup == modeRqstLCfgPtr->swcModeRqstsRef[swcIdx])
                 {
-                    modeRqstPtr = bswmPartPCCfgs->modeRqstPortRunPtr;
+                    modeRqstPtr = BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].modeRqstPortRunPtr;
                     modeRqstPtr->swcModeRqstStatus[swcIdx] = mode;
                     if (BSWM_IMMEDIATE == modeRqstLCfgPtr->swcModeRqst[swcIdx].process)
                     {
                         numOfRules = modeRqstLCfgPtr->swcModeRqst[swcIdx].belongToRlueNum;
-                        ruleLCfgPtr = bswmPartLCfgs->ruleLCfg;
+                        ruleLCfgPtr = BswM_RuntimeStatus.bswmPartLCfgs[partIdx].ruleLCfg;
                         for (idx = 0u; idx < numOfRules; idx++)
                         {
                             ruleIdx = modeRqstLCfgPtr->swcModeRqst[swcIdx].belongToRlue[idx];
@@ -353,7 +342,6 @@ BswM_GetSwcRqstStatus(BswM_ModeGroupType swcChIdx)
 FUNC(BswM_EventRquestPortRuntimeType, BSWM_NMIF_CODE)
 BswM_GetModeSwiErrNoti(uint16 portId)
 {
-    P2CONST(BswM_PartitionPCCfgType, TYPEDEF, BSWM_CONST) bswmPartPCCfgs;
     BswM_EventRquestPortRuntimeType ret = BSWM_INVALID_U8;
     ApplicationType partIdx;
     boolean result;
@@ -362,16 +350,15 @@ BswM_GetModeSwiErrNoti(uint16 portId)
     result = BswM_GetPartitionIdx(&partIdx);
     if ((boolean)TRUE == result)
     {
-        bswmPartPCCfgs = &(BswM_RuntimeStatus.bswmPartPCCfgs[partIdx]);
-        evIdx = bswmPartPCCfgs->evRqstPCCfg->modeSwiErrEvPtr[portId];
-        ret = bswmPartPCCfgs->eventRqstPortRunPtr[evIdx];
+        evIdx = BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].evRqstPCCfg->modeSwiErrEvPtr[portId];
+        ret = BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].eventRqstPortRunPtr[evIdx];
     }
     return ret;
 }
-#endif /* BSWM_EVENT_RQSTPORT_ENABLE == STD_ON */
+#endif /*BSWM_EVENT_RQSTPORT_ENABLE == STD_ON*/
 /*******************************************************************************
 **                      Private Function Definitions                          **
 *******************************************************************************/
 #define BSWM_STOP_SEC_CODE
 #include "BswM_MemMap.h"
-#endif /* BSWM_RTE_ENABLED == STD_ON */
+#endif /*BSWM_RTE_ENABLED == STD_ON*/

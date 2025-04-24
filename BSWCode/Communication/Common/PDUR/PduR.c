@@ -18,186 +18,52 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : PduR.c                                                      **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : zhengfei.li                                                 **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Implementation for PDUR                                     **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                       **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : PduR.c                                                      **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : zhengfei.li                                                 **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Implementation for PDUR                                     **
+**                                                                            **
+**  SPECIFICATION(S) : AUTOSAR Classic Platform 4.2.2 and R19_11              **
+**                                                                            **
+*******************************************************************************/
 
 /*******************************************************************************
 **                      REVISION   HISTORY                                    **
 *******************************************************************************/
-/* <VERSION>  <DATE>    <AUTHOR>      <REVISION LOG>
- *  V2.0.0    20200622  zhengfei.li   Initial version
- *                                    (Upgrade according to the R19_11 standards)
- *  V2.0.1    20211103  zhengfei.li   add "PDUR_" to some Macro Name
- *  V2.1.0    20211217  zhengfei.li   PB/PC configuration parameter split
- *  V2.1.1    20230901  tong.zhao     fix Bug CPT-6391
- *    In order to optimize the code execution efficiency, modify.
- *  V2.1.2    20231124  tong.zhao     CPD-33590
- *    Code Execution Optimization.
- *  V2.1.3    20240229  tong.zhao
- *    1> Replace standard library functions to iSoft library functions
- *    2> QAC check issue fix
- *  V2.1.4    20240319  tong.zhao     fix Bug CPT-8495
- *    1> PduR_DestPduState can't recovery in gateway when dest bus-off(no TxConfirmation)
- *  V2.1.5    20240419  tong.zhao     fix Bug CPT-8865
- *    1> Modify the logic error that occurs when PduIdType is uint8.
- ******************************************************************************/
-
-/**
-  \page ISOFT_MISRA_Exceptions  MISRA-C:2012 Compliance Exceptions
-    ModeName:PduR<br>
-  RuleSorce:puhua-rule2024-2.rcf
-
-    \li PRQA S 1532 MISRA Rule 8.7 .<br>
-    Reason:In order to make the module code structure clear, the functions are classified.
-
-    \li PRQA S 2877 MISRA Rule 4.1 .<br>
-    Reason:for loop condition is a macro definition, which varies in different projs.
-
-    \li PRQA S 3673 MISRA Rule 8.13 .<br>
-    Reason:variant usage may be different in other Configuration projects.
- */
+/* Refer to PduR.h */
 
 /*******************************************************************************
 **                      Includes                                              **
 *******************************************************************************/
 #include "PduR_Internal.h"
-#include "istd_lib.h"
 #if (STD_OFF == PDUR_ZERO_COST_OPERATION)
-#include "Det.h"
-/*******************************************************************************
-**                      Imported Compiler Switch Check                        **
-*******************************************************************************/
-#define PDUR_C_AR_MAJOR_VERSION 4u
-#define PDUR_C_AR_MINOR_VERSION 2u
-#define PDUR_C_AR_PATCH_VERSION 2u
-#define PDUR_C_SW_MAJOR_VERSION 2u
-#define PDUR_C_SW_MINOR_VERSION 1u
-#define PDUR_C_SW_PATCH_VERSION 6u
+
 /*******************************************************************************
 **                       Version  Check                                       **
 *******************************************************************************/
-#if (PDUR_C_AR_MAJOR_VERSION != PDUR_H_AR_MAJOR_VERSION)
-#error "PduR.c : Mismatch in Specification Major Version"
+#if ((PDUR_CFG_H_SW_MAJOR_VERSION != 2u) || (PDUR_CFG_H_SW_MINOR_VERSION != 3u) || (PDUR_CFG_H_SW_PATCH_VERSION != 1u))
+#error "PduR: Mismatch in Specification Software Version"
 #endif
-#if (PDUR_C_AR_MINOR_VERSION != PDUR_H_AR_MINOR_VERSION)
-#error "PduR.c : Mismatch in Specification Major Version"
-#endif
-#if (PDUR_C_AR_PATCH_VERSION != PDUR_H_AR_PATCH_VERSION)
-#error "PduR.c : Mismatch in Specification Major Version"
-#endif
-#if (PDUR_C_SW_MAJOR_VERSION != PDUR_H_SW_MAJOR_VERSION)
-#error "PduR.c : Mismatch in Specification Major Version"
-#endif
-#if (PDUR_C_SW_MINOR_VERSION != PDUR_H_SW_MINOR_VERSION)
-#error "PduR.c : Mismatch in Specification Major Version"
-#endif
-#if (PDUR_C_SW_PATCH_VERSION != PDUR_H_SW_PATCH_VERSION)
-#error "PduR.c : Mismatch in Specification Major Version"
-#endif
+
 /*******************************************************************************
 **                      Private Variable Definitions                          **
 *******************************************************************************/
-#if (STD_ON == PDUR_DEV_ERROR_DETECT)
 #define PDUR_START_SEC_VAR_INIT_8
 #include "PduR_MemMap.h"
-static VAR(PduR_StateType, PDUR_VAR_POWER_ON_INIT) PduR_Status = PDUR_UNINIT;
+PDUR_LOCAL VAR(PduR_StateType, PDUR_VAR_POWER_ON_INIT) PduR_Status = PDUR_UNINIT;
 #define PDUR_STOP_SEC_VAR_INIT_8
 #include "PduR_MemMap.h"
-#endif
 /*******************************************************************************
 **                      Private Function Declarations                         **
 *******************************************************************************/
-#define PDUR_START_SEC_CODE
-#include "PduR_MemMap.h"
 
-#if (STD_ON == PDUR_TRANSMIT_SUPPORT)
-static FUNC(Std_ReturnType, PDUR_CODE)
-    PduR_UpModeTransmit(PduIdType id, P2CONST(PduInfoType, AUTOMATIC, PDUR_APPL_DATA) info);
-#endif /*STD_ON == PDUR_TRANSMIT_SUPPORT*/
-
-#if (STD_ON == PDUR_CANCEL_TRANSMIT)
-static FUNC(Std_ReturnType, PDUR_CODE) PduR_UpModeCancelTransmit(PduIdType id);
-#endif /*STD_ON == PDUR_CANCEL_TRANSMIT*/
-
-#if (STD_ON == PDUR_CHANGE_PARAMETER)
-static FUNC(Std_ReturnType, PDUR_CODE)
-    PduR_UpModeChangeParameter(PduIdType id, TPParameterType parameter, uint16 value);
-#endif /*STD_ON == PDUR_CHANGE_PARAMETER*/
-
-#if (STD_ON == PDUR_CANCEL_RECEIVE)
-static FUNC(Std_ReturnType, PDUR_CODE) PduR_UpModeCancelReceive(PduIdType id);
-#endif /*STD_ON == PDUR_CANCEL_RECEIVE*/
-
-#if (STD_ON == PDUR_TP_STARTOFRECEPTION_TRANSMIT)
-static FUNC(BufReq_ReturnType, PDUR_CODE) PduR_LoTpStartOfReception(
-    PduIdType id,
-    P2CONST(PduInfoType, AUTOMATIC, PDUR_APPL_DATA) info,
-    PduLengthType TpSduLength,
-    P2VAR(PduLengthType, AUTOMATIC, PDUR_APPL_DATA) bufferSizePtr);
-#endif /*STD_ON == PDUR_TP_STARTOFRECEPTION_TRANSMIT*/
-
-#if (STD_ON == PDUR_TP_COPYRXDATA)
-static FUNC(BufReq_ReturnType, PDUR_CODE) PduR_LoTpCopyRxData(
-    PduIdType id,
-    P2CONST(PduInfoType, AUTOMATIC, PDUR_APPL_DATA) info,
-    P2VAR(PduLengthType, AUTOMATIC, PDUR_APPL_DATA) bufferSizePtr);
-#endif /*STD_ON == PDUR_TP_COPYRXDATA*/
-
-#if (STD_ON == PDUR_TP_RXINDICATION)
-static FUNC(void, PDUR_CODE) PduR_LoTpRxIndication(PduIdType id, Std_ReturnType result);
-#endif /*STD_ON == PDUR_TP_RXINDICATION*/
-
-#if (STD_ON == PDUR_TP_COPYTXDATA)
-static FUNC(BufReq_ReturnType, PDUR_CODE) PduR_LoTpCopyTxData(
-    PduIdType id,
-    P2CONST(PduInfoType, AUTOMATIC, PDUR_APPL_DATA) info,
-    P2CONST(RetryInfoType, AUTOMATIC, PDUR_APPL_DATA) retry,
-    P2VAR(PduLengthType, AUTOMATIC, PDUR_APPL_DATA) availableDataPtr);
-#endif /*STD_ON == PDUR_TP_COPYTXDATA*/
-
-#if (STD_ON == PDUR_TP_TXCONFIRMATION)
-static FUNC(void, PDUR_CODE) PduR_LoTpTxConfirmation(PduIdType id, Std_ReturnType result);
-#endif /*STD_ON == PDUR_TP_TXCONFIRMATION*/
-
-/*Rx If pdu gateway to other If Pdus*/
-#if (STD_ON == PDUR_RX_INDICATION)
-static FUNC(void, PDUR_CODE)
-    PduR_GateWayIfPdu(uint8 DestModule, PduIdType DestPduId, P2CONST(PduInfoType, AUTOMATIC, PDUR_APPL_DATA) InfoPtr);
-#endif /*STD_ON == PDUR_RX_INDICATION*/
-
-/*Called by PduR_IfTriggerTransmit.
- *IfTriggerTransmit GW handle*/
-#if ((STD_ON == PDUR_TRIGGER_TRANSMIT) && (PDUR_TX_BUFFER_SUM > 0u))
-static FUNC(Std_ReturnType, PDUR_CODE)
-    PduR_IfTriggerTransmitGwHandle(PduIdType TxPduId, P2VAR(PduInfoType, AUTOMATIC, PDUR_APPL_DATA) PduInfoPtr);
-#endif
-
-/*Copy RxPdu data to TxBuffer,called by PduR_EnQueueBuffer.
- * Gateway handle*/
-#if ((STD_ON == PDUR_RX_INDICATION) && (PDUR_TX_BUFFER_SUM > 0u))
-static FUNC(void, PDUR_CODE) PduR_CopyRxPduToTxBuffer(
-#if (STD_ON == PDUR_META_DATA_SUPPORT)
-    uint8 MetaDataLength,
-#endif
-    P2VAR(PduR_TxBufferType, AUTOMATIC, PDUR_APPL_DATA) TxBufferPtr,
-    P2CONST(PduInfoType, AUTOMATIC, PDUR_APPL_DATA) PduInfo,
-    PduLengthType PduLength);
-#endif /* STD_ON == PDUR_RX_INDICATION && PDUR_TX_BUFFER_SUM > 0u */
-
-#define PDUR_STOP_SEC_CODE
-#include "PduR_MemMap.h"
 /*******************************************************************************
 **                      Global Variable Definitions                           **
 *******************************************************************************/
@@ -224,49 +90,61 @@ P2CONST(PduR_PBConfigType, PDUR_CONST, PDUR_CONST_PBCFG) PduR_ConfigStd = NULL_P
  * Return              None
  */
 /******************************************************************************/
-FUNC(void, PDUR_CODE)
-PduR_Init(P2CONST(PduR_PBConfigType, AUTOMATIC, PDUR_CONST_PBCFG) ConfigPtr)
+void PduR_Init(const PduR_PBConfigType* ConfigPtr)
 {
-#if ((0u < PDUR_TX_BUFFER_SUM) || (0u < PDUR_TP_BUFFER_SUM))
-    uint16 index;
-#endif
 #if (STD_ON == PDUR_DEV_ERROR_DETECT)
-    boolean detNoErr = TRUE;
-    if (NULL_PTR == ConfigPtr)
+    if ((NULL_PTR == ConfigPtr) || (ConfigPtr->PduRRoutingPathNum > PDUR_ROUTINGPATH_MAX)
+        || (ConfigPtr->routingPathGroupCnt > PDUR_ROUTING_PATH_GROUP_MAX))
     {
-        (void)Det_ReportError(PDUR_MODULE_ID, PDUR_INSTANCE_ID, PDUR_INIT_ID, PDUR_E_INIT_FAILED);
-        detNoErr = FALSE;
+        PduR_Det_ReportError(PDUR_INIT_ID, PDUR_E_INIT_FAILED);
     }
-    if (detNoErr)
+    else
 #endif
     {
         PduR_ConfigStd = ConfigPtr;
-        PduR_InitHandle();
-/*Init TP Buffer*/
-#if (0u < PDUR_TP_BUFFER_SUM)
-        for (index = 0u; index < PDUR_TP_BUFFER_SUM; index++)
-        {
-            PduR_TpBuffer[index].used = FALSE;
-        }
-#endif
-/*Init Tx Buffer*/
-#if (0u < PDUR_TX_BUFFER_SUM)
-        for (index = 0u; index < PDUR_TX_BUFFER_SUM; index++)
-        {
-            uint8 depthCnt, depth;
-            depth = PduR_TxBuffer[index].PduRTxBufferDepth;
-            for (depthCnt = 0u; depthCnt < depth; depthCnt++)
-            {
-                PduR_TxBuffer[index].PduRTxBufferRef[depthCnt].used = FALSE;
-            }
-        }
-#endif
-#if (STD_ON == PDUR_DEV_ERROR_DETECT)
+#if (PDUR_ROUTING_PATH_GROUP_ENABLED == STD_ON)
+        PduR_RoutingPathGroupInit();
+#endif /* PDUR_ROUTING_PATH_GROUP_ENABLED == STD_ON */
+#if (PDUR_NUMBER_OF_QUEUES > 0u)
+        PduR_BufferInit();
+#endif /* PDUR_NUMBER_OF_QUEUES > 0u */
+        PduR_RouteInit();
         PduR_Status = PDUR_ONLINE;
-#endif
     }
-    return;
 }
+#if (STD_ON == PDUR_VERSION_INFO_API)
+/******************************************************************************/
+/*
+ * Brief               This service returns the version information of this module.
+ * ServiceId           0xf1
+ * Sync/Async          Synchronous
+ * Reentrancy          Reentrant
+ * Param-Name[in]      None
+ * Param-Name[out]     versionInfo, Pointer to where to store the version information
+ *                     of this module
+ * Param-Name[in/out]  None
+ * Return              None
+ */
+/******************************************************************************/
+void PduR_GetVersionInfo(Std_VersionInfoType* versionInfo)
+{
+#if (STD_ON == PDUR_DEV_ERROR_DETECT)
+
+    if (NULL_PTR == versionInfo)
+    {
+        PduR_Det_ReportError(PDUR_INIT_ID, PDUR_E_INIT_FAILED);
+    }
+    else
+#endif /* STD_ON == PDUR_DEV_ERROR_DETECT */
+    {
+        (versionInfo)->vendorID = PDUR_VENDOR_ID;
+        (versionInfo)->moduleID = PDUR_MODULE_ID;
+        (versionInfo)->sw_major_version = PDUR_SW_MAJOR_VERSION;
+        (versionInfo)->sw_minor_version = PDUR_SW_MINOR_VERSION;
+        (versionInfo)->sw_patch_version = PDUR_SW_PATCH_VERSION;
+    }
+}
+#endif /* STD_ON == PDUR_VERSION_INFO_API */
 /******************************************************************************/
 /*
  * Brief               Returns the unique identifier of the post-build time
@@ -280,13 +158,12 @@ PduR_Init(P2CONST(PduR_PBConfigType, AUTOMATIC, PDUR_CONST_PBCFG) ConfigPtr)
  * Return              PduR_PBConfigIdType: Identifier of the post-build time configuration
  */
 /******************************************************************************/
-FUNC(PduR_PBConfigIdType, PDUR_CODE)
-PduR_GetConfigurationId(void)
+PduR_PBConfigIdType PduR_GetConfigurationId(void)
 {
 #if (STD_ON == PDUR_DEV_ERROR_DETECT)
     if (PDUR_ONLINE != PduR_Status)
     {
-        (void)Det_ReportError(PDUR_MODULE_ID, PDUR_INSTANCE_ID, PDUR_GETCONFIGURATIONID_ID, PDUR_E_UNINIT);
+        PduR_Det_ReportError(PDUR_GETCONFIGURATIONID_ID, PDUR_E_UNINIT);
     }
 #endif
     return PduR_ConfigStd->PduRConfigId;
@@ -304,49 +181,37 @@ PduR_GetConfigurationId(void)
  * Return              None
  */
 /******************************************************************************/
-FUNC(void, PDUR_CODE)
-PduR_EnableRouting(PduR_RoutingPathGroupIdType id) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
+void PduR_EnableRouting(PduR_RoutingPathGroupIdType id)
 {
-#if (0u < PDUR_ROUTING_PATH_GROUP_MAX)
-    PduIdType destPduId;
-    PduIdType destPduNumber;
-    PduIdType index;
-#endif
 #if (STD_ON == PDUR_DEV_ERROR_DETECT)
-    boolean detNoErr = TRUE;
     if (PDUR_ONLINE != PduR_Status)
     {
-        (void)Det_ReportError(PDUR_MODULE_ID, PDUR_INSTANCE_ID, PDUR_ENABLEROUTING_ID, PDUR_E_UNINIT);
-        detNoErr = FALSE;
+        PduR_Det_ReportError(PDUR_ENABLEROUTING_ID, PDUR_E_UNINIT);
     }
-    if ((detNoErr)
-#if (0u < PDUR_ROUTING_PATH_GROUP_MAX)
-        && ((id >= PDUR_ROUTING_PATH_GROUP_MAX) || (id >= PduR_ConfigStd->PduRRoutingPathGroupNum))
-#endif
-    )
+    else if (id >= PduR_GetRoutingPathGroupCntOfPBConfig())
     {
-        (void)Det_ReportError(
-            PDUR_MODULE_ID,
-            PDUR_INSTANCE_ID,
-            PDUR_ENABLEROUTING_ID,
-            PDUR_E_ROUTING_PATH_GROUP_ID_INVALID);
-        detNoErr = FALSE;
+        PduR_Det_ReportError(PDUR_ENABLEROUTING_ID, PDUR_E_ROUTING_PATH_GROUP_ID_INVALID);
     }
-    if (detNoErr)
+    else
 #endif
     {
-#if (0u < PDUR_ROUTING_PATH_GROUP_MAX)
-        destPduNumber = PDUR_ROUTEPATHGROUP_CFG(id).PduRDestPduRefNumber;
-        for (index = 0u; index < destPduNumber; index++)
+#if (PDUR_ROUTING_PATH_GROUP_ENABLED == STD_ON)
+        SchM_Enter_PduR_ExclusiveArea_Group();
+        PduIdType destPduNumber = PDUR_ROUTEPATHGROUP_CFG(id).PduRDestPduRefNumber;
+        for (PduIdType index = 0u; index < destPduNumber; index++)
         {
-            destPduId = PDUR_ROUTEPATHGROUP_CFG(id).PduRDestPduIdRef[index];
-            PduRIsEnabled[destPduId] = TRUE;
+            PduIdType destPduId = PDUR_ROUTEPATHGROUP_CFG(id).PduRDestPduIdRef[index];
+            if (!PduR_RoutingPathEnabled[destPduId])
+            {
+                PduR_RoutingPathEnabled[destPduId] = TRUE;
+            }
         }
-#endif
+        SchM_Exit_PduR_ExclusiveArea_Group();
+#endif /* PDUR_ROUTING_PATH_GROUP_ENABLED == STD_ON */
     }
     PDUR_NOUSED(id);
-    return;
 }
+
 /******************************************************************************/
 /*
  * Brief               Disables a routing path table
@@ -363,121 +228,88 @@ PduR_EnableRouting(PduR_RoutingPathGroupIdType id) /* PRQA S 1532 */ /* MISRA Ru
  * Return              None
  */
 /******************************************************************************/
-FUNC(void, PDUR_CODE)
-/* PRQA S 1532 ++ */ /* MISRA Rule 8.7 */
-PduR_DisableRouting(PduR_RoutingPathGroupIdType id, boolean initialize)
-/* PRQA S 1532 -- */ /* MISRA Rule 8.7 */
+void PduR_DisableRouting(PduR_RoutingPathGroupIdType id, boolean initialize)
 {
-#if (0u < PDUR_ROUTING_PATH_GROUP_MAX)
-    PduIdType destPduNumber;
-    PduIdType index;
-    PduIdType destPduId;
-#if (PDUR_TX_BUFFER_SUM > 0u)
-    uint16 txBufferId;
-    uint8 cnt, txBufferDepth;
-    boolean clearTxBuffer;
-#endif
-#if (PDUR_GATEWAY_DIRECT_BUFFER_PDU_SUM > 0u)
-    PduIdType gateWayIfPduDirectStateId;
-#endif /* PDUR_GATEWAY_DIRECT_BUFFER_PDU_SUM > 0u */
-#endif
 #if (STD_ON == PDUR_DEV_ERROR_DETECT)
-    boolean detNoErr = TRUE;
     if (PDUR_ONLINE != PduR_Status)
     {
-        (void)Det_ReportError(PDUR_MODULE_ID, PDUR_INSTANCE_ID, PDUR_DISABLEROUTING_ID, PDUR_E_UNINIT);
-        detNoErr = FALSE;
+        PduR_Det_ReportError(PDUR_DISABLEROUTING_ID, PDUR_E_UNINIT);
     }
-    if ((detNoErr)
-#if (0u < PDUR_ROUTING_PATH_GROUP_MAX)
-        && ((id >= PDUR_ROUTING_PATH_GROUP_MAX) || (id >= PduR_ConfigStd->PduRRoutingPathGroupNum))
-#endif
-    )
+    else if (id >= PduR_GetRoutingPathGroupCntOfPBConfig())
     {
-        (void)Det_ReportError(
-            PDUR_MODULE_ID,
-            PDUR_INSTANCE_ID,
-            PDUR_DISABLEROUTING_ID,
-            PDUR_E_ROUTING_PATH_GROUP_ID_INVALID);
-        detNoErr = FALSE;
+        PduR_Det_ReportError(PDUR_DISABLEROUTING_ID, PDUR_E_ROUTING_PATH_GROUP_ID_INVALID);
     }
-    if (detNoErr)
+    else
 #endif
     {
-#if (0u < PDUR_ROUTING_PATH_GROUP_MAX)
-        destPduNumber = PDUR_ROUTEPATHGROUP_CFG(id).PduRDestPduRefNumber;
-        for (index = 0u; index < destPduNumber; index++)
+#if (PDUR_ROUTING_PATH_GROUP_ENABLED == STD_ON)
+        SchM_Enter_PduR_ExclusiveArea_Group();
+        PduIdType destPduNumber = PDUR_ROUTEPATHGROUP_CFG(id).PduRDestPduRefNumber;
+        for (PduIdType index = 0u; index < destPduNumber; index++)
         {
-            destPduId = PDUR_ROUTEPATHGROUP_CFG(id).PduRDestPduIdRef[index];
-#if (PDUR_GATEWAY_DIRECT_BUFFER_PDU_SUM > 0u)
-            gateWayIfPduDirectStateId = PDUR_DESTPDU_CFG(destPduId).PduRGatewayDirectTxStateIndex;
-            if (gateWayIfPduDirectStateId != PDUR_PDU_ID_INVALID)
+            PduIdType destPduId = PDUR_ROUTEPATHGROUP_CFG(id).PduRDestPduIdRef[index];
+            PduR_DestinationRouteStatus[destPduId] = PDUR_RES_INITIAL;
+            if (PduR_RoutingPathEnabled[destPduId])
             {
-                PduR_DestPduState[gateWayIfPduDirectStateId] = PDUR_IDLE;
-            }
-#endif /* PDUR_GATEWAY_DIRECT_BUFFER_PDU_SUM > 0u */
-            if (PduRIsEnabled[destPduId])
-            {
-#if (PDUR_TX_BUFFER_SUM > 0u)
-                txBufferId = PDUR_DESTPDU_CFG(destPduId).PduRDestTxBufferRef;
-                if (PDUR_UNUSED_UINT16 != txBufferId)
+#if (PDUR_NUMBER_OF_QUEUES > 0u)
+                /* FIFO: flush and report PDUR_E_PDU_INSTANCES_LOST to DET (if enable) (SWS_PduR_00663) */
+                PduR_QueueType* queuePtr = PduR_GetQueuePtrOfDestPdu(destPduId);
+                if (queuePtr != NULL_PTR)
                 {
-                    txBufferDepth = PduR_TxBuffer[txBufferId].PduRTxBufferDepth;
-                    if (1u == txBufferDepth)
+                    PduR_BufferType* bufferPtr = PduR_QueueGetHead(queuePtr); /* PRQA S 3678 */ /* MISRA Rule 8.13 */
+                    if (bufferPtr != NULL_PTR)
                     {
-                        if (PDUR_TRIGGERTRANSMIT == PDUR_DESTPDU_CFG(destPduId).PduRDestPduDataProvision)
+                        if (queuePtr->depth == 1u)
                         {
-                            /*the according buffer shall be set to the default value*/
+#if (PDUR_DEFAULT_VALUE_ENABLED == STD_ON)
+                            /* Single buffer: set to the default value with initialize set to true (SWS_PduR_00810) */
                             if (initialize)
                             {
-                                PduR_DestPduDefaultValueSet(destPduId, txBufferId);
+                                PduRDefaultValueType* defaultValuePtr = PduR_GetDefaultValuePtrOfDestPdu(destPduId);
+                                PduR_MetaDataLengthType metaDataLength = PduR_GetMetaDataLengthOfDestPdu(destPduId);
+                                if (defaultValuePtr != NULL_PTR)
+                                {
+                                    bufferPtr->pduCurLength = metaDataLength + defaultValuePtr->DefaultValueLength;
+                                    (void)ILib_memcpy(
+                                        &bufferPtr->data[metaDataLength],
+                                        &PduR_Default_value[defaultValuePtr->DefaultValueStart],
+                                        defaultValuePtr->DefaultValueLength);
+                                }
                             }
-                            clearTxBuffer = FALSE;
+                            else
+#endif /* PDUR_DEFAULT_VALUE_ENABLED == STD_ON */
+                            {
+                                /* Single buffer: do nothing with initialize set to false (SWS_PduR_00810) */
+                            }
                         }
                         else
                         {
-                            clearTxBuffer = TRUE;
-                        }
-                    }
-                    else
-                    {
-                        clearTxBuffer = TRUE;
-                    }
-                    /*clear and the buffer*/
-                    if (clearTxBuffer)
-                    {
-                        if (PduR_TxBuffer[txBufferId].PduRTxBufferRef[0u].used)
-                        {
-                            (void)Det_ReportRuntimeError(
-                                PDUR_MODULE_ID,
-                                PDUR_INSTANCE_ID,
-                                PDUR_DISABLEROUTING_ID,
-                                PDUR_E_PDU_INSTANCES_LOST);
-                        }
-                        for (cnt = 0u; cnt < txBufferDepth; cnt++)
-                        {
-                            PduR_TxBuffer[txBufferId].PduRTxBufferRef[cnt].used = FALSE;
+                            /* Multiple buffer: buffer flush,report DET(SWS_PduR_00663) */
+                            PduR_QueueFlush(queuePtr);
+                            PduR_Det_ReportRuntimeError(PDUR_DISABLEROUTING_ID, PDUR_E_PDU_INSTANCES_LOST);
                         }
                     }
                 }
-#endif /*PDUR_TX_BUFFER_SUM > 0u*/
-                PduRIsEnabled[destPduId] = FALSE;
+#endif /* PDUR_NUMBER_OF_QUEUES > 0u */
+                PduR_RoutingPathEnabled[destPduId] = FALSE;
             }
         }
-#endif
+        SchM_Exit_PduR_ExclusiveArea_Group();
+#endif /* PDUR_ROUTING_PATH_GROUP_ENABLED == STD_ON */
     }
     PDUR_NOUSED(id);
     PDUR_NOUSED(initialize);
-    return;
 }
+
+#if (PDUR_TRANSMIT_SUPPORT == STD_ON)
 /******************************************************************************/
 /*
  * Brief               Requests transmission of an I-PDU.
  * ServiceId           0x49
  * Sync/Async          Asynchronous
  * Reentrancy          Reentrant
- * Param-Name[in]      id: Identification of the I-PDU.
- *                     info: Length and pointer to the buffer of the I-PDU.
+ * Param-Name[in]      TxPduId: Identification of the I-PDU.
+ *                     PduInfoPtr: Length and pointer to the buffer of the I-PDU.
  * Param-Name[out]     None
  * Param-Name[in/out]  None
  * Return              Std_ReturnType (E_OK,E_NOT_OK)
@@ -485,42 +317,63 @@ PduR_DisableRouting(PduR_RoutingPathGroupIdType id, boolean initialize)
  *                     E_NOT_OK - request is not accepted by the destination module;transmission is aborted.
  */
 /******************************************************************************/
-FUNC(Std_ReturnType, PDUR_CODE)
-PduR_Transmit(PduIdType id, P2CONST(PduInfoType, AUTOMATIC, PDUR_APPL_DATA) info)
+Std_ReturnType PduR_Transmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr)
 {
     Std_ReturnType result = E_NOT_OK;
 #if (STD_ON == PDUR_DEV_ERROR_DETECT)
-    boolean detNoErr = TRUE;
     if (PDUR_ONLINE != PduR_Status)
     {
-        (void)Det_ReportError(PDUR_MODULE_ID, PDUR_INSTANCE_ID, PDUR_TRANSMIT_ID, PDUR_E_UNINIT);
-        detNoErr = FALSE;
+        PduR_Det_ReportError(PDUR_TRANSMIT_ID, PDUR_E_UNINIT);
     }
-    if ((detNoErr) && (NULL_PTR == info))
+    else if (TxPduId >= PduR_ConfigStd->PduRSrcPduNum)
     {
-        (void)Det_ReportError(PDUR_MODULE_ID, PDUR_INSTANCE_ID, PDUR_TRANSMIT_ID, PDUR_E_PARAM_POINTER);
-        detNoErr = FALSE;
+        PduR_Det_ReportError(PDUR_TRANSMIT_ID, PDUR_E_PDU_ID_INVALID);
     }
-    if ((detNoErr)
-#if (0u < PDUR_ROUTINGPATH_MAX)
-        && ((id >= PDUR_ROUTINGPATH_MAX) || (id >= PduR_ConfigStd->PduRRoutingPathNum))
-#endif
-    )
+    else if (
+        (NULL_PTR == PduInfoPtr)
+        || ((0u < PduR_GetMetaDataLengthOfSrcPdu(TxPduId)) && (NULL_PTR == PduInfoPtr->MetaDataPtr)))
     {
-        (void)Det_ReportError(PDUR_MODULE_ID, PDUR_INSTANCE_ID, PDUR_TRANSMIT_ID, PDUR_E_PDU_ID_INVALID);
-        detNoErr = FALSE;
+        PduR_Det_ReportError(PDUR_TRANSMIT_ID, PDUR_E_PARAM_POINTER);
     }
-    if (detNoErr)
-#endif
+    else
+#endif /* STD_ON == PDUR_DEV_ERROR_DETECT */
     {
-#if (STD_ON == PDUR_TRANSMIT_SUPPORT)
-        result = PduR_UpModeTransmit(id, info);
-#endif
+        /* Tp route 1:1, If route 1:n, Dependent configuration tool */
+        for (uint8 cnt = 0u; cnt < PduR_GetDestPduNumOfSrcPdu(TxPduId); cnt++)
+        {
+            PduIdType destPduId = PduR_GetDestPduOfRoutingPath(TxPduId, cnt);
+            /* If a routing path group is disabled the PduR shall directly return (SWS_PduR_00805) */
+            if (PduR_IsRoutingPathEnable(destPduId))
+            {
+                Std_ReturnType tmpResult = E_NOT_OK;
+                switch (PduR_GetRouteTypeOfDestPdu(destPduId))
+                {
+                case PDUR_ROUTE_IF_TX_NOBUFFERED:
+                    tmpResult = PduR_PduRIfTransmit(TxPduId, destPduId, PduInfoPtr);
+                    break;
+                case PDUR_ROUTE_TP_TX_NOBUFFERED:
+                    tmpResult = PduR_PduRTpTransmit(TxPduId, destPduId, PduInfoPtr);
+                    break;
+                default:
+                    /* do nothing */
+                    break;
+                }
+
+                /* The PDU Router reports E_OK if at least one destination lower layer reports E_OK.
+                 * (SWS_PduR_xxxxx 4.1.1) */
+                if (tmpResult == E_OK)
+                {
+                    result = E_OK;
+                    PduR_SourceRouteStatus[TxPduId] = PDUR_RES_PENDING;
+                }
+            }
+        }
     }
-    PDUR_NOUSED(id);
-    PDUR_NOUSED(info);
     return result;
 }
+#endif /* PDUR_TRANSMIT_SUPPORT == STD_ON */
+
+#if (PDUR_CANCEL_TRANSMIT == STD_ON)
 /******************************************************************************/
 /*
  * Brief               Requests cancellation of an ongoing transmission of an I-PDU in a lower
@@ -536,217 +389,81 @@ PduR_Transmit(PduIdType id, P2CONST(PduInfoType, AUTOMATIC, PDUR_APPL_DATA) info
  *                     E_NOT_OK - Cancellation was rejected by the destination module.
  */
 /******************************************************************************/
-FUNC(Std_ReturnType, PDUR_CODE)
-PduR_CancelTransmit(PduIdType id)
+Std_ReturnType PduR_CancelTransmit(PduIdType TxPduId)
 {
     Std_ReturnType result = E_NOT_OK;
 #if (STD_ON == PDUR_DEV_ERROR_DETECT)
-    boolean detNoErr = TRUE;
     if (PDUR_ONLINE != PduR_Status)
     {
-        (void)Det_ReportError(PDUR_MODULE_ID, PDUR_INSTANCE_ID, PDUR_CANCELTRANSMIT_ID, PDUR_E_UNINIT);
-        detNoErr = FALSE;
+        PduR_Det_ReportError(PDUR_CANCELTRANSMIT_ID, PDUR_E_UNINIT);
     }
-    if ((detNoErr)
-#if (0u < PDUR_ROUTINGPATH_MAX)
-        && ((id >= PDUR_ROUTINGPATH_MAX) || (id >= PduR_ConfigStd->PduRRoutingPathNum))
-#endif
-    )
+    else if (TxPduId >= PduR_ConfigStd->PduRSrcPduNum)
     {
-        (void)Det_ReportError(PDUR_MODULE_ID, PDUR_INSTANCE_ID, PDUR_CANCELTRANSMIT_ID, PDUR_E_PDU_ID_INVALID);
-        detNoErr = FALSE;
+        PduR_Det_ReportError(PDUR_CANCELTRANSMIT_ID, PDUR_E_PDU_ID_INVALID);
     }
-    if (detNoErr)
+    else
 #endif
     {
-#if (STD_ON == PDUR_CANCEL_TRANSMIT)
-        result = PduR_UpModeCancelTransmit(id);
-#endif
+        /* Only all dest pdu cancel transmit OK,then return OK. */
+        uint8 destPduNum = PduR_GetDestPduNumOfSrcPdu(TxPduId);
+        for (uint8 cnt = 0u; cnt < destPduNum; cnt++)
+        {
+            PduIdType destPduId = PduR_GetDestPduOfRoutingPath(TxPduId, cnt);
+            if (PduR_IsRoutingPathEnable(destPduId))
+            {
+                result = PduR_PduRCanceTransmit(TxPduId, destPduId);
+            }
+
+            if (result != E_OK)
+            {
+                break;
+            }
+        }
     }
-    PDUR_NOUSED(id);
     return result;
 }
-/******************************************************************************/
-/*
- * Brief               Request to change a specific transport protocol parameter (e.g. block size).
- * ServiceId           0x4b
- * Sync/Async          Synchronous
- * Reentrancy          Non Reentrant
- * Param-Name[in]      id: Identifiaction of the I-PDU which the parameter change shall affect.
- *                     parameter: The parameter that shall change.
- *                     value: The new value of the parameter
- * Param-Name[out]     None
- * Param-Name[in/out]  None
- * Return              Std_ReturnType (E_OK,E_NOT_OK)
- *                     E_OK: The parameter was changed successfully.
- *                     E_NOT_OK: The parameter change was rejected.
- */
-/******************************************************************************/
-FUNC(Std_ReturnType, PDUR_CODE)
-PduR_ChangeParameter(PduIdType id, TPParameterType parameter, uint16 value)
-{
-    Std_ReturnType result = E_NOT_OK;
-#if (STD_ON == PDUR_DEV_ERROR_DETECT)
-    boolean detNoErr = TRUE;
-    if (PDUR_ONLINE != PduR_Status)
-    {
-        (void)Det_ReportError(PDUR_MODULE_ID, PDUR_INSTANCE_ID, PDUR_CHANGEPARAMETER_ID, PDUR_E_UNINIT);
-        detNoErr = FALSE;
-    }
-    if ((detNoErr)
-#if (0u < PDUR_ROUTINGPATH_MAX)
-        && ((id >= PDUR_ROUTINGPATH_MAX) || (id >= PduR_ConfigStd->PduRRoutingPathNum)
-            || (!PDUR_ROUTINGPATH_CFG(id).TpRoute))
-#endif
-    )
-    {
-        (void)Det_ReportError(PDUR_MODULE_ID, PDUR_INSTANCE_ID, PDUR_CHANGEPARAMETER_ID, PDUR_E_PDU_ID_INVALID);
-        detNoErr = FALSE;
-    }
-    if (detNoErr)
-#endif
-    {
-#if (STD_ON == PDUR_CHANGE_PARAMETER)
-        result = PduR_UpModeChangeParameter(id, parameter, value);
-#endif
-    }
-    PDUR_NOUSED(id);
-    PDUR_NOUSED(parameter);
-    PDUR_NOUSED(value);
-    return result;
-}
+#endif /* PDUR_CANCEL_TRANSMIT == STD_ON */
+
+#if (PDUR_CANCEL_RECEIVE == STD_ON)
 /******************************************************************************/
 /*
  * Brief               Requests cancellation of an ongoing reception of an I-PDU in a lower layer transport protocol
- * module. ServiceId           0x4c Sync/Async          Synchronous Reentrancy          Non Reentrant Param-Name[in] id:
- * Identification of the I-PDU to be cancelled. Param-Name[out]     None Param-Name[in/out]  None Return Std_ReturnType
- * (E_OK,E_NOT_OK) E_OK: Cancellation was executed successfully by the destination module. E_NOT_OK: Cancellation was
- * rejected by the destination module.
+ * module. ServiceId           0x4c Sync/Async          Synchronous Reentrancy          Non Reentrant Param-Name[in]
+ * RxPduId: Identification of the I-PDU to be cancelled. Param-Name[out]     None Param-Name[in/out]  None Return
+ * Std_ReturnType (E_OK,E_NOT_OK) E_OK: Cancellation was executed successfully by the destination module. E_NOT_OK:
+ * Cancellation was rejected by the destination module.
  */
 /******************************************************************************/
-FUNC(Std_ReturnType, PDUR_CODE)
-/* PRQA S 1532 ++ */ /* MISRA Rule 8.7 */
-PduR_CancelReceive(PduIdType id)
-/* PRQA S 1532 -- */ /* MISRA Rule 8.7 */
+Std_ReturnType PduR_CancelReceive(PduIdType RxPduId)
 {
     Std_ReturnType result = E_NOT_OK;
+    PduIdType srcPduId = PduR_GetSrcPduOfDestPdu(RxPduId, 0u);
 #if (STD_ON == PDUR_DEV_ERROR_DETECT)
-    boolean detNoErr = TRUE;
-    PduIdType pduRSourcePduId;
     if (PDUR_ONLINE != PduR_Status)
     {
-        (void)Det_ReportError(PDUR_MODULE_ID, PDUR_INSTANCE_ID, PDUR_CANCELRECEIVE_ID, PDUR_E_UNINIT);
-        detNoErr = FALSE;
+        PduR_Det_ReportError(PDUR_CANCELRECEIVE_ID, PDUR_E_UNINIT);
     }
-    if ((detNoErr) && (id >= PduR_ConfigStd->PduRDestPduNum))
+    else if (RxPduId >= PduR_ConfigStd->PduRRoutingPathNum)
     {
-        (void)Det_ReportError(PDUR_MODULE_ID, PDUR_INSTANCE_ID, PDUR_CANCELRECEIVE_ID, PDUR_E_PDU_ID_INVALID);
-        detNoErr = FALSE;
+        PduR_Det_ReportError(PDUR_CANCELRECEIVE_ID, PDUR_E_PDU_ID_INVALID);
     }
-    pduRSourcePduId = PDUR_DESTPDU_CFG(id).PduRSrcPduRef;
-    if ((detNoErr) && (!PDUR_ROUTINGPATH_CFG(pduRSourcePduId).TpRoute))
+    else if (FALSE == PduR_IsTpRouteOfSrcPdu(srcPduId))
     {
-        (void)Det_ReportError(PDUR_MODULE_ID, PDUR_INSTANCE_ID, PDUR_CANCELRECEIVE_ID, PDUR_E_PDU_ID_INVALID);
-        detNoErr = FALSE;
+        PduR_Det_ReportError(PDUR_CANCELRECEIVE_ID, PDUR_E_PDU_ID_INVALID);
     }
-    if (detNoErr)
+    else
 #endif
     {
-#if (STD_ON == PDUR_CANCEL_RECEIVE)
-        result = PduR_UpModeCancelReceive(id);
-#endif
+        if (PduR_IsRoutingPathEnable(RxPduId))
+        {
+            result = PduR_PduRCancelReceive(srcPduId, RxPduId);
+        }
     }
-    PDUR_NOUSED(id);
     return result;
 }
+#endif /* PDUR_CANCEL_RECEIVE == STD_ON */
 
-/*Store the If Rx Pdu data to buffer.
- *Just hoping to be called by PduR_Internal.c.
- *Not the AUTOSAR standard API.*/
-#if ((STD_ON == PDUR_RX_INDICATION) && (PDUR_TX_BUFFER_SUM > 0u))
-FUNC(void, PDUR_CODE)
-PduR_EnQueueBuffer(PduIdType PduId, P2CONST(PduInfoType, AUTOMATIC, PDUR_APPL_DATA) PduInfo)
-{
-    uint8 bufferDepth;
-    uint16 bufferId;
-    uint8 cnt;
-    boolean findIdleBuffer = FALSE;
-    PduLengthType pduMaxLength;
-    PduR_TxBufferType* txBufferPtr;
-#if (STD_ON == PDUR_META_DATA_SUPPORT)
-    uint8 metaDataLength;
-    metaDataLength = PDUR_DESTPDU_CFG(PduId).MetaDataLength;
-#endif
-    bufferId = PDUR_DESTPDU_CFG(PduId).PduRDestTxBufferRef;
-    pduMaxLength = PduR_TxBuffer[bufferId].PduRPduMaxLength;
-    bufferDepth = PduR_TxBuffer[bufferId].PduRTxBufferDepth;
-    if (pduMaxLength > PduInfo->SduLength)
-    {
-        pduMaxLength = PduInfo->SduLength;
-    }
-    if (1u == bufferDepth)
-    {
-        txBufferPtr = &(PduR_TxBuffer[bufferId].PduRTxBufferRef[0u]);
-        PduR_CopyRxPduToTxBuffer(
-#if (STD_ON == PDUR_META_DATA_SUPPORT)
-            metaDataLength,
-#endif
-            txBufferPtr,
-            PduInfo,
-            pduMaxLength);
-    }
-    if (bufferDepth > 1u)
-    {
-        for (cnt = 0u; (cnt < bufferDepth) && (!findIdleBuffer); cnt++)
-        {
-            if (!PduR_TxBuffer[bufferId].PduRTxBufferRef[cnt].used)
-            {
-                findIdleBuffer = TRUE;
-                txBufferPtr = &(PduR_TxBuffer[bufferId].PduRTxBufferRef[cnt]);
-                PduR_CopyRxPduToTxBuffer(
-#if (STD_ON == PDUR_META_DATA_SUPPORT)
-                    metaDataLength,
-#endif
-                    txBufferPtr,
-                    PduInfo,
-                    pduMaxLength);
-            }
-        }
-        /*all buffer is used, the FIFO is flushed and IF GW flag reset */
-        if (!findIdleBuffer)
-        {
-            txBufferPtr = &(PduR_TxBuffer[bufferId].PduRTxBufferRef[0u]);
-            PduR_CopyRxPduToTxBuffer(
-#if (STD_ON == PDUR_META_DATA_SUPPORT)
-                metaDataLength,
-#endif
-                txBufferPtr,
-                PduInfo,
-                pduMaxLength);
-            for (cnt = 1u; cnt < bufferDepth; cnt++)
-            {
-                PduR_TxBuffer[bufferId].PduRTxBufferRef[cnt].used = FALSE;
-            }
-#if (PDUR_GATEWAY_DIRECT_BUFFER_PDU_SUM > 0u)
-            PduIdType gateWayIfPduDirectStateId = PDUR_DESTPDU_CFG(PduId).PduRGatewayDirectTxStateIndex;
-            if (gateWayIfPduDirectStateId != PDUR_PDU_ID_INVALID)
-            {
-                PduR_DestPduState[gateWayIfPduDirectStateId] = PDUR_IDLE;
-            }
-#endif /* PDUR_GATEWAY_DIRECT_BUFFER_PDU_SUM > 0u */
-            (void)Det_ReportRuntimeError(
-                PDUR_MODULE_ID,
-                PDUR_INSTANCE_ID,
-                PDUR_IFRXINDICATION_ID,
-                PDUR_E_PDU_INSTANCES_LOST);
-        }
-    }
-    return;
-}
-#endif /* STD_ON == PDUR_RX_INDICATION && PDUR_TX_BUFFER_SUM > 0u */
-
-#define PDUR_STOP_SEC_CODE
-#include "PduR_MemMap.h"
+#if (PDUR_RX_INDICATION == STD_ON)
 /******************************************************************************/
 /*
  * Brief               Indication of a received I-PDU from a lower layer communication interface module.
@@ -758,83 +475,40 @@ PduR_EnQueueBuffer(PduIdType PduId, P2CONST(PduInfoType, AUTOMATIC, PDUR_APPL_DA
  * (SduDataPtr) containing the I-PDU. Param-Name[out]     None Param-Name[in/out]  None Return              None
  */
 /******************************************************************************/
-#define PDUR_START_SEC_IFRXINDICATION_CALLBACK_CODE
-#include "PduR_MemMap.h"
-FUNC(void, PDUR_CODE)
-PduR_IfRxIndication(PduIdType RxPduId, P2CONST(PduInfoType, AUTOMATIC, PDUR_APPL_DATA) PduInfoPtr)
+void PduR_IfRxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr)
 {
-#if (STD_ON == PDUR_RX_INDICATION)
-    uint8 cnt, pduDestSum;
-    PduIdType pduRDestPduId;
-    PduIdType destModulePduId;
-    uint8 destModuleIndex;
-    const PduRDestPduType* destPduConfigPtr;
-    const PduRRoutingPathType* pdurRoutingPathCfgPtr;
-    const PduIdType* destPduIdRefPtr;
-#endif
 #if (STD_ON == PDUR_DEV_ERROR_DETECT)
-    boolean detNoErr = TRUE;
     if (PDUR_ONLINE != PduR_Status)
     {
-        (void)Det_ReportError(PDUR_MODULE_ID, PDUR_INSTANCE_ID, PDUR_IFRXINDICATION_ID, PDUR_E_UNINIT);
-        detNoErr = FALSE;
+        PduR_Det_ReportError(PDUR_IFRXINDICATION_ID, PDUR_E_UNINIT);
     }
-    if ((detNoErr)
-        && ((NULL_PTR == PduInfoPtr) || (NULL_PTR == PduInfoPtr->SduDataPtr)
-#if (STD_ON == PDUR_META_DATA_SUPPORT)
-            || ((0u < PDUR_SRCEPDU_CFG(RxPduId).MetaDataLength) && (NULL_PTR == PduInfoPtr->MetaDataPtr))
-#endif
-                ))
+    else if (
+        (NULL_PTR == PduInfoPtr) || (NULL_PTR == PduInfoPtr->SduDataPtr)
+        || ((0u < PduR_GetMetaDataLengthOfSrcPdu(RxPduId)) && (NULL_PTR == PduInfoPtr->MetaDataPtr)))
     {
-        (void)Det_ReportError(PDUR_MODULE_ID, PDUR_INSTANCE_ID, PDUR_IFRXINDICATION_ID, PDUR_E_PARAM_POINTER);
-        detNoErr = FALSE;
+        PduR_Det_ReportError(PDUR_IFRXINDICATION_ID, PDUR_E_PARAM_POINTER);
     }
-    if ((detNoErr)
-#if (0u < PDUR_ROUTINGPATH_MAX)
-        && ((RxPduId >= PDUR_ROUTINGPATH_MAX) || (RxPduId >= PduR_ConfigStd->PduRRoutingPathNum)
-            || (PDUR_ROUTINGPATH_CFG(RxPduId).TpRoute))
-#endif
-    )
+    else if ((RxPduId >= PduR_ConfigStd->PduRSrcPduNum) || (TRUE == PDUR_ROUTINGPATH_CFG(RxPduId).TpRoute))
     {
-        (void)Det_ReportError(PDUR_MODULE_ID, PDUR_INSTANCE_ID, PDUR_IFRXINDICATION_ID, PDUR_E_PDU_ID_INVALID);
-        detNoErr = FALSE;
+        PduR_Det_ReportError(PDUR_IFRXINDICATION_ID, PDUR_E_PDU_ID_INVALID);
     }
-    if (detNoErr)
+    else
 #endif
     {
-#if (STD_ON == PDUR_RX_INDICATION)
-        pdurRoutingPathCfgPtr = &PDUR_ROUTINGPATH_CFG(RxPduId);
-        destPduIdRefPtr = pdurRoutingPathCfgPtr->PduRDestPduIdRef;
-        pduDestSum = pdurRoutingPathCfgPtr->PduDestSum;
-        for (cnt = 0u; cnt < pduDestSum; cnt++)
+        uint8 destPduNum = PduR_GetDestPduNumOfSrcPdu(RxPduId);
+        for (uint8 cnt = 0u; cnt < destPduNum; cnt++)
         {
-            pduRDestPduId = destPduIdRefPtr[cnt];
-            destPduConfigPtr = &PDUR_DESTPDU_CFG(pduRDestPduId);
-            destModulePduId = destPduConfigPtr->PduRDestModulePduIndex;
-            destModuleIndex = destPduConfigPtr->BswModuleIndex;
-            if (PduRIsEnabled[pduRDestPduId])
+            PduIdType destPduId = PduR_GetDestPduOfRoutingPath(RxPduId, cnt);
+            if (PduR_IsRoutingPathEnable(destPduId))
             {
-                if (!destPduConfigPtr->GateWayRoute)
-                {
-                    if (NULL_PTR != PduR_BswModuleConfigData[destModuleIndex].ModuleIfRxIndicationApi)
-                    {
-                        PduR_BswModuleConfigData[destModuleIndex].ModuleIfRxIndicationApi(destModulePduId, PduInfoPtr);
-                    }
-                }
-                else
-                {
-                    PduR_GateWayIfPdu(destModuleIndex, pduRDestPduId, PduInfoPtr);
-                }
+                PduR_PduRIfRxIndication(RxPduId, destPduId, PduInfoPtr);
             }
         }
-#endif /*STD_ON == PDUR_RX_INDICATION*/
     }
-    PDUR_NOUSED(RxPduId);
-    PDUR_NOUSED(PduInfoPtr);
-    return;
 }
-#define PDUR_STOP_SEC_IFRXINDICATION_CALLBACK_CODE
-#include "PduR_MemMap.h"
+#endif /* PDUR_RX_INDICATION == STD_ON */
+
+#if (PDUR_TX_CONFIRMATION == STD_ON)
 /******************************************************************************/
 /*
  * Brief               The lower layer communication interface module confirms the transmission of an IPDU.
@@ -847,75 +521,28 @@ PduR_IfRxIndication(PduIdType RxPduId, P2CONST(PduInfoType, AUTOMATIC, PDUR_APPL
  * Return              None
  */
 /******************************************************************************/
-#define PDUR_START_SEC_IFTXCONFIRMATION_CALLBACK_CODE
-#include "PduR_MemMap.h"
-FUNC(void, PDUR_CODE)
-PduR_IfTxConfirmation(PduIdType TxPduId)
+void PduR_IfTxConfirmation(PduIdType TxPduId)
 {
-#if (STD_ON == PDUR_TX_CONFIRMATION)
-    PduIdType srcPduId;
-    uint8 srcPduModuleIndex;
-    PduR_UpIfTxConfirmation_FuncPtrType pduR_UpIfTxConfirmationApi;
-    const PduRSrcPduType* srcPduConfigPtr;
-    const PduRDestPduType* destPduConfigPtr;
-#endif
 #if (STD_ON == PDUR_DEV_ERROR_DETECT)
-    boolean detNoErr = TRUE;
     if (PDUR_ONLINE != PduR_Status)
     {
-        (void)Det_ReportError(PDUR_MODULE_ID, PDUR_INSTANCE_ID, PDUR_IFTXCONFIRMATION_ID, PDUR_E_UNINIT);
-        detNoErr = FALSE;
+        PduR_Det_ReportError(PDUR_IFTXCONFIRMATION_ID, PDUR_E_UNINIT);
     }
-    if ((detNoErr) && (TxPduId >= PduR_ConfigStd->PduRDestPduNum))
+    else if (TxPduId >= PduR_ConfigStd->PduRRoutingPathNum)
     {
-        (void)Det_ReportError(PDUR_MODULE_ID, PDUR_INSTANCE_ID, PDUR_IFTXCONFIRMATION_ID, PDUR_E_PDU_ID_INVALID);
-        detNoErr = FALSE;
+        PduR_Det_ReportError(PDUR_IFTXCONFIRMATION_ID, PDUR_E_PDU_ID_INVALID);
     }
-    if (detNoErr)
+    else
 #endif
     {
-#if (STD_ON == PDUR_TX_CONFIRMATION)
-        destPduConfigPtr = &PDUR_DESTPDU_CFG(TxPduId);
-        srcPduId = destPduConfigPtr->PduRSrcPduRef;
-        if (!PDUR_ROUTINGPATH_CFG(srcPduId).TpRoute)
-        {
-            srcPduConfigPtr = &PDUR_SRCEPDU_CFG(srcPduId);
-            srcPduModuleIndex = srcPduConfigPtr->BswModuleIndex;
-            /*Transmit route*/
-            if (!destPduConfigPtr->GateWayRoute)
-            {
-                pduR_UpIfTxConfirmationApi = PduR_BswModuleConfigData[srcPduModuleIndex].ModuleTxConfirmationApi;
-                if ((NULL_PTR != pduR_UpIfTxConfirmationApi) && (srcPduConfigPtr->PduRSrcPduUpTxConf))
-                {
-                    PduIdType upTxStateId = srcPduConfigPtr->UpTxconfirmStateIndex;
-                    PduIdType srcUpPduId = srcPduConfigPtr->PduRDestModulePduIndex;
-                    /*route 1:1 Pdu from up module to lo If module*/
-                    if (PDUR_PDU_ID_INVALID == upTxStateId)
-                    {
-                        pduR_UpIfTxConfirmationApi(srcUpPduId);
-                    }
-                    /*route 1:n Pdu from up module to lo If module,only the first Lo TxConfirm call Up TxConfirm*/
-                    else
-                    {
-                        PduR_MulticastIfPduTxConfirmationHandle(upTxStateId, srcUpPduId, pduR_UpIfTxConfirmationApi);
-                    }
-                }
-            }
-            /*Gateway route*/
-            else
-            {
-#if (PDUR_TX_BUFFER_SUM > 0u)
-                PduR_IfTxConfirmationGatewayHandle(TxPduId);
-#endif
-            }
-        }
-#endif /*STD_ON == PDUR_TX_CONFIRMATION*/
+        /* Only the first confirmation is accepted (SWS_PDUR_xxxxx AR 4.2.2) */
+        PduIdType srcPduId = PduR_GetSrcPduOfDestPdu(TxPduId, 0u);
+        PduR_PduRIfTxConfirmation(srcPduId, TxPduId, E_OK);
     }
-    PDUR_NOUSED(TxPduId);
-    return;
 }
-#define PDUR_STOP_SEC_IFTXCONFIRMATION_CALLBACK_CODE
-#include "PduR_MemMap.h"
+#endif /* PDUR_TX_CONFIRMATION == STD_ON */
+
+#if (PDUR_TRIGGER_TRANSMIT == STD_ON)
 /******************************************************************************/
 /*
  * Brief               Within this API, the upper layer module (called module) shall check whether the
@@ -935,62 +562,186 @@ PduR_IfTxConfirmation(PduIdType TxPduId)
  * Return              None
  */
 /******************************************************************************/
-#define PDUR_START_SEC_IFTRIGGERTRANSMIT_CALLBACK_CODE
-#include "PduR_MemMap.h"
-FUNC(Std_ReturnType, PDUR_CODE)
-PduR_IfTriggerTransmit(PduIdType TxPduId, P2VAR(PduInfoType, AUTOMATIC, PDUR_APPL_DATA) PduInfoPtr)
+Std_ReturnType PduR_IfTriggerTransmit(PduIdType TxPduId, PduInfoType* PduInfoPtr)
 {
     Std_ReturnType result = E_NOT_OK;
-#if (STD_ON == PDUR_TRIGGER_TRANSMIT)
-    PduIdType srcPduId;
-    PduIdType srcUpPduId;
-    uint8 srcModuleIndex;
-#endif
 #if (STD_ON == PDUR_DEV_ERROR_DETECT)
-    boolean detNoErr = TRUE;
     if (PDUR_ONLINE != PduR_Status)
     {
-        (void)Det_ReportError(PDUR_MODULE_ID, PDUR_INSTANCE_ID, PDUR_IFTRIGGERTRANSMIT_ID, PDUR_E_UNINIT);
-        detNoErr = FALSE;
+        PduR_Det_ReportError(PDUR_IFTRIGGERTRANSMIT_ID, PDUR_E_UNINIT);
     }
-    if ((detNoErr) && (TxPduId >= PduR_ConfigStd->PduRDestPduNum))
+    else if (TxPduId >= PduR_ConfigStd->PduRRoutingPathNum)
     {
-        (void)Det_ReportError(PDUR_MODULE_ID, PDUR_INSTANCE_ID, PDUR_IFTRIGGERTRANSMIT_ID, PDUR_E_PDU_ID_INVALID);
-        detNoErr = FALSE;
+        PduR_Det_ReportError(PDUR_IFTRIGGERTRANSMIT_ID, PDUR_E_PDU_ID_INVALID);
     }
-    if (detNoErr)
+    else if ((PduInfoPtr == NULL_PTR) || (PduInfoPtr->SduDataPtr == NULL_PTR))
+    {
+        PduR_Det_ReportError(PDUR_IFTRIGGERTRANSMIT_ID, PDUR_E_PARAM_POINTER);
+    }
+    else
 #endif
     {
-#if (STD_ON == PDUR_TRIGGER_TRANSMIT)
-        srcPduId = PDUR_DESTPDU_CFG(TxPduId).PduRSrcPduRef;
-        if ((PduRIsEnabled[TxPduId]) && (!PDUR_ROUTINGPATH_CFG(srcPduId).TpRoute))
-        {
-            /*Transmit route handle*/
-            if (!PDUR_DESTPDU_CFG(TxPduId).GateWayRoute)
-            {
-                srcModuleIndex = PDUR_SRCEPDU_CFG(srcPduId).BswModuleIndex;
-                if (NULL_PTR != PduR_BswModuleConfigData[srcModuleIndex].ModuleTriggertransmitApi)
-                {
-                    srcUpPduId = PDUR_SRCEPDU_CFG(srcPduId).PduRDestModulePduIndex;
-                    result = PduR_BswModuleConfigData[srcModuleIndex].ModuleTriggertransmitApi(srcUpPduId, PduInfoPtr);
-                }
-            }
-            /*Gateway route handle*/
-            else
-            {
-#if (PDUR_TX_BUFFER_SUM > 0u)
-                result = PduR_IfTriggerTransmitGwHandle(TxPduId, PduInfoPtr);
-#endif /*PDUR_TX_BUFFER_SUM > 0u*/
-            }
-        }
-#endif /*STD_ON == PDUR_TRIGGER_TRANSMIT*/
+        PduIdType srcPduId = PduR_GetSrcPduOfDestPdu(TxPduId, 0u);
+        result = PduR_PduRTriggerTransmit(srcPduId, TxPduId, PduInfoPtr);
     }
-    PDUR_NOUSED(TxPduId);
-    PDUR_NOUSED(PduInfoPtr);
     return result;
 }
-#define PDUR_STOP_SEC_IFTRIGGERTRANSMIT_CALLBACK_CODE
-#include "PduR_MemMap.h"
+#endif /* PDUR_TRIGGER_TRANSMIT == STD_ON */
+
+#if (PDUR_TP_COPYRXDATA == STD_ON)
+/******************************************************************************/
+/*
+ * Brief               This function is called to provide the received data of an I-PDU segment (N-PDU) to the upper
+ * layer. Each call to this function provides the next part of the I-PDU data. The size of the remaining data is written
+ * to the position indicated by bufferSizePtr. ServiceId           0x44 Sync/Async          Synchronous Reentrancy
+ * Reentrant Param-Name[in]      id: Identification of the received I-PDU. info: Provides the source buffer (SduDataPtr)
+ * and the number of bytes to be copied (SduLength). An SduLength of 0 can be used to query the current amount of
+ * available buffer in the upper layer module. In this case, the SduDataPtr may be a NULL_PTR. Param-Name[out]
+ * bufferSizePtr: Available receive buffer after data has been copied. Param-Name[in/out]  None Return
+ * BufReq_ReturnType(BUFREQ_OK,BUFREQ_E_NOT_OK) BUFREQ_OK: Data copied successfully BUFREQ_E_NOT_OK: Data was not copied
+ * because an error occurred.
+ */
+/******************************************************************************/
+BufReq_ReturnType PduR_TpCopyRxData(PduIdType id, const PduInfoType* info, PduLengthType* bufferSizePtr)
+{
+    BufReq_ReturnType bufQeqReturn = BUFREQ_E_NOT_OK;
+#if (STD_ON == PDUR_DEV_ERROR_DETECT)
+    if (PDUR_ONLINE != PduR_Status)
+    {
+        PduR_Det_ReportError(PDUR_TPCOPYRXDATA_ID, PDUR_E_UNINIT);
+    }
+    else if ((id >= PduR_ConfigStd->PduRSrcPduNum) || (FALSE == PDUR_ROUTINGPATH_CFG(id).TpRoute))
+    {
+        PduR_Det_ReportError(PDUR_TPCOPYRXDATA_ID, PDUR_E_PDU_ID_INVALID);
+    }
+    else if ((NULL_PTR == info) || (NULL_PTR == bufferSizePtr))
+    {
+        PduR_Det_ReportError(PDUR_TPCOPYRXDATA_ID, PDUR_E_PARAM_POINTER);
+    }
+    else
+#endif
+    {
+        uint8 destPduNum = PduR_GetDestPduNumOfSrcPdu(id);
+#if PDUR_TRANSPORT_PROTOCOL_GATEWAYING_ENABLED == STD_ON \
+    || PDUR_TRANSPORT_PROTOCOL_FORWARDING_BUFFERED_ENABLED == STD_ON
+        PduLengthType bufferSizeMin = PDUR_PDU_LENGTH_INVALID;
+#endif
+        for (uint8 cnt = 0u; cnt < destPduNum; cnt++) /* PRQA S 0771 */ /* MISRA Rule 15.4 */
+        {
+            PduIdType destPduId = PduR_GetDestPduOfRoutingPath(id, cnt);
+            if (!PduR_IsRoutingPathEnable(destPduId))
+            {
+                continue;
+            }
+
+            PduR_RouteType routeType = PduR_GetRouteTypeOfDestPdu(destPduId);
+#if PDUR_TRANSPORT_PROTOCOL_FORWARDING_NOBUFFERED_ENABLED == STD_ON
+            /* Only support 1:1 routing for transport protocol I-PDU forwarding */
+            if (routeType == PDUR_ROUTE_TP_RX_NOBUFFERED)
+            {
+                bufQeqReturn = PduR_CopyRxDataForward(destPduId, info, bufferSizePtr);
+                break;
+            }
+#endif /* PDUR_TRANSPORT_PROTOCOL_FORWARDING_NOBUFFERED_ENABLED == STD_ON */
+
+#if PDUR_TRANSPORT_PROTOCOL_GATEWAYING_ENABLED == STD_ON \
+    || PDUR_TRANSPORT_PROTOCOL_FORWARDING_BUFFERED_ENABLED == STD_ON
+            if ((routeType == PDUR_ROUTE_TP_RX_BUFFERED) || (routeType == PDUR_ROUTE_TP_GW_BUFFERED))
+            {
+                if (PduR_SourceRouteStatus[id] != PDUR_RES_PENDING)
+                {
+                    break;
+                }
+
+                PduLengthType bufferSize;
+                if (PduR_PduRCopyRxDataBuffered(id, destPduId, info, &bufferSize) == BUFREQ_OK)
+                {
+                    bufQeqReturn = BUFREQ_OK;
+                    if (bufferSizeMin > bufferSize)
+                    {
+                        bufferSizeMin = bufferSize;
+                    }
+                }
+
+                if ((bufQeqReturn == BUFREQ_OK) && ((cnt + 1u) == destPduNum))
+                {
+                    *bufferSizePtr = bufferSizeMin;
+                }
+            }
+#endif /* PDUR_TRANSPORT_PROTOCOL_GATEWAYING_ENABLED == STD_ON \
+          || PDUR_TRANSPORT_PROTOCOL_FORWARDING_BUFFERED_ENABLED == STD_ON */
+        }
+    }
+    return bufQeqReturn;
+}
+#endif /* PDUR_TP_COPYRXDATA == STD_ON */
+
+#if (PDUR_TP_RXINDICATION == STD_ON)
+/******************************************************************************/
+/*
+ * Brief               Called after an I-PDU has been received via the TP API, the result indicates
+ *                     whether the transmission was successful or not.
+ * ServiceId           0x45
+ * Sync/Async          Synchronous
+ * Reentrancy          Reentrant
+ * Param-Name[in]      id: Identification of the received I-PDU.
+ *                     result: Result of the reception.
+ * Param-Name[out]     None
+ * Param-Name[in/out]  None
+ * Return              None
+ */
+/******************************************************************************/
+void PduR_TpRxIndication(PduIdType id, Std_ReturnType result)
+{
+#if (STD_ON == PDUR_DEV_ERROR_DETECT)
+    if (PDUR_ONLINE != PduR_Status)
+    {
+        PduR_Det_ReportError(PDUR_TPRXINDICATION_ID, PDUR_E_UNINIT);
+    }
+    else if ((id >= PduR_ConfigStd->PduRSrcPduNum) || (FALSE == PDUR_ROUTINGPATH_CFG(id).TpRoute))
+    {
+        PduR_Det_ReportError(PDUR_TPRXINDICATION_ID, PDUR_E_PDU_ID_INVALID);
+    }
+    else
+#endif
+    {
+        uint8 destPduNum = PduR_GetDestPduNumOfSrcPdu(id);
+        for (uint8 cnt = 0u; cnt < destPduNum; cnt++) /* PRQA S 0771 */ /* MISRA Rule 15.4 */
+        {
+            PduIdType destPduId = PduR_GetDestPduOfRoutingPath(id, cnt);
+            PduR_RouteType routeType = PduR_GetRouteTypeOfDestPdu(destPduId);
+
+#if PDUR_TRANSPORT_PROTOCOL_FORWARDING_NOBUFFERED_ENABLED == STD_ON
+            if (routeType == PDUR_ROUTE_TP_RX_NOBUFFERED)
+            {
+                PduR_TpRxIndicationForward(destPduId, result);
+                break;
+            }
+#endif /* PDUR_TRANSPORT_PROTOCOL_FORWARDING_NOBUFFERED_ENABLED == STD_ON */
+#if PDUR_TRANSPORT_PROTOCOL_GATEWAYING_ENABLED == STD_ON \
+    || PDUR_TRANSPORT_PROTOCOL_FORWARDING_BUFFERED_ENABLED == STD_ON
+            if ((routeType == PDUR_ROUTE_TP_RX_BUFFERED) || (routeType == PDUR_ROUTE_TP_GW_BUFFERED))
+            {
+                if (PduR_SourceRouteStatus[id] != PDUR_RES_PENDING)
+                {
+                    break;
+                }
+
+                PduR_PduRTpRxIndicationBuffered(id, destPduId, result);
+
+                if ((cnt + 1u) == destPduNum)
+                {
+                    PduR_SourceRouteStatus[id] = PDUR_RES_INITIAL;
+                }
+            }
+#endif /* PDUR_TRANSPORT_PROTOCOL_GATEWAYING_ENABLED == STD_ON \
+          || PDUR_TRANSPORT_PROTOCOL_FORWARDING_BUFFERED_ENABLED == STD_ON */
+        }
+    }
+}
+#endif /* PDUR_TP_RXINDICATION == STD_ON */
+
+#if (PDUR_TP_STARTOFRECEPTION_TRANSMIT == STD_ON)
 /******************************************************************************/
 /*
  * Brief               This function is called at the start of receiving an N-SDU. The N-SDU might be
@@ -1023,165 +774,96 @@ PduR_IfTriggerTransmit(PduIdType TxPduId, P2VAR(PduInfoType, AUTOMATIC, PDUR_APP
  *                     provided; reception is aborted. bufferSizePtr remains unchanged.
  */
 /******************************************************************************/
-#define PDUR_START_SEC_TPSTARTOFRECEPTION_CALLBACK_CODE
-#include "PduR_MemMap.h"
-FUNC(BufReq_ReturnType, PDUR_CODE)
-PduR_TpStartOfReception(
+BufReq_ReturnType PduR_TpStartOfReception(
     PduIdType id,
-    P2CONST(PduInfoType, AUTOMATIC, PDUR_APPL_DATA) info,
+    const PduInfoType* info,
     PduLengthType TpSduLength,
-    P2VAR(PduLengthType, AUTOMATIC, PDUR_APPL_DATA) bufferSizePtr)
+    PduLengthType* bufferSizePtr)
 {
     BufReq_ReturnType bufQeqReturn = BUFREQ_E_NOT_OK;
 #if (STD_ON == PDUR_DEV_ERROR_DETECT)
-    boolean detNoErr = TRUE;
     if (PDUR_ONLINE != PduR_Status)
     {
-        (void)Det_ReportError(PDUR_MODULE_ID, PDUR_INSTANCE_ID, PDUR_TPSTARTOFRECEPTION_ID, PDUR_E_UNINIT);
-        detNoErr = FALSE;
+        PduR_Det_ReportError(PDUR_TPSTARTOFRECEPTION_ID, PDUR_E_UNINIT);
     }
-    if ((detNoErr)
-#if (0u < PDUR_ROUTINGPATH_MAX)
-        && ((id >= PDUR_ROUTINGPATH_MAX) || (id >= PduR_ConfigStd->PduRRoutingPathNum)
-            || (!PDUR_ROUTINGPATH_CFG(id).TpRoute))
-#endif
-    )
+    else if ((id >= PduR_ConfigStd->PduRSrcPduNum) || (FALSE == PDUR_ROUTINGPATH_CFG(id).TpRoute))
     {
-        (void)Det_ReportError(PDUR_MODULE_ID, PDUR_INSTANCE_ID, PDUR_TPSTARTOFRECEPTION_ID, PDUR_E_PDU_ID_INVALID);
-        detNoErr = FALSE;
+        PduR_Det_ReportError(PDUR_TPSTARTOFRECEPTION_ID, PDUR_E_PDU_ID_INVALID);
     }
-    if ((detNoErr)
-        && ((NULL_PTR == bufferSizePtr)
-#if (STD_ON == PDUR_META_DATA_SUPPORT)
-            || ((0u < PDUR_SRCEPDU_CFG(id).MetaDataLength) && (NULL_PTR == info->MetaDataPtr))
-#endif
-                ))
+    else if (
+        (NULL_PTR == bufferSizePtr)
+        || ((NULL_PTR != info) && (0u < PduR_GetMetaDataLengthOfSrcPdu(id)) && (NULL_PTR == info->MetaDataPtr)))
     {
-        (void)Det_ReportError(PDUR_MODULE_ID, PDUR_INSTANCE_ID, PDUR_TPSTARTOFRECEPTION_ID, PDUR_E_PARAM_POINTER);
-        detNoErr = FALSE;
+        PduR_Det_ReportError(PDUR_TPSTARTOFRECEPTION_ID, PDUR_E_PARAM_POINTER);
     }
-    if (detNoErr)
+    else
 #endif
     {
-#if (STD_ON == PDUR_TP_STARTOFRECEPTION_TRANSMIT)
-        bufQeqReturn = PduR_LoTpStartOfReception(id, info, TpSduLength, bufferSizePtr);
-#endif
+        uint8 destPduNum = PduR_GetDestPduNumOfSrcPdu(id);
+#if PDUR_TRANSPORT_PROTOCOL_GATEWAYING_ENABLED == STD_ON \
+    || PDUR_TRANSPORT_PROTOCOL_FORWARDING_BUFFERED_ENABLED == STD_ON
+        PduLengthType bufferSizeMin = PDUR_PDU_LENGTH_INVALID;
+#endif /* PDUR_TRANSPORT_PROTOCOL_GATEWAYING_ENABLED == STD_ON \
+          || PDUR_TRANSPORT_PROTOCOL_FORWARDING_BUFFERED_ENABLED == STD_ON */
+        for (uint8 cnt = 0u; cnt < destPduNum; cnt++) /* PRQA S 0771 */ /* MISRA Rule 15.4 */
+        {
+            PduIdType destPduId = PduR_GetDestPduOfRoutingPath(id, cnt);
+            if (!PduR_IsRoutingPathEnable(destPduId))
+            {
+                continue;
+            }
+
+            PduR_RouteType routeType = PduR_GetRouteTypeOfDestPdu(destPduId);
+#if PDUR_TRANSPORT_PROTOCOL_FORWARDING_NOBUFFERED_ENABLED == STD_ON
+            /* Only support 1:1 routing for transport protocol I-PDU forwarding */
+            if (routeType == PDUR_ROUTE_TP_RX_NOBUFFERED)
+            {
+                bufQeqReturn = PduR_StartOfReceptionForward(destPduId, info, TpSduLength, bufferSizePtr);
+                break;
+            }
+#endif /* PDUR_TRANSPORT_PROTOCOL_FORWARDING_NOBUFFERED_ENABLED == STD_ON */
+
+#if PDUR_TRANSPORT_PROTOCOL_GATEWAYING_ENABLED == STD_ON \
+    || PDUR_TRANSPORT_PROTOCOL_FORWARDING_BUFFERED_ENABLED == STD_ON
+            if ((routeType == PDUR_ROUTE_TP_RX_BUFFERED) || (routeType == PDUR_ROUTE_TP_GW_BUFFERED))
+            {
+                if (PduR_SourceRouteStatus[id] != PDUR_RES_INITIAL)
+                {
+                    break;
+                }
+
+                PduLengthType bufferSize;
+                if (PduR_PduRStartOfReceptionBuffered(id, destPduId, info, TpSduLength, &bufferSize) == BUFREQ_OK)
+                {
+                    bufQeqReturn = BUFREQ_OK;
+                    if (bufferSizeMin > bufferSize)
+                    {
+                        bufferSizeMin = bufferSize;
+                    }
+                }
+
+                if ((cnt + 1u) == destPduNum)
+                {
+                    if (bufQeqReturn == BUFREQ_OK)
+                    {
+                        *bufferSizePtr = bufferSizeMin;
+                        PduR_SourceRouteStatus[id] = PDUR_RES_PENDING;
+                    }
+                    else
+                    {
+                        bufQeqReturn = BUFREQ_E_OVFL;
+                    }
+                }
+            }
+#endif /* PDUR_TRANSPORT_PROTOCOL_GATEWAYING_ENABLED == STD_ON \
+          || PDUR_TRANSPORT_PROTOCOL_FORWARDING_BUFFERED_ENABLED == STD_ON */
+        }
     }
-    PDUR_NOUSED(id);
-    PDUR_NOUSED(info);
-    PDUR_NOUSED(TpSduLength);
-    PDUR_NOUSED(bufferSizePtr);
     return bufQeqReturn;
 }
-#define PDUR_STOP_SEC_TPSTARTOFRECEPTION_CALLBACK_CODE
-#include "PduR_MemMap.h"
-/******************************************************************************/
-/*
- * Brief               This function is called to provide the received data of an I-PDU segment (N-PDU) to the upper
- * layer. Each call to this function provides the next part of the I-PDU data. The size of the remaining data is written
- * to the position indicated by bufferSizePtr. ServiceId           0x44 Sync/Async          Synchronous Reentrancy
- * Reentrant Param-Name[in]      id: Identification of the received I-PDU. info: Provides the source buffer (SduDataPtr)
- * and the number of bytes to be copied (SduLength). An SduLength of 0 can be used to query the current amount of
- * available buffer in the upper layer module. In this case, the SduDataPtr may be a NULL_PTR. Param-Name[out]
- * bufferSizePtr: Available receive buffer after data has been copied. Param-Name[in/out]  None Return
- * BufReq_ReturnType(BUFREQ_OK,BUFREQ_E_NOT_OK) BUFREQ_OK: Data copied successfully BUFREQ_E_NOT_OK: Data was not copied
- * because an error occurred.
- */
-/******************************************************************************/
-#define PDUR_START_SEC_TPCOPYRXDATA_CALLBACK_CODE
-#include "PduR_MemMap.h"
-FUNC(BufReq_ReturnType, PDUR_CODE)
-PduR_TpCopyRxData(
-    PduIdType id,
-    P2CONST(PduInfoType, AUTOMATIC, PDUR_APPL_DATA) info,
-    P2VAR(PduLengthType, AUTOMATIC, PDUR_APPL_DATA) bufferSizePtr)
-{
-    BufReq_ReturnType bufQeqReturn = BUFREQ_E_NOT_OK;
-#if (STD_ON == PDUR_DEV_ERROR_DETECT)
-    boolean detNoErr = TRUE;
-    if (PDUR_ONLINE != PduR_Status)
-    {
-        (void)Det_ReportError(PDUR_MODULE_ID, PDUR_INSTANCE_ID, PDUR_TPCOPYRXDATA_ID, PDUR_E_UNINIT);
-        detNoErr = FALSE;
-    }
-    if ((detNoErr)
-#if (0u < PDUR_ROUTINGPATH_MAX)
-        && ((id >= PDUR_ROUTINGPATH_MAX) || (id >= PduR_ConfigStd->PduRRoutingPathNum)
-            || (!PDUR_ROUTINGPATH_CFG(id).TpRoute))
-#endif
-    )
-    {
-        (void)Det_ReportError(PDUR_MODULE_ID, PDUR_INSTANCE_ID, PDUR_TPCOPYRXDATA_ID, PDUR_E_PDU_ID_INVALID);
-        detNoErr = FALSE;
-    }
-    if ((detNoErr) && ((NULL_PTR == info) || (NULL_PTR == bufferSizePtr)))
-    {
-        (void)Det_ReportError(PDUR_MODULE_ID, PDUR_INSTANCE_ID, PDUR_TPCOPYRXDATA_ID, PDUR_E_PARAM_POINTER);
-        detNoErr = FALSE;
-    }
-    if (detNoErr)
-#endif
-    {
-#if (STD_ON == PDUR_TP_COPYRXDATA)
-        bufQeqReturn = PduR_LoTpCopyRxData(id, info, bufferSizePtr);
-#endif
-    }
-    PDUR_NOUSED(id);
-    PDUR_NOUSED(info);
-    PDUR_NOUSED(bufferSizePtr);
-    return bufQeqReturn;
-}
-#define PDUR_STOP_SEC_TPCOPYRXDATA_CALLBACK_CODE
-#include "PduR_MemMap.h"
-/******************************************************************************/
-/*
- * Brief               Called after an I-PDU has been received via the TP API, the result indicates
- *                     whether the transmission was successful or not.
- * ServiceId           0x45
- * Sync/Async          Synchronous
- * Reentrancy          Reentrant
- * Param-Name[in]      id: Identification of the received I-PDU.
- *                     result: Result of the reception.
- * Param-Name[out]     None
- * Param-Name[in/out]  None
- * Return              None
- */
-/******************************************************************************/
-#define PDUR_START_SEC_TPRXINDICATION_CALLBACK_CODE
-#include "PduR_MemMap.h"
-FUNC(void, PDUR_CODE)
-PduR_TpRxIndication(PduIdType id, Std_ReturnType result)
-{
-#if (STD_ON == PDUR_DEV_ERROR_DETECT)
-    boolean detNoErr = TRUE;
-    if (PDUR_ONLINE != PduR_Status)
-    {
-        (void)Det_ReportError(PDUR_MODULE_ID, PDUR_INSTANCE_ID, PDUR_TPRXINDICATION_ID, PDUR_E_UNINIT);
-        detNoErr = FALSE;
-    }
-    if ((detNoErr)
-#if (0u < PDUR_ROUTINGPATH_MAX)
-        && ((id >= PDUR_ROUTINGPATH_MAX) || (id >= PduR_ConfigStd->PduRRoutingPathNum)
-            || (!PDUR_ROUTINGPATH_CFG(id).TpRoute))
-#endif
-    )
-    {
-        (void)Det_ReportError(PDUR_MODULE_ID, PDUR_INSTANCE_ID, PDUR_TPRXINDICATION_ID, PDUR_E_PDU_ID_INVALID);
-        detNoErr = FALSE;
-    }
-    if (detNoErr)
-#endif
-    {
-#if (STD_ON == PDUR_TP_RXINDICATION)
-        PduR_LoTpRxIndication(id, result);
-#endif
-    }
-    PDUR_NOUSED(id);
-    PDUR_NOUSED(result);
-    return;
-}
-#define PDUR_STOP_SEC_TPRXINDICATION_CALLBACK_CODE
-#include "PduR_MemMap.h"
+#endif /* PDUR_TP_STARTOFRECEPTION_TRANSMIT == STD_ON */
+
+#if (PDUR_TP_COPYTXDATA == STD_ON)
 /******************************************************************************/
 /*
  * Brief               This function is called to acquire the transmit data of an I-PDU segment (N-PDU).
@@ -1215,45 +897,35 @@ PduR_TpRxIndication(PduIdType id, Std_ReturnType result)
  * copied. Request failed.
  */
 /******************************************************************************/
-#define PDUR_START_SEC_TPCOPYTXDATA_CALLBACK_CODE
-#include "PduR_MemMap.h"
-FUNC(BufReq_ReturnType, PDUR_CODE)
-PduR_TpCopyTxData(
+BufReq_ReturnType PduR_TpCopyTxData(
     PduIdType id,
-    P2CONST(PduInfoType, AUTOMATIC, PDUR_APPL_DATA) info,
-    P2CONST(RetryInfoType, AUTOMATIC, PDUR_APPL_DATA) retry,
-    P2VAR(PduLengthType, AUTOMATIC, PDUR_APPL_DATA) availableDataPtr)
+    const PduInfoType* info,
+    const RetryInfoType* retry,
+    PduLengthType* availableDataPtr)
 {
     BufReq_ReturnType bufQeqReturn = BUFREQ_E_NOT_OK;
 #if (STD_ON == PDUR_DEV_ERROR_DETECT)
-    boolean detNoErr = TRUE;
-    PduIdType srcPdu;
-    srcPdu = PDUR_DESTPDU_CFG(id).PduRSrcPduRef;
     if (PDUR_ONLINE != PduR_Status)
     {
-        (void)Det_ReportError(PDUR_MODULE_ID, PDUR_INSTANCE_ID, PDUR_TPCOPYTXDATA_ID, PDUR_E_UNINIT);
-        detNoErr = FALSE;
+        PduR_Det_ReportError(PDUR_TPCOPYTXDATA_ID, PDUR_E_UNINIT);
     }
-    if ((detNoErr) && ((id >= PduR_ConfigStd->PduRDestPduNum) || (!PDUR_ROUTINGPATH_CFG(srcPdu).TpRoute)))
+    else if ((id >= PduR_ConfigStd->PduRRoutingPathNum) || !PduR_IsTpRouteOfDestPdu(id))
     {
-        (void)Det_ReportError(PDUR_MODULE_ID, PDUR_INSTANCE_ID, PDUR_TPCOPYTXDATA_ID, PDUR_E_PDU_ID_INVALID);
-        detNoErr = FALSE;
+        PduR_Det_ReportError(PDUR_TPCOPYTXDATA_ID, PDUR_E_PDU_ID_INVALID);
     }
-    if (detNoErr)
+    else
 #endif
     {
-#if (STD_ON == PDUR_TP_COPYTXDATA)
-        bufQeqReturn = PduR_LoTpCopyTxData(id, info, retry, availableDataPtr);
-#endif
+        if (PduR_IsRoutingPathEnable(id))
+        {
+            bufQeqReturn = PduR_PduRCopyTxData(id, info, retry, availableDataPtr);
+        }
     }
-    PDUR_NOUSED(id);
-    PDUR_NOUSED(info);
-    PDUR_NOUSED(retry);
-    PDUR_NOUSED(availableDataPtr);
     return bufQeqReturn;
 }
-#define PDUR_STOP_SEC_TPCOPYTXDATA_CALLBACK_CODE
-#include "PduR_MemMap.h"
+#endif /* PDUR_TP_COPYTXDATA == STD_ON */
+
+#if (PDUR_TP_TXCONFIRMATION == STD_ON)
 /******************************************************************************/
 /*
  * Brief               This function is called after the I-PDU has been transmitted on its network, the
@@ -1268,518 +940,28 @@ PduR_TpCopyTxData(
  * Return              None
  */
 /******************************************************************************/
-#define PDUR_START_SEC_TPTXCONFIRMATION_CALLBACK_CODE
-#include "PduR_MemMap.h"
-FUNC(void, PDUR_CODE)
-PduR_TpTxConfirmation(PduIdType id, Std_ReturnType result)
+void PduR_TpTxConfirmation(PduIdType id, Std_ReturnType result)
 {
+    PduIdType srcPdu = PduR_GetSrcPduOfDestPdu(id, 0u);
 #if (STD_ON == PDUR_DEV_ERROR_DETECT)
     boolean detNoErr = TRUE;
-    PduIdType srcPdu;
-    srcPdu = PDUR_DESTPDU_CFG(id).PduRSrcPduRef;
     if (PDUR_ONLINE != PduR_Status)
     {
-        (void)Det_ReportError(PDUR_MODULE_ID, PDUR_INSTANCE_ID, PDUR_TPTXCONFIRMATION_ID, PDUR_E_UNINIT);
+        PduR_Det_ReportError(PDUR_TPTXCONFIRMATION_ID, PDUR_E_UNINIT);
         detNoErr = FALSE;
     }
-    if ((detNoErr) && ((id >= PduR_ConfigStd->PduRDestPduNum) || (!PDUR_ROUTINGPATH_CFG(srcPdu).TpRoute)))
+    if ((detNoErr) && ((id >= PduR_ConfigStd->PduRRoutingPathNum) || (FALSE == PDUR_ROUTINGPATH_CFG(srcPdu).TpRoute)))
     {
-        (void)Det_ReportError(PDUR_MODULE_ID, PDUR_INSTANCE_ID, PDUR_TPTXCONFIRMATION_ID, PDUR_E_PDU_ID_INVALID);
+        PduR_Det_ReportError(PDUR_TPTXCONFIRMATION_ID, PDUR_E_PDU_ID_INVALID);
         detNoErr = FALSE;
     }
     if (detNoErr)
 #endif
     {
-#if (STD_ON == PDUR_TP_TXCONFIRMATION)
-        PduR_LoTpTxConfirmation(id, result);
-#endif
+        PduR_PduRTpTxConfirmation(srcPdu, id, result);
     }
-    PDUR_NOUSED(id);
-    PDUR_NOUSED(result);
-    return;
 }
-#define PDUR_STOP_SEC_TPTXCONFIRMATION_CALLBACK_CODE
-#include "PduR_MemMap.h"
-/*******************************************************************************
-**                      Private Function Definitions                          **
-*******************************************************************************/
-#define PDUR_START_SEC_CODE
-#include "PduR_MemMap.h"
-#if (STD_ON == PDUR_TRANSMIT_SUPPORT)
-static FUNC(Std_ReturnType, PDUR_CODE)
-    PduR_UpModeTransmit(PduIdType id, P2CONST(PduInfoType, AUTOMATIC, PDUR_APPL_DATA) info)
-{
-    Std_ReturnType result = E_NOT_OK;
-    PduIdType pduRDestPduId;
-    PduIdType loModulePduId;
-    uint8 loModuleIndex;
-    uint8 pduDestSum;
-    uint8 cnt;
-    const PduRDestPduType* destPduConfigPtr;
-    const PduRRoutingPathType* pdurRoutingPathCfgPtr;
-    pdurRoutingPathCfgPtr = &PDUR_ROUTINGPATH_CFG(id);
-    pduDestSum = pdurRoutingPathCfgPtr->PduDestSum;
-    /*route one up module pdu to tp module,just support 1:1*/
-    if (pdurRoutingPathCfgPtr->TpRoute)
-    {
-        if (1u == pduDestSum)
-        {
-            pduRDestPduId = pdurRoutingPathCfgPtr->PduRDestPduIdRef[0u];
-            destPduConfigPtr = &PDUR_DESTPDU_CFG(pduRDestPduId);
-            loModulePduId = destPduConfigPtr->PduRDestModulePduIndex;
-            loModuleIndex = destPduConfigPtr->BswModuleIndex;
-            if ((PduRIsEnabled[pduRDestPduId])
-                && (NULL_PTR != PduR_BswModuleConfigData[loModuleIndex].ModuleTpTransmitApi))
-            {
-                result = PduR_BswModuleConfigData[loModuleIndex].ModuleTpTransmitApi(loModulePduId, info);
-            }
-        }
-    }
-    /*route one up module pdu to if modules (pdus)*/
-    else
-    {
-        for (cnt = 0u; cnt < pduDestSum; cnt++)
-        {
-            pduRDestPduId = pdurRoutingPathCfgPtr->PduRDestPduIdRef[cnt];
-            destPduConfigPtr = &PDUR_DESTPDU_CFG(pduRDestPduId);
-            loModulePduId = destPduConfigPtr->PduRDestModulePduIndex;
-            loModuleIndex = destPduConfigPtr->BswModuleIndex;
-            if ((PduRIsEnabled[pduRDestPduId])
-                && (NULL_PTR != PduR_BswModuleConfigData[loModuleIndex].ModuleIfTransmitApi))
-            {
-                if (E_OK == PduR_BswModuleConfigData[loModuleIndex].ModuleIfTransmitApi(loModulePduId, info))
-                {
-                    result = E_OK;
-                }
-            }
-        }
-        if ((1u < pduDestSum) && (E_OK == result))
-        {
-            PduR_MulticastIfPduTxPending(id);
-        }
-    }
-    return result;
-}
-#endif /*STD_ON == PDUR_TRANSMIT_SUPPORT*/
-
-#if (STD_ON == PDUR_CANCEL_TRANSMIT)
-static FUNC(Std_ReturnType, PDUR_CODE) PduR_UpModeCancelTransmit(PduIdType id)
-{
-    Std_ReturnType result = E_NOT_OK;
-    boolean resultOk = TRUE;
-    PduIdType pduRDestPduId;
-    PduIdType loModulePduId;
-    uint8 loModuleIndex;
-    uint8 pduDestSum;
-    uint8 cnt;
-    pduDestSum = PDUR_ROUTINGPATH_CFG(id).PduDestSum;
-    /*Only all dest pdu cancel transmit OK,then return OK.*/
-    for (cnt = 0u; (cnt < pduDestSum) && (resultOk); cnt++)
-    {
-        pduRDestPduId = PDUR_ROUTINGPATH_CFG(id).PduRDestPduIdRef[cnt];
-        loModulePduId = PDUR_DESTPDU_CFG(pduRDestPduId).PduRDestModulePduIndex;
-        loModuleIndex = PDUR_DESTPDU_CFG(pduRDestPduId).BswModuleIndex;
-        if (PduRIsEnabled[pduRDestPduId])
-        {
-            if (PDUR_ROUTINGPATH_CFG(id).TpRoute)
-            {
-                if (NULL_PTR != PduR_BswModuleConfigData[loModuleIndex].ModuleTpCancelTransmitApi)
-                {
-                    if (E_NOT_OK == PduR_BswModuleConfigData[loModuleIndex].ModuleTpCancelTransmitApi(loModulePduId))
-                    {
-                        resultOk = FALSE;
-                    }
-                }
-            }
-            else
-            {
-                if (NULL_PTR != PduR_BswModuleConfigData[loModuleIndex].ModuleIfCancelTransmitApi)
-                {
-                    if (E_NOT_OK == PduR_BswModuleConfigData[loModuleIndex].ModuleIfCancelTransmitApi(loModulePduId))
-                    {
-                        resultOk = FALSE;
-                    }
-                }
-            }
-        }
-        else
-        {
-            resultOk = FALSE;
-        }
-    }
-    if (resultOk)
-    {
-        result = E_OK;
-    }
-    return result;
-}
-#endif /*STD_ON == PDUR_CANCEL_TRANSMIT*/
-
-#if (STD_ON == PDUR_CHANGE_PARAMETER)
-static FUNC(Std_ReturnType, PDUR_CODE) PduR_UpModeChangeParameter(PduIdType id, TPParameterType parameter, uint16 value)
-{
-    Std_ReturnType result = E_NOT_OK;
-    PduIdType pduRSourcePduId;
-    PduIdType loModulePduId;
-    uint8 loModuleIndex;
-    pduRSourcePduId = PDUR_DESTPDU_CFG(id).PduRSrcPduRef;
-    loModulePduId = PDUR_SRCEPDU_CFG(pduRSourcePduId).PduRDestModulePduIndex;
-    loModuleIndex = PDUR_SRCEPDU_CFG(pduRSourcePduId).BswModuleIndex;
-    if ((PduRIsEnabled[id]) && (NULL_PTR != PduR_BswModuleConfigData[loModuleIndex].ModuleChangeParameterApi))
-    {
-        result = PduR_BswModuleConfigData[loModuleIndex].ModuleChangeParameterApi(loModulePduId, parameter, value);
-    }
-    return result;
-}
-#endif /*STD_ON == PDUR_CHANGE_PARAMETER*/
-
-#if (STD_ON == PDUR_CANCEL_RECEIVE)
-static FUNC(Std_ReturnType, PDUR_CODE) PduR_UpModeCancelReceive(PduIdType id)
-{
-    Std_ReturnType result = E_NOT_OK;
-    PduIdType pduRSourcePduId;
-    PduIdType loModulePduId;
-    uint8 loModuleIndex;
-    pduRSourcePduId = PDUR_DESTPDU_CFG(id).PduRSrcPduRef;
-    loModulePduId = PDUR_SRCEPDU_CFG(pduRSourcePduId).PduRDestModulePduIndex;
-    loModuleIndex = PDUR_SRCEPDU_CFG(pduRSourcePduId).BswModuleIndex;
-    if ((PduRIsEnabled[id]) && (NULL_PTR != PduR_BswModuleConfigData[loModuleIndex].ModuleCancelReceiveApi))
-    {
-        result = PduR_BswModuleConfigData[loModuleIndex].ModuleCancelReceiveApi(loModulePduId);
-    }
-    return result;
-}
-#endif /*STD_ON == PDUR_CANCEL_RECEIVE*/
-
-#if (STD_ON == PDUR_TP_STARTOFRECEPTION_TRANSMIT)
-static FUNC(BufReq_ReturnType, PDUR_CODE) PduR_LoTpStartOfReception(
-    PduIdType id,
-    P2CONST(PduInfoType, AUTOMATIC, PDUR_APPL_DATA) info,
-    PduLengthType TpSduLength,
-    P2VAR(PduLengthType, AUTOMATIC, PDUR_APPL_DATA) bufferSizePtr)
-{
-    BufReq_ReturnType bufQeqReturn = BUFREQ_E_NOT_OK;
-    uint8 pduDestSum;
-    PduIdType pduRDestPduId;
-    uint8 destModuleIndex;
-    PduIdType upPduId;
-    pduDestSum = PDUR_ROUTINGPATH_CFG(id).PduDestSum;
-    /*route tp pdu 1:1*/
-    if (1u == pduDestSum)
-    {
-        pduRDestPduId = PDUR_ROUTINGPATH_CFG(id).PduRDestPduIdRef[0u];
-        if (PduRIsEnabled[pduRDestPduId])
-        {
-            /*TP receive route*/
-            if (!PDUR_DESTPDU_CFG(pduRDestPduId).GateWayRoute)
-            {
-                destModuleIndex = PDUR_DESTPDU_CFG(pduRDestPduId).BswModuleIndex;
-                if (NULL_PTR != PduR_BswModuleConfigData[destModuleIndex].ModuleStartOfReceptionApi)
-                {
-                    upPduId = PDUR_DESTPDU_CFG(pduRDestPduId).PduRDestModulePduIndex;
-                    bufQeqReturn = PduR_BswModuleConfigData[destModuleIndex]
-                                       .ModuleStartOfReceptionApi(upPduId, info, TpSduLength, bufferSizePtr);
-                }
-            }
-            /*TP gateway route*/
-            else
-            {
-                bufQeqReturn = PduR_StartOfReceptionToOneTpHandle(id, info, TpSduLength, bufferSizePtr);
-            }
-        }
-    }
-    return bufQeqReturn;
-}
-#endif /*STD_ON == PDUR_TP_STARTOFRECEPTION_TRANSMIT*/
-
-#if (STD_ON == PDUR_TP_COPYRXDATA)
-static FUNC(BufReq_ReturnType, PDUR_CODE) PduR_LoTpCopyRxData(
-    PduIdType id,
-    P2CONST(PduInfoType, AUTOMATIC, PDUR_APPL_DATA) info,
-    P2VAR(PduLengthType, AUTOMATIC, PDUR_APPL_DATA) bufferSizePtr)
-{
-    BufReq_ReturnType bufQeqReturn = BUFREQ_E_NOT_OK;
-    uint8 pduDestSum;
-    PduIdType pduRDestPduId;
-    uint8 destModuleIndex;
-    PduIdType upPduId;
-    pduDestSum = PDUR_ROUTINGPATH_CFG(id).PduDestSum;
-    /*one dest pdu*/
-    if (1u == pduDestSum)
-    {
-        pduRDestPduId = PDUR_ROUTINGPATH_CFG(id).PduRDestPduIdRef[0u];
-        if (PduRIsEnabled[pduRDestPduId])
-        {
-            /*TP receive route*/
-            if (!PDUR_DESTPDU_CFG(pduRDestPduId).GateWayRoute)
-            {
-                destModuleIndex = PDUR_DESTPDU_CFG(pduRDestPduId).BswModuleIndex;
-                if (NULL_PTR != PduR_BswModuleConfigData[destModuleIndex].ModuleCopyRxDataApi)
-                {
-                    upPduId = PDUR_DESTPDU_CFG(pduRDestPduId).PduRDestModulePduIndex;
-                    bufQeqReturn =
-                        PduR_BswModuleConfigData[destModuleIndex].ModuleCopyRxDataApi(upPduId, info, bufferSizePtr);
-                }
-            }
-            /*TP gateway route*/
-            else
-            {
-                bufQeqReturn = PduR_CopyRxDataToOneTpHandle(
-#if (0u < PDUR_TP_BUFFER_SUM)
-                    id,
-#endif
-                    pduRDestPduId,
-                    info,
-                    bufferSizePtr);
-            }
-        }
-    }
-    return bufQeqReturn;
-}
-#endif /*STD_ON == PDUR_TP_COPYRXDATA*/
-
-#if (STD_ON == PDUR_TP_RXINDICATION)
-static FUNC(void, PDUR_CODE) PduR_LoTpRxIndication(PduIdType id, Std_ReturnType result)
-{
-    uint8 pduDestSum;
-    PduIdType pduRDestPduId;
-    uint8 destModuleIndex;
-    PduIdType upPduId;
-    pduDestSum = PDUR_ROUTINGPATH_CFG(id).PduDestSum;
-    /*rx tp pdu to only one dest pdu*/
-    if (1u == pduDestSum)
-    {
-        pduRDestPduId = PDUR_ROUTINGPATH_CFG(id).PduRDestPduIdRef[0u];
-        /*TP receive route*/
-        if (!PDUR_DESTPDU_CFG(pduRDestPduId).GateWayRoute)
-        {
-            destModuleIndex = PDUR_DESTPDU_CFG(pduRDestPduId).BswModuleIndex;
-            if (NULL_PTR != PduR_BswModuleConfigData[destModuleIndex].ModuleTpRxIndicationApi)
-            {
-                upPduId = PDUR_DESTPDU_CFG(pduRDestPduId).PduRDestModulePduIndex;
-                PduR_BswModuleConfigData[destModuleIndex].ModuleTpRxIndicationApi(upPduId, result);
-            }
-        }
-        /*TP gateway route*/
-        else
-        {
-            if ((E_OK == result) && (PduRIsEnabled[pduRDestPduId]))
-            {
-                PduR_RxIndicationToOneTpHandle(id, pduRDestPduId);
-            }
-            else
-            {
-                PduR_ClearBufferAndStateOfGateWayTpPdu(id);
-            }
-        }
-    }
-    return;
-}
-#endif /*STD_ON == PDUR_TP_RXINDICATION*/
-
-#if (STD_ON == PDUR_TP_COPYTXDATA)
-static FUNC(BufReq_ReturnType, PDUR_CODE) PduR_LoTpCopyTxData(
-    PduIdType id,
-    P2CONST(PduInfoType, AUTOMATIC, PDUR_APPL_DATA) info,
-    P2CONST(RetryInfoType, AUTOMATIC, PDUR_APPL_DATA) retry,
-    P2VAR(PduLengthType, AUTOMATIC, PDUR_APPL_DATA) availableDataPtr)
-{
-    BufReq_ReturnType bufQeqReturn = BUFREQ_E_NOT_OK;
-    PduIdType srcPdu;
-    uint8 srcModuleIndex;
-    PduIdType upPduId;
-    srcPdu = PDUR_DESTPDU_CFG(id).PduRSrcPduRef;
-    /*one dest pdu route*/
-    if (1u == PDUR_ROUTINGPATH_CFG(srcPdu).PduDestSum)
-    {
-        if (PduRIsEnabled[id])
-        {
-            /*TP transmit route*/
-            if (!PDUR_DESTPDU_CFG(id).GateWayRoute)
-            {
-                srcModuleIndex = PDUR_SRCEPDU_CFG(srcPdu).BswModuleIndex;
-                if (NULL_PTR != PduR_BswModuleConfigData[srcModuleIndex].ModuleCopyTxDataApi)
-                {
-                    upPduId = PDUR_SRCEPDU_CFG(srcPdu).PduRDestModulePduIndex;
-                    bufQeqReturn = PduR_BswModuleConfigData[srcModuleIndex]
-                                       .ModuleCopyTxDataApi(upPduId, info, retry, availableDataPtr);
-                }
-            }
-            /*TP gateway route*/
-            else
-            {
-                bufQeqReturn = PduR_OneDestCopyTxDataFromTpHandle(id, info, retry, availableDataPtr);
-            }
-        }
-    }
-    return bufQeqReturn;
-}
-#endif /*STD_ON == PDUR_TP_COPYTXDATA*/
-
-#if (STD_ON == PDUR_TP_TXCONFIRMATION)
-static FUNC(void, PDUR_CODE) PduR_LoTpTxConfirmation(PduIdType id, Std_ReturnType result)
-{
-    PduIdType srcPdu;
-    uint8 srcModuleIndex;
-    PduIdType upPduId;
-    srcPdu = PDUR_DESTPDU_CFG(id).PduRSrcPduRef;
-    /*one dest pdu route*/
-    if (1u == PDUR_ROUTINGPATH_CFG(srcPdu).PduDestSum)
-    {
-        /*TP transmit route*/
-        if (!PDUR_DESTPDU_CFG(id).GateWayRoute)
-        {
-            srcModuleIndex = PDUR_SRCEPDU_CFG(srcPdu).BswModuleIndex;
-            if (NULL_PTR != PduR_BswModuleConfigData[srcModuleIndex].ModuleTpTxConfirmationApi)
-            {
-                upPduId = PDUR_SRCEPDU_CFG(srcPdu).PduRDestModulePduIndex;
-                PduR_BswModuleConfigData[srcModuleIndex].ModuleTpTxConfirmationApi(upPduId, result);
-            }
-        }
-        /*TP gateway route*/
-        else
-        {
-            PduR_ClearBufferAndStateOfGateWayTpPdu(srcPdu);
-        }
-    }
-    return;
-}
-#endif /*STD_ON == PDUR_TP_TXCONFIRMATION*/
-
-#if ((STD_ON == PDUR_RX_INDICATION) && (PDUR_TX_BUFFER_SUM > 0u))
-static FUNC(void, PDUR_CODE) PduR_CopyRxPduToTxBuffer(
-#if (STD_ON == PDUR_META_DATA_SUPPORT)
-    uint8 MetaDataLength,
-#endif
-    P2VAR(PduR_TxBufferType, AUTOMATIC, PDUR_APPL_DATA) TxBufferPtr,
-    P2CONST(PduInfoType, AUTOMATIC, PDUR_APPL_DATA) PduInfo,
-    PduLengthType PduLength)
-{
-    TxBufferPtr->used = TRUE;
-    TxBufferPtr->SduLength = PduLength;
-    (void)ILib_memcpy(TxBufferPtr->TxBufferData, PduInfo->SduDataPtr, PduLength);
-#if (STD_ON == PDUR_META_DATA_SUPPORT)
-    if (0u < MetaDataLength)
-    {
-        (void)ILib_memcpy(TxBufferPtr->MetaData, PduInfo->MetaDataPtr, (PduLengthType)MetaDataLength);
-    }
-#endif
-    return;
-}
-#endif /* STD_ON == PDUR_RX_INDICATION && PDUR_TX_BUFFER_SUM > 0u */
-
-#if (STD_ON == PDUR_RX_INDICATION)
-static FUNC(void, PDUR_CODE)
-    PduR_GateWayIfPdu(uint8 DestModule, PduIdType DestPduId, P2CONST(PduInfoType, AUTOMATIC, PDUR_APPL_DATA) InfoPtr)
-{
-#if (STD_ON == PDUR_TRANSMIT_SUPPORT)
-    PduR_DestPduDataProvisionType provisionType;
-#if (PDUR_TX_BUFFER_SUM > 0u)
-    PduInfoType pduInfo;
-#endif
-    PduIdType destModulePduId;
-    PduR_LoIfTransmit_FuncPtrType pduR_LoIfTransmitApi = PduR_BswModuleConfigData[DestModule].ModuleIfTransmitApi;
-    if (NULL_PTR != pduR_LoIfTransmitApi)
-    {
-        provisionType = PDUR_DESTPDU_CFG(DestPduId).PduRDestPduDataProvision;
-        destModulePduId = PDUR_DESTPDU_CFG(DestPduId).PduRDestModulePduIndex;
-        if (PDUR_TRIGGERTRANSMIT == provisionType)
-        {
-#if (PDUR_TX_BUFFER_SUM > 0u)
-            PduR_EnQueueBuffer(DestPduId, InfoPtr);
-            pduInfo.SduDataPtr = NULL_PTR;
-            pduInfo.SduLength = 0u;
-            pduInfo.MetaDataPtr = InfoPtr->MetaDataPtr;
-            (void)pduR_LoIfTransmitApi(destModulePduId, &pduInfo);
-#endif /*PDUR_TX_BUFFER_SUM > 0u*/
-        }
-        else
-        {
-            /*don't configuration buffer*/
-#if (PDUR_TX_BUFFER_SUM == 0u)
-            (void)pduR_LoIfTransmitApi(destModulePduId, InfoPtr);
-#else
-            if (PDUR_UNUSED_UINT16 == PDUR_DESTPDU_CFG(DestPduId).PduRDestTxBufferRef)
-            {
-                (void)pduR_LoIfTransmitApi(destModulePduId, InfoPtr);
-            }
-            else
-            {
-                PduR_GateWayDirectBufferHandle(pduR_LoIfTransmitApi, DestPduId, InfoPtr);
-            }
-#endif /* PDUR_TX_BUFFER_SUM == 0u */
-        }
-    }
-#endif /* STD_ON == PDUR_TRANSMIT_SUPPORT */
-    return;
-}
-#endif /*STD_ON == PDUR_RX_INDICATION*/
-
-/*Called by PduR_IfTriggerTransmit.
- *IfTriggerTransmit GW handle*/
-#if ((STD_ON == PDUR_TRIGGER_TRANSMIT) && (PDUR_TX_BUFFER_SUM > 0u))
-static FUNC(Std_ReturnType, PDUR_CODE)
-    PduR_IfTriggerTransmitGwHandle(PduIdType TxPduId, P2VAR(PduInfoType, AUTOMATIC, PDUR_APPL_DATA) PduInfoPtr)
-{
-    Std_ReturnType result = E_NOT_OK;
-    uint16 bufferId;
-    PduInfoType pduInfo;
-    uint8 moduleId;
-    PduR_LoIfTransmit_FuncPtrType PduR_LoIfTransmitApi;
-    bufferId = PDUR_DESTPDU_CFG(TxPduId).PduRDestTxBufferRef;
-    if ((PDUR_UNUSED_UINT16 != bufferId) && (PduR_TxBuffer[bufferId].PduRTxBufferRef[0u].used)
-        && (PduInfoPtr->SduLength >= PduR_TxBuffer[bufferId].PduRTxBufferRef[0u].SduLength))
-    {
-        PduInfoPtr->SduLength = PduR_TxBuffer[bufferId].PduRTxBufferRef[0u].SduLength;
-        (void)ILib_memcpy(
-            PduInfoPtr->SduDataPtr,
-            PduR_TxBuffer[bufferId].PduRTxBufferRef[0u].TxBufferData,
-            PduInfoPtr->SduLength);
-#if (STD_ON == PDUR_META_DATA_SUPPORT)
-        if (0u < PDUR_DESTPDU_CFG(TxPduId).MetaDataLength)
-        {
-            (void)ILib_memcpy(
-                PduInfoPtr->MetaDataPtr,
-                PduR_TxBuffer[bufferId].PduRTxBufferRef[0u].MetaData,
-                (PduLengthType)PDUR_DESTPDU_CFG(TxPduId).MetaDataLength);
-        }
-        else
-#endif
-        {
-            PduInfoPtr->MetaDataPtr = NULL_PTR;
-        }
-        if (1u < PduR_TxBuffer[bufferId].PduRTxBufferDepth)
-        {
-            PduR_DeQueueBuffer(TxPduId);
-            if (PduR_TxBuffer[bufferId].PduRTxBufferRef[0u].used)
-            {
-#if (STD_ON == PDUR_TRANSMIT_SUPPORT)
-                moduleId = PDUR_DESTPDU_CFG(TxPduId).BswModuleIndex;
-                PduR_LoIfTransmitApi = PduR_BswModuleConfigData[moduleId].ModuleIfTransmitApi;
-                if (NULL_PTR != PduR_LoIfTransmitApi)
-                {
-                    pduInfo.SduDataPtr = NULL_PTR;
-                    pduInfo.SduLength = 0u;
-#if (STD_ON == PDUR_META_DATA_SUPPORT)
-                    if (0u < PDUR_DESTPDU_CFG(TxPduId).MetaDataLength)
-                    {
-                        pduInfo.MetaDataPtr = PduR_TxBuffer[bufferId].PduRTxBufferRef[0u].MetaData;
-                    }
-                    else
-#endif
-                    {
-                        pduInfo.MetaDataPtr = NULL_PTR;
-                    }
-                    (void)PduR_LoIfTransmitApi(PDUR_DESTPDU_CFG(TxPduId).PduRDestModulePduIndex, &pduInfo);
-                }
-#endif /* STD_ON == PDUR_TRANSMIT_SUPPORT */
-            }
-        }
-        result = E_OK;
-    }
-    return result;
-}
-#endif /* STD_ON == PDUR_TRIGGER_TRANSMIT) && (PDUR_TX_BUFFER_SUM > 0u */
+#endif /* PDUR_TP_TXCONFIRMATION == STD_ON */
 
 #define PDUR_STOP_SEC_CODE
 #include "PduR_MemMap.h"

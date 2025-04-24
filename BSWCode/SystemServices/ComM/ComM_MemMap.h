@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : ComM_MemMap.h                                               **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : <Auto generated>                                            **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Memory mapping abstraction declaration of ComM              **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                       **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : ComM_MemMap.h                                               **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : <Auto generated>                                            **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Memory mapping abstraction declaration of ComM              **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                       **
+**                                                                            **
+*******************************************************************************/
 /*******************************************************************************
 **                      Revision Control History                              **
 *******************************************************************************/
@@ -57,7 +58,7 @@
 /* PRQA S 0883,0791++ */ /* MISAR Dir-4.10,Rule-5.4 */
 #define MEMMAP_ERROR
 
-/* Total section items: 8 */
+/* Total section items: 9 */
 #if defined(START_WITH_IF)
 #undef MEMMAP_ERROR
 
@@ -111,7 +112,32 @@
 #endif
 #define STOP_SEC_CONST_PBCFG_8
 
-/*Index:2  Section name :CONST_PBCFG_PTR*/
+/*Index:2  Section name :CONST_PBCFG_16*/
+#elif defined COMM_START_SEC_CONST_PBCFG_16
+#undef COMM_START_SEC_CONST_PBCFG_16
+#undef MEMMAP_ERROR
+#ifndef MEMMAP_ERROR_SEC_NO_MATCH
+#define MEMMAP_ERROR_SEC_NO_MATCH
+#else
+#error "ComM_MemMap.h, section is used consecutively many times."
+#endif
+#define COMM_START_SEC_CONST_PBCFG_16_NO_MATCH
+#define START_SEC_CONST_PBCFG_16
+
+#elif defined COMM_STOP_SEC_CONST_PBCFG_16
+#undef COMM_STOP_SEC_CONST_PBCFG_16
+#undef MEMMAP_ERROR
+#ifdef COMM_START_SEC_CONST_PBCFG_16_NO_MATCH
+#undef COMM_START_SEC_CONST_PBCFG_16_NO_MATCH
+#else
+#error "ComM_MemMap.h, no matching section was used."
+#endif
+#ifdef MEMMAP_ERROR_SEC_NO_MATCH
+#undef MEMMAP_ERROR_SEC_NO_MATCH
+#endif
+#define STOP_SEC_CONST_PBCFG_16
+
+/*Index:3  Section name :CONST_PBCFG_PTR*/
 #elif defined COMM_START_SEC_CONST_PBCFG_PTR
 #undef COMM_START_SEC_CONST_PBCFG_PTR
 #undef MEMMAP_ERROR
@@ -136,7 +162,7 @@
 #endif
 #define STOP_SEC_CONST_PBCFG_PTR
 
-/*Index:3  Section name :CONST_PBCFG_UNSPECIFIED*/
+/*Index:4  Section name :CONST_PBCFG_UNSPECIFIED*/
 #elif defined COMM_START_SEC_CONST_PBCFG_UNSPECIFIED
 #undef COMM_START_SEC_CONST_PBCFG_UNSPECIFIED
 #undef MEMMAP_ERROR
@@ -161,7 +187,7 @@
 #endif
 #define STOP_SEC_CONST_PBCFG_UNSPECIFIED
 
-/*Index:4  Section name :VAR_INIT_8*/
+/*Index:5  Section name :VAR_INIT_8*/
 #elif defined COMM_START_SEC_VAR_INIT_8
 #undef COMM_START_SEC_VAR_INIT_8
 #undef MEMMAP_ERROR
@@ -186,7 +212,7 @@
 #endif
 #define STOP_SEC_VAR_INIT_8
 
-/*Index:5  Section name :VAR_NO_INIT_8*/
+/*Index:6  Section name :VAR_NO_INIT_8*/
 #elif defined COMM_START_SEC_VAR_NO_INIT_8
 #undef COMM_START_SEC_VAR_NO_INIT_8
 #undef MEMMAP_ERROR
@@ -211,7 +237,7 @@
 #endif
 #define STOP_SEC_VAR_NO_INIT_8
 
-/*Index:6  Section name :VAR_NO_INIT_PTR*/
+/*Index:7  Section name :VAR_NO_INIT_PTR*/
 #elif defined COMM_START_SEC_VAR_NO_INIT_PTR
 #undef COMM_START_SEC_VAR_NO_INIT_PTR
 #undef MEMMAP_ERROR
@@ -236,7 +262,7 @@
 #endif
 #define STOP_SEC_VAR_NO_INIT_PTR
 
-/*Index:7  Section name :VAR_NO_INIT_UNSPECIFIED*/
+/*Index:8  Section name :VAR_NO_INIT_UNSPECIFIED*/
 #elif defined COMM_START_SEC_VAR_NO_INIT_UNSPECIFIED
 #undef COMM_START_SEC_VAR_NO_INIT_UNSPECIFIED
 #undef MEMMAP_ERROR

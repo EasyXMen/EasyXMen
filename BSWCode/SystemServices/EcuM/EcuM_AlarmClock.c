@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : EcuM_AlarmClock.c                                           **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : qinchun.yang                                                **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Implement code for alarm clock if present                   **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : EcuM_AlarmClock.c                                           **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : qinchun.yang                                                **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Implement code for alarm clock if present                   **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 
 /*******************************************************************************
 **                      Revision Control History                              **
@@ -116,6 +117,7 @@ FUNC(Std_ReturnType, ECUM_CODE) EcuM_SetRelWakeupAlarm(EcuM_UserType user, EcuM_
         alarmId = EcuM_FindAlarmIdByUser(user);
         if (alarmId != ECUM_MAX_ALARM_CLOCK_NUM)
         {
+            SchM_Enter_EcuM_GlobalClock();
             ret = E_OK;
             setWkTime = pRt->GlobalClock + time;
             pRt->UserAlarm[alarmId] = setWkTime;
@@ -130,13 +132,14 @@ FUNC(Std_ReturnType, ECUM_CODE) EcuM_SetRelWakeupAlarm(EcuM_UserType user, EcuM_
                 /*The relative time from now is later than the current wakeup time.*/
                 ret = ECUM_E_EARLIER_ACTIVE;
             }
+            SchM_Exit_EcuM_GlobalClock();
         }
 #if (ECUM_DEV_ERROR_DETECT == STD_ON)
         else
         {
             Det_ReportError(ECUM_MODULE_ID, ECUM_INSTANCE_ID, ECUM_SID_SETRELWAKEUPALARM, ECUM_E_INVALID_PAR);
         }
-#endif /* ECUM_DEV_ERROR_DETECT == STD_ON */
+#endif /*ECUM_DEV_ERROR_DETECT == STD_ON*/
     }
     return ret;
 }
@@ -175,6 +178,7 @@ FUNC(Std_ReturnType, ECUM_CODE) EcuM_SetAbsWakeupAlarm(EcuM_UserType user, EcuM_
         alarmId = EcuM_FindAlarmIdByUser(user);
         if (alarmId != ECUM_MAX_ALARM_CLOCK_NUM)
         {
+            SchM_Enter_EcuM_GlobalClock();
             ret = E_OK;
             if (time > pRt->GlobalClock)
             {
@@ -196,13 +200,14 @@ FUNC(Std_ReturnType, ECUM_CODE) EcuM_SetAbsWakeupAlarm(EcuM_UserType user, EcuM_
                 /*Time parameter is earlier than now.*/
                 ret = ECUM_E_PAST;
             }
+            SchM_Exit_EcuM_GlobalClock();
         }
 #if (ECUM_DEV_ERROR_DETECT == STD_ON)
         else
         {
             Det_ReportError(ECUM_MODULE_ID, ECUM_INSTANCE_ID, ECUM_SID_SETABSWAKEUPALARM, ECUM_E_INVALID_PAR);
         }
-#endif /* ECUM_DEV_ERROR_DETECT == STD_ON */
+#endif /*ECUM_DEV_ERROR_DETECT == STD_ON*/
     }
     return ret;
 }
@@ -232,11 +237,12 @@ FUNC(Std_ReturnType, ECUM_CODE) EcuM_AbortWakeupAlarm(EcuM_UserType user)
         Det_ReportError(ECUM_MODULE_ID, ECUM_INSTANCE_ID, ECUM_SID_ABORTWAKEUPALARM, ECUM_E_UNINIT);
     }
     else
-#endif /* ECUM_DEV_ERROR_DETECT == STD_ON */
+#endif /*ECUM_DEV_ERROR_DETECT == STD_ON*/
     {
         alarmId = EcuM_FindAlarmIdByUser(user);
         if (alarmId != ECUM_MAX_ALARM_CLOCK_NUM)
         {
+            SchM_Enter_EcuM_GlobalClock();
             if (pRt->UserAlarm[alarmId] != 0u)
             {
                 if (pRt->MasterAlarm == pRt->UserAlarm[alarmId])
@@ -246,13 +252,14 @@ FUNC(Std_ReturnType, ECUM_CODE) EcuM_AbortWakeupAlarm(EcuM_UserType user)
                 pRt->UserAlarm[alarmId] = 0u;
                 ret = E_OK;
             }
+            SchM_Exit_EcuM_GlobalClock();
         }
 #if (ECUM_DEV_ERROR_DETECT == STD_ON)
         else
         {
             Det_ReportError(ECUM_MODULE_ID, ECUM_INSTANCE_ID, ECUM_SID_ABORTWAKEUPALARM, ECUM_E_INVALID_PAR);
         }
-#endif /* ECUM_DEV_ERROR_DETECT == STD_ON */
+#endif /*ECUM_DEV_ERROR_DETECT == STD_ON*/
     }
     return ret;
 }
@@ -271,17 +278,25 @@ FUNC(Std_ReturnType, ECUM_CODE) EcuM_AbortWakeupAlarm(EcuM_UserType user)
  */
 FUNC(Std_ReturnType, ECUM_CODE) EcuM_GetCurrentTime(P2VAR(EcuM_TimeType, AUTOMATIC, ECUM_APPL_DATA) time)
 {
+    Std_ReturnType ret = E_NOT_OK;
 #if (ECUM_DEV_ERROR_DETECT == STD_ON)
     if (FALSE == EcuM_IsInit)
     {
         Det_ReportError(ECUM_MODULE_ID, ECUM_INSTANCE_ID, ECUM_SID_GETCURRENTTIME, ECUM_E_UNINIT);
     }
-    else
-#endif /* ECUM_DEV_ERROR_DETECT == STD_ON */
+    else if (NULL_PTR == time)
     {
-        *time = EcuMRunData.GlobalClock;
+        Det_ReportError(ECUM_MODULE_ID, ECUM_INSTANCE_ID, ECUM_SID_GETCURRENTTIME, ECUM_E_NULL_POINTER);
     }
-    return E_OK;
+    else
+#endif /*ECUM_DEV_ERROR_DETECT == STD_ON*/
+    {
+        SchM_Enter_EcuM_GlobalClock();
+        *time = EcuMRunData.GlobalClock;
+        SchM_Exit_EcuM_GlobalClock();
+        ret = E_OK;
+    }
+    return ret;
 }
 
 /**
@@ -300,17 +315,25 @@ FUNC(Std_ReturnType, ECUM_CODE) EcuM_GetCurrentTime(P2VAR(EcuM_TimeType, AUTOMAT
  */
 FUNC(Std_ReturnType, ECUM_CODE) EcuM_GetWakeupTime(P2VAR(EcuM_TimeType, AUTOMATIC, ECUM_APPL_DATA) time)
 {
+    Std_ReturnType ret = E_NOT_OK;
 #if (ECUM_DEV_ERROR_DETECT == STD_ON)
     if (FALSE == EcuM_IsInit)
     {
         Det_ReportError(ECUM_MODULE_ID, ECUM_INSTANCE_ID, ECUM_SID_GETWAKEUPTIME, ECUM_E_UNINIT);
     }
-    else
-#endif /* ECUM_DEV_ERROR_DETECT == STD_ON */
+    else if (NULL_PTR == time)
     {
-        *time = EcuMRunData.MasterAlarm;
+        Det_ReportError(ECUM_MODULE_ID, ECUM_INSTANCE_ID, ECUM_SID_GETWAKEUPTIME, ECUM_E_NULL_POINTER);
     }
-    return E_OK;
+    else
+#endif /*ECUM_DEV_ERROR_DETECT == STD_ON*/
+    {
+        SchM_Enter_EcuM_GlobalClock();
+        *time = EcuMRunData.MasterAlarm;
+        SchM_Exit_EcuM_GlobalClock();
+        ret = E_OK;
+    }
+    return ret;
 }
 
 /**
@@ -329,23 +352,27 @@ FUNC(Std_ReturnType, ECUM_CODE) EcuM_GetWakeupTime(P2VAR(EcuM_TimeType, AUTOMATI
  */
 FUNC(Std_ReturnType, ECUM_CODE) EcuM_SetClock(EcuM_UserType user, EcuM_TimeType time)
 {
+    Std_ReturnType ret = E_NOT_OK;
 #if (ECUM_DEV_ERROR_DETECT == STD_ON)
     if (FALSE == EcuM_IsInit)
     {
         Det_ReportError(ECUM_MODULE_ID, ECUM_INSTANCE_ID, ECUM_SID_GETWAKEUPTIME, ECUM_E_UNINIT);
     }
     else
-#endif /* ECUM_DEV_ERROR_DETECT == STD_ON */
+#endif /*ECUM_DEV_ERROR_DETECT == STD_ON*/
     {
+        SchM_Enter_EcuM_GlobalClock();
         if (EcuM_UserCfgs[user].setClkAllowed == TRUE)
         {
             EcuMRunData.GlobalClock = time;
+            ret = E_OK;
         }
+        SchM_Exit_EcuM_GlobalClock();
     }
-    return E_OK;
+    return ret;
 }
 
-/* Update Ecum global clock.(Use EcuMMainFunctionPeriod */
+/*Update Ecum global clock.(Use EcuMMainFunctionPeriod)*/
 FUNC(void, ECUM_CODE)
 EcuM_UpdateEcuMClock(void)
 {
@@ -355,13 +382,15 @@ EcuM_UpdateEcuMClock(void)
     /*Up to 1 second.*/
     if (ECUM_MS_TO_SECOND <= EcuM_TimeRecord)
     {
+        SchM_Enter_EcuM_GlobalClock();
         EcuM_TimeRecord = 0;
         pRt->GlobalClock++;
         if (pRt->GlobalClock >= pRt->MasterAlarm)
         {
-            pRt->Wks.Validated |= ECUM_WKSOURCE_ALARMCLOCK;
+            (*pRt->Wks.Validated) |= ECUM_WKSOURCE_ALARMCLOCK;
             pRt->MasterAlarm = EcuM_FindNextEarliestAlarm();
         }
+        SchM_Exit_EcuM_GlobalClock();
     }
 }
 
@@ -375,7 +404,9 @@ EcuM_CancellAlarms(void)
     {
         pRt->UserAlarm[alarmIdx] = 0u;
     }
+    SchM_Enter_EcuM_GlobalClock();
     pRt->MasterAlarm = (uint32)0xFFFFFFFF;
+    SchM_Exit_EcuM_GlobalClock();
 }
 #define ECUM_STOP_SEC_CODE
 #include "EcuM_MemMap.h"
@@ -434,4 +465,4 @@ static FUNC(EcuM_TimeType, ECUM_CODE) EcuM_FindNextEarliestAlarm(void)
 #define ECUM_STOP_SEC_CODE
 #include "EcuM_MemMap.h"
 
-#endif /* ECUM_ALARM_CLOCK_PRESENT == STD_ON */
+#endif /*ECUM_ALARM_CLOCK_PRESENT == STD_ON*/

@@ -18,26 +18,31 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : FlsTst.h                                                    **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : yin.Huang                                                   **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Containing the entire or parts of Flash test code           **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19_11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*********************************************************************************
+**                                                                            **
+**  FILENAME    : FlsTst.h                                                    **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : peng.wu                                                     **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S):   AUTOSAR classic Platform R19-11                       **
+**                                                                            **
+*******************************************************************************/
 
 /*======================[R E V I S I O N   H I S T O R Y]=====================*/
 /*  <VERSION>    <DATE>      <AUTHOR>         <REVISION LOG>
- *   V2.0.0     20210916     Huangyin         Initial version
+ *   V1.0.0     20210916     Huangyin         Initial version
+ *   V2.0.0     20221221     Peng.Wu          Modified to version R19-11
  *   V2.0.1     20231025     pengwu           CPT-6553, FIx FlsTst_MemCompare function
- *   V2.0.2     20240514     pengwu           CPT-9008, FIx CRC32Fgnd and remove mcal Apis
+ *              20231025     pengwu           1.CPT-8641, Fix compile problem when DET is disable
+ *                                            2.Fix compile warning information
+ *                                            3.CPT-8747, Fix FLSTST_E_INIT_FAILED report,add duplicated address
+ *                                            4.Add Qac
+ *              2024-5-7     pengwu           1.CPT-8937, Fix code error, add Qac
  */
 /*============================================================================*/
 #ifndef FLSTST_H
@@ -45,6 +50,9 @@
 
 /*============================[I N C L U D E S]===============================*/
 #include "FlsTst_Cfg.h"
+#if (STD_ON == FLSTST_DEV_ERROR_DETECT)
+#include "Det.h"
+#endif /*STD_ON == RAMTST_DEV_ERROR_DETECT*/
 /*============================================================================*/
 
 /*===================[V E R S I O N  I N F O R M A T I O N]===================*/
@@ -55,7 +63,7 @@
 #define FLSTST_H_AR_PATCH_VERSION 0U
 #define FLSTST_H_SW_MAJOR_VERSION 2U
 #define FLSTST_H_SW_MINOR_VERSION 0U
-#define FLSTST_H_SW_PATCH_VERSION 2U
+#define FLSTST_H_SW_PATCH_VERSION 1U
 #define FLSTST_INSTANCE_ID        0U
 /*============================================================================*/
 
@@ -85,14 +93,18 @@
 #define FLSTST_E_ALREADY_INITIALIZED 0x04U
 #define FLSTST_E_INIT_FAILED         0x05U
 #define FLSTST_E_PARAM_POINTER       0x06U
-#define FLSTST_E_DATA_CRRUPTED       0x07U
-#define FLSTST_E_SUSPEND_OVERTIME    0x08U
+#define FLSTST_E_TIMEOUT             0x07U
 
 #define FlsTst_GetResource()
 #define FlsTst_FreeResource()
 /*============================================================================*/
 
-extern uint8 CrcCompleted;
+#if (STD_ON == FLSTST_DEV_ERROR_DETECT)
+static inline void FLSTST_DET_REPORTERROR(uint8 ApiId, uint8 ErrorId)
+{
+    ((void)Det_ReportError(FLSTST_MODULE_ID, FLSTST_INSTANCE_ID, ApiId, ErrorId));
+}
+#endif /* STD_ON == FLSTST_DEV_ERROR_DETECT */
 
 /*===============[F U N C T I O N   D E C L A R A T I O N]===============*/
 /*************************************************************************/
@@ -109,7 +121,7 @@ extern uint8 CrcCompleted;
  * CallByAPI           Up layer
  */
 /*************************************************************************/
-extern void FlsTst_Init(const FlsTst_ConfigType* ConfigPtr);
+extern FUNC(void, FLSTST_CODE) FlsTst_Init(P2CONST(FlsTst_ConfigType, AUTOMATIC, FLSTST_APPL_CONST) ConfigPtr);
 
 /*************************************************************************/
 /*
@@ -125,7 +137,7 @@ extern void FlsTst_Init(const FlsTst_ConfigType* ConfigPtr);
  * CallByAPI           Up layer
  */
 /*************************************************************************/
-extern void FlsTst_DeInit(void);
+extern FUNC(void, FLSTST_CODE) FlsTst_DeInit(void);
 
 /*************************************************************************/
 /*
@@ -144,8 +156,8 @@ extern void FlsTst_DeInit(void);
  */
 /*************************************************************************/
 #if ((STD_ON == FLSTST_START_FGND_API) && (0 != FLSTST_FGND_BLOCK_NUM))
-extern Std_ReturnType FlsTst_StartFgnd(FlsTst_BlockIdFgndType FgndBlockId);
-#endif
+extern FUNC(Std_ReturnType, FLSTST_CODE) FlsTst_StartFgnd(FlsTst_BlockIdFgndType FgndBlockId);
+#endif /* #if ((STD_ON == FLSTST_START_FGND_API) && (0 != FLSTST_FGND_BLOCK_NUM)) */
 /*************************************************************************/
 /*
  * Brief               Service for aborting the Flash Test.
@@ -160,8 +172,8 @@ extern Std_ReturnType FlsTst_StartFgnd(FlsTst_BlockIdFgndType FgndBlockId);
  */
 /*************************************************************************/
 #if (0U != FLSTST_BGND_BLOCK_NUM)
-extern void FlsTst_Abort(void);
-#endif
+extern FUNC(void, FLSTST_CODE) FlsTst_Abort(void);
+#endif /* #if (0U != FLSTST_BGND_BLOCK_NUM) */
 /*************************************************************************/
 /*
  * Brief               Service for suspending current operation of the
@@ -177,8 +189,8 @@ extern void FlsTst_Abort(void);
  */
 /*************************************************************************/
 #if ((STD_ON == FLSTST_SUSPEND_RESUME_API) && (0U != FLSTST_BGND_BLOCK_NUM))
-extern void FlsTst_Suspend(void);
-#endif /* STD_ON == FLSTST_SUSPEND_RESUME_API */
+extern FUNC(void, FLSTST_CODE) FlsTst_Suspend(void);
+#endif /* #if ((STD_ON == FLSTST_SUSPEND_RESUME_API) && (0U != FLSTST_BGND_BLOCK_NUM)) */
 
 /*************************************************************************/
 /*
@@ -195,8 +207,8 @@ extern void FlsTst_Suspend(void);
  */
 /*************************************************************************/
 #if ((STD_ON == FLSTST_SUSPEND_RESUME_API) && (0U != FLSTST_BGND_BLOCK_NUM))
-extern void FlsTst_Resume(void);
-#endif /* STD_ON == FLSTST_SUSPEND_RESUME_API */
+extern FUNC(void, FLSTST_CODE) FlsTst_Resume(void);
+#endif /* #if ((STD_ON == FLSTST_SUSPEND_RESUME_API) && (0U != FLSTST_BGND_BLOCK_NUM)) */
 
 /*************************************************************************/
 /*
@@ -224,8 +236,8 @@ extern void FlsTst_Resume(void);
  */
 /*************************************************************************/
 #if (STD_ON == FLSTST_GET_CURRENT_STATE_API)
-extern FlsTst_StateType FlsTst_GetCurrentState(void);
-#endif /* STD_ON == FLSTST_GET_CURRENT_STATE_API */
+extern FUNC(FlsTst_StateType, FLSTST_CODE) FlsTst_GetCurrentState(void);
+#endif /* #if (STD_ON == FLSTST_GET_CURRENT_STATE_API) */
 
 /*************************************************************************/
 /*
@@ -241,8 +253,8 @@ extern FlsTst_StateType FlsTst_GetCurrentState(void);
  */
 /*************************************************************************/
 #if ((STD_ON == FLSTST_GET_TEST_RESULT_BGND_API) && (0 != FLSTST_BGND_BLOCK_NUM))
-extern FlsTst_TestResultBgndType FlsTst_GetTestResultBgnd(void);
-#endif /* STD_ON == FLSTST_GET_TEST_RESULT_BGND_API */
+extern FUNC(FlsTst_TestResultBgndType, FLSTST_CODE) FlsTst_GetTestResultBgnd(void);
+#endif /* #if ((STD_ON == FLSTST_GET_TEST_RESULT_BGND_API) && (0 != FLSTST_BGND_BLOCK_NUM)) */
 
 /*************************************************************************/
 /*
@@ -258,8 +270,8 @@ extern FlsTst_TestResultBgndType FlsTst_GetTestResultBgnd(void);
  */
 /*************************************************************************/
 #if ((STD_ON == FLSTST_GET_TEST_RESULT_FGND_API) && (0 != FLSTST_FGND_BLOCK_NUM))
-extern FlsTst_TestResultFgndType FlsTst_GetTestResultFgnd(void);
-#endif /* STD_ON == FLSTST_GET_TEST_RESULT_FGND_API */
+extern FUNC(FlsTst_TestResultFgndType, FLSTST_CODE) FlsTst_GetTestResultFgnd(void);
+#endif /* #if ((STD_ON == FLSTST_GET_TEST_RESULT_FGND_API) && (0 != FLSTST_FGND_BLOCK_NUM)) */
 
 /*************************************************************************/
 /*
@@ -276,8 +288,8 @@ extern FlsTst_TestResultFgndType FlsTst_GetTestResultFgnd(void);
  */
 /*************************************************************************/
 #if (STD_ON == FLSTST_VERSION_INFO_API)
-extern void FlsTst_GetVersionInfo(Std_VersionInfoType* versionInfo);
-#endif /* STD_ON == FLSTST_VERSION_INFO_API */
+extern FUNC(void, FLSTST_CODE) FlsTst_GetVersionInfo(Std_VersionInfoType* versionInfo);
+#endif /* #if (STD_ON == FLSTST_VERSION_INFO_API) */
 
 /*************************************************************************/
 /*
@@ -294,8 +306,8 @@ extern void FlsTst_GetVersionInfo(Std_VersionInfoType* versionInfo);
  */
 /*************************************************************************/
 #if ((STD_ON == FLSTST_GET_TEST_SIGNATURE_BGND_API) && (0 != FLSTST_BGND_BLOCK_NUM))
-extern FlsTst_TestSignatureBgndType FlsTst_GetTestSignatureBgnd(void);
-#endif /* STD_ON == FLSTST_GET_TEST_SIGNATURE_BGND_API */
+extern FUNC(FlsTst_TestSignatureBgndType, FLSTST_CODE) FlsTst_GetTestSignatureBgnd(void);
+#endif /* #if ((STD_ON == FLSTST_GET_TEST_SIGNATURE_BGND_API) && (0 != FLSTST_BGND_BLOCK_NUM )) */
 
 /*************************************************************************/
 /*
@@ -312,8 +324,8 @@ extern FlsTst_TestSignatureBgndType FlsTst_GetTestSignatureBgnd(void);
  */
 /*************************************************************************/
 #if ((STD_ON == FLSTST_GET_TEST_SIGNATURE_FGND_API) && (0 != FLSTST_FGND_BLOCK_NUM))
-extern FlsTst_TestSignatureFgndType FlsTst_GetTestSignatureFgnd(void);
-#endif /* STD_ON == FLSTST_GET_TEST_SIGNATURE_FGND_API */
+extern FUNC(FlsTst_TestSignatureFgndType, FLSTST_CODE) FlsTst_GetTestSignatureFgnd(void);
+#endif /* #if ((STD_ON == FLSTST_GET_TEST_SIGNATURE_FGND_API) && (0 != FLSTST_FGND_BLOCK_NUM)) */
 
 /*************************************************************************/
 /*
@@ -330,8 +342,9 @@ extern FlsTst_TestSignatureFgndType FlsTst_GetTestSignatureFgnd(void);
  */
 /*************************************************************************/
 #if ((STD_ON == FLSTST_GET_ERRORD_ETAILS_API) && ((0U != FLSTST_BGND_BLOCK_NUM) || (0U != FLSTST_FGND_BLOCK_NUM)))
-extern FlsTst_ErrorDetailsType FlsTst_GetErrorDetails(void);
-#endif /* STD_ON == FLSTST_GET_ERRORD_ETAILS_API */
+extern FUNC(FlsTst_ErrorDetailsType, FLSTST_CODE) FlsTst_GetErrorDetails(void);
+#endif /* #if ((STD_ON == FLSTST_GET_ERRORD_ETAILS_API) && ((0U != FLSTST_BGND_BLOCK_NUM) || (0U != \
+          FLSTST_FGND_BLOCK_NUM))) */
 
 /*************************************************************************/
 /*
@@ -349,7 +362,25 @@ extern FlsTst_ErrorDetailsType FlsTst_GetErrorDetails(void);
  */
 /*************************************************************************/
 #if ((STD_ON == FLSTST_TEST_ECC_API) && ((0U != FLSTST_BGND_BLOCK_NUM) || (0U != FLSTST_FGND_BLOCK_NUM)))
-extern Std_ReturnType FlsTst_TestEcc(void);
-#endif /* STD_ON == FLSTST_TEST_ECC_API */
+extern FUNC(Std_ReturnType, FLSTST_CODE) FlsTst_TestEcc(void);
+#endif /* #if ((STD_ON == FLSTST_TEST_ECC_API) && ((0U != FLSTST_BGND_BLOCK_NUM) || (0U != FLSTST_FGND_BLOCK_NUM))) */
 
-#endif
+/*************************************************************************/
+/*
+ * Brief               Service for executing the Flash Test in background
+ *                     mode.
+ * ServiceId           0x0d
+ * Sync/Async          Synchronous
+ * Reentrancy          Reentrant
+ * Param-Name[in]      None
+ * Param-Name[out]     None
+ * Param-Name[in/out]  None
+ * Return              None
+ * PreCondition        None
+ */
+/*************************************************************************/
+#if (0U != FLSTST_BGND_BLOCK_NUM)
+extern FUNC(void, FLSTST_CODE) FlsTst_MainFunction(void);
+#endif /* #if (0U != FLSTST_BGND_BLOCK_NUM) */
+
+#endif /* #ifndef FLSTST_H */

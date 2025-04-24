@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : KeyM_KeyManager.c                                           **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : qinchun.yang                                                **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Implementation for key sub module                           **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R21-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : KeyM_KeyManager.c                                           **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : qinchun.yang                                                **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Implementation for key sub module                           **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R21-11                      **
+**                                                                            **
+*******************************************************************************/
 
 /******************************************************************************
 **                      Revision Control History                             **
@@ -144,8 +145,10 @@ KeyM_Start(
     VAR(KeyM_StartType, AUTOMATIC) StartType,
     P2CONST(uint8, AUTOMATIC, KEYM_APPL_CONST) RequestData,
     VAR(uint16, AUTOMATIC) RequestDataLength,
+    /* PRQA S 3673 ++ */ /* MISRA Rule 8.13 */
     P2VAR(uint8, AUTOMATIC, KEYM_APPL_DATA) ResponseData,
     P2VAR(uint16, AUTOMATIC, KEYM_APPL_DATA) ResponseDataLength)
+/* PRQA S 3673 -- */ /* MISRA Rule 8.13 */
 {
     Std_ReturnType ret = E_NOT_OK; /* PRQA S 2981 */ /* MISRA Rule 2.2 */
 
@@ -169,11 +172,18 @@ KeyM_Start(
         ret = KeyM_KH_Start(StartType, RequestData, RequestDataLength, ResponseData, ResponseDataLength);
 #else
         /*SWS_KeyM_00005*/
+        (void)StartType;
+        (void)RequestData;
+        (void)RequestDataLength;
+        (void)ResponseData;
+        (void)ResponseDataLength;
         ret = E_OK;
 #endif /* STD_ON == KEYM_CRYPTO_KEYHANDLER_START_FINALIZE_ENABLED */
         /*SWS_KeyM_00085:initiate a key update session
          * SWS_KeyM_00004*/
+        SchM_Enter_KeyM_Area_KeyM();
         KeyM_SessionOpen = TRUE;
+        SchM_Exit_KeyM_Area_KeyM();
     }
     return ret;
 }
@@ -234,12 +244,16 @@ KeyM_Finalize(
         ret = KeyM_KH_Finalize(RequestDataPtr, RequestDataLength, ResponseDataPtr, &length);
         /*SWS_KeyM_00104*/
         if ((Std_ReturnType)E_OK == ret)
+#else
+        (void)RequestDataPtr;
+        (void)RequestDataLength;
 #endif /*KEYM_CRYPTO_KEYHANDLER_START_FINALIZE_ENABLED == STD_ON*/
         {
             for (keyIdx = 0u; keyIdx < KEYM_KEY_NUM; keyIdx++) /* PRQA S 2877 */ /* MISRA Dir 4.1 */
             {
                 /*SWS_KeyM_00019*/
                 /*SWS_KeyM_00103*/
+                SchM_Enter_KeyM_Area_KeyM();
                 if ((boolean)TRUE == KeyM_NeedUpate[keyIdx])
                 {
                     if (E_OK == Csm_KeySetValid(*(KeyM_CryptoKeyCfg[keyIdx].keyTargetRef)))
@@ -249,7 +263,7 @@ KeyM_Finalize(
                         {
 
                             (void)KeyM_GetSHEKey_M4M5(
-                                *(KeyM_CryptoKeyCfg[keyIdx].keyTargetRef),
+                                *(const uint32*)(KeyM_CryptoKeyCfg[keyIdx].keyTargetRef),
                                 ResponseDataPtr,
                                 &length);
                         }
@@ -263,11 +277,14 @@ KeyM_Finalize(
                     }
                     KeyM_NeedUpate[keyIdx] = FALSE;
                 }
+                SchM_Exit_KeyM_Area_KeyM();
             }
             KeyM_CryptoKeyFinalizeCallbackNotification(keyRes, length, ResponseDataPtr);
         }
         /*SWS_KeyM_00106*/
+        SchM_Enter_KeyM_Area_KeyM();
         KeyM_SessionOpen = FALSE;
+        SchM_Exit_KeyM_Area_KeyM();
     }
     return ret;
 }
@@ -300,8 +317,8 @@ KeyM_Prepare(
     VAR(uint16, AUTOMATIC) RequestDataLength,
     /* PRQA S 3673 ++*/ /* MISRA Rule 8.13 */
     P2VAR(uint8, AUTOMATIC, KEYM_APPL_DATA) ResponseData,
-    /* PRQA S 3673 --*/ /* MISRA Rule 8.13 */
-    P2VAR(uint16, AUTOMATIC, KEYM_APPL_DATA) ResponseDataLength)
+    /* PRQA S 3673 --*/                                                            /* MISRA Rule 8.13 */
+    P2VAR(uint16, AUTOMATIC, KEYM_APPL_DATA) ResponseDataLength) /* PRQA S 3673 */ /* MISRA Rule 8.13 */
 {
     Std_ReturnType ret = E_NOT_OK;
 
@@ -325,6 +342,12 @@ KeyM_Prepare(
 #if (STD_ON == KEYM_CRYPTO_KEYHANDLER_PREPARE_ENABLED)
             /*SWS_KeyM_00011*/
             ret = KeyM_KH_Prepare(RequestData, RequestDataLength, ResponseData, ResponseDataLength);
+#else
+            (void)RequestData;
+            (void)RequestDataLength;
+            (void)ResponseData;
+            (void)ResponseDataLength;
+
 #endif /* STD_ON == KEYM_CRYPTO_KEYHANDLER_PREPARE_ENABLED */
         }
     }
@@ -408,7 +431,9 @@ KeyM_Update(
                 }
                 sheKey = TRUE;
 #if (STD_OFF == KEYM_CRYPTO_KEYHANDLER_UPDATE_ENABLED)
+                SchM_Enter_KeyM_Area_KeyM();
                 KeyM_SheKeyFlag = TRUE;
+                SchM_Exit_KeyM_Area_KeyM();
 #endif
             }
             else /*Normal key*/
@@ -423,7 +448,9 @@ KeyM_Update(
                 }
 #endif
 #if (STD_OFF == KEYM_CRYPTO_KEYHANDLER_UPDATE_ENABLED)
+                SchM_Enter_KeyM_Area_KeyM();
                 KeyM_SheKeyFlag = FALSE;
+                SchM_Exit_KeyM_Area_KeyM();
 #endif
             }
 #if (STD_ON == KEYM_CRYPTO_KEYHANDLER_UPDATE_ENABLED)
@@ -463,7 +490,9 @@ KeyM_HandleUpdate(
     uint16 KeyIdx,
     boolean sheKey)
 {
+#if (KEYM_NVM_BLOCK_NUM > 0u)
     uint16 blkIdx;
+#endif
     boolean updateCsmFlag = FALSE;
     Std_ReturnType ret;
     KeyM_ResultType keyMRes;
@@ -530,14 +559,20 @@ KeyM_HandleUpdate(
     {
 #if (STD_ON == KEYM_CRYPTO_KEY_START_FINALIZE_FUNCTION_ENABLED)
         /*SWS_KeyM_00102:Internal marker will be set for this key*/
+        SchM_Enter_KeyM_Area_KeyM();
         KeyM_NeedUpate[KeyIdx] = TRUE;
+        SchM_Exit_KeyM_Area_KeyM();
+        (void)sheKey;
 #else
         /*SWS_KeyM_00101*/
         /*SWS_KeyM_00018*/
         (void)Csm_KeySetValid(*(KeyM_CryptoKeyCfg[KeyIdx].keyTargetRef));
         if (TRUE == sheKey)
         {
-            KeyM_GetSHEKey_M4M5(*(KeyM_CryptoKeyCfg[KeyIdx].keyTargetRef), ResultDataPtr, &ResultDataLength);
+            KeyM_GetSHEKey_M4M5(
+                *(uint32*)(KeyM_CryptoKeyCfg[KeyIdx].keyTargetRef),
+                (uint8*)ResultDataPtr,
+                &ResultDataLength);
         }
 #endif /*STD_OFF == KEYM_CRYPTO_KEY_START_FINALIZE_FUNCTION_ENABLED*/
     }

@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : EcuM_Internal.h                                             **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : qinchun.yang                                                **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Internal type definition and function declaration           **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11.                     **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : EcuM_Internal.h                                             **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : qinchun.yang                                                **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Internal type definition and function declaration           **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11.                     **
+**                                                                            **
+*******************************************************************************/
 
 /******************************************************************************
 **                      Revision Control History                             **
@@ -46,16 +47,15 @@
 **                      Include Section                                       **
 *******************************************************************************/
 #include "EcuM.h"
-#include "Mcu.h"
 #include "BswM_EcuM.h"
 #if (ECUM_USE_TIMER == ECUM_TIMER_USE_GPT)
 #include "Tm.h"
 #endif /*ECUM_USE_TIMER == ECUM_TIMER_USE_GPT*/
 #if (ECUM_DEV_ERROR_DETECT == STD_ON)
 #include "Det.h"
-#endif /* ECUM_DEV_ERROR_DETECT == STD_ON */
+#endif /*ECUM_DEV_ERROR_DETECT == STD_ON*/
 #include "SchM_EcuM.h"
-#include "Rte_SchM.h"
+#include "Rte_Main.h"
 #include "EcuM_Externals.h"
 /*******************************************************************************
 **                      Global Symbols                                        **
@@ -103,10 +103,10 @@ typedef struct
     P2CONST(NetworkHandleType, TYPEDEF, ECUM_CONST)
     comMChnl; /*reference to a Network in COMM, INVALID value
 indicates wake up source not a communication channel*/
-#if (ECWM_COMM_PNC_ENABLED == STD_ON)
+#if (ECUM_COMM_PNC_ENABLED == STD_ON)
     PNCHandleType pncNum;                            /*number of PNC for this wake up source*/
     P2CONST(PNCHandleType, TYPEDEF, ECUM_CONST) pnc; /*PNC of this wake up source*/
-#endif                                               /*ECWM_COMM_PNC_ENABLED == STD_ON*/
+#endif                                               /*ECUM_COMM_PNC_ENABLED == STD_ON*/
     uint32 resetResasonNum;
     P2CONST(Mcu_ResetType, TYPEDEF, ECUM_CONST)
     resetResasonPtr; /*describes the mapping of reset reasons detected
@@ -144,22 +144,22 @@ typedef struct
     boolean IsRun[ECUM_MAX_USER_NUM];
     boolean IsPostRun[ECUM_MAX_USER_NUM];
 } EcuM_UserStateType;
-#endif /* ECUM_USER_NUM > 0u */
+#endif /*ECUM_USER_NUM > 0u*/
 
 #if (ECUM_MAX_WAKE_UP_SOURCE_NUM > 0u)
 /* Wakeup Source */
 typedef struct
 {
-    EcuM_WakeupSourceType Pending;
-    EcuM_WakeupSourceType Validated;
-    EcuM_WakeupSourceType Expired;
+    P2VAR(EcuM_WakeupSourceType, AUTOMATIC, ECUM_VAR) Pending;
+    P2VAR(EcuM_WakeupSourceType, AUTOMATIC, ECUM_VAR) Validated;
+    P2VAR(EcuM_WakeupSourceType, AUTOMATIC, ECUM_VAR) Expired;
 #if (ECUM_USE_TIMER == ECUM_TIMER_USE_GPT)
     Tm_PredefTimer100us32bitType wkTime[ECUM_MAX_WAKE_UP_SOURCE_NUM];
 #else
     TickType wkTime[ECUM_MAX_WAKE_UP_SOURCE_NUM];
-#endif /* ECUM_USE_TIMER == ECUM_TIMER_USE_GPT */
+#endif /*ECUM_USE_TIMER == ECUM_TIMER_USE_GPT*/
 } EcuM_WksStateType;
-#endif /* ECUM_MAX_WAKE_UP_SOURCE_NUM > 0u */
+#endif /*ECUM_MAX_WAKE_UP_SOURCE_NUM > 0u*/
 
 typedef struct
 {
@@ -175,14 +175,14 @@ typedef struct
     EcuM_TimeType UserAlarm[ECUM_MAX_ALARM_CLOCK_NUM];
     EcuM_TimeType MasterAlarm;
     EcuM_TimeType GlobalClock;
-#endif /* ECUM_ALARM_CLOCK_PRESENT == STD_ON */
+#endif /*ECUM_ALARM_CLOCK_PRESENT == STD_ON*/
 #if (ECUM_MAX_USER_NUM > 0u)
     EcuM_UserStateType Users;
-#endif /* ECUM_USER_NUM > 0u */
+#endif /*ECUM_USER_NUM > 0u*/
 
 #if (ECUM_MAX_WAKE_UP_SOURCE_NUM > 0u)
     EcuM_WksStateType Wks;
-#endif /* ECUM_MAX_WAKE_UP_SOURCE_NUM > 0u */
+#endif /*ECUM_MAX_WAKE_UP_SOURCE_NUM > 0u*/
 
     EcuM_TargetType SdtgNext; /* Next shutdown target */
     EcuM_TargetType SdtgLast; /* Last shutdown target */
@@ -220,7 +220,7 @@ extern CONST(EcuM_UserCfgType, ECUM_CONST) EcuM_UserCfgs[ECUM_MAX_USER_NUM];
 /*ECUM user alarm configuration*/
 extern CONST(EcuM_AlarmClockCfgType, ECUM_CONST) EcuM_AlarmClkCfgs[ECUM_MAX_ALARM_CLOCK_NUM];
 
-#endif /* ECUM_ALARM_CLOCK_PRESENT == STD_ON */
+#endif /*ECUM_ALARM_CLOCK_PRESENT == STD_ON*/
 
 #if (ECUM_MAX_MCU_CORE_NUM > 1)
 
@@ -228,16 +228,20 @@ extern CONST(CoreIdType, ECUM_CONST) EcuM_SlaveCoreIds[ECUM_MAX_MCU_CORE_NUM - 1
 
 extern CONST(SpinlockIdType, ECUM_CONST) EcuM_RefSpinLockCfg;
 
-#endif /* ECUM_MAX_MCU_CORE_NUM > 1 */
+#endif /*ECUM_MAX_MCU_CORE_NUM > 1*/
 
 /*Runtime variable*/
 #if (ECUM_DEV_ERROR_DETECT == STD_ON)
 
 extern VAR(boolean, ECUM_CLEARED) EcuM_IsInit;
 
-#endif /* ECUM_DEV_ERROR_DETECT == STD_ON */
+#endif /*ECUM_DEV_ERROR_DETECT == STD_ON*/
 
 extern VAR(EcuM_RunTimeType, ECUM_CLEARED) EcuMRunData;
+
+extern VAR(EcuM_WakeupSourceType, ECUM_CLEARED) EcuMWksPending;
+extern VAR(EcuM_WakeupSourceType, ECUM_CLEARED) EcuMWksValidated;
+extern VAR(EcuM_WakeupSourceType, ECUM_CLEARED) EcuMWksExpired;
 
 /*Pointer variable to store the determined PB configuration data*/
 extern P2CONST(EcuM_ConfigType, ECUM_VAR_CLEARED_PTR, ECUM_APPL_CONST) EcuM_ConfigPtr;
@@ -268,7 +272,7 @@ EcuM_DoShutDownPhase(uint16 caller);
 FUNC(void, ECUM_CODE)
 EcuM_OffPreOS(void);
 
-/* Update Ecum global clock.(Use EcuMMainFunctionPeriod */
+/*Update Ecum global clock.(Use EcuMMainFunctionPeriod)*/
 FUNC(void, ECUM_CODE)
 EcuM_UpdateEcuMClock(void);
 
@@ -279,7 +283,7 @@ EcuM_CancellAlarms(void);
 /*Get slave core index in configuration*/
 FUNC(uint8, ECUM_CODE)
 EcuM_GetSlaveCoreIndex(CoreIdType coreId);
-#endif /* ECUM_MAX_MCU_CORE_NUM > 1 */
+#endif /*ECUM_MAX_MCU_CORE_NUM > 1*/
 
 /*Query the corresponding configured user id*/
 FUNC(Std_ReturnType, ECUM_CODE)

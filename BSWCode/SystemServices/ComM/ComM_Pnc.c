@@ -18,6 +18,10 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
+ */
+/* PRQA S 3108-- */
+/*
+ ********************************************************************************
  ************************************************************************************************************************
  ** **
  **  @file               : ComM_Pnc.c **
@@ -29,7 +33,6 @@
  **  @specification(s)   : AUTOSAR classic Platform R19-11 **
  ** **
  ***********************************************************************************************************************/
-/* PRQA S 3108-- */
 
 /*=================================================[inclusions]=======================================================*/
 #include "ComM_Internal.h"
@@ -167,7 +170,7 @@ COMM_LOCAL FUNC(void, COMM_CODE) ComM_PncLearnSendIraByCh(uintx chIdx)
     /** @ref [SWS_ComM_01030] {OBSOLETE replaced by [SWS_ComM_01090]} and @ref SWS_ComM_01090
      * gateway enable forward receiver era rx to all other channel where ComMPncDynamicMappingEnabled is true
      */
-    uint8 txVlu[COMM_PN_INFO_LENGTH] = {0u};
+    uint8 txVlu[COMM_PN_INFO_LENGTH] = {0};
     if (chIdx < ComM_PncCfgPtr->pncMapTotalChannelNum)
     {
         for (uintx i = 0u; i < COMM_PN_INFO_LENGTH; i++)
@@ -187,14 +190,6 @@ COMM_LOCAL FUNC(void, COMM_CODE) ComM_PncLearnSendIraByCh(uintx chIdx)
     }
 }
 #endif /* COMM_DYN_PNC_TO_CH_MAPP_SUPPORT == STD_ON */
-/**
- * @ingroup     ComM pnc
- * @brief       pnc send iar
- * @param[in]   chIdx  channel mapping pnc index
- * @param[in]   chPncGwMask  channel gateway type mask
- * @return      NA
- */
-
 /* pnc state machine */
 /**
  * @ingroup     ComM pnc
@@ -222,11 +217,6 @@ COMM_LOCAL FUNC(void, COMM_CODE) ComM_PncBeh_EntryReadySleep(uintx pncIdx)
         {
             if (oldPncMode == COMM_PNC_REQUESTED)
             {
-                /** @ref SWS_ComM_00960] {OBSOLETE replaced by [SWS_ComM_01085]
-                 *  PNC bit representing this PNC within the IRA shall be set to value 0 and the aggregated internal
-                 * PNC requests shall be forwarded to each channel which is referenced by this PNC
-                 */
-
                 /** @ref [SWS_ComM_00961] {OBSOLETE replaced by [SWS_ComM_01086]}
                  * entering state COMM_PNC_READY_SLEEP for COMM_PNC_REQUESTED comm shall release COMM_FULL_COMMUNICATION
                  * all config this pnc map channel
@@ -358,16 +348,7 @@ COMM_LOCAL FUNC(void, COMM_CODE) ComM_PncBeh_EntryRequst(uintx pncIdx)
 #if ((COMM_USER_MODESWITCH_NOTIFY == STD_ON) && (COMM_USER_NUMBER > 0))
     ComM_PncStateChangeHandleNotify(pncIdx);
 #endif
-    /* set pnc bit to 1 */
     uint32 pncOffsetId = ComM_PncCfgPtr->pncListCfgPtr[pncIdx].pncOffsetId;
-    /** @ref SWS_ComM_01072
-     * entering COMM_PNC_REQUESTED ComMPncGatewayType is COMM_GATEWAY_TYPE_ACTIVE shall be set 1
-     *
-     */
-    /** @ref SWS_ComM_00930 --> @ref SWS_ComM_01068
-     * not gateway,shall transmit pnc bit to 1 */
-    /**  @ref SWS_ComM_01076
-     * user request shall be set passive channel bit 1 */
     for (uintx index = 0u; index < ComM_PncCfgPtr->pncMapTotalChannelNum; index++)
     {
         const ComM_ChannelConfigType* chCfgPtr = ComM_PncCfgPtr->ChCfgPtr[index];
@@ -488,7 +469,7 @@ COMM_LOCAL FUNC(void, COMM_CODE) ComM_ComRxEiraMainHandle(void)
         SchM_Enter_ComM_COMM_EXCLUSIVE_AREA_0();
         ComM_PncRxComSigEiraInd = FALSE;
         SchM_Exit_ComM_COMM_EXCLUSIVE_AREA_0();
-        uint8 rxEiraMerge[COMM_PN_INFO_LENGTH] = {0u};
+        uint8 rxEiraMerge[COMM_PN_INFO_LENGTH] = {0};
         boolean eiraEnCo = FALSE;
         for (uintx index = 0; index < ComM_PncCfgPtr->comRxEiraSigNum; index++)
         {
@@ -524,8 +505,7 @@ COMM_LOCAL FUNC(void, COMM_CODE) ComM_ComRxEiraMainHandle(void)
  * @ingroup     ComM pnc
  * @brief       get pnc state
  * @param[in]   pncIdx pnc index
- * @param[out]  pncMode pnc module
- * @return      NA
+ * @return      pncMode
  */
 ComM_PncModeType ComM_PncGetStatus(uintx pncIdx) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
 {
@@ -618,10 +598,11 @@ FUNC(void, COMM_CODE)
 ComM_PncRequestComMode(uintx pncIdx, uintx usrInPncIdx, ComM_ModeType comMode) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
 {
     ComM_PncVarType* pncVarPtr = &ComM_PncVar[pncIdx];
+
 #if COMM_PNC_GATEWAY_ENABLED == STD_ON || COMM_TX_ONLY_PNC_ENABLE == STD_ON
     const ComM_PncItemConfigType* pncCfgPtr = &ComM_PncCfgPtr->pncListCfgPtr[pncIdx];
-#endif /* COMM_PNC_GATEWAY_ENABLED == STD_ON */
 
+#endif
     ComM_ModeType modeReq = 0xffu;
     if ((comMode == COMM_FULL_COMMUNICATION) && !ComM_CommonGetBit(pncVarPtr->userReqTable, usrInPncIdx))
     {
@@ -648,11 +629,6 @@ ComM_PncRequestComMode(uintx pncIdx, uintx usrInPncIdx, ComM_ModeType comMode) /
 
     if (modeReq == COMM_FULL_COMMUNICATION)
     {
-        /* shall be request this pnc */
-        /** @ref SWS_ComM_01076
-         * a user request full com ,pnc state in COMM_PNC_REQUESTED passive channel shall set era 1
-         * include ComMChannelPerPnc and ComMChannelPerTxOnlyPnc
-         */
         /** @ref SWS_ComM_00932
          * a user request full com ,pnc state COMM_PNC_NO_COMMUNICATION shall be entry COMM_PNC_REQUESTED
          * @ref SWS_ComM_01087
@@ -711,7 +687,6 @@ ComM_PncRequestComMode(uintx pncIdx, uintx usrInPncIdx, ComM_ModeType comMode) /
                  * passive channel pnc shall be set pnc 0 (or ComMPncGatewayType is not set @ref SWS_ComM_01080)
                  * include ComMChannelPerPnc or ComMChannelPerTxOnlyPnc
                  */
-                /* clear pnc bit */
                 for (uintx chIdx = 0u; chIdx < ComM_PncCfgPtr->pncMapTotalChannelNum; chIdx++)
                 {
                     if (ComM_CommonGetBit(ComM_ChToPncMap[chIdx], pncCfgPtr->pncOffsetId)
@@ -949,7 +924,6 @@ COMM_LOCAL void ComM_PncUpdateEra(uintx chIdx, const uint8* pncBitEra)
             uintx chInPncIdx = ComM_PncCfgPtr->pncListCfgPtr[pncIdx].chMapEraIndex[chIdx];
             /* PRQA S 3469 ++ */ /* MISRA Dir 4.9 */
             /* PRQA S 3469 -- */ /* MISRA Dir 4.9 */
-
             if (ComM_CommonGetBit(pncBitEra, pncId))
             {
                 if (!ComM_CommonGetBit(pncVarPtr->eraActiveTable, chInPncIdx))
@@ -959,21 +933,15 @@ COMM_LOCAL void ComM_PncUpdateEra(uintx chIdx, const uint8* pncBitEra)
                 }
                 if (chCfgPtr->pncGateWayType == COMM_PNC_GATEWAY_TPYE_PASSIVE)
                 {
-                    /** @ref SWS_ComM_01077 update @ref SWS_ComM_00164
-                     * in COMM_PNC_REQUESTED
-                     * passive channel rx era 1 shall shell all active channel pnc bit
-                     * include ComMChannelPerPnc  or ComMChannelPerTxOnlyPnc
-                     */
                     if (!ComM_CommonGetBit(pncVarPtr->setMask, COMM_PNC_PASSIVE_CHREQ))
                     {
                         ComM_CommonSetBit(pncVarPtr->setMask, COMM_PNC_PASSIVE_CHREQ);
                     }
-                    /* no handle */
                 }
-                /** @ref [SWS_ComM_00165] {OBSOLETE replaced by [SWS_ComM_01088]}
+                /** @ref [SWS_ComM_00165]
                  * pnc state is COMM_PNC_READY_SLEEP, channel gateway is set;era =1 and least one channel this pnc
                  * COMM_PNC_REQUESTED shall be entered
-                 * @ref [SWS_ComM_00951] {OBSOLETE replaced by [SWS_ComM_01089]}
+                 * @ref [SWS_ComM_00951]
                  * The timer ComMPncPrepareSleepTimer shall be stopped and the sub state COMM_PNC_REQUESTED shall be
                  * entered
                  */
@@ -1024,8 +992,7 @@ COMM_LOCAL void ComM_PncUpdateEra(uintx chIdx, const uint8* pncBitEra)
                 if ((ComM_PncGetStatus(pncIdx) == COMM_PNC_REQUESTED) && (pncVarPtr->userReqCnt == 0u)
                     && (eraActiveCnt == 0u))
                 {
-                    /* first clear pnc bit */
-                    /** @ref SWS_ComM_01079 update @ref SWS_ComM_00959
+                    /** @ref SWS_ComM_01079
                      * pnc state is COMM_PNC_REQUESTED, gateway,all user request pnc no commuication
                      * all active channel pnc era is 0 in this pnc
                      * passive channel pnc shall be set pnc 0
@@ -1119,13 +1086,6 @@ ComM_PncForwardSyncPncShutdown(uintx chIdx, P2CONST(uint8, AUTOMATIC, COMM_APPL_
 #endif /* COMM_SYNC_PNC_SHUTDOWN_ENABLED == STD_ON) && (COMM_PNC_GATEWAY_ENABLED == STD_ON */
 
 #if (COMM_DYN_PNC_TO_CH_MAPP_SUPPORT == STD_ON)
-/**
- * @ingroup     ComM pnc
- * @brief       pnc learn phase active
- * @param[in]   chIdx  era pnc bit
- * @param[in]   pncBitVectorPtr  pnc vector bit
- * @return      NA
- */
 /**
  * @ingroup     ComM pnc
  * @brief       pnc learn indication
@@ -1426,18 +1386,19 @@ FUNC(Std_ReturnType, COMM_CODE) ComM_PncResetPncMap(void)
 #endif /* COMM_DYN_PNC_TO_CH_MAPP_SUPPORT ==STD_ON */
 COMM_LOCAL void ComM_PncUpdateIRA(uint8 chIdx, const uint8* ComM_PncIra)
 {
-    uint8 txVlu[COMM_PN_INFO_LENGTH] = {0u};
+    uint8 txVlu[COMM_PN_INFO_LENGTH] = {0};
     for (uint8 i = 0; i < COMM_PN_INFO_LENGTH; i++)
     {
         txVlu[i] = (ComM_PncIra[i] & ComM_ChToPncMap[chIdx][i]);
     }
     Nm_UpdateIRA(ComM_PncCfgPtr->ChCfgPtr[chIdx]->inerChIdx, txVlu);
 }
+
 COMM_LOCAL void ComM_TxIraMainHandle(void)
 {
-    uint8 pncActiveIraChanged[COMM_PN_INFO_LENGTH] = {0u};
+    uint8 pncActiveIraChanged[COMM_PN_INFO_LENGTH] = {0};
 #if COMM_PNC_GATEWAY_ENABLED == STD_ON
-    uint8 pncPassiveIraChanged[COMM_PN_INFO_LENGTH] = {0u};
+    uint8 pncPassiveIraChanged[COMM_PN_INFO_LENGTH] = {0};
 #endif
     for (uint8 pncIdx = 0u; pncIdx < ComM_PncCfgPtr->pncListNum; pncIdx++)
     {
@@ -1475,6 +1436,7 @@ COMM_LOCAL void ComM_TxIraMainHandle(void)
         {
             /* do nothing */
         }
+
 #if COMM_PNC_GATEWAY_ENABLED == STD_ON
         if (!ComM_CommonGetBit(ComM_PncPassiveIra, pncOffsetId) && (activeRequests > 0u))
         {
@@ -1492,6 +1454,7 @@ COMM_LOCAL void ComM_TxIraMainHandle(void)
         }
 #endif
     }
+
     for (uint8 chIdx = 0u; chIdx < ComM_PncCfgPtr->pncMapTotalChannelNum; chIdx++)
     {
         const uint8* pncIraChanged = pncActiveIraChanged;
@@ -1525,8 +1488,9 @@ FUNC(void, COMM_CODE) ComM_PncMainFunction(void) /* PRQA S 1532 */ /* MISRA Rule
 {
 #if (COMM_PNC_GATEWAY_ENABLED == STD_ON)
     ComM_ComRxEraMainHandle();
-#endif /* COMM_PNC_GATEWAY_ENABLED == STD_ON */
+#endif
     ComM_ComRxEiraMainHandle();
+
     ComM_TxIraMainHandle();
 }
 #endif /* COMM_PNC_USED_COM == STD_ON */
@@ -1584,20 +1548,6 @@ FUNC(void, COMM_CODE) ComM_ComEiraRxIndication(uint8 sigIdx) /* PRQA S 1532 */ /
     SchM_Exit_ComM_COMM_EXCLUSIVE_AREA_0();
 }
 #endif /* COMM_PNC_USED_COM == STD_ON */
-
-#if COMM_EXTEND_FUNCTION_SUPPORT
-/**
- * @ingroup     ComM pnc
- * @brief       get pnc state
- * @param[in]   pncIdx pnc index
- * @return      ComM_PncModeType module
- */
-/*=======================================[extend function definitions]================================================*/
-FUNC(ComM_PncModeType, COMM_CODE) ComM_PncGetMode(uint8 pncIdx)
-{
-    return ComM_PncVar[pncIdx].pncMode;
-}
-#endif /* COMM_EXTEND_FUNCTION_SUPPORT */
 
 #define COMM_STOP_SEC_CODE
 #include "ComM_MemMap.h"

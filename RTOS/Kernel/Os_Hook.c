@@ -18,21 +18,22 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Os_Hook.c                                                   **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : i-soft-os                                                   **
- **  Vendor      :                                                             **
- **  DESCRIPTION : hook manager                                                **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
- **  Version :   AUTOSAR classic Platform R19--Function Safety                 **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Os_Hook.c                                                   **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : i-soft-os                                                   **
+**  Vendor      :                                                             **
+**  DESCRIPTION : hook manager                                                **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
+**  Version :   AUTOSAR classic Platform R19--Function Safety                 **
+**                                                                            **
+*******************************************************************************/
 
 /*=======[I N C L U D E S]====================================================*/
 #include "Os_Internal.h"
@@ -133,6 +134,10 @@ FUNC(void, OS_CODE) Os_CallErrorHook(StatusType Error)
 #if (TRUE == CFG_APPL_ERRORHOOK)
     P2CONST(Os_ApplicationCfgType, AUTOMATIC, OS_VAR) pAppCfg;
 #endif
+
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceLastError(Error);
+#endif /* TRUE == CFG_TRACE_ENABLE */
 
     if (OS_LEVEL_ERRORHOOK == Os_SCB.sysOsLevel)
     {
@@ -689,7 +694,9 @@ static FUNC(void, OS_CODE) Os_ProtHookTerminateTask(StatusType osErrType)
 #if (CFG_SPINLOCK_MAX > 0U)
     VAR(uint16, OS_VAR) CountIdx;
     VAR(uint16, OS_VAR) CurrentCount;
+#if (CFG_STD_RESOURCE_MAX > 0U)
     VAR(ResourceType, OS_VAR) ResourceId;
+#endif
     VAR(SpinlockIdType, OS_VAR) SpinlockId;
 
     for (CountIdx = pRunningTaskTcb->taskCriticalZoneCount; CountIdx > 0u; CountIdx--)
@@ -700,12 +707,15 @@ static FUNC(void, OS_CODE) Os_ProtHookTerminateTask(StatusType osErrType)
             SpinlockId = pRunningTaskTcb->taskCriticalZoneStack[CurrentCount];
             (void)Os_ReleaseSpinlock(SpinlockId);
         }
+#if (CFG_STD_RESOURCE_MAX > 0U)
         else
         {
             ResourceId = (coreIndex | pRunningTaskTcb->taskCriticalZoneStack[CurrentCount]);
             (void)Os_ReleaseResource(ResourceId);
         }
+#endif
     }
+
 #elif (CFG_STD_RESOURCE_MAX > 0U)
     VAR(uint16, OS_VAR) i;
     if (pRunningTaskTcb->taskResCount > 0u)
@@ -790,10 +800,27 @@ static FUNC(void, OS_CODE) Os_ProtHookTerminateTask(StatusType osErrType)
         /* Timing protection do task_dispatch at the end of tm_prot_isr. */
         if ((E_OS_PROTECTION_LOCKED != (StatusType)osErrType) && (E_OS_PROTECTION_TIME != (StatusType)osErrType))
         {
+#if (TRUE == CFG_TRACE_ENABLE)
+            Os_TraceTaskSwitch(
+                Os_SCB.sysRunningTaskID,
+                Os_SCB.sysHighTaskID,
+                OS_TRACE_TASK_SWITCH_REASON_PROT_HOOK_TERMINATE,
+                OS_TRACE_TASK_SWITCH_REASON_PROT_HOOK_ACTIVE);
+#endif
             Os_SCB.sysDispatchLocker = 0U;
             Os_Dispatch(); /* PRQA S 3469 */ /* MISRA  Dir-4.9*/ /* OS_HOOK_MACRO_003 */
         }
+        Os_TprotTerminateTask = TRUE;
 #else
+
+#if (TRUE == CFG_TRACE_ENABLE)
+        Os_TraceTaskSwitch(
+            Os_SCB.sysRunningTaskID,
+            Os_SCB.sysHighTaskID,
+            OS_TRACE_TASK_SWITCH_REASON_PROT_HOOK_TERMINATE,
+            OS_TRACE_TASK_SWITCH_REASON_PROT_HOOK_ACTIVE);
+#endif
+
         Os_SCB.sysDispatchLocker = 0U;
         Os_Dispatch();
 #endif /* TRUE == CFG_TIMING_PROTECTION_ENABLE */
@@ -859,7 +886,9 @@ static FUNC(void, OS_CODE) Os_ProtHookTerminateIsrC2(StatusType osErrType)
 #if (CFG_SPINLOCK_MAX > 0U)
     VAR(uint16, OS_VAR) CountIdx;
     VAR(uint16, OS_VAR) CurrentCount;
+#if (CFG_STD_RESOURCE_MAX > 0U)
     VAR(ResourceType, OS_VAR) ResourceId;
+#endif
     VAR(SpinlockIdType, OS_VAR) SpinlockId;
 
     for (CountIdx = pIcb->isr2CriticalZoneCount; CountIdx > 0u; CountIdx--)
@@ -870,12 +899,15 @@ static FUNC(void, OS_CODE) Os_ProtHookTerminateIsrC2(StatusType osErrType)
             SpinlockId = pIcb->isr2CriticalZoneStack[CurrentCount];
             (void)Os_ReleaseSpinlock(SpinlockId);
         }
+#if (CFG_STD_RESOURCE_MAX > 0U)
         else
         {
             ResourceId = (coreIndex | pIcb->isr2CriticalZoneStack[CurrentCount]);
             (void)Os_ReleaseResource(ResourceId);
         }
+#endif
     }
+
 #elif (CFG_STD_RESOURCE_MAX > 0U)
     VAR(uint16, OS_VAR) i;
     if (pIcb->IsrC2ResCount > 0u)
@@ -1151,32 +1183,6 @@ FUNC(ProtectionReturnType, OS_CODE) Os_CallProtectionHook(StatusType osErrType, 
         /* SWS_Os_00506 */
         osRet = PRO_SHUTDOWN;
     }
-
-#if (CFG_SPINLOCK_MAX > 0U)
-    VAR(SpinlockIdType, OS_VAR) spinLockIdx;
-    VAR(uint16, OS_VAR) obj_id;
-    /*Os_00613*/
-    if ((uint32)OS_NO_CARE == osWhoHook)
-    {
-        if ((StatusType)E_OS_SPINLOCK == osErrType)
-        {
-            for (spinLockIdx = 0u; spinLockIdx < CFG_SPINLOCK_MAX; spinLockIdx++)
-            {
-                if (Os_SLCB[spinLockIdx].objOccupyType == OBJECT_TASK)
-                {
-                    obj_id = Os_SLCB[spinLockIdx].objOccupyId;
-                    /* PRQA S 3469 ++ */ /* MISRA  Dir-4.9*/ /* OS_HOOK_MACRO_003 */
-                    if ((Os_GetObjLocalId(obj_id) == Os_SCB.sysRunningTaskID)
-                        && (Os_SCB.sysCore == Os_GetObjCoreId(obj_id)))
-                    /* PRQA S 3469 -- */ /* MISRA  Dir-4.9*/
-                    {
-                        (void)Os_ReleaseSpinlock(spinLockIdx);
-                    }
-                }
-            }
-        }
-    }
-#endif /* CFG_SPINLOCK_MAX > 0U */
 
     /* Hook post process. */
     switch (osRet)

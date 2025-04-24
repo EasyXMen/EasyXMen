@@ -2,7 +2,7 @@
 #define LWIP_HOOKS_H_
 
 #include "TcpIp_Cfg.h"
-
+#include "lwip/prot/ethernet.h"
 #if TCPIP_LWIP_HOOKS
 
 #if (STD_ON == TCPIP_TCP_SYNISN_RECALC)

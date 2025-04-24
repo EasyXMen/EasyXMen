@@ -1,38 +1,3 @@
-/* PRQA S 3108++ */
-/**
- * Copyright (C) 2024 Isoft Infrastructure Software Co., Ltd.
- * SPDX-License-Identifier: LGPL-2.1-only-with-exception OR  LicenseRef-Commercial-License
- *
- * This library is free software; you can redistribute it and/or modify it under the terms of the
- * GNU Lesser General Public License as published by the Free Software Foundation; version 2.1.
- * This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Lesser General Public License for more details.
- * You should have received a copy of the GNU Lesser General Public License along with this library;
- * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
- * or see <https://www.gnu.org/licenses/>.
- *
- * Alternatively, this file may be used under the terms of the Isoft Infrastructure Software Co., Ltd.
- * Commercial License, in which case the provisions of the Isoft Infrastructure Software Co., Ltd.
- * Commercial License shall apply instead of those of the GNU Lesser General Public License.
- *
- * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
- * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    :Compiler_Cfg.h                                               **
- **                                                                            **
- **  Created on  : 2020-03-24                                                  **
- **  Author      : qinchun.yang                                                **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
-/* PRQA S 3108-- */
-
 #ifndef COMPILER_CFG_H
 #define COMPILER_CFG_H
 
@@ -46,118 +11,628 @@
 #define END_C_DECLS
 #endif
 
-/* eth */
-#define ETH_VAR
+/* Comestack */
+#define AUTOSAR_COMSTACKDATA
 
-/* ethif */
+/* BFX */
+#define BFX_APPL_DATA
+#define BFX_BIT16_CODE
+#define BFX_BIT32_CODE
+#define BFX_BIT8_CODE
+#define BFX_CODE
+
+/* BSWM */
+#define BSWM_APPL_CODE
+#define BSWM_APPL_DATA
+#define BSWM_CANSM_CODE
+#define BSWM_CLEARED
+#define BSWM_CODE
+#define BSWM_COMM_CODE
+#define BSWM_CONFIG_DATA
+#define BSWM_CONST
+#define BSWM_DCM_CODE
+#define BSWM_ECUM_CODE
+#define BSWM_ETHIF_CODE
+#define BSWM_ETHSM_CODE
+#define BSWM_FRSM_CODE
+#define BSWM_J1939DCM_CODE
+#define BSWM_J1939NM_CODE
+#define BSWM_LINSM_CODE
+#define BSWM_LINTP_CODE
+#define BSWM_NMIF_CODE
+#define BSWM_NVM_CODE
+#define BSWM_SD_CODE
+#define BSWM_SWC_CODE
+#define BSWM_VAR_CLEARED
+#define BSWM_VAR_NO_INIT_SINGLE_8
+#define BSWM_WDGM_CODE
+
+/* CANIF */
+#define CANIF_APPL_CODE
+#define CANIF_APPL_CONST
+#define CANIF_APPL_DATA
+#define CANIF_CODE
+#define CANIF_CONFIG_DATA
+#define CANIF_CONST
+#define CANIF_CONST_PBCFG
+#define CANIF_PBCFG_CONST
+#define CANIF_VAR
+#define CANIF_VAR_POWER_ON_INIT
+
+/* CANNM */
+#define CANNM_APPL_CONST
+#define CANNM_APPL_DATA
+#define CANNM_CODE
+#define CANNM_CONST
+#define CANNM_VAR
+#define CANNM_VAR_POWER_ON_INIT
+
+/* CANSM */
+#define CANSM_CHECKTRANSCEIVERWAKEFLAGINDICATION_CODE
+#define CANSM_CLEARTRCVWUFFLAGINDICATION_CODE
+#define CANSM_CODE
+#define CANSM_CONFIG_DATA
+#define CANSM_CONFIRMPNAVAILABILITY_CODE
+#define CANSM_CONST
+#define CANSM_CONST_PBCFG
+#define CANSM_ECUM_CODE
+#define CANSM_TRANSCEIVERMODEINDICATION_CODE
+#define CANSM_TXTIMEOUTEXCEPTION_CODE
+#define CANSM_VAR
+#define CANSM_VAR_POWER_ON_INIT
+
+/* CANTP */
+#define CANTP_APPL_CODE
+#define CANTP_APPL_CONST
+#define CANTP_APPL_DATA
+#define CANTP_CODE
+#define CANTP_CONST
+#define CANTP_VAR_NOINIT
+#define CANTP_VAR_POWER_ON_INIT
+
+/* CANTRCV */
+#define CANTRCV_APPL_DATA
+#define CANTRCV_CODE
+#define CANTRCV_CONST
+#define CANTRCV_CONST_PBCFG
+#define CANTRCV_VAR
+#define CANTRCV_VAR_NOINIT
+#define CANTRCV_VAR_POWER_ON_INIT
+
+/* CANTSYN */
+#define CANTSYN_APPL_DATA
+#define CANTSYN_CONST
+#define CANTSYN_CONST_PBCFG
+
+/* CDD */
+#define CDD_ASIC_DI_CODE
+#define CDD_FOTA_CODE
+#define CDD_FOTA_VAR
+#define CDD_FVM_APPL_CONST
+#define CDD_FVM_APPL_DATA
+#define CDD_FVM_CFG_CONST
+#define CDD_FVM_CODE
+#define CDD_FVM_CONST
+#define CDD_FVM_VAR_POWER_ON_INIT
+#define CDD_FVM__CONST
+#define CDD_FVM__VAR
+
+/* CMAC */
+#define CMAC_CODE
+
+/* COM */
+#define COM_APPL_CODE
+#define COM_APPL_CONST
+#define COM_APPL_DATA
+#define COM_CODE
+#define COM_CONST
+#define COM_CONST_PBCFG
+#define COM_VAR
+#define COM_VAR_POWER_ON_INIT
+
+/* COMM */
+#define COMM_APPL_CONST
+#define COMM_APPL_DATA
+#define COMM_CODE
+#define COMM_CONST
+#define COMM_VAR
+
+/* COMXF */
+#define COMXF_APPL_DATA
+#define COMXF_CODE
+#define COMXF_CONST
+#define COMXF_CONST_PBCFG
+#define COMXF_VAR
+#define COMXF_VAR_POWER_ON_INIT
+
+/* CPT */
+#define CPT_APP_ADC_CODE
+#define CPT_APP_SENDER_CODE
+
+/* CRC */
+#define CRC_APPL_CONST
+#define CRC_CODE
+
+/* CRYIF */
+#define CRYIF_APPL_CODE
+#define CRYIF_APPL_DATA
+#define CRYIF_CODE
+#define CRYIF_VAR_CLEARED_BOOLEAN
+
+/* CRYPTO */
+#define CRYPTO_APPL_CONST
+#define CRYPTO_APPL_DATA
+#define CRYPTO_CODE
+#define CRYPTO_CONST
+#define CRYPTO_VAR
+
+/* CSM */
+#define CSM_APPL_CODE
+#define CSM_APPL_DATA
+#define CSM_CBK_NOTIFICATION_CODE
+#define CSM_CODE
+#define CSM_CONST
+#define CSM_VAR_CLEARED_BOOLEAN
+#define CSM_VAR_CLEARED_UNSPECIFIED
+#define CSM_VAR_NO_INIT_PTR
+#define CSM_VAR_NO_INIT_UNSPECIFIED
+
+/* Crypto */
+#define Crypto_VAR_CLEARED_BOOLEAN
+
+/* DCM */
+#define DCM_APPL_CODE
+#define DCM_CODE
+#define DCM_CONST
+#define DCM_CONST_PBCFG
+#define DCM_STOP_CODE
+#define DCM_VAR
+#define DCM_VAR_NOINIT
+#define DCM_VAR_POWER_ON_INIT
+
+/* DEM */
+#define DEM_APPL_DATA
+#define DEM_CODE
+#define DEM_CONST
+#define DEM_CONST_PBCFG
+#define DEM_READDATA_CODE
+#define DEM_VAR
+
+/* DET */
+#define DET_APPL_CONST
+#define DET_APPL_DATA
+#define DET_CODE
+#define DET_CONST
+#define DET_VAR
+
+/* DLT */
+#define DLT_APPL_CODE
+#define DLT_APPL_CONST
+#define DLT_APPL_DATA
+#define DLT_APPL_VAR
+#define DLT_CODE
+#define DLT_CONST
+
+/* DOIP */
+#define DOIP_APPL_CODE
+#define DOIP_APPL_CONST
+#define DOIP_CODE
+#define DOIP_CONST
+#define DOIP_VAR
+#define DOIP_VAR_CLEARED
+#define DOIP_VAR_INIT
+
+/* E2E */
+#define E2E_APPL_CONST
+#define E2E_APPL_DATA
+#define E2E_CODE
+#define E2E_CONST
+#define E2E_CONST_UNSPECIFIED
+#define E2E_VAR_CLEARED
+
+/* E2EXF */
+#define E2EXF_APPL_DATA
+#define E2EXF_CODE
+#define E2EXF_CONST
+#define E2EXF_VAR
+#define E2EXF_VAR_CLEARED
+#define E2EXF_VAR_POWER_ON_INIT
+
+/* EA */
+#define EA_APPL_CODE
+#define EA_APPL_DATA
+#define EA_CODE
+#define EA_CONST
+#define EA_PRIVATE_CONST
+#define EA_PUBLIC_CODE
+#define EA_VAR
+
+/* ECUM */
+#define ECUM_AL_DRIVERINITBSWM_CODE
+#define ECUM_AL_DRIVERINITONE_CODE
+#define ECUM_AL_DRIVERINITZERO_CODE
+#define ECUM_AL_DRIVERRESTART_CODE
+#define ECUM_AL_RESET_CODE
+#define ECUM_AL_SETPROGRAMMABLEINTERRUPTS_CODE
+#define ECUM_AL_SWITCHOFF_CODE
+#define ECUM_APPL_CONST
+#define ECUM_APPL_DATA
+#define ECUM_CALCULATEELAPSEDMS_CODE
+#define ECUM_CHECKRAMHASH_CODE
+#define ECUM_CHECKVALIDATION_CODE
+#define ECUM_CHECKWAKEUP_CODE
+#define ECUM_CLEARED
+#define ECUM_CODE
+#define ECUM_CONFIG_DATA
+#define ECUM_CONST
+#define ECUM_CURRENTTIMESTAMPMS_CODE
+#define ECUM_DETERMINEPBCONFIGURATION_CODE
+#define ECUM_DISABLEWAKEUPSOURCES_CODE
+#define ECUM_ENABLEWAKEUPSOURCES_CODE
+#define ECUM_ENDCHECKWAKEUP_CODE
+#define ECUM_ERRORHOOK_CODE
+#define ECUM_GENERATERAMHASH_CODE
+#define ECUM_INTERNALSTARTCHECKWAKEUP_CODE
+#define ECUM_LOOPDETECTION_CODE
+#define ECUM_MCUSETMODE_CODE
+#define ECUM_ONGOOFFONE_CODE
+#define ECUM_ONGOOFFTWO_CODE
+#define ECUM_SETWAKEUPEVENT_CODE
+#define ECUM_SLEEPACTIVITY_CODE
+#define ECUM_STARTCHECKWAKEUP_CODE
+#define ECUM_STARTWAKEUPSOURCES_CODE
+#define ECUM_STOPWAKEUPSOURCES_CODE
+#define ECUM_VALIDATEWAKEUPEVENT_CODE
+#define ECUM_VAR
+#define ECUM_VAR_CLEARED_PTR
+#define ECUM_VAR_NO_INIT
+
+/* EEP */
+#define EEP_APPL_CODE
+#define EEP_APPL_CONST
+#define EEP_APPL_DATA
+#define EEP_CODE
+#define EEP_CONST
+#define EEP_CONST_PBCFG
+#define EEP_PRIVATE_CODE
+#define EEP_PUBLIC_CODE
+
+/* ETHIF */
+#define ETHIF_APPL_CODE
+#define ETHIF_APPL_CONST
+#define ETHIF_APPL_DATA
 #define ETHIF_CODE
 #define ETHIF_VAR
 
-#define ETHIF_APPL_DATA
-
-/* tcpip */
-#define TCPIP_CODE
-#define TCPIP_VAR
-
-#define TCPIP_APPL_CONST
-#define TCPIP_APPL_VAR
-#define TCPIP_CONST
-
-#define TCPIP_CONFIG_DATA
-
-#define TCPIP_APPL_DATA
-#define TCPIP_APPL_CODE
-#define TCPIP_VAR_ZERO_INIT
-
-/* csm */
-#define CSM_APPL_DATA
-#define CSM_CONST
-#define CSM_CODE
-
-/* keym */
-#define KEYM_CONST_PBCFG
-#define KEYM_APPL_CONST
-
-#define KEYM_APPL_CODE
-#define KEYM_CODE
-
-#define KEYM_APPL_DATA
-#define KEYM_CONST
-
-/* det */
-#define DET_CODE
-
-/* ethsm */
+/* ETHSM */
 #define ETHSM_CODE
+#define ETHSM_CONST
+#define ETHSM_VAR
+#define ETHSM_VAR_POWER_ON_INIT
 
-/* StbM */
-#define STBM_CODE
-#define STBM_APPL_DATA
-#define STBM_CONST_PBCFG
-#define STBM_VAR_CLEARED_BOOLEAN
-#define STBM_VAR
-#define STBM_CONST
+/* ETHSWT */
+#define ETHSWT_APPL_CODE
+#define ETHSWT_APPL_CONST
+#define ETHSWT_APPL_DATA
+#define ETHSWT_CODE
+#define ETHSWT_CONFIG_DATA
+#define ETHSWT_CONST
+#define ETHSWT_VAR
+#define ETHSWT_VAR_ZERO_INIT
 
-/* CanTSyn */
-#define CANTSYN_CODE
-#define CANTSYN_APPL_CONST
-#define CANTSYN_VAR_NOINIT
-#define CANTSYN_VAR_POWER_ON_INIT
-#define CANTSYN_APPL_DATA
-#define CANTSYN_CONST_PBCFG
-#define CANTSYN_CONST
+/* ETHTRCV */
+#define ETHTRCV_APPL_DATA
+#define ETHTRCV_CODE
+#define ETHTRCV_CONFIG_DATA
+#define ETHTRCV_CONST
+#define ETHTRCV_VAR_NOINIT
+#define ETHTRCV_VAR_ZERO_INIT
 
-/* EthTSyn */
-#define ETHTSYN_CODE
+/* ETHTSYN */
 #define ETHTSYN_VAR
-#define ETHTSYN_APPL_DATA
-#define ETHTSYN_VAR_CLEARED_BOOLEAN
 
-/* Tm */
-#define TM_APPL_DATA
-#define TM_APPL_CONST
-#define TM_CODE
+/* FEE */
+#define FEE_APPL_CODE
+#define FEE_APPL_CONST
+#define FEE_APPL_DATA
+#define FEE_CODE
+#define FEE_CONST
+#define FEE_CONST_PBCFG
+#define FEE_VAR
 
-/* CanTrcv */
-#define CANTRCV_CODE
-#define CANTRCV_VAR_NOINIT
-#define CANTRCV_CONST_PBCFG
-#define CANTRCV_VAR_POWER_ON_INIT
-#define CANTRCV_APPL_DATA
+/* FIM */
+#define FIM_APPL_DATA
+#define FIM_CODE
+#define FIM_VAR_INIT_32
+#define FIM_VAR_INIT_8
+#define FIM_VAR_NO_INIT_UNSPECIFIED
 
-/* LinIf */
-#define LINIF_CODE
-#define LINIF_VAR
+/* FLSTST */
+#define FLSTST_APPL_CONST
+#define FLSTST_CODE
+
+/* FOTAMASTER */
+#define FOTAMASTER_APPL_VAR
+#define FOTAMASTER_CODE
+#define FOTAMASTER_CONST
+#define FOTAMASTER_INIT_DATA
+#define FOTAMASTER_VAR_ZERO_INIT
+
+/* FRARTP */
+#define FRARTP_CODE
+#define FRARTP_CONST
+#define FRARTP_VAR
+#define FRARTP_VAR_POWER_ON_INIT
+
+/* FRIF */
+#define FRIF_APPL_CODE
+#define FRIF_APPL_CONST
+#define FRIF_APPL_DATA
+#define FRIF_CODE
+#define FRIF_CONST
+#define FRIF_VAR
+#define FRIF_VAR_POWER_ON_INIT
+
+/* FRNM */
+#define FRNM_APPL_CODE
+#define FRNM_APPL_CONST
+#define FRNM_APPL_DATA
+#define FRNM_CODE
+#define FRNM_CONST
+#define FRNM_CONST_PBCFG
+#define FRNM_VAR
+#define FRNM_VAR_POWER_ON_INIT
+
+/* FRSM */
+#define FRSM_APPL_CODE
+#define FRSM_APPL_DATA
+#define FRSM_CODE
+#define FRSM_CONFIG_DATA
+#define FRSM_CONST
+#define FRSM_CONST_PBCFG
+#define FRSM_VAR
+#define FRSM_VAR_POWER_ON_INIT
+
+/* FlsTst */
+#define FLSTST_APPL_CONST
+#define FLSTST_APPL_DATA
+#define FLSTST_CODE
+
+/* IOHWAB */
+#define IOHWAB_APPL_CONST
+#define IOHWAB_APPL_DATA
+#define IOHWAB_CODE
+#define IOHWAB_VAR
+
+/* IPDUM */
+#define IPDUM_APPL_CONST
+#define IPDUM_APPL_DATA
+#define IPDUM_CODE
+#define IPDUM_CONST
+#define IPDUM_RXINDICATION_CODE
+#define IPDUM_TRIGGERTRANSMIT_CODE
+#define IPDUM_TXCONFIRMATION_CODE
+#define IPDUM_VAR
+#define IPDUM_VAR_NOINIT
+#define IPDUM_VAR_POWER_ON_INIT
+
+/* J1939DCM */
+#define J1939DCM_APPL_CODE
+#define J1939DCM_APPL_DATA
+#define J1939DCM_CODE
+#define J1939DCM_CONST_16
+#define J1939DCM_CONST_32
+#define J1939DCM_CONST_BOOLEAN
+#define J1939DCM_CONST_UNSPECIFIED
+#define J1939DCM_COPYRXDATA_CODE
+#define J1939DCM_COPYTXDATA_CODE
+#define J1939DCM_DEMTRIGGERONDTCSTATUS_CODE
+#define J1939DCM_REQUESTINDICATION_CODE
+#define J1939DCM_RXINDICATION_CODE
+#define J1939DCM_STARTOFRECEPTION_CODE
+#define J1939DCM_TPRXINDICATION_CODE
+#define J1939DCM_TPTXCONFIRMATION_CODE
+#define J1939DCM_TXCONFIRMATION_CODE
+#define J1939DCM_VAR_CLEARED_16
+#define J1939DCM_VAR_CLEARED_32
+#define J1939DCM_VAR_CLEARED_8
+#define J1939DCM_VAR_CLEARED_BOOLEAN
+#define J1939DCM_VAR_INIT_16
+#define J1939DCM_VAR_NO_INIT_UNSPECIFIED
+
+/* J1939NM */
+#define J1939NM_APPL_CODE
+#define J1939NM_APPL_DATA
+#define J1939NM_CODE
+#define J1939NM_CONST_16
+#define J1939NM_CONST_8
+#define J1939NM_CONST_BOOLEAN
+#define J1939NM_CONST_UNSPECIFIED
+#define J1939NM_REQUESTINDICATION_CODE
+#define J1939NM_RXINDICATION_CODE
+#define J1939NM_TXCONFIRMATION_CODE
+#define J1939NM_VAR_CLEARED_32
+#define J1939NM_VAR_CLEARED_8
+#define J1939NM_VAR_CLEARED_UNSPECIFIED
+#define J1939NM_VAR_INIT_BOOLEAN
+#define J1939NM_VAR_UNSPECIFIED
+
+/* J1939RM */
+#define J1939RM_APPL_CODE
+#define J1939RM_APPL_DATA
+#define J1939RM_CODE
+#define J1939RM_COMRXIPDUCALLOUT_CODE
+#define J1939RM_CONFIG_DATA
+#define J1939RM_CONST_16
+#define J1939RM_CONST_BOOLEAN
+#define J1939RM_CONST_UNSPECIFIED
+#define J1939RM_PBCFG
+#define J1939RM_RXINDICATION_CODE
+#define J1939RM_TXCONFIRMATION_CODE
+#define J1939RM_VAR
+#define J1939RM_VAR_CLEARED_32
+#define J1939RM_VAR_CLEARED_BOOLEAN
+#define J1939RM_VAR_CLEARED_UNSPECIFIED
+#define J1939RM_VAR_NO_INIT_UNSPECIFIED
+
+/* J1939TP */
+#define J1939TP_APPL_DATA
+#define J1939TP_CODE
+#define J1939TP_CONST_16
+#define J1939TP_CONST_8
+#define J1939TP_CONST_UNSPECIFIED
+#define J1939TP_RXINDICATION_CODE
+#define J1939TP_TXCONFIRMATION_CODE
+#define J1939TP_VAR_CLEARED_32
+#define J1939TP_VAR_CLEARED_PTR
+#define J1939TP_VAR_CLEARED_UNSPECIFIED
+#define J1939TP_VAR_NO_INIT_8
+#define J1939TP_VAR_NO_INIT_UNSPECIFIED
+
+/* KEYM */
+#define KEYM_APPL_CODE
+#define KEYM_APPL_CONST
+#define KEYM_APPL_DATA
+#define KEYM_CODE
+#define KEYM_CONST
+#define KEYM_VAR
+
+/* LDCOM */
+#define LDCOM_APPL_CODE
+#define LDCOM_APPL_DATA
+#define LDCOM_CODE
+#define LDCOM_CONST
+#define LDCOM_CONST_PBCFG
+#define LDCOM_COPYRXDATA_CODE
+#define LDCOM_COPYTXDATA_CODE
+#define LDCOM_RXINDICATION_CODE
+#define LDCOM_STARTOFRECEPTION_CODE
+#define LDCOM_TPRXINDICATION_CODE
+#define LDCOM_TPTXCONFIRMATION_CODE
+#define LDCOM_TRIGGERTRANSMIT_CODE
+#define LDCOM_TXCONFIRMATION_CODE
+#define LDCOM_VAR
+#define LDCOM_VAR_POWER_ON_INIT
+
+/* LINIF */
+#define LINIF_APPL_CODE
 #define LINIF_APPL_CONST
 #define LINIF_APPL_DATA
+#define LINIF_CODE
 #define LINIF_CONST
 #define LINIF_DATA
+#define LINIF_VAR
 
-/* LinSM */
+/* LINSM */
 #define LINSM_CODE
-#define LINSM_VAR_POWER_ON_INIT
-#define LINSM_VAR
 #define LINSM_CONST
 #define LINSM_CONST_PBCFG
-#define LinSM_APPL_DATA
+#define LINSM_VAR
+#define LINSM_VAR_POWER_ON_INIT
 
-/* SecOC */
+/* LINTP */
+#define LINTP_CODE
+
+/* MEMIF */
+#define MEMIF_APPL_CONST
+#define MEMIF_APPL_DATA
+#define MEMIF_CODE
+#define MEMIF_CONST
+
+/* NM */
+#define NM_APPL_DATA
+#define NM_CODE
+#define NM_CONST
+#define NM_VAR_CLEARED_BOOLEAN
+#define NM_VAR_NO_INIT_UNSPECIFIED
+
+/* NVM */
+#define NVM_APPL_CODE
+#define NVM_APPL_DATA
+#define NVM_CODE
+#define NVM_CONST
+#define NVM_VAR
+#define NVM_VAR_NOINIT
+#define NVM_VAR_POWER_ON_INIT
+
+/* OS */
+#define OS_APPL_CODE
+#define OS_CODE
+#define OS_CODE_FAST
+#define OS_CONST
+#define OS_VAR
+
+/* OSEKNM */
+#define OSEKNM_APPL_CODE
+#define OSEKNM_APPL_DATA
+#define OSEKNM_CODE
+#define OSEKNM_CONST
+#define OSEKNM_PBCFG_CONST
+#define OSEKNM_RXINDICATION_CODE
+#define OSEKNM_TXCONFIRMATION_CODE
+#define OSEKNM_VAR_CLEARED_32
+#define OSEKNM_VAR_CLEARED_BOOLEAN
+#define OSEKNM_VAR_NO_INIT_UNSPECIFIED
+
+/* PDUR */
+#define PDUR_CODE
+#define PDUR_CONST
+#define PDUR_CONST_PBCFG
+#define PDUR_VAR
+#define PDUR_VAR_POWER_ON_INIT
+
+/* RTE */
+#define RTE_APPL_DATA
+#define RTE_CODE
+#define RTE_COMPAREKEY_DCMDSPSECURITYROW_CODE
+#define RTE_CONDITIONCHECKREAD_CODE
+#define RTE_FREEZECURRENTSTATE_CODE
+#define RTE_GETSECURITYATTEMPTCOUNTER_DCMDSPSECURITYROW_CODE
+#define RTE_GETSEED_DCMDSPSECURITYROW_CODE
+#define RTE_NVMNOTIFYJOBFINISHED_CODE
+#define RTE_READDATALENGTH_CODE
+#define RTE_READDATA_CODE
+#define RTE_REQUESTRESULTS_CODE
+#define RTE_RETURNCONTROLTOECU_CODE
+#define RTE_SETSECURITYATTEMPTCOUNTER_DCMDSPSECURITYROW_CODE
+#define RTE_SHORTTERMADJUSTMENT_CODE
+#define RTE_STARTPROTOCOL_CODE
+#define RTE_START_CODE
+#define RTE_STOPPROTOCOL_CODE
+#define RTE_WRITEDATA_CODE
+
+/* RamTst */
+#define RAMTST_APPL_CONST
+#define RAMTST_APPL_DATA
+#define RAMTST_CODE
+#define RAMTST_VAR
+
+/* SD */
+#define SD_CONST
+
+/* SECOC */
 #define SECOC_APPL_CONST
 #define SECOC_APPL_DATA
 #define SECOC_CFG_CONST
+#define SECOC_CFG_DATA
 #define SECOC_CFG_VAR
 #define SECOC_CODE
 #define SECOC_CONST
+#define SECOC_VAR
 #define SECOC_VAR_POWER_ON_INIT
 
-/* Sd */
-#define SD_CFG_CONST
-#define SD_CFG_VAR
-#define SD_CODE
-#define SD_VAR
-#define SD_CONST
+/* SOAD */
+#define SOAD_APPL_CODE
+#define SOAD_APPL_CONST
+#define SOAD_APPL_DATA
+#define SOAD_CALLBACK_CODE
+#define SOAD_CODE
+#define SOAD_CONST
+#define SOAD_CONST_PBCFG
+#define SOAD_VAR
+#define SOAD_VAR_POWER_ON_INIT
 
-/* SomeIpTp */
+/* SOMEIPTP */
 #define SOMEIPTP_APPL_CONST
 #define SOMEIPTP_APPL_DATA
 #define SOMEIPTP_CODE
@@ -165,366 +640,74 @@
 #define SOMEIPTP_VAR
 #define SOMEIPTP_VAR_POWER_ON_INIT
 
-/* EthSM */
-#define ETHSM_APPL_DATA
-#define ETHSM_CODE
-#define ETHSM_CONST
-#define ETHSM_VAR
-#define ETHSM_VAR_POWER_ON_INIT
+/* SOMEIPXF */
+#define SOMEIPXF_APPL_CONST
+#define SOMEIPXF_APPL_DATA
+#define SOMEIPXF_CODE
+#define SOMEIPXF_CONST
+#define SOMEIPXF_VAR
 
-/* UdpNm */
+/* STBM */
+#define STBM_APPL_DATA
+#define STBM_CONST
+#define STBM_CONST_PBCFG
+
+/* TCPIP */
+#define TCPIP_APPL_CONST
+#define TCPIP_APPL_DATA
+#define TCPIP_APPL_VAR
+#define TCPIP_CODE
+#define TCPIP_CONFIG_DATA
+#define TCPIP_CONST
+#define TCPIP_VAR
+#define TCPIP_VAR_ZERO_INIT
+
+/* TM */
+#define TM_APPL_CONST
+#define TM_APPL_DATA
+#define TM_CODE
+
+/* TRANSFORMCHAIN */
+#define TRANSFORMCHAIN_CODE
+#define TRANSFORMCHAIN_CONST
+#define TRANSFORMCHAIN_VAR
+
+/* UDPNM */
 #define UDPNM_APPL_CONST
 #define UDPNM_APPL_DATA
 #define UDPNM_CODE
+#define UDPNM_CONST
 #define UDPNM_VAR
 #define UDPNM_VAR_POWER_ON_INIT
 
-/* cantp */
-#define CANTP_VAR_POWER_ON_INIT
-#define CANTP_CODE
-#define CANTP_CONST
-#define CANTP_APPL_CONST
-#define CANTP_APPL_DATA
-#define CANTP_APPL_CODE
-#define CANTP_VAR_NOINIT
-#define CANTP_VAR
-
-/* dcm */
-#define DCM_VAR_POWER_ON_INIT
-#define DCM_CODE
-#define DCM_CONST_PBCFG
-#define DCM_VAR
-#define DCM_APPL_CODE
-#define DCM_CONST
-#define DCM_VAR_NOINIT
-#define DCM_APPL_CONST
-#define DCM_APPL_DATA
-
-/* Dlt */
-#define DLT_VAR_POWER_ON_INIT
-#define DLT_CODE
-#define DLT_CONST_PBCFG
-#define DLT_VAR
-#define DLT_APPL_CODE
-#define DLT_CONST
-#define DLT_VAR_NOINIT
-#define DLT_APPL_CONST
-#define DLT_APPL_DATA
-
-/* Det */
-#define DET_VAR_POWER_ON_INIT
-#define DET_CODE
-#define DET_CONST_PBCFG
-#define DET_VAR
-#define DET_APPL_CODE
-#define DET_CONST
-#define DET_VAR_NOINIT
-#define DET_APPL_CONST
-#define DET_APPL_DATA
-
-/* Wdg */
-#define WDG_VAR_POWER_ON_INIT
-#define WDG_CODE
-#define WDG_CONST_PBCFG
-#define WDG_VAR
-#define WDG_APPL_CODE
-#define WDG_CONST
-#define WDG_VAR_NOINIT
-#define WDG_APPL_CONST
-#define WDG_APPL_DATA
-
-/* WdgIf */
-#define WDGIF_VAR_POWER_ON_INIT
+/* WDGIF */
 #define WDGIF_CODE
-#define WDGIF_CONST_PBCFG
-#define WDGIF_VAR
-#define WDGIF_APPL_CODE
 #define WDGIF_CONST
-#define WDGIF_VAR_NOINIT
-#define WDGIF_APPL_CONST
-#define WDGIF_APPL_DATA
 
-/* doip */
-#define DOIP_VAR
-#define DOIP_CODE
-#define DOIP_VAR_CLEARED
-#define DOIP_VAR_INIT
-#define DOIP_APPL_CONST
-#define DOIP_CONST
-#define DOIP_APPL_CODE
+/* WDGM */
+#define WDGM_CODE
+#define WDGM_CONST
 
-/* nvm */
-#define NVM_CODE
-#define NVM_VAR
-#define NVM_CONST
-#define NVM_VAR_NOINIT
-#define NVM_APPL_DATA
-#define NVM_VAR_POWER_ON_INIT
-#define NVM_APPL_CODE
-
-/* MemIf */
-#define MEMIF_CODE
-#define MEMIF_VAR
-#define MEMIF_CONST
-#define MEMIF_VAR_NOINIT
-#define MEMIF_APPL_DATA
-#define MEMIF_VAR_POWER_ON_INIT
-#define MEMIF_APPL_CODE
-
-/* Fee */
-#define FEE_CODE
-#define FEE_VAR
-#define FEE_CONST
-#define FEE_VAR_NOINIT
-#define FEE_APPL_DATA
-#define FEE_VAR_POWER_ON_INIT
-#define FEE_APPL_CODE
-
-/* Fls */
-#define FLS_CODE
-#define FLS_VAR
-#define FLS_CONST
-#define FLS_VAR_NOINIT
-#define FLS_APPL_DATA
-#define FLS_VAR_POWER_ON_INIT
-#define FLS_APPL_CODE
-
-/* EA */
-#define EA_CODE
-#define EA_VAR
-#define EA_CONST
-#define EA_VAR_NOINIT
-#define EA_APPL_DATA
-#define EA_VAR_POWER_ON_INIT
-#define EA_APPL_CODE
-
-/* Eep */
-#define EEP_CODE
-#define EEP_VAR
-#define EEP_CONST
-#define EEP_VAR_NOINIT
-#define EEP_APPL_DATA
-#define EEP_VAR_POWER_ON_INIT
-#define EEP_APPL_CODE
-
-/* dem */
-#define DEM_CODE
-#define DEM_CONST
-#define DEM_VAR
-#define DEM_CONST_PBCFG
-#define DEM_APPL_DATA
-
-/* fim */
-#define FIM_VAR_INIT_8
-#define FIM_APPL_DATA
-#define FIM_VAR_NO_INIT_UNSPECIFIED
-#define FIM_CODE
-
-/* canif */
-#define CANIF_VAR_POWER_ON_INIT
-#define CANIF_CONST
-#define CANIF_VAR
-#define CANIF_CODE
-#define CANIF_APPL_DATA
-#define CANIF_CONST_PBCFG
-#define CANIF_APPL_CONST
-#define CANIF_APPL_CODE
-
-/* com */
-#define COM_VAR_POWER_ON_INIT
-#define COM_VAR
-#define COM_CODE
-#define COM_APPL_CONST
-#define COM_APPL_DATA
-#define COM_CONST_PBCFG
-#define COM_CONST
-#define COM_APPL_CODE
-
-/* comxf */
-#define COMXF_CODE
-#define COMXF_CONST
-#define COMXF_VAR
-#define COMXF_VAR_POWER_ON_INIT
-#define COMXF_CONST_PBCFG
-
-/* ipdum */
-#define IPDUM_VAR_POWER_ON_INIT
-#define IPDUM_CONST
-#define IPDUM_VAR_NOINIT
-#define IPDUM_CODE
-#define IPDUM_APPL_DATA
-#define IPDUM_APPL_CONST
-#define IPDUM_RXINDICATION_CODE
-#define IPDUM_TXCONFIRMATION_CODE
-#define IPDUM_TRIGGERTRANSMIT_CODE
-
-/* ldcom */
-#define LDCOM_VAR_POWER_ON_INIT
-#define LDCOM_CONST
-#define LDCOM_APPL_DATA
-#define LDCOM_CODE
-#define LDCOM_COPYTXDATA_CODE
-#define LDCOM_TPTXCONFIRMATION_CODE
-#define LDCOM_STARTOFRECEPTION_CODE
-#define LDCOM_COPYRXDATA_CODE
-#define LDCOM_TPRXINDICATION_CODE
-#define LDCOM_RXINDICATION_CODE
-#define LDCOM_TXCONFIRMATION_CODE
-#define LDCOM_TRIGGERTRANSMIT_CODE
-#define LDCOM_APPL_CODE
-#define LDCOM_CONST_PBCFG
-
-/* pdur */
-#define PDUR_VAR_POWER_ON_INIT
-#define PDUR_VAR
-#define PDUR_APPL_DATA
-#define PDUR_CODE
-#define PDUR_CONST
-#define PDUR_CONST_PBCFG
-#define PDUR_APPL_CODE
-
-/* soad */
-#define SOAD_APPL_DATA
-#define SOAD_APPL_CONST
-#define SOAD_VAR_POWER_ON_INIT
-#define SOAD_VAR
-#define SOAD_CODE
-#define SOAD_CONST
-#define SOAD_CALLBACK_CODE
-#define SOAD_APPL_CODE
-#define SOAD_CONST_PBCFG
-
-/* comm */
-#define COMM_VAR_POWER_ON_INIT
-#define COMM_APPL_CONST
-#define COMM_APPL_DATA
-#define COMM_CODE
-#define COMM_COM_CODE
-#define COMM_DCM_CODE
-#define COMM_ECUM_USED
-#define COMM_CONST
-#define COMM_VAR
-#define COMM_NM_CODE
-#define ComM_CONFIG_DATA
-
-/*nm*/
-#define NM_CODE
-#define NM_APPL_DATA
-#define NM_VAR_CLEARED_BOOLEAN
-#define NM_VAR_NO_INIT_UNSPECIFIED
-
-/*cannm*/
-#define CANNM_APPL_CONST
-#define CANNM_APPL_DATA
-#define CANNM_CODE
-#define CANNM_VAR
-#define CANNM_VAR_POWER_ON_INIT
-
-/*cansm*/
-#define CANNM_VAR_POWER_ON_INIT
-#define CANSM_CONFIG_DATA
-#define CANSM_VAR
-#define CANSM_CODE
-#define CANSM_COMM_CODE
-#define CANSM_ECUM_CODE
-#define CANSM_CONTROLLERBUSOFF_CODE
-#define CANSM_CONTROLLERNODEINDICATION_CODE
-#define CANSM_TRANSCEIVERMODEINDICATION_CODE
-#define CANSM_CLEARTRCVWUFFLAGINDICATION_CODE
-#define CANSM_CHECKTRANSCEIVERWAKEFLAGINDICATION_CODE
-#define CANSM_CONFIRMPNAVAILABILITY_CODE
-#define CANSM_CURRENTICOMCONFIGURATION_CODE
-#define CANSM_TXTIMEOUTEXCEPTION_CODE
-
-/*EthTrcv*/
-#define ETHTRCV_VAR_NOINIT
-#define ETHTRCV_VAR_ZERO_INIT
-#define ETHTRCV_CODE
-#define ETHTRCV_CONFIG_DATA
-#define ETHTRCV_CONST
-#define ETHTRCV_APPL_DATA
-
-/*crc*/
-#define CRC_CODE
-#define CRC_APPL_CONST
-
-/*e2e*/
-#define E2E_APPL_DATA
-#define E2E_CODE
-
-/*e2exf*/
-#define E2EXF_CONST
-#define E2EXF_CODE
-#define E2EXF_VAR_POWER_ON_INIT
-#define E2EXF_VAR
-
-/* IoHwAbDrv */
-#define IOHWABDRV_VAR_POWER_ON_INIT
-#define IOHWABDRV_APPL_DATA
-#define IOHWABDRV_CODE
-#define IOHWABDRV_COM_CODE
-#define IOHWABDRV_DCM_CODE
-#define IOHWABDRV_ECUM_USED
-#define IOHWABDRV_CONST
-#define IOHWABDRV_VAR
-#define IOHWABDRV_NM_CODE
-#define IOHWABDRV_CONFIG_DATA
-
-/* IoHwAb */
-#define IOHWAB_VAR_POWER_ON_INIT
-#define IOHWAB_APPL_DATA
-#define IOHWAB_CODE
-#define IOHWAB_COM_CODE
-#define IOHWAB_DCM_CODE
-#define IOHWAB_ECUM_USED
-#define IOHWAB_CONST
-#define IOHWAB_VAR
-#define IOHWAB_NM_CODE
-#define IOHWAB_CONFIG_DATA
-
-/* Rte_IoHwAb */
-#define RTEIOHWAB_VAR_POWER_ON_INIT
-#define RTEIOHWAB_APPL_DATA
-#define RTEIOHWAB_CODE
-#define RTEIOHWAB_COM_CODE
-#define RTEIOHWAB_DCM_CODE
-#define RTEIOHWAB_ECUM_USED
-#define RTEIOHWAB_CONST
-#define RTEIOHWAB_VAR
-#define RTEIOHWAB_NM_CODE
-#define RTEIOHWAB_CONFIG_DATA
-
-/* J193DCM */
-#define J1939DCM_CONST_UNSPECIFIED
-#define J1939DCM_CONST_BOOLEAN
-#define J1939DCM_CONST_16
-#define J1939DCM_VAR_NO_INIT_UNSPECIFIED
-#define J1939DCM_APPL_DATA
-
-/* J1939RM */
-#define J1939RM_APPL_DATA
-#define J1939RM_VAR_NO_INIT_UNSPECIFIED
-#define J1939RM_VAR_CLEARED_UNSPECIFIED
-#define J1939RM_CONFIG_DATA
-#define J1939RM_CONST_UNSPECIFIED
-#define J1939RM_CONST_16
-#define J1939RM_CONST_BOOLEAN
-#define J1939RM_PBCFG
-
-/* J1939Nm */
-#define J1939NM_APPL_DATA
-#define J1939NM_CONST_BOOLEAN
-#define J1939NM_CONST_8
-#define J1939NM_CONST_16
-#define J1939NM_CONST_BOOLEAN
-#define J1939NM_CONST_UNSPECIFIED
-#define J1939NM_VAR_CLEARED_32
-#define J1939NM_VAR_UNSPECIFIED
-
-/* J1939TP */
-#define J1939TP_APPL_DATA
-#define J1939TP_CONST_UNSPECIFIED
-#define J1939TP_CONST_UNSPECIFIED
-#define J1939TP_CONST_8
+/* XCP */
+#define XCP_APPL_CONST
+#define XCP_APPL_DATA
+#define XCP_CANIFRXINDICATION_CODE
+#define XCP_CANIFTXCONFIRMATION_CODE
+#define XCP_CANIFTXINDICATION_CODE
+#define XCP_CODE
+#define XCP_CONST
+#define XCP_CONST_PBCFG
+#define XCP_SOADIFRXINDICATION_CODE
+#define XCP_SOADIFTXCONFIRMATION_CODE
+#define XCP_SOADIFTXINDICATION_CODE
+#define XCP_TEST_CODE
+#define XCP_VAR
+#define XCP_VAR_CLEARED_32
+#define XCP_VAR_CLEARED_8
+#define XCP_VAR_CLEARED_UNSPECIFIED
+#define XCP_VAR_INIT_16
+#define XCP_VAR_INIT_8
+#define XCP_VAR_INIT_UNSPECIFIED
+#define XCP_VAR_NO_INIT_8
 
 #endif /* COMPILER_CFG_H */

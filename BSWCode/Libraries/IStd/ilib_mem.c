@@ -18,20 +18,20 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- ** **
- **  FILENAME    : ilib_mem.c **
- ** **
- **  Created on  : 12/12/23 **
- **  Author      : darren.zhang **
- **  Vendor      : **
- **  DESCRIPTION :  stand lib source code **
- ** **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform **
- ** **
- ***********************************************************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*************************************************************************************************************************
+**                                                                                                                    **
+**  FILENAME    : ilib_mem.c                                                                                          **
+**                                                                                                                    **
+**  Created on  : 12/12/23                                                                                            **
+**  Author      : darren.zhang                                                                                        **
+**  Vendor      :                                                                                                     **
+**  DESCRIPTION :  stand lib source code                                                                              **
+**                                                                                                                    **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform                                                                     **
+**                                                                                                                    **
+***********************************************************************************************************************/
 
 /*======================================================================================================================
  *                                       REVISION HISTORY
@@ -44,6 +44,7 @@
  *                                      2.modify ILib_memcmp return type to int
  *                                      3.modify ILib_memset input parameter u8 to int
  *  V1.0.2    20240304   darren         resolve QAC
+ *  V1.0.2    20240429   qinmei.chen    add T320 support by adjusting some bit
  *
  */
 
@@ -105,15 +106,22 @@
 
 #elif (CPU_TYPE == CPU_TYPE_32)
 /* normal 32-bit mcu */
+
+#if (CPU_32_WITH_16_ADR == TRUE)
+#define SUFFIX_BIT_LEN   1u
+#define IS_ALIGEN_ADR(x) (((uintptr_t)(x) << 31u) == 0u) /* PRQA S 3472 */  /* MISRA Dir-4.9 */
+#define SUFFIX_VLU(x)    (((uintptr_t)(x) << 31u) >> 31u) /* PRQA S 3472 */ /* MISRA Dir-4.9 */
+#else
 #define SUFFIX_BIT_LEN   2u
 #define IS_ALIGEN_ADR(x) (((uintptr_t)(x) << 30u) == 0u) /* PRQA S 3472 */  /* MISRA Dir-4.9 */
 #define SUFFIX_VLU(x)    (((uintptr_t)(x) << 30u) >> 30u) /* PRQA S 3472 */ /* MISRA Dir-4.9 */
+#endif
 
 #elif (CPU_TYPE == CPU_TYPE_16)
 /*  16-bit mcu */
 #define SUFFIX_BIT_LEN   1u
-#define IS_ALIGEN_ADR(x) (((uintptr_t)(x) << 15u) == 0u) /* PRQA S 3472 */ /* MISRA Dir-4.9 */
-#define SUFFIX_VLU(x) (((uintptr_t)x) << 15u) >> 15u) /* PRQA S 3472 */ /* MISRA Dir-4.9 */
+#define IS_ALIGEN_ADR(x) (((uintptr_t)(x) << 15u) == 0u) /* PRQA S 3472 */  /* MISRA Dir-4.9 */
+#define SUFFIX_VLU(x)    ((((uintptr_t)x) << 15u) >> 15u) /* PRQA S 3472 */ /* MISRA Dir-4.9 */
 #else
 /* default 32-bit mcu */
 #define SUFFIX_BIT_LEN   2u
@@ -129,6 +137,14 @@
     (((uintptr_t)(x) > (sizeof(uintptr_t) << 2u)) ? ((uintptr_t)(x) - (sizeof(uintptr_t) << 2u)) : 0u)
 /* Gets the backward aligned address of the current address */
 #define GET_ALIGN_NEXT_ADR(x) GET_ALIGEN_FORWARD_ADR(((uintptr_t)(x) + sizeof(uintptr_t) - 1u))
+/*Gets shift bit for unaligned address*/
+#if (CPU_32_WITH_16_ADR == TRUE)
+#define GET_ALIGN_RIGNT_SHIFT(x) (SUFFIX_VLU(x) << 4u)
+#define GET_ALIGN_LEFT_SHIFT(x)  ((sizeof(uintptr_t) - (SUFFIX_VLU(x))) << 4u)
+#else
+#define GET_ALIGN_RIGNT_SHIFT(x) (SUFFIX_VLU(x) << 3u)
+#define GET_ALIGN_LEFT_SHIFT(x)  ((sizeof(uintptr_t) - (SUFFIX_VLU(x))) << 3u)
+#endif
 /* PRQA S 3472-- */ /* MISRA Dir-4.9 */
 #endif              /* CPU_TYPE != CPU_TYPE_8 */
 
@@ -209,8 +225,8 @@ void* ILib_memcpy(void* ILIB_RESTRICT __dst, const void* ILIB_RESTRICT __src, ui
     {
         /* PRQA S 3472,3469++ */ /* MISRA Dir-4.9 */
         uintptr_t offset_vlu = SUFFIX_VLU(src);
-        uintptr_t right_shift = (SUFFIX_VLU(src) << 3u);
-        uintptr_t left_shift = ((sizeof(uintptr_t) - (SUFFIX_VLU(src))) << 3u);
+        uintptr_t right_shift = GET_ALIGN_RIGNT_SHIFT(src);
+        uintptr_t left_shift = GET_ALIGN_LEFT_SHIFT(src);
         dst_tmp = (const uint8*)GET_ALIGEN_128_FORWARD_ADR(dst_last);
         src = (const uintptr_t*)GET_ALIGEN_FORWARD_ADR(src);
         /* PRQA S 3472,3469-- */                                      /* MISRA Dir-4.9 */
@@ -281,7 +297,11 @@ void* ILib_memset(void* ILIB_RESTRICT __dst, int __val, uint32 __n)
         /* Data assembly */
         for (uintptr_t i = 0u; i < sizeof(uintptr_t); i++)
         {
+#if (CPU_32_WITH_16_ADR == TRUE)
+            vlu <<= 16u;
+#else
             vlu <<= 8u;
+#endif
             vlu |= (uintptr_t)__val;
         }
     }
@@ -389,8 +409,8 @@ int ILib_memcmp(const void* ILIB_RESTRICT __str1, const void* ILIB_RESTRICT __st
     {
         /* PRQA S 3472,3469++ */ /* MISRA Dir-4.9 */
         uintptr_t offset_vlu = SUFFIX_VLU(src);
-        uintptr_t right_shift = (SUFFIX_VLU(src) << 3u);
-        uintptr_t left_shift = ((sizeof(uintptr_t) - (SUFFIX_VLU(src))) << 3u);
+        uintptr_t right_shift = GET_ALIGN_RIGNT_SHIFT(src);
+        uintptr_t left_shift = GET_ALIGN_LEFT_SHIFT(src);
         dst_tmp = (const uint8*)GET_ALIGEN_128_FORWARD_ADR(dst_last);
         src = (const uintptr_t*)GET_ALIGEN_FORWARD_ADR(src);
         /* PRQA S 3472,3469-- */ /* MISRA Dir-4.9 */

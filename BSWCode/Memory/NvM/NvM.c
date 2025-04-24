@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                           **
- **  FILENAME    : NvM.c                                                      **
- **                                                                           **
- **  Created on  : 2020/5/9 15:21:52                                          **
- **  Author      : tao.yu                                                     **
- **  Vendor      :                                                            **
- **  DESCRIPTION :Containing the entire or parts of NVRAM manager code        **
- **                                                                           **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                     **
- **                                                                           **
- **************************************************************************** */
+ */
 /* PRQA S 3108-- */
+/*
+**************************************************************************** **
+**                                                                           **
+**  FILENAME    : NvM.c                                                      **
+**                                                                           **
+**  Created on  : 2020/5/9 15:21:52                                          **
+**  Author      : tao.yu                                                     **
+**  Vendor      :                                                            **
+**  DESCRIPTION :Containing the entire or parts of NVRAM manager code        **
+**                                                                           **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                     **
+**                                                                           **
+**************************************************************************** */
 
 /**
   \page ISOFT_MISRA_Exceptions  MISRA-C:2012 Compliance Exceptions
@@ -127,7 +128,7 @@
 #if (STD_ON == NVM_DEM_PRODUCTION_ERROR_DETECT)
 #include "Dem.h" /* req NVM077 */
 #endif
-
+#include "SchM_NvM.h"
 /*====================[V E R S I O N  C H E C K]====================*/
 /* req NVM089 */
 #ifndef NVM_AR_RELEASE_MAJOR_VERSION
@@ -161,7 +162,7 @@ static FUNC(Std_ReturnType, NVM_CODE) NvM_ImmedQueueSort(NvM_BlockIdType BlockId
  * ServiceId           0x00
  * Sync/Async          Synchronous
  * Reentrancy          Non Reentrant
- * Param-Name[in]      ConfigPtr
+ * Param-Name[in]      ConfigPtr: Pointer to the selected configuration set
  * Param-Name[out]     None
  * Param-Name[in/out]  None
  * Return              None
@@ -240,7 +241,7 @@ NvM_Init(const NvM_ConfigType* ConfigPtr) /* PRQA S 3206 */ /* MISRA Rule 2.7 */
  * Brief               This service returns the version information of this module
  * ServiceId           0x0f
  * Sync/Async          Synchronous
- * Reentrancy          Non Reentrant
+ * Reentrancy          Reentrant
  * Param-Name[in]      None
  * Param-Name[out]     Versioninfo: Pointer to where to store the version
  * Param-Name[in/out]  None
@@ -274,13 +275,14 @@ NvM_GetVersionInfo(Std_VersionInfoType* VersionInfo)
  * ServiceId           0x03
  * Sync/Async          Synchronous
  * Reentrancy          Reentrant
- * Param-Name[in]      BlockId: The block identifier uniquely identifies one
- * NVRAM block descriptor. A NVRAM block descriptor contains all needed
- *  information about a single NVRAM block.ProtectionEnabled: TRUE: Write
- *  protection shall be enabled FALSE: Write protection shall be disabled
+ * Param-Name[in]      BlockId: The block identifier uniquely identifies one NVRAM block descriptor.
+ *                               A NVRAM block descriptor contains all needed information about a single NVRAM block.
+ *                     ProtectionEnabled: TRUE: Write protection shall be enabled
+ *                                      FALSE: Write protection shall be disabled
  * Param-Name[out]     None
  * Param-Name[in/out]  None
- * Return              None
+ * Return              E_OK: The block was enabled/disabled as requested
+ *                     E_NOT_OK: An error occurred
  * PreCondition        None
  * CallByAPI           Up layer
  */
@@ -356,10 +358,8 @@ NvM_SetBlockProtection(NvM_BlockIdType BlockId, boolean ProtectionEnabled) /* re
  * ServiceId           0x0b
  * Sync/Async          Asynchronous
  * Reentrancy          Reentrant
- * Param-Name[in]      BlockId: The block identifier uniquely identifies one
- *  NVRAM block descriptor.
- *                               A NVRAM block descriptor contains all needed
- *                               information about a single NVRAM block.
+ * Param-Name[in]      BlockId: The block identifier uniquely identifies one NVRAM block descriptor.
+ *                               A NVRAM block descriptor contains all needed information about a single NVRAM block.
  * Param-Name[out]     None
  * Param-Name[in/out]  None
  * Return              E_OK: request has been accepted
@@ -443,10 +443,8 @@ NvM_InvalidateNvBlock(NvM_BlockIdType BlockId)
  * ServiceId           0x09
  * Sync/Async          Asynchronous
  * Reentrancy          Reentrant
- * Param-Name[in]      BlockId: The block identifier uniquely identifies
- * one NVRAM block descriptor.
- *                               A NVRAM block descriptor contains all
- *                               needed information about a single NVRAM block.
+ * Param-Name[in]      BlockId: The block identifier uniquely identifies one NVRAM block descriptor.
+ *                               A NVRAM block descriptor contains all needed information about a single NVRAM block.
  * Param-Name[out]     None
  * Param-Name[in/out]  None
  * Return              E_OK: request has been accepted
@@ -545,13 +543,12 @@ NvM_EraseNvBlock(NvM_BlockIdType BlockId)
  * ServiceId           0x04
  * Sync/Async          Synchronous
  * Reentrancy          Reentrant
- * Param-Name[in]      BlockId: The block identifier uniquely identifies one
- * NVRAM block descriptor.
- *                               A NVRAM block descriptor contains all needed
- *                               information about a single NVRAM block.
+ * Param-Name[in]      BlockId: The block identifier uniquely identifies one NVRAM block descriptor.
+ *                               A NVRAM block descriptor contains all needed information about a single NVRAM block.
  * Param-Name[out]     RequestResultPtr: Pointer to where to store the request result
  * Param-Name[in/out]  None
- * Return              None
+ * Return              E_OK: The block dependent error/status information was read successfully
+ *                     E_NOT_OK: An error occured
  * PreCondition        None
  * CallByAPI           Up layer
  */
@@ -601,17 +598,14 @@ NvM_GetErrorStatus(NvM_BlockIdType BlockId, NvM_RequestResultType* RequestResult
  * ServiceId           0x05
  * Sync/Async          Synchronous
  * Reentrancy          Reentrant
- * Param-Name[in]      BlockId: The block identifier uniquely identifies one
- *  NVRAM block descriptor.
- *                               A NVRAM block descriptor contains all needed
- *                               information about a single NVRAM block.
+ * Param-Name[in]      BlockId: The block identifier uniquely identifies one NVRAM block descriptor.
+ *                               A NVRAM block descriptor contains all needed information about a single NVRAM block.
  *                     BlockChanged: TRUE: Validate the RAM block and mark block as changed
  *                                 FALSE: Invalidate the RAM block and mark block as unchanged
  * Param-Name[out]     None
  * Param-Name[in/out]  None
- * Return              None
- * PreCondition        None
- * CallByAPI           Up layer
+ * Return              E_OK: The status of the permanent RAM block or the explicit synchronization was changed as
+ * requested E_NOT_OK: An error occurred PreCondition        None CallByAPI           Up layer
  */
 #define NVM_START_SEC_CODE
 #include "NvM_MemMap.h"
@@ -714,16 +708,11 @@ NvM_SetRamBlockStatus(NvM_BlockIdType BlockId, boolean BlockChanged) /* req NVM4
 #endif
 
 /*
- * Brief               Service for setting the RAM block status of an NVRAM block
- * ServiceId           0x13
- * Sync/Async          Synchronous
- * Reentrancy          Reentrant
- * Param-Name[in]      BlockId: The block identifier uniquely identifies one
- * NVRAM block descriptor.
- *                               A NVRAM block descriptor contains all needed
- *                               information about a single NVRAM block.
- *                     BlockChanged: TRUE: Validate the RAM block and mark block as changed
- *                                 FALSE: Invalidate the RAM block and mark block as unchanged
+ * Brief               Service for setting the lock status of a permanent RAM block or of the explicit synchronization
+ * of a NVRAM block. ServiceId           0x13 Sync/Async          Synchronous Reentrancy          Reentrant
+ * Param-Name[in]      BlockId: The block identifier uniquely identifies one NVRAM block descriptor.
+ *                            A NVRAM block descriptor contains all needed information about a single NVRAM block.
+ *                     BlockLocked: TRUE: Mark the RAM.block as locked FALSE: Mark the RAM.block as unlocked
  * Param-Name[out]     None
  * Param-Name[in/out]  None
  * Return              None
@@ -794,14 +783,13 @@ NvM_SetBlockLockStatus(NvM_BlockIdType BlockId, boolean BlockLocked)
  * ServiceId           0x01
  * Sync/Async          Synchronous
  * Reentrancy          Reentrant
- * Param-Name[in]      BlockId: The block identifier uniquely identifies one
- * NVRAM block descriptor.
- *                            A NVRAM block descriptor contains all needed
-information about a single NVRAM block.
+ * Param-Name[in]      BlockId: The block identifier uniquely identifies one NVRAM block descriptor.
+ *                            A NVRAM block descriptor contains all needed information about a single NVRAM block.
  *                     DataIndex: Index position (association) of a NV/ROM block.
  * Param-Name[out]     None
  * Param-Name[in/out]  None
- * Return              None
+ * Return              E_OK: request has been accepted
+ *                     E_NOT_OK: request has not been accepted
  * PreCondition        None
  * CallByAPI           Up layer
  */
@@ -862,13 +850,12 @@ NvM_SetDataIndex(NvM_BlockIdType BlockId, uint8 DataIndex)
  * ServiceId           0x02
  * Sync/Async          Synchronous
  * Reentrancy          Reentrant
- * Param-Name[in]      BlockId: The block identifier uniquely identifies
- * one NVRAM block descriptor.
- *                               A NVRAM block descriptor contains all
- *                                needed information about a single NVRAM block.
+ * Param-Name[in]      BlockId: The block identifier uniquely identifies one NVRAM block descriptor.
+ *                               A NVRAM block descriptor contains all needed information about a single NVRAM block.
  * Param-Name[out]     DataIndexPtr: Pointer to where to store the current dataset index (0..255)
  * Param-Name[in/out]  None
- * Return              None
+ * Return              E_OK: request has been accepted
+ *                     E_NOT_OK: request has not been accepted
  * PreCondition        None
  * CallByAPI           Up layer
  */
@@ -922,10 +909,8 @@ NvM_GetDataIndex(
  * ServiceId           0x06
  * Sync/Async          Asynchronous
  * Reentrancy          Reentrant
- * Param-Name[in]      BlockId: The block identifier uniquely identifies one
- * NVRAM block descriptor.
- *                               A NVRAM block descriptor contains all needed
- *                               information about a single NVRAM block.
+ * Param-Name[in]      BlockId: The block identifier uniquely identifies one NVRAM block descriptor.
+ *                               A NVRAM block descriptor contains all needed information about a single NVRAM block.
  * Param-Name[out]     NvM_DstPtr: Pointer to the RAM data block
  * Param-Name[in/out]  None
  * Return              E_OK: request has been accepted
@@ -1000,15 +985,13 @@ NvM_ReadBlock(NvM_BlockIdType BlockId, void* NvM_DstPtr) /* req NVM454 */
 #define NVM_START_SEC_CODE
 #include "NvM_MemMap.h"
 /*
- * Brief               Service to copy the data of the NV block to its
- * corresponding permanent RAM block
+ * Brief               Service to copy the data of the NV block to its corresponding permanent RAM block
  * ServiceId           0x16
  * Sync/Async          Asynchronous
  * Reentrancy          Reentrant
- * Param-Name[in]      BlockId: The block identifier uniquely identifies
- * one NVRAM block descriptor.
- *                               A NVRAM block descriptor contains all
- *                               needed information about a single NVRAM block.
+ * Param-Name[in]      BlockId: The block identifier uniquely identifies one NVRAM block descriptor.
+ *                               A NVRAM block descriptor contains all needed information about a single NVRAM block.
+ * Param-Name[out]     None
  * Param-Name[in/out]  None
  * Return              E_OK: request has been accepted
  *                     E_NOT_OK: request has not been accepted
@@ -1078,10 +1061,8 @@ NvM_ReadPRAMBlock(NvM_BlockIdType BlockId)
  * ServiceId           0x07
  * Sync/Async          Asynchronous
  * Reentrancy          Reentrant
- * Param-Name[in]      BlockId: The block identifier uniquely identifies
- * one NVRAM block descriptor.
- *                               A NVRAM block descriptor contains all
- *                                needed information about a single NVRAM block.
+ * Param-Name[in]      BlockId: The block identifier uniquely identifies one NVRAM block descriptor.
+ *                               A NVRAM block descriptor contains all needed information about a single NVRAM block.
  *                     NvM_SrcPtr: Pointer to the RAM data block
  * Param-Name[out]     None
  * Param-Name[in/out]  None
@@ -1207,15 +1188,12 @@ NvM_WriteBlock(NvM_BlockIdType BlockId, const void* NvM_SrcPtr)
 #define NVM_START_SEC_CODE
 #include "NvM_MemMap.h"
 /*
- * Brief               Service to copy the data of the RAM block to its
- * corresponding permanent RAM block
+ * Brief               Service to copy the data of the permanent RAM block to its corresponding NV block
  * ServiceId           0x17
  * Sync/Async          Asynchronous
  * Reentrancy          Reentrant
- * Param-Name[in]      BlockId: The block identifier uniquely identifies
- * one NVRAM block descriptor.
- *                               A NVRAM block descriptor contains all
- *                               needed information about a single NVRAM block.
+ * Param-Name[in]      BlockId: The block identifier uniquely identifies one NVRAM block descriptor.
+ *                            A NVRAM block descriptor contains all needed information about a single NVRAM block.
  * Param-Name[out]     None
  * Param-Name[in/out]  None
  * Return              E_OK: request has been accepted
@@ -1332,11 +1310,9 @@ NvM_WritePRAMBlock(NvM_BlockIdType BlockId)
  * ServiceId           0x08
  * Sync/Async          Asynchronous
  * Reentrancy          Non Reentrant
- * Param-Name[in]      BlockId: The block identifier uniquely identifies one
- * NVRAM block descriptor.
- *                               A NVRAM block descriptor contains all needed
- *                               information about a single NVRAM block.
- * Param-Name[out]     None
+ * Param-Name[in]      BlockId: The block identifier uniquely identifies one NVRAM block descriptor.
+ *                               A NVRAM block descriptor contains all needed information about a single NVRAM block.
+ * Param-Name[out]     NvM_DestPtr: Pointer to the RAM data block
  * Param-Name[in/out]  None
  * Return              E_OK: request has been accepted
  *                     E_NOT_OK: request has not been accepted
@@ -1428,15 +1404,12 @@ NvM_RestoreBlockDefaults(NvM_BlockIdType BlockId, void* NvM_DestPtr)
 #define NVM_START_SEC_CODE
 #include "NvM_MemMap.h"
 /*
- * Brief               Service to restore the default data to its
- * corresponding Penmanent RAM block
+ * Brief               Service to restore the default data to its corresponding permanent RAM block
  * ServiceId           0x18
  * Sync/Async          Asynchronous
  * Reentrancy          Non Reentrant
- * Param-Name[in]      BlockId: The block identifier uniquely identifies
- *  one NVRAM block descriptor.
- *                               A NVRAM block descriptor contains all
- *                               needed information about a single NVRAM block.
+ * Param-Name[in]      BlockId: The block identifier uniquely identifies one NVRAM block descriptor.
+ *                            A NVRAM block descriptor contains all needed information about a single NVRAM block.
  * Param-Name[out]     None
  * Param-Name[in/out]  None
  * Return              E_OK: request has been accepted
@@ -1560,19 +1533,16 @@ NvM_ValidateAll(void)
 #define NVM_START_SEC_CODE
 #include "NvM_MemMap.h"
 /*
- * Brief               Service for getting the currently set
- * DataIndex of a dataset NVRAM block
+ * Brief               Service to cancel all jobs pending for a NV block
  * ServiceId           0x10
  * Sync/Async          Synchronous
  * Reentrancy          Reentrant
- * Param-Name[in]      BlockId: The block identifier uniquely identifies
- * one NVRAM block descriptor.
- *                               A NVRAM block descriptor contains all
- *                               needed information about a single NVRAM block.
- * Param-Name[out]     DataIndexPtr: Pointer to where to store the
- * current dataset index (0..255)
+ * Param-Name[in]      BlockId: The block identifier uniquely identifies one NVRAM block descriptor.
+ *                               A NVRAM block descriptor contains all needed information about a single NVRAM block.
+ * Param-Name[out]     None
  * Param-Name[in/out]  None
- * Return              None
+ * Return              E_OK: The job was successfully removed from queue
+ *                     E_NOT_OK: The job could not be found in the queue
  * PreCondition        None
  * CallByAPI           Up layer
  */
@@ -2025,8 +1995,7 @@ NvM_CancelWriteAll(void)
  * Param-Name[out]     None
  * Param-Name[in/out]  None
  * Return              None
- * PreCondition        This request may be triggered only
- * by the ECU state manager at system startup
+ * PreCondition        This request may be triggered only by the ECU state manager at system startup
  * CallByAPI           Up layer
  */
 /* req NVM027 NVM191 NVM409 */
@@ -2064,15 +2033,11 @@ NvM_ReadAll(void)
  * ServiceId           0x0d
  * Sync/Async          Asynchronous
  * Reentrancy          Non Reentrant
- * Param-Name[in]      BlockId: The block identifier uniquely identifies
- *  one NVRAM block descriptor.
- *                               A NVRAM block descriptor contains all
- *                                needed information about a single NVRAM block.
+ * Param-Name[in]      None
  * Param-Name[out]     None
  * Param-Name[in/out]  None
  * Return              None
- * PreCondition        This request must only be triggered by
- * the ECU state manager at shutdown of the system
+ * PreCondition        This request must only be triggered by the ECU state manager at shutdown of the system
  * CallByAPI           Up layer
  */
 /* req NVM027 NVM191 NVM409 */

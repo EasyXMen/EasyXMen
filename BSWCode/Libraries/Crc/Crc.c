@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Crc.c                                                       **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : ShenXu,Yb                                                   **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Crc.c                                                       **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : ShenXu,Yb                                                   **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 
 /**
   \page ISOFT_MISRA_Exceptions  MISRA-C:2012 Compliance Exceptions
@@ -187,9 +188,9 @@ static const uint32 Cal_Crc32Tab[256] = {
     0xb3667a2euL, 0xc4614ab8uL, 0x5d681b02uL, 0x2a6f2b94uL, 0xb40bbe37uL, 0xc30c8ea1uL, 0x5a05df1buL, 0x2d02ef8duL};
 #define CRC_STOP_SEC_CONST_32BIT
 #include "Crc_MemMap.h"
-#endif /* STD_ON == CRC32_ALGORITHM && CRC_TABLE == CRC32_MODE */
+#endif
 
-#if ((STD_ON == CRC32_ALGORITHM) && (CRC_TABLE == CRC32P4_MODE))
+#if ((STD_ON == CRC32P4_ALGORITHM) && (CRC_TABLE == CRC32P4_MODE))
 #define CRC_START_SEC_CONST_32BIT
 #include "Crc_MemMap.h"
 static const uint32 Cal_Crc32p4Tab[256] = {
@@ -228,7 +229,7 @@ static const uint32 Cal_Crc32p4Tab[256] = {
 };
 #define CRC_STOP_SEC_CONST_32BIT
 #include "Crc_MemMap.h"
-#endif /* STD_ON == CRC32_ALGORITHM  &&  CRC_TABLE == CRC32P4_MODE */
+#endif
 
 #if ((STD_ON == CRC16_ALGORITHM) && (CRC_TABLE == CRC16_MODE))
 #define CRC_START_SEC_CONST_16BIT
@@ -256,7 +257,7 @@ static const uint16 Cal_Crc16Tab[256] = {
     0x9ff8u, 0x6e17u, 0x7e36u, 0x4e55u, 0x5e74u, 0x2e93u, 0x3eb2u, 0x0ed1u, 0x1ef0u};
 #define CRC_STOP_SEC_CONST_16BIT
 #include "Crc_MemMap.h"
-#endif /* STD_ON == CRC16_ALGORITHM && CRC_TABLE == CRC16_MODE */
+#endif
 
 #if ((STD_ON == CRC8_ALGORITHM) && (CRC_TABLE == CRC8_MODE))
 #define CRC_START_SEC_CONST_8BIT
@@ -280,9 +281,9 @@ static const uint8 Cal_Crc8Tab[256] = {
     0x7fu, 0x62u, 0x45u, 0x58u, 0x0bu, 0x16u, 0x31u, 0x2cu, 0x97u, 0x8au, 0xadu, 0xb0u, 0xe3u, 0xfeu, 0xd9u, 0xc4u};
 #define CRC_STOP_SEC_CONST_8BIT
 #include "Crc_MemMap.h"
-#endif /* STD_ON == CRC8_ALGORITHM  &&  CRC_TABLE == CRC8_MODE */
+#endif
 
-#if ((STD_ON == CRC8_ALGORITHM) && (CRC_TABLE == CRC8H2F_MODE))
+#if ((STD_ON == CRC8H2F_ALGORITHM) && (CRC_TABLE == CRC8H2F_MODE))
 #define CRC_START_SEC_CONST_8BIT
 #include "Crc_MemMap.h"
 static const uint8 Cal_Crc8H2FTab[256] = {
@@ -305,7 +306,7 @@ static const uint8 Cal_Crc8H2FTab[256] = {
 };
 #define CRC_STOP_SEC_CONST_8BIT
 #include "Crc_MemMap.h"
-#endif /* STD_ON == CRC8_ALGORITHM  &&  CRC_TABLE == CRC8H2F_MODE */
+#endif
 
 #if ((STD_ON == CRC64_ALGORITHM) && (CRC_TABLE == CRC64_MODE))
 #define CRC_START_SEC_CONST_64BIT
@@ -367,10 +368,24 @@ static const uint64 Cal_Crc64Tab[256] = {
 };
 #define CRC_STOP_SEC_CONST_64BIT
 #include "Crc_MemMap.h"
-#endif /* STD_ON == CRC64_ALGORITHM CRC_TABLE == CRC64_MODE */
+#endif
 /*=======[ I N T E R N A L F U N C T I O N   ]===========================*/
 
-#if (STD_ON == CRC32_ALGORITHM)
+/*
+|    CRC function    |     polynomial      | Input data reflected | Result data reflected |
+| :----------------: | :-----------------: | :------------------: | :-------------------: |
+|       CRC-8        |        0x1Dh        |          NO          |          NO           |
+|      CRC-8H2F      |        0x2Fh        |          NO          |          NO           |
+| CCITT FALSE CRC-16 |       0x1021h       |          NO          |          NO           |
+|       CRC-16       |       0x8005h       |         YES          |          YES          |
+|  IEEE-802.3 CRC32  |     0x04C11DB7h     |         YES          |          YES          |
+|      CRC32P4       |     0xF4ACFB13h     |         YES          |          YES          |
+|       CRC64        | 0x42F0E1EBA9EA3693h |         YES          |          YES          |
+*/
+#if (                                                                   \
+    ((STD_ON == CRC32_ALGORITHM) && (CRC_RUNTIME == CRC32_MODE))        \
+    || ((STD_ON == CRC32P4_ALGORITHM) && (CRC_RUNTIME == CRC32P4_MODE)) \
+    || ((STD_ON == CRC64_ALGORITHM)) && (CRC_RUNTIME == CRC64_MODE))
 /*************************************************************************/
 /*
  * Brief               get the reflection of char type data
@@ -402,6 +417,11 @@ static FUNC(uint8, CRC_CODE) Crc_GetReflection_char(VAR(uint8, AUTOMATIC) input)
 #define CRC_STOP_SEC_CODE
 #include "Crc_MemMap.h"
 
+#endif
+
+#if (                                                            \
+    ((STD_ON == CRC32_ALGORITHM) && (CRC_RUNTIME == CRC32_MODE)) \
+    || ((STD_ON == CRC32P4_ALGORITHM) && (CRC_RUNTIME == CRC32P4_MODE)))
 /*************************************************************************/
 /*
  * Brief               get the reflection of uint32 type data
@@ -433,7 +453,7 @@ static FUNC(uint32, CRC_CODE) Crc_GetReflection_int(VAR(uint32, AUTOMATIC) input
 #define CRC_STOP_SEC_CODE
 #include "Crc_MemMap.h"
 
-#endif /* STD_ON == CRC32_ALGORITHM */
+#endif
 
 /*************************************************************************/
 /*
@@ -449,7 +469,7 @@ static FUNC(uint32, CRC_CODE) Crc_GetReflection_int(VAR(uint32, AUTOMATIC) input
  * CallByAPI           Crc_CalculateCRC32
  */
 /*************************************************************************/
-#if (STD_ON == CRC64_ALGORITHM)
+#if ((STD_ON == CRC64_ALGORITHM) && (CRC_RUNTIME == CRC64_MODE))
 #define CRC_START_SEC_CODE
 #include "Crc_MemMap.h"
 static FUNC(uint64, CRC_CODE) Crc_GetReflection_longlong(VAR(uint64, AUTOMATIC) input)
@@ -508,7 +528,7 @@ Crc_CalculateCRC8(
 #endif /* CRC_HARDWARE != CRC8_MODE */
 #if (CRC_RUNTIME == CRC8_MODE)
     uint8 j;
-#endif /*  CRC_RUNTIME == CRC8_MODE */
+#endif
 
     if (TRUE == Crc_IsFirstCall)
     {
@@ -516,7 +536,7 @@ Crc_CalculateCRC8(
     }
     else
     {
-        crc = Crc_StartValue8;
+        crc = Crc_StartValue8 & (uint8)0xff;
         crc ^= CRC_XORVALUE8;
     }
 
@@ -550,12 +570,12 @@ Crc_CalculateCRC8(
 
 /* check if it is hardware method to calculate */
 #elif (CRC_HARDWARE == CRC8_MODE)
-
+    Crc_CalculateCRC8ByHardware(Crc_DataPtr, Crc_Length, Crc_StartValue8, Crc_IsFirstCall);
 #endif /* CRC_RUNTIME == CRC8_MODE */
 
     crc ^= CRC_XORVALUE8;
 
-    return crc;
+    return crc & (uint8)0xff;
 }
 #define CRC_STOP_SEC_CODE
 #include "Crc_MemMap.h"
@@ -601,7 +621,7 @@ Crc_CalculateCRC8H2F(
 #endif /* CRC_HARDWARE != CRC8H2F_MODE */
 #if (CRC_RUNTIME == CRC8H2F_MODE)
     uint8 j;
-#endif /* CRC_RUNTIME == CRC8H2F_MODE */
+#endif
 
     if (TRUE == Crc_IsFirstCall)
     {
@@ -609,7 +629,7 @@ Crc_CalculateCRC8H2F(
     }
     else
     {
-        crc = Crc_StartValue8H2F;
+        crc = Crc_StartValue8H2F & (uint8)0xff;
         crc ^= CRC_XORVALUE8H2F;
     }
 
@@ -643,12 +663,12 @@ Crc_CalculateCRC8H2F(
 
 /* check if it is hardware method to calculate */
 #elif (CRC_HARDWARE == CRC8H2F_MODE)
-
+    Crc_CalculateCRC8H2FByHardware(Crc_DataPtr, Crc_Length, Crc_StartValue8H2F, Crc_IsFirstCall);
 #endif /* CRC_RUNTIME == CRC8H2F_MODE */
 
     crc ^= CRC_XORVALUE8H2F;
 
-    return crc;
+    return crc & (uint8)0xff;
 }
 #define CRC_STOP_SEC_CODE
 #include "Crc_MemMap.h"
@@ -735,7 +755,7 @@ Crc_CalculateCRC16(
 
 /* check if it is hardware method to calculate */
 #elif (CRC_HARDWARE == CRC16_MODE)
-
+    Crc_CalculateCRC16ByHardware(Crc_DataPtr, Crc_Length, Crc_StartValue16, Crc_IsFirstCall);
 #endif /* CRC_RUNTIME == CRC16_MODE */
 
     crc ^= CRC_XORVALUE16; /* PRQA S 2985 */ /* MISRA Rule 2.2 */
@@ -786,7 +806,7 @@ Crc_CalculateCRC32(
 #endif /* CRC_HARDWARE != CRC32_MODE */
 #if (CRC_RUNTIME == CRC32_MODE)
     uint8 j;
-#endif /* CRC_RUNTIME == CRC32_MODE */
+#endif
 
     if (TRUE == Crc_IsFirstCall)
     {
@@ -831,8 +851,8 @@ Crc_CalculateCRC32(
     }
     /* check if it is hardware method to calculate */
 #elif (CRC_HARDWARE == CRC32_MODE)
-
-#endif /* CRC_RUNTIME == CRC32_MODE */
+    Crc_CalculateCRC32ByHardware(Crc_DataPtr, Crc_Length, Crc_StartValue32, Crc_IsFirstCall);
+#endif
 
     crc ^= CRC_XORVALUE32;
 
@@ -882,7 +902,7 @@ Crc_CalculateCRC32P4(
 #endif /* CRC_HARDWARE != CRC32P4_MODE */
 #if (CRC_RUNTIME == CRC32P4_MODE)
     uint8 j;
-#endif /* CRC_RUNTIME == CRC32P4_MODE */
+#endif
 
     if (TRUE == Crc_IsFirstCall)
     {
@@ -927,8 +947,8 @@ Crc_CalculateCRC32P4(
     }
     /* check if it is hardware method to calculate */
 #elif (CRC_HARDWARE == CRC32P4_MODE)
-
-#endif /* CRC_RUNTIME == CRC32P4_MODE */
+    Crc_CalculateCRC32P4ByHardware(Crc_DataPtr, Crc_Length, Crc_StartValue32, Crc_IsFirstCall);
+#endif
 
     crc ^= CRC_XORVALUE32P4;
 
@@ -977,7 +997,7 @@ Crc_CalculateCRC64(
 #endif /* CRC_HARDWARE != CRC64_MODE */
 #if (CRC_RUNTIME == CRC64_MODE)
     uint8 j;
-#endif /* CRC_RUNTIME C== CRC64_MODE */
+#endif
 
     if (TRUE == Crc_IsFirstCall)
     {
@@ -1021,8 +1041,8 @@ Crc_CalculateCRC64(
     }
     /* check if it is hardware method to calculate */
 #elif (CRC_HARDWARE == CRC64_MODE)
-
-#endif /* CRC_RUNTIME C== CRC64_MODE */
+    Crc_CalculateCRC64ByHardware(Crc_DataPtr, Crc_Length, Crc_StartValue64, Crc_IsFirstCall);
+#endif
 
     crc ^= CRC_XORVALUE64;
 

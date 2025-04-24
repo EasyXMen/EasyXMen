@@ -18,6 +18,10 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
+ */
+/* PRQA S 3108-- */
+/*
+ ********************************************************************************
  ************************************************************************************************************************
  ** **
  **  @file               : ComM_BusSM.h **
@@ -29,7 +33,6 @@
  **  @specification(s)   : AUTOSAR classic Platform R19-11 **
  ** **
  ***********************************************************************************************************************/
-/* PRQA S 3108-- */
 
 #ifndef COMM_BUSSM_H
 #define COMM_BUSSM_H
@@ -40,8 +43,7 @@
 
 /*======================================[external function definitions]===============================================*/
 BEGIN_C_DECLS
-FUNC(void, COMM_CODE)
-ComM_BusSM_ModeIndication(NetworkHandleType Channel, ComM_ModeType ComMode);
+void ComM_BusSM_ModeIndication(NetworkHandleType Channel, ComM_ModeType ComMode);
 
 FUNC(void, COMM_CODE) ComM_BusSM_BusSleepMode(NetworkHandleType Channel);
 END_C_DECLS

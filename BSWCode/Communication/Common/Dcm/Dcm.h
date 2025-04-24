@@ -19,114 +19,118 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                           **
- **  FILENAME    :  Dcm.h                                                     **
- **                                                                           **
- **  Created on  : 2020/5/6 14:29:43                                          **
- **  Author      : tao.yu                                                     **
- **  Vendor      :                                                            **
- **  DESCRIPTION : declaration of Dcm                                         **
- **                                                                           **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                      **
- **                                                                           **
- **************************************************************************** */
+ */
 /* PRQA S 3108-- */
+/*
+**************************************************************************** **
+**                                                                           **
+**  FILENAME    :  Dcm.h                                                     **
+**                                                                           **
+**  Created on  : 2020/5/6 14:29:43                                          **
+**  Author      : tao.yu                                                     **
+**  Vendor      :                                                            **
+**  DESCRIPTION : declaration of Dcm                                         **
+**                                                                           **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                      **
+**                                                                           **
+**************************************************************************** */
 
 #ifndef DCM_H
 #define DCM_H
+/*============================================================================*/
 /*=======[R E V I S I O N   H I S T O R Y]====================================*
-*  <VERSION>    <DATE>       <AUTHOR>     <REVISION LOG>
-*  V1.0.0       2018-3-20    shushi       Initial version
-*  V1.0.1       2019-12-24   tao.yu       QAC check fix
-*  V1.0.2       2020-1-7     tao.yu       Commercial project problem modification
-*  V2.0.0       2021-8-25    tao.yu       release version
-*  V2.0.1       2022-4-1     xinrun.wang  move out timing function as callback
-*  V2.0.2       2022-8-30    tao.yu       change Dcm_StartRoutineFncType/
-    Dcm_StopRoutineFncType/Dcm_RequestResultsRoutineFncType,add Dcm_OpStatusType OpStatus
-*  V2.0.3       2023-1-9     tong.zhao
-*    1> Change the initialization flag conditions of Dcm_SecCtrl.Dcm_SecFlag
-*  V2.0.4       2023-3-29    Xinrun.Wang/tao.yu  Modify 0x31 to match uint32 req/res length,fix 2A data size check
-    without prior 2C,Modify Dcm_MsgState processing mechanism
-*  V2.0.5       2023-4-13    Xinrun.Wang  Move CheckProtocol behaivor to RxIndication
-*  V2.0.6       2023-5-9     Xinrun.Wang  1.Modify 0x36 to check reqlength and sequence to match 0x38
-                                          2.Change Dcm_CommunicationModeType Macros to unsigned
-*  V2.0.7       2023-6-7     Xinrun.Wang  1.Adjust P2Server timeout calculation by adding a tasktime offset
-                                          2.Modify 0x31 return position
-                                          3.Modify 0x2F controlEnableMask position
-*  V2.0.8       2023-6-13    tao.yu       1.add option Function: in default session, delay S3 time release network
-                                          2.change version type
-*  V2.0.9       2023-6-29    peng.wu      1.Modified the nrc priority order of 0x10 0x11 0x19 0x22 0x27 0x28 0x2c 0x2f
-                                          0x3e 0x85 0x86
-*  V2.0.10      2023-7-17    xue.han      fix CPT-6157,fix function request causes a data error while the previous
-                                          request is still being processed
-*  V2.0.11      2023-8-7     Xinrun.Wang  1. Do not change current reqLen for functional req until tpRxIndication
-                                          2. Adjust dynamic req/res length for routine control
-*  V2.0.12      2023-8-10    xue.han      fix UDS0x86 Dcm_Uds0X86EventWindowTimeCheck() return value
-*  V2.0.13      2023-8-11    xue.han      QAC change
-*  V2.0.14      2023-8-18    Xinrun.Wang  Add queued reqeust functionality
-*  V2.0.15      2023-8-23    peng.wu      1.CPT-6467 fix Big Endian and little Endian conversion
-                                          2.CPT-5999 Fix Dcm_UDS0x19_06SubDeal when DtcExtendedDataRecordNumber is 0xFE
-*  V2.0.16      2023-8-24    Xinrun.Wang  check result E_OK for queued request with tpRxIndication
-*  V2.0.17      2023-8-25    Xinrun.Wang  Fix Functional Reqeust handle at startOfReception
-*  V2.0.18      2023-8-28    peng.wu      add the validation of nrc 7E,33, Update length check in 0x86 service
-*  V2.0.19      2023-8-28    Xinrun.Wang  Check if functional request processing at startOfReception
-*  V2.0.20      2023-8-31    Xinrun.Wang  Check queued request for functional address req
-                             peng.wu      Fix 0x36 service not responding to NRC73 CPT-6718
-*  V2.0.21      2023-9-07    xue.han      CPT-6812 Fix OBD0x06 Service SupportBuffer param Initial value
-                                          and OBD_ReadPidValues when OBD0x02 Service is enable
-                2023-9-11    tao.yu       fix 0x36 service NRC
-                2023-9-22    xue.han      fix 0x2A service PeriodicTransmission Rate
-                2023-10-25   peng.wu      CPT-7315, Fixed Dcm_0x22DidReadNvmFlag variable assignment in the 22 service
-                2023-11-07   peng.wu      CPT-7315, Reset Dcm_0x22DidReadNvmFlag after it is used
-*  V2.0.22      2023-11-13   tao.yu       CPT-6467 fix Big Endian and little Endian conversion
-                2023-11-14   xue.han      CPT-7595, avoid Dcm_CheckProtocol to use released protocol
-                2023-11-15   xue.han      CPT-7613,fix Det error in Dcm_TpRxIndication()
-*               2023-11-16   xue.han      CPT-7528, Fixed DcmDsdSubServiceUsed
-*               2023-11-17   xue.han      QAC
-*  V2.0.23      2023-11-23   xue.han      code performance optimization
-*               2023-11-24   xue.han      1、CPT-7683, Fix DtcStatus in Service 19 04、19 06
-*                                         2、CPT-7707, Fix macro condition for Dcm_UDS0x2C_Init()
-*               2023-11-30   xue.han      1、CPT-7747, Fix 0x22 service NRC13
-                                          2、CPT-7653, Delete redundant Attempt Counter process
-                2023-12-06   xue.han      1、CPT-7779, Fix 0x22 service sessioncheck 2、QAC
-                2023-12-12   xue.han      CPT-7811, Fix 0x10、0x27 service NRC12
-                2023-12-06   xue.han      Fix performance optimization ：wrong Dcm_BufferCunrentPosition
-                2023-12-08   xue.han      Fix performance optimization ：wrong Dcm_BufferCunrentPosition,UDS0x2C,OBD0x09
-                2023-12-12   xue.han      (optimize regression)1、CPT-7747, Fix 0x22 service NRC13
-                                          2、CPT-7653, Delete redundant Attempt Counter process
-                                          3、CPT-7779, Fix 0x22 service sessioncheck
-                                          4、CPT-7811, Fix 0x10、0x27 service NRC12
-                2023-12-26   xue.han      QAC
-*  V2.0.24      2024-01-03   peng.wu      Add DCM_DDDID_STORAGE_BLOCKID macro condition for Dcm_UDS0x2C_Init(), CPT-7707
-                2024-01-04   xinrun.wang  CPT-8017, Fix protocol switch, avoid unnecessary ComM notification
-                2024-01-08   xue.han      Add Dem_DcmGetNumberOfFilteredDTC function call in OBD0x03,0x07,0x0A
-                2024-01-22   tao.yu       QAC
-                2024-01-30   xue.han      Fix OBD_MemSet Array overflow and add inline function.
-                2024-01-31   xue.han      CPT-8175,CPT-8239 Fix 0x2F DcmDspDidSignalNum index error and NRC33
-                                          CPT-7547,Fix 0x31 ReqLen Type Cast
-                2024-03-05   xue.han      CPT-8381,Redesigned how to get Dcm_FalseAcessCount at initialization.
- * V2.0.25      2024-03-29   xue.han      CPT-8405/8406,Add handling of NRC24 and repeat request in service 0x36.
- *                                        CPT-8606/8625,Add handling of NRC71 and address offset in service 0x36.
- *              2024-04-11   xinrun.wang  CPT-8728, data consistency check for queued request process
- *              2024-04-12   xue.han      CPT-8512, Stop 0x2A transfer when DCM_0x2C clear DDDID.
- *              2024-04-23   xue.han      CPT-8405/8625, fix repeat request and NRC71 in service 0x36.
- *              2024-04-28   xue.han      CPT-8731, delete Redundant variable in DslInternal_InitSecCtrl
- *              2024-05-29   xinrun.wang  fix AvailableBufferSize calculation for queued request in copyRxData.
- *              2024-07-16   xue.han      CPT-9354,change DDDID range,including boundary value
- *              2024-07-18   xue.han      CPT-8823,fix UDS0x14 pending response
- *              2024-07-24   xinrun.wang  fix functional address handling for queued request
- *              2024-08-08   xue.han      add mainfunction timer
- * V2.0.26      2024-08-23   xue.han      CPT-10156, fix Dcm_SetProgConditions when programsession
- *                                        CPT-10148, fix Dcm_ActiveNetwork in RX ISR
- *                                        CPT-10250, fix Nrc72 in UDS service 0x2
- *              2024-08-26   xue.han      CPT-10221,fix Subnet handling in UDS service 0x28
- *              2024-08-29   xue.han      delete redundant condition check
- *              2024-09-12   xue.han      fix Dcm_UDS0x2A_DDDidStop,UDS0x28 NRC31
- *              2024-09-27   xue.han      QAC
- *                           peng.wu      CPT-9403, fix DemFreezeFrameRecordNumber range
- * V2.0.27      2024-10-14   xue.han      CPT-10773,add NRC process if channel is NULL
+ * <VERSION>  <DATE>       <AUTHOR>           <REVISION LOG>
+ *  V1.0.0    2018-3-20    shushi              Initial version
+ *  V1.0.1    2019-12-24   tao.yu              QAC check fix
+ *  V1.0.2    2020-1-7     tao.yu              Commercial project problem modification
+ *  V2.0.0    2021-8-25    tao.yu              release version
+ *  V2.0.1    2022-4-1     xinrun.wang         move out timing function as callback
+ *  V2.1.0    2022-8-18    tao.yu              change to PBPC mode,Implementation 0x29 service
+ *  V2.1.1    2023-7-31    xinrun.wang         fix functional tester present interrupt behavior
+ *  V2.1.2    2023-8-08    peng.wu             fix Big Endian and little Endian conversion CPT-6467
+ *  V2.1.3    2023-8-10    xue.han             QAC Change
+ *  V2.1.3    2023-8-11    Xinrun.Wang         Do not change current reqLen for functional req until tpRxIndication
+ *  V2.1.4    2023-8-16    tao.yu              CPT-6531 Fix 0x29 Service Connection Index Values Error
+ *  V2.1.5    2023-8-16    xinrun.wang         Handle status for startOfReception with info.SduLength > 0
+ *  V2.1.6    2023-8-18    tao.yu              CPT-6579/CPT-6577 Fix 0x29 Service
+ *  V2.1.7    2023-8-18    xinrun.wang         1. CPT-6585 Fix macro condition for supplier notification
+ *                                             2. Add extra buffer for queued reqeust for switch
+ *  V2.1.8    2023-8-21    tao.yu              CPT-6603 Fix 0x29 Service busy
+ *  V2.1.9    2023-8-23    peng.wu             CPT-5999 Fix Dcm_UDS0x19_06SubDeal when DtcExtendedDataRecordNumber is
+ *                                             0xFE
+ *  V2.1.10   2023-8-24    xinrun.wang         check result E_OK for queued request with tpRxIndication
+ *  V2.1.11   2023-8-24    peng.wu             add the validation of nrc 7E,33, Update length check in 0x86 service
+ *  V2.1.12   2023-8-28    xinrun.wang/tao.yu  Check if functional request processing at startOfReception
+ *                                             CPT-6716 Fix 0x29 Service 03 sub service ret init value
+ *  V2.1.13   2023-8-31    peng.wu/tao.yu      Fix 0x36 service not responding to NRC73 CPT-6718
+ *                                             CPT-6764/CPT-6766 Fix 0x29 Service and other Service subService check
+ *  V2.1.14   2023-9-1     xinrun.wang         Check queued request for functional address req
+ *  V2.1.15   2023-9-7     tao.yu              CPT-6811/CPT-6839 Fix 0x29 Service
+ *                         xue.han             CPT-6812 Fix OBD0x06 Service SupportBuffer param Initial value and
+ *                                             OBD_ReadPidValues when OBD0x02 Service is enable
+ *                         peng.wu             CPT-6732 Add callout DataFormatIdentifier to services 0x34,0x35.
+ *            2023-9-11    tao.yu              fix 0x36 service NRC,Fix 0x29 Service
+ *            2023-9-13    tao.yu              Fix 0x29 Service White List
+ *            2023-9-18    tao.yu              add new feature SWS_Dcm_01355 SWS_Dcm_01048, remove warning
+ *            2023-10-10   xue.han             fix DataSize bit transform
+ *            2023-10-24   peng.wu             CPT-7315, Fixed DidReadNvmFlag variable assignment in the 22 service
+ *            2023-10-24   peng.wu             CPT-7315, Reset Dcm_0x22DidReadNvmFlag after it is used
+ *            2023-11-09   xue.han             CPT-7528, Fixed DcmDsdSubServiceUsed
+ *            2023-11-14   xue.han             CPT-7595, avoid Dcm_CheckProtocol to use released protocol
+ *            2023-11-24   xue.han             1、CPT-7683, Fix DtcStatus in Service 19 04、19 06
+ *                                             2、CPT-7707, Fix macro condition for Dcm_UDS0x2C_Init()
+ *            2023-11-28   xue.han             QAC
+ *            2023-11-30   xue.han             1、CPT-7747, Fix 0x22 service NRC13
+                                               2、CPT-7653, Delete redundant Attempt Counter process
+ *            2023-12-06   xue.han             CPT-7779, Fix 0x22 service SessionCheck
+ *            2024-1-4     xinrun.wang         CPT-8017, Fix protocol switch, avoid unnecessary ComM notification
+ *            2024-1-15    xue.han             Add Dem_DcmGetNumberOfFilteredDTC function call in OBD0x03,0x07,0x0A
+ *            2024-01-31   xue.han             CPT-8175,CPT-8239 Fix 0x2F DcmDspDidSignalNum index error and NRC33
+                                               CPT-7547,Fix 0x31 ReqLen Type Cast
+ *  V2.1.16   2024-03-22   xue.han             clear 0210HuaYangproject compilation warnings
+ *            2024-03-25   xue.han             CPT-8405/8406,Add handling of NRC24 and repeat request in service 0x36.
+ *                                             CPT-8606/8625,Add handling of NRC71 and address offset in service 0x36.
+ *            2024-03-26   tao.yu              fix schm
+ *            2024-04-09   xue.han             CPT-8512,Stop 0x2A transfer when DCM_0x2C clear DDDID.
+ *            2024-04-11   xinrun.wang         CPT-8728, data consistency check for queued request process
+ *            2024-04-25   xue.han             CPT-8405/8625,fix repeat request and NRC71 in service 0x36.
+ *                                             CPT-8731/8381,redesigned to get Dcm_FalseAcessCount at initialization.
+ *            2024-05-06   xinrun.wang         0x31 variable length check correct for routine with no input
+ *                         xue.han             CPT-8512,fix Dcm_UDS0x2A_DDDidStop()
+ *            2024-5-29    xinrun.wang         fix AvailableBufferSize calculation for queued request in copyRxData.
+ *            2024-05-31   xue.han             change MetaData to global variable to fit DCache
+ *            2024-06-13   xue.han             change protocol start/stop position to fit multicore
+ *            2024-06-19   xue.han             add some functional macro to reduce amount of code.
+ *            2024-06-27   xue.han             change DcmDslProtocolRxTesterSourceAddr to fit Big-Enddian
+ *            2024-07-10   xue.han             CPT-9354,change DDDID range,including boundary value
+ *            2024-07-16   xue.han             CPT-9742,fix marco DCM_UDS0X31_STARTROUTINE_ENABLED
+ *            2024-07-18   xue.han             CPT-8823,fix UDS0x14 pending response
+ *            2024-07-24   xinrun.wang         fix functional address handling for queued request
+ *            2024-08-02   xue.han             QAC
+ *  V2.1.17   2024-08-26   xue.han             CPT-10221,fix Subnet handling in UDS service 0x28
+ *                                             CPT-10250,fix Nrc72 in UDS service 0x2E
+ *            2024-08-29   xue.han             CPT-10156, fix Dcm_SetProgConditions when programsession
+ *                                             CPT-10148, fix Dcm_ActiveNetwork in RX ISR
+ *  V2.1.18   2024-10-15   xue.han             CPT-10773,add NRC process if channel is NULL
+ *                                             fix unreachable code
+ *            2024-10-22   xue.han             CPT-10607,delete AE process
+ *            2024-10-31   xue.han             CPT-10991,fix data types associated with DID
+ *            2024-11-16   peng.wu             CPT-9403, fix DemFreezeFrameRecordNumber range
+ *            2024-11-22   xue.han             QAC
+ *            2024-11-23   xinrun.wang         Set Functional message length for all cases in startOfReception
+ *            2024-11-23   xue.han             CPT-11373,fix 0x2F totaldatalength check
+ *                                             CPT-11435,fix Dcm_GetUDSPhyPduID
+ *            2024-11-25   xue.han             CPT-11635,fix getting RxPduId for UDS service 0x86
+ *                                             fix Dcm exclusiveArea
+ *            2024-12-12   xue.han             CPT-11934,fix DCM_DELAY_COMM_INACTIVE function
+ *            2024-12-16   xinrun.wang         CPT-11958,fix 0x31 variable length check
+ *            2024-12-17   xue.han             CPT-11943,fix mode switch trigger by received resetType
+ *                                             CPT-11059,add handle of extra returnvalue from servicefunc
+ *            2024-12-25   xue.han             CPT-11943,fix Dcm_UDS0x2A_SubFunSubDeal for UDS service 0x2A
+ *            2025-03-12   xue.han             CPT-11232,fix processing consecutive requests with the same protocol.
+ *                                             CPT-13207,fix global variable naming for ProgConditions.
+ *                                             CPT-12870,fix Dcm_SetDeauthenticatedRole.
+ *            2025-04-22   xue.han             CPT-14039,fix negative response NRC 0x22.
 ============================================================================*/
 
 /*=======[V E R S I O N  I N F O R M A T I O N]===============================*/
@@ -134,14 +138,16 @@
 #define DCM_AR_RELEASE_MINOR_VERSION (0x02u)
 #define DCM_AR_RELEASE_PATCH_VERSION (0x02u)
 #define DCM_SW_MAJOR_VERSION         (0x02u) /*Major Version*/
-#define DCM_SW_MINOR_VERSION         (0x00u) /*Minor Version*/
-#define DCM_SW_PATCH_VERSION         (0x1Bu) /*Patch version*/
+#define DCM_SW_MINOR_VERSION         (0x01u) /*Minor Version*/
+#define DCM_SW_PATCH_VERSION         (0x12u) /*Patch version*/
 
 /*******************************************************************************
 **                      Include Section                                       **
 *******************************************************************************/
 #include "Dcm_Types.h"
-#include "Dcm_Internal.h"
+#if (DCM_DEM_SUPPOTR == STD_ON)
+#include "Dem_Types.h"
+#endif
 /*******************************************************************************
 **                      Revision Control History                              **
 *******************************************************************************/
@@ -153,7 +159,7 @@
 /*******************************************************************************
 **                      Global Data                                           **
 *******************************************************************************/
-
+extern CONST(Dcm_CfgType, DCM_CONST) Dcm_Cfg;
 /*******************************************************************************
 **                      Global Functions                                      **
 *******************************************************************************/
@@ -170,9 +176,9 @@
  * CallByAPI            <>
  */
 /*************************************************************************/
-
 extern FUNC(void, DCM_CODE) Dcm_Init(P2CONST(Dcm_CfgType, DCM_CONST, DCM_CONST_PBCFG) ConfigPtr);
 
+#if (STD_ON == DCM_VERSION_INFO_API)
 /*************************************************************************/
 /*
  * Brief               <Returns the version information of this module>
@@ -188,11 +194,11 @@ extern FUNC(void, DCM_CODE) Dcm_Init(P2CONST(Dcm_CfgType, DCM_CONST, DCM_CONST_P
  * CallByAPI           <None>
  */
 /*************************************************************************/
-#if (STD_ON == DCM_VERSION_INFO_API)
 /* PRQA S 3432++ */ /* MISRA Rule 20.7 */
 extern FUNC(void, DCM_CODE) Dcm_GetVersionInfo(P2VAR(Std_VersionInfoType, AUTOMATIC, DCM_VAR) VersionInfo);
 /* PRQA S 3432-- */ /* MISRA Rule 20.7 */
-#endif
+#endif              /* STD_ON == DCM_VERSION_INFO_API */
+
 /*************************************************************************/
 /*
  * Brief               <Function to get the VIN (as defined in SAE J1979-DA)>
@@ -211,6 +217,8 @@ extern FUNC(void, DCM_CODE) Dcm_GetVersionInfo(P2VAR(Std_VersionInfoType, AUTOMA
 /* PRQA S 3432++ */ /* MISRA Rule 20.7 */
 extern FUNC(Std_ReturnType, DCM_CODE) Dcm_GetVin(P2VAR(uint8, AUTOMATIC, DCM_VAR) Data);
 /* PRQA S 3432-- */ /* MISRA Rule 20.7 */
+
+#if (DCM_DEM_SUPPOTR == STD_ON)
 /*************************************************************************/
 /*
  * Brief               <Triggers on changes of the UDS DTC status byte.
@@ -228,10 +236,9 @@ extern FUNC(Std_ReturnType, DCM_CODE) Dcm_GetVin(P2VAR(uint8, AUTOMATIC, DCM_VAR
  * CallByAPI           <None>
  */
 /*************************************************************************/
-
 extern FUNC(Std_ReturnType, DCM_CODE)
     Dcm_DemTriggerOnDTCStatus(uint32 DTC, Dem_UdsStatusByteType DTCStatusOld, Dem_UdsStatusByteType DTCStatusNew);
-
+#endif
 /*************************************************************************/
 /*
  * Brief               <This function provides the active security level value.>
@@ -247,9 +254,10 @@ extern FUNC(Std_ReturnType, DCM_CODE)
  * CallByAPI            <APIName>
  */
 /*************************************************************************/
-/* PRQA S 3432,3449,3451++ */ /* MISRA Rule 20.7,8.5 */
+/* PRQA S 3432,3451,3449++ */ /* MISRA Rule 20.7,8.5 */
 extern FUNC(Std_ReturnType, DCM_CODE) Dcm_GetSecurityLevel(P2VAR(Dcm_SecLevelType, AUTOMATIC, DCM_VAR) SecLevel);
-/* PRQA S 3432,3449,3451-- */ /* MISRA Rule 20.7,8.5 */
+/* PRQA S 3432,3451,3449-- */ /* MISRA Rule 20.7,8.5 */
+
 /*************************************************************************/
 /*
  * Brief               <This function provides the active session control type value. >
@@ -264,9 +272,9 @@ extern FUNC(Std_ReturnType, DCM_CODE) Dcm_GetSecurityLevel(P2VAR(Dcm_SecLevelTyp
  * CallByAPI           <>
  */
 /*************************************************************************/
-/* PRQA S 3432,1330,3449,3451++ */ /* MISRA Rule 20.7,8.3,8.5 */
+/* PRQA S 1330,3451,3449++ */ /* MISRA Rule 8.3,8.5 */
 extern FUNC(Std_ReturnType, DCM_CODE) Dcm_GetSesCtrlType(P2VAR(Dcm_SesCtrlType, AUTOMATIC, DCM_VAR) SesType);
-/* PRQA S 3432,1330,3449,3451-- */ /* MISRA Rule 20.7,8.3,8.5 */
+/* PRQA S 1330,3451,3449++ */ /* MISRA Rule 8.3,8.5 */
 /*************************************************************************/
 /*
  * Brief               <This function returns the active protocol name. >
@@ -281,9 +289,10 @@ extern FUNC(Std_ReturnType, DCM_CODE) Dcm_GetSesCtrlType(P2VAR(Dcm_SesCtrlType, 
  * CallByAPI           <>
  */
 /*************************************************************************/
-/* PRQA S 3432,3449,3451++ */ /* MISRA Rule 20.7,8.5 */
+/* PRQA S 3432,3451,3449++ */ /* MISRA Rule 20.7,8.5 */
 extern FUNC(Std_ReturnType, DCM_CODE) Dcm_GetActiveProtocol(P2VAR(Dcm_ProtocolType, AUTOMATIC, DCM_VAR) ActiveProtocol);
-/* PRQA S 3432,3449,3451-- */ /* MISRA Rule 20.7,8.5 */
+/* PRQA S 3432,3451,3449-- */ /* MISRA Rule 20.7,8.5 */
+
 /*************************************************************************/
 /*
  * Brief               <The call to this function allows the application
@@ -299,9 +308,9 @@ extern FUNC(Std_ReturnType, DCM_CODE) Dcm_GetActiveProtocol(P2VAR(Dcm_ProtocolTy
  * CallByAPI           <>
  */
 /*************************************************************************/
-/* PRQA S 3449,3451++ */ /* MISRA Rule 8.5 */
+/* PRQA S 3451,3449++ */ /* MISRA Rule 8.5 */
 extern FUNC(Std_ReturnType, DCM_CODE) Dcm_ResetToDefaultSession(void);
-/* PRQA S 3449,3451-- */ /* MISRA Rule 8.5 */
+/* PRQA S 3451,3449-- */ /* MISRA Rule 8.5 */
 /*************************************************************************/
 /*
  * Brief               <The call to this function allows to trigger an
@@ -317,9 +326,7 @@ extern FUNC(Std_ReturnType, DCM_CODE) Dcm_ResetToDefaultSession(void);
  * CallByAPI           <>
  */
 /*************************************************************************/
-
 extern FUNC(Std_ReturnType, DCM_CODE) Dcm_TriggerOnEvent(uint8 RoeEventId);
-
 /*************************************************************************/
 /*
  * Brief               <Allows to activate and deactivate the call
@@ -336,12 +343,24 @@ extern FUNC(Std_ReturnType, DCM_CODE) Dcm_TriggerOnEvent(uint8 RoeEventId);
  * CallByAPI           <>
  */
 /*************************************************************************/
-/* PRQA S 0624,3449,3451++ */ /* MISRA Rule 8.3,8.5 */
+/* PRQA S 3451,3449,0624++ */ /* MISRA Rule 20.7,8.5,8.3 */
 extern FUNC(Std_ReturnType, DCM_CODE) Dcm_SetActiveDiagnostic(boolean active);
-/* PRQA S 0624,3449,3451-- */ /* MISRA Rule 8.3,8.5 */
+/* PRQA S 3451,3449,0624-- */ /* MISRA Rule 20.7,8.5,8.3 */
+#if (STD_ON == DCM_UDS_SERVICE0X29_ENABLED)
 /*************************************************************************/
-
-/* PRQA S 3449,3451-- */ /* MISRA Rule 8.5 */
-extern Dcm_EcuStartModeType Dcm_GetProgConditions(Dcm_ProgConditionsType* ProgConditions);
+/*
+ * Brief               <Dcm_SetDeauthenticatedRole>
+ * ServiceId           <0x79>
+ * Sync/Async          <Synchronous>
+ * Reentrancy          <Reentrant>
+ * Param-Name[in]      <connectionId,deauthenticatedRole>
+ * Param-Name[out]     <None>
+ * Param-Name[in/out]  <None>
+ * Return              <Std_ReturnType>
+ */
+/*************************************************************************/
+FUNC(void, DCM_CODE)
+Dcm_SetDeauthenticatedRole(uint16 connectionId, P2CONST(uint8, AUTOMATIC, DCM_VAR) deauthenticatedRole);
+#endif
 
 #endif /* CANTP_H */

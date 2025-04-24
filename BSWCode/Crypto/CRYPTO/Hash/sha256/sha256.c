@@ -1,34 +1,3 @@
-/* PRQA S 3108++ */
-/**
- * Copyright (C) 2024 Isoft Infrastructure Software Co., Ltd.
- * SPDX-License-Identifier: LGPL-2.1-only-with-exception OR  LicenseRef-Commercial-License
- *
- * This library is free software; you can redistribute it and/or modify it under the terms of the
- * GNU Lesser General Public License as published by the Free Software Foundation; version 2.1.
- * This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Lesser General Public License for more details.
- * You should have received a copy of the GNU Lesser General Public License along with this library;
- * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
- * or see <https://www.gnu.org/licenses/>.
- *
- * Alternatively, this file may be used under the terms of the Isoft Infrastructure Software Co., Ltd.
- * Commercial License, in which case the provisions of the Isoft Infrastructure Software Co., Ltd.
- * Commercial License shall apply instead of those of the GNU Lesser General Public License.
- *
- * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
- * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- *  @file               : sha256.c
- *  @version            : V1.0.0
- *  @author             : qinchun.yang
- *  @date               : 2018/10/13
- *  @vendor             : isoft
- *  @description        : Implementation for Crypto
- *  @specification(s)   : AUTOSAR classic Platform R19-11
- *
- */
-/* PRQA S 3108-- */
 /* PRQA S 3432 ++ */                     /* MISRA Rule 20.7 */
 /* PRQA S 0488 ++ */                     /* MISRA Rule 18.4 */
 /* PRQA S 2212 ++ */                     /* MISRA Rule 15.6 */
@@ -44,7 +13,8 @@
 #define CRYPTO_START_SEC_CODE
 #include "Crypto_MemMap.h"
 #if (CRYPTO_ALGORITHM_HASH == STD_ON)
-FUNC(Std_ReturnType, CRY_CODE) Crypto_internal_sha256_process(Crypto_Sha256Data* ctx, VAR(uint8, AUTOMATIC) data[64]);
+FUNC(Std_ReturnType, CRYPTO_CODE)
+Crypto_internal_sha256_process(Crypto_Sha256Data* ctx, VAR(uint8, AUTOMATIC) data[64]);
 
 /*
  * 32-bit integer manipulation macros(big endian)
@@ -69,18 +39,10 @@ FUNC(Std_ReturnType, CRY_CODE) Crypto_internal_sha256_process(Crypto_Sha256Data*
     } while (0)
 #endif
 
-/******************************************************************************/
 /*
- * Brief               This function starts a SHA-224 or SHA-256 checksum calculation.
- *
- * Param-Name[in]      ctx: The context to use.
- *
- * Param-Name[in/out]  None
- * Param-Name[out]     None
- * Return              Std_ReturnType
+ * SHA-256 context setup
  */
-/******************************************************************************/
-FUNC(Std_ReturnType, CRY_CODE) Crypto_sha256_starts_ret(Crypto_Sha256Data* ctx)
+FUNC(Std_ReturnType, CRYPTO_CODE) Crypto_sha256_starts_ret(Crypto_Sha256Data* ctx)
 {
     Std_ReturnType ret = E_OK;
 
@@ -133,30 +95,20 @@ static VAR(uint32, AUTOMATIC) K[] = {
         (d) += local.temp1;                                        \
         (h) = local.temp1 + local.temp2;                           \
     } while (0)
-/******************************************************************************/
-/*
- * Brief               This function processes one group.
- * Param-Name[in]      data: Data to be processed.
- * Param-Name[in/out]  ctx: The SHA-256 context. This must be initialized and
- *                           have a hash operation started.
- * Param-Name[out]     None
- * Return              Std_ReturnType:  E_OK: State accepted
- *                                      E_NOT_OK: State not accepted
- */
-/******************************************************************************/
-FUNC(Std_ReturnType, CRY_CODE) Crypto_internal_sha256_process(Crypto_Sha256Data* ctx, VAR(uint8, AUTOMATIC) data[64])
+
+FUNC(Std_ReturnType, CRYPTO_CODE) Crypto_internal_sha256_process(Crypto_Sha256Data* ctx, VAR(uint8, AUTOMATIC) data[64])
 {
     struct
     {
         uint32 temp1, temp2, W[64];
+        uint32 A[8];
     } local;
     uint32 i;
-    uint32 tempArray[8];
     Std_ReturnType ret = E_OK;
 
     for (i = 0; i < 8; i++)
     {
-        tempArray[i] = ctx->state[i];
+        local.A[i] = ctx->state[i];
     }
 
     for (i = 0; i < 16; i++)
@@ -166,198 +118,186 @@ FUNC(Std_ReturnType, CRY_CODE) Crypto_internal_sha256_process(Crypto_Sha256Data*
 
     for (i = 0; i < 16; i += 8)
     {
-        P(tempArray[0],
-          tempArray[1],
-          tempArray[2],
-          tempArray[3],
-          tempArray[4],
-          tempArray[5],
-          tempArray[6],
-          tempArray[7],
+        P(local.A[0],
+          local.A[1],
+          local.A[2],
+          local.A[3],
+          local.A[4],
+          local.A[5],
+          local.A[6],
+          local.A[7],
           local.W[i + 0],
           K[i + 0]);
-        P(tempArray[7],
-          tempArray[0],
-          tempArray[1],
-          tempArray[2],
-          tempArray[3],
-          tempArray[4],
-          tempArray[5],
-          tempArray[6],
+        P(local.A[7],
+          local.A[0],
+          local.A[1],
+          local.A[2],
+          local.A[3],
+          local.A[4],
+          local.A[5],
+          local.A[6],
           local.W[i + 1],
           K[i + 1]);
-        P(tempArray[6],
-          tempArray[7],
-          tempArray[0],
-          tempArray[1],
-          tempArray[2],
-          tempArray[3],
-          tempArray[4],
-          tempArray[5],
+        P(local.A[6],
+          local.A[7],
+          local.A[0],
+          local.A[1],
+          local.A[2],
+          local.A[3],
+          local.A[4],
+          local.A[5],
           local.W[i + 2],
           K[i + 2]);
-        P(tempArray[5],
-          tempArray[6],
-          tempArray[7],
-          tempArray[0],
-          tempArray[1],
-          tempArray[2],
-          tempArray[3],
-          tempArray[4],
+        P(local.A[5],
+          local.A[6],
+          local.A[7],
+          local.A[0],
+          local.A[1],
+          local.A[2],
+          local.A[3],
+          local.A[4],
           local.W[i + 3],
           K[i + 3]);
-        P(tempArray[4],
-          tempArray[5],
-          tempArray[6],
-          tempArray[7],
-          tempArray[0],
-          tempArray[1],
-          tempArray[2],
-          tempArray[3],
+        P(local.A[4],
+          local.A[5],
+          local.A[6],
+          local.A[7],
+          local.A[0],
+          local.A[1],
+          local.A[2],
+          local.A[3],
           local.W[i + 4],
           K[i + 4]);
-        P(tempArray[3],
-          tempArray[4],
-          tempArray[5],
-          tempArray[6],
-          tempArray[7],
-          tempArray[0],
-          tempArray[1],
-          tempArray[2],
+        P(local.A[3],
+          local.A[4],
+          local.A[5],
+          local.A[6],
+          local.A[7],
+          local.A[0],
+          local.A[1],
+          local.A[2],
           local.W[i + 5],
           K[i + 5]);
-        P(tempArray[2],
-          tempArray[3],
-          tempArray[4],
-          tempArray[5],
-          tempArray[6],
-          tempArray[7],
-          tempArray[0],
-          tempArray[1],
+        P(local.A[2],
+          local.A[3],
+          local.A[4],
+          local.A[5],
+          local.A[6],
+          local.A[7],
+          local.A[0],
+          local.A[1],
           local.W[i + 6],
           K[i + 6]);
-        P(tempArray[1],
-          tempArray[2],
-          tempArray[3],
-          tempArray[4],
-          tempArray[5],
-          tempArray[6],
-          tempArray[7],
-          tempArray[0],
+        P(local.A[1],
+          local.A[2],
+          local.A[3],
+          local.A[4],
+          local.A[5],
+          local.A[6],
+          local.A[7],
+          local.A[0],
           local.W[i + 7],
           K[i + 7]);
     }
 
     for (i = 16; i < 64; i += 8)
     {
-        P(tempArray[0],
-          tempArray[1],
-          tempArray[2],
-          tempArray[3],
-          tempArray[4],
-          tempArray[5],
-          tempArray[6],
-          tempArray[7],
+        P(local.A[0],
+          local.A[1],
+          local.A[2],
+          local.A[3],
+          local.A[4],
+          local.A[5],
+          local.A[6],
+          local.A[7],
           R(i + 0),
           K[i + 0]);
-        P(tempArray[7],
-          tempArray[0],
-          tempArray[1],
-          tempArray[2],
-          tempArray[3],
-          tempArray[4],
-          tempArray[5],
-          tempArray[6],
+        P(local.A[7],
+          local.A[0],
+          local.A[1],
+          local.A[2],
+          local.A[3],
+          local.A[4],
+          local.A[5],
+          local.A[6],
           R(i + 1),
           K[i + 1]);
-        P(tempArray[6],
-          tempArray[7],
-          tempArray[0],
-          tempArray[1],
-          tempArray[2],
-          tempArray[3],
-          tempArray[4],
-          tempArray[5],
+        P(local.A[6],
+          local.A[7],
+          local.A[0],
+          local.A[1],
+          local.A[2],
+          local.A[3],
+          local.A[4],
+          local.A[5],
           R(i + 2),
           K[i + 2]);
-        P(tempArray[5],
-          tempArray[6],
-          tempArray[7],
-          tempArray[0],
-          tempArray[1],
-          tempArray[2],
-          tempArray[3],
-          tempArray[4],
+        P(local.A[5],
+          local.A[6],
+          local.A[7],
+          local.A[0],
+          local.A[1],
+          local.A[2],
+          local.A[3],
+          local.A[4],
           R(i + 3),
           K[i + 3]);
-        P(tempArray[4],
-          tempArray[5],
-          tempArray[6],
-          tempArray[7],
-          tempArray[0],
-          tempArray[1],
-          tempArray[2],
-          tempArray[3],
+        P(local.A[4],
+          local.A[5],
+          local.A[6],
+          local.A[7],
+          local.A[0],
+          local.A[1],
+          local.A[2],
+          local.A[3],
           R(i + 4),
           K[i + 4]);
-        P(tempArray[3],
-          tempArray[4],
-          tempArray[5],
-          tempArray[6],
-          tempArray[7],
-          tempArray[0],
-          tempArray[1],
-          tempArray[2],
+        P(local.A[3],
+          local.A[4],
+          local.A[5],
+          local.A[6],
+          local.A[7],
+          local.A[0],
+          local.A[1],
+          local.A[2],
           R(i + 5),
           K[i + 5]);
-        P(tempArray[2],
-          tempArray[3],
-          tempArray[4],
-          tempArray[5],
-          tempArray[6],
-          tempArray[7],
-          tempArray[0],
-          tempArray[1],
+        P(local.A[2],
+          local.A[3],
+          local.A[4],
+          local.A[5],
+          local.A[6],
+          local.A[7],
+          local.A[0],
+          local.A[1],
           R(i + 6),
           K[i + 6]);
-        P(tempArray[1],
-          tempArray[2],
-          tempArray[3],
-          tempArray[4],
-          tempArray[5],
-          tempArray[6],
-          tempArray[7],
-          tempArray[0],
+        P(local.A[1],
+          local.A[2],
+          local.A[3],
+          local.A[4],
+          local.A[5],
+          local.A[6],
+          local.A[7],
+          local.A[0],
           R(i + 7),
           K[i + 7]);
     }
 
     for (i = 0; i < 8; i++)
-        ctx->state[i] += tempArray[i];
+        ctx->state[i] += local.A[i];
 
-    (void)ILib_memset(&local, 0u, sizeof(local));
+    Crypto_memset(&local, sizeof(local));
     return (ret);
 }
 
-/******************************************************************************/
 /*
- * Brief               This function feeds an input buffer into an ongoing SHA-256
- *                     checksum calculation.
- *
- * Param-Name[in]      input: The buffer holding the data. This must be a readable
- *                            buffer of length ilen Bytes.
- *				       ilen: The length of the input data in Bytes.
- * Param-Name[in/out]  ctx: The SHA-256 context. This must be initialized and have
- *                          a hash operation started.
- * Param-Name[out]     None
- * Return              Std_ReturnType:  E_OK: State accepted
- *                                      E_NOT_OK: State not accepted
+ * SHA-256 process buffer
  */
-/******************************************************************************/
-FUNC(Std_ReturnType, CRY_CODE)
+FUNC(Std_ReturnType, CRYPTO_CODE)
 Crypto_sha256_update_ret(
     Crypto_Sha256Data* ctx,
-    P2VAR(uint8, AUTOMATIC, CRY_APPL_DATA) input,
+    P2VAR(uint8, AUTOMATIC, CRYPTO_APPL_DATA) input,
     VAR(uint32, AUTOMATIC) ilen)
 {
     Std_ReturnType ret = E_OK;
@@ -382,7 +322,7 @@ Crypto_sha256_update_ret(
 
     if (left && ilen >= fill) /* PRQA S 3397 */ /* MISRA Rule 12.1 */
     {
-        (void)ILib_memcpy((void*)(ctx->buffer + left), input, fill);
+        Crypto_memcpy((void*)(ctx->buffer + left), input, fill);
 
         if ((ret = Crypto_internal_sha256_process(ctx, ctx->buffer)) != 0)
         {
@@ -406,28 +346,16 @@ Crypto_sha256_update_ret(
     }
 
     if (ilen > 0)
-        (void)ILib_memcpy((void*)(ctx->buffer + left), input, ilen);
+        Crypto_memcpy((void*)(ctx->buffer + left), input, ilen);
 
 exit:
     return (ret);
 }
 
-/******************************************************************************/
 /*
- * Brief               This function finishes the SHA-256 operation, and writes
- *                     the result to the output buffer.
- *
- * Param-Name[in]      ctx: The SHA-256 context. This must be initialized and
- *                          have a hash operation started.
- * Param-Name[in/out]  None
- * Param-Name[out]     output: The SHA-224 or SHA-256 checksum result. This must
- *                             be a writable buffer of length 32 bytes for SHA-256,
- *                             28 bytes for SHA-224.
- * Return              Std_ReturnType:  E_OK: State accepted
- *                                      E_NOT_OK: State not accepted
+ * SHA-256 final digest
  */
-/******************************************************************************/
-FUNC(Std_ReturnType, CRY_CODE) Crypto_sha256_finish_ret(Crypto_Sha256Data* ctx, VAR(uint8, AUTOMATIC) output[32])
+FUNC(Std_ReturnType, CRYPTO_CODE) Crypto_sha256_finish_ret(Crypto_Sha256Data* ctx, VAR(uint8, AUTOMATIC) output[32])
 {
     uint32 used;
     uint32 high, low;
@@ -442,17 +370,17 @@ FUNC(Std_ReturnType, CRY_CODE) Crypto_sha256_finish_ret(Crypto_Sha256Data* ctx, 
     if (used <= 56)
     {
         /* Enough room for padding + length in current block */
-        (void)ILib_memset((ctx->buffer + used), 0u, (56 - used));
+        Crypto_memset((ctx->buffer + used), (56 - used));
     }
     else
     {
         /* We'll need an extra block */
-        (void)ILib_memset((ctx->buffer + used), 0u, (64 - used));
+        Crypto_memset((ctx->buffer + used), (64 - used));
         if ((ret = Crypto_internal_sha256_process(ctx, ctx->buffer)) != 0)
         {
             goto exit;
         }
-        (void)ILib_memset((ctx->buffer), 0u, 56);
+        Crypto_memset((ctx->buffer), 56);
     }
 
     /*
@@ -483,33 +411,19 @@ exit:
     return (ret);
 }
 
-/******************************************************************************/
 /*
- * Brief               This function calculates the SHA-224 or SHA-256 checksum
- *                     of a buffer.
- *
- * Param-Name[in]      input: The buffer holding the data. This must be a readable
- *                            buffer of length ilen Bytes.
- *                     ilen: The length of the input data in Bytes.
- *
- * Param-Name[in/out]  None
- * Param-Name[out]     output: The SHA-224 or SHA-256 checksum result. This must
- *                             be a writable buffer of length 32 bytes for SHA-256,
- *                             28 bytes for SHA-224.
- * Return              Std_ReturnType:  E_OK: State accepted
- *                                      E_NOT_OK: State not accepted
+ * output = SHA-256(input buffer)
  */
-/******************************************************************************/
-FUNC(Std_ReturnType, CRY_CODE)
+FUNC(Std_ReturnType, CRYPTO_CODE)
 Crypto_sha256(
-    P2VAR(uint8, AUTOMATIC, CRY_APPL_DATA) input,
+    P2VAR(uint8, AUTOMATIC, CRYPTO_APPL_DATA) input,
     VAR(uint32, AUTOMATIC) ilen,
-    P2VAR(uint8, AUTOMATIC, CRY_APPL_DATA) output)
+    P2VAR(uint8, AUTOMATIC, CRYPTO_APPL_DATA) output)
 {
     Std_ReturnType ret;
     Crypto_Sha256Data ctx;
 
-    (void)ILib_memset(&ctx, 0u, sizeof(Crypto_Sha256Data));
+    Crypto_memset(&ctx, sizeof(Crypto_Sha256Data));
     ret = Crypto_sha256_starts_ret(&ctx);
 
     if (E_NOT_OK != ret)

@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Xcp_Interface.h                                             **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : qinchun.yang                                                **
- **  Vendor      :                                                             **
- **  DESCRIPTION : API declaration and type definitions of interface functions **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Xcp_Interface.h                                             **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : qinchun.yang                                                **
+**  Vendor      :                                                             **
+**  DESCRIPTION : API declaration and type definitions of interface functions **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 /*=======[I N C L U D E S]====================================================*/
 #ifndef XCP_INTERFACE_H_
 #define XCP_INTERFACE_H_
@@ -57,16 +58,16 @@ extern boolean Xcp_IsKeyRight(
     const Xcp_SeedVerifyType seedVerify,
     const Xcp_KeyVerifyType keyVerify,
     const uint8 resource);
-#endif /* STD_ON == XCP_SEED_AND_UNLOCK */
+#endif /*STD_ON == XCP_SEED_AND_UNLOCK*/
 
 #if (STD_ON == XCP_BUILD_CHECKSUM)
 extern void Xcp_InitCrc16CcittTable(void);
 extern FUNC(void, XCP_CODE)
     Xcp_ChecksumCompute(const uint32 checksumStartAddress, const uint32 blockSize, uint32* crcResult);
-#endif /* STD_ON == XCP_BUILD_CHECKSUM */
+#endif /*STD_ON == XCP_BUILD_CHECKSUM*/
 
 #if (STD_ON == XCP_PAG_SUPPORT)
 extern void Xcp_InitCalMem(void);
-#endif /* STD_ON == XCP_PAG_SUPPORT */
+#endif /*STD_ON == XCP_PAG_SUPPORT*/
 
 #endif /* XCP_INTERFACE_H_ */

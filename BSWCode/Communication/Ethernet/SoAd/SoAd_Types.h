@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                           **
- **  FILENAME    : SoAd_Types.h                                               **
- **                                                                           **
- **  Created on  :                                                            **
- **  Author      : zhengfei.li                                                **
- **  Vendor      :                                                            **
- **  DESCRIPTION : SoAd header description                                    **
- **                                                                           **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2 and R19_11           **
- **                                                                           **
- **************************************************************************** */
+ */
 /* PRQA S 3108-- */
+/*
+**************************************************************************** **
+**                                                                           **
+**  FILENAME    : SoAd_Types.h                                               **
+**                                                                           **
+**  Created on  :                                                            **
+**  Author      : zhengfei.li                                                **
+**  Vendor      :                                                            **
+**  DESCRIPTION : SoAd header description                                    **
+**                                                                           **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2 and R19_11           **
+**                                                                           **
+**************************************************************************** */
 #ifndef SOAD_TYPES_H_
 #define SOAD_TYPES_H_
 
@@ -72,6 +73,7 @@ typedef enum
 
 /*SoAd Internal unknown type definition*/
 typedef uint16 SoAd_uintx;
+/* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
 /*PC configuration type definition*/
 typedef struct
 {
@@ -90,6 +92,7 @@ typedef struct
     P2FUNC(void, SOAD_APPL_CODE, LocalIpAddrAssignmentChg_FuncPtr)
     (SoAd_SoConIdType SoConId, TcpIp_IpAddrStateType State);
 } SoAd_UpLayerFuncType;
+/* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
 #if (SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u)
 typedef struct
 {
@@ -283,7 +286,9 @@ typedef struct
     SoAd_RoutingGroupIdType SoAd_TxRoutingGroupRefNum;
     CONSTP2CONST(SoAd_RoutingGroupIdType, TYPEDEF, SOAD_CONST_PBCFG)
     SoAd_TxRoutingGroupRefPtr;
-    SoAd_SoConIdType SoAd_SoConId;
+    SoAd_SoConIdType SoAd_TxPduRouteDestSocketConRefNum;
+    CONSTP2CONST(SoAd_SoConIdType, TYPEDEF, SOAD_CONST_PBCFG)
+    SoAd_TxSocketConRefIndexPtr;
     PduIdType SoAd_PduRouteIndex;
 } SoAd_PduRouteDestType;
 

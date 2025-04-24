@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : DoIP_Types.h                                               **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : YB                                                          **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : DoIP_Types.h                                               **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : YB                                                          **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 
 #ifndef DOIP_TYPES_H
 #define DOIP_TYPES_H
@@ -46,14 +47,6 @@
 /*******************************************************************************
 **                      Global Data Types                                     **
 *******************************************************************************/
-#ifndef _DEFINED_TYPEDEF_FOR_DoIP_PowerStateType_
-typedef uint8 DoIP_PowerStateType;
-#endif /* _DEFINED_TYPEDEF_FOR_DoIP_PowerStateType_ */
-
-#ifndef _DEFINED_TYPEDEF_FOR_DoIP_FurtherActionByteType_
-typedef uint8 DoIP_FurtherActionByteType;
-#endif /* _DEFINED_TYPEDEF_FOR_DoIP_FurtherActionByteType_ */
-
 /*Event to user*/
 typedef enum
 {
@@ -70,12 +63,6 @@ typedef uint8 DoIP_RoleType;
 #define DOIP_ROLE_GATEWAY_IN  4u
 #define DOIP_ROLE_GATEWAY_OUT 8u
 #define DOIP_ROLE_GATEWAY_ETH 16u
-
-typedef enum
-{
-    DOIP_ACTIVATION_LINE_ACTIVE,
-    DOIP_ACTIVATION_LINE_INACTIVE
-} DoIP_ActivationLineType;
 
 /*This container cantains the max time and count that remote node can wait for diagnostic response*/
 typedef struct

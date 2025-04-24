@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Tm.h                                                        **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : Xinrun.Wang                                                 **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Public interfaces declared by Tm module                     **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Tm.h                                                        **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : Xinrun.Wang                                                 **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Public interfaces declared by Tm module                     **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 /*******************************************************************************
 **                      Revision Control History                              **
 *******************************************************************************/
@@ -54,8 +55,8 @@
 #define TM_H_AR_MINOR_VERSION 5U
 #define TM_H_AR_PATCH_VERSION 0U
 #define TM_H_SW_MAJOR_VERSION 2U
-#define TM_H_SW_MINOR_VERSION 0U
-#define TM_H_SW_PATCH_VERSION 1U
+#define TM_H_SW_MINOR_VERSION 1U
+#define TM_H_SW_PATCH_VERSION 0U
 
 #define TM_DEMO               STD_ON
 

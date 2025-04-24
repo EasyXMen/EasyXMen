@@ -18,27 +18,30 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Os_Internal.h                                               **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : i-soft-os                                                   **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
- **  Version :   AUTOSAR classic Platform R19--Function Safety                 **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Os_Internal.h                                               **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : i-soft-os                                                   **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
+**  Version :   AUTOSAR classic Platform R19--Function Safety                 **
+**                                                                            **
+*******************************************************************************/
 #ifndef OS_INTERNAL_H
 #define OS_INTERNAL_H
 
 /*=======[I N C L U D E S]====================================================*/
 #include "Arch_Processor.h"
 #include "Os_Hook.h"
+#include "Os_Trace.h"
+#include "Os_Monitor.h"
 
 #ifdef OS_GLOBAL_VAR
 #define OS_EXTERN
@@ -55,7 +58,7 @@
 #define OS_DisableInterrupts() Os_ArchDisableInt()      /* Disable interrupts. */
 /* PRQA S 3472 ++*/ /* MISRA  Dir-4.9*/                 /* OS_INTERNAL_MACRO_001 */
 #define Os_Dispatch()         Os_ArchDispatch()         /* Run the scheduler. */
-#define Os_Switch2System()    Os_ArchSwitch2System()    /* Switch to the system stack. */
+#define Os_Switch2System()                              /* Switch to the system stack. */
 #define Os_InitCPU()          Os_ArchInitCPU()          /* Initialize the CPU. */
 #define Os_PreSwitch2System() Os_ArchPreSwitch2System() /* Prepare to switch to the system stack. */
 #define Os_StartScheduler()   Os_ArchStartScheduler()   /* schedule for the first time. */
@@ -83,188 +86,188 @@ OS_EXTERN OS_KNL_BSS(VAR(Os_SpinlockType, OS_VAR) Os_SpinlockSync);
 
 /*============================ @+KERNEL+@=====================================*/
 /* PRQA S 0791++ */ /* MISRA Rule 5.4 */ /*OS_INTERNAL_SEGMENTNAME_SIMILAR_002*/
-#define OS_START_SEC_VAR_CLEARED_CLONE_16
+#define OS_START_SEC_VAR_CLONE_16
 #include "Os_MemMap.h"
 OS_EXTERN OS_KNL_BSS(VAR(uint16, OS_VAR) Os_CfgPriorityMax);
-#define OS_STOP_SEC_VAR_CLEARED_CLONE_16
+#define OS_STOP_SEC_VAR_CLONE_16
 #include "Os_MemMap.h"
 
 /* PRQA S 3432 ++*/ /* MISRA Rule 20.7 */ /* OS_INTERNAL_COMPILER_001 */
-#define OS_START_SEC_VAR_CLEARED_CLONE_16
+#define OS_START_SEC_VAR_CLONE_16
 #include "Os_MemMap.h"
 OS_EXTERN OS_KNL_BSS(P2VAR(Os_PriorityType, AUTOMATIC, OS_VAR) Os_ReadyMap);
-#define OS_STOP_SEC_VAR_CLEARED_CLONE_16
+#define OS_STOP_SEC_VAR_CLONE_16
 #include "Os_MemMap.h"
 /* PRQA S 3432 --*/ /* MISRA Rule 20.7 */
 
 #if ((OS_BCC1 == CFG_CC) || (OS_ECC1 == CFG_CC))
-#define OS_START_SEC_VAR_CLEARED_CLONE_16
+#define OS_START_SEC_VAR_CLONE_16
 #include "Os_MemMap.h"
 OS_EXTERN OS_KNL_BSS(P2VAR(Os_TaskType, AUTOMATIC, OS_VAR) Os_ReadyTable);
-#define OS_STOP_SEC_VAR_CLEARED_CLONE_16
+#define OS_STOP_SEC_VAR_CLONE_16
 #include "Os_MemMap.h"
 #else
 /* PRQA S 3432 ++*/ /* MISRA Rule 20.7 */ /* OS_INTERNAL_COMPILER_001 */
-#define OS_START_SEC_VAR_CLEARED_CLONE_UNSPECIFIED
+#define OS_START_SEC_VAR_CLONE_UNSPECIFIED
 #include "Os_MemMap.h"
 OS_EXTERN OS_KNL_BSS(P2VAR(Os_ReadyQueueType, AUTOMATIC, OS_VAR) Os_ReadyQueueMark);
-#define OS_STOP_SEC_VAR_CLEARED_CLONE_UNSPECIFIED
+#define OS_STOP_SEC_VAR_CLONE_UNSPECIFIED
 #include "Os_MemMap.h"
 /* PRQA S 3432 --*/ /* MISRA Rule 20.7 */
 
-#define OS_START_SEC_VAR_CLEARED_CLONE_32
+#define OS_START_SEC_VAR_CLONE_32
 #include "Os_MemMap.h"
 OS_EXTERN OS_KNL_BSS(P2CONST(uint32, AUTOMATIC, OS_VAR) Os_ActivateQueueSize);
-#define OS_STOP_SEC_VAR_CLEARED_CLONE_32
+#define OS_STOP_SEC_VAR_CLONE_32
 #include "Os_MemMap.h"
 
-#define OS_START_SEC_VAR_CLEARED_CLONE_PTR
+#define OS_START_SEC_VAR_CLONE_PTR
 #include "Os_MemMap.h"
 OS_EXTERN OS_KNL_BSS(P2CONST(Os_TaskRefType, AUTOMATIC, OS_VAR) Os_ReadyQueue);
-#define OS_STOP_SEC_VAR_CLEARED_CLONE_PTR
+#define OS_STOP_SEC_VAR_CLONE_PTR
 #include "Os_MemMap.h"
 #endif /* OS_BCC1 == CFG_CC || OS_ECC1 == CFG_CC */
 
-#define OS_START_SEC_VAR_CLEARED_CLONE_PTR
+#define OS_START_SEC_VAR_CLONE_PTR
 #include "Os_MemMap.h"
 OS_EXTERN OS_KNL_BSS(P2CONST(Os_PriorityType, AUTOMATIC, OS_VAR) Os_PrioGroup);
-#define OS_STOP_SEC_VAR_CLEARED_CLONE_PTR
+#define OS_STOP_SEC_VAR_CLONE_PTR
 #include "Os_MemMap.h"
 
-#define OS_START_SEC_VAR_CLEARED_CLONE_PTR
+#define OS_START_SEC_VAR_CLONE_PTR
 #include "Os_MemMap.h"
 OS_EXTERN OS_KNL_BSS(P2CONST(Os_PriorityType, AUTOMATIC, OS_VAR) Os_PrioMask);
-#define OS_STOP_SEC_VAR_CLEARED_CLONE_PTR
+#define OS_STOP_SEC_VAR_CLONE_PTR
 #include "Os_MemMap.h"
 
-#define OS_START_SEC_VAR_CLEARED_CLONE_PTR
+#define OS_START_SEC_VAR_CLONE_PTR
 #include "Os_MemMap.h"
 OS_EXTERN OS_KNL_BSS(P2CONST(Os_StackType, AUTOMATIC, OS_VAR) Os_SystemStack);
-#define OS_STOP_SEC_VAR_CLEARED_CLONE_PTR
+#define OS_STOP_SEC_VAR_CLONE_PTR
 #include "Os_MemMap.h"
 /*===============================@-KERNEL-@===================================*/
 
 /*===============================@+TASK+@=====================================*/
 #if (CFG_TASK_MAX > 0U)
-#define OS_START_SEC_VAR_CLEARED_CLONE_PTR
+#define OS_START_SEC_VAR_CLONE_PTR
 #include "Os_MemMap.h"
 OS_EXTERN OS_KNL_BSS(P2CONST(Os_TaskCfgType, AUTOMATIC, OS_VAR) Os_TaskCfg);
-#define OS_STOP_SEC_VAR_CLEARED_CLONE_PTR
+#define OS_STOP_SEC_VAR_CLONE_PTR
 #include "Os_MemMap.h"
 
-#define OS_START_SEC_VAR_CLEARED_CLONE_PTR
+#define OS_START_SEC_VAR_CLONE_PTR
 #include "Os_MemMap.h"
 OS_EXTERN OS_KNL_BSS(P2CONST(Os_StackType, AUTOMATIC, OS_VAR) Os_TaskStack);
-#define OS_STOP_SEC_VAR_CLEARED_CLONE_PTR
+#define OS_STOP_SEC_VAR_CLONE_PTR
 #include "Os_MemMap.h"
 
 /* PRQA S 3432 ++*/ /* MISRA Rule 20.7 */ /* OS_INTERNAL_COMPILER_001 */
-#define OS_START_SEC_VAR_CLEARED_CLONE_PTR
+#define OS_START_SEC_VAR_CLONE_PTR
 #include "Os_MemMap.h"
 OS_EXTERN OS_KNL_BSS(P2VAR(Os_TCBType, AUTOMATIC, OS_VAR) Os_TCB);
-#define OS_STOP_SEC_VAR_CLEARED_CLONE_PTR
+#define OS_STOP_SEC_VAR_CLONE_PTR
 #include "Os_MemMap.h"
 /* PRQA S 3432 --*/ /* MISRA Rule 20.7 */
 
-#define OS_START_SEC_VAR_CLEARED_CLONE_16
+#define OS_START_SEC_VAR_CLONE_16
 #include "Os_MemMap.h"
 OS_EXTERN OS_KNL_BSS(VAR(uint16, OS_VAR) OS_TASK_IDLE);
-#define OS_STOP_SEC_VAR_CLEARED_CLONE_16
+#define OS_STOP_SEC_VAR_CLONE_16
 #include "Os_MemMap.h"
 
-#define OS_START_SEC_VAR_CLEARED_CLONE_16
+#define OS_START_SEC_VAR_CLONE_16
 #include "Os_MemMap.h"
 OS_EXTERN OS_KNL_BSS(VAR(uint16, OS_VAR) Os_CfgExtendTaskMax);
-#define OS_STOP_SEC_VAR_CLEARED_CLONE_16
+#define OS_STOP_SEC_VAR_CLONE_16
 #include "Os_MemMap.h"
 #endif /* CFG_TASK_MAX > 0U */
 /*===============================@-TASK-@=====================================*/
 
 /*===============================@+ISR+@======================================*/
 #if (CFG_ISR_MAX > 0U)
-#define OS_START_SEC_VAR_CLEARED_CLONE_16
+#define OS_START_SEC_VAR_CLONE_16
 #include "Os_MemMap.h"
 OS_EXTERN OS_KNL_BSS(VAR(uint16, OS_VAR) Os_CfgIsrMax);
-#define OS_STOP_SEC_VAR_CLEARED_CLONE_16
+#define OS_STOP_SEC_VAR_CLONE_16
 #include "Os_MemMap.h"
 
-#define OS_START_SEC_VAR_CLEARED_CLONE_16
+#define OS_START_SEC_VAR_CLONE_16
 #include "Os_MemMap.h"
 OS_EXTERN OS_KNL_BSS(VAR(uint16, OS_VAR) Os_CfgIsr2Max);
-#define OS_STOP_SEC_VAR_CLEARED_CLONE_16
+#define OS_STOP_SEC_VAR_CLONE_16
 #include "Os_MemMap.h"
 
 /* PRQA S 3432 ++*/ /* MISRA Rule 20.7 */ /* OS_INTERNAL_COMPILER_001 */
-#define OS_START_SEC_VAR_CLEARED_CLONE_PTR
+#define OS_START_SEC_VAR_CLONE_PTR
 #include "Os_MemMap.h"
 OS_EXTERN OS_KNL_BSS(P2VAR(Os_ICBType, AUTOMATIC, OS_VAR) Os_ICB);
-#define OS_STOP_SEC_VAR_CLEARED_CLONE_PTR
+#define OS_STOP_SEC_VAR_CLONE_PTR
 #include "Os_MemMap.h"
 /* PRQA S 3432 --*/ /* MISRA Rule 20.7 */
 
-#define OS_START_SEC_VAR_CLEARED_CLONE_PTR
+#define OS_START_SEC_VAR_CLONE_PTR
 #include "Os_MemMap.h"
 OS_EXTERN OS_KNL_BSS(P2CONST(Os_StackType, AUTOMATIC, OS_VAR) Os_ISR2Stack);
-#define OS_STOP_SEC_VAR_CLEARED_CLONE_PTR
+#define OS_STOP_SEC_VAR_CLONE_PTR
 #include "Os_MemMap.h"
 
-#define OS_START_SEC_VAR_CLEARED_CLONE_PTR
+#define OS_START_SEC_VAR_CLONE_PTR
 #include "Os_MemMap.h"
 OS_EXTERN OS_KNL_BSS(P2CONST(Os_IsrCfgType, AUTOMATIC, OS_VAR) Os_IsrCfg);
-#define OS_STOP_SEC_VAR_CLEARED_CLONE_PTR
+#define OS_STOP_SEC_VAR_CLONE_PTR
 #include "Os_MemMap.h"
 
-#define OS_START_SEC_VAR_CLEARED_CLONE_16
+#define OS_START_SEC_VAR_CLONE_16
 #include "Os_MemMap.h"
 OS_EXTERN OS_KNL_BSS(VAR(Os_IsrType, OS_VAR) Os_IntCfgIsrId);
-#define OS_STOP_SEC_VAR_CLEARED_CLONE_16
+#define OS_STOP_SEC_VAR_CLONE_16
 #include "Os_MemMap.h"
 #endif /* CFG_ISR_MAX > 0U */
 
-#define OS_START_SEC_VAR_CLEARED_CLONE_8
+#define OS_START_SEC_VAR_CLONE_8
 #include "Os_MemMap.h"
 OS_EXTERN OS_KNL_BSS(VAR(uint8, OS_VAR) Os_SuspendAllCount);
-#define OS_STOP_SEC_VAR_CLEARED_CLONE_8
+#define OS_STOP_SEC_VAR_CLONE_8
 #include "Os_MemMap.h"
 
-#define OS_START_SEC_VAR_CLEARED_CLONE_8
+#define OS_START_SEC_VAR_CLONE_8
 #include "Os_MemMap.h"
 OS_EXTERN OS_KNL_BSS(VAR(uint8, OS_VAR) Os_SuspendOsCount);
-#define OS_STOP_SEC_VAR_CLEARED_CLONE_8
+#define OS_STOP_SEC_VAR_CLONE_8
 #include "Os_MemMap.h"
 
-#define OS_START_SEC_VAR_CLEARED_CLONE_16
+#define OS_START_SEC_VAR_CLONE_16
 #include "Os_MemMap.h"
 OS_EXTERN OS_KNL_BSS(VAR(Os_IPLType, OS_VAR) Os_SaveOsIntNested);
-#define OS_STOP_SEC_VAR_CLEARED_CLONE_16
+#define OS_STOP_SEC_VAR_CLONE_16
 #include "Os_MemMap.h"
 
-#define OS_START_SEC_VAR_CLEARED_CLONE_32
+#define OS_START_SEC_VAR_CLONE_32
 #include "Os_MemMap.h"
 OS_EXTERN OS_KNL_BSS(VAR(uint8, OS_VAR) Os_IntNestISR1);
-#define OS_STOP_SEC_VAR_CLEARED_CLONE_32
+#define OS_STOP_SEC_VAR_CLONE_32
 #include "Os_MemMap.h"
 
-#define OS_START_SEC_VAR_CLEARED_CLONE_32
+#define OS_START_SEC_VAR_CLONE_32
 #include "Os_MemMap.h"
 OS_EXTERN OS_KNL_BSS(VAR(uint8, OS_VAR) Os_IntNestISR2);
-#define OS_STOP_SEC_VAR_CLEARED_CLONE_32
+#define OS_STOP_SEC_VAR_CLONE_32
 #include "Os_MemMap.h"
 /*===============================@-ISR-@======================================*/
 
 /*===============================@+COUNTER+@==================================*/
 #if (CFG_COUNTER_MAX > 0U)
-#define OS_START_SEC_VAR_CLEARED_CLONE_PTR
+#define OS_START_SEC_VAR_CLONE_PTR
 #include "Os_MemMap.h"
 OS_EXTERN OS_KNL_BSS(P2CONST(Os_CounterCfgType, AUTOMATIC, OS_VAR) Os_CounterCfg);
-#define OS_STOP_SEC_VAR_CLEARED_CLONE_PTR
+#define OS_STOP_SEC_VAR_CLONE_PTR
 #include "Os_MemMap.h"
 
 /* PRQA S 3432 ++*/ /* MISRA Rule 20.7 */ /* OS_INTERNAL_COMPILER_001 */
-#define OS_START_SEC_VAR_CLEARED_CLONE_PTR
+#define OS_START_SEC_VAR_CLONE_PTR
 #include "Os_MemMap.h"
 OS_EXTERN OS_KNL_BSS(P2VAR(Os_CCBType, AUTOMATIC, OS_VAR) Os_CCB);
-#define OS_STOP_SEC_VAR_CLEARED_CLONE_PTR
+#define OS_STOP_SEC_VAR_CLONE_PTR
 #include "Os_MemMap.h"
 /* PRQA S 3432 --*/ /* MISRA Rule 20.7 */
 #endif              /* CFG_COUNTER_MAX > 0U */
@@ -272,40 +275,40 @@ OS_EXTERN OS_KNL_BSS(P2VAR(Os_CCBType, AUTOMATIC, OS_VAR) Os_CCB);
 
 /*===============================@+RESOURCE+@=================================*/
 #if (CFG_STD_RESOURCE_MAX > 0U)
-#define OS_START_SEC_VAR_CLEARED_CLONE_PTR
+#define OS_START_SEC_VAR_CLONE_PTR
 #include "Os_MemMap.h"
 OS_EXTERN OS_KNL_BSS(P2CONST(Os_ResourceCfgType, AUTOMATIC, OS_VAR) Os_ResourceCfg);
-#define OS_STOP_SEC_VAR_CLEARED_CLONE_PTR
+#define OS_STOP_SEC_VAR_CLONE_PTR
 #include "Os_MemMap.h"
 
 /* PRQA S 3432 ++*/ /* MISRA Rule 20.7 */ /* OS_INTERNAL_COMPILER_001 */
-#define OS_START_SEC_VAR_CLEARED_CLONE_PTR
+#define OS_START_SEC_VAR_CLONE_PTR
 #include "Os_MemMap.h"
 OS_EXTERN OS_KNL_BSS(P2VAR(Os_RCBType, AUTOMATIC, OS_VAR) Os_RCB);
-#define OS_STOP_SEC_VAR_CLEARED_CLONE_PTR
+#define OS_STOP_SEC_VAR_CLONE_PTR
 #include "Os_MemMap.h"
 /* PRQA S 3432 --*/ /* MISRA Rule 20.7 */
 
-#define OS_START_SEC_VAR_CLEARED_CLONE_16
+#define OS_START_SEC_VAR_CLONE_16
 #include "Os_MemMap.h"
 OS_EXTERN OS_KNL_BSS(VAR(uint16, OS_VAR) Os_CfgResourceMax);
-#define OS_STOP_SEC_VAR_CLEARED_CLONE_16
+#define OS_STOP_SEC_VAR_CLONE_16
 #include "Os_MemMap.h"
 #endif /* CFG_STD_RESOURCE_MAX > 0U */
 
 #if (CFG_INTERNAL_RESOURCE_MAX > 0U)
-#define OS_START_SEC_VAR_CLEARED_CLONE_PTR
+#define OS_START_SEC_VAR_CLONE_PTR
 #include "Os_MemMap.h"
 OS_EXTERN OS_KNL_BSS(P2CONST(Os_PriorityType, AUTOMATIC, OS_VAR) Os_InterResCeiling);
-#define OS_STOP_SEC_VAR_CLEARED_CLONE_PTR
+#define OS_STOP_SEC_VAR_CLONE_PTR
 #include "Os_MemMap.h"
 #endif /* CFG_INTERNAL_RESOURCE_MAX > 0U */
 
 #if (CFG_STD_RESOURCE_MAX > 0U)
-#define OS_START_SEC_VAR_CLEARED_CLONE_16
+#define OS_START_SEC_VAR_CLONE_16
 #include "Os_MemMap.h"
 OS_EXTERN OS_KNL_BSS(VAR(Os_ResourceType, OS_VAR) RES_SCHEDULER);
-#define OS_STOP_SEC_VAR_CLEARED_CLONE_16
+#define OS_STOP_SEC_VAR_CLONE_16
 #include "Os_MemMap.h"
 #endif /* CFG_STD_RESOURCE_MAX > 0U */
 /*===============================@-RESOURCE-@=================================*/
@@ -313,10 +316,10 @@ OS_EXTERN OS_KNL_BSS(VAR(Os_ResourceType, OS_VAR) RES_SCHEDULER);
 /*===============================@+OS-APP+@===================================*/
 #if (CFG_OSAPPLICATION_MAX > 0U)
 /* PRQA S 3432 ++*/ /* MISRA Rule 20.7 */ /* OS_INTERNAL_COMPILER_001 */
-#define OS_START_SEC_VAR_CLEARED_CLONE_PTR
+#define OS_START_SEC_VAR_CLONE_PTR
 #include "Os_MemMap.h"
 OS_EXTERN OS_KNL_BSS(P2CONST(P2VAR(Os_ObjectAppCfgType, AUTOMATIC, OS_VAR), AUTOMATIC, OS_VAR) Os_ObjectAppCfg);
-#define OS_STOP_SEC_VAR_CLEARED_CLONE_PTR
+#define OS_STOP_SEC_VAR_CLONE_PTR
 #include "Os_MemMap.h"
 /* PRQA S 3432 --*/ /* MISRA Rule 20.7 */
 #endif              /*CFG_OSAPPLICATION_MAX >0U */
@@ -325,29 +328,23 @@ OS_EXTERN OS_KNL_BSS(P2CONST(P2VAR(Os_ObjectAppCfgType, AUTOMATIC, OS_VAR), AUTO
 /*===============================@+SERVICE_PROTECTION+@=======================*/
 #if (CFG_TRUSTED_SYSTEM_SERVICE_MAX > 0U)
 /* PRQA S 3432 ++*/ /* MISRA Rule 20.7 */ /* OS_INTERNAL_COMPILER_001 */
-#define OS_START_SEC_VAR_CLEARED_CLONE_PTR
+#define OS_START_SEC_VAR_CLONE_PTR
 #include "Os_MemMap.h"
 OS_EXTERN OS_KNL_BSS(P2VAR(TrustedFunctionIndexType, AUTOMATIC, OS_VAR) Os_TrustedFuncNestQueue);
-#define OS_STOP_SEC_VAR_CLEARED_CLONE_PTR
+#define OS_STOP_SEC_VAR_CLONE_PTR
 #include "Os_MemMap.h"
 /* PRQA S 3432 --*/ /* MISRA Rule 20.7 */
 
-#define OS_START_SEC_VAR_CLEARED_CLONE_8
+#define OS_START_SEC_VAR_CLONE_8
 #include "Os_MemMap.h"
 OS_EXTERN OS_KNL_BSS(VAR(uint8, OS_VAR) Os_TrustedFuncNest);
-#define OS_STOP_SEC_VAR_CLEARED_CLONE_8
+#define OS_STOP_SEC_VAR_CLONE_8
 #include "Os_MemMap.h"
 
-#define OS_START_SEC_VAR_CLEARED_CLONE_8
+#define OS_START_SEC_VAR_CLONE_UNSPECIFIED
 #include "Os_MemMap.h"
-OS_EXTERN OS_KNL_BSS(VAR(boolean, OS_VAR) Os_TrustedFuncTportDelayCall);
-#define OS_STOP_SEC_VAR_CLEARED_CLONE_8
-#include "Os_MemMap.h"
-
-#define OS_START_SEC_VAR_CLEARED_CLONE_8
-#include "Os_MemMap.h"
-OS_EXTERN OS_KNL_BSS(VAR(boolean, OS_VAR) Os_TrustedFuncTporFlag);
-#define OS_STOP_SEC_VAR_CLEARED_CLONE_8
+OS_EXTERN OS_KNL_BSS(VAR(Os_TrustedFuncTpDataDef, OS_VAR) Os_TrustedFuncTp);
+#define OS_STOP_SEC_VAR_CLONE_UNSPECIFIED
 #include "Os_MemMap.h"
 #endif              /* CFG_TRUSTED_SYSTEM_SERVICE_MAX > 0U */
 /* PRQA S 0791-- */ /* MISRA Rule 5.4 */
@@ -709,7 +706,7 @@ extern FUNC(void, OS_CODE) Os_GetInternalSpinlock(Os_SpinlockRefType spinlock);
  */
 /******************************************************************************/
 extern FUNC(void, OS_CODE) Os_ReleaseInternalSpinlock(Os_SpinlockRefType spinlock);
-#endif /* OS_AUTOSAR_CORES > 1U || CFG_SPINLOCK_MAX > 0U */
+#endif /* OS_AUTOSAR_CORES > 1U ||CFG_SPINLOCK_MAX > 0U */
 /*============================ @-SPINLOCK-@===================================*/
 
 /*============================ @+MEMORY PROTECTION+@==========================*/
@@ -1990,6 +1987,21 @@ extern FUNC(StatusType, OS_CODE) Os_IocTransmit(
 /******************************************************************************/
 extern FUNC(StatusType, OS_CODE)
     Os_IocReceive(Os_IocComIdType comId, Os_IocReceiveDataSourceType* pData, Os_IocU16Type paraNum);
+
+/******************************************************************************/
+/*
+ * Brief                <IOC cross-core remote callback function>
+ * Service ID           <None>
+ * Sync/Async           <Synchronous>
+ * Reentrancy           <Non Reentrant>
+ * return               <StatusType>
+ * PreCondition         <None>
+ * CallByAPI            <>
+ * REQ ID               <None>
+ */
+/******************************************************************************/
+FUNC(StatusType, OS_CODE)
+Os_IocRemoteCallBack(Os_IocComIdType comId, Os_IocU16Type vReceiverId, Os_ApplicationType vRecAppId);
 #endif
 /*============================ @-IOC-@=====================================*/
 

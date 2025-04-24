@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : KeyM.h                                                      **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : qinchun.yang                                                **
- **  Vendor      :                                                             **
- **  DESCRIPTION : API declaration and type definitions of KeyManager          **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R21-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : KeyM.h                                                      **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : qinchun.yang                                                **
+**  Vendor      :                                                             **
+**  DESCRIPTION : API declaration and type definitions of KeyManager          **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R21-11                      **
+**                                                                            **
+*******************************************************************************/
 
 /******************************************************************************
 **                      Revision Control History                             **
@@ -53,7 +54,7 @@
 #define KEYM_INSTANCE_ID                 7U
 #define KEYM_SW_MAJOR_VERSION            2U
 #define KEYM_SW_MINOR_VERSION            1U
-#define KEYM_SW_PATCH_VERSION            8U
+#define KEYM_SW_PATCH_VERSION            11U
 
 #define KEYM_AR_MAJOR_VERSION            4U
 #define KEYM_AR_MINOR_VERSION            7U
@@ -141,13 +142,6 @@ typedef uint16 KeyM_CryptoKeyIdType;
 
 typedef uint8* KeyM_CertDataPointerType;
 
-typedef struct
-{
-    uint32 certDataLength; /* Length of the certificate data. */
-    /* Pointer references the data for a certificate on a local data area of the caller.*/
-    P2CONST(void, AUTOMATIC, KEYM_APPL_CONST)
-    certData;
-} KeyM_CertDataType;
 /*******************************************************************************
 **                      Global Data Declaration                               **
 *******************************************************************************/

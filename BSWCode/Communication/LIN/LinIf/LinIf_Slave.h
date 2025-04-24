@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : LinIf_Slave.h                                               **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : HuRongbo                                                    **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : LinIf_Slave.h                                               **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : HuRongbo                                                    **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 #ifndef LINIF_SLAVE_H
 #define LINIF_SLAVE_H
 
@@ -116,7 +117,9 @@ FUNC(void, LINIF_CODE) LinIf_SlaveWakeupConfirmation(EcuM_WakeupSourceType Wakeu
  */
 /******************************************************************************/
 FUNC(void, LINIF_CODE)
+/* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
 LinIf_SlaveGetPIDTable(NetworkHandleType ch, P2VAR(Lin_FramePidType, AUTOMATIC, LINIF_APPL_DATA) PidBuffer);
+/* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
 
 /******************************************************************************/
 /*
@@ -131,7 +134,8 @@ LinIf_SlaveGetPIDTable(NetworkHandleType ch, P2VAR(Lin_FramePidType, AUTOMATIC, 
  * Return              None
  */
 /******************************************************************************/
-void LinIf_SlaveSetPIDTable(NetworkHandleType ch, const Lin_FramePidType* PidBuffer);
+FUNC(void, LINIF_CODE)
+LinIf_SlaveSetPIDTable(NetworkHandleType ch, const Lin_FramePidType* PidBuffer);
 
 /******************************************************************************/
 /*
@@ -144,7 +148,10 @@ void LinIf_SlaveSetPIDTable(NetworkHandleType ch, const Lin_FramePidType* PidBuf
  * Return              None
  */
 /******************************************************************************/
-FUNC(void, LINIF_CODE) LinIf_SlaveGetConfiguredNAD(NetworkHandleType ch, P2VAR(uint8, AUTOMATIC, LINIF_APPL_DATA) Nad);
+/* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
+FUNC(Std_ReturnType, LINIF_CODE)
+LinIf_SlaveGetConfiguredNAD(NetworkHandleType ch, P2VAR(uint8, AUTOMATIC, LINIF_APPL_DATA) Nad);
+/* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
 
 /******************************************************************************/
 /*
@@ -172,7 +179,9 @@ FUNC(void, LINIF_CODE) LinIf_SlaveSetConfiguredNAD(NetworkHandleType ch, uint8 N
  */
 /******************************************************************************/
 FUNC(Std_ReturnType, LINIF_CODE)
+/* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
 LinIf_SlaveHeaderIndication(NetworkHandleType ch, P2VAR(Lin_PduType, AUTOMATIC, LINIF_APPL_DATA) PduPtr);
+/* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
 
 /******************************************************************************/
 /*
@@ -188,7 +197,9 @@ LinIf_SlaveHeaderIndication(NetworkHandleType ch, P2VAR(Lin_PduType, AUTOMATIC, 
  */
 /******************************************************************************/
 FUNC(void, LINIF_CODE)
+/* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
 LinIf_SlaveRxIndication(NetworkHandleType ch, P2VAR(uint8, AUTOMATIC, LINIF_APPL_DATA) Lin_SduPtr);
+/* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
 
 /******************************************************************************/
 /*
@@ -241,23 +252,8 @@ FUNC(void, LINIF_CODE) LinIf_SlaveGotoSleep(NetworkHandleType ch);
  * Return              None
  */
 /******************************************************************************/
-FUNC(void, LINIF_CODE) LinIf_SlaveMainFunction(NetworkHandleType ch);
+void LinIf_SlaveMainFunction(NetworkHandleType ch);
 
-/******************************************************************************/
-/*
- * Brief               Get Configed Nad in runtime buffer
- * Sync/Async          Synchronous
- * Reentrancy          Reentrant
- * Param-Name[in]      ch: LinIf channel
- *                     Nad: pointer to a buffer used to store NAD
- * Param-Name[out]     None
- * Param-Name[in/out]  None
- * Return              None
- */
-/******************************************************************************/
-FUNC(Std_ReturnType, LINIF_CODE)
-LinIf_SlaveGetConfigedNAD(NetworkHandleType ch, P2VAR(uint8, AUTOMATIC, LINIF_VAR) Nad);
+#endif
 
-#endif /* STD_ON == LINIF_SLAVE_SUPPORT */
-
-#endif /* LINIF_SLAVE_H */
+#endif

@@ -18,28 +18,241 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Dem_CfgTypes.h                                              **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : tao.yu                                                      **
- **  Vendor      : i-soft                                                      **
- **  DESCRIPTION : CfgType definitions of DEM                                  **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                       **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Dem_CfgTypes.h                                              **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : tao.yu                                                      **
+**  Vendor      : i-soft                                                      **
+**  DESCRIPTION : CfgType definitions of DEM                                  **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                       **
+**                                                                            **
+*******************************************************************************/
 #ifndef DEM_CFGTYPES_H_
 #define DEM_CFGTYPES_H_
 
 /*******************************************************************************
 **                           Include Section                                  **
 *******************************************************************************/
-#include "Rte_Dem.h"
-#include "Dem_Cfg.h"
+#include "Dem_PBcfg.h"
+
+/*******************************************************************************
+**                      Macro Definitions                                     **
+*******************************************************************************/
+/* DemEventMemoryEntryStorageTrigger */
+#define DEM_TRIGGER_ON_CONFIRMED     0x00u
+#define DEM_TRIGGER_ON_FDC_THRESHOLD 0x01u
+#define DEM_TRIGGER_ON_MIRROR        0x02u
+#define DEM_TRIGGER_ON_PASSED        0x03u
+#define DEM_TRIGGER_ON_PENDING       0x04u
+#define DEM_TRIGGER_ON_TEST_FAILED   0x05u
+
+/* DemAvailabilitySupport */
+#define DEM_EVENT_AVAILABILITY 1u
+#define DEM_NO_AVAILABILITY    2u
+
+/* DemClearDTCBehavior  */
+#define DEM_CLRRESP_NONVOLATILE_FINISH  1u
+#define DEM_CLRRESP_NONVOLATILE_TRIGGER 2u
+#define DEM_CLRRESP_VOLATILE            3u
+
+/* DemClearDTCLimitation */
+#define DEM_ALL_SUPPORTED_DTCS  1u
+#define DEM_ONLY_CLEAR_ALL_DTCS 2u
+
+/* DemEnvironmentDataCapture */
+#define DEM_CAPTURE_ASYNCHRONOUS_TO_REPORTING 1u
+#define DEM_CAPTURE_SYNCHRONOUS_TO_REPORTING  2u
+
+/* DemEventCombinationSupport */
+#define DEM_EVCOMB_DISABLED    1u
+#define DEM_EVCOMB_ONRETRIEVAL 2u
+#define DEM_EVCOMB_ONSTORAGE   3u
+
+/* DemEventDisplacementStrategy  */
+#define DEM_DISPLACEMENT_FULL     1u
+#define DEM_DISPLACEMENT_NONE     2u
+#define DEM_DISPLACEMENT_PRIO_OCC 3u
+
+/* DemOBDSupport  */
+#define DEM_OBD_DEP_SEC_ECU    1u
+#define DEM_OBD_MASTER_ECU     2u
+#define DEM_OBD_NO_OBD_SUPPORT 3u
+#define DEM_OBD_PRIMARY_ECU    4u
+
+/* DemOccurrenceCounterProcessing  */
+#define DEM_PROCESS_OCCCTR_CDTC  1u
+#define DEM_PROCESS_OCCCTR_TF    2u
+#define DEM_PROCESS_OCCCTR_TFTOC 3u
+
+/* DemStatusBitHandlingTestFailedSinceLastClear  */
+#define DEM_STATUS_BIT_AGING_AND_DISPLACEMENT 1u
+#define DEM_STATUS_BIT_NORMAL                 2u
+
+/* DemSuppressionSupport  */
+#define DEM_DTC_SUPPRESSION 1u
+#define DEM_NO_SUPPRESSION  2u
+
+/* DemTypeOfDTCSupported  */
+/* DEM_DTC_TRANSLATION_ISO11992_4 1u
+ * DEM_DTC_TRANSLATION_ISO14229_1 2u
+ * DEM_DTC_TRANSLATION_ISO15031_6 3u
+ * DEM_DTC_TRANSLATION_SAEJ1939_73 4u
+ */
+#define DEM_DTC_TRANSLATION_SAE_J2012_DA_DTCFORMAT_04 5u
+
+/* DemDtrUpdateKind */
+#define DEM_DTR_UPDATE_ALWAYS 1u
+#define DEM_DTR_UPDATE_STEADY 2u
+
+#define DEM_UPDATE_RECORD_NO  0u
+#define DEM_UPDATE_RECORD_YES 1u
+
+/* DemOperationCycleType */
+#define DEM_OPCYC_IGNITION 0u
+#define DEM_OPCYC_OBD_DCY  1u
+#define DEM_OPCYC_OTHER    2u
+#define DEM_OPCYC_POWER    3u
+#define DEM_OPCYC_TIME     4u
+#define DEM_OPCYC_WARMUP   5u
+
+/* DemIUMPRDenGroup */
+#define DEM_IUMPR_DEN_500MILL   0u
+#define DEM_IUMPR_DEN_COLDSTART 1u
+#define DEM_IUMPR_DEN_EVAP      2u
+#define DEM_IUMPR_DEN_NONE      3u
+#define DEM_IUMPR_DEN_PHYS_API  4u
+
+/* DemInternalDataElement  */
+#define DEM_AGINGCTR_DOWNCNT             0u
+#define DEM_AGINGCTR_UPCNT               1u
+#define DEM_CURRENT_FDC                  2u
+#define DEM_CYCLES_SINCE_FIRST_FAILED    3u
+#define DEM_CYCLES_SINCE_LAST_FAILED     4u
+#define DEM_FAILED_CYCLES                5u
+#define DEM_MAX_FDC_DURING_CURRENT_CYCLE 6u
+#define DEM_MAX_FDC_SINCE_LAST_CLEAR     7u
+#define DEM_OCCCTR                       8u
+#define DEM_OVFLIND                      9u
+#define DEM_SIGNIFICANCE                 10u
+
+/* DemWWHOBDDTCClass */
+#define DEM_DTC_WWHOBD_CLASS_NOCLASS 0u
+#define DEM_DTC_WWHOBD_CLASS_A       1u
+#define DEM_DTC_WWHOBD_CLASS_B1      2u
+#define DEM_DTC_WWHOBD_CLASS_B2      3u
+#define DEM_DTC_WWHOBD_CLASS_C       4u
+
+/* DemDTCSignificance */
+#define DEM_EVENT_SIGNIFICANCE_FAULT      1u
+#define DEM_EVENT_SIGNIFICANCE_OCCURRENCE 0u
+
+/* DemDebounceBehavior */
+#define DEM_DEBOUNCE_FREEZE               0u
+#define DEM_DEBOUNCE_RESET                1u
+
+#define DEM_NO_STATUS_BYTE_CHANGE         0u
+#define DEM_ONLY_THIS_CYCLE_AND_READINESS 1u
+
+/* DemEventKind */
+#define DEM_EVENT_KIND_BSW 0u
+#define DEM_EVENT_KIND_SWC 1u
+
+/* DemReportBehavior */
+#define REPORT_AFTER_INIT  0u
+#define REPORT_BEFORE_INIT 1u
+
+/* DemDebounceType */
+#define DEM_DEBOUNCE_COUNTER_BASED    0u
+#define DEM_DEBOUNCE_TIME_BASE        1u
+#define DEM_DEBOUNCE_MONITOR_INTERNAL 2u
+
+/* DemEventOBDReadinessGroup */
+#define DEM_OBD_RDY_MISF          0u
+#define DEM_OBD_RDY_FLSYS         1u
+#define DEM_OBD_RDY_CMPRCMPT      2u
+#define DEM_OBD_RDY_CAT           4u
+#define DEM_OBD_RDY_HTCAT         5u
+#define DEM_OBD_RDY_EVAP          6u
+#define DEM_OBD_RDY_SECAIR        7u
+#define DEM_OBD_RDY_AC            8u
+#define DEM_OBD_RDY_O2SENS        9u
+#define DEM_OBD_RDY_O2SENSHT      10u
+#define DEM_OBD_RDY_ERG           11u
+#define DEM_OBD_RDY_BOOSTPR       13u
+#define DEM_OBD_RDY_EGSENS        20u
+#define DEM_OBD_RDY_FLSYS_NONCONT 21u
+#define DEM_OBD_RDY_HCCAT         22u
+#define DEM_OBD_RDY_NONE          23u
+#define DEM_OBD_RDY_NOXCAT        24u
+#define DEM_OBD_RDY_PMFLT         25u
+
+#define DEM_OBD_RDY_INVAILD       0xFFu
+
+/* DemOBDEngineType */
+#define DEM_IGNITION_COMPRESSION 0u
+#define DEM_IGNITION_SPARK       1u
+
+/*Invalid*/
+#define DEM_DATA_ELEMENT_CLASS_NUM_INVALID  0xFFu
+#define DEM_ENABLE_CONDITION_GROUP_INVALID  0xFFu
+#define DEM_EXTENDED_DATA_RECORD_INVALID    0xFFu
+#define DEM_EXTENDED_DATA_INVALID           0xFFFFu
+#define DEM_FREEZE_FRAME_INVALID            0xFFFFu
+#define DEM_FREEZE_FRAME_RECORD_INVALID     0xFFu
+#define DEM_FREEZE_FRAME_REC_NUM_INVALID    0xFFu
+#define DemIndicator_INVALID                0xFFu
+#define DEM_GROUP_OF_DTC_INVALID            0xFFu
+#define DEM_MEM_DEST_INVALID                0xFFu
+#define DEM_STORAGE_CONDITION_GROUP_INVALID 0xFFu
+#define DEM_EVENT_PARAMETER_INVALID         0xFFFFu
+#define DEM_COMPONENT_INVALID               0xFFFFu
+#define DEM_DTC_REF_INVALID                 0xFFFFu
+#define DEM_OBD_DTC_INVALID                 0xFFFFu
+#define DEM_DTC_CFG_INVALID                 0xFFFFFFu
+#define DEM_OBD_DTC_CFG_INVALID             0xFFFFu
+#define DEM_J1939_DTC_CFG_INVALID           0xFFFFFFu
+#define DEM_OPERATION_CYCLE_INVALID         0xFFu
+#define DEM_J1939_NODE_INVALID              0xFFu
+#define DEM_J1939_FREEZE_FRAME_INVALID      0xFFu
+#define DEM_WWHOBD_FREEZE_FRAME_INVALID     0xFFu
+
+#define DEM_BITS_TO_BYTE(x)                 (((x) + 7u) >> 3u)
+
+/*DEM_BITS_TO_BYTE*/
+#define DEM_ENABLE_CONDITION_NUM_BYTE      DEM_BITS_TO_BYTE(DEM_ENABLE_CONDITION_NUM)
+
+#define DEM_EXTENDED_DATA_MAX_REF_NUM_BYTE DEM_BITS_TO_BYTE(DEM_EXTENDED_DATA_MAX_REF_NUM)
+
+#define DEM_GROUP_OF_DTC_NUM_BYTE          DEM_BITS_TO_BYTE(DEM_GROUP_OF_DTC_NUM)
+
+#define DEM_MEM_DEST_MAX_ENTRY_NUM_BYTE    DEM_BITS_TO_BYTE(DEM_MEM_DEST_MAX_ENTRY_NUM)
+
+#define DEM_OPERATION_CYCLE_NUM_BYTE       DEM_BITS_TO_BYTE(DEM_OPERATION_CYCLE_NUM)
+
+#define DEM_STORAGE_CONDITION_NUM_BYTE     DEM_BITS_TO_BYTE(DEM_STORAGE_CONDITION_NUM)
+
+#define DEM_EVENT_PARAMETER_NUM_BYTE       DEM_BITS_TO_BYTE(DEM_EVENT_PARAMETER_NUM)
+
+#define DEM_DTC_NUM_BYTE                   DEM_BITS_TO_BYTE(DEM_DTC_NUM)
+
+#define DEM_OBD_DTC_NUM_BYTE               DEM_BITS_TO_BYTE(DEM_OBD_DTC_NUM)
+
+typedef struct
+{
+    /* All Group */
+    boolean AllGroupIsEnabled;
+    Dem_DTCKindType DTCKind;
+#if (DEM_GROUP_OF_DTC_NUM > 0)
+    uint8 DTCGroupStatus[DEM_GROUP_OF_DTC_NUM_BYTE];
+#endif
+} Dem_DTCSettingInfoType;
+
 /*******************************************************************************
  *                          General Configuration                              **
  *******************************************************************************/
@@ -71,26 +284,6 @@ typedef struct
     const uint8 DemOperationCycleType;
 } Dem_OperationCycleType;
 
-#if (DEM_OPERATION_CYCLE_NUM > 0)
-
-extern CONST(Dem_OperationCycleType, AUTOMATIC) DemOperationCycle[DEM_OPERATION_CYCLE_NUM];
-
-#endif
-
-#if (DEM_ENABLE_CONDITION_NUM > 0)
-
-/* DemGeneral/DemEnableCondition 0-255 */
-extern CONST(uint8, AUTOMATIC) DemEnableCondition[DEM_ENABLE_CONDITION_NUM_BYTE];
-
-#endif
-
-#if (DEM_ENABLE_CONDITION_GROUP_NUM > 0)
-
-/* DemGeneral/DemEnableConditionGroup 0-255 */
-extern CONST(uint8, AUTOMATIC) DemEnableConditionGroup[DEM_ENABLE_CONDITION_GROUP_NUM][DEM_ENABLE_CONDITION_NUM_BYTE];
-
-#endif
-
 #if (DEM_STORAGE_CONDITION_NUM > 0)
 /* DemGeneral/DemStorageCondition 0-255 */
 typedef struct
@@ -103,15 +296,6 @@ typedef struct
 } Dem_StorageConditionType;
 
 extern const Dem_StorageConditionType DemStorageCondition[DEM_STORAGE_CONDITION_NUM];
-
-#endif
-
-#if (DEM_STORAGE_CONDITION_GROUP_NUM > 0)
-
-/* DemGeneral/DemStorageConditionGroup 0-255 */
-extern CONST(uint8, AUTOMATIC)
-    DemStorageConditionGroup[DEM_STORAGE_CONDITION_GROUP_NUM][DEM_STORAGE_CONDITION_NUM_BYTE];
-
 #endif
 
 /*******************************************************************************
@@ -126,7 +310,6 @@ typedef struct
     const uint8 DataSize; /*added by yt  means the total size of dataelement*/
 } Dem_PidClassType;
 
-#if (DEM_FREEZE_FRAME_CLASS_NUM > 0)
 /* DemGeneral/DemFreezeFrameClass 0-65535 */
 typedef struct
 {
@@ -134,10 +317,6 @@ typedef struct
     const uint16 StartIndex;
     const uint8 RefNum;
 } Dem_FreezeFrameClassType;
-
-extern CONST(Dem_FreezeFrameClassType, AUTOMATIC) DemFreezeFrameClass[DEM_FREEZE_FRAME_CLASS_NUM];
-
-#if (DEM_DID_CLASS_NUM > 0)
 /* DemGeneral/DemDidClass 0-0xFFFF */
 typedef struct
 {
@@ -147,24 +326,15 @@ typedef struct
     const uint8 DataSize; /*added by yt  means the total size of dataelement*/
 } Dem_DidClassType;
 
+#if (DEM_FREEZE_FRAME_CLASS_NUM > 0)
+extern CONST(Dem_FreezeFrameClassType, AUTOMATIC) DemFreezeFrameClass[DEM_FREEZE_FRAME_CLASS_NUM];
+
+#if (DEM_DID_CLASS_NUM > 0)
 extern CONST(Dem_DidClassType, AUTOMATIC) DemDidClass[DEM_DID_CLASS_NUM];
-
 extern CONST(uint16, AUTOMATIC) DemDidClassRef[DEM_DID_CLASS_REF_TOTAL_NUM];
-
 #endif
 #endif
 
-#if (DEM_J1939_FREEZE_FRAME_CLASS_NUM > 0)
-typedef struct
-{
-    const uint16 DataSize;
-    const uint16 StartIndex;
-    const uint8 RefNum;
-} Dem_J1939FreezeFrameClassType;
-
-extern CONST(Dem_J1939FreezeFrameClassType, AUTOMATIC) DemJ1939FreezeFrameClass[DEM_J1939_FREEZE_FRAME_CLASS_NUM];
-
-#if (DEM_SPN_CLASS_NUM > 0)
 /* DemGeneral/DemDidClass 0-0xFFFF */
 typedef struct
 {
@@ -173,14 +343,22 @@ typedef struct
     const uint8 DataSize; /*added by yt  means the total size of dataelement*/
 } Dem_SPNClassType;
 
+typedef struct
+{
+    const uint16 DataSize;
+    const uint16 StartIndex;
+    const uint8 RefNum;
+} Dem_J1939FreezeFrameClassType;
+
+#if (DEM_J1939_FREEZE_FRAME_CLASS_NUM > 0)
+extern CONST(Dem_J1939FreezeFrameClassType, AUTOMATIC) DemJ1939FreezeFrameClass[DEM_J1939_FREEZE_FRAME_CLASS_NUM];
+
+#if (DEM_SPN_CLASS_NUM > 0)
 extern CONST(Dem_SPNClassType, AUTOMATIC) DemSPNClass[DEM_SPN_CLASS_NUM];
-
 extern CONST(uint16, AUTOMATIC) DemSPNClassRef[DEM_SPN_CLASS_REF_TOTAL_NUM];
-
 #endif
 #endif
 
-#if (DEM_FREEZE_FRAME_RECORD_CLASS_NUM > 0)
 /* DemGeneral/DemFreezeFrameRecordClass 0-255 */
 typedef struct
 {
@@ -204,11 +382,37 @@ typedef struct
     const uint8 DemFreezeFrameRecordUpdate;
 } Dem_FreezeFrameRecordClassType;
 
+#if (DEM_FREEZE_FRAME_RECORD_CLASS_NUM > 0)
 extern CONST(Dem_FreezeFrameRecordClassType, AUTOMATIC) DemFreezeFrameRecordClass[DEM_FREEZE_FRAME_RECORD_CLASS_NUM];
 
 #endif
 
-#if (DEM_FREEZE_FRAME_REC_NUM_CLASS_NUM > 0)
+typedef struct
+{
+    /* GlobalDemFreezeFrameClassRef  */
+    uint16 DemFreezeFrameClassRef;
+    /* DemFreezeFrameRecordNumber Range:1~254 */
+    const uint8 DemFreezeFrameRecordNumber;
+
+    /* DemFreezeFrameRecordTrigger type:
+    Enum{
+    DEM_TRIGGER_ON_CONFIRMED
+    DEM_TRIGGER_ON_FDC_THRESHOLD
+    DEM_TRIGGER_ON_PENDING
+    DEM_TRIGGER_ON_TEST_FAILED
+    } */
+    const uint8 DemFreezeFrameRecordTrigger;
+
+    /*  DEM_UPDATE_RECORD_NO */
+    const uint8 DemFreezeFrameRecordUpdate;
+
+} Dem_GlobalFreezeFrameType;
+
+#if (DEM_GLOBAL_FREEZE_FRAME_SUPPORT == STD_ON)
+extern CONST(Dem_GlobalFreezeFrameType, AUTOMATIC) DemGlobalFreezeFrame;
+
+#endif
+
 /* DemGeneral/DemFreezeFrameRecNumClass 0-255 */
 typedef struct
 {
@@ -217,19 +421,98 @@ typedef struct
     const uint8 RefNum;
 } Dem_FreezeFrameRecNumClassType;
 
+#if (DEM_FREEZE_FRAME_REC_NUM_CLASS_NUM > 0)
 /* DemFreezeFrameRecNumClass 0-255 */
-
 extern CONST(Dem_FreezeFrameRecNumClassType, AUTOMATIC) DemFreezeFrameRecNumClass[DEM_FREEZE_FRAME_REC_NUM_CLASS_NUM];
 
 extern CONST(uint8, AUTOMATIC) DemFreezeFrameRecordClassRef[DEM_FREEZE_FRAME_RECORD_CLASS_REF_TOTAL_NUM];
-
 #endif
 
+typedef struct
+{
+    uint8 UdsStatus[DEM_EVENT_PARAMETER_NUM];
+    sint16 DebounceCounter[DEM_EVENT_PARAMETER_NUM];
+#if (DEM_MAXFDCSINCELASTCLEAR_EANLE == STD_ON)
+    uint8 MaxFDCSinceLastClear[DEM_DTC_NUM];
+#endif
+#if (DEM_OPERATION_CYCLE_STATUS_STORAGE == STD_ON)
+    uint8 DemOperationCycleStatus[DEM_OPERATION_CYCLE_NUM_BYTE]; /*SWS_Dem_00577]*/
+#endif
+    Dem_EventIdType FirstFailed;
+    Dem_EventIdType MostRecentFailed;
+    Dem_EventIdType FirstDtcConfirmed;
+    Dem_EventIdType MostRecDtcConfirmed;
+#if (DEM_STATUSINDICATOR30ENABLE == STD_ON)
+    uint8 StatusIndicator30[DEM_EVENT_PARAMETER_NUM];
+#endif /* DEM_STATUSINDICATOR30ENABLE == STD_ON */
+#if (DEM_AGEDCOUNT_SAIC == STD_ON)
+    uint8 AgedCounter[DEM_EVENT_PARAMETER_NUM];
+#endif /* DEM_AGEDCOUNT_SAIC == STD_ON */
+} Dem_EventRelateInformationStorageType;
+
+typedef struct
+{
+    uint16 IgnUpCycleCounter;
+    uint8 WarmUpCycleCounter;
+    uint16 OBDDistanceMILOn;
+    uint16 DistSinceDtcCleared;
+    uint16 OBDTimeMILOn;
+    uint16 OBDTimeDTCClear;
+    uint16 ContinuousMICounter;
+    uint16 OBDB1Counter;
+#if (DEM_OBD_SUPPORT == DEM_OBD_MASTER_ECU)
+    uint16 MasterContinuousMICounter;
+#endif
+} DemOBDDataStorageType;
+
+typedef struct
+{
+    /* EventId, Status: Dem_ReportErrorStatus/Dem_SetEventStatus()*/
+    Dem_EventIdType ExtId;
+    Dem_EventStatusType Status;
+} Dem_EventDataBufferType;
+
+/* Debounce Time Base Info Define */
+typedef struct
+{
+    uint64 Timeout;
+    boolean Triggered;
+    Dem_EventIdType IntId;
+    Dem_EventStatusType CurStatus;
+    boolean IsFreezing;
+} Dem_DebounceTimeInfoType;
+
+typedef struct
+{
+    uint8 RecordNum;
+    uint8 DisableDTCRecordUpdate[DEM_DTC_NUM_BYTE]; /* 1, Disable, 0:Enable */
+    boolean OverFlow;
+} Dem_MemDestInfoType;
+
+typedef struct
+{
+    Dem_EventIdType ExtId;
+#if (DEM_FREEZE_FRAME_MAX_LEN > 0u)
+    uint8 FFData[DEM_FREEZE_FRAME_MAX_LEN];
+#endif
+} Dem_PreStoreFFInfoType;
+
+#if (DEM_BSW_ERROR_BUFFER_SIZE > DEM_MAX_NUMBER_EVENT_ENTRY_EVENT_BUFFER)
+#define DEM_EVENT_QUEUE_SIZE DEM_BSW_ERROR_BUFFER_SIZE
+#else
+#define DEM_EVENT_QUEUE_SIZE DEM_MAX_NUMBER_EVENT_ENTRY_EVENT_BUFFER
+#endif
+
+typedef struct
+{
+    Dem_EventDataBufferType Queue[DEM_EVENT_QUEUE_SIZE];
+    uint8 ReadIndex;
+    uint8 WriteIndex;
+} Dem_EventQueueType;
 /*******************************************************************************
  *                          ExtendedData Configuration                         **
  *******************************************************************************/
 
-#if (DEM_EXTENDED_DATA_RECORD_CLASS_NUM > 0)
 /* DemGeneral/DemExtendedDataRecordClass 0-253 */
 typedef struct
 {
@@ -268,16 +551,15 @@ typedef struct
     const uint8 RefNum;
 } Dem_ExtendedDataClassType;
 
+#if (DEM_EXTENDED_DATA_RECORD_CLASS_NUM > 0)
 extern CONST(Dem_ExtendedDataRecordClassType, AUTOMATIC) DemExtendedDataRecordClass[DEM_EXTENDED_DATA_RECORD_CLASS_NUM];
 
 #endif
 
 #if (DEM_EXTENDED_DATA_CLASS_NUM > 0)
-
 extern CONST(Dem_ExtendedDataClassType, AUTOMATIC) DemExtendedDataClass[DEM_EXTENDED_DATA_CLASS_NUM];
 
 extern CONST(uint8, AUTOMATIC) DemExtendedDataRecordClassRef[DEM_EXTENDED_DATA_RECORD_CLASS_REF_TOTAL_NUM];
-
 #endif
 
 /*******************************************************************************
@@ -287,26 +569,6 @@ extern CONST(uint8, AUTOMATIC) DemExtendedDataRecordClassRef[DEM_EXTENDED_DATA_R
 typedef Std_ReturnType (
     *Dem_TriggerOnDTCStatusType)(uint32 DTC, Dem_UdsStatusByteType DTCStatusOld, Dem_UdsStatusByteType DTCStatusNew);
 
-#if (DEM_CALLBACK_DTC_STATUS_CHANGED_NUM > 0u)
-extern CONST(Dem_TriggerOnDTCStatusType, AUTOMATIC) DemCallbackDTCStatusChanged[DEM_CALLBACK_DTC_STATUS_CHANGED_NUM];
-#endif /* DEM_CALLBACK_DTC_STATUS_CHANGED_NUM > 0u */
-
-#if (DEM_CALLBACK_OBD_DTC_STATUS_CHANGED_NUM > 0u)
-extern CONST(Dem_TriggerOnDTCStatusType, AUTOMATIC)
-    DemCallbackObdDTCStatusChanged[DEM_CALLBACK_OBD_DTC_STATUS_CHANGED_NUM];
-#endif /* DEM_CALLBACK_OBD_DTC_STATUS_CHANGED_NUM > 0u */
-
-#if (DEM_CALLBACK_J1939_DTC_STATUS_CHANGED_NUM > 0u)
-extern CONST(Dem_TriggerOnDTCStatusType, AUTOMATIC)
-    DemCallbackJ1939DTCStatusChanged[DEM_CALLBACK_J1939_DTC_STATUS_CHANGED_NUM];
-#endif /* DEM_CALLBACK_J1939_DTC_STATUS_CHANGED_NUM > 0u */
-
-#if (DEM_GROUP_OF_DTC_NUM > 0u)
-/* DemGeneral/DemGroupOfDTC 0-255 */
-extern CONST(uint32, AUTOMATIC) DemGroupOfDTC[DEM_GROUP_OF_DTC_NUM];
-#endif /* DEM_GROUP_OF_DTC_NUM > 0u */
-
-#if (DEM_DTC_NUM > 0)
 /* DemConfigSet/DemDTC 0-65535 */
 typedef struct
 {
@@ -351,9 +613,7 @@ typedef struct
 #endif
     const uint8 NodeNum;
 } J1939NodeType;
-#endif
 
-#if (DEM_DTC_ATTRIBUTES_NUM > 0)
 /* DemConfigSet/DemDTCAttributes 0-65535 */
 typedef struct
 {
@@ -400,8 +660,8 @@ typedef struct
     /* DemFreezeFrameClassRef Reference: DemFreezeFrameClass MULTI:0-1*/
     const uint16 DemFreezeFrameClassRef;
 
-    /* DemMemoryDestinationRef ChoiceReference: TOOL shall TODO: 2 The same event shall not be configured two
-     * destinations if one is not DemMirrorMemory. */
+    /* DemMemoryDestinationRef ChoiceReference: TOOL shall TODO: 2 The same event shall not be
+     * configured two destinations if one is not DemMirrorMemory. */
     const uint8 DemMemoryDestinationRef[DEM_MEM_DEST_MAX_NUM_OF_DTC];
 
     /*DemJ1939DTC_J1939NodeRef*/
@@ -416,7 +676,6 @@ typedef struct
     /*DemWWHOBDFreezeFrameClassRef*/
     const uint8 DemWWHOBDFreezeFrameClassRef;
 } Dem_DTCAttributesType;
-#endif
 
 typedef struct
 {
@@ -445,9 +704,7 @@ typedef struct
  *******************************************************************************/
 #if (DEM_INDICATOR_ATTRIBUTE_TOTAL_NUM > 0)
 /* DemConfigSet/DemEventParameter/DemIndicatorAttribute */
-
 extern CONST(Dem_IndicatorAttributeType, AUTOMATIC) DemIndicatorAttribute[DEM_INDICATOR_ATTRIBUTE_TOTAL_NUM];
-
 #endif
 
 /*******************************************************************************
@@ -508,35 +765,15 @@ typedef struct
     const uint8 DemDebounceBehavior;
 } Dem_DebounceTimeBaseClassType;
 
-#if (DEM_DEBOUNCE_MONITOR_INTERNAL_EVENT_NUM > 0)
 /* DemConfigSet/DemEventParameter/DemDebounceAlgorithmClass/DemDebounceMonitorInternal */
 typedef Std_ReturnType (*Dem_GetFDCFncType)(sint8* FDC);
 
+#if (DEM_DEBOUNCE_MONITOR_INTERNAL_EVENT_NUM > 0)
 extern CONST(Dem_GetFDCFncType, AUTOMATIC) DemGetFDCFncs[DEM_DEBOUNCE_MONITOR_INTERNAL_EVENT_NUM];
-
 #endif
 /*******************************************************************************
  *                          Event Configuration                                **
  *******************************************************************************/
-#ifndef _DEFINED_TYPEDEF_FOR_Dem_InitMonitorReasonType_
-typedef uint8 Dem_InitMonitorReasonType;
-#define DEM_INIT_MONITOR_CLEAR             0x01u
-#define DEM_INIT_MONITOR_RESTART           0x02u
-#define DEM_INIT_MONITOR_REENABLED         0x03u
-#define DEM_INIT_MONITOR_STORAGE_REENABLED 0x04u
-#endif /* _DEFINED_TYPEDEF_FOR_Dem_InitMonitorReasonType_ */
-
-#ifndef _DEFINED_TYPEDEF_FOR_Dem_IndicatorStatusType_
-typedef uint8 Dem_IndicatorStatusType;
-#define DEM_INDICATOR_OFF        0x00u
-#define DEM_INDICATOR_CONTINUOUS 0x01u
-#define DEM_INDICATOR_BLINKING   0x02u
-#define DEM_INDICATOR_BLINK_CONT 0x03u
-#define DEM_INDICATOR_SLOW_FLASH 0x04u
-#define DEM_INDICATOR_FAST_FLASH 0x05u
-#define DEM_INDICATOR_ON_DEMAND  0x06u
-#define DEM_INDICATOR_SHORT      0x07u
-#endif /* _DEFINED_TYPEDEF_FOR_Dem_IndicatorStatusType_ */
 
 /* DemConfigSet/DemEventParameter/DemCallbackInitMForE */
 typedef Std_ReturnType (*Dem_CallbackInitMForEType)(Dem_InitMonitorReasonType InitMonitorReason);
@@ -544,16 +781,15 @@ typedef Std_ReturnType (*Dem_CallbackInitMForEType)(Dem_InitMonitorReasonType In
 /* DemConfigSet/DemEventParameter/DemCallbackEventDataChanged */
 typedef Std_ReturnType (*Dem_CallbackEventDataChangedType)(Dem_EventIdType EventId);
 
-#if (DEM_CALLBACK_EVENT_STATUS_CHANGED_TOTAL_NUM > 0)
 /* DemConfigSet/DemEventParameter/DemCallbackEventStatusChanged */
 typedef Std_ReturnType (*Dem_TriggerOnEventStatusType)(
     Dem_EventIdType EventId,
     Dem_UdsStatusByteType EventStatusByteOld,
     Dem_UdsStatusByteType EventStatusByteNew);
 
+#if (DEM_CALLBACK_EVENT_STATUS_CHANGED_TOTAL_NUM > 0)
 extern CONST(Dem_TriggerOnEventStatusType, AUTOMATIC)
     DemCallbackEventStatusChanged[DEM_CALLBACK_EVENT_STATUS_CHANGED_TOTAL_NUM];
-
 #endif
 
 typedef Std_ReturnType (*ClearEventAllowedType)(boolean* Allowed);
@@ -572,17 +808,16 @@ typedef struct
 } Dem_CallbackClearEventAllowedType;
 
 #if (DEM_CALLBACK_CLEAR_EVENT_ALLOWED_TOTAL_NUM > 0)
-
 extern CONST(Dem_CallbackClearEventAllowedType, AUTOMATIC)
     DemCallbackClearEventAllowed[DEM_CALLBACK_CLEAR_EVENT_ALLOWED_TOTAL_NUM];
-
 #endif
 
 typedef Std_ReturnType (*DemComponentFailedCallbackFnc)(Dem_ComponentIdType ComponentId, boolean ComponentFailedStatus);
 typedef struct
 {
     const DemComponentFailedCallbackFnc DemComponentFailedCallbackFnc;
-    const boolean DemComponentIgnoresPriority; /*whether the priority of events at this component shall be ignored*/
+    const boolean DemComponentIgnoresPriority; /*whether the priority of events at this component
+                                                  shall be ignored*/
     const uint16 DemParentComponentRef;        /* parent component added by yt*/
 #if (DEM_IMMEDITE_CHILD_COMPONENT_MAX_NUM > 0)
     const uint16
@@ -601,7 +836,8 @@ typedef struct
     const Dem_CallbackEventDataChangedType DemCallbackEventDataChanged;
 
     /* DemCallbackClearEventAllowed 0-1 */
-    P2CONST(Dem_CallbackClearEventAllowedType, AUTOMATIC, DEM_CONST_PBCFG) DemCallbackClearEventAllowed;
+    P2CONST(Dem_CallbackClearEventAllowedType, AUTOMATIC, DEM_CONST_PBCFG)
+    DemCallbackClearEventAllowed;
 
     /* DemCallbackEventStatusChanged 0-* */
     const uint16 StatusChangedCbkStartIndex;
@@ -661,7 +897,6 @@ typedef struct
 /*******************************************************************************
  *                          Memory Configuration                               **
  *******************************************************************************/
-#if ((DEM_FREEZE_FRAME_CLASS_NUM > 0) || (DEM_J1939_FREEZE_FRAME_CLASS_NUM > 0) || (DEM_PID_CLASS_NUM > 0))
 /* FreezeFrameInfo Define */
 typedef struct
 {
@@ -670,6 +905,14 @@ typedef struct
     uint8 Data[DEM_FREEZE_FRAME_MAX_LEN];
 #endif
 } Dem_FreezeFrameInfoType;
+
+#if (DEM_GLOBAL_FREEZE_FRAME_SUPPORT == STD_ON)
+/* GlobalFreezeFrameInfo Define */
+typedef struct
+{
+    uint8 RecordNum; /* GlobalDemFreezeFrameRecordNumber */
+    uint8 Data[DEM_GLOBAL_FREEZE_FRAME_LENGTH];
+} Dem_GlobalFreezeFrameInfoType;
 #endif
 
 /* EventMemoryEntry Define */
@@ -691,6 +934,10 @@ typedef struct
     uint8 StatusIndicator30;
 #endif /* DEM_STATUSINDICATOR30ENABLE == STD_ON */
     uint8 OccurrenceCounter;
+#if (DEM_AGEDCOUNT_SAIC == STD_ON)
+    uint8 AgedCounter;
+#endif /* DEM_AGEDCOUNT_SAIC == STD_ON */
+    /* Operation Cycle Counter */
 /* Operation Cycle Counter */
 #if (DEM_CYCLESSINCEFRISTFAILEDEANLE == STD_ON)
     uint8 CyclesSinceFirstFailed;
@@ -703,6 +950,9 @@ typedef struct
     uint8 FFNum;
     uint8 LatestFF;
     Dem_FreezeFrameInfoType FFList[DEM_MAX_NUMBER_FF_RECORDS];
+#endif
+#if (DEM_GLOBAL_FREEZE_FRAME_SUPPORT == STD_ON)
+    Dem_GlobalFreezeFrameInfoType GlobalFFList;
 #endif
 #if (DEM_EXTENDED_DATA_CLASS_NUM > 0)
     uint8 ExtStatus[DEM_EXTENDED_DATA_MAX_REF_NUM_BYTE];
@@ -721,21 +971,16 @@ typedef struct
 } Dem_MemDestConfigType;
 
 #if (DEM_MEM_DEST_TOTAL_NUM > 0)
-
 extern CONST(Dem_MemDestConfigType, AUTOMATIC) DemMemDestCfg[DEM_MEM_DEST_TOTAL_NUM];
-
 #endif
 
 #if (DEM_NVRAM_BLOCKID_NUM > 0)
-
 extern CONST(uint16, AUTOMATIC) DemNvRamBlockId[DEM_NVRAM_BLOCKID_NUM];
-
 #endif
 
 /*************************************************************************************
                                 OBD Configuration                                   **
 **************************************************************************************/
-#if (DEM_OBD_SUPPORT != DEM_OBD_NO_OBD_SUPPORT)
 typedef struct
 {
     /*Configuration value to define the appropriate value to PID1C "OBD
@@ -775,26 +1020,10 @@ typedef struct
 
 } DemGeneralOBDType;
 
+#if (DEM_OBD_SUPPORT != DEM_OBD_NO_OBD_SUPPORT)
 extern CONST(DemGeneralOBDType, AUTOMATIC) DemGeneralOBD;
-
-typedef struct
-{
-    const uint8 DemSecondaryFunctionIdRefNum;
-    const uint8 DemSecondaryFunctionIdRef[DEM_SECONDARY_FUNCTIONID_REF_MAX_NUM];
-} DemSecondaryFunctionIdType;
-
-typedef struct
-{
-    const uint8 DemDiagnosticEventRef;
-    const uint8 DemFunctionIdRef;
-    const uint8 DemIUMPRDenGroup;
-    const uint8 DemIUMPRGroup; /*Dem_IUMPRGroupType*/
-    const uint8 DemRatioId;
-    const uint8 DemRatioKind;
-    P2CONST(DemSecondaryFunctionIdType, AUTOMATIC, DEM_CONST_PBCFG) DemSecondaryFunctionIdRef;
-} DemRatioType;
-
 #endif /* DEM_OBD_SUPPORT != DEM_OBD_NO_OBD_SUPPORT */
+
 typedef struct
 {
     const sint16 DemDtrCompuDenominator0;
@@ -816,17 +1045,22 @@ typedef struct
     DemDataElementReadFncType DemDataElementReadFnc;
 } DemDataElementClassTypes;
 
-#if (DEM_DATA_ELEMENT_CLASS_NUM > 0)
+typedef struct
+{
+    const uint8 DemSecondaryFunctionIdRefNum;
+    const uint8 DemSecondaryFunctionIdRef[DEM_SECONDARY_FUNCTIONID_REF_MAX_NUM];
+} DemSecondaryFunctionIdType;
 
-extern CONST(DemDataElementClassTypes, AUTOMATIC) DemDataElementClass[DEM_DATA_ELEMENT_CLASS_NUM];
-
-#endif
-
-#if (DEM_RATIO_NUM > 0)
-
-extern CONST(DemRatioType, AUTOMATIC) DemRatio[DEM_RATIO_NUM];
-
-#endif
+typedef struct
+{
+    const uint8 DemDiagnosticEventRef;
+    const uint8 DemFunctionIdRef;
+    const uint8 DemIUMPRDenGroup;
+    const uint8 DemIUMPRGroup; /*Dem_IUMPRGroupType*/
+    const uint8 DemRatioId;
+    const uint8 DemRatioKind;
+    P2CONST(DemSecondaryFunctionIdType, AUTOMATIC, DEM_CONST_PBCFG) DemSecondaryFunctionIdRef;
+} DemRatioType;
 
 /*******************************************************************************
  *                          PostBuild Configuration                            **
@@ -836,14 +1070,22 @@ typedef struct
 {
     P2CONST(DemComponentTypes, AUTOMATIC, DEM_CONST_PBCFG) DemComponent;
     P2CONST(Dem_DTCType, AUTOMATIC, DEM_CONST_PBCFG) DemDTC;
+    P2CONST(uint32, AUTOMATIC, DEM_CONST_PBCFG) DemGroupOfDTC;
+    uint16 DemDTCNum;
     P2CONST(Dem_DTCAttributesType, AUTOMATIC, DEM_CONST_PBCFG) DemDTCAttributes;
-    P2CONST(Dem_DebounceCounterBasedClassType, AUTOMATIC, DEM_CONST_PBCFG) DemDebounceCounterBasedClass;
+    P2CONST(Dem_DebounceCounterBasedClassType, AUTOMATIC, DEM_CONST_PBCFG)
+    DemDebounceCounterBasedClass;
     P2CONST(Dem_DebounceTimeBaseClassType, AUTOMATIC, DEM_CONST_PBCFG) DemDebounceTimeBaseClass;
     P2CONST(DTRType, AUTOMATIC, DEM_CONST_PBCFG) DTR;
     P2CONST(Dem_EventParameterType, AUTOMATIC, DEM_CONST_PBCFG) DemEventParameter;
+    uint16 DemEventNum;
     P2CONST(J1939NodeType, AUTOMATIC, DEM_CONST_PBCFG) J1939Node;
     P2CONST(DemObdDTCType, AUTOMATIC, DEM_CONST_PBCFG) DemObdDTC;
     P2CONST(Dem_PidClassType, AUTOMATIC, DEM_CONST_PBCFG) DemPidClass;
+    P2CONST(Dem_OperationCycleType, AUTOMATIC, DEM_CONST_PBCFG) DemOperationCycle;
+    uint16 DemOperationCycleNum;
+    P2CONST(DemRatioType, AUTOMATIC, DEM_CONST_PBCFG) DemRatio;
+    P2CONST(DemDataElementClassTypes, AUTOMATIC, DEM_CONST_PBCFG) DemDataElementClass;
     P2CONST(Dem_EventIdType, AUTOMATIC, DEM_CONST_PBCFG) DemDTCMapping;
 } Dem_ConfigType;
 

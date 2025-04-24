@@ -18,166 +18,203 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : PduR_Internal.h                                             **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : zhengfei.li                                                 **
- **  Vendor      :                                                             **
- **  DESCRIPTION : PDUR internal header for internal API declarations          **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                       **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : PduR_Internal.h                                             **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : zhengfei.li                                                 **
+**  Vendor      :                                                             **
+**  DESCRIPTION : PDUR internal header for internal API declarations          **
+**                                                                            **
+**  SPECIFICATION(S) : AUTOSAR Classic Platform 4.2.2 and R19_11              **
+**                                                                            **
+*******************************************************************************/
 #ifndef PDUR_INTERNAL_H
 #define PDUR_INTERNAL_H
 /*******************************************************************************
 **                      Includes                                              **
 *******************************************************************************/
 #include "PduR.h"
-#if (STD_OFF == PDUR_ZERO_COST_OPERATION)
-/*******************************************************************************
-**                      Private Type Definitions                              **
-*******************************************************************************/
-typedef struct
-{
-    boolean NeedGateWayOnTheFly;
-    uint8 ActiveTpBufferId;
-    boolean TpTxConfirmation;
-    PduLengthType TxBufferOffset;
-} PduR_GateWayDestTpRunTimeType;
-
-#if (PDUR_GATEWAY_DIRECT_BUFFER_PDU_SUM > 0u)
-typedef enum
-{
-    PDUR_BUSY = 0u,
-    PDUR_IDLE
-} PduR_DestStateType;
+#if (PDUR_NUMBER_OF_QUEUES > 0u)
+#include "PduR_Buffer.h"
 #endif
+#include "PduR_Route.h"
+#include "Det.h"
+#include "istd_lib.h"
+#include "SchM_PduR.h"
+
+/*******************************************************************************
+**                      Macros                                                **
+*******************************************************************************/
+#if ((PDUR_NUMBER_OF_QUEUES > 0u) && (PDUR_DEFAULT_VALUE_LENGTH > 0u) && (PDUR_DEFAULT_VALUE_PDU > 0u))
+#define PDUR_DEFAULT_VALUE_ENABLED STD_ON
+#else
+#define PDUR_DEFAULT_VALUE_ENABLED STD_OFF
+#endif
+
+#if (PDUR_ROUTING_PATH_GROUP_MAX > 0u)
+#define PDUR_ROUTING_PATH_GROUP_ENABLED STD_ON
+#else
+#define PDUR_ROUTING_PATH_GROUP_ENABLED STD_OFF
+#endif /* PDUR_ROUTING_PATH_GROUP_MAX > 0u */
+
+/* Using for Conditional compilation PB-Config */
+/* PDUR_COMMUNICATION_INTERFACE_FORWARDING_ENABLED
+   PDUR_COMMUNICATION_INTERFACE_GATEWAYING_ENABLED
+   PDUR_TRANSPORT_PROTOCOL_FORWARDING_NOBUFFERED_ENABLED
+   PDUR_TRANSPORT_PROTOCOL_FORWARDING_BUFFERED_ENABLED
+   PDUR_TRANSPORT_PROTOCOL_GATEWAYING_ENABLED */
+/*******************************************************************************
+**                      Global Symbols                                        **
+*******************************************************************************/
+/* Published information */
+#if !defined(PDUR_PUBLISHED_INFORMATION)
+#define PDUR_PUBLISHED_INFORMATION
+#define PDUR_MODULE_ID                   51u
+#define PDUR_VENDOR_ID                   62u
+#define PDUR_AR_RELEASE_MAJOR_VERSION    4u
+#define PDUR_AR_RELEASE_MINOR_VERSION    2u
+#define PDUR_AR_RELEASE_REVISION_VERSION 2u
+#define PDUR_SW_MAJOR_VERSION            2u
+#define PDUR_SW_MINOR_VERSION            3u
+#define PDUR_SW_PATCH_VERSION            5u
+#elif ((PDUR_SW_MAJOR_VERSION != 2u) || (PDUR_SW_MINOR_VERSION != 3u) || (PDUR_SW_PATCH_VERSION != 5u))
+#error "PduR: Mismatch in Software Version"
+#endif
+
+#if !defined(PDUR_LOCAL)
+#define PDUR_LOCAL static
+#endif
+
+#if (STD_OFF == PDUR_ZERO_COST_OPERATION)
+/* Common Library */
+#define PduR_Min(a, b)                       (((a) < (b)) ? (a) : (b))
+#define PduR_Det_ReportError(apiId, errorId) (void)Det_ReportError(PDUR_MODULE_ID, PDUR_INSTANCE_ID, (apiId), (errorId))
+#define PduR_Det_ReportRuntimeError(apiId, errorId) \
+    (void)Det_ReportRuntimeError(PDUR_MODULE_ID, PDUR_INSTANCE_ID, (apiId), (errorId))
+
+/* Get Interface of PBConfig */
+#define PduR_GetRoutingPathGroupCntOfPBConfig()       PduR_ConfigStd->routingPathGroupCnt
+
+#define PduR_GetDestPduNumOfSrcPdu(srcPduId)          PDUR_ROUTINGPATH_CFG(srcPduId).PduDestSum
+#define PduR_GetDestPduOfRoutingPath(srcPduId, index) PDUR_ROUTINGPATH_CFG(srcPduId).PduRDestPduIdRef[index]
+
+#define PduR_GetSrcPduUpTxConfOfSrcPdu(srcPduId)      PDUR_SRCEPDU_CFG(srcPduId).PduRSrcPduUpTxConf
+#define PduR_GetBswModulePtrOfSrcPdu(pduId)           &PduR_BswModuleConfigData[PDUR_SRCEPDU_CFG(pduId).BswModuleIndex]
+#define PduR_GetBswModulePduIdOfSrcPdu(pduId)         PDUR_SRCEPDU_CFG(pduId).PduRSrcModulePduIndex
+
+#define PduR_GetSrcPduNumOfDestPdu(destPduId)         PDUR_DESTPDU_CFG(destPduId).PduSrcSum
+#define PduR_GetSrcPduOfDestPdu(destPduId, index)     PDUR_DESTPDU_CFG(destPduId).PduRSrcPduRef[index]
+#define PduR_GetDataProvisionOfDestPdu(destPduId)     PDUR_DESTPDU_CFG(destPduId).PduRDestPduDataProvision
+#define PduR_GetBswModulePduIdOfDestPdu(destPduId)    PDUR_DESTPDU_CFG(destPduId).PduRDestModulePduIndex
+#define PduR_GetBswModulePtrOfDestPdu(destPduId)      &PduR_BswModuleConfigData[PDUR_DESTPDU_CFG(destPduId).BswModuleIndex]
+#if (PDUR_NUMBER_OF_QUEUES > 0u)
+#define PduR_GetQueueIndexOfDestPdu(destPduId)  PDUR_DESTPDU_CFG(destPduId).PduRDestQueueIdRef
+#define PduR_GetTpThresholdOfDestPdu(destPduId) PDUR_DESTPDU_CFG(destPduId).PduRTpThreshold
+#endif /* PDUR_NUMBER_OF_QUEUES > 0u */
+
+#if (PDUR_NUMBER_OF_QUEUES > 0u)
+#define PduR_GetQueuePtrOfDestPdu(destPduId)                       \
+    (PduR_GetQueueIndexOfDestPdu(destPduId) == PDUR_UNUSED_UINT16) \
+        ? NULL_PTR                                                 \
+        : &PduR_Queues[PduR_GetQueueIndexOfDestPdu(destPduId)]
+#endif /* PDUR_NUMBER_OF_QUEUES > 0u */
+#define PduR_GetConfiguredLengthOfDestPdu(destPduId)         PDUR_DESTPDU_CFG(destPduId).configuredLength
+#define PduR_GetDefaultValuePtrOfDestPdu(destPduId)          PDUR_DESTPDU_CFG(destPduId).PduRDefaultValueRef
+#define PduR_GetTransmissionConfirmationOfDestPdu(destPduId) PDUR_DESTPDU_CFG(destPduId).transmissionConfirmation
+#define PduR_GetRouteTypeOfDestPdu(destPduId)                PDUR_DESTPDU_CFG(destPduId).routeType
+#if (STD_ON == PDUR_MULITIPARTITION_SUPPORT)
+#define PduR_GetPartitionIndexOfDestPdu(destPduId) PDUR_DESTPDU_CFG(destPduId).PartitionIndex
+#define PduR_GetPartitionIndexOfSrcPdu(srcPduId)   PDUR_SRCEPDU_CFG(srcPduId).PartitionIndex
+#endif /* STD_ON == PDUR_MULITIPARTITION_SUPPORT */
+
+#define PduR_GetGlobalBufferPoolPtr() &PduR_GlobalBufferPool
+
 /*******************************************************************************
 **                      Global Data                                           **
 *******************************************************************************/
-#if (PDUR_TP_BUFFER_SUM > 0u)
-
-extern VAR(PduR_TpBufferTableType, PDUR_VAR_POWER_ON_INIT) PduR_TpBuffer[PDUR_TP_BUFFER_SUM];
-
-#endif
-
-#if (PDUR_TX_BUFFER_SUM > 0u)
-
-extern CONST(PduR_TxBufferTableType, PDUR_CONST) PduR_TxBuffer[PDUR_TX_BUFFER_SUM];
-
-#endif
-
-#if (PDUR_DEFAULT_VALUE_LENGTH > 0u)
-
+#if (PDUR_DEFAULT_VALUE_ENABLED == STD_ON)
 extern CONST(uint8, PDUR_CONST) PduR_Default_value[PDUR_DEFAULT_VALUE_LENGTH];
-
-#endif
+#endif /* PDUR_DEFAULT_VALUE_ENABLED == STD_ON */
 
 extern CONST(PduRBswModuleType, PDUR_CONST) PduR_BswModuleConfigData[PDUR_BSW_MODULE_SUM];
+
+#if (PDUR_NUMBER_OF_QUEUES > 0u)
+extern const PduR_BufferPoolType PduR_GlobalBufferPool;
+extern PduR_QueueType PduR_Queues[PDUR_NUMBER_OF_QUEUES];
+extern PduR_BufferType PduR_Buffers[PDUR_NUMBER_OF_BUFFERS];
+#endif /* PDUR_NUMBER_OF_QUEUES > 0u */
 
 /*********************************
 ** define in PduR_Internal.c   **
 **********************************/
 /*all route dest pdus is enable or disable*/
-#if (PDUR_DEST_PDU_SUM > 0u)
+#if (PDUR_ROUTING_PATH_GROUP_ENABLED == STD_ON)
+extern boolean PduR_RoutingPathEnabled[PDUR_ROUTINGPATH_MAX];
+#endif /* PDUR_ROUTING_PATH_GROUP_ENABLED == STD_ON */
 
-extern VAR(boolean, PDUR_VAR) PduRIsEnabled[PDUR_DEST_PDU_SUM];
-
-#else
-
-extern P2VAR(boolean, PDUR_VAR, PDUR_APPL_DATA) PduRIsEnabled;
-
+#if ((PDUR_DEST_PDU_SUM > 0u) && (PDUR_SRC_PDU_SUM > 0u))
+extern PduR_RouteStatusType PduR_DestinationRouteStatus[PDUR_DEST_PDU_SUM];
+extern PduR_RouteStatusType PduR_SourceRouteStatus[PDUR_SRC_PDU_SUM];
 #endif
-
-#if (PDUR_GATEWAY_DIRECT_BUFFER_PDU_SUM > 0u)
-extern VAR(PduR_DestStateType, PDUR_VAR) PduR_DestPduState[PDUR_GATEWAY_DIRECT_BUFFER_PDU_SUM];
-#endif /* PDUR_GATEWAY_DIRECT_BUFFER_PDU_SUM > 0u */
 /*******************************************************************************
 **                      External function declarations                        **
 *******************************************************************************/
+static inline PduR_MetaDataLengthType PduR_GetMetaDataLengthOfSrcPdu(PduIdType srcPduId)
+{
+#if (STD_ON == PDUR_META_DATA_SUPPORT)
+    return PDUR_SRCEPDU_CFG(srcPduId).MetaDataLength;
+#else
+    PDUR_NOUSED(srcPduId);
+    return 0u;
+#endif /* STD_ON == PDUR_META_DATA_SUPPORT */
+}
 
-extern FUNC(void, PDUR_CODE) PduR_InitHandle(void);
+static inline PduR_MetaDataLengthType PduR_GetMetaDataLengthOfDestPdu(PduIdType destPduId)
+{
+#if (STD_ON == PDUR_META_DATA_SUPPORT)
+    return PDUR_DESTPDU_CFG(destPduId).MetaDataLength;
+#else
+    PDUR_NOUSED(destPduId);
+    return 0u;
+#endif /* STD_ON == PDUR_META_DATA_SUPPORT */
+}
 
-#if ((0u < PDUR_ROUTING_PATH_GROUP_MAX) && (PDUR_TX_BUFFER_SUM > 0u))
-extern FUNC(void, PDUR_CODE) PduR_DestPduDefaultValueSet(PduIdType DestPduId, uint16 TxBufferId);
-#endif
+static inline boolean PduR_IsRoutingPathEnable(PduIdType destPduId)
+{
+#if (PDUR_ROUTING_PATH_GROUP_ENABLED == STD_ON)
+    return PduR_RoutingPathEnabled[destPduId];
+#else
+    PDUR_NOUSED(destPduId);
+    return TRUE;
+#endif /* PDUR_ROUTING_PATH_GROUP_ENABLED == STD_ON */
+}
 
-#if (STD_ON == PDUR_TX_CONFIRMATION)
-extern FUNC(void, PDUR_CODE) PduR_MulticastIfPduTxConfirmationHandle(
-    PduIdType TxMPduStateId,
-    PduIdType UpPduId,
-    PduR_UpIfTxConfirmation_FuncPtrType UpIfTxConfirmationApi);
-#endif
+static inline boolean PduR_IsTpRouteOfSrcPdu(PduIdType srcPduId)
+{
+    return (TRUE == PDUR_ROUTINGPATH_CFG(srcPduId).TpRoute);
+}
 
-#if ((STD_ON == PDUR_TX_CONFIRMATION) && (PDUR_TX_BUFFER_SUM > 0u))
-extern FUNC(void, PDUR_CODE) PduR_IfTxConfirmationGatewayHandle(PduIdType TxPduId);
-#endif
+static inline boolean PduR_IsTpRouteOfDestPdu(PduIdType destPduId)
+{
+    return (TRUE == PDUR_ROUTINGPATH_CFG(PduR_GetSrcPduOfDestPdu(destPduId, 0u)).TpRoute);
+}
 
-#if (STD_ON == PDUR_TRANSMIT_SUPPORT)
-extern FUNC(void, PDUR_CODE) PduR_MulticastIfPduTxPending(PduIdType TxPduId);
-#endif /* STD_ON == PDUR_TRANSMIT_SUPPORT */
+#if (PDUR_ROUTING_PATH_GROUP_ENABLED == STD_ON)
+extern FUNC(void, PDUR_CODE) PduR_RoutingPathGroupInit(void);
+#endif /* PDUR_ROUTING_PATH_GROUP_ENABLED == STD_ON */
 
-#if ((STD_ON == PDUR_RX_INDICATION) && (PDUR_TX_BUFFER_SUM > 0u))
-extern FUNC(void, PDUR_CODE) PduR_GateWayDirectBufferHandle(
-    PduR_LoIfTransmit_FuncPtrType pduR_LoIfTransmitApi,
-    PduIdType DestPduId,
-    P2CONST(PduInfoType, AUTOMATIC, PDUR_APPL_DATA) InfoPtr);
-#endif
+#if (PDUR_MULITIPARTITION_SUPPORT == STD_ON)
+uint8 PduR_GetPartitionFuncIndexFromDestPdu(const PduRBswModuleType* modulePtr, PduIdType destPduId);
+uint8 PduR_GetPartitionFuncIndexFromSrcPdu(const PduRBswModuleType* modulePtr, PduIdType srcPduId);
 
-#if (STD_ON == PDUR_TP_STARTOFRECEPTION_TRANSMIT)
-extern FUNC(BufReq_ReturnType, PDUR_CODE) PduR_StartOfReceptionToOneTpHandle(
-    PduIdType SrcPduId,
-    P2CONST(PduInfoType, AUTOMATIC, PDUR_APPL_DATA) info,
-    PduLengthType Length,
-    P2VAR(PduLengthType, AUTOMATIC, PDUR_APPL_DATA) bufferSizePtr);
-#endif /*STD_ON == PDUR_TP_STARTOFRECEPTION_TRANSMIT*/
+#endif /* PDUR_MULITIPARTITION_SUPPORT == STD_ON */
 
-#if (STD_ON == PDUR_TP_COPYRXDATA)
-/*Rx Tp Pdu gateway to only one Tp Module Pdu handle,when copy Rx Data*/
-extern FUNC(BufReq_ReturnType, PDUR_CODE) PduR_CopyRxDataToOneTpHandle(
-#if (0u < PDUR_TP_BUFFER_SUM)
-    PduIdType SrcPduId,
-#endif
-    PduIdType DestPduId,
-    P2CONST(PduInfoType, AUTOMATIC, PDUR_APPL_DATA) info,
-    P2VAR(PduLengthType, AUTOMATIC, PDUR_APPL_DATA) BufferSizePtr);
-#endif /*STD_ON == PDUR_TP_COPYRXDATA*/
-
-#if (STD_ON == PDUR_TP_RXINDICATION)
-/*Rx Tp Pdu gateway to only one Tp Module Pdu handle,when Rx Indication*/
-extern FUNC(void, PDUR_CODE) PduR_RxIndicationToOneTpHandle(PduIdType SrcPduId, PduIdType DestPduId);
-#endif /*STD_ON == PDUR_TP_RXINDICATION*/
-
-#if (STD_ON == PDUR_TP_COPYTXDATA)
-/*one Tp Pdu route to one Tp Pdu,the dest pdu copy tx data handle*/
-extern FUNC(BufReq_ReturnType, PDUR_CODE) PduR_OneDestCopyTxDataFromTpHandle(
-    PduIdType DestPduId,
-    P2CONST(PduInfoType, AUTOMATIC, PDUR_APPL_DATA) info,
-    P2CONST(RetryInfoType, AUTOMATIC, PDUR_APPL_DATA) retry,
-    P2VAR(PduLengthType, AUTOMATIC, PDUR_APPL_DATA) availableDataPtr);
-#endif /*STD_ON == PDUR_TP_COPYTXDATA*/
-
-#if ((0u < PDUR_DEST_GATEWAY_TP_PDU_SUM) || (STD_ON == PDUR_TP_RXINDICATION) || (STD_ON == PDUR_TP_TXCONFIRMATION))
-/*clear buffer and gateway state for gateway tp pdu*/
-extern FUNC(void, PDUR_CODE) PduR_ClearBufferAndStateOfGateWayTpPdu(PduIdType PduRSrcPduId);
-#endif /* 0u < PDUR_DEST_GATEWAY_TP_PDU_SUM || STD_ON == PDUR_TP_RXINDICATION || STD_ON == PDUR_TP_TXCONFIRMATION*/
-
-#if (((STD_ON == PDUR_TRIGGER_TRANSMIT) || (PDUR_GATEWAY_DIRECT_BUFFER_PDU_SUM > 0u)) && (PDUR_TX_BUFFER_SUM > 0u))
-/*clear the buffer(the buffer data have transmit,Whether or not it succeeds)*/
-extern FUNC(void, PDUR_CODE) PduR_DeQueueBuffer(PduIdType PduId);
-#endif /* STD_ON == PDUR_TRIGGER_TRANSMIT || PDUR_GATEWAY_DIRECT_BUFFER_PDU_SUM > 0u && PDUR_TX_BUFFER_SUM > 0u */
-
-#if ((STD_ON == PDUR_RX_INDICATION) && (PDUR_TX_BUFFER_SUM > 0u))
-extern FUNC(void, PDUR_CODE)
-    PduR_EnQueueBuffer(PduIdType PduId, P2CONST(PduInfoType, AUTOMATIC, PDUR_APPL_DATA) PduInfo);
-#endif /* STD_ON == PDUR_RX_INDICATION && PDUR_TX_BUFFER_SUM > 0u */
-
-#endif /* STD_OFF == PDUR_ZERO_COST_OPERATION */
+#endif /*STD_OFF == PDUR_ZERO_COST_OPERATION*/
 
 #endif /* end of PDUR_INTERNAL_H */
 /*******************************************************************************

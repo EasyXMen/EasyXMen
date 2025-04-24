@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : E2E_P02.c                                                   **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : YangBo                                                      **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : E2E_P02.c                                                   **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : YangBo                                                      **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 /*******************************************************************************
 **                      Revision Control History                              **
 *******************************************************************************/
@@ -63,7 +64,7 @@
 /*******************************************************************************
 **                      Private Function Declarations                         **
 *******************************************************************************/
-/* PRQA S 3432,4391 ++ */ /* MISRA Rule 20.7, Rule 10.8 */
+/* PRQA S 3432,4391,1503 ++ */ /* MISRA Rule 20.7, Rule 10.8,Rule 2.1 */
 #define E2E_START_SEC_CODE
 #include "E2E_MemMap.h"
 static FUNC(Std_ReturnType, E2E_CODE) E2E_P02ProtectVerifyInputs(
@@ -183,31 +184,6 @@ FUNC(Std_ReturnType, E2E_CODE) E2E_P02ProtectInit(P2VAR(E2E_P02ProtectStateType,
 }
 #define E2E_STOP_SEC_CODE
 #include "E2E_MemMap.h"
-/*Caculate the status of received counter based on sync*/
-#define E2E_START_SEC_CODE
-#include "E2E_MemMap.h"
-static FUNC(void, E2E_CODE) E2E_AnalysisSync(
-    P2VAR(E2E_P02CheckStateType, AUTOMATIC, E2E_APPL_DATA) StatePtr,
-    P2CONST(E2E_P02ConfigType, AUTOMATIC, E2E_APPL_DATA) ConfigPtr)
-{
-    if (StatePtr->NoNewOrRepeatedDataCounter <= ConfigPtr->MaxNoNewOrRepeatedData)
-    {
-        StatePtr->NoNewOrRepeatedDataCounter = 0u;
-        if (StatePtr->SyncCounter > 0u)
-        {
-            StatePtr->SyncCounter--;
-            StatePtr->Status = E2E_P02STATUS_SYNC;
-        }
-    }
-    else
-    {
-        StatePtr->NoNewOrRepeatedDataCounter = 0u;
-        StatePtr->SyncCounter = ConfigPtr->SyncCounterInit;
-        StatePtr->Status = E2E_P02STATUS_SYNC;
-    }
-}
-#define E2E_STOP_SEC_CODE
-#include "E2E_MemMap.h"
 /*Caculate the status of received counter*/
 #define E2E_START_SEC_CODE
 #include "E2E_MemMap.h"
@@ -230,10 +206,52 @@ static FUNC(void, E2E_CODE) AnalysisDeltaCounter(
         StatePtr->MaxDeltaCounter = ConfigPtr->MaxDeltaCounterInit;
         StatePtr->LastValidCounter = ReceivedCounter;
         StatePtr->LostData = 0;
-        StatePtr->Status = E2E_P02STATUS_OK;
-        E2E_AnalysisSync(StatePtr, ConfigPtr);
+        if (StatePtr->NoNewOrRepeatedDataCounter <= ConfigPtr->MaxNoNewOrRepeatedData)
+        {
+            StatePtr->NoNewOrRepeatedDataCounter = 0;
+            if (StatePtr->SyncCounter > 0u)
+            {
+                StatePtr->SyncCounter--;
+                StatePtr->Status = E2E_P02STATUS_SYNC;
+            }
+            else
+            {
+                StatePtr->Status = E2E_P02STATUS_OK;
+            }
+        }
+        else
+        {
+            StatePtr->NoNewOrRepeatedDataCounter = 0;
+            StatePtr->SyncCounter = ConfigPtr->SyncCounterInit;
+            StatePtr->Status = E2E_P02STATUS_SYNC;
+        }
     }
-    else if ((uint8)DeltaCounter > StatePtr->MaxDeltaCounter)
+    else if ((1 < DeltaCounter) && ((uint8)DeltaCounter <= StatePtr->MaxDeltaCounter))
+    {
+        StatePtr->MaxDeltaCounter = ConfigPtr->MaxDeltaCounterInit;
+        StatePtr->LastValidCounter = ReceivedCounter;
+        StatePtr->LostData = ((uint8)DeltaCounter - 1u);
+        if (StatePtr->NoNewOrRepeatedDataCounter <= ConfigPtr->MaxNoNewOrRepeatedData)
+        {
+            StatePtr->NoNewOrRepeatedDataCounter = 0;
+            if (StatePtr->SyncCounter > 0u)
+            {
+                StatePtr->SyncCounter--;
+                StatePtr->Status = E2E_P02STATUS_SYNC;
+            }
+            else
+            {
+                StatePtr->Status = E2E_P02STATUS_OKSOMELOST;
+            }
+        }
+        else
+        {
+            StatePtr->NoNewOrRepeatedDataCounter = 0;
+            StatePtr->SyncCounter = ConfigPtr->SyncCounterInit;
+            StatePtr->Status = E2E_P02STATUS_SYNC;
+        }
+    }
+    else
     {
         StatePtr->NoNewOrRepeatedDataCounter = 0;
         StatePtr->SyncCounter = ConfigPtr->SyncCounterInit;
@@ -243,14 +261,6 @@ static FUNC(void, E2E_CODE) AnalysisDeltaCounter(
             StatePtr->LastValidCounter = ReceivedCounter;
             StatePtr->Status = E2E_P02STATUS_WRONGSEQUENCE;
         }
-    }
-    else
-    {
-        StatePtr->MaxDeltaCounter = ConfigPtr->MaxDeltaCounterInit;
-        StatePtr->LastValidCounter = ReceivedCounter;
-        StatePtr->LostData = ((uint8)DeltaCounter - 1u);
-        StatePtr->Status = E2E_P02STATUS_OKSOMELOST;
-        E2E_AnalysisSync(StatePtr, ConfigPtr);
     }
 }
 #define E2E_STOP_SEC_CODE
@@ -360,7 +370,6 @@ FUNC(Std_ReturnType, E2E_CODE) E2E_P02CheckInit(P2VAR(E2E_P02CheckStateType, AUT
     }
     else
     {
-
         StatePtr->LastValidCounter = 0;
         StatePtr->MaxDeltaCounter = 0;
         StatePtr->WaitForFirstData = TRUE;
@@ -375,11 +384,10 @@ FUNC(Std_ReturnType, E2E_CODE) E2E_P02CheckInit(P2VAR(E2E_P02CheckStateType, AUT
 #define E2E_STOP_SEC_CODE
 #include "E2E_MemMap.h"
 /**
- * The E2E Profile 2 delivers a more fine-granular status, but this is not relevant for the E2E state machine.
- * The function is prapared for E2E state machine check function.It maps the check status of Profile 2
- * to a generic check status.
- * Service ID: 0x20 Sync/Async: synchronous Reentrancy: Reentrant Parameters(IN): CheckReturn,Return value of
- * the E2E_P02Check function Status,Status determined by E2E_P02Check function profileBehavior,FALSE: check has the
+ * The function maps the check status of Profile 2 to a generic check status, which can be used by E2E state machine
+ * check function. The E2E Profile 2 delivers a more fine-granular status, but this is not relevant for the E2E state
+ * machine. Service ID: 0x20 Sync/Async: synchronous Reentrancy: Reentrant Parameters(IN): CheckReturn,Return value of
+ * the E2E_P01Check function Status,Status determined by E2E_P01Check function profileBehavior,FALSE: check has the
  * legacy behavior, before R4.2 TRUE: check behaves like new P4/P5/P6 profiles introduced in R4.2 Parameters(INOUT): NA
  * Parameters(OUT): NA
  * Return value: E2E_PCheckStatusType,Profile-independent status of the reception on one single Data in one cycle.
@@ -397,36 +405,60 @@ E2E_P02MapStatusToSM(Std_ReturnType CheckReturn, E2E_P02CheckStatusType Status, 
     {
         Ret = E2E_P_ERROR;
     }
+    /*@SWS_E2E_00380*/
+    else if ((boolean)1 == ProfileBehavior)
+    {
+        switch (Status)
+        {
+        case E2E_P02STATUS_OK:
+        case E2E_P02STATUS_OKSOMELOST:
+        case E2E_P02STATUS_SYNC:
+            Ret = E2E_P_OK;
+            break;
+        case E2E_P02STATUS_WRONGCRC:
+            Ret = E2E_P_ERROR;
+            break;
+        case E2E_P02STATUS_REPEATED:
+            Ret = E2E_P_REPEATED;
+            break;
+        case E2E_P02STATUS_NONEWDATA:
+            Ret = E2E_P_NONEWDATA;
+            break;
+        case E2E_P02STATUS_WRONGSEQUENCE:
+        case E2E_P02STATUS_INITIAL:
+            Ret = E2E_P_WRONGSEQUENCE;
+            break;
+        default:
+            Ret = E2E_P_ERROR;
+            break;
+        }
+    }
+    /*@SWS_E2E_00477*/
     else
     {
-        /*@SWS_E2E_00380 SWS_E2E_00477*/
-        if ((Status == E2E_P02STATUS_OK) || (Status == E2E_P02STATUS_OKSOMELOST)
-            || (ProfileBehavior && (Status == E2E_P02STATUS_SYNC))
-            || ((ProfileBehavior == FALSE) && (Status == E2E_P02STATUS_INITIAL)))
+        switch (Status)
         {
+        case E2E_P02STATUS_OK:
+        case E2E_P02STATUS_OKSOMELOST:
+        case E2E_P02STATUS_INITIAL:
             Ret = E2E_P_OK;
-        }
-        else if (Status == E2E_P02STATUS_REPEATED)
-        {
+            break;
+        case E2E_P02STATUS_WRONGCRC:
+            Ret = E2E_P_ERROR;
+            break;
+        case E2E_P02STATUS_REPEATED:
             Ret = E2E_P_REPEATED;
-        }
-        else if (Status == E2E_P02STATUS_WRONGCRC)
-        {
-            Ret = E2E_P_ERROR;
-        }
-        else if (
-            (Status == E2E_P02STATUS_WRONGSEQUENCE) || (ProfileBehavior && (Status == E2E_P02STATUS_INITIAL))
-            || ((ProfileBehavior == FALSE) && (Status == E2E_P02STATUS_SYNC)))
-        {
-            Ret = E2E_P_WRONGSEQUENCE;
-        }
-        else if (Status == E2E_P02STATUS_NONEWDATA)
-        {
+            break;
+        case E2E_P02STATUS_NONEWDATA:
             Ret = E2E_P_NONEWDATA;
-        }
-        else
-        {
+            break;
+        case E2E_P02STATUS_WRONGSEQUENCE:
+        case E2E_P02STATUS_SYNC:
+            Ret = E2E_P_WRONGSEQUENCE;
+            break;
+        default:
             Ret = E2E_P_ERROR;
+            break;
         }
     }
     return Ret;
@@ -491,5 +523,6 @@ static FUNC(Std_ReturnType, E2E_CODE) E2E_P02CheckVerifyInputs(
     }
     return ret;
 }
+/* PRQA S 3432,4391,1503 -- */ /* MISRA Rule 20.7, Rule 10.8,Rule 2.1 */
 #define E2E_STOP_SEC_CODE
 #include "E2E_MemMap.h"

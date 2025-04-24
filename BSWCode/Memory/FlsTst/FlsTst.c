@@ -18,103 +18,62 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : FlsTst.c                                                    **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : yin.Huang                                                   **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Containing the entire or parts of Flash test code           **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19_11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*********************************************************************************
+**                                                                            **
+**  FILENAME    : FlsTst.c                                                    **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : peng.wu                                                     **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S):   AUTOSAR classic Platform R19-11                       **
+**                                                                            **
+*******************************************************************************/
 
 /**
   \page ISOFT_MISRA_Exceptions  MISRA-C:2012 Compliance Exceptions
     ModeName:FlsTst<br>
-  RuleSorce:puhua-rule.rcf 2.3.1
+  RuleSorce:puhua-rule.rcf 2.3.5
 
-   \li PRQA S 0306 MISRA Rule 11.4 .<br>
-    Reason:Necessary type conversions.
+   \li PRQA S 0306 MISRA Rule 11.4 .<br>Reason:Cast between a pointer to object and an integral type.
 
-   \li PRQA S 1514 MISRA Rule 8.9 .<br>
-    Reason:Global variables that need to be updated by dependent applications.
-
-    \li PRQA S 3432 MISRA Rule 20.7 .<br>
-    Reason:Function-like macros are used to allow more efficient code.
+    Reason: autosar require.
  */
-
-/*===================[V E R S I O N  I N F O R M A T I O N]===================*/
-#define FLSTST_C_AR_MAJOR_VERSION 4U
-#define FLSTST_C_AR_MINOR_VERSION 5U
-#define FLSTST_C_AR_PATCH_VERSION 0U
-#define FLSTST_C_SW_MAJOR_VERSION 2U
-#define FLSTST_C_SW_MINOR_VERSION 0U
-#define FLSTST_C_SW_PATCH_VERSION 2U
-/*============================================================================*/
 
 /*==============================[I N C L U D E S]=============================*/
 #include "FlsTst.h"
 #include "SchM_FlsTst.h"
 #include "Dem.h"
-#include "Det.h"
 #include "Crc.h"
+#if (FLSTST_TIMEOUT == STD_ON)
+#include "FreeRTimer.h"
+#endif /* FLSTST_TIMEOUT == STD_ON */
 /*============================================================================*/
 
-/*==============================[M A C R O S]=================================*/
-#if (STD_ON == FLSTST_DEV_ERROR_DETECT)
-#define FLSTST_DET_REPORTERROR(ApiId, ErrorId) \
-    ((void)Det_ReportError(FLSTST_MODULE_ID, FLSTST_INSTANCE_ID, (ApiId), (ErrorId)))
-#else
-#define FLSTST_DET_REPORTERROR(ApiId, ErrorId)
-#endif /* STD_ON == FLSTST_DEV_ERROR_DETECT */
-
+/*===================[V E R S I O N  I N F O R M A T I O N]===================*/
+#define FLSTST_AR_RELEASE_MAJOR_VERSION 4U
+#define FLSTST_AR_RELEASE_MINOR_VERSION 5U
+#define FLSTST_AR_RELEASE_PATCH_VERSION 0U
+#define FLSTST_SW_MAJOR_VERSION         2U
+#define FLSTST_SW_MINOR_VERSION         0U
+#define FLSTST_SW_PATCH_VERSION         1U
 /*============================================================================*/
 
 /*==========================[V E R S I O N  C H E C K]========================*/
-
-#if (FLSTST_C_AR_MAJOR_VERSION != FLSTST_H_AR_MAJOR_VERSION)
-#error "FLSTST.c and FLSTST.h AR major version Mismatch"
+#ifndef FLSTST_AR_RELEASE_MAJOR_VERSION
+#error " FLSTST version miss"
 #endif
-
-#if (FLSTST_C_AR_MINOR_VERSION != FLSTST_H_AR_MINOR_VERSION)
-#error "FLSTST.c and FLSTST.h AR minor version Mismatch"
+#ifndef FLSTST_AR_RELEASE_MINOR_VERSION
+#error " FLSTST version miss"
 #endif
-
-#if (FLSTST_C_AR_PATCH_VERSION != FLSTST_H_AR_PATCH_VERSION)
-#error "FLSTST.c and FLSTST.h AR patch version Mismatch"
+#ifndef FLSTST_AR_RELEASE_PATCH_VERSION
+#error " FLSTST version miss"
 #endif
-
-#if (FLSTST_C_SW_MAJOR_VERSION != FLSTST_H_SW_MAJOR_VERSION)
-#error "FLSTST.c and FLSTST.h SW major version Mismatch"
-#endif
-
-#if (FLSTST_C_SW_MINOR_VERSION != FLSTST_H_SW_MINOR_VERSION)
-#error "FLSTST.c and FLSTST.h SW minor version Mismatch"
-#endif
-
-#if (FLSTST_CFG_H_AR_MAJOR_VERSION != FLSTST_H_AR_MAJOR_VERSION)
-#error "FLSTST.h and FLSTST_CFG.h AR major version Mismatch"
-#endif
-
-#if (FLSTST_CFG_H_AR_MINOR_VERSION != FLSTST_H_AR_MINOR_VERSION)
-#error "FLSTST.c and FLSTST_CFG.h AR minor version Mismatch"
-#endif
-
-#if (FLSTST_CFG_H_AR_PATCH_VERSION != FLSTST_H_AR_PATCH_VERSION)
-#error "FLSTST.c and FLSTST_CFG.h AR patch version Mismatch"
-#endif
-
-#if (FLSTST_CFG_H_SW_MAJOR_VERSION != FLSTST_H_SW_MAJOR_VERSION)
-#error "FLSTST.c and FLSTST_CFG.h SW major version Mismatch"
-#endif
-
-#if (FLSTST_CFG_H_SW_MINOR_VERSION != FLSTST_H_SW_MINOR_VERSION)
-#error "FLSTST.c and FLSTST_CFG.h SW minor version Mismatch"
+#if ((2 != FLSTST_CFG_SW_MAJOR_VERSION) || (0 != FLSTST_CFG_SW_MINOR_VERSION) || (1 != FLSTST_CFG_SW_PATCH_VERSION))
+#error " cfg version mismatching"
 #endif
 
 /*============================================================================*/
@@ -123,35 +82,53 @@
 #define FLSTST_START_SEC_CODE
 #include "FlsTst_MemMap.h"
 
-#if (0u != FLSTST_BGND_BLOCK_NUM)
-static void FlsTst_CalcAtomic(void);
-static void FlsTst_InterTest(void);
-static void FlsTst_BlockTestFinish(void);
-static void FlsTst_CopyBlockInfo(FlsTst_BlockIdType FlsTstBlockID);
-#endif
-#if (0u != FLSTST_FGND_BLOCK_NUM)
-static Std_ReturnType FlsTst_StartFgndInterTest(FlsTst_BlockInfoType* BlockInfoPtr);
-static Std_ReturnType FlsTst_CRC32Fgnd(FlsTst_BlockInfoType* BlockInfoPtr);
-static Std_ReturnType FlsTst_CRC16Fgnd(FlsTst_BlockInfoType* BlockInfoPtr);
-static Std_ReturnType FlsTst_CRC8Fgnd(FlsTst_BlockInfoType* BlockInfoPtr);
-static Std_ReturnType FlsTst_ChecksumFgnd(FlsTst_BlockInfoType* BlockInfoPtr);
-static Std_ReturnType FlsTst_ECCTestFgnd(FlsTst_BlockInfoType* BlockInfoPtr);
-static Std_ReturnType FlsTst_DuplicatedMemoryFgnd(FlsTst_BlockInfoType* BlockInfoPtr);
-#endif
+#if (0 != FLSTST_BGND_BLOCK_NUM)
+/* Calculation with a length of one Flash Cell */
+static FUNC(void, FLSTST_CODE) FlsTst_CalcAtomic(void);
+/* calculating Flash cells in background mode */
+static FUNC(void, FLSTST_CODE) FlsTst_InterTest(void);
+/* called when a memmory block test finished */
+static FUNC(void, FLSTST_CODE) FlsTst_BlockTestFinish(void);
+/* Copy information from FlsTst_BlockBgndInfo to FlsTst_CurRunning */
+static FUNC(void, FLSTST_CODE) FlsTst_CopyBlockInfo(FlsTst_BlockIdType FlsTstBlockID);
+#endif /* 0 != FLSTST_BGND_BLOCK_NUM */
+
+#if (0 != FLSTST_FGND_BLOCK_NUM)
+/* called by FlsTst_StartFgnd */
+static FUNC(Std_ReturnType, FLSTST_CODE) FlsTst_StartFgndInterTest(FlsTst_BlockInfoType* BlockInfoPtr);
+/* CRC32 calculation of the input block parameters in foreground */
+static FUNC(Std_ReturnType, FLSTST_CODE) FlsTst_CRC32Fgnd(FlsTst_BlockInfoType* BlockInfoPtr);
+/* CRC16 calculation of the input block parameters in foreground */
+static FUNC(Std_ReturnType, FLSTST_CODE) FlsTst_CRC16Fgnd(FlsTst_BlockInfoType* BlockInfoPtr);
+/* CRC8 calculation of the input block parameters in foreground */
+static FUNC(Std_ReturnType, FLSTST_CODE) FlsTst_CRC8Fgnd(FlsTst_BlockInfoType* BlockInfoPtr);
+/* Checksum calculation of the input block parameters in foreground */
+static FUNC(Std_ReturnType, FLSTST_CODE) FlsTst_ChecksumFgnd(FlsTst_BlockInfoType* BlockInfoPtr);
+/* ECC calculation of the input block parameters in foreground */
+static FUNC(Std_ReturnType, FLSTST_CODE) FlsTst_ECCTestFgnd(FlsTst_BlockInfoType* BlockInfoPtr);
+/* DuplicatedMemory calculation of the input block parameters in foreground */
+static FUNC(Std_ReturnType, FLSTST_CODE) FlsTst_DuplicatedMemoryFgnd(FlsTst_BlockInfoType* BlockInfoPtr);
+#endif /* 0 != FLSTST_FGND_BLOCK_NUM */
+
 #if ((0U != FLSTST_BGND_BLOCK_NUM) || (0U != FLSTST_FGND_BLOCK_NUM))
-static Std_ReturnType FlsTst_MemCompare(
+/* Services to data comparison in foreground */
+static FUNC(Std_ReturnType, FLSTST_CODE) FlsTst_MemCompare(
     P2CONST(uint8, AUTOMATIC, FLSTST_APPL_CONST) SourceDataPtr,
     P2CONST(uint8, AUTOMATIC, FLSTST_APPL_CONST) DstDataPtr,
     VAR(uint32, AUTOMATIC) Length);
-static uint32 FlsTst_CheckSum(
+/* Services to CheckSum */
+static FUNC(uint32, FLSTST_CODE) FlsTst_CheckSum(
     P2CONST(uint8, AUTOMATIC, FLSTST_APPL_CONST) Checksum_DataPtr,
     VAR(uint32, AUTOMATIC) Checksum_Length,
     VAR(uint32, AUTOMATIC) Checksum_StartValue,
     VAR(boolean, AUTOMATIC) Checksum_IsFirstCall);
-#endif
+#endif /* 0U != FLSTST_BGND_BLOCK_NUM || 0U != FLSTST_FGND_BLOCK_NUM */
+
 #if (STD_ON == FLSTST_COMPLETED_NOTIFY_SUPPORT)
-static void FlsTst_TestCompleted(void);
+/* Called every time when a complete test cycle had been tested */
+static FUNC(void, FLSTST_CODE) FlsTst_TestCompletedNotification(void);
 #endif /* STD_ON == FLSTST_COMPLETED_NOTIFY_SUPPORT */
+
 #define FLSTST_STOP_SEC_CODE
 #include "FlsTst_MemMap.h"
 /*============================================================================*/
@@ -159,29 +136,28 @@ static void FlsTst_TestCompleted(void);
 /*=============================[V A R I A N T S]==============================*/
 #define FLSTST_START_SEC_VAR_NO_INIT_UNSPECIFIED
 #include "FlsTst_MemMap.h"
-#if (0u == FLSTST_BGND_BLOCK_NUM)
-static FlsTst_BlockInfoType* FlsTst_BlockBgndInfo;
+#if (0 == FLSTST_BGND_BLOCK_NUM)
+static P2VAR(FlsTst_BlockInfoType, AUTOMATIC, FLSTST_APPL_DATA) FlsTst_BlockBgndInfo;
 #else
-static FlsTst_BlockInfoType FlsTst_BlockBgndInfo[FLSTST_BGND_BLOCK_NUM];
-static FlsTst_CurRunningType FlsTst_CurRunning;
-#if (STD_ON == FLSTST_EXTEND_SAFETY_MODE)
-static FlsTst_SignatureType FlsTst_ParamChecksum;
-#endif /* STD_ON == FLSTST_EXTEND_SAFETY_MODE */
-#endif
-#if (0u == FLSTST_FGND_BLOCK_NUM)
-static FlsTst_BlockInfoType* FlsTst_BlockFgndInfo;
+static VAR(FlsTst_BlockInfoType, FLSTST_APPL_DATA) FlsTst_BlockBgndInfo[FLSTST_BGND_BLOCK_NUM];
+static VAR(FlsTst_CurRunningType, FLSTST_APPL_DATA) FlsTst_CurRunning;
+#endif /* 0 == FLSTST_BGND_BLOCK_NUM */
+
+#if (0 == FLSTST_FGND_BLOCK_NUM)
+static P2VAR(FlsTst_BlockInfoType, AUTOMATIC, FLSTST_APPL_DATA) FlsTst_BlockFgndInfo;
 #else
-static FlsTst_BlockInfoType FlsTst_BlockFgndInfo[FLSTST_FGND_BLOCK_NUM];
-#endif
-static FlsTst_ModuleTypes FlsTst_Module;
+static VAR(FlsTst_BlockInfoType, FLSTST_APPL_DATA) FlsTst_BlockFgndInfo[FLSTST_FGND_BLOCK_NUM];
+#endif /* 0 == FLSTST_FGND_BLOCK_NUM */
+
+static VAR(FlsTst_ModuleTypes, FLSTST_APPL_DATA) FlsTst_Module;
+
+#if (STD_ON == FLSTST_INIT_ECC)
+static VAR(FlsTst_ECCInitType, FLSTST_APPL_DATA) FlsTst_ECCInitInfo;
+#endif /* STD_ON == FLSTST_INIT_ECC */
+
 #define FLSTST_STOP_SEC_VAR_NO_INIT_UNSPECIFIED
 #include "FlsTst_MemMap.h"
 
-#define FLSTST_START_SEC_VAR_NO_INIT_8BIT
-#include "FlsTst_MemMap.h"
-uint8 CrcCompleted; /* PRQA S 1514 */ /* MISRA Rule 8.9 */
-#define FLSTST_STOP_SEC_VAR_NO_INIT_8BIT
-#include "FlsTst_MemMap.h"
 /*============================================================================*/
 
 /*================[F U N C T I O N   I M P L E M E N T A T I O N S]===========*/
@@ -200,189 +176,99 @@ uint8 CrcCompleted; /* PRQA S 1514 */ /* MISRA Rule 8.9 */
  */
 /*************************************************************************/
 /* req FlsTst_00017  */
+/* PRQA S 0306 ++ */ /* MISRA Rule 11.4 */ /* FLSTST_CAST_OPERATORS_001 */
 #define FLSTST_START_SEC_CODE
 #include "FlsTst_MemMap.h"
-void FlsTst_Init(const FlsTst_ConfigType* ConfigPtr)
+FUNC(void, FLSTST_CODE)
+FlsTst_Init(P2CONST(FlsTst_ConfigType, AUTOMATIC, FLSTST_APPL_CONST) ConfigPtr)
 {
     uint8 MemBlockIndex;
-    uint32 SigntureStoredAddr;
-    uint32 TempBlockAddr;
-    uint32 TempBlockSize;
     uint32 TempSignature;
 
-#if (STD_ON == FLSTST_EXTEND_SAFETY_MODE)
-    uint32 ExtendAddr;
-#endif
+#if (STD_ON == FLSTST_DEV_ERROR_DETECT)
     if (NULL_PTR == ConfigPtr)
     {
-        FLSTST_DET_REPORTERROR(FLSTST_INIT_ID, FLSTST_E_PARAM_POINTER);
+        FLSTST_DET_REPORTERROR(FLSTST_INIT_ID, FLSTST_E_INIT_FAILED);
+    }
+    else if (FLSTST_UNINIT != FlsTst_Module.State)
+    {
+        FLSTST_DET_REPORTERROR(FLSTST_INIT_ID, FLSTST_E_ALREADY_INITIALIZED);
     }
     else
+#endif STD_ON == FLSTST_DEV_ERROR_DETECT* /
     {
-        if (FLSTST_UNINIT != FlsTst_Module.State)
-        {
-            FLSTST_DET_REPORTERROR(FLSTST_INIT_ID, FLSTST_E_ALREADY_INITIALIZED);
-        }
-        else
-        {
-            SchM_Enter_FlsTst_RAMTST_EXCLUSIVE_AREA();
-#if (0u != FLSTST_BGND_BLOCK_NUM)
+        SchM_Enter_FlsTst_Queue();
+#if (0 != FLSTST_BGND_BLOCK_NUM)
 #if (1u < FLSTST_BGND_BLOCK_NUM)
-            for (MemBlockIndex = 0; MemBlockIndex < FLSTST_BGND_BLOCK_NUM; MemBlockIndex++)
+        for (MemBlockIndex = 0; MemBlockIndex < FLSTST_BGND_BLOCK_NUM; MemBlockIndex++)
 #else
-            MemBlockIndex = 0;
-#endif /* #if (1u < FLSTST_BGND_BLOCK_NUM) */
-            {
-#if (STD_ON == FLSTST_EXTEND_SAFETY_MODE)
-                if ((0U == ConfigPtr->FlsTst_BgndBlockPtr[MemBlockIndex].BlcokLength)
-                    || (0U == ConfigPtr->FlsTst_BgndBlockPtr[MemBlockIndex].SignatureAddress))
-                {
-                    /* Error parameter ,Please check your configuration */
-                    FLSTST_DET_REPORTERROR(FLSTST_INIT_ID, FLSTST_E_INIT_FAILED);
-                }
-                else
-                {
-                    /*Get signaure's Address of Current configuration Block*/
-                    ExtendAddr = ConfigPtr->FlsTst_BgndBlockPtr[MemBlockIndex].SignatureAddress;
-                    TempBlockAddr = ConfigPtr->FlsTst_BgndBlockPtr[MemBlockIndex].BlockBaseAddress;
-                    TempBlockSize = ConfigPtr->FlsTst_BgndBlockPtr[MemBlockIndex].BlcokLength;
-                    /* PRQA S 0306++ */ /* MISRA Rule 11.4 */
-                    if (((uint8)(TempBlockAddr) != *(uint8*)(ExtendAddr - 8U))
-                        && ((uint8)(TempBlockAddr >> 8U) != *(uint8*)(ExtendAddr - 7U))
-                        && ((uint8)(TempBlockAddr >> 16U) != *(uint8*)(ExtendAddr - 6U))
-                        && ((uint8)(TempBlockAddr >> 24U) != *(uint8*)(ExtendAddr - 5U))
-                        && ((uint8)(TempBlockSize) != *(uint8*)(ExtendAddr - 4U))
-                        && ((uint8)(TempBlockSize >> 8U) != *(uint8*)(ExtendAddr - 3U))
-                        && ((uint8)(TempBlockSize >> 16U) != *(uint8*)(ExtendAddr - 2U))
-                        && ((uint8)(TempBlockSize >> 24U) != *(uint8*)(ExtendAddr - 1U)))
-                    /* PRQA S 0306-- */ /* MISRA Rule 11.4 */
-                    {
-                        /* Error parameter stored at fixed address锛孭lease check signature have been stored at correct
-                         * address */
-                        FLSTST_DET_REPORTERROR(FLSTST_INIT_ID, FLSTST_E_INIT_FAILED);
-                    }
-                    else
-                    {
-                        /* empty */
-                    }
-                }
-#endif
-                FlsTst_BlockBgndInfo[MemBlockIndex].MemoryBlockID =
-                    ConfigPtr->FlsTst_BgndBlockPtr[MemBlockIndex].BgndBlockIndex;
-                FlsTst_BlockBgndInfo[MemBlockIndex].TestAlgorithm =
-                    ConfigPtr->FlsTst_BgndBlockPtr[MemBlockIndex].TestAlgorithm;
-                FlsTst_BlockBgndInfo[MemBlockIndex].MemBlcokStartAddr =
-                    ConfigPtr->FlsTst_BgndBlockPtr[MemBlockIndex].BlockBaseAddress;
-                FlsTst_BlockBgndInfo[MemBlockIndex].MemBlcokLength =
-                    ConfigPtr->FlsTst_BgndBlockPtr[MemBlockIndex].BlcokLength;
-                if (FLSTST_DUPLICATED_MEMORY == FlsTst_BlockBgndInfo[MemBlockIndex].TestAlgorithm)
-                {
-                    /*Duplicated memory start address*/
-                    FlsTst_BlockBgndInfo[MemBlockIndex].SignatureStored =
-                        ConfigPtr->FlsTst_BgndBlockPtr[MemBlockIndex].SignatureAddress;
-                }
-                else
-                {
-                    TempSignature = ConfigPtr->FlsTst_BgndBlockPtr[MemBlockIndex].SignatureAddress;
-                    /* PRQA S 0306++ */ /* MISRA Rule 11.4 */
-                    FlsTst_BlockBgndInfo[MemBlockIndex].SignatureStored = ((uint32)(*(uint8*)(TempSignature)) << 24u);
-                    FlsTst_BlockBgndInfo[MemBlockIndex].SignatureStored +=
-                        ((uint32)(*(uint8*)(TempSignature + 1U)) << 16u);
-                    FlsTst_BlockBgndInfo[MemBlockIndex].SignatureStored +=
-                        ((uint32)(*(uint8*)(TempSignature + 2U)) << 8u);
-                    FlsTst_BlockBgndInfo[MemBlockIndex].SignatureStored += (uint32)(*(uint8*)(TempSignature + 3U));
-                    /* PRQA S 0306-- */ /* MISRA Rule 11.4 */
-                }
-                FlsTst_BlockBgndInfo[MemBlockIndex].SignatueCalculated = 0u;
-                FlsTst_BlockBgndInfo[MemBlockIndex].TestResult = FLSTST_RESULT_NOT_TESTED;
-            }
-#endif
+        MemBlockIndex = 0;
+#endif /* 1u < FLSTST_BGND_BLOCK_NUM */
+        {
+            FlsTst_BlockBgndInfo[MemBlockIndex].MemoryBlockID =
+                ConfigPtr->FlsTst_BgndBlockPtr[MemBlockIndex].BgndBlockIndex;
+            FlsTst_BlockBgndInfo[MemBlockIndex].TestAlgorithm =
+                ConfigPtr->FlsTst_BgndBlockPtr[MemBlockIndex].TestAlgorithm;
+            FlsTst_BlockBgndInfo[MemBlockIndex].MemBlcokStartAddr =
+                ConfigPtr->FlsTst_BgndBlockPtr[MemBlockIndex].BlockBaseAddress;
+            FlsTst_BlockBgndInfo[MemBlockIndex].MemBlcokLength =
+                ConfigPtr->FlsTst_BgndBlockPtr[MemBlockIndex].BlcokLength;
+            /*Duplicated memory start address*/
+            FlsTst_BlockBgndInfo[MemBlockIndex].DuplicateAddr =
+                ConfigPtr->FlsTst_BgndBlockPtr[MemBlockIndex].DuplicateAddr;
+            TempSignature = ConfigPtr->FlsTst_BgndBlockPtr[MemBlockIndex].SignatureAddress;
+            FlsTst_BlockBgndInfo[MemBlockIndex].SignatureStored = ((uint32)(*(uint8*)(TempSignature)) << 24u);
+            FlsTst_BlockBgndInfo[MemBlockIndex].SignatureStored += ((uint32)(*(uint8*)(TempSignature + 1U)) << 16u);
+            FlsTst_BlockBgndInfo[MemBlockIndex].SignatureStored += ((uint32)(*(uint8*)(TempSignature + 2U)) << 8u);
+            FlsTst_BlockBgndInfo[MemBlockIndex].SignatureStored += (uint32)(*(uint8*)(TempSignature + 3U));
+            FlsTst_BlockBgndInfo[MemBlockIndex].SignatueCalculated = 0u;
+            FlsTst_BlockBgndInfo[MemBlockIndex].TestResult = FLSTST_RESULT_NOT_TESTED;
+        }
+#endif /* 0 != FLSTST_BGND_BLOCK_NUM */
 
-#if (0u != FLSTST_FGND_BLOCK_NUM)
+#if (0 != FLSTST_FGND_BLOCK_NUM)
 #if (1u < FLSTST_FGND_BLOCK_NUM)
-            for (MemBlockIndex = 0; MemBlockIndex < FLSTST_FGND_BLOCK_NUM; MemBlockIndex++)
+        for (MemBlockIndex = 0; MemBlockIndex < FLSTST_FGND_BLOCK_NUM; MemBlockIndex++)
 #else
-            MemBlockIndex = 0;
-#endif /* #if (1u < FLSTST_FGND_BLOCK_NUM) */
-            {
-#if (STD_ON == FLSTST_EXTEND_SAFETY_MODE)
-                if ((0U == ConfigPtr->FlsTst_FgndBlockPtr[MemBlockIndex].BlcokLength)
-                    || (0U == ConfigPtr->FlsTst_FgndBlockPtr[MemBlockIndex].SignatureAddress))
-                {
-                    /* Error parameter ,Please check your configuration */
-                    FLSTST_DET_REPORTERROR(FLSTST_INIT_ID, FLSTST_E_INIT_FAILED);
-                }
-                else
-                {
-                    /*Get signaure's Address of Current configuration Block*/
-                    ExtendAddr = ConfigPtr->FlsTst_FgndBlockPtr[MemBlockIndex].SignatureAddress;
-                    TempBlockAddr = ConfigPtr->FlsTst_FgndBlockPtr[MemBlockIndex].BlockBaseAddress;
-                    TempBlockSize = ConfigPtr->FlsTst_FgndBlockPtr[MemBlockIndex].BlcokLength;
-                    /* PRQA S 0306++ */ /* MISRA Rule 11.4 */
-                    if (((uint8)(TempBlockAddr) != *(uint8*)(ExtendAddr - 8U))
-                        && ((uint8)(TempBlockAddr >> 8U) != *(uint8*)(ExtendAddr - 7U))
-                        && ((uint8)(TempBlockAddr >> 16U) != *(uint8*)(ExtendAddr - 6U))
-                        && ((uint8)(TempBlockAddr >> 24U) != *(uint8*)(ExtendAddr - 5U))
-                        && ((uint8)(TempBlockSize) != *(uint8*)(ExtendAddr - 4U))
-                        && ((uint8)(TempBlockSize >> 8U) != *(uint8*)(ExtendAddr - 3U))
-                        && ((uint8)(TempBlockSize >> 16U) != *(uint8*)(ExtendAddr - 2U))
-                        && ((uint8)(TempBlockSize >> 24U) != *(uint8*)(ExtendAddr - 1U)))
-                    /* PRQA S 0306-- */ /* MISRA Rule 11.4 */
-                    {
-                        /* Error parameter stored at fixed address锛孭lease check signature have been stored at correct
-                         * address */
-                        FLSTST_DET_REPORTERROR(FLSTST_INIT_ID, FLSTST_E_INIT_FAILED);
-                    }
-                    else
-                    {
-                        /* empty */
-                    }
-                }
-#endif
-                FlsTst_BlockFgndInfo[MemBlockIndex].MemoryBlockID =
-                    ConfigPtr->FlsTst_FgndBlockPtr[MemBlockIndex].BgndBlockIndex;
-                FlsTst_BlockFgndInfo[MemBlockIndex].TestAlgorithm =
-                    ConfigPtr->FlsTst_FgndBlockPtr[MemBlockIndex].TestAlgorithm;
-                FlsTst_BlockFgndInfo[MemBlockIndex].MemBlcokStartAddr =
-                    ConfigPtr->FlsTst_FgndBlockPtr[MemBlockIndex].BlockBaseAddress;
-                FlsTst_BlockFgndInfo[MemBlockIndex].MemBlcokLength =
-                    ConfigPtr->FlsTst_FgndBlockPtr[MemBlockIndex].BlcokLength;
-                if (FLSTST_DUPLICATED_MEMORY == FlsTst_BlockFgndInfo[MemBlockIndex].TestAlgorithm)
-                {
-                    /*Duplicated memory start address*/
-                    FlsTst_BlockFgndInfo[MemBlockIndex].SignatureStored =
-                        ConfigPtr->FlsTst_FgndBlockPtr[MemBlockIndex].SignatureAddress;
-                }
-                else
-                {
-                    TempSignature = ConfigPtr->FlsTst_FgndBlockPtr[MemBlockIndex].SignatureAddress;
-                    /* PRQA S 0306++ */ /* MISRA Rule 11.4 */
-                    FlsTst_BlockFgndInfo[MemBlockIndex].SignatureStored = ((uint32)(*(uint8*)(TempSignature)) << 24u);
-                    FlsTst_BlockFgndInfo[MemBlockIndex].SignatureStored +=
-                        ((uint32)(*(uint8*)(TempSignature + 1U)) << 16u);
-                    FlsTst_BlockFgndInfo[MemBlockIndex].SignatureStored +=
-                        ((uint32)(*(uint8*)(TempSignature + 2U)) << 8u);
-                    FlsTst_BlockFgndInfo[MemBlockIndex].SignatureStored += (uint32)(*(uint8*)(TempSignature + 3U));
-                    /* PRQA S 0306-- */ /* MISRA Rule 11.4 */
-                }
-                FlsTst_BlockFgndInfo[MemBlockIndex].SignatueCalculated = 0u;
-                FlsTst_BlockFgndInfo[MemBlockIndex].TestResult = FLSTST_RESULT_NOT_TESTED;
-            }
-#endif
+        MemBlockIndex = 0;
+#endif /* 1u < FLSTST_FGND_BLOCK_NUM */
+        {
+            FlsTst_BlockFgndInfo[MemBlockIndex].MemoryBlockID =
+                ConfigPtr->FlsTst_FgndBlockPtr[MemBlockIndex].BgndBlockIndex;
+            FlsTst_BlockFgndInfo[MemBlockIndex].TestAlgorithm =
+                ConfigPtr->FlsTst_FgndBlockPtr[MemBlockIndex].TestAlgorithm;
+            FlsTst_BlockFgndInfo[MemBlockIndex].MemBlcokStartAddr =
+                ConfigPtr->FlsTst_FgndBlockPtr[MemBlockIndex].BlockBaseAddress;
+            FlsTst_BlockFgndInfo[MemBlockIndex].MemBlcokLength =
+                ConfigPtr->FlsTst_FgndBlockPtr[MemBlockIndex].BlcokLength;
+            /*Duplicated memory start address*/
+            FlsTst_BlockFgndInfo[MemBlockIndex].DuplicateAddr =
+                ConfigPtr->FlsTst_FgndBlockPtr[MemBlockIndex].DuplicateAddr;
+            TempSignature = ConfigPtr->FlsTst_FgndBlockPtr[MemBlockIndex].SignatureAddress;
+            FlsTst_BlockFgndInfo[MemBlockIndex].SignatureStored = ((uint32)(*(uint8*)(TempSignature)) << 24u);
+            FlsTst_BlockFgndInfo[MemBlockIndex].SignatureStored += ((uint32)(*(uint8*)(TempSignature + 1U)) << 16u);
+            FlsTst_BlockFgndInfo[MemBlockIndex].SignatureStored += ((uint32)(*(uint8*)(TempSignature + 2U)) << 8u);
+            FlsTst_BlockFgndInfo[MemBlockIndex].SignatureStored += (uint32)(*(uint8*)(TempSignature + 3U));
+            FlsTst_BlockFgndInfo[MemBlockIndex].SignatueCalculated = 0u;
+            FlsTst_BlockFgndInfo[MemBlockIndex].TestResult = FLSTST_RESULT_NOT_TESTED;
+        }
+#endif /* 0 != FLSTST_FGND_BLOCK_NUM */
 
 #if (STD_ON == FLSTST_INIT_ECC)
-            REG_WRITE8(FLASH_FERCNFG_ADDR32, FLASH_FERCNFG_DFDIE_U8);
-#endif
-            FlsTst_Module.State = FLSTST_INIT;
-            FlsTst_Module.ErrorInfo.ErrorBlockID = 0xFFu;
-            FlsTst_Module.ErrorInfo.Algorithm = FLSTST_16BIT_CRC;
-            FlsTst_Module.ErrorInfo.SignatureResult = 0U;
-            FlsTst_Module.UserCallBack = ConfigPtr->FlsTstUserCallBack;
-            FlsTst_Module.IntervalID = 0U;
-            FlsTst_Module.BgndResult = FLSTST_RESULT_NOT_TESTED;
-            FlsTst_Module.FgndResult = FLSTST_NOT_TESTED;
-            SchM_Exit_FlsTst_RAMTST_EXCLUSIVE_AREA();
-        }
+        FlsTst_ECCInitInfo.FlsTst_ECCInitPtr = ConfigPtr->FlsTst_ECCInitFunc;
+        FlsTst_ECCInitInfo.FlsTst_ECCDeinitPtr = ConfigPtr->FlsTst_ECCDeInitFunc;
+        FlsTst_ECCInitInfo.FlsTst_ECCInitPtr();
+#endif /* STD_ON == FLSTST_INIT_ECC */
+        FlsTst_Module.State = FLSTST_INIT;
+        FlsTst_Module.ErrorInfo.ErrorBlockID = 0xFFu;
+        FlsTst_Module.ErrorInfo.Algorithm = FLSTST_16BIT_CRC;
+        FlsTst_Module.ErrorInfo.SignatureResult = 0U;
+        FlsTst_Module.UserCallBack = ConfigPtr->FlsTstUserCallBack;
+        FlsTst_Module.FlsTstECCTestFunction = ConfigPtr->FlsTst_ECCTestFunc;
+        FlsTst_Module.IntervalID = 0U;
+        FlsTst_Module.BgndResult = FLSTST_RESULT_NOT_TESTED;
+        FlsTst_Module.FgndResult = FLSTST_NOT_TESTED;
+        SchM_Exit_FlsTst_Queue();
     }
 }
 #define FLSTST_STOP_SEC_CODE
@@ -403,53 +289,60 @@ void FlsTst_Init(const FlsTst_ConfigType* ConfigPtr)
 /*************************************************************************/
 #define FLSTST_START_SEC_CODE
 #include "FlsTst_MemMap.h"
-void FlsTst_DeInit(void)
+FUNC(void, FLSTST_CODE)
+FlsTst_DeInit(void)
 {
     uint8 MemBlockIndex;
 
+#if (STD_ON == FLSTST_DEV_ERROR_DETECT)
     if (FLSTST_UNINIT == FlsTst_Module.State)
     {
         FLSTST_DET_REPORTERROR(FLSTST_DEINIT_ID, FLSTST_E_STATE_FAILURE);
     }
-    SchM_Enter_FlsTst_RAMTST_EXCLUSIVE_AREA();
+    else
+#endif /* STD_ON == FLSTST_DEV_ERROR_DETECT */
+    {
+        SchM_Enter_FlsTst_Queue();
 #if (0 != FLSTST_BGND_BLOCK_NUM)
 #if (1u < FLSTST_BGND_BLOCK_NUM)
-    for (MemBlockIndex = 0; MemBlockIndex < FLSTST_BGND_BLOCK_NUM; MemBlockIndex++)
+        for (MemBlockIndex = 0; MemBlockIndex < FLSTST_BGND_BLOCK_NUM; MemBlockIndex++)
 #else
-    MemBlockIndex = 0;
-#endif /* #if (1u < FLSTST_BGND_BLOCK_NUM) */
-    {
-        FlsTst_BlockBgndInfo[MemBlockIndex].MemoryBlockID = 0u;
-        FlsTst_BlockBgndInfo[MemBlockIndex].TestAlgorithm = FLSTST_16BIT_CRC;
-        FlsTst_BlockBgndInfo[MemBlockIndex].MemBlcokStartAddr = 0u;
-        FlsTst_BlockBgndInfo[MemBlockIndex].MemBlcokLength = 0u;
-        FlsTst_BlockBgndInfo[MemBlockIndex].SignatureStored = 0u;
-        FlsTst_BlockBgndInfo[MemBlockIndex].SignatueCalculated = 0u;
-        FlsTst_BlockBgndInfo[MemBlockIndex].TestResult = FLSTST_RESULT_NOT_TESTED;
-    }
-#endif
+        MemBlockIndex = 0;
+#endif /* 1u < FLSTST_BGND_BLOCK_NUM */
+        {
+            FlsTst_BlockBgndInfo[MemBlockIndex].MemoryBlockID = 0u;
+            FlsTst_BlockBgndInfo[MemBlockIndex].TestAlgorithm = FLSTST_16BIT_CRC;
+            FlsTst_BlockBgndInfo[MemBlockIndex].MemBlcokStartAddr = 0u;
+            FlsTst_BlockBgndInfo[MemBlockIndex].MemBlcokLength = 0u;
+            FlsTst_BlockBgndInfo[MemBlockIndex].SignatureStored = 0u;
+            FlsTst_BlockBgndInfo[MemBlockIndex].SignatueCalculated = 0u;
+            FlsTst_BlockBgndInfo[MemBlockIndex].TestResult = FLSTST_RESULT_NOT_TESTED;
+        }
+#endif /* 0 != FLSTST_BGND_BLOCK_NUM */
 
 #if (0 != FLSTST_FGND_BLOCK_NUM)
 #if (1u < FLSTST_FGND_BLOCK_NUM)
-    for (MemBlockIndex = 0; MemBlockIndex < FLSTST_FGND_BLOCK_NUM; MemBlockIndex++)
+        for (MemBlockIndex = 0; MemBlockIndex < FLSTST_FGND_BLOCK_NUM; MemBlockIndex++)
 #else
-    MemBlockIndex = 0;
-#endif /* #if (1u < FLSTST_FGND_BLOCK_NUM) */
-    {
-        FlsTst_BlockFgndInfo[MemBlockIndex].MemoryBlockID = 0u;
-        FlsTst_BlockFgndInfo[MemBlockIndex].TestAlgorithm = FLSTST_16BIT_CRC;
-        FlsTst_BlockFgndInfo[MemBlockIndex].MemBlcokStartAddr = 0u;
-        FlsTst_BlockFgndInfo[MemBlockIndex].MemBlcokLength = 0u;
-        FlsTst_BlockFgndInfo[MemBlockIndex].SignatureStored = 0u;
-        FlsTst_BlockFgndInfo[MemBlockIndex].SignatueCalculated = 0u;
-        FlsTst_BlockFgndInfo[MemBlockIndex].TestResult = FLSTST_RESULT_NOT_TESTED;
-    }
-#endif
+        MemBlockIndex = 0;
+#endif /* 1u < FLSTST_FGND_BLOCK_NUM */
+        {
+            FlsTst_BlockFgndInfo[MemBlockIndex].MemoryBlockID = 0u;
+            FlsTst_BlockFgndInfo[MemBlockIndex].TestAlgorithm = FLSTST_16BIT_CRC;
+            FlsTst_BlockFgndInfo[MemBlockIndex].MemBlcokStartAddr = 0u;
+            FlsTst_BlockFgndInfo[MemBlockIndex].MemBlcokLength = 0u;
+            FlsTst_BlockFgndInfo[MemBlockIndex].SignatureStored = 0u;
+            FlsTst_BlockFgndInfo[MemBlockIndex].SignatueCalculated = 0u;
+            FlsTst_BlockFgndInfo[MemBlockIndex].TestResult = FLSTST_RESULT_NOT_TESTED;
+        }
+#endif /* 0 != FLSTST_FGND_BLOCK_NUM */
+
 #if (STD_ON == FLSTST_INIT_ECC)
-    REG_WRITE8(FLASH_FERCNFG_ADDR32, 0u);
-#endif
-    FlsTst_Module.State = FLSTST_UNINIT;
-    SchM_Exit_FlsTst_RAMTST_EXCLUSIVE_AREA();
+        FlsTst_ECCInitInfo.FlsTst_ECCDeinitPtr();
+#endif /* STD_ON == FLSTST_INIT_ECC */
+        FlsTst_Module.State = FLSTST_UNINIT;
+        SchM_Exit_FlsTst_Queue();
+    }
 }
 #define FLSTST_STOP_SEC_CODE
 #include "FlsTst_MemMap.h"
@@ -473,31 +366,32 @@ void FlsTst_DeInit(void)
 #if ((STD_ON == FLSTST_START_FGND_API) && (0 != FLSTST_FGND_BLOCK_NUM))
 #define FLSTST_START_SEC_CODE
 #include "FlsTst_MemMap.h"
-Std_ReturnType FlsTst_StartFgnd(FlsTst_BlockIdFgndType FgndBlockId)
+FUNC(Std_ReturnType, FLSTST_CODE)
+FlsTst_StartFgnd(FlsTst_BlockIdFgndType FgndBlockId)
 {
-    Std_ReturnType testResult = E_NOT_OK;
-    uint32 CurentCRC = 0;
+    Std_ReturnType testResult;
 
+    testResult = E_NOT_OK;
+
+#if (STD_ON == FLSTST_DEV_ERROR_DETECT)
     if (FLSTST_UNINIT == FlsTst_Module.State)
     {
         FLSTST_DET_REPORTERROR(FLSTST_STARTFGND_ID, FLSTST_E_UNINIT);
     }
-    else
+    else if (FgndBlockId >= FLSTST_FGND_BLOCK_NUM)
     {
-        if (FgndBlockId >= FLSTST_FGND_BLOCK_NUM)
-        {
-            FLSTST_DET_REPORTERROR(FLSTST_STARTFGND_ID, FLSTST_E_PARAM_INVALID);
-        }
-        else
-        {
-            testResult = FlsTst_StartFgndInterTest(&FlsTst_BlockFgndInfo[FgndBlockId]);
-        }
+        FLSTST_DET_REPORTERROR(FLSTST_STARTFGND_ID, FLSTST_E_PARAM_INVALID);
+    }
+    else
+#endif /* STD_ON == FLSTST_DEV_ERROR_DETECT */
+    {
+        testResult = FlsTst_StartFgndInterTest(&FlsTst_BlockFgndInfo[FgndBlockId]);
     }
     return testResult;
 }
 #define FLSTST_STOP_SEC_CODE
 #include "FlsTst_MemMap.h"
-#endif /* STD_ON == FLSTST_START_FGND_API */
+#endif /* STD_ON == FLSTST_START_FGND_API && 0 != FLSTST_FGND_BLOCK_NUM */
 
 /*************************************************************************/
 /*
@@ -515,8 +409,10 @@ Std_ReturnType FlsTst_StartFgnd(FlsTst_BlockIdFgndType FgndBlockId)
 #if (0U != FLSTST_BGND_BLOCK_NUM)
 #define FLSTST_START_SEC_CODE
 #include "FlsTst_MemMap.h"
-void FlsTst_Abort(void)
+FUNC(void, FLSTST_CODE)
+FlsTst_Abort(void)
 {
+#if (STD_ON == FLSTST_DEV_ERROR_DETECT)
     if (FLSTST_UNINIT == FlsTst_Module.State)
     {
         FLSTST_DET_REPORTERROR(FLSTST_ABORT_ID, FLSTST_E_UNINIT);
@@ -526,13 +422,14 @@ void FlsTst_Abort(void)
         FLSTST_DET_REPORTERROR(FLSTST_ABORT_ID, FLSTST_E_STATE_FAILURE);
     }
     else
+#endif /* STD_ON == FLSTST_DEV_ERROR_DETECT */
     {
         FlsTst_Module.State = FLSTST_ABORTED;
     }
 }
 #define FLSTST_STOP_SEC_CODE
 #include "FlsTst_MemMap.h"
-#endif
+#endif /* 0U != FLSTST_BGND_BLOCK_NUM */
 /*************************************************************************/
 /*
  * Brief               Service for suspending current operation of the
@@ -550,8 +447,10 @@ void FlsTst_Abort(void)
 #if ((STD_ON == FLSTST_SUSPEND_RESUME_API) && (0U != FLSTST_BGND_BLOCK_NUM))
 #define FLSTST_START_SEC_CODE
 #include "FlsTst_MemMap.h"
-void FlsTst_Suspend(void)
+FUNC(void, FLSTST_CODE)
+FlsTst_Suspend(void)
 {
+#if (STD_ON == FLSTST_DEV_ERROR_DETECT)
     if (FLSTST_UNINIT == FlsTst_Module.State)
     {
         FLSTST_DET_REPORTERROR(FLSTST_SUSPEND_ID, FLSTST_E_UNINIT);
@@ -561,13 +460,14 @@ void FlsTst_Suspend(void)
         FLSTST_DET_REPORTERROR(FLSTST_SUSPEND_ID, FLSTST_E_STATE_FAILURE);
     }
     else
+#endif /* STD_ON == FLSTST_DEV_ERROR_DETECT */
     {
         FlsTst_Module.State = FLSTST_SUSPENDED;
     }
 }
 #define FLSTST_STOP_SEC_CODE
 #include "FlsTst_MemMap.h"
-#endif /* STD_ON == FLSTST_SUSPEND_RESUME_API */
+#endif /* STD_ON == FLSTST_SUSPEND_RESUME_API && 0U != FLSTST_BGND_BLOCK_NUM */
 
 /*************************************************************************/
 /*
@@ -586,8 +486,10 @@ void FlsTst_Suspend(void)
 #if ((STD_ON == FLSTST_SUSPEND_RESUME_API) && (0U != FLSTST_BGND_BLOCK_NUM))
 #define FLSTST_START_SEC_CODE
 #include "FlsTst_MemMap.h"
-void FlsTst_Resume(void)
+FUNC(void, FLSTST_CODE)
+FlsTst_Resume(void)
 {
+#if (STD_ON == FLSTST_DEV_ERROR_DETECT)
     if (FLSTST_UNINIT == FlsTst_Module.State)
     {
         FLSTST_DET_REPORTERROR(FLSTST_RESUME_ID, FLSTST_E_UNINIT);
@@ -597,13 +499,14 @@ void FlsTst_Resume(void)
         FLSTST_DET_REPORTERROR(FLSTST_RESUME_ID, FLSTST_E_STATE_FAILURE);
     }
     else
+#endif /* STD_ON == FLSTST_DEV_ERROR_DETECT */
     {
         FlsTst_Module.State = FLSTST_RUNNING;
     }
 }
 #define FLSTST_STOP_SEC_CODE
 #include "FlsTst_MemMap.h"
-#endif /* STD_ON == FLSTST_SUSPEND_RESUME_API */
+#endif /* STD_ON == FLSTST_SUSPEND_RESUME_API && 0U != FLSTST_BGND_BLOCK_NUM */
 /*************************************************************************/
 /*
  * Brief               Service for continuing the Flash Test at the point
@@ -632,7 +535,8 @@ void FlsTst_Resume(void)
 #if (STD_ON == FLSTST_GET_CURRENT_STATE_API)
 #define FLSTST_START_SEC_CODE
 #include "FlsTst_MemMap.h"
-FlsTst_StateType FlsTst_GetCurrentState(void)
+FUNC(FlsTst_StateType, FLSTST_CODE)
+FlsTst_GetCurrentState(void)
 {
     return FlsTst_Module.State;
 }
@@ -652,25 +556,31 @@ FlsTst_StateType FlsTst_GetCurrentState(void)
  * PreCondition        None
  */
 /*************************************************************************/
-#if ((STD_ON == FLSTST_GET_TEST_RESULT_BGND_API) && (0u != FLSTST_BGND_BLOCK_NUM))
+#if ((STD_ON == FLSTST_GET_TEST_RESULT_BGND_API) && (0 != FLSTST_BGND_BLOCK_NUM))
 #define FLSTST_START_SEC_CODE
 #include "FlsTst_MemMap.h"
-FlsTst_TestResultBgndType FlsTst_GetTestResultBgnd(void)
+FUNC(FlsTst_TestResultBgndType, FLSTST_CODE)
+FlsTst_GetTestResultBgnd(void)
 {
-    FlsTst_TestResultBgndType TestResultBgnd;
+    FlsTst_TestResultBgndType TestResultBgnd = {0, FLSTST_RESULT_NOT_TESTED};
 
+#if (STD_ON == FLSTST_DEV_ERROR_DETECT)
     if (FLSTST_UNINIT == FlsTst_Module.State)
     {
         FLSTST_DET_REPORTERROR(FLSTST_GETTESTRESULTBGND_ID, FLSTST_E_UNINIT);
     }
-    TestResultBgnd.FlsTstIntervalID = FlsTst_Module.IntervalID;
-    TestResultBgnd.result = FlsTst_Module.BgndResult;
+    else
+#endif /* STD_ON == FLSTST_DEV_ERROR_DETECT */
+    {
+        TestResultBgnd.FlsTstIntervalID = FlsTst_Module.IntervalID;
+        TestResultBgnd.result = FlsTst_Module.BgndResult;
+    }
 
     return TestResultBgnd;
 }
 #define FLSTST_STOP_SEC_CODE
 #include "FlsTst_MemMap.h"
-#endif /* STD_ON == FLSTST_GET_TEST_RESULT_BGND_API */
+#endif /* STD_ON == FLSTST_GET_TEST_RESULT_BGND_API && 0 != FLSTST_BGND_BLOCK_NUM */
 
 /*************************************************************************/
 /*
@@ -685,24 +595,29 @@ FlsTst_TestResultBgndType FlsTst_GetTestResultBgnd(void)
  * PreCondition        None
  */
 /*************************************************************************/
-#if ((STD_ON == FLSTST_GET_TEST_RESULT_FGND_API) && (0u != FLSTST_FGND_BLOCK_NUM))
+#if ((STD_ON == FLSTST_GET_TEST_RESULT_FGND_API) && (0 != FLSTST_FGND_BLOCK_NUM))
 #define FLSTST_START_SEC_CODE
 #include "FlsTst_MemMap.h"
-FlsTst_TestResultFgndType FlsTst_GetTestResultFgnd(void)
+FUNC(FlsTst_TestResultFgndType, FLSTST_CODE)
+FlsTst_GetTestResultFgnd(void)
 {
-    FlsTst_TestResultFgndType TestResultFgnd;
+    FlsTst_TestResultFgndType TestResultFgnd = FLSTST_NOT_TESTED;
 
+#if (STD_ON == FLSTST_DEV_ERROR_DETECT)
     if (FLSTST_UNINIT == FlsTst_Module.State)
     {
         FLSTST_DET_REPORTERROR(FLSTST_GETTESTRESULTFGND_ID, FLSTST_E_UNINIT);
     }
-    TestResultFgnd = FlsTst_Module.FgndResult;
-
+    else
+#endif /* STD_ON == FLSTST_DEV_ERROR_DETECT */
+    {
+        TestResultFgnd = FlsTst_Module.FgndResult;
+    }
     return TestResultFgnd;
 }
 #define FLSTST_STOP_SEC_CODE
 #include "FlsTst_MemMap.h"
-#endif /* STD_ON == FLSTST_GET_TEST_RESULT_FGND_API */
+#endif /* STD_ON == FLSTST_GET_TEST_RESULT_FGND_API && 0 != FLSTST_FGND_BLOCK_NUM */
 /*************************************************************************/
 /*
  * Brief               Service returns the version information of this module.
@@ -720,8 +635,10 @@ FlsTst_TestResultFgndType FlsTst_GetTestResultFgnd(void)
 #if (STD_ON == FLSTST_VERSION_INFO_API)
 #define FLSTST_START_SEC_CODE
 #include "FlsTst_MemMap.h"
-void FlsTst_GetVersionInfo(Std_VersionInfoType* versionInfo)
+FUNC(void, FLSTST_CODE)
+FlsTst_GetVersionInfo(Std_VersionInfoType* versionInfo)
 {
+#if (STD_ON == FLSTST_DEV_ERROR_DETECT)
     if (FLSTST_UNINIT == FlsTst_Module.State)
     {
         FLSTST_DET_REPORTERROR(FLSTST_GETVERSIONINFO_ID, FLSTST_E_UNINIT);
@@ -731,12 +648,13 @@ void FlsTst_GetVersionInfo(Std_VersionInfoType* versionInfo)
         FLSTST_DET_REPORTERROR(FLSTST_GETVERSIONINFO_ID, FLSTST_E_PARAM_POINTER);
     }
     else
+#endif /* STD_ON == FLSTST_DEV_ERROR_DETECT */
     {
         (versionInfo)->vendorID = (uint16)FLSTST_VENDOR_ID;
         (versionInfo)->moduleID = (uint8)FLSTST_MODULE_ID;
-        (versionInfo)->sw_major_version = (uint8)FLSTST_C_AR_MAJOR_VERSION;
-        (versionInfo)->sw_minor_version = (uint8)FLSTST_C_AR_MINOR_VERSION;
-        (versionInfo)->sw_patch_version = (uint8)FLSTST_C_AR_PATCH_VERSION;
+        (versionInfo)->sw_major_version = (uint8)FLSTST_SW_MAJOR_VERSION;
+        (versionInfo)->sw_minor_version = (uint8)FLSTST_SW_MINOR_VERSION;
+        (versionInfo)->sw_patch_version = (uint8)FLSTST_SW_PATCH_VERSION;
     }
 }
 #define FLSTST_STOP_SEC_CODE
@@ -758,36 +676,32 @@ void FlsTst_GetVersionInfo(Std_VersionInfoType* versionInfo)
  */
 /*************************************************************************/
 
-#if ((STD_ON == FLSTST_GET_TEST_SIGNATURE_BGND_API) && (0u != FLSTST_BGND_BLOCK_NUM))
+#if ((STD_ON == FLSTST_GET_TEST_SIGNATURE_BGND_API) && (0 != FLSTST_BGND_BLOCK_NUM))
 #define FLSTST_START_SEC_CODE
 #include "FlsTst_MemMap.h"
-FlsTst_TestSignatureBgndType FlsTst_GetTestSignatureBgnd(void)
+FUNC(FlsTst_TestSignatureBgndType, FLSTST_CODE)
+FlsTst_GetTestSignatureBgnd(void)
 {
     FlsTst_TestSignatureBgndType TestSignatureBgnd;
     FlsTst_BlockIdType MemBlockIndex;
 
     TestSignatureBgnd.BgndSignature = 0;
     TestSignatureBgnd.FlsTstIntervalID = 0;
+
+#if (STD_ON == FLSTST_DEV_ERROR_DETECT)
     if (FLSTST_UNINIT == FlsTst_Module.State)
     {
         FLSTST_DET_REPORTERROR(FLSTST_MAINFUNCTION_ID, FLSTST_E_UNINIT);
     }
     else
+#endif /* STD_ON == FLSTST_DEV_ERROR_DETECT */
     {
-#if (1u < FLSTST_BGND_BLOCK_NUM)
         for (MemBlockIndex = 0; MemBlockIndex < FLSTST_BGND_BLOCK_NUM; MemBlockIndex++)
-#else
-        MemBlockIndex = 0;
-#endif /* #if (1u < FLSTST_BGND_BLOCK_NUM) */
         {
             if (FLSTST_RESULT_OK == FlsTst_BlockBgndInfo[MemBlockIndex].TestResult)
             {
                 /* sum of Signature of all blocks */
-#if (1u < FLSTST_BGND_BLOCK_NUM)
                 TestSignatureBgnd.BgndSignature += FlsTst_BlockBgndInfo[MemBlockIndex].SignatueCalculated;
-#else
-                TestSignatureBgnd.BgndSignature = FlsTst_BlockBgndInfo[MemBlockIndex].SignatueCalculated;
-#endif /* #if (1u < FLSTST_BGND_BLOCK_NUM) */
             }
             else
             {
@@ -800,7 +714,7 @@ FlsTst_TestSignatureBgndType FlsTst_GetTestSignatureBgnd(void)
 }
 #define FLSTST_STOP_SEC_CODE
 #include "FlsTst_MemMap.h"
-#endif /* STD_ON == FLSTST_GET_TEST_SIGNATURE_BGND_API */
+#endif /* STD_ON == FLSTST_GET_TEST_SIGNATURE_BGND_API && 0 != FLSTST_BGND_BLOCK_NUM */
 
 /*************************************************************************/
 /*
@@ -816,26 +730,30 @@ FlsTst_TestSignatureBgndType FlsTst_GetTestSignatureBgnd(void)
  * PreCondition        None
  */
 /*************************************************************************/
-#if ((STD_ON == FLSTST_GET_TEST_SIGNATURE_FGND_API) && (0u != FLSTST_FGND_BLOCK_NUM))
+#if ((STD_ON == FLSTST_GET_TEST_SIGNATURE_FGND_API) && (0 != FLSTST_FGND_BLOCK_NUM))
 #define FLSTST_START_SEC_CODE
 #include "FlsTst_MemMap.h"
-FlsTst_TestSignatureFgndType FlsTst_GetTestSignatureFgnd(void)
+FUNC(FlsTst_TestSignatureFgndType, FLSTST_CODE)
+FlsTst_GetTestSignatureFgnd(void)
 {
     FlsTst_TestSignatureFgndType TestSignatureFgnd;
     FlsTst_BlockIdType MemBlockIndex;
 
     TestSignatureFgnd.FgndSignature = 0;
+
+#if (STD_ON == FLSTST_DEV_ERROR_DETECT)
     if (FLSTST_UNINIT == FlsTst_Module.State)
     {
         FLSTST_DET_REPORTERROR(FLSTST_GETTESTSIGNATUREFGND_ID, FLSTST_E_UNINIT);
     }
     else
+#endif /* STD_ON == FLSTST_DEV_ERROR_DETECT */
     {
 #if (1u < FLSTST_BGND_BLOCK_NUM)
         for (MemBlockIndex = 0; MemBlockIndex < FLSTST_BGND_BLOCK_NUM; MemBlockIndex++)
 #else
         MemBlockIndex = 0;
-#endif /* #if (1u < FLSTST_BGND_BLOCK_NUM) */
+#endif /* 1u < FLSTST_BGND_BLOCK_NUM */
         {
             if (FLSTST_RESULT_OK == FlsTst_BlockFgndInfo[MemBlockIndex].TestResult)
             {
@@ -844,10 +762,11 @@ FlsTst_TestSignatureFgndType FlsTst_GetTestSignatureFgnd(void)
                 TestSignatureFgnd.FgndSignature += FlsTst_BlockFgndInfo[MemBlockIndex].SignatueCalculated;
 #else
                 TestSignatureFgnd.FgndSignature = FlsTst_BlockFgndInfo[MemBlockIndex].SignatueCalculated;
-#endif /* #if (1u < FLSTST_BGND_BLOCK_NUM) */
+#endif /* 1u < FLSTST_BGND_BLOCK_NUM */
             }
             else
             {
+                /* empty */
             }
         }
     }
@@ -855,7 +774,7 @@ FlsTst_TestSignatureFgndType FlsTst_GetTestSignatureFgnd(void)
 }
 #define FLSTST_STOP_SEC_CODE
 #include "FlsTst_MemMap.h"
-#endif /* STD_ON == FLSTST_GET_TEST_SIGNATURE_FGND_API */
+#endif /* STD_ON == FLSTST_GET_TEST_SIGNATURE_FGND_API && 0 != FLSTST_FGND_BLOCK_NUM */
 
 /*************************************************************************/
 /*
@@ -874,20 +793,27 @@ FlsTst_TestSignatureFgndType FlsTst_GetTestSignatureFgnd(void)
 #if ((STD_ON == FLSTST_GET_ERRORD_ETAILS_API) && ((0U != FLSTST_BGND_BLOCK_NUM) || (0U != FLSTST_FGND_BLOCK_NUM)))
 #define FLSTST_START_SEC_CODE
 #include "FlsTst_MemMap.h"
-FlsTst_ErrorDetailsType FlsTst_GetErrorDetails(void)
+FUNC(FlsTst_ErrorDetailsType, FLSTST_CODE)
+FlsTst_GetErrorDetails(void)
 {
-    FlsTst_ErrorDetailsType ErrDetails;
+    FlsTst_ErrorDetailsType ErrDetails = {0, FLSTST_16BIT_CRC, 0};
 
+#if (STD_ON == FLSTST_DEV_ERROR_DETECT)
     if (FLSTST_UNINIT == FlsTst_Module.State)
     {
         FLSTST_DET_REPORTERROR(FLSTST_GETERRORDETAILS_ID, FLSTST_E_UNINIT);
     }
-    ErrDetails = FlsTst_Module.ErrorInfo;
+    else
+#endif /* STD_ON == FLSTST_DEV_ERROR_DETECT */
+    {
+        ErrDetails = FlsTst_Module.ErrorInfo;
+    }
     return ErrDetails;
 }
 #define FLSTST_STOP_SEC_CODE
 #include "FlsTst_MemMap.h"
-#endif /* STD_ON == FLSTST_GET_ERRORD_ETAILS_API */
+#endif /* STD_ON == FLSTST_GET_ERRORD_ETAILS_API && \
+    0U != FLSTST_BGND_BLOCK_NUM || 0U != FLSTST_FGND_BLOCK_NUM */
 
 /*************************************************************************/
 /*
@@ -907,20 +833,51 @@ FlsTst_ErrorDetailsType FlsTst_GetErrorDetails(void)
 #if ((STD_ON == FLSTST_TEST_ECC_API) && ((0U != FLSTST_BGND_BLOCK_NUM) || (0U != FLSTST_FGND_BLOCK_NUM)))
 #define FLSTST_START_SEC_CODE
 #include "FlsTst_MemMap.h"
-Std_ReturnType FlsTst_TestEcc(void)
+FUNC(Std_ReturnType, FLSTST_CODE)
+FlsTst_TestEcc(void)
 {
-    Std_ReturnType Result = E_NOT_OK;
+    Std_ReturnType Result;
+    FlsTst_LengthType l_EccLength;
+    FlsTst_AddressType TestStartAddr;
+    FlsTst_AddressType TestEndAddr;
 
+    TestStartAddr = FlsTst_CurRunning.TestAddr;
+    Result = E_NOT_OK;
+
+#if (STD_ON == FLSTST_DEV_ERROR_DETECT)
     if (FLSTST_UNINIT == FlsTst_Module.State)
     {
-        FLSTST_DET_REPORTERROR(FLSTST_MAINFUNCTION_ID, FLSTST_E_UNINIT);
+        FLSTST_DET_REPORTERROR(FLSTST_TESTECC_ID, FLSTST_E_UNINIT);
     }
-    /* do not supprort ECC test*/
+    else
+#endif /* STD_ON == FLSTST_DEV_ERROR_DETECT */
+    {
+        if (FLSTST_TESTCELL_LENGTH_ATOMIC < FlsTst_CurRunning.TestLength)
+        {
+            l_EccLength = FLSTST_TESTCELL_LENGTH_ATOMIC;
+        }
+        else
+        {
+            l_EccLength = FlsTst_CurRunning.TestLength;
+        }
+
+        TestEndAddr = TestStartAddr + l_EccLength;
+
+        if (NULL_PTR != FlsTst_Module.FlsTstECCTestFunction)
+        {
+            Result = FlsTst_Module.FlsTstECCTestFunction((const uint32*)TestStartAddr, (const uint32*)TestEndAddr);
+        }
+        else
+        {
+            /* Do not support Flash ECC test function */
+        }
+    }
     return Result;
 }
 #define FLSTST_STOP_SEC_CODE
 #include "FlsTst_MemMap.h"
-#endif /* STD_ON == FLSTST_TEST_ECC_API */
+#endif /* STD_ON == FLSTST_TEST_ECC_API && \
+    0U != FLSTST_BGND_BLOCK_NUM || 0U != FLSTST_FGND_BLOCK_NUM */
 /*************************************************************************/
 /*
  * Brief               Service for executing the Flash Test in background
@@ -938,16 +895,16 @@ Std_ReturnType FlsTst_TestEcc(void)
 #if (0U != FLSTST_BGND_BLOCK_NUM)
 #define FLSTST_START_SEC_CODE
 #include "FlsTst_MemMap.h"
-void FlsTst_MainFunction(void)
+FUNC(void, FLSTST_CODE)
+FlsTst_MainFunction(void)
 {
-#if (STD_ON == FLSTST_EXTEND_SAFETY_MODE)
-    static uint32 FlsTst_SuspendCounter;
-#endif
     FlsTst_GetResource();
     switch (FlsTst_Module.State)
     {
     case FLSTST_UNINIT:
+#if (STD_ON == FLSTST_DEV_ERROR_DETECT)
         FLSTST_DET_REPORTERROR(FLSTST_MAINFUNCTION_ID, FLSTST_E_UNINIT);
+#endif /* STD_ON == FLSTST_DEV_ERROR_DETECT */
         break;
 
     case FLSTST_INIT:
@@ -966,10 +923,6 @@ void FlsTst_MainFunction(void)
         break;
 
     case FLSTST_RUNNING:
-#if (STD_ON == FLSTST_EXTEND_SAFETY_MODE)
-        /* clear suspend counter*/
-        FlsTst_SuspendCounter = 0;
-#endif
         /*Continue Calc*/
         FlsTst_InterTest();
         break;
@@ -979,26 +932,19 @@ void FlsTst_MainFunction(void)
         break;
 
     case FLSTST_SUSPENDED:
-#if (STD_ON == FLSTST_EXTEND_SAFETY_MODE)
-        /*suspend overtime check*/
-        FlsTst_SuspendCounter++;
-        if (FlsTst_SuspendCounter > 100U)
-        {
-            /* suspend time is too long */
-            FLSTST_DET_REPORTERROR(FLSTST_MAINFUNCTION_ID, FLSTST_E_SUSPEND_OVERTIME);
-        }
-#endif
         break;
 
     default:
+#if (STD_ON == FLSTST_DEV_ERROR_DETECT)
         FLSTST_DET_REPORTERROR(FLSTST_MAINFUNCTION_ID, FLSTST_E_PARAM_INVALID);
+#endif /* STD_ON == FLSTST_DEV_ERROR_DETECT */
         break;
     }
     FlsTst_FreeResource();
 }
 #define FLSTST_STOP_SEC_CODE
 #include "FlsTst_MemMap.h"
-#endif
+#endif /* 0U != FLSTST_BGND_BLOCK_NUM */
 /*************************************************************************/
 /*
  * Brief               The function FlsTst_TestCompletedNotification shall be called
@@ -1014,15 +960,24 @@ void FlsTst_MainFunction(void)
  * PreCondition        None
  */
 /*************************************************************************/
-#if (0u != FLSTST_BGND_BLOCK_NUM)
+#if (0 != FLSTST_BGND_BLOCK_NUM)
 #define FLSTST_START_SEC_CODE
 #include "FlsTst_MemMap.h"
 #if (STD_ON == FLSTST_COMPLETED_NOTIFY_SUPPORT)
-static void FlsTst_TestCompleted(void)
+static FUNC(void, FLSTST_CODE) FlsTst_TestCompletedNotification(void)
 {
-    if (NULL_PTR != FlsTst_Module.UserCallBack)
+#if (STD_ON == FLSTST_DEV_ERROR_DETECT)
+    if (FLSTST_UNINIT == FlsTst_Module.State)
     {
-        FlsTst_Module.UserCallBack();
+        FLSTST_DET_REPORTERROR(FLSTST_TESTCOMPLETENOTIFY_ID, FLSTST_E_UNINIT);
+    }
+    else
+#endif /* STD_ON == FLSTST_DEV_ERROR_DETECT */
+    {
+        if (NULL_PTR != FlsTst_Module.UserCallBack)
+        {
+            FlsTst_Module.UserCallBack();
+        }
     }
 }
 #define FLSTST_STOP_SEC_CODE
@@ -1045,26 +1000,26 @@ static void FlsTst_TestCompleted(void)
 /*************************************************************************/
 #define FLSTST_START_SEC_CODE
 #include "FlsTst_MemMap.h"
-static void FlsTst_CopyBlockInfo(FlsTst_BlockIdType FlsTstBlockID)
+static FUNC(void, FLSTST_CODE) FlsTst_CopyBlockInfo(FlsTst_BlockIdType FlsTstBlockID)
 {
+#if (STD_ON == FLSTST_DEV_ERROR_DETECT)
     if (FlsTstBlockID >= FLSTST_BGND_BLOCK_NUM)
     {
         FLSTST_DET_REPORTERROR(FLSTST_MAINFUNCTION_ID, FLSTST_E_PARAM_INVALID);
     }
     else
+#endif /* STD_ON == FLSTST_DEV_ERROR_DETECT */
     {
-        SchM_Enter_FlsTst_RAMTST_EXCLUSIVE_AREA();
-        FlsTst_CurRunning.FirstFlag = 0u;
+        SchM_Enter_FlsTst_Queue();
+        FlsTst_CurRunning.FirstFlag = FALSE;
         FlsTst_CurRunning.CalcResult = 0;
         FlsTst_CurRunning.CurBlockID = FlsTst_BlockBgndInfo[FlsTstBlockID].MemoryBlockID;
         FlsTst_CurRunning.TestAddr = FlsTst_BlockBgndInfo[FlsTstBlockID].MemBlcokStartAddr;
         FlsTst_CurRunning.TestLength = FlsTst_BlockBgndInfo[FlsTstBlockID].MemBlcokLength;
         FlsTst_CurRunning.TestAlgorithm = FlsTst_BlockBgndInfo[FlsTstBlockID].TestAlgorithm;
-        SchM_Exit_FlsTst_RAMTST_EXCLUSIVE_AREA();
-#if (STD_ON == FLSTST_EXTEND_SAFETY_MODE)
-        FlsTst_ParamChecksum = (uint32)FlsTst_CurRunning.TestAddr + (uint32)FlsTst_CurRunning.TestLength
-                               + (uint32)FlsTst_CurRunning.CalcResult;
-#endif
+        /*Duplicated memory start address*/
+        FlsTst_CurRunning.DupTestAddr = FlsTst_BlockBgndInfo[FlsTstBlockID].DuplicateAddr;
+        SchM_Exit_FlsTst_Queue();
     }
 }
 #define FLSTST_STOP_SEC_CODE
@@ -1088,18 +1043,22 @@ static void FlsTst_CopyBlockInfo(FlsTst_BlockIdType FlsTstBlockID)
 /*************************************************************************/
 #define FLSTST_START_SEC_CODE
 #include "FlsTst_MemMap.h"
-static void FlsTst_BlockTestFinish(void)
+static FUNC(void, FLSTST_CODE) FlsTst_BlockTestFinish(void)
 {
-    FlsTst_BlockIdType BlockID = FlsTst_CurRunning.CurBlockID;
+    FlsTst_BlockIdType BlockID;
     FlsTst_BlockIdType MemBlockIndex;
+    boolean l_ErrorBlock;
 
-    uint8 l_ErrorBlock = 0;
+    l_ErrorBlock = FALSE;
+    BlockID = FlsTst_CurRunning.CurBlockID;
+
+#if (STD_ON == FLSTST_DEV_ERROR_DETECT)
     if (BlockID > (FLSTST_BGND_BLOCK_NUM - 1U))
     {
         FLSTST_DET_REPORTERROR(FLSTST_MAINFUNCTION_ID, FLSTST_E_PARAM_INVALID);
     }
-#if (1u < FLSTST_BGND_BLOCK_NUM)
-    else if (BlockID < (FLSTST_BGND_BLOCK_NUM - 1U))
+    else
+#endif /* STD_ON == FLSTST_DEV_ERROR_DETECT */
     {
         FlsTst_BlockBgndInfo[BlockID].SignatueCalculated = FlsTst_CurRunning.CalcResult;
         if (FlsTst_BlockBgndInfo[BlockID].SignatueCalculated == FlsTst_BlockBgndInfo[BlockID].SignatureStored)
@@ -1111,65 +1070,56 @@ static void FlsTst_BlockTestFinish(void)
             FlsTst_Module.BgndResult = FLSTST_RESULT_NOT_OK;
             FlsTst_BlockBgndInfo[BlockID].TestResult = FLSTST_RESULT_NOT_OK;
             /*at least one block test failed*/
-#if FLSTST_DEM_FLSTST_E_FLSTST_FAILURE
+#if (FLSTST_DEM_FLSTST_E_FLSTST_FAILURE == STD_ON)
             Dem_ReportErrorStatus(FLSTST_E_FLSTST_FAILURE, DEM_EVENT_STATUS_FAILED);
-#endif
+#endif /* FLSTST_DEM_FLSTST_E_FLSTST_FAILURE == STD_ON */
         }
-        /* Another block need to be tested*/
+    }
+
+    /* Another block need to be tested*/
+#if (FLSTST_BGND_BLOCK_NUM > 1)
+    if (BlockID < ((FlsTst_BlockIdType)(FLSTST_BGND_BLOCK_NUM - 1U)))
+    {
         BlockID++;
         FlsTst_CopyBlockInfo(BlockID);
     }
-#endif   /* #if (1u < FLSTST_BGND_BLOCK_NUM) */
     else /*the last block test finished*/
+#endif   /* FLSTST_BGND_BLOCK_NUM > 1 */
     {
-        FlsTst_BlockBgndInfo[BlockID].SignatueCalculated = FlsTst_CurRunning.CalcResult;
-        if (FlsTst_BlockBgndInfo[BlockID].SignatueCalculated == FlsTst_BlockBgndInfo[BlockID].SignatureStored)
-        {
-            FlsTst_BlockBgndInfo[BlockID].TestResult = FLSTST_RESULT_OK;
-        }
-        else
-        {
-            FlsTst_Module.BgndResult = FLSTST_RESULT_NOT_OK;
-            FlsTst_BlockBgndInfo[BlockID].TestResult = FLSTST_RESULT_NOT_OK;
-            /*at least one block test failed*/
-#if FLSTST_DEM_FLSTST_E_FLSTST_FAILURE
-            Dem_ReportErrorStatus(FLSTST_E_FLSTST_FAILURE, DEM_EVENT_STATUS_FAILED);
-#endif
-        }
         /*no more block need to be tested, current test interval finished.*/
-
 #if (1u < FLSTST_BGND_BLOCK_NUM)
         for (MemBlockIndex = 0U; MemBlockIndex < FLSTST_BGND_BLOCK_NUM; MemBlockIndex++)
 #else
         MemBlockIndex = 0;
-#endif /*#if (1u < FLSTST_BGND_BLOCK_NUM)*/
+#endif /*1u < FLSTST_BGND_BLOCK_NUM*/
         {
             if (FLSTST_RESULT_NOT_OK == FlsTst_BlockBgndInfo[MemBlockIndex].TestResult)
             {
-                l_ErrorBlock = 1U;
+                l_ErrorBlock = TRUE;
                 FlsTst_Module.ErrorInfo.ErrorBlockID = MemBlockIndex;
                 FlsTst_Module.ErrorInfo.Algorithm = FlsTst_BlockBgndInfo[MemBlockIndex].TestAlgorithm;
                 FlsTst_Module.ErrorInfo.SignatureResult = FlsTst_BlockBgndInfo[MemBlockIndex].SignatueCalculated;
 #if (1u < FLSTST_BGND_BLOCK_NUM)
                 break;
-#endif /*#if (1u < FLSTST_BGND_BLOCK_NUM)*/
+#endif /*1u < FLSTST_BGND_BLOCK_NUM*/
             }
         }
 
-        if (0U == l_ErrorBlock)
+        if (FALSE == l_ErrorBlock)
         {
             FlsTst_Module.BgndResult = FLSTST_RESULT_OK;
-#if FLSTST_DEM_FLSTST_E_FLSTST_FAILURE
+#if (FLSTST_DEM_FLSTST_E_FLSTST_FAILURE == STD_ON)
             Dem_ReportErrorStatus(FLSTST_E_FLSTST_FAILURE, DEM_EVENT_STATUS_PASSED);
-#endif
+#endif /* FLSTST_DEM_FLSTST_E_FLSTST_FAILURE == STD_ON */
         }
         else
         {
             /* empty */
         }
+
         FlsTst_Module.State = FLSTST_INIT;
 #if (STD_ON == FLSTST_COMPLETED_NOTIFY_SUPPORT)
-        FlsTst_TestCompleted();
+        FlsTst_TestCompletedNotification();
 #endif /* STD_ON == FLSTST_COMPLETED_NOTIFY_SUPPORT */
     }
 }
@@ -1193,10 +1143,15 @@ static void FlsTst_BlockTestFinish(void)
 /*************************************************************************/
 #define FLSTST_START_SEC_CODE
 #include "FlsTst_MemMap.h"
-static void FlsTst_InterTest(void)
+static FUNC(void, FLSTST_CODE) FlsTst_InterTest(void)
 {
     uint32 Cycletimes;
     uint32 l_Counter;
+    Std_ReturnType ret = E_NOT_OK;
+#if (FLSTST_TIMEOUT == STD_ON)
+    uint32 FlsTstTimeStart_Bgnd;
+    uint32 FlsTstTimeGap_Bgnd;
+#endif /* FLSTST_TIMEOUT == STD_ON */
 
     if ((FlsTst_CurRunning.TestLength == 0U) && (FLSTST_RUNNING == FlsTst_Module.State))
     {
@@ -1208,56 +1163,50 @@ static void FlsTst_InterTest(void)
         /* First calculate CRC*/
         if ((FLSTST_TESTCELLS_NUM * FLSTST_TESTCELL_LENGTH_ATOMIC) < FlsTst_CurRunning.TestLength)
         {
-#if (1u < FLSTST_TESTCELLS_NUM)
-            for (l_Counter = 0; l_Counter < FLSTST_TESTCELLS_NUM; l_Counter++)
-#endif /* #if (1u < FLSTST_TESTCELLS_NUM) */
-            {
-                if (FLSTST_RUNNING == FlsTst_Module.State)
-                {
-                    FlsTst_CalcAtomic();
-                }
-                else if ((FLSTST_SUSPENDED == FlsTst_Module.State) || (FLSTST_ABORTED == FlsTst_Module.State))
-                {
-#if (1u < FLSTST_TESTCELLS_NUM)
-                    break;
-#endif /* #if (1u < FLSTST_TESTCELLS_NUM) */
-                }
-                else
-                {
-                    FLSTST_DET_REPORTERROR(FLSTST_MAINFUNCTION_ID, FLSTST_E_STATE_FAILURE);
-                }
-
-                if (0U == FlsTst_CurRunning.TestLength)
-                {
-#if (1u < FLSTST_TESTCELLS_NUM)
-                    break;
-#endif /* #if (1u < FLSTST_TESTCELLS_NUM) */
-                }
-            }
+            Cycletimes = FLSTST_TESTCELLS_NUM;
         }
         else /* Length smaller than FLSTST_NUMOFTESTEDCELLS,but not 0 */
         {
             Cycletimes = FlsTst_CurRunning.TestLength / FLSTST_TESTCELL_LENGTH_ATOMIC;
             Cycletimes = Cycletimes + 1U;
-            for (l_Counter = 0U; l_Counter < Cycletimes; l_Counter++)
-            {
-                if (FLSTST_RUNNING == FlsTst_Module.State)
-                {
-                    FlsTst_CalcAtomic();
-                }
-                else if ((FLSTST_SUSPENDED == FlsTst_Module.State) || (FLSTST_ABORTED == FlsTst_Module.State))
-                {
-                    break;
-                }
-                else
-                {
-                    FLSTST_DET_REPORTERROR(FLSTST_MAINFUNCTION_ID, FLSTST_E_STATE_FAILURE);
-                }
+        }
 
-                if (0U == FlsTst_CurRunning.TestLength)
+#if (FLSTST_TIMEOUT == STD_ON)
+        FlsTstTimeStart_Bgnd = Frt_ReadOutMS();
+#endif /* FLSTST_TIMEOUT == STD_ON */
+
+        for (l_Counter = 0U; ((l_Counter < Cycletimes) && (ret == E_OK)); l_Counter++)
+        {
+            if (FLSTST_RUNNING == FlsTst_Module.State)
+            {
+                FlsTst_CalcAtomic();
+#if (FLSTST_TIMEOUT == STD_ON)
+                FlsTstTimeGap_Bgnd = Frt_CalculateElapsedMS(FlsTstTimeStart_Bgnd);
+                if (FlsTstTimeGap_Bgnd >= FLSTST_TIMEOUTVALUE_BGND)
                 {
-                    break;
+#if (STD_ON == FLSTST_DEV_ERROR_DETECT)
+                    FLSTST_DET_REPORTERROR(FLSTST_MAINFUNCTION_ID, FLSTST_E_TIMEOUT);
+#endif /* STD_ON == FLSTST_DEV_ERROR_DETECT */
+                    FlsTst_Abort();
+                    FlsTst_Module.BgndResult = FLSTST_RESULT_NOT_OK;
+                    ret = E_NOT_OK;
                 }
+#endif /* FLSTST_TIMEOUT == STD_ON */
+            }
+            else if ((FLSTST_SUSPENDED == FlsTst_Module.State) || (FLSTST_ABORTED == FlsTst_Module.State))
+            {
+                ret = E_NOT_OK;
+            }
+            else
+            {
+#if (STD_ON == FLSTST_DEV_ERROR_DETECT)
+                FLSTST_DET_REPORTERROR(FLSTST_MAINFUNCTION_ID, FLSTST_E_STATE_FAILURE);
+#endif /* STD_ON == FLSTST_DEV_ERROR_DETECT */
+            }
+
+            if (0U == FlsTst_CurRunning.TestLength)
+            {
+                break;
             }
         }
     }
@@ -1282,25 +1231,16 @@ static void FlsTst_InterTest(void)
 /*************************************************************************/
 #define FLSTST_START_SEC_CODE
 #include "FlsTst_MemMap.h"
-static void FlsTst_CalcAtomic(void)
+static FUNC(void, FLSTST_CODE) FlsTst_CalcAtomic(void)
 {
     FlsTst_LengthType l_CrcLength;
     boolean l_FirstTimeCalc;
 
-#if (STD_ON == FLSTST_EXTEND_SAFETY_MODE)
-    if ((uint32)FlsTst_ParamChecksum
-        != ((uint32)FlsTst_CurRunning.TestAddr + (uint32)FlsTst_CurRunning.TestLength
-            + (uint32)FlsTst_CurRunning.CalcResult))
-    {
-        FLSTST_DET_REPORTERROR(FLSTST_STARTFGND_ID, FLSTST_E_DATA_CRRUPTED);
-        /* Data of FlsTst_CurRunning is corrupted */
-    }
-#endif /* STD_ON == FLSTST_EXTEND_SAFETY_MODE */
-    SchM_Enter_FlsTst_RAMTST_EXCLUSIVE_AREA();
+    SchM_Enter_FlsTst_Queue();
     /*if a block was First time to calculate CRC*/
-    if (0U == FlsTst_CurRunning.FirstFlag)
+    if (FALSE == FlsTst_CurRunning.FirstFlag)
     {
-        FlsTst_CurRunning.FirstFlag = 1U;
+        FlsTst_CurRunning.FirstFlag = TRUE;
         l_FirstTimeCalc = TRUE;
     }
     else
@@ -1308,7 +1248,7 @@ static void FlsTst_CalcAtomic(void)
         l_FirstTimeCalc = FALSE;
     }
 
-    if ((FLSTST_TESTCELL_LENGTH_ATOMIC) < FlsTst_CurRunning.TestLength)
+    if (FLSTST_TESTCELL_LENGTH_ATOMIC < FlsTst_CurRunning.TestLength)
     {
         l_CrcLength = FLSTST_TESTCELL_LENGTH_ATOMIC;
     }
@@ -1319,7 +1259,6 @@ static void FlsTst_CalcAtomic(void)
 
     switch (FlsTst_CurRunning.TestAlgorithm)
     {
-        /* PRQA S 0306++ */ /* MISRA Rule 11.4 */
     case FLSTST_16BIT_CRC:
         FlsTst_CurRunning.CalcResult = (uint32)Crc_CalculateCRC16(
             (uint8*)FlsTst_CurRunning.TestAddr,
@@ -1351,36 +1290,35 @@ static void FlsTst_CalcAtomic(void)
             (uint32)FlsTst_CurRunning.CalcResult,
             l_FirstTimeCalc);
         break;
-        /* PRQA S 0306-- */ /* MISRA Rule 11.4 */
 
     case FLSTST_DUPLICATED_MEMORY:
-        /* do not support in background test*/
-        FLSTST_DET_REPORTERROR(FLSTST_MAINFUNCTION_ID, FLSTST_E_PARAM_INVALID);
+        FlsTst_CurRunning.CalcResult = (uint32)
+            FlsTst_MemCompare((uint8*)FlsTst_CurRunning.TestAddr, (uint8*)FlsTst_CurRunning.DupTestAddr, l_CrcLength);
         break;
 
     case FLSTST_ECC:
-        /* do not support in background test*/
-        FLSTST_DET_REPORTERROR(FLSTST_MAINFUNCTION_ID, FLSTST_E_PARAM_INVALID);
+#if ((STD_ON == FLSTST_TEST_ECC_API) && ((0U != FLSTST_BGND_BLOCK_NUM) || (0U != FLSTST_FGND_BLOCK_NUM)))
+        FlsTst_CurRunning.CalcResult = FlsTst_TestEcc();
+#endif /* STD_ON == FLSTST_TEST_ECC_API && \
+    0U != FLSTST_BGND_BLOCK_NUM || 0U != FLSTST_FGND_BLOCK_NUM */
         break;
 
     default:
+#if (STD_ON == FLSTST_DEV_ERROR_DETECT)
         /* do not support other Algorithm. */
         FLSTST_DET_REPORTERROR(FLSTST_MAINFUNCTION_ID, FLSTST_E_PARAM_INVALID);
+#endif /* STD_ON == FLSTST_DEV_ERROR_DETECT */
         break;
     }
     FlsTst_CurRunning.TestLength -= l_CrcLength;
     FlsTst_CurRunning.TestAddr += l_CrcLength;
-    SchM_Exit_FlsTst_RAMTST_EXCLUSIVE_AREA();
-#if (STD_ON == FLSTST_EXTEND_SAFETY_MODE)
-    FlsTst_ParamChecksum = (uint32)FlsTst_CurRunning.TestAddr + (uint32)FlsTst_CurRunning.TestLength
-                           + (uint32)FlsTst_CurRunning.CalcResult;
-    /* Data of FlsTst_CurRunning is corrupted */
-#endif /* STD_ON == FLSTST_EXTEND_SAFETY_MODE */
+    FlsTst_CurRunning.DupTestAddr += l_CrcLength;
+    SchM_Exit_FlsTst_Queue();
     return;
 }
 #define FLSTST_STOP_SEC_CODE
 #include "FlsTst_MemMap.h"
-#endif
+#endif /* 0 != FLSTST_BGND_BLOCK_NUM */
 /*************************************************************************/
 /*
  * Brief               The function FlsTst_StartFgndInterTest shall be
@@ -1396,26 +1334,38 @@ static void FlsTst_CalcAtomic(void)
  * PreCondition        None
  */
 /*************************************************************************/
-#if (0u != FLSTST_FGND_BLOCK_NUM)
+#if (0 != FLSTST_FGND_BLOCK_NUM)
 #define FLSTST_START_SEC_CODE
 #include "FlsTst_MemMap.h"
-static Std_ReturnType FlsTst_StartFgndInterTest(FlsTst_BlockInfoType* BlockInfoPtr)
+static FUNC(Std_ReturnType, FLSTST_CODE) FlsTst_StartFgndInterTest(FlsTst_BlockInfoType* BlockInfoPtr)
 {
-    Std_ReturnType testResult = E_NOT_OK;
+    Std_ReturnType testResult;
     FlsTst_AlgorithmType Algorithm;
-    FlsTst_BlockIdType MemBlockIndex;
-    uint8 l_BlockError = 0;
+    boolean l_BlockError;
     FlsTst_StateType BgndState;
 
+#if (FLSTST_TIMEOUT == STD_ON)
+    uint32 FlsTstTimeStart_Fgnd;
+    uint32 FlsTstTimeGap_Fgnd;
+#endif /* FLSTST_TIMEOUT == STD_ON */
+
+    testResult = E_NOT_OK;
+    l_BlockError = FALSE;
+
+#if (STD_ON == FLSTST_DEV_ERROR_DETECT)
     if (NULL_PTR == BlockInfoPtr)
     {
         FLSTST_DET_REPORTERROR(FLSTST_STARTFGND_ID, FLSTST_E_PARAM_POINTER);
     }
     else
+#endif /* STD_ON == FLSTST_DEV_ERROR_DETECT */
     {
         BgndState = FlsTst_Module.State;
         FlsTst_Module.State = FLSTST_RUNNING;
         Algorithm = BlockInfoPtr->TestAlgorithm;
+#if (FLSTST_TIMEOUT == STD_ON)
+        FlsTstTimeStart_Fgnd = Frt_ReadOutMS();
+#endif /* FLSTST_TIMEOUT == STD_ON */
         switch (Algorithm)
         {
         case FLSTST_16BIT_CRC:
@@ -1443,43 +1393,43 @@ static Std_ReturnType FlsTst_StartFgndInterTest(FlsTst_BlockInfoType* BlockInfoP
             break;
 
         default:
+#if (STD_ON == FLSTST_DEV_ERROR_DETECT)
             FLSTST_DET_REPORTERROR(FLSTST_STARTFGND_ID, FLSTST_E_PARAM_INVALID);
+#endif /* STD_ON == FLSTST_DEV_ERROR_DETECT */
             testResult = E_NOT_OK;
             break;
         }
-
-        if (FLSTST_RESULT_NOT_OK == BlockInfoPtr->TestResult)
+#if (FLSTST_TIMEOUT == STD_ON)
+        FlsTstTimeGap_Fgnd = Frt_CalculateElapsedMS(FlsTstTimeStart_Fgnd);
+        if (FlsTstTimeGap_Fgnd >= FLSTST_TIMEOUTVALUE_FGND)
+        {
+            FlsTstTimeGap_Fgnd = 0;
+#if (STD_ON == FLSTST_DEV_ERROR_DETECT)
+            FLSTST_DET_REPORTERROR(FLSTST_MAINFUNCTION_ID, FLSTST_E_TIMEOUT);
+#endif /* STD_ON == FLSTST_DEV_ERROR_DETECT */
+            FlsTst_Abort();
+            FlsTst_Module.FgndResult = FLSTST_NOT_OK;
+            l_BlockError = TRUE;
+        }
+#endif /* FLSTST_TIMEOUT == STD_ON */
+        if ((FLSTST_RESULT_NOT_OK == BlockInfoPtr->TestResult)
+#if (FLSTST_TIMEOUT == STD_ON)
+            && (l_BlockError == FALSE)
+#endif /* FLSTST_TIMEOUT == STD_ON */
+        )
         {
             /*copy error details info*/
             FlsTst_Module.ErrorInfo.ErrorBlockID = BlockInfoPtr->MemoryBlockID;
             FlsTst_Module.ErrorInfo.Algorithm = BlockInfoPtr->TestAlgorithm;
             FlsTst_Module.ErrorInfo.SignatureResult = BlockInfoPtr->SignatueCalculated;
-#if FLSTST_DEM_FLSTST_E_FLSTST_FAILURE
+            FlsTst_Module.FgndResult = FLSTST_NOT_OK;
+            l_BlockError = TRUE;
+#if (FLSTST_DEM_FLSTST_E_FLSTST_FAILURE == STD_ON)
             Dem_ReportErrorStatus(FLSTST_E_FLSTST_FAILURE, DEM_EVENT_STATUS_FAILED);
-#endif
+#endif /* FLSTST_DEM_FLSTST_E_FLSTST_FAILURE == STD_ON */
         }
 
-#if (1u < FLSTST_BGND_BLOCK_NUM)
-        for (MemBlockIndex = 0; MemBlockIndex < FLSTST_BGND_BLOCK_NUM; MemBlockIndex++)
-#else
-        MemBlockIndex = 0;
-#endif /*#if (1u < FLSTST_BGND_BLOCK_NUM)*/
-        {
-            if (FLSTST_RESULT_NOT_OK == FlsTst_BlockFgndInfo[MemBlockIndex].TestResult)
-            {
-                l_BlockError++;
-                FlsTst_Module.FgndResult = FLSTST_NOT_OK;
-            }
-            else if (FLSTST_RESULT_NOT_TESTED == FlsTst_BlockFgndInfo[MemBlockIndex].TestResult)
-            {
-                l_BlockError++;
-            }
-            else
-            {
-                /* if all block test successfully, l_BlockError should be 0*/
-            }
-        }
-        if (0U == l_BlockError)
+        if (FALSE == l_BlockError)
         {
             FlsTst_Module.FgndResult = FLSTST_OK;
         }
@@ -1495,240 +1445,35 @@ static Std_ReturnType FlsTst_StartFgndInterTest(FlsTst_BlockInfoType* BlockInfoP
 
 #define FLSTST_START_SEC_CODE
 #include "FlsTst_MemMap.h"
-static Std_ReturnType FlsTst_CRC32Fgnd(FlsTst_BlockInfoType* BlockInfoPtr)
+static FUNC(Std_ReturnType, FLSTST_CODE) FlsTst_CRC32Fgnd(FlsTst_BlockInfoType* BlockInfoPtr)
 {
+
     FlsTst_AddressType TestAddr;
     FlsTst_LengthType TestLength;
-    FlsTst_AlgorithmType Algorithm;
     FlsTst_SignatureType SignatureResult;
-    Std_ReturnType l_testResult = E_NOT_OK;
+    Std_ReturnType l_testResult;
 
+    l_testResult = E_NOT_OK;
+
+#if (STD_ON == FLSTST_DEV_ERROR_DETECT)
     if (NULL_PTR == BlockInfoPtr)
     {
         FLSTST_DET_REPORTERROR(FLSTST_STARTFGND_ID, FLSTST_E_PARAM_POINTER);
     }
+    else if (FLSTST_32BIT_CRC != BlockInfoPtr->TestAlgorithm)
+    {
+        FLSTST_DET_REPORTERROR(FLSTST_STARTFGND_ID, FLSTST_E_PARAM_INVALID);
+    }
     else
+#endif /* STD_ON == FLSTST_DEV_ERROR_DETECT */
     {
         TestAddr = BlockInfoPtr->MemBlcokStartAddr;
         TestLength = BlockInfoPtr->MemBlcokLength;
-        Algorithm = BlockInfoPtr->TestAlgorithm;
-        SignatureResult = 0;
-
-        if (FLSTST_32BIT_CRC != Algorithm)
-        {
-            FLSTST_DET_REPORTERROR(FLSTST_STARTFGND_ID, FLSTST_E_PARAM_INVALID);
-        }
-        else
-        {
-            /* if test method changes,Modify the code below */
-            /* Use CRC32  */
-            /* PRQA S 0306++ */ /* MISRA Rule 11.4 */
-            SignatureResult = (uint32)Crc_CalculateCRC32((uint8*)TestAddr, TestLength, (uint32)SignatureResult, TRUE);
-            /* PRQA S 0306-- */ /* MISRA Rule 11.4 */
-
-            BlockInfoPtr->SignatueCalculated = SignatureResult;
-            if (BlockInfoPtr->SignatureStored == BlockInfoPtr->SignatueCalculated)
-            {
-                BlockInfoPtr->TestResult = FLSTST_RESULT_OK;
-            }
-            else
-            {
-                BlockInfoPtr->TestResult = FLSTST_RESULT_NOT_OK;
-            }
-            l_testResult = E_OK;
-        }
-    }
-
-    return l_testResult;
-}
-#define FLSTST_STOP_SEC_CODE
-#include "FlsTst_MemMap.h"
-
-#define FLSTST_START_SEC_CODE
-#include "FlsTst_MemMap.h"
-static Std_ReturnType FlsTst_CRC16Fgnd(FlsTst_BlockInfoType* BlockInfoPtr)
-{
-    FlsTst_AddressType TestAddr;
-    FlsTst_LengthType TestLength;
-    FlsTst_AlgorithmType Algorithm;
-    FlsTst_SignatureType SignatureResult;
-    Std_ReturnType l_testResult = E_NOT_OK;
-
-    if (NULL_PTR == BlockInfoPtr)
-    {
-        FLSTST_DET_REPORTERROR(FLSTST_STARTFGND_ID, FLSTST_E_PARAM_POINTER);
-    }
-    else
-    {
-        TestAddr = BlockInfoPtr->MemBlcokStartAddr;
-        TestLength = BlockInfoPtr->MemBlcokLength;
-        Algorithm = BlockInfoPtr->TestAlgorithm;
-        SignatureResult = 0;
-
-        if (FLSTST_16BIT_CRC != Algorithm)
-        {
-            FLSTST_DET_REPORTERROR(FLSTST_STARTFGND_ID, FLSTST_E_PARAM_INVALID);
-        }
-        else
-        {
-            /* if test method changes,Modify the code below */
-            /* Use CRC16  */
-            /* PRQA S 0306++ */ /* MISRA Rule 11.4 */
-            SignatureResult = (uint32)Crc_CalculateCRC16((uint8*)TestAddr, TestLength, (uint16)SignatureResult, TRUE);
-            /* PRQA S 0306-- */ /* MISRA Rule 11.4 */
-
-            BlockInfoPtr->SignatueCalculated = SignatureResult;
-            if (BlockInfoPtr->SignatureStored == BlockInfoPtr->SignatueCalculated)
-            {
-                BlockInfoPtr->TestResult = FLSTST_RESULT_OK;
-            }
-            else
-            {
-                BlockInfoPtr->TestResult = FLSTST_RESULT_NOT_OK;
-            }
-            l_testResult = E_OK;
-        }
-    }
-
-    return l_testResult;
-}
-#define FLSTST_STOP_SEC_CODE
-#include "FlsTst_MemMap.h"
-
-#define FLSTST_START_SEC_CODE
-#include "FlsTst_MemMap.h"
-static Std_ReturnType FlsTst_CRC8Fgnd(FlsTst_BlockInfoType* BlockInfoPtr)
-{
-    FlsTst_AddressType TestAddr;
-    FlsTst_LengthType TestLength;
-    FlsTst_AlgorithmType Algorithm;
-    FlsTst_SignatureType SignatureResult;
-    Std_ReturnType l_testResult = E_NOT_OK;
-
-    if (NULL_PTR == BlockInfoPtr)
-    {
-        FLSTST_DET_REPORTERROR(FLSTST_STARTFGND_ID, FLSTST_E_PARAM_POINTER);
-    }
-    else
-    {
-
-        TestAddr = BlockInfoPtr->MemBlcokStartAddr;
-        TestLength = BlockInfoPtr->MemBlcokLength;
-        Algorithm = BlockInfoPtr->TestAlgorithm;
-        SignatureResult = 0;
-
-        if (FLSTST_8BIT_CRC != Algorithm)
-        {
-            FLSTST_DET_REPORTERROR(FLSTST_STARTFGND_ID, FLSTST_E_PARAM_INVALID);
-        }
-        else
-        {
-            /* if test method changes,Modify the code below */
-            /* Use CRC8  */
-            /* PRQA S 0306++ */ /* MISRA Rule 11.4 */
-            SignatureResult = Crc_CalculateCRC8((uint8*)TestAddr, TestLength, (uint8)SignatureResult, TRUE);
-            /* PRQA S 0306-- */ /* MISRA Rule 11.4 */
-
-            BlockInfoPtr->SignatueCalculated = SignatureResult;
-            if (BlockInfoPtr->SignatureStored == BlockInfoPtr->SignatueCalculated)
-            {
-                BlockInfoPtr->TestResult = FLSTST_RESULT_OK;
-            }
-            else
-            {
-                BlockInfoPtr->TestResult = FLSTST_RESULT_NOT_OK;
-            }
-            l_testResult = E_OK;
-        }
-    }
-    return l_testResult;
-}
-#define FLSTST_STOP_SEC_CODE
-#include "FlsTst_MemMap.h"
-
-#define FLSTST_START_SEC_CODE
-#include "FlsTst_MemMap.h"
-static Std_ReturnType FlsTst_DuplicatedMemoryFgnd(FlsTst_BlockInfoType* BlockInfoPtr)
-{
-    FlsTst_AddressType TestAddr;
-    FlsTst_LengthType TestLength;
-    FlsTst_AlgorithmType Algorithm;
-    FlsTst_AddressType DuplicateMemoryAddr;
-    Std_ReturnType l_testResult = E_NOT_OK;
-
-    if (NULL_PTR == BlockInfoPtr)
-    {
-        FLSTST_DET_REPORTERROR(FLSTST_STARTFGND_ID, FLSTST_E_PARAM_POINTER);
-    }
-    else
-    {
-        TestAddr = BlockInfoPtr->MemBlcokStartAddr;
-        TestLength = BlockInfoPtr->MemBlcokLength;
-        Algorithm = BlockInfoPtr->TestAlgorithm;
-        /*duplicate memory address*/
-        DuplicateMemoryAddr = (FlsTst_AddressType)BlockInfoPtr->SignatureStored;
-
-        if (FLSTST_DUPLICATED_MEMORY != Algorithm)
-        {
-            FLSTST_DET_REPORTERROR(FLSTST_STARTFGND_ID, FLSTST_E_PARAM_INVALID);
-        }
-        else
-        {
-            /* if test method changes,Modify the code below */
-            /* FlsTst Duplicated Memory  Foreground  test */
-            /* PRQA S 0306++ */ /* MISRA Rule 11.4 */
-            l_testResult = FlsTst_MemCompare((uint8*)TestAddr, (uint8*)DuplicateMemoryAddr, TestLength);
-            /* PRQA S 0306-- */ /* MISRA Rule 11.4 */
-
-            if ((Std_ReturnType)E_OK == l_testResult)
-            {
-                BlockInfoPtr->TestResult = FLSTST_RESULT_OK;
-            }
-            else
-            {
-                BlockInfoPtr->TestResult = FLSTST_RESULT_NOT_OK;
-            }
-        }
-    }
-    return l_testResult;
-}
-#define FLSTST_STOP_SEC_CODE
-#include "FlsTst_MemMap.h"
-
-#define FLSTST_START_SEC_CODE
-#include "FlsTst_MemMap.h"
-static Std_ReturnType FlsTst_ChecksumFgnd(FlsTst_BlockInfoType* BlockInfoPtr)
-{
-    FlsTst_AddressType TestAddr;
-    FlsTst_LengthType TestLength;
-    FlsTst_AlgorithmType Algorithm;
-    FlsTst_SignatureType SignatureResult;
-    Std_ReturnType l_testResult = E_NOT_OK;
-
-    if (NULL_PTR == BlockInfoPtr)
-    {
-        FLSTST_DET_REPORTERROR(FLSTST_STARTFGND_ID, FLSTST_E_PARAM_POINTER);
-    }
-    else
-    {
-        TestAddr = BlockInfoPtr->MemBlcokStartAddr;
-        TestLength = BlockInfoPtr->MemBlcokLength;
-        Algorithm = BlockInfoPtr->TestAlgorithm;
-        SignatureResult = 0U;
-        if (FLSTST_CHECKSUM != Algorithm)
-        {
-            FLSTST_DET_REPORTERROR(FLSTST_STARTFGND_ID, FLSTST_E_PARAM_INVALID);
-        }
-        else
-        {
-            /* empty */
-        }
+        SignatureResult = 0u;
 
         /* if test method changes,Modify the code below */
-        /* Use CRC8  */
-        /* PRQA S 0306++ */ /* MISRA Rule 11.4 */
-        SignatureResult = FlsTst_CheckSum((uint8*)TestAddr, TestLength, SignatureResult, TRUE);
-        /* PRQA S 0306-- */ /* MISRA Rule 11.4 */
+        /* Use CRC32  */
+        SignatureResult = (uint32)Crc_CalculateCRC32((uint8*)TestAddr, TestLength, (uint16)SignatureResult, TRUE);
 
         BlockInfoPtr->SignatueCalculated = SignatureResult;
         if (BlockInfoPtr->SignatureStored == BlockInfoPtr->SignatueCalculated)
@@ -1748,41 +1493,246 @@ static Std_ReturnType FlsTst_ChecksumFgnd(FlsTst_BlockInfoType* BlockInfoPtr)
 
 #define FLSTST_START_SEC_CODE
 #include "FlsTst_MemMap.h"
-static Std_ReturnType FlsTst_ECCTestFgnd(FlsTst_BlockInfoType* BlockInfoPtr)
+static FUNC(Std_ReturnType, FLSTST_CODE) FlsTst_CRC16Fgnd(FlsTst_BlockInfoType* BlockInfoPtr)
 {
+    FlsTst_AddressType TestAddr;
+    FlsTst_LengthType TestLength;
+    FlsTst_SignatureType SignatureResult;
+    Std_ReturnType l_testResult;
 
-    Std_ReturnType l_testResult = E_NOT_OK;
-    FlsTst_AlgorithmType Algorithm;
+    l_testResult = E_NOT_OK;
 
+#if (STD_ON == FLSTST_DEV_ERROR_DETECT)
     if (NULL_PTR == BlockInfoPtr)
     {
         FLSTST_DET_REPORTERROR(FLSTST_STARTFGND_ID, FLSTST_E_PARAM_POINTER);
     }
-    else
+    else if (FLSTST_16BIT_CRC != BlockInfoPtr->TestAlgorithm)
     {
-        Algorithm = BlockInfoPtr->TestAlgorithm;
-        if (FLSTST_ECC != Algorithm)
+        FLSTST_DET_REPORTERROR(FLSTST_STARTFGND_ID, FLSTST_E_PARAM_INVALID);
+    }
+    else
+#endif /* STD_ON == FLSTST_DEV_ERROR_DETECT */
+    {
+        TestAddr = BlockInfoPtr->MemBlcokStartAddr;
+        TestLength = BlockInfoPtr->MemBlcokLength;
+        SignatureResult = 0u;
+
+        /* if test method changes,Modify the code below */
+        /* Use CRC16  */
+        SignatureResult = (uint32)Crc_CalculateCRC16((uint8*)TestAddr, TestLength, (uint16)SignatureResult, TRUE);
+
+        BlockInfoPtr->SignatueCalculated = SignatureResult;
+        if (BlockInfoPtr->SignatureStored == BlockInfoPtr->SignatueCalculated)
         {
-            FLSTST_DET_REPORTERROR(FLSTST_STARTFGND_ID, FLSTST_E_PARAM_INVALID);
+            BlockInfoPtr->TestResult = FLSTST_RESULT_OK;
         }
         else
         {
-            /* empty */
+            BlockInfoPtr->TestResult = FLSTST_RESULT_NOT_OK;
         }
+        l_testResult = E_OK;
+    }
 
-        BlockInfoPtr->TestResult = FLSTST_RESULT_NOT_OK;
-        /* S32K146 do not support Flash ECC test function */
+    return l_testResult;
+}
+#define FLSTST_STOP_SEC_CODE
+#include "FlsTst_MemMap.h"
+
+#define FLSTST_START_SEC_CODE
+#include "FlsTst_MemMap.h"
+static FUNC(Std_ReturnType, FLSTST_CODE) FlsTst_CRC8Fgnd(FlsTst_BlockInfoType* BlockInfoPtr)
+{
+    FlsTst_AddressType TestAddr;
+    FlsTst_LengthType TestLength;
+    FlsTst_SignatureType SignatureResult;
+    Std_ReturnType l_testResult;
+
+    l_testResult = E_NOT_OK;
+
+#if (STD_ON == FLSTST_DEV_ERROR_DETECT)
+    if (NULL_PTR == BlockInfoPtr)
+    {
+        FLSTST_DET_REPORTERROR(FLSTST_STARTFGND_ID, FLSTST_E_PARAM_POINTER);
+    }
+    else if (FLSTST_8BIT_CRC != BlockInfoPtr->TestAlgorithm)
+    {
+        FLSTST_DET_REPORTERROR(FLSTST_STARTFGND_ID, FLSTST_E_PARAM_INVALID);
+    }
+    else
+#endif /* STD_ON == FLSTST_DEV_ERROR_DETECT */
+    {
+        TestAddr = BlockInfoPtr->MemBlcokStartAddr;
+        TestLength = BlockInfoPtr->MemBlcokLength;
+        SignatureResult = 0u;
+
+        /* if test method changes,Modify the code below */
+        /* Use CRC8  */
+        SignatureResult = Crc_CalculateCRC8((uint8*)TestAddr, TestLength, (uint8)SignatureResult, TRUE);
+        BlockInfoPtr->SignatueCalculated = SignatureResult;
+        if (BlockInfoPtr->SignatureStored == BlockInfoPtr->SignatueCalculated)
+        {
+            BlockInfoPtr->TestResult = FLSTST_RESULT_OK;
+        }
+        else
+        {
+            BlockInfoPtr->TestResult = FLSTST_RESULT_NOT_OK;
+        }
+        l_testResult = E_OK;
     }
     return l_testResult;
 }
 #define FLSTST_STOP_SEC_CODE
 #include "FlsTst_MemMap.h"
-#endif
+
+#define FLSTST_START_SEC_CODE
+#include "FlsTst_MemMap.h"
+static FUNC(Std_ReturnType, FLSTST_CODE) FlsTst_DuplicatedMemoryFgnd(FlsTst_BlockInfoType* BlockInfoPtr)
+{
+    FlsTst_AddressType TestAddr;
+    FlsTst_LengthType TestLength;
+    FlsTst_AddressType DuplicateMemoryAddr;
+    Std_ReturnType l_testResult;
+
+    l_testResult = E_NOT_OK;
+
+#if (STD_ON == FLSTST_DEV_ERROR_DETECT)
+    if (NULL_PTR == BlockInfoPtr)
+    {
+        FLSTST_DET_REPORTERROR(FLSTST_STARTFGND_ID, FLSTST_E_PARAM_POINTER);
+    }
+    else if (FLSTST_DUPLICATED_MEMORY != BlockInfoPtr->TestAlgorithm)
+    {
+        FLSTST_DET_REPORTERROR(FLSTST_STARTFGND_ID, FLSTST_E_PARAM_INVALID);
+    }
+    else
+#endif /* STD_ON == FLSTST_DEV_ERROR_DETECT */
+    {
+        TestAddr = BlockInfoPtr->MemBlcokStartAddr;
+        TestLength = BlockInfoPtr->MemBlcokLength;
+        /*duplicate memory address*/
+        DuplicateMemoryAddr = (FlsTst_AddressType)BlockInfoPtr->DuplicateAddr;
+        /* if test method changes,Modify the code below */
+        /* FlsTst Duplicated Memory  Foreground  test */
+        l_testResult = FlsTst_MemCompare((uint8*)TestAddr, (uint8*)DuplicateMemoryAddr, TestLength);
+
+        if ((Std_ReturnType)E_OK == l_testResult)
+        {
+            BlockInfoPtr->TestResult = FLSTST_RESULT_OK;
+        }
+        else
+        {
+            BlockInfoPtr->TestResult = FLSTST_RESULT_NOT_OK;
+        }
+    }
+    return l_testResult;
+}
+#define FLSTST_STOP_SEC_CODE
+#include "FlsTst_MemMap.h"
+
+#define FLSTST_START_SEC_CODE
+#include "FlsTst_MemMap.h"
+static FUNC(Std_ReturnType, FLSTST_CODE) FlsTst_ChecksumFgnd(FlsTst_BlockInfoType* BlockInfoPtr)
+{
+    FlsTst_AddressType TestAddr;
+    FlsTst_LengthType TestLength;
+    FlsTst_SignatureType SignatureResult;
+    Std_ReturnType l_testResult;
+
+    l_testResult = E_NOT_OK;
+
+#if (STD_ON == FLSTST_DEV_ERROR_DETECT)
+    if (NULL_PTR == BlockInfoPtr)
+    {
+        FLSTST_DET_REPORTERROR(FLSTST_STARTFGND_ID, FLSTST_E_PARAM_POINTER);
+    }
+    else if (FLSTST_CHECKSUM != BlockInfoPtr->TestAlgorithm)
+    {
+        FLSTST_DET_REPORTERROR(FLSTST_STARTFGND_ID, FLSTST_E_PARAM_INVALID);
+    }
+    else
+#endif /* STD_ON == FLSTST_DEV_ERROR_DETECT */
+    {
+        TestAddr = BlockInfoPtr->MemBlcokStartAddr;
+        TestLength = BlockInfoPtr->MemBlcokLength;
+        SignatureResult = 0u;
+
+        /* if test method changes,Modify the code below */
+        /* Use CRC8  */
+        SignatureResult = FlsTst_CheckSum((uint8*)TestAddr, TestLength, SignatureResult, TRUE);
+
+        BlockInfoPtr->SignatueCalculated = SignatureResult;
+        if (BlockInfoPtr->SignatureStored == BlockInfoPtr->SignatueCalculated)
+        {
+            BlockInfoPtr->TestResult = FLSTST_RESULT_OK;
+        }
+        else
+        {
+            BlockInfoPtr->TestResult = FLSTST_RESULT_NOT_OK;
+        }
+        l_testResult = E_OK;
+    }
+    return l_testResult;
+}
+#define FLSTST_STOP_SEC_CODE
+#include "FlsTst_MemMap.h"
+
+#define FLSTST_START_SEC_CODE
+#include "FlsTst_MemMap.h"
+static FUNC(Std_ReturnType, FLSTST_CODE) FlsTst_ECCTestFgnd(FlsTst_BlockInfoType* BlockInfoPtr)
+{
+    Std_ReturnType l_testResult;
+    FlsTst_AddressType TestStartAddr;
+    FlsTst_AddressType TestEndAddr;
+
+    l_testResult = E_NOT_OK;
+
+#if (STD_ON == FLSTST_DEV_ERROR_DETECT)
+    if (NULL_PTR == BlockInfoPtr)
+    {
+        FLSTST_DET_REPORTERROR(FLSTST_STARTFGND_ID, FLSTST_E_PARAM_POINTER);
+    }
+    else if (FLSTST_ECC != BlockInfoPtr->TestAlgorithm)
+    {
+        FLSTST_DET_REPORTERROR(FLSTST_STARTFGND_ID, FLSTST_E_PARAM_INVALID);
+    }
+    else
+#endif /* STD_ON == FLSTST_DEV_ERROR_DETECT */
+    {
+        TestStartAddr = BlockInfoPtr->MemBlcokStartAddr;
+        TestEndAddr = TestStartAddr + BlockInfoPtr->MemBlcokLength;
+
+        if (NULL_PTR != FlsTst_Module.FlsTstECCTestFunction)
+        {
+            l_testResult =
+                FlsTst_Module.FlsTstECCTestFunction((const uint32*)TestStartAddr, (const uint32*)TestEndAddr);
+
+            if (E_OK == l_testResult)
+            {
+                BlockInfoPtr->TestResult = FLSTST_RESULT_OK;
+            }
+            else
+            {
+                BlockInfoPtr->TestResult = FLSTST_RESULT_NOT_OK;
+            }
+        }
+        else
+        {
+            /* Do not support Flash ECC test function */
+            BlockInfoPtr->TestResult = FLSTST_RESULT_NOT_OK;
+        }
+    }
+    return l_testResult;
+}
+#define FLSTST_STOP_SEC_CODE
+#include "FlsTst_MemMap.h"
+#endif               /* 0 != FLSTST_FGND_BLOCK_NUM */
+/* PRQA S 0306 -- */ /* MISRA Rule 11.4 */
 
 #if ((0U != FLSTST_BGND_BLOCK_NUM) || (0U != FLSTST_FGND_BLOCK_NUM))
 #define FLSTST_START_SEC_CODE
 #include "FlsTst_MemMap.h"
-static uint32 FlsTst_CheckSum(
+static FUNC(uint32, FLSTST_CODE) FlsTst_CheckSum(
     P2CONST(uint8, AUTOMATIC, FLSTST_APPL_CONST) Checksum_DataPtr,
     VAR(uint32, AUTOMATIC) Checksum_Length,
     VAR(uint32, AUTOMATIC) Checksum_StartValue,
@@ -1808,12 +1758,12 @@ static uint32 FlsTst_CheckSum(
 }
 #define FLSTST_STOP_SEC_CODE
 #include "FlsTst_MemMap.h"
-#endif
+#endif /* 0U != FLSTST_BGND_BLOCK_NUM || 0U != FLSTST_FGND_BLOCK_NUM */
 
 #if ((0U != FLSTST_BGND_BLOCK_NUM) || (0U != FLSTST_FGND_BLOCK_NUM))
 #define FLSTST_START_SEC_CODE
 #include "FlsTst_MemMap.h"
-static Std_ReturnType FlsTst_MemCompare(
+static FUNC(Std_ReturnType, FLSTST_CODE) FlsTst_MemCompare(
     P2CONST(uint8, AUTOMATIC, FLSTST_APPL_CONST) SourceDataPtr,
     P2CONST(uint8, AUTOMATIC, FLSTST_APPL_CONST) DstDataPtr,
     VAR(uint32, AUTOMATIC) Length)
@@ -1821,7 +1771,9 @@ static Std_ReturnType FlsTst_MemCompare(
     uint32 i;
     const uint8* pDest = (const uint8*)DstDataPtr;
     const uint8* pSrc = (const uint8*)SourceDataPtr;
-    Std_ReturnType l_testResult = E_OK;
+    Std_ReturnType l_testResult;
+
+    l_testResult = E_OK;
 
     for (i = 0U; i < Length; i++)
     {
@@ -1835,4 +1787,4 @@ static Std_ReturnType FlsTst_MemCompare(
 }
 #define FLSTST_STOP_SEC_CODE
 #include "FlsTst_MemMap.h"
-#endif
+#endif /* 0U != FLSTST_BGND_BLOCK_NUM || 0U != FLSTST_FGND_BLOCK_NUM */

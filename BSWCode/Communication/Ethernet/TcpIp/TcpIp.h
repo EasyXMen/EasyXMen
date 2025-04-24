@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- ** **
- **  FILENAME    : TcpIp.h **
- ** **
- **  Created on  : 03/12/18 **
- **  Author      : darren.zhang **
- **  Vendor      : **
- **  DESCRIPTION : function declaration for TcpIp **
- ** **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11 **
- ** **
- ***********************************************************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+************************************************************************************************************************
+**                                                                                                                    **
+**  FILENAME    : TcpIp.h                                                                                             **
+**                                                                                                                    **
+**  Created on  : 03/12/18                                                                                            **
+**  Author      : darren.zhang                                                                                        **
+**  Vendor      :                                                                                                     **
+**  DESCRIPTION : function declaration for TcpIp                                                                      **
+**                                                                                                                    **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                                                              **
+**                                                                                                                    **
+***********************************************************************************************************************/
 
 #ifndef TCPIP_H_
 #define TCPIP_H_
@@ -45,6 +46,7 @@
 #include "TcpIp_PBcfg.h"
 #include "TcpIp_SocketOwner.h"
 #include "Eth_GeneralTypes.h"
+#include "SchM_TcpIp.h"
 /***********************************************************************************************************************
  *                              SOURCE FILE VERSION INFORMATION
  ***********************************************************************************************************************/
@@ -100,9 +102,6 @@
 #define TCPIP_E_AFNOSUPPORT   0x0E
 #define TCPIP_E_INIT_FAILED   0x0F
 #endif /*STD_ON == TCPIP_DEV_ERROR_DETECT*/
-
-/*the Private Macro Definition*/
-#define TCPIP_CTRLIDX_INVALID 0xFFu
 
 extern CONST(TcpIp_ConfigType, TCPIP_CONST) TcpIp_Config;
 

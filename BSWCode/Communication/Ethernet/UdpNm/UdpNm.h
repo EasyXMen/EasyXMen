@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : UdpNm.h                                                     **
- **                                                                            **
- **  Created on  : 25/07/19                                                    **
- **  Author      : lili.wang                                                   **
- **  Vendor      :                                                             **
- **  DESCRIPTION : declaration of provided interface functions                 **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : UdpNm.h                                                     **
+**                                                                            **
+**  Created on  : 25/07/19                                                    **
+**  Author      : lili.wang                                                   **
+**  Vendor      :                                                             **
+**  DESCRIPTION : declaration of provided interface functions                 **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 
 #ifndef UDPNM_H_
 #define UDPNM_H_
@@ -62,8 +63,9 @@
 #define UDPNM_E_INVALID_CHANNEL     ((uint8)(0x02u))
 #define UDPNM_E_INVALID_PDUID       ((uint8)(0x03u))
 #define UDPNM_E_INIT_FAILED         ((uint8)(0x04u))
-#define UDPNM_E_NETWORK_TIMEOUT     ((uint8)(0x11u))
 #define UDPNM_E_PARAM_POINTER       ((uint8)(0x12u))
+#define UDPNM_E_NETWORK_TIMEOUT     ((uint8)(0x11u))
+#define UDPNM_E_PARTITION           ((uint8)(0x13u))
 #define UDPNM_E_ALREADY_INITIALIZED ((uint8)(0xF0u))
 
 /* Service ID[hex] */
@@ -92,7 +94,7 @@
 #define UDPNM_SERVICE_ID_MAINFUNCTION               ((uint8)(0x13u))
 
 /* UDPNM_VER_4_2_2 or UDPNM_VER_R19_11 */
-#define UDPNM_VER_4_2_2
+#define UDPNM_VER_R19_11
 /*******************************************************************************
 **                      Global Data Types                                     **
 *******************************************************************************/
@@ -217,10 +219,8 @@ typedef struct
     boolean PnHandleMultipleNetworkRequests;
 #endif /* STD_ON == UDPNM_GLOBAL_PN_ENABLED */
 
-#if UDPNM_REMOTE_SLEEP_IND_ENABLED == STD_ON
     /* Timeout for Remote Sleep Indication. */
     uint16 RemoteSleepIndTime;
-#endif
 
     /* Timeout for Repeat Message State. */
     uint16 RepeatMessageTime;
@@ -233,10 +233,12 @@ typedef struct
     boolean RepeatMsgIndEnabled;
 #endif /* UDPNM_REPEAT_MSG_IND_ENABLED == STD_ON */
 
+#if (UDPNM_PASSIVE_MODE_ENABLED == STD_OFF) && (UDPNM_RETRY_FIRST_MESSAGE_REQUEST == STD_ON)
     /* Specifies if first message request in UdpNm is repeated until accepted
      * by SoAd.
      */
     boolean RetryFirstMessageRequest;
+#endif
 
     /* If this parameter is disabled Prepare Bus-Sleep Mode is left after
      * UdpNmWaitBusSleepTime.
@@ -255,7 +257,6 @@ typedef struct
      * and provides access to the unique channel index value in ComMChannelId
      */
     NetworkHandleType ComMNetworkHandleRef;
-
 #if (STD_ON == UDPNM_GLOBAL_PN_ENABLED)
     /*
      * Reference to a Pdu in the COM-Stack.The SduRef is required for every
@@ -439,7 +440,8 @@ Std_ReturnType UdpNm_DisableCommunication(NetworkHandleType nmChannelHandle);
 Std_ReturnType UdpNm_EnableCommunication(NetworkHandleType nmChannelHandle);
 #endif /* STD_ON == UDPNM_COM_CONTROL_ENABLED */
 
-#if (STD_ON == UDPNM_USER_DATA_ENABLED) && (STD_OFF == UDPNM_PASSIVE_MODE_ENABLED)
+#if (UDPNM_USER_DATA_ENABLED == STD_ON) && (UDPNM_COM_USERDATA_SUPPORT == STD_OFF) \
+    && (UDPNM_PASSIVE_MODE_ENABLED == STD_OFF)
 /******************************************************************************/
 /*
  * Brief               Set user data for all NM messages transmitted on the bus
@@ -454,11 +456,10 @@ Std_ReturnType UdpNm_EnableCommunication(NetworkHandleType nmChannelHandle);
  * Param-Name[in/out]  None
  * Return              E_OK: No error
  *                     E_NOT_OK: Setting of user data has failed.
+ * Trace               SWS_UdpNm_00312
  */
 /******************************************************************************/
-Std_ReturnType UdpNm_SetUserData(
-    NetworkHandleType nmChannelHandle,
-    P2CONST(uint8, AUTOMATIC, UDPNM_APPL_DATA) nmUserDataPtr);
+Std_ReturnType UdpNm_SetUserData(NetworkHandleType nmChannelHandle, const uint8* nmUserDataPtr);
 #endif
 
 #if (STD_ON == UDPNM_USER_DATA_ENABLED)
@@ -673,6 +674,6 @@ Std_ReturnType UdpNm_Transmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr);
  * Return              None
  */
 /******************************************************************************/
-FUNC(void, UDPNM_CODE) UdpNm_MainFunction(NetworkHandleType channel);
+void UdpNm_MainFunction(NetworkHandleType channel);
 
 #endif /* UDPNM_H_ */

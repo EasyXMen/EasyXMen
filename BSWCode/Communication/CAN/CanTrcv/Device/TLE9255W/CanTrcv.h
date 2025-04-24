@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : CanTrcv.h                                                   **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : Xinrun.Wang                                                 **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Public interfaces declared by CanTrcv module                **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : CanTrcv.h                                                   **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : Xinrun.Wang                                                 **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Public interfaces declared by CanTrcv module                **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 #ifndef CANTRCV_H_
 #define CANTRCV_H_
 
@@ -52,12 +53,12 @@
 #define CANTRCV_VENDOR_ID          62U
 #define CANTRCV_MODULE_ID          70U
 #define CANTRCV_INSTANCE_ID        0U
-#define CANTRCV_H_AR_MAJOR_VERSION 4U
-#define CANTRCV_H_AR_MINOR_VERSION 5U
+#define CANTRCV_H_AR_MAJOR_VERSION 19U
+#define CANTRCV_H_AR_MINOR_VERSION 11U
 #define CANTRCV_H_AR_PATCH_VERSION 0U
 #define CANTRCV_H_SW_MAJOR_VERSION 2U
 #define CANTRCV_H_SW_MINOR_VERSION 0U
-#define CANTRCV_H_SW_PATCH_VERSION 2U
+#define CANTRCV_H_SW_PATCH_VERSION 1U
 
 /* timer type */
 #define None           0x00u

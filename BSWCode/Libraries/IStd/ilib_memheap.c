@@ -18,20 +18,20 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- ** **
- **  FILENAME    : ilib_memheap.c **
- ** **
- **  Created on  : 2024/01/09 **
- **  Author      : lizhi.huang **
- **  Vendor      : **
- **  DESCRIPTION :  stand lib source code **
- ** **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform **
- ** **
- ***********************************************************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*************************************************************************************************************************
+**                                                                                                                    **
+**  FILENAME    : ilib_memheap.c                                                                                      **
+**                                                                                                                    **
+**  Created on  : 2024/01/09                                                                                          **
+**  Author      : lizhi.huang                                                                                         **
+**  Vendor      :                                                                                                     **
+**  DESCRIPTION :  stand lib source code                                                                              **
+**                                                                                                                    **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform                                                                     **
+**                                                                                                                    **
+***********************************************************************************************************************/
 
 /*======================================================================================================================
  *                                       REVISION HISTORY
@@ -41,6 +41,10 @@
  *  V1.0.1    20240111   lizhi.huang   Resolve QAC
  *  V1.0.2    20240131   lizhi.huang   Resolve malloc memory crossover
  *  V1.0.3    20240304   lizhi.huang   Resolve QAC
+ *  V1.0.4    20240429   qinmei.chen   add T320 support by increasing HeadSize
+ *  V1.0.5    20240529   lizhi.huang   Resolve memory crossover
+ *  V1.0.6    20240620   lizhi.huang   Supports 64 bit high-end environments
+ *
  */
 
 /**
@@ -79,41 +83,41 @@
  *                                                  Private Macro Definitions
 ======================================================================================================================*/
 
+/* SLI definition */
+#define MAX_LOG2_SLI (uint32)(3u)
+#define MAX_SLI      (1u << MAX_LOG2_SLI)
+
 /* block align address */
-#define BLOCK_ALIGN          (size_type)(3u)
+#define BLOCK_ALIGN          (size_type)(MAX_SLI - 1u)
 #define ROUNDUP_SIZE(size)   (size_type)(((size) + BLOCK_ALIGN) & ~BLOCK_ALIGN)
 #define ROUNDDOWN_SIZE(size) (size_type)((size) & ~BLOCK_ALIGN)
 
 /* minimum block size  */
-#define SMALL_BLOCK (32u)
+#define SMALL_BLOCK (size_type)(32u)
 
 /* FLI definition */
-#define MAX_FLI    (16u)
-#define FLI_OFFSET (4u)
-#define REAL_FLI   (MAX_FLI - FLI_OFFSET)
-
-/* SLI definition */
-#define MAX_LOG2_SLI      (uint32)(2u)
-#define MAX_SLI           (1u << MAX_LOG2_SLI)
+#define MAX_FLI           (size_type)(16u)
+#define FLI_OFFSET        (size_type)(4u)
+#define REAL_FLI          (MAX_FLI - FLI_OFFSET)
 
 #define MEMHEAP_INIT_FLAG 0x2A59FA59u
 
 /* bit of the block state */
-#define BLOCK_STATE (0x1u)
-#define PREV_STATE  (0x2u)
+#define BLOCK_STATE (size_type)(0x1u)
+#define PREV_STATE  (size_type)(0x2u)
 
 /* bit 0 of the block size */
-#define FREE_BLOCK (0x1u)
-#define USED_BLOCK (0x0u)
+#define FREE_BLOCK (size_type)(0x1u)
+#define USED_BLOCK (size_type)(0x0u)
 
 /* bit 1 of the block size */
-#define PREV_FREE (0x2u)
-#define PREV_USED (0x0u)
+#define PREV_FREE (size_type)(0x2u)
+#define PREV_USED (size_type)(0x0u)
 
 /* the minimum applicable size  */
 #define MIN_APPLICABLE_SIZE ROUNDUP_SIZE((sizeof(FreePtrType)))
 #define BLOCK_HEAD_SIZE     (size_type)(sizeof(BlockType) - sizeof(FreePtrType))
-#define BLOCK_SIZE_ALIGN    ((~0u) - (3u))
+#define BLOCK_SIZE_ALIGN    ((~(size_type)0u) - (3u))
 /* PRQA S 3472++ */ /* MISRA Dir-4.9 */
 /* get the next block addr */
 #define GET_BLOCK(addr, offset) ((BlockType*)((size_t)(addr) + (size_t)(offset)))
@@ -138,8 +142,19 @@
 /*======================================================================================================================
  *                                                  Private Data Types
 ======================================================================================================================*/
-
+#if defined(CPU_TYPE_64) && (CPU_TYPE == CPU_TYPE_64)
+typedef uint32 size_type;
+#elif defined(CPU_TYPE_32) && (CPU_TYPE == CPU_TYPE_32)
+#if (CPU_32_WITH_16_ADR == TRUE)
+typedef uint32 size_type;
+#else
 typedef uint16 size_type;
+#endif
+#elif defined(CPU_TYPE_16) && (CPU_TYPE == CPU_TYPE_16)
+typedef uint16 size_type;
+#else
+typedef uint32 size_type;
+#endif
 
 /* free block link list pointer */
 typedef struct
@@ -221,7 +236,7 @@ static const uint32 MemHeap_Table[] = {
 static uint32 MemHeap_LSBIT(uint32 i)
 {
     uint32 a;
-    uint32 x = i & (0u - i);
+    uint32 x = i & ((size_type)0u - i);
 
     a = (x <= 0xFFFFu) ? ((x <= 0xFFu) ? 0u : 8u) : ((x <= 0xFFFFFFu) ? 16u : 24u);
     a = a + MemHeap_Table[x >> a];
@@ -275,7 +290,7 @@ static void MemHeap_MatchNextIndex(uint32* size, uint32* fli, uint32* sli)
         *fli -= FLI_OFFSET;
 
         /* take slBlockSize from size */
-        *size &= ~slBlockSize;
+        *size &= ~(size_type)slBlockSize;
     }
 }
 
@@ -486,8 +501,10 @@ static BlockType* MemHeap_SplitBlock(const HeapManager* manager, const BlockType
            points to the splitBlock node after splitting */
         /* PRQA S 3469++ */ /* MISRA Dir-4.9 */
         BlockType* nextBlock = GET_BLOCK(block->ptr.buffer, (size_t)block->head.size & BLOCK_SIZE_ALIGN);
-        /* PRQA S 3469-- */                                                             /* MISRA Dir-4.9 */
-        nextBlock->head.prev = GET_BLOCK_OFFSET(splitBlock, manager); /* PRQA S 3469 */ /* MISRA Dir-4.9 */
+        /* PRQA S 3469-- */ /* MISRA Dir-4.9 */
+
+        LINK_PREV_PHY_BLOCK(splitBlock, block, manager); /* PRQA S 3469 */     /* MISRA Dir-4.9 */
+        LINK_PREV_PHY_BLOCK(nextBlock, splitBlock, manager); /* PRQA S 3469 */ /* MISRA Dir-4.9 */
     }
 
     return splitBlock;
@@ -520,7 +537,7 @@ uint8 ILib_MemHeapInit(void* ram, uint32 size)
     }
 
     /* unable to manage space larger than 64K */
-    else if (size > (uint32)((size_type)(-1)))
+    else if ((uint64)size > (uint64)((uint16)(-1)))
     {
         ret = MEMHEAP_INVALID_SIZE;
     }
@@ -557,7 +574,8 @@ uint8 ILib_MemHeapInit(void* ram, uint32 size)
         block->ptr.free.prev = 0u;
         block->ptr.free.next = 0u;
         block->head.size =
-            (size_type)(((size_type)size - ROUNDUP_SIZE(sizeof(HeapManager)) - ((size_type)3u * (BLOCK_HEAD_SIZE))))
+            ROUNDDOWN_SIZE((
+                size_type)(((size_type)size - ROUNDUP_SIZE(sizeof(HeapManager)) - ((size_type)3u * (BLOCK_HEAD_SIZE)))))
             | USED_BLOCK | PREV_USED;
 
         /* system block : always used */
@@ -605,7 +623,7 @@ void* ILib_MemHeapMalloc(void* ram, uint32 size)
     }
 
     /* address not byte aligned */
-    else if (0u != ((size_t)manager & (size_t)(sizeof(void*) - 1u)))
+    else if (0u != ((size_t)manager & (size_t)(sizeof(void*) - (size_t)1u)))
     {
         ret = MEMHEAP_INVALID_ALIGN;
     }
@@ -617,7 +635,7 @@ void* ILib_MemHeapMalloc(void* ram, uint32 size)
     }
 
     /* unable to manage space larger than 64K */
-    else if (size > (uint32)((size_type)(-1)))
+    else if ((uint64)size > (uint64)((uint16)(-1)))
     {
         ret = MEMHEAP_INVALID_SIZE;
     }
@@ -653,28 +671,45 @@ void* ILib_MemHeapMalloc(void* ram, uint32 size)
 
             MemHeap_ExtractBlockDirect(manager, block, fli, sli);
 
+            /* PRQA S 3469++ */ /* MISRA Dir-4.9 */
+            BlockType* nextBlock = GET_BLOCK(block->ptr.buffer, (size_t)block->head.size & BLOCK_SIZE_ALIGN);
+            /* PRQA S 3469-- */ /* MISRA Dir-4.9 */
+
             /* unused space forms a new free block */
             BlockType* splitBlock = MemHeap_SplitBlock(manager, block, local_size);
 
             if (NULL_PTR != splitBlock)
             {
-                LINK_PREV_PHY_BLOCK(splitBlock, block, manager); /* PRQA S 3469 */ /* MISRA Dir-4.9 */
-
                 /* put unused blocks back into the free link list */
                 MemHeap_InsertBlock(manager, splitBlock);
+
+                /* modify the block size, but use old state of the block */
+                block->head.size = ((size_type)local_size | (block->head.size & (size_type)PREV_STATE)) & (~FREE_BLOCK);
+            }
+            else
+            {
+                /* modify the block size, but use old state of the block */
+                block->head.size &= (~FREE_BLOCK);
+
+                nextBlock->head.size &= (~PREV_STATE);
             }
 
-            /* modify the block size, but use old state of the block */
-            block->head.size = ((size_type)local_size | (block->head.size & (size_type)PREV_STATE)) & (~FREE_BLOCK);
-            /* PRQA S 3469++ */ /* MISRA Dir-4.9 */
-            BlockType* nextBlock = GET_BLOCK(block->ptr.buffer, (size_t)block->head.size & BLOCK_SIZE_ALIGN);
-            /* PRQA S 3469-- */ /* MISRA Dir-4.9 */
-            nextBlock->head.size &= (~PREV_STATE);
-
             ptr = (void*)block->ptr.buffer;
+
+            if (!(((size_t)block >= ((size_t)manager + (size_t)sizeof(HeapManager)))
+                  && (((size_t)block) < ((size_t)manager + manager->manageSize - (size_t)sizeof(BlockHeadType)))
+                  && (((size_t)block + block->head.size)
+                      >= ((size_t)manager + (size_t)sizeof(HeapManager) + (size_t)sizeof(BlockHeadType)))
+                  && (((size_t)block + block->head.size)
+                      < ((size_t)manager + manager->manageSize - (size_t)sizeof(BlockHeadType)))))
+            {
+                ret = MEMHEAP_INVALID_PTR;
+                ptr = NULL_PTR;
+            }
         }
     }
 
+    (void)ret;
     return ptr;
 }
 /* PRQA S 0306-- */ /* MISRA Rule 11.4 */
@@ -736,10 +771,12 @@ uint8 ILib_MemHeapFree(void* ram, void* ptr) /* PRQA S 3673 */ /* MISRA Rule-8.1
     }
 
     /* pointer not in valid range */
-    else if (
-        (((size_t)block) < ((size_t)manager + (size_t)sizeof(HeapManager) + (size_t)sizeof(BlockHeadType)))
-        || (((size_t)(block->ptr.buffer) + (size_t)(block->head.size))
-            > ((size_t)manager + (size_t)(manager->manageSize) - (size_t)sizeof(BlockHeadType))))
+    else if (!(((size_t)block >= ((size_t)manager + (size_t)sizeof(HeapManager)))
+               && (((size_t)block) < ((size_t)manager + manager->manageSize - (size_t)sizeof(BlockHeadType)))
+               && (((size_t)block + block->head.size)
+                   >= ((size_t)manager + (size_t)sizeof(HeapManager) + (size_t)sizeof(BlockHeadType)))
+               && (((size_t)block + block->head.size)
+                   < ((size_t)manager + manager->manageSize - (size_t)sizeof(BlockHeadType)))))
     {
         ret = MEMHEAP_INVALID_PTR;
     }

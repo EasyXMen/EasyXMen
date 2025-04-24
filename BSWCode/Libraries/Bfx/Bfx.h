@@ -18,28 +18,29 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Bfx.h                                                       **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : stanleyluo                                                  **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Public function prototypes and types defined by the BFX     **
- **                library specification                                       **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                       **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Bfx.h                                                       **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : stanleyluo                                                  **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Public function prototypes and types defined by the BFX     **
+**                library specification                                       **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                       **
+**                                                                            **
+*******************************************************************************/
 
 /*******************************************************************************
 **                      Revision Control History                              **
-*******************************************************************************/
 /*  <VERSION>    <DATE>      <AUTHOR>       <REVISION LOG>
- *  V1.0.0       2024-07-15  chenqinmei      fix CPT-8741 the definition of some variables is wrong
- */
+ *  V1.0.0       2024-04-16  chenqinmei      fix CPT-8741 the definition of some variables is wrong
+ *
+*******************************************************************************/
 
 #ifndef BFX_H
 #define BFX_H

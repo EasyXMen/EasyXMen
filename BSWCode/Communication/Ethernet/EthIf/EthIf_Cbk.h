@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : EthIf.h                                                     **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : YangBo                                                      **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : EthIf.h                                                     **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : YangBo                                                      **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 /*******************************************************************************
 **                      Revision Control History                              **
 *******************************************************************************/
@@ -69,29 +70,20 @@ extern FUNC(void, ETHIF_CODE) EthIf_RxIndication(
     P2CONST(Eth_DataType, ETHIF_APPL_DATA, ETHIF_VAR) DataPtr,
     VAR(uint16, ETHIF_VAR) LenByte);
 /* @req SWS_EthIf_00091 */
-#if (42u == ETHIF_ETH_MAIJORVERSION)
-extern FUNC(void, ETHIF_CODE)
-    EthIf_TxConfirmation(VAR(uint8, ETHIF_VAR) CtrlIdx, VAR(Eth_BufIdxType, ETHIF_VAR) BufIdx);
-#else  /* 42u != ETHIF_ETH_MAIJORVERSION ,R19 4.4 */
+#if (ETHIF_ETH_AUTOSAR_VERSION >= ETHIF_ETH_AUTOSAR_431)
 extern FUNC(void, ETHIF_CODE) EthIf_TxConfirmation(
     VAR(uint8, ETHIF_VAR) CtrlIdx,
     VAR(Eth_BufIdxType, ETHIF_VAR) BufIdx,
     VAR(Std_ReturnType, ETHIF_VAR) Result);
-#endif /* 42u == ETHIF_ETH_MAIJORVERSION */
+#else  /*The default version of eth driver is 4.2.2*/
+extern FUNC(void, ETHIF_CODE)
+    EthIf_TxConfirmation(VAR(uint8, ETHIF_VAR) CtrlIdx, VAR(Eth_BufIdxType, ETHIF_VAR) BufIdx);
+#endif /* ETHIF_ETH_AUTOSAR_VERSION >= ETHIF_ETH_AUTOSAR_431 */
 
 /* @req SWS_EthIf_00231 */
 extern FUNC(void, ETHIF_CODE)
     EthIf_CtrlModeIndication(VAR(uint8, ETHIF_VAR) CtrlIdx, VAR(Eth_ModeType, ETHIF_VAR) CtrlMode);
 /* @req SWS_EthIf_00232 */
-#if (42u == ETHIF_ETH_MAIJORVERSION)
 extern FUNC(void, ETHIF_CODE)
-    EthIf_TrcvModeIndication(VAR(uint8, ETHIF_VAR) CtrlIdx, VAR(EthTrcv_ModeType, ETHIF_VAR) CtrlMode);
-#elif (44u == ETHIF_ETH_MAIJORVERSION)
-extern FUNC(void, ETHIF_CODE)
-    EthIf_TrcvModeIndication(VAR(uint8, ETHIF_VAR) TrcvIdx, VAR(EthTrcv_ModeType, ETHIF_VAR) CtrlMode);
-
-#elif (19u == ETHIF_ETH_MAIJORVERSION)
-extern FUNC(void, ETHIF_CODE)
-    EthIf_TrcvModeIndication(VAR(uint8, ETHIF_VAR) TrcvIdx, VAR(Eth_ModeType, ETHIF_VAR) CtrlMode);
-#endif /* 42u == ETHIF_ETH_MAIJORVERSION */
-#endif
+    EthIf_TrcvModeIndication(VAR(uint8, ETHIF_VAR) CtrlIdx, VAR(Eth_ModeType, ETHIF_VAR) CtrlMode);
+#endif /* ETHIF_CBK_H */
