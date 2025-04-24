@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Xcp_Interface.c                                             **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : qinchun.yang                                                **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Interface functions with other modules                      **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Xcp_Interface.c                                             **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : qinchun.yang                                                **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Interface functions with other modules                      **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 /*=======[I N C L U D E S]====================================================*/
 #include "Xcp_Interface.h"
 #include "Xcp_Internal.h"
@@ -39,8 +40,8 @@
 #if (XCP_BUILD_CHECKSUM == STD_ON)
 #define XCP_START_SEC_CODE
 #include "Xcp_MemMap.h"
-static uint16 XcpCrc16Ccitt(const uint16* pu1data, uint16 crc);
-static uint16 Xcp_GetCrc16Citt(const uint8* data, uint16 crc);
+static uint16 XcpCrc16Ccitt(const uint16* pu1data, uint16 u2Crc);
+static uint16 Xcp_GetCrc16Citt(uint8* data, uint16 crc);
 #define XCP_STOP_SEC_CODE
 #include "Xcp_MemMap.h"
 #endif
@@ -101,16 +102,16 @@ boolean Xcp_IsKeyRight(const Xcp_SeedVerifyType seedVerify, const Xcp_KeyVerifyT
 }
 #define XCP_STOP_SEC_CODE
 #include "Xcp_MemMap.h"
-#endif /* (STD_ON == XCP_SEED_AND_UNLOCK ) */ /* PRQA S 2053 */ /* MISRA Rule 18.8, Dir 4.4 */
+#endif /*STD_ON == XCP_SEED_AND_UNLOCK*/
 
 #if (STD_ON == XCP_BUILD_CHECKSUM)
 #define XCP_START_SEC_CODE
 #include "Xcp_MemMap.h"
-static uint16 XcpCrc16Ccitt(const uint16* pu1data, uint16 crc)
+static uint16 XcpCrc16Ccitt(const uint16* pu1data, uint16 u2Crc)
 {
     uint8 CrCCounter;
     uint16 t_u2_ccitt16 = (uint16)0x1021u;
-    uint16 u2Crc = crc;
+    /* PRQA S 1338 ++ */ /* MISRA Rule 17.8 */
     u2Crc ^= ((uint16)(*pu1data) << 8u);
     for (CrCCounter = 0u; CrCCounter < 8u; CrCCounter++)
     {
@@ -124,11 +125,12 @@ static uint16 XcpCrc16Ccitt(const uint16* pu1data, uint16 crc)
             u2Crc <<= 1;
         }
     }
+    /* PRQA S 1338 -- */ /* MISRA Rule 17.8 */
     return u2Crc;
 }
 
 /* Init the Xcp_Crc16CittTable */
-void Xcp_InitCrc16CcittTable(void) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
+void Xcp_InitCrc16CcittTable(void)
 {
     uint16 i;
     for (i = 0u; i < 256u; i++)
@@ -136,16 +138,18 @@ void Xcp_InitCrc16CcittTable(void) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
         Xcp_Crc16CittTable[i] = XcpCrc16Ccitt(&i, 0);
     }
 }
-
-static uint16 Xcp_GetCrc16Citt(const uint8* data, uint16 crc)
+/* PRQA S 3673 ++ */ /* MISRA Rule 17.8 */
+static uint16 Xcp_GetCrc16Citt(uint8* data, uint16 crc)
 {
+    /* PRQA S 1338 ++ */ /* MISRA Rule 17.8 */
     uint16 c;
-    uint16 crcTmep = crc;
-    c = crcTmep >> 8;
-    crcTmep <<= 8;
-    crcTmep ^= Xcp_Crc16CittTable[(*data) ^ c];
-    return crcTmep;
+    c = crc >> 8;
+    crc <<= 8;
+    crc ^= Xcp_Crc16CittTable[(*data) ^ c];
+    return crc;
+    /* PRQA S 1338 -- */ /* MISRA Rule 17.8 */
 }
+/* PRQA S 3673 -- */ /* MISRA Rule 17.8 */
 
 /* PRQA S 1532 ++ */ /* MISRA Rule 8.7 */
 FUNC(void, XCP_CODE) Xcp_ChecksumCompute(const uint32 checksumStartAddress, const uint32 blockSize, uint32* crcResult)
@@ -167,16 +171,16 @@ FUNC(void, XCP_CODE) Xcp_ChecksumCompute(const uint32 checksumStartAddress, cons
 }
 #define XCP_STOP_SEC_CODE
 #include "Xcp_MemMap.h"
-#endif /* (STD_ON == XCP_BUILD_CHECKSUM) */ /* PRQA S 2053 */ /* MISRA Rule 18.8, Dir 4.4 */
+#endif /*STD_ON == XCP_BUILD_CHECKSUM*/
 
 #if (STD_ON == XCP_PAG_SUPPORT)
 #define XCP_START_SEC_CODE
 #include "Xcp_MemMap.h"
-void Xcp_InitCalMem(void) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
+void Xcp_InitCalMem(void)
 {
     /*Overlay or MMU init.*/
     return;
 }
 #define XCP_STOP_SEC_CODE
 #include "Xcp_MemMap.h"
-#endif
+#endif /*STD_ON == XCP_PAG_SUPPORT*/

@@ -18,20 +18,20 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : WdgIf.c                                                     **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : haibin.shao                                                 **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S):   AUTOSAR classic Platform R19-11                       **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*********************************************************************************
+**                                                                            **
+**  FILENAME    : WdgIf.c                                                     **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : haibin.shao                                                 **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S):   AUTOSAR classic Platform R19-11                       **
+**                                                                            **
+*******************************************************************************/
 
 /*===========================[R E V I S I O N   H I S T O R Y]====================================*/
 /*  <VERSION>    <DATE>    <AUTHOR>         <REVISION LOG>
@@ -39,8 +39,9 @@
  *  V1.0.1     20180713     Xinyu.J       Update the WdgIf_SetMode and WdgIf_SetTriggerCondition.
  *  V1.0.2     20190717     Xinyu.J       Update the note  after CodeReview
  *  V1.0.3     20221222     peng.wu       Modify the head and version info
- *  V2.0.0     20230714     xudong.G      CP2.1 Release Version. Delete version info in other files
- *  V2.0.1     20231226     Peng.Wu       1.Update some QAC problems
+ *  V2.1.0     20230714     Xudong.Guan   CP2.1 Release Version. Delete version info in other files
+ *  V2.1.1     20231226     Peng.Wu       1.Update some QAC problems
+ *  V2.1.2     20240528     Xudong.Guan   Multi-core branch code regression
  */
 /*================================================================================================*/
 
@@ -49,8 +50,8 @@
 #define WDGIF_C_AR_MINOR_VERSION 5U
 #define WDGIF_C_AR_PATCH_VERSION 0U
 #define WDGIF_C_SW_MAJOR_VERSION 2U
-#define WDGIF_C_SW_MINOR_VERSION 0U
-#define WDGIF_C_SW_PATCH_VERSION 1U
+#define WDGIF_C_SW_MINOR_VERSION 1U
+#define WDGIF_C_SW_PATCH_VERSION 2U
 
 /*===========================[I N C L U D E S]====================================================*/
 #include "WdgIf.h"

@@ -18,39 +18,39 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : LinTp_Internal.h                                            **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : HuRongbo                                                    **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Implementation for LinIf                                    **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : LinTp_Internal.h                                            **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : HuRongbo                                                    **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Implementation for LinIf                                    **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 #ifndef LINTP_INTERNAL_H
 #define LINTP_INTERNAL_H
 
 #include "LinIf_Cfg.h"
 #if (LINIF_TP_SUPPORTED == STD_ON)
 #include "LinTp_Types.h"
+#include "SchM_LinTp.h"
 
 /*******************************************************************************
 **                            Macros Definitions                              **
 *******************************************************************************/
 /* PC/LT/PB configuration */
-#define LINTP_GET_RXNSDU(idx)            LinTp_ConfigPtr->LinTpRxNSdu[idx]
-#define LINTP_GET_TXNSDU(idx)            LinTp_ConfigPtr->LinTpTxNSdu[idx]
-#define LINTP_GET_RXNSDU_NUM             LinTp_ConfigPtr->LinTpNumOfRxNSdu
-#define LINTP_GET_TXNSDU_NUM             LinTp_ConfigPtr->LinTpNumOfTxNSdu
-#define LINIF_GET_P2_TIME_CNT            LinTp_ConfigPtr->LinTpP2TimingCnt
-#define LINIF_GET_P2MAX_TIME_CNT         LinTp_ConfigPtr->LinTpP2MaxCnt
-#define LINTP_GET_CHANNEL_CONFIG(idx)    LinTp_ConfigPtr->LinTpChannelConfig[idx]
-#define LINIF_GET_MAX_NUM_PENDING_FRAMES LinTp_ConfigPtr->LinTpMaxNumberOfRespPendingFrames
+#define LINTP_GET_RXNSDU(idx)         LinTp_ConfigPtr->LinTpRxNSdu[idx]
+#define LINTP_GET_TXNSDU(idx)         LinTp_ConfigPtr->LinTpTxNSdu[idx]
+#define LINTP_GET_RXNSDU_NUM          LinTp_ConfigPtr->LinTpNumOfRxNSdu
+#define LINTP_GET_TXNSDU_NUM          LinTp_ConfigPtr->LinTpNumOfTxNSdu
+#define LINTP_GET_CHANNEL_CONFIG(idx) LinTp_ConfigPtr->LinTpChannelConfig[idx]
+#define LINTP_GET_P2_TIME(idx)        LINTP_GET_CHANNEL_CONFIG(idx).LinTpP2TimingCnt
 
 /* The maximum frame length */
 #define LINTP_FRAME_LEN_MAX   8u
@@ -181,6 +181,6 @@ extern P2CONST(LinTp_ConfigType, AUTOMATIC, LINIF_CONST) LinTp_ConfigPtr;
 FUNC(P2CONST(LinTp_RxNSduType, AUTOMATIC, LINIF_APPL_CONST), LINIF_CODE)
 LinTp_GetRxNSduByNad(NetworkHandleType ch, uint8 Nad);
 
-#endif /* LINIF_TP_SUPPORTED == STD_ON */
+#endif
 
 #endif /* LINTP_INTERNAL_H */

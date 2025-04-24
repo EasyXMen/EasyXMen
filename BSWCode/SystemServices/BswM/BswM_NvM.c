@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : BswM_NvM.c                                                  **
- **                                                                            **
- **  Created on  : 2020-03-24                                                  **
- **  Author      : qinchun.yang                                                **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : BswM_NvM.c                                                  **
+**                                                                            **
+**  Created on  : 2020-03-24                                                  **
+**  Author      : qinchun.yang                                                **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 
 /*******************************************************************************
 **                      Include Section                                       **
@@ -69,7 +70,6 @@ BswM_InitNvMRequestPorts(void)
 {
     P2CONST(BswM_ModeRqstPortPCCfgType, AUTOMATIC, BSWM_CONST) modeRqstPCfgPtr;
     P2CONST(BswM_ModeRqstPortRuntimeType, AUTOMATIC, BSWM_VAR_CLEARED) modeRqstPtr;
-    P2CONST(BswM_PartitionPCCfgType, TYPEDEF, BSWM_CONST) bswmPartPCCfgs;
     ApplicationType partIdx;
     NvM_BlockIdType numOfNvMBlock;
     uint8 numOfNvmJob;
@@ -79,9 +79,8 @@ BswM_InitNvMRequestPorts(void)
     result = BswM_GetPartitionIdx(&partIdx);
     if ((boolean)TRUE == result)
     {
-        bswmPartPCCfgs = &(BswM_RuntimeStatus.bswmPartPCCfgs[partIdx]);
-        modeRqstPCfgPtr = bswmPartPCCfgs->modeRqstPCCfg;
-        modeRqstPtr = bswmPartPCCfgs->modeRqstPortRunPtr;
+        modeRqstPCfgPtr = BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].modeRqstPCCfg;
+        modeRqstPtr = BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].modeRqstPortRunPtr;
         numOfNvmJob = modeRqstPCfgPtr->numOfNvMJob;
         if (NULL_PTR != modeRqstPCfgPtr->nvmJobInitMode)
         {
@@ -104,7 +103,7 @@ BswM_InitNvMRequestPorts(void)
     {
         (void)Det_ReportError(BSWM_MODULE_ID, BSWM_INSTANCE_ID, BSWM_API_ID_INIT, BSWM_E_INIT_FAILED);
     }
-#endif /* BSWM_DEV_ERROR_DETECT == STD_ON */
+#endif /*BSWM_DEV_ERROR_DETECT == STD_ON*/
 }
 
 /**
@@ -128,8 +127,6 @@ BswM_NvM_CurrentJobMode(NvM_MultiBlockRequestType MultiBlockRequest, NvM_Request
     P2CONST(BswM_ModeRqstPortLCfgType, AUTOMATIC, BSWM_CONST) modeRqstLCfgPtr;
     P2CONST(BswM_ModeRqstPortRuntimeType, AUTOMATIC, BSWM_VAR_CLEARED) modeRqstPtr;
     P2CONST(BswM_RuleLcCfgType, AUTOMATIC, BSWM_CONST) ruleLCfgPtr;
-    P2CONST(BswM_PartitionPCCfgType, TYPEDEF, BSWM_CONST) bswmPartPCCfgs;
-    P2CONST(BswM_PartitionLCfgType, TYPEDEF, BSWM_CONST) bswmPartLCfgs;
     BswM_RuleIndexType numOfRules;
     BswM_RuleIndexType idx;
     BswM_RuleIndexType ruleIdx;
@@ -140,26 +137,24 @@ BswM_NvM_CurrentJobMode(NvM_MultiBlockRequestType MultiBlockRequest, NvM_Request
 
 #if (BSWM_DEV_ERROR_DETECT == STD_ON)
     if ((Std_ReturnType)E_OK == BswM_DetChkCurNvmJobMode(MultiBlockRequest))
-#endif /* BSWM_DEV_ERROR_DETECT == STD_ON */
+#endif /*BSWM_DEV_ERROR_DETECT == STD_ON*/
     {
         result = BswM_GetPartitionIdx(&partIdx);
         if ((boolean)TRUE == result)
         {
-            bswmPartPCCfgs = &(BswM_RuntimeStatus.bswmPartPCCfgs[partIdx]);
-            bswmPartLCfgs = &(BswM_RuntimeStatus.bswmPartLCfgs[partIdx]);
-            modeRqstPCfgPtr = bswmPartPCCfgs->modeRqstPCCfg;
-            modeRqstLCfgPtr = bswmPartLCfgs->modeRqstLCfg;
+            modeRqstPCfgPtr = BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].modeRqstPCCfg;
+            modeRqstLCfgPtr = BswM_RuntimeStatus.bswmPartLCfgs[partIdx].modeRqstLCfg;
             numOfNvmJob = modeRqstPCfgPtr->numOfNvMJob;
             for (jobIdx = 0u; jobIdx < numOfNvmJob; jobIdx++)
             {
                 if (MultiBlockRequest == modeRqstLCfgPtr->nvmService[jobIdx])
                 {
-                    modeRqstPtr = bswmPartPCCfgs->modeRqstPortRunPtr;
+                    modeRqstPtr = BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].modeRqstPortRunPtr;
                     modeRqstPtr->nvMJobModeIndiStatus[jobIdx] = CurrentJobMode;
                     if (BSWM_IMMEDIATE == modeRqstLCfgPtr->nvmJobInd[jobIdx].process)
                     {
                         numOfRules = modeRqstLCfgPtr->nvmJobInd[jobIdx].belongToRlueNum;
-                        ruleLCfgPtr = bswmPartLCfgs->ruleLCfg;
+                        ruleLCfgPtr = BswM_RuntimeStatus.bswmPartLCfgs[partIdx].ruleLCfg;
                         for (idx = 0u; idx < numOfRules; idx++)
                         {
                             ruleIdx = modeRqstLCfgPtr->nvmJobInd[jobIdx].belongToRlue[idx];
@@ -196,8 +191,6 @@ BswM_NvM_CurrentBlockMode(NvM_BlockIdType Block, NvM_RequestResultType CurrentBl
     P2CONST(BswM_ModeRqstPortLCfgType, AUTOMATIC, BSWM_CONST) modeRqstLCfgPtr;
     P2CONST(BswM_ModeRqstPortRuntimeType, AUTOMATIC, BSWM_VAR_CLEARED) modeRqstPtr;
     P2CONST(BswM_RuleLcCfgType, AUTOMATIC, BSWM_CONST) ruleLCfgPtr;
-    P2CONST(BswM_PartitionPCCfgType, TYPEDEF, BSWM_CONST) bswmPartPCCfgs;
-    P2CONST(BswM_PartitionLCfgType, TYPEDEF, BSWM_CONST) bswmPartLCfgs;
     BswM_RuleIndexType numOfRules;
     BswM_RuleIndexType idx;
     BswM_RuleIndexType ruleIdx;
@@ -208,26 +201,24 @@ BswM_NvM_CurrentBlockMode(NvM_BlockIdType Block, NvM_RequestResultType CurrentBl
 
 #if (BSWM_DEV_ERROR_DETECT == STD_ON)
     if ((Std_ReturnType)E_OK == BswM_DetChkCurNvmBlockMode(CurrentBlockMode))
-#endif /* BSWM_DEV_ERROR_DETECT == STD_ON */
+#endif /*BSWM_DEV_ERROR_DETECT == STD_ON*/
     {
         result = BswM_GetPartitionIdx(&partIdx);
         if ((boolean)TRUE == result)
         {
-            bswmPartPCCfgs = &(BswM_RuntimeStatus.bswmPartPCCfgs[partIdx]);
-            bswmPartLCfgs = &(BswM_RuntimeStatus.bswmPartLCfgs[partIdx]);
-            modeRqstPCfgPtr = bswmPartPCCfgs->modeRqstPCCfg;
-            modeRqstLCfgPtr = bswmPartLCfgs->modeRqstLCfg;
+            modeRqstPCfgPtr = BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].modeRqstPCCfg;
+            modeRqstLCfgPtr = BswM_RuntimeStatus.bswmPartLCfgs[partIdx].modeRqstLCfg;
             numOfNvMBlock = modeRqstPCfgPtr->numOfNvMBlock;
             for (bloIdx = 0u; bloIdx < numOfNvMBlock; bloIdx++)
             {
                 if (Block == modeRqstLCfgPtr->nvmBlockRef[bloIdx])
                 {
-                    modeRqstPtr = bswmPartPCCfgs->modeRqstPortRunPtr;
+                    modeRqstPtr = BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].modeRqstPortRunPtr;
                     modeRqstPtr->nvMReqStatus[bloIdx] = CurrentBlockMode;
                     if (BSWM_IMMEDIATE == modeRqstLCfgPtr->nvmRqst[bloIdx].process)
                     {
                         numOfRules = modeRqstLCfgPtr->nvmRqst[bloIdx].belongToRlueNum;
-                        ruleLCfgPtr = bswmPartLCfgs->ruleLCfg;
+                        ruleLCfgPtr = BswM_RuntimeStatus.bswmPartLCfgs[partIdx].ruleLCfg;
                         for (idx = 0u; idx < numOfRules; idx++)
                         {
                             ruleIdx = modeRqstLCfgPtr->nvmRqst[bloIdx].belongToRlue[idx];
@@ -282,4 +273,4 @@ BswM_GetCurNvmJobMode(uint8 jobIdx)
 **                      Private Function Definitions                          **
 *******************************************************************************/
 
-#endif /* BSWM_NVM_ENABLED == STD_ON */
+#endif /*BSWM_NVM_ENABLED == STD_ON*/

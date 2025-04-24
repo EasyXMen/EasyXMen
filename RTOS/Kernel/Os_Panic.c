@@ -18,21 +18,22 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Os_Panic.c                                                  **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : i-soft-os                                                   **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Panic Managment                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
- **  Version :   AUTOSAR classic Platform R19--Function Safety                 **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Os_Panic.c                                                  **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : i-soft-os                                                   **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Panic Managment                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
+**  Version :   AUTOSAR classic Platform R19--Function Safety                 **
+**                                                                            **
+*******************************************************************************/
 
 /*=======[I N C L U D E S]====================================================*/
 #include "Os_Internal.h"

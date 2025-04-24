@@ -18,40 +18,48 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : PduR_Types.h                                                **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : zhengfei.li                                                 **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Type definitions of PDUR                                    **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2 and R19_11            **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : PduR_Types.h                                                **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : zhengfei.li                                                 **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Type definitions of PDUR                                    **
+**                                                                            **
+**  SPECIFICATION(S) : AUTOSAR Classic Platform 4.2.2 and R19_11              **
+**                                                                            **
+*******************************************************************************/
 #ifndef PDUR_TYPES_H
 #define PDUR_TYPES_H
-/*******************************************************************************
-**                      Global Symbols                                        **
-*******************************************************************************/
-#define PDUR_TYPES_H_AR_MAJOR_VERSION 4u
-#define PDUR_TYPES_H_AR_MINOR_VERSION 2u
-#define PDUR_TYPES_H_AR_PATCH_VERSION 2u
-#define PDUR_TYPES_H_SW_MAJOR_VERSION 2u
-#define PDUR_TYPES_H_SW_MINOR_VERSION 1u
-#define PDUR_TYPES_H_SW_PATCH_VERSION 0u
+
 /*******************************************************************************
 **                      Includes                                              **
 *******************************************************************************/
-#include "PduR_PBcfg.h"
 #include "PduR_Cfg.h"
+
 #if (STD_OFF == PDUR_ZERO_COST_OPERATION)
 /*******************************************************************************
 **                      Global Data Types                                     **
 *******************************************************************************/
+/* Published information */
+#if !defined(PDUR_PUBLISHED_INFORMATION)
+#define PDUR_PUBLISHED_INFORMATION
+#define PDUR_MODULE_ID                   51u
+#define PDUR_VENDOR_ID                   62u
+#define PDUR_AR_RELEASE_MAJOR_VERSION    4u
+#define PDUR_AR_RELEASE_MINOR_VERSION    2u
+#define PDUR_AR_RELEASE_REVISION_VERSION 2u
+#define PDUR_SW_MAJOR_VERSION            2u
+#define PDUR_SW_MINOR_VERSION            3u
+#define PDUR_SW_PATCH_VERSION            5u
+#elif ((PDUR_SW_MAJOR_VERSION != 2u) || (PDUR_SW_MINOR_VERSION != 3u) || (PDUR_SW_PATCH_VERSION != 5u))
+#error "PduR: Mismatch in Software Version"
+#endif
+
 typedef enum
 {
     PDUR_DIRECT = 0u,
@@ -61,16 +69,14 @@ typedef enum
 typedef uint16 PduR_PBConfigIdType;
 typedef uint16 PduR_RoutingPathGroupIdType;
 
+typedef uint32 PduR_TpThresholdType;
+
 typedef enum
 {
     PDUR_UNINIT = 0u,
     PDUR_ONLINE
 } PduR_StateType;
 
-typedef Std_ReturnType (
-    *PduR_LoIfTransmit_FuncPtrType)(PduIdType SoAdSrcPduId, P2CONST(PduInfoType, AUTOMATIC, PDUR_APPL_DATA) PduInfoPtr);
-
-typedef void (*PduR_UpIfTxConfirmation_FuncPtrType)(PduIdType TxPduId);
 /*****************************************************************************************************************/
 typedef struct
 {
@@ -78,38 +84,81 @@ typedef struct
     PduLengthType DefaultValueLength;
 } PduRDefaultValueType;
 
+typedef enum
+{
+    PDUR_BUFFER_UNLOCK,
+    PDUR_BUFFER_LOCK
+} PduR_BufferLockStateType;
+
+typedef enum
+{
+    PDUR_BUFFER_WRITE_OK,
+    PDUR_BUFFER_WRITE_NOT_OK,
+    PDUR_BUFFER_WRITE_PENDING
+} PduR_BufferWriteStateType;
+
+typedef enum
+{
+    PDUR_ROUTE_IF_TX_NOBUFFERED,
+    PDUR_ROUTE_IF_RX_NOBUFFERED,
+    PDUR_ROUTE_IF_RX_BUFFERED,
+    PDUR_ROUTE_IF_GW_NOBUFFERED,
+    PDUR_ROUTE_IF_GW_BUFFERED,
+    PDUR_ROUTE_TP_TX_NOBUFFERED,
+    PDUR_ROUTE_TP_RX_NOBUFFERED,
+    PDUR_ROUTE_TP_RX_BUFFERED,
+    PDUR_ROUTE_TP_GW_BUFFERED
+} PduR_RouteType;
+
+typedef enum
+{
+    PDUR_RES_INITIAL,
+    PDUR_RES_PENDING,
+    PDUR_RES_OK,
+    PDUR_RES_NOT_OK
+} PduR_RouteStatusType;
+
+typedef enum
+{
+    PDUR_QUEUESTORE_NOT_OK,
+    PDUR_QUEUESTORE_OK,
+    PDUR_QUEUESTORE_FLUSH_OK
+} PduR_QueueStoreType;
+
 typedef struct
 {
     boolean PduRSrcPduUpTxConf;
     uint8 BswModuleIndex;
 #if (STD_ON == PDUR_META_DATA_SUPPORT)
     uint8 MetaDataLength;
-#endif /* STD_ON == PDUR_META_DATA_SUPPORT */
-    PduIdType UpTxconfirmStateIndex;
-    PduIdType PduRDestModulePduIndex;
+#endif
+#if (STD_ON == PDUR_MULITIPARTITION_SUPPORT)
+    uint8 PartitionIndex;
+#endif /* STD_ON == PDUR_MULITIPARTITION_SUPPORT */
+    PduIdType PduRSrcModulePduIndex;
 } PduRSrcPduType;
 
 typedef struct
 {
     uint8 BswModuleIndex;
-    boolean GateWayRoute;
 #if (STD_ON == PDUR_META_DATA_SUPPORT)
     uint8 MetaDataLength;
 #endif /* STD_ON == PDUR_META_DATA_SUPPORT */
-#if (PDUR_TP_BUFFER_SUM > 0u)
-    uint16 PduRTpThreshold;
-#endif /* PDUR_TP_BUFFER_SUM > 0u */
-#if (PDUR_TX_BUFFER_SUM > 0u)
-    uint16 PduRDestTxBufferRef;
-#if (PDUR_GATEWAY_DIRECT_BUFFER_PDU_SUM > 0u)
-    PduIdType PduRGatewayDirectTxStateIndex;
-#endif /* PDUR_GATEWAY_DIRECT_BUFFER_PDU_SUM > 0u */
-#endif /* PDUR_TX_BUFFER_SUM > 0u */
-#if (PDUR_DEST_GATEWAY_TP_PDU_SUM > 0u)
-    PduIdType GateWayTpRunTimeIndex;
-#endif /* PDUR_DEST_GATEWAY_TP_PDU_SUM > 0u */
-    PduIdType PduRSrcPduRef;
+#if (STD_ON == PDUR_MULITIPARTITION_SUPPORT)
+    uint8 PartitionIndex;
+#endif /* STD_ON == PDUR_MULITIPARTITION_SUPPORT */
+    boolean transmissionConfirmation;
+#if (PDUR_NUMBER_OF_QUEUES > 0u)
+    uint16 PduRDestQueueIdRef;
+#endif /* PDUR_NUMBER_OF_QUEUES > 0u */
+    uint8 PduSrcSum;
+    P2CONST(PduIdType, AUTOMATIC, PDUR_CONST_PBCFG) PduRSrcPduRef;
     PduIdType PduRDestModulePduIndex;
+    PduLengthType configuredLength;
+#if (PDUR_NUMBER_OF_QUEUES > 0u)
+    PduR_TpThresholdType PduRTpThreshold;
+#endif /* PDUR_NUMBER_OF_QUEUES >0u */
+    PduR_RouteType routeType;
     PduR_DestPduDataProvisionType PduRDestPduDataProvision;
 #if (PDUR_DEFAULT_VALUE_PDU > 0u)
     P2CONST(PduRDefaultValueType, AUTOMATIC, PDUR_CONST_PBCFG) PduRDefaultValueRef;
@@ -118,14 +167,8 @@ typedef struct
 
 typedef struct
 {
-    boolean TpRoute;
-#if (PDUR_DEST_GATEWAY_TP_PDU_SUM > 0u)
-    boolean GatewayOnTheFly;
-#endif /* PDUR_DEST_GATEWAY_TP_PDU_SUM > 0u */
     uint8 PduDestSum;
-#if (PDUR_DEST_GATEWAY_TP_PDU_SUM > 0u)
-    uint16 PduRTpMaxThreshold;
-#endif /* PDUR_DEST_GATEWAY_TP_PDU_SUM > 0u */
+    boolean TpRoute;
     P2CONST(PduIdType, AUTOMATIC, PDUR_CONST_PBCFG) PduRDestPduIdRef;
 } PduRRoutingPathType;
 
@@ -145,95 +188,157 @@ typedef struct
 typedef struct
 {
     PduR_PBConfigIdType PduRConfigId;
-    uint16 PduRRoutingPathGroupNum;
-    uint16 PduRRoutingPathNum;
-    PduIdType PduRDestPduNum;
+    uint16 routingPathGroupCnt;
+    uint16 PduRSrcPduNum;
+    PduIdType PduRRoutingPathNum;
     P2CONST(PduRRoutingPathGroupType, AUTOMATIC, PDUR_CONST_PBCFG) PduRRoutingPathGroupRef;
     P2CONST(PduRRoutingTableType, AUTOMATIC, PDUR_CONST_PBCFG) PduRRoutingTableRef;
     P2CONST(PduRSrcPduType, AUTOMATIC, PDUR_CONST_PBCFG) PduRSrcPduRef;
     P2CONST(PduRDestPduType, AUTOMATIC, PDUR_CONST_PBCFG) PduRDestPduRef;
 } PduR_PBConfigType;
 
+typedef Std_ReturnType (*ModuleCancelReceiveApiType)(PduIdType RxPduId);
+typedef Std_ReturnType (*ModuleIfTpCancelTransmitApiType)(PduIdType TxPduId);
+typedef Std_ReturnType (*ModuleTriggertransmitApiType)(PduIdType TxPduId, PduInfoType* PduInfoPtr);
+typedef Std_ReturnType (*ModuleIfTransmitApiType)(PduIdType id, const PduInfoType* info);
+typedef void (*ModuleTxConfirmationApiType)(PduIdType TxPduId);
+typedef void (*ModuleIfRxIndicationApiType)(PduIdType RxPduId, const PduInfoType* PduInfoPtr);
+typedef Std_ReturnType (*ModuleTpTransmitApiType)(PduIdType id, const PduInfoType* info);
+typedef BufReq_ReturnType (*ModuleCopyTxDataApiType)(
+    PduIdType id,
+    const PduInfoType* info,
+    const RetryInfoType* retry,
+    PduLengthType* availableDataPtr);
+typedef void (*ModuleTpTxConfirmationApiType)(PduIdType id, Std_ReturnType result);
+typedef BufReq_ReturnType (*ModuleStartOfReceptionApiType)(
+    PduIdType id,
+    const PduInfoType* info,
+    PduLengthType TpSduLength,
+    PduLengthType* bufferSizePtr);
+typedef BufReq_ReturnType (
+    *ModuleCopyRxDataApiType)(PduIdType id, const PduInfoType* info, PduLengthType* bufferSizePtr);
+typedef void (*ModuleTpRxIndicationApiType)(PduIdType id, Std_ReturnType result);
+
 typedef struct
 {
     uint8 PduRBswModuleRef;
+#if (STD_OFF == PDUR_MULITIPARTITION_SUPPORT)
 #if (STD_ON == PDUR_CANCEL_RECEIVE)
-    P2FUNC(Std_ReturnType, PDUR_APPL_CODE, ModuleCancelReceiveApi)(PduIdType RxPduId);
+    ModuleCancelReceiveApiType CancelReceiveApi;
 #endif /* STD_ON == PDUR_CANCEL_RECEIVE */
 #if (STD_ON == PDUR_CANCEL_TRANSMIT)
-    P2FUNC(Std_ReturnType, PDUR_APPL_CODE, ModuleIfCancelTransmitApi)(PduIdType TxPduId);
-    P2FUNC(Std_ReturnType, PDUR_APPL_CODE, ModuleTpCancelTransmitApi)(PduIdType TxPduId);
+    ModuleIfTpCancelTransmitApiType IfCancelTransmitApi;
+    ModuleIfTpCancelTransmitApiType TpCancelTransmitApi;
 #endif /* STD_ON == PDUR_CANCEL_TRANSMIT */
-#if (STD_ON == PDUR_CHANGE_PARAMETER)
-    P2FUNC(Std_ReturnType, PDUR_APPL_CODE, ModuleChangeParameterApi)
-    (PduIdType id, TPParameterType parameter, uint16 value);
-#endif /* STD_ON == PDUR_CHANGE_PARAMETER */
 #if (STD_ON == PDUR_TRIGGER_TRANSMIT)
-    P2FUNC(Std_ReturnType, PDUR_APPL_CODE, ModuleTriggertransmitApi)
-    (PduIdType TxPduId, PduInfoType* PduInfoPtr);
+    ModuleTriggertransmitApiType TriggertransmitApi;
 #endif /* STD_ON == PDUR_TRIGGER_TRANSMIT */
 #if (STD_ON == PDUR_TRANSMIT_SUPPORT)
-    P2FUNC(Std_ReturnType, PDUR_APPL_CODE, ModuleIfTransmitApi)(PduIdType id, const PduInfoType* info);
+    ModuleIfTransmitApiType IfTransmitApi;
 #endif /* STD_ON == PDUR_TRANSMIT_SUPPORT */
 #if (STD_ON == PDUR_TX_CONFIRMATION)
-    P2FUNC(void, PDUR_APPL_CODE, ModuleTxConfirmationApi)(PduIdType TxPduId);
+    ModuleTxConfirmationApiType TxConfirmationApi;
 #endif /* STD_ON == PDUR_TX_CONFIRMATION */
 #if (STD_ON == PDUR_RX_INDICATION)
-    P2FUNC(void, PDUR_APPL_CODE, ModuleIfRxIndicationApi)(PduIdType RxPduId, const PduInfoType* PduInfoPtr);
+    ModuleIfRxIndicationApiType IfRxIndicationApi;
 #endif /* STD_ON == PDUR_RX_INDICATION */
 #if (STD_ON == PDUR_TRANSMIT_SUPPORT)
-    P2FUNC(Std_ReturnType, PDUR_APPL_CODE, ModuleTpTransmitApi)(PduIdType id, const PduInfoType* info);
+    ModuleTpTransmitApiType TpTransmitApi;
 #endif /* STD_ON == PDUR_TRANSMIT_SUPPORT */
 #if (STD_ON == PDUR_TP_COPYTXDATA)
-    P2FUNC(BufReq_ReturnType, PDUR_APPL_CODE, ModuleCopyTxDataApi)
-    (PduIdType id, const PduInfoType* info, const RetryInfoType* retry, PduLengthType* availableDataPtr);
+    ModuleCopyTxDataApiType CopyTxDataApi;
 #endif /* STD_ON == PDUR_TP_COPYTXDATA */
 #if (STD_ON == PDUR_TP_TXCONFIRMATION)
-    P2FUNC(void, PDUR_APPL_CODE, ModuleTpTxConfirmationApi)(PduIdType id, Std_ReturnType result);
+    ModuleTpTxConfirmationApiType TpTxConfirmationApi;
 #endif /* STD_ON == PDUR_TP_TXCONFIRMATION */
 #if (STD_ON == PDUR_TP_STARTOFRECEPTION_TRANSMIT)
-    P2FUNC(BufReq_ReturnType, PDUR_APPL_CODE, ModuleStartOfReceptionApi)
-    (PduIdType id, const PduInfoType* info, PduLengthType TpSduLength, PduLengthType* bufferSizePtr);
+    ModuleStartOfReceptionApiType StartOfReceptionApi;
 #endif /* STD_ON == PDUR_TP_STARTOFRECEPTION_TRANSMIT */
 #if (STD_ON == PDUR_TP_COPYRXDATA)
-    P2FUNC(BufReq_ReturnType, PDUR_APPL_CODE, ModuleCopyRxDataApi)
-    (PduIdType id, const PduInfoType* info, PduLengthType* bufferSizePtr);
+    ModuleCopyRxDataApiType CopyRxDataApi;
 #endif /* STD_ON == PDUR_TP_COPYRXDATA */
 #if (STD_ON == PDUR_TP_RXINDICATION)
-    P2FUNC(void, PDUR_APPL_CODE, ModuleTpRxIndicationApi)(PduIdType id, Std_ReturnType result);
+    ModuleTpRxIndicationApiType TpRxIndicationApi;
 #endif /* STD_ON == PDUR_TP_RXINDICATION */
+#else
+    uint8 PduRBswModulePartitionNum;
+    const uint8* PduRBswModulePartitionRef;
+#if (STD_ON == PDUR_CANCEL_RECEIVE)
+    ModuleCancelReceiveApiType* CancelReceiveApi;
+#endif /* STD_ON == PDUR_CANCEL_RECEIVE */
+#if (STD_ON == PDUR_CANCEL_TRANSMIT)
+    ModuleIfTpCancelTransmitApiType* IfCancelTransmitApi;
+    ModuleIfTpCancelTransmitApiType* TpCancelTransmitApi;
+#endif /* STD_ON == PDUR_CANCEL_TRANSMIT */
+#if (STD_ON == PDUR_TRIGGER_TRANSMIT)
+    ModuleTriggertransmitApiType* TriggertransmitApi;
+#endif /* STD_ON == PDUR_TRIGGER_TRANSMIT */
+#if (STD_ON == PDUR_TRANSMIT_SUPPORT)
+    ModuleIfTransmitApiType* IfTransmitApi;
+#endif /* STD_ON == PDUR_TRANSMIT_SUPPORT */
+#if (STD_ON == PDUR_TX_CONFIRMATION)
+    ModuleTxConfirmationApiType* TxConfirmationApi;
+#endif /* STD_ON == PDUR_TX_CONFIRMATION */
+#if (STD_ON == PDUR_RX_INDICATION)
+    ModuleIfRxIndicationApiType* IfRxIndicationApi;
+#endif /* STD_ON == PDUR_RX_INDICATION */
+#if (STD_ON == PDUR_TRANSMIT_SUPPORT)
+    ModuleTpTransmitApiType* TpTransmitApi;
+#endif /* STD_ON == PDUR_TRANSMIT_SUPPORT */
+#if (STD_ON == PDUR_TP_COPYTXDATA)
+    ModuleCopyTxDataApiType* CopyTxDataApi;
+#endif /* STD_ON == PDUR_TP_COPYTXDATA */
+#if (STD_ON == PDUR_TP_TXCONFIRMATION)
+    ModuleTpTxConfirmationApiType* TpTxConfirmationApi;
+#endif /* STD_ON == PDUR_TP_TXCONFIRMATION */
+#if (STD_ON == PDUR_TP_STARTOFRECEPTION_TRANSMIT)
+    ModuleStartOfReceptionApiType* StartOfReceptionApi;
+#endif /* STD_ON == PDUR_TP_STARTOFRECEPTION_TRANSMIT */
+#if (STD_ON == PDUR_TP_COPYRXDATA)
+    ModuleCopyRxDataApiType* CopyRxDataApi;
+#endif /* STD_ON == PDUR_TP_COPYRXDATA */
+#if (STD_ON == PDUR_TP_RXINDICATION)
+    ModuleTpRxIndicationApiType* TpRxIndicationApi;
+#endif /* STD_ON == PDUR_TP_RXINDICATION */
+#endif /* STD_OFF == PDUR_MULITIPARTITION_SUPPORT */
 } PduRBswModuleType;
 
+/* PduR_BufferType is designed to be compatible with PduR_TxBufferType and PduR_TpBufferTableType */
 typedef struct
 {
-    boolean used;
-    uint8 NextTpBufferId;
-    PduLengthType RxBufferOffset;
-    PduLengthType TpBufferLength;
-    PduLengthType SduLength;
-    PduIdType PduHandleId;
-    P2VAR(uint8, AUTOMATIC, PDUR_CONST_PBCFG) TpBufferData;
-#if (STD_ON == PDUR_META_DATA_SUPPORT)
-    uint8* MetaData;
-#endif
-} PduR_TpBufferTableType;
+    const PduLengthType pduMaxLength; /* Configured PduLength + metadata length */
+    PduLengthType sduLength;          /* Total length of the Tp N-SDU to be received or the I-SDU to be transmitted */
+    PduLengthType pduCurLength;       /* Current length of the data stored in the buffer */
+    PduIdType srcPduId;               /* Source Pdu Id */
+    uint8* data;
+    PduR_BufferLockStateType lockState;   /* Occupied by a queue */
+    PduR_BufferWriteStateType writeState; /* Data receive state */
+} PduR_BufferType;
+
+typedef uint8 PduR_QueueDepthType;
+typedef uint16 PduR_BufferPoolSizeType;
+typedef uint16 PduR_BufferIndexType;
+typedef PduIdType PduR_QueueIndexType; /* PduRDestPdu => PduRRoutingPath => PduRQueue */
+typedef struct
+{
+    PduR_BufferPoolSizeType size;
+    const PduR_BufferIndexType* indexes;
+} PduR_BufferPoolType;
 
 typedef struct
 {
-    boolean used;
-    PduLengthType SduLength;
-    P2VAR(uint8, AUTOMATIC, PDUR_CONST_PBCFG) TxBufferData;
-#if (STD_ON == PDUR_META_DATA_SUPPORT)
-    uint8* MetaData;
-#endif
-} PduR_TxBufferType;
+    const PduR_QueueDepthType depth;
+    PduLengthType
+        curPosition; /* Current position of head buffer which identifies the number of bytes to be transmitted */
+    PduLengthType
+        curSduLength; /* Used in inter-partition TP Transmit to determine the tpSdu is already copied to PduR Buffer */
+    PduR_BufferType** bufferPtrs; /* Point to a PduR_BufferType* array of size depth, init to ALL NULL PTR */
+    const PduR_BufferPoolType* const bufferPoolPtr;
+} PduR_QueueType;
 
-typedef struct
-{
-    uint8 PduRTxBufferDepth;
-    PduLengthType PduRPduMaxLength;
-    P2VAR(PduR_TxBufferType, AUTOMATIC, PDUR_CONST_PBCFG) PduRTxBufferRef;
-} PduR_TxBufferTableType;
+/* The range of MetaDataItemLength is "1 .. 64" (ECUC_EcuC_00075) */
+typedef uint8 PduR_MetaDataLengthType;
+
 #endif /*STD_OFF == PDUR_ZERO_COST_OPERATION*/
 
 #endif /* end of PDUR_TYPES_H */

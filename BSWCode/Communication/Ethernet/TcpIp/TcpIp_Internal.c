@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- ** **
- **  FILENAME    : TcpIp_Internal.c **
- ** **
- **  Created on  : 02/03/21 **
- **  Author      : darren.zhang **
- **  Vendor      : **
- **  DESCRIPTION : internal function for TcpIp **
- ** **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11 **
- ** **
- ***********************************************************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+************************************************************************************************************************
+**                                                                                                                    **
+**  FILENAME    : TcpIp_Internal.c                                                                                    **
+**                                                                                                                    **
+**  Created on  : 02/03/21                                                                                            **
+**  Author      : darren.zhang                                                                                        **
+**  Vendor      :                                                                                                     **
+**  DESCRIPTION : internal function for TcpIp                                                                         **
+**                                                                                                                    **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                                                              **
+**                                                                                                                    **
+***********************************************************************************************************************/
 
 /***********************************************************************************************************************
  *  INCLUDES
@@ -40,6 +41,7 @@
 #include "TcpIp_Types.h"
 #include "TcpIp_Lcfg.h"
 #include "TcpIp_PBcfg.h"
+#include "TcpIp.h"
 #include "EthIf.h"
 #include "SchM_TcpIp.h"
 #include "TcpIp_Internal.h"
@@ -50,6 +52,10 @@
 #if (STD_ON == TCPIP_MUILT_IPADT_PER_CTRL)
 #include "hooks/lwip_hooks.h"
 #endif /* STD_ON == TCPIP_MUILT_IPADT_PER_CTRL */
+#if TCPIP_TCP_IPERF_SUPPORT && LWIP_TCP_IPERF && defined(LWIP_HOOK_IPERF_GET_TIME_100US)
+#include "Tm.h"
+#endif /* TCPIP_TCP_IPERF_SUPPORT && LWIP_TCP_IPERF && LWIP_HOOK_IPERF_GET_TIME_100US && \
+          defined LWIP_HOOK_IPERF_GET_TIME_100US */
 /***********************************************************************************************************************
  *  VERSION
  ***********************************************************************************************************************/
@@ -92,16 +98,16 @@
 #endif /* defined(TCPIP_INNER_CHECK_TAG) */
 
 #if (TCPIP_CONTROLLER_NUM > 0u)
-/* PRQA S 3472++*/ /* MISRA Dir 4.9 */
-#define TCPIP_REG_NETIF_ETHIF_CTRLINDEX(netif, index) \
-    do                                                \
-    {                                                 \
-        (netif)->name[0] = (char)'I';                 \
-        (netif)->name[1] = (char)(index);             \
-    } while (0)
-/* PRQA S 3472--*/ /* MISRA Dir 4.9 */
-#define TCPIP_CHECK_NETIF_ETHIF_CTRLINDEX(netif) \
-    ((netif)->name[0] == (char)'I') && ((netif)->name[1] < (char)(ETHIF_CTRL_NUM))
+static inline void TCPIP_REG_NETIF_ETHIF_CTRLINDEX(struct netif* netif, TcpIp_RefType index)
+{
+    netif->name[0] = (char)'I';
+    netif->name[1] = (char)(index);
+}
+
+static inline boolean TCPIP_CHECK_NETIF_ETHIF_CTRLINDEX(const struct netif* netif)
+{
+    return ((netif->name[0] == (char)'I') && (netif->name[1] < (char)(TCPIP_REF_ETHIF_CTRL_NUM)));
+}
 #define TCPIP_GET_NETIF_ETHIF_CTRLINDEX(netif)    ((uint8)((netif)->name[1]))
 
 #define TCPIP_GET_NETIF_CTRLINDEX(netif)          (uint8)((netif)->num)
@@ -110,10 +116,9 @@
 
 #define TCPIP_CTRL_SET_STATE_PENDING(ctrl, state) (ctrl)->stateFlag |= (uint8)TCPIP_CTRL_STATE_MASK(state)
 #define TCPIP_CTRL_CLR_STATE_PENDING(ctrl, state) (ctrl)->stateFlag &= ~(uint8)TCPIP_CTRL_STATE_MASK(state)
-/* PRQA S 3472++*/ /* MISRA Dir 4.9 */
-#define TCPIP_CTRL_IS_STATE_PENDING(ctrl, state) (((ctrl)->stateFlag & (uint8)TCPIP_CTRL_STATE_MASK(state)) != 0u)
-/* PRQA S 3472--*/                             /* MISRA Dir 4.9 */
-#if (STD_ON == TCPIP_SUPPORT_AUTOIP_INITTIMER) /* PRQA S 3332 */
+#define TCPIP_CTRL_IS_STATE_PENDING(ctrl, state)  ((ctrl)->stateFlag & (uint8)TCPIP_CTRL_STATE_MASK(state)) != 0u
+
+#if (STD_ON == TCPIP_SUPPORT_AUTOIP_INITTIMER)
 #define TCPIP_CTRL_MASK_AUTOIP_PENDING_MASK ((uint8)0x01)
 #define TCPIP_CTRL_SET_AUTOIP_PENDING(ctrl) ((ctrl)->maskFlg |= TCPIP_CTRL_MASK_AUTOIP_PENDING_MASK)
 #define TCPIP_CTRL_CLR_AUTOIP_PENDING(ctrl) ((ctrl)->maskFlg &= ~TCPIP_CTRL_MASK_AUTOIP_PENDING_MASK)
@@ -127,17 +132,13 @@
         | (netif_nsc_reason_t)LWIP_NSC_IPV4_NETMASK_CHANGED | (netif_nsc_reason_t)LWIP_NSC_IPV4_SETTINGS_CHANGED \
         | (netif_nsc_reason_t)LWIP_NSC_IPV6_SET | (netif_nsc_reason_t)LWIP_NSC_IPV6_ADDR_STATE_CHANGED)
 #if (TCPIP_LOCAL_ADR_NUM > 0)
-/* PRQA S 3472++*/ /* MISRA Dir 4.9 */
-#define TCPIP_LOCALADR_IS_REQUESTIP(lcd) (((lcd)->flag & LOCALADR_FLAG_REQUEST_IP) != 0u)
-/* PRQA S 3472--*/ /* MISRA Dir 4.9 */
+#define TCPIP_LOCALADR_IS_REQUESTIP(lcd)  ((lcd)->flag & LOCALADR_FLAG_REQUEST_IP) != 0u
 #define TCPIP_LOCALADR_SET_REQUESTIP(lcd) (lcd)->flag = (lcd)->flag | LOCALADR_FLAG_REQUEST_IP
 #define TCPIP_LOCALADR_CLR_REQUESTIP(lcd) (lcd)->flag = (lcd)->flag & (uint32)(~(LOCALADR_FLAG_REQUEST_IP))
 
-/* PRQA S 3472++*/ /* MISRA Dir 4.9 */
-#define TCPIP_LOCALADR_IS_IPVALID(lcd) (((lcd)->flag & LOCALADR_FLAG_IP_VAID) != 0u)
-/* PRQA S 3472--*/ /* MISRA Dir 4.9 */
-#define TCPIP_LOCALADR_SET_IPVALID(lcd) (lcd)->flag = (lcd)->flag | LOCALADR_FLAG_IP_VAID
-#define TCPIP_LOCALADR_CLR_IPVALID(lcd) (lcd)->flag = (lcd)->flag & (uint32)(~(LOCALADR_FLAG_IP_VAID))
+#define TCPIP_LOCALADR_IS_IPVALID(lcd)    ((lcd)->flag & LOCALADR_FLAG_IP_VAID) != 0u
+#define TCPIP_LOCALADR_SET_IPVALID(lcd)   (lcd)->flag = (lcd)->flag | LOCALADR_FLAG_IP_VAID
+#define TCPIP_LOCALADR_CLR_IPVALID(lcd)   (lcd)->flag = (lcd)->flag & (uint32)(~(LOCALADR_FLAG_IP_VAID))
 
 #endif /* TCPIP_LOCAL_ADR_NUM > 0 */
 
@@ -151,28 +152,23 @@
 #else
 #define TCPIP_WRITE_FILL_FLAG (uint8)(0x1u)
 #endif /* TCPIP_SUPPORT_WRITE_MORE */
-#define TCP_FLAG_FORCERETRIEVE (uint8)(0x01u)
-#define TCP_FLAG_SERVERSOCKET  (uint8)(0x02u)
+#define TCP_FLAG_FORCERETRIEVE              (uint8)(0x01u)
+#define TCP_FLAG_SERVERSOCKET               (uint8)(0x02u)
 
-/* PRQA S 3472++*/ /* MISRA Dir 4.9 */
-#define TCPIP_TCP_IS_FORCERETRIEVE(sockPtr) ((((sockPtr)->socketFlag) & TCP_FLAG_FORCERETRIEVE) != 0u)
-#define TCPIP_TCP_SET_ZFORCERETRIEVE(sockPtr, sw)                      \
-    do                                                                 \
-    {                                                                  \
-        if ((boolean)TRUE == (sw))                                     \
-        {                                                              \
-            (sockPtr)->socketFlag |= TCP_FLAG_FORCERETRIEVE;           \
-        }                                                              \
-        else                                                           \
-        {                                                              \
-            (sockPtr)->socketFlag &= (uint8)(~TCP_FLAG_FORCERETRIEVE); \
-        }                                                              \
-    } while (0)
-/* PRQA S 3472--*/ /* MISRA Dir 4.9 */
+#define TCPIP_TCP_IS_FORCERETRIEVE(sockPtr) (((sockPtr)->socketFlag) & TCP_FLAG_FORCERETRIEVE) != 0u
+static inline void TCPIP_TCP_SET_ZFORCERETRIEVE(TcpIp_SocketHandleType* sockPtr, boolean sw)
+{
+    if (sw)
+    {
+        sockPtr->socketFlag |= TCP_FLAG_FORCERETRIEVE;
+    }
+    else
+    {
+        sockPtr->socketFlag &= (uint8)(~TCP_FLAG_FORCERETRIEVE);
+    }
+}
 /* mark this socket is listen socket */
-/* PRQA S 3472++*/ /* MISRA Dir 4.9 */
-#define TCPIP_TCP_IS_SERVERSOCKET(sockPtr) ((((sockPtr)->socketFlag) & TCP_FLAG_SERVERSOCKET) != 0u)
-/* PRQA S 3472--*/ /* MISRA Dir 4.9 */
+#define TCPIP_TCP_IS_SERVERSOCKET(sockPtr)  (((sockPtr)->socketFlag) & TCP_FLAG_SERVERSOCKET) != 0u
 #define TCPIP_TCP_SET_SERVERSOCKET(sockPtr) ((sockPtr)->socketFlag) |= TCP_FLAG_SERVERSOCKET
 #define TCPIP_TCP_CLR_SERVERSOCKET(sockPtr) ((sockPtr)->socketFlag) &= (uint8)(~TCP_FLAG_SERVERSOCKET)
 
@@ -180,9 +176,8 @@
 
 #if (TCPIP_SOCKET_NUM > 0u)
 /* by socket management data point calculate socket index */
-#define TCPIP_SOCKID_CAL_ARYADR(ptr)                                                                                \
-    (TcpIp_SocketIdType)(((uintx)(ptr) - (uintx)(TcpIp_SocketTable)) / sizeof(TcpIp_SocketTable[0])) /* PRQA S 0306 \
-                                                                                                      */
+#define TCPIP_SOCKID_CAL_ARYADR(ptr) \
+    (TcpIp_SocketIdType)(((uintx)(ptr) - (uintx)(TcpIp_SocketTable)) / sizeof(TcpIp_SocketTable[0]))
 #endif /* TCPIP_SOCKET_NUM > 0u */
 
 #if (STD_ON == TCPIP_MUILT_IPADT_PER_CTRL)
@@ -206,11 +201,9 @@
 
 /* return true is this control link all local addr released */
 #if (1u < TCPIP_CTRL_LOCAL_NUMBER)
-#define TCPIP_CTRL_ALL_LOCAL_IS_RELEASE(ctrlPtr) (TcpIp_CtrlLinkAllLocalIsRelease(ctrlPtr) == TRUE)
+#define TCPIP_CTRL_ALL_LOCAL_IS_RELEASE(ctrlPtr) TcpIp_CtrlLinkAllLocalIsRelease(ctrlPtr) == TRUE
 #else
-/* PRQA S 3472++*/ /* MISRA Dir 4.9 */
-#define TCPIP_CTRL_ALL_LOCAL_IS_RELEASE(ctrlPtr) ((ctrlPtr)->localUsedMask[0] == 0u)
-/* PRQA S 3472--*/ /* MISRA Dir 4.9 */
+#define TCPIP_CTRL_ALL_LOCAL_IS_RELEASE(ctrlPtr) (ctrlPtr)->localUsedMask[0] == 0u
 #endif /* 1u < TCPIP_CTRL_LOCAL_NUMBER */
 
 #endif /* STD_ON == TCPIP_MUILT_IPADT_PER_CTRL */
@@ -332,6 +325,12 @@ TCPIP_LOCAL FUNC(Std_ReturnType, TCPIP_CODE) TcpIp_ChanegeSocketTcpKeepAlive(
     VAR(TcpIp_ParamIdType, AUTOMATIC) parameterId,
     P2CONST(void, AUTOMATIC, TCPIP_APPL_CONST) paraPtr);
 #endif /* STD_ON == TCPIP_TCP_ENABLED */
+#if (STD_ON == TCPIP_TCP_TLS_ENABLED)
+TCPIP_LOCAL FUNC(Std_ReturnType, TCPIP_CODE) TcpIp_TlsDynamicConnect(
+    VAR(TcpIp_SocketIdType, AUTOMATIC) socketId,
+    VAR(TcpIp_ParamIdType, AUTOMATIC) parameterId,
+    P2CONST(void, AUTOMATIC, TCPIP_APPL_CONST) paraPtr);
+#endif /* STD_ON == TCPIP_TCP_TLS_ENABLED */
 
 TCPIP_LOCAL CONST(TcpIp_SocketParaHandleType, TCPIP_VAR)
     TcpIp_SocketParaHandleTebla[] = /* PRQA S 3218 */ /* MISRA Rule 8.9 */
@@ -347,7 +346,9 @@ TCPIP_LOCAL CONST(TcpIp_SocketParaHandleType, TCPIP_VAR)
         {TCPIP_PARAMID_TCP_KEEPALIVE_INTERVAL, TcpIp_ChanegeSocketTcpKeepAlive},
         {TCPIP_PARAMID_TCP_OPTIONFILTER, NULL_PTR},
 #endif /* STD_ON == TCPIP_TCP_ENABLED */
-
+#if (STD_ON == TCPIP_TCP_TLS_ENABLED)
+        {TCPIP_PARAMID_TLS_CONNECTION_ASSIGNMENT, TcpIp_TlsDynamicConnect},
+#endif /* STD_ON == TCPIP_TCP_TLS_ENABLED */
         {TCPIP_PARAMID_PATHMTU_ENABLE, NULL_PTR},
         {TCPIP_PARAMID_FLOWLABEL, NULL_PTR},
         {TCPIP_PARAMID_DSCP, NULL_PTR},
@@ -369,7 +370,7 @@ TCPIP_LOCAL CONST(TcpIp_SocketParaHandleType, TCPIP_VAR)
 TCPIP_LOCAL VAR(uint32, TCPIP_VAR) TcpIp_TcpIsnCount;
 #define TCPIP_STOP_SEC_VAR_NO_INIT_32
 #include "TcpIp_MemMap.h"
-#endif /* defined TCPIP_TCP_SYNISN_RECALC) && STD_ON == TCPIP_TCP_SYNISN_RECALC */
+#endif /* defined TCPIP_TCP_SYNISN_RECALC && STD_ON == TCPIP_TCP_SYNISN_RECALC */
 /***********************************************************************************************************************
  *  LOCAL FUNCTIONS PROTOTYPES
  ***********************************************************************************************************************/
@@ -382,8 +383,8 @@ TCPIP_LOCAL FUNC(uintx, TCPIP_CODE) TcpIp_CloseAllSocket(VAR(uint8, AUTOMATIC) c
 
 #if (STD_ON == TCPIP_TCP_ENABLED)
 
-TCPIP_LOCAL FUNC_P2VAR(TcpIp_SocketHandleType, AUTOMATIC, TCPIP_CODE) /* MISRA Rule 20.7 */
-    TcpIp_MallocTcpSocketIdByPcb(TcpIp_SocketHandleType* socketMngPtr, struct tcp_pcb* pcbPtr);
+TCPIP_LOCAL FUNC_P2VAR(TcpIp_SocketHandleType, AUTOMATIC, TCPIP_CODE)
+    TcpIp_MallocTcpSocketIdByPcb(const TcpIp_SocketHandleType* socketMngPtr, struct tcp_pcb* pcbPtr);
 
 TCPIP_LOCAL FUNC(void, TCPIP_CODE) TcpIp_FreeTcpSocketId(VAR(TcpIp_SocketIdType, TCPIP_VAR) socketId);
 
@@ -391,7 +392,7 @@ TCPIP_LOCAL FUNC(void, TCPIP_CODE)
     TcpIp_CopyTcpMainHandle(P2VAR(TcpIp_SocketHandleType, AUTOMATIC, TCPIP_APPL_CONST) socketMngPtr);
 
 TCPIP_LOCAL FUNC(void, TCPIP_CODE) TcpIp_TcpSocketFreeAndEventNotifyUpLayer(
-    P2VAR(TcpIp_SocketHandleType, AUTOMATIC, TCPIP_APPL_VAR) socketMngPtr,
+    P2CONST(TcpIp_SocketHandleType, AUTOMATIC, TCPIP_APPL_VAR) socketMngPtr,
     VAR(TcpIp_EventType, AUTOMATIC) event);
 #endif /* STD_ON == TCPIP_TCP_ENABLED */
 
@@ -431,7 +432,7 @@ TCPIP_LOCAL FUNC(void, TCPIP_CODE)
 TCPIP_LOCAL FUNC(void, TCPIP_CODE) TcpIp_FreeUdpSocketId(VAR(TcpIp_SocketIdType, TCPIP_VAR) socketId);
 
 TCPIP_LOCAL FUNC(void, TCPIP_CODE) TcpIp_UdpSocketFreeAndEventNotifyUpLayer(
-    P2VAR(TcpIp_SocketHandleType, AUTOMATIC, TCPIP_APPL_VAR) socketMngPtr,
+    P2CONST(TcpIp_SocketHandleType, AUTOMATIC, TCPIP_APPL_VAR) socketMngPtr,
     VAR(TcpIp_EventType, AUTOMATIC) event);
 #endif /* STD_ON == TCPIP_UDP_ENABLED */
 
@@ -481,7 +482,7 @@ TCPIP_LOCAL FUNC(void, TCPIP_CODE) TcpIp_NotfiyUpperLayerIpAdrChange(
 #if (STD_ON == TCPIP_MUILT_SOCKET_OWNERCFG)
 
         for (uintx index = 0u; index < TcpIp_LCfg.SocketOwnerNum; index++)
-#else /* (STD_ON != TCPIP_MUILT_SOCKET_OWNERCFG */
+#else /* STD_ON != TCPIP_MUILT_SOCKET_OWNERCFG */
         uintx index = 0u;
 
 #endif /* STD_ON == TCPIP_MUILT_SOCKET_OWNERCFG */
@@ -585,7 +586,7 @@ TCPIP_LOCAL FUNC(uintx, TCPIP_CODE) TcpIp_CloseAllSocket(VAR(uint8, AUTOMATIC) c
                 /* first shall notify event */
                 TCPIP_TCP_SET_PENDINGEVENT(socketMngPtr);
                 /* next close socket */
-                SchM_Enter_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+                SchM_Enter_TcpIp_ExclusiveArea_Tx();
                 err_t err = tcp_close((struct tcp_pcb*)socketMngPtr->pcbPtr);
 
                 /* A close failure occurs while a close task is already executing,this not consider half close */
@@ -594,7 +595,7 @@ TCPIP_LOCAL FUNC(uintx, TCPIP_CODE) TcpIp_CloseAllSocket(VAR(uint8, AUTOMATIC) c
                     tcp_abort((struct tcp_pcb*)socketMngPtr->pcbPtr);
                 }
 
-                SchM_Exit_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+                SchM_Exit_TcpIp_ExclusiveArea_Tx();
                 /* tcp socket close four times to shake hands,
                 so will pending control state,not direct switch to shutdown */
                 pendCnt++;
@@ -605,10 +606,10 @@ TCPIP_LOCAL FUNC(uintx, TCPIP_CODE) TcpIp_CloseAllSocket(VAR(uint8, AUTOMATIC) c
 
             if (TCPIP_IPPROTO_UDP == socketMngPtr->protocol)
             {
-                SchM_Enter_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+                SchM_Enter_TcpIp_ExclusiveArea_Tx();
                 udp_disconnect((struct udp_pcb*)socketMngPtr->pcbPtr);
                 udp_remove((struct udp_pcb*)socketMngPtr->pcbPtr);
-                SchM_Exit_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+                SchM_Exit_TcpIp_ExclusiveArea_Tx();
                 /* first shall notify event */
                 TcpIp_UdpSocketFreeAndEventNotifyUpLayer(socketMngPtr, TCPIP_UDP_CLOSED);
             }
@@ -631,14 +632,10 @@ TCPIP_LOCAL FUNC(uintx, TCPIP_CODE) TcpIp_CloseAllSocket(VAR(uint8, AUTOMATIC) c
  * @param pcbPtr the new connection pcb
  * @return TcpIp_SocketHandleType *,is not null,meas malloc ok,another is failed
  */
-// *INDENT-OFF*
-TCPIP_LOCAL FUNC_P2VAR(TcpIp_SocketHandleType, AUTOMATIC, TCPIP_CODE) TcpIp_MallocTcpSocketIdByPcb(
-    TcpIp_SocketHandleType* socketMngPtr,
-    /* PRQA S 3673++ */ /* MISRA Rule 8.13 */
-    struct tcp_pcb* pcbPtr
-    /* PRQA S 3673-- */ /* MISRA Rule 8.13 */
-)
-// *INDENT-ON*
+/* *INDENT-OFF* */
+TCPIP_LOCAL FUNC_P2VAR(TcpIp_SocketHandleType, AUTOMATIC, TCPIP_CODE)
+    TcpIp_MallocTcpSocketIdByPcb(const TcpIp_SocketHandleType* socketMngPtr, struct tcp_pcb* pcbPtr)
+/* *INDENT-ON* */
 {
     TcpIp_SocketHandleType* newSocketMngPtr = NULL_PTR;
 
@@ -646,7 +643,7 @@ TCPIP_LOCAL FUNC_P2VAR(TcpIp_SocketHandleType, AUTOMATIC, TCPIP_CODE) TcpIp_Mall
     {
         newSocketMngPtr = &TcpIp_SocketTable[TcpIp_SocketLastId];
         newSocketMngPtr->pcbPtr = (void*)pcbPtr;
-        struct tcp_pcb* tpcb = (struct tcp_pcb*)pcbPtr;
+        struct tcp_pcb* tpcb = pcbPtr;
         newSocketMngPtr->socketFlag = 0u;
         /* reg extend callback function */
         tcp_ext_arg_set_callbacks(tpcb, 0u, TcpIp_tcpExtArgCallbacksTable);
@@ -658,7 +655,7 @@ TCPIP_LOCAL FUNC_P2VAR(TcpIp_SocketHandleType, AUTOMATIC, TCPIP_CODE) TcpIp_Mall
         tcp_err(tpcb, TcpIp_TcpErrCallback);
         /* reg send call back function */
         tcp_sent(tpcb, TcpIp_TcpSentCallback);
-        SchM_Enter_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_ALL);
+        SchM_Enter_TcpIp_ExclusiveArea();
         /* state handle */
         Tcp_SocketUsedNum++;
         /* output parameter setting */
@@ -666,11 +663,14 @@ TCPIP_LOCAL FUNC_P2VAR(TcpIp_SocketHandleType, AUTOMATIC, TCPIP_CODE) TcpIp_Mall
         /* link list handle */
         TcpIp_SocketLastId = newSocketMngPtr->nextSocketId;
         newSocketMngPtr->nextSocketId = TCPIP_SOCKET_INVALIDVLU;
+#if (STD_ON == TCPIP_TCP_TLS_ENABLED)
+        newSocketMngPtr->listenSocketId = (TCPIP_SOCKID_CAL_ARYADR(socketMngPtr)); /* PRQA S 0326,0306 */
+#endif                                                                             /* STD_ON == TCPIP_TCP_TLS_ENABLED */
         /* copy data from listen socket */
         newSocketMngPtr->ownerCfgPtr = socketMngPtr->ownerCfgPtr;
         newSocketMngPtr->ctrlIndex = socketMngPtr->ctrlIndex;
         TcpIp_ControllerVar[socketMngPtr->ctrlIndex].socketNum++;
-        SchM_Exit_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_ALL);
+        SchM_Exit_TcpIp_ExclusiveArea();
     }
 
     return newSocketMngPtr;
@@ -698,13 +698,16 @@ TCPIP_LOCAL FUNC(void, TCPIP_CODE) TcpIp_FreeTcpSocketId(VAR(TcpIp_SocketIdType,
         if (NULL_PTR != socketMngPtr->txBuf)
         {
             /* have not transmit data in local buffer */
-            SchM_Enter_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+            SchM_Enter_TcpIp_ExclusiveArea_Tx();
             (void)pbuf_free(socketMngPtr->txBuf);
-            SchM_Exit_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+            SchM_Exit_TcpIp_ExclusiveArea_Tx();
         }
 
         socketMngPtr->txBuf = NULL_PTR;
-
+#if (STD_ON == TCPIP_TCP_TLS_ENABLED)
+        socketMngPtr->listenSocketId = TCPIP_SOCKET_INVALIDVLU;
+        socketMngPtr->tlsPtr = NULL_PTR;
+#endif /* STD_ON == TCPIP_TCP_TLS_ENABLED */
 #if (TCPIP_CONTROLLER_NUM > 0)
         TcpIp_ControllerStatus* ctrlMngPtr = &TcpIp_ControllerVar[socketMngPtr->ctrlIndex];
 
@@ -714,9 +717,7 @@ TCPIP_LOCAL FUNC(void, TCPIP_CODE) TcpIp_FreeTcpSocketId(VAR(TcpIp_SocketIdType,
         }
 
         /* [SWS_TCPIP_00087] */
-        /* PRQA S 3469++*/ /* MISRA Dir 4.9 */
         if ((TCPIP_CTRL_IS_STATE_PENDING(ctrlMngPtr, TCPIP_STATE_SHUTDOWN)) && (0u == ctrlMngPtr->socketNum))
-        /* PRQA S 3469--*/ /* MISRA Dir 4.9 */
         {
             TCPIP_CTRL_CLR_STATE_PENDING(ctrlMngPtr, TCPIP_STATE_SHUTDOWN);
             ctrlMngPtr->ctrlStatus = TCPIP_STATE_OFFLINE;
@@ -728,12 +729,12 @@ TCPIP_LOCAL FUNC(void, TCPIP_CODE) TcpIp_FreeTcpSocketId(VAR(TcpIp_SocketIdType,
         }
 
 #endif /* TCPIP_CONTROLLER_NUM > 0 */
-        SchM_Enter_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_ALL);
+        SchM_Enter_TcpIp_ExclusiveArea();
         /* link list handle */
         socketMngPtr->nextSocketId = TcpIp_SocketLastId;
         TcpIp_SocketLastId = socketId;
         Tcp_SocketUsedNum--;
-        SchM_Exit_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_ALL);
+        SchM_Exit_TcpIp_ExclusiveArea();
     }
 
 #if defined(TCPIP_INNER_CHECK)
@@ -759,8 +760,7 @@ TCPIP_LOCAL FUNC(void, TCPIP_CODE)
     struct tcp_pcb* tcpPcbPtr = (struct tcp_pcb*)socketMngPtr->pcbPtr;
     struct pbuf* tcpTxPbuf = NULL_PTR;
 
-    if ((socketMngPtr->txBuf != NULL_PTR)
-        || (!TCPIP_TCP_IS_FORCERETRIEVE(socketMngPtr))) /* PRQA S 3469*/ /* MISRA Dir 4.9 */
+    if ((socketMngPtr->txBuf != NULL_PTR) || (!(TCPIP_TCP_IS_FORCERETRIEVE(socketMngPtr))))
     {
         sendFlag = 1u;
         tcpTxPbuf = socketMngPtr->txBuf;
@@ -772,22 +772,23 @@ TCPIP_LOCAL FUNC(void, TCPIP_CODE)
 
     if (copyLen > 0u)
     {
-        SchM_Enter_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+        SchM_Enter_TcpIp_ExclusiveArea_Tx();
         tcpTxPbuf = pbuf_alloc(PBUF_RAW, copyLen, PBUF_RAM);
         if ((NULL_PTR != tcpTxPbuf) && (tcpTxPbuf->tot_len == 0u))
         {
             (void)pbuf_free(tcpTxPbuf);
             tcpTxPbuf = NULL_PTR;
         }
-        SchM_Exit_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+        SchM_Exit_TcpIp_ExclusiveArea_Tx();
 
 #if defined(TCPIP_INNER_CHECK)
         if (NULL_PTR != tcpTxPbuf)
 #endif /* defined(TCPIP_INNER_CHECK) */
         {
-            SchM_Enter_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+
+            SchM_Enter_TcpIp_ExclusiveArea_Tx();
             tcpTxPbuf = pbuf_coalesce(tcpTxPbuf, PBUF_RAW);
-            SchM_Exit_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+            SchM_Exit_TcpIp_ExclusiveArea_Tx();
             copyLen = tcpTxPbuf->len;
 
             TcpIp_Up_SocketOwnerCopyTxDataType copyFuncPtr = socketMngPtr->ownerCfgPtr->Up_CopyTxDataFuncPtr;
@@ -802,9 +803,9 @@ TCPIP_LOCAL FUNC(void, TCPIP_CODE)
                 /* link all pbuf */
                 if (NULL_PTR != socketMngPtr->txBuf)
                 {
-                    SchM_Enter_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+                    SchM_Enter_TcpIp_ExclusiveArea_Tx();
                     pbuf_cat(socketMngPtr->txBuf, tcpTxPbuf);
-                    SchM_Exit_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+                    SchM_Exit_TcpIp_ExclusiveArea_Tx();
                     tcpTxPbuf = socketMngPtr->txBuf;
                 }
                 else
@@ -814,8 +815,7 @@ TCPIP_LOCAL FUNC(void, TCPIP_CODE)
 
                 socketMngPtr->UpCopyTxRemainLen -= copyLen;
 
-                if ((socketMngPtr->UpCopyTxRemainLen == 0u)
-                    || (!TCPIP_TCP_IS_FORCERETRIEVE(socketMngPtr))) /* PRQA S 3469*/ /* MISRA Dir 4.9 */
+                if ((socketMngPtr->UpCopyTxRemainLen == 0u) || (!(TCPIP_TCP_IS_FORCERETRIEVE(socketMngPtr))))
                 {
                     sendFlag = 2u;
                 }
@@ -823,9 +823,9 @@ TCPIP_LOCAL FUNC(void, TCPIP_CODE)
             else
             {
                 /* upper layer copy tx data return BUFREQ_E_NOT_OK,shall release local buff */
-                SchM_Enter_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+                SchM_Enter_TcpIp_ExclusiveArea_Tx();
                 (void)pbuf_free(tcpTxPbuf);
-                SchM_Exit_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+                SchM_Exit_TcpIp_ExclusiveArea_Tx();
                 lw_ret = (err_t)ERR_ARG;
 #if defined(TCPIP_INNER_CHECK)
                 TCPIP_INNER_CHECK_OUTPUT("CopyTxData return error=%d\n", bufRet);
@@ -844,24 +844,33 @@ TCPIP_LOCAL FUNC(void, TCPIP_CODE)
 
     if (sendFlag > 0u)
     {
-        SchM_Enter_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+        SchM_Enter_TcpIp_ExclusiveArea_Tx();
         tcpTxPbuf = pbuf_coalesce(tcpTxPbuf, PBUF_RAW);
-        SchM_Exit_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+        SchM_Exit_TcpIp_ExclusiveArea_Tx();
 
-        SchM_Enter_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
-        lw_ret = tcp_write(tcpPcbPtr, tcpTxPbuf->payload, tcpTxPbuf->len, TCPIP_WRITE_FILL_FLAG);
+#if (STD_ON == TCPIP_TCP_TLS_ENABLED)
+        if (NULL_PTR != socketMngPtr->tlsPtr)
+        {
+            lw_ret = TcpIp_TlsWrite(socketMngPtr, tcpTxPbuf->payload, tcpTxPbuf->len);
+        }
+        else
+#endif /* STD_ON == TCPIP_TCP_TLS_ENABLED */
+        {
+            SchM_Enter_TcpIp_ExclusiveArea_Tx();
+            lw_ret = tcp_write(tcpPcbPtr, tcpTxPbuf->payload, tcpTxPbuf->len, TCPIP_WRITE_FILL_FLAG);
 #if (STD_ON == TCPIP_FASTTX_TCP)
-        lw_ret += tcp_output(tcpPcbPtr);
+            lw_ret += tcp_output(tcpPcbPtr);
 #endif /* STD_ON == TCPIP_FASTTX_TCP */
-        SchM_Exit_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+            SchM_Exit_TcpIp_ExclusiveArea_Tx();
+        }
 
         if ((err_t)ERR_MEM != lw_ret)
         {
             /* call low layer transmit, shall realse all buffer ,whether it's successful or not */
-            SchM_Enter_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+            SchM_Enter_TcpIp_ExclusiveArea_Tx();
             (void)pbuf_free(tcpTxPbuf);
             socketMngPtr->txBuf = NULL_PTR;
-            SchM_Exit_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+            SchM_Exit_TcpIp_ExclusiveArea_Tx();
         }
         else
         {
@@ -874,9 +883,9 @@ TCPIP_LOCAL FUNC(void, TCPIP_CODE)
             /* free history buf,not copy next mainfunction */
             if (NULL_PTR != socketMngPtr->txBuf)
             {
-                SchM_Enter_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+                SchM_Enter_TcpIp_ExclusiveArea_Tx();
                 (void)pbuf_free(socketMngPtr->txBuf);
-                SchM_Exit_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+                SchM_Exit_TcpIp_ExclusiveArea_Tx();
             }
 
             socketMngPtr->txBuf = NULL_PTR;
@@ -891,14 +900,12 @@ TCPIP_LOCAL FUNC(void, TCPIP_CODE)
  * @param event @ref TcpIp_EventType
  */
 TCPIP_LOCAL FUNC(void, TCPIP_CODE) TcpIp_TcpSocketFreeAndEventNotifyUpLayer(
-    /* PRQA S 3673++ */ /* MISRA Rule 8.13 */
-    P2VAR(TcpIp_SocketHandleType, AUTOMATIC, TCPIP_APPL_VAR) socketMngPtr,
-    /* PRQA S 3673-- */ /* MISRA Rule 8.13 */
+    P2CONST(TcpIp_SocketHandleType, AUTOMATIC, TCPIP_APPL_VAR) socketMngPtr,
     VAR(TcpIp_EventType, AUTOMATIC) event)
 {
     TcpIp_Up_TcpIpEventType eventFuncPtr = socketMngPtr->ownerCfgPtr->Up_TcpIpEventFuncPtr;
-    TcpIp_SocketIdType socketId = TCPIP_SOCKID_CAL_ARYADR(socketMngPtr);              /* PRQA S 0326,0306 */
-    boolean needNotifyFlg = TCPIP_TCP_IS_PENDINGEVENT(socketMngPtr); /* PRQA S 3469*/ /* MISRA Dir 4.9 */
+    TcpIp_SocketIdType socketId = (TCPIP_SOCKID_CAL_ARYADR(socketMngPtr)); /* PRQA S 0326,0306 */
+    boolean needNotifyFlg = (TCPIP_TCP_IS_PENDINGEVENT(socketMngPtr));
     TcpIp_FreeTcpSocketId(socketId);
 
     if (needNotifyFlg && (NULL_PTR != eventFuncPtr))
@@ -917,13 +924,11 @@ TCPIP_LOCAL FUNC(void, TCPIP_CODE) TcpIp_TcpSocketFreeAndEventNotifyUpLayer(
  * @param event @ref TcpIp_EventType
  */
 TCPIP_LOCAL FUNC(void, TCPIP_CODE) TcpIp_UdpSocketFreeAndEventNotifyUpLayer(
-    /* PRQA S 3673++ */ /* MISRA Rule 8.13 */
-    P2VAR(TcpIp_SocketHandleType, AUTOMATIC, TCPIP_APPL_VAR) socketMngPtr,
-    /* PRQA S 3673-- */ /* MISRA Rule 8.13 */
+    P2CONST(TcpIp_SocketHandleType, AUTOMATIC, TCPIP_APPL_VAR) socketMngPtr,
     VAR(TcpIp_EventType, AUTOMATIC) event)
 {
     TcpIp_Up_TcpIpEventType eventFuncPtr = socketMngPtr->ownerCfgPtr->Up_TcpIpEventFuncPtr;
-    TcpIp_SocketIdType socketId = TCPIP_SOCKID_CAL_ARYADR(socketMngPtr); /* PRQA S 0326,0306 */
+    TcpIp_SocketIdType socketId = (TCPIP_SOCKID_CAL_ARYADR(socketMngPtr)); /* PRQA S 0326,0306 */
     TcpIp_FreeUdpSocketId(socketId);
 
     if (NULL_PTR != eventFuncPtr)
@@ -938,6 +943,15 @@ TCPIP_LOCAL FUNC(void, TCPIP_CODE) TcpIp_UdpSocketFreeAndEventNotifyUpLayer(
  *  LWIP HOOKS FUNCTIONS
  ***********************************************************************************************************************/
 #if TCPIP_LWIP_HOOKS
+#if defined(LWIP_HOOK_IPERF_GET_TIME_100US)
+FUNC(uint32, TCPIP_CODE) TcpIp_HookGetTimeNow100us(void)
+{
+    Tm_PredefTimer100us32bitType time_vlu = {0};
+    (void)Tm_ResetTimer100us32bit(&time_vlu);
+    return time_vlu.ui32RefTime;
+}
+#endif /* defined(LWIP_HOOK_IPERF_GET_TIME_100US) */
+
 #if (defined TCPIP_TCP_SYNISN_RECALC) && (STD_ON == TCPIP_TCP_SYNISN_RECALC)
 FUNC(uint32, TCPIP_CODE)
 TcpIp_HookTcpIsn(const ip_addr_t* local_ip, u16_t local_port, const ip_addr_t* remote_ip, u16_t remote_port)
@@ -951,8 +965,8 @@ TcpIp_HookTcpIsn(const ip_addr_t* local_ip, u16_t local_port, const ip_addr_t* r
 #endif /* defined TCPIP_TCP_SYNISN_RECALC && STD_ON == TCPIP_TCP_SYNISN_RECALC */
 
 #if (STD_ON == TCPIP_MUILT_IPADT_PER_CTRL)
-FUNC_P2VAR(struct netif, AUTOMATIC, TCPIP_CODE) /* PRQA S 3430 */                              /* MISRA Rule 20.7 */
-TcpIp_HookIp4InputAccept(struct netif* netifPtr, const ip_addr_t* destIpPtr) /* PRQA S 3408 */ /* MISRA Rule 8.4 */
+FUNC_P2VAR(struct netif, AUTOMATIC, TCPIP_CODE)
+TcpIp_HookIp4InputAccept(struct netif* netifPtr, const ip_addr_t* destIpPtr)
 {
     struct netif* netifRtePtr = NULL_PTR;
     uint8 ctrlIdx = TCPIP_GET_NETIF_CTRLINDEX(netifPtr);
@@ -1016,9 +1030,7 @@ uint8 TcpIp_HookEthArpInputForus(const struct netif* netifPtr, const ip_addr_t* 
             const TcpIp_LocalAdrHandleType* lcaPtr = &TcpIp_LocalAdrTable[loop];
 
             /* compare ip address, compare before shall check local addr is valid */
-            /* PRQA S 3469++*/ /* MISRA Dir 4.9 */
             if ((TCPIP_LOCALADR_IS_IPVALID(lcaPtr)) && (ip_addr_cmp(&lcaPtr->ipAdrSrc, destAddrPtr)))
-            /* PRQA S 3469--*/ /* MISRA Dir 4.9 */
             {
                 *rltAddrPtr = *destAddrPtr;
                 ret = 1u;
@@ -1062,11 +1074,9 @@ const ip4_addr_t* TcpIp_HookEthArpGetGw(
         {
             const TcpIp_LocalAdrHandleType* localAdrVarPtr = &TcpIp_LocalAdrTable[loop];
 
-            /* PRQA S 3469++*/ /* MISRA Dir 4.9 */
             if ((TCPIP_LOCALADR_IS_IPVALID(localAdrVarPtr)) && (!ip4_addr_isany_val(localAdrVarPtr->ipAdrSrc))
                 && (!(ip4_addr_isany_val(localAdrVarPtr->netmask)))
                 && ip4_addr_netcmp(destAddrPtr, &localAdrVarPtr->ipAdrSrc, &localAdrVarPtr->netmask))
-            /* PRQA S 3469--*/ /* MISRA Dir 4.9 */
             {
                 retPtr = &localAdrVarPtr->defaultrouter;
                 break;
@@ -1089,8 +1099,7 @@ const ip4_addr_t* TcpIp_HookEthArpGetGw(
 }
 
 FUNC(void, TCPIP_CODE)
-TcpIp_HookGratuitousArp(                                                                      /* PRQA S 3408 */
-                        P2VAR(struct netif, AUTOMATIC, TCPIP_VAR) netifPtr) /* PRQA S 3430 */ /* MISRA Rule 20.7 */
+TcpIp_HookGratuitousArp(P2VAR(struct netif, AUTOMATIC, TCPIP_VAR) netifPtr)
 {
     uint8 ctrlIdx = TCPIP_GET_NETIF_CTRLINDEX(netifPtr);
 #if defined(TCPIP_INNER_CHECK)
@@ -1103,30 +1112,31 @@ TcpIp_HookGratuitousArp(                                                        
         TcpIp_LocalAddrIdType loopEnd = ControlCfgPtr[ctrlIdx].TcpIpLocalAddrStopId;
         struct eth_addr local_ethbroadcast = {{0xff, 0xff, 0xff, 0xff, 0xff, 0xff}};
         struct eth_addr local_ethzero = {{0, 0, 0, 0, 0, 0}};
-
+        struct eth_addr ethAddr;
+        ethAddr.addr[0] = netifPtr->hwaddr[0];
+        ethAddr.addr[1] = netifPtr->hwaddr[1];
+        ethAddr.addr[2] = netifPtr->hwaddr[2];
+        ethAddr.addr[3] = netifPtr->hwaddr[3];
+        ethAddr.addr[4] = netifPtr->hwaddr[4];
+        ethAddr.addr[5] = netifPtr->hwaddr[5];
         while (loop <= loopEnd)
         {
             const TcpIp_LocalAdrHandleType* lcaPtr = &TcpIp_LocalAdrTable[loop];
             const ip_addr_t* ipvar = &lcaPtr->ipAdrSrc;
-            /* PRQA S 3469++*/ /* MISRA Dir 4.9 */
             if ((TCPIP_LOCALADR_IS_IPVALID(lcaPtr)) && (!ip4_addr_isany_val(*ipvar)))
-            /* PRQA S 3469++*/ /* MISRA Dir 4.9 */
             {
-                SchM_Enter_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_ALL);
+                SchM_Enter_TcpIp_ExclusiveArea_Tx();
+
                 (void)etharp_raw(
                     netifPtr,
-                    /* PRQA S 0310 ++*/ /* MISRA Rule 11.3 */
-                    (struct eth_addr*)netifPtr->hwaddr,
-                    /* PRQA S 0310 --*/  /* MISRA Rule 11.3 */
-                    &local_ethbroadcast, /* PRQA S 3335 */
-                    /* PRQA S 0310 ++*/  /* MISRA Rule 11.3 */
-                    (struct eth_addr*)netifPtr->hwaddr,
-                    /* PRQA S 0310 --*/ /* MISRA Rule 11.3 */
+                    &ethAddr,
+                    &local_ethbroadcast,
+                    &ethAddr,
                     ipvar,
                     &local_ethzero,
                     ipvar,
                     (u16_t)ARP_REQUEST);
-                SchM_Exit_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_ALL);
+                SchM_Exit_TcpIp_ExclusiveArea_Tx();
             }
 
             loop++;
@@ -1163,9 +1173,7 @@ uint8 TcpIp_UdpTransmitLocalIpCompare(const ip_addr_t* pcbLocalAddrPtr, const st
             const TcpIp_LocalAdrHandleType* lcaPtr = &TcpIp_LocalAdrTable[loop];
 
             /* compare ip address, compare before shall check local addr is valid */
-            /* PRQA S 3469++*/ /* MISRA Dir 4.9 */
             if ((TCPIP_LOCALADR_IS_IPVALID(lcaPtr)) && (ip_addr_cmp(&lcaPtr->ipAdrSrc, pcbLocalAddrPtr)))
-            /* PRQA S 3469--*/ /* MISRA Dir 4.9 */
             {
                 ret = 1u;
                 break;
@@ -1281,8 +1289,7 @@ TCPIP_LOCAL_INLINE FUNC(void, TCPIP_CODE) TcpIp_NetIfGetPhyAddrFormEthIf(struct 
  * lwip netif initial callback
  * @param netif lwip netif struct
  */
-TCPIP_LOCAL FUNC(err_t, TCPIP_CODE)
-    ethernetif_init(P2VAR(struct netif, AUTOMATIC, TCPIP_APPL_VAR) netif) /* PRQA S 3430 */ /* MISRA Rule 20.7 */
+TCPIP_LOCAL FUNC(err_t, TCPIP_CODE) ethernetif_init(P2VAR(struct netif, AUTOMATIC, TCPIP_APPL_VAR) netif)
 {
     err_t lwRet = (err_t)ERR_OK;
 #if LWIP_IPV4
@@ -1354,7 +1361,7 @@ TCPIP_LOCAL FUNC(void, TCPIP_CODE) TcpIp_TcpExtargCallbackPcbDestroyed(
 
     if (NULL_PTR != data)
     {
-        TcpIp_SocketIdType socketId = TCPIP_SOCKID_CAL_ARYADR(data); /* PRQA S 0326,0306 */
+        TcpIp_SocketIdType socketId = (TCPIP_SOCKID_CAL_ARYADR(data)); /* PRQA S 0326,0306 */
         TcpIp_SocketHandleType* socketMngPtr = &TcpIp_SocketTable[socketId];
         struct tcp_pcb* pcbTmpPtr = (struct tcp_pcb*)socketMngPtr->pcbPtr;
 #if defined(TCPIP_INNER_CHECK)
@@ -1365,12 +1372,12 @@ TCPIP_LOCAL FUNC(void, TCPIP_CODE) TcpIp_TcpExtargCallbackPcbDestroyed(
             /* clear extend callback fucntion */
             tcp_ext_arg_set(pcbTmpPtr, 0, NULL_PTR);
             /* set callback is null shall trig lwip assert */
-            /* tcp_ext_arg_set_callbacks(pcbTmpPtr, 0u, NULL_PTR) */
+            /* tcp_ext_arg_set_callbacks(pcbTmpPtr, 0u, NULL_PTR);. */
             /* clear normal callback function */
             tcp_arg(pcbTmpPtr, NULL);
 
             /* listen socket handle is difference */
-            if (TCPIP_TCP_IS_SERVERSOCKET(socketMngPtr)) /* PRQA S 3469*/ /* MISRA Dir 4.9 */
+            if ((TCPIP_TCP_IS_SERVERSOCKET(socketMngPtr)))
             {
                 tcp_accept(pcbTmpPtr, NULL);
             }
@@ -1383,7 +1390,14 @@ TCPIP_LOCAL FUNC(void, TCPIP_CODE) TcpIp_TcpExtargCallbackPcbDestroyed(
 
             /* clear socket server flag */
             TCPIP_TCP_CLR_SERVERSOCKET(socketMngPtr);
+#if (STD_ON == TCPIP_TCP_TLS_ENABLED)
 
+            if (NULL_PTR != socketMngPtr->tlsPtr)
+            {
+                TcpIp_TlsSocketDeInit(socketMngPtr);
+            }
+
+#endif /* STD_ON == TCPIP_TCP_TLS_ENABLED */
             TcpIp_TcpSocketFreeAndEventNotifyUpLayer(socketMngPtr, TCPIP_TCP_CLOSED);
         }
 
@@ -1419,7 +1433,7 @@ TCPIP_LOCAL FUNC(void, TCPIP_CODE) TcpIp_TcpErrCallback(
     if ((NULL_PTR != socketMngPtr) && (NULL_PTR != socketMngPtr->ownerCfgPtr))
 #endif /* defined(TCPIP_INNER_CHECK) */
     {
-        TcpIp_SocketIdType socketId = TCPIP_SOCKID_CAL_ARYADR(arg); /* PRQA S 0326,0306 */
+        TcpIp_SocketIdType socketId = (TCPIP_SOCKID_CAL_ARYADR(arg)); /* PRQA S 0326,0306 */
         /* notify upper layer socket is RESET */
         TcpIp_Up_TcpIpEventType eventFuncPtr = socketMngPtr->ownerCfgPtr->Up_TcpIpEventFuncPtr;
         /* tcp socket error event only notify once ,sence: receiver remote FIN,local response ACK but remote send RST */
@@ -1451,7 +1465,7 @@ TCPIP_LOCAL FUNC(err_t, TCPIP_CODE) TcpIp_TcpSentCallback(
     uint16 len)
 {
     err_t err = (err_t)ERR_OK;
-    const TcpIp_SocketHandleType* socketMngPtr = (const TcpIp_SocketHandleType*)arg;
+    const TcpIp_SocketHandleType* socketMngPtr = (TcpIp_SocketHandleType*)arg;
 #if defined(TCPIP_INNER_CHECK)
 
     if ((NULL_PTR != socketMngPtr) && (NULL_PTR != socketMngPtr->pcbPtr) && (socketMngPtr->pcbPtr == tpcb))
@@ -1482,7 +1496,7 @@ TCPIP_LOCAL FUNC(err_t, TCPIP_CODE) TcpIp_TcpConnnectCallback(
     err_t err)
 {
     err_t err_ret = (err_t)ERR_ABRT;
-    const TcpIp_SocketHandleType* socketMngPtr = (const TcpIp_SocketHandleType*)arg;
+    const TcpIp_SocketHandleType* socketMngPtr = (TcpIp_SocketHandleType*)arg;
 #if defined(TCPIP_INNER_CHECK)
 
     if ((NULL_PTR != socketMngPtr) && (NULL_PTR != socketMngPtr->pcbPtr) && (socketMngPtr->pcbPtr == tpcb))
@@ -1521,30 +1535,58 @@ TCPIP_LOCAL FUNC(err_t, TCPIP_CODE) TcpIp_TcpAcceptCallcback(
     if ((NULL_PTR != arg) && ((err_t)ERR_OK == err))
 #endif /* defined(TCPIP_INNER_CHECK) */
     {
-        /* PRQA S 3678++ */ /* MISRA Rule 8.13 */
-        TcpIp_SocketHandleType* socketMngPtr = TcpIp_MallocTcpSocketIdByPcb((TcpIp_SocketHandleType*)arg, newpcb);
-        /* PRQA S 3678-- */ /* MISRA Rule 8.13 */
+        const TcpIp_SocketHandleType* socketMngPtr = TcpIp_MallocTcpSocketIdByPcb((TcpIp_SocketHandleType*)arg, newpcb);
+
         if (NULL_PTR != socketMngPtr)
         {
-            TcpIp_SocketIdType listenSocketId = TCPIP_SOCKID_CAL_ARYADR(arg); /* PRQA S 0326,0306 */
-            Std_ReturnType ret = E_NOT_OK;
+#if (STD_ON == TCPIP_TCP_TLS_ENABLED)
 
-            /* [SWS_TCPIP_00094]  The TcpIp module shall only accept new TCP connections if the related EthIf
-            controller is in state TCPIP_STATE_ONLINE */
-            if (TCPIP_STATE_ONLINE == TcpIp_ControllerVar[socketMngPtr->ctrlIndex].ctrlStatus)
+            if (NULL_PTR == socketMngPtr->tlsPtr)
             {
-                ret = TcpIp_TcpAcceptNofiyUplayer(listenSocketId, socketMngPtr);
+                ip_addr_t reIp;
+                TcpIp_SockAddrType remoteAdrInfo;
+                /* get local port and ip */
+                retErr = tcp_tcp_get_tcp_addrinfo(newpcb, 1, &reIp, &remoteAdrInfo.port);
+
+                if ((err_t)ERR_OK == retErr)
+                {
+                    TCPIP_LWIP_TO_LOCAL_IPADDR(remoteAdrInfo.addr, reIp.addr);
+#if (TCPIP_SC1 == TCPIP_SCALABILITY_CLASS)
+                    remoteAdrInfo.domain = TCPIP_AF_INET;
+#elif (TCPIP_SC2 == TCPIP_SCALABILITY_CLASS)
+                    remoteAdrInfo.domain = TCPIP_AF_INET6;
+#else  /* TCPIP_SC3 == TCPIP_SCALABILITY_CLASS */
+                    remoteAdrInfo.domain = IP_IS_V4_VAL(reIp) ? TCPIP_AF_INET : TCPIP_AF_INET6;
+#endif /* TCPIP_SC1 == TCPIP_SCALABILITY_CLASS */
+                    /* static tls connection assignment */
+                    TcpIp_TlsBaseStaticConnect(socketMngPtr, &remoteAdrInfo, TLS_SERVER);
+                }
             }
 
-            if ((Std_ReturnType)E_OK == ret)
+            /* if tls connect not assignment,this socket is normal */
+            if (NULL_PTR == socketMngPtr->tlsPtr)
+#endif /* STD_ON == TCPIP_TCP_TLS_ENABLED */
             {
-                retErr = (err_t)ERR_OK;
-            }
-            else
-            {
-                /* if accept is not ok ,not continue notify upper layer event */
-                tcp_err(newpcb, NULL_PTR);
-                retErr = (err_t)ERR_VAL;
+                TcpIp_SocketIdType listenSocketId = (TCPIP_SOCKID_CAL_ARYADR(arg)); /* PRQA S 0326,0306 */
+                Std_ReturnType ret = E_NOT_OK;
+
+                /* [SWS_TCPIP_00094]  The TcpIp module shall only accept new TCP connections if the related EthIf
+                controller is in state TCPIP_STATE_ONLINE */
+                if (TCPIP_STATE_ONLINE == TcpIp_ControllerVar[socketMngPtr->ctrlIndex].ctrlStatus)
+                {
+                    ret = TcpIp_TcpAcceptNofiyUplayer(listenSocketId, socketMngPtr);
+                }
+
+                if ((Std_ReturnType)E_OK == ret)
+                {
+                    retErr = (err_t)ERR_OK;
+                }
+                else
+                {
+                    /* if accept is not ok ,not continue notify upper layer event */
+                    tcp_err(newpcb, NULL_PTR);
+                    retErr = (err_t)ERR_VAL;
+                }
             }
         }
     }
@@ -1569,13 +1611,13 @@ TCPIP_LOCAL FUNC(err_t, TCPIP_CODE) TcpIp_TcpRecvCallback(
     err_t err)
 {
     err_t ret = err;
-    const TcpIp_SocketHandleType* socketMngPtr = (const TcpIp_SocketHandleType*)arg;
+    const TcpIp_SocketHandleType* socketMngPtr = (TcpIp_SocketHandleType*)arg;
 #if defined(TCPIP_INNER_CHECK)
 
     if ((NULL_PTR != socketMngPtr) && (NULL_PTR != socketMngPtr->pcbPtr) && (socketMngPtr->pcbPtr == tpcb))
 #endif /* defined(TCPIP_INNER_CHECK) */
     {
-        TcpIp_SocketIdType socketId = TCPIP_SOCKID_CAL_ARYADR(arg); /* PRQA S 0326,0306 */
+        TcpIp_SocketIdType socketId = (TCPIP_SOCKID_CAL_ARYADR(arg)); /* PRQA S 0326,0306 */
 
         if ((err_t)ERR_OK == ret)
         {
@@ -1587,8 +1629,7 @@ TCPIP_LOCAL FUNC(err_t, TCPIP_CODE) TcpIp_TcpRecvCallback(
             {
                 TcpIp_Up_TcpIpEventType eventFuncPtr = socketMngPtr->ownerCfgPtr->Up_TcpIpEventFuncPtr;
 
-                if ((NULL_PTR != eventFuncPtr)
-                    && (!TCPIP_TCP_IS_PENDINGEVENT(socketMngPtr))) /* PRQA S 3469*/ /* MISRA Dir 4.9 */
+                if ((NULL_PTR != eventFuncPtr) && (!(TCPIP_TCP_IS_PENDINGEVENT(socketMngPtr))))
                 {
                     /* report FIN to upper layer */
                     eventFuncPtr(socketId, TCPIP_TCP_FIN_RECEIVED);
@@ -1638,7 +1679,7 @@ TCPIP_LOCAL FUNC(void, TCPIP_CODE) TcpIp_UdpRecvCallcback(
     if ((NULL_PTR != socketMngPtr) && (NULL_PTR != p) && (socketMngPtr->pcbPtr == pcb))
 #endif /* defined(TCPIP_INNER_CHECK) */
     {
-        TcpIp_SocketIdType socketId = TCPIP_SOCKID_CAL_ARYADR(arg); /* PRQA S 0326,0306 */
+        TcpIp_SocketIdType socketId = (TCPIP_SOCKID_CAL_ARYADR(arg)); /* PRQA S 0326,0306 */
         /* rxindication function pointer */
         TcpIp_Up_RxIndicationType rxIndFuncPtr = socketMngPtr->ownerCfgPtr->Up_RxIndicationFuncPtr;
 
@@ -1695,9 +1736,7 @@ TCPIP_LOCAL FUNC(void, TCPIP_CODE) TcpIp_FreeUdpSocketId(VAR(TcpIp_SocketIdType,
         }
 
         /* [SWS_TCPIP_00077] */
-        /* PRQA S 3469++*/ /* MISRA Dir 4.9 */
-        if (TCPIP_CTRL_IS_STATE_PENDING(ctrlMngPtr, TCPIP_STATE_SHUTDOWN) && (0u == ctrlMngPtr->socketNum))
-        /* PRQA S 3469--*/ /* MISRA Dir 4.9 */
+        if ((TCPIP_CTRL_IS_STATE_PENDING(ctrlMngPtr, TCPIP_STATE_SHUTDOWN)) && (0u == ctrlMngPtr->socketNum))
         {
             TCPIP_CTRL_CLR_STATE_PENDING(ctrlMngPtr, TCPIP_STATE_SHUTDOWN);
             ctrlMngPtr->ctrlStatus = TCPIP_STATE_OFFLINE;
@@ -1710,10 +1749,10 @@ TCPIP_LOCAL FUNC(void, TCPIP_CODE) TcpIp_FreeUdpSocketId(VAR(TcpIp_SocketIdType,
 
 #endif /* TCPIP_CONTROLLER_NUM > 0 */
         /* link list handle */
-        SchM_Enter_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_ALL);
+        SchM_Enter_TcpIp_ExclusiveArea();
         socketMngPtr->nextSocketId = TcpIp_SocketLastId;
         TcpIp_SocketLastId = socketId;
-        SchM_Exit_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_ALL);
+        SchM_Exit_TcpIp_ExclusiveArea();
     }
 
 #if defined(TCPIP_INNER_CHECK)
@@ -1769,12 +1808,12 @@ TCPIP_LOCAL FUNC(void, TCPIP_CODE) TcpIp_CtrlLinkLocalAddrChagneHandle(
             boolean notifyFlg = forceNotifyFlg;
 
             if ((forceNotifyFlg) && (TCPIP_IPADDR_STATE_ASSIGNED == ipAdrState)
-                && (!TCPIP_LOCALADR_IS_IPVALID(lcaPtr))) /* PRQA S 3469*/ /* MISRA Dir 4.9 */
+                && (!(TCPIP_LOCALADR_IS_IPVALID(lcaPtr))))
             {
                 notifyFlg = FALSE;
             }
 
-            if (TCPIP_LOCALADR_IS_REQUESTIP(lcaPtr)) /* PRQA S 3469*/ /* MISRA Dir 4.9 */
+            if ((TCPIP_LOCALADR_IS_REQUESTIP(lcaPtr)))
             {
                 TCPIP_LOCALADR_CLR_REQUESTIP(lcaPtr);
                 /* The address is written back to inner local address variable asynchronously */
@@ -1856,7 +1895,7 @@ TCPIP_LOCAL FUNC(void, TCPIP_CODE) TcpIp_RequestCtrlIpAssignment(VAR(uint8, AUTO
         if ((localAdrCfgPtr->AddrAssignmentCfgPtr != NULL_PTR) && (localAdrCfgPtr->AddrAssignmentNum > 0U))
 #endif /* defined(TCPIP_CHECK) */
         {
-#if (TCPIP_LOCALADDR_MUILT_ASSIGNMENT == STD_ON) /* PRQA S 3332 */
+#if (TCPIP_LOCALADDR_MUILT_ASSIGNMENT == STD_ON)
 
             for (uint8 index = 0u; index < localAdrCfgPtr->AddrAssignmentNum; index++)
 #else /* TCPIP_LOCALADDR_MUILT_ASSIGNMENT != STD_ON */
@@ -1908,7 +1947,7 @@ TCPIP_LOCAL FUNC(void, TCPIP_CODE) TcpIp_UnasignedCtrlIpAssigemt(VAR(uint8, AUTO
         if ((localAdrCfgPtr->AddrAssignmentCfgPtr != NULL_PTR) && (localAdrCfgPtr->AddrAssignmentNum > 0U))
 #endif /* defined(TCPIP_CHECK) */
         {
-#if (TCPIP_LOCALADDR_MUILT_ASSIGNMENT == STD_ON) /* PRQA S 3332 */
+#if (TCPIP_LOCALADDR_MUILT_ASSIGNMENT == STD_ON)
 
             for (uint8 index = 0u; index < localAdrCfgPtr->AddrAssignmentNum; index++)
 #else /* (TCPIP_LOCALADDR_MUILT_ASSIGNMENT != STD_ON */
@@ -2199,9 +2238,7 @@ TcpIp_ControllerInit(VAR(uint32, AUTOMATIC) ctrlCnt, P2CONST(TcpIp_CtrlType, AUT
 
 #endif /* 1u < TCPIP_CONTROLLER_NUM */
     {
-        /* PRQA S 3469++*/ /* MISRA Dir 4.9 */
         TCPIP_REG_NETIF_ETHIF_CTRLINDEX(&TcpIp_ControllerVar[index].netifVar, ctrlCfgPtr[index].EthIfCtrlRef);
-        /* PRQA S 3469--*/ /* MISRA Dir 4.9 */
         struct netif* netifPtr =
             netif_add_noaddr(&TcpIp_ControllerVar[index].netifVar, (void*)NULL_PTR, ethernetif_init, NULL_PTR);
 #if defined(TCPIP_INNER_CHECK)
@@ -2377,7 +2414,7 @@ TcpIp_CloseSocketHandle(VAR(TcpIp_SocketIdType, AUTOMATIC) socketId, VAR(boolean
         {
             struct tcp_pcb* localTcpPcbPtr = (struct tcp_pcb*)socketMngPtr->pcbPtr;
             err_t errRes;
-            SchM_Enter_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+            SchM_Enter_TcpIp_ExclusiveArea_Tx();
 
             /* tcp socket close not nodify upper module
              listen socket close shall used close,not call isAbort */
@@ -2389,12 +2426,7 @@ TcpIp_CloseSocketHandle(VAR(TcpIp_SocketIdType, AUTOMATIC) socketId, VAR(boolean
             else if ((boolean)TRUE != isAbort)
             {
                 TCPIP_TCP_SET_PENDINGEVENT(socketMngPtr);
-#if (TCPIP_TCP_HALFCLOSE)
-                /* TCP supports half - close function, then this end is not allowed to send, but allow receiving */
-                errRes = (err_t)tcp_shutdown(localTcpPcbPtr, 0, 1);
-#else  /* !TCPIP_TCP_HALFCLOSE */
                 errRes = (err_t)tcp_close(localTcpPcbPtr);
-#endif /* TCPIP_TCP_HALFCLOSE */
             }
             else
             {
@@ -2402,7 +2434,7 @@ TcpIp_CloseSocketHandle(VAR(TcpIp_SocketIdType, AUTOMATIC) socketId, VAR(boolean
                 errRes = (err_t)ERR_OK;
             }
 
-            SchM_Exit_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+            SchM_Exit_TcpIp_ExclusiveArea_Tx();
 
             if ((err_t)ERR_OK == errRes)
             {
@@ -2416,10 +2448,10 @@ TcpIp_CloseSocketHandle(VAR(TcpIp_SocketIdType, AUTOMATIC) socketId, VAR(boolean
         if (TCPIP_IPPROTO_UDP == socketMngPtr->protocol)
         {
             struct udp_pcb* localUdpPcbPtr = (struct udp_pcb*)socketMngPtr->pcbPtr;
-            SchM_Enter_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+            SchM_Enter_TcpIp_ExclusiveArea_Tx();
             udp_disconnect(localUdpPcbPtr);
             udp_remove(localUdpPcbPtr);
-            SchM_Exit_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+            SchM_Exit_TcpIp_ExclusiveArea_Tx();
             /* shall notify upper module this udp socket is close */
             TcpIp_UdpSocketFreeAndEventNotifyUpLayer(socketMngPtr, TCPIP_UDP_CLOSED);
             ret = E_OK;
@@ -2459,16 +2491,15 @@ TcpIp_MallocTcpSocketId(
 {
     TCPIP_UNUSED_ARG(domain);
     Std_ReturnType ret = E_NOT_OK;
-    SchM_Enter_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_ALL);
 
     if ((Tcp_SocketUsedNum < TCPIP_TCP_SOCKET_MAX) && (TcpIp_SocketLastId < TCPIP_SOCKET_NUM))
     {
         TcpIp_SocketHandleType* socketMngPtr = &TcpIp_SocketTable[TcpIp_SocketLastId];
         struct tcp_pcb* tpcb;
-        SchM_Enter_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_ALL);
+        SchM_Enter_TcpIp_ExclusiveArea();
 #if (TCPIP_SC3 != TCPIP_SCALABILITY_CLASS)
         tpcb = tcp_new();
-#else /* (TCPIP_SC3 == TCPIP_SCALABILITY_CLASS */
+#else /* TCPIP_SC3 == TCPIP_SCALABILITY_CLASS */
 
         if (domain == TCPIP_AF_INET)
         {
@@ -2480,7 +2511,7 @@ TcpIp_MallocTcpSocketId(
         }
 
 #endif /* TCPIP_SC3 != TCPIP_SCALABILITY_CLASS */
-        SchM_Exit_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_ALL);
+        SchM_Exit_TcpIp_ExclusiveArea();
         if ((tpcb != NULL_PTR) && (TCPIP_SOCKET_NUM > socketMngPtr->nextSocketId))
         {
             /* reg extend callback function */
@@ -2493,7 +2524,7 @@ TcpIp_MallocTcpSocketId(
             tcp_err(tpcb, TcpIp_TcpErrCallback);
             /* reg send call back function */
             tcp_sent(tpcb, TcpIp_TcpSentCallback);
-            SchM_Enter_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_ALL);
+            SchM_Enter_TcpIp_ExclusiveArea();
             socketMngPtr->socketFlag = 0u;
             /* state handle */
             Tcp_SocketUsedNum++;
@@ -2504,9 +2535,12 @@ TcpIp_MallocTcpSocketId(
             /* link list handle */
             TcpIp_SocketLastId = socketMngPtr->nextSocketId;
             socketMngPtr->nextSocketId = TCPIP_SOCKET_INVALIDVLU;
+#if (STD_ON == TCPIP_TCP_TLS_ENABLED)
+            socketMngPtr->listenSocketId = TCPIP_SOCKET_INVALIDVLU;
+#endif /* STD_ON == TCPIP_TCP_TLS_ENABLED */
             /* comm unit fill data */
             socketMngPtr->ownerCfgPtr = socketOwnerCfgPtr;
-            SchM_Exit_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_ALL);
+            SchM_Exit_TcpIp_ExclusiveArea();
             ret = E_OK;
         }
     }
@@ -2518,7 +2552,6 @@ TcpIp_MallocTcpSocketId(
     }
 
 #endif /* TCPIP_TCP_SOCKET_MAX > 0u */
-    SchM_Exit_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_ALL);
     return ret;
 }
 
@@ -2545,10 +2578,10 @@ TcpIp_MallocUdpSocketId(
     if ((Udp_SocketUsedNum < TCPIP_UDP_SOCKET_MAX) && (TcpIp_SocketLastId < TCPIP_SOCKET_NUM))
     {
         TcpIp_SocketHandleType* socketMngPtr = &TcpIp_SocketTable[TcpIp_SocketLastId];
-        SchM_Enter_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_ALL);
+        SchM_Enter_TcpIp_ExclusiveArea();
 #if (TCPIP_SC3 != TCPIP_SCALABILITY_CLASS)
         socketMngPtr->pcbPtr = udp_new();
-#else /* (TCPIP_SC3 == TCPIP_SCALABILITY_CLASS */
+#else /* TCPIP_SC3 == TCPIP_SCALABILITY_CLASS */
 
         if (domain == TCPIP_AF_INET)
         {
@@ -2561,11 +2594,11 @@ TcpIp_MallocUdpSocketId(
         }
 
 #endif /* TCPIP_SC3 != TCPIP_SCALABILITY_CLASS */
-        SchM_Exit_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_ALL);
+        SchM_Exit_TcpIp_ExclusiveArea();
 
         if (socketMngPtr->pcbPtr != NULL_PTR)
         {
-            SchM_Enter_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_ALL);
+            SchM_Enter_TcpIp_ExclusiveArea();
             Udp_SocketUsedNum++;
             socketMngPtr->protocol = TCPIP_IPPROTO_UDP;
             /* output parameter setting */
@@ -2575,7 +2608,7 @@ TcpIp_MallocUdpSocketId(
             socketMngPtr->nextSocketId = TCPIP_SOCKET_INVALIDVLU;
             /* comm unit fill data */
             socketMngPtr->ownerCfgPtr = socketOwnerCfgPtr;
-            SchM_Exit_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_ALL);
+            SchM_Exit_TcpIp_ExclusiveArea();
             ret = E_OK;
         }
     }
@@ -2717,10 +2750,10 @@ TcpIp_InnerRequestComMode(VAR(uint8, AUTOMATIC) ctrlIdx, VAR(TcpIp_StateType, AU
 #if TCPIP_REPEAT_GET_NETIF_MAC
             TcpIp_NetIfGetPhyAddrFormEthIf(netifPtr);
 #endif /* TCPIP_REPEAT_GET_NETIF_MAC */
-            SchM_Enter_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_ALL);
+            SchM_Enter_TcpIp_ExclusiveArea();
             /* set lwip netif is used by upper layer */
             netif_set_up(netifPtr);
-            SchM_Exit_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_ALL);
+            SchM_Exit_TcpIp_ExclusiveArea();
             /* (b) enter the state TCPIP_STATE_STARTUP for the EthIf controller */
             *ctrlState = TCPIP_STATE_STARTUP;
             TcpIp_ControlStateNotifyEthSm(ctrlIdx, TCPIP_STATE_STARTUP);
@@ -2728,10 +2761,10 @@ TcpIp_InnerRequestComMode(VAR(uint8, AUTOMATIC) ctrlIdx, VAR(TcpIp_StateType, AU
             (TcpIpAssignmentMethod) and triggers (TcpIpAssignmentTrigger) for that EthIf controller */
             /* only assignment trigger is configured to TCPIP_AUTOMATIC,shall be handle ip assigement */
             TcpIp_RequestCtrlIpAssignment(ctrlIdx);
-            SchM_Enter_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_ALL);
+            SchM_Enter_TcpIp_ExclusiveArea();
             /* open netif link ,info:netif up and link up shall trg arp send*/
             netif_set_link_up(netifPtr);
-            SchM_Exit_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_ALL);
+            SchM_Exit_TcpIp_ExclusiveArea();
             ret = E_OK;
         }
         else
@@ -2815,8 +2848,8 @@ TcpIp_SetLocalAdrIpVar(
 #if (STD_ON == TCPIP_MUILT_IPADT_PER_CTRL)
             const TcpIp_CtrlType* ctrlCfgPtr = &ControlCfgPtr[localAdrCfgPtr->ctrlIndex];
 
-            if (TCPIP_CTRL_ALL_LOCAL_IS_RELEASE(ctrlVarPtr)) /* PRQA S 3469*/ /* MISRA Dir 4.9 */
-#endif                                                                        /* STD_ON == TCPIP_MUILT_IPADT_PER_CTRL */
+            if ((TCPIP_CTRL_ALL_LOCAL_IS_RELEASE(ctrlVarPtr)))
+#endif /* STD_ON == TCPIP_MUILT_IPADT_PER_CTRL */
             {
 #if (STD_ON == TCPIP_MUILT_IPADT_PER_CTRL)
                 TCPIP_SET_CTRL_LOCAL_MASK(ctrlVarPtr, localAdrIndx - ctrlCfgPtr->TcpIpLocalAddrStartId);
@@ -2879,7 +2912,7 @@ TcpIp_ClearLocalAdrIpVar(
     TcpIp_LocalAdrHandleType* localAdtPtr = &TcpIp_LocalAdrTable[localAdrIndx];
     TcpIp_AddressType addrType = TcpIp_LocalAdrCfgPtr[localAdrIndx].AddrType;
 
-    if (TCPIP_LOCALADR_IS_IPVALID(localAdtPtr)) /* PRQA S 3469*/ /* MISRA Dir 4.9 */
+    if ((TCPIP_LOCALADR_IS_IPVALID(localAdtPtr)))
     {
         TCPIP_LOCALADR_CLR_IPVALID(localAdtPtr);
         TCPIP_LOCALADR_SET_REQUESTIP(localAdtPtr);
@@ -2903,8 +2936,8 @@ TcpIp_ClearLocalAdrIpVar(
             TCPIP_CLR_CTRL_LOCAL_MASK(ctrlVarPtr, localAdrIndx - ctrlCfgPtr->TcpIpLocalAddrStartId);
 
             /* all local address is release shall be set netif addr is null in this control */
-            if (TCPIP_CTRL_ALL_LOCAL_IS_RELEASE(ctrlVarPtr)) /* PRQA S 3469*/ /* MISRA Dir 4.9 */
-#endif                                                                        /* STD_ON == TCPIP_MUILT_IPADT_PER_CTRL */
+            if ((TCPIP_CTRL_ALL_LOCAL_IS_RELEASE(ctrlVarPtr)))
+#endif /* STD_ON == TCPIP_MUILT_IPADT_PER_CTRL */
             {
                 netif_set_addr(&(ctrlVarPtr->netifVar), NULL_PTR, NULL_PTR, NULL_PTR);
             }
@@ -3000,7 +3033,7 @@ TCPIP_LOCAL FUNC(Std_ReturnType, TCPIP_CODE) TcpIp_AutoMaticAssignmentIpByLocal(
             {
                 /* multiple ip only first local addr write to netif,other local addr direct notify upper layer */
 #if (STD_ON == TCPIP_MUILT_IPADT_PER_CTRL)
-                if (TCPIP_CTRL_ALL_LOCAL_IS_RELEASE(ctrlVarPtr)) /* PRQA S 3469*/ /* MISRA Dir 4.9 */
+                if ((TCPIP_CTRL_ALL_LOCAL_IS_RELEASE(ctrlVarPtr)))
 #endif /* STD_ON == TCPIP_MUILT_IPADT_PER_CTRL */
                 {
 #if (STD_ON == TCPIP_MUILT_IPADT_PER_CTRL)
@@ -3150,7 +3183,7 @@ TcpIp_InnerBind(
 {
     Std_ReturnType ret = E_NOT_OK;
     /* TCPIP_LOCALADDRID_ANY */
-    TcpIp_LocalAdrHandleType const* localAdtPtr = NULL_PTR;
+    const TcpIp_LocalAdrHandleType* localAdtPtr = NULL_PTR;
     TcpIp_ControllerStatus* ctrlMngPtr = NULL_PTR;
 
     if (localAdrIndx < TCPIP_LOCAL_ADR_NUM)
@@ -3166,7 +3199,7 @@ TcpIp_InnerBind(
     /*[SWS_TCPIP_00147] first check local address is valid */
     if (((TCPIP_STATE_ONLINE == ctrlMngPtr->ctrlStatus)
          || ((ctrlMngPtr == NULL_PTR) && (localAdrIndx == TCPIP_LOCALADDRID_ANY)))
-        && ((localAdtPtr == NULL_PTR) || (TCPIP_LOCALADR_IS_IPVALID(localAdtPtr)))) /* PRQA S 3469*/ /* MISRA Dir 4.9 */
+        && ((localAdtPtr == NULL_PTR) || (TCPIP_LOCALADR_IS_IPVALID(localAdtPtr))))
     {
         err_t lw_ret = (err_t)ERR_ARG;
         TcpIp_SocketHandleType* socketMngPtr = &TcpIp_SocketTable[socketId];
@@ -3292,19 +3325,19 @@ TcpIp_InnerUdpTransmit(
         ip_addr_t dst_ip;
         u16_t dst_port = remoteAddrPtr->port;
         TCPIP_LOCAL_TO_LWIP_IPADDR(dst_ip.addr, remoteAddrPtr->addr);
-        SchM_Enter_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+        SchM_Enter_TcpIp_ExclusiveArea_Tx();
         struct pbuf* udpTxPbuf = pbuf_alloc(PBUF_TRANSPORT, totalLength, PBUF_REF);
-        SchM_Exit_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+        SchM_Exit_TcpIp_ExclusiveArea_Tx();
 #if defined(TCPIP_INNER_CHECK)
 
         if (NULL_PTR != udpTxPbuf)
 #endif /* defined(TCPIP_INNER_CHECK) */
         {
             udpTxPbuf->payload = (void*)dataPtr; /* PRQA S 0311 */ /* MISRA Rule 11.8 */
-            SchM_Enter_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+            SchM_Enter_TcpIp_ExclusiveArea_Tx();
             err_t lw_ret = (err_t)udp_sendto((struct udp_pcb*)socketMngPtr->pcbPtr, udpTxPbuf, &dst_ip, dst_port);
             (void)pbuf_free(udpTxPbuf);
-            SchM_Exit_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+            SchM_Exit_TcpIp_ExclusiveArea_Tx();
 
             if ((err_t)ERR_OK == lw_ret)
             {
@@ -3363,9 +3396,9 @@ TcpIp_InnerCopyUdpTransmit(
 #endif /* defined(TCPIP_INNER_CHECK) */
     )
     {
-        SchM_Enter_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+        SchM_Enter_TcpIp_ExclusiveArea_Tx();
         struct pbuf* udpTxPbuf = pbuf_alloc(PBUF_TRANSPORT, totalLength, PBUF_RAM);
-        SchM_Exit_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+        SchM_Exit_TcpIp_ExclusiveArea_Tx();
 #if defined(TCPIP_INNER_CHECK)
 
         if ((NULL_PTR != udpTxPbuf) && (udpTxPbuf->len == udpTxPbuf->tot_len))
@@ -3379,9 +3412,9 @@ TcpIp_InnerCopyUdpTransmit(
                 ip_addr_t dst_ip;
                 u16_t dst_port = remoteAddrPtr->port;
                 TCPIP_LOCAL_TO_LWIP_IPADDR(dst_ip.addr, remoteAddrPtr->addr);
-                SchM_Enter_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+                SchM_Enter_TcpIp_ExclusiveArea_Tx();
                 err_t lw_ret = (err_t)udp_sendto((struct udp_pcb*)socketMngPtr->pcbPtr, udpTxPbuf, &dst_ip, dst_port);
-                SchM_Exit_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+                SchM_Exit_TcpIp_ExclusiveArea_Tx();
 
                 if ((err_t)ERR_OK == lw_ret)
                 {
@@ -3414,9 +3447,9 @@ TcpIp_InnerCopyUdpTransmit(
 
 #endif /* defined(TCPIP_INNER_CHECK) */
         /* free buffer */
-        SchM_Enter_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+        SchM_Enter_TcpIp_ExclusiveArea_Tx();
         (void)pbuf_free(udpTxPbuf);
-        SchM_Exit_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+        SchM_Exit_TcpIp_ExclusiveArea_Tx();
     }
 
 #if defined(TCPIP_INNER_CHECK)
@@ -3451,15 +3484,24 @@ TcpIp_InnerTcpTransmit(
     if ((TCPIP_IPPROTO_TCP == socketMngPtr->protocol) && (NULL_PTR != socketMngPtr->pcbPtr))
     {
         err_t lw_ret;
+#if (STD_ON == TCPIP_TCP_TLS_ENABLED)
 
-        SchM_Enter_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
-        /* waring:input parameters 'totalLength' shall less than tcp_pcb->snd_buf */
-        lw_ret =
-            (err_t)tcp_write((struct tcp_pcb*)socketMngPtr->pcbPtr, dataPtr, (u16_t)totalLength, TCPIP_WRITE_FILL_FLAG);
-#if (STD_ON == TCPIP_FASTTX_TCP)
-        lw_ret += tcp_output((struct tcp_pcb*)socketMngPtr->pcbPtr);
-#endif /* STD_ON == TCPIP_FASTTX_TCP */
-        SchM_Exit_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+        if (NULL_PTR != socketMngPtr->tlsPtr)
+        {
+            lw_ret = (err_t)TcpIp_TlsWrite(socketMngPtr, dataPtr, totalLength);
+        }
+        else
+#endif /* STD_ON == TCPIP_TCP_TLS_ENABLED */
+        {
+            SchM_Enter_TcpIp_ExclusiveArea_Tx();
+            /* waring:input parameters 'totalLength' shall less than tcp_pcb->snd_buf */
+            lw_ret = (err_t)
+                tcp_write((struct tcp_pcb*)socketMngPtr->pcbPtr, dataPtr, (u16_t)totalLength, TCPIP_WRITE_FILL_FLAG);
+#if TCPIP_FASTTX_TCP
+            lw_ret += tcp_output((struct tcp_pcb*)socketMngPtr->pcbPtr);
+#endif /* TCPIP_FASTTX_TCP */
+            SchM_Exit_TcpIp_ExclusiveArea_Tx();
+        }
 
         if ((err_t)ERR_OK == lw_ret)
         {
@@ -3514,22 +3556,22 @@ TcpIp_InnerCopyTcpTransmit(
     {
         struct tcp_pcb* tcpPcbPtr = (struct tcp_pcb*)socketMngPtr->pcbPtr;
         uint16 copyLen = (totalLength > tcpPcbPtr->snd_buf) ? tcpPcbPtr->snd_buf : totalLength;
-        SchM_Enter_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+        SchM_Enter_TcpIp_ExclusiveArea_Tx();
         struct pbuf* tcpTxPbuf = pbuf_alloc(PBUF_RAW, copyLen, PBUF_RAM);
         if ((NULL_PTR != tcpTxPbuf) && (tcpTxPbuf->tot_len == 0u))
         {
             (void)pbuf_free(tcpTxPbuf);
             tcpTxPbuf = NULL_PTR;
         }
-        SchM_Exit_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+        SchM_Exit_TcpIp_ExclusiveArea_Tx();
 #if defined(TCPIP_INNER_CHECK)
 
         if (NULL_PTR != tcpTxPbuf)
 #endif /* defined(TCPIP_INNER_CHECK) */
         {
-            SchM_Enter_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+            SchM_Enter_TcpIp_ExclusiveArea_Tx();
             tcpTxPbuf = pbuf_coalesce(tcpTxPbuf, PBUF_RAW);
-            SchM_Exit_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+            SchM_Exit_TcpIp_ExclusiveArea_Tx();
             copyLen = tcpTxPbuf->len;
 
             TcpIp_Up_SocketOwnerCopyTxDataType copyFuncPtr = socketMngPtr->ownerCfgPtr->Up_CopyTxDataFuncPtr;
@@ -3540,21 +3582,30 @@ TcpIp_InnerCopyTcpTransmit(
             {
                 if (((boolean)FALSE == forceRetrieve) || (copyLen == totalLength))
                 {
+#if (STD_ON == TCPIP_TCP_TLS_ENABLED)
 
-                    SchM_Enter_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
-                    lw_ret = tcp_write(tcpPcbPtr, tcpTxPbuf->payload, tcpTxPbuf->len, TCPIP_WRITE_FILL_FLAG);
-#if (STD_ON == TCPIP_FASTTX_TCP)
-                    lw_ret += tcp_output(tcpPcbPtr);
-#endif /* STD_ON == TCPIP_FASTTX_TCP */
-                    SchM_Exit_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+                    if (NULL_PTR != socketMngPtr->tlsPtr)
+                    {
+                        lw_ret = TcpIp_TlsWrite(socketMngPtr, tcpTxPbuf->payload, tcpTxPbuf->len);
+                    }
+                    else
+#endif /* STD_ON == TCPIP_TCP_TLS_ENABLED */
+                    {
+                        SchM_Enter_TcpIp_ExclusiveArea_Tx();
+                        lw_ret = tcp_write(tcpPcbPtr, tcpTxPbuf->payload, tcpTxPbuf->len, TCPIP_WRITE_FILL_FLAG);
+#if TCPIP_FASTTX_TCP
+                        lw_ret += tcp_output(tcpPcbPtr);
+#endif /* TCPIP_FASTTX_TCP */
+                        SchM_Exit_TcpIp_ExclusiveArea_Tx();
+                    }
 
                     if ((err_t)ERR_MEM != lw_ret)
                     {
                         /* call low layer transmit, shall realse pbuf ,whether it's successful or not */
-                        SchM_Enter_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+                        SchM_Enter_TcpIp_ExclusiveArea_Tx();
                         (void)pbuf_free(tcpTxPbuf);
                         tcpTxPbuf = NULL_PTR;
-                        SchM_Exit_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+                        SchM_Exit_TcpIp_ExclusiveArea_Tx();
                     }
                     else
                     {
@@ -3566,9 +3617,9 @@ TcpIp_InnerCopyTcpTransmit(
             else
             {
                 /* upper layer copy tx data return BUFREQ_E_NOT_OK,shall release local buff */
-                SchM_Enter_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+                SchM_Enter_TcpIp_ExclusiveArea_Tx();
                 (void)pbuf_free(tcpTxPbuf);
-                SchM_Exit_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+                SchM_Exit_TcpIp_ExclusiveArea_Tx();
                 lw_ret = (err_t)ERR_ARG;
 #if defined(TCPIP_INNER_CHECK)
                 TCPIP_INNER_CHECK_OUTPUT("CopyTxData return error=%d\n", bufRet);
@@ -3577,11 +3628,11 @@ TcpIp_InnerCopyTcpTransmit(
 
             if ((err_t)ERR_OK == lw_ret)
             {
-                SchM_Enter_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+                SchM_Enter_TcpIp_ExclusiveArea_Tx();
                 socketMngPtr->txBuf = tcpTxPbuf;
                 socketMngPtr->UpCopyTxRemainLen = (uint32)totalLength - (uint32)copyLen;
-                TCPIP_TCP_SET_ZFORCERETRIEVE(socketMngPtr, forceRetrieve); /* PRQA S 3469*/ /* MISRA Dir 4.9 */
-                SchM_Exit_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+                TCPIP_TCP_SET_ZFORCERETRIEVE(socketMngPtr, forceRetrieve);
+                SchM_Exit_TcpIp_ExclusiveArea_Tx();
                 ret = E_OK;
             }
         }
@@ -3589,13 +3640,13 @@ TcpIp_InnerCopyTcpTransmit(
 #if defined(TCPIP_INNER_CHECK)
         else
         {
-            SchM_Enter_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+            SchM_Enter_TcpIp_ExclusiveArea_Tx();
             /* Failure to allocate buffer is also a success, and tp copy handle will be performed in the next
              * mianfunction */
             socketMngPtr->txBuf = NULL_PTR;
             socketMngPtr->UpCopyTxRemainLen = (uint32)totalLength;
-            TCPIP_TCP_SET_ZFORCERETRIEVE(socketMngPtr, forceRetrieve); /* PRQA S 3469*/ /* MISRA Dir 4.9 */
-            SchM_Exit_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+            TCPIP_TCP_SET_ZFORCERETRIEVE(socketMngPtr, forceRetrieve);
+            SchM_Exit_TcpIp_ExclusiveArea_Tx();
             ret = E_OK;
             TCPIP_INNER_CHECK_OUTPUT("pbuf_alloc return null,length=%d!\n", totalLength);
         }
@@ -3643,12 +3694,27 @@ TcpIp_InnerTcpConnect(
             /* reg connect error callback function */
             tcp_err(tcpPcbPtr, TcpIp_TcpErrCallback);
             err_t lw_ret;
+#if (STD_ON == TCPIP_TCP_TLS_ENABLED)
 
+            if (NULL_PTR == socketMngPtr->tlsPtr)
+            {
+                /* static tls connection assignment */
+                TcpIp_TlsBaseStaticConnect(socketMngPtr, remoteAddrPtr, TLS_CLIENT);
+            }
+
+            /* shall support static and dynamic tls connect */
+            if (NULL_PTR != socketMngPtr->tlsPtr)
+            {
+                lw_ret = TcpIp_TlsConnet(tcpPcbPtr, &reIp, port);
+            }
+            else
+#endif /* STD_ON == TCPIP_TCP_TLS_ENABLED */
             /* connect handle shell protect context */
-
-            SchM_Enter_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
-            lw_ret = (err_t)tcp_connect(tcpPcbPtr, &reIp, port, TcpIp_TcpConnnectCallback);
-            SchM_Exit_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+            {
+                SchM_Enter_TcpIp_ExclusiveArea_Tx();
+                lw_ret = (err_t)tcp_connect(tcpPcbPtr, &reIp, port, TcpIp_TcpConnnectCallback);
+                SchM_Exit_TcpIp_ExclusiveArea_Tx();
+            }
 
             if ((err_t)ERR_OK == lw_ret)
             {
@@ -3696,7 +3762,7 @@ TcpIp_InnerTcpListen(VAR(TcpIp_SocketIdType, AUTOMATIC) socketId, VAR(uint8, AUT
         in state TCPIP_STATE_ONLINE */
         if (TCPIP_STATE_ONLINE == TcpIp_ControllerVar[socketMngPtr->ctrlIndex].ctrlStatus)
         {
-            SchM_Enter_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+            SchM_Enter_TcpIp_ExclusiveArea_Tx();
             /* listen pcb shall be remalloc,so lwip pcb free handle not release local val */
             tcp_ext_arg_set(tcpPcbPtr, 0u, NULL_PTR);
             err_t err;
@@ -3709,7 +3775,7 @@ TcpIp_InnerTcpListen(VAR(TcpIp_SocketIdType, AUTOMATIC) socketId, VAR(uint8, AUT
             TCPIP_TCP_SET_SERVERSOCKET(socketMngPtr);
             /* register other callback function */
             tcp_ext_arg_set(tcpPcbPtr, 0u, socketMngPtr);
-            SchM_Exit_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+            SchM_Exit_TcpIp_ExclusiveArea_Tx();
 
             if (err == (err_t)ERR_OK)
 #endif /* defined(TCPIP_INNER_CHECK) */
@@ -3756,11 +3822,20 @@ TcpIp_InnerTcpReceived(VAR(TcpIp_SocketIdType, AUTOMATIC) socketId, VAR(uint16, 
     if ((NULL_PTR != socketMngPtr->pcbPtr) && (TCPIP_IPPROTO_TCP == socketMngPtr->protocol))
 #endif /* defined(TCPIP_INNER_CHECK) */
     {
+#if (STD_ON == TCPIP_TCP_TLS_ENABLED)
 
-        SchM_Enter_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
-        tcp_recved((struct tcp_pcb*)socketMngPtr->pcbPtr, revcLen);
-        SchM_Exit_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
-        ret = E_OK;
+        if (NULL_PTR != socketMngPtr->tlsPtr)
+        {
+            ret = TcpIp_TlsRecved(socketMngPtr, revcLen);
+        }
+        else
+#endif /* STD_ON == TCPIP_TCP_TLS_ENABLED */
+        {
+            SchM_Enter_TcpIp_ExclusiveArea_Tx();
+            tcp_recved((struct tcp_pcb*)socketMngPtr->pcbPtr, revcLen);
+            SchM_Exit_TcpIp_ExclusiveArea_Tx();
+            ret = E_OK;
+        }
     }
 
 #if defined(TCPIP_INNER_CHECK)
@@ -3808,7 +3883,7 @@ TcpIp_InnerRxIndication(
 
         if ((err_t)ERR_OK == lwRet)
 #endif /* !defined TCPIP_RXIND_PBUF_REF */
-#else  /* ndefined(TCPIP_INNER_CHECK) */
+#else  /* !defined TCPIP_INNER_CHECK */
         (void)pbuf_take(p, dataPtr, lenByte);
 
 #endif /* defined(TCPIP_INNER_CHECK) */
@@ -3846,7 +3921,7 @@ TcpIp_InnerRxIndication(
                 }
 
                 break;
-#endif /* STD_ON == TCPIP_IPV4_ENABLED)&&(STD_ON == TCPIP_ARP_ENABLED */
+#endif /* STD_ON == TCPIP_IPV4_ENABLED && STD_ON == TCPIP_ARP_ENABLED */
 #if (STD_ON == TCPIP_IPV6_ENABLED)
 
             case ((uint16)ETHTYPE_IPV6):
@@ -3977,6 +4052,29 @@ TcpIp_NetMaskInnerToExt(
     *outNetMaskNumPtr = cnt;
 }
 
+#if (STD_ON == TCPIP_TCP_TLS_ENABLED)
+/**
+ * @ingroup tcpip_internal
+ * event notify socket owner
+ * @param socketMngPtr local socket management data struct
+ * @param event @ref TcpIp_EventType
+ */
+FUNC(void, TCPIP_CODE)
+TcpIp_EventNotifyUpLayer(
+    P2VAR(TcpIp_SocketHandleType, AUTOMATIC, TCPIP_APPL_VAR) socketMngPtr,
+    VAR(TcpIp_EventType, AUTOMATIC) event)
+{
+    TcpIp_Up_TcpIpEventType eventFuncPtr = socketMngPtr->ownerCfgPtr->Up_TcpIpEventFuncPtr;
+
+    if (NULL_PTR != eventFuncPtr)
+    {
+        TcpIp_SocketIdType socketId = (TCPIP_SOCKID_CAL_ARYADR(socketMngPtr)); /* PRQA S 0326,0306 */
+        /* report event to upper layer */
+        eventFuncPtr(socketId, event);
+    }
+}
+#endif /* STD_ON == TCPIP_TCP_TLS_ENABLED */
+
 #if (STD_ON == TCPIP_TCP_ENABLED)
 
 /**
@@ -3990,7 +4088,7 @@ TcpIp_TcpTxConfNotifyUpLayer(
     P2CONST(TcpIp_SocketHandleType, AUTOMATIC, TCPIP_APPL_VAR) socketMngPtr,
     VAR(uint16, AUTOMATIC) len)
 {
-    TcpIp_SocketIdType socketId = TCPIP_SOCKID_CAL_ARYADR(socketMngPtr); /* PRQA S 0326,0306 */
+    TcpIp_SocketIdType socketId = (TCPIP_SOCKID_CAL_ARYADR(socketMngPtr)); /* PRQA S 0326,0306 */
     TcpIp_Up_TxConfirmationType txConfFuncPtr = socketMngPtr->ownerCfgPtr->Up_TxConfirmationFuncPtr;
 
     if ((NULL_PTR != txConfFuncPtr) && (0u < len))
@@ -4006,7 +4104,7 @@ TcpIp_TcpTxConfNotifyUpLayer(
 FUNC(void, TCPIP_CODE)
 TcpIp_TcpConnectNofiyUplayer(P2CONST(TcpIp_SocketHandleType, AUTOMATIC, TCPIP_APPL_VAR) socketMngPtr)
 {
-    TcpIp_SocketIdType socketId = TCPIP_SOCKID_CAL_ARYADR(socketMngPtr); /* PRQA S 0326,0306 */
+    TcpIp_SocketIdType socketId = (TCPIP_SOCKID_CAL_ARYADR(socketMngPtr)); /* PRQA S 0326,0306 */
     TcpIp_Up_TcpConnectedType connectPtr = socketMngPtr->ownerCfgPtr->Up_TcpConnectedFuncPtr;
 
     if (NULL_PTR != connectPtr)
@@ -4043,7 +4141,7 @@ TcpIp_TcpAcceptNofiyUplayer(
 #else  /* TCPIP_SC3 == TCPIP_SCALABILITY_CLASS */
         remoteAdrInfo.domain = IP_IS_V4_VAL(reIp) ? TCPIP_AF_INET : TCPIP_AF_INET6;
 #endif /* TCPIP_SC1 == TCPIP_SCALABILITY_CLASS */
-        TcpIp_SocketIdType newAccSckId = TCPIP_SOCKID_CAL_ARYADR(socketMngPtr); /* PRQA S 0326,0306 */
+        TcpIp_SocketIdType newAccSckId = (TCPIP_SOCKID_CAL_ARYADR(socketMngPtr)); /* PRQA S 0326,0306 */
         ret = acceptFunc(listenSocketId, newAccSckId, &remoteAdrInfo);
     }
 
@@ -4059,7 +4157,7 @@ TcpIp_TcpAcceptNofiyUplayer(
 FUNC(err_t, TCPIP_CODE)
 TcpIp_TcpRxIndNotifyUpLayer(
     P2CONST(TcpIp_SocketHandleType, AUTOMATIC, TCPIP_APPL_VAR) socketMngPtr,
-    P2VAR(struct pbuf, AUTOMATIC, TCPIP_APPL_VAR) buf) /* PRQA S 3430 */ /* MISRA Rule 20.7 */
+    P2VAR(struct pbuf, AUTOMATIC, TCPIP_APPL_VAR) buf)
 {
     err_t ret = (err_t)ERR_ARG;
     struct pbuf* q = buf;
@@ -4087,7 +4185,7 @@ TcpIp_TcpRxIndNotifyUpLayer(
                 remoteAdrInfo.domain = IP_IS_V4_VAL(reIp) ? TCPIP_AF_INET : TCPIP_AF_INET6;
 #endif /* TCPIP_SC1 == TCPIP_SCALABILITY_CLASS */
 
-                TcpIp_SocketIdType socketId = TCPIP_SOCKID_CAL_ARYADR(socketMngPtr); /* PRQA S 0326,0306 */
+                TcpIp_SocketIdType socketId = (TCPIP_SOCKID_CAL_ARYADR(socketMngPtr)); /* PRQA S 0326,0306 */
                 struct pbuf* use_buf = pbuf_coalesce(q, PBUF_RAW);
                 q = use_buf;
                 while (use_buf != NULL_PTR)
@@ -4210,6 +4308,37 @@ FUNC(Std_ReturnType, TCPIP_CODE) TcpIp_StopAutoIp(VAR(uintx, AUTOMATIC) ctrlInde
 }
 #endif /* STD_ON == TCPIP_AUTOIP_ENABLED */
 
+#if (STD_ON == TCPIP_TCP_TLS_ENABLED)
+/**
+ * @ingroup tcpip_internal
+ * start dynamic tls
+ * @param socketId socket inner index
+ * @param parameterId not used
+ * @param tlsConnetId tls connect index
+ * @return E_OK ok,another is failed
+ */
+FUNC(Std_ReturnType, TCPIP_CODE)
+TcpIp_TlsDynamicConnect(
+    VAR(TcpIp_SocketIdType, AUTOMATIC) socketId,
+    VAR(TcpIp_ParamIdType, AUTOMATIC) parameterId,
+    P2CONST(void, AUTOMATIC, TCPIP_APPL_CONST) paraPtr)
+{
+    TCPIP_UNUSED_ARG(parameterId);
+    uint8 tlsConnetId = *(const uint8*)paraPtr;
+    Std_ReturnType ret = E_NOT_OK;
+    TcpIp_SocketHandleType* socketMngPtr = &TcpIp_SocketTable[socketId];
+#if defined(TCPIP_INNER_CHECK)
+
+    if ((NULL_PTR != socketMngPtr->pcbPtr) && (TCPIP_IPPROTO_TCP == socketMngPtr->protocol))
+#endif /* defined(TCPIP_INNER_CHECK) */
+    {
+        ret = TcpIp_TlsBaseDynamicConnect(socketMngPtr, tlsConnetId);
+    }
+
+    return ret;
+}
+#endif /* STD_ON == TCPIP_TCP_TLS_ENABLED */
+
 /**
  * @ingroup tcpip_internal
  * all period timer init,call by TcpIp_Tnit
@@ -4328,9 +4457,9 @@ TcpIp_InnerIcmpTransmit(
 #endif /* defined(TCPIP_INNER_CHECK) */
             {
                 uint16 len = (uint16)sizeof(struct icmp_echo_hdr) + icmpParaPtr->dataLength;
-                SchM_Enter_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+                SchM_Enter_TcpIp_ExclusiveArea_Tx();
                 struct pbuf* q = pbuf_alloc(PBUF_IP, len, PBUF_RAM);
-                SchM_Exit_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+                SchM_Exit_TcpIp_ExclusiveArea_Tx();
 #if defined(TCPIP_INNER_CHECK)
 
                 if (NULL_PTR != q)
@@ -4342,16 +4471,16 @@ TcpIp_InnerIcmpTransmit(
                     icmphdr->id = 0u;
                     icmphdr->seqno = 0u;
                     TcpIp_IcmpPcbPtr->ttl = icmpParaPtr->ttl;
-                    icmphdr->chksum = 0u; /* PRQA S 2982 */ /* MISRA Rule 2.2 */
-                                                            /* copy data to pbuf */
+                    icmphdr->chksum = 0u;
+                    /* copy data to pbuf */
 #if defined(TCPIP_INNER_CHECK)
-                    SchM_Enter_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+                    SchM_Enter_TcpIp_ExclusiveArea_Tx();
                     lwRet = pbuf_take_at(
                         q,
                         icmpParaPtr->dataPtr,
                         icmpParaPtr->dataLength,
                         (uint16)sizeof(struct icmp_echo_hdr));
-                    SchM_Exit_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+                    SchM_Exit_TcpIp_ExclusiveArea_Tx();
 #endif /* defined(TCPIP_INNER_CHECK) */
 #if CHECKSUM_GEN_ICMP
                     IF__NETIF_CHECKSUM_ENABLED(netif, NETIF_CHECKSUM_GEN_ICMP)
@@ -4379,9 +4508,9 @@ TcpIp_InnerIcmpTransmit(
                 /* free buff */
                 if (NULL_PTR != q)
                 {
-                    SchM_Enter_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+                    SchM_Enter_TcpIp_ExclusiveArea_Tx();
                     (void)pbuf_free(q);
-                    SchM_Exit_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+                    SchM_Exit_TcpIp_ExclusiveArea_Tx();
                 }
             }
         }
@@ -4486,7 +4615,7 @@ FUNC(void, TCPIP_CODE) TcpIp_PeriodTimerMainHandle(void)
         TcpIp_TcpIsnCount++;
     }
 #endif /* TCPIP_MAINFUNCTION_PERIOD >= 4u */
-#endif /* defined TCPIP_TCP_SYNISN_RECALC) && STD_ON == TCPIP_TCP_SYNISN_RECALC */
+#endif /* defined TCPIP_TCP_SYNISN_RECALC && STD_ON == TCPIP_TCP_SYNISN_RECALC */
 #if (STD_ON == TCPIP_SUPPORT_TMR_100ms)
 
     /* 100ms period handle */
@@ -4516,9 +4645,9 @@ FUNC(void, TCPIP_CODE) TcpIp_PeriodTimerMainHandle(void)
     {
         TcpIp_PeriodTmr.tmr_250ms = TCPIP_CALCTMR(250u);
 #if (STD_ON == TCPIP_TCP_ENABLED)
-        SchM_Enter_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+        SchM_Enter_TcpIp_ExclusiveArea_Tx();
         tcp_tmr();
-        SchM_Exit_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+        SchM_Exit_TcpIp_ExclusiveArea_Tx();
 #endif /* STD_ON == TCPIP_TCP_ENABLED */
     }
 
@@ -4639,7 +4768,6 @@ TcpIp_ArpRemoveStaticEntry(
     return ret;
 }
 #endif /* ETHARP_SUPPORT_STATIC_ENTRIES */
-
 #endif /* STD_ON == TCPIP_ARP_ENABLED */
 
 #if defined(TCPIP_SPPORT_TC8_TEST)
@@ -4672,6 +4800,12 @@ static const uint8 tcpStateTable[11] = {
 
 extern struct tcp_pcb* tcp_active_pcbs;
 
+/**
+ * @ingroup TcpIp_GetTcpSocketState() for TC8 Test
+ * @param socketId socket inner index
+ * @param statePtr socket state
+ * @return E_OK ok,another is failed
+ */
 FUNC(Std_ReturnType, TCPIP_CODE)
 TcpIp_GetTcpSocketState(VAR(TcpIp_SocketIdType, AUTOMATIC) SocketId, P2VAR(uint8, AUTOMATIC, TCPIP_APPL_DATA) statePtr)
 {
@@ -4691,26 +4825,34 @@ TcpIp_GetTcpSocketState(VAR(TcpIp_SocketIdType, AUTOMATIC) SocketId, P2VAR(uint8
     {
         const TcpIp_SocketHandleType* socketMngPtr = &TcpIp_SocketTable[SocketId];
 
-        if ((TCPIP_IPPROTO_TCP == socketMngPtr->protocol) && (NULL_PTR != socketMngPtr->pcbPtr))
+        if ((TCPIP_IPPROTO_TCP == socketMngPtr->protocol))
         {
-            uint8 srcState = ((struct tcp_pcb*)socketMngPtr->pcbPtr)->state;
-            struct tcp_pcb_listen* tpcb = (struct tcp_pcb_listen*)socketMngPtr->pcbPtr;
-
-            /* listen pcb shall find all active pcb max state */
-            if (srcState == (uint8)LISTEN)
+            if (NULL_PTR != socketMngPtr->pcbPtr)
             {
-                for (struct tcp_pcb* pcb = tcp_active_pcbs; pcb != NULL; pcb = pcb->next)
+                uint8 srcState = ((struct tcp_pcb*)socketMngPtr->pcbPtr)->state;
+                struct tcp_pcb_listen* tpcb = (struct tcp_pcb_listen*)socketMngPtr->pcbPtr;
+
+                /* listen pcb shall find all active pcb max state */
+                if (srcState == (uint8)LISTEN)
                 {
-                    if ((pcb->listener == tpcb) && ((uint8)pcb->state > srcState))
+                    for (struct tcp_pcb* pcb = tcp_active_pcbs; pcb != NULL; pcb = pcb->next)
                     {
-                        srcState = pcb->state;
+                        if ((pcb->listener == tpcb) && ((uint8)pcb->state > srcState))
+                        {
+                            srcState = pcb->state;
+                        }
                     }
                 }
-            }
 
-            if (srcState < (sizeof(tcpStateTable) / sizeof(tcpStateTable[0])))
+                if (srcState < (sizeof(tcpStateTable) / sizeof(tcpStateTable[0])))
+                {
+                    *statePtr = tcpStateTable[srcState];
+                    ret = E_OK;
+                }
+            }
+            else
             {
-                *statePtr = tcpStateTable[srcState];
+                *statePtr = TCPSTATEID_CLOSED;
                 ret = E_OK;
             }
         }
@@ -4722,7 +4864,7 @@ TcpIp_GetTcpSocketState(VAR(TcpIp_SocketIdType, AUTOMATIC) SocketId, P2VAR(uint8
 
 #if (STD_ON == TCPIP_ARP_ENABLED)
 
-#if ETHARP_SUPPORT_DYNAMIC_TIMEOUT_CHANGE
+#if TCPIP_ARP_SUPPORT_DYNAMIC_TIMEOUT_CHANGE
 
 FUNC(void, TCPIP_CODE) TcpIp_ArpClearAllDynamicEntry(VAR(uintx, AUTOMATIC) ctrlIndex)
 {
@@ -4746,7 +4888,7 @@ FUNC(void, TCPIP_CODE) TcpIp_ArpClearDynamicTimout(void)
     etharp_clear_dynamic_timeout();
 }
 
-#endif /* ETHARP_SUPPORT_DYNAMIC_TIMEOUT_CHANGE */
+#endif /* TCPIP_ARP_SUPPORT_DYNAMIC_TIMEOUT_CHANGE */
 #endif /* STD_ON == TCPIP_ARP_ENABLED */
 
 FUNC(Std_ReturnType, TCPIP_CODE)
@@ -4772,15 +4914,10 @@ TcpIp_TcpShutdown(
             struct tcp_pcb* localTcpPcbPtr = (struct tcp_pcb*)socketMngPtr->pcbPtr;
             err_t errRes;
 
-            SchM_Enter_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
-
+            SchM_Enter_TcpIp_ExclusiveArea_Tx();
             TCPIP_TCP_SET_PENDINGEVENT(socketMngPtr);
-#if (TCPIP_TCP_HALFCLOSE)
-            /* TCP supports half - close function, then this end is not allowed to send, but allow receiving */
             errRes = (err_t)tcp_shutdown(localTcpPcbPtr, shut_rx, shut_tx);
-#endif /* TCPIP_TCP_HALFCLOSE) */
-
-            SchM_Exit_TcpIp(TCPIP_INSTANCE, TCPIP_AREA_TX);
+            SchM_Exit_TcpIp_ExclusiveArea_Tx();
 
             if ((err_t)ERR_OK == errRes)
             {
@@ -4793,7 +4930,54 @@ TcpIp_TcpShutdown(
     return ret;
 }
 
-#endif /* defined(TCPIP_SPPORT_TC8_TEST */
+#endif /* defined(TCPIP_SPPORT_TC8_TEST) */
+
+#if TCPIP_TCP_IPERF_SUPPORT
+/* iperf api */
+/**
+ * @ingroup TCPIP
+ * @brief Start a TCP iperf client or server to a specific IP address and port.
+ * @param[in] localAdrIndx local address index
+ * @param[in] test_mode  client testmode,only used para is_server is false,0u:Unidirectional tx only test;
+ *              1u:Do a bidirectional test simultaneously,2u:Do a bidirectional test individually
+ * @param[in] is_server  true:as tcp server,false:as tcp client
+ * @param[in] portPtr test client link remote server port,if is null point,shall used default iperf port
+ *
+ * @returns a connection handle that can be used to abort the client
+ *          by calling @ref TcpIp_IperfStop()
+ */
+void* TcpIp_IperfStartTcp(const TcpIp_SockAddrType* socketAddrPtr, uint8 test_mode, boolean is_server)
+{
+    void* session_ptr = NULL_PTR;
+    if (socketAddrPtr != NULL_PTR)
+    {
+        ip_addr_t dst_ip;
+        u16_t dst_port = socketAddrPtr->port;
+        TCPIP_LOCAL_TO_LWIP_IPADDR(dst_ip.addr, socketAddrPtr->addr);
+        if (is_server != TRUE)
+        {
+            session_ptr =
+                lwiperf_start_tcp_client(&dst_ip, dst_port, (enum lwiperf_client_type)(test_mode), NULL_PTR, NULL_PTR);
+        }
+        else
+        {
+            session_ptr = lwiperf_start_tcp_server(&dst_ip, dst_port, NULL_PTR, NULL_PTR);
+        }
+    }
+
+    return session_ptr;
+}
+
+/**
+ * @ingroup TCPIP
+ * @brief Abort an iperf session (handle returned by lwiperf_start_tcp_server*())
+ */
+void TcpIp_IperfStopSession(void* session_ptr)
+{
+    lwiperf_abort(session_ptr);
+}
+
+#endif /* TCPIP_TCP_IPERF_SUPPORT */
 
 #define TCPIP_STOP_SEC_CODE
 #include "TcpIp_MemMap.h"

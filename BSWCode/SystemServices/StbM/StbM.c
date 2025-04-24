@@ -18,20 +18,20 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : StbM.c                                                      **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : yuzhe.zhang                                                 **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Implementation for StbM                                     **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*********************************************************************************
+**                                                                            **
+**  FILENAME    : StbM.c                                                      **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : yuzhe.zhang                                                 **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Implementation for StbM                                     **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 /******************************************************************************
 **                      Revision Control History                             **
 ******************************************************************************/
@@ -60,6 +60,9 @@
  *                                         StbM_Init starts the GPT timer.
  *              20240409  Xiaojian.liang   CPT-8583 Can't trigger the status notification callback if a timeout occurs
  *  V2.0.12     20240510  Han.li           CPT-8508 Remove StbMStoreTimebaseNonVolatile related code
+ *              20240620  Han.li           CPT-9255 Modify the initialization of "ret" in StbM_StartTimer()
+ *              20241127  xiongfei.shi     Fixed CPT-8763, Accuracy loss problem of StbM_GetRateDeviation()
+ *                                         Fixed CPT-9091, Miscalculation of the entry parameter of Gpt_StartTimer()
  */
 
 /**
@@ -74,23 +77,23 @@
 **                      Include Section                                       **
 *******************************************************************************/
 #include "StbM.h"
-#if (STD_ON == STBM_DEV_ERROR_DETECT)
+#if (STBM_DEV_ERROR_DETECT == STD_ON)
 #include "Det.h"
-#endif /* STD_ON == STBM_DEV_ERROR_DETECT */
+#endif
 /* SWS_StbM_00065 */
 #if ((STBM_TRIGGERED_CUSTOMER_NUM > 0) || (STBM_OS_TIMESTAMP_SUPPORT))
 #include "Os.h"
-#endif /* STBM_TRIGGERED_CUSTOMER_NUM > 0 */
+#endif
 /* SWS_StbM_00426 */
-#if ((STD_ON == STBM_GPT_TIMESTAMP_SUPPORT) || (STBM_NOTIFICATION_CUSTOMER_NUM > 0))
+#if ((STBM_GPT_TIMESTAMP_SUPPORT == STD_ON) || (STBM_NOTIFICATION_CUSTOMER_NUM > 0))
 #include "Gpt.h"
 #endif
 #include "SchM_StbM.h"
 #include "StbM_Cfg.h"
 /* SWS_StbM_00246 */
-#if (STD_ON == STBM_ETHIF_TIMESTAMP_SUPPORT)
+#if (STBM_ETHIF_TIMESTAMP_SUPPORT == STD_ON)
 #include "EthIf.h"
-#endif /* STD_ON == STBM_ETHIF_TIMESTAMP_SUPPORT */
+#endif
 /*******************************************************************************
 **                      Imported Compiler Switch Check                        **
 *******************************************************************************/
@@ -120,35 +123,36 @@
 **                      Private Type Definitions                              **
 *******************************************************************************/
 typedef uint16 StbM_TimeBaseIndexType;
+typedef void (*StbMTimeNtfCallbackType)(StbM_TimeDiffType diff);
 
 /*******************************************************************************
 **                      Private Function Declarations                         **
 *******************************************************************************/
-#if (STBM_NOTIFICATION_CUSTOMER_NUM > 0)
-extern const StbMNotificationCustomerCfgType StbMNotificationCustomer[STBM_NOTIFICATION_CUSTOMER_NUM];
-#endif
 #define STBM_START_SEC_CODE
 #include "StbM_MemMap.h"
-#if (STD_ON == STBM_DEV_ERROR_DETECT)
-static FUNC(Std_ReturnType, STBM_CODE)
-    Stbm_TimeBaseIdDetCheck(StbM_SynchronizedTimeBaseType timeBaseId, uint8 serviceid, StbM_TimeBaseIdAllowedType type);
-#endif /* STD_ON == STBM_DEV_ERROR_DETECT */
+#if (STBM_DEV_ERROR_DETECT == STD_ON)
+static Std_ReturnType CheckTimeBaseIdType(StbM_SynchronizedTimeBaseType timeBaseId, StbM_TimeBaseIdAllowedType type);
+static Std_ReturnType Stbm_TimeBaseIdDetCheck(
+    StbM_SynchronizedTimeBaseType timeBaseId,
+    uint8 serviceid,
+    StbM_TimeBaseIdAllowedType type);
+#endif
 STBM_LOCAL StbM_TimeBaseIndexType StbM_FindSynchronizedTimeBase(StbM_SynchronizedTimeBaseType timeBaseId);
 STBM_LOCAL Std_ReturnType StbM_GetCurrentLocalTime(StbM_TimeBaseIndexType timeBaseIndex, StbM_LocalTimeType* localTime);
-static FUNC(void, STBM_CODE) StbM_GetGlobalTime64(uint16 CfgTimeBaseid, uint64* timeStamp);
-static FUNC(void, STBM_CODE) StbM_UpdateMainTimeTuple(uint16 timebasecfgid, uint64 TL, uint64 TV);
-static FUNC(uint64, STBM_CODE) StbM_GTTimeTo64Time(StbM_TimeStampType timeStamp);
-static FUNC(StbM_TimeStampType, STBM_CODE) StbM_64TimeToGTTime(uint64 time64);
-static FUNC(void, STBM_CODE) StbM_CheckTimeleap(uint16 timebasecfgid, uint64 timenow, uint64 timereceived);
-static FUNC(void, STBM_CODE) StbM_CheckTimeout(uint16 timebasecfgid, uint64 timenow);
+static void StbM_GetGlobalTime64(uint16 CfgTimeBaseid, uint64* timeStamp);
+static void StbM_UpdateMainTimeTuple(uint16 timebasecfgid, uint64 TL, uint64 TV);
+static uint64 StbM_GTTimeTo64Time(StbM_TimeStampType timeStamp);
+static StbM_TimeStampType StbM_64TimeToGTTime(uint64 time64);
+static void StbM_CheckTimeleap(uint16 timebasecfgid, uint64 timenow, uint64 timereceived);
+static void StbM_CheckTimeout(uint16 timebasecfgid, uint64 timenow);
 
-#if (STD_ON == STBM_TIME_CORRECTION_SUPPORT)
-STBM_LOCAL FUNC(void, STBM_CODE) StbM_CalculateRateCorrection(
+#if (STBM_TIME_CORRECTION_SUPPORT == STD_ON)
+STBM_LOCAL void StbM_CalculateRateCorrection(
     uint16 timebasecfgid,
     P2VAR(uint64, AUTOMATIC, STBM_APPL_DATA) globalTimePtr,
     P2VAR(uint64, AUTOMATIC, STBM_APPL_DATA) localTimePtr,
     StbM_TimeBaseStatusType timeBaseStatus);
-#endif /* STD_ON == STBM_TIME_CORRECTION_SUPPORT */
+#endif
 
 #if STBM_STATUS_NOTIFICATIONS_ENABLED == STD_ON
 STBM_LOCAL void StbM_OnChangeTimeBaseStatus(
@@ -159,38 +163,44 @@ STBM_LOCAL void StbM_CheckStatusNotification(StbM_TimeBaseIndexType timeBaseInde
 #endif
 
 #if (STBM_TIME_RECORDING_SUPPORT == STD_ON)
-static FUNC(void, STBM_CODE)
-    StbM_TimeRecord(StbM_SynchronizedTimeBaseType timeBaseId, uint64 TLreceived, uint32 TVLoreceived, uint32 pathDelay);
-static FUNC(void, STBM_CODE) StbM_TimeRecordback(StbM_SynchronizedTimeBaseType timeBaseId);
-#endif /* STBM_TIME_RECORDING_SUPPORT = STD_ON */
-static FUNC(void, STBM_CODE) StbM_SetUserDataIn(uint16 timebasecfgid, StbM_UserDataType userData);
+static void StbM_TimeRecord(
+    StbM_SynchronizedTimeBaseType timeBaseId,
+    uint64 TLreceived,
+    uint32 TVLoreceived,
+    uint32 pathDelay);
+static void StbM_TimeRecordback(StbM_SynchronizedTimeBaseType timeBaseId);
+#endif
+static void StbM_SetUserDataIn(uint16 timebasecfgid, StbM_UserDataType userData);
 #define STBM_STOP_SEC_CODE
 #include "StbM_MemMap.h"
 /*******************************************************************************
 **                      Private Variable Definitions                          **
 *******************************************************************************/
+#if (STBM_NOTIFICATION_CUSTOMER_NUM > 0)
+extern const StbMNotificationCustomerCfgType StbMNotificationCustomer[STBM_NOTIFICATION_CUSTOMER_NUM];
+#endif
 #define STBM_START_SEC_VAR_CLEARED_UNSPECIFIED
 #include "StbM_MemMap.h"
-STBM_LOCAL VAR(StbM_TimeBaseType, STBM_VAR) StbM_TimeBase[STBM_SYNCHRONIZED_TIME_BASE_NUM];
+STBM_LOCAL StbM_TimeBaseType StbM_TimeBase[STBM_SYNCHRONIZED_TIME_BASE_NUM];
 #if (STBM_MAX_SYNC_TIMERECORDTABLE_BLOCK_COUNT > 0)
-STBM_LOCAL VAR(StbM_SyncRecordTableBlockType, STBM_VAR)
+STBM_LOCAL StbM_SyncRecordTableBlockType
     StbM_SyncTimeRecordBlock[STBM_SYNCHRONIZED_TIME_BASE_NUM][STBM_MAX_SYNC_TIMERECORDTABLE_BLOCK_COUNT];
-#endif /* STBM_MAX_SYNC_TIMERECORDTABLE_BLOCK_COUNT > 0 */
+#endif
 #if (STBM_MAX_OFFSET_TIMERECORDTABLE_BLOCK_COUNT > 0)
-STBM_LOCAL VAR(StbM_OffsetRecordTableBlockType, STBM_VAR)
+STBM_LOCAL StbM_OffsetRecordTableBlockType
     StbM_OffsetTimeRecordBlock[STBM_SYNCHRONIZED_TIME_BASE_NUM][STBM_MAX_OFFSET_TIMERECORDTABLE_BLOCK_COUNT];
-#endif /* STBM_MAX_OFFSET_TIMERECORDTABLE_BLOCK_COUNT > 0 */
+#endif
 
 #if (STBM_NOTIFICATION_CUSTOMER_NUM > 0)
-STBM_LOCAL VAR(StbM_NotificationType, STBM_VAR) StbM_Notification[STBM_NOTIFICATION_CUSTOMER_NUM];
-#endif /* STBM_NOTIFICATION_CUSTOMER_NUM > 0 */
+STBM_LOCAL StbM_NotificationType StbM_Notification[STBM_NOTIFICATION_CUSTOMER_NUM];
+#endif
 
-STBM_LOCAL P2CONST(StbM_ConfigType, AUTOMATIC, STBM_APPL_DATA) StbM_ConfigData;
+STBM_LOCAL const StbM_ConfigType* StbM_ConfigData;
 
-#if (STD_ON == STBM_TIME_CORRECTION_SUPPORT)
-STBM_LOCAL VAR(StbM_RateCorrectionType, STBM_VAR)
+#if (STBM_TIME_CORRECTION_SUPPORT == STD_ON)
+STBM_LOCAL StbM_RateCorrectionType
     StbM_RateCorrection[STBM_SYNCHRONIZED_TIME_BASE_NUM][STBM_MAX_PER_MEASUREMENT_DURATION];
-#endif /* STD_ON == STBM_TIME_CORRECTION_SUPPORT */
+#endif
 #define STBM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
 #include "StbM_MemMap.h"
 
@@ -207,7 +217,7 @@ STBM_LOCAL boolean StbM_InitStatus = FALSE;
 STBM_LOCAL uint16 StbM_TriggerRemainPeriod[STBM_TRIGGERED_CUSTOMER_NUM];
 #define STBM_STOP_SEC_VAR_CLEARED_16
 #include "StbM_MemMap.h"
-#endif /* STBM_TRIGGERED_CUSTOMER_NUM > 0 */
+#endif
 
 /*******************************************************************************
 **                      Global Variable Definitions                          **
@@ -229,15 +239,14 @@ STBM_LOCAL uint16 StbM_TriggerRemainPeriod[STBM_TRIGGERED_CUSTOMER_NUM];
  * Parameters(OUT): NA
  * Return value: NA
  */
-FUNC(void, STBM_CODE)
-StbM_Init(P2CONST(StbM_ConfigType, AUTOMATIC, STBM_APPL_DATA) ConfigPtr) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
+void StbM_Init(const StbM_ConfigType* ConfigPtr) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
 {
-#if ((STD_ON == STBM_TIME_CORRECTION_SUPPORT) || (STBM_NOTIFICATION_CUSTOMER_NUM > 0u))
+#if ((STBM_TIME_CORRECTION_SUPPORT == STD_ON) || (STBM_NOTIFICATION_CUSTOMER_NUM > 0u))
     uint16 subIndex;
 #endif
 
-#if (STD_ON == STBM_DEV_ERROR_DETECT)
-    if (NULL_PTR == ConfigPtr)
+#if (STBM_DEV_ERROR_DETECT == STD_ON)
+    if (ConfigPtr == NULL_PTR)
     {
         (void)Det_ReportError(STBM_MODULE_ID, STBM_INSTANCE_ID, STBM_SID_INIT, STBM_E_INIT_FAILED);
     }
@@ -274,20 +283,20 @@ StbM_Init(P2CONST(StbM_ConfigType, AUTOMATIC, STBM_APPL_DATA) ConfigPtr) /* PRQA
             timeBasePtr->StbMClearTimeleapCount = 0u;
 
 /* SWS_StbM_00306 */
-#if (STD_ON == STBM_TIME_RECORDING_SUPPORT)
+#if (STBM_TIME_RECORDING_SUPPORT == STD_ON)
             timeBasePtr->RecordBlockIndex = 0u;
             timeBasePtr->RecordBlockCount = 0u;
 #if (STBM_MAX_SYNC_TIMERECORDTABLE_BLOCK_COUNT > 0)
             timeBasePtr->StbMSyncTimeRecordBlock = &StbM_SyncTimeRecordBlock[index][0];
-#else  /* STBM_MAX_SYNC_TIMERECORDTABLE_BLOCK_COUNT > 0 */
+#else
             timeBasePtr->StbMSyncTimeRecordBlock = NULL_PTR;
-#endif /* STBM_MAX_SYNC_TIMERECORDTABLE_BLOCK_COUNT > 0 */
+#endif
 #if (STBM_MAX_OFFSET_TIMERECORDTABLE_BLOCK_COUNT > 0)
             timeBasePtr->StbMOffsetTimeRecordBlock = &StbM_OffsetTimeRecordBlock[index][0];
-#else  /* STBM_MAX_OFFSET_TIMERECORDTABLE_BLOCK_COUNT > 0 */
+#else
             timeBasePtr->StbMOffsetTimeRecordBlock = NULL_PTR;
-#endif /* STBM_MAX_OFFSET_TIMERECORDTABLE_BLOCK_COUNT > 0 */
-#endif /* STD_ON == STBM_TIME_RECORDING_SUPPORT */
+#endif
+#endif
 
             timeBasePtr->RateDeviation.ratioSet = FALSE;
 
@@ -301,7 +310,7 @@ StbM_Init(P2CONST(StbM_ConfigType, AUTOMATIC, STBM_APPL_DATA) ConfigPtr) /* PRQA
             }
 #endif
 
-#if (STD_ON == STBM_TIME_CORRECTION_SUPPORT)
+#if (STBM_TIME_CORRECTION_SUPPORT == STD_ON)
             timeBasePtr->TimeOffsetForRateAdaption = 0;
             timeBasePtr->RateDeviation.ratio =
                 (timeBaseCfgPtr->synchronizedTimeBaseType == STBM_TBTYPE_OFFSET) ? 0.0 : 1.0;
@@ -317,7 +326,7 @@ StbM_Init(P2CONST(StbM_ConfigType, AUTOMATIC, STBM_APPL_DATA) ConfigPtr) /* PRQA
                     timeBasePtr->RateCorrection[subIndex].TVstart = 0u;
                 }
             }
-#endif /* STD_ON == STBM_TIME_CORRECTION_SUPPORT */
+#endif
         }
 #if (STBM_NOTIFICATION_CUSTOMER_NUM > 0u)
         for (uint16 index = 0u; index < STBM_NOTIFICATION_CUSTOMER_NUM; index++)
@@ -332,12 +341,12 @@ StbM_Init(P2CONST(StbM_ConfigType, AUTOMATIC, STBM_APPL_DATA) ConfigPtr) /* PRQA
         {
             StbM_TriggerRemainPeriod[index] = StbM_GetTriggerCustomerConfig(index)->triggeredCustomerPeriod;
         }
-#endif /* STBM_TRIGGERED_CUSTOMER_NUM > 0u */
+#endif
         StbM_InitStatus = TRUE;
     }
 }
 
-#if (STD_ON == STBM_VERSION_INFO_API)
+#if (STBM_VERSION_INFO_API == STD_ON)
 /**
  * Returns the version information of this module.
  * Service ID: 0x05
@@ -349,11 +358,10 @@ StbM_Init(P2CONST(StbM_ConfigType, AUTOMATIC, STBM_APPL_DATA) ConfigPtr) /* PRQA
 the module.
  * Return value: NA
  */
-FUNC(void, STBM_CODE)
-StbM_GetVersionInfo(P2VAR(Std_VersionInfoType, AUTOMATIC, STBM_APPL_DATA) versioninfo)
+void StbM_GetVersionInfo(P2VAR(Std_VersionInfoType, AUTOMATIC, STBM_APPL_DATA) versioninfo)
 {
-#if (STD_ON == STBM_DEV_ERROR_DETECT)
-    if (NULL_PTR == versioninfo)
+#if (STBM_DEV_ERROR_DETECT == STD_ON)
+    if (versioninfo == NULL_PTR)
     {
         (void)Det_ReportError(STBM_MODULE_ID, STBM_INSTANCE_ID, STBM_SID_GETVERSIONINFO, STBM_E_PARAM_POINTER);
     }
@@ -367,7 +375,7 @@ StbM_GetVersionInfo(P2VAR(Std_VersionInfoType, AUTOMATIC, STBM_APPL_DATA) versio
         versioninfo->sw_patch_version = STBM_H_SW_PATCH_VERSION;
     }
 }
-#endif /* STBM_VERSION_INFO_API = STD_ON */
+#endif
 
 /**
  * Returns a time value(Local Time Base derived from Global Time Base) in standard format.
@@ -382,21 +390,20 @@ StbM_GetVersionInfo(P2VAR(Std_VersionInfoType, AUTOMATIC, STBM_APPL_DATA) versio
                     E_NOT_OK: failed
  */
 /* PRQA S 1532 ++ */ /* MISRA Rule 8.7 */
-FUNC(Std_ReturnType, STBM_CODE)
-StbM_GetCurrentTime(
+Std_ReturnType StbM_GetCurrentTime(
     StbM_SynchronizedTimeBaseType timeBaseId,
     StbM_TimeStampType* timeStamp,
     StbM_UserDataType* userData)
 /* PRQA S 1532 -- */ /* MISRA Rule 8.7 */
 {
     Std_ReturnType ret = E_OK;
-#if (STD_ON == STBM_DEV_ERROR_DETECT)
+#if (STBM_DEV_ERROR_DETECT == STD_ON)
     ret = Stbm_TimeBaseIdDetCheck(timeBaseId, STBM_SID_GETCURRENTTIME, RESERVED_NOT_ALLOWED);
-    if ((Std_ReturnType)E_NOT_OK == ret)
+    if (ret == (Std_ReturnType)E_NOT_OK)
     {
         /* nothing */
     }
-    else if ((NULL_PTR == timeStamp) || (NULL_PTR == userData))
+    else if ((timeStamp == NULL_PTR) || (userData == NULL_PTR))
     {
         (void)Det_ReportError(STBM_MODULE_ID, STBM_INSTANCE_ID, STBM_SID_GETCURRENTTIME, STBM_E_PARAM_POINTER);
         ret = E_NOT_OK;
@@ -425,12 +432,12 @@ StbM_GetCurrentTime(
 
         /* SWS_StbM_00173 */
         /* SWS_StbM_00434 */
-        if ((Std_ReturnType)E_OK == ret)
+        if (ret == (Std_ReturnType)E_OK)
         {
             ret = StbM_GetCurrentLocalTime(timebasecfgid, &time64);
         }
 
-        if ((Std_ReturnType)E_OK == ret)
+        if (ret == (Std_ReturnType)E_OK)
         {
             const StbM_TimeBaseType* timeBasePtr = &StbM_TimeBase[timebasecfgid];
             StbM_GetGlobalTime64(timebasecfgid, &time64);
@@ -456,19 +463,20 @@ StbM_GetCurrentTime(
  * Return value:    E_OK: successful
                     E_NOT_OK: failed
  */
-FUNC(Std_ReturnType, STBM_CODE)
-StbM_GetCurrentVirtualLocalTime(StbM_SynchronizedTimeBaseType timeBaseId, StbM_VirtualLocalTimeType* localTimePtr)
+Std_ReturnType StbM_GetCurrentVirtualLocalTime(
+    StbM_SynchronizedTimeBaseType timeBaseId,
+    StbM_VirtualLocalTimeType* localTimePtr)
 {
     uint64 time64 = 0u;
     Std_ReturnType ret = E_OK;
 
-#if (STD_ON == STBM_DEV_ERROR_DETECT)
+#if (STBM_DEV_ERROR_DETECT == STD_ON)
     ret = Stbm_TimeBaseIdDetCheck(timeBaseId, STBM_SID_GETCURRENTVIRTUALLOCALTIME, RESERVED_NOT_ALLOWED);
-    if ((Std_ReturnType)E_NOT_OK == ret)
+    if (ret == (Std_ReturnType)E_NOT_OK)
     {
         /* nothing */
     }
-    else if (NULL_PTR == localTimePtr)
+    else if (localTimePtr == NULL_PTR)
     {
         (void)Det_ReportError(
             STBM_MODULE_ID,
@@ -478,7 +486,7 @@ StbM_GetCurrentVirtualLocalTime(StbM_SynchronizedTimeBaseType timeBaseId, StbM_V
         ret = E_NOT_OK;
     }
     else
-#endif /* STD_ON == STBM_DEV_ERROR_DETECT */
+#endif
     {
         uint16 timebasecfgid = StbM_FindSynchronizedTimeBase(timeBaseId);
         if ((timeBaseId >= STBM_SYNC_TIMEBASE_RANGE) && (timeBaseId < STBM_OFFSET_TIMEBASE_RANGE))
@@ -494,11 +502,11 @@ StbM_GetCurrentVirtualLocalTime(StbM_SynchronizedTimeBaseType timeBaseId, StbM_V
         }
 
         /* SWS_StbM_00437 */
-        if ((Std_ReturnType)E_OK == ret)
+        if (ret == (Std_ReturnType)E_OK)
         {
             ret = StbM_GetCurrentLocalTime(timebasecfgid, &time64);
         }
-        if ((Std_ReturnType)E_OK == ret)
+        if (ret == (Std_ReturnType)E_OK)
         {
             localTimePtr->nanosecondsHi = (uint32)(time64 >> 32);
             localTimePtr->nanosecondsLo = (uint32)time64;
@@ -717,19 +725,16 @@ Std_ReturnType StbM_UpdateGlobalTime(
  * Return value:    E_OK: successful
                     E_NOT_OK: failed
  */
-FUNC(Std_ReturnType, STBM_CODE)
-StbM_SetUserData(
-    StbM_SynchronizedTimeBaseType timeBaseId,
-    P2CONST(StbM_UserDataType, AUTOMATIC, STBM_APPL_DATA) userData)
+Std_ReturnType StbM_SetUserData(StbM_SynchronizedTimeBaseType timeBaseId, const StbM_UserDataType* userData)
 {
     Std_ReturnType ret = E_OK;
-#if (STD_ON == STBM_DEV_ERROR_DETECT)
+#if (STBM_DEV_ERROR_DETECT == STD_ON)
     ret = Stbm_TimeBaseIdDetCheck(timeBaseId, STBM_SID_SETUSERDATA, RESERVED_NOT_ALLOWED);
-    if ((Std_ReturnType)E_NOT_OK == ret)
+    if (ret == (Std_ReturnType)E_NOT_OK)
     {
         /* nothing */
     }
-    else if (NULL_PTR == userData)
+    else if (userData == NULL_PTR)
     {
         (void)Det_ReportError(STBM_MODULE_ID, STBM_INSTANCE_ID, STBM_SID_SETUSERDATA, STBM_E_PARAM_POINTER);
         ret = E_NOT_OK;
@@ -763,20 +768,19 @@ StbM_SetUserData(
  * Return value:    E_OK: successful
                     E_NOT_OK: failed
  */
-FUNC(Std_ReturnType, STBM_CODE)
-StbM_SetOffset(
+Std_ReturnType StbM_SetOffset(
     StbM_SynchronizedTimeBaseType timeBaseId,
-    P2CONST(StbM_TimeStampType, AUTOMATIC, STBM_APPL_DATA) timeStamp,
-    P2CONST(StbM_UserDataType, AUTOMATIC, STBM_APPL_DATA) userData)
+    const StbM_TimeStampType* timeStamp,
+    const StbM_UserDataType* userData)
 {
     Std_ReturnType ret;
-#if (STD_ON == STBM_DEV_ERROR_DETECT)
+#if (STBM_DEV_ERROR_DETECT == STD_ON)
     ret = Stbm_TimeBaseIdDetCheck(timeBaseId, STBM_SID_SETOFFSET, SYNC_AND_PURELOCAL_TIMEBASE_NOT_ALLOWED);
-    if ((Std_ReturnType)E_NOT_OK == ret)
+    if (ret == (Std_ReturnType)E_NOT_OK)
     {
         /* nothing */
     }
-    else if ((NULL_PTR == timeStamp) || (NULL_PTR == userData))
+    else if ((timeStamp == NULL_PTR) || (userData == NULL_PTR))
     {
         (void)Det_ReportError(STBM_MODULE_ID, STBM_INSTANCE_ID, STBM_SID_SETOFFSET, STBM_E_PARAM_POINTER);
         ret = E_NOT_OK;
@@ -812,7 +816,7 @@ StbM_SetOffset(
 
         uint64 TV = 0u;
         ret = StbM_GetCurrentLocalTime(timebasecfgid, &TV);
-        if ((Std_ReturnType)E_OK == ret)
+        if (ret == (Std_ReturnType)E_OK)
         {
             uint64 TL = StbM_GTTimeTo64Time(*timeStamp);
             /* SWS_StbM_00436 */
@@ -835,17 +839,19 @@ StbM_SetOffset(
  * Return value:    E_OK: successful
                     E_NOT_OK: failed
  */
-FUNC(Std_ReturnType, STBM_CODE)
-StbM_GetOffset(StbM_SynchronizedTimeBaseType timeBaseId, StbM_TimeStampType* timeStamp, StbM_UserDataType* userData)
+Std_ReturnType StbM_GetOffset(
+    StbM_SynchronizedTimeBaseType timeBaseId,
+    StbM_TimeStampType* timeStamp,
+    StbM_UserDataType* userData)
 {
     Std_ReturnType ret = E_OK;
-#if (STD_ON == STBM_DEV_ERROR_DETECT)
+#if (STBM_DEV_ERROR_DETECT == STD_ON)
     ret = Stbm_TimeBaseIdDetCheck(timeBaseId, STBM_SID_GETOFFSET, SYNC_AND_PURELOCAL_TIMEBASE_NOT_ALLOWED);
-    if ((Std_ReturnType)E_NOT_OK == ret)
+    if (ret == (Std_ReturnType)E_NOT_OK)
     {
         /* nothing */
     }
-    else if ((NULL_PTR == timeStamp) || (NULL_PTR == userData))
+    else if ((timeStamp == NULL_PTR) || (userData == NULL_PTR))
     {
         (void)Det_ReportError(STBM_MODULE_ID, STBM_INSTANCE_ID, STBM_SID_GETOFFSET, STBM_E_PARAM_POINTER);
         ret = E_NOT_OK;
@@ -884,21 +890,20 @@ StbM_GetOffset(StbM_SynchronizedTimeBaseType timeBaseId, StbM_TimeStampType* tim
  * Return value:    E_OK: successful
                     E_NOT_OK: failed
  */
-FUNC(Std_ReturnType, STBM_CODE)
-StbM_BusGetCurrentTime(
+Std_ReturnType StbM_BusGetCurrentTime(
     StbM_SynchronizedTimeBaseType timeBaseId,
     StbM_TimeStampType* globalTimePtr,
     StbM_VirtualLocalTimeType* localTimePtr,
     StbM_UserDataType* userDataPtr)
 {
     Std_ReturnType ret;
-#if (STD_ON == STBM_DEV_ERROR_DETECT)
+#if (STBM_DEV_ERROR_DETECT == STD_ON)
     ret = Stbm_TimeBaseIdDetCheck(timeBaseId, STBM_SID_BUSGETCURRENTTIME, OFFSET_TIMEBASE_NOT_ALLOWED);
-    if ((Std_ReturnType)E_NOT_OK == ret)
+    if (ret == (Std_ReturnType)E_NOT_OK)
     {
         /* nothing */
     }
-    else if ((NULL_PTR == globalTimePtr) || (NULL_PTR == localTimePtr) || (NULL_PTR == userDataPtr))
+    else if ((globalTimePtr == NULL_PTR) || (localTimePtr == NULL_PTR) || (userDataPtr == NULL_PTR))
     {
         (void)Det_ReportError(STBM_MODULE_ID, STBM_INSTANCE_ID, STBM_SID_BUSGETCURRENTTIME, STBM_E_PARAM_POINTER);
         ret = E_NOT_OK;
@@ -911,7 +916,7 @@ StbM_BusGetCurrentTime(
 
         /* SWS_StbM_00435 */
         ret = StbM_GetCurrentLocalTime(timebasecfgid, &localTime);
-        if ((Std_ReturnType)E_OK == ret)
+        if (ret == (Std_ReturnType)E_OK)
         {
             localTimePtr->nanosecondsHi = (uint32)(localTime >> 32);
             localTimePtr->nanosecondsLo = (uint32)localTime;
@@ -944,23 +949,22 @@ StbM_BusGetCurrentTime(
  * Return value:    E_OK: successful
                     E_NOT_OK: failed
  */
-FUNC(Std_ReturnType, STBM_CODE)
-StbM_BusSetGlobalTime(
+Std_ReturnType StbM_BusSetGlobalTime(
     StbM_SynchronizedTimeBaseType timeBaseId,
-    P2CONST(StbM_TimeStampType, AUTOMATIC, STBM_APPL_DATA) globalTimePtr,
-    P2CONST(StbM_UserDataType, AUTOMATIC, STBM_APPL_DATA) userDataPtr,
-    P2CONST(StbM_MeasurementType, AUTOMATIC, STBM_APPL_DATA) measureDataPtr,
-    P2CONST(StbM_VirtualLocalTimeType, AUTOMATIC, STBM_APPL_DATA) localTimePtr)
+    const StbM_TimeStampType* globalTimePtr,
+    const StbM_UserDataType* userDataPtr,
+    const StbM_MeasurementType* measureDataPtr,
+    const StbM_VirtualLocalTimeType* localTimePtr)
 {
     Std_ReturnType ret;
 
-#if (STD_ON == STBM_DEV_ERROR_DETECT)
+#if (STBM_DEV_ERROR_DETECT == STD_ON)
     ret = Stbm_TimeBaseIdDetCheck(timeBaseId, STBM_SID_BUSSETGLOBALTIME, PURELOCAL_TIMEBASE_NOT_ALLOWED);
-    if ((Std_ReturnType)E_NOT_OK == ret)
+    if (ret == (Std_ReturnType)E_NOT_OK)
     {
         /* nothing */
     }
-    else if ((NULL_PTR == globalTimePtr) || (NULL_PTR == measureDataPtr) || (NULL_PTR == localTimePtr))
+    else if ((globalTimePtr == NULL_PTR) || (measureDataPtr == NULL_PTR) || (localTimePtr == NULL_PTR))
     {
         (void)Det_ReportError(STBM_MODULE_ID, STBM_INSTANCE_ID, STBM_SID_BUSSETGLOBALTIME, STBM_E_PARAM_POINTER);
         ret = E_NOT_OK;
@@ -990,7 +994,7 @@ StbM_BusSetGlobalTime(
         ret = StbM_GetCurrentLocalTime(timebasecfgid, &time64);
         tempTime64 = time64;
 
-        if ((Std_ReturnType)E_OK == ret)
+        if (ret == (Std_ReturnType)E_OK)
         {
             SchM_Enter_StbM_Context();
             timeBasePtr->timeBaseStatus |= STBM_TIMEBASE_STATUS_GLOBAL_TIME_BASE;
@@ -1000,7 +1004,7 @@ StbM_BusSetGlobalTime(
             StbM_GetGlobalTime64(timebasecfgid, &tempTime64);
             StbM_CheckTimeleap(timebasecfgid, tempTime64, time64received);
 
-            if ((boolean)FALSE == timeBasePtr->BusNotFirstSet)
+            if (timeBasePtr->BusNotFirstSet == (boolean)FALSE)
             {
                 timeBasePtr->BusNotFirstSet = (boolean)TRUE;
             }
@@ -1010,9 +1014,9 @@ StbM_BusSetGlobalTime(
             STBM_UNUSED(measureDataPtr);
             STBM_UNUSED(localTimePtr);
 #endif
-#if (STD_ON == STBM_TIME_CORRECTION_SUPPORT)
+#if (STBM_TIME_CORRECTION_SUPPORT == STD_ON)
             StbM_CalculateRateCorrection(timebasecfgid, &time64received, &time64, globalTimePtr->timeBaseStatus);
-#endif /* STD_ON == STBM_TIME_CORRECTION_SUPPORT */
+#endif
             /* SWS_StbM_00184 */
             SchM_Enter_StbM_Context();
             if (((globalTimePtr->timeBaseStatus) & STBM_TIMEBASE_STATUS_SYNC_TO_GATEWAY) != 0u)
@@ -1058,17 +1062,16 @@ StbM_BusSetGlobalTime(
                     E_NOT_OK: failed
  */
 /* PRQA S 1532, 3673 ++ */ /* VL_StbM_3673 */
-FUNC(Std_ReturnType, STBM_CODE)
-StbM_GetRateDeviation(StbM_SynchronizedTimeBaseType timeBaseId, StbM_RateDeviationType* rateDeviation)
+Std_ReturnType StbM_GetRateDeviation(StbM_SynchronizedTimeBaseType timeBaseId, StbM_RateDeviationType* rateDeviation)
 /* PRQA S 1532, 3673 -- */
 {
     Std_ReturnType ret = E_NOT_OK;
-#if (STD_ON == STBM_DEV_ERROR_DETECT)
+#if (STBM_DEV_ERROR_DETECT == STD_ON)
     if (Stbm_TimeBaseIdDetCheck(timeBaseId, STBM_SID_GETRATEDEVIATION, RESERVED_NOT_ALLOWED) == E_NOT_OK)
     {
         /* nothing */
     }
-    else if (NULL_PTR == rateDeviation)
+    else if (rateDeviation == NULL_PTR)
     {
         (void)Det_ReportError(STBM_MODULE_ID, STBM_INSTANCE_ID, STBM_SID_GETRATEDEVIATION, STBM_E_PARAM_POINTER);
     }
@@ -1081,7 +1084,16 @@ StbM_GetRateDeviation(StbM_SynchronizedTimeBaseType timeBaseId, StbM_RateDeviati
         SchM_Enter_StbM_Context();
         if (timeBasePtr->RateDeviation.ratioSet)
         {
-            *rateDeviation = ((timeBasePtr->RateDeviation.ratio - 1.0) * 1000000.0);
+            float64 fRate = (timeBasePtr->RateDeviation.ratio - 1.0) * 1000000.0;
+            StbM_RateDeviationType dir = 1;
+            if (fRate < 0.0)
+            {
+                fRate = -fRate;
+                dir = -1;
+            }
+            fRate += 0.1; /* Avoid loss of precision when converted to integer */
+            *rateDeviation = (StbM_RateDeviationType)fRate;
+            *rateDeviation *= dir;
             ret = E_OK;
         }
         SchM_Exit_StbM_Context();
@@ -1108,16 +1120,15 @@ StbM_GetRateDeviation(StbM_SynchronizedTimeBaseType timeBaseId, StbM_RateDeviati
  * Return value:    E_OK: successful
                     E_NOT_OK: failed
  */
-FUNC(Std_ReturnType, STBM_CODE)
-StbM_SetRateCorrection(StbM_SynchronizedTimeBaseType timeBaseId, StbM_RateDeviationType rateDeviation)
+Std_ReturnType StbM_SetRateCorrection(StbM_SynchronizedTimeBaseType timeBaseId, StbM_RateDeviationType rateDeviation)
 {
     Std_ReturnType ret;
-#if (STD_ON == STBM_DEV_ERROR_DETECT)
+#if (STBM_DEV_ERROR_DETECT == STD_ON)
     ret = Stbm_TimeBaseIdDetCheck(timeBaseId, STBM_SID_SETRATECORRECTION, RESERVED_NOT_ALLOWED);
-    if ((Std_ReturnType)E_OK == ret)
+    if (ret == (Std_ReturnType)E_OK)
 #endif
     {
-#if (STD_ON == STBM_TIME_CORRECTION_SUPPORT)
+#if (STBM_TIME_CORRECTION_SUPPORT == STD_ON)
         uint16 timebasecfgid = StbM_FindSynchronizedTimeBase(timeBaseId);
         const StbMSynchronizedTimeBaseCfgType* synchronizedTimeBase = &TIMEBASE_CFG(timebasecfgid);
         if ((synchronizedTimeBase->StbMTimeCorrection != NULL_PTR)
@@ -1149,7 +1160,7 @@ StbM_SetRateCorrection(StbM_SynchronizedTimeBaseType timeBaseId, StbM_RateDeviat
 
             uint64 TV = 0u;
             ret = StbM_GetCurrentLocalTime(timebasecfgid, &TV);
-            if ((Std_ReturnType)E_OK == ret)
+            if (ret == (Std_ReturnType)E_OK)
             {
                 uint64 TL = TV;
                 (void)StbM_GetGlobalTime64(timebasecfgid, &TL);
@@ -1162,10 +1173,9 @@ StbM_SetRateCorrection(StbM_SynchronizedTimeBaseType timeBaseId, StbM_RateDeviat
 #else
         STBM_UNUSED(timeBaseId);
         STBM_UNUSED(rateDeviation);
-#endif /* STD_ON == STBM_TIME_CORRECTION_SUPPORT */
-
+#endif
         {
-#if (STD_ON == STBM_DEV_ERROR_DETECT)
+#if (STBM_DEV_ERROR_DETECT == STD_ON)
             (void)
                 Det_ReportError(STBM_MODULE_ID, STBM_INSTANCE_ID, STBM_SID_SETRATECORRECTION, STBM_E_SERVICE_DISABLED);
 #endif
@@ -1186,17 +1196,16 @@ StbM_SetRateCorrection(StbM_SynchronizedTimeBaseType timeBaseId, StbM_RateDeviat
  * Return value:    E_OK: successful
                     E_NOT_OK: failed
  */
-FUNC(Std_ReturnType, STBM_CODE)
-StbM_GetTimeLeap(StbM_SynchronizedTimeBaseType timeBaseId, StbM_TimeDiffType* timeJump)
+Std_ReturnType StbM_GetTimeLeap(StbM_SynchronizedTimeBaseType timeBaseId, StbM_TimeDiffType* timeJump)
 {
     Std_ReturnType ret;
-#if (STD_ON == STBM_DEV_ERROR_DETECT)
+#if (STBM_DEV_ERROR_DETECT == STD_ON)
     ret = Stbm_TimeBaseIdDetCheck(timeBaseId, STBM_SID_GETTIMELEAP, PURELOCAL_TIMEBASE_NOT_ALLOWED);
-    if ((Std_ReturnType)E_NOT_OK == ret)
+    if (ret == (Std_ReturnType)E_NOT_OK)
     {
         /* nothing */
     }
-    else if (NULL_PTR == timeJump)
+    else if (timeJump == NULL_PTR)
     {
         (void)Det_ReportError(STBM_MODULE_ID, STBM_INSTANCE_ID, STBM_SID_GETTIMELEAP, STBM_E_PARAM_POINTER);
         ret = E_NOT_OK;
@@ -1234,20 +1243,19 @@ StbM_GetTimeLeap(StbM_SynchronizedTimeBaseType timeBaseId, StbM_TimeDiffType* ti
  * Return value:    E_OK: successful
                     E_NOT_OK: failed
  */
-FUNC(Std_ReturnType, STBM_CODE)
-StbM_GetTimeBaseStatus(
+Std_ReturnType StbM_GetTimeBaseStatus(
     StbM_SynchronizedTimeBaseType timeBaseId,
     StbM_TimeBaseStatusType* syncTimeBaseStatus,
     StbM_TimeBaseStatusType* offsetTimeBaseStatus)
 {
     Std_ReturnType ret;
-#if (STD_ON == STBM_DEV_ERROR_DETECT)
+#if (STBM_DEV_ERROR_DETECT == STD_ON)
     ret = Stbm_TimeBaseIdDetCheck(timeBaseId, STBM_SID_GETTIMEBASESTATUS, RESERVED_NOT_ALLOWED);
-    if ((Std_ReturnType)E_NOT_OK == ret)
+    if (ret == (Std_ReturnType)E_NOT_OK)
     {
         /* nothing */
     }
-    else if ((NULL_PTR == syncTimeBaseStatus) || (NULL_PTR == offsetTimeBaseStatus))
+    else if ((syncTimeBaseStatus == NULL_PTR) || (offsetTimeBaseStatus == NULL_PTR))
     {
         (void)Det_ReportError(STBM_MODULE_ID, STBM_INSTANCE_ID, STBM_SID_GETTIMEBASESTATUS, STBM_E_PARAM_POINTER);
         ret = E_NOT_OK;
@@ -1298,19 +1306,18 @@ StbM_GetTimeBaseStatus(
  * Return value:    E_OK: successful
                     E_NOT_OK: failed
  */
-FUNC(Std_ReturnType, STBM_CODE)
-StbM_StartTimer(
+Std_ReturnType StbM_StartTimer(
     StbM_SynchronizedTimeBaseType timeBaseId,
     StbM_CustomerIdType customerId,
-    P2CONST(StbM_TimeStampType, AUTOMATIC, STBM_APPL_DATA) expireTime)
+    const StbM_TimeStampType* expireTime)
 {
     Std_ReturnType ret = E_NOT_OK;
-#if (STD_ON == STBM_DEV_ERROR_DETECT)
+#if (STBM_DEV_ERROR_DETECT == STD_ON)
     if (Stbm_TimeBaseIdDetCheck(timeBaseId, STBM_SID_STARTTIMER, RESERVED_NOT_ALLOWED) == E_NOT_OK)
     {
         /* nothing */
     }
-    else if (NULL_PTR == expireTime)
+    else if (expireTime == NULL_PTR)
     {
         (void)Det_ReportError(STBM_MODULE_ID, STBM_INSTANCE_ID, STBM_SID_STARTTIMER, STBM_E_PARAM_POINTER);
     }
@@ -1324,7 +1331,6 @@ StbM_StartTimer(
 #endif
     {
         StbM_NotificationType* notificationPtr = &StbM_Notification[customerId];
-
         SchM_Enter_StbM_Context();
         if (!notificationPtr->isrunning)
         {
@@ -1336,8 +1342,8 @@ StbM_StartTimer(
     }
     return ret;
 }
-#endif /* STBM_NOTIFICATION_CUSTOMER_NUM>0 */
-#if (STD_ON == STBM_TIME_RECORDING_SUPPORT)
+#endif
+#if (STBM_TIME_RECORDING_SUPPORT == STD_ON)
 /**
  * Accesses to the recorded snapshot data Header of the table belonging to the Synchronized Time Base.
  * Service ID: 0x16
@@ -1349,20 +1355,19 @@ StbM_StartTimer(
  * Return value:    E_OK: successful
                     E_NOT_OK: failed
  */
-FUNC(Std_ReturnType, STBM_CODE)
-StbM_GetSyncTimeRecordHead(
+Std_ReturnType StbM_GetSyncTimeRecordHead(
     StbM_SynchronizedTimeBaseType timeBaseId,
     P2VAR(StbM_SyncRecordTableHeadType, AUTOMATIC, STBM_APPL_DATA) syncRecordTableHead)
 {
     Std_ReturnType ret = E_NOT_OK;
-#if (STD_ON == STBM_DEV_ERROR_DETECT)
+#if (STBM_DEV_ERROR_DETECT == STD_ON)
     ret =
         Stbm_TimeBaseIdDetCheck(timeBaseId, STBM_SID_GETSYNCTIMERECORDHEAD, OFFSET_AND_PURELOCAL_TIMEBASE_NOT_ALLOWED);
-    if ((Std_ReturnType)E_NOT_OK == ret)
+    if (ret == (Std_ReturnType)E_NOT_OK)
     {
         /* nothing */
     }
-    else if (NULL_PTR == syncRecordTableHead)
+    else if (syncRecordTableHead == NULL_PTR)
     {
         (void)Det_ReportError(STBM_MODULE_ID, STBM_INSTANCE_ID, STBM_SID_GETSYNCTIMERECORDHEAD, STBM_E_PARAM_POINTER);
         ret = E_NOT_OK;
@@ -1390,22 +1395,21 @@ StbM_GetSyncTimeRecordHead(
  * Return value:    E_OK: successful
                     E_NOT_OK: failed
  */
-FUNC(Std_ReturnType, STBM_CODE)
-StbM_GetOffsetTimeRecordHead(
+Std_ReturnType StbM_GetOffsetTimeRecordHead(
     StbM_SynchronizedTimeBaseType timeBaseId,
     P2VAR(StbM_OffsetRecordTableHeadType, AUTOMATIC, STBM_APPL_DATA) offsetRecordTableHead)
 {
     Std_ReturnType ret = E_NOT_OK;
-#if (STD_ON == STBM_DEV_ERROR_DETECT)
+#if (STBM_DEV_ERROR_DETECT == STD_ON)
     ret =
         Stbm_TimeBaseIdDetCheck(timeBaseId, STBM_SID_GETOFFSETTIMERECORDHEAD, SYNC_AND_PURELOCAL_TIMEBASE_NOT_ALLOWED);
-    if ((Std_ReturnType)E_NOT_OK == ret)
+    if (ret == (Std_ReturnType)E_NOT_OK)
     {
         /* nothing */
     }
-    else if (NULL_PTR == offsetRecordTableHead)
+    else if (offsetRecordTableHead == NULL_PTR)
     {
-        (void)Det_ReportError(STBM_MODULE_ID, STBM_INSTANCE_ID, STBM_SID_GETOFFSETTIMERECORDHEAD, STBM_E_PARAM_POINTER);
+        STBM_DET_REPORT(STBM_SID_GETOFFSETTIMERECORDHEAD, STBM_E_PARAM_POINTER);
         ret = E_NOT_OK;
     }
     else
@@ -1415,7 +1419,7 @@ StbM_GetOffsetTimeRecordHead(
     }
     return ret;
 }
-#endif /* STBM_TIME_RECORDING_SUPPORT == STD_ON */
+#endif
 /**
  * Called by the <Upper Layer> to force the Timesync Modules to transmit the current
    Time Base again due to an incremented timeBaseUpdateCounter[timeBaseId]
@@ -1428,13 +1432,12 @@ StbM_GetOffsetTimeRecordHead(
  * Return value:    E_OK: successful
                     E_NOT_OK: failed
  */
-FUNC(Std_ReturnType, STBM_CODE)
-StbM_TriggerTimeTransmission(StbM_SynchronizedTimeBaseType timeBaseId)
+Std_ReturnType StbM_TriggerTimeTransmission(StbM_SynchronizedTimeBaseType timeBaseId)
 {
     Std_ReturnType ret = E_OK;
-#if (STD_ON == STBM_DEV_ERROR_DETECT)
+#if (STBM_DEV_ERROR_DETECT == STD_ON)
     ret = Stbm_TimeBaseIdDetCheck(timeBaseId, STBM_SID_TRIGGERTIMETRANSMISSION, PURELOCAL_TIMEBASE_NOT_ALLOWED);
-    if ((Std_ReturnType)E_OK == ret)
+    if (ret == (Std_ReturnType)E_OK)
 #endif
     {
         uint16 timebasecfgid;
@@ -1458,11 +1461,10 @@ StbM_TriggerTimeTransmission(StbM_SynchronizedTimeBaseType timeBaseId)
  * Return value:    Counter value belonging to the Time Base, that indicates a Time Base
                     update to the Timesync Modules
  */
-FUNC(uint8, STBM_CODE)
-StbM_GetTimeBaseUpdateCounter(StbM_SynchronizedTimeBaseType timeBaseId)
+uint8 StbM_GetTimeBaseUpdateCounter(StbM_SynchronizedTimeBaseType timeBaseId)
 {
     uint8 StbM_TimeBaseUpdateCounter;
-#if (STD_ON == STBM_DEV_ERROR_DETECT)
+#if (STBM_DEV_ERROR_DETECT == STD_ON)
     Std_ReturnType ret;
     ret = Stbm_TimeBaseIdDetCheck(timeBaseId, STBM_SID_GETTIMEBASEUPDATECOUNTER, PURELOCAL_TIMEBASE_NOT_ALLOWED);
     if ((Std_ReturnType)E_OK != ret)
@@ -1493,17 +1495,16 @@ StbM_GetTimeBaseUpdateCounter(StbM_SynchronizedTimeBaseType timeBaseId)
  * Return value:    E_OK: successful
                     E_NOT_OK: failed
  */
-FUNC(Std_ReturnType, STBM_CODE)
-StbM_GetMasterConfig(StbM_SynchronizedTimeBaseType timeBaseId, StbM_MasterConfigType* masterConfig)
+Std_ReturnType StbM_GetMasterConfig(StbM_SynchronizedTimeBaseType timeBaseId, StbM_MasterConfigType* masterConfig)
 {
     Std_ReturnType ret = E_OK;
-#if (STD_ON == STBM_DEV_ERROR_DETECT)
+#if (STBM_DEV_ERROR_DETECT == STD_ON)
     ret = Stbm_TimeBaseIdDetCheck(timeBaseId, STBM_SID_GETMASTERCONFIG, RESERVED_NOT_ALLOWED);
-    if ((Std_ReturnType)E_NOT_OK == ret)
+    if (ret == (Std_ReturnType)E_NOT_OK)
     {
         /* nothing */
     }
-    else if (NULL_PTR == masterConfig)
+    else if (masterConfig == NULL_PTR)
     {
         (void)Det_ReportError(STBM_MODULE_ID, STBM_INSTANCE_ID, STBM_SID_GETMASTERCONFIG, STBM_E_PARAM_POINTER);
         ret = E_NOT_OK;
@@ -1528,7 +1529,7 @@ StbM_GetMasterConfig(StbM_SynchronizedTimeBaseType timeBaseId, StbM_MasterConfig
  */
 void StbM_MainFunction(void) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
 {
-    if ((boolean)TRUE == StbM_InitStatus)
+    if (StbM_InitStatus == (boolean)TRUE)
     {
         uint16 index;
         uint64 TV = 0u;
@@ -1550,18 +1551,43 @@ void StbM_MainFunction(void) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
                 uint16 timeBaseCfgId = StbM_FindSynchronizedTimeBase(StbMNotificationCustomer[index].timeBaseId);
                 (void)StbM_GetCurrentLocalTime(timeBaseCfgId, &TL);
                 (void)StbM_GetGlobalTime64(timeBaseCfgId, &TL);
-                SchM_Enter_StbM_Context();
-                if ((notificationPtr->CustomerTimerExpireTime - TL) < (STBM_TIMER_START_THRESHOLD))
+                sint64 timeDiff;
+                /* PRQA S 4394 ++ */ /* MISRA Rule 10.8 */
+                timeDiff = (sint64)(notificationPtr->CustomerTimerExpireTime - TL);
+                /* PRQA S 4394 --*/ /* MISRA Rule 10.8 */
+                if (timeDiff <= 0)
+                {
+                    timeDiff = (timeDiff < StbM_TimeDiffType_LowerLimit) ? StbM_TimeDiffType_LowerLimit : timeDiff;
+                    StbMTimeNtfCallbackType StbMTimeNtfCallback =
+                        StbMNotificationCustomer[index].StbMTimeNotificationCallback;
+                    if (NULL_PTR != StbMTimeNtfCallback)
+                    {
+                        StbMTimeNtfCallback((StbM_TimeDiffType)timeDiff);
+                    }
+                    SchM_Enter_StbM_Context();
+                    notificationPtr->isrunning = FALSE;
+                    notificationPtr->GPTtimercalled = FALSE;
+                    SchM_Exit_StbM_Context();
+                }
+                else if (timeDiff < (sint64)(STBM_TIMER_START_THRESHOLD))
                 {
                     /* SWS_StbM_00336 */
-                    Gpt_StartTimer(STBM_GPT_TIMER_REF, notificationPtr->CustomerTimerExpireTime - TL);
+                    /* PRQA S 4393 ++ */ /* MISRA Rule 10.8 */
+                    uint32 tickDiff =
+                        (uint32)((timeDiff * (sint64)(STBM_GPT_TIMER_FREQUENCY)) / (sint64)(STBM_NS_PER_S));
+                    /* PRQA S 4393 -- */ /* MISRA Rule 10.8 */
+                    Gpt_StartTimer(STBM_GPT_TIMER_REF, tickDiff);
+                    SchM_Enter_StbM_Context();
                     notificationPtr->isrunning = FALSE;
                     notificationPtr->GPTtimercalled = TRUE;
+                    SchM_Exit_StbM_Context();
                 }
-                SchM_Exit_StbM_Context();
+                else /* PRQA S 2013 */ /* MISRA Rule 15.7 */
+                {
+                }
             }
         }
-#endif /* STBM_NOTIFICATION_CUSTOMER_NUM > 0u */
+#endif
 #if (STBM_TRIGGERED_CUSTOMER_NUM > 0u)
         for (index = 0u; index < STBM_TRIGGERED_CUSTOMER_NUM; index++)
         {
@@ -1597,10 +1623,10 @@ void StbM_MainFunction(void) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
         }
 #endif
 
-#if (STD_ON == STBM_TIME_RECORDING_SUPPORT)
+#if (STBM_TIME_RECORDING_SUPPORT == STD_ON)
         for (index = 0u; index < STBM_SYNCHRONIZED_TIME_BASE_NUM; index++)
         {
-            if (FALSE == TIMEBASE_CFG(index).StbMIsSystemWideGlobalTimeMaster)
+            if (TIMEBASE_CFG(index).StbMIsSystemWideGlobalTimeMaster == FALSE)
             {
                 StbM_TimeRecordback(index);
             }
@@ -1636,7 +1662,7 @@ void StbM_TimerCallback(void)
                                      ? StbM_TimeDiffType_LowerLimit
                                      : -(time64 - notificationPtr->CustomerTimerExpireTime);
             }
-            void (*StbMTimeNtfCallback)(StbM_TimeDiffType) = customerPtr->StbMTimeNotificationCallback;
+            StbMTimeNtfCallbackType StbMTimeNtfCallback = customerPtr->StbMTimeNotificationCallback;
             if (NULL_PTR != StbMTimeNtfCallback)
             {
                 StbMTimeNtfCallback(timeDifference);
@@ -1654,7 +1680,7 @@ void StbM_TimerCallback(void)
 *******************************************************************************/
 #define STBM_START_SEC_CODE
 #include "StbM_MemMap.h"
-#if (STD_ON == STBM_DEV_ERROR_DETECT)
+#if (STBM_DEV_ERROR_DETECT == STD_ON)
 static Std_ReturnType CheckTimeBaseIdType(StbM_SynchronizedTimeBaseType timeBaseId, StbM_TimeBaseIdAllowedType type)
 {
     Std_ReturnType ret = E_OK;
@@ -1797,7 +1823,7 @@ STBM_LOCAL Std_ReturnType StbM_LocalClockToLocalTime(
         /* unreachable */
         break;
     }
-    if (E_OK == ret)
+    if (ret == E_OK)
     {
         StbM_HwCounterType preHwCounter = localClockTime->preHwCounter;
         StbM_HwCounterType elapsedHwCounter = (preHwCounter <= curHwCounter)
@@ -1840,17 +1866,16 @@ STBM_LOCAL Std_ReturnType StbM_GetCurrentLocalTime(StbM_TimeBaseIndexType timeBa
     return stdReturn;
 }
 
-static FUNC(void, STBM_CODE) StbM_GetGlobalTime64(uint16 CfgTimeBaseid, uint64* timeStamp)
+static void StbM_GetGlobalTime64(uint16 CfgTimeBaseid, uint64* timeStamp)
 {
     /* SWS_StbM_00355 */
     uint64 TV = *timeStamp;
     /* PRQA S 1532, 3678 ++ */ /* VL_StbM_3678 */
     StbM_TimeBaseType* timeBasePtr = &StbM_TimeBase[CfgTimeBaseid];
     /* PRQA S 1532, 3678 -- */
-
     SchM_Enter_StbM_Context();
     TV -= timeBasePtr->StbMMainTimeTuple.VirtualLocalTime;
-#if (STD_ON == STBM_TIME_CORRECTION_SUPPORT)
+#if (STBM_TIME_CORRECTION_SUPPORT == STD_ON)
     if ((timeBasePtr->RateDeviation.roc != 0.0) && (timeBasePtr->TimeOffsetForRateAdaption != 0))
     {
         /*judge if offsettime have reached,if not keep ratio*/
@@ -1870,7 +1895,7 @@ static FUNC(void, STBM_CODE) StbM_GetGlobalTime64(uint16 CfgTimeBaseid, uint64* 
     SchM_Exit_StbM_Context();
 }
 
-static FUNC(void, STBM_CODE) StbM_UpdateMainTimeTuple(uint16 timebasecfgid, uint64 TL, uint64 TV)
+static void StbM_UpdateMainTimeTuple(uint16 timebasecfgid, uint64 TL, uint64 TV)
 {
     StbM_MainTimeTupleType* mainTimeTuplePtr = &StbM_TimeBase[timebasecfgid].StbMMainTimeTuple;
     SchM_Enter_StbM_Context();
@@ -1879,7 +1904,7 @@ static FUNC(void, STBM_CODE) StbM_UpdateMainTimeTuple(uint16 timebasecfgid, uint
     SchM_Exit_StbM_Context();
 }
 
-static FUNC(uint64, STBM_CODE) StbM_GTTimeTo64Time(StbM_TimeStampType timeStamp)
+static uint64 StbM_GTTimeTo64Time(StbM_TimeStampType timeStamp)
 {
     uint64 time64 = (((uint64)timeStamp.secondsHi) << 32) + (uint64)timeStamp.seconds;
     time64 *= STBM_NANOSECOND_TO_SECOND;
@@ -1887,7 +1912,7 @@ static FUNC(uint64, STBM_CODE) StbM_GTTimeTo64Time(StbM_TimeStampType timeStamp)
     return time64;
 }
 
-static FUNC(StbM_TimeStampType, STBM_CODE) StbM_64TimeToGTTime(uint64 time64)
+static StbM_TimeStampType StbM_64TimeToGTTime(uint64 time64)
 {
     StbM_TimeStampType timeStamp;
     timeStamp.nanoseconds = (uint32)(time64 % STBM_NANOSECOND_TO_SECOND);
@@ -1897,25 +1922,23 @@ static FUNC(StbM_TimeStampType, STBM_CODE) StbM_64TimeToGTTime(uint64 time64)
     return timeStamp;
 }
 
-static FUNC(void, STBM_CODE) StbM_CheckTimeleap(uint16 timebasecfgid, uint64 timenow, uint64 timereceived)
+static void StbM_CheckTimeleap(uint16 timebasecfgid, uint64 timenow, uint64 timereceived)
 {
     StbM_TimeBaseType* timeBasePtr = &StbM_TimeBase[timebasecfgid];
     SchM_Enter_StbM_Context();
-    if ((boolean)TRUE == timeBasePtr->BusNotFirstSet)
+    if (timeBasePtr->BusNotFirstSet == (boolean)TRUE)
     {
-        uint8 TimeLeapstate =
+        uint8 timeLeapState =
             (timenow > timereceived) ? STBM_TIMEBASE_STATUS_TIMELEAP_PAST : STBM_TIMEBASE_STATUS_TIMELEAP_FUTURE;
         uint64 TimeLeapPastThreshold = (timenow > timereceived)
                                            ? (TIMEBASE_CFG(timebasecfgid).StbMTimeLeapPastThreshold)
                                            : (TIMEBASE_CFG(timebasecfgid).StbMTimeLeapFutureThreshold);
         uint64 time64offset = (timenow > timereceived) ? (timenow - timereceived) : (timereceived - timenow);
-        /* SWS_StbM_00305 */
-        timeBasePtr->TimeLeap = (StbM_TimeDiffType)((sint64)timereceived - (sint64)timenow);
         if (TimeLeapPastThreshold != 0u)
         {
             if (time64offset > TimeLeapPastThreshold)
             {
-                timeBasePtr->timeBaseStatus |= TimeLeapstate;
+                timeBasePtr->timeBaseStatus |= timeLeapState;
                 timeBasePtr->StbMClearTimeleapCount = TIMEBASE_CFG(timebasecfgid).StbMClearTimeleapCount;
             }
             else
@@ -1935,13 +1958,13 @@ static FUNC(void, STBM_CODE) StbM_CheckTimeleap(uint16 timebasecfgid, uint64 tim
         {
             time64offset = (uint64)StbM_TimeDiffType_UpperLimit;
         }
-        timeBasePtr->TimeLeap = (TimeLeapstate == STBM_TIMEBASE_STATUS_TIMELEAP_FUTURE)
+        timeBasePtr->TimeLeap = (timeLeapState == STBM_TIMEBASE_STATUS_TIMELEAP_FUTURE)
                                     ? (StbM_TimeDiffType)time64offset
                                     : -(StbM_TimeDiffType)time64offset;
     }
     SchM_Exit_StbM_Context();
 }
-static FUNC(void, STBM_CODE) StbM_CheckTimeout(uint16 timebasecfgid, uint64 timenow)
+static void StbM_CheckTimeout(uint16 timebasecfgid, uint64 timenow)
 {
     const StbMSynchronizedTimeBaseCfgType* timeBaseCfgPtr = &TIMEBASE_CFG(timebasecfgid);
     if (timeBaseCfgPtr->StbMSyncLossTimeout != 0u)
@@ -1952,7 +1975,7 @@ static FUNC(void, STBM_CODE) StbM_CheckTimeout(uint16 timebasecfgid, uint64 time
 #if STBM_STATUS_NOTIFICATIONS_ENABLED == STD_ON
         StbM_TimeBaseStatusType oldTimeBaseStatus = timeBasePtr->timeBaseStatus;
 #endif
-        if ((boolean)TRUE == timeBasePtr->BusNotFirstSet)
+        if (timeBasePtr->BusNotFirstSet == (boolean)TRUE)
         {
             if ((timenow - timeBasePtr->lastBusSettime) > timeBaseCfgPtr->StbMSyncLossTimeout)
             {
@@ -1978,8 +2001,8 @@ static FUNC(void, STBM_CODE) StbM_CheckTimeout(uint16 timebasecfgid, uint64 time
     }
 }
 
-#if (STD_ON == STBM_TIME_CORRECTION_SUPPORT)
-STBM_LOCAL FUNC(void, STBM_CODE) StbM_CalculateRateCorrection(
+#if (STBM_TIME_CORRECTION_SUPPORT == STD_ON)
+STBM_LOCAL void StbM_CalculateRateCorrection(
     uint16 timebasecfgid,
     P2VAR(uint64, AUTOMATIC, STBM_APPL_DATA) globalTimePtr,
     P2VAR(uint64, AUTOMATIC, STBM_APPL_DATA) localTimePtr,
@@ -2028,7 +2051,7 @@ STBM_LOCAL FUNC(void, STBM_CODE) StbM_CalculateRateCorrection(
             == (timeBasePtr->timeBaseStatus & STBM_TIMEBASE_STATUS_SYNC_TO_GATEWAY)))
     {
         timePerMeasurementDuration = timeCorrectionCfgPtr->StbMRateCorrectionMeasurementDuration / measurementNum;
-        if ((0u == rataCorrection[0].TGstart) && (0u == rataCorrection[0].TVstart))
+        if ((rataCorrection[0].TGstart == 0u) && (rataCorrection[0].TVstart == 0u))
         {
             rataCorrection[0].TGstart = TGstop;
             rataCorrection[0].TVstart = TVstop;
@@ -2036,7 +2059,7 @@ STBM_LOCAL FUNC(void, STBM_CODE) StbM_CalculateRateCorrection(
         passedTimeCount = (TVstop - rataCorrection[0].TVstart) / timePerMeasurementDuration;
         if (passedTimeCount < measurementNum)
         {
-            if ((0u == rataCorrection[passedTimeCount].TGstart) && (0u == rataCorrection[passedTimeCount].TVstart))
+            if ((rataCorrection[passedTimeCount].TGstart == 0u) && (rataCorrection[passedTimeCount].TVstart == 0u))
             {
                 rataCorrection[passedTimeCount].TGstart = TGstop;
                 rataCorrection[passedTimeCount].TVstart = TVstop;
@@ -2127,7 +2150,7 @@ STBM_LOCAL FUNC(void, STBM_CODE) StbM_CalculateRateCorrection(
     }
     SchM_Exit_StbM_Context();
 }
-#endif /* STD_ON == STBM_TIME_CORRECTION_SUPPORT */
+#endif
 
 #if STBM_STATUS_NOTIFICATIONS_ENABLED == STD_ON
 STBM_LOCAL void StbM_OnChangeTimeBaseStatus(
@@ -2182,13 +2205,13 @@ STBM_LOCAL void StbM_CheckStatusNotification(StbM_TimeBaseIndexType timeBaseInde
     StbM_TimeBaseNotificationType eventNotification = *notificationEvents & timeBaseConfig->statusNotificationMask;
     if (eventNotification != 0u)
     {
-        if ((SR_INTERFACE == timeBaseConfig->StbMNotificationInterface)
-            || (CALLBACK_AND_SR_INTERFACE == timeBaseConfig->StbMNotificationInterface))
+        if ((timeBaseConfig->StbMNotificationInterface == SR_INTERFACE)
+            || (timeBaseConfig->StbMNotificationInterface == CALLBACK_AND_SR_INTERFACE))
         {
             /* notify the APP via StatusNotification Interface */
         }
-        if ((CALLBACK == timeBaseConfig->StbMNotificationInterface)
-            || (CALLBACK_AND_SR_INTERFACE == timeBaseConfig->StbMNotificationInterface))
+        if ((timeBaseConfig->StbMNotificationInterface == CALLBACK)
+            || (timeBaseConfig->StbMNotificationInterface == CALLBACK_AND_SR_INTERFACE))
         {
             timeBaseConfig->StbMStatusNotificationCallback(eventNotification);
         }
@@ -2198,18 +2221,23 @@ STBM_LOCAL void StbM_CheckStatusNotification(StbM_TimeBaseIndexType timeBaseInde
 #endif
 
 #if (STBM_TIME_RECORDING_SUPPORT == STD_ON)
-static FUNC(void, STBM_CODE)
-    StbM_TimeRecord(StbM_SynchronizedTimeBaseType timeBaseId, uint64 TLreceived, uint32 TVLoreceived, uint32 pathDelay)
+static void StbM_TimeRecord(
+    StbM_SynchronizedTimeBaseType timeBaseId,
+    uint64 TLreceived,
+    uint32 TVLoreceived,
+    uint32 pathDelay)
 {
     uint16 timebasecfgid = StbM_FindSynchronizedTimeBase(timeBaseId);
+    uint64 time64;
     const StbMSynchronizedTimeBaseCfgType* timeBaseCfgPtr = &TIMEBASE_CFG(timebasecfgid);
     if (!timeBaseCfgPtr->StbMIsSystemWideGlobalTimeMaster)
     {
         StbM_TimeBaseType* timeBasePtr = &StbM_TimeBase[timebasecfgid];
+        StbM_GetCurrentLocalTime(timebasecfgid, &time64);
+        StbM_GetGlobalTime64(timebasecfgid, &time64);
 
         SchM_Enter_StbM_Context();
         uint16 recordBlockIndex = timeBasePtr->RecordBlockIndex;
-
         if ((timeBaseId < STBM_SYNC_TIMEBASE_RANGE)
             && (timeBaseCfgPtr->StbMTimeRecording->StbMSyncTimeRecordTableBlockCount > 0))
         {
@@ -2217,15 +2245,14 @@ static FUNC(void, STBM_CODE)
                 &timeBasePtr->StbMSyncTimeRecordBlock[recordBlockIndex];
             syncRecordTableBlock->GlbNanoSeconds = TLreceived % STBM_NANOSECOND_TO_SECOND;
             syncRecordTableBlock->GlbSeconds = TLreceived / STBM_NANOSECOND_TO_SECOND;
-            syncRecordTableBlock->LocNanoSeconds =
-                timeBasePtr->StbMMainTimeTuple.GlobalTime % STBM_NANOSECOND_TO_SECOND;
-            syncRecordTableBlock->LocSeconds = timeBasePtr->StbMMainTimeTuple.GlobalTime / STBM_NANOSECOND_TO_SECOND;
+            syncRecordTableBlock->LocNanoSeconds = time64 % STBM_NANOSECOND_TO_SECOND;
+            syncRecordTableBlock->LocSeconds = time64 / STBM_NANOSECOND_TO_SECOND;
             syncRecordTableBlock->PathDelay = pathDelay;
-#if (STD_ON == STBM_TIME_CORRECTION_SUPPORT)
+#if (STBM_TIME_CORRECTION_SUPPORT == STD_ON)
             syncRecordTableBlock->RateDeviation = (timeBasePtr->RateDeviation.ratio - 1.0) * 1000000.0;
-#else  /* STD_ON == STBM_TIME_CORRECTION_SUPPORT */
+#else
             syncRecordTableBlock->RateDeviation = 0;
-#endif /* STD_ON == STBM_TIME_CORRECTION_SUPPORT */
+#endif
             syncRecordTableBlock->TimeBaseStatus = timeBasePtr->timeBaseStatus;
             syncRecordTableBlock->VirtualLocalTimeLow = TVLoreceived;
             timeBasePtr->RecordBlockIndex =
@@ -2255,7 +2282,7 @@ static FUNC(void, STBM_CODE)
 }
 
 /* Called when a measurement is prepared, currently not available */
-static FUNC(void, STBM_CODE) StbM_TimeRecordback(StbM_SynchronizedTimeBaseType timebasecfgid)
+static void StbM_TimeRecordback(StbM_SynchronizedTimeBaseType timebasecfgid)
 {
     uint16 timeBaseId = TIMEBASE_CFG(timebasecfgid).StbMSynchronizedTimeBaseIdentifier;
     const StbMTimeRecordingCfgType* timeRecordingCfgPtr = TIMEBASE_CFG(timebasecfgid).StbMTimeRecording;
@@ -2296,7 +2323,7 @@ static FUNC(void, STBM_CODE) StbM_TimeRecordback(StbM_SynchronizedTimeBaseType t
 }
 #endif
 
-static FUNC(void, STBM_CODE) StbM_SetUserDataIn(uint16 timebasecfgid, StbM_UserDataType userData)
+static void StbM_SetUserDataIn(uint16 timebasecfgid, StbM_UserDataType userData)
 {
     StbM_TimeBaseType* timeBasePtr = &StbM_TimeBase[timebasecfgid];
     timeBasePtr->UserData.userDataLength = userData.userDataLength;

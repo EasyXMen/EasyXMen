@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : BswM_Bsw.c                                                  **
- **                                                                            **
- **  Created on  : 2020-03-24                                                  **
- **  Author      : qinchun.yang                                                **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : BswM_Bsw.c                                                  **
+**                                                                            **
+**  Created on  : 2020-03-24                                                  **
+**  Author      : qinchun.yang                                                **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 
 /*******************************************************************************
 **                      Include Section                                       **
@@ -70,7 +71,6 @@ BswM_InitBswModeRqstPort(void)
 {
     P2CONST(BswM_ModeRqstPortPCCfgType, AUTOMATIC, BSWM_CONST) modeRqstPCfgPtr;
     P2CONST(BswM_ModeRqstPortRuntimeType, AUTOMATIC, BSWM_VAR_CLEARED) modeRqstPtr;
-    P2CONST(BswM_PartitionPCCfgType, TYPEDEF, BSWM_CONST) bswmPartPCCfgs;
     ApplicationType partIdx;
     boolean result;
     BswM_ModeGroupType numOfBswModeNoti;
@@ -79,9 +79,8 @@ BswM_InitBswModeRqstPort(void)
     result = BswM_GetPartitionIdx(&partIdx);
     if ((boolean)TRUE == result)
     {
-        bswmPartPCCfgs = &(BswM_RuntimeStatus.bswmPartPCCfgs[partIdx]);
-        modeRqstPCfgPtr = bswmPartPCCfgs->modeRqstPCCfg;
-        modeRqstPtr = bswmPartPCCfgs->modeRqstPortRunPtr;
+        modeRqstPCfgPtr = BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].modeRqstPCCfg;
+        modeRqstPtr = BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].modeRqstPortRunPtr;
         numOfBswModeNoti = modeRqstPCfgPtr->numOfBswModeNoti;
         for (idx = 0u; idx < numOfBswModeNoti; idx++)
         {
@@ -100,7 +99,7 @@ BswM_InitBswModeRqstPort(void)
     {
         (void)Det_ReportError(BSWM_MODULE_ID, BSWM_INSTANCE_ID, BSWM_API_ID_INIT, BSWM_E_INIT_FAILED);
     }
-#endif /* BSWM_DEV_ERROR_DETECT == STD_ON */
+#endif /*BSWM_DEV_ERROR_DETECT == STD_ON*/
 }
 
 /**
@@ -121,8 +120,6 @@ BswM_BswModeNotification(BswM_ModeGroupType modeGroup, BswM_ModeType mode)
     P2CONST(BswM_ModeRqstPortLCfgType, AUTOMATIC, BSWM_CONST) modeRqstLCfgPtr;
     P2CONST(BswM_ModeRqstPortRuntimeType, AUTOMATIC, BSWM_VAR_CLEARED) modeRqstPtr;
     P2CONST(BswM_RuleLcCfgType, AUTOMATIC, BSWM_CONST) ruleLCfgPtr;
-    P2CONST(BswM_PartitionPCCfgType, TYPEDEF, BSWM_CONST) bswmPartPCCfgs;
-    P2CONST(BswM_PartitionLCfgType, TYPEDEF, BSWM_CONST) bswmPartLCfgs;
     BswM_RuleIndexType numOfRules;
     BswM_RuleIndexType idx;
     BswM_RuleIndexType ruleIdx;
@@ -136,21 +133,19 @@ BswM_BswModeNotification(BswM_ModeGroupType modeGroup, BswM_ModeType mode)
         result = BswM_GetPartitionIdx(&partIdx);
         if ((boolean)TRUE == result)
         {
-            bswmPartPCCfgs = &(BswM_RuntimeStatus.bswmPartPCCfgs[partIdx]);
-            bswmPartLCfgs = &(BswM_RuntimeStatus.bswmPartLCfgs[partIdx]);
-            modeRqstPCfgPtr = bswmPartPCCfgs->modeRqstPCCfg;
-            modeRqstLCfgPtr = bswmPartLCfgs->modeRqstLCfg;
+            modeRqstPCfgPtr = BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].modeRqstPCCfg;
+            modeRqstLCfgPtr = BswM_RuntimeStatus.bswmPartLCfgs[partIdx].modeRqstLCfg;
             numOfBswModeNoti = modeRqstPCfgPtr->numOfBswModeNoti;
             for (bswIdx = 0u; bswIdx < numOfBswModeNoti; bswIdx++)
             {
                 if (modeGroup == modeRqstLCfgPtr->bswModeNotiRef[bswIdx])
                 {
-                    modeRqstPtr = bswmPartPCCfgs->modeRqstPortRunPtr;
+                    modeRqstPtr = BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].modeRqstPortRunPtr;
                     modeRqstPtr->bswMode[bswIdx] = mode;
                     if (BSWM_IMMEDIATE == modeRqstLCfgPtr->bswModeNoti[bswIdx].process)
                     {
                         numOfRules = modeRqstLCfgPtr->bswModeNoti[bswIdx].belongToRlueNum;
-                        ruleLCfgPtr = bswmPartLCfgs->ruleLCfg;
+                        ruleLCfgPtr = BswM_RuntimeStatus.bswmPartLCfgs[partIdx].ruleLCfg;
                         for (idx = 0u; idx < numOfRules; idx++)
                         {
                             ruleIdx = modeRqstLCfgPtr->bswModeNoti[bswIdx].belongToRlue[idx];
@@ -189,4 +184,4 @@ BswM_GetBswModeIndStatus(BswM_ModeGroupType bswChIdx)
 **                      Private Function Definitions                          **
 *******************************************************************************/
 
-#endif /* BSWM_SCHM_ENABLED == STD_ON */
+#endif /*BSWM_SCHM_ENABLED == STD_ON*/

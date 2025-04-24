@@ -18,21 +18,22 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    :  Os_Tprot.c                                                 **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      :  i-soft-os                                                  **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
- **  Version :   AUTOSAR classic Platform R19--Function Safety                 **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    :  Os_Tprot.c                                                 **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      :  i-soft-os                                                  **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
+**  Version :   AUTOSAR classic Platform R19--Function Safety                 **
+**                                                                            **
+*******************************************************************************/
 /*=======[I N C L U D E S]====================================================*/
 #include "Os_Internal.h"
 
@@ -277,16 +278,24 @@ static FUNC(void, OS_CODE) Os_TmProtResCounter(ResourceType osResId)
         if (TRUE == pCbData->osIsTpStart)
         {
             pCbData->osTpTime += 1U;
-#if ((OS_SC4 == CFG_SC) && (CFG_TRUSTED_SYSTEM_SERVICE_MAX > 0U))
-            if (FALSE == Os_TrustedFuncTportDelayCall)
-#endif
+            if (pCbData->osTpTime >= pCbData->osTpBudget)
             {
-                if (pCbData->osTpTime >= pCbData->osTpBudget)
-                {
-                    pCbData->osTpTime = 0u;
-                    pCbData->osTpBudget = 0u;
-                    pCbData->osIsTpStart = FALSE;
+                pCbData->osTpTime = 0u;
+                pCbData->osTpBudget = 0u;
+                pCbData->osIsTpStart = FALSE;
 
+#if ((OS_SC4 == CFG_SC) && (CFG_TRUSTED_SYSTEM_SERVICE_MAX > 0U))
+                if (TRUE == Os_TrustedFuncTp.TrustedFuncTportDelayCall)
+                {
+                    /* Time protection and delay processing are triggered in the trusted function */
+
+                    Os_TrustedFuncTp.TrustedFuncTporFlag = TRUE;
+                    Os_TrustedFuncTp.TrustedFuncTporErrType = E_OS_PROTECTION_LOCKED;
+                    Os_TrustedFuncTp.osWhoHook = (uint32)pCbData->osWhoHook;
+                }
+                else
+#endif
+                {
                     /* Hook. */
                     (void)Os_CallProtectionHook(E_OS_PROTECTION_LOCKED, (uint32)pCbData->osWhoHook);
                 }
@@ -383,10 +392,12 @@ FUNC(StatusType, OS_CODE) Os_TmProtTaskFrameChk(Os_TaskType osTaskId)
             if (TRUE != pTcb->taskTpFrameflag)
             {
 #if ((OS_SC4 == CFG_SC) && (CFG_TRUSTED_SYSTEM_SERVICE_MAX > 0U))
-                if (TRUE == Os_TrustedFuncTportDelayCall)
+                if (TRUE == Os_TrustedFuncTp.TrustedFuncTportDelayCall)
                 {
                     /* Time protection and delay processing are triggered in the trusted function */
-                    Os_TrustedFuncTporFlag = TRUE;
+                    Os_TrustedFuncTp.TrustedFuncTporFlag = TRUE;
+                    Os_TrustedFuncTp.TrustedFuncTporErrType = E_OS_PROTECTION_ARRIVAL;
+                    Os_TrustedFuncTp.osWhoHook = OS_TMPROT_HOOK_TASK;
                 }
                 else
 #endif
@@ -547,26 +558,34 @@ static FUNC(void, OS_CODE) Os_TmProtTaskCounter(Os_TaskType osTaskId, Os_TmProtO
             else
             {
                 pCbData->osTpTime += 1U;
-#if ((OS_SC4 == CFG_SC) && (CFG_TRUSTED_SYSTEM_SERVICE_MAX > 0U))
-                if (FALSE == Os_TrustedFuncTportDelayCall)
-#endif
+                if (pCbData->osTpTime >= pCbData->osTpBudget)
                 {
-                    if (pCbData->osTpTime >= pCbData->osTpBudget)
+                    pCbData->osTpTime = 0u;
+                    pCbData->osIsTpStart = FALSE;
+
+                    /* Get error type. */
+                    if (TP_TASK_EXE == osOptType)
                     {
-                        pCbData->osTpTime = 0u;
-                        pCbData->osIsTpStart = FALSE;
+                        osErrType = E_OS_PROTECTION_TIME;
+                    }
+                    else
+                    {
+                        osErrType = E_OS_PROTECTION_LOCKED;
+                    }
+                    /* Resource lock is not maintained in this function. */
 
-                        /* Get error type. */
-                        if (TP_TASK_EXE == osOptType)
-                        {
-                            osErrType = E_OS_PROTECTION_TIME;
-                        }
-                        else
-                        {
-                            osErrType = E_OS_PROTECTION_LOCKED;
-                        }
-                        /* Resource lock is not maintained in this function. */
+#if ((OS_SC4 == CFG_SC) && (CFG_TRUSTED_SYSTEM_SERVICE_MAX > 0U))
+                    if (TRUE == Os_TrustedFuncTp.TrustedFuncTportDelayCall)
+                    {
+                        /* Time protection and delay processing are triggered in the trusted function */
 
+                        Os_TrustedFuncTp.TrustedFuncTporFlag = TRUE;
+                        Os_TrustedFuncTp.TrustedFuncTporErrType = osErrType;
+                        Os_TrustedFuncTp.osWhoHook = OS_TMPROT_HOOK_TASK;
+                    }
+                    else
+#endif
+                    {
                         /* Hook. */
                         (void)Os_CallProtectionHook(osErrType, OS_TMPROT_HOOK_TASK);
                     }
@@ -662,11 +681,23 @@ FUNC(StatusType, OS_CODE) Os_TmProtIsrFrameChk(Os_IsrType osIsrId)
             /* Timing frame: arrive so frequently. */
             if (TRUE != pIcb->osIsrTpFrameflag)
             {
-                /* Hook. */
-                if (PRO_IGNORE != Os_CallProtectionHook(E_OS_PROTECTION_ARRIVAL, OS_TMPROT_HOOK_ISR))
+#if ((OS_SC4 == CFG_SC) && (CFG_TRUSTED_SYSTEM_SERVICE_MAX > 0U))
+                if (TRUE == Os_TrustedFuncTp.TrustedFuncTportDelayCall)
                 {
-                    pCbData->osTpTime = 0U;
-                    osRet = E_OS_ID;
+                    /* Time protection and delay processing are triggered in the trusted function */
+                    Os_TrustedFuncTp.TrustedFuncTporFlag = TRUE;
+                    Os_TrustedFuncTp.TrustedFuncTporErrType = E_OS_PROTECTION_ARRIVAL;
+                    Os_TrustedFuncTp.osWhoHook = OS_TMPROT_HOOK_ISR;
+                }
+                else
+#endif
+                {
+                    /* Hook. */
+                    if (PRO_IGNORE != Os_CallProtectionHook(E_OS_PROTECTION_ARRIVAL, OS_TMPROT_HOOK_ISR))
+                    {
+                        pCbData->osTpTime = 0U;
+                        osRet = E_OS_ID;
+                    }
                 }
             }
             else
@@ -808,27 +839,35 @@ static FUNC(void, OS_CODE) Os_TmProtIsrCounter(Os_IsrType osIsrId, Os_TmProtOptI
         if (TRUE == pCbData->osIsTpStart)
         {
             pCbData->osTpTime += 1U;
-#if ((OS_SC4 == CFG_SC) && (CFG_TRUSTED_SYSTEM_SERVICE_MAX > 0U))
-            if (FALSE == Os_TrustedFuncTportDelayCall)
-#endif
+            if (pCbData->osTpTime >= pCbData->osTpBudget)
             {
-                if (pCbData->osTpTime >= pCbData->osTpBudget)
+                pCbData->osTpTime = 0u;
+                pCbData->osIsTpStart = FALSE;
+
+                /* Get error type. */
+                if (TP_ISR_CAT2_EXE == osOptType)
                 {
-                    pCbData->osTpTime = 0u;
-                    pCbData->osIsTpStart = FALSE;
+                    osErrType = E_OS_PROTECTION_TIME;
+                }
+                else
+                {
+                    osErrType = E_OS_PROTECTION_LOCKED;
+                }
+                /* TP_ISR_ARRIVAL and resource lock are not maintained
+                 * in this function. */
 
-                    /* Get error type. */
-                    if (TP_ISR_CAT2_EXE == osOptType)
-                    {
-                        osErrType = E_OS_PROTECTION_TIME;
-                    }
-                    else
-                    {
-                        osErrType = E_OS_PROTECTION_LOCKED;
-                    }
-                    /* TP_ISR_ARRIVAL and resource lock are not maintained
-                     * in this function. */
+#if ((OS_SC4 == CFG_SC) && (CFG_TRUSTED_SYSTEM_SERVICE_MAX > 0U))
+                if (TRUE == Os_TrustedFuncTp.TrustedFuncTportDelayCall)
+                {
+                    /* Time protection and delay processing are triggered in the trusted function */
 
+                    Os_TrustedFuncTp.TrustedFuncTporFlag = TRUE;
+                    Os_TrustedFuncTp.TrustedFuncTporErrType = osErrType;
+                    Os_TrustedFuncTp.osWhoHook = OS_TMPROT_HOOK_ISR;
+                }
+                else
+#endif
+                {
                     /* Hook. */
                     (void)Os_CallProtectionHook(osErrType, OS_TMPROT_HOOK_ISR);
                 }

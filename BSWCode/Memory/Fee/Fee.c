@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Fee.c                                                       **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : zhengfei.li                                                 **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Implementation for FEE                                      **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19_11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Fee.c                                                       **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : zhengfei.li                                                 **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Implementation for FEE                                      **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19_11                      **
+**                                                                            **
+*******************************************************************************/
 
 /*******************************************************************************
 **                      REVISION   HISTORY                                    **
@@ -112,6 +113,28 @@
 /*******************************************************************************
 **                            Local Macros                                    **
 *******************************************************************************/
+#if (CPU_32_WITH_16_ADR == TRUE)
+#define FEE_SERIALIZE(ParamVal, ParamType, pSerialPtr)       \
+    do                                                       \
+    {                                                        \
+        for (uint8 i = 0; i < (sizeof(ParamType) * 2u); i++) \
+        {                                                    \
+            pSerialPtr[i] = (uint8)(ParamVal >> (i * 8u));   \
+        }                                                    \
+        pSerialPtr = &pSerialPtr[sizeof(ParamType) * 2u];    \
+    } while (0);
+
+#define FEE_DESERIALIZE(pDeserialPtr, ParamVal, ParamType)                             \
+    do                                                                                 \
+    {                                                                                  \
+        ParamVal = 0;                                                                  \
+        for (uint8 i = 0; i < (sizeof(ParamType) * 2u); i++)                           \
+        {                                                                              \
+            ParamVal = ParamVal | (ParamType)((ParamType)pDeserialPtr[i] << (i * 8u)); \
+        }                                                                              \
+        pDeserialPtr = &pDeserialPtr[sizeof(ParamType) * 2u];                          \
+    } while (0);
+#else
 #define FEE_SERIALIZE(ParamVal, ParamType, pSerialPtr)     \
     do                                                     \
     {                                                      \
@@ -132,6 +155,7 @@
         }                                                                              \
         pDeserialPtr = &pDeserialPtr[sizeof(ParamType)];                               \
     } while (0);
+#endif
 
 #ifndef FEE_LOCAL
 #define FEE_LOCAL static
@@ -184,7 +208,7 @@ FEE_LOCAL VAR(uint8, FEE_VAR) Fee_DataBuffer[FEE_BUFFER_SIZE];
 /*******************************************************************************
 **                      Global Variable Definitions                           **
 *******************************************************************************/
-extern CONST(Fee_BankConfigType, FEE_CONST_PCCFG) Fee_BankConfig[FEE_BANK_NUM];
+extern CONST(Fee_BankConfigType, FEE_CONST_PBCFG) Fee_BankConfig[FEE_BANK_NUM];
 /*******************************************************************************
 **                      Private Function Declarations                         **
 *******************************************************************************/

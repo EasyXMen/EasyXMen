@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                           **
- **  FILENAME    : SoAd_Cbk.c                                                 **
- **                                                                           **
- **  Created on  :                                                            **
- **  Author      : zhengfei.li                                                **
- **  Vendor      :                                                            **
- **  DESCRIPTION : SoAd call-back function define                             **
- **                                                                           **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2 and R19_11           **
- **                                                                           **
- **************************************************************************** */
+ */
 /* PRQA S 3108-- */
+/*
+**************************************************************************** **
+**                                                                           **
+**  FILENAME    : SoAd_Cbk.c                                                 **
+**                                                                           **
+**  Created on  :                                                            **
+**  Author      : zhengfei.li                                                **
+**  Vendor      :                                                            **
+**  DESCRIPTION : SoAd call-back function define                             **
+**                                                                           **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2 and R19_11           **
+**                                                                           **
+**************************************************************************** */
 #ifndef SOAD_CBK_H_
 #define SOAD_CBK_H_
 

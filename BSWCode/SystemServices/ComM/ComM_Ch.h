@@ -18,6 +18,10 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
+ */
+/* PRQA S 3108-- */
+/*
+ ********************************************************************************
  ************************************************************************************************************************
  ** **
  **  @file               : ComM_Ch.h **
@@ -29,7 +33,6 @@
  **  @specification(s)   : AUTOSAR classic Platform R19-11 **
  ** **
  ***********************************************************************************************************************/
-/* PRQA S 3108-- */
 
 #ifndef COMM_CH_H_
 #define COMM_CH_H_
@@ -58,7 +61,7 @@ typedef struct
 #define COMM_NM_IND_BUS_SLEEP        0x0u
 #define COMM_NM_IND_PREPARE_BUSSLEEP 0x1u
 #define COMM_NM_IND_NETWORK_MODE     0x3u
-    uint8 nmInd;
+#define COMM_NM_MODE_EVENT_NONE      0x5u
 #endif
     /** \brief indication of actual bus mode */
     ComM_ModeType busSmIndMode;
@@ -80,6 +83,9 @@ typedef struct
 #if (defined(COMM_NM_VARIANT_LIGHT) || defined(COMM_NM_VARIANT_NONE))
     uint32 durationTmr;
 #endif
+#if (COMM_USED_MODULE_NM == STD_ON)
+    uint8 NmModeEvent;
+#endif
 } ComM_ChVarType;
 
 /*========================================[external function declarations]============================================*/
@@ -90,7 +96,7 @@ void ComM_ChInit(const ComM_ChannelConfigType* channelConfigPtr, uint32 chNum);
 FUNC(void, COMM_CODE)
 ComM_ChGetState(uintx chIdx, ComM_StateType* chStu);
 
-void ComM_ChGetMaxAllowMode(uintx chIdx, ComM_ModeType* chMode);
+ComM_ModeType ComM_ChGetMaxAllowMode(uintx chIdx);
 
 FUNC(Std_ReturnType, COMM_CODE)
 ComM_ChGetCurrentComMode(uintx chIdx, ComM_ModeType* ComMode);
@@ -102,6 +108,8 @@ FUNC(void, COMM_CODE) ComM_ChComAllow(uintx chIdx, boolean allowed);
 FUNC(void, COMM_CODE) ComM_ChBusSmModeInd(uintx chIdx, ComM_ModeType comMode);
 
 FUNC(void, COMM_CODE) ComM_ChNmModeInd(uintx chIdx, uint8 indMode);
+
+void ComM_ChannelNmModeIndication(NetworkHandleType Channel, uint8 NmModeEvent);
 
 FUNC(Std_ReturnType, COMM_CODE) ComM_ChRequstCommMode(uintx chIdx, uintx reqIdex, ComM_ModeType comMode);
 

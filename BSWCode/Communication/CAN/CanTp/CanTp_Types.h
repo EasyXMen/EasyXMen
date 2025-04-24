@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                           **
- **  FILENAME    : CanTp_Types.h                                              **
- **                                                                           **
- **  Created on  : 2021/7/30 14:29:43                                         **
- **  Author      : tao.yu                                                     **
- **  Vendor      :                                                            **
- **  DESCRIPTION : Public type definitions for CanTp module                   **
- **                                                                           **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                     **
- **                                                                           **
- **************************************************************************** */
+ */
 /* PRQA S 3108-- */
+/*
+**************************************************************************** **
+**                                                                           **
+**  FILENAME    : CanTp_Types.h                                              **
+**                                                                           **
+**  Created on  : 2021/7/30 14:29:43                                         **
+**  Author      : tao.yu                                                     **
+**  Vendor      :                                                            **
+**  DESCRIPTION : Public type definitions for CanTp module                   **
+**                                                                           **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                     **
+**                                                                           **
+**************************************************************************** */
 #ifndef CANTP_TYPES_H
 #define CANTP_TYPES_H
 

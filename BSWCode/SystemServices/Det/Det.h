@@ -18,30 +18,28 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Det.h                                                       **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : Haibin.shao                                                 **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Type definition and API declaration for DET                 **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                       **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Det.h                                                       **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : Haibin.shao                                                 **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Type definition and API declaration for DET                 **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 /*======================[Revision   History]==================================*/
 /*  <VERSION>   <DATE>      <AUTHOR>        <REVISION LOG>
  *  V1.0.0      20210123    Haibin.Shao     First Version
  *  V1.0.1      20230918    tao.yu          remove warning
  *  V1.0.2      20231101    haibin.shao     update condition of Det_EndlessLoop
  *  V1.0.3      20231101    haibin.shao     The Det_EndlessLoop function was changed to be generated with configuration
- *              20231207    haibin.shao     QAC
- *  V1.0.4      20240103    haibin.shao     Adjust the detection mode of DET module version control information
- *  V1.0.5      2024-01-22  tao.yu          QAC
- *              2024-03-12  haibin.shao     QAC
+ *  V1.0.4      20240202    xue.han         QAC
  */
 #ifndef DET_H
 #define DET_H
@@ -59,11 +57,11 @@
 #define DET_MODULE_ID                (15u)
 #define DET_INSTANCE_ID              (0u)
 #define DET_AR_RELEASE_MAJOR_VERSION (4u)
-#define DET_AR_RELEASE_MINOR_VERSION (2u)
-#define DET_AR_RELEASE_PATCH_VERSION (2u)
+#define DET_AR_RELEASE_MINOR_VERSION (5u)
+#define DET_AR_RELEASE_PATCH_VERSION (0u)
 #define DET_SW_MAJOR_VERSION         (1u)
 #define DET_SW_MINOR_VERSION         (0u)
-#define DET_SW_PATCH_VERSION         (5u)
+#define DET_SW_PATCH_VERSION         (4u)
 
 /* Development Errors */
 #define DET_E_PARAM_POINTER (1u)

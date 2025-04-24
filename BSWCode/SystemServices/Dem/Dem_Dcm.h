@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Dem_Dcm.h                                                   **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : tao.yu                                                      **
- **  Vendor      : i-soft                                                      **
- **  DESCRIPTION : API declaration of DEM for DCM                              **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                       **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Dem_Dcm.h                                                   **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : tao.yu                                                      **
+**  Vendor      : i-soft                                                      **
+**  DESCRIPTION : API declaration of DEM for DCM                              **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                       **
+**                                                                            **
+*******************************************************************************/
 
 #ifndef DEM_DCM_H_
 #define DEM_DCM_H_
@@ -41,6 +42,7 @@
 *******************************************************************************/
 #include "Dcm_Types.h"
 #include "Dem.h"
+
 #if (DEM_RESET_CONFIRMED_BIT_ON_OVERFLOW == STD_ON)
 typedef struct
 {
@@ -48,6 +50,14 @@ typedef struct
     uint16 DtcRef;
 } Dem_DTCReportByTimeOrderType;
 #endif
+/* DTCByOccurrenceTime */
+typedef struct
+{
+    Dem_EventIdType FirstFailed;
+    Dem_EventIdType MostRecentFailed;
+    Dem_EventIdType FirstDtcConfirmed;
+    Dem_EventIdType MostRecDtcConfirmed;
+} Dem_DTCByOccurrenceTimeType;
 
 /* DTC Filter */
 typedef struct
@@ -68,6 +78,7 @@ typedef struct
 #endif
     uint16 DemDemDTCReportNum;
     uint16 DemDTCReport[DEM_DTC_NUM];
+
     /* IsSet */
     boolean IsSet;
     /* Result */
@@ -136,6 +147,8 @@ typedef uint8 Dem_ReturnGetSizeOfExtendedDataRecordByDTCType;
 
 extern VAR(Dem_DTCFilterInfoType, AUTOMATIC) DemDTCFilterInfo;
 
+extern VAR(Dem_DTCByOccurrenceTimeType, AUTOMATIC) DemDTCByOccurrenceTimeInfo;
+
 /*************************************************************************/
 /*
  * Brief               Gets the supported DTC formats of the ECU.
@@ -149,8 +162,6 @@ extern VAR(Dem_DTCFilterInfoType, AUTOMATIC) DemDTCFilterInfo;
  *                              different DTC formats is not possible.
  */
 /*************************************************************************/
-
-/* PRQA S 3451,3449,0624++ */ /* MISRA Rule 8.5,Rule 8.5,Rule 8.3 */
 extern FUNC(Dem_DTCTranslationFormatType, DEM_CODE) Dem_DcmGetTranslationType(void);
 
 /*************************************************************************/
@@ -159,15 +170,14 @@ extern FUNC(Dem_DTCTranslationFormatType, DEM_CODE) Dem_DcmGetTranslationType(vo
  * ServiceId           0x16
  * Sync/Async          Synchronous
  * Reentrancy          Non Reentrant
- * Param-Name[in]      none
- * Param-Name[out]     DTCStatusMask:The value DTCStatusMask indicates the supported DTC status
+ * Param-Name[in]     DTCStatusMask:The value DTCStatusMask indicates the supported DTC status
  *                              bits from the Dem.
+ * Param-Name[out]     none
  * Param-Name[in/out]  none
  * Return              E_OK: get of DTC status mask was successful
  *                       E_NOT_OK: get of DTC status mask failed
  */
 /*************************************************************************/
-
 extern FUNC(Std_ReturnType, DEM_CODE)
     /* PRQA S 3432++ */ /* MISRA Rule 20.7 */
     Dem_DcmGetDTCStatusAvailabilityMask(P2VAR(Dem_UdsStatusByteType, AUTOMATIC, DEM_APPL_DATA) DTCStatusMask);
@@ -191,7 +201,6 @@ extern FUNC(Std_ReturnType, DEM_CODE)
  * Return              Status of the operation of type Dem_ReturnGetStatusOfDTCType.
  */
 /*************************************************************************/
-
 extern FUNC(Dem_ReturnGetStatusOfDTCType, DEM_CODE)
     /* PRQA S 3432++ */ /* MISRA Rule 20.7 */
     Dem_DcmGetStatusOfDTC(uint32 DTC, Dem_DTCOriginType DTCOrigin, P2VAR(uint8, AUTOMATIC, DEM_APPL_DATA) DTCStatus);
@@ -209,7 +218,6 @@ extern FUNC(Dem_ReturnGetStatusOfDTCType, DEM_CODE)
  * Return              Status of the operation of type Dem_ReturnGetSeverityOfDTCType.
  */
 /*************************************************************************/
-
 extern FUNC(Dem_ReturnGetSeverityOfDTCType, DEM_CODE)
     /* PRQA S 3432++ */ /* MISRA Rule 20.7 */
     Dem_DcmGetSeverityOfDTC(uint32 DTC, P2VAR(Dem_DTCSeverityType, AUTOMATIC, DEM_APPL_DATA) DTCSeverity);
@@ -227,7 +235,6 @@ extern FUNC(Dem_ReturnGetSeverityOfDTCType, DEM_CODE)
  * Return              Status of the operation of type Dem_ReturnGetFunctionalUnitOfDTCType.
  */
 /*************************************************************************/
-
 extern FUNC(Dem_ReturnGetFunctionalUnitOfDTCType, DEM_CODE)
     /* PRQA S 3432++ */ /* MISRA Rule 20.7 */
     Dem_DcmGetFunctionalUnitOfDTC(uint32 DTC, P2VAR(uint8, AUTOMATIC, DEM_APPL_DATA) DTCFunctionalUnit);
@@ -256,7 +263,6 @@ extern FUNC(Dem_ReturnGetFunctionalUnitOfDTCType, DEM_CODE)
  * Return              Status of the operation to (re-)set a DTC filter.
  */
 /*************************************************************************/
-
 extern FUNC(Dem_ReturnSetFilterType, DEM_CODE) Dem_DcmSetDTCFilter(
     Dem_UdsStatusByteType DTCStatusMask,
     Dem_DTCKindType DTCKind,
@@ -278,7 +284,6 @@ extern FUNC(Dem_ReturnSetFilterType, DEM_CODE) Dem_DcmSetDTCFilter(
  * Return              Status of the operation to retrieve a number of DTC from the Dem
  */
 /*************************************************************************/
-
 extern FUNC(Dem_ReturnGetNumberOfFilteredDTCType, DEM_CODE)
     /* PRQA S 3432++ */ /* MISRA Rule 20.7 */
     Dem_DcmGetNumberOfFilteredDTC(P2VAR(uint16, AUTOMATIC, DEM_APPL_DATA) NumberOfFilteredDTC);
@@ -299,7 +304,6 @@ extern FUNC(Dem_ReturnGetNumberOfFilteredDTCType, DEM_CODE)
  * Return              Status of the operation to retrieve a DTC from the Dem.
  */
 /*************************************************************************/
-
 extern FUNC(Dem_ReturnGetNextFilteredElementType, DEM_CODE) Dem_DcmGetNextFilteredDTC(
     /* PRQA S 3432++ */ /* MISRA Rule 20.7 */
     P2VAR(uint32, AUTOMATIC, DEM_APPL_DATA) DTC,
@@ -322,7 +326,6 @@ extern FUNC(Dem_ReturnGetNextFilteredElementType, DEM_CODE) Dem_DcmGetNextFilter
  * Return              Status of the operation to retrieve a DTC from the Dem.
  */
 /*************************************************************************/
-
 extern FUNC(Dem_ReturnGetNextFilteredElementType, DEM_CODE) Dem_DcmGetNextFilteredDTCAndFDC(
     /* PRQA S 3432++ */ /* MISRA Rule 20.7 */
     P2VAR(uint32, AUTOMATIC, DEM_APPL_DATA) DTC,
@@ -336,8 +339,8 @@ extern FUNC(Dem_ReturnGetNextFilteredElementType, DEM_CODE) Dem_DcmGetNextFilter
                         number of DTCs has to be processed.
  * ServiceId           0x3d
  * Sync/Async          Asynchronous
- * Reentrancy          Non Reentrant
- * Param-Name[in]      none
+ * Reentrancy          Re-entrant for different ClientIDs, Non re-entrant for same ClientId.
+ * Param-Name[in]      ClientId: Unique client id, assigned to the instance of the calling module.
  * Param-Name[out]     DTC:Receives the DTC value in respective format of the
                             filter returned by this function. If the return value of
                             the function is other than DEM_FILTERED_OK this
@@ -358,7 +361,6 @@ extern FUNC(Dem_ReturnGetNextFilteredElementType, DEM_CODE) Dem_DcmGetNextFilter
  * Return              Status of the operation to retrieve a DTC from the Dem.
  */
 /*************************************************************************/
-
 extern FUNC(Dem_ReturnGetNextFilteredElementType, DEM_CODE) Dem_DcmGetNextFilteredDTCAndSeverity(
     /* PRQA S 3432++ */ /* MISRA Rule 20.7 */
     P2VAR(uint32, AUTOMATIC, DEM_APPL_DATA) DTC,
@@ -372,7 +374,7 @@ extern FUNC(Dem_ReturnGetNextFilteredElementType, DEM_CODE) Dem_DcmGetNextFilter
  * Brief               Sets a freeze frame record filter.
  * ServiceId           0x3f
  * Sync/Async          Synchronous
- * Reentrancy          Reentrant
+ * Reentrancy          Reentrant for different ClientIds, non reentrant for the same ClientId.
  * Param-Name[in]      DTCFormat: Defines the output-format of the requested DTC values for the
  *                           sub-sequent API calls.
  * Param-Name[out]     NumberOfFilteredRecords:Number of freeze frame records currently stored
@@ -381,7 +383,6 @@ extern FUNC(Dem_ReturnGetNextFilteredElementType, DEM_CODE) Dem_DcmGetNextFilter
  * Return              Status of the operation to (re-)set a freeze frame record filter.
  */
 /*************************************************************************/
-
 extern FUNC(Dem_ReturnSetFilterType, DEM_CODE) Dem_DcmSetFreezeFrameRecordFilter(
     Dem_DTCFormatType DTCFormat,
     /* PRQA S 3432++ */ /* MISRA Rule 20.7 */
@@ -405,7 +406,6 @@ extern FUNC(Dem_ReturnSetFilterType, DEM_CODE) Dem_DcmSetFreezeFrameRecordFilter
  *                          snapshot record number from the Dem.
  */
 /*************************************************************************/
-
 extern FUNC(Dem_ReturnGetNextFilteredElementType, DEM_CODE) Dem_DcmGetNextFilteredRecord(
     /* PRQA S 3432++ */ /* MISRA Rule 20.7 */
     P2VAR(uint32, AUTOMATIC, DEM_APPL_DATA) DTC,
@@ -424,7 +424,6 @@ extern FUNC(Dem_ReturnGetNextFilteredElementType, DEM_CODE) Dem_DcmGetNextFilter
  * Return              Status of the operation of type Dem_ReturnGetDTCByOccurrenceTimeType.
  */
 /*************************************************************************/
-
 extern FUNC(Dem_ReturnGetDTCByOccurrenceTimeType, DEM_CODE)
     /* PRQA S 3432++ */ /* MISRA Rule 20.7 */
     Dem_DcmGetDTCByOccurrenceTime(Dem_DTCRequestType DTCRequest, P2VAR(uint32, AUTOMATIC, DEM_APPL_DATA) DTC);
@@ -443,7 +442,6 @@ extern FUNC(Dem_ReturnGetDTCByOccurrenceTimeType, DEM_CODE)
  * Return              none
  */
 /*************************************************************************/
-
 extern FUNC(void, DEM_CODE) Dem_DcmControlDTCStatusChangedNotification(boolean TriggerNotification);
 
 /*******************************************************************************
@@ -467,7 +465,6 @@ extern FUNC(void, DEM_CODE) Dem_DcmControlDTCStatusChangedNotification(boolean T
  *                          update of a specific DTC.
  */
 /*************************************************************************/
-
 extern FUNC(Dem_ReturnDisableDTCRecordUpdateType, DEM_CODE)
     Dem_DcmDisableDTCRecordUpdate(uint32 DTC, Dem_DTCOriginType DTCOrigin);
 
@@ -484,7 +481,6 @@ extern FUNC(Dem_ReturnDisableDTCRecordUpdateType, DEM_CODE)
  * Return              Always E_OK is returned.
  */
 /*************************************************************************/
-
 extern FUNC(Std_ReturnType, DEM_CODE) Dem_DcmEnableDTCRecordUpdate(void);
 
 /*************************************************************************/
@@ -508,7 +504,6 @@ extern FUNC(Std_ReturnType, DEM_CODE) Dem_DcmEnableDTCRecordUpdate(void);
  * Return              Status of the operation to retrieve freeze frame data by DTC.
  */
 /*************************************************************************/
-
 extern FUNC(Dem_ReturnGetFreezeFrameDataByDTCType, DEM_CODE) Dem_DcmGetFreezeFrameDataByDTC(
     uint32 DTC,
     Dem_DTCOriginType DTCOrigin,
@@ -520,7 +515,7 @@ extern FUNC(Dem_ReturnGetFreezeFrameDataByDTCType, DEM_CODE) Dem_DcmGetFreezeFra
 
 /*************************************************************************/
 /*
- * Brief               BRIEF DESCRIPTION
+ * Brief               Get the size of frozen frame data using DTC
  * ServiceId           0x1f
  * Sync/Async          Asynchronous
  * Reentrancy          Non Reentrant
@@ -530,12 +525,11 @@ extern FUNC(Dem_ReturnGetFreezeFrameDataByDTCType, DEM_CODE) Dem_DcmGetFreezeFra
  *                          the DTCs shall be read from.
  *                       RecordNumber: This parameter is a unique identifier for a freeze
  *                          frame record as defined in ISO 15031-5 and ISO 14229-1.
- * Param-Name[out]     SizeOfFreezeFrame:
+ * Param-Name[out]     SizeOfFreezeFrame:The number of bytes in the requested freeze frame record
  * Param-Name[in/out]  none
- * Return              none
+ * Return              Gets the operation status of freezing frame data size
  */
 /*************************************************************************/
-
 extern FUNC(Dem_ReturnGetSizeOfDataByDTCType, DEM_CODE) Dem_DcmGetSizeOfFreezeFrameByDTC(
     uint32 DTC,
     Dem_DTCOriginType DTCOrigin,
@@ -565,7 +559,6 @@ extern FUNC(Dem_ReturnGetSizeOfDataByDTCType, DEM_CODE) Dem_DcmGetSizeOfFreezeFr
  * Return              Status of the operation to retrieve extended data by DTC.
  */
 /*************************************************************************/
-
 extern FUNC(Dem_ReturnGetExtendedDataRecordByDTCType, DEM_CODE) Dem_DcmGetExtendedDataRecordByDTC(
     uint32 DTC,
     Dem_DTCOriginType DTCOrigin,
@@ -594,7 +587,6 @@ extern FUNC(Dem_ReturnGetExtendedDataRecordByDTCType, DEM_CODE) Dem_DcmGetExtend
  * Return              Status of the operation to retrieve the size of extended data.
  */
 /*************************************************************************/
-
 extern FUNC(Dem_ReturnGetSizeOfDataByDTCType, DEM_CODE) Dem_DcmGetSizeOfExtendedDataRecordByDTC(
     uint32 DTC,
     Dem_DTCOriginType DTCOrigin,
@@ -629,7 +621,6 @@ extern FUNC(Dem_ReturnGetSizeOfDataByDTCType, DEM_CODE) Dem_DcmGetSizeOfExtended
 with clear parameters
  */
 /*************************************************************************/
-
 extern FUNC(Dem_ReturnClearDTCType, DEM_CODE)
     Dem_DcmCheckClearParameter(uint32 DTC, Dem_DTCFormatType DTCFormat, Dem_DTCOriginType DTCOrigin);
 
@@ -637,7 +628,8 @@ extern FUNC(Dem_ReturnClearDTCType, DEM_CODE)
 /*
  * Brief               Clears single DTCs, as well as groups of DTCs. This API is intended
                        for the Dcm. It can only be used through the RTE (due to work-around
-                       described below SWS_Dem_00009), and therefore no declaration is exported via Dem_Dcm.h.
+                       described below SWS_Dem_00009), and therefore no declaration is exported via
+ Dem_Dcm.h.
  * ServiceId           0x22
  * Sync/Async          Asynchronous
  * Reentrancy          Reentrant
@@ -653,7 +645,7 @@ extern FUNC(Dem_ReturnClearDTCType, DEM_CODE)
  * Return              Status of the operation of type Dem_ReturnClearDTCType.
  */
 /*************************************************************************/
-
+/* PRQA S 0624,3449,3451++ */ /* MISRA Rule 8.3,8.5,8.5 */
 FUNC(Dem_ReturnClearDTCType, DEM_CODE)
 Dem_DcmClearDTC(uint32 DTC, Dem_DTCFormatType DTCFormat, Dem_DTCOriginType DTCOrigin);
 
@@ -675,9 +667,9 @@ Dem_DcmClearDTC(uint32 DTC, Dem_DTCFormatType DTCFormat, Dem_DTCOriginType DTCOr
  * Return              Returns the status of the operation
  */
 /*************************************************************************/
-
 FUNC(Dem_ReturnControlDTCSettingType, DEM_CODE)
 Dem_DcmEnableDTCSetting(uint32 DTCGroup, Dem_DTCKindType DTCKind);
+/* PRQA S 0624,3449,3451-- */ /* MISRA Rule 8.3,8.5,8.5 */
 
 /*************************************************************************/
 /*
@@ -694,10 +686,27 @@ Dem_DcmEnableDTCSetting(uint32 DTCGroup, Dem_DTCKindType DTCKind);
  * Return              Returns status of the operation>
  */
 /*************************************************************************/
-
 extern FUNC(Dem_ReturnControlDTCSettingType, DEM_CODE)
     Dem_DcmDisableDTCSetting(uint32 DTCGroup, Dem_DTCKindType DTCKind);
-/* PRQA S 3451,3449,0624-- */ /* MISRA Rule 8.5,Rule 8.5,Rule 8.3 */
+
+/*************************************************************************/
+/*
+ * Brief               Gets the DTC Severity availability mask.
+ * ServiceId           0xb2
+ * Sync/Async          Synchronous
+ * Reentrancy          Non Reentrant
+ * Param-Name[in]      none
+ * Param-Name[out]     DTCSeverityMask:The value DTCSeverityMask indicates the
+ *                      supported DTC severity bits from the Dem.
+ * Param-Name[in/out]  none
+ * Return              E_OK: get of DTC severity mask was successful
+                        E_NOT_OK: get of DTC severity mask failed
+ */
+/*************************************************************************/
+extern FUNC(Dem_ReturnClearDTCType, DEM_CODE)
+    /* PRQA S 3432++ */ /* MISRA Rule 20.7 */
+    Dem_DcmGetDTCSeverityAvailabilityMask(P2VAR(Dem_DTCSeverityType, AUTOMATIC, DEM_APPL_DATA) DTCSeverityMask);
+/* PRQA S 3432-- */ /* MISRA Rule 20.7 */
 
 #endif /* DEM_DCM_H_ */
 

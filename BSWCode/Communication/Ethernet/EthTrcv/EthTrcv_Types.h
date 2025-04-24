@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : EthTrcv_Types.h                                             **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : wanglili                                                    **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : EthTrcv_Types.h                                             **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : wanglili                                                    **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 /*******************************************************************************
 **                      Revision Control History                              **
 *******************************************************************************/
@@ -57,9 +58,6 @@
 /*******************************************************************************
 **                      Global Symbols                                        **
 *******************************************************************************/
-#ifndef ETHTRCV_MAJORVERSION
-#define ETHTRCV_MAJORVERSION 42u
-#endif
 /*the invalid channel id base on the "Icu_ChannelType" type*/
 #define ICU_CHANNEL_ID_INVALID (0xFFU)
 /*base on the Dem_EventIdType is uint16*/
@@ -83,7 +81,7 @@ typedef enum
 {
     TRCV_PHYS_LAYER_TYPE_NONE = 0u,
     TRCV_PHYS_LAYER_TYPE_1000BASE_T,
-    TRCV_PHYS_LAYER_TYPE_1000BASE_T1, /*PRQA S 0779*/
+    TRCV_PHYS_LAYER_TYPE_1000BASE_T1,
     TRCV_PHYS_LAYER_TYPE_100BASE_T1,
     TRCV_PHYS_LAYER_TYPE_100BASE_TX
 } EthTrcv_PhysLayerTypeType;

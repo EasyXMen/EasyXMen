@@ -18,6 +18,10 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
+ */
+/* PRQA S 3108-- */
+/*
+ ********************************************************************************
  ************************************************************************************************************************
  ** **
  **  @file               : ComM_Internal.h **
@@ -29,7 +33,6 @@
  **  @specification(s)   : AUTOSAR classic Platform R19-11 **
  ** **
  ***********************************************************************************************************************/
-/* PRQA S 3108-- */
 #ifndef COMM_INTERNAL_H_
 #define COMM_INTERNAL_H_
 
@@ -45,6 +48,10 @@
 #include "Det.h"
 #endif
 #include "ComM_Types.h"
+
+#if COMM_MULTIPLE_PARTITION_ENABLED == STD_ON
+#include "Os.h"
+#endif
 
 /*====================================================[macros]========================================================*/
 
@@ -72,10 +79,6 @@
 #define COMM_LOCAL static
 #endif
 
-#if !defined(COMM_EXTEND_FUNCTION_SUPPORT)
-#define COMM_EXTEND_FUNCTION_SUPPORT 0
-#endif
-
 #if !defined(COMM_LOCAL_INLINE)
 #define COMM_LOCAL_INLINE LOCAL_INLINE
 #endif
@@ -97,8 +100,6 @@ typedef uint32 uintx;
 
 typedef struct
 {
-#define COMM_ECU_GROUP_CLS_NOMODE_LIMIT COMM_MASK_LIMIT_TO_NOCOM
-#define COMM_ECU_GROUP_CLS_WAKEUP_LIMIT COMM_MASK_INHIBIT_WAKEUP
     uint8 ecuGroupClass;
     uint16 inhibitCnt;
 } ComM_StoryDataType;
@@ -106,6 +107,13 @@ typedef struct
 extern ComM_InitStatusType ComM_InitStatus;
 extern const ComM_ConfigType* ComM_ConfigPtr;
 
+#if COMM_MULTIPLE_PARTITION_ENABLED == STD_ON
+#if COMM_USER_NUMBER > 0u
+extern const ApplicationType ComM_UserApplicationID[COMM_USER_NUMBER];
+#endif
+
+extern const ApplicationType ComM_ChannelApplicationID[COMM_CHANNEL_NUMBER];
+#endif
 #if (COMM_USER_NUMBER > 0u)
 extern ComM_ModeType ComM_UserReqMode[COMM_USER_NUMBER];
 #endif

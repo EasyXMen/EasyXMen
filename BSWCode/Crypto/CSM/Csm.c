@@ -18,20 +18,20 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Csm.c                                                       **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : qinchun.yang                                                **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Implementation for CSM                                      **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*********************************************************************************
+**                                                                            **
+**  FILENAME    : Csm.c                                                       **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : qinchun.yang                                                **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Implementation for CSM                                      **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 
 /******************************************************************************
 **                      Revision Control History                             **
@@ -43,6 +43,7 @@
  *    V2.1.0     2023-07-17   jie.gu           CP2.1 Release Version
  *    V2.1.1     2023-11-22   jie.gu           CPD-33590 Code execution efficiency optimization
  *    V2.1.2     2024-01-31   jie.gu           CPD-33716 update code for misra c rules check
+ *    V2.1.3     2024-05-27   jie.gu           CPD-33710 Add exclusive area
  */
 
 /**
@@ -84,7 +85,7 @@
 #define CSM_C_AR_PATCH_VERSION 0U
 #define CSM_C_SW_MAJOR_VERSION 2U
 #define CSM_C_SW_MINOR_VERSION 1U
-#define CSM_C_SW_PATCH_VERSION 2U
+#define CSM_C_SW_PATCH_VERSION 3U
 
 /*******************************************************************************
 **                       Version  Check                                       **
@@ -213,10 +214,12 @@ Csm_Init(P2CONST(Csm_ConfigType, AUTOMATIC, CSM_APPL_DATA) configPtr)
             Csm_QueueChRunStatus[queIdx].maxPriority = CSM_INVALID_PRIORITY;
             Csm_QueueChRunStatus[queIdx].dealSynJobIng = (boolean)FALSE;
         }
+        SchM_Enter_Csm_Area_Csm();
         for (queIdx = 0u; queIdx < CSM_QUEUE_TOTAL_SIZE; queIdx++)
         {
             Csm_JobQueBufUsed[queIdx] = (boolean)FALSE;
         }
+        SchM_Exit_Csm_Area_Csm();
         Csm_InitStatus = (boolean)TRUE;
     }
 }
@@ -1624,6 +1627,7 @@ Csm_CancelJob(VAR(uint32, CSM_APPL_DATA) job, VAR(Crypto_OperationModeType, CSM_
          * Avoid warning
          * */
         CSM_AVOID_WARNING(mode);
+        SchM_Enter_Csm_Area_Csm();
         if (CRYPTO_JOBSTATE_ACTIVE == Csm_JobStates[job])
         {
             jobCfgPtr = &(Csm_JobCfg[job]);
@@ -1657,6 +1661,7 @@ Csm_CancelJob(VAR(uint32, CSM_APPL_DATA) job, VAR(Crypto_OperationModeType, CSM_
             /*Remove the job from its own queue*/
             (void)Csm_DequeueJobInQue(job, jobQueId);
         }
+        SchM_Exit_Csm_Area_Csm();
     }
     return ret;
 }
@@ -1702,12 +1707,16 @@ Csm_MainFunction(void) /* PRQA S 3408 */ /* MISRA Rule 8.4 */
         jobInfo.jobInfo = jobCfgPtr->jobInfo;
         jobInfo.jobPrimitiveInfo = jobCfgPtr->jobPrimitiveInfo;
         jobInfo.jobId = jobInQueId;
+        SchM_Enter_Csm_Area_Csm();
         jobInfo.jobState = Csm_JobStates[jobInQueId];
+        SchM_Exit_Csm_Area_Csm();
         jobInfo.jobPrimitiveInputOutput = queChRunPtr->pendingJobQue->jobPriInOut;
         ret = CryIf_ProcessJob(cryIfChId, &jobInfo);
         if (E_OK == ret)
         {
+            SchM_Enter_Csm_Area_Csm();
             Csm_JobStates[jobInQueId] = CRYPTO_JOBSTATE_ACTIVE;
+            SchM_Exit_Csm_Area_Csm();
             /*Delete the job from queue*/
             (void)Csm_DequeueJobInQue(jobInQueId, queIdx);
         }
@@ -1737,7 +1746,9 @@ static FUNC(Std_ReturnType, CSM_CODE) Csm_ProcessJobToCryIf(
     Std_ReturnType ret = E_OK;
 
     jobCfgPtr = &(Csm_JobCfg[jobId]);
+    SchM_Enter_Csm_Area_Csm();
     jobState = Csm_JobStates[jobId];
+    SchM_Exit_Csm_Area_Csm();
     if ((jobCfgPtr->inOutRedirtRef != NULL_PTR)
         && ((jobPrimInOut->inputLength != 0u) || (*(jobPrimInOut->outputLengthPtr) != 0u)))
     {
@@ -1763,6 +1774,7 @@ static FUNC(Std_ReturnType, CSM_CODE) Csm_ProcessJobToCryIf(
             if (CRYPTO_PROCESSING_SYNC == processMode)
             {
                 /*1.CryIf_ProcessJob return negative response*/
+                SchM_Enter_Csm_Area_Csm();
                 if (ret != E_OK)
                 {
                     Csm_JobStates[jobId] = CRYPTO_JOBSTATE_IDLE;
@@ -1776,6 +1788,7 @@ static FUNC(Std_ReturnType, CSM_CODE) Csm_ProcessJobToCryIf(
                 {
                     /*Do nothing*/
                 }
+                SchM_Exit_Csm_Area_Csm();
             }
         }
         else /*Job in CRYPTO_JOBSTATE_IDLE state*/
@@ -1792,7 +1805,9 @@ static FUNC(Std_ReturnType, CSM_CODE) Csm_ProcessJobToCryIf(
                     )
                     {
                         /*The job has not been completed yet*/
+                        SchM_Enter_Csm_Area_Csm();
                         Csm_JobStates[jobId] = CRYPTO_JOBSTATE_ACTIVE;
+                        SchM_Exit_Csm_Area_Csm();
                     }
                     queChRunPtr->dealSynJobIng = (boolean)FALSE;
                 }
@@ -1811,7 +1826,9 @@ static FUNC(Std_ReturnType, CSM_CODE) Csm_ProcessJobToCryIf(
                     ret = CryIf_ProcessJob(channelId, &job);
                     if (E_OK == ret)
                     {
+                        SchM_Enter_Csm_Area_Csm();
                         Csm_JobStates[jobId] = CRYPTO_JOBSTATE_ACTIVE;
+                        SchM_Exit_Csm_Area_Csm();
                     }
                     else if (CRYPTO_E_BUSY == ret)
                     {
@@ -1972,7 +1989,9 @@ static FUNC(Std_ReturnType, CSM_CODE) Csm_DequeueJobInQue(VAR(uint32, AUTOMATIC)
         {
             queChRunPtr->maxPriority = CSM_INVALID_PRIORITY;
         }
+        SchM_Enter_Csm_Area_Csm();
         Csm_JobQueBufUsed[(*curNode)->bufPos] = (boolean)FALSE;
+        SchM_Exit_Csm_Area_Csm();
         (*curNode) = (*curNode)->next;
         queChRunPtr->jobCnt--;
     }
@@ -1985,7 +2004,9 @@ static FUNC(Std_ReturnType, CSM_CODE) Csm_DequeueJobInQue(VAR(uint32, AUTOMATIC)
             /*Delete node from link list*/
             if (temNode->jobId == jobId)
             {
+                SchM_Enter_Csm_Area_Csm();
                 Csm_JobQueBufUsed[temNode->bufPos] = (boolean)FALSE;
+                SchM_Exit_Csm_Area_Csm();
                 (*preNode)->next = temNode->next;
                 queChRunPtr->jobCnt--;
                 ret = E_OK;
@@ -2003,6 +2024,7 @@ static FUNC(Csm_JobInQueuePtrType, CSM_CODE) Csm_FindIdleQueue(P2VAR(uint32, AUT
     uint32 queIdx;
 
     queBuf = NULL_PTR;
+    SchM_Enter_Csm_Area_Csm();
     for (queIdx = 0u; queIdx < CSM_QUEUE_TOTAL_SIZE; queIdx++)
     {
         if ((boolean)FALSE == Csm_JobQueBufUsed[queIdx])
@@ -2010,11 +2032,14 @@ static FUNC(Csm_JobInQueuePtrType, CSM_CODE) Csm_FindIdleQueue(P2VAR(uint32, AUT
             break;
         }
     }
+    SchM_Exit_Csm_Area_Csm();
     if (queIdx != CSM_QUEUE_TOTAL_SIZE)
     {
         queBuf = &(Csm_JobQueBuf[queIdx]);
         *bufPos = queIdx;
+        SchM_Enter_Csm_Area_Csm();
         Csm_JobQueBufUsed[queIdx] = (boolean)TRUE;
+        SchM_Exit_Csm_Area_Csm();
     }
     return queBuf;
 }

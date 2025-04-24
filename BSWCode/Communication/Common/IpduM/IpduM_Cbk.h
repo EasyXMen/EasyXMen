@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                           **
- **  FILENAME    : IpduM_Cbk.h                                                **
- **                                                                           **
- **  Created on  :                                                            **
- **  Author      : darren.zhang                                               **
- **  Vendor      :                                                            **
- **  DESCRIPTION : IPDUM                                                      **
- **                                                                           **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                      **
- **                                                                           **
- **************************************************************************** */
+ */
 /* PRQA S 3108-- */
+/*
+**************************************************************************** **
+**                                                                           **
+**  FILENAME    : IpduM_Cbk.h                                                **
+**                                                                           **
+**  Created on  :                                                            **
+**  Author      : darren.zhang                                               **
+**  Vendor      :                                                            **
+**  DESCRIPTION : IPDUM                                                      **
+**                                                                           **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                      **
+**                                                                           **
+**************************************************************************** */
 #ifndef IPDUM_CBK_H_
 #define IPDUM_CBK_H_
 /******************************************************************************
@@ -43,8 +44,8 @@
 *******************************************************************************/
 /*Published information elements*/
 #define IPDUM_CBK_H_AR_RELEASE_MAJOR_VERSION    4u
-#define IPDUM_CBK_H_AR_RELEASE_MINOR_VERSION    2u
-#define IPDUM_CBK_H_AR_RELEASE_REVISION_VERSION 2u
+#define IPDUM_CBK_H_AR_RELEASE_MINOR_VERSION    5u
+#define IPDUM_CBK_H_AR_RELEASE_REVISION_VERSION 0u
 
 /******************************Public API Declarations************************/
 /**

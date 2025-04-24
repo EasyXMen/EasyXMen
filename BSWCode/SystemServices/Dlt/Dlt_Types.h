@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                           **
- **  FILENAME    : Dlt_Types.h                                                **
- **                                                                           **
- **  Created on  :                                                            **
- **  Author      : tao.yu                                                     **
- **  Vendor      :                                                            **
- **  DESCRIPTION : Dlt types define                                           **
- **                                                                           **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                     **
- **                                                                           **
- **************************************************************************** */
+ */
 /* PRQA S 3108-- */
+/*
+**************************************************************************** **
+**                                                                           **
+**  FILENAME    : Dlt_Types.h                                                **
+**                                                                           **
+**  Created on  :                                                            **
+**  Author      : tao.yu                                                     **
+**  Vendor      :                                                            **
+**  DESCRIPTION : Dlt types define                                           **
+**                                                                           **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                     **
+**                                                                           **
+**************************************************************************** */
 #ifndef DLT_TYPES_H_
 #define DLT_TYPES_H_
 

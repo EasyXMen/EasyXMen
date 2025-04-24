@@ -18,20 +18,20 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : WdgM.h                                                      **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : haibin.shao                                                 **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S):   AUTOSAR classic Platform R19-11                       **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*********************************************************************************
+**                                                                            **
+**  FILENAME    : WdgM.h                                                      **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : haibin.shao                                                 **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S):   AUTOSAR classic Platform R19-11                       **
+**                                                                            **
+*******************************************************************************/
 
 /*======================[R E V I S I O N   H I S T O R Y]=====================*/
 /*============================================================================*/
@@ -50,7 +50,7 @@
 
 #define WDGM_H_SW_MAJOR_VERSION 2u /*DD_2_214, Major Version*/
 #define WDGM_H_SW_MINOR_VERSION 0u /*DD_2_215, Minor Version*/
-#define WDGM_H_SW_PATCH_VERSION 6u /*DD_2_216, Patch Version*/
+#define WDGM_H_SW_PATCH_VERSION 3u /*DD_2_216, Patch Version*/
 #define WDGM_H_AR_MAJOR_VERSION 4u /*DD_2_217, Autosar Major Version*/
 #define WDGM_H_AR_MINOR_VERSION 5u /*DD_2_218, Autosar Minor Version*/
 #define WDGM_H_AR_PATCH_VERSION 0u /*DD_2_219, Autosar Patch Version*/
@@ -114,10 +114,8 @@ extern FUNC(Std_ReturnType, WDGM_CODE)
 extern FUNC(Std_ReturnType, WDGM_CODE) WdgM_GetGlobalStatus(WdgM_GlobalStatusType* Status);
 extern FUNC(void, WDGM_CODE) WdgM_PerformReset(void);
 extern FUNC(Std_ReturnType, WDGM_CODE) WdgM_GetFirstExpiredSEID(WdgM_SupervisedEntityIdType* SEID);
-
 extern FUNC(Std_ReturnType, WDGM_CODE)
     WdgM_GetLocalStatus(WdgM_SupervisedEntityIdType SEID, WdgM_LocalStatusType* Status);
-
 #if (STD_ON == WDGM_OFF_MODE_ENABLED)
 extern FUNC(void, WDGM_CODE) WdgM_DeInit(void);
 #endif /*STD_ON == WDGM_OFF_MODE_ENABLED*/

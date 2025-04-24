@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : LinSM.c                                                     **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : HuRongbo                                                    **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Implementation for LinSM                                    **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : LinSM.c                                                     **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : HuRongbo                                                    **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Implementation for LinSM                                    **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 /*******************************************************************************
 **                      Revision Control History                              **
 *******************************************************************************/
@@ -49,10 +50,16 @@
  * V2.0.5      20230314   HuRongbo
  *   1> Resolves an exception that is raised when LinSMConfirmationTimeout is
  *   set to 0(JIRA:PRD0042022-590)
- * V2.0.6      20231123   sunshengnan   Performance optimization.
- * V2.0.7      20231204   sunshengnan   LinSM is UNINIT，NetworkHandle is NULL_PTR
- * V2.0.8      20240227   sunshengnan   QAC_PH_2024 check.
+ * V2.0.6      20231128   SunShengnan
+ *   1>LinSM_CheckSchedule,Compile warning clean.(CPT-7666)
+ * V2.0.7      20240229   SunShengnan   QAC_PH_2024 check.
+ *                                      LinSM is UNINIT, NetworkHandle is NULL_PTR.
+ * V2.0.8      20240309   SunShengnan    Support multiple partition feature.
  * V2.0.9      20240710   liucaihong     Remove the LINSM_GOTOSLEEP_TIMER requirement
+ * V2.0.10     20241127   liucaihong
+ *  1> Fixed CPT-11559:  Fix Det_ReportRuntimeError violates MISRA 2012 Rule 17.3
+ *  2> Fixed CPT-11561:  Fix the function partition and det coupling in LinSM_Mainfunction.
+ *  3> Fixed CPT-11562:  Fix the LINSM_IS_TRANSCEIVER_PASSIVER_MODE_SUPPORT judgment condition
  */
 
 /**
@@ -75,7 +82,7 @@
 
 #define LINSM_C_SW_MAJOR_VERSION            2
 #define LINSM_C_SW_MINOR_VERSION            0
-#define LINSM_C_SW_PATCH_VERSION            8
+#define LINSM_C_SW_PATCH_VERSION            10
 
 /*******************************************************************************
 **                      Include Section                                       **
@@ -90,6 +97,11 @@
 #include "SchM_LinSM.h"
 #include "LinSM_Cbk.h"
 #include "Det.h"
+/* Multiple partition check. */
+#if (STD_ON == LINSM_MULTIPLE_PARTITION_USED)
+#include "ComM.h"
+#include "Os.h"
+#endif
 
 /*******************************************************************************
 **                       Version  Check                                       **
@@ -265,11 +277,9 @@ LinSM_Init(P2CONST(LinSM_ConfigType, AUTOMATIC, LINSM_CONST_PBCFG) ConfigPtr) /*
         LinSM_CfgPtr = ConfigPtr;
 
         /*@req <SWS_LinSM_00043> */
-        SchM_Enter_LinSM(LINSM_INSTANCE_ID, LINSM_EXCLUSIVE_AREA_CHANNEL);
-
+        SchM_Enter_LinSM_Context();
         LinSM_RunTimeType* LinSM_RTPtr;
         uint8 loop = 0u;
-
         /* initialize run time structure variable for every channel */
         while (loop < LINSM_CHANNEL_NUM) /* PRQA S 2877 */ /* MISRA Dir 4.1 */
         {
@@ -284,13 +294,10 @@ LinSM_Init(P2CONST(LinSM_ConfigType, AUTOMATIC, LINSM_CONST_PBCFG) ConfigPtr) /*
             LinSM_RTPtr->wakeupRetryCnt = 0x00;
             loop++;
         }
-        SchM_Exit_LinSM(LINSM_INSTANCE_ID, LINSM_EXCLUSIVE_AREA_CHANNEL);
-
         /*@req <SWS_LinSM_00025> */
-        SchM_Enter_LinSM(LINSM_INSTANCE_ID, LINSM_EXCLUSIVE_AREA_STATE);
         /* change module state */
         LinSM_ModuleStatus = LINSM_INIT;
-        SchM_Exit_LinSM(LINSM_INSTANCE_ID, LINSM_EXCLUSIVE_AREA_STATE);
+        SchM_Exit_LinSM_Context();
     }
 }
 
@@ -334,6 +341,10 @@ LinSM_ScheduleRequest /* PRQA S 1503 */
         /* get channel by network */
         uint8 chl = LinSM_GetChannelByNetworkHandle(network);
 #if (STD_ON == LINSM_DEV_ERROR_DETECT)
+/* Multiple partition check. */
+#if (STD_ON == LINSM_MULTIPLE_PARTITION_USED)
+        ApplicationType applicationID = GetApplicationID();
+#endif
         /*@req <SWS_LinSM_00114> */
         /* the network parameter has an invalid value, report error */
         if (LINSM_CHANNEL_NUM == chl)
@@ -355,35 +366,47 @@ LinSM_ScheduleRequest /* PRQA S 1503 */
                 LINSM_E_PARAMETER);
         }
         else
-#endif /* STD_ON == LINSM_DEV_ERROR_DETECT */
-        {
-            LinSM_RunTimeType* LinSM_RTPtr = &LinSM_RTArray[chl];
-
-            /*@req <SWS_LinSM_00163> */
-            /* If the function LinSM_ScheduleRequest is called and another
-             * request is in process on the same network,return with E_NOT_OK */
-            /*@req <SWS_LinSM_10211> */
-            /* If the function LinSM_ScheduleRequest is called and the
-             * state is not LINSM_FULL_COM, return directly with E_NOT_OK */
-            if ((LINSM_EXE_NOTHING == LinSM_RTPtr->runningReq) && (LINSM_FULL_COM == LinSM_RTPtr->channelComMode))
+#if (STD_ON == LINSM_MULTIPLE_PARTITION_USED)
+            /* Multiple partition check. */
+            if (applicationID != ComM_GetChannelApplicationID(network))
             {
-                /* call Schedule request function of LinIf module */
-                /*@req <SWS_LinSM_00079>,<SWS_LinSM_00167>,<SWS_LinSM_00168>*/
-                ret = LinIf_ScheduleRequest(network, schedule);
-
-                SchM_Enter_LinSM(LINSM_INSTANCE_ID, LINSM_EXCLUSIVE_AREA_CHANNEL);
-                if ((E_OK == ret) && (0u != LINSM_CONFIRMATION_TIMEOUT(chl)))
-                {
-                    /*@req <SWS_LinSM_00100>,<SWS_LinSM_00103> */
-                    /* start timer */
-                    LinSM_RTPtr->timerCnt = LINSM_CONFIRMATION_TIMEOUT(chl);
-                }
-                /* Runtime Information setup */
-                LinSM_RTPtr->runningReq = LINSM_EXE_CHANGE_SCHEDULE;
-                LinSM_RTPtr->req2LinIfResult = ret;
-                SchM_Exit_LinSM(LINSM_INSTANCE_ID, LINSM_EXCLUSIVE_AREA_CHANNEL);
+                (void)Det_ReportError(
+                    LINSM_MODULE_ID,
+                    LINSM_INSTANCE_ID,
+                    LINSM_SERVICE_ID_SCHEDULE_REQUEST,
+                    LINSM_E_PARTITION);
             }
-        }
+            else
+#endif
+#endif
+            {
+                LinSM_RunTimeType* LinSM_RTPtr = &LinSM_RTArray[chl];
+
+                /*@req <SWS_LinSM_00163> */
+                /* If the function LinSM_ScheduleRequest is called and another
+                 * request is in process on the same network,return with E_NOT_OK */
+                /*@req <SWS_LinSM_10211> */
+                /* If the function LinSM_ScheduleRequest is called and the
+                 * state is not LINSM_FULL_COM, return directly with E_NOT_OK */
+                if ((LINSM_EXE_NOTHING == LinSM_RTPtr->runningReq) && (LINSM_FULL_COM == LinSM_RTPtr->channelComMode))
+                {
+                    /* call Schedule request function of LinIf module */
+                    /*@req <SWS_LinSM_00079>,<SWS_LinSM_00167>,<SWS_LinSM_00168>*/
+                    ret = LinIf_ScheduleRequest(network, schedule);
+
+                    SchM_Enter_LinSM_Context();
+                    if ((E_OK == ret) && (0u != LINSM_CONFIRMATION_TIMEOUT(chl)))
+                    {
+                        /*@req <SWS_LinSM_00100>,<SWS_LinSM_00103> */
+                        /* start timer */
+                        LinSM_RTPtr->timerCnt = LINSM_CONFIRMATION_TIMEOUT(chl);
+                    }
+                    /* Runtime Information setup */
+                    LinSM_RTPtr->runningReq = LINSM_EXE_CHANGE_SCHEDULE;
+                    LinSM_RTPtr->req2LinIfResult = ret;
+                    SchM_Exit_LinSM_Context();
+                }
+            }
     }
 
     return ret;
@@ -409,10 +432,11 @@ FUNC(Std_ReturnType, LINSM_CODE)
 LinSM_GetCurrentComMode /* PRQA S 1503 */
     (NetworkHandleType network, ComM_ModeType* mode)
 {
-    Std_ReturnType ret = E_NOT_OK;
+    Std_ReturnType ret;
     /*@req <SWS_LinSM_00125> */
     /* the state LINSM_UNINIT is active ,report error */
 #if (STD_ON == LINSM_DEV_ERROR_DETECT)
+    ret = E_NOT_OK;
     if (LINSM_UNINIT == LinSM_ModuleStatus)
     {
         (void)Det_ReportError(LINSM_MODULE_ID, LINSM_INSTANCE_ID, LINSM_SERVICE_ID_GET_CURRENTCOMMODE, LINSM_E_UNINIT);
@@ -427,6 +451,10 @@ LinSM_GetCurrentComMode /* PRQA S 1503 */
         /* get channel by network */
         uint8 chl = LinSM_GetChannelByNetworkHandle(network);
 #if (STD_ON == LINSM_DEV_ERROR_DETECT)
+/* Multiple partition check. */
+#if (STD_ON == LINSM_MULTIPLE_PARTITION_USED)
+        ApplicationType applicationID = GetApplicationID();
+#endif
         /*@req <SWS_LinSM_00123> */
         /* the network parameter has an invalid value, report error */
         if (LINSM_CHANNEL_NUM == chl)
@@ -448,14 +476,27 @@ LinSM_GetCurrentComMode /* PRQA S 1503 */
                 LINSM_E_PARAM_POINTER);
         }
         else
+#if (STD_ON == LINSM_MULTIPLE_PARTITION_USED)
+            /* Multiple partition check. */
+            if (applicationID != ComM_GetChannelApplicationID(network))
+            {
+                (void)Det_ReportError(
+                    LINSM_MODULE_ID,
+                    LINSM_INSTANCE_ID,
+                    LINSM_SERVICE_ID_GET_CURRENTCOMMODE,
+                    LINSM_E_PARTITION);
+            }
+            else
 #endif
-        {
-            const LinSM_RunTimeType* LinSM_RTPtr = &LinSM_RTArray[chl];
-            /*@req <SWS_LinSM_00181> COMM_FULL_COMMUNICATION*/
-            /*@req <SWS_LinSM_00180> COMM_NO_COMMUNICATION */
-            *mode = (LINSM_FULL_COM == LinSM_RTPtr->channelComMode) ? COMM_FULL_COMMUNICATION : COMM_NO_COMMUNICATION;
-            ret = E_OK;
-        }
+#endif
+            {
+                const LinSM_RunTimeType* LinSM_RTPtr = &LinSM_RTArray[chl];
+                /*@req <SWS_LinSM_00181> COMM_FULL_COMMUNICATION*/
+                /*@req <SWS_LinSM_00180> COMM_NO_COMMUNICATION */
+                *mode =
+                    (LINSM_FULL_COM == LinSM_RTPtr->channelComMode) ? COMM_FULL_COMMUNICATION : COMM_NO_COMMUNICATION;
+                ret = E_OK;
+            }
     }
 
     return ret;
@@ -506,6 +547,10 @@ LinSM_RequestComMode /* PRQA S 1532 */ /* MISRA Rule 8.7 */
             /* get channel by network */
             uint8 chl = LinSM_GetChannelByNetworkHandle(network);
 #if (STD_ON == LINSM_DEV_ERROR_DETECT)
+/* Multiple partition check. */
+#if (STD_ON == LINSM_MULTIPLE_PARTITION_USED)
+            ApplicationType applicationID = GetApplicationID();
+#endif
             /*@req <SWS_LinSM_00127> */
             /* the network parameter has an invalid value, report error */
             if (LINSM_CHANNEL_NUM == chl)
@@ -529,70 +574,83 @@ LinSM_RequestComMode /* PRQA S 1532 */ /* MISRA Rule 8.7 */
                 ret = E_NOT_OK;
             }
             else
-#endif
-            {
-                LinSM_RunTimeType* LinSM_RTPtr = &LinSM_RTArray[chl];
-
-                /*@req <SWS_LinSM_00047>,<SWS_LinSM_00178>,<SWS_LinSM_00237>*/
-                if ((COMM_FULL_COMMUNICATION == mode)
-                    && ((LINSM_MASTER == LINSM_NODE_TYPE(chl))
-                        || !((LINSM_SILENCEWAKEUP_TIMER == LinSM_RTPtr->timerType) && (LinSM_RTPtr->timerCnt > 0u))))
+#if (STD_ON == LINSM_MULTIPLE_PARTITION_USED)
+                /* Multiple partition check. */
+                if (applicationID != ComM_GetChannelApplicationID(network))
                 {
-
-                    ret = LinIf_Wakeup(network);
-
-                    /*@req <SWS_LinSM_00176> */
-                    if (E_OK == ret)
-                    {
-                        SchM_Enter_LinSM(LINSM_INSTANCE_ID, LINSM_EXCLUSIVE_AREA_CHANNEL);
-                        /*@req <SWS_LinSM_00103> */
-                        if (0u != LINSM_CONFIRMATION_TIMEOUT(chl))
-                        {
-                            /*@req <SWS_LinSM_00100> */
-                            /* start timer */
-                            LinSM_RTPtr->timerCnt = LINSM_CONFIRMATION_TIMEOUT(chl);
-                            LinSM_RTPtr->timerType = LINSM_WAKEUP_TIMER;
-                            /* Set max retry times */
-                            LinSM_RTPtr->wakeupRetryCnt = LINSM_MODE_REQUEST_REPETITION_MAX();
-                        }
-                        /* Information bakeup */
-                        LinSM_RTPtr->runningReq = LINSM_EXE_WAKE_UP;
-                        LinSM_RTPtr->req2LinIfResult = ret;
-                        SchM_Exit_LinSM(LINSM_INSTANCE_ID, LINSM_EXCLUSIVE_AREA_CHANNEL);
-                    }
+                    (void)Det_ReportError(
+                        LINSM_MODULE_ID,
+                        LINSM_INSTANCE_ID,
+                        LINSM_SERVICE_ID_REQUEST_COMMODE,
+                        LINSM_E_PARTITION);
                 }
-
-                /*@req <SWS_LinSM_00035>,<SWS_LinSM_10208>,<SWS_LinSM_10209>*/
-                if ((COMM_NO_COMMUNICATION == mode) && (LINSM_FULL_COM == LinSM_RTPtr->channelComMode)
-                    && (LINSM_RUN_COMMUNICATION == LinSM_RTPtr->fullComSubStatus))
+                else
+#endif
+#endif
                 {
-                    if (LINSM_MASTER == LINSM_NODE_TYPE(chl))
-                    {
-                        /*@req <SWS_LinSM_00036>,<SWS_LinSM_00177>*/
-                        ret = LinIf_GotoSleep(network);
+                    LinSM_RunTimeType* LinSM_RTPtr = &LinSM_RTArray[chl];
 
-                        SchM_Enter_LinSM(LINSM_INSTANCE_ID, LINSM_EXCLUSIVE_AREA_CHANNEL);
+                    /*@req <SWS_LinSM_00047>,<SWS_LinSM_00178>,<SWS_LinSM_00237>*/
+                    if ((COMM_FULL_COMMUNICATION == mode)
+                        && ((LINSM_MASTER == LINSM_NODE_TYPE(chl))
+                            || !(
+                                (LINSM_SILENCEWAKEUP_TIMER == LinSM_RTPtr->timerType) && (LinSM_RTPtr->timerCnt > 0u))))
+                    {
+
+                        ret = LinIf_Wakeup(network);
+
+                        /*@req <SWS_LinSM_00176> */
                         if (E_OK == ret)
                         {
-                            /*@req <SWS_LinSM_00302> */
-                            LinSM_RTPtr->fullComSubStatus = LINSM_GOTO_SLEEP;
+                            SchM_Enter_LinSM_Context();
+                            /*@req <SWS_LinSM_00103> */
+                            if (0u != LINSM_CONFIRMATION_TIMEOUT(chl))
+                            {
+                                /*@req <SWS_LinSM_00100> */
+                                /* start timer */
+                                LinSM_RTPtr->timerCnt = LINSM_CONFIRMATION_TIMEOUT(chl);
+                                LinSM_RTPtr->timerType = LINSM_WAKEUP_TIMER;
+                                /* Set max retry times */
+                                LinSM_RTPtr->wakeupRetryCnt = LINSM_MODE_REQUEST_REPETITION_MAX();
+                            }
+                            /* Information bakeup */
+                            LinSM_RTPtr->runningReq = LINSM_EXE_WAKE_UP;
+                            LinSM_RTPtr->req2LinIfResult = ret;
+                            SchM_Exit_LinSM_Context();
                         }
-                        /* Information bakeup */
-                        LinSM_RTPtr->runningReq = LINSM_EXE_GOTO_SLEEP;
-                        LinSM_RTPtr->req2LinIfResult = ret;
-                        SchM_Exit_LinSM(LINSM_INSTANCE_ID, LINSM_EXCLUSIVE_AREA_CHANNEL);
                     }
-                    else
-                    {
-                        /*@req <SWS_LinSM_00230> */
-                        ret = E_OK;
-                    }
-                }
 
-                /*@req <SWS_LinSM_00230>,<SWS_LinSM_00236>,<SWS_LinSM_00237> */
-                LinSM_RTPtr->reqComMode = mode;     /* PRQA S 2842 */
-                LinSM_RTPtr->reqComModeFlag = TRUE; /* PRQA S 2842 */
-            }
+                    /*@req <SWS_LinSM_00035>,<SWS_LinSM_10208>,<SWS_LinSM_10209>*/
+                    if ((COMM_NO_COMMUNICATION == mode) && (LINSM_FULL_COM == LinSM_RTPtr->channelComMode)
+                        && (LINSM_RUN_COMMUNICATION == LinSM_RTPtr->fullComSubStatus))
+                    {
+                        if (LINSM_MASTER == LINSM_NODE_TYPE(chl))
+                        {
+                            /*@req <SWS_LinSM_00036>,<SWS_LinSM_00177>*/
+                            ret = LinIf_GotoSleep(network);
+
+                            SchM_Enter_LinSM_Context();
+                            if (E_OK == ret)
+                            {
+                                /*@req <SWS_LinSM_00302> */
+                                LinSM_RTPtr->fullComSubStatus = LINSM_GOTO_SLEEP;
+                            }
+                            /* Information bakeup */
+                            LinSM_RTPtr->runningReq = LINSM_EXE_GOTO_SLEEP;
+                            LinSM_RTPtr->req2LinIfResult = ret;
+                            SchM_Exit_LinSM_Context();
+                        }
+                        else
+                        {
+                            /*@req <SWS_LinSM_00230> */
+                            ret = E_OK;
+                        }
+                    }
+
+                    /*@req <SWS_LinSM_00230>,<SWS_LinSM_00236>,<SWS_LinSM_00237> */
+                    LinSM_RTPtr->reqComMode = mode;     /* PRQA S 2842 */
+                    LinSM_RTPtr->reqComModeFlag = TRUE; /* PRQA S 2842 */
+                }
         }
     }
 
@@ -620,9 +678,20 @@ LinSM_MainFunction(void) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
 
     if (LINSM_INIT == LinSM_ModuleStatus)
     {
+#if (STD_ON == LINSM_MULTIPLE_PARTITION_USED)
+        /* Multiple partition check. */
+        ApplicationType applicationID = GetApplicationID();
+#endif
         for (chl = 0u; chl < LINSM_CHANNEL_NUM; ++chl) /* PRQA S 2877 */ /* MISRA Dir 4.1 */
         {
             LinSM_RTPtr = &LinSM_RTArray[chl];
+#if (STD_ON == LINSM_MULTIPLE_PARTITION_USED)
+            /* Multiple partition check. */
+            if (applicationID != ComM_GetChannelApplicationID(LINSM_NETWORK_HANDLE(chl)))
+            {
+                continue;
+            }
+#endif
             switch (LinSM_RTPtr->runningReq)
             {
             case LINSM_EXE_GOTO_SLEEP:
@@ -641,10 +710,10 @@ LinSM_MainFunction(void) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
                 break;
 
             default:
-                SchM_Enter_LinSM(LINSM_INSTANCE_ID, LINSM_EXCLUSIVE_AREA_CHANNEL);
+                SchM_Enter_LinSM_Context();
                 /* RAM abnormal countermeasure */
                 LinSM_RTPtr->runningReq = LINSM_EXE_NOTHING;
-                SchM_Exit_LinSM(LINSM_INSTANCE_ID, LINSM_EXCLUSIVE_AREA_CHANNEL);
+                SchM_Exit_LinSM_Context();
                 break;
             }
         }
@@ -706,26 +775,24 @@ LinSM_ScheduleRequestConfirmation(NetworkHandleType network, LinIf_SchHandleType
         else
 #endif
         {
-
             LinSM_RunTimeType* LinSM_RTPtr = &LinSM_RTArray[chl];
-
             if (LINSM_EXE_CHANGE_SCHEDULE == LinSM_RTPtr->runningReq)
             {
-                SchM_Enter_LinSM(LINSM_INSTANCE_ID, LINSM_EXCLUSIVE_AREA_CHANNEL);
+                SchM_Enter_LinSM_Context();
                 /*@req <SWS_LinSM_00154> */
                 /* stop timer */
                 LinSM_RTPtr->timerCnt = 0u;
                 LinSM_RTPtr->runningReq = LINSM_EXE_NOTHING;
                 LinSM_RTPtr->reqComModeFlag = FALSE;
                 LinSM_RTPtr->timerType = LINSM_NONE_TIMER;
-                SchM_Exit_LinSM(LINSM_INSTANCE_ID, LINSM_EXCLUSIVE_AREA_CHANNEL);
+                SchM_Exit_LinSM_Context();
             }
             /*@req <SWS_LinSM_00206>,<SWS_LinSM_00207>*/
             BswM_LinSM_CurrentSchedule(network, schedule);
 
-            SchM_Enter_LinSM(LINSM_INSTANCE_ID, LINSM_EXCLUSIVE_AREA_CHANNEL);
+            SchM_Enter_LinSM_Context();
             LinSM_RTPtr->curSchedule = schedule;
-            SchM_Exit_LinSM(LINSM_INSTANCE_ID, LINSM_EXCLUSIVE_AREA_CHANNEL);
+            SchM_Exit_LinSM_Context();
         }
     }
 }
@@ -869,7 +936,7 @@ LinSM_GotoSleepConfirmation(NetworkHandleType network, boolean success)
             {
                 if (COMM_NO_COMMUNICATION == LinSM_RTPtr->reqComMode)
                 {
-                    SchM_Enter_LinSM(LINSM_INSTANCE_ID, LINSM_EXCLUSIVE_AREA_CHANNEL);
+                    SchM_Enter_LinSM_Context();
                     /*@req <SWS_LinSM_00154> */
                     /* stop Go-To-Sleep timer */
                     LinSM_RTPtr->timerCnt = 0u;
@@ -883,7 +950,7 @@ LinSM_GotoSleepConfirmation(NetworkHandleType network, boolean success)
                     /* Note: if not timeout,current state is LINSM_GOTO_SLEEP,
                      * needn't duplicate check */
                     LinSM_RTPtr->channelComMode = LINSM_NO_COM;
-                    SchM_Exit_LinSM(LINSM_INSTANCE_ID, LINSM_EXCLUSIVE_AREA_CHANNEL);
+                    SchM_Exit_LinSM_Context();
 
                     /*@req <SWS_LinSM_00027> */
                     ComM_BusSM_ModeIndication(network, COMM_NO_COMMUNICATION);
@@ -891,9 +958,9 @@ LinSM_GotoSleepConfirmation(NetworkHandleType network, boolean success)
                     BswM_LinSM_CurrentState(network, LINSM_NO_COM);
 /*@req <SWS_LinSM_00203> */
 #if (STD_ON == LINSM_TRANSCEIVER_PASSIVER_MODE_SUPPORT)
-                    if (STD_ON == LINSM_IS_TRANSCEIVER_PASSIVER_MODE_SUPPORT(chl))
+                    if (LINSM_IS_TRANSCEIVER_PASSIVER_MODE_SUPPORT(chl))
                     {
-                        LinTrcv_TrcvModeType LinTrcvModeType = (TRUE == LINSM_GET_TRANSCEIVER_PASSIVER_MODE(chl))
+                        LinTrcv_TrcvModeType LinTrcvModeType = LINSM_GET_TRANSCEIVER_PASSIVER_MODE(chl)
                                                                    ? LINTRCV_TRCV_MODE_STANDBY
                                                                    : LINTRCV_TRCV_MODE_SLEEP;
                         (void)LinIf_SetTrcvMode(network, LinTrcvModeType);
@@ -909,7 +976,7 @@ LinSM_GotoSleepConfirmation(NetworkHandleType network, boolean success)
                     /*@req <SWS_LinSM_00176> */
                     if (E_OK == ret)
                     {
-                        SchM_Enter_LinSM(LINSM_INSTANCE_ID, LINSM_EXCLUSIVE_AREA_CHANNEL);
+                        SchM_Enter_LinSM_Context();
                         /*@req <SWS_LinSM_00103> */
                         if (0u != LINSM_CONFIRMATION_TIMEOUT(chl))
                         {
@@ -923,7 +990,7 @@ LinSM_GotoSleepConfirmation(NetworkHandleType network, boolean success)
                         /* Information bakeup */
                         LinSM_RTPtr->runningReq = LINSM_EXE_WAKE_UP;
                         LinSM_RTPtr->req2LinIfResult = ret;
-                        SchM_Exit_LinSM(LINSM_INSTANCE_ID, LINSM_EXCLUSIVE_AREA_CHANNEL);
+                        SchM_Exit_LinSM_Context();
                     }
                 }
             }
@@ -986,22 +1053,22 @@ LinSM_WakeupConfirmation(NetworkHandleType network, boolean success) /* PRQA S 1
 
             if (LINSM_EXE_WAKE_UP == LinSM_RTPtr->runningReq)
             {
-                SchM_Enter_LinSM(LINSM_INSTANCE_ID, LINSM_EXCLUSIVE_AREA_CHANNEL);
+                SchM_Enter_LinSM_Context();
                 /*@req <SWS_LinSM_00154> */
                 /* stop timer */
                 LinSM_RTPtr->timerCnt = 0u;
                 LinSM_RTPtr->timerType = LINSM_NONE_TIMER;
                 LinSM_RTPtr->runningReq = LINSM_EXE_NOTHING;
-                SchM_Exit_LinSM(LINSM_INSTANCE_ID, LINSM_EXCLUSIVE_AREA_CHANNEL);
+                SchM_Exit_LinSM_Context();
 
                 if (success)
                 {
-                    SchM_Enter_LinSM(LINSM_INSTANCE_ID, LINSM_EXCLUSIVE_AREA_CHANNEL);
+                    SchM_Enter_LinSM_Context();
                     /*@req <SWS_LinSM_00049> */
                     LinSM_RTPtr->channelComMode = LINSM_FULL_COM;
                     /*@req <SWS_LinSM_00301> */
                     LinSM_RTPtr->fullComSubStatus = LINSM_RUN_COMMUNICATION;
-                    SchM_Exit_LinSM(LINSM_INSTANCE_ID, LINSM_EXCLUSIVE_AREA_CHANNEL);
+                    SchM_Exit_LinSM_Context();
 
                     /*@req <SWS_LinSM_00033> */
                     ComM_BusSM_ModeIndication(network, COMM_FULL_COMMUNICATION);
@@ -1009,7 +1076,7 @@ LinSM_WakeupConfirmation(NetworkHandleType network, boolean success) /* PRQA S 1
                     BswM_LinSM_CurrentState(network, LINSM_FULL_COM);
 /*@req <SWS_LinSM_00205> */
 #if (STD_ON == LINSM_TRANSCEIVER_PASSIVER_MODE_SUPPORT)
-                    if (STD_ON == LINSM_IS_TRANSCEIVER_PASSIVER_MODE_SUPPORT(chl))
+                    if (LINSM_IS_TRANSCEIVER_PASSIVER_MODE_SUPPORT(chl))
                     {
                         (void)LinIf_SetTrcvMode(network, LINTRCV_TRCV_MODE_NORMAL);
                     }
@@ -1090,7 +1157,7 @@ static FUNC(boolean, LINSM_CODE) LinSM_CheckSchedule(uint8 ch, LinIf_SchHandleTy
 
     return loop < LINSM_CHANNEL_SCHEDULE_NUM(ch);
 }
-#endif /* STD_ON == LINSM_DEV_ERROR_DETECT && LINSM_MASTER_NODE_SUPPORT == STD_ON */
+#endif /* STD_ON == LINSM_DEV_ERROR_DETECT */
 
 /******************************************************************************/
 /*
@@ -1105,10 +1172,8 @@ static FUNC(boolean, LINSM_CODE) LinSM_CheckSchedule(uint8 ch, LinIf_SchHandleTy
 /******************************************************************************/
 static FUNC(void, LINSM_CODE) LinSM_HandleGotoSleepPeriod(uint8 chl)
 {
-    SchM_Enter_LinSM(LINSM_INSTANCE_ID, LINSM_EXCLUSIVE_AREA_CHANNEL);
-
+    SchM_Enter_LinSM_Context();
     LinSM_RunTimeType* LinSM_RTPtr = &LinSM_RTArray[chl];
-
     if (E_NOT_OK == LinSM_RTPtr->req2LinIfResult)
     {
         /*@req <SWS_LinSM_00177> */
@@ -1118,7 +1183,7 @@ static FUNC(void, LINSM_CODE) LinSM_HandleGotoSleepPeriod(uint8 chl)
         LinSM_RTPtr->runningReq = LINSM_EXE_NOTHING;
         LinSM_RTPtr->timerType = LINSM_NONE_TIMER;
     }
-    SchM_Exit_LinSM(LINSM_INSTANCE_ID, LINSM_EXCLUSIVE_AREA_CHANNEL);
+    SchM_Exit_LinSM_Context();
 }
 
 /******************************************************************************/
@@ -1134,8 +1199,8 @@ static FUNC(void, LINSM_CODE) LinSM_HandleGotoSleepPeriod(uint8 chl)
 /******************************************************************************/
 static FUNC(void, LINSM_CODE) LinSM_HandleWakeupPeriod(uint8 chl)
 {
-    SchM_Enter_LinSM(LINSM_INSTANCE_ID, LINSM_EXCLUSIVE_AREA_CHANNEL);
 
+    SchM_Enter_LinSM_Context();
     LinSM_RunTimeType* LinSM_RTPtr = &LinSM_RTArray[chl];
 
     if (0u != LinSM_RTPtr->timerCnt)
@@ -1223,7 +1288,7 @@ static FUNC(void, LINSM_CODE) LinSM_HandleWakeupPeriod(uint8 chl)
             }
         }
     }
-    SchM_Exit_LinSM(LINSM_INSTANCE_ID, LINSM_EXCLUSIVE_AREA_CHANNEL);
+    SchM_Exit_LinSM_Context();
 }
 
 /******************************************************************************/
@@ -1239,10 +1304,8 @@ static FUNC(void, LINSM_CODE) LinSM_HandleWakeupPeriod(uint8 chl)
 /******************************************************************************/
 static FUNC(void, LINSM_CODE) LinSM_HandleChangeSchedulePeriod(uint8 chl)
 {
-    SchM_Enter_LinSM(LINSM_INSTANCE_ID, LINSM_EXCLUSIVE_AREA_CHANNEL);
-
+    SchM_Enter_LinSM_Context();
     LinSM_RunTimeType* LinSM_RTPtr = &LinSM_RTArray[chl];
-
     if (E_NOT_OK == LinSM_RTPtr->req2LinIfResult)
     {
         /*@req <SWS_LinSM_00213> */
@@ -1275,7 +1338,7 @@ static FUNC(void, LINSM_CODE) LinSM_HandleChangeSchedulePeriod(uint8 chl)
             }
         }
     }
-    SchM_Exit_LinSM(LINSM_INSTANCE_ID, LINSM_EXCLUSIVE_AREA_CHANNEL);
+    SchM_Exit_LinSM_Context();
 }
 
 #define LINSM_STOP_SEC_CODE

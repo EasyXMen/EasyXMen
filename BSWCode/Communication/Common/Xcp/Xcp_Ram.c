@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Xcp_Ram.c                                                   **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : qinchun.yang                                                **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Defined array variables for XCP                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Xcp_Ram.c                                                   **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : qinchun.yang                                                **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Defined array variables for XCP                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 /*=======[I N C L U D E S]====================================================*/
 #include "Xcp_Internal.h"
 #define XCP_START_SEC_VAR_CLEARED_8
@@ -64,7 +65,7 @@ VAR(uint8, XCP_VAR) Xcp_ServBuffer[XCP_CTO_BUFFER_SIZE]; /*PRQA S 1533*/
 VAR(Xcp_DaqType, XCP_VAR) Xcp_Daq[XCP_MAX_DAQ]; /* PRQA S 1531 */ /* MISRA Rule 8.7 */
 #define XCP_STOP_SEC_VAR_SAVED_ZONE_16
 #include "Xcp_MemMap.h"
-#endif
+#endif /*XCP_PL_DAQ == XCP_PL_DAQ & XCP_RESOURCE*/
 
 /*
  * Block transfer

@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Xcp_Cal.c                                                   **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : qinchun.yang                                                **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Implementation of the XCP_Cal command                       **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Xcp_Cal.c                                                   **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : qinchun.yang                                                **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Implementation of the XCP_Cal command                       **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 /*=======[I N C L U D E S]====================================================*/
 #include "Xcp_Internal.h"
 #if (STD_ON == XCP_PAG_SUPPORT)
@@ -58,7 +59,7 @@ static FUNC(void, XCP_CODE) Xcp_DownloadHal(void);
 static FUNC(void, XCP_CODE) Xcp_SwitchToWP(void);
 static FUNC(void, XCP_CODE) Xcp_SwitchToRP(void);
 static FUNC(void, XCP_CODE) Xcp_SetCalPageHal(void);
-#endif
+#endif /*STD_ON == XCP_PAG_SUPPORT*/
 #define XCP_STOP_SEC_CODE
 #include "Xcp_MemMap.h"
 /*=======[F U N C T I O N   I M P L E M E N T A T I O N S]====================*/
@@ -84,14 +85,16 @@ Xcp_CALInit(void) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
     uint8 segNum;
 #if (STD_ON == XCP_PAG_SUPPORT)
     Xcp_InitCalMem();
-#endif
+#endif /*STD_ON == XCP_PAG_SUPPORT*/
     /* init the RAM page */
     for (segNum = 0; segNum < Xcp_SegmentInfo.maxSegNum; segNum++)
     {
+        SchM_Enter_Xcp_Exclusive_Common();
         Xcp_BufferCopy(
             Xcp_SegmentInfo.pageInfoPtr[segNum].romStart,
             Xcp_SegmentInfo.pageInfoPtr[segNum].ramStart,
             Xcp_SegmentInfo.pageInfoPtr[segNum].size);
+        SchM_Exit_Xcp_Exclusive_Common();
 #if (STD_ON == XCP_PAG_SUPPORT)
         /* alloc an array to copy the data in the RAM */
         Xcp_BufferCopy(
@@ -99,7 +102,7 @@ Xcp_CALInit(void) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
             Xcp_SegmentInfo.pageInfoPtr[segNum].bufferPtr,
             Xcp_SegmentInfo.pageInfoPtr[segNum].size);
         Xcp_ActivPagNum[segNum] = XCP_RAM_PAGE_NUM;
-#endif
+#endif /*STD_ON == XCP_PAG_SUPPORT*/
     }
     return;
 }
@@ -281,7 +284,7 @@ Xcp_ShortDownload(void)
     Xcp_SendResp();
     return;
 }
-#endif /*(XCP_MAX_CTO > 8u)*/ /* PRQA S 2053 */ /* MISRA Rule 18.8, Dir 4.4 */
+#endif /*XCP_MAX_CTO > 8u*/
 /*
  * CAL/PAG Optional Function
  */
@@ -669,7 +672,7 @@ static FUNC(void, XCP_CODE) Xcp_SetCalPageHal(void)
     return;
 }
 
-#endif /* (STD_ON == XCP_SET_CAL_PAGE) */ /* PRQA S 2053 */ /* MISRA Rule 18.8, Dir 4.4 */
+#endif /*STD_ON == XCP_SET_CAL_PAGE*/
 #if (XCP_GET_CAL_PAGE == STD_ON)
 /******************************************************************************/
 /*
@@ -738,10 +741,10 @@ FUNC(void, XCP_CODE) Xcp_GetCalPage(void) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
     Xcp_SendResp();
     return;
 }
-#endif /* (XCP_GET_CAL_PAGE == STD_ON) */ /* PRQA S 2053 */ /* MISRA Rule 18.8, Dir 4.4 */
-#endif /* (STD_ON == XCP_PAG_SUPPORT) */ /* PRQA S 2053 */  /* MISRA Rule 18.8, Dir 4.4 */
+#endif /*XCP_GET_CAL_PAGE == STD_ON*/
+#endif /*STD_ON == XCP_PAG_SUPPORT*/
 
 #define XCP_STOP_SEC_CODE
 #include "Xcp_MemMap.h"
 
-#endif /* #if (XCP_PL_CAL == (XCP_PL_CAL & XCP_RESOURCE)) */ /* PRQA S 2053 */ /* MISRA Rule 18.8, Dir 4.4 */
+#endif /*XCP_PL_CAL == XCP_PL_CAL & XCP_RESOURCE*/

@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : SomeIpTp.c                                                  **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : HuRongbo                                                    **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : SomeIpTp.c                                                  **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : HuRongbo                                                    **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 /*******************************************************************************
 **                      Revision Control History                              **
 *******************************************************************************/
@@ -212,7 +213,9 @@ static FUNC(SomeIpTp_TpHeaderType, SOMEIPTP_CODE)
 
 SOMEIPTP_LOCAL_INLINE FUNC(PduLengthType, SOMEIPTP_CODE) SomeIpTp_Min(PduLengthType a, PduLengthType b);
 
+#if (STD_ON == SOMEIPTP_DEV_ERROR_DETECT)
 SOMEIPTP_LOCAL_INLINE FUNC(void, SOMEIPTP_CODE) SomeIpTp_DetReportError(uint8 ApiId, uint8 ErrorId);
+#endif
 
 SOMEIPTP_LOCAL_INLINE FUNC(void, SOMEIPTP_CODE) SomeIpTp_DetReportRuntimeError(uint8 ApiId, uint8 ErrorId);
 

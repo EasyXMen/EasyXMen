@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Crypto_GeneralTypes.h                                       **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : qinchun.yang                                                **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Type header for CSM                                         **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Crypto_GeneralTypes.h                                       **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : qinchun.yang                                                **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Type header for CSM                                         **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 /******************************************************************************
 **                      Revision Control History                             **
 ******************************************************************************/
@@ -54,7 +55,8 @@
 /*
  * Enumeration of the algorithm family.
  * */
-
+#define CRYPTO_E_QUEUE_FULL   ((Std_ReturnType)0x05u)
+#define CRYPTO_E_SMALL_BUFFER ((Std_ReturnType)0x03u)
 typedef enum
 {
     CRYPTO_ALGOFAM_3DES = 0x01u,
@@ -101,8 +103,10 @@ typedef enum
     CRYPTO_ALGOFAM_SHAKE128,
     CRYPTO_ALGOFAM_SHAKE256,
     CRYPTO_ALGOFAM_SIPHASH,
+    CRYPTO_ALGOFAM_SM1,
     CRYPTO_ALGOFAM_SM2,
     CRYPTO_ALGOFAM_SM3,
+    CRYPTO_ALGOFAM_SM4,
     CRYPTO_ALGOFAM_X25519
 } Crypto_AlgorithmFamilyType;
 
@@ -195,6 +199,8 @@ typedef enum
     CRYPTO_AEADDECRYPT = 0x06u,           /* AEADDecrypt Service */
     CRYPTO_SIGNATUREGENERATE = 0x07u,     /* SignatureGenerate Service*/
     CRYPTO_SIGNATUREVERIFY = 0x08u,       /* SignatureVerify Service */
+    CRYPTO_SECCOUNTERINCREMENT = 0x09u,   /* SECCOUNTERINCREMENT Service */
+    CRYPTO_SECCOUNTERREAD = 0x0Au,        /* SECCOUNTERREAD Service */
     CRYPTO_RANDOMGENERATE = 0x0Bu,        /* RandomGenerate Service */
     CRYPTO_RANDOMSEED = 0x0Cu,            /* RandomSeed Service */
     CRYPTO_KEYGENERATE = 0x0Du,           /* KeyGenerate Service */

@@ -18,21 +18,22 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    :  Os_Task.c                                                  **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      :  i-soft-os                                                  **
- **  Vendor      :                                                             **
- **  DESCRIPTION :  task manager                                               **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
- **  Version :   AUTOSAR classic Platform R19--Function Safety                 **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    :  Os_Task.c                                                  **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      :  i-soft-os                                                  **
+**  Vendor      :                                                             **
+**  DESCRIPTION :  task manager                                               **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
+**  Version :   AUTOSAR classic Platform R19--Function Safety                 **
+**                                                                            **
+*******************************************************************************/
 
 /*=======[I N C L U D E S]====================================================*/
 #include "Os_Internal.h"
@@ -243,6 +244,9 @@ FUNC(StatusType, OS_CODE) Os_ActivateTask(TaskType TaskID)
 #if (CFG_SCHED_POLICY != OS_PREEMPTIVE_NON)
             if (0U == Os_SCB.sysDispatchLocker)
             {
+#if (TRUE == CFG_TRACE_ENABLE)
+                Os_TraceTaskActive(TaskID);
+#endif
                 OS_START_DISPATCH();
                 /* PRQA S 3469 ++ */ /* MISRA Dir 4.9 */ /* OS_TASK_MACRO_TO_FUNCTION_004 */
                 Os_Dispatch();
@@ -367,6 +371,17 @@ static FUNC(StatusType, OS_CODE) Os_TerminateTask(void)
 #endif
 
         Os_SCB.sysDispatchLocker = 0U;
+#if (TRUE == CFG_TRACE_ENABLE)
+        Os_TraceTaskSwitch(
+            Os_SCB.sysRunningTaskID,
+            Os_SCB.sysHighTaskID,
+            OS_TRACE_TASK_SWITCH_REASON_TERMINATE,
+            OS_TRACE_TASK_SWITCH_REASON_TERMINATE_ACTIVE);
+#endif
+
+#if (TRUE == CFG_TASK_RESPONSE_TIME_ENABLE)
+        Os_TaskRecordTotalTick(Os_SCB.sysRunningTaskID);
+#endif /* TRUE == CFG_TASK_RESPONSE_TIME_ENABLE */
 
         OS_START_DISPATCH();
         /* PRQA S 3469 ++ */ /* MISRA Dir 4.9 */ /* OS_TASK_MACRO_TO_FUNCTION_004 */
@@ -515,6 +530,18 @@ static FUNC(StatusType, OS_CODE) Os_ChainTask(TaskType TaskID)
 
             Os_SCB.sysDispatchLocker = 0u;
 
+#if (TRUE == CFG_TRACE_ENABLE)
+            Os_TraceTaskSwitch(
+                Os_SCB.sysRunningTaskID,
+                Os_SCB.sysHighTaskID,
+                OS_TRACE_TASK_SWITCH_REASON_CHAIN_READY,
+                OS_TRACE_TASK_SWITCH_REASON_CHAIN_ACTIVE);
+#endif
+
+#if (TRUE == CFG_TASK_RESPONSE_TIME_ENABLE)
+            Os_TaskRecordTotalTick(Os_SCB.sysRunningTaskID);
+#endif /* TRUE == CFG_TASK_RESPONSE_TIME_ENABLE */
+
             OS_START_DISPATCH();
             /* PRQA S 3469 ++ */ /* MISRA Dir 4.9 */ /* OS_TASK_MACRO_TO_FUNCTION_004 */
             Os_Dispatch();
@@ -599,6 +626,10 @@ FUNC(StatusType, OS_CODE) GetTaskState(TaskType TaskID, TaskStateRefType State)
 
     VAR(StatusType, OS_VAR) status = E_OK;
 
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceEnter(OSServiceId_GetTaskState);
+#endif /* TRUE == CFG_TRACE_ENABLE */
+
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
     if (NULL_PTR == State)
     {
@@ -666,6 +697,10 @@ FUNC(StatusType, OS_CODE) GetTaskState(TaskType TaskID, TaskStateRefType State)
     }
 #endif
 
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceExit(OSServiceId_GetTaskState);
+#endif /* TRUE == CFG_TRACE_ENABLE */
+
     OS_EXIT_KERNEL(); /* PRQA S 3469 */ /* MISRA Dir 4.9 */ /* OS_TASK_MACRO_TO_FUNCTION_004 */
 
     return status;
@@ -695,6 +730,10 @@ FUNC(StatusType, OS_CODE) ActivateTask(TaskType TaskID)
 {
     OS_ENTER_KERNEL();
     VAR(StatusType, OS_VAR) status = E_OK;
+
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceEnter(OSServiceId_ActivateTask);
+#endif /* TRUE == CFG_TRACE_ENABLE */
 
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
     /* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */ /* OS_TASK_COMPILER_001 */
@@ -756,6 +795,10 @@ FUNC(StatusType, OS_CODE) ActivateTask(TaskType TaskID)
     }
 #endif
 
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceExit(OSServiceId_ActivateTask);
+#endif /* TRUE == CFG_TRACE_ENABLE */
+
     OS_EXIT_KERNEL(); /* PRQA S 3469 */ /* MISRA Dir 4.9 */ /* OS_TASK_MACRO_TO_FUNCTION_004 */
 
     return status;
@@ -785,6 +828,10 @@ FUNC(StatusType, OS_CODE) ActivateTaskAsyn(TaskType TaskID)
     OS_ENTER_KERNEL();
 
     VAR(StatusType, OS_VAR) status = E_OK;
+
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceEnter(OSServiceId_ActivateTaskAsyn);
+#endif /* TRUE == CFG_TRACE_ENABLE */
 
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
     /* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */ /* OS_TASK_COMPILER_001 */
@@ -846,6 +893,10 @@ FUNC(StatusType, OS_CODE) ActivateTaskAsyn(TaskType TaskID)
     }
 #endif
 
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceExit(OSServiceId_ActivateTaskAsyn);
+#endif /* TRUE == CFG_TRACE_ENABLE */
+
     OS_EXIT_KERNEL(); /* PRQA S 3469 */ /* MISRA Dir 4.9 */ /* OS_TASK_MACRO_TO_FUNCTION_004 */
     return status;
 }
@@ -873,6 +924,10 @@ FUNC(StatusType, OS_CODE) TerminateTask(void)
 {
     OS_ENTER_KERNEL();
     VAR(StatusType, OS_VAR) status = E_OK;
+
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceEnter(OSServiceId_TerminateTask);
+#endif /* TRUE == CFG_TRACE_ENABLE */
 
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
     if (OS_LEVEL_ISR2 == Os_SCB.sysOsLevel)
@@ -903,6 +958,10 @@ FUNC(StatusType, OS_CODE) TerminateTask(void)
         Os_TraceErrorHook(OSError_Save_TerminateTask(), OSServiceId_TerminateTask, status);
     }
 #endif
+
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceExit(OSServiceId_TerminateTask);
+#endif /* TRUE == CFG_TRACE_ENABLE */
 
     OS_EXIT_KERNEL(); /* PRQA S 3469 */ /* MISRA Dir 4.9 */ /* OS_TASK_MACRO_TO_FUNCTION_004 */
     return status;
@@ -959,14 +1018,7 @@ FUNC(StatusType, OS_CODE) GetTaskID(TaskRefType TaskID)
     else
 #endif /* TRUE == CFG_SERVICE_PROTECTION_ENABLE */
     {
-        if (OS_TASK_IDLE == Os_SCB.sysRunningTaskID)
-        {
-            *TaskID = OS_TASK_INVALID;
-        }
-        else
-        {
-            *TaskID = Os_SCB.sysRunningTaskID | (Os_SCB.sysCore << 12u);
-        }
+        *TaskID = Os_SCB.sysRunningTaskID | (Os_SCB.sysCore << 12u);
     }
 
 #if (CFG_ERRORHOOK == TRUE)
@@ -975,6 +1027,10 @@ FUNC(StatusType, OS_CODE) GetTaskID(TaskRefType TaskID)
         Os_TraceErrorHook(OSError_Save_GetTaskID(TaskID), OSServiceId_GetTaskID, status);
     }
 #endif
+
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceExit(OSServiceId_GetTaskID);
+#endif /* TRUE == CFG_TRACE_ENABLE */
 
     OS_EXIT_KERNEL(); /* PRQA S 3469 */ /* MISRA Dir 4.9 */ /* OS_TASK_MACRO_TO_FUNCTION_004 */
     return status;
@@ -1008,6 +1064,11 @@ FUNC(StatusType, OS_CODE) Schedule(void)
     OS_ENTER_KERNEL();
 
     VAR(StatusType, OS_VAR) status = E_OK;
+
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceEnter(OSServiceId_Schedule);
+#endif /* TRUE == CFG_TRACE_ENABLE */
+
     OS_ARCH_DECLARE_CRITICAL();
 
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
@@ -1075,6 +1136,13 @@ FUNC(StatusType, OS_CODE) Schedule(void)
             if (Os_SCB.sysHighTaskID != Os_SCB.sysRunningTaskID)
             {
                 Os_SCB.sysDispatchLocker = 0u;
+#if (TRUE == CFG_TRACE_ENABLE)
+                Os_TraceTaskSwitch(
+                    Os_SCB.sysRunningTaskID,
+                    Os_SCB.sysHighTaskID,
+                    OS_TRACE_TASK_SWITCH_REASON_SCHEDULE_READY,
+                    OS_TRACE_TASK_SWITCH_REASON_SCHEDULE_ACTIVE);
+#endif
 
                 OS_START_DISPATCH();
                 /* PRQA S 3469 ++ */ /* MISRA Dir 4.9 */ /* OS_TASK_MACRO_TO_FUNCTION_004 */
@@ -1098,6 +1166,10 @@ FUNC(StatusType, OS_CODE) Schedule(void)
         Os_TraceErrorHook(OSError_Save_Schedule(), OSServiceId_Schedule, status);
     }
 #endif
+
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceExit(OSServiceId_Schedule);
+#endif /* TRUE == CFG_TRACE_ENABLE */
 
     OS_EXIT_KERNEL(); /* PRQA S 3469 */ /* MISRA Dir 4.9 */ /* OS_TASK_MACRO_TO_FUNCTION_004 */
     return status;
@@ -1131,6 +1203,10 @@ FUNC(StatusType, OS_CODE) ChainTask(TaskType TaskID)
     OS_ENTER_KERNEL();
 
     VAR(StatusType, OS_VAR) status = E_OK;
+
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceEnter(OSServiceId_ChainTask);
+#endif /* TRUE == CFG_TRACE_ENABLE */
 
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
     if (OS_LEVEL_ISR2 == Os_SCB.sysOsLevel)
@@ -1212,6 +1288,10 @@ FUNC(StatusType, OS_CODE) ChainTask(TaskType TaskID)
         Os_TraceErrorHook(OSError_Save_ChainTask(TaskID), OSServiceId_ChainTask, status);
     }
 #endif
+
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceExit(OSServiceId_ChainTask);
+#endif /* TRUE == CFG_TRACE_ENABLE */
 
     OS_EXIT_KERNEL(); /* PRQA S 3469 */ /* MISRA Dir 4.9 */ /* OS_TASK_MACRO_TO_FUNCTION_004 */
     return status;

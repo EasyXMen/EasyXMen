@@ -18,41 +18,90 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Com.h                                                       **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : zhengfei.li                                                 **
- **  Vendor      :                                                             **
- **  DESCRIPTION : API declaration and type definitions of COM                 **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                       **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Com.h                                                       **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : zhengfei.li                                                 **
+**  Vendor      :                                                             **
+**  DESCRIPTION : API declaration and type definitions of COM                 **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                       **
+**                                                                            **
+*******************************************************************************/
 /*******************************************************************************
 **                      Revision Control History                              **
 *******************************************************************************/
+/* <VERSION>  <DATE>    <AUTHOR>      <REVISION LOG>
+ *  V2.0.0    20200706  zhengfei.li   Initial version
+ *                                    (Upgrade according to the R19_11 standards)
+ *  V2.0.1    20211108  zhengfei.li   Optimize enumeration element names, macro names
+ *  V2.1.0    20211217  zhengfei.li   PB/PC configuration parameter split
+ *  V2.1.1    20230111  xiaojian.liang Multicore support
+ *  V2.1.2    20231009  fupeng.yu     1.support ComRxDataTimeoutAction seted to SUBSTITUTE
+ *                                    2.add IPDU based Reception Deadline Monitoring
+ *                                    3.add MDT handling in com_txconfirmation
+ *  V2.1.3    20240122  shengnan.sun  1.Code optimization.
+ *                                    2.Reference library function from istd_lib.h.
+ *  V2.1.4    20240329  shengnan.sun  Modify Com_SetTxSignalBuff and Com_GetTxSignalValue.
+ *  V2.1.5    20240415  shengnan.sun  1.Resolve RxGroupSignal gateway error.
+ *                                    2.ComDataInvalidAction is NOTIFY, do not repalce InitValue.
+ *  V2.1.6    20240422  shengnan.sun  RxTimeout handle with update bit disable.
+ *  V2.1.7    20240423  shengnan.sun  Resolve ComTxModeRepetitionPeriod is error after the
+ *                                    ComMinimumDelayTime timer timeout, when ComTxModeMode is DIRECT or MIXED.
+ *  V2.1.8    20240425  shengnan.sun  Modify Com_StartOfReception to copy data.
+ *  V2.1.9    20240524  shengnan.sun  Add multiCore code.
+ *  V2.1.10   20240614  shengnan.sun  Modify the compilation condition of Com_RxSignalBuffHandle.
+ *  V2.1.11   20240703  shengnan.sun  Add the COM_MULTIPLE_PARTITION_USED judgment to reference os.h file.
+ *  V2.1.12   20240723  shengnan.sun  Compatible with 16-bit addressable CPU.
+ *  V2.1.13   20240815  shengnan.sun  Generated code optimization.
+ *  V2.1.14   20240821  shengnan.sun  Modify code to fit TxMode is DIRECT withoutRepetition.
+ *  V2.1.15   20240829  shengnan.sun  Modify Com_StartOfReceptionHandle, the second input
+ *                                    parameter of ILib_memcpy shall be a pointer.
+ *  V2.1.16   20240921  shengnan.sun  Modify the input parameter IpduId to get TxIpduPartitionId.
+ *  V2.1.17   20240926  shengnan.sun  Modify Com_SwitchIpduTxMode to judge
+ *  V2.1.18   20241106  shengnan.sun  Modify signalInvalidId of Com_Rx8NSignalHandle, not invalidValueId.
+ *  V2.1.19   20241112  shengnan.sun  Processing RxSignalGroup when invalidValueAction is Replace.
+ *  V2.1.20   20241122  shengnan.sun  Modify COM_TX_GRP_SIGNAL_TYPE_UINT8_N_ENABLE of Com_TxSignalPack to
+ *                                    COM_TX_SIGNAL_TYPE_UINT8_N_ENABLE
+ *  V2.1.21   20241126  shengnan.sun  Modify the calculation of msbByteBitSize
+ *  V2.1.22   20241217  shengnan.sun  1.Modify RxSignalGroup invalid action.
+ *                                    2.Modify Com_SwitchIpduTxModeHandle to get TxModeTimeOffset.
+ *  V2.1.23   20241226  shengnan.sun  The process of copying the length of a uint8_dyn gateway signal should be
+ *                                    protected.
+ *  V2.1.24   20250213  tong.zhao     Modify call condition of the notify function in Com_TxDMTimeOutNotification.
+ *  V2.1.25   20250407  tong.zhao     Modify the process in Com_TxSignalPackHandle when cpu is big endian.
+ *  V2.1.25   20250414  tong.zhao     Fix for the issues of the Com multi-core and update-bit signal gateway.
+ ******************************************************************************/
+
 #ifndef COM_H
 #define COM_H
 /*******************************************************************************
 **                      Includes                                              **
 *******************************************************************************/
 #include "Com_Types.h"
-#include "PduR_Com.h"
+
 /*******************************************************************************
 **                      Global Symbols                                        **
 *******************************************************************************/
-#define COM_VENDOR_ID             62u
-#define COM_MODULE_ID             50u
-#define COM_H_AR_MAJOR_VERSION    4u
-#define COM_H_AR_MINOR_VERSION    2u
-#define COM_H_AR_PATCH_VERSION    2u
-#define COM_H_SW_MAJOR_VERSION    2u
-#define COM_H_SW_MINOR_VERSION    0u
-#define COM_H_SW_PATCH_VERSION    17u
+/* Published information */
+#if !defined(COM_PUBLISHED_INFORMATION)
+#define COM_PUBLISHED_INFORMATION
+#define COM_MODULE_ID                   50u
+#define COM_VENDOR_ID                   62u
+#define COM_AR_RELEASE_MAJOR_VERSION    4u
+#define COM_AR_RELEASE_MINOR_VERSION    5u
+#define COM_AR_RELEASE_REVISION_VERSION 0u
+#define COM_SW_MAJOR_VERSION            2u
+#define COM_SW_MINOR_VERSION            1u
+#define COM_SW_PATCH_VERSION            26u
+#elif ((COM_SW_MAJOR_VERSION != 2u) || (COM_SW_MINOR_VERSION != 1u))
+#error "Com: Mismatch in Software Version"
+#endif
 
 #define COM_SERVICE_NOT_AVAILABLE ((uint8)0x80u)
 #define COM_BUSY                  ((uint8)0x81u)
@@ -97,6 +146,7 @@
 #define COM_E_UNINIT        ((uint8)0x02u)
 #define COM_E_PARAM_POINTER ((uint8)0x03u)
 #define COM_E_INIT_FAILED   ((uint8)0x04u)
+#define COM_E_PARTITION     ((uint8)0x05u)
 #endif /*STD_ON == COM_DEV_ERROR_DETECT*/
 #define COM_MAINFUNCTIONTX_ID      ((uint8)0x19u)
 #define COM_E_SKIPPED_TRANSMISSION ((uint8)0x05u)
@@ -148,7 +198,6 @@
 **                      Internal Macro Define                                 **
 *******************************************************************************/
 #define COM_UNUSED_RXIPDUCOUNTERID            (Com_RxIPduCounterIdType)(-1)
-#define COM_UNUSED_RXIPDUGWID                 (Com_RxIpduGWIdType)(-1)
 #define COM_UNUSED_RXIPDUGROUPID              (Com_RxIpduGroupIdType)(-1)
 #define COM_UNUSED_TXIPDUGROUPID              (Com_TxIpduGroupIdType)(-1)
 #define COM_UNUSED_RXSIGTIMEOUTID             (Com_RxSigTimeoutIdType)(-1)
@@ -214,20 +263,20 @@ BEGIN_C_DECLS
         {                                                                                                      \
             (VersionInfo)->vendorID = COM_VENDOR_ID;                                                           \
             (VersionInfo)->moduleID = COM_MODULE_ID;                                                           \
-            (VersionInfo)->sw_major_version = COM_H_SW_MAJOR_VERSION;                                          \
-            (VersionInfo)->sw_minor_version = COM_H_SW_MINOR_VERSION;                                          \
-            (VersionInfo)->sw_patch_version = COM_H_SW_PATCH_VERSION;                                          \
+            (VersionInfo)->sw_major_version = COM_SW_MAJOR_VERSION;                                            \
+            (VersionInfo)->sw_minor_version = COM_SW_MINOR_VERSION;                                            \
+            (VersionInfo)->sw_patch_version = COM_SW_PATCH_VERSION;                                            \
         }                                                                                                      \
     } while (0)
 #else
-#define Com_GetVersionInfo(VersionInfo)                           \
-    do                                                            \
-    {                                                             \
-        (VersionInfo)->vendorID = COM_VENDOR_ID;                  \
-        (VersionInfo)->moduleID = COM_MODULE_ID;                  \
-        (VersionInfo)->sw_major_version = COM_H_SW_MAJOR_VERSION; \
-        (VersionInfo)->sw_minor_version = COM_H_SW_MINOR_VERSION; \
-        (VersionInfo)->sw_patch_version = COM_H_SW_PATCH_VERSION; \
+#define Com_GetVersionInfo(VersionInfo)                         \
+    do                                                          \
+    {                                                           \
+        (VersionInfo)->vendorID = COM_VENDOR_ID;                \
+        (VersionInfo)->moduleID = COM_MODULE_ID;                \
+        (VersionInfo)->sw_major_version = COM_SW_MAJOR_VERSION; \
+        (VersionInfo)->sw_minor_version = COM_SW_MINOR_VERSION; \
+        (VersionInfo)->sw_patch_version = COM_SW_PATCH_VERSION; \
     } while (0)
 #endif
 #endif
@@ -262,6 +311,8 @@ extern FUNC(void, COM_CODE) Com_Init(P2CONST(Com_ConfigType, AUTOMATIC, COM_CONS
  */
 /******************************************************************************/
 extern FUNC(void, COM_CODE) Com_DeInit(void);
+
+#if (COM_IPDUGROUP_MAX > 0u)
 /******************************************************************************/
 /*
  * Brief               This service starts I-PDU groups.
@@ -293,6 +344,33 @@ extern FUNC(void, COM_CODE) Com_IpduGroupControl(Com_IpduGroupVector ipduGroupVe
 extern FUNC(void, COM_CODE) Com_ReceptionDMControl(Com_IpduGroupVector ipduGroupVector);
 /******************************************************************************/
 /*
+ * Brief               Enables the reception deadline monitoring for the I-PDUs within the given IPDU group.
+ * ServiceId           0x06
+ * Sync/Async          Synchronous
+ * Reentrancy          Reentrant for different I-PDU groups. Non reentrant for the same I-PDU group
+ * Param-Name[in]      IpduGroupId: Id of I-PDU group where reception DM shall be enabled.
+ * Param-Name[out]     None
+ * Param-Name[in/out]  None
+ * Return              None
+ */
+/******************************************************************************/
+extern void Com_EnableReceptionDM(Com_IpduGroupIdType IpduGroupId);
+/******************************************************************************/
+/*
+ * Brief               Disables the reception deadline monitoring for the I-PDUs within the given IPDU group.
+ * ServiceId           0x05
+ * Sync/Async          Synchronous
+ * Reentrancy          Reentrant for different I-PDU groups. Non reentrant for the same I-PDU group.
+ * Param-Name[in]      IpduGroupId: Id of I-PDU group where reception DM shall be disabled.
+ * Param-Name[out]     None
+ * Param-Name[in/out]  None
+ * Return              None
+ */
+/******************************************************************************/
+extern void Com_DisableReceptionDM(Com_IpduGroupIdType IpduGroupId);
+#endif
+/******************************************************************************/
+/*
  * Brief               Returns the status of the AUTOSAR COM module.
  * ServiceId           0x07
  * Sync/Async          Synchronous
@@ -306,6 +384,8 @@ extern FUNC(void, COM_CODE) Com_ReceptionDMControl(Com_IpduGroupVector ipduGroup
  */
 /******************************************************************************/
 extern FUNC(Com_StatusType, COM_CODE) Com_GetStatus(void);
+
+#if (COM_IPDUGROUP_MAX > 0u)
 /******************************************************************************/
 /*
  * Brief               This service sets all bits of the given Com_IpduGroupVector to 0.
@@ -334,6 +414,7 @@ extern FUNC(void, COM_CODE) Com_ClearIpduGroupVector(Com_IpduGroupVector ipduGro
 /******************************************************************************/
 extern FUNC(void, COM_CODE)
     Com_SetIpduGroup(Com_IpduGroupVector ipduGroupVector, Com_IpduGroupIdType ipduGroupId, boolean bitval);
+#endif
 /******************************************************************************/
 /*
  * Brief               The service Com_SendSignal updates the signal(include group signal) object
@@ -582,7 +663,48 @@ extern Std_ReturnType Com_TriggerIPDUSendWithMetaData(PduIdType PduId, uint8* Me
  */
 /******************************************************************************/
 extern FUNC(void, COM_CODE) Com_SwitchIpduTxMode(PduIdType PduId, boolean Mode);
-
+/******************************************************************************/
+/*
+ * Brief               This function performs the processing of the AUTOSAR COM module's receive processing that
+ *                     are not directly handled within the COM's functions invoked by the PDU-R, for example
+ * Com_RxIndication.
+ * ServiceId           0x18
+ * Sync/Async          None
+ * Reentrancy          None
+ * Param-Name[in]      mainFunctionId
+ * Param-Name[out]     None
+ * Param-Name[in/out]  None
+ * Return              None
+ */
+/******************************************************************************/
+extern void Com_MainFunctionRx(Com_MainFunctionType mainFunctionId);
+/******************************************************************************/
+/*
+ * Brief               This function performs the processing of the AUTOSAR COM module's transmission activities that
+ * are not directly handled within the COM's function invoked by the RTE, for example Com_SendSignal.
+ * ServiceId           0x19
+ * Sync/Async          None
+ * Reentrancy          None
+ * Param-Name[in]      mainFunctionId
+ * Param-Name[out]     None
+ * Param-Name[in/out]  None
+ * Return              None
+ */
+/******************************************************************************/
+extern void Com_MainFunctionTx(Com_MainFunctionType mainFunctionId);
+/******************************************************************************/
+/*
+ * Brief               Calls the signal gateway part of the AUTOSAR COM module to forward received signals to be routed.
+ * ServiceId           0x1a
+ * Sync/Async          None
+ * Reentrancy          None
+ * Param-Name[in]      mainFunctionId
+ * Param-Name[out]     None
+ * Param-Name[in/out]  None
+ * Return              None
+ */
+/******************************************************************************/
+extern void Com_MainFunctionRouteSignals(Com_MainFunctionType mainFunctionId);
 END_C_DECLS
 
 #endif /*end of COM_H*/

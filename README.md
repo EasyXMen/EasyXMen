@@ -30,8 +30,6 @@ https://atomgit.com/easyxmen/XMen
 │   └── SystemServices      # 系统服务模块代码
 ├── Drivers                 # 板级外设芯片代码
 ├── Examples                # 示例工程
-├── RTE                     # RTE代码
-│   └── StaticCode          # RTE 静态代码
 ├── RTOS                    # OS 代码
 │   ├── Extend              # OS 扩展代码
 │   ├── Kernel              # OS 内核代码
@@ -72,7 +70,7 @@ https://atomgit.com/easyxmen/XMen
 
 ## 项目状态
 
-EasyXMen目前支持NXP S32K148平台
+EasyXMen目前支持NXP S32K148,英飞凌TC397，瑞萨RH850 U2A16这三个平台
 
 
 
@@ -96,7 +94,7 @@ EasyXMen目前支持NXP S32K148平台
 
 # 开源许可
 
-EasyXMen项目整体基于LGPL V2.1开源，详见[LICENSE.txt](./LICENSE.txt)，并附有例外，例外详见[EXCEPTION.txt](./EXCEPTION.txt)
+EasyXMen项目整体基于LGPL V2.1开源，详见[LICENSE.txt](./LICENSE.txt)，并附有例外，例外详见[EXCEPTION.md](./EXCEPTION.md)
 
 同时，EasyXMen也提供商业许可协议（Commercial License)，详见[https://EasyXMen.com/xy/reference/permissions.html](https://EasyXMen.com/xy/reference/permissions.html)
 

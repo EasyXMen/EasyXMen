@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : BswM_LinTp.h                                                **
- **                                                                            **
- **  Created on  : 2020-03-24                                                  **
- **  Author      : qinchun.yang                                                **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : BswM_LinTp.h                                                **
+**                                                                            **
+**  Created on  : 2020-03-24                                                  **
+**  Author      : qinchun.yang                                                **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 
 #ifndef BSWM_LINTP_H
 #define BSWM_LINTP_H
@@ -72,5 +73,5 @@
 FUNC(void, BSWM_LINTP_CODE)
 BswM_LinTp_RequestMode(NetworkHandleType Network, LinTp_Mode LinTpRequestedMode);
 
-#endif /* BSWM_LINTP_ENABLED == STD_ON */
+#endif /*BSWM_LINTP_ENABLED == STD_ON*/
 #endif /* BSWM_LINTP_H */

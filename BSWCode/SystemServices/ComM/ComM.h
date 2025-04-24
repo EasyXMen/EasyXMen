@@ -18,6 +18,10 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
+ */
+/* PRQA S 3108-- */
+/*
+ ********************************************************************************
  ************************************************************************************************************************
  ** **
  **  @file               : ComM.h **
@@ -29,7 +33,6 @@
  **  @specification(s)   : AUTOSAR classic Platform R19-11 **
  ** **
  ***********************************************************************************************************************/
-/* PRQA S 3108-- */
 
 #ifndef COMM_H_
 #define COMM_H_
@@ -39,12 +42,17 @@
 #include "ComM_PBCfg.h"
 #include "ComM_Types.h"
 
+#if COMM_MULTIPLE_PARTITION_ENABLED == STD_ON
+#include "Os.h"
+#endif
+
 /*=================================================[macros]===========================================================*/
-#define COMM_E_NO_ERROR         0u
-#define COMM_E_UNINIT           1u
-#define COMM_E_WRONG_PARAMETERS 2u
-#define COMM_E_PARAM_POINTER    3u
-#define COMM_E_INIT_FAILED      4u
+#define COMM_E_NO_ERROR                  0u
+#define COMM_E_UNINIT                    1u
+#define COMM_E_WRONG_PARAMETERS          2u
+#define COMM_E_PARAM_POINTER             3u
+#define COMM_E_INIT_FAILED               4u
+#define COMM_E_INVALID_PARTITION_CONTEXT 5u
 
 /*-------------------------------------------------[Service Id]-------------------------------------------------------*/
 #define COMM_SID_INIT                      0x01u
@@ -84,6 +92,7 @@
 #define COMM_SID_NM_PNCLEARNBITINDICATION  0x69u
 #define COMM_SID_GETCURRENTPNCCOMMODE      0x6au
 #define COMM_SID_FORWARDSYNCPNCSHUTDOWN    0x6bu
+#define COMM_SID_GETCHANNELAPPLICATIONID   0x70u
 
 /*========================================[external function declarations]============================================*/
 BEGIN_C_DECLS
@@ -142,11 +151,9 @@ ComM_UpdatePncMembership(boolean Control, P2CONST(uint8, AUTOMATIC, COMM_APPL_DA
 FUNC(Std_ReturnType, COMM_CODE) ComM_PreventWakeUp(NetworkHandleType Channel, boolean Status);
 #endif
 
-#if (COMM_MODE_LIMITATION_ENABLED == STD_ON) && (COMM_RESET_AFTER_FORCING_NOCOMM == STD_ON)
-FUNC(Std_ReturnType, COMM_CODE)
-ComM_LimitChannelToNoComMode(NetworkHandleType Channel, boolean Status);
-
-FUNC(Std_ReturnType, COMM_CODE) ComM_LimitECUToNoComMode(boolean Status);
+#if COMM_MODE_LIMITATION_ENABLED == STD_ON
+Std_ReturnType ComM_LimitChannelToNoComMode(NetworkHandleType Channel, boolean Status);
+Std_ReturnType ComM_LimitECUToNoComMode(boolean Status);
 #endif
 
 #if (COMM_MODE_LIMITATION_ENABLED == STD_ON) && defined(COMM_GLOBAL_NVM_BLOCK_DESCRIPTOR)
@@ -178,6 +185,17 @@ extern Std_ReturnType ComM_GetInhibitionStatus(NetworkHandleType Channel, ComM_I
  * @retval        E_NOT_OK  Change of the ECU Group Classification Status failed
  */
 extern Std_ReturnType ComM_SetECUGroupClassification(ComM_InhibitionStatusType Status);
+#endif
+
+#if COMM_MULTIPLE_PARTITION_ENABLED == STD_ON
+/**
+ * @brief         Returns the ApplicationID of a ComM channel.
+ * @id            0x70
+ * @synchronous   Synchronous
+ * @reentrancy    Reentrant
+ * @retval        The ApplicationID of a ComM channel
+ */
+extern ApplicationType ComM_GetChannelApplicationID(NetworkHandleType Channel);
 #endif
 
 END_C_DECLS

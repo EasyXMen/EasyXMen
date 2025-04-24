@@ -18,21 +18,22 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Os_Counter.c                                                **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : i-soft-os                                                   **
- **  Vendor      :                                                             **
- **  DESCRIPTION : counter manager                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
- **  Version :   AUTOSAR classic Platform R19--Function Safety                 **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Os_Counter.c                                                **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : i-soft-os                                                   **
+**  Vendor      :                                                             **
+**  DESCRIPTION : counter manager                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
+**  Version :   AUTOSAR classic Platform R19--Function Safety                 **
+**                                                                            **
+*******************************************************************************/
 
 /*=======[I N C L U D E S]====================================================*/
 #include "Os_Internal.h"
@@ -48,13 +49,13 @@
 
 /*=======[I N T E R N A L   D A T A]=========================================*/
 /* PRQA S 0791 ++ */ /* MISRA Rule 5.4 */ /*OS_COUNTER_MACRONAME_SIMILAR_001*/
-#define OS_START_SEC_VAR_CLEARED_CLONE_16
+#define OS_START_SEC_VAR_CLONE_16
 /* PRQA S 0791 -- */ /* MISRA Rule 5.4 */
 #include "Os_MemMap.h"
 /* PRQA S 3218 ++ */ /* MISRA Rule 8.9 */ /*OS_COUNTER_TYPE_005*/
 static VAR(Os_CounterType, OS_VAR) Os_CfgCounterMax;
 /* PRQA S 3218 -- */ /* MISRA Rule 8.9 */
-#define OS_STOP_SEC_VAR_CLEARED_CLONE_16
+#define OS_STOP_SEC_VAR_CLONE_16
 #include "Os_MemMap.h"
 
 /*=======[I N T E R N A L   F U N C T I O N   D E C L A R A T I O N S]========*/
@@ -217,7 +218,7 @@ FUNC(StatusType, OS_CODE) Os_IncrementHardCounter(CounterType CounterID)
     {
         /* PRQA S 3469, 1338 ++ */ /* MISRA  Rule 17.8,Dir-4.9*/ /* OS_COUNTER_MACRO_004 */
         CounterID = Os_GetObjLocalId(CounterID);
-/* PRQA S 3469, 1338 -- */ /* MISRA  Rule 17.8,Dir-4.9*/
+        /* PRQA S 3469, 1338 -- */ /* MISRA  Rule 17.8,Dir-4.9*/
 
 /* OS285 :check CounterID */
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
@@ -374,6 +375,10 @@ FUNC(StatusType, OS_CODE) IncrementCounter(CounterType CounterID)
 
     VAR(StatusType, OS_VAR) err = E_OK;
 
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceEnter(OSServiceId_IncrementCounter);
+#endif /* TRUE == CFG_TRACE_ENABLE */
+
     /* SWS_Os_00629:A COUNTER belonging to an OS-Application shall be
      * incremented by the core on which the OS-Application resides. */
     /* PRQA S 3469 ++ */ /* MISRA  Dir-4.9*/ /* OS_COUNTER_MACRO_004 */
@@ -483,6 +488,10 @@ FUNC(StatusType, OS_CODE) GetCounterValue(CounterType CounterID, TickRefType Val
 
     VAR(StatusType, OS_VAR) err = E_OK;
 
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceEnter(OSServiceId_GetCounterValue);
+#endif /* TRUE == CFG_TRACE_ENABLE */
+
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
     if (NULL_PTR == Value)
     {
@@ -552,6 +561,10 @@ FUNC(StatusType, OS_CODE) GetCounterValue(CounterType CounterID, TickRefType Val
     }
 #endif
 
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceExit(OSServiceId_GetCounterValue);
+#endif /* TRUE == CFG_TRACE_ENABLE */
+
     OS_EXIT_KERNEL(); /* PRQA S 3469 */ /* MISRA  Dir-4.9*/ /* OS_COUNTER_MACRO_004 */
     return err;
 }
@@ -580,6 +593,10 @@ FUNC(StatusType, OS_CODE) GetElapsedValue(CounterType CounterID, TickRefType Val
 {
     OS_ENTER_KERNEL();
     VAR(StatusType, OS_VAR) err = E_OK;
+
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceEnter(OSServiceId_GetElapsedValue);
+#endif /* TRUE == CFG_TRACE_ENABLE */
 
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
     if ((NULL_PTR == Value) || (NULL_PTR == ElapsedValue))
@@ -658,6 +675,10 @@ FUNC(StatusType, OS_CODE) GetElapsedValue(CounterType CounterID, TickRefType Val
             err);
     }
 #endif
+
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceExit(OSServiceId_GetElapsedValue);
+#endif /* TRUE == CFG_TRACE_ENABLE */
 
     OS_EXIT_KERNEL(); /* PRQA S 3469 */ /* MISRA  Dir-4.9*/ /* OS_COUNTER_MACRO_004 */
     return err;

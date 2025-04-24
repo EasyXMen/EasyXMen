@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : DoIP.h                                                      **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : YB                                                          **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : DoIP.h                                                      **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : YB                                                          **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 
 #ifndef DOIP_H
 #define DOIP_H
@@ -76,9 +77,14 @@
  *               2023-11-15   xue.han         fix CPT-7619 change DoIP_ActivationLineType
  *  V2.0.19      2023-11-21   Xinrun.Wang     Optimize code performance, change some functions to inline
  *               2023-12-27   xue.han         QAC
- *  V2.0.20      2024-01-22   tao.yu          QAC
- *               2024-03-12   xue.han         QAC
- *  V2.0.21      2024-04-09   xue.han         fix CPT-8630 null pointer in DoIP_SoAdTpTxConfirmation and compile error
+ *  V2.0.20      2024-02-02   xue.han         QAC
+ *               2024-03-09   xue.han         delete redundant type definitions
+ *               2024-04-09   xue.han         fix CPT-8630 null pointer in DoIP_SoAdTpTxConfirmation and compile error
+ *               2024-03-19   xue.han         change DoIPActivationLine function name
+ *               2024-03-22   xue.han         clear 0210HuaYangproject compilation warnings
+ *  V2.0.21      2024-03-26   tao.yu          fix schm
+ *               2024-04-26   xue.han         delete Det report in DoIP_MainFunction
+ *               2024-04-30   xue.han         QAC
                  2024-05-06   hao.wen         fix CPT-8965 greenhills compilation error caused by DoIPVehicle not being
                                               configured on the server
  *  V2.0.22      2024-06-17   hao.wen         Fix an issue where vehicle announcement messages could not be sent in
@@ -88,8 +94,13 @@
                  2024-07-17   hao.wen         Resolve compilation warnings, CPT-9724 CPT-9724
                  2024-07-23   hao.wen         Let routing active 0x01 negative response priority higher than 0x03
                                               negative response, CPT-9640
+                 2024-08-08   hao.wen         QAC
  *  V2.0.23      2024-08-26   hao.wen         Modify interface's service ID
-                 2024-09-27   xue.han         QAC
+                 2024-10-23   hao.wen         Fix CPT-9656,alive check response message was received but the route
+                                              activation request that triggered the sending of the alive check was
+                                              not processed.
+ *  V2.0.24      2025-02-26   hao.wen         1. Realize routing activation authentication and confirmation.
+                                              2. When metadata is not configured, obtain sa and ta from the channel.
 ============================================================================*/
 
 /*******************************************************************************
@@ -113,7 +124,7 @@
 #define DOIP_AR_RELEASE_PATCH_VERSION (0u)
 #define DOIP_SW_MAJOR_VERSION         (2u)
 #define DOIP_SW_MINOR_VERSION         (0u)
-#define DOIP_SW_PATCH_VERSION         (23u)
+#define DOIP_SW_PATCH_VERSION         (24u)
 
 #if (STD_ON == DOIP_DEV_ERROR_DETECT)
 #define DOIP_E_UNINIT                   (0x01)
@@ -198,6 +209,14 @@ DoIP_GetVersionInfo(P2VAR(Std_VersionInfoType, AUTOMATIC, DOIP_VAR) versioninfo)
 /* PRQA S 3432-- */ /* MISRA Rule 20.7 */
 /******************************************************************************/
 /*
+ * Brief               Schedules the Diagnostic over IP module. (Entry point
+ *                     for scheduling)
+ * ServiceId           0x02
+ *
+ */
+FUNC(void, DOIP_CODE) DoIP_MainFunction(void);
+/******************************************************************************/
+/*
  * Brief               This function is used to notify the DoIP on a switch of
  *                     the DoIPActivationLine
  * ServiceId           0x0f
@@ -209,7 +228,9 @@ DoIP_GetVersionInfo(P2VAR(Std_VersionInfoType, AUTOMATIC, DOIP_VAR) versioninfo)
  * Return              None
  *
  */
-FUNC(void, DOIP_CODE) DoIP_ActivationLineSwitch(void);
+/* PRQA S 0624,3451,3449++ */ /* MISRA Rule 8.3,8.5,8.5 */
+FUNC(void, DOIP_CODE) DoIP_ActivationLineSwitch(boolean* Active);
+/* PRQA S 0624,3451,3449-- */ /* MISRA Rule 8.3,8.5,8.5 */
 /******************************************************************************/
 /*
  * Brief               By calling this API with the corresponding DoIPPduRRxId the currently ongoing data reception
@@ -295,7 +316,6 @@ DoIP_IfTransmit(VAR(PduIdType, AUTOMATIC) id, P2CONST(PduInfoType, AUTOMATIC, DO
  */
 /******************************************************************************/
 FUNC(Std_ReturnType, DOIP_CODE) DoIP_IfCancelTransmit(VAR(PduIdType, AUTOMATIC) id);
-
 /******************************************************************************/
 /*
  * Brief               Schedules the Diagnostic over IP module. (Entry point

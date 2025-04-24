@@ -18,46 +18,49 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : WdgM.c                                                      **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : haibin.shao                                                 **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S):   AUTOSAR classic Platform R19-11                       **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*********************************************************************************
+**                                                                            **
+**  FILENAME    : WdgM.c                                                      **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : haibin.shao                                                 **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S):   AUTOSAR classic Platform R19-11                       **
+**                                                                            **
+*******************************************************************************/
 
 /*======================[R E V I S I O N   H I S T O R Y]=====================*/
-/*  <VERSION>    <DATE>    <AUTHOR>   <REVISION LOG>
- *  V1.0.0     20180116     xinyu.J   Initial version
- *  V1.0.1     20180713     Xinyu.J   1. Modify the type definition base on the Req356/357/358
- *                                    2. Delete the function of checking SE deactivate or activate,
- *                                    which is realized by the ORIENTAIS.
- *  V1.0.2     20190703     Xinyu.J   Add the Function WdgM_GetSupervisedEntityTabIndex
- *  V1.0.3     20190717     Xinyu.J   Update the note and code after CodeReview
- *  V1.0.4     20221222     peng.wu   Modify the head and version info
- *  V1.0.5     20230424     peng.wu   Fix the bugs during logic supervision
- *  V1.0.6     20230630     XD.guan   1. Fix spelling errors
- *                                    2. Modify and add errors classification
- *                                    3. Add the macros switch about BSWM
- *  V1.0.7     20230712     XD.guan   1. Fix some bugs
- *                                    2. Delete WdgMDeInitFlag
- *                                    3. Modify some process about WDGM is not initialized
- *  V1.0.8     20230817     peng.wu   1.Fix CPT-6093 CPT-6205;
- *  V1.0.9     20231120     haibin.shao Update the SchM for WdgM's interaction with ShutDownOS
- *  V2.0.0     20230714     xudong.G  CP2.1 Release Version. Delete version info in other files
- *  V2.0.1     20230804     Peng.Wu   1.Add WdgMDeInitFlag; 2.Fix spelling errors;3.Delete no used macros
- *  V2.0.2     20231120     Peng.Wu   1.Add multi-core supervision
- *  V2.0.3     20231226     Peng.Wu   1.Fix CPT-7826,CPT-7834; 2.Update some QAC problems
- *  V2.0.4     20240228     Jian.Jiang  Rectification of QAC based on new rule sets
- *  V2.0.5     20240910     Xudong.Guan Change the time obtaining method
- *  V2.0.6     20240926     Xudong.Guan Slove QAC problems
+/*  <VERSION>    <DATE>    <AUTHOR>        <REVISION LOG>
+ *  V1.0.0     20180116     xinyu.J        Initial version
+ *  V1.0.1     20180713     Xinyu.J        1. Modify the type definition base on the Req356/357/358
+ *                                         2. Delete the function of checking SE deactivate or activate,
+ *                                         which is realized by the ORIENTAIS.
+ *  V1.0.2     20190703     Xinyu.J        Add the Function WdgM_GetSupervisedEntityTabIndex
+ *  V1.0.3     20190717     Xinyu.J        Update the note and code after CodeReview
+ *  V1.0.4     20221222     peng.wu        Modify the head and version info
+ *  V1.0.5     20230424     peng.wu        Fix the bugs during logic supervision
+ *  V1.0.6     20230630     Xudong.Guan    1.Fix spelling errors
+ *                                         2.Modify and add errors classification
+ *                                         3.Add the macros switch about BSWM
+ *  V1.0.7     20230712     Xudong.Guan    1.Fix some bugs
+ *                                         2.Delete WdgMDeInitFlag
+ *                                         3.Modify some process about WDGM is not initialized
+ *  V1.0.8     20230817     peng.wu        1.Fix CPT-6093 CPT-6205;
+ *  V1.0.9     20231120     haibin.shao    Update the SchM for WdgM's interaction with ShutDownOS
+ *  V2.1.0     20230714     Xudong.Guan    CP2.1 Release Version. Delete version info in other files
+ *  V2.1.1     20230804     Peng.Wu        1.Add WdgMDeInitFlag; 2.Fix spelling errors;3.Delete no used macros
+ *  V2.1.2     20231120     Peng.Wu        1.Add multi-core supervision
+ *  V2.1.3     20231226     Peng.Wu        1.Fix CPT-7826,CPT-7834; 2.Update some QAC problems
+ *  V2.1.4     20240228     Jian.Jiang     Rectification of QAC based on new rule sets
+ *  V2.1.5     20240528     Xudong.Guan    Multi-core branch code regression
+ *  V2.1.6     20240730     Xudong.Guan    1.Delete WdgMDeInitFlag; 2.Change the time obtaining method.
+ *  V2.1.7     20240801     Xudong.Guan    1.Add external function declarations; 2.Change the time interval calculation
+ *                                         method of Deadline Supervision.
+ *  V2.1.8     20240808     Xudong.Guan    Modify the initialization logic for multiple devices.
  */
 /*============================================================================*/
 /**
@@ -98,7 +101,7 @@
 
 #define WDGM_C_SW_MAJOR_VERSION 2u /*Major Version*/
 #define WDGM_C_SW_MINOR_VERSION 0u /*Minor Version*/
-#define WDGM_C_SW_PATCH_VERSION 6u /*Patch Version*/
+#define WDGM_C_SW_PATCH_VERSION 3u /*Patch Version*/
 #define WDGM_C_AR_MAJOR_VERSION 4u /*Autosar Major Version*/
 #define WDGM_C_AR_MINOR_VERSION 5u /*Autosar Minor Version*/
 #define WDGM_C_AR_PATCH_VERSION 0u /*Autosar Patch Version*/
@@ -166,8 +169,6 @@ static WdgM_GlobalStatusType WdgMPartitionGlobalStatus[WDGM_BSWM_MULTI_PARTITION
 #define WDGM_START_SEC_VAR_POWER_ON_INIT_8
 #include "WdgM_MemMap.h"
 #if (WDGM_SE_NUM > 0)
-/*The flag for WdgM De-initialization.*/
-static Std_ReturnType WdgMDeInitFlag = E_NOT_OK;
 #endif /*WDGM_SE_NUM > 0*/
 #define WDGM_STOP_SEC_VAR_POWER_ON_INIT_8
 #include "WdgM_MemMap.h"
@@ -280,8 +281,7 @@ extern FUNC(void, BSWM_WDGM_CODE) BswM_WdgM_RequestPartitionReset(ApplicationTyp
  * REQ ID              DD_2_061,DD_2_088,DD_2_089,DD_2_144~DD_2_149
  */
 /**************************************************************/
-FUNC(void, WDGM_CODE)
-WdgM_Init(const WdgM_ConfigType* WdgMConfigPtr)
+FUNC(void, WDGM_CODE) WdgM_Init(const WdgM_ConfigType* WdgMConfigPtr)
 {
 #if (WDGM_SE_NUM > 0)
     uint8 dev_index; /*Rule-2.2     This initialization is redundant.*/
@@ -331,8 +331,6 @@ WdgM_Init(const WdgM_ConfigType* WdgMConfigPtr)
 
                 WdgMModeInfo.WdgMModeInitStatus = WDGM_INIT_NOT;
 
-                WdgMDeInitFlag = (Std_ReturnType)E_OK;
-
                 break;
             }
         }
@@ -347,8 +345,6 @@ WdgM_Init(const WdgM_ConfigType* WdgMConfigPtr)
             WdgMModeInfo.WdgMModeInitStatus = WDGM_INIT_OK;
 
             WdgMModeInfo.WdgMExpiredSupTolCounter = 0u;
-
-            WdgMDeInitFlag = (Std_ReturnType)E_NOT_OK;
         }
     }
 #endif /*WDGM_SE_NUM > 0*/
@@ -383,7 +379,6 @@ WdgM_DeInit(void)
     }
     else
     {
-        WdgMDeInitFlag = E_OK;
         if ((Std_ReturnType)E_OK == WdgM_SetMode((WdgM_ModeType)WDGM_SLEEP_MODE_ID))
         {
             /*req WdgM 286 : Fig 4-14*/
@@ -499,17 +494,9 @@ WdgM_SetMode(WdgM_ModeType Mode)
     }
     else
     {
-        if (((Std_ReturnType)E_OK == WdgMDeInitFlag)
-            || ((WDGM_SLEEP_MODE_ID != Mode)
-                && ((WDGM_GLOBAL_STATUS_OK == WdgMGlobalInfo.WdgMGlobalResult)
-                    || (WDGM_GLOBAL_STATUS_FAILED == WdgMGlobalInfo.WdgMGlobalResult))))
+        if ((WDGM_GLOBAL_STATUS_OK == WdgMGlobalInfo.WdgMGlobalResult)
+            || (WDGM_GLOBAL_STATUS_FAILED == WdgMGlobalInfo.WdgMGlobalResult))
         {
-
-            if ((Std_ReturnType)E_OK == WdgMDeInitFlag)
-            {
-                WdgMDeInitFlag = E_NOT_OK;
-            }
-
             for (triggerIndex = 0; triggerIndex < WdgMConfig->WdgMMode[Mode].ModeTriggerCnt; triggerIndex++)
             {
                 Deviceid = WdgMConfig->WdgMMode[Mode].WdgMTriggerRelated[triggerIndex].WdgM_WatchdogDevice;
@@ -681,7 +668,7 @@ WdgM_CheckpointReached(WdgM_SupervisedEntityIdType SEID, WdgM_CheckpointIdType C
             l_ReturnValue = WdgM_GetSECheckpointIndex(CheckpointID, CurSECfg, &SECPIndex);
             if ((Std_ReturnType)E_OK == l_ReturnValue)
             {
-                SchM_Enter_WdgM(); /* PRQA S 3469*/ /* MISRA Rule 4.9 */
+                SchM_Enter_WdgM_Exclusive(); /* PRQA S 3469*/ /* MISRA Rule 4.9 */
 #if (WDGM_ALIVE_NUM > 0)
                 /*Confirm whether has AliveSup,then update AI Cnt*/
                 WdgM_UpdateAICounter(SECPIndex, CurSECfg);
@@ -702,7 +689,7 @@ WdgM_CheckpointReached(WdgM_SupervisedEntityIdType SEID, WdgM_CheckpointIdType C
                     WdgM_UpdateIntLogSup(SECPIndex, CurSECfg);
 #endif /*WDGM_INTLOG_SUP_NUM > 0*/
                 }
-                SchM_Exit_WdgM(); /* PRQA S 3469*/ /* MISRA Rule 4.9 */
+                SchM_Exit_WdgM_Exclusive(); /* PRQA S 3469*/ /* MISRA Rule 4.9 */
             }
             else
             {
@@ -876,7 +863,7 @@ WdgM_PerformReset(void)
                     WDGM_TRIGGER_CONDITION_STOP);
             }
         }
-        SchM_Exit_WdgM(); /* PRQA S 3469*/ /* MISRA Rule 4.9 */
+        SchM_Exit_WdgM_Exclusive(); /* PRQA S 3469*/ /* MISRA Rule 4.9 */
         while (1)
         {
             /*Nothing to do*/
@@ -1759,14 +1746,9 @@ void WdgM_MainFunction(void)
     uint16 SE_Index;
     const WdgM_SECfgType* ModeSEInfo;
 
-#if (STD_ON == WDGM_DEV_ERROR_DETECT)
-    if (WDGM_INIT_NOT == WdgMModeInfo.WdgMModeInitStatus)
+    if (WDGM_INIT_OK == WdgMModeInfo.WdgMModeInitStatus)
     {
-        (void)Det_ReportError(WDGM_MODULE_ID, WDGM_INSTANCE_ID, WDGM_MAINFUNCTION_ID, WDGM_E_UNINIT); /*req WdgM 039*/
-    }
-    else
-#endif /*STD_ON == WDGM_DEV_ERROR_DETECT*/
-    {
+
         if (WDGM_GLOBAL_STATUS_DEACTIVATED != WdgMGlobalInfo.WdgMGlobalResult) /*req WdgM 0063*/
         {
 /*Determine the External Log Sup status of each SE*/
@@ -2093,9 +2075,9 @@ static FUNC(void, WDGM_CODE) WdgM_StopStatusErrorHanding(void)
 #if (STD_ON == WDGM_IMMEDIATE_RESET)
     /*DD_2_039:(1)*/
     /*ShutdownOS shall Deinit the RAM for OS, this shall forbid the fail of startOS*/
-    SchM_Enter_WdgM();
+    SchM_Enter_WdgM_Exclusive();
     (void)Mcu_PerformReset(); /* req WdgM 133*/
-    SchM_Exit_WdgM();
+    SchM_Exit_WdgM_Exclusive();
 /*req WdgM 134: no notification to the application via the RTE */
 #endif /*STD_ON == WDGM_IMMEDIATE_RESET*/
 }
@@ -2119,7 +2101,7 @@ static FUNC(void, WDGM_CODE) WdgM_RestartOSApplication(const WdgM_SECfgType* Cer
     if ((uint16)WDGM_NO_OS_APPLICAITON_REF != CerSEInfo->WdgMEcucPartitionRef)
     {
 #if (WDGM_BSWM_ENABLED == STD_ON)
-        BswM_WdgM_RequestPartitionReset(CerSEInfo->WdgMEcucPartitionRef);
+        (void)BswM_WdgM_RequestPartitionReset(CerSEInfo->WdgMEcucPartitionRef);
 #endif
     }
 }

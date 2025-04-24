@@ -18,25 +18,28 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : LinTp_Master.h                                              **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : HuRongbo                                                    **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : LinTp_Master.h                                              **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : HuRongbo                                                    **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 #ifndef LINTP_MASTER_H
 #define LINTP_MASTER_H
 
 #include "LinIf_Cfg.h"
-#if ((LINTP_MASTER_SUPPORT == STD_ON) && (STD_ON == LINIF_MASTER_SUPPORT))
+#if (LINIF_TP_SUPPORTED == STD_ON)
+#include "LinTp_Cfg.h"
+#if (LINTP_MASTER_SUPPORT == STD_ON)
 #include "LinTp.h"
 #include "LinTp_Internal.h"
 
@@ -54,7 +57,7 @@
 #define LINTP_IS_TRS_EVENT(e)  (tpChPtr->TrsEvent & (e)) != 0u
 
 /* Convert time(ms) to tick */
-#define LINTP_MS2TICK(TIME) (OS_MS2TICK_SYSTIMERCORE0(TIME))
+#define LINTP_MS2TICK(TIME) OS_MS2TICK_SYSTIMERCORE0(TIME)
 
 /*******************************************************************************
 **                      Runtime Type Definitions                              **
@@ -86,6 +89,58 @@ typedef struct
     P2CONST(LinTp_TxNSduType, AUTOMATIC, LINIF_APPL_CONST) PhyReqNSduPtr;
     PduLengthType PhyReqSduSize;
 } LinTp_MasterRuntimeType;
+
+/*******************************************************************************
+**                      Macros Function Definitions                           **
+*******************************************************************************/
+/* Reset channel runtime data */
+static inline void LinTp_MasterChReset(LinTp_MasterRuntimeType* tpChPtr)
+{
+    tpChPtr->LinTpChannelState = LINTP_CHANNEL_IDLE;
+    tpChPtr->TxNSduPtr = NULL_PTR;
+    tpChPtr->RxNSduPtr = NULL_PTR;
+    tpChPtr->SduRemaining = 0u;
+    tpChPtr->SduSize = 0u;
+    tpChPtr->SduIdx = 0u;
+    tpChPtr->SduSN = 0u;
+    tpChPtr->SubEvent = LINTP_EVENT_NONE;
+    tpChPtr->LastFrameType = LINTP_FRAMETYPE_NONE;
+    tpChPtr->TpTimer.EnabledTimer = LINTP_TIMER_NONE;
+    tpChPtr->TpP2Timer.EnabledTimer = LINTP_TIMER_NONE;
+    tpChPtr->PendingFrameNum = 0u;
+    tpChPtr->MRFRequestedNad = 0x00;
+    tpChPtr->MRFRequestedSID = 0x00;
+    tpChPtr->BufReqNum = 0x00;
+    LINTP_CLR_TRS_EVENT(LINTP_TRS_EVT_PHY_TX | LINTP_TRS_EVT_FUN_TX);
+}
+
+/* Construct SF */
+static inline void LinTp_ConstructSF(LinTp_MasterRuntimeType* tpChPtr)
+{
+    tpChPtr->SduBuf[LINTP_PDU_OFS_NAD] = tpChPtr->TxNSduPtr->LinTpTxNSduNad;
+    tpChPtr->SduBuf[LINTP_PDU_OFS_PCI] = (uint8)tpChPtr->SduSize;
+    tpChPtr->SduIdx = LINTP_PDU_OFS_SF_DATA;
+}
+
+/* Construct FF */
+static inline void LinTp_ConstructFF(LinTp_MasterRuntimeType* tpChPtr)
+{
+    tpChPtr->SduBuf[LINTP_PDU_OFS_NAD] = tpChPtr->TxNSduPtr->LinTpTxNSduNad;
+    tpChPtr->SduBuf[LINTP_PDU_OFS_PCI] = LINTP_PDU_PCI_FF | (uint8)(tpChPtr->SduSize >> 8u);
+    tpChPtr->SduBuf[LINTP_PDU_OFS_LEN] = (uint8)(tpChPtr->SduSize & 0xffu);
+    tpChPtr->SduIdx = LINTP_PDU_OFS_FF_DATA;
+    tpChPtr->SduSN = 1u;
+}
+
+/* Construct CF */
+static inline void LinTp_ConstructCF(LinTp_MasterRuntimeType* tpChPtr)
+{
+    tpChPtr->SduBuf[LINTP_PDU_OFS_NAD] = tpChPtr->TxNSduPtr->LinTpTxNSduNad;
+    tpChPtr->SduBuf[LINTP_PDU_OFS_PCI] = LINTP_PDU_PCI_CF | tpChPtr->SduSN;
+    tpChPtr->SduIdx = LINTP_PDU_OFS_CF_DATA;
+    tpChPtr->SduSN++;
+    tpChPtr->SduSN &= LINTP_PDU_PCI_SN_MASK;
+}
 
 /*******************************************************************************
 **                      Global Functions                                      **
@@ -296,6 +351,6 @@ FUNC(boolean, LINIF_CODE) LinTp_IsStopMRFOrSRFSendEventSet(NetworkHandleType Lin
 FUNC(boolean, LINIF_CODE) LinTp_GetScheduleChangeDiag(NetworkHandleType LinIfChannelId);
 #endif /* STD_ON == LINTP_SCHEDULE_CHANGE_DIAG_SUPPORT */
 
-#endif /* LINTP_MASTER_SUPPORT == STD_ON && STD_ON == LINIF_MASTER_SUPPORT */
-
+#endif /* LINTP_MASTER_SUPPORT == STD_ON */
+#endif /* LINIF_TP_SUPPORTED == STD_ON */
 #endif /* LINTP_MASTER_H */

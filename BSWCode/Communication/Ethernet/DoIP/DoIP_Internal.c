@@ -18,26 +18,28 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : DOIP_Internal.c                                             **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : Zhiqiang.huang                                              **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : DOIP_Internal.c                                             **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : Zhiqiang.huang                                              **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 
 /*******************************************************************************
 **                      Include Section                                       **
 *******************************************************************************/
 #include "DoIP_Internal.h"
 #include "DoIP_Types.h"
+#include "SchM_DoIP.h"
 /*******************************************************************************
 **                      Internal Variable Definitions                         **
 *******************************************************************************/
@@ -87,12 +89,6 @@ VAR(DoIP_TcpInnerBufferType, DOIP_VAR_CLEARED) DoIP_TcpInnerBuf[DOIP_MAX_TCP_CON
 #include "DoIP_MemMap.h"
 
 #if (DOIP_ROLE_SERVER_SUPPORT == TRUE)
-#define DOIP_START_SEC_VAR_CLEARED_BOOLEAN
-#include "DoIP_MemMap.h"
-/*activation line status*/
-VAR(DoIP_ActivationLineType, DOIP_VAR_CLEARED) DoIP_ActivationLineStatus = DOIP_ACTIVATION_LINE_INACTIVE;
-#define DOIP_STOP_SEC_VAR_CLEARED_BOOLEAN
-#include "DoIP_MemMap.h"
 
 #define DOIP_START_SEC_VAR_INIT_8
 #include "DoIP_MemMap.h"
@@ -164,7 +160,9 @@ DOIP_LOCAL FUNC(void, DOIP_CODE) DoIP_SendRoutineActiveRsp(
     VAR(uint16, AUTOMATIC) txPduId,
     VAR(uint16, AUTOMATIC) sa,
     VAR(uint8, AUTOMATIC) routingActivationResponseCode,
-    VAR(uint8, AUTOMATIC) bufIdx);
+    VAR(uint8, AUTOMATIC) bufIdx,
+    P2VAR(uint8, AUTOMATIC, DOIP_VAR) responseData,
+    VAR(uint8, AUTOMATIC) responseDataLen);
 
 DOIP_LOCAL FUNC(void, DOIP_CODE) DoIP_SendAliveCheckReq(VAR(uint16, AUTOMATIC) txPduId, VAR(uint8, AUTOMATIC) bufIdx);
 
@@ -218,9 +216,17 @@ DOIP_LOCAL FUNC(void, DOIP_CODE) DoIP_SendSingleSaAliveCheck(VAR(uint16, AUTOMAT
 
 DOIP_LOCAL FUNC(void, DOIP_CODE) DoIP_SendAllSocketsAliveCheck(void);
 
-DOIP_LOCAL_INLINE FUNC(boolean, DOIP_CODE) DoIP_IsAuthenticatioRequiredCheck(VAR(uint8, AUTOMATIC) activationType);
+DOIP_LOCAL_INLINE FUNC(boolean, DOIP_CODE) DoIP_IsAuthenticatioRequiredCheck(
+    VAR(uint8, AUTOMATIC) activationType,
+    P2CONST(DoIP_TcpInnerBufferType, AUTOMATIC, DOIP_CONST) buffer,
+    P2VAR(uint8, AUTOMATIC, DOIP_VAR) responseData,
+    P2VAR(uint8, AUTOMATIC, DOIP_VAR) responseDataLen);
 
-DOIP_LOCAL_INLINE FUNC(boolean, DOIP_CODE) DoIP_IsConfirmationRequiredCheck(VAR(uint8, AUTOMATIC) activationType);
+DOIP_LOCAL_INLINE FUNC(boolean, DOIP_CODE) DoIP_IsConfirmationRequiredCheck(
+    VAR(uint8, AUTOMATIC) activationType,
+    P2CONST(DoIP_TcpInnerBufferType, AUTOMATIC, DOIP_CONST) buffer,
+    P2VAR(uint8, AUTOMATIC, DOIP_VAR) responseData,
+    P2VAR(uint8, AUTOMATIC, DOIP_VAR) responseDataLen);
 
 DOIP_LOCAL FUNC(void, DOIP_CODE) DoIP_HandleAlivecheckTimeOut(VAR(uint8, AUTOMATIC) index);
 #endif /* DOIP_ROLE_SERVER_SUPPORT == TRUE */
@@ -422,6 +428,15 @@ DoIP_DiagMsgHandleHeaderReceived(
                     {
                         taIsFound = TRUE;
                         break;
+                    }
+                    else
+                    {
+                        if ((ta != tcpConnStatus->ta) && (doipChannel->DoIPChannelSARef->DoIPTesterSA == sa)
+                            && (ta == doipChannel->DoIPChannelTARef->DoIPTargetAddressValue))
+                        {
+                            taIsFound = TRUE;
+                            break;
+                        }
                     }
                 }
                 if (FALSE == taIsFound)
@@ -634,6 +649,7 @@ FUNC(void, DOIP_CODE) DoIP_TcpSocketTimeoutHandler(void) /* PRQA S 1532 */ /* MI
 
     for (i = 0u; i < DOIP_MAX_TCP_CONNECTIONS; i++)
     {
+        SchM_Enter_DoIP_ExclusiveArea();
         tcpConnStatus = &DoIP_TcpConnStatus[i];
         if ((tcpConnStatus->soConnState == SOAD_SOCON_ONLINE)
             && (tcpConnStatus->routActiveState != DOIP_SOCKET_CONNECTION_REGISTERED))
@@ -690,6 +706,7 @@ FUNC(void, DOIP_CODE) DoIP_TcpSocketTimeoutHandler(void) /* PRQA S 1532 */ /* MI
         {
             /*nothing should do*/
         }
+        SchM_Exit_DoIP_ExclusiveArea();
     }
 }
 
@@ -727,7 +744,7 @@ DoIP_TpTransmitInternal(
                     txCtrl->pdurTxPduId = DoIPPduRTxId;
                     txCtrl->pdurTxPduIdRef = doIPPduRTxPduRef;
 
-                    if (E_OK == DoIP_GetTcpConnIdxBySa(sa, &index))
+                    if (E_OK == DoIP_GetTcpConnIdxBySa(ta, &index))
                     {
                         DoIP_TcpConnStatus[index].diagMsgTimer = 0u;
                         DoIP_TcpConnStatus[index].wait4DiagMsgResponse = TRUE;
@@ -1081,12 +1098,25 @@ DoIP_SoAdTxIdExtrac(
             sa = (((uint16)(MetaDataPtr[1])) << 8u) + (uint16)(MetaDataPtr[0]);
 #endif /* HIGH_BYTE_FIRST == CPU_BYTE_ORDE */
         }
-
-        if (E_OK == DoIP_GetTcpConnIdxBySa(sa, &i))
+    }
+    else
+    {
+        for (i = 0u; i < DoIP_PBCfgPtr->DoIPChannelNbr; i++)
         {
-            *soadID = DoIP_TcpConnStatus[i].lowerlayerTxPduId;
-            ret = E_OK;
+            P2CONST(DoIPPduRTxPduType, AUTOMATIC, DOIP_VAR) pdurTxPdu = DoIP_PBCfgPtr->DoIPChannel[i].DoIPPduRTxPdu;
+            DoIPChannel = &DoIP_PBCfgPtr->DoIPChannel[i];
+            if ((pdurTxPdu != NULL_PTR) && (DoIPPduRTxId == pdurTxPdu->DoIPPduRTxPduId))
+            {
+                sa = DoIPChannel->DoIPChannelSARef->DoIPTesterSA;
+                break;
+            }
         }
+    }
+
+    if (E_OK == DoIP_GetTcpConnIdxBySa(sa, &i))
+    {
+        *soadID = DoIP_TcpConnStatus[i].lowerlayerTxPduId;
+        ret = E_OK;
     }
 
     return ret;
@@ -1373,7 +1403,14 @@ DoIP_PdurSaTaExtract(
         DoIPPduRTxPdu = DoIPChannel->DoIPPduRTxPdu;
         if ((NULL_PTR != DoIPPduRTxPdu) && (DoIPPduRTxPdu->DoIPPduRTxPduId == pdurid))
         {
-            if (DOIP_TPPDU == DoIPPduRTxPdu->DoIPPduType)
+            if (MetaDataPtr == NULL_PTR)
+            {
+                *sa = DoIPChannel->DoIPChannelTARef->DoIPTargetAddressValue;
+                *ta = DoIPChannel->DoIPChannelSARef->DoIPTesterSA;
+                ret = E_OK;
+                ProcessOn = FALSE;
+            }
+            else if (DOIP_TPPDU == DoIPPduRTxPdu->DoIPPduType)
             {
                 metaDataLength = DoIPPduRTxPdu->DoIPMetaDataMask & 0x0Fu;
                 c_sa = DoIPChannel->DoIPChannelSARef->DoIPTesterSA;
@@ -1504,11 +1541,26 @@ DoIP_TransmitBufIdExtrac(
             sa = (((uint16)(info->MetaDataPtr[1])) << 8u) + (uint16)(info->MetaDataPtr[0]);
 #endif /*HIGH_BYTE_FIRST == CPU_BYTE_ORDER*/
         }
-        if (E_OK == DoIP_GetTcpConnIdxBySa(sa, &i))
+    }
+    else
+    {
+        for (i = 0u; i < DoIP_PBCfgPtr->DoIPChannelNbr; i++)
         {
-            *bufferId = DoIP_TcpConnStatus[i].bufferId;
-            ret = E_OK;
+            P2CONST(DoIPPduRTxPduType, AUTOMATIC, DOIP_VAR) pdurTxPdu = DoIP_PBCfgPtr->DoIPChannel[i].DoIPPduRTxPdu;
+
+            if ((pdurTxPdu != NULL_PTR) && (pdurid == pdurTxPdu->DoIPPduRTxPduId))
+            {
+                DoIPChannel = &DoIP_PBCfgPtr->DoIPChannel[i];
+                sa = DoIPChannel->DoIPChannelSARef->DoIPTesterSA;
+                break;
+            }
         }
+    }
+
+    if (E_OK == DoIP_GetTcpConnIdxBySa(sa, &i))
+    {
+        *bufferId = DoIP_TcpConnStatus[i].bufferId;
+        ret = E_OK;
     }
 
     return ret;
@@ -1529,12 +1581,9 @@ DoIP_MsgIfRxHandler(
     uint8 index;
 #endif /* DOIP_ROLE_CLIENT_SUPPORT == TRUE */
     PayloadType = DOIP_U8_2_U16(&PduInfoPtr->SduDataPtr[2]);
-#if (DOIP_ROLE_CLIENT_SUPPORT == TRUE)
+    /* PRQA S 3678++ */ /* MISRA Dir 8.13 */
     uint8* PayloadPtr = &PduInfoPtr->SduDataPtr[DOIP_HEADER_LEN];
-#else
-    const uint8* PayloadPtr = &PduInfoPtr->SduDataPtr[DOIP_HEADER_LEN];
-#endif
-
+    /* PRQA S 3678-- */ /* MISRA Dir 8.13 */
     /*RX IF data may be udp message or annoucement*/
 #if (DOIP_ROLE_CLIENT_SUPPORT == TRUE)
     if ((DOIP_ROLE_CLIENT & role) != 0u)
@@ -1920,7 +1969,6 @@ FUNC(void, DOIP_CODE) DoIP_SendVehicleIdentificationRsp(VAR(uint16, AUTOMATIC) t
     uint8 i, j;
     boolean findFlag = FALSE;
     uint16 sa;
-    DoIPGetGidCallbackFncType GetGid;
     DoIPFurtherActionByteCallbackFncType GetFurtherActionByte;
     SoAd_SoConIdType SoConId;
     uint8 byte;
@@ -1929,6 +1977,7 @@ FUNC(void, DOIP_CODE) DoIP_SendVehicleIdentificationRsp(VAR(uint16, AUTOMATIC) t
 #if (FALSE == DOIP_GID_CONFIGURED)
     uint8 temp[6];
     Std_ReturnType ret;
+    DoIPGetGidCallbackFncType GetGid;
 #endif /*FALSE == DOIP_GID_CONFIGURED*/
 #if (TRUE == DOIP_USE_VEHICLEIDENTIFICATIONSYNCSTATUS)
     uint8 vinGidStatus;
@@ -2119,10 +2168,12 @@ DOIP_LOCAL FUNC(void, DOIP_CODE)
         VAR(uint16, AUTOMATIC) txPduId,
         VAR(uint16, AUTOMATIC) sa,
         VAR(uint8, AUTOMATIC) routingActivationResponseCode,
-        VAR(uint8, AUTOMATIC) bufIdx)
+        VAR(uint8, AUTOMATIC) bufIdx,
+        P2VAR(uint8, AUTOMATIC, DOIP_VAR) responseData,
+        VAR(uint8, AUTOMATIC) responseDataLen)
 /* PRQA S 1505-- */ /* MISRA Rule 8.7 */
 {
-    VAR(uint8, AUTOMATIC) txBuffer[DOIP_NON_DIAG_QUEUE_BUFFER_SIZE];
+    VAR(uint8, AUTOMATIC) txBuffer[DOIP_NON_DIAG_QUEUE_BUFFER_SIZE] = {0};
     PduInfoType pduInfo;
     DoIP_TcpInnerBufferType* pBuffer = &DoIP_TcpInnerBuf[bufIdx];
     TxChannelCtrlType* txCtrl = &pBuffer->txCtrl;
@@ -2133,8 +2184,12 @@ DOIP_LOCAL FUNC(void, DOIP_CODE)
     DoIP_u16_2_u8(&txBuffer[8], sa);
     DoIP_u16_2_u8(&txBuffer[8 + 2], DoIP_PBCfgPtr->DoIPLogicalAddress);
     txBuffer[8 + 4] = routingActivationResponseCode;
-    DoIP_u32_2_u8(&txBuffer[8 + 5], 0u);
-    DoIP_u32_2_u8(&txBuffer[8 + 9], 0u);
+    DoIP_u32_2_u8(&txBuffer[8 + 5], 0u); /* reserved */
+
+    if (responseDataLen != 0u)
+    {
+        DoIP_MemCpy(responseData, &txBuffer[8 + 9], responseDataLen); /* oem */
+    }
 
     pduInfo.SduLength = DoIP_ROUTINE_ACTIVE_RESPONSE_LENGTH;
     pduInfo.SduDataPtr = txBuffer;
@@ -2374,14 +2429,17 @@ DOIP_LOCAL FUNC(void, DOIP_CODE)
 {
     SoAd_SoConIdType SoConId;
     uint16 sa;
-    uint16 ta;
-    uint8 activationType;
+    uint16 ta = 0u;
+    uint8 activationType = 0xFFu;
     uint8 routingActivationResponseCode;
     DoIP_SocketAssignmentResultType SocketAssignmentResult;
     const DoIP_TcpInnerBufferType* buffer;
     uint8 i;
     uint8 j;
     boolean activationIsOk = FALSE;
+
+    uint8 responseData[4] = {0};
+    uint8 responseDataLen = 0u;
 
     buffer = &DoIP_TcpInnerBuf[bufIdx];
 
@@ -2413,21 +2471,18 @@ DOIP_LOCAL FUNC(void, DOIP_CODE)
             SocketAssignmentResult = DoIP_SocketHandle(SoConId, sa, ta, &routingActivationResponseCode);
             if (DOIP_SOCKET_ASSIGNMENT_SUCCESSFUL == SocketAssignmentResult)
             {
-                boolean authenticated;
-                if (TRUE == DoIP_IsAuthenticatioRequiredCheck(activationType))
-                {
-                    /*todo*/
-                    authenticated = TRUE;
-                }
-                else
+                boolean authenticated = FALSE;
+
+                if (TRUE == DoIP_IsAuthenticatioRequiredCheck(activationType, buffer, responseData, &responseDataLen))
                 {
                     authenticated = TRUE;
                 }
+
                 if (TRUE == authenticated) /* PRQA S 2995,2991 */ /* MISRA Rule 2.2,14.3 */
                 {
-                    if (TRUE == DoIP_IsConfirmationRequiredCheck(activationType))
+                    if (TRUE
+                        == DoIP_IsConfirmationRequiredCheck(activationType, buffer, responseData, &responseDataLen))
                     {
-                        /*todo*/
                         /*SWS_DoIP_00113*/
                         for (i = 0u; i < DoIP_PBCfgPtr->DOIPTesterNbr; i++)
                         {
@@ -2460,37 +2515,13 @@ DOIP_LOCAL FUNC(void, DOIP_CODE)
                     }
                     else
                     {
-                        /*Routing successfully activated.*/
-                        routingActivationResponseCode = 0x10;
-#if (DOIP_ROLE_GATEWAY_SUPPORT == TRUE)
-                        if (E_OK == DoIP_GetTcpConnIdxBySa(sa, &i))
-                        {
-                            for (j = 0u; j < DoIP_PBCfgPtr->DoIPChannelNbr; j++)
-                            {
-                                if (((DOIP_ROLE_GATEWAY_ETH & DoIP_PBCfgPtr->DoIPChannel[j].DoIPRole) != 0u)
-                                    && (NULL_PTR != DoIP_PBCfgPtr->DoIPChannel[j].DoIPChannelSARef)
-                                    && (sa == DoIP_PBCfgPtr->DoIPChannel[j].DoIPChannelSARef->DoIPTesterSA))
-                                {
-                                    (void)DoIP_ConnectToVehicle(0);
-                                    DoIP_TcpConnStatus[i].activationType = activationType;
-                                    if (DoIP_PendingRoutMsg.pendingFlag == FALSE)
-                                    {
-                                        DoIP_PendingRoutMsg.pendingSa = sa;
-                                        DoIP_PendingRoutMsg.pendingBufferIndex = bufIdx;
-                                        DoIP_PendingRoutMsg.pendingSocketConId = SoConId;
-                                        DoIP_PendingRoutMsg.pendingTxPduId = txPduId;
-                                        DoIP_PendingRoutMsg.pendingFlag = TRUE;
-                                    }
-                                    return;
-                                }
-                            }
-                        }
-#endif /*DOIP_ROLE_GATEWAY_SUPPORT == TRUE*/
+                        /*Routing activation denied due to rejected confirmation. SWS_DoIP_00274*/
+                        routingActivationResponseCode = 0x05;
                     }
                 }
                 else
                 {
-                    /*Routing activation denied due to missing authentication.*/
+                    /*Routing activation denied due to missing authentication.  SWS_DoIP_00111 */
                     routingActivationResponseCode = 0x04; /* PRQA S 2880 */ /* MISRA Rule 2.1 */
                 }
             }
@@ -2517,6 +2548,9 @@ DOIP_LOCAL FUNC(void, DOIP_CODE)
                     DoIP_PendingRoutMsg.pendingSocketConId = SoConId;
                     DoIP_PendingRoutMsg.pendingTxPduId = txPduId;
                     DoIP_PendingRoutMsg.pendingFlag = TRUE;
+
+                    DoIP_PendingRoutMsg.responseDataLen = responseDataLen;
+                    DoIP_MemCpy(responseData, DoIP_PendingRoutMsg.responseData, responseDataLen);
                 }
                 return;
             }
@@ -2531,7 +2565,8 @@ DOIP_LOCAL FUNC(void, DOIP_CODE)
         /*SWS_DoIP_00104,Routing activation denied due to unknown source address.*/
         routingActivationResponseCode = 0x00;
     }
-    DoIP_SendRoutineActiveRsp(txPduId, sa, routingActivationResponseCode, bufIdx);
+
+    DoIP_SendRoutineActiveRsp(txPduId, sa, routingActivationResponseCode, bufIdx, responseData, responseDataLen);
     DoIP_ResetTcpInnerRxBuf(bufIdx);
     /*ISO13400-2 Table 25*/
     switch (routingActivationResponseCode)
@@ -2621,7 +2656,10 @@ DOIP_LOCAL FUNC(void, DOIP_CODE)
                         DoIP_PendingRoutMsg.pendingTxPduId,
                         DoIP_PendingRoutMsg.pendingSa,
                         routingActivationResponseCode,
-                        DoIP_PendingRoutMsg.pendingBufferIndex);
+                        DoIP_PendingRoutMsg.pendingBufferIndex,
+                        DoIP_PendingRoutMsg.responseData,
+                        DoIP_PendingRoutMsg.responseDataLen);
+
                     DoIP_ResetTcpInnerRxBuf(bufIdx);
                     for (j = 0u; j < DOIP_MAX_TCP_CONNECTIONS; j++)
                     {
@@ -2654,7 +2692,7 @@ DOIP_LOCAL FUNC(void, DOIP_CODE)
     PduInfoType pduInfo;
     uint16 sa;
     uint8 i;
-    uint16 dataLength;
+    uint16 dataLength = 0u;
     DoIP_TcpInnerBufferType* pBuffer = &DoIP_TcpInnerBuf[bufIdx];
     const uint8* rxChannel = pBuffer->rxChannel;
     TxChannelCtrlType* txCtrl = &pBuffer->txCtrl;
@@ -3006,7 +3044,11 @@ DOIP_LOCAL FUNC(void, DOIP_CODE) DoIP_SendAllSocketsAliveCheck(void) /* PRQA S 1
 }
 
 /* PRQA S 1505++ */ /* MISRA Rule 8.7 */
-DOIP_LOCAL_INLINE FUNC(boolean, DOIP_CODE) DoIP_IsAuthenticatioRequiredCheck(VAR(uint8, AUTOMATIC) activationType)
+DOIP_LOCAL_INLINE FUNC(boolean, DOIP_CODE) DoIP_IsAuthenticatioRequiredCheck(
+    VAR(uint8, AUTOMATIC) activationType,
+    P2CONST(DoIP_TcpInnerBufferType, AUTOMATIC, DOIP_CONST) buffer,
+    P2VAR(uint8, AUTOMATIC, DOIP_VAR) responseData,
+    P2VAR(uint8, AUTOMATIC, DOIP_VAR) responseDataLen)
 /* PRQA S 1505-- */ /* MISRA Rule 8.7 */
 {
     boolean req = FALSE;
@@ -3023,11 +3065,55 @@ DOIP_LOCAL_INLINE FUNC(boolean, DOIP_CODE) DoIP_IsAuthenticatioRequiredCheck(VAR
                     == DoIPRoutingActivation->DoIPRoutingActivationAuthenticationCallback
                            ->DoIPRoutingActivationAuthenticationFunc))
             {
-                req = FALSE;
+                req = TRUE;
             }
             else
             {
-                req = TRUE;
+                const uint8* reqData = NULL_PTR;
+                uint8* resData = NULL_PTR;
+
+                uint8 reqDataLen = DoIPRoutingActivation->DoIPRoutingActivationAuthenticationCallback
+                                       ->DoIPRoutingActivationAuthenticationReqLength;
+                /* SWS_DoIP_00109 */
+                if ((buffer->rxCtrl.rxBufPos == 19u) && /* include oem */
+                    (reqDataLen != 0))
+                {
+                    reqData = &buffer->rxChannel[8 + 7];
+                }
+
+                /* SWS_DoIP_00161 */
+                if (DoIPRoutingActivation->DoIPRoutingActivationAuthenticationCallback
+                        ->DoIPRoutingActivationAuthenticationResLength
+                    != 0)
+                {
+                    resData = responseData;
+                    *responseDataLen = DoIPRoutingActivation->DoIPRoutingActivationAuthenticationCallback
+                                           ->DoIPRoutingActivationAuthenticationResLength;
+                }
+
+                boolean isAuthen;
+                Std_ReturnType ret = DoIPRoutingActivation->DoIPRoutingActivationAuthenticationCallback
+                                         ->DoIPRoutingActivationAuthenticationFunc(&isAuthen, (uint8*)reqData, resData);
+
+                if (ret == E_OK)
+                {
+                    req = isAuthen;
+                }
+                else if (ret == E_NOT_OK)
+                {
+                    req = FALSE;
+                }
+                else if (ret == 0x10) /* DOIP_E_PENDING */
+                {
+                    req = FALSE; /* Todo should not simply return true or false, because there is also a pending
+                                    status. */
+                }
+                else
+                {
+                    /* for qac */
+                }
+
+                /* todo 3. DOIP_E_PENDING */
             }
             break;
         }
@@ -3037,7 +3123,11 @@ DOIP_LOCAL_INLINE FUNC(boolean, DOIP_CODE) DoIP_IsAuthenticatioRequiredCheck(VAR
 }
 
 /* PRQA S 1505++ */ /* MISRA Rule 8.7 */
-DOIP_LOCAL_INLINE FUNC(boolean, DOIP_CODE) DoIP_IsConfirmationRequiredCheck(VAR(uint8, AUTOMATIC) activationType)
+DOIP_LOCAL_INLINE FUNC(boolean, DOIP_CODE) DoIP_IsConfirmationRequiredCheck(
+    VAR(uint8, AUTOMATIC) activationType,
+    P2CONST(DoIP_TcpInnerBufferType, AUTOMATIC, DOIP_CONST) buffer,
+    P2VAR(uint8, AUTOMATIC, DOIP_VAR) responseData,
+    P2VAR(uint8, AUTOMATIC, DOIP_VAR) responseDataLen)
 /* PRQA S 1505-- */ /* MISRA Rule 8.7 */
 {
     boolean req = FALSE;
@@ -3054,12 +3144,57 @@ DOIP_LOCAL_INLINE FUNC(boolean, DOIP_CODE) DoIP_IsConfirmationRequiredCheck(VAR(
                     == DoIPRoutingActivation->DoIPRoutingActivationConfirmationCallback
                            ->DoIPRoutingActivationConfirmationCallbackFunc))
             {
-                req = FALSE;
+                req = TRUE;
             }
             else
             {
-                req = TRUE;
+                const uint8* reqData = NULL_PTR;
+                uint8* resData = NULL_PTR;
+
+                uint8 reqDataLen = DoIPRoutingActivation->DoIPRoutingActivationConfirmationCallback
+                                       ->DoIPRoutingActivationConfirmationReqLength;
+                /* SWS_DoIP_00112 */
+                if ((buffer->rxCtrl.rxBufPos == 19u) && /* include oem  */
+                    (reqDataLen != 0))
+                {
+                    reqData = &buffer->rxChannel[8 + 7];
+                }
+
+                if (DoIPRoutingActivation->DoIPRoutingActivationConfirmationCallback
+                        ->DoIPRoutingActivationConfirmationResLength
+                    != 0)
+                {
+                    resData = responseData;
+                    *responseDataLen = DoIPRoutingActivation->DoIPRoutingActivationConfirmationCallback
+                                           ->DoIPRoutingActivationConfirmationResLength;
+                }
+
+                boolean isAuthen;
+                Std_ReturnType ret =
+                    DoIPRoutingActivation->DoIPRoutingActivationConfirmationCallback
+                        ->DoIPRoutingActivationConfirmationCallbackFunc(&isAuthen, (uint8*)reqData, resData);
+
+                if (ret == E_OK)
+                {
+                    req = isAuthen;
+                }
+                else if (ret == E_NOT_OK)
+                {
+                    req = FALSE;
+                }
+                else if (ret == 0x10) /* DOIP_E_PENDING */
+                {
+                    req = FALSE; /* Todo should not simply return true or false, because there is also a pending status.
+                                  */
+                }
+                else
+                {
+                    /* for qac */
+                }
+
+                /* todo 3. DOIP_E_PENDING */
             }
+
             break;
         }
     }
@@ -3480,11 +3615,13 @@ FUNC(void, DOIP_CODE) DoIP_VehicleConnTimeoutHandler(void)
     uint8 i;
     uint8 vehicleId;
 
+    SchM_Enter_DoIP_ExclusiveArea();
     if ((DoIP_VehicleConnCtrl.vehicleConnState >= DOIP_CONN_STATE_STARTED)
         && (DoIP_VehicleConnCtrl.vehicleConnState != DOIP_CONN_STATE_CONNECT_SUCCESS))
     {
         if (DoIP_VehicleConnCtrl.connTimer >= DOIP_VEHICLE_CONN_TIME)
         {
+            SchM_Exit_DoIP_ExclusiveArea();
             /*notify user timeout*/
             if (NULL_PTR != DoIP_General.DoIPClientEventCbk)
             {
@@ -3500,6 +3637,7 @@ FUNC(void, DOIP_CODE) DoIP_VehicleConnTimeoutHandler(void)
             (DoIP_VehicleConnCtrl.connTimer >= DOIP_AUTO_ID_REQ_TIME)
             && (DoIP_VehicleConnCtrl.vehicleConnState == DOIP_CONN_STATE_STARTED))
         {
+            SchM_Exit_DoIP_ExclusiveArea();
             /*loop and send vehicle identification req*/
 #if (DOIP_MAX_VEHICLE > 0U)
             for (i = 0u; i < DoIP_PBCfgPtr->DoIPConnections->DoIPClientUdpConnectionNbr; i++)
@@ -3516,7 +3654,12 @@ FUNC(void, DOIP_CODE) DoIP_VehicleConnTimeoutHandler(void)
         else
         {
             DoIP_VehicleConnCtrl.connTimer += DOIP_MAIN_FUNCTION_PERIOD;
+            SchM_Exit_DoIP_ExclusiveArea();
         }
+    }
+    else
+    {
+        SchM_Exit_DoIP_ExclusiveArea();
     }
 }
 
@@ -3527,6 +3670,7 @@ FUNC(void, DOIP_CODE) DoIP_DoIPMsgTimeoutHandler(void)
 
     for (i = 0u; i < DOIP_UDP_MAX_CONNECTIONS; i++)
     {
+        SchM_Enter_DoIP_ExclusiveArea();
         if (DoIP_UdpConnStatus[i].outgoingMsgType != DOIP_NO_REQ_W4_RSP)
         {
             if (DoIP_UdpConnStatus[i].doipMsgTimer >= DOIP_CTRL_TIME)
@@ -3544,6 +3688,7 @@ FUNC(void, DOIP_CODE) DoIP_DoIPMsgTimeoutHandler(void)
                 DoIP_UdpConnStatus[i].doipMsgTimer += DOIP_MAIN_FUNCTION_PERIOD;
             }
         }
+        SchM_Exit_DoIP_ExclusiveArea();
     }
 }
 
@@ -3552,6 +3697,7 @@ FUNC(void, DOIP_CODE) DoIP_VehicleDiscoveryTimeoutHandler(void)
     uint8 i;
     uint8 vehicleId;
 
+    SchM_Enter_DoIP_ExclusiveArea();
     if (DoIP_VehicleConnCtrl.vehicleConnState == DOIP_CONN_STATE_DISCOVERY_WAIT)
     {
         if (DoIP_VehicleConnCtrl.discoveryWaitTimer >= DOIP_DISCOVERY_TIME)
@@ -3846,7 +3992,10 @@ DoIP_HandleRoutingActiveRsp(uint8 vehicleId, VAR(uint16, AUTOMATIC) txPduId, VAR
                     DoIP_PendingRoutMsg.pendingTxPduId,
                     DoIP_PendingRoutMsg.pendingSa,
                     0x10,
-                    DoIP_PendingRoutMsg.pendingBufferIndex);
+                    DoIP_PendingRoutMsg.pendingBufferIndex,
+                    DoIP_PendingRoutMsg.responseData,
+                    DoIP_PendingRoutMsg.responseDataLen);
+
                 DoIP_ResetTcpInnerRxBuf(DoIP_PendingRoutMsg.pendingBufferIndex);
 
                 DoIP_ResetPendingRoutingActiveMsg();

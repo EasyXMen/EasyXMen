@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : SD.c                                                        **
- **                                                                            **
- **  Created on  : 2019-03-11                                                  **
- **  Author      : HuRongbo                                                    **
- **  Vendor      : iSoft                                                       **
- **  DESCRIPTION : Implementation Of SD                                        **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : SD.c                                                        **
+**                                                                            **
+**  Created on  : 2019-03-11                                                  **
+**  Author      : HuRongbo                                                    **
+**  Vendor      : iSoft                                                       **
+**  DESCRIPTION : Implementation Of SD                                        **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 /***************************Change History*************************************/
 /* V0.1.0   2019/3/11   hurongbo
             Initial Version
@@ -139,7 +140,8 @@
    V2.0.24  2024/03/06 hurongbo
             1> QAC check use new rule set
    V2.0.25  2024/5/14 zhijiazou
-            1> Support continuous sending of Sd messages
+            1> Delete callback API Sd_TxConfirmation
+            2> Support continuous sending of Sd messages
    V2.0.26  2024/7/17 hurongbo
             1> Remove the ues of Frt module function
 */
@@ -160,6 +162,9 @@
 
     \li PRQA S 1531, 1532 MISRA Rule 8.7 .<br>
     Reason:The exception is global configuration data(1531) and API(1532).
+
+    \li PRQA S 0686 MISRA Rule 9.3 .<br>
+    Reason:Resolve compilation warnings.
  */
 #include "Sd.h"
 #include "Sd_Cfg.h"
@@ -174,7 +179,7 @@
 
 #define SD_C_SW_MAJOR_VERSION            2U
 #define SD_C_SW_MINOR_VERSION            0U
-#define SD_C_SW_PATCH_VERSION            25U
+#define SD_C_SW_PATCH_VERSION            26U
 
 /*******************************************************************************
 **                               Includes                                     **
@@ -2011,39 +2016,6 @@ void Sd_RxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr) /* PRQA S
 #define SD_STOP_SEC_SDRXINDICATION_CALLBACK_CODE
 #include "Sd_MemMap.h"
 
-#define SD_START_SEC_SDTXCONFIRMATION_CALLBACK_CODE
-#include "Sd_MemMap.h"
-/******************************************************************************/
-/*
- * Brief: It does not belong to the AUTOSAR specification. It is a new
- *        requirement to reset the remote port information after sending a message.
- * ServiceId           None
- * Sync/Async          Synchronous
- * Reentrancy          Reentrant
- * Param-Name[in]      TxPduId
- * Param-Name[in/out]  None
- * Param-Name[out]     None
- * Return              None
- */
-/******************************************************************************/
-FUNC(void, DOIP_CODE)
-Sd_TxConfirmation(VAR(PduIdType, AUTOMATIC) TxPduId) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
-{
-    uint8 idx;
-    SoAd_SoConIdType txPduSoConId;
-
-    for (idx = 0u; idx < SD_INSTANCE_NUM; idx++) /* PRQA S 2877 */ /* MISRA Dir 4.1 */
-    {
-        if (TxPduId == Sd_CfgPtr->SdInstance[idx].SdInstanceTxPdu)
-        {
-            txPduSoConId = Sd_CfgPtr->SdInstance[idx].SdInstanceTxPduSoConId;
-            SoAd_ReleaseRemoteAddr(txPduSoConId);
-            break;
-        }
-    }
-}
-#define SD_STOP_SEC_SDTXCONFIRMATION_CALLBACK_CODE
-#include "Sd_MemMap.h"
 #define SD_START_SEC_CODE
 #include "Sd_MemMap.h"
 /******************************************************************************/
@@ -2881,7 +2853,7 @@ static uint32 Sd_CalcServerServiceDelayTime(
     boolean isRxUseMulticast)
 {
     const Sd_ServerTimerType* timerPtr;
-    uint32 seedForRand, tRandom, delayMin, delayMax;
+    uint32 tRandom, delayMin, delayMax;
 
     if (TRUE == isRxUseMulticast)
     {
@@ -3460,7 +3432,9 @@ static Std_ReturnType Sd_GetInfoFromMulticastOption(
 {
     Sd_Type2EntryType type2Entry;
     Sd_IPv4OptionsType ipv4Opt;
+#if (STD_ON == SD_IPV6_ENABLE)
     Sd_IPv6OptionsType ipv6Opt;
+#endif
     uint8 idx1stOptions, numOpt1;
     uint8 idx2ndOptions, numOpt2;
     uint8 index;
@@ -3751,7 +3725,9 @@ static Std_ReturnType Sd_BuildSubscribeEventgroupEntry(
     Sd_SendQueueType* sendQueueObjPtr;
     Sd_Type2EntryType* entryPtr;
     uint8* ipv4OptPtr;
+#if (STD_ON == SD_IPV6_ENABLE)
     uint8* ipv6OptPtr;
+#endif
     uint8* optionPtr = NULL_PTR;
     uint32 ttl;
     TcpIp_SockAddrType localAddr, defaultRouter;
@@ -3943,7 +3919,9 @@ static Std_ReturnType Sd_BuildStopSubscribeEventgroupEntry(
     Sd_Type2EntryType* entryPtr;
     uint8* optionPtr = NULL_PTR;
     uint8* ipv4OptPtr;
+#if (STD_ON == SD_IPV6_ENABLE)
     uint8* ipv6OptPtr;
+#endif
     uint32 ttl;
     TcpIp_SockAddrType localAddr, defaultRouter;
     SoAd_SoConIdType soConId;
@@ -4134,7 +4112,7 @@ static Std_ReturnType Sd_BuildStopSubscribeEventgroupEntry(
 static uint32 Sd_CalcClientServiceDelayTime(const Sd_ConsumedEventGroupType* eventHandlerPtr, boolean isRxUseMulticast)
 {
     const Sd_ClientTimerType* timerPtr;
-    uint32 seedForRand, tRandom, delayMin, delayMax;
+    uint32 tRandom, delayMin, delayMax;
 
     if (TRUE == isRxUseMulticast)
     {
@@ -5125,7 +5103,7 @@ static void Sd_ServerServiceDownPhaseHandle(
     const Sd_SoAdSoConGroupType* soAdSoConGroupPtr;
     const Sd_EventHandlerMulticastType* eventHandlerMulticastPtr;
     Sd_ServerServiceRTType* sRtDataPtr;
-    uint32 seedForRand, tRandom, delayMin, delayMax;
+    uint32 tRandom, delayMin, delayMax;
     uint16 soConIdNum;
     uint16 index;
     uint16 eventGroupIdx;
@@ -5571,7 +5549,7 @@ static void Sd_ServerServiceInitialWaitEnter(
     const Sd_ProvidedMethodsType* provideMethodPtr;
     const Sd_SoAdSoConGroupType* soadSoConGroupPtr;
     Sd_ServerServiceRTType* sRtDataPtr;
-    uint32 seedForRand, tRandom, delayMin, delayMax;
+    uint32 tRandom, delayMin, delayMax;
     uint16 soConIdNum;
     uint16 index;
 
@@ -6111,7 +6089,7 @@ static void Sd_ClientServiceInitialWaitEnter(
     Sd_ClientServiceRTType* cRtDataPtr)
 {
     const Sd_ClientTimerType* timerPtr;
-    uint32 seedForRand, tRandom, delayMin, delayMax;
+    uint32 tRandom, delayMin, delayMax;
 
     /* Enter Initial Wait Phase */
     cRtDataPtr->phase = SD_CLIENT_PHASE_INITIAL_WAIT;
@@ -7867,7 +7845,9 @@ static void Sd_ClientHandleSoConBasedOptionInfo(
 {
     Sd_Type1EntryType type1Entry;
     Sd_IPv4OptionsType ipv4Opt;
+#if (STD_ON == SD_IPV6_ENABLE)
     Sd_IPv6OptionsType ipv6Opt;
+#endif
     TcpIp_SockAddrType remoteAddr;
     uint8 idx1stOptions, numOpt1;
     uint8 idx2ndOptions, numOpt2;
@@ -7999,7 +7979,9 @@ static void Sd_ClientTimerHandle(const Sd_ClientServiceType* clientServicePtr)
 #if (SD_CONSUMED_EVENTGROUP_NUM > 0)
     const Sd_ConsumedEventGroupType* eventGroupPtr;
     Sd_ConsumedEventGroupRTType* consumedEgRTPtr;
+#if (STD_ON == SD_SUBSCRIBE_EVENTGROUP_RETRY_ENABLE)
     const Sd_ClientTimerType* consumedEgTimerPtr;
+#endif
 #endif /* SD_CONSUMED_EVENTGROUP_NUM > 0 */
     uint16 eventGroupIdx;
 
@@ -8500,7 +8482,9 @@ static void Sd_TransmitUnicastMessage(
     uint8 numPerAddrKind[SD_MAX_ENTRIES_PER_FRAME];
     uint8 numAllKind;
     Sd_SendQueueType* sendQue[SD_MAX_ENTRIES_PER_FRAME];
-    uint8 sendQueEleList[SD_MAX_ENTRIES_PER_FRAME][SD_MAX_ENTRIES_PER_FRAME] = {0};
+    /* PRQA S 0686 ++ */ /* MISRA Rule 9.3 */
+    uint8 sendQueEleList[SD_MAX_ENTRIES_PER_FRAME][SD_MAX_ENTRIES_PER_FRAME] = {{0}};
+    /* PRQA S 0686 -- */ /* MISRA Rule 9.3 */
     PduInfoType pduInfo;
     SoAd_SoConIdType soConId;
     TcpIp_SockAddrType destAddr;
@@ -9217,7 +9201,8 @@ static Sd_SessionIdCtrlType* Sd_AddRemoteAddrToSessionIdCtrlList(
     boolean isRxUseMulticast)
 {
     Sd_InstanceRTType* instanceRtPtr = &Sd_InstanceRTData[instanceId];
-    Sd_SessionIdCtrlType *sesIdCtrlPtr = NULL_PTR, *lastSesIdCtrlPtr;
+    Sd_SessionIdCtrlType* sesIdCtrlPtr = NULL_PTR;
+    Sd_SessionIdCtrlType* lastSesIdCtrlPtr = NULL_PTR;
     TcpIp_SockAddrType remoteAddr = rxQueueItem->remoteAddr;
     Sd_HeaderType header;
 

@@ -18,21 +18,22 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Os_Core.c                                                   **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : i-soft-os                                                   **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
- **  Version :   AUTOSAR classic Platform R19--Function Safety                 **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Os_Core.c                                                   **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : i-soft-os                                                   **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
+**  Version :   AUTOSAR classic Platform R19--Function Safety                 **
+**                                                                            **
+*******************************************************************************/
 
 /*=======[I N C L U D E S]====================================================*/
 #define OS_GLOBAL_VAR
@@ -489,7 +490,7 @@ FUNC(void, OS_CODE) ShutdownAllCores(StatusType Error)
     VAR(Os_TaskType, OS_VAR) i;
 #if (CFG_SPINLOCK_MAX > 0U)
     /* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */ /* OS_CORE_COMPILER_002 */
-    /* PRQA S 3678 ++ */ /* MISRA  Rule-8.13*/ /* OS_CORE_CONST_004 */
+    /* PRQA S 3678 ++ */ /* MISRA  Rule-8.13*/ /* OS_APPL_CONST_004 */
     P2VAR(Os_TCBType, AUTOMATIC, OS_VAR) pTCB;
     P2VAR(Os_ICBType, AUTOMATIC, OS_VAR) pICB;
     /* PRQA S 3678 -- */ /* MISRA  Rule-8.13*/
@@ -577,7 +578,7 @@ FUNC(void, OS_CODE) ShutdownAllCores(StatusType Error)
             }
 #endif /* CFG_SPINLOCK_MAX > 0U */
 
-/*clear the CoreCB info*/
+            /*clear the CoreCB info*/
 #if (OS_AUTOSAR_CORES > 1U)
             Os_GetInternalSpinlock(&Os_SpinlockSync);
 #endif

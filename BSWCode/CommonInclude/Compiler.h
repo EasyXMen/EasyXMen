@@ -18,25 +18,29 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Compiler.h                                                  **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      :                                                             **
- **  Vendor      :                                                             **
- **  DESCRIPTION :Provider of compiler specific (non-ANSI) keywords.           **
- **              All mappings of keywords which are  not standardized and/or   **
- **              compiler specific shall be placed  and organized in this      **
- **              compiler specific header. The file is  needed to decouple     **
- **              the code of all standard core components from compiler        **
- **              topics and thus enhance portability.                          **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                       **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**   $FILENAME   : Compiler.h $                                               **
+**                                                                            **
+**   $CC VERSION : highTec 1.6.1                                              **
+**                                                                            **
+**   VENDOR      :                                                            **
+**                                                                            **
+**   DESCRIPTION :Provider of compiler specific (non-ANSI) keywords.          **
+**              All mappings of keywords which are  not standardized and/or   **
+**              compiler specific shall be placed  and organized in this      **
+**              compiler specific header. The file is  needed to decouple     **
+**              the code of all standard core components from compiler        **
+**              topics and thus enhance portability.                          **
+**                                                                            **
+**                                                                            **
+**   SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                      **
+**                                                                            **
+**                                                                            **
+*******************************************************************************/
 #ifndef COMPILER_H
 #define COMPILER_H
 
@@ -65,7 +69,7 @@
 #define INLINE
 
 /* The compiler abstraction shall provide the LOCAL_INLINE define for abstraction
-   of the keyword inline in functions with "static" scope.
+   of the keyword inline in functions with 鈥渟tatic鈥� scope.
  */
 #define LOCAL_INLINE
 

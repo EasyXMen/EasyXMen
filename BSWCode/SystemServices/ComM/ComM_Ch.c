@@ -18,6 +18,10 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
+ */
+/* PRQA S 3108-- */
+/*
+ ********************************************************************************
  ************************************************************************************************************************
  ** **
  **  @file               : ComM_Ch.c **
@@ -29,7 +33,6 @@
  **  @specification(s)   : AUTOSAR classic Platform R19-11 **
  ** **
  ***********************************************************************************************************************/
-/* PRQA S 3108-- */
 
 /*================================================[inclusions]========================================================*/
 #include "ComM_Internal.h"
@@ -106,6 +109,7 @@ COMM_LOCAL void ComM_ChBeh_EntryFullCom(uintx chIdx, uint32 currentReqCnt);
 COMM_LOCAL void ComM_ChBeh_EntryComReadySleep(uintx chIdx);
 #if (COMM_USED_MODULE_NM == STD_ON)
 COMM_LOCAL void ComM_ChBeh_EntrySlientMode(uintx chIdx);
+COMM_LOCAL void ComM_ChannelNmModeEventHandle(NetworkHandleType Channel, uint32 currentReqCnt);
 #endif /* COMM_USED_MODULE_NM == STD_ON */
 /*==========================================[internal function definitions]===========================================*/
 /**
@@ -122,16 +126,13 @@ COMM_LOCAL FUNC(void, COMM_CODE) ComM_ChBeh_EntryFullComReq(uintx chIdx, uint32 
     chVarPtr->specMode = COMM_SPEC_FULL_COM_REQ;
 #if (COMM_USED_MODULE_NM == STD_ON)
     uint8 nmVariantMask = 0u;
-#if defined COMM_NM_VARIANT_FULL
     nmVariantMask |= COMM_NM_VARIANT_FULL;
-#endif /* defined COMM_NM_VARIANT_FULL */
-#if defined COMM_NM_VARIANT_PASSIVE
     nmVariantMask |= COMM_NM_VARIANT_PASSIVE;
-#endif /* defined COMM_NM_VARIANT_PASSIVE */
     /** @ref SWS_ComM_00869
      * entry for anthoher state or substate ComMNmVariant=FULL
      */
     boolean passiveWakeup = ComM_CommonGetBit(chVarPtr->funcMask, COMM_FUN_PASSIVE_WAKEUP);
+    /* clear passive wakeup */
     ComM_CommonClrBit(chVarPtr->funcMask, COMM_FUN_PASSIVE_WAKEUP);
     if ((oldSepcMode != COMM_SPEC_FULL_COM_REQ) && ((chCfgPtr->nmVariant & nmVariantMask) != 0u))
     {
@@ -154,7 +155,6 @@ COMM_LOCAL FUNC(void, COMM_CODE) ComM_ChBeh_EntryFullComReq(uintx chIdx, uint32 
 #endif /* COMM_FUNC_CHECK */
         }
 
-#if defined COMM_NM_VARIANT_FULL
         /* by user request */
         if (currentReqCnt > 0u)
         {
@@ -170,7 +170,6 @@ COMM_LOCAL FUNC(void, COMM_CODE) ComM_ChBeh_EntryFullComReq(uintx chIdx, uint32 
             }
 #endif /* COMM_FUNC_CHECK */
         }
-#endif /* defined COMM_NM_VARIANT_FULL */
     }
 #endif /* COMM_USED_MODULE_NM == STD_ON */
 #if (COMM_MANAGED_CHANNEL_SUPPORT == STD_ON)
@@ -185,6 +184,10 @@ COMM_LOCAL FUNC(void, COMM_CODE) ComM_ChBeh_EntryFullComReq(uintx chIdx, uint32 
 #endif
     )
     {
+        /** @ref SWS_ComM_00889
+         * ComMNmVariant=LIGHT|NONE no user requset (include dcm) ComMTMinFullComModeDuration expired shall be switch
+         * COMM_FULL_COM_READY_SLEEP
+         */
         if (NULL_PTR != chCfgPtr->mangaingChIdx)
         {
             boolean passiveWakeup = ComM_CommonGetBit(chVarPtr->funcMask, COMM_FUN_PASSIVE_WAKEUP);
@@ -209,11 +212,11 @@ COMM_LOCAL FUNC(void, COMM_CODE) ComM_ChBeh_EntryFullComReq(uintx chIdx, uint32 
                         ComM_ChannelConfigPtr[*chCfgPtr->mangaingChIdx].inerChIdx,
                         nmRet);
                 }
-#endif
+#endif /* COMM_FUNC_CHECK */
             }
-#endif
+#endif /* COMM_USED_MODULE_NM == STD_ON */
         }
-#endif
+#endif /* COMM_MANAGED_CHANNEL_SUPPORT == STD_ON */
     }
 #endif
 }
@@ -253,12 +256,13 @@ COMM_LOCAL FUNC(void, COMM_CODE) ComM_ChBeh_EntryNoCom(uintx chIdx)
 #if (COMM_USED_MODULE_BUSSM == STD_ON)
     if (NULL_PTR != chCfgPtr->busSmCfgType)
     {
+
         chVarPtr->busSmReqMode = COMM_NO_COMMUNICATION;
+
         (void)chCfgPtr->busSmCfgType->busSm_RequestComMode(chCfgPtr->busIndex, COMM_NO_COMMUNICATION);
     }
 #endif /* COMM_USED_MODULE_BUSSM == STD_ON */
 #if (COMM_USED_MODULE_NM == STD_ON)
-#if defined(COMM_NM_VARIANT_FULL)
     /** @ref SWS_ComM_00288
      * entry state COMM_NO_COMMUNICATION and ComMNmVariant=FULL comm moudle shall call Nm_NetworkRelease
      */
@@ -267,7 +271,6 @@ COMM_LOCAL FUNC(void, COMM_CODE) ComM_ChBeh_EntryNoCom(uintx chIdx)
         ComM_CommonClrBit(chVarPtr->funcMask, COMM_FUN_NMIF_REQ);
         (void)Nm_NetworkRelease(chCfgPtr->inerChIdx);
     }
-#endif /* defined(COMM_NM_VARIANT_FULL */
 #endif /* COMM_USED_MODULE_NM == STD_ON */
 #if (COMM_RESET_AFTER_FORCING_NOCOMM == STD_ON)
     /** @ref SWS_ComM_00355
@@ -321,6 +324,7 @@ COMM_LOCAL FUNC(void, COMM_CODE) ComM_ChBeh_EntryComReadySleep(uintx chIdx)
         if (NULL_PTR != chCfgPtr->busSmCfgType)
         {
             chVarPtr->busSmReqMode = COMM_NO_COMMUNICATION;
+
             (void)chCfgPtr->busSmCfgType->busSm_RequestComMode(chCfgPtr->busIndex, COMM_NO_COMMUNICATION);
         }
 #endif /* COMM_USED_MODULE_BUSSM == STD_ON */
@@ -404,16 +408,7 @@ COMM_LOCAL FUNC(void, COMM_CODE) ComM_ChBeh_EntryFullCom(uintx chIdx, uint32 cur
      * switch from COMM_SILENT_COMMUNICATION ,comm channel state can switch COMM_FULL_COM_READY_SLEEP
      * Rationale @ref SWS_ComM_00296
      */
-#if (COMM_USED_MODULE_NM == STD_ON)
-    if ((oldState == COMM_SPEC_SILENT_COM) && (chVarPtr->nmInd == COMM_NM_IND_NETWORK_MODE))
-    {
-        ComM_ChBeh_EntryComReadySleep(chIdx);
-    }
-    else
-#endif /* COMM_USED_MODULE_NM == STD_ON */
-    {
-        ComM_ChBeh_EntryFullComReq(chIdx, currentReqCnt);
-    }
+    ComM_ChBeh_EntryFullComReq(chIdx, currentReqCnt);
 }
 #if (COMM_USED_MODULE_NM == STD_ON)
 /**
@@ -444,13 +439,6 @@ COMM_LOCAL FUNC(void, COMM_CODE) ComM_ChBeh_EntrySlientMode(uintx chIdx)
         (void)chCfgPtr->busSmCfgType->busSm_RequestComMode(chCfgPtr->busIndex, COMM_SILENT_COMMUNICATION);
     }
 #endif /* COMM_USED_MODULE_BUSSM == STD_ON */
-    /* The comm status is changed quickly. The nm does not perform the processing */
-    if (chVarPtr->nmInd == COMM_NM_IND_BUS_SLEEP)
-    {
-        SchM_Enter_ComM_COMM_EXCLUSIVE_AREA_0();
-        ComM_ChBeh_EntryNoCom(chIdx);
-        SchM_Exit_ComM_COMM_EXCLUSIVE_AREA_0();
-    }
 }
 #endif /* COMM_USED_MODULE_NM == STD_ON */
 /**
@@ -459,15 +447,22 @@ COMM_LOCAL FUNC(void, COMM_CODE) ComM_ChBeh_EntrySlientMode(uintx chIdx)
  * @param[in]   chIdx  channel inner index
  * @return      NA
  */
-COMM_LOCAL void ComM_ChReqModeMainHandle(uintx chIdx)
+COMM_LOCAL void ComM_ChReqModeMainHandle(uint8 chIdx)
 {
     ComM_ChVarType* chVarPtr = &ComM_ChVarTable[chIdx];
     uint32 currentReqCnt = chVarPtr->reqCnt;
+    const ComM_ChannelConfigType* chCfgPtr = &ComM_ChannelConfigPtr[chIdx];
+#if (COMM_USED_MODULE_NM == STD_ON)
+    if ((chCfgPtr->nmVariant == COMM_NM_VARIANT_FULL) || (chCfgPtr->nmVariant == COMM_NM_VARIANT_PASSIVE))
+    {
+        ComM_ChannelNmModeEventHandle(chIdx, currentReqCnt);
+    }
+#endif
 #if (                                                                                        \
     ((COMM_WAKEUP_INHIBITION_ENABLED == STD_ON) || (COMM_MODE_LIMITATION_ENABLED == STD_ON)) \
     && (COMM_DCM_INDICATION == STD_ON))                                                      \
     || (COMM_NM_VARIANT_LIGHT_SUPPORT == STD_ON)
-    const ComM_ChannelConfigType* chCfgPtr = &ComM_ChannelConfigPtr[chIdx];
+
 #endif /* ((COMM_WAKEUP_INHIBITION_ENABLED == STD_ON) || (COMM_MODE_LIMITATION_ENABLED == STD_ON)) && \
           (COMM_DCM_INDICATION == STD_ON)) || (COMM_NM_VARIANT_LIGHT_SUPPORT == STD_ON */
     SchM_Enter_ComM_COMM_EXCLUSIVE_AREA_0();
@@ -545,11 +540,9 @@ COMM_LOCAL void ComM_ChReqModeMainHandle(uintx chIdx)
 #endif /* COMM_DCM_INDICATION == STD_ON */
                 )
 #endif /* COMM_WAKEUP_INHIBITION_ENABLED == STD_ON */
-
                 {
                     ComM_ChBeh_EntryFullCom(chIdx, currentReqCnt);
                 }
-
                 break;
             default:
                 /* do nothing */
@@ -557,6 +550,7 @@ COMM_LOCAL void ComM_ChReqModeMainHandle(uintx chIdx)
             }
         }
     }
+
     ComM_ChStateTransitionToNoCom(chIdx, currentReqCnt);
 }
 
@@ -564,10 +558,7 @@ COMM_LOCAL void ComM_ChStateTransitionToNoCom(uintx chIdx, uint32 currentReqCnt)
 {
     const ComM_ChVarType* chVarPtr = &ComM_ChVarTable[chIdx];
     uint8 oldState;
-#if defined COMM_NM_VARIANT_LIGHT
     const ComM_ChannelConfigType* chCfgPtr = &ComM_ChannelConfigPtr[chIdx];
-#endif /* defined COMM_NM_VARIANT_LIGHT */
-
     do
     {
         oldState = chVarPtr->specMode;
@@ -589,9 +580,21 @@ COMM_LOCAL void ComM_ChStateTransitionToNoCom(uintx chIdx, uint32 currentReqCnt)
                     ComM_ChBeh_EntryComReadySleep(chIdx);
                 }
             }
+            SchM_Enter_ComM_COMM_EXCLUSIVE_AREA_0();
+            if (ComM_CommonGetBit(chVarPtr->funcMask, COMM_FUN_LIMIT_NOCOM_REQ))
+            {
+#if (COMM_DCM_INDICATION == STD_ON)
+                if (!ComM_CommonGetBit(chVarPtr->reqMask, chCfgPtr->dcmInReqIdx))
+#endif
+                {
+                    ComM_ChBeh_EntryComReadySleep(chIdx);
+                }
+            }
+            SchM_Exit_ComM_COMM_EXCLUSIVE_AREA_0();
             break;
-#if defined COMM_NM_VARIANT_LIGHT
+
         case COMM_SPEC_FULL_READY_SLEEP:
+#if defined COMM_NM_VARIANT_LIGHT
             /** @ref SWS_ComM_00610
              * ComMNmVariant=LIGHT,ComMNmLightTimeout has expired ComM channel state machine shall switch to state
              * COMM_NO_COMMUNICATION, durationTmr is always 0 if nmVariant != LIGHT
@@ -759,6 +762,10 @@ void ComM_ChInit(const ComM_ChannelConfigType* channelConfigPtr, uint32 chNum) /
         chVarPtr->reqMask = chCfgPtr->requestMask;
 
         chVarPtr->funcMask[0] = 0u;
+#if (COMM_USED_MODULE_NM == STD_ON)
+        chVarPtr->NmModeEvent = COMM_NM_MODE_EVENT_NONE;
+#endif
+
 #if (COMM_MODE_LIMITATION_ENABLED == STD_ON)
         if (ComM_CommonGetBit(chCfgPtr->cfgMask, COMM_NO_COM_INHIBITION))
         {
@@ -773,9 +780,6 @@ void ComM_ChInit(const ComM_ChannelConfigType* channelConfigPtr, uint32 chNum) /
         }
 #endif /* COMM_WAKEUP_INHIBITION_ENABLED == STD_ON */
 
-#if (COMM_USED_MODULE_NM == STD_ON)
-        chVarPtr->nmInd = COMM_NM_IND_BUS_SLEEP;
-#endif /* COMM_USED_MODULE_NM == STD_ON */
         for (uintx i = 0u; i < chCfgPtr->requestMaskLen; i++)
         {
             chVarPtr->reqMask[i] = 0u;
@@ -820,67 +824,34 @@ ComM_ChGetState(uintx chIdx, ComM_StateType* chStu) /* PRQA S 1532 */ /* MISRA R
  * @ingroup     ComM Channel
  * @brief       get channel max allowed mode
  * @param[in]   chIdx  channel inner index
- * @param[out]  chMode  channel mode
- * @return      NA
+ * @param[out]  NA
+ * @return      ComM_ModeType:max allow mode of channel
+ * @retval      COMM_NO_COMMUNICATION
+ * @retval      COMM_FULL_COMMUNICATION
  * @note        called by ComM_GetMaxComMode
  */
-void ComM_ChGetMaxAllowMode(uintx chIdx, ComM_ModeType* chMode) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
+ComM_ModeType ComM_ChGetMaxAllowMode(uintx chIdx)
 {
+#if (COMM_MODE_LIMITATION_ENABLED == STD_ON || COMM_WAKEUP_INHIBITION_ENABLED == STD_ON)
     const ComM_ChVarType* chVarPtr = &ComM_ChVarTable[chIdx];
-    uint8 chSpecMode = chVarPtr->specMode;
-#if (COMM_MODE_LIMITATION_ENABLED == STD_ON)
-    boolean limitNoComStu = FALSE;
-#endif /* COMM_MODE_LIMITATION_ENABLED == STD_ON */
-#if (COMM_WAKEUP_INHIBITION_ENABLED == STD_ON)
-    boolean limitWakeup = FALSE;
-#endif /* COMM_WAKEUP_INHIBITION_ENABLED == STD_ON */
+#else
+    COMM_PARA_UNUSED(chIdx);
+#endif
 #if (COMM_MODE_LIMITATION_ENABLED == STD_ON)
     if (ComM_CommonGetBit(chVarPtr->funcMask, COMM_FUN_LIMIT_NOCOM_REQ))
     {
-        limitNoComStu = TRUE;
+        return COMM_NO_COMMUNICATION;
     }
-#endif /* COMM_MODE_LIMITATION_ENABLED == STD_ON */
+#endif
 #if (COMM_WAKEUP_INHIBITION_ENABLED == STD_ON)
-    if (ComM_CommonGetBit(chVarPtr->funcMask, COMM_FUN_LIMIT_WAKEUP))
+    uint8 chSpecMode = chVarPtr->specMode;
+    if (ComM_CommonGetBit(chVarPtr->funcMask, COMM_FUN_LIMIT_WAKEUP) && (chSpecMode != COMM_FULL_COM_READY_SLEEP)
+        && (chSpecMode != COMM_FULL_COM_NETWORK_REQUESTED))
     {
-        limitWakeup = TRUE;
+        return COMM_NO_COMMUNICATION;
     }
-#endif /* COMM_WAKEUP_INHIBITION_ENABLED == STD_ON */
-
-    if (((chSpecMode == COMM_SPEC_NOCOM_NOPENDING_REQ) || (chSpecMode == COMM_SPEC_NOCOM_REQ_PENDING))
-        || (
-#if (COMM_MODE_LIMITATION_ENABLED == STD_ON) || (COMM_WAKEUP_INHIBITION_ENABLED == STD_ON)
-#if (COMM_MODE_LIMITATION_ENABLED == STD_ON)
-            (limitNoComStu == TRUE) ||
-#endif /* COMM_MODE_LIMITATION_ENABLED == STD_ON */
-#if (COMM_WAKEUP_INHIBITION_ENABLED == STD_ON)
-            (limitWakeup == TRUE) ||
-#endif /* COMM_WAKEUP_INHIBITION_ENABLED == STD_ON */
-#endif /* COMM_MODE_LIMITATION_ENABLED == STD_ON) || (COMM_WAKEUP_INHIBITION_ENABLED == STD_ON */
-            !ComM_CommonGetBit(chVarPtr->funcMask, COMM_FUN_ALLOW_STU)))
-    {
-        *chMode = COMM_NO_COMMUNICATION;
-    }
-    else if (
-        (COMM_SPEC_SILENT_COM == chSpecMode)
-#if (COMM_MODE_LIMITATION_ENABLED == STD_ON) || (COMM_WAKEUP_INHIBITION_ENABLED == STD_ON)
-        && (
-#if (COMM_MODE_LIMITATION_ENABLED == STD_ON)
-            (limitNoComStu == TRUE) ||
-#endif /* COMM_MODE_LIMITATION_ENABLED == STD_ON */
-#if (COMM_WAKEUP_INHIBITION_ENABLED == STD_ON)
-            (limitWakeup == TRUE) ||
-#endif /* COMM_WAKEUP_INHIBITION_ENABLED == STD_ON */
-            FALSE)
-#endif /* COMM_MODE_LIMITATION_ENABLED == STD_ON) || (COMM_WAKEUP_INHIBITION_ENABLED == STD_ON */
-    )
-    {
-        *chMode = COMM_SILENT_COMMUNICATION;
-    }
-    else
-    {
-        *chMode = COMM_FULL_COMMUNICATION;
-    }
+#endif
+    return COMM_FULL_COMMUNICATION;
 }
 
 /**
@@ -1033,86 +1004,6 @@ FUNC(void, COMM_CODE) ComM_ChBusSmModeInd(uintx chIdx, ComM_ModeType comMode) /*
     }
 }
 
-#if (COMM_USED_MODULE_NM == STD_ON)
-/**
- * @ingroup     ComM Channel
- * @brief       notification that this channel network management state
- * @param[in]   chIdx - index of channel same as ChannelId
- * @param[in]   indMode - nm indication channel state
- * @return      NA
- * @note        called by ComM_Nm_NetworkMode ComM_Nm_PrepareBusSleepMode ComM_Nm_BusSleepMode
- */
-FUNC(void, COMM_CODE) ComM_ChNmModeInd(uintx chIdx, uint8 indMode) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
-{
-#if (defined(COMM_NM_VARIANT_FULL) || defined(COMM_NM_VARIANT_PASSIVE))
-    ComM_ChVarType* chVarPtr = &ComM_ChVarTable[chIdx];
-    uint32 currentReqCnt = chVarPtr->reqCnt;
-    const ComM_ChannelConfigType* chCfgPtr = &ComM_ChannelConfigPtr[chIdx];
-    if (
-#if (defined(COMM_NM_VARIANT_FULL) && defined(COMM_NM_VARIANT_PASSIVE))
-        (chCfgPtr->nmVariant == COMM_NM_VARIANT_FULL) || (chCfgPtr->nmVariant == COMM_NM_VARIANT_PASSIVE)
-#elif defined(COMM_NM_VARIANT_FULL)
-        (chCfgPtr->nmVariant == COMM_NM_VARIANT_FULL)
-#else
-        (chCfgPtr->nmVariant == COMM_NM_VARIANT_PASSIVE)
-#endif /* defined(COMM_NM_VARIANT_FULL) && defined(COMM_NM_VARIANT_PASSIVE */
-    )
-    {
-        chVarPtr->nmInd = indMode;
-        if (chVarPtr->specMode == COMM_SPEC_SILENT_COM)
-        {
-            /** @ref SWS_ComM_00295
-             * slient mode and nmif indicate ComM_Nm_BusSleepMode.the channel state shall switch to
-             * COMM_NO_COMMUNICATION
-             */
-            if (indMode == COMM_NM_IND_BUS_SLEEP)
-            {
-                SchM_Enter_ComM_COMM_EXCLUSIVE_AREA_0();
-                ComM_ChBeh_EntryNoCom(chIdx);
-                SchM_Exit_ComM_COMM_EXCLUSIVE_AREA_0();
-            }
-            /** @ref SWS_ComM_00296
-             * slient mode and nmif indicate ComM_Nm_NetworkMode.the channel state shall switch to
-             * COMM_FULL_COM_READY_SLEEP
-             *
-             */
-            else if (indMode == COMM_NM_IND_NETWORK_MODE)
-            {
-                SchM_Enter_ComM_COMM_EXCLUSIVE_AREA_0();
-                ComM_ChBeh_EntryFullCom(chIdx, currentReqCnt);
-                SchM_Exit_ComM_COMM_EXCLUSIVE_AREA_0();
-            }
-            else
-            {
-                /* nothing to do */
-            }
-        }
-        if ((chVarPtr->specMode == COMM_SPEC_FULL_COM_REQ) || (chVarPtr->specMode == COMM_SPEC_FULL_READY_SLEEP))
-        {
-            /** @ref SWS_ComM_00637
-             * In state COMM_FULL_COMMUNICATION and the Network Manager module indicates ComM_Nm_BusSleepMode state
-             * shell switch COMM_NO_COMMUNICATION
-             */
-            if (indMode == COMM_NM_IND_BUS_SLEEP)
-            {
-                SchM_Enter_ComM_COMM_EXCLUSIVE_AREA_0();
-                ComM_ChBeh_EntryNoCom(chIdx);
-                SchM_Exit_ComM_COMM_EXCLUSIVE_AREA_0();
-            }
-            else if (indMode == COMM_NM_IND_PREPARE_BUSSLEEP)
-            {
-                ComM_ChBeh_EntrySlientMode(chIdx);
-            }
-            else
-            {
-                /* nothing to do */
-            }
-        }
-    }
-#endif /* defined(COMM_NM_VARIANT_FULL) || defined(COMM_NM_VARIANT_PASSIVE */
-}
-
-#endif /* COMM_USED_MODULE_NM == STD_ON */
 /**
  * @ingroup     ComM Channel
  * @brief       requesting of a communication mode this channel
@@ -1129,12 +1020,10 @@ FUNC(Std_ReturnType, COMM_CODE) ComM_ChRequstCommMode(uintx chIdx, uintx reqIdex
 {
     Std_ReturnType ret = E_OK;
     ComM_ChVarType* chVarPtr = &ComM_ChVarTable[chIdx];
-    const ComM_ChannelConfigType* chCfgPtr = &ComM_ChannelConfigPtr[chIdx];
     ComM_ModeType modeReq = 0xffu;
 
-#if defined COMM_NM_VARIANT_PASSIVE
+    const ComM_ChannelConfigType* chCfgPtr = &ComM_ChannelConfigPtr[chIdx];
     if (chCfgPtr->nmVariant != COMM_NM_VARIANT_PASSIVE)
-#endif /* defined COMM_NM_VARIANT_PASSIVE */
     {
         if (!ComM_CommonGetBit(chVarPtr->reqMask, reqIdex)
             && ((comMode == COMM_FULL_COMMUNICATION) || (comMode == COMM_FULL_COMMUNICATION_WITH_WAKEUP_REQUEST)))
@@ -1177,12 +1066,6 @@ FUNC(Std_ReturnType, COMM_CODE) ComM_ChRequstCommMode(uintx chIdx, uintx reqIdex
         SchM_Enter_ComM_COMM_EXCLUSIVE_AREA_0();
         chVarPtr->reqMode = comMode;
         SchM_Exit_ComM_COMM_EXCLUSIVE_AREA_0();
-#if (COMM_DCM_INDICATION == STD_ON)
-        if (reqIdex == chCfgPtr->dcmInReqIdx)
-        {
-            ComM_ChReqModeMainHandle(chIdx);
-        }
-#endif /* COMM_DCM_INDICATION == STD_ON */
     }
     return ret;
 }
@@ -1217,7 +1100,7 @@ FUNC(void, COMM_CODE) ComM_ChEcuMWakeup(uintx chIdx) /* PRQA S 1532 */ /* MISRA 
             uint32 currentReqCnt = chVarPtr->reqCnt;
             if ((chVarPtr->specMode == COMM_SPEC_NOCOM_NOPENDING_REQ))
             {
-                ComM_ChBeh_EntryNoComRequestPending(*chCfgPtr->mangaingChIdx, currentReqCnt);
+                ComM_CommonSetBit(chVarPtr->funcMask, COMM_FUN_PASSIVE_WAKEUP);
             }
         }
 #endif /* COMM_MANAGED_CHANNEL_SUPPORT == STD_ON */
@@ -1237,6 +1120,12 @@ FUNC(void, COMM_CODE) ComM_ChPassiveWakeup(uintx chIdx) /* PRQA S 1532 */ /* MIS
     SchM_Enter_ComM_COMM_EXCLUSIVE_AREA_0();
     ComM_CommonSetBit(chVarPtr->funcMask, COMM_FUN_PASSIVE_WAKEUP);
     SchM_Exit_ComM_COMM_EXCLUSIVE_AREA_0();
+
+    /** @ref SWS_ComM_00894
+     * ComM_Nm_RestartIndication state immediately switch to sub-state COMM_SPEC_NOCOM_REQ_PENDING in state
+     * COMM_SPEC_NOCOM_NOPENDING_REQ
+     */
+    /* shall be add handle is immediately*/
 }
 /**
  * @ingroup     ComM Channel
@@ -1327,16 +1216,6 @@ void ComM_ChLimitNoCom(uintx chIdx, boolean stu) /* PRQA S 1532 */ /* MISRA Rule
             ComM_CommonSetBit(chVarPtr->funcMask, COMM_FUN_LIMIT_NOCOM_FORCE);
             SchM_Exit_ComM_COMM_EXCLUSIVE_AREA_0();
 #endif /* COMM_RESET_AFTER_FORCING_NOCOMM == STD_ON */
-#if (COMM_DCM_INDICATION == STD_ON)
-            /** @ref SWS_ComM_00182
-             * The communication inhibition shall get temporarily inactive during an active diagnostic session
-             */
-
-            if (!ComM_CommonGetBit(chVarPtr->reqMask, chCfgPtr->dcmInReqIdx))
-#endif /* COMM_DCM_INDICATION == STD_ON */
-            {
-                ComM_ChBeh_EntryComReadySleep(chIdx);
-            }
         }
     }
     else
@@ -1370,7 +1249,7 @@ ComM_ChRequstCommModeLimitCheck(uintx chIdx, uintx reqIdex, ComM_ModeType comMod
 {
     Std_ReturnType ret = E_OK;
 #if ((COMM_MODE_LIMITATION_ENABLED == STD_ON) || (COMM_WAKEUP_INHIBITION_ENABLED == STD_ON))
-    ComM_ChVarType* chVarPtr = &ComM_ChVarTable[chIdx];
+    const ComM_ChVarType* chVarPtr = &ComM_ChVarTable[chIdx];
 #endif /* COMM_MODE_LIMITATION_ENABLED == STD_ON) || (COMM_WAKEUP_INHIBITION_ENABLED == STD_ON */
     const ComM_ChannelConfigType* chCfgPtr = &ComM_ChannelConfigPtr[chIdx];
 
@@ -1483,14 +1362,78 @@ void ComM_ChGetInhibitionStu(uintx chIdx, ComM_InhibitionStatusType* chStu) /* P
     *chStu = 0x0u;
     if (ComM_CommonGetBit(chVarPtr->funcMask, COMM_FUN_LIMIT_NOCOM_REQ))
     {
-        *chStu |= COMM_ECU_GROUP_CLS_NOMODE_LIMIT;
+        *chStu |= COMM_LIMITED_TO_NO_COM_YES;
     }
     if (ComM_CommonGetBit(chVarPtr->funcMask, COMM_FUN_LIMIT_WAKEUP))
     {
-        *chStu |= COMM_ECU_GROUP_CLS_WAKEUP_LIMIT;
+        *chStu |= COMM_WAKEUP_INHIBITION_ACTIVE_YES;
     }
 }
-#endif /* COMM_MODE_LIMITATION_ENABLED == STD_ON) || (COMM_WAKEUP_INHIBITION_ENABLED == STD_ON */
+#endif
+
+#if (COMM_USED_MODULE_NM == STD_ON)
+COMM_LOCAL void ComM_ChannelStoreNmModeEvent(uint8* Object, uint8 Desired)
+{
+    SchM_Enter_ComM_COMM_EXCLUSIVE_AREA_0();
+    *Object = Desired;
+    SchM_Exit_ComM_COMM_EXCLUSIVE_AREA_0();
+}
+
+void ComM_ChannelNmModeIndication(NetworkHandleType Channel, uint8 NmModeEvent)
+{
+    const ComM_ChannelConfigType* chCfgPtr = &ComM_ChannelConfigPtr[Channel];
+    ComM_ChVarType* chVarPtr = &ComM_ChVarTable[Channel];
+    if ((chCfgPtr->nmVariant == COMM_NM_VARIANT_FULL) || (chCfgPtr->nmVariant == COMM_NM_VARIANT_PASSIVE))
+    {
+        ComM_ChannelStoreNmModeEvent(&chVarPtr->NmModeEvent, NmModeEvent);
+    }
+}
+
+COMM_LOCAL boolean ComM_ChannelCompareAndClearNmModeEvent(uint8* Object, uint8 Expected)
+{
+    boolean equal = FALSE;
+    SchM_Enter_ComM_COMM_EXCLUSIVE_AREA_0();
+    if (*Object == Expected)
+    {
+        equal = TRUE;
+        *Object = COMM_NM_MODE_EVENT_NONE;
+    }
+    SchM_Exit_ComM_COMM_EXCLUSIVE_AREA_0();
+    return equal;
+}
+
+COMM_LOCAL void ComM_ChannelNmModeEventHandle(NetworkHandleType Channel, uint32 currentReqCnt)
+{
+    ComM_ChVarType* chVarPtr = &ComM_ChVarTable[Channel];
+
+    if (ComM_ChannelCompareAndClearNmModeEvent(&chVarPtr->NmModeEvent, COMM_NM_IND_PREPARE_BUSSLEEP))
+    {
+        /* if channel state keep in COMM_FULL_COM_NETWORK_REQUESTED, active request has requested via
+         * Nm_NetworkRequest() */
+        if (chVarPtr->specMode == COMM_FULL_COM_READY_SLEEP)
+        {
+            ComM_ChBeh_EntrySlientMode(Channel);
+        }
+    }
+
+    if (ComM_ChannelCompareAndClearNmModeEvent(&chVarPtr->NmModeEvent, COMM_NM_IND_NETWORK_MODE))
+    {
+        if (chVarPtr->specMode == COMM_SILENT_COM)
+        {
+            ComM_ChBeh_EntryFullCom(Channel, currentReqCnt);
+        }
+    }
+
+    if (ComM_ChannelCompareAndClearNmModeEvent(&chVarPtr->NmModeEvent, COMM_NM_IND_BUS_SLEEP))
+    {
+        if ((chVarPtr->specMode != COMM_NO_COM_NO_PENDING_REQUEST)
+            && (chVarPtr->specMode != COMM_NO_COM_REQUEST_PENDING))
+        {
+            ComM_ChBeh_EntryNoCom(Channel);
+        }
+    }
+}
+#endif
 
 #define COMM_STOP_SEC_CODE
 #include "ComM_MemMap.h"

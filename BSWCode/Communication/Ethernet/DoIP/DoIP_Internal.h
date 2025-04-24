@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : DoIP_Internal.h                                             **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : zhiqiang.huang                                              **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : DoIP_Internal.h                                             **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : zhiqiang.huang                                              **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 
 #ifndef DOIP_INTERNAL_H
 #define DOIP_INTERNAL_H
@@ -42,6 +43,7 @@
 #if (STD_ON == DOIP_DEV_ERROR_DETECT)
 #include "Det.h"
 #endif /*STD_ON == DOIP_DEV_ERROR_DETECT*/
+#include "SchM_DoIP.h"
 /*******************************************************************************
 **                      Global Symbols                                        **
 *******************************************************************************/
@@ -201,6 +203,9 @@ typedef struct
     SoAd_SoConIdType pendingSocketConId;
     uint16 pendingTxPduId;
     uint16 pendingSa;
+
+    uint8 responseDataLen; /* Used for auth and confirmation */
+    uint8 responseData[4]; /* Used for auth and confirmation */
 } PendingRoutingActiveType;
 
 /*node info type, report to upper layer*/
@@ -489,8 +494,6 @@ extern VAR(DoIP_VehicleAncConnStatusType, DOIP_VAR_CLEARED)
 extern VAR(DoIP_TcpInnerBufferType, DOIP_VAR_CLEARED) DoIP_TcpInnerBuf[DOIP_MAX_TCP_CONNECTIONS];
 
 #if (DOIP_ROLE_SERVER_SUPPORT == TRUE)
-/*activation line status*/
-extern VAR(DoIP_ActivationLineType, DOIP_VAR_CLEARED) DoIP_ActivationLineStatus;
 
 /*current connection tcp socket number*/
 extern VAR(uint8, DOIP_VAR_INIT) DoIP_CurrentTcpSocketNbr;
@@ -534,9 +537,11 @@ static inline void DOIP_DET_REPORT(uint8 ApiId, uint8 ErrorId) /* PRQA S 3219 */
 static inline boolean DOIP_GENERICHEADER_CHECK(const uint8* dataPtr, PduLengthType SduLength)
 /* PRQA S 3219-- */ /* MISRA Rule 2.1 */
 {
+    uint8 temp = dataPtr[0] ^ 0xffu;
+
     return (
-        (((dataPtr)[0] == 1u) || ((dataPtr)[0] == 2u) || ((dataPtr)[0] == 0xffu))
-        && ((((dataPtr)[0]) ^ 0xffu) == ((dataPtr)[1])) && ((SduLength) >= DOIP_GENERIC_HEADER_LEN));
+        ((dataPtr[0] == 1u) || (dataPtr[0] == 2u) || (dataPtr[0] == 0xffu)) && (temp == dataPtr[1])
+        && (SduLength >= DOIP_GENERIC_HEADER_LEN));
 }
 
 static inline uint16 DOIP_U8_2_U16(const uint8* array) /* PRQA S 3219 */ /* MISRA Rule 2.1 */
@@ -1659,6 +1664,8 @@ static inline FUNC(void, DOIP_CODE) DoIP_ResetPendingRoutingActiveMsg(void)
     DoIP_PendingRoutMsg.pendingSa = DOIP_INVALID_UINT16;
     DoIP_PendingRoutMsg.pendingSocketConId = DOIP_INVALID_UINT8;
     DoIP_PendingRoutMsg.pendingTxPduId = DOIP_INVALID_UINT16;
+
+    DoIP_PendingRoutMsg.responseDataLen = 0u;
 }
 
 static inline FUNC(Std_ReturnType, DOIP_CODE) DoIP_ExtractAnnounceConnBySoConId(SoAd_SoConIdType soConId, uint8* index)
@@ -1739,6 +1746,7 @@ static inline FUNC(void, DOIP_CODE) DoIP_DiagnosticMsgTimeoutHandler(void)
 
     for (i = 0u; i < DOIP_MAX_TCP_CONNECTIONS; i++)
     {
+        SchM_Enter_DoIP_ExclusiveArea();
         if (DoIP_TcpConnStatus[i].wait4DiagMsgResponse == TRUE)
         {
             if (DoIP_TcpConnStatus[i].diagMsgTimer >= DOIP_DIAG_MSG_TIME)
@@ -1751,6 +1759,7 @@ static inline FUNC(void, DOIP_CODE) DoIP_DiagnosticMsgTimeoutHandler(void)
                 DoIP_TcpConnStatus[i].diagMsgTimer += DOIP_MAIN_FUNCTION_PERIOD;
             }
         }
+        SchM_Exit_DoIP_ExclusiveArea();
     }
 }
 

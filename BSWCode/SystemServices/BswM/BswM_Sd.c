@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : BswM_Sd.c                                                   **
- **                                                                            **
- **  Created on  : 2020-03-24                                                  **
- **  Author      : qinchun.yang                                                **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : BswM_Sd.c                                                   **
+**                                                                            **
+**  Created on  : 2020-03-24                                                  **
+**  Author      : qinchun.yang                                                **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 
 /*******************************************************************************
 **                      Include Section                                       **
@@ -69,7 +70,6 @@ BswM_InitSDRequestPorts(void)
 {
     P2CONST(BswM_ModeRqstPortPCCfgType, AUTOMATIC, BSWM_CONST) modeRqstPCfgPtr;
     P2CONST(BswM_ModeRqstPortRuntimeType, AUTOMATIC, BSWM_VAR_CLEARED) modeRqstPtr;
-    P2CONST(BswM_PartitionPCCfgType, TYPEDEF, BSWM_CONST) bswmPartPCCfgs;
     ApplicationType partIdx;
     boolean result;
     uint16 numOfSdCliSrvCurState;
@@ -80,9 +80,8 @@ BswM_InitSDRequestPorts(void)
     result = BswM_GetPartitionIdx(&partIdx);
     if ((boolean)TRUE == result)
     {
-        bswmPartPCCfgs = &(BswM_RuntimeStatus.bswmPartPCCfgs[partIdx]);
-        modeRqstPCfgPtr = bswmPartPCCfgs->modeRqstPCCfg;
-        modeRqstPtr = bswmPartPCCfgs->modeRqstPortRunPtr;
+        modeRqstPCfgPtr = BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].modeRqstPCCfg;
+        modeRqstPtr = BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].modeRqstPortRunPtr;
         numOfSdCliSrvCurState = modeRqstPCfgPtr->numOfSdCliSrvCurState;
         numOfSdConsumedEvGrpCurrState = modeRqstPCfgPtr->numOfSdConsumedEvGrpCurrState;
         numOfSdEvHdlerCurrState = modeRqstPCfgPtr->numOfSdEvHdlerCurrState;
@@ -126,7 +125,7 @@ BswM_InitSDRequestPorts(void)
     {
         (void)Det_ReportError(BSWM_MODULE_ID, BSWM_INSTANCE_ID, BSWM_API_ID_INIT, BSWM_E_INIT_FAILED);
     }
-#endif /* BSWM_DEV_ERROR_DETECT == STD_ON */
+#endif /*BSWM_DEV_ERROR_DETECT == STD_ON*/
 }
 
 /**
@@ -148,8 +147,6 @@ BswM_Sd_ClientServiceCurrentState(uint16 SdClientServiceHandleId, Sd_ClientServi
     P2CONST(BswM_ModeRqstPortLCfgType, AUTOMATIC, BSWM_CONST) modeRqstLCfgPtr;
     P2CONST(BswM_ModeRqstPortRuntimeType, AUTOMATIC, BSWM_VAR_CLEARED) modeRqstPtr;
     P2CONST(BswM_RuleLcCfgType, AUTOMATIC, BSWM_CONST) ruleLCfgPtr;
-    P2CONST(BswM_PartitionPCCfgType, TYPEDEF, BSWM_CONST) bswmPartPCCfgs;
-    P2CONST(BswM_PartitionLCfgType, TYPEDEF, BSWM_CONST) bswmPartLCfgs;
     BswM_RuleIndexType numOfRules;
     BswM_RuleIndexType idx;
     BswM_RuleIndexType ruleIdx;
@@ -160,26 +157,24 @@ BswM_Sd_ClientServiceCurrentState(uint16 SdClientServiceHandleId, Sd_ClientServi
 
 #if (BSWM_DEV_ERROR_DETECT == STD_ON)
     if ((Std_ReturnType)E_OK == BswM_DetChkClientCurState(CurrentClientState))
-#endif /* BSWM_DEV_ERROR_DETECT == STD_ON */
+#endif /*BSWM_DEV_ERROR_DETECT == STD_ON*/
     {
         result = BswM_GetPartitionIdx(&partIdx);
         if ((boolean)TRUE == result)
         {
-            bswmPartPCCfgs = &(BswM_RuntimeStatus.bswmPartPCCfgs[partIdx]);
-            bswmPartLCfgs = &(BswM_RuntimeStatus.bswmPartLCfgs[partIdx]);
-            modeRqstPCfgPtr = bswmPartPCCfgs->modeRqstPCCfg;
-            modeRqstLCfgPtr = bswmPartLCfgs->modeRqstLCfg;
+            modeRqstPCfgPtr = BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].modeRqstPCCfg;
+            modeRqstLCfgPtr = BswM_RuntimeStatus.bswmPartLCfgs[partIdx].modeRqstLCfg;
             numOfSdCliSrvCurState = modeRqstPCfgPtr->numOfSdCliSrvCurState;
             for (cliIdx = 0u; cliIdx < numOfSdCliSrvCurState; cliIdx++)
             {
                 if (SdClientServiceHandleId == modeRqstLCfgPtr->sdClientSrvMethodsRef[cliIdx])
                 {
-                    modeRqstPtr = bswmPartPCCfgs->modeRqstPortRunPtr;
+                    modeRqstPtr = BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].modeRqstPortRunPtr;
                     modeRqstPtr->sdCliServiceCurrStaStatus[cliIdx] = CurrentClientState;
                     if (BSWM_IMMEDIATE == modeRqstLCfgPtr->sdClientSrv[cliIdx].process)
                     {
                         numOfRules = modeRqstLCfgPtr->sdClientSrv[cliIdx].belongToRlueNum;
-                        ruleLCfgPtr = bswmPartLCfgs->ruleLCfg;
+                        ruleLCfgPtr = BswM_RuntimeStatus.bswmPartLCfgs[partIdx].ruleLCfg;
                         for (idx = 0u; idx < numOfRules; idx++)
                         {
                             ruleIdx = modeRqstLCfgPtr->sdClientSrv[cliIdx].belongToRlue[idx];
@@ -218,8 +213,6 @@ BswM_Sd_ConsumedEventGroupCurrentState(
     P2CONST(BswM_ModeRqstPortLCfgType, AUTOMATIC, BSWM_CONST) modeRqstLCfgPtr;
     P2CONST(BswM_ModeRqstPortRuntimeType, AUTOMATIC, BSWM_VAR_CLEARED) modeRqstPtr;
     P2CONST(BswM_RuleLcCfgType, AUTOMATIC, BSWM_CONST) ruleLCfgPtr;
-    P2CONST(BswM_PartitionPCCfgType, TYPEDEF, BSWM_CONST) bswmPartPCCfgs;
-    P2CONST(BswM_PartitionLCfgType, TYPEDEF, BSWM_CONST) bswmPartLCfgs;
     BswM_RuleIndexType numOfRules;
     BswM_RuleIndexType idx;
     BswM_RuleIndexType ruleIdx;
@@ -230,26 +223,24 @@ BswM_Sd_ConsumedEventGroupCurrentState(
 
 #if (BSWM_DEV_ERROR_DETECT == STD_ON)
     if ((Std_ReturnType)E_OK == BswM_DetChkEvGruCurState(ConsumedEventGroupState))
-#endif /* BSWM_DEV_ERROR_DETECT == STD_ON */
+#endif /*BSWM_DEV_ERROR_DETECT == STD_ON*/
     {
         result = BswM_GetPartitionIdx(&partIdx);
         if ((boolean)TRUE == result)
         {
-            bswmPartPCCfgs = &(BswM_RuntimeStatus.bswmPartPCCfgs[partIdx]);
-            bswmPartLCfgs = &(BswM_RuntimeStatus.bswmPartLCfgs[partIdx]);
-            modeRqstPCfgPtr = bswmPartPCCfgs->modeRqstPCCfg;
-            modeRqstLCfgPtr = bswmPartLCfgs->modeRqstLCfg;
+            modeRqstPCfgPtr = BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].modeRqstPCCfg;
+            modeRqstLCfgPtr = BswM_RuntimeStatus.bswmPartLCfgs[partIdx].modeRqstLCfg;
             numOfSdConsumedEvGrpCurrState = modeRqstPCfgPtr->numOfSdConsumedEvGrpCurrState;
             for (evIdx = 0u; evIdx < numOfSdConsumedEvGrpCurrState; evIdx++)
             {
                 if (SdConsumedEventGroupHandleId == modeRqstLCfgPtr->sdConEvGroupIdRef[evIdx])
                 {
-                    modeRqstPtr = bswmPartPCCfgs->modeRqstPortRunPtr;
+                    modeRqstPtr = BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].modeRqstPortRunPtr;
                     modeRqstPtr->sdConsumedEvGrpCurrStaStatus[evIdx] = ConsumedEventGroupState;
                     if (BSWM_IMMEDIATE == modeRqstLCfgPtr->sdConEvGroup[evIdx].process)
                     {
                         numOfRules = modeRqstLCfgPtr->sdConEvGroup[evIdx].belongToRlueNum;
-                        ruleLCfgPtr = bswmPartLCfgs->ruleLCfg;
+                        ruleLCfgPtr = BswM_RuntimeStatus.bswmPartLCfgs[partIdx].ruleLCfg;
                         for (idx = 0u; idx < numOfRules; idx++)
                         {
                             ruleIdx = modeRqstLCfgPtr->sdConEvGroup[evIdx].belongToRlue[idx];
@@ -286,8 +277,6 @@ BswM_Sd_EventHandlerCurrentState(uint16 SdEventHandlerHandleId, Sd_EventHandlerC
     P2CONST(BswM_ModeRqstPortLCfgType, AUTOMATIC, BSWM_CONST) modeRqstLCfgPtr;
     P2CONST(BswM_ModeRqstPortRuntimeType, AUTOMATIC, BSWM_VAR_CLEARED) modeRqstPtr;
     P2CONST(BswM_RuleLcCfgType, AUTOMATIC, BSWM_CONST) ruleLCfgPtr;
-    P2CONST(BswM_PartitionPCCfgType, TYPEDEF, BSWM_CONST) bswmPartPCCfgs;
-    P2CONST(BswM_PartitionLCfgType, TYPEDEF, BSWM_CONST) bswmPartLCfgs;
     BswM_RuleIndexType numOfRules;
     BswM_RuleIndexType idx;
     BswM_RuleIndexType ruleIdx;
@@ -298,26 +287,24 @@ BswM_Sd_EventHandlerCurrentState(uint16 SdEventHandlerHandleId, Sd_EventHandlerC
 
 #if (BSWM_DEV_ERROR_DETECT == STD_ON)
     if ((Std_ReturnType)E_OK == BswM_DetChkEvHandlerCurState(EventHandlerStatus))
-#endif /* BSWM_DEV_ERROR_DETECT == STD_ON */
+#endif /*BSWM_DEV_ERROR_DETECT == STD_ON*/
     {
         result = BswM_GetPartitionIdx(&partIdx);
         if ((boolean)TRUE == result)
         {
-            bswmPartPCCfgs = &(BswM_RuntimeStatus.bswmPartPCCfgs[partIdx]);
-            bswmPartLCfgs = &(BswM_RuntimeStatus.bswmPartLCfgs[partIdx]);
-            modeRqstPCfgPtr = bswmPartPCCfgs->modeRqstPCCfg;
-            modeRqstLCfgPtr = bswmPartLCfgs->modeRqstLCfg;
+            modeRqstPCfgPtr = BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].modeRqstPCCfg;
+            modeRqstLCfgPtr = BswM_RuntimeStatus.bswmPartLCfgs[partIdx].modeRqstLCfg;
             numOfSdEvHdlerCurrState = modeRqstPCfgPtr->numOfSdEvHdlerCurrState;
             for (handlerIdx = 0u; handlerIdx < numOfSdEvHdlerCurrState; handlerIdx++)
             {
                 if (SdEventHandlerHandleId == modeRqstLCfgPtr->sdEvHandleIdRef[handlerIdx])
                 {
-                    modeRqstPtr = bswmPartPCCfgs->modeRqstPortRunPtr;
+                    modeRqstPtr = BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].modeRqstPortRunPtr;
                     modeRqstPtr->sdEvHdlerCurrStaStatus[handlerIdx] = EventHandlerStatus;
                     if (BSWM_IMMEDIATE == modeRqstLCfgPtr->sdEvHandler[handlerIdx].process)
                     {
                         numOfRules = modeRqstLCfgPtr->sdEvHandler[handlerIdx].belongToRlueNum;
-                        ruleLCfgPtr = bswmPartLCfgs->ruleLCfg;
+                        ruleLCfgPtr = BswM_RuntimeStatus.bswmPartLCfgs[partIdx].ruleLCfg;
                         for (idx = 0u; idx < numOfRules; idx++)
                         {
                             ruleIdx = modeRqstLCfgPtr->sdEvHandler[handlerIdx].belongToRlue[idx];
@@ -390,4 +377,4 @@ BswM_GetEvHandlerCurState(uint16 handlerIdx)
 **                      Private Function Definitions                          **
 *******************************************************************************/
 
-#endif /* BSWM_SD_ENABLED == STD_ON */
+#endif /*BSWM_SD_ENABLED == STD_ON*/

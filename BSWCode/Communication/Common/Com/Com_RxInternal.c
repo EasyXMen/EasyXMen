@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Com_RxInternal.c                                            **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : zhengfei.li                                                 **
- **  Vendor      :                                                             **
- **  DESCRIPTION : internal implementation for COM receive                     **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                       **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Com_RxInternal.c                                            **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : zhengfei.li                                                 **
+**  Vendor      :                                                             **
+**  DESCRIPTION : internal implementation for COM receive                     **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                       **
+**                                                                            **
+*******************************************************************************/
 
 /*******************************************************************************
 **                      Includes                                              **
@@ -40,6 +41,25 @@
 #if (STD_ON == COM_DEV_ERROR_DETECT)
 #include "Det.h"
 #endif
+
+/*******************************************************************************
+**                      Private Macro Definitions                             **
+*******************************************************************************/
+
+#define COM_RX_SIGNAL_DM             (1u)
+#define COM_RX_SIGNAL_GROUP_DM       (2u)
+#define COM_RX_IPDU_DM               (4u)
+#define COM_RX_IPDU_DM_ONLY          (8u)
+#define COM_SET_RX_DM_FLAG(Var, val) (Var) = ((uint8)((Var) | (uint8)(val)))
+#define COM_CLEAR_RX_DM_FLAG(Var)    (Var) = ((uint8)(0u))
+
+/*******************************************************************************
+**                      Global Variable Definitions                           **
+*******************************************************************************/
+
+/*******************************************************************************
+**                      Private Variable Definitions                          **
+*******************************************************************************/
 /*******************************************************************************
 **                      Private Function Declarations                         **
 *******************************************************************************/
@@ -191,6 +211,30 @@ static FUNC(boolean, COM_CODE) Com_SignalGroupInvalidCalculate(
     Com_RxIpduBufIdType IpduBufferId,
     uint16 RxDynSignalLength);
 #endif /* 0u < COM_RXSIGNALGROUP_NUMBER && 0u < COM_RXGROUPSIGNAL_NUMBER */
+
+/* RxSignal receive timeout handle*/
+#if ((0u < COM_RXIPDU_NUMBER) && (COM_RXSIGNAL_NUMBER > 0u) && (STD_ON == COM_RX_SIGNAL_TIMEOUT_ENABLE))
+static FUNC(void, COM_CODE)
+    Com_RxSignalTimeOutHandle(Com_RxIPduRunTimeStateType* RxIpduStatePtr, const Com_RxIPduType* RxIpduPtr);
+#endif /* 0u < COM_RXIPDU_NUMBER) && (COM_RXSIGNAL_NUMBER > 0u) && (STD_ON == COM_RX_SIGNAL_TIMEOUT_ENABLE */
+
+#if (                                                                        \
+    ((0u < COM_RXSIGNAL_NUMBER) && (STD_ON == COM_RX_SIGNAL_TIMEOUT_ENABLE)) \
+    || ((0u < COM_RXGROUPSIGNAL_NUMBER) && (STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ENABLE)))
+static FUNC(void, COM_CODE)
+    Com_RxIpduBaseDMTimeOutHandle(Com_RxIPduRunTimeStateType* RxIpduStatePtr, const Com_RxIPduType* RxIpduPtr);
+#endif /* 0u < COM_RXSIGNAL_NUMBER && STD_ON == COM_RX_SIGNAL_TIMEOUT_ENABLE \
+       or 0u < COM_RXGROUPSIGNAL_NUMBER && STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ENABLE */
+
+#if (0u < COM_RXSIGNAL_NUMBER) && (STD_ON == COM_RX_SIGNAL_TIMEOUT_ENABLE)
+static FUNC(void, COM_CODE)
+    Com_RxDMTimeOutHandleSignal(Com_RxIPduRunTimeStateType* RxIpduStatePtr, const Com_RxIPduType* RxIpduPtr);
+#endif
+
+#if (0u < COM_RXGROUPSIGNAL_NUMBER) && (STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ENABLE)
+static FUNC(void, COM_CODE)
+    Com_RxDMTimeOutHandleSignalGroup(Com_RxIPduRunTimeStateType* RxIpduStatePtr, const Com_RxIPduType* RxIpduPtr);
+#endif
 #if ((COM_RXSIGNAL_NUMBER + COM_RXSIGNALGROUP_NUMBER) > 0u)
 /*set the reception deadline monitoring timer for the
  *included signals and signal groups to the configured
@@ -224,6 +268,10 @@ static FUNC(boolean, COM_CODE) Com_RxPduCounterValid(PduIdType IpduId, uint8 RxC
  * copy the Rx Pdu data to RxPdu Buffer*/
 static FUNC(void, COM_CODE)
     Com_CopyPduDataToRxBuffer(PduIdType RxPduId, P2CONST(PduInfoType, AUTOMATIC, COM_APPL_DATA) PduInfoPtr);
+/* called by Com_RxIndication,Com_TpRxIndication,Com_MainFunctionRx.
+ * unpack the rx pdu data and invoke notification*/
+static FUNC(void, COM_CODE)
+    Com_IndicationProcess(const Com_RxIPduRunTimeStateType* RxIpduStatePtr, const Com_RxIPduType* RxIpduPtr);
 /* called by Com_TpRxIndication.
  * execute all configured ComDataInvalidActions for all included signals and signal groups*/
 #if (STD_ON == COM_RXTPPDU_SUPPORT) \
@@ -237,6 +285,19 @@ static FUNC(boolean, COM_CODE) Com_RxPduReplicationValid(
     PduIdType IpduId,
     uint8 RxCounter,
     P2CONST(PduInfoType, AUTOMATIC, COM_APPL_DATA) PduInfoPtr);
+#endif
+#if (                                                              \
+    (STD_ON == COM_RX_SIGNAL_TIMEOUT_ACTION_REPLACE_ENABLE)        \
+    || (STD_ON == COM_RX_SIGNAL_TIMEOUT_ACTION_SUBSTITUTE_ENABLE)) \
+    || ((STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ACTION_REPLACE_ENABLE) \
+        || (STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ACTION_SUBSTITUTE_ENABLE))
+static void Com_RxDataTimeOutActionHandle(
+    Com_RxIPduRunTimeStateType* RxIpduStatePtr,
+    const Com_RxIPduType* RxIpduPtr,
+    Com_RxDataTimeoutActionType RxTimeoutAction,
+    const void* RxArgPtr,
+    boolean IsRxSignal,
+    Com_SignalIdType SubstituteBufId);
 #endif
 #define COM_STOP_SEC_CODE
 #include "Com_MemMap.h"
@@ -261,9 +322,8 @@ static FUNC(boolean, COM_CODE) Com_RxPduReplicationValid(
 /******************************************************************************/
 static FUNC(void, COM_CODE) Com_ResetRxOccurrenceOfPduFilter(const Com_RxIPduType* RxIpduPtr)
 {
-    Com_SignalIdType oneEveryNId;
 /*reset signal/group signal of rx pdu which ComFilterAlgorithm is ONE_EVERY_N*/
-#if (0u < COM_RXSIGNAL_NUMBER)
+#if (0u < COM_RXSIGNAL_NUMBER) && (COM_RXSIGNAL_FILTERTYPE_MAX_NUMBER > 0u)
     Com_RxSignalIdType ipduSignalRefNumber, cnt;
     const Com_RxSignalType* rxSignalPtr;
     ipduSignalRefNumber = RxIpduPtr->ComIPduSignalsRefNumber;
@@ -277,7 +337,7 @@ static FUNC(void, COM_CODE) Com_ResetRxOccurrenceOfPduFilter(const Com_RxIPduTyp
         }
     }
 #endif
-#if ((0u < COM_RXSIGNALGROUP_NUMBER) && (0u < COM_RXGROUPSIGNAL_NUMBER))
+#if ((0u < COM_RXSIGNALGROUP_NUMBER) && (0u < COM_RXGROUPSIGNAL_NUMBER) && (COM_RXGRPSIG_FILTERTYPE_MAX_NUMBER > 0u))
     Com_RxSignalGroupIdType ipduSignalGroupNumber, counter;
     Com_RxGroupSignalIdType groupSignalNumber, groupSignalId;
     const Com_RxGroupSignalType* rxGroupSignalPtr;
@@ -303,7 +363,6 @@ static FUNC(void, COM_CODE) Com_ResetRxOccurrenceOfPduFilter(const Com_RxIPduTyp
 }
 #endif
 
-/* PRQA S 3469 ++ */ /* MISRA Rule Dir 4.9 */
 #if ((0u < COM_RXSIGNAL_NUMBER) && (0u < COM_SIGNAL_8BITBUFF_SIZE) && (STD_ON == COM_RX_SIGNAL_TYPE_UINT8_DYN_ENABLE)) \
     && (0u < COM_RXIPDU_NUMBER)
 /******************************************************************************/
@@ -469,7 +528,7 @@ FUNC(void, COM_CODE) Com_ReceiveSignalGroupHandle(PduIdType RxPduId, Com_SignalG
 }
 #endif
 
-#if (0u < COM_RXSIGNALGROUP_NUMBER > 0u) && (0u < COM_RXGROUPSIGNAL_NUMBER) && (0u < COM_RXIPDU_NUMBER)
+#if (0u < COM_RXSIGNALGROUP_NUMBER) && (0u < COM_RXGROUPSIGNAL_NUMBER) && (0u < COM_RXIPDU_NUMBER)
 /******************************************************************************/
 /*
  * Brief               Receive group signal handle
@@ -493,7 +552,7 @@ Com_ReceiveGroupSignalHandle(Com_SignalIdType SignalId, P2VAR(void, AUTOMATIC, C
     const Com_RxIPduRunTimeStateType* rxIpduStatePtr = &Com_RxIPduRunTimeState[ipduRef];
     uint16 signalInitValueId;
     uint8 ret = COM_SERVICE_NOT_AVAILABLE;
-#if (0u < COM_RXGROUPSIGNAL_8BITBUFF_SIZE)
+#if (0u < COM_RX_GRP_SIGNAL_TYPE_UINT8_N_ENABLE)
     uint16 signalLength;
 #endif
 
@@ -586,10 +645,10 @@ Com_ReceiveGroupSignalHandle(Com_SignalIdType SignalId, P2VAR(void, AUTOMATIC, C
  * Return              uint8
  */
 /******************************************************************************/
-/* PRQA S 3673,1532 ++ */ /* MISRA Rule 8.13,2.7 */
+/* PRQA S 3673,1532 ++ */ /* MISRA Rule 8.13,8.7 */
 FUNC(uint8, COM_CODE)
 Com_ReceiveSignalHandle(Com_SignalIdType SignalId, P2VAR(void, AUTOMATIC, COM_APPL_CONST) SignalDataPtr)
-/* PRQA S 3673,1532 -- */ /* MISRA Rule 8.13,2.7 */
+/* PRQA S 3673,1532 -- */ /* MISRA Rule 8.13,8.7 */
 {
     const Com_RxSignalType* rxSignalPtr = &Com_ConfigStd->ComRxSignal[SignalId];
     uint8 ret = COM_SERVICE_NOT_AVAILABLE;
@@ -711,12 +770,6 @@ static FUNC(void, COM_CODE)
             rxIpduStatePtr->RxIpduRTStFlag &= Com_RX_INDICATION_DIS;
             /*rx indication handle*/
             Com_IndicationProcess(rxIpduStatePtr, rxIpduPtr);
-#if (0u < COM_GWMAPPING_NUMBER)
-            if (COM_UNUSED_RXIPDUGWID != rxIpduPtr->IpduGwIndex)
-            {
-                Com_RxIpduNeedGw[rxIpduPtr->IpduGwIndex] = TRUE;
-            }
-#endif
         }
         /*signal/signal group RxIndication is made in next MainFunctionRx*/
         else
@@ -816,19 +869,17 @@ static FUNC(void, COM_CODE)
                         substituteBufId = Com_RxGrpSigSubstituteValueIdRef[substituteStartId];
                         substituteStartId++;
 #endif
-                        if (COM_TIMEOUT_ACTION_NONE != RxTimeoutAction)
-                        {
-                            Com_RxDataTimeOutActionHandle(
-                                RxIpduStatePtr,
-                                RxIpduPtr,
-                                timeoutAction,
-                                (void*)rxGroupSignalPtr,
-                                FALSE,
-                                substituteBufId);
-                        }
+                        Com_RxDataTimeOutActionHandle(
+                            RxIpduStatePtr,
+                            RxIpduPtr,
+                            timeoutAction,
+                            (void*)rxGroupSignalPtr,
+                            FALSE,
+                            substituteBufId);
                     }
                 }
-#endif
+#endif /* STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ACTION_REPLACE_ENABLE \
+    || (STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ACTION_SUBSTITUTE_ENABLE */
 #if (STD_ON == COM_RX_SIG_GROUP_TIMEOUT_NOTIFICATION_ENABLE)
                 if (NULL_PTR != Com_RxSigGrpTimeoutNotificationCfg[counter])
                 {
@@ -911,6 +962,13 @@ static FUNC(void, COM_CODE) Com_ResetRxPduBufferAndSignalBuffer(PduIdType IpduId
         }
 #endif /* STD_ON == COM_RX_SIGNAL_TYPE_UINT8_N_ENABLE || STD_ON == COM_RX_SIGNAL_TYPE_UINT8_DYN_ENABLE */
         Com_InitSignalBuffer(signalType, signalInitValueId, signalLength);
+#if COM_GWMAPPING_NUMBER > 0u
+        Com_GwMappingIdType gwMappingId = rxSignalPtr->GwMappingId;
+        if (gwMappingId != COM_NOT_USED_GW_MAPPING_ID)
+        {
+            Com_GwUpdateDestinationRequest(gwMappingId, FALSE);
+        }
+#endif
     }
 #endif
 /*init group signal buffer*/
@@ -931,6 +989,15 @@ static FUNC(void, COM_CODE) Com_ResetRxPduBufferAndSignalBuffer(PduIdType IpduId
             rxGroupSignalPtr = &Com_ConfigStd->ComRxGroupSignal[groupSignalId];
             signalInitValueId = rxGroupSignalPtr->ComSignalInitValueId;
             signalType = rxGroupSignalPtr->ComSignalType;
+
+#if COM_GWMAPPING_NUMBER > 0u
+            Com_GwMappingIdType gwMappingId = rxGroupSignalPtr->GwMappingId;
+            if (gwMappingId != COM_NOT_USED_GW_MAPPING_ID)
+            {
+                Com_GwUpdateDestinationRequest(gwMappingId, FALSE);
+            }
+#endif
+
 #if (STD_ON == COM_RX_GRP_SIGNAL_TYPE_UINT8_N_ENABLE) || (STD_ON == COM_RX_GRP_SIGNAL_TYPE_UINT8_DYN_ENABLE)
             if (signalType < COM_UINT8_DYN)
 #endif /* STD_ON == COM_RX_GRP_SIGNAL_TYPE_UINT8_N_ENABLE) || (STD_ON == COM_RX_GRP_SIGNAL_TYPE_UINT8_DYN_ENABLE */
@@ -948,16 +1015,24 @@ static FUNC(void, COM_CODE) Com_ResetRxPduBufferAndSignalBuffer(PduIdType IpduId
         }
     }
 #endif
-#if (0u < COM_GWMAPPING_NUMBER)
-    if (COM_UNUSED_RXIPDUGWID != rxIpduPtr->IpduGwIndex)
+
+#if COM_GW_SOURCE_DESCRIPTION_NUMBER > 0u
+    Com_GwSourceDescriptionIdType gwSourceDescriptionNumber = rxIpduPtr->ComIPduSourceSignalsRefNumber;
+    Com_GwSourceDescriptionIdType gwSourceDescriptionId = rxIpduPtr->ComIPduSourceSignalsRefStartId;
+    for (; gwSourceDescriptionId < gwSourceDescriptionNumber; ++gwSourceDescriptionId)
     {
-        Com_RxIpduNeedGw[rxIpduPtr->IpduGwIndex] = FALSE;
+        const Com_GwSourceSignalType* gwSourceDescriptionPtr = &Com_ConfigStd->ComSourceSignal[gwSourceDescriptionId];
+        Com_GwMappingIdType gwMappingId = gwSourceDescriptionPtr->GwMappingId;
+        if (gwMappingId != COM_NOT_USED_GW_MAPPING_ID)
+        {
+            Com_GwUpdateDestinationRequest(gwMappingId, FALSE);
+        }
     }
 #endif
+
     rxIpduStatePtr->RxIpduRTStFlag &= Com_RX_RECEIVING_DIS;
     rxIpduStatePtr->RxIpduRTStFlag &= Com_RX_INDICATION_DIS;
     rxIpduStatePtr->RxIpduLength = Com_RxIPduInitState[IpduId].RxIpduLength;
-    return;
 }
 #endif
 
@@ -1009,6 +1084,8 @@ static FUNC(void, COM_CODE) Com_SourceSignalUnPack(
         Com_RxIpduBufIdType ipduBufferPos = IpduBufferId + (Com_RxIpduBufIdType)sigLsbBytePos;
         /* COM_UINT8_DYN or COM_UINT8_N */
         uint16 signalLength = (COM_UINT8_N == signalType) ? GwSourceSignalPtr->ComSignalLength : RxDynSignalLength;
+        SchM_Enter_Com_MultiCore_Lock();
+        SchM_Enter_Com_Context();
 #if (STD_ON == COM_GW_SRC_DSP_SIG_TYPE_UINT8_DYN_ENABLE)
         if (COM_UINT8_DYN == signalType)
         {
@@ -1018,14 +1095,21 @@ static FUNC(void, COM_CODE) Com_SourceSignalUnPack(
             signalBufferId += (uint16)(sizeof(RxDynSignalLength));
         }
 #endif
-        SchM_Enter_Com_MultiCore_Lock();
-        SchM_Enter_Com_Context();
         (void)ILib_memcpy(&Com_GWSignal8BitBuff[signalBufferId], &Com_RxIPduRuntimeBuff[ipduBufferPos], signalLength);
         SchM_Exit_Com_Context();
         SchM_Exit_Com_MultiCore_Lock();
     }
 #endif
 #endif
+
+#if COM_GWMAPPING_NUMBER > 0u
+    Com_GwMappingIdType gwMappingId = GwSourceSignalPtr->GwMappingId;
+    if (gwMappingId != COM_NOT_USED_GW_MAPPING_ID)
+    {
+        Com_GwUpdateDestinationRequest(gwMappingId, TRUE);
+    }
+#endif
+
     COM_NOUSED(RxDynSignalLength);
     COM_NOUSED(IpduBufferId);
     return;
@@ -1050,7 +1134,6 @@ static FUNC(void, COM_CODE) Com_SignalRxIndication(
     const Com_RxSignalType* RxSignalPtr,
     uint16 RxDynSignalLength,
     Com_RxIpduBufIdType IpduBufferId)
-
 {
 #if (0u < COM_RXIPDUBUFF_SIZE)
     Com_SignalType signalType = RxSignalPtr->ComSignalType;
@@ -1072,6 +1155,8 @@ static FUNC(void, COM_CODE) Com_SignalRxIndication(
         /*the rx signal need to be gateway,then store the value to gateway buffer*/
         if (COM_UNUSED_UINT16 != gwSignalBufferId)
         {
+            SchM_Enter_Com_MultiCore_Lock();
+            SchM_Enter_Com_Context();
             if (COM_UINT8_DYN == signalType)
             {
                 /* PRQA S 1340 ++ */ /* MISRA Rule 17.8 */
@@ -1080,8 +1165,6 @@ static FUNC(void, COM_CODE) Com_SignalRxIndication(
                 /* PRQA S 1340 -- */ /* MISRA Rule 17.8 */
                 gwSignalBufferId += (uint16)(sizeof(RxDynSignalLength));
             }
-            SchM_Enter_Com_MultiCore_Lock();
-            SchM_Enter_Com_Context();
             (void)ILib_memcpy(
                 &Com_GWSignal8BitBuff[gwSignalBufferId],
                 &Com_RxIPduRuntimeBuff[ipduBufferPos],
@@ -1105,7 +1188,14 @@ static FUNC(void, COM_CODE) Com_SignalRxIndication(
     }
 #endif
 #endif
-    return;
+
+#if COM_GWMAPPING_NUMBER > 0u
+    Com_GwMappingIdType gwMappingId = RxSignalPtr->GwMappingId;
+    if (gwMappingId != COM_NOT_USED_GW_MAPPING_ID)
+    {
+        Com_GwUpdateDestinationRequest(gwMappingId, TRUE);
+    }
+#endif
 }
 #endif
 
@@ -1134,10 +1224,10 @@ static FUNC(void, COM_CODE)
        /*the rx signal configuration invalid value*/
 #if (STD_ON == COM_RX_SIGNAL_INVALID_DATA_ENABLE)
     boolean ret = TRUE;
-
-    if (COM_UNUSED_RXSIGNALINVALIDID != RxSignalPtr->ComSignalInvalidRefId)
+    Com_RxSignalInvalidIdType signalInvalidId = RxSignalPtr->ComSignalInvalidRefId;
+    if (COM_UNUSED_RXSIGNALINVALIDID != signalInvalidId)
     {
-        uint16 invalidValueId = Com_RxSignalDataInvalidValueIdRef[RxSignalPtr->ComSignalInvalidRefId];
+        uint16 invalidValueId = Com_RxSignalDataInvalidValueIdRef[signalInvalidId];
 #if (0u < COM_SIGNAL_8BIT_INVALID_SIZE)
         if (0
             == ILib_memcmp(
@@ -1147,11 +1237,11 @@ static FUNC(void, COM_CODE)
 #endif
         {
 #if (STD_ON == COM_RX_SIGNAL_INVALID_DATA_ACTION_NOTIFY_ENABLE)
-            if (COM_INVALID_ACTION_NOTIFY == Com_RxSignalDataInvalidActionRef[invalidValueId])
+            if (COM_INVALID_ACTION_NOTIFY == Com_RxSignalDataInvalidActionRef[signalInvalidId])
             {
-                if (NULL_PTR != Com_RxInvalidNotificationCfg[invalidValueId])
+                if (NULL_PTR != Com_RxInvalidNotificationCfg[signalInvalidId])
                 {
-                    Com_RxInvalidNotificationCfg[invalidValueId]();
+                    Com_RxInvalidNotificationCfg[signalInvalidId]();
                 }
             }
             else
@@ -1703,22 +1793,23 @@ static FUNC(void, COM_CODE) Com_SignalGroupRxIndication(
     uint16 RxDynSignalLength,
     Com_RxIpduBufIdType IpduBufferId)
 {
+    boolean normalRxIndication = FALSE;
     /*if the signal group have invalid signal or not, and update gwGroupSignal buffer*/
     boolean signalGroupInvalid = Com_SignalGroupInvalidCalculate(RxSignalGroupPtr, IpduBufferId, RxDynSignalLength);
-    /*the signal group is invalid if at least one group signal is invalid*/
+/*the signal group is invalid if at least one group signal is invalid*/
+#if (STD_ON == COM_RX_GRP_SIGNAL_INVALID_DATA_ENABLE)
     if (signalGroupInvalid)
     {
-#if (STD_ON == COM_RX_GRP_SIGNAL_INVALID_DATA_ENABLE) && (STD_ON == COM_RX_SIG_GROUP_INVALID_DATA_ACTION_NOTIFY_ENABLE)
-        if (COM_INVALID_ACTION_NOTIFY == RxSignalGroupPtr->ComDataInvalidAction)
+#if (STD_ON == COM_RX_SIG_GROUP_INVALID_DATA_ACTION_NOTIFY_ENABLE)
+        if ((COM_INVALID_ACTION_NOTIFY == RxSignalGroupPtr->ComDataInvalidAction)
+            && (NULL_PTR != RxSignalGroupPtr->ComInvalidNotification))
         {
-            if (NULL_PTR != RxSignalGroupPtr->ComInvalidNotification)
-            {
-                RxSignalGroupPtr->ComInvalidNotification();
-            }
+            RxSignalGroupPtr->ComInvalidNotification();
         }
-        else
-#endif /* STD_ON == COM_RX_SIG_GROUP_INVALID_DATA_ACTION_NOTIFY_ENABLE */
+#endif
+        if (COM_INVALID_ACTION_REPLACE == RxSignalGroupPtr->ComDataInvalidAction)
         {
+            normalRxIndication = TRUE;
 /*replace the rx pdu buffer for signal group array*/
 #if ((STD_ON == COM_ENABLE_SIGNAL_GROUP_ARRAY_API) && (0u < COM_RXIPDUBUFF_SIZE))
             if (COM_UNUSED_COM_SIGNALGROUPARRYID != RxSignalGroupPtr->ComSignalGroupArrayId)
@@ -1737,12 +1828,8 @@ static FUNC(void, COM_CODE) Com_SignalGroupRxIndication(
 #endif
         }
     }
-    if ((!signalGroupInvalid)
-#if (STD_ON == COM_RX_GRP_SIGNAL_INVALID_DATA_ENABLE) && (STD_ON == COM_ENABLE_SIGNAL_GROUP_ARRAY_API)
-        || ((COM_INVALID_ACTION_REPLACE == RxSignalGroupPtr->ComDataInvalidAction)
-            && (COM_UNUSED_COM_SIGNALGROUPARRYID != RxSignalGroupPtr->ComSignalGroupArrayId))
 #endif
-    )
+    if ((!signalGroupInvalid) || (normalRxIndication == TRUE))
     {
 #if (COM_RXGRPSIG_FILTERTYPE_MAX_NUMBER > 0u)
         if (Com_RxSignalGroupFilter(RxSignalGroupPtr, signalGroupInvalid, IpduBufferId))
@@ -2088,28 +2175,30 @@ static FUNC(void, COM_CODE) Com_Uint8NDynGroupSignalInvalidCalculate(
 {
     const Com_RxGroupSignalType* rxGroupSignalPtr = &Com_ConfigStd->ComRxGroupSignal[GroupSignalId];
     Com_RxIpduBufIdType ipduBufferPos = IpduBufferId + (Com_RxIpduBufIdType)rxGroupSignalPtr->ComSigLsbBytePos;
+#if ((0u < COM_GWSIGNAL_8BITBUFF_SIZE) && (STD_ON == COM_RX_GRP_SIGNAL_TYPE_UINT8_DYN_ENABLE))     \
+    || ((0u < COM_SIGNAL_8BIT_INVALID_SIZE) && (STD_ON == COM_RX_GRP_SIGNAL_TYPE_UINT8_DYN_ENABLE) \
+        && (STD_ON == COM_RX_GRP_SIGNAL_INVALID_DATA_ENABLE))
     Com_SignalType signalType = rxGroupSignalPtr->ComSignalType;
+#endif
 #if (0u < COM_SIGNAL_8BIT_INVALID_SIZE) && (STD_ON == COM_RX_GRP_SIGNAL_INVALID_DATA_ENABLE)
     uint16 invalidValueId = rxGroupSignalPtr->ComSignalInvalidBuffRefId;
 #endif
 
-    /*the group signal need gateway,store group signal value in gateway buffer*/
+/*the group signal need gateway,store group signal value in gateway buffer*/
 #if (COM_GWMAPPING_NUMBER > 0u)
     uint16 gwSignalBufferId = rxGroupSignalPtr->GWSignalBufferId;
     if (COM_UNUSED_UINT16 != gwSignalBufferId)
     {
 #if (0u < COM_GWSIGNAL_8BITBUFF_SIZE)
+        SchM_Enter_Com_MultiCore_Lock();
+        SchM_Enter_Com_Context();
 #if (STD_ON == COM_RX_GRP_SIGNAL_TYPE_UINT8_DYN_ENABLE)
         if (COM_UINT8_DYN == signalType)
         {
-            SchM_Enter_Com_Context();
             (void)ILib_memcpy(&Com_GWSignal8BitBuff[gwSignalBufferId], &SignalLength, sizeof(SignalLength));
-            SchM_Exit_Com_Context();
             gwSignalBufferId += sizeof(SignalLength);
         }
 #endif
-        SchM_Enter_Com_MultiCore_Lock();
-        SchM_Enter_Com_Context();
         (void)ILib_memcpy(&Com_GWSignal8BitBuff[gwSignalBufferId], &Com_RxIPduRuntimeBuff[ipduBufferPos], SignalLength);
         SchM_Exit_Com_Context();
         SchM_Exit_Com_MultiCore_Lock();
@@ -2118,7 +2207,7 @@ static FUNC(void, COM_CODE) Com_Uint8NDynGroupSignalInvalidCalculate(
 #endif /* COM_GWMAPPING_NUMBER > 0u */
 
 #if (0u < COM_SIGNAL_8BIT_INVALID_SIZE)
-#if (STD_ON == COM_RX_GRP_SIGNAL_TYPE_UINT8_DYN_ENABLE)
+#if (STD_ON == COM_RX_GRP_SIGNAL_TYPE_UINT8_DYN_ENABLE) && (STD_ON == COM_RX_GRP_SIGNAL_INVALID_DATA_ENABLE)
     if (((COM_UINT8_DYN == signalType) && (SignalLength == rxGroupSignalPtr->ComSignalDataInvalidValueLength))
         || (COM_UINT8_N == signalType))
 #endif
@@ -2223,11 +2312,336 @@ static FUNC(boolean, COM_CODE) Com_SignalGroupInvalidCalculate(
             }
 #endif
         }
+
+#if COM_GWMAPPING_NUMBER > 0u
+        Com_GwMappingIdType gwMappingId = rxGroupSignalPtr->GwMappingId;
+        if (gwMappingId != COM_NOT_USED_GW_MAPPING_ID)
+        {
+            Com_GwUpdateDestinationRequest(gwMappingId, TRUE);
+        }
+#endif
     }
+    COM_NOUSED(RxDynSignalLength);
     return signalGroupInvalid;
 }
 #endif /*  0u < COM_RXSIGNALGROUP_NUMBER && 0u < COM_RXGROUPSIGNAL_NUMBER */
-#if ((COM_RXSIGNAL_NUMBER + COM_RXSIGNALGROUP_NUMBER) > 0u)
+
+#if (COM_RXSIGNAL_NUMBER > 0u) && (STD_ON == COM_RX_SIGNAL_TIMEOUT_ENABLE)
+/******************************************************************************/
+/*
+ * Brief               RxSignal receive timeout handle
+ * ServiceId
+ * Sync/Async          Synchronous
+ * Reentrancy          Non Reentrant
+ * Param-Name[in]      rxIpduId
+ * Param-Name[out]     None
+ * Param-Name[in/out]  None
+ * Return              boolean
+ */
+/******************************************************************************/
+/* PRQA S 3673 ++ */ /* MISRA Rule 8.13 */
+static FUNC(void, COM_CODE)
+    Com_RxSignalTimeOutHandle(Com_RxIPduRunTimeStateType* RxIpduStatePtr, const Com_RxIPduType* RxIpduPtr)
+/* PRQA S 3673 -- */ /* MISRA Rule 8.13 */
+{
+    Com_RxSigTimeoutIdType ipduSignalTimeoutRefNumber, cnt;
+    Com_SignalIdType rxSignalId;
+#if (STD_ON == COM_RX_SIGNAL_TIMEOUT_ACTION_REPLACE_ENABLE) \
+    || (STD_ON == COM_RX_SIGNAL_TIMEOUT_ACTION_SUBSTITUTE_ENABLE)
+    Com_RxDataTimeoutActionType timeoutAction;
+    uint16 substituteBufId = COM_UNUSED_UINT16;
+#endif
+    uint16* rxSignalTimeoutCnt;
+    const Com_RxSignalType* rxSignalPtr;
+#if (COM_RXMASKNEWDIFFERMASKOLD_NUMBER > 0u)
+    Com_SignalIdType maskNewDifferMaskOldId;
+#endif
+
+    ipduSignalTimeoutRefNumber = RxIpduPtr->ComIPduSignalsTimeoutRefNumber;
+    cnt = RxIpduPtr->ComIPduSignalsTimeoutRefStartId;
+    for (; cnt < ipduSignalTimeoutRefNumber; ++cnt)
+    {
+        rxSignalId = Com_TimeoutRxSignalRef[cnt];
+        /* PRQA S 2983 ++ */ /* MISRA Rule 2.2*/
+        rxSignalPtr = &Com_ConfigStd->ComRxSignal[rxSignalId];
+        /* PRQA S 2983 -- */ /* MISRA Rule 2.2*/
+        rxSignalTimeoutCnt = &Com_RxSignalTimeOutCnt[cnt];
+        if (*rxSignalTimeoutCnt > 0u)
+        {
+            *rxSignalTimeoutCnt -= 1u;
+            if (0u == *rxSignalTimeoutCnt)
+            {
+/*let pass any value for the filter MASKED_NEW_DIFFERS_MASKED_OLD after an RX deadline timeout*/
+#if (COM_RXMASKNEWDIFFERMASKOLD_NUMBER > 0u) && (COM_RXSIGNAL_FILTERTYPE_MAX_NUMBER > 0u)
+                if ((COM_UNUSED_RXSIGNALFILTERID != rxSignalPtr->ComFilterIndex)
+                    && (COM_MASKED_NEW_DIFFERS_MASKED_OLD == rxSignalPtr->ComFilterAlgorithm))
+                {
+                    maskNewDifferMaskOldId = rxSignalPtr->ComFilterIndex;
+                    Com_MaskNewDifferMaskOldTimeOut[maskNewDifferMaskOldId] = TRUE;
+                }
+#endif
+                /*handle the timeout replace action*/
+#if (STD_ON == COM_RX_SIGNAL_TIMEOUT_ACTION_REPLACE_ENABLE) \
+    || (STD_ON == COM_RX_SIGNAL_TIMEOUT_ACTION_SUBSTITUTE_ENABLE)
+                timeoutAction = Com_RxSignalDataTimeoutActionCfg[cnt];
+#if (STD_ON == COM_RX_SIGNAL_TIMEOUT_ACTION_SUBSTITUTE_ENABLE)
+                substituteBufId = Com_RxSignalSubstituteValueIdRef[cnt];
+#endif
+                if (COM_TIMEOUT_ACTION_NONE != timeoutAction)
+                {
+                    Com_RxDataTimeOutActionHandle(
+                        RxIpduStatePtr,
+                        RxIpduPtr,
+                        timeoutAction,
+                        (const void*)rxSignalPtr,
+                        TRUE,
+                        substituteBufId);
+                }
+#endif
+#if (STD_ON == COM_RX_SIGNAL_TIMEOUT_NOTIFICATION_ENABLE)
+                if (NULL_PTR != Com_RxSignalTimeoutNotificationCfg[cnt])
+                {
+                    Com_RxSignalTimeoutNotificationCfg[cnt]();
+                }
+#endif
+                *rxSignalTimeoutCnt = Com_RxSignalTimeoutVal[cnt];
+            }
+        }
+    }
+    COM_NOUSED(RxIpduStatePtr);
+    return;
+}
+#endif
+
+#if (                                                                        \
+    ((COM_RXSIGNAL_NUMBER > 0u) && (STD_ON == COM_RX_SIGNAL_TIMEOUT_ENABLE)) \
+    || ((0u < COM_RXGROUPSIGNAL_NUMBER) && (STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ENABLE)))
+/******************************************************************************/
+/*
+ * Brief               Rx ipdu based receive DM timeout handle
+ * ServiceId
+ * Sync/Async          Synchronous
+ * Reentrancy          Non Reentrant
+ * Param-Name[in]      rxIpduId
+ * Param-Name[out]     None
+ * Param-Name[in/out]  None
+ * Return              boolean
+ */
+/******************************************************************************/
+static FUNC(void, COM_CODE)
+    Com_RxIpduBaseDMTimeOutHandle(Com_RxIPduRunTimeStateType* RxIpduStatePtr, const Com_RxIPduType* RxIpduPtr)
+{
+    if (RxIpduStatePtr->RxIpduBaseDMTimeout > 0u)
+    {
+        RxIpduStatePtr->RxIpduBaseDMTimeout -= 1u;
+        if (0u == RxIpduStatePtr->RxIpduBaseDMTimeout)
+        {
+#if (0u < COM_RXSIGNAL_NUMBER) && (STD_ON == COM_RX_SIGNAL_TIMEOUT_ENABLE)
+            Com_RxDMTimeOutHandleSignal(RxIpduStatePtr, RxIpduPtr);
+#endif /* 0u < COM_RXSIGNAL_NUMBER && STD_ON == COM_RX_SIGNAL_TIMEOUT_ENABLE */
+
+#if (0u < COM_RXGROUPSIGNAL_NUMBER) && (STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ENABLE)
+            Com_RxDMTimeOutHandleSignalGroup(RxIpduStatePtr, RxIpduPtr);
+#endif /* 0u < COM_RXGROUPSIGNAL_NUMBER && STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ENABLE */
+            RxIpduStatePtr->RxIpduBaseDMTimeout = RxIpduPtr->ComRxIPduDMTimeout;
+        }
+    }
+}
+#endif
+
+#if (0u < COM_RXSIGNAL_NUMBER) && (STD_ON == COM_RX_SIGNAL_TIMEOUT_ENABLE)
+/******************************************************************************/
+/*
+ * Brief               Rx ipdu based receive DM timeout handle signal
+ * ServiceId
+ * Sync/Async          Synchronous
+ * Reentrancy          Non Reentrant
+ * Param-Name[in]      rxIpduId
+ * Param-Name[out]     None
+ * Param-Name[in/out]  None
+ * Return              boolean
+ */
+/******************************************************************************/
+/* PRQA S 3673 ++ */ /* MISRA Rule 8.13 */
+static FUNC(void, COM_CODE)
+    Com_RxDMTimeOutHandleSignal(Com_RxIPduRunTimeStateType* RxIpduStatePtr, const Com_RxIPduType* RxIpduPtr)
+/* PRQA S 3673 -- */ /* MISRA Rule 8.13 */
+{
+    const Com_RxSignalType* rxSignalPtr;
+#if (STD_ON == COM_RX_SIGNAL_TIMEOUT_ACTION_REPLACE_ENABLE) \
+    || (STD_ON == COM_RX_SIGNAL_TIMEOUT_ACTION_SUBSTITUTE_ENABLE)
+    Com_RxDataTimeoutActionType timeoutAction;
+    uint16 substituteBufId = COM_UNUSED_UINT16; /* PRQA S 2983 */ /* MISRA Rule 2.2*/
+#endif
+#if (COM_RXMASKNEWDIFFERMASKOLD_NUMBER > 0u)
+    Com_SignalIdType maskNewDifferMaskOldId;
+#endif
+    Com_RxSigTimeoutIdType ipduSignalTimeoutRefNumber, cnt;
+    Com_SignalIdType rxSignalId;
+    ipduSignalTimeoutRefNumber = RxIpduPtr->ComIPduSignalsTimeoutRefNumber;
+    cnt = RxIpduPtr->ComIPduSignalsTimeoutRefStartId;
+    for (; cnt < ipduSignalTimeoutRefNumber; ++cnt)
+    {
+        rxSignalId = Com_TimeoutRxSignalRef[cnt];
+        rxSignalPtr = &Com_ConfigStd->ComRxSignal[rxSignalId]; /* PRQA S 2983 */ /* MISRA Rule 2.2*/
+#if (STD_ON == COM_RX_SIGNAL_UPDATE_BIT_ENABLE)
+        /*rx signal ComTimeout > 0 and have not update-bit*/
+        if (COM_UNUSED_SIGNALPOSITION == rxSignalPtr->ComUpdateLsbBytePos)
+#endif
+        {
+            if (Com_RxSignalTimeoutVal[cnt] > 0u)
+            {
+/*let pass any value for the filter MASKED_NEW_DIFFERS_MASKED_OLD after an RX deadline timeout*/
+#if (COM_RXMASKNEWDIFFERMASKOLD_NUMBER > 0u)
+                maskNewDifferMaskOldId = rxSignalPtr->ComFilterIndex;
+                if ((COM_UNUSED_RXSIGNALFILTERID == maskNewDifferMaskOldId)
+                    && (COM_MASKED_NEW_DIFFERS_MASKED_OLD == rxSignalPtr->ComFilterAlgorithm))
+                {
+                    Com_MaskNewDifferMaskOldTimeOut[maskNewDifferMaskOldId] = TRUE;
+                }
+#endif
+
+#if (STD_ON == COM_RX_SIGNAL_TIMEOUT_ACTION_REPLACE_ENABLE) \
+    || (STD_ON == COM_RX_SIGNAL_TIMEOUT_ACTION_SUBSTITUTE_ENABLE)
+                timeoutAction = Com_RxSignalDataTimeoutActionCfg[cnt];
+#if (STD_ON == COM_RX_SIGNAL_TIMEOUT_ACTION_SUBSTITUTE_ENABLE)
+                substituteBufId = Com_RxSignalSubstituteValueIdRef[cnt];
+#endif
+                Com_RxDataTimeOutActionHandle(
+                    RxIpduStatePtr,
+                    RxIpduPtr,
+                    timeoutAction,
+                    (const void*)rxSignalPtr,
+                    TRUE,
+                    substituteBufId);
+#endif
+#if (STD_ON == COM_RX_SIGNAL_TIMEOUT_NOTIFICATION_ENABLE)
+                if (NULL_PTR != Com_RxSignalTimeoutNotificationCfg[cnt])
+                {
+                    Com_RxSignalTimeoutNotificationCfg[cnt]();
+                }
+#endif
+            }
+        }
+    }
+    COM_NOUSED(RxIpduStatePtr);
+}
+#endif
+
+#if (0u < COM_RXGROUPSIGNAL_NUMBER) && (STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ENABLE)
+/******************************************************************************/
+/*
+ * Brief               Rx ipdu based receive DM timeout handle signal group
+ * ServiceId
+ * Sync/Async          Synchronous
+ * Reentrancy          Non Reentrant
+ * Param-Name[in]      rxIpduId
+ * Param-Name[out]     None
+ * Param-Name[in/out]  None
+ * Return              boolean
+ */
+/******************************************************************************/
+static FUNC(void, COM_CODE)
+    Com_RxDMTimeOutHandleSignalGroup(Com_RxIPduRunTimeStateType* RxIpduStatePtr, const Com_RxIPduType* RxIpduPtr)
+{
+    Com_RxDataTimeoutActionType timeoutAction;
+#if (COM_RXMASKNEWDIFFERMASKOLD_NUMBER > 0u)
+    Com_SignalIdType maskNewDifferMaskOldId;
+#endif
+    uint16 substituteBufId = COM_UNUSED_UINT16;
+#if (STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ACTION_SUBSTITUTE_ENABLE)
+    /* substituteStartId is continuous */
+    Com_RxGroupSignalIdType substituteStartId = RxIpduPtr->ComGrpSigSubstituteStartId;
+#endif
+    const Com_RxSignalGroupType* rxSignalGroupPtr;
+    const Com_RxGroupSignalType* rxGroupSignalPtr;
+    Com_RxSigGrpTimeoutIdType ipduSignalGroupTimeoutNumber, counter;
+    Com_RxSignalGroupIdType rxSignalGroupId;
+    ipduSignalGroupTimeoutNumber = RxIpduPtr->ComIPduSignalGroupsTimeoutRefNumber;
+    counter = RxIpduPtr->ComIPduSignalGroupsTimeoutRefStartId;
+    for (; counter < ipduSignalGroupTimeoutNumber; ++counter)
+    {
+        rxSignalGroupId = Com_TimeoutRxSigGrpRef[counter];
+        rxSignalGroupPtr = &Com_ConfigStd->ComRxSignalGroup[rxSignalGroupId];
+/*rx signal group ComTimeout > 0 and have not update-bit*/
+#if (STD_ON == COM_RX_SIG_GROUP_UPDATE_BIT_ENABLE)
+        if (COM_UNUSED_SIGNALPOSITION == rxSignalGroupPtr->ComUpdateLsbBytePos)
+#endif
+        {
+            if (Com_RxSigGrpTimeoutVal[counter] > 0u)
+            {
+                Com_RxGroupSignalIdType groupSignalNumber = rxSignalGroupPtr->ComGroupSignalRefNumber;
+                Com_RxGroupSignalIdType groupSignalId = rxSignalGroupPtr->ComGroupSignalRefStartId;
+                /* update all group signal init value into group signal runtime buffer */
+#if (COM_RXMASKNEWDIFFERMASKOLD_NUMBER > 0u)
+                for (; groupSignalId < groupSignalNumber; ++groupSignalId)
+                {
+                    rxGroupSignalPtr = &Com_ConfigStd->ComRxGroupSignal[groupSignalId];
+                    if ((COM_UNUSED_RXGRPSIGFILTERID != rxGroupSignalPtr->ComFilterIndex)
+                        && (COM_MASKED_NEW_DIFFERS_MASKED_OLD == rxGroupSignalPtr->ComFilterAlgorithm))
+                    {
+                        maskNewDifferMaskOldId = rxGroupSignalPtr->ComFilterIndex;
+                        Com_MaskNewDifferMaskOldTimeOut[maskNewDifferMaskOldId] = TRUE;
+                    }
+                }
+#endif
+#if (STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ACTION_REPLACE_ENABLE) \
+    || (STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ACTION_SUBSTITUTE_ENABLE)
+                timeoutAction = Com_RxSigGrpDataTimeoutActionCfg[counter];
+                if (COM_TIMEOUT_ACTION_NONE != timeoutAction)
+                {
+/*replace the rx pdu buffer for signal group array*/
+#if (STD_ON == COM_ENABLE_SIGNAL_GROUP_ARRAY_API)
+                    if (COM_UNUSED_COM_SIGNALGROUPARRYID != rxSignalGroupPtr->ComSignalGroupArrayId)
+                    {
+                        uint16 iPduSignalGroupArrayStartBufId =
+                            Com_SignalGroupArray[rxSignalGroupPtr->ComSignalGroupArrayId].ComIPduStartBufIndex;
+                        uint16 signalGroupArrayLength =
+                            Com_SignalGroupArray[rxSignalGroupPtr->ComSignalGroupArrayId].SignalGroupArrayLength;
+                        SchM_Enter_Com_Context();
+                        (void)ILib_memcpy(
+                            &Com_RxIPduRuntimeBuff[iPduSignalGroupArrayStartBufId],
+                            &Com_RxIPduInitValue[iPduSignalGroupArrayStartBufId],
+                            signalGroupArrayLength);
+                        SchM_Exit_Com_Context();
+                    }
+#endif
+                    /*replace the signal group(include all group signals) value with init value*/
+                    groupSignalId = rxSignalGroupPtr->ComGroupSignalRefStartId;
+                    for (; groupSignalId < groupSignalNumber; ++groupSignalId)
+                    {
+                        rxGroupSignalPtr = &Com_ConfigStd->ComRxGroupSignal[groupSignalId];
+#if (STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ACTION_SUBSTITUTE_ENABLE)
+                        if (COM_TIMEOUT_ACTION_SUBSTITUTE == timeoutAction)
+                        {
+                            substituteBufId = Com_RxGrpSigSubstituteValueIdRef[substituteStartId];
+                            substituteStartId++;
+                        }
+#endif
+
+                        Com_RxDataTimeOutActionHandle(
+                            RxIpduStatePtr,
+                            RxIpduPtr,
+                            timeoutAction,
+                            (void*)rxGroupSignalPtr,
+                            FALSE,
+                            substituteBufId);
+                    }
+                }
+#endif
+#if (STD_ON == COM_RX_SIG_GROUP_TIMEOUT_NOTIFICATION_ENABLE)
+                if (NULL_PTR != Com_RxSigGrpTimeoutNotificationCfg[counter])
+                {
+                    Com_RxSigGrpTimeoutNotificationCfg[counter]();
+                }
+#endif
+            }
+        }
+    }
+}
+#endif
+
+#if ((COM_IPDUGROUP_MAX > 0u) && ((COM_RXSIGNAL_NUMBER + COM_RXSIGNALGROUP_NUMBER) > 0u))
 /******************************************************************************/
 /*
  * Brief               set the reception deadline monitoring timer for the
@@ -2245,15 +2659,40 @@ static FUNC(boolean, COM_CODE) Com_SignalGroupInvalidCalculate(
 static FUNC(void, COM_CODE) Com_ResetRxPduTimeOut(PduIdType IpduId)
 {
     const Com_RxIPduType* rxIpduPtr = &Com_ConfigStd->ComRxIPdu[IpduId];
+#if (STD_ON == COM_RX_SIGNAL_UPDATE_BIT_ENABLE) || (STD_ON == COM_RX_SIG_GROUP_UPDATE_BIT_ENABLE)
+    Com_SignalPositionType updateBitPosition;
+#endif /* STD_ON == COM_RX_SIGNAL_UPDATE_BIT_ENABLE || STD_ON == COM_RX_SIG_GROUP_UPDATE_BIT_ENABLE */
+    uint8 rxDMFlag = 0u;
+
 #if (COM_RXSIGNAL_NUMBER > 0u) && (STD_ON == COM_RX_SIGNAL_TIMEOUT_ENABLE)
+    const Com_RxSignalType* rxSignalPtr;
     Com_RxSigTimeoutIdType ipduSignalTimeoutRefNumber, cnt;
+    Com_SignalIdType rxSignalId;
     ipduSignalTimeoutRefNumber = rxIpduPtr->ComIPduSignalsTimeoutRefNumber;
     cnt = rxIpduPtr->ComIPduSignalsTimeoutRefStartId;
     for (; cnt < ipduSignalTimeoutRefNumber; ++cnt)
     {
-        Com_RxSignalTimeOutCnt[cnt] = Com_RxSignalFirstTimeoutVal[cnt];
-    }
+#if (STD_ON == COM_RX_SIGNAL_UPDATE_BIT_ENABLE)
+        rxSignalId = Com_TimeoutRxSignalRef[cnt];
+        rxSignalPtr = &Com_ConfigStd->ComRxSignal[rxSignalId];
+        updateBitPosition = rxSignalPtr->ComUpdateLsbBytePos;
+        /*rx signal with update-bits*/
+        if (COM_UNUSED_SIGNALPOSITION != updateBitPosition)
+        {
+            Com_RxSignalTimeOutCnt[cnt] = Com_RxSignalFirstTimeoutVal[cnt];
+            rxDMFlag |= COM_RX_SIGNAL_DM;
+        }
+        /* rx signal without update-bits */
+        else
 #endif
+        {
+            rxDMFlag |= COM_RX_IPDU_DM;
+#if (STD_OFF == COM_RX_SIGNAL_UPDATE_BIT_ENABLE)
+            break;
+#endif
+        }
+    }
+#endif /* COM_RXSIGNAL_NUMBER > 0u && STD_ON == COM_RX_SIGNAL_TIMEOUT_ENABLE */
 #if (COM_RXSIGNALGROUP_NUMBER > 0u) && (STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ENABLE)
     Com_RxSigGrpTimeoutIdType ipduSignalGroupTimeoutNumber, counter;
     Com_RxSignalGroupIdType rxSignalGroupId;
@@ -2262,12 +2701,56 @@ static FUNC(void, COM_CODE) Com_ResetRxPduTimeOut(PduIdType IpduId)
     counter = rxIpduPtr->ComIPduSignalGroupsTimeoutRefStartId;
     for (; counter < ipduSignalGroupTimeoutNumber; ++counter)
     {
-        Com_RxSignalGroupTimeOutCnt[counter] = Com_RxSigGrpFirstTimeoutVal[counter];
+#if (STD_ON == COM_RX_SIG_GROUP_UPDATE_BIT_ENABLE)
+        rxSignalGroupId = Com_TimeoutRxSigGrpRef[counter];
+        rxSignalGroupPtr = &Com_ConfigStd->ComRxSignalGroup[rxSignalGroupId];
+        updateBitPosition = rxSignalGroupPtr->ComUpdateLsbBytePos;
+        /*rx signal group with update-bits*/
+        if (COM_UNUSED_SIGNALPOSITION != updateBitPosition)
+        {
+            Com_RxSignalGroupTimeOutCnt[cnt] = Com_RxSigGrpFirstTimeoutVal[cnt];
+            rxDMFlag |= COM_RX_SIGNAL_GROUP_DM;
+        }
+        /* rx signal group without update-bits */
+        else
+#endif
+        {
+            rxDMFlag |= COM_RX_IPDU_DM;
+#if (STD_OFF == COM_RX_SIG_GROUP_UPDATE_BIT_ENABLE)
+            break;
+#endif
+        }
+    }
+#endif /* COM_RXSIGNALGROUP_NUMBER > 0u && STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ENABLE */
+
+#if (                                                                        \
+    ((COM_RXSIGNAL_NUMBER > 0u) && (STD_ON == COM_RX_SIGNAL_TIMEOUT_ENABLE)) \
+    || ((COM_RXSIGNALGROUP_NUMBER > 0u) && (STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ENABLE)))
+    if (rxDMFlag > 0u)
+    {
+        Com_RxIPduRunTimeStateType* rxIpduStatePtr = &Com_RxIPduRunTimeState[IpduId];
+        if (COM_RX_IPDU_DM == (rxDMFlag & COM_RX_IPDU_DM)) /* PRQA S 2991,2995 */ /* MISRA Rule 14.3,2.2 */
+        {
+            rxIpduStatePtr->RxIpduBaseDMTimeout = rxIpduPtr->ComRxIPduDMFirstTimeout;
+        }
+#if (STD_ON == COM_RX_SIGNAL_UPDATE_BIT_ENABLE) || (STD_ON == COM_RX_SIG_GROUP_UPDATE_BIT_ENABLE)
+        if ((COM_RX_SIGNAL_DM == (rxDMFlag & COM_RX_SIGNAL_DM))
+            || (COM_RX_SIGNAL_GROUP_DM == (rxDMFlag & COM_RX_SIGNAL_GROUP_DM)))
+        {
+            COM_SET_RX_DM_FLAG(rxIpduStatePtr->RxIpduDMFlag, rxDMFlag);
+        }
+        /* rx ipdu base DM */
+        else
+#endif
+        {
+            COM_CLEAR_RX_DM_FLAG(rxIpduStatePtr->RxIpduDMFlag);
+            COM_SET_RX_DM_FLAG(rxIpduStatePtr->RxIpduDMFlag, COM_RX_IPDU_DM_ONLY);
+        }
     }
 #endif
-    return;
 }
 #endif
+
 #if ((COM_IPDUGROUP_NUMBER > 0u) && ((COM_RXSIGNAL_NUMBER + COM_RXSIGNALGROUP_NUMBER) > 0u))
 /******************************************************************************/
 /*
@@ -2285,6 +2768,7 @@ static FUNC(void, COM_CODE) Com_ResetRxPduTimeOut(PduIdType IpduId)
 static FUNC(void, COM_CODE) Com_DisableRxPduTimeOut(PduIdType IpduId)
 {
     const Com_RxIPduType* rxIpduPtr = &Com_ConfigStd->ComRxIPdu[IpduId];
+    Com_RxIPduRunTimeStateType* rxIpduStatePtr = &Com_RxIPduRunTimeState[IpduId];
 #if (COM_RXSIGNAL_NUMBER > 0u) && (STD_ON == COM_RX_SIGNAL_TIMEOUT_ENABLE)
     Com_RxSigTimeoutIdType ipduSignalTimeoutRefNumber, cnt;
     ipduSignalTimeoutRefNumber = rxIpduPtr->ComIPduSignalsTimeoutRefNumber;
@@ -2304,7 +2788,9 @@ static FUNC(void, COM_CODE) Com_DisableRxPduTimeOut(PduIdType IpduId)
         Com_RxSignalGroupTimeOutCnt[counter] = 0u;
     }
 #endif
-    return;
+
+    COM_CLEAR_RX_DM_FLAG(rxIpduStatePtr->RxIpduDMFlag);
+    rxIpduStatePtr->RxIpduBaseDMTimeout = 0u;
 }
 #endif
 
@@ -2327,10 +2813,12 @@ static FUNC(void, COM_CODE)
     Com_ResetUpdateDMTime(PduIdType IpduId, P2CONST(PduInfoType, AUTOMATIC, COM_APPL_DATA) PduInfo)
 {
     const Com_RxIPduType* rxIpduPtr = &Com_ConfigStd->ComRxIPdu[IpduId];
+    Com_RxIPduRunTimeStateType* rxIpduStatePtr = &Com_RxIPduRunTimeState[IpduId];
 #if (STD_ON == COM_RX_SIGNAL_UPDATE_BIT_ENABLE) || (STD_ON == COM_RX_SIG_GROUP_UPDATE_BIT_ENABLE)
     Com_SignalPositionType updateBitPosition;
     uint8 updateBitOffset;
-#endif
+#endif /* STD_ON == COM_RX_SIGNAL_UPDATE_BIT_ENABLE || STD_ON == COM_RX_SIG_GROUP_UPDATE_BIT_ENABLE */
+    uint8 rxDMFlag = 0u;
 
 #if (COM_RXSIGNAL_NUMBER > 0u) && (STD_ON == COM_RX_SIGNAL_TIMEOUT_ENABLE)
     const Com_RxSignalType* rxSignalPtr;
@@ -2344,24 +2832,26 @@ static FUNC(void, COM_CODE)
         rxSignalId = Com_TimeoutRxSignalRef[cnt];
         rxSignalPtr = &Com_ConfigStd->ComRxSignal[rxSignalId];
         updateBitPosition = rxSignalPtr->ComUpdateLsbBytePos;
-        /*the rx signal not have update bit*/
-        if (COM_UNUSED_SIGNALPOSITION == updateBitPosition)
-#endif /* STD_ON == COM_RX_SIGNAL_UPDATE_BIT_ENABLE */
-        {
-            Com_RxSignalTimeOutCnt[cnt] = Com_RxSignalTimeoutVal[cnt];
-        }
-/*the rx signal have update bit*/
-#if (STD_ON == COM_RX_SIGNAL_UPDATE_BIT_ENABLE)
-        else
+        /*the rx signal have update bit*/
+        if (COM_UNUSED_SIGNALPOSITION != updateBitPosition)
         {
             updateBitOffset = rxSignalPtr->ComUpdateBitMask;
             /*update bit is 1*/
             if (updateBitOffset == ((PduInfo->SduDataPtr[updateBitPosition]) & updateBitOffset))
             {
                 Com_RxSignalTimeOutCnt[cnt] = Com_RxSignalTimeoutVal[cnt];
+                rxDMFlag |= COM_RX_SIGNAL_DM;
             }
         }
-#endif /* STD_ON == COM_RX_SIGNAL_UPDATE_BIT_ENABLE */
+        /*the rx signal not have update bit*/
+        else
+#endif
+        {
+            rxDMFlag |= COM_RX_IPDU_DM;
+#if (STD_OFF == COM_RX_SIGNAL_UPDATE_BIT_ENABLE)
+            break;
+#endif
+        }
     }
 #endif /* COM_RXSIGNAL_NUMBER > 0u && STD_ON == COM_RX_SIGNAL_TIMEOUT_ENABLE */
 #if (COM_RXSIGNALGROUP_NUMBER > 0u) && (STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ENABLE)
@@ -2373,27 +2863,54 @@ static FUNC(void, COM_CODE)
     for (; counter < ipduSignalGroupTimeoutNumber; ++counter)
     {
 #if (STD_ON == COM_RX_SIG_GROUP_UPDATE_BIT_ENABLE)
-        rxSignalGroupId = ComTimeoutRxSigGrpRef[counter];
+        rxSignalGroupId = Com_TimeoutRxSigGrpRef[counter];
         rxSignalGroupPtr = &Com_ConfigStd->ComRxSignalGroup[rxSignalGroupId];
         updateBitPosition = rxSignalGroupPtr->ComUpdateLsbBytePos;
-        /*the rx signal group not have update bit*/
-        if (COM_UNUSED_SIGNALPOSITION == updateBitPosition)
-#endif /* STD_ON == COM_RX_SIG_GROUP_UPDATE_BIT_ENABLE */
-        {
-            Com_RxSignalGroupTimeOutCnt[cnt] = ComRxSigGrpTimeoutVal[cnt];
-        }
-/*the rx signal group have update bit*/
-#if (STD_ON == COM_RX_SIG_GROUP_UPDATE_BIT_ENABLE)
-        else
+        /*the rx signal group have update bit*/
+        if (COM_UNUSED_SIGNALPOSITION != updateBitPosition)
         {
             updateBitOffset = rxSignalGroupPtr->ComUpdateBitMask;
             /*update bit is 1*/
             if (updateBitOffset == ((PduInfo->SduDataPtr[updateBitPosition]) & updateBitOffset))
             {
-                Com_RxSignalGroupTimeOutCnt[cnt] = ComRxSigGrpTimeoutVal[cnt];
+                Com_RxSignalGroupTimeOutCnt[counter] = Com_RxSigGrpTimeoutVal[counter];
+                rxDMFlag |= COM_RX_SIGNAL_GROUP_DM;
             }
         }
-#endif /* STD_ON == COM_RX_SIG_GROUP_UPDATE_BIT_ENABLE */
+        /*the rx signal group not have update bit*/
+        else
+#endif
+        {
+            rxDMFlag |= COM_RX_IPDU_DM;
+#if (STD_OFF == COM_RX_SIG_GROUP_UPDATE_BIT_ENABLE)
+            break;
+#endif
+        }
+    }
+#endif /* COM_RXSIGNALGROUP_NUMBER > 0u && STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ENABLE */
+
+#if (                                                                        \
+    ((COM_RXSIGNAL_NUMBER > 0u) && (STD_ON == COM_RX_SIGNAL_TIMEOUT_ENABLE)) \
+    || ((COM_RXSIGNALGROUP_NUMBER > 0u) && (STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ENABLE)))
+    if (rxDMFlag > 0u)
+    {
+        if (COM_RX_IPDU_DM == (rxDMFlag & COM_RX_IPDU_DM)) /* PRQA S 2991,2995 */ /* MISRA Rule 14.3,2.2 */
+        {
+            rxIpduStatePtr->RxIpduBaseDMTimeout = rxIpduPtr->ComRxIPduDMTimeout;
+        }
+#if (STD_ON == COM_RX_SIGNAL_UPDATE_BIT_ENABLE) || (STD_ON == COM_RX_SIG_GROUP_UPDATE_BIT_ENABLE)
+        if ((COM_RX_SIGNAL_DM == (rxDMFlag & COM_RX_SIGNAL_DM))
+            || (COM_RX_SIGNAL_GROUP_DM == (rxDMFlag & COM_RX_SIGNAL_GROUP_DM)))
+        {
+            COM_SET_RX_DM_FLAG(rxIpduStatePtr->RxIpduDMFlag, rxDMFlag);
+        }
+        /* rx ipdu base DM */
+        else
+#endif
+        {
+            COM_CLEAR_RX_DM_FLAG(rxIpduStatePtr->RxIpduDMFlag);
+            COM_SET_RX_DM_FLAG(rxIpduStatePtr->RxIpduDMFlag, COM_RX_IPDU_DM_ONLY);
+        }
     }
 #endif
     COM_NOUSED(PduInfo);
@@ -2535,7 +3052,120 @@ static FUNC(void, COM_CODE)
     Com_RxIPduRunTimeState[RxPduId].RxIpduLength = (uint16)PduInfoPtr->SduLength;
     return;
 }
+/******************************************************************************/
+/*
+ * Brief               unpack the rx pdu data and invoke notification
+ * ServiceId
+ * Sync/Async          Synchronous
+ * Reentrancy          Non Reentrant
+ * Param-Name[in]      RxIpduStatePtr, RxIpduPtr
+ * Param-Name[out]     None
+ * Param-Name[in/out]  None
+ * Return              None
+ */
+/******************************************************************************/
+static FUNC(void, COM_CODE)
+    Com_IndicationProcess(const Com_RxIPduRunTimeStateType* RxIpduStatePtr, const Com_RxIPduType* RxIpduPtr)
+{
+    uint16 rxDynSignalLength = RxIpduStatePtr->RxIpduLength - (uint16)RxIpduPtr->IPduNoDynSignalLength;
+    Com_RxIpduBufIdType ipduBufferId = RxIpduPtr->ComRxIPduBufIndex;
+#if (STD_ON == COM_RX_SIGNAL_UPDATE_BIT_ENABLE) || (STD_ON == COM_RX_SIG_GROUP_UPDATE_BIT_ENABLE) \
+    || (STD_ON == COM_GW_SRC_SIG_UPDATE_BIT_ENABLE)
+    Com_SignalPositionType updateBitPosition;
+    uint8 updateBitOffset;
+#endif
 
+/*store the rx dynamic signal length which really receive,not replace by any reason for gateway*/
+#if (0u < COM_RXSIGNAL_NUMBER)
+    Com_RxSignalIdType ipduSignalRefNumber, cnt;
+    const Com_RxSignalType* rxSignalPtr;
+    ipduSignalRefNumber = RxIpduPtr->ComIPduSignalsRefNumber;
+    cnt = RxIpduPtr->ComIpduSignalRefStartId;
+    for (; cnt < ipduSignalRefNumber; ++cnt)
+    {
+        rxSignalPtr = &Com_ConfigStd->ComRxSignal[cnt];
+#if (STD_ON == COM_RX_SIGNAL_UPDATE_BIT_ENABLE)
+        updateBitPosition = rxSignalPtr->ComUpdateLsbBytePos;
+        /*the rx signal have update bit*/
+        if (COM_UNUSED_SIGNALPOSITION != updateBitPosition)
+        {
+            updateBitOffset = rxSignalPtr->ComUpdateBitMask;
+            /*update bit is 1*/
+            if (updateBitOffset
+                == ((Com_RxIPduRuntimeBuff[ipduBufferId + (Com_RxIpduBufIdType)(updateBitPosition)]) & updateBitOffset))
+            {
+                Com_SignalRxIndication(rxSignalPtr, rxDynSignalLength, ipduBufferId);
+            }
+        }
+        /*the rx signal not have update bit*/
+        else
+#endif /* STD_ON == COM_RX_SIGNAL_UPDATE_BIT_ENABLE */
+        {
+            Com_SignalRxIndication(rxSignalPtr, rxDynSignalLength, ipduBufferId);
+        }
+    }
+#endif /*0u < COM_RXSIGNAL_NUMBER*/
+#if ((0u < COM_RXSIGNALGROUP_NUMBER) && (0u < COM_RXGROUPSIGNAL_NUMBER))
+    Com_RxSignalGroupIdType ipduSignalGroupNumber, counter;
+    const Com_RxSignalGroupType* rxSignalGroupPtr;
+    ipduSignalGroupNumber = RxIpduPtr->ComIPduSignalGroupsRefNumber;
+    counter = RxIpduPtr->ComIPduSignalGroupsRefStartId;
+    for (; counter < ipduSignalGroupNumber; ++counter)
+    {
+        rxSignalGroupPtr = &Com_ConfigStd->ComRxSignalGroup[counter];
+#if (STD_ON == COM_RX_SIG_GROUP_UPDATE_BIT_ENABLE)
+        updateBitPosition = rxSignalGroupPtr->ComUpdateLsbBytePos;
+        /*the rx group signal have update bit*/
+        if (COM_UNUSED_SIGNALPOSITION != updateBitPosition)
+        {
+            updateBitOffset = rxSignalGroupPtr->ComUpdateBitMask;
+            /*update bit is 1*/
+            if (updateBitOffset
+                == ((Com_RxIPduRuntimeBuff[ipduBufferId + (Com_RxIpduBufIdType)(updateBitPosition)]) & updateBitOffset))
+            {
+                Com_SignalGroupRxIndication(rxSignalGroupPtr, rxDynSignalLength, ipduBufferId);
+            }
+        }
+        /*the rx group signal not have update bit*/
+        else
+#endif /* STD_ON == COM_RX_SIG_GROUP_UPDATE_BIT_ENABLE */
+        {
+            Com_SignalGroupRxIndication(rxSignalGroupPtr, rxDynSignalLength, ipduBufferId);
+        }
+    }
+#endif
+#if (0u < COM_GW_SOURCE_DESCRIPTION_NUMBER) && (COM_GWMAPPING_NUMBER > 0u)
+    Com_GwSourceDescriptionIdType gwSourceSignalNumber, id;
+    const Com_GwSourceSignalType* gwSourceSignalPtr;
+    gwSourceSignalNumber = RxIpduPtr->ComIPduSourceSignalsRefNumber;
+    id = RxIpduPtr->ComIPduSourceSignalsRefStartId;
+    for (; id < gwSourceSignalNumber; ++id)
+    {
+        gwSourceSignalPtr = &Com_ConfigStd->ComSourceSignal[id];
+#if (STD_ON == COM_GW_SRC_SIG_UPDATE_BIT_ENABLE)
+        updateBitPosition = gwSourceSignalPtr->ComUpdateLsbBytePos;
+        /*the source signal have update bit*/
+        if (COM_UNUSED_SIGNALPOSITION != updateBitPosition)
+        {
+            updateBitOffset = gwSourceSignalPtr->ComUpdateBitMask;
+            /*update bit is 1*/
+            if (updateBitOffset
+                == ((Com_RxIPduRuntimeBuff[ipduBufferId + (Com_RxIpduBufIdType)updateBitPosition]) & updateBitOffset))
+            {
+                Com_SourceSignalUnPack(gwSourceSignalPtr, rxDynSignalLength, ipduBufferId);
+            }
+        }
+        /*the rx signal not have update bit*/
+        else
+#endif /* STD_ON == COM_GW_SRC_SIG_UPDATE_BIT_ENABLE */
+        {
+            /*unpack the rx source description signal to gateway buffer*/
+            Com_SourceSignalUnPack(gwSourceSignalPtr, rxDynSignalLength, ipduBufferId);
+        }
+    }
+#endif /* 0u < COM_GW_SOURCE_DESCRIPTION_NUMBER && COM_GWMAPPING_NUMBER > 0u */
+    return;
+}
 #if (STD_ON == COM_RXTPPDU_SUPPORT) \
     && ((STD_ON == COM_RX_SIGNAL_INVALID_DATA_ENABLE) || (STD_ON == COM_RX_GRP_SIGNAL_INVALID_DATA_ENABLE))
 /******************************************************************************/
@@ -2634,7 +3264,6 @@ static FUNC(void, COM_CODE) Com_TpPduInvalidAction(PduIdType RxIpduId)
     return;
 }
 #endif
-
 #if (STD_ON == COM_RX_IPDU_COUNTER_ENABLE) && (STD_ON == COM_IPDU_REPLICATION_ENABLE)
 /******************************************************************************/
 /*
@@ -2743,6 +3372,95 @@ static FUNC(boolean, COM_CODE)
     return rxPduValid;
 }
 #endif
+#if (                                                              \
+    (STD_ON == COM_RX_SIGNAL_TIMEOUT_ACTION_REPLACE_ENABLE)        \
+    || (STD_ON == COM_RX_SIGNAL_TIMEOUT_ACTION_SUBSTITUTE_ENABLE)) \
+    || ((STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ACTION_REPLACE_ENABLE) \
+        || (STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ACTION_SUBSTITUTE_ENABLE))
+/******************************************************************************/
+/*
+ * Brief               Rx data timeout action handle
+ * ServiceId
+ * Sync/Async          Synchronous
+ * Reentrancy          Non Reentrant
+ * Param-Name[in]      rxIpduId
+ * Param-Name[out]     None
+ * Param-Name[in/out]  None
+ * Return              boolean
+ */
+/******************************************************************************/
+static void Com_RxDataTimeOutActionHandle(
+    Com_RxIPduRunTimeStateType* RxIpduStatePtr,
+    const Com_RxIPduType* RxIpduPtr,
+    Com_RxDataTimeoutActionType RxTimeoutAction,
+    const void* RxArgPtr,
+    boolean IsRxSignal,
+    Com_SignalIdType SubstituteBufId)
+{
+    Com_SignalType signalType;
+    uint16 initValueLength;
+    uint16 initValueId;
+    const Com_RxSignalType* rxSignalPtr;
+    const Com_RxGroupSignalType* rxGroupSignalPtr;
+
+    /*rx signal*/
+    if (IsRxSignal)
+    {
+        rxSignalPtr = (const Com_RxSignalType*)RxArgPtr;
+        initValueId = rxSignalPtr->ComSignalInitValueId;
+        signalType = rxSignalPtr->ComSignalType;
+    }
+    /*rx signal group*/
+    else
+    {
+        rxGroupSignalPtr = (const Com_RxGroupSignalType*)RxArgPtr;
+        initValueId = rxGroupSignalPtr->ComSignalInitValueId;
+        signalType = rxGroupSignalPtr->ComSignalType;
+    }
+
+    /*handle the timeout replace or substitute action*/
+#if (STD_ON == COM_RX_SIGNAL_TYPE_UINT8_DYN_ENABLE) || (STD_ON == COM_RX_GRP_SIGNAL_TYPE_UINT8_DYN_ENABLE) \
+    || (STD_ON == COM_GW_SRC_DSP_SIG_TYPE_UINT8_DYN_ENABLE)
+    if (COM_UINT8_DYN == signalType)
+    {
+        initValueLength = (TRUE == IsRxSignal) ? (rxSignalPtr->ComSignalDataInitValueLength)
+                                               : (rxGroupSignalPtr->ComSignalDataInitValueLength);
+        RxIpduStatePtr->RxIpduLength = (uint16)RxIpduPtr->IPduNoDynSignalLength + initValueLength;
+    }
+    else
+#endif /* STD_ON == COM_RX_SIGNAL_TYPE_UINT8_DYN_ENABLE || STD_ON == COM_RX_GRP_SIGNAL_TYPE_UINT8_DYN_ENABLE) \
+    || STD_ON == COM_GW_SRC_DSP_SIG_TYPE_UINT8_DYN_ENABLE */
+#if (STD_ON == COM_RX_SIGNAL_TYPE_UINT8_N_ENABLE) || (STD_ON == COM_RX_GRP_SIGNAL_TYPE_UINT8_N_ENABLE) \
+    || (STD_ON == COM_GW_SRC_DSP_SIG_TYPE_UINT8_N_ENABLE)
+        if (COM_UINT8_N == signalType)
+    {
+        initValueLength = (TRUE == IsRxSignal) ? (rxSignalPtr->ComSignalLength) : (rxGroupSignalPtr->ComSignalLength);
+    }
+    else
+#endif /* STD_ON == COM_RX_SIGNAL_TYPE_UINT8_N_ENABLE || STD_ON == COM_RX_GRP_SIGNAL_TYPE_UINT8_N_ENABLE) \
+    || STD_ON == COM_GW_SRC_DSP_SIG_TYPE_UINT8_N_ENABLE */
+    {
+        initValueLength = 0u;
+    }
+
+#if (STD_ON == COM_RX_SIGNAL_TIMEOUT_ACTION_REPLACE_ENABLE) \
+    || (STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ACTION_REPLACE_ENABLE)
+    if (COM_TIMEOUT_ACTION_REPLACE == RxTimeoutAction)
+    {
+        Com_InitSignalBuffer(signalType, initValueId, initValueLength);
+    }
+#endif /* STD_ON == COM_RX_SIGNAL_TIMEOUT_ACTION_REPLACE_ENABLE \
+    || STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ACTION_REPLACE_ENABLE */
+#if (STD_ON == COM_RX_SIGNAL_TIMEOUT_ACTION_SUBSTITUTE_ENABLE) \
+    || (STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ACTION_SUBSTITUTE_ENABLE)
+    if (COM_TIMEOUT_ACTION_SUBSTITUTE == RxTimeoutAction)
+    {
+        Com_SubstituteSignalBuffer(signalType, initValueId, initValueLength, SubstituteBufId);
+    }
+#endif
+    COM_NOUSED(SubstituteBufId);
+}
+#endif
 #define COM_STOP_SEC_CODE
 #include "Com_MemMap.h"
 /*******************************************************************************
@@ -2750,121 +3468,6 @@ static FUNC(boolean, COM_CODE)
 *******************************************************************************/
 #define COM_START_SEC_CODE
 #include "Com_MemMap.h"
-/******************************************************************************/
-/*
- * Brief               unpack the rx pdu data and invoke notification
- * ServiceId
- * Sync/Async          Synchronous
- * Reentrancy          Non Reentrant
- * Param-Name[in]      RxIpduStatePtr, RxIpduPtr
- * Param-Name[out]     None
- * Param-Name[in/out]  None
- * Return              None
- */
-/******************************************************************************/
-FUNC(void, COM_CODE)
-Com_IndicationProcess(const Com_RxIPduRunTimeStateType* RxIpduStatePtr, const Com_RxIPduType* RxIpduPtr)
-{
-    uint16 rxDynSignalLength = RxIpduStatePtr->RxIpduLength - (uint16)RxIpduPtr->IPduNoDynSignalLength;
-    Com_RxIpduBufIdType ipduBufferId = RxIpduPtr->ComRxIPduBufIndex;
-#if (STD_ON == COM_RX_SIGNAL_UPDATE_BIT_ENABLE) || (STD_ON == COM_RX_SIG_GROUP_UPDATE_BIT_ENABLE) \
-    || (STD_ON == COM_GW_SRC_SIG_UPDATE_BIT_ENABLE)
-    Com_SignalPositionType updateBitPosition;
-    uint8 updateBitOffset;
-#endif
-
-/*store the rx dynamic signal length which really receive,not replace by any reason for gateway*/
-#if (0u < COM_RXSIGNAL_NUMBER)
-    Com_RxSignalIdType ipduSignalRefNumber, cnt;
-    const Com_RxSignalType* rxSignalPtr;
-    ipduSignalRefNumber = RxIpduPtr->ComIPduSignalsRefNumber;
-    cnt = RxIpduPtr->ComIpduSignalRefStartId;
-    for (; cnt < ipduSignalRefNumber; ++cnt)
-    {
-        rxSignalPtr = &Com_ConfigStd->ComRxSignal[cnt];
-#if (STD_ON == COM_RX_SIGNAL_UPDATE_BIT_ENABLE)
-        updateBitPosition = rxSignalPtr->ComUpdateLsbBytePos;
-        /*the rx signal have update bit*/
-        if (COM_UNUSED_SIGNALPOSITION != updateBitPosition)
-        {
-            updateBitOffset = rxSignalPtr->ComUpdateBitMask;
-            /*update bit is 1*/
-            if (updateBitOffset
-                == ((Com_RxIPduRuntimeBuff[ipduBufferId + (Com_RxIpduBufIdType)(updateBitPosition)]) & updateBitOffset))
-            {
-                Com_SignalRxIndication(rxSignalPtr, rxDynSignalLength, ipduBufferId);
-            }
-        }
-        /*the rx signal not have update bit*/
-        else
-#endif /* STD_ON == COM_RX_SIGNAL_UPDATE_BIT_ENABLE */
-        {
-            Com_SignalRxIndication(rxSignalPtr, rxDynSignalLength, ipduBufferId);
-        }
-    }
-#endif /*0u < COM_RXSIGNAL_NUMBER*/
-#if ((0u < COM_RXSIGNALGROUP_NUMBER) && (0u < COM_RXGROUPSIGNAL_NUMBER))
-    Com_RxSignalGroupIdType ipduSignalGroupNumber, counter;
-    const Com_RxSignalGroupType* rxSignalGroupPtr;
-    ipduSignalGroupNumber = RxIpduPtr->ComIPduSignalGroupsRefNumber;
-    counter = RxIpduPtr->ComIPduSignalGroupsRefStartId;
-    for (; counter < ipduSignalGroupNumber; ++counter)
-    {
-        rxSignalGroupPtr = &Com_ConfigStd->ComRxSignalGroup[counter];
-#if (STD_ON == COM_RX_SIG_GROUP_UPDATE_BIT_ENABLE)
-        updateBitPosition = rxSignalGroupPtr->ComUpdateLsbBytePos;
-        /*the rx group signal have update bit*/
-        if (COM_UNUSED_SIGNALPOSITION != updateBitPosition)
-        {
-            updateBitOffset = rxSignalGroupPtr->ComUpdateBitMask;
-            /*update bit is 1*/
-            if (updateBitOffset
-                == ((Com_RxIPduRuntimeBuff[ipduBufferId + (Com_RxIpduBufIdType)(updateBitPosition)]) & updateBitOffset))
-            {
-                Com_SignalGroupRxIndication(rxSignalGroupPtr, rxDynSignalLength, ipduBufferId);
-            }
-        }
-        /*the rx group signal not have update bit*/
-        else
-#endif /* STD_ON == COM_RX_SIG_GROUP_UPDATE_BIT_ENABLE */
-        {
-            Com_SignalGroupRxIndication(rxSignalGroupPtr, rxDynSignalLength, ipduBufferId);
-        }
-    }
-#endif
-#if (0u < COM_GW_SOURCE_DESCRIPTION_NUMBER) && (COM_GWMAPPING_NUMBER > 0u)
-    Com_GwSourceDescriptionIdType gwSourceSignalNumber, id;
-    const Com_GwSourceSignalType* gwSourceSignalPtr;
-    gwSourceSignalNumber = RxIpduPtr->ComIPduSourceSignalsRefNumber;
-    id = RxIpduPtr->ComIPduSourceSignalsRefStartId;
-    for (; id < gwSourceSignalNumber; ++id)
-    {
-        gwSourceSignalPtr = &Com_ConfigStd->ComSourceSignal[id];
-#if (STD_ON == COM_GW_SRC_SIG_UPDATE_BIT_ENABLE)
-        updateBitPosition = gwSourceSignalPtr->ComUpdateLsbBytePos;
-        /*the source signal have update bit*/
-        if (COM_UNUSED_SIGNALPOSITION != updateBitPosition)
-        {
-            updateBitOffset = gwSourceSignalPtr->ComUpdateBitMask;
-            /*update bit is 1*/
-            if (updateBitOffset
-                == ((Com_RxIPduRuntimeBuff[ipduBufferId + (Com_RxIpduBufIdType)updateBitPosition]) & updateBitOffset))
-            {
-                Com_SourceSignalUnPack(gwSourceSignalPtr, rxDynSignalLength, ipduBufferId);
-            }
-        }
-        /*the rx signal not have update bit*/
-        else
-#endif /* STD_ON == COM_GW_SRC_SIG_UPDATE_BIT_ENABLE */
-        {
-            /*unpack the rx source description signal to gateway buffer*/
-            Com_SourceSignalUnPack(gwSourceSignalPtr, rxDynSignalLength, ipduBufferId);
-        }
-    }
-#endif /* 0u < COM_GW_SOURCE_DESCRIPTION_NUMBER && COM_GWMAPPING_NUMBER > 0u */
-    return;
-}
-
 #if (STD_ON == COM_RXTPPDU_SUPPORT) && (0u < COM_RXIPDU_NUMBER)
 /******************************************************************************/
 /*
@@ -3075,7 +3678,8 @@ Com_StartOfReceptionHandle(
                     if (NULL_PTR != info->SduDataPtr)
                     {
                         SchM_Enter_Com_Context();
-                        (void)ILib_memcpy(&Com_RxIPduRuntimeBuff[rxIPduBufIndex], info->SduDataPtr, info->SduLength);
+                        (void)
+                            ILib_memcpy(&Com_RxIPduRuntimeBuff[rxIPduBufIndex], &info->SduDataPtr[0], info->SduLength);
                         SchM_Exit_Com_Context();
                         *bufferSizePtr = rxPduMaxLength - info->SduLength;
                     }
@@ -3086,7 +3690,7 @@ Com_StartOfReceptionHandle(
                         uint16 metaDataPos = (uint16)rxPduMaxLength + (uint16)rxIPduBufIndex;
                         /*copy the metadata to RX PDU buffer*/
                         SchM_Enter_Com_Context();
-                        (void)ILib_memcpy(&Com_RxIPduRuntimeBuff[metaDataPos], info->MetaDataPtr, metadataLength);
+                        (void)ILib_memcpy(&Com_RxIPduRuntimeBuff[metaDataPos], &info->MetaDataPtr[0], metadataLength);
                         SchM_Exit_Com_Context();
                     }
 #endif
@@ -3156,7 +3760,7 @@ Com_ReceiveSignalGroupArrayHandle(
 }
 #endif
 
-#if (COM_IPDUGROUP_NUMBER > 0u) && (COM_RXIPDUGROUP_NUMBER > 0u)
+#if (COM_IPDUGROUP_MAX > 0u) && (COM_RXIPDUGROUP_NUMBER > 0u)
 /******************************************************************************/
 /*
  * Brief               used to handle all Rx Ipdu state change or not
@@ -3182,76 +3786,80 @@ Com_RxIpduController(boolean initialize) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
 
     for (ipduCnt = 0u; ipduCnt < COM_RXIPDU_NUMBER; ++ipduCnt)
     {
-        /*if the Pdu not included in any Ipdu Group,the state is always start*/
-        rxIpduPtr = &Com_ConfigStd->ComRxIPdu[ipduCnt];
-        ipduGroupRefNumber = rxIpduPtr->ComIPduGroupsRefNumber;
-        if (ipduGroupRefNumber > 0u)
+#if (STD_ON == COM_DEV_ERROR_DETECT) && (STD_ON == COM_MULTIPLE_PARTITION_USED)
+        if (Com_GetRxIPduPartitionId(ipduCnt) == GetApplicationID())
+#endif
         {
-            index = rxIpduPtr->ComIPduGroupsRefStartId;
-            rxIpduStatePtr = &Com_RxIPduRunTimeState[ipduCnt];
-            activeEnable = rxIpduStatePtr->RxIpduRTStFlag & Com_RX_ACTIVE_EN;
-            for (; index < ipduGroupRefNumber; ++index)
+            rxIpduPtr = &Com_ConfigStd->ComRxIPdu[ipduCnt];
+            ipduGroupRefNumber = rxIpduPtr->ComIPduGroupsRefNumber;
+            /*if the Pdu not included in any Ipdu Group,the state is always start*/
+            if (ipduGroupRefNumber > 0u)
             {
-                ipduGroupId = Com_RxIPduGroupsRef[index];
-                if (Com_IpduGroupEnable[ipduGroupId])
+                index = rxIpduPtr->ComIPduGroupsRefStartId;
+                rxIpduStatePtr = &Com_RxIPduRunTimeState[ipduCnt];
+                activeEnable = rxIpduStatePtr->RxIpduRTStFlag & Com_RX_ACTIVE_EN;
+                for (; index < ipduGroupRefNumber; ++index)
                 {
-                    break;
+                    ipduGroupId = Com_RxIPduGroupsRef[index];
+                    if (Com_IpduGroupEnable[ipduGroupId])
+                    {
+                        break;
+                    }
                 }
-            }
-            /*at least one Ipdu Group is start,the Pdu shall be active*/
-            if (index < ipduGroupRefNumber)
-            {
-                /*the pdu restart*/
-                if (Com_RX_ACTIVE_EN != activeEnable)
+                /*at least one Ipdu Group is start,the Pdu shall be active*/
+                if (index < ipduGroupRefNumber)
                 {
-                    SchM_Enter_Com_MultiCore_Lock();
-                    rxIpduStatePtr->RxIpduRTStFlag |= Com_RX_ACTIVE_EN;
-                    SchM_Exit_Com_MultiCore_Lock();
+                    /*the pdu restart*/
+                    if (Com_RX_ACTIVE_EN != activeEnable)
+                    {
+                        SchM_Enter_Com_MultiCore_Lock();
+                        rxIpduStatePtr->RxIpduRTStFlag |= Com_RX_ACTIVE_EN;
+                        SchM_Exit_Com_MultiCore_Lock();
 /*reset rx i-pdu(all signal/signal group) DM Counter*/
 #if ((COM_RXSIGNAL_NUMBER + COM_RXSIGNALGROUP_NUMBER) > 0u)
-                    Com_ResetRxPduTimeOut(ipduCnt);
+                        Com_ResetRxPduTimeOut(ipduCnt);
 #endif
 /*reset OCCURRENCE of filter with ComFilterAlgorithm ONE_EVERY_N*/
 #if (COM_ONEEVERYNFILTERSIGNAL_NUMBER > 0u)
-                    Com_ResetRxOccurrenceOfPduFilter(rxIpduPtr);
+                        Com_ResetRxOccurrenceOfPduFilter(rxIpduPtr);
 #endif
-                    if (initialize)
-                    {
-                        /*init the rx ipdu buffer,all signal buffer(included in the ipdu,except source signal)*/
-                        Com_ResetRxPduBufferAndSignalBuffer(ipduCnt);
-#if (STD_ON == COM_RX_IPDU_COUNTER_ENABLE)
-                        if (COM_UNUSED_RXIPDUCOUNTERID != rxIpduPtr->ComIPduCounterIndex)
+                        if (initialize)
                         {
-                            /*accept for I-PDUs with ComIPduDirection configured to RECEIVED any next incoming I-PDU
-                             * counter*/
-                            rxIpduStatePtr->RxIpduRTStFlag |= Com_RX_COUNTER_PDU_EN;
+                            /*init the rx ipdu buffer,all signal buffer(included in the ipdu,except source
+                             * signal)*/
+                            Com_ResetRxPduBufferAndSignalBuffer(ipduCnt);
+#if (STD_ON == COM_RX_IPDU_COUNTER_ENABLE)
+                            if (COM_UNUSED_RXIPDUCOUNTERID != rxIpduPtr->ComIPduCounterIndex)
+                            {
+                                /*accept for I-PDUs with ComIPduDirection configured to RECEIVED any next
+                                 * incoming I-PDU counter*/
+                                rxIpduStatePtr->RxIpduRTStFlag |= Com_RX_COUNTER_PDU_EN;
 #if (STD_ON == COM_IPDU_REPLICATION_ENABLE)
-                            rxIpduStatePtr->RxReplicationNumber = 0u;
+                                rxIpduStatePtr->RxReplicationNumber = 0u;
+#endif
+                            }
 #endif
                         }
+                    }
+                }
+                else
+                {
+                    if (Com_RX_ACTIVE_EN == activeEnable)
+                    {
+                        SchM_Enter_Com_MultiCore_Lock();
+                        rxIpduStatePtr->RxIpduRTStFlag &= Com_RX_ACTIVE_DIS;
+                        SchM_Exit_Com_MultiCore_Lock();
+/*disable rx i-pdu(all signal/signal group) DM Counter*/
+#if ((COM_RXSIGNAL_NUMBER + COM_RXSIGNALGROUP_NUMBER) > 0u)
+                        Com_DisableRxPduTimeOut(ipduCnt);
 #endif
                     }
                 }
             }
-            else
-            {
-                if (Com_RX_ACTIVE_EN == activeEnable)
-                {
-                    SchM_Enter_Com_MultiCore_Lock();
-                    rxIpduStatePtr->RxIpduRTStFlag &= Com_RX_ACTIVE_DIS;
-                    SchM_Exit_Com_MultiCore_Lock();
-/*disable rx i-pdu(all signal/signal group) DM Counter*/
-#if ((COM_RXSIGNAL_NUMBER + COM_RXSIGNALGROUP_NUMBER) > 0u)
-                    Com_DisableRxPduTimeOut(ipduCnt);
-#endif
-                }
-            }
         }
     }
-    return;
 }
 #endif
-/* PRQA S 3469 -- */ /* MISRA Rule Dir 4.9 */
 
 #if (0u < COM_RXIPDU_NUMBER)
 /******************************************************************************/
@@ -3285,8 +3893,8 @@ Com_RxIndicationHandle(PduIdType RxPduId, P2CONST(PduInfoType, AUTOMATIC, COM_AP
         uint8 DMEnable = rxIpduStatePtr->RxIpduRTStFlag & Com_RX_DM_EN;
         if (Com_RX_DM_EN == DMEnable)
         {
-            /*reset all signals and signal groups DM time(except the signal/signal group have update bit and the update
-             * bit is not 1)*/
+            /*reset all signals and signal groups DM time(except the signal/signal group have update bit and the
+             * update bit is not 1)*/
             Com_ResetUpdateDMTime(RxPduId, PduInfoPtr);
         }
 #endif /* STD_ON == COM_RX_SIGNAL_TIMEOUT_ENABLE || STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ENABLE */
@@ -3332,8 +3940,76 @@ Com_RxIndicationHandle(PduIdType RxPduId, P2CONST(PduInfoType, AUTOMATIC, COM_AP
     }
 }
 #endif
-/*Called by Com_ReceiveDynSignal.
- *Receive Dynamic Group Signal handle*/
+
+#if (0u < COM_RXIPDU_NUMBER)
+/******************************************************************************/
+/*
+ * Brief               RxPdu MainFunction handle
+ * ServiceId
+ * Sync/Async          Synchronous
+ * Reentrancy          Non Reentrant
+ * Param-Name[in]      None
+ * Param-Name[out]     None
+ * Param-Name[in/out]  None
+ * Return              None
+ */
+/******************************************************************************/
+void Com_MainFunctionRxHandle(Com_MainFunctionType mainFunctionId) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
+{
+    const Com_RxIPduType* rxIpduPtr;
+    Com_RxIPduRunTimeStateType* rxIpduStatePtr;
+    PduIdType rxIpduId = Com_GetStartOfMainFunctionRx(mainFunctionId);
+    uint8 DMEnable;
+    uint8 activeEnable;
+    uint8 RxIndication;
+    for (; rxIpduId < Com_GetEndOfMainFunctionRx(mainFunctionId); ++rxIpduId)
+    {
+        rxIpduStatePtr = &Com_RxIPduRunTimeState[rxIpduId];
+        rxIpduPtr = &Com_ConfigStd->ComRxIPdu[rxIpduId];
+        activeEnable = rxIpduStatePtr->RxIpduRTStFlag & Com_RX_ACTIVE_EN;
+        if (Com_RX_ACTIVE_EN == activeEnable)
+        {
+            RxIndication = rxIpduStatePtr->RxIpduRTStFlag & Com_RX_INDICATION_EN;
+            /*signal/signal group RxIndication is DEFERRED in the MainFunctionRx*/
+            if (Com_RX_INDICATION_EN == RxIndication)
+            {
+                /*rx indication handle*/
+                Com_IndicationProcess(rxIpduStatePtr, rxIpduPtr);
+                rxIpduStatePtr->RxIpduRTStFlag &= Com_RX_INDICATION_DIS;
+                /*the rx pdu include signal/signal group which need gateway*/
+            }
+            /*if the rx DM is enabled*/
+#if (STD_ON == COM_RX_SIGNAL_TIMEOUT_ENABLE) || (STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ENABLE)
+            DMEnable = rxIpduStatePtr->RxIpduRTStFlag & Com_RX_DM_EN;
+            if (Com_RX_DM_EN == DMEnable)
+            {
+#if (COM_RXSIGNAL_NUMBER > 0u) && (STD_ON == COM_RX_SIGNAL_TIMEOUT_ENABLE)
+                if (COM_RX_SIGNAL_DM == (rxIpduStatePtr->RxIpduDMFlag & COM_RX_SIGNAL_DM))
+                {
+                    Com_RxSignalTimeOutHandle(rxIpduStatePtr, rxIpduPtr);
+                }
+#endif
+
+#if (COM_RXSIGNALGROUP_NUMBER > 0u) && (STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ENABLE)
+                if (COM_RX_SIGNAL_GROUP_DM == (rxIpduStatePtr->RxIpduDMFlag & COM_RX_SIGNAL_GROUP_DM))
+                {
+                    Com_RxSignalGroupTimeOutHandle(rxIpduStatePtr, rxIpduPtr);
+                }
+#endif
+
+#if ((0u < COM_RXSIGNAL_NUMBER) || (0u < COM_RXGROUPSIGNAL_NUMBER))
+                if ((COM_RX_IPDU_DM_ONLY == (rxIpduStatePtr->RxIpduDMFlag & COM_RX_IPDU_DM_ONLY))
+                    || (COM_RX_IPDU_DM == (rxIpduStatePtr->RxIpduDMFlag & COM_RX_IPDU_DM)))
+                {
+                    Com_RxIpduBaseDMTimeOutHandle(rxIpduStatePtr, rxIpduPtr);
+                }
+#endif
+            }
+#endif
+        }
+    }
+}
+#endif
 #if (((COM_RXSIGNALGROUP_NUMBER > 0u) && (COM_RXGROUPSIGNAL_NUMBER > 0u)) && (0u < COM_RXGROUPSIGNAL_8BITBUFF_SIZE)) \
     && (STD_ON == COM_RX_GRP_SIGNAL_TYPE_UINT8_DYN_ENABLE) && (0u < COM_RXIPDU_NUMBER)
 /******************************************************************************/
@@ -3364,7 +4040,8 @@ Com_ReceiveDynGroupSignalHandle(
     Com_RxSignalGroupIdType signalGroupId;
     Com_SignalIdType id = SignalId - COM_RXSIGNAL_NUMBER;
 
-    /* Check IPdu which this group signal belonged is Active or not,the group signal type must be COM_UINT8_DYN*/
+    /* Check IPdu which this group signal belonged is Active or not,the group signal type must be
+     * COM_UINT8_DYN*/
     if (COM_UINT8_DYN == Com_ConfigStd->ComRxGroupSignal[id].ComSignalType)
     {
         signalGroupId = Com_ConfigStd->ComRxGroupSignal[id].ComSignalGroupRef;
@@ -3563,99 +4240,6 @@ Com_RxSignalGroupFilter(
     }
 
     return signalGroupFilter;
-}
-#endif
-
-#if (                                                              \
-    (STD_ON == COM_RX_SIGNAL_TIMEOUT_ACTION_REPLACE_ENABLE)        \
-    || (STD_ON == COM_RX_SIGNAL_TIMEOUT_ACTION_SUBSTITUTE_ENABLE)) \
-    || ((STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ACTION_REPLACE_ENABLE) \
-        || (STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ACTION_SUBSTITUTE_ENABLE))
-/******************************************************************************/
-/*
- * Brief               Rx data timeout action handle
- * ServiceId
- * Sync/Async          Synchronous
- * Reentrancy          Non Reentrant
- * Param-Name[in]      rxIpduId
- * Param-Name[out]     None
- * Param-Name[in/out]  None
- * Return              boolean
- */
-/******************************************************************************/
-/* PRQA S 1532 ++ */ /* MISRA Rule 8.7 */
-void Com_RxDataTimeOutActionHandle(
-    Com_RxIPduRunTimeStateType* RxIpduStatePtr,
-    const Com_RxIPduType* RxIpduPtr,
-    Com_RxDataTimeoutActionType RxTimeoutAction,
-    const void* RxArgPtr,
-    boolean IsRxSignal,
-    Com_SignalIdType SubstituteBufId)
-/* PRQA S 1532 -- */ /* MISRA Rule 8.7 */
-{
-    Com_SignalType signalType;
-    uint16 initValueLength;
-    uint16 initValueId;
-    const Com_RxSignalType* rxSignalPtr;
-    const Com_RxGroupSignalType* rxGroupSignalPtr;
-
-    /*rx signal*/
-    if (IsRxSignal)
-    {
-        rxSignalPtr = (const Com_RxSignalType*)RxArgPtr;
-        initValueId = rxSignalPtr->ComSignalInitValueId;
-        signalType = rxSignalPtr->ComSignalType;
-    }
-    /*rx signal group*/
-    else
-    {
-        rxGroupSignalPtr = (const Com_RxGroupSignalType*)RxArgPtr;
-        initValueId = rxGroupSignalPtr->ComSignalInitValueId;
-        signalType = rxGroupSignalPtr->ComSignalType;
-    }
-
-    /*handle the timeout replace or substitute action*/
-#if (STD_ON == COM_RX_SIGNAL_TYPE_UINT8_DYN_ENABLE) || (STD_ON == COM_RX_GRP_SIGNAL_TYPE_UINT8_DYN_ENABLE) \
-    || (STD_ON == COM_GW_SRC_DSP_SIG_TYPE_UINT8_DYN_ENABLE)
-    if (COM_UINT8_DYN == signalType)
-    {
-        initValueLength = (TRUE == IsRxSignal) ? (rxSignalPtr->ComSignalDataInitValueLength)
-                                               : (rxGroupSignalPtr->ComSignalDataInitValueLength);
-        RxIpduStatePtr->RxIpduLength = (uint16)RxIpduPtr->IPduNoDynSignalLength + initValueLength;
-    }
-    else
-#endif /* STD_ON == COM_RX_SIGNAL_TYPE_UINT8_DYN_ENABLE || STD_ON == COM_RX_GRP_SIGNAL_TYPE_UINT8_DYN_ENABLE) \
-    || STD_ON == COM_GW_SRC_DSP_SIG_TYPE_UINT8_DYN_ENABLE */
-#if (STD_ON == COM_RX_SIGNAL_TYPE_UINT8_N_ENABLE) || (STD_ON == COM_RX_GRP_SIGNAL_TYPE_UINT8_N_ENABLE) \
-    || (STD_ON == COM_GW_SRC_DSP_SIG_TYPE_UINT8_N_ENABLE)
-        if (COM_UINT8_N == signalType)
-    {
-        initValueLength = (TRUE == IsRxSignal) ? (rxSignalPtr->ComSignalLength) : (rxGroupSignalPtr->ComSignalLength);
-    }
-    else
-#endif /* STD_ON == COM_RX_SIGNAL_TYPE_UINT8_N_ENABLE || STD_ON == COM_RX_GRP_SIGNAL_TYPE_UINT8_N_ENABLE) \
-    || STD_ON == COM_GW_SRC_DSP_SIG_TYPE_UINT8_N_ENABLE */
-    {
-        initValueLength = 0u;
-    }
-
-#if (STD_ON == COM_RX_SIGNAL_TIMEOUT_ACTION_REPLACE_ENABLE) \
-    || (STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ACTION_REPLACE_ENABLE)
-    if (COM_TIMEOUT_ACTION_REPLACE == RxTimeoutAction)
-    {
-        Com_InitSignalBuffer(signalType, initValueId, initValueLength);
-    }
-#endif /* STD_ON == COM_RX_SIGNAL_TIMEOUT_ACTION_REPLACE_ENABLE \
-    || STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ACTION_REPLACE_ENABLE */
-#if (STD_ON == COM_RX_SIGNAL_TIMEOUT_ACTION_SUBSTITUTE_ENABLE) \
-    || (STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ACTION_SUBSTITUTE_ENABLE)
-    if (COM_TIMEOUT_ACTION_SUBSTITUTE == RxTimeoutAction)
-    {
-        Com_SubstituteSignalBuffer(signalType, initValueId, initValueLength, SubstituteBufId);
-    }
-#endif /* STD_ON == COM_RX_SIGNAL_TIMEOUT_ACTION_SUBSTITUTE_ENABLE \
-    || STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ACTION_SUBSTITUTE_ENABLE */
-    COM_NOUSED(SubstituteBufId);
 }
 #endif
 #define COM_STOP_SEC_CODE

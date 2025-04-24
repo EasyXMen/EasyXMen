@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Nm.h                                                        **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : Wanglili                                                    **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Nm.h                                                        **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : Wanglili                                                    **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 
 #ifndef NM_H_
 #define NM_H_
@@ -53,10 +54,11 @@
 #define NM_H_AR_RELEASE_PATCH_VERSION 0u
 
 /* Error classification */
-#define NM_E_UNINIT          ((uint8)(0x00u))
-#define NM_E_INVALID_CHANNEL ((uint8)(0x01u))
-#define NM_E_PARAM_POINTER   ((uint8)(0x02u))
-#define NM_E_NO_ERROR        ((uint8)(0xffu))
+#define NM_E_UNINIT                    ((uint8)(0x00u))
+#define NM_E_INVALID_CHANNEL           ((uint8)(0x01u))
+#define NM_E_PARAM_POINTER             ((uint8)(0x02u))
+#define NM_E_INVALID_PARTITION_CONTEXT ((uint8)(0x0Fu))
+#define NM_E_NO_ERROR                  ((uint8)(0xffu))
 
 /* Service ID[hex] */
 #define NM_SERVICE_ID_INIT                          ((uint8)0x00u)
@@ -638,6 +640,23 @@ FUNC(void, NM_CODE)
 Nm_GetVersionInfo(Std_VersionInfoType* nmVerInfoPtr);
 #endif /* STD_ON == NM_VERSION_INFO_API */
 
+#if (STD_ON == NM_COORDINATOR_SUPPORT_ENABLED)
+/**
+ * This function implements the processes of the NM Interface,which need a fix
+ *   cyclic scheduling.
+ * Service ID: 0x10
+ * Sync/Async: Synchronous
+ * Reentrancy: Reentrant
+ * Parameters(IN): NA
+ * Parameters(INOUT): NA
+ * Parameters(OUT): NA
+ * Return value: NA
+ *  @SWS_Nm_00279
+ */
+FUNC(void, NM_CODE)
+Nm_MainFunction(void);
+#endif /* STD_ON == NM_COORDINATOR_SUPPORT_ENABLED */
+
 #if NM_PARTIAL_NETWORK_SUPPORT_ENABLED == STD_ON
 /**
  * @brief       Indication by ComM of internal PNC requests. This is used to aggregate the internal PNC requests.
@@ -650,8 +669,8 @@ Nm_GetVersionInfo(Std_VersionInfoType* nmVerInfoPtr);
 void Nm_UpdateIRA(NetworkHandleType NetworkHandle, const uint8* PncBitVectorPtr);
 
 /**
- * @brief       Function called by <Bus>Nms to request the aggregated internal PNC requests for transmission within the
- *              Nm message.
+ * @brief       Function called by <Bus>Nms to request the aggregated internal PNC requests for transmission within
+ * the Nm message.
  * @id          0x27
  * @synchronous Synchronous
  * @reentrancy  Non Reentrant for the same NetworkHandle, reentrant otherwise

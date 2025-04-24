@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : CryIf.h                                                     **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : yuzhe.zhang                                                 **
- **  Vendor      :                                                             **
- **  DESCRIPTION : implementation header for CryIf                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : CryIf.h                                                     **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : yuzhe.zhang                                                 **
+**  Vendor      :                                                             **
+**  DESCRIPTION : implementation header for CryIf                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 /******************************************************************************
 **                      Revision Control History                             **
 ******************************************************************************/
@@ -43,7 +44,7 @@
 **                      Includes                                              **
 *******************************************************************************/
 #include "CryIf_Cfg.h"
-#include "Csm_Types.h"
+#include "CSM_Types.h"
 #include "Std_Types.h"
 #include "Rte_Csm_Type.h"
 

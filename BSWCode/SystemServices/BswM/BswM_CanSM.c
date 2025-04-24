@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : BswM_CanSM.c                                                **
- **                                                                            **
- **  Created on  : 2020-03-24                                                  **
- **  Author      : qinchun.yang                                                **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : BswM_CanSM.c                                                **
+**                                                                            **
+**  Created on  : 2020-03-24                                                  **
+**  Author      : qinchun.yang                                                **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 
 /*******************************************************************************
 **                      Include Section                                       **
@@ -69,22 +70,20 @@ BswM_InitCanSMRequestPorts(void)
 {
     P2CONST(BswM_ModeRqstPortPCCfgType, AUTOMATIC, BSWM_CONST) modeRqstPCfgPtr;
     P2CONST(BswM_ModeRqstPortRuntimeType, AUTOMATIC, BSWM_VAR_CLEARED) modeRqstPtr;
-    P2CONST(BswM_PartitionPCCfgType, TYPEDEF, BSWM_CONST) bswmPartPCCfgs;
     NetworkHandleType numOfCanSMInd;
     NetworkHandleType idx;
 #if (BSWM_CANSM_ICOM_ENABLED == STD_ON)
     uint8 numOfIcom;
     uint8 icomIdx;
-#endif /* BSWM_CANSM_ICOM_ENABLED == STD_ON */
+#endif /*BSWM_CANSM_ICOM_ENABLED == STD_ON*/
     ApplicationType partIdx;
     boolean result;
 
     result = BswM_GetPartitionIdx(&partIdx);
     if ((boolean)TRUE == result)
     {
-        bswmPartPCCfgs = &(BswM_RuntimeStatus.bswmPartPCCfgs[partIdx]);
-        modeRqstPCfgPtr = bswmPartPCCfgs->modeRqstPCCfg;
-        modeRqstPtr = bswmPartPCCfgs->modeRqstPortRunPtr;
+        modeRqstPCfgPtr = BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].modeRqstPCCfg;
+        modeRqstPtr = BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].modeRqstPortRunPtr;
         numOfCanSMInd = modeRqstPCfgPtr->numOfCanSMInd;
         for (idx = 0u; idx < numOfCanSMInd; idx++)
         {
@@ -110,14 +109,14 @@ BswM_InitCanSMRequestPorts(void)
                 break;
             }
         }
-#endif /* BSWM_CANSM_ICOM_ENABLED == STD_ON */
+#endif /*BSWM_CANSM_ICOM_ENABLED == STD_ON*/
     }
 #if (BSWM_DEV_ERROR_DETECT == STD_ON)
     else
     {
         (void)Det_ReportError(BSWM_MODULE_ID, BSWM_INSTANCE_ID, BSWM_API_ID_INIT, BSWM_E_INIT_FAILED);
     }
-#endif /* BSWM_DEV_ERROR_DETECT == STD_ON */
+#endif /*BSWM_DEV_ERROR_DETECT == STD_ON*/
 }
 
 /**
@@ -138,8 +137,6 @@ BswM_CanSM_CurrentState(NetworkHandleType Network, CanSM_BswMCurrentStateType Cu
     P2CONST(BswM_ModeRqstPortLCfgType, AUTOMATIC, BSWM_CONST) modeRqstLCfgPtr;
     P2CONST(BswM_ModeRqstPortRuntimeType, AUTOMATIC, BSWM_VAR_CLEARED) modeRqstPtr;
     P2CONST(BswM_RuleLcCfgType, AUTOMATIC, BSWM_CONST) ruleLCfgPtr;
-    P2CONST(BswM_PartitionPCCfgType, TYPEDEF, BSWM_CONST) bswmPartPCCfgs;
-    P2CONST(BswM_PartitionLCfgType, TYPEDEF, BSWM_CONST) bswmPartLCfgs;
     NetworkHandleType numOfCansmCh;
     NetworkHandleType chIdx;
     BswM_RuleIndexType numOfRules;
@@ -150,26 +147,24 @@ BswM_CanSM_CurrentState(NetworkHandleType Network, CanSM_BswMCurrentStateType Cu
 
 #if (BSWM_DEV_ERROR_DETECT == STD_ON)
     if ((Std_ReturnType)E_OK == BswM_DetChkCanSMInd(CurrentState))
-#endif /* BSWM_DEV_ERROR_DETECT == STD_ON */
+#endif /*BSWM_DEV_ERROR_DETECT == STD_ON*/
     {
         result = BswM_GetPartitionIdx(&partIdx);
         if ((boolean)TRUE == result)
         {
-            bswmPartPCCfgs = &(BswM_RuntimeStatus.bswmPartPCCfgs[partIdx]);
-            bswmPartLCfgs = &(BswM_RuntimeStatus.bswmPartLCfgs[partIdx]);
-            modeRqstPCfgPtr = bswmPartPCCfgs->modeRqstPCCfg;
-            modeRqstLCfgPtr = bswmPartLCfgs->modeRqstLCfg;
+            modeRqstPCfgPtr = BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].modeRqstPCCfg;
+            modeRqstLCfgPtr = BswM_RuntimeStatus.bswmPartLCfgs[partIdx].modeRqstLCfg;
             numOfCansmCh = modeRqstPCfgPtr->numOfCanSMInd;
             for (chIdx = 0u; chIdx < numOfCansmCh; chIdx++)
             {
                 if (Network == modeRqstLCfgPtr->cansmIndChRef[chIdx])
                 {
-                    modeRqstPtr = bswmPartPCCfgs->modeRqstPortRunPtr;
+                    modeRqstPtr = BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].modeRqstPortRunPtr;
                     modeRqstPtr->canSMIndiStatus[chIdx] = CurrentState;
                     if (BSWM_IMMEDIATE == modeRqstLCfgPtr->cansmInd[chIdx].process)
                     {
                         numOfRules = modeRqstLCfgPtr->cansmInd[chIdx].belongToRlueNum;
-                        ruleLCfgPtr = bswmPartLCfgs->ruleLCfg;
+                        ruleLCfgPtr = BswM_RuntimeStatus.bswmPartLCfgs[partIdx].ruleLCfg;
                         for (idx = 0u; idx < numOfRules; idx++)
                         {
                             ruleIdx = modeRqstLCfgPtr->cansmInd[chIdx].belongToRlue[idx];
@@ -217,8 +212,6 @@ BswM_CanSM_CurrentIcomConfiguration(
     P2CONST(BswM_ModeRqstPortLCfgType, AUTOMATIC, BSWM_CONST) modeRqstLCfgPtr;
     P2CONST(BswM_ModeRqstPortRuntimeType, AUTOMATIC, BSWM_VAR_CLEARED) modeRqstPtr;
     P2CONST(BswM_RuleLcCfgType, AUTOMATIC, BSWM_CONST) ruleLCfgPtr;
-    P2CONST(BswM_PartitionPCCfgType, TYPEDEF, BSWM_CONST) bswmPartPCCfgs;
-    P2CONST(BswM_PartitionLCfgType, TYPEDEF, BSWM_CONST) bswmPartLCfgs;
     NetworkHandleType numOfIcomCh;
     NetworkHandleType chIdx;
     BswM_RuleIndexType numOfRules;
@@ -229,27 +222,25 @@ BswM_CanSM_CurrentIcomConfiguration(
 
 #if (BSWM_DEV_ERROR_DETECT == STD_ON)
     if ((Std_ReturnType)E_OK == BswM_DetChkCanSMIcom(Network))
-#endif /* BSWM_DEV_ERROR_DETECT == STD_ON */
+#endif /*BSWM_DEV_ERROR_DETECT == STD_ON*/
     {
         result = BswM_GetPartitionIdx(&partIdx);
         if ((boolean)TRUE == result)
         {
-            bswmPartPCCfgs = &(BswM_RuntimeStatus.bswmPartPCCfgs[partIdx]);
-            bswmPartLCfgs = &(BswM_RuntimeStatus.bswmPartLCfgs[partIdx]);
-            modeRqstPCfgPtr = bswmPartPCCfgs->modeRqstPCCfg;
-            modeRqstLCfgPtr = bswmPartLCfgs->modeRqstLCfg;
+            modeRqstPCfgPtr = BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].modeRqstPCCfg;
+            modeRqstLCfgPtr = BswM_RuntimeStatus.bswmPartLCfgs[partIdx].modeRqstLCfg;
             numOfIcomCh = modeRqstPCfgPtr->numOfCanSMIcomInd;
             for (chIdx = 0u; chIdx < numOfIcomCh; chIdx++)
             {
                 if ((Network == modeRqstLCfgPtr->cansmIcomChRef[chIdx])
                     && (Error == modeRqstLCfgPtr->cansmIcomSwichErrRef[chIdx]))
                 {
-                    modeRqstPtr = bswmPartPCCfgs->modeRqstPortRunPtr;
+                    modeRqstPtr = BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].modeRqstPortRunPtr;
                     modeRqstPtr->canSMIcomIndiStatus[chIdx] = ActiveConfiguration;
                     if (BSWM_IMMEDIATE == modeRqstLCfgPtr->cansmIcom[chIdx].process)
                     {
                         numOfRules = modeRqstLCfgPtr->cansmIcom[chIdx].belongToRlueNum;
-                        ruleLCfgPtr = bswmPartLCfgs->ruleLCfg;
+                        ruleLCfgPtr = BswM_RuntimeStatus.bswmPartLCfgs[partIdx].ruleLCfg;
                         for (idx = 0u; idx < numOfRules; idx++)
                         {
                             ruleIdx = modeRqstLCfgPtr->cansmIcom[chIdx].belongToRlue[idx];
@@ -282,7 +273,7 @@ BswM_GetCanSmIcomCfgId(NetworkHandleType icomIdx)
     }
     return icomCfgId;
 }
-#endif /* BSWM_CANSM_ICOM_ENABLED == STD_ON */
+#endif /*BSWM_CANSM_ICOM_ENABLED == STD_ON*/
 
 /*Get cansm indicate status*/
 FUNC(CanSM_BswMCurrentStateType, BSWM_CANSM_CODE)
@@ -305,4 +296,4 @@ BswM_GetCanSmIndStatus(NetworkHandleType cansmChIdx)
 **                      Private Function Definitions                          **
 *******************************************************************************/
 
-#endif /* BSWM_CANSM_ENABLED == STD_ON */
+#endif /*BSWM_CANSM_ENABLED == STD_ON*/

@@ -18,32 +18,33 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Crypto.h                                                    **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : yuhao.ge                                                    **
- **  Vendor      :                                                             **
- **  DESCRIPTION : implementation header for CRYPTO                            **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform 4.4.0                       **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Crypto.h                                                    **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : yuhao.ge                                                    **
+**  Vendor      :                                                             **
+**  DESCRIPTION : implementation header for CRYPTO                            **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform 4.4.0                       **
+**                                                                            **
+*******************************************************************************/
 #ifndef CRYPTO_H
 #define CRYPTO_H
 
 /*******************************************************************************
 **                      Includes                                              **
 *******************************************************************************/
-#include "Crypto_Cfg.h"
+#include "Crypto_ISoft_Cfg.h"
 #include "CSM_Types.h"
 #include "CryIf.h"
 #include "Std_Types.h"
 #include "Crypto_Types.h"
-#include "SchM_Crypto.h"
+#include "SchM_Crypto_ISoft.h"
 /*==================================================================================================
 *                              SOURCE FILE VERSION INFORMATION
 ==================================================================================================*/
@@ -121,7 +122,7 @@ typedef uint8 Crypto_ConfigType;
  */
 
 /* @req SRS_BSW_00101,SRS_BSW_00358,SRS_BSW_00414*/
-FUNC(void, CRY_CODE) Crypto_Init(P2CONST(Crypto_ConfigType, AUTOMATIC, CRYPTO_APPL_DATA) configPtr);
+FUNC(void, CRYPTO_CODE) Crypto_Init(P2CONST(Crypto_ConfigType, AUTOMATIC, CRYPTO_APPL_DATA) configPtr);
 /**
  * Returns the version information of this module.
  * Service ID: 0x01
@@ -135,7 +136,7 @@ FUNC(void, CRY_CODE) Crypto_Init(P2CONST(Crypto_ConfigType, AUTOMATIC, CRYPTO_AP
 
 #if (CRYPTO_VERSION_INFO_API == STD_ON)
 /* @req SWS_Crypto_910011,SRS_BSW_00407 */
-FUNC(void, CRY_CODE) Crypto_GetVersionInfo(P2VAR(Std_VersionInfoType, AUTOMATIC, CRY_APPL_DATA) versioninfo);
+FUNC(void, CRYPTO_CODE) Crypto_GetVersionInfo(P2VAR(Std_VersionInfoType, AUTOMATIC, CRYPTO_APPL_DATA) versioninfo);
 #endif
 
 /**
@@ -164,8 +165,8 @@ FUNC(void, CRY_CODE) Crypto_GetVersionInfo(P2VAR(Std_VersionInfoType, AUTOMATIC,
  */
 
 /* @req SWS_Crypto_91003 */
-FUNC(Std_ReturnType, CRY_CODE)
-Crypto_ProcessJob(VAR(uint32, AUTOMATIC) objectId, P2VAR(Crypto_JobType, AUTOMATIC, CRY_APPL_DATA) job);
+FUNC(Std_ReturnType, CRYPTO_CODE)
+Crypto_ProcessJob(VAR(uint32, AUTOMATIC) objectId, P2VAR(Crypto_JobType, AUTOMATIC, CRYPTO_APPL_DATA) job);
 
 /**
  * This interface cancels the processing of the job if possible.
@@ -182,8 +183,8 @@ Crypto_ProcessJob(VAR(uint32, AUTOMATIC) objectId, P2VAR(Crypto_JobType, AUTOMAT
  *      CRYPTO_E_JOB_CANCELED: The job has been cancelled but is still processed.
  */
 
-FUNC(Std_ReturnType, CRY_CODE)
-Crypto_CancelJob(VAR(uint32, AUTOMATIC) objectId, P2VAR(Crypto_JobType, AUTOMATIC, CRY_APPL_DATA) job);
+FUNC(Std_ReturnType, CRYPTO_CODE)
+Crypto_CancelJob(VAR(uint32, AUTOMATIC) objectId, P2VAR(Crypto_JobType, AUTOMATIC, CRYPTO_APPL_DATA) job);
 
 /**
  * Sets the given key element bytes to the key identified by keyId.
@@ -205,7 +206,7 @@ Crypto_CancelJob(VAR(uint32, AUTOMATIC) objectId, P2VAR(Crypto_JobType, AUTOMATI
  *    CRYPTO_E_KEY_NOT_AVAILABLE: Request failed because the key is not available.
  *    CRYPTO_E_KEY_SIZE_MISMATCH: Request failed,key element size does not match size of provided data.
  */
-FUNC(Std_ReturnType, CRY_CODE)
+FUNC(Std_ReturnType, CRYPTO_CODE)
 Crypto_KeyElementSet(
     uint32 cryptokeyId,
     uint32 keyElementId,
@@ -228,7 +229,7 @@ Crypto_KeyElementSet(
  *
  */
 
-FUNC(Std_ReturnType, CRY_CODE) Crypto_KeySetValid(VAR(uint32, AUTOMATIC) cryptoKeyId);
+FUNC(Std_ReturnType, CRYPTO_CODE) Crypto_KeySetValid(VAR(uint32, AUTOMATIC) cryptoKeyId);
 
 /**
  * @brief    CRYPTO driver key element extraction interface.
@@ -256,12 +257,12 @@ FUNC(Std_ReturnType, CRY_CODE) Crypto_KeySetValid(VAR(uint32, AUTOMATIC) cryptoK
  * @api
  *
  */
-FUNC(Std_ReturnType, CRY_CODE)
+FUNC(Std_ReturnType, CRYPTO_CODE)
 Crypto_KeyElementGet(
     VAR(uint32, AUTOMATIC) cryptoKeyId,
     VAR(uint32, AUTOMATIC) keyElementId,
-    P2VAR(uint8, AUTOMATIC, CRY_APPL_DATA) resultPtr,
-    P2VAR(uint32, AUTOMATIC, CRY_APPL_DATA) resultLengthPtr);
+    P2VAR(uint8, AUTOMATIC, CRYPTO_APPL_DATA) resultPtr,
+    P2VAR(uint32, AUTOMATIC, CRYPTO_APPL_DATA) resultLengthPtr);
 
 /**
  * @brief    CRYPTO driver key element copy interface.
@@ -290,7 +291,7 @@ Crypto_KeyElementGet(
  *
  */
 
-FUNC(Std_ReturnType, CRY_CODE)
+FUNC(Std_ReturnType, CRYPTO_CODE)
 Crypto_KeyElementCopy(
     VAR(uint32, AUTOMATIC) cryptoKeyId,
     VAR(uint32, AUTOMATIC) keyElementId,
@@ -333,7 +334,7 @@ Crypto_KeyElementCopy(
  * @api
  *
  */
-FUNC(Std_ReturnType, CRY_CODE)
+FUNC(Std_ReturnType, CRYPTO_CODE)
 Crypto_KeyElementCopyPartial(
     VAR(uint32, AUTOMATIC) cryptoKeyId,
     VAR(uint32, AUTOMATIC) keyElementId,
@@ -369,7 +370,7 @@ Crypto_KeyElementCopyPartial(
  * @api
  *
  */
-FUNC(Std_ReturnType, CRY_CODE)
+FUNC(Std_ReturnType, CRYPTO_CODE)
 Crypto_KeyCopy(VAR(uint32, AUTOMATIC) cryptoKeyId, VAR(uint32, AUTOMATIC) targetCryptoKeyId);
 
 /**
@@ -395,11 +396,11 @@ Crypto_KeyCopy(VAR(uint32, AUTOMATIC) cryptoKeyId, VAR(uint32, AUTOMATIC) target
  *
  */
 
-FUNC(Std_ReturnType, CRY_CODE)
+FUNC(Std_ReturnType, CRYPTO_CODE)
 Crypto_KeyElementIdsGet(
     VAR(uint32, AUTOMATIC) cryptoKeyId,
-    P2VAR(uint32, AUTOMATIC, CRY_APPL_DATA) keyElementIdsPtr,
-    P2VAR(uint32, AUTOMATIC, CRY_APPL_DATA) keyElementIdsLengthPtr);
+    P2VAR(uint32, AUTOMATIC, CRYPTO_APPL_DATA) keyElementIdsPtr,
+    P2VAR(uint32, AUTOMATIC, CRYPTO_APPL_DATA) keyElementIdsLengthPtr);
 
 /**
  * @brief    CRYPTO driver key generate interface.
@@ -422,10 +423,10 @@ Crypto_KeyElementIdsGet(
  * @api
  *
  */
-FUNC(Std_ReturnType, CRY_CODE)
+FUNC(Std_ReturnType, CRYPTO_CODE)
 Crypto_RandomSeed(
     VAR(uint32, AUTOMATIC) cryptoKeyId,
-    P2CONST(uint8, AUTOMATIC, CRY_APPL_DATA) seedPtr,
+    P2CONST(uint8, AUTOMATIC, CRYPTO_APPL_DATA) seedPtr,
     VAR(uint32, AUTOMATIC) seedLength);
 
 /**
@@ -447,7 +448,7 @@ Crypto_RandomSeed(
  * @api
  *
  */
-FUNC(Std_ReturnType, CRY_CODE) Crypto_KeyGenerate(VAR(uint32, AUTOMATIC) cryptoKeyId);
+FUNC(Std_ReturnType, CRYPTO_CODE) Crypto_KeyGenerate(VAR(uint32, AUTOMATIC) cryptoKeyId);
 /**
  * @brief    CRYPTO driver key Derivation interface.
  * @details  Derives a new key by using the key elements in the given key identified by the cryptoKeyId.
@@ -472,7 +473,7 @@ FUNC(Std_ReturnType, CRY_CODE) Crypto_KeyGenerate(VAR(uint32, AUTOMATIC) cryptoK
  * @api
  *
  */
-FUNC(Std_ReturnType, CRY_CODE)
+FUNC(Std_ReturnType, CRYPTO_CODE)
 Crypto_KeyDerive(VAR(uint32, AUTOMATIC) cryptoKeyId, VAR(uint32, AUTOMATIC) targetCryptoKeyId);
 
 /**
@@ -499,11 +500,11 @@ Crypto_KeyDerive(VAR(uint32, AUTOMATIC) cryptoKeyId, VAR(uint32, AUTOMATIC) targ
  *
  */
 
-FUNC(Std_ReturnType, CRY_CODE)
+FUNC(Std_ReturnType, CRYPTO_CODE)
 Crypto_KeyExchangeCalcPubVal(
     VAR(uint32, AUTOMATIC) cryptoKeyId,
-    P2VAR(uint8, AUTOMATIC, CRY_APPL_DATA) publicValuePtr,
-    P2VAR(uint32, AUTOMATIC, CRY_APPL_DATA) publicValueLengthPtr);
+    P2VAR(uint8, AUTOMATIC, CRYPTO_APPL_DATA) publicValuePtr,
+    P2VAR(uint32, AUTOMATIC, CRYPTO_APPL_DATA) publicValueLengthPtr);
 
 /**
  * @brief    CRYPTO driver key Exchange interface.
@@ -530,10 +531,10 @@ Crypto_KeyExchangeCalcPubVal(
  *
  */
 
-FUNC(Std_ReturnType, CRY_CODE)
+FUNC(Std_ReturnType, CRYPTO_CODE)
 Crypto_KeyExchangeCalcSecret(
     VAR(uint32, AUTOMATIC) cryptoKeyId,
-    P2CONST(uint8, AUTOMATIC, CRY_APPL_DATA) partnerPublicValuePtr,
+    P2CONST(uint8, AUTOMATIC, CRYPTO_APPL_DATA) partnerPublicValuePtr,
     VAR(uint32, AUTOMATIC) partnerPublicValueLength);
 
 /**
@@ -556,7 +557,7 @@ Crypto_KeyExchangeCalcSecret(
  * @api
  *
  */
-FUNC(Std_ReturnType, CRY_CODE)
+FUNC(Std_ReturnType, CRYPTO_CODE)
 Crypto_CertificateParse(VAR(uint32, AUTOMATIC) cryptoKeyId);
 
 /**
@@ -582,10 +583,10 @@ Crypto_CertificateParse(VAR(uint32, AUTOMATIC) cryptoKeyId);
  *
  */
 
-FUNC(Std_ReturnType, CRY_CODE)
+FUNC(Std_ReturnType, CRYPTO_CODE)
 Crypto_CertificateVerify(
     VAR(uint32, AUTOMATIC) cryptoKeyId,
     VAR(uint32, AUTOMATIC) verifyCryptoKeyId,
-    P2VAR(Crypto_VerifyResultType, AUTOMATIC, CRY_APPL_DATA) verifyPtr);
+    P2VAR(Crypto_VerifyResultType, AUTOMATIC, CRYPTO_APPL_DATA) verifyPtr);
 
 #endif

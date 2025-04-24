@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Crypto_internal.c                                           **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : yuzhe.zhang                                                 **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Implementation for Crypto                                   **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Crypto_internal.c                                           **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : yuzhe.zhang                                                 **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Implementation for Crypto                                   **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 
 /******************************************************************************
 **                      Revision Control History                             **
@@ -79,11 +80,11 @@
 #if (CRYPTO_MAXKEY_CONFIGURED > 0)
 /*Find Key Element index*/
 
-FUNC(Std_ReturnType, CRY_CODE)
+FUNC(Std_ReturnType, CRYPTO_CODE)
 Crypto_KeyElementIndexFind(
     VAR(uint32, AUTOMATIC) cryptokeyId,
     VAR(uint32, AUTOMATIC) keyElementId,
-    P2VAR(uint32, AUTOMATIC, CRY_APPL_DATA) getkeyElementId)
+    P2VAR(uint32, AUTOMATIC, CRYPTO_APPL_DATA) getkeyElementId)
 {
     uint32 i;
     Std_ReturnType ret = E_NOT_OK;
@@ -117,10 +118,10 @@ Crypto_KeyElementIndexFind(
     return ret;
 }
 
-FUNC(Std_ReturnType, CRY_CODE)
+FUNC(Std_ReturnType, CRYPTO_CODE)
 Get_Key(
     VAR(uint32, AUTOMATIC) cryptoKeyId,
-    P2VAR(uint8, AUTOMATIC, CRY_APPL_DATA) key,
+    P2VAR(uint8, AUTOMATIC, CRYPTO_APPL_DATA) key,
     VAR(uint8, AUTOMATIC) keyelementid)
 {
     Std_ReturnType ret;
@@ -149,7 +150,7 @@ Get_Key(
     return ret;
 }
 
-FUNC(Std_ReturnType, CRY_CODE)
+FUNC(Std_ReturnType, CRYPTO_CODE)
 Crypto_KeyElementSetInternal(
     uint32 cryptokeyId,
     uint32 keyElementId,
@@ -182,7 +183,51 @@ Crypto_KeyElementSetInternal(
     return Status;
 }
 #endif
+/* PRQA S 3673 ++ */ /* MISRA Rule 8.13 */
+/* PRQA S 3387 ++ */ /* MISRA Rule 13.3 */
+/* PRQA S 1338 ++ */ /* MISRA Rule 17.8 */
+FUNC(void, CRYPTO_CODE) Crypto_memset(void* buf, uint32 len)
+{
+    uint8* tmpsrc = (uint8*)buf;
 
+    if ((len > 0) && (buf != NULL_PTR))
+    {
+        while (len--)
+        {
+            *tmpsrc++ = (uint8)0;
+        }
+    }
+}
+
+FUNC(void, CRYPTO_CODE) Crypto_memsetVal(void* buf, uint8 val, uint32 len)
+{
+    uint8* tmpsrc = (uint8*)buf;
+
+    if ((len > 0) && (buf != NULL_PTR))
+    {
+        while (len--)
+        {
+            *tmpsrc++ = val;
+        }
+    }
+}
+
+FUNC(void, CRYPTO_CODE) Crypto_memcpy(void* buf, const void* buf1, uint32 len)
+{
+    uint32 i;
+    if ((len > 0) && (buf != NULL_PTR) && (buf1 != NULL_PTR))
+    {
+        const char* psrc = (const char*)buf1;
+        char* pdest = (char*)buf;
+        for (i = 0; i < len; i++)
+        {
+            pdest[i] = psrc[i];
+        }
+    }
+}
+/* PRQA S 3673 -- */ /* MISRA Rule 8.13 */
+/* PRQA S 3387 -- */ /* MISRA Rule 13.3 */
+/* PRQA S 1338 -- */ /* MISRA Rule 17.8 */
 #define CRYPTO_STOP_SEC_CODE
 #include "Crypto_MemMap.h"
 /* PRQA S 3432 -- */ /* MISRA Rule 20.7 */

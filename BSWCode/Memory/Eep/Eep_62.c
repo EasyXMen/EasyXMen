@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Eep_62.c                                                    **
- **                                                                            **
- **  Created on  : 2022/02/15                                                  **
- **  Author      : Haibin.Shao                                                 **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Eep_62.c                                                    **
+**                                                                            **
+**  Created on  : 2022/02/15                                                  **
+**  Author      : Haibin.Shao                                                 **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 /**
   \page ISOFT_MISRA_Exceptions  MISRA-C:2012 Compliance Exceptions
     ModeName:Eep_62<br>

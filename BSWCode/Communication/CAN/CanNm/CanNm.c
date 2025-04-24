@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : CanNm.c                                                     **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : Wanglili                                                    **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : CanNm.c                                                     **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : Wanglili                                                    **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 /*******************************************************************************
 **                      REVISION   HISTORY                                    **
 *******************************************************************************/
@@ -110,6 +111,12 @@
  *  V2.0.23   2024-01-31   xiaojian.liang
  *      CPT-8061 Source NID is always zero if CanNmNodeIdEnabled is true but CanNmNodeDetectionEnabled is false
  *      Replace the std library with the istd library
+ *      CPD-33700 Multiple partition support
+ *  V2.0.24   2024-10-30   xiaojian.liang
+ *      Fixed CPT-10964 If CanNmComUserDataSupport is enabled the API CanNm_SetUserData shall not be available.
+ *  V2.0.25   2024-11-27   caihong.liu
+ *      1. Fixed CPT-10987 - Fixed CanNm_Transmit precompilation condition and PduId comparison
+ *      2. Fixed CPT-11294 - Fixed The PduR_CanNmRxIndication function is called within Critical Section
  */
 
 /**
@@ -122,6 +129,9 @@
 
     \li PRQA S 1531, 1532 MISRA Rule 8.7 .<br>
     Reason:The exception is global configuration data(1531) and API(1532).
+
+    \li PRQA S 3678 VL_QAC_3678 .<br>
+    Reason: Variables cannot be prefixed with const because they are used under other conditions to be compiled
  */
 /*******************************************************************************
 **                      Imported Compiler Switch Check                        **
@@ -131,7 +141,7 @@
 #define CANNM_C_AR_RELEASE_PATCH_VERSION 0u
 #define CANNM_C_SW_MAJOR_VERSION         2u
 #define CANNM_C_SW_MINOR_VERSION         0u
-#define CANNM_C_SW_PATCH_VERSION         23u
+#define CANNM_C_SW_PATCH_VERSION         25u
 /*******************************************************************************
 **                      Include Section                                       **
 *******************************************************************************/
@@ -146,6 +156,10 @@
 
 #if (STD_ON == CANNM_COM_USERDATA_SUPPORT) || (STD_ON == CANNM_GLOBAL_PN_SUPPORT)
 #include "PduR_CanNm.h"
+#endif
+
+#if CANNM_MULTIPLE_PARTITION_USED == STD_ON
+#include "ComM.h"
 #endif
 
 /*******************************************************************************
@@ -176,7 +190,6 @@ typedef uint8 CanNm_ChannelIndexType;
 *******************************************************************************/
 #define CANNM_START_SEC_CODE
 #include "CanNm_MemMap.h"
-
 #if (STD_ON == CANNM_CAR_WAKEUP_RX_ENABLED)
 static FUNC(void, CANNM_CODE) CanNm_RxCarWakeUpHadle(uint8 chIndex);
 #endif /* STD_ON == CANNM_CAR_WAKEUP_RX_ENABLED */
@@ -215,7 +228,7 @@ static FUNC(void, CANNM_CODE) CanNm_PnEiraResetTimerHandle(void);
 #endif
 
 #if (STD_OFF == CANNM_PASSIVE_MODE_ENABLED)
-static FUNC(Std_ReturnType, CANNM_CODE) CanNm_SendNmPdu(uint8 chIndex, boolean addTransFlag);
+static FUNC(Std_ReturnType, CANNM_CODE) CanNm_SendNmPdu(uint8 chIndex);
 #endif /*STD_OFF == CANNM_PASSIVE_MODE_ENABLED*/
 
 #if CANNM_PN_EIRA_CALC_ENABLED == STD_ON
@@ -382,7 +395,9 @@ void CanNm_Init(const CanNm_ConfigType* CanNmConfigPtr) /* PRQA S 1532 */ /* MIS
             /* @req SWS_CanNm_00061 */
             /* Stop the transmission nm pdu message cycle timer */
             chRTPtr->msgTxCylceTimer = 0u;
+#if CANNM_RETRY_FIRST_MESSAGE_REQUEST == STD_ON
             chRTPtr->retrySendMsgFlag = FALSE;
+#endif
             chRTPtr->msgTimeoutTimer = 0u;
             chRTPtr->msgToutFlg = FALSE;
             chRTPtr->sendNmMsgFlg = FALSE;
@@ -763,11 +778,10 @@ Std_ReturnType CanNm_EnableCommunication(NetworkHandleType nmChannelHandle) /* P
 }
 #endif /* STD_ON == CANNM_COM_CONTROL_ENABLED */
 
-/* @SWS_CanNm_00266
-optional avaliable
-@SWS_CanNm_00327
-COM user data is not need this api */
-#if (STD_ON == CANNM_USER_DATA_ENABLED) && (STD_OFF == CANNM_PASSIVE_MODE_ENABLED)
+/* @SWS_CanNm_00266 optional avaliable
+   @SWS_CanNm_00327 COM user data is not need this api */
+#if (CANNM_USER_DATA_ENABLED == STD_ON) && (CANNM_COM_USERDATA_SUPPORT == STD_OFF) \
+    && (CANNM_PASSIVE_MODE_ENABLED == STD_OFF)
 /******************************************************************************/
 /*
  * Brief               Set user data for NM PDUs transmitted next on the bus.
@@ -864,7 +878,7 @@ Std_ReturnType CanNm_GetUserData(NetworkHandleType nmChannelHandle, uint8* nmUse
 #endif
 
 /* @SWS_CanNm_00330 */
-#if (CANNM_COM_USERDATA_SUPPORT == STD_ON) || (CANNM_GLOBAL_PN_SUPPORT == STD_ON)
+#if CANNM_COM_USERDATA_SUPPORT == STD_ON
 /**
  * @brief       Requests transmission of a PDU.
  * @id          0x49
@@ -878,9 +892,8 @@ Std_ReturnType CanNm_GetUserData(NetworkHandleType nmChannelHandle, uint8* nmUse
 Std_ReturnType CanNm_Transmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
 {
     Std_ReturnType ret = E_NOT_OK;
-
 #if CANNM_DEV_ERROR_DETECT == STD_ON
-    if (CanNm_ValidateTxPdu(CANNM_SERVICE_ID_TRANSMIT, TxPduId, PduInfoPtr))
+    if (CanNm_ValidateTxPduId(CANNM_SERVICE_ID_TRANSMIT, TxPduId))
 #endif
     {
         P2CONST(CanNm_ChannelConfigType, AUTOMATIC, CANNM_APPL_CONST) chCfgPtr;
@@ -889,7 +902,8 @@ Std_ReturnType CanNm_Transmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr) 
 
         for (chIndex = 0; chIndex < CANNM_NUMBER_OF_CHANNEL; chIndex++)
         {
-            if (TxPduId == CanNm_CfgPtr->ChannelConfig[chIndex].TxPdu->TxConfirmationPduId)
+            const CanNm_UserDataTxPduType* userDataPduPtr = CanNm_CfgPtr->ChannelConfig[chIndex].UserDataTxPdu;
+            if ((userDataPduPtr != NULL_PTR) && (userDataPduPtr->TxUserDataPduId == TxPduId))
             {
                 chCfgPtr = &CanNm_CfgPtr->ChannelConfig[chIndex];
                 chRTPtr = &CanNm_ChRunTime[chIndex];
@@ -899,26 +913,20 @@ Std_ReturnType CanNm_Transmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr) 
         if (chRTPtr != NULL_PTR)
         {
             /* @req SWS_CanNm_00464 */
-            if (((NM_STATE_NORMAL_OPERATION == chRTPtr->canNmState) || (NM_STATE_REPEAT_MESSAGE == chRTPtr->canNmState))
-                && (PduInfoPtr->SduLength >= chCfgPtr->UserDataLength))
+            if ((NM_STATE_NORMAL_OPERATION == chRTPtr->canNmState) || (NM_STATE_REPEAT_MESSAGE == chRTPtr->canNmState))
             {
-                /* Copy tx data to tx buffer */
-                (void)ILib_memcpy(
-                    &chRTPtr->txPduData[chCfgPtr->UserDataOffset],
-                    PduInfoPtr->SduDataPtr,
-                    chCfgPtr->UserDataLength);
-
                 /*
                  * Request an additional transmission of the NM PDU with the current
                  * user data.
                  */
-                (void)CanNm_SendNmPdu(chIndex, TRUE);
+                chRTPtr->sendNmMsgFlg = TRUE;
 
                 ret = E_OK;
             }
         }
     }
 
+    CANNM_UNUSED(PduInfoPtr);
     return ret;
 }
 #endif
@@ -1183,7 +1191,6 @@ Std_ReturnType CanNm_RequestBusSynchronization(NetworkHandleType nmChannelHandle
         CanNm_ChannelIndexType chIndex = CanNm_FindChannelIndex(nmChannelHandle);
         CanNm_InnerChannelType* chRTPtr = &CanNm_ChRunTime[chIndex];
 
-        SchM_Enter_CanNm_Context();
         if ((NM_MODE_NETWORK == chRTPtr->cannmMode)
 #if (STD_ON == CANNM_COM_CONTROL_ENABLED)
             && chRTPtr->canNmTxEnable
@@ -1195,7 +1202,8 @@ Std_ReturnType CanNm_RequestBusSynchronization(NetworkHandleType nmChannelHandle
              * This service shall trigger transmission of a single
              * Network Management PDU
              */
-            ret = CanNm_SendNmPdu(chIndex, FALSE);
+            chRTPtr->sendNmMsgFlg = TRUE;
+            ret = E_OK;
         }
         else
         {
@@ -1211,7 +1219,6 @@ Std_ReturnType CanNm_RequestBusSynchronization(NetworkHandleType nmChannelHandle
              * shall return E_NOT_OK.
              */
         }
-        SchM_Exit_CanNm_Context();
     }
 
     return ret;
@@ -1307,9 +1314,7 @@ Std_ReturnType CanNm_SetSleepReadyBit(NetworkHandleType nmChannelHandle, boolean
         {
             CanNm_ClrTxPduCbvBit(chIndex, CANNM_CBV_BIT_CSR_MASK);
         }
-        SchM_Enter_CanNm_Context();
-        (void)CanNm_SendNmPdu(chIndex, FALSE);
-        SchM_Exit_CanNm_Context();
+        chRTPtr->sendNmMsgFlg = TRUE;
         ret = E_OK;
     }
 
@@ -1345,7 +1350,6 @@ void CanNm_TxConfirmation(PduIdType TxPduID) /* PRQA S 1532 */ /* MISRA Rule 8.7
 #endif
     {
         uint8 chIndex;
-
         for (chIndex = 0; chIndex < CANNM_NUMBER_OF_CHANNEL; chIndex++) /* PRQA S 2877 */ /* MISRA Dir 4.1 */
         {
             if (TxPduID == CanNm_CfgPtr->ChannelConfig[chIndex].TxPdu->TxConfirmationPduId)
@@ -1503,10 +1507,9 @@ Std_ReturnType CanNm_TriggerTransmit(PduIdType TxPduId, PduInfoType* PduInfoPtr)
     if (CanNm_ValidateTxPdu(CANNM_SERVICE_ID_TRIGGERTRANSMIT, TxPduId, PduInfoPtr))
 #endif
     {
-        const CanNm_InnerChannelType* chRTPtr = NULL_PTR;
+        CanNm_InnerChannelType* chRTPtr = NULL_PTR; /* PRQA S 3678 */ /* VL_QAC_3678 */
         uint8 chIndex;
 #if (STD_ON == CANNM_COM_USERDATA_SUPPORT)
-        PduInfoType pduInfo;
         P2CONST(CanNm_ChannelConfigType, AUTOMATIC, CANNM_APPL_CONST) chCfgPtr;
 #endif
 
@@ -1525,20 +1528,34 @@ Std_ReturnType CanNm_TriggerTransmit(PduIdType TxPduId, PduInfoType* PduInfoPtr)
             }
             if (chRTPtr != NULL_PTR)
             {
+
 #if (STD_ON == CANNM_COM_USERDATA_SUPPORT)
                 /* @req SWS_CanNm_00350 */
-                pduInfo.SduLength = chCfgPtr->UserDataLength;
-                pduInfo.SduDataPtr = &chRTPtr->txPduData[chCfgPtr->UserDataOffset];
-                pduInfo.MetaDataPtr = NULL_PTR;
-                ret = PduR_CanNmTriggerTransmit(chCfgPtr->UserDataTxPdu->UpperLayerPduId, &pduInfo);
-                if ((uint8)E_OK == ret)
-#else
-                ret = E_OK;
-#endif
+                if (chCfgPtr->UserDataTxPdu != NULL_PTR)
                 {
-                    /* @req SWS_CanNm_00351 */
-                    (void)ILib_memcpy(PduInfoPtr->SduDataPtr, chRTPtr->txPduData, CANNM_DEFAULT_PDU_LENGTH);
+                    PduInfoType pduInfo;
+                    uint8 userData[CANNM_USER_DATA_MAX_LENGTH] = {0};
+                    pduInfo.SduLength = chCfgPtr->UserDataLength;
+                    pduInfo.SduDataPtr = userData;
+                    pduInfo.MetaDataPtr = NULL_PTR;
+                    if (PduR_CanNmTriggerTransmit(chCfgPtr->UserDataTxPdu->UpperLayerPduId, &pduInfo) == E_OK)
+                    {
+                        SchM_Enter_CanNm_Context();
+                        (void)ILib_memcpy(
+                            &chRTPtr->txPduData[chCfgPtr->UserDataOffset],
+                            userData,
+                            chCfgPtr->UserDataLength);
+                        SchM_Exit_CanNm_Context();
+                    }
                 }
+#endif
+
+                /* @req SWS_CanNm_00351 */
+                SchM_Enter_CanNm_Context();
+                (void)ILib_memcpy(PduInfoPtr->SduDataPtr, chRTPtr->txPduData, CANNM_DEFAULT_PDU_LENGTH);
+                SchM_Exit_CanNm_Context();
+
+                ret = E_OK;
             }
         }
     }
@@ -1567,8 +1584,19 @@ void CanNm_MainFunction(void) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
 {
     if (CanNm_InitStatus == CANNM_INIT)
     {
+#if CANNM_MULTIPLE_PARTITION_USED == STD_ON
+        ApplicationType applicationID = GetApplicationID();
+#endif
+
         for (uint8 chIndex = 0u; chIndex < CANNM_NUMBER_OF_CHANNEL; chIndex++) /* PRQA S 2877 */ /* MISRA Dir 4.1 */
         {
+#if CANNM_MULTIPLE_PARTITION_USED == STD_ON
+            if (CanNm_CfgPtr->ChannelConfig[chIndex].applicationID != applicationID)
+            {
+                continue;
+            }
+#endif
+
             CanNm_InnerChannelType* chRTPtr = &CanNm_ChRunTime[chIndex];
             if (chRTPtr->rxPduFlg)
             {
@@ -1580,6 +1608,7 @@ void CanNm_MainFunction(void) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
             CanNm_TimerManagement(chIndex);
             CanNm_StateManagement(chIndex);
 #if (CANNM_PASSIVE_MODE_ENABLED == STD_OFF)
+            CanNm_MsgcycleTimerManage(chIndex);
             CanNm_SendMsgMainHandle(chIndex);
 #endif /* CANNM_PASSIVE_MODE_ENABLED == STD_OFF */
             /* Clear Flags */
@@ -1739,16 +1768,9 @@ static FUNC(void, CANNM_CODE) CanNm_EntryRepeatMessageState(uint8 chIndex, boole
 
         if (0u == chRTPtr->msgTxCylceTimer)
         {
-            chRTPtr->msgTxCylceTimer = 1;
+            chRTPtr->msgTxCylceTimer = 1u;
         }
 
-#if (STD_ON == CANNM_VER_4_2_2)
-        /* @req SWS_CanNm_00007 */
-        if ((NM_MODE_BUS_SLEEP == chRTPtr->cannmMode) && chCfgPtr->RetryFirstMessageRequest)
-        {
-            chRTPtr->retrySendMsgFlag = TRUE;
-        }
-#endif
 #if (STD_ON == CANNM_IMMEDIATE_RESTART_ENABLED)
         if (isNetWorkRequest && (NM_MODE_PREPARE_BUS_SLEEP == chRTPtr->cannmMode))
         {
@@ -1778,14 +1800,14 @@ static FUNC(void, CANNM_CODE) CanNm_EntryRepeatMessageState(uint8 chIndex, boole
 
             chRTPtr->msgTxCylceTimer = chCfgPtr->ImmediateNmCycleTime;
             chRTPtr->immedMsgTxCnt = chCfgPtr->ImmediateNmTransmissions;
-
-            /* @req SWS_CanNm_00335 */
-            /*
-             * If immediate transmit Nm Pdu failed, retry in next
-             * MainFunction.
-             */
-            chRTPtr->retrySendMsgFlag = TRUE;
         }
+    }
+#endif
+#if CANNM_RETRY_FIRST_MESSAGE_REQUEST == STD_ON
+    /* @req SWS_CanNm_00007 */
+    if ((NM_MODE_BUS_SLEEP == chRTPtr->cannmMode) || (NM_MODE_PREPARE_BUS_SLEEP == chRTPtr->cannmMode))
+    {
+        chRTPtr->retrySendMsgFlag = chCfgPtr->RetryFirstMessageRequest;
     }
 #endif
 #endif
@@ -1839,7 +1861,6 @@ static FUNC(void, CANNM_CODE) CanNm_EntryRepeatMessageState(uint8 chIndex, boole
 #if (STD_OFF == CANNM_PASSIVE_MODE_ENABLED)
 static FUNC(void, CANNM_CODE) CanNm_MsgcycleTimerManage(uint8 chIndex)
 {
-    const CanNm_ChannelConfigType* chCfgPtr = &CanNm_CfgPtr->ChannelConfig[chIndex];
     CanNm_InnerChannelType* chRTPtr = &CanNm_ChRunTime[chIndex];
     if ((chRTPtr->msgTxCylceTimer > 0u)
 #if (STD_ON == CANNM_COM_CONTROL_ENABLED)
@@ -1856,18 +1877,6 @@ static FUNC(void, CANNM_CODE) CanNm_MsgcycleTimerManage(uint8 chIndex)
             /* @req SWS_CanNm_00032 */
             /* Set send NM message flag */
             chRTPtr->sendNmMsgFlg = TRUE;
-
-#if (STD_ON == CANNM_IMMEDIATE_TRANSMIT_ENABLED)
-            if (chRTPtr->immedMsgTxCnt > 0u)
-            {
-                chRTPtr->msgTxCylceTimer = chCfgPtr->ImmediateNmCycleTime;
-            }
-            else
-#endif
-            {
-                /* @req SWS_CanNm_00040 */
-                chRTPtr->msgTxCylceTimer = chCfgPtr->MsgCycleTime;
-            }
         }
     }
 }
@@ -1985,11 +1994,6 @@ static FUNC(void, CANNM_CODE) CanNm_TimerManagement(uint8 chIndex)
         }
     }
 #endif /* STD_ON == CANNM_REMOTE_SLEEP_IND_ENABLED */
-
-/* Msg cycle timer */
-#if (STD_OFF == CANNM_PASSIVE_MODE_ENABLED)
-    CanNm_MsgcycleTimerManage(chIndex);
-#endif /* STD_ON == CANNM_PASSIVE_MODE_ENABLED */
 
 #if (STD_ON == CANNM_PN_ERA_CALC_ENABLED)
     if (chCfgPtr->PnEraCalcEnabled)
@@ -2323,6 +2327,7 @@ static FUNC(void, CANNM_CODE) CanNm_PnEiraResetTimerHandle(void)
             pnIdx++;
         }
     }
+    SchM_Exit_CanNm_PnEiraCalc();
 
     /* @req SWS_CanNm_00352 */
     if (CanNm_InnerGlobal.pnEiraUpdate)
@@ -2335,12 +2340,11 @@ static FUNC(void, CANNM_CODE) CanNm_PnEiraResetTimerHandle(void)
         PduInfo.SduLength = pnInfoConfigPtr->CanNmPnInfoLength;
         PduR_CanNmRxIndication(upRxPduId, &PduInfo);
     }
-    SchM_Exit_CanNm_PnEiraCalc();
 }
 #endif
 
 #if (STD_OFF == CANNM_PASSIVE_MODE_ENABLED)
-static FUNC(Std_ReturnType, CANNM_CODE) CanNm_SendNmPdu(uint8 chIndex, boolean addTransFlag)
+static FUNC(Std_ReturnType, CANNM_CODE) CanNm_SendNmPdu(uint8 chIndex)
 {
     Std_ReturnType ret;
     CanNm_InnerChannelType* chRTPtr = &CanNm_ChRunTime[chIndex];
@@ -2353,7 +2357,6 @@ static FUNC(Std_ReturnType, CANNM_CODE) CanNm_SendNmPdu(uint8 chIndex, boolean a
 #endif
     {
         const CanNm_ChannelConfigType* chCfgPtr = &CanNm_CfgPtr->ChannelConfig[chIndex];
-        PduInfoType pduInfo;
 
 #if CANNM_PN_EIRA_CALC_ENABLED == STD_ON
         if (chCfgPtr->PnEnabled)
@@ -2365,20 +2368,26 @@ static FUNC(Std_ReturnType, CANNM_CODE) CanNm_SendNmPdu(uint8 chIndex, boolean a
 
 /* @req SWS_CanNm_00317 */
 #if (STD_ON == CANNM_COM_USERDATA_SUPPORT)
-        if ((addTransFlag == FALSE) && (FALSE == chCfgPtr->TxPdu->TxPduIsTriggerTrans))
+        if ((!chCfgPtr->TxPdu->TxPduIsTriggerTrans) && (chCfgPtr->UserDataTxPdu != NULL_PTR))
         {
+            PduInfoType pduInfo;
+            uint8 userData[CANNM_USER_DATA_MAX_LENGTH] = {0};
             PduIdType pdurTxSduId = chCfgPtr->UserDataTxPdu->UpperLayerPduId;
-            pduInfo.SduDataPtr = &chRTPtr->txPduData[chCfgPtr->UserDataOffset];
+            pduInfo.SduDataPtr = userData;
             pduInfo.SduLength = chCfgPtr->UserDataLength;
             pduInfo.MetaDataPtr = NULL_PTR;
-            (void)PduR_CanNmTriggerTransmit(pdurTxSduId, &pduInfo);
+            if (PduR_CanNmTriggerTransmit(pdurTxSduId, &pduInfo) == E_OK)
+            {
+                SchM_Enter_CanNm_Context();
+                (void)ILib_memcpy(&chRTPtr->txPduData[chCfgPtr->UserDataOffset], userData, chCfgPtr->UserDataLength);
+                SchM_Exit_CanNm_Context();
+            }
         }
-#else
-        CANNM_UNUSED(addTransFlag);
 #endif /* STD_OFF==CANNM_COM_USERDATA_SUPPORT */
 
 #if (0u < CANNM_TX_PDU_NUMBER)
         /* if PduR_CanNmTriggerTransmit return E_NOT_OK allow transmit nm pdu */
+        PduInfoType pduInfo;
         PduIdType canIfTxSduId = chCfgPtr->TxPdu->LowerLayerPduId;
         pduInfo.SduDataPtr = chRTPtr->txPduData;
         pduInfo.SduLength = CANNM_DEFAULT_PDU_LENGTH;
@@ -2524,13 +2533,11 @@ static FUNC(void, CANNM_CODE) CanNm_BusSleepStateHandle(uint8 chIndex)
     if (chRTPtr->rxPduExtFlg)
     {
         Nm_NetworkStartIndication(CanNm_CfgPtr->ChannelConfig[chIndex].ComMNetworkHandleRef);
-#if ((STD_ON == CANNM_DEV_ERROR_DETECT) && (STD_ON == CANNM_VER_R19_11))
         (void)Det_ReportRuntimeError(
             CANNM_MODULE_ID,
             CANNM_INSTANCE_ID,
             CANNM_SERVICE_ID_RXINDICATION,
             CANNM_E_NET_START_IND);
-#endif
     }
 
     boolean activeWakeUp = TRUE;
@@ -2687,6 +2694,9 @@ static FUNC(void, CANNM_CODE) CanNm_RepeatMessageStateHandle(uint8 chIndex)
              * State,transmission of NM PDUs shall be stopped.
              */
             chRTPtr->msgTxCylceTimer = 0u;
+#if CANNM_RETRY_FIRST_MESSAGE_REQUEST == STD_ON
+            chRTPtr->retrySendMsgFlag = FALSE;
+#endif
 #endif /* CANNM_PASSIVE_MODE_ENABLED == STD_OFF */
         }
 
@@ -2751,6 +2761,9 @@ static FUNC(void, CANNM_CODE) CanNm_NormalOperationStateHandle(uint8 chIndex)
          * State,transmission of NM PDUs shall be stopped.
          */
         chRTPtr->msgTxCylceTimer = 0u;
+#if CANNM_RETRY_FIRST_MESSAGE_REQUEST == STD_ON
+        chRTPtr->retrySendMsgFlag = FALSE;
+#endif
         goto exit; /* PRQA S 2001 */ /* MISRA Rule 15.1 */
     }
 
@@ -3018,41 +3031,56 @@ static FUNC(void, CANNM_CODE) CanNm_RxDataMainHandle(uint8 chIndex)
 /******************************************************************************/
 static FUNC(void, CANNM_CODE) CanNm_SendMsgMainHandle(uint8 chIndex)
 {
-    const CanNm_ChannelConfigType* chCfgPtr = &CanNm_CfgPtr->ChannelConfig[chIndex];
     CanNm_InnerChannelType* chRTPtr = &CanNm_ChRunTime[chIndex];
-    Std_ReturnType ret;
+    const CanNm_ChannelConfigType* chCfgPtr = &CanNm_CfgPtr->ChannelConfig[chIndex];
 
     if (chRTPtr->sendNmMsgFlg)
     {
-        ret = CanNm_SendNmPdu(chIndex, FALSE);
         chRTPtr->sendNmMsgFlg = FALSE;
-        if ((uint8)E_OK == ret)
+        if (CanNm_SendNmPdu(chIndex) == E_OK)
         {
+#if CANNM_RETRY_FIRST_MESSAGE_REQUEST == STD_ON
             chRTPtr->retrySendMsgFlag = FALSE;
-#if (STD_ON == CANNM_IMMEDIATE_TRANSMIT_ENABLED)
+#endif
+#if CANNM_IMMEDIATE_TRANSMIT_ENABLED == STD_ON
             if (chRTPtr->immedMsgTxCnt > 0u)
             {
                 chRTPtr->immedMsgTxCnt--;
-                if (0u == chRTPtr->immedMsgTxCnt)
+                if (chRTPtr->immedMsgTxCnt == 0u)
                 {
                     chRTPtr->msgTxCylceTimer = chCfgPtr->MsgCycleTime;
                 }
+                else
+                {
+                    chRTPtr->msgTxCylceTimer = chCfgPtr->ImmediateNmCycleTime;
+                }
             }
+            else
 #endif
+            {
+                chRTPtr->msgTxCylceTimer = chCfgPtr->MsgCycleTime;
+            }
         }
         else
         {
-            if (chRTPtr->retrySendMsgFlag)
+#if CANNM_IMMEDIATE_TRANSMIT_ENABLED == STD_ON
+            if (chRTPtr->immedMsgTxCnt > 0u)
             {
-                /*@req SWS_CanNm_00335*/
-                /*if transmit fail,retry in the next main function and modify
-                 *the transmit timer to CanNmMsgCycleTime*/
-                chRTPtr->retrySendMsgFlag = FALSE;
-#if (STD_ON == CANNM_IMMEDIATE_TRANSMIT_ENABLED)
-                chRTPtr->immedMsgTxCnt = 0u;
-#endif
-                /*timeout in the next main function*/
                 chRTPtr->msgTxCylceTimer = 1u;
+            }
+            else
+#endif
+            {
+#if CANNM_RETRY_FIRST_MESSAGE_REQUEST == STD_ON
+                if (chRTPtr->retrySendMsgFlag)
+                {
+                    chRTPtr->msgTxCylceTimer = 1u;
+                }
+                else
+#endif
+                {
+                    chRTPtr->msgTxCylceTimer = chCfgPtr->MsgCycleTime;
+                }
             }
         }
     }
@@ -3217,6 +3245,17 @@ static boolean CanNm_ValidateNetworkHandle(uint8 apiId, NetworkHandleType networ
             (void)Det_ReportError(CANNM_MODULE_ID, CANNM_INSTANCE_ID, apiId, CANNM_E_INVALID_CHANNEL);
         }
     }
+
+#if CANNM_MULTIPLE_PARTITION_USED == STD_ON
+    if (valid)
+    {
+        if (GetApplicationID() != ComM_GetChannelApplicationID(networkHandle))
+        {
+            valid = FALSE;
+            (void)Det_ReportError(CANNM_MODULE_ID, CANNM_INSTANCE_ID, apiId, CANNM_E_INVALID_PARTITION_CONTEXT);
+        }
+    }
+#endif
     return valid;
 }
 
@@ -3248,9 +3287,26 @@ static boolean CanNm_ValidateNetworkHandlePointerAndPointer(
 static boolean CanNm_ValidateTxPduId(uint8 apiId, PduIdType txPduId)
 {
     boolean valid = CanNm_ValidateInitStatus(apiId);
+    uint8 pduNum = 0u;
+
+    switch (apiId)
+    {
+    case CANNM_SERVICE_ID_TRANSMIT:
+        pduNum = CANNM_USERDATA_TX_PDU_NUM;
+        break;
+    case CANNM_SERVICE_ID_TRIGGERTRANSMIT:
+    case CANNM_SERVICE_ID_TXCONFIRMATION:
+        pduNum = CANNM_TX_PDU_NUMBER;
+        break;
+
+    default:
+        /* Unreachable */
+        break;
+    }
+
     if (valid)
     {
-        if (txPduId > CANNM_TX_PDU_NUMBER)
+        if (txPduId > pduNum)
         {
             valid = FALSE;
             (void)Det_ReportError(CANNM_MODULE_ID, CANNM_INSTANCE_ID, apiId, CANNM_E_INVALID_PDUID);

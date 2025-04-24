@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- ** **
- **  FILENAME    : EthSwt_88Q5050.c **
- ** **
- **  Created on  : 2021-10-13 **
- **  Author      : zhiqiang.huang **
- **  Vendor      : **
- **  DESCRIPTION : none **
- ** **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11 **
- ** **
- ***********************************************************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+************************************************************************************************************************
+**                                                                                                                    **
+**  FILENAME    : EthSwt_88Q5050.c                                                                                    **
+**                                                                                                                    **
+**  Created on  : 2021-10-13                                                                                          **
+**  Author      : zhiqiang.huang                                                                                      **
+**  Vendor      :                                                                                                     **
+**  DESCRIPTION : none                                                                                                **
+**                                                                                                                    **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                                                              **
+**                                                                                                                    **
+***********************************************************************************************************************/
 
 /***********************************************************************************************************************
 **                                          REVISION   HISTORY                                                        **
@@ -39,16 +40,6 @@
 /* <VERSION>    <DATE>       <AUTHOR>        <REVISION LOG>
  *  V1.0.0    [20211013]  [zhiqiang.huang]   Initial version
  **********************************************************************************************************************/
-
-/**
-  \page ISOFT_MISRA_Exceptions  MISRA-C:2012 Compliance Exceptions
-    ModeName:EthSwt_88Q5050<br>
-  RuleSorce:puhua-rule2024-2.rcf 2.3.5
-
-    \li PRQA S 1505 MISRA Rule 8.7 .<br>
-    Reason:Functions may be used in other projects.
-
- */
 
 /***********************************************************************************************************************
  *  INCLUDES
@@ -81,7 +72,6 @@ static VAR(EthSwt_ArlTableBufType, ETHSWT_VAR_ZERO_INIT) EthSwt_ArlTabShadowBuf[
  ***********************************************************************************************************************/
 #define ETHSWT_START_SEC_CODE
 #include "EthSwt_MemMap.h"
-/* PRQA S 1505 ++ */ /* MISRA Rule 8.7 */
 
 #if (STD_ON == ETHSWT_MIRROR_NVM_SUPPORT)
 FUNC(void, ETHSWT_CODE) EthSwt_MirroredPortRestore(P2CONST(EthSwt_ConfigType, AUTOMATIC, ETHSWT_APPL_CONST) SwtCfgPtr)
@@ -301,10 +291,8 @@ EthSwt_GetSwitchPortModeInternal(uint8 SwitchIdx, uint8 SwitchPortIdx, Eth_ModeT
 }
 #endif /* STD_ON == ETHSWT_GET_SWITCH_PORT_MODE_API */
 
-/* PRQA S 1505 ++ */ /* MISRA Rule 8.7 */
 FUNC(Std_ReturnType, ETHSWT_CODE)
 EthSwt_ATULoadOrPurgeEntry(uint8 SwitchIdx, const EthSwt_AtuOpInfoType* atuInfo, EthSwt_ATU_OperationType op)
-/* PRQA S 1505 -- */ /* MISRA Rule 8.7 */
 {
     EthSwt_RegType regVal;
     Std_ReturnType retVal = E_OK;
@@ -368,10 +356,8 @@ EthSwt_ATULoadOrPurgeEntry(uint8 SwitchIdx, const EthSwt_AtuOpInfoType* atuInfo,
     return retVal;
 }
 
-/* PRQA S 1505 ++ */ /* MISRA Rule 8.7 */
 FUNC(Std_ReturnType, ETHSWT_CODE)
 EthSwt_ATUGetEntry(uint8 SwitchIdx, EthSwt_AtuOpInfoType* atuInfo, EthSwt_ATU_OperationType op)
-/* PRQA S 1505 -- */ /* MISRA Rule 8.7 */
 {
     EthSwt_RegType regVal;
     EthSwt_RegType regTemp;
@@ -472,7 +458,7 @@ EthSwt_ATUGetEntry(uint8 SwitchIdx, EthSwt_AtuOpInfoType* atuInfo, EthSwt_ATU_Op
 }
 
 FUNC(Std_ReturnType, ETHSWT_CODE)
-EthSwt_VTULoadOrPurgeEntry(uint8 SwitchIdx, const EthSwt_VtuOpInfoType* vtuInfo) /* PRQA S 1505 */ /* MISRA Rule 8.7 */
+EthSwt_VTULoadOrPurgeEntry(uint8 SwitchIdx, const EthSwt_VtuOpInfoType* vtuInfo)
 {
     EthSwt_RegType regVal;
     uint32 memberTag = vtuInfo->memberTag;
@@ -626,7 +612,7 @@ EthSwt_VTULoadOrPurgeEntry(uint8 SwitchIdx, const EthSwt_VtuOpInfoType* vtuInfo)
 }
 
 FUNC(Std_ReturnType, ETHSWT_CODE)
-EthSwt_VTUGetEntry(uint8 SwitchIdx, EthSwt_VtuOpInfoType* vtuInfo) /* PRQA S 1505 */ /* MISRA Rule 8.7 */
+EthSwt_VTUGetEntry(uint8 SwitchIdx, EthSwt_VtuOpInfoType* vtuInfo)
 {
     EthSwt_RegType regVal;
     EthSwt_RegType regTemp;
@@ -730,6 +716,9 @@ EthSwt_VTUGetEntry(uint8 SwitchIdx, EthSwt_VtuOpInfoType* vtuInfo) /* PRQA S 150
     vtuInfo->fid = (uint8)(ETHSWT_REG_SHIFT_FIELD(regTemp, ETHSWT_REG_GLB1_VTU_FID_FID_OFST));
 
     /*get vidPolicy*/
+    /*
+     * vtuInfo->vidPolicy = ETHSWT_REG_GET_BIT(regVal, ETHSWT_REG_GLB1_VTU_FID_VIDPOLICY_OFST);
+     */
 
     /*read vtu sid*/
     EthSwt_ReadRegister(SwitchIdx, ETHSWT_REG_GROUP_GLB1, ETHSWT_REG_GLB1_VTU_SID, &regVal);
@@ -760,11 +749,11 @@ EthSwt_EnableVlanInternal(uint8 SwitchIdx, uint8 SwitchPortIdx, uint16 VlanId, b
     {
         /* code */
     }
-    
+
     if ((vtuInfo.memberTag >> portOfst) & ETHSWT_NOT_SENT != ETHSWT_NOT_SENT)
     {
-        if ((vtuInfo.valid == 1) && 
-            ((vtuInfo.memberTag >> portOfst) & 0x3 != 0x3) && 
+        if ((vtuInfo.valid == 1) &&
+            ((vtuInfo.memberTag >> portOfst) & 0x3 != 0x3) &&
             (Enable == FALSE))
         {
             vtuInfo.memberTag = vtuInfo.memberTag & (~(0x3 << portOfst));
@@ -779,8 +768,8 @@ EthSwt_EnableVlanInternal(uint8 SwitchIdx, uint8 SwitchPortIdx, uint16 VlanId, b
             EthSwt_VTULoadOrPurgeEntry(SwtCfgPtr->SwtIdx, &vtuInfo);
 
         }
-        else if ((vtuInfo.valid == 1) && 
-                ((vtuInfo.memberTag >> portOfst) & 0x3 == 0x3) && 
+        else if ((vtuInfo.valid == 1) &&
+                ((vtuInfo.memberTag >> portOfst) & 0x3 == 0x3) &&
                 (Enable == FALSE))
         {
             vtuInfo.memberTag = vtuInfo.memberTag | (0x1 << portOfst);
@@ -789,7 +778,7 @@ EthSwt_EnableVlanInternal(uint8 SwitchIdx, uint8 SwitchPortIdx, uint16 VlanId, b
         {
             /*do nothing*/
         }
-        
+
         vtuInfo.fid = 0u;
         vtuInfo.sid = 0u;
         vtuInfo.op  = ETHSWT_VTU_OP_VTU_LOAD_OR_PURGE;
@@ -829,7 +818,7 @@ FUNC(void, ETHSWT_CODE) EthSwt_PortAllResetVLANTable(P2CONST(EthSwt_ConfigType, 
 }
 #endif /*STD_ON == ETHSWT_PORTBASED_VLAN_SUPPORT*/
 FUNC(void, ETHSWT_CODE)
-EthSwt_PortIngressInit(uint8 swtIdx, const EthSwt_PortConifgType* portCfgPtr) /* PRQA S 1505 */ /* MISRA Rule 8.7 */
+EthSwt_PortIngressInit(uint8 swtIdx, const EthSwt_PortConifgType* portCfgPtr)
 {
     uint8 DefPrior;
     uint16 DefVID;

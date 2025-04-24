@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : BswM_EthIf.c                                                **
- **                                                                            **
- **  Created on  : 2020-03-24                                                  **
- **  Author      : qinchun.yang                                                **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : BswM_EthIf.c                                                **
+**                                                                            **
+**  Created on  : 2020-03-24                                                  **
+**  Author      : qinchun.yang                                                **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 
 /*******************************************************************************
 **                      Include Section                                       **
@@ -69,7 +70,6 @@ BswM_InitEthIfRequestPorts(void)
 {
     P2CONST(BswM_ModeRqstPortPCCfgType, AUTOMATIC, BSWM_CONST) modeRqstPCfgPtr;
     P2CONST(BswM_ModeRqstPortRuntimeType, AUTOMATIC, BSWM_VAR_CLEARED) modeRqstPtr;
-    P2CONST(BswM_PartitionPCCfgType, TYPEDEF, BSWM_CONST) bswmPartPCCfgs;
     ApplicationType partIdx;
     boolean result;
     EthIf_SwitchPortGroupIdxType numOfEthIfPG;
@@ -78,9 +78,8 @@ BswM_InitEthIfRequestPorts(void)
     result = BswM_GetPartitionIdx(&partIdx);
     if ((boolean)TRUE == result)
     {
-        bswmPartPCCfgs = &(BswM_RuntimeStatus.bswmPartPCCfgs[partIdx]);
-        modeRqstPCfgPtr = bswmPartPCCfgs->modeRqstPCCfg;
-        modeRqstPtr = bswmPartPCCfgs->modeRqstPortRunPtr;
+        modeRqstPCfgPtr = BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].modeRqstPCCfg;
+        modeRqstPtr = BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].modeRqstPortRunPtr;
         numOfEthIfPG = modeRqstPCfgPtr->numOfEthIfPG;
         for (pgIdx = 0u; pgIdx < numOfEthIfPG; pgIdx++)
         {
@@ -99,7 +98,7 @@ BswM_InitEthIfRequestPorts(void)
     {
         (void)Det_ReportError(BSWM_MODULE_ID, BSWM_INSTANCE_ID, BSWM_API_ID_INIT, BSWM_E_INIT_FAILED);
     }
-#endif /* BSWM_DEV_ERROR_DETECT == STD_ON */
+#endif /*BSWM_DEV_ERROR_DETECT == STD_ON*/
 }
 
 /**
@@ -123,8 +122,6 @@ BswM_EthIf_PortGroupLinkStateChg(EthIf_SwitchPortGroupIdxType PortGroupIdx, EthT
     P2CONST(BswM_ModeRqstPortLCfgType, AUTOMATIC, BSWM_CONST) modeRqstLCfgPtr;
     P2CONST(BswM_ModeRqstPortRuntimeType, AUTOMATIC, BSWM_VAR_CLEARED) modeRqstPtr;
     P2CONST(BswM_RuleLcCfgType, AUTOMATIC, BSWM_CONST) ruleLCfgPtr;
-    P2CONST(BswM_PartitionPCCfgType, TYPEDEF, BSWM_CONST) bswmPartPCCfgs;
-    P2CONST(BswM_PartitionLCfgType, TYPEDEF, BSWM_CONST) bswmPartLCfgs;
     BswM_RuleIndexType numOfRules;
     BswM_RuleIndexType idx;
     BswM_RuleIndexType ruleIdx;
@@ -135,26 +132,24 @@ BswM_EthIf_PortGroupLinkStateChg(EthIf_SwitchPortGroupIdxType PortGroupIdx, EthT
 
 #if (BSWM_DEV_ERROR_DETECT == STD_ON)
     if ((Std_ReturnType)E_OK == BswM_DetChkEthIfPortGru(PortGroupState))
-#endif /* BSWM_DEV_ERROR_DETECT == STD_ON */
+#endif /*BSWM_DEV_ERROR_DETECT == STD_ON*/
     {
         result = BswM_GetPartitionIdx(&partIdx);
         if ((boolean)TRUE == result)
         {
-            bswmPartPCCfgs = &(BswM_RuntimeStatus.bswmPartPCCfgs[partIdx]);
-            bswmPartLCfgs = &(BswM_RuntimeStatus.bswmPartLCfgs[partIdx]);
-            modeRqstPCfgPtr = bswmPartPCCfgs->modeRqstPCCfg;
-            modeRqstLCfgPtr = bswmPartLCfgs->modeRqstLCfg;
+            modeRqstPCfgPtr = BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].modeRqstPCCfg;
+            modeRqstLCfgPtr = BswM_RuntimeStatus.bswmPartLCfgs[partIdx].modeRqstLCfg;
             numOfEthIfPG = modeRqstPCfgPtr->numOfEthIfPG;
             for (pgIdx = 0u; pgIdx < numOfEthIfPG; pgIdx++)
             {
                 if (PortGroupIdx == modeRqstLCfgPtr->ethIfPortGroRef[pgIdx])
                 {
-                    modeRqstPtr = bswmPartPCCfgs->modeRqstPortRunPtr;
+                    modeRqstPtr = BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].modeRqstPortRunPtr;
                     modeRqstPtr->ethIfPGStatus[pgIdx] = PortGroupState;
                     if (BSWM_IMMEDIATE == modeRqstLCfgPtr->ethIfPortGroLink[pgIdx].process)
                     {
                         numOfRules = modeRqstLCfgPtr->ethIfPortGroLink[pgIdx].belongToRlueNum;
-                        ruleLCfgPtr = bswmPartLCfgs->ruleLCfg;
+                        ruleLCfgPtr = BswM_RuntimeStatus.bswmPartLCfgs[partIdx].ruleLCfg;
                         for (idx = 0u; idx < numOfRules; idx++)
                         {
                             ruleIdx = modeRqstLCfgPtr->ethIfPortGroLink[pgIdx].belongToRlue[idx];
@@ -193,4 +188,4 @@ BswM_GetEthIfGruStateStatus(EthIf_SwitchPortGroupIdxType ethIdx)
 **                      Private Function Definitions                          **
 *******************************************************************************/
 
-#endif /* BSWM_ETHIF_ENABLED == STD_ON */
+#endif /*BSWM_ETHIF_ENABLED == STD_ON*/

@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : LinTp_Master.c                                              **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : HuRongbo                                                    **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Implementation for LinIf                                    **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : LinTp_Master.c                                              **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : HuRongbo                                                    **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Implementation for LinIf                                    **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 /*******************************************************************************
 **                      Revision Control History                              **
 *******************************************************************************/
@@ -44,13 +45,14 @@
 **                               Includes                                     **
 *******************************************************************************/
 #include "LinIf_Cfg.h"
+#if (LINIF_TP_SUPPORTED == STD_ON)
+#include "LinTp_Cfg.h"
 #if (LINTP_MASTER_SUPPORT == STD_ON)
 #include "LinTp_Master.h"
 #include "LinIf_Master.h"
 #include "LinTp_Internal.h"
 #include "LinIf_Internal.h"
 #include "PduR_LinTp.h"
-#include "istd_lib.h"
 #include "BswM_LinTp.h"
 
 /*******************************************************************************
@@ -66,107 +68,76 @@
 *******************************************************************************/
 
 /*******************************************************************************
-**                      Macros Function Definitions                           **
-*******************************************************************************/
-/* Reset channel runtime data */
-static inline void LINTP_MASTER_CH_RESET(LinTp_MasterRuntimeType* tpChPtr)
-{
-    tpChPtr->LinTpChannelState = LINTP_CHANNEL_IDLE;
-    tpChPtr->TxNSduPtr = NULL_PTR;
-    tpChPtr->RxNSduPtr = NULL_PTR;
-    tpChPtr->SduRemaining = 0u;
-    tpChPtr->SduSize = 0u;
-    tpChPtr->SduIdx = 0u;
-    tpChPtr->SduSN = 0u;
-    tpChPtr->SubEvent = LINTP_EVENT_NONE;
-    tpChPtr->LastFrameType = LINTP_FRAMETYPE_NONE;
-    tpChPtr->TpTimer.EnabledTimer = LINTP_TIMER_NONE;
-    tpChPtr->TpP2Timer.EnabledTimer = LINTP_TIMER_NONE;
-    tpChPtr->PendingFrameNum = 0u;
-    tpChPtr->MRFRequestedNad = 0x00;
-    tpChPtr->MRFRequestedSID = 0x00;
-    tpChPtr->BufReqNum = 0x00;
-    LINTP_CLR_TRS_EVENT(LINTP_TRS_EVT_PHY_TX | LINTP_TRS_EVT_FUN_TX);
-}
-
-/* Construct SF */
-static inline void LINTP_CONSTRUCT_SF(LinTp_MasterRuntimeType* tpChPtr)
-{
-    tpChPtr->SduBuf[LINTP_PDU_OFS_NAD] = tpChPtr->TxNSduPtr->LinTpTxNSduNad;
-    tpChPtr->SduBuf[LINTP_PDU_OFS_PCI] = (uint8)tpChPtr->SduSize;
-    tpChPtr->SduIdx = LINTP_PDU_OFS_SF_DATA;
-}
-
-/* Construct FF */
-static inline void LINTP_CONSTRUCT_FF(LinTp_MasterRuntimeType* tpChPtr)
-{
-    tpChPtr->SduBuf[LINTP_PDU_OFS_NAD] = tpChPtr->TxNSduPtr->LinTpTxNSduNad;
-    tpChPtr->SduBuf[LINTP_PDU_OFS_PCI] = LINTP_PDU_PCI_FF | (uint8)(tpChPtr->SduSize >> 8u);
-    tpChPtr->SduBuf[LINTP_PDU_OFS_LEN] = (uint8)(tpChPtr->SduSize & 0xffu);
-    tpChPtr->SduIdx = LINTP_PDU_OFS_FF_DATA;
-    tpChPtr->SduSN = 1u;
-}
-
-/* Construct CF */
-static inline void LINTP_CONSTRUCT_CF(LinTp_MasterRuntimeType* tpChPtr)
-{
-    tpChPtr->SduBuf[LINTP_PDU_OFS_NAD] = tpChPtr->TxNSduPtr->LinTpTxNSduNad;
-    tpChPtr->SduBuf[LINTP_PDU_OFS_PCI] = LINTP_PDU_PCI_CF | tpChPtr->SduSN;
-    tpChPtr->SduIdx = LINTP_PDU_OFS_CF_DATA;
-    tpChPtr->SduSN++;
-    tpChPtr->SduSN &= LINTP_PDU_PCI_SN_MASK;
-}
-/*******************************************************************************
 **                      Private Function Declarations                         **
 *******************************************************************************/
 #define LINIF_START_SEC_CODE
 #include "LinIf_MemMap.h"
 
 static FUNC(void, LINIF_CODE)
-    LinTp_HandleCopyTxDataFailure(P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA) tpChPtr);
+    LinTp_HandleCopyTxDataFailure(P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA) tpChPtr /* PRQA S 3432 */
+    );
 
 static FUNC(void, LINIF_CODE)
-    LinTp_CopyTxDataFromPduR(P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA) tpChPtr);
-
-static FUNC(void, LINIF_CODE) LinTp_TxEventRequest(P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA) tpChPtr);
-
-static FUNC(void, LINIF_CODE) LinTp_TxEventHandler(P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA) tpChPtr);
+    LinTp_CopyTxDataFromPduR(P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA) tpChPtr /* PRQA S 3432 */
+    );
 
 static FUNC(void, LINIF_CODE)
-    LinTp_TxEventConfirmation(P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA) tpChPtr);
+    LinTp_TxEventRequest(P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA) tpChPtr /* PRQA S 3432 */
+    );
+
+static FUNC(void, LINIF_CODE)
+    LinTp_TxEventHandler(P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA) tpChPtr /* PRQA S 3432 */
+    );
+
+static FUNC(void, LINIF_CODE)
+    LinTp_TxEventConfirmation(P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA) tpChPtr /* PRQA S 3432 */
+    );
 
 static FUNC(boolean, LINIF_CODE) LinTp_IsRxSF(
-    P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA) tpChPtr,
+    P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA) tpChPtr, /* PRQA S 3432 */
     P2CONST(LinTp_RxNSduType, AUTOMATIC, LINIF_APPL_CONST) rx,
     P2CONST(uint8, AUTOMATIC, LINIF_APPL_DATA) sdu,
-    P2VAR(boolean, AUTOMATIC, LINIF_APPL_DATA) isIgnoreFramePtr);
+    P2VAR(boolean, AUTOMATIC, LINIF_APPL_DATA) isIgnoreFramePtr /* PRQA S 3432 */
+);
 
 static FUNC(boolean, LINIF_CODE) LinTp_IsRxFF(
-    P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA) tpChPtr,
+    P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA) tpChPtr, /* PRQA S 3432 */
     P2CONST(LinTp_RxNSduType, AUTOMATIC, LINIF_APPL_CONST) rx,
     P2CONST(uint8, AUTOMATIC, LINIF_APPL_DATA) sdu,
-    P2VAR(boolean, AUTOMATIC, LINIF_APPL_DATA) isIgnoreFramePtr);
+    P2VAR(boolean, AUTOMATIC, LINIF_APPL_DATA) isIgnoreFramePtr /* PRQA S 3432 */
+);
 
 static FUNC(boolean, LINIF_CODE) LinTp_IsRxCF(
-    P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA) tpChPtr,
+    P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA) tpChPtr, /* PRQA S 3432 */
     P2CONST(uint8, AUTOMATIC, LINIF_APPL_DATA) sdu);
 
-static FUNC(P2CONST(LinTp_ChannelConfigType, AUTOMATIC, LINIF_APPL_CONST), LINIF_CODE) LinTp_GetChannelConfig(uint8 ch);
+static FUNC(P2CONST(LinTp_ChannelConfigType, AUTOMATIC, LINIF_APPL_CONST), LINIF_CODE)
+    LinTp_GetChannelConfig(NetworkHandleType ch);
 
 static FUNC(void, LINIF_CODE)
-    LinTp_RxBufferRequestStart(P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA) tpChPtr);
-
-static FUNC(void, LINIF_CODE) LinTp_RxBufferRequest(P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA) tpChPtr);
-
-static FUNC(void, LINIF_CODE) LinTp_RxEventRequest(P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA) tpChPtr);
-
-static FUNC(void, LINIF_CODE) LinTp_RxEventHandler(P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA) tpChPtr);
+    LinTp_RxBufferRequestStart(P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA) tpChPtr /* PRQA S 3432 */
+    );
 
 static FUNC(void, LINIF_CODE)
-    LinTp_RxEventIndication(P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA) tpChPtr);
+    LinTp_RxBufferRequest(P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA) tpChPtr /* PRQA S 3432 */
+    );
 
 static FUNC(void, LINIF_CODE)
-    LinTp_LoadTxRequest(NetworkHandleType ch, P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA) tpChPtr);
+    LinTp_RxEventRequest(P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA) tpChPtr /* PRQA S 3432 */
+    );
+
+static FUNC(void, LINIF_CODE)
+    LinTp_RxEventHandler(P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA) tpChPtr /* PRQA S 3432 */
+    );
+
+static FUNC(void, LINIF_CODE)
+    LinTp_RxEventIndication(P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA) tpChPtr /* PRQA S 3432 */
+    );
+
+static FUNC(void, LINIF_CODE) LinTp_LoadTxRequest(
+    NetworkHandleType ch,
+    P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA) tpChPtr /* PRQA S 3432 */
+);
 
 static FUNC(NetworkHandleType, LINIF_CODE) LinTp_GetLinTpChannel(NetworkHandleType LinIfChannelId);
 
@@ -206,14 +177,14 @@ LINTP_LOCAL VAR(LinTp_MasterRuntimeType, LINIF_VAR) LinTp_MasterRTData[LINTP_MAS
 FUNC(void, LINIF_CODE) LinTp_MasterInit(void) /* PRQA S 1532 */
 {
     uint8 idx = LINTP_MASTER_CHANNEL_NUMBER;
-    P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA)
+    P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA) /* PRQA S 3432 */
     tpChPtr = LINTP_MASTER_CH(0u);
 
     /* Reset all of the channel */
     while (idx > 0u) /* PRQA S 2877 */ /* MISRA Rule 4.1 */
     {
         /*@req <SWS_LinIf_00320>,<SWS_LinIf_00710> */
-        LINTP_MASTER_CH_RESET(tpChPtr);
+        LinTp_MasterChReset(tpChPtr);
         tpChPtr->TrsEvent = LINTP_TRS_EVT_NONE;
         tpChPtr++; /* PRQA S 2983 */
 
@@ -237,10 +208,10 @@ LinTp_MasterChannelInit(/* PRQA S 1532 */
                         NetworkHandleType LinIfChannelId)
 {
     NetworkHandleType linTpChId = LinTp_GetLinTpChannel(LinIfChannelId);
-    P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA)
+    P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA) /* PRQA S 3432 */
     tpChPtr = LINTP_MASTER_CH(linTpChId);
 
-    LINTP_MASTER_CH_RESET(tpChPtr);
+    LinTp_MasterChReset(tpChPtr);
 }
 
 /******************************************************************************/
@@ -261,7 +232,7 @@ LinTp_MasterTransmit(/* PRQA S 1532 */
 {
     NetworkHandleType linIfChId = txNSdu->LinTpLinIfChannelRef;
     NetworkHandleType linTpChId = LinTp_GetLinTpChannel(linIfChId);
-    P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA)
+    P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA) /* PRQA S 3432 */
     tpChPtr = LINTP_MASTER_CH(linTpChId);
     Std_ReturnType ret;
 
@@ -293,7 +264,7 @@ LinTp_MasterTransmit(/* PRQA S 1532 */
         if (LINTP_IS_TRS_EVENT(LINTP_TRS_EVT_PHY_TX))
         {
             /* Drop the old physical request */
-            LINTP_MASTER_CH_RESET(tpChPtr);
+            LinTp_MasterChReset(tpChPtr);
         }
 
         /*@req <SWS_LinIf_00413>*/
@@ -325,7 +296,7 @@ LinTp_MasterTransmit(/* PRQA S 1532 */
 FUNC(void, LINIF_CODE) LinTp_MasterShutdown(void) /* PRQA S 1532 */
 {
     uint8 idx = LINTP_MASTER_CHANNEL_NUMBER;
-    P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA)
+    P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA) /* PRQA S 3432 */
     tpChPtr = LINTP_MASTER_CH(0u);
 
     /*@req <SWS_LinIf_00433> */
@@ -333,7 +304,7 @@ FUNC(void, LINIF_CODE) LinTp_MasterShutdown(void) /* PRQA S 1532 */
     while (idx > 0u) /* PRQA S 2877 */ /* MISRA Rule 4.1 */
     {
         /*@req <SWS_LinIf_00356>*/
-        LINTP_MASTER_CH_RESET(tpChPtr);
+        LinTp_MasterChReset(tpChPtr);
         tpChPtr->TrsEvent = LINTP_TRS_EVT_NONE;
         /*@req <SWS_LinIf_00484>*/
         tpChPtr->LinTpChannelState = LINTP_UNINIT;
@@ -359,7 +330,7 @@ LinTp_MasterTxSuccessHandle(/* PRQA S 1532 */
                             NetworkHandleType LinIfChannelId)
 {
     NetworkHandleType linTpChId = LinTp_GetLinTpChannel(LinIfChannelId);
-    P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA)
+    P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA) /* PRQA S 3432 */
     tpChPtr = LINTP_MASTER_CH(linTpChId);
 
     /* Check whether clear confirmation event */
@@ -419,7 +390,7 @@ LinTp_MasterTxErrorHandle(/* PRQA S 1532 */
         }
 #endif /* STD_ON == LINTP_SCHEDULE_CHANGE_DIAG_SUPPORT */
         /* Reset channel */
-        LINTP_MASTER_CH_RESET(tpChPtr);
+        LinTp_MasterChReset(tpChPtr);
 
         /* Next entry */
         LinIf_MoveScheduleToNextEntry(LinIfChannelId);
@@ -444,13 +415,13 @@ LinTp_MasterTxErrorHandle(/* PRQA S 1532 */
 FUNC(void, LINIF_CODE) LinTp_TxProcess(NetworkHandleType LinIfChannelId) /* PRQA S 1532 */
 {
     NetworkHandleType linTpChId = LinTp_GetLinTpChannel(LinIfChannelId);
-    P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA)
+    P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA) /* PRQA S 3432 */
     tpChPtr = LINTP_MASTER_CH(linTpChId);
     LinIf_FrameTypeType frameType;
     boolean entryDelayTimeout = LinIf_IsEntryDelayTimeout(LinIfChannelId);
     Std_ReturnType ret;
 
-    if (entryDelayTimeout)
+    if (TRUE == entryDelayTimeout)
     {
         ret = LinIf_GetCurFrameType(LinIfChannelId, &frameType);
         if ((E_OK == ret) && (LINIF_MRF == frameType))
@@ -484,7 +455,7 @@ FUNC(void, LINIF_CODE) LinTp_TxProcess(NetworkHandleType LinIfChannelId) /* PRQA
 FUNC(void, LINIF_CODE) LinTp_RxProcess(NetworkHandleType LinIfChannelId) /* PRQA S 1532 */
 {
     NetworkHandleType linTpChId = LinTp_GetLinTpChannel(LinIfChannelId);
-    P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA)
+    P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA) /* PRQA S 3432 */
     tpChPtr = LINTP_MASTER_CH(linTpChId);
 
     /* Receive request */
@@ -519,9 +490,6 @@ FUNC(void, LINTP_CODE) LinTp_HandleTimers(NetworkHandleType LinIfChannelId) /* P
     P2CONST(LinTp_RxNSduType, AUTOMATIC, LINIF_APPL_CONST) rx;
     NetworkHandleType network;
     NetworkHandleType linIfChannel;
-
-    /* Locked */
-    SCHM_ENTER_LINIF(LINIF_MODULE_ID, LINIF_AREA_EXEC);
 
     /* Update N_As,N_Cs,N_Cr timer */
     if (LINTP_TIMER_NONE != tpChPtr->TpTimer.EnabledTimer)
@@ -561,14 +529,10 @@ FUNC(void, LINTP_CODE) LinTp_HandleTimers(NetworkHandleType LinIfChannelId) /* P
                 }
                 else
                 {
-                    /* FALSE == tpChPtr->ChCfgPtr->LinTpScheduleChangeDiag */
-                    /* Change schedule table */
-                    /* tpChPtr->Timer = 0 */
                 }
-#endif /* STD_ON == LINTP_SCHEDULE_CHANGE_DIAG_SUPPORT */
-
+#endif
                 /* Reset channel */
-                LINTP_MASTER_CH_RESET(tpChPtr);
+                LinTp_MasterChReset(tpChPtr);
                 /* Clear the flag of header and response */
                 LinIf_ClearEvent(linIfChannel, LINIF_EVENT_HEADER | LINIF_EVENT_RESPONSE);
                 /* Next entry */
@@ -602,14 +566,11 @@ FUNC(void, LINTP_CODE) LinTp_HandleTimers(NetworkHandleType LinIfChannelId) /* P
                 }
                 else
                 {
-                    /* FALSE == tpChPtr->ChCfgPtr->LinTpScheduleChangeDiag */
-                    /* Change schedule table */
-                    /* tpChPtr->Timer = 0 */
                 }
-#endif /* STD_ON == LINTP_SCHEDULE_CHANGE_DIAG_SUPPORT */
+#endif
 
                 /* Reset channel */
-                LINTP_MASTER_CH_RESET(tpChPtr);
+                LinTp_MasterChReset(tpChPtr);
                 /* Clear the flag of header and response */
                 LinIf_ClearEvent(linIfChannel, LINIF_EVENT_HEADER | LINIF_EVENT_RESPONSE);
                 /* Next entry */
@@ -617,9 +578,6 @@ FUNC(void, LINTP_CODE) LinTp_HandleTimers(NetworkHandleType LinIfChannelId) /* P
             }
         }
     }
-
-    /* Unlocked */
-    SCHM_EXIT_LINIF(LINIF_MODULE_ID, LINIF_AREA_EXEC);
 }
 
 /******************************************************************************/
@@ -669,7 +627,7 @@ LinTp_RxEventParse(/* PRQA S 1532 */
     {
         tpChPtr->PendingFrameNum++;
         /*@req <SWS_LinIf_00623>*/
-        if (tpChPtr->PendingFrameNum > LINIF_GET_MAX_NUM_PENDING_FRAMES)
+        if (tpChPtr->PendingFrameNum > chCfgPtr->LinTpMaxNumberOfRespPendingFrames)
         {
             rxCancelFlag = TRUE;
         }
@@ -678,7 +636,7 @@ LinTp_RxEventParse(/* PRQA S 1532 */
             /*@req <SWS_LinIf_00621>*/
             /* Reload P2 timer with the time P2*max */
             tpChPtr->TpP2Timer.EnabledTimer = LINTP_TIMER_P2MAX;
-            tpChPtr->TpP2Timer.Timer = LINIF_GET_P2MAX_TIME_CNT;
+            tpChPtr->TpP2Timer.Timer = chCfgPtr->LinTpP2MaxCnt;
 
             LINTP_SET_EVENT(LINTP_EVENT_WAIT);
             /* Send a head again */
@@ -709,9 +667,6 @@ LinTp_RxEventParse(/* PRQA S 1532 */
                 case LINTP_PDU_PCI_SF:
                     if (LINTP_FRAMETYPE_CF == tpChPtr->LastFrameType)
                     {
-                        /* Locked */
-                        SCHM_ENTER_LINIF(LINIF_MODULE_ID, LINIF_AREA_EXEC);
-
                         /*@req <SWS_LinIf_00653>*/
                         PduR_LinTpRxIndication(rx->LinTpRxNSduPduRef, E_NOT_OK);
 
@@ -720,13 +675,10 @@ LinTp_RxEventParse(/* PRQA S 1532 */
                         bakupMRFRequestedSID = tpChPtr->MRFRequestedSID;
                         /*@req <SWS_LinIf_00651>*/
                         /* Reset channel */
-                        LINTP_MASTER_CH_RESET(tpChPtr);
+                        LinTp_MasterChReset(tpChPtr);
                         /* Recover Nad and SID */
                         tpChPtr->MRFRequestedNad = bakupMRFRequestedNad;
                         tpChPtr->MRFRequestedSID = bakupMRFRequestedSID;
-
-                        /* Unlocked */
-                        SCHM_EXIT_LINIF(LINIF_MODULE_ID, LINIF_AREA_EXEC);
                     }
                     /*@req <SWS_LinIf_00080>*/
                     isCopy = LinTp_IsRxSF(tpChPtr, rx, sdu, &isIgnoreFrame);
@@ -736,9 +688,6 @@ LinTp_RxEventParse(/* PRQA S 1532 */
                 case LINTP_PDU_PCI_FF:
                     if (LINTP_FRAMETYPE_CF == tpChPtr->LastFrameType)
                     {
-                        /* Locked */
-                        SCHM_ENTER_LINIF(LINIF_MODULE_ID, LINIF_AREA_EXEC);
-
                         /*@req <SWS_LinIf_00653>*/
                         PduR_LinTpRxIndication(rx->LinTpRxNSduPduRef, E_NOT_OK);
 
@@ -747,13 +696,10 @@ LinTp_RxEventParse(/* PRQA S 1532 */
                         bakupMRFRequestedSID = tpChPtr->MRFRequestedSID;
                         /*@req <SWS_LinIf_00651>*/
                         /* Reset channel */
-                        LINTP_MASTER_CH_RESET(tpChPtr);
+                        LinTp_MasterChReset(tpChPtr);
                         /* Recover Nad and SID */
                         tpChPtr->MRFRequestedNad = bakupMRFRequestedNad;
                         tpChPtr->MRFRequestedSID = bakupMRFRequestedSID;
-
-                        /* Unlocked */
-                        SCHM_EXIT_LINIF(LINIF_MODULE_ID, LINIF_AREA_EXEC);
                     }
                     /*@req <SWS_LinIf_00080>*/
                     isCopy = LinTp_IsRxFF(tpChPtr, rx, sdu, &isIgnoreFrame);
@@ -800,16 +746,11 @@ LinTp_RxEventParse(/* PRQA S 1532 */
                         /* Data copy */
                         (void)ILib_memcpy(tpChPtr->SduBuf, sdu, LINTP_FRAME_LEN_MAX);
 
-                        /* Locked */
-                        SCHM_ENTER_LINIF(LINIF_MODULE_ID, LINIF_AREA_EXEC);
-
                         /* Set events */
                         LINTP_SET_EVENT(LINTP_EVENT_RX_REQ);
+
                         tpChPtr->LastFrameType = (LinTp_FrameType)pciType; /* PRQA S 4342 */
                         tpChPtr->ChCfgPtr = chCfgPtr;
-
-                        /* Unlocked */
-                        SCHM_EXIT_LINIF(LINIF_MODULE_ID, LINIF_AREA_EXEC);
                     }
                     else
                     {
@@ -823,14 +764,11 @@ LinTp_RxEventParse(/* PRQA S 1532 */
 
     if (rxCancelFlag)
     {
-        /* Locked */
-        SCHM_ENTER_LINIF(LINIF_MODULE_ID, LINIF_AREA_EXEC);
-
         /*@req <SWS_LinIf_00655>,<SWS_LinIf_00081>,<SWS_LinIf_00623>*/
         PduR_LinTpRxIndication(rx->LinTpRxNSduPduRef, E_NOT_OK);
 
         /* Reset channel */
-        LINTP_MASTER_CH_RESET(tpChPtr);
+        LinTp_MasterChReset(tpChPtr);
 
         /* Next entry */
         LinIf_MoveScheduleToNextEntry(rx->LinTpLinIfChannelRef);
@@ -843,9 +781,6 @@ LinTp_RxEventParse(/* PRQA S 1532 */
             tpChPtr->RecoverMode = LINTP_APPLICATIVE_SCHEDULE;
         }
 #endif /* STD_ON == LINTP_SCHEDULE_CHANGE_DIAG_SUPPORT */
-
-        /* Unlocked */
-        SCHM_EXIT_LINIF(LINIF_MODULE_ID, LINIF_AREA_EXEC);
     }
 }
 
@@ -863,10 +798,11 @@ LinTp_RxEventParse(/* PRQA S 1532 */
 FUNC(Std_ReturnType, LINIF_CODE)
 LinTp_MasterGetMRFResponse(/* PRQA S 1532 */
                            NetworkHandleType LinIfChannelId,
-                           P2VAR(uint8, AUTOMATIC, LINIF_APPL_DATA) sduBufPtr)
+                           P2VAR(uint8, AUTOMATIC, LINIF_APPL_DATA) sduBufPtr /* PRQA S 3432 */
+)
 {
     NetworkHandleType linTpChId = LinTp_GetLinTpChannel(LinIfChannelId);
-    P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA)
+    P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA) /* PRQA S 3432 */
     tpChPtr = LINTP_MASTER_CH(linTpChId);
     Std_ReturnType ret = E_NOT_OK;
     uint8 pciType;
@@ -892,7 +828,7 @@ LinTp_MasterGetMRFResponse(/* PRQA S 1532 */
             if (LINTP_FUNCTIONAL_REQ_NAD != tpChPtr->SduBuf[LINTP_PDU_OFS_NAD])
             {
                 tpChPtr->TpP2Timer.EnabledTimer = LINTP_TIMER_P2;
-                tpChPtr->TpP2Timer.Timer = LINIF_GET_P2_TIME_CNT;
+                tpChPtr->TpP2Timer.Timer = LINTP_GET_P2_TIME(linTpChId);
             }
         }
 
@@ -945,7 +881,7 @@ LinTp_IsWaitEventSet(/* PRQA S 1532 */
                      NetworkHandleType LinIfChannelId)
 {
     NetworkHandleType linTpChId = LinTp_GetLinTpChannel(LinIfChannelId);
-    LinTp_MasterRuntimeType* tpChPtr = LINTP_MASTER_CH(linTpChId); /* PRQA S 3678 */ /* MISRA Rule 8.13 */
+    const LinTp_MasterRuntimeType* tpChPtr = LINTP_MASTER_CH(linTpChId);
 
     return LINTP_IS_EVENT(LINTP_EVENT_WAIT);
 }
@@ -966,7 +902,7 @@ LinTp_IsStopSRFSendEventSet(/* PRQA S 1532 */
                             uint8 LinIfChannelId)
 {
     NetworkHandleType linTpChId = LinTp_GetLinTpChannel(LinIfChannelId);
-    LinTp_MasterRuntimeType* tpChPtr = LINTP_MASTER_CH(linTpChId); /* PRQA S 3678 */ /* MISRA Rule 8.13 */
+    const LinTp_MasterRuntimeType* tpChPtr = LINTP_MASTER_CH(linTpChId);
 
     return LINTP_IS_EVENT(LINTP_EVENT_TX | LINTP_EVENT_STOP_SRF);
 }
@@ -987,7 +923,7 @@ LinTp_IsStopMRFOrSRFSendEventSet(/* PRQA S 1532 */
                                  NetworkHandleType LinIfChannelId)
 {
     NetworkHandleType linTpChId = LinTp_GetLinTpChannel(LinIfChannelId);
-    LinTp_MasterRuntimeType* tpChPtr = LINTP_MASTER_CH(linTpChId); /* PRQA S 3678 */ /* MISRA Rule 8.13 */
+    const LinTp_MasterRuntimeType* tpChPtr = LINTP_MASTER_CH(linTpChId);
 
     return LINTP_IS_EVENT(LINTP_EVENT_STOP_SRF | LINTP_EVENT_STOP_MRF);
 }
@@ -1044,16 +980,10 @@ static FUNC(void, LINIF_CODE)
     }
 #endif /* STD_ON == LINTP_SCHEDULE_CHANGE_DIAG_SUPPORT */
 
-    /* Locked */
-    SCHM_ENTER_LINIF(LINIF_MODULE_ID, LINIF_AREA_EXEC);
-
     /* Next entry */
     LinIf_MoveScheduleToNextEntry(tpChPtr->TxNSduPtr->LinTpLinIfChannelRef);
     /* Reset channel */
-    LINTP_MASTER_CH_RESET(tpChPtr);
-
-    /* Unlocked */
-    SCHM_EXIT_LINIF(LINIF_MODULE_ID, LINIF_AREA_EXEC);
+    LinTp_MasterChReset(tpChPtr);
 }
 
 /******************************************************************************/
@@ -1068,12 +998,13 @@ static FUNC(void, LINIF_CODE)
  */
 /******************************************************************************/
 static FUNC(void, LINIF_CODE)
-    LinTp_CopyTxDataFromPduR(P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA) tpChPtr)
+    LinTp_CopyTxDataFromPduR(P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA) tpChPtr /* PRQA S 3432 */
+    )
 {
     if (tpChPtr->BufReqNum > 0u)
     {
         PduInfoType infoData;
-        P2VAR(PduInfoType, AUTOMATIC, LINIF_APPL_DATA) info = &infoData;
+        P2VAR(PduInfoType, AUTOMATIC, LINIF_APPL_DATA) info = &infoData; /* PRQA S 3432 */
         BufReq_ReturnType bufRslt;
         PduLengthType len = (LINTP_FRAME_LEN_MAX - tpChPtr->SduIdx);
 
@@ -1091,18 +1022,14 @@ static FUNC(void, LINIF_CODE)
         switch (bufRslt)
         {
         case BUFREQ_OK:
-            /* Locked */
-            SCHM_ENTER_LINIF(LINIF_MODULE_ID, LINIF_AREA_EXEC);
-
             /* Update buffer information */
             LINTP_CLR_EVENT(LINTP_EVENT_COPY_REQ | LINTP_EVENT_STOP_MRF);
+
             tpChPtr->SduIdx += len;
             tpChPtr->SduRemaining -= len;
             /* reload retry counter */
             tpChPtr->BufReqNum = tpChPtr->TxNSduPtr->LinTpMaxBufReq;
 
-            /* Unlocked */
-            SCHM_EXIT_LINIF(LINIF_MODULE_ID, LINIF_AREA_EXEC);
             break;
 
         case BUFREQ_E_NOT_OK:
@@ -1139,7 +1066,9 @@ static FUNC(void, LINIF_CODE)
  * CallByAPI: This is a internal function
  */
 /******************************************************************************/
-static FUNC(void, LINIF_CODE) LinTp_TxEventRequest(P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA) tpChPtr)
+static FUNC(void, LINIF_CODE)
+    LinTp_TxEventRequest(P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA) tpChPtr /* PRQA S 3432 */
+    )
 {
     if (!(LINTP_IS_EVENT(LINTP_EVENT_TX)))
     {
@@ -1148,35 +1077,29 @@ static FUNC(void, LINIF_CODE) LinTp_TxEventRequest(P2VAR(LinTp_MasterRuntimeType
 
     if (!(LINTP_IS_EVENT(LINTP_EVENT_CONF | LINTP_EVENT_OK)))
     {
-        /* Locked */
-        SCHM_ENTER_LINIF(LINIF_MODULE_ID, LINIF_AREA_EXEC);
-
         /* SF */
         if (LINTP_IS_EVENT(LINTP_EVENT_SF_REQ))
         {
             LINTP_CLR_EVENT(LINTP_EVENT_SF_REQ);
-            LINTP_CONSTRUCT_SF(tpChPtr);
+            LinTp_ConstructSF(tpChPtr);
         }
         /* FF */
         else if (LINTP_IS_EVENT(LINTP_EVENT_FF_REQ))
         {
             LINTP_CLR_EVENT(LINTP_EVENT_FF_REQ);
-            LINTP_CONSTRUCT_FF(tpChPtr);
+            LinTp_ConstructFF(tpChPtr);
         }
         /* CF */
         else if (!(LINTP_IS_EVENT(LINTP_EVENT_TX_REQ)) && (LINTP_IS_EVENT(LINTP_EVENT_CF_REQ)))
         {
             LINTP_CLR_EVENT(LINTP_EVENT_CF_REQ);
             LINTP_SET_EVENT(LINTP_EVENT_COPY_REQ);
-            /* tpChPtr->BufReqNum = tpChPtr->TxNSduPtr->LinTpMaxBufReq */
-            LINTP_CONSTRUCT_CF(tpChPtr);
+            LinTp_ConstructCF(tpChPtr);
         }
         else
         {
             /* only for the MISRA-C */
         }
-        /* Unlocked */
-        SCHM_EXIT_LINIF(LINIF_MODULE_ID, LINIF_AREA_EXEC);
 
         if (LINTP_IS_EVENT(LINTP_EVENT_COPY_REQ))
         {
@@ -1197,12 +1120,11 @@ static FUNC(void, LINIF_CODE) LinTp_TxEventRequest(P2VAR(LinTp_MasterRuntimeType
  * CallByAPI: This is a internal function
  */
 /******************************************************************************/
-static FUNC(void, LINIF_CODE) LinTp_TxEventHandler(P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA) tpChPtr)
+static FUNC(void, LINIF_CODE)
+    LinTp_TxEventHandler(P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA) tpChPtr /* PRQA S 3432 */
+    )
 {
     PduLengthType len;
-
-    /* Locked */
-    SCHM_ENTER_LINIF(LINIF_MODULE_ID, LINIF_AREA_EXEC);
 
     if (!(LINTP_IS_EVENT(LINTP_EVENT_TX)))
     {
@@ -1221,7 +1143,7 @@ static FUNC(void, LINIF_CODE) LinTp_TxEventHandler(P2VAR(LinTp_MasterRuntimeType
         {
             /* Fill padding value */
             len = LINTP_FRAME_LEN_MAX - tpChPtr->SduIdx;
-            (void)ILib_memset(&tpChPtr->SduBuf[tpChPtr->SduIdx], (sint32)LINTP_PADDING_VALUE, len);
+            (void)ILib_memset(&tpChPtr->SduBuf[tpChPtr->SduIdx], LINTP_PADDING_VALUE, len);
             LINTP_SET_EVENT(LINTP_EVENT_TX_REQ | LINTP_EVENT_CONF_REQ);
         }
         /* SF/CF */
@@ -1235,8 +1157,6 @@ static FUNC(void, LINIF_CODE) LinTp_TxEventHandler(P2VAR(LinTp_MasterRuntimeType
             LINTP_SET_EVENT(LINTP_EVENT_COPY_REQ);
         }
     }
-    /* Unlocked */
-    SCHM_EXIT_LINIF(LINIF_MODULE_ID, LINIF_AREA_EXEC);
 }
 
 /******************************************************************************/
@@ -1278,10 +1198,7 @@ static FUNC(void, LINIF_CODE)
                 tpChPtr->RecoverMode = LINTP_DIAG_RESPONSE;
             }
         }
-#endif /* STD_ON == LINTP_SCHEDULE_CHANGE_DIAG_SUPPORT */
-
-        /* Locked */
-        SCHM_ENTER_LINIF(LINIF_MODULE_ID, LINIF_AREA_EXEC);
+#endif
 
         /* Next entry */
         LinIf_MoveScheduleToNextEntry(tpChPtr->TxNSduPtr->LinTpLinIfChannelRef);
@@ -1292,14 +1209,11 @@ static FUNC(void, LINIF_CODE)
         bakupMRFRequestedNad = tpChPtr->MRFRequestedNad;
         bakupMRFRequestedSID = tpChPtr->MRFRequestedSID;
         /* Reset channel */
-        LINTP_MASTER_CH_RESET(tpChPtr);
+        LinTp_MasterChReset(tpChPtr); /* PRQA S 2982 */ /* MISRA Rule 2.2 */
         /* recover */
         tpChPtr->TpP2Timer.EnabledTimer = bakupTimerType;
         tpChPtr->MRFRequestedNad = bakupMRFRequestedNad;
         tpChPtr->MRFRequestedSID = bakupMRFRequestedSID;
-
-        /* Unlocked */
-        SCHM_EXIT_LINIF(LINIF_MODULE_ID, LINIF_AREA_EXEC);
     }
 }
 
@@ -1315,15 +1229,13 @@ static FUNC(void, LINIF_CODE)
  */
 /******************************************************************************/
 static FUNC(boolean, LINIF_CODE) LinTp_IsRxSF(
-    P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA) tpChPtr,
+    P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA) tpChPtr, /* PRQA S 3432 */
     P2CONST(LinTp_RxNSduType, AUTOMATIC, LINIF_APPL_CONST) rx,
     P2CONST(uint8, AUTOMATIC, LINIF_APPL_DATA) sdu,
-    P2VAR(boolean, AUTOMATIC, LINIF_APPL_DATA) isIgnoreFramePtr)
+    P2VAR(boolean, AUTOMATIC, LINIF_APPL_DATA) isIgnoreFramePtr /* PRQA S 3432 */
+)
 {
     boolean isCopy = FALSE;
-
-    /* Locked */
-    SCHM_ENTER_LINIF(LINIF_MODULE_ID, LINIF_AREA_EXEC);
 
     /* Update buffer information */
     tpChPtr->SduSize = (PduLengthType)sdu[LINTP_PDU_OFS_PCI] & LINTP_PDU_PCI_DL_MASK;
@@ -1334,7 +1246,6 @@ static FUNC(boolean, LINIF_CODE) LinTp_IsRxSF(
     {
         /* Set events */
         LINTP_SET_EVENT(LINTP_EVENT_RX | LINTP_EVENT_SF_REQ | LINTP_EVENT_COPY_REQ);
-
         /* Do not need to send a header again */
         LINTP_SET_EVENT(LINTP_EVENT_STOP_SRF);
 
@@ -1351,9 +1262,6 @@ static FUNC(boolean, LINIF_CODE) LinTp_IsRxSF(
         *isIgnoreFramePtr = TRUE;
     }
 
-    /* Unlocked */
-    SCHM_EXIT_LINIF(LINIF_MODULE_ID, LINIF_AREA_EXEC);
-
     return isCopy;
 }
 
@@ -1369,15 +1277,13 @@ static FUNC(boolean, LINIF_CODE) LinTp_IsRxSF(
  */
 /******************************************************************************/
 static FUNC(boolean, LINIF_CODE) LinTp_IsRxFF(
-    P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA) tpChPtr,
+    P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA) tpChPtr, /* PRQA S 3432 */
     P2CONST(LinTp_RxNSduType, AUTOMATIC, LINIF_APPL_CONST) rx,
     P2CONST(uint8, AUTOMATIC, LINIF_APPL_DATA) sdu,
-    P2VAR(boolean, AUTOMATIC, LINIF_APPL_DATA) isIgnoreFramePtr)
+    P2VAR(boolean, AUTOMATIC, LINIF_APPL_DATA) isIgnoreFramePtr /* PRQA S 3432 */
+)
 {
     boolean isCopy = FALSE;
-
-    /* Locked */
-    SCHM_ENTER_LINIF(LINIF_MODULE_ID, LINIF_AREA_EXEC);
 
     /* Update buffer information */
     tpChPtr->SduSize = (PduLengthType)sdu[LINTP_PDU_OFS_PCI] & LINTP_PDU_PCI_DL_MASK;
@@ -1405,9 +1311,6 @@ static FUNC(boolean, LINIF_CODE) LinTp_IsRxFF(
         *isIgnoreFramePtr = TRUE;
     }
 
-    /* Unlocked */
-    SCHM_EXIT_LINIF(LINIF_MODULE_ID, LINIF_AREA_EXEC);
-
     return isCopy;
 }
 
@@ -1423,26 +1326,17 @@ static FUNC(boolean, LINIF_CODE) LinTp_IsRxFF(
  */
 /******************************************************************************/
 static FUNC(boolean, LINIF_CODE) LinTp_IsRxCF(
-    P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA) tpChPtr,
+    P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA) tpChPtr, /* PRQA S 3432 */
     P2CONST(uint8, AUTOMATIC, LINIF_APPL_DATA) sdu)
 {
     boolean isCopy = FALSE;
-
-    /* Locked */
-    SCHM_ENTER_LINIF(LINIF_MODULE_ID, LINIF_AREA_EXEC);
 
     /* Update serial number */
     tpChPtr->SduSN++;
     tpChPtr->SduSN &= LINTP_PDU_PCI_SN_MASK;
 
-    /* Unlocked */
-    SCHM_EXIT_LINIF(LINIF_MODULE_ID, LINIF_AREA_EXEC);
-
     if ((LINTP_IS_EVENT(LINTP_EVENT_RX)) && ((sdu[LINTP_PDU_OFS_PCI] & LINTP_PDU_PCI_SN_MASK) == tpChPtr->SduSN))
     {
-        /* Locked */
-        SCHM_ENTER_LINIF(LINIF_MODULE_ID, LINIF_AREA_EXEC);
-
         /* Set events */
         LINTP_SET_EVENT(LINTP_EVENT_CF_REQ | LINTP_EVENT_COPY_REQ);
 
@@ -1453,9 +1347,6 @@ static FUNC(boolean, LINIF_CODE) LinTp_IsRxCF(
             LINTP_SET_EVENT(LINTP_EVENT_STOP_SRF);
         }
         isCopy = TRUE;
-
-        /* Unlocked */
-        SCHM_EXIT_LINIF(LINIF_MODULE_ID, LINIF_AREA_EXEC);
     }
     else
     {
@@ -1477,11 +1368,12 @@ static FUNC(boolean, LINIF_CODE) LinTp_IsRxCF(
  * CallByAPI: This is a internal function
  */
 /******************************************************************************/
-static FUNC(P2CONST(LinTp_ChannelConfigType, AUTOMATIC, LINIF_APPL_CONST), LINIF_CODE) LinTp_GetChannelConfig(uint8 ch)
+static FUNC(P2CONST(LinTp_ChannelConfigType, AUTOMATIC, LINIF_APPL_CONST), LINIF_CODE)
+    LinTp_GetChannelConfig(NetworkHandleType ch)
 {
     P2CONST(LinTp_ChannelConfigType, AUTOMATIC, LINIF_APPL_CONST)
     chCfgPtr = &LINTP_GET_CHANNEL_CONFIG(0);
-    uint8 idx = LINIF_NUMBER_OF_CHANNELS;
+    NetworkHandleType idx = LINIF_NUMBER_OF_CHANNELS;
 
     while (idx > 0u)
     {
@@ -1548,10 +1440,7 @@ static FUNC(void, LINIF_CODE)
             BswM_LinTp_RequestMode(tpChPtr->RxNSduPtr->LinTpRxNSduChannelRef, LINTP_APPLICATIVE_SCHEDULE);
             tpChPtr->RecoverMode = LINTP_APPLICATIVE_SCHEDULE;
         }
-#endif /* STD_ON == LINTP_SCHEDULE_CHANGE_DIAG_SUPPORT */
-
-        /* Locked */
-        SCHM_ENTER_LINIF(LINIF_MODULE_ID, LINIF_AREA_EXEC);
+#endif
 
         /* Clear flag of header */
         LinIf_ClearEvent(tpChPtr->RxNSduPtr->LinTpLinIfChannelRef, LINIF_EVENT_HEADER);
@@ -1560,10 +1449,7 @@ static FUNC(void, LINIF_CODE)
 
         /*@req <SWS_LinIf_00676>,<SWS_LinIf_00701> */
         /* Reset channel */
-        LINTP_MASTER_CH_RESET(tpChPtr);
-
-        /* Unlocked */
-        SCHM_EXIT_LINIF(LINIF_MODULE_ID, LINIF_AREA_EXEC);
+        LinTp_MasterChReset(tpChPtr);
     }
 }
 
@@ -1606,9 +1492,6 @@ static FUNC(void, LINIF_CODE) LinTp_RxBufferRequest(P2VAR(LinTp_MasterRuntimeTyp
     /* Copy data to PduR */
     bufRslt = PduR_LinTpCopyRxData(tpChPtr->RxNSduPtr->LinTpRxNSduPduRef, info, &(tpChPtr->UpperBufRemaining));
 
-    /* Locked */
-    SCHM_ENTER_LINIF(LINIF_MODULE_ID, LINIF_AREA_EXEC);
-
     /* Update buffer information */
     tpChPtr->SduRemaining -= info->SduLength;
     tpChPtr->SduIdx += info->SduLength;
@@ -1634,7 +1517,7 @@ static FUNC(void, LINIF_CODE) LinTp_RxBufferRequest(P2VAR(LinTp_MasterRuntimeTyp
         LinIf_MoveScheduleToNextEntry(tpChPtr->RxNSduPtr->LinTpLinIfChannelRef);
 
         /* Reset channel */
-        LINTP_MASTER_CH_RESET(tpChPtr);
+        LinTp_MasterChReset(tpChPtr);
     }
     else
     {
@@ -1672,9 +1555,6 @@ static FUNC(void, LINIF_CODE) LinTp_RxBufferRequest(P2VAR(LinTp_MasterRuntimeTyp
             }
         }
     }
-
-    /* Unlocked */
-    SCHM_EXIT_LINIF(LINIF_MODULE_ID, LINIF_AREA_EXEC);
 }
 
 /******************************************************************************/
@@ -1688,15 +1568,14 @@ static FUNC(void, LINIF_CODE) LinTp_RxBufferRequest(P2VAR(LinTp_MasterRuntimeTyp
  * CallByAPI: This is a internal function
  */
 /******************************************************************************/
-static FUNC(void, LINIF_CODE) LinTp_RxEventRequest(P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA) tpChPtr)
+static FUNC(void, LINIF_CODE)
+    LinTp_RxEventRequest(P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA) tpChPtr /* PRQA S 3432 */
+    )
 {
     boolean firstRequestBufFlag = FALSE;
 
     if (LINTP_IS_EVENT(LINTP_EVENT_RX_REQ))
     {
-        /* Locked */
-        SCHM_ENTER_LINIF(LINIF_MODULE_ID, LINIF_AREA_EXEC);
-
         /* SF */
         if (LINTP_IS_EVENT(LINTP_EVENT_SF_REQ))
         {
@@ -1722,8 +1601,6 @@ static FUNC(void, LINIF_CODE) LinTp_RxEventRequest(P2VAR(LinTp_MasterRuntimeType
         {
             /* only for the MISRA-C */
         }
-        /* Unlocked */
-        SCHM_EXIT_LINIF(LINIF_MODULE_ID, LINIF_AREA_EXEC);
 
         if ((TRUE == firstRequestBufFlag) && (LINTP_IS_EVENT(LINTP_EVENT_COPY_REQ)))
         {
@@ -1744,7 +1621,9 @@ static FUNC(void, LINIF_CODE) LinTp_RxEventRequest(P2VAR(LinTp_MasterRuntimeType
  * CallByAPI: This is a internal function
  */
 /******************************************************************************/
-static FUNC(void, LINIF_CODE) LinTp_RxEventHandler(P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA) tpChPtr)
+static FUNC(void, LINIF_CODE)
+    LinTp_RxEventHandler(P2VAR(LinTp_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA) tpChPtr /* PRQA S 3432 */
+    )
 {
     if ((LINTP_IS_EVENT(LINTP_EVENT_RX_REQ)) && (LINTP_IS_EVENT(LINTP_EVENT_COPY_REQ)))
     {
@@ -1781,17 +1660,12 @@ static FUNC(void, LINIF_CODE)
             tpChPtr->RecoverMode = LINTP_APPLICATIVE_SCHEDULE;
         }
 #endif /* STD_ON == LINTP_SCHEDULE_CHANGE_DIAG_SUPPORT */
-        /* Locked */
-        SCHM_ENTER_LINIF(LINIF_MODULE_ID, LINIF_AREA_EXEC);
 
         /* Next entry */
         LinIf_MoveScheduleToNextEntry(tpChPtr->RxNSduPtr->LinTpLinIfChannelRef);
 
         /* Reset channel */
-        LINTP_MASTER_CH_RESET(tpChPtr);
-
-        /* Unlocked */
-        SCHM_EXIT_LINIF(LINIF_MODULE_ID, LINIF_AREA_EXEC);
+        LinTp_MasterChReset(tpChPtr);
     }
 }
 
@@ -1814,7 +1688,7 @@ static FUNC(void, LINIF_CODE)
         && (LINTP_IS_TRS_EVENT(LINTP_TRS_EVT_FUN_TX_REQ | LINTP_TRS_EVT_PHY_TX_REQ)))
     {
         P2CONST(LinTp_ChannelConfigType, AUTOMATIC, LINIF_APPL_CONST)
-        chCfgPtr = LinTp_GetChannelConfig((uint8)ch);
+        chCfgPtr = LinTp_GetChannelConfig(ch);
 
         if (LINTP_IS_TRS_EVENT(LINTP_TRS_EVT_FUN_TX_REQ))
         {
@@ -1895,3 +1769,4 @@ static FUNC(NetworkHandleType, LINIF_CODE) LinTp_GetLinTpChannel(NetworkHandleTy
 #include "LinIf_MemMap.h"
 
 #endif /* LINTP_MASTER_SUPPORT == STD_ON */
+#endif /* LINIF_TP_SUPPORTED == STD_ON */

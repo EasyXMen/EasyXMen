@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Fee.h                                                       **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : zhengfei.li                                                 **
- **  Vendor      :                                                             **
- **  DESCRIPTION : API declaration and type definitions of FEE                 **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19_11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Fee.h                                                       **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : zhengfei.li                                                 **
+**  Vendor      :                                                             **
+**  DESCRIPTION : API declaration and type definitions of FEE                 **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19_11                      **
+**                                                                            **
+*******************************************************************************/
 /*******************************************************************************
 **                      Revision Control History                              **
 *******************************************************************************/
@@ -138,6 +139,8 @@ Fee_GetVersionInfo(P2VAR(Std_VersionInfoType, AUTOMATIC, FEE_APPL_DATA) VersionI
 #endif
 
 FUNC(Std_ReturnType, FEE_CODE) Fee_EraseImmediateBlock(VAR(uint16, AUTOMATIC) BlockNumber);
+
+FUNC(void, FEE_CODE) Fee_MainFunction(void);
 
 extern CONST(Fee_ConfigType, FEE_CONST_PBCFG) Fee_ConfigData;
 

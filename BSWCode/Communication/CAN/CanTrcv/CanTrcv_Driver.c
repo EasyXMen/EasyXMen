@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : CanTrcv_Driver.c                                          **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : Xinrun.Wang                                                 **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Public functions implementation by CanTrcv_Driver module  **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : CanTrcv_Driver.c                                          **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : Xinrun.Wang                                                 **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Public functions implementation by CanTrcv_Driver module  **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 /*******************************************************************************
 **                      Revision Control History                              **
 *******************************************************************************/
@@ -100,10 +101,10 @@ static FUNC(Std_ReturnType, CANTRCV_CODE) CanTrcv_Driver_ClearAllStatus(uint8 Tr
 #include "CanTrcv_MemMap.h"
 FUNC(Std_ReturnType, CANTRCV_CODE) CanTrcv_Driver_EnableWakeup(uint8 Transceiver)
 {
-    const CanTrcv_ChannelType* trcvChPtr = &CANTRCV_CHANNEL(Transceiver);
 #if (STD_ON == CANTRCV_HWPN_SUPPORT)
     Std_ReturnType result = E_OK;
-    if ((PN_ENABLED == CanTrcv_PNActivation) && (trcvChPtr->CanTrcvHwPnSupport) && (trcvChPtr->CanTrcvWakeupByBusUsed))
+    if ((PN_ENABLED == CanTrcv_PNActivation) && (TRUE == CANTRCV_CHANNEL(Transceiver).CanTrcvHwPnSupport)
+        && (TRUE == CANTRCV_CHANNEL(Transceiver).CanTrcvWakeupByBusUsed))
     {
         result = CanTrcv_Driver_PNWKSetup(Transceiver);
     }
@@ -136,7 +137,7 @@ FUNC(Std_ReturnType, CANTRCV_CODE) CanTrcv_Driver_Init(uint8 Transceiver)
 {
     Std_ReturnType result = E_OK;
 
-    if (CANTRCV_CHANNEL(Transceiver).CanTrcvWakeupByBusUsed)
+    if (TRUE == CANTRCV_CHANNEL(Transceiver).CanTrcvWakeupByBusUsed)
     {
         /* todo: write to control register to enable Bus wakeup */
     }
@@ -358,20 +359,21 @@ CanTrcv_Driver_GetOpMode(uint8 Transceiver, P2VAR(CanTrcv_TrcvModeType, AUTOMATI
 
     /* todo: read from mode ctrl register to get current OpMode */
 
-    switch (workMode)
+    if (CANTRCV_DRIVER_SLEEPMODE == workMode)
     {
-    case CANTRCV_DRIVER_SLEEPMODE:
         *OpMode = CANTRCV_TRCVMODE_SLEEP;
-        break;
-    case CANTRCV_DRIVER_STANDBYMODE:
+    }
+    else if (CANTRCV_DRIVER_STANDBYMODE == workMode)
+    {
         *OpMode = CANTRCV_TRCVMODE_STANDBY;
-        break;
-    case CANTRCV_DRIVER_NORMALMODE:
+    }
+    else if (CANTRCV_DRIVER_NORMALMODE == workMode)
+    {
         *OpMode = CANTRCV_TRCVMODE_NORMAL;
-        break;
-    default:
+    }
+    else
+    {
         /* do nothing */
-        break;
     }
 
     return result;
@@ -485,10 +487,10 @@ FUNC(Std_ReturnType, CANTRCV_CODE) CanTrcv_Driver_PNWKSetup(uint8 Transceiver)
 /* todo: write to register to enable and setup PN wakeup functionalities */
 #if (STD_ON == CANTRCV_BUS_ERR_FLAG)
         /* check SYSERR */
-        if ((E_OK == result) && (CANTRCV_PN(Transceiver)->CanTrcvBusErrFlag))
+        if ((E_OK == result) && (TRUE == CANTRCV_PN(Transceiver)->CanTrcvBusErrFlag))
         {
             result += CanTrcv_Driver_ReadStatus(Transceiver, CANTRCV_DRIVER_SYSERR, &isSyserrSet);
-            if ((E_OK == result) && (isSyserrSet))
+            if ((E_OK == result) && (TRUE == isSyserrSet))
             {
                 (void)CanTrcv_Driver_DisablePNWK(Transceiver);
                 result = E_NOT_OK;

@@ -18,6 +18,10 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
+ */
+/* PRQA S 3108-- */
+/*
+ ********************************************************************************
  ************************************************************************************************************************
  ** **
  **  @file               : ComM_EcuM.h **
@@ -29,7 +33,6 @@
  **  @specification(s)   : AUTOSAR classic Platform R19-11 **
  ** **
  ***********************************************************************************************************************/
-/* PRQA S 3108-- */
 #ifndef COMM_ECUM_H_
 #define COMM_ECUM_H_
 /*=================================================[inclusions]=======================================================*/

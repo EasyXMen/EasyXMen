@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                           **
- **  FILENAME    : CanTp_Internal.c                                           **
- **                                                                           **
- **  Created on  : 2021/7/30 14:29:43                                         **
- **  Author      : tao.yu                                                     **
- **  Vendor      :                                                            **
- **  DESCRIPTION : Internal Source file of CanTp module.                      **
- **                                                                           **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                     **
- **                                                                           **
- **************************************************************************** */
+ */
 /* PRQA S 3108-- */
+/*
+**************************************************************************** **
+**                                                                           **
+**  FILENAME    : CanTp_Internal.c                                           **
+**                                                                           **
+**  Created on  : 2021/7/30 14:29:43                                         **
+**  Author      : tao.yu                                                     **
+**  Vendor      :                                                            **
+**  DESCRIPTION : Internal Source file of CanTp module.                      **
+**                                                                           **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                     **
+**                                                                           **
+**************************************************************************** */
 
 /*=======[I N C L U D E S]====================================================*/
 #include "CanTp_Internal.h"
@@ -226,7 +227,7 @@ CanTp_SaveRxMetaDataInfo(
     P2CONST(PduInfoType, AUTOMATIC, CANTP_APPL_CONST) PduInfoPtr)
 {
     Std_ReturnType ret = E_OK;
-    SchM_Enter_CanTp(CANTP_MODULE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL); /*lock channel*/
+    SchM_Enter_CanTp_ExclusiveArea(); /*lock channel*/
 #if (                                                                                             \
     (CANTP_MIXED29_ADDRESSING_SUPPORT == STD_ON) || (CANTP_EXTENDED_ADDRESSING_SUPPORT == STD_ON) \
     || (CANTP_MIXED_ADDRESSING_SUPPORT == STD_ON) || (CANTP_NORMAL_FIXED_ADDRESSING_SUPPORT == STD_ON))
@@ -243,95 +244,85 @@ CanTp_SaveRxMetaDataInfo(
 #if (CANTP_EXTENDED_ADDRESSING_SUPPORT == STD_ON)
     case CANTP_EXTENDED:
         RxchannelPtr->MetaDataN_TA = PduInfoPtr->SduDataPtr[CANTP_TA_OFFSET_META_EX];
-#if (CANTP_GENERIC_CONNECTION_SUPPORT != STD_ON)
-        if (RxchannelPtr->MetaDataN_TA != *(RxNSduCfgPtr->NTa))
+        if ((RxNSduCfgPtr->RxTaType == CANTP_PHYSICAL_RX) || (RxNSduCfgPtr->RxTaType == CANTP_CANFD_PHYSICAL))
         {
-            ret = E_NOT_OK;
+            if (RxNSduCfgPtr->NSa == NULL_PTR)
+            {
+                ret = E_NOT_OK;
+            }
+            else if (RxchannelPtr->MetaDataN_TA != *(RxNSduCfgPtr->NSa))
+            {
+                ret = E_NOT_OK;
+            }
+            else
+            {
+                /* idle */
+            }
         }
-        RxchannelPtr->MetaDataN_SA = *(RxNSduCfgPtr->NSa);
-#endif /* CANTP_GENERIC_CONNECTION_SUPPORT != STD_ON */
         break;
-#endif /* CANTP_EXTENDED_ADDRESSING_SUPPORT == STD_ON */
+#endif
 #if (CANTP_MIXED_ADDRESSING_SUPPORT == STD_ON)
     case CANTP_MIXED:
         RxchannelPtr->MetaDataN_AE = PduInfoPtr->SduDataPtr[CANTP_AE_OFFSET_META_MIX];
-#if (CANTP_GENERIC_CONNECTION_SUPPORT != STD_ON)
         if ((RxNSduCfgPtr->NAe == NULL_PTR) || (RxchannelPtr->MetaDataN_AE != *(RxNSduCfgPtr->NAe)))
         {
             ret = E_NOT_OK;
         }
-#endif /* CANTP_GENERIC_CONNECTION_SUPPORT != STD_ON */
         break;
 #endif /* CANTP_MIXED_ADDRESSING_SUPPORT == STD_ON */
 #if (CANTP_NORMAL_FIXED_ADDRESSING_SUPPORT == STD_ON)
     case CANTP_NORMALFIXED:
-        if ((RxchannelPtr->MetaDataLength >= 4u)
-            && (CANTP_CAN_ID_32_MASK == (RxNSduCfgPtr->CanTpPduFlag & CANTP_CAN_ID_32_MASK)))
+        if (PduInfoPtr->MetaDataPtr != NULL_PTR)
         {
-#if (CPU_BYTE_ORDER == HIGH_BYTE_FIRST) /* Big endian bit ordering*/
-            RxchannelPtr->MetaDataN_SA = PduInfoPtr->MetaDataPtr[CANTP_SA_OFFSET_META_NF_MSB];
-            RxchannelPtr->MetaDataN_TA = PduInfoPtr->MetaDataPtr[CANTP_TA_OFFSET_META_NF_MSB];
-#else  /* Little endian bit ordering  CPU_BYTE_ORDER == HIGH_BYTE_FIRST */
-            RxchannelPtr->MetaDataN_SA = PduInfoPtr->MetaDataPtr[CANTP_SA_OFFSET_META_NF_LSB];
-            RxchannelPtr->MetaDataN_TA = PduInfoPtr->MetaDataPtr[CANTP_TA_OFFSET_META_NF_LSB];
-#endif /* CPU_BYTE_ORDER == HIGH_BYTE_FIRST */
-#if (CANTP_GENERIC_CONNECTION_SUPPORT != STD_ON)
-            if ((RxNSduCfgPtr->NSa == NULL_PTR) || (RxNSduCfgPtr->NTa == NULL_PTR)
-                || (RxchannelPtr->MetaDataN_SA != *(RxNSduCfgPtr->NSa))
-                || (RxchannelPtr->MetaDataN_TA != *(RxNSduCfgPtr->NTa)))
-            {
-                ret = E_NOT_OK;
-            }
-#endif /* CANTP_GENERIC_CONNECTION_SUPPORT != STD_ON */
+            RxchannelPtr->MetaDataN_SA = PduInfoPtr->MetaDataPtr[CANTP_SA_OFFSET_META_IF];
+            RxchannelPtr->MetaDataN_TA = PduInfoPtr->MetaDataPtr[CANTP_TA_OFFSET_META_IF];
         }
-        else
+#if (CANTP_GENERIC_CONNECTION_SUPPORT != STD_ON)
+        if ((RxNSduCfgPtr->NSa == NULL_PTR) || (RxchannelPtr->MetaDataN_TA != *(RxNSduCfgPtr->NSa)))
         {
             ret = E_NOT_OK;
         }
+        if ((RxNSduCfgPtr->NTa == NULL_PTR) || (RxchannelPtr->MetaDataN_SA != *(RxNSduCfgPtr->NTa)))
+        {
+            ret = E_NOT_OK;
+        }
+#endif
         break;
 #endif /* CANTP_NORMAL_FIXED_ADDRESSING_SUPPORT == STD_ON */
 #if (CANTP_MIXED29_ADDRESSING_SUPPORT == STD_ON)
     case CANTP_MIXED29BIT:
-        RxchannelPtr->MetaDataN_AE = PduInfoPtr->SduDataPtr[CANTP_AE_OFFSET_META_MIX29];
+        if (PduInfoPtr->MetaDataPtr != NULL_PTR)
+        {
+            RxchannelPtr->MetaDataN_SA = PduInfoPtr->MetaDataPtr[CANTP_SA_OFFSET_META_IF];
+            RxchannelPtr->MetaDataN_TA = PduInfoPtr->MetaDataPtr[CANTP_TA_OFFSET_META_IF];
+            RxchannelPtr->MetaDataN_AE = PduInfoPtr->SduDataPtr[CANTP_AE_OFFSET_META_MIX];
+        }
+
 #if (CANTP_GENERIC_CONNECTION_SUPPORT != STD_ON)
-        if ((RxNSduCfgPtr->NAe == NULL_PTR) || (RxchannelPtr->MetaDataN_AE != *(RxNSduCfgPtr->NAe)))
+        if ((*(RxNSduCfgPtr->NSa) == NULL_PTR) || (RxchannelPtr->MetaDataN_TA != *(RxNSduCfgPtr->NSa)))
+        {
+            ret = E_NOT_OK;
+        }
+        else if ((RxNSduCfgPtr->NTa == NULL_PTR) || (RxchannelPtr->MetaDataN_SA != *(RxNSduCfgPtr->NTa)))
+        {
+            ret = E_NOT_OK;
+        }
+        else if ((RxNSduCfgPtr->NAe == NULL_PTR) || (RxchannelPtr->MetaDataN_AE != *(RxNSduCfgPtr->NAe)))
         {
             ret = E_NOT_OK;
         }
         else
-#endif /* CANTP_GENERIC_CONNECTION_SUPPORT != STD_ON */
         {
-            if ((RxchannelPtr->MetaDataLength >= 4u)
-                && (CANTP_CAN_ID_32_MASK == (RxNSduCfgPtr->CanTpPduFlag & CANTP_CAN_ID_32_MASK)))
-            {
-#if (CPU_BYTE_ORDER == HIGH_BYTE_FIRST) /* Big endian bit ordering*/
-                RxchannelPtr->MetaDataN_SA = PduInfoPtr->MetaDataPtr[CANTP_SA_OFFSET_META_NF_MSB];
-                RxchannelPtr->MetaDataN_TA = PduInfoPtr->MetaDataPtr[CANTP_TA_OFFSET_META_NF_MSB];
-#else  /* Little endian bit ordering  */
-                RxchannelPtr->MetaDataN_SA = PduInfoPtr->MetaDataPtr[CANTP_SA_OFFSET_META_NF_LSB];
-                RxchannelPtr->MetaDataN_TA = PduInfoPtr->MetaDataPtr[CANTP_TA_OFFSET_META_NF_LSB];
-#endif /* CPU_BYTE_ORDER == HIGH_BYTE_FIRST */
-#if (CANTP_GENERIC_CONNECTION_SUPPORT != STD_ON)
-                if ((RxNSduCfgPtr->NSa == NULL_PTR) || (RxNSduCfgPtr->NTa == NULL_PTR)
-                    || (RxchannelPtr->MetaDataN_SA != *(RxNSduCfgPtr->NSa))
-                    || (RxchannelPtr->MetaDataN_TA != *(RxNSduCfgPtr->NTa)))
-                {
-                    ret = E_NOT_OK;
-                }
-#endif /* CANTP_GENERIC_CONNECTION_SUPPORT != STD_ON */
-            }
-            else
-            {
-                ret = E_NOT_OK;
-            }
+            /* idle */
         }
+#endif
         break;
 #endif /* CANTP_MIXED29_ADDRESSING_SUPPORT == STD_ON */
     default:
         /*idle*/
         break;
     }
-    SchM_Exit_CanTp(CANTP_MODULE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL); /*unlock channel*/
+    SchM_Exit_CanTp_ExclusiveArea(); /*unlock channel*/
     return ret;
 }
 #endif /* CANTP_DYN_ID_SUPPORT == STD_ON */
@@ -428,11 +419,13 @@ FUNC(void, CANTP_CODE)
 CanTp_CalcBS(P2CONST(CanTp_RxNSduType, AUTOMATIC, CANTP_CONST) RxNSduCfgPtr, CanTp_ConnectionType* RxchannelPtr)
 /* PRQA S 1532-- */ /* MISRA Rule 8.7 */
 {
+#ifndef CANTP_FIX_BS
     PduLengthType blockDataLen;
     uint8 length = 0xFF;
 #if (STD_ON == CANTP_FD)
     uint8 offset = 0xFF;
 #endif /* STD_ON == CANTP_FD */
+#endif
     uint8 bs;
 
     /*check changParameter of BS is done or not*/
@@ -445,9 +438,7 @@ CanTp_CalcBS(P2CONST(CanTp_RxNSduType, AUTOMATIC, CANTP_CONST) RxNSduCfgPtr, Can
     if (0u == bs)
     {
         /*BS is 0, no more FC need from now on*/
-        SchM_Enter_CanTp(CANTP_MODULE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL); /*lock channel*/
         RxchannelPtr->CurrentBs = 0;
-        SchM_Exit_CanTp(CANTP_MODULE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL); /*unlock channel*/
     }
     else
     {
@@ -459,9 +450,7 @@ CanTp_CalcBS(P2CONST(CanTp_RxNSduType, AUTOMATIC, CANTP_CONST) RxNSduCfgPtr, Can
         if (0u == blockDataLen)
         {
             /*no more upper buffer space left */
-            SchM_Enter_CanTp(CANTP_MODULE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL); /*lock channel*/
             RxchannelPtr->CurrentBs = 1U;
-            SchM_Exit_CanTp(CANTP_MODULE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL); /*unlock channel*/
         }
         else
         {
@@ -493,7 +482,7 @@ CanTp_CalcBS(P2CONST(CanTp_RxNSduType, AUTOMATIC, CANTP_CONST) RxNSduCfgPtr, Can
             }
 
             /*calculate CF block,CAN2.0 and CANFD is the same format,just different with length*/
-            SchM_Enter_CanTp(CANTP_MODULE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL); /*lock channel*/
+            SchM_Enter_CanTp_ExclusiveArea(); /*lock channel*/
             if (CANTP_CAN_20 == RxNSduCfgPtr->CanFrameType)
             {
                 RxchannelPtr->CurrentBs = (uint8)((blockDataLen + length - 1U) / length);
@@ -511,12 +500,10 @@ CanTp_CalcBS(P2CONST(CanTp_RxNSduType, AUTOMATIC, CANTP_CONST) RxNSduCfgPtr, Can
             {
                 RxchannelPtr->CurrentBs = bs;
             }
-            SchM_Exit_CanTp(CANTP_MODULE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL); /*unlock channel*/
+            SchM_Exit_CanTp_ExclusiveArea(); /*unlock channel*/
         }
 #else
-        SchM_Enter_CanTp(CANTP_MODULE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL); /*lock channel*/
         RxchannelPtr->CurrentBs = ((RxNSduCfgPtr->Bs != NULL_PTR) ? *(RxNSduCfgPtr->Bs) : 0x0u);
-        SchM_Exit_CanTp(CANTP_MODULE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL); /*unlock channel*/
 #endif /* CANTP_FIX_BS */
     }  /*END OF BS needed*/
 }
@@ -628,6 +615,8 @@ CanTp_SendFC(
 #else  /* STD_ON == CANTP_FD */
     uint8 FcBuf[CANTP_CAN20_FRAME_LEN_MAX];
 #endif /* STD_ON == CANTP_FD */
+
+    SchM_Enter_CanTp_ExclusiveArea();
 #if (                                                                                                       \
     (CANTP_MIXED_ADDRESSING_SUPPORT == STD_OFF) && (CANTP_MIXED29_ADDRESSING_SUPPORT == STD_OFF)            \
     && (CANTP_EXTENDED_ADDRESSING_SUPPORT == STD_OFF) && (CANTP_NORMAL_FIXED_ADDRESSING_SUPPORT == STD_OFF) \
@@ -684,36 +673,14 @@ CanTp_SendFC(
 #endif /* CANTP_MIXED_ADDRESSING_SUPPORT == STD_ON */
 #if (CANTP_NORMAL_FIXED_ADDRESSING_SUPPORT == STD_ON)
     case CANTP_NORMALFIXED:
-#if (CANTP_GENERIC_CONNECTION_SUPPORT == STD_ON)
-        if (((RxNSduCfgPtr->CanTpPduFlag & CANTP_METADATA_LENGTH_MASK) >= 4u)
-            && (CANTP_CAN_ID_32_MASK == (RxNSduCfgPtr->CanTpPduFlag & CANTP_CAN_ID_32_MASK)))
-        {
-#if (CPU_BYTE_ORDER == HIGH_BYTE_FIRST) /* Big endian bit ordering*/
-            Metadata[CANTP_SA_OFFSET_META_MIX29_MSB] = RxchannelPtr->MetaDataN_TA;
-            Metadata[CANTP_TA_OFFSET_META_MIX29_MSB] = RxchannelPtr->MetaDataN_SA;
-#else  /* Little endian bit ordering  CPU_BYTE_ORDER == HIGH_BYTE_FIRST */
-            Metadata[CANTP_SA_OFFSET_META_MIX29_LSB] = RxchannelPtr->MetaDataN_TA;
-            Metadata[CANTP_TA_OFFSET_META_MIX29_LSB] = RxchannelPtr->MetaDataN_SA;
-#endif /* CPU_BYTE_ORDER == HIGH_BYTE_FIRST */
-        }
-#endif /* CANTP_GENERIC_CONNECTION_SUPPORT == STD_ON */
+        Metadata[CANTP_SA_OFFSET_META_IF] = RxchannelPtr->MetaDataN_TA;
+        Metadata[CANTP_TA_OFFSET_META_IF] = RxchannelPtr->MetaDataN_SA;
         break;
 #endif /* CANTP_NORMAL_FIXED_ADDRESSING_SUPPORT == STD_ON */
 #if (CANTP_MIXED29_ADDRESSING_SUPPORT == STD_ON)
     case CANTP_MIXED29BIT:
-#if (CANTP_GENERIC_CONNECTION_SUPPORT == STD_ON)
-        if (((RxNSduCfgPtr->CanTpPduFlag & CANTP_METADATA_LENGTH_MASK) >= 4u)
-            && (CANTP_CAN_ID_32_MASK == (RxNSduCfgPtr->CanTpPduFlag & CANTP_CAN_ID_32_MASK)))
-        {
-#if (CPU_BYTE_ORDER == HIGH_BYTE_FIRST) /* Big endian bit ordering*/
-            Metadata[CANTP_SA_OFFSET_META_MIX29_MSB] = RxchannelPtr->MetaDataN_TA;
-            Metadata[CANTP_TA_OFFSET_META_MIX29_MSB] = RxchannelPtr->MetaDataN_SA;
-#else  /* Little endian bit ordering  CPU_BYTE_ORDER == HIGH_BYTE_FIRST */
-            Metadata[CANTP_SA_OFFSET_META_MIX29_LSB] = RxchannelPtr->MetaDataN_TA;
-            Metadata[CANTP_TA_OFFSET_META_MIX29_LSB] = RxchannelPtr->MetaDataN_SA;
-#endif /* CPU_BYTE_ORDER == HIGH_BYTE_FIRST */
-        }
-#endif /* CANTP_GENERIC_CONNECTION_SUPPORT == STD_ON */
+        Metadata[CANTP_SA_OFFSET_META_IF] = RxchannelPtr->MetaDataN_TA;
+        Metadata[CANTP_TA_OFFSET_META_IF] = RxchannelPtr->MetaDataN_SA;
         FcBuf[CANTP_AE_OFFSET_META_MIX29] = RxchannelPtr->MetaDataN_AE;
         break;
 #endif /* CANTP_MIXED29_ADDRESSING_SUPPORT == STD_ON */
@@ -729,6 +696,8 @@ CanTp_SendFC(
     }
     pduInfo.SduLength = (PduLengthType)fcFrameLen;
     pduInfo.SduDataPtr = FcBuf;
+    SchM_Exit_CanTp_ExclusiveArea();
+
     ret = CanIf_Transmit(RxNSduCfgPtr->TxFcLPduId, &pduInfo);
 #if (                                                                                           \
     (CANTP_EXTENDED_ADDRESSING_SUPPORT != STD_ON) && (CANTP_MIXED_ADDRESSING_SUPPORT != STD_ON) \
@@ -783,13 +752,11 @@ CanTp_CheckRxCFMetaData(
     P2CONST(CanTp_RxNSduType, AUTOMATIC, CANTP_CONST) RxNSduCfgPtr,
     P2CONST(PduInfoType, AUTOMATIC, CANTP_APPL_CONST) PduInfoPtr)
 {
-    Std_ReturnType result = E_OK;
+    Std_ReturnType result = E_NOT_OK;
 #if (                                                                                             \
     (CANTP_MIXED29_ADDRESSING_SUPPORT == STD_ON) || (CANTP_EXTENDED_ADDRESSING_SUPPORT == STD_ON) \
     || (CANTP_MIXED_ADDRESSING_SUPPORT == STD_ON) || (CANTP_NORMAL_FIXED_ADDRESSING_SUPPORT == STD_ON))
-    SchM_Enter_CanTp(CANTP_MODULE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL); /*lock channel*/
     RxchannelPtr->MetaDataLength = (RxNSduCfgPtr->CanTpPduFlag & CANTP_METADATA_LENGTH_MASK);
-    SchM_Exit_CanTp(CANTP_MODULE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL); /*unlock channel*/
 #else
     CANTP_UNUSED(RxchannelPtr);
     CANTP_UNUSED(PduInfoPtr);
@@ -799,76 +766,45 @@ CanTp_CheckRxCFMetaData(
     {
 #if (CANTP_EXTENDED_ADDRESSING_SUPPORT == STD_ON)
     case CANTP_EXTENDED: {
-        if (PduInfoPtr->SduDataPtr[CANTP_TA_OFFSET_META_EX] != RxchannelPtr->MetaDataN_TA)
+        if (PduInfoPtr->SduDataPtr[CANTP_TA_OFFSET_META_EX] == RxchannelPtr->MetaDataN_TA)
         {
-            result = E_NOT_OK;
+            result = E_OK;
         }
         break;
     }
 #endif /* CANTP_EXTENDED_ADDRESSING_SUPPORT == STD_ON */
 #if (CANTP_MIXED_ADDRESSING_SUPPORT == STD_ON)
     case CANTP_MIXED: {
-        if (PduInfoPtr->SduDataPtr[CANTP_AE_OFFSET_META_MIX] != RxchannelPtr->MetaDataN_AE)
+        if (RxchannelPtr->MetaDataN_AE == PduInfoPtr->SduDataPtr[CANTP_AE_OFFSET_META_MIX])
         {
-            result = E_NOT_OK;
+            result = E_OK;
         }
         break;
     }
 #endif /* CANTP_MIXED_ADDRESSING_SUPPORT == STD_ON */
 #if (CANTP_NORMAL_FIXED_ADDRESSING_SUPPORT == STD_ON)
-    case CANTP_NORMALFIXED: {
-        if ((RxchannelPtr->MetaDataLength >= 4u)
-            && (CANTP_CAN_ID_32_MASK == (RxNSduCfgPtr->CanTpPduFlag & CANTP_CAN_ID_32_MASK)))
+    case CANTP_NORMALFIXED:
+        if ((PduInfoPtr->MetaDataPtr != NULL_PTR)
+            && (RxchannelPtr->MetaDataN_TA == PduInfoPtr->MetaDataPtr[CANTP_TA_OFFSET_META_IF])
+            && (RxchannelPtr->MetaDataN_SA == PduInfoPtr->MetaDataPtr[CANTP_SA_OFFSET_META_IF]))
         {
-#if (CPU_BYTE_ORDER == HIGH_BYTE_FIRST) /* Big endian bit ordering*/
-            if ((RxchannelPtr->MetaDataN_SA != PduInfoPtr->MetaDataPtr[CANTP_SA_OFFSET_META_MIX29_MSB])
-                || (RxchannelPtr->MetaDataN_TA != PduInfoPtr->MetaDataPtr[CANTP_TA_OFFSET_META_MIX29_MSB]))
-#else  /* Little endian bit ordering  CPU_BYTE_ORDER == HIGH_BYTE_FIRST */
-            if ((RxchannelPtr->MetaDataN_SA != PduInfoPtr->MetaDataPtr[CANTP_SA_OFFSET_META_MIX29_LSB])
-                || (RxchannelPtr->MetaDataN_TA != PduInfoPtr->MetaDataPtr[CANTP_TA_OFFSET_META_MIX29_LSB]))
-#endif /* CPU_BYTE_ORDER == HIGH_BYTE_FIRST */
-            {
-                result = E_NOT_OK;
-            }
-        }
-        else
-        {
-            result = E_NOT_OK;
+            result = E_OK;
         }
         break;
-    }
 #endif /* CANTP_NORMAL_FIXED_ADDRESSING_SUPPORT == STD_ON */
 #if (CANTP_MIXED29_ADDRESSING_SUPPORT == STD_ON)
-    case CANTP_MIXED29BIT: {
-        if (PduInfoPtr->SduDataPtr[CANTP_AE_OFFSET_META_MIX29] != RxchannelPtr->MetaDataN_AE)
+    case CANTP_MIXED29BIT:
+        if ((PduInfoPtr->MetaDataPtr != NULL_PTR)
+            && (RxchannelPtr->MetaDataN_AE == PduInfoPtr->SduDataPtr[CANTP_AE_OFFSET_META_MIX])
+            && (RxchannelPtr->MetaDataN_TA == PduInfoPtr->MetaDataPtr[CANTP_TA_OFFSET_META_IF])
+            && (RxchannelPtr->MetaDataN_SA == PduInfoPtr->MetaDataPtr[CANTP_SA_OFFSET_META_IF]))
         {
-            result = E_NOT_OK;
-        }
-        if ((RxchannelPtr->MetaDataLength >= 4u)
-            && (CANTP_CAN_ID_32_MASK == (RxNSduCfgPtr->CanTpPduFlag & CANTP_CAN_ID_32_MASK)))
-        {
-            if (
-#if (CPU_BYTE_ORDER == HIGH_BYTE_FIRST) /* Big endian bit ordering*/
-                (RxchannelPtr->MetaDataN_SA != PduInfoPtr->MetaDataPtr[CANTP_SA_OFFSET_META_MIX29_MSB])
-                || (RxchannelPtr->MetaDataN_TA != PduInfoPtr->MetaDataPtr[CANTP_TA_OFFSET_META_MIX29_MSB])
-#else  /* Little endian bit ordering CPU_BYTE_ORDER == HIGH_BYTE_FIRST */
-                (RxchannelPtr->MetaDataN_SA != PduInfoPtr->MetaDataPtr[CANTP_SA_OFFSET_META_MIX29_LSB])
-                || (RxchannelPtr->MetaDataN_TA != PduInfoPtr->MetaDataPtr[CANTP_TA_OFFSET_META_MIX29_LSB])
-#endif /* CPU_BYTE_ORDER == HIGH_BYTE_FIRST */
-            )
-            {
-                result = E_NOT_OK;
-            }
-        }
-        else
-        {
-            result = E_NOT_OK;
+            result = E_OK;
         }
         break;
-    }
 #endif /* CANTP_MIXED29_ADDRESSING_SUPPORT == STD_ON */
     default:
-        /*idle*/
+        result = E_OK;
         break;
     }
     return result;
@@ -1025,9 +961,7 @@ CanTp_CheckRxFCMetaData(
 #if (                                                                                             \
     (CANTP_MIXED29_ADDRESSING_SUPPORT == STD_ON) || (CANTP_EXTENDED_ADDRESSING_SUPPORT == STD_ON) \
     || (CANTP_MIXED_ADDRESSING_SUPPORT == STD_ON) || (CANTP_NORMAL_FIXED_ADDRESSING_SUPPORT == STD_ON))
-    SchM_Enter_CanTp(CANTP_MODULE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL); /*lock channel*/
     TxSubchannelPtr->MetaDataLength = (TxNSduCfgPtr->CanTpPduFlag & CANTP_METADATA_LENGTH_MASK);
-    SchM_Exit_CanTp(CANTP_MODULE_ID, CANTP_EXCLUSIVE_AREA_CHANNEL); /*unlock channel*/
 #else
     CANTP_UNUSED(TxSubchannelPtr);
     CANTP_UNUSED(PduInfoPtr);
@@ -1053,53 +987,38 @@ CanTp_CheckRxFCMetaData(
 #endif /* CANTP_MIXED_ADDRESSING_SUPPORT == STD_ON */
 #if (CANTP_NORMAL_FIXED_ADDRESSING_SUPPORT == STD_ON)
     case CANTP_NORMALFIXED:
-        if ((TxSubchannelPtr->MetaDataLength >= 4u)
-            && (CANTP_CAN_ID_32_MASK == (TxNSduCfgPtr->CanTpPduFlag & CANTP_CAN_ID_32_MASK)))
+        if (PduInfoPtr->MetaDataPtr == NULL_PTR)
         {
-            if (
-#if (CPU_BYTE_ORDER == HIGH_BYTE_FIRST) /* Big endian bit ordering*/
-                (TxSubchannelPtr->MetaDataN_SA != PduInfoPtr->MetaDataPtr[CANTP_SA_OFFSET_META_NF_MSB])
-                || (TxSubchannelPtr->MetaDataN_TA != PduInfoPtr->MetaDataPtr[CANTP_TA_OFFSET_META_NF_MSB])
-#else  /* Little endian bit ordering CPU_BYTE_ORDER == HIGH_BYTE_FIRST */
-                (TxSubchannelPtr->MetaDataN_SA != PduInfoPtr->MetaDataPtr[CANTP_SA_OFFSET_META_NF_LSB])
-                || (TxSubchannelPtr->MetaDataN_TA != PduInfoPtr->MetaDataPtr[CANTP_TA_OFFSET_META_NF_LSB])
-#endif /* CPU_BYTE_ORDER == HIGH_BYTE_FIRST */
-            )
-            {
-                result = E_NOT_OK;
-            }
+            result = E_NOT_OK;
+        }
+        else if (
+            (TxSubchannelPtr->MetaDataN_SA != PduInfoPtr->MetaDataPtr[CANTP_TA_OFFSET_META_IF])
+            || (TxSubchannelPtr->MetaDataN_TA != PduInfoPtr->MetaDataPtr[CANTP_SA_OFFSET_META_IF]))
+        {
+            result = E_NOT_OK;
         }
         else
         {
-            result = E_NOT_OK;
+            /* idle */
         }
         break;
 #endif /* CANTP_NORMAL_FIXED_ADDRESSING_SUPPORT == STD_ON */
 #if (CANTP_MIXED29_ADDRESSING_SUPPORT == STD_ON)
     case CANTP_MIXED29BIT:
-        if ((TxSubchannelPtr->MetaDataLength >= 4u)
-            && (CANTP_CAN_ID_32_MASK == (TxNSduCfgPtr->CanTpPduFlag & CANTP_CAN_ID_32_MASK)))
+        if (PduInfoPtr->MetaDataPtr == NULL_PTR)
         {
-            if (
-#if (CPU_BYTE_ORDER == HIGH_BYTE_FIRST) /* Big endian bit ordering*/
-                (TxSubchannelPtr->MetaDataN_SA != PduInfoPtr->MetaDataPtr[CANTP_SA_OFFSET_META_NF_MSB])
-                || (TxSubchannelPtr->MetaDataN_TA != PduInfoPtr->MetaDataPtr[CANTP_TA_OFFSET_META_NF_MSB])
-#else  /* Little endian bit ordering CPU_BYTE_ORDER == HIGH_BYTE_FIRST */
-                (TxSubchannelPtr->MetaDataN_SA != PduInfoPtr->MetaDataPtr[CANTP_SA_OFFSET_META_NF_LSB])
-                || (TxSubchannelPtr->MetaDataN_TA != PduInfoPtr->MetaDataPtr[CANTP_TA_OFFSET_META_NF_LSB])
-#endif /* CPU_BYTE_ORDER == HIGH_BYTE_FIRST */
-            )
-            {
-                result = E_NOT_OK;
-            }
+            result = E_NOT_OK;
+        }
+        else if (
+            (TxSubchannelPtr->MetaDataN_SA != PduInfoPtr->MetaDataPtr[CANTP_TA_OFFSET_META_IF])
+            || (TxSubchannelPtr->MetaDataN_TA != PduInfoPtr->MetaDataPtr[CANTP_SA_OFFSET_META_IF])
+            || (TxSubchannelPtr->MetaDataN_AE != PduInfoPtr->SduDataPtr[CANTP_AE_OFFSET_META_MIX29]))
+        {
+            result = E_NOT_OK;
         }
         else
         {
-            result = E_NOT_OK;
-        }
-        if (TxSubchannelPtr->MetaDataN_AE != PduInfoPtr->SduDataPtr[CANTP_AE_OFFSET_META_MIX29])
-        {
-            result = E_NOT_OK;
+            /* idle */
         }
         break;
 #endif /* CANTP_MIXED29_ADDRESSING_SUPPORT == STD_ON */
@@ -1273,93 +1192,55 @@ CanTp_SaveTxMetaDataInfo(
 {
 #if (                                                                                             \
     (CANTP_MIXED29_ADDRESSING_SUPPORT == STD_ON) || (CANTP_EXTENDED_ADDRESSING_SUPPORT == STD_ON) \
-    || (CANTP_MIXED_ADDRESSING_SUPPORT == STD_ON) || (CANTP_NORMAL_FIXED_ADDRESSING_SUPPORT == STD_ON))
+    || (CANTP_NORMAL_FIXED_ADDRESSING_SUPPORT == STD_ON))
     TxSubchannelPtr->MetaDataLength = (TxNSduCfgPtr->CanTpPduFlag & CANTP_METADATA_LENGTH_MASK);
 #else
-    CANTP_UNUSED(TxSubchannelPtr);
     CANTP_UNUSED(PduInfoPtr);
-#endif /* CANTP_MIXED29_ADDRESSING_SUPPORT == STD_ON || CANTP_EXTENDED_ADDRESSING_SUPPORT == STD_ON \
-|| CANTP_MIXED_ADDRESSING_SUPPORT == STD_ON || CANTP_NORMAL_FIXED_ADDRESSING_SUPPORT == STD_ON */
+#if (CANTP_MIXED_ADDRESSING_SUPPORT != STD_ON)
+    CANTP_UNUSED(TxSubchannelPtr);
+#endif
+#endif
     switch (TxNSduCfgPtr->AddressingFormat)
     {
 #if (CANTP_EXTENDED_ADDRESSING_SUPPORT == STD_ON)
     case CANTP_EXTENDED:
-#if (CANTP_GENERIC_CONNECTION_SUPPORT == STD_ON)
-        if (((TxNSduCfgPtr->CanTpPduFlag & CANTP_METADATA_LENGTH_MASK) > 0u)
-            && (CANTP_SA16_AND_TA16_MASK == (TxNSduCfgPtr->CanTpPduFlag & CANTP_SA16_AND_TA16_MASK)))
-        {
-#if (CPU_BYTE_ORDER == HIGH_BYTE_FIRST) /* Big endian bit ordering*/
-            TxSubchannelPtr->MetaDataN_TA = PduInfoPtr->MetaDataPtr[CANTP_TA_FOR_DCM_MSB];
-            TxSubchannelPtr->MetaDataN_SA = PduInfoPtr->MetaDataPtr[CANTP_SA_FOR_DCM_MSB];
-#else  /* Little endian bit ordering CPU_BYTE_ORDER == HIGH_BYTE_FIRST */
-            TxSubchannelPtr->MetaDataN_TA = PduInfoPtr->MetaDataPtr[CANTP_TA_FOR_DCM_LSB];
-            TxSubchannelPtr->MetaDataN_SA = PduInfoPtr->MetaDataPtr[CANTP_SA_FOR_DCM_LSB];
-#endif /* CPU_BYTE_ORDER == HIGH_BYTE_FIRST */
-        }
-#else  /* CANTP_GENERIC_CONNECTION_SUPPORT == STD_ON */
         TxSubchannelPtr->MetaDataN_TA = *(TxNSduCfgPtr->NTa);
-        TxSubchannelPtr->MetaDataN_SA = *(TxNSduCfgPtr->NSa);
-        CANTP_UNUSED(PduInfoPtr);
-#endif /* CANTP_GENERIC_CONNECTION_SUPPORT == STD_ON */
         break;
 #endif /* CANTP_EXTENDED_ADDRESSING_SUPPORT == STD_ON */
 #if (CANTP_MIXED_ADDRESSING_SUPPORT == STD_ON)
     case CANTP_MIXED:
-#if (CANTP_GENERIC_CONNECTION_SUPPORT == STD_ON)
-        if (((TxNSduCfgPtr->CanTpPduFlag & CANTP_METADATA_LENGTH_MASK) > 0u)
-            && (CANTP_ADDRESS_EXTENSION_8_MASK == (TxNSduCfgPtr->CanTpPduFlag & CANTP_ADDRESS_EXTENSION_8_MASK)))
-        {
-            TxSubchannelPtr->MetaDataN_AE = PduInfoPtr->MetaDataPtr[CANTP_AE_FOR_DCM];
-        }
-#else  /* CANTP_GENERIC_CONNECTION_SUPPORT == STD_ON */
         TxSubchannelPtr->MetaDataN_AE = *(TxNSduCfgPtr->NAe);
-        CANTP_UNUSED(PduInfoPtr);
 #endif /* CANTP_GENERIC_CONNECTION_SUPPORT == STD_ON */
         break;
-#endif /* CANTP_MIXED_ADDRESSING_SUPPORT == STD_ON */
 #if (CANTP_NORMAL_FIXED_ADDRESSING_SUPPORT == STD_ON)
     case CANTP_NORMALFIXED:
 #if (CANTP_GENERIC_CONNECTION_SUPPORT == STD_ON)
-        if (((TxNSduCfgPtr->CanTpPduFlag & CANTP_METADATA_LENGTH_MASK) > 0u)
-            && (CANTP_SA16_AND_TA16_MASK == (TxNSduCfgPtr->CanTpPduFlag & CANTP_SA16_AND_TA16_MASK)))
+        if (PduInfoPtr->MetaDataPtr != NULL_PTR)
         {
-#if (CPU_BYTE_ORDER == HIGH_BYTE_FIRST) /* Big endian bit ordering*/
-            TxSubchannelPtr->MetaDataN_SA = PduInfoPtr->MetaDataPtr[CANTP_SA_FOR_DCM_MSB];
-            TxSubchannelPtr->MetaDataN_TA = PduInfoPtr->MetaDataPtr[CANTP_TA_FOR_DCM_MSB];
-#else  /* Little endian bit ordering CPU_BYTE_ORDER == HIGH_BYTE_FIRST */
-            TxSubchannelPtr->MetaDataN_SA = PduInfoPtr->MetaDataPtr[CANTP_SA_FOR_DCM_LSB];
-            TxSubchannelPtr->MetaDataN_TA = PduInfoPtr->MetaDataPtr[CANTP_TA_FOR_DCM_LSB];
-#endif /* CPU_BYTE_ORDER == HIGH_BYTE_FIRST */
+            TxSubchannelPtr->MetaDataN_SA = PduInfoPtr->MetaDataPtr[CANTP_SA_OFFSET_META_UPPER];
+            TxSubchannelPtr->MetaDataN_TA = PduInfoPtr->MetaDataPtr[CANTP_TA_OFFSET_META_UPPER];
         }
 #else  /* CANTP_GENERIC_CONNECTION_SUPPORT == STD_ON */
-        TxSubchannelPtr->MetaDataN_SA = *(TxNSduCfgPtr->NSa);
         TxSubchannelPtr->MetaDataN_TA = *(TxNSduCfgPtr->NTa);
-        CANTP_UNUSED(PduInfoPtr);
+        TxSubchannelPtr->MetaDataN_SA = *(TxNSduCfgPtr->NSa);
 #endif /* CANTP_GENERIC_CONNECTION_SUPPORT == STD_ON */
+
         break;
 #endif /* CANTP_NORMAL_FIXED_ADDRESSING_SUPPORT == STD_ON */
 #if (CANTP_MIXED29_ADDRESSING_SUPPORT == STD_ON)
     case CANTP_MIXED29BIT:
 #if (CANTP_GENERIC_CONNECTION_SUPPORT == STD_ON)
-        if (((TxNSduCfgPtr->CanTpPduFlag & CANTP_METADATA_LENGTH_MASK) > 0u)
-            && (CANTP_SA16_AND_TA16_MASK == (TxNSduCfgPtr->CanTpPduFlag & CANTP_SA16_AND_TA16_MASK))
-            && (CANTP_ADDRESS_EXTENSION_8_MASK == (TxNSduCfgPtr->CanTpPduFlag & CANTP_ADDRESS_EXTENSION_8_MASK)))
+        if (PduInfoPtr->MetaDataPtr != NULL_PTR)
         {
-#if (CPU_BYTE_ORDER == HIGH_BYTE_FIRST) /* Big endian bit ordering*/
-            TxSubchannelPtr->MetaDataN_SA = PduInfoPtr->MetaDataPtr[CANTP_SA_FOR_DCM_MSB];
-            TxSubchannelPtr->MetaDataN_TA = PduInfoPtr->MetaDataPtr[CANTP_TA_FOR_DCM_MSB];
-#else  /* Little endian bit ordering CPU_BYTE_ORDER == HIGH_BYTE_FIRST */
-            TxSubchannelPtr->MetaDataN_SA = PduInfoPtr->MetaDataPtr[CANTP_SA_FOR_DCM_LSB];
-            TxSubchannelPtr->MetaDataN_TA = PduInfoPtr->MetaDataPtr[CANTP_TA_FOR_DCM_LSB];
-#endif /* CPU_BYTE_ORDER == HIGH_BYTE_FIRST */
-            TxSubchannelPtr->MetaDataN_AE = PduInfoPtr->MetaDataPtr[CANTP_AE_FOR_DCM];
+            TxSubchannelPtr->MetaDataN_SA = PduInfoPtr->MetaDataPtr[CANTP_SA_OFFSET_META_UPPER];
+            TxSubchannelPtr->MetaDataN_TA = PduInfoPtr->MetaDataPtr[CANTP_TA_OFFSET_META_UPPER];
         }
-#else  /* CANTP_GENERIC_CONNECTION_SUPPORT == STD_ON */
-        TxSubchannelPtr->MetaDataN_SA = *(TxNSduCfgPtr->NSa);
+#else /* CANTP_GENERIC_CONNECTION_SUPPORT == STD_ON */
         TxSubchannelPtr->MetaDataN_TA = *(TxNSduCfgPtr->NTa);
-        TxSubchannelPtr->MetaDataN_AE = *(TxNSduCfgPtr->NAe);
-        CANTP_UNUSED(PduInfoPtr);
+        TxSubchannelPtr->MetaDataN_SA = *(TxNSduCfgPtr->NSa);
+
 #endif /* CANTP_GENERIC_CONNECTION_SUPPORT == STD_ON */
+        TxSubchannelPtr->MetaDataN_AE = *(TxNSduCfgPtr->NAe);
         break;
 #endif /* CANTP_MIXED29_ADDRESSING_SUPPORT == STD_ON */
     default:
@@ -1386,10 +1267,18 @@ FUNC(void, CANTP_CODE)
 CanTp_TxHandleTransmitReq(
     /* PRQA S 1532-- */ /* MISRA Rule 8.7 */
     CanTp_ConnectionType* TxSubchannelPtr,
-    P2CONST(CanTp_TxNSduType, AUTOMATIC, CANTP_CONST) TxNSduCfgPtr)
+    P2CONST(CanTp_TxNSduType, AUTOMATIC, CANTP_CONST) TxNSduCfgPtr
+#if (CANTP_SYNCHRONOUS_TRANSMIT == STD_ON)
+    ,
+    uint8 ChannelId
+#endif
+)
 {
     PduLengthType len;
     uint8 offset = 0xFF;
+#if (CANTP_SYNCHRONOUS_TRANSMIT == STD_ON)
+    CanTp_ConnectionChannelType* channelPtr = &CanTp_Channels[ChannelId];
+#endif
 
     switch (TxNSduCfgPtr->AddressingFormat)
     {
@@ -1443,6 +1332,9 @@ CanTp_TxHandleTransmitReq(
             TxSubchannelPtr->HandleType = CANTP_FTYPE_FF;
             TxSubchannelPtr->RootState = CANTP_LARGE_TRANSMITTING;
             TxSubchannelPtr->Substate = CANTP_TX_LARGE_START;
+#if (CANTP_SYNCHRONOUS_TRANSMIT == STD_ON)
+            CanTp_TxHandleLargeStart(channelPtr);
+#endif
         }
         else
         {
@@ -1450,6 +1342,9 @@ CanTp_TxHandleTransmitReq(
             TxSubchannelPtr->HandleType = CANTP_FTYPE_SF;
             TxSubchannelPtr->RootState = CANTP_SF_TRANSIMITTING;
             TxSubchannelPtr->Substate = CANTP_TX_SF_START;
+#if (CANTP_SYNCHRONOUS_TRANSMIT == STD_ON)
+            CanTp_TxHandleSFStart(channelPtr);
+#endif
         }
     }
 }
@@ -1551,7 +1446,7 @@ CanTp_ConstructCFPci(
     uint8* totalOffset)
 /* PRQA S 1532,3432-- */ /* MISRA Rule 8.7,20.7 */
 {
-    uint8 offset = 0xFF;
+    uint8 offset = 0x00u;
 
     switch (txNSduCfgPtr->AddressingFormat)
     {
@@ -1728,31 +1623,19 @@ CanTp_ConstructTxMetaDataInfo(
 #endif /* CANTP_MIXED_ADDRESSING_SUPPORT == STD_ON */
 #if (CANTP_NORMAL_FIXED_ADDRESSING_SUPPORT == STD_ON)
     case CANTP_NORMALFIXED:
-        if (((TxNSduCfgPtr->CanTpPduFlag & CANTP_METADATA_LENGTH_MASK) >= 4u)
-            && (CANTP_CAN_ID_32_MASK == (TxNSduCfgPtr->CanTpPduFlag & CANTP_CAN_ID_32_MASK)))
+        if (pduInfoPtr->MetaDataPtr != NULL_PTR)
         {
-#if (CPU_BYTE_ORDER == HIGH_BYTE_FIRST) /* Big endian bit ordering*/
-            pduInfoPtr->MetaDataPtr[CANTP_SA_OFFSET_META_NF_MSB] = TxSubchannelPtr->MetaDataN_SA;
-            pduInfoPtr->MetaDataPtr[CANTP_TA_OFFSET_META_NF_MSB] = TxSubchannelPtr->MetaDataN_TA;
-#else  /* Little endian bit ordering CPU_BYTE_ORDER == HIGH_BYTE_FIRST */
-            pduInfoPtr->MetaDataPtr[CANTP_SA_OFFSET_META_NF_LSB] = TxSubchannelPtr->MetaDataN_SA;
-            pduInfoPtr->MetaDataPtr[CANTP_TA_OFFSET_META_NF_LSB] = TxSubchannelPtr->MetaDataN_TA;
-#endif /* CPU_BYTE_ORDER == HIGH_BYTE_FIRST */
+            pduInfoPtr->MetaDataPtr[CANTP_SA_OFFSET_META_IF] = TxSubchannelPtr->MetaDataN_SA;
+            pduInfoPtr->MetaDataPtr[CANTP_TA_OFFSET_META_IF] = TxSubchannelPtr->MetaDataN_TA;
         }
         break;
 #endif /* CANTP_NORMAL_FIXED_ADDRESSING_SUPPORT == STD_ON */
 #if (CANTP_MIXED29_ADDRESSING_SUPPORT == STD_ON)
     case CANTP_MIXED29BIT:
-        if (((TxNSduCfgPtr->CanTpPduFlag & CANTP_METADATA_LENGTH_MASK) >= 4u)
-            && (CANTP_CAN_ID_32_MASK == (TxNSduCfgPtr->CanTpPduFlag & CANTP_CAN_ID_32_MASK)))
+        if (pduInfoPtr->MetaDataPtr != NULL_PTR)
         {
-#if (CPU_BYTE_ORDER == HIGH_BYTE_FIRST) /* Big endian bit ordering*/
-            pduInfoPtr->MetaDataPtr[CANTP_SA_OFFSET_META_NF_MSB] = TxSubchannelPtr->MetaDataN_SA;
-            pduInfoPtr->MetaDataPtr[CANTP_TA_OFFSET_META_NF_MSB] = TxSubchannelPtr->MetaDataN_TA;
-#else  /* Little endian bit ordering CPU_BYTE_ORDER == HIGH_BYTE_FIRST */
-            pduInfoPtr->MetaDataPtr[CANTP_SA_OFFSET_META_NF_LSB] = TxSubchannelPtr->MetaDataN_SA;
-            pduInfoPtr->MetaDataPtr[CANTP_TA_OFFSET_META_NF_LSB] = TxSubchannelPtr->MetaDataN_TA;
-#endif /* CPU_BYTE_ORDER == HIGH_BYTE_FIRST */
+            pduInfoPtr->MetaDataPtr[CANTP_SA_OFFSET_META_IF] = TxSubchannelPtr->MetaDataN_SA;
+            pduInfoPtr->MetaDataPtr[CANTP_TA_OFFSET_META_IF] = TxSubchannelPtr->MetaDataN_TA;
         }
         pduInfoPtr->SduDataPtr[CANTP_AE_OFFSET_META_MIX] = TxSubchannelPtr->MetaDataN_AE;
         break;
@@ -1837,7 +1720,7 @@ CanTp_TxSFPadding(
             CanTp_MemorySet(
                 &pduInfoPtr->SduDataPtr[pduInfoPtr->SduLength],
                 CANTP_PADDING_BYTE,
-                (frameDL - pduInfoPtr->SduLength));
+                (uint16)(frameDL - pduInfoPtr->SduLength));
             pduInfoPtr->SduLength = frameDL;
         }
     }
@@ -1864,72 +1747,21 @@ CanTp_ConstructForwardRxMetaData(
     const CanTp_RxNSduType* RxNSduCfgPtr,
     const PduInfoType* CanTpRxInfoPtr)
 {
-#if (                                                                                               \
-    (CANTP_MIXED29_ADDRESSING_SUPPORT == STD_OFF) && (CANTP_EXTENDED_ADDRESSING_SUPPORT == STD_OFF) \
-    && (CANTP_MIXED_ADDRESSING_SUPPORT == STD_OFF) && (CANTP_NORMAL_FIXED_ADDRESSING_SUPPORT == STD_OFF))
+#if ((CANTP_MIXED29_ADDRESSING_SUPPORT == STD_OFF) && (CANTP_NORMAL_FIXED_ADDRESSING_SUPPORT == STD_OFF))
     CANTP_UNUSED(RxchannelPtr);
     CANTP_UNUSED(CanTpRxInfoPtr);
-#endif /* CANTP_MIXED29_ADDRESSING_SUPPORT == STD_OFF && CANTP_EXTENDED_ADDRESSING_SUPPORT == STD_OFF \
-    && CANTP_MIXED_ADDRESSING_SUPPORT == STD_OFF && CANTP_NORMAL_FIXED_ADDRESSING_SUPPORT == STD_OFF */
-
-    switch (RxNSduCfgPtr->AddressingFormat)
+    CANTP_UNUSED(RxNSduCfgPtr);
+#else
+    if ((RxNSduCfgPtr->AddressingFormat == CANTP_NORMALFIXED)
+        || (RxNSduCfgPtr->AddressingFormat == CANTP_MIXED29_ADDRESSING_SUPPORT))
     {
-#if (CANTP_EXTENDED_ADDRESSING_SUPPORT == STD_ON)
-    case CANTP_EXTENDED:
-        if (CANTP_SA16_AND_TA16_MASK == (RxNSduCfgPtr->CanTpPduFlag & CANTP_SA16_AND_TA16_MASK))
+        if (CanTpRxInfoPtr->MetaDataPtr != NULL_PTR)
         {
-#if (CPU_BYTE_ORDER == HIGH_BYTE_FIRST) /* Big endian bit ordering*/
-            CanTpRxInfoPtr->MetaDataPtr[CANTP_TA_FOR_DCM_MSB] = RxchannelPtr->MetaDataN_TA;
-#else  /* Little endian bit ordering CPU_BYTE_ORDER == HIGH_BYTE_FIRST */
-            CanTpRxInfoPtr->MetaDataPtr[CANTP_TA_FOR_DCM_LSB] = RxchannelPtr->MetaDataN_TA;
-#endif /* CPU_BYTE_ORDER == HIGH_BYTE_FIRST */
+            CanTpRxInfoPtr->MetaDataPtr[CANTP_SA_OFFSET_META_UPPER] = RxchannelPtr->MetaDataN_SA;
+            CanTpRxInfoPtr->MetaDataPtr[CANTP_TA_OFFSET_META_UPPER] = RxchannelPtr->MetaDataN_TA;
         }
-        break;
-#endif /* CANTP_EXTENDED_ADDRESSING_SUPPORT == STD_ON */
-#if (CANTP_NORMAL_FIXED_ADDRESSING_SUPPORT == STD_ON)
-    case CANTP_NORMALFIXED:
-        if (CANTP_SA16_AND_TA16_MASK == (RxNSduCfgPtr->CanTpPduFlag & CANTP_SA16_AND_TA16_MASK))
-        {
-#if (CPU_BYTE_ORDER == HIGH_BYTE_FIRST) /* Big endian bit ordering*/
-            CanTpRxInfoPtr->MetaDataPtr[CANTP_SA_FOR_DCM_MSB] = RxchannelPtr->MetaDataN_SA;
-            CanTpRxInfoPtr->MetaDataPtr[CANTP_TA_FOR_DCM_MSB] = RxchannelPtr->MetaDataN_TA;
-#else  /* Little endian bit ordering CPU_BYTE_ORDER == HIGH_BYTE_FIRST */
-            CanTpRxInfoPtr->MetaDataPtr[CANTP_SA_FOR_DCM_LSB] = RxchannelPtr->MetaDataN_SA;
-            CanTpRxInfoPtr->MetaDataPtr[CANTP_TA_FOR_DCM_LSB] = RxchannelPtr->MetaDataN_TA;
-#endif /* CPU_BYTE_ORDER == HIGH_BYTE_FIRST */
-        }
-        break;
-#endif /* CANTP_NORMAL_FIXED_ADDRESSING_SUPPORT == STD_ON */
-#if (CANTP_MIXED_ADDRESSING_SUPPORT == STD_ON)
-    case CANTP_MIXED:
-        if (CANTP_ADDRESS_EXTENSION_8_MASK == (RxNSduCfgPtr->CanTpPduFlag & CANTP_ADDRESS_EXTENSION_8_MASK))
-        {
-            CanTpRxInfoPtr->MetaDataPtr[CANTP_AE_FOR_DCM] = RxchannelPtr->MetaDataN_AE;
-        }
-        break;
-#endif /* CANTP_MIXED_ADDRESSING_SUPPORT == STD_ON */
-#if (CANTP_MIXED29_ADDRESSING_SUPPORT == STD_ON)
-    case CANTP_MIXED29BIT:
-        if (CANTP_SA16_AND_TA16_MASK == (RxNSduCfgPtr->CanTpPduFlag & CANTP_SA16_AND_TA16_MASK))
-        {
-#if (CPU_BYTE_ORDER == HIGH_BYTE_FIRST) /* Big endian bit ordering*/
-            CanTpRxInfoPtr->MetaDataPtr[CANTP_SA_FOR_DCM_MSB] = RxchannelPtr->MetaDataN_SA;
-            CanTpRxInfoPtr->MetaDataPtr[CANTP_TA_FOR_DCM_MSB] = RxchannelPtr->MetaDataN_TA;
-#else  /* Little endian bit ordering CPU_BYTE_ORDER == HIGH_BYTE_FIRST */
-            CanTpRxInfoPtr->MetaDataPtr[CANTP_SA_FOR_DCM_LSB] = RxchannelPtr->MetaDataN_SA;
-            CanTpRxInfoPtr->MetaDataPtr[CANTP_TA_FOR_DCM_LSB] = RxchannelPtr->MetaDataN_TA;
-#endif /* CPU_BYTE_ORDER == HIGH_BYTE_FIRST */
-        }
-        if (CANTP_ADDRESS_EXTENSION_8_MASK == (RxNSduCfgPtr->CanTpPduFlag & CANTP_ADDRESS_EXTENSION_8_MASK))
-        {
-            CanTpRxInfoPtr->MetaDataPtr[CANTP_AE_FOR_DCM] = RxchannelPtr->MetaDataN_AE;
-        }
-        break;
-#endif /* CANTP_MIXED29_ADDRESSING_SUPPORT == STD_ON */
-    default:
-        /*idle*/
-        break;
     }
+#endif
 }
 #endif /* CANTP_GENERIC_CONNECTION_SUPPORT == STD_ON */
 

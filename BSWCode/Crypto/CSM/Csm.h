@@ -18,20 +18,20 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Csm.H                                                       **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : qinchun.yang                                                **
- **  Vendor      :                                                             **
- **  DESCRIPTION : implementation header for CSM                               **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform 4.4.0                       **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*********************************************************************************
+**                                                                            **
+**  FILENAME    : Csm.H                                                       **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : qinchun.yang                                                **
+**  Vendor      :                                                             **
+**  DESCRIPTION : implementation header for CSM                               **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform 4.4.0                       **
+**                                                                            **
+*******************************************************************************/
 /******************************************************************************
 **                      Revision Control History                             **
 ******************************************************************************/
@@ -56,7 +56,7 @@
 #define CSM_H_AR_PATCH_VERSION 0U
 #define CSM_H_SW_MAJOR_VERSION 2U
 #define CSM_H_SW_MINOR_VERSION 1U
-#define CSM_H_SW_PATCH_VERSION 2U
+#define CSM_H_SW_PATCH_VERSION 3U
 
 #if (STD_ON == CSM_DEV_ERROR_DETECT)
 /*Development errors used by the CSM module*/

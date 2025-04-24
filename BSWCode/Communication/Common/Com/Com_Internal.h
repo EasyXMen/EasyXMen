@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Com_Internal.h                                              **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : zhengfei.li                                                 **
- **  Vendor      :                                                             **
- **  DESCRIPTION : COM internal header for internal API declarations           **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                       **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Com_Internal.h                                              **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : zhengfei.li                                                 **
+**  Vendor      :                                                             **
+**  DESCRIPTION : COM internal header for internal API declarations           **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                       **
+**                                                                            **
+*******************************************************************************/
 
 /*******************************************************************************
 **                      Revision Control History                              **
@@ -43,25 +44,89 @@
 *******************************************************************************/
 #include "Com.h"
 #include "PduR_Com.h"
+#if (STD_ON == COM_MULTIPLE_PARTITION_USED)
 #include "Os.h"
+#endif
 #include "istd_lib.h"
 #include "SchM_Com.h"
 
 /*******************************************************************************
+**                      Published information                                 **
+*******************************************************************************/
+/* Published information */
+#if !defined(COM_PUBLISHED_INFORMATION)
+#define COM_PUBLISHED_INFORMATION
+#define COM_MODULE_ID                   50u
+#define COM_VENDOR_ID                   62u
+#define COM_AR_RELEASE_MAJOR_VERSION    4u
+#define COM_AR_RELEASE_MINOR_VERSION    5u
+#define COM_AR_RELEASE_REVISION_VERSION 0u
+#define COM_SW_MAJOR_VERSION            2u
+#define COM_SW_MINOR_VERSION            1u
+#define COM_SW_PATCH_VERSION            25u
+#elif ((COM_SW_MAJOR_VERSION != 2u) || (COM_SW_MINOR_VERSION != 1u))
+#error "Com: Mismatch in Software Version"
+#endif
+
+/*******************************************************************************
 **                      Internal Macro Define                                 **
 *******************************************************************************/
-#if !defined(COM_INLINE)
-#define COM_LOCAL_INLINE static inline
-#endif /* !defined(COM_INLINE */
+#define Com_GetStartOfMainFunctionTx(mainFunctionId) \
+    ((mainFunctionId) == 0u) ? 0u : Com_ConfigStd->MainFunctionTxRange[(mainFunctionId)-1u]
+#define Com_GetEndOfMainFunctionTx(mainFunctionId) Com_ConfigStd->MainFunctionTxRange[(mainFunctionId)]
+
+#define Com_GetStartOfMainFunctionRx(mainFunctionId) \
+    ((mainFunctionId) == 0u) ? 0u : Com_ConfigStd->MainFunctionRxRange[(mainFunctionId)-1u]
+#define Com_GetEndOfMainFunctionRx(mainFunctionId) Com_ConfigStd->MainFunctionRxRange[(mainFunctionId)]
+
+/* PartitionId used to check multiple partition. */
+#if (STD_ON == COM_DEV_ERROR_DETECT) && (STD_ON == COM_MULTIPLE_PARTITION_USED)
+#define Com_GetRxMFPartitionId(mainfunctionId) (Com_ConfigStd->ComMainFuncRxPartitionRange[(mainfunctionId)])
+#define Com_GetTxMFPartitionId(mainfunctionId) (Com_ConfigStd->ComMainFuncTxPartitionRange[(mainfunctionId)])
+#if (COM_RXSIGNAL_NUMBER > 0u)
+#define Com_GetRxSigPartitionId(signalId) (Com_ConfigStd->ComRxSignal[(signalId)].ComRxSignalPartitionId)
+#endif
+#if (COM_TXSIGNAL_NUMBER > 0u)
+#define Com_GetTxSigPartitionId(signalId) (Com_ConfigStd->ComTxSignal[(signalId)].ComTxSignalPartitionId)
+#endif
+#if (COM_RXIPDU_NUMBER > 0u)
+#define Com_GetRxIPduPartitionId(ipduId) (Com_ConfigStd->ComRxIPdu[(ipduId)].ComRxIpduPartitionId)
+#endif
+#if (COM_TXIPDU_NUMBER > 0u)
+#define Com_GetTxIPduPartitionId(ipduId) (Com_ConfigStd->ComTxIPdu[(ipduId)].ComTxIpduPartitionId)
+#endif
+#if (COM_RXSIGNALGROUP_NUMBER > 0u)
+#define Com_GetRxSigGrpPartitionId(signaGroupId) \
+    (Com_ConfigStd->ComRxSignalGroup[(signaGroupId)].ComRxSigGrpPartitionId)
+#endif
+#if (COM_TXSIGNALGROUP_NUMBER > 0u)
+#define Com_GetTxSigGrpPartitionId(signaGroupId) \
+    (Com_ConfigStd->ComTxSignalGroup[(signaGroupId)].ComTxSigGrpPartitionId)
+#endif
+#if (COM_IPDUGROUP_MAX > 0u)
+#define Com_GetIPduGrpPartitionId(ipduGroupId) (Com_ConfigStd->ComIPduGroupPartition[(ipduGroupId)])
+#endif
+#if (COM_TXGROUPSIGNAL_NUMBER > 0u)
+#define Com_GetTxSignalGroupId(groupSignalId)     Com_ConfigStd->ComTxGroupSignal[(groupSignalId)].ComSignalGroupRef
+#define Com_GetTxGrpSigPartitionId(groupSignalId) (Com_GetTxSigGrpPartitionId(Com_GetTxSignalGroupId(groupSignalId)))
+#endif
+#if (COM_RXGROUPSIGNAL_NUMBER > 0u)
+#define Com_GetRxSignalGroupId(groupSignalId)     Com_ConfigStd->ComRxGroupSignal[(groupSignalId)].ComSignalGroupRef
+#define Com_GetRxGrpSigPartitionId(groupSignalId) (Com_GetRxSigGrpPartitionId(Com_GetRxSignalGroupId(groupSignalId)))
+#endif
+#endif
 
 /*******************************************************************************
 **                      Global Data                                           **
 *******************************************************************************/
-#if (COM_IPDUGROUP_NUMBER > 0u)
-extern VAR(boolean, COM_VAR) Com_IpduGroupDMEnable[COM_IPDUGROUP_NUMBER];
-extern VAR(boolean, COM_VAR) Com_IpduGroupEnable[COM_IPDUGROUP_NUMBER];
+/*define in Com.c*/
+
+#if (COM_IPDUGROUP_MAX > 0u)
+extern VAR(boolean, COM_VAR) Com_IpduGroupDMEnable[COM_IPDUGROUP_MAX];
+extern VAR(boolean, COM_VAR) Com_IpduGroupEnable[COM_IPDUGROUP_MAX];
 #endif
-/*define in Com_Cfg.c*/
+
+/*define in Com_PBcfg.c*/
 #if (COM_RXIPDU_NUMBER > 0u)
 extern VAR(Com_RxIPduRunTimeStateType, COM_VAR) Com_RxIPduRunTimeState[COM_RXIPDU_NUMBER];
 extern CONST(Com_RxIPduRunTimeStateType, COM_CONST) Com_RxIPduInitState[COM_RXIPDU_NUMBER];
@@ -71,11 +136,6 @@ extern CONST(Com_RxIPduRunTimeStateType, COM_CONST) Com_RxIPduInitState[COM_RXIP
 extern VAR(Com_TxIPduRunTimeStateType, COM_VAR) Com_TxIPduRunTimeState[COM_TXIPDU_NUMBER];
 extern CONST(Com_TxIPduRunTimeStateType, COM_CONST) Com_TxIPduInitState[COM_TXIPDU_NUMBER];
 #endif /*COM_TXIPDU_NUMBER > 0u*/
-
-#if (COM_GWMAPPING_NUMBER > 0u)
-extern VAR(boolean, COM_VAR) Com_RxIpduNeedGw[COM_RXIPDU_GW_NUMBER];
-extern CONST(uint16, COM_CONST) Com_RxIpduGwStartId[COM_RXIPDU_GW_NUMBER];
-#endif
 
 #if (COM_RXIPDUGROUP_NUMBER > 0u)
 extern CONST(Com_RxIpduGroupIdType, COM_CONST) Com_RxIPduGroupsRef[COM_RXIPDUGROUP_NUMBER];
@@ -230,8 +290,12 @@ extern CONST(Com_TxTimeoutNotificationType, COM_CONST) Com_TxSigGrpTimeoutNotifi
 extern CONST(Com_RxGroupSignalIdType, COM_CONST) Com_RxGrpSigSubstituteValueIdRef[COM_RXGRPSIG_SUBSTITUTE_NUMBER];
 #endif
 
-#if (COM_GWMAPPING_NUMBER > 0u)
-extern CONST(Com_GwDestType, COM_CONST) Com_GwDest[COM_GW_DESTINATION_NUM];
+#if COM_GWMAPPING_NUMBER > 0u
+extern const Com_GwDestType Com_GwDest[COM_GW_DESTINATION_NUM];
+
+#if COM_MULTIPLE_PARTITION_USED == STD_ON
+extern const ApplicationType Com_MainFunctionRouteSignalsApplcation[COM_NUMBER_OF_MAIN_FUNCTION_ROUTE_SIGNALS];
+#endif
 #endif
 
 #if (COM_TXIPDUBUFF_SIZE > 0u)
@@ -401,7 +465,8 @@ extern FUNC(uint64, COM_CODE) Com_SignalUnPackHandle(
     Com_SignalConfigType SignalConfigType,
     const void* SignalPtr,
     const uint8* IPduBufferPtr);
-#endif
+#endif /* 0u < COM_RXIPDUBUFF_SIZE) || ((STD_ON == COM_ENABLE_SIGNAL_GROUP_ARRAY_API) && \
+          (COM_TXSIGNALGROUP_NUMBER > 0u */
 /* called by Com_TxSignalPack,Com_TxGroupSignalPack.
  * pack signal which signal type is not boolean,UINT8_N,UINT8_DYN,and the signal value bits cover 2-9 bytes*/
 #if ((0u < COM_TXSIGNALGROUP_NUMBER) || (0u < COM_TXSIGNAL_NUMBER) || (0u < COM_GWMAPPING_NUMBER))
@@ -487,7 +552,7 @@ extern FUNC(void, COM_CODE) Com_TxSignalTMCStateInit(void);
 extern FUNC(void, COM_CODE) Com_TxSignalGroupTriggerFlagInit(void);
 #endif
 
-#if (COM_IPDUGROUP_NUMBER > 0u) && (COM_TXIPDUGROUP_NUMBER > 0u)
+#if (COM_IPDUGROUP_MAX > 0u) && (COM_TXIPDUGROUP_NUMBER > 0u)
 /*used to handle Tx Ipdu state change or not*/
 extern FUNC(void, COM_CODE) Com_TxIpduController(boolean initialize);
 #endif
@@ -520,13 +585,9 @@ extern FUNC(uint8, COM_CODE) Com_ReceiveDynGroupSignalHandle(
 #if (0u < COM_RXIPDU_NUMBER)
 /* called by Com_IpduGroupControl.
  * used to handle Rx Ipdu state change or not*/
-#if (COM_IPDUGROUP_NUMBER > 0u) && (COM_RXIPDUGROUP_NUMBER > 0u)
+#if (COM_IPDUGROUP_MAX > 0u) && (COM_RXIPDUGROUP_NUMBER > 0u)
 extern FUNC(void, COM_CODE) Com_RxIpduController(boolean initialize);
 #endif
-/* called by Com_RxIndication,Com_TpRxIndication,Com_MainFunctionRx.
- * unpack the rx pdu data and invoke notification*/
-extern FUNC(void, COM_CODE)
-    Com_IndicationProcess(const Com_RxIPduRunTimeStateType* RxIpduStatePtr, const Com_RxIPduType* RxIpduPtr);
 /* called by Com_SignalGroupRxIndication,Com_TpPduInvalidAction.
  * judge the rx signal group value is filter out or not*/
 #if (COM_RXGRPSIG_FILTERTYPE_MAX_NUMBER > 0u)
@@ -534,19 +595,6 @@ extern FUNC(boolean, COM_CODE) Com_RxSignalGroupFilter(
     const Com_RxSignalGroupType* RxSignalGroupPtr,
     boolean InvalidSignalGroup,
     Com_RxIpduBufIdType IpduBufferId);
-#endif
-#if (                                                              \
-    (STD_ON == COM_RX_SIGNAL_TIMEOUT_ACTION_REPLACE_ENABLE)        \
-    || (STD_ON == COM_RX_SIGNAL_TIMEOUT_ACTION_SUBSTITUTE_ENABLE)) \
-    || ((STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ACTION_REPLACE_ENABLE) \
-        || (STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ACTION_SUBSTITUTE_ENABLE))
-extern void Com_RxDataTimeOutActionHandle(
-    Com_RxIPduRunTimeStateType* RxIpduStatePtr,
-    const Com_RxIPduType* RxIpduPtr,
-    Com_RxDataTimeoutActionType RxTimeoutAction,
-    const void* RxArgPtr,
-    boolean IsRxSignal,
-    Com_SignalIdType SubstituteBufId);
 #endif
 #endif /*0u < COM_RXIPDU_NUMBER*/
 /*********************************************************************
@@ -611,6 +659,10 @@ extern FUNC(Std_ReturnType, COM_CODE)
 #if (0u < COM_TXIPDU_NUMBER) && (STD_ON == COM_TMS_ENABLE)
 extern FUNC(void, COM_CODE) Com_SwitchIpduTxModeHandle(PduIdType PduId, boolean Mode);
 #endif
+/*TxPdu MainFunction handle*/
+#if (0u < COM_TXIPDU_NUMBER)
+extern void Com_MainFunctionTxHandle(Com_MainFunctionType mainFunctionId);
+#endif
 /*TxPdu Trigger Transmit handle*/
 /* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
 #if (0u < COM_TXIPDU_NUMBER)
@@ -638,7 +690,7 @@ extern FUNC(BufReq_ReturnType, COM_CODE) Com_CopyTxDataHandle(
 **********************************************************************/
 /*Called by Com_ReceiveSignal.
  *Receive group signal handle*/
-#if (0u < COM_RXSIGNALGROUP_NUMBER > 0u) && (0u < COM_RXGROUPSIGNAL_NUMBER) && (0u < COM_RXIPDU_NUMBER)
+#if (0u < COM_RXSIGNALGROUP_NUMBER) && (0u < COM_RXGROUPSIGNAL_NUMBER) && (0u < COM_RXIPDU_NUMBER)
 extern FUNC(uint8, COM_CODE)
     Com_ReceiveGroupSignalHandle(Com_SignalIdType SignalId, P2VAR(void, AUTOMATIC, COM_APPL_CONST) SignalDataPtr);
 #endif
@@ -696,28 +748,25 @@ extern FUNC(BufReq_ReturnType, COM_CODE) Com_StartOfReceptionHandle(
     /* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
     P2VAR(PduLengthType, AUTOMATIC, COM_APPL_DATA) bufferSizePtr);
 /* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
-#endif               /* STD_ON == COM_RXTPPDU_SUPPORT */
+#endif
+/*RxPdu MainFunction handle*/
+#if (0u < COM_RXIPDU_NUMBER)
+extern void Com_MainFunctionRxHandle(Com_MainFunctionType mainFunctionId);
+#endif
+/*********************************************************************
+**Internal public functions definition in Com_GwInternal.c for Com.c**
+**********************************************************************/
+/*Signal gateway handle*/
+#if COM_GWMAPPING_NUMBER > 0u
+extern void Com_MainFunctionRouteSignalsHandle(Com_MainFunctionType mainFunctionId);
+extern void Com_GwInitDestinationRequest(void);
+extern void Com_GwUpdateDestinationRequest(Com_GwMappingIdType gwMappingId, boolean request);
+#endif
 #if (COM_RXIPDUGROUP_NUMBER > 0u) && (0u < COM_RXIPDU_NUMBER)
 /*Rx Pdu DM timeout enable/disable handle*/
 extern FUNC(void, COM_CODE) Com_RxPduDMCtrHandle(void);
 #endif
-/* called by Com_MainFunctionTx,Com_TriggerIPDUSend,Com_TriggerIPDUSendWithMetaData.
- * Pack the counter value in the pdu buffer*/
-#if (STD_ON == COM_TX_IPDU_COUNTER_ENABLE)
-extern FUNC(void, COM_CODE)
-    Com_PackCounterValue(const Com_TxIPduRunTimeStateType* TxIpduStatePtr, const Com_TxIPduType* TxIpduPtr);
-#endif
-#if (STD_ON == COM_MDT_ENABLE)
-extern FUNC(void, COM_CODE)
-    Com_ResetTxIpduMDT(Com_TxIPduRunTimeStateType* TxIpduStatePtr, const Com_TxIPduType* TxIpduPtr);
-#endif
-/* called by Com_TriggerIPDUSend,Com_TriggerIPDUSendWithMetaData,Com_TriggerTransmit,
- * Com_TxConfirmation,Com_TpTxConfirmation,Com_MainFunctionTx,Com_TxIpduController.
- * clear all signal group/signal/dest description signal update bit of the Tx Pdu*/
-#if (STD_ON == COM_TX_SIG_GROUP_UPDATE_BIT_ENABLE) || (STD_ON == COM_TX_SIGNAL_UPDATE_BIT_ENABLE) \
-    || (STD_ON == COM_GW_DEST_SIG_UPDATE_BIT_ENABLE)
-extern FUNC(void, COM_CODE) Com_ClearTxIPduUpdates(const Com_TxIPduType* TxIpduPtr);
-#endif
+
 #endif /*COM_INTERNAL_H*/
 /*******************************************************************************
 **                      End of file                                           **

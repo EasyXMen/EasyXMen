@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Sd.h                                                        **
- **                                                                            **
- **  Created on  : 2019-03-11                                                  **
- **  Author      : HuRongbo                                                    **
- **  Vendor      : iSoft                                                       **
- **  DESCRIPTION : API declaration and type definitions of Sd.h                **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Sd.h                                                        **
+**                                                                            **
+**  Created on  : 2019-03-11                                                  **
+**  Author      : HuRongbo                                                    **
+**  Vendor      : iSoft                                                       **
+**  DESCRIPTION : API declaration and type definitions of Sd.h                **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 /***************************Change History*************************************/
 /* V0.1     2019/3/11   hurongbo
             Initial Version
@@ -49,6 +50,8 @@
             QAC check issue fix.
    V2.0.7   2022/07/26
             Add callback API Sd_TxConfirmation.
+   V2.0.8   2024/5/14
+            Delete callback API Sd_TxConfirmation.
 */
 #ifndef SD_H
 #define SD_H
@@ -261,21 +264,6 @@ extern void Sd_SoConModeChg(SoAd_SoConIdType SoConId, SoAd_SoConModeType Mode);
  */
 /******************************************************************************/
 void Sd_RxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr);
-
-/******************************************************************************/
-/*
- * Brief: It does not belong to the AUTOSAR specification. It is a new
- *        requirement to reset the remote port information after sending a message.
- * ServiceId           None
- * Sync/Async          Synchronous
- * Reentrancy          Reentrant
- * Param-Name[in]      TxPduId
- * Param-Name[in/out]  None
- * Param-Name[out]     None
- * Return              None
- */
-/******************************************************************************/
-FUNC(void, DOIP_CODE) Sd_TxConfirmation(VAR(PduIdType, AUTOMATIC) TxPduId);
 
 #endif /* SD_MODULE_ENABLE == STD_ON */
 #endif /* SD_H */

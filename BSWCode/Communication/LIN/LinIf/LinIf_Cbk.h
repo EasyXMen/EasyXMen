@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : LinIf_Cbk.h                                                 **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : HuRongbo                                                    **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Callback declaration supplied by LinSM                      **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : LinIf_Cbk.h                                                 **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : HuRongbo                                                    **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Callback declaration supplied by LinSM                      **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 
 #ifndef LINIF_CBK_H
 #define LINIF_CBK_H
@@ -80,7 +81,7 @@
 /******************************************************************************/
 FUNC(void, LINIF_CODE) LinIf_WakeupConfirmation(EcuM_WakeupSourceType WakeupSource);
 
-#endif /* LINIF_WAKEUP_SUPPORT == STD_ON */
+#endif
 
 #if (STD_ON == LINIF_SLAVE_SUPPORT)
 
@@ -107,7 +108,9 @@ FUNC(void, LINIF_CODE) LinIf_WakeupConfirmation(EcuM_WakeupSourceType WakeupSour
  */
 /******************************************************************************/
 FUNC(Std_ReturnType, LINIF_CODE)
+/* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
 LinIf_HeaderIndication(NetworkHandleType Channel, P2VAR(Lin_PduType, AUTOMATIC, LINIF_APPL_DATA) PduPtr);
+/* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
 
 /******************************************************************************/
 /*
@@ -129,7 +132,9 @@ LinIf_HeaderIndication(NetworkHandleType Channel, P2VAR(Lin_PduType, AUTOMATIC, 
  */
 /******************************************************************************/
 FUNC(void, LINIF_CODE)
+/* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
 LinIf_RxIndication(NetworkHandleType Channel, P2VAR(uint8, AUTOMATIC, LINIF_APPL_DATA) Lin_SduPtr);
+/* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
 
 /******************************************************************************/
 /*
@@ -164,6 +169,6 @@ FUNC(void, LINIF_CODE) LinIf_TxConfirmation(NetworkHandleType Channel);
 /******************************************************************************/
 FUNC(void, LINIF_CODE) LinIf_LinErrorIndication(NetworkHandleType Channel, Lin_SlaveErrorType ErrorStatus);
 
-#endif /* STD_ON == LINIF_SLAVE_SUPPORT */
+#endif
 
 #endif /* LINIF_CBK_H */

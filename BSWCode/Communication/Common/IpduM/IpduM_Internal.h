@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                           **
- **  FILENAME    : IpduM_Internal.h                                           **
- **                                                                           **
- **  Created on  :                                                            **
- **  Author      : darren.zhang                                               **
- **  Vendor      :                                                            **
- **  DESCRIPTION : IPDUM                                                      **
- **                                                                           **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                      **
- **                                                                           **
- **************************************************************************** */
+ */
 /* PRQA S 3108-- */
+/*
+**************************************************************************** **
+**                                                                           **
+**  FILENAME    : IpduM_Internal.h                                           **
+**                                                                           **
+**  Created on  :                                                            **
+**  Author      : darren.zhang                                               **
+**  Vendor      :                                                            **
+**  DESCRIPTION : IPDUM                                                      **
+**                                                                           **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                      **
+**                                                                           **
+**************************************************************************** */
 #ifndef IPDUM_INTERNAL_H_
 #define IPDUM_INTERNAL_H_
 /******************************************************************************
@@ -41,12 +42,16 @@
 /******************************************************************************
 **                      Global Symbols                                       **
 ******************************************************************************/
-#define IPDUM_MODULE_ID                     182u
-#define IPDUM_VENDOR_ID                     62u
-#define IPDUM_SW_MAJOR_VERSION              2u
-#define IPDUM_SW_MINOR_VERSION              0u
-#define IPDUM_SW_PATCH_VERSION              0u
-#define IPDUM_INSTANCE_ID                   0u
+#define IPDUM_MODULE_ID        182u
+#define IPDUM_VENDOR_ID        62u
+#define IPDUM_SW_MAJOR_VERSION 2u
+#define IPDUM_SW_MINOR_VERSION 0u
+#define IPDUM_SW_PATCH_VERSION 0u
+#if (STD_ON == IPDUM_MULTIPLE_PARTITION_USED)
+#define IPDUM_INSTANCE_ID (GetApplicationID())
+#else
+#define IPDUM_INSTANCE_ID 0u
+#endif
 
 #define IPDUM_UNUSED_UINT8                  (0xFFu)
 
@@ -57,6 +62,14 @@
 #define IPUDM_TRIG_MULT_SUPPORT_TXCONF      STD_ON
 
 #define IPDUM_REINIT_CHECK                  STD_ON
+
+#define IpduM_GetStartOfMainFunctionTx(mainFunctionId) \
+    ((mainFunctionId) == 0u) ? 0u : IpduM_CfgPtr->IpduMMainFunctionTxRange[(mainFunctionId)-1u]
+#define IpduM_GetEndOfMainFunctionTx(mainFunctionId) IpduM_CfgPtr->IpduMMainFunctionTxRange[(mainFunctionId)]
+
+#define IpduM_GetStartOfMainFunctionRx(mainFunctionId) \
+    ((mainFunctionId) == 0u) ? 0u : IpduM_CfgPtr->IpduMMainFunctionRxRange[(mainFunctionId)-1u]
+#define IpduM_GetEndOfMainFunctionRx(mainFunctionId) IpduM_CfgPtr->IpduMMainFunctionRxRange[(mainFunctionId)]
 
 #if (IPDUM_TX_REQUEST_NUMBER_MAX > 0u)
 /* multiplexer tx request pdu data type define */
@@ -87,7 +100,7 @@ typedef struct
     const IpduM_SegmentType* segmentPtr;
 } IpduM_PduTranslateType;
 
-#endif /* IPDUM_TX_REQUEST_NUMBER_MAX > 0u || IPDUM_RX_INDICA_NUMBER_MAX > 0u */
+#endif
 
 #if (IPDUM_CONTAINER_TX_NUMBER_MAX > 0u)
 /* store contained index in gloabel container queue */

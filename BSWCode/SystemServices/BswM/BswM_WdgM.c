@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : BswM_WdgM.c                                                 **
- **                                                                            **
- **  Created on  : 2020-03-24                                                  **
- **  Author      : qinchun.yang                                                **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : BswM_WdgM.c                                                 **
+**                                                                            **
+**  Created on  : 2020-03-24                                                  **
+**  Author      : qinchun.yang                                                **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 
 /*******************************************************************************
 **                      Include Section                                       **
@@ -82,8 +83,6 @@ BswM_WdgM_RequestPartitionReset(ApplicationType Application)
     P2CONST(BswM_EventRqstPortLCfgType, AUTOMATIC, BSWM_CONST) evRqstLCfgPtr;
     P2VAR(BswM_EventRquestPortRuntimeType, AUTOMATIC, BSWM_VAR_CLEARED) evRqstPtr;
     P2CONST(BswM_RuleLcCfgType, AUTOMATIC, BSWM_CONST) ruleLCfgPtr;
-    P2CONST(BswM_PartitionPCCfgType, TYPEDEF, BSWM_CONST) bswmPartPCCfgs;
-    P2CONST(BswM_PartitionLCfgType, TYPEDEF, BSWM_CONST) bswmPartLCfgs;
     BswM_RuleIndexType numOfRules;
     BswM_RuleIndexType idx;
     BswM_RuleIndexType ruleIdx;
@@ -95,26 +94,24 @@ BswM_WdgM_RequestPartitionReset(ApplicationType Application)
 
 #if (BSWM_DEV_ERROR_DETECT == STD_ON)
     if ((Std_ReturnType)E_OK == BswM_DetChkWgmParRst())
-#endif /* BSWM_DEV_ERROR_DETECT == STD_ON */
+#endif /*BSWM_DEV_ERROR_DETECT == STD_ON*/
     {
         result = BswM_GetPartitionIdx(&partIdx);
         if ((boolean)TRUE == result)
         {
-            bswmPartPCCfgs = &(BswM_RuntimeStatus.bswmPartPCCfgs[partIdx]);
-            bswmPartLCfgs = &(BswM_RuntimeStatus.bswmPartLCfgs[partIdx]);
-            numOfWdgmRstEv = bswmPartPCCfgs->evRqstPCCfg->numOfWdgmRstEv;
-            evRqstLCfgPtr = bswmPartLCfgs->evRqstLCfg;
+            numOfWdgmRstEv = BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].evRqstPCCfg->numOfWdgmRstEv;
+            evRqstLCfgPtr = BswM_RuntimeStatus.bswmPartLCfgs[partIdx].evRqstLCfg;
             for (wdgIdx = 0u; wdgIdx < numOfWdgmRstEv; wdgIdx++)
             {
                 if (Application == evRqstLCfgPtr->wdgAppRef[wdgIdx])
                 {
-                    evIdx = bswmPartPCCfgs->evRqstPCCfg->wdgmRqstParRstEvIdxPtr[wdgIdx];
-                    evRqstPtr = bswmPartPCCfgs->eventRqstPortRunPtr;
+                    evIdx = BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].evRqstPCCfg->wdgmRqstParRstEvIdxPtr[wdgIdx];
+                    evRqstPtr = BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].eventRqstPortRunPtr;
                     evRqstPtr[evIdx] = BSWM_EVENT_IS_SET;
                     if (BSWM_IMMEDIATE == evRqstLCfgPtr->wdgMRqstParReset[wdgIdx].process)
                     {
                         numOfRules = evRqstLCfgPtr->wdgMRqstParReset[wdgIdx].belongToRlueNum;
-                        ruleLCfgPtr = bswmPartLCfgs->ruleLCfg;
+                        ruleLCfgPtr = BswM_RuntimeStatus.bswmPartLCfgs[partIdx].ruleLCfg;
                         for (idx = 0u; idx < numOfRules; idx++)
                         {
                             ruleIdx = evRqstLCfgPtr->wdgMRqstParReset[wdgIdx].belongToRlue[idx];
@@ -132,30 +129,30 @@ BswM_WdgM_RequestPartitionReset(ApplicationType Application)
     }
 #else
     BSWM_PARA_UNUSED(Application);
-#endif /* BSWM_EVENT_RQSTPORT_ENABLE == STD_ON */
+#endif /*BSWM_EVENT_RQSTPORT_ENABLE == STD_ON*/
 }
 
-#if (BSWM_EVENT_RQSTPORT_ENABLE == STD_ON)
 /*Get BswM_WdgM_RequestPartitionReset*/
 FUNC(BswM_EventRquestPortRuntimeType, BSWM_NMIF_CODE)
 BswM_GetWgmParReset(uint8 wdgIdx)
 {
     BswM_EventRquestPortRuntimeType ret = BSWM_INVALID_U8;
+#if (BSWM_EVENT_RQSTPORT_ENABLE == STD_ON)
     ApplicationType partIdx;
     boolean result;
     BswM_EventRquestPortRuntimeType evIdx;
-    P2CONST(BswM_PartitionPCCfgType, TYPEDEF, BSWM_CONST) bswmPartPCCfgs;
 
     result = BswM_GetPartitionIdx(&partIdx);
     if ((boolean)TRUE == result)
     {
-        bswmPartPCCfgs = &(BswM_RuntimeStatus.bswmPartPCCfgs[partIdx]);
-        evIdx = bswmPartPCCfgs->evRqstPCCfg->wdgmRqstParRstEvIdxPtr[wdgIdx];
-        ret = bswmPartPCCfgs->eventRqstPortRunPtr[evIdx];
+        evIdx = BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].evRqstPCCfg->wdgmRqstParRstEvIdxPtr[wdgIdx];
+        ret = BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].eventRqstPortRunPtr[evIdx];
     }
+#else
+    BSWM_PARA_UNUSED(wdgIdx);
+#endif /*BSWM_EVENT_RQSTPORT_ENABLE == STD_ON*/
     return ret;
 }
-#endif /* BSWM_EVENT_RQSTPORT_ENABLE == STD_ON */
 
 #define BSWM_STOP_SEC_CODE
 #include "BswM_MemMap.h"
@@ -163,4 +160,4 @@ BswM_GetWgmParReset(uint8 wdgIdx)
 **                      Private Function Definitions                          **
 *******************************************************************************/
 
-#endif /* BSWM_WDGM_ENABLED == STD_ON */
+#endif /*BSWM_WDGM_ENABLED == STD_ON*/

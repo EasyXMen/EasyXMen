@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : EcuM_Types.h                                                **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : qinchun.yang                                                **
- **  Vendor      :                                                             **
- **  DESCRIPTION : This file is partly ECU dependent.                          **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11.                     **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : EcuM_Types.h                                                **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : qinchun.yang                                                **
+**  Vendor      :                                                             **
+**  DESCRIPTION : This file is partly ECU dependent.                          **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11.                     **
+**                                                                            **
+*******************************************************************************/
 
 /******************************************************************************
 **                      Revision Control History                             **
@@ -60,7 +61,7 @@
 #define ECUM_E_SERVICE_DISABLED 1
 /*A invalid pointer was passed as an argument*/
 #define ECUM_E_NULL_POINTER 2
-/* A parameter was invalid (unspecific */
+/*A parameter was invalid (unspecific)*/
 #define ECUM_E_INVALID_PAR 3
 /*A state, passed as an argument to a service, was out of range (specific
  * parameter test)*/
@@ -73,7 +74,7 @@
 #define ECUM_E_RAM_CHECK_FAILED 7
 /*Postbuild configuration data is inconsistent*/
 #define ECUM_E_CONFIGURATION_DATA_INCONSISTENT 8
-/* On multiple requests by the same ID for requestRun( */
+/*On multiple requests by the same ID for requestRun()*/
 #define ECUM_E_MULTIPLE_RUN_REQUESTS 9
 /*On releasing without a matching request for releaseRun */
 #define ECUM_E_MISMATCHED_RUN_RELEASE 10
@@ -88,7 +89,6 @@
 /*Encode states and sub-states of the ECU Manager module.
  *States shall be encoded in the high-nibble, sub-states in the low-nibble.
  */
-typedef EcuM_ShutdownTargetType EcuM_DefaultShutdownTargetType;
 
 typedef uint8 EcuM_StateType;
 #define ECUM_SUBSTATE_MASK      (EcuM_StateType)0x0f
@@ -144,7 +144,7 @@ typedef uint8 Rte_ModeType_EcuM_Mode;
 #define RTE_MODE_EcuM_Mode_SHUTDOWN 3
 #define RTE_MODE_EcuM_Mode_SLEEP    4
 #endif
-#endif /* ECUM_MODE_HANDING == STD_ON */
+#endif /*ECUM_MODE_HANDING == STD_ON*/
 /*******************************************************************************
 **                      Global Data Declaration                               **
 *******************************************************************************/

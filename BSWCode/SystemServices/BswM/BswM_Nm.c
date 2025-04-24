@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : BswM_Nm.c                                                   **
- **                                                                            **
- **  Created on  : 2020-03-24                                                  **
- **  Author      : qinchun.yang                                                **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : BswM_Nm.c                                                   **
+**                                                                            **
+**  Created on  : 2020-03-24                                                  **
+**  Author      : qinchun.yang                                                **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 
 /*******************************************************************************
 **                      Include Section                                       **
@@ -83,8 +84,6 @@ BswM_Nm_CarWakeUpIndication(NetworkHandleType Network)
     P2VAR(BswM_EventRquestPortRuntimeType, AUTOMATIC, BSWM_VAR_CLEARED) evRqstPtr;
     /* PRQA S 3432 --*/ /* MISRA Rule 20.7 */
     P2CONST(BswM_RuleLcCfgType, AUTOMATIC, BSWM_CONST) ruleLCfgPtr;
-    P2CONST(BswM_PartitionPCCfgType, TYPEDEF, BSWM_CONST) bswmPartPCCfgs;
-    P2CONST(BswM_PartitionLCfgType, TYPEDEF, BSWM_CONST) bswmPartLCfgs;
     BswM_RuleIndexType numOfRules;
     BswM_RuleIndexType idx;
     BswM_RuleIndexType ruleIdx;
@@ -96,26 +95,24 @@ BswM_Nm_CarWakeUpIndication(NetworkHandleType Network)
 
 #if (BSWM_DEV_ERROR_DETECT == STD_ON)
     if ((Std_ReturnType)E_OK == BswM_DetChkNmCarWkUp())
-#endif /* BSWM_DEV_ERROR_DETECT == STD_ON */
+#endif /*BSWM_DEV_ERROR_DETECT == STD_ON*/
     {
         result = BswM_GetPartitionIdx(&partIdx);
         if ((boolean)TRUE == result)
         {
-            bswmPartPCCfgs = &(BswM_RuntimeStatus.bswmPartPCCfgs[partIdx]);
-            bswmPartLCfgs = &(BswM_RuntimeStatus.bswmPartLCfgs[partIdx]);
-            numOfNmWkCh = bswmPartPCCfgs->evRqstPCCfg->numOfNmWkCh;
-            evRqstLCfgPtr = bswmPartLCfgs->evRqstLCfg;
+            numOfNmWkCh = BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].evRqstPCCfg->numOfNmWkCh;
+            evRqstLCfgPtr = BswM_RuntimeStatus.bswmPartLCfgs[partIdx].evRqstLCfg;
             for (chIdx = 0u; chIdx < numOfNmWkCh; chIdx++)
             {
                 if (Network == evRqstLCfgPtr->nmWkChRef[chIdx])
                 {
-                    evIdx = bswmPartPCCfgs->evRqstPCCfg->nmWkEvPortIdxPtr[chIdx];
-                    evRqstPtr = bswmPartPCCfgs->eventRqstPortRunPtr;
+                    evIdx = BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].evRqstPCCfg->nmWkEvPortIdxPtr[chIdx];
+                    evRqstPtr = BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].eventRqstPortRunPtr;
                     evRqstPtr[evIdx] = BSWM_EVENT_IS_SET;
                     if (BSWM_IMMEDIATE == evRqstLCfgPtr->nmWakeUpInd[chIdx].process)
                     {
                         numOfRules = evRqstLCfgPtr->nmWakeUpInd[chIdx].belongToRlueNum;
-                        ruleLCfgPtr = bswmPartLCfgs->ruleLCfg;
+                        ruleLCfgPtr = BswM_RuntimeStatus.bswmPartLCfgs[partIdx].ruleLCfg;
                         for (idx = 0u; idx < numOfRules; idx++)
                         {
                             ruleIdx = evRqstLCfgPtr->nmWakeUpInd[chIdx].belongToRlue[idx];
@@ -131,16 +128,15 @@ BswM_Nm_CarWakeUpIndication(NetworkHandleType Network)
             }
         }
     }
-#endif /* BSWM_EVENT_RQSTPORT_ENABLE == STD_ON */
+#endif /*BSWM_EVENT_RQSTPORT_ENABLE == STD_ON*/
 }
 
-#if (BSWM_EVENT_RQSTPORT_ENABLE == STD_ON)
 /*Get Nm wake-up indication*/
 FUNC(BswM_EventRquestPortRuntimeType, BSWM_NMIF_CODE)
 BswM_GetNmWkInd(NetworkHandleType nmIdx)
 {
-    P2CONST(BswM_PartitionPCCfgType, TYPEDEF, BSWM_CONST) bswmPartPCCfgs;
     BswM_EventRquestPortRuntimeType ret = BSWM_INVALID_U8;
+#if (BSWM_EVENT_RQSTPORT_ENABLE == STD_ON)
     ApplicationType partIdx;
     boolean result;
     BswM_EventRquestPortRuntimeType evIdx;
@@ -148,17 +144,19 @@ BswM_GetNmWkInd(NetworkHandleType nmIdx)
     result = BswM_GetPartitionIdx(&partIdx);
     if ((boolean)TRUE == result)
     {
-        bswmPartPCCfgs = &(BswM_RuntimeStatus.bswmPartPCCfgs[partIdx]);
-        evIdx = bswmPartPCCfgs->evRqstPCCfg->nmWkEvPortIdxPtr[nmIdx];
-        ret = bswmPartPCCfgs->eventRqstPortRunPtr[evIdx];
+        evIdx = BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].evRqstPCCfg->nmWkEvPortIdxPtr[nmIdx];
+        ret = BswM_RuntimeStatus.bswmPartPCCfgs[partIdx].eventRqstPortRunPtr[evIdx];
     }
+#else
+    BSWM_PARA_UNUSED(nmIdx);
+#endif /*BSWM_EVENT_RQSTPORT_ENABLE == STD_ON*/
     return ret;
 }
-#endif /* BSWM_EVENT_RQSTPORT_ENABLE == STD_ON */
+
 #define BSWM_STOP_SEC_CODE
 #include "BswM_MemMap.h"
 /*******************************************************************************
 **                      Private Function Definitions                          **
 *******************************************************************************/
 
-#endif /* BSWM_NM_ENABLED == STD_ON */
+#endif /*BSWM_NM_ENABLED == STD_ON*/

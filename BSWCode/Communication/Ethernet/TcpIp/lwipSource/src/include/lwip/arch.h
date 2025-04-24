@@ -74,32 +74,23 @@
 
 /** Platform specific diagnostic output.\n
  * Note the default implementation pulls in printf, which may
- * in turn pull in a lot of standard libary code. In resource-constrained
+ * in turn pull in a lot of standard libary code. In resource-constrained 
  * systems, this should be defined to something less resource-consuming.
  */
 #ifndef LWIP_PLATFORM_DIAG
-#define LWIP_PLATFORM_DIAG(x) \
-    do                        \
-    {                         \
-        printf x;             \
-    } while (0)
+#define LWIP_PLATFORM_DIAG(x) do {printf x;} while(0)
 #include <stdio.h>
 #include <stdlib.h>
 #endif
 
 /** Platform specific assertion handling.\n
  * Note the default implementation pulls in printf, fflush and abort, which may
- * in turn pull in a lot of standard libary code. In resource-constrained
+ * in turn pull in a lot of standard libary code. In resource-constrained 
  * systems, this should be defined to something less resource-consuming.
  */
 #ifndef LWIP_PLATFORM_ASSERT
-#define LWIP_PLATFORM_ASSERT(x)                                                      \
-    do                                                                               \
-    {                                                                                \
-        printf("Assertion \"%s\" failed at line %d in %s\n", x, __LINE__, __FILE__); \
-        fflush(NULL);                                                                \
-        abort();                                                                     \
-    } while (0)
+#define LWIP_PLATFORM_ASSERT(x) do {printf("Assertion \"%s\" failed at line %d in %s\n", \
+                                     x, __LINE__, __FILE__); fflush(NULL); abort();} while(0)
 #include <stdio.h>
 #include <stdlib.h>
 #endif
@@ -131,15 +122,15 @@
 #if !defined(LWIP_HAVE_INT64) && defined(UINT64_MAX)
 #define LWIP_HAVE_INT64 1
 #endif
-typedef uint8_t u8_t;
-typedef int8_t s8_t;
-typedef uint16_t u16_t;
-typedef int16_t s16_t;
-typedef uint32_t u32_t;
-typedef int32_t s32_t;
+typedef uint8_t   u8_t;
+typedef int8_t    s8_t;
+typedef uint16_t  u16_t;
+typedef int16_t   s16_t;
+typedef uint32_t  u32_t;
+typedef int32_t   s32_t;
 #if LWIP_HAVE_INT64
-typedef uint64_t u64_t;
-typedef int64_t s64_t;
+typedef uint64_t  u64_t;
+typedef int64_t   s64_t;
 #endif
 typedef uintptr_t mem_ptr_t;
 #endif
@@ -156,7 +147,7 @@ typedef uintptr_t mem_ptr_t;
 #if !LWIP_NO_INTTYPES_H
 #include <inttypes.h>
 #ifndef X8_F
-#define X8_F "02" PRIx8
+#define X8_F  "02" PRIx8
 #endif
 #ifndef U16_F
 #define U16_F PRIu16
@@ -225,23 +216,23 @@ typedef int ssize_t;
 #endif
 
 #if LWIP_NO_CTYPE_H
-#define lwip_in_range(c, lo, up) ((u8_t)(c) >= (lo) && (u8_t)(c) <= (up))
-#define lwip_isdigit(c)          lwip_in_range((c), '0', '9')
-#define lwip_isxdigit(c)         (lwip_isdigit(c) || lwip_in_range((c), 'a', 'f') || lwip_in_range((c), 'A', 'F'))
-#define lwip_islower(c)          lwip_in_range((c), 'a', 'z')
-#define lwip_isspace(c)          ((c) == ' ' || (c) == '\f' || (c) == '\n' || (c) == '\r' || (c) == '\t' || (c) == '\v')
-#define lwip_isupper(c)          lwip_in_range((c), 'A', 'Z')
-#define lwip_tolower(c)          (lwip_isupper(c) ? (c) - 'A' + 'a' : c)
-#define lwip_toupper(c)          (lwip_islower(c) ? (c) - 'a' + 'A' : c)
+#define lwip_in_range(c, lo, up)  ((u8_t)(c) >= (lo) && (u8_t)(c) <= (up))
+#define lwip_isdigit(c)           lwip_in_range((c), '0', '9')
+#define lwip_isxdigit(c)          (lwip_isdigit(c) || lwip_in_range((c), 'a', 'f') || lwip_in_range((c), 'A', 'F'))
+#define lwip_islower(c)           lwip_in_range((c), 'a', 'z')
+#define lwip_isspace(c)           ((c) == ' ' || (c) == '\f' || (c) == '\n' || (c) == '\r' || (c) == '\t' || (c) == '\v')
+#define lwip_isupper(c)           lwip_in_range((c), 'A', 'Z')
+#define lwip_tolower(c)           (lwip_isupper(c) ? (c) - 'A' + 'a' : c)
+#define lwip_toupper(c)           (lwip_islower(c) ? (c) - 'a' + 'A' : c)
 #else
 #include <ctype.h>
-#define lwip_isdigit(c)  isdigit((unsigned char)(c))
-#define lwip_isxdigit(c) isxdigit((unsigned char)(c))
-#define lwip_islower(c)  islower((unsigned char)(c))
-#define lwip_isspace(c)  isspace((unsigned char)(c))
-#define lwip_isupper(c)  isupper((unsigned char)(c))
-#define lwip_tolower(c)  tolower((unsigned char)(c))
-#define lwip_toupper(c)  toupper((unsigned char)(c))
+#define lwip_isdigit(c)           isdigit((unsigned char)(c))
+#define lwip_isxdigit(c)          isxdigit((unsigned char)(c))
+#define lwip_islower(c)           islower((unsigned char)(c))
+#define lwip_isspace(c)           isspace((unsigned char)(c))
+#define lwip_isupper(c)           isupper((unsigned char)(c))
+#define lwip_tolower(c)           tolower((unsigned char)(c))
+#define lwip_toupper(c)           toupper((unsigned char)(c))
 #endif
 
 /** C++ const_cast<target_type>(val) equivalent to remove constness from a value (GCC -Wcast-qual) */
@@ -274,8 +265,7 @@ typedef int ssize_t;
  * e.g. if you use gcc and need 32 bit alignment:\n
  * \#define LWIP_DECLARE_MEMORY_ALIGNED(variable_name, size) u8_t variable_name[size] \_\_attribute\_\_((aligned(4)))\n
  * or more portable:\n
- * \#define LWIP_DECLARE_MEMORY_ALIGNED(variable_name, size) u32_t variable_name[(size + sizeof(u32_t) - 1) /
- * sizeof(u32_t)]
+ * \#define LWIP_DECLARE_MEMORY_ALIGNED(variable_name, size) u32_t variable_name[(size + sizeof(u32_t) - 1) / sizeof(u32_t)]
  */
 #ifndef LWIP_DECLARE_MEMORY_ALIGNED
 #define LWIP_DECLARE_MEMORY_ALIGNED(variable_name, size) u8_t variable_name[LWIP_MEM_ALIGN_BUFFER(size)]
@@ -286,7 +276,7 @@ typedef int ssize_t;
  * LWIP_MEM_ALIGN_SIZE(4) will both yield 4 for MEM_ALIGNMENT == 4).
  */
 #ifndef LWIP_MEM_ALIGN_SIZE
-#define LWIP_MEM_ALIGN_SIZE(size) (((size) + MEM_ALIGNMENT - 1U) & ~(MEM_ALIGNMENT - 1U))
+#define LWIP_MEM_ALIGN_SIZE(size) (((size) + MEM_ALIGNMENT - 1U) & ~(MEM_ALIGNMENT-1U))
 #endif
 
 /** Calculate safe memory size for an aligned buffer when using an unaligned
@@ -301,37 +291,36 @@ typedef int ssize_t;
  * so that ADDR % MEM_ALIGNMENT == 0
  */
 #ifndef LWIP_MEM_ALIGN
-#define LWIP_MEM_ALIGN(addr) ((void*)(((mem_ptr_t)(addr) + MEM_ALIGNMENT - 1) & ~(mem_ptr_t)(MEM_ALIGNMENT - 1)))
+#define LWIP_MEM_ALIGN(addr) ((void *)(((mem_ptr_t)(addr) + MEM_ALIGNMENT - 1) & ~(mem_ptr_t)(MEM_ALIGNMENT-1)))
 #endif
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
 /** Packed structs support.
- * Placed BEFORE declaration of a packed struct.\n
- * For examples of packed struct declarations, see include/lwip/prot/ subfolder.\n
- * A port to GCC/clang is included in lwIP, if you use these compilers there is nothing to do here.
- */
+  * Placed BEFORE declaration of a packed struct.\n
+  * For examples of packed struct declarations, see include/lwip/prot/ subfolder.\n
+  * A port to GCC/clang is included in lwIP, if you use these compilers there is nothing to do here.
+  */
 #ifndef PACK_STRUCT_BEGIN
 #define PACK_STRUCT_BEGIN
 #endif /* PACK_STRUCT_BEGIN */
 
 /** Packed structs support.
- * Placed AFTER declaration of a packed struct.\n
- * For examples of packed struct declarations, see include/lwip/prot/ subfolder.\n
- * A port to GCC/clang is included in lwIP, if you use these compilers there is nothing to do here.
- */
+  * Placed AFTER declaration of a packed struct.\n
+  * For examples of packed struct declarations, see include/lwip/prot/ subfolder.\n
+  * A port to GCC/clang is included in lwIP, if you use these compilers there is nothing to do here.
+  */
 #ifndef PACK_STRUCT_END
 #define PACK_STRUCT_END
 #endif /* PACK_STRUCT_END */
 
 /** Packed structs support.
- * Placed between end of declaration of a packed struct and trailing semicolon.\n
- * For examples of packed struct declarations, see include/lwip/prot/ subfolder.\n
- * A port to GCC/clang is included in lwIP, if you use these compilers there is nothing to do here.
- */
+  * Placed between end of declaration of a packed struct and trailing semicolon.\n
+  * For examples of packed struct declarations, see include/lwip/prot/ subfolder.\n
+  * A port to GCC/clang is included in lwIP, if you use these compilers there is nothing to do here.
+  */
 #ifndef PACK_STRUCT_STRUCT
 #if defined(__GNUC__) || defined(__clang__)
 #define PACK_STRUCT_STRUCT __attribute__((packed))
@@ -341,28 +330,28 @@ extern "C"
 #endif /* PACK_STRUCT_STRUCT */
 
 /** Packed structs support.
- * Wraps u32_t and u16_t members.\n
- * For examples of packed struct declarations, see include/lwip/prot/ subfolder.\n
- * A port to GCC/clang is included in lwIP, if you use these compilers there is nothing to do here.
- */
+  * Wraps u32_t and u16_t members.\n
+  * For examples of packed struct declarations, see include/lwip/prot/ subfolder.\n
+  * A port to GCC/clang is included in lwIP, if you use these compilers there is nothing to do here.
+  */
 #ifndef PACK_STRUCT_FIELD
 #define PACK_STRUCT_FIELD(x) x
 #endif /* PACK_STRUCT_FIELD */
 
 /** Packed structs support.
- * Wraps u8_t members, where some compilers warn that packing is not necessary.\n
- * For examples of packed struct declarations, see include/lwip/prot/ subfolder.\n
- * A port to GCC/clang is included in lwIP, if you use these compilers there is nothing to do here.
- */
+  * Wraps u8_t members, where some compilers warn that packing is not necessary.\n
+  * For examples of packed struct declarations, see include/lwip/prot/ subfolder.\n
+  * A port to GCC/clang is included in lwIP, if you use these compilers there is nothing to do here.
+  */
 #ifndef PACK_STRUCT_FLD_8
 #define PACK_STRUCT_FLD_8(x) PACK_STRUCT_FIELD(x)
 #endif /* PACK_STRUCT_FLD_8 */
 
 /** Packed structs support.
- * Wraps members that are packed structs themselves, where some compilers warn that packing is not necessary.\n
- * For examples of packed struct declarations, see include/lwip/prot/ subfolder.\n
- * A port to GCC/clang is included in lwIP, if you use these compilers there is nothing to do here.
- */
+  * Wraps members that are packed structs themselves, where some compilers warn that packing is not necessary.\n
+  * For examples of packed struct declarations, see include/lwip/prot/ subfolder.\n
+  * A port to GCC/clang is included in lwIP, if you use these compilers there is nothing to do here.
+  */
 #ifndef PACK_STRUCT_FLD_S
 #define PACK_STRUCT_FLD_S(x) PACK_STRUCT_FIELD(x)
 #endif /* PACK_STRUCT_FLD_S */
@@ -393,9 +382,9 @@ extern "C"
 #define LWIP_PROVIDE_ERRNO
 #endif
 
-    /**
-     * @}
-     */
+/**
+ * @}
+ */
 
 #ifdef __cplusplus
 }

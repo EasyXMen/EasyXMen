@@ -18,20 +18,20 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : WdgIf_Types.h                                               **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : haibin.shao                                                 **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S):   AUTOSAR classic Platform R19-11                       **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*********************************************************************************
+**                                                                            **
+**  FILENAME    : WdgIf_Types.h                                               **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : haibin.shao                                                 **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S):   AUTOSAR classic Platform R19-11                       **
+**                                                                            **
+*******************************************************************************/
 #ifndef WDGIF_TYPES_H
 #define WDGIF_TYPES_H
 

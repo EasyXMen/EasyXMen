@@ -1,34 +1,3 @@
-/* PRQA S 3108++ */
-/**
- * Copyright (C) 2024 Isoft Infrastructure Software Co., Ltd.
- * SPDX-License-Identifier: LGPL-2.1-only-with-exception OR  LicenseRef-Commercial-License
- *
- * This library is free software; you can redistribute it and/or modify it under the terms of the
- * GNU Lesser General Public License as published by the Free Software Foundation; version 2.1.
- * This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Lesser General Public License for more details.
- * You should have received a copy of the GNU Lesser General Public License along with this library;
- * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
- * or see <https://www.gnu.org/licenses/>.
- *
- * Alternatively, this file may be used under the terms of the Isoft Infrastructure Software Co., Ltd.
- * Commercial License, in which case the provisions of the Isoft Infrastructure Software Co., Ltd.
- * Commercial License shall apply instead of those of the GNU Lesser General Public License.
- *
- * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
- * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- *  @file               : cmac.c
- *  @version            : V1.0.0
- *  @author             : qinchun.yang
- *  @date               : 2018/10/13
- *  @vendor             : isoft
- *  @description        : Implementation for Crypto
- *  @specification(s)   : AUTOSAR classic Platform R19-11
- *
- */
-/* PRQA S 3108-- */
 /* PRQA S 5209 ++  */               /* MISRA Dir 4.6 */
 /* PRQA S 0686 ++  */               /* MISRA Dir 9.3 */
 /* PRQA S 3432 ++ */                /* MISRA Rule 20.7 */
@@ -51,33 +20,22 @@ FUNC(void, CMAC_CODE) leftshift(int len, uint8* add, uint8* des);
 FUNC(void, CMAC_CODE) ArrayXor(int len, uint8* a1, uint8* a2, uint8* des);
 FUNC(Std_ReturnType, CMAC_CODE)
 LoadMacKey(
-    P2VAR(Crypto_AESData, AUTOMATIC, CRY_APPL_DATA) aes,
-    P2VAR(uint8, AUTOMATIC, CRY_APPL_DATA) key,
-    P2VAR(uint8, AUTOMATIC, CRY_APPL_DATA) IVkey,
-    P2VAR(uint8, AUTOMATIC, CRY_APPL_DATA) k1,
-    P2VAR(uint8, AUTOMATIC, CRY_APPL_DATA) k2);
+    P2VAR(Crypto_AESData, AUTOMATIC, CRYPTO_APPL_DATA) aes,
+    P2VAR(uint8, AUTOMATIC, CRYPTO_APPL_DATA) key,
+    P2VAR(uint8, AUTOMATIC, CRYPTO_APPL_DATA) IVkey,
+    P2VAR(uint8, AUTOMATIC, CRYPTO_APPL_DATA) k1,
+    P2VAR(uint8, AUTOMATIC, CRYPTO_APPL_DATA) k2);
 FUNC(Std_ReturnType, CMAC_CODE)
 internal_GenerateMAC(
-    P2VAR(Crypto_AESData, AUTOMATIC, CRY_APPL_DATA) aes,
+    P2VAR(Crypto_AESData, AUTOMATIC, CRYPTO_APPL_DATA) aes,
     VAR(uint8, AUTOMATIC) len,
-    P2VAR(uint8, AUTOMATIC, CRY_APPL_DATA) add,
-    P2VAR(uint8, AUTOMATIC, CRY_APPL_DATA) macvalue,
-    P2VAR(uint8, AUTOMATIC, CRY_APPL_DATA) Key,
-    P2VAR(uint8, AUTOMATIC, CRY_APPL_DATA) IVKey,
-    P2VAR(uint8, AUTOMATIC, CRY_APPL_DATA) k1,
-    P2VAR(uint8, AUTOMATIC, CRY_APPL_DATA) k2);
-/******************************************************************************/
-/*
- * Brief               This function do left shift for add and des .
- *
- *
- * Param-Name[in]      len: lenth of the data input.
- *                     add: the data to be left shifted.
- * Param-Name[in/out]  None.
- * Param-Name[out]     des:the data after left shift.
- * Return              None
- */
-/******************************************************************************/
+    P2VAR(uint8, AUTOMATIC, CRYPTO_APPL_DATA) add,
+    P2VAR(uint8, AUTOMATIC, CRYPTO_APPL_DATA) macvalue,
+    P2VAR(uint8, AUTOMATIC, CRYPTO_APPL_DATA) Key,
+    P2VAR(uint8, AUTOMATIC, CRYPTO_APPL_DATA) IVKey,
+    P2VAR(uint8, AUTOMATIC, CRYPTO_APPL_DATA) k1,
+    P2VAR(uint8, AUTOMATIC, CRYPTO_APPL_DATA) k2);
+
 FUNC(void, CMAC_CODE) leftshift(int len, uint8* add, uint8* des)
 {
     int i;
@@ -87,19 +45,7 @@ FUNC(void, CMAC_CODE) leftshift(int len, uint8* add, uint8* des)
     }
     des[len - 1] = add[len - 1] << 1;
 }
-/******************************************************************************/
-/*
- * Brief               This function do xor for a1 and a2 .
- *
- * Param-Name[in]      len: lenth of the data input.
- *                     a1: the data to be xor.
- *                     a2: the data to be xor.
- *
- * Param-Name[in/out]  None.
- * Param-Name[out]     des:the data after xor..
- * Return              None
- */
-/******************************************************************************/
+
 FUNC(void, CMAC_CODE) ArrayXor(int len, uint8* a1, uint8* a2, uint8* des)
 {
     int i;
@@ -108,30 +54,14 @@ FUNC(void, CMAC_CODE) ArrayXor(int len, uint8* a1, uint8* a2, uint8* des)
         des[i] = a1[i] ^ a2[i];
     }
 }
-/******************************************************************************/
-/*
- * Brief               This function generate subkey k1,k2 for cmac-aes.
- *
- *
- * Param-Name[in]      aes: aes context .
- *                     key: the key to be used to generate subkey.
- *                     IVkey: the IV key to be used to generate subkey.
- *                     k1: the first subkey.
- *                     k2: the second subkey.
- * Param-Name[in/out]  None.
- * Param-Name[out]     None.
- * Return              Std_ReturnType:
- *                            E_OK: Request successful
- *                            E_NOT_OK: Request failed
- */
-/******************************************************************************/
+
 FUNC(Std_ReturnType, CMAC_CODE)
 LoadMacKey(
-    P2VAR(Crypto_AESData, AUTOMATIC, CRY_APPL_DATA) aes,
-    P2VAR(uint8, AUTOMATIC, CRY_APPL_DATA) key,
-    P2VAR(uint8, AUTOMATIC, CRY_APPL_DATA) IVkey,
-    P2VAR(uint8, AUTOMATIC, CRY_APPL_DATA) k1,
-    P2VAR(uint8, AUTOMATIC, CRY_APPL_DATA) k2)
+    P2VAR(Crypto_AESData, AUTOMATIC, CRYPTO_APPL_DATA) aes,
+    P2VAR(uint8, AUTOMATIC, CRYPTO_APPL_DATA) key,
+    P2VAR(uint8, AUTOMATIC, CRYPTO_APPL_DATA) IVkey,
+    P2VAR(uint8, AUTOMATIC, CRYPTO_APPL_DATA) k1,
+    P2VAR(uint8, AUTOMATIC, CRYPTO_APPL_DATA) k2)
 {
     Std_ReturnType ret;
     uint8 c0[16];
@@ -161,42 +91,24 @@ LoadMacKey(
     }
     return ret;
 }
-/******************************************************************************/
-/*
- * Brief               This function generate cmac-aes.
- *
- *
- * Param-Name[in]      aes: aes context.
- *                     len: input data length.
- *                     add: input data.
- *                     IVKey: the key to be used to generate mac value.
- *                     key: the key to be used to generate mac value.
- *                     k1: the first subkey.
- *                     k2: the second subkey.
- * Param-Name[in/out]  None.
- * Param-Name[out]     macvalue: output mac value.
- * Return              Std_ReturnType:
- *                            E_OK: Request successful
- *                            E_NOT_OK: Request failed
- */
-/******************************************************************************/
+
 FUNC(Std_ReturnType, CMAC_CODE)
 internal_GenerateMAC(
-    P2VAR(Crypto_AESData, AUTOMATIC, CRY_APPL_DATA) aes,
+    P2VAR(Crypto_AESData, AUTOMATIC, CRYPTO_APPL_DATA) aes,
     VAR(uint8, AUTOMATIC) len,
-    P2VAR(uint8, AUTOMATIC, CRY_APPL_DATA) add,
-    P2VAR(uint8, AUTOMATIC, CRY_APPL_DATA) macvalue,
-    P2VAR(uint8, AUTOMATIC, CRY_APPL_DATA) Key,
-    P2VAR(uint8, AUTOMATIC, CRY_APPL_DATA) IVKey,
-    P2VAR(uint8, AUTOMATIC, CRY_APPL_DATA) k1,
-    P2VAR(uint8, AUTOMATIC, CRY_APPL_DATA) k2)
+    P2VAR(uint8, AUTOMATIC, CRYPTO_APPL_DATA) add,
+    P2VAR(uint8, AUTOMATIC, CRYPTO_APPL_DATA) macvalue,
+    P2VAR(uint8, AUTOMATIC, CRYPTO_APPL_DATA) Key,
+    P2VAR(uint8, AUTOMATIC, CRYPTO_APPL_DATA) IVKey,
+    P2VAR(uint8, AUTOMATIC, CRYPTO_APPL_DATA) k1,
+    P2VAR(uint8, AUTOMATIC, CRYPTO_APPL_DATA) k2)
 {
     Std_ReturnType ret;
     int i, block;
     uint8 IVtemp[128];
     uint8 Blocktemp[128];
-    (void)ILib_memset(IVtemp, 0u, 128u);
-    (void)ILib_memset(Blocktemp, 0u, 128u);
+    Crypto_memset(IVtemp, 128);
+    Crypto_memset(Blocktemp, 128);
 
     if (len % 16 == 0 && len != 0)
     {
@@ -250,22 +162,7 @@ internal_GenerateMAC(
     }
     return ret;
 }
-/******************************************************************************/
-/*
- * Brief               This function generate cmac.
- *
- *
- * Param-Name[in]      inputlength: input data length.
- *                     add: input data.
- *                     IVKey: the key to be used to generate mac value.
- *                     key: the key to be used to generate mac value.
- * Param-Name[in/out]  None.
- * Param-Name[out]     MAC: output mac value.
- * Return              Std_ReturnType:
- *                            E_OK: Request successful
- *                            E_NOT_OK: Request failed
- */
-/******************************************************************************/
+
 FUNC(Std_ReturnType, CMAC_CODE)
 Crypto_GernerateMAC(uint8 MAC[16], uint8 Key[16], uint8 IVKey[16], uint8* add, uint8 inputlength)
 {
@@ -279,23 +176,7 @@ Crypto_GernerateMAC(uint8 MAC[16], uint8 Key[16], uint8 IVKey[16], uint8* add, u
 
     return ret;
 }
-/******************************************************************************/
-/*
- * Brief               This function verify generated cmac
- *
- *
- * Param-Name[in]      inputlength: input data length.
- *                     add: input data.
- *                     IVKey: the key to be used to generate mac value.
- *                     key: the key to be used to generate mac value.
- *                     Verifylength: the length of mac value to be verified.
- * Param-Name[in/out]  None.
- * Param-Name[out]     MAC_Result: output mac value.
- * Return              Std_ReturnType:
- *                            E_OK: Request successful
- *                            E_NOT_OK: Request failed
- */
-/******************************************************************************/
+
 FUNC(Std_ReturnType, CMAC_CODE)
 Crypto_VerifyMAC(uint8* Key, uint8* IVKey, uint8* add, uint8 inputlength, uint8 MAC_Result[16], uint32 Verifylength)
 {

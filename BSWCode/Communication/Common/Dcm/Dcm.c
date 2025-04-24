@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                           **
- **  FILENAME    :  Dcm.c                                                     **
- **                                                                           **
- **  Created on  : 2020/5/6 14:29:43                                          **
- **  Author      : tao.yu                                                     **
- **  Vendor      :                                                            **
- **  DESCRIPTION : Implementation of Dcm                                      **
- **                                                                           **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                      **
- **                                                                           **
- **************************************************************************** */
+ */
 /* PRQA S 3108-- */
+/*
+**************************************************************************** **
+**                                                                           **
+**  FILENAME    :  Dcm.c                                                     **
+**                                                                           **
+**  Created on  : 2020/5/6 14:29:43                                          **
+**  Author      : tao.yu                                                     **
+**  Vendor      :                                                            **
+**  DESCRIPTION : Implementation of Dcm                                      **
+**                                                                           **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                      **
+**                                                                           **
+**************************************************************************** */
 
 /**
   \page ISOFT_MISRA_Exceptions  MISRA-C:2012 Compliance Exceptions
@@ -41,35 +42,47 @@
     \li PRQA S 3432 MISRA Rule 20.7 .<br>
     Reason:Function-like macros are used to allow more efficient code.
 
-    \li PRQA S 0779 MISRA Rule 5.2 .<br>
-    Reason:Configuration parameter, design needs, namelength set to 63 in C99.
-
-    \li PRQA S 0791 MISRA Rule 5.4 .<br>
-    Reason:Memmap section, design needs, namelength set to 63 in C99.
-
-    \li PRQA S 4604 MISRA Rule 21.2 .<br>
-    Reason:name "signal" is not necessarily used in other projects.
-
     \li PRQA S 1532 MISRA Rule 8.7 .<br>
-    Reason:Functions may be used in other projects.
+    Reason:Local functions are designed to extern for more clear design structure.
+
+    \li PRQA S 1505 MISRA Rule 8.7 .<br>
+    Reason:Local functions are designed to extern for more clear design structure.
 
     \li PRQA S 2981 MISRA Rule 2.2 .<br>
     Reason:Init may be necessary for different macro definition.
 
-    \li PRQA S 2469 MISRA Rule 14.2 .<br>
-    Reason:For loop variant is designed to manually be change, design needs.
+    \li PRQA S 3334 MISRA Rule 5.3 .<br>
+    Reason:Init may be necessary for different macro definition.
+
+    \li PRQA S 2983 MISRA Rule 2.2 .<br>
+    Reason:Macro values varies in different projects, thus the code is not necessarily considered extra.
+
+    \li PRQA S 0791 MISRA Rule 5.4 .<br>
+    Reason:Macro definition, design needs, namelength set to 63 in C99.
+
+    \li PRQA S 0777 MISRA Rule 5.4 .<br>
+    Reason:Function name, design needs, namelength set to 63 in C99.
+
+    \li PRQA S 0779 MISRA Rule 5.4 .<br>
+    Reason:Structure member name, design needs, namelength set to 63 in C99.
+
+    \li PRQA S 0779 MISRA Rule 5.2 .<br>
+    Reason:member name, design needs.
+
+    \li PRQA S 0779 MISRA Rule 1.3 .<br>
+    Reason:member name, design needs.
+
+    \li PRQA S 3408 MISRA Rule 8.4 .<br>
+    Reason:Configuration design needs.
+
+    \li PRQA S 4604 MISRA Rule 21.2 .<br>
+    Reason:name "signal" is not necessarily used in other projects.
 
     \li PRQA S 3415 MISRA Rule 13.5 .<br>
     Reason:function in && comparison does not need to be called when the first condition fails.
 
     \li PRQA S 2877 MISRA Dir 4.1 .<br>
     Reason:for loop condition is a macro definition, which varies in different projs.
-
-    \li PRQA S 4391 MISRA Rule 10.8 .<br>
-    Reason:Data conversion to a wider range is necessary for accumulation.
-
-    \li PRQA S 0342 MISRA Rule 20.10 .<br>
-    Reason:## is used to match manul SchM for Dcm as desgin needs.
 
     \li PRQA S 1330 MISRA Rule 8.3 .<br>
     Reason:Different configurations produce variations.
@@ -80,19 +93,13 @@
     \li PRQA S 3449 MISRA Rule 8.5 .<br>
     Reason:Different configurations produce variations.
 
-    \li PRQA S 2472 MISRA Rule 8.5 .<br>
-    Reason:For loop variant is designed to manually be change, design needs.
  */
 
 /*******************************************************************************
 **                      Includes                                              **
 *******************************************************************************/
 #include "Dcm.h"
-#include "UDS.h"
-#if (DCM_BSWM_ENABLE == STD_ON)
-#include "BswM_Dcm.h"
-#endif
-#include "ComM_Dcm.h"
+#include "Dcm_Internal.h"
 /*============================================================================*/
 
 /*=======[V E R S I O N  C H E C K]===========================================*/
@@ -105,6 +112,11 @@
 #ifndef DCM_AR_RELEASE_PATCH_VERSION
 #error " Dcm version miss"
 #endif
+
+#if ((2u != DCM_CFG_H_SW_MAJOR_VERSION) || (1u != DCM_CFG_H_SW_MINOR_VERSION) || (0u != DCM_CFG_H_SW_PATCH_VERSION))
+#error " Dcm version mismatching"
+#endif
+
 /*******************************************************************************
 **                      Private Macro Definitions                             **
 *******************************************************************************/
@@ -112,76 +124,62 @@
 /*******************************************************************************
 **                      Private Type Definitions                              **
 *******************************************************************************/
-typedef struct
-{
-    uint8 Dcm_VIN[17];
-    boolean Flag;
-} Dcm_VINType;
-
-#define DCM_START_SEC_VAR_NO_INIT_UNSPECIFIED
-#include "Dcm_MemMap.h"
-static VAR(Dcm_VINType, DCM_VAR_POWER_ON_INIT) Dcm_VIN;
-#define DCM_STOP_SEC_VAR_NO_INIT_UNSPECIFIED
-#include "Dcm_MemMap.h"
-
-#if (STD_ON == DCM_TIME_MAINFUNCTION_ENABLED)
-#define DCM_START_SEC_VAR_POWER_ON_INIT_32
-#include "Dcm_MemMap.h"
-VAR(uint32, DCM_VAR_POWER_ON_INIT) Dcm_Timer = 0u;
-#define DCM_STOP_SEC_VAR_POWER_ON_INIT_32
-#include "Dcm_MemMap.h"
-#endif /*  STD_ON == DCM_TIME_MAINFUNCTION_ENABLED*/
 
 /*******************************************************************************
 **                      Private Function Declarations                         **
 *******************************************************************************/
-
 #define DCM_START_SEC_CODE
 #include "Dcm_MemMap.h"
+/*************************************************************************/
+/*
+ * Brief               <The Pending message background processing function>
+ * ServiceId           <None>
+ * Sync/Async          <Synchronous>
+ * Reentrancy          <Non Reentrant>
+ * Param-Name[in]      <None>
+ * Param-Name[out]     <None>
+ * Param-Name[in/out]  <None>
+ * Return              <None>
+ * PreCondition        <None>
+ * CallByAPI           <APIName>
+ */
+/*************************************************************************/
 static FUNC(void, DCM_CODE) Dcm_MainFunction_PendingManage(void);
-#define DCM_STOP_SEC_CODE
-#include "Dcm_MemMap.h"
 
-#define DCM_START_SEC_CODE
-#include "Dcm_MemMap.h"
+/*************************************************************************/
+/*
+ * Brief               <P2Server Timer background processing function>
+ * ServiceId           <None>
+ * Sync/Async          <Synchronous>
+ * Reentrancy          <Non Reentrant>
+ * Param-Name[in]      <None>
+ * Param-Name[out]     <None>
+ * Param-Name[in/out]  <None>
+ * Return              <None>
+ * PreCondition        <None>
+ * CallByAPI           <APIName>
+ */
+/*************************************************************************/
 static FUNC(void, DCM_CODE) Dcm_MainFunction_P2ServerTimer(void);
-#define DCM_STOP_SEC_CODE
-#include "Dcm_MemMap.h"
 
-#if (STD_ON == DCM_SESSION_FUNC_ENABLED)
-#define DCM_START_SEC_CODE
-#include "Dcm_MemMap.h"
-static FUNC(void, DCM_CODE) Dcm_MainFunction_S3Timer(void);
-#define DCM_STOP_SEC_CODE
-#include "Dcm_MemMap.h"
-#endif
-
-#if (STD_ON == DCM_SECURITY_FUNC_ENABLED)
-#define DCM_START_SEC_CODE
-#include "Dcm_MemMap.h"
-static FUNC(void, DCM_CODE) Dcm_MainFunction_SecTimer(void);
-#define DCM_STOP_SEC_CODE
-#include "Dcm_MemMap.h"
-#endif
-
-#if (DCM_PAGEDBUFFER_ENABLED == STD_ON)
-#define DCM_START_SEC_CODE
-#include "Dcm_MemMap.h"
-static FUNC(void, DCM_CODE) Dcm_MainFunction_PageBufferTimer(void);
-#define DCM_STOP_SEC_CODE
-#include "Dcm_MemMap.h"
-#endif
-
-#define DCM_START_SEC_CODE
-#include "Dcm_MemMap.h"
+/**********************************************************************/
+/*
+ * Brief
+ * ServiceId           <None>
+ * Sync/Async          <Synchronous>
+ * Reentrancy          <Non Reentrant>
+ * Param-Name[in]      <None>
+ * Param-Name[out]     <None>
+ * Param-Name[in/out]  <None>
+ * Return              <None>
+ * PreCondition        <None>
+ * CallByAPI           <APIName>
+ */
+/***********************************************************************/
 /* PRQA S 3432++ */ /* MISRA Rule 20.7 */
 static FUNC(void, DCM_CODE) Dcm_GetUDSPhyPduID(P2VAR(PduIdType, AUTOMATIC, DCM_VAR) rxPhyPduId);
 /* PRQA S 3432-- */ /* MISRA Rule 20.7 */
-#define DCM_STOP_SEC_CODE
-#include "Dcm_MemMap.h"
 
-#define DCM_START_SEC_CODE
-#include "Dcm_MemMap.h"
 static FUNC(void, DCM_CODE) Dcm_BootloaderResponse(void);
 #define DCM_STOP_SEC_CODE
 #include "Dcm_MemMap.h"
@@ -192,52 +190,53 @@ static FUNC(void, DCM_CODE) Dcm_BootloaderResponse(void);
 /*******************************************************************************
 **                      Global Variable Definitions                           **
 *******************************************************************************/
+#define DCM_START_SEC_VAR_INIT_PTR
+#include "Dcm_MemMap.h"
+P2CONST(Dcm_CfgType, AUTOMATIC, DCM_CONST_PBCFG) DcmPbCfgPtr = NULL_PTR;
+#define DCM_STOP_SEC_VAR_INIT_PTR
+#include "Dcm_MemMap.h"
+
 #define DCM_START_SEC_VAR_NO_INIT_UNSPECIFIED
 #include "Dcm_MemMap.h"
 VAR(Dcm_MkCtrlType, DCM_VAR_NOINIT) Dcm_MkCtrl;
 #define DCM_STOP_SEC_VAR_NO_INIT_UNSPECIFIED
 #include "Dcm_MemMap.h"
 
-#define DCM_START_SEC_VAR_POWER_ON_INIT_BOOLEAN
+#define DCM_START_SEC_VAR_POWER_ON_INIT_8
 #include "Dcm_MemMap.h"
 VAR(boolean, DCM_VAR_POWER_ON_INIT) gAppl_UpdataOK_ResponseFlag = FALSE;
-#define DCM_STOP_SEC_VAR_POWER_ON_INIT_BOOLEAN
-#include "Dcm_MemMap.h"
 
-#define DCM_START_SEC_VAR_POWER_ON_INIT_BOOLEAN
-#include "Dcm_MemMap.h"
 VAR(boolean, DCM_VAR_POWER_ON_INIT) Dcm_ReqSetProgConditions = FALSE;
-#define DCM_STOP_SEC_VAR_POWER_ON_INIT_BOOLEAN
+#define DCM_STOP_SEC_VAR_POWER_ON_INIT_8
 #include "Dcm_MemMap.h"
 
 #define DCM_START_SEC_VAR_NO_INIT_UNSPECIFIED
 #include "Dcm_MemMap.h"
-VAR(Dcm_ProgConditionsType, DCM_VAR_NOINIT) ProgConditions;
-#define DCM_STOP_SEC_VAR_NO_INIT_UNSPECIFIED
-#include "Dcm_MemMap.h"
+VAR(Dcm_ProgConditionsType, DCM_VAR_NOINIT) Dcm_ProgConditions;
 
 #if (STD_ON == DCM_PAGEDBUFFER_ENABLED)
-#define DCM_START_SEC_VAR_NO_INIT_UNSPECIFIED
-#include "Dcm_MemMap.h"
 VAR(Dcm_PageBufferDataType, DCM_VAR_NOINIT) Dcm_PageBufferData;
-#define DCM_STOP_SEC_VAR_NO_INIT_UNSPECIFIED
-#include "Dcm_MemMap.h"
 #endif
 
-#define DCM_START_SEC_VAR_NO_INIT_UNSPECIFIED
-#include "Dcm_MemMap.h"
 VAR(Dcm_DspProgramType, DCM_VAR_NOINIT) Dcm_DspProgram;
 #define DCM_STOP_SEC_VAR_NO_INIT_UNSPECIFIED
 #include "Dcm_MemMap.h"
 
-#if (STD_ON == DCM_UDS_SERVICE0X2A_ENABLED)
-#define DCM_START_SEC_VAR_NO_INIT_UNSPECIFIED
+#if (STD_ON == DCM_GENERIC_CONNECTION)
+#define DCM_START_SEC_VAR_NO_INIT_8
 #include "Dcm_MemMap.h"
-VAR(SchedulerQueueTransmitTypes, DCM_VAR_NOINIT)
-Scheduler_0x2A_Transmit[DCM_PERIODICCONNECTION_NUM];
-#define DCM_STOP_SEC_VAR_NO_INIT_UNSPECIFIED
+VAR(uint8, DCM_VAR_NOINIT) Dcm_Metadata[DCM_DSLPROTOCOLROW_NUM_MAX][4];
+#define DCM_STOP_SEC_VAR_NO_INIT_8
 #include "Dcm_MemMap.h"
-#endif
+#endif /* STD_ON == DCM_GENERIC_CONNECTION */
+
+#if (STD_ON == DCM_TIME_MAINFUNCTION_ENABLED)
+#define DCM_START_SEC_VAR_POWER_ON_INIT_32
+#include "Dcm_MemMap.h"
+VAR(uint32, DCM_VAR_POWER_ON_INIT) Dcm_Timer = 0u;
+#define DCM_STOP_SEC_VAR_POWER_ON_INIT_32
+#include "Dcm_MemMap.h"
+#endif /*  STD_ON == DCM_TIME_MAINFUNCTION_ENABLED*/
 /*******************************************************************************
 **                      Private Constant Definitions                          **
 *******************************************************************************/
@@ -249,55 +248,8 @@ Scheduler_0x2A_Transmit[DCM_PERIODICCONNECTION_NUM];
 /*******************************************************************************
 **                      Global Function Definitions                           **
 *******************************************************************************/
-
-#if (STD_ON == DCM_PAGEDBUFFER_ENABLED)
 #define DCM_START_SEC_CODE
 #include "Dcm_MemMap.h"
-FUNC(void, DCM_CODE) DslInternal_InitPageBuffer(void)
-{
-    SchM_Enter_Dcm(Dcm_PageBufferData);
-    Dcm_PageBufferData.AlreadyPageSize = 0u;
-    Dcm_PageBufferData.IloopOne = 0u;
-    Dcm_PageBufferData.TotalDtcCount = 0u;
-    Dcm_PageBufferData.TotalSize = 0UL;
-    Dcm_PageBufferData.Filled = FALSE;
-    Dcm_PageBufferData.PageTxOK = FALSE;
-    Dcm_PageBufferData.PageIndex = 0u;
-    Dcm_PageBufferData.LastFilled = TRUE;
-    Dcm_PageBufferData.ThisPageSize = 0u;
-    Dcm_PageBufferData.ReqOffset = 0u;
-    Dcm_PageBufferData.LastFilledSize = 0u;
-    Dcm_PageBufferData.ThisPageTxSize = 0u;
-    Dcm_PageBufferData.LastNotTxDataSize = 0u;
-    Dcm_PageBufferData.TimerStart = FALSE;
-    Dcm_PageBufferData.TimeOut = FALSE;
-    Dcm_PageBufferData.CurTimer = 0UL;
-    Dcm_PageBufferData.ExpiredTimer = 0UL;
-    SchM_Exit_Dcm(Dcm_PageBufferData);
-}
-#define DCM_STOP_SEC_CODE
-#include "Dcm_MemMap.h"
-#endif
-
-#define DCM_START_SEC_CODE
-#include "Dcm_MemMap.h"
-FUNC(void, DCM_CODE) DslInternal_InitDspProgramInfo(void)
-{
-    SchM_Enter_Dcm(Dcm_DspProgram);
-    Dcm_DspProgram.address = 0UL;
-    Dcm_DspProgram.blockId = 0x00;
-    Dcm_DspProgram.reqBlockId = 0x00;
-    Dcm_DspProgram.Status = DCM_UDS0X36_INIT;
-    Dcm_DspProgram.MemoryIdInfoIndex = 0xFF;
-    Dcm_DspProgram.BlockLength = 0;
-    Dcm_DspProgram.MemorySize = 0;
-    Dcm_DspProgram.FirstFlag = FALSE;
-    Dcm_DspProgram.DcmLastloadSize = 0;
-    SchM_Exit_Dcm(Dcm_DspProgram);
-}
-#define DCM_STOP_SEC_CODE
-#include "Dcm_MemMap.h"
-
 /*************************************************************************/
 /*
  * Brief                <initialization of DCM module.>
@@ -312,18 +264,12 @@ FUNC(void, DCM_CODE) DslInternal_InitDspProgramInfo(void)
  * CallByAPI            <>
  */
 /*************************************************************************/
-#define DCM_START_SEC_CODE
-#include "Dcm_MemMap.h"
 FUNC(void, DCM_CODE) Dcm_Init(P2CONST(Dcm_CfgType, DCM_CONST, DCM_CONST_PBCFG) ConfigPtr)
 {
     uint32 Index;
-#if (STD_ON == DCM_DSP_DATA_FUNC_ENABLED)
-    uint16 Offest = 0;
-    P2VAR(uint8, AUTOMATIC, DCM_VAR) VIN_Data; /* PRQA S 3432 */ /* MISRA Rule 20.7 */
-    Dcm_NegativeResponseCodeType ErrorCode;
-    uint8 DidSignal_Num;
-    const Dcm_DspDataType* pDidData;
-#endif
+    uint8 MainConnectionNum = Dcm_GetMainConnectionNum();
+    const Dcm_DslMainConnectionType* pDsl_Protocol_MainConnectionCfg;
+
 #if (STD_ON == DCM_DEV_ERROR_DETECT)
     if (NULL_PTR == ConfigPtr)
     {
@@ -332,98 +278,70 @@ FUNC(void, DCM_CODE) Dcm_Init(P2CONST(Dcm_CfgType, DCM_CONST, DCM_CONST_PBCFG) C
     else
 #endif
     {
+        DcmPbCfgPtr = ConfigPtr;
+        pDsl_Protocol_MainConnectionCfg = DcmPbCfgPtr->DslProtocolMainConnectionCfg;
 #if (STD_ON == DCM_REQUEST_QUEUED_ENABLED)
         Dcm_QueuedIndex = 0u;
         DslInternal_InitChannelQueuedRequestCtrl();
 #endif /* STD_ON == DCM_REQUEST_QUEUED_ENABLED */
-        for (Index = 0; Index < DCM_CHANNEL_NUM; Index++)
+        for (Index = 0; Index < DcmPbCfgPtr->pDcmDslCfg->DcmChannelCfg_Num; Index++)
         {
             DslInternal_InitChannelCtrl((uint8)Index);
         }
-        for (Index = 0; Index < DCM_MSG_NUM; Index++)
+        for (Index = 0; Index < DcmPbCfgPtr->pDcmDslCfg->pDcmDslProtocol->DcmDslProtocolRow_Num; Index++)
         {
             DslInternal_InitMsgCtrl((uint8)Index);
         }
-        for (Index = 0; Index < DCM_DSLPROTOCOLROW_NUM_MAX; Index++)
+        for (Index = 0; Index < DcmPbCfgPtr->pDcmDslCfg->pDcmDslProtocol->DcmDslProtocolRow_Num; Index++)
         {
+            SchM_Enter_Dcm_ExclusiveArea();
+            Dcm_ProtocolCtrl[(uint8)Index].ProtocolId = DCM_INVALID_UINT8;
+            Dcm_ProtocolCtrl[(uint8)Index].ProtocolPri = DCM_INVALID_UINT8;
+            Dcm_ProtocolCtrl[(uint8)Index].MsgCtrlIndex = DCM_INVALID_UINT8;
+            Dcm_ProtocolCtrl[(uint8)Index].P2ServerMax = 50UL;       /* ms converted to tick */
+            Dcm_ProtocolCtrl[(uint8)Index].P2StarServerMax = 5000UL; /* ms converted to tick */
+            Dcm_ProtocolCtrl[(uint8)Index].P2ServerMin = 0UL;
+            Dcm_ProtocolCtrl[(uint8)Index].P2StarServerMin = 0UL;
+            Dcm_ProtocolCtrl[(uint8)Index].S3Server = 5000UL; /* ms converted to tick */
+            Dcm_ProtocolCtrl[(uint8)Index].Dcm_ProtocolState = DCM_PROTOCOL_INVALID;
+            SchM_Exit_Dcm_ExclusiveArea();
             DslInternal_InitProtocolCtrl((uint8)Index);
         }
-        for (Index = 0; Index < DCM_CONNECTION_NUM; Index++)
+        Dcm_InterInit();
+        for (Index = 0; Index < MainConnectionNum; Index++)
         {
-            DslInternal_InitConnectionCtrl((uint8)Index);
+            SchM_Enter_Dcm_ExclusiveArea();
+            Dcm_CommCtrl[Index].Dcm_CommState = DCM_COMM_NO_COMMUNICATION;
+            Dcm_CommCtrl[Index].Dcm_ActiveDiagnostic = DCM_COMM_ACTIVE;
+            Dcm_CommCtrl[Index].DcmDslProtocolComMChannelId =
+                pDsl_Protocol_MainConnectionCfg[Index].DcmDslProtocolComMChannelId;
+            SchM_Exit_Dcm_ExclusiveArea();
         }
-        /*Clear Buffer*/
-        SchM_Enter_Dcm(Dcm_Channel);
-        for (Index = 0; Index < DCM_CHANNEL_LENGTH; Index++)
-        {
-            Dcm_Channel[Index] = 0x00;
-        }
-        SchM_Exit_Dcm(Dcm_Channel);
 
-#if (STD_ON == DCM_SESSION_FUNC_ENABLED)
-        DslInternal_InitSesCtrl();
-#endif
+        SchM_Enter_Dcm_ExclusiveArea();
+        Dcm_MkCtrl.Dcm_ActiveSes = DCM_DEFAULT_SESSION;
+        Dcm_MkCtrl.Dcm_ActiveSec = DCM_SEC_LEV_LOCKED;
+        Dcm_MkCtrl.Dcm_ActiveProtocol = DCM_NO_ACTIVE_PROTOCOL;
+        Dcm_MkCtrl.Dcm_ActiveNetwork = DCM_INVALID_UINT8;
+        Dcm_MkCtrl.Dcm_ActiveProtocolCfgCtrlId = DCM_INVALID_UINT8;
+        Dcm_MkCtrl.Dcm_MkState = DCM_ON;
 
-#if (STD_ON == DCM_SECURITY_FUNC_ENABLED)
-        DslInternal_InitSecCtrl();
-#endif
+        Dcm_OBDMessage.Length = 0u;
+        Dcm_FunctionalMessage.Length = 0u;
+        SchM_Exit_Dcm_ExclusiveArea();
 
-#if ((STD_ON == DCM_DSP_ROUTINE_FUNC_ENABLED) && (DCM_DSP_ROUTINE_MAX_NUM > 0))
-        Dsp_InitRoutineStates();
-#endif
-        DslInternal_InitComMCtrl();
-        DslInternal_InitMkCtrl();
-
+#if (STD_ON == DCM_GENERIC_CONNECTION)
+        Dcm_MemSet((uint8*)Dcm_Metadata, 0u, (4u * DCM_DSLPROTOCOLROW_NUM_MAX));
+#endif /* STD_ON == DCM_GENERIC_CONNECTION */
 #if (STD_ON == DCM_PAGEDBUFFER_ENABLED)
         DslInternal_InitPageBuffer();
-#endif
+#endif /* STD_ON == DCM_PAGEDBUFFER_ENABLED */
         DslInternal_InitDspProgramInfo();
-
 #if ((STD_ON == DCM_UDS_SERVICE0X2C_ENABLED) && (DCM_DDDID_STORAGE == STD_ON))
         Dcm_UDS0x2C_Init();
 #endif /* STD_ON == DCM_UDS_SERVICE0X2C_ENABLED && DCM_DDDID_STORAGE == STD_ON */
-
-#if (STD_ON == DCM_UDS_SERVICE0X86_ENABLED)
-        Dcm_UDS0x86_Init();
-#endif
-
-#if (STD_ON == DCM_UDS_SERVICE0X2A_ENABLED)
-        Dcm_Scheduler_0x2A_Init();
-#endif
-
-        /*get VIN*/
-        Dcm_VIN.Flag = FALSE;
-#if (STD_ON == DCM_DSP_DATA_FUNC_ENABLED)
-        if (NULL_PTR != Dcm_GeneralCfg.DcmVinRef)
-        {
-            Dcm_VIN.Flag = TRUE;
-            for (Index = 0; Index < 17u; Index++)
-            {
-                Dcm_VIN.Dcm_VIN[Index] = 0xFF;
-            }
-            DidSignal_Num = Dcm_GeneralCfg.DcmVinRef->DcmDspDidSignalNum;
-            for (Index = 0; (Index < DidSignal_Num) && (Dcm_VIN.Flag == TRUE); Index++)
-            {
-                VIN_Data = &(Dcm_VIN.Dcm_VIN[Offest]);
-                pDidData = Dcm_GeneralCfg.DcmVinRef->pDcmDspDidSignal[Index].pDcmDspDidData;
-                if (NULL_PTR != pDidData->DcmDspDataReadFnc)
-                {
-                    if (E_OK != pDidData->DcmDspDataReadFnc(DCM_INITIAL, VIN_Data, &ErrorCode))
-                    {
-                        Dcm_VIN.Flag = FALSE;
-                    }
-                    else
-                    {
-                        Offest += ((pDidData->DcmDspDataSize + 7u) >> 3u);
-                    }
-                }
-            }
-        }
-#endif
     }
 }
-#define DCM_STOP_SEC_CODE
-#include "Dcm_MemMap.h"
 
 #if (STD_ON == DCM_VERSION_INFO_API)
 /*************************************************************************/
@@ -441,8 +359,6 @@ FUNC(void, DCM_CODE) Dcm_Init(P2CONST(Dcm_CfgType, DCM_CONST, DCM_CONST_PBCFG) C
  * CallByAPI           <None>
  */
 /*************************************************************************/
-#define DCM_START_SEC_CODE
-#include "Dcm_MemMap.h"
 /* PRQA S 3432++ */ /* MISRA Rule 20.7 */
 FUNC(void, DCM_CODE) Dcm_GetVersionInfo(P2VAR(Std_VersionInfoType, AUTOMATIC, DCM_VAR) VersionInfo)
 /* PRQA S 3432-- */ /* MISRA Rule 20.7 */
@@ -466,9 +382,7 @@ FUNC(void, DCM_CODE) Dcm_GetVersionInfo(P2VAR(Std_VersionInfoType, AUTOMATIC, DC
         VersionInfo->sw_patch_version = DCM_SW_PATCH_VERSION;
     }
 }
-#define DCM_STOP_SEC_CODE
-#include "Dcm_MemMap.h"
-#endif
+#endif /* STD_ON == DCM_VERSION_INFO_API */
 /*************************************************************************/
 /*
  * Brief               <Function to get the VIN (as defined in SAE J1979-DA)>
@@ -484,11 +398,9 @@ FUNC(void, DCM_CODE) Dcm_GetVersionInfo(P2VAR(Std_VersionInfoType, AUTOMATIC, DC
  * CallByAPI           <None>
  */
 /*************************************************************************/
-#define DCM_START_SEC_CODE
-#include "Dcm_MemMap.h"
-/* PRQA S 3432,1532++ */ /* MISRA Rule 20.7,8.7 */
+/* PRQA S 3432++ */ /* MISRA Rule 20.7 */
 FUNC(Std_ReturnType, DCM_CODE) Dcm_GetVin(P2VAR(uint8, AUTOMATIC, DCM_VAR) Data)
-/* PRQA S 3432,1532-- */ /* MISRA Rule 20.7,8.7 */
+/* PRQA S 3432-- */ /* MISRA Rule 20.7 */
 {
     Std_ReturnType ret = E_NOT_OK;
 #if (STD_ON == DCM_DEV_ERROR_DETECT)
@@ -511,8 +423,8 @@ FUNC(Std_ReturnType, DCM_CODE) Dcm_GetVin(P2VAR(uint8, AUTOMATIC, DCM_VAR) Data)
     }
     return ret;
 }
-#define DCM_STOP_SEC_CODE
-#include "Dcm_MemMap.h"
+
+#if (DCM_DEM_SUPPOTR == STD_ON)
 /*************************************************************************/
 /*
  * Brief               <Triggers on changes of the UDS DTC status byte.
@@ -530,13 +442,12 @@ FUNC(Std_ReturnType, DCM_CODE) Dcm_GetVin(P2VAR(uint8, AUTOMATIC, DCM_VAR) Data)
  * CallByAPI           <None>
  */
 /*************************************************************************/
-#define DCM_START_SEC_CODE
-#include "Dcm_MemMap.h"
-FUNC(Std_ReturnType, DCM_CODE)
 /* PRQA S 1532++ */ /* MISRA Rule 8.7 */
+FUNC(Std_ReturnType, DCM_CODE)
 Dcm_DemTriggerOnDTCStatus(uint32 DTC, Dem_UdsStatusByteType DTCStatusOld, Dem_UdsStatusByteType DTCStatusNew)
-/* PRQA S 1532-- */ /* MISRA Rule 8.7 */
+/* PRQA S 1532++ */ /* MISRA Rule 8.7 */
 {
+    Std_ReturnType ret = E_NOT_OK;
 #if (STD_ON == DCM_DEV_ERROR_DETECT)
     if (DCM_ON != Dcm_MkCtrl.Dcm_MkState)
     {
@@ -545,18 +456,12 @@ Dcm_DemTriggerOnDTCStatus(uint32 DTC, Dem_UdsStatusByteType DTCStatusOld, Dem_Ud
     else
 #endif
     {
-#if (STD_ON == DCM_UDS_SERVICE0X86_ENABLED)
-        Dcm_UDS0x86_DTCStatusChange(DTCStatusOld, DTCStatusNew);
-#else
-        DCM_UNUSED(DTCStatusNew);
-        DCM_UNUSED(DTCStatusOld);
-#endif
-        DCM_UNUSED(DTC);
+        Dcm_InterDemTriggerOnDTCStatus(DTC, DTCStatusOld, DTCStatusNew);
+        ret = E_OK;
     }
-    return E_OK;
+    return ret;
 }
-#define DCM_STOP_SEC_CODE
-#include "Dcm_MemMap.h"
+#endif
 /*************************************************************************/
 /*
  * Brief               <This function provides the active security level value.>
@@ -572,10 +477,9 @@ Dcm_DemTriggerOnDTCStatus(uint32 DTC, Dem_UdsStatusByteType DTCStatusOld, Dem_Ud
  * CallByAPI            <APIName>
  */
 /*************************************************************************/
-#define DCM_START_SEC_CODE
-#include "Dcm_MemMap.h"
+FUNC(Std_ReturnType, DCM_CODE)
 /* PRQA S 3432++ */ /* MISRA Rule 20.7 */
-FUNC(Std_ReturnType, DCM_CODE) Dcm_GetSecurityLevel(P2VAR(Dcm_SecLevelType, AUTOMATIC, DCM_VAR) SecLevel)
+Dcm_GetSecurityLevel(P2VAR(Dcm_SecLevelType, AUTOMATIC, DCM_VAR) SecLevel)
 /* PRQA S 3432-- */ /* MISRA Rule 20.7 */
 {
     Std_ReturnType ret = E_NOT_OK;
@@ -591,13 +495,11 @@ FUNC(Std_ReturnType, DCM_CODE) Dcm_GetSecurityLevel(P2VAR(Dcm_SecLevelType, AUTO
     else
 #endif
     {
-        (*SecLevel) = Dcm_MkCtrl.Dcm_ActiveSec;
+        *SecLevel = Dcm_MkCtrl.Dcm_ActiveSec;
         ret = E_OK;
     }
     return ret;
 }
-#define DCM_STOP_SEC_CODE
-#include "Dcm_MemMap.h"
 
 /*************************************************************************/
 /*
@@ -613,11 +515,10 @@ FUNC(Std_ReturnType, DCM_CODE) Dcm_GetSecurityLevel(P2VAR(Dcm_SecLevelType, AUTO
  * CallByAPI           <>
  */
 /*************************************************************************/
-#define DCM_START_SEC_CODE
-#include "Dcm_MemMap.h"
-/* PRQA S 3432++ */ /* MISRA Rule 20.7 */
-FUNC(Std_ReturnType, DCM_CODE) Dcm_GetSesCtrlType(P2VAR(Dcm_SesCtrlType, AUTOMATIC, DCM_VAR) SesType)
-/* PRQA S 3432-- */ /* MISRA Rule 20.7 */
+FUNC(Std_ReturnType, DCM_CODE)
+/* PRQA S 3432,1330++ */ /* MISRA Rule 20.7, Rule 8.3 */
+Dcm_GetSesCtrlType(P2VAR(Dcm_SesCtrlType, AUTOMATIC, DCM_VAR) SesType)
+/* PRQA S 3432,1330-- */ /* MISRA Rule 20.7, Rule 8.3 */
 {
     Std_ReturnType ret = E_NOT_OK;
 #if (STD_ON == DCM_DEV_ERROR_DETECT)
@@ -632,13 +533,11 @@ FUNC(Std_ReturnType, DCM_CODE) Dcm_GetSesCtrlType(P2VAR(Dcm_SesCtrlType, AUTOMAT
     else
 #endif
     {
-        (*SesType) = Dcm_MkCtrl.Dcm_ActiveSes;
+        *SesType = Dcm_MkCtrl.Dcm_ActiveSes;
         ret = E_OK;
     }
     return ret;
 }
-#define DCM_STOP_SEC_CODE
-#include "Dcm_MemMap.h"
 
 /*************************************************************************/
 /*
@@ -654,10 +553,9 @@ FUNC(Std_ReturnType, DCM_CODE) Dcm_GetSesCtrlType(P2VAR(Dcm_SesCtrlType, AUTOMAT
  * CallByAPI           <>
  */
 /*************************************************************************/
-#define DCM_START_SEC_CODE
-#include "Dcm_MemMap.h"
+FUNC(Std_ReturnType, DCM_CODE)
 /* PRQA S 3432++ */ /* MISRA Rule 20.7 */
-FUNC(Std_ReturnType, DCM_CODE) Dcm_GetActiveProtocol(P2VAR(Dcm_ProtocolType, AUTOMATIC, DCM_VAR) ActiveProtocol)
+Dcm_GetActiveProtocol(P2VAR(Dcm_ProtocolType, AUTOMATIC, DCM_VAR) ActiveProtocol)
 /* PRQA S 3432-- */ /* MISRA Rule 20.7 */
 {
     Std_ReturnType ret = E_NOT_OK;
@@ -683,8 +581,6 @@ FUNC(Std_ReturnType, DCM_CODE) Dcm_GetActiveProtocol(P2VAR(Dcm_ProtocolType, AUT
     }
     return ret;
 }
-#define DCM_STOP_SEC_CODE
-#include "Dcm_MemMap.h"
 
 /*************************************************************************/
 /*
@@ -701,8 +597,6 @@ FUNC(Std_ReturnType, DCM_CODE) Dcm_GetActiveProtocol(P2VAR(Dcm_ProtocolType, AUT
  * CallByAPI           <>
  */
 /*************************************************************************/
-#define DCM_START_SEC_CODE
-#include "Dcm_MemMap.h"
 FUNC(Std_ReturnType, DCM_CODE) Dcm_ResetToDefaultSession(void)
 {
 #if (STD_ON == DCM_DEV_ERROR_DETECT)
@@ -713,16 +607,13 @@ FUNC(Std_ReturnType, DCM_CODE) Dcm_ResetToDefaultSession(void)
     else
 #endif
     {
-        SchM_Enter_Dcm(Dcm_SesCtrl);
         Dcm_SesCtrl.Dcm_NewSes = DCM_DEFAULT_SESSION;
-        SchM_Exit_Dcm(Dcm_SesCtrl);
         DslInternal_SesRefresh(Dcm_SesCtrl.Dcm_NewSes);
         (void)SchM_Switch_DcmDiagnosticSessionControl(RTE_MODE_DcmDiagnosticSessionControl_DEFAULT_SESSION);
     }
     return E_OK;
 }
-#define DCM_STOP_SEC_CODE
-#include "Dcm_MemMap.h"
+
 /*************************************************************************/
 /*
  * Brief               <The call to this function allows to trigger an
@@ -738,8 +629,6 @@ FUNC(Std_ReturnType, DCM_CODE) Dcm_ResetToDefaultSession(void)
  * CallByAPI           <>
  */
 /*************************************************************************/
-#define DCM_START_SEC_CODE
-#include "Dcm_MemMap.h"
 FUNC(Std_ReturnType, DCM_CODE) Dcm_TriggerOnEvent(uint8 RoeEventId) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
 {
     Std_ReturnType ret = E_OK; /* PRQA S 2981 */ /* MISRA Rule 2.2 */
@@ -760,8 +649,7 @@ FUNC(Std_ReturnType, DCM_CODE) Dcm_TriggerOnEvent(uint8 RoeEventId) /* PRQA S 15
     }
     return ret;
 }
-#define DCM_STOP_SEC_CODE
-#include "Dcm_MemMap.h"
+
 /*************************************************************************/
 /*
  * Brief               <Allows to activate and deactivate the call
@@ -778,11 +666,11 @@ FUNC(Std_ReturnType, DCM_CODE) Dcm_TriggerOnEvent(uint8 RoeEventId) /* PRQA S 15
  * CallByAPI           <>
  */
 /*************************************************************************/
-#define DCM_START_SEC_CODE
-#include "Dcm_MemMap.h"
-FUNC(Std_ReturnType, DCM_CODE) Dcm_SetActiveDiagnostic(boolean active)
+FUNC(Std_ReturnType, DCM_CODE) Dcm_SetActiveDiagnostic(boolean active) /* PRQA S 0624 */ /* MISRA Rule 8.3 */
 {
+    Std_ReturnType ret = E_NOT_OK;
     uint8 Index;
+    uint8 MainConnectionNum = Dcm_GetMainConnectionNum();
 #if (STD_ON == DCM_DEV_ERROR_DETECT)
     if (DCM_ON != Dcm_MkCtrl.Dcm_MkState)
     {
@@ -793,29 +681,27 @@ FUNC(Std_ReturnType, DCM_CODE) Dcm_SetActiveDiagnostic(boolean active)
     {
         if (FALSE == active)
         {
-            for (Index = 0; Index < DCM_MAINCONNECTION_NUM; Index++)
+            SchM_Enter_Dcm_ExclusiveArea();
+            for (Index = 0; Index < MainConnectionNum; Index++)
             {
-                SchM_Enter_Dcm(Dcm_CommCtrl);
                 Dcm_CommCtrl[Index].Dcm_ActiveDiagnostic = DCM_COMM_NOT_ACTIVE;
-                SchM_Exit_Dcm(Dcm_CommCtrl);
             }
+            SchM_Exit_Dcm_ExclusiveArea();
         }
         else
         {
-            for (Index = 0; Index < DCM_MAINCONNECTION_NUM; Index++)
+            SchM_Enter_Dcm_ExclusiveArea();
+            for (Index = 0; Index < MainConnectionNum; Index++)
             {
-                SchM_Enter_Dcm(Dcm_CommCtrl);
                 Dcm_CommCtrl[Index].Dcm_ActiveDiagnostic = DCM_COMM_ACTIVE;
-                SchM_Exit_Dcm(Dcm_CommCtrl);
                 ComM_DCM_ActiveDiagnostic(Dcm_CommCtrl[Index].DcmDslProtocolComMChannelId);
             }
+            SchM_Exit_Dcm_ExclusiveArea();
         }
+        ret = E_OK;
     }
-
-    return E_OK;
+    return ret;
 }
-#define DCM_STOP_SEC_CODE
-#include "Dcm_MemMap.h"
 
 /*************************************************************************/
 /*
@@ -831,8 +717,6 @@ FUNC(Std_ReturnType, DCM_CODE) Dcm_SetActiveDiagnostic(boolean active)
  * CallByAPI           <APIName>
  */
 /*************************************************************************/
-#define DCM_START_SEC_CODE
-#include "Dcm_MemMap.h"
 FUNC(void, DCM_CODE) Dcm_MainFunction(void)
 {
     if (DCM_ON == Dcm_MkCtrl.Dcm_MkState)
@@ -853,37 +737,16 @@ FUNC(void, DCM_CODE) Dcm_MainFunction(void)
         /***************************************************/
         /*The Pending message background processing function*/
         Dcm_MainFunction_PendingManage();
-        /**************************************************/
-        /*S3Timer background processing function*/
-#if (STD_ON == DCM_SESSION_FUNC_ENABLED)
-        Dcm_MainFunction_S3Timer();
-#endif
-        /*************************************************/
-        /*SecTimer background processing function*/
-#if (STD_ON == DCM_SECURITY_FUNC_ENABLED)
-        Dcm_MainFunction_SecTimer();
-#endif
-        /**************************************************/
-        /*Page_Buffer Timer background processing function*/
-#if (DCM_PAGEDBUFFER_ENABLED == STD_ON)
-        Dcm_MainFunction_PageBufferTimer();
-#endif
-        /**************************************************/
-        /*ROE Timer check*/
-#if (STD_ON == DCM_UDS_SERVICE0X86_ENABLED)
-        Dcm_UDS0x86_CheckTimer();
-#endif
-        /*************************************************/
+
+        Dcm_InterMainFunction();
+
         Dcm_BootloaderResponse();
     }
 }
-#define DCM_STOP_SEC_CODE
-#include "Dcm_MemMap.h"
 
 /*******************************************************************************
 **                      Private Function Definitions                          **
 *******************************************************************************/
-
 /*************************************************************************/
 /*
  * Brief               <The Pending message background processing function>
@@ -898,15 +761,13 @@ FUNC(void, DCM_CODE) Dcm_MainFunction(void)
  * CallByAPI           <APIName>
  */
 /*************************************************************************/
-#define DCM_START_SEC_CODE
-#include "Dcm_MemMap.h"
 static FUNC(void, DCM_CODE) Dcm_MainFunction_PendingManage(void)
 {
-    uint8 ProtocolCtrlId;
+    uint8 iloop;
     uint8 MsgCtrlId;
-    uint16 SidTabCfgIndex = 0u;
-    uint16 SidTabServiceCfgIndex = 0u;
-    Std_ReturnType ret = E_OK; /* PRQA S 2981 */ /* MISRA Rule 2.2 */
+    uint16 SidTabCfgIndex;
+    uint16 SidTabServiceCfgIndex;
+    Std_ReturnType ret = E_OK;
     Dcm_NegativeResponseCodeType errorCode = DCM_E_RESERVED;
     /* PRQA S 3432++ */ /* MISRA Rule 20.7 */
     P2FUNC(Std_ReturnType, DCM_APPL_CODE, Dcm_DiagnosticServicex)
@@ -914,16 +775,21 @@ static FUNC(void, DCM_CODE) Dcm_MainFunction_PendingManage(void)
      uint8 ProtocolCtrlId,
      P2VAR(Dcm_NegativeResponseCodeType, AUTOMATIC, DCM_VAR) ErrorCode);
     /* PRQA S 3432-- */ /* MISRA Rule 20.7 */
-
 #if (STD_ON == DCM_REQUEST_QUEUED_ENABLED)
     uint8 tempIndex;
     PduIdType queuedPduRxPduId;
     uint8 ConnectionCfgCtrlId;
     uint8 TxChannelCfgCtrlId;
+    const Dcm_DslProtocolRxType* pDsl_Protocol_Connection_RxCfg = DcmPbCfgPtr->DslProtocolConnectionRxCfg;
+    const Dcm_DslConnectionType* pDsl_Protocol_ConnectionCfg = DcmPbCfgPtr->DslProtocolConnectionCfg;
     uint8 ProtocolCfgCtrlId;
     uint8 MsgCtrlIndex;
+#endif /* STD_ON == DCM_REQUEST_QUEUED_ENABLED */
+    const Dcm_DslProtocolType* pDcmDslProtocol = DcmPbCfgPtr->pDcmDslCfg->pDcmDslProtocol;
+    const Dcm_DsdServiceTableCfgType* pDcmDsdServiceTable = DcmPbCfgPtr->pDcmDsdCfg->pDcmDsdServiceTable;
 
-    SchM_Enter_Dcm(Dcm_MsgCtrl);
+#if (STD_ON == DCM_REQUEST_QUEUED_ENABLED)
+    SchM_Enter_Dcm_ExclusiveArea();
     if ((DCM_PENDING_REQUEST_READY == Dcm_QueuedRequestCtrl[0u].Dcm_PendingRequestState)
         && (DCM_PENDING_REQUEST_READY == Dcm_QueuedRequestCtrl[1u].Dcm_PendingRequestState))
     {
@@ -936,45 +802,55 @@ static FUNC(void, DCM_CODE) Dcm_MainFunction_PendingManage(void)
     queuedPduRxPduId = Dcm_QueuedRequestCtrl[tempIndex].Dcm_QueuedRequestRxPduId;
     if (queuedPduRxPduId != 0xffu)
     {
-        ConnectionCfgCtrlId = Dsl_Protocol_Connection_RxCfg[queuedPduRxPduId].DcmDslParentConnectionCtrlId;
-        ProtocolCfgCtrlId = Dsl_Protocol_ConnectionCfg[ConnectionCfgCtrlId].DcmDslParentProtocolRowCtrlId;
+        ConnectionCfgCtrlId = pDsl_Protocol_Connection_RxCfg[queuedPduRxPduId].DcmDslParentConnectionCtrlId;
+        ProtocolCfgCtrlId = pDsl_Protocol_ConnectionCfg[ConnectionCfgCtrlId].DcmDslParentProtocolRowCtrlId;
         MsgCtrlIndex = ProtocolCfgCtrlId;
-        TxChannelCfgCtrlId = Dcm_DslCfg.pDcmDslProtocol->pDcmDslProtocolRow[ProtocolCfgCtrlId]
-                                 .DcmDslProtocolTxBufferRef->Dcm_DslBufferId;
+        TxChannelCfgCtrlId =
+            pDcmDslProtocol->pDcmDslProtocolRow[ProtocolCfgCtrlId].DcmDslProtocolTxBufferRef->Dcm_DslBufferId;
         if ((DCM_PENDING_REQUEST_READY == Dcm_QueuedRequestCtrl[tempIndex].Dcm_PendingRequestState)
             && (DCM_MSG_WAIT == Dcm_MsgCtrl[MsgCtrlIndex].Dcm_MsgState)
             && (DCM_CH_IDLE == Dcm_ChannelCtrl[TxChannelCfgCtrlId].Dcm_ChannelTxState))
         {
+            Dcm_MsgCtrl[MsgCtrlIndex].Dcm_MsgState = DCM_MSG_RECEIVED;
+            SchM_Exit_Dcm_ExclusiveArea();
             Dcm_MkCtrl.Dcm_ActiveNetwork =
-                Dsl_Protocol_ConnectionCfg[ConnectionCfgCtrlId].pDcmDslMainConnection->DcmDslProtocolComMChannelId;
+                pDsl_Protocol_ConnectionCfg[ConnectionCfgCtrlId].pDcmDslMainConnection->DcmDslProtocolComMChannelId;
             Dcm_MsgCtrl[MsgCtrlIndex].MsgContext.ReqDataLen = Dcm_QueuedRequestCtrl[tempIndex].Dcm_QueuedRequestLength;
             Dcm_MsgCtrl[MsgCtrlIndex].MsgContext.pReqData = Dcm_RequestQueuedBuffer[tempIndex];
             Dcm_ConnectionCtrl[ConnectionCfgCtrlId].Dcm_ConnectionActive = TRUE;
             Dcm_TpRxIndication(queuedPduRxPduId, E_OK);
             Dcm_QueuedRequestCtrl[tempIndex].Dcm_PendingRequestState = DCM_PENDING_REQUEST_PROCESS;
         }
+        else
+        {
+            SchM_Exit_Dcm_ExclusiveArea();
+        }
     }
-    SchM_Exit_Dcm(Dcm_MsgCtrl);
+    else
+    {
+        SchM_Exit_Dcm_ExclusiveArea();
+    }
 #endif /* STD_ON == DCM_REQUEST_QUEUED_ENABLED */
 
     /*Pending manage*/
-    for (ProtocolCtrlId = 0; ProtocolCtrlId < DCM_DSLPROTOCOLROW_NUM_MAX; ProtocolCtrlId++)
+    for (iloop = 0; iloop < pDcmDslProtocol->DcmDslProtocolRow_Num; iloop++)
     {
-        ret = E_OK;
-        MsgCtrlId = Dcm_ProtocolCtrl[ProtocolCtrlId].MsgCtrlIndex;
+        MsgCtrlId = Dcm_ProtocolCtrl[iloop].MsgCtrlIndex;
         if (DCM_INVALID_UINT8 != MsgCtrlId)
         {
-            if (DCM_MSG_PROCESSED == Dcm_MsgCtrl[MsgCtrlId].Dcm_MsgState)
+            /* PRQA S 3415++ */ /* MISRA Rule 13.5 */
+            if ((DCM_MSG_PROCESSED == Dcm_MsgCtrl[MsgCtrlId].Dcm_MsgState)
+                && (DslInternal_RxIndicationDeal(iloop) == E_OK))
+            /* PRQA S 3415-- */ /* MISRA Rule 13.5 */
             {
                 /*when Message is "DCM_MSG_PROCESSED" status,App return E_PENDING"*/
                 (void)DsdInternal_SearchSidTabServiceIndex(
                     Dcm_MsgCtrl[MsgCtrlId].SID,
-                    ProtocolCtrlId,
+                    iloop,
                     &SidTabCfgIndex,
                     &SidTabServiceCfgIndex);
                 Dcm_DiagnosticServicex =
-                    ((Dcm_DsdCfg.pDcmDsdServiceTable)[SidTabCfgIndex].pDcmDsdService)[SidTabServiceCfgIndex]
-                        .DcmDsdSidTabFnc;
+                    ((pDcmDsdServiceTable)[SidTabCfgIndex].pDcmDsdService)[SidTabServiceCfgIndex].DcmDsdSidTabFnc;
                 /*Enter the specific service handler*/
                 if (
 #if (STD_ON == DCM_DSLDIAGRESP_FORCERESPENDEN)
@@ -982,9 +858,7 @@ static FUNC(void, DCM_CODE) Dcm_MainFunction_PendingManage(void)
 #endif
                     (DCM_FORCE_RCRRP_OK == Dcm_MsgCtrl[MsgCtrlId].Dcm_OpStatus))
                 {
-                    SchM_Enter_Dcm(Dcm_MsgCtrl);
                     Dcm_MsgCtrl[MsgCtrlId].Dcm_Ret = E_NOT_OK;
-                    SchM_Exit_Dcm(Dcm_MsgCtrl);
                 }
                 else if (
                     (DCM_PENDING == Dcm_MsgCtrl[MsgCtrlId].Dcm_OpStatus)
@@ -1000,17 +874,25 @@ static FUNC(void, DCM_CODE) Dcm_MainFunction_PendingManage(void)
 
                 if (ret == E_OK)
                 {
-                    ret = (*Dcm_DiagnosticServicex)(Dcm_MsgCtrl[MsgCtrlId].Dcm_OpStatus, ProtocolCtrlId, &errorCode);
-                    if (ret == E_NOT_OK)
+                    ret = (*Dcm_DiagnosticServicex)(Dcm_MsgCtrl[MsgCtrlId].Dcm_OpStatus, iloop, &errorCode);
+                    if ((ret != E_OK) && (ret != DCM_E_FORCE_RCRRP) && (ret != DCM_E_PENDING))
                     {
                         if (DCM_E_RESERVED == errorCode)
                         {
-                            DslInternal_ResetResource(ProtocolCtrlId);
+                            if (ret == E_NOT_OK)
+                            {
+                                DslInternal_ResetResource(iloop);
+                            }
+                            else
+                            {
+                                DsdInternal_SetNrc(iloop, DCM_E_CONDITIONSNOTCORRECT);
+                                DsdInternal_ProcessingDone(iloop);
+                            }
                         }
                         else
                         {
-                            DsdInternal_SetNrc(ProtocolCtrlId, errorCode);
-                            DsdInternal_ProcessingDone(ProtocolCtrlId);
+                            DsdInternal_SetNrc(iloop, errorCode);
+                            DsdInternal_ProcessingDone(iloop);
                         }
                     }
                 }
@@ -1019,23 +901,16 @@ static FUNC(void, DCM_CODE) Dcm_MainFunction_PendingManage(void)
                 (FALSE == Dcm_MsgCtrl[MsgCtrlId].SendFlag)
                 && (DCM_MSG_TRANSMISSION == Dcm_MsgCtrl[MsgCtrlId].Dcm_MsgState))
             {
-                DslInternal_ProcessingDone(ProtocolCtrlId);
+                DslInternal_ProcessingDone(iloop);
             }
             else
             {
                 /*Avoid Misra error*/
             }
         }
-#if (STD_ON == DCM_UDS_SERVICE0X2A_ENABLED)
-        if (DCM_PROTOCOL_VALID == Dcm_ProtocolCtrl[ProtocolCtrlId].Dcm_ProtocolState)
-        {
-            Dcm_MainFunction_Scheduler_0x2A(ProtocolCtrlId);
-        }
-#endif
+        Dcm_MainFunction_Pending2A(iloop);
     }
 }
-#define DCM_STOP_SEC_CODE
-#include "Dcm_MemMap.h"
 
 /*************************************************************************/
 /*
@@ -1051,255 +926,30 @@ static FUNC(void, DCM_CODE) Dcm_MainFunction_PendingManage(void)
  * CallByAPI           <APIName>
  */
 /*************************************************************************/
-#define DCM_START_SEC_CODE
-#include "Dcm_MemMap.h"
 static FUNC(void, DCM_CODE) Dcm_MainFunction_P2ServerTimer(void)
 {
-    uint8 ProtocolCtrlId;
+    uint8 iloop;
     uint8 MsgCtrlId;
     uint32 OldTimer;
     uint32 ExpireTimer;
     uint32 Timer;
 
-    for (ProtocolCtrlId = 0; ProtocolCtrlId < DCM_DSLPROTOCOLROW_NUM_MAX; ProtocolCtrlId++)
+    for (iloop = 0; iloop < DcmPbCfgPtr->pDcmDslCfg->pDcmDslProtocol->DcmDslProtocolRow_Num; iloop++)
     {
-        MsgCtrlId = Dcm_ProtocolCtrl[ProtocolCtrlId].MsgCtrlIndex;
-        if (DCM_INVALID_UINT8 != MsgCtrlId)
+        MsgCtrlId = Dcm_ProtocolCtrl[iloop].MsgCtrlIndex;
+        if ((DCM_INVALID_UINT8 != MsgCtrlId) && (DCM_P2TIMER_ON == (Dcm_MsgCtrl[MsgCtrlId].Dcm_P2Ctrl.Dcm_P2State)))
         {
-            if (DCM_P2TIMER_ON == (Dcm_MsgCtrl[MsgCtrlId].Dcm_P2Ctrl.Dcm_P2State))
-            {
-                OldTimer = Dcm_MsgCtrl[MsgCtrlId].Dcm_P2Ctrl.Dcm_P2CurTimer;
-                ExpireTimer = Dcm_MsgCtrl[MsgCtrlId].Dcm_P2Ctrl.Dcm_P2ExpiredTimer;
-                Dcm_GetTimeSpan(OldTimer, &Timer);
-                if ((Timer + Dcm_GeneralCfg.DcmTaskTime) >= ExpireTimer)
-                { /*P2Server Timer timeout*/
-                    DslInternal_P2ServerTimeout(ProtocolCtrlId);
-                }
-            }
-        }
-    }
-}
-#define DCM_STOP_SEC_CODE
-#include "Dcm_MemMap.h"
-
-/*************************************************************************/
-/*
- * Brief               <S3Timer background processing function>
- * ServiceId           <None>
- * Sync/Async          <Synchronous>
- * Reentrancy          <Non Reentrant>
- * Param-Name[in]      <None>
- * Param-Name[out]     <None>
- * Param-Name[in/out]  <None>
- * Return              <None>
- * PreCondition        <None>
- * CallByAPI           <APIName>
- */
-/*************************************************************************/
-#if (STD_ON == DCM_SESSION_FUNC_ENABLED)
-#define DCM_START_SEC_CODE
-#include "Dcm_MemMap.h"
-static FUNC(void, DCM_CODE) Dcm_MainFunction_S3Timer(void)
-{
-    uint32 OldTimer;
-    uint32 ExpireTimer;
-    uint32 Timer;
-
-    /*S3Server timer*/
-    if (DCM_S3TIMER_ON == (Dcm_SesCtrl.Dcm_S3Ctrl.Dcm_S3State))
-    {
-        OldTimer = Dcm_SesCtrl.Dcm_S3Ctrl.Dcm_S3CurTimer;
-        ExpireTimer = Dcm_SesCtrl.Dcm_S3Ctrl.Dcm_S3ExpiredTimer;
-        Dcm_GetTimeSpan(OldTimer, &Timer);
-        if (Timer >= ExpireTimer)
-        {
-            /*S3Server Timer timeout*/
-            DslInternal_S3ServerTimeout();
-        }
-    }
-}
-#define DCM_STOP_SEC_CODE
-#include "Dcm_MemMap.h"
-#endif
-
-/*************************************************************************/
-/*
- * Brief               <Read SecTimer background processing function>
- * ServiceId           <None>
- * Sync/Async          <Synchronous>
- * Reentrancy          <Non Reentrant>
- * Param-Name[in]      <None>
- * Param-Name[out]     <None>
- * Param-Name[in/out]  <None>
- * Return              <None>
- * PreCondition        <None>
- * CallByAPI           <APIName>
- */
-/*************************************************************************/
-#if (STD_ON == DCM_SECURITY_FUNC_ENABLED)
-#define DCM_START_SEC_CODE
-#include "Dcm_MemMap.h"
-static FUNC(void, DCM_CODE) Dcm_MainFunction_ReadSecTimer(void)
-{
-    uint8 SecCfgIndex;
-    const Dcm_DspSecurityRowType* pSecurityRow = Dcm_DspCfg.pDcm_DspSecurity->pDcm_DspSecurityRow;
-    Std_ReturnType ret;
-    uint8* pDcmFalseAcessCount = Dcm_SecCtrl.Dcm_FalseAcessCount;
-
-    /***************************************/
-#if (DCM_SECURITY_MAX_READOUT_TIME != 0u)
-
-    if (Dcm_SecCtrl.Dcm_MaxReadoutTime < DCM_SECURITY_MAX_READOUT_TIME)
-    {
-        Dcm_SecCtrl.Dcm_MaxReadoutTime++;
-#endif
-        for (SecCfgIndex = Dcm_SecCtrl.Dcm_SecCfgIndex; (SecCfgIndex < DCM_SECURITY_NUM) && (pSecurityRow != NULL_PTR);
-             SecCfgIndex++)
-        {
-            if ((TRUE == pSecurityRow->DcmDspSecurityAttemptCounterEnabled)
-                && ((USE_ASYNCH_FNC == pSecurityRow->DcmDspSecurityUsePort)
-                    || (USE_ASYNCH_CLIENT_SERVER == pSecurityRow->DcmDspSecurityUsePort)))
-            {
-                if (pSecurityRow->Dcm_GetSecurityAttemptCounterFnc != NULL_PTR)
-                {
-                    Dcm_OpStatusType OpStatus = DCM_PENDING;
-                    if ((Dcm_SecCtrl.Dcm_SecFlag & DCM_SEC_CALL_AGAIN_MASK) == 0u)
-                    {
-                        OpStatus = DCM_INITIAL;
-                    }
-                    ret = pSecurityRow->Dcm_GetSecurityAttemptCounterFnc(OpStatus, &pDcmFalseAcessCount[SecCfgIndex]);
-                    if (DCM_E_PENDING == ret)
-                    {
-                        Dcm_SecCtrl.Dcm_SecFlag |= DCM_SEC_CALL_AGAIN_MASK;
-                        break;
-                    }
-                    else
-                    {
-                        Dcm_SecCtrl.Dcm_SecFlag &= (~DCM_SEC_CALL_AGAIN_MASK);
-                        Dcm_SecCtrl.Dcm_SecCfgIndex++;
-                    }
-                    if (E_NOT_OK == ret)
-                    {
-                        pDcmFalseAcessCount[SecCfgIndex] = pSecurityRow->DcmDspSecurityNumAttDelay;
-                    }
-                    if (pDcmFalseAcessCount[SecCfgIndex] >= pSecurityRow->DcmDspSecurityNumAttDelay)
-                    {
-                        Dcm_ResetTime(&Dcm_SecCtrl.Dcm_RunDlyCtrl.Dcm_SecCurTimer[SecCfgIndex]);
-                        Dcm_SecCtrl.Dcm_RunDlyCtrl.Dcm_SecExpiredTimer[SecCfgIndex] =
-                            pSecurityRow->DcmDspSecurityDelayTime;
-                        Dcm_SecCtrl.Dcm_RunDlyCtrl.Dcm_SecTimerState[SecCfgIndex] = DCM_SECTIMER_ON;
-                    }
-                }
-            }
-            else
-            {
-                Dcm_SecCtrl.Dcm_SecCfgIndex++;
-            }
-            pSecurityRow++;
-        }
-        if (Dcm_SecCtrl.Dcm_SecCfgIndex == DCM_SECURITY_NUM)
-        {
-            Dcm_SecCtrl.Dcm_SecFlag |= DCM_SEC_CALL_OVER_MASK;
-        }
-#if (DCM_SECURITY_MAX_READOUT_TIME != 0u)
-    }
-#endif
-    else
-    {
-        SecCfgIndex = Dcm_SecCtrl.Dcm_SecCfgIndex;
-        pSecurityRow = &(Dcm_DspCfg.pDcm_DspSecurity->pDcm_DspSecurityRow[SecCfgIndex]);
-        pSecurityRow->Dcm_GetSecurityAttemptCounterFnc(DCM_CANCEL, &pDcmFalseAcessCount[SecCfgIndex]);
-
-        for (SecCfgIndex = Dcm_SecCtrl.Dcm_SecCfgIndex; (SecCfgIndex < DCM_SECURITY_NUM); SecCfgIndex++)
-        {
-            if ((pSecurityRow != NULL_PTR) && (TRUE == pSecurityRow->DcmDspSecurityAttemptCounterEnabled)
-                && ((USE_ASYNCH_FNC == pSecurityRow->DcmDspSecurityUsePort)
-                    || (USE_ASYNCH_CLIENT_SERVER == pSecurityRow->DcmDspSecurityUsePort)))
-            {
-                pDcmFalseAcessCount[SecCfgIndex] = pSecurityRow->DcmDspSecurityNumAttDelay;
-                Dcm_ResetTime(&Dcm_SecCtrl.Dcm_RunDlyCtrl.Dcm_SecCurTimer[SecCfgIndex]);
-                Dcm_SecCtrl.Dcm_RunDlyCtrl.Dcm_SecExpiredTimer[SecCfgIndex] = pSecurityRow->DcmDspSecurityDelayTime;
-                Dcm_SecCtrl.Dcm_RunDlyCtrl.Dcm_SecTimerState[SecCfgIndex] = DCM_SECTIMER_ON;
-            }
-            pSecurityRow++;
-        }
-        Dcm_SecCtrl.Dcm_SecFlag |= DCM_SEC_CALL_OVER_MASK;
-    }
-}
-#define DCM_STOP_SEC_CODE
-#include "Dcm_MemMap.h"
-#endif
-
-/*************************************************************************/
-/*
- * Brief               <SecTimer background processing function>
- * ServiceId           <None>
- * Sync/Async          <Synchronous>
- * Reentrancy          <Non Reentrant>
- * Param-Name[in]      <None>
- * Param-Name[out]     <None>
- * Param-Name[in/out]  <None>
- * Return              <None>
- * PreCondition        <None>
- * CallByAPI           <APIName>
- */
-/*************************************************************************/
-#if (STD_ON == DCM_SECURITY_FUNC_ENABLED)
-#define DCM_START_SEC_CODE
-#include "Dcm_MemMap.h"
-static FUNC(void, DCM_CODE) Dcm_MainFunction_SecTimer(void)
-{
-    uint32 OldTimer;
-    uint32 ExpireTimer;
-    uint32 Timer;
-    uint8 SecCfgIndex;
-    P2CONST(Dcm_DspSecurityRowType, AUTOMATIC, DCM_CONST) pSecurityRow;
-
-    /***************************************/
-    if (0u == (Dcm_SecCtrl.Dcm_SecFlag & DCM_SEC_CALL_OVER_MASK))
-    {
-        Dcm_MainFunction_ReadSecTimer();
-    }
-    /*security timer*/
-    for (SecCfgIndex = 0; SecCfgIndex < DCM_SECURITY_NUM; SecCfgIndex++)
-    {
-        if (DCM_SECTIMER_ON == (Dcm_SecCtrl.Dcm_RunDlyCtrl.Dcm_SecTimerState[SecCfgIndex]))
-        {
-            OldTimer = Dcm_SecCtrl.Dcm_RunDlyCtrl.Dcm_SecCurTimer[SecCfgIndex];
-            ExpireTimer = Dcm_SecCtrl.Dcm_RunDlyCtrl.Dcm_SecExpiredTimer[SecCfgIndex];
+            OldTimer = Dcm_MsgCtrl[MsgCtrlId].Dcm_P2Ctrl.Dcm_P2CurTimer;
+            ExpireTimer = Dcm_MsgCtrl[MsgCtrlId].Dcm_P2Ctrl.Dcm_P2ExpiredTimer;
             Dcm_GetTimeSpan(OldTimer, &Timer);
-            if (Timer >= ExpireTimer)
+            if ((Timer + Dcm_GeneralCfg.DcmTaskTime) >= ExpireTimer)
             {
-                /*security timeout*/
-                SchM_Enter_Dcm(Dcm_SecCtrl);
-                Dcm_SecCtrl.Dcm_RunDlyCtrl.Dcm_SecTimerState[SecCfgIndex] = DCM_SECTIMER_OFF;
-                /*********************************/
-                Dcm_SecCtrl.Dcm_FalseAcessCount[SecCfgIndex] = 0;
-                Dcm_SecCtrl.Dcm_SubfunctionForSeed = 0;
-                Dcm_SecCtrl.Dcm_SecServiceState = DCM_SERVICE_IDLE;
-                SchM_Exit_Dcm(Dcm_SecCtrl);
-                pSecurityRow = &(Dcm_DspCfg.pDcm_DspSecurity->pDcm_DspSecurityRow[SecCfgIndex]);
-                if (pSecurityRow != NULL_PTR)
-                {
-                    if ((TRUE == pSecurityRow->DcmDspSecurityAttemptCounterEnabled)
-                        && ((USE_ASYNCH_FNC == pSecurityRow->DcmDspSecurityUsePort)
-                            || (USE_ASYNCH_CLIENT_SERVER == pSecurityRow->DcmDspSecurityUsePort)))
-                    {
-                        if (pSecurityRow->Dcm_SetSecurityAttemptCounterFnc != NULL_PTR)
-                        {
-                            (void)pSecurityRow->Dcm_SetSecurityAttemptCounterFnc(
-                                Dcm_SecCtrl.Dcm_OpStatus,
-                                Dcm_SecCtrl.Dcm_FalseAcessCount[SecCfgIndex]);
-                        }
-                    }
-                }
+                /*P2Server Timer timeout*/
+                DslInternal_P2ServerTimeout(iloop);
             }
         }
     }
 }
-#define DCM_STOP_SEC_CODE
-#include "Dcm_MemMap.h"
-#endif
 
 /**********************************************************************/
 /*
@@ -1315,39 +965,34 @@ static FUNC(void, DCM_CODE) Dcm_MainFunction_SecTimer(void)
  * CallByAPI           <APIName>
  */
 /***********************************************************************/
-#define DCM_START_SEC_CODE
-#include "Dcm_MemMap.h"
 /* PRQA S 3432++ */ /* MISRA Rule 20.7 */
 static FUNC(void, DCM_CODE) Dcm_GetUDSPhyPduID(P2VAR(PduIdType, AUTOMATIC, DCM_VAR) rxPhyPduId)
 /* PRQA S 3432-- */ /* MISRA Rule 20.7 */
 {
-    uint8 protocolIndex;
-    uint8 rxpduidindex;
-    P2CONST(Dcm_DslProtocolRxType, AUTOMATIC, DCM_CONST) pDslProtocolRx;
+    uint8 iloop;
+    uint8 index;
+    const Dcm_DslProtocolRxType* pDslProtocolRx;
+    const Dcm_DslProtocolType* pDcmDslProtocol = DcmPbCfgPtr->pDcmDslCfg->pDcmDslProtocol;
+    uint8 ProtocolRow_Num = pDcmDslProtocol->DcmDslProtocolRow_Num;
+    const Dcm_DslProtocolRowType* pDcmDslProtocolRow = pDcmDslProtocol->pDcmDslProtocolRow;
 
     if (NULL_PTR != rxPhyPduId)
     {
-        protocolIndex = (Dcm_DslCfg.pDcmDslProtocol)->DcmDslProtocolRow_Num;
-        while (protocolIndex > 0u)
+        for (iloop = 0u; iloop < ProtocolRow_Num; iloop++)
         {
-            protocolIndex--;
-            if (DCM_UDS_ON_CAN == (Dcm_DslCfg.pDcmDslProtocol)->pDcmDslProtocolRow[protocolIndex].DcmDslProtocolID)
+            if (DCM_UDS_ON_CAN == pDcmDslProtocolRow[iloop].DcmDslProtocolID)
             {
                 /** regard a protocol only have a connection here */
-                pDslProtocolRx = (Dcm_DslCfg.pDcmDslProtocol)
-                                     ->pDcmDslProtocolRow[protocolIndex]
-                                     .pDcmDslConnection[0]
-                                     .pDcmDslMainConnection->pDcmDslProtocolRx;
-                rxpduidindex = (Dcm_DslCfg.pDcmDslProtocol)
-                                   ->pDcmDslProtocolRow[protocolIndex]
-                                   .pDcmDslConnection[0]
-                                   .pDcmDslMainConnection->DcmDslProtocolRx_Num;
-                while (rxpduidindex > 0u)
+                const Dcm_DslMainConnectionType* pDcmDslMainConnection =
+                    pDcmDslProtocolRow[iloop].pDcmDslConnection[0].pDcmDslMainConnection;
+                uint8 ProtocolRx_Num = pDcmDslMainConnection->DcmDslProtocolRx_Num;
+                pDslProtocolRx = pDcmDslMainConnection->pDcmDslProtocolRx;
+                for (index = 0u; index < ProtocolRx_Num; index++)
                 {
-                    rxpduidindex--;
-                    if (DCM_PHYSICAL == pDslProtocolRx[rxpduidindex].DcmDslProtocolRxAddrType)
+                    if (DCM_PHYSICAL == pDslProtocolRx[index].DcmDslProtocolRxAddrType)
                     {
-                        *rxPhyPduId = pDslProtocolRx[rxpduidindex].DcmDslProtocolRxPduId;
+                        *rxPhyPduId = pDslProtocolRx[index].DcmDslProtocolRxPduId;
+                        break;
                     }
                 }
                 break;
@@ -1355,57 +1000,6 @@ static FUNC(void, DCM_CODE) Dcm_GetUDSPhyPduID(P2VAR(PduIdType, AUTOMATIC, DCM_V
         }
     }
 }
-#define DCM_STOP_SEC_CODE
-#include "Dcm_MemMap.h"
-
-#if (DCM_PAGEDBUFFER_ENABLED == STD_ON)
-/*************************************************************************/
-/*
- * Brief               <Page_Buffer Timer background processing function>
- * ServiceId           <None>
- * Sync/Async          <Synchronous>
- * Reentrancy          <Non Reentrant>
- * Param-Name[in]      <None>
- * Param-Name[out]     <None>
- * Param-Name[in/out]  <None>
- * Return              <None>
- * PreCondition        <None>
- * CallByAPI           <APIName>
- */
-/*************************************************************************/
-#define DCM_START_SEC_CODE
-#include "Dcm_MemMap.h"
-static FUNC(void, DCM_CODE) Dcm_MainFunction_PageBufferTimer(void)
-{
-    uint8 ProtocolCtrlId;
-    uint8 MsgCtrlId;
-    uint32 OldTimer;
-    uint32 ExpireTimer;
-    uint32 Timer;
-
-    for (ProtocolCtrlId = 0; ProtocolCtrlId < DCM_DSLPROTOCOLROW_NUM_MAX; ProtocolCtrlId++)
-    {
-        MsgCtrlId = Dcm_ProtocolCtrl[ProtocolCtrlId].MsgCtrlIndex;
-        if (DCM_INVALID_UINT8 != MsgCtrlId)
-        {
-            if (TRUE == Dcm_PageBufferData.TimerStart)
-            {
-                OldTimer = Dcm_PageBufferData.CurTimer;
-                ExpireTimer = Dcm_PageBufferData.ExpiredTimer;
-                Dcm_GetTimeSpan(OldTimer, &Timer);
-                if (Timer >= ExpireTimer)
-                { /*PageBuffer Timer timeout*/
-                    SchM_Enter_Dcm(Dcm_PageBufferData);
-                    Dcm_PageBufferData.TimeOut = TRUE;
-                    SchM_Exit_Dcm(Dcm_PageBufferData);
-                }
-            }
-        }
-    }
-}
-#define DCM_STOP_SEC_CODE
-#include "Dcm_MemMap.h"
-#endif
 
 /**********************************************************************/
 /*
@@ -1421,8 +1015,6 @@ static FUNC(void, DCM_CODE) Dcm_MainFunction_PageBufferTimer(void)
  * CallByAPI           <APIName>
  */
 /***********************************************************************/
-#define DCM_START_SEC_CODE
-#include "Dcm_MemMap.h"
 static FUNC(void, DCM_CODE) Dcm_BootloaderResponse(void)
 {
     PduInfoType PduBuffer;
@@ -1430,11 +1022,11 @@ static FUNC(void, DCM_CODE) Dcm_BootloaderResponse(void)
     PduIdType pduRxId = 0;
     PduLengthType availabeBufferLength;
     uint8 Data[2] = {0};
-    Std_ReturnType ret;
+    Std_ReturnType ret = E_OK;
 
     if (Dcm_ReqSetProgConditions == TRUE)
     {
-        ret = Dcm_SetProgConditions(DCM_PENDING, &ProgConditions);
+        ret = Dcm_SetProgConditions(DCM_PENDING, &Dcm_ProgConditions);
         if (ret == E_OK)
         {
             /* By this mode switch the DCM informs the BswM to jump to the bootloader.*/
@@ -1451,19 +1043,17 @@ static FUNC(void, DCM_CODE) Dcm_BootloaderResponse(void)
         }
     }
 
-    if (DCM_WARM_START == Dcm_GetProgConditions(&ProgConditions))
+    if (DCM_WARM_START == Dcm_GetProgConditions(&Dcm_ProgConditions))
     {
-        if (ProgConditions.ApplUpdated == TRUE)
+        if (Dcm_ProgConditions.ApplUpdated == TRUE)
         {
             gAppl_UpdataOK_ResponseFlag = TRUE;
-            ProgConditions.ApplUpdated = FALSE;
+            Dcm_ProgConditions.ApplUpdated = FALSE;
             /*receive App updata flag,response 0x51 01*/
 #if (DCM_BSWM_ENABLE == STD_ON)
             BswM_Dcm_ApplicationUpdated();
 #endif
-
             Dcm_GetUDSPhyPduID(&pduRxId);
-
             PduInfo->SduLength = 0;
             (void)Dcm_StartOfReception(pduRxId, PduInfo, 2, &availabeBufferLength);
             Data[0] = 0x10;
@@ -1484,8 +1074,74 @@ static FUNC(void, DCM_CODE) Dcm_BootloaderResponse(void)
         }
     }
 }
+
+#if (STD_ON == DCM_PAGEDBUFFER_ENABLED)
+/**********************************************************************/
+/*
+ * Brief
+ * ServiceId           <None>
+ * Sync/Async          <Synchronous>
+ * Reentrancy          <Non Reentrant>
+ * Param-Name[in]      <None>
+ * Param-Name[out]     <None>
+ * Param-Name[in/out]  <None>
+ * Return              <None>
+ * PreCondition        <None>
+ * CallByAPI           <APIName>
+ */
+/***********************************************************************/
+FUNC(void, DCM_CODE) DslInternal_InitPageBuffer(void)
+{
+    SchM_Enter_Dcm_ExclusiveArea();
+    Dcm_PageBufferData.AlreadyPageSize = 0u;
+    Dcm_PageBufferData.IloopOne = 0u;
+    Dcm_PageBufferData.TotalDtcCount = 0u;
+    Dcm_PageBufferData.TotalSize = 0UL;
+    Dcm_PageBufferData.Filled = FALSE;
+    Dcm_PageBufferData.PageTxOK = FALSE;
+    Dcm_PageBufferData.PageIndex = 0u;
+    Dcm_PageBufferData.LastFilled = TRUE;
+    Dcm_PageBufferData.ThisPageSize = 0u;
+    Dcm_PageBufferData.ReqOffset = 0u;
+    Dcm_PageBufferData.LastFilledSize = 0u;
+    Dcm_PageBufferData.ThisPageTxSize = 0u;
+    Dcm_PageBufferData.LastNotTxDataSize = 0u;
+    Dcm_PageBufferData.TimerStart = FALSE;
+    Dcm_PageBufferData.TimeOut = FALSE;
+    Dcm_PageBufferData.CurTimer = 0UL;
+    Dcm_PageBufferData.ExpiredTimer = 0UL;
+    SchM_Exit_Dcm_ExclusiveArea();
+}
+#endif /* STD_ON == DCM_PAGEDBUFFER_ENABLED */
+
+/**********************************************************************/
+/*
+ * Brief
+ * ServiceId           <None>
+ * Sync/Async          <Synchronous>
+ * Reentrancy          <Non Reentrant>
+ * Param-Name[in]      <None>
+ * Param-Name[out]     <None>
+ * Param-Name[in/out]  <None>
+ * Return              <None>
+ * PreCondition        <None>
+ * CallByAPI           <APIName>
+ */
+/***********************************************************************/
+FUNC(void, DCM_CODE) DslInternal_InitDspProgramInfo(void)
+{
+    SchM_Enter_Dcm_ExclusiveArea();
+    Dcm_DspProgram.address = 0UL;
+    Dcm_DspProgram.blockId = 0x00;
+    Dcm_DspProgram.reqBlockId = 0x00;
+    Dcm_DspProgram.Status = DCM_UDS0X36_INIT;
+    Dcm_DspProgram.MemoryIdInfoIndex = 0xFF;
+    Dcm_DspProgram.BlockLength = 0;
+    Dcm_DspProgram.MemorySize = 0;
+    Dcm_DspProgram.FirstFlag = FALSE;
+    Dcm_DspProgram.DcmLastloadSize = 0;
+    SchM_Exit_Dcm_ExclusiveArea();
+}
+
 #define DCM_STOP_SEC_CODE
 #include "Dcm_MemMap.h"
-/*******************************************************************************
-**                            General Notes                                   **
-*******************************************************************************/

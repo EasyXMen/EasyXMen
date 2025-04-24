@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Nm_Internal.h                                               **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : Wanglili                                                    **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Nm_Internal.h                                               **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : Wanglili                                                    **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 #ifndef NM_INTERNAL_H_
 #define NM_INTERNAL_H_
 
@@ -41,6 +42,9 @@
 #include "NmStack_Types.h"
 #include "Nm_Cfg.h"
 
+#if NM_MULTIPLE_PARTITION_USED == STD_ON
+#include "Os.h"
+#endif
 /*******************************************************************************
 **                      Global Symbols                                        **
 *******************************************************************************/
@@ -120,6 +124,10 @@ typedef struct
 /*******************************************************************************
 **                      Global Data Declaration                               **
 *******************************************************************************/
+#if NM_MULTIPLE_PARTITION_USED == STD_ON
+extern const Os_ApplicationType Nm_ApplicationID;
+#endif /* NM_MULTIPLE_PARTITION_USED == STD_ON */
+
 /*******************************************************************************
 **                      Global Functions                                      **
 *******************************************************************************/

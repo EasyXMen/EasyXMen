@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                           **
- **  FILENAME    : NvM_Inter.c                                                **
- **                                                                           **
- **  Created on  : 2020/5/9 15:21:52                                          **
- **  Author      : tao.yu                                                     **
- **  Vendor      :                                                            **
- **  DESCRIPTION :Containing the entire or parts of NVRAM manager code        **
- **                                                                           **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                     **
- **                                                                           **
- **************************************************************************** */
+ */
 /* PRQA S 3108-- */
+/*
+**************************************************************************** **
+**                                                                           **
+**  FILENAME    : NvM_Inter.c                                                **
+**                                                                           **
+**  Created on  : 2020/5/9 15:21:52                                          **
+**  Author      : tao.yu                                                     **
+**  Vendor      :                                                            **
+**  DESCRIPTION :Containing the entire or parts of NVRAM manager code        **
+**                                                                           **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                     **
+**                                                                           **
+**************************************************************************** */
 
 /* req NVM076 */
 
@@ -3216,11 +3217,26 @@ FUNC(void, NVM_CODE) NvM_InterReadAll(void)
 /* PRQA S 1532,3334-- */ /* MISRA Rule 8.7,Rule 5.3 */
 {
     uint8 l_ResistentChangedSw;
-    uint8 SelectBlockForReadAll;
-    uint8 Changed;
+    uint8 SelectBlockForReadAll = NvM_GetWordBitState(
+        NvM_BlockDescriptor[NvM_CurRunning.BlockId - 1U].FlagGroup,
+        (uint8)NVM_BLOCK_DESC_SELECTBLOCKFORREADALL);
+    uint8 Changed = NvM_GetWordBitState(NvM_CurRunning.AdminFlagGroup, NVM_ADMIN_RAM_CHANGED);
     if (NVM_READALL_FIRST_BLOCKID == NvM_CurRunning.BlockId) /*For MultiJob,start from first block*/
     {
-        NvM_AtomJobReq(NVM_ATOMJOB_READBLOCK);
+#if (NVM_API_CONFIG_CLASS_1 != NVM_API_CONFIG_CLASS)
+        if (((uint8)STD_ON == SelectBlockForReadAll) && ((uint8)STD_OFF == Changed)
+            && (NVM_BLOCK_DATASET != NvM_CurRunning.ManagementType))
+#else
+        if (((uint8)STD_ON == SelectBlockForReadAll) && ((uint8)STD_OFF == Changed))
+#endif
+        {
+            NvM_AtomJobReq(NVM_ATOMJOB_READBLOCK);
+        }
+        else
+        {
+            /* req NVM287*/
+            NvM_JobOverSetFlag(NVM_REQ_BLOCK_SKIPPED, NVM_CRC_REMAIN);
+        }
     }
     else if (NVM_READALL_FIRST_BLOCKID < NvM_CurRunning.BlockId)
     {
@@ -3228,10 +3244,7 @@ FUNC(void, NVM_CODE) NvM_InterReadAll(void)
         {
             NvM_RunTimeHandle();
         }
-        SelectBlockForReadAll = NvM_GetWordBitState(
-            NvM_BlockDescriptor[NvM_CurRunning.BlockId - 1U].FlagGroup,
-            (uint8)NVM_BLOCK_DESC_SELECTBLOCKFORREADALL);
-        Changed = NvM_GetWordBitState(NvM_CurRunning.AdminFlagGroup, NVM_ADMIN_RAM_CHANGED);
+
 #if (NVM_API_CONFIG_CLASS_1 != NVM_API_CONFIG_CLASS)
         if (((uint8)STD_ON == SelectBlockForReadAll) && ((uint8)STD_OFF == Changed)
             && (NVM_BLOCK_DATASET != NvM_CurRunning.ManagementType))

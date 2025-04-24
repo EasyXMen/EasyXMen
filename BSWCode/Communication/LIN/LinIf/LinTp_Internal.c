@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : LinIf_Internal.c                                            **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : HuRongbo                                                    **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : LinIf_Internal.c                                            **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : HuRongbo                                                    **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 /*******************************************************************************
 **                      Revision Control History                              **
 *******************************************************************************/
@@ -50,7 +51,7 @@
 #include "LinIf_Internal.h"
 #if (STD_ON == LINIF_SLAVE_SUPPORT)
 #include "LinIf_Slave.h"
-#endif /*STD_ON == LINIF_SLAVE_SUPPORT*/
+#endif
 /*******************************************************************************
 **                       Version  Check                                       **
 *******************************************************************************/
@@ -117,7 +118,7 @@ LinTp_GetRxNSduByNad(NetworkHandleType ch, uint8 Nad)
 #if (STD_ON == LINIF_SLAVE_SUPPORT)
                 if (LINIF_SLAVE == LINIF_GET_NODETYPE(ch))
                 {
-                    ret = LinIf_SlaveGetConfigedNAD(ch, &runtimeNad);
+                    ret = LinIf_SlaveGetConfiguredNAD(ch, &runtimeNad);
                     if ((E_OK == ret) && (runtimeNad == Nad))
                     {
                         findFlag = TRUE;
@@ -133,7 +134,7 @@ LinTp_GetRxNSduByNad(NetworkHandleType ch, uint8 Nad)
                 }
             }
 
-            if (findFlag)
+            if (TRUE == findFlag)
             {
                 retRxNSdu = rxNSdu;
                 break;
@@ -152,4 +153,4 @@ LinTp_GetRxNSduByNad(NetworkHandleType ch, uint8 Nad)
 **                      Private Function Definitions                          **
 *******************************************************************************/
 
-#endif /* LINIF_TP_SUPPORTED == STD_ON */
+#endif

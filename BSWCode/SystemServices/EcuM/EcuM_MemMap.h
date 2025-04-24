@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : EcuM_MemMap.h                                               **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : <Auto generated>                                            **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Memory mapping abstraction declaration of EcuM              **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                       **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : EcuM_MemMap.h                                               **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : <Auto generated>                                            **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Memory mapping abstraction declaration of EcuM              **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                       **
+**                                                                            **
+*******************************************************************************/
 /*******************************************************************************
 **                      Revision Control History                              **
 *******************************************************************************/
@@ -57,7 +58,7 @@
 /* PRQA S 0883,0791++ */ /* MISAR Dir-4.10,Rule-5.4 */
 #define MEMMAP_ERROR
 
-/* Total section items: 16 */
+/* Total section items: 17 */
 #if defined(START_WITH_IF)
 #undef MEMMAP_ERROR
 
@@ -436,30 +437,55 @@
 #endif
 #define STOP_SEC_VAR_CLEARED_UNSPECIFIED
 
-/*Index:15  Section name :VAR_INIT_BOOLEAN*/
-#elif defined ECUM_START_SEC_VAR_INIT_BOOLEAN
-#undef ECUM_START_SEC_VAR_INIT_BOOLEAN
+/*Index:15  Section name :VAR_CLONE_CLEARED_UNSPECIFIED*/
+#elif defined ECUM_START_SEC_VAR_CLONE_CLEARED_UNSPECIFIED
+#undef ECUM_START_SEC_VAR_CLONE_CLEARED_UNSPECIFIED
 #undef MEMMAP_ERROR
 #ifndef MEMMAP_ERROR_SEC_NO_MATCH
 #define MEMMAP_ERROR_SEC_NO_MATCH
 #else
 #error "EcuM_MemMap.h, section is used consecutively many times."
 #endif
-#define ECUM_START_SEC_VAR_INIT_BOOLEAN_NO_MATCH
-#define START_SEC_VAR_INIT_BOOLEAN
+#define ECUM_START_SEC_VAR_CLONE_CLEARED_UNSPECIFIED_NO_MATCH
+#define START_SEC_VAR_CLONE_CLEARED_UNSPECIFIED
 
-#elif defined ECUM_STOP_SEC_VAR_INIT_BOOLEAN
-#undef ECUM_STOP_SEC_VAR_INIT_BOOLEAN
+#elif defined ECUM_STOP_SEC_VAR_CLONE_CLEARED_UNSPECIFIED
+#undef ECUM_STOP_SEC_VAR_CLONE_CLEARED_UNSPECIFIED
 #undef MEMMAP_ERROR
-#ifdef ECUM_START_SEC_VAR_INIT_BOOLEAN_NO_MATCH
-#undef ECUM_START_SEC_VAR_INIT_BOOLEAN_NO_MATCH
+#ifdef ECUM_START_SEC_VAR_CLONE_CLEARED_UNSPECIFIED_NO_MATCH
+#undef ECUM_START_SEC_VAR_CLONE_CLEARED_UNSPECIFIED_NO_MATCH
 #else
 #error "EcuM_MemMap.h, no matching section was used."
 #endif
 #ifdef MEMMAP_ERROR_SEC_NO_MATCH
 #undef MEMMAP_ERROR_SEC_NO_MATCH
 #endif
-#define STOP_SEC_VAR_INIT_BOOLEAN
+#define STOP_SEC_VAR_CLONE_CLEARED_UNSPECIFIED
+
+/*Index:16  Section name :VAR_CLONE_INIT_BOOLEAN*/
+#elif defined ECUM_START_SEC_VAR_CLONE_INIT_BOOLEAN
+#undef ECUM_START_SEC_VAR_CLONE_INIT_BOOLEAN
+#undef MEMMAP_ERROR
+#ifndef MEMMAP_ERROR_SEC_NO_MATCH
+#define MEMMAP_ERROR_SEC_NO_MATCH
+#else
+#error "EcuM_MemMap.h, section is used consecutively many times."
+#endif
+#define ECUM_START_SEC_VAR_CLONE_INIT_BOOLEAN_NO_MATCH
+#define START_SEC_VAR_CLONE_INIT_BOOLEAN
+
+#elif defined ECUM_STOP_SEC_VAR_CLONE_INIT_BOOLEAN
+#undef ECUM_STOP_SEC_VAR_CLONE_INIT_BOOLEAN
+#undef MEMMAP_ERROR
+#ifdef ECUM_START_SEC_VAR_CLONE_INIT_BOOLEAN_NO_MATCH
+#undef ECUM_START_SEC_VAR_CLONE_INIT_BOOLEAN_NO_MATCH
+#else
+#error "EcuM_MemMap.h, no matching section was used."
+#endif
+#ifdef MEMMAP_ERROR_SEC_NO_MATCH
+#undef MEMMAP_ERROR_SEC_NO_MATCH
+#endif
+#define STOP_SEC_VAR_CLONE_INIT_BOOLEAN
 
 #endif /* START_WITH_IF */
 

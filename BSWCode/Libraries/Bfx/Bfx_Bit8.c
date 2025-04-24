@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Bfx_Bit8.c                                                  **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : stanleyluo                                                  **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Implementation for APIs of 8-bit data                       **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                       **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Bfx_Bit8.c                                                  **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : stanleyluo                                                  **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Implementation for APIs of 8-bit data                       **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                       **
+**                                                                            **
+*******************************************************************************/
 
 /*******************************************************************************
 **                      Includes                                              **
@@ -80,12 +81,12 @@
 #define BFX_START_SEC_CODE
 #include "Bfx_MemMap.h"
 /**
- * Set the request bit position of the input value to 1.
+ * set logical status of input data as '1' at the requested bit position.
  * Service ID: 0x01
  * Sync/Async: Synchronous
  * Reentrancy: Reentrant
  * Parameters(IN): bitPn, Bit position
- * Parameters(INOUT): data, Pointer to input value
+ * Parameters(INOUT): data, Pointer to input data
  * Parameters(OUT): NA
  * Return value: NA
  */
@@ -96,12 +97,12 @@ Bfx_SetBit_u8u8(P2VAR(uint8, AUTOMATIC, BFX_APPL_DATA) data, uint8 bitPn)
 }
 
 /**
- * Set the request bit position of the input value to 0.
+ * clear the logical status of the input data to '0' at the requested bit position.
  * Service ID: 0x06
  * Sync/Async: Synchronous
  * Reentrancy: Reentrant
  * Parameters(IN): bitPn, Bit position
- * Parameters(INOUT): data, Pointer to input value
+ * Parameters(INOUT): data, Pointer to input data
  * Parameters(OUT): NA
  * Return value: NA
  */
@@ -112,11 +113,11 @@ Bfx_ClrBit_u8u8(P2VAR(uint8, AUTOMATIC, BFX_APPL_DATA) data, uint8 bitPn)
 }
 
 /**
- * return the logical level of the input value at the requested bit position.
+ * return the logical status of the input data for the requested bit position.
  * Service ID: 0x0a
  * Sync/Async: Synchronous
  * Reentrancy: Reentrant
- * Parameters(IN): data, input value
+ * Parameters(IN): data, input data
  *                 bitPn, Bit position
  * Parameters(INOUT):NA
  * Parameters(OUT): NA
@@ -135,15 +136,15 @@ Bfx_GetBit_u8u8_u8(uint8 data, uint8 bitPn)
 }
 
 /**
- * Set the input value to "1" or "0" based on the "Status"
- * data from "BitStartPn" to "BitStartPn+BitLn".
+ * set the input data as '1' or '0' as per 'Status' value starting from
+ * 'BitStartPn' for the length 'BitLn'.
  * Service ID: 0x20
  * Sync/Async: Synchronous
  * Reentrancy: Reentrant
  * Parameters(IN): bitStartPn, Start bit position
  *                 bitLn, Bit field length
  *                 status, Status value
- * Parameters(INOUT):data, Pointer to input value
+ * Parameters(INOUT):data, Pointer to input data
  * Parameters(OUT): NA
  * Return value: NA
  */
@@ -171,12 +172,12 @@ Bfx_SetBits_u8u8u8u8(P2VAR(uint8, AUTOMATIC, BFX_APPL_DATA) data, uint8 bitStart
 }
 
 /**
- * return the Bits of the input value starting from 'BitStartPn' for the length
+ * return the Bits of the input data starting from 'BitStartPn' for the length
  *  of 'BitLn'.
  * Service ID: 0x26
  * Sync/Async: Synchronous
  * Reentrancy: Reentrant
- * Parameters(IN): data, input value
+ * Parameters(IN): data, input data
  *                 bitStartPn, Start bit position
  *                 bitLn, Bit field length
  * Parameters(INOUT):NA
@@ -204,7 +205,7 @@ Bfx_GetBits_u8u8u8_u8(uint8 data, uint8 bitStartPn, uint8 bitLn)
  * Sync/Async: Synchronous
  * Reentrancy: Reentrant
  * Parameters(IN): mask, Mask used to set bits
- * Parameters(INOUT):data, Pointer to input value
+ * Parameters(INOUT):data, Pointer to input data
  * Parameters(OUT): NA
  * Return value: NA
  */
@@ -215,13 +216,13 @@ Bfx_SetBitMask_u8u8(P2VAR(uint8, AUTOMATIC, BFX_APPL_DATA) data, uint8 mask)
 }
 
 /**
- * clear the logical status to '0' for the input value for all the bit positions
+ * clear the logical status to '0' for the input data for all the bit positions
  *  as per the mask.
  * Service ID: 0x30
  * Sync/Async: Synchronous
  * Reentrancy: Reentrant
  * Parameters(IN): mask, mask value
- * Parameters(INOUT):data, Pointer to input value
+ * Parameters(INOUT):data, Pointer to input data
  * Parameters(OUT): NA
  * Return value: NA
  */
@@ -232,12 +233,12 @@ Bfx_ClrBitMask_u8u8(P2VAR(uint8, AUTOMATIC, BFX_APPL_DATA) data, uint8 mask)
 }
 
 /**
- * return TRUE, if all bits defined in Mask value are set in the input value
+ * return TRUE, if all bits defined in Mask value are set in the input Data
  * value. In all other cases this function shall return FALSE.
  * Service ID: 0x36
  * Sync/Async: Synchronous
  * Reentrancy: Reentrant
- * Parameters(IN):data, input value
+ * Parameters(IN):data, input data
  *                mask, mask value
  * Parameters(INOUT):NA
  * Parameters(OUT): NA
@@ -257,12 +258,12 @@ Bfx_TstBitMask_u8u8_u8(uint8 data, uint8 mask)
 }
 
 /**
- * makes a test on the input value and if at least one bit is set as per the
+ * makes a test on the input data and if at least one bit is set as per the
  * mask, then the function shall return TRUE, otherwise it shall return FALSE.
  * Service ID: 0x3a
  * Sync/Async: Synchronous
  * Reentrancy: Reentrant
- * Parameters(IN):data, input value
+ * Parameters(IN):data, input data
  *                mask, mask value
  * Parameters(INOUT):NA
  * Parameters(OUT): NA
@@ -286,7 +287,7 @@ Bfx_TstBitLnMask_u8u8_u8(uint8 data, uint8 mask)
  * Service ID: 0x40
  * Sync/Async: Synchronous
  * Reentrancy: Reentrant
- * Parameters(IN):data, input value
+ * Parameters(IN):data, input data
  * Parameters(INOUT):NA
  * Parameters(OUT): NA
  * Return value: status
@@ -326,7 +327,7 @@ Bfx_TstParityEven_u8_u8(uint8 data)
  * Sync/Async: Synchronous
  * Reentrancy: Reentrant
  * Parameters(IN):NA
- * Parameters(INOUT):data, Pointer to input value
+ * Parameters(INOUT):data, Pointer to input data
  * Parameters(OUT): NA
  * Return value: NA
  */
@@ -343,7 +344,7 @@ Bfx_ToggleBits_u8(P2VAR(uint8, AUTOMATIC, BFX_APPL_DATA) data)
  * Sync/Async: Synchronous
  * Reentrancy: Reentrant
  * Parameters(IN):mask, mask value
- * Parameters(INOUT):data, Pointer to input value
+ * Parameters(INOUT):data, Pointer to input data
  * Parameters(OUT): NA
  * Return value: NA
  */
@@ -361,7 +362,7 @@ Bfx_ToggleBitMask_u8u8(P2VAR(uint8, AUTOMATIC, BFX_APPL_DATA) data, uint8 mask)
  * Sync/Async: Synchronous
  * Reentrancy: Reentrant
  * Parameters(IN):shiftCnt, Shift right count
- * Parameters(INOUT):data, Pointer to input value
+ * Parameters(INOUT):data, Pointer to input data
  * Parameters(OUT): NA
  * Return value: NA
  */
@@ -379,7 +380,7 @@ Bfx_ShiftBitRt_u8u8(P2VAR(uint8, AUTOMATIC, BFX_APPL_DATA) data, uint8 shiftCnt)
  * Sync/Async: Synchronous
  * Reentrancy: Reentrant
  * Parameters(IN):shiftCnt, Shift left count
- * Parameters(INOUT):data, Pointer to input value
+ * Parameters(INOUT):data, Pointer to input data
  * Parameters(OUT): NA
  * Return value: NA
  */
@@ -396,7 +397,7 @@ Bfx_ShiftBitLt_u8u8(P2VAR(uint8, AUTOMATIC, BFX_APPL_DATA) data, uint8 shiftCnt)
  * Sync/Async: Synchronous
  * Reentrancy: Reentrant
  * Parameters(IN):shiftCnt, Shift count
- * Parameters(INOUT):data, Pointer to input value
+ * Parameters(INOUT):data, Pointer to input data
  * Parameters(OUT): NA
  * Return value: NA
  */
@@ -424,7 +425,7 @@ Bfx_RotBitRt_u8u8(P2VAR(uint8, AUTOMATIC, BFX_APPL_DATA) data, uint8 shiftCnt)
  * Sync/Async: Synchronous
  * Reentrancy: Reentrant
  * Parameters(IN):shiftCnt, Shift count
- * Parameters(INOUT):data, Pointer to input value
+ * Parameters(INOUT):data, Pointer to input data
  * Parameters(OUT): NA
  * Return value: NA
  */
@@ -476,7 +477,7 @@ Bfx_CopyBit_u8u8u8u8(P2VAR(uint8, AUTOMATIC, BFX_APPL_DATA) destData, uint8 dest
 }
 
 /**
- * put bits as mentioned in Pattern to the input value from the specified bit
+ * put bits as mentioned in Pattern to the input Data from the specified bit
  * position.
  * Service ID: 0x70
  * Sync/Async: Synchronous
@@ -484,7 +485,7 @@ Bfx_CopyBit_u8u8u8u8(P2VAR(uint8, AUTOMATIC, BFX_APPL_DATA) destData, uint8 dest
  * Parameters(IN):bitStartPn, Start bit position
  *                bitLn, Bit field length
  *                pattern, Pattern to be set
- * Parameters(INOUT):data, Pointer to input value
+ * Parameters(INOUT):data, Pointer to input data
  * Parameters(OUT): NA
  * Return value: NA
  */
@@ -501,13 +502,13 @@ Bfx_PutBits_u8u8u8u8(P2VAR(uint8, AUTOMATIC, BFX_APPL_DATA) data, uint8 bitStart
 
 /**
  * put all bits defined in Pattern and for which the corresponding Mask bit is
- *  set to 1 in the input value.
+ *  set to 1 in the input Data.
  * Service ID: 0x80
  * Sync/Async: Synchronous
  * Reentrancy: Reentrant
  * Parameters(IN):pattern, Pattern to be set
  *                mask, mask value
- * Parameters(INOUT):data, Pointer to input value
+ * Parameters(INOUT):data, Pointer to input data
  * Parameters(OUT): NA
  * Return value: NA
  */
@@ -520,14 +521,14 @@ Bfx_PutBitsMask_u8u8u8(P2VAR(uint8, AUTOMATIC, BFX_APPL_DATA) data, uint8 patter
 }
 
 /**
- * update the bit specified by BitPn of input value as '1' or '0' as per
+ * update the bit specified by BitPn of input data as '1' or '0' as per
  * 'Status' value.
  * Service ID: 0x85
  * Sync/Async: Synchronous
  * Reentrancy: Reentrant
  * Parameters(IN):bitPn, Bit position
  *                status, status value
- * Parameters(INOUT):data, Pointer to input value
+ * Parameters(INOUT):data, Pointer to input data
  * Parameters(OUT): NA
  * Return value: NA
  */

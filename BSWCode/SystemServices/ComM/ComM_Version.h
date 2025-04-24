@@ -18,6 +18,10 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
+ */
+/* PRQA S 3108-- */
+/*
+ ********************************************************************************
  ************************************************************************************************************************
  ** **
  **  @file               : ComM_Version.h **
@@ -29,7 +33,6 @@
  **  @specification(s)   : AUTOSAR classic Platform R19-11 **
  ** **
  ***********************************************************************************************************************/
-/* PRQA S 3108-- */
 
 #ifndef COMM_VERSION_H_
 #define COMM_VERSION_H_
@@ -97,7 +100,7 @@
 #error COMM_SW_PATCH_VERSION already defined
 #endif
 /** \brief AUTOSAR module patch version */
-#define COMM_SW_PATCH_VERSION 13u
+#define COMM_SW_PATCH_VERSION 14u
 
 /*----------------------------------[AUTOSAR config depend on version identification]---------------------------------*/
 #if (defined COMM_SW_CFG_DEP_MAJOR_VERSION)

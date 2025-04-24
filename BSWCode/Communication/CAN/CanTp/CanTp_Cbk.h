@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                           **
- **  FILENAME    : CanTp_Cbk.h                                                **
- **                                                                           **
- **  Created on  : 2021/7/30 14:29:43                                         **
- **  Author      : tao.yu                                                     **
- **  Vendor      :                                                            **
- **  DESCRIPTION : Call-back function declarations                            **
- **                                                                           **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                     **
- **                                                                           **
- **************************************************************************** */
+ */
 /* PRQA S 3108-- */
+/*
+**************************************************************************** **
+**                                                                           **
+**  FILENAME    : CanTp_Cbk.h                                                **
+**                                                                           **
+**  Created on  : 2021/7/30 14:29:43                                         **
+**  Author      : tao.yu                                                     **
+**  Vendor      :                                                            **
+**  DESCRIPTION : Call-back function declarations                            **
+**                                                                           **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                     **
+**                                                                           **
+**************************************************************************** */
 
 #ifndef CANTP_CBK_H
 #define CANTP_CBK_H
@@ -45,12 +46,11 @@ BEGIN_C_DECLS
 /*
  * Brief               This function is called by the CAN Interface after a successful
  *                     reception of a RX CAN L-PDU.
- * ServiceId           0x04
+ * ServiceId           0x42
  * Sync/Async          Synchronous
- * Reentrancy          Reentrant
- * Param-Name[in]      CanTpRxPduId the received N-PDU ID
- *                     CanTpRxPduPtr indicator of structure with received
- *                                   L-SDU(payload) and data length
+ * Reentrancy          Reentrant for different PduIds. Non reentrant for the same PduId.
+ * Param-Name[in]      RxPduId    the received N-PDU ID
+ *                     PduInfoPtr indicator of structure with received L-SDU(payload) and data length
  * Param-Name[out]     N/A
  * Param-Name[in/out]  N/A
  * Return              N/A
@@ -63,10 +63,10 @@ extern FUNC(void, CANTP_APPL_CODE)
 /*
  * Brief               All transmitted CAN frames belonging to the CAN Transport
  *                     Layer will be confirmed by this function.
- * ServiceId           0x05
+ * ServiceId           0x40
  * Sync/Async          Synchronous
- * Reentrancy          Reentrant
- * Param-Name[in]      CanTpTxPduId ID of CAN L-PDU that has been transmitted
+ * Reentrancy          Reentrant for different PduIds. Non reentrant for the same PduId.
+ * Param-Name[in]      TxPduId ID of CAN L-PDU that has been transmitted
  * Param-Name[out]     N/A
  * Param-Name[in/out]  N/A
  * Return              N/A

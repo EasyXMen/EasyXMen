@@ -18,26 +18,28 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Eep_62.h                                                    **
- **                                                                            **
- **  Created on  : 2022/02/15                                                  **
- **  Author      : Haibin.Shao                                                 **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Eep_62.h                                                    **
+**                                                                            **
+**  Created on  : 2022/02/15                                                  **
+**  Author      : Haibin.Shao                                                 **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 
 /*======================[Revision   History]==================================*/
 /*  <VERSION>   <DATE>      <AUTHOR>        <REVISION LOG>
  *  V1.0.0      20210123    Haibin.Shao     First Version
  *  V1.0.1      20230918    tao.yu          remove warning
  *  V1.0.2      20240202    xue.han         QAC
+ *  V2.0.3      20240813    haibin.shao     Append QAC remarks and remove main function declarations from header files
  */
 /*============================================================================*/
 #ifndef EEP_62_H
@@ -56,7 +58,7 @@
 #define EEP_62_AR_RELEASE_PATCH_VERSION 0U
 #define EEP_62_SW_MAJOR_VERSION         1U
 #define EEP_62_SW_MINOR_VERSION         0U
-#define EEP_62_SW_PATCH_VERSION         2U
+#define EEP_62_SW_PATCH_VERSION         3U
 
 /*==============[Macros]========================================================*/
 

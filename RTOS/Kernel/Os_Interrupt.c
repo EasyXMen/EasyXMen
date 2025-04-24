@@ -18,21 +18,22 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Interrupt.c                                                 **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : i-soft-os                                                   **
- **  Vendor      :                                                             **
- **  DESCRIPTION : interrupt manager                                           **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
- **  Version :   AUTOSAR classic Platform R19--Function Safety                 **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Interrupt.c                                                 **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : i-soft-os                                                   **
+**  Vendor      :                                                             **
+**  DESCRIPTION : interrupt manager                                           **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
+**  Version :   AUTOSAR classic Platform R19--Function Safety                 **
+**                                                                            **
+*******************************************************************************/
 /*=======[I N C L U D E S]====================================================*/
 #include "Os_Internal.h"
 
@@ -46,29 +47,29 @@
 
 /*=======[I N T E R N A L   D A T A]==========================================*/
 /* PRQA S 0791 ++*/ /* MISRA Rule 5.4 */ /*OS_INTERRUPT_SEGMENTNAME_SIMILAR_003*/
-#define OS_START_SEC_VAR_CLEARED_CLONE_16
+#define OS_START_SEC_VAR_CLONE_16
 #include "Os_MemMap.h"
 static VAR(Os_IPLType, OS_VAR) Os_cfgIsr2IplMax;
-#define OS_STOP_SEC_VAR_CLEARED_CLONE_16
+#define OS_STOP_SEC_VAR_CLONE_16
 #include "Os_MemMap.h"
 
-#define OS_START_SEC_VAR_CLEARED_CLONE_UNSPECIFIED
+#define OS_START_SEC_VAR_CLONE_UNSPECIFIED
 #include "Os_MemMap.h"
 static VAR(Os_CallLevelType, OS_VAR) Os_SaveLevel;
-#define OS_STOP_SEC_VAR_CLEARED_CLONE_UNSPECIFIED
+#define OS_STOP_SEC_VAR_CLONE_UNSPECIFIED
 #include "Os_MemMap.h"
 
 #if (FALSE == CFG_TIMING_PROTECTION_ENABLE)
-#define OS_START_SEC_VAR_CLEARED_CLONE_32
+#define OS_START_SEC_VAR_CLONE_32
 #include "Os_MemMap.h"
 static VAR(Os_ArchMsrType, OS_VAR) Os_SaveAllInt;
-#define OS_STOP_SEC_VAR_CLEARED_CLONE_32
+#define OS_STOP_SEC_VAR_CLONE_32
 #include "Os_MemMap.h"
 
-#define OS_START_SEC_VAR_CLEARED_CLONE_32
+#define OS_START_SEC_VAR_CLONE_32
 #include "Os_MemMap.h"
 static VAR(Os_ArchMsrType, OS_VAR) Os_SaveAllIntNested;
-#define OS_STOP_SEC_VAR_CLEARED_CLONE_32
+#define OS_STOP_SEC_VAR_CLONE_32
 #include "Os_MemMap.h"
 #endif              /* FALSE == CFG_TIMING_PROTECTION_ENABLE */
 /* PRQA S 0791-- */ /* MISRA Rule 5.4 */
@@ -102,7 +103,7 @@ FUNC(void, OS_CODE) Os_InitInterrupt(void)
     VAR(uint16, OS_VAR) j;
     /* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */ /* OS_INTERRUPT_COMPILER_001 */
     P2VAR(Os_ICBType, AUTOMATIC, OS_VAR) pICB;
-/* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
+    /* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
 #endif
 
     VAR(uint16, OS_VAR) vCoreId = Os_SCB.sysCore;
@@ -781,10 +782,23 @@ FUNC(void, OS_CODE) Os_ResumeAllInterrupts(void)
                     Os_TmProtTaskEnd(Os_SCB.sysRunningTaskID, TP_TASK_SUS_ALL_INT);
                 }
             }
+
+#if (CFG_INTERRUPT_MONITOR_ENABLE == TRUE)
+            if (TRUE == Os_InterInitFlag)
+            {
+                Os_InterMonitorEndRecord(OS_ALL_SUSPEND);
+            }
+#endif
             Os_ArchEnableAllInt_ButTimingProtInt();
         }
 #else
         {
+#if (CFG_INTERRUPT_MONITOR_ENABLE == TRUE)
+            if (TRUE == Os_InterInitFlag)
+            {
+                Os_InterMonitorEndRecord(OS_ALL_SUSPEND);
+            }
+#endif
             Os_ArchRestoreInt(Os_SaveAllIntNested);
         }
 #endif /* TRUE == CFG_TIMING_PROTECTION_ENABLE */
@@ -846,10 +860,23 @@ FUNC(void, OS_CODE) Os_SuspendAllInterrupts(void)
                 Os_TmProtTaskStart(Os_SCB.sysRunningTaskID, TP_TASK_SUS_ALL_INT);
             }
         }
+
+#if (CFG_INTERRUPT_MONITOR_ENABLE == TRUE)
+        if (TRUE == Os_InterInitFlag)
+        {
+            Os_InterMonitorStartRecord(OS_ALL_SUSPEND);
+        }
+#endif
         Os_ArchDisableAllInt_ButTimingProtInt();
     }
 #else
     {
+#if (CFG_INTERRUPT_MONITOR_ENABLE == TRUE)
+        if (TRUE == Os_InterInitFlag)
+        {
+            Os_InterMonitorStartRecord(OS_ALL_SUSPEND);
+        }
+#endif
         Os_ArchSuspendInt(&Os_SaveAllIntNested);
     }
 #endif /* TRUE == CFG_TIMING_PROTECTION_ENABLE */
@@ -934,7 +961,12 @@ FUNC(void, OS_CODE) Os_ResumeOSInterrupts(void)
                 }
             }
 #endif /* TRUE == CFG_TIMING_PROTECTION_ENABLE */
-
+#if (CFG_INTERRUPT_MONITOR_ENABLE == TRUE)
+            if (TRUE == Os_InterInitFlag)
+            {
+                Os_InterMonitorEndRecord(OS_OS_SUSPEND);
+            }
+#endif
             Os_ArchSetIpl(Os_SaveOsIntNested, OS_ISR_ENABLE);
         }
     }
@@ -998,10 +1030,16 @@ FUNC(void, OS_CODE) Os_SuspendOSInterrupts(void)
         }
 #endif /* TRUE == CFG_TIMING_PROTECTION_ENABLE */
 
-        OS_ARCH_ENTRY_CRITICAL(); /* PRQA S 3469 */ /* MISRA  Dir-4.9*/ /* OS_INTERRUPT_MACRO_004 */
+        OS_ARCH_SUSPEND_ALLINT(); /* PRQA S 3469 */ /* MISRA  Dir-4.9*/ /* OS_INTERRUPT_MACRO_004 */
         Os_SaveOsIntNested = Os_ArchGetIpl();
+#if (CFG_INTERRUPT_MONITOR_ENABLE == TRUE)
+        if (TRUE == Os_InterInitFlag)
+        {
+            Os_InterMonitorStartRecord(OS_OS_SUSPEND);
+        }
+#endif
         Os_ArchSetIpl(Os_cfgIsr2IplMax, OS_ISR_DISABLE);
-        OS_ARCH_EXIT_CRITICAL(); /* PRQA S 3469 */ /* MISRA  Dir-4.9*/ /* OS_INTERRUPT_MACRO_004 */
+        OS_ARCH_RESTORE_ALLINT(); /* PRQA S 3469 */ /* MISRA  Dir-4.9*/ /* OS_INTERRUPT_MACRO_004 */
     }
 
     Os_SuspendOsCount++;
@@ -1081,6 +1119,10 @@ FUNC(ISRType, OS_CODE) GetISRID(void)
 /******************************************************************************/
 FUNC(void, OS_CODE) Os_EnterISR2(void)
 {
+#if (TRUE == CFG_LOAD_RATIO_CALC_ENABLE)
+    Os_EnterIsrRecordTick(Os_IntCfgIsrId);
+#endif /* TRUE == CFG_LOAD_RATIO_CALC_ENABLE */
+
 #if ((TRUE == CFG_STACK_CHECK) && (CFG_ISR2_MAX > 0U))
     VAR(Os_StackPtrType, OS_VAR) StackPtr;
 
@@ -1096,6 +1138,14 @@ FUNC(void, OS_CODE) Os_EnterISR2(void)
     }
     Os_StackMonitor(StackPtr);
 #endif /* TRUE == CFG_STACK_CHECK && CFG_ISR2_MAX > 0U */
+
+#if (CFG_INTERRUPT_MONITOR_ENABLE == TRUE)
+    Os_InterMonitorRATIO();
+#endif
+
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceIsrEnter(Os_IntCfgIsrId);
+#endif /* TRUE == CFG_TRACE_ENABLE */
 
 #if (TRUE == CFG_INT_NEST_ENABLE)
     if (0U == Os_IntNestISR2)
@@ -1117,7 +1167,9 @@ FUNC(void, OS_CODE) Os_EnterISR2(void)
         Os_SCB.sysIsrNestQueue[Os_IntNestISR2 - 1U] = Os_IntCfgIsrId;
         Os_SCB.sysRunningIsrCat2Id = Os_IntCfgIsrId;
         Os_SCB.sysInIsrCat2 = TRUE;
-
+#if (TRUE == CFG_SCHEDULE_COUNT_MONITOR)
+        Os_IncrementIsr2ScheduleCount(Os_IntCfgIsrId);
+#endif
 /*Writing the running ApplID and Object */
 #if (CFG_OSAPPLICATION_MAX > 0U)
         Os_SCB.sysRunningAppID = Os_ObjectAppCfg[OBJECT_ISR][Os_SCB.sysRunningIsrCat2Id].hostApp;
@@ -1158,6 +1210,11 @@ FUNC(void, OS_CODE) Os_EnterISR2(void)
 /******************************************************************************/
 FUNC(void, OS_CODE) Os_ExitISR2(void)
 {
+#if (TRUE == CFG_LOAD_RATIO_CALC_ENABLE)
+    Os_IsrType isrid = Os_SCB.sysRunningIsrCat2Id;
+    VAR(uint32, OS_VAR) curTicks;
+#endif
+
 #if ((TRUE == CFG_STACK_CHECK) && (CFG_ISR2_MAX > 0U))
     Os_StackPtrType StackPtr = Os_ISR2Stack[Os_SCB.sysIsrNestQueue[Os_IntNestISR2 - 1U]].stackBottom;
     Os_StackMonitor(StackPtr);
@@ -1230,12 +1287,27 @@ FUNC(void, OS_CODE) Os_ExitISR2(void)
         Os_SCB.sysRunningAppID = Os_ObjectAppCfg[OBJECT_ISR][Os_SCB.sysRunningIsrCat2Id].hostApp;
 #endif
 
+#if (TRUE == CFG_SCHEDULE_COUNT_MONITOR)
+        Os_IncrementIsr2ScheduleCount(Os_SCB.sysRunningIsrCat2Id);
+#endif
+
 #if (TRUE == CFG_MEMORY_PROTECTION_ENABLE)
         Os_MemProtIsrMap();
 #endif
     }
 #endif /* TRUE == CFG_INT_NEST_ENABLE */
 
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceIsrExit(isrid, Os_SCB.sysRunningIsrCat2Id);
+#endif /* TRUE == CFG_TRACE_ENABLE */
+
+#if (TRUE == CFG_LOAD_RATIO_CALC_ENABLE)
+    curTicks = Os_ExitIsrRecordTick(isrid);
+    if (0u == Os_GetObjLocalId(isrid))
+    {
+        Os_CalcLoadRatio(curTicks);
+    }
+#endif /* TRUE == CFG_LOAD_RATIO_CALC_ENABLE */
     return;
 }
 #define OS_STOP_SEC_CODE
@@ -1287,6 +1359,14 @@ FUNC(void, OS_CODE) Os_EnterISR1(void)
     Os_StackMonitor(StackPtr);
 #endif /* TRUE == CFG_STACK_CHECK */
 
+#if (TRUE == CFG_LOAD_RATIO_CALC_ENABLE)
+    Os_EnterIsrRecordTick(Os_IntCfgIsrId);
+#endif /* TRUE == CFG_LOAD_RATIO_CALC_ENABLE */
+
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceIsrEnter(Os_IntCfgIsrId);
+#endif /* TRUE == CFG_TRACE_ENABLE */
+
     Os_SCB.sysIsrNestQueue[Os_IntNestISR2 + Os_IntNestISR1] = Os_IntCfgIsrId;
 }
 #define OS_STOP_SEC_CODE
@@ -1316,6 +1396,22 @@ FUNC(void, OS_CODE) Os_ExitISR1(void)
     Os_StackPtrType StackPtr = Os_SystemStack->stackBottom;
     Os_StackMonitor(StackPtr);
 #endif
+
+    Os_IntCfgIsrId = Os_SCB.sysIsrNestQueue[Os_IntNestISR2 + Os_IntNestISR1 - 1u];
+#if (TRUE == CFG_TRACE_ENABLE)
+    if ((Os_IntNestISR2 + Os_IntNestISR1) > 1u)
+    {
+        Os_TraceIsrExit(Os_IntCfgIsrId, Os_SCB.sysIsrNestQueue[Os_IntNestISR2 + Os_IntNestISR1 - 2u]);
+    }
+    else
+    {
+        Os_TraceIsrExit(Os_IntCfgIsrId, Os_IntCfgIsrId);
+    }
+#endif /* TRUE == CFG_TRACE_ENABLE */
+
+#if (TRUE == CFG_LOAD_RATIO_CALC_ENABLE)
+    (void)Os_ExitIsrRecordTick(Os_IntCfgIsrId);
+#endif /* TRUE == CFG_LOAD_RATIO_CALC_ENABLE */
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"

@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : EthSM.h                                                     **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : HuRongbo                                                    **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19_11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : EthSM.h                                                     **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : HuRongbo                                                    **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19_11                      **
+**                                                                            **
+*******************************************************************************/
 
 /*******************************************************************************
 **                      Revision Control History                              **
@@ -70,6 +71,7 @@
 #define ETHSM_E_INVALID_NETWORK_HANDLE 0x04U
 #define ETHSM_E_INVALID_TCP_IP_MODE    0x05U
 #define ETHSM_E_PARAM_CONTROLLER       0x07U
+#define ETHSM_E_PARTITION              0x08U
 
 /*service id*/
 #define ETHSM_SID_INIT                   0x07U
@@ -125,7 +127,7 @@ FUNC(void, ETHSM_CODE) EthSM_Init(void);
 /******************************************************************************/
 #if (STD_ON == ETHSM_VERSION_INFO_API)
 FUNC(void, ETHSM_CODE) EthSM_GetVersionInfo(P2VAR(Std_VersionInfoType, AUTOMATIC, AUTOMATIC) VersionInfo);
-#endif /* STD_ON == ETHSM_VERSION_INFO_API */
+#endif
 
 /******************************************************************************/
 /*

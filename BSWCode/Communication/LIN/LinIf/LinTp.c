@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : LinTp.c                                                     **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : HuRongbo                                                    **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Implementation for LinIf                                    **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : LinIf.c                                                     **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : HuRongbo                                                    **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Implementation for LinIf                                    **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 
 /*******************************************************************************
 **                      Revision Control History                              **
@@ -48,26 +49,23 @@
  *    1> Change LinTp_MasterRTData[] from static to macro LINTP_LOCAL
  *    2> Change private variable keyword from static to macro LINTP_LOCAL
  * V2.0.4      20221215   ZhaoTong    fix PH-PRD-QC-004-2022PRD0042022-357
- * V2.0.5      20230915   ZhaoTong
+ * V2.0.5      20230322   ZhaoTong
+ *    1> Change the define of type LinTp_ConfigType and LinTp_ChannelConfigType
+ * V2.0.6      20230915   ZhaoTong
  *    1> Bug fix CPT-6932.
  *       It's necessary to add a macro switch When referencing the Master/Slave header file
- * V2.0.6      20230920   ZhaoTong
- *    1> Bug fix CPT-6946.add two macro for Master/Slave of TP separately.
- * V2.0.7      20231123   ZhaoTong
- *    1> CPD-33590.Code Execution Optimization.
- * V2.0.8      20240229   ZhaoTong
- *    1> Replace standard library functions to iSoft library functions
- *    2> QAC check issue fix
- * V2.0.9      20240705   ZhaoTong
- *    Add macro condition for the call to API BswM_LinTp_RequestMode.
- * V2.0.10     20240718   ZhaoTong
- *    Resolve build warnings
- * V2.0.11     20240723   ZhaoTong
- *    Receiving a functional transmission in slave node shall not respond to any slave response header.
- * V2.0.12     20240913   ZouZhiJia    1:Bug fix CPT-10293
- *                                     2:Delete LinTp_SlaveAbortTxAndNotifyFailToUpper
- *                                     3:Delete LinTp_SlaveAbortRxAndNotifyFailToUpper
- * V2.0.13     20240925   ZhaoTong     fix bug CPT-10610
+ * V2.0.7      20230920   ZhaoTong    Bug fix CPT-6946
+ *    1> Add two macro for Master/Slave of TP separately.
+ * V2.0.8      20240105   ZhaoTong    Muliticore adapt
+ * V2.0.9      20240705   ZhaoTong    Add macro condition for the call to API BswM_LinTp_RequestMode.
+ * V2.0.10     20240723   ZhaoTong    Receiving a functional transmission in slave node shall not respond to any slave
+ * response header.
+ * V2.0.11     20240913   ZouZhiJia    1.Bug fix CPT-10293
+ *                                     2.Delete LinTp_SlaveAbortTxAndNotifyFailToUpper
+ *                                     3.Delete LinTp_SlaveAbortRxAndNotifyFailToUpper
+ * V2.0.12     20240825   ZhaoTong    fix bug CPT-10610
+ * V2.0.13     20241029   ZhaoTong    fix bug CPT-11007
+ * V2.0.14     20241122   ZhaoTong    fix bug CPT-10961
  */
 
 /*******************************************************************************
@@ -75,7 +73,7 @@
 *******************************************************************************/
 #define LINTP_C_SW_MAJOR_VERSION 2U
 #define LINTP_C_SW_MINOR_VERSION 0U
-#define LINTP_C_SW_PATCH_VERSION 13U
+#define LINTP_C_SW_PATCH_VERSION 14U
 
 /*******************************************************************************
 **                               Includes                                     **
@@ -119,9 +117,11 @@
 #include "LinIf_MemMap.h"
 
 static FUNC(P2CONST(LinTp_TxNSduType, AUTOMATIC, LINIF_APPL_CONST), LINIF_CODE) LinTp_GetTxNSdu(PduIdType txSduId);
+
 #if (LINIF_DEV_ERROR_DETECT == STD_ON)
 static FUNC(P2CONST(LinTp_RxNSduType, AUTOMATIC, LINIF_APPL_CONST), LINIF_CODE) LinTp_GetRxNSdu(PduIdType rxSduId);
-#endif /* LINIF_DEV_ERROR_DETECT == STD_ON */
+#endif
+
 static FUNC(LinIf_NodeTypeType, LINIF_CODE) LinTp_GetNodeType(NetworkHandleType ComMChannel);
 
 #define LINIF_STOP_SEC_CODE
@@ -165,9 +165,10 @@ LinTp_ConfigPtr = NULL_PTR;
  * Return              None
  */
 /******************************************************************************/
+/* PRQA S 1532 ++ */ /* MISRA Rule 8.7 */
 FUNC(void, LINIF_CODE)
-LinTp_Init(/* PRQA S 1503 */
-           P2CONST(LinTp_ConfigType, AUTOMATIC, LINIF_APPL_CONST) ConfigPtr)
+LinTp_Init(P2CONST(LinTp_ConfigType, AUTOMATIC, LINIF_APPL_CONST) ConfigPtr)
+/* PRQA S 1532 -- */ /* MISRA Rule 8.7 */
 {
 #if (LINIF_DEV_ERROR_DETECT == STD_ON)
     if (NULL_PTR == ConfigPtr)
@@ -175,18 +176,18 @@ LinTp_Init(/* PRQA S 1503 */
         LinIf_Det_ReportError(LINTP_INIT_ID, LINIF_E_PARAM_POINTER);
     }
     else
-#endif /* LINIF_DEV_ERROR_DETECT == STD_ON */
+#endif
     {
         /*@req <SWS_LinIf_00427> */
         LinTp_ConfigPtr = ConfigPtr;
 
 #if (STD_ON == LINTP_MASTER_SUPPORT)
         LinTp_MasterInit();
-#endif /* STD_ON == LINTP_MASTER_SUPPORT */
+#endif
 
 #if (STD_ON == LINTP_SLAVE_SUPPORT)
         LinTp_SlaveInit();
-#endif /* STD_ON == LINTP_SLAVE_SUPPORT */
+#endif
 
         /*@req <SWS_LinIf_00320> */
         /* Set the status of LINTP */
@@ -240,7 +241,7 @@ LinTp_Transmit(PduIdType LinTpTxSduId, P2CONST(PduInfoType, AUTOMATIC, LINIF_APP
         detNoErr = FALSE;
     }
     if (TRUE == detNoErr)
-#endif /* LINIF_DEV_ERROR_DETECT == STD_ON */
+#endif
     {
         LinIf_NodeTypeType nodeType = LinTp_GetNodeType(tx->LinTpTxNSduChannelRef);
 
@@ -301,45 +302,6 @@ FUNC(void, LINIF_CODE) LinTp_Shutdown(void) /* PRQA S 1503 */
 /******************************************************************************/
 /*
  * Brief               A dummy method introduced for interface compatibility
- * ServiceId           0x46
- * Sync/Async          Synchronous
- * Reentrancy          Non Reentrant
- * Param-Name[in]      LinTpTxSduId: This parameter contains the Lin TP instance
- *                                   unique identifier of the Lin N-SDU which
- *                                   transfer has to be cancelled
- * Param-Name[in/out]  None
- * Param-Name[out]     None
- * Return              E_NOT_OK: Cancellation request of the transfer of the
- *                               specified Lin N-SDU is rejected
- */
-/******************************************************************************/
-FUNC(Std_ReturnType, LINIF_CODE)
-LinTp_CancelTransmit(/* PRQA S 1503 */
-                     PduIdType LinTpTxSduId)
-{
-#if (LINIF_DEV_ERROR_DETECT == STD_ON)
-    P2CONST(LinTp_TxNSduType, AUTOMATIC, LINIF_APPL_CONST)
-    tx = LinTp_GetTxNSdu(LinTpTxSduId);
-    if ((LINTP_UNINIT == LinTp_Status) || (LINIF_UNINIT == LinIf_Status))
-    {
-        /*@req <SWS_LinIf_00535>,<SWS_LinIf_00687> */
-        LinIf_Det_ReportError(LINTP_CANCELTRANSMIT_ID, LINIF_E_UNINIT);
-        return E_NOT_OK;
-    }
-    if (NULL_PTR == tx)
-    {
-        /*@req <SWS_LinIf_00577>*/
-        LinIf_Det_ReportError(LINTP_CANCELTRANSMIT_ID, LINIF_E_PARAMETER);
-    }
-#endif
-    LINTP_NOUSED(LinTpTxSduId);
-    /*@req <SWS_LinIf_00490> */
-    return E_NOT_OK;
-}
-
-/******************************************************************************/
-/*
- * Brief               A dummy method introduced for interface compatibility
  * ServiceId           0x4b
  * Sync/Async          Synchronous
  * Reentrancy          Non Reentrant
@@ -380,47 +342,6 @@ LinTp_ChangeParameter(/* PRQA S 1503 */
     return E_NOT_OK;
 }
 
-/******************************************************************************/
-/*
- * Brief               A dummy method introduced for interface compatibility
- * ServiceId           0x47
- * Sync/Async          Synchronous
- * Reentrancy          Non Reentrant
- * Param-Name[in]      LinTpRxSduId: This parameter contains the Lin TP instance
- *                                   unique identifier of the Lin N-SDU
-.*                                   reception of which has to be cancelled.
- * Param-Name[in/out]  None
- * Param-Name[out]     None
- * Return              E_NOT_OK: Cancellation request of the reception of the
- *                               specified Lin N-SDU is rejected
- */
-/******************************************************************************/
-#if (LINIF_CANCEL_TRANSMIT_SUPPORTED == STD_ON)
-FUNC(Std_ReturnType, LINIF_CODE)
-LinTp_CancelReceive(/* PRQA S 1503 */
-                    PduIdType LinTpRxSduId)
-{
-#if (LINIF_DEV_ERROR_DETECT == STD_ON)
-    P2CONST(LinTp_RxNSduType, AUTOMATIC, LINIF_APPL_CONST)
-    rx = LinTp_GetRxNSdu(LinTpRxSduId);
-    if ((LINTP_UNINIT == LinTp_Status) || (LINIF_UNINIT == LinIf_Status))
-    {
-        /*@req <SWS_LinIf_00535>,<SWS_LinIf_00687> */
-        LinIf_Det_ReportError(LINTP_CANCELRECEIVE_ID, LINIF_E_UNINIT);
-        return E_NOT_OK;
-    }
-    if (NULL_PTR == rx)
-    {
-        /*@req <SWS_LinIf_00627>*/
-        LinIf_Det_ReportError(LINTP_CANCELRECEIVE_ID, LINIF_E_PARAMETER);
-    }
-#endif
-    LINTP_NOUSED(LinTpRxSduId);
-    /*@req <SWS_LinIf_00626> */
-    return E_NOT_OK;
-}
-#endif
-
 /*******************************************************************************
 **                      Private Function Definitions                          **
 *******************************************************************************/
@@ -438,12 +359,14 @@ LinTp_CancelReceive(/* PRQA S 1503 */
 static FUNC(P2CONST(LinTp_TxNSduType, AUTOMATIC, LINIF_APPL_CONST), LINIF_CODE) LinTp_GetTxNSdu(PduIdType txSduId)
 {
     P2CONST(LinTp_TxNSduType, AUTOMATIC, LINIF_APPL_CONST) retTxNSdu = NULL_PTR;
+    P2CONST(LinTp_TxNSduType, AUTOMATIC, LINIF_APPL_CONST) tx;
+    uint16 idx;
 
     if (LINTP_INIT == LinTp_Status)
     {
-        const LinTp_TxNSduType* tx = &LINTP_GET_TXNSDU(0u);
-        uint16 idx = LINTP_GET_TXNSDU_NUM;
+        tx = &LINTP_GET_TXNSDU(0u);
 
+        idx = LINTP_GET_TXNSDU_NUM;
         while (idx > 0u)
         {
             if (tx->LinTpTxNSduId == txSduId)
@@ -457,7 +380,7 @@ static FUNC(P2CONST(LinTp_TxNSduType, AUTOMATIC, LINIF_APPL_CONST), LINIF_CODE) 
 
     return retTxNSdu;
 }
-#if (LINIF_DEV_ERROR_DETECT == STD_ON)
+
 /******************************************************************************/
 /*
  * Brief               Gets configured RxNSdu pointer by parameter 'rxSduId'
@@ -469,6 +392,7 @@ static FUNC(P2CONST(LinTp_TxNSduType, AUTOMATIC, LINIF_APPL_CONST), LINIF_CODE) 
  * Return              Configured RxNSdu address(Not found return NULL_PTR)
  */
 /******************************************************************************/
+#if (LINIF_DEV_ERROR_DETECT == STD_ON)
 static FUNC(P2CONST(LinTp_RxNSduType, AUTOMATIC, LINIF_APPL_CONST), LINIF_CODE) LinTp_GetRxNSdu(PduIdType rxSduId)
 {
     P2CONST(LinTp_RxNSduType, AUTOMATIC, LINIF_APPL_CONST) retRxNSdu = NULL_PTR;
@@ -492,7 +416,8 @@ static FUNC(P2CONST(LinTp_RxNSduType, AUTOMATIC, LINIF_APPL_CONST), LINIF_CODE) 
 
     return retRxNSdu;
 }
-#endif /* LINIF_DEV_ERROR_DETECT == STD_ON */
+#endif
+
 /******************************************************************************/
 /*
  * Brief: Gets the configuration pointer by transmit 'NSduId'
@@ -508,16 +433,13 @@ static FUNC(LinIf_NodeTypeType, LINIF_CODE) LinTp_GetNodeType(NetworkHandleType 
 {
     NetworkHandleType ch;
     LinIf_NodeTypeType retNodeType = LINIF_MASTER;
-    const LinIf_ChannelType* chCfgPtr = &LINIF_GET_CHANNEL(0);
 
     for (ch = 0u; ch < LINIF_NUMBER_OF_CHANNELS; ch++)
     {
-        if (chCfgPtr->LinIfComMNetworkHandleRef == ComMChannel)
+        if (LINIF_GET_COMM_NETWORK(ch) == ComMChannel)
         {
-            retNodeType = chCfgPtr->LinIfNodeType->LinIfNodeType;
-            break;
+            retNodeType = LINIF_GET_NODETYPE(ch);
         }
-        chCfgPtr++;
     }
     return retNodeType;
 }

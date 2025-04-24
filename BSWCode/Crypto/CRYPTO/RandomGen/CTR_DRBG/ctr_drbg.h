@@ -1,34 +1,3 @@
-/* PRQA S 3108++ */
-/**
- * Copyright (C) 2024 Isoft Infrastructure Software Co., Ltd.
- * SPDX-License-Identifier: LGPL-2.1-only-with-exception OR  LicenseRef-Commercial-License
- *
- * This library is free software; you can redistribute it and/or modify it under the terms of the
- * GNU Lesser General Public License as published by the Free Software Foundation; version 2.1.
- * This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Lesser General Public License for more details.
- * You should have received a copy of the GNU Lesser General Public License along with this library;
- * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
- * or see <https://www.gnu.org/licenses/>.
- *
- * Alternatively, this file may be used under the terms of the Isoft Infrastructure Software Co., Ltd.
- * Commercial License, in which case the provisions of the Isoft Infrastructure Software Co., Ltd.
- * Commercial License shall apply instead of those of the GNU Lesser General Public License.
- *
- * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
- * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- *  @file               : ctr_drbg.h
- *  @version            : V1.0.0
- *  @author             : qinchun.yang
- *  @date               : 2018/10/13
- *  @vendor             : isoft
- *  @description        : Implementation for Crypto
- *  @specification(s)   : AUTOSAR classic Platform R19-11
- *
- */
-/* PRQA S 3108-- */
 #ifndef CTR_DRBG_H
 #define CTR_DRBG_H
 #if (CRYPTO_ALGORITHM_CTRG == STD_ON)
@@ -47,15 +16,15 @@
 #define CTR_DRBG_ENTROPY_LEN     32
 
 /** Critical entropy source failure. */
-#define CRYPTO_ERR_ENTROPY_SOURCE_FAILED 0x11
+#define MBEDTLS_ERR_ENTROPY_SOURCE_FAILED 0x11
 /** No more sources can be added. */
-#define CRYPTO_ERR_ENTROPY_MAX_SOURCES 0x22
+#define MBEDTLS_ERR_ENTROPY_MAX_SOURCES 0x22
 /** No sources have been added to poll. */
-#define CRYPTO_ERR_ENTROPY_NO_SOURCES_DEFINED 0x33
+#define MBEDTLS_ERR_ENTROPY_NO_SOURCES_DEFINED 0x33
 /** No strong sources have been added to poll. */
-#define CRYPTO_ERR_ENTROPY_NO_STRONG_SOURCE 0x44
+#define MBEDTLS_ERR_ENTROPY_NO_STRONG_SOURCE 0x44
 /** Read/write error in file. */
-#define CRYPTO_ERR_ENTROPY_FILE_IO_ERROR 0x55 /** Critical entropy source failure. */
+#define MBEDTLS_ERR_ENTROPY_FILE_IO_ERROR 0x55 /** Critical entropy source failure. */
 
 /*#define INTERNALRAND*/
 
@@ -68,7 +37,7 @@ typedef struct Crypto_CtrDrbgData
     int reseed_interval;       /*!< The reseed interval. */
     Crypto_AESData aes_ctx;    /*!< The AES context. */
     void* p_entropy;           /*!< The context for the entropy function. */
-    Std_ReturnType (*f_entropy)(void*, P2VAR(uint8, AUTOMATIC, CRY_APPL_DATA), uint32);
+    Std_ReturnType (*f_entropy)(void*, P2VAR(uint8, AUTOMATIC, CRYPTO_APPL_DATA), uint32);
 } Crypto_CtrDrbgData;
 
 typedef int (*entropy_f_source_ptr)(void* data, unsigned char* output, uint32 len, uint32* olen);
@@ -96,22 +65,22 @@ typedef struct
 
 } Crypto_entropy_context;
 
-FUNC(Std_ReturnType, CRY_CODE)
-Crypto_ctr_drbg_seed(
-    P2VAR(Crypto_CtrDrbgData, AUTOMATIC, CRY_APPL_DATA) ctx,
+FUNC(Std_ReturnType, CRYPTO_CODE)
+mbedtls_ctr_drbg_seed(
+    P2VAR(Crypto_CtrDrbgData, AUTOMATIC, CRYPTO_APPL_DATA) ctx,
     Std_ReturnType (*f_entropy)(void*, uint8*, uint32),
-    P2VAR(Crypto_entropy_context, AUTOMATIC, CRY_APPL_DATA) p_entropy,
+    P2VAR(Crypto_entropy_context, AUTOMATIC, CRYPTO_APPL_DATA) p_entropy,
     const uint8* custom,
     uint32 len);
 /* PRQA S 1336 */ /* MISRA Rule 8.2 */
 
-FUNC(Std_ReturnType, CRY_CODE)
-Crypto_ctr_drbg_random(void* p_rng, P2VAR(uint8, AUTOMATIC, CRY_APPL_DATA) output, uint32 output_len);
+FUNC(Std_ReturnType, CRYPTO_CODE)
+mbedtls_ctr_drbg_random(void* p_rng, P2VAR(uint8, AUTOMATIC, CRYPTO_APPL_DATA) output, uint32 output_len);
 
-FUNC(Std_ReturnType, CRY_CODE) Crypto_entropy_func(void* data, uint8* output, uint32 len);
+FUNC(Std_ReturnType, CRYPTO_CODE) mbedtls_entropy_func(void* data, uint8* output, uint32 len);
 
-FUNC(Std_ReturnType, CRY_CODE) Crypto_CtrDrbg(uint8 key[16], uint8 buf[16]);
+FUNC(Std_ReturnType, CRYPTO_CODE) Crypto_CtrDrbg(uint8 key[16], uint8 buf[16]);
 
-void Crypto_ctr_drbg_init(Crypto_CtrDrbgData* ctx);
+void mbedtls_ctr_drbg_init(Crypto_CtrDrbgData* ctx);
 #endif /* CRYPTO_ALGORITHM_CTRG == STD_ON */
 #endif /* ctr_drbg.h */

@@ -18,21 +18,22 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Os_Event.c                                                  **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : i-soft-os                                                   **
- **  Vendor      :                                                             **
- **  DESCRIPTION : event manager                                               **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
- **  Version :   AUTOSAR classic Platform R19--Function Safety                 **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Os_Event.c                                                  **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : i-soft-os                                                   **
+**  Vendor      :                                                             **
+**  DESCRIPTION : event manager                                               **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
+**  Version :   AUTOSAR classic Platform R19--Function Safety                 **
+**                                                                            **
+*******************************************************************************/
 
 /*=======[I N C L U D E S]====================================================*/
 #include "Os_Internal.h"
@@ -46,10 +47,10 @@
 #if (CFG_EXTENDED_TASK_MAX > 0)
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
 /* PRQA S 0791++ */ /* MISRA Rule 5.4 */ /*OS_EVENT_SEGMENTNAME_SIMILAR_003*/
-#define OS_START_SEC_VAR_CLEARED_CLONE_PTR
+#define OS_START_SEC_VAR_CLONE_PTR
 #include "Os_MemMap.h"
 static P2CONST(Os_EventMaskRefType, OS_VAR, OS_CONST) Os_TaskEventAccessMask;
-#define OS_STOP_SEC_VAR_CLEARED_CLONE_PTR
+#define OS_STOP_SEC_VAR_CLONE_PTR
 #include "Os_MemMap.h"
 /* PRQA S 0791-- */ /* MISRA Rule 5.4 */
 #endif
@@ -82,15 +83,23 @@ static P2CONST(Os_EventMaskRefType, OS_VAR, OS_CONST) Os_TaskEventAccessMask;
 FUNC(void, OS_CODE) Os_InitEvent(void)
 {
     VAR(Os_TaskType, OS_VAR) i;
+    Os_CfgExtendTaskMax = Os_CfgExtendTaskMax_Inf[Os_SCB.sysCore];
 
     for (i = 0U; i < CFG_EXTENDED_TASK_MAX; i++)
     {
+        if (i >= Os_CfgExtendTaskMax)
+        {
+            break;
+        }
         Os_ECB[i].eventSetEvent = 0U;
         Os_ECB[i].eventWaitEvent = 0U;
         Os_ECB[i].eventIsWaitAllEvents = FALSE;
+
+#if ((TRUE == CFG_EVENT_RESPONSE_TIME_MONITOR) || (TRUE == CFG_EVENT_RESPONSE_RATE_MONITOR))
+        Os_InitMonitorEvent(i);
+#endif /* (TRUE == CFG_EVENT_RESPONSE_TIME_MONITOR) || (TRUE == CFG_EVENT_RESPONSE_RATE_MONITOR) */
     }
 
-    Os_CfgExtendTaskMax = Os_CfgExtendTaskMax_Inf[Os_SCB.sysCore];
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
     /* PRQA S 0310,0311 ++ */ /* MISRA Rule 11.8,11.3 */ /* OS_EVENT_TYPE_CAST_001 */
     Os_TaskEventAccessMask = (const Os_EventMaskRefType*)((void**)Os_TaskEventAccessMask_Inf[Os_SCB.sysCore]);
@@ -157,7 +166,7 @@ static FUNC(void, OS_CODE) Os_EventTaskDispatch(TaskType TaskID)
  * REQ ID               <None>
  */
 /******************************************************************************/
-inline static FUNC(StatusType, OS_CODE) Os_EventBitCompare(EventMaskType EventMask, uint32 Mask)
+static inline FUNC(StatusType, OS_CODE) Os_EventBitCompare(EventMaskType EventMask, EventMaskType Mask)
 {
     VAR(StatusType, OS_VAR) err = E_OK;
 
@@ -200,6 +209,10 @@ FUNC(StatusType, OS_CODE) SetEvent(TaskType TaskID, EventMaskType Mask)
 
     VAR(StatusType, OS_VAR) err = E_OK;
 
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceEnter(OSServiceId_SetEvent);
+#endif /* TRUE == CFG_TRACE_ENABLE */
+
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
     /* PRQA S 3432 ++*/ /* MISRA Rule 20.7 */ /* OS_EVENT_MACRO_005 */
     if (CHECK_ID_INVALID(TaskID, Os_CfgTaskMax_Inf))
@@ -237,8 +250,8 @@ FUNC(StatusType, OS_CODE) SetEvent(TaskType TaskID, EventMaskType Mask)
                 .remoteCoreId = coreId,
                 .serviceId = OSServiceId_SetEvent,
                 .srvPara0 = (uint32)TaskID,
-                .srvPara1 = (uint32)Mask,
-                .srvPara2 = (uint32)NULL_PARA,
+                .srvPara1 = (uint32)(Mask & 0xFFFFFFFFu),
+                .srvPara2 = (uint32)((Mask >> 32u)),
             };
             err = Os_RpcCallService(&rpcData);
         }
@@ -255,6 +268,10 @@ FUNC(StatusType, OS_CODE) SetEvent(TaskType TaskID, EventMaskType Mask)
         Os_TraceErrorHook(OSError_Save_SetEvent(TaskID, Mask), OSServiceId_SetEvent, err);
     }
 #endif
+
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceExit(OSServiceId_SetEvent);
+#endif /* TRUE == CFG_TRACE_ENABLE */
 
     OS_EXIT_KERNEL(); /* PRQA S 3469 */ /* MISRA  Dir-4.9*/ /* OS_EVENT_MACRO_004 */
     return err;
@@ -285,6 +302,10 @@ FUNC(StatusType, OS_CODE) SetEventAsyn(TaskType TaskID, EventMaskType Mask)
     OS_ENTER_KERNEL();
 
     VAR(StatusType, OS_VAR) err = E_OK;
+
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceEnter(OSServiceId_SetEventAsyn);
+#endif /* TRUE == CFG_TRACE_ENABLE */
 
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
     /* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */ /* OS_EVENT_MACRO_005 */
@@ -323,8 +344,8 @@ FUNC(StatusType, OS_CODE) SetEventAsyn(TaskType TaskID, EventMaskType Mask)
                 .remoteCoreId = coreId,
                 .serviceId = OSServiceId_SetEvent,
                 .srvPara0 = (uint32)TaskID,
-                .srvPara1 = (uint32)Mask,
-                .srvPara2 = (uint32)NULL_PARA,
+                .srvPara1 = (uint32)(Mask & 0xFFFFFFFFu),
+                .srvPara2 = (uint32)((Mask >> 32u)),
             };
             err = Os_RpcCallService(&rpcData);
         }
@@ -341,6 +362,10 @@ FUNC(StatusType, OS_CODE) SetEventAsyn(TaskType TaskID, EventMaskType Mask)
         Os_TraceErrorHook(OSError_Save_SetEvent(TaskID, Mask), OSServiceId_SetEvent, err);
     }
 #endif
+
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceExit(OSServiceId_SetEventAsyn);
+#endif /* TRUE == CFG_TRACE_ENABLE */
 
     OS_EXIT_KERNEL(); /* PRQA S 3469 */ /* MISRA  Dir-4.9*/ /* OS_EVENT_MACRO_004 */
     return err;
@@ -380,6 +405,10 @@ FUNC(StatusType, OS_CODE) WaitEvent(EventMaskType Mask)
     OS_ENTER_KERNEL();
 
     VAR(StatusType, OS_VAR) err = E_OK;
+
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceEnter(OSServiceId_WaitEvent);
+#endif /* TRUE == CFG_TRACE_ENABLE */
 
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
     if (OS_LEVEL_ISR2 == Os_SCB.sysOsLevel)
@@ -449,6 +478,10 @@ FUNC(StatusType, OS_CODE) WaitEvent(EventMaskType Mask)
     }
 #endif
 
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceExit(OSServiceId_WaitEvent);
+#endif /* TRUE == CFG_TRACE_ENABLE */
+
     OS_EXIT_KERNEL(); /* PRQA S 3469 */ /* MISRA  Dir-4.9*/ /* OS_EVENT_MACRO_004 */
     return err;
 }
@@ -486,6 +519,10 @@ FUNC(StatusType, OS_CODE) WaitAllEvents(EventMaskType Mask)
     OS_ENTER_KERNEL();
 
     VAR(StatusType, OS_VAR) err = E_OK;
+
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceEnter(OSServiceId_WaitAllEvents);
+#endif /* TRUE == CFG_TRACE_ENABLE */
 
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
     if (OS_LEVEL_ISR2 == Os_SCB.sysOsLevel)
@@ -555,6 +592,10 @@ FUNC(StatusType, OS_CODE) WaitAllEvents(EventMaskType Mask)
     }
 #endif
 
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceExit(OSServiceId_WaitAllEvents);
+#endif /* TRUE == CFG_TRACE_ENABLE */
+
     OS_EXIT_KERNEL(); /* PRQA S 3469 */ /* MISRA  Dir-4.9*/ /* OS_EVENT_MACRO_004 */
     return err;
 }
@@ -591,6 +632,11 @@ FUNC(StatusType, OS_CODE) GetEvent(TaskType TaskID, EventMaskRefType Event)
 {
     OS_ENTER_KERNEL();
     VAR(StatusType, OS_VAR) err = E_OK;
+
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceEnter(OSServiceId_GetEvent);
+#endif /* TRUE == CFG_TRACE_ENABLE */
+
     OS_ARCH_DECLARE_CRITICAL();
 
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
@@ -637,7 +683,7 @@ FUNC(StatusType, OS_CODE) GetEvent(TaskType TaskID, EventMaskRefType Event)
 #if (OS_AUTOSAR_CORES > 1)
             /* PRQA S 3469,1338 ++ */ /* MISRA  Rule 17.8,4.9 */ /* OS_EVENT_MACRO_004 */
             TaskID = Os_GetObjLocalId(TaskID);
-/* PRQA S 3469,1338 -- */ /* MISRA  Rule 17.8,4.9 */
+            /* PRQA S 3469,1338 -- */ /* MISRA  Rule 17.8,4.9 */
 #endif
 
 /* Extended Status */
@@ -685,6 +731,10 @@ FUNC(StatusType, OS_CODE) GetEvent(TaskType TaskID, EventMaskRefType Event)
     }
 #endif
 
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceExit(OSServiceId_GetEvent);
+#endif /* TRUE == CFG_TRACE_ENABLE */
+
     OS_EXIT_KERNEL(); /* PRQA S 3469 */ /* MISRA  Dir-4.9*/ /* OS_EVENT_MACRO_004 */
     return err;
 }
@@ -714,6 +764,10 @@ FUNC(StatusType, OS_CODE) ClearEvent(EventMaskType Mask)
 {
     OS_ENTER_KERNEL();
     VAR(StatusType, OS_VAR) err = E_OK;
+
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceEnter(OSServiceId_ClearEvent);
+#endif /* TRUE == CFG_TRACE_ENABLE */
 
     OS_ARCH_DECLARE_CRITICAL();
 
@@ -762,6 +816,13 @@ FUNC(StatusType, OS_CODE) ClearEvent(EventMaskType Mask)
         if ((StatusType)E_OK == err)
         {
             OS_ARCH_ENTRY_CRITICAL(); /* PRQA S 3469 */ /* MISRA  Dir-4.9*/ /* OS_EVENT_MACRO_004 */
+#if (TRUE == CFG_EVENT_RESPONSE_TIME_MONITOR)
+            Os_MonitorEventResponseTime(Os_SCB.sysRunningTaskID, Mask);
+#endif
+#if (TRUE == CFG_EVENT_RESPONSE_RATE_MONITOR)
+            Os_MonitorEventResponseRate(Os_SCB.sysRunningTaskID, Mask);
+#endif
+
             Os_ECB[Os_SCB.sysRunningTaskID].eventSetEvent &= (~Mask);
             OS_ARCH_EXIT_CRITICAL(); /* PRQA S 3469 */ /* MISRA  Dir-4.9*/ /* OS_EVENT_MACRO_004 */
         }
@@ -773,6 +834,10 @@ FUNC(StatusType, OS_CODE) ClearEvent(EventMaskType Mask)
         Os_TraceErrorHook(OSError_Save_ClearEvent(Mask), OSServiceId_ClearEvent, err);
     }
 #endif
+
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceExit(OSServiceId_ClearEvent);
+#endif /* TRUE == CFG_TRACE_ENABLE */
 
     OS_EXIT_KERNEL(); /* PRQA S 3469 */ /* MISRA  Dir-4.9*/ /* OS_EVENT_MACRO_004 */
     return err;
@@ -846,6 +911,13 @@ FUNC(StatusType, OS_CODE) Os_SetEvent(TaskType TaskID, EventMaskType Mask)
             /* Standard Status */
             Os_ECB[TaskID].eventSetEvent |= Mask;
 
+#if (TRUE == CFG_EVENT_RESPONSE_TIME_MONITOR)
+            Os_MonitorEventStartTime(TaskID, Mask);
+#endif
+#if (TRUE == CFG_EVENT_RESPONSE_RATE_MONITOR)
+            Os_AddEventResponseNum(TaskID, Mask);
+#endif
+
             SetEventMask = Os_ECB[TaskID].eventSetEvent;
             WaitEventMask = Os_ECB[TaskID].eventWaitEvent;
 
@@ -858,6 +930,13 @@ FUNC(StatusType, OS_CODE) Os_SetEvent(TaskType TaskID, EventMaskType Mask)
                     /* PRQA S 3469 -- */ /* MISRA Rule 4.9*/
                     {
                         Os_ECB[TaskID].eventIsWaitAllEvents = FALSE;
+#if (TRUE == CFG_TRACE_ENABLE)
+                        Os_TraceTaskSwitch(
+                            Os_SCB.sysRunningTaskID,
+                            TaskID,
+                            OS_TRACE_TASK_SWITCH_REASON_SETEVENT_READY,
+                            OS_TRACE_TASK_SWITCH_REASON_SETEVENT_ACTIVE);
+#endif
                         Os_EventTaskDispatch(TaskID);
                     }
                 }
@@ -865,6 +944,13 @@ FUNC(StatusType, OS_CODE) Os_SetEvent(TaskType TaskID, EventMaskType Mask)
                 {
                     if ((SetEventMask & WaitEventMask) != 0u)
                     {
+#if (TRUE == CFG_TRACE_ENABLE)
+                        Os_TraceTaskSwitch(
+                            Os_SCB.sysRunningTaskID,
+                            TaskID,
+                            OS_TRACE_TASK_SWITCH_REASON_SETEVENT_READY,
+                            OS_TRACE_TASK_SWITCH_REASON_SETEVENT_ACTIVE);
+#endif
                         Os_EventTaskDispatch(TaskID);
                     }
                 }
@@ -935,9 +1021,21 @@ FUNC(StatusType, OS_CODE) Os_WaitEvent(EventMaskType Mask)
         Os_SCB.sysHighTaskID = Os_ReadyQueueGetFirst(Os_SCB.sysHighPrio);
         Os_SCB.sysDispatchLocker = 0u;
 
+#if (TRUE == CFG_TRACE_ENABLE)
+        Os_TraceTaskSwitch(
+            Os_SCB.sysRunningTaskID,
+            Os_SCB.sysHighTaskID,
+            OS_TRACE_TASK_SWITCH_REASON_WAITEVENT_WAIT,
+            OS_TRACE_TASK_SWITCH_REASON_WAITEVENT_ACTIVE);
+#endif
+
         OS_START_DISPATCH();
         Os_Dispatch(); /* PRQA S 3469 */ /* MISRA  Dir-4.9*/ /* OS_EVENT_MACRO_004 */
     }
+
+#if (TRUE == CFG_EVENT_RESPONSE_TIME_MONITOR)
+    Os_MonitorEventEndTime(Os_SCB.sysRunningTaskID, Mask);
+#endif
     OS_ARCH_EXIT_CRITICAL(); /* PRQA S 3469 */ /* MISRA  Dir-4.9*/ /* OS_EVENT_MACRO_004 */
 
     return status;
@@ -1007,6 +1105,10 @@ FUNC(StatusType, OS_CODE) Os_WaitAllEvents(EventMaskType Mask)
         OS_START_DISPATCH();
         Os_Dispatch(); /* PRQA S 3469 */ /* MISRA  Dir-4.9*/ /* OS_EVENT_MACRO_004 */
     }
+
+#if (TRUE == CFG_EVENT_RESPONSE_TIME_MONITOR)
+    Os_MonitorEventEndTime(Os_SCB.sysRunningTaskID, Mask);
+#endif
     OS_ARCH_EXIT_CRITICAL(); /* PRQA S 3469 */ /* MISRA  Dir-4.9*/ /* OS_EVENT_MACRO_004 */
 
     return status;

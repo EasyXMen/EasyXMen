@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : EthSM_Types.h                                               **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : HuRongbo                                                    **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Type definitions of EthSM                                   **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : EthSM_Types.h                                               **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : HuRongbo                                                    **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Type definitions of EthSM                                   **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 
 /*******************************************************************************
 **                      Revision Control History                              **
@@ -74,7 +75,7 @@ typedef struct
     /*Reference to configured DEM event*/
     Dem_EventIdType EthSMDemEventId;
 } EthSM_DemEventParameterRefType;
-#endif /*STD_ON == ETHSM_DEM_SUPPORT */
+#endif
 
 /*
  * This container contains the Ethernet network-specific parameters of each
@@ -96,7 +97,7 @@ typedef struct
     /*references to DemEventParameter elements*/
     P2CONST(EthSM_DemEventParameterRefType, TYPEDEF, ETHSM_CONST)
     EthSMDemEventParameterRefs;
-#endif /* STD_ON == ETHSM_DEM_SUPPORT*/
+#endif
 } EthSM_NetworkType;
 
 /* Configuration of the Ethernet State Manager */

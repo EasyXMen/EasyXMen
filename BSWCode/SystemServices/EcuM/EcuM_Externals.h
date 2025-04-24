@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : EcuM_Externals.h                                            **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : qinchun.yang                                                **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Callout function declaration                                **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11.                     **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : EcuM_Externals.h                                            **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : qinchun.yang                                                **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Callout function declaration                                **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11.                     **
+**                                                                            **
+*******************************************************************************/
 
 /******************************************************************************
 **                      Revision Control History                             **
@@ -94,7 +95,7 @@ FUNC(void, ECUM_ERRORHOOK_CODE) EcuM_ErrorHook(uint16 reason);
  */
 FUNC(void, ECUM_AL_SETPROGRAMMABLEINTERRUPTS_CODE)
 EcuM_AL_SetProgrammableInterrupts(void);
-#endif /* ECUM_SET_PROGRAMMABLE_INTERRUPTS == STD_ON */
+#endif /*ECUM_SET_PROGRAMMABLE_INTERRUPTS == STD_ON*/
 
 #if (ECUM_DRIVER_INIT_LIST_ZERO == STD_ON)
 /**
@@ -111,7 +112,7 @@ EcuM_AL_SetProgrammableInterrupts(void);
  */
 FUNC(void, ECUM_AL_DRIVERINITZERO_CODE)
 EcuM_AL_DriverInitZero(void);
-#endif /* ECUM_DRIVER_INIT_LIST_ZERO == STD_ON */
+#endif /*ECUM_DRIVER_INIT_LIST_ZERO == STD_ON*/
 
 /**
  * This callout should evaluate some condition, like port pin or NVRAM value,
@@ -163,7 +164,7 @@ EcuM_AL_DriverInitOne(void);
  */
 FUNC(boolean, ECUM_LOOPDETECTION_CODE)
 EcuM_LoopDetection(void);
-#endif /* ECUM_RESET_LOOP_DETECTION == STD_ON */
+#endif /*ECUM_RESET_LOOP_DETECTION == STD_ON*/
 
 /**
  * This call allows the system designer to notify that the GO OFF I state is
@@ -394,6 +395,20 @@ EcuM_CheckValidation(EcuM_WakeupSourceType wakeupSource);
 FUNC(void, ECUM_STOPWAKEUPSOURCES_CODE)
 EcuM_StopWakeupSources(EcuM_WakeupSourceType wakeupSource);
 
+/**
+ * This function calls Mcu_SetMode as a callback
+ * validation.
+ * Service ID[hex]: 0x00
+ * Sync/Async: Synchronous
+ * Reentrancy: Non Reentrant
+ * Parameters (in): wakeupSource
+ * Parameters(INOUT): NA
+ * Parameters(OUT):  NA
+ * Return value: NA
+ */
+FUNC(void, ECUM_MCUSETMODE_CODE)
+EcuM_McuSetMode(Mcu_ModeType mode);
+
 /******************************************************************************/
 /*
  * Description         This function retrieves the current timestamp in milliseconds.
@@ -406,7 +421,7 @@ EcuM_StopWakeupSources(EcuM_WakeupSourceType wakeupSource);
  * Return              uint32: Current timestamp in milliseconds.
  */
 /******************************************************************************/
-FUNC(uint32, EcuM_CurrentTimestampMS_CODE) EcuM_CurrentTimestampMS(void);
+FUNC(uint32, ECUM_CURRENTTIMESTAMPMS_CODE) EcuM_CurrentTimestampMS(void);
 
 /******************************************************************************/
 /*
@@ -421,4 +436,5 @@ FUNC(uint32, EcuM_CurrentTimestampMS_CODE) EcuM_CurrentTimestampMS(void);
  */
 /******************************************************************************/
 FUNC(uint32, ECUM_CALCULATEELAPSEDMS_CODE) EcuM_CalculateElapsedMS(uint32 OldCurMs);
+
 #endif /*ECUM_EXTERNAL_H*/

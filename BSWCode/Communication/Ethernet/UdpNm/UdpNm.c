@@ -18,8 +18,9 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
+ */
+/* PRQA S 3108-- */
+/* *******************************************************************************
  **                                                                           **
  **  FILENAME    : UdpNm.c                                                    **
  **                                                                           **
@@ -31,7 +32,6 @@
  **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                     **
  **                                                                           **
  ******************************************************************************/
-/* PRQA S 3108-- */
 
 /*******************************************************************************
 **                      REVISION   HISTORY                                    **
@@ -88,12 +88,15 @@
  *      Fixed CPT-8002 UdpNmNodeIdEnabled, UdpNmNodeDetectionEnabled, UdpNmRepeatMsgIndEnabled related features review
  *  V2.0.12   2024-01-24   xiaojian.liang
  *      CPT-6562 Source NID is always zero if UdpNmNodeIdEnabled is true but UdpNmNodeDetectionEnabled is false
- *      Replace the std library with the istd library
- *  V2.0.13   2024-03-04   shengnan.sun
+ *  V2.0.13   2024-03-05   shengnan.sun
  *      Modify the error code UDPNM_E_NETWORK_TIMEOUT to 0x11u.
- *  V2.0.14 2024-05-30  xiaojian.liang
- *      CPT-9115 Definition of scheduled function UdpNm_MainFunction<Instance_Id> and exclusive area Context.
- *
+ *  V2.0.14   2024-03-09   shengnan.sun
+ *      Support multiple partition feature.
+ *  V2.0.15   2024-10-30   xiaojian.liang
+ *      Fixed CPT-10964 If UdpNmComUserDataSupport is enabled the API UdpNm_SetUserData shall not be available.
+ *  V2.0.16   2024-11-27   caihong.liu
+ *      1. Fixed CPT-10987 - Fixed CanNm_Transmit precompilation condition and PduId comparison
+ *      2. Fixed CPT-11294 - Fixed The PduR_CanNmRxIndication function is called within Critical Section
  ******************************************************************************/
 
 /**
@@ -106,6 +109,9 @@
 
     \li PRQA S 1531, 1532 MISRA Rule 8.7 .<br>
     Reason:The exception is global configuration data(1531) and API(1532).
+
+    \li PRQA S 3678 VL_QAC_3678 .<br>
+    Reason: Variables cannot be prefixed with const because they are used under other conditions to be compiled
  */
 
 /*******************************************************************************
@@ -116,25 +122,30 @@
 #define UDPNM_C_AR_PATCH_VERSION 0u
 #define UDPNM_C_SW_MAJOR_VERSION 2u
 #define UDPNM_C_SW_MINOR_VERSION 0u
-#define UDPNM_C_SW_PATCH_VERSION 14u
+#define UDPNM_C_SW_PATCH_VERSION 16u
 
 /*******************************************************************************
 **                      Include Section                                       **
 *******************************************************************************/
 #include "UdpNm.h"
 #include "UdpNm_Internal.h"
+
 #include "istd_lib.h"
+
 #include "Nm.h"
 #include "SchM_UdpNm.h"
 #include "SoAd.h"
-
 #if (STD_ON == UDPNM_COM_USERDATA_SUPPORT) || (STD_ON == UDPNM_GLOBAL_PN_ENABLED)
 #include "PduR_UdpNm.h"
 #endif
-
-#if (STD_ON == UDPNM_DEV_ERROR_DETECT)
+#if (UDPNM_DEV_ERROR_DETECT == STD_ON)
 #include "Det.h"
-#endif /*STD_ON == UDPNM_DEV_ERROR_DETECT*/
+/* Multiple partition check. */
+#include "Os.h"
+#if (STD_ON == UDPNM_MULTIPLE_PARTITION_USED)
+#include "ComM.h"
+#endif
+#endif /*UDPNM_DEV_ERROR_DETECT == STD_ON*/
 
 /*******************************************************************************
 **                       Version  Check                                       **
@@ -181,6 +192,9 @@ static FUNC(void, UDPNM_CODE) UdpNm_StateChange(uint8 chIndex, Nm_StateType nmNe
 
 static FUNC(void, UDPNM_CODE) UdpNm_EntryRepeatMessageState(uint8 chIndex, boolean isNetWorkRequest);
 
+#if UDPNM_PASSIVE_MODE_ENABLED == STD_OFF
+static FUNC(void, UDPNM_CODE) UdpNm_MsgcycleTimerManage(uint8 chIndex);
+#endif
 static FUNC(void, UDPNM_CODE) UdpNm_TimerManagement(uint8 chIndex);
 
 #if (STD_ON == UDPNM_GLOBAL_PN_ENABLED)
@@ -195,6 +209,7 @@ static FUNC(boolean, UDPNM_CODE) UdpNm_RxPnFilter(
     && ((STD_ON == UDPNM_PN_ERA_CALC_ENABLED) || (STD_ON == UDPNM_PN_EIRA_CALC_ENABLED)))
 static FUNC(void, UDPNM_CODE) UdpNm_RxPnEiraEraHandle(uint8 chIndex);
 #endif
+
 #if (STD_ON == UDPNM_PN_ERA_CALC_ENABLED)
 static FUNC(void, UDPNM_CODE) UdpNm_PnEraResetTimerHandle(uint8 chIndex);
 #endif /*STD_ON == UDPNM_PN_ERA_CALC_ENABLED*/
@@ -204,7 +219,7 @@ static FUNC(void, UDPNM_CODE) UdpNm_PnEiraResetTimerHandle(void);
 #endif
 
 #if (STD_OFF == UDPNM_PASSIVE_MODE_ENABLED)
-static FUNC(Std_ReturnType, UDPNM_CODE) UdpNm_SendNmPdu(uint8 chIndex, boolean addTransFlag);
+static FUNC(Std_ReturnType, UDPNM_CODE) UdpNm_SendNmPdu(uint8 chIndex);
 #endif /*STD_OFF == UDPNM_PASSIVE_MODE_ENABLED*/
 
 #if UDPNM_PN_EIRA_CALC_ENABLED == STD_ON
@@ -260,12 +275,13 @@ static VAR(UdpNm_InnerChannelType, UDPNM_VAR) UdpNm_ChRunTime[UDPNM_NUMBER_OF_CH
 #if (STD_ON == UDPNM_PN_EIRA_CALC_ENABLED)
 static VAR(UdpNm_InnerGlobalType, UDPNM_VAR) UdpNm_InnerGlobal;
 #endif
+
 #if UDPNM_DEV_ERROR_DETECT == STD_ON
 static boolean UdpNm_ValidateInitStatus(uint8 apiId);
 static boolean UdpNm_ValidateNetworkHandle(uint8 apiId, NetworkHandleType networkHandle);
 static boolean UdpNm_ValidatePointer(uint8 apiId, const void* pointer);
 static boolean UdpNm_ValidateNetworkHandleAndPointer(uint8 apiId, NetworkHandleType networkHandle, const void* pointer);
-static boolean UdpNm_ValidateNetworkHandleAndPointerPointer(
+static boolean UdpNm_ValidateNetworkHandlePointerAndPointer(
     uint8 apiId,
     NetworkHandleType networkHandle,
     const void* pointer1,
@@ -275,12 +291,13 @@ static boolean UdpNm_ValidateTxPdu(uint8 apiId, PduIdType txPduId, const PduInfo
 static boolean UdpNm_ValidateRxPdu(uint8 apiId, PduIdType rxPduId, const PduInfoType* pduInfoPtr);
 static boolean UdpNm_ValidateInit(const UdpNm_ConfigType* configPtr);
 #endif
-#define UDPNM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
-#include "UdpNm_MemMap.h"
 
 #ifdef QAC_ANALYZE
 #pragma PRQA_NO_SIDE_EFFECTS UdpNm_ValidatePointer
 #endif
+
+#define UDPNM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "UdpNm_MemMap.h"
 
 /*******************************************************************************
 **                      Global Variable Definitions                          **
@@ -310,7 +327,7 @@ void UdpNm_Init(const UdpNm_ConfigType* UdpNmConfigPtr) /* PRQA S 1532 */ /* MIS
     UdpNm_InnerChannelType* chRTPtr;
 
     /* @req SWS_UdpNm_00210 */
-#if (STD_ON == UDPNM_DEV_ERROR_DETECT)
+#if (UDPNM_DEV_ERROR_DETECT == STD_ON)
     if (UdpNm_ValidateInit(UdpNmConfigPtr))
 #endif
     {
@@ -366,7 +383,9 @@ void UdpNm_Init(const UdpNm_ConfigType* UdpNmConfigPtr) /* PRQA S 1532 */ /* MIS
             /* @req SWS_UdpNm_00061 */
             /* Stop the transmission nm pdu message cycle timer */
             chRTPtr->msgTxCylceTimer = 0u;
+#if UDPNM_RETRY_FIRST_MESSAGE_REQUEST == STD_ON
             chRTPtr->retrySendMsgFlag = FALSE;
+#endif
             chRTPtr->msgTimeoutTimer = 0u;
             chRTPtr->msgToutFlg = FALSE;
             chRTPtr->sendNmMsgFlg = FALSE;
@@ -399,7 +418,7 @@ void UdpNm_Init(const UdpNm_ConfigType* UdpNmConfigPtr) /* PRQA S 1532 */ /* MIS
 #if (STD_ON == UDPNM_GLOBAL_PN_ENABLED)
             /* @req SWS_UdpNm_00332,@req SWS_UdpNm_00333 */
             /* pnenable=true,shall set transmit PNI bit=1 */
-            if (TRUE == UdpNm_CfgPtr->ChannelConfig[chIndex].PnEnabled)
+            if (UdpNm_CfgPtr->ChannelConfig[chIndex].PnEnabled)
             {
                 uint8 pnIdx;
 
@@ -430,7 +449,7 @@ void UdpNm_Init(const UdpNm_ConfigType* UdpNmConfigPtr) /* PRQA S 1532 */ /* MIS
                 chRTPtr->pnEraResetTimer[loop] = 0x0u;
             }
 #endif
-#endif /* STD_ON == UDPNM_GLOBAL_PN_ENABLED */
+#endif
         }
 
 #if (STD_ON == UDPNM_PN_EIRA_CALC_ENABLED)
@@ -473,25 +492,21 @@ Std_ReturnType UdpNm_PassiveStartUp(NetworkHandleType nmChannelHandle) /* PRQA S
     if (UdpNm_ValidateNetworkHandle(UDPNM_SERVICE_ID_PASSIVESTARUP, nmChannelHandle))
 #endif
     {
+        SchM_Enter_UdpNm_Context();
         UdpNm_ChannelIndexType chIndex = UdpNm_FindChannelIndex(nmChannelHandle);
         UdpNm_InnerChannelType* chRTPtr = &UdpNm_ChRunTime[chIndex];
 
+        /* @req SWS_UdpNm_00147 */
+        /*
+         * In network mode,shall not execute this service,
+         * return E_NOT_OK.
+         */
         if (NM_MODE_NETWORK != chRTPtr->udpnmMode)
         {
-            SchM_Enter_UdpNm_Context();
             chRTPtr->passiveStartUp = TRUE;
-            SchM_Exit_UdpNm_Context();
-
             ret = E_OK;
         }
-        else
-        {
-            /* @req SWS_UdpNm_00147 */
-            /*
-             * In network mode,shall not execute this service,
-             * return E_NOT_OK.
-             */
-        }
+        SchM_Exit_UdpNm_Context();
     }
 
     return ret;
@@ -520,10 +535,9 @@ Std_ReturnType UdpNm_NetworkRequest(NetworkHandleType nmChannelHandle) /* PRQA S
     if (UdpNm_ValidateNetworkHandle(UDPNM_SERVICE_ID_NETWORKREQUEST, nmChannelHandle))
 #endif
     {
+        SchM_Enter_UdpNm_Context();
         UdpNm_ChannelIndexType chIndex = UdpNm_FindChannelIndex(nmChannelHandle);
         UdpNm_InnerChannelType* chRTPtr = &UdpNm_ChRunTime[chIndex];
-
-        SchM_Enter_UdpNm_Context();
 
         /* @req SWS_UdpNm_00104 */
         /* Change network state to request */
@@ -536,7 +550,6 @@ Std_ReturnType UdpNm_NetworkRequest(NetworkHandleType nmChannelHandle) /* PRQA S
 
         ret = E_OK;
     }
-
     return ret;
 }
 #endif /*STD_OFF == UDPNM_PASSIVE_MODE_ENABLED*/
@@ -564,14 +577,13 @@ Std_ReturnType UdpNm_NetworkRelease(NetworkHandleType nmChannelHandle) /* PRQA S
     if (UdpNm_ValidateNetworkHandle(UDPNM_SERVICE_ID_NETWORKRELEASE, nmChannelHandle))
 #endif
     {
+        SchM_Enter_UdpNm_Context();
         UdpNm_ChannelIndexType chIndex = UdpNm_FindChannelIndex(nmChannelHandle);
         UdpNm_InnerChannelType* chRTPtr = &UdpNm_ChRunTime[chIndex];
-
-        SchM_Enter_UdpNm_Context();
-
         /* @req SWS_UdpNm_00105 */
         /* Change network state to release */
         chRTPtr->netRequestStatus = UDPNM_NETWORK_RELEASED;
+        SchM_Exit_UdpNm_Context();
 #if (STD_ON == UDPNM_COM_CONTROL_ENABLED)
         /*
          * If UdpNm_NetworkRelease is called and NM PDU transmission ability
@@ -583,10 +595,8 @@ Std_ReturnType UdpNm_NetworkRelease(NetworkHandleType nmChannelHandle) /* PRQA S
         }
 
 #endif
-        SchM_Exit_UdpNm_Context();
         ret = E_OK;
     }
-
     return ret;
 }
 #endif /*STD_OFF == UDPNM_PASSIVE_MODE_ENABLED*/
@@ -618,10 +628,9 @@ Std_ReturnType UdpNm_DisableCommunication(NetworkHandleType nmChannelHandle) /* 
     if (UdpNm_ValidateNetworkHandle(UDPNM_SERVICE_ID_DISABLECOMMUNICATION, nmChannelHandle))
 #endif
     {
+        SchM_Enter_UdpNm_Context();
         UdpNm_ChannelIndexType chIndex = UdpNm_FindChannelIndex(nmChannelHandle);
         UdpNm_InnerChannelType* chRTPtr = &UdpNm_ChRunTime[chIndex];
-
-        SchM_Enter_UdpNm_Context();
 
         if (NM_MODE_NETWORK == chRTPtr->udpnmMode)
         {
@@ -662,6 +671,7 @@ Std_ReturnType UdpNm_DisableCommunication(NetworkHandleType nmChannelHandle) /* 
         SchM_Exit_UdpNm_Context();
     }
 #endif /* STD_OFF == UDPNM_PASSIVE_MODE_ENABLED */
+
     return ret;
 }
 #endif /* STD_ON == UDPNM_COM_CONTROL_ENABLED*/
@@ -695,9 +705,9 @@ Std_ReturnType UdpNm_EnableCommunication(NetworkHandleType nmChannelHandle) /* P
     {
         UdpNm_ChannelIndexType chIndex = UdpNm_FindChannelIndex(nmChannelHandle);
         const UdpNm_ChannelConfigType* chCfgPtr = &UdpNm_CfgPtr->ChannelConfig[chIndex];
+        SchM_Enter_UdpNm_Context();
         UdpNm_InnerChannelType* chRTPtr = &UdpNm_ChRunTime[chIndex];
 
-        SchM_Enter_UdpNm_Context();
         if ((FALSE == chRTPtr->udpNmTxEnable) && (NM_MODE_NETWORK == chRTPtr->udpnmMode))
         {
             chRTPtr->udpNmTxEnable = TRUE;
@@ -733,7 +743,8 @@ Std_ReturnType UdpNm_EnableCommunication(NetworkHandleType nmChannelHandle) /* P
 }
 #endif /* STD_ON == UDPNM_COM_CONTROL_ENABLED */
 
-#if (STD_ON == UDPNM_USER_DATA_ENABLED) && (STD_OFF == UDPNM_PASSIVE_MODE_ENABLED)
+#if (UDPNM_USER_DATA_ENABLED == STD_ON) && (UDPNM_COM_USERDATA_SUPPORT == STD_OFF) \
+    && (UDPNM_PASSIVE_MODE_ENABLED == STD_OFF)
 /******************************************************************************/
 /*
  * Brief               Set user data for all NM messages transmitted on the bus
@@ -762,17 +773,15 @@ Std_ReturnType UdpNm_SetUserData(NetworkHandleType nmChannelHandle, const uint8*
     {
         UdpNm_ChannelIndexType chIndex = UdpNm_FindChannelIndex(nmChannelHandle);
         const UdpNm_ChannelConfigType* chCfgPtr = &UdpNm_CfgPtr->ChannelConfig[chIndex];
-        /* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
         UdpNm_InnerChannelType* chRTPtr = &UdpNm_ChRunTime[chIndex];
-        /* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
-
         /* @req SWS_UdpNm_00159 */
         /* Set NM user data*/
         uint16 userDataLength = chCfgPtr->UserDataLength;
         uint16 userDataOffset = chCfgPtr->UserDataOffset;
-        uint8* userDataPtr = &chRTPtr->txPduData[userDataOffset];
-
+        /* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
         SchM_Enter_UdpNm_Context();
+        /* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
+        uint8* userDataPtr = &chRTPtr->txPduData[userDataOffset];
         (void)ILib_memcpy(userDataPtr, nmUserDataPtr, userDataLength);
         SchM_Exit_UdpNm_Context();
 
@@ -802,6 +811,7 @@ Std_ReturnType UdpNm_GetUserData(
     uint8* nmUserDataPtr) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
 {
     Std_ReturnType ret = E_NOT_OK;
+
 #if (UDPNM_DEV_ERROR_DETECT == STD_ON)
     if (UdpNm_ValidateNetworkHandleAndPointer(UDPNM_SERVICE_ID_GETUSERDATA, nmChannelHandle, nmUserDataPtr))
 #endif
@@ -814,9 +824,8 @@ Std_ReturnType UdpNm_GetUserData(
         /* Provided most recently received NM PDU user data*/
         uint16 userDataLength = chCfgPtr->UserDataLength;
         uint16 userDataOffset = chCfgPtr->UserDataOffset;
-        const uint8* userDataPtr = &chRTPtr->rxPduData[userDataOffset];
-
         SchM_Enter_UdpNm_Context();
+        const uint8* userDataPtr = &chRTPtr->rxPduData[userDataOffset];
         (void)ILib_memcpy(nmUserDataPtr, userDataPtr, userDataLength);
         SchM_Exit_UdpNm_Context();
 
@@ -841,7 +850,7 @@ Std_ReturnType UdpNm_GetNodeIdentifier(NetworkHandleType nmChannelHandle, uint8*
         const UdpNm_InnerChannelType* chRTPtr = &UdpNm_ChRunTime[chIndex];
 
         /* @req SWS_UdpNm_00132 */
-        if (chCfgPtr->NodeIdEnabled)
+        if (UdpNm_CfgPtr->ChannelConfig[chIndex].NodeIdEnabled)
         {
             SchM_Enter_UdpNm_Context();
             *nmNodeIdPtr = chRTPtr->rxPduData[(uint8)chCfgPtr->PduNidPosition];
@@ -866,10 +875,10 @@ Std_ReturnType UdpNm_GetLocalNodeIdentifier(NetworkHandleType nmChannelHandle, u
     if (UdpNm_ValidateNetworkHandleAndPointer(UDPNM_SERVICE_ID_GETLOCALNODEIDENTIFIER, nmChannelHandle, nmNodeIdPtr))
 #endif
     {
+        /* @req SWS_UdpNm_00133 */
         UdpNm_ChannelIndexType chIndex = UdpNm_FindChannelIndex(nmChannelHandle);
         const UdpNm_ChannelConfigType* chCfgPtr = &UdpNm_CfgPtr->ChannelConfig[chIndex];
-        /* @req SWS_UdpNm_00133 */
-        if (chCfgPtr->NodeIdEnabled)
+        if (UdpNm_CfgPtr->ChannelConfig[chIndex].NodeIdEnabled)
         {
             *nmNodeIdPtr = chCfgPtr->NodeId;
             ret = E_OK;
@@ -893,9 +902,9 @@ Std_ReturnType UdpNm_RepeatMessageRequest(NetworkHandleType nmChannelHandle)
         UdpNm_ChannelIndexType chIndex = UdpNm_FindChannelIndex(nmChannelHandle);
         if (UdpNm_CfgPtr->ChannelConfig[chIndex].NodeDetectionEnabled)
         {
+            SchM_Enter_UdpNm_Context();
             UdpNm_InnerChannelType* chRTPtr = &UdpNm_ChRunTime[chIndex];
 
-            SchM_Enter_UdpNm_Context();
             /*@req SWS_UdpNm_00137 */
             /*
              * If the service is called in Repeat Message State,
@@ -905,6 +914,7 @@ Std_ReturnType UdpNm_RepeatMessageRequest(NetworkHandleType nmChannelHandle)
             if ((NM_STATE_NORMAL_OPERATION == chRTPtr->udpNmState) || (NM_STATE_READY_SLEEP == chRTPtr->udpNmState))
             {
                 chRTPtr->repeatMessageRequest = TRUE;
+
                 ret = E_OK;
             }
             SchM_Exit_UdpNm_Context();
@@ -973,20 +983,19 @@ Std_ReturnType UdpNm_GetPduData(NetworkHandleType nmChannelHandle, uint8* nmPduD
  */
 /******************************************************************************/
 /* PRQA S 1532 ++ */ /* MISRA Rule 8.7 */
-FUNC(Std_ReturnType, UDPNM_CODE)
-UdpNm_GetState(NetworkHandleType nmChannelHandle, Nm_StateType* nmStatePtr, Nm_ModeType* nmModePtr)
+Std_ReturnType UdpNm_GetState(NetworkHandleType nmChannelHandle, Nm_StateType* nmStatePtr, Nm_ModeType* nmModePtr)
 /* PRQA S 1532 -- */ /* MISRA Rule 8.7 */
 {
     Std_ReturnType ret = E_NOT_OK;
 
 #if (UDPNM_DEV_ERROR_DETECT == STD_ON)
-    if (UdpNm_ValidateNetworkHandleAndPointerPointer(UDPNM_SERVICE_ID_GETSTATE, nmChannelHandle, nmStatePtr, nmModePtr))
+    if (UdpNm_ValidateNetworkHandlePointerAndPointer(UDPNM_SERVICE_ID_GETSTATE, nmChannelHandle, nmStatePtr, nmModePtr))
 #endif
     {
         UdpNm_ChannelIndexType chIndex = UdpNm_FindChannelIndex(nmChannelHandle);
-        const UdpNm_InnerChannelType* chRTPtr = &UdpNm_ChRunTime[chIndex];
 
         SchM_Enter_UdpNm_Context();
+        const UdpNm_InnerChannelType* chRTPtr = &UdpNm_ChRunTime[chIndex];
         *nmStatePtr = chRTPtr->udpNmState;
         *nmModePtr = chRTPtr->udpnmMode;
         SchM_Exit_UdpNm_Context();
@@ -1047,15 +1056,12 @@ Std_ReturnType UdpNm_RequestBusSynchronization(NetworkHandleType nmChannelHandle
     if (UdpNm_ValidateNetworkHandle(UDPNM_SERVICE_ID_REQUESTBUSSYNCHRONIZATION, nmChannelHandle))
 #endif
     {
-        /* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
         UdpNm_ChannelIndexType chIndex = UdpNm_FindChannelIndex(nmChannelHandle);
         UdpNm_InnerChannelType* chRTPtr = &UdpNm_ChRunTime[chIndex];
-        /* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
 
-        SchM_Enter_UdpNm_Context();
         if ((NM_MODE_NETWORK == chRTPtr->udpnmMode)
 #if (STD_ON == UDPNM_COM_CONTROL_ENABLED)
-            && (TRUE == chRTPtr->udpNmTxEnable)
+            && (chRTPtr->udpNmTxEnable)
 #endif /* STD_ON == UDPNM_COM_CONTROL_ENABLED */
         )
         {
@@ -1064,7 +1070,8 @@ Std_ReturnType UdpNm_RequestBusSynchronization(NetworkHandleType nmChannelHandle
              * This service shall trigger transmission of a single
              * Network Management PDU
              */
-            ret = UdpNm_SendNmPdu(chIndex, FALSE);
+            chRTPtr->sendNmMsgFlg = TRUE;
+            ret = E_OK;
         }
         else
         {
@@ -1080,8 +1087,8 @@ Std_ReturnType UdpNm_RequestBusSynchronization(NetworkHandleType nmChannelHandle
              * shall return E_NOT_OK.
              */
         }
-        SchM_Exit_UdpNm_Context();
     }
+
     return ret;
 }
 #endif
@@ -1109,12 +1116,10 @@ Std_ReturnType UdpNm_CheckRemoteSleepIndication(NetworkHandleType nmChannelHandl
     if (UdpNm_ValidateNetworkHandle(UDPNM_SERVICE_ID_CHECKREMOTESLEEPINDICATION, nmChannelHandle))
 #endif
     {
-        /* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
+        SchM_Enter_UdpNm_Context();
         UdpNm_ChannelIndexType chIndex = UdpNm_FindChannelIndex(nmChannelHandle);
         UdpNm_InnerChannelType* chRTPtr = &UdpNm_ChRunTime[chIndex];
-        /* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
 
-        SchM_Enter_UdpNm_Context();
         if ((NM_STATE_NORMAL_OPERATION == chRTPtr->udpNmState) || (NM_STATE_READY_SLEEP == chRTPtr->udpNmState))
         {
             *nmRemoteSleepIndPtr = chRTPtr->remoteSleepInd;
@@ -1131,6 +1136,7 @@ Std_ReturnType UdpNm_CheckRemoteSleepIndication(NetworkHandleType nmChannelHandl
         }
         SchM_Exit_UdpNm_Context();
     }
+
     return ret;
 }
 #endif /* STD_ON == UDPNM_REMOTE_SLEEP_IND_ENABLED */
@@ -1160,9 +1166,9 @@ Std_ReturnType UdpNm_SetCoordBits(NetworkHandleType nmChannelHandle, uint8 nmCoo
     if (UdpNm_ValidateNetworkHandle(UDPNM_SERVICE_ID_SETCOORDBITS, nmChannelHandle))
 #endif
     {
-        SchM_Enter_UdpNm_Context();
-        UdpNm_SetTxPduCbvBit(chIndex, nmCoordBits << 1u);
-        SchM_Exit_UdpNm_Context();
+        UdpNm_ChannelIndexType chIndex = UdpNm_FindChannelIndex(nmChannelHandle);
+
+        UdpNm_SetTxPduCbvBit(chIndex, nmCoordBits << 1u); /* PRQA S 3469 */ /* MISRA Dir 4.9 */
         ret = E_OK;
     }
     return ret;
@@ -1193,32 +1199,31 @@ Std_ReturnType UdpNm_SetSleepReadyBit(NetworkHandleType nmChannelHandle, boolean
     if (UdpNm_ValidateNetworkHandle(UDPNM_SERVICE_ID_SETSLEEPREADYBIT, nmChannelHandle))
 #endif
     {
-        SchM_Enter_UdpNm_Context();
-        UdpNm_ChannelIndexType chIndex = UdpNm_FindChannelIndex(nmChannelHandle);
+
         /* @req SWS_UdpNm_00321 */
         /*
          * UdpNm shall set the "NM Coordinator Sleep Ready Bit" bit to
          * passed value and trigger a single Network Management PDU.
          */
-        if (TRUE == nmSleepReadyBit)
+        UdpNm_ChannelIndexType chIndex = UdpNm_FindChannelIndex(nmChannelHandle);
+
+        if (nmSleepReadyBit)
         {
-            UdpNm_SetTxPduCbvBit(chIndex, UDPNM_CBV_BIT_CSR_MASK);
+            UdpNm_SetTxPduCbvBit(chIndex, UDPNM_CBV_BIT_CSR_MASK); /* PRQA S 3469 */ /* MISRA Dir 4.9 */
         }
         else
         {
-            UdpNm_ClrTxPduCbvBit(chIndex, UDPNM_CBV_BIT_CSR_MASK);
+            UdpNm_ClrTxPduCbvBit(chIndex, UDPNM_CBV_BIT_CSR_MASK); /* PRQA S 3469 */ /* MISRA Dir 4.9 */
         }
-        (void)UdpNm_SendNmPdu(chIndex, FALSE);
-
-        SchM_Exit_UdpNm_Context();
+        chRTPtr->sendNmMsgFlg = TRUE;
         ret = E_OK;
     }
-}
-return ret;
+
+    return ret;
 }
 #endif /* STD_ON == UDPNM_COORDINATOR_SYNC_SUPPORT */
 
-#if ((STD_ON == UDPNM_COM_USERDATA_SUPPORT) || (STD_ON == UDPNM_GLOBAL_PN_ENABLED))
+#if (STD_ON == UDPNM_COM_USERDATA_SUPPORT)
 /******************************************************************************/
 /*
  * Brief               Requests transmission of a PDU.
@@ -1238,9 +1243,8 @@ return ret;
 Std_ReturnType UdpNm_Transmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
 {
     Std_ReturnType ret = E_NOT_OK;
-
 #if (UDPNM_DEV_ERROR_DETECT == STD_ON)
-    if (UdpNm_ValidateTxPdu(UDPNM_SERVICE_ID_TRANSMIT, TxPduId, PduInfoPtr))
+    if (UdpNm_ValidateTxPduId(UDPNM_SERVICE_ID_TRANSMIT, TxPduId))
 #endif
     {
         P2CONST(UdpNm_ChannelConfigType, AUTOMATIC, UDPNM_APPL_CONST)
@@ -1250,7 +1254,8 @@ Std_ReturnType UdpNm_Transmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr) 
 
         for (chIndex = 0; chIndex < UDPNM_NUMBER_OF_CHANNEL; chIndex++) /* PRQA S 2877 */ /* MISRA Dir 4.1 */
         {
-            if (TxPduId == chCfgPtr[chIndex].TxPdu->TxConfirmationPduId)
+            const UdpNm_UserDataTxPduType* userDataPduPtr = chCfgPtr[chIndex].UserDataTxPdu;
+            if ((userDataPduPtr != NULL_PTR) && (userDataPduPtr->TxUserDataPduId == TxPduId))
             {
                 break;
             }
@@ -1258,28 +1263,35 @@ Std_ReturnType UdpNm_Transmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr) 
 
         if (chIndex < UDPNM_NUMBER_OF_CHANNEL)
         {
-            chRTPtr = &UdpNm_ChRunTime[chIndex];
-            /* @req SWS_UdpNm_00464 */
-            if (((NM_STATE_NORMAL_OPERATION == chRTPtr->udpNmState) || (NM_STATE_REPEAT_MESSAGE == chRTPtr->udpNmState))
-                && (PduInfoPtr->SduLength >= chCfgPtr[chIndex].UserDataLength))
+#if (UDPNM_DEV_ERROR_DETECT == STD_ON) && (STD_ON == UDPNM_MULTIPLE_PARTITION_USED)
+            /* Multiple partition check. */
+            ApplicationType applicationID = GetApplicationID();
+
+            if (applicationID
+                != ComM_GetChannelApplicationID(UdpNm_CfgPtr->ChannelConfig[chIndex].ComMNetworkHandleRef))
             {
-                /* Copy tx data to tx buffer */
-                (void)ILib_memcpy(
-                    &chRTPtr->txPduData[chCfgPtr[chIndex].UserDataOffset],
-                    PduInfoPtr->SduDataPtr,
-                    chCfgPtr[chIndex].UserDataLength);
+                UDPNM_DET_REPORT(UDPNM_SERVICE_ID_TRANSMIT, UDPNM_E_PARTITION);
+            }
+            else
+#endif
+            {
+                chRTPtr = &UdpNm_ChRunTime[chIndex];
+                /* @req SWS_UdpNm_00464 */
+                if ((NM_STATE_NORMAL_OPERATION == chRTPtr->udpNmState)
+                    || (NM_STATE_REPEAT_MESSAGE == chRTPtr->udpNmState))
+                {
+                    /*
+                     * Request an additional transmission of the NM PDU with the current
+                     * user data.
+                     */
+                    chRTPtr->sendNmMsgFlg = TRUE;
 
-                /*
-                 * Request an additional transmission of the NM PDU with the current
-                 * user data.
-                 */
-                (void)UdpNm_SendNmPdu(chIndex, TRUE);
-
-                ret = E_OK;
+                    ret = E_OK;
+                }
             }
         }
     }
-
+    UDPNM_UNUSED_PARAMETER(PduInfoPtr);
     return ret;
 }
 #endif
@@ -1323,32 +1335,43 @@ void UdpNm_SoAdIfTxConfirmation(PduIdType TxPduId) /* PRQA S 1532 */ /* MISRA Ru
             chCfgPtr++;
         }
 
-        chRTPtr = &UdpNm_ChRunTime[chIndex];
-
-        SchM_Enter_UdpNm_Context();
-        /* @req SWS_UdpNm_00099 */
-        /* Nm pdu transmit success,restart the nm-timeout timer */
-        if (NM_MODE_NETWORK == chRTPtr->udpnmMode)
+#if (UDPNM_DEV_ERROR_DETECT == STD_ON) && (STD_ON == UDPNM_MULTIPLE_PARTITION_USED)
+        /* Multiple partition check. */
+        ApplicationType applicationID = GetApplicationID();
+        if (applicationID != ComM_GetChannelApplicationID(UdpNm_CfgPtr->ChannelConfig[chIndex].ComMNetworkHandleRef))
         {
-            chRTPtr->nmTimeoutTimer = chCfgPtr->TimeoutTime;
+            UDPNM_DET_REPORT(UDPNM_SERVICE_ID_IFTXCONFIRMATION, UDPNM_E_PARTITION);
         }
+        else
+#endif
+        {
+            SchM_Enter_UdpNm_Context();
+            chRTPtr = &UdpNm_ChRunTime[chIndex];
+
+            /* @req SWS_UdpNm_00099 */
+            /* Nm pdu transmit success,restart the nm-timeout timer */
+            if (NM_MODE_NETWORK == chRTPtr->udpnmMode)
+            {
+                chRTPtr->nmTimeoutTimer = chCfgPtr->TimeoutTime;
+            }
 
 #if (STD_OFF == UDPNM_PASSIVE_MODE_ENABLED)
-        chRTPtr->msgTimeoutTimer = 0u;
-        chRTPtr->msgToutFlg = FALSE;
+            chRTPtr->msgTimeoutTimer = 0u;
+            chRTPtr->msgToutFlg = FALSE;
 #endif /* STD_OFF == UDPNM_PASSIVE_MODE_ENABLED */
-        SchM_Exit_UdpNm_Context();
+            SchM_Exit_UdpNm_Context();
 
 #if (STD_ON == UDPNM_COM_USERDATA_SUPPORT)
 #if (0u < UDPNM_USERDATA_TX_PDU_NUM)
-        if (NULL_PTR != chCfgPtr->UserDataTxPdu)
-        {
-            /* @req SWS_UdpNm_00316 */
-            /* Call PduR_UdpNmTxConfirmation */
-            PduR_UdpNmTxConfirmation(chCfgPtr->UserDataTxPdu->UpperLayerPduId);
-        }
+            if (NULL_PTR != chCfgPtr->UserDataTxPdu)
+            {
+                /* @req SWS_UdpNm_00316 */
+                /* Call PduR_UdpNmTxConfirmation */
+                PduR_UdpNmTxConfirmation(chCfgPtr->UserDataTxPdu->UpperLayerPduId);
+            }
 #endif /*0 < UDPNM_USERDATA_TX_PDU_NUM */
 #endif /* STD_ON == UDPNM_COM_USERDATA_SUPPORT */
+        }
     }
 }
 #define UDPNM_STOP_SEC_UDPNMSOADIFTXCONFIRMATION_CALLBACK_CODE
@@ -1386,39 +1409,53 @@ void UdpNm_SoAdIfRxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr) 
 
         for (chIndex = 0; chIndex < UDPNM_NUMBER_OF_CHANNEL; chIndex++) /* PRQA S 2877 */ /* MISRA Dir 4.1 */
         {
-            chCfgPtr = &UdpNm_CfgPtr->ChannelConfig[chIndex];
-            for (pduIdx = 0; pduIdx < chCfgPtr->RxPduNum; pduIdx++)
             {
-                if (RxPduId == chCfgPtr->RxPdu[pduIdx].RxPduId)
+                chCfgPtr = &UdpNm_CfgPtr->ChannelConfig[chIndex];
+                for (pduIdx = 0; pduIdx < chCfgPtr->RxPduNum; pduIdx++)
+                {
+                    if (RxPduId == chCfgPtr->RxPdu[pduIdx].RxPduId)
+                    {
+                        break;
+                    }
+                }
+
+                if (pduIdx < chCfgPtr->RxPduNum)
                 {
                     break;
                 }
             }
-
-            if (pduIdx < chCfgPtr->RxPduNum)
-            {
-                break;
-            }
         }
-
-        chRTPtr = &UdpNm_ChRunTime[chIndex];
+#if (UDPNM_DEV_ERROR_DETECT == STD_ON) && (STD_ON == UDPNM_MULTIPLE_PARTITION_USED)
+        /* Multiple partition check. */
+        ApplicationType applicationID = GetApplicationID();
+        if (applicationID != ComM_GetChannelApplicationID(UdpNm_CfgPtr->ChannelConfig[chIndex].ComMNetworkHandleRef))
+        {
+            UDPNM_DET_REPORT(UDPNM_SERVICE_ID_RXINDICATION, UDPNM_E_PARTITION);
+        }
+        else
+#endif
+        {
+            chRTPtr = &UdpNm_ChRunTime[chIndex];
 
 /* @req SWS_UdpNm_00337, @req SWS_UdpNm_00339*/
 #if (STD_ON == UDPNM_GLOBAL_PN_ENABLED)
-        if (TRUE == UdpNm_RxPnFilter(chCfgPtr, chRTPtr, PduInfoPtr))
+            if (UdpNm_RxPnFilter(chCfgPtr, chRTPtr, PduInfoPtr))
 #endif
-        {
-            PduLengthType copyLen =
-                (PduInfoPtr->SduLength > UDPNM_PDU_LENGTH) ? UDPNM_PDU_LENGTH : PduInfoPtr->SduLength;
-            /* @req SWS_UdpNm_00035 */
-            (void)ILib_memcpy(chRTPtr->rxPduData, PduInfoPtr->SduDataPtr, copyLen);
-            chRTPtr->rxPduFlg = TRUE;
+            {
+                SchM_Enter_UdpNm_Context();
+                PduLengthType copyLen =
+                    (PduInfoPtr->SduLength > UDPNM_PDU_LENGTH) ? UDPNM_PDU_LENGTH : PduInfoPtr->SduLength;
+                /* @req SWS_UdpNm_00035 */
+                (void)ILib_memcpy(chRTPtr->rxPduData, PduInfoPtr->SduDataPtr, copyLen);
+                chRTPtr->rxPduFlg = TRUE;
+                SchM_Exit_UdpNm_Context();
 
 /* @req SWS_UdpNm_00037 */
 /* Notify nm layer,if rx pdu */
 #if (STD_ON == UDPNM_PDU_RX_INDICATION_ENABLED)
-            Nm_PduRxIndication(chCfgPtr->ComMNetworkHandleRef);
+                Nm_PduRxIndication(chCfgPtr->ComMNetworkHandleRef);
 #endif /* STD_ON == UDPNM_PDU_RX_INDICATION_ENABLED */
+            }
         }
     }
 }
@@ -1465,11 +1502,8 @@ Std_ReturnType UdpNm_SoAdIfTriggerTransmit(PduIdType TxPduId, PduInfoType* PduIn
     {
         P2CONST(UdpNm_ChannelConfigType, AUTOMATIC, UDPNM_APPL_CONST)
         chCfgPtr = &UdpNm_CfgPtr->ChannelConfig[0];
-        UdpNm_InnerChannelType* chRTPtr;
+        UdpNm_InnerChannelType* chRTPtr; /* PRQA S 3678 */ /* VL_QAC_3678 */
         uint8 chIndex;
-#if (STD_ON == UDPNM_COM_USERDATA_SUPPORT)
-        PduInfoType pduInfo;
-#endif /* STD_ON == UDPNM_COM_USERDATA_SUPPORT */
 
         if (PduInfoPtr->SduLength >= chCfgPtr->UdpNmPduLength)
         {
@@ -1482,20 +1516,35 @@ Std_ReturnType UdpNm_SoAdIfTriggerTransmit(PduIdType TxPduId, PduInfoType* PduIn
                 chCfgPtr++;
             }
 
-            chRTPtr = &UdpNm_ChRunTime[chIndex];
+            if (chIndex < UDPNM_NUMBER_OF_CHANNEL)
+            {
+                chRTPtr = &UdpNm_ChRunTime[chIndex];
 
 #if (STD_ON == UDPNM_COM_USERDATA_SUPPORT)
-            /* @req SWS_UdpNm_00377 */
-            pduInfo.SduLength = chCfgPtr->UserDataLength;
-            pduInfo.SduDataPtr = &chRTPtr->txPduData[chCfgPtr->UserDataOffset];
-            ret = PduR_UdpNmTriggerTransmit(chCfgPtr->UserDataTxPdu->UpperLayerPduId, &pduInfo);
-            if (E_OK == ret)
-#else
-            ret = E_OK;
+                /* @req SWS_UdpNm_00377 */
+                if (chCfgPtr->UserDataTxPdu != NULL_PTR)
+                {
+                    uint8 userData[UDPNM_USER_DATA_MAX_LENGTH] = {0};
+                    PduInfoType pduInfo;
+                    pduInfo.SduLength = chCfgPtr->UserDataLength;
+                    pduInfo.SduDataPtr = userData;
+                    if (PduR_UdpNmTriggerTransmit(chCfgPtr->UserDataTxPdu->UpperLayerPduId, &pduInfo) == E_OK)
+                    {
+                        SchM_Enter_UdpNm_Context();
+                        (void)ILib_memcpy(
+                            &chRTPtr->txPduData[chCfgPtr->UserDataOffset],
+                            userData,
+                            chCfgPtr->UserDataLength);
+                        SchM_Exit_UdpNm_Context();
+                    }
+                }
 #endif
-            {
                 /* @req SWS_UdpNm_00378 */
+                SchM_Enter_UdpNm_Context();
                 (void)ILib_memcpy(PduInfoPtr->SduDataPtr, chRTPtr->txPduData, chCfgPtr->UdpNmPduLength);
+                SchM_Exit_UdpNm_Context();
+
+                ret = E_OK;
             }
         }
     }
@@ -1520,30 +1569,43 @@ Std_ReturnType UdpNm_SoAdIfTriggerTransmit(PduIdType TxPduId, PduInfoType* PduIn
  * Return              None
  */
 /******************************************************************************/
-FUNC(void, UDPNM_CODE) UdpNm_MainFunction(NetworkHandleType channel) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
+void UdpNm_MainFunction(NetworkHandleType channel) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
 {
     if ((UdpNm_InitStatus == UDPNM_INIT) && (channel < UDPNM_NUMBER_OF_CHANNEL))
     {
-        UdpNm_InnerChannelType* chRTPtr = &UdpNm_ChRunTime[channel];
-        if (chRTPtr->rxPduFlg)
+#if (UDPNM_DEV_ERROR_DETECT == STD_ON) && (STD_ON == UDPNM_MULTIPLE_PARTITION_USED)
+        /* Multiple partition check. */
+        ApplicationType applicationID = GetApplicationID();
+        if (applicationID != ComM_GetChannelApplicationID(UdpNm_CfgPtr->ChannelConfig[channel].ComMNetworkHandleRef))
         {
-            chRTPtr->rxPduFlg = FALSE;
-            chRTPtr->rxPduExtFlg = TRUE;
-            UdpNm_RxDataMainHandle(channel);
+            UDPNM_DET_REPORT(UDPNM_SERVICE_ID_MAINFUNCTION, UDPNM_E_PARTITION);
         }
-
-        UdpNm_TimerManagement(channel);
-        UdpNm_StateManagement(channel);
-#if UDPNM_PASSIVE_MODE_ENABLED == STD_OFF
-        UdpNm_SendMsgMainHandle(channel);
-#endif /* UDPNM_PASSIVE_MODE_ENABLED == STD_OFF */
-        /* Clear Flags */
-        chRTPtr->rxPduExtFlg = FALSE;
-#if (STD_ON == UDPNM_NODE_DETECTION_ENABLED)
-        chRTPtr->repeatMessageRequest = FALSE;
+        else
 #endif
-        chRTPtr->nmToutFlg = FALSE;
-        chRTPtr->stateToutFlg = FALSE;
+        {
+
+            UdpNm_InnerChannelType* chRTPtr = &UdpNm_ChRunTime[channel];
+            if (chRTPtr->rxPduFlg)
+            {
+                chRTPtr->rxPduFlg = FALSE;
+                chRTPtr->rxPduExtFlg = TRUE;
+                UdpNm_RxDataMainHandle(channel);
+            }
+
+            UdpNm_TimerManagement(channel);
+            UdpNm_StateManagement(channel);
+#if UDPNM_PASSIVE_MODE_ENABLED == STD_OFF
+            UdpNm_MsgcycleTimerManage(channel);
+            UdpNm_SendMsgMainHandle(channel);
+#endif /* UDPNM_PASSIVE_MODE_ENABLED == STD_OFF */
+            /* Clear Flags */
+            chRTPtr->rxPduExtFlg = FALSE;
+#if (STD_ON == UDPNM_NODE_DETECTION_ENABLED)
+            chRTPtr->repeatMessageRequest = FALSE;
+#endif
+            chRTPtr->nmToutFlg = FALSE;
+            chRTPtr->stateToutFlg = FALSE;
+        }
     }
 }
 
@@ -1574,8 +1636,7 @@ static inline boolean UdpNm_TestAndClear(boolean* flagPtr)
 #if (STD_ON == UDPNM_CAR_WAKEUP_RX_ENABLED)
 static FUNC(void, UDPNM_CODE) UdpNm_RxCarWakeUpHadle(uint8 chIndex)
 {
-    P2CONST(UdpNm_ChannelConfigType, AUTOMATIC, UDPNM_APPL_CONST)
-    chCfgPtr = &UdpNm_CfgPtr->ChannelConfig[chIndex];
+    const UdpNm_ChannelConfigType* chCfgPtr = &UdpNm_CfgPtr->ChannelConfig[chIndex];
     const UdpNm_InnerChannelType* chRTPtr = &UdpNm_ChRunTime[chIndex];
     uint8 carWakeupMask = (1u << (chCfgPtr->CarWakeUpBitPosition));
     SchM_Enter_UdpNm_Context();
@@ -1583,11 +1644,11 @@ static FUNC(void, UDPNM_CODE) UdpNm_RxCarWakeUpHadle(uint8 chIndex)
     SchM_Exit_UdpNm_Context();
 
 #if (STD_ON == UDPNM_CAR_WAKEUP_RX_ENABLED)
-    if (UdpNm_GetCarWakeUpRxEnabled(chIndex) && ((carWakeupByte & carWakeupMask) > 0u))
+    if (UdpNm_CfgPtr->ChannelConfig[chIndex].CarWakeUpRxEnabled && ((carWakeupByte & carWakeupMask) > 0u))
     {
 #if (STD_ON == UDPNM_CAR_WAKEUP_FILTER_ENABLED)
 #if !defined(UDPNM_VER_4_2_2)
-        if (TRUE == UdpNm_GetCarWakeUpFilterEnabled(chIndex))
+        if (UdpNm_CfgPtr->ChannelConfig[chIndex].CarWakeUpFilterEnabled)
 #endif
         {
             /* @req SWS_UdpNm_00376 */
@@ -1597,9 +1658,9 @@ static FUNC(void, UDPNM_CODE) UdpNm_RxCarWakeUpHadle(uint8 chIndex)
                 uint8 rxNodeId = chRTPtr->rxPduData[(uint8)chCfgPtr->PduNidPosition];
                 SchM_Exit_UdpNm_Context();
 
-                if (UdpNm_GetCarWakeUpFilterNodeId(chIndex) == rxNodeId)
+                if (UdpNm_CfgPtr->ChannelConfig[chIndex].CarWakeUpFilterNodeId == rxNodeId)
                 {
-                    Nm_CarWakeUpIndication(chCfgPtr->ComMNetworkHandleRef);
+                    Nm_CarWakeUpIndication(UdpNm_CfgPtr->ChannelConfig[chIndex].ComMNetworkHandleRef);
                 }
             }
         }
@@ -1609,7 +1670,7 @@ static FUNC(void, UDPNM_CODE) UdpNm_RxCarWakeUpHadle(uint8 chIndex)
 #endif /* STD_ON == UDPNM_CAR_WAKEUP_FILTER_ENABLED */
         {
             /* @req SWS_UdpNm_00374 */
-            Nm_CarWakeUpIndication(chCfgPtr->ComMNetworkHandleRef);
+            Nm_CarWakeUpIndication(UdpNm_CfgPtr->ChannelConfig[chIndex].ComMNetworkHandleRef);
         }
     }
 #endif /* STD_ON == UDPNM_CAR_WAKEUP_RX_ENABLED */
@@ -1659,19 +1720,19 @@ UDPNM_LOCAL UdpNm_ChannelIndexType UdpNm_FindChannelIndex(NetworkHandleType nmCh
 /******************************************************************************/
 static FUNC(void, UDPNM_CODE) UdpNm_StateChange(uint8 chIndex, Nm_StateType nmNewState)
 {
+    SchM_Enter_UdpNm_Context();
     UdpNm_InnerChannelType* chRTPtr = &UdpNm_ChRunTime[chIndex];
+#if (STD_ON == UDPNM_STATE_CHANGE_IND_ENABLED)
+    Nm_StateType udpNmState = chRTPtr->udpNmState;
+#endif /* STD_ON == UDPNM_STATE_CHANGE_IND_ENABLED */
+    chRTPtr->udpNmState = nmNewState;
+    SchM_Exit_UdpNm_Context();
+
 #if (STD_ON == UDPNM_STATE_CHANGE_IND_ENABLED)
     /* @req SWS_UdpNm_00166 */
     /* UdpNm states shall be notified to the upper layer.*/
-    Nm_StateChangeNotification(
-        UdpNm_CfgPtr->ChannelConfig[chIndex].ComMNetworkHandleRef,
-        chRTPtr->udpNmState,
-        nmNewState);
+    Nm_StateChangeNotification(UdpNm_CfgPtr->ChannelConfig[chIndex].ComMNetworkHandleRef, udpNmState, nmNewState);
 #endif /* STD_ON == UDPNM_STATE_CHANGE_IND_ENABLED */
-
-    SchM_Enter_UdpNm_Context();
-    chRTPtr->udpNmState = nmNewState;
-    SchM_Exit_UdpNm_Context();
 }
 
 /******************************************************************************/
@@ -1689,8 +1750,7 @@ static FUNC(void, UDPNM_CODE) UdpNm_StateChange(uint8 chIndex, Nm_StateType nmNe
 /******************************************************************************/
 static FUNC(void, UDPNM_CODE) UdpNm_EntryRepeatMessageState(uint8 chIndex, boolean isNetWorkRequest)
 {
-    P2CONST(UdpNm_ChannelConfigType, AUTOMATIC, UDPNM_APPL_CONST)
-    chCfgPtr = &UdpNm_CfgPtr->ChannelConfig[chIndex];
+    const UdpNm_ChannelConfigType* chCfgPtr = &UdpNm_CfgPtr->ChannelConfig[chIndex];
     UdpNm_InnerChannelType* chRTPtr = &UdpNm_ChRunTime[chIndex];
     /* Load UdpNmRepeatMessageTime to stateTimer */
     chRTPtr->stateTimer = chCfgPtr->RepeatMessageTime;
@@ -1709,14 +1769,13 @@ static FUNC(void, UDPNM_CODE) UdpNm_EntryRepeatMessageState(uint8 chIndex, boole
          */
         chRTPtr->msgTxCylceTimer = chCfgPtr->MsgCycleOffset;
 
-        /* @req SWS_UdpNm_00007 */
-        if ((NM_MODE_BUS_SLEEP == chRTPtr->udpnmMode) && (TRUE == chCfgPtr->RetryFirstMessageRequest))
+        if (chRTPtr->msgTxCylceTimer == 0u)
         {
-            chRTPtr->retrySendMsgFlag = TRUE;
+            chRTPtr->msgTxCylceTimer = 1;
         }
 
 #if (STD_ON == UDPNM_IMMEDIATE_RESTART_ENABLED)
-        if ((TRUE == isNetWorkRequest) && (NM_MODE_PREPARE_BUS_SLEEP == chRTPtr->udpnmMode))
+        if ((isNetWorkRequest) && (NM_MODE_PREPARE_BUS_SLEEP == chRTPtr->udpnmMode))
         {
             /* @req SWS_UdpNm_00122 */
             /* Set send NM message flag */
@@ -1735,7 +1794,7 @@ static FUNC(void, UDPNM_CODE) UdpNm_EntryRepeatMessageState(uint8 chIndex, boole
          */
         if ((NM_MODE_BUS_SLEEP == chRTPtr->udpnmMode) || (NM_MODE_PREPARE_BUS_SLEEP == chRTPtr->udpnmMode)
 #if (STD_ON == UDPNM_GLOBAL_PN_ENABLED)
-            || ((NM_MODE_NETWORK == chRTPtr->udpnmMode) && (TRUE == chCfgPtr->PnHandleMultipleNetworkRequests))
+            || ((NM_MODE_NETWORK == chRTPtr->udpnmMode) && (chCfgPtr->PnHandleMultipleNetworkRequests))
 #endif /* STD_ON == UDPNM_GLOBAL_PN_ENABLED */
         )
         {
@@ -1744,13 +1803,14 @@ static FUNC(void, UDPNM_CODE) UdpNm_EntryRepeatMessageState(uint8 chIndex, boole
 
             chRTPtr->msgTxCylceTimer = chCfgPtr->ImmediateNmCycleTime;
             chRTPtr->immedMsgTxCnt = chCfgPtr->ImmediateNmTransmissions;
-            /* @req SWS_UdpNm_00330 @req SWS_UdpNm_00007 */
-            /*
-             * If immediate transmit Nm Pdu failed, retry in next
-             * MainFunction.
-             */
-            chRTPtr->retrySendMsgFlag = TRUE;
         }
+    }
+#endif
+#if UDPNM_RETRY_FIRST_MESSAGE_REQUEST == STD_ON
+    /* @req SWS_UdpNm_00007 */
+    if ((NM_MODE_BUS_SLEEP == chRTPtr->udpnmMode) || (NM_MODE_PREPARE_BUS_SLEEP == chRTPtr->udpnmMode))
+    {
+        chRTPtr->retrySendMsgFlag = chCfgPtr->RetryFirstMessageRequest;
     }
 #endif
 #endif /* STD_OFF == UDPNM_PASSIVE_MODE_ENABLED*/
@@ -1761,11 +1821,11 @@ static FUNC(void, UDPNM_CODE) UdpNm_EntryRepeatMessageState(uint8 chIndex, boole
      * Entry Repeat Message state from Normal Operation State or Ready
      * Sleep State,shall cancel remote notify.
      */
-    if ((TRUE == chRTPtr->remoteSleepInd)
+    if ((chRTPtr->remoteSleepInd)
         && ((NM_STATE_NORMAL_OPERATION == chRTPtr->udpNmState) || (NM_STATE_READY_SLEEP == chRTPtr->udpNmState)))
     {
         chRTPtr->remoteSleepInd = FALSE;
-        Nm_RemoteSleepCancellation(chCfgPtr->ComMNetworkHandleRef);
+        Nm_RemoteSleepCancellation(UdpNm_CfgPtr->ChannelConfig[chIndex].ComMNetworkHandleRef);
     }
 #endif /*STD_ON == UDPNM_REMOTE_SLEEP_IND_ENABLED */
 
@@ -1775,7 +1835,7 @@ static FUNC(void, UDPNM_CODE) UdpNm_EntryRepeatMessageState(uint8 chIndex, boole
     {
 #if (STD_ON == UDPNM_COORDINATOR_SYNC_SUPPORT)
         UdpNm_ChRunTime[chIndex].coordReadyToSleepInd = UDPNM_CSR_IND_INIT;
-        UdpNm_ClrTxPduCbvBit(chIndex, UDPNM_CBV_BIT_CSR_MASK);
+        UdpNm_ClrTxPduCbvBit(chIndex, UDPNM_CBV_BIT_CSR_MASK); /* PRQA S 3469 */ /* MISRA Dir 4.9 */
 #endif /* STD_ON == UDPNM_COORDINATOR_SYNC_SUPPORT */
 
         /* @req SWS_UdpNm_00096 */
@@ -1785,9 +1845,45 @@ static FUNC(void, UDPNM_CODE) UdpNm_EntryRepeatMessageState(uint8 chIndex, boole
         /* @req SWS_UdpNm_00097 @req SWS_UdpNm_00093 */
         /* Network Mode is entered, notify the upper layer by Nm_NetworkMode.*/
         chRTPtr->udpnmMode = NM_MODE_NETWORK;
-        Nm_NetworkMode(chCfgPtr->ComMNetworkHandleRef);
+        Nm_NetworkMode(UdpNm_CfgPtr->ChannelConfig[chIndex].ComMNetworkHandleRef);
     }
 }
+
+/******************************************************************************/
+/*
+ * Brief               Process used timers
+ * Sync/Async          Synchronous
+ * Reentrancy          Reentrant for different channel.
+ * Param-Name[in]      chIndex, Channel index in UdpNm
+ * Param-Name[out]     None
+ * Param-Name[in/out]  None
+ * Return              None
+ */
+/******************************************************************************/
+#if UDPNM_PASSIVE_MODE_ENABLED == STD_OFF
+static FUNC(void, UDPNM_CODE) UdpNm_MsgcycleTimerManage(uint8 chIndex)
+{
+    UdpNm_InnerChannelType* chRTPtr = &UdpNm_ChRunTime[chIndex];
+    if ((chRTPtr->msgTxCylceTimer > 0u)
+#if (STD_ON == UDPNM_COM_CONTROL_ENABLED)
+        /* @req SWS_UdpNm_00173 */
+        && (chRTPtr->udpNmTxEnable)
+#endif /* STD_ON == UDPNM_COM_CONTROL_ENABLED */
+    )
+    {
+        chRTPtr->msgTxCylceTimer--;
+        if ((0u == chRTPtr->msgTxCylceTimer)
+            && ((UDPNM_NETWORK_REQUESTED == chRTPtr->netRequestStatus)
+                || (NM_STATE_REPEAT_MESSAGE == chRTPtr->udpNmState)))
+        {
+            /* @req SWS_UdpNm_00032 */
+            /* Set send NM message flag */
+            chRTPtr->sendNmMsgFlg = TRUE;
+        }
+    }
+}
+
+#endif
 
 /******************************************************************************/
 /*
@@ -1816,7 +1912,7 @@ static FUNC(void, UDPNM_CODE) UdpNm_TimerManagement(uint8 chIndex)
             chRTPtr->msgToutFlg = TRUE;
 
             /* @req SWS_UdpNm_00379 */
-            Nm_TxTimeoutException(chCfgPtr->ComMNetworkHandleRef);
+            Nm_TxTimeoutException(UdpNm_CfgPtr->ChannelConfig[chIndex].ComMNetworkHandleRef);
         }
     }
 #endif /* STD_OFF == UDPNM_PASSIVE_MODE_ENABLED */
@@ -1882,46 +1978,13 @@ static FUNC(void, UDPNM_CODE) UdpNm_TimerManagement(uint8 chIndex)
         {
             /* @req SWS_UdpNm_00150 */
             chRTPtr->remoteSleepInd = TRUE;
-            Nm_RemoteSleepIndication(chCfgPtr->ComMNetworkHandleRef);
+            Nm_RemoteSleepIndication(UdpNm_CfgPtr->ChannelConfig[chIndex].ComMNetworkHandleRef);
         }
     }
 #endif /* STD_ON == UDPNM_REMOTE_SLEEP_IND_ENABLED */
 
-/* Msg cycle timer */
-#if (STD_OFF == UDPNM_PASSIVE_MODE_ENABLED)
-    if ((chRTPtr->msgTxCylceTimer > 0u)
-#if (STD_ON == UDPNM_COM_CONTROL_ENABLED)
-        /* @req SWS_UdpNm_00173 */
-        && (TRUE == chRTPtr->udpNmTxEnable)
-#endif /* STD_ON == UDPNM_COM_CONTROL_ENABLED */
-    )
-    {
-        chRTPtr->msgTxCylceTimer--;
-        if ((0u == chRTPtr->msgTxCylceTimer)
-            && ((UDPNM_NETWORK_REQUESTED == chRTPtr->netRequestStatus)
-                || (NM_STATE_REPEAT_MESSAGE == chRTPtr->udpNmState)))
-        {
-            /* @req SWS_UdpNm_00032 */
-            /* Set send NM message flag */
-            chRTPtr->sendNmMsgFlg = TRUE;
-
-#if (STD_ON == UDPNM_IMMEDIATE_TRANSMIT_ENABLED)
-            if (chRTPtr->immedMsgTxCnt > 0u)
-            {
-                chRTPtr->msgTxCylceTimer = chCfgPtr->ImmediateNmCycleTime;
-            }
-            else
-#endif
-            {
-                /* @req SWS_UdpNm_00040 */
-                chRTPtr->msgTxCylceTimer = chCfgPtr->MsgCycleTime;
-            }
-        }
-    }
-#endif /* STD_ON == UDPNM_PASSIVE_MODE_ENABLED */
-
 #if (STD_ON == UDPNM_PN_ERA_CALC_ENABLED)
-    if (TRUE == chCfgPtr->PnEraCalcEnabled)
+    if (chCfgPtr->PnEraCalcEnabled)
     {
         UdpNm_PnEraResetTimerHandle(chIndex);
     }
@@ -1961,46 +2024,26 @@ static FUNC(boolean, UDPNM_CODE) UdpNm_RxPnFilter(
     /*@req SWS_UdpNm_00328*/
     if (chCfgPtr->PnEnabled)
     {
-        /* @req SWS_UdpNm_00329 */
-        if (chCfgPtr->AllNmMessagesKeepAwake)
+        uint8 cbv = PduInfoPtr->SduDataPtr[(uint8)chCfgPtr->PduCbvPosition];
+        ret = chCfgPtr->AllNmMessagesKeepAwake;
+        /* @req SWS_UdpNm_00331 */
+        if ((cbv & UDPNM_CBV_BIT_PNI_MASK) > 0u)
         {
-            chRTPtr->pnRxIndFlg = TRUE;
-        }
-        else if (UDPNM_PDU_OFF != chCfgPtr->PduCbvPosition)
-        {
-            uint8 cbv = PduInfoPtr->SduDataPtr[(uint8)chCfgPtr->PduCbvPosition];
-            /* @req SWS_UdpNm_00331 */
-            if ((cbv & UDPNM_CBV_BIT_PNI_MASK) > 0u)
+            uint8 pduIdx;
+            P2CONST(UdpNm_PnInfoType, AUTOMATIC, UDPNM_APPL_CONST)
+            pnInfoPtr = UdpNm_CfgPtr->PnInfo;
+            P2CONST(UdpNm_PnFilterMaskByteType, AUTOMATIC, UDPNM_APPL_CONST)
+            pnFilMaskByte = pnInfoPtr->PnFilterMaskByte;
+            for (pduIdx = 0u; pduIdx < pnInfoPtr->UdpNmPnInfoLength; pduIdx++)
             {
-                uint8 pduIdx;
-                P2CONST(UdpNm_PnInfoType, AUTOMATIC, UDPNM_APPL_CONST)
-                pnInfoPtr = UdpNm_CfgPtr->PnInfo;
-                P2CONST(UdpNm_PnFilterMaskByteType, AUTOMATIC, UDPNM_APPL_CONST)
-                pnFilMaskByte = pnInfoPtr->PnFilterMaskByte;
-
-                ret = FALSE;
-                for (pduIdx = 0u; pduIdx < pnInfoPtr->UdpNmPnInfoLength; pduIdx++)
+                uint8 byteIndex = pnInfoPtr->UdpNmPnInfoOffset + pnFilMaskByte[pduIdx].PnFilterMaskByteIndex;
+                if ((PduInfoPtr->SduDataPtr[byteIndex] & pnFilMaskByte[pduIdx].PnFilterMaskByteValue) > 0u)
                 {
-                    uint8 byteIndex = pnInfoPtr->UdpNmPnInfoOffset + pnFilMaskByte[pduIdx].PnFilterMaskByteIndex;
-                    if ((PduInfoPtr->SduDataPtr[byteIndex] & pnFilMaskByte[pduIdx].PnFilterMaskByteValue) > 0u)
-                    {
-                        chRTPtr->pnRxIndFlg = TRUE;
-                        ret = TRUE;
-                        break;
-                    }
+                    chRTPtr->pnRxIndFlg = TRUE;
+                    ret = TRUE;
+                    break;
                 }
             }
-            else
-            {
-                /* not accept this nm pdu*/
-                chRTPtr->pnRxIndFlg = FALSE;
-                ret = FALSE;
-            }
-        }
-        else
-        {
-            /*@req SWS_UdpNm_00328*/
-            /* Nothing to do here*/
         }
     }
     return ret;
@@ -2023,7 +2066,6 @@ static FUNC(boolean, UDPNM_CODE) UdpNm_RxPnFilter(
 /******************************************************************************/
 static FUNC(void, UDPNM_CODE) UdpNm_RxPnEiraEraHandle(uint8 chIndex)
 {
-    const UdpNm_InnerChannelType* chRTPtr = &UdpNm_ChRunTime[chIndex];
     P2CONST(UdpNm_PnInfoType, AUTOMATIC, UDPNM_APPL_CONST)
     pnInfoPtr = UdpNm_CfgPtr->PnInfo;
 #if (STD_ON == UDPNM_PN_EIRA_CALC_ENABLED)
@@ -2044,10 +2086,13 @@ static FUNC(void, UDPNM_CODE) UdpNm_RxPnEiraEraHandle(uint8 chIndex)
     uint8 pnIdx = 0u;
     uint8 find0To1;
 
-    rxPnDtaPtr = &(chRTPtr->rxPduData[pnInfoPtr->UdpNmPnInfoOffset]);
+    SchM_Enter_UdpNm_Context();
+    UdpNm_InnerChannelType* chRTPtr = &UdpNm_ChRunTime[chIndex]; /* PRQA S 3678 */ /* VL_QAC_3678 */
 #if UDPNM_PN_ERA_CALC_ENABLED == STD_ON
     const UdpNm_ChannelConfigType* chCfgPtr = &UdpNm_CfgPtr->ChannelConfig[chIndex];
 #endif
+    rxPnDtaPtr = &chRTPtr->rxPduData[pnInfoPtr->UdpNmPnInfoOffset];
+
     /* Handle ERA and EIRA resetTimer */
     for (index = 0u; index < (pnInfoPtr->UdpNmPnInfoLength * 8u); index++)
     {
@@ -2061,7 +2106,7 @@ static FUNC(void, UDPNM_CODE) UdpNm_RxPnEiraEraHandle(uint8 chIndex)
             if (0u != (rxPnInfoDta & bitMask))
             {
 #if (STD_ON == UDPNM_PN_ERA_CALC_ENABLED)
-                if (TRUE == chCfgPtr->PnEraCalcEnabled)
+                if (chCfgPtr->PnEraCalcEnabled)
                 {
                     /* @req SWS_UdpNm_00359 */
                     /*
@@ -2084,7 +2129,7 @@ static FUNC(void, UDPNM_CODE) UdpNm_RxPnEiraEraHandle(uint8 chIndex)
     }
 
 #if (STD_ON == UDPNM_PN_ERA_CALC_ENABLED)
-    if (TRUE == chCfgPtr->PnEraCalcEnabled)
+    if (chCfgPtr->PnEraCalcEnabled)
     {
         for (index = 0u; index < pnInfoPtr->UdpNmPnInfoLength; index++)
         {
@@ -2129,7 +2174,7 @@ static FUNC(void, UDPNM_CODE) UdpNm_RxPnEiraEraHandle(uint8 chIndex)
         uint8 relatedPnData = rxPnDtaPtr[index] & filterMaskData;
 
 #if (STD_ON == UDPNM_PN_ERA_CALC_ENABLED)
-        if (TRUE == chCfgPtr->PnEraCalcEnabled)
+        if (chCfgPtr->PnEraCalcEnabled)
         {
             chRTPtr->pnInfoEra[index] |= relatedPnData;
         }
@@ -2139,7 +2184,7 @@ static FUNC(void, UDPNM_CODE) UdpNm_RxPnEiraEraHandle(uint8 chIndex)
         pnEiraInfoPtr[index] |= relatedPnData;
 #endif
     }
-
+    SchM_Exit_UdpNm_Context();
     /* @req SWS_UdpNm_00352,@req SWS_UdpNm_00361 */
     /*
      * If the stored value for a PN is set to requested,UdpNm
@@ -2148,7 +2193,7 @@ static FUNC(void, UDPNM_CODE) UdpNm_RxPnEiraEraHandle(uint8 chIndex)
     PduIdType upRxPduId;
     PduInfoType PduInfo;
 #if (STD_ON == UDPNM_PN_ERA_CALC_ENABLED)
-    if (TRUE == rxIndEraFlag)
+    if (rxIndEraFlag)
     {
         upRxPduId = chCfgPtr->PnEraRxNSduRef;
         PduInfo.SduLength = pnInfoPtr->UdpNmPnInfoLength;
@@ -2159,7 +2204,7 @@ static FUNC(void, UDPNM_CODE) UdpNm_RxPnEiraEraHandle(uint8 chIndex)
 #endif
 
 #if (STD_ON == UDPNM_PN_EIRA_CALC_ENABLED)
-    if (TRUE == rxIndEiraFlag)
+    if (rxIndEiraFlag)
     {
         upRxPduId = UdpNm_CfgPtr->UdpNmPnEiraRxNSduRef;
         PduInfo.SduLength = pnInfoPtr->UdpNmPnInfoLength;
@@ -2185,14 +2230,11 @@ static FUNC(void, UDPNM_CODE) UdpNm_RxPnEiraEraHandle(uint8 chIndex)
 /******************************************************************************/
 static FUNC(void, UDPNM_CODE) UdpNm_PnEraResetTimerHandle(uint8 chIndex)
 {
-    P2CONST(UdpNm_ChannelConfigType, AUTOMATIC, UDPNM_APPL_CONST)
-    chCfgPtr = &UdpNm_CfgPtr->ChannelConfig[chIndex];
+    const UdpNm_ChannelConfigType* chCfgPtr = &UdpNm_CfgPtr->ChannelConfig[chIndex];
     /* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
-    P2VAR(UdpNm_InnerChannelType, AUTOMATIC, UDPNM_APPL_DATA)
-    chRTPtr = &UdpNm_ChRunTime[chIndex];
+    UdpNm_InnerChannelType* chRTPtr = &UdpNm_ChRunTime[chIndex];
     /* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
-    P2CONST(UdpNm_PnInfoType, AUTOMATIC, UDPNM_APPL_CONST)
-    pnInfoPtr = UdpNm_CfgPtr->PnInfo;
+    const UdpNm_PnInfoType* pnInfoPtr = UdpNm_CfgPtr->PnInfo;
     uint8 bitMask;
     boolean eraIndFlag = FALSE;
     uint8 index;
@@ -2227,7 +2269,7 @@ static FUNC(void, UDPNM_CODE) UdpNm_PnEraResetTimerHandle(uint8 chIndex)
     }
 
     /* @req SWS_UdpNm_00361 */
-    if (TRUE == eraIndFlag)
+    if (eraIndFlag)
     {
         PduIdType upRxPduId = chCfgPtr->PnEraRxNSduRef;
         PduInfoType PduInfoPtr;
@@ -2253,8 +2295,7 @@ static FUNC(void, UDPNM_CODE) UdpNm_PnEraResetTimerHandle(uint8 chIndex)
 /******************************************************************************/
 static FUNC(void, UDPNM_CODE) UdpNm_PnEiraResetTimerHandle(void)
 {
-    P2CONST(UdpNm_PnInfoType, AUTOMATIC, UDPNM_APPL_CONST)
-    pnInfoPtr = UdpNm_CfgPtr->PnInfo;
+    const UdpNm_PnInfoType* pnInfoPtr = UdpNm_CfgPtr->PnInfo;
     uint8* pnEiraInfoPtr = UdpNm_InnerGlobal.pnEiraInfo;
     uint16* pnEiraResetTimerPtr = UdpNm_InnerGlobal.pnEiraResetTimer;
     uint8 bitMask;
@@ -2291,7 +2332,7 @@ static FUNC(void, UDPNM_CODE) UdpNm_PnEiraResetTimerHandle(void)
     }
 
     /* @req SWS_UdpNm_00352 */
-    if (TRUE == eiraIndFlag)
+    if (eiraIndFlag)
     {
         PduIdType upRxPduId = UdpNm_CfgPtr->UdpNmPnEiraRxNSduRef;
         PduInfoType PduInfoPtr;
@@ -2319,12 +2360,12 @@ static FUNC(void, UDPNM_CODE) UdpNm_PnEiraResetTimerHandle(void)
  *                     E_NOT_OK, Send NM pdu fail
  */
 /******************************************************************************/
-static FUNC(Std_ReturnType, UDPNM_CODE) UdpNm_SendNmPdu(uint8 chIndex, boolean addTransFlag)
+static FUNC(Std_ReturnType, UDPNM_CODE) UdpNm_SendNmPdu(uint8 chIndex)
 {
     Std_ReturnType ret;
     UdpNm_InnerChannelType* chRTPtr = &UdpNm_ChRunTime[chIndex];
 #if (STD_ON == UDPNM_COM_CONTROL_ENABLED)
-    if (FALSE == chRTPtr->udpNmTxEnable)
+    if (!chRTPtr->udpNmTxEnable)
     {
         ret = E_NOT_OK;
     }
@@ -2332,7 +2373,6 @@ static FUNC(Std_ReturnType, UDPNM_CODE) UdpNm_SendNmPdu(uint8 chIndex, boolean a
 #endif
     {
         const UdpNm_ChannelConfigType* chCfgPtr = &UdpNm_CfgPtr->ChannelConfig[chIndex];
-        PduInfoType pduInfo;
 
 #if UDPNM_PN_EIRA_CALC_ENABLED == STD_ON
         if (chCfgPtr->PnEnabled)
@@ -2343,17 +2383,24 @@ static FUNC(Std_ReturnType, UDPNM_CODE) UdpNm_SendNmPdu(uint8 chIndex, boolean a
 #endif
 /* @req SWS_UdpNm_00317 */
 #if (STD_ON == UDPNM_COM_USERDATA_SUPPORT) && (STD_OFF == UDPNM_IS_TRIGGER_TRANSMIT_IN_SOAD)
-        if (addTransFlag == FALSE)
+        if (chCfgPtr->UserDataTxPdu != NULL_PTR)
         {
+            PduInfoType pduInfo;
+            uint8 userData[UDPNM_USER_DATA_MAX_LENGTH] = {0};
             PduIdType pdurTxSduId = chCfgPtr->UserDataTxPdu->UpperLayerPduId;
-            pduInfo.SduDataPtr = &chRTPtr->txPduData[chCfgPtr->UserDataOffset];
             pduInfo.SduLength = chCfgPtr->UserDataLength;
-
-            (void)PduR_UdpNmTriggerTransmit(pdurTxSduId, &pduInfo);
+            pduInfo.SduDataPtr = userData;
+            if (PduR_UdpNmTriggerTransmit(pdurTxSduId, &pduInfo) == E_OK)
+            {
+                SchM_Enter_UdpNm_Context();
+                (void)ILib_memcpy(&chRTPtr->txPduData[chCfgPtr->UserDataOffset], userData, chCfgPtr->UserDataLength);
+                SchM_Exit_UdpNm_Context();
+            }
         }
 #endif
 
 #if (0u < UDPNM_TX_PDU_NUMBER)
+        PduInfoType pduInfo;
         PduIdType SoAdIfTxSduId = chCfgPtr->TxPdu->LowerLayerPduId;
         pduInfo.SduDataPtr = chRTPtr->txPduData;
         pduInfo.SduLength = chCfgPtr->UdpNmPduLength;
@@ -2362,15 +2409,14 @@ static FUNC(Std_ReturnType, UDPNM_CODE) UdpNm_SendNmPdu(uint8 chIndex, boolean a
         ret = SoAd_IfTransmit(SoAdIfTxSduId, &pduInfo);
         if (E_OK == ret)
         {
+            SchM_Enter_UdpNm_Context();
             chRTPtr->msgTimeoutTimer = chCfgPtr->MsgTimeoutTime;
             chRTPtr->msgToutFlg = FALSE;
+            SchM_Exit_UdpNm_Context();
         }
 #endif /* 0u < UDPNM_TX_PDU_NUMBER_MAX */
     }
 
-#if (UDPNM_COM_USERDATA_SUPPORT == STD_OFF) || (UDPNM_IS_TRIGGER_TRANSMIT_IN_SOAD == STD_ON)
-    UDPNM_UNUSED_PARAMETER(addTransFlag);
-#endif
     return ret;
 }
 #endif /*STD_OFF == UDPNM_PASSIVE_MODE_ENABLED*/
@@ -2433,7 +2479,7 @@ static void UdpNm_TxPnEiraHandle(NetworkHandleType networkHandle, uint8* txDta)
     SchM_Exit_UdpNm_Context();
 
     /* @req SWS_UdpNm_00352 */
-    if (TRUE == rxIndEiraFlag)
+    if (rxIndEiraFlag)
     {
         PduIdType upRxPduId = UdpNm_CfgPtr->UdpNmPnEiraRxNSduRef;
         PduInfoType PduInfoPtr;
@@ -2555,7 +2601,7 @@ static FUNC(void, UDPNM_CODE) UdpNm_PrepareBusSleepStateHandle(uint8 chIndex)
     if (UdpNm_TestAndClear(&chRTPtr->netRequestFlg))
     {
         const UdpNm_ChannelConfigType* chCfgPtr = &UdpNm_CfgPtr->ChannelConfig[chIndex];
-        if (TRUE == chCfgPtr->ActiveWakeupBitEnabled)
+        if (chCfgPtr->ActiveWakeupBitEnabled)
         {
             /* @req SWS_UdpNm_00366 */
             /* Set ActiveWakeupBit in CBV */
@@ -2605,8 +2651,7 @@ static FUNC(void, UDPNM_CODE) UdpNm_RepeatMessageStateHandle(uint8 chIndex)
 {
 #if (                                                                                \
     ((STD_OFF == UDPNM_PASSIVE_MODE_ENABLED) && (STD_ON == UDPNM_GLOBAL_PN_ENABLED)) \
-    || (STD_ON == UDPNM_REMOTE_SLEEP_IND_ENABLED))                                   \
-    || (UDPNM_NODE_DETECTION_ENABLED == STD_ON)
+    || (STD_ON == UDPNM_REMOTE_SLEEP_IND_ENABLED))
     P2CONST(UdpNm_ChannelConfigType, AUTOMATIC, UDPNM_APPL_CONST)
     chCfgPtr = &UdpNm_CfgPtr->ChannelConfig[chIndex];
 #endif
@@ -2663,6 +2708,9 @@ static FUNC(void, UDPNM_CODE) UdpNm_RepeatMessageStateHandle(uint8 chIndex)
              * State,transmission of NM PDUs shall be stopped.
              */
             chRTPtr->msgTxCylceTimer = 0u;
+#if UDPNM_RETRY_FIRST_MESSAGE_REQUEST == STD_ON
+            chRTPtr->retrySendMsgFlag = FALSE;
+#endif
         }
 
 /* @req SWS_UdpNm_00107 */
@@ -2671,7 +2719,7 @@ static FUNC(void, UDPNM_CODE) UdpNm_RepeatMessageStateHandle(uint8 chIndex)
  * Repeat Message State.
  */
 #if (STD_ON == UDPNM_NODE_DETECTION_ENABLED)
-        if (chCfgPtr->NodeDetectionEnabled)
+        if (UdpNm_CfgPtr->ChannelConfig[chIndex].NodeDetectionEnabled)
         {
             UdpNm_ClrTxPduCbvBit(chIndex, UDPNM_CBV_BIT_RMP_MASK); /* PRQA S 3469 */ /* MISRA Dir 4.9 */
         }
@@ -2726,11 +2774,14 @@ static FUNC(void, UDPNM_CODE) UdpNm_NormalOperationStateHandle(uint8 chIndex)
          * State,transmission of NM PDUs shall be stopped.
          */
         chRTPtr->msgTxCylceTimer = 0u;
+#if UDPNM_RETRY_FIRST_MESSAGE_REQUEST == STD_ON
+        chRTPtr->retrySendMsgFlag = FALSE;
+#endif
         goto exit; /* PRQA S 2001 */ /* MISRA Rule 15.1 */
     }
 
 #if (STD_ON == UDPNM_NODE_DETECTION_ENABLED)
-    if (chCfgPtr->NodeDetectionEnabled)
+    if (UdpNm_CfgPtr->ChannelConfig[chIndex].NodeDetectionEnabled)
     {
         if (chRTPtr->repeatMessageRequest)
         {
@@ -2824,7 +2875,7 @@ static FUNC(void, UDPNM_CODE) UdpNm_ReadySleepStateHandle(uint8 chIndex)
     }
 
 #if (STD_ON == UDPNM_NODE_DETECTION_ENABLED)
-    if (chCfgPtr->NodeDetectionEnabled && chRTPtr->repeatMessageRequest && !stateChanged)
+    if (UdpNm_CfgPtr->ChannelConfig[chIndex].NodeDetectionEnabled && chRTPtr->repeatMessageRequest && !stateChanged)
     {
         /* @req SWS_UdpNm_00112 */
         UdpNm_EntryRepeatMessageState(chIndex, FALSE);
@@ -2837,8 +2888,8 @@ static FUNC(void, UDPNM_CODE) UdpNm_ReadySleepStateHandle(uint8 chIndex)
 #endif /* STD_OFF == UDPNM_PASSIVE_MODE_ENABLED */
 
 #if (STD_ON == UDPNM_NODE_DETECTION_ENABLED)
-    if (chCfgPtr->NodeDetectionEnabled && chRTPtr->rxPduExtFlg && (UDPNM_PDU_OFF != chCfgPtr->PduCbvPosition)
-        && !stateChanged)
+    if (UdpNm_CfgPtr->ChannelConfig[chIndex].NodeDetectionEnabled && chRTPtr->rxPduExtFlg
+        && (UDPNM_PDU_OFF != chCfgPtr->PduCbvPosition) && !stateChanged)
     {
         uint8 cbvPos = (uint8)chCfgPtr->PduCbvPosition;
         uint8 cbvDta = chRTPtr->rxPduData[cbvPos];
@@ -2894,7 +2945,7 @@ static FUNC(void, UDPNM_CODE) UdpNm_RxDataMainHandle(uint8 chIndex)
         && ((NM_STATE_NORMAL_OPERATION == chRTPtr->udpNmState) || (NM_STATE_READY_SLEEP == chRTPtr->udpNmState)))
     {
         chRTPtr->remoteSleepInd = FALSE;
-        Nm_RemoteSleepCancellation(chCfgPtr->ComMNetworkHandleRef);
+        Nm_RemoteSleepCancellation(UdpNm_CfgPtr->ChannelConfig[chIndex].ComMNetworkHandleRef);
     }
 #endif /* UDPNM_REMOTE_SLEEP_IND_ENABLED */
 
@@ -2915,14 +2966,15 @@ static FUNC(void, UDPNM_CODE) UdpNm_RxDataMainHandle(uint8 chIndex)
      * to TRUE and Repeat Message Request bit is received, UdpNm module
      * shall call the callback function Nm_RepeatMessageIndication.
      */
-    if ((UDPNM_PDU_OFF != chCfgPtr->PduCbvPosition) && chCfgPtr->NodeDetectionEnabled && chCfgPtr->RepeatMsgIndEnabled)
+    if ((UDPNM_PDU_OFF != chCfgPtr->PduCbvPosition) && UdpNm_CfgPtr->ChannelConfig[chIndex].NodeDetectionEnabled
+        && UdpNm_CfgPtr->PnInfo(chIndex))
     {
         uint8 cbvPos = (uint8)chCfgPtr->PduCbvPosition;
         uint8 cbvDta = chRTPtr->rxPduData[cbvPos];
 
         if ((cbvDta & UDPNM_CBV_BIT_RMP_MASK) > 0u)
         {
-            Nm_RepeatMessageIndication(chCfgPtr->ComMNetworkHandleRef);
+            Nm_RepeatMessageIndication(UdpNm_CfgPtr->ChannelConfig[chIndex].ComMNetworkHandleRef);
         }
     }
 #endif /* STD_ON == UDPNM_REPEAT_MSG_IND_ENABLED && \
@@ -2930,7 +2982,7 @@ static FUNC(void, UDPNM_CODE) UdpNm_RxDataMainHandle(uint8 chIndex)
 
 #if (STD_ON == UDPNM_CAR_WAKEUP_RX_ENABLED)
 #if !defined(UDPNM_VER_4_2_2)
-    if (UdpNm_GetCarWakeUpRxEnabled(chIndex))
+    if (UdpNm_CfgPtr->ChannelConfig[chIndex].CarWakeUpRxEnabled)
 #endif
     {
         UdpNm_RxCarWakeUpHadle(chIndex);
@@ -2973,38 +3025,56 @@ static FUNC(void, UDPNM_CODE) UdpNm_RxDataMainHandle(uint8 chIndex)
 /******************************************************************************/
 static FUNC(void, UDPNM_CODE) UdpNm_SendMsgMainHandle(uint8 chIndex)
 {
-#if (STD_ON == UDPNM_IMMEDIATE_TRANSMIT_ENABLED)
-    P2CONST(UdpNm_ChannelConfigType, AUTOMATIC, UDPNM_APPL_CONST)
-    chCfgPtr = &UdpNm_CfgPtr->ChannelConfig[chIndex];
-#endif /* STD_ON == UDPNM_IMMEDIATE_TRANSMIT_ENABLED */
-
     UdpNm_InnerChannelType* chRTPtr = &UdpNm_ChRunTime[chIndex];
-    Std_ReturnType ret;
+    const UdpNm_ChannelConfigType* chCfgPtr = &UdpNm_CfgPtr->ChannelConfig[chIndex];
 
-    if (TRUE == chRTPtr->sendNmMsgFlg)
+    if (chRTPtr->sendNmMsgFlg)
     {
-        ret = UdpNm_SendNmPdu(chIndex, FALSE);
-        if (E_OK == ret)
+        chRTPtr->sendNmMsgFlg = FALSE;
+        if (UdpNm_SendNmPdu(chIndex) == E_OK)
         {
-            chRTPtr->sendNmMsgFlg = FALSE;
+#if UDPNM_RETRY_FIRST_MESSAGE_REQUEST == STD_ON
             chRTPtr->retrySendMsgFlag = FALSE;
-
-#if (STD_ON == UDPNM_IMMEDIATE_TRANSMIT_ENABLED)
+#endif
+#if UDPNM_IMMEDIATE_TRANSMIT_ENABLED == STD_ON
             if (chRTPtr->immedMsgTxCnt > 0u)
             {
                 chRTPtr->immedMsgTxCnt--;
-                if (0u == chRTPtr->immedMsgTxCnt)
+                if (chRTPtr->immedMsgTxCnt == 0u)
                 {
                     chRTPtr->msgTxCylceTimer = chCfgPtr->MsgCycleTime;
                 }
+                else
+                {
+                    chRTPtr->msgTxCylceTimer = chCfgPtr->ImmediateNmCycleTime;
+                }
             }
-#endif /* STD_ON == UDPNM_IMMEDIATE_TRANSMIT_ENABLED */
+            else
+#endif
+            {
+                chRTPtr->msgTxCylceTimer = chCfgPtr->MsgCycleTime;
+            }
         }
         else
         {
-            if (TRUE != chRTPtr->retrySendMsgFlag)
+#if UDPNM_IMMEDIATE_TRANSMIT_ENABLED == STD_ON
+            if (chRTPtr->immedMsgTxCnt > 0u)
             {
-                chRTPtr->sendNmMsgFlg = FALSE;
+                chRTPtr->msgTxCylceTimer = 1u;
+            }
+            else
+#endif
+            {
+#if UDPNM_RETRY_FIRST_MESSAGE_REQUEST == STD_ON
+                if (chRTPtr->retrySendMsgFlag)
+                {
+                    chRTPtr->msgTxCylceTimer = 1u;
+                }
+                else
+#endif
+                {
+                    chRTPtr->msgTxCylceTimer = chCfgPtr->MsgCycleTime;
+                }
             }
         }
     }
@@ -3041,7 +3111,7 @@ static FUNC(void, UDPNM_CODE) UdpNm_CoordReadyToSleepIndHandle(uint8 chIndex)
         {
             chRTPtr->coordReadyToSleepInd = UDPNM_CSR_IND_CANCELLED;
             /* notify upper layer */
-            Nm_CoordReadyToSleepCancellation(chCfgPtr->ComMNetworkHandleRef);
+            Nm_CoordReadyToSleepCancellation(UdpNm_CfgPtr->ChannelConfig[chIndex].ComMNetworkHandleRef);
         }
     }
     else
@@ -3053,7 +3123,7 @@ static FUNC(void, UDPNM_CODE) UdpNm_CoordReadyToSleepIndHandle(uint8 chIndex)
         {
             chRTPtr->coordReadyToSleepInd = UDPNM_CSR_IND_INDICATED;
             /* notify upper layer */
-            Nm_CoordReadyToSleepIndication(chCfgPtr->ComMNetworkHandleRef);
+            Nm_CoordReadyToSleepIndication(UdpNm_CfgPtr->ChannelConfig[chIndex].ComMNetworkHandleRef);
         }
     }
 }
@@ -3073,15 +3143,16 @@ static FUNC(void, UDPNM_CODE) UdpNm_CoordReadyToSleepIndHandle(uint8 chIndex)
 static FUNC(void, UDPNM_CODE) UdpNm_EnterBusSleepModeHandle(uint8 chIndex)
 {
     const UdpNm_ChannelConfigType* chCfgPtr = &UdpNm_CfgPtr->ChannelConfig[chIndex];
+    SchM_Enter_UdpNm_Context();
     UdpNm_InnerChannelType* chRTPtr = &UdpNm_ChRunTime[chIndex];
-
     /* @req SWS_UdpNm_00109 */
     /* NM-timeout timer expires,shall entry the Prepare Bus-sleep mode*/
-    UdpNm_StateChange(chIndex, NM_STATE_PREPARE_BUS_SLEEP);
     chRTPtr->udpnmMode = NM_MODE_PREPARE_BUS_SLEEP;
+    SchM_Exit_UdpNm_Context();
+    UdpNm_StateChange(chIndex, NM_STATE_PREPARE_BUS_SLEEP);
 
     /* @req SWS_UdpNm_00114 @req SWS_UdpNm_00093 */
-    Nm_PrepareBusSleepMode(chCfgPtr->ComMNetworkHandleRef);
+    Nm_PrepareBusSleepMode(UdpNm_CfgPtr->ChannelConfig[chIndex].ComMNetworkHandleRef);
 
     /* @req SWS_UdpNm_00115 */
     /*
@@ -3091,13 +3162,15 @@ static FUNC(void, UDPNM_CODE) UdpNm_EnterBusSleepModeHandle(uint8 chIndex)
      */
     if (FALSE == chCfgPtr->StayInPbsEnabled)
     {
+        SchM_Enter_UdpNm_Context();
         chRTPtr->stateTimer = chCfgPtr->WaitBusSleepTime;
+        SchM_Exit_UdpNm_Context();
     }
 
 #if (STD_OFF == UDPNM_PASSIVE_MODE_ENABLED)
     /* @req SWS_UdpNm_00367 */
     /* Clear activeWakeupbit in CBV */
-    if (TRUE == chCfgPtr->ActiveWakeupBitEnabled)
+    if (chCfgPtr->ActiveWakeupBitEnabled)
     {
         UdpNm_ClrTxPduCbvBit(chIndex, UDPNM_CBV_BIT_AW_MASK); /* PRQA S 3469 */ /* MISRA Dir 4.9 */
     }
@@ -3127,6 +3200,16 @@ static boolean UdpNm_ValidateNetworkHandle(uint8 apiId, NetworkHandleType networ
         }
     }
 
+#if UDPNM_MULTIPLE_PARTITION_USED == STD_ON
+    if (valid)
+    {
+        if (GetApplicationID() != ComM_GetChannelApplicationID(networkHandle))
+        {
+            valid = FALSE;
+            (void)Det_ReportError(UDPNM_MODULE_ID, UDPNM_INSTANCE_ID, apiId, UDPNM_E_PARTITION);
+        }
+    }
+#endif
     return valid;
 }
 
@@ -3145,7 +3228,7 @@ static boolean UdpNm_ValidateNetworkHandleAndPointer(uint8 apiId, NetworkHandleT
     return UdpNm_ValidateNetworkHandle(apiId, networkHandle) && UdpNm_ValidatePointer(apiId, pointer);
 }
 
-static boolean UdpNm_ValidateNetworkHandleAndPointerPointer(
+static boolean UdpNm_ValidateNetworkHandlePointerAndPointer(
     uint8 apiId,
     NetworkHandleType networkHandle,
     const void* pointer1,
@@ -3158,9 +3241,26 @@ static boolean UdpNm_ValidateNetworkHandleAndPointerPointer(
 static boolean UdpNm_ValidateTxPduId(uint8 apiId, PduIdType txPduId)
 {
     boolean valid = UdpNm_ValidateInitStatus(apiId);
+    uint8 pduNum = 0u;
+
+    switch (apiId)
+    {
+    case UDPNM_SERVICE_ID_TRANSMIT:
+        pduNum = UDPNM_USERDATA_TX_PDU_NUM;
+        break;
+    case UDPNM_SERVICE_ID_IFTXCONFIRMATION:
+    case UDPNM_SERVICE_ID_IFTRIGGERTRANSMIT:
+        pduNum = UDPNM_TX_PDU_NUMBER;
+        break;
+
+    default:
+        /* Unreachable */
+        break;
+    }
+
     if (valid)
     {
-        if (txPduId > UDPNM_TX_PDU_NUMBER)
+        if (txPduId > pduNum)
         {
             valid = FALSE;
             (void)Det_ReportError(UDPNM_MODULE_ID, UDPNM_INSTANCE_ID, apiId, UDPNM_E_INVALID_PDUID);

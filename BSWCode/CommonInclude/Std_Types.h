@@ -18,20 +18,27 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Std_Types.h                                                 **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      :                                                             **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                       **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME  : Std_Types.h                                                   **
+**                                                                            **
+**                                                                            **
+**  PLATFORM  : Infineon AURIX                                                **
+**                                                                            **
+**  AUTHOR    :                                                               **
+**                                                                            **
+**  VENDOR    :                                                               **
+**                                                                            **
+**  DESCRIPTION: Provision of Standard Types                                  **
+**                                                                            **
+**                                                                            **
+**   SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                      **
+**                                                                            **
+**                                                                            **
+*******************************************************************************/
 #ifndef STD_TYPES_H
 #define STD_TYPES_H
 
@@ -43,7 +50,7 @@ typedef uint8 Std_ReturnType;
 #ifndef STATUSTYPEDEFINED
 #define STATUSTYPEDEFINED
 #define E_OK 0x00u
-typedef unsigned char StatusType;
+typedef unsigned char StatusType; /* OSEK compliance */
 #endif
 #define E_NOT_OK 0x01u
 #define E_BUSY   0x02u
@@ -58,16 +65,49 @@ typedef struct
     uint8 sw_patch_version;
 } Std_VersionInfoType;
 
-#define STD_HIGH   0x01u
+#define STD_HIGH   0x01u /* Physical state 5V or 3.3V */
 
-#define STD_LOW    0x00u
+#define STD_LOW    0x00u /* Physical state 0V */
 
-#define STD_ACTIVE 0x01u
+#define STD_ACTIVE 0x01u /* Logical state active */
 
-#define STD_IDLE   0x00u
+#define STD_IDLE   0x00u /* Logical state idle */
 
 #define STD_ON     0x01u
 
 #define STD_OFF    0x00u
+
+/**
+ * @brief     The values are specified for eachtransformer class in ASWS_TransformerGeneral.
+ */
+typedef uint8 Std_TransformerErrorCode;
+
+/**
+ * @brief     Std_TransformerError represents a transformer error in the context of a certain transformer chain
+ */
+typedef uint8 Std_TransformerClass;
+#define STD_TRANSFORMER_UNSPECIFIED 0x00
+#define STD_TRANSFORMER_SERIALIZER  0x01
+#define STD_TRANSFORMER_SAFETY      0x02
+#define STD_TRANSFORMER_SECURITY    0x03
+#define STD_TRANSFORMER_CUSTOM      0xFF
+
+/**
+ * @brief     Std_TransformerError represents a transformer error in the context of a certain transformer chain.
+ */
+typedef struct
+{
+    Std_TransformerErrorCode errorCode;
+    Std_TransformerClass transformerClass;
+} Std_TransformerError;
+
+/**
+ * @brief     The data type Std_TransformerForwardCode represents a forwarded transformer
+ *            codein the context of a certain transformer chain
+ */
+typedef uint8 Std_TransformerForwardCode;
+#define E_SAFETY_INVALID_REP 0x01
+#define E_SAFETY_INVALID_CRC 0x02
+#define E_SAFETY_INVALID_SEQ 0x03
 
 #endif /* STD_TYPES_H */

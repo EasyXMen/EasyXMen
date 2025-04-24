@@ -18,20 +18,23 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Crc.h                                                       **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : ShenXu,Yb                                                   **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Crc.h                                                       **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : ShenXu,Yb                                                   **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
+#ifndef CRC_H_
+#define CRC_H_
 /*******************************************************************************
 **                      Revision Control History                              **
 *******************************************************************************/
@@ -41,14 +44,15 @@
  * V2.0.2 [2020/12/23] [YangBo,LXJ] CRC64 FIX
  * V2.0.3 [2020/12/23] [YangBo] Change loop i to suitable size
  * V2.0.4 [2021/05/18] [YangBo] Change loop i to suitable size
- * V2.0.5 [2024/03/11] [darren] QAC Fixed
+ * V2.1.0 2023-07-18   Jian.jiang      CP2.1 Release Version.
+ * V2.1.1 2024-04-22   zhiqiang.huang      Add callout function for CRC calculation performed by hardware.
+ *        2024-05-22   qinmei.chen     TMS320 support
+ * v2.1.2 2024-07-26   qinmei.chen    CPT-8730 fix corresponding macro error between definition and invoke.
+ * v2.1.3 2024-08-13   qinmei.chen    change something to adapt to CP-rules
+ * v2.1.4 2024-10-29   qinmei.chen    CPT-10780 Use more precise macros in CRC for
+ *                                   fixing corresponding macro error between definition and invoke.
  */
 
-#ifndef CRC_H_
-#define CRC_H_
-/*******************************************************************************
-**                      Revision Control History                              **
-*******************************************************************************/
 /*@ req<SWS_Crc_00048> */
 #define CRC_VENDOR_ID                   (62u)
 #define CRC_MODULE_ID                   (201u)
@@ -56,8 +60,8 @@
 #define CRC_AR_RELEASE_MINOR_VERSION    (5u)
 #define CRC_AR_RELEASE_REVISION_VERSION (0u)
 #define CRC_SW_MAJOR_VERSION            (2u)
-#define CRC_SW_MINOR_VERSION            (0u)
-#define CRC_SW_PATCH_VERSION            (5u)
+#define CRC_SW_MINOR_VERSION            (1u)
+#define CRC_SW_PATCH_VERSION            (3u)
 
 /*******************************************************************************
 **                      Include Section                                       **
@@ -87,7 +91,6 @@
     {                                                           \
         (VersionInfo)->vendorID = CRC_VENDOR_ID;                \
         (VersionInfo)->moduleID = CRC_MODULE_ID;                \
-        (VersionInfo)->instanceID = 0u;                         \
         (VersionInfo)->sw_major_version = CRC_SW_MAJOR_VERSION; \
         (VersionInfo)->sw_minor_version = CRC_SW_MINOR_VERSION; \
         (VersionInfo)->sw_patch_version = CRC_SW_PATCH_VERSION; \
@@ -181,10 +184,10 @@ extern FUNC(uint8, CRC_CODE) Crc_CalculateCRC8H2F(
  *                     Crc_Length:Length of data block to be calculated in bytes.
  *                     Crc_StartValue16:Start value when the algorithm starts.
  *                     Crc_IsFirstCall:
- *                     TRUE: independent CRC calculation or First call in a sequence;
- *                     start from initial value, Crc_StartValue16 is not used.
- *                     FALSE:Not first call in a call sequence; the return value
- *                     of the previous function call is passed as Crc_StartValue16.
+ *                     TRUE: First call in a sequence or individual CRC calculation;
+ *                     start from initial value, ignore Crc_StartValue16.
+ *                     FALSE:Subsequent call in a call sequence; Crc_StartValue16 is
+ *                     interpreted to be the return value of the previous function call.
  * Param-Name[out]     None
  * Param-Name[in/out]  None
  * Return              uint16
@@ -215,10 +218,10 @@ extern FUNC(uint16, CRC_CODE) Crc_CalculateCRC16(
  *                     Crc_Length: Length of data block to be calculated in bytes.
  *                     Crc_StartValue32: Start value when the algorithm starts.
  *                     Crc_IsFirstCall:
- *                     TRUE: independent CRC calculation or First call in a sequence;
- *                     start from initial value, Crc_StartValue16 is not used.
- *                     FALSE:Not first call in a call sequence; the return value
- *                     of the previous function call is passed as Crc_StartValue16.
+ *                     TRUE: First call in a sequence or individual CRC calculation;
+ *                     start from initial value, ignore Crc_StartValue32.
+ *                     FALSE: Subsequent call in a call sequence; Crc_StartValue32 is
+ *                     interpreted to be the return value of the previous function call.
  * Param-Name[out]     None
  * Param-Name[in/out]  None
  * Return              uint16
@@ -249,10 +252,10 @@ extern FUNC(uint32, CRC_CODE) Crc_CalculateCRC32(
  *                     Crc_Length: Length of data block to be calculated in bytes.
  *                     Crc_StartValue32: Start value when the algorithm starts.
  *                     Crc_IsFirstCall:
- *                     TRUE: independent CRC calculation or First call in a sequence;
- *                     start from initial value, Crc_StartValue16 is not used.
- *                     FALSE:Not first call in a call sequence; the return value
- *                     of the previous function call is passed as Crc_StartValue16.
+ *                     TRUE: First call in a sequence or individual CRC calculation;
+ *                     start from initial value, ignore Crc_StartValue32.
+ *                     FALSE: Subsequent call in a call sequence; Crc_StartValue32 is
+ *                     interpreted to be the return value of the previous function call.
  * Param-Name[out]     None
  * Param-Name[in/out]  None
  * Return              uint16

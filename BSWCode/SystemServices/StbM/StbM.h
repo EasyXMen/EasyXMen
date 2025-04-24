@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : StbM.h                                                      **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : yuzhe.zhang                                                 **
- **  Vendor      :                                                             **
- **  DESCRIPTION : implementation header for StbM                              **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : StbM.h                                                      **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : yuzhe.zhang                                                 **
+**  Vendor      :                                                             **
+**  DESCRIPTION : implementation header for StbM                              **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 /******************************************************************************
 **                      Revision Control History                             **
 ******************************************************************************/
@@ -55,8 +56,8 @@
 #define STBM_H_AR_PATCH_VERSION 0U
 #define STBM_H_SW_MAJOR_VERSION 2U
 #define STBM_H_SW_MINOR_VERSION 0U
-#define STBM_H_SW_PATCH_VERSION 11U
-#if (STD_ON == STBM_DEV_ERROR_DETECT)
+#define STBM_H_SW_PATCH_VERSION 12U
+#if (STBM_DEV_ERROR_DETECT == STD_ON)
 /*Development errors used by the STBM module*/
 /* StbM_Init called with an invalid configuration pointer */
 #define STBM_E_INIT_FAILED ((Std_ReturnType)0x11)
@@ -104,9 +105,9 @@
 typedef struct
 {
 #if STBM_TRIGGERED_CUSTOMER_NUM > 0u
-    P2CONST(StbMTriggeredCustomerCfgType, TYPEDEF, STBM_CONST) StbMTriggeredCustomer;
+    const StbMTriggeredCustomerCfgType* StbMTriggeredCustomer;
 #endif /* STBM_TRIGGERED_CUSTOMER_NUM > 0u */
-    P2CONST(StbMSynchronizedTimeBaseCfgType, TYPEDEF, STBM_CONST) StbMSynchronizedTimeBase;
+    const StbMSynchronizedTimeBaseCfgType* StbMSynchronizedTimeBase;
 } StbM_ConfigType;
 
 /* Variables of this type store time stamps of the Virtual Local Time. The unit is nanoseconds */
@@ -140,10 +141,8 @@ extern CONST(StbM_ConfigType, STBM_CONST_PBCFG) StbM_Config;
  * Parameters(OUT): NA
  * Return value: NA
  */
-FUNC(void, STBM_CODE)
-StbM_Init(P2CONST(StbM_ConfigType, AUTOMATIC, STBM_APPL_DATA) ConfigPtr);
-
-#if (STD_ON == STBM_VERSION_INFO_API)
+void StbM_Init(const StbM_ConfigType* ConfigPtr);
+#if (STBM_VERSION_INFO_API == STD_ON)
 /**
  * Returns the version information of this module.
  * Service ID: 0x05
@@ -155,8 +154,7 @@ StbM_Init(P2CONST(StbM_ConfigType, AUTOMATIC, STBM_APPL_DATA) ConfigPtr);
 the module.
  * Return value: NA
  */
-FUNC(void, STBM_CODE)
-StbM_GetVersionInfo(P2VAR(Std_VersionInfoType, AUTOMATIC, STBM_APPL_DATA) versioninfo);
+void StbM_GetVersionInfo(P2VAR(Std_VersionInfoType, AUTOMATIC, STBM_APPL_DATA) versioninfo);
 #endif /* STBM_VERSION_INFO_API = STD_ON */
 
 /**
@@ -171,8 +169,7 @@ StbM_GetVersionInfo(P2VAR(Std_VersionInfoType, AUTOMATIC, STBM_APPL_DATA) versio
  * Return value:    E_OK: successful
                     E_NOT_OK: failed
  */
-FUNC(Std_ReturnType, STBM_CODE)
-StbM_GetCurrentTime(
+Std_ReturnType StbM_GetCurrentTime(
     StbM_SynchronizedTimeBaseType timeBaseId,
     StbM_TimeStampType* timeStamp,
     StbM_UserDataType* userData);
@@ -188,8 +185,9 @@ StbM_GetCurrentTime(
  * Return value:    E_OK: successful
                     E_NOT_OK: failed
  */
-FUNC(Std_ReturnType, STBM_CODE)
-StbM_GetCurrentVirtualLocalTime(StbM_SynchronizedTimeBaseType timeBaseId, StbM_VirtualLocalTimeType* localTimePtr);
+Std_ReturnType StbM_GetCurrentVirtualLocalTime(
+    StbM_SynchronizedTimeBaseType timeBaseId,
+    StbM_VirtualLocalTimeType* localTimePtr);
 
 /**
  * Allows the Customers to set the new global time that has to be valid for the system,
@@ -206,11 +204,10 @@ StbM_GetCurrentVirtualLocalTime(StbM_SynchronizedTimeBaseType timeBaseId, StbM_V
  * Return value:    E_OK: successful
                     E_NOT_OK: failed
  */
-FUNC(Std_ReturnType, STBM_CODE)
-StbM_SetGlobalTime(
+Std_ReturnType StbM_SetGlobalTime(
     StbM_SynchronizedTimeBaseType timeBaseId,
-    P2CONST(StbM_TimeStampType, AUTOMATIC, STBM_APPL_DATA) timeStamp,
-    P2CONST(StbM_UserDataType, AUTOMATIC, STBM_APPL_DATA) userData);
+    const StbM_TimeStampType* timeStamp,
+    const StbM_UserDataType* userData);
 
 /**
  * Allows the Customers to set the Global Time that will be sent to the buses. This
@@ -227,11 +224,10 @@ StbM_SetGlobalTime(
  * Return value:    E_OK: successful
                     E_NOT_OK: failed
  */
-FUNC(Std_ReturnType, STBM_CODE)
-StbM_UpdateGlobalTime(
+Std_ReturnType StbM_UpdateGlobalTime(
     StbM_SynchronizedTimeBaseType timeBaseId,
-    P2CONST(StbM_TimeStampType, AUTOMATIC, STBM_APPL_DATA) timeStamp,
-    P2CONST(StbM_UserDataType, AUTOMATIC, STBM_APPL_DATA) userData);
+    const StbM_TimeStampType* timeStamp,
+    const StbM_UserDataType* userData);
 
 /**
  * Allows the Customers to set the new User Data that has to be valid for the
@@ -246,10 +242,7 @@ StbM_UpdateGlobalTime(
  * Return value:    E_OK: successful
                     E_NOT_OK: failed
  */
-FUNC(Std_ReturnType, STBM_CODE)
-StbM_SetUserData(
-    StbM_SynchronizedTimeBaseType timeBaseId,
-    P2CONST(StbM_UserDataType, AUTOMATIC, STBM_APPL_DATA) userData);
+Std_ReturnType StbM_SetUserData(StbM_SynchronizedTimeBaseType timeBaseId, const StbM_UserDataType* userData);
 
 /**
  * Allows the Customers and the Timesync Modules to set the Offset Time and the User Data.
@@ -264,11 +257,10 @@ StbM_SetUserData(
  * Return value:    E_OK: successful
                     E_NOT_OK: failed
  */
-FUNC(Std_ReturnType, STBM_CODE)
-StbM_SetOffset(
+Std_ReturnType StbM_SetOffset(
     StbM_SynchronizedTimeBaseType timeBaseId,
-    P2CONST(StbM_TimeStampType, AUTOMATIC, STBM_APPL_DATA) timeStamp,
-    P2CONST(StbM_UserDataType, AUTOMATIC, STBM_APPL_DATA) userData);
+    const StbM_TimeStampType* timeStamp,
+    const StbM_UserDataType* userData);
 
 /**
  * Allows the Timesync Modules to get the current Offset Time and User Data.
@@ -282,8 +274,10 @@ StbM_SetOffset(
  * Return value:    E_OK: successful
                     E_NOT_OK: failed
  */
-FUNC(Std_ReturnType, STBM_CODE)
-StbM_GetOffset(StbM_SynchronizedTimeBaseType timeBaseId, StbM_TimeStampType* timeStamp, StbM_UserDataType* userData);
+Std_ReturnType StbM_GetOffset(
+    StbM_SynchronizedTimeBaseType timeBaseId,
+    StbM_TimeStampType* timeStamp,
+    StbM_UserDataType* userData);
 
 /**
  * Returns the current Time Tuple, status and User Data of the Time Base.
@@ -300,8 +294,7 @@ StbM_GetOffset(StbM_SynchronizedTimeBaseType timeBaseId, StbM_TimeStampType* tim
  * Return value:    E_OK: successful
                     E_NOT_OK: failed
  */
-FUNC(Std_ReturnType, STBM_CODE)
-StbM_BusGetCurrentTime(
+Std_ReturnType StbM_BusGetCurrentTime(
     StbM_SynchronizedTimeBaseType timeBaseId,
     StbM_TimeStampType* globalTimePtr,
     StbM_VirtualLocalTimeType* localTimePtr,
@@ -323,13 +316,12 @@ StbM_BusGetCurrentTime(
  * Return value:    E_OK: successful
                     E_NOT_OK: failed
  */
-FUNC(Std_ReturnType, STBM_CODE)
-StbM_BusSetGlobalTime(
+Std_ReturnType StbM_BusSetGlobalTime(
     StbM_SynchronizedTimeBaseType timeBaseId,
-    P2CONST(StbM_TimeStampType, AUTOMATIC, STBM_APPL_DATA) globalTimePtr,
-    P2CONST(StbM_UserDataType, AUTOMATIC, STBM_APPL_DATA) userDataPtr,
-    P2CONST(StbM_MeasurementType, AUTOMATIC, STBM_APPL_DATA) measureDataPtr,
-    P2CONST(StbM_VirtualLocalTimeType, AUTOMATIC, STBM_APPL_DATA) localTimePtr);
+    const StbM_TimeStampType* globalTimePtr,
+    const StbM_UserDataType* userDataPtr,
+    const StbM_MeasurementType* measureDataPtr,
+    const StbM_VirtualLocalTimeType* localTimePtr);
 
 /**
  * Returns value of the current rate deviation of a Time Base
@@ -342,8 +334,9 @@ StbM_BusSetGlobalTime(
  * Return value:    E_OK: successful
                     E_NOT_OK: failed
  */
-FUNC(Std_ReturnType, STBM_CODE)
-StbM_GetRateDeviation(StbM_SynchronizedTimeBaseType timeBaseId, StbM_RateDeviationType* rateDeviation);
+/* PRQA S 1532, 3673 ++ */ /* VL_StbM_3673 */
+Std_ReturnType StbM_GetRateDeviation(StbM_SynchronizedTimeBaseType timeBaseId, StbM_RateDeviationType* rateDeviation);
+/* PRQA S 1532, 3673 -- */
 
 /**
  * Allows to set the rate of a Synchronized Time Base(being either a Pure Local Time Base or not)
@@ -351,14 +344,13 @@ StbM_GetRateDeviation(StbM_SynchronizedTimeBaseType timeBaseId, StbM_RateDeviati
  * Sync/Async: Synchronous
  * Reentrancy: Reentrant
  * Parameters(IN): @timeBaseId, time base reference
- *                 @rateDeviation, Value of the applied rate deviation
+ *                 @rateDeviation, value of the applied rate deviation
  * Parameters(INOUT): NA
  * Parameters(OUT): NA
  * Return value:    E_OK: successful
                     E_NOT_OK: failed
  */
-FUNC(Std_ReturnType, STBM_CODE)
-StbM_SetRateCorrection(StbM_SynchronizedTimeBaseType timeBaseId, StbM_RateDeviationType rateDeviation);
+Std_ReturnType StbM_SetRateCorrection(StbM_SynchronizedTimeBaseType timeBaseId, StbM_RateDeviationType rateDeviation);
 
 /**
  * Returns value of Time Leap.
@@ -371,8 +363,7 @@ StbM_SetRateCorrection(StbM_SynchronizedTimeBaseType timeBaseId, StbM_RateDeviat
  * Return value:    E_OK: successful
                     E_NOT_OK: failed
  */
-FUNC(Std_ReturnType, STBM_CODE)
-StbM_GetTimeLeap(StbM_SynchronizedTimeBaseType timeBaseId, StbM_TimeDiffType* timeJump);
+Std_ReturnType StbM_GetTimeLeap(StbM_SynchronizedTimeBaseType timeBaseId, StbM_TimeDiffType* timeJump);
 
 /**
  * Returns detailed status information for a Synchronized(or Pure Local) Time Base
@@ -388,8 +379,7 @@ StbM_GetTimeLeap(StbM_SynchronizedTimeBaseType timeBaseId, StbM_TimeDiffType* ti
  * Return value:    E_OK: successful
                     E_NOT_OK: failed
  */
-FUNC(Std_ReturnType, STBM_CODE)
-StbM_GetTimeBaseStatus(
+Std_ReturnType StbM_GetTimeBaseStatus(
     StbM_SynchronizedTimeBaseType timeBaseId,
     StbM_TimeBaseStatusType* syncTimeBaseStatus,
     StbM_TimeBaseStatusType* offsetTimeBaseStatus);
@@ -409,14 +399,13 @@ StbM_GetTimeBaseStatus(
  * Return value:    E_OK: successful
                     E_NOT_OK: failed
  */
-FUNC(Std_ReturnType, STBM_CODE)
-StbM_StartTimer(
+Std_ReturnType StbM_StartTimer(
     StbM_SynchronizedTimeBaseType timeBaseId,
     StbM_CustomerIdType customerId,
-    P2CONST(StbM_TimeStampType, AUTOMATIC, STBM_APPL_DATA) expireTime);
+    const StbM_TimeStampType* expireTime);
 #endif /* STBM_NOTIFICATION_CUSTOMER_NUM>0 */
 
-#if (STD_ON == STBM_TIME_RECORDING_SUPPORT)
+#if (STBM_TIME_RECORDING_SUPPORT == STD_ON)
 /**
  * Accesses to the recorded snapshot data Header of the table belonging to the Synchronized Time Base.
  * Service ID: 0x16
@@ -428,8 +417,7 @@ StbM_StartTimer(
  * Return value:    E_OK: successful
                     E_NOT_OK: failed
  */
-FUNC(Std_ReturnType, STBM_CODE)
-StbM_GetSyncTimeRecordHead(
+Std_ReturnType StbM_GetSyncTimeRecordHead(
     StbM_SynchronizedTimeBaseType timeBaseId,
     P2VAR(StbM_SyncRecordTableHeadType, AUTOMATIC, STBM_APPL_DATA) syncRecordTableHead);
 
@@ -444,11 +432,10 @@ StbM_GetSyncTimeRecordHead(
  * Return value:    E_OK: successful
                     E_NOT_OK: failed
  */
-FUNC(Std_ReturnType, STBM_CODE)
-StbM_GetOffsetTimeRecordHead(
+Std_ReturnType StbM_GetOffsetTimeRecordHead(
     StbM_SynchronizedTimeBaseType timeBaseId,
     P2VAR(StbM_OffsetRecordTableHeadType, AUTOMATIC, STBM_APPL_DATA) offsetRecordTableHead);
-#endif /* STD_ON == STBM_TIME_RECORDING_SUPPORT */
+#endif
 
 /**
  * Called by the <Upper Layer> to force the Timesync Modules to transmit the current
@@ -462,8 +449,7 @@ StbM_GetOffsetTimeRecordHead(
  * Return value:    E_OK: successful
                     E_NOT_OK: failed
  */
-FUNC(Std_ReturnType, STBM_CODE)
-StbM_TriggerTimeTransmission(StbM_SynchronizedTimeBaseType timeBaseId);
+Std_ReturnType StbM_TriggerTimeTransmission(StbM_SynchronizedTimeBaseType timeBaseId);
 
 /**
  * Allows the Timesync Modules to detect, whether a Time Base should be
@@ -477,8 +463,7 @@ StbM_TriggerTimeTransmission(StbM_SynchronizedTimeBaseType timeBaseId);
  * Return value:    Counter value belonging to the Time Base, that indicates a Time Base
                     update to the Timesync Modules
  */
-FUNC(uint8, STBM_CODE)
-StbM_GetTimeBaseUpdateCounter(StbM_SynchronizedTimeBaseType timeBaseId);
+uint8 StbM_GetTimeBaseUpdateCounter(StbM_SynchronizedTimeBaseType timeBaseId);
 
 /**
  * Indicates if the functionality for a system wide master(e.g. StbM_SetGlobalTime)
@@ -492,7 +477,6 @@ StbM_GetTimeBaseUpdateCounter(StbM_SynchronizedTimeBaseType timeBaseId);
  * Return value:    E_OK: successful
                     E_NOT_OK: failed
  */
-FUNC(Std_ReturnType, STBM_CODE)
-StbM_GetMasterConfig(StbM_SynchronizedTimeBaseType timeBaseId, StbM_MasterConfigType* masterConfig);
+Std_ReturnType StbM_GetMasterConfig(StbM_SynchronizedTimeBaseType timeBaseId, StbM_MasterConfigType* masterConfig);
 
 #endif /* STBM_H */

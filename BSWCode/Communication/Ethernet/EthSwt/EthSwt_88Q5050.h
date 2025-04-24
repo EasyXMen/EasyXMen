@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- ** **
- **  FILENAME    : EthSwt_88Q5050.h **
- ** **
- **  Created on  : 2021-10-13 **
- **  Author      : zhiqiang.huang **
- **  Vendor      : **
- **  DESCRIPTION : none **
- ** **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11 **
- ** **
- ***********************************************************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+************************************************************************************************************************
+**                                                                                                                    **
+**  FILENAME    : EthSwt_88Q5050.h                                                                                    **
+**                                                                                                                    **
+**  Created on  : 2021-10-13                                                                                          **
+**  Author      : zhiqiang.huang                                                                                      **
+**  Vendor      :                                                                                                     **
+**  DESCRIPTION : none                                                                                                **
+**                                                                                                                    **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                                                              **
+**                                                                                                                    **
+***********************************************************************************************************************/
 #ifndef ETHSWT_88Q5050_H_
 #define ETHSWT_88Q5050_H_
 /***********************************************************************************************************************
@@ -65,6 +66,9 @@ typedef struct
     EthSwt_VTU_OperationType op;
     /*VTU entry below*/
     boolean priOverride;
+    /*
+     * boolean     vidPolicy;
+     */
     uint8 vidPri;
     uint8 sid;
     boolean valid;

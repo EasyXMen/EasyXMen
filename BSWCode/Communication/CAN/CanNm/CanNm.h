@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : CanNm.h                                                     **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : Wanglili                                                    **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : CanNm.h                                                     **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : Wanglili                                                    **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 /*******************************************************************************
 **                      Revision Control History                              **
 *******************************************************************************/
@@ -47,6 +48,10 @@
 #include "CanNm_Cfg.h"
 #include "CanNm_Cbk.h"
 
+#if CANNM_MULTIPLE_PARTITION_USED == STD_ON
+#include "Os.h"
+#endif
+
 /******************************************************************************
 **                      Global Symbols                                       **
 ******************************************************************************/
@@ -60,15 +65,16 @@
 #define CANNM_DEFAULT_PDU_LENGTH         8u
 
 /* Development errors used by CAN Network Management module */
-#define CANNM_E_UNINIT              ((uint8)(0x01u))
-#define CANNM_E_INVALID_CHANNEL     ((uint8)(0x02u))
-#define CANNM_E_INVALID_PDUID       ((uint8)(0x03u))
-#define CANNM_E_NET_START_IND       ((uint8)(0x04u))
-#define CANNM_E_INIT_FAILED         ((uint8)(0x05u))
-#define CANNM_E_NETWORK_TIMEOUT     ((uint8)(0x11u))
-#define CANNM_E_PARAM_POINTER       ((uint8)(0x12u))
-#define CANNM_E_NOT_IN_BUS_SLEEP    ((uint8)(0x13u))
-#define CANNM_E_ALREADY_INITIALIZED ((uint8)(0xF0u))
+#define CANNM_E_UNINIT                    ((uint8)(0x01u))
+#define CANNM_E_INVALID_CHANNEL           ((uint8)(0x02u))
+#define CANNM_E_INVALID_PDUID             ((uint8)(0x03u))
+#define CANNM_E_NET_START_IND             ((uint8)(0x04u))
+#define CANNM_E_INIT_FAILED               ((uint8)(0x05u))
+#define CANNM_E_INVALID_PARTITION_CONTEXT ((uint8)(0x06u))
+#define CANNM_E_NETWORK_TIMEOUT           ((uint8)(0x11u))
+#define CANNM_E_PARAM_POINTER             ((uint8)(0x12u))
+#define CANNM_E_NOT_IN_BUS_SLEEP          ((uint8)(0x13u))
+#define CANNM_E_ALREADY_INITIALIZED       ((uint8)(0xF0u))
 
 /* Service ID[hex] */
 #define CANNM_SERVICE_ID_INIT                       ((uint8)(0x00u))
@@ -97,8 +103,8 @@
 #define CANNM_SERVICE_ID_MAINFUNCTION               ((uint8)(0x13u))
 
 /* CANNM_VER_4_2_2 on or CANNM_VER_R19_11 on  */
-#define CANNM_VER_4_2_2  STD_ON
-#define CANNM_VER_R19_11 STD_OFF
+#define CANNM_VER_4_2_2  STD_OFF
+#define CANNM_VER_R19_11 STD_ON
 
 typedef enum
 {
@@ -245,14 +251,11 @@ typedef struct
     boolean RepeatMsgIndEnabled;
 #endif /* CANNM_REPEAT_MSG_IND_ENABLED == STD_ON */
 
-#if (STD_ON == CANNM_VER_4_2_2)
-
-/* Specifies if first message request in CanNm is repeated until accepted
- * by CanIf.
- */
-#if (STD_OFF == CANNM_PASSIVE_MODE_ENABLED)
+#if (CANNM_PASSIVE_MODE_ENABLED == STD_OFF) && (CANNM_RETRY_FIRST_MESSAGE_REQUEST == STD_ON)
+    /* Specifies if first message request in CanNm is repeated until accepted
+     * by CanIf.
+     */
     boolean RetryFirstMessageRequest;
-#endif /* STD_OFF == CANNM_PASSIVE_MODE_ENABLED */
 #endif
 
     /* If this parameter is disabled Prepare Bus-Sleep Mode is left after
@@ -292,6 +295,10 @@ typedef struct
     uint8 UserDataOffset;
 #if CANNM_COM_USERDATA_SUPPORT == STD_ON
     const CanNm_UserDataTxPduType* UserDataTxPdu;
+#endif
+
+#if CANNM_MULTIPLE_PARTITION_USED == STD_ON
+    ApplicationType applicationID;
 #endif
 } CanNm_ChannelConfigType;
 
@@ -468,7 +475,8 @@ Std_ReturnType CanNm_DisableCommunication(NetworkHandleType nmChannelHandle);
 Std_ReturnType CanNm_EnableCommunication(NetworkHandleType nmChannelHandle);
 #endif /* STD_ON == CANNM_COM_CONTROL_ENABLED */
 
-#if (CANNM_USER_DATA_ENABLED == STD_ON) && (CANNM_PASSIVE_MODE_ENABLED == STD_OFF)
+#if (CANNM_USER_DATA_ENABLED == STD_ON) && (CANNM_COM_USERDATA_SUPPORT == STD_OFF) \
+    && (CANNM_PASSIVE_MODE_ENABLED == STD_OFF)
 /******************************************************************************/
 /*
  * Brief               Set user data for NM PDUs transmitted next on the bus.
@@ -482,6 +490,7 @@ Std_ReturnType CanNm_EnableCommunication(NetworkHandleType nmChannelHandle);
  * Param-Name[in/out]  None
  * Return              E_OK: No error
  *                     E_NOT_OK: Setting of user data has failed
+ * Trace               SWS_CanNm_00327
  */
 /******************************************************************************/
 Std_ReturnType CanNm_SetUserData(NetworkHandleType nmChannelHandle, const uint8* nmUserDataPtr);
@@ -505,7 +514,7 @@ Std_ReturnType CanNm_SetUserData(NetworkHandleType nmChannelHandle, const uint8*
 Std_ReturnType CanNm_GetUserData(NetworkHandleType nmChannelHandle, uint8* nmUserDataPtr);
 #endif
 
-#if (CANNM_COM_USERDATA_SUPPORT == STD_ON) || (CANNM_GLOBAL_PN_SUPPORT == STD_ON)
+#if (CANNM_COM_USERDATA_SUPPORT == STD_ON)
 /**
  * @brief       Requests transmission of a PDU.
  * @id          0x49

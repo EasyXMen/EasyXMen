@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : KeyM_Internal.h                                             **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : qinchun.yang                                                **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Internal implementation for KeyM                            **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R21-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : KeyM_Internal.h                                             **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : qinchun.yang                                                **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Internal implementation for KeyM                            **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R21-11                      **
+**                                                                            **
+*******************************************************************************/
 
 /******************************************************************************
 **                      Revision Control History                             **
@@ -49,6 +50,7 @@
 #include "NvM.h"
 #include "Csm.h"
 #include "KeyM_Cfg.h"
+#include "SchM_KeyM.h"
 #if (STD_ON == KEYM_DEVERROR_DETECT)
 #include "Det.h"
 #endif
@@ -59,11 +61,11 @@
 #define KEYM_SHEKEY_SLOTID_OFFSET (15U)
 #define KEYM_SHEKEY_SLOTID_MASK   (0xf0U)
 
-#define KEYM_CONST_1              (1U)
-#define KEYM_CONST_2              (2U)
-#define KEYM_CONST_3              (3U)
-#define KEYM_CONST_4              (4U)
-#define KEYM_CONST_5              (4U)
+#define KEYM_CONST_1              (0x1U)
+#define KEYM_CONST_2              (0x2U)
+#define KEYM_CONST_3              (0x3U)
+#define KEYM_CONST_4              (0x4U)
+#define KEYM_CONST_5              (0x5U)
 #define KEYM_INVALID_U16          (0xffffU)
 #define KEYM_INVALID_U32          (0xffffffffU)
 

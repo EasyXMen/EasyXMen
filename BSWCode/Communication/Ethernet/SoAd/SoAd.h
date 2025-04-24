@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                           **
- **  FILENAME    : SoAd.h                                                     **
- **                                                                           **
- **  Created on  :                                                            **
- **  Author      : zhengfei.li                                                **
- **  Vendor      :                                                            **
- **  DESCRIPTION : SoAd header description                                    **
- **                                                                           **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2 and R19_11           **
- **                                                                           **
- **************************************************************************** */
+ */
 /* PRQA S 3108-- */
+/*
+**************************************************************************** **
+**                                                                           **
+**  FILENAME    : SoAd.h                                                     **
+**                                                                           **
+**  Created on  :                                                            **
+**  Author      : zhengfei.li                                                **
+**  Vendor      :                                                            **
+**  DESCRIPTION : SoAd header description                                    **
+**                                                                           **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2 and R19_11           **
+**                                                                           **
+**************************************************************************** */
 /*============================================================================
 ==============================================================================*/
 #ifndef SOAD_H_
@@ -43,6 +44,7 @@
 * 3) internal and external interfaces from this unit
 ==============================================================================*/
 #include "SoAd_Types.h"
+#include "SchM_SoAd.h"
 /*==============================================================================
 *                              SOURCE FILE VERSION INFORMATION
 ==============================================================================*/
@@ -50,8 +52,8 @@
 #define SOAD_MODULE_ID          56u
 #define SOAD_INSTANCE           0u
 #define SOAD_H_AR_MAJOR_VERSION 4u
-#define SOAD_H_AR_MINOR_VERSION 2u
-#define SOAD_H_AR_PATCH_VERSION 2u
+#define SOAD_H_AR_MINOR_VERSION 5u
+#define SOAD_H_AR_PATCH_VERSION 0u
 
 /*==============================================================================
 *                                     FILE VERSION CHECKS
@@ -130,23 +132,11 @@ extern FUNC(void, SOAD_CODE) SoAd_Init(P2CONST(SoAd_ConfigType, AUTOMATIC, SOAD_
 extern FUNC(void, SOAD_CODE) SoAd_GetVersionInfo(P2VAR(Std_VersionInfoType, AUTOMATIC, SOAD_APPL_DATA) versioninfo);
 #endif /*STD_ON == SOAD_VERSION_INFO_API*/
 /*============================================================================*/
-extern FUNC(Std_ReturnType, SOAD_CODE) SoAd_IfTransmit(
-    VAR(PduIdType, AUTOMATIC) SoAdSrcPduId,
-    P2CONST(PduInfoType, AUTOMATIC, SOAD_APPL_CONST) SoAdSrcPduInfoPtr);
-/*============================================================================*/
 extern FUNC(Std_ReturnType, SOAD_CODE) SoAd_IfRoutingGroupTransmit(VAR(SoAd_RoutingGroupIdType, AUTOMATIC) id);
 /*============================================================================*/
 extern FUNC(Std_ReturnType, SOAD_CODE) SoAd_IfSpecificRoutingGroupTransmit(
     VAR(SoAd_RoutingGroupIdType, AUTOMATIC) id,
     VAR(SoAd_SoConIdType, AUTOMATIC) SoConId);
-/*============================================================================*/
-extern FUNC(Std_ReturnType, SOAD_CODE) SoAd_TpTransmit(
-    VAR(PduIdType, AUTOMATIC) SoAdSrcPduId,
-    P2CONST(PduInfoType, AUTOMATIC, SOAD_APPL_CONST) SoAdSrcPduInfoPtr);
-/*============================================================================*/
-extern FUNC(Std_ReturnType, SOAD_CODE) SoAd_TpCancelTransmit(VAR(PduIdType, AUTOMATIC) PduId);
-/*============================================================================*/
-extern FUNC(Std_ReturnType, SOAD_CODE) SoAd_TpCancelReceive(VAR(PduIdType, AUTOMATIC) PduId);
 /*============================================================================*/
 extern FUNC(Std_ReturnType, SOAD_CODE)
     SoAd_GetSoConId(VAR(PduIdType, AUTOMATIC) TxPduId, P2VAR(SoAd_SoConIdType, AUTOMATIC, SOAD_APPL_DATA) SoConIdPtr);
@@ -213,8 +203,6 @@ extern FUNC(Std_ReturnType, SOAD_CODE) SoAd_WriteDhcpHostNameOption(
     VAR(SoAd_SoConIdType, AUTOMATIC) SoConId,
     VAR(uint8, AUTOMATIC) length,
     P2CONST(uint8, AUTOMATIC, SOAD_APPL_CONST) data);
-/*============================================================================*/
-
 /*============================================================================*/
 extern FUNC(void, SOAD_CODE) SoAd_GetSoConMode(
     VAR(SoAd_SoConIdType, AUTOMATIC) SoConId,

@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                           **
- **  FILENAME    : FiM.h                                                      **
- **                                                                           **
- **  Created on  : 2020/5/9 15:21:52                                          **
- **  Author      : tao.yu                                                     **
- **  Vendor      :                                                            **
- **  DESCRIPTION : FiM                                                        **
- **                                                                           **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                      **
- **                                                                           **
- **************************************************************************** */
+ */
 /* PRQA S 3108-- */
+/*
+**************************************************************************** **
+**                                                                           **
+**  FILENAME    : FiM.h                                                      **
+**                                                                           **
+**  Created on  : 2020/5/9 15:21:52                                          **
+**  Author      : tao.yu                                                     **
+**  Vendor      :                                                            **
+**  DESCRIPTION : FiM                                                        **
+**                                                                           **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                      **
+**                                                                           **
+**************************************************************************** */
 /*======================[R E V I S I O N   H I S T O R Y]=====================*/
 /*  <VERSION>    <DATE>    <AUTHOR>    <REVISION LOG>
  *   V1.0.0     2020/5/9    tao.yu        Create
@@ -46,7 +47,10 @@
  *   V2.0.6     2024-04-08   tao.yu      CPT-8691,fix fid counter error
  *              2024-04-08   xinrun.wang FiM_SetFunctionAvailable control by macro
  *   V2.0.7     2024-05-13   hao.wen     1. Add FIM_LOCAL FIM_LOCAL_INLINE. 2. Resolve FiM memory access exceeding
- *              2024-09-27   xue.han     QAC
+                                         range.
+*               2024-08-13   xue.han     QAC
+ *   V2.0.8     2024-12-16   tao.yu      CPT-11957, fix init status when trigger by dem is off
+
 ============================================================================*/
 #ifndef FIM_H_
 #define FIM_H_
@@ -70,7 +74,7 @@
 #define FIM_AR_RELEASE_PATCH_VERSION 2u
 #define FIM_SW_MAJOR_VERSION         2u
 #define FIM_SW_MINOR_VERSION         0u
-#define FIM_SW_PATCH_VERSION         7u
+#define FIM_SW_PATCH_VERSION         8u
 
 /* Error classification */
 

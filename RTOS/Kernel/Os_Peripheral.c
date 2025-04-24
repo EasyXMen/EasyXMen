@@ -18,21 +18,22 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Os_Peripheral.c                                             **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      :  i-soft-os                                                  **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Peripheral manager                                          **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
- **  Version :   AUTOSAR classic Platform R19--Function Safety                 **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Os_Peripheral.c                                             **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      :  i-soft-os                                                  **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Peripheral manager                                          **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
+**  Version :   AUTOSAR classic Platform R19--Function Safety                 **
+**                                                                            **
+*******************************************************************************/
 
 /*=======[I N C L U D E S]====================================================*/
 #include "Os_Internal.h"
@@ -110,7 +111,7 @@ FUNC(StatusType, OS_CODE) ReadPeripheral8(AreaIdType Area, const uint8* Address,
             /* PRQA S 3469 ++ */ /* MISRA Dir 4.9 */ /* OS_PERIPHERAL_MACRO_TO_FUNCTION_002 */
             OS_ARCH_ENTRY_CRITICAL();
             /* PRQA S 3469 -- */ /* MISRA Dir 4.9 */
-            *ReadValue = *Address;
+            *ReadValue = *Address & 0xFF;
             /* PRQA S 3469 ++ */ /* MISRA Dir 4.9 */ /* OS_PERIPHERAL_MACRO_TO_FUNCTION_002 */
             OS_ARCH_EXIT_CRITICAL();
             /* PRQA S 3469 -- */ /* MISRA Dir 4.9 */
@@ -359,7 +360,7 @@ FUNC(StatusType, OS_CODE) WritePeripheral8(AreaIdType Area, uint8* Address, uint
             /* PRQA S 3469 ++ */ /* MISRA Dir 4.9 */ /* OS_PERIPHERAL_MACRO_TO_FUNCTION_002 */
             OS_ARCH_ENTRY_CRITICAL();
             /* PRQA S 3469 -- */ /* MISRA Dir 4.9 */
-            *Address = WriteValue;
+            *Address = (WriteValue & 0xFF);
             /* PRQA S 3469 ++ */ /* MISRA Dir 4.9 */ /* OS_PERIPHERAL_MACRO_TO_FUNCTION_002 */
             OS_ARCH_EXIT_CRITICAL();
             /* PRQA S 3469 -- */ /* MISRA Dir 4.9 */
@@ -595,7 +596,7 @@ FUNC(StatusType, OS_CODE) ModifyPeripheral8(AreaIdType Area, uint8* Address, uin
             OS_ARCH_ENTRY_CRITICAL();
             /* PRQA S 3469 -- */ /* MISRA Dir 4.9 */
             /* modify the value to address. */
-            *Address = ((*Address) & Clearmask) | Setmask;
+            *Address = (((*Address) & Clearmask) | Setmask) & 0xFF;
             /* PRQA S 3469 ++ */ /* MISRA Dir 4.9 */ /* OS_PERIPHERAL_MACRO_TO_FUNCTION_002 */
             OS_ARCH_EXIT_CRITICAL();
             /* PRQA S 3469 -- */ /* MISRA Dir 4.9 */

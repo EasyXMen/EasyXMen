@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : E2E.h                                                       **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : YangBo                                                      **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : E2E.h                                                       **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : YangBo                                                      **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 #ifndef E2E_H_
 #define E2E_H_
 /*******************************************************************************
@@ -44,7 +45,9 @@
  * V2.0.2 [2023/2/08] [Jian.Jiang] Code walkthrough, in the conditional statement (==),
  * constants must be placed on the left.
  * V2.0.3 [2023/5/15] [Jian.Jiang] QAC rectification.
- * V2.0.4 [2024/3/11] [darren] QAC rectification.
+ * V2.0.4[2024/7/5] [qinmei.chen] CPT-9501 fix counter is not increased
+ * V2.0.5 [2024/8/13] [qinmei.chen] change the logic of DeltaCounter of E2EP05
+ * and E2EP06 and other lines to adapt to CP-rules
  */
 /*******************************************************************************
 **                      Include Section                                       **
@@ -62,8 +65,8 @@
 #define E2E_AR_RELEASE_MINOR_VERSION    (5u)
 #define E2E_AR_RELEASE_REVISION_VERSION (0u)
 #define E2E_SW_MAJOR_VERSION            (2u)
-#define E2E_SW_MINOR_VERSION            (0u)
-#define E2E_SW_PATCH_VERSION            (4u)
+#define E2E_SW_MINOR_VERSION            (1u)
+#define E2E_SW_PATCH_VERSION            (0u)
 
 /**
  * Returns the version information of this module.
@@ -81,7 +84,6 @@
     {                                                           \
         (VersionInfo)->vendorID = E2E_VENDOR_ID;                \
         (VersionInfo)->moduleID = E2E_MODULE_ID;                \
-        (VersionInfo)->instanceID = 0u;                         \
         (VersionInfo)->sw_major_version = E2E_SW_MAJOR_VERSION; \
         (VersionInfo)->sw_minor_version = E2E_SW_MINOR_VERSION; \
         (VersionInfo)->sw_patch_version = E2E_SW_PATCH_VERSION; \
@@ -165,7 +167,7 @@ typedef struct
 {
     /*Pointer to an array, in which the ProfileStatus-es of the last E2Echecks are stored.
     The array size shall be WindowSize*/
-    P2VAR(uint8, AUTOMATIC, E2E_APPL_DATA) ProfileStatusWindow;
+    uint8 ProfileStatusWindow[16]; /* PRQA S 3432 */ /* MISRA Rule 20.7 */
     /*index in the array, at which the next ProfileStatus is to be written.*/
     uint8 WindowTopIndex;
     /*Count of checks in which ProfileStatus equal to E2E_P_OK was determined, within the last
@@ -198,10 +200,12 @@ typedef struct
  *
  */
 
+/* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
 extern FUNC(Std_ReturnType, E2E_CODE) E2E_SMCheck(
     E2E_PCheckStatusType ProfileStatus,
     P2CONST(E2E_SMConfigType, AUTOMATIC, E2E_APPL_DATA) ConfigPtr,
     P2VAR(E2E_SMCheckStateType, AUTOMATIC, E2E_APPL_DATA) StatePtr);
+/* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
 
 /**
  * Initializes the state machine.
@@ -214,9 +218,10 @@ extern FUNC(Std_ReturnType, E2E_CODE) E2E_SMCheck(
  * Return value: Std_ReturnType,E2E_E_INPUTERR_NULL E2E_E_OK.
  *
  */
-
+/* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
 extern FUNC(Std_ReturnType, E2E_CODE) E2E_SMCheckInit(
     P2VAR(E2E_SMCheckStateType, AUTOMATIC, E2E_APPL_DATA) StatePtr,
     P2CONST(E2E_SMConfigType, AUTOMATIC, E2E_APPL_DATA) ConfigPtr);
+/* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
 
 #endif

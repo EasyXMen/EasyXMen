@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : CanTp_MemMap.h                                               **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : <Auto generated>                                            **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Memory mapping abstraction declaration of CanTp              **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                       **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : CanTp_MemMap.h                                               **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : <Auto generated>                                            **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Memory mapping abstraction declaration of CanTp              **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                       **
+**                                                                            **
+*******************************************************************************/
 /*******************************************************************************
 **                      Revision Control History                              **
 *******************************************************************************/
@@ -262,6 +263,30 @@
 #define STOP_SEC_VAR_NO_INIT_UNSPECIFIED
 
 /*Index:8  Section name :VAR_POWER_ON_INIT_8*/
+#elif defined CANTP_START_SEC_VAR_POWER_ON_INIT_32
+#undef CANTP_START_SEC_VAR_POWER_ON_INIT_32
+#undef MEMMAP_ERROR
+#ifndef MEMMAP_ERROR_SEC_NO_MATCH
+#define MEMMAP_ERROR_SEC_NO_MATCH
+#else
+#error "CanTp_MemMap.h, section is used consecutively many times."
+#endif
+#define CANTP_START_SEC_VAR_POWER_ON_INIT_32_NO_MATCH
+#define START_SEC_VAR_POWER_ON_INIT_32
+
+#elif defined CANTP_STOP_SEC_VAR_POWER_ON_INIT_32
+#undef CANTP_STOP_SEC_VAR_POWER_ON_INIT_32
+#undef MEMMAP_ERROR
+#ifdef CANTP_START_SEC_VAR_POWER_ON_INIT_32_NO_MATCH
+#undef CANTP_START_SEC_VAR_POWER_ON_INIT_32_NO_MATCH
+#else
+#error "CanTp_MemMap.h, no matching section was used."
+#endif
+#ifdef MEMMAP_ERROR_SEC_NO_MATCH
+#undef MEMMAP_ERROR_SEC_NO_MATCH
+#endif
+#define STOP_SEC_VAR_POWER_ON_INIT_32
+
 #elif defined CANTP_START_SEC_VAR_POWER_ON_INIT_8
 #undef CANTP_START_SEC_VAR_POWER_ON_INIT_8
 #undef MEMMAP_ERROR
@@ -310,31 +335,6 @@
 #undef MEMMAP_ERROR_SEC_NO_MATCH
 #endif
 #define STOP_SEC_VAR_POWER_ON_INIT_UNSPECIFIED
-
-/*Index:10  Section name :VAR_POWER_ON_INIT_32*/
-#elif defined CANTP_START_SEC_VAR_POWER_ON_INIT_32
-#undef CANTP_START_SEC_VAR_POWER_ON_INIT_32
-#undef MEMMAP_ERROR
-#ifndef MEMMAP_ERROR_SEC_NO_MATCH
-#define MEMMAP_ERROR_SEC_NO_MATCH
-#else
-#error "CanTp_MemMap.h, section is used consecutively many times."
-#endif
-#define CANTP_START_SEC_VAR_POWER_ON_INIT_32_NO_MATCH
-#define START_SEC_VAR_POWER_ON_INIT_32
-
-#elif defined CANTP_STOP_SEC_VAR_POWER_ON_INIT_32
-#undef CANTP_STOP_SEC_VAR_POWER_ON_INIT_32
-#undef MEMMAP_ERROR
-#ifdef CANTP_START_SEC_VAR_POWER_ON_INIT_32_NO_MATCH
-#undef CANTP_START_SEC_VAR_POWER_ON_INIT_32_NO_MATCH
-#else
-#error "CanTp_MemMap.h, no matching section was used."
-#endif
-#ifdef MEMMAP_ERROR_SEC_NO_MATCH
-#undef MEMMAP_ERROR_SEC_NO_MATCH
-#endif
-#define STOP_SEC_VAR_POWER_ON_INIT_32
 
 #endif /* START_WITH_IF */
 

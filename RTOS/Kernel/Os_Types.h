@@ -18,21 +18,22 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    :  Os_Types.h                                                 **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      :  i-soft-os                                                  **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
- **  Version :   AUTOSAR classic Platform R19--Function Safety                 **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    :  Os_Types.h                                                 **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      :  i-soft-os                                                  **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
+**  Version :   AUTOSAR classic Platform R19--Function Safety                 **
+**                                                                            **
+*******************************************************************************/
 
 #ifndef OS_TYPES_H
 #define OS_TYPES_H
@@ -102,6 +103,9 @@ typedef enum
     OSServiceId_ActivateTaskAsyn = 0x33,
     OSServiceId_SetEventAsyn = 0x34,
     OSServiceId_ModifyPeripheral16 = 0x35,
+
+    /* Currently no service execution */
+    OSServiceId_NoServiceRunning = 0x44,
 
     /*Additional Service*/
     OSServiceId_WaitAllEvents = 0xD7,
@@ -307,11 +311,11 @@ typedef struct
 
 /* ------------------------------Event---------------------------- */
 /* This type of event. */
-typedef uint32 Os_EventType;
+typedef uint64 Os_EventType;
 typedef Os_EventType EventType;
 
 /* This type of event mask. */
-typedef uint32 Os_EventMaskType;
+typedef uint64 Os_EventMaskType;
 typedef Os_EventMaskType* Os_EventMaskRefType;
 typedef Os_EventMaskType EventMaskType;
 typedef EventMaskType* EventMaskRefType;
@@ -574,6 +578,13 @@ typedef void* TrustedFunctionParameterRefType;
 /* Used in Os_AppTrustedFunctionCfgType */
 typedef P2FUNC(void, OS_APPL_CODE, Os_AppTrustedFunc)(TrustedFunctionIndexType ix, TrustedFunctionParameterRefType ref);
 
+typedef struct
+{
+    boolean TrustedFuncTportDelayCall;
+    boolean TrustedFuncTporFlag;
+    StatusType TrustedFuncTporErrType;
+    uint32 osWhoHook;
+} Os_TrustedFuncTpDataDef;
 /* ------------------------application---------------------------- */
 /* 8.3.5 */
 /* This data type identifies if an OS-Application has access to an object. */
@@ -849,7 +860,7 @@ typedef struct
 {
     RpcSyncType sync;
     uint8 nextNode;
-    RPC_SERVICE_STATE procState;
+    volatile RPC_SERVICE_STATE procState;
     Os_CoreIdType sourceCoreId;
     StatusType retValue;
     Os_ServiceIdType serviceId;
@@ -907,16 +918,16 @@ typedef enum
 typedef struct
 {
     Os_IocBlockStateType IocBlockState;
-    union { /* PRQA S 0750 */ /* MISRA  Rule-19.2*/ /* OS_TYPES_UNION_001 */
+    union Os_IocBlockLink { /* PRQA S 0750 */ /* MISRA  Rule-19.2*/ /* OS_TYPES_UNION_001 */
         Os_IocBlockIdType IocBlockNext;
         Os_IocBlockIdType IocBlockCurrent;
-    };
+    } IocBlockLink;
 } Os_IocBlockType;
 
 /* Define the type of send data source in IOC. */
 typedef struct
 {
-    void* IocDataPtr;
+    const void* IocDataPtr;
     Os_IocU16Type IocDataLenth;
 } Os_IocSendDataSourceType;
 
@@ -1117,6 +1128,106 @@ typedef struct
     Os_ApplicationType periAreaAppAccMask;
 #endif /* TRUE == CFG_SERVICE_PROTECTION_ENABLE */
 } OsPeripheralAreaCfgType;
+/* -------------------------------Trace--------------------------- */
+typedef enum
+{
+    OS_TRACE_TASK_SWITCH_REASON_NONE,
+    OS_TRACE_TASK_SWITCH_REASON_ERROR_TERMINATE,
+    OS_TRACE_TASK_SWITCH_REASON_SPROT_ERROR_TERMINATE,
+    OS_TRACE_TASK_SWITCH_REASON_PROT_HOOK_TERMINATE,
+    OS_TRACE_TASK_SWITCH_REASON_TERMINATE,
+    OS_TRACE_TASK_SWITCH_REASON_APP_TERMINATE,
+    OS_TRACE_TASK_SWITCH_REASON_WAITEVENT_WAIT,
+    OS_TRACE_TASK_SWITCH_REASON_SETEVENT_READY,
+    OS_TRACE_TASK_SWITCH_REASON_PREEMPT_READY,
+    OS_TRACE_TASK_SWITCH_REASON_RELEASE_RES_READY,
+    OS_TRACE_TASK_SWITCH_REASON_CHAIN_READY,
+    OS_TRACE_TASK_SWITCH_REASON_SCHEDULE_READY,
+    OS_TRACE_TASK_SWITCH_REASON_WAITEVENT_ACTIVE,
+    OS_TRACE_TASK_SWITCH_REASON_SETEVENT_ACTIVE,
+    OS_TRACE_TASK_SWITCH_REASON_PREEMPT_ACTIVE,
+    OS_TRACE_TASK_SWITCH_REASON_RELEASE_RES_ACTIVE,
+    OS_TRACE_TASK_SWITCH_REASON_ERROR_ACTIVE,
+    OS_TRACE_TASK_SWITCH_REASON_PROT_HOOK_ACTIVE,
+    OS_TRACE_TASK_SWITCH_REASON_SPROT_ERROR_ACTIVE,
+    OS_TRACE_TASK_SWITCH_REASON_TERMINATE_ACTIVE,
+    OS_TRACE_TASK_SWITCH_REASON_APP_TERMINATE_ACTIVE,
+    OS_TRACE_TASK_SWITCH_REASON_CHAIN_ACTIVE,
+    OS_TRACE_TASK_SWITCH_REASON_SCHEDULE_ACTIVE,
+    OS_TRACE_TASK_SWITCH_REASON_POSITIVE_ACTIVE,
+    OS_TRACE_TASK_SWITCH_REASON_START_ACTIVE
+} Os_TraceTaskSwitchReasonType;
+
+typedef enum
+{
+    OS_TRACE_TASK_STATE_TERMINATED,
+    OS_TRACE_TASK_STATE_ACTIVED,
+} Os_TraceTaskStateType;
+
+typedef enum
+{
+    OS_TRACE_ISR_STATE_EXITED,
+    OS_TRACE_ISR_STATE_ENTERED,
+} Os_TraceIsrStateType;
+
+typedef enum
+{
+    OS_TRACE_RES_STATE_UNLOCKED,
+    OS_TRACE_RES_STATE_LOCKED
+} Os_TraceResourceStateType;
+
+typedef enum
+{
+    OS_TRACE_ALARM_STATE_STOPPED,
+    OS_TRACE_ALARM_STATE_RUNNING
+} Os_TraceAlarmStateType;
+
+typedef struct
+{
+    Os_TraceTaskSwitchReasonType switchReason;
+    Os_TraceTaskStateType state;
+    Os_TaskStateType realState;
+} Os_TraceTaskType;
+
+typedef struct
+{
+    Os_TraceIsrStateType state;
+    Os_TaskStateType realState;
+} Os_TraceIsrType;
+
+typedef struct
+{
+    Os_AppObjectId occupyObjectId;
+    Os_TraceResourceStateType state;
+} Os_TraceResourceType;
+
+typedef struct
+{
+    Os_TraceAlarmStateType state;
+} Os_TraceAlarmType;
+
+#define OS_TRACE_NO_ISR_ID     (0xffffu)
+#define OS_TRACE_NO_TASK_ID    (0xffffu)
+#define OS_TRACE_NO_OBJECT_ID  (0xffffu)
+#define OS_TRACE_NO_LAST_ERROR (0xffu)
+
+typedef struct
+{
+    Os_CoreIdType coreId;
+    Os_AppModeType curAppMode;
+    Os_AppObjectType runObjId;
+    Os_IsrType runIsrId;
+    Os_TaskType runTaskId;
+    Os_TaskType nextTaskId;
+    Os_PriorityType runTaskPrio;
+    Os_TraceTaskSwitchReasonType nextRunReason;
+    Os_ServiceIdType curServiceId;
+    StatusType lastError;
+    Os_TraceIsrType* isrTrace;
+    Os_TraceTaskType* taskTrace;
+    Os_TraceResourceType* resourceTrace;
+    Os_TraceAlarmType* alarmTrace;
+} Os_TraceSysType;
 
 /* --------------------------------others------------------------------*/
 typedef struct
@@ -1222,12 +1333,16 @@ typedef struct
     uint8 taskSuspendOSCount;
 #endif
 
+#if (TRUE == CFG_SCHEDULE_COUNT_MONITOR)
+    uint32 taskScheduleCount;
+#endif
+
 /*multi-core*/
 #if ((CFG_SPINLOCK_MAX > 0U) || (CFG_STD_RESOURCE_MAX > 0U))
     uint16 taskCriticalZoneStack[CFG_CRITICAL_ZONE_MAX];
     uint16 taskCriticalZoneCount;
     Os_ObjectTypeType taskCriticalZoneType[CFG_CRITICAL_ZONE_MAX];
-    VAR(uint16 volatile, OS_VAR) taskCurrentSpinlockOccupyLevel;
+    VAR(volatile uint16, OS_VAR) taskCurrentSpinlockOccupyLevel;
 #endif
 } Os_TCBType;
 
@@ -1287,6 +1402,10 @@ typedef struct
     uint8 isrC2DisableAllCount;
     uint8 isrC2SuspendAllCount;
     uint8 isrC2SuspendOSCount;
+#endif
+
+#if (TRUE == CFG_SCHEDULE_COUNT_MONITOR)
+    uint32 isrScheduleCount;
 #endif
 
 /*multi-core*/
@@ -1356,7 +1475,7 @@ typedef struct
     Os_LockerType sysDispatchLocker;
     Os_PriorityType sysHighPrio;
     Os_TaskType sysHighTaskID;
-    Os_TaskType sysRunningTaskID;
+    Os_TaskType sysRunningTaskID; /* No attached core ID, just local ID */
     Os_TaskType sysPrevTaskID;
     Os_AppModeType sysActiveAppMode;
     Os_CallLevelType sysOsLevel;
@@ -1392,6 +1511,11 @@ typedef struct
 #if (CFG_SPINLOCK_MAX > 0)
     boolean CurrentSpinlockOccupied[CFG_SPINLOCK_MAX];
 #endif
+
+    /*Trace*/
+#if (TRUE == CFG_TRACE_ENABLE)
+    P2VAR(Os_TraceSysType, AUTOMATIC, OS_VAR) trace;
+#endif
 } Os_SCBType;
 
 typedef struct
@@ -1408,6 +1532,7 @@ typedef struct
     /* UNQEUEU */
     Os_IocBlockIdType IocBlockRead;
 } Os_IocCBType;
+
 #endif               /* OS_TYPES_H */
 /* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
 

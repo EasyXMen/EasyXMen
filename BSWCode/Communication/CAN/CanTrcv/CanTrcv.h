@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : CanTrcv.h                                                   **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : Xinrun.Wang                                                 **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Public interfaces declared by CanTrcv module                **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : CanTrcv.h                                                   **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : Xinrun.Wang                                                 **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Public interfaces declared by CanTrcv module                **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 #ifndef CANTRCV_H_
 #define CANTRCV_H_
 
@@ -57,7 +58,7 @@
 #define CANTRCV_H_AR_PATCH_VERSION 0U
 #define CANTRCV_H_SW_MAJOR_VERSION 2U
 #define CANTRCV_H_SW_MINOR_VERSION 0U
-#define CANTRCV_H_SW_PATCH_VERSION 3U
+#define CANTRCV_H_SW_PATCH_VERSION 2U
 
 /* timer type */
 #define None           0x00u
@@ -173,7 +174,9 @@ extern FUNC(Std_ReturnType, CANTRCV_CODE) CanTrcv_SetOpMode(uint8 Transceiver, C
  */
 
 extern FUNC(Std_ReturnType, CANTRCV_CODE)
+    /* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
     CanTrcv_GetOpMode(uint8 Transceiver, P2VAR(CanTrcv_TrcvModeType, AUTOMATIC, CANTRCV_APPL_DATA) OpMode);
+/* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
 
 /**
  * This function gets the wakeup reason for the Transceiver and returns it in parameter Reason.
@@ -189,7 +192,9 @@ extern FUNC(Std_ReturnType, CANTRCV_CODE)
  */
 
 extern FUNC(Std_ReturnType, CANTRCV_CODE)
+    /* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
     CanTrcv_GetBusWuReason(uint8 Transceiver, P2VAR(CanTrcv_TrcvWakeupReasonType, AUTOMATIC, CANTRCV_APPL_DATA) reason);
+/* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
 
 #if (STD_ON == CANTRCV_VERSIONINFO_API)
 /**
@@ -307,7 +312,9 @@ extern FUNC(void, CANTRCV_CODE) CanTrcv_DeInit(void);
  */
 
 extern FUNC(Std_ReturnType, CANTRCV_CODE)
+    /* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
     CanTrcv_GetTrcvSystemData(uint8 Transceiver, P2VAR(uint32, AUTOMATIC, CANTRCV_CONST) TrcvSysData);
+/* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
 
 /**
  * This function clears the WUF flag in the transceiver hardware.
@@ -339,7 +346,9 @@ extern FUNC(Std_ReturnType, CANTRCV_CODE) CanTrcv_ClearTrcvWufFlag(uint8 Transce
 
 extern FUNC(Std_ReturnType, CANTRCV_CODE) CanTrcv_ReadTrcvTimeoutFlag(
     uint8 Transceiver,
+    /* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
     P2VAR(CanTrcv_TrcvFlagStateType, AUTOMATIC, CANTRCV_APPL_DATA) FlagState);
+/* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
 
 /**
  * This function clears the status of the timeout flag in the transceiver hardware.
@@ -371,7 +380,9 @@ extern FUNC(Std_ReturnType, CANTRCV_CODE) CanTrcv_ClearTrcvTimeoutFlag(uint8 Tra
 
 extern FUNC(Std_ReturnType, CANTRCV_CODE) CanTrcv_ReadTrcvSilenceFlag(
     uint8 Transceiver,
+    /* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
     P2VAR(CanTrcv_TrcvFlagStateType, AUTOMATIC, CANTRCV_APPL_DATA) FlagState);
+/* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
 
 /**
  * This function requests to check the status of the wakeup flag from the transceiver hardware.

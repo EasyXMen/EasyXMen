@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Eep_62_MemMap.h                                               **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : <Auto generated>                                            **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Memory mapping abstraction declaration of Eep_62              **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                       **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Eep_62_MemMap.h                                               **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : <Auto generated>                                            **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Memory mapping abstraction declaration of Eep_62              **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                       **
+**                                                                            **
+*******************************************************************************/
 /*******************************************************************************
 **                      Revision Control History                              **
 *******************************************************************************/

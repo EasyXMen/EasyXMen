@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : EcuM_Shutdown.c                                             **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : qinchun.yang                                                **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Implement code for EcuM shutdown phase.                     **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : EcuM_Shutdown.c                                             **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : qinchun.yang                                                **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Implement code for EcuM shutdown phase.                     **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 
 /*******************************************************************************
 **                      Revision Control History                              **
@@ -88,7 +89,7 @@ static FUNC(void, ECUM_CODE) EcuM_GetSdtg(
 static VAR(TaskType, ECUM_CLEARED) EcuM_McShutdownTaskId;
 #define ECUM_STOP_SEC_VAR_CLEARED_SHARE_16
 #include "EcuM_MemMap.h"
-#endif /* ECUM_MAX_MCU_CORE_NUM > 1 */
+#endif /*ECUM_MAX_MCU_CORE_NUM > 1*/
 
 #if (ECUM_MAX_MCU_CORE_NUM > 1)
 /*Shutdown request flag, set by master core, check by slave main function*/
@@ -137,7 +138,7 @@ FUNC(void, ECUM_CODE) EcuM_Shutdown(void)
         (void)Det_ReportError(ECUM_MODULE_ID, ECUM_INSTANCE_ID, ECUM_SID_SHUTDOWN, ECUM_E_UNINIT);
     }
     else
-#endif /* ECUM_DEV_ERROR_DETECT == STD_ON */
+#endif /*ECUM_DEV_ERROR_DETECT == STD_ON*/
     {
         /*notify integration code ongoing into OFF II step*/
         EcuM_OnGoOffTwo();
@@ -145,7 +146,7 @@ FUNC(void, ECUM_CODE) EcuM_Shutdown(void)
 #if (ECUM_MAX_MCU_CORE_NUM > 1)
         /*This instance is running on master or slave*/
         if (ECUM_MASTER_CORE_ID == coreId)
-#endif /* ECUM_MAX_MCU_CORE_NUM > 1 */
+#endif /*ECUM_MAX_MCU_CORE_NUM > 1*/
         {
             /*Callout EcuM_AL_Reset or Callout EcuM_AL_SwitchOff, depends on the
              *selected shutdown target (RESET or OFF)*/
@@ -228,7 +229,7 @@ EcuM_SelectShutdownTarget(EcuM_ShutdownTargetType shutdownTarget, EcuM_ShutdownM
             break;
         }
     }
-#endif /* ECUM_DEV_ERROR_DETECT == STD_ON */
+#endif /*ECUM_DEV_ERROR_DETECT == STD_ON*/
     if ((Std_ReturnType)E_OK == ret)
     {
         EcuM_SetSdtg(&EcuMRunData, shutdownTarget, shutdownMode);
@@ -277,7 +278,7 @@ EcuM_GetShutdownTarget(
         ret = E_NOT_OK;
     }
     else
-#endif /* ECUM_DEV_ERROR_DETECT == STD_ON */
+#endif /*ECUM_DEV_ERROR_DETECT == STD_ON*/
     {
         EcuM_GetSdtg(&EcuMRunData, shutdownTarget, shutdownMode);
     }
@@ -325,7 +326,7 @@ EcuM_GetLastShutdownTarget(
         ret = E_NOT_OK;
     }
     else
-#endif /* ECUM_DEV_ERROR_DETECT == STD_ON */
+#endif /*ECUM_DEV_ERROR_DETECT == STD_ON*/
     {
         *(shutdownTarget) = EcuMRunData.SdtgLast.Target;
         *(shutdownMode) = EcuMRunData.SdtgLast.Mode;
@@ -364,7 +365,7 @@ FUNC(Std_ReturnType, ECUM_CODE) EcuM_SelectShutdownCause(EcuM_ShutdownCauseType 
         ret = E_NOT_OK;
     }
     else
-#endif /* ECUM_DEV_ERROR_DETECT == STD_ON */
+#endif /*ECUM_DEV_ERROR_DETECT == STD_ON*/
     {
         (pRt)->cause = cause;
     }
@@ -404,7 +405,7 @@ EcuM_GetShutdownCause(P2VAR(EcuM_ShutdownCauseType, AUTOMATIC, ECUM_APPL_DATA) s
         ret = E_NOT_OK;
     }
     else
-#endif /* ECUM_DEV_ERROR_DETECT == STD_ON */
+#endif /*ECUM_DEV_ERROR_DETECT == STD_ON*/
     {
         *(shutdownCause) = EcuMRunData.cause;
     }
@@ -433,7 +434,7 @@ EcuM_DoShutDownPhase(uint16 caller)
         (void)Det_ReportError(ECUM_MODULE_ID, ECUM_INSTANCE_ID, ECUM_SID_GODOWNHALTPOLL, ECUM_E_INVALID_PAR);
         ret = E_NOT_OK;
     }
-#endif /* ECUM_DEV_ERROR_DETECT == STD_ON */
+#endif /*ECUM_DEV_ERROR_DETECT == STD_ON*/
     return ret;
 }
 
@@ -451,7 +452,7 @@ EcuM_OffPreOS(void)
 #if (ECUM_ALARM_CLOCK_PRESENT == STD_ON)
     /*Cancelled alarms.*/
     EcuM_CancellAlarms();
-#endif /* ECUM_ALARM_CLOCK_PRESENT == STD_ON */
+#endif /*ECUM_ALARM_CLOCK_PRESENT == STD_ON*/
     /*call callout OnGoOffOne*/
     EcuM_OnGoOffOne();
 
@@ -489,7 +490,7 @@ EcuM_OffPreOS(void)
         {
             goto ECUM_OS_ERROR_HANDLE;
         }
-        /* Get the ID of the task that initiated the shutdown process.(Master core */
+        /*Get the ID of the task that initiated the shutdown process.(Master core)*/
         osRet = GetTaskID(&EcuM_McShutdownTaskId);
         if (E_OK != osRet)
         {

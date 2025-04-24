@@ -18,21 +18,22 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    :  Os_Sprot.c                                                 **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      :  i-soft-os                                                  **
- **  Vendor      :                                                             **
- **  DESCRIPTION :  AutoSar Protection Managment                               **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
- **  Version :   AUTOSAR classic Platform R19--Function Safety                 **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    :  Os_Sprot.c                                                 **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      :  i-soft-os                                                  **
+**  Vendor      :                                                             **
+**  DESCRIPTION :  AutoSar Protection Managment                               **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
+**  Version :   AUTOSAR classic Platform R19--Function Safety                 **
+**                                                                            **
+*******************************************************************************/
 
 /*=======[I N C L U D E S]====================================================*/
 #include "Os_Internal.h"
@@ -49,10 +50,10 @@
 
 /*=======[I N T E R N A L   D A T A]==========================================*/
 #if (CFG_TRUSTED_SYSTEM_SERVICE_MAX > 0U)
-#define OS_START_SEC_VAR_CLEARED_CLONE_16
+#define OS_START_SEC_VAR_CLONE_16
 #include "Os_MemMap.h"
 static VAR(TrustedFunctionIndexType, OS_VAR) Os_CfgTrustedServiceMax;
-#define OS_STOP_SEC_VAR_CLEARED_CLONE_16
+#define OS_STOP_SEC_VAR_CLONE_16
 #include "Os_MemMap.h"
 #endif
 
@@ -82,8 +83,11 @@ FUNC(void, OS_CODE) Os_InitTrustedFunction(void)
     VAR(uint8, OS_VAR) i;
     VAR(uint16, OS_VAR) vCoreId = Os_SCB.sysCore;
     Os_TrustedFuncNest = 0;
-    Os_TrustedFuncTportDelayCall = 0;
-    Os_TrustedFuncTporFlag = FALSE;
+
+    Os_TrustedFuncTp.TrustedFuncTportDelayCall = 0;
+    Os_TrustedFuncTp.TrustedFuncTporFlag = FALSE;
+    Os_TrustedFuncTp.TrustedFuncTporErrType = 0;
+    Os_TrustedFuncTp.osWhoHook = 0;
 
     if (Os_CfgTrustedServiceMax_Inf[vCoreId] > 0U)
     {
@@ -170,7 +174,7 @@ CallTrustedFunction(TrustedFunctionIndexType FunctionIndex, TrustedFunctionParam
             Os_TrustedFuncNestQueue[Os_TrustedFuncNest] = (0x0F00u & FunctionIndex) >> 8u;
             ApplID = Os_TrustedFuncNestQueue[Os_TrustedFuncNest];
             /* Save Trusted Function time protection delay call flag*/
-            Os_TrustedFuncTportDelayCall = Os_AppCfg[ApplID].OsTrustedApplicationDelayTimingViolationCall;
+            Os_TrustedFuncTp.TrustedFuncTportDelayCall = Os_AppCfg[ApplID].OsTrustedApplicationDelayTimingViolationCall;
             Os_TrustedFuncNest++;
             /* PRQA S 3469 ++ */ /* MISRA Dir 4.9 */ /* OS_SPROT_MACRO_TO_FUNCTION_004 */
             OS_ARCH_EXIT_CRITICAL();
@@ -197,13 +201,14 @@ CallTrustedFunction(TrustedFunctionIndexType FunctionIndex, TrustedFunctionParam
 
             if (0U == Os_TrustedFuncNest)
             {
-                Os_TrustedFuncTportDelayCall = FALSE;
+                Os_TrustedFuncTp.TrustedFuncTportDelayCall = FALSE;
             }
             else
             {
                 /* Save the last trusted function time protection delay call flag */
                 ApplID = Os_TrustedFuncNestQueue[Os_TrustedFuncNest - 1U];
-                Os_TrustedFuncTportDelayCall = Os_AppCfg[ApplID].OsTrustedApplicationDelayTimingViolationCall;
+                Os_TrustedFuncTp.TrustedFuncTportDelayCall =
+                    Os_AppCfg[ApplID].OsTrustedApplicationDelayTimingViolationCall;
             }
             /* PRQA S 3469 ++ */ /* MISRA Dir 4.9 */ /* OS_SPROT_MACRO_TO_FUNCTION_004 */
             OS_ARCH_EXIT_CRITICAL();
@@ -212,11 +217,12 @@ CallTrustedFunction(TrustedFunctionIndexType FunctionIndex, TrustedFunctionParam
     }
 
     /* Time protection and delay processing are triggered in the trusted function */
-    if ((TRUE == Os_TrustedFuncTporFlag) && (FALSE == Os_TrustedFuncTportDelayCall))
+    if ((TRUE == Os_TrustedFuncTp.TrustedFuncTporFlag) && (FALSE == Os_TrustedFuncTp.TrustedFuncTportDelayCall))
     {
-        Os_TrustedFuncTporFlag = FALSE;
+        Os_TrustedFuncTp.TrustedFuncTporFlag = FALSE;
+        Os_TrustedFuncTp.TrustedFuncTporErrType = 0;
         /* Hook. */
-        (void)Os_CallProtectionHook(E_OS_PROTECTION_ARRIVAL, OS_TMPROT_HOOK_TASK);
+        (void)Os_CallProtectionHook(Os_TrustedFuncTp.TrustedFuncTporErrType, Os_TrustedFuncTp.osWhoHook);
     }
 
 #if (CFG_ERRORHOOK == TRUE)
@@ -581,6 +587,14 @@ static FUNC(void, OS_CODE) Os_SProTerminateTask(void)
     /* PRQA S 3469 ++ */ /* MISRA Dir 4.9 */ /* OS_SPROT_MACRO_TO_FUNCTION_004 */
     Os_ErrorHook(E_OS_MISSINGEND);
 
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceTaskSwitch(
+        Os_SCB.sysRunningTaskID,
+        Os_SCB.sysHighTaskID,
+        OS_TRACE_TASK_SWITCH_REASON_SPROT_ERROR_TERMINATE,
+        OS_TRACE_TASK_SWITCH_REASON_SPROT_ERROR_ACTIVE);
+#endif
+
     Os_SCB.sysDispatchLocker = 0U;
     Os_Dispatch();
     OS_ARCH_EXIT_CRITICAL();
@@ -609,6 +623,10 @@ static FUNC(void, OS_CODE) Os_SProTerminateTask(void)
 /********************************************************************/
 FUNC(void, OS_CODE) Os_TaskEndNoTerminate(void)
 {
+#if (TRUE == CFG_TASK_RESPONSE_TIME_ENABLE)
+    Os_TaskRecordTotalTick(Os_SCB.sysRunningTaskID);
+#endif /* TRUE == CFG_TASK_RESPONSE_TIME_ENABLE */
+
 /*OS239*/
 #if (TRUE == CFG_TIMING_PROTECTION_ENABLE)
     Os_ArchEnableAllInt_ButTimingProtInt();
@@ -655,10 +673,12 @@ FUNC(void, OS_CODE) Os_Isr2OccupyIntRes(void)
 #if (CFG_SPINLOCK_MAX > 0U)
     VAR(uint16, OS_VAR) CountIdx;
     VAR(uint16, OS_VAR) CurrentCount;
-    VAR(ResourceType, OS_VAR) ResourceId;
     VAR(SpinlockIdType, OS_VAR) SpinlockId;
     VAR(boolean, OS_VAR) SpinlockFlag = FALSE;
+#if (CFG_STD_RESOURCE_MAX > 0U)
+    VAR(ResourceType, OS_VAR) ResourceId;
     VAR(boolean, OS_VAR) ResouceFlag = FALSE;
+#endif
 
     for (CountIdx = pOsICB->isr2CriticalZoneCount; CountIdx > 0u; CountIdx--)
     {
@@ -669,12 +689,14 @@ FUNC(void, OS_CODE) Os_Isr2OccupyIntRes(void)
             (void)Os_ReleaseSpinlock(SpinlockId);
             SpinlockFlag = TRUE;
         }
+#if (CFG_STD_RESOURCE_MAX > 0U)
         else
         {
             ResourceId = (coreIndex | pOsICB->isr2CriticalZoneStack[CurrentCount]);
             (void)Os_ReleaseResource(ResourceId);
             ResouceFlag = TRUE;
         }
+#endif
     }
 
     if (TRUE == SpinlockFlag)
@@ -683,18 +705,22 @@ FUNC(void, OS_CODE) Os_Isr2OccupyIntRes(void)
         Os_ErrorHook(E_OS_SPINLOCK);
         /* PRQA S 3469 -- */ /* MISRA Dir 4.9 */
     }
+#if (CFG_STD_RESOURCE_MAX > 0U)
     if (TRUE == ResouceFlag)
     {
         /* PRQA S 3469 ++ */ /* MISRA Dir 4.9 */ /* OS_SPROT_MACRO_TO_FUNCTION_004 */
         Os_ErrorHook(E_OS_RESOURCE);
         /* PRQA S 3469 -- */ /* MISRA Dir 4.9 */
     }
+#endif
+
 #elif (CFG_STD_RESOURCE_MAX > 0U)
     /*OS369*/
     /* free the resources occupied on the ISRs*/
     if (pOsICB->IsrC2ResCount > 0u)
     {
-        for (VAR(uint16, OS_VAR) i = pOsICB->IsrC2ResCount; i > 0u; i--)
+        VAR(uint16, OS_VAR) i;
+        for (i = pOsICB->IsrC2ResCount; i > 0u; i--)
         {
             (void)Os_ReleaseResource(coreIndex | pOsICB->IsrC2ResourceStack[i - 1u]);
         }

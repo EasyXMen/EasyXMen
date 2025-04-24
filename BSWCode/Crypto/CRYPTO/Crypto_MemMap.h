@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Crypto_MemMap.h                                               **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : <Auto generated>                                            **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Memory mapping abstraction declaration of Crypto              **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                       **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Crypto_MemMap.h                                               **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : <Auto generated>                                            **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Memory mapping abstraction declaration of Crypto              **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                       **
+**                                                                            **
+*******************************************************************************/
 /*******************************************************************************
 **                      Revision Control History                              **
 *******************************************************************************/
@@ -211,6 +212,55 @@
 #endif
 #define STOP_SEC_VAR_CLEARED_UNSPECIFIED
 
+/*Index:3  Section name :VAR_INIT_8*/
+#elif defined CRYPTO_START_SEC_VAR_INIT_8
+#undef CRYPTO_START_SEC_VAR_INIT_8
+#undef MEMMAP_ERROR
+#ifndef MEMMAP_ERROR_SEC_NO_MATCH
+#define MEMMAP_ERROR_SEC_NO_MATCH
+#else
+#error "Crypto_MemMap.h, section is used consecutively many times."
+#endif
+#define CRYPTO_START_SEC_VAR_INIT_8_NO_MATCH
+#define START_SEC_VAR_INIT_8
+
+#elif defined CRYPTO_STOP_SEC_VAR_INIT_8
+#undef CRYPTO_STOP_SEC_VAR_INIT_8
+#undef MEMMAP_ERROR
+#ifdef CRYPTO_START_SEC_VAR_INIT_8_NO_MATCH
+#undef CRYPTO_START_SEC_VAR_INIT_8_NO_MATCH
+#else
+#error "Crypto_MemMap.h, no matching section was used."
+#endif
+#ifdef MEMMAP_ERROR_SEC_NO_MATCH
+#undef MEMMAP_ERROR_SEC_NO_MATCH
+#endif
+#define STOP_SEC_VAR_INIT_8
+
+/*Index:3  Section name :VAR_INIT_32*/
+#elif defined CRYPTO_START_SEC_VAR_INIT_32
+#undef CRYPTO_START_SEC_VAR_INIT_32
+#undef MEMMAP_ERROR
+#ifndef MEMMAP_ERROR_SEC_NO_MATCH
+#define MEMMAP_ERROR_SEC_NO_MATCH
+#else
+#error "Crypto_MemMap.h, section is used consecutively many times."
+#endif
+#define CRYPTO_START_SEC_VAR_INIT_32_NO_MATCH
+#define START_SEC_VAR_INIT_32
+
+#elif defined CRYPTO_STOP_SEC_VAR_INIT_32
+#undef CRYPTO_STOP_SEC_VAR_INIT_32
+#undef MEMMAP_ERROR
+#ifdef CRYPTO_START_SEC_VAR_INIT_32_NO_MATCH
+#undef CRYPTO_START_SEC_VAR_INIT_32_NO_MATCH
+#else
+#error "Crypto_MemMap.h, no matching section was used."
+#endif
+#ifdef MEMMAP_ERROR_SEC_NO_MATCH
+#undef MEMMAP_ERROR_SEC_NO_MATCH
+#endif
+#define STOP_SEC_VAR_INIT_32
 #endif /* START_WITH_IF */
 
 #if defined MEMMAP_ERROR

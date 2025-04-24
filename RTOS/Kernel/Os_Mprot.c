@@ -18,21 +18,22 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Os_Mprot.c                                                  **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : i-soft-os                                                   **
- **  Vendor      :                                                             **
- **  DESCRIPTION : AutoSar Memory Protection Managment                         **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
- **  Version :   AUTOSAR classic Platform R19--Function Safety                 **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Os_Mprot.c                                                  **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : i-soft-os                                                   **
+**  Vendor      :                                                             **
+**  DESCRIPTION : AutoSar Memory Protection Managment                         **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
+**  Version :   AUTOSAR classic Platform R19--Function Safety                 **
+**                                                                            **
+*******************************************************************************/
 
 /*=======[I N C L U D E S]====================================================*/
 #include "Os_Internal.h"
@@ -70,7 +71,11 @@ FUNC(AccessType, OS_CODE) CheckISRMemoryAccess(ISRType ISRID, MemoryStartAddress
     VAR(AccessType, OS_VAR) Access = (AccessType)NO_PERMISSION;
     VAR(StatusType, OS_VAR) Status = E_OK;
 
-/* OS268 */
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceEnter(OSServiceId_CheckISRMemoryAccess);
+#endif /* TRUE == CFG_TRACE_ENABLE */
+
+    /* OS268 */
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
     /* PRQA S 3469,3432 ++ */ /* MISRA  Dir-4.9, Rule-20.7*/ /* OS_MPROT_MACRO_002 */
     if (CHECK_ID_INVALID(ISRID, Os_CfgIsrMax_Inf))
@@ -104,6 +109,10 @@ FUNC(AccessType, OS_CODE) CheckISRMemoryAccess(ISRType ISRID, MemoryStartAddress
             Status);
     }
 #endif
+
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceExit(OSServiceId_CheckISRMemoryAccess);
+#endif /* TRUE == CFG_TRACE_ENABLE */
 
     OS_EXIT_KERNEL(); /* PRQA S 3469 */ /* MISRA  Dir-4.9*/ /* OS_MPROT_MACRO_002 */
     UNUSED_PARAMETER(Status);
@@ -516,7 +525,11 @@ FUNC(AccessType, OS_CODE) CheckTaskMemoryAccess(TaskType TaskID, MemoryStartAddr
     VAR(AccessType, OS_VAR) Access = (AccessType)NO_PERMISSION;
     VAR(StatusType, OS_VAR) Status = E_OK;
 
-/* OS268 */
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceEnter(OSServiceId_CheckTaskMemoryAccess);
+#endif /* TRUE == CFG_TRACE_ENABLE */
+
+    /* OS268 */
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
     /* PRQA S 3469,3432 ++ */ /* MISRA  Dir-4.9, Rule-20.7*/ /* OS_MPROT_MACRO_002 */
     if (CHECK_ID_INVALID(TaskID, Os_CfgTaskMax_Inf))

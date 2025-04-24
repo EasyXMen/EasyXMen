@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : XcpOnEth.c                                                   **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : qinchun.yang                                                **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Transport Layer:XCP on Ethernet                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : XcpOnEth.c                                                   **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : qinchun.yang                                                **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Transport Layer:XCP on Ethernet                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 /*=======[I N C L U D E S]====================================================*/
 #include "Xcp_Internal.h"
 
@@ -112,7 +113,7 @@ Xcp_SoAdTxConfirmation(PduIdType TxPduId)
 {
 #if (XCP_DEV_ERROR_DETECT == STD_ON)
     if ((boolean)FALSE == Xcp_TxIndCheckDetErr())
-#endif
+#endif /*XCP_DEV_ERROR_DETECT == STD_ON*/
     {
         Xcp_TxConfirmation(TxPduId);
     }

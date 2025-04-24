@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : EcuM_Up.c                                                   **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : qinchun.yang                                                **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Implement code for ECUM UP phase                            **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : EcuM_Up.c                                                   **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : qinchun.yang                                                **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Implement code for ECUM UP phase                            **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 
 /*******************************************************************************
 **                      Revision Control History                              **
@@ -48,7 +49,7 @@
 #include "EcuM_Internal.h"
 #if (ECUM_MODE_HANDING == STD_ON)
 #include "Rte_EcuM.h"
-#endif /* ECUM_MODE_HANDING == STD_ON */
+#endif /*ECUM_MODE_HANDING == STD_ON*/
 /*******************************************************************************
 **                      Private Macro Definitions                             **
 *******************************************************************************/
@@ -67,7 +68,7 @@ static FUNC(void, ECUM_CODE) EcuM_WakeupMainFunction(void);
 #if (ECUM_MODE_HANDING == STD_ON)
 /*Do EcuM Mode Handling*/
 static FUNC(void, ECUM_CODE) EcuM_ModeHandingMainFunction(void);
-#endif /* ECUM_MODE_HANDING == STD_ON */
+#endif /*ECUM_MODE_HANDING == STD_ON*/
 #define ECUM_STOP_SEC_CODE
 #include "EcuM_MemMap.h"
 /*******************************************************************************
@@ -106,14 +107,7 @@ FUNC(void, ECUM_CODE) EcuM_MainFunction(void)
 #if (ECUM_ALARM_CLOCK_PRESENT == STD_ON)
     /*2.Update the Alarm Clock timer.*/
     EcuM_UpdateEcuMClock();
-#endif /* ECUM_ALARM_CLOCK_PRESENT == STD_ON */
-#if (ECUM_MODE_HANDING == STD_ON)
-    /*3.Arbitrate RUN and POST_RUN requests and releases.*/
-    if (EcuMRunData.State != EcuMRunData.rqstState)
-    {
-        EcuM_ModeHandingMainFunction();
-    }
-#endif /* ECUM_MODE_HANDING == STD_ON */
+#endif /*ECUM_ALARM_CLOCK_PRESENT == STD_ON*/
 
 #if (ECUM_MAX_MCU_CORE_NUM > 1)
     /*get core ID for this running core*/
@@ -129,7 +123,17 @@ FUNC(void, ECUM_CODE) EcuM_MainFunction(void)
             EcuM_OffPreOS();
         }
     }
-#endif /* ECUM_MAX_MCU_CORE_NUM > 1 */
+    else
+    {
+#if (ECUM_MODE_HANDING == STD_ON)
+        /*3.Arbitrate RUN and POST_RUN requests and releases.*/
+        if (EcuMRunData.State != EcuMRunData.rqstState)
+        {
+            EcuM_ModeHandingMainFunction();
+        }
+#endif /*ECUM_MODE_HANDING == STD_ON*/
+    }
+#endif /*ECUM_MAX_MCU_CORE_NUM > 1*/
 }
 #define ECUM_STOP_SEC_CODE
 #include "EcuM_MemMap.h"
@@ -140,12 +144,12 @@ FUNC(void, ECUM_CODE) EcuM_MainFunction(void)
 #include "EcuM_MemMap.h"
 static FUNC(void, ECUM_CODE) EcuM_WakeupMainFunction(void)
 {
-    P2VAR(EcuM_RunTimeType, AUTOMATIC, ECUM_VAR) pRt = &EcuMRunData; /* PRQA S 3432 */ /* MISRA Rule 20.7 */
+    P2CONST(EcuM_RunTimeType, AUTOMATIC, ECUM_CONST) pRt = &EcuMRunData; /* PRQA S 3432 */ /* MISRA Rule 20.7 */
     P2CONST(EcuM_WakeupSourceCfgType, AUTOMATIC, ECUM_CONST) pWks;
     uint32 spanTime;
 #if (ECUM_USE_TIMER == ECUM_TIMER_USE_GPT)
     Std_ReturnType ret;
-#endif /* ECUM_USE_TIMER == ECUM_TIMER_USE_GPT */
+#endif /*ECUM_USE_TIMER == ECUM_TIMER_USE_GPT*/
     EcuM_WakeupSourceType pendingWkup;
 
     uint8 wksIdx;
@@ -169,13 +173,13 @@ static FUNC(void, ECUM_CODE) EcuM_WakeupMainFunction(void)
             if ((pWks->validationTimeout < spanTime)
 #if (ECUM_USE_TIMER == ECUM_TIMER_USE_GPT)
                 || (ret != E_OK)
-#endif /* ECUM_USE_TIMER == ECUM_TIMER_USE_GPT */
+#endif /*ECUM_USE_TIMER == ECUM_TIMER_USE_GPT*/
             )
 
             {
-                pRt->Wks.Pending &= ~(pWks->wkSource);
-                /* Update internal variable(record expired wake up source. */
-                pRt->Wks.Expired |= pWks->wkSource;
+                *pRt->Wks.Pending &= ~(pWks->wkSource);
+                /*Update internal variable(record expired wake up source.)*/
+                (*pRt->Wks.Expired) |= pWks->wkSource;
                 /*notify BSWM for expired wake up source*/
                 BswM_EcuM_CurrentWakeup(pWks->wkSource, ECUM_WKSTATUS_EXPIRED);
                 /*stop wake up source*/
@@ -192,15 +196,15 @@ static FUNC(void, ECUM_CODE) EcuM_ModeHandingMainFunction(void)
     /*Arbitrate RUN and POST_RUN requests and releases.*/
     if (EcuM_RteState != RTE_TRANSITION_EcuM_Mode)
     {
-        (void)SchM_Switch_currentMode_currentMode(EcuM_RteState);
+        (void)SchM_Switch_currentMode(EcuM_RteState);
         EcuM_RteState = RTE_TRANSITION_EcuM_Mode;
     }
-    if (SchM_SwitchAck_currentMode_currentMode() != RTE_E_NO_DATA)
+    if (SchM_SwitchAck_currentMode() != RTE_E_NO_DATA)
     {
         EcuMRunData.State = EcuMRunData.rqstState;
         BswM_EcuM_CurrentState(EcuMRunData.State);
     }
 }
-#endif /* ECUM_MODE_HANDING == STD_ON */
+#endif /*ECUM_MODE_HANDING == STD_ON*/
 #define ECUM_STOP_SEC_CODE
 #include "EcuM_MemMap.h"

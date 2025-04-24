@@ -18,24 +18,27 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Com_Cbk.h                                                   **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : zhengfei.li                                                 **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Callback declaration supplied by COM                        **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                       **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Com_Cbk.h                                                   **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : zhengfei.li                                                 **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Callback declaration supplied by COM                        **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                       **
+**                                                                            **
+*******************************************************************************/
 
 /*******************************************************************************
 **                      Revision Control History                              **
 *******************************************************************************/
+/* Refer to Com.h */
+
 #ifndef COM_CBK_H
 #define COM_CBK_H
 /*******************************************************************************
@@ -43,14 +46,23 @@
 *******************************************************************************/
 #include "Com_Types.h"
 /*******************************************************************************
-**                      Global Symbols                                        **
+**                      Published information                                 **
 *******************************************************************************/
-#define COM_CBK_H_AR_MAJOR_VERSION 4u
-#define COM_CBK_H_AR_MINOR_VERSION 2u
-#define COM_CBK_H_AR_PATCH_VERSION 2u
-#define COM_CBK_H_SW_MAJOR_VERSION 2u
-#define COM_CBK_H_SW_MINOR_VERSION 0u
-#define COM_CBK_H_SW_PATCH_VERSION 1u
+/* Published information */
+#if !defined(COM_PUBLISHED_INFORMATION)
+#define COM_PUBLISHED_INFORMATION
+#define COM_MODULE_ID                   50u
+#define COM_VENDOR_ID                   62u
+#define COM_AR_RELEASE_MAJOR_VERSION    4u
+#define COM_AR_RELEASE_MINOR_VERSION    5u
+#define COM_AR_RELEASE_REVISION_VERSION 0u
+#define COM_SW_MAJOR_VERSION            2u
+#define COM_SW_MINOR_VERSION            1u
+#define COM_SW_PATCH_VERSION            25u
+#elif ((COM_SW_MAJOR_VERSION != 2u) || (COM_SW_MINOR_VERSION != 1u))
+#error "Com: Mismatch in Software Version"
+#endif
+
 /*******************************************************************************
 **                      Global Functions                                      **
 *******************************************************************************/

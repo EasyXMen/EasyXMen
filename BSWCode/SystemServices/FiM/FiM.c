@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                           **
- **  FILENAME    : FiM.c                                                      **
- **                                                                           **
- **  Created on  : 2020/5/9 15:21:52                                          **
- **  Author      : tao.yu                                                     **
- **  Vendor      :                                                            **
- **  DESCRIPTION : fim source code                                            **
- **                                                                           **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                      **
- **                                                                           **
- **************************************************************************** */
+ */
 /* PRQA S 3108-- */
+/*
+**************************************************************************** **
+**                                                                           **
+**  FILENAME    : FiM.c                                                      **
+**                                                                           **
+**  Created on  : 2020/5/9 15:21:52                                          **
+**  Author      : tao.yu                                                     **
+**  Vendor      :                                                            **
+**  DESCRIPTION : fim source code                                            **
+**                                                                           **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                      **
+**                                                                           **
+**************************************************************************** */
 
 /**
   \page ISOFT_MISRA_Exceptions  MISRA-C:2012 Compliance Exceptions
@@ -258,7 +259,11 @@ FiM_Init(P2CONST(FiM_ConfigType, AUTOMATIC, FIM_APPL_DATA) FiMConfigPtr)
 #endif
     {
         FiM_CfgPtr = FiMConfigPtr;
+#if (STD_OFF == FIM_EVENT_UPDATE_TRIGGERED_BY_DEM)
+        FiM_InitStep = FIM_INIT_STEP_DEM;
+#else
         FiM_InitStep = FIM_INIT_STEP_LOCAL;
+#endif
         /* PRQA S 2877++ */ /* MISRA Dir 4.1 */
         for (index = 0u; (FIM_INIT_STEP_LOCAL == FiM_InitStep) && (index < FiM_CfgPtr->InhibitionCfgCnt); index++)
         /* PRQA S 2877-- */ /* MISRA Dir 4.1 */
@@ -296,7 +301,11 @@ FiM_Init(P2CONST(FiM_ConfigType, AUTOMATIC, FIM_APPL_DATA) FiMConfigPtr)
         }
 
 #if (STD_ON == FIM_DEV_ERROR_DETECT)
+#if (STD_OFF == FIM_EVENT_UPDATE_TRIGGERED_BY_DEM)
+        if (FIM_INIT_STEP_DEM != FiM_InitStep)
+#else
         if (FIM_INIT_STEP_LOCAL != FiM_InitStep)
+#endif
         {
             FIM_DET_REPORT(FIM_SERVICE_ID_INIT, FIM_E_INIT_FAILED);
         }
@@ -368,11 +377,11 @@ FiM_GetFunctionPermission(FiM_FunctionIdType FID, P2VAR(boolean, AUTOMATIC, FIM_
 
             if ((1u << FIM_FID_AVAILABLE_BIT) == ((FiM_FidStu[fidIndex].ctrlStu) & (1u << FIM_FID_AVAILABLE_BIT)))
             {
-                SchM_Enter_FIM_MsgContext();
+                SchM_Enter_FiM_ExclusiveArea();
                 /* PRQA S 4440++ */ /* MISRA Rule 10.3 */
                 *Permission = (((FiM_FidStu[fidIndex].ctrlStu) & (1u << FIM_FID_PERMISSION_STU_BIT))) >> 1u;
                 /* PRQA S 4440-- */ /* MISRA Rule 10.3 */
-                SchM_Exit_FIM_MsgContext();
+                SchM_Exit_FiM_ExclusiveArea();
             }
             else
             {
@@ -426,12 +435,12 @@ FiM_SetFunctionAvailable(FiM_FunctionIdType FID, boolean Availability)
         if (TRUE == FiM_FindFidIndex(FID, &fidIndex))
         {
             ret = E_OK;
-            SchM_Enter_FIM_MsgContext();
+            SchM_Enter_FiM_ExclusiveArea();
             /* PRQA S 4304++ */ /* MISRA Rule 10.5 */
             FiM_FidStu[fidIndex].ctrlStu = (FiM_FidStu[fidIndex].ctrlStu & ((uint8)(~(1u << FIM_FID_AVAILABLE_BIT))))
                                            | (uint8)(((uint8)Availability) << FIM_FID_AVAILABLE_BIT);
             /* PRQA S 4304-- */ /* MISRA Rule 10.5 */
-            SchM_Exit_FIM_MsgContext();
+            SchM_Exit_FiM_ExclusiveArea();
         }
 #if (STD_ON == FIM_DEV_ERROR_DETECT)
         else
@@ -820,7 +829,7 @@ FIM_LOCAL FUNC(void, FIM_CODE)
 /* fid perssion status handle */
 FIM_LOCAL FUNC(void, FIM_CODE) FiM_FidPerssionHandle(uint16 fidIndex, boolean inhibstu)
 {
-    SchM_Exit_FIM_MsgContext();
+    SchM_Enter_FiM_ExclusiveArea();
     if (TRUE == inhibstu)
     {
         if (0x0u == FiM_FidStu[fidIndex].inhCouter)
@@ -850,7 +859,7 @@ FIM_LOCAL FUNC(void, FIM_CODE) FiM_FidPerssionHandle(uint16 fidIndex, boolean in
             /* PRQA S 4340,4394,4404-- */ /* MISRA Rule 10.5,Rule 10.8,Rule 10.3 */
         }
     }
-    SchM_Exit_FIM_MsgContext();
+    SchM_Exit_FiM_ExclusiveArea();
 }
 
 #if (STD_ON == FIM_EVENT_UPDATE_TRIGGERED_BY_DEM)

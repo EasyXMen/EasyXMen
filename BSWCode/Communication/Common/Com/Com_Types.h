@@ -18,56 +18,58 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Com_Types.h                                                 **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : zhengfei.li                                                 **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Type definitions of COM                                     **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                       **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Com_Types.h                                                 **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : zhengfei.li                                                 **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Type definitions of COM                                     **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                       **
+**                                                                            **
+*******************************************************************************/
 #ifndef COM_TYPES_H
 #define COM_TYPES_H
-/*******************************************************************************
-**                      Global Symbols                                        **
-*******************************************************************************/
-#define COM_TYPES_H_AR_MAJOR_VERSION 4u
-#define COM_TYPES_H_AR_MINOR_VERSION 2u
-#define COM_TYPES_H_AR_PATCH_VERSION 2u
-#define COM_TYPES_H_SW_MAJOR_VERSION 2u
-#define COM_TYPES_H_SW_MINOR_VERSION 0u
-#define COM_TYPES_H_SW_PATCH_VERSION 1u
+
 /*******************************************************************************
 **                      Includes                                              **
 *******************************************************************************/
 #include "Com_Cfg.h"
+#include "Com_PBcfg.h"
+#include "ComStack_Types.h"
+
+/*******************************************************************************
+**                      Global Symbols                                        **
+*******************************************************************************/
+/* Published information */
+#if !defined(COM_PUBLISHED_INFORMATION)
+#define COM_PUBLISHED_INFORMATION
+#define COM_MODULE_ID                   50u
+#define COM_VENDOR_ID                   62u
+#define COM_AR_RELEASE_MAJOR_VERSION    4u
+#define COM_AR_RELEASE_MINOR_VERSION    5u
+#define COM_AR_RELEASE_REVISION_VERSION 0u
+#define COM_SW_MAJOR_VERSION            2u
+#define COM_SW_MINOR_VERSION            1u
+#define COM_SW_PATCH_VERSION            25u
+#elif ((COM_SW_MAJOR_VERSION != 2u) || (COM_SW_MINOR_VERSION != 1u))
+#error "Com: Mismatch in Software Version"
+#endif
+
 /*******************************************************************************
 **                      Global Data Types                                     **
 *******************************************************************************/
-/* AutoSAR COM Com_Module_Status_Type, Range COM_UNINIT/COM_INIT */
-
 #if ((COM_RXIPDU_COUNTER_NUMBER <= 0xFFu) && (COM_RXIPDU_COUNTER_NUMBER >= 0u))
 typedef uint8 Com_RxIPduCounterIdType;
 #elif ((COM_RXIPDU_COUNTER_NUMBER <= 0xFFFFu) && (COM_RXIPDU_COUNTER_NUMBER > 0xFFu))
 typedef uint16 Com_RxIPduCounterIdType;
 #elif ((COM_RXIPDU_COUNTER_NUMBER <= 0xFFFFFFu) && (COM_RXIPDU_COUNTER_NUMBER > 0xFFFFu))
 typedef uint32 Com_RxIPduCounterIdType;
-#else
-#error "Error Type"
-#endif
-
-#if ((COM_RXIPDU_GW_NUMBER <= 0xFFu) && (COM_RXIPDU_GW_NUMBER >= 0u))
-typedef uint8 Com_RxIpduGWIdType;
-#elif ((COM_RXIPDU_GW_NUMBER <= 0xFFFFu) && (COM_RXIPDU_GW_NUMBER > 0xFFu))
-typedef uint16 Com_RxIpduGWIdType;
-#elif ((COM_RXIPDU_GW_NUMBER <= 0xFFFFFFu) && (COM_RXIPDU_GW_NUMBER > 0xFFFFu))
-typedef uint32 Com_RxIpduGWIdType;
 #else
 #error "Error Type"
 #endif
@@ -416,7 +418,8 @@ typedef enum
 {
     COM_CONFIRMATION = 0u,
     COM_TRANSMIT,
-    COM_TRIGGER_TRANSMIT
+    COM_TRIGGER_TRANSMIT,
+    COM_CLEAR_UP_UNUSED
 } Com_TxIPduClearUpdateBitType;
 
 typedef enum
@@ -464,8 +467,10 @@ typedef uint16 Com_SignalGroupIdType;
 /* AUTOSAR COM IPdu group object identifier, Range 0-PduGroupIdMax */
 typedef uint16 Com_IpduGroupIdType;
 
-#if (COM_IPDUGROUP_NUMBER > 0u)
-typedef uint8 Com_IpduGroupVector[((COM_IPDUGROUP_NUMBER - 1u) / 8u) + 1u];
+typedef uint8 Com_MainFunctionType;
+
+#if (COM_IPDUGROUP_MAX > 0u)
+typedef uint8 Com_IpduGroupVector[((COM_IPDUGROUP_MAX - 1u) / 8u) + 1u];
 #else
 typedef uint8 Com_IpduGroupVector[1u];
 #endif
@@ -492,6 +497,7 @@ typedef struct
 typedef struct
 {
     Com_SignalIdType ComGwDestSignalId;
+    Com_MainFunctionType ComMainFunctionId;
     Com_SignalConfigType ComGwDestSignalType;
 } Com_GwDestType;
 
@@ -520,6 +526,9 @@ typedef struct
     uint8 ComSignalByteLength;
     Com_SignalEndiannessType ComSignalEndianness;
     Com_SignalType ComSignalType;
+#if (COM_GWMAPPING_NUMBER > 0u)
+    Com_GwMappingIdType GwMappingId;
+#endif
 } Com_GwSourceSignalType;
 
 /*This container contains the configuration parameters of the AUTOSAR COM module's Filters*/
@@ -595,6 +604,11 @@ typedef struct
 #endif
     PduLengthType IPduNoDynSignalLength;
     PduLengthType IPduMaxDynSignalLength;
+    uint16 ComRxIPduDMFirstTimeout;
+    uint16 ComRxIPduDMTimeout;
+#if (STD_ON == COM_MULTIPLE_PARTITION_USED)
+    uint16 ComRxIpduPartitionId;
+#endif
     Com_RxIpduBufIdType ComRxIPduBufIndex;
     Com_RxSignalIdType ComIpduSignalRefStartId;
     Com_RxSignalIdType ComIPduSignalsRefNumber;
@@ -612,9 +626,6 @@ typedef struct
 #if (STD_ON == COM_RX_SIG_GROUP_TIMEOUT_ACTION_SUBSTITUTE_ENABLE)
     Com_RxGroupSignalIdType ComGrpSigSubstituteStartId;
 #endif
-#endif
-#if (COM_GWMAPPING_NUMBER > 0u)
-    Com_RxIpduGWIdType IpduGwIndex;
 #endif
 #if (COM_GW_SOURCE_DESCRIPTION_NUMBER > 0u)
     Com_GwSourceDescriptionIdType ComIPduSourceSignalsRefStartId;
@@ -675,6 +686,9 @@ typedef struct
     PduLengthType IPduMaxDynSignalLength;
     uint16 ComTxIpduDM;
     uint16 ComMinimumDelayTime;
+#if (STD_ON == COM_MULTIPLE_PARTITION_USED)
+    uint16 ComTxIpduPartitionId;
+#endif
     Com_TxIpduBufIdType ComTxIPduBufIndex;
     PduIdType ComPduIdRef;
     PduIdType ComTxModeTrueRefId;
@@ -718,6 +732,9 @@ typedef struct
     uint16 ComSignalLength;
     uint16 ComSignalDataInitValueLength;
     uint16 GWSignalBufferId;
+#if (STD_ON == COM_MULTIPLE_PARTITION_USED)
+    uint16 ComRxSignalPartitionId;
+#endif
     Com_SignalPositionType ComSigLsbBytePos;
 #if (STD_ON == COM_RX_SIGNAL_UPDATE_BIT_ENABLE)
     Com_SignalPositionType ComUpdateLsbBytePos;
@@ -740,6 +757,9 @@ typedef struct
 #if (COM_RXSIGNAL_FILTERTYPE_MAX_NUMBER > 0u)
     Com_FilterAlgorithmType ComFilterAlgorithm;
 #endif
+#if (COM_GWMAPPING_NUMBER > 0u)
+    Com_GwMappingIdType GwMappingId;
+#endif
 } Com_RxSignalType;
 
 /* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
@@ -753,6 +773,9 @@ typedef struct
     uint16 ComSignalInitValueId;
     uint16 ComSignalLength;
     uint16 ComSignalDataInitValueLength;
+#if (STD_ON == COM_MULTIPLE_PARTITION_USED)
+    uint16 ComTxSignalPartitionId;
+#endif
 #if (COM_TXSIGNAL_FILTERTYPE_MAX_NUMBER > 0u)
     Com_SignalIdType ComTMCBufferId;
 #endif
@@ -805,6 +828,9 @@ typedef struct
 #if (STD_ON == COM_RX_GRP_SIGNAL_INVALID_DATA_ENABLE)
     P2FUNC(void, COM_APPL_CODE, ComInvalidNotification)(void); /* PRQA S 3432 */ /* MISRA Rule 20.7 */
 #endif
+#if (STD_ON == COM_MULTIPLE_PARTITION_USED)
+    uint16 ComRxSigGrpPartitionId;
+#endif
 #if (STD_ON == COM_RX_SIG_GROUP_UPDATE_BIT_ENABLE)
     Com_SignalPositionType ComUpdateLsbBytePos;
 #endif
@@ -824,6 +850,9 @@ typedef struct
 
 typedef struct
 {
+#if (STD_ON == COM_MULTIPLE_PARTITION_USED)
+    uint16 ComTxSigGrpPartitionId;
+#endif
 #if (STD_ON == COM_TX_SIG_GROUP_UPDATE_BIT_ENABLE)
     Com_SignalPositionType ComUpdateLsbBytePos;
 #endif
@@ -842,7 +871,7 @@ typedef struct
 #if (STD_ON == COM_TX_SIG_GROUP_UPDATE_BIT_ENABLE)
     uint8 ComUpdateBitMask;
 #endif
-#if (COM_TXSIG_ERROR_AND_NOTIFY_NUMBER > 0u)
+#if (COM_TXSIGGRP_ERROR_AND_NOTIFY_NUMBER > 0u)
     Com_TxSignalNotifyType ComTxSignalNotificationType;
 #endif
     boolean ComInitialValueOnly;
@@ -871,6 +900,9 @@ typedef struct
     Com_SignalType ComSignalType;
 #if (COM_RXGRPSIG_FILTERTYPE_MAX_NUMBER > 0u)
     Com_FilterAlgorithmType ComFilterAlgorithm;
+#endif
+#if (COM_GWMAPPING_NUMBER > 0u)
+    Com_GwMappingIdType GwMappingId;
 #endif
 } Com_RxGroupSignalType;
 typedef struct
@@ -903,6 +935,7 @@ typedef struct
 typedef struct
 {
     uint16 RxIpduLength;
+    uint16 RxIpduBaseDMTimeout;
     PduLengthType RxOffset;
     /*
      * bit0 ActiveEnable;
@@ -912,6 +945,7 @@ typedef struct
      * bit4 RxAnyCounterPdu;
      */
     uint8 RxIpduRTStFlag;
+    uint8 RxIpduDMFlag;
 #if (STD_ON == COM_RX_IPDU_COUNTER_ENABLE)
     uint8 RxIpduCounter;
 #endif
@@ -957,17 +991,36 @@ typedef struct
 
 typedef struct
 {
-    P2CONST(Com_RxIPduType, AUTOMATIC, COM_APPL_CONST) ComRxIPdu;
-    P2CONST(Com_TxIPduType, AUTOMATIC, COM_APPL_CONST) ComTxIPdu;
-    P2CONST(Com_RxSignalType, AUTOMATIC, COM_APPL_CONST) ComRxSignal;
-    P2CONST(Com_TxSignalType, AUTOMATIC, COM_APPL_CONST) ComTxSignal;
-    P2CONST(Com_RxSignalGroupType, AUTOMATIC, COM_APPL_CONST) ComRxSignalGroup;
-    P2CONST(Com_TxSignalGroupType, AUTOMATIC, COM_APPL_CONST) ComTxSignalGroup;
-    P2CONST(Com_RxGroupSignalType, AUTOMATIC, COM_APPL_CONST) ComRxGroupSignal;
-    P2CONST(Com_TxGroupSignalType, AUTOMATIC, COM_APPL_CONST) ComTxGroupSignal;
-    P2CONST(Com_GwMappingType, AUTOMATIC, COM_APPL_CONST) ComGwMapping;
-    P2CONST(Com_GwSourceSignalType, AUTOMATIC, COM_APPL_CONST) ComSourceSignal;
-    P2CONST(Com_GwDestSignalType, AUTOMATIC, COM_APPL_CONST) ComDestSignal;
+    const Com_RxIPduType* ComRxIPdu;
+    const Com_TxIPduType* ComTxIPdu;
+    const Com_RxSignalType* ComRxSignal;
+    const Com_TxSignalType* ComTxSignal;
+    const Com_RxSignalGroupType* ComRxSignalGroup;
+    const Com_TxSignalGroupType* ComTxSignalGroup;
+    const Com_RxGroupSignalType* ComRxGroupSignal;
+    const Com_TxGroupSignalType* ComTxGroupSignal;
+    const Com_GwMappingType* ComGwMapping;
+    const Com_GwSourceSignalType* ComSourceSignal;
+    const Com_GwDestSignalType* ComDestSignal;
+    const uint16* MainFunctionRxRange;
+    const uint16* MainFunctionTxRange;
+#if (STD_ON == COM_MULTIPLE_PARTITION_USED)
+    const uint16* ComIPduGroupPartition;
+    const uint16* ComMainFuncRxPartitionRange;
+    const uint16* ComMainFuncTxPartitionRange;
+#endif
+    Com_SignalIdType ComTxSignalNum;
+    Com_SignalIdType ComRxSignalNum;
+    PduIdType ComTxPduNum;
+    PduIdType ComRxPduNum;
+    Com_SignalIdType ComTxGroupSignalNum;
+    Com_SignalIdType ComRxGroupSignalNum;
+    Com_SignalGroupIdType ComTxSignalGroupNum;
+    Com_SignalGroupIdType ComRxSignalGroupNum;
+    Com_IpduGroupIdType ComIpduGroupNum;
+    Com_MainFunctionType MainFunctionRouteSignalsNum;
+    Com_MainFunctionType MainFunctionRxNum;
+    Com_MainFunctionType MainFunctionTxNum;
 } Com_ConfigType;
 
 #endif /* end of COM_TYPES_H */

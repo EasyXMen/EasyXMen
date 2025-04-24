@@ -18,20 +18,32 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : E2E.c                                                       **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : YangBo                                                      **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : E2E.c                                                       **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : YangBo                                                      **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
+/*******************************************************************************
+**                      Revision Control History                              **
+*******************************************************************************/
+/* <VERSION> <DATE> <AUTHOR> <REVISION LOG>
+ * V2.0.0 [2020/8/17] [YangBo] Initial Vertion.
+ * V2.0.1 [2020/11/18] [YangBo] E2E_SM adjust to new type.
+ * V2.1.0  2023-07-18   Jian.jiang      CP2.1 Release Version.
+ * V2.1.1  2024-04-25   zhiqiang.huang      Modify E2EP11bug to not rely on DataIDNibbleOffset for
+ * counter calculation in non E2E_P11_DATAID_NIBBLE mode.
+ *         2024-05-22   qinmei.chen     TMS320 support
+ */
 
 /**
   \page ISOFT_MISRA_Exceptions  MISRA-C:2012 Compliance Exceptions
@@ -51,9 +63,6 @@
 
     \li PRQA S 3432 MISRA Rule 20.7 .<br>
     Reason:Function-like macros are used to allow more efficient code.
-
-    \li PRQA S 3472,3469 MISRA Dir-4.9 <br>
-    Reason: Based on operational performance, it has been verified by unit tests
  */
 /*******************************************************************************
 **                      Include Section                                       **
@@ -100,10 +109,10 @@
 #if (E2E_SW_MAJOR_VERSION != 2U)
 #error "E2E_SW_MAJOR_VERSION does not match. "
 #endif
-#if (E2E_SW_MINOR_VERSION != 0U)
+#if (E2E_SW_MINOR_VERSION != 1U)
 #error "E2E_SW_MINOR_VERSION does not match. "
 #endif
-#if (E2E_SW_PATCH_VERSION != 4U)
+#if (E2E_SW_PATCH_VERSION != 0U)
 #error "E2E_SW_PATCH_VERSION does not match. "
 #endif
 
@@ -132,6 +141,7 @@
 **                      Private Type Definitions                              **
 *******************************************************************************/
 /* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
+/* PRQA S 1503 ++ */ /* MISRA Rule 2.1 */
 /*******************************************************************************
 **                      Private Function Declarations                         **
 *******************************************************************************/
@@ -155,7 +165,7 @@ static FUNC(void, E2E_CODE) E2E_SMClearStatus(
 #define E2E_START_SEC_CODE
 #include "E2E_MemMap.h"
 static FUNC(void, E2E_CODE) E2E_SMClearRemainingStatus(
-    P2CONST(E2E_SMCheckStateType, AUTOMATIC, E2E_APPL_DATA) State,
+    P2VAR(E2E_SMCheckStateType, AUTOMATIC, E2E_APPL_DATA) State,
     P2CONST(E2E_SMConfigType, AUTOMATIC, E2E_APPL_DATA) Config,
     VAR(E2E_SMStateType, E2E_APPL_DATA) NextState);
 #define E2E_STOP_SEC_CODE
@@ -275,6 +285,10 @@ E2E_SMCheck(
                 E2E_SMClearRemainingStatus(StatePtr, ConfigPtr, E2E_SM_VALID);
                 StatePtr->SMState = E2E_SM_VALID;
             }
+            else
+            {
+                /*nothing to do*/
+            }
             break;
         default:
             Ret = E2E_E_WRONGSTATE;
@@ -387,7 +401,7 @@ static FUNC(void, E2E_CODE) E2E_SMAddStatus(
     }
     State->ErrorCount = Count;
 
-    if ((State->WindowTopIndex) == (CurrentWindowSize - (uint8)1))
+    if ((State->WindowTopIndex) >= (CurrentWindowSize - (uint8)1))
     {
         State->WindowTopIndex = 0u;
     }
@@ -426,7 +440,7 @@ static FUNC(void, E2E_CODE) E2E_SMClearStatus(
 }
 
 static FUNC(void, E2E_CODE) E2E_SMClearRemainingStatus(
-    P2CONST(E2E_SMCheckStateType, AUTOMATIC, E2E_APPL_DATA) State,
+    P2VAR(E2E_SMCheckStateType, AUTOMATIC, E2E_APPL_DATA) State,
     P2CONST(E2E_SMConfigType, AUTOMATIC, E2E_APPL_DATA) Config,
     VAR(E2E_SMStateType, E2E_APPL_DATA) NextState)
 {
@@ -466,6 +480,7 @@ static FUNC(void, E2E_CODE) E2E_SMClearRemainingStatus(
         }
     }
 }
-
+/* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
+/* PRQA S 1503 -- */ /* MISRA Rule 2.1 */
 #define E2E_STOP_SEC_CODE
 #include "E2E_MemMap.h"

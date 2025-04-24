@@ -18,20 +18,20 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : WdgM_Type.h                                                 **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : haibin.shao                                                 **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S):   AUTOSAR classic Platform R19-11                       **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*********************************************************************************
+**                                                                            **
+**  FILENAME    : WdgM_Type.h                                                 **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : haibin.shao                                                 **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S):   AUTOSAR classic Platform R19-11                       **
+**                                                                            **
+*******************************************************************************/
 /*======================[R E V I S I O N   H I S T O R Y]=====================*/
 /*============================================================================*/
 

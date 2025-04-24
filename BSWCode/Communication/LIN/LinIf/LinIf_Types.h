@@ -18,20 +18,20 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : LinIf_Types.h                                               **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : HuRongbo                                                    **
- **  Vendor      :                                                             **
- **  DESCRIPTION : API declaration and type definitions of LinIf               **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*********************************************************************************
+**                                                                            **
+**  FILENAME    : LinIf_Types.h                                               **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : HuRongbo                                                    **
+**  Vendor      :                                                             **
+**  DESCRIPTION : API declaration and type definitions of LinIf               **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 
 /*******************************************************************************
 **                      Revision Control History                              **
@@ -72,8 +72,10 @@ typedef enum
 {
     LINIF_ASSIGN,
     LINIF_ASSIGN_FRAME_ID_RANGE,
+#if (LINIF_NC_OPTIONAL_REQUEST_SUPPORTED == STD_ON)
     LINIF_ASSIGN_NAD,
     LINIF_CONDITIONAL,
+#endif
     LINIF_EVENT_TRIGGERED,
     LINIF_FREE,
     LINIF_MRF,
@@ -113,8 +115,8 @@ typedef enum
 {
     LINIF_RX_PDU = 0u,
     LINIF_TX_PDU = 1u,
-    LINIF_SLAVE_TO_SLAVE_PDU = 2u,
-    LINIF_INTERNAL_PDU = 3u
+    LINIF_INTERNAL_PDU = 2u,
+    LINIF_SLAVE_TO_SLAVE_PDU = 3u
 } LinIf_PduDirectionIdType;
 
 typedef enum
@@ -134,16 +136,20 @@ typedef enum
 
 typedef struct
 {
+    /* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
     P2FUNC(void, LINIF_APPL_CODE, LinIfRxIndicationUL)(PduIdType RxPduId, const PduInfoType* PduInfoPtr);
+    /* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
     LinIf_ULModuleType LinIfUserRxIndicationUL;
     PduIdType LinIfRxPduRef;
 } LinIf_RxPduType;
 
 typedef struct
 {
-    P2FUNC(void, LINIF_APPL_CODE, LinIfTxConfirmationUL)(PduIdType TxPduId); /* MISRA Rule 20.7 */
+    P2FUNC(void, LINIF_APPL_CODE, LinIfTxConfirmationUL)(PduIdType TxPduId); /* PRQA S 3432 */ /* MISRA Rule 20.7 */
     PduIdType LinIfTxPduId;
+    /* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
     P2FUNC(Std_ReturnType, LINIF_APPL_CODE, LinIfTxTriggerTransmitUL)(PduIdType TxPduId, PduInfoType* PduInfoPtr);
+    /* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
     LinIf_ULModuleType LinIfUserTxUL;
     PduIdType LinIfTxPduRef;
     boolean LinIfContainResponseErrorSignal;
@@ -186,7 +192,7 @@ typedef struct
     P2CONST(LinIf_PduDirectionType, AUTOMATIC, LINIF_APPL_DATA) LinIfPduDirection;
     uint8 LinIfNumOfSubstitutionFrame;
     P2CONST(LinIf_SubstitutionFramesType, AUTOMATIC, LINIF_APPL_CONST) LinIfSubstitutionFrames;
-    P2VAR(boolean, AUTOMATIC, LINIF_APPL_DATA) LinIfIsTransmitPending;
+    P2VAR(boolean, AUTOMATIC, LINIF_APPL_DATA) LinIfIsTransmitPending; /* PRQA S 3432 */ /* MISRA Rule 20.7 */
 } LinIf_FrameType;
 
 typedef struct
@@ -252,8 +258,11 @@ typedef struct
 
 typedef struct
 {
+    uint16 LinIfMainFunctionPeriod;
     uint16 LinIfBusIdleTimeoutCnt;
+    uint16 LinIfSleepModeFrameDelayCnt;
     LinIf_ULModuleType LinIfGotoSleepConfirmationUL;
+    /* PRQA S 3432 ++*/ /* MISRA Rule 20.7 */
     P2FUNC(void, LINIF_APPL_CODE, GotoSleepConfirmation)(NetworkHandleType channel, boolean success);
     LinIf_ULModuleType LinIfGotoSleepIndicationUL;
     P2FUNC(void, LINIF_APPL_CODE, GotoSleepIndication)
@@ -265,6 +274,7 @@ typedef struct
     LinIf_StartupStateType LinIfStartupState;
     LinIf_ULModuleType LinIfWakeupConfirmationUL;
     P2FUNC(void, LINIF_APPL_CODE, WakeupConfirmation)(NetworkHandleType channel, boolean success);
+    /* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
     P2CONST(LinIf_LinDriverChannelRef, AUTOMATIC, LINIF_APPL_CONST) LinIfChannelRef;
     NetworkHandleType LinIfComMNetworkHandleRef;
     uint16 LinIfNumOfFrame;
@@ -279,7 +289,6 @@ typedef struct
 
 typedef struct
 {
-    uint8 LinIfTimeBase;
     uint16 LinIfNumOfSubstitution;
     P2CONST(LinIf_SubstitutionFramesType, AUTOMATIC, LINIF_APPL_CONST) LinIfSubstitution;
     uint16 LinIfNumOfTxPdu;
@@ -290,10 +299,11 @@ typedef struct
 
 typedef struct
 {
+    /* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
     P2FUNC(Lin_StatusType, LINIF_APPL_CODE, LinGetStatus)(uint8 Channel, uint8** Lin_SduPtr);
     P2FUNC(Std_ReturnType, LINIF_APPL_CODE, LinGoToSleep)(uint8 Channel);
     P2FUNC(Std_ReturnType, LINIF_APPL_CODE, LinGoToSleepInternal)(uint8 Channel);
-#if (LINIF_LIN_AUTOSAR_VERSION > LINIF_LIN_AUTOSAR_422)
+#if (LINIF_LIN_AUTOSAR_VERSION >= LINIF_LIN_AUTOSAR_431)
     P2FUNC(Std_ReturnType, LINIF_APPL_CODE, LinSendFrame)(uint8 Channel, const Lin_PduType* PduInfoPtr);
 #else
     P2FUNC(Std_ReturnType, LINIF_APPL_CODE, LinSendFrame)(uint8 Channel, Lin_PduType* PduInfoPtr);
@@ -301,6 +311,7 @@ typedef struct
     P2FUNC(Std_ReturnType, LINIF_APPL_CODE, LinWakeup)(uint8 Channel);
     P2FUNC(Std_ReturnType, LINIF_APPL_CODE, LinWakeupInternal)(uint8 Channel);
     P2FUNC(Std_ReturnType, LINIF_APPL_CODE, LinCheckWakeup)(uint8 Channel);
+    /* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
 } Lin_DriverApiType;
 
-#endif /* ifndef LINIF_TYPES_H */
+#endif

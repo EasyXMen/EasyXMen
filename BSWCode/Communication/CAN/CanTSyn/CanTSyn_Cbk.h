@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : CanTSyn_Cbk.h                                               **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : Xinrun Wang                                                 **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Call-back function declarations                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : CanTSyn_Cbk.h                                               **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : Xinrun Wang                                                 **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Call-back function declarations                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 /*******************************************************************************
 **                      Revision Control History                              **
 *******************************************************************************/
@@ -81,8 +82,7 @@
  *
  */
 
-extern FUNC(void, CANTSYN_CODE)
-    CanTSyn_RxIndication(PduIdType RxPduId, P2CONST(PduInfoType, AUTOMATIC, CANTSYN_APPL_DATA) PduInfoPtr);
+extern void CanTSyn_RxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr);
 
 /**
  * The lower layer communication interface module confirms the transmission of a PDU, or the failure to transmit a PDU.
@@ -98,7 +98,7 @@ extern FUNC(void, CANTSYN_CODE)
  *
  */
 
-extern FUNC(void, CANTSYN_CODE) CanTSyn_TxConfirmation(
+extern void CanTSyn_TxConfirmation(
     PduIdType TxPduId
 #if (STD_ON == CANTSYN_VER_R19_11)
     ,

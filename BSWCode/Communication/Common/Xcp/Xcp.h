@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Xcp.h                                                      **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : qinchun.yang                                                **
- **  Vendor      :                                                             **
- **  DESCRIPTION : API declaration and type definitions of XCP                 **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Xcp.h                                                      **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : qinchun.yang                                                **
+**  Vendor      :                                                             **
+**  DESCRIPTION : API declaration and type definitions of XCP                 **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 #ifndef XCP_H
 #define XCP_H
 
@@ -51,7 +52,7 @@
 #include "Xcp_Cfg.h"
 #if (XCP_PL_PGM == (XCP_PL_PGM & XCP_RESOURCE))
 #include XCP_FLS_HEADER
-#endif /* XCP_PL_PGM EQL XCP_PL_PGM&XCP_RESOURCE */
+#endif /*XCP_PL_PGM == XCP_PL_PGM&XCP_RESOURCE*/
 /*
  * Development errors used by XCP
  */
@@ -193,7 +194,7 @@ typedef struct
     uint32 romEnd;
     uint32 bufferPtr;
 } Xcp_PageInfoType;
-#endif /* XCP_PL_CAL EQL XCP_PL_CAL&XCP_RESOURCE */
+#endif /* XCP_PL_CAL == XCP_PL_CAL&XCP_RESOURCE */
 
 #if (XCP_PL_CAL == (XCP_PL_CAL & XCP_RESOURCE))
 typedef struct
@@ -201,7 +202,7 @@ typedef struct
     uint8 maxSegNum;
     P2CONST(Xcp_PageInfoType, AUTOMATIC, XCP_CONST) pageInfoPtr;
 } Xcp_SegmentInfoType;
-#endif /* XCP_PL_CAL EQL XCP_PL_CAL&XCP_RESOURCE */
+#endif /*XCP_PL_CAL == XCP_PL_CAL&XCP_RESOURCE*/
 
 #if (XCP_PL_PGM == (XCP_PL_PGM & XCP_RESOURCE))
 /* xcp sector information,used in GET_SECTOR_INFO command */
@@ -229,7 +230,7 @@ typedef struct
     P2FUNC(MemIf_JobResultType, BSWM_APPL_CODE, flsGetJobResult)(void);
     /* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
 } Xcp_FlsFuncPtrType;
-#endif /* XCP_PL_PGM EQL XCP_PL_PGM&XCP_RESOURCE */
+#endif /* XCP_PL_PGM == XCP_PL_PGM&XCP_RESOURCE */
 
 /**********Post-Build configuration parameter declarations*************/
 extern const Xcp_ConfigType Xcp_PBConfig;

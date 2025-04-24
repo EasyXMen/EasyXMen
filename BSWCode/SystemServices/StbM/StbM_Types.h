@@ -18,20 +18,21 @@
  *
  * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
  * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
- *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : StbM_Types.h                                                **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : yuzhe.zhang                                                 **
- **  Vendor      :                                                             **
- **  DESCRIPTION : Type header for StbM                                        **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
- **                                                                            **
- *******************************************************************************/
+ */
 /* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : StbM_Types.h                                                **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : yuzhe.zhang                                                 **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Type header for StbM                                        **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
 
 #ifndef STBM_TYPES_H
 #define STBM_TYPES_H
@@ -45,7 +46,7 @@
 
 #if STBM_TRIGGERED_CUSTOMER_NUM > 0u
 #include "Os.h"
-#endif /* STBM_TRIGGERED_CUSTOMER_NUM > 0u */
+#endif
 /*******************************************************************************
 **                      Global Symbols                                        **
 *******************************************************************************/
@@ -84,7 +85,7 @@ typedef struct
     uint32 LocNanoSeconds;
     uint32 PathDelay;
 } StbM_SyncRecordTableBlockType;
-#endif /* _DEFINED_TYPEDEF_FOR_StbM_SyncRecordTableBlockType_ */
+#endif
 
 #ifndef _DEFINED_TYPEDEF_FOR_StbM_OffsetRecordTableBlockType_
 /* Offset Time Base Record Table Block */
@@ -94,7 +95,7 @@ typedef struct
     uint32 GlbNanoSeconds;
     StbM_TimeBaseStatusType TimeBaseStatus;
 } StbM_OffsetRecordTableBlockType;
-#endif /* _DEFINED_TYPEDEF_FOR_StbM_OffsetRecordTableBlockType_ */
+#endif
 
 #ifndef _DEFINED_TYPEDEF_FOR_StbM_TimeBaseNotificationType_
 /* The StbM_TimeBaseNotificationType type defines a number of global time related events.  */
@@ -110,7 +111,7 @@ typedef struct
 #define STBM_STATUS_NTF_RESYNC                  0x0200u
 #define STBM_STATUS_NTF_RATECORRECTION          0x0400u
 typedef uint16 StbM_TimeBaseNotificationType;
-#endif /* _DEFINED_TYPEDEF_FOR_StbM_TimeBaseNotificationType_ */
+#endif
 
 #if STBM_TRIGGERED_CUSTOMER_NUM > 0u
 /* The triggered customer is directly triggered by the Synchronized Timebase Manager by getting synchronized with the
@@ -124,7 +125,7 @@ explicitly synchronized by the StbM. */
     uint8 indexOfSynchronizedTimeBase;
     TickType osScheduleTableDuration;
 } StbMTriggeredCustomerCfgType;
-#endif /* STBM_TRIGGERED_CUSTOMER_NUM > 0u */
+#endif
 
 typedef enum
 {
@@ -193,7 +194,7 @@ events for the Offset Time Base Record Table. */
 events for the Synchronized Time Base Record Table. */
     uint16 StbMSyncTimeRecordTableBlockCount;
 } StbMTimeRecordingCfgType;
-#endif /* STBM_TIME_RECORDING_SUPPORT == STD_ON */
+#endif
 
 typedef struct
 {
@@ -236,16 +237,16 @@ current Local Time Base value and a newly received Global Time Base value */
     uint64 StbMTimeLeapPastThreshold;
     /* This is the reference to the Synchronized Time-Base this Offset Time-Base
 is based on. */
-    P2CONST(uint16, TYPEDEF, STBM_CONST) StbMOffsetTimeBase;
-    P2CONST(StbMTimeCorrectionCfgType, TYPEDEF, STBM_CONST) StbMTimeCorrection;
-    P2CONST(StbMLocalTimeClockCfgType, TYPEDEF, STBM_CONST) StbMLocalTimeClock;
-#if (STD_ON == STBM_TIME_RECORDING_SUPPORT)
-    P2CONST(StbMTimeRecordingCfgType, TYPEDEF, STBM_CONST) StbMTimeRecording;
+    const uint16* StbMOffsetTimeBase;
+    const StbMTimeCorrectionCfgType* StbMTimeCorrection;
+    const StbMLocalTimeClockCfgType* StbMLocalTimeClock;
+#if (STBM_TIME_RECORDING_SUPPORT == STD_ON)
+    const StbMTimeRecordingCfgType* StbMTimeRecording;
 #endif
     /* This container holds the configuration of a notification customer, which is
 notified is informed about the occurance of a Time-base related event. */
     uint16 StbMNotificationCustomerNum;
-    P2CONST(StbMNotificationCustomerCfgType, TYPEDEF, STBM_CONST) StbMNotificationCustomer;
+    const StbMNotificationCustomerCfgType* StbMNotificationCustomer;
     StbM_SynchronizedTimeBaseTypeType synchronizedTimeBaseType;
     boolean StbMisTimeGateway;
 } StbMSynchronizedTimeBaseCfgType;
@@ -277,10 +278,10 @@ typedef struct
 
 typedef struct
 {
-#if (STD_ON == STBM_TIME_CORRECTION_SUPPORT)
+#if (STBM_TIME_CORRECTION_SUPPORT == STD_ON)
     float64 ratio;
     float64 roc;
-#endif /* STD_ON == STBM_TIME_CORRECTION_SUPPORT */
+#endif
     boolean ratioSet;
 } StbM_CurrentRateType;
 
@@ -291,7 +292,7 @@ typedef struct
     boolean GPTtimercalled;
     boolean isrunning;
 } StbM_NotificationType;
-#endif /* STBM_NOTIFICATION_CUSTOMER_NUM > 0 */
+#endif
 
 typedef enum
 {
@@ -320,11 +321,11 @@ typedef struct
     StbM_LocalClockTimeType localClockTime;
     StbM_CurrentRateType RateDeviation;
     StbM_RateCorrectionType* RateCorrection;
-#if (STD_ON == STBM_TIME_CORRECTION_SUPPORT)
+#if (STBM_TIME_CORRECTION_SUPPORT == STD_ON)
     sint64 TimeOffsetForRateAdaption;
     uint64 RemainTimeOffsetForRateAdaption;
 #endif
-#if (STD_ON == STBM_TIME_RECORDING_SUPPORT)
+#if (STBM_TIME_RECORDING_SUPPORT == STD_ON)
     P2VAR(StbM_SyncRecordTableBlockType, AUTOMATIC, STBM_APPL_DATA) StbMSyncTimeRecordBlock;
     P2VAR(StbM_OffsetRecordTableBlockType, AUTOMATIC, STBM_APPL_DATA) StbMOffsetTimeRecordBlock;
     uint16 RecordBlockIndex;
@@ -337,4 +338,4 @@ typedef struct
 #define STBM_PURELOCAL_TIMEBASE_RANGE 128U
 #define STBM_NANOSECOND_TO_SECOND     0x3B9ACA00u
 
-#endif /* STBM_TYPES_H */
+#endif
