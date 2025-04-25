@@ -461,10 +461,11 @@ uint32 Os_Extru(
     VAR(uint32, OS_VAR)
     res;
     OS_ASM volatile("mov %%d14,%2  \n\
-                   extr.u %0,%1,%%e14"
-                    : "=d"(res)
-                    : "d"(a), "d"(p), "d"(w)
-                    : "d14", "d15");
+                    mov %%d15,%3  \n\
+                    extr.u %0,%1,%%e14" 
+                     : "=d"(res) 
+                     : "d"(a), "d"(p), "d"(w) 
+                     : "d14", "d15");
     return res; /* PRQA S 2961 */ /* MISRA Rule 9.1 */ /*ARCH_PROCESSOR_C_INLINE_ASM_007*/
 }
 #define OS_STOP_SEC_CODE
