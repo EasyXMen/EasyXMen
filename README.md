@@ -128,14 +128,6 @@ During the issue communication process, if the issue has been resolved or the is
 - EasyXMen项目整体基于LGPL V2.1开源，详见[LICENSE.txt](./LICENSE.txt)，并附有例外，例外详见[EXCEPTION.md](./EXCEPTION.md)   
 The EasyXMen project is open-source based on LGPL V2.1, see [LICENSE.txt](./LICENSE.txt) for details, with exceptions outlined in [EXCEPTION.md](./EXCEPTION.md).
 
-- 同时，EasyXMen也提供商业许可协议（Commercial License），详见
-[https://EasyXMen.com/xy/reference/permissions.html](https://EasyXMen.com/xy/reference/permissions.html)  
-In addition, EasyXMen also offers a Commercial License Agreement, available at
-[https://EasyXMen.com/xy/reference/permissions.html](https://EasyXMen.com/xy/reference/permissions.html)
-
-- _EasyXMen提供商业许可是为了给用户提供更加丰富的许可选项，并不代表LGPL V2.1开源许可证禁止商业利用，您完全可以在遵循LGPL V2.1和我们的例外声明的前提下自由地使用本开源项目，具体内容请详见相关许可协议文本_  
-_EasyXMen provides a commercial license to offer users more licensing options. This does not mean that the LGPL V2.1 open source license prohibits commercial use. You are free to use this open source project in accordance with the LGPL V2.1 and our exception statement. For details, please refer to the relevant license agreement text._
-
 # 贡献者（Contributors）
 
 | 用户名（User Name）               | 邮箱 （E-mail）                        | 贡献的描述（Description of Contributors）               |
