@@ -2242,7 +2242,9 @@ FUNC(Std_ReturnType, CRYPTO_CODE) rsa_verifyProcess()
     Std_ReturnType ret = E_NOT_OK;
     uint8 keyN[128 * CRYPTO_RSA_TYPE];
     uint8 keyE[4 * CRYPTO_RSA_TYPE];
-    uint32 Length = Crypto_StoredJob.jobPrimitiveInputOutput.inputLength;
+    /*hash256*/
+    uint32 Length = 32u;
+    uint32 ilen = Crypto_StoredJob.jobPrimitiveInputOutput.inputLength;
 #if (CRYPTO_RSA_TYPE == 1)
     /*RSA 1024*/
     uint8 Ciphertext[128u];
@@ -2262,7 +2264,7 @@ FUNC(Std_ReturnType, CRYPTO_CODE) rsa_verifyProcess()
     Crypto_memset(keyN, 128 * CRYPTO_RSA_TYPE);
     Crypto_memset(keyE, 4 * CRYPTO_RSA_TYPE);
 
-    ret = Crypto_AlgorithmGetInput(Ciphertext);
+    ret = Crypto_sha256(Crypto_StoredJob.jobPrimitiveInputOutput.inputPtr, ilen, Ciphertext);
     Crypto_AlgorithmGetSecondInput(sig);
     if (E_OK == ret)
     {

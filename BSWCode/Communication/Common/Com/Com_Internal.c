@@ -894,27 +894,27 @@ Com_TxIpduTMSHandle(Com_TxIPduRunTimeStateType* TxIpduStatePtr, const Com_TxIPdu
     || (0u < COM_TX_MODE_TRUE_PERIOD_NUMBER) || (0u < COM_TX_MODE_FALSE_PERIOD_NUMBER) \
     || (0u < COM_TX_MODE_TRUE_MIXED_NUMBER) || (0u < COM_TX_MODE_FALSE_MIXED_NUMBER)   \
     || (0u < COM_TX_MODE_TRUE_MIXED_NOREPETITION_NUMBER) || (0u < COM_TX_MODE_FALSE_MIXED_NOREPETITION_NUMBER)
-    PduIdType txModeIndex;
+
 #if (STD_ON == COM_TMS_ENABLE)
     /*According to the TMS get send mode, event trigger send times, send cycles*/
     if (!txIpduTMS)
     {
         TxIpduStatePtr->TxIpduRTStFlag &= Com_TX_TMS_DIS;
-        txModeIndex = TxIpduPtr->ComTxModeFalseRefId;
         TxIpduStatePtr->ipduTxMode = TxIpduPtr->ComTxFalseModeMode;
         switch (TxIpduStatePtr->ipduTxMode)
         {
 #if (0u < COM_TX_MODE_FALSE_DIRECT_NUMBER)
         case COM_TX_MODE_DIRECT:
-            *RptNum = Com_TxModeFalseDirectRepetitions[txModeIndex].ComTxModeNumberOfRepetitions;
+            *RptNum = Com_TxModeFalseDirectRepetitions[TxIpduPtr->ComTxModeFalseRefId].ComTxModeNumberOfRepetitions;
             break;
 #endif
 #if (0u < COM_TX_MODE_FALSE_MIXED_NUMBER)
         case COM_TX_MODE_MIXED:
-            *RptNum = Com_TxModeFalseMixedRepetitions[txModeIndex].ComTxModeNumberOfRepetitions;
+            *RptNum = Com_TxModeFalseMixedRepetitions[TxIpduPtr->ComTxModeFalseRefId].ComTxModeNumberOfRepetitions;
             if (Com_TX_TMS_EN == oldTMS)
             {
-                TxIpduStatePtr->PeriodCnt = Com_TxModeFalseMixedRepetitions[txModeIndex].ComTxModeTimeOffset;
+                TxIpduStatePtr->PeriodCnt =
+                    Com_TxModeFalseMixedRepetitions[TxIpduPtr->ComTxModeFalseRefId].ComTxModeTimeOffset;
             }
             break;
 #endif
@@ -923,7 +923,7 @@ Com_TxIpduTMSHandle(Com_TxIPduRunTimeStateType* TxIpduStatePtr, const Com_TxIPdu
         case COM_TX_MODE_PERIODIC:
             if (Com_TX_TMS_EN == oldTMS)
             {
-                TxIpduStatePtr->PeriodCnt = Com_TxModeFalsePeriod[txModeIndex].ComTxModeTimeOffset;
+                TxIpduStatePtr->PeriodCnt = Com_TxModeFalsePeriod[TxIpduPtr->ComTxModeFalseRefId].ComTxModeTimeOffset;
             }
             break;
 #endif
@@ -936,22 +936,22 @@ Com_TxIpduTMSHandle(Com_TxIPduRunTimeStateType* TxIpduStatePtr, const Com_TxIPdu
 #endif
     {
         TxIpduStatePtr->TxIpduRTStFlag |= Com_TX_TMS_EN;
-        txModeIndex = TxIpduPtr->ComTxModeTrueRefId;
         TxIpduStatePtr->ipduTxMode = TxIpduPtr->ComTxTrueModeMode;
         switch (TxIpduStatePtr->ipduTxMode)
         {
 #if (0u < COM_TX_MODE_TRUE_DIRECT_NUMBER)
         case COM_TX_MODE_DIRECT:
-            *RptNum = Com_TxModeTrueDirectRepetitions[txModeIndex].ComTxModeNumberOfRepetitions;
+            *RptNum = Com_TxModeTrueDirectRepetitions[TxIpduPtr->ComTxModeFalseRefId].ComTxModeNumberOfRepetitions;
             break;
 #endif
 #if (0u < COM_TX_MODE_TRUE_MIXED_NUMBER)
         case COM_TX_MODE_MIXED:
-            *RptNum = Com_TxModeTrueMixedRepetitions[txModeIndex].ComTxModeNumberOfRepetitions;
+            *RptNum = Com_TxModeTrueMixedRepetitions[TxIpduPtr->ComTxModeFalseRefId].ComTxModeNumberOfRepetitions;
 #if (STD_ON == COM_TMS_ENABLE)
             if (Com_TX_TMS_EN != oldTMS)
             {
-                TxIpduStatePtr->PeriodCnt = Com_TxModeTrueMixedRepetitions[txModeIndex].ComTxModeTimeOffset;
+                TxIpduStatePtr->PeriodCnt =
+                    Com_TxModeTrueMixedRepetitions[TxIpduPtr->ComTxModeFalseRefId].ComTxModeTimeOffset;
             }
 #endif
             break;
@@ -962,7 +962,7 @@ Com_TxIpduTMSHandle(Com_TxIPduRunTimeStateType* TxIpduStatePtr, const Com_TxIPdu
         case COM_TX_MODE_PERIODIC:
             if (Com_TX_TMS_EN != oldTMS)
             {
-                TxIpduStatePtr->PeriodCnt = Com_TxModeTruePeriod[txModeIndex].ComTxModeTimeOffset;
+                TxIpduStatePtr->PeriodCnt = Com_TxModeTruePeriod[TxIpduPtr->ComTxModeFalseRefId].ComTxModeTimeOffset;
             }
             break;
 #endif

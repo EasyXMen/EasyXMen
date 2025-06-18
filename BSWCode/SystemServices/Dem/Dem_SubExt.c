@@ -42,12 +42,16 @@
  * Return              None
  */
 /*************************************************************************/
+
+#if (DEM_EXTENDED_DATA_CLASS_NUM > 0)
 /* PRQA S 1505,3432++ */ /* MISRA Rule 8.7,20.7 */
 DEM_LOCAL FUNC(void, DEM_CODE) Dem_ExtendedDataStorage(
     Dem_EventIdType IntId,
     P2VAR(Dem_EventMemEntryType, AUTOMATIC, DEM_APPL_DATA) pEntry,
     uint8 Trigger);
 /* PRQA S 1505,3432-- */ /* MISRA Rule 8.7,20.7 */
+#endif
+
 /*******************************************************************************
 **                      Private Function Definitions                         **
 *******************************************************************************/
@@ -2057,7 +2061,7 @@ Dem_DebounceProcess(Dem_EventDataBufferType pEventBuffer)
         && ((DEM_DEBOUNCE_COUNTER_BASED == AlgorithmType)
 #if (DEM_DEBOUNCE_TIME_BASE_CLASS_NUM > 0)
             || ((DEM_DEBOUNCE_TIME_BASE == AlgorithmType)
-                && (&DemDebounceTimerInfo[pEventCfg->AlgorithmIndex].Triggered == FALSE))
+                && (DemDebounceTimerInfo[pEventCfg->AlgorithmIndex].Triggered == FALSE))
 #endif
                 ))
     {

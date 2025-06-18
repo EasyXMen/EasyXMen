@@ -124,6 +124,11 @@
  *                                             CPT-13207,fix global variable naming for ProgConditions.
  *                                             CPT-12870,fix Dcm_SetDeauthenticatedRole.
  *            2025-04-22   xue.han             CPT-14039,fix negative response NRC 0x22.
+ *            2025-04-29   xue.han             CPT-13251,fix RTE_MODE_DcmDiagnosticSessionControl_DCM_DEFAULT_SESSION.
+ *                                             CPT-14082,Add Dcm_AuthenticationRoleType Type
+ *                                             CPT-14170,fix whitelist process for UDS service 0x29
+ *  V2.1.19   2025-05-07   li.feng             CPT-14228,Fix the bug in the 0x29 authentication process.
+ *            2025-05-12   peng.wu             CPT-13897,Fix OBD 04 service respond after clearing the flash
 ============================================================================*/
 
 /*=======[V E R S I O N  I N F O R M A T I O N]===============================*/
@@ -132,7 +137,7 @@
 #define DCM_AR_RELEASE_PATCH_VERSION (0x02u)
 #define DCM_SW_MAJOR_VERSION         (0x02u) /*Major Version*/
 #define DCM_SW_MINOR_VERSION         (0x01u) /*Minor Version*/
-#define DCM_SW_PATCH_VERSION         (0x12u) /*Patch version*/
+#define DCM_SW_PATCH_VERSION         (0x13u) /*Patch version*/
 
 /*******************************************************************************
 **                      Include Section                                       **
@@ -352,8 +357,8 @@ extern FUNC(Std_ReturnType, DCM_CODE) Dcm_SetActiveDiagnostic(boolean active);
  * Return              <Std_ReturnType>
  */
 /*************************************************************************/
-FUNC(void, DCM_CODE)
-Dcm_SetDeauthenticatedRole(uint16 connectionId, P2CONST(uint8, AUTOMATIC, DCM_VAR) deauthenticatedRole);
+FUNC(Std_ReturnType, DCM_CODE)
+Dcm_SetDeauthenticatedRole(uint16 connectionId, const Dcm_AuthenticationRoleType deauthenticatedRole);
 #endif
 
 #endif /* CANTP_H */

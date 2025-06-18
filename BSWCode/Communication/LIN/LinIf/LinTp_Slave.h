@@ -40,7 +40,7 @@
 **                            Macros Definitions                              **
 *******************************************************************************/
 
-#define LINTP_GET_SLAVE_RTDATA_PTR(ch) &LinTp_SlaveRTData[(ch)-LINTP_MASTER_CHANNEL_NUMBER]
+#define LINTP_GET_SLAVE_RTDATA_PTR(ch) &LinTp_SlaveRTData[(ch) - LINTP_MASTER_CHANNEL_NUMBER]
 
 /*******************************************************************************
 **                      Runtime Type Definitions                              **
@@ -83,6 +83,7 @@ typedef struct
     LinTp_SlaveTxStage TxStage;
     uint8 SduSN;
     uint8 RetryCopyCnt;
+    uint8 MRFRequestedNad;
     boolean FunctionAddressFlag;
 } LinTp_SlaveRuntimeType;
 

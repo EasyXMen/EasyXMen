@@ -1513,17 +1513,17 @@ typedef struct
 
 typedef struct
 {
-    Os_IocBlockType* IocBlockPtr;
+    Os_IocBlockType*  IocBlockPtr;
     Os_IocBufferType* IocBufferPtr;
-    Os_IocU16Type IocDataElementSizeWithHeader;
-    Os_IocU16Type IocBlockLength;
-    boolean IocLostData;
+    Os_IocU16Type     IocDataElementSizeWithHeader;
+    Os_IocU16Type     IocBlockLength;
     /* QEUEU */
     Os_IocBlockIdType IocBlockHead;
     Os_IocBlockIdType IocBlockTail;
     Os_IocBlockIdType IocBlockFreeHead;
     /* UNQEUEU */
     Os_IocBlockIdType IocBlockRead;
+    boolean           IocLostData;
 } Os_IocCBType;
 
 #endif               /* OS_TYPES_H */

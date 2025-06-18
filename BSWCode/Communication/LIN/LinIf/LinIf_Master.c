@@ -252,19 +252,19 @@ LinIf_MasterTransmit(/* PRQA S 1532 */
 FUNC(Std_ReturnType, LINIF_CODE)
 LinIf_MasterScheduleRequest(/* PRQA S 1532 */
                             NetworkHandleType ch,
-                            LinIf_SchHandleType Schedule /* PRQA S 3334 */
+                            LinIf_SchHandleType ScheduleId /* PRQA S 3334 */
 )
 {
     P2VAR(LinIf_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA) /* PRQA S 3432 */
     chPtr = LINIF_CH(ch);
     Std_ReturnType ret = E_NOT_OK; /* PRQA S 2981 */ /* MISRA Rule 2.2 */
-    LinIf_SchHandleType schedule = Schedule;
+    LinIf_SchHandleType schedule = ScheduleId;
 
 #if (LINIF_DEV_ERROR_DETECT == STD_ON)
     if ((LINIF_CHANNEL_SLEEP == chPtr->LinIfChannelState)
-        || ((LINIF_NULL_SCHEDULE_INDEX != Schedule)
-            && ((Schedule < LINIF_GET_SCHEDULE_OFS(ch))
-                || ((LINIF_GET_SCHEDULE_NUM(ch) + LINIF_GET_SCHEDULE_OFS(ch)) <= Schedule))))
+        || ((LINIF_NULL_SCHEDULE_INDEX != ScheduleId)
+            && ((ScheduleId < LINIF_GET_SCHEDULE_OFS(ch))
+                || ((LINIF_GET_SCHEDULE_NUM(ch) + LINIF_GET_SCHEDULE_OFS(ch)) <= ScheduleId))))
     {
         /*@req <SWS_LinIf_00567>*/
         LinIf_Det_ReportError(LINIF_SCHEDULEREQUEST_ID, LINIF_E_SCHEDULE_REQUEST_ERROR);
@@ -374,7 +374,7 @@ FUNC(void, LINIF_CODE) LinIf_SleepProcess(uint8 ch) /* PRQA S 1532 */
         else
         {
             /* PRQA S 0432 ++ */ /* MISRA Rule 1.1 */
-            Lin_StatusType st = Lin_DriverApi[linDriver].LinGetStatus(linChannel, &sdu);
+            Lin_StatusType st = Lin_DriverApi[linDriver].LinGetStatus(linChannel, (uint8**)&sdu);
             /* PRQA S 0432 -- */ /* MISRA Rule 1.1 */
             if (LIN_CH_SLEEP == st)
             {
@@ -520,9 +520,12 @@ FUNC(void, LINIF_CODE)
 LinIf_MasterWakeupConfirmation(EcuM_WakeupSourceType WakeupSource)
 /* PRQA S 1532,3206 -- */ /* MISRA Rule 8.7,2.7 */
 {
+#if (LINIF_LIN_CHANNEL_WAKEUP_SUPPORT == STD_ON) \
+    || ((LINIF_TRCV_DRIVER_SUPPORTED == STD_ON) && (LINIF_LIN_TRCV_WAKEUP_SUPPORT == STD_ON))
     P2VAR(LinIf_MasterRuntimeType, AUTOMATIC, LINIF_APPL_DATA) chPtr; /* PRQA S 3432 */
     EcuM_WakeupSourceType wakeupSource;
     NetworkHandleType ch;
+#endif
 
 #if (LINIF_LIN_CHANNEL_WAKEUP_SUPPORT == STD_ON)
     /*check all Lin driver channel to find the wake-up source*/
@@ -649,7 +652,7 @@ FUNC(void, LINIF_CODE) LinIf_PrevTransmit(uint8 ch) /* PRQA S 1532 */
             uint8 linDriver = LINIF_GET_LIN_DRIVER_ID(ch);
             uint8 linChannel = LINIF_GET_LIN_CHANNEL_ID(ch);
             /* PRQA S 0432 ++ */ /* MISRA Rule 1.1 */
-            Lin_StatusType st = Lin_DriverApi[linDriver].LinGetStatus(linChannel, &sduDataPtr);
+            Lin_StatusType st = Lin_DriverApi[linDriver].LinGetStatus(linChannel, (uint8**)&sduDataPtr);
             /* PRQA S 0432 -- */ /* MISRA Rule 1.1 */
             P2CONST(LinIf_SubstitutionFramesType, AUTOMATIC, LINIF_CONST) sub;
             P2CONST(LinIf_FrameType, AUTOMATIC, LINIF_APPL_CONST) fra;

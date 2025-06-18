@@ -265,13 +265,10 @@ typedef struct TcpIp_SocketMangeDataTag
 /***********************************************************************************************************************
  *  LOCAL DATA
  **********************************************************************************************************************/
-#if (STD_ON == TCPIP_INITIALIZATION_AVAILABLE)
 typedef uint8 TcpIp_InitStateType;
 #define TCPIP_STATE_UNINIT 0x0u
 #define TCPIP_STATE_INIT   0x1u
 TCPIP_LOCAL VAR(TcpIp_InitStateType, TCPIP_VAR_ZERO_INIT) TcpIp_InitState = TCPIP_STATE_UNINIT;
-
-#endif /* (STD_ON == TCPIP_INITIALIZATION_AVAILABLE) */
 
 TCPIP_LOCAL P2CONST(TcpIp_ConfigType, AUTOMATIC, TCPIP_VAR) TcpIp_PbCfgPtr;
 
@@ -1854,9 +1851,8 @@ TcpIp_BsdDeInit(void)
     }
 
 #endif /* (TCPIP_IO_MULTPLEXING_METHOD == TCPIP_LINUX_POLL) */
-#if (STD_ON == TCPIP_INITIALIZATION_AVAILABLE)
     TcpIp_InitState = TCPIP_STATE_UNINIT;
-#endif /* (STD_ON == TCPIP_INITIALIZATION_AVAILABLE) */
+
 #if (TCPIP_TCP_SOCKET_MAX > 0)
     TCPIP_DEBUG("residue tcp socket num:%d\n", Tcp_SocketUsedNum);
 #endif /* (TCPIP_TCP_SOCKET_MAX > 0) */

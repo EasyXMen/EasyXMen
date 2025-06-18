@@ -37,6 +37,9 @@
 #include "ComStack_Types.h"
 #include "NmStack_Types.h"
 #include "Nm_Cbk.h"
+#if (STD_ON == NM_STATE_CHANGE_IND_ENABLED)
+#include "Com.h"
+#endif
 
 /*******************************************************************************
 **                      Global Symbols                                        **
@@ -201,7 +204,7 @@ typedef struct
 typedef struct
 {
     /* signal id,form com module */
-    uint8 sigId;
+    Com_SignalIdType sigId;
 } Nm_SignalRefType;
 #endif /* STD_ON == NM_STATE_CHANGE_IND_ENABLED */
 

@@ -1005,7 +1005,6 @@ SoAd_IfTransmit(
                 SoAd_uintx txSuccessCnt = 0u;
                 SoAd_uintx txFailCnt = 0u;
                 const SoAd_InnerSocketManageType* soadSoConMPtr;
-                SoAd_uintx soConGroupId;
                 SoAd_SoConIdType soceketConNum;
 
                 pduRouteDestNum = SOAD_PDUROUT_CFG(SoAdSrcPduId).SoAd_PduRouteDestNum;
@@ -1016,7 +1015,6 @@ SoAd_IfTransmit(
                     /* SWS_SoAd_00722 */
                     for (SoAd_SoConIdType soConCnt = 0u; (soConCnt < soceketConNum) && (0u == txFailCnt); soConCnt++)
                     {
-                        boolean pduRouteDestEnable = FALSE;
                         SoAd_SoConIdType soConId =
                             SOAD_PDUROTDEST_CFG(pduRouteDestId).SoAd_TxSocketConRefIndexPtr[soConCnt];
 
@@ -1119,7 +1117,6 @@ SoAd_IfRoutingGroupTransmit(VAR(SoAd_RoutingGroupIdType, AUTOMATIC) id)
             if ((SOAD_UPPER_LAYER_IF == SOAD_PDUROUT_CFG(pduRouteId).SoAd_TxUpperLayerType)
                 && (SOAD_UNUSED_UINT8 == soadPduRoutMPtr->TxPendingNum))
             {
-                SoAd_uintx soConGroupId;
                 SoAd_SoConIdType socketConNum;
                 SoAd_SoConIdType soConId;
                 /* SWS_SoAd_00722 */
@@ -3045,11 +3042,14 @@ SoAd_TcpConnected(VAR(TcpIp_SocketIdType, AUTOMATIC) SocketId)
 #if (STD_ON == SOAD_SUPPORT_TCP)
     SoAd_SoConIdType soConId;
     SoAd_uintx soConGroupId;
-    boolean socketIdValid = FALSE;
+
     SoAd_InnerSocketManageType* soadSoConMPtr;
     const SoAd_SocketTcpType* soadSoTcpCfgPtr;
 
 #if (STD_ON == SOAD_DEV_ERROR_DETECT)
+
+    boolean socketIdValid = FALSE;
+
     /*SWS_SoAd_00274*/
     if (SOAD_STATE_UNINIT == SoAd_Module_Status)
     {
@@ -3074,7 +3074,9 @@ SoAd_TcpConnected(VAR(TcpIp_SocketIdType, AUTOMATIC) SocketId)
                     soadSoConMPtr->SoAd_SoConMode = SOAD_SOCON_ONLINE;
                     SoAd_SoConModeChgNotificationAndTpStartOfReception(soConId, soConGroupId);
                 }
+#if (STD_ON == SOAD_DEV_ERROR_DETECT)
                 socketIdValid = TRUE;
+#endif
                 break;
             }
         }

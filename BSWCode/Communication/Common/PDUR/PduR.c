@@ -48,11 +48,13 @@
 /*******************************************************************************
 **                      Private Variable Definitions                          **
 *******************************************************************************/
+#if (STD_ON == PDUR_DEV_ERROR_DETECT)
 #define PDUR_START_SEC_VAR_INIT_8
 #include "PduR_MemMap.h"
 PDUR_LOCAL VAR(PduR_StateType, PDUR_VAR_POWER_ON_INIT) PduR_Status = PDUR_UNINIT;
 #define PDUR_STOP_SEC_VAR_INIT_8
 #include "PduR_MemMap.h"
+#endif
 /*******************************************************************************
 **                      Private Function Declarations                         **
 *******************************************************************************/
@@ -102,7 +104,9 @@ void PduR_Init(const PduR_PBConfigType* ConfigPtr)
         PduR_BufferInit();
 #endif /* PDUR_NUMBER_OF_QUEUES > 0u */
         PduR_RouteInit();
+#if (STD_ON == PDUR_DEV_ERROR_DETECT)
         PduR_Status = PDUR_ONLINE;
+#endif
     }
 }
 #if (STD_ON == PDUR_VERSION_INFO_API)

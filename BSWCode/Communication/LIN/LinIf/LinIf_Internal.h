@@ -67,8 +67,10 @@
 #define LINIF_GET_SCHEDULE(ch, idx)                        LINIF_GET_CHANNEL(ch).LinIfScheduleTable[idx]
 #define LINIF_GET_FRAME(ch, idx)                           LINIF_GET_CHANNEL(ch).LinIfFrame[idx]
 #define LINIF_GET_LIN_CHANNEL_ID(ch)                       LINIF_GET_CHANNEL(ch).LinIfChannelRef->LinChannelIdRef
-#define LINIF_GET_LIN_DRIVER_ID(ch)                        LINIF_GET_CHANNEL(ch).LinIfChannelRef->LinDriverId
 #define LINIF_GET_LIN_DRIVER_WAKEUP_SOURCE(ch)             LINIF_GET_CHANNEL(ch).LinIfChannelRef->WakeUpSource
+#define LINIF_GET_LIN_DRIVER_ID(ch)                        LINIF_GET_CHANNEL(ch).LinIfChannelRef->LinDriverId
+#define LINIF_GET_LIN_TRCV_CHANNEL_ID(ch)                  LINIF_GET_CHANNEL(ch).LinIfTransceiverDrvConfig->LinIfTrcvIdRef
+#define LINIF_GET_LIN_TRCV_DRIVER_ID(ch)                   LINIF_GET_CHANNEL(ch).LinIfTransceiverDrvConfig->LinIfTrcvDrvId
 #define LINIF_GET_LIN_TRCV_WAKEUP_SOURCE(ch)               LINIF_GET_CHANNEL(ch).LinIfTransceiverDrvConfig->WakeUpSource
 #define LINIF_GET_COMM_NETWORK(ch)                         LINIF_GET_CHANNEL(ch).LinIfComMNetworkHandleRef
 #define LINIF_GET_STARTUP_STATE(ch)                        LINIF_GET_CHANNEL(ch).LinIfStartupState

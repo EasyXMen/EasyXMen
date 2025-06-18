@@ -2328,12 +2328,12 @@ FUNC(TcpIp_StateType, TCPIP_CODE) TcpIp_GetControlState(VAR(uintx, AUTOMATIC) ct
  * socket init,call by TcpIp_Init
  * @param socketNum socket number
  */
-FUNC(void, TCPIP_CODE) TcpIp_SocketInit(VAR(uint8, AUTOMATIC) socketNum)
+FUNC(void, TCPIP_CODE) TcpIp_SocketInit(VAR(uint16, AUTOMATIC) socketNum)
 {
-    uint8 num = (socketNum < TCPIP_SOCKET_NUM) ? socketNum : TCPIP_SOCKET_NUM;
+    uint16 num = (socketNum < TCPIP_SOCKET_NUM) ? socketNum : TCPIP_SOCKET_NUM;
     TcpIp_SocketLastId = 0u;
 
-    for (uint8 index = 0u; index < num; index++)
+    for (uint16 index = 0u; index < num; index++)
     {
         TcpIp_SocketTable[index].ownerCfgPtr = NULL_PTR;
         TcpIp_SocketTable[index].nextSocketId = (TcpIp_SocketIdType)(index + 1u);
@@ -3233,6 +3233,12 @@ TcpIp_InnerBind(
             if (TCPIP_IPPROTO_UDP == socketMngPtr->protocol)
             {
                 struct udp_pcb* upcb = (struct udp_pcb*)socketMngPtr->pcbPtr;
+                if (ctrlMngPtr != NULL_PTR)
+                {
+                    /* Preprocess to avoid calling ip_route */
+                    udp_bind_netif(upcb, &ctrlMngPtr->netifVar);
+                }
+                
                 lw_ret = (err_t)udp_bind(upcb, bindIpSrcPtr, *portPtr);
 
                 if (((err_t)ERR_OK == lw_ret) && (TCPIP_PORT_ANY == *portPtr))
@@ -3240,11 +3246,6 @@ TcpIp_InnerBind(
                     *portPtr = upcb->local_port;
                 }
 
-                if (ctrlMngPtr != NULL_PTR)
-                {
-                    /* Preprocess to avoid calling ip_route */
-                    udp_bind_netif(upcb, &ctrlMngPtr->netifVar);
-                }
                 /* register udp rx data callback function and callback input arg data point */
                 udp_recv((struct udp_pcb*)socketMngPtr->pcbPtr, TcpIp_UdpRecvCallcback, socketMngPtr);
             }

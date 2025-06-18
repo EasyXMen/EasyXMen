@@ -139,13 +139,14 @@
 /*Set interrupt pending */
 #define OS_INTERRUPT_SET_PENDING(id) OS_NVIC_STIR = ((uint32)(id)-16u) & 0x1FFu /* PRQA S 3409*/ /* MISRA PRE02 */
 #define OS_INTERRUPT_TRIGGER(isrId)  OS_INTERRUPT_SET_PENDING(Os_IsrCfg[Os_GetObjLocalId(isrId)].OsIsrSrc)
-#define OS_INTERRUPT_CLEAR(isrId)    OS_INTERRUPT_SET_PENDING(Os_IsrCfg[Os_GetObjLocalId(isrId)].OsIsrSrc)
 /*Clear interrupt pending */
 /* PRQA S 3409++*/ /* MISRA PRE02 */
 #define OS_INTERRUPT_CLEAR_PENDING(id)                              \
     OS_NVIC_ICPR_BASE[((uint32)(id) - (uint32)16u) >> (uint32)5u] = \
         (uint32)((uint32)1u << (uint32)(((uint32)(id) - (uint32)16u) & (uint32)(0x1FU)))
 /* PRQA S 3409--*/ /* MISRA PRE02 */
+
+#define OS_INTERRUPT_CLEAR(isrId) OS_INTERRUPT_CLEAR_PENDING(Os_IsrCfg[Os_GetObjLocalId(isrId)].OsIsrSrc)
 
 /* Get interrupt pending status */
 #define OS_INTERRUPT_GET_PENDING_STATUS(id)                                                        \

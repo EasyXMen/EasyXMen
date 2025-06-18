@@ -521,7 +521,13 @@ FUNC(Std_ReturnType, CANIF_CODE)
 CanIf_Transmit(PduIdType CanIfTxSduId, P2CONST(PduInfoType, AUTOMATIC, CANIF_APPL_DATA) PduInfoPtr)
 {
     Std_ReturnType result = E_NOT_OK;
+
+#if (                                                                                      \
+    (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT) || (STD_ON == CANIF_TX_STANDARD_CAN_SUPPORT) \
+    || (STD_ON == CANIF_TX_EXTENDED_CAN_SUPPORT))
     const CanIf_TxPduConfigType* txPduConfigPtr = &CANIF_TXPDU(CanIfTxSduId);
+#endif
+
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
     /* check whether module been initialized */
     if (CANIF_INITED != CanIf_InitStatus)

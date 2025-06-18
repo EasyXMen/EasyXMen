@@ -122,13 +122,16 @@
  *                                          CPT-11960,CPT-11959, Fixd compile problem
  *               2025-02-26  peng.wu        CPT-12316, Fixd the return result judgment of NvM during initialization
  *               2025-03-8   tao.yu         fix error of use iloop in Dem_TriggerOnEventStatus
- * V2.1.14       2024-09-19  tao.yu         remove Dem_EventQueueAddDebounceFailed and Dem_EventQueueAddDebouncePass,
+ * V2.1.14       2025-03-31  tao.yu         remove Dem_EventQueueAddDebounceFailed and Dem_EventQueueAddDebouncePass,
  *                                          change debounce counter to sys
  * V2.1.15       2025-04-14  peng.wu        Fixd error data type definition
  *               2025-04-21  peng.wu        CPT-13982, Add the judgment that eventid is not zero
  *                           peng.wu        CPT-13926, The problem of reading frozen frames in OBD
  *                                          CPT-13913, Reset DemMemDestInfo when reading fails
  *                                          CPT-13904, Do not set UDS bit6 in Dem_SubInit
+ *               2025-04-28  peng.wu        CPT-13889, Fix the index position in the PID
+ *                                          CPT-13897, Fix the FF and the extended data reading for time debouncing
+ *                                          CPT-14161, Fix the dcy cycle judgment of obddtc
  *******************************************************************************/
 
 /*******************************************************************************

@@ -435,7 +435,7 @@ FUNC(TcpIp_StateType, TCPIP_CODE) TcpIp_GetControlState(VAR(uintx, AUTOMATIC) ct
 #endif /* TCPIP_CONTROLLER_NUM > 0 */
 
 #if (TCPIP_SOCKET_NUM > 0u)
-FUNC(void, TCPIP_CODE) TcpIp_SocketInit(VAR(uint8, AUTOMATIC) socketNum);
+FUNC(void, TCPIP_CODE) TcpIp_SocketInit(VAR(uint16, AUTOMATIC) socketNum);
 #endif /* TCPIP_SOCKET_NUM > 0u */
 
 #if (TCPIP_LOCAL_ADR_NUM > 0u)

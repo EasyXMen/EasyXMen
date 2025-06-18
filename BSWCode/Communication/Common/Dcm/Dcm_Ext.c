@@ -1872,7 +1872,7 @@ FUNC(void, DCM_CODE) DslInternal_ProtocolStartSession(void) /* PRQA S 1532 */ /*
 #if (STD_ON == DCM_SESSION_FUNC_ENABLED)
     Dcm_SesCtrl.Dcm_NewSes = DCM_DEFAULT_SESSION;
     DslInternal_SesRefresh(Dcm_SesCtrl.Dcm_NewSes);
-    (void)SchM_Switch_DcmDiagnosticSessionControl(RTE_MODE_DcmDiagnosticSessionControl_DEFAULT_SESSION);
+    (void)SchM_Switch_DcmDiagnosticSessionControl(RTE_MODE_DcmDiagnosticSessionControl_DCM_DEFAULT_SESSION);
 #endif
 }
 

@@ -67,7 +67,10 @@
 #define LINIF_NC_DATA5_POS              (uint8)0x07
 
 #define LINIF_NC_SID_ASSIGNNAD          (uint8)0xB0
+#define LINIF_NC_ASSIGNFRAMEIDENTIFIER  (uint8)0xB1
 #define LINIF_NC_SID_READBYIDENTIFIER   (uint8)0xB2
+#define LINIF_NC_CONDITIONALCHANGENAD   (uint8)0xB3
+#define LINIF_NC_SID_DATADUMP           (uint8)0xB4
 #define LINIF_NC_SID_SAVECONFIGURATION  (uint8)0xB6
 #define LINIF_NC_SID_ASSIGNFRAMEIDRANGE (uint8)0xB7
 
@@ -1313,7 +1316,7 @@ static FUNC(void, LINIF_CODE) LinIf_SlaveMRFRxHandle(
     slaveRTDataPtr = LINIF_GET_SLAVE_RTDATA_PTR(ch);
     P2CONST(LinIf_NodeConfigurationIdentificationType, AUTOMATIC, LINIF_CONST)
     ncIdentifi = LINIF_GET_NC_IDENTIFICATION(ch);
-    Std_ReturnType ret;
+    Std_ReturnType ret = E_NOT_OK;
     boolean tpFlag = FALSE;
 
     if (LINIF_NC_FUNCTIONAL_REQ_NAD != Lin_SduPtr[LINIF_NC_NAD_POS])
@@ -1338,6 +1341,9 @@ static FUNC(void, LINIF_CODE) LinIf_SlaveMRFRxHandle(
         if (((0x06u == Lin_SduPtr[LINIF_NC_PCI_POS])
              && ((LINIF_NC_SID_ASSIGNNAD == Lin_SduPtr[LINIF_NC_SID_POS])
                  || (LINIF_NC_SID_ASSIGNFRAMEIDRANGE == Lin_SduPtr[LINIF_NC_SID_POS])
+                 || (LINIF_NC_ASSIGNFRAMEIDENTIFIER == Lin_SduPtr[LINIF_NC_SID_POS])
+                 || (LINIF_NC_CONDITIONALCHANGENAD == Lin_SduPtr[LINIF_NC_SID_POS])
+                 || (LINIF_NC_SID_DATADUMP == Lin_SduPtr[LINIF_NC_SID_POS])
                  || ((LINIF_NC_SID_READBYIDENTIFIER == Lin_SduPtr[LINIF_NC_SID_POS])
                      && ((0u == Lin_SduPtr[LINIF_NC_DATA1_POS]) || (2u == Lin_SduPtr[LINIF_NC_DATA1_POS])))))
             || ((0x01u == Lin_SduPtr[LINIF_NC_PCI_POS])
@@ -1349,7 +1355,6 @@ static FUNC(void, LINIF_CODE) LinIf_SlaveMRFRxHandle(
 
             switch (Lin_SduPtr[LINIF_NC_SID_POS])
             {
-
             case LINIF_NC_SID_ASSIGNNAD:
 #if (LINIF_NC_OPTIONAL_REQUEST_SUPPORTED == STD_ON)
                 ret = LinIf_SlaveNcAssignNAD(ch, Lin_SduPtr);
@@ -1366,6 +1371,11 @@ static FUNC(void, LINIF_CODE) LinIf_SlaveMRFRxHandle(
 
             case LINIF_NC_SID_ASSIGNFRAMEIDRANGE:
                 ret = LinIf_SlaveNcAssignFrameIdRange(ch, Lin_SduPtr);
+                break;
+
+            case LINIF_NC_ASSIGNFRAMEIDENTIFIER:
+            case LINIF_NC_CONDITIONALCHANGENAD:
+            case LINIF_NC_SID_DATADUMP:
                 break;
 
             default:

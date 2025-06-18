@@ -105,6 +105,10 @@
 
 extern CONST(Lin_DriverApiType, LINIF_CONST) Lin_DriverApi[LINIF_NUMBER_OF_DRIVERS];
 
+#if (LINIF_TRCV_DRIVER_SUPPORTED == STD_ON)
+extern CONST(LinTrcv_DriverApiType, LINIF_CONST) LinTrcv_DriverApi[];
+#endif
+
 extern CONST(LinIf_ConfigType, LINIF_CONST) LinIf_PCConfig;
 /*******************************************************************************
 **                      Global Functions                                      **

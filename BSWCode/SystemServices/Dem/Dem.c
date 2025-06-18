@@ -2631,8 +2631,7 @@ DEM_LOCAL FUNC(void, DEM_CODE) Dem_EventQueueProcess(void)
             && (0x00u != DEM_FLAGS_ISSET(pEvent->Status, DEM_EVENT_STATUS_ENABLED_CONDICTION)))
         {
             /* req SWS_Dem_00700 */
-            if (((DEM_BITS_ISSET(DemOperationCycleStatus, OperationCycleId))
-                 || (DemPbCfgPtr->DemOperationCycle[OperationCycleId].DemOperationCycleType == DEM_OPCYC_OBD_DCY)))
+            if (DEM_BITS_ISSET(DemOperationCycleStatus, OperationCycleId))
             {
 #if (DEM_TRIGGERONFDCTHRESHOLDEANLE == STD_ON)
                 if ((pBuffer->Status == DEM_EVENT_STATUS_FDC_THRESHOLD_REACHED)
