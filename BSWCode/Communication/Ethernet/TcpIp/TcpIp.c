@@ -96,6 +96,8 @@
  *                                        TcpIp_ClearLocalAdrIpVar
  *  V2.0.28   [20240814]  [fupeng.yu]     modify transmission of TP for the TcpTransmit
  *  V2.0.29   [20240914]  [fupeng.yu]     Modify the pre-compilation condition for fast transmission of TCP data.
+ *  V2.0.30   [20250506]  [fupeng.yu]     1.Resolve UDP port reuse for different TcpIp Controller.
+ *                                        2.Modify the pre-compilation condition of TcpIp_InitState.
  **********************************************************************************************************************/
 /**
  \page ISOFT_MISRA_Exceptions  MISRA-C:2012 Compliance Exceptions
@@ -138,13 +140,11 @@
 /***********************************************************************************************************************
  *  LOCAL DATA
  ***********************************************************************************************************************/
-#if (STD_ON == TCPIP_INITIALIZATION_AVAILABLE)
 #define TCPIP_START_SEC_VAR_INIT_8
 #include "TcpIp_MemMap.h"
 TCPIP_LOCAL VAR(TcpIp_InitStateType, TCPIP_VAR_ZERO_INIT) TcpIp_InitState = TCPIP_STATE_UNINIT;
 #define TCPIP_STOP_SEC_VAR_INIT_8
 #include "TcpIp_MemMap.h"
-#endif /* STD_ON == TCPIP_INITIALIZATION_AVAILABLE */
 
 #define TCPIP_START_SEC_VAR_CLEARED_PTR
 #include "TcpIp_MemMap.h"
@@ -160,7 +160,7 @@ TCPIP_LOCAL P2CONST(TcpIp_ConfigType, AUTOMATIC, TCPIP_VAR) TcpIp_PbCfgPtr;
 #define TCPIP_C_AR_PATCH_VERSION       0
 #define TCPIP_C_SW_MAJOR_VERSION       2
 #define TCPIP_C_SW_MINOR_VERSION       0
-#define TCPIP_C_SW_PATCH_VERSION       29
+#define TCPIP_C_SW_PATCH_VERSION       30
 #define TCPIP_SW_CFG_DEP_MAJOR_VERSION 2
 #define TCPIP_SW_CFG_DEP_MINOR_VERSION 0
 #define TCPIP_SW_CFG_DEP_PATCH_VERSION 0
@@ -246,9 +246,7 @@ TcpIp_Init(P2CONST(TcpIp_ConfigType, AUTOMATIC, TCPIP_APPL_CONST) ConfigPtr)
 
 #endif /* STD_ON == TCPIP_BSDSOCKET_SUPPORT */
 
-#if (STD_ON == TCPIP_INITIALIZATION_AVAILABLE)
         TcpIp_InitState = TCPIP_STATE_INIT;
-#endif /* STD_ON == TCPIP_INITIALIZATION_AVAILABLE */
     }
 }
 

@@ -376,7 +376,6 @@ void PduR_PduRIfTxConfirmation(PduIdType srcPduId, PduIdType destPduId, Std_Retu
                 {
                     SchM_Exit_PduR_ExclusiveArea_Route();
                     break;
-                    SchM_Exit_PduR_ExclusiveArea_Route();
                 }
 
                 PduInfoType pduInfo;

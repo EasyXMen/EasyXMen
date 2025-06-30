@@ -1005,7 +1005,7 @@ udp_bind(struct udp_pcb *pcb, const ip_addr_t *ipaddr, u16_t port)
 #endif /* SO_REUSE */
         {
           /* port matches that of PCB in list and REUSEADDR not set -> reject */
-          if ((ipcb->local_port == port) &&
+          if ((pcb->netif_idx == ipcb->netif_idx) && (ipcb->local_port == port) &&
               /* IP address matches or any IP used? */
               (ip_addr_cmp(&ipcb->local_ip, ipaddr) || ip_addr_isany(ipaddr) ||
               ip_addr_isany(&ipcb->local_ip))) {

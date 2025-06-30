@@ -2338,8 +2338,37 @@ static FUNC(void, NVM_CODE) NvM_MemIfInconsistent(void) /* PRQA S 0709 */ /* MIS
 static FUNC(void, NVM_CODE) NvM_MemIfInvalid(void) /* PRQA S 0709 */ /* MISRA Rule 1.1 */
 {
     NvM_Module.MemIfJobState = NVM_MEMIF_JOB_IDLE;
-    NvM_UpdateValidandChangeStatus(STD_OFF, STD_OFF);
-    NvM_JobOverSetFlag(NVM_REQ_NV_INVALIDATED, NVM_CRC_DELETE);
+#if (NVM_API_CONFIG_CLASS_1 != NVM_API_CONFIG_CLASS)
+    if (NVM_BLOCK_DATASET == NvM_CurRunning.ManagementType)
+    {
+        NvM_UpdateValidandChangeStatus(STD_OFF, STD_OFF);
+        NvM_JobOverSetFlag(NVM_REQ_NV_INVALIDATED, NVM_CRC_DELETE);
+    }
+    else
+#endif
+        if ((NVM_BLOCK_NATIVE == NvM_CurRunning.ManagementType) || (NVM_JOB_STEP_READ_2ND_NV == NvM_Module.JobStep))
+    {
+        NvM_CurRunning.ESingleReqResult = NVM_REQ_INTEGRITY_FAILED;
+        NvM_UpdateValidandChangeStatus(STD_OFF, STD_OFF); /* req NVM317*/
+        if ((NULL_PTR != NvM_BlockDescriptor[NvM_CurRunning.BlockId - 1U].NvmRomBlockDataAddress)
+            || (NULL_PTR != NvM_BlockDescriptor[NvM_CurRunning.BlockId - 1U].NvmInitBlockCallback))
+        {
+            NVM_GetRepeatMirrorOperation();
+            NvM_Module.JobStep = NVM_JOB_STEP_READ_ROM;
+            NvM_AtomJobReq(NVM_ATOMJOB_READROM);
+        }
+        else
+        {
+            NvM_UpdateValidandChangeStatus(STD_OFF, STD_OFF);
+            NvM_JobOverSetFlag(NVM_REQ_NV_INVALIDATED, NVM_CRC_DELETE);
+        }
+    }
+    else
+    {
+        NvM_Module.JobStep = NVM_JOB_STEP_READ_2ND_NV;
+        NvM_Module.MemIfJobState = NVM_MEMIF_JOB_ASYNC_READY;
+        NvM_CurRunning.Index = 1;
+    }
 }
 
 /*
@@ -3483,21 +3512,24 @@ static FUNC(void, NVM_CODE) NvM_MemCpyStep(void) /* PRQA S 0709 */ /* MISRA Rule
     uint8 MirrorOrNot =
         NvM_GetWordBitState(NvM_AdminBlock[NvM_CurRunning.BlockId - 1U].FlagGroup, NVM_ADMIN_RAMMIRROR_OR_NOT);
     uint8 Loss;
-    if (((uint8)STD_ON == MirrorOrNot) && (NvM_CurRunning.RepeatMirrorCounter > 0U))
+    if ((uint8)STD_ON == MirrorOrNot)
     {
-        if ((Std_ReturnType)E_OK == NvM_MemCpy(NvM_NvDataBuffer, NvM_CurRunning.RamAddr))
+        if (NvM_CurRunning.RepeatMirrorCounter > 0U)
         {
-            Loss = NvM_GetWordBitState(NvM_CurRunning.AdminFlagGroup, NVM_ADMIN_REDUNDANCY_LOSS);
-            if ((uint8)STD_ON == Loss)
+            if ((Std_ReturnType)E_OK == NvM_MemCpy(NvM_NvDataBuffer, NvM_CurRunning.RamAddr))
             {
-                NvM_SetWordBitState(&NvM_CurRunning.AdminFlagGroup, NVM_ADMIN_NV_REPAIR, STD_ON);
-                NvM_RepireDataSave(NvM_CurRunning.RamAddr, NvM_CurRunning.Length);
+                Loss = NvM_GetWordBitState(NvM_CurRunning.AdminFlagGroup, NVM_ADMIN_REDUNDANCY_LOSS);
+                if ((uint8)STD_ON == Loss)
+                {
+                    NvM_SetWordBitState(&NvM_CurRunning.AdminFlagGroup, NVM_ADMIN_NV_REPAIR, STD_ON);
+                    NvM_RepireDataSave(NvM_CurRunning.RamAddr, NvM_CurRunning.Length);
 #if (STD_ON == NVM_DEM_E_LOSS_OF_REDUNDANCY)
-                Dem_ReportErrorStatus(NVM_E_LOSS_OF_REDUNDANCY, DEM_EVENT_STATUS_FAILED);
+                    Dem_ReportErrorStatus(NVM_E_LOSS_OF_REDUNDANCY, DEM_EVENT_STATUS_FAILED);
 #endif
+                }
+                NvM_UpdateValidandChangeStatus(STD_ON, STD_OFF);
+                NvM_JobOverSetFlag(NVM_REQ_OK, NVM_CRC_UPDATE);
             }
-            NvM_UpdateValidandChangeStatus(STD_ON, STD_OFF);
-            NvM_JobOverSetFlag(NVM_REQ_OK, NVM_CRC_UPDATE);
         }
         else if (NvM_CurRunning.RepeatMirrorCounter == 0U)
         {
@@ -3512,7 +3544,7 @@ static FUNC(void, NVM_CODE) NvM_MemCpyStep(void) /* PRQA S 0709 */ /* MISRA Rule
             /*idle*/
         }
     }
-    else if ((uint8)STD_OFF == MirrorOrNot)
+    else /* STD_OFF == MirrorOrNot */
     {
         if ((Std_ReturnType)E_OK == NvM_MemCpy(NvM_NvDataBuffer, NvM_CurRunning.RamAddr))
         {
@@ -3533,10 +3565,6 @@ static FUNC(void, NVM_CODE) NvM_MemCpyStep(void) /* PRQA S 0709 */ /* MISRA Rule
             NvM_UpdateValidandChangeStatus(STD_OFF, STD_OFF);
             NvM_JobOverSetFlag(NVM_REQ_NOT_OK, NVM_CRC_REMAIN);
         }
-    }
-    else
-    {
-        /*MISRA*/
     }
 }
 

@@ -69,8 +69,10 @@
  *              2024-10-14  tao.yu      CPT-10775, fix call SingleCallback when read
  *                                      CPT-10763, fix Repaire redundant block
  *              2024-10-14  xue.han     QAC
+ *              2024-12-12  peng.wu     Fix Mirror counter
  *   V2.0.12    2025-03-10  peng.wu     Update the external API comment
  *              2025-03-25  peng.wu     CPT-13643,Fix the logic for reading the first block during power-on
+ *              2025-05-07  peng.wu     Fix invalidate process during reading or writing
 ============================================================================*/
 
 /*===================[V E R S I O N  I N F O R M A T I O N]===================*/

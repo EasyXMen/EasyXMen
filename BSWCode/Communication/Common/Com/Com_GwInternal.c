@@ -142,7 +142,9 @@ static void Com_GwNotArraySignal(
 #endif
 #if ((0u < COM_TXSIGNAL_NUMBER) || (0u < COM_GW_DESTINATION_DESCRIPTION_NUMBER))
     const Com_TxSignalType* txSignalPtr;
+#if (0u < COM_GW_DESTINATION_DESCRIPTION_NUMBER) || (COM_DESTSIG_FILTERTYPE_MAX_NUMBER > 0u)
     const Com_GwDestSignalType* gwDestSignalPtr;
+#endif
 #endif
     boolean notArrSigIsTrue = FALSE;
 
@@ -378,16 +380,16 @@ static FUNC(void, COM_CODE) Com_GwUint8NDYNSignal(
 {
 #if (0u < COM_TXIPDUBUFF_SIZE)
     boolean valueChanged = FALSE;
-    PduIdType txPduId;
+    PduIdType txPduId = 0u;
     uint16 rptNum = 1u;
-    Com_SignalPositionType sigLsbBytePos;
+    Com_SignalPositionType sigLsbBytePos = 0u;
 #if (STD_ON == COM_GW_DEST_SIG_UPDATE_BIT_ENABLE)
     Com_SignalPositionType updateBitPosition = COM_UNUSED_SIGNALPOSITION;
     uint8 updateBitMask;
 #endif
-    Com_TransferPropertyType signalTxProperty;
+    Com_TransferPropertyType signalTxProperty = COM_PENDING;
 #if ((0u < COM_TXSIGNAL_NUMBER) || (0u < COM_GW_DESTINATION_DESCRIPTION_NUMBER))
-    const Com_TxSignalType* txSignalPtr;
+    const Com_TxSignalType* txSignalPtr = NULL_PTR;
     const Com_GwDestSignalType* gwDestSignalPtr;
 #endif
 #if ((0u < COM_TXGROUPSIGNAL_NUMBER) && (COM_TXSIGNALGROUP_NUMBER))
@@ -490,7 +492,7 @@ static FUNC(void, COM_CODE) Com_GwUint8NDYNSignal(
         Com_GwSignalOfPduHandle(txIpduStatePtr, signalTxProperty, rptNum, valueChanged);
 /*the tx signal configuration timeout*/
 #if (STD_ON == COM_TX_SIGNAL_TIMEOUT_ENABLE)
-        if (COM_UNUSED_TXSIGNALTIMEOUTID != txSignalPtr->ComTimeoutIndex)
+        if (txSignalPtr != NULL_PTR && COM_UNUSED_TXSIGNALTIMEOUTID != txSignalPtr->ComTimeoutIndex)
         {
             if ((0u == txIpduStatePtr->DMCnt) || (1u < txIpduStatePtr->RptNum))
             {
@@ -698,7 +700,10 @@ static void Com_GwSignal(
     Com_SignalConfigType gwDestSignalType;
     Com_SignalIdType gwDestSignalId;
     boolean gwSigIsTrue;
-#if (0u < COM_GWSIGNAL_8BITBUFF_SIZE)
+#if (0u < COM_GWSIGNAL_8BITBUFF_SIZE)                                                                               \
+    && ((STD_ON == COM_RX_SIGNAL_TYPE_UINT8_N_ENABLE) || (STD_ON == COM_RX_SIGNAL_TYPE_UINT8_DYN_ENABLE)            \
+        || (STD_ON == COM_RX_GRP_SIGNAL_TYPE_UINT8_N_ENABLE) || (STD_ON == COM_RX_GRP_SIGNAL_TYPE_UINT8_DYN_ENABLE) \
+        || (STD_ON == COM_GW_SRC_DSP_SIG_TYPE_UINT8_N_ENABLE) || (STD_ON == COM_GW_SRC_DSP_SIG_TYPE_UINT8_DYN_ENABLE))
     uint16 signalLength = 0u;
 #endif
 #if (0u < COM_RXGROUPSIGNAL_NUMBER)

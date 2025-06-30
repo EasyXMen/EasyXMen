@@ -598,6 +598,7 @@ static FUNC(Std_ReturnType, DCM_CODE) Dcm_UDS0x29_Challenge(
 
             {
                 KeyM_CertDataType CertData;
+                uint32 DslBuffer = pDcmChannelCfg->Dcm_DslBufferSize;
                 CertData.certData = &Dcm_Channel[Offset + 7u + Dcm_challengeLength];
                 CertData.certDataLength = pDcmChannelCfg->Dcm_DslBufferSize - (*ResLen);
                 ret =
@@ -624,6 +625,7 @@ static FUNC(Std_ReturnType, DCM_CODE) Dcm_UDS0x29_Challenge(
                     Dcm_CsmJobId = pAuthenticationConnection->DcmDspAuthenticationClientChallengeSignJobRef;
                     Dcm_Channel[Offset + 5u + Dcm_challengeLength] = (uint8)(Dcm_certDataLength >> 8u);
                     Dcm_Channel[Offset + 6u + Dcm_challengeLength] = (uint8)Dcm_certDataLength;
+                    Dcm_ProofOfOwnershipServerLength = DslBuffer - 9u - Dcm_challengeLength - Dcm_certDataLength;
                     ret = Csm_SignatureGenerate(
                         Dcm_CsmJobId,
                         CRYPTO_OPERATIONMODE_SINGLECALL,
@@ -959,11 +961,12 @@ static FUNC(Std_ReturnType, DCM_CODE) Dcm_UDS0x29_0x03_getlist(
 static FUNC(Std_ReturnType, DCM_CODE)
     Dcm_UDS0x29_0x03_whitelist(uint8 connectionId, P2VAR(Dcm_NegativeResponseCodeType, AUTOMATIC, DCM_VAR) ErrorCode)
 {
-    Std_ReturnType ret;
+    Std_ReturnType ret = E_OK;
     const Dcm_DspAuthenticationConnectionTypes* pAuthenticationConnection =
         &DcmPbCfgPtr->pDcmDspCfg->Dcm_DspAuthentication->DcmDspAuthenticationConnection[connectionId];
     Dcm_KeyMCertInfoTypes Dcm_KeyMCertInfo;
     uint8 listNum = 0;
+#if DCM_DSP_AUTHENTICATION_SERVICE_WHITE_LIST
     uint8 Data[DCM_DSP_AUTHENTICATION_SERVICE_WHITE_LIST] = {0};
     const Dcm_DspAuthenticationTypes* pDcm_DspAuthentication = DcmPbCfgPtr->pDcmDspCfg->Dcm_DspAuthentication;
     Dcm_WhiteListTypes* pDcm_WhiteList = &Dcm_AuthenticateInfo[connectionId].Dcm_WhiteList;
@@ -1015,6 +1018,7 @@ static FUNC(Std_ReturnType, DCM_CODE)
             &Dcm_AuthenticateInfo[connectionId].Dcm_WhiteList.Dcm_WhiteListRidLength,
             ErrorCode);
     }
+#endif
     return ret;
 }
 
@@ -1735,8 +1739,8 @@ FUNC(void, DCM_CODE) Dcm_MainFunction_AuthenticationTimer(void)
  * Return              <Std_ReturnType>
  */
 /*************************************************************************/
-FUNC(void, DCM_CODE)
-Dcm_SetDeauthenticatedRole(uint16 connectionId, P2CONST(uint8, AUTOMATIC, DCM_VAR) deauthenticatedRole)
+FUNC(Std_ReturnType, DCM_CODE)
+Dcm_SetDeauthenticatedRole(uint16 connectionId, const Dcm_AuthenticationRoleType deauthenticatedRole)
 {
     const Dcm_DspAuthenticationTypes* pDcm_DspAuthentication = DcmPbCfgPtr->pDcmDspCfg->Dcm_DspAuthentication;
     /*SWS_Dcm_01486 Default authentication role set from SWC
@@ -1766,6 +1770,7 @@ Dcm_SetDeauthenticatedRole(uint16 connectionId, P2CONST(uint8, AUTOMATIC, DCM_VA
             Dcm_AuthenticateInfo[connectionId].Dcm_Certificate |= (uint32)((uint32)deauthenticatedRole[i] << (3u - i));
         }
     }
+    return E_OK;
 }
 
 /*************************************************************************/

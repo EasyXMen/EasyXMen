@@ -1190,7 +1190,6 @@ void ComM_ChLimitWakeUp(uintx chIdx, boolean stu)
  */
 void ComM_ChLimitNoCom(uintx chIdx, boolean stu) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
 {
-    const ComM_ChannelConfigType* chCfgPtr = &ComM_ChannelConfigPtr[chIdx];
     ComM_ChVarType* chVarPtr = &ComM_ChVarTable[chIdx];
     if (TRUE == stu)
     {

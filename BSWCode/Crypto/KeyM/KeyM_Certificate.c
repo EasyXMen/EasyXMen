@@ -102,19 +102,21 @@
 *******************************************************************************/
 #define KEYM_LONG_FORMAT_MASK           0x80u
 
-#define KEYM_CERT_ASN1_BOOLEAN          0x01u
-#define KEYM_CERT_ASN1_INTEGER          0x02u
-#define KEYM_CERT_ASN1_BIT_STRING       0x03u
-#define KEYM_CERT_ASN1_OCTET_STRING     0x04u
-#define KEYM_CERT_ASN1_NULL             0x05u
-#define KEYM_CERT_ASN1_OID              0x06u
-#define KEYM_CERT_ASN1_UINT8_STRING     0x0Cu
-#define KEYM_CERT_ASN1_ASCII_STRING     0x13u
-#define KEYM_CERT_ASN1_UTC_TIME         0x17u
-#define KEYM_CERT_ASN1_GENERALIZED_TIME 0x18u
-#define KEYM_CERT_ASN1_SEQ_CONSTRU      0x30u
-#define KEYM_CERT_ASN1_SET_CONSTRU      0x31u
-#define KEYM_CERT_ASN1_TAG              0xA0u
+#define KEYM_CERT_ASN1_BOOLEAN          0x01u /**< ASN.1 tag for boolean type. */
+#define KEYM_CERT_ASN1_INTEGER          0x02u /**< ASN.1 tag for integer type. */
+#define KEYM_CERT_ASN1_BIT_STRING       0x03u /**< ASN.1 tag for bit string type. */
+#define KEYM_CERT_ASN1_OCTET_STRING     0x04u /**< ASN.1 tag for octet string type. */
+#define KEYM_CERT_ASN1_NULL             0x05u /**< ASN.1 tag for null type. */
+#define KEYM_CERT_ASN1_OID              0x06u /**< ASN.1 tag for object identifier (OID) type. */
+#define KEYM_CERT_ASN1_UINT8_STRING     0x0Cu /**< ASN.1 tag for UTF8 string type. */
+#define KEYM_CERT_ASN1_ASCII_STRING     0x13u /**< ASN.1 tag for printable string type (ASCII). */
+#define KEYM_CERT_ASN1_IA5_STRING       0X16U /**< ASN.1 tag for IA5 string type . */
+#define KEYM_CERT_ASN1_UTC_TIME         0x17u /**< ASN.1 tag for UTC time type. */
+#define KEYM_CERT_ASN1_GENERALIZED_TIME 0x18u /**< ASN.1 tag for generalized time type. */
+#define KEYM_CERT_ASN1_SEQ_CONSTRU      0x30u /**< ASN.1 tag for constructed sequence type. */
+#define KEYM_CERT_ASN1_SET_CONSTRU      0x31u /**< ASN.1 tag for constructed set type. */
+#define KEYM_CERT_ASN1_TAG              0xA0u /**< ASN.1 context-specific tag. */
+                                              /**< Check val is in the range of min to max. */
 
 #define KEYM_CHECK_RANGE(min, max, val)         \
     do                                          \
@@ -393,11 +395,6 @@ KeyM_ServiceCertificate(
             {
                 ret = KEYM_E_KEY_CERT_SIZE_MISMATCH;
             }
-            /*Service check.*/
-            else if ((Service < KEYM_SERVICE_CERT_REQUEST_CSR) || (Service > KEYM_SERVICE_CERT_UPDATE_CRL))
-            {
-                ret = E_NOT_OK;
-            }
             else
             {
                 switch (Service)
@@ -451,7 +448,12 @@ KeyM_ServiceCertificate(
                                 ret = KEYM_E_CERT_INVALID_CHAIN_OF_TRUST;
                                 break;
                             }
-                        } while ((certUpperHierRef->selfSignedCert != TRUE) && (ret == E_OK));
+                            if (certUpperHierRef == NULL_PTR)
+                            {
+                                ret = KEYM_E_KEY_CERT_READ_FAIL;
+                                break;
+                            }
+                        } while (certUpperHierRef->selfSignedCert != TRUE);
                         if (E_OK == ret)
                         {
                             ret = KeyM_HandleParseCert(certCfgPtr->certId, RequestData, (uint32)RequestDataLength);
@@ -752,7 +754,12 @@ KeyM_VerifyCertificate(VAR(KeyM_CertificateIdType, AUTOMATIC) CertId)
                         ret = KEYM_E_CERT_INVALID_CHAIN_OF_TRUST;
                         break;
                     }
-                } while (certUpperHierRef->selfSignedCert != TRUE);
+                    if (certUpperHierRef == NULL_PTR)
+                    {
+                        ret = KEYM_E_KEY_CERT_READ_FAIL;
+                        break;
+                    }
+                } while (!certUpperHierRef->selfSignedCert); /* PRQA S 2109 */
             }
         }
     }
@@ -1426,6 +1433,7 @@ KeyM_HandleParseCert(
     {
         goto PARSE_CERT_EXIT;
     }
+
     /*
      *  issuerUniqueID  [1]  IMPLICIT UniqueIdentifier OPTIONAL,
      *                       -- If present, version shall be v2 or v3
@@ -1471,12 +1479,21 @@ KeyM_HandleParseCert(
         {
             /*Parsing operation has been completed without failure*/
             KeyM_CertStatus[CertId] = KEYM_CERTIFICATE_PARSED_NOT_VALIDATED;
-            KeyM_CopyData(certCfgPtr->tbsCert->dataEle, certDataPtr, certDataLength);
+            /*only tbs*/
+            KeyM_CopyData(certCfgPtr->tbsCert->dataEle, &certDataPtr[KEYM_CONST_4], certCfgPtr->tbsCert->len);
         }
     }
-PARSE_CERT_EXIT:
-    /* PRQA S 2001 -- */ /* MISRA Rule 15.1 */
-    if (ret != E_OK)
+PARSE_CERT_EXIT:                       /* PRQA S 2015 */
+    /* PRQA S 2001 -- */               /* MISRA Rule 15.1 */
+    if (ret == E_OK) /* PRQA S 1881 */ /* VL_QAC_KeyM */
+    {
+        (void)KeyM_CertSetStatus(CertId, KEYM_CERTIFICATE_PARSED_NOT_VALIDATED);
+    }
+    else if (ret == KEYM_E_CERTIFICATE_INVALID_TYPE) /* PRQA S 1881 */ /* VL_QAC_KeyM */
+    {
+        (void)KeyM_CertSetStatus(CertId, KEYM_E_CERTIFICATE_INVALID_TYPE);
+    }
+    else
     {
         (void)KeyM_CertSetStatus(CertId, KEYM_E_CERTIFICATE_INVALID_FORMAT);
     }
@@ -1595,6 +1612,9 @@ KEYM_LOCAL FUNC(Std_ReturnType, KEYM_CODE) KeyM_CheckGeneralParam(
         else if (*CertElementDataLength < KeyM_CertPCfg[CertId].certEleRef[CertElementId].certEleMaxLen)
         {
             ret = KEYM_E_KEY_CERT_SIZE_MISMATCH;
+#if (STD_ON == KEYM_DEVERROR_DETECT)
+            KEYM_DET_REPORT(ApiId, KEYM_E_SMALL_BUFFER);
+#endif /*STD_ON == KEYM_DEVERROR_DETECT*/
         }
         else if (KeyM_CertStatus[CertId] != KEYM_CERTIFICATE_VALID)
         {
@@ -1656,7 +1676,12 @@ KEYM_LOCAL FUNC(Std_ReturnType, KEYM_CODE) KeyM_FindCertElement(
         if ((certEleCfgPtr->certEleMaxLen < certEle->certEleMaxLen)
             || (certEleCfgPtr->certEleStruct != certEle->certEleStruct))
         {
-            continue;
+            if (idx == KeyM_CertPCfg[certId].numOfCertEle - 1u) /* PRQA S 3397 */
+            {
+                /*SWS_KeyM_00168*/
+                ret = (Std_ReturnType)KEYM_E_CERTIFICATE_INVALID_TYPE;
+            }
+            continue; /* PRQA S 0770 */
         }
         else
         {
@@ -1997,9 +2022,10 @@ KEYM_LOCAL FUNC(Std_ReturnType, KEYM_CODE) KeyM_CertHandleName(
                 KeyM_CopyData(isuNameOid->dataEle, *cerS, isuNameOid->len);
                 *cerS += isuNameOid->len;
 
-                if (((temp_EndAddr - *cerS) < KEYM_CONST_1) /* PRQA S 1822 */ /* MISRA Rule 10.4 */
+                if (((temp_EndAddr - *cerS) < (uint8)KEYM_CONST_1) /* PRQA S 1822,1852 */ /* MISRA Rule 10.4 */
                     || ((**cerS != KEYM_CERT_ASN1_BIT_STRING) && (**cerS != KEYM_CERT_ASN1_OCTET_STRING)
-                        && (**cerS != KEYM_CERT_ASN1_UINT8_STRING) && (**cerS != KEYM_CERT_ASN1_ASCII_STRING)))
+                        && (**cerS != KEYM_CERT_ASN1_UINT8_STRING) && (**cerS != KEYM_CERT_ASN1_ASCII_STRING)
+                        && (**cerS != KEYM_CERT_ASN1_IA5_STRING)))
                 {
                     ret = E_NOT_OK;
                 }
@@ -2796,9 +2822,10 @@ KeyM_HandleCertcVerify(
                              * to be set*/
                             ret = Csm_KeyElementSet(
                                 certCfgPtr->certSigVeriKey,
-                                CRYPTO_KE_SIGNATURE_KEY,
-                                pbKeyBuf->dataEle,
-                                pbKeyBuf->len);
+                                CRYPTO_KE_SIGNATURE_KEY, /* PRQA S 1258 */
+                                &pbKeyBuf->dataEle[1],
+                                pbKeyBuf->len - 1);
+                            /* PRQA S 1840 -- */
                             (void)Csm_KeySetValid(certCfgPtr->certSigVeriKey);
                             sigVerJob = certCfgPtr->certSigVeriJob;
                         }

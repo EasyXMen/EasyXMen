@@ -1967,7 +1967,7 @@ FUNC(void, DOIP_CODE) DoIP_SendVehicleIdentificationRsp(VAR(uint16, AUTOMATIC) t
     uint8 byte;
     uint8 txBuffer[41];
     PduInfoType pduInfo;
-#if (FALSE == DOIP_GID_CONFIGURED)
+#if ((FALSE == DOIP_GID_CONFIGURED) && (FALSE == DOIP_USE_EID_AS_GID))
     uint8 temp[6];
     Std_ReturnType ret;
     DoIPGetGidCallbackFncType GetGid;

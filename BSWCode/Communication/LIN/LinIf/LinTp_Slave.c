@@ -239,6 +239,20 @@ LinTp_SlaveMRFIndication(/* PRQA S 1532 */
             break;
         }
     }
+    else
+    {
+        NetworkHandleType commCh = LINIF_GET_COMM_NETWORK(ch);
+        NetworkHandleType tpCh = LinTp_SlaveGetLinTpChannel(commCh);
+        LinTp_SlaveRuntimeType* tpSlaveRTPtr = LINTP_GET_SLAVE_RTDATA_PTR(tpCh);
+        if ((LINTP_CHANNEL_BUSY == tpSlaveRTPtr->channelState)
+            && (Lin_SduPtr[LINTP_PDU_OFS_NAD] != tpSlaveRTPtr->MRFRequestedNad))
+        {
+            if ((pciType == LINTP_PDU_PCI_SF) || (pciType == LINTP_PDU_PCI_FF))
+            {
+                LinTp_SlaveAbortTxRxAndNotifyFailToUpper(tpSlaveRTPtr);
+            }
+        }
+    }
 }
 
 /******************************************************************************/
@@ -534,6 +548,7 @@ static FUNC(void, LINIF_CODE) LinTp_SlaveSFRxHandle(
         tpSlaveRTPtr->ChCfgPtr = &LINTP_GET_CHANNEL_CONFIG(tpCh);
         tpSlaveRTPtr->RxStage = LINTP_SLAVE_RX_SF;
         tpSlaveRTPtr->SduSN = 0u;
+        tpSlaveRTPtr->MRFRequestedNad = Lin_SduPtr[LINTP_PDU_OFS_NAD];
         /* Reset functional addressing flag */
         if (tpSlaveRTPtr->FunctionAddressFlag)
         {
@@ -609,6 +624,7 @@ static FUNC(void, LINIF_CODE) LinTp_SlaveFFRxHandle(
         tpSlaveRTPtr->ChCfgPtr = &LINTP_GET_CHANNEL_CONFIG(tpCh);
         tpSlaveRTPtr->RxStage = LINTP_SLAVE_RX_FF;
         tpSlaveRTPtr->SduSN = 0u;
+        tpSlaveRTPtr->MRFRequestedNad = Lin_SduPtr[LINTP_PDU_OFS_NAD];
 
         /* @req <SWS_LinIf_00652> */
         /* Start the N_Cr timer */
@@ -1373,6 +1389,7 @@ static FUNC(void, LINIF_CODE)
     tpSlaveRTPtr->TxStage = LINTP_SLAVE_TX_IDLE;
     tpSlaveRTPtr->SduSN = 0u;
     tpSlaveRTPtr->RetryCopyCnt = 0u;
+    tpSlaveRTPtr->MRFRequestedNad = 0x0u;
     (void)ILib_memset(tpSlaveRTPtr->SduBuf, 0, LINTP_FRAME_LEN_MAX);
 }
 

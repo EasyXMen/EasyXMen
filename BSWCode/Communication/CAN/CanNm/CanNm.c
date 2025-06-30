@@ -889,7 +889,6 @@ Std_ReturnType CanNm_Transmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr) 
     if (CanNm_ValidateTxPduId(CANNM_SERVICE_ID_TRANSMIT, TxPduId))
 #endif
     {
-        P2CONST(CanNm_ChannelConfigType, AUTOMATIC, CANNM_APPL_CONST) chCfgPtr;
         CanNm_InnerChannelType* chRTPtr = NULL_PTR;
         uint8 chIndex;
 
@@ -898,7 +897,6 @@ Std_ReturnType CanNm_Transmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr) 
             const CanNm_UserDataTxPduType* userDataPduPtr = CanNm_CfgPtr->ChannelConfig[chIndex].UserDataTxPdu;
             if ((userDataPduPtr != NULL_PTR) && (userDataPduPtr->TxUserDataPduId == TxPduId))
             {
-                chCfgPtr = &CanNm_CfgPtr->ChannelConfig[chIndex];
                 chRTPtr = &CanNm_ChRunTime[chIndex];
                 break;
             }

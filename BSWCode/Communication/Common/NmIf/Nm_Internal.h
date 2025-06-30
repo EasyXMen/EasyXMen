@@ -52,7 +52,6 @@
 **                      Global Data Types                                     **
 *******************************************************************************/
 /* used cycle find */
-typedef uint32 uintx;
 
 #if (STD_ON == NM_STATE_CHANGE_IND_ENABLED)
 /* nm state and report signal value */

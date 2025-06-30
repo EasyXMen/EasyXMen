@@ -1781,7 +1781,7 @@ Dem_InterDcmReadDataOfOBDFreezeFrame(
                         for (DataElementIndex = 0; DataElementIndex < pPid->RefNum; DataElementIndex++)
                         {
 #if (DEM_DATA_ELEMENT_CLASS_NUM > 0)
-                            if (DataElementIndexOfPID == (pPid->StartIndex + DataElementIndex))
+                            if (DataElementIndexOfPID == DataElementIndex)
                             {
                                 const DemDataElementClassTypes* pDemDataElementClass =
                                     &DemPbCfgPtr->DemDataElementClass[pPid->StartIndex + DataElementIndex];

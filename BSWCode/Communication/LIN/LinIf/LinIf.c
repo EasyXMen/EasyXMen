@@ -399,8 +399,8 @@ LinIf_Transmit /* PRQA S 1503,1532 */ /* MISRA Rule 2.1,8.7 */
 /******************************************************************************/
 #if (STD_ON == LINIF_MASTER_SUPPORT)
 FUNC(Std_ReturnType, LINIF_CODE)
-LinIf_ScheduleRequest /* PRQA S 1503 */                      /* PRQA S 1532 */
-    (NetworkHandleType Channel, LinIf_SchHandleType Schedule /* PRQA S 3334 */
+LinIf_ScheduleRequest /* PRQA S 1503 */                        /* PRQA S 1532 */
+    (NetworkHandleType Channel, LinIf_SchHandleType ScheduleId /* PRQA S 3334 */
     )
 {
     Std_ReturnType ret = E_NOT_OK; /* PRQA S 2981 */ /* MISRA Rule 2.2 */
@@ -423,7 +423,7 @@ LinIf_ScheduleRequest /* PRQA S 1503 */                      /* PRQA S 1532 */
     if (TRUE == detNoErr)
 #endif
     {
-        ret = LinIf_MasterScheduleRequest(ch, Schedule);
+        ret = LinIf_MasterScheduleRequest(ch, ScheduleId);
     }
 
     return ret;
@@ -567,7 +567,8 @@ LinIf_SetTrcvMode /* PRQA S 1503 */
 {
     Std_ReturnType ret = E_NOT_OK;
     NetworkHandleType ch = LinIf_GetLinIfChannel(Channel);
-    uint8 linChannel;
+    uint8 linTrcvChannelId;
+    uint8 linTrcvDrvId;
 
 #if (LINIF_DEV_ERROR_DETECT == STD_ON)
     boolean detNoErr = TRUE;
@@ -594,8 +595,13 @@ LinIf_SetTrcvMode /* PRQA S 1503 */
 #endif
     {
         /*@req <SWS_LinIf_00536>,<SWS_LinIf_00537>,<SWS_LinIf_00538>*/
-        linChannel = LINIF_GET_LIN_CHANNEL_ID(ch);
-        ret = LinTrcv_SetOpMode(linChannel, TransceiverMode);
+        P2CONST(LinIf_ChannelType, AUTOMATIC, LINIF_APPL_CONST) chCfgPtr = &LINIF_GET_CHANNEL(ch);
+        if (NULL_PTR != chCfgPtr->LinIfTransceiverDrvConfig)
+        {
+            linTrcvDrvId = LINIF_GET_LIN_TRCV_DRIVER_ID(ch);
+            linTrcvChannelId = LINIF_GET_LIN_TRCV_CHANNEL_ID(ch);
+            ret = LinTrcv_DriverApi[linTrcvDrvId].LinTrcvSetOpMode(linTrcvChannelId, TransceiverMode);
+        }
     }
 
     return ret;
@@ -626,7 +632,8 @@ LinIf_GetTrcvMode /* PRQA S 1503 */
 {
     Std_ReturnType ret = E_NOT_OK;
     NetworkHandleType ch = LinIf_GetLinIfChannel(Channel);
-    uint8 linChannel;
+    uint8 linTrcvChannelId;
+    uint8 linTrcvDrvId;
 
 #if (LINIF_DEV_ERROR_DETECT == STD_ON)
     boolean detNoErr = TRUE;
@@ -652,8 +659,13 @@ LinIf_GetTrcvMode /* PRQA S 1503 */
 #endif
     {
         /*@req <SWS_LinIf_00541>*/
-        linChannel = LINIF_GET_LIN_CHANNEL_ID(ch);
-        ret = LinTrcv_GetOpMode(linChannel, TransceiverModePtr);
+        P2CONST(LinIf_ChannelType, AUTOMATIC, LINIF_APPL_CONST) chCfgPtr = &LINIF_GET_CHANNEL(ch);
+        if (NULL_PTR != chCfgPtr->LinIfTransceiverDrvConfig)
+        {
+            linTrcvDrvId = LINIF_GET_LIN_TRCV_DRIVER_ID(ch);
+            linTrcvChannelId = LINIF_GET_LIN_TRCV_CHANNEL_ID(ch);
+            ret = LinTrcv_DriverApi[linTrcvDrvId].LinTrcvGetOpMode(linTrcvChannelId, TransceiverModePtr);
+        }
     }
 
     return ret;
@@ -685,8 +697,9 @@ LinIf_GetTrcvWakeupReason /* PRQA S 1503 */
 {
     Std_ReturnType ret = E_NOT_OK;
     NetworkHandleType ch = LinIf_GetLinIfChannel(Channel);
-    uint8 linChannel;
+    uint8 linTrcvChannelId;
     LinTrcv_TrcvModeType transceiverMode = LINTRCV_TRCV_MODE_SLEEP;
+    uint8 linTrcvDrvId;
 
 #if (LINIF_DEV_ERROR_DETECT == STD_ON)
     boolean detNoErr = TRUE;
@@ -710,8 +723,15 @@ LinIf_GetTrcvWakeupReason /* PRQA S 1503 */
     }
     if (ch < LINIF_NUMBER_OF_CHANNELS)
     {
-        linChannel = LINIF_GET_LIN_CHANNEL_ID(ch);
-        (void)LinTrcv_GetOpMode(linChannel, &transceiverMode);
+        linTrcvChannelId = LINIF_GET_LIN_TRCV_CHANNEL_ID(ch);
+        P2CONST(LinIf_ChannelType, AUTOMATIC, LINIF_APPL_CONST) chCfgPtr = &LINIF_GET_CHANNEL(ch);
+
+        if (NULL_PTR != chCfgPtr->LinIfTransceiverDrvConfig)
+        {
+            linTrcvDrvId = LINIF_GET_LIN_TRCV_DRIVER_ID(ch);
+            (void)LinTrcv_DriverApi[linTrcvDrvId].LinTrcvGetOpMode(linTrcvChannelId, &transceiverMode);
+        }
+
         if (LINTRCV_TRCV_MODE_NORMAL != transceiverMode)
         {
             /*@req <SWS_LinIf_00572>*/
@@ -723,8 +743,17 @@ LinIf_GetTrcvWakeupReason /* PRQA S 1503 */
 #endif
     {
         /*@req <SWS_LinIf_00548>*/
-        linChannel = LINIF_GET_LIN_CHANNEL_ID(ch);
-        ret = LinTrcv_GetBusWuReason(linChannel, TrcvWuReasonPtr);
+        linTrcvChannelId = LINIF_GET_LIN_TRCV_CHANNEL_ID(ch);
+        P2CONST(LinIf_ChannelType, AUTOMATIC, LINIF_APPL_CONST) chCfgPtr = &LINIF_GET_CHANNEL(ch);
+
+        if (NULL_PTR != chCfgPtr->LinIfTransceiverDrvConfig)
+        {
+            linTrcvDrvId = LINIF_GET_LIN_TRCV_DRIVER_ID(ch);
+            if (LinTrcv_DriverApi[linTrcvDrvId].LinTrcvGetBusWuReason != NULL_PTR)
+            {
+                ret = LinTrcv_DriverApi[linTrcvDrvId].LinTrcvGetBusWuReason(linTrcvChannelId, TrcvWuReasonPtr);
+            }
+        }
     }
 
     return ret;
@@ -754,7 +783,8 @@ LinIf_SetTrcvWakeupMode /* PRQA S 1503 */
 {
     Std_ReturnType ret = E_NOT_OK;
     NetworkHandleType ch = LinIf_GetLinIfChannel(Channel);
-    uint8 linChannel;
+    uint8 linTrcvChannelId;
+    uint8 linTrcvDrvId;
 
 #if (LINIF_DEV_ERROR_DETECT == STD_ON)
     boolean detNoErr = TRUE;
@@ -781,8 +811,16 @@ LinIf_SetTrcvWakeupMode /* PRQA S 1503 */
 #endif
     {
         /*@req <SWS_LinIf_00551>*/
-        linChannel = LINIF_GET_LIN_CHANNEL_ID(ch);
-        ret = LinTrcv_SetWakeupMode(linChannel, LinTrcvWakeupMode);
+        P2CONST(LinIf_ChannelType, AUTOMATIC, LINIF_APPL_CONST) chCfgPtr = &LINIF_GET_CHANNEL(ch);
+        if (NULL_PTR != chCfgPtr->LinIfTransceiverDrvConfig)
+        {
+            linTrcvDrvId = LINIF_GET_LIN_TRCV_DRIVER_ID(ch);
+            if (LinTrcv_DriverApi[linTrcvDrvId].LinTrcvSetWakeupMode != NULL_PTR)
+            {
+                linTrcvChannelId = LINIF_GET_LIN_TRCV_CHANNEL_ID(ch);
+                ret = LinTrcv_DriverApi[linTrcvDrvId].LinTrcvSetWakeupMode(linTrcvChannelId, LinTrcvWakeupMode);
+            }
+        }
     }
 
     return ret;
@@ -884,8 +922,10 @@ LinIf_CheckWakeup(EcuM_WakeupSourceType WakeupSource)
 #endif
     {
         NetworkHandleType ch;
-        uint8 linDriver;
+        uint8 linTrcvDriverId;
+        uint8 linDriverId;
         uint8 linChannel;
+        uint8 linTrcvChannelId;
         EcuM_WakeupSourceType wakeupSource;
 
 #if (LINIF_WAKEUP_SUPPORT == STD_ON)
@@ -899,8 +939,13 @@ LinIf_CheckWakeup(EcuM_WakeupSourceType WakeupSource)
                 wakeupSource = LINIF_GET_LIN_TRCV_WAKEUP_SOURCE(ch);
                 if (0u != (WakeupSource & wakeupSource))
                 {
+                    linTrcvChannelId = LINIF_GET_LIN_TRCV_CHANNEL_ID(ch);
+                    linTrcvDriverId = LINIF_GET_LIN_TRCV_DRIVER_ID(ch);
                     /*@req <SWS_LinIf_00503>*/
-                    ret = LinTrcv_CheckWakeup(ch);
+                    if (LinTrcv_DriverApi[linTrcvDriverId].LinTrcvCheckWakeup != NULL_PTR)
+                    {
+                        ret = LinTrcv_DriverApi[linTrcvDriverId].LinTrcvCheckWakeup(linTrcvChannelId);
+                    }
                     break;
                 }
             }
@@ -911,9 +956,9 @@ LinIf_CheckWakeup(EcuM_WakeupSourceType WakeupSource)
                 if (0u != (WakeupSource & wakeupSource))
                 {
                     /*@req <SWS_LinIf_00503>*/
-                    linDriver = LINIF_GET_LIN_DRIVER_ID(ch);
+                    linDriverId = LINIF_GET_LIN_DRIVER_ID(ch);
                     linChannel = LINIF_GET_LIN_CHANNEL_ID(ch);
-                    ret = Lin_DriverApi[linDriver].LinCheckWakeup(linChannel);
+                    ret = Lin_DriverApi[linDriverId].LinCheckWakeup(linChannel);
                     break;
                 }
             }

@@ -104,6 +104,7 @@ Dcm_OBD0x04(
         else if (DEM_CLEAR_PENDING == ret)
         {
             Dcm_MsgCtrl[MsgCtrlId].Dcm_OpStatus = DCM_PENDING;
+            ret = DCM_E_PENDING;
         }
         else
         {

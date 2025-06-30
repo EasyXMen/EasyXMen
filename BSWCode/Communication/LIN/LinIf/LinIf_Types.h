@@ -246,6 +246,7 @@ typedef struct
 typedef struct
 {
     uint8 LinIfTrcvIdRef;
+    uint8 LinIfTrcvDrvId;
     EcuM_WakeupSourceType WakeUpSource;
 } LinIf_TransceiverDrvConfigType;
 
@@ -306,5 +307,18 @@ typedef struct
     P2FUNC(Std_ReturnType, LINIF_APPL_CODE, LinCheckWakeup)(uint8 Channel);
     /* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
 } Lin_DriverApiType;
+
+#if (LINIF_TRCV_DRIVER_SUPPORTED == STD_ON)
+typedef struct
+{
+    P2FUNC(Std_ReturnType, LINIF_APPL_CODE, LinTrcvSetOpMode)(uint8 Channel, LinTrcv_TrcvModeType TransceiverMode);
+    P2FUNC(Std_ReturnType, LINIF_APPL_CODE, LinTrcvGetOpMode)(uint8 Channel, LinTrcv_TrcvModeType* TransceiverModePtr);
+    P2FUNC(Std_ReturnType, LINIF_APPL_CODE, LinTrcvGetBusWuReason)
+    (uint8 Channel, LinTrcv_TrcvWakeupReasonType* TrcvWuReasonPtr);
+    P2FUNC(Std_ReturnType, LINIF_APPL_CODE, LinTrcvSetWakeupMode)
+    (uint8 Channel, LinTrcv_TrcvWakeupModeType LinTrcvWakeupMode);
+    P2FUNC(Std_ReturnType, LINIF_APPL_CODE, LinTrcvCheckWakeup)(uint8 LinNetwork);
+} LinTrcv_DriverApiType;
+#endif
 
 #endif

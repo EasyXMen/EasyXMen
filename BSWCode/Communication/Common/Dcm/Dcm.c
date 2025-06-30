@@ -602,7 +602,7 @@ FUNC(Std_ReturnType, DCM_CODE) Dcm_ResetToDefaultSession(void)
     {
         Dcm_SesCtrl.Dcm_NewSes = DCM_DEFAULT_SESSION;
         DslInternal_SesRefresh(Dcm_SesCtrl.Dcm_NewSes);
-        (void)SchM_Switch_DcmDiagnosticSessionControl(RTE_MODE_DcmDiagnosticSessionControl_DEFAULT_SESSION);
+        (void)SchM_Switch_DcmDiagnosticSessionControl(RTE_MODE_DcmDiagnosticSessionControl_DCM_DEFAULT_SESSION);
     }
     return E_OK;
 }

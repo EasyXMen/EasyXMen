@@ -907,7 +907,7 @@ EthIf_TxConfirmation(VAR(uint8, ETHIF_VAR) CtrlIdx, VAR(Eth_BufIdxType, ETHIF_VA
 {
     uint8 i;
     uint8 index;
-    uint8 ethifCrlId;
+    uint8 ethifCrlId = 0u;
     uint8 handle;
     Std_ReturnType ret;
 
@@ -1400,14 +1400,20 @@ FUNC(void, ETHIF_CODE) EthIf_MainFunctionRx(void)
 {
     if (EthIf_Internal.initStatus == ETHIF_STATE_INIT)
     {
+
+#if (ETH_CTRL_ENABLE_RX_POLLING == STD_ON)
         Eth_RxStatusType RxStatusPtr = ETH_NOT_RECEIVED;
         uint8 i;
+#endif
         uint8 CtrlIdx;
+
+#if (ETH_CTRL_ENABLE_RX_POLLING == STD_ON)
         uint8 driverId;
         uint8 ethContrllerId;
-#if (ETHIF_ETH_AUTOSAR_VERSION >= ETHIF_ETH_AUTOSAR_431)
+#endif
+#if (ETH_CTRL_ENABLE_RX_POLLING == STD_ON) && (ETHIF_ETH_AUTOSAR_VERSION >= ETHIF_ETH_AUTOSAR_431)
         uint8 FifoIdx;
-#endif /* ETHIF_ETH_AUTOSAR_VERSION >= ETHIF_ETH_AUTOSAR_431 */
+#endif /* ETH_CTRL_ENABLE_RX_POLLING == STD_ON && ETHIF_ETH_AUTOSAR_VERSION >= ETHIF_ETH_AUTOSAR_431 */
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
         if (EthIf_Internal.initStatus != ETHIF_STATE_INIT)
         {
@@ -1418,15 +1424,18 @@ FUNC(void, ETHIF_CODE) EthIf_MainFunctionRx(void)
         {
             for (CtrlIdx = 0u; CtrlIdx < ETHIF_CTRL_NUM; CtrlIdx++)
             {
+#if (ETH_CTRL_ENABLE_RX_POLLING == STD_ON)
                 driverId = ETHIF_PHYSCONTROLLER_ETHDRIVERID(ETHIF_CONTROLLER_PHYSCONTROLLER(CtrlIdx));
                 ethContrllerId = ETHIF_PHYSCONTROLLER_ETHCONTRLLER(ETHIF_CONTROLLER_PHYSCONTROLLER(CtrlIdx));
+#endif
 #if (ETHIF_ETH_AUTOSAR_VERSION >= ETHIF_ETH_AUTOSAR_431)
                 (void)Eth_DriverApi[driverId].Eth_Receive(ethContrllerId, FifoIdx, &RxStatusPtr); /*FifoIdx TODO*/
 #else  /*The default version of eth driver is 4.2.2*/
                 (void)Eth_DriverApi[driverId].Eth_Receive(ethContrllerId, &RxStatusPtr);
 #endif /* ETHIF_ETH_AUTOSAR_VERSION >= ETHIF_ETH_AUTOSAR_431 */
 
-                for (i = 0; i < ETHIF_RX_INDICATION_ITERATIONS_MAX; i++)
+#if (ETHIF_RX_INDICATION_ITERATIONS_MAX != 0u) && (ETH_CTRL_ENABLE_RX_POLLING == STD_ON)
+                for (i = 0u; i < ETHIF_RX_INDICATION_ITERATIONS_MAX; i++)
                 {
                     if (RxStatusPtr == ETH_RECEIVED_MORE_DATA_AVAILABLE)
                     {
@@ -1445,6 +1454,7 @@ FUNC(void, ETHIF_CODE) EthIf_MainFunctionRx(void)
                         break;
                     }
                 }
+#endif
             }
         }
     }
@@ -1462,8 +1472,11 @@ FUNC(void, ETHIF_CODE) EthIf_MainFunctionTx(void)
     if (EthIf_Internal.initStatus == ETHIF_STATE_INIT)
     {
         uint8 CtrlIdx;
+
+#if (ETH_CTRL_ENABLE_TX_POLLING == STD_ON)
         uint8 driverId;
         uint8 ethContrllerId;
+#endif
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
         if (EthIf_Internal.initStatus != ETHIF_STATE_INIT)
         {

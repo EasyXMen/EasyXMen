@@ -1484,7 +1484,9 @@ Std_ReturnType Sd_ClientServiceSetState(uint16 ClientServiceHandleId, Sd_ClientS
 /* PRQA S 1532 -- */ /* MISRA Rule 8.7 */
 {
     Std_ReturnType ret = E_NOT_OK;
-
+#if (SD_CLIENT_SERVICE_NUM == 0u)
+    SD_UNUSED(ClientServiceHandleId);
+#endif
 #if (STD_ON == SD_DEV_ERROR_DETECT)
     if (SD_UNINIT == Sd_Status)
     {
@@ -1498,14 +1500,16 @@ Std_ReturnType Sd_ClientServiceSetState(uint16 ClientServiceHandleId, Sd_ClientS
     {
         SD_REPORT_ERROR(SD_CLIENT_SERVICE_SET_STATE_ID, SD_E_INV_MODE);
     }
+#if (SD_CLIENT_SERVICE_NUM > 0u)
     else if (ClientServiceHandleId >= SD_CLIENT_SERVICE_NUM) /* PRQA S 2995, 2991 */ /* MISRA Rule 2.2, 14.3 */
     {
         SD_REPORT_ERROR(SD_CLIENT_SERVICE_SET_STATE_ID, SD_E_INV_ID);
     }
+#endif
     else
 #endif
     {
-#if (SD_CLIENT_SERVICE_NUM > 0)
+#if (SD_CLIENT_SERVICE_NUM > 0u)
         SchM_Enter_Sd_ExclusiveArea();
         Sd_ClientRTData[ClientServiceHandleId].setState = ClientServiceState;
         SchM_Exit_Sd_ExclusiveArea();
@@ -1541,7 +1545,9 @@ Std_ReturnType Sd_ConsumedEventGroupSetState(
 /* PRQA S 1532 -- */ /* MISRA Rule 8.7 */
 {
     Std_ReturnType ret = E_NOT_OK;
-
+#if (SD_CONSUMED_EVENTGROUP_NUM == 0u)
+    SD_UNUSED(SdConsumedEventGroupHandleId);
+#endif
 #if (STD_ON == SD_DEV_ERROR_DETECT)
     if (SD_UNINIT == Sd_Status)
     {
@@ -1557,11 +1563,13 @@ Std_ReturnType Sd_ConsumedEventGroupSetState(
     {
         SD_REPORT_ERROR(SD_CONSUMED_EVENT_GROUP_SET_STATE_ID, SD_E_INV_MODE);
     }
+#if (SD_CONSUMED_EVENTGROUP_NUM > 0u)
     else if (SdConsumedEventGroupHandleId >= SD_CONSUMED_EVENTGROUP_NUM) /* PRQA S 2995, 2991 */ /* MISRA Rule 2.2, 14.3
                                                                                                   */
     {
         SD_REPORT_ERROR(SD_CONSUMED_EVENT_GROUP_SET_STATE_ID, SD_E_INV_ID);
     }
+#endif
     else
 #endif
     {
@@ -5850,7 +5858,9 @@ static void Sd_ClientServiceMainPhaseHandle(
     const Sd_ConsumedEventGroupType* cEgPtr;
     const Sd_ConsumedEventGroupType* eventGroupPtr;
     Sd_ConsumedEventGroupRTType* consumedEgRTPtr;
+#if (STD_ON == SD_SUBSCRIBE_EVENTGROUP_RETRY_ENABLE)
     const Sd_ClientTimerType* consumedEgTimerPtr;
+#endif
 #endif /* SD_CONSUMED_EVENTGROUP_NUM > 0 */
     SoAd_SoConModeType tcpSoConMode;
     SoAd_SoConModeType udpSoConMode;
@@ -5935,7 +5945,9 @@ static void Sd_ClientServiceMainPhaseHandle(
                 for (index = 0u; index < clientServicePtr->SdConsumedEventGroupNum; index++)
                 {
                     consumedEgRTPtr = &Sd_ConsumedEventGroupRTData[eventGroupPtr->SdConsumedEventGroupHandleId];
+#if (STD_ON == SD_SUBSCRIBE_EVENTGROUP_RETRY_ENABLE)
                     consumedEgTimerPtr = eventGroupPtr->SdConsumedEventGroupTimerRef;
+#endif
                     if ((SD_CONSUMED_EVENTGROUP_REQUESTED == consumedEgRTPtr->setState)
                             && (((NULL_PTR != eventGroupPtr->SdConsumedEventGroupTcpActivationRef)
                                  && (TRUE == cRtDataPtr->tcpSoCon.isSoConOpened)

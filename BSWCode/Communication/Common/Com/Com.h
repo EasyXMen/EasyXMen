@@ -68,7 +68,8 @@
  *                                    protected.
  *  V2.1.24   20250213  tong.zhao     Modify call condition of the notify function in Com_TxDMTimeOutNotification.
  *  V2.1.25   20250407  tong.zhao     Modify the process in Com_TxSignalPackHandle when cpu is big endian.
- *  V2.1.25   20250414  tong.zhao     Fix for the issues of the Com multi-core and update-bit signal gateway.
+ *  V2.1.26   20250414  tong.zhao     Fix for the issues of the Com multi-core and update-bit signal gateway.
+ *  V2.1.27   20250220  tong.zhao     Modify the logic of Com_TriggerTransmitHandle about calloutfunction.
  ******************************************************************************/
 
 #ifndef COM_H
@@ -91,7 +92,7 @@
 #define COM_AR_RELEASE_REVISION_VERSION 0u
 #define COM_SW_MAJOR_VERSION            2u
 #define COM_SW_MINOR_VERSION            1u
-#define COM_SW_PATCH_VERSION            26u
+#define COM_SW_PATCH_VERSION            27u
 #elif ((COM_SW_MAJOR_VERSION != 2u) || (COM_SW_MINOR_VERSION != 1u))
 #error "Com: Mismatch in Software Version"
 #endif

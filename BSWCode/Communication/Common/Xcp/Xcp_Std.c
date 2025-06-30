@@ -939,7 +939,9 @@ Xcp_SetMta(void) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
     uint8 extAddr = Xcp_CmdBuffer[3u];
     uint32 Addr = 0;
     boolean calflag;
+#if (0 != (XCP_PL_PGM & XCP_RESOURCE))
     boolean pgmflag;
+#endif
 
     Xcp_CopyU1BufferToU4(&Xcp_CmdBuffer[4u], &Addr, CPU_BYTE_ORDER);
 
