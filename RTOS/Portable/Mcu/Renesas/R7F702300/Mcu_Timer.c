@@ -96,7 +96,27 @@ FUNC(void, OS_CODE) Os_ArchInitSystemTimer(void)
 #if (TRUE == CFG_LOAD_RATIO_CALC_ENABLE)
 /******************************************************************************/
 /*
- * Brief                <Get current time in the OS.>
+ * Brief                <Start global timer.>
+ * ServiceId            <None>
+ * Sync/Async           <Synchronous>
+ * Reentrancy           <Non Reentrant>
+ * Param-Name[in]       <None>
+ * Param-Name[out]      <None>
+ * Param-Name[in/out]   <None>
+ * Return               <None>
+ * PreCondition         <None>
+ * CallByAPI            <Os_ArchLoadRatioInit>
+ * REQ ID               <None>
+ */
+/******************************************************************************/
+FUNC(uint32, OS_CODE) Os_ArchLoadRatioInit(void)
+{
+    /* Strat TPTM Freerun timer */
+    Os_ArchTptmPtr->TPTMSFRUN = 0x1;
+}
+/******************************************************************************/
+/*
+ * Brief                <Get global timer conut value.>
  * ServiceId            <None>
  * Sync/Async           <Synchronous>
  * Reentrancy           <Non Reentrant>
@@ -111,8 +131,8 @@ FUNC(void, OS_CODE) Os_ArchInitSystemTimer(void)
 /******************************************************************************/
 FUNC(uint32, OS_CODE) Os_ArchGetTimeTicks(void)
 {
-    /* TIM1 as global base time(us) */
-    return OS_OSTM1_CNT; /* PRQA S 0303 */ /* MISRA Rule 11.4 */
+    /* Get TPTM Freerun timer current value */
+    return (uint32)(Os_ArchTptmPtr->TPTMSFCNT);
 }
 #endif
 

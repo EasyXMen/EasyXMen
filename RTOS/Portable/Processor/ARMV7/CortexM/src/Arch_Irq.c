@@ -1,0 +1,656 @@
+/* PRQA S 3108++ */
+/**
+ * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * SPDX-License-Identifier: LGPL-2.1-only-with-exception
+ *
+ * This library is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU Lesser General Public License as published by the Free Software Foundation; version 2.1.
+ * This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU Lesser General Public License for more details.
+ * You should have received a copy of the GNU Lesser General Public License along with this library;
+ * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ * or see <https://www.gnu.org/licenses/>.
+ */
+/* PRQA S 3108-- */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Arch_Irq.c                                                  **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : i-soft-os                                                   **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Deal with operations related to processor interrupts        **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
+**  Version :   AUTOSAR classic Platform R19--Function Safety                 **
+**                                                                            **
+*******************************************************************************/
+/*=======[I N C L U D E S]===================================================*/
+#include "Arch_Irq.h"
+#include "Os_Internal.h"
+/*=======[V E R S I O N  C H E C K]==========================================*/
+
+/*=======[M A C R O S]=======================================================*/
+#define OS_ISR_EXTERNAL_NUM 16u
+/*=======[E X T E R N A L   D A T A]=========================================*/
+#define OS_START_SEC_VAR_INTVECTOR_GLOBAL_32
+#include "MemMapVector.h"
+uint32 Os_GlobalVector[OS_NVIC_NUM + 1u];
+#define OS_STOP_SEC_VAR_INTVECTOR_GLOBAL_32
+#include "MemMapVector.h"
+
+#define OS_START_SEC_VAR_INTVECTOR_LOCAL_32
+#include "MemMapVector.h"
+uint32 Os_LocalVector[OS_NVIC_NUM + 1u];
+#define OS_STOP_SEC_VAR_INTVECTOR_LOCAL_32
+#include "MemMapVector.h"
+
+/* PRQA S 0791++ */ /* MISRA Rule 5.4 */
+#define OS_START_SEC_VAR_CLONE_PTR
+#include "Os_MemMap.h"
+uint32 Os_ArchMasterSp_ARRAY[CFG_ISR_MAX];
+#define OS_STOP_SEC_VAR_CLONE_PTR
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_VAR_CLONE_32
+#include "Os_MemMap.h"
+uint32 Os_ISRxPSRStack[CFG_ISR_MAX];
+#define OS_STOP_SEC_VAR_CLONE_32
+#include "Os_MemMap.h"
+
+#if (CFG_ISR_MAX > 0U)
+#define OS_START_SEC_VAR_CLONE_32
+#include "Os_MemMap.h"
+Os_CallLevelType Os_SaveLevelISR1;
+#define OS_STOP_SEC_VAR_CLONE_32
+#include "Os_MemMap.h"
+#endif
+
+
+#if (TRUE == CFG_TIMING_PROTECTION_ENABLE)
+#define OS_START_SEC_VAR_CLONE_32
+#include "Os_MemMap.h"
+volatile uint32 Os_TprotTerminateIsr;
+#define OS_STOP_SEC_VAR_CLONE_32
+#include "Os_MemMap.h"
+#define OS_START_SEC_VAR_CLONE_32
+#include "Os_MemMap.h"
+volatile uint32 Os_TprotTerminateTask;
+#define OS_STOP_SEC_VAR_CLONE_32
+#include "Os_MemMap.h"
+#endif
+
+#define OS_START_SEC_VAR_CLONE_32
+#include "Os_MemMap.h"
+uint32 Os_ArchTempSysSp;
+#define OS_STOP_SEC_VAR_CLONE_32
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_VAR_CLONE_PTR
+#include "Os_MemMap.h"
+uint32 Os_IsrTempIPSR = 0U;
+#define OS_STOP_SEC_VAR_CLONE_PTR
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_VAR_CLONE_32
+#include "Os_MemMap.h"
+uint32 Os_Isr2_Ipl_Limit;
+#define OS_STOP_SEC_VAR_CLONE_32
+#include "Os_MemMap.h"
+
+/* PRQA S 0791-- */ /* MISRA Rule 5.4 */
+/*=======[I N T E R N A L   D A T A]=========================================*/
+/* PRQA S 0305,0428 ++ */ /* MISRA Rule 11.1,CWE-398 */
+
+/*=======[I N T E R N A L   F U N C T I O N   D E C L A R A T I O N S]=======*/
+
+/*=======[F U N C T I O N   I M P L E M E N T A T I O N S]===================*/
+#if ((OS_SC3 == CFG_SC) || (OS_SC4 == CFG_SC))
+#if (CFG_ISR_MAX > 0)
+#if (TRUE == CFG_INT_NEST_ENABLE)
+static StatusType Os_ArchTerminateOneNestIsr(Os_IsrType OsIsrID);
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/******************************************************************************/
+/*
+ * Brief                <Terminate an interrupt>
+ *
+ * Service ID   :       <None>
+ * Sync/Async   :       <Synchronous>
+ * Reentrancy           <Non Reentrant>
+ * param[in]            <OsIsrID>
+ * param[out]           <None>
+ * param[in/out]        <None>
+ * return               <StatusType>
+ * CallByAPI            <Os_ArchAppTerminateIsrProc>
+ * REQ ID               <DD_1_0901>
+ */
+/******************************************************************************/
+static StatusType Os_ArchTerminateOneNestIsr(Os_IsrType OsIsrID)
+{
+    uint8 i;
+    StatusType Status = (uint8)E_OK; /* PRQA S 1277 */ /* CWE-398 */
+    for (i = 0u; i < Os_IntNestISR2; i++)
+    {
+        /* find out the Isr nested position and reclaim its context saving area */
+        if (OsIsrID == Os_SCB.sysIsrNestQueue[i])
+        {
+            Os_IsrTempIPSR = Os_ISRxPSRStack[i];
+            TERMINATEISR_ISR();
+            break;
+        }
+    }
+
+    /* Not find out the Isr Id in the IsrStack from the SCB,
+     * not include outermost_isr. */
+    if (i >= Os_IntNestISR2)
+    {
+        Status = (uint8)E_NOT_OK; /* PRQA S 1277 */ /* CWE-398 */
+    }
+    else
+    {
+        /* Moving the following nested ISR2s to shift one position left */
+        while (i < (uint8)(Os_IntNestISR2 - (uint8)1u))
+        {
+            Os_SCB.sysIsrNestQueue[i] = Os_SCB.sysIsrNestQueue[i + (uint8)1u];
+
+            if (i < (Os_IntNestISR2 - 2U)) /* PRQA S 3120 */ /* MISRA CWE-398 */
+            {
+                Os_ArchMasterSp_ARRAY[i + 1U] = Os_ArchMasterSp_ARRAY[i + 2U]; /* PRQA S 3120 */ /* MISRA CWE-398 */
+            }
+
+            i++;
+        }
+    }
+    return Status;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/*****************************************************************************/
+/*
+ * Brief                <Terminate Isr2 platform process in TerminateApplication>
+ * ServiceId            <None>
+ * Sync/Async           <Synchronous>
+ * Reentrancy           <Non Reentrant>
+ * Param-Name[in]       <None>
+ * Param-Name[out]      <None>
+ * Param-Name[in/out]   <None>
+ * Return               <None>
+ * PreCondition         <None>
+ * CallByAPI            <Os_ArchInitCPU>
+ */
+/*****************************************************************************/
+void Os_ArchAppTerminateIsrProc(Os_IsrType OsIsrID)
+{
+    StatusType ulRet = (uint8)E_OK; /* PRQA S 1277 */ /* CWE-398 */
+    /* Isr_nest process. */
+    /* Just find out the nested corresponding ISR2s(excluding the running one) */
+    if (OsIsrID != Os_SCB.sysRunningIsrCat2Id)
+    {
+        /* Terminate one isr */
+        ulRet = Os_ArchTerminateOneNestIsr(OsIsrID);
+
+        if ((uint8)E_OK == ulRet) /* PRQA S 1277 */ /* CWE-398 */
+        {
+            if (Os_IntNestISR2 > (uint8)0u)
+            {
+                Os_IntNestISR2--;
+            }
+
+            if (Os_SCB.sysDispatchLocker > (uint8)0u)
+            {
+                Os_SCB.sysDispatchLocker--;
+            }
+        }
+    }
+
+    return;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+#endif /* #if (TRUE == CFG_INT_NEST_ENABLE) */ /* PRQA S 2053 */              /* MISRA Rule 18.8 */
+#endif /* #if (CFG_ISR_MAX > 0) */ /* PRQA S 2053 */                          /* MISRA Rule 18.8 */
+#endif /* #if ((OS_SC3 == CFG_SC) || (OS_SC4 == CFG_SC)) */ /* PRQA S 2053 */ /* MISRA Rule 18.8 */
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/******************************************************************************/
+/*
+ * Brief                <Save ccr to variable msr and disable maskable interrupt>
+ *
+ * Service ID   :       <None>
+ * Sync/Async   :       <Synchronous>
+ * Reentrancy           <Non Reentrant>
+ * @param[in]           <None>
+ * @param[out]          <None>
+ * @param[in/out]       <None>
+ * @return              <None>
+ * PreCondition         <None>
+ * CallByAPI            <SuspendAllInterrupts>
+ */
+/******************************************************************************/
+void Os_ArchSuspendOsInt(P2VAR(Os_ArchMsrType, AUTOMATIC, OS_VAR) msr) /*PRQA S 3006,3432*/ /*MISRA Dir 4.3,Rule 20.7*/
+{
+    register Os_ArchMsrType result; /* PRQA S 2011 */ /* MISRA CWE-398 */
+    OS_ASM("MRS %0, basepri_max" : "=r"(result));
+    result = OS_NVIC_CONVERT_GET_PRIO(result);
+    *msr = result;
+    result = Os_Isr2_Ipl_Limit;
+    OS_ASM("msr basepri, %0" : : "r"(result));
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/******************************************************************************/
+/*
+ * Brief                <transfer variable msr back to ccr>
+ *
+ * Service ID   :       <None>
+ * Sync/Async   :       <Synchronous>
+ * Reentrancy           <Non Reentrant>
+ * @param[in]           <None>
+ * @param[out]          <None>
+ * @param[in/out]       <None>
+ * @return              <None>
+ * PreCondition         <None>
+ * CallByAPI            <ResumeAllInterrupts>
+ */
+/******************************************************************************/
+void Os_ArchRestoreOsInt(Os_ArchMsrType msr) /*PRQA S 3006*/ /*MISRA Dir 4.3*/
+{
+    register Os_ArchMsrType converted_prio = OS_NVIC_CONVERT_SET_PRIO(msr); /* PRQA S 2011 */ /* MISRA CWE-398 */
+    OS_ASM("msr basepri, %0" : : "r"(converted_prio));
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/******************************************************************************/
+/*
+ * Brief                <Save ccr to variable msr and disable maskable interrupt>
+ *
+ * Service ID   :       <None>
+ * Sync/Async   :       <Synchronous>
+ * Reentrancy           <Non Reentrant>
+ * @param[in]           <None>
+ * @param[out]          <None>
+ * @param[in/out]       <None>
+ * @return              <None>
+ * PreCondition         <None>
+ * CallByAPI            <SuspendAllInterrupts>
+ */
+/******************************************************************************/
+void Os_ArchSuspendInt(P2VAR(Os_ArchMsrType, AUTOMATIC, OS_VAR) msr) /*PRQA S 3006,3432*/ /*MISRA Dir 4.3,Rule 20.7*/
+{
+    register Os_ArchMsrType result; /* PRQA S 2011 */ /* MISRA CWE-398 */
+    OS_ASM("MRS %0, primask" : "=r"(result));
+    OS_ASM("MSR primask, %0" : : "r"(OS_MSR_PRIMASK_BIT0));
+    *msr = result;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/******************************************************************************/
+/*
+ * Brief                <transfer variable msr back to ccr>
+ *
+ * Service ID   :       <None>
+ * Sync/Async   :       <Synchronous>
+ * Reentrancy           <Non Reentrant>
+ * @param[in]           <None>
+ * @param[out]          <None>
+ * @param[in/out]       <None>
+ * @return              <None>
+ * PreCondition         <None>
+ * CallByAPI            <ResumeAllInterrupts>
+ */
+/******************************************************************************/
+void Os_ArchRestoreInt(Os_ArchMsrType msr) /*PRQA S 3006*/ /*MISRA Dir 4.3*/
+{
+    UNUSED_PARAMETER(msr);
+    OS_ARCH_DSYNC();
+    OS_ASM("MSR primask, %0 " : : "r"(msr));
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/*****************************************************************************/
+/*
+ * Brief                <Installation interrupted>
+ * ServiceId            <None>
+ * Sync/Async           <Synchronous>
+ * Reentrancy           <Non Reentrant>
+ * Param-Name[in]       <None>
+ * Param-Name[out]      <None>
+ * Param-Name[in/out]   <None>
+ * Return               <None>
+ * PreCondition         <None>
+ * CallByAPI            <Os_ArchInitCPU>
+ */
+/*****************************************************************************/
+/*PRQA S 3006,3672 ++*/ /*MISRA Dir 4.3,CWE-398*/
+void Os_InterruptInstall(uint8 id, uint8 prio, uint32 srcType, Os_isrhnd isrProc)
+{
+    (void)srcType;
+    /* PRQA S 0303,3345,3442 ++*/ /* MISRA Rule 11.4,CWE-398 */
+    OS_INTERRUPT_INSTALL(id, prio, srcType);
+    /* PRQA S 0303,3345,3442 --*/ /* MISRA Rule 11.4,CWE-398 */
+
+    /* Save the former handler pointer */
+    if (isrProc != NULL_PTR)
+    {
+        /* Set handler into vector table */
+        Os_LocalVector[id] = (uint32)isrProc; /* PRQA S 0305 */ /* MISRA Rule 11.1 */
+    }
+    OS_ASM("dsb");
+    OS_ASM("isb");
+}
+/*PRQA S 3006,3672 --*/ /*MISRA Dir 4.3,CWE-398*/
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/*****************************************************************************/
+/*
+ * Brief                <Installation interrupt by default>
+ * ServiceId            <None>
+ * Sync/Async           <Synchronous>
+ * Reentrancy           <Non Reentrant>
+ * Param-Name[in]       <None>
+ * Param-Name[out]      <None>
+ * Param-Name[in/out]   <None>
+ * Return               <None>
+ * PreCondition         <None>
+ * CallByAPI            <Os_ArchInitCPU>
+ */
+/*****************************************************************************/
+void Os_InterruptInit(void)
+{
+    uint32 index;
+    uint32 i;
+    OS_REG_VTOR = (uint32)&Os_GlobalVector[0u];
+    Os_GlobalVector[0] = (uint32)0u;
+    Os_GlobalVector[1] = (uint32)(&Reset_Handler);
+    Os_GlobalVector[2] = (uint32)(&NMI_Handler);
+    Os_GlobalVector[3] = (uint32)(&HardFault_Handler);
+    Os_GlobalVector[4] = (uint32)(&MemManage_Handler);
+    Os_GlobalVector[5] = (uint32)(&BusFault_Handler);
+    Os_GlobalVector[6] = (uint32)(&UsageFault_Handler);
+    Os_GlobalVector[7] = (uint32)0u;  /* Reserved */
+    Os_GlobalVector[8] = (uint32)0u;  /* Reserved */
+    Os_GlobalVector[9] = (uint32)0u;  /* Reserved */
+    Os_GlobalVector[10] = (uint32)0u; /* Reserved */
+    Os_GlobalVector[11] = (uint32)(&Os_SVC_Handler);
+    Os_GlobalVector[12] = (uint32)(&DebugMon_Handler);
+    Os_GlobalVector[13] = (uint32)0u;
+    Os_GlobalVector[14] = (uint32)(&PendSV_Handler);
+    for (i = 15; i < 256; i++)
+    {
+        Os_GlobalVector[i] = (uint32)(&armv7_default_isr);
+    }
+
+    /* PRQA S 0303,0306*/ /*Rule-11.4*/
+    /* PRQA S 0303 ++ */  /* MISRA Rule-11.4 */
+    OS_INTERRUPT_SYS_SET_PRIO(OS_SVCall_IRQn, OS_NVIC_CONVERT_SET_PRIO(OS_NVIC_PRIO_MAX));
+    OS_INTERRUPT_SYS_SET_PRIO(OS_PendSV_IRQn, OS_NVIC_CONVERT_SET_PRIO(OS_NVIC_PRIO_MAX));
+    /* PRQA S 0303 -- */ /* MISRA Rule-11.4 */
+    for (index = OS_ISR_EXTERNAL_NUM; index < OS_NVIC_NUM; index++)
+    {
+        OS_INTERRUPT_DISABLE(index); /* PRQA S 0303,3345,3442 */ /* MISRA Rule 11.4,CWE-398 */
+        OS_INTERRUPT_CLEAR_PENDING(index); /* PRQA S 0303 */     /* MISRA Rule 11.4 */
+    }
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/*****************************************************************************/
+/*
+ * Brief                <Ipl greater than 0, disable interrupt otherwise enable interrupt>
+ *
+ * Service ID   :       <None>
+ * Sync/Async   :       <Synchronous>
+ * Reentrancy           <Non Reentrant>
+ * @param[in]           <ipl>
+ * @param[out]          <None>
+ * @param[in/out]       <None>
+ * @return              <None>
+ * PreCondition         <None>
+ * CallByAPI            <ResumeOSInterrupts and so on>
+ */
+/******************************************************************************/
+void Os_ArchSetIpl(Os_IPLType ipl, Os_IsrDescriptionType isrdesc) /*PRQA S 3006*/ /*MISRA Dir 4.3*/
+{
+    /*add comments to pass QAC.*/
+    (void)isrdesc;
+    /* Disable interrupt prio - 1,CAN open the max OSinterrupt self*/
+    register Os_IPLType converted_prio = OS_NVIC_CONVERT_SET_PRIO(ipl); /* PRQA S 2011 */ /* MISRA CWE-398 */
+
+    OS_ASM("msr basepri, %0" : : "r"(converted_prio));
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/******************************************************************************/
+/*
+ * Brief                <Get current IPL>
+ *
+ * Service ID   :       <None>
+ * Sync/Async   :       <Synchronous>
+ * Reentrancy           <Non Reentrant>
+ * @param[in]           <None>
+ * @param[out]          <None>
+ * @param[in/out]       <None>
+ * @return              <0>
+ * PreCondition         <None>
+ * CallByAPI            <SuspendOSInterrupts and so on>
+ */
+/******************************************************************************/
+Os_IPLType Os_ArchGetIpl(void) /*PRQA S 3006*/ /*MISRA Dir 4.3*/
+{
+    register Os_IPLType result; /* PRQA S 2011 */ /* MISRA CWE-398 */
+
+    OS_ASM("MRS %0, basepri_max" : "=r"(result));
+
+    result = OS_NVIC_CONVERT_GET_PRIO(result);
+
+    return (result);
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/******************************************************************************/
+/*
+ * Brief                <Disable the given interrupt source>
+ * Service ID           <None>
+ * Sync/Async           <Synchronous>
+ * Reentrancy           <Reentrant>
+ * param-vIsrSrc[in]    <Interrupt source>
+ * param-vIsrSrcType[in]<Type of Interrupt source>
+ * param-Name[out]      <None>
+ * param-Name[in/out]   <None>
+ * return               <None>
+ * PreCondition         <None>
+ * CallByAPI            <DisableInterruptSource>
+ * REQ ID               <None>
+ */
+/******************************************************************************/
+void Os_DisableInterruptSource(uint32 vIsrSrc, uint32 vIsrSrcType)
+{
+    UNUSED_PARAMETER(vIsrSrcType);
+    uint32 convertId = Os_GetNvicIrqId(vIsrSrc);
+    OS_INTERRUPT_DISABLE(convertId); /* PRQA S 0303,3345,3442 */ /* MISRA Rule 11.4,CWE-398 */
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/******************************************************************************/
+/*
+ * Brief                <Clear the pending status of the given interrupt>
+ * Service ID           <None>
+ * Sync/Async           <Synchronous>
+ * Reentrancy           <Reentrant>
+ * param-vIsrSrc[in]    <Interrupt source>
+ * param-vIsrSrcType[in]<Type of Interrupt source>
+ * param-Name[out]      <None>
+ * param-Name[in/out]   <None>
+ * return               <None>
+ * PreCondition         <None>
+ * CallByAPI            <EnableInterruptSource><ClearPendingInterrupt>
+ * REQ ID               <None>
+ */
+/******************************************************************************/
+void Os_ClearPendingInterrupt(uint32 vIsrSrc, uint32 vIsrSrcType)
+{
+    UNUSED_PARAMETER(vIsrSrcType);
+    uint32 convertId = Os_GetNvicIrqId(vIsrSrc);
+    OS_INTERRUPT_CLEAR_PENDING(convertId); /* PRQA S 0303 */ /* MISRA Rule 11.4 */
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/******************************************************************************/
+/*
+ * Brief                <Get the status of the given interrupt.>
+ * Service ID   :       <None>
+ * Sync/Async   :       <Synchronous>
+ * Reentrancy           <Reentrant>
+ * param[in]            <srcAddr,prio,srcType,isrProc>
+ * param[out]           <None>
+ * param[in/out]        <None>
+ * return               <None>
+ * CallByAPI            <None>
+ * REQ ID               <>
+ */
+/******************************************************************************/
+Os_IsrStateType Os_GetIsrSourceState(uint32 vIsrSrc, uint32 vIsrSrcType)
+{
+    UNUSED_PARAMETER(vIsrSrcType);
+    Os_IsrStateType isrSourceState = OS_ISR_DISABLED;
+    uint32 convertId = Os_GetNvicIrqId(vIsrSrc);
+    if (1U == OS_INTERRUPT_CHECK_STATUS(convertId)) /* PRQA S 0303,3442 */ /* MISRA Rule 11.4,CWE-398 */
+    {
+        isrSourceState = OS_ISR_ENABLED;
+    }
+    return isrSourceState;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/******************************************************************************/
+/*
+ * Brief                <Enable the given interrupt source vIsrSrc.>
+ * Service ID   :       <None>
+ * Sync/Async   :       <Synchronous>
+ * Reentrancy           <Reentrant>
+ * param[in]            <srcAddr,prio,srcType,isrProc>
+ * param[out]           <None>
+ * param[in/out]        <None>
+ * return               <None>
+ * CallByAPI            <None>
+ * REQ ID               <>
+ */
+void Os_EnableInterruptSource(uint32 vIsrSrc, uint32 vIsrSrcType)
+{
+    UNUSED_PARAMETER(vIsrSrcType);
+    uint32 convertId = Os_GetNvicIrqId(vIsrSrc);
+    OS_INTERRUPT_ENABLE(convertId); /* PRQA S 0303,3345,3442 */ /* MISRA Rule 11.4,CWE-398 */
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+#if ((OS_SC3 == CFG_SC) || (OS_SC4 == CFG_SC))
+#if (CFG_ISR_MAX > 0)
+/*****************************************************************************/
+/*
+ * Brief                <Disable all interrupts in os_app during TerminateApplication.>
+ * ServiceId            <None>
+ * Sync/Async           <Synchronous>
+ * Reentrancy           <Non Reentrant>
+ * Param-Name[in]       <None>
+ * Param-Name[out]      <None>
+ * Param-Name[in/out]   <None>
+ * Return               <None>
+ * PreCondition         <None>
+ * CallByAPI            <Os_ArchInitCPU>
+ */
+/*****************************************************************************/
+void Os_ArchDisableIntInApp(P2CONST(Os_ApplicationCfgType, AUTOMATIC, OS_VAR) posCurAppCfg)
+{
+    uint16 i;
+    uint16 osIsrRefCnt;
+    Os_IsrType osIsrId;
+    uint32 osIsrRegVal;
+
+    osIsrRefCnt = posCurAppCfg->OsAppIsrRefCnt;
+
+    for (i = 0u; i < osIsrRefCnt; i++)
+    {
+        osIsrId = Os_GetObjLocalId(posCurAppCfg->OsAppObjectRef[OBJECT_ISR][i]);
+
+        osIsrRegVal = Os_IsrCfg[osIsrId].OsIsrSrc;
+        uint32 convertId = Os_GetNvicIrqId(osIsrRegVal);
+        OS_INTERRUPT_CLEAR_PENDING(convertId); /* PRQA S 0303 */     /* MISRA Rule 11.4 */
+        OS_INTERRUPT_DISABLE(convertId); /* PRQA S 0303,3345,3442 */ /* MISRA Rule 11.4,CWE-398 */
+    }
+}
+
+#endif /* #if (CFG_ISR_MAX > 0) */ /* PRQA S 2053 */                          /* MISRA Rule 18.8 */
+#endif /* #if ((OS_SC3 == CFG_SC) || (OS_SC4 == CFG_SC)) */ /* PRQA S 2053 */ /* MISRA Rule 18.8 */
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/*****************************************************************************/
+/*
+ * Brief                <Os_ArchDispatch_ISR>
+ * ServiceId            <None>
+ * Sync/Async           <Synchronous>
+ * Reentrancy           <Non Reentrant>
+ * Param-Name[in]       <None>
+ * Param-Name[out]      <None>
+ * Param-Name[in/out]   <None>
+ * Return               <None>
+ * PreCondition         <None>
+ * CallByAPI            <>
+ */
+/*****************************************************************************/
+void Os_ArchDispatch_ISR(void)
+{
+    /* Call PendSV to switch task */
+    OS_ASM("cpsid i                            \n"
+           "ldr r0, =0xE000ED04             \n"
+           "ldr r1, =0x10000000            \n"
+           "str r1, [r0]                       \n"
+           "dsb                                \n");
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+/*=======[E N D   O F   F I L E]==============================================*/
