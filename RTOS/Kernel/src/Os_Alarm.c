@@ -1,0 +1,1279 @@
+/**
+ * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * SPDX-License-Identifier: LGPL-2.1-only-with-exception OR  LicenseRef-Commercial-License
+ *
+ * This library is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU Lesser General Public License as published by the Free Software Foundation; version 2.1.
+ * This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU Lesser General Public License for more details.
+ * You should have received a copy of the GNU Lesser General Public License along with this library;
+ * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ * or see <https://www.gnu.org/licenses/>.
+ *
+ ********************************************************************************
+ **                                                                            **
+ **  FILENAME    : Os_Alarm.c                                                  **
+ **                                                                            **
+ **  Created on  :                                                             **
+ **  Author      : i-soft-os                                                   **
+ **  Vendor      :                                                             **
+ **  DESCRIPTION : alarm manager                                               **
+ **                                                                            **
+ **  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
+ **  Version :   AUTOSAR classic Platform R19--Function Safety                 **
+ **                                                                            **
+ *******************************************************************************/
+
+/*=======[I N C L U D E S]====================================================*/
+#include "Os_Internal.h"
+/*=======[M A C R O S]========================================================*/
+
+/*=======[T Y P E   D E F I N I T I O N S]====================================*/
+
+/*=======[E X T E R N A L   D A T A]==========================================*/
+
+/*=======[E X T E R N A L   F U N C T I O N   D E C L A R A T I O N S]========*/
+
+/*=======[I N T E R N A L   D A T A]==========================================*/
+#if (CFG_ALARM_MAX > 0)
+#define OS_START_SEC_VAR_CLONE_PTR
+#include "Os_MemMap.h"
+static const Os_AlarmCfgType* Os_AlarmCfg;
+#define OS_STOP_SEC_VAR_CLONE_PTR
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_VAR_CLONE_PTR
+#include "Os_MemMap.h"
+static Os_ACBType* Os_ACB;
+#define OS_STOP_SEC_VAR_CLONE_PTR
+#include "Os_MemMap.h"
+
+/*=======[I N T E R N A L   F U N C T I O N   D E C L A R A T I O N S]========*/
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+static void Os_InsertAlarm(Os_AlarmType alarmid, Os_AlarmRefType almque, Os_TickType curTick);
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+static void Os_DeleteAlarm(Os_AlarmType alarmid, Os_AlarmRefType almque);
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/*=======[F U N C T I O N   I M P L E M E N T A T I O N S]====================*/
+/******************************************************************************/
+/*
+ * Brief                <Init the alarm control block>
+ * Service ID           <None>
+ * Sync/Async           <Synchronous>
+ * Reentrancy           <Non Reentrant>
+ * return               <None>
+ * PreCondition         <None>
+ * CallByAPI            <Os_InitSystem>
+ * REQ ID               <None>
+ */
+/******************************************************************************/
+void Os_InitAlarm(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
+{
+    Os_AlarmType i;
+    Os_ACBType*  pACB;
+
+#if (CFG_AUTO_ALARM_MAX > 0U)
+    const Os_AlarmCfgType* pAlarmCfg = NULL_PTR;
+    Os_CounterType         alarmCounter;
+    Os_AppModeType         alarmAppModeMask;
+    Os_AlarmType           AlarmQue;
+#endif
+
+    Os_CoreIdType coreId = Os_SCB.sysCore;
+    Os_AlarmCfg          = Os_AlarmCfg_Inf[coreId];
+    Os_ACB               = Os_ACB_Inf[coreId];
+    Os_SCB.sysAlarmMax   = Os_CfgAlarmMax_Inf[coreId];
+
+    if (Os_AlarmCfg != NULL_PTR)
+    {
+#if (CFG_ALARM_MAX > 0)
+        for (i = 0U; i < Os_SCB.sysAlarmMax; i++)
+        {
+            pACB             = &Os_ACB[i];
+            pACB->alarmStart = 0U;
+            pACB->alarmCycle = 0U;
+            pACB->alarmPre   = i;
+            pACB->alarmNext  = i;
+
+#if (CFG_AUTO_ALARM_MAX > 0U)
+            pAlarmCfg = &Os_AlarmCfg[i];
+            if (NULL_PTR != pAlarmCfg->osAlarmAutostartRef)
+            {
+                alarmAppModeMask = pAlarmCfg->osAlarmAutostartRef->osAlarmAppMode;
+                if (0U != (alarmAppModeMask & Os_SCB.sysActiveAppMode))
+                {
+                    alarmCounter     = pAlarmCfg->osAlarmCounter;
+                    pACB->alarmStart = pAlarmCfg->osAlarmAutostartRef->osAlarmStartTime;
+                    pACB->alarmCycle = pAlarmCfg->osAlarmAutostartRef->osAlarmCycleTime;
+                    AlarmQue         = Os_CCB[alarmCounter].counterAlmQue;
+                    Os_InsertAlarm(i, &AlarmQue, Os_CCB[alarmCounter].counterCurVal);
+                    Os_CCB[alarmCounter].counterAlmQue = AlarmQue;
+                }
+            }
+#endif /* CFG_AUTO_ALARM_MAX > 0U */
+        }
+#endif /* CFG_ALARM_MAX > 0 */
+    }
+
+    return;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/******************************************************************************/
+/*
+ * Brief                <The system service GetAlarm returns the relative value
+ *                       in ticksbefore the alarm <AlarmID> expires>
+ * Service ID           <>
+ * Sync/Async           <Synchronous>
+ * Reentrancy           <Reentrant>
+ * param-AlarmID[in]    <reference to alarm>
+ * Param-Tick[out]      <Relative value in ticks before the alarm <AlarmID>
+ *                       expires>
+ * Param-Name[in/out]   <None>
+ * return               <StatusType>
+ * PreCondition         <None>
+ * CallByAPI            <None>
+ * REQ ID               <None>
+ */
+/******************************************************************************/
+StatusType Os_GetAlarm(AlarmType AlarmID, TickRefType Tick) /* PRQA S 1505 */ /* VL_Os_1505 */
+{
+    StatusType     err = E_OK;
+    Os_CounterType osCounterId;
+    Os_TickType    counterCurval;
+    OS_ARCH_DECLARE_CRITICAL();
+
+#if (OS_AUTOSAR_CORES > 1)
+    AlarmID = Os_GetObjLocalId(AlarmID); /* PRQA S 1338 */ /* VL_Os_1338 */
+#endif
+
+    OS_ARCH_ENTRY_CRITICAL();
+    if (Os_ACB[AlarmID].alarmNext == AlarmID)
+    {
+        err = E_OS_NOFUNC;
+    }
+    else
+    {
+        osCounterId = Os_AlarmCfg[AlarmID].osAlarmCounter;
+
+        /* Driven by hardware counter or sofrware counter. */
+        counterCurval = Os_CCB[osCounterId].counterCurVal;
+        *Tick         = Os_GetDistance(counterCurval, Os_ACB[AlarmID].alarmStart, osCounterId);
+    }
+    OS_ARCH_EXIT_CRITICAL();
+
+    return err;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/******************************************************************************/
+/*
+ * Brief                <Os_WorkAlarm>
+ * Service ID           <None>
+ * Sync/Async           <Synchronous>
+ * Reentrancy           <Reentrant>
+ * param-CounterID[in]  <reference to counter>
+ * Param-Name[out]      <None>
+ * Param-Name[in/out]   <None>
+ * return               <None>
+ * PreCondition         <None>
+ * CallByAPI            <None>
+ * REQ ID               <None>
+ */
+/******************************************************************************/
+void Os_WorkAlarm(Os_CounterType CounterID) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
+{
+    Os_TickType  counterCurval;
+    Os_TickType  counterMaxAllowedValue;
+    boolean      done = FALSE;
+    Os_AlarmType AlarmQue;
+    Os_AlarmType alarmCurVal;
+    Os_AlarmType alarmNextVal;
+
+    OS_ARCH_DECLARE_CRITICAL();
+
+#if (CFG_OSAPPLICATION_MAX > 0U)
+    Os_ApplicationType bakappID = Os_SCB.sysRunningAppID;
+#endif
+
+    counterMaxAllowedValue = Os_CounterCfg[CounterID].osCounterMaxAllowedValue;
+
+    OS_ARCH_ENTRY_CRITICAL();
+    counterCurval = Os_CCB[CounterID].counterCurVal;
+    alarmNextVal  = Os_CCB[CounterID].counterAlmQue;
+
+    while (FALSE == done)
+    {
+        if (OS_ALARM_INVALID == alarmNextVal)
+        {
+            done = TRUE;
+        }
+        else if (Os_GetDistance(Os_ACB[alarmNextVal].alarmStart, counterCurval, CounterID) <= counterMaxAllowedValue)
+        {
+            alarmCurVal  = alarmNextVal;
+            alarmNextVal = Os_ACB[alarmNextVal].alarmNext;
+
+#if (CFG_OSAPPLICATION_MAX > 0U)
+            Os_SCB.sysRunningAppID = Os_ObjectAppCfg[OBJECT_ALARM][alarmCurVal].hostApp;
+#endif
+
+            Os_CCB[CounterID].counterAlmQue = alarmNextVal;
+
+            if (OS_ALARM_INVALID != alarmNextVal)
+            {
+                Os_ACB[alarmNextVal].alarmPre = OS_ALARM_INVALID;
+            }
+
+            Os_ACB[alarmCurVal].alarmPre  = alarmCurVal;
+            Os_ACB[alarmCurVal].alarmNext = alarmCurVal;
+
+            if (NULL_PTR != Os_AlarmCfg[alarmCurVal].osAlarmCallback)
+            {
+#if (CFG_OSAPPLICATION_MAX > 0U)
+                if (Os_SCB.sysOsLevel == OS_LEVEL_TASK)
+                {
+                    Os_TCB[Os_SCB.sysRunningTaskID].CallBackAppID = Os_SCB.sysRunningAppID;
+                }
+                else if (Os_SCB.sysOsLevel == OS_LEVEL_ISR2)
+                {
+                    Os_ICB[Os_SCB.sysRunningIsrCat2Id].CallBackAppID = Os_SCB.sysRunningAppID;
+                }
+                else
+                {
+                    Os_Panic();
+                }
+#endif
+
+                OS_ARCH_EXIT_CRITICAL();
+                Os_AlarmCfg[alarmCurVal].osAlarmCallback();
+                OS_ARCH_ENTRY_CRITICAL();
+
+#if (CFG_OSAPPLICATION_MAX > 0U)
+                if (Os_SCB.sysOsLevel == OS_LEVEL_TASK)
+                {
+                    Os_TCB[Os_SCB.sysRunningTaskID].CallBackAppID = INVALID_OSAPPLICATION;
+                }
+                else if (Os_SCB.sysOsLevel == OS_LEVEL_ISR2)
+                {
+                    Os_ICB[Os_SCB.sysRunningIsrCat2Id].CallBackAppID = INVALID_OSAPPLICATION;
+                }
+                else
+                {
+                    Os_Panic();
+                }
+#endif
+            }
+
+            if (Os_ACB[alarmCurVal].alarmCycle > 0U)
+            {
+                Os_ACB[alarmCurVal].alarmStart =
+                    Os_CalcAbsTicks(Os_ACB[alarmCurVal].alarmStart, Os_ACB[alarmCurVal].alarmCycle, CounterID);
+                AlarmQue = Os_CCB[CounterID].counterAlmQue;
+                Os_InsertAlarm(alarmCurVal, &AlarmQue, Os_CCB[CounterID].counterLastVal);
+                Os_CCB[CounterID].counterAlmQue = AlarmQue;
+            }
+        }
+        else
+        {
+            done = TRUE;
+        }
+    }
+    OS_ARCH_EXIT_CRITICAL();
+
+#if (CFG_OSAPPLICATION_MAX > 0U)
+    Os_SCB.sysRunningAppID = bakappID;
+#endif
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/******************************************************************************/
+/*
+ * Brief                <Insert an alarm in alarm queue>
+ * Service ID           <None>
+ * Sync/Async           <Synchronous>
+ * Reentrancy           <Reentrant>
+ * param-alarmid[in]    <reference to alarm>
+ * param-curTick[in]    <current tick value>
+ * Param-Name[out]      <None>
+ * Param-almque[in/out] <reference to alarm queue>
+ * return               <None>
+ * PreCondition         <None>
+ * CallByAPI            <None>
+ * REQ ID               <None>
+ */
+/******************************************************************************/
+/* PRQA S 6030, 6010 ++ */ /* VL_MTR_Os_STMIF, VL_MTR_Os_STCYC */
+static void Os_InsertAlarm(Os_AlarmType alarmid, Os_AlarmRefType almque, Os_TickType curTick)
+/* PRQA S 6030, 6010 -- */
+{
+    Os_TickType  alarmTick;
+    Os_AlarmType pre;
+    Os_AlarmType next;
+    boolean      done = FALSE;
+
+    if (alarmid < Os_SCB.sysAlarmMax)
+    {
+        alarmTick = Os_ACB[alarmid].alarmStart;
+
+        pre  = OS_ALARM_INVALID;
+        next = *almque;
+
+        if (curTick < alarmTick)
+        {
+            while (done != TRUE)
+            {
+                if (OS_ALARM_INVALID == next)
+                {
+                    done = TRUE;
+                }
+                else if ((Os_ACB[next].alarmStart >= curTick) && (Os_ACB[next].alarmStart <= alarmTick))
+                {
+                    pre  = next;
+                    next = Os_ACB[next].alarmNext;
+                }
+                else
+                {
+                    done = TRUE;
+                }
+            }
+        }
+        else
+        {
+            while (done != TRUE)
+            {
+                if (OS_ALARM_INVALID == next)
+                {
+                    done = TRUE;
+                }
+                else if ((Os_ACB[next].alarmStart >= curTick) || (Os_ACB[next].alarmStart <= alarmTick))
+                {
+                    pre  = next;
+                    next = Os_ACB[next].alarmNext;
+                }
+                else
+                {
+                    done = TRUE;
+                }
+            }
+        }
+
+        Os_ACB[alarmid].alarmPre  = pre;
+        Os_ACB[alarmid].alarmNext = next;
+
+        if (pre != OS_ALARM_INVALID)
+        {
+            Os_ACB[pre].alarmNext = alarmid;
+        }
+        else
+        {
+            *almque = alarmid;
+        }
+
+        if (next != OS_ALARM_INVALID)
+        {
+            Os_ACB[next].alarmPre = alarmid;
+        }
+    }
+
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceAlarmStart(alarmid);
+#endif /* TRUE == CFG_TRACE_ENABLE */
+
+    return;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/******************************************************************************/
+/*
+ * Brief                <Delete an alarm in alarm queue>
+ * Service ID           <None>
+ * Sync/Async           <Synchronous>
+ * Reentrancy           <Reentrant>
+ * param-alarmid[in]    <reference to alarm>
+ * Param-Name[out]      <None>
+ * Param-almque[in/out] <reference to alarm queue>
+ * return               <None>
+ * PreCondition         <None>
+ * CallByAPI            <None>
+ * REQ ID               <None>
+ */
+/******************************************************************************/
+static void Os_DeleteAlarm(Os_AlarmType alarmid, Os_AlarmRefType almque)
+{
+    Os_AlarmType pre;
+    Os_AlarmType next;
+
+    if (alarmid >= Os_SCB.sysAlarmMax)
+    {
+        /*nothing to do*/
+    }
+    else
+    {
+        pre  = Os_ACB[alarmid].alarmPre;
+        next = Os_ACB[alarmid].alarmNext;
+
+        if (pre != OS_ALARM_INVALID)
+        {
+            Os_ACB[pre].alarmNext = next;
+        }
+        else
+        {
+            *almque = next;
+        }
+
+        if (next != OS_ALARM_INVALID)
+        {
+            Os_ACB[next].alarmPre = pre;
+        }
+
+        Os_ACB[alarmid].alarmPre  = alarmid;
+        Os_ACB[alarmid].alarmNext = alarmid;
+    }
+
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceAlarmStop(alarmid);
+#endif /* TRUE == CFG_TRACE_ENABLE */
+
+    return;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/******************************************************************************/
+/*
+ * Brief                <Internal implementation of OS service: CancelAlarm>
+ * Service ID           <OSServiceId_CancelAlarm>
+ * Sync/Async           <Synchronous>
+ * Reentrancy           <Reentrant>
+ * param-AlarmID[in]    <reference to alarm>
+ * Param-Name[out]      <None>
+ * Param-Name[in/out]   <None>
+ * return               <StatusType>
+ * PreCondition         <None>
+ * CallByAPI            <None>
+ * REQ ID               <None>
+ */
+/******************************************************************************/
+StatusType Os_CancelAlarm(AlarmType AlarmID) /* PRQA S 1505 */ /* VL_Os_1505 */
+{
+    StatusType     err = E_OK;
+    Os_CounterType alarmCounter;
+    Os_AlarmType   AlarmQue;
+
+    OS_ARCH_DECLARE_CRITICAL();
+
+#if (OS_AUTOSAR_CORES > 1)
+    AlarmID = Os_GetObjLocalId(AlarmID); /* PRQA S 1338 */ /* VL_Os_1338 */
+#endif
+
+    /* Standard Status */
+    OS_ARCH_ENTRY_CRITICAL();
+    if (Os_ACB[AlarmID].alarmNext == AlarmID)
+    {
+        err = E_OS_NOFUNC;
+    }
+    else
+    {
+        alarmCounter = Os_AlarmCfg[AlarmID].osAlarmCounter;
+        AlarmQue     = Os_CCB[alarmCounter].counterAlmQue;
+        Os_DeleteAlarm(AlarmID, &AlarmQue);
+        Os_CCB[alarmCounter].counterAlmQue = AlarmQue;
+    }
+    OS_ARCH_EXIT_CRITICAL();
+
+    return err;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/******************************************************************************/
+/*
+ * Brief                <The system service occupies the alarm <AlarmID> element.
+ *                       When <start> ticks are reached, the task assigned to
+ *                       the alarm <AlarmID> is activated or the assigned event
+ *                       (only for extendedtasks) is set or the alarm-callback
+ *                       routine is called.>
+ * Service ID           <None>
+ * Sync/Async           <Synchronous>
+ * Reentrancy           <Reentrant>
+ * param-AlarmID[in]    <reference to alarm>
+ * param-start[in]      <Absolute value in ticks>
+ * param-cycle[in]      <Cycle value in case of cyclic alarm. In case of single
+ *                       alarms,cycle has to be zero.>
+ * Param-Name[out]      <None>
+ * Param-Name[in/out]   <None>
+ * return               <StatusType>
+ * PreCondition         <None>
+ * CallByAPI            <None>
+ * REQ ID               <None>
+ */
+/******************************************************************************/
+StatusType Os_SetAbsAlarm(AlarmType AlarmID, TickType start, TickType cycle) /* PRQA S 1505 */ /* VL_Os_1505 */
+{
+    StatusType     err = E_OK;
+    Os_AlarmType   AlarmQue;
+    Os_TickType    osCounterCurVal;
+    Os_CounterType alarmCounter;
+    Os_TickType    counterMaxAllowedValue;
+
+    OS_ARCH_DECLARE_CRITICAL();
+
+#if (OS_AUTOSAR_CORES > 1)
+    AlarmID = Os_GetObjLocalId(AlarmID); /* PRQA S 1338 */ /* VL_Os_1338 */
+#endif
+
+    alarmCounter           = Os_AlarmCfg[AlarmID].osAlarmCounter;
+    counterMaxAllowedValue = Os_CounterCfg[alarmCounter].osCounterMaxAllowedValue;
+
+#if (OS_STATUS_EXTENDED == CFG_STATUS)
+    Os_TickType counterMinCycle = Os_CounterCfg[alarmCounter].osCounterMinCycle;
+    /*start is unsigned long integer, so not check smaller than 0*/
+    if ((0U == start) || (start > counterMaxAllowedValue))
+    {
+        err = E_OS_VALUE;
+    }
+    else if ((cycle != 0U) && ((cycle > counterMaxAllowedValue) || (cycle < counterMinCycle)))
+    {
+        err = E_OS_VALUE;
+    }
+    else
+    {
+        /*nothing to do*/
+    }
+#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
+
+    if ((StatusType)E_OK == err) /* PRQA S 2991, 2995 */ /* VL_Os_2991, VL_Os_2995 */
+    {
+        OS_ARCH_ENTRY_CRITICAL();
+        if (Os_ACB[AlarmID].alarmNext != AlarmID)
+        {
+            OS_ARCH_EXIT_CRITICAL();
+            err = E_OS_STATE;
+        }
+        else
+        {
+            osCounterCurVal = Os_CCB[alarmCounter].counterCurVal;
+
+            if (Os_GetDistance(osCounterCurVal, start, alarmCounter) <= counterMaxAllowedValue)
+            {
+                Os_ACB[AlarmID].alarmStart = start;
+            }
+            else
+            {
+                Os_ACB[AlarmID].alarmStart = start + counterMaxAllowedValue + 1U;
+            }
+
+            Os_ACB[AlarmID].alarmCycle = cycle;
+            AlarmQue                   = Os_CCB[alarmCounter].counterAlmQue;
+            Os_InsertAlarm(AlarmID, &AlarmQue, Os_CCB[alarmCounter].counterCurVal);
+            Os_CCB[alarmCounter].counterAlmQue = AlarmQue;
+            OS_ARCH_EXIT_CRITICAL();
+        }
+    }
+
+    return err;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/******************************************************************************/
+/*
+ * Brief                <The system service GetAlarmBase reads the alarm base
+ *                       characteristics. The return value <Info> is a structure in which
+ *                       the information of data type Os_AlarmBaseType is stored.>
+ * Service ID           <None>
+ * Sync/Async           <Synchronous>
+ * Reentrancy           <Reentrant>
+ * param-AlarmID[in]    <reference to alarm>
+ * Param-Info[out]      <Reference to structure with constants of the alarm base>
+ * Param-Name[in/out]   <None>
+ * return               <StatusType>
+ * PreCondition         <None>
+ * CallByAPI            <None>
+ * REQ ID               <None>
+ */
+/******************************************************************************/
+void Os_GetAlarmBase(AlarmType AlarmID, AlarmBaseRefType Info) /* PRQA S 1505 */ /* VL_Os_1505 */
+{
+    Os_CounterType alarmCounter;
+
+#if (OS_AUTOSAR_CORES > 1)
+    AlarmID = Os_GetObjLocalId(AlarmID); /* PRQA S 1338 */ /* VL_Os_1338 */
+#endif
+    alarmCounter = Os_AlarmCfg[AlarmID].osAlarmCounter;
+
+    Info->maxallowedvalue = Os_CounterCfg[alarmCounter].osCounterMaxAllowedValue;
+    Info->mincycle        = Os_CounterCfg[alarmCounter].osCounterMinCycle;
+    Info->ticksperbase    = Os_CounterCfg[alarmCounter].osCounterTicksPerBase;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/******************************************************************************/
+/*
+ * Brief                <The system service occupies the alarm <AlarmID> element.
+ *                       After <increment> ticks have elapsed, the task assigned
+ *                       to the alarm <AlarmID> is activated or the assigned
+ *                       event (only for extended tasks) is set or the
+ *                       alarm-callback routine is called>
+ * Service ID           <None>
+ * Sync/Async           <Synchronous>
+ * Reentrancy           <Reentrant>
+ * param-AlarmID[in]    <reference to alarm>
+ * param-increment[in]  <Relative value in ticks>
+ * param-cycle[in]      <Cycle value in case of cyclic alarm. In case of single
+ *                       alarms,cycle has to be zero.>
+ * Param-Name[out]      <None>
+ * Param-Name[in/out]   <None>
+ * return               <None>
+ * PreCondition         <None>
+ * CallByAPI            <None>
+ * REQ ID               <None>
+ */
+/******************************************************************************/
+StatusType Os_SetRelAlarm(AlarmType AlarmID, TickType increment, TickType cycle) /* PRQA S 1505 */ /* VL_Os_1505 */
+{
+    StatusType     err = E_OK;
+    Os_AlarmType   AlarmQue;
+    Os_CounterType alarmCounter;
+
+#if (OS_AUTOSAR_CORES > 1)
+    AlarmID = Os_GetObjLocalId(AlarmID); /* PRQA S 1338 */ /* VL_Os_1338 */
+#endif
+
+    /*
+     * OSEKOS223: the behaviour of this case is up to the implementation
+     * AutoSarOS, @SWS_Os_00304: If in a call to SetRelAlarm() the
+     * parameter increment is set to zero, the service shall
+     * return E_OS_VALUE in standard and extended status
+     *
+     * we meet SWS_Os_00304 requirement in here.
+     */
+    if (0U == increment)
+    {
+        err = E_OS_VALUE;
+    }
+    else
+    {
+        alarmCounter = Os_AlarmCfg[AlarmID].osAlarmCounter;
+
+#if (OS_STATUS_EXTENDED == CFG_STATUS)
+        Os_TickType counterMinCycle        = Os_CounterCfg[alarmCounter].osCounterMinCycle;
+        Os_TickType counterMaxAllowedValue = Os_CounterCfg[alarmCounter].osCounterMaxAllowedValue;
+
+        if (increment > counterMaxAllowedValue)
+        {
+            err = E_OS_VALUE;
+        }
+        else if ((cycle != 0U) && ((cycle > counterMaxAllowedValue) || (cycle < counterMinCycle)))
+        {
+            err = E_OS_VALUE;
+        }
+        else
+        {
+            /*nothing to do*/
+        }
+#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
+    }
+
+    if ((StatusType)E_OK == err)
+    {
+        OS_ARCH_DECLARE_CRITICAL();
+        OS_ARCH_ENTRY_CRITICAL();
+        if (Os_ACB[AlarmID].alarmNext != AlarmID)
+        {
+            OS_ARCH_EXIT_CRITICAL();
+            err = E_OS_STATE;
+        }
+        else
+        {
+            /* Timer type. */
+            Os_ACB[AlarmID].alarmStart = Os_CalcAbsTicks(Os_CCB[alarmCounter].counterCurVal, increment, alarmCounter);
+            Os_ACB[AlarmID].alarmCycle = cycle;
+            AlarmQue                   = Os_CCB[alarmCounter].counterAlmQue;
+            Os_InsertAlarm(AlarmID, &AlarmQue, Os_CCB[alarmCounter].counterCurVal);
+            Os_CCB[alarmCounter].counterAlmQue = AlarmQue;
+            OS_ARCH_EXIT_CRITICAL();
+        }
+    }
+    return err;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/******************************************************************************/
+/*
+ * Brief                <The system service GetAlarm returns the relative value
+ *                       in ticksbefore the alarm <AlarmID> expires>
+ * Service ID           <0xf1>
+ * Sync/Async           <Synchronous>
+ * Reentrancy           <Reentrant>
+ * param-AlarmID[in]    <reference to alarm>
+ * Param-Tick[out]      <Relative value in ticks before the alarm <AlarmID>
+ *                       expires>
+ * Param-Name[in/out]   <None>
+ * return               <StatusType>
+ * PreCondition         <None>
+ * CallByAPI            <None>
+ * REQ ID               <None>
+ */
+/******************************************************************************/
+/* PRQA S 6030, 6010, 6070 ++ */ /* VL_MTR_Os_STMIF, VL_MTR_Os_STCYC, VL_MTR_Os_STCAL */
+/* PRQA S 1503, 3006 ++ */       /* VL_QAC_NoUsedApi, VL_Os_3006 */
+StatusType GetAlarm(AlarmType AlarmID, TickRefType Tick)
+/* PRQA S 1503, 3006 -- */
+/* PRQA S 6030, 6010, 6070 -- */
+{
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
+    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
+    OS_ENTER_KERNEL();
+    /* PRQA S 1006 -- */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
+    StatusType err = E_OK;
+
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceEnter(OSServiceId_GetAlarm);
+#endif /* TRUE == CFG_TRACE_ENABLE */
+
+#if (OS_STATUS_EXTENDED == CFG_STATUS)
+    if (NULL_PTR == Tick)
+    {
+        err = E_OS_PARAM_POINTER;
+    }
+    /* PRQA S 3432 ++ */ /* VL_Os_3432 */
+    else if (CHECK_ID_INVALID(AlarmID, Os_CfgAlarmMax_Inf))
+    /* PRQA S 3432 -- */
+    {
+        err = E_OS_ID;
+    }
+    else
+#endif /* OS_STATUS_EXTENDED != CFG_STATUS */
+
+#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
+        if (Os_WrongContext(OS_CONTEXT_GET_ALARM) != TRUE)
+    {
+        err = E_OS_CALLEVEL;
+    }
+    else if (Os_AddressWritable((uint32)Tick) != TRUE) /* PRQA S 0306 */ /* VL_Os_0306 */
+    {
+        err = E_OS_ILLEGAL_ADDRESS;
+    }
+    else if (Os_IgnoreService() != TRUE)
+    {
+        err = E_OS_DISABLEDINT;
+    }
+    else if (Os_CheckObjAcs(OBJECT_ALARM, AlarmID) != TRUE)
+    {
+        err = E_OS_ACCESS;
+    }
+    else
+#endif /* TRUE == CFG_SERVICE_PROTECTION_ENABLE */
+    {
+/* SWS_Os_00640:GetAlarm shall also work on an
+ * ALARM that is bound to another core. */
+#if (OS_AUTOSAR_CORES > 1)
+        Os_CoreIdType coreId = Os_GetObjCoreId(AlarmID);
+        if (coreId != Os_SCB.sysCore)
+        {
+            RpcInputType rpcData = {
+                .sync         = RPC_SYNC,
+                .remoteCoreId = coreId,
+                .serviceId    = OSServiceId_GetAlarm,
+                .srvPara0     = (uint32)AlarmID,
+                /* PRQA S 0306 ++ */ /* VL_Os_0306 */
+                .srvPara1 = (uint32)Tick,
+                /* PRQA S 0306 -- */
+                /* PRQA S 1258 ++ */ /* VL_Os_ConstToIntegral  */
+                .srvPara2 = (uint32)NULL_PARA,
+                /* PRQA S 1258 -- */
+            };
+            err = Os_RpcCallService(&rpcData);
+        }
+        else
+#endif /* OS_AUTOSAR_CORES > 1 */
+        {
+            err = Os_GetAlarm(AlarmID, Tick);
+        }
+    }
+
+#if (CFG_ERRORHOOK == TRUE)
+    if (err != E_OK)
+    {
+        Os_TraceErrorHook(OSError_Save_GetAlarm(AlarmID, Tick), OSServiceId_GetAlarm, err);
+    }
+#endif
+
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceExit(OSServiceId_GetAlarm);
+#endif /* TRUE == CFG_TRACE_ENABLE */
+
+    OS_EXIT_KERNEL(); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
+
+    return err;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/******************************************************************************/
+/*
+ * Brief                <The system service GetAlarmBase reads the alarm base
+ *                       characteristics. The return value <Info> is a structure in which
+ *                       the information of data type Os_AlarmBaseType is stored.>
+ * Service ID           <0xf0>
+ * Sync/Async           <Synchronous>
+ * Reentrancy           <Reentrant>
+ * param-AlarmID[in]    <reference to alarm>
+ * Param-Info[out]      <Reference to structure with constants of the alarm base>
+ * Param-Name[in/out]   <None>
+ * return               <StatusType>
+ * PreCondition         <None>
+ * CallByAPI            <None>
+ * REQ ID               <None>
+ */
+/******************************************************************************/
+/* PRQA S 6030, 6010, 6070 ++ */ /* VL_MTR_Os_STMIF, VL_MTR_Os_STCYC, VL_MTR_Os_STCAL */
+/* PRQA S 1503, 3006 ++ */       /* VL_QAC_NoUsedApi, VL_Os_3006 */
+StatusType GetAlarmBase(AlarmType AlarmID, AlarmBaseRefType Info)
+/* PRQA S 1503, 3006 -- */
+/* PRQA S 6030, 6010, 6070 -- */
+{
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
+    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
+    OS_ENTER_KERNEL();
+    /* PRQA S 1006 -- */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
+    StatusType err = E_OK;
+
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceEnter(OSServiceId_GetAlarmBase);
+#endif /* TRUE == CFG_TRACE_ENABLE */
+
+#if (OS_STATUS_EXTENDED == CFG_STATUS)
+    if (NULL_PTR == Info)
+    {
+        err = E_OS_PARAM_POINTER;
+    }
+    /* PRQA S 3432 ++ */ /* VL_Os_3432 */
+    else if (CHECK_ID_INVALID(AlarmID, Os_CfgAlarmMax_Inf))
+    /* PRQA S 3432 -- */
+    {
+        err = E_OS_ID;
+    }
+    else
+#endif /* OS_STATUS_EXTENDED != CFG_STATUS */
+
+#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
+        if (Os_WrongContext(OS_CONTEXT_GET_ALARM_BASE) != TRUE)
+    {
+        err = E_OS_CALLEVEL;
+    }
+    /* PRQA S 0306 ++ */ /* VL_Os_0306 */
+    else if (Os_AddressWritable((uint32)Info) != TRUE)
+    /* PRQA S 0306 -- */
+    {
+        err = E_OS_ILLEGAL_ADDRESS;
+    }
+    else if (Os_IgnoreService() != TRUE)
+    {
+        err = E_OS_DISABLEDINT;
+    }
+    else if (Os_CheckObjAcs(OBJECT_ALARM, AlarmID) != TRUE)
+    {
+        err = E_OS_ACCESS;
+    }
+    else
+#endif /* TRUE == CFG_SERVICE_PROTECTION_ENABLE */
+    {
+/* SWS_Os_00639:GetAlarmBase shall also work on an
+ * ALARM that is bound to another core. */
+#if (OS_AUTOSAR_CORES > 1)
+        Os_CoreIdType coreId = Os_GetObjCoreId(AlarmID);
+        if (coreId != Os_SCB.sysCore)
+        {
+            RpcInputType rpcData = {
+                .sync         = RPC_SYNC,
+                .remoteCoreId = coreId,
+                .serviceId    = OSServiceId_GetAlarmBase,
+                .srvPara0     = (uint32)AlarmID,
+                /* PRQA S 0306 ++ */ /* VL_Os_0306 */
+                .srvPara1 = (uint32)Info,
+                /* PRQA S 0306 -- */
+                /* PRQA S 1258 ++ */ /* VL_Os_ConstToIntegral  */
+                .srvPara2 = (uint32)NULL_PARA,
+                /* PRQA S 1258 -- */
+            };
+            err = Os_RpcCallService(&rpcData);
+        }
+        else
+#endif /* OS_AUTOSAR_CORES > 1 */
+        {
+            Os_GetAlarmBase(AlarmID, Info);
+        }
+    }
+
+#if (CFG_ERRORHOOK == TRUE)
+    if (err != E_OK)
+    {
+        Os_TraceErrorHook(OSError_Save_GetAlarmBase(AlarmID, Info), OSServiceId_GetAlarmBase, err);
+    }
+#endif
+
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceExit(OSServiceId_GetAlarmBase);
+#endif /* TRUE == CFG_TRACE_ENABLE */
+
+    OS_EXIT_KERNEL(); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
+    return err;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/******************************************************************************/
+/*
+ * Brief                <The system service cancels the alarm <AlarmID>>
+ * Service ID           <0xf4>
+ * Sync/Async           <Synchronous>
+ * Reentrancy           <Reentrant>
+ * param-AlarmID[in]    <reference to alarm>
+ * Param-Name[out]      <None>
+ * Param-Name[in/out]   <None>
+ * return               <StatusType>
+ * PreCondition         <None>
+ * CallByAPI            <None>
+ * REQ ID               <None>
+ */
+/******************************************************************************/
+/* PRQA S 1503, 6030, 6070, 3006 ++ */ /* VL_QAC_NoUsedApi, VL_MTR_Os_STMIF, VL_MTR_Os_STCAL, VL_Os_3006 */
+StatusType CancelAlarm(AlarmType AlarmID)
+/* PRQA S 1503, 6030, 6070, 3006 -- */
+{
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
+    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
+    OS_ENTER_KERNEL();
+    /* PRQA S 1006 -- */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
+    StatusType err = E_OK;
+
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceEnter(OSServiceId_CancelAlarm);
+#endif /* TRUE == CFG_TRACE_ENABLE */
+
+#if (OS_STATUS_EXTENDED == CFG_STATUS)
+
+    /* PRQA S 3432 ++ */ /* VL_Os_3432 */
+    if (CHECK_ID_INVALID(AlarmID, Os_CfgAlarmMax_Inf))
+    /* PRQA S 3432 -- */
+    {
+        err = E_OS_ID;
+    }
+    else
+#endif /* OS_STATUS_EXTENDED != CFG_STATUS */
+#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
+        if (Os_WrongContext(OS_CONTEXT_CANCEL_ALARM) != TRUE)
+    {
+        err = E_OS_CALLEVEL;
+    }
+    else if (Os_IgnoreService() != TRUE)
+    {
+        err = E_OS_DISABLEDINT;
+    }
+    else if (Os_CheckObjAcs(OBJECT_ALARM, AlarmID) != TRUE)
+    {
+        err = E_OS_ACCESS;
+    }
+    else
+#endif /* TRUE == CFG_SERVICE_PROTECTION_ENABLE */
+    {
+/* SWS_Os_00638:CancelAlarm shall also work on an
+ * ALARM that is bound to another core. */
+#if (OS_AUTOSAR_CORES > 1)
+        Os_CoreIdType coreId = Os_GetObjCoreId(AlarmID);
+        if (coreId != Os_SCB.sysCore)
+        {
+            RpcInputType rpcData = {
+                .sync         = RPC_SYNC,
+                .remoteCoreId = coreId,
+                .serviceId    = OSServiceId_CancelAlarm,
+                .srvPara0     = (uint32)AlarmID,
+                /* PRQA S 1258 ++ */ /* VL_Os_ConstToIntegral  */
+                .srvPara1 = (uint32)NULL_PARA,
+                .srvPara2 = (uint32)NULL_PARA,
+                /* PRQA S 1258 -- */
+            };
+            err = Os_RpcCallService(&rpcData);
+        }
+        else
+#endif /* OS_AUTOSAR_CORES > 1 */
+        {
+            err = Os_CancelAlarm(AlarmID);
+        }
+    }
+
+#if (CFG_ERRORHOOK == TRUE)
+    if (err != E_OK)
+    {
+        Os_TraceErrorHook(OSError_Save_CancelAlarm(AlarmID), OSServiceId_CancelAlarm, err);
+    }
+#endif
+
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceExit(OSServiceId_CancelAlarm);
+#endif /* TRUE == CFG_TRACE_ENABLE */
+
+    OS_EXIT_KERNEL(); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
+    return err;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/******************************************************************************/
+/*
+ * Brief                <The system service occupies the alarm <AlarmID> element.
+ *                       After <increment> ticks have elapsed, the task assigned
+ *                       to the alarm <AlarmID> is activated or the assigned
+ *                       event (only for extended tasks) is set or the
+ *                       alarm-callback routine is called>
+ * Service ID           <0xf2>
+ * Sync/Async           <Synchronous>
+ * Reentrancy           <Reentrant>
+ * param-AlarmID[in]    <reference to alarm>
+ * param-increment[in]  <Relative value in ticks>
+ * param-cycle[in]      <Cycle value in case of cyclic alarm. In case of single
+ *                       alarms,cycle has to be zero.>
+ * Param-Name[out]      <None>
+ * Param-Name[in/out]   <None>
+ * return               <StatusType>
+ * PreCondition         <None>
+ * CallByAPI            <None>
+ * REQ ID               <None>
+ */
+/******************************************************************************/
+/* PRQA S 1503, 6030, 6070, 3006 ++ */ /* VL_QAC_NoUsedApi, VL_MTR_Os_STMIF, VL_MTR_Os_STCAL, VL_Os_3006 */
+StatusType SetRelAlarm(AlarmType AlarmID, TickType increment, TickType cycle)
+/* PRQA S 1503, 6030, 6070, 3006 -- */
+{
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
+    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
+    OS_ENTER_KERNEL();
+    /* PRQA S 1006 -- */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
+
+    StatusType err = E_OK;
+
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceEnter(OSServiceId_SetRelAlarm);
+#endif /* TRUE == CFG_TRACE_ENABLE */
+
+#if (OS_STATUS_EXTENDED == CFG_STATUS)
+
+    /* PRQA S 3432 ++ */ /* VL_Os_3432 */
+    if (CHECK_ID_INVALID(AlarmID, Os_CfgAlarmMax_Inf))
+    /* PRQA S 3432 -- */
+    {
+        err = E_OS_ID;
+    }
+    else
+#endif /* OS_STATUS_EXTENDED != CFG_STATUS */
+#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
+        if (Os_WrongContext(OS_CONTEXT_SET_REL_ALARM) != TRUE)
+    {
+        err = E_OS_CALLEVEL;
+    }
+    else if (Os_IgnoreService() != TRUE)
+    {
+        err = E_OS_DISABLEDINT;
+    }
+    else if (Os_CheckObjAcs(OBJECT_ALARM, AlarmID) != TRUE)
+    {
+        err = E_OS_ACCESS;
+    }
+    else
+#endif /* TRUE == CFG_SERVICE_PROTECTION_ENABLE */
+    {
+/* SWS_Os_00636:SetRelAlarm shall also work on an
+ * ALARM that is bound to another core. */
+#if (OS_AUTOSAR_CORES > 1)
+        Os_CoreIdType coreId = Os_GetObjCoreId(AlarmID);
+        if (coreId != Os_SCB.sysCore)
+        {
+            RpcInputType rpcData = {
+                .sync         = RPC_SYNC,
+                .remoteCoreId = coreId,
+                .serviceId    = OSServiceId_SetRelAlarm,
+                .srvPara0     = (uint32)AlarmID,
+                .srvPara1     = (uint32)increment,
+                .srvPara2     = (uint32)cycle,
+            };
+            err = Os_RpcCallService(&rpcData);
+        }
+        else
+#endif /* OS_AUTOSAR_CORES > 1 */
+        {
+            err = Os_SetRelAlarm(AlarmID, increment, cycle);
+        }
+    }
+
+#if (CFG_ERRORHOOK == TRUE)
+    if (err != E_OK)
+    {
+        Os_TraceErrorHook(OSError_Save_SetRelAlarm(AlarmID, increment, cycle), OSServiceId_SetRelAlarm, err);
+    }
+#endif
+
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceExit(OSServiceId_SetRelAlarm);
+#endif /* TRUE == CFG_TRACE_ENABLE */
+
+    OS_EXIT_KERNEL(); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
+    return err;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/******************************************************************************/
+/*
+ * Brief                <The system service occupies the alarm <AlarmID> element.
+ *                       When <start> ticks are reached, the task assigned to
+ *                       the alarm <AlarmID> is activated or the assigned event
+ *                       (only for extendedtasks) is set or the alarm-callback
+ *                       routine is called.>
+ * Service ID           <0xf3>
+ * Sync/Async           <Synchronous>
+ * Reentrancy           <Reentrant>
+ * param-AlarmID[in]    <reference to alarm>
+ * param-start[in]      <Absolute value in ticks>
+ * param-cycle[in]      <Cycle value in case of cyclic alarm. In case of single
+ *                       alarms,cycle has to be zero.>
+ * Param-Name[out]      <None>
+ * Param-Name[in/out]   <None>
+ * return               <StatusType>
+ * PreCondition         <None>
+ * CallByAPI            <None>
+ * REQ ID               <None>
+ */
+/******************************************************************************/
+/* PRQA S 6030, 6070, 3006, 1503 ++ */ /* VL_MTR_Os_STMIF, VL_MTR_Os_STCAL, VL_Os_3006, VL_QAC_NoUsedApi */
+StatusType SetAbsAlarm(AlarmType AlarmID, TickType start, TickType cycle)
+/* PRQA S 6030, 6070, 3006, 1503 -- */
+{
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
+    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
+    OS_ENTER_KERNEL();
+    /* PRQA S 1006 -- */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
+
+    StatusType err = E_OK;
+
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceEnter(OSServiceId_SetAbsAlarm);
+#endif /* TRUE == CFG_TRACE_ENABLE */
+
+#if (OS_STATUS_EXTENDED == CFG_STATUS)
+
+    /* PRQA S 3432 ++ */ /* VL_Os_3432 */
+    if (CHECK_ID_INVALID(AlarmID, Os_CfgAlarmMax_Inf))
+    /* PRQA S 3432 -- */
+    {
+        err = E_OS_ID;
+    }
+    else
+#endif /* OS_STATUS_EXTENDED != CFG_STATUS */
+#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
+        if (Os_WrongContext(OS_CONTEXT_SET_ABS_ALARM) != TRUE)
+    {
+        err = E_OS_CALLEVEL;
+    }
+    else if (Os_IgnoreService() != TRUE)
+    {
+        err = E_OS_DISABLEDINT;
+    }
+    else if (Os_CheckObjAcs(OBJECT_ALARM, AlarmID) != TRUE)
+    {
+        err = E_OS_ACCESS;
+    }
+    else
+#endif /* TRUE == CFG_SERVICE_PROTECTION_ENABLE */
+    {
+/* SWS_Os_00637:SetAbsAlarm shall also work on an
+ * ALARM that is bound to another core. */
+#if (OS_AUTOSAR_CORES > 1)
+        Os_CoreIdType coreId = Os_GetObjCoreId(AlarmID);
+        if (coreId != Os_SCB.sysCore)
+        {
+            RpcInputType rpcData = {
+                .sync         = RPC_SYNC,
+                .remoteCoreId = coreId,
+                .serviceId    = OSServiceId_SetAbsAlarm,
+                .srvPara0     = (uint32)AlarmID,
+                .srvPara1     = (uint32)start,
+                .srvPara2     = (uint32)cycle,
+            };
+            err = Os_RpcCallService(&rpcData);
+        }
+        else
+#endif /* OS_AUTOSAR_CORES > 1 */
+        {
+            err = Os_SetAbsAlarm(AlarmID, start, cycle);
+        }
+    }
+
+#if (CFG_ERRORHOOK == TRUE)
+    if (err != E_OK)
+    {
+        Os_TraceErrorHook(OSError_Save_SetAbsAlarm(AlarmID, start, cycle), OSServiceId_SetAbsAlarm, err);
+    }
+#endif
+
+#if (TRUE == CFG_TRACE_ENABLE)
+    Os_TraceServiceExit(OSServiceId_SetAbsAlarm);
+#endif /* TRUE == CFG_TRACE_ENABLE */
+
+    OS_EXIT_KERNEL(); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
+    return err;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#endif /* CFG_ALARM_MAX > 0 */
+
+/*=======[E N D   O F   F I L E]==============================================*/

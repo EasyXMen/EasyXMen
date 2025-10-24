@@ -29,7 +29,7 @@
  *******************************************************************************/
 #ifndef MCU_TIMER_H
 #define MCU_TIMER_H
-
+#include "Os.h"
 /* MSRKCPROT register is used for protection against writing operation to the registers which may have
 a material effect on the system so that the application system is not incorrectly stopped due to program
 malfunction and the like */
@@ -81,16 +81,64 @@ malfunction and the like */
 #endif /* TRUE == CFG_TIMING_PROTECTION_ENABLE */
 
 #if (TRUE == CFG_LOAD_RATIO_CALC_ENABLE)
-
-#define Os_ArchLoadRatioInit()
-
-#define OS_SYSTEM_TIMER_MAX_TICK_VALUE   0xFFFFFFFFU
-
-#define OS_SYSTEM_TIMER_REG_PER_MS_VALUE CFG_REG_OSTIMER_VALUE_CORE0
-
+#define OS_SYSTEM_TIMER_MAX_TICK_VALUE      0xFFFFFFFFU
+#define OS_SYSTEM_TIMER_REG_PER_MS_VALUE    400000U
+#define Os_ArchTptmPtr                      ((Os_ArchTptmTypeRef)(0xFFFBB000U))
 #endif /* TRUE == CFG_LOAD_RATIO_CALC_ENABLE */
 
 /*=======[T Y P E   D E F I N I T I O N S]====================================*/
+typedef struct
+{
+    // Interval Timer Control Registers
+    volatile uint32 TPTMSIRUN;         // 0x000: Counter Start Register
+    volatile uint32 TPTMSIRRUN;        // 0x004: Counter Restart Register
+    volatile uint32 TPTMSISTP;         // 0x008: Counter Stop Register
+    volatile uint32 TPTMSISTR;         // 0x00C: Counter Status Register
+    volatile uint32 TPTMSIIEN;         // 0x010: Interrupt Enable Register
+    volatile uint32 TPTMSIUSTR;        // 0x014: Underflow Status Register
+    volatile uint32 TPTMSIDIV;         // 0x018: Divider Register
+    volatile uint32 RESERVED1;         // 0x01C: Reserved
+    // Free-run Timer Control Registers
+    volatile uint32 TPTMSFRUN;         // 0x020: Counter Start Register
+    volatile uint32 TPTMSFRRUN;        // 0x024: Counter Restart Register
+    volatile uint32 TPTMSFSTP;         // 0x028: Counter Stop Register
+    volatile uint32 TPTMSFSTR;         // 0x02C: Counter Status Register
+    volatile uint32 TPTMSFDIV;         // 0x030: Divider Register
+    volatile uint32 RESERVED2[3];      // 0x034-0x03F: Reserved
+    // Up Timer Control Registers
+    volatile uint32 TPTMSURUN;         // 0x040: Counter Start Register
+    volatile uint32 TPTMSURRUN;        // 0x044: Counter Restart Register
+    volatile uint32 TPTMSUSTP;         // 0x048: Counter Stop Register
+    volatile uint32 TPTMSUSTR;         // 0x04C: Counter Status Register
+    volatile uint32 TPTMSUIEN;         // 0x050: Interrupt Enable Register
+    volatile uint32 RESERVED3;         // 0x054: Reserved
+    volatile uint32 TPTMSUDIV;         // 0x058: Divider Register
+    volatile uint32 TPTMSUTRG;         // 0x05C: Trigger Select Register
+    volatile uint32 RESERVED4[8];      // 0x060-0x07F: Reserved
+    // Interval Timer Counter/Load Registers
+    volatile uint32 TPTMSICNT0;        // 0x080: Channel 0 Counter Register
+    volatile uint32 TPTMSILD0;         // 0x084: Channel 0 Load Register
+    volatile uint32 TPTMSICNT1;        // 0x088: Channel 1 Counter Register
+    volatile uint32 TPTMSILD1;         // 0x08C: Channel 1 Load Register
+    volatile uint32 RESERVED5[4];      // 0x090-0x09F: Reserved
+    // Free-run Timer Counter Register
+    volatile uint32 TPTMSFCNT;         // 0x0A0: Counter Register
+    volatile uint32 RESERVED6[7];      // 0x0A4-0x0BF: Reserved
+    // Up Timer 0 Counter/Compare Registers
+    volatile uint32 TPTMSUCNT0;        // 0x0C0: Channel 0 Counter Register
+    volatile uint32 TPTMSUCMP00;       // 0x0C4: Compare Value 0 Register
+    volatile uint32 TPTMSUCMP01;       // 0x0C8: Compare Value 1 Register
+    volatile uint32 TPTMSUCMP02;       // 0x0CC: Compare Value 2 Register
+    volatile uint32 TPTMSUCMP03;       // 0x0D0: Compare Value 3 Register
+    volatile uint32 RESERVED7[3];      // 0x0D4-0x0DF: Reserved
+    // Up Timer 1 Counter/Compare Registers
+    volatile uint32 TPTMSUCNT1;        // 0x0E0: Channel 1 Counter Register
+    volatile uint32 TPTMSUCMP10;       // 0x0E4: Compare Value 0 Register
+    volatile uint32 TPTMSUCMP11;       // 0x0E8: Compare Value 1 Register
+    volatile uint32 TPTMSUCMP12;       // 0x0EC: Compare Value 2 Register
+    volatile uint32 TPTMSUCMP13;       // 0x0F0: Compare Value 3 Register
+} Os_ArchTptmType,*Os_ArchTptmTypeRef;
+
 typedef struct __STMn
 {
     volatile uint32 CMP;         /* CMP              */
@@ -120,6 +168,7 @@ extern FUNC(void, OS_CODE) Os_ArchInitSystemTimer(void);
 #endif /* #if (TRUE == CFG_SYSTEM_TIMER_ENABLE) */
 
 #if (TRUE == CFG_LOAD_RATIO_CALC_ENABLE)
+extern FUNC(uint32, OS_CODE) Os_ArchLoadRatioInit(void);
 extern FUNC(uint32, OS_CODE) Os_ArchGetTimeTicks(void);
 #endif
 
