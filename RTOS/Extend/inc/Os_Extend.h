@@ -1,8 +1,8 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2024 Isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception OR  LicenseRef-Commercial-License
  *
-  * This library is free software; you can redistribute it and/or modify it under the terms of the
+ * This library is free software; you can redistribute it and/or modify it under the terms of the
  * GNU Lesser General Public License as published by the Free Software Foundation; version 2.1.
  * This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
@@ -11,39 +11,45 @@
  * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  * or see <https://www.gnu.org/licenses/>.
  *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    :  Os_Extened.h                                               **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      :  i-soft-os                                                  **
- **  Vendor      :                                                             **
- **  DESCRIPTION :  Extended functions                                         **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
- **  Version :   AUTOSAR classic Platform R19--Function Safety                 **
- **                                                                            **
- *******************************************************************************/
-
+ * Alternatively, this file may be used under the terms of the Isoft Infrastructure Software Co., Ltd.
+ * Commercial License, in which case the provisions of the Isoft Infrastructure Software Co., Ltd.
+ * Commercial License shall apply instead of those of the GNU Lesser General Public License.
+ *
+ * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
+ * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
+ *
+ ************************************************************************************************************************
+ **
+ **  @file               : Os_Extened.h
+ **  @author             : i-soft-os
+ **  @date               : 2024/02/10
+ **  @vendor             : isoft
+ **  @description        : Os header file for extended function
+ **
+ ***********************************************************************************************************************/
 #ifndef OS_EXTEND_H
 #define OS_EXTEND_H
 
-/*=======[I N C L U D E S]====================================================*/
-#include "Os_Types.h"
-#include "Os_Internal.h"
-#include "Arch_Extend.h"
+/* =================================================== inclusions =================================================== */
+#include "Std_Types.h"
 
-/*=======[M A C R O S]========================================================*/
+/* ===================================================== macros ===================================================== */
+/**
+ * Define the vendor ID and module ID.
+ */
+#define OS_VENDOR_ID (62U)
+#define OS_MODULE_ID (1U)
+
 /* Types of stack usage. */
-typedef uint32 osStackUsageType;
+typedef uint32 Os_StackUsageType;
 
 /* Enumeration type of stack object. */
 typedef enum
 {
     OS_STACK_SYSTEM = 0,
-    OS_STACK_TASK   = 1,
-    OS_STACK_ISR2   = 2
-} osStackObject;
+    OS_STACK_TASK = 1,
+    OS_STACK_ISR2 = 2
+} Os_StackObject;
 
 /*=======[E X T E R N A L   D A T A]==========================================*/
 
@@ -51,50 +57,58 @@ typedef enum
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
 /**
- * @brief           Provide Version information to user.
- * @param[out]      osVerInfoPtr: pointer for getting OS version
- * @synchronous     TRUE
- * @reentrant       Non Reentrant
- * @trace           -
+ * @brief          Provide Version information to user.
+ * @param[in]      Versioninfo: Version information.
+ * @reentrant      TRUE
+ * @synchronous    FALSE
+ * @trace          -
  */
-void OSGetVersionInfo(Std_VersionInfoType* osVerInfoPtr);
+void OSGetVersionInfo(Std_VersionInfoType *osVerInfoPtr);
 
-#if (CHECK_STACK_USAGE > 0)
+#if (CFG_STACK_USAGE_CHECK == TRUE)
 /**
- * @brief           Get max usage of system,task,ISR2 stack.
- * @param[in]       stack: Stack type
- * @param[in]       id: Object ID
- * @return          osStackUsageType
- * @retval          uint32: Max usage of stack
- * @synchronous     TRUE
- * @reentrant       Non Reentrant
- * @trace           -
+ * @brief          Get max usage of system,task,ISR2 stack.
+ * @param[in]      stack: The type of stack.
+ * @param[in]      id: The id of stack.
+ * @return         Os_StackUsageType
+ * @retval         Return the used size of the stack.
+ * @reentrant      TRUE
+ * @synchronous    FALSE
+ * @trace          -
  */
-osStackUsageType OSGetStackUsage(osStackObject stack, uint16 id);
+Os_StackUsageType OSGetStackUsage(Os_StackObject stack, uint16 id);
 #endif
 
 /**
- * @brief           OSCheckISRSource is used to check the interrupt source.
- * @param[in]       Source: Isr source
- * @return          StatusType
- * @retval          TRUE: current triggered interrupt.
- * @retval          FALSE: not current triggered interrupt.
- * @synchronous     TRUE
- * @reentrant       Non Reentrant
- * @trace           -
+ * @brief          Check ISR source.
+ * @param[in]      source: The Interrupt source.
+ * @return         StatusType
+ * @retval         Check if the input interrupt source is the current interrupt;
+ *                 if it is, return TRUE, otherwise return FALSE.
+ * @reentrant      TRUE
+ * @synchronous    FALSE
+ * @trace          -
  */
-StatusType OSCheckISRSource(uint32 Source);
+extern StatusType OSCheckISRSource(uint32 source);
 
 /**
- * @brief           OSCheckCPUInformation is used to check if the CPU information is correct.
- * @synchronous     TRUE
- * @reentrant       Non Reentrant
- * @trace           -
+ * @brief          Check whether CPU information is correct.
+ * @reentrant      TRUE
+ * @synchronous    FALSE
+ * @trace          -
  */
 void OSCheckCPUInformation(void);
 
+/**
+ * @brief          Shell processing commands.
+ * @reentrant      FALSE
+ * @synchronous    FALSE
+ * @trace          -
+ */
+extern void OSShellhandler(void); /* PRQA S 1753, 1501 */ /* VL_Os_1753, VL_Os_1501 */
+
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
-#endif /* OS_EXTEND_H */
+#endif
 
 /*=======[E N D   O F   F I L E]==============================================*/

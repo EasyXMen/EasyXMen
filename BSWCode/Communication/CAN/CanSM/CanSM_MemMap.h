@@ -1,0 +1,479 @@
+/**
+ * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * SPDX-License-Identifier: LGPL-2.1-only-with-exception
+ *
+ * This library is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU Lesser General Public License as published by the Free Software Foundation; version 2.1.
+ * This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU Lesser General Public License for more details.
+ * You should have received a copy of the GNU Lesser General Public License along with this library;
+ * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ * or see <https://www.gnu.org/licenses/>.
+ */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : CanSM_MemMap.h                                               **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : <Auto generated>                                            **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Memory mapping abstraction declaration of CanSM              **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                       **
+**                                                                            **
+*******************************************************************************/
+/*******************************************************************************
+**                      Revision Control History                              **
+*******************************************************************************/
+/*
+ * Version: V1.0.0
+ * Note:    Automatically generated, manual modification is not allowed.
+ */
+/*============================================================================*/
+
+/* PRQA S 0883,0791++ */ /* VL_QAC_include, VL_QAC_identifier*/
+#define MEMMAP_ERROR
+
+/* Total section items: 17 */
+#if defined(START_WITH_IF)
+#undef MEMMAP_ERROR
+
+/*Index:0  Section name :CANSM_CHECKTRANSCEIVERWAKEFLAGINDICATION_CALLBACK_CODE*/
+#elif defined CANSM_START_SEC_CANSM_CHECKTRANSCEIVERWAKEFLAGINDICATION_CALLBACK_CODE
+#undef CANSM_START_SEC_CANSM_CHECKTRANSCEIVERWAKEFLAGINDICATION_CALLBACK_CODE
+#undef MEMMAP_ERROR
+#ifndef MEMMAP_ERROR_SEC_NO_MATCH
+#define MEMMAP_ERROR_SEC_NO_MATCH
+#else
+#error "CanSM_MemMap.h, section is used consecutively many times."
+#endif
+/* PRQA S 0793++ */ /* VL_QAC_MacroLength*/
+#define CANSM_START_SEC_CANSM_CHECKTRANSCEIVERWAKEFLAGINDICATION_CALLBACK_CODE_NO_MATCH
+/* PRQA S 0793-- */ /* VL_QAC_MacroLength*/
+#define START_SEC_CALLBACK_CODE
+
+#elif defined CANSM_STOP_SEC_CANSM_CHECKTRANSCEIVERWAKEFLAGINDICATION_CALLBACK_CODE
+#undef CANSM_STOP_SEC_CANSM_CHECKTRANSCEIVERWAKEFLAGINDICATION_CALLBACK_CODE
+#undef MEMMAP_ERROR
+#ifdef CANSM_START_SEC_CANSM_CHECKTRANSCEIVERWAKEFLAGINDICATION_CALLBACK_CODE_NO_MATCH
+#undef CANSM_START_SEC_CANSM_CHECKTRANSCEIVERWAKEFLAGINDICATION_CALLBACK_CODE_NO_MATCH
+#else
+#error "CanSM_MemMap.h, no matching section was used."
+#endif
+#ifdef MEMMAP_ERROR_SEC_NO_MATCH
+#undef MEMMAP_ERROR_SEC_NO_MATCH
+#endif
+#define STOP_SEC_CALLBACK_CODE
+
+/*Index:1  Section name :CANSM_CLEARTRCVWUFFLAGINDICATION_CALLBACK_CODE*/
+#elif defined CANSM_START_SEC_CANSM_CLEARTRCVWUFFLAGINDICATION_CALLBACK_CODE
+#undef CANSM_START_SEC_CANSM_CLEARTRCVWUFFLAGINDICATION_CALLBACK_CODE
+#undef MEMMAP_ERROR
+#ifndef MEMMAP_ERROR_SEC_NO_MATCH
+#define MEMMAP_ERROR_SEC_NO_MATCH
+#else
+#error "CanSM_MemMap.h, section is used consecutively many times."
+#endif
+#define CANSM_START_SEC_CANSM_CLEARTRCVWUFFLAGINDICATION_CALLBACK_CODE_NO_MATCH
+#define START_SEC_CALLBACK_CODE
+
+#elif defined CANSM_STOP_SEC_CANSM_CLEARTRCVWUFFLAGINDICATION_CALLBACK_CODE
+#undef CANSM_STOP_SEC_CANSM_CLEARTRCVWUFFLAGINDICATION_CALLBACK_CODE
+#undef MEMMAP_ERROR
+#ifdef CANSM_START_SEC_CANSM_CLEARTRCVWUFFLAGINDICATION_CALLBACK_CODE_NO_MATCH
+#undef CANSM_START_SEC_CANSM_CLEARTRCVWUFFLAGINDICATION_CALLBACK_CODE_NO_MATCH
+#else
+#error "CanSM_MemMap.h, no matching section was used."
+#endif
+#ifdef MEMMAP_ERROR_SEC_NO_MATCH
+#undef MEMMAP_ERROR_SEC_NO_MATCH
+#endif
+#define STOP_SEC_CALLBACK_CODE
+
+/*Index:2  Section name :CANSM_CONFIRMPNAVAILABILITY_CALLBACK_CODE*/
+#elif defined CANSM_START_SEC_CANSM_CONFIRMPNAVAILABILITY_CALLBACK_CODE
+#undef CANSM_START_SEC_CANSM_CONFIRMPNAVAILABILITY_CALLBACK_CODE
+#undef MEMMAP_ERROR
+#ifndef MEMMAP_ERROR_SEC_NO_MATCH
+#define MEMMAP_ERROR_SEC_NO_MATCH
+#else
+#error "CanSM_MemMap.h, section is used consecutively many times."
+#endif
+#define CANSM_START_SEC_CANSM_CONFIRMPNAVAILABILITY_CALLBACK_CODE_NO_MATCH
+#define START_SEC_CALLBACK_CODE
+
+#elif defined CANSM_STOP_SEC_CANSM_CONFIRMPNAVAILABILITY_CALLBACK_CODE
+#undef CANSM_STOP_SEC_CANSM_CONFIRMPNAVAILABILITY_CALLBACK_CODE
+#undef MEMMAP_ERROR
+#ifdef CANSM_START_SEC_CANSM_CONFIRMPNAVAILABILITY_CALLBACK_CODE_NO_MATCH
+#undef CANSM_START_SEC_CANSM_CONFIRMPNAVAILABILITY_CALLBACK_CODE_NO_MATCH
+#else
+#error "CanSM_MemMap.h, no matching section was used."
+#endif
+#ifdef MEMMAP_ERROR_SEC_NO_MATCH
+#undef MEMMAP_ERROR_SEC_NO_MATCH
+#endif
+#define STOP_SEC_CALLBACK_CODE
+
+/*Index:3  Section name :CANSM_CONTROLLERBUSOFF_CALLBACK_CODE*/
+#elif defined CANSM_START_SEC_CANSM_CONTROLLERBUSOFF_CALLBACK_CODE
+#undef CANSM_START_SEC_CANSM_CONTROLLERBUSOFF_CALLBACK_CODE
+#undef MEMMAP_ERROR
+#ifndef MEMMAP_ERROR_SEC_NO_MATCH
+#define MEMMAP_ERROR_SEC_NO_MATCH
+#else
+#error "CanSM_MemMap.h, section is used consecutively many times."
+#endif
+#define CANSM_START_SEC_CANSM_CONTROLLERBUSOFF_CALLBACK_CODE_NO_MATCH
+#define START_SEC_CALLBACK_CODE
+
+#elif defined CANSM_STOP_SEC_CANSM_CONTROLLERBUSOFF_CALLBACK_CODE
+#undef CANSM_STOP_SEC_CANSM_CONTROLLERBUSOFF_CALLBACK_CODE
+#undef MEMMAP_ERROR
+#ifdef CANSM_START_SEC_CANSM_CONTROLLERBUSOFF_CALLBACK_CODE_NO_MATCH
+#undef CANSM_START_SEC_CANSM_CONTROLLERBUSOFF_CALLBACK_CODE_NO_MATCH
+#else
+#error "CanSM_MemMap.h, no matching section was used."
+#endif
+#ifdef MEMMAP_ERROR_SEC_NO_MATCH
+#undef MEMMAP_ERROR_SEC_NO_MATCH
+#endif
+#define STOP_SEC_CALLBACK_CODE
+
+/*Index:4  Section name :CANSM_CONTROLLERMODEINDICATION_CALLBACK_CODE*/
+#elif defined CANSM_START_SEC_CANSM_CONTROLLERMODEINDICATION_CALLBACK_CODE
+#undef CANSM_START_SEC_CANSM_CONTROLLERMODEINDICATION_CALLBACK_CODE
+#undef MEMMAP_ERROR
+#ifndef MEMMAP_ERROR_SEC_NO_MATCH
+#define MEMMAP_ERROR_SEC_NO_MATCH
+#else
+#error "CanSM_MemMap.h, section is used consecutively many times."
+#endif
+#define CANSM_START_SEC_CANSM_CONTROLLERMODEINDICATION_CALLBACK_CODE_NO_MATCH
+#define START_SEC_CALLBACK_CODE
+
+#elif defined CANSM_STOP_SEC_CANSM_CONTROLLERMODEINDICATION_CALLBACK_CODE
+#undef CANSM_STOP_SEC_CANSM_CONTROLLERMODEINDICATION_CALLBACK_CODE
+#undef MEMMAP_ERROR
+#ifdef CANSM_START_SEC_CANSM_CONTROLLERMODEINDICATION_CALLBACK_CODE_NO_MATCH
+#undef CANSM_START_SEC_CANSM_CONTROLLERMODEINDICATION_CALLBACK_CODE_NO_MATCH
+#else
+#error "CanSM_MemMap.h, no matching section was used."
+#endif
+#ifdef MEMMAP_ERROR_SEC_NO_MATCH
+#undef MEMMAP_ERROR_SEC_NO_MATCH
+#endif
+#define STOP_SEC_CALLBACK_CODE
+
+/*Index:5  Section name :CANSM_CURRENTICOMCONFIGURATION_CALLBACK_CODE*/
+#elif defined CANSM_START_SEC_CANSM_CURRENTICOMCONFIGURATION_CALLBACK_CODE
+#undef CANSM_START_SEC_CANSM_CURRENTICOMCONFIGURATION_CALLBACK_CODE
+#undef MEMMAP_ERROR
+#ifndef MEMMAP_ERROR_SEC_NO_MATCH
+#define MEMMAP_ERROR_SEC_NO_MATCH
+#else
+#error "CanSM_MemMap.h, section is used consecutively many times."
+#endif
+#define CANSM_START_SEC_CANSM_CURRENTICOMCONFIGURATION_CALLBACK_CODE_NO_MATCH
+#define START_SEC_CALLBACK_CODE
+
+#elif defined CANSM_STOP_SEC_CANSM_CURRENTICOMCONFIGURATION_CALLBACK_CODE
+#undef CANSM_STOP_SEC_CANSM_CURRENTICOMCONFIGURATION_CALLBACK_CODE
+#undef MEMMAP_ERROR
+#ifdef CANSM_START_SEC_CANSM_CURRENTICOMCONFIGURATION_CALLBACK_CODE_NO_MATCH
+#undef CANSM_START_SEC_CANSM_CURRENTICOMCONFIGURATION_CALLBACK_CODE_NO_MATCH
+#else
+#error "CanSM_MemMap.h, no matching section was used."
+#endif
+#ifdef MEMMAP_ERROR_SEC_NO_MATCH
+#undef MEMMAP_ERROR_SEC_NO_MATCH
+#endif
+#define STOP_SEC_CALLBACK_CODE
+
+/*Index:6  Section name :CANSM_TRANSCEIVERMODEINDICATION_CALLBACK_CODE*/
+#elif defined CANSM_START_SEC_CANSM_TRANSCEIVERMODEINDICATION_CALLBACK_CODE
+#undef CANSM_START_SEC_CANSM_TRANSCEIVERMODEINDICATION_CALLBACK_CODE
+#undef MEMMAP_ERROR
+#ifndef MEMMAP_ERROR_SEC_NO_MATCH
+#define MEMMAP_ERROR_SEC_NO_MATCH
+#else
+#error "CanSM_MemMap.h, section is used consecutively many times."
+#endif
+#define CANSM_START_SEC_CANSM_TRANSCEIVERMODEINDICATION_CALLBACK_CODE_NO_MATCH
+#define START_SEC_CALLBACK_CODE
+
+#elif defined CANSM_STOP_SEC_CANSM_TRANSCEIVERMODEINDICATION_CALLBACK_CODE
+#undef CANSM_STOP_SEC_CANSM_TRANSCEIVERMODEINDICATION_CALLBACK_CODE
+#undef MEMMAP_ERROR
+#ifdef CANSM_START_SEC_CANSM_TRANSCEIVERMODEINDICATION_CALLBACK_CODE_NO_MATCH
+#undef CANSM_START_SEC_CANSM_TRANSCEIVERMODEINDICATION_CALLBACK_CODE_NO_MATCH
+#else
+#error "CanSM_MemMap.h, no matching section was used."
+#endif
+#ifdef MEMMAP_ERROR_SEC_NO_MATCH
+#undef MEMMAP_ERROR_SEC_NO_MATCH
+#endif
+#define STOP_SEC_CALLBACK_CODE
+
+/*Index:7  Section name :CANSM_TXTIMEOUTEXCEPTION_CALLBACK_CODE*/
+#elif defined CANSM_START_SEC_CANSM_TXTIMEOUTEXCEPTION_CALLBACK_CODE
+#undef CANSM_START_SEC_CANSM_TXTIMEOUTEXCEPTION_CALLBACK_CODE
+#undef MEMMAP_ERROR
+#ifndef MEMMAP_ERROR_SEC_NO_MATCH
+#define MEMMAP_ERROR_SEC_NO_MATCH
+#else
+#error "CanSM_MemMap.h, section is used consecutively many times."
+#endif
+#define CANSM_START_SEC_CANSM_TXTIMEOUTEXCEPTION_CALLBACK_CODE_NO_MATCH
+#define START_SEC_CALLBACK_CODE
+
+#elif defined CANSM_STOP_SEC_CANSM_TXTIMEOUTEXCEPTION_CALLBACK_CODE
+#undef CANSM_STOP_SEC_CANSM_TXTIMEOUTEXCEPTION_CALLBACK_CODE
+#undef MEMMAP_ERROR
+#ifdef CANSM_START_SEC_CANSM_TXTIMEOUTEXCEPTION_CALLBACK_CODE_NO_MATCH
+#undef CANSM_START_SEC_CANSM_TXTIMEOUTEXCEPTION_CALLBACK_CODE_NO_MATCH
+#else
+#error "CanSM_MemMap.h, no matching section was used."
+#endif
+#ifdef MEMMAP_ERROR_SEC_NO_MATCH
+#undef MEMMAP_ERROR_SEC_NO_MATCH
+#endif
+#define STOP_SEC_CALLBACK_CODE
+
+/*Index:8  Section name :CODE*/
+#elif defined CANSM_START_SEC_CODE
+#undef CANSM_START_SEC_CODE
+#undef MEMMAP_ERROR
+#ifndef MEMMAP_ERROR_SEC_NO_MATCH
+#define MEMMAP_ERROR_SEC_NO_MATCH
+#else
+#error "CanSM_MemMap.h, section is used consecutively many times."
+#endif
+#define CANSM_START_SEC_CODE_NO_MATCH
+#define START_SEC_CODE
+
+#elif defined CANSM_STOP_SEC_CODE
+#undef CANSM_STOP_SEC_CODE
+#undef MEMMAP_ERROR
+#ifdef CANSM_START_SEC_CODE_NO_MATCH
+#undef CANSM_START_SEC_CODE_NO_MATCH
+#else
+#error "CanSM_MemMap.h, no matching section was used."
+#endif
+#ifdef MEMMAP_ERROR_SEC_NO_MATCH
+#undef MEMMAP_ERROR_SEC_NO_MATCH
+#endif
+#define STOP_SEC_CODE
+
+/*Index:9  Section name :CONFIG_DATA_UNSPECIFIED*/
+#elif defined CANSM_START_SEC_CONFIG_DATA_UNSPECIFIED
+#undef CANSM_START_SEC_CONFIG_DATA_UNSPECIFIED
+#undef MEMMAP_ERROR
+#ifndef MEMMAP_ERROR_SEC_NO_MATCH
+#define MEMMAP_ERROR_SEC_NO_MATCH
+#else
+#error "CanSM_MemMap.h, section is used consecutively many times."
+#endif
+#define CANSM_START_SEC_CONFIG_DATA_UNSPECIFIED_NO_MATCH
+#define START_SEC_CONFIG_DATA_UNSPECIFIED
+
+#elif defined CANSM_STOP_SEC_CONFIG_DATA_UNSPECIFIED
+#undef CANSM_STOP_SEC_CONFIG_DATA_UNSPECIFIED
+#undef MEMMAP_ERROR
+#ifdef CANSM_START_SEC_CONFIG_DATA_UNSPECIFIED_NO_MATCH
+#undef CANSM_START_SEC_CONFIG_DATA_UNSPECIFIED_NO_MATCH
+#else
+#error "CanSM_MemMap.h, no matching section was used."
+#endif
+#ifdef MEMMAP_ERROR_SEC_NO_MATCH
+#undef MEMMAP_ERROR_SEC_NO_MATCH
+#endif
+#define STOP_SEC_CONFIG_DATA_UNSPECIFIED
+
+/*Index:10  Section name :CONFIG_DATA_16*/
+#elif defined CANSM_START_SEC_CONFIG_DATA_16
+#undef CANSM_START_SEC_CONFIG_DATA_16
+#undef MEMMAP_ERROR
+#ifndef MEMMAP_ERROR_SEC_NO_MATCH
+#define MEMMAP_ERROR_SEC_NO_MATCH
+#else
+#error "CanSM_MemMap.h, section is used consecutively many times."
+#endif
+#define CANSM_START_SEC_CONFIG_DATA_16_NO_MATCH
+#define START_SEC_CONFIG_DATA_16
+
+#elif defined CANSM_STOP_SEC_CONFIG_DATA_16
+#undef CANSM_STOP_SEC_CONFIG_DATA_16
+#undef MEMMAP_ERROR
+#ifdef CANSM_START_SEC_CONFIG_DATA_16_NO_MATCH
+#undef CANSM_START_SEC_CONFIG_DATA_16_NO_MATCH
+#else
+#error "CanSM_MemMap.h, no matching section was used."
+#endif
+#ifdef MEMMAP_ERROR_SEC_NO_MATCH
+#undef MEMMAP_ERROR_SEC_NO_MATCH
+#endif
+#define STOP_SEC_CONFIG_DATA_16
+
+/*Index:11  Section name :CONFIG_DATA_8*/
+#elif defined CANSM_START_SEC_CONFIG_DATA_8
+#undef CANSM_START_SEC_CONFIG_DATA_8
+#undef MEMMAP_ERROR
+#ifndef MEMMAP_ERROR_SEC_NO_MATCH
+#define MEMMAP_ERROR_SEC_NO_MATCH
+#else
+#error "CanSM_MemMap.h, section is used consecutively many times."
+#endif
+#define CANSM_START_SEC_CONFIG_DATA_8_NO_MATCH
+#define START_SEC_CONFIG_DATA_8
+
+#elif defined CANSM_STOP_SEC_CONFIG_DATA_8
+#undef CANSM_STOP_SEC_CONFIG_DATA_8
+#undef MEMMAP_ERROR
+#ifdef CANSM_START_SEC_CONFIG_DATA_8_NO_MATCH
+#undef CANSM_START_SEC_CONFIG_DATA_8_NO_MATCH
+#else
+#error "CanSM_MemMap.h, no matching section was used."
+#endif
+#ifdef MEMMAP_ERROR_SEC_NO_MATCH
+#undef MEMMAP_ERROR_SEC_NO_MATCH
+#endif
+#define STOP_SEC_CONFIG_DATA_8
+
+/*Index:12  Section name :CONST_PTR*/
+#elif defined CANSM_START_SEC_CONST_PTR
+#undef CANSM_START_SEC_CONST_PTR
+#undef MEMMAP_ERROR
+#ifndef MEMMAP_ERROR_SEC_NO_MATCH
+#define MEMMAP_ERROR_SEC_NO_MATCH
+#else
+#error "CanSM_MemMap.h, section is used consecutively many times."
+#endif
+#define CANSM_START_SEC_CONST_PTR_NO_MATCH
+#define START_SEC_CONST_PTR
+
+#elif defined CANSM_STOP_SEC_CONST_PTR
+#undef CANSM_STOP_SEC_CONST_PTR
+#undef MEMMAP_ERROR
+#ifdef CANSM_START_SEC_CONST_PTR_NO_MATCH
+#undef CANSM_START_SEC_CONST_PTR_NO_MATCH
+#else
+#error "CanSM_MemMap.h, no matching section was used."
+#endif
+#ifdef MEMMAP_ERROR_SEC_NO_MATCH
+#undef MEMMAP_ERROR_SEC_NO_MATCH
+#endif
+#define STOP_SEC_CONST_PTR
+
+/*Index:13  Section name :VAR_CLEARED_BOOLEAN*/
+#elif defined CANSM_START_SEC_VAR_CLEARED_BOOLEAN
+#undef CANSM_START_SEC_VAR_CLEARED_BOOLEAN
+#undef MEMMAP_ERROR
+#ifndef MEMMAP_ERROR_SEC_NO_MATCH
+#define MEMMAP_ERROR_SEC_NO_MATCH
+#else
+#error "CanSM_MemMap.h, section is used consecutively many times."
+#endif
+#define CANSM_START_SEC_VAR_CLEARED_BOOLEAN_NO_MATCH
+#define START_SEC_VAR_CLEARED_BOOLEAN
+
+#elif defined CANSM_STOP_SEC_VAR_CLEARED_BOOLEAN
+#undef CANSM_STOP_SEC_VAR_CLEARED_BOOLEAN
+#undef MEMMAP_ERROR
+#ifdef CANSM_START_SEC_VAR_CLEARED_BOOLEAN_NO_MATCH
+#undef CANSM_START_SEC_VAR_CLEARED_BOOLEAN_NO_MATCH
+#else
+#error "CanSM_MemMap.h, no matching section was used."
+#endif
+#ifdef MEMMAP_ERROR_SEC_NO_MATCH
+#undef MEMMAP_ERROR_SEC_NO_MATCH
+#endif
+#define STOP_SEC_VAR_CLEARED_BOOLEAN
+
+/*Index:14  Section name :VAR_CLEARED_UNSPECIFIED*/
+#elif defined CANSM_START_SEC_VAR_CLEARED_UNSPECIFIED
+#undef CANSM_START_SEC_VAR_CLEARED_UNSPECIFIED
+#undef MEMMAP_ERROR
+#ifndef MEMMAP_ERROR_SEC_NO_MATCH
+#define MEMMAP_ERROR_SEC_NO_MATCH
+#else
+#error "CanSM_MemMap.h, section is used consecutively many times."
+#endif
+#define CANSM_START_SEC_VAR_CLEARED_UNSPECIFIED_NO_MATCH
+#define START_SEC_VAR_CLEARED_UNSPECIFIED
+
+#elif defined CANSM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#undef CANSM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#undef MEMMAP_ERROR
+#ifdef CANSM_START_SEC_VAR_CLEARED_UNSPECIFIED_NO_MATCH
+#undef CANSM_START_SEC_VAR_CLEARED_UNSPECIFIED_NO_MATCH
+#else
+#error "CanSM_MemMap.h, no matching section was used."
+#endif
+#ifdef MEMMAP_ERROR_SEC_NO_MATCH
+#undef MEMMAP_ERROR_SEC_NO_MATCH
+#endif
+#define STOP_SEC_VAR_CLEARED_UNSPECIFIED
+
+/*Index:15  Section name :VAR_INIT_8*/
+#elif defined CANSM_START_SEC_VAR_INIT_8
+#undef CANSM_START_SEC_VAR_INIT_8
+#undef MEMMAP_ERROR
+#ifndef MEMMAP_ERROR_SEC_NO_MATCH
+#define MEMMAP_ERROR_SEC_NO_MATCH
+#else
+#error "CanSM_MemMap.h, section is used consecutively many times."
+#endif
+#define CANSM_START_SEC_VAR_INIT_8_NO_MATCH
+#define START_SEC_VAR_INIT_8
+
+#elif defined CANSM_STOP_SEC_VAR_INIT_8
+#undef CANSM_STOP_SEC_VAR_INIT_8
+#undef MEMMAP_ERROR
+#ifdef CANSM_START_SEC_VAR_INIT_8_NO_MATCH
+#undef CANSM_START_SEC_VAR_INIT_8_NO_MATCH
+#else
+#error "CanSM_MemMap.h, no matching section was used."
+#endif
+#ifdef MEMMAP_ERROR_SEC_NO_MATCH
+#undef MEMMAP_ERROR_SEC_NO_MATCH
+#endif
+#define STOP_SEC_VAR_INIT_8
+
+/*Index:16  Section name :VAR_NO_INIT_PTR*/
+#elif defined CANSM_START_SEC_VAR_NO_INIT_PTR
+#undef CANSM_START_SEC_VAR_NO_INIT_PTR
+#undef MEMMAP_ERROR
+#ifndef MEMMAP_ERROR_SEC_NO_MATCH
+#define MEMMAP_ERROR_SEC_NO_MATCH
+#else
+#error "CanSM_MemMap.h, section is used consecutively many times."
+#endif
+#define CANSM_START_SEC_VAR_NO_INIT_PTR_NO_MATCH
+#define START_SEC_VAR_NO_INIT_PTR
+
+#elif defined CANSM_STOP_SEC_VAR_NO_INIT_PTR
+#undef CANSM_STOP_SEC_VAR_NO_INIT_PTR
+#undef MEMMAP_ERROR
+#ifdef CANSM_START_SEC_VAR_NO_INIT_PTR_NO_MATCH
+#undef CANSM_START_SEC_VAR_NO_INIT_PTR_NO_MATCH
+#else
+#error "CanSM_MemMap.h, no matching section was used."
+#endif
+#ifdef MEMMAP_ERROR_SEC_NO_MATCH
+#undef MEMMAP_ERROR_SEC_NO_MATCH
+#endif
+#define STOP_SEC_VAR_NO_INIT_PTR
+
+#endif /* START_WITH_IF */
+
+#if defined MEMMAP_ERROR
+#error "CanSM_MemMap.h, wrong pragma command"
+#endif
+
+#include "MemMap.h"
+
+/*=======[E N D   O F   F I L E]==============================================*/
+/* PRQA S 0883,0791-- */ /* VL_QAC_include, VL_QAC_identifier*/

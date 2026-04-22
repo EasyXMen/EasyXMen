@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2024 Isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception OR  LicenseRef-Commercial-License
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -11,265 +11,616 @@
  * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  * or see <https://www.gnu.org/licenses/>.
  *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    :  Os_Tprot.c                                                 **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      :  i-soft-os                                                  **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
- **  Version :   AUTOSAR classic Platform R19--Function Safety                 **
- **                                                                            **
- *******************************************************************************/
-/*=======[I N C L U D E S]====================================================*/
-#include "Os_Internal.h"
-/* PRQA S 0553 EOF */ /* VL_QAC_UnUsedFiles */
+ * Alternatively, this file may be used under the terms of the Isoft Infrastructure Software Co., Ltd.
+ * Commercial License, in which case the provisions of the Isoft Infrastructure Software Co., Ltd.
+ * Commercial License shall apply instead of those of the GNU Lesser General Public License.
+ *
+ * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
+ * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
+ *
+ ************************************************************************************************************************
+ **
+ **  @file               : Os_Tprot.c
+ **  @author             : i-soft-os
+ **  @date               : 2025/02/10
+ **  @vendor             : isoft
+ **  @description        : Os source file for Tprot API implementations
+ **
+ ***********************************************************************************************************************/
+
+/* =================================================== inclusions =================================================== */
+#include "Os_Arch_Processor.h"
+#include "Os_Tprot.h"
+#include "Os_Task.h"
+#include "Os_Resource.h"
+#include "Os_Interrupt.h"
+#include "Os_ProtectHook.h"
+#include "Os_Kernel.h"
+
 #if (TRUE == CFG_TIMING_PROTECTION_ENABLE)
-/*=======[M A C R O S]========================================================*/
-/* Initialize the time protection control block. */
-#define Os_TmProtInitCbData(pCbData, budget) \
-    (pCbData)->osIsTpStart = FALSE;          \
-    (pCbData)->osTpTime    = 0u;             \
-    (pCbData)->osTpBudget  = (budget)
-/*=======[T Y P E   D E F I N I T I O N S]====================================*/
+/* ===================================================== macros ===================================================== */
 
-/*=======[E X T E R N A L   D A T A]==========================================*/
+/* ================================================ type definitions ================================================ */
 
-/*=======[E X T E R N A L   F U N C T I O N   D E C L A R A T I O N S]========*/
+/* ============================================ external data definitions =========================================== */
 
-/*=======[I N T E R N A L   D A T A]==========================================*/
-
-/*=======[I N T E R N A L   F U N C T I O N   D E C L A R A T I O N S]========*/
-#if (CFG_STD_RESOURCE_MAX > 0)
-#define OS_START_SEC_CODE
+/* ============================================ internal data definitions =========================================== */
+#define OS_START_SEC_VAR_CLEARED_GLOBAL_UNSPECIFIED
 #include "Os_MemMap.h"
-static void Os_TmProtResCounter(ResourceType osResId);
-#define OS_STOP_SEC_CODE
+OS_LOCAL Os_TpMonitorType Os_TpMonitor[CFG_CORE_MAX];
+#define OS_STOP_SEC_VAR_CLEARED_GLOBAL_UNSPECIFIED
 #include "Os_MemMap.h"
 
-#define OS_START_SEC_CODE
-#include "Os_MemMap.h"
-static void Os_TmProtInitTaskResLock(Os_TaskType osTaskId, const Os_TaskCfgType* pTaskCfg);
-#define OS_STOP_SEC_CODE
-#include "Os_MemMap.h"
-#endif /* CFG_STD_RESOURCE_MAX > 0 */
-
-#if (CFG_ISR2_MAX > 0U)
-#define OS_START_SEC_CODE
-#include "Os_MemMap.h"
-static void Os_TmProtIsrProc(void);
-#define OS_STOP_SEC_CODE
-#include "Os_MemMap.h"
-
-#define OS_START_SEC_CODE
-#include "Os_MemMap.h"
-static void Os_TmProtIsrFrameCounter(Os_IsrType osIsrId, Os_TmProtOptIsrType osOptType);
-#define OS_STOP_SEC_CODE
-#include "Os_MemMap.h"
-
-#define OS_START_SEC_CODE
-#include "Os_MemMap.h"
-static void Os_TmProtIsrCounter(Os_IsrType osIsrId, Os_TmProtOptIsrType osOptType);
-#define OS_STOP_SEC_CODE
-#include "Os_MemMap.h"
-
-#define OS_START_SEC_CODE
-#include "Os_MemMap.h"
-static void Os_InitIsrTmProt(Os_IsrType osIsrId, const Os_IsrCfgType* pIsrCfg, Os_ICBType* pIcb);
-#define OS_STOP_SEC_CODE
-#include "Os_MemMap.h"
-
-#if (CFG_STD_RESOURCE_MAX > 0)
-#define OS_START_SEC_CODE
-#include "Os_MemMap.h"
-static void Os_TmProtInitIsrResLock(Os_IsrType osIsrId, const Os_IsrCfgType* pIsrCfg);
-#define OS_STOP_SEC_CODE
-#include "Os_MemMap.h"
-
-#endif /* CFG_STD_RESOURCE_MAX > 0 */
-#endif /* CFG_ISR2_MAX > 0U */
-
-#define OS_START_SEC_CODE
-#include "Os_MemMap.h"
-static void Os_TmProtTaskFrameCounter(Os_TaskType osTaskId, Os_TmProtOptTaskType osOptType);
-#define OS_STOP_SEC_CODE
-#include "Os_MemMap.h"
-
-#define OS_START_SEC_CODE
-#include "Os_MemMap.h"
-static void Os_TmProtTaskCounter(Os_TaskType osTaskId, Os_TmProtOptTaskType osOptType);
-#define OS_STOP_SEC_CODE
-#include "Os_MemMap.h"
-
-#define OS_START_SEC_CODE
-#include "Os_MemMap.h"
-static void Os_InitTaskTmProt(Os_TaskType osTaskId, const Os_TaskCfgType* pTaskCfg, Os_TCBType* pTcb);
-#define OS_STOP_SEC_CODE
-#include "Os_MemMap.h"
-
-#define OS_START_SEC_CODE
-#include "Os_MemMap.h"
-static void Os_TmProtTaskProc(void);
-#define OS_STOP_SEC_CODE
-#include "Os_MemMap.h"
-
-/*=======[F U N C T I O N   I M P L E M E N T A T I O N S]====================*/
-#if (CFG_STD_RESOURCE_MAX > 0)
-#define OS_START_SEC_CODE
-#include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <Start process for budget of resource locking.>
- * Service ID           <None>
- * Sync/Async           <None>
- * Reentrancy           <None>
- * param-eventId[in]    <osResId>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * CallByAPI            <GetResource>
- * REQ ID               <None>
+/* ========================================== internal function declarations ======================================== */
+/**
+ * @brief           Inserts a timing protection node into a list
+ * @param[inout]    HeadAddr: Pointer to the list head pointer
+ * @param[inout]    pNode: Pointer to the node to be inserted
+ * @return          boolean
+ * @retval          TRUE: The compare register needs to be set
+ * @retval          FALSE: No need to update the compare register
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
  */
-/********************************************************************/
-void Os_TmProtResStart(ResourceType osResId, Os_TmProtResOccupyType osOccupyType)
-{
-    uint8               osWhoHook;
-    Os_TickType         osBudget;
-    Os_RCBType*         pRcb;
-    const Os_SCBType*   pScb;
-    Os_TmProtCbDataDef* pCbData;
+OS_LOCAL boolean Os_TpNodeInsert(Os_TpNodeType **HeadAddr, Os_TpNodeType *pNode);
 
-    pRcb = &Os_RCB[osResId];
-    pScb = &Os_SCB;
+/**
+ * @brief           Deletes a timing protection node from a list
+ * @param[inout]    HeadAddr: Pointer to the list head pointer
+ * @param[inout]    pNode: Pointer to the node to be deleted
+ * @return          boolean
+ * @retval          TRUE: The compare register needs to be set
+ * @retval          FALSE: No need to update the compare register
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL boolean Os_TpNodeDelete(Os_TpNodeType **HeadAddr, Os_TpNodeType *pNode);
 
-    /* If start timing protection. */
-    if (osOccupyType < TP_RES_OCCUPY_BUTT)
-    {
-        /* Get budget according to osOccupyType. */
-        if (TP_RES_OCCUPY_TASK == osOccupyType) /* By task. */
-        {
-            osBudget  = pRcb->osTmProtResBgtTask[pScb->sysRunningTaskID];
-            osWhoHook = OS_TMPROT_HOOK_TASK;
+/**
+ * @brief           Sets the hardware compare register for timing protection
+ * @param[in]       coreId: ID of the core
+ * @param[in]       Increment: Time increment for the compare register
+ * @param[in]       MonitoredType: Type of monitored entity (task or ISR)
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_TpSetCompare(Os_CoreIdType coreId, Os_Hal_TpType Increment, Os_TpMonitoredType MonitoredType);
 
-            /* Which task occupy this resource. */
-            pRcb->osWhichTaskOccupy = pScb->sysRunningTaskID;
-        }
+/**
+ * @brief           Updates timestamp for task timing protection
+ * @param[in]       coreId: ID of the core
+ * @param[inout]    pTcb: Pointer to the Task Control Block
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_TpTaskUpsetTimeStamp(Os_CoreIdType coreId, Os_TCBType* pTcb);
 
-#if (CFG_ISR2_MAX > 0)
-        else /*TP_RES_OCCUPY_ISR == osOccupyType*/
-        {
-            osBudget  = pRcb->osTmProtResBgtIsr[pScb->sysRunningIsrCat2Id];
-            osWhoHook = OS_TMPROT_HOOK_ISR;
+/**
+ * @brief           Inserts a timing protection node for a task
+ * @param[in]       coreId: ID of the core
+ * @param[inout]    pTcb: Pointer to the Task Control Block
+ * @param[inout]    pTpNode: Pointer to the timing protection node
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_TmProtTaskNodeInsert(Os_CoreIdType coreId, Os_TCBType* pTcb, Os_TpNodeType* pTpNode);
 
-            /* Which isr occupy this resource. */
-            pRcb->osWhichIsrOccupy = pScb->sysRunningIsrCat2Id;
-        }
+/**
+ * @brief           Deletes a timing protection node for a task
+ * @param[in]       coreId: ID of the core
+ * @param[inout]    pTcb: Pointer to the Task Control Block
+ * @param[inout]    pTpNode: Pointer to the timing protection node
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_TmProtTaskNodeDelete(Os_CoreIdType coreId, Os_TCBType* pTcb, Os_TpNodeType* pTpNode);
+
+/**
+ * @brief           Updates timestamp for ISR timing protection
+ * @param[in]       coreId: ID of the core
+ * @param[inout]    pIcb: Pointer to the ISR Control Block
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_TpIsrUpsetTimeStamp(Os_CoreIdType coreId, Os_ICBType* pIcb);
+
+/**
+ * @brief           Inserts a timing protection node for an ISR
+ * @param[in]       coreId: ID of the core
+ * @param[inout]    pIcb: Pointer to the ISR Control Block
+ * @param[inout]    pTpNode: Pointer to the timing protection node
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_TmProtIsrNodeInsert(Os_CoreIdType coreId, Os_ICBType* pIcb, Os_TpNodeType* pTpNode);
+
+/**
+ * @brief           Deletes a timing protection node for an ISR
+ * @param[in]       coreId: ID of the core
+ * @param[inout]    pIcb: Pointer to the ISR Control Block
+ * @param[inout]    pTpNode: Pointer to the timing protection node
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_TmProtIsrNodeDelete(Os_CoreIdType coreId, Os_ICBType* pIcb, Os_TpNodeType* pTpNode);
+
+#if (CFG_STD_RESOURCE_MAX > 0)
+/**
+ * @brief           Initializes resource lock budgets for an ISR
+ * @param[in]       isrId: ID of the ISR
+ * @param[in]       pIsrTpCfg: Pointer to the ISR timing protection configuration
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_TmProtInitIsrResLock(Os_IsrType isrId, const Os_TmProtCfgType* pIsrTpCfg);
 #endif
 
-        /* Timing protection start for task or isr. */
-        if (OS_TICK_INVALID != osBudget)
-        {
-            pCbData = &(pRcb->osResTpData);
+/**
+ * @brief           Initializes timing protection for an ISR
+ * @param[in]       isrId: ID of the ISR
+ * @param[in]       pIsrTpCfg: Pointer to the ISR timing protection configuration
+ * @param[inout]    pIcb: Pointer to the ISR Control Block
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_InitIsrTmProt(Os_IsrType isrId, const Os_TmProtCfgType* pIsrTpCfg, Os_ICBType* pIcb);
 
-            if (TRUE != pCbData->osIsTpStart)
-            {
-                pCbData->osIsTpStart = TRUE;
-                pCbData->osTpTime    = 0u;
-                pCbData->osTpBudget  = osBudget;
-                pCbData->osWhoHook   = osWhoHook;
-            }
-        }
-    }
+#if (CFG_STD_RESOURCE_MAX > 0)
+/**
+ * @brief           Initializes resource lock budgets for a task
+ * @param[in]       osTaskId: ID of the task
+ * @param[in]       pTaskTpCfg: Pointer to the task timing protection configuration
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_TmProtInitTaskResLock(Os_TaskType osTaskId, const Os_TmProtCfgType* pTaskTpCfg);
+#endif
 
-    return;
-}
-#define OS_STOP_SEC_CODE
-#include "Os_MemMap.h"
+/**
+ * @brief           Initializes timing protection for a task
+ * @param[in]       osTaskId: ID of the task
+ * @param[in]       pTaskTpCfg: Pointer to the task timing protection configuration
+ * @param[inout]    pTcb: Pointer to the Task Control Block
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_InitTaskTmProt(Os_TaskType osTaskId, const Os_TmProtCfgType* pTaskTpCfg, Os_TCBType* pTcb);
 
+/**
+ * @brief           Calls the protection hook for timing protection violations
+ * @param[in]       pScb: Pointer to the System Control Block
+ * @param[in]       Head: Pointer to the timing protection node
+ * @param[in]       osWhoHook: Indicator for task or ISR context
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_TpCallProtectHook(Os_SCBType *pScb, const Os_TpNodeType *Head, uint32 osWhoHook);
+
+/**
+ * @brief           Calls the protection hook for task timing protection violations
+ * @param[in]       pScb: Pointer to the System Control Block
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_TpTaskCallProtectHook(Os_SCBType *pScb);
+
+/**
+ * @brief           Calls the protection hook for ISR timing protection violations
+ * @param[in]       pScb: Pointer to the System Control Block
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_TpIsrCallProtectHook(Os_SCBType *pScb);
+
+/* ========================================== external function definitions ========================================= */
+/**
+ * Insert TpNode to the list
+ */
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <Counter process for budget of resource locking.>
- * Service ID           <None>
- * Sync/Async           <None>
- * Reentrancy           <None>
- * param-eventId[in]    <osResId>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * CallByAPI            <Os_TmProtMainProc>
- * REQ ID               <None>
- */
-/********************************************************************/
-static void Os_TmProtResCounter(ResourceType osResId)
+OS_LOCAL boolean Os_TpNodeInsert(Os_TpNodeType **HeadAddr, Os_TpNodeType *pNode)
 {
-    Os_RCBType*         pRcb;
-    const Os_TCBType*   pTcb;
-    Os_TmProtCbDataDef* pCbData;
-    const Os_SCBType*   pScb;
-    boolean             Status = TRUE;
-    pRcb                       = &Os_RCB[osResId];
-    pCbData                    = &(pRcb->osResTpData);
-    pScb                       = &Os_SCB;
+    boolean NeedSetCMP = FALSE;
+    Os_TpNodeType *Head = *HeadAddr;
 
-    /* If occupied by task, if this task is not running, resource lock
-     * counter stop. */
-    if (pRcb->osWhichTaskOccupy < Os_SCB.sysTaskMax)
+    if(NULL_PTR == Head)
     {
-        pTcb = &Os_TCB[pRcb->osWhichTaskOccupy];
-
-        if (TASK_STATE_RUNNING != pTcb->taskState)
-        {
-            Status = FALSE;
-        }
+        pNode->Next = NULL_PTR;
+        *HeadAddr = pNode;
+        NeedSetCMP = TRUE;
     }
-    /* If occupied by isr and this isr is pending, resource lock counter stop.*/
-    else if (Os_IntNestISR2 >= OS_TMPROT_TARGET_ISR_OFFSET)
+    else if(Head->TpEndTime > pNode->TpEndTime)
     {
-        /* Current_isr: Os_IntNestISR2-1;
-         * OccupyResource_isr: Os_IntNestISR2-2. */
-        if (pScb->sysIsrNestQueue[Os_IntNestISR2 - OS_TMPROT_TARGET_ISR_OFFSET] != pRcb->osWhichIsrOccupy)
-        {
-            Status = FALSE;
-        }
+        pNode->Next = Head;
+        Head->Pre = pNode;
+        *HeadAddr = pNode;
+        NeedSetCMP = TRUE;
     }
     else
     {
-        Status = FALSE;
+        Os_TpNodeType *Current = Head;
+        while ((NULL_PTR != Current->Next) && (Current->Next->TpEndTime <= pNode->TpEndTime))
+        {
+            Current = Current->Next;
+        }
+        if(NULL_PTR != Current->Next)
+        {
+            Current->Next->Pre = pNode;
+            pNode->Next = Current->Next;
+        }
+        Current->Next = pNode;
+        pNode->Pre = Current;
+    }
+    pNode->TpNodeInList = TRUE;
+
+    return NeedSetCMP;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * Delete TpNode from the list
+ */
+OS_LOCAL boolean Os_TpNodeDelete(Os_TpNodeType **HeadAddr, Os_TpNodeType *pNode)
+{
+    boolean NeedSetCMP = FALSE;
+    Os_TpNodeType *Head = *HeadAddr;
+
+    if (Head == pNode)
+    {
+        Head = Head->Next;
+        *HeadAddr = Head;
+        NeedSetCMP = TRUE;
+    }
+    else if (NULL_PTR == pNode->Next)
+    {
+        pNode->Pre->Next = NULL_PTR;
+    }
+    else
+    {
+        pNode->Pre->Next = pNode->Next;
+        pNode->Next->Pre = pNode->Pre;
+    }
+    
+    pNode->Next = NULL_PTR;
+    pNode->Pre = NULL_PTR;
+    pNode->TpEndTime = 0U;
+    pNode->TpNodeInList = FALSE;
+
+    return NeedSetCMP;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * TimeProtect set CMP reg
+ */
+OS_LOCAL void Os_TpSetCompare(Os_CoreIdType coreId, Os_Hal_TpType Increment, Os_TpMonitoredType MonitoredType)
+{
+    Os_TpMonitor[coreId].Os_TpMonitored = MonitoredType;
+    Os_Hal_TpSetCompare(coreId, Increment);
+    return;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * Task update timestamp
+ */
+OS_LOCAL void Os_TpTaskUpsetTimeStamp(Os_CoreIdType coreId, Os_TCBType* pTcb)
+{
+    Os_TpMonitor[coreId].Os_TpTimeStamp += Os_Hal_TpGetTimePass(coreId);
+    uint64 TimePass = Os_TpMonitor[coreId].Os_TpTimeStamp - pTcb->taskTpLastReadTime;
+    pTcb->taskTpLastReadTime = Os_TpMonitor[coreId].Os_TpTimeStamp;
+    pTcb->taskTpTimeStamp += TimePass;
+    return;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * Timing protection upset task timestap, then insert it to Head list
+ */
+OS_LOCAL void Os_TmProtTaskNodeInsert(Os_CoreIdType coreId, Os_TCBType* pTcb, Os_TpNodeType* pTpNode)
+{
+    OS_HAL_DECLARE_CRITICAL();
+    OS_HAL_ENTRY_CRITICAL();
+
+    if(TP_READY == pTcb->taskTpStatus)
+    {
+        pTcb->taskTpStatus = TP_WORKING;
+        Os_TpMonitor[coreId].Os_TpTimeStamp += Os_Hal_TpGetTimePass(coreId);
+        pTcb->taskTpTimeStamp = 0U;
+        pTcb->taskTpLastReadTime = Os_TpMonitor[coreId].Os_TpTimeStamp;
+    }
+    else
+    {
+        Os_TpTaskUpsetTimeStamp(coreId, pTcb);
     }
 
-    /* Lock_bugdet for this resource is configured. */
-    if ((boolean)TRUE == Status)
+    pTpNode->TpEndTime = pTcb->taskTpTimeStamp + pTpNode->osTpBudget;
+    if(TRUE == Os_TpNodeInsert(&(pTcb->taskTpHead), pTpNode))
     {
-        if (TRUE == pCbData->osIsTpStart)
+        Os_TpSetCompare(coreId, pTpNode->osTpBudget, TP_FOR_TASK);
+    }
+    OS_HAL_EXIT_CRITICAL();
+    return;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * Timing protection delete task node from head list.
+ */
+OS_LOCAL void Os_TmProtTaskNodeDelete(Os_CoreIdType coreId, Os_TCBType* pTcb, Os_TpNodeType* pTpNode)
+{
+    OS_HAL_DECLARE_CRITICAL();
+    OS_HAL_ENTRY_CRITICAL();
+
+    if(TRUE == Os_TpNodeDelete(&(pTcb->taskTpHead), pTpNode))
+    {
+        if(NULL_PTR == pTcb->taskTpHead)
         {
-            pCbData->osTpTime += 1U;
-            if (pCbData->osTpTime >= pCbData->osTpBudget)
+            pTcb->taskTpStatus = TP_READY;
+            Os_TpSetCompare(coreId, OS_HAL_TP_MAX_INCREMENT_VALUE, TP_FOR_NONE);
+        }
+        else
+        {
+            Os_TpTaskUpsetTimeStamp(coreId, pTcb);
+            uint32 CompareVale = (uint32)(pTcb->taskTpHead->TpEndTime - pTcb->taskTpTimeStamp);
+            Os_TpSetCompare(coreId, CompareVale, TP_FOR_TASK);
+        }
+    }
+    OS_HAL_EXIT_CRITICAL();
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * ISR2 update timestamp
+ */
+OS_LOCAL void Os_TpIsrUpsetTimeStamp(Os_CoreIdType coreId, Os_ICBType* pIcb)
+{
+    Os_TpMonitor[coreId].Os_TpTimeStamp += Os_Hal_TpGetTimePass(coreId);
+    uint64 TimePass = Os_TpMonitor[coreId].Os_TpTimeStamp - pIcb->isrTpLastReadTime;
+    pIcb->isrTpLastReadTime = Os_TpMonitor[coreId].Os_TpTimeStamp;
+    pIcb->isrTpTimeStamp += TimePass;
+    return;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * Timing protection upset isr timestap, then insert it to head list.
+ */
+OS_LOCAL void Os_TmProtIsrNodeInsert(Os_CoreIdType coreId, Os_ICBType* pIcb, Os_TpNodeType* pTpNode)
+{
+    OS_HAL_DECLARE_CRITICAL();
+    OS_HAL_ENTRY_CRITICAL();
+
+    if(TP_READY == pIcb->isrTpStatus)
+    {
+        pIcb->isrTpStatus = TP_WORKING;
+        Os_TpMonitor[coreId].Os_TpTimeStamp += Os_Hal_TpGetTimePass(coreId);
+        pIcb->isrTpTimeStamp = 0U;
+        pIcb->isrTpLastReadTime = Os_TpMonitor[coreId].Os_TpTimeStamp;
+    }
+    else
+    {
+        Os_TpIsrUpsetTimeStamp(coreId, pIcb);
+    }
+
+    pTpNode->TpEndTime = pIcb->isrTpTimeStamp + pTpNode->osTpBudget;
+    if(TRUE == Os_TpNodeInsert(&(pIcb->isrTpHead), pTpNode))
+    {
+        Os_TpSetCompare(coreId, pTpNode->osTpBudget, TP_FOR_ISR);
+    }
+    OS_HAL_EXIT_CRITICAL();
+    return;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * Timing protection delete Isr node from head list.
+ */
+OS_LOCAL void Os_TmProtIsrNodeDelete(Os_CoreIdType coreId, Os_ICBType* pIcb, Os_TpNodeType* pTpNode)
+{
+    OS_HAL_DECLARE_CRITICAL();
+    OS_HAL_ENTRY_CRITICAL();
+
+    if(TRUE == Os_TpNodeDelete(&(pIcb->isrTpHead), pTpNode))
+    {
+        if(NULL_PTR == pIcb->isrTpHead)
+        {
+            pIcb->isrTpStatus = TP_READY;
+            Os_TpSetCompare(coreId, OS_HAL_TP_MAX_INCREMENT_VALUE, TP_FOR_NONE);
+        }
+        else
+        {
+            Os_TpIsrUpsetTimeStamp(coreId, pIcb);
+            uint32 CompareVale = (uint32)(pIcb->isrTpHead->TpEndTime - pIcb->isrTpTimeStamp);
+            Os_TpSetCompare(coreId, CompareVale, TP_FOR_ISR);
+        }
+    }
+    OS_HAL_EXIT_CRITICAL();
+    return;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * Time protect suspend current monitored thread
+ */
+void Os_TpSupend(const Os_SCBType *pScb, Os_TpMonitoredType MonitoredType)
+{
+    if (MonitoredType < TP_FOR_NONE)
+    {
+        Os_CoreIdType coreId = pScb->SysCore;
+        if(TP_FOR_TASK == MonitoredType)
+        {
+            Os_TCBType* pTcb = pScb->SysRunningTCB;
+            if(TP_WORKING == pTcb->taskTpStatus)
             {
-                pCbData->osTpTime    = 0u;
-                pCbData->osTpBudget  = 0u;
-                pCbData->osIsTpStart = FALSE;
+                pTcb->taskTpStatus = TP_SUSPEND;
+                Os_TpTaskUpsetTimeStamp(coreId, pTcb);
+                Os_TpSetCompare(coreId, OS_HAL_TP_MAX_INCREMENT_VALUE, TP_FOR_NONE);
+            }
+        }
+        else
+        {
+            Os_ICBType* pIcb = Os_ICB[pScb->SysRunningIsrCat2Id];
+            if(TP_WORKING == pIcb->isrTpStatus)
+            {
+                pIcb->isrTpStatus = TP_SUSPEND;
+                Os_TpIsrUpsetTimeStamp(coreId, pIcb);
+                Os_TpSetCompare(coreId, OS_HAL_TP_MAX_INCREMENT_VALUE, TP_FOR_NONE);
+            }
+        }
+    }
 
-#if ((OS_SC4 == CFG_SC) && (CFG_TRUSTED_SYSTEM_SERVICE_MAX > 0U))
-                if (TRUE == Os_TrustedFuncTp.TrustedFuncTportDelayCall)
+    return;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * Time protect resume monitored node
+ */
+void Os_TpResume(const Os_SCBType *pScb, Os_TpMonitoredType MonitoredType)
+{
+    if (MonitoredType < TP_FOR_NONE)
+    {
+        uint32 RemainTime;
+        Os_CoreIdType coreId = pScb->SysCore;
+        if(TP_FOR_TASK == MonitoredType)
+        {
+            Os_TCBType* pTcb = pScb->SysRunningTCB;
+            if(TP_SUSPEND == pTcb->taskTpStatus)
+            {
+                pTcb->taskTpStatus = TP_WORKING;
+                Os_TpMonitor[coreId].Os_TpTimeStamp += Os_Hal_TpGetTimePass(coreId);
+                pTcb->taskTpLastReadTime = Os_TpMonitor[coreId].Os_TpTimeStamp;
+                RemainTime = (uint32)(pTcb->taskTpHead->TpEndTime - pTcb->taskTpTimeStamp);
+                Os_TpSetCompare(coreId, RemainTime, TP_FOR_TASK);
+            }
+        }
+        else
+        {
+            Os_ICBType* pIcb = Os_ICB[pScb->SysRunningIsrCat2Id];
+            if(TP_SUSPEND == pIcb->isrTpStatus)
+            {
+                pIcb->isrTpStatus = TP_WORKING;
+                Os_TpMonitor[coreId].Os_TpTimeStamp += Os_Hal_TpGetTimePass(coreId);
+                pIcb->isrTpLastReadTime = Os_TpMonitor[coreId].Os_TpTimeStamp;
+                RemainTime = (uint32)(pIcb->isrTpHead->TpEndTime - pIcb->isrTpTimeStamp);
+                Os_TpSetCompare(coreId, RemainTime, TP_FOR_ISR);
+            }
+        }
+    }
+
+    return;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#if (CFG_STD_RESOURCE_MAX > 0)
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * Start process for budget of resource locking
+ */
+/* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
+void Os_TmProtResStart(const Os_SCBType *pScb, ResourceType resId, Os_TpMonitoredType MonitoredType)
+/* PRQA S 1532 -- */
+{
+    if (MonitoredType < TP_FOR_NONE)
+    {
+        uint32 osBudget;
+        Os_TpNodeType* pTpNode;
+        Os_RCBType* pRcb = Os_RCB[resId];
+
+        /* Get budget according to MonitoredType. */
+        if (TP_FOR_TASK == MonitoredType)      /* By task. */
+        {
+            Os_TCBType* pTcb = pScb->SysRunningTCB;
+            if(TP_NO_INIT != pTcb->taskTpStatus)
+            {
+                osBudget = pRcb->TmProtResBgtTask[pScb->SysRunningTaskId];
+                if (OS_TICK_INVALID != osBudget) /* PRQA S 1258 */ /* VL_Os_1258 */
                 {
-                    /* Time protection and delay processing are triggered in the trusted function */
-
-                    Os_TrustedFuncTp.TrustedFuncTporFlag    = TRUE;
-                    Os_TrustedFuncTp.TrustedFuncTporErrType = E_OS_PROTECTION_LOCKED;
-                    Os_TrustedFuncTp.osWhoHook              = (uint32)pCbData->osWhoHook;
+                    pTpNode = &(pRcb->osResTpNode);
+                    pTpNode->osTpBudget = osBudget;
+                    Os_TmProtTaskNodeInsert(pScb->SysCore, pTcb, pTpNode);
+                    /* Which task occupy this resource. */
+                    pRcb->WhichTaskOccupy = pScb->SysRunningTaskId;
                 }
-                else
-#endif
+            }
+        }
+        else /*TP_FOR_ISR == MonitoredType*/
+        {
+
+            Os_ICBType* pIcb = Os_ICB[pScb->SysRunningIsrCat2Id];
+            if(TP_NO_INIT != pIcb->isrTpStatus)
+            {
+                osBudget = pRcb->TmProtResBgtIsr[pScb->SysRunningIsrCat2Id];
+                if (OS_TICK_INVALID != osBudget) /* PRQA S 1258 */ /* VL_Os_1258 */
                 {
-                    /* Hook. */
-                    (void)Os_CallProtectionHook(E_OS_PROTECTION_LOCKED, (uint32)pCbData->osWhoHook);
+                    pTpNode = &(pRcb->osResTpNode);
+                    pTpNode->osTpBudget = osBudget;
+                    Os_TmProtIsrNodeInsert(pScb->SysCore, pIcb, pTpNode);
+                    /* Which isr occupy this resource. */
+                    pRcb->WhichIsrOccupy = pScb->SysRunningIsrCat2Id;
                 }
             }
         }
@@ -282,104 +633,86 @@ static void Os_TmProtResCounter(ResourceType osResId)
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <End process for budget of resource locking.>
- * Service ID           <None>
- * Sync/Async           <None>
- * Reentrancy           <None>
- * param-eventId[in]    <osResId>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * CallByAPI            <Os_ApplReleaseResource>
- * REQ ID               <None>
+/**
+ * End process for budget of resource locking
  */
-/********************************************************************/
-void Os_TmProtResEnd(ResourceType osResId)
+/* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
+void Os_TmProtResEnd(Os_CoreIdType coreId, ResourceType resId)
+/* PRQA S 1532 -- */
 {
-    Os_RCBType*         pRcb;
-    Os_TmProtCbDataDef* pCbData;
-    pRcb    = &Os_RCB[osResId];
-    pCbData = &(pRcb->osResTpData);
+    Os_RCBType* pRcb = Os_RCB[resId];
+    Os_TpNodeType* pTpNode = &(pRcb->osResTpNode);
 
     /* Stop timing protection for this resource. */
-    if (TRUE == pCbData->osIsTpStart)
+    if (TRUE == pTpNode->TpNodeInList)
     {
-        pCbData->osIsTpStart = FALSE;
-        pCbData->osTpTime    = 0u;
-        pCbData->osTpBudget  = 0u;
-        pCbData->osWhoHook   = 0u;
+        if(OS_TASK_INVALID != pRcb->WhichTaskOccupy) /* PRQA S 4342 */ /* VL_Os_4342 */
+        {
+            Os_TCBType* pTcb = Os_TCB[pRcb->WhichTaskOccupy];
+            Os_TmProtTaskNodeDelete(coreId, pTcb, pTpNode);
+            pRcb->WhichTaskOccupy = OS_TASK_INVALID; /* PRQA S 4342 */ /* VL_Os_4342 */
+        }
+        else
+        {
+            Os_ICBType* pIcb = Os_ICB[pRcb->WhichIsrOccupy];
+            Os_TmProtIsrNodeDelete(coreId, pIcb, pTpNode);
+            pRcb->WhichIsrOccupy  = INVALID_ISR; /* PRQA S 1297*/ /* VL_Os_1297*/
+        }
     }
-
-    /* Clear the task/isr occupy the resource. */
-    pRcb->osWhichTaskOccupy = OS_TASK_INVALID;
-    pRcb->osWhichIsrOccupy  = INVALID_ISR;
 
     return;
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
-#endif /* CFG_STD_RESOURCE_MAX > 0 */
+#endif
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <Time frame of task: frame check process.>
- * Service ID           <None>
- * Sync/Async           <None>
- * Reentrancy           <Non Reentrant>
- * param-eventId[in]    <osTaskId>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * CallByAPI            <ActivateTask>
- * REQ ID               <None>
+/**
+ * Time frame of task: frame check process
  */
-/********************************************************************/
-StatusType Os_TmProtTaskFrameChk(Os_TaskType osTaskId)
+/* PRQA S 6030 ++ */ /* VL_MTR_Os_STMIF */
+StatusType Os_TmProtTaskFrameChk(Os_TaskType taskId)
+/* PRQA S 6030 -- */
 {
-    StatusType          osRet = E_OK;
-    Os_TCBType*         pTcb;
-    Os_TmProtCbDataDef* pCbData;
+    StatusType osRet = E_OK;
+    Os_TCBType *pTcb = Os_TCB[taskId];
 
-    /* Idle task should not be protected. */
-    if (OS_TASK_IDLE != osTaskId)
+    if(TP_NO_INIT != pTcb->taskTpStatus)
     {
-        pTcb    = &Os_TCB[osTaskId];
-        pCbData = &pTcb->osTpTask[TP_TASK_ARRIVAL];
+        uint32 TpFrameBudget = pTcb->taskTpNode[TP_ARRIVAL].osTpBudget;
 
         /* Timing frame for this task is not configed. */
-        if (OS_TICK_INVALID != pCbData->osTpBudget)
+        if(OS_TICK_INVALID != TpFrameBudget) /* PRQA S 1258 */ /* VL_Os_1258 */
         {
-            /* Timing frame: arrive so frequently. */
-            if (TRUE != pTcb->taskTpFrameflag)
+            Os_CoreIdType coreId = OS_TASK_GET_COREID(taskId);
+            Os_TpMonitor[coreId].Os_TpTimeStamp += Os_Hal_TpGetTimePass(coreId);
+
+            if(pTcb->taskTpEerlistArrival > Os_TpMonitor[coreId].Os_TpTimeStamp)
             {
 #if ((OS_SC4 == CFG_SC) && (CFG_TRUSTED_SYSTEM_SERVICE_MAX > 0U))
-                if (TRUE == Os_TrustedFuncTp.TrustedFuncTportDelayCall)
+                Os_SCBType *pScb = Os_GetSystemContext(coreId);
+                Os_TrustedFuncTpDataDef *trustedFuncTp = &pScb->Os_TrustedFuncTp;
+                if (TRUE == trustedFuncTp->TrustedFuncTportDelayCall)
                 {
                     /* Time protection and delay processing are triggered in the trusted function */
-                    Os_TrustedFuncTp.TrustedFuncTporFlag    = TRUE;
-                    Os_TrustedFuncTp.TrustedFuncTporErrType = E_OS_PROTECTION_ARRIVAL;
-                    Os_TrustedFuncTp.osWhoHook              = OS_TMPROT_HOOK_TASK;
+                    trustedFuncTp->TrustedFuncTporFlag = TRUE;
+                    trustedFuncTp->TrustedFuncTporErrType = E_OS_PROTECTION_ARRIVAL;
+                    trustedFuncTp->TrustedFuncWhoHook = OS_TMPROT_HOOK_TASK;
                 }
                 else
 #endif
                 {
                     /* Hook. */
-                    if (PRO_IGNORE != Os_CallProtectionHook(E_OS_PROTECTION_ARRIVAL, OS_TMPROT_HOOK_TASK))
+                    if (PRO_IGNORE != Os_CallProtectionHook(E_OS_PROTECTION_ARRIVAL, OS_TMPROT_HOOK_TASK)) /* PRQA S 1520 */ /* VL_Os_1520 */
                     {
-                        osRet = E_OS_ID;
+                        osRet = E_OS_PROTECTION_ARRIVAL;
                     }
                 }
             }
             else
             {
-                pCbData->osTpTime     = 0U;
-                pTcb->taskTpFrameflag = FALSE;
+                pTcb->taskTpEerlistArrival = Os_TpMonitor[coreId].Os_TpTimeStamp + TpFrameBudget;
             }
         }
     }
@@ -391,40 +724,19 @@ StatusType Os_TmProtTaskFrameChk(Os_TaskType osTaskId)
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <Time frame of task: frame counter process.>
- * Service ID           <None>
- * Sync/Async           <None>
- * Reentrancy           <Non Reentrant>
- * param-eventId[in]    <osTaskId, osOptType>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * CallByAPI            <Os_TmProtTaskCounter>
- * REQ ID               <None>
+/**
+ * Timing protection start process of task.
  */
-/********************************************************************/
-static void Os_TmProtTaskFrameCounter(Os_TaskType osTaskId, Os_TmProtOptTaskType osOptType)
+void Os_TmProtTaskStart(Os_CoreIdType coreId, Os_TaskType taskId, Os_TmProtOptType osOptType)
 {
-    Os_TCBType*         pTcb;
-    Os_TmProtCbDataDef* pCbData;
+    Os_TCBType* pTcb = Os_TCB[taskId];
 
-    pTcb = &Os_TCB[osTaskId];
-
-    /* Task has been actived. */
-    if (TRUE != pTcb->taskTpFrameflag)
+    if(TP_NO_INIT != pTcb->taskTpStatus)
     {
-        pCbData = &(pTcb->osTpTask[osOptType]);
-
-        pCbData->osTpTime += 1U;
-
-        if (pCbData->osTpTime >= pCbData->osTpBudget)
+        Os_TpNodeType* pTpNode = &(pTcb->taskTpNode[osOptType]);
+        if(OS_TICK_INVALID != pTpNode->osTpBudget) /* PRQA S 1258 */ /* VL_Os_1258 */
         {
-            /* Set taskTpFrameflag, so the task can be actived again. */
-            pTcb->taskTpFrameflag = TRUE;
-            pCbData->osTpTime     = 0u;
+            Os_TmProtTaskNodeInsert(coreId, pTcb, pTpNode);
         }
     }
 
@@ -435,40 +747,19 @@ static void Os_TmProtTaskFrameCounter(Os_TaskType osTaskId, Os_TmProtOptTaskType
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <Timing protection start process of task.>
- * Service ID           <None>
- * Sync/Async           <None>
- * Reentrancy           <Non Reentrant>
- * param-eventId[in]    <osTaskId, osOptType>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * CallByAPI            <DisableAllInterrupts>
- * REQ ID               <None>
+/**
+ * Timing protection end process of task.
  */
-/********************************************************************/
-void Os_TmProtTaskStart(Os_TaskType osTaskId, Os_TmProtOptTaskType osOptType)
+void Os_TmProtTaskEnd(Os_CoreIdType coreId, Os_TaskType taskId, Os_TmProtOptType osOptType)
 {
-    Os_TCBType*         pTcb;
-    Os_TmProtCbDataDef* pCbData;
+    Os_TCBType* pTcb = Os_TCB[taskId];
 
-    /* Idle task should not be protected. */
-    if (OS_TASK_IDLE != osTaskId)
+    if(TP_NO_INIT != pTcb->taskTpStatus)
     {
-        pTcb    = &Os_TCB[osTaskId];
-        pCbData = &(pTcb->osTpTask[osOptType]);
-
-        /* This task cfg timing protection. */
-        if (OS_TICK_INVALID != pCbData->osTpBudget)
+        Os_TpNodeType* pTpNode = &(pTcb->taskTpNode[osOptType]);
+       if(TRUE == pTpNode->TpNodeInList)
         {
-            if (TRUE != pCbData->osIsTpStart)
-            {
-                pCbData->osIsTpStart = TRUE;
-                pCbData->osTpTime    = 0u;
-            }
+            Os_TmProtTaskNodeDelete(coreId, pTcb, pTpNode);
         }
     }
 
@@ -479,188 +770,55 @@ void Os_TmProtTaskStart(Os_TaskType osTaskId, Os_TmProtOptTaskType osOptType)
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <Timing protection counter process of task.>
- * Service ID           <None>
- * Sync/Async           <None>
- * Reentrancy           <Non Reentrant>
- * param-eventId[in]    <osTaskId, osOptType>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * CallByAPI            <Os_TmProtTaskProc>
- * REQ ID               <None>
+/**
+ * Time frame of isrId: frame check process
  */
-/********************************************************************/
-static void Os_TmProtTaskCounter(Os_TaskType osTaskId, Os_TmProtOptTaskType osOptType)
+/* PRQA S 6030, 1532 ++ */ /* VL_MTR_Os_STMIF, VL_QAC_OneFunRef */
+StatusType Os_TmProtIsrFrameChk(Os_IsrType isrId)
+/* PRQA S 6030, 1532 -- */
 {
-    StatusType          osErrType;
-    Os_TCBType*         pTcb;
-    Os_TmProtCbDataDef* pCbData;
+    StatusType osRet = E_OK;
 
-    /* Inter-arrival time. */
-    if (TP_TASK_ARRIVAL == osOptType)
+    /* Note: When Os_ArchSystemTimer isr arrive, Os_IntCfgIsrId is
+     * not set to vaild value.
+     * On tc1782, priority of Os_ArchSystemTimer isr is 255. */
+    if (Os_CheckIsr2Id(isrId))
     {
-        Os_TmProtTaskFrameCounter(osTaskId, osOptType);
-    }
-    else /* Other budget. */
-    {
-        pTcb    = &Os_TCB[osTaskId];
-        pCbData = &(pTcb->osTpTask[osOptType]);
-
-        if (TRUE == pCbData->osIsTpStart)
+        Os_ICBType *pIcb = Os_ICB[isrId];
+        if(TP_NO_INIT != pIcb->isrTpStatus)
         {
-            if (OS_TMPROT_TARGET_ISR_OFFSET <= Os_IntNestISR2)
+            uint32 TpFrameBudget = pIcb->isrTpNode[TP_ARRIVAL].osTpBudget;
+
+            if(OS_TICK_INVALID != TpFrameBudget) /* PRQA S 1258 */ /* VL_Os_1258 */
             {
-                /*nothing to do*/
-            }
-            else
-            {
-                pCbData->osTpTime += 1U;
-                if (pCbData->osTpTime >= pCbData->osTpBudget)
+                Os_CoreIdType coreId = OS_ISR_GET_COREID(isrId);
+                Os_TpMonitor[coreId].Os_TpTimeStamp += Os_Hal_TpGetTimePass(coreId);
+                if(pIcb->isrTpEerlistArrival > Os_TpMonitor[coreId].Os_TpTimeStamp)
                 {
-                    pCbData->osTpTime    = 0u;
-                    pCbData->osIsTpStart = FALSE;
-
-                    /* Get error type. */
-                    if (TP_TASK_EXE == osOptType)
-                    {
-                        osErrType = E_OS_PROTECTION_TIME;
-                    }
-                    else
-                    {
-                        osErrType = E_OS_PROTECTION_LOCKED;
-                    }
-                    /* Resource lock is not maintained in this function. */
-
 #if ((OS_SC4 == CFG_SC) && (CFG_TRUSTED_SYSTEM_SERVICE_MAX > 0U))
-                    if (TRUE == Os_TrustedFuncTp.TrustedFuncTportDelayCall)
+                    Os_SCBType *pScb = Os_GetSystemContext(coreId);
+                    Os_TrustedFuncTpDataDef *trustedFuncTp = &pScb->Os_TrustedFuncTp;
+                    if (TRUE == trustedFuncTp->TrustedFuncTportDelayCall)
                     {
                         /* Time protection and delay processing are triggered in the trusted function */
-
-                        Os_TrustedFuncTp.TrustedFuncTporFlag    = TRUE;
-                        Os_TrustedFuncTp.TrustedFuncTporErrType = osErrType;
-                        Os_TrustedFuncTp.osWhoHook              = OS_TMPROT_HOOK_TASK;
+                        trustedFuncTp->TrustedFuncTporFlag = TRUE;
+                        trustedFuncTp->TrustedFuncTporErrType = E_OS_PROTECTION_ARRIVAL;
+                        trustedFuncTp->TrustedFuncWhoHook = OS_TMPROT_HOOK_ISR;
                     }
                     else
 #endif
                     {
                         /* Hook. */
-                        (void)Os_CallProtectionHook(osErrType, OS_TMPROT_HOOK_TASK);
+                        if (PRO_IGNORE != Os_CallProtectionHook(E_OS_PROTECTION_ARRIVAL, OS_TMPROT_HOOK_ISR))
+                        {
+                            osRet = E_OS_PROTECTION_ARRIVAL;
+                        }
                     }
-                }
-            }
-        }
-    }
-
-    return;
-}
-#define OS_STOP_SEC_CODE
-#include "Os_MemMap.h"
-
-#define OS_START_SEC_CODE
-#include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <Timing protection end process of task.>
- * Service ID           <None>
- * Sync/Async           <None>
- * Reentrancy           <Non Reentrant>
- * param-eventId[in]    <osTaskId, osOptType>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * CallByAPI            <Os_ApplTerminateOneTask and so on>
- * REQ ID               <None>
- */
-/********************************************************************/
-void Os_TmProtTaskEnd(Os_TaskType osTaskId, Os_TmProtOptTaskType osOptType)
-{
-    Os_TCBType*         pTcb;
-    Os_TmProtCbDataDef* pCbData;
-
-    /* Idle task should not be protected. */
-    if (OS_TASK_IDLE != osTaskId)
-    {
-        pTcb    = &Os_TCB[osTaskId];
-        pCbData = &(pTcb->osTpTask[osOptType]);
-
-        if (TRUE == pCbData->osIsTpStart)
-        {
-            pCbData->osIsTpStart = FALSE;
-            pCbData->osTpTime    = 0u;
-        }
-    }
-
-    return;
-}
-#define OS_STOP_SEC_CODE
-#include "Os_MemMap.h"
-
-#if (CFG_ISR2_MAX > 0U)
-#define OS_START_SEC_CODE
-#include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <Time frame of task: frame check process.>
- * Service ID           <None>
- * Sync/Async           <None>
- * Reentrancy           <Non Reentrant>
- * param-eventId[in]    <osTaskId>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * CallByAPI            <None>
- * REQ ID               <None>
- */
-/********************************************************************/
-StatusType Os_TmProtIsrFrameChk(Os_IsrType osIsrId)
-{
-    StatusType          osRet = E_OK;
-    Os_ICBType*         pIcb;
-    Os_TmProtCbDataDef* pCbData;
-
-    /* Note: When Os_ArchSystemTimer isr arrive, Os_IntCfgIsrId is
-     * not set to vaild value.
-     * On tc1782, priority of Os_ArchSystemTimer isr is 255. */
-    if (osIsrId < CFG_ISR_MAX)
-    {
-        pIcb    = &Os_ICB[osIsrId];
-        pCbData = &pIcb->osTpIsr[TP_ISR_CAT2_ARRIVAL];
-
-        /* Timing frame for this isr is configed. */
-        if (OS_TICK_INVALID != pCbData->osTpBudget)
-        {
-            /* Timing frame: arrive so frequently. */
-            if (TRUE != pIcb->osIsrTpFrameflag)
-            {
-#if ((OS_SC4 == CFG_SC) && (CFG_TRUSTED_SYSTEM_SERVICE_MAX > 0U))
-                if (TRUE == Os_TrustedFuncTp.TrustedFuncTportDelayCall)
-                {
-                    /* Time protection and delay processing are triggered in the trusted function */
-                    Os_TrustedFuncTp.TrustedFuncTporFlag    = TRUE;
-                    Os_TrustedFuncTp.TrustedFuncTporErrType = E_OS_PROTECTION_ARRIVAL;
-                    Os_TrustedFuncTp.osWhoHook              = OS_TMPROT_HOOK_ISR;
                 }
                 else
-#endif
                 {
-                    /* Hook. */
-                    if (PRO_IGNORE != Os_CallProtectionHook(E_OS_PROTECTION_ARRIVAL, OS_TMPROT_HOOK_ISR))
-                    {
-                        pCbData->osTpTime = 0U;
-                        osRet             = E_OS_ID;
-                    }
+                    pIcb->isrTpEerlistArrival = Os_TpMonitor[coreId].Os_TpTimeStamp + TpFrameBudget;
                 }
-            }
-            else
-            {
-                pCbData->osTpTime      = 0U;
-                pIcb->osIsrTpFrameflag = FALSE;
             }
         }
     }
@@ -672,39 +830,19 @@ StatusType Os_TmProtIsrFrameChk(Os_IsrType osIsrId)
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <Timing protection timing frame process of isr.>
- * Service ID           <None>
- * Sync/Async           <None>
- * Reentrancy           <Non Reentrant>
- * param-eventId[in]    <osTaskId, osOptType>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * CallByAPI            <Os_TmProtIsrCounter>
- * REQ ID               <None>
+/**
+ * Timing protection start process of isr.
  */
-/********************************************************************/
-static void Os_TmProtIsrFrameCounter(Os_IsrType osIsrId, Os_TmProtOptIsrType osOptType)
+void Os_TmProtIsrStart(Os_CoreIdType coreId, Os_IsrType isrId, Os_TmProtOptType osOptType)
 {
-    Os_ICBType*         pIcb;
-    Os_TmProtCbDataDef* pCbData;
+    Os_ICBType* pIcb = Os_ICB[isrId];
 
-    pIcb = &Os_ICB[osIsrId];
-
-    /* Isr has been called. */
-    if (TRUE != pIcb->osIsrTpFrameflag)
+    if(TP_NO_INIT != pIcb->isrTpStatus)
     {
-        pCbData = &(pIcb->osTpIsr[osOptType]);
-        pCbData->osTpTime += 1U;
-
-        /* Set osIsrTpFrameflag to true, so the isr can be called again. */
-        if (pCbData->osTpTime >= pCbData->osTpBudget)
+        Os_TpNodeType* pTpNode = &(pIcb->isrTpNode[osOptType]);
+        if(OS_TICK_INVALID != pTpNode->osTpBudget) /* PRQA S 1258 */ /* VL_Os_1258 */
         {
-            pIcb->osIsrTpFrameflag = TRUE;
-            pCbData->osTpTime      = 0U;
+            Os_TmProtIsrNodeInsert(coreId, pIcb, pTpNode);
         }
     }
 
@@ -715,151 +853,20 @@ static void Os_TmProtIsrFrameCounter(Os_IsrType osIsrId, Os_TmProtOptIsrType osO
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <Timing protection start process of isr.>
- * Service ID           <None>
- * Sync/Async           <None>
- * Reentrancy           <Non Reentrant>
- * param-eventId[in]    <osTaskId, osOptType>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * CallByAPI            <DisableAllInterrupts>
- * REQ ID               <None>
+/**
+ * Timing protection end process of isr
  */
-/********************************************************************/
-void Os_TmProtIsrStart(Os_IsrType osIsrId, Os_TmProtOptIsrType osOptType)
+void Os_TmProtIsrEnd(Os_CoreIdType coreId, Os_IsrType isrId, Os_TmProtOptType osOptType)
 {
-    Os_ICBType*         pIcb;
-    Os_TmProtCbDataDef* pCbData;
+    Os_ICBType* pIcb = Os_ICB[isrId];
 
-    pIcb    = &Os_ICB[osIsrId];
-    pCbData = &(pIcb->osTpIsr[osOptType]);
-
-    /* This isr cfg timing protection. */
-    if (OS_TICK_INVALID != pCbData->osTpBudget)
+    if(TP_NO_INIT != pIcb->isrTpStatus)
     {
-        if (TRUE != pCbData->osIsTpStart)
+        Os_TpNodeType* pTpNode = &(pIcb->isrTpNode[osOptType]);
+        if(TRUE == pTpNode->TpNodeInList)
         {
-            pCbData->osIsTpStart = TRUE;
-            pCbData->osTpTime    = 0u;
+            Os_TmProtIsrNodeDelete(coreId, pIcb, pTpNode);
         }
-    }
-
-    return;
-}
-#define OS_STOP_SEC_CODE
-#include "Os_MemMap.h"
-
-#define OS_START_SEC_CODE
-#include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <Timing protection counter process of isr.>
- * Service ID           <None>
- * Sync/Async           <None>
- * Reentrancy           <Non Reentrant>
- * param-eventId[in]    <osTaskId, osOptType>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * CallByAPI            <Os_TmProtIsrProc>
- * REQ ID               <None>
- */
-/********************************************************************/
-static void Os_TmProtIsrCounter(Os_IsrType osIsrId, Os_TmProtOptIsrType osOptType)
-{
-    StatusType          osErrType;
-    Os_ICBType*         pIcb;
-    Os_TmProtCbDataDef* pCbData;
-
-    /* Inter-arrival time. */
-    if (TP_ISR_CAT2_ARRIVAL == osOptType)
-    {
-        Os_TmProtIsrFrameCounter(osIsrId, osOptType);
-    }
-    else
-    {
-        pIcb = &Os_ICB[osIsrId];
-
-        pCbData = &(pIcb->osTpIsr[osOptType]);
-
-        if (TRUE == pCbData->osIsTpStart)
-        {
-            pCbData->osTpTime += 1U;
-            if (pCbData->osTpTime >= pCbData->osTpBudget)
-            {
-                pCbData->osTpTime    = 0u;
-                pCbData->osIsTpStart = FALSE;
-
-                /* Get error type. */
-                if (TP_ISR_CAT2_EXE == osOptType)
-                {
-                    osErrType = E_OS_PROTECTION_TIME;
-                }
-                else
-                {
-                    osErrType = E_OS_PROTECTION_LOCKED;
-                }
-                /* TP_ISR_ARRIVAL and resource lock are not maintained
-                 * in this function. */
-
-#if ((OS_SC4 == CFG_SC) && (CFG_TRUSTED_SYSTEM_SERVICE_MAX > 0U))
-                if (TRUE == Os_TrustedFuncTp.TrustedFuncTportDelayCall)
-                {
-                    /* Time protection and delay processing are triggered in the trusted function */
-
-                    Os_TrustedFuncTp.TrustedFuncTporFlag    = TRUE;
-                    Os_TrustedFuncTp.TrustedFuncTporErrType = osErrType;
-                    Os_TrustedFuncTp.osWhoHook              = OS_TMPROT_HOOK_ISR;
-                }
-                else
-#endif
-                {
-                    /* Hook. */
-                    (void)Os_CallProtectionHook(osErrType, OS_TMPROT_HOOK_ISR);
-                }
-            }
-        }
-    }
-
-    return;
-}
-#define OS_STOP_SEC_CODE
-#include "Os_MemMap.h"
-
-#define OS_START_SEC_CODE
-#include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <Timing protection end process of isr.>
- * Service ID           <None>
- * Sync/Async           <None>
- * Reentrancy           <Non Reentrant>
- * param-eventId[in]    <osTaskId, osOptType>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * CallByAPI            <Os_AppTerminateIsrKernelProc and so on>
- * REQ ID               <None>
- */
-/********************************************************************/
-void Os_TmProtIsrEnd(Os_IsrType osIsrId, Os_TmProtOptIsrType osOptType)
-{
-    Os_ICBType*         pIcb;
-    Os_TmProtCbDataDef* pCbData;
-
-    pIcb    = &Os_ICB[osIsrId];
-    pCbData = &(pIcb->osTpIsr[osOptType]);
-
-    if (TRUE == pCbData->osIsTpStart)
-    {
-        pCbData->osIsTpStart = FALSE;
-        pCbData->osTpTime    = 0u;
     }
 
     return;
@@ -870,226 +877,134 @@ void Os_TmProtIsrEnd(Os_IsrType osIsrId, Os_TmProtOptIsrType osOptType)
 #if (CFG_STD_RESOURCE_MAX > 0)
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <Init resource lock budget for isr.>
- * Service ID           <None>
- * Sync/Async           <None>
- * Reentrancy           <None>
- * param-eventId[in]    <None>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * CallByAPI            <Os_InitIsrTmProt>
- * REQ ID               <None>
+/**
+ * Init resource lock budget for isr
  */
-/********************************************************************/
-static void Os_TmProtInitIsrResLock(Os_IsrType osIsrId, const Os_IsrCfgType* pIsrCfg)
+OS_LOCAL void Os_TmProtInitIsrResLock(Os_IsrType isrId, const Os_TmProtCfgType* pIsrTpCfg)
 {
-    uint16                   i;
-    uint32                   osResCnt;
-    const Os_RCBType*        pRcb;
-    const Os_IsrResLockType* pResLock;
-
     /* If Isr cfg OsIsrResourceLock, read budget to RCB. */
-    if (NULL_PTR != pIsrCfg->OsIsrTimePt)
+    uint16 osResCnt = pIsrTpCfg->osResLockCnt;
+
+    for (uint16 i = 0u; i < osResCnt; i++)
     {
-        osResCnt = pIsrCfg->OsIsrTimePt->osIsrResLockCnt;
+        const Os_TpResLockType* pResLock = &(pIsrTpCfg->osResLockRef[i]);
 
-        for (i = 0u; i < osResCnt; i++)
-        {
-            /* Misrac: Msg(2:0491) Array subscripting applied to an
-             * object of pointer type.
-             * Note: osIsrResLockRef is array. osIsrResLockCnt is variable,
-             * so osIsrResLockRef must be used like below.
-             */
-            pResLock = &pIsrCfg->OsIsrTimePt->osIsrResLockRef[i];
-
-            /* PRQA S 3469 ++ */ /* VL_Os_3469 */
-            pRcb = &Os_RCB[Os_GetObjLocalId(pResLock->osIsrResLockResRef)];
-            /* PRQA S 3469 -- */
-
-            /* Read budget to RCB. */
-            pRcb->osTmProtResBgtIsr[osIsrId] = pResLock->osIsrResLockBudget;
-        }
+        /* Read budget to RCB. */
+        Os_RCB[pResLock->OsResLockResRef]->TmProtResBgtIsr[isrId] = pResLock->OsResLockBudget;
     }
 
     return;
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
-#endif /* CFG_STD_RESOURCE_MAX > 0 */
+#endif
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <Init timing protection for isr.>
- * Service ID           <None>
- * Sync/Async           <None>
- * Reentrancy           <None>
- * param-eventId[in]    <None>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * CallByAPI            <Os_InitTmProt>
- * REQ ID               <None>
+/**
+ * Init timing protection for isr
  */
-/********************************************************************/
-static void Os_InitIsrTmProt(
-    Os_IsrType           osIsrId,
-    const Os_IsrCfgType* pIsrCfg,
-    Os_ICBType*          pIcb
-
+OS_LOCAL void Os_InitIsrTmProt
+(
+    Os_IsrType isrId,
+    const Os_TmProtCfgType* pIsrTpCfg,
+    Os_ICBType* pIcb
 )
 {
-    const Os_IsrTimingProtectionType* pIsrTimePt;
-
-    pIcb->IsrC2IsrOpt      = TP_OPT_BUTT;
-    pIcb->osIsrTpFrameflag = TRUE;
-
-#if (CFG_STD_RESOURCE_MAX > 0U)
-    pIcb->IsrC2ResCount = 0u;
-#endif
-
-    pIsrTimePt = pIsrCfg->OsIsrTimePt;
+    pIcb->isrTpStatus = TP_READY;
+    pIcb->isrTpHead = NULL_PTR;
+    pIcb->isrTpTimeStamp = 0U;
+    pIcb->isrTpLastReadTime = 0U;
+    pIcb->isrTpEerlistArrival = 0U;
 
     /* Set budget of each type. */
-    if (NULL_PTR == pIsrTimePt)
-    {
-        Os_TmProtInitCbData(&pIcb->osTpIsr[TP_ISR_CAT2_EXE], OS_TICK_INVALID);
-        Os_TmProtInitCbData(&pIcb->osTpIsr[TP_ISR_CAT2_ARRIVAL], OS_TICK_INVALID);
-        Os_TmProtInitCbData(&pIcb->osTpIsr[TP_ISR_CAT2_SUS_OS_INT], OS_TICK_INVALID);
-        Os_TmProtInitCbData(&pIcb->osTpIsr[TP_ISR_CAT2_SUS_ALL_INT], OS_TICK_INVALID);
-        Os_TmProtInitCbData(&pIcb->osTpIsr[TP_ISR_CAT2_DIS_ALL_INT], OS_TICK_INVALID);
-    }
-    else
-    {
-        Os_TmProtInitCbData(&pIcb->osTpIsr[TP_ISR_CAT2_EXE], pIsrTimePt->osIsrExeBudget);
-        Os_TmProtInitCbData(&pIcb->osTpIsr[TP_ISR_CAT2_ARRIVAL], pIsrTimePt->osIsrTimeFrame);
-        Os_TmProtInitCbData(&pIcb->osTpIsr[TP_ISR_CAT2_SUS_OS_INT], pIsrTimePt->osIsrOsIptLockBudget);
-        Os_TmProtInitCbData(&pIcb->osTpIsr[TP_ISR_CAT2_SUS_ALL_INT], pIsrTimePt->osIsrAllIptLockBudget);
-        Os_TmProtInitCbData(&pIcb->osTpIsr[TP_ISR_CAT2_DIS_ALL_INT], pIsrTimePt->osIsrAllIptLockBudget);
-    }
-
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_3138, VL_Os_3141 */
+    Os_TmProtInitCbData(&pIcb->isrTpNode[TP_EXE], TP_EXE, pIsrTpCfg->osExecutionBudget);
+    Os_TmProtInitCbData(&pIcb->isrTpNode[TP_ARRIVAL], TP_ARRIVAL, pIsrTpCfg->osTimeFrame);
+    Os_TmProtInitCbData(&pIcb->isrTpNode[TP_SUS_OS_INT], TP_SUS_OS_INT,
+                             pIsrTpCfg->osOsInterruptLockBudget);
+    Os_TmProtInitCbData(&pIcb->isrTpNode[TP_SUS_ALL_INT], TP_SUS_ALL_INT,
+                             pIsrTpCfg->osAllInterruptLockBudget);
+    Os_TmProtInitCbData(&pIcb->isrTpNode[TP_DIS_ALL_INT], TP_DIS_ALL_INT,
+                             pIsrTpCfg->osAllInterruptLockBudget);
+    /* PRQA S 3138, 3141 -- */
 /* Init resource lock budget for isr. */
 #if (CFG_STD_RESOURCE_MAX > 0)
-    Os_TmProtInitIsrResLock(osIsrId, pIsrCfg);
+    if(NULL_PTR != pIsrTpCfg->osResLockRef)
+    {
+        Os_TmProtInitIsrResLock(isrId, pIsrTpCfg);
+    }
 #endif
 
     return;
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
-#endif /* CFG_ISR2_MAX > 0U */
 
 #if (CFG_STD_RESOURCE_MAX > 0)
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <Init resource lock budget for task.>
- * Service ID           <None>
- * Sync/Async           <None>
- * Reentrancy           <None>
- * param-eventId[in]    <None>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * CallByAPI            <Os_InitTaskTmProt>
- * REQ ID               <None>
+/**
+ * Init resource lock budget for task
  */
-/********************************************************************/
-static void Os_TmProtInitTaskResLock(Os_TaskType osTaskId, const Os_TaskCfgType* pTaskCfg)
+OS_LOCAL void Os_TmProtInitTaskResLock(
+    Os_TaskType osTaskId, 
+    const Os_TmProtCfgType* pTaskTpCfg
+)
 {
-    uint16                    i;
-    uint16                    osCnt;
-    const Os_RCBType*         pRcb;
-    const Os_TaskResLockType* pResLock;
-
     /* If task cfg OsTaskResourceLock, read budget to RCB. */
-    if (NULL_PTR != pTaskCfg->osTaskTmProtCfgRef->osTaskResLockRef)
+    uint16 osResCnt = pTaskTpCfg->osResLockCnt;
+
+    for (uint16 i = 0u; i < osResCnt; i++)
     {
-        osCnt = pTaskCfg->osTaskTmProtCfgRef->osTaskResLockCnt;
+        const Os_TpResLockType* pResLock = &(pTaskTpCfg->osResLockRef[i]);
 
-        for (i = 0u; i < osCnt; i++)
-        {
-            /* Misrac: Msg(2:0491) Array subscripting applied to an object of
-             * pointer type.
-             * Note: osTaskResLockRef is array. osTaskResLockCnt is variable,
-             * so osTaskResLockRef must be used like below. */
-            pResLock = &pTaskCfg->osTaskTmProtCfgRef->osTaskResLockRef[i];
-
-            /* PRQA S 3469 ++ */ /* VL_Os_3469 */
-            pRcb = &Os_RCB[Os_GetObjLocalId(pResLock->OsTaskResLockResRef)];
-            /* PRQA S 3469 -- */
-
-            /* Read budget to RCB. */
-            pRcb->osTmProtResBgtTask[osTaskId] = pResLock->OsTaskResLockBudget;
-        }
+        /* Read budget to RCB. */
+        Os_RCB[pResLock->OsResLockResRef]->TmProtResBgtTask[osTaskId] = pResLock->OsResLockBudget;
     }
 
     return;
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
-#endif /* CFG_STD_RESOURCE_MAX > 0 */
+#endif
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <Init timing protection for task.>
- * Service ID           <None>
- * Sync/Async           <None>
- * Reentrancy           <None>
- * param-eventId[in]    <None>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * CallByAPI            <Os_InitTmProt>
- * REQ ID               <None>
+/**
+ * Init timing protection for task
  */
-/********************************************************************/
-static void Os_InitTaskTmProt(Os_TaskType osTaskId, const Os_TaskCfgType* pTaskCfg, Os_TCBType* pTcb)
+OS_LOCAL void Os_InitTaskTmProt(
+    Os_TaskType osTaskId,
+    const Os_TmProtCfgType* pTaskTpCfg,
+    Os_TCBType* pTcb
+)
 {
-    const Os_TaskTmProtCfgType* pTaskTmProtCfgRef;
+    pTcb->taskTpStatus = TP_READY;
+    pTcb->taskTpHead = NULL_PTR;
+    pTcb->taskTpTimeStamp = 0U;
+    pTcb->taskTpLastReadTime = 0U;
+    pTcb->taskTpEerlistArrival = 0U;
 
-    pTcb->taskIsrOpt      = TP_OPT_BUTT;
-    pTcb->taskTpFrameflag = TRUE;
-
-#if (CFG_STD_RESOURCE_MAX > 0U)
-    pTcb->taskResCount = 0u;
-#endif
-
-    pTaskTmProtCfgRef = pTaskCfg->osTaskTmProtCfgRef;
-
-    /* Set budget of each type. NULL_PTR means not configed. */
-    if (NULL_PTR == pTaskTmProtCfgRef)
-    {
-        Os_TmProtInitCbData(&pTcb->osTpTask[TP_TASK_EXE], OS_TICK_INVALID);
-        Os_TmProtInitCbData(&pTcb->osTpTask[TP_TASK_ARRIVAL], OS_TICK_INVALID);
-        Os_TmProtInitCbData(&pTcb->osTpTask[TP_TASK_SUS_OS_INT], OS_TICK_INVALID);
-        Os_TmProtInitCbData(&pTcb->osTpTask[TP_TASK_SUS_ALL_INT], OS_TICK_INVALID);
-        Os_TmProtInitCbData(&pTcb->osTpTask[TP_TASK_DIS_ALL_INT], OS_TICK_INVALID);
-    }
-    else
-    {
-        Os_TmProtInitCbData(&pTcb->osTpTask[TP_TASK_EXE], pTaskTmProtCfgRef->osTaskExecutionBudget);
-        Os_TmProtInitCbData(&pTcb->osTpTask[TP_TASK_ARRIVAL], pTaskTmProtCfgRef->osTaskTimeFrame);
-        Os_TmProtInitCbData(&pTcb->osTpTask[TP_TASK_SUS_OS_INT], pTaskTmProtCfgRef->osTaskOsInterruptLockBudget);
-        Os_TmProtInitCbData(&pTcb->osTpTask[TP_TASK_SUS_ALL_INT], pTaskTmProtCfgRef->osTaskAllInterruptLockBudget);
-        Os_TmProtInitCbData(&pTcb->osTpTask[TP_TASK_DIS_ALL_INT], pTaskTmProtCfgRef->osTaskAllInterruptLockBudget);
+    /* Set budget of each type*/
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_3138, VL_Os_3141 */
+    Os_TmProtInitCbData(&pTcb->taskTpNode[TP_EXE], TP_EXE, pTaskTpCfg->osExecutionBudget);
+    Os_TmProtInitCbData(&pTcb->taskTpNode[TP_ARRIVAL], TP_ARRIVAL, pTaskTpCfg->osTimeFrame);
+    Os_TmProtInitCbData(&pTcb->taskTpNode[TP_SUS_OS_INT], TP_SUS_OS_INT,
+                             pTaskTpCfg->osOsInterruptLockBudget);
+    Os_TmProtInitCbData(&pTcb->taskTpNode[TP_SUS_ALL_INT], TP_SUS_ALL_INT,
+                             pTaskTpCfg->osAllInterruptLockBudget);
+    Os_TmProtInitCbData(&pTcb->taskTpNode[TP_DIS_ALL_INT], TP_DIS_ALL_INT,
+                             pTaskTpCfg->osAllInterruptLockBudget);
+    /* PRQA S 3138, 3141 -- */
 
 /* Init resource lock budget for task. */
 #if (CFG_STD_RESOURCE_MAX > 0)
-        Os_TmProtInitTaskResLock(osTaskId, pTaskCfg);
-#endif
+    if(NULL_PTR != pTaskTpCfg->osResLockRef)
+    {
+        Os_TmProtInitTaskResLock(osTaskId, pTaskTpCfg);
     }
+#endif
 
     return;
 }
@@ -1098,158 +1013,110 @@ static void Os_InitTaskTmProt(Os_TaskType osTaskId, const Os_TaskCfgType* pTaskC
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <Init protection module.>
- * Service ID           <None>
- * Sync/Async           <None>
- * Reentrancy           <None>
- * param-eventId[in]    <None>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * CallByAPI            <Os_InitSystem>
- * REQ ID               <None>
+/**
+ * Init timing protection module
  */
-/********************************************************************/
-void Os_InitTmProt(void)
+/* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
+void Os_InitTmProt(Os_CoreIdType coreId)
+/* PRQA S 1532 -- */
 {
-    uint16 i;
+    boolean TpCoreNeedInit = Os_CfgTprot_Inf[coreId]; /* PRQA S 4461 */ /* VL_Os_4461 */
+    Os_TpMonitor[coreId].Os_TpMonitored = TP_FOR_NONE;
+    Os_TpMonitor[coreId].Os_TpTimeStamp = 0u;
 
 /* Init protection para for task. */
-#if (CFG_TASK_MAX > 0)
-    for (i = 0U; i < Os_SCB.sysTaskMax; i++)
+    Os_TaskType taskIdStartRange = Os_TaskIdRange[coreId].AllTask.Start;
+    Os_TaskType taskIdEndRange = Os_TaskIdRange[coreId].AllTask.End;
+    for (uint16 i = (uint16)taskIdStartRange; i < (uint16)taskIdEndRange; i++)
     {
-        Os_InitTaskTmProt((Os_TaskType)i, &Os_TaskCfg[i], &Os_TCB[i]);
+        if((FALSE == TpCoreNeedInit) || (NULL_PTR == Os_TaskCfg[i].TaskTmProtCfgRef))
+        {
+            Os_TCB[i]->taskTpStatus = TP_NO_INIT;
+        }
+        else
+        {
+            /* PRQA S 4342 ++ */ /* VL_Os_4342 */
+            Os_InitTaskTmProt((Os_TaskType)i, Os_TaskCfg[i].TaskTmProtCfgRef, Os_TCB[i]);
+            /* PRQA S 4342 -- */
+        }
     }
-#endif
 
-#if (CFG_ISR2_MAX > 0U)
+    Os_IsrType isrIdStartRange = Os_IsrIdRange[coreId].Isr2.IsrStart;
+    Os_IsrType isrIdEndRange = Os_IsrIdRange[coreId].Isr2.IsrEnd;
     /* Init protection para for Isr-Cat2. */
-    for (i = 0U; i < Os_CfgIsr2Max; i++)
+    for (uint16 i = (uint16)isrIdStartRange; i < (uint16)isrIdEndRange; i++)
     {
-        Os_InitIsrTmProt((Os_IsrType)i, &Os_IsrCfg[i], &Os_ICB[i]);
+        if((FALSE == TpCoreNeedInit) || (NULL_PTR == Os_IsrCfg[i].isrTmProtCfgRef))
+        {
+            Os_ICB[i]->isrTpStatus = TP_NO_INIT;
+        }
+        else
+        {
+            /* PRQA S 4342 ++ */ /* VL_Os_4342 */
+            Os_InitIsrTmProt((Os_IsrType)i, Os_IsrCfg[i].isrTmProtCfgRef, Os_ICB[i]);
+            /* PRQA S 4342 -- */
+        }
     }
-#endif
 
     return;
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
 
-#if (CFG_ISR2_MAX > 0U)
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <Timing Protection isr process.>
- * Service ID           <None>
- * Sync/Async           <None>
- * Reentrancy           <None>
- * param-eventId[in]    <None>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * CallByAPI            <Os_TmProtMainProc>
- * REQ ID               <None>
+/**
+ * Timing Protection call Protecthook
  */
-/********************************************************************/
-static void Os_TmProtIsrProc(void)
+/* PRQA S 3673 ++ */ /* VL_QAC_3673 */
+OS_LOCAL void Os_TpCallProtectHook(Os_SCBType *pScb, const Os_TpNodeType *Head, uint32 osWhoHook)
+/* PRQA S 3673 -- */
 {
-    uint16               i;
-    Os_IsrType           osIsrC2Id;
-    const Os_IsrCfgType* pIsrCfg;
-    const Os_SCBType*    pScb;
-
-    pScb = &Os_SCB;
-
-    /* IntNest: current_isr is isr for timing protection,
-     * previous_isr is the target to protect. */
-    if (Os_IntNestISR2 >= OS_TMPROT_TARGET_ISR_OFFSET)
+    StatusType osErrType = E_OS_PROTECTION_LOCKED;
+    if(TP_EXE == Head->TpNodeOpt)
     {
-        osIsrC2Id = pScb->sysIsrNestQueue[Os_IntNestISR2 - OS_TMPROT_TARGET_ISR_OFFSET];
-        if (osIsrC2Id < CFG_ISR_MAX)
-        {
-            pIsrCfg = &Os_IsrCfg[osIsrC2Id];
-            if (OS_ISR_CATEGORY2 == pIsrCfg->OsIsrCatType)
-            {
-                Os_TmProtIsrCounter(osIsrC2Id, TP_ISR_CAT2_EXE);
-                Os_TmProtIsrCounter(osIsrC2Id, TP_ISR_CAT2_SUS_OS_INT);
-                Os_TmProtIsrCounter(osIsrC2Id, TP_ISR_CAT2_SUS_ALL_INT);
-                Os_TmProtIsrCounter(osIsrC2Id, TP_ISR_CAT2_DIS_ALL_INT);
-            }
-        }
+        osErrType = E_OS_PROTECTION_TIME;
     }
 
-/* IntNest: arrival time should be checked for each isr. */
-#if (CFG_ISR2_MAX > 0U)
-    for (i = (Os_CfgIsrMax - Os_CfgIsr2Max); i < Os_CfgIsr2Max; i++)
+#if ((OS_SC4 == CFG_SC) && (CFG_TRUSTED_SYSTEM_SERVICE_MAX > 0U))
+    Os_TrustedFuncTpDataDef *trustedFuncTp = &pScb->Os_TrustedFuncTp;
+    if (TRUE == trustedFuncTp->TrustedFuncTportDelayCall)
     {
-        /* Current_isr is running isr, this isr is for timing counter.
-         * It should not be protected. */
-        if (i != pScb->sysRunningIsrCat2Id)
-        {
-            Os_TmProtIsrCounter(i, TP_ISR_CAT2_ARRIVAL);
-        }
+        /* Time protection and delay processing are triggered in the trusted function */
+        trustedFuncTp->TrustedFuncTporFlag = TRUE;
+        trustedFuncTp->TrustedFuncTporErrType = osErrType;
+        trustedFuncTp->TrustedFuncWhoHook = osWhoHook;
+        Os_TpSetCompare(pScb->SysCore, OS_HAL_TP_MAX_INCREMENT_VALUE, TP_FOR_NONE);
     }
+    else
 #endif
+    {
+        /* Hook. */
+        (void)Os_CallProtectionHook(osErrType, osWhoHook);
+    }
 
+    UNUSED_PARAMETER(pScb);
     return;
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
-#endif /* CFG_ISR2_MAX > 0 */
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <Timing Protection task process.>
- * Service ID           <None>
- * Sync/Async           <None>
- * Reentrancy           <None>
- * param-eventId[in]    <None>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * CallByAPI            <Os_TmProtMainProc>
- * REQ ID               <None>
+/**
+ * Timing Protection call Protecthook for task
  */
-/********************************************************************/
-static void Os_TmProtTaskProc(void)
+OS_LOCAL void Os_TpTaskCallProtectHook(Os_SCBType *pScb)
 {
-    uint16           i;
-    Os_TaskStateType osTaskState;
-
-#if (CFG_TASK_MAX > 0)
-    for (i = 0U; i < Os_SCB.sysTaskMax; i++)
+    const Os_TpNodeType* pHead = pScb->SysRunningTCB->taskTpHead;
+    if(NULL_PTR != pHead)
     {
-        /* Implementation-dependent: IDLE task should not be protected. */
-        if (OS_TASK_IDLE != (Os_TaskType)i)
-        {
-            osTaskState = Os_TCB[i].taskState;
-
-            if (TASK_STATE_RUNNING == osTaskState)
-            {
-                /* Exe_budget only checked in running state. */
-                Os_TmProtTaskCounter((Os_TaskType)i, TP_TASK_EXE);
-                Os_TmProtTaskCounter((Os_TaskType)i, TP_TASK_ARRIVAL);
-                Os_TmProtTaskCounter((Os_TaskType)i, TP_TASK_SUS_OS_INT);
-                Os_TmProtTaskCounter((Os_TaskType)i, TP_TASK_SUS_ALL_INT);
-                Os_TmProtTaskCounter((Os_TaskType)i, TP_TASK_DIS_ALL_INT);
-            }
-            else
-            {
-                /* Time-frame is checked in running and ready states. */
-                Os_TmProtTaskCounter((Os_TaskType)i, TP_TASK_ARRIVAL);
-            }
-        }
+        Os_TpCallProtectHook(pScb, pHead, OS_TMPROT_HOOK_TASK);
     }
-#endif
-
+    else
+    {
+        Os_TpSetCompare(pScb->SysCore, OS_HAL_TP_MAX_INCREMENT_VALUE, TP_FOR_NONE);
+    }
     return;
 }
 #define OS_STOP_SEC_CODE
@@ -1257,45 +1124,63 @@ static void Os_TmProtTaskProc(void)
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <Timing Protection isr callback.>
- * Service ID           <None>
- * Sync/Async           <None>
- * Reentrancy           <None>
- * param-eventId[in]    <None>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * CallByAPI            <ISR>
- * REQ ID               <None>
+/**
+ * Timing Protection call Protecthook for Isr2
  */
-/********************************************************************/
+OS_LOCAL void Os_TpIsrCallProtectHook(Os_SCBType *pScb)
+{
+    Os_IsrType IsrId = pScb->SysIsrNestQueue[pScb->IntNestISR2 - OS_TMPROT_TARGET_ISR_OFFSET];
+    const Os_TpNodeType* pHead = Os_ICB[IsrId]->isrTpHead;
+    if(NULL_PTR != pHead)
+    {
+        Os_TpCallProtectHook(pScb, pHead, OS_TMPROT_HOOK_ISR);
+    }
+    else
+    {
+        Os_TpSetCompare(pScb->SysCore, OS_HAL_TP_MAX_INCREMENT_VALUE, TP_FOR_NONE);
+    }
+    return;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * Timing Protection isr callback
+ */
+/* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
 void Os_TmProtMainProc(void)
+/* PRQA S 1532 -- */
 {
-    uint16 i;
+    Os_CoreIdType coreId = Os_GetCoreIdLocal();
+    Os_SCBType *pScb = Os_GetSystemContext(coreId);
 
-    /* 1: Timing Protection for task. */
-    Os_TmProtTaskProc();
-
-/* 2: Timing Protection for Resource lock. */
-#if (CFG_STD_RESOURCE_MAX > 0)
-    for (i = 0u; i < Os_CfgResourceMax; i++)
+    switch (Os_TpMonitor[coreId].Os_TpMonitored)
     {
-        Os_TmProtResCounter((ResourceType)i);
-    }
-#endif
+    case TP_FOR_NONE:
+        Os_TpMonitor[coreId].Os_TpTimeStamp += Os_Hal_TpGetTimePass(coreId);
+        Os_Hal_TpSetCompare(coreId, OS_HAL_TP_MAX_INCREMENT_VALUE);
+        break;
 
-/* 3: Timing Protection for Isr2. */
-#if (CFG_ISR2_MAX > 0)
-    Os_TmProtIsrProc();
-#endif
+    case TP_FOR_TASK:
+    	Os_TpTaskCallProtectHook(pScb);
+        break;
+
+    case TP_FOR_ISR:
+    	Os_TpIsrCallProtectHook(pScb);
+        break;
+
+    default:
+        /* Nothing to do */
+        break;
+    }
 
     return;
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
-#endif /* TRUE == CFG_TIMING_PROTECTION_ENABLE */
+#endif
 
 /*=======[E N D   O F   F I L E]==============================================*/
+/* PRQA S 0553 EOF */ /* VL_QAC_UnUsedFiles */

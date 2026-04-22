@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2024 Isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception OR  LicenseRef-Commercial-License
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -11,270 +11,225 @@
  * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  * or see <https://www.gnu.org/licenses/>.
  *
+ * Alternatively, this file may be used under the terms of the Isoft Infrastructure Software Co., Ltd.
+ * Commercial License, in which case the provisions of the Isoft Infrastructure Software Co., Ltd.
+ * Commercial License shall apply instead of those of the GNU Lesser General Public License.
  *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Os_Event.c                                                  **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : i-soft-os                                                   **
- **  Vendor      :                                                             **
- **  DESCRIPTION : event manager                                               **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
- **  Version :   AUTOSAR classic Platform R19--Function Safety                 **
- **                                                                            **
- *******************************************************************************/
+ * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
+ * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
+ *
+ ************************************************************************************************************************
+ **
+ **  @file               : Os_Event.c
+ **  @author             : i-soft-os
+ **  @date               : 2025/02/10
+ **  @vendor             : isoft
+ **  @description        : Os source file for Event API implementations
+ **
+ ***********************************************************************************************************************/
 
-/*=======[I N C L U D E S]====================================================*/
-#include "Os_Internal.h"
+/* =================================================== inclusions =================================================== */
+#include "Os_Arch_Processor.h"
+#include "Os_Event.h"
+#include "Os_Spinlock.h"
+#include "Os_Resource.h"
+#include "Os_Task.h"
+#include "Os_Rpc.h"
+#include "Os_Sprot.h"
+#include "Os_ReadyQue.h"
+#include "Os_Tprot.h"
+#include "Os_Hook.h"
+#include "Os_Kernel.h"
+#include "Os_Err.h"
+#include "Os_Rti.h"
+#include "Os_Arti.h"
+#include "Os_Monitor.h"
 
-/*=======[M A C R O S]========================================================*/
-/* PRQA S 3472 ++ */ /* VL_Os_3472 */
-#define OS_EVENT_PERMISSION_CHECKING(EventMask, AccessMask)   Os_EventBitCompare(EventMask, AccessMask)
-#define OS_EVENT_IS_ALL_EVENTS_TRIGGERED(EventMask, SetEvent) Os_EventBitCompare(EventMask, SetEvent)
-/* PRQA S 3472 -- */
-/*=======[T Y P E   D E F I N I T I O N S]====================================*/
+/* ===================================================== macros ===================================================== */
+
+/* ================================================ type definitions ================================================ */
+
+/* ============================================ external data definitions =========================================== */
+
+/* ============================================ internal data definitions =========================================== */
+
+/* ========================================== internal function declarations ======================================== */
 #if (CFG_EXTENDED_TASK_MAX > 0)
-#if (OS_STATUS_EXTENDED == CFG_STATUS)
-#define OS_START_SEC_VAR_CLONE_PTR
-#include "Os_MemMap.h"
-static const Os_EventMaskRefType* Os_TaskEventAccessMask;
-#define OS_STOP_SEC_VAR_CLONE_PTR
-#include "Os_MemMap.h"
-#endif
-/*=======[E X T E R N A L   D A T A]==========================================*/
-
-/*=======[E X T E R N A L   F U N C T I O N   D E C L A R A T I O N S]========*/
-
-/*=======[I N T E R N A L   D A T A]==========================================*/
-
-/*=======[I N T E R N A L   F U N C T I O N   D E C L A R A T I O N S]========*/
-
-/*=======[F U N C T I O N   I M P L E M E N T A T I O N S]====================*/
-#define OS_START_SEC_CODE
-#include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <Init the Event control block>
- * Service ID           <None>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Non Reentrant>
- * param-eventId[in]    <Event control block id>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * CallByAPI            <Os_InitSystem>
- * REQ ID               <None>
+/**
+ * @brief           Performs bitwise comparison of event masks
+ * @param[in]       eventMask: Event mask to check
+ * @param[in]       mask: Reference mask for comparison
+ * @return          StatusType
+ * @retval          E_OK: If eventMask is contained in mask
+ * @retval          E_OS_ACCESS: If eventMask contains bits not in mask
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
  */
-/******************************************************************************/
-void Os_InitEvent(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
-{
-    Os_TaskType i;
-    Os_CfgExtendTaskMax = Os_CfgExtendTaskMax_Inf[Os_SCB.sysCore];
+OS_LOCAL_INLINE OS_ALWAYS_INLINE StatusType Os_EventBitCompare(EventMaskType eventMask, EventMaskType mask);
 
-    for (i = 0U; i < CFG_EXTENDED_TASK_MAX; i++)
-    {
-        if (i >= Os_CfgExtendTaskMax)
-        {
-            break;
-        }
-        Os_ECB[i].eventSetEvent        = 0U;
-        Os_ECB[i].eventWaitEvent       = 0U;
-        Os_ECB[i].eventIsWaitAllEvents = FALSE;
-
-#if ((TRUE == CFG_EVENT_RESPONSE_TIME_MONITOR) || (TRUE == CFG_EVENT_RESPONSE_RATE_MONITOR))
-        Os_InitMonitorEvent(i);
-#endif
-    }
+/**
+ * @brief           Performs safety checks for GetEvent function
+ * @param[in]       curCoreId: Current core ID
+ * @param[in]       taskId: Task ID to check
+ * @return          StatusType
+ * @retval          E_OK: All checks pass
+ * @retval          E_OS_CORE: Task belongs to another core
+ * @retval          E_OS_ACCESS: Task is not an extended task
+ * @retval          E_OS_STATE: Task is suspended
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL_INLINE OS_ALWAYS_INLINE StatusType Os_GetEventSafetyCheck(Os_CoreIdType curCoreId, TaskType taskId);
 
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
-    /* PRQA S 0310, 0311 ++ */ /* VL_Os_0310, VL_Os_0311 */
-    Os_TaskEventAccessMask = (const Os_EventMaskRefType*)((void**)Os_TaskEventAccessMask_Inf[Os_SCB.sysCore]);
-    /* PRQA S 0310, 0311 -- */
+/**
+ * @brief           Performs safety checks for WaitEvent function
+ * @param[in]       pScb: Pointer to system control block
+ * @param[in]       mask: Event mask to wait for
+ * @return          StatusType
+ * @retval          E_OK: All checks pass
+ * @retval          E_OS_CALLEVEL: Not called from task level
+ * @retval          E_OS_ACCESS: Task is not an extended task
+ * @retval          E_OS_RESOURCE: Task occupies resources
+ * @retval          E_OS_SPINLOCK: Task occupies spinlocks
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL_INLINE OS_ALWAYS_INLINE StatusType Os_WaitEventSafetyCheck(const Os_SCBType *pScb, EventMaskType mask);
+
+/**
+ * @brief           Validates parameters for GetEvent function
+ * @param[in]       taskId: Task ID to check
+ * @param[in]       event: Pointer where to store events
+ * @return          StatusType
+ * @retval          E_OK: All parameters valid
+ * @retval          E_OS_ID: Invalid task ID
+ * @retval          E_OS_ILLEGAL_ADDRESS: Null event pointer
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL_INLINE OS_ALWAYS_INLINE StatusType Os_GetEventParamCheck(TaskType taskId, const Os_EventMaskType *event);
+
+/**
+ * @brief           Performs safety checks for ClearEvent function
+ * @param[in]       pScb: Pointer to system control block
+ * @param[in]       mask: Event mask to clear
+ * @return          StatusType
+ * @retval          E_OK: All checks pass
+ * @retval          E_OS_CALLEVEL: Not called from task level
+ * @retval          E_OS_ACCESS: Task is not an extended task
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL_INLINE OS_ALWAYS_INLINE StatusType Os_ClearEventSafetyCheck(const Os_SCBType *pScb, EventMaskType mask);
+
+/**
+ * @brief           Performs safety checks for SetEvent function
+ * @param[in]       taskId: Task ID to set events for
+ * @return          StatusType
+ * @retval          E_OK: All checks pass
+ * @retval          E_OS_ACCESS: Task is not an extended task
+ * @retval          E_OS_STATE: Task is suspended
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL_INLINE OS_ALWAYS_INLINE StatusType Os_SetEventSafetyCheck(TaskType taskId, EventMaskType mask);
 #endif
-}
-#define OS_STOP_SEC_CODE
-#include "Os_MemMap.h"
 
-#define OS_START_SEC_CODE
-#include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <Set the task status to ready and prepare for scheduling.>
- * Service ID   :       <None>
- * Sync/Async   :       <Synchronous>
- * Reentrancy           <Reentrant>
- * @param[in]           <TaskID>
- * @param[out]          <None>
- * @param[in/out]       <None>
- * @return              <None>
- * PreCondition         <None>
- * CallByAPI            <Os_SetEvent>
- * REQ ID               <None>
- */
-/******************************************************************************/
-static void Os_EventTaskDispatch(TaskType TaskID) /* PRQA S 3450 */ /* VL_Os_3450 */
-{
-    Os_TCB[TaskID].taskState = TASK_STATE_READY;
-
-    Os_ReadyQueueInsert(TaskID, OS_LEVEL_TASK, Os_TCB[TaskID].taskRunPrio);
-
-    if (Os_TCB[TaskID].taskRunPrio > Os_SCB.sysHighPrio)
-    {
-        Os_SCB.sysHighTaskID = TaskID;
-        Os_SCB.sysHighPrio   = Os_TCB[TaskID].taskRunPrio;
-
-#if (CFG_SCHED_POLICY != OS_PREEMPTIVE_NON)
-        if (Os_SCB.sysDispatchLocker == 0u)
-        {
-            OS_START_DISPATCH(); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
-            Os_Dispatch(); /* PRQA S 1290, 3138 */       /* VL_Os_1290, VL_Os_PlatformDef */
-        }
-#endif
-    }
-}
-#define OS_STOP_SEC_CODE
-#include "Os_MemMap.h"
-
-#define OS_START_SEC_CODE
-#include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <Bitwise comparison.>
- * Service ID   :       <None>
- * Sync/Async   :       <Synchronous>
- * Reentrancy           <StatusType>
- * @param[in]           <Mask>
- * @param[out]          <None>
- * @param[in/out]       <None>
- * @return              <StatusType>
- * PreCondition         <None>
- * CallByAPI            <WaitEvent or ClearEvent>
- * REQ ID               <None>
- */
-/******************************************************************************/
-static inline StatusType Os_EventBitCompare(EventMaskType EventMask, EventMaskType Mask)
-{
-    StatusType err = E_OK;
-
-    if (EventMask != (EventMask & Mask))
-    {
-        err = E_OS_ACCESS;
-    }
-
-    return err;
-}
-#define OS_STOP_SEC_CODE
-#include "Os_MemMap.h"
-
-#define OS_START_SEC_CODE
-#include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <The service may be called from an interrupt service routine and
- *                       from the task level, but not from hook routines.
- *                       The events of task <TaskID> are set according to the event
- *                       mask <Mask>. Calling SetEvent causes the task <TaskID> to
- *                       be transferred to the ready state, if it was waiting for at least
- *                       one of the events specified in <Mask>>
- * Service ID           <0xec>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * param-TaskID[in]     <Reference to the task for which one or several events are to be set.>
- * param-Mask[in]       <Mask of the events to be set>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <StatusType>
- * PreCondition         <None>
- * CallByAPI            <None>
- * REQ ID               <None>
- */
-/******************************************************************************/
-/* PRQA S 6030, 6070, 3006 ++ */ /* VL_MTR_Os_STMIF, VL_MTR_Os_STCAL, VL_Os_3006 */
-StatusType SetEvent(TaskType TaskID, EventMaskType Mask)
-/* PRQA S 6030, 6070, 3006 -- */
-{
-    /* PRQA S 2742, 2880, 3138, 2741 ++ */ /* VL_Os_PlatformDef */
-    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
-    OS_ENTER_KERNEL();
-    /* PRQA S 1006 -- */
-    /* PRQA S 2742, 2880, 3138, 2741 -- */
-
-    StatusType err = E_OK;
-
-#if (TRUE == CFG_TRACE_ENABLE)
-    Os_TraceServiceEnter(OSServiceId_SetEvent);
-#endif /* TRUE == CFG_TRACE_ENABLE */
-
-#if (OS_STATUS_EXTENDED == CFG_STATUS)
-    /* PRQA S 3432 ++ */ /* VL_Os_3432 */
-    if (CHECK_ID_INVALID(TaskID, Os_CfgTaskMax_Inf))
-    /* PRQA S 3432 -- */
-    {
-        err = E_OS_ID;
-    }
-    else if (OS_EVENT_PERMISSION_CHECKING(Mask, /* PRQA S 2986 */ /* VL_Os_2986 */
-        *Os_TaskEventAccessMask_Inf[Os_GetObjCoreId(TaskID)][Os_GetObjLocalId(TaskID)]) != E_OK)
-    {
-        /* Task access EVENT permission check */
-        err = E_OS_ACCESS;
-    }
-    else
-#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
-
-#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
-        if (Os_WrongContext(OS_CONTEXT_SET_EVENT) != TRUE)
-    {
-        err = E_OS_CALLEVEL;
-    }
-    else if (Os_IgnoreService() != TRUE)
-    {
-        err = E_OS_DISABLEDINT;
-    }
-    else if (Os_CheckObjAcs(OBJECT_TASK, TaskID) != TRUE)
-    {
-        err = E_OS_ACCESS;
-    }
-    else
-#endif /* TRUE == CFG_SERVICE_PROTECTION_ENABLE */
-    {
 #if (OS_AUTOSAR_CORES > 1)
-        Os_CoreIdType coreId = Os_GetObjCoreId(TaskID);
-        if (coreId != Os_SCB.sysCore)
-        {
-            RpcInputType rpcData = {
-                .sync         = RPC_SYNC,
-                .remoteCoreId = coreId,
-                .serviceId    = OSServiceId_SetEvent,
-                .srvPara0     = (uint32)TaskID,
-                /* PRQA S 3120 ++ */ /* VL_QAC_MagicNum */
-                .srvPara1 = (uint32)(Mask & 0xFFFFFFFFu),
-                /* PRQA S 3120 -- */
-                .srvPara2 = (uint32)((Mask >> 32u)),
-            };
-            err = Os_RpcCallService(&rpcData);
-        }
-        else
-#endif /* OS_AUTOSAR_CORES > 1 */
-        {
-            err = Os_SetEvent(TaskID, Mask);
-        }
-    }
-
-#if (CFG_ERRORHOOK == TRUE)
-    if (err != E_OK)
-    {
-        Os_TraceErrorHook(OSError_Save_SetEvent(TaskID, Mask), OSServiceId_SetEvent, err);
-    }
+/**
+ * @brief           RPC action handler for SetEvent
+ * @param[in]       inPara: Parameter array containing task ID and event masks
+ * @return          StatusType
+ * @retval          Result of Os_SetEvent operation
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL StatusType Os_RpcAction_SetEvent(uint32 *inPara);
 #endif
 
-#if (TRUE == CFG_TRACE_ENABLE)
-    Os_TraceServiceExit(OSServiceId_SetEvent);
-#endif /* TRUE == CFG_TRACE_ENABLE */
+/**
+ * @brief           Implements WaitEvent functionality
+ * @param[in]       mask: Event mask to wait for
+ * @param[in]       pScb: Pointer to system control block
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_WaitEvent(EventMaskType mask, Os_SCBType *pScb);
 
-    OS_EXIT_KERNEL(); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
+/**
+ * @brief           Implements WaitAllEvents functionality
+ * @param[in]       mask: Event mask to wait for (all events)
+ * @param[in]       pScb: Pointer to system control block
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_WaitAllEvents(EventMaskType mask, Os_SCBType *pScb);
+#endif
+
+/* ========================================== external function definitions ========================================= */
+#if (CFG_EXTENDED_TASK_MAX > 0)
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * Init the Event control block
+ */
+/* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
+void Os_InitEvent(void)
+/* PRQA S 1532 -- */
+{
+    Os_CoreIdType coreId = Os_GetCoreIdLocal();
+    Os_TaskType idStartRange = Os_TaskIdRange[coreId].ExtendTask.Start;
+    Os_TaskType idEndRange = Os_TaskIdRange[coreId].ExtendTask.End;
+
+    if (INVALID_TASK != idStartRange) /* PRQA S 1881, 1461*/ /* VL_Os_1881, VL_Os_1461*/
+    {
+        for (uint16 i = (uint16)idStartRange; i < (uint16)idEndRange; i++)
+        {
+            if (Os_ECB[i] != NULL_PTR)
+            {
+                /* PRQA S 4342 ++ */ /* VL_Os_4342 */
+                Os_ClearECB((Os_TaskType)i);
+                /* PRQA S 4342 -- */
+            }
+
+#if ((TRUE == CFG_EVENT_RESPONSE_TIME_MONITOR) || (TRUE == CFG_EVENT_RESPONSE_RATE_MONITOR)) /* PRQA S 3332 */ /* VL_Os_3332 */
+            /* PRQA S 4342 ++ */ /* VL_Os_4342 */
+            Os_InitMonitorEvent((Os_TaskType)i);
+            /* PRQA S 4342 -- */
+#endif
+        }
+    }
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * Bitwise comparison.
+ */
+OS_LOCAL_INLINE OS_ALWAYS_INLINE StatusType Os_EventBitCompare(EventMaskType eventMask, EventMaskType mask)
+{
+    StatusType err = E_OK;
+
+    if (eventMask != (eventMask & mask))
+    {
+        err = E_OS_ACCESS;
+    }
+
     return err;
 }
 #define OS_STOP_SEC_CODE
@@ -282,346 +237,83 @@ StatusType SetEvent(TaskType TaskID, EventMaskType Mask)
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <Asynchronous version of the SetEvent() function.>
- * Service ID           <0xec>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * param-TaskID[in]     <Reference to the task for which one or several events are to be set.>
- * param-Mask[in]       <Mask of the events to be set>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <StatusType>
- * PreCondition         <None>
- * CallByAPI            <None>
- * REQ ID               <None>
+/**
+ * Safety check when the GetEvent function is called.
  */
-/******************************************************************************/
-/* PRQA S 6030, 6070, 3006 ++ */ /* VL_MTR_Os_STMIF, VL_MTR_Os_STCAL, VL_Os_3006 */
-StatusType SetEventAsyn(TaskType TaskID, EventMaskType Mask)
-/* PRQA S 6030, 6070, 3006 -- */
+OS_LOCAL_INLINE OS_ALWAYS_INLINE StatusType Os_GetEventSafetyCheck(Os_CoreIdType curCoreId, TaskType taskId)
 {
-    /* PRQA S 2742, 2880, 3138, 2741 ++ */ /* VL_Os_PlatformDef */
-    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
-    OS_ENTER_KERNEL();
-    /* PRQA S 1006 -- */
-    /* PRQA S 2742, 2880, 3138, 2741 -- */
-
     StatusType err = E_OK;
 
-#if (TRUE == CFG_TRACE_ENABLE)
-    Os_TraceServiceEnter(OSServiceId_SetEventAsyn);
-#endif /* TRUE == CFG_TRACE_ENABLE */
-
-#if (OS_STATUS_EXTENDED == CFG_STATUS)
-    /* PRQA S 3432 ++ */ /* VL_Os_3432 */
-    if (CHECK_ID_INVALID(TaskID, Os_CfgTaskMax_Inf))
-    /* PRQA S 3432 -- */
-    {
-        err = E_OS_ID;
-    }
-    else if (OS_EVENT_PERMISSION_CHECKING(Mask, /* PRQA S 2986 */ /* VL_Os_2986 */
-        *Os_TaskEventAccessMask_Inf[Os_GetObjCoreId(TaskID)][Os_GetObjLocalId(TaskID)]) != E_OK)
-    {
-        /* Task access EVENT permission check */
-        err = E_OS_ACCESS;
-    }
-    else
-#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
-
-#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
-        if (Os_WrongContext(OS_CONTEXT_SET_EVENT) != TRUE)
-    {
-        err = E_OS_CALLEVEL;
-    }
-    else if (Os_IgnoreService() != TRUE)
-    {
-        err = E_OS_DISABLEDINT;
-    }
-    else if (Os_CheckObjAcs(OBJECT_TASK, TaskID) != TRUE)
-    {
-        err = E_OS_ACCESS;
-    }
-    else
-#endif /* TRUE == CFG_SERVICE_PROTECTION_ENABLE */
-    {
 #if (OS_AUTOSAR_CORES > 1)
-        Os_CoreIdType coreId = Os_GetObjCoreId(TaskID);
-        if (coreId != Os_SCB.sysCore)
+    if (curCoreId != OS_TASK_GET_COREID(taskId))
+    {
+        err = E_OS_CORE;
+    }
+    else
+#endif
+    {
+/* Extended Status */
+#if (OS_STATUS_EXTENDED == CFG_STATUS)
+        if (!Os_CheckExternalTaskId(taskId, curCoreId))
         {
-            RpcInputType rpcData = {
-                .sync         = RPC_ASYNC,
-                .remoteCoreId = coreId,
-                .serviceId    = OSServiceId_SetEvent,
-                .srvPara0     = (uint32)TaskID,
-                /* PRQA S 3120 ++ */ /* VL_QAC_MagicNum */
-                .srvPara1 = (uint32)(Mask & 0xFFFFFFFFu),
-                /* PRQA S 3120 -- */
-                .srvPara2 = (uint32)((Mask >> 32u)),
-            };
-            err = Os_RpcCallService(&rpcData);
+            err = E_OS_ACCESS;
         }
         else
-#endif /* OS_AUTOSAR_CORES > 1 */
         {
-            err = Os_SetEvent(TaskID, Mask);
+            if (OS_TASK_STATE_SUSPENDED == Os_TCB[taskId]->TaskState)
+            {
+                err = E_OS_STATE;
+            }
         }
-    }
-
-#if (CFG_ERRORHOOK == TRUE)
-    if (err != E_OK)
-    {
-        Os_TraceErrorHook(OSError_Save_SetEvent(TaskID, Mask), OSServiceId_SetEvent, err);
-    }
 #endif
+    }
 
-#if (TRUE == CFG_TRACE_ENABLE)
-    Os_TraceServiceExit(OSServiceId_SetEventAsyn);
-#endif /* TRUE == CFG_TRACE_ENABLE */
-
-    OS_EXIT_KERNEL(); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
+    UNUSED_PARAMETER(taskId);
+    UNUSED_PARAMETER(curCoreId);
     return err;
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
 
+#if (OS_STATUS_EXTENDED == CFG_STATUS)
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <The state of the calling task is set to waiting, unless
- *                       at least one of the events specified in <Mask> has
- *                       already been set.
- *                       Particularities: This call enforces rescheduling,
- *                       if the wait condition occurs. If rescheduling takes
- *                       place, the internal resource of the task is released
- *                       while the task is in the waiting state.
- *                       This service must only be called from the extended task
- *                       owning the event.
- *                       The system service ClearEvent is restricted to extended
- *                       taskswhich own the event.>
- * Service ID           <0xef>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * param-Mask[in]       <Mask of the events to be set>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <StatusType>
- * PreCondition         <None>
- * CallByAPI            <None>
- * REQ ID               <None>
+/**
+ * Safety check when the WaitEvent function is called.
  */
-/******************************************************************************/
-/* PRQA S 6010, 6030, 6070 ++ */ /* VL_MTR_Os_STCYC, VL_MTR_Os_STMIF, VL_MTR_Os_STCAL */
-/* PRQA S 3006, 1532 ++ */       /* VL_Os_3006, VL_QAC_OneFunRef */
-StatusType WaitEvent(EventMaskType Mask)
-/* PRQA S 3006, 1532 -- */
-/* PRQA S 6010, 6030, 6070 -- */
+OS_LOCAL_INLINE OS_ALWAYS_INLINE StatusType Os_WaitEventSafetyCheck(const Os_SCBType *pScb, EventMaskType mask)
 {
-    /* PRQA S 2742, 2880, 3138, 2741 ++ */ /* VL_Os_PlatformDef */
-    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
-    OS_ENTER_KERNEL();
-    /* PRQA S 1006 -- */
-    /* PRQA S 2742, 2880, 3138, 2741 -- */
-
     StatusType err = E_OK;
+    Os_TaskType runningTaskId = pScb->SysRunningTaskId;
 
-#if (TRUE == CFG_TRACE_ENABLE)
-    Os_TraceServiceEnter(OSServiceId_WaitEvent);
-#endif /* TRUE == CFG_TRACE_ENABLE */
-
-#if (OS_STATUS_EXTENDED == CFG_STATUS)
-    if (OS_LEVEL_ISR2 == Os_SCB.sysOsLevel)
+    if (pScb->SysOsLevel != OS_LEVEL_TASK)
     {
         err = E_OS_CALLEVEL;
     }
     else
-#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
-#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
-        if (Os_WrongContext(OS_CONTEXT_WAIT_EVENT) != TRUE)
     {
-        err = E_OS_CALLEVEL;
-    }
-    else if (Os_IgnoreService() != TRUE)
-    {
-        err = E_OS_DISABLEDINT;
-    }
-    else
-#endif /* TRUE == CFG_SERVICE_PROTECTION_ENABLE */
-    {
-#if (OS_STATUS_EXTENDED == CFG_STATUS)
-#if ((OS_NOSC == CFG_SC) || (OS_SC1 == CFG_SC) || (OS_SC2 == CFG_SC))
-        if (Os_SCB.sysOsLevel != OS_LEVEL_TASK)
+        if (!Os_CheckExternalTaskId(runningTaskId, pScb->SysCore))
         {
-            err = E_OS_CALLEVEL;
+            err = E_OS_ACCESS;
         }
-        else
-#endif /* OS_NOSC == CFG_SC || OS_SC1 == CFG_SC || OS_SC2 == CFG_SC */
-        {
-            if (Os_SCB.sysRunningTaskID >= Os_CfgExtendTaskMax)
-            {
-                err = E_OS_ACCESS;
-            }
-
 #if (CFG_STD_RESOURCE_MAX > 0U)
-            else if (Os_TCB[Os_SCB.sysRunningTaskID].taskResCount > 0u)
-            {
-                err = E_OS_RESOURCE;
-            }
-#endif /* CFG_STD_RESOURCE_MAX > 0U */
+        else if (Os_TCB[runningTaskId]->TaskResCount > 0u)
+        {
+            err = E_OS_RESOURCE;
+        }
+#endif
 #if (CFG_SPINLOCK_MAX > 0U)
-            else if (Os_SpinlockSafetyCheck() != E_OK)
-            {
-                err = E_OS_SPINLOCK;
-            }
-#endif
-            else
-            {
-                /* Task access EVENT permission check */
-                err = OS_EVENT_PERMISSION_CHECKING(Mask, *Os_TaskEventAccessMask[Os_SCB.sysRunningTaskID]);
-            }
-        }
-#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
-
-        if ((StatusType)E_OK == err)
+        else if (Os_SpinlockSafetyCheck(pScb->SysRunningTaskId) != E_OK)
         {
-            err = Os_WaitEvent(Mask);
+            err = E_OS_SPINLOCK;
         }
-    }
-
-#if (CFG_ERRORHOOK == TRUE)
-    if (err != E_OK)
-    {
-        Os_TraceErrorHook(OSError_Save_WaitEvent(Mask), OSServiceId_WaitEvent, err);
-    }
 #endif
-
-#if (TRUE == CFG_TRACE_ENABLE)
-    Os_TraceServiceExit(OSServiceId_WaitEvent);
-#endif /* TRUE == CFG_TRACE_ENABLE */
-
-    OS_EXIT_KERNEL(); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
-    return err;
-}
-#define OS_STOP_SEC_CODE
-#include "Os_MemMap.h"
-
-#define OS_START_SEC_CODE
-#include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <The state of the calling task is set to waiting, must
- *                       all the events specified in <Mask> has already been set.
- *                       Particularities: This call enforces rescheduling,
- *                       if the wait condition occurs. If rescheduling takes
- *                       place, the internal resource of the task is released
- *                       while the task is in the waiting state.
- *                       This service must only be called from the extended task
- *                       owning the event.
- *                       The system service ClearEvent is restricted to extended
- *                       taskswhich own the event.>
- * Service ID           <0xD7>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * param-Mask[in]       <Mask of the events to be set>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <StatusType>
- * PreCondition         <None>
- * CallByAPI            <None>
- * REQ ID               <None>
- */
-/******************************************************************************/
-/* PRQA S 6010, 6030, 6070 ++ */ /* VL_MTR_Os_STCYC, VL_MTR_Os_STMIF, VL_MTR_Os_STCAL */
-/* PRQA S 3006, 1532 ++ */       /* VL_Os_3006, VL_QAC_OneFunRef */
-StatusType WaitAllEvents(EventMaskType Mask)
-/* PRQA S 3006, 1532 -- */
-/* PRQA S 6010, 6030, 6070 -- */
-{
-    /* PRQA S 2742, 2880, 3138, 2741 ++ */ /* VL_Os_PlatformDef */
-    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
-    OS_ENTER_KERNEL();
-    /* PRQA S 1006 -- */
-    /* PRQA S 2742, 2880, 3138, 2741 -- */
-
-    StatusType err = E_OK;
-
-#if (TRUE == CFG_TRACE_ENABLE)
-    Os_TraceServiceEnter(OSServiceId_WaitAllEvents);
-#endif /* TRUE == CFG_TRACE_ENABLE */
-
-#if (OS_STATUS_EXTENDED == CFG_STATUS)
-    if (OS_LEVEL_ISR2 == Os_SCB.sysOsLevel)
-    {
-        err = E_OS_CALLEVEL;
-    }
-    else
-#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
-#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
-        if (Os_WrongContext(OS_CONTEXT_WAIT_EVENT) != TRUE)
-    {
-        err = E_OS_CALLEVEL;
-    }
-    else if (Os_IgnoreService() != TRUE)
-    {
-        err = E_OS_DISABLEDINT;
-    }
-    else
-#endif /* TRUE == CFG_SERVICE_PROTECTION_ENABLE */
-    {
-#if (OS_STATUS_EXTENDED == CFG_STATUS)
-#if ((OS_NOSC == CFG_SC) || (OS_SC1 == CFG_SC) || (OS_SC2 == CFG_SC))
-        if (Os_SCB.sysOsLevel != OS_LEVEL_TASK)
-        {
-            err = E_OS_CALLEVEL;
-        }
         else
-#endif /* OS_NOSC == CFG_SC || OS_SC1 == CFG_SC || OS_SC2 == CFG_SC */
         {
-            if (Os_SCB.sysRunningTaskID >= Os_CfgExtendTaskMax)
-            {
-                err = E_OS_ACCESS;
-            }
-
-#if (CFG_STD_RESOURCE_MAX > 0U)
-            else if (Os_TCB[Os_SCB.sysRunningTaskID].taskResCount > 0u)
-            {
-                err = E_OS_RESOURCE;
-            }
-#endif /* CFG_STD_RESOURCE_MAX > 0U */
-#if (CFG_SPINLOCK_MAX > 0U)
-            else if (Os_SpinlockSafetyCheck() != E_OK)
-            {
-                err = E_OS_SPINLOCK;
-            }
-#endif
-            else
-            {
-                /* Task access EVENT permission check */
-                err = OS_EVENT_PERMISSION_CHECKING(Mask, *Os_TaskEventAccessMask[Os_SCB.sysRunningTaskID]);
-            }
-        }
-#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
-
-        if ((StatusType)E_OK == err)
-        {
-            err = Os_WaitAllEvents(Mask);
+            /* Task access EVENT permission check */
+            err = Os_EventPermissionCheck(mask, Os_TaskCfg[runningTaskId].EventAccessMask);
         }
     }
-
-#if (CFG_ERRORHOOK == TRUE)
-    if (err != E_OK)
-    {
-        Os_TraceErrorHook(OSError_Save_WaitEvent(Mask), OSServiceId_WaitAllEvents, err);
-    }
-#endif
-
-#if (TRUE == CFG_TRACE_ENABLE)
-    Os_TraceServiceExit(OSServiceId_WaitAllEvents);
-#endif /* TRUE == CFG_TRACE_ENABLE */
-
-    OS_EXIT_KERNEL(); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
     return err;
 }
 #define OS_STOP_SEC_CODE
@@ -629,136 +321,22 @@ StatusType WaitAllEvents(EventMaskType Mask)
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <This service returns the current state of all event
- *                       bits of the task
- *                       <TaskID>, not the events that the task is waiting for.
- *                       The service may be called from interrupt service
- *                       routines, task level and some hook routines
- *                       (see Figure 12-1).
- *                       The current status of the event mask of task <TaskID>
- *                       is copied to <Event>.
- *                       The referenced task must be an extended task.>
- * Service ID           <0xee>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * param-TaskID[in]     <Reference to the task for which one or several events
- *                       are to be set.>
- * Param-Event[out]     <Reference to the memory of the return data>
- * Param-Name[in/out]   <None>
- * return               <StatusType>
- * PreCondition         <None>
- * CallByAPI            <None>
- * REQ ID               <None>
+/**
+ * Check the validity of the arguments.
  */
-/******************************************************************************/
-/* PRQA S 6010, 6030, 6070 ++ */ /* VL_MTR_Os_STCYC, VL_MTR_Os_STMIF, VL_MTR_Os_STCAL */
-/* PRQA S 3006, 1532 ++ */       /* VL_Os_3006, VL_QAC_OneFunRef */
-StatusType GetEvent(TaskType TaskID, EventMaskRefType Event)
-/* PRQA S 3006, 1532 -- */
-/* PRQA S 6010, 6030, 6070 -- */
+OS_LOCAL_INLINE OS_ALWAYS_INLINE StatusType Os_GetEventParamCheck(TaskType taskId, const Os_EventMaskType *event)
 {
-    /* PRQA S 2742, 2880, 3138, 2741 ++ */ /* VL_Os_PlatformDef */
-    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
-    OS_ENTER_KERNEL();
-    /* PRQA S 1006 -- */
-    /* PRQA S 2742, 2880, 3138, 2741 -- */
     StatusType err = E_OK;
 
-#if (TRUE == CFG_TRACE_ENABLE)
-    Os_TraceServiceEnter(OSServiceId_GetEvent);
-#endif /* TRUE == CFG_TRACE_ENABLE */
-
-    OS_ARCH_DECLARE_CRITICAL();
-
-#if (OS_STATUS_EXTENDED == CFG_STATUS)
-    /* PRQA S 3432 ++ */ /* VL_Os_3432 */
-    if (CHECK_ID_INVALID(TaskID, Os_CfgTaskMax_Inf))
-    /* PRQA S 3432 -- */
+    if (Os_ObjectIDCheck((ObjectType)taskId, (uint8)OS_OBJECT_TASK) != TRUE)
     {
         err = E_OS_ID;
     }
-    else if (NULL_PTR == Event)
-    {
-        err = E_OS_PARAM_POINTER;
-    }
-    else
-#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
-#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
-        if (Os_WrongContext(OS_CONTEXT_GET_EVENT) != TRUE)
-    {
-        err = E_OS_CALLEVEL;
-    }
-    /* PRQA S 0306 ++ */ /* VL_Os_0306 */
-    else if (Os_AddressWritable((uint32)Event) != TRUE)
-    /* PRQA S 0306 -- */
+    else if (NULL_PTR == event) /* PRQA S 2004 */ /* VL_Os_2004 */
     {
         err = E_OS_ILLEGAL_ADDRESS;
     }
-    else if (Os_IgnoreService() != TRUE)
-    {
-        err = E_OS_DISABLEDINT;
-    }
-    else
-#endif /* TRUE == CFG_SERVICE_PROTECTION_ENABLE */
-    {
-#if (OS_AUTOSAR_CORES > 1)
-        if (Os_SCB.sysCore != Os_GetObjCoreId(TaskID))
-        {
-            err = E_OS_CORE;
-        }
-        else
-#endif /* OS_AUTOSAR_CORES > 1 */
-        {
-#if (OS_AUTOSAR_CORES > 1)
-            TaskID = Os_GetObjLocalId(TaskID); /* PRQA S 1338 */ /* VL_Os_1338 */
-#endif
 
-/* Extended Status */
-#if (OS_STATUS_EXTENDED == CFG_STATUS)
-            if (TaskID >= Os_CfgExtendTaskMax)
-            {
-                err = E_OS_ACCESS;
-            }
-            else
-            {
-                OS_ARCH_ENTRY_CRITICAL();
-                if (TASK_STATE_SUSPENDED == Os_TCB[TaskID].taskState)
-                {
-                    OS_ARCH_EXIT_CRITICAL();
-                    err = E_OS_STATE;
-                }
-
-                if ((StatusType)E_OK == err)
-                {
-                    *Event = Os_ECB[TaskID].eventSetEvent;
-                    OS_ARCH_EXIT_CRITICAL();
-                }
-            }
-#else
-            if ((StatusType)E_OK == err)
-            {
-                OS_ARCH_ENTRY_CRITICAL();
-                *Event = Os_ECB[TaskID].eventSetEvent;
-                OS_ARCH_EXIT_CRITICAL();
-            }
-#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
-        }
-    }
-
-#if (CFG_ERRORHOOK == TRUE)
-    if (err != E_OK)
-    {
-        Os_TraceErrorHook(OSError_Save_GetEvent(TaskID, Event), OSServiceId_GetEvent, err);
-    }
-#endif
-
-#if (TRUE == CFG_TRACE_ENABLE)
-    Os_TraceServiceExit(OSServiceId_GetEvent);
-#endif /* TRUE == CFG_TRACE_ENABLE */
-
-    OS_EXIT_KERNEL(); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
     return err;
 }
 #define OS_STOP_SEC_CODE
@@ -766,224 +344,737 @@ StatusType GetEvent(TaskType TaskID, EventMaskRefType Event)
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <The events of the extended task calling ClearEvent are cleared
- *                       according to the event mask <Mask>.
- *                       The system service ClearEvent is restricted to extended tasks which own the event.>
- * Service ID           <0xed>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * param-Mask[in]       <Mask of the events to be set>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <StatusType>
- * PreCondition         <None>
- * CallByAPI            <None>
- * REQ ID               <None>
+/**
+ * Safety check when the ClearEvent function is called.
  */
-/******************************************************************************/
-/* PRQA S 6070, 3006, 1532 ++ */ /* VL_MTR_Os_STCAL, VL_Os_3006, VL_QAC_OneFunRef */
-StatusType ClearEvent(EventMaskType Mask)
-/* PRQA S 6070, 3006, 1532 -- */
+OS_LOCAL_INLINE OS_ALWAYS_INLINE StatusType Os_ClearEventSafetyCheck(const Os_SCBType *pScb, EventMaskType mask)
 {
-    /* PRQA S 2741, 2742, 2880, 3138 ++ */ /* VL_Os_PlatformDef */
-    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
-    OS_ENTER_KERNEL();
-    /* PRQA S 1006 -- */
-    /* PRQA S 2741, 2742, 2880, 3138 -- */
+    StatusType err = E_OK;
+    Os_TaskType runningTaskId = pScb->SysRunningTaskId;
+
+    if (pScb->SysOsLevel != OS_LEVEL_TASK)
+    {
+        err = E_OS_CALLEVEL;
+    }
+    else
+    {
+        if (!Os_CheckExternalTaskId(runningTaskId, pScb->SysCore))
+        {
+            err = E_OS_ACCESS;
+        }
+        else
+        {
+            /* Task access EVENT permission check */
+            err = Os_EventPermissionCheck(mask, Os_TaskCfg[runningTaskId].EventAccessMask);
+        }
+    }
+
+    return err;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * Safety check when the SetEvent function is called.
+ */
+OS_LOCAL_INLINE OS_ALWAYS_INLINE StatusType Os_SetEventSafetyCheck(TaskType taskId, EventMaskType mask)
+{
     StatusType err = E_OK;
 
-#if (TRUE == CFG_TRACE_ENABLE)
-    Os_TraceServiceEnter(OSServiceId_ClearEvent);
-#endif /* TRUE == CFG_TRACE_ENABLE */
-
-    OS_ARCH_DECLARE_CRITICAL();
-
-#if (OS_STATUS_EXTENDED == CFG_STATUS)
-    if (OS_LEVEL_ISR2 == Os_SCB.sysOsLevel)
-    {
-        err = E_OS_CALLEVEL;
-    }
-    else
-#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
-#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
-        if (Os_WrongContext(OS_CONTEXT_CLEAR_EVENT) != TRUE)
-    {
-        err = E_OS_CALLEVEL;
-    }
-    else if (Os_IgnoreService() != TRUE)
-    {
-        err = E_OS_DISABLEDINT;
-    }
-    else
-#endif /* TRUE == CFG_SERVICE_PROTECTION_ENABLE */
-    {
-#if (OS_STATUS_EXTENDED == CFG_STATUS)
-#if ((OS_NOSC == CFG_SC) || (OS_SC1 == CFG_SC) || (OS_SC2 == CFG_SC))
-        if (Os_SCB.sysOsLevel != OS_LEVEL_TASK)
-        {
-            err = E_OS_CALLEVEL;
-        }
-        else
-#endif /* OS_NOSC == CFG_SC || OS_SC1 == CFG_SC || OS_SC2 == CFG_SC */
-        {
-            if (Os_SCB.sysRunningTaskID >= Os_CfgExtendTaskMax)
-            {
-                err = E_OS_ACCESS;
-            }
-            else
-            {
-                /* Task access EVENT permission check */
-                err = OS_EVENT_PERMISSION_CHECKING(Mask, *Os_TaskEventAccessMask[Os_SCB.sysRunningTaskID]);
-            }
-        }
-#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
-
-        if ((StatusType)E_OK == err)
-        {
-            OS_ARCH_ENTRY_CRITICAL();
-#if (TRUE == CFG_EVENT_RESPONSE_TIME_MONITOR)
-            Os_MonitorEventResponseTime(Os_SCB.sysRunningTaskID, Mask);
-#endif
-#if (TRUE == CFG_EVENT_RESPONSE_RATE_MONITOR)
-            Os_MonitorEventResponseRate(Os_SCB.sysRunningTaskID, Mask);
-#endif
-
-            /* PRQA S 3442 ++ */ /* VL_Os_3442 */
-            Os_ECB[Os_SCB.sysRunningTaskID].eventSetEvent &= (~Mask);
-            /* PRQA S 3442 -- */
-            OS_ARCH_EXIT_CRITICAL();
-        }
-    }
-
-#if (CFG_ERRORHOOK == TRUE)
-    if (err != E_OK)
-    {
-        Os_TraceErrorHook(OSError_Save_ClearEvent(Mask), OSServiceId_ClearEvent, err);
-    }
-#endif
-
-#if (TRUE == CFG_TRACE_ENABLE)
-    Os_TraceServiceExit(OSServiceId_ClearEvent);
-#endif /* TRUE == CFG_TRACE_ENABLE */
-
-    OS_EXIT_KERNEL(); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
-    return err;
-}
-#define OS_STOP_SEC_CODE
-#include "Os_MemMap.h"
-
-#define OS_START_SEC_CODE
-#include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <The service may be called from an interrupt service routine and
- *                       from the task level, but not from hook routines.
- *                       The events of task <TaskID> are set according to the event
- *                       mask <Mask>. Calling SetEvent causes the task <TaskID> to
- *                       be transferred to the ready state, if it was waiting for at least
- *                       one of the events specified in <Mask>>
- * Service ID           <None>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * param-TaskID[in]     <Reference to the task for which one or several events are to be set.>
- * param-Mask[in]       <Mask of the events to be set>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <StatusType>
- * PreCondition         <None>
- * CallByAPI            <None>
- * REQ ID               <None>
- */
-/******************************************************************************/
-StatusType Os_SetEvent(TaskType TaskID, EventMaskType Mask)
-{
-    OS_ARCH_DECLARE_CRITICAL();
-    StatusType       err           = E_OK;
-    Os_EventMaskType SetEventMask  = 0U;
-    Os_EventMaskType WaitEventMask = 0U;
-
-#if (OS_AUTOSAR_CORES > 1)
-    TaskID = Os_GetObjLocalId(TaskID); /* PRQA S 1338 */ /* VL_Os_1338 */
-#endif
-
-/* Extended Status */
-#if (OS_STATUS_EXTENDED == CFG_STATUS)
-    if (TaskID >= Os_CfgExtendTaskMax)
+    if (!Os_CheckExternalTaskId(taskId, OS_TASK_GET_COREID(taskId)))
     {
         err = E_OS_ACCESS;
     }
-    else if (TASK_STATE_SUSPENDED == Os_TCB[TaskID].taskState)
+    else if (OS_TASK_STATE_SUSPENDED == Os_TCB[taskId]->TaskState)
     {
         err = E_OS_STATE;
     }
     else
     {
-        /*nothing to do*/
+        /* Task access EVENT permission check */
+        err = Os_EventPermissionCheck(mask, Os_TaskCfg[taskId].EventAccessMask);
     }
-    if ((StatusType)E_OK == err)
-#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
+
+    return err;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+#endif
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * The service may be called from an interrupt service routine and
+ *                       from the task level, but not from hook routines.
+ *                       The events of task <taskId
+ */
+#if (OS_AUTOSAR_CORES > 1)
+/* PRQA S 3673 ++ */ /* VL_QAC_3673 */
+OS_LOCAL StatusType Os_RpcAction_SetEvent(uint32 *inPara)
+/* PRQA S 3673 -- */
+{
+    Os_EventMaskType EventLow = (Os_EventMaskType)(inPara[1]);
+    /* PRQA S 3120 ++ */ /* VL_QAC_MagicNum */
+    Os_EventMaskType EventHigh = ((Os_EventMaskType)(inPara[2]) << 32u);
+    /* PRQA S 3120 -- */
+    return Os_SetEvent((TaskType)inPara[0], /* PRQA S 4342 */ /* VL_Os_4342 */
+                       (EventMaskType)(EventLow | EventHigh));
+}
+
+/* PRQA S 1505 ++ */ /* VL_Os_1505 */
+StatusType Os_RpcCall_SetEvent(
+    Os_CoreIdType ownerCore,
+    Os_RpcSyncType syncType,
+    TaskType taskId,
+    EventMaskType mask)
+/* PRQA S 1505 -- */
+{
+    StatusType err = E_OK;
+    Os_RpcInputType rpcData = {
+        .RpcSync = syncType,
+        .RemoteCoreId = ownerCore,
+        .ActionFn = Os_RpcAction_SetEvent,
+        .InPara[0] = (uint32)taskId,
+        .InPara[1] = (uint32)(mask & OS_EVENT_32_MSAK_SIZE),
+        /* PRQA S 0691, 3120 ++ */ /* VL_Os_0691, VL_QAC_MagicNum */
+        .InPara[2] = (uint32)(mask >> 32u),
+        /* PRQA S 0691, 3120 -- */
+    };/* PRQA S 0704 */ /* VL_Os_0704 */
+
+    err = Os_RpcCallService(&rpcData);
+    return err;
+}
+#endif
+
+/* PRQA S 1503,3006,6070,3408,1532,1512 ++ */ /* VL_QAC_NoUsedApi, VL_Os_3006, VL_MTR_Os_STCAL, VL_Os_3408, VL_QAC_OneFunRef, VL_Os_1512 */
+StatusType SetEvent(TaskType TaskID, EventMaskType Mask)
+/* PRQA S 1503,3006,6070,3408,1532,1512 -- */
+{
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
+    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
+    OS_HAL_ENTER_KERNEL(); /* PRQA S 1021 */ /* VL_Os_1021 */
+    /* PRQA S 1006 -- */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
+
+    StatusType err = E_OK;
+    /* PRQA S 3678 ++ */ /* VL_Os_3678 */
+    Os_SCBType *pScb = Os_GetCurrentContext();
+    /* PRQA S 3678 -- */
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 1317, 3432, 4442, 4521, 4544 ++ */ /* VL_Os_1317, VL_Os_3432, VL_Os_4442, VL_Os_4521, VL_Os_4544 */
+    OSRtiEnterApi(pScb, OSApiId_SetEvent);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_SetEvent_Start, TaskID);
+    /* PRQA S 1317, 3432, 4442, 4521, 4544 -- */
+    /* PRQA S 3138, 3141-- */
+
+#if (OS_STATUS_EXTENDED == CFG_STATUS)
+    if (Os_ObjectIDCheck((ObjectType)TaskID, (uint8)OS_OBJECT_TASK) != TRUE)
     {
-        OS_ARCH_ENTRY_CRITICAL();
+        err = E_OS_ID;
+    }
+    else
+#endif
+    {
+#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
+        Os_ServicePortParamType SprotParam = {
+            .AllowedContext = OS_SERVICEPORT_CHECK_SET_EVENT,
+            .ObjectType = OS_OBJECT_TASK,
+            .ObjectID = (Os_AppObjectId)TaskID,
+            /* PRQA S 1258 ++ */ /* VL_Os_ConstToIntegral */
+            .Address = NULL_PARA,
+            /* PRQA S 1258 -- */
+        };
+        err = Os_ServiceProtCheck(pScb, &SprotParam);
+        if (E_OK == err)
+#endif
+        {
+#if (OS_AUTOSAR_CORES > 1)
+            Os_CoreIdType ownerCore = OS_TASK_GET_COREID(TaskID);
+            if (ownerCore != Os_GetCoreIdLocal())
+            {
+                err = Os_RpcCall_SetEvent(ownerCore, OS_RPC_SYNC, TaskID, Mask);
+            }
+            else
+#endif
+            {
+                err = Os_SetEvent(TaskID, Mask);
+            }
+        }
+    }
+
+#if (CFG_ERRORHOOK == TRUE)
+    if (err != E_OK)
+    {
+        Os_TraceErrorHook(OSError_Save_SetEvent(TaskID, Mask),
+                          OSServiceId_SetEvent,
+                          err, pScb); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
+    }
+#endif
+
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 3432, 4544 ++ */ /* VL_Os_3432, VL_Os_4544 */
+    OSRtiExitApi(pScb, OSApiId_SetEvent);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_SetEvent_Return, err);
+    OS_HAL_EXIT_KERNEL();/* PRQA S 2743*/ /* VL_Os_2743*/
+    /* PRQA S 3432, 4544 -- */
+    /* PRQA S 3138, 3141 -- */
+    UNUSED_PARAMETER(pScb);
+    return err;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * Asynchronous version of the SetEvent() function.
+ */
+/* PRQA S 1503,3006,6070,3408,1512 ++ */ /* VL_QAC_NoUsedApi, VL_Os_3006, VL_MTR_Os_STCAL, VL_Os_3408, VL_Os_1512 */
+void SetEventAsyn(TaskType TaskID, EventMaskType Mask) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
+/* PRQA S 1503,3006,6070,3408,1512 -- */
+{
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
+    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
+    OS_HAL_ENTER_KERNEL(); /* PRQA S 1021 */ /* VL_Os_1021 */
+    /* PRQA S 1006 -- */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
+
+    StatusType err = E_OK;
+    /* PRQA S 3678 ++ */ /* VL_Os_3678 */
+    Os_SCBType *pScb = Os_GetCurrentContext();
+    /* PRQA S 3678 -- */
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 1317, 3432, 4442, 4521, 4544 ++ */ /* VL_Os_1317, VL_Os_3432, VL_Os_4442, VL_Os_4521, VL_Os_4544 */
+    OSRtiEnterApi(pScb, OSApiId_SetEventAsyn);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_SetEventAsyn_Start, TaskID);
+    /* PRQA S 1317, 3432, 4442, 4521, 4544 -- */
+    /* PRQA S 3138, 3141-- */
+
+#if (OS_STATUS_EXTENDED == CFG_STATUS)
+    if (Os_ObjectIDCheck((ObjectType)TaskID, (uint8)OS_OBJECT_TASK) != TRUE)
+    {
+        err = E_OS_ID;
+    }
+    else
+#endif
+    {
+#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
+        Os_ServicePortParamType SprotParam = {
+            .AllowedContext = OS_SERVICEPORT_CHECK_SET_EVENT_ASYN,
+            .ObjectType = OS_OBJECT_TASK,
+            .ObjectID = (Os_AppObjectId)TaskID,
+            /* PRQA S 1258 ++ */ /* VL_Os_ConstToIntegral */
+            .Address = NULL_PARA,
+            /* PRQA S 1258 -- */
+        };
+        err = Os_ServiceProtCheck(pScb, &SprotParam);
+        if (E_OK == err)
+#endif
+        {
+#if (OS_AUTOSAR_CORES > 1)
+            Os_CoreIdType ownerCore = OS_TASK_GET_COREID(TaskID);
+            if (ownerCore != Os_GetCoreIdLocal())
+            {
+                err = Os_RpcCall_SetEvent(ownerCore, OS_RPC_ASYNC, TaskID, Mask);
+            }
+            else
+#endif
+            {
+                err = Os_SetEvent(TaskID, Mask);
+            }
+        }
+    }
+
+#if (CFG_ERRORHOOK == TRUE)
+    if (err != E_OK)
+    {
+        Os_TraceErrorHook(OSError_Save_SetEventAsyn(TaskID, Mask),
+                          OSServiceId_SetEventAsyn,
+                          err, pScb); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
+    }
+#endif
+
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 3432, 4544, 1259 ++ */ /* VL_Os_3432, VL_Os_4544, VL_Os_1259 */
+    OSRtiExitApi(pScb, OSApiId_SetEventAsyn);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_SetEventAsyn_Return, 0);
+    OS_HAL_EXIT_KERNEL(); /* PRQA S 2743*/ /* VL_Os_2743*/
+    /* PRQA S 3432, 4544, 1259 -- */
+    /* PRQA S 3138, 3141 -- */
+    UNUSED_PARAMETER(pScb);
+    UNUSED_PARAMETER(err);
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/* PRQA S 6070++ */ /* VL_MTR_Os_STCAL */
+OS_LOCAL void Os_WaitEvent(EventMaskType mask, Os_SCBType *pScb) /* PRQA S 3006*/ /* VL_Os_3006*/
+/* PRQA S 6070 -- */
+{
+    Os_TaskType runningTaskId = pScb->SysRunningTaskId;
+    OS_HAL_DECLARE_CRITICAL();
+
+    OS_HAL_ENTRY_CRITICAL();
+    Os_ECB[runningTaskId]->WaitEventMask = mask;
+    if (0u == (Os_ECB[runningTaskId]->SetEventMask & mask))
+    {
+        Os_PostTaskHook(pScb); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
+
+#if (CFG_INTERNAL_RESOURCE_MAX > 0)
+        Os_ReleaseInternalResource(pScb, runningTaskId);
+#endif
+
+        Os_TCB[runningTaskId]->TaskState = OS_TASK_STATE_WAITING;
+        /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+        /* PRQA S 1821, 4532, 4544, 4542 ++ */ /* VL_Os_1821, VL_Os_4532, VL_Os_4544, VL_Os_4542 */
+        /* PRQA S 4543, 4523, 3762, 1277 ++ */ /* VL_Os_4543, VL_Os_4523, VL_Os_3762, VL_Os_1277 */
+        ARTI_TRACE(NOSUSP, AR_CP_OS_TASK, Os, pScb->SysCore, OsTask_Wait, runningTaskId);
+        /* PRQA S 4543, 4523, 3762, 1277 -- */
+        /* PRQA S 1821, 4532, 4544, 4542 -- */
+        /* PRQA S 3138, 3141 -- */
+        Os_ReadyQueueRemove(pScb->QueueMg, Os_TCB[runningTaskId]->TaskRunPrio);
+
+        Os_TCB[runningTaskId]->TaskRunPrio =
+            Os_TaskCfg[runningTaskId].TaskPriority;
+
+/* Timing protection: reset task exe time. OS473. */
+#if (TRUE == CFG_TIMING_PROTECTION_ENABLE)
+        Os_TmProtTaskEnd(pScb->SysCore, runningTaskId, TP_EXE);
+#endif
+
+        Os_UpdateHighPrioTask(pScb);
+
+        pScb->SysDispatchLocker = 0u;
+
+        Os_Hal_Dispatch(); /* PRQA S 1006*/ /* VL_Os_1006*/
+    }
+    OS_HAL_EXIT_CRITICAL();
+
+#if (TRUE == CFG_EVENT_RESPONSE_TIME_MONITOR) /* PRQA S 3332 */ /* VL_Os_3332 */
+    Os_MonitorEventEndTime(runningTaskId, mask);
+#endif
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * The state of the calling task is set to waiting, unless
+ *                       at least one of the events specified in <Mask
+ */
+/* PRQA S 1503,3006,6070,3408,1512 ++ */ /* VL_QAC_NoUsedApi, VL_Os_3006, VL_MTR_Os_STCAL, VL_Os_3408, VL_Os_1512 */
+StatusType WaitEvent(EventMaskType Mask)
+/* PRQA S 1503,3006,6070,3408,1512 -- */
+{
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
+    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
+    OS_HAL_ENTER_KERNEL(); /* PRQA S 1021 */ /* VL_Os_1021 */
+    /* PRQA S 1006 -- */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
+
+    StatusType err = E_OK;
+    Os_SCBType *pScb = Os_GetCurrentContext();
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 1317, 1259, 3432, 4442, 4521, 4544 ++ */ /* VL_Os_1317, VL_Os_1259, VL_Os_3432, VL_Os_4442, VL_Os_4521, VL_Os_4544 */
+    OSRtiEnterApi(pScb, OSApiId_WaitEvent);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_WaitEvent_Start, 0);
+    /* PRQA S 1317, 1259, 3432, 4442, 4521, 4544 -- */
+    /* PRQA S 3138, 3141 -- */
+
+#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
+    Os_ServicePortParamType SprotParam = {
+        .AllowedContext = OS_SERVICEPORT_CHECK_WAIT_EVENT,
+        .ObjectType = (Os_ObjectTypeType)OS_OBJECT_INVALID,
+        .ObjectID = (Os_AppObjectId)OS_OBJECT_INVALID,
+        /* PRQA S 1258 ++ */ /* VL_Os_ConstToIntegral */
+        .Address = NULL_PARA,
+        /* PRQA S 1258 -- */
+    };
+    err = Os_ServiceProtCheck(pScb, &SprotParam);
+    if (E_OK == err)
+#endif
+    {
+#if (OS_STATUS_EXTENDED == CFG_STATUS)
+        err = Os_WaitEventSafetyCheck(pScb, Mask);
+        if ((StatusType)E_OK == err)
+#endif
+        {
+            Os_WaitEvent(Mask, pScb);
+        }
+    }
+
+#if (CFG_ERRORHOOK == TRUE)
+    if (err != E_OK) /* PRQA S 2992, 2996 */ /* VL_Os_2992, VL_Os_2996 */
+    {
+        Os_TraceErrorHook(OSError_Save_WaitEvent(Mask), /* PRQA S 2880 */ /* VL_Os_2880 */
+                          OSServiceId_WaitEvent,
+                          err, pScb); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
+    }
+#endif
+
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 3432, 4544 ++ */ /* VL_Os_3432, VL_Os_4544 */
+    OSRtiExitApi(pScb, OSApiId_WaitEvent);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_WaitEvent_Return, err);
+    OS_HAL_EXIT_KERNEL(); /* PRQA S 2743*/ /* VL_Os_2743*/
+    /* PRQA S 3432, 4544 -- */
+    /* PRQA S 3138, 3141 -- */
+    return err;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/* PRQA S 6070++ */ /* VL_MTR_Os_STCAL */
+OS_LOCAL void Os_WaitAllEvents(EventMaskType mask, Os_SCBType *pScb) /* PRQA S 3006*/ /* VL_Os_3006*/
+/* PRQA S 6070 -- */
+{
+    Os_TaskType runningTaskId = pScb->SysRunningTaskId;
+    OS_HAL_DECLARE_CRITICAL();
+
+    OS_HAL_ENTRY_CRITICAL();
+    Os_ECB[runningTaskId]->WaitEventMask = mask;
+    Os_ECB[runningTaskId]->IsWaitAllEvents = TRUE;
+
+    if (E_OK != Os_EventIsAllEventsTriggered(mask, Os_ECB[runningTaskId]->SetEventMask))
+    {
+        Os_PostTaskHook(pScb); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
+
+#if (CFG_INTERNAL_RESOURCE_MAX > 0)
+        Os_ReleaseInternalResource(pScb, runningTaskId);
+#endif
+
+        Os_TCB[runningTaskId]->TaskState = OS_TASK_STATE_WAITING;
+        /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+        /* PRQA S 1821, 4532, 4544, 4542 ++ */ /* VL_Os_1821, VL_Os_4532, VL_Os_4544, VL_Os_4542 */
+        /* PRQA S 4543, 4523, 3762, 1277 ++ */ /* VL_Os_4543, VL_Os_4523, VL_Os_3762, VL_Os_1277 */
+        ARTI_TRACE(NOSUSP, AR_CP_OS_TASK, Os, pScb->SysCore, OsTask_Wait, runningTaskId);
+        /* PRQA S 4543, 4523, 3762, 1277 -- */
+        /* PRQA S 1821, 4532, 4544, 4542 -- */
+        /* PRQA S 3138, 3141 -- */
+        Os_ReadyQueueRemove(pScb->QueueMg, Os_TCB[runningTaskId]->TaskRunPrio);
+
+        Os_TCB[runningTaskId]->TaskRunPrio =
+            Os_TaskCfg[runningTaskId].TaskPriority;
+
+/* Timing protection: reset task exe time. OS473. */
+#if (TRUE == CFG_TIMING_PROTECTION_ENABLE)
+        Os_TmProtTaskEnd(pScb->SysCore, runningTaskId, TP_EXE);
+#endif
+
+        Os_UpdateHighPrioTask(pScb);
+
+        pScb->SysDispatchLocker = 0u;
+
+        Os_Hal_Dispatch(); /* PRQA S 1006*/ /* VL_Os_1006*/
+    }
+    OS_HAL_EXIT_CRITICAL();
+
+#if (TRUE == CFG_EVENT_RESPONSE_TIME_MONITOR) /* PRQA S 3332 */ /* VL_Os_3332 */
+    Os_MonitorEventEndTime(runningTaskId, mask);
+#endif
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * The state of the calling task is set to waiting, must
+ *                       all the events specified in <Mask
+ */
+/* PRQA S 1503,3006,6070,3408,1512 ++ */ /* VL_QAC_NoUsedApi, VL_Os_3006, VL_MTR_Os_STCAL, VL_Os_3408, VL_Os_1512 */
+StatusType WaitAllEvents(EventMaskType Mask)
+/* PRQA S 1503,3006,6070,3408,1512 -- */
+{
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
+    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
+    OS_HAL_ENTER_KERNEL(); /* PRQA S 1021 */ /* VL_Os_1021 */
+    /* PRQA S 1006 -- */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
+
+    StatusType err = E_OK;
+    Os_SCBType *pScb = Os_GetCurrentContext();
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 1317, 1259, 3432, 4442, 4521, 4544 ++ */ /* VL_Os_1317, VL_Os_1259, VL_Os_3432, VL_Os_4442, VL_Os_4521, VL_Os_4544 */
+    OSRtiEnterApi(pScb, OSApiId_WaitAllEvents);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_WaitAllEvents_Start, 0);
+    /* PRQA S 1317, 1259, 3432, 4442, 4521, 4544 -- */
+    /* PRQA S 3138, 3141 -- */
+
+#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
+    Os_ServicePortParamType SprotParam = {
+        .AllowedContext = OS_SERVICEPORT_CHECK_WAIT_ALL_EVENTS,
+        .ObjectType = (Os_ObjectTypeType)OS_OBJECT_INVALID,
+        .ObjectID = (Os_AppObjectId)OS_OBJECT_INVALID,
+        /* PRQA S 1258 ++ */ /* VL_Os_ConstToIntegral */
+        .Address = NULL_PARA,
+        /* PRQA S 1258 -- */
+    };
+    err = Os_ServiceProtCheck(pScb, &SprotParam);
+    if (E_OK == err)
+#endif
+    {
+#if (OS_STATUS_EXTENDED == CFG_STATUS)
+        err = Os_WaitEventSafetyCheck(pScb, Mask);
+        if ((StatusType)E_OK == err)
+#endif
+        {
+            Os_WaitAllEvents(Mask, pScb);
+        }
+    }
+
+#if (CFG_ERRORHOOK == TRUE)
+    if (err != E_OK) /* PRQA S 2992, 2996 */ /* VL_Os_2992, VL_Os_2996 */
+    {
+        Os_TraceErrorHook(OSError_Save_WaitEvent(Mask), /* PRQA S 2880 */ /* VL_Os_2880 */
+                          OSServiceId_WaitAllEvents,
+                          err, pScb);/* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
+    }
+#endif
+
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 3432, 4544 ++ */ /* VL_Os_3432, VL_Os_4544 */
+    OSRtiExitApi(pScb, OSApiId_WaitAllEvents);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_WaitAllEvents_Return, err);
+    OS_HAL_EXIT_KERNEL(); /* PRQA S 2743*/ /* VL_Os_2743*/
+    /* PRQA S 3432, 4544 -- */
+    /* PRQA S 3138, 3141 -- */
+    return err;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * This service returns the current state of all event
+ *                       bits of the task
+ *                       <TaskID
+ */
+/* PRQA S 1503,3006,6070,3408,1512 ++ */ /* VL_QAC_NoUsedApi, VL_Os_3006, VL_MTR_Os_STCAL, VL_Os_3408, VL_Os_1512 */
+StatusType GetEvent(TaskType TaskID, EventMaskRefType Event)
+/* PRQA S 1503,3006,6070,3408,1512 -- */
+{
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
+    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
+    OS_HAL_ENTER_KERNEL(); /* PRQA S 1021 */ /* VL_Os_1021 */
+    /* PRQA S 1006 -- */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
+    StatusType err = E_OK;
+    OS_HAL_DECLARE_CRITICAL();
+
+    Os_CoreIdType curCoreId = Os_GetCoreIdLocal();
+    /* PRQA S 3678 ++ */ /* VL_Os_3678 */
+    Os_SCBType *pScb = Os_GetSystemContext(curCoreId);
+    /* PRQA S 3678 -- */
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 1317, 3432, 4442, 4521, 4544 ++ */ /* VL_Os_1317, VL_Os_3432, VL_Os_4442, VL_Os_4521, VL_Os_4544 */
+    OSRtiEnterApi(pScb, OSApiId_GetEvent);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_GetEvent_Start, TaskID);
+    /* PRQA S 1317, 3432, 4442, 4521, 4544 -- */
+    /* PRQA S 3138, 3141-- */
+
+#if (OS_STATUS_EXTENDED == CFG_STATUS)
+    err = Os_GetEventParamCheck(TaskID, Event);
+    if (E_OK == err)
+#endif
+    {
+#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
+        Os_ServicePortParamType SprotParam = {
+            .AllowedContext = OS_SERVICEPORT_CHECK_GET_EVENT,
+            .ObjectType = (Os_ObjectTypeType)OS_OBJECT_INVALID,
+            .ObjectID = (Os_AppObjectId)OS_OBJECT_INVALID,
+            /* PRQA S 0306 ++ */ /* VL_Os_0306 */
+            .Address = (uint32)Event,
+            /* PRQA S 0306 -- */
+        };
+        err = Os_ServiceProtCheck(pScb, &SprotParam);
+        if (E_OK == err)
+#endif
+        {
+            OS_HAL_ENTRY_CRITICAL();
+            err = Os_GetEventSafetyCheck(curCoreId, TaskID);
+            if ((StatusType)E_OK == err)
+            {
+                *Event = Os_ECB[TaskID]->SetEventMask;
+            }
+            OS_HAL_EXIT_CRITICAL();
+        }
+    }
+
+#if (CFG_ERRORHOOK == TRUE)
+    if (err != E_OK)
+    {
+        Os_TraceErrorHook(OSError_Save_GetEvent(TaskID, Event),
+                          OSServiceId_GetEvent,
+                          err, pScb);/* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
+    }
+#endif
+
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 3432, 4544, 1259 ++ */ /* VL_Os_3432, VL_Os_4544, VL_Os_1259 */
+    OSRtiExitApi(pScb, OSApiId_GetEvent);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_GetEvent_Return, 0);
+    OS_HAL_EXIT_KERNEL(); /* PRQA S 2743*/ /* VL_Os_2743*/
+    /* PRQA S 3432, 4544, 1259 -- */
+    /* PRQA S 3138, 3141 -- */
+    UNUSED_PARAMETER(pScb);
+
+    return err;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * The events of the extended task calling ClearEvent are cleared
+ *                       according to the event mask <Mask
+ */
+/* PRQA S 1503,3006,6070,3408,1512 ++ */ /* VL_QAC_NoUsedApi, VL_Os_3006, VL_MTR_Os_STCAL, VL_Os_3408,VL_Os_1512 */
+StatusType ClearEvent(EventMaskType Mask)
+/* PRQA S 1503,3006,6070,3408,1512 -- */
+{
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
+    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
+    OS_HAL_ENTER_KERNEL(); /* PRQA S 1021 */ /* VL_Os_1021 */
+    /* PRQA S 1006 -- */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
+    StatusType err = E_OK;
+
+    OS_HAL_DECLARE_CRITICAL();
+    /* PRQA S 3678 ++ */ /* VL_Os_3678 */
+    Os_SCBType *pScb = Os_GetCurrentContext();
+    /* PRQA S 3678 -- */
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 1317, 1259, 3432, 4442, 4521, 4544 ++ */ /* VL_Os_1317, VL_Os_1259, VL_Os_3432, VL_Os_4442, VL_Os_4521, VL_Os_4544 */
+    OSRtiEnterApi(pScb, OSApiId_ClearEvent);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_ClearEvent_Start, 0);
+    /* PRQA S 1317, 1259, 3432, 4442, 4521, 4544 -- */
+    /* PRQA S 3138, 3141 -- */
+
+#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
+    Os_ServicePortParamType SprotParam = {
+        .AllowedContext = OS_SERVICEPORT_CHECK_CLEAR_EVENT,
+        .ObjectType = (Os_ObjectTypeType)OS_OBJECT_INVALID,
+        .ObjectID = (Os_AppObjectId)OS_OBJECT_INVALID,
+        /* PRQA S 1258 ++ */ /* VL_Os_ConstToIntegral */
+        .Address = NULL_PARA,
+        /* PRQA S 1258 -- */
+    };
+    err = Os_ServiceProtCheck(pScb, &SprotParam);
+    if (E_OK == err)
+#endif
+    {
+#if (OS_STATUS_EXTENDED == CFG_STATUS)
+        err = Os_ClearEventSafetyCheck(pScb, Mask);
+        if ((StatusType)E_OK == err)
+#endif
+        {
+            OS_HAL_ENTRY_CRITICAL();
+#if (TRUE == CFG_EVENT_RESPONSE_TIME_MONITOR) /* PRQA S 3332 */ /* VL_Os_3332 */
+            Os_MonitorEventResponseTime(pScb->SysRunningTaskId, Mask);
+#endif
+#if (TRUE == CFG_EVENT_RESPONSE_RATE_MONITOR) /* PRQA S 3332 */ /* VL_Os_3332 */
+            Os_MonitorEventResponseRate(pScb->SysRunningTaskId, Mask);
+#endif
+
+            Os_ECB[pScb->SysRunningTaskId]->SetEventMask &= (~Mask);
+            OS_HAL_EXIT_CRITICAL();
+        }
+    }
+
+#if (CFG_ERRORHOOK == TRUE)
+    if (err != E_OK) /* PRQA S 2992, 2996 */ /* VL_Os_2992, VL_Os_2996 */
+    {
+        Os_TraceErrorHook(OSError_Save_ClearEvent(Mask), /* PRQA S 2880 */ /* VL_Os_2880 */
+                          OSServiceId_ClearEvent,
+                          err, pScb); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
+    }
+#endif
+
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 3432, 4544 ++ */ /* VL_Os_3432, VL_Os_4544 */
+    OSRtiExitApi(pScb, OSApiId_ClearEvent);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_ClearEvent_Return, err);
+    OS_HAL_EXIT_KERNEL(); /* PRQA S 2743*/ /* VL_Os_2743*/
+    /* PRQA S 3432, 4544 -- */
+    /* PRQA S 3138, 3141 -- */
+    return err;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * The service may be called from an interrupt service routine and
+ *                       from the task level, but not from hook routines.
+ *                       The events of task <taskId
+ */
+/* PRQA S 1505,6030,6070 ++ */ /* VL_Os_1505, VL_MTR_Os_STMIF, VL_MTR_Os_STCAL */
+StatusType Os_SetEvent(TaskType taskId, EventMaskType mask)
+/* PRQA S 1505,6030,6070 -- */
+{
+    OS_HAL_DECLARE_CRITICAL();
+    StatusType err = E_OK;
+
+/* Extended Status */
+#if (OS_STATUS_EXTENDED == CFG_STATUS)
+    err = Os_SetEventSafetyCheck(taskId, mask);
+    if ((StatusType)E_OK == err)
+#endif
+    {
+        OS_HAL_ENTRY_CRITICAL();
 /* Timing protection: Check inter-arrival time. */
 #if (TRUE == CFG_TIMING_PROTECTION_ENABLE)
-        if ((StatusType)E_OK != Os_TmProtTaskFrameChk(TaskID))
+        if ((StatusType)E_OK != Os_TmProtTaskFrameChk(taskId))
         {
-            err = E_OS_ID;
+            err = E_OS_PROTECTION_ARRIVAL;
         }
         else
-#endif /* TRUE == CFG_TIMING_PROTECTION_ENABLE */
+#endif
         {
             /* Standard Status */
-            Os_ECB[TaskID].eventSetEvent |= Mask; /* PRQA S 3442 */ /* VL_Os_3442 */
+            Os_ECB[taskId]->SetEventMask |= mask;
 
-#if (TRUE == CFG_EVENT_RESPONSE_TIME_MONITOR)
-            Os_MonitorEventStartTime(TaskID, Mask);
+#if (TRUE == CFG_EVENT_RESPONSE_TIME_MONITOR) /* PRQA S 3332 */ /* VL_Os_3332 */
+            Os_MonitorEventStartTime(taskId, mask);
 #endif
-#if (TRUE == CFG_EVENT_RESPONSE_RATE_MONITOR)
-            Os_AddEventResponseNum(TaskID, Mask);
+#if (TRUE == CFG_EVENT_RESPONSE_RATE_MONITOR) /* PRQA S 3332 */ /* VL_Os_3332 */
+            Os_AddEventResponseNum(taskId, mask);
 #endif
 
-            SetEventMask  = Os_ECB[TaskID].eventSetEvent;
-            WaitEventMask = Os_ECB[TaskID].eventWaitEvent;
+            Os_EventMaskType SetEventMask = Os_ECB[taskId]->SetEventMask;
+            Os_EventMaskType WaitEventMask = Os_ECB[taskId]->WaitEventMask;
 
-            if (TASK_STATE_WAITING == Os_TCB[TaskID].taskState)
+            if (OS_TASK_STATE_WAITING == Os_TCB[taskId]->TaskState)
             {
-                /* PRQA S 3442 ++ */ /* VL_Os_3442 */
-                if (TRUE == Os_ECB[TaskID].eventIsWaitAllEvents)
-                /* PRQA S 3442 -- */
+                if (TRUE == Os_ECB[taskId]->IsWaitAllEvents)
                 {
-                    if (E_OK == OS_EVENT_IS_ALL_EVENTS_TRIGGERED(WaitEventMask, SetEventMask))
+                    if (E_OK == Os_EventIsAllEventsTriggered(WaitEventMask, SetEventMask))
                     {
-                        Os_ECB[TaskID].eventIsWaitAllEvents = FALSE;
-#if (TRUE == CFG_TRACE_ENABLE)
-                        Os_TraceTaskSwitch(
-                            Os_SCB.sysRunningTaskID,
-                            TaskID,
-                            OS_TRACE_TASK_SWITCH_REASON_SETEVENT_READY,
-                            OS_TRACE_TASK_SWITCH_REASON_SETEVENT_ACTIVE);
-#endif
-                        Os_EventTaskDispatch(TaskID);
+                        Os_ECB[taskId]->IsWaitAllEvents = FALSE;
+                        Os_SetTaskToReady(taskId);
                     }
                 }
                 else
                 {
                     if ((SetEventMask & WaitEventMask) != 0u)
                     {
-#if (TRUE == CFG_TRACE_ENABLE)
-                        Os_TraceTaskSwitch(
-                            Os_SCB.sysRunningTaskID,
-                            TaskID,
-                            OS_TRACE_TASK_SWITCH_REASON_SETEVENT_READY,
-                            OS_TRACE_TASK_SWITCH_REASON_SETEVENT_ACTIVE);
-#endif
-                        Os_EventTaskDispatch(TaskID);
+                        Os_SetTaskToReady(taskId);
                     }
                 }
             }
         }
-        OS_ARCH_EXIT_CRITICAL();
+        OS_HAL_EXIT_CRITICAL();
     }
 
     return err;
@@ -991,160 +1082,7 @@ StatusType Os_SetEvent(TaskType TaskID, EventMaskType Mask)
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
 
-#define OS_START_SEC_CODE
-#include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <The state of the calling task is set to waiting, unless
- *                       at least one of the events specified in <Mask> has
- *                       already been set.
- *                       Particularities: This call enforces rescheduling,
- *                       if the wait condition occurs. If rescheduling takes
- *                       place, the internal resource of the task is released
- *                       while the task is in the waiting state.
- *                       This service must only be called from the extended task
- *                       owning the event.
- *                       The system service ClearEvent is restricted to extended
- *                       taskswhich own the event.>
- * Service ID           <None>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * param-Mask[in]       <Mask of the events to be set>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <StatusType>
- * PreCondition         <None>
- * CallByAPI            <None>
- * REQ ID               <None>
- */
-/******************************************************************************/
-StatusType Os_WaitEvent(EventMaskType Mask) /* PRQA S 1505 */ /* VL_Os_1505 */
-{
-    StatusType status = E_OK;
-    OS_ARCH_DECLARE_CRITICAL();
-
-    OS_ARCH_ENTRY_CRITICAL();
-    Os_ECB[Os_SCB.sysRunningTaskID].eventWaitEvent = Mask;
-    /* PRQA S 3442 ++ */ /* VL_Os_3442 */
-    if (0u == (Os_ECB[Os_SCB.sysRunningTaskID].eventSetEvent & Mask))
-    /* PRQA S 3442 -- */
-    {
-        Os_PostTaskHook(); /* PRQA S 3138, 3141 */ /* VL_Os_HookDef */
-
-#if (CFG_INTERNAL_RESOURCE_MAX > 0)
-        Os_ReleaseInternalResource(Os_SCB.sysRunningTaskID);
 #endif
-
-        Os_TCB[Os_SCB.sysRunningTaskID].taskState = TASK_STATE_WAITING;
-
-        Os_ReadyQueueRemove(OS_LEVEL_TASK, Os_TCB[Os_SCB.sysRunningTaskID].taskRunPrio);
-
-        Os_TCB[Os_SCB.sysRunningTaskID].taskRunPrio = Os_TaskCfg[Os_SCB.sysRunningTaskID].osTaskPriority;
-
-/* Timing protection: reset task exe time. OS473. */
-#if (TRUE == CFG_TIMING_PROTECTION_ENABLE)
-        Os_TmProtTaskEnd(Os_SCB.sysRunningTaskID, TP_TASK_EXE);
-#endif
-
-        Os_SCB.sysHighPrio       = Os_GetHighPrio();
-        Os_SCB.sysHighTaskID     = Os_ReadyQueueGetFirst(Os_SCB.sysHighPrio);
-        Os_SCB.sysDispatchLocker = 0u;
-
-#if (TRUE == CFG_TRACE_ENABLE)
-        Os_TraceTaskSwitch(
-            Os_SCB.sysRunningTaskID,
-            Os_SCB.sysHighTaskID,
-            OS_TRACE_TASK_SWITCH_REASON_WAITEVENT_WAIT,
-            OS_TRACE_TASK_SWITCH_REASON_WAITEVENT_ACTIVE);
-#endif
-
-        OS_START_DISPATCH(); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
-        Os_Dispatch(); /* PRQA S 1290, 3138 */       /* VL_Os_1290, VL_Os_PlatformDef */
-    }
-
-#if (TRUE == CFG_EVENT_RESPONSE_TIME_MONITOR)
-    Os_MonitorEventEndTime(Os_SCB.sysRunningTaskID, Mask);
-#endif
-    OS_ARCH_EXIT_CRITICAL();
-
-    return status;
-}
-#define OS_STOP_SEC_CODE
-#include "Os_MemMap.h"
-
-#define OS_START_SEC_CODE
-#include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <The state of the calling task is set to waiting, must
- *                       all the events specified in <Mask> has already been set.
- *                       Particularities: This call enforces rescheduling,
- *                       if the wait condition occurs. If rescheduling takes
- *                       place, the internal resource of the task is released
- *                       while the task is in the waiting state.
- *                       This service must only be called from the extended task
- *                       owning the event.
- *                       The system service ClearEvent is restricted to extended
- *                       taskswhich own the event.>
- * Service ID           <None>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * param-Mask[in]       <Mask of the events to be set>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <StatusType>
- * PreCondition         <None>
- * CallByAPI            <None>
- * REQ ID               <None>
- */
-/******************************************************************************/
-StatusType Os_WaitAllEvents(EventMaskType Mask) /* PRQA S 1505 */ /* VL_Os_1505 */
-{
-    StatusType status = E_OK;
-    OS_ARCH_DECLARE_CRITICAL();
-
-    OS_ARCH_ENTRY_CRITICAL();
-    Os_ECB[Os_SCB.sysRunningTaskID].eventWaitEvent       = Mask;
-    Os_ECB[Os_SCB.sysRunningTaskID].eventIsWaitAllEvents = TRUE;
-
-    /* PRQA S 3442 ++ */ /* VL_Os_3442 */
-    if (E_OK != OS_EVENT_IS_ALL_EVENTS_TRIGGERED(Mask, Os_ECB[Os_SCB.sysRunningTaskID].eventSetEvent))
-    /* PRQA S 3442 -- */
-    {
-        Os_PostTaskHook(); /* PRQA S 3138, 3141 */ /* VL_Os_HookDef */
-
-#if (CFG_INTERNAL_RESOURCE_MAX > 0)
-        Os_ReleaseInternalResource(Os_SCB.sysRunningTaskID);
-#endif
-
-        Os_TCB[Os_SCB.sysRunningTaskID].taskState = TASK_STATE_WAITING;
-        Os_ReadyQueueRemove(OS_LEVEL_TASK, Os_TCB[Os_SCB.sysRunningTaskID].taskRunPrio);
-
-        Os_TCB[Os_SCB.sysRunningTaskID].taskRunPrio = Os_TaskCfg[Os_SCB.sysRunningTaskID].osTaskPriority;
-
-/* Timing protection: reset task exe time. OS473. */
-#if (TRUE == CFG_TIMING_PROTECTION_ENABLE)
-        Os_TmProtTaskEnd(Os_SCB.sysRunningTaskID, TP_TASK_EXE);
-#endif
-
-        Os_SCB.sysHighPrio       = Os_GetHighPrio();
-        Os_SCB.sysHighTaskID     = Os_ReadyQueueGetFirst(Os_SCB.sysHighPrio);
-        Os_SCB.sysDispatchLocker = 0u;
-
-        OS_START_DISPATCH(); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
-        Os_Dispatch(); /* PRQA S 1290, 3138 */       /* VL_Os_1290, VL_Os_PlatformDef */
-    }
-
-#if (TRUE == CFG_EVENT_RESPONSE_TIME_MONITOR)
-    Os_MonitorEventEndTime(Os_SCB.sysRunningTaskID, Mask);
-#endif
-    OS_ARCH_EXIT_CRITICAL();
-
-    return status;
-}
-#define OS_STOP_SEC_CODE
-#include "Os_MemMap.h"
-#endif /* CFG_EXTENDED_TASK_MAX > 0 */
 
 /*=======[E N D   O F   F I L E]==============================================*/
 /* PRQA S 0553 EOF */ /* VL_QAC_UnUsedFiles */

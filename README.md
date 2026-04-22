@@ -25,67 +25,22 @@ https://atomgit.com/easyxmen/XMen
 
 https://atomgit.com/easyxmen/docs
 
-* 快速预览（Instant view the page at）：https://easyxmen.atomgit.net/docs/
+* 快速预览（Instant view the page at）：https://easyxmen.atomgit.com/
 
 # 目录结构 Directory Structure
 
 ```
 ├── BSWCode                 # 模块静态代码(Module static code)
-│   ├── Bfx
-│   ├── BswM
-│   ├── CanIf
-│   ├── CanNm
-│   ├── CanSM
-│   ├── CanTp
-│   ├── CanTrcv
-│   ├── CanTSyn
-│   ├── CDD_FVM
-│   ├── Com
-│   ├── ComM
 │   ├── CommonInclude       # 共用的头文件(Common header files)
-│   ├── Crc
-│   ├── CryIf
-│   ├── Crypto_62
-│   ├── Csm
-│   ├── Dcm
-│   ├── Dem
-│   ├── Det
-│   ├── Dlt
-│   ├── DoIP
-│   ├── E2E
-│   ├── Ea
-│   ├── EcuM
-│   ├── Eep_62
-│   ├── EthIf
-│   ├── EthSM
-│   ├── EthSwt
-│   ├── EthTrcv_62
-│   ├── EthTSyn
-│   ├── Fee
-│   ├── FiM
-│   ├── FlsTst
-│   ├── IpduM
-│   ├── IStdLib
-│   ├── KeyM
-│   ├── LdCom
-│   ├── LinIf
-│   ├── LinSM
-│   ├── MemIf
-│   ├── Nm
-│   ├── NvM
-│   ├── PduR
-│   ├── RamTst
-│   ├── Sd
-│   ├── SecOC
-│   ├── SoAd
-│   ├── SOMEIPTP
-│   ├── StbM
-│   ├── TcpIp
-│   ├── Tm
-│   ├── UdpNm
-│   ├── WdgIf
-│   ├── WdgM
-│   └── Xcp
+│   ├── Communication       # 通信模块(Communication modules)
+│   │   ├── CAN             # CAN总线相关模块(CAN bus related modules)
+│   │   ├── Common          # 通信公共模块(Common communication modules)
+│   │   ├── Ethernet        # 以太网相关模块(Ethernet related modules)
+│   │   └── LIN             # LIN总线相关模块(LIN bus related modules)
+│   ├── Crypto              # 密码学模块(Cryptography modules)
+│   ├── Libraries           # 库文件(Library files)
+│   ├── Memory              # 内存管理模块(Memory management modules)
+│   └── SystemServices      # 系统服务模块(System service modules)
 ├── Drivers                 # 板级外设芯片代码(Board-level peripheral chip code)
 ├── Examples                # 示例工程(Example projects)
 ├── RTOS                    # OS 代码(OS code)
@@ -176,4 +131,3 @@ EasyXMen now supports three platforms, i.e. NXP S32K148, Infineon TC397, Renesas
 
 - EasyXMen项目整体基于LGPL V2.1开源，详见[LICENSE.txt](./LICENSE.txt)，并附有例外，例外详见[EXCEPTION.md](./EXCEPTION.md)   
   The EasyXMen project is open-source based on LGPL V2.1, see [LICENSE.txt](./LICENSE.txt) for details, with exceptions outlined in [EXCEPTION.md](./EXCEPTION.md).
-

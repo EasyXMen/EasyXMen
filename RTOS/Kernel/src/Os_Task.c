@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2024 Isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception OR  LicenseRef-Commercial-License
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -11,140 +11,262 @@
  * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  * or see <https://www.gnu.org/licenses/>.
  *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    :  Os_Task.c                                                  **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      :  i-soft-os                                                  **
- **  Vendor      :                                                             **
- **  DESCRIPTION :  task manager                                               **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
- **  Version :   AUTOSAR classic Platform R19--Function Safety                 **
- **                                                                            **
- *******************************************************************************/
+ * Alternatively, this file may be used under the terms of the Isoft Infrastructure Software Co., Ltd.
+ * Commercial License, in which case the provisions of the Isoft Infrastructure Software Co., Ltd.
+ * Commercial License shall apply instead of those of the GNU Lesser General Public License.
+ *
+ * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
+ * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
+ *
+ ************************************************************************************************************************
+ **
+ **  @file               : Os_Task.c
+ **  @author             : i-soft-os
+ **  @date               : 2025/02/10
+ **  @vendor             : isoft
+ **  @description        : Os source file for Task API implementations
+ **
+ ***********************************************************************************************************************/
 
-/*=======[I N C L U D E S]====================================================*/
-#include "Os_Internal.h"
-/*=======[M A C R O S]========================================================*/
+/* =================================================== inclusions =================================================== */
+#include "Os_Arch_Processor.h"
+#include "Os_Task.h"
+#include "Os_ReadyQue.h"
+#include "Os_Resource.h"
+#include "Os_Appl.h"
+#include "Os_Spinlock.h"
+#include "Os_Tprot.h"
+#include "Os_Sprot.h"
+#include "Os_Rpc.h"
+#include "Os_Event.h"
+#include "Os_StackMonitor.h"
+#include "Os_Hook.h"
+#include "Os_Kernel.h"
+#include "Os_Extend.h"
+#include "Os_Err.h"
+#include "Os_Rti.h"
+#include "Os_Arti.h"
+#include "Os_Monitor.h"
+/* ===================================================== macros ===================================================== */
 
-/*=======[T Y P E   D E F I N I T I O N S]====================================*/
+/* ================================================ type definitions ================================================ */
 
-/*=======[E X T E R N A L   D A T A]==========================================*/
+/* ============================================ external data definitions =========================================== */
 
-/*=======[E X T E R N A L   F U N C T I O N   D E C L A R A T I O N S]========*/
+/* ============================================ internal data definitions =========================================== */
 
-/*=======[I N T E R N A L   D A T A]==========================================*/
-
-/*=======[I N T E R N A L   F U N C T I O N   D E C L A R A T I O N S]========*/
-
-/*=======[F U N C T I O N   I M P L E M E N T A T I O N S]====================*/
+/* ========================================== internal function declarations ======================================== */
 #if (CFG_TASK_MAX > 0U)
+#if (OS_AUTOSAR_CORES > 1)
+/**
+ * @brief           RPC action handler for activating a task
+ * @param[in]       inPara: Parameter array containing the task ID to activate
+ * @return          StatusType
+ * @retval          E_OK: Task activated successfully
+ * @retval          E_OS_LIMIT: Task activation limit reached
+ * @retval          E_OS_ID: Task ID is invalid under timing protection
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL StatusType Os_RpcAction_ActivateTask(uint32 *inPara);
+#endif
+
+/**
+ * @brief           Internal implementation for terminating a task
+ * @param[in]       pScb: Pointer to the System Control Block
+ * @param[in]       runningTaskID: ID of the task to be terminated
+ * @param[in]       runningTCB: Pointer to the Task Control Block of the task
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_TerminateTaskInternal(Os_SCBType *pScb, TaskType runningTaskID, Os_TCBType *runningTCB);
+
+/**
+ * @brief           Terminates the specified task
+ * @param[in]       runningTaskID: ID of the task to be terminated
+ * @return          StatusType
+ * @retval          E_OK: Task terminated successfully
+ * @retval          E_OS_CALLEVEL: Called from wrong context
+ * @retval          E_OS_RESOURCE: Task still occupies resources
+ * @retval          E_OS_SPINLOCK: Task still holds spinlocks
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_TerminateTask(TaskType runningTaskID);
+
+/**
+ * @brief           Terminates the calling task and activates another specified task
+ * @param[in]       taskId: ID of the task to be activated after termination
+ * @return          StatusType
+ * @retval          E_OK: Task chain completed successfully
+ * @retval          E_OS_LIMIT: Task activation limit reached for the specified task
+ * @retval          E_OS_ID: Task ID is invalid under timing protection
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL StatusType Os_ChainTask(TaskType taskId);
+
+/**
+ * @brief           Retrieves the current state of a specified task
+ * @param[in]       taskId: ID of the task to get state for
+ * @param[out]      State: Pointer to store the task state
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_GetTaskState(TaskType taskId, TaskStateRefType State);
+
+/**
+ * @brief           Performs scheduling by checking for higher priority tasks
+ * @param[in]       pScb: Pointer to the System Control Block
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL_INLINE OS_ALWAYS_INLINE void Os_Schedule(Os_SCBType *pScb);
+
+/**
+ * @brief           Init the task control block
+ * @param[in]       pScb: Pointer to the System Control Block
+ * @param[in]       taskId: ID of the task to get state for
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_InitTaskTCB(Os_SCBType *pScb, TaskType taskId);
+#endif
+
+/* ========================================== external function definitions ========================================= */
+#if (CFG_TASK_MAX > 0U)
+
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <Init the task control block>
- * Service ID           <None>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Non Reentrant>
- * param-Name[in]       <None>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <StatusType>
- * PreCondition         <None>
- * CallByAPI            <Os_InitSystem>
- * REQ ID               <None>
+/**
+ * Init the task control block
  */
-/******************************************************************************/
-void Os_InitTask(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
+OS_LOCAL void Os_InitTaskTCB(Os_SCBType *pScb, TaskType taskId)
 {
-    Os_TaskType i;
-#if ((CFG_SPINLOCK_MAX > 0U) && (CFG_STD_RESOURCE_MAX > 0U))
-    uint16 j;
-#endif
+    Os_TCBType *pTCB = Os_TCB[taskId];
+    const Os_TaskCfgType *pTaskCfg = &Os_TaskCfg[taskId];
 
-    /* PRQA S 3432 ++ */ /* VL_Os_3432 */
-    Os_TCBType* pTCB;
-    /* PRQA S 3432 -- */
-    const Os_TaskCfgType* pTaskCfg;
-
-    Os_CoreIdType coreId = Os_SCB.sysCore;
-    Os_TaskCfg           = Os_TaskCfg_Inf[coreId];
-    Os_TaskStack         = Os_TaskStack_Inf[coreId];
-    Os_TCB               = Os_TCB_Inf[coreId];
-    Os_SCB.sysTaskMax    = Os_CfgTaskMax_Inf[coreId];
-    /* PRQA S 3469 ++ */ /* VL_Os_3469 */
-    OS_TASK_IDLE = Os_GetObjLocalId(Os_TASK_IDLE_Inf[coreId]);
-    /* PRQA S 3469 -- */
-
-#if (CFG_STD_RESOURCE_MAX > 0U)
-    const TaskResourceStackType* pTaskResStackCfg   = &Os_TCBTaskResourceStack_Inf[coreId];
-    const uint16                 vResourceCfgStdMax = Os_CfgStdResourceMax_Inf[coreId];
-    if (vResourceCfgStdMax > 0U)
-    {
-        for (i = 0U; i < Os_SCB.sysTaskMax; i++)
-        {
-            /* PRQA S 0488 ++ */ /* VL_Os_0488 */
-            Os_TCB[i].taskResourceStack = pTaskResStackCfg->TaskResourceStackPtr + (i * vResourceCfgStdMax);
-            /* PRQA S 0488 -- */
-        }
-    }
-#endif
-
-    for (i = 0u; i < Os_SCB.sysTaskMax; i++)
-    {
-        pTCB     = &Os_TCB[i];
-        pTaskCfg = &Os_TaskCfg[i];
-
-        pTCB->taskTop         = Os_TaskStack[pTaskCfg->osTaskStackId].stackTop;
-        pTCB->taskStackBottom = Os_TaskStack[pTaskCfg->osTaskStackId].stackBottom;
+    pTCB->TaskStackTop = pTaskCfg->TaskStack.StackTop;
+    pTCB->TaskStackBottom = pTaskCfg->TaskStack.StackBottom;
 
 #if ((OS_BCC2 == CFG_CC) || (OS_ECC2 == CFG_CC))
-        pTCB->taskActCount     = 0u;
-        pTCB->taskSelfActCount = 0u;
+    pTCB->TaskActCount = 0u;
 #endif
 
-        pTCB->taskRunPrio = pTaskCfg->osTaskPriority;
+    pTCB->TaskRunPrio = pTaskCfg->TaskPriority;
 #if (CFG_OSAPPLICATION_MAX > 0U)
-        pTCB->CallBackAppID = INVALID_OSAPPLICATION;
+    pTCB->CallBackAppID = INVALID_OSAPPLICATION;
 #endif
 
 /*multi-core for res and spinlock release as LIFO*/
 #if ((CFG_SPINLOCK_MAX > 0U) && (CFG_STD_RESOURCE_MAX > 0U))
-        pTCB->taskCriticalZoneCount          = 0u;
-        pTCB->taskCurrentSpinlockOccupyLevel = OS_SPINLOCK_INVALID;
-        for (j = 0u; j < (uint16)CFG_CRITICAL_ZONE_MAX; j++)
-        {
-            pTCB->taskCriticalZoneStack[j] = OS_OBJECT_INVALID;
-            pTCB->taskCriticalZoneType[j]  = OBJECT_MAX;
-        }
+    pTCB->TaskCriticalZoneCount = 0u;
+    pTCB->TaskCurrentSpinlockOccupyLevel = OS_SPINLOCK_INVALID; /* PRQA S 4424, 4342 */ /* VL_Os_4424, VL_Os_4342 */
+    for (uint16 i = 0u; i < (uint16)CFG_CRITICAL_ZONE_MAX; i++)
+    {
+        pTCB->TaskCriticalZoneStack[i] = OS_OBJECT_INVALID; /* PRQA S 4424 */ /* VL_Os_4424 */
+        pTCB->TaskCriticalZoneType[i] = OS_OBJECT_MAX;
+    }
 #endif
 
-        if (0U != (pTaskCfg->osTaskAutoStartMode & Os_SCB.sysActiveAppMode))
-        {
+    if (0U != (pTaskCfg->TaskAutoStartMode & pScb->SysActiveAppMode))
+    {
 #if ((OS_BCC2 == CFG_CC) || (OS_ECC2 == CFG_CC))
-            pTCB->taskActCount = pTCB->taskActCount + 1U;
+        pTCB->TaskActCount = pTCB->TaskActCount + 1U;
 #endif
 
-            pTCB->taskState = TASK_STATE_START;
-            Os_ReadyQueueInsert(i, OS_LEVEL_TASK, pTCB->taskRunPrio);
+        pTCB->TaskState = OS_TASK_STATE_START;
+        /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+        /* PRQA S 1821, 4532, 4544, 4542 ++ */ /* VL_Os_1821, VL_Os_4532, VL_Os_4544, VL_Os_4542 */
+        /* PRQA S 4543, 4523, 3762, 1277, 2985 ++ */ /* VL_Os_4543, VL_Os_4523, VL_Os_3762, VL_Os_1277, VL_Os_2985 */
+        ARTI_TRACE(NOSUSP, AR_CP_OS_TASK, Os, pScb->SysCore, OsTask_Activate, taskId);
+        /* PRQA S 4543, 4523, 3762, 1277, 2985 -- */
+        /* PRQA S 1821, 4532, 4544, 4542 -- */
+        /* PRQA S 3138, 3141 -- */
+        Os_ReadyQueueInsert(pScb->QueueMg, taskId, OS_LEVEL_TASK, pTCB->TaskRunPrio);
 
-            if ((Os_SCB.sysHighPrio == OS_PRIORITY_INVALID) || (pTCB->taskRunPrio > Os_SCB.sysHighPrio))
-            {
-                Os_SCB.sysHighTaskID = i;
-                Os_SCB.sysHighPrio   = pTCB->taskRunPrio;
-            }
-        }
-        else
+        if ((pScb->SysHighPrio == OS_PRIORITY_INVALID) || (pTCB->TaskRunPrio > pScb->SysHighPrio))
         {
-            pTCB->taskState = TASK_STATE_SUSPENDED;
+            pScb->SysHighTaskId = taskId;
+            pScb->SysHighPrio = pTCB->TaskRunPrio;
         }
+    }
+    else
+    {
+        pTCB->TaskState = OS_TASK_STATE_SUSPENDED;
+        /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+        /* PRQA S 1821, 4532, 4544, 4542 ++ */ /* VL_Os_1821, VL_Os_4532, VL_Os_4544, VL_Os_4542 */
+        /* PRQA S 4543, 4523, 3762, 1277++ */ /* VL_Os_4543, VL_Os_4523, VL_Os_3762, VL_Os_1277 */
+        ARTI_TRACE(NOSUSP, AR_CP_OS_TASK, Os, pScb->SysCore, OsTask_Terminate, taskId);
+        /* PRQA S 4543, 4523, 3762, 1277 -- */
+        /* PRQA S 1821, 4532, 4544, 4542 -- */
+        /* PRQA S 3138, 3141 -- */
+    }
+
+/* Init task schedule count */
+#if (TRUE == CFG_SCHEDULE_COUNT_MONITOR) /* PRQA S 3332 */ /* VL_Os_3332 */
+    pTCB->taskScheduleCount = 0u;
+#endif
+
 /* Init task stack */
 #if ((TRUE == CFG_STACK_CHECK) && (CFG_TASK_MAX > 0U))
-        Os_FillStack(Os_TaskStack[i]);
+    Os_FillStack(&(pTaskCfg->TaskStack));
 #endif
+
+    return;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * Initialize control blocks for all tasks of the current core
+ */
+/* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
+void Os_InitTask(void)
+/* PRQA S 1532 -- */
+{
+    Os_CoreIdType coreId = Os_GetCoreIdLocal();
+    Os_SCBType *pScb = Os_GetSystemContext(coreId);
+
+    pScb->TaskIdle = (uint16)Os_TASK_IDLE_Inf[coreId];
+    Os_TaskType idStartRange = Os_TaskIdRange[coreId].AllTask.Start;
+    Os_TaskType idEndRange = Os_TaskIdRange[coreId].AllTask.End;
+
+    pScb->SysTaskMax = (uint16)idEndRange - (uint16)idStartRange;
+
+    if (idStartRange > idEndRange)
+    {
+        Os_Panic();
+    }
+
+#if (CFG_STD_RESOURCE_MAX > 0U)
+    uint32 resMax = (uint32)Os_CfgStdResourceMax_Inf[coreId];
+    if (resMax > 0U)
+    {
+        for (uint16 i = (uint16)idStartRange; i < (uint16)idEndRange; i++)
+        {
+            Os_TCB[i]->TaskResourceStack = Os_TCBTaskResourceStack[i];
+            Os_TCB[i]->TaskResCount = 0u;
+        }
+    }
+#endif
+
+    for (uint16 i = (uint16)idStartRange; i < (uint16)idEndRange; i++)
+    {
+        Os_InitTaskTCB(pScb, (Os_TaskType)i); /* PRQA S 4342 */ /* VL_Os_4342 */
     }
 
     return;
@@ -154,59 +276,36 @@ void Os_InitTask(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <Internal implementation of OS service:ActivateTask>
- * Service ID           <OSServiceId_ActivateTask>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * param-TaskID[in]     <Reference to the task>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <StatusType>
- * PreCondition         <None>
- * CallByAPI            <None>
- * REQ ID               <None>
+/**
+ * Internal implementation of OS service:ActivateTask
  */
-/******************************************************************************/
-StatusType Os_ActivateTask(TaskType TaskID) /* PRQA S 1505 */ /* VL_Os_1505 */
+/* PRQA S 1505, 3006 ++ */ /* VL_Os_1505, VL_Os_3006 */
+StatusType Os_ActivateTask(TaskType taskId)
+/* PRQA S 1505, 3006 -- */
 {
     StatusType status = E_OK;
 
-    OS_ARCH_DECLARE_CRITICAL();
-
-#if (OS_AUTOSAR_CORES > 1)
-    /* PRQA S 3469, 1338 ++ */ /* VL_Os_3469 */ /* VL_Os_1338 */
-    TaskID = Os_GetObjLocalId(TaskID);
-/* PRQA S 3469, 1338 -- */
-#endif
-
-    /* PRQA S 3469 ++ */ /* VL_Os_3469 */
-    OS_ARCH_ENTRY_CRITICAL();
-/* PRQA S 3469 -- */
+    OS_HAL_DECLARE_CRITICAL();
+    OS_HAL_ENTRY_CRITICAL();
 /* Timing protection: Check inter-arrival time. */
 #if (TRUE == CFG_TIMING_PROTECTION_ENABLE)
-    if ((StatusType)E_OK != Os_TmProtTaskFrameChk(TaskID))
+    if ((StatusType)E_OK != Os_TmProtTaskFrameChk(taskId)) /* PRQA S 1520 */ /* VL_Os_1520 */
     {
-        /* PRQA S 3469 ++ */ /* VL_Os_3469 */
-        OS_ARCH_EXIT_CRITICAL();
-        /* PRQA S 3469 -- */
+        OS_HAL_EXIT_CRITICAL();
 
-        status = E_OS_ID;
+        status = E_OS_PROTECTION_ARRIVAL;
     }
     else
-#endif /* TRUE == CFG_TIMING_PROTECTION_ENABLE */
+#endif
     {
 /* Basic status */
 #if ((OS_BCC1 == CFG_CC) || (OS_ECC1 == CFG_CC))
-        if (Os_TCB[TaskID].taskState != TASK_STATE_SUSPENDED)
+        if (Os_TCB[taskId]->TaskState != OS_TASK_STATE_SUSPENDED)
 #else
-        if (Os_TCB[TaskID].taskActCount >= Os_TaskCfg[TaskID].osTaskActivation)
-#endif /* OS_BCC1 == CFG_CC || OS_ECC1 == CFG_CC */
+        if (Os_TCB[taskId]->TaskActCount >= Os_TaskCfg[taskId].TaskActivation)
+#endif
         {
-            /* PRQA S 3469 ++ */ /* VL_Os_3469 */
-            OS_ARCH_EXIT_CRITICAL();
-            /* PRQA S 3469 -- */
+            OS_HAL_EXIT_CRITICAL();
 
             status = E_OS_LIMIT;
         }
@@ -215,337 +314,262 @@ StatusType Os_ActivateTask(TaskType TaskID) /* PRQA S 1505 */ /* VL_Os_1505 */
     if ((StatusType)E_OK == status)
     {
 #if ((OS_BCC2 == CFG_CC) || (OS_ECC2 == CFG_CC))
-        Os_TCB[TaskID].taskActCount = Os_TCB[TaskID].taskActCount + 1U;
-        if (TaskID == Os_SCB.sysRunningTaskID)
-        {
-            Os_TCB[TaskID].taskSelfActCount = Os_TCB[TaskID].taskSelfActCount + 1U;
-        }
+        Os_TCB[taskId]->TaskActCount = Os_TCB[taskId]->TaskActCount + 1U;
 #endif
-
-        if (TASK_STATE_SUSPENDED == Os_TCB[TaskID].taskState)
+        Os_SCBType *pScb = OS_TASK_GET_SCB(taskId);
+        if (OS_TASK_STATE_SUSPENDED == Os_TCB[taskId]->TaskState)
         {
-            Os_TCB[TaskID].taskState = TASK_STATE_START;
+            Os_TCB[taskId]->TaskState = OS_TASK_STATE_START;
+            /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+            /* PRQA S 1821, 4532, 4544, 4542 ++ */ /* VL_Os_1821, VL_Os_4532, VL_Os_4544, VL_Os_4542 */
+            /* PRQA S 4543, 4523, 3762, 1277, 2985 ++ */ /* VL_Os_4543, VL_Os_4523, VL_Os_3762, VL_Os_1277, VL_Os_2985 */
+            ARTI_TRACE(NOSUSP, AR_CP_OS_TASK, Os, pScb->SysCore, OsTask_Activate, taskId);
+            /* PRQA S 4543, 4523, 3762, 1277, 2985 -- */
+            /* PRQA S 1821, 4532, 4544, 4542 -- */
+            /* PRQA S 3138, 3141 -- */
         }
 
-        Os_ReadyQueueInsert(TaskID, OS_LEVEL_TASK, Os_TaskCfg[TaskID].osTaskPriority);
+        Os_ReadyQueueInsert(pScb->QueueMg, taskId, OS_LEVEL_TASK, Os_TaskCfg[taskId].TaskPriority);
 
-        if (Os_TaskCfg[TaskID].osTaskPriority > Os_SCB.sysHighPrio)
+        if (Os_TaskCfg[taskId].TaskPriority > pScb->SysHighPrio)
         {
-            Os_SCB.sysHighTaskID = TaskID;
-            Os_SCB.sysHighPrio   = Os_TaskCfg[TaskID].osTaskPriority;
+            pScb->SysHighTaskId = taskId;
+            pScb->SysHighPrio = Os_TaskCfg[taskId].TaskPriority;
 
 #if (CFG_SCHED_POLICY != OS_PREEMPTIVE_NON)
-            if (0U == Os_SCB.sysDispatchLocker)
+            if (0U == pScb->SysDispatchLocker)
             {
-#if (TRUE == CFG_TRACE_ENABLE)
-                Os_TraceTaskActive(TaskID);
-#endif
-                OS_START_DISPATCH(); /* PRQA S 3138,3141 */ /* VL_Os_PlatformNoDef */
-                /* PRQA S 3469 ++ */                        /* VL_Os_3469 */
-                Os_Dispatch(); /* PRQA S 3138,1290 */       /* VL_Os_3138,VL_Os_1290 */
-                /* PRQA S 3469 -- */
+                Os_Hal_Dispatch(); /* PRQA S 1006*/ /* VL_Os_1006*/
             }
 #endif
         }
-        /* PRQA S 3469 ++ */ /* VL_Os_3469 */
-        OS_ARCH_EXIT_CRITICAL();
-        /* PRQA S 3469 -- */
+        OS_HAL_EXIT_CRITICAL();
     }
 
     return status;
 }
+#if (OS_AUTOSAR_CORES > 1)
+/* PRQA S 3673 ++ */ /* VL_QAC_3673 */
+OS_LOCAL StatusType Os_RpcAction_ActivateTask(uint32 *inPara)
+/* PRQA S 3673 -- */
+{
+    return Os_ActivateTask((TaskType)inPara[0]); /* PRQA S 4342 */ /* VL_Os_4342 */
+}
+
+/* PRQA S 1505 ++ */ /* VL_Os_1505 */
+StatusType Os_RpcCall_ActivateTask(
+    Os_CoreIdType ownerCore,
+    Os_RpcSyncType syncType,
+    TaskType taskId)
+/* PRQA S 1505 -- */
+{
+    StatusType err = E_OK;
+    Os_RpcInputType rpcData = {
+        .RpcSync = syncType,
+        .RemoteCoreId = ownerCore,
+        .ActionFn = Os_RpcAction_ActivateTask, /* PRQA S 0674 */ /* VL_Os_0674 */
+        .InPara[0] = (uint32)taskId, /* PRQA S 0691 */ /* VL_Os_0691 */
+    }; /* PRQA S 0704 */ /* VL_Os_0704 */
+
+    err = Os_RpcCallService(&rpcData);
+    return err;
+}
+#endif
+
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <This service causes the termination of the calling task.>
- * Service ID           <None>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * param-Name[in]       <None>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <StatusType>
- * PreCondition         <None>
- * CallByAPI            <None>
- * REQ ID               <None>
+/**
+ * This service causes the termination of the calling task.
  */
-/******************************************************************************/
-static StatusType Os_TerminateTask(void) /* PRQA S 3450 */ /* VL_Os_3450 */
+/* PRQA S 3673 ++ */ /* VL_QAC_3673 */
+OS_LOCAL void Os_TerminateTaskInternal(
+    Os_SCBType *pScb,
+    TaskType runningTaskID,
+    Os_TCBType *runningTCB)
+/* PRQA S 3673 -- */
 {
-    StatusType status = E_OK;
-    OS_ARCH_DECLARE_CRITICAL();
-
-#if (OS_STATUS_EXTENDED == CFG_STATUS)
-#if ((OS_NOSC == CFG_SC) || (OS_SC1 == CFG_SC) || (OS_SC2 == CFG_SC))
-    if (Os_SCB.sysOsLevel != OS_LEVEL_TASK)
-    {
-        status = E_OS_CALLEVEL;
-    }
-    else
-#endif /* OS_NOSC == CFG_SC || OS_SC1 == CFG_SC || OS_SC2 == CFG_SC */
-    {
-#if (CFG_STD_RESOURCE_MAX > 0U)
-        if (Os_TCB[Os_SCB.sysRunningTaskID].taskResCount > 0U)
-        {
-            status = E_OS_RESOURCE;
-        }
-        else
-#endif /* CFG_STD_RESOURCE_MAX > 0U */
-        {
-#if (CFG_SPINLOCK_MAX > 0U)
-            status = Os_SpinlockSafetyCheck();
-#endif
-        }
-    }
-#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
-
-    if ((StatusType)E_OK == status) /* PRQA S 2991, 2995 */ /* VL_Os_2991, VL_Os_2995 */
-    {
-        /* PRQA S 3469 ++ */ /* VL_Os_3469 */
-        OS_ARCH_ENTRY_CRITICAL();
-        /* PRQA S 3138, 3141 ++ */ /* VL_Os_HookDef */
-        Os_PostTaskHook();
-        /* PRQA S 3138, 3141 -- */
-        /* PRQA S 3469 -- */
+    Os_PostTaskHook(pScb); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
 
 #if (CFG_INTERNAL_RESOURCE_MAX > 0U)
-        Os_ReleaseInternalResource(Os_SCB.sysRunningTaskID);
+    Os_ReleaseInternalResource(pScb, runningTaskID);
 #endif
 
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 1821, 4532, 4544, 4542 ++ */ /* VL_Os_1821, VL_Os_4532, VL_Os_4544, VL_Os_4542 */
+    /* PRQA S 4543, 4523, 3762, 1277++ */ /* VL_Os_4543, VL_Os_4523, VL_Os_3762, VL_Os_1277 */
+    ARTI_TRACE(NOSUSP, AR_CP_OS_TASK, Os, pScb->SysCore, OsTask_Terminate, runningTaskID);
+    /* PRQA S 4543, 4523, 3762, 1277 -- */
+    /* PRQA S 1821, 4532, 4544, 4542 -- */
+    /* PRQA S 3138, 3141 -- */
 #if ((OS_BCC1 == CFG_CC) || (OS_ECC1 == CFG_CC))
-        Os_SCB.sysRunningTCB->taskState = TASK_STATE_SUSPENDED;
+    runningTCB->TaskState = OS_TASK_STATE_SUSPENDED;
 #else
-        if (Os_SCB.sysRunningTCB->taskSelfActCount > 0U)
-        {
-            Os_SCB.sysRunningTCB->taskSelfActCount = Os_SCB.sysRunningTCB->taskSelfActCount - 1U;
-        }
-        if (Os_SCB.sysRunningTCB->taskActCount > 0U)
-        {
-            Os_SCB.sysRunningTCB->taskActCount = Os_SCB.sysRunningTCB->taskActCount - 1U;
-        }
+    if (runningTCB->TaskActCount > 0U)
+    {
+        runningTCB->TaskActCount--;
+    }
 
-        if (Os_SCB.sysRunningTCB->taskActCount > 0U)
-        {
-            Os_SCB.sysRunningTCB->taskState = TASK_STATE_START;
-        }
-        else
-        {
-            Os_SCB.sysRunningTCB->taskState = TASK_STATE_SUSPENDED;
-        }
-#endif /* OS_BCC1 == CFG_CC || OS_ECC1 == CFG_CC */
+    if (runningTCB->TaskActCount > 0U)
+    {
+        runningTCB->TaskState = OS_TASK_STATE_START;
+        /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+        /* PRQA S 1821, 4532, 4544, 4542 ++ */ /* VL_Os_1821, VL_Os_4532, VL_Os_4544, VL_Os_4542 */
+        /* PRQA S 4543, 4523, 3762, 1277, 2985++ */ /* VL_Os_4543, VL_Os_4523, VL_Os_3762, VL_Os_1277, VL_Os_2985 */
+        ARTI_TRACE(NOSUSP, AR_CP_OS_TASK, Os, pScb->SysCore, OsTask_Activate, runningTaskID);
+        /* PRQA S 4543, 4523, 3762, 1277, 2985 -- */
+        /* PRQA S 1821, 4532, 4544, 4542 -- */
+        /* PRQA S 3138, 3141 -- */
+    }
+    else
+    {
+        runningTCB->TaskState = OS_TASK_STATE_SUSPENDED;
+    }
+#endif
 
-        Os_ReadyQueueRemove(OS_LEVEL_TASK, Os_TCB[Os_SCB.sysRunningTaskID].taskRunPrio);
+    Os_ReadyQueueRemove(pScb->QueueMg, Os_TCB[runningTaskID]->TaskRunPrio);
 
 #if (CFG_STD_RESOURCE_MAX > 0U)
-        Os_SCB.sysRunningTCB->taskResCount = 0U;
+    runningTCB->TaskResCount = 0U;
 #endif
 
-        Os_SCB.sysRunningTCB->taskRunPrio = Os_TaskCfg[Os_SCB.sysRunningTaskID].osTaskPriority;
+    runningTCB->TaskRunPrio = Os_TaskCfg[runningTaskID].TaskPriority;
 
 #if (CFG_EXTENDED_TASK_MAX > 0U)
-        if (Os_SCB.sysRunningTaskID < Os_CfgExtendTaskMax)
-        {
-            Os_ECB[Os_SCB.sysRunningTaskID].eventSetEvent  = 0U;
-            Os_ECB[Os_SCB.sysRunningTaskID].eventWaitEvent = 0U;
-        }
+    if (Os_CheckExternalTaskId(runningTaskID, pScb->SysCore))
+    {
+        Os_ClearECB(runningTaskID);
+    }
 #endif
-
-        if (Os_SCB.sysHighTaskID == Os_SCB.sysRunningTaskID)
-        {
-            Os_SCB.sysHighPrio   = Os_GetHighPrio();
-            Os_SCB.sysHighTaskID = Os_ReadyQueueGetFirst(Os_SCB.sysHighPrio);
-        }
 
 /* Timing protection: reset task exe time. */
 #if (TRUE == CFG_TIMING_PROTECTION_ENABLE)
-        Os_TmProtTaskEnd(Os_SCB.sysRunningTaskID, TP_TASK_EXE);
+    Os_TmProtTaskEnd(pScb->SysCore, runningTaskID, TP_EXE);
 #endif
-
-        Os_SCB.sysDispatchLocker = 0U;
-#if (TRUE == CFG_TRACE_ENABLE)
-        Os_TraceTaskSwitch(
-            Os_SCB.sysRunningTaskID,
-            Os_SCB.sysHighTaskID,
-            OS_TRACE_TASK_SWITCH_REASON_TERMINATE,
-            OS_TRACE_TASK_SWITCH_REASON_TERMINATE_ACTIVE);
-#endif
-
-#if (TRUE == CFG_TASK_RESPONSE_TIME_ENABLE)
-        Os_TaskRecordTotalTick(Os_SCB.sysRunningTaskID);
-#endif                            /* TRUE == CFG_TASK_RESPONSE_TIME_ENABLE */
-        /* PRQA S 3138,3141 ++ */ /* VL_Os_PlatformNoDef */
-        OS_START_DISPATCH();
-        /* PRQA S 3138,3141 -- */
-        /* PRQA S 3469 ++ */                  /* VL_Os_3469 */
-        Os_Dispatch(); /* PRQA S 1290,3138 */ /* VL_Os_1290,VL_Os_3138 */
-        OS_ARCH_EXIT_CRITICAL();
-        /* PRQA S 3469 -- */
-    }
-
-    return status;
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <This service causes the termination of the calling task. After
- *                       termination of the calling task a succeeding task <TaskID> is
- *                       activated. Using this service, it ensures that the succeeding
- *                       task starts to run at the earliest after the calling task has been
- *                       terminated.>
- * Service ID           <None>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * param-TaskID[in]     <Reference to the task>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <StatusType>
- * PreCondition         <None>
- * CallByAPI            <None>
- * REQ ID               <None>
+/**
+ * This service causes the termination of the calling task.
  */
-/******************************************************************************/
-/* PRQA S 6080, 3450 ++ */ /* VL_MTR_Os_STPTH, VL_Os_3450 */
-static StatusType Os_ChainTask(TaskType TaskID)
-/* PRQA S 6080, 3450 -- */
+OS_LOCAL void Os_TerminateTask(TaskType runningTaskID) /* PRQA S 3408, 3006 */ /* VL_Os_3408 *//* VL_Os_3006*/
+{
+    Os_SCBType *pScb = OS_TASK_GET_SCB(runningTaskID);
+
+    OS_HAL_DECLARE_CRITICAL();
+    OS_HAL_ENTRY_CRITICAL();
+
+    Os_TerminateTaskInternal(pScb, runningTaskID, pScb->SysRunningTCB);
+
+    if (pScb->SysHighTaskId == runningTaskID)
+    {
+        Os_UpdateHighPrioTask(pScb);
+    }
+
+    pScb->SysDispatchLocker = 0U;
+
+#if (TRUE == CFG_TASK_RESPONSE_TIME_ENABLE) /* PRQA S 3332 */ /* VL_Os_3332 */
+    Os_TaskRecordTotalTick(runningTaskID);
+#endif                            /* TRUE == CFG_TASK_RESPONSE_TIME_ENABLE */
+
+    Os_Hal_Dispatch(); /* PRQA S 1006*/ /* VL_Os_1006*/
+    OS_HAL_EXIT_CRITICAL();
+
+    return;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * This service causes the termination of the calling task. After
+ *                       termination of the calling task a succeeding task <taskId
+ */
+/* PRQA S 6070 ++ */ /* VL_MTR_Os_STCAL */
+OS_LOCAL StatusType Os_ChainTask(TaskType taskId) /* PRQA S 3006*/ /* VL_Os_3006*/
+/* PRQA S 6070 -- */
 {
     StatusType status = E_OK;
-    OS_ARCH_DECLARE_CRITICAL();
+    OS_HAL_DECLARE_CRITICAL();
 
-#if (OS_AUTOSAR_CORES > 1)
-    /* PRQA S 3469, 1338 ++ */ /* VL_Os_3469,VL_Os_1338 */
-    TaskID = Os_GetObjLocalId(TaskID);
-/* PRQA S 3469, 1338 -- */
-#endif
+    Os_SCBType *pScb = OS_TASK_GET_SCB(taskId);
+    Os_TaskType SysRunningTaskId = pScb->SysRunningTaskId;
 
     /* Basic status */
-    /* PRQA S 3469 ++ */ /* VL_Os_3469 */
-    OS_ARCH_ENTRY_CRITICAL();
-/* PRQA S 3469 -- */
+    OS_HAL_ENTRY_CRITICAL();
 #if ((OS_BCC2 == CFG_CC) || (OS_ECC2 == CFG_CC))
-    if ((Os_TCB[TaskID].taskActCount >= Os_TaskCfg[TaskID].osTaskActivation) && (TaskID != Os_SCB.sysRunningTaskID))
+    if ((Os_TCB[taskId]->TaskActCount >= Os_TaskCfg[taskId].TaskActivation) && (taskId != SysRunningTaskId))
 #else
-    if ((Os_TCB[TaskID].taskState != TASK_STATE_SUSPENDED) && (TaskID != Os_SCB.sysRunningTaskID))
-#endif /* OS_BCC2 == CFG_CC || OS_ECC2 == CFG_CC */
+    if ((Os_TCB[taskId]->TaskState != OS_TASK_STATE_SUSPENDED) &&
+        (taskId != SysRunningTaskId))
+#endif
     {
-        /* PRQA S 3469 ++ */ /* VL_Os_3469 */
-        OS_ARCH_EXIT_CRITICAL();
-        /* PRQA S 3469 -- */
+        OS_HAL_EXIT_CRITICAL();
         status = E_OS_LIMIT;
     }
 
     if ((StatusType)E_OK == status)
     {
-        /* PRQA S 3469 ++ */                      /* VL_Os_3469 */
-        Os_PostTaskHook(); /* PRQA S 3138,3141 */ /* VL_Os_PlatformNoDef */
-                                                  /* PRQA S 3469 -- */
-
-#if (CFG_INTERNAL_RESOURCE_MAX > 0)
-        Os_ReleaseInternalResource(Os_SCB.sysRunningTaskID);
-#endif
-
-#if ((OS_BCC1 == CFG_CC) || (OS_ECC1 == CFG_CC))
-        Os_SCB.sysRunningTCB->taskState = TASK_STATE_SUSPENDED;
-#else
-        if (Os_SCB.sysRunningTCB->taskSelfActCount > 0U)
-        {
-            Os_SCB.sysRunningTCB->taskSelfActCount--;
-        }
-        if (Os_SCB.sysRunningTCB->taskActCount > 0U)
-        {
-            Os_SCB.sysRunningTCB->taskActCount--;
-        }
-
-        if (Os_SCB.sysRunningTCB->taskActCount > 0U)
-        {
-            Os_SCB.sysRunningTCB->taskState = TASK_STATE_START;
-        }
-        else
-        {
-            Os_SCB.sysRunningTCB->taskState = TASK_STATE_SUSPENDED;
-        }
-#endif /* OS_BCC1 == CFG_CC || OS_ECC1 == CFG_CC */
-
-        Os_ReadyQueueRemove(OS_LEVEL_TASK, Os_TCB[Os_SCB.sysRunningTaskID].taskRunPrio);
-
-#if (CFG_STD_RESOURCE_MAX > 0U)
-        Os_SCB.sysRunningTCB->taskResCount = 0u;
-#endif
-
-        Os_SCB.sysRunningTCB->taskRunPrio = Os_TaskCfg[Os_SCB.sysRunningTaskID].osTaskPriority;
-
-#if (CFG_EXTENDED_TASK_MAX > 0)
-        if (Os_SCB.sysRunningTaskID < Os_CfgExtendTaskMax)
-        {
-            Os_ECB[Os_SCB.sysRunningTaskID].eventSetEvent  = 0u;
-            Os_ECB[Os_SCB.sysRunningTaskID].eventWaitEvent = 0u;
-        }
-#endif
-
-/* Timing protection: reset task exe time. */
-#if (TRUE == CFG_TIMING_PROTECTION_ENABLE)
-        Os_TmProtTaskEnd(Os_SCB.sysRunningTaskID, TP_TASK_EXE);
-#endif
+        Os_TerminateTaskInternal(pScb, SysRunningTaskId, pScb->SysRunningTCB);
 
 /* Timing protection: Check inter-arrival time. */
 #if (TRUE == CFG_TIMING_PROTECTION_ENABLE)
-        if ((StatusType)E_OK != Os_TmProtTaskFrameChk(TaskID))
+        if ((StatusType)E_OK != Os_TmProtTaskFrameChk(taskId))
         {
-            /* PRQA S 3469 ++ */ /* VL_Os_3469 */
-            OS_ARCH_EXIT_CRITICAL();
-            /* PRQA S 3469 -- */
+            OS_HAL_EXIT_CRITICAL();
 
-            status = E_OS_ID;
+            status = E_OS_PROTECTION_ARRIVAL;
         }
         else
-#endif /* TRUE == CFG_TIMING_PROTECTION_ENABLE */
+#endif
         {
 #if ((OS_BCC2 == CFG_CC) || (OS_ECC2 == CFG_CC))
-            Os_TCB[TaskID].taskActCount = Os_TCB[TaskID].taskActCount + 1U;
+            Os_TCB[taskId]->TaskActCount = Os_TCB[taskId]->TaskActCount + 1U;
 
-            if (TASK_STATE_SUSPENDED == Os_TCB[TaskID].taskState)
+            if (OS_TASK_STATE_SUSPENDED == Os_TCB[taskId]->TaskState)
             {
-                Os_TCB[TaskID].taskState = TASK_STATE_START;
+                Os_TCB[taskId]->TaskState = OS_TASK_STATE_START;
+                /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+                /* PRQA S 1821, 4532, 4544, 4542 ++ */ /* VL_Os_1821, VL_Os_4532, VL_Os_4544, VL_Os_4542 */
+                /* PRQA S 4543, 4523, 3762, 1277, 2985 ++ */ /* VL_Os_4543, VL_Os_4523, VL_Os_3762, VL_Os_1277, VL_Os_2985 */
+                ARTI_TRACE(NOSUSP, AR_CP_OS_TASK, Os, pScb->SysCore, OsTask_Activate, taskId);
+                /* PRQA S 4543, 4523, 3762, 1277, 2985 -- */
+                /* PRQA S 1821, 4532, 4544, 4542 -- */
+                /* PRQA S 3138, 3141 -- */
             }
 #else
-            Os_TCB[TaskID].taskState = TASK_STATE_START;
-#endif /* OS_BCC2 == CFG_CC || OS_ECC2 == CFG_CC */
-
-            Os_ReadyQueueInsert(TaskID, OS_LEVEL_TASK, Os_TaskCfg[TaskID].osTaskPriority);
-
-            if (Os_SCB.sysHighTaskID == Os_SCB.sysRunningTaskID)
-            {
-                Os_SCB.sysHighPrio   = Os_GetHighPrio();
-                Os_SCB.sysHighTaskID = Os_ReadyQueueGetFirst(Os_SCB.sysHighPrio);
-            }
-
-            Os_SCB.sysDispatchLocker = 0u;
-
-#if (TRUE == CFG_TRACE_ENABLE)
-            Os_TraceTaskSwitch(
-                Os_SCB.sysRunningTaskID,
-                Os_SCB.sysHighTaskID,
-                OS_TRACE_TASK_SWITCH_REASON_CHAIN_READY,
-                OS_TRACE_TASK_SWITCH_REASON_CHAIN_ACTIVE);
+            Os_TCB[taskId]->TaskState = OS_TASK_STATE_START;
+            /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+            /* PRQA S 1821, 4532, 4544, 4542 ++ */ /* VL_Os_1821, VL_Os_4532, VL_Os_4544, VL_Os_4542 */
+            /* PRQA S 4543, 4523, 3762, 1277, 2985 ++ */ /* VL_Os_4543, VL_Os_4523, VL_Os_3762, VL_Os_1277, VL_Os_2985 */
+            ARTI_TRACE(NOSUSP, AR_CP_OS_TASK, Os, pScb->SysCore, OsTask_Activate, taskId);
+            /* PRQA S 4543, 4523, 3762, 1277, 2985 -- */
+            /* PRQA S 1821, 4532, 4544, 4542 -- */
+            /* PRQA S 3138, 3141 -- */
 #endif
 
-#if (TRUE == CFG_TASK_RESPONSE_TIME_ENABLE)
-            Os_TaskRecordTotalTick(Os_SCB.sysRunningTaskID);
-#endif /* TRUE == CFG_TASK_RESPONSE_TIME_ENABLE */
+            Os_ReadyQueueInsert(pScb->QueueMg, taskId, OS_LEVEL_TASK, Os_TaskCfg[taskId].TaskPriority);
 
-            OS_START_DISPATCH(); /* PRQA S 3138,3141 */ /* VL_Os_PlatformNoDef */
-            /* PRQA S 3469 ++ */                        /* VL_Os_3469 */
-            Os_Dispatch(); /* PRQA S 3138,1290 */       /* VL_Os_3138,VL_Os_1290 */
+            if (pScb->SysHighTaskId == SysRunningTaskId)
+            {
+                Os_UpdateHighPrioTask(pScb);
+            }
 
-            OS_ARCH_EXIT_CRITICAL();
-            /* PRQA S 3469 -- */
+            pScb->SysDispatchLocker = 0u;
+
+#if (TRUE == CFG_TASK_RESPONSE_TIME_ENABLE) /* PRQA S 3332 */ /* VL_Os_3332 */
+            Os_TaskRecordTotalTick(SysRunningTaskId);
+#endif
+
+            Os_Hal_Dispatch(); /* PRQA S 1006*/ /* VL_Os_1006*/
+
+            OS_HAL_EXIT_CRITICAL();
         }
     }
 
@@ -556,160 +580,96 @@ static StatusType Os_ChainTask(TaskType TaskID)
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <Returns the state of a task (running, ready, waiting, suspended)
- *                       at the time of calling GetTaskState.>
- * Service ID           <None>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * param-TaskID[in]     <Reference to the task>
- * Param-State[out]     <Reference to the state of the task <TaskID>>
- * Param-Name[in/out]   <None>
- * return               <StatusType>
- * PreCondition         <None>
- * CallByAPI            <None>
- * REQ ID               <None>
+/**
+ * Returns the state of a task (running, ready, waiting, suspended)
+ *                       at the time of calling GetTaskState.
  */
-/******************************************************************************/
-void Os_GetTaskState(TaskType TaskID, TaskStateRefType State) /* PRQA S 1505 */ /* VL_Os_1505 */
+OS_LOCAL void Os_GetTaskState(TaskType taskId, TaskStateRefType State)
 {
-    OS_ARCH_DECLARE_CRITICAL();
+    OS_HAL_DECLARE_CRITICAL();
 
-#if (OS_AUTOSAR_CORES > 1)
-    /* PRQA S 3469, 1338 ++ */ /* VL_Os_3469 */
-    TaskID = Os_GetObjLocalId(TaskID);
-/* PRQA S 3469, 1338 -- */
-#endif
-
-    /* PRQA S 3469 ++ */ /* VL_Os_3469 */
-    OS_ARCH_ENTRY_CRITICAL();
-    /* PRQA S 3469 -- */
-    if (TASK_STATE_START == Os_TCB[TaskID].taskState)
+    OS_HAL_ENTRY_CRITICAL();
+    if (OS_TASK_STATE_START == Os_TCB[taskId]->TaskState)
     {
-        *State = TASK_STATE_READY;
+        *State = OS_TASK_STATE_READY;
     }
     else
     {
-        *State = Os_TCB[TaskID].taskState;
+        *State = Os_TCB[taskId]->TaskState;
     }
-    /* PRQA S 3469 ++ */ /* VL_Os_3469 */
-    OS_ARCH_EXIT_CRITICAL();
-    /* PRQA S 3469 -- */
+    OS_HAL_EXIT_CRITICAL();
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <Returns the state of a task (running, ready, waiting, suspended)
- *                       at the time of calling GetTaskState.>
- * Service ID           <0xe3>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * param-TaskID[in]     <Reference to the task>
- * Param-State[out]     <Reference to the state of the task <TaskID>>
- * Param-Name[in/out]   <None>
- * return               <StatusType>
- * PreCondition         <None>
- * CallByAPI            <None>
- * REQ ID               <None>
+/**
+ * Returns the state of a task (running, ready, waiting, suspended)
+ * at the time of calling GetTaskState.
  */
-/******************************************************************************/
-/* PRQA S 6070,6030,6010 ++ */ /* VL_MTR_Os_STCAL,VL_MTR_Os_STMIF,VL_MTR_Os_STCYC */
-/* PRQA S 3006,1503 ++ */      /* VL_Os_3006,VL_QAC_NoUsedApi */
+/* PRQA S 6070, 3006, 1503, 3408, 1512 ++ */ /* VL_MTR_Os_STCAL, VL_Os_3006, VL_QAC_NoUsedApi, VL_Os_3408, VL_Os_1512 */
 StatusType GetTaskState(TaskType TaskID, TaskStateRefType State)
-/* PRQA S 3006,1503 -- */
-/* PRQA S 6070,6030,6010 -- */
+/* PRQA S 6070, 3006, 1503, 3408, 1512 -- */
 {
     /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
     /* PRQA S 1006 ++ */ /* VL_Os_1006 */
-    OS_ENTER_KERNEL();
+    OS_HAL_ENTER_KERNEL(); /* PRQA S 1021 */ /* VL_Os_1021 */
     /* PRQA S 1006 -- */
     /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
 
     StatusType status = E_OK;
+    /* PRQA S 3678 ++ */ /* VL_Os_3678 */
+    Os_SCBType *pScb = Os_GetCurrentContext();
+    /* PRQA S 3678 -- */
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 1317, 3432, 4442, 4521, 4544 ++ */ /* VL_Os_1317, VL_Os_3432, VL_Os_4442, VL_Os_4521, VL_Os_4544 */
+    OSRtiEnterApi(pScb, OSApiId_GetTaskState);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_GetTaskState_Start, TaskID);
+    /* PRQA S 1317, 3432, 4442, 4521, 4544 -- */
+    /* PRQA S 3138, 3141 -- */
 
-#if (TRUE == CFG_TRACE_ENABLE)
-    Os_TraceServiceEnter(OSServiceId_GetTaskState);
-#endif /* TRUE == CFG_TRACE_ENABLE */
+#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
+    Os_ServicePortParamType SprotParam = {
+        .AllowedContext = OS_SERVICEPORT_CHECK_GET_TASK_STATE,
+        .ObjectType = OS_OBJECT_TASK,
+        .ObjectID = (Os_AppObjectId)TaskID,
+        .Address = (uint32)State, /* PRQA S 0306 */ /* VL_Os_0306 */
+    };
+#endif
 
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
-    if (NULL_PTR == State)
-    {
-        status = E_OS_PARAM_POINTER;
-    }
-    /* PRQA S 3432 ++ */ /* VL_Os_3432  */
-    else if (CHECK_ID_INVALID(TaskID, Os_CfgTaskMax_Inf))
-    /* PRQA S 3432 -- */
+    if (Os_ObjectIDCheck((ObjectType)TaskID, (uint8)OS_OBJECT_TASK) != TRUE)
     {
         status = E_OS_ID;
     }
     else
-#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
+#endif
+
 #if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
-        if (Os_WrongContext(OS_CONTEXT_GET_TASK_STATE) != TRUE)
+    if ((status = Os_ServiceProtCheck(pScb, &SprotParam)) == E_OK) /* PRQA S 3326, 2004 */ /* VL_Os_3326, VL_Os_2004 */
+#endif
     {
-        status = E_OS_CALLEVEL;
-    }
-    /* PRQA S 0306 ++ */ /* VL_Os_0306 */
-    else if (Os_AddressWritable((uint32)State) != TRUE)
-    /* PRQA S 0306 -- */
-    {
-        status = E_OS_ILLEGAL_ADDRESS;
-    }
-    else if (Os_IgnoreService() != TRUE)
-    {
-        status = E_OS_DISABLEDINT;
-    }
-    else if (Os_CheckObjAcs(OBJECT_TASK, TaskID) != TRUE)
-    {
-        status = E_OS_ACCESS;
-    }
-    else
-#endif /* TRUE == CFG_SERVICE_PROTECTION_ENABLE */
-    {
-#if (OS_AUTOSAR_CORES > 1)
-        /* PRQA S 3469 ++ */ /* VL_Os_3469 */
-        Os_CoreIdType coreId = Os_GetObjCoreId(TaskID);
-        /* PRQA S 3469 -- */
-        if (coreId != Os_SCB.sysCore)
-        {
-            RpcInputType rpcData = {
-                .sync         = RPC_SYNC,
-                .remoteCoreId = coreId,
-                .serviceId    = OSServiceId_GetTaskState,
-                .srvPara0     = (uint32)TaskID,
-                /* PRQA S 0306 ++ */ /* VL_Os_0306 */
-                .srvPara1 = (uint32)State,
-                /* PRQA S 0306 -- */
-                /* PRQA S 1258 ++ */ /* VL_Os_1258 */
-                .srvPara2 = (uint32)NULL_PARA,
-                /* PRQA S 1258 -- */
-            };
-            status = Os_RpcCallService(&rpcData);
-        }
-        else
-#endif /* OS_AUTOSAR_CORES > 1 */
-        {
-            Os_GetTaskState(TaskID, State);
-        }
+        Os_GetTaskState(TaskID, State);
     }
 
 #if (CFG_ERRORHOOK == TRUE)
-    if (status != E_OK)
+    if (status != E_OK) /* PRQA S 2992, 2996 */ /* VL_Os_2992, VL_Os_2996 */
     {
-        Os_TraceErrorHook(OSError_Save_GetTaskState(TaskID, State), OSServiceId_GetTaskState, status);
+        Os_TraceErrorHook(OSError_Save_GetTaskState(TaskID, State), /* PRQA S 2880 */ /* VL_Os_2880 */
+                          OSServiceId_GetTaskState,
+                          status, pScb); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
     }
 #endif
 
-#if (TRUE == CFG_TRACE_ENABLE)
-    Os_TraceServiceExit(OSServiceId_GetTaskState);
-#endif /* TRUE == CFG_TRACE_ENABLE */
-
-    OS_EXIT_KERNEL(); /* PRQA S 3469 */ /* VL_Os_3469 */ /* PRQA S 3138,3141 */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 3432, 4544, 1258, 4342, 2998, 2996 ++ */ /* VL_Os_3432, VL_Os_4544, VL_Os_1258, VL_Os_4342, VL_Os_2998, VL_Os_2996 */
+    OSRtiExitApi(pScb, OSApiId_GetTaskState);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_GetTaskState_Return, (status != E_OK ) ? (TaskStateType)0U : *State);
+    UNUSED_PARAMETER(pScb);
+    OS_HAL_EXIT_KERNEL(); /* PRQA S 2743*/ /* VL_Os_2743*/  
+    /* PRQA S 3432, 4544, 1258, 4342, 2998, 2996 -- */
+    /* PRQA S 3138, 3141 -- */
 
     return status;
 }
@@ -718,87 +678,62 @@ StatusType GetTaskState(TaskType TaskID, TaskStateRefType State)
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <The task <TaskID> is transferred from the suspended state into
- *                       the ready state>
- * Service ID           <0xde>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * param-TaskID[in]     <Reference to the task>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <StatusType>
- * PreCondition         <None>
- * CallByAPI            <None>
- * REQ ID               <None>
+/**
+ * The task <TaskID
  */
-/******************************************************************************/
-/* PRQA S 6070, 6030, 3006, 1532 ++ */ /* VL_MTR_Os_STCAL, VL_MTR_Os_STMIF, VL_Os_3006, VL_QAC_OneFunRef */
+/* PRQA S 6070, 3006, 1532, 3408, 1512 ++ */ /* VL_MTR_Os_STCAL, VL_Os_3006, VL_QAC_OneFunRef, VL_Os_3408, VL_Os_1512 */
 StatusType ActivateTask(TaskType TaskID)
-/* PRQA S 6070, 6030, 3006, 1532 -- */
+/* PRQA S 6070, 3006, 1532, 3408, 1512 -- */
 {
     /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
     /* PRQA S 1006 ++ */ /* VL_Os_1006 */
-    OS_ENTER_KERNEL();
+    OS_HAL_ENTER_KERNEL(); /* PRQA S 1021 */ /* VL_Os_1021 */
     /* PRQA S 1006 -- */
     /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
     StatusType status = E_OK;
+    /* PRQA S 3678 ++ */ /* VL_Os_3678 */
+    Os_SCBType *pScb = Os_GetCurrentContext();
+    /* PRQA S 3678 -- */
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 1317, 3432, 4442, 4521, 4544 ++ */ /* VL_Os_1317, VL_Os_3432, VL_Os_4442, VL_Os_4521, VL_Os_4544 */
+    OSRtiEnterApi(pScb, OSApiId_ActivateTask);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_ActivateTask_Start, TaskID);
+    /* PRQA S 1317, 3432, 4442, 4521, 4544 -- */
+    /* PRQA S 3138, 3141 -- */
 
-#if (TRUE == CFG_TRACE_ENABLE)
-    Os_TraceServiceEnter(OSServiceId_ActivateTask);
-#endif /* TRUE == CFG_TRACE_ENABLE */
+#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
+    Os_ServicePortParamType SprotParam = {
+        .AllowedContext = OS_SERVICEPORT_CHECK_ACTIVATE_TASK,
+        .ObjectType = OS_OBJECT_TASK,
+        .ObjectID = (Os_AppObjectId)TaskID,
+        .Address = NULL_PARA, /* PRQA S 1258 */ /* VL_Os_1258 */
+    };
+#endif
 
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
-    /* PRQA S 3432 ++ */ /* VL_Os_3442 */
-    if (CHECK_ID_INVALID(TaskID, Os_CfgTaskMax_Inf))
-    /* PRQA S 3432 -- */
+    if (Os_ObjectIDCheck((ObjectType)TaskID, (uint8)OS_OBJECT_TASK) != TRUE)
     {
         status = E_OS_ID;
     }
     else
-#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
+#endif
 
 #if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
-        if (Os_WrongContext(OS_CONTEXT_ACTIVATE_TASK) != TRUE)
-    {
-        status = E_OS_CALLEVEL;
-    }
-    else if (Os_IgnoreService() != TRUE)
-    {
-        status = E_OS_DISABLEDINT;
-    }
-    else if (APPLICATION_ACCESSIBLE != Os_AppCB[Os_SCB.sysRunningAppID].appState) /* PRQA S 3442 */ /* VL_Os_3442 */
+        if (OS_APPLICATION_ACCESSIBLE != Os_GetAppStateInternal(pScb->SysRunningAppId))
     {
         status = E_OS_ACCESS;
     }
-    else if (Os_CheckObjAcs(OBJECT_TASK, TaskID) != TRUE)
-    {
-        status = E_OS_ACCESS;
-    }
-    else
-#endif /* TRUE == CFG_SERVICE_PROTECTION_ENABLE */
+    else if ((status = Os_ServiceProtCheck(pScb, &SprotParam)) == E_OK) /* PRQA S 3326, 2004 */ /* VL_Os_3326, VL_Os_2004 */
+#endif
     {
 #if (OS_AUTOSAR_CORES > 1)
-        /* PRQA S 3469 ++ */ /* VL_Os_3469 */
-        Os_CoreIdType coreId = Os_GetObjCoreId(TaskID);
-        /* PRQA S 3469 -- */
-        if (coreId != Os_SCB.sysCore)
+        Os_CoreIdType ownerCore = OS_TASK_GET_COREID(TaskID);
+        if (ownerCore != Os_GetCoreIdLocal())
         {
-            RpcInputType rpcData = {
-                .sync         = RPC_SYNC,
-                .remoteCoreId = coreId,
-                .serviceId    = OSServiceId_ActivateTask,
-                .srvPara0     = (uint32)TaskID,
-                /* PRQA S 1258 ++ */ /* VL_Os_1258 */
-                .srvPara1 = (uint32)NULL_PARA,
-                .srvPara2 = (uint32)NULL_PARA,
-                /* PRQA S 1258 -- */
-            };
-            status = Os_RpcCallService(&rpcData);
+            status = Os_RpcCall_ActivateTask(ownerCore, OS_RPC_SYNC, TaskID);
         }
         else
-#endif /* OS_AUTOSAR_CORES > 1 */
+#endif
         {
             status = Os_ActivateTask(TaskID);
         }
@@ -807,15 +742,20 @@ StatusType ActivateTask(TaskType TaskID)
 #if (CFG_ERRORHOOK == TRUE)
     if (status != E_OK)
     {
-        Os_TraceErrorHook(OSError_Save_ActivateTask(TaskID), OSServiceId_ActivateTask, status);
+        Os_TraceErrorHook(OSError_Save_ActivateTask(TaskID),
+                          OSServiceId_ActivateTask,
+                          status, pScb); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
     }
 #endif
 
-#if (TRUE == CFG_TRACE_ENABLE)
-    Os_TraceServiceExit(OSServiceId_ActivateTask);
-#endif /* TRUE == CFG_TRACE_ENABLE */
-
-    OS_EXIT_KERNEL(); /* PRQA S 3469 */ /* VL_Os_3469 */ /* PRQA S 3138,3141 */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 3432, 4544 ++ */ /* VL_Os_3432, VL_Os_4544 */
+    OSRtiExitApi(pScb, OSApiId_ActivateTask);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_ActivateTask_Return, status);
+    UNUSED_PARAMETER(pScb);
+    OS_HAL_EXIT_KERNEL(); /* PRQA S 2743*/ /* VL_Os_2743*/
+    /* PRQA S 3432, 4544 -- */
+    /* PRQA S 3138, 3141 -- */
 
     return status;
 }
@@ -824,87 +764,62 @@ StatusType ActivateTask(TaskType TaskID)
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <Asynchronous version of the ActivateTask() function.>
- * Service ID           <0xde>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * param-TaskID[in]     <Reference to the task>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <StatusType>
- * PreCondition         <None>
- * CallByAPI            <None>
- * REQ ID               <None>
+/**
+ * Asynchronous version of the ActivateTask() function.
  */
-/******************************************************************************/
-/* PRQA S 6070,6030, 1503, 3006 ++ */ /* VL_MTR_Os_STCAL,VL_MTR_Os_STMIF, VL_QAC_NoUsedApi,VL_Os_3006 */
-StatusType ActivateTaskAsyn(TaskType TaskID)
-/* PRQA S 6070,6030, 1503, 3006 -- */
+/* PRQA S 6070, 3006, 1503, 3408, 1512 ++ */ /* VL_MTR_Os_STCAL, VL_Os_3006, VL_QAC_NoUsedApi, VL_Os_3408, VL_Os_1512 */
+void ActivateTaskAsyn(TaskType TaskID) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
+/* PRQA S 6070, 3006, 1503, 3408, 1512 -- */
 {
     /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
     /* PRQA S 1006 ++ */ /* VL_Os_1006 */
-    OS_ENTER_KERNEL();
+    OS_HAL_ENTER_KERNEL(); /* PRQA S 1021 */ /* VL_Os_1021 */
     /* PRQA S 1006 -- */
     /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
-
     StatusType status = E_OK;
+    /* PRQA S 3678 ++ */ /* VL_Os_3678 */
+    Os_SCBType *pScb = Os_GetCurrentContext();
+    /* PRQA S 3678 -- */
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 1317, 3432, 4442, 4521, 4544 ++ */ /* VL_Os_1317, VL_Os_3432, VL_Os_4442, VL_Os_4521, VL_Os_4544 */
+    OSRtiEnterApi(pScb, OSApiId_ActivateTaskAsyn);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_ActivateTaskAsyn_Start, TaskID);
+    /* PRQA S 1317, 3432, 4442, 4521, 4544 -- */
+    /* PRQA S 3138, 3141 -- */
 
-#if (TRUE == CFG_TRACE_ENABLE)
-    Os_TraceServiceEnter(OSServiceId_ActivateTaskAsyn);
-#endif /* TRUE == CFG_TRACE_ENABLE */
+#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
+    Os_ServicePortParamType SprotParam = {
+        .AllowedContext = OS_SERVICEPORT_CHECK_ACTIVATE_TASK_ASYN,
+        .ObjectType = OS_OBJECT_TASK,
+        .ObjectID = (Os_AppObjectId)TaskID,
+        .Address = NULL_PARA, /* PRQA S 1258 */ /* VL_Os_1258 */
+    };
+#endif
 
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
-    /* PRQA S 3432 ++ */ /* VL_Os_3432 */
-    if (CHECK_ID_INVALID(TaskID, Os_CfgTaskMax_Inf))
-    /* PRQA S 3432 -- */
+    if (Os_ObjectIDCheck((ObjectType)TaskID, (uint8)OS_OBJECT_TASK) != TRUE)
     {
         status = E_OS_ID;
     }
     else
-#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
+#endif
 
 #if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
-        if (Os_WrongContext(OS_CONTEXT_ACTIVATE_TASK) != TRUE)
-    {
-        status = E_OS_CALLEVEL;
-    }
-    else if (Os_IgnoreService() != TRUE)
-    {
-        status = E_OS_DISABLEDINT;
-    }
-    else if (APPLICATION_ACCESSIBLE != Os_AppCB[Os_SCB.sysRunningAppID].appState) /* PRQA S 3442 */ /* VL_Os_3442 */
+        if (OS_APPLICATION_ACCESSIBLE != Os_GetAppStateInternal(pScb->SysRunningAppId))
     {
         status = E_OS_ACCESS;
     }
-    else if (Os_CheckObjAcs(OBJECT_TASK, TaskID) != TRUE)
-    {
-        status = E_OS_ACCESS;
-    }
-    else
-#endif /* TRUE == CFG_SERVICE_PROTECTION_ENABLE */
+    else if ((status = Os_ServiceProtCheck(pScb, &SprotParam)) == E_OK) /* PRQA S 3326, 2004 */ /* VL_Os_3326, VL_Os_2004 */
+#endif
     {
 #if (OS_AUTOSAR_CORES > 1)
-        /* PRQA S 3469 ++ */ /* VL_Os_3469 */
-        Os_CoreIdType coreId = Os_GetObjCoreId(TaskID);
-        /* PRQA S 3469 -- */
-        if (coreId != Os_SCB.sysCore)
+        Os_CoreIdType ownerCore = OS_TASK_GET_COREID(TaskID);
+        if (ownerCore != Os_GetCoreIdLocal())
         {
-            RpcInputType rpcData = {
-                .sync         = RPC_ASYNC,
-                .remoteCoreId = coreId,
-                .serviceId    = OSServiceId_ActivateTask,
-                .srvPara0     = (uint32)TaskID,
-                /* PRQA S 1258 ++ */ /* VL_Os_1258 */
-                .srvPara1 = (uint32)NULL_PARA,
-                .srvPara2 = (uint32)NULL_PARA,
-                /* PRQA S 1258 -- */
-            };
-            status = Os_RpcCallService(&rpcData);
+            status = Os_RpcCall_ActivateTask(ownerCore, OS_RPC_ASYNC, TaskID);
         }
         else
-#endif /* OS_AUTOSAR_CORES > 1 */
+#endif
         {
             status = Os_ActivateTask(TaskID);
         }
@@ -913,421 +828,414 @@ StatusType ActivateTaskAsyn(TaskType TaskID)
 #if (CFG_ERRORHOOK == TRUE)
     if (status != E_OK)
     {
-        Os_TraceErrorHook(OSError_Save_ActivateTaskAsyn(TaskID), OSServiceId_ActivateTaskAsyn, status);
+        Os_TraceErrorHook(OSError_Save_ActivateTaskAsyn(TaskID),
+                          OSServiceId_ActivateTaskAsyn,
+                          status, pScb); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
     }
 #endif
-
-#if (TRUE == CFG_TRACE_ENABLE)
-    Os_TraceServiceExit(OSServiceId_ActivateTaskAsyn);
-#endif /* TRUE == CFG_TRACE_ENABLE */
-
-    OS_EXIT_KERNEL(); /* PRQA S 3469 */ /* VL_Os_3469 */ /* PRQA S 3138,3141 */ /* VL_Os_PlatformNoDef */
-    return status;
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 3432, 4544, 1259 ++ */ /* VL_Os_3432, VL_Os_4544, VL_Os_1259 */
+    OSRtiExitApi(pScb, OSApiId_ActivateTaskAsyn);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_ActivateTaskAsyn_Return, 0);
+    UNUSED_PARAMETER(pScb);
+    UNUSED_PARAMETER(status);
+    OS_HAL_EXIT_KERNEL(); /* PRQA S 2743*/ /* VL_Os_2743*/
+    /* PRQA S 3432, 4544, 1259 -- */
+    /* PRQA S 3138, 3141 -- */
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <This service causes the termination of the calling task.>
- * Service ID           <0xdf>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * param-Name[in]       <None>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <StatusType>
- * PreCondition         <None>
- * CallByAPI            <None>
- * REQ ID               <None>
+/**
+ * This service causes the termination of the calling task.
  */
-/******************************************************************************/
-/* PRQA S 3006, 1532, 1503 ++ */ /* VL_Os_3006, VL_QAC_OneFunRef, VL_QAC_NoUsedApi */
+/* PRQA S 6070, 3006, 1503, 3408, 1512 ++ */ /* VL_MTR_Os_STCAL, VL_Os_3006, VL_QAC_NoUsedApi, VL_Os_3408, VL_Os_1512 */
 StatusType TerminateTask(void)
-/* PRQA S 3006, 1532, 1503 -- */
+/* PRQA S 6070, 3006, 1503, 3408, 1512 -- */
 {
     /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
     /* PRQA S 1006 ++ */ /* VL_Os_1006 */
-    OS_ENTER_KERNEL();
+    OS_HAL_ENTER_KERNEL(); /* PRQA S 1021 */ /* VL_Os_1021 */
     /* PRQA S 1006 -- */
     /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
     StatusType status = E_OK;
-
-#if (TRUE == CFG_TRACE_ENABLE)
-    Os_TraceServiceEnter(OSServiceId_TerminateTask);
-#endif /* TRUE == CFG_TRACE_ENABLE */
-
-#if (OS_STATUS_EXTENDED == CFG_STATUS)
-    if (OS_LEVEL_ISR2 == Os_SCB.sysOsLevel)
-    {
-        status = E_OS_CALLEVEL;
-    }
-    else
-#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
+    /* PRQA S 3678 ++ */ /* VL_Os_3678 */
+    Os_SCBType *pScb = Os_GetCurrentContext();
+    /* PRQA S 3678 -- */
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 1317, 3432, 4442, 4521, 4544 ++ */ /* VL_Os_1317, VL_Os_3432, VL_Os_4442, VL_Os_4521, VL_Os_4544 */
+    OSRtiEnterApi(pScb, OSApiId_TerminateTask);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_TerminateTask_Start, pScb->SysRunningTaskId);
+    /* PRQA S 1317, 3432, 4442, 4521, 4544 -- */
+    /* PRQA S 3138, 3141 -- */
 
 #if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
-        if (Os_WrongContext(OS_CONTEXT_TERMINATE_TASK) != TRUE)
-    {
-        status = E_OS_CALLEVEL;
-    }
-    else if (Os_IgnoreService() != TRUE)
-    {
-        status = E_OS_DISABLEDINT;
-    }
-    else
-#endif /* TRUE == CFG_SERVICE_PROTECTION_ENABLE */
-    {
-        status = Os_TerminateTask();
-    }
-
-#if (CFG_ERRORHOOK == TRUE)
-    if (status != E_OK)
-    {
-        Os_TraceErrorHook(OSError_Save_TerminateTask(), OSServiceId_TerminateTask, status);
-    }
+    Os_ServicePortParamType SprotParam = {
+        .AllowedContext = OS_SERVICEPORT_CHECK_TERMINATE_TASK,
+        .ObjectType = OS_OBJECT_TASK,
+        .ObjectID = (Os_AppObjectId)pScb->SysRunningTaskId,
+        .Address = NULL_PARA, /* PRQA S 1258 */ /* VL_Os_1258 */
+    };
 #endif
 
-#if (TRUE == CFG_TRACE_ENABLE)
-    Os_TraceServiceExit(OSServiceId_TerminateTask);
-#endif /* TRUE == CFG_TRACE_ENABLE */
-
-    OS_EXIT_KERNEL(); /* PRQA S 3469,2741,3138,3141 */ /* VL_Os_PlatformNoDef */
-    return status;
-}
-#define OS_STOP_SEC_CODE
-#include "Os_MemMap.h"
-
-#define OS_START_SEC_CODE
-#include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <TaskID Reference to the task which is currently running
- *                       Description: GetTaskID returns the information about the
- *                       TaskID of the task which is currently running.>
- * Service ID           <0xe2>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * param-TaskID[in]     <Reference to the task>
- * Param-Name[out]      <TaskID>
- * Param-Name[in/out]   <None>
- * return               <StatusType>
- * PreCondition         <None>
- * CallByAPI            <None>
- * REQ ID               <None>
- */
-/******************************************************************************/
-StatusType GetTaskID(TaskRefType TaskID) /* PRQA S 3006 */ /* VL_Os_3006 */ /* PRQA S 1503 */ /* VL_QAC_NoUsedApi */
-{
-    /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
-    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
-    OS_ENTER_KERNEL();
-    /* PRQA S 1006 -- */
-    /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
-
-    StatusType status = E_OK;
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
-    if (NULL_PTR == TaskID)
-    {
-        status = E_OS_PARAM_POINTER;
-    }
-    else
-#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
-#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
-        if (Os_WrongContext(OS_CONTEXT_GET_TASK_ID) != TRUE)
-    {
-        status = E_OS_CALLEVEL;
-    }
-    /* PRQA S 0306 ++ */ /* VL_Os_0306 */
-    else if (Os_AddressWritable((uint32)TaskID) != TRUE)
-    /* PRQA S 0306 -- */
-    {
-        status = E_OS_ILLEGAL_ADDRESS;
-    }
-    else if (Os_IgnoreService() != TRUE)
-    {
-        status = E_OS_DISABLEDINT;
-    }
-    else
-#endif /* TRUE == CFG_SERVICE_PROTECTION_ENABLE */
-    {
-        /* PRQA S 3120, 4397 ++ */ /* VL_QAC_MagicNum, VL_Os_4397 */
-        *TaskID = Os_SCB.sysRunningTaskID | (Os_SCB.sysCore << 12u);
-        /* PRQA S 3120, 4397 -- */
-    }
-
-#if (CFG_ERRORHOOK == TRUE)
-    if (status != E_OK)
-    {
-        Os_TraceErrorHook(OSError_Save_GetTaskID(TaskID), OSServiceId_GetTaskID, status);
-    }
-#endif
-
-#if (TRUE == CFG_TRACE_ENABLE)
-    Os_TraceServiceExit(OSServiceId_GetTaskID);
-#endif /* TRUE == CFG_TRACE_ENABLE */
-
-    OS_EXIT_KERNEL(); /* PRQA S 3469 */ /* VL_Os_3469 */ /* PRQA S 3138,3141 */ /* VL_Os_PlatformNoDef */
-    return status;
-}
-#define OS_STOP_SEC_CODE
-#include "Os_MemMap.h"
-
-#define OS_START_SEC_CODE
-#include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <If a higher-priority task is ready, the internal
- *                       resource of the task is released, the current task
- *                       is put into the ready state, its context is saved and
- *                       the higher-priority task is executed.
- *                       Otherwise the calling task is continued.>
- * Service ID           <0xe1>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * param-Name[in]       <None>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <StatusType>
- * PreCondition         <None>
- * CallByAPI            <None>
- * REQ ID               <None>
- */
-/******************************************************************************/
-/* PRQA S 6070,6030, 3006, 1503 ++ */ /* VL_MTR_Os_STCAL,VL_MTR_Os_STMIF, VL_Os_3006, VL_QAC_NoUsedApi */
-StatusType Schedule(void)
-/* PRQA S 6070,6030, 3006, 1503 -- */
-{
-    /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
-    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
-    OS_ENTER_KERNEL();
-    /* PRQA S 1006 -- */
-    /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
-
-    StatusType status = E_OK;
-
-#if (TRUE == CFG_TRACE_ENABLE)
-    Os_TraceServiceEnter(OSServiceId_Schedule);
-#endif /* TRUE == CFG_TRACE_ENABLE */
-
-    OS_ARCH_DECLARE_CRITICAL();
-
-#if (OS_STATUS_EXTENDED == CFG_STATUS)
-    if (OS_LEVEL_ISR2 == Os_SCB.sysOsLevel)
+    if (OS_LEVEL_ISR2 == pScb->SysOsLevel)
     {
         status = E_OS_CALLEVEL;
     }
     else
-#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
-
-#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
-        if (Os_WrongContext(OS_CONTEXT_SCHEDULE) != TRUE)
-    {
-        status = E_OS_CALLEVEL;
-    }
-    else if (Os_IgnoreService() != TRUE)
-    {
-        status = E_OS_DISABLEDINT;
-    }
-    else
-#endif /* TRUE == CFG_SERVICE_PROTECTION_ENABLE */
-    {
-#if (OS_STATUS_EXTENDED == CFG_STATUS)
 #if ((OS_NOSC == CFG_SC) || (OS_SC1 == CFG_SC) || (OS_SC2 == CFG_SC))
-        if (Os_SCB.sysOsLevel != OS_LEVEL_TASK)
-        {
-            status = E_OS_CALLEVEL;
-        }
-        else
-#endif /* OS_NOSC == CFG_SC || OS_SC1 == CFG_SC || OS_SC2 == CFG_SC */
-        {
-#if (CFG_STD_RESOURCE_MAX > 0U)
-            if (Os_TCB[Os_SCB.sysRunningTaskID].taskResCount > (Os_ResourceType)0)
-            {
-                status = E_OS_RESOURCE;
-            }
-            else
-#endif /* CFG_STD_RESOURCE_MAX > 0U */
-            {
-#if (CFG_SPINLOCK_MAX > 0U)
-                status = Os_SpinlockSafetyCheck();
-#endif
-            }
-        }
-#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
-
-        if ((StatusType)E_OK == status) /* PRQA S 2991, 2995 */ /* VL_Os_2991, VL_Os_2995 */
-        {
-            /* PRQA S 3469 ++ */ /* VL_Os_3469 */
-            OS_ARCH_ENTRY_CRITICAL();
-/* PRQA S 3469 -- */
-
-/* Basic status */
-#if (CFG_INTERNAL_RESOURCE_MAX > 0)
-            if (Os_InterResCeiling[Os_SCB.sysRunningTaskID] != (Os_PriorityType)0)
-            {
-                Os_ReleaseInternalResource(Os_SCB.sysRunningTaskID);
-                Os_SCB.sysRunningTCB->taskRunPrio = Os_TaskCfg[Os_SCB.sysRunningTaskID].osTaskPriority;
-            }
-#endif
-
-            Os_SCB.sysHighPrio   = Os_GetHighPrio();
-            Os_SCB.sysHighTaskID = Os_ReadyQueueGetFirst(Os_SCB.sysHighPrio);
-
-            if (Os_SCB.sysHighTaskID != Os_SCB.sysRunningTaskID)
-            {
-                Os_SCB.sysDispatchLocker = 0u;
-#if (TRUE == CFG_TRACE_ENABLE)
-                Os_TraceTaskSwitch(
-                    Os_SCB.sysRunningTaskID,
-                    Os_SCB.sysHighTaskID,
-                    OS_TRACE_TASK_SWITCH_REASON_SCHEDULE_READY,
-                    OS_TRACE_TASK_SWITCH_REASON_SCHEDULE_ACTIVE);
-#endif
-
-                OS_START_DISPATCH(); /* PRQA S 3138,3141 */ /* VL_Os_PlatformNoDef */
-                /* PRQA S 3469 ++ */                        /* VL_Os_3469 */
-                Os_Dispatch(); /* PRQA S 3138,1290 */       /* VL_Os_3138,VL_Os_1290 */
-                /* PRQA S 3469 -- */
-            }
-
-#if (CFG_INTERNAL_RESOURCE_MAX > 0)
-            Os_GetInternalResource();
-#endif
-
-            /* PRQA S 3469 ++ */ /* VL_Os_3469 */
-            OS_ARCH_EXIT_CRITICAL();
-            /* PRQA S 3469 -- */
-        }
-    }
-
-#if (CFG_ERRORHOOK == TRUE)
-    if (status != E_OK)
-    {
-        Os_TraceErrorHook(OSError_Save_Schedule(), OSServiceId_Schedule, status);
-    }
-#endif
-
-#if (TRUE == CFG_TRACE_ENABLE)
-    Os_TraceServiceExit(OSServiceId_Schedule);
-#endif /* TRUE == CFG_TRACE_ENABLE */
-
-    OS_EXIT_KERNEL(); /* PRQA S 3469 */ /* VL_Os_3469 */ /* PRQA S 3138,3141 */ /* VL_Os_PlatformNoDef */
-    return status;
-}
-#define OS_STOP_SEC_CODE
-#include "Os_MemMap.h"
-
-#define OS_START_SEC_CODE
-#include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <This service causes the termination of the calling task. After
- *                       termination of the calling task a succeeding task <TaskID> is
- *                       activated. Using this service, it ensures that the succeeding
- *                       task starts to run at the earliest after the calling task has been
- *                       terminated.>
- * Service ID           <0xe0>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * param-TaskID[in]     <Reference to the task>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <StatusType>
- * PreCondition         <None>
- * CallByAPI            <None>
- * REQ ID               <None>
- */
-/******************************************************************************/
-/* PRQA S 6070,6030,6010 ++ */ /* VL_MTR_Os_STCAL,VL_MTR_Os_STMIF,VL_MTR_Os_STCYC */
-/* PRQA S 3006,1503,1532 ++ */ /* VL_Os_3006,VL_QAC_NoUsedApi,VL_QAC_OneFunRef */
-StatusType ChainTask(TaskType TaskID)
-/* PRQA S 3006,1503,1532 -- */
-/* PRQA S 6070,6030,6010 -- */
-{
-    /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
-    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
-    OS_ENTER_KERNEL();
-    /* PRQA S 1006 -- */
-    /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
-
-    StatusType status = E_OK;
-
-#if (TRUE == CFG_TRACE_ENABLE)
-    Os_TraceServiceEnter(OSServiceId_ChainTask);
-#endif /* TRUE == CFG_TRACE_ENABLE */
-
-#if (OS_STATUS_EXTENDED == CFG_STATUS)
-    if (OS_LEVEL_ISR2 == Os_SCB.sysOsLevel)
+    if (OS_LEVEL_TASK != pScb->SysOsLevel)
     {
         status = E_OS_CALLEVEL;
     }
-    /* PRQA S 3432 ++ */ /* VL_Os_3432 */
-    else if (CHECK_ID_INVALID(TaskID, Os_CfgTaskMax_Inf))
-    /* PRQA S 3432 -- */
-    {
-        status = E_OS_ID;
-    }
     else
-#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
+#endif
+#endif
+
 #if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
-        if (Os_WrongContext(OS_CONTEXT_CHAIN_TASK) != TRUE)
-    {
-        status = E_OS_CALLEVEL;
-    }
-    else if (Os_IgnoreService() != TRUE)
-    {
-        status = E_OS_DISABLEDINT;
-    }
-    else if (Os_CheckObjAcs(OBJECT_TASK, TaskID) != TRUE)
-    {
-        status = E_OS_ACCESS;
-    }
-    else
-#endif /* TRUE == CFG_SERVICE_PROTECTION_ENABLE */
+    if ((status = Os_ServiceProtCheck(pScb, &SprotParam)) == E_OK) /* PRQA S 3326, 2004 */ /* VL_Os_3326, VL_Os_2004 */
+#endif
     {
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
 #if (CFG_STD_RESOURCE_MAX > 0U)
-        if (Os_TCB[Os_SCB.sysRunningTaskID].taskResCount > (Os_ResourceType)0)
+        if (Os_TCB[pScb->SysRunningTaskId]->TaskResCount > 0U)
         {
             status = E_OS_RESOURCE;
         }
         else
-#endif /* CFG_STD_RESOURCE_MAX > 0U */
+#endif
         {
 #if (CFG_SPINLOCK_MAX > 0U)
-            status = Os_SpinlockSafetyCheck();
+            status = Os_SpinlockSafetyCheck(pScb->SysRunningTaskId);
 #endif
         }
-#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
+#endif
+        if ((StatusType)E_OK == status) /* PRQA S 2991, 2995 */ /* VL_Os_2991, VL_Os_2995 */
+        {
+            Os_TerminateTask(pScb->SysRunningTaskId);
+        }
+    }
+
+#if (CFG_ERRORHOOK == TRUE)
+    if (status != E_OK) /* PRQA S 2992, 2996 */ /* VL_Os_2992, VL_Os_2996 */
+    {
+        /* PRQA S 3138 ++ */ /* VL_Os_3138 */
+        Os_TraceErrorHook(OSError_Save_TerminateTask(), OSServiceId_TerminateTask, status, pScb); /* PRQA S 2880 */ /* VL_Os_2880 */
+        /* PRQA S 3138 -- */
+    }
+#endif
+
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 3432, 4544 ++ */ /* VL_Os_3432, VL_Os_4544 */
+    OSRtiExitApi(pScb, OSApiId_TerminateTask);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_TerminateTask_Return, status);
+    OS_HAL_EXIT_KERNEL(); /* PRQA S 2743*/ /* VL_Os_2743*/
+    /* PRQA S 3432, 4544 -- */
+    /* PRQA S 3138, 3141 -- */
+    return status;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * TaskID Reference to the task which is currently running
+ *                       Description: GetTaskID returns the information about the
+ *                       TaskID of the task which is currently running.
+ */
+/* PRQA S 3006, 1503, 3408, 1512 ++ */ /* VL_Os_3006, VL_QAC_NoUsedApi, VL_Os_3408, VL_Os_1512 */
+StatusType GetTaskID(TaskRefType TaskID)
+/* PRQA S 3006, 1503, 3408, 1512 -- */
+{
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
+    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
+    OS_HAL_ENTER_KERNEL(); /* PRQA S 1021 */ /* VL_Os_1021 */
+    /* PRQA S 1006 -- */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
+    StatusType status = E_OK;
+    /* PRQA S 3678 ++ */ /* VL_Os_3678 */
+    Os_SCBType *pScb = Os_GetCurrentContext();
+    /* PRQA S 3678 -- */
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 1317, 1259, 3432, 4442, 4521, 4544 ++ */ /* VL_Os_1317, VL_Os_1259, VL_Os_3432, VL_Os_4442, VL_Os_4521, VL_Os_4544 */
+    OSRtiEnterApi(pScb, OSApiId_GetTaskID);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_GetTaskID_Start, 0);
+    /* PRQA S 1317, 1259, 3432, 4442, 4521, 4544 -- */
+    /* PRQA S 3138, 3141 -- */
+
+#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
+    Os_ServicePortParamType SprotParam = {
+        .AllowedContext = OS_SERVICEPORT_CHECK_GET_TASK_ID,
+        .ObjectType = OS_OBJECT_TASK,
+        .ObjectID = (Os_AppObjectId)0U,
+        .Address = (uint32)TaskID, /* PRQA S 0306 */ /* VL_Os_0306 */
+    };
+    if ((status = Os_ServiceProtCheck(pScb, &SprotParam)) == E_OK) /* PRQA S 3326 */ /* VL_Os_3326 */
+#endif
+    {
+        *TaskID = pScb->SysRunningTaskId;
+    }
+
+#if (CFG_ERRORHOOK == TRUE)
+    if (status != E_OK) /* PRQA S 2992, 2996 */ /* VL_Os_2992, VL_Os_2996 */
+    {
+        Os_TraceErrorHook(OSError_Save_GetTaskID(TaskID), /* PRQA S 2880 */ /* VL_Os_2880 */
+                          OSServiceId_GetTaskID,
+                          status,
+                          pScb); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
+    }
+#endif
+
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 3432, 4544, 1258, 2996, 2998 ++ */ /* VL_Os_3432, VL_Os_4544, VL_Os_1258, VL_Os_2996, VL_Os_2998 */
+    OSRtiExitApi(pScb, OSApiId_GetTaskID);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_GetTaskID_Return, (status != E_OK ) ? INVALID_TASK :*TaskID);
+    OS_HAL_EXIT_KERNEL(); /* PRQA S 2743*/ /* VL_Os_2743*/
+    /* PRQA S 3432, 4544, 1258, 2996, 2998 -- */
+    /* PRQA S 3138, 3141 -- */
+    return status;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * If a higher-priority task is ready, the internal
+ *                       resource of the task is released, the current task
+ *                       is put into the ready state, its context is saved and
+ *                       the higher-priority task is executed.
+ *                       Otherwise the calling task is continued.
+ */
+OS_LOCAL_INLINE OS_ALWAYS_INLINE void Os_Schedule(Os_SCBType *pScb) /* PRQA S 3006*/ /* VL_Os_3006*/
+{
+    OS_HAL_DECLARE_CRITICAL();
+
+    OS_HAL_ENTRY_CRITICAL();
+/* Basic status */
+#if (CFG_INTERNAL_RESOURCE_MAX > 0)
+    if (Os_InterResCeiling[pScb->SysRunningTaskId] != (Os_PriorityType)0)
+    {
+        Os_ReleaseInternalResource(pScb, pScb->SysRunningTaskId);
+        pScb->SysRunningTCB->TaskRunPrio = Os_TaskCfg[pScb->SysRunningTaskId].TaskPriority;
+    }
+#endif
+
+    Os_UpdateHighPrioTask(pScb);
+
+    if (pScb->SysHighTaskId != pScb->SysRunningTaskId)
+    {
+        pScb->SysDispatchLocker = 0u;
+
+        Os_Hal_Dispatch(); /* PRQA S 1006*/ /* VL_Os_1006*/
+    }
+
+#if (CFG_INTERNAL_RESOURCE_MAX > 0)
+    Os_GetInternalResource(pScb);
+#endif
+
+    OS_HAL_EXIT_CRITICAL();
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * If a higher-priority task is ready, the internal
+ *                       resource of the task is released, the current task
+ *                       is put into the ready state, its context is saved and
+ *                       the higher-priority task is executed.
+ *                       Otherwise the calling task is continued.
+ */
+/* PRQA S 6070, 3006, 1503, 3408, 1512 ++ */ /* VL_MTR_Os_STCAL,VL_Os_3006, VL_QAC_NoUsedApi, VL_Os_3408, VL_Os_1512 */
+StatusType Schedule(void)
+/* PRQA S 6070, 3006, 1503, 3408, 1512 -- */
+{
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
+    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
+    OS_HAL_ENTER_KERNEL(); /* PRQA S 1021 */ /* VL_Os_1021 */
+    /* PRQA S 1006 -- */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
+    StatusType status = E_OK;
+    Os_SCBType *pScb = Os_GetCurrentContext();
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 1317, 1259, 3432, 4442, 4521, 4544 ++ */ /* VL_Os_1317, VL_Os_1259, VL_Os_3432, VL_Os_4442, VL_Os_4521, VL_Os_4544 */
+    OSRtiEnterApi(pScb, OSApiId_Schedule);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_Schedule_Start, 0);
+    /* PRQA S 1317, 1259, 3432, 4442, 4521, 4544 -- */
+    /* PRQA S 3138, 3141 -- */
+
+#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
+    Os_ServicePortParamType SprotParam = {
+        .AllowedContext = OS_SERVICEPORT_CHECK_SCHEDULE,
+        .ObjectType = OS_OBJECT_TASK,
+        .ObjectID = (Os_AppObjectId)pScb->SysRunningTaskId,
+        .Address = NULL_PARA, /* PRQA S 1258 */ /* VL_Os_1258 */
+    };
+#endif
+
+#if (OS_STATUS_EXTENDED == CFG_STATUS)
+    if (OS_LEVEL_ISR2 == pScb->SysOsLevel)
+    {
+        status = E_OS_CALLEVEL;
+    }
+    else
+#endif
+#if (TRUE == CFG_GLOBAL_TASK_STACK_SHARING)
+    if (Os_TaskCfg[pScb->SysRunningTaskId].StackSharing == TRUE)
+    {
+        status = E_OS_LIMIT;
+    }
+    else
+#endif
+#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
+    if ((status = Os_ServiceProtCheck(pScb, &SprotParam)) == E_OK) /* PRQA S 3326, 2004 */ /* VL_Os_3326, VL_Os_2004 */
+#endif
+    {
+#if (OS_STATUS_EXTENDED == CFG_STATUS)
+#if ((OS_NOSC == CFG_SC) || (OS_SC1 == CFG_SC) || (OS_SC2 == CFG_SC))
+        if (pScb->SysOsLevel != OS_LEVEL_TASK)
+        {
+            status = E_OS_CALLEVEL;
+        }
+        else
+#endif
+        {
+#if (CFG_STD_RESOURCE_MAX > 0U)
+            if (Os_TCB[pScb->SysRunningTaskId]->TaskResCount > 0U)
+            {
+                status = E_OS_RESOURCE;
+            }
+            else
+#endif
+            {
+#if (CFG_SPINLOCK_MAX > 0U)
+                status = Os_SpinlockSafetyCheck(pScb->SysRunningTaskId);
+#endif
+            }
+        }
+#endif
+
+        if ((StatusType)E_OK == status) /* PRQA S 2991, 2995 */ /* VL_Os_2991, VL_Os_2995 */
+        {
+            Os_Schedule(pScb);
+        }
+    }
+
+#if (CFG_ERRORHOOK == TRUE)
+    if (status != E_OK) /* PRQA S 2992, 2996 */ /* VL_Os_2992, VL_Os_2996 */
+    {
+        /* PRQA S 3138 ++ */ /* VL_Os_3138 */
+        Os_TraceErrorHook(OSError_Save_Schedule(), OSServiceId_Schedule, status, pScb); /* PRQA S 2880 */ /* VL_Os_2880 */
+        /* PRQA S 3138 -- */
+    }
+#endif
+
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 3432, 4544 ++ */ /* VL_Os_3432, VL_Os_4544 */
+    OSRtiExitApi(pScb, OSApiId_Schedule);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_Schedule_Return, status);
+    OS_HAL_EXIT_KERNEL(); /* PRQA S 2743*/ /* VL_Os_2743*/
+    /* PRQA S 3432, 4544 -- */
+    /* PRQA S 3138, 3141 -- */
+    return status;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * This service causes the termination of the calling task. After
+ *                       termination of the calling task a succeeding task <TaskID
+ */
+/* PRQA S 3006, 6070, 6010, 6030, 6080, 1503, 3408, 1512 ++ */ /* VL_Os_3006, VL_MTR_Os_STCAL, VL_MTR_Os_STCYC, VL_MTR_Os_STMIF, VL_MTR_Os_STPTH, VL_QAC_NoUsedApi, VL_Os_3408, VL_Os_1512 */
+StatusType ChainTask(TaskType TaskID)
+/* PRQA S 3006, 6070, 6010, 6030, 6080, 1503, 3408, 1512 -- */
+{
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
+    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
+    OS_HAL_ENTER_KERNEL(); /* PRQA S 1021 */ /* VL_Os_1021 */
+    /* PRQA S 1006 -- */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
+    StatusType status = E_OK;
+
+    /* PRQA S 3678 ++ */ /* VL_Os_3678 */
+    Os_SCBType *pScb = Os_GetCurrentContext();
+    /* PRQA S 3678 -- */
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 1317, 3432, 4442, 4521, 4544 ++ */ /* VL_Os_1317, VL_Os_3432, VL_Os_4442, VL_Os_4521, VL_Os_4544 */
+    OSRtiEnterApi(pScb, OSApiId_ChainTask);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_ChainTask_Start, TaskID);
+    /* PRQA S 1317, 3432, 4442, 4521, 4544 -- */
+    /* PRQA S 3138, 3141 -- */
+
+#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
+    Os_ServicePortParamType SprotParam = {
+        .AllowedContext = OS_SERVICEPORT_CHECK_CHAIN_TASK,
+        .ObjectType = OS_OBJECT_TASK,
+        .ObjectID = (Os_AppObjectId)TaskID,
+        .Address = NULL_PARA, /* PRQA S 1258 */ /* VL_Os_1258 */
+    };
+#endif
+
+#if (OS_STATUS_EXTENDED == CFG_STATUS)
+    if (Os_ObjectIDCheck((ObjectType)TaskID, (uint8)OS_OBJECT_TASK) != TRUE)
+    {
+        status = E_OS_ID;
+    }
+    else if (OS_LEVEL_ISR2 == pScb->SysOsLevel)
+    {
+        status = E_OS_CALLEVEL;
+    }
+    else
+#if ((OS_NOSC == CFG_SC) || (OS_SC1 == CFG_SC) || (OS_SC2 == CFG_SC))
+    if (OS_LEVEL_TASK != pScb->SysOsLevel)
+    {
+        status = E_OS_CALLEVEL;
+    }
+    else
+#endif
+#endif
+
+#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
+    if ((status = Os_ServiceProtCheck(pScb, &SprotParam)) == E_OK) /* PRQA S 3326, 2004 */ /* VL_Os_3326, VL_Os_2004 */
+#endif
+    {
+#if (OS_STATUS_EXTENDED == CFG_STATUS)
+#if (CFG_STD_RESOURCE_MAX > 0U)
+        if (Os_TCB[pScb->SysRunningTaskId]->TaskResCount > 0U)
+        {
+            status = E_OS_RESOURCE;
+        }
+        else
+#endif
+        {
+#if (CFG_SPINLOCK_MAX > 0U)
+            status = Os_SpinlockSafetyCheck(pScb->SysRunningTaskId);
+#endif
+        }
+#endif
 
         if ((StatusType)E_OK == status) /* PRQA S 2991, 2995 */ /* VL_Os_2991, VL_Os_2995 */
         {
 #if (OS_AUTOSAR_CORES > 1)
-            /* PRQA S 3469 ++ */ /* VL_Os_3469 */
-            Os_CoreIdType coreId = Os_GetObjCoreId(TaskID);
-            /* PRQA S 3469 -- */
-            if (coreId != Os_SCB.sysCore)
+            Os_CoreIdType ownerCore = OS_TASK_GET_COREID(TaskID);
+            if (ownerCore != Os_GetCoreIdLocal())
             {
-                RpcInputType rpcData = {
-                    .sync         = RPC_SYNC,
-                    .remoteCoreId = coreId,
-                    .serviceId    = OSServiceId_ChainTask,
-                    .srvPara0     = (uint32)TaskID,
-                    /* PRQA S 1258 ++ */ /* VL_Os_1258 */
-                    .srvPara1 = (uint32)NULL_PARA,
-                    .srvPara2 = (uint32)NULL_PARA,
-                    /* PRQA S 1258 -- */
-                };
-                status = Os_RpcCallService(&rpcData);
+                status = Os_RpcCall_ActivateTask(ownerCore, OS_RPC_SYNC, TaskID);
                 if (E_OK == status)
                 {
-                    status = Os_TerminateTask();
+                    Os_TerminateTask(pScb->SysRunningTaskId);
                 }
             }
             else
-#endif /* OS_AUTOSAR_CORES > 1 */
+#endif
             {
                 status = Os_ChainTask(TaskID);
             }
@@ -1337,20 +1245,220 @@ StatusType ChainTask(TaskType TaskID)
 #if (CFG_ERRORHOOK == TRUE)
     if (status != E_OK)
     {
-        Os_TraceErrorHook(OSError_Save_ChainTask(TaskID), OSServiceId_ChainTask, status);
+        Os_TraceErrorHook(OSError_Save_ChainTask(TaskID),
+                          OSServiceId_ChainTask,
+                          status, pScb); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
     }
 #endif
 
-#if (TRUE == CFG_TRACE_ENABLE)
-    Os_TraceServiceExit(OSServiceId_ChainTask);
-#endif /* TRUE == CFG_TRACE_ENABLE */
-
-    OS_EXIT_KERNEL(); /* PRQA S 3469 */ /* VL_Os_3469 */ /* PRQA S 3138,3141 */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 3432, 4544 ++ */ /* VL_Os_3432, VL_Os_4544 */
+    OSRtiExitApi(pScb, OSApiId_ChainTask);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_ChainTask_Return, status);
+    OS_HAL_EXIT_KERNEL(); /* PRQA S 2743*/ /* VL_Os_2743*/
+    /* PRQA S 3432, 4544 -- */
+    /* PRQA S 3138, 3141 -- */
     return status;
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
 
-#endif /* CFG_TASK_MAX > 0U */
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * Set the task status to ready and prepare for scheduling.
+ */
+/* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
+void Os_SetTaskToReady(TaskType taskId) /* PRQA S 3006*/ /* VL_Os_3006*/
+/* PRQA S 1532 -- */
+{
+    Os_SCBType *pScb = OS_TASK_GET_SCB(taskId);
+    Os_TCB[taskId]->TaskState = OS_TASK_STATE_READY;
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 1821, 4532, 4544, 4542 ++ */ /* VL_Os_1821, VL_Os_4532, VL_Os_4544, VL_Os_4542 */
+    /* PRQA S 4543, 4523, 3762, 1277 ++ */ /* VL_Os_4543, VL_Os_4523, VL_Os_3762, VL_Os_1277 */
+    ARTI_TRACE(NOSUSP, AR_CP_OS_TASK, Os, pScb->SysCore, OsTask_Release, taskId);
+    /* PRQA S 4543, 4523, 3762, 1277 -- */
+    /* PRQA S 1821, 4532, 4544, 4542 -- */
+    /* PRQA S 3138, 3141 -- */
+
+    Os_ReadyQueueInsert(pScb->QueueMg, taskId, OS_LEVEL_TASK,
+                        Os_TCB[taskId]->TaskRunPrio);
+
+    if (Os_TCB[taskId]->TaskRunPrio > pScb->SysHighPrio)
+    {
+        pScb->SysHighTaskId = taskId;
+        pScb->SysHighPrio = Os_TCB[taskId]->TaskRunPrio;
+
+#if (CFG_SCHED_POLICY != OS_PREEMPTIVE_NON)
+        if (pScb->SysDispatchLocker == 0u)
+        {
+            Os_Hal_Dispatch(); /* PRQA S 1006*/ /* VL_Os_1006*/
+        }
+#endif
+    }
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#if (TRUE == CFG_MEMORY_PROTECTION_ENABLE)
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * Memory Protection for Task
+ */
+/* PRQA S 3673 ++ */ /* VL_QAC_3673 */
+OS_LOCAL_INLINE OS_ALWAYS_INLINE void Os_MemProtTaskMap(Os_SCBType *pScb, Os_TaskType taskId)
+/* PRQA S 3673 -- */
+{
+    if (pScb->SysAppId != pScb->SysRunningAppId)
+    {
+        Os_ApplicationType appId  = Os_TaskCfg[taskId].ObjAppCfg->HostApp;
+        Os_Hal_MemProtTaskMap(taskId, appId); /* PRQA S 1520 */ /* VL_Os_1520 */
+    }
+    else
+    {
+        /* SYS_APP, as OS kernel, have all access rights */
+        Os_Hal_MemProtKernelMap();
+    }
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+#endif
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * pre entry highest priority task
+ */
+/* PRQA S 6070, 1532 ++ */ /* VL_MTR_Os_STCAL, VL_QAC_OneFunRef */
+void Os_SwitchTask(Os_CoreIdType coreId)
+/* PRQA S 6070, 1532 -- */
+{
+    Os_SCBType *pScb = Os_GetSystemContext(coreId);
+#if (TRUE == CFG_LOAD_RATIO_CALC_ENABLE) /* PRQA S 3332 */ /* VL_Os_3332 */
+    Os_TimerTickType curTicks;
+#endif
+    pScb->SysPrevTaskID = pScb->SysRunningTaskId;
+#if (TRUE == CFG_STACK_CHECK)
+    const Os_StackType *StackPtr;
+#endif
+
+    if (NULL_PTR != pScb->SysRunningTCB)
+    {
+/* check running task stack overflow. */
+#if (TRUE == CFG_STACK_CHECK)
+        StackPtr = &Os_TaskStack[pScb->SysRunningTaskId];
+        Os_StackMonitor(StackPtr);
+#endif
+
+        if (OS_TASK_STATE_RUNNING == pScb->SysRunningTCB->TaskState)
+        {
+#if (TRUE == CFG_TIMING_PROTECTION_ENABLE)
+            Os_TpSupend(pScb, TP_FOR_TASK);
+#endif
+            pScb->SysRunningTCB->TaskState = OS_TASK_STATE_READY;
+            /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+            /* PRQA S 1821, 4532, 4544, 4542 ++ */ /* VL_Os_1821, VL_Os_4532, VL_Os_4544, VL_Os_4542 */
+            /* PRQA S 4543, 4523, 3762, 1277 ++ */ /* VL_Os_4543, VL_Os_4523, VL_Os_3762, VL_Os_1277 */
+            ARTI_TRACE(NOSUSP, AR_CP_OS_TASK, Os, pScb->SysCore, OsTask_Preempt, pScb->SysRunningTaskId);
+            Os_PostTaskHook(pScb);
+            /* PRQA S 4543, 4523, 3762, 1277 -- */
+            /* PRQA S 1821, 4532, 4544, 4542 -- */
+            /* PRQA S 3138, 3141 -- */
+        }
+    }
+
+    pScb->SysRunningTaskId = pScb->SysHighTaskId;
+    pScb->SysRunningTCB = Os_TCB[pScb->SysRunningTaskId];
+#if (TRUE == CFG_SCHEDULE_COUNT_MONITOR) /* PRQA S 3332 */ /* VL_Os_3332 */
+    Os_IncrementTaskScheduleCount();
+#endif
+    /*Writing the running ApplID and Object */
+
+#if (CFG_OSAPPLICATION_MAX > 0U)
+    if (Os_TCB[pScb->SysRunningTaskId]->CallBackAppID != INVALID_OSAPPLICATION)
+    {
+        pScb->SysRunningAppId = Os_TCB[pScb->SysRunningTaskId]->CallBackAppID;
+    }
+    else
+    {
+        pScb->SysRunningAppId = Os_GetObjectAppID(OS_OBJECT_TASK, (Os_AppObjectId)pScb->SysRunningTaskId);
+    }
+    pScb->SysRunningAppObj = OS_OBJECT_TASK;
+#endif
+
+#if (OS_PREEMPTIVE_MIXED == CFG_SCHED_POLICY)
+    if (OS_PREEMPTIVE_NON == Os_TaskCfg[pScb->SysRunningTaskId].TaskSchedule)
+    {
+        pScb->SysDispatchLocker = 1U;
+    }
+#endif
+
+#if (CFG_INTERNAL_RESOURCE_MAX > 0)
+    Os_GetInternalResource(pScb);
+#endif
+
+    Os_TaskStateType tempState = pScb->SysRunningTCB->TaskState;
+
+    pScb->SysRunningTCB->TaskState = OS_TASK_STATE_RUNNING;
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 1821, 4532, 4544, 4542 ++ */ /* VL_Os_1821, VL_Os_4532, VL_Os_4544, VL_Os_4542 */
+    /* PRQA S 4543, 4523, 3762, 1277 ++ */ /* VL_Os_4543, VL_Os_4523, VL_Os_3762, VL_Os_1277 */
+    ARTI_TRACE(NOSUSP, AR_CP_OS_TASK, Os, pScb->SysCore, OsTask_Start, pScb->SysRunningTaskId);
+    /* PRQA S 4543, 4523, 3762, 1277 -- */
+    /* PRQA S 1821, 4532, 4544, 4542 -- */
+    /* PRQA S 3138, 3141 -- */
+
+    Os_PreTaskHook(pScb); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
+
+    if (OS_TASK_STATE_START == tempState)
+    {
+        pScb->SysRunningTCB->TaskStackTop = Os_TaskCfg[pScb->SysRunningTaskId].TaskStack.StackTop;
+
+#if (TRUE == CFG_MEMORY_PROTECTION_ENABLE)
+        Os_MemProtTaskMap(pScb, pScb->SysRunningTaskId); /* PRQA S 1520 */ /* VL_Os_1520 */
+#endif
+
+/* Timing protection: start task exe time. */
+#if (TRUE == CFG_TIMING_PROTECTION_ENABLE)
+        Os_TmProtTaskStart(pScb->SysCore, pScb->SysRunningTaskId, TP_EXE);
+#endif
+
+        Os_Hal_FirstEnterTask(pScb->SysRunningTaskId);
+
+#if (TRUE == CFG_TASK_RESPONSE_TIME_ENABLE) /* PRQA S 3332 */ /* VL_Os_3332 */
+        Os_TaskRecordStartTick(pScb->SysRunningTaskId);
+#endif
+    }
+    else
+    {
+#if (TRUE == CFG_MEMORY_PROTECTION_ENABLE)
+        Os_MemProtTaskMap(pScb, pScb->SysRunningTaskId); /* PRQA S 1520 */ /* VL_Os_1520 */
+#endif
+
+#if (TRUE == CFG_TIMING_PROTECTION_ENABLE)
+        Os_TpResume(pScb, TP_FOR_TASK);
+#endif
+    }
+#if (TRUE == CFG_LOAD_RATIO_CALC_ENABLE) /* PRQA S 3332 */ /* VL_Os_3332 */
+    curTicks = Os_ExitTaskRecordTick(pScb->SysPrevTaskID);
+    Os_EnterTaskRecordTick(pScb->SysRunningTaskId, curTicks);
+#endif
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+void Os_UpdateHighPrioTask(Os_SCBType *pScb)
+{
+    pScb->SysHighPrio = Os_GetHighPrio(pScb->QueueMg);
+    pScb->SysHighTaskId = Os_ReadyQueueGetFirst(pScb->QueueMg, pScb->SysHighPrio);
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#endif
 
 /*=======[E N D   O F   F I L E]==============================================*/

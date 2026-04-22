@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2024 Isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception OR  LicenseRef-Commercial-License
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -11,80 +11,421 @@
  * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  * or see <https://www.gnu.org/licenses/>.
  *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Os_Appl.c                                                   **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : i-soft-os                                                   **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
- **  Version :   AUTOSAR classic Platform R19--Function Safety                 **
- **                                                                            **
- *******************************************************************************/
+ * Alternatively, this file may be used under the terms of the Isoft Infrastructure Software Co., Ltd.
+ * Commercial License, in which case the provisions of the Isoft Infrastructure Software Co., Ltd.
+ * Commercial License shall apply instead of those of the GNU Lesser General Public License.
+ *
+ * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
+ * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
+ *
+ ************************************************************************************************************************
+ **
+ **  @file               : Os_Appl.c
+ **  @author             : i-soft-os
+ **  @date               : 2025/02/10
+ **  @vendor             : isoft
+ **  @description        : Os source file for Application API implementations
+ **
+ ***********************************************************************************************************************/
 
-/*=======[I N C L U D E S]====================================================*/
-#include "Os_Internal.h"
+/* =================================================== inclusions =================================================== */
+#include "Os_Arch_Processor.h"
+#include "Os_Appl.h"
+#include "Os_Task.h"
+#include "Os_Counter.h"
+#include "Os_Interrupt.h"
+#include "Os_Resource.h"
+#include "Os_ReadyQue.h"
+#include "Os_Tprot.h"
+#include "Os_Spinlock.h"
+#include "Os_Alarm.h"
+#include "Os_ScheduleTable.h"
+#include "Os_Sprot.h"
+#include "Os_Rpc.h"
+#include "Os_Counter.h"
+#include "Os_Event.h"
+#include "Os_Hook.h"
+#include "Os_Kernel.h"
+#include "Os_Err.h"
+#include "Os_Rti.h"
+#include "Os_Arti.h"
 
-/*=======[M A C R O S]========================================================*/
+/* ===================================================== macros ===================================================== */
+
+/* ================================================ type definitions ================================================ */
+
+/* ============================================ external data definitions =========================================== */
+
+/* ============================================ internal data definitions =========================================== */
+
+/* ========================================== internal function declarations ======================================== */
+#if (CFG_OSAPPLICATION_MAX > 0U)
+/**
+ * @brief           Retrieves the access configuration for a specified object
+ * @param[in]       objectType: Type of the object to check
+ * @param[in]       objectId: ID of the object to check
+ * @return          const Os_ObjectAppCfgType*
+ * @retval          Pointer to object access configuration if found
+ * @retval          NULL_PTR if not found
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL const Os_ObjectAppCfgType *Os_GetObjectAccess(ObjectTypeType objectType, AppObjectId objectId);
+
 #if ((OS_SC3 == CFG_SC) || (OS_SC4 == CFG_SC))
-/* The size of the minimum access bit unit for one application */
-/* DD_1_0176 */
-#define OS_APPACCBITUNIT_SIZE (sizeof(ApplicationType) * CHAR_BIT)
+#if (CFG_STD_RESOURCE_MAX > 0)
+/**
+ * @brief           Releases a resource occupied by a task
+ * @param[in]       pScb: Pointer to system control block
+ * @param[in]       appObjId: Task ID that owns the resource
+ * @param[in]       ceilPrio: Ceiling priority of the resource
+ * @param[in]       savePrio: Original priority to restore
+ * @return          StatusType
+ * @retval          E_OK: Resource successfully released
+ * @retval          E_NOT_OK: Resource cannot be released
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL StatusType Os_ApplReleaseResourceTask(const Os_SCBType *pScb, Os_AppObjectIdType appObjId, Os_PriorityType ceilPrio, Os_PriorityType savePrio);
 
-/*the access application bit position based on the access bit unit size*/
-#define OS_APPGETACCESS_BP(osAppId) ((osAppId) % OS_APPACCBITUNIT_SIZE)
+/**
+ * @brief           Releases a resource occupied by task or ISR
+ * @param[in]       pScb: Pointer to system control block
+ * @param[in]       object: Type of object (TASK or ISR)
+ * @param[in]       appObjId: Task or ISR ID that owns the resource
+ * @param[in]       ceilPrio: Ceiling priority of the resource
+ * @param[in]       savePrio: Original priority to restore
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_ApplReleaseResourceTaskOrISR(Os_SCBType *pScb, ObjectTypeType object, Os_AppObjectIdType appObjId, Os_PriorityType ceilPrio, Os_PriorityType savePrio);
 
-/* PRQA S 3472 ++ */ /* VL_Os_3472 */
-/*the access application bit group*/
-/*osAppId /OS_APPACCBITUNIT_SIZE*/
-#define OS_APPGETACCESS_GP(osAppId) ((osAppId) >> 4u)
+/**
+ * @brief           Releases a resource occupied by an ISR
+ * @param[in]       pScb: Pointer to system control block
+ * @param[in]       appObjId: ISR ID that owns the resource
+ * @param[in]       ceilPrio: Ceiling priority of the resource
+ * @param[in]       savePrio: Original priority to restore
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL_INLINE OS_ALWAYS_INLINE void Os_ApplReleaseResourceISR(const Os_SCBType *pScb, Os_AppObjectIdType appObjId, Os_PriorityType ceilPrio, Os_PriorityType savePrio);
 
-/*the access mask of the application*/
-#define OS_APPACCESS_MASK(osAppId) ((uint16)1u << OS_APPGETACCESS_BP(osAppId))
-/* PRQA S 3472 -- */
-#endif /* OS_SC3 == CFG_SC || OS_SC4 == CFG_SC */
-/*=======[T Y P E   D E F I N I T I O N S]====================================*/
+/**
+ * @brief           Releases a resource occupied by the application object
+ * @param[in]       pScb: Pointer to system control block
+ * @param[in]       resId: Resource ID to release
+ * @param[in]       object: Type of object (TASK or ISR)
+ * @param[in]       appObjId: Task or ISR ID that owns the resource
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_ApplReleaseResource(Os_SCBType *pScb, ResourceType resId, ObjectTypeType object, Os_AppObjectIdType appObjId);
+#endif
 
-/*=======[E X T E R N A L   D A T A]==========================================*/
+/**
+ * @brief           Resumes ISR interrupt locks
+ * @param[in]       pScb: Pointer to system control block
+ * @param[in]       isrId: ISR ID to resume
+ * @param[inout]    pICB: Pointer to ISR control block
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_ApplResumeISRLockInt(Os_SCBType *pScb, Os_IsrType isrId, Os_ICBType *pICB);
 
-/*=======[E X T E R N A L   F U N C T I O N   D E C L A R A T I O N S]========*/
+#if (CFG_ISR_MAX > 0)
+/**
+ * @brief           Terminates an ISR and processes kernel-related cleanup
+ * @param[in]       isrId: ISR ID to terminate
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_AppTerminateIsrKernelProc(Os_IsrType isrId);
 
-/*=======[I N T E R N A L   D A T A]==========================================*/
+#if (TRUE == CFG_INT_NEST_ENABLE)
+/**
+ * @brief           Terminates an ISR and handles nest counters
+ * @param[in]       isrId: ISR ID to terminate
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_AppTerminateIsrProc(Os_IsrType isrId);
+#endif
 
-/*=======[I N T E R N A L   F U N C T I O N   D E C L A R A T I O N S]========*/
+/**
+ * @brief           Terminates a group of ISRs belonging to an application
+ * @param[in]       appIsrRef: Array of ISR IDs to terminate
+ * @param[in]       appIsrCnt: Count of ISRs in the array
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_TerminateISRObjectHandler(const Os_IsrType *appIsrRef, Os_IsrType appIsrCnt);
+#endif
 
-/*=======[F U N C T I O N   I M P L E M E N T A T I O N S]====================*/
+/**
+ * @brief           Releases all resources occupied by a task
+ * @param[in]       pScb: Pointer to system control block
+ * @param[in]       taskId: Task ID whose resources need to be released
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL_INLINE OS_ALWAYS_INLINE void Os_ApplReleaseAllResource(Os_SCBType *pScb, Os_TaskType taskId);
+
+#if (CFG_SPINLOCK_MAX > 0U)
+/**
+ * @brief           Releases all spinlocks held by a task
+ * @param[in]       pScb: Pointer to system control block
+ * @param[inout]    pTcb: Pointer to task control block
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL_INLINE OS_ALWAYS_INLINE void Os_ApplReleaseAllSpinlock(Os_SCBType *pScb, Os_TCBType *pTcb);
+#endif
+
+/**
+ * @brief           Resumes task interrupt locks
+ * @param[in]       pScb: Pointer to system control block
+ * @param[in]       taskId: Task ID to resume
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_AppResumeTaskLockInt(Os_SCBType *pScb, Os_TaskType taskId);
+
+/**
+ * @brief           Terminates one task
+ * @param[in]       taskId: Task ID to terminate
+ * @return          StatusType
+ * @retval          E_OK: Task successfully terminated
+ * @retval          E_NOT_OK: Task cannot be terminated
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL StatusType Os_ApplTerminateOneTask(Os_TaskType taskId);
+
+/**
+ * @brief           Terminates a group of tasks belonging to an application
+ * @param[in]       pScb: Pointer to system control block
+ * @param[in]       appTaskRef: Array of task IDs to terminate
+ * @param[in]       appTaskCnt: Count of tasks in the array
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_TerminateTaskObjectHandler(const Os_SCBType *pScb, const Os_TaskType *appTaskRef, Os_TaskType appTaskCnt);
+
+#if (CFG_ALARM_MAX > 0)
+/**
+ * @brief           Terminates a group of alarms belonging to an application
+ * @param[in]       pScb: Pointer to system control block
+ * @param[in]       appAlarmRef: Array of alarm IDs to terminate
+ * @param[in]       appAlarmCnt: Count of alarms in the array
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_TerminateAlarmObjectHandler(const Os_SCBType *pScb, const Os_AlarmType *appAlarmRef, Os_AlarmType appAlarmCnt);
+#endif
+
+#if (CFG_SCHEDTBL_MAX > 0)
+/**
+ * @brief           Terminates a group of schedule tables belonging to an application
+ * @param[in]       pScb: Pointer to system control block
+ * @param[in]       appSchTblRef: Array of schedule table IDs to terminate
+ * @param[in]       appSchTblCnt: Count of schedule tables in the array
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_TerminateScheduleTblObjectHandler(Os_SCBType *pScb, const Os_ScheduleTableType *appSchTblRef, Os_ScheduleTableType appSchTblCnt);
+#endif
+
+/**
+ * @brief           Terminates all objects belonging to an application
+ * @param[in]       pScb: Pointer to system control block
+ * @param[in]       curAppCfg: Pointer to application configuration
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_TerminateObjects(Os_SCBType *pScb, const Os_ApplicationCfgType *curAppCfg);
+
+#if (CFG_ISR_MAX > 0)
+/**
+ * @brief           Disables all interrupts belonging to an application
+ * @param[in]       posCurAppCfg: Pointer to application configuration
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_DisableIntInApp(const Os_ApplicationCfgType *posCurAppCfg);
+#endif
+
+#if (OS_AUTOSAR_CORES > 1)
+/**
+ * @brief           RPC action handler for TerminateApplication
+ * @param[in]       inPara: Parameter array containing application ID and restart option
+ * @return          StatusType
+ * @retval          E_OK: Operation successful
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL StatusType Os_RpcAction_TerminateApplication(uint32 *inPara);
+
+/**
+ * @brief           Makes RPC call to TerminateApplication on remote core
+ * @param[in]       ownerCore: Core ID to execute the call
+ * @param[in]       Application: Application ID to terminate
+ * @param[in]       RestartOption: Whether to restart the application
+ * @return          StatusType
+ * @retval          E_OK: Remote call completed successfully
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL StatusType Os_RpcCall_TerminateApplication(Os_CoreIdType ownerCore, ApplicationType Application, RestartType RestartOption);
+
+/**
+ * @brief           Internal implementation of OS service:CheckObjectOwnership
+ * @param[in]       pScb: Pointer to system control block
+ * @param[in]       object: Type of object (TASK or ISR)
+ * @param[in]       appObjId: Task or ISR ID that owns the resource
+ * @return          ApplicationType
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL ApplicationType Os_CheckObjectOwnership(const Os_SCBType *pScb, ObjectTypeType objectType, AppObjectId objectId);
+#endif
+#endif
+#endif
+
+/* ========================================== external function definitions ========================================= */
 #if (CFG_OSAPPLICATION_MAX > 0U)
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <Init the Application control block>
- * Service ID   :       <None>
- * Sync/Async   :       <Synchronous>
- * Reentrancy           <Non Reentrant>
- * PreCondition         <None>
- * CallByAPI            <Os_InitSystem>
- * REQ ID               <None>
+/**
+ * Init the Application control block
  */
-/******************************************************************************/
-void Os_InitApplication(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
+/* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
+void Os_InitApplication(void)
+/* PRQA S 1532 -- */
 {
-    ApplicationType i;
-    uint16          vCoreId = Os_SCB.sysCore;
-    /* PRQA S 0310, 0311 ++ */ /* VL_Os_0310, VL_Os_0311 */
-    Os_ObjectAppCfg = (const Os_ObjectAppCfgType**)((void**)Os_ObjectAppCfg_Inf[vCoreId]);
-    /* PRQA S 0310, 0311 -- */
-    Os_SCB.sysAppId = Os_AppSysId_Inf[vCoreId];
+    Os_CoreIdType coreId = Os_GetCoreIdLocal();
+    Os_SCBType *pScb = Os_GetSystemContext(coreId);
 
-    Os_SCB.sysRunningAppID = Os_SCB.sysAppId;
-    for (i = 0u; i < CFG_OSAPPLICATION_MAX; i++)
+    pScb->SysAppId = Os_AppSysId[coreId];/* PRQA S 4424, 2842 */ /* VL_Os_4424, VL_Os_2842 */
+    pScb->SysRunningAppId = pScb->SysAppId;
+
+    if (OS_CORE_ID_MASTER == coreId)
     {
-        Os_AppCB[i].appState = APPLICATION_ACCESSIBLE;
+        for (ApplicationType i = 0u; i < CFG_OSAPPLICATION_MAX; i++)
+        {
+            Os_AppCB[i].AppState = OS_APPLICATION_ACCESSIBLE;
+            /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+            /* PRQA S 1821, 4532, 4544, 4542 ++ */ /* VL_Os_1821, VL_Os_4532, VL_Os_4544, VL_Os_4542 */
+            /* PRQA S 0499, 4543, 1861, 4397, 1277 ++ */ /* VL_Os_0499, VL_Os_4543, VL_Os_1861, VL_Os_4397, VL_Os_1277 */
+            ARTI_TRACE(NOSUSP, AR_CP_OS_APPLICATION, Os, pScb->SysCore, OsApplication_Start, i);
+            /* PRQA S 0499, 4543, 1861, 4397, 1277 -- */
+            /* PRQA S 1821, 4532, 4544, 4542 -- */
+            /* PRQA S 3138, 3141 -- */
+        }
     }
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+OS_LOCAL const Os_ObjectAppCfgType *Os_GetObjectAccess(
+    ObjectTypeType objectType,
+    AppObjectId objectId)
+{
+    const Os_ObjectAppCfgType *pObjectAcc = NULL_PTR;
+
+    switch (objectType)
+    {
+#if (CFG_TASK_MAX > 0U)
+    case OS_OBJECT_TASK:
+    {
+        pObjectAcc = Os_TaskCfg[objectId].ObjAppCfg;
+    }
+    break;
+#endif
+#if (CFG_ISR_MAX > 0U)
+    case OS_OBJECT_ISR:
+    {
+        pObjectAcc = Os_IsrCfg[objectId].ObjAppCfg;
+    }
+    break;
+#endif
+#if (CFG_ALARM_MAX > 0U)
+    case OS_OBJECT_ALARM:
+    {
+        pObjectAcc = Os_AlarmCfg[objectId].ObjAppCfg;
+    }
+    break;
+#endif
+#if (CFG_COUNTER_MAX > 0U)
+    case OS_OBJECT_COUNTER:
+    {
+        pObjectAcc = Os_CounterCfg[objectId].ObjAppCfg;
+    }
+    break;
+#endif
+#if (CFG_SCHEDTBL_MAX > 0U)
+    case OS_OBJECT_SCHEDULETABLE:
+    {
+        pObjectAcc = Os_SchedTblCfg[objectId].ObjAppCfg;
+    }
+    break;
+#endif
+#if (CFG_STD_RESOURCE_MAX > 0U)
+    case OS_OBJECT_RESOURCE:
+    {
+        pObjectAcc = Os_ResourceCfg[objectId].ObjAppCfg;
+    }
+    break;
+#endif
+#if (CFG_SPINLOCK_MAX > 0U)
+    case OS_OBJECT_SPINLOCK:
+    {
+        pObjectAcc = Os_SpinlockCfg[objectId].ObjAppCfg;
+    }
+#endif
+    break;/* PRQA S 2880 */ /* VL_Os_2880 */
+    default: /* Nothing to do. */
+        break;
+    }
+    return pObjectAcc;
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
@@ -93,125 +434,163 @@ void Os_InitApplication(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
 #if (CFG_STD_RESOURCE_MAX > 0)
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <task or ISR terminate its resource occupied before>
- *
- * Service ID   :       <None>
- * Sync/Async   :       <Synchronous>
- * Reentrancy           <Yes>
- * @param[in]           <ResID>
- * @param[out]          <None>
- * @param[in/out]       <None>
- * @return              <None>
- * PreCondition         <None>
- * CallByAPI            <Os_AppTerminateIsrKernelProc>
- *                      <Os_ApplTerminateOneTask>
- * REQ ID               <None>
+/**
+ * release the resource occupied by task
  */
-/******************************************************************************/
-/* PRQA S 6030, 6010, 3450 ++ */ /* VL_MTR_Os_STMIF, VL_MTR_Os_STCYC, VL_Os_3450 */
-static void Os_ApplReleaseResource(ResourceType ResID, ObjectTypeType Object, Os_AppObjectIDType OsAppObjID)
-/* PRQA S 6030, 6010, 3450 -- */
+OS_LOCAL StatusType Os_ApplReleaseResourceTask(
+    const Os_SCBType *pScb,
+    Os_AppObjectIdType appObjId,
+    Os_PriorityType ceilPrio,
+    Os_PriorityType savePrio)
 {
-    Os_PriorityType prio;
-    StatusType      err = E_OK;
-    Os_PriorityType savePrioTemp;
-    Os_TCBType*     pTcb;
-    Os_ICBType*     pIcb;
+    StatusType err = E_OK;
+    Os_TCBType *pTcb = Os_TCB[appObjId];
+    const Os_TaskCfgType *pTaskCfg = &Os_TaskCfg[appObjId];
+
+    if (pTaskCfg->TaskPriority > ceilPrio)
+    {
+        err = E_NOT_OK;
+    }
+    else
+    {
+        if (pTcb->TaskResCount > 0u)
+        {
+            pTcb->TaskResCount = pTcb->TaskResCount - 1u;
+        }
+
+        if (ceilPrio > savePrio)
+        {
+            Os_ReadyQueueRemove(pScb->QueueMg,
+                                pTcb->TaskRunPrio);
+            pTcb->TaskRunPrio = pTaskCfg->TaskPriority;
+        }
+    }
+
+    return err;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * release the resource occupied by task or ISR
+ */
+OS_LOCAL void Os_ApplReleaseResourceTaskOrISR(
+    Os_SCBType *pScb,
+    ObjectTypeType object,
+    Os_AppObjectIdType appObjId,
+    Os_PriorityType ceilPrio,
+    Os_PriorityType savePrio)
+{
+    if (OS_OBJECT_TASK == object)
+    {
+        Os_TCBType *pTcb = Os_TCB[appObjId];
+
+        if (pTcb->TaskResCount > 0u)
+        {
+            pTcb->TaskResCount = pTcb->TaskResCount - 1u;
+        }
+
+        Os_Hal_SetIpl(Os_PrioToIpl(pScb, savePrio), OS_ISR_ENABLE);
+        pScb->SysDispatchLocker = pScb->SysDispatchLocker - 1u;
+    }
+    else if (OS_OBJECT_ISR == object) /* PRQA S 2004 */ /* VL_Os_2004 */
+    {
+        Os_ICBType *pIcb = Os_ICB[appObjId];
+
+#if (TRUE == CFG_INT_NEST_ENABLE)
+        if (ceilPrio > savePrio)
+        {
+            Os_Hal_SetIpl(Os_PrioToIpl(pScb, savePrio), OS_ISR_ENABLE);
+        }
+#endif
+
+/* AutoSar: add resId to stack. For protection hook. */
+#if (CFG_ISR2_MAX > 0)
+        if ((uint16)pIcb->IsrC2ResCount > 0u)
+        {
+            /* PRQA S 4521, 4442 ++ */ /* VL_Os_4521, VL_Os_4442 */
+            pIcb->IsrC2ResCount = pIcb->IsrC2ResCount - 1u;
+            /* PRQA S 4521, 4442 -- */
+        }
+#endif
+    }
+
+    UNUSED_PARAMETER(ceilPrio);
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+/**
+ * release the resource occupied by ISR
+ */
+OS_LOCAL_INLINE OS_ALWAYS_INLINE void Os_ApplReleaseResourceISR(
+    const Os_SCBType *pScb,
+    Os_AppObjectIdType appObjId,
+    Os_PriorityType ceilPrio,
+    Os_PriorityType savePrio)
+{
+#if (TRUE == CFG_INT_NEST_ENABLE)
+    if (ceilPrio > savePrio)
+    {
+        Os_Hal_SetIpl(Os_PrioToIpl(pScb, savePrio), OS_ISR_ENABLE);
+    }
+#endif
+
+/* AutoSar: add resId to stack. For protection hook. */
+#if (CFG_ISR2_MAX > 0)
+    Os_ICBType *pIcb = Os_ICB[appObjId];
+    if ((uint16)pIcb->IsrC2ResCount > 0u)
+    {
+        /* PRQA S 4521, 4442 ++ */ /* VL_Os_4521, VL_Os_4442 */
+        pIcb->IsrC2ResCount = pIcb->IsrC2ResCount - 1u;
+        /* PRQA S 4521, 4442 -- */
+    }
+#endif
+
+    UNUSED_PARAMETER(ceilPrio);
+    UNUSED_PARAMETER(savePrio);
+    UNUSED_PARAMETER(pScb);
+}
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * task or ISR terminate its resource occupied before
+ */
+OS_LOCAL void Os_ApplReleaseResource(
+    Os_SCBType *pScb,
+    ResourceType resId,
+    ObjectTypeType object,
+    Os_AppObjectIdType appObjId)
+{
+    StatusType err = E_OK;
 
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
     /* No any resource to release */
-    if (0U == Os_RCB[ResID].saveCount)
+    if (0U == Os_RCB[resId]->SaveCount)
     {
         /*nothing to do*/
     }
     else
-#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
+#endif
     {
-        prio         = Os_ResourceCfg[ResID].ceiling;
-        savePrioTemp = Os_RCB[ResID].savePrio;
+        Os_PriorityType ceilPrio = Os_ResourceCfg[resId].Ceiling;
+        Os_PriorityType savePrio = Os_RCB[resId]->SavePrio;
 
-        switch (Os_ResourceCfg[ResID].resourceOccupyType)
+        switch (Os_ResourceCfg[resId].ResourceOccupyType)
         {
-        case OCCUPIED_BY_TASK:
-            pTcb = &Os_TCB[OsAppObjID];
-
-            if (Os_TaskCfg[OsAppObjID].osTaskPriority > prio)
-            {
-                err = E_NOT_OK;
-                break; /* PRQA S 3333 */ /* VL_Os_3333 */
-            }
-
-            if (pTcb->taskResCount > 0u)
-            {
-                pTcb->taskResCount = pTcb->taskResCount - 1u;
-            }
-
-            if (prio > savePrioTemp)
-            {
-                Os_ReadyQueueRemove(OS_LEVEL_STANDARD_RESOURCE, Os_TCB[OsAppObjID].taskRunPrio);
-                pTcb->taskRunPrio = Os_TaskCfg[OsAppObjID].osTaskPriority;
-            }
-
+        case OS_RES_OCCUPIED_BY_TASK:
+            err = Os_ApplReleaseResourceTask(pScb, appObjId, ceilPrio, savePrio);
             break;
 
-        case OCCUPIED_BY_TASK_OR_INTERRUPT:
-            pTcb = &Os_TCB[OsAppObjID];
-
-            if (OBJECT_TASK == Object)
-            {
-                if (pTcb->taskResCount > 0u)
-                {
-                    pTcb->taskResCount = pTcb->taskResCount - 1u;
-                }
-
-                Os_ArchSetIpl(Os_PrioToIpl(savePrioTemp), OS_ISR_ENABLE);
-                Os_SCB.sysDispatchLocker = Os_SCB.sysDispatchLocker - 1u;
-            }
-            else if (OBJECT_ISR == Object)
-            {
-                pIcb = &Os_ICB[OsAppObjID];
-
-#if (TRUE == CFG_INT_NEST_ENABLE)
-                if (prio > savePrioTemp)
-                {
-                    Os_ArchSetIpl(Os_PrioToIpl(savePrioTemp), OS_ISR_ENABLE);
-                }
-#endif
-
-/* AutoSar: add ResID to stack. For protection hook. */
-#if (CFG_ISR2_MAX > 0)
-                if (pIcb->IsrC2ResCount > 0u)
-                {
-                    pIcb->IsrC2ResCount = pIcb->IsrC2ResCount - 1u;
-                }
-#endif
-            }
-            else
-            {
-                /*nothing to do*/
-            }
+        case OS_RES_OCCUPIED_BY_TASK_OR_INTERRUPT:
+            Os_ApplReleaseResourceTaskOrISR(pScb, object, appObjId, ceilPrio, savePrio);
             break;
 
-        case OCCUPIED_BY_INTERRUPT:
-            pIcb = &Os_ICB[OsAppObjID];
-
-#if (TRUE == CFG_INT_NEST_ENABLE)
-            if (prio > savePrioTemp)
-            {
-                Os_ArchSetIpl(Os_PrioToIpl(savePrioTemp), OS_ISR_ENABLE);
-            }
-#endif
-
-/* AutoSar: add ResID to stack. For protection hook. */
-#if (CFG_ISR2_MAX > 0)
-            if (pIcb->IsrC2ResCount > 0u)
-            {
-                pIcb->IsrC2ResCount = pIcb->IsrC2ResCount - 1u;
-            }
-#endif
-
+        case OS_RES_OCCUPIED_BY_INTERRUPT:
+            Os_ApplReleaseResourceISR(pScb, appObjId, ceilPrio, savePrio);
             break;
 
         /*add comments to pass QAC.*/
@@ -224,11 +603,11 @@ static void Os_ApplReleaseResource(ResourceType ResID, ObjectTypeType Object, Os
         {
 /* AutoSar SC2: Timing protection, resource lock. */
 #if (TRUE == CFG_TIMING_PROTECTION_ENABLE)
-            Os_TmProtResEnd(ResID);
+            Os_TmProtResEnd(pScb->SysCore, resId);
 #endif
 
-            Os_RCB[ResID].saveCount = 0u;
-            Os_RCB[ResID].savePrio  = OS_PRIORITY_INVALID;
+            Os_RCB[resId]->SaveCount = 0u;
+            Os_RCB[resId]->SavePrio = OS_PRIORITY_INVALID;
         }
     }
 
@@ -236,109 +615,104 @@ static void Os_ApplReleaseResource(ResourceType ResID, ObjectTypeType Object, Os
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
-#endif /* CFG_STD_RESOURCE_MAX > 0 */
+#endif
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+OS_LOCAL void Os_ApplResumeISRLockInt(
+    Os_SCBType *pScb,
+    Os_IsrType isrId,
+    Os_ICBType *pICB
+)
+{
+#if (TRUE == CFG_TIMING_PROTECTION_ENABLE)
+    Os_TmProtIsrEnd(pScb->SysCore, isrId, TP_EXE);
+#endif
+
+    if (pICB->IsrC2DisableAllCount > 0u)
+    {
+        pICB->IsrC2DisableAllCount = 0u;
+#if (TRUE == CFG_TIMING_PROTECTION_ENABLE)
+        Os_TmProtIsrEnd(pScb->SysCore, isrId, TP_DIS_ALL_INT);
+        Os_Hal_EnableAllInt_ButTimingProtInt(pScb->SysCore);
+#else
+        Os_Hal_RestoreInt(pScb->SaveAllInt);
+#endif
+    }
+
+    if (pICB->IsrC2SuspendAllCount > 0u)
+    {
+        pScb->SuspendAllCount -= pICB->IsrC2SuspendAllCount;
+        pICB->IsrC2SuspendAllCount = 0u;
+        if (0u == pScb->SuspendAllCount)
+        {
+#if (TRUE == CFG_TIMING_PROTECTION_ENABLE)
+            Os_TmProtIsrEnd(pScb->SysCore, isrId, TP_SUS_ALL_INT);
+            Os_Hal_EnableAllInt_ButTimingProtInt(pScb->SysCore);
+#else
+            Os_Hal_RestoreInt(pScb->SaveAllIntNested);
+#endif
+        }
+    }
+
+    if (pICB->IsrC2SuspendOSCount > 0u)
+    {
+        pScb->SuspendOsCount -= pICB->IsrC2SuspendOSCount;
+        pICB->IsrC2SuspendOSCount = 0u;
+        if (0u == pScb->SuspendOsCount)
+        {
+#if (TRUE == CFG_TIMING_PROTECTION_ENABLE)
+            Os_TmProtIsrEnd(pScb->SysCore, isrId, TP_SUS_OS_INT);
+#endif
+            Os_Hal_SetIpl(pScb->SaveOsIntNested, OS_ISR_ENABLE);
+
+        }
+    }
+    UNUSED_PARAMETER(isrId);
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
 
 #if (CFG_ISR_MAX > 0)
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <free the ISR running control block and the resources occupied>
- * ServiceId            <None>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Yes>
- * Param-Name[in]       <OsIsrID>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * Return               <None>
- * PreCondition         <None>
- * CallByAPI            <Os_TerminateISRObjectHandler>
- * REQ ID               <None>
+/**
+ * free the ISR running control block and the resources occupied
  */
-/******************************************************************************/
-/* PRQA S 3450 ++ */ /* VL_Os_3450 */
-static void Os_AppTerminateIsrKernelProc(Os_IsrType OsIsrID)
-/* PRQA S 3450 -- */
+OS_LOCAL void Os_AppTerminateIsrKernelProc(Os_IsrType isrId)
 {
-#if ((TRUE == CFG_TIMING_PROTECTION_ENABLE) || (CFG_STD_RESOURCE_MAX > 0) || (CFG_SPINLOCK_MAX > 0U))
-    Os_ICBType* pOsICB;
-#endif
+    Os_SCBType *pScb = OS_ISR_GET_SCB(isrId);
 
-#if (CFG_SPINLOCK_MAX > 0U)
-    SpinlockIdType spinLockIdx;
-    SpinlockIdType SpinlockId;
-#endif /* CFG_SPINLOCK_MAX > 0U */
-#if (CFG_STD_RESOURCE_MAX > 0)
-    Os_IsrType      i;
-    Os_ResourceType osTemp;
-#endif
-
-    if (OsIsrID < Os_CfgIsr2Max)
+    if (Os_CheckIsr2Id(isrId))
     {
 #if ((TRUE == CFG_TIMING_PROTECTION_ENABLE) || (CFG_STD_RESOURCE_MAX > 0) || (CFG_SPINLOCK_MAX > 0U))
-        pOsICB = &Os_ICB[OsIsrID];
+        Os_ICBType *pICB = Os_ICB[isrId];
 #endif
 
-/* Timing protection. */
-#if (TRUE == CFG_TIMING_PROTECTION_ENABLE)
-        Os_TmProtIsrEnd(OsIsrID, TP_ISR_CAT2_EXE);
-
-        pOsICB->IsrC2IsrOpt = TP_OPT_BUTT;
-
-        if (pOsICB->isrC2DisableAllCount > 0u)
-        {
-            Os_TmProtIsrEnd(OsIsrID, TP_ISR_CAT2_DIS_ALL_INT);
-
-            pOsICB->isrC2DisableAllCount = 0u;
-            Os_ArchEnableAllInt_ButTimingProtInt();
-        }
-
-        if (pOsICB->isrC2SuspendAllCount > 0u)
-        {
-            Os_TmProtIsrEnd(OsIsrID, TP_ISR_CAT2_SUS_ALL_INT);
-
-            Os_SuspendAllCount -= pOsICB->isrC2SuspendAllCount;
-            if (0u == Os_SuspendAllCount)
-            {
-                Os_ArchEnableAllInt_ButTimingProtInt();
-            }
-        }
-
-        if (pOsICB->isrC2SuspendOSCount > 0u)
-        {
-            Os_TmProtIsrEnd(OsIsrID, TP_ISR_CAT2_SUS_OS_INT);
-
-            Os_SuspendOsCount -= pOsICB->isrC2SuspendOSCount;
-            if (0u == Os_SuspendOsCount)
-            {
-                Os_ArchSetIpl(Os_SaveOsIntNested, OS_ISR_ENABLE);
-            }
-        }
-#endif /* TRUE == CFG_TIMING_PROTECTION_ENABLE */
+        Os_ApplResumeISRLockInt(pScb, isrId, pICB);
 
 /* Release resource occupied by this isr. */
 #if (CFG_STD_RESOURCE_MAX > 0)
-        osTemp = pOsICB->IsrC2ResCount;
-        if (osTemp > 0u)
+        for (uint16 i = (uint16)pICB->IsrC2ResCount; i > 0u; i--)
         {
-            for (i = osTemp; i > 0u; i--)
-            {
-                Os_ApplReleaseResource(pOsICB->IsrC2ResourceStack[i - 1u], OBJECT_ISR, OsIsrID);
-            }
+            Os_ApplReleaseResource(pScb,
+                                   pICB->IsrC2ResourceStack[i - 1u],/* PRQA S 4521 */ /* VL_Os_4521 */
+                                   OS_OBJECT_ISR,
+                                   (Os_AppObjectIdType)isrId);
         }
 #endif
 
 #if (CFG_SPINLOCK_MAX > 0U)
-        for (spinLockIdx = pOsICB->isr2CriticalZoneCount; spinLockIdx > 0u; spinLockIdx--)
+        for (SpinlockIdType spinLockIdx = pICB->Isr2CriticalZoneCount; (uint16)spinLockIdx > 0u; spinLockIdx--) /* PRQA S 4442, 4527 */ /* VL_Os_4442, VL_Os_4527 */
         {
-            if (OBJECT_SPINLOCK == pOsICB->isr2CriticalZoneType[pOsICB->isr2CriticalZoneCount - 1u])
+            if (OS_OBJECT_SPINLOCK == pICB->Isr2CriticalZoneType[pICB->Isr2CriticalZoneCount - 1u])
             {
-                SpinlockId = pOsICB->isr2CriticalZoneStack[pOsICB->isr2CriticalZoneCount - 1u];
-                (void)Os_ReleaseSpinlock(SpinlockId);
+                SpinlockIdType SpinlockId = pICB->Isr2CriticalZoneStack[pICB->Isr2CriticalZoneCount - 1u]; /* PRQA S 4442 */ /* VL_Os_4442 */
+                (void)Os_ReleaseSpinlock(pScb, SpinlockId);
             }
             else
             {
-                pOsICB->isr2CriticalZoneCount--;
+                pICB->Isr2CriticalZoneCount--;
             }
         }
 #endif
@@ -349,359 +723,343 @@ static void Os_AppTerminateIsrKernelProc(Os_IsrType OsIsrID)
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
 
-#define OS_START_SEC_CODE
-#include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <Terminate the ISR objects of the calling application>
- * ServiceId            <None>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Yes>
- * Param-Name[in]       <pOsAppIsrRef: the application specified Isrs ref>
- *                      <OsAppIsrCnt: the number or size of the Isrs >
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * Return               <None>
- * PreCondition         <None>
- * CallByAPI            <Os_TerminateObjects>
- * REQ ID               <None>
- */
-/******************************************************************************/
-/* PRQA S 3450 ++ */ /* VL_Os_3450 */
-static void Os_TerminateISRObjectHandler(const Os_IsrType* pOsAppIsrRef, Os_IsrType OsAppIsrCnt)
-/* PRQA S 3450 -- */
-{
-    Os_IsrType OsIsrLoopi;
-
-    if ((0u == OsAppIsrCnt) || (Os_CfgIsrMax < OsAppIsrCnt))
-    {
-        /*nothing to do*/
-    }
-    else
-    {
-        for (OsIsrLoopi = 0u; OsIsrLoopi < OsAppIsrCnt; OsIsrLoopi++)
-        {
-            /* MISRA-C: 17.4  Array subscripting applied to an object of pointer type.
-            pOsAppIsrRef is pointor of static_cfg_array, OsAppIsrCnt is the size of array,
-            it must be used like below. */
-
-            /* Arch platform related process. */
 #if (TRUE == CFG_INT_NEST_ENABLE)
-            Os_ArchAppTerminateIsrProc(Os_GetObjLocalId(pOsAppIsrRef[OsIsrLoopi]));
-#endif
-            Os_AppTerminateIsrKernelProc(Os_GetObjLocalId(pOsAppIsrRef[OsIsrLoopi]));
-        }
-    }
-
-    return;
-}
-#define OS_STOP_SEC_CODE
-#include "Os_MemMap.h"
-#endif /* CFG_ISR_MAX > 0 */
-
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <Removing task_node from ready_queue in TerminateApplication.>
- * ServiceId           <None>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Yes>
- * Param-Name[in]      <OsTaskID>
- *                     <OsQueuePriority>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * Return              <None>
- * PreCondition         <None>
- * CallByAPI            <Os_ApplTerminateOneTask>
- * REQ ID               <None>
+/**
+ * Terminate the ISR objects of the calling application
  */
-/******************************************************************************/
-/* PRQA S 3450, 2755 ++ */ /* VL_Os_3450, VL_Os_2755 */
-static void Os_ApplReadyQueueRemove(Os_TaskType OsTaskID, Os_PriorityType OsQueuePriority)
-/* PRQA S 3450, 2755 -- */
+/* PRQA S 6010, 6030, 6080, 3006 ++ */ /* VL_MTR_Os_STCYC, VL_MTR_Os_STCAL, VL_MTR_Os_STPTH, VL_Os_3006 */
+OS_LOCAL void Os_AppTerminateIsrProc(Os_IsrType isrId)
+/* PRQA S 6010, 6030, 6080, 3006 -- */
 {
-    uint32             OsQueueHead;
-    uint32             OsQueueTail;
-    uint32             OsQueueSize;
-    Os_ReadyQueueType* pOsReadyQueueMark;
-    Os_TaskType*       pOsReadyQueue;
+    StatusType ulRet = E_OK;
 
-    pOsReadyQueue     = Os_ReadyQueue[OsQueuePriority];
-    pOsReadyQueueMark = &Os_ReadyQueueMark[OsQueuePriority];
-
-    /* Remove one node from Os_ReadyQueue and shift to the left. */
-    OsQueueHead = pOsReadyQueueMark->queueHead;
-    OsQueueTail = pOsReadyQueueMark->queueTail;
-
-    OsQueueSize = Os_ActivateQueueSize[OsQueuePriority];
-
-    /*Retrieve the previous position of the queue's tail.*/
-    /* PRQA S 2834 ++ */ /* VL_Os_2834 */
-    uint32 OsQueueTailLast = (OsQueueTail + (OsQueueSize - 1U)) % OsQueueSize;
-    /* PRQA S 2834 -- */
-
-    /* Queue is empty. */
-    if ((OsQueueHead == OsQueueTail) && (OS_TASK_INVALID == pOsReadyQueue[OsQueueTailLast]))
+    /* Isr_nest process. */
+    /* Just find out the nested corresponding ISR2s(excluding the running one) */
+    Os_SCBType *pScb = OS_ISR_GET_SCB(isrId);
+    if (isrId != pScb->SysRunningIsrCat2Id)
     {
-        /*nothing to do*/
-    }
-    else
-    {
-        uint32 queueFront = OsQueueHead;
-        /* PRQA S 2834 ++ */ /* VL_Os_2834 */
-        uint32 loopWidth =
-            (OsQueueHead == OsQueueTail) ? OsQueueSize : ((OsQueueTail + OsQueueSize - OsQueueHead) % OsQueueSize);
-        /* PRQA S 2834 -- */
-        uint32 hitCount = 0u;
-
-        do
+        /* Terminate one isr */
+        uint16 i;
+        for (i = 0u; i < pScb->IntNestISR2; i++)
         {
-            /*If the queue element is equal to OsTaskID, increment hitCount.*/
-            /* PRQA S 2834 ++ */ /* VL_Os_2834 */
-            while ((OsTaskID == pOsReadyQueue[(queueFront + hitCount) % OsQueueSize]) && (hitCount < loopWidth))
-            /* PRQA S 2834 -- */
+            /* find out the Isr nested position and reclaim its context saving area */
+            if (isrId == pScb->SysIsrNestQueue[i])
             {
-                hitCount++;
-                OsQueueTail = (OsQueueTail + (OsQueueSize - 1U)) % OsQueueSize; /* PRQA S 2834 */ /* VL_Os_2834 */
-            }
-
-            /*If, after moving OsQueueTail, queueFront becomes equal to OsQueueTail, exit the loop.*/
-            if ((queueFront == OsQueueTail) && (hitCount > 0U))
-            {
+                /* Reclaim csa list used by this isr. */
+                /* if OsIsrChkindex == Os_IntNestISR2, the isr is the innermost_isr,
+                * can not reclaim csas here */
+                /* PRQA S 0310, 3138, 1006, 3345 ++ */ /* VL_Os_0310, VL_Os_3138, VL_Os_1006, VL_Os_3345 */
+                /* PRQA S 0404, 0306, 3442, 2743 ++ */ /* VL_Os_0404, VL_Os_0306, VL_Os_3442, VL_Os_2743 */
+                OS_HAL_TERMINATE_NESTED_ISR(i);/* PRQA S 3432, 1021 */ /* VL_Os_3432, VL_Os_1021 */
+                /* PRQA S 0404, 0306, 3442, 2743 -- */
+                /* PRQA S 0310, 3138, 1006, 3345 -- */
                 break;
             }
-
-            if (hitCount > 0U)
-            {
-                /* PRQA S 2834 ++ */ /* VL_Os_2834 */
-                pOsReadyQueue[queueFront] = pOsReadyQueue[(queueFront + hitCount) % OsQueueSize];
-                /* PRQA S 2834 -- */
-            }
-
-            queueFront = (queueFront + 1u) % OsQueueSize; /* PRQA S 2834 */ /* VL_Os_2834 */
-
-        } while (queueFront != OsQueueTail);
-
-        /*Set the deleted QueueTail as invalid.*/
-        while (0U != hitCount)
-        {
-            /* PRQA S 2834 ++ */ /* VL_Os_2834 */
-            pOsReadyQueue[(OsQueueTail + hitCount) % OsQueueSize] = OS_TASK_INVALID;
-            /* PRQA S 2834 -- */
-            hitCount = hitCount - 1u;
         }
-        /*Update the QueueTail.*/
-        pOsReadyQueueMark->queueTail = OsQueueTail;
 
-        /* Queue for this prio is empty. */
-        if (pOsReadyQueueMark->queueHead == pOsReadyQueueMark->queueTail)
+        /* Not find out the Isr Id in the IsrStack from the SCB,
+        * not include outermost_isr. */
+        if (i >= pScb->IntNestISR2)
         {
-            /* Clear prio_has_task bit flag of Os_ReadyMap. */
-            Os_ClearPrioReadyMap(OsQueuePriority);
-        }
-    }
-
-    return;
-}
-#define OS_STOP_SEC_CODE
-#include "Os_MemMap.h"
-
-#define OS_START_SEC_CODE
-#include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <Terminate one task.>
- * ServiceId            <None>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Yes>
- * Param-Name[in]       <OsTaskID>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * Return               <None>
- * PreCondition         <None>
- * CallByAPI            <Os_TerminateTaskObjectHandler>
- * REQ ID               <None>
- */
-/******************************************************************************/
-/* PRQA S 3450 ++ */ /* VL_Os_3450 */
-static StatusType Os_ApplTerminateOneTask(Os_TaskType OsTaskID)
-/* PRQA S 3450 -- */
-{
-#if (CFG_STD_RESOURCE_MAX > 0U)
-    uint16          i;
-    Os_ResourceType osTemp;
-#endif /* CFG_STD_RESOURCE_MAX > 0 */
-#if (CFG_SPINLOCK_MAX > 0U)
-    SpinlockIdType spinLockIdx;
-    SpinlockIdType SpinlockId;
-#endif /* CFG_SPINLOCK_MAX > 0U */
-    StatusType  osRet = E_OK;
-    Os_TCBType* pTcb;
-
-    pTcb = &Os_TCB[OsTaskID];
-
-    /* Terminated task no need to process. */
-    if (TASK_STATE_SUSPENDED == pTcb->taskState)
-    {
-        osRet = E_NOT_OK;
-    }
-    else
-    {
-        if (TASK_STATE_START == pTcb->taskState)
-        {
-            osRet = E_NOT_OK;
+            ulRet = E_NOT_OK;
         }
         else
         {
+            /* Moving the following nested ISR2s to shift one position left */ /* PRQA S 3120 ++ */ /* VL_QAC_MagicNum */
+            while (i < (pScb->IntNestISR2 - 1u)) /* PRQA S 1891 */ /* VL_Os_1891 */
+            {
+                pScb->SysIsrNestQueue[i] = pScb->SysIsrNestQueue[i + 1u];
+
+                if (i < (pScb->IntNestISR2 - 2u)) /* PRQA S 1891 */ /* VL_Os_1891 */
+                {
+                    /* PRQA S 3432 ++ */ /* VL_Os_3432 */
+                    OS_HAL_PROCESS_NESTED_ISR_STACK(i); /* PRQA S 2743*/ /* VL_Os_2743*/
+                    /* PRQA S 3432 -- */
+                }
+
+                i++;
+            }
+            /* PRQA S 3120 -- */
+        }
+
+        if (E_OK == ulRet)
+        {
+            pScb->IntNestISR2--;
+
+            if (pScb->SysDispatchLocker > 0u)
+            {
+                /*pScb->SysDispatchLocker--*/
+                pScb->SysDispatchLocker = pScb->SysDispatchLocker - 1u;
+            }
+        }
+    }
+
+    return;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+#endif
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * Terminate the ISR objects of the calling application
+ */
+OS_LOCAL void Os_TerminateISRObjectHandler(
+    const Os_IsrType *appIsrRef,
+    Os_IsrType appIsrCnt)
+{
+    if ((0u == (uint16)appIsrCnt) || (Os_CfgIsrMax_Inf[Os_GetCoreIdLocal()] < (uint16)appIsrCnt))
+    {
+        /*nothing to do*/
+    }
+    else
+    {
+        for (uint16 OsIsrLoopi = 0U; OsIsrLoopi < (uint16)appIsrCnt; OsIsrLoopi++)
+        {
+/* MISRA-C: 17.4  Array subscripting applied to an object of pointer type.
+   appIsrRef is pointor of static_cfg_array, appIsrCnt is the size of array,
+   it must be used like below. */
+
+/* Arch platform related process. */
+#if (TRUE == CFG_INT_NEST_ENABLE)
+            Os_AppTerminateIsrProc(appIsrRef[OsIsrLoopi]);
+#endif
+            Os_AppTerminateIsrKernelProc(appIsrRef[OsIsrLoopi]);
+        }
+    }
+
+    return;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+#endif
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+OS_LOCAL_INLINE OS_ALWAYS_INLINE void Os_ApplReleaseAllResource(
+    Os_SCBType *pScb,
+    Os_TaskType taskId)
+{
 #if (CFG_INTERNAL_RESOURCE_MAX > 0U)
-            Os_ReleaseInternalResource(OsTaskID);
+    Os_ReleaseInternalResource(pScb, taskId);
 #endif
 
 /* Release resource occupied by this task. */
-#if (CFG_STD_RESOURCE_MAX > 0u)
-            if (pTcb->taskResCount > 0u)
-            {
-                osTemp = pTcb->taskResCount;
+#if (CFG_STD_RESOURCE_MAX > 0U)
+    const Os_TCBType *pTcb = Os_TCB[taskId];
+    for (uint16 i = pTcb->TaskResCount; i > 0u; i--)
+    {
+        Os_ApplReleaseResource(pScb,
+                               pTcb->TaskResourceStack[i - 1u],
+                               OS_OBJECT_TASK, (Os_AppObjectIdType)taskId);
+    }
+#endif
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
 
-                for (i = osTemp; i > 0u; i--)
-                {
-                    Os_ApplReleaseResource(pTcb->taskResourceStack[i - 1u], OBJECT_TASK, OsTaskID);
-                }
-            }
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+#if (CFG_SPINLOCK_MAX > 0U)
+OS_LOCAL_INLINE OS_ALWAYS_INLINE void Os_ApplReleaseAllSpinlock(
+    Os_SCBType *pScb,
+    Os_TCBType *pTcb)
+{
+    for (SpinlockIdType spinLockIdx = pTcb->TaskCriticalZoneCount; (uint16)spinLockIdx > 0u; spinLockIdx--) /* PRQA S 4442, 4527 */ /* VL_Os_4442, VL_Os_4527 */
+    {
+        if (OS_OBJECT_SPINLOCK == pTcb->TaskCriticalZoneType[pTcb->TaskCriticalZoneCount - 1u])
+        {
+            SpinlockIdType SpinlockId = pTcb->TaskCriticalZoneStack[pTcb->TaskCriticalZoneCount - 1u]; /* PRQA S 4442 */ /* VL_Os_4442 */
+            (void)Os_ReleaseSpinlock(pScb, SpinlockId);
+        }
+        else
+        {
+            pTcb->TaskCriticalZoneCount--;
+        }
+    }
+}
+#endif
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+OS_LOCAL void Os_AppResumeTaskLockInt(Os_SCBType *pScb, Os_TaskType taskId)
+{
+    Os_TCBType *pTcb = Os_TCB[taskId];
+
+    /* Timing protection. */
+
+    /* Task_exe budget. */
+#if (TRUE == CFG_TIMING_PROTECTION_ENABLE)
+    Os_TmProtTaskEnd(pScb->SysCore, taskId, TP_EXE);
 #endif
 
+    if (pTcb->TaskDisableAllCount > 0u)
+    {
+        pTcb->TaskDisableAllCount = 0u;
+#if (TRUE == CFG_TIMING_PROTECTION_ENABLE)
+        Os_TmProtTaskEnd(pScb->SysCore, taskId, TP_DIS_ALL_INT);
+        Os_Hal_EnableAllInt_ButTimingProtInt(pScb->SysCore);
+#else
+        Os_Hal_RestoreInt(pScb->SaveAllInt);
+#endif
+    }
+
+    if (pTcb->TaskSuspendAllCount > 0u)
+    {
+        pScb->SuspendAllCount -= pTcb->TaskSuspendAllCount;
+        pTcb->TaskSuspendAllCount = 0u;
+        if (0u == pScb->SuspendAllCount)
+        {
+#if (TRUE == CFG_TIMING_PROTECTION_ENABLE)
+            Os_TmProtTaskEnd(pScb->SysCore, taskId, TP_SUS_ALL_INT);
+            Os_Hal_EnableAllInt_ButTimingProtInt(pScb->SysCore);
+#else
+            Os_Hal_RestoreInt(pScb->SaveAllIntNested);
+#endif
+        }
+    }
+
+    if (pTcb->TaskSuspendOsCount > 0u)
+    {
+        pScb->SuspendOsCount -= pTcb->TaskSuspendOsCount;
+        pTcb->TaskSuspendOsCount =0u;
+        if (0u == pScb->SuspendOsCount)
+        {
+#if (TRUE == CFG_TIMING_PROTECTION_ENABLE)
+            Os_TmProtTaskEnd(pScb->SysCore, taskId, TP_SUS_OS_INT);
+#endif
+            Os_Hal_SetIpl(pScb->SaveOsIntNested, OS_ISR_ENABLE);
+        }
+    }
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * Terminate one task.
+ */
+OS_LOCAL StatusType Os_ApplTerminateOneTask(Os_TaskType taskId)
+{
+    StatusType ret = E_OK;
+    Os_TCBType *pTcb = Os_TCB[taskId];
+    const Os_TaskCfgType *pTaskCfg = &Os_TaskCfg[taskId];
+    Os_SCBType *pScb = OS_TASK_GET_SCB(taskId);
+
+    /* Terminated task no need to process. */
+    if (OS_TASK_STATE_SUSPENDED == pTcb->TaskState)
+    {
+        ret = E_NOT_OK;
+    }
+    else
+    {
+        if (OS_TASK_STATE_START == pTcb->TaskState)
+        {
+            ret = E_NOT_OK;
+        }
+        else
+        {
+            Os_ApplReleaseAllResource(pScb, taskId);
+
 #if (CFG_SPINLOCK_MAX > 0U)
-            for (spinLockIdx = pTcb->taskCriticalZoneCount; spinLockIdx > 0u; spinLockIdx--)
-            {
-                if (OBJECT_SPINLOCK == pTcb->taskCriticalZoneType[pTcb->taskCriticalZoneCount - 1u])
-                {
-                    SpinlockId = pTcb->taskCriticalZoneStack[pTcb->taskCriticalZoneCount - 1u];
-                    (void)Os_ReleaseSpinlock(SpinlockId);
-                }
-                else
-                {
-                    pTcb->taskCriticalZoneCount--;
-                }
-            }
+            Os_ApplReleaseAllSpinlock(pScb, pTcb);
 #endif
 
             /*If the current task is a non-preemptible task and is in the running state,
              * the scheduling lock should be reduced by one*/
-            if ((TASK_STATE_RUNNING == pTcb->taskState) && (OS_PREEMPTIVE_NON == Os_TaskCfg[OsTaskID].osTaskSchedule))
+            if ((OS_TASK_STATE_RUNNING == pTcb->TaskState) && (OS_PREEMPTIVE_NON == pTaskCfg->TaskSchedule))
             {
-                Os_SCB.sysDispatchLocker = Os_SCB.sysDispatchLocker - 1U;
+                pScb->SysDispatchLocker = pScb->SysDispatchLocker - 1U;
             }
         }
         /* Reset task_state. */
-        pTcb->taskState = TASK_STATE_SUSPENDED;
+        pTcb->TaskState = OS_TASK_STATE_SUSPENDED;
+        /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+        /* PRQA S 1821, 4532, 4544, 4542 ++ */ /* VL_Os_1821, VL_Os_4532, VL_Os_4544, VL_Os_4542 */
+        /* PRQA S 4543, 4523, 3762, 1277 ++ */ /* VL_Os_4543, VL_Os_4523, VL_Os_3762, VL_Os_1277 */
+        ARTI_TRACE(NOSUSP, AR_CP_OS_TASK, Os, pScb->SysCore, OsTask_Terminate, taskId);
+        /* PRQA S 4543, 4523, 3762, 1277 -- */
+        /* PRQA S 1821, 4532, 4544, 4542 -- */
+        /* PRQA S 3138, 3141 -- */
         /* Remove from ready_queue. */
-        Os_ApplReadyQueueRemove(OsTaskID, pTcb->taskRunPrio);
+        Os_ApplReadyQueueRemove(pScb->QueueMg, taskId, pTcb->TaskRunPrio);
 
 #if (CFG_STD_RESOURCE_MAX > 0U)
-        pTcb->taskResCount = 0U;
+        pTcb->TaskResCount = 0U;
 #endif
 
 #if ((OS_BCC2 == CFG_CC) || (OS_ECC2 == CFG_CC))
-        pTcb->taskActCount = 0u;
+        pTcb->TaskActCount = 0u;
 #endif
 
-        pTcb->taskRunPrio = Os_TaskCfg[OsTaskID].osTaskPriority;
+        pTcb->TaskRunPrio = pTaskCfg->TaskPriority;
 
 #if (CFG_EXTENDED_TASK_MAX > 0U)
-        if (OsTaskID < Os_CfgExtendTaskMax)
+        if (Os_CheckExternalTaskId(taskId, pScb->SysCore))
         {
-            Os_ECB[OsTaskID].eventSetEvent  = 0U;
-            Os_ECB[OsTaskID].eventWaitEvent = 0U;
+            Os_ClearECB(taskId);
         }
 #endif
 
-        Os_SCB.sysHighPrio   = Os_GetHighPrio();
-        Os_SCB.sysHighTaskID = Os_ReadyQueueGetFirst(Os_SCB.sysHighPrio);
+        Os_UpdateHighPrioTask(pScb);
 
-/* Timing protection. */
-#if (TRUE == CFG_TIMING_PROTECTION_ENABLE)
-        /* Task_exe budget. */
-        Os_TmProtTaskEnd(OsTaskID, TP_TASK_EXE);
-
-        /* Task isr_timing_protection process. */
-        pTcb->taskIsrOpt = TP_OPT_BUTT;
-        if (pTcb->taskDisableAllCount > 0u)
-        {
-            Os_TmProtTaskEnd(OsTaskID, TP_TASK_DIS_ALL_INT);
-            pTcb->taskDisableAllCount = 0u;
-            Os_ArchEnableAllInt_ButTimingProtInt();
-        }
-
-        if (pTcb->taskSuspendAllCount > 0u)
-        {
-            Os_TmProtTaskEnd(OsTaskID, TP_TASK_SUS_ALL_INT);
-            Os_SuspendAllCount -= pTcb->taskSuspendAllCount;
-            if (0u == Os_SuspendAllCount)
-            {
-                Os_ArchEnableAllInt_ButTimingProtInt();
-            }
-        }
-
-        if (pTcb->taskSuspendOSCount > 0u)
-        {
-            Os_TmProtTaskEnd(OsTaskID, TP_TASK_SUS_OS_INT);
-            Os_SuspendOsCount -= pTcb->taskSuspendOSCount;
-            if (0u == Os_SuspendOsCount)
-            {
-                Os_ArchSetIpl(Os_SaveOsIntNested, OS_ISR_ENABLE);
-            }
-        }
-#endif /* TRUE == CFG_TIMING_PROTECTION_ENABLE */
+        Os_AppResumeTaskLockInt(pScb, taskId);
     }
 
-    return osRet;
+    return ret;
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <Terminate the task objects of the calling application>
- * ServiceId            <None>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Yes>
- * Param-Name[in]       <pOsAppTaskRef: the application specified tasks ref>
- *                      <OsAppTaskCnt: the task count of this app.>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * Return               <None>
- * PreCondition         <None>
- * CallByAPI            <Os_TerminateObjects>
- * REQ ID               <None>
+/**
+ * Terminate the task objects of the calling application
  */
-/******************************************************************************/
-/* PRQA S 3450 ++ */ /* VL_Os_3450 */
-static void Os_TerminateTaskObjectHandler(const Os_TaskType* pOsAppTaskRef, Os_TaskType OsAppTaskCnt)
-/* PRQA S 3450 -- */
+/* PRQA S 3006, 6030 ++ */ /* VL_Os_3006, VL_MTR_Os_STMIF */
+OS_LOCAL void Os_TerminateTaskObjectHandler(
+    const Os_SCBType *pScb,
+    const Os_TaskType *appTaskRef,
+    Os_TaskType appTaskCnt)
+/* PRQA S 3006, 6030 -- */
 {
-    Os_TaskType i;
-    Os_TaskType osTaskId;
-    StatusType  osRet;
-
     /*check the count to be valid */
-    if ((0u == OsAppTaskCnt) || (Os_SCB.sysTaskMax <= OsAppTaskCnt))
+    if ((0u == (uint16)appTaskCnt) || (pScb->SysTaskMax <= (uint16)appTaskCnt))
     {
         /*nothing to do*/
     }
     else
     {
-        for (i = 0u; i < OsAppTaskCnt; i++)
+        for (uint16 i = 0u; i < (uint16)appTaskCnt; i++)
         {
-            osTaskId = Os_GetObjLocalId(pOsAppTaskRef[i]);
-            osRet    = Os_ApplTerminateOneTask(osTaskId);
+            Os_TaskType taskId = appTaskRef[i];
+            StatusType ret = Os_ApplTerminateOneTask(taskId);
 
             /* Os_App terminate task arch_related process. */
-            if ((StatusType)E_OK == osRet)
+            if ((StatusType)E_OK == ret)
             {
-                Os_ArchAppTerminateTaskProc(osTaskId);
+                /* PRQA S 3432, 3138, 0306, 1006 ++ */ /* VL_Os_3432, VL_Os_PlatformNoDef, VL_Os_0306, VL_Os_1006 */
+                Os_CallLevelType sysLevel = pScb->SysOsLevel;                                      
+                if ((OS_LEVEL_TASK == sysLevel)                                                    
+                    || (((OS_LEVEL_ERRORHOOK_APP == sysLevel) || (OS_LEVEL_ERRORHOOK == sysLevel)) 
+                        && (TRUE != pScb->SysInIsrCat2)))                                         
+                {                                                                                  
+                    if (taskId != pScb->SysRunningTaskId) /* PRQA S 3410 */ /* VL_Os_3410 */
+                    {                                                                              
+                        OS_HAL_TERMINATE_TASK(taskId); /* PRQA S 1021, 2743 */ /* VL_Os_1021, VL_Os_2743 */
+                    }                                                                              
+                }                                                                                  
+                else                                                                               
+                {                                                                                  
+                    OS_HAL_TERMINATE_TASK(taskId); /* PRQA S 1021, 2743 */ /* VL_Os_1021, VL_Os_2743 */                                                    
+                }                                               
+                /* PRQA S 3432, 3138, 0306, 1006 -- */
             }
         }
     }
@@ -714,37 +1072,24 @@ static void Os_TerminateTaskObjectHandler(const Os_TaskType* pOsAppTaskRef, Os_T
 #if (CFG_ALARM_MAX > 0)
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <Terminate the Alarm objects of the calling application>
- * ServiceId            <None>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Yes>
- * Param-Name[in]       <pOsAppAlarmRef: the application specified Alarms ref>
- *                      <OsAppAlarmCnt : the count/size of the pOsAppAlarmRef>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * Return               <None>
- * PreCondition         <None>
- * CallByAPI            <Os_TerminateObjects>
- * REQ ID               <None>
+/**
+ * Terminate the Alarm objects of the calling application
  */
-/******************************************************************************/
-/* PRQA S 3450 ++ */ /* VL_Os_3450 */
-static void Os_TerminateAlarmObjectHandler(const Os_AlarmType* pOsAppAlarmRef, Os_AlarmType OsAppAlarmCnt)
-/* PRQA S 3450 -- */
+OS_LOCAL void Os_TerminateAlarmObjectHandler(
+    const Os_SCBType *pScb,
+    const Os_AlarmType *appAlarmRef,
+    Os_AlarmType appAlarmCnt)
 {
-    Os_AlarmType i;
     /*check the count to be valid */
-    if ((0u == OsAppAlarmCnt) || (Os_SCB.sysAlarmMax < OsAppAlarmCnt))
+    if ((0u == (uint16)appAlarmCnt) || (pScb->SysAlarmMax < appAlarmCnt))
     {
         /*nothing to do*/
     }
     else
     {
-        for (i = 0u; i < OsAppAlarmCnt; i++)
+        for (uint16 i = 0u; i < (uint16)appAlarmCnt; i++)
         {
-            (void)Os_CancelAlarm(pOsAppAlarmRef[i]);
+            (void)Os_CancelAlarm(appAlarmRef[i]);
         }
     }
 
@@ -752,86 +1097,60 @@ static void Os_TerminateAlarmObjectHandler(const Os_AlarmType* pOsAppAlarmRef, O
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
-#endif /* CFG_ALARM_MAX > 0 */
+#endif
 
 #if (CFG_SCHEDTBL_MAX > 0)
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <Terminate the ScheduleTable objects of the calling application>
- * ServiceId            <None>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Yes>
- * Param-Name[in]       <pOsAppSchTblRef: the application specified scheduleTbls ref>
- *                      <OsAppSchTblCnt : the count/size of the pOsAppSchTblRef>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * Return               <None>
- * PreCondition         <None>
- * CallByAPI            <Os_TerminateObjects>
- * REQ ID               <None>
+/**
+ * Terminate the ScheduleTable objects of the calling application
  */
-/******************************************************************************/
-static void Os_TerminateScheduleTblObjectHandler(
-    const Os_ScheduleTableType* pOsAppSchTblRef,
-    Os_ScheduleTableType        OsAppSchTblCnt)
+OS_LOCAL void Os_TerminateScheduleTblObjectHandler(
+    Os_SCBType *pScb,
+    const Os_ScheduleTableType *appSchTblRef,
+    Os_ScheduleTableType appSchTblCnt)
 {
-    Os_ScheduleTableType i;
-    Os_CallLevelType     sysCallLevel;
-
     /*check the count to be valid */
-    if ((0u == OsAppSchTblCnt) || (CFG_SCHEDTBL_MAX < OsAppSchTblCnt))
+    if ((0u == (uint16)appSchTblCnt) || (CFG_SCHEDTBL_MAX < (uint16)appSchTblCnt))
     {
         /*nothing to do*/
     }
     else
     {
         /* in order to pass service protection*/
-        sysCallLevel      = Os_SCB.sysOsLevel;
-        Os_SCB.sysOsLevel = OS_LEVEL_TASK;
-        for (i = 0u; i < OsAppSchTblCnt; i++)
+        Os_CallLevelType sysCallLevel = pScb->SysOsLevel;
+        pScb->SysOsLevel = OS_LEVEL_TASK; /* PRQA S 2982 */ /* VL_Os_2982 */
+        for (uint16 i = 0u; i < (uint16)appSchTblCnt; i++) /* PRQA S 4527 */ /* VL_Os_4527 */
         {
-            (void)Os_StopScheduleTable(pOsAppSchTblRef[i]);
+            (void)Os_StopScheduleTable(appSchTblRef[i]);
         }
-        Os_SCB.sysOsLevel = sysCallLevel;
+        pScb->SysOsLevel = sysCallLevel;
     }
 
     return;
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
-#endif /* CFG_SCHEDTBL_MAX > 0 */
+#endif
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <Terminate the objects belonging to the calling application>
- * ServiceId            <None>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Yes>
- * Param-Name[in]       <pOsCurAppCfg: the application config reference>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * Return               <None>
- * PreCondition         <None>
- * CallByAPI            <TerminateApplication>
- * REQ ID               <DD_1_1013, DD_1_1014>
+/**
+ * Terminate the objects belonging to the calling application
  */
-/******************************************************************************/
-/* PRQA S 3450 ++ */ /* VL_Os_3450 */
-static void Os_TerminateObjects(const Os_ApplicationCfgType* pOsCurAppCfg)
-/* PRQA S 3450 -- */
+/* PRQA S 3673 ++ */ /* VL_QAC_3673 */
+OS_LOCAL void Os_TerminateObjects(Os_SCBType *pScb, const Os_ApplicationCfgType *curAppCfg)
+/* PRQA S 3673 -- */
 {
 #if (CFG_ALARM_MAX > 0)
     /**
      * stop all active alarms
      */
-    Os_TerminateAlarmObjectHandler(
-        (Os_AlarmRefType)pOsCurAppCfg->OsAppObjectRef[OBJECT_ALARM],
-        pOsCurAppCfg->OsAppAlarmRefCnt);
-#endif /* CFG_ALARM_MAX > 0 */
+    /* PRQA S 0310, 3305, 4342 ++ */ /* VL_Os_0310, VL_Os_3305, VL_Os_4342 */
+    Os_TerminateAlarmObjectHandler(pScb, (Os_AlarmRefType)curAppCfg->AppObjectRef[OS_OBJECT_ALARM],
+                                   (Os_AlarmType)curAppCfg->AppAlarmRefCnt);
+    /* PRQA S 0310, 3305, 4342 -- */
+#endif
 /**
  * All other interrupt sources should be already disabled in above handling,
  * which as one precondition here.
@@ -845,29 +1164,35 @@ static void Os_TerminateObjects(const Os_ApplicationCfgType* pOsCurAppCfg)
      * on the Tasks will be handled while in the following terminating the Task objects.
      */
     /* MISRA-C: 17.4  Array subscripting applied to an object of pointer type.
-       OsAppObjectRef is pointor of static_cfg_array, OsAppIsrRefCnt is the size of array,
+       AppObjectRef is pointor of static_cfg_array, AppIsrRefCnt is the size of array,
        it must be used like below. */
-    Os_TerminateISRObjectHandler((Os_IsrType*)pOsCurAppCfg->OsAppObjectRef[OBJECT_ISR], pOsCurAppCfg->OsAppIsrRefCnt);
-#endif /* CFG_ISR_MAX > 0 */
+    /* PRQA S 0310, 3305, 4342 ++ */ /* VL_Os_0310, VL_Os_3305, VL_Os_4342 */
+    Os_TerminateISRObjectHandler((Os_IsrType *)curAppCfg->AppObjectRef[OS_OBJECT_ISR],
+                                 (Os_IsrType)curAppCfg->AppIsrRefCnt);
+    /* PRQA S 0310, 3305, 4342 -- */
+#endif
 
 #if (CFG_TASK_MAX > 0)
     /**
      * Terminate all the tasks of the application, kick out the queued request and free
      * all of the control block context, also will free the resources occupied on them.
      */
-    Os_TerminateTaskObjectHandler(
-        (Os_TaskRefType)pOsCurAppCfg->OsAppObjectRef[OBJECT_TASK],
-        pOsCurAppCfg->OsAppTaskCnt);
-#endif /* CFG_TASK_MAX > 0 */
+    /* PRQA S 0310, 3305 ++ */ /* VL_Os_0310, VL_Os_3305 */
+    /* PRQA S 0432, 4342 ++ */ /* VL_Os_0432, VL_Os_4342 */
+    Os_TerminateTaskObjectHandler(pScb, curAppCfg->AppObjectRef[OS_OBJECT_TASK],
+                                  (Os_TaskType)curAppCfg->AppTaskCnt);
+    /* PRQA S 0432, 4342 -- */
+    /* PRQA S 0310, 3305 -- */
+#endif
 
 #if (CFG_SCHEDTBL_MAX > 0)
     /**
      * stop all schedule tables
      */
-    Os_TerminateScheduleTblObjectHandler(
-        (Os_ScheduleTableType*)pOsCurAppCfg->OsAppObjectRef[OBJECT_SCHEDULETABLE],
-        pOsCurAppCfg->OsAppScheduleTableCnt);
-#endif /* CFG_SCHEDTBL_MAX > 0 */
+    Os_TerminateScheduleTblObjectHandler(pScb,
+                                         curAppCfg->AppObjectRef[OS_OBJECT_SCHEDULETABLE], /* PRQA S 0432 */ /* VL_Os_0432 */
+                                         curAppCfg->AppScheduleTableCnt); /* PRQA S 4442, 1441 */ /* VL_Os_4442, VL_Os_1441 */
+#endif
 
     return;
 }
@@ -876,147 +1201,168 @@ static void Os_TerminateObjects(const Os_ApplicationCfgType* pOsCurAppCfg)
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <This service determines the currently running
+/**
+ * This service determines the currently running
  *                      OS-Application (a unique identifier has to be
- *                      allocated to each application)>
- * Service ID           <0x27>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * Return value         <OS-Application id>
- * PreCondition         <SC3 and SC4>
- * CallByAPI            <None>
- * REQ ID               <None>
+ *                      allocated to each application)
  */
-/******************************************************************************/
-ApplicationType GetCurrentApplicationID(void) /* PRQA S 3006 */ /* VL_Os_3006 */
+/* PRQA S 1503,3006,3408,6070,1512 ++ */ /* VL_QAC_NoUsedApi,VL_Os_3006,VL_Os_3408,VL_MTR_Os_STCAL,VL_Os_1512 */
+ApplicationType GetCurrentApplicationID(void)
+/* PRQA S 1503,3006,3408,6070,1512 -- */
 {
-    /* PRQA S 2741, 2742, 2880, 3138 ++ */ /* VL_Os_PlatformDef */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
     /* PRQA S 1006 ++ */ /* VL_Os_1006 */
-    OS_ENTER_KERNEL();
+    OS_HAL_ENTER_KERNEL(); /* PRQA S 1021 */ /* VL_Os_1021 */
     /* PRQA S 1006 -- */
-    /* PRQA S 2741, 2742, 2880, 3138 -- */
-    ApplicationType ApplID = INVALID_OSAPPLICATION;
-    StatusType      status = E_OK;
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
+    ApplicationType applId = INVALID_OSAPPLICATION;
+    StatusType status = E_OK;
+    /* PRQA S 3678 ++ */ /* VL_Os_3678 */
+    Os_SCBType *pScb = Os_GetCurrentContext();
+    /* PRQA S 3678 -- */
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 1317, 3432, 4442, 4521, 4544, 1259 ++ */ /* VL_Os_1317, VL_Os_3432, VL_Os_4442, VL_Os_4521, VL_Os_4544, VL_Os_1259 */
+    OSRtiEnterApi(pScb, OSApiId_GetCurrentApplicationID);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_GetCurrentApplicationID_Start, 0);
+    /* PRQA S 1317, 3432, 4442, 4521, 4544, 1259 -- */
+    /* PRQA S 3138, 3141 -- */
+    OS_HAL_DECLARE_CRITICAL();
 
-#if (TRUE == CFG_TRACE_ENABLE)
-    Os_TraceServiceEnter(OSServiceId_GetApplicationID);
-#endif /* TRUE == CFG_TRACE_ENABLE */
-
-    OS_ARCH_DECLARE_CRITICAL();
-
-/*service protection*/
 #if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
-    if (Os_WrongContext(OS_CONTEXT_GET_CURRENT_APPLICATION_ID) != TRUE)
+    Os_ServicePortParamType SprotParam = {
+        .AllowedContext = OS_SERVICEPORT_CHECK_GET_CURRENT_APPLICATION_ID,
+        .ObjectType = OS_OBJECT_INVALID,
+        .ObjectID = INVALID_OSAPPLICATION,
+        /* PRQA S 1258 ++ */ /* VL_Os_ConstToIntegral */
+        .Address = NULL_PARA,
+        /* PRQA S 1258 -- */
+    };
+
+    /* PRQA S 3326 ++ */ /* VL_Os_3326 */
+    if ((status = Os_ServiceProtCheck(pScb, &SprotParam)) == E_OK)
+    /* PRQA S 3326 -- */
+#endif
     {
-        status = E_OS_CALLEVEL;
-    }
-    else if (Os_IgnoreService() != TRUE)
-    {
-        status = E_OS_DISABLEDINT;
-    }
-    else
-#endif /* TRUE == CFG_SERVICE_PROTECTION_ENABLE */
-    {
-        OS_ARCH_ENTRY_CRITICAL();
+        OS_HAL_ENTRY_CRITICAL();
 
         /*OS798: return the identifier in which the current Task/ISR/hook is executed*/
-        ApplID = Os_SCB.sysRunningAppID;
-        if (ApplID < CFG_OSAPPLICATION_MAX) /* OS799 */
+        applId = pScb->SysRunningAppId;
+        if (applId < CFG_OSAPPLICATION_MAX) /* OS799 */
         {
-            if (Os_SCB.sysAppId == ApplID)
+            if (pScb->SysAppId == applId)
             {
-                ApplID = INVALID_OSAPPLICATION;
+                applId = INVALID_OSAPPLICATION;
             }
         }
         else
         {
-            ApplID = INVALID_OSAPPLICATION;
+            applId = INVALID_OSAPPLICATION;
         }
 
-        OS_ARCH_EXIT_CRITICAL();
+        OS_HAL_EXIT_CRITICAL();
     }
 
 #if (CFG_ERRORHOOK == TRUE)
     if (status != E_OK)
     {
-        Os_TraceErrorHook(OSError_Save_GetCurrentApplicationID(), OSServiceId_GetCurrentApplicationID, status);
+        Os_TraceErrorHook(OSError_Save_GetCurrentApplicationID(),
+                          OSServiceId_GetCurrentApplicationID,
+                          status, pScb); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
     }
 #endif
 
-#if (TRUE == CFG_TRACE_ENABLE)
-    Os_TraceServiceExit(OSServiceId_GetApplicationID);
-#endif /* TRUE == CFG_TRACE_ENABLE */
-
-    OS_EXIT_KERNEL(); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 3432, 4544 ++ */ /* VL_Os_3432, VL_Os_4544 */
+    OSRtiExitApi(pScb, OSApiId_GetCurrentApplicationID);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_GetCurrentApplicationID_Return, applId);
+    OS_HAL_EXIT_KERNEL(); /* PRQA S 2743*/ /* VL_Os_2743*/
+    /* PRQA S 3432, 4544 -- */
+    /* PRQA S 3138, 3141 -- */
     UNUSED_PARAMETER(status);
-    return ApplID;
+    return applId;
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <This service sets the own state of an OS-Application
- *                         from APPLICATION_RESTARTING to APPLICATION_ACCESSIBLE.>
- * Service ID           <0x13>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * Return value         <StatusType>
- * PreCondition         <SC3 and SC4>
- * CallByAPI            <None>
- * REQ ID               <None>
+/**
+ * This service sets the own state of an OS-Application
+ *                         from OS_APPLICATION_RESTARTING to OS_APPLICATION_ACCESSIBLE.
  */
-/******************************************************************************/
-/* PRQA S 3006, 1503 ++ */ /* VL_Os_3006, VL_QAC_NoUsedApi */
+/* PRQA S 1503,3006,3408,6070,1512 ++ */ /* VL_QAC_NoUsedApi,VL_Os_3006,VL_Os_3408,VL_MTR_Os_STCAL,VL_Os_1512 */
 StatusType AllowAccess(void)
-/* PRQA S 3006, 1503 -- */
+/* PRQA S 1503,3006,3408,6070,1512 -- */
 {
-    /* PRQA S 2741, 2742, 2880, 3138 ++ */ /* VL_Os_PlatformDef */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
     /* PRQA S 1006 ++ */ /* VL_Os_1006 */
-    OS_ENTER_KERNEL();
+    OS_HAL_ENTER_KERNEL(); /* PRQA S 1021 */ /* VL_Os_1021 */
     /* PRQA S 1006 -- */
-    /* PRQA S 2741, 2742, 2880, 3138 -- */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
     StatusType err = E_OK;
-    OS_ARCH_DECLARE_CRITICAL();
+    OS_HAL_DECLARE_CRITICAL();
+    /* PRQA S 3678 ++ */ /* VL_Os_3678 */
+    Os_SCBType *pScb = Os_GetCurrentContext();
+    /* PRQA S 3678 -- */
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 1317, 3432, 4442, 4521, 4544, 1259 ++ */ /* VL_Os_1317, VL_Os_3432, VL_Os_4442, VL_Os_4521, VL_Os_4544, VL_Os_1259 */
+    OSRtiEnterApi(pScb, OSApiId_AllowAccess);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_AllowAccess_Start, 0);
+    /* PRQA S 1317, 3432, 4442, 4521, 4544, 1259 -- */
+    /* PRQA S 3138, 3141 -- */
 
 #if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
-    if (Os_WrongContext(OS_CONTEXT_ALLOW_ACCESS) != TRUE)
+    Os_ServicePortParamType SprotParam = {
+        .AllowedContext = OS_SERVICEPORT_CHECK_ALLOW_ACCESS,
+        .ObjectType = OS_OBJECT_INVALID,
+        .ObjectID = INVALID_OSAPPLICATION,
+        /* PRQA S 1258 ++ */ /* VL_Os_ConstToIntegral */
+        .Address = NULL_PARA,
+        /* PRQA S 1258 -- */
+    };
+
+    /* PRQA S 3326 ++ */ /* VL_Os_3326 */
+    if ((err = Os_ServiceProtCheck(pScb, &SprotParam)) == E_OK)
+    /* PRQA S 3326 -- */
+#endif
     {
-        err = E_OS_CALLEVEL;
-    }
-    else if (Os_IgnoreService() != TRUE)
-    {
-        err = E_OS_DISABLEDINT;
-    }
-    else
-#endif /* TRUE == CFG_SERVICE_PROTECTION_ENABLE */
-    {
-        OS_ARCH_ENTRY_CRITICAL();
+        OS_HAL_ENTRY_CRITICAL();
         /* PRQA S 3442 ++ */ /* VL_Os_3442 */
-        if (APPLICATION_RESTARTING != Os_AppCB[Os_SCB.sysRunningAppID].appState)
+        if (OS_APPLICATION_RESTARTING != Os_AppCB[pScb->SysRunningAppId].AppState)
         /* PRQA S 3442 -- */
         {
-            OS_ARCH_EXIT_CRITICAL();
+            OS_HAL_EXIT_CRITICAL();
             err = E_OS_STATE;
         }
         else
         {
-            Os_AppCB[Os_SCB.sysRunningAppID].appState = APPLICATION_ACCESSIBLE;
-            OS_ARCH_EXIT_CRITICAL();
+            Os_AppCB[pScb->SysRunningAppId].AppState = OS_APPLICATION_ACCESSIBLE;
+            /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+            /* PRQA S 1821, 4532, 4544, 4542 ++ */ /* VL_Os_1821, VL_Os_4532, VL_Os_4544, VL_Os_4542 */
+            /* PRQA S 0499, 4543, 1861, 4397, 1277 ++ */ /* VL_Os_0499, VL_Os_4543, VL_Os_1861, VL_Os_4397, VL_Os_1277 */
+            ARTI_TRACE(NOSUSP, AR_CP_OS_APPLICATION, Os, pScb->SysCore, OsApplication_AllowAccess, pScb->SysRunningAppId);
+            /* PRQA S 0499, 4543, 1861, 4397, 1277 -- */
+            /* PRQA S 1821, 4532, 4544, 4542 -- */
+            /* PRQA S 3138, 3141 -- */
+            OS_HAL_EXIT_CRITICAL();
         }
     }
 
 #if (CFG_ERRORHOOK == TRUE)
     if (err != E_OK)
     {
-        Os_TraceErrorHook(OSError_Save_AllowAccess(), OSServiceId_AllowAccess, err);
+        /* PRQA S 3138 ++ */ /* VL_Os_3138 */
+        Os_TraceErrorHook(OSError_Save_AllowAccess(), OSServiceId_AllowAccess, err, pScb);
+        /* PRQA S 3138 -- */
     }
 #endif
-    OS_EXIT_KERNEL(); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 3432, 4544 ++ */ /* VL_Os_3432, VL_Os_4544 */
+    OSRtiExitApi(pScb, OSApiId_AllowAccess);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_AllowAccess_Return, err);
+    OS_HAL_EXIT_KERNEL(); /* PRQA S 2743*/ /* VL_Os_2743*/
+    /* PRQA S 3432, 4544 -- */
+    /* PRQA S 3138, 3141 -- */
     return err;
 }
 #define OS_STOP_SEC_CODE
@@ -1024,67 +1370,72 @@ StatusType AllowAccess(void)
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <This service returns the current state of an OS-Application.>
- * Service ID           <0x14>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * Return value         <StatusType>
- * PreCondition         <SC3 and SC4>
- * CallByAPI            <None>
- * REQ ID               <None>
+/**
+ * This service returns the current state of an OS-Application.
  */
-/******************************************************************************/
-/* PRQA S 6030, 3006, 1503 ++ */ /* VL_MTR_Os_STMIF, VL_Os_3006, VL_QAC_NoUsedApi */
+/* PRQA S 1503,3006,3408,1512 ++ */ /* VL_QAC_NoUsedApi, VL_Os_3006, VL_Os_3408, VL_Os_1512 */
 StatusType GetApplicationState(ApplicationType Application, ApplicationStateRefType Value)
-/* PRQA S 6030, 3006, 1503 -- */
+/* PRQA S 1503,3006,3408,1512 -- */
 {
-    /* PRQA S 2741, 2742, 2880, 3138 ++ */ /* VL_Os_PlatformDef */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
     /* PRQA S 1006 ++ */ /* VL_Os_1006 */
-    OS_ENTER_KERNEL();
+    OS_HAL_ENTER_KERNEL(); /* PRQA S 1021 */ /* VL_Os_1021 */
     /* PRQA S 1006 -- */
-    /* PRQA S 2741, 2742, 2880, 3138 -- */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
     StatusType err = E_OK;
+    /* PRQA S 3678 ++ */ /* VL_Os_3678 */
+    Os_SCBType *pScb = Os_GetCurrentContext();
+    /* PRQA S 3678 -- */
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 1317, 3432, 4442, 4521, 4544 ++ */ /* VL_Os_1317, VL_Os_3432, VL_Os_4442, VL_Os_4521, VL_Os_4544 */
+    OSRtiEnterApi(pScb, OSApiId_GetApplicationState);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_GetApplicationState_Start, Application);
+    /* PRQA S 1317, 3432, 4442, 4521, 4544 -- */
+    /* PRQA S 3138, 3141 -- */
 
-#if (OS_STATUS_EXTENDED == CFG_STATUS)
-    if (NULL_PTR == Value)
-    {
-        err = E_OS_PARAM_POINTER;
-    }
-    else if (CFG_OSAPPLICATION_MAX <= Application)
-    {
-        err = E_OS_ID;
-    }
-    else
-#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
 #if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
-        if (Os_WrongContext(OS_CONTEXT_GET_APPLICATION_STATE) != TRUE)
+    Os_ServicePortParamType SprotParam = {
+        .AllowedContext = OS_SERVICEPORT_CHECK_GET_APPLICATION_STATE,
+        .ObjectType = OS_OBJECT_APP,
+        .ObjectID = Application,
+        /* PRQA S 0306 ++ */ /* VL_Os_0306 */
+        .Address = (uint32)Value,
+        /* PRQA S 0306 -- */
+    };
+    /* PRQA S 3326 ++ */ /* VL_Os_3326 */
+    if ((err = Os_ServiceProtCheck(pScb, &SprotParam)) == E_OK)
+    /* PRQA S 3326 -- */
+#endif
     {
-        err = E_OS_CALLEVEL;
-    }
-    else if (Os_AddressWritable((uint32)Value) != TRUE) /* PRQA S 0306 */ /* VL_Os_0306 */
-    {
-        err = E_OS_ILLEGAL_ADDRESS;
-    }
-    else if (Os_IgnoreService() != TRUE)
-    {
-        err = E_OS_DISABLEDINT;
-    }
-    else
-#endif /* TRUE == CFG_SERVICE_PROTECTION_ENABLE */
-    {
-        *Value = Os_AppCB[Application].appState;
+#if (OS_STATUS_EXTENDED == CFG_STATUS)
+        if (CFG_OSAPPLICATION_MAX <= Application)
+        {
+            err = E_OS_ID;
+        }
+        else
+#endif
+        {
+            *Value = Os_AppCB[Application].AppState;
+        }
     }
 
 #if (CFG_ERRORHOOK == TRUE)
     if (err != E_OK)
     {
-        Os_TraceErrorHook(OSError_Save_GetApplicationState(Application, Value), OSServiceId_GetApplicationState, err);
+        Os_TraceErrorHook(OSError_Save_GetApplicationState(Application, Value),
+                          OSServiceId_GetApplicationState,
+                          err, pScb);/* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
     }
 #endif
 
-    OS_EXIT_KERNEL(); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 3432, 4544, 1258, 4342 ++ */ /* VL_Os_3432, VL_Os_4544, VL_Os_1258, VL_Os_4342 */
+    OSRtiExitApi(pScb, OSApiId_GetApplicationState);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_GetApplicationState_Return, (err == E_OK ) ? *Value : (Os_ApplicationStateType)0U);
+    OS_HAL_EXIT_KERNEL(); /* PRQA S 2743*/ /* VL_Os_2743*/  
+    /* PRQA S 3432, 4544, 1258, 4342 -- */
+    /* PRQA S 3138, 3141 -- */
+    UNUSED_PARAMETER(pScb);
     return err;
 }
 #define OS_STOP_SEC_CODE
@@ -1092,349 +1443,239 @@ StatusType GetApplicationState(ApplicationType Application, ApplicationStateRefT
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <This service determines if the OS-Applications,
- *                       given by ApplID, is allowed to use the IDs of a
+/**
+ * This service determines if the OS-Applications,
+ *                       given by applId, is allowed to use the IDs of a
  *                       Task, ISR, Resource, Counter, Alarm or Schedule
- *                       Table in API calls.>
- * Service ID           <0x05>
- * Sync/Async           <Synchronous>
- * Reentrancy           < Reentrant>
- * param-Name[in]       <ApplID>
- *                      <ObjectType>
- *                      <ObjectID>
- * Return value         <ACCESS>
- *                      <NO_ACCESS>
- * PreCondition         <SC3 and SC4>
- * REQ ID               <None>
+ *                       Table in API calls.
  */
-/******************************************************************************/
-/* PRQA S 6030, 3006, 1503 ++ */ /* VL_MTR_Os_STMIF, VL_Os_3006, VL_QAC_NoUsedApi */
+/* PRQA S 1503,3006,3408 ++ */ /* VL_QAC_NoUsedApi, VL_Os_3006, VL_Os_3408 */
+/* PRQA S 3334,6070,1512,1506 ++ */ /* VL_Os_3334, VL_MTR_Os_STCAL, VL_Os_1512, VL_Os_1506 */
 ObjectAccessType CheckObjectAccess(ApplicationType ApplID, ObjectTypeType ObjectType, AppObjectId ObjectID)
-/* PRQA S 6030, 3006, 1503 -- */
+/* PRQA S 3334,6070,1512,1506 -- */
+/* PRQA S 1503,3006,3408 -- */
 {
-    /* PRQA S 2741, 2742, 2880, 3138 ++ */ /* VL_Os_PlatformDef */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
     /* PRQA S 1006 ++ */ /* VL_Os_1006 */
-    OS_ENTER_KERNEL();
+    OS_HAL_ENTER_KERNEL(); /* PRQA S 1021 */ /* VL_Os_1021 */
     /* PRQA S 1006 -- */
-    /* PRQA S 2741, 2742, 2880, 3138 -- */
-    const Os_AppObjectId* pObjectIDMaxTableRef;
-    ObjectAccessType      err    = NO_ACCESS;
-    StatusType            Status = E_OK;
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
+    ObjectAccessType err = OS_NO_ACCESS;
+    StatusType Status = E_OK;
+    /* PRQA S 3678 ++ */ /* VL_Os_3678 */
+    Os_SCBType *pScb = Os_GetCurrentContext();
+    /* PRQA S 3678 -- */
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 1317, 3432, 4442, 4521, 4544 ++ */ /* VL_Os_1317, VL_Os_3432, VL_Os_4442, VL_Os_4521, VL_Os_4544 */
+    OSRtiEnterApi(pScb, OSApiId_CheckObjectAccess);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_CheckObjectAccess_Start, ApplID);
+    /* PRQA S 1317, 3432, 4442, 4521, 4544 -- */
+    /* PRQA S 3138, 3141 -- */
 
-#if (TRUE == CFG_TRACE_ENABLE)
-    Os_TraceServiceEnter(OSServiceId_CheckObjectAccess);
-#endif /* TRUE == CFG_TRACE_ENABLE */
-
-    pObjectIDMaxTableRef = Os_ObjectIDMaxTable_Inf[Os_GetObjCoreId(ObjectID)];
-
-/*service protection*/
 #if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
-    if (Os_WrongContext(OS_CONTEXT_CHECK_OBJECT_ACCESS) != TRUE)
+    Os_ServicePortParamType SprotParam = {
+        .AllowedContext = OS_SERVICEPORT_CHECK_OBJECT_ACCESS,
+        .ObjectType = ObjectType,
+        .ObjectID = ApplID,
+        /* PRQA S 1258 ++ */ /* VL_Os_ConstToIntegral */
+        .Address = NULL_PARA,
+        /* PRQA S 1258 -- */
+    };
+    /* PRQA S 3326 ++ */ /* VL_Os_3326 */
+    if ((Status = Os_ServiceProtCheck(pScb, &SprotParam)) == E_OK)
+    /* PRQA S 3326 -- */
+#endif
     {
-        Status = E_OS_CALLEVEL;
-    }
-    else if (Os_IgnoreService() != TRUE)
-    {
-        Status = E_OS_DISABLEDINT;
-    }
-    else
-#endif /* TRUE == CFG_SERVICE_PROTECTION_ENABLE */
-
         if (ApplID >= CFG_OSAPPLICATION_MAX)
         {
-            err = NO_ACCESS;
+            err = OS_NO_ACCESS;
         }
-        /*OS423: if the objectType is not a valid , return NO_ACCESS*/
-        else if (ObjectType >= OBJECT_MAX)
+        /*OS423: if the objectType is not a valid , return OS_NO_ACCESS*/
+        else if (ObjectType >= OS_OBJECT_MAX)
         {
-            err = NO_ACCESS;
+            err = OS_NO_ACCESS;
         }
-        else if (Os_GetObjLocalId(ObjectID) >= pObjectIDMaxTableRef[ObjectType])
+        else if (Os_ObjectIDCheck((uint16)ObjectID, (uint8)ObjectType) != TRUE)
         {
-            err = NO_ACCESS;
+            err = OS_NO_ACCESS;
         }
         else
         {
-            err = Os_CheckObjectAccess(ApplID, ObjectType, ObjectID);
+            err = Os_CheckObjectAccess(pScb, ApplID, ObjectType, ObjectID);
         }
+    }
 
 #if (CFG_ERRORHOOK == TRUE)
     if (Status != E_OK)
     {
-        Os_TraceErrorHook(
-            OSError_Save_CheckObjectAccess(ApplID, ObjectType, ObjectID),
-            OSServiceId_CheckObjectAccess,
-            Status);
+        Os_TraceErrorHook(OSError_Save_CheckObjectAccess(ApplID, ObjectType, ObjectID),
+                          OSServiceId_CheckObjectAccess,
+                          Status, pScb);/* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
     }
 #endif
 
-#if (TRUE == CFG_TRACE_ENABLE)
-    Os_TraceServiceExit(OSServiceId_CheckObjectAccess);
-#endif /* TRUE == CFG_TRACE_ENABLE */
-
-    OS_EXIT_KERNEL(); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
-
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 3432, 4544 ++ */ /* VL_Os_3432, VL_Os_4544 */
+    OSRtiExitApi(pScb, OSApiId_CheckObjectAccess);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_CheckObjectAccess_Return, ObjectType);
+    OS_HAL_EXIT_KERNEL(); /* PRQA S 2743*/ /* VL_Os_2743*/
+    /* PRQA S 3432, 4544 -- */
+    /* PRQA S 3138, 3141 -- */
+    UNUSED_PARAMETER(pScb);
     UNUSED_PARAMETER(Status);
     return err;
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
 
+#if (CFG_ISR_MAX > 0)
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <Terminate Application>
- * ServiceId            <0x12>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Yes>
- * Param-Name[in]       <Application>
- *                      <RestartOption>
- * Return               <E_OS_CALLEVEL>
- *                      <E_OS_VALUE>
- * PreCondition         <None>
- * PreCondition         <SC3 and SC4>
- * REQ ID               <None>
+/**
+ * TryToGetSpinlock has the same functionality as GetSpinlock with the difference
+                         that if the spinlock is already occupied by a TASK on a different core the function
+                         sets the OUT parameter "Success" and returns with E_OK
  */
-/******************************************************************************/
-/* PRQA S 6030, 6010, 3006, 1503 ++ */ /* VL_MTR_Os_STMIF, VL_MTR_Os_STCYC, VL_Os_3006, VL_QAC_NoUsedApi */
-StatusType TerminateApplication(ApplicationType Application, RestartType RestartOption)
-/* PRQA S 6030, 6010, 3006, 1503 -- */
+OS_LOCAL void Os_DisableIntInApp( /* PRQA S 3006 */ /* VL_Os_3006 */
+    const Os_ApplicationCfgType *posCurAppCfg)
 {
-    /* PRQA S 2741, 2742, 2880, 3138 ++ */ /* VL_Os_PlatformDef */
-    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
-    OS_ENTER_KERNEL();
-    /* PRQA S 1006 -- */
-    /* PRQA S 2741, 2742, 2880, 3138 -- */
-
-    StatusType err = E_OK;
-
-#if (TRUE == CFG_TRACE_ENABLE)
-    Os_TraceServiceEnter(OSServiceId_TerminateApplication);
-#endif /* TRUE == CFG_TRACE_ENABLE */
-
-#if (OS_STATUS_EXTENDED == CFG_STATUS)
-    /*SWS_Os_00493*/
-    if (CFG_OSAPPLICATION_MAX <= Application)
+    uint16 isrRefCnt = posCurAppCfg->AppIsrRefCnt;
+    for (uint16 i = 0u; i < isrRefCnt; i++)
     {
-        err = E_OS_ID;
+        /* PRQA S 3305, 3678, 0310 ++ */ /* VL_Os_3305, VL_Os_3678, VL_Os_0310 */
+        Os_IsrType *arrayAppIsr = (Os_IsrType *)posCurAppCfg->AppObjectRef[OS_OBJECT_ISR];
+        uint32 isrId = (uint32)arrayAppIsr[i];
+        /* PRQA S 3305, 3678, 0310 -- */
+        uint32 isrRegVal = Os_IsrCfg[isrId].IsrSrc;
+        /* PRQA S 0303, 3138 ++ */ /* VL_Os_0303, VL_Os_3138 */
+        /* PRQA S 3442, 3345, 1006 ++ */ /* VL_Os_3442, VL_Os_3345, VL_Os_1006 */
+         OS_Hal_DisableIntApp(isrRegVal);
+        /* PRQA S 3442, 3345, 1006 -- */
+        /* PRQA S 0303, 3138 -- */
     }
-    /*SWS_Os_00459: if the <RestartOption> is invalid, return E_OS_VALUE*/
-    else if ((RESTART != RestartOption) && (NO_RESTART != RestartOption))
-    {
-        err = E_OS_VALUE;
-    }
-    /*SWS_Os_00494*/
-    else if ((FALSE == Os_AppCfg[Os_SCB.sysRunningAppID].OsTrusted) && (Application != Os_SCB.sysRunningAppID))
-    {
-        err = E_OS_ACCESS;
-    }
-    /*SWS_Os_00507*/
-    /* PRQA S 3442 ++ */ /* VL_Os_3442 */
-    else if (APPLICATION_TERMINATED == Os_AppCB[Application].appState)
-    {
-        err = E_OS_STATE;
-    }
-    /*SWS_Os_00508,SWS_Os_00548*/
-    else if (
-        (APPLICATION_RESTARTING == Os_AppCB[Application].appState)
-        && ((Os_SCB.sysRunningAppID != Application) || (RESTART == RestartOption)))
-    /* PRQA S 3442 -- */
-    {
-        err = E_OS_STATE;
-    }
-    else
-#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
-
-#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
-        /*OS088*/
-        if (Os_WrongContext(OS_CONTEXT_TERMINATE_APPLICATION) != TRUE)
-        {
-            err = E_OS_CALLEVEL;
-        }
-        else if (Os_IgnoreService() != TRUE)
-        {
-            err = E_OS_DISABLEDINT;
-        }
-        else
-#endif /* TRUE == CFG_SERVICE_PROTECTION_ENABLE */
-        {
-#if (OS_AUTOSAR_CORES > 1)
-            Os_CoreIdType coreId = Os_AppCfg[Application].OsHostCore;
-            if (coreId != Os_SCB.sysCore)
-            {
-                RpcInputType rpcData = {
-                    .sync         = RPC_SYNC,
-                    .remoteCoreId = coreId,
-                    .serviceId    = OSServiceId_TerminateApplication,
-                    .srvPara0     = (uint32)Application,
-                    .srvPara1     = (uint32)RestartOption,
-                    /* PRQA S 1258 ++ */ /* VL_Os_ConstToIntegral  */
-                    .srvPara2 = (uint32)NULL_PARA,
-                    /* PRQA S 1258 -- */
-                };
-                err = Os_RpcCallService(&rpcData);
-            }
-            else
-#endif /* OS_AUTOSAR_CORES > 1 */
-            {
-                Os_TerminateApplication(Application, RestartOption);
-            }
-        }
-
-#if (CFG_ERRORHOOK == TRUE)
-    if (err != E_OK)
-    {
-        Os_TraceErrorHook(
-            OSError_Save_TerminateApplication(Application, RestartOption),
-            OSServiceId_TerminateApplication,
-            err);
-    }
-#endif
-
-#if (TRUE == CFG_TRACE_ENABLE)
-    Os_TraceServiceExit(OSServiceId_TerminateApplication);
-#endif /* TRUE == CFG_TRACE_ENABLE */
-
-    OS_EXIT_KERNEL(); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
-    return err;
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
+#endif
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <Internal implementation of OS service:TerminateApplication>
- * ServiceId            <OSServiceId_TerminateApplication>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Yes>
- * Param-Name[in]       <Application>
- *                      <RestartOption>
- * Return               <E_OS_CALLEVEL>
- *                      <E_OS_VALUE>
- * PreCondition         <None>
- * PreCondition         <SC3 and SC4>
- * REQ ID               <None>
+/**
+ * Internal implementation of OS service:TerminateApplication
  */
-/******************************************************************************/
-/* PRQA S 6030, 6010, 6070 ++ */ /* VL_MTR_Os_STMIF, VL_MTR_Os_STCYC, VL_MTR_Os_STCAL */
-/* PRQA S 6050, 3006 ++ */       /* VL_MTR_Os_STST3, VL_Os_3006 */
-void Os_TerminateApplication(ApplicationType Application, RestartType RestartOption)
-/* PRQA S 6050, 3006 -- */
-/* PRQA S 6030, 6010, 6070 -- */
+/* PRQA S 6030, 6070, 3006 ++ */ /* VL_MTR_Os_STMIF, VL_MTR_Os_STCAL, VL_Os_3006 */
+void Os_TerminateApplication
+/* PRQA S 6030, 6070, 3006 -- */
+    (
+        Os_SCBType *pScb,
+        ApplicationType application,
+        RestartType restartOption)
 {
-    Os_CoreIdType                coreId;
-    Os_CoreIdType                coreIndex;
-    Os_CallLevelType             sysCallLevel;
-    ApplicationStateType         tempAppState;
-    const Os_ApplicationCfgType* posCurAppCfg;
+    OS_HAL_DECLARE_CRITICAL();
+    OS_HAL_ENTRY_CRITICAL();
+    Os_CallLevelType sysCallLevel = pScb->SysOsLevel;
+    const Os_ApplicationCfgType *posCurAppCfg = &Os_AppCfg[application];
+    OS_HAL_EXIT_CRITICAL();
 
-    OS_ARCH_DECLARE_CRITICAL();
-    OS_ARCH_ENTRY_CRITICAL();
-    sysCallLevel = Os_SCB.sysOsLevel;
-    posCurAppCfg = &Os_AppCfg[Application];
-    OS_ARCH_EXIT_CRITICAL();
-
-    OS_ARCH_SUSPEND_ALLINT();
-    if (APPLICATION_ACCESSIBLE != Os_AppCB[Application].appState) /* PRQA S 3442 */ /* VL_Os_3442 */
+    OS_HAL_ENTRY_CRITICAL();
+    /* PRQA S 3442 ++ */ /* VL_Os_3442 */
+    if (OS_APPLICATION_ACCESSIBLE != Os_AppCB[application].AppState)
+    /* PRQA S 3442 -- */
     {
         /* nothing to do */
     }
     else
     {
         /*@OS287: If Called from allowed context, terminate the calling OS-Application*/
-        Os_TerminateObjects(posCurAppCfg);
+        Os_TerminateObjects(pScb, posCurAppCfg);
 
 /* OS447: Disable the interrupt source of the OsIsrs owned by the application */
 #if (CFG_ISR_MAX > 0)
-        Os_ArchDisableIntInApp(posCurAppCfg);
+        Os_DisableIntInApp(posCurAppCfg);
 #endif
 
-        if (RESTART == RestartOption)
+        if (OS_RESTART == restartOption)
         {
-            Os_AppCB[Application].appState = APPLICATION_RESTARTING;
+            Os_AppCB[application].AppState = OS_APPLICATION_RESTARTING;
+            /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+            /* PRQA S 1821, 4532, 4544, 4542 ++ */ /* VL_Os_1821, VL_Os_4532, VL_Os_4544, VL_Os_4542 */
+            /* PRQA S 0499, 4543, 1861, 4397, 1277 ++ */ /* VL_Os_0499, VL_Os_4543, VL_Os_1861, VL_Os_4397, VL_Os_1277 */
+            ARTI_TRACE(NOSUSP, AR_CP_OS_APPLICATION, Os, pScb->SysCore, OsApplication_Restart, application);
+            /* PRQA S 0499, 4543, 1861, 4397, 1277 -- */
+            /* PRQA S 1821, 4532, 4544, 4542 -- */
+            /* PRQA S 3138, 3141 -- */
         }
         else
         {
-            Os_AppCB[Application].appState = APPLICATION_TERMINATED;
+            Os_AppCB[application].AppState = OS_APPLICATION_TERMINATED;
+            /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+            /* PRQA S 1821, 4532, 4544, 4542 ++ */ /* VL_Os_1821, VL_Os_4532, VL_Os_4544, VL_Os_4542 */
+            /* PRQA S 0499, 4543, 1861, 4397, 1277 ++ */ /* VL_Os_0499, VL_Os_4543, VL_Os_1861, VL_Os_4397, VL_Os_1277 */
+            ARTI_TRACE(NOSUSP, AR_CP_OS_APPLICATION, Os, pScb->SysCore, OsApplication_Terminate, application);
+            /* PRQA S 0499, 4543, 1861, 4397, 1277 -- */
+            /* PRQA S 1821, 4532, 4544, 4542 -- */
+            /* PRQA S 3138, 3141 -- */
         }
 
-        /*@OS346: if RESTART, activate the OsRestartTask of the application*/
-        if ((RESTART == RestartOption) && (Os_SCB.sysTaskMax > posCurAppCfg->OsRestartTask))
+        /*@OS346: if OS_RESTART, activate the RestartTask of the application*/
+        if ((OS_RESTART == restartOption) && (CheckCoreTaskId(posCurAppCfg->RestartTask,
+                                                              pScb->SysCore)))
         {
             /* Set OsLevel to OS_LEVEL_TASK in order to call ActivateTask.
              * ActivateTask can not be called in OS_LEVEL_ERRORHOOK_APP level. */
             if (OS_LEVEL_ERRORHOOK_APP == sysCallLevel)
             {
-                Os_SCB.sysOsLevel = OS_LEVEL_TASK;
+                pScb->SysOsLevel = OS_LEVEL_TASK;
             }
-            coreId       = Os_SCB.sysCore;
-            coreIndex    = coreId << 12; /* PRQA S 4544, 3120 */ /*  VL_Os_4544, VL_QAC_MagicNum */
-            tempAppState = Os_AppCB[Application].appState;
+            ApplicationStateType tempAppState = Os_AppCB[application].AppState;
 
-            Os_AppCB[Application].appState = APPLICATION_ACCESSIBLE;
+            Os_AppCB[application].AppState = OS_APPLICATION_ACCESSIBLE;
 
             /*Activate the RestartTask*/
-            Os_SCB.sysDispatchLocker = Os_SCB.sysDispatchLocker + (Os_LockerType)1;
-            (void)Os_ActivateTask((coreIndex | posCurAppCfg->OsRestartTask));
-            Os_SCB.sysDispatchLocker = Os_SCB.sysDispatchLocker - (Os_LockerType)1;
+            pScb->SysDispatchLocker = pScb->SysDispatchLocker + (Os_LockerType)1;
+            (void)Os_ActivateTask(posCurAppCfg->RestartTask); /* PRQA S 1520 */ /* VL_Os_1520 */
+            pScb->SysDispatchLocker = pScb->SysDispatchLocker - (Os_LockerType)1;
 
-            Os_AppCB[Application].appState = tempAppState;
+            Os_AppCB[application].AppState = tempAppState;
 
             /* In level OS_LEVEL_ERRORHOOK_APP, restore OsLevel. */
             if (OS_LEVEL_ERRORHOOK_APP == sysCallLevel)
             {
-                Os_SCB.sysOsLevel = sysCallLevel;
+                pScb->SysOsLevel = sysCallLevel;
             }
         }
 
-        if (Application == Os_SCB.sysRunningAppID)
+        if (application == pScb->SysRunningAppId)
         {
 #if (CFG_ISR2_MAX > 0)
-            if (TRUE == Os_SCB.sysInIsrCat2)
+            if (TRUE == pScb->SysInIsrCat2)
             {
-                /* If this service is called by isr_c2, sysRunningTaskID can be
+                /* If this service is called by isr_c2, SysRunningTaskId can be
                  * set to IDLE_TASK, in order to call Os_SwitchTask in OS_ARCH_ISR2_EPILOGUE. */
-                /* Tasks of this OsApp are all terminated, the sysRunningTaskID is also might be terminated,
+                /* Tasks of this OsApp are all terminated, the SysRunningTaskId is also might be terminated,
                  * so Os_SwitchTask must be called in OS_ARCH_ISR2_EPILOGUE. */
                 /*If called context is in ISR2, Now Exit */
-                OS_ARCH_EXIT_CRITICAL();
-                /* PRQA S 3442, 2481, 0306 ++ */ /* VL_Os_3442, VL_Os_2481, VL_Os_0306 */
-                /* PRQA S 0310, 2743, 3415 ++ */ /* VL_Os_0310, VL_Os_2743, VL_Os_3415 */
-                /* PRQA S 0404, 3345 ++ */       /* VL_Os_VolatileAccess */
-                /* PRQA S 1006 ++ */             /* VL_Os_1006 */
-                OS_ARCH_ISR2_EPILOGUE_KILL_ISR();
-                /* PRQA S 1006 -- */
-                /* PRQA S 0404, 3345 -- */
-                /* PRQA S 0310, 2743, 3415 -- */
-                /* PRQA S 3442, 2481, 0306 -- */
+                OS_HAL_EXIT_CRITICAL();
+                Os_IsrType isrId = pScb->SysRunningIsrCat2Id;
+                /* PRQA S 2743, 3442, 0306, 1006 ++ */ /* VL_Os_2743, VL_Os_3442, VL_Os_0306, VL_Os_1006 */
+                /* PRQA S 1431, 1290, 4424, 1021 ++ */ /* VL_Os_1431, VL_Os_1290, VL_Os_4424, VL_Os_1021 */
+                OS_HAL_ISR2_EPILOGUE_KILL_ISR(isrId);  /* PRQA S 1520, 1753, 1512, 1513 */ /* VL_Os_1520, VL_Os_1753, VL_Os_1512, VL_Os_1513 */
+                /* PRQA S 1431, 1290, 4424, 1021 -- */
+                /* PRQA S 2743, 3442, 0306, 1006 -- */
             }
             else
-#endif /* CFG_ISR2_MAX > 0 */
+#endif
             {
                 /* Task dispatch. */
-                Os_SCB.sysOsLevel        = OS_LEVEL_TASK;
-                Os_SCB.sysDispatchLocker = 0u;
+                pScb->SysOsLevel = OS_LEVEL_TASK;
+                pScb->SysDispatchLocker = 0u;
 
-#if (TRUE == CFG_TRACE_ENABLE)
-                Os_TraceTaskSwitch(
-                    Os_SCB.sysRunningTaskID,
-                    Os_SCB.sysHighTaskID,
-                    OS_TRACE_TASK_SWITCH_REASON_APP_TERMINATE,
-                    OS_TRACE_TASK_SWITCH_REASON_APP_TERMINATE_ACTIVE);
-#endif
-
-                OS_START_DISPATCH(); /* PRQA S 3141, 3138 */ /* VL_Os_PlatformNoDef  */
-                Os_Dispatch(); /* PRQA S 1290, 3138 */       /* VL_Os_1290, VL_Os_PlatformDef */
+                Os_Hal_Dispatch(); /* PRQA S 1006*/ /* VL_Os_1006*/
             }
         }
     }
 
-    OS_ARCH_RESTORE_ALLINT();
+    OS_HAL_EXIT_CRITICAL();
     return;
 }
 #define OS_STOP_SEC_CODE
@@ -1442,316 +1683,467 @@ void Os_TerminateApplication(ApplicationType Application, RestartType RestartOpt
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <Internal implementation of OS service:CheckObjectAccess>
- * Service ID           <OSServiceId_CheckObjectAccess>
- * Sync/Async           <Synchronous>
- * Reentrancy           < Reentrant>
- * param-Name[in]       <ApplID>
- *                      <ObjectType>
- *                      <ObjectID>
- * Return value         <ACCESS>
- *                      <NO_ACCESS>
- * PreCondition         <SC3 and SC4>
- * REQ ID               <None>
+/**
+ * Terminate Application
  */
-/******************************************************************************/
-ObjectAccessType Os_CheckObjectAccess(ApplicationType ApplID, ObjectTypeType ObjectType, AppObjectId ObjectID)
+#if (OS_AUTOSAR_CORES > 1)
+/* PRQA S 3673 ++ */ /* VL_QAC_3673 */
+OS_LOCAL StatusType Os_RpcAction_TerminateApplication(uint32 *inPara)
+/* PRQA S 3673 -- */
 {
-    ObjectAccessType       err = ACCESS;
-    ApplicationType        osAccAppNodePos;
-    ApplicationType        osAccAppBitPos;
-    const ApplicationType* pOsAccAppRef;
-    /* PRQA S 3678 ++ */ /* VL_Os_3678 */
-    const Os_ObjectAppCfgType** pObjectAppCfgRef;
-    /* PRQA S 3678 -- */
+    Os_SCBType *pScb = Os_GetCurrentContext();
+    Os_TerminateApplication(pScb,
+                            (ApplicationType)inPara[0],
+                            (RestartType)inPara[1]);/* PRQA S 4342 */ /* VL_Os_4342 */
 
-    OS_ARCH_DECLARE_CRITICAL();
-    /* PRQA S 0310, 0311 ++ */ /* VL_Os_0310, VL_Os_0311 */
-    pObjectAppCfgRef = (const Os_ObjectAppCfgType**)((void**)Os_ObjectAppCfg_Inf[Os_GetObjCoreId(ObjectID)]);
-    /* PRQA S 0310, 0311 -- */
+    return E_OK;
+}
 
-    /*MultiCore: Change to local id*/
-    ObjectID = Os_GetObjLocalId(ObjectID); /* PRQA S 1338 */ /* VL_Os_1338 */
+/* PRQA S 3209 ++ */ /* VL_Os_3209 */
+OS_LOCAL StatusType Os_RpcCall_TerminateApplication(
+    Os_CoreIdType ownerCore,
+    ApplicationType Application,
+    RestartType RestartOption)
+/* PRQA S 3209 -- */
+{
+    StatusType err = E_OK;
+    Os_RpcInputType rpcData = {
+        .RpcSync = OS_RPC_SYNC,
+        .RemoteCoreId = ownerCore,
+        .ActionFn = Os_RpcAction_TerminateApplication,
+        .InPara[0] = (uint32)Application,
+        /* PRQA S 0691 ++ */ /* VL_Os_0691 */
+        .InPara[1] = (uint32)RestartOption,
+        /* PRQA S 0691 -- */
+    };/* PRQA S 0704 */ /* VL_Os_0704 */
 
-    /*OS423: if the ApplID is invalid , return NO_ACCESS*/
-    OS_ARCH_ENTRY_CRITICAL();
+    err = Os_RpcCallService(&rpcData);
+    return err;
+}
+#endif
 
-    if ((OBJECT_RESOURCE == ObjectType) || (OBJECT_SPINLOCK == ObjectType))
+/* PRQA S 6030,6010,6070 ++ */ /* VL_MTR_Os_STMIF, VL_MTR_Os_STCYC, VL_MTR_Os_STCAL */
+/* PRQA S 1503,3006,3408,1512 ++ */ /* VL_QAC_NoUsedApi, VL_Os_3006, VL_Os_3408, VL_Os_1512 */
+StatusType TerminateApplication(ApplicationType Application, RestartType RestartOption)
+/* PRQA S 1503,3006,3408,1512 -- */
+/* PRQA S 6030,6010,6070 -- */
+{
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
+    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
+    OS_HAL_ENTER_KERNEL(); /* PRQA S 1021 */ /* VL_Os_1021 */
+    /* PRQA S 1006 -- */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
+
+    StatusType err = E_OK;
+    Os_SCBType *pScb = Os_GetCurrentContext();
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 1317, 3432, 4442, 4521, 4544 ++ */ /* VL_Os_1317, VL_Os_3432, VL_Os_4442, VL_Os_4521, VL_Os_4544 */
+    OSRtiEnterApi(pScb, OSApiId_TerminateApplication);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_TerminateApplication_Start, Application);
+    /* PRQA S 1317, 3432, 4442, 4521, 4544 -- */
+    /* PRQA S 3138, 3141 -- */
+
+#if (OS_STATUS_EXTENDED == CFG_STATUS)
+    /*SWS_Os_00493*/
+    if (CFG_ECUCPARTITION_MAX <= Application)
     {
-        /*Object do not belong to any application*/
+        err = E_OS_ID;
+    }
+    else
+    {
+#endif
+        /* Convert the incoming PartitionId to AppId */
+        Os_ApplicationType appId = Os_EcucPartitionIdMapToAppId[Application]; /* PRQA S 4424 */ /* VL_Os_4424 */
+
+#if (OS_STATUS_EXTENDED == CFG_STATUS)
+        /*SWS_Os_00493*/
+        if (CFG_OSAPPLICATION_MAX <= appId)
+        {
+            err = E_OS_ID;
+        }
+        /*SWS_Os_00459: if the <RestartOption> is invalid, return E_OS_VALUE*/
+        else if ((OS_RESTART != RestartOption) && (OS_NO_RESTART != RestartOption))
+        {
+            err = E_OS_VALUE;
+        }
+        /*SWS_Os_00494*/
+        else if ((FALSE == Os_AppCfg[pScb->SysRunningAppId].Trusted) && (appId != pScb->SysRunningAppId))
+        {
+            err = E_OS_ACCESS;
+        }
+        /*SWS_Os_00507*/
+        /* PRQA S 3442 ++ */ /* VL_Os_3442 */
+        else if (OS_APPLICATION_TERMINATED == Os_AppCB[appId].AppState)
+        /* PRQA S 3442 -- */
+        {
+            err = E_OS_STATE;
+        }
+        /*SWS_Os_00508,SWS_Os_00548*/
+        /* PRQA S 3442 ++ */ /* VL_Os_3442 */
+        else if ((OS_APPLICATION_RESTARTING == Os_AppCB[appId].AppState) && ((pScb->SysRunningAppId != appId) || (OS_RESTART == RestartOption)))
+        /* PRQA S 3442 -- */
+        {
+            err = E_OS_STATE;
+        }
+        /* When calling TerminateApplication in ErrorHook, it can only terminate itself */
+#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
+        else if (((OS_LEVEL_ERRORHOOK == pScb->SysOsLevel) || (OS_LEVEL_ERRORHOOK_APP == pScb->SysOsLevel)) && (appId != pScb->SysRunningAppId))
+        {
+            err = E_OS_ACCESS;
+        }
+#endif
+        else
+#endif
+        {
+#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
+            Os_ServicePortParamType SprotParam = {
+                .AllowedContext = OS_SERVICEPORT_CHECK_TERMINATE_APPLICATION,
+                .ObjectType = OS_OBJECT_INVALID,
+                .ObjectID = appId,
+                /* PRQA S 1258 ++ */ /* VL_Os_ConstToIntegral */
+                .Address = NULL_PARA,
+                /* PRQA S 1258 -- */
+            };
+            /* PRQA S 3326 ++ */ /* VL_Os_3326 */
+            if ((err = Os_ServiceProtCheck(pScb, &SprotParam)) == E_OK)
+            /* PRQA S 3326 -- */
+#endif
+            {
+#if (OS_AUTOSAR_CORES > 1)
+                Os_CoreIdType coreId = Os_AppCfg[appId].HostCore;
+                if (coreId != pScb->SysCore)
+                {
+                    /* PRQA S 3200 ++ */ /* VL_Os_3200 */
+                    Os_RpcCall_TerminateApplication(coreId, appId, RestartOption);
+                    /* PRQA S 3200 -- */
+                }
+                else
+#endif
+                {
+                    Os_TerminateApplication(pScb, appId, RestartOption);
+                }
+            }
+        }
+#if (CFG_ERRORHOOK == TRUE)
+        if (err != E_OK)
+        {
+            Os_TraceErrorHook(OSError_Save_TerminateApplication(appId, RestartOption),
+                                OSServiceId_TerminateApplication,
+                                err, pScb);/* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
+        }
+#endif
+#if (OS_STATUS_EXTENDED == CFG_STATUS)
+    }
+#endif
+
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 3432, 4544 ++ */ /* VL_Os_3432, VL_Os_4544 */
+    OSRtiExitApi(pScb, OSApiId_TerminateApplication);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_TerminateApplication_Return, err);
+    OS_HAL_EXIT_KERNEL(); /* PRQA S 2743*/ /* VL_Os_2743*/
+    /* PRQA S 3432, 4544 -- */
+    /* PRQA S 3138, 3141 -- */
+    return err;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * Internal implementation of OS service:CheckObjectAccess
+ */
+Os_ObjectAccessType Os_CheckObjectAccess(
+    const Os_SCBType *pScb,
+    ApplicationType applId,
+    ObjectTypeType objectType,
+    AppObjectId objectId)
+{
+    Os_ObjectAccessType err = OS_ACCESS;
+    const Os_ObjectAppCfgType *pObjectAppCfgRef = Os_GetObjectAccess(objectType, objectId);
+
+    OS_HAL_DECLARE_CRITICAL();
+    OS_HAL_ENTRY_CRITICAL();
+
+    if ((OS_OBJECT_RESOURCE == objectType) || (OS_OBJECT_SPINLOCK == objectType))
+    {
+        /*object do not belong to any application*/
     }
     else
     {
         /* SWS_Os_00504, SWS_Os_00509 */
         /* PRQA S 3442 ++ */ /* VL_Os_3442 */
-        if ((pObjectAppCfgRef[ObjectType][ObjectID].hostApp != Os_SCB.sysRunningAppID)
-            && (Os_AppCB[pObjectAppCfgRef[ObjectType][ObjectID].hostApp].appState != APPLICATION_ACCESSIBLE))
+        if ((pObjectAppCfgRef->HostApp != pScb->SysRunningAppId) && (Os_AppCB[pObjectAppCfgRef->HostApp].AppState != OS_APPLICATION_ACCESSIBLE))
         /* PRQA S 3442 -- */
         {
-            OS_ARCH_EXIT_CRITICAL();
-            err = NO_ACCESS;
+            OS_HAL_EXIT_CRITICAL();
+            err = OS_NO_ACCESS;
         }
     }
 
-    if ((ObjectAccessType)ACCESS == err)
+    if ((Os_ObjectAccessType)OS_ACCESS == err)
     {
-/* OS318: if the object type is OBJECT_RESOURCE and the object is
- * RES_SCHEDULER , return ACCESS */
+/* OS318: if the object type is OS_OBJECT_RESOURCE and the object is
+ * RES_SCHEDULER , return OS_ACCESS */
 #if (TRUE == CFG_USERESSCHEDULER)
-        if ((OBJECT_RESOURCE == ObjectType) && (RES_SCHEDULER == ObjectID))
+        /* PRQA S 4342 ++ */ /* VL_Os_4342 */
+        if ((OS_OBJECT_RESOURCE == objectType) && (pScb->ScheduleResId == (Os_ResourceType)objectId))
+        /* PRQA S 4342 -- */
         {
-            err = ACCESS;
+            err = OS_ACCESS;
         }
         else
-#endif /* TRUE == CFG_USERESSCHEDULER */
+#endif
         {
-            /* ApplID in which bit_group(uint16). */
-            osAccAppNodePos = OS_APPGETACCESS_GP(ApplID);
-            /* ApplID in which bit_pos of uint16. */
+            /* applId in which bit_group(uint16). */
+            ApplicationType accAppNodePos = OS_APPGETACCESS_GP(applId);
+            /* applId in which bit_pos of uint16. */
             /* PRQA S 1840, 0582 ++ */ /* VL_Os_1840, VL_Os_0582 */
-            osAccAppBitPos = OS_APPACCESS_MASK(ApplID);
+            ApplicationType AccAppBitPos = OS_APPACCESS_MASK(applId);
             /* PRQA S 1840, 0582 -- */
             /* Access right bit map. */
-            pOsAccAppRef = pObjectAppCfgRef[ObjectType][ObjectID].accAppRef;
+            const ApplicationType *accAppRef = pObjectAppCfgRef->AccAppRef;
 
-            /* Check object access right by app_id. */
-            if ((osAccAppBitPos & pOsAccAppRef[osAccAppNodePos]) > 0u)
+/* Check object access right by app_id. */
+            if ((pObjectAppCfgRef->AccAppRefNodeCnt > 0U) &&
+                (accAppRef != NULL_PTR) &&
+                ((AccAppBitPos & accAppRef[accAppNodePos]) > 0u))
             {
-                err = ACCESS;
+                err = OS_ACCESS;
             }
             else
             {
-                err = NO_ACCESS;
+                err = OS_NO_ACCESS;
             }
         }
-        OS_ARCH_EXIT_CRITICAL();
+        OS_HAL_EXIT_CRITICAL();
     }
 
     return err;
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
-#endif /* OS_SC3 == CFG_SC || OS_SC4 == CFG_SC */
+#endif
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <This service determines the OS-Application (a unique
+/**
+ * This service determines the OS-Application (a unique
  *                         identifier has to be allocated to each application)
- *                         where the caller originally belongs to (was configured to)>
- * Service ID           <0x00>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * Return value         <OS-Application id>
- * PreCondition         <SC3 and SC4>
- * CallByAPI            <None>
- * REQ ID               <None>
+ *                         where the caller originally belongs to (was configured to)
  */
-/******************************************************************************/
-ApplicationType GetApplicationID(void) /* PRQA S 3006 */ /* VL_Os_3006 */
+/* PRQA S 1503,3006,3408,6070,1512 ++ */ /* VL_QAC_NoUsedApi, VL_Os_3006, VL_Os_3408, VL_MTR_Os_STCAL, VL_Os_1512 */
+ApplicationType GetApplicationID(void)
+/* PRQA S 1503,3006,3408,6070,1512 -- */
 {
-    /* PRQA S 2742, 2880, 3138, 2741 ++ */ /* VL_Os_PlatformDef */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
     /* PRQA S 1006 ++ */ /* VL_Os_1006 */
-    OS_ENTER_KERNEL();
+    OS_HAL_ENTER_KERNEL(); /* PRQA S 1021 */ /* VL_Os_1021 */
     /* PRQA S 1006 -- */
-    /* PRQA S 2742, 2880, 3138, 2741 -- */
-    ApplicationType ApplID = INVALID_OSAPPLICATION;
-    StatusType      status = E_OK;
-    OS_ARCH_DECLARE_CRITICAL();
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
+    ApplicationType applId = INVALID_OSAPPLICATION;
+    StatusType status = E_OK;
+    /* PRQA S 3678 ++ */ /* VL_Os_3678 */
+    Os_SCBType *pScb = Os_GetCurrentContext();
+    /* PRQA S 3678 -- */
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 1317, 3432, 4442, 4521, 4544, 1259, 2986 ++ */ /* VL_Os_1317, VL_Os_3432, VL_Os_4442, VL_Os_4521, VL_Os_4544, VL_Os_1259, VL_Os_2986 */
+    OSRtiEnterApi(pScb, OSApiId_GetApplicationID);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_GetApplicationID_Start, 0);
+    /* PRQA S 1317, 3432, 4442, 4521, 4544, 1259, 2986 -- */
+    /* PRQA S 3138, 3141 -- */
+
+    OS_HAL_DECLARE_CRITICAL();
 
 /*service protection*/
 #if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
-    if (Os_WrongContext(OS_CONTEXT_GET_APPLICATION_ID) != TRUE)
+    Os_ServicePortParamType SprotParam = {
+        .AllowedContext = OS_SERVICEPORT_CHECK_GET_APPLICATION_ID,
+        .ObjectType = OS_OBJECT_INVALID,
+        .ObjectID = INVALID_OSAPPLICATION,
+        /* PRQA S 1258 ++ */ /* VL_Os_ConstToIntegral */
+        .Address = NULL_PARA,
+        /* PRQA S 1258 -- */
+    };
+
+    /* PRQA S 3326 ++ */ /* VL_Os_3326 */
+    if ((status = Os_ServiceProtCheck(pScb, &SprotParam)) == E_OK)
+    /* PRQA S 3326 -- */
+#endif
     {
-        status = E_OS_CALLEVEL;
-    }
-    else
-#endif /* TRUE == CFG_SERVICE_PROTECTION_ENABLE */
-    {
-        OS_ARCH_ENTRY_CRITICAL();
+        OS_HAL_ENTRY_CRITICAL();
 /*OS261: return the identifier to which the executing Task/ISR/hook was configured*/
 #if (CFG_TRUSTED_SYSTEM_SERVICE_MAX > 0U)
-        if (0u != Os_TrustedFuncNest)
+        if (0u != pScb->Os_TrustedFuncTp.TrustedFuncNest)
         {
-            ApplID = Os_TrustedFuncNestQueue[Os_TrustedFuncNest - 1U];
+            applId = pScb->TrustedFuncNestQueue[pScb->Os_TrustedFuncTp.TrustedFuncNest - 1U];
         }
         else
-#endif /* CFG_TRUSTED_SYSTEM_SERVICE_MAX > 0U */
+#endif
         {
-            ApplID = Os_SCB.sysRunningAppID;
+            applId = pScb->SysRunningAppId;
         }
 
-        if (ApplID < CFG_OSAPPLICATION_MAX) /* OS262 */
+        if (applId < CFG_OSAPPLICATION_MAX) /* OS262 */
         {
-            if (Os_SCB.sysAppId == ApplID)
-            {
-                ApplID = INVALID_OSAPPLICATION;
-            }
+            applId = Os_AppIdMapToPartitionId[applId]; /* AppId to EcucPartitionId */
         }
         else
         {
-            ApplID = INVALID_OSAPPLICATION;
+            applId = INVALID_OSAPPLICATION;
         }
 
-        OS_ARCH_EXIT_CRITICAL();
+        OS_HAL_EXIT_CRITICAL();
     }
 
 #if (CFG_ERRORHOOK == TRUE)
-    if (status != E_OK)
+    if (status != E_OK) /* PRQA S 2992, 2996 */ /* VL_Os_2992, VL_Os_2996 */
     {
-        Os_TraceErrorHook(OSError_Save_GetApplicationID(), OSServiceId_GetApplicationID, status);
+        Os_TraceErrorHook(OSError_Save_GetApplicationID(), /* PRQA S 2880 */ /* VL_Os_2880 */
+                          OSServiceId_GetApplicationID,
+                          status, pScb); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
     }
 #endif
 
-    OS_EXIT_KERNEL(); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 3432, 4544 ++ */ /* VL_Os_3432, VL_Os_4544 */
+    OSRtiExitApi(pScb, OSApiId_GetApplicationID);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_GetApplicationID_Return, applId);
+    OS_HAL_EXIT_KERNEL(); /* PRQA S 2743*/ /* VL_Os_2743*/
+    /* PRQA S 3432, 4544 -- */
+    /* PRQA S 3138, 3141 -- */
     UNUSED_PARAMETER(status);
-    return ApplID;
+    return applId;
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <Internal implementation of OS service:CheckObjectOwnership>
- * Service ID           <OSServiceId_CheckObjectOwnership>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * param-Name[in]       <ObjectType>
- *                      <ObjectID>
- * Return value         <OS-Application id>
- * PreCondition         <SC3 and SC4>
- * REQ ID               <None>
+/**
+ * Internal implementation of OS service:CheckObjectOwnership
  */
-/******************************************************************************/
 /* PRQA S 3450 ++ */ /* VL_Os_3450 */
-static ApplicationType Os_CheckObjectOwnership(ObjectTypeType ObjectType, AppObjectId ObjectID)
+OS_LOCAL ApplicationType Os_CheckObjectOwnership(
+    const Os_SCBType *pScb,
+    ObjectTypeType objectType,
+    AppObjectId objectId)
 /* PRQA S 3450 -- */
 {
-    ApplicationType       ApplID = INVALID_OSAPPLICATION;
-    const Os_AppObjectId* pObjectIDMaxTableRef;
-    /* PRQA S 3678 ++ */ /* VL_Os_3678 */
-    const Os_ObjectAppCfgType** pObjectAppCfgRef;
-    /* PRQA S 3678 -- */
+    ApplicationType applId = INVALID_OSAPPLICATION;
 
-    OS_ARCH_DECLARE_CRITICAL();
+    OS_HAL_DECLARE_CRITICAL();
 
-    /* PRQA S 0311 ++ */ /* VL_Os_0311 */
-    pObjectAppCfgRef = (const Os_ObjectAppCfgType**)Os_ObjectAppCfg_Inf[Os_GetObjCoreId(ObjectID)];
-    /* PRQA S 0311 -- */
-    pObjectIDMaxTableRef = Os_ObjectIDMaxTable_Inf[Os_GetObjCoreId(ObjectID)];
-
-    /*MultiCore: Change to local id*/
-    ObjectID = Os_GetObjLocalId(ObjectID); /* PRQA S 1338 */ /* VL_Os_1338 */
-
-    if (ObjectType >= OBJECT_MAX)
+    if (objectType >= OS_OBJECT_MAX)
     {
-        ApplID = INVALID_OSAPPLICATION;
+        applId = INVALID_OSAPPLICATION;
     }
     else
     {
-        if (ObjectID < pObjectIDMaxTableRef[ObjectType])
+        if (Os_ObjectIDCheck((ObjectType)objectId, (uint8)objectType) == TRUE)
         {
-            OS_ARCH_ENTRY_CRITICAL();
-/* OS318: if the object type is OBJECT_RESOURCE and the object is
- * RES_SCHEDULER , return ACCESS */
+            OS_HAL_ENTRY_CRITICAL();
+
+            const Os_ObjectAppCfgType *pObjectAppCfgRef = Os_GetObjectAccess(objectType, objectId);
+
+/* OS318: if the object type is OS_OBJECT_RESOURCE and the object is
+ * RES_SCHEDULER , return OS_ACCESS */
 #if (TRUE == CFG_USERESSCHEDULER)
-            if ((OBJECT_RESOURCE == ObjectType) && (RES_SCHEDULER == ObjectID))
+            /* PRQA S 4342 ++ */ /* VL_Os_4342 */
+            if ((OS_OBJECT_RESOURCE == objectType) && (pScb->ScheduleResId == (Os_ResourceType)objectId))
+            /* PRQA S 4342 -- */
             {
-                ApplID = INVALID_OSAPPLICATION;
+                applId = INVALID_OSAPPLICATION;
             }
             else
-#endif /* TRUE == CFG_USERESSCHEDULER */
+#endif
             {
-                ApplID = pObjectAppCfgRef[ObjectType][ObjectID].hostApp;
+                applId = pObjectAppCfgRef->HostApp;
             }
-            OS_ARCH_EXIT_CRITICAL();
+            OS_HAL_EXIT_CRITICAL();
         }
         else
         {
-            ApplID = INVALID_OSAPPLICATION;
+            applId = INVALID_OSAPPLICATION;
         }
     }
 
-    return ApplID;
+    return applId;
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <This service determines to which OS-Application
+/**
+ * This service determines to which OS-Application
  *                      a given Task, ISR, Resource, Counter, Alarm or
- *                      Schedule Table belongs>
- * Service ID           <0x06>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * param-Name[in]       <ObjectType>
- *                      <ObjectID>
- * Return value         <OS-Application id>
- * PreCondition         <SC3 and SC4>
- * REQ ID               <None>
+ *                      Schedule Table belongs
  */
-/******************************************************************************/
-/* PRQA S 3006, 1503 ++ */ /* VL_Os_3006, VL_QAC_NoUsedApi */
+/* PRQA S 1503,3006,3408 ++ */ /* VL_QAC_NoUsedApi, VL_Os_3006, VL_Os_3408 */
+/* PRQA S 3334,6070,1512,1506 ++ */ /* VL_Os_3334, VL_MTR_Os_STCAL, VL_Os_1512, VL_Os_1506 */
 ApplicationType CheckObjectOwnership(ObjectTypeType ObjectType, AppObjectId ObjectID)
-/* PRQA S 3006, 1503 -- */
+/* PRQA S 3334,6070,1512,1506 -- */
+/* PRQA S 1503,3006,3408 -- */
 {
-    /* PRQA S 2742, 2880, 3138, 2741 ++ */ /* VL_Os_PlatformDef */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
     /* PRQA S 1006 ++ */ /* VL_Os_1006 */
-    OS_ENTER_KERNEL();
+    OS_HAL_ENTER_KERNEL(); /* PRQA S 1021 */ /* VL_Os_1021 */
     /* PRQA S 1006 -- */
-    /* PRQA S 2742, 2880, 3138, 2741 -- */
-    ApplicationType ApplID = INVALID_OSAPPLICATION;
-    StatusType      Status = E_OK;
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
+    ApplicationType applId = INVALID_OSAPPLICATION;
+    StatusType status = E_OK;
+    /* PRQA S 3678 ++ */ /* VL_Os_3678 */
+    Os_SCBType *pScb = Os_GetCurrentContext();
+    /* PRQA S 3678 -- */
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 1317, 3432, 4442, 4521, 4544, 1259 ++ */ /* VL_Os_1317, VL_Os_3432, VL_Os_4442, VL_Os_4521, VL_Os_4544, VL_Os_1259 */
+    OSRtiEnterApi(pScb, OSApiId_CheckObjectOwnership);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_CheckObjectOwnership_Start, ObjectType);
+    /* PRQA S 1317, 3432, 4442, 4521, 4544, 1259 -- */
+    /* PRQA S 3138, 3141 -- */
 
-#if (TRUE == CFG_TRACE_ENABLE)
-    Os_TraceServiceEnter(OSServiceId_CheckObjectOwnership);
-#endif /* TRUE == CFG_TRACE_ENABLE */
-
-/*service protection*/
 #if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
-    if (Os_WrongContext(OS_CONTEXT_CHECK_OBJECT_OWNERSHIP) != TRUE)
+    Os_ServicePortParamType SprotParam = {
+        .AllowedContext = OS_SERVICEPORT_CHECK_OBJECT_OWNERSHIP,
+        .ObjectType = ObjectType,
+        .ObjectID = ObjectID,
+        /* PRQA S 1258 ++ */ /* VL_Os_ConstToIntegral */
+        .Address = NULL_PARA,
+        /* PRQA S 1258 -- */
+    };
+
+    /* PRQA S 3326 ++ */ /* VL_Os_3326 */
+    if ((status = Os_ServiceProtCheck(pScb, &SprotParam)) == E_OK)
+    /* PRQA S 3326 -- */
+#endif
     {
-        Status = E_OS_CALLEVEL;
-    }
-    else if (Os_IgnoreService() != TRUE)
-    {
-        Status = E_OS_DISABLEDINT;
-    }
-    else
-#endif /* TRUE == CFG_SERVICE_PROTECTION_ENABLE */
-    {
-        ApplID = Os_CheckObjectOwnership(ObjectType, ObjectID);
+        applId = Os_CheckObjectOwnership(pScb, ObjectType, ObjectID);
     }
 
 #if (CFG_ERRORHOOK == TRUE)
-    if (Status != E_OK)
+    if (status != E_OK) /* PRQA S 2992, 2996 */ /* VL_Os_2992, VL_Os_2996 */
     {
-        Os_TraceErrorHook(
-            OSError_Save_CheckObjectOwnership(ObjectType, ObjectID),
-            OSServiceId_CheckObjectOwnership,
-            Status);
+        Os_TraceErrorHook(OSError_Save_CheckObjectOwnership(ObjectType, ObjectID), /* PRQA S 2880 */ /* VL_Os_2880 */
+                          OSServiceId_CheckObjectOwnership,
+                          status, pScb);/* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
     }
 #endif
 
-#if (TRUE == CFG_TRACE_ENABLE)
-    Os_TraceServiceExit(OSServiceId_CheckObjectOwnership);
-#endif /* TRUE == CFG_TRACE_ENABLE */
-
-    OS_EXIT_KERNEL(); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
-    UNUSED_PARAMETER(Status);
-    return ApplID;
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 3432, 4544 ++ */ /* VL_Os_3432, VL_Os_4544 */
+    OSRtiExitApi(pScb, OSApiId_CheckObjectOwnership);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_CheckObjectOwnership_Return, applId);
+    OS_HAL_EXIT_KERNEL(); /* PRQA S 2743*/ /* VL_Os_2743*/
+    /* PRQA S 3432, 4544 -- */
+    /* PRQA S 3138, 3141 -- */
+    UNUSED_PARAMETER(status);
+    return applId;
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
 #endif /*CFG_OSAPPLICATION_MAX >0U */
+
 /*=======[E N D   O F   F I L E]==============================================*/
 /* PRQA S 6530 EOF */ /* VL_MTR_Os_STECT */
 /* PRQA S 0553 EOF */ /* VL_QAC_UnUsedFiles */

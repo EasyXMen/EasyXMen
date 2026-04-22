@@ -1,0 +1,302 @@
+/**
+ * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * SPDX-License-Identifier: LGPL-2.1-only-with-exception
+ *
+ * This library is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU Lesser General Public License as published by the Free Software Foundation; version 2.1.
+ * This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU Lesser General Public License for more details.
+ * You should have received a copy of the GNU Lesser General Public License along with this library;
+ * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ * or see <https://www.gnu.org/licenses/>.
+ */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : NvM_MemMap.h                                               **
+**                                                                            **
+**  Created on  :                                                             **
+**  Author      : <Auto generated>                                            **
+**  Vendor      :                                                             **
+**  DESCRIPTION : Memory mapping abstraction declaration of NvM              **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform 4.2.2                       **
+**                                                                            **
+*******************************************************************************/
+/*******************************************************************************
+**                      Revision Control History                              **
+*******************************************************************************/
+/*
+ * Version: V1.0.0
+ * Note:    Automatically generated, manual modification is not allowed.
+ */
+/*============================================================================*/
+
+/* PRQA S 0883,0791++ */ /* VL_QAC_include, VL_QAC_identifier*/
+#define MEMMAP_ERROR
+
+/* Total section items: 9 */
+#if defined(START_WITH_IF)
+#undef MEMMAP_ERROR
+
+/*Index:0  Section name :CODE*/
+#elif defined NVM_START_SEC_CODE
+#undef NVM_START_SEC_CODE
+#undef MEMMAP_ERROR
+#ifndef MEMMAP_ERROR_SEC_NO_MATCH
+#define MEMMAP_ERROR_SEC_NO_MATCH
+#else
+#error "NvM_MemMap.h, section is used consecutively many times."
+#endif
+#define NVM_START_SEC_CODE_NO_MATCH
+#define START_SEC_CODE
+
+#elif defined NVM_STOP_SEC_CODE
+#undef NVM_STOP_SEC_CODE
+#undef MEMMAP_ERROR
+#ifdef NVM_START_SEC_CODE_NO_MATCH
+#undef NVM_START_SEC_CODE_NO_MATCH
+#else
+#error "NvM_MemMap.h, no matching section was used."
+#endif
+#ifdef MEMMAP_ERROR_SEC_NO_MATCH
+#undef MEMMAP_ERROR_SEC_NO_MATCH
+#endif
+#define STOP_SEC_CODE
+
+/*Index:1  Section name :CONST_UNSPECIFIED*/
+#elif defined NVM_START_SEC_CONST_UNSPECIFIED
+#undef NVM_START_SEC_CONST_UNSPECIFIED
+#undef MEMMAP_ERROR
+#ifndef MEMMAP_ERROR_SEC_NO_MATCH
+#define MEMMAP_ERROR_SEC_NO_MATCH
+#else
+#error "NvM_MemMap.h, section is used consecutively many times."
+#endif
+#define NVM_START_SEC_CONST_UNSPECIFIED_NO_MATCH
+#define START_SEC_CONST_UNSPECIFIED
+
+#elif defined NVM_STOP_SEC_CONST_UNSPECIFIED
+#undef NVM_STOP_SEC_CONST_UNSPECIFIED
+#undef MEMMAP_ERROR
+#ifdef NVM_START_SEC_CONST_UNSPECIFIED_NO_MATCH
+#undef NVM_START_SEC_CONST_UNSPECIFIED_NO_MATCH
+#else
+#error "NvM_MemMap.h, no matching section was used."
+#endif
+#ifdef MEMMAP_ERROR_SEC_NO_MATCH
+#undef MEMMAP_ERROR_SEC_NO_MATCH
+#endif
+#define STOP_SEC_CONST_UNSPECIFIED
+
+/*Index:2  Section name :JOBENDNOTIFICATIONCALLBACK_CODE*/
+#elif defined NVM_START_SEC_JOBENDNOTIFICATIONCALLBACK_CODE
+#undef NVM_START_SEC_JOBENDNOTIFICATIONCALLBACK_CODE
+#undef MEMMAP_ERROR
+#ifndef MEMMAP_ERROR_SEC_NO_MATCH
+#define MEMMAP_ERROR_SEC_NO_MATCH
+#else
+#error "NvM_MemMap.h, section is used consecutively many times."
+#endif
+#define NVM_START_SEC_JOBENDNOTIFICATIONCALLBACK_CODE_NO_MATCH
+#define START_SEC_CALLBACK_CODE
+
+#elif defined NVM_STOP_SEC_JOBENDNOTIFICATIONCALLBACK_CODE
+#undef NVM_STOP_SEC_JOBENDNOTIFICATIONCALLBACK_CODE
+#undef MEMMAP_ERROR
+#ifdef NVM_START_SEC_JOBENDNOTIFICATIONCALLBACK_CODE_NO_MATCH
+#undef NVM_START_SEC_JOBENDNOTIFICATIONCALLBACK_CODE_NO_MATCH
+#else
+#error "NvM_MemMap.h, no matching section was used."
+#endif
+#ifdef MEMMAP_ERROR_SEC_NO_MATCH
+#undef MEMMAP_ERROR_SEC_NO_MATCH
+#endif
+#define STOP_SEC_CALLBACK_CODE
+
+/*Index:3  Section name :JOBERRORNOTIFICATIONCALLBACK_CODE*/
+#elif defined NVM_START_SEC_JOBERRORNOTIFICATIONCALLBACK_CODE
+#undef NVM_START_SEC_JOBERRORNOTIFICATIONCALLBACK_CODE
+#undef MEMMAP_ERROR
+#ifndef MEMMAP_ERROR_SEC_NO_MATCH
+#define MEMMAP_ERROR_SEC_NO_MATCH
+#else
+#error "NvM_MemMap.h, section is used consecutively many times."
+#endif
+#define NVM_START_SEC_JOBERRORNOTIFICATIONCALLBACK_CODE_NO_MATCH
+#define START_SEC_CALLBACK_CODE
+
+#elif defined NVM_STOP_SEC_JOBERRORNOTIFICATIONCALLBACK_CODE
+#undef NVM_STOP_SEC_JOBERRORNOTIFICATIONCALLBACK_CODE
+#undef MEMMAP_ERROR
+#ifdef NVM_START_SEC_JOBERRORNOTIFICATIONCALLBACK_CODE_NO_MATCH
+#undef NVM_START_SEC_JOBERRORNOTIFICATIONCALLBACK_CODE_NO_MATCH
+#else
+#error "NvM_MemMap.h, no matching section was used."
+#endif
+#ifdef MEMMAP_ERROR_SEC_NO_MATCH
+#undef MEMMAP_ERROR_SEC_NO_MATCH
+#endif
+#define STOP_SEC_CALLBACK_CODE
+
+/*Index:4  Section name :VAR_CLEARED_32*/
+#elif defined NVM_START_SEC_VAR_CLEARED_32
+#undef NVM_START_SEC_VAR_CLEARED_32
+#undef MEMMAP_ERROR
+#ifndef MEMMAP_ERROR_SEC_NO_MATCH
+#define MEMMAP_ERROR_SEC_NO_MATCH
+#else
+#error "NvM_MemMap.h, section is used consecutively many times."
+#endif
+#define NVM_START_SEC_VAR_CLEARED_32_NO_MATCH
+#define START_SEC_VAR_CLEARED_32
+
+#elif defined NVM_STOP_SEC_VAR_CLEARED_32
+#undef NVM_STOP_SEC_VAR_CLEARED_32
+#undef MEMMAP_ERROR
+#ifdef NVM_START_SEC_VAR_CLEARED_32_NO_MATCH
+#undef NVM_START_SEC_VAR_CLEARED_32_NO_MATCH
+#else
+#error "NvM_MemMap.h, no matching section was used."
+#endif
+#ifdef MEMMAP_ERROR_SEC_NO_MATCH
+#undef MEMMAP_ERROR_SEC_NO_MATCH
+#endif
+#define STOP_SEC_VAR_CLEARED_32
+
+/*Index:5  Section name :VAR_CLEARED_16*/
+#elif defined NVM_START_SEC_VAR_CLEARED_16
+#undef NVM_START_SEC_VAR_CLEARED_16
+#undef MEMMAP_ERROR
+#ifndef MEMMAP_ERROR_SEC_NO_MATCH
+#define MEMMAP_ERROR_SEC_NO_MATCH
+#else
+#error "NvM_MemMap.h, section is used consecutively many times."
+#endif
+#define NVM_START_SEC_VAR_CLEARED_16_NO_MATCH
+#define START_SEC_VAR_CLEARED_16
+
+#elif defined NVM_STOP_SEC_VAR_CLEARED_16
+#undef NVM_STOP_SEC_VAR_CLEARED_16
+#undef MEMMAP_ERROR
+#ifdef NVM_START_SEC_VAR_CLEARED_16_NO_MATCH
+#undef NVM_START_SEC_VAR_CLEARED_16_NO_MATCH
+#else
+#error "NvM_MemMap.h, no matching section was used."
+#endif
+#ifdef MEMMAP_ERROR_SEC_NO_MATCH
+#undef MEMMAP_ERROR_SEC_NO_MATCH
+#endif
+#define STOP_SEC_VAR_CLEARED_16
+
+/*Index:6  Section name :VAR_CLEARED_8*/
+#elif defined NVM_START_SEC_VAR_CLEARED_8
+#undef NVM_START_SEC_VAR_CLEARED_8
+#undef MEMMAP_ERROR
+#ifndef MEMMAP_ERROR_SEC_NO_MATCH
+#define MEMMAP_ERROR_SEC_NO_MATCH
+#else
+#error "NvM_MemMap.h, section is used consecutively many times."
+#endif
+#define NVM_START_SEC_VAR_CLEARED_8_NO_MATCH
+#define START_SEC_VAR_CLEARED_8
+
+#elif defined NVM_STOP_SEC_VAR_CLEARED_8
+#undef NVM_STOP_SEC_VAR_CLEARED_8
+#undef MEMMAP_ERROR
+#ifdef NVM_START_SEC_VAR_CLEARED_8_NO_MATCH
+#undef NVM_START_SEC_VAR_CLEARED_8_NO_MATCH
+#else
+#error "NvM_MemMap.h, no matching section was used."
+#endif
+#ifdef MEMMAP_ERROR_SEC_NO_MATCH
+#undef MEMMAP_ERROR_SEC_NO_MATCH
+#endif
+#define STOP_SEC_VAR_CLEARED_8
+
+/*Index:7  Section name :VAR_CLEARED_UNSPECIFIED*/
+#elif defined NVM_START_SEC_VAR_CLEARED_UNSPECIFIED
+#undef NVM_START_SEC_VAR_CLEARED_UNSPECIFIED
+#undef MEMMAP_ERROR
+#ifndef MEMMAP_ERROR_SEC_NO_MATCH
+#define MEMMAP_ERROR_SEC_NO_MATCH
+#else
+#error "NvM_MemMap.h, section is used consecutively many times."
+#endif
+#define NVM_START_SEC_VAR_CLEARED_UNSPECIFIED_NO_MATCH
+#define START_SEC_VAR_CLEARED_UNSPECIFIED
+
+#elif defined NVM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#undef NVM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#undef MEMMAP_ERROR
+#ifdef NVM_START_SEC_VAR_CLEARED_UNSPECIFIED_NO_MATCH
+#undef NVM_START_SEC_VAR_CLEARED_UNSPECIFIED_NO_MATCH
+#else
+#error "NvM_MemMap.h, no matching section was used."
+#endif
+#ifdef MEMMAP_ERROR_SEC_NO_MATCH
+#undef MEMMAP_ERROR_SEC_NO_MATCH
+#endif
+#define STOP_SEC_VAR_CLEARED_UNSPECIFIED
+
+/*Index:8  Section name :VAR_POWER_ON_INIT_16*/
+#elif defined NVM_START_SEC_VAR_POWER_ON_INIT_16
+#undef NVM_START_SEC_VAR_POWER_ON_INIT_16
+#undef MEMMAP_ERROR
+#ifndef MEMMAP_ERROR_SEC_NO_MATCH
+#define MEMMAP_ERROR_SEC_NO_MATCH
+#else
+#error "NvM_MemMap.h, section is used consecutively many times."
+#endif
+#define NVM_START_SEC_VAR_POWER_ON_INIT_16_NO_MATCH
+#define START_SEC_VAR_POWER_ON_INIT_16
+
+#elif defined NVM_STOP_SEC_VAR_POWER_ON_INIT_16
+#undef NVM_STOP_SEC_VAR_POWER_ON_INIT_16
+#undef MEMMAP_ERROR
+#ifdef NVM_START_SEC_VAR_POWER_ON_INIT_16_NO_MATCH
+#undef NVM_START_SEC_VAR_POWER_ON_INIT_16_NO_MATCH
+#else
+#error "NvM_MemMap.h, no matching section was used."
+#endif
+#ifdef MEMMAP_ERROR_SEC_NO_MATCH
+#undef MEMMAP_ERROR_SEC_NO_MATCH
+#endif
+#define STOP_SEC_VAR_POWER_ON_INIT_16
+
+/*Index:9  Section name :VAR_POWER_ON_INIT_UNSPECIFIED*/
+#elif defined NVM_START_SEC_VAR_POWER_ON_INIT_UNSPECIFIED
+#undef NVM_START_SEC_VAR_POWER_ON_INIT_UNSPECIFIED
+#undef MEMMAP_ERROR
+#ifndef MEMMAP_ERROR_SEC_NO_MATCH
+#define MEMMAP_ERROR_SEC_NO_MATCH
+#else
+#error "NvM_MemMap.h, section is used consecutively many times."
+#endif
+#define NVM_START_SEC_VAR_POWER_ON_INIT_UNSPECIFIED_NO_MATCH
+#define START_SEC_VAR_POWER_ON_INIT_UNSPECIFIED
+
+#elif defined NVM_STOP_SEC_VAR_POWER_ON_INIT_UNSPECIFIED
+#undef NVM_STOP_SEC_VAR_POWER_ON_INIT_UNSPECIFIED
+#undef MEMMAP_ERROR
+#ifdef NVM_START_SEC_VAR_POWER_ON_INIT_UNSPECIFIED_NO_MATCH
+#undef NVM_START_SEC_VAR_POWER_ON_INIT_UNSPECIFIED_NO_MATCH
+#else
+#error "NvM_MemMap.h, no matching section was used."
+#endif
+#ifdef MEMMAP_ERROR_SEC_NO_MATCH
+#undef MEMMAP_ERROR_SEC_NO_MATCH
+#endif
+#define STOP_SEC_VAR_POWER_ON_INIT_UNSPECIFIED
+
+#endif /* START_WITH_IF */
+
+#if defined MEMMAP_ERROR
+#error "NvM_MemMap.h, wrong pragma command"
+#endif
+
+#include "MemMap.h"
+
+/*=======[E N D   O F   F I L E]==============================================*/
+/* PRQA S 0883,0791-- */ /* VL_QAC_include, VL_QAC_identifier*/

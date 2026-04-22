@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2024 Isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception OR  LicenseRef-Commercial-License
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -11,87 +11,153 @@
  * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  * or see <https://www.gnu.org/licenses/>.
  *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Os_Rpc.c                                                   **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      : i-soft-os                                                   **
- **  Vendor      :                                                             **
- **  DESCRIPTION :                                                             **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
- **  Version :   AUTOSAR classic Platform R19--Function Safety                 **
- **                                                                            **
- *******************************************************************************/
+ * Alternatively, this file may be used under the terms of the Isoft Infrastructure Software Co., Ltd.
+ * Commercial License, in which case the provisions of the Isoft Infrastructure Software Co., Ltd.
+ * Commercial License shall apply instead of those of the GNU Lesser General Public License.
+ *
+ * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
+ * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
+ *
+ ************************************************************************************************************************
+ **
+ **  @file               : Os_Rpc.c
+ **  @author             : i-soft-os
+ **  @date               : 2025/02/10
+ **  @vendor             : isoft
+ **  @description        : Os source file for Rpc API implementations
+ **
+ ***********************************************************************************************************************/
 
-/*=======[I N C L U D E S]====================================================*/
-#include "Os_Internal.h"
+/* =================================================== inclusions =================================================== */
+#include "Os_Arch_Processor.h"
+#include "Os_Rpc.h"
+#include "Os_Spinlock.h"
+#include "Os_Core.h"
+#include "Os_Kernel.h"
 
-/*=======[M A C R O S]========================================================*/
+/* ===================================================== macros ===================================================== */
 
-/*=======[T Y P E   D E F I N I T I O N S]====================================*/
+/* ================================================ type definitions ================================================ */
 
-/*=======[E X T E R N A L   D A T A]==========================================*/
+/* ============================================ external data definitions =========================================== */
 
-/*=======[E X T E R N A L   F U N C T I O N   D E C L A R A T I O N S]========*/
-
-/*=======[I N T E R N A L   D A T A]==========================================*/
+/* ============================================ internal data definitions =========================================== */
 #if (OS_AUTOSAR_CORES > 1)
 /* Multi-core Shared variables */
+/* PRQA S 0791 ++ */ /* VL_QAC_identifier */
 #define OS_START_SEC_VAR_CLEARED_GLOBAL_UNSPECIFIED
 #include "Os_MemMap.h"
-static Os_RpcCoreType Os_InterCore[OS_AUTOSAR_CORES];
+OS_LOCAL Os_RpcCoreType Os_InterCore[OS_AUTOSAR_CORES];
 #define OS_STOP_SEC_VAR_CLEARED_GLOBAL_UNSPECIFIED
 #include "Os_MemMap.h"
 
 #define OS_START_SEC_VAR_CLEARED_GLOBAL_32
 #include "Os_MemMap.h"
-static Os_SpinlockType Os_SpinlockRpc;
+OS_LOCAL Os_SpinlockType Os_SpinlockRpc[OS_AUTOSAR_CORES];
 #define OS_STOP_SEC_VAR_CLEARED_GLOBAL_32
 #include "Os_MemMap.h"
+/* PRQA S 0791 -- */
 
-/*=======[I N T E R N A L   F U N C T I O N   D E C L A R A T I O N S]========*/
-static void Os_RpcAddService(LinkQueRefType rpcQue, srvNodeRefType srvStation, RpcNodeIdType nodeId);
+/* ========================================== internal function declarations ======================================== */
+/**
+ * @brief           Retrieves a service node from the specified queue
+ * @param[in]       rpcQue: Pointer to the queue to get a service node from
+ * @param[in]       serviceStation: Pointer to the service station containing the nodes
+ * @return          Os_RpcNodeIdType
+ * @retval          Node ID of retrieved service, or OS_RPC_INVALID_TRAIN if no service is available
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL Os_RpcNodeIdType Os_RpcGetService(LinkQueRefType rpcQue, Os_RpcServiceNodeRefType serviceStation, Os_SpinlockRefType pSpinlock);
 
-/*=======[E X T E R N A L   F U N C T I O N   D E C L A R A T I O N S]========*/
+/**
+ * @brief           Adds a service node to the tail of a queue
+ * @param[in]       rpcQue: Pointer to the queue to add the service node to
+ * @param[in]       serviceStation: Pointer to the service station containing the nodes
+ * @param[in]       nodeId: ID of the node to add
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_RpcAddService(LinkQueRefType rpcQue, Os_RpcServiceNodeRefType serviceStation, Os_RpcNodeIdType nodeId, Os_SpinlockRefType pSpinlock);
 
-/*=======[F U N C T I O N   I M P L E M E N T A T I O N S]====================*/
+/**
+ * @brief           Sets up service node parameters based on input data
+ * @param[in]       rpcData: Pointer to the RPC input data
+ * @param[out]      srvNode: Pointer to the service node to populate
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_RpcProcessParameter(Os_RpcInputRefType rpcData, Os_RpcServiceNodeRefType srvNode);
+
+/**
+ * @brief           Waits for a service node to complete processing or timeout
+ * @param[in]       coreId: ID of the core executing the service
+ * @param[in]       srvNode: Pointer to the service node being processed
+ * @return          StatusType
+ * @retval          E_OK: Service completed successfully
+ * @retval          E_OS_CORE: Target core is not running
+ * @retval          E_OS_TIMEOUT: Service request timed out
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL StatusType Os_RpcWaitResult(Os_CoreIdType coreId, Os_RpcServiceNodeRefType srvNode);
+
+/**
+ * @brief           Copies results from a service node back to RPC data structure
+ * @param[out]      rpcData: Pointer to the RPC data to update with results
+ * @param[in]       srvNode: Pointer to the service node containing results
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_RpcProcessResult(Os_RpcInputRefType rpcData, Os_RpcServiceNodeRefType srvNode);
+
+/**
+ * @brief           Executes the action function associated with a service node
+ * @param[inout]    srvNode: Pointer to the service node to process
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_RpcServiceAction(Os_RpcServiceNodeRefType srvNode);
+
+/* ========================================== external function definitions ========================================= */
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <Init the RPC module>
- * Service ID           <None>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Non Reentrant>
- * return               <None>
- * PreCondition         <None>
- * CallByAPI            <Os_RpcAddService>
- * REQ ID               <None>
+/**
+ * Init the RPC module
  */
-/******************************************************************************/
 /* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
 void Os_InitRpc(void)
 /* PRQA S 1532 -- */
 {
-    Os_CoreIdType ix;
-    uint8         iy;
+    Os_SCBType *pScb = Os_GetCurrentContext();  /* PRQA S 3678 */ /* VL_Os_3678 */
 
     /*only logic master core need to RUN this code.*/
-    if (0u == Os_SCB.sysCore)
+    if (OS_CORE_ID_MASTER == pScb->SysCore)
     {
-        for (ix = (Os_CoreIdType)0; ix < OS_AUTOSAR_CORES; ix++)
+        for (Os_CoreIdType i = (Os_CoreIdType)0; i < OS_AUTOSAR_CORES; i++)
         {
-            Os_InterCore[ix].freeQ.head = INVALID_TRAIN;
-            Os_InterCore[ix].freeQ.tail = INVALID_TRAIN;
-            Os_InterCore[ix].workQ.head = INVALID_TRAIN;
-            Os_InterCore[ix].workQ.tail = INVALID_TRAIN;
-            for (iy = 0U; iy < RPC_MAX_NODE; iy++)
+            Os_InterCore[i].FreeQue.Head = OS_RPC_INVALID_TRAIN;
+            Os_InterCore[i].FreeQue.Tail = OS_RPC_INVALID_TRAIN;
+            Os_InterCore[i].WorkQue.Head = OS_RPC_INVALID_TRAIN;
+            Os_InterCore[i].WorkQue.Tail = OS_RPC_INVALID_TRAIN;
+            for (uint8 y = 0U; y < OS_RPC_MAX_NODE; y++)
             {
-                Os_InterCore[ix].srvStation[iy].nextNode = INVALID_TRAIN;
-                Os_RpcAddService(&Os_InterCore[ix].freeQ, Os_InterCore[ix].srvStation, iy);
+                Os_InterCore[i].ServiceStation[y].NextNode = OS_RPC_INVALID_TRAIN;
+                Os_RpcAddService(&Os_InterCore[i].FreeQue,
+                                 Os_InterCore[i].ServiceStation,
+                                 y,
+                                 &Os_SpinlockRpc[i]);
             }
         }
     }
@@ -101,51 +167,40 @@ void Os_InitRpc(void)
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <Get the number of the service node and remove
-                         this node from head of queue>
- * Service ID           <None>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * return               <uint8>
- * PreCondition         <None>
- * CallByAPI            <Os_GetInternalSpinlock>
- *                      <Os_ReleaseInternalSpinlock>
- * REQ ID               <None>
+/**
+ * Get the number of the service node and remove
+                         this node from Head of queue
  */
-/******************************************************************************/
-/* PRQA S 3450 ++ */ /* VL_Os_3450 */
-static uint8 Os_RpcGetService(LinkQueRefType rpcQue, srvNodeRefType srvStation)
-/* PRQA S 3450 -- */
+OS_LOCAL Os_RpcNodeIdType Os_RpcGetService(LinkQueRefType rpcQue,
+                                  Os_RpcServiceNodeRefType serviceStation,
+                                  Os_SpinlockRefType pSpinlock)
 {
-    uint8 retNode = INVALID_TRAIN;
-    OS_ARCH_DECLARE_CRITICAL();
+    Os_RpcNodeIdType retNode = OS_RPC_INVALID_TRAIN;
+    OS_HAL_DECLARE_CRITICAL();
 
-    if ((rpcQue != NULL_PTR) && (srvStation != NULL_PTR))
+    if ((rpcQue != NULL_PTR) && (serviceStation != NULL_PTR))
     {
-        OS_ARCH_ENTRY_CRITICAL();
-        Os_GetInternalSpinlock(&Os_SpinlockRpc);
-        if (INVALID_TRAIN == rpcQue->head)
+        OS_HAL_ENTRY_CRITICAL();
+        Os_GetInternalSpinlock(pSpinlock);
+        if (OS_RPC_INVALID_TRAIN == rpcQue->Head)
         {
-            retNode = INVALID_TRAIN;
+            retNode = OS_RPC_INVALID_TRAIN;
         }
         else
         {
-            retNode      = rpcQue->head;
-            rpcQue->head = srvStation[retNode].nextNode;
-            if (INVALID_TRAIN == rpcQue->head)
+            retNode = rpcQue->Head;
+            rpcQue->Head = serviceStation[retNode].NextNode;
+            if (OS_RPC_INVALID_TRAIN == rpcQue->Head)
             {
-                rpcQue->tail = INVALID_TRAIN;
+                rpcQue->Tail = OS_RPC_INVALID_TRAIN;
             }
             else
             {
-                srvStation[retNode].nextNode = INVALID_TRAIN;
+                serviceStation[retNode].NextNode = OS_RPC_INVALID_TRAIN;
             }
         }
-        Os_ReleaseInternalSpinlock(&Os_SpinlockRpc);
-
-        OS_ARCH_EXIT_CRITICAL();
+        Os_ReleaseInternalSpinlock(pSpinlock);
+        OS_HAL_EXIT_CRITICAL();
     }
 
     return retNode;
@@ -153,123 +208,39 @@ static uint8 Os_RpcGetService(LinkQueRefType rpcQue, srvNodeRefType srvStation)
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
 
-#if (TRUE == RPC_TIMEOUT_SUPPORT)
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <Remove the service node nodeId from the queue rpcQue
- *                       of service station srvStation>
- * Service ID           <None>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * return               <StatusType>
- * PreCondition         <None>
- * CallByAPI            <Os_RpcWaitResult>
- * REQ ID               <None>
+/**
+ * Add the service node nodeId to the queue rpcQue Tail
+ *                       of service station serviceStation
  */
-/******************************************************************************/
-/* PRQA S 6030, 3450 ++ */ /* VL_MTR_Os_STMIF, VL_Os_3450 */
-static StatusType Os_RpcRemoveService(LinkQueRefType rpcQue, srvNodeRefType srvStation, RpcNodeIdType nodeId)
-/* PRQA S 6030, 3450 -- */
+OS_LOCAL void Os_RpcAddService(LinkQueRefType rpcQue,
+                               Os_RpcServiceNodeRefType serviceStation,
+                               Os_RpcNodeIdType nodeId,
+                               Os_SpinlockRefType pSpinlock)
 {
-    StatusType status = E_NOT_OK;
-    uint8      current;
-    uint8      previous;
-    OS_ARCH_DECLARE_CRITICAL();
+    OS_HAL_DECLARE_CRITICAL();
 
-    if (nodeId >= RPC_MAX_NODE)
+    if ((nodeId < OS_RPC_MAX_NODE) && (rpcQue != NULL_PTR) &&
+        (serviceStation != NULL_PTR))
     {
-        status = E_OS_ID;
-    }
-    else if ((NULL_PTR == rpcQue) || (NULL_PTR == srvStation))
-    {
-        status = E_OS_PARAM_POINTER;
-    }
-    else
-    {
-        OS_ARCH_ENTRY_CRITICAL();
-        Os_GetInternalSpinlock(&Os_SpinlockRpc);
-        if (rpcQue->head != INVALID_TRAIN)
+        OS_HAL_ENTRY_CRITICAL();
+        Os_GetInternalSpinlock(pSpinlock);
+        if (OS_RPC_INVALID_TRAIN == rpcQue->Tail)
         {
-            current  = rpcQue->head;
-            previous = INVALID_TRAIN;
-            do
-            {
-                if (current == nodeId)
-                {
-                    if (nodeId == rpcQue->head)
-                    {
-                        rpcQue->head = srvStation[current].nextNode;
-                    }
-                    else
-                    {
-                        srvStation[previous].nextNode = srvStation[current].nextNode;
-                    }
-                    if (current == rpcQue->tail)
-                    {
-                        rpcQue->tail = previous;
-                    }
-                    srvStation[current].nextNode = INVALID_TRAIN;
-                    status                       = E_OK;
-                    break;
-                }
-                previous = current;
-                current  = srvStation[current].nextNode;
-            } while (current != INVALID_TRAIN);
-        }
-        Os_ReleaseInternalSpinlock(&Os_SpinlockRpc);
-
-        OS_ARCH_EXIT_CRITICAL();
-    }
-
-    return status;
-}
-#define OS_STOP_SEC_CODE
-#include "Os_MemMap.h"
-#endif
-
-#define OS_START_SEC_CODE
-#include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <Add the service node nodeId to the queue rpcQue tail
- *                       of service station srvStation>
- * Service ID           <None>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * return               <None>
- * PreCondition         <None>
- * CallByAPI            <Os_GetInternalSpinlock>
- *                      <Os_ReleaseInternalSpinlock>
- * REQ ID               <None>
- */
-/******************************************************************************/
-static void Os_RpcAddService(LinkQueRefType rpcQue, srvNodeRefType srvStation, RpcNodeIdType nodeId)
-{
-    uint8 tail;
-    OS_ARCH_DECLARE_CRITICAL();
-
-    if ((nodeId < RPC_MAX_NODE) && (rpcQue != NULL_PTR) && (srvStation != NULL_PTR))
-    {
-        OS_ARCH_ENTRY_CRITICAL();
-        Os_GetInternalSpinlock(&Os_SpinlockRpc);
-        if (INVALID_TRAIN == rpcQue->tail)
-        {
-            rpcQue->head                = nodeId;
-            rpcQue->tail                = nodeId;
-            srvStation[nodeId].nextNode = INVALID_TRAIN;
+            rpcQue->Head = nodeId;
+            rpcQue->Tail = nodeId;
+            serviceStation[nodeId].NextNode = OS_RPC_INVALID_TRAIN;
         }
         else
         {
-            tail                        = rpcQue->tail;
-            srvStation[tail].nextNode   = nodeId;
-            srvStation[nodeId].nextNode = INVALID_TRAIN;
-            rpcQue->tail                = nodeId;
+            uint8 Tail = rpcQue->Tail;
+            serviceStation[Tail].NextNode = nodeId;
+            serviceStation[nodeId].NextNode = OS_RPC_INVALID_TRAIN;
+            rpcQue->Tail = nodeId;
         }
-        Os_ReleaseInternalSpinlock(&Os_SpinlockRpc);
-
-        OS_ARCH_EXIT_CRITICAL();
+        Os_ReleaseInternalSpinlock(pSpinlock);
+        OS_HAL_EXIT_CRITICAL();
     }
 }
 #define OS_STOP_SEC_CODE
@@ -277,103 +248,51 @@ static void Os_RpcAddService(LinkQueRefType rpcQue, srvNodeRefType srvStation, R
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <Set the paramters in rpcData to the service node srvNode>
- * Service ID           <None>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * return               <None>
- * PreCondition         <None>
- * CallByAPI            <None>
- * REQ ID               <None>
+/**
+ * Set the paramters in rpcData to the service node srvNode
  */
-/******************************************************************************/
-/* PRQA S 3450, 3673 ++ */ /* VL_Os_3450, VL_QAC_3673 */
-static void Os_RpcProcessParameter(RpcInputRefType rpcData, srvNodeRefType srvNode)
-/* PRQA S 3450, 3673 -- */
+/* PRQA S 3673 ++ */ /* VL_QAC_3673 */
+OS_LOCAL void Os_RpcProcessParameter(Os_RpcInputRefType rpcData,
+                                     Os_RpcServiceNodeRefType srvNode)
+/* PRQA S 3673 -- */
 {
     /* get destination core execution state */
-    srvNode->procState    = RPC_START;
-    srvNode->retValue     = E_NOT_OK; /* get return value */
-    srvNode->serviceId    = rpcData->serviceId;
-    srvNode->sync         = rpcData->sync;
-    srvNode->sourceCoreId = Os_SCB.sysCore;
-    /* PRQA S 3120 ++ */ /* VL_QAC_MagicNum */
-    srvNode->interParameter[0] = rpcData->srvPara0;
-    srvNode->extraParameter[0] = 0U;
-    srvNode->extraParameter[1] = 0U;
-    srvNode->extraParameter[2] = 0U;
-    srvNode->extraParameter[3] = 0U;
+    srvNode->ProcState = OS_RPC_START;
+    srvNode->RetValue = E_NOT_OK; /* get return value */
+    srvNode->ActionFn = rpcData->ActionFn;
+    srvNode->RpcSync = rpcData->RpcSync;
+    srvNode->SourceCoreId = Os_GetCoreIdLocal();
 
-    if (OSServiceId_GetElapsedValue == srvNode->serviceId)
+    for (uint8 i = 0; i < OS_RPC_IN_PARA_MAX; i++) /* PRQA S 1290 */ /* VL_Os_1290 */
     {
-        /* PRQA S 0306 ++ */ /* VL_Os_0306 */
-        srvNode->interParameter[1] = *(TickRefType)rpcData->srvPara1;
-        srvNode->interParameter[2] = *(TickRefType)rpcData->srvPara2;
-        /* PRQA S 0306 -- */
+        srvNode->InPara[i] = rpcData->InPara[i];
     }
-    else
-    {
-        srvNode->interParameter[1] = rpcData->srvPara1;
-        srvNode->interParameter[2] = rpcData->srvPara2;
-    }
-    /* PRQA S 3120 -- */
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <Wait the result until timeout>
- * Service ID           <None>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * return               <StatusType>
- * PreCondition         <None>
- * CallByAPI            <Os_RpcCallService>
- * REQ ID               <None>
+/**
+ * Wait the result until timeout
  */
-/******************************************************************************/
-/* PRQA S 3450, 3673 ++ */ /* VL_Os_3450, VL_QAC_3673 */
-static StatusType Os_RpcWaitResult(Os_CoreIdType vCoreId, srvNodeRefType srvNode, RpcNodeIdType nodeId)
-/* PRQA S 3450, 3673 -- */
+/* PRQA S 3673 ++ */ /* VL_QAC_3673 */
+OS_LOCAL StatusType Os_RpcWaitResult(Os_CoreIdType coreId,
+                                     Os_RpcServiceNodeRefType srvNode)
+/* PRQA S 3673 -- */
 {
     /* CORE1: FREE -> START  ===> CORE2: WORK -> DONE  ===> CORE1: FREE */
-    StatusType vRet    = E_OK;
-    uint64     counter = 0U;
-    /* PRQA S 3442 ++ */ /* VL_Os_3442 */
-    while (RPC_DONE != srvNode->procState)
-    /* PRQA S 3442 -- */
+    StatusType vRet   = E_OK;
+
+    while (OS_RPC_DONE != srvNode->ProcState) /* PRQA S 3442, 0771 */ /* VL_Os_3442, VL_Os_0771 */
     {
-        counter++;
-        if (Os_CoreCB.coreStatus[vCoreId] != OS_RUN) /* PRQA S 3442 */ /* VL_Os_3442 */
+        if (Os_CoreCB.CoreStatus[coreId] != OS_RUN) /* PRQA S 3442 */ /* VL_Os_3442 */
         {
             vRet = E_OS_CORE;
             break;
         }
-
-#if (TRUE == RPC_TIMEOUT_SUPPORT)
-        /* PRQA S 3442 ++ */ /* VL_Os_3442 */
-        if ((srvNode->procState < RPC_WORK) && (((uint64)RPC_WAIT_TIME) == counter))
-        /* PRQA S 3442 -- */
-        {
-            StatusType status;
-            /* Removing node from workQ, if fails,
-            execution is underway, so keep waiting */
-            status = Os_RpcRemoveService(&Os_InterCore[vCoreId].workQ, Os_InterCore[vCoreId].srvStation, nodeId);
-            if (E_OK == status)
-            {
-                vRet = E_OS_TIMEOUT; /* time out */
-                break;
-            }
-        }
-#endif
     }
 
-    UNUSED_PARAMETER(nodeId);
     return vRet;
 }
 #define OS_STOP_SEC_CODE
@@ -381,150 +300,90 @@ static StatusType Os_RpcWaitResult(Os_CoreIdType vCoreId, srvNodeRefType srvNode
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <Set the service node srvNode to the paramters
- *                       in rpcData according to the service ID>
- * Service ID           <None>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * return               <None>
- * PreCondition         <None>
- * CallByAPI            <None>
- * REQ ID               <None>
+/**
+ * Set the service node srvNode to the paramters
+ *                       in rpcData according to the service ID
  */
-/******************************************************************************/
-/* PRQA S 3450, 3673 ++ */ /* VL_Os_3450, VL_QAC_3673 */
-static void Os_RpcProcessResult(RpcInputRefType rpcData, srvNodeRefType srvNode)
-/* PRQA S 3450, 3673 -- */
+OS_LOCAL void Os_RpcProcessResult(Os_RpcInputRefType rpcData,
+                                  Os_RpcServiceNodeRefType srvNode)
 {
-    /* PRQA S 0306 ++ */ /* VL_Os_0306 */
-    switch (srvNode->serviceId)
+    for (uint8 i = 0; i < OS_RPC_IN_PARA_MAX; i++) /* PRQA S 1290 */ /* VL_Os_1290 */
     {
-#if (CFG_TASK_MAX > 0U)
-    case OSServiceId_GetTaskState:
-        /* PRQA S 4342 ++ */ /* VL_Os_4342 */
-        *(TaskStateRefType)rpcData->srvPara1 = (Os_TaskStateType)srvNode->interParameter[1];
-        /* PRQA S 4342 -- */
-        break;
-#endif /* CFG_TASK_MAX > 0U */
-
-    case OSServiceId_GetCounterValue:
-        *(TickRefType)rpcData->srvPara1 = (TickType)srvNode->interParameter[1];
-        break;
-
-    case OSServiceId_GetElapsedValue:
-        *(TickRefType)rpcData->srvPara1 = (TickType)srvNode->interParameter[1];
-        /* PRQA S 3120 ++ */ /* VL_QAC_MagicNum */
-        *(TickRefType)rpcData->srvPara2 = (TickType)srvNode->interParameter[2];
-        /* PRQA S 3120 -- */
-        break;
-
-#if (CFG_ALARM_MAX > 0)
-    case OSServiceId_GetAlarm:
-        *(TickRefType)rpcData->srvPara1 = (TickType)srvNode->interParameter[1];
-        break;
-
-    case OSServiceId_GetAlarmBase:
-    {
-        AlarmBaseRefType almRet = (AlarmBaseRefType)rpcData->srvPara1;
-        /* PRQA S 0310, 3679 ++ */ /* VL_Os_0310, VL_Os_3679 */
-        AlarmBaseRefType almBaseInfo = (AlarmBaseRefType)&srvNode->extraParameter[0];
-        /* PRQA S 0310, 3679 -- */
-        almRet->maxallowedvalue = almBaseInfo->maxallowedvalue;
-        almRet->mincycle        = almBaseInfo->mincycle;
-        almRet->ticksperbase    = almBaseInfo->ticksperbase;
-        break;
+        rpcData->InPara[i] = srvNode->InPara[i];
     }
-    /* PRQA S 0306 -- */
-#endif /* CFG_ALARM_MAX > 0 */
-
-#if (CFG_SCHEDTBL_MAX > 0U)
-    case OSServiceId_GetScheduleTableStatus:
-        *(ScheduleTableStatusRefType)rpcData->srvPara1 = (Os_SchedTblStateType)srvNode->interParameter[1];
-        break;
-#endif /* CFG_SCHEDTBL_MAX > 0U */
-
-    default: /* PRQA S 2016 */ /* VL_QAC_EmptyClause */
-        break;
-    }
-    srvNode->procState = RPC_FREE;
+    srvNode->ProcState = OS_RPC_FREE;
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <Make a remote service call to given core with
- *                       given service ID and input parameters>
- * Service ID           <None>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * return               <StatusType>
- * PreCondition         <None>
- * CallByAPI            <Os_RpcGetService>, <Os_RpcProcessParameter>
- *                      <Os_RpcAddService>, <Os_ArchRemoteCall>
- *                      <Os_RpcWaitResult>, <Os_RpcProcessResult>
- * REQ ID               <None>
+/**
+ * Make a remote service call to given core with
+ *                       given service ID and input parameters
  */
-/******************************************************************************/
 /* PRQA S 6030 ++ */ /* VL_MTR_Os_STMIF */
-StatusType Os_RpcCallService(RpcInputRefType rpcData)
+StatusType Os_RpcCallService(Os_RpcInputRefType rpcData)
 /* PRQA S 6030 -- */
 {
-    StatusType     vRet = E_OK;
-    uint16         vCoreId;
-    srvNodeRefType srvNode;
-    RpcNodeIdType  nodeId = INVALID_TRAIN;
+    StatusType vRet = E_OK;
 
+#if (OS_STATUS_EXTENDED == CFG_STATUS)
     if (NULL_PTR == rpcData)
     {
-        vRet = E_OS_PARAM_POINTER;
+        vRet = E_OS_ILLEGAL_ADDRESS;
     }
-    else if (rpcData->remoteCoreId > OS_AUTOSAR_CORES)
+    else if (rpcData->RemoteCoreId >= OS_AUTOSAR_CORES)
     {
         vRet = E_OS_CORE;
     }
     else
+#endif
     {
-        vCoreId = rpcData->remoteCoreId;
+        uint16 coreId = rpcData->RemoteCoreId;
+        Os_RpcNodeIdType nodeId = OS_RPC_INVALID_TRAIN;
+        Os_RpcServiceNodeRefType srvNode;
+
         do
         {
-            if (Os_CoreCB.coreStatus[vCoreId] != OS_RUN) /* PRQA S 3442 */ /* VL_Os_3442 */
+            if (Os_CoreCB.CoreStatus[coreId] != OS_RUN) /* PRQA S 3442 */ /* VL_Os_3442 */
             {
                 vRet = E_OS_CORE;
                 break;
             }
-            nodeId = Os_RpcGetService(&Os_InterCore[vCoreId].freeQ, Os_InterCore[vCoreId].srvStation);
-        }while (INVALID_TRAIN == nodeId);
-
-        if(E_OK == vRet)
+            nodeId = Os_RpcGetService(&Os_InterCore[coreId].FreeQue,
+                                      Os_InterCore[coreId].ServiceStation,
+                                      &Os_SpinlockRpc[coreId]); 
+        }while (OS_RPC_INVALID_TRAIN == nodeId);
+        
+        if (vRet == E_OK)
         {
-            srvNode = &Os_InterCore[vCoreId].srvStation[nodeId];
-
+            srvNode = &Os_InterCore[coreId].ServiceStation[nodeId];
             Os_RpcProcessParameter(rpcData, srvNode);
-
-            Os_RpcAddService(&Os_InterCore[vCoreId].workQ, Os_InterCore[vCoreId].srvStation, nodeId);
-            /* PRQA S 1258, 3138, 3455, 0303 ++ */ /* VL_Os_ConstToIntegral, VL_Os_3138, VL_Os_3455, VL_Os_0303 */
-            /* OS_RPC_MACRO_TO_FUNCTION_008 */
-            Os_ArchRemoteCall(Os_GetCorePhyID(rpcData->remoteCoreId));
-            /* PRQA S 1258, 3138, 3455, 0303 -- */
-            if (srvNode->sync == RPC_SYNC)
+            Os_RpcAddService(&Os_InterCore[coreId].WorkQue,
+                             Os_InterCore[coreId].ServiceStation,
+                             nodeId,
+                             &Os_SpinlockRpc[coreId]);
+            /* PRQA S 0303, 1258, 3455, 3138 ++ */ /* VL_Os_0303, VL_Os_1258, VL_Os_3455, VL_Os_3138 */
+            Os_Hal_RemoteCall(rpcData->RemoteCoreId);
+            /* PRQA S 0303, 1258, 3455, 3138 -- */
+            if (rpcData->RpcSync == OS_RPC_SYNC)
             {
                 StatusType status = E_OK;
-                status            = Os_RpcWaitResult(vCoreId, srvNode, nodeId);
-                if (RPC_DONE == srvNode->procState) /* PRQA S 3442 */ /* VL_Os_3442 */
+                status = Os_RpcWaitResult(coreId, srvNode);
+                if (OS_RPC_DONE == srvNode->ProcState) /* PRQA S 3442 */ /* VL_Os_3442 */
                 {
                     Os_RpcProcessResult(rpcData, srvNode);
-                    vRet = srvNode->retValue;
+                    vRet = srvNode->RetValue;
                 }
                 else
                 {
                     vRet = status;
                 }
-                Os_RpcAddService(&Os_InterCore[vCoreId].freeQ, Os_InterCore[vCoreId].srvStation, nodeId);
+                Os_RpcAddService(&Os_InterCore[coreId].FreeQue,
+                                 Os_InterCore[coreId].ServiceStation,
+                                 nodeId,
+                                 &Os_SpinlockRpc[coreId]);
             }
         }
     }
@@ -535,222 +394,65 @@ StatusType Os_RpcCallService(RpcInputRefType rpcData)
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <Call the specified function according to service ID>
- * Service ID           <None>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * return               <None>
- * PreCondition         <None>
- * CallByAPI            <Os_Panic>
- * REQ ID               <None>
+/**
+ * Call the specified function according to service ID
  */
-/******************************************************************************/
-/* PRQA S 6010, 6020, 6070, 3450 ++ */ /* VL_MTR_Os_STCYC, VL_MTR_Os_STLIN, VL_MTR_Os_STCAL, VL_Os_3450 */
-static void Os_RpcServiceAction(srvNodeRefType srvNode)
-/* PRQA S 6010, 6020, 6070, 3450 -- */
+OS_LOCAL void Os_RpcServiceAction(Os_RpcServiceNodeRefType srvNode)
 {
-    Os_CoreIdType osCoreId = Os_SCB.sysCore;
-
-    if (osCoreId < OS_AUTOSAR_CORES)
+#if (OS_STATUS_EXTENDED == CFG_STATUS)
+    if (srvNode->ActionFn == NULL_PTR)
     {
-        switch (srvNode->serviceId)
-        {
-#if (CFG_TASK_MAX > 0U)
-        case OSServiceId_ActivateTask:
-            /*SWS_Os_00596*/
-            srvNode->retValue = Os_ActivateTask((Os_TaskType)srvNode->interParameter[0]);
-            break;
-
-        case OSServiceId_ChainTask:
-            /*SWS_Os_00600*/
-            /*the second part of ChainTask is ActivateTask*/
-            srvNode->retValue = Os_ActivateTask((Os_TaskType)srvNode->interParameter[0]);
-            break;
-
-        case OSServiceId_GetTaskState:
-            /* PRQA S 0310 ++ */ /* VL_Os_0310 */
-            Os_GetTaskState((Os_TaskType)srvNode->interParameter[0], (Os_TaskStateRefType)&srvNode->interParameter[1]);
-            /* PRQA S 0310 -- */
-            srvNode->retValue = E_OK;
-            break;
-#endif /* CFG_TASK_MAX > 0U */
-
-#if (CFG_EXTENDED_TASK_MAX > 0)
-        case OSServiceId_SetEvent:
-        {
-            Os_EventMaskType EventLow = (Os_EventMaskType)(srvNode->interParameter[1]);
-            /* PRQA S 3120 ++ */ /* VL_QAC_MagicNum */
-            Os_EventMaskType EventHigh = ((Os_EventMaskType)(srvNode->interParameter[2]) << 32u);
-            /* PRQA S 3120 -- */
-            srvNode->retValue =
-                Os_SetEvent((Os_TaskType)srvNode->interParameter[0], (Os_EventMaskType)(EventLow | EventHigh));
-            break;
-        }
-#endif /* CFG_EXTENDED_TASK_MAX > 0 */
-
-        case OSServiceId_GetCounterValue:
-            Os_GetCounterValue((CounterType)srvNode->interParameter[0], (Os_TickRefType)&srvNode->interParameter[1]);
-            srvNode->retValue = E_OK;
-            break;
-
-        case OSServiceId_GetElapsedValue:
-            srvNode->retValue = Os_GetElapsedValue(
-                (CounterType)srvNode->interParameter[0],
-                (Os_TickRefType)&srvNode->interParameter[1],
-                /* PRQA S 3120 ++ */ /* VL_QAC_MagicNum */
-                (Os_TickRefType)&srvNode->interParameter[2]);
-            /* PRQA S 3120 -- */
-            break;
-
-#if (CFG_ALARM_MAX > 0)
-        case OSServiceId_GetAlarm:
-            srvNode->retValue =
-                Os_GetAlarm((Os_AlarmType)srvNode->interParameter[0], (Os_TickRefType)&srvNode->interParameter[1]);
-            break;
-
-        case OSServiceId_GetAlarmBase:
-            Os_GetAlarmBase(
-                (Os_AlarmType)srvNode->interParameter[0],
-                /* PRQA S 0310 ++ */ /* VL_Os_0310 */
-                (Os_AlarmBaseRefType)&srvNode->extraParameter[0]);
-            /* PRQA S 0310 -- */
-            srvNode->retValue = E_OK;
-            break;
-
-        case OSServiceId_CancelAlarm:
-            srvNode->retValue = Os_CancelAlarm((Os_AlarmType)srvNode->interParameter[0]);
-            break;
-
-        case OSServiceId_SetRelAlarm:
-            srvNode->retValue = Os_SetRelAlarm(
-                (Os_AlarmType)srvNode->interParameter[0],
-                (Os_TickType)srvNode->interParameter[1],
-                /* PRQA S 3120 ++ */ /* VL_QAC_MagicNum */
-                (Os_TickType)srvNode->interParameter[2]);
-            /* PRQA S 3120 -- */
-            break;
-
-        case OSServiceId_SetAbsAlarm:
-            srvNode->retValue = Os_SetAbsAlarm(
-                (Os_AlarmType)srvNode->interParameter[0],
-                (Os_TickType)srvNode->interParameter[1],
-                /* PRQA S 3120 ++ */ /* VL_QAC_MagicNum */
-                (Os_TickType)srvNode->interParameter[2]);
-            /* PRQA S 3120 -- */
-            break;
-#endif /* CFG_ALARM_MAX > 0 */
-
-#if (CFG_SCHEDTBL_MAX > 0U)
-        case OSServiceId_GetScheduleTableStatus:
-            Os_GetScheduleTableStatus(
-                (ScheduleTableType)srvNode->interParameter[0],
-
-                (ScheduleTableStatusRefType)&srvNode->interParameter[1]);
-
-            srvNode->retValue = E_OK;
-            break;
-
-        case OSServiceId_StartScheduleTableRel:
-            srvNode->retValue = Os_StartScheduleTableRel(
-                (ScheduleTableType)srvNode->interParameter[0],
-                (TickType)srvNode->interParameter[1]);
-            break;
-
-        case OSServiceId_StartScheduleTableAbs:
-            srvNode->retValue = Os_StartScheduleTableAbs(
-                (ScheduleTableType)srvNode->interParameter[0],
-                (TickType)srvNode->interParameter[1]);
-            break;
-
-        case OSServiceId_StopScheduleTable:
-            srvNode->retValue = Os_StopScheduleTable((ScheduleTableType)srvNode->interParameter[0]);
-            break;
-#endif /* CFG_SCHEDTBL_MAX > 0U */
-
-        case OSServiceId_ShutdownOS:
-            Os_ShutdownOS((StatusType)srvNode->interParameter[0], SHUTDOWN_ALL_OS);
-            break;
-
-#if (CFG_IOC_MAX > 0u)
-        case OSServiceId_IocCallBackNotify:
-        {
-            /* PRQA S 3120, 4461 ++ */ /* VL_QAC_MagicNum, VL_Os_4461 */
-            Os_IocComIdType    comId       = srvNode->interParameter[0];
-            Os_IocU16Type      vReceiverId = srvNode->interParameter[1];
-            Os_ApplicationType vRecAppId   = srvNode->interParameter[2];
-            /* PRQA S 3120, 4461 -- */
-
-            srvNode->retValue = Os_IocRemoteCallBack(comId, vReceiverId, vRecAppId);
-            break;
-        }
-#endif /* CFG_IOC_MAX > 0u */
-
-#if ((OS_SC3 == CFG_SC) || (OS_SC4 == CFG_SC))
-        case OSServiceId_TerminateApplication:
-            Os_TerminateApplication(
-                (ApplicationType)srvNode->interParameter[0],
-                /* PRQA S 4342 ++ */ /* VL_Os_4342 */
-                (RestartType)srvNode->interParameter[1]);
-            /* PRQA S 4342 -- */
-            srvNode->retValue = E_OK;
-            break;
-#endif /* OS_SC3 == CFG_SC || OS_SC4 == CFG_SC */
-
-        /*add comments to pass QAC.*/
-        default:
-            Os_Panic();
-            break;
-        }
-
-        srvNode->procState = RPC_DONE;
+        Os_Panic();
     }
+#endif
+
+    /* PRQA S 2812 ++ */ /* VL_Os_2812 */
+    srvNode->RetValue = srvNode->ActionFn(srvNode->InPara);
+    /* PRQA S 2812 -- */
+    srvNode->ProcState = OS_RPC_DONE;
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <Process all received RPC service request on the
-                         core given osCoreId>
- * Service ID           <None>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * return               <None>
- * PreCondition         <None>
- * CallByAPI            <Os_RpcGetService>, <Os_RpcServiceAction>
- *                      <Os_RpcAddService>
- * REQ ID               <None>
+/**
+ * Process all received RPC service request on the
+                         core given coreId
  */
-/******************************************************************************/
-void Os_RpcServiceOperation(Os_CoreIdType osCoreId) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
+/* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
+void Os_RpcServiceOperation(Os_CoreIdType coreId)
+/* PRQA S 1532 -- */
 {
-    srvNodeRefType srvNode;
-    RpcNodeIdType  nodeId;
+    Os_RpcServiceNodeRefType srvNode;
+    Os_RpcNodeIdType nodeId;
 
-    while (1) /* PRQA S 2870, 2740 */ /* VL_Os_2870, VL_Os_2740 */
+    while (1) /* PRQA S 2740 */ /* VL_Os_2740 */
     {
-        nodeId = Os_RpcGetService(&Os_InterCore[osCoreId].workQ, Os_InterCore[osCoreId].srvStation);
-        if (nodeId == INVALID_TRAIN)
+        nodeId = Os_RpcGetService(&Os_InterCore[coreId].WorkQue,
+                                  Os_InterCore[coreId].ServiceStation,
+                                  &Os_SpinlockRpc[coreId]);
+        if (nodeId == OS_RPC_INVALID_TRAIN)
         {
             break;
         }
-        srvNode            = &Os_InterCore[osCoreId].srvStation[nodeId];
-        srvNode->procState = RPC_WORK;
+        srvNode = &Os_InterCore[coreId].ServiceStation[nodeId];
+        srvNode->ProcState = OS_RPC_WORK;
         Os_RpcServiceAction(srvNode);
-        if (srvNode->sync != RPC_SYNC)
+        if (srvNode->RpcSync != OS_RPC_SYNC)
         {
-            srvNode->procState = RPC_FREE;
-            Os_RpcAddService(&Os_InterCore[osCoreId].freeQ, Os_InterCore[osCoreId].srvStation, nodeId);
+            srvNode->ProcState = OS_RPC_FREE;
+            Os_RpcAddService(&Os_InterCore[coreId].FreeQue,
+                             Os_InterCore[coreId].ServiceStation,
+                             nodeId,
+                             &Os_SpinlockRpc[coreId]);
         }
     }
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
-#endif /* OS_AUTOSAR_CORES > 1 */
+
+#endif
 
 /*=======[E N D   O F   F I L E]==============================================*/
 /* PRQA S 0553 EOF */ /* VL_QAC_UnUsedFiles */

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2024 Isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception OR  LicenseRef-Commercial-License
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -11,120 +11,566 @@
  * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  * or see <https://www.gnu.org/licenses/>.
  *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    : Os_ScheduleTable.c                                          **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      :  i-soft-os                                                  **
- **  Vendor      :                                                             **
- **  DESCRIPTION :  AutoSar SC2 Schedule Table Management                      **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
- **  Version :   AUTOSAR classic Platform R19--Function Safety                 **
- **                                                                            **
- *******************************************************************************/
+ * Alternatively, this file may be used under the terms of the Isoft Infrastructure Software Co., Ltd.
+ * Commercial License, in which case the provisions of the Isoft Infrastructure Software Co., Ltd.
+ * Commercial License shall apply instead of those of the GNU Lesser General Public License.
+ *
+ * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
+ * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
+ *
+ ************************************************************************************************************************
+ **
+ **  @file               : Os_ScheduleTable.c
+ **  @author             : i-soft-os
+ **  @date               : 2025/02/10
+ **  @vendor             : isoft
+ **  @description        : Os source file for ScheduleTable API implementations
+ **
+ ***********************************************************************************************************************/
 
-#include "Os_Internal.h"
+/* =================================================== inclusions =================================================== */
+#include "Os_Arch_Processor.h"
+#include "Os_ScheduleTable.h"
+#include "Os_Appl.h"
+#include "Os_Counter.h"
+#include "Os_Sprot.h"
+#include "Os_Task.h"
+#include "Os_Task.h"
+#include "Os_Event.h"
+#include "Os_Rpc.h"
+#include "Os_Hook.h"
+#include "Os_Kernel.h"
+#include "Os_Err.h"
+#include "Os_Rti.h"
+#include "Os_Arti.h"
 
 #if (CFG_SCHEDTBL_MAX > 0U)
-/*=======[E X T E R N A L   D A T A]==========================================*/
+/* ============================================ external data definitions =========================================== */
 
-/*=======[I N T E R N A L   D A T A]==========================================*/
-#define OS_START_SEC_VAR_CLONE_PTR
-#include "Os_MemMap.h"
-static const Os_SchedTblCfgType* Os_SchedTblCfg;
-#define OS_STOP_SEC_VAR_CLONE_PTR
-#include "Os_MemMap.h"
+/* ============================================ internal data definitions =========================================== */
 
-#define OS_START_SEC_VAR_CLONE_PTR
-#include "Os_MemMap.h"
-static Os_STCBType* Os_STCB;
-#define OS_STOP_SEC_VAR_CLONE_PTR
-#include "Os_MemMap.h"
-
-/*=======[I N T E R N A L   F U N C T I O N   D E C L A R A T I O N S]========*/
-#define OS_START_SEC_CODE
-#include "Os_MemMap.h"
-static void Os_InitSchedTblCB(Os_ScheduleTableType StId);
-#define OS_STOP_SEC_CODE
-#include "Os_MemMap.h"
-
-#define OS_START_SEC_CODE
-#include "Os_MemMap.h"
-static void Os_InsertSTNode(Os_ScheduleTableType InsertStId);
-#define OS_STOP_SEC_CODE
-#include "Os_MemMap.h"
-
-#define OS_START_SEC_CODE
-#include "Os_MemMap.h"
-static Os_TickType Os_StGetEpDelay(const Os_SchedTblCfgType* pStCfgRef, const Os_STCBType* const pStNode);
-#define OS_STOP_SEC_CODE
-#include "Os_MemMap.h"
-
-#define OS_START_SEC_CODE
-#include "Os_MemMap.h"
-static void Os_StInnerStart(Os_TickType osStartAbsTick, Os_STCBType* const pStCB, const Os_SchedTblCfgType* pStCfgRef);
-#define OS_STOP_SEC_CODE
-#include "Os_MemMap.h"
-
-#define OS_START_SEC_CODE
-#include "Os_MemMap.h"
-static void Os_InitStAutoStart(Os_STCBType* const pStCB, const Os_SchedTblCfgType* pStCfgRef);
-#define OS_STOP_SEC_CODE
-#include "Os_MemMap.h"
-
-#define OS_START_SEC_CODE
-#include "Os_MemMap.h"
-static boolean Os_InitStAutoStartChk(const Os_SchedTblAutostart* osSchedTblAutostartRef);
-#define OS_STOP_SEC_CODE
-#include "Os_MemMap.h"
-
-/*=======[F U N C T I O N   I M P L E M E N T A T I O N S]====================*/
-/********************************************************************/
-/* Begin: INNER API.                                                */
-/********************************************************************/
-
-#define OS_START_SEC_CODE
-#include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <Init ScheduleTable during os_startup.>
- * Service ID           <None>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Non Reentrant>
- * return               <None>
- * PreCondition         <None>
- * CallByAPI            <Os_InitSystem>
- * REQ ID               <None>
+/* ========================================== internal function declarations ======================================== */
+/**
+ * @brief           Initializes a Schedule Table Control Block
+ * @param[in]       schedTblId: ID of the schedule table to initialize
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
  */
-/********************************************************************/
-void Os_InitScheduleTable(void)
+OS_LOCAL void Os_InitSchedTblCB(Os_ScheduleTableType schedTblId);
+
+/**
+ * @brief           Inserts a schedule table node into the schedule table list
+ * @param[in]       schedTblId: ID of the schedule table to insert
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_InsertSchedTblNode(Os_ScheduleTableType schedTblId);
+
+/**
+ * @brief           Calculates the delay between expiry points
+ * @param[in]       schedTblCfgRef: Pointer to schedule table configuration
+ * @param[in]       pSchedTblNode: Pointer to schedule table control block
+ * @return          Os_TickType
+ * @retval          Time delay in ticks between current expiry point and the next one
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL Os_TickType Os_GetEpDelay(const Os_SchedTblCfgType *schedTblCfgRef, const Os_STCBType *const pSchedTblNode);
+
+/**
+ * @brief           Initializes a schedule table with startup parameters
+ * @param[in]       startAbsTick: Absolute start tick value
+ * @param[inout]    pStcb: Pointer to schedule table control block
+ * @param[in]       schedTblCfgRef: Pointer to schedule table configuration
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_SchedTblInnerStart(Os_TickType startAbsTick, Os_STCBType *const pStcb, const Os_SchedTblCfgType *schedTblCfgRef);
+
+/**
+ * @brief           Initializes auto-start parameters for a schedule table
+ * @param[inout]    pStcb: Pointer to schedule table control block
+ * @param[in]       schedTblCfgRef: Pointer to schedule table configuration
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_InitSchedTblAutoStart(Os_STCBType *const pStcb, const Os_SchedTblCfgType *schedTblCfgRef);
+
+/**
+ * @brief           Checks if a schedule table should auto-start based on application mode
+ * @param[in]       schedTblAutoStartRef: Pointer to schedule table auto-start configuration
+ * @return          boolean
+ * @retval          TRUE: Schedule table should auto-start
+ * @retval          FALSE: Schedule table should not auto-start
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL boolean Os_SchedTblAutoStartCheck(const Os_SchedTblAutostart *schedTblAutoStartRef);
+
+/**
+ * @brief           Inserts a schedule table node into the schedule table list based on expiry time
+ * @param[in]       schedTblRefCounterId: Counter ID referenced by the schedule table
+ * @param[inout]    pInsertStcb: Pointer to schedule table control block to insert
+ * @param[inout]    pCcb: Pointer to counter control block
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_InsertSchedTblList(Os_CounterType schedTblRefCounterId, Os_STCBType *pInsertStcb, Os_CCBType *pCcb);
+
+/**
+ * @brief           Removes a schedule table node from the schedule table list
+ * @param[in]       delSchedTblId: ID of the schedule table to delete
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_DelSchedTblNode(ScheduleTableType delSchedTblId);
+
+/**
+ * @brief           Activates tasks at expiry points of a schedule table
+ * @param[in]       taskListRef: Pointer to task activation list
+ * @param[in]       taskCnt: Number of tasks in the activation list
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_SchedTblEpActiveTask(const Os_EPActivateTaskAction *taskListRef, uint16 taskCnt);
+
+#if (CFG_EXTENDED_TASK_MAX > 0)
+/**
+ * @brief           Sets events for tasks at expiry points of a schedule table
+ * @param[in]       eventListRef: Pointer to event setting list
+ * @param[in]       eventCnt: Number of events in the list
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_SchedTblEpSetEvent(const Os_EPSetEventAction *eventListRef, uint16 eventCnt);
+#endif
+
+/**
+ * @brief           Processes the work to be done at an expiry point
+ * @param[in]       pSchedTblNode: Pointer to schedule table control block
+ * @param[in]       schedTblCfgRef: Pointer to schedule table configuration
+ * @return          boolean
+ * @retval          TRUE: This was the last expiry point
+ * @retval          FALSE: This was not the last expiry point
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL boolean Os_WorkSchedTblEp(const Os_STCBType *const pSchedTblNode, const Os_SchedTblCfgType *schedTblCfgRef);
+
+/**
+ * @brief           Handles the repeating of a schedule table after reaching the final expiry point
+ * @param[inout]    pSchedTblNode: Pointer to schedule table control block
+ * @param[in]       schedTblCfgRef: Pointer to schedule table configuration
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_WorkSchedTblRepeat(Os_STCBType *const pSchedTblNode, const Os_SchedTblCfgType *schedTblCfgRef);
+
+/**
+ * @brief           Updates schedule table state to process the next expiry point
+ * @param[inout]    pSchedTblNode: Pointer to schedule table control block
+ * @param[in]       schedTblCfgRef: Pointer to schedule table configuration
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_WorkSchedTblToNextEp(Os_STCBType *const pSchedTblNode, const Os_SchedTblCfgType *schedTblCfgRef);
+
+#if ((OS_SC2 == CFG_SC) || (OS_SC4 == CFG_SC))
+/**
+ * @brief           Performs synchronization adjustment by adding ticks
+ * @param[inout]    pStcb: Pointer to schedule table control block
+ * @param[in]       schedTblCfgRef: Pointer to schedule table configuration
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_SyncAdjustEpByAdd(Os_STCBType *const pStcb, const Os_SchedTblCfgType *schedTblCfgRef);
+
+/**
+ * @brief           Performs synchronization adjustment by subtracting ticks
+ * @param[inout]    pStcb: Pointer to schedule table control block
+ * @param[in]       schedTblCfgRef: Pointer to schedule table configuration
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_SyncAdjustEpBySub(Os_STCBType *const pStcb, const Os_SchedTblCfgType *schedTblCfgRef);
+
+/**
+ * @brief           Performs synchronization adjustment for an expiry point
+ * @param[inout]    pStcb: Pointer to schedule table control block
+ * @param[in]       schedTblCfgRef: Pointer to schedule table configuration
+ * @param[in]       counterCfgRef: Pointer to counter configuration
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_WorkSyncAdjustEp(Os_STCBType *const pStcb, const Os_SchedTblCfgType *schedTblCfgRef, const Os_CounterCfgType *counterCfgRef);
+#endif
+
+/**
+ * @brief           Handles schedule table processing when in RUNNING state
+ * @param[inout]    pSchedTblNode: Pointer to schedule table control block
+ * @param[in]       schedTblCfgRef: Pointer to schedule table configuration
+ * @param[in]       counterCfgRef: Pointer to counter configuration
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_WorkSchedTblRunningState(Os_STCBType *const pSchedTblNode, const Os_SchedTblCfgType *schedTblCfgRef, const Os_CounterCfgType *counterCfgRef);
+
+#if ((OS_SC2 == CFG_SC) || (OS_SC4 == CFG_SC))
+/**
+ * @brief           Handles schedule table processing when in RUNNING_AND_SYNCHRONOUS state
+ * @param[inout]    pSchedTblNode: Pointer to schedule table control block
+ * @param[in]       schedTblCfgRef: Pointer to schedule table configuration
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_WorkSchedTblRunningAndSyncState(Os_STCBType *const pSchedTblNode, const Os_SchedTblCfgType *schedTblCfgRef);
+
+/**
+ * @brief           Handles schedule table synchronization when in WAITING state
+ * @param[in]       syncVal: Synchronization value (position in physical time)
+ * @param[in]       counterCurVal: Current counter value
+ * @param[inout]    pStcb: Pointer to schedule table control block
+ * @param[in]       schedTblCfgRef: Pointer to schedule table configuration
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_SchedTblSyncInWaittingState(Os_TickType syncVal, Os_TickType counterCurVal, Os_STCBType *const pStcb, const Os_SchedTblCfgType *schedTblCfgRef);
+
+/**
+ * @brief           Calculates the difference value for schedule table synchronization
+ * @param[in]       syncVal: Synchronization value (position in physical time)
+ * @param[in]       counterCurVal: Current counter value
+ * @param[inout]    pStcb: Pointer to schedule table control block
+ * @param[in]       schedTblCfgRef: Pointer to schedule table configuration
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_SchedTblSyncGetDiffVal(Os_TickType syncVal, Os_TickType counterCurVal, Os_STCBType *const pStcb, const Os_SchedTblCfgType *schedTblCfgRef);
+
+/**
+ * @brief           Handles schedule table synchronization when in RUNNING state
+ * @param[in]       syncVal: Synchronization value (position in physical time)
+ * @param[in]       counterCurVal: Current counter value
+ * @param[inout]    pStcb: Pointer to schedule table control block
+ * @param[in]       schedTblCfgRef: Pointer to schedule table configuration
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_SchedTblSyncInRunningState(Os_TickType syncVal, Os_TickType counterCurVal, Os_STCBType *const pStcb, const Os_SchedTblCfgType *schedTblCfgRef);
+
+/**
+ * @brief           Handles schedule table synchronization when in RUNNING_AND_SYNCHRONOUS state
+ * @param[in]       syncVal: Synchronization value (position in physical time)
+ * @param[in]       counterCurVal: Current counter value
+ * @param[inout]    pStcb: Pointer to schedule table control block
+ * @param[in]       schedTblCfgRef: Pointer to schedule table configuration
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_SchedTblSyncInRunningAndSyncState(Os_TickType syncVal, Os_TickType counterCurVal, Os_STCBType *const pStcb, const Os_SchedTblCfgType *schedTblCfgRef);
+#endif
+
+/**
+ * @brief           Processes an expiry point of a schedule table
+ * @param[inout]    pScb: Pointer to system control block
+ * @param[inout]    pSchedTblListHead: Pointer to head of schedule table list
+ * @param[in]       counterCfgRef: Pointer to counter configuration
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_SchedTblEpProc(Os_SCBType *pScb, Os_STCBType *pSchedTblListHead, const Os_CounterCfgType *counterCfgRef);
+
+/**
+ * @brief           Retrieves the current status of a schedule table
+ * @param[in]       schedTblId: ID of the schedule table
+ * @param[out]      schedTblStatus: Pointer to store the schedule table status
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_GetScheduleTableStatus(ScheduleTableType schedTblId, ScheduleTableStatusRefType schedTblStatus);
+
+/**
+ * @brief           Checks if a relative schedule table start request is valid
+ * @param[in]       schedTblId: ID of the schedule table
+ * @param[in]       offset: Relative start offset in ticks
+ * @return          StatusType
+ * @retval          E_OK: Request is valid
+ * @retval          E_OS_ID: Schedule table ID is invalid
+ * @retval          E_OS_VALUE: Offset is invalid
+ * @retval          E_OS_STATE: Schedule table is not in STOPPED state
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL StatusType Os_StartRelStatusCheck(ScheduleTableType schedTblId, TickType offset);
+
+/**
+ * @brief           Starts a schedule table with a relative offset
+ * @param[in]       schedTblId: ID of the schedule table
+ * @param[in]       offset: Relative start offset in ticks
+ * @return          StatusType
+ * @retval          E_OK: Schedule table started successfully
+ * @retval          E_OS_ID: Schedule table ID is invalid
+ * @retval          E_OS_VALUE: Offset is invalid
+ * @retval          E_OS_STATE: Schedule table is not in STOPPED state
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL StatusType Os_StartScheduleTableRel(ScheduleTableType schedTblId, TickType offset);
+
+/**
+ * @brief           Starts a schedule table at an absolute counter value
+ * @param[in]       schedTblId: ID of the schedule table
+ * @param[in]       start: Absolute start tick value
+ * @return          StatusType
+ * @retval          E_OK: Schedule table started successfully
+ * @retval          E_OS_VALUE: Start value is invalid
+ * @retval          E_OS_STATE: Schedule table is not in STOPPED state
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL StatusType Os_StartScheduleTableAbs(ScheduleTableType schedTblId, TickType start);
+
+/**
+ * @brief           Sets up a next schedule table to be started after a currently running one
+ * @param[in]       schedTblIdFrom: ID of the currently running schedule table
+ * @param[in]       schedTblIdTo: ID of the schedule table to start next
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_NextScheduleTable(ScheduleTableType schedTblIdFrom, ScheduleTableType schedTblIdTo);
+
+#if ((OS_SC2 == CFG_SC) || (OS_SC4 == CFG_SC))
+/**
+ * @brief           Checks if a synchronized start request for a schedule table is valid
+ * @param[in]       schedTblId: ID of the schedule table
+ * @return          StatusType
+ * @retval          E_OK: Request is valid
+ * @retval          E_OS_ID: Schedule table doesn't support explicit synchronization
+ * @retval          E_OS_STATE: Schedule table is not in STOPPED state
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL StatusType Os_StartSyncStatusCheck(ScheduleTableType schedTblId);
+
+/**
+ * @brief           Starts a schedule table in synchronous mode
+ * @param[in]       schedTblId: ID of the schedule table
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_StartScheduleTableSynchron(ScheduleTableType schedTblId);
+
+/**
+ * @brief           Checks if a schedule table synchronization request is valid
+ * @param[in]       schedTblId: ID of the schedule table
+ * @param[in]       value: Synchronization value (position in physical time)
+ * @return          StatusType
+ * @retval          E_OK: Request is valid
+ * @retval          E_OS_ID: Schedule table doesn't support explicit synchronization
+ * @retval          E_OS_VALUE: Synchronization value is invalid
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL StatusType Os_SyncStatusCheck(ScheduleTableType schedTblId, TickType value);
+
+/**
+ * @brief           Synchronizes a schedule table with a given synchronization value
+ * @param[in]       schedTblId: ID of the schedule table
+ * @param[in]       value: Synchronization value (position in physical time)
+ * @return          StatusType
+ * @retval          E_OK: Schedule table synchronized successfully
+ * @retval          E_OS_STATE: Schedule table is not in appropriate state for synchronization
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL StatusType Os_SyncScheduleTable(ScheduleTableType schedTblId, TickType value);
+
+/**
+ * @brief           Sets a schedule table to asynchronous mode
+ * @param[in]       schedTblId: ID of the schedule table
+ * @return          StatusType
+ * @retval          E_OK: Schedule table set to asynchronous successfully
+ * @retval          E_OS_ID: Schedule table doesn't support explicit synchronization
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL StatusType Os_SetScheduleTableAsync(ScheduleTableType schedTblId);
+#endif
+
+#if (OS_AUTOSAR_CORES > 1)
+/**
+ * @brief           RPC action handler for starting a schedule table with a relative offset
+ * @param[in]       inPara: Parameter array containing schedule table ID and offset
+ * @return          StatusType
+ * @retval          E_OK: Schedule table started successfully
+ * @retval          Other: Error code from schedule table start
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL StatusType Os_RpcAction_StartScheduleTableRel(uint32 *inPara);
+
+/**
+ * @brief           Makes an RPC call to start a schedule table with a relative offset on another core
+ * @param[in]       ownerCore: ID of the core owning the schedule table
+ * @param[in]       schedTblId: ID of the schedule table
+ * @param[in]       offset: Relative start offset in ticks
+ * @return          StatusType
+ * @retval          E_OK: Schedule table started successfully
+ * @retval          Other: Error code from remote core
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL StatusType Os_RpcCall_StartScheduleTableRel(Os_CoreIdType ownerCore, ScheduleTableType schedTblId, TickType offset);
+
+/**
+ * @brief           RPC action handler for starting a schedule table at an absolute counter value
+ * @param[in]       inPara: Parameter array containing schedule table ID and start value
+ * @return          StatusType
+ * @retval          E_OK: Schedule table started successfully
+ * @retval          Other: Error code from schedule table start
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL StatusType Os_RpcAction_StartScheduleTableAbs(uint32 *inPara);
+
+/**
+ * @brief           Makes an RPC call to start a schedule table at an absolute counter value on another core
+ * @param[in]       ownerCore: ID of the core owning the schedule table
+ * @param[in]       schedTblId: ID of the schedule table
+ * @param[in]       start: Absolute start tick value
+ * @return          StatusType
+ * @retval          E_OK: Schedule table started successfully
+ * @retval          Other: Error code from remote core
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL StatusType Os_RpcCall_StartScheduleTableAbs(Os_CoreIdType ownerCore, ScheduleTableType schedTblId, TickType start);
+
+/**
+ * @brief           RPC action handler for stopping a schedule table
+ * @param[in]       inPara: Parameter array containing schedule table ID
+ * @return          StatusType
+ * @retval          E_OK: Schedule table stopped successfully
+ * @retval          Other: Error code from schedule table stop
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL StatusType Os_RpcAction_StopScheduleTable(uint32 *inPara);
+
+/**
+ * @brief           Makes an RPC call to stop a schedule table on another core
+ * @param[in]       ownerCore: ID of the core owning the schedule table
+ * @param[in]       schedTblId: ID of the schedule table
+ * @return          StatusType
+ * @retval          E_OK: Schedule table stopped successfully
+ * @retval          Other: Error code from remote core
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL StatusType Os_RpcCall_StopScheduleTable(Os_CoreIdType ownerCore, ScheduleTableType schedTblId);
+#endif
+
+/**
+ * @brief           Verifies if a next schedule table request is valid
+ * @param[in]       schedTblIdFrom: ID of the currently running schedule table
+ * @param[in]       schedTblIdTo: ID of the schedule table to start next
+ * @return          StatusType
+ * @retval          E_OK: Request is valid
+ * @retval          E_OS_ID: Schedule tables use different counters or sync strategies
+ * @retval          E_OS_NOFUNC: From schedule table is not in proper state
+ * @retval          E_OS_STATE: To schedule table is not stopped or source is repeating
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL StatusType Os_NextSTCheckStatus(ScheduleTableType schedTblIdFrom, ScheduleTableType schedTblIdTo);
+
+/* ========================================== external function definitions ========================================= */
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * Init ScheduleTable during os_startup.
+ */
+void Os_InitScheduleTable(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
 {
-    Os_ScheduleTableType      i;
-    Os_STCBType*              pStCB;
-    const Os_SchedTblCfgType* pStCfgRef;
-    uint16                    vCoreId           = Os_SCB.sysCore;
-    Os_ScheduleTableType      Os_CfgSchedTblMax = Os_CfgSchedTblMax_Inf[vCoreId];
+    Os_CoreIdType coreId = Os_GetCoreIdLocal();
+    Os_ScheduleTableType idStartRange = Os_CfgScheduleTableIndex_Inf[coreId].SchedTblStart;
+    Os_ScheduleTableType idEndRange = Os_CfgScheduleTableIndex_Inf[coreId].SchedTblEnd;
 
-    Os_SchedTblCfg = Os_SchedTblCfg_Inf[vCoreId];
-    Os_STCB        = Os_STCB_Inf[vCoreId];
-
-#if (CFG_SCHEDTBL_MAX > 0)
-    for (i = 0U; i < Os_CfgSchedTblMax; i++)
+    for (uint16 i = (uint16)idStartRange; i < idEndRange; i++) /* PRQA S 1880 */ /* VL_Os_1880 */
     {
-        pStCB     = &Os_STCB[i];
-        pStCfgRef = &Os_SchedTblCfg[i];
+        const Os_SchedTblCfgType *schedTblCfgRef = &Os_SchedTblCfg[i];
 
-        Os_InitSchedTblCB(i);
+        Os_InitSchedTblCB(i); /* PRQA S 4442, 1441 */ /* VL_Os_4442, VL_Os_1441 */
 
         /* Auto start. */
-        if (TRUE == Os_InitStAutoStartChk(pStCfgRef->osSchedTblAutostartRef))
+        if (TRUE == Os_SchedTblAutoStartCheck(schedTblCfgRef->SchedTblAutoStartRef))
         {
-            Os_InitStAutoStart(pStCB, pStCfgRef);
+            Os_InitSchedTblAutoStart(Os_STCB[i], schedTblCfgRef);
         }
     }
-#endif /* CFG_SCHEDTBL_MAX > 0 */
 
     return;
 }
@@ -133,59 +579,41 @@ void Os_InitScheduleTable(void)
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <Os_InitStAutoStart.>
- * Service ID           <none>
- * Sync/Async           <none>
- * Reentrancy           <none>
- * param-eventId[in]    <pStCB, pStCfgRef>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * CallByAPI            <Os_InitScheduleTable>
- * REQ ID               <None>
+/**
+ * Os_InitSchedTblAutoStart.
  */
-/********************************************************************/
-static void Os_InitStAutoStart(
-
-    Os_STCBType* const pStCB,
-
-    const Os_SchedTblCfgType* pStCfgRef)
+OS_LOCAL void Os_InitSchedTblAutoStart(
+    Os_STCBType *const pStcb, /* PRQA S 3432 */ /* VL_Os_3432 */
+    const Os_SchedTblCfgType *schedTblCfgRef)
 {
-    Os_TickType              osStartAbsTick;
-    Os_SchedTblAutostartType osType;
-
-    const Os_CCBType* pCcb;
-
-    osType = pStCfgRef->osSchedTblAutostartRef->osSchedTblAutostartType;
-    pCcb   = &Os_CCB[pStCfgRef->osSchedTblCounterRef];
-
-    switch (osType)
+    switch (schedTblCfgRef->SchedTblAutoStartRef->SchedTblAutostartType)
     {
-    case ST_START_ABSOLUTE:
-        Os_StInnerStart(pStCfgRef->osSchedTblAutostartRef->osSchedTblAbsValue, pStCB, pStCfgRef);
+    case OS_ST_START_ABSOLUTE:
+        Os_SchedTblInnerStart(schedTblCfgRef->SchedTblAutoStartRef->SchedTblAbsValue,
+                              pStcb,
+                              schedTblCfgRef);
 
         /* Insert ScheduleTable to list. */
-        Os_InsertSTNode(pStCB->stId);
+        Os_InsertSchedTblNode(pStcb->SchedTblId);
         break;
 
-    case ST_START_RELATIVE:
-        osStartAbsTick = Os_CalcAbsTicks(
-            pCcb->counterCurVal,
-            pStCfgRef->osSchedTblAutostartRef->osSchedTblRelOffset,
-            pStCfgRef->osSchedTblCounterRef);
+    case OS_ST_START_RELATIVE:
+    {
+        Os_TickType startAbsTick = Os_CalcAbsTicks(
+            Os_CCB[schedTblCfgRef->SchedTblCounterRef]->CounterCurVal,
+            schedTblCfgRef->SchedTblAutoStartRef->SchedTblRelOffset,
+            schedTblCfgRef->SchedTblCounterRef);
 
-        Os_StInnerStart(osStartAbsTick, pStCB, pStCfgRef);
+        Os_SchedTblInnerStart(startAbsTick, pStcb, schedTblCfgRef);
 
         /* Insert ScheduleTable to list. */
-        Os_InsertSTNode(pStCB->stId);
+        Os_InsertSchedTblNode(pStcb->SchedTblId);
         break;
+    }
 
 #if ((OS_SC2 == CFG_SC) || (OS_SC4 == CFG_SC))
-    case ST_START_SYNCHRON:
-        pStCB->stState = SCHEDULETABLE_WAITING;
+    case OS_ST_START_SYNCHRON:
+        pStcb->SchedTblState = SCHEDULETABLE_WAITING;
         break;
 #endif
 
@@ -202,87 +630,60 @@ static void Os_InitStAutoStart(
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <Check whether this st can auto start.>
- * Service ID           <None>
- * Sync/Async           <None>
- * Reentrancy           <None>
- * param-eventId[in]    <osSchedTblAutostartRef>
- * Param-Name[out]      <boolean>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * CallByAPI            <Os_InitScheduleTable>
- * REQ ID               <None>
+/**
+ * Check whether this st can auto start.
  */
-/********************************************************************/
-static boolean Os_InitStAutoStartChk(const Os_SchedTblAutostart* osSchedTblAutostartRef)
+OS_LOCAL boolean Os_SchedTblAutoStartCheck(
+    const Os_SchedTblAutostart *schedTblAutoStartRef)
 {
-    boolean bAutoStart = FALSE;
+    boolean autoStart = FALSE;
 
-    if (NULL_PTR != osSchedTblAutostartRef)
+    if (NULL_PTR != schedTblAutoStartRef)
     {
+        Os_SCBType *pScb = Os_GetCurrentContext(); /* PRQA S 3678 */ /* VL_Os_3678 */
+
         /* Check whether appmode during StartOs in appmode bitmap. */
-        if (0U != (osSchedTblAutostartRef->osSchedTblAppModeBitmap & Os_SCB.sysActiveAppMode))
+        if (0U != (schedTblAutoStartRef->SchedTblAppModeBitmap & pScb->SysActiveAppMode))
         {
-            bAutoStart = TRUE;
+            autoStart = TRUE;
         }
     }
 
-    return bAutoStart;
+    return autoStart;
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <Init ScheduleTable.>
- * Service ID           <None>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Non Reentrant>
- * param-eventId[in]    <StId>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * CallByAPI            <Os_InitScheduleTable and so on>
- * REQ ID               <None>
+/**
+ * Init ScheduleTable.
  */
-/********************************************************************/
-static void Os_InitSchedTblCB(Os_ScheduleTableType StId)
+OS_LOCAL void Os_InitSchedTblCB(Os_ScheduleTableType schedTblId)
 {
-    Os_STCBType* pStCB;
-
-    const Os_SchedTblCfgType* pStCfgRef;
-
-    pStCB     = &Os_STCB[StId];
-    pStCfgRef = &Os_SchedTblCfg[StId];
+    Os_STCBType *pStcb = Os_STCB[schedTblId];
+    const Os_SchedTblCfgType *schedTblCfgRef = &Os_SchedTblCfg[schedTblId];
 
     /* Init STCB */
-    pStCB->stId            = StId;
-    pStCB->stIsAdjust      = FALSE;
-    pStCB->stIsAdjAdd      = FALSE;
-    pStCB->stIsStarted     = FALSE;
-    pStCB->stIsStopAdjust  = FALSE;
-    pStCB->stNextEP        = pStCfgRef->osSchedTblEP;
-    pStCB->stDiff          = 0U;
-    pStCB->stDev           = 0U;
-    pStCB->stStartAbsTick  = 0U;
-    pStCB->stNextEpAbsTick = 0U;
-    pStCB->stState         = SCHEDULETABLE_STOPPED;
-    pStCB->stEpId          = 0U;
-    pStCB->NextStID        = OS_SCHEDTABLE_INVALID;
-    pStCB->PrevStID        = OS_SCHEDTABLE_INVALID;
-    pStCB->stNextNode      = NULL_PTR;
-    pStCB->stPreNode       = NULL_PTR;
-
-    pStCB->stFinalDelay =
-        pStCfgRef->osSchedTblDuration - pStCfgRef->osSchedTblEP[pStCfgRef->osSchedTblEPsize - 1u].osSchedTblEPOffset;
-
-    pStCB->stDelay = Os_StGetEpDelay(pStCfgRef, pStCB);
+    pStcb->SchedTblId = schedTblId;
+    pStcb->SchedTblIsAdjust = FALSE;
+    pStcb->SchedTblIsAdjustAdd = FALSE;
+    pStcb->SchedTblIsStarted = FALSE;
+    pStcb->SchedTblIsStopAdjust = FALSE;
+    pStcb->SchedTblNextEP = schedTblCfgRef->SchedTblEP;
+    pStcb->SchedTblDiff = 0U;
+    pStcb->SchedTblDev = 0U;
+    pStcb->SchedTblStartAbsTick = 0U;
+    pStcb->SchedTblNextEpAbsTick = 0U;
+    pStcb->SchedTblState = SCHEDULETABLE_STOPPED;
+    pStcb->SchedTblEpId = 0U;
+    pStcb->NextSchedTblId = OS_SCHEDTABLE_INVALID; /* PRQA S 4342 */ /* VL_Os_4342 */
+    pStcb->PrevSchedTblId = OS_SCHEDTABLE_INVALID; /* PRQA S 4342 */ /* VL_Os_4342 */
+    pStcb->SchedTblNextNode = NULL_PTR;
+    pStcb->SchedTblPreNode = NULL_PTR;
+    pStcb->SchedTblFinalDelay = schedTblCfgRef->SchedTblDuration -
+                                schedTblCfgRef->SchedTblEP[schedTblCfgRef->SchedTblEPsize - 1u].SchedTblEPOffset;
+    pStcb->SchedTblDelay = Os_GetEpDelay(schedTblCfgRef, pStcb);
 
     return;
 }
@@ -291,94 +692,93 @@ static void Os_InitSchedTblCB(Os_ScheduleTableType StId)
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <Insert scheduleTable node to list(Array).>
- * Service ID           <None>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Non Reentrant>
- * param-eventId[in]    <ScheduleTableID>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * CallByAPI            <Os_InitStAutoStart and so on>
- * REQ ID               <None>
+/**
+ * Insert scheduleTable node to STlist.
  */
-/********************************************************************/
-static void Os_InsertSTNode(Os_ScheduleTableType InsertStId)
+OS_LOCAL void Os_InsertSchedTblList(
+    Os_CounterType schedTblRefCounterId,
+    Os_STCBType *pInsertStcb,
+    Os_CCBType *pCcb)
 {
-    Os_TickType    InsertStEpRelTick;
-    Os_CounterType stCounterId;
+    /* If list is not empty, insert node by EP rel tick, increase order.
+     * Modified, use relative ticks between current tick and EP*/
+    Os_TickType InsertEpRelTick = Os_GetDistance(pCcb->CounterLastVal,
+                                                 pInsertStcb->SchedTblNextEpAbsTick,
+                                                 schedTblRefCounterId);
+    Os_STCBType *pCurStcb = pCcb->CounterStListHead;
+    Os_STCBType *pPreStcb = NULL_PTR;
 
-    Os_STCBType* pInsertStCB;
-    Os_STCBType* pCurStCB;
-    Os_STCBType* pPreStCB;
-    Os_CCBType*  pCcb;
+    /* Find insert position. */
+    while (NULL_PTR != pCurStcb)
+    {
+        /* Insert node by increase order. */
+        if (InsertEpRelTick >= Os_GetDistance(pCcb->CounterLastVal,
+                                              pCurStcb->SchedTblNextEpAbsTick,
+                                              schedTblRefCounterId))
+        {
+            pPreStcb = pCurStcb;
+            pCurStcb = pCurStcb->SchedTblNextNode;
+        }
+        else
+        {
+            break;
+        }
+    }
 
-    pInsertStCB = &Os_STCB[InsertStId];
-    stCounterId = Os_SchedTblCfg[InsertStId].osSchedTblCounterRef;
-    pCcb        = &Os_CCB[stCounterId];
+    /* Insert to head position. */
+    if (NULL_PTR == pPreStcb)
+    {
+        /* Update head node. */
+        pCcb->CounterStListHead = pInsertStcb;
+        pInsertStcb->SchedTblNextNode = pCurStcb;
+        pInsertStcb->SchedTblPreNode = NULL_PTR;
+        pCurStcb->SchedTblPreNode = pInsertStcb; /* PRQA S 2813 */ /* VL_Os_2813 */
+    }
+    else
+    {
+        /* Insert to other position. */
+        pInsertStcb->SchedTblNextNode = pPreStcb->SchedTblNextNode;
+        pInsertStcb->SchedTblPreNode = pPreStcb;
+        pPreStcb->SchedTblNextNode = pInsertStcb;
+
+        /* Process pCurStcb. */
+        if (NULL_PTR != pCurStcb)
+        {
+            pCurStcb->SchedTblPreNode = pInsertStcb;
+        }
+    }
+
+    return;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * Insert scheduleTable node to list(Array).
+ */
+OS_LOCAL void Os_InsertSchedTblNode(Os_ScheduleTableType schedTblId)
+{
+    Os_CounterType schedTblRefCounterId = Os_SchedTblCfg[schedTblId].SchedTblCounterRef;
+    Os_STCBType *pInsertStcb = Os_STCB[schedTblId];
+    Os_CCBType *pCcb = Os_CCB[schedTblRefCounterId];
 
     /* Note: can not repeat insert. */
-    if ((NULL_PTR != pInsertStCB->stNextNode) || (NULL_PTR != pInsertStCB->stPreNode))
+    if ((NULL_PTR != pInsertStcb->SchedTblNextNode) || (NULL_PTR != pInsertStcb->SchedTblPreNode))
     {
         /*nothing to do*/
     }
     /* Flexible design: if list is empty, insert node directly. */
-    else if (NULL_PTR == pCcb->counterStListHead)
+    else if (NULL_PTR == pCcb->CounterStListHead)
     {
-        pInsertStCB->stNextNode = NULL_PTR;
-        pCcb->counterStListHead = pInsertStCB;
+        pInsertStcb->SchedTblNextNode = NULL_PTR;
+        pCcb->CounterStListHead = pInsertStcb;
     }
     else
     {
-        /* If list is not empty, insert node by EP rel tick, increase order.
-         * Modified, use relative ticks between current tick and EP*/
-        InsertStEpRelTick = Os_GetDistance(pCcb->counterLastVal, pInsertStCB->stNextEpAbsTick, stCounterId);
-
-        pCurStCB = pCcb->counterStListHead;
-        pPreStCB = NULL_PTR;
-
-        /* Find insert position. */
-        while (NULL_PTR != pCurStCB)
-        {
-            /* Insert node by increase order. */
-            if (InsertStEpRelTick >= Os_GetDistance(pCcb->counterLastVal, pCurStCB->stNextEpAbsTick, stCounterId))
-            {
-                pPreStCB = pCurStCB;
-                pCurStCB = pCurStCB->stNextNode;
-            }
-            else
-            {
-                break;
-            }
-        }
-
-        /* Insert to head position. */
-        if (NULL_PTR == pPreStCB)
-        {
-            /* Update head node. */
-            pCcb->counterStListHead = pInsertStCB;
-
-            pInsertStCB->stNextNode = pCurStCB;
-            pInsertStCB->stPreNode  = NULL_PTR;
-            pCurStCB->stPreNode     = pInsertStCB;
-        }
-        else
-        {
-            /* Insert to other position. */
-            pInsertStCB->stNextNode = pPreStCB->stNextNode;
-            pInsertStCB->stPreNode  = pPreStCB;
-
-            pPreStCB->stNextNode = pInsertStCB;
-
-            /* Process pCurStCB. */
-            if (NULL_PTR != pCurStCB)
-            {
-                pCurStCB->stPreNode = pInsertStCB;
-            }
-        }
+        /* STList is not empty */
+        Os_InsertSchedTblList(schedTblRefCounterId, pInsertStcb, pCcb);
     }
 
     return;
@@ -388,62 +788,44 @@ static void Os_InsertSTNode(Os_ScheduleTableType InsertStId)
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <Insert scheduleTable node to list(Array).>
- * Service ID           <None>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Non Reentrant>
- * param-eventId[in]    <ScheduleTableID>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * CallByAPI            <Os_WorkStRepeatProc and so on>
- * REQ ID               <None>
+/**
+ * Remove the ScheduleTable node from STList.
  */
-/********************************************************************/
-static void Os_DelStNode(ScheduleTableType DelStId)
+OS_LOCAL void Os_DelSchedTblNode(ScheduleTableType delSchedTblId)
 {
-    Os_CounterType stCounterId;
-
-    Os_STCBType* pDelStCB;
-    Os_CCBType*  pCcb;
-
-    stCounterId = Os_SchedTblCfg[DelStId].osSchedTblCounterRef;
-    pCcb        = &Os_CCB[stCounterId];
+    Os_CCBType *pCcb = Os_CCB[Os_SchedTblCfg[delSchedTblId].SchedTblCounterRef];
 
     /* If list is null, return. */
-    if (NULL_PTR == pCcb->counterStListHead)
+    if (NULL_PTR == pCcb->CounterStListHead)
     {
         /*nothing to do*/
     }
     else
     {
-        pDelStCB = &(Os_STCB[DelStId]);
+        Os_STCBType *pDelStcb = Os_STCB[delSchedTblId];
 
-        /* Flexible design: DelStId is head node. */
-        if (NULL_PTR == pDelStCB->stPreNode)
+        /* Flexible design: delSchedTblId is head node. */
+        if (NULL_PTR == pDelStcb->SchedTblPreNode)
         {
-            pCcb->counterStListHead = pDelStCB->stNextNode;
+            pCcb->CounterStListHead = pDelStcb->SchedTblNextNode;
 
-            if (NULL_PTR != pDelStCB->stNextNode)
+            if (NULL_PTR != pDelStcb->SchedTblNextNode)
             {
-                pDelStCB->stNextNode->stPreNode = NULL_PTR;
-                pDelStCB->stNextNode            = NULL_PTR;
+                pDelStcb->SchedTblNextNode->SchedTblPreNode = NULL_PTR;
+                pDelStcb->SchedTblNextNode = NULL_PTR;
             }
         }
         else
         {
             /* Normal delete. */
-            pDelStCB->stPreNode->stNextNode = pDelStCB->stNextNode;
+            pDelStcb->SchedTblPreNode->SchedTblNextNode = pDelStcb->SchedTblNextNode;
 
-            if (NULL_PTR != pDelStCB->stNextNode) /* Not tail node. */
+            if (NULL_PTR != pDelStcb->SchedTblNextNode) /* Not tail node. */
             {
-                pDelStCB->stNextNode->stPreNode = pDelStCB->stPreNode;
+                pDelStcb->SchedTblNextNode->SchedTblPreNode = pDelStcb->SchedTblPreNode;
             }
 
-            pDelStCB->stPreNode = NULL_PTR;
+            pDelStcb->SchedTblPreNode = NULL_PTR;
         }
     }
 
@@ -454,34 +836,24 @@ static void Os_DelStNode(ScheduleTableType DelStId)
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <Insert scheduleTable node to list(Array)>
- * Service ID           <none>
- * Sync/Async           <none>
- * Reentrancy           <none>
- * param-eventId[in]    <pStCfgRef,pStNode>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * CallByAPI            <Os_InitSchedTblCB>
- * REQ ID               <None>
+/**
+ * Calculate the delay between EPs.
  */
-/********************************************************************/
-static Os_TickType Os_StGetEpDelay(const Os_SchedTblCfgType* pStCfgRef, const Os_STCBType* const pStNode)
+OS_LOCAL Os_TickType Os_GetEpDelay(
+    const Os_SchedTblCfgType *schedTblCfgRef,
+    const Os_STCBType *const pSchedTblNode)
 {
-    Os_TickType osDelay;
+    Os_TickType osDelay = 0U;
 
     /* Last Ep. Figure 7.1 */
-    if (pStNode->stEpId >= (pStCfgRef->osSchedTblEPsize - 1u))
+    if (pSchedTblNode->SchedTblEpId >= (schedTblCfgRef->SchedTblEPsize - 1u))
     {
-        osDelay = pStNode->stFinalDelay + pStCfgRef->osSchedTblEP[0].osSchedTblEPOffset;
+        osDelay = pSchedTblNode->SchedTblFinalDelay + schedTblCfgRef->SchedTblEP[0].SchedTblEPOffset;
     }
     else
     {
-        osDelay = pStCfgRef->osSchedTblEP[pStNode->stEpId + 1u].osSchedTblEPOffset
-                  - pStCfgRef->osSchedTblEP[pStNode->stEpId].osSchedTblEPOffset;
+        osDelay = schedTblCfgRef->SchedTblEP[pSchedTblNode->SchedTblEpId + 1u].SchedTblEPOffset -
+                  schedTblCfgRef->SchedTblEP[pSchedTblNode->SchedTblEpId].SchedTblEPOffset;
     }
 
     return osDelay;
@@ -491,46 +863,28 @@ static Os_TickType Os_StGetEpDelay(const Os_SchedTblCfgType* pStCfgRef, const Os
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <Save start para of schedule table.>
- * Service ID           <none>
- * Sync/Async           <none>
- * Reentrancy           <none>
- * param-eventId[in]    <osStartAbsTick, osCounterMaxVal, pStCB, pStCfgRef>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * CallByAPI            <Os_InitStAutoStart and so on>
- * REQ ID               <None>
+/**
+ * Save start para of schedule table.
  */
-/********************************************************************/
-static void Os_StInnerStart(
-    Os_TickType osStartAbsTick,
-
-    Os_STCBType* const pStCB,
-
-    const Os_SchedTblCfgType* pStCfgRef)
+OS_LOCAL void Os_SchedTblInnerStart(
+    Os_TickType startAbsTick,
+    Os_STCBType *const pStcb, /* PRQA S 3432 */ /* VL_Os_3432 */
+    const Os_SchedTblCfgType *schedTblCfgRef)
 {
-    Os_CounterType stCounterId;
-
-    stCounterId           = pStCfgRef->osSchedTblCounterRef;
-    pStCB->stStartAbsTick = osStartAbsTick;
-    pStCB->stNextEpAbsTick =
-        Os_CalcAbsTicks(pStCB->stStartAbsTick, pStCfgRef->osSchedTblEP[0].osSchedTblEPOffset, stCounterId);
-
-    pStCB->stEpId      = 0u;
-    pStCB->stIsStarted = TRUE;
-
+    pStcb->SchedTblStartAbsTick = startAbsTick;
+    pStcb->SchedTblNextEpAbsTick = Os_CalcAbsTicks(pStcb->SchedTblStartAbsTick,
+                                                   schedTblCfgRef->SchedTblEP[0].SchedTblEPOffset,
+                                                   schedTblCfgRef->SchedTblCounterRef);
+    pStcb->SchedTblEpId = 0u;
+    pStcb->SchedTblIsStarted = TRUE;
     /* Set state to running. */
-    pStCB->stState = SCHEDULETABLE_RUNNING;
+    pStcb->SchedTblState = SCHEDULETABLE_RUNNING;
 
 /* If SyncStrategy is IMPLICIT, state should be RUNNING_AND_SYNCHRONOUS. */
 #if ((OS_SC2 == CFG_SC) || (OS_SC4 == CFG_SC))
-    if (ST_SYNC_IMPLICIT == pStCfgRef->osSchedTblSync.osSchedTblSyncStrategy)
+    if (OS_ST_SYNC_IMPLICIT == schedTblCfgRef->SchedTblSync.SchedTblSyncStrategy)
     {
-        pStCB->stState = SCHEDULETABLE_RUNNING_AND_SYNCHRONOUS;
+        pStcb->SchedTblState = SCHEDULETABLE_RUNNING_AND_SYNCHRONOUS;
     }
 #endif
 
@@ -541,48 +895,26 @@ static void Os_StInnerStart(
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <Activate tasks at expiry points>
- * Service ID           <none>
- * Sync/Async           <none>
- * Reentrancy           <none>
- * param-eventId[in]    <pTaskList, osTaskCnt>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * CallByAPI            <Os_WorkStEpProc>
- * REQ ID               <None>
+/**
+ * Activate tasks at expiry points
  */
-/********************************************************************/
-static void Os_StEpActiveTask(const Os_EPActivateTaskAction* pTaskList, uint16 osTaskCnt)
+OS_LOCAL void Os_SchedTblEpActiveTask(const Os_EPActivateTaskAction *taskListRef, uint16 taskCnt)
 {
-    uint16      i;
-    Os_TaskType TaskID;
-
-    for (i = 0u; i < osTaskCnt; i++)
+    for (uint16 i = 0u; i < taskCnt; i++)
     {
-        TaskID = pTaskList[i].osSchedTblActivateTaskRef;
+        Os_TaskType taskId = taskListRef[i].SchedTblActivateTaskRef;
 
 #if (OS_AUTOSAR_CORES > 1)
-        Os_CoreIdType coreId = Os_GetObjCoreId(TaskID);
-        if (coreId != Os_SCB.sysCore)
+        Os_SCBType *pScb = Os_GetCurrentContext(); /* PRQA S 3678 */ /* VL_Os_3678 */
+        Os_CoreIdType coreId = OS_TASK_GET_COREID(taskId);
+        if (coreId != pScb->SysCore)
         {
-            RpcInputType rpcData = {
-                .sync         = RPC_SYNC,
-                .remoteCoreId = coreId,
-                .serviceId    = OSServiceId_ActivateTask,
-                .srvPara0     = (uint32)TaskID,
-                .srvPara1     = (uint32)NULL_PARA,
-                .srvPara2     = (uint32)NULL_PARA,
-            };
-            (void)Os_RpcCallService(&rpcData);
+            (void)Os_RpcCall_ActivateTask(coreId, OS_RPC_ASYNC, taskId);
         }
         else
-#endif /* OS_AUTOSAR_CORES > 1 */
+#endif
         {
-            (void)Os_ActivateTask(TaskID);
+            (void)Os_ActivateTask(taskId);
         }
     }
 
@@ -594,52 +926,27 @@ static void Os_StEpActiveTask(const Os_EPActivateTaskAction* pTaskList, uint16 o
 #if (CFG_EXTENDED_TASK_MAX > 0)
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <Set Event at expiry points>
- * Service ID           <none>
- * Sync/Async           <none>
- * Reentrancy           <none>
- * param-eventId[in]    <pEventList, osEventCnt>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * CallByAPI            <Os_WorkStEpProc>
- * REQ ID               <None>
+/**
+ * Set Event at expiry points
  */
-/********************************************************************/
-static void Os_StEpSetEvent(const Os_EPSetEventAction* pEventList, uint16 osEventCnt)
+OS_LOCAL void Os_SchedTblEpSetEvent(const Os_EPSetEventAction *eventListRef, uint16 eventCnt)
 {
-    uint16           i;
-    Os_TaskType      TaskID;
-    Os_EventMaskType Mask;
-
-    for (i = 0u; i < osEventCnt; i++)
+    for (uint16 i = 0u; i < eventCnt; i++)
     {
-        TaskID = pEventList[i].osSchedTblSetEventTaskRef;
-        Mask   = pEventList[i].osSchedTblSetEventRef;
+        Os_TaskType taskId = eventListRef[i].SchedTblSetEventTaskRef;
+        Os_EventMaskType eventMask = eventListRef[i].SchedTblSetEventRef;
 
 #if (OS_AUTOSAR_CORES > 1)
-
-        Os_CoreIdType coreId = Os_GetObjCoreId(TaskID);
-
-        if (coreId != Os_SCB.sysCore)
+        Os_SCBType *pScb = Os_GetCurrentContext(); /* PRQA S 3678 */ /* VL_Os_3678 */
+        Os_CoreIdType coreId = OS_TASK_GET_COREID(taskId);
+        if (coreId != pScb->SysCore)
         {
-            RpcInputType rpcData = {
-                .sync         = RPC_SYNC,
-                .remoteCoreId = coreId,
-                .serviceId    = OSServiceId_SetEvent,
-                .srvPara0     = (uint32)TaskID,
-                .srvPara1     = (uint32)Mask,
-                .srvPara2     = (uint32)NULL_PARA,
-            };
-            (void)Os_RpcCallService(&rpcData);
+            (void)Os_RpcCall_SetEvent(coreId, OS_RPC_ASYNC, taskId, eventMask);
         }
         else
-#endif /* OS_AUTOSAR_CORES > 1 */
+#endif
         {
-            (void)Os_SetEvent(TaskID, Mask);
+            (void)Os_SetEvent(taskId, eventMask);
         }
     }
 
@@ -647,94 +954,62 @@ static void Os_StEpSetEvent(const Os_EPSetEventAction* pEventList, uint16 osEven
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
-#endif /* CFG_EXTENDED_TASK_MAX > 0 */
+#endif
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <Procedures for handling at expiry points>
- * Service ID           <none>
- * Sync/Async           <none>
- * Reentrancy           <none>
- * param-eventId[in]    <pStNode, pStCfgRef>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * CallByAPI            <Os_WorkStRunningState>
- * REQ ID               <None>
+/**
+ * Procedures for handling at expiry points
  */
-/********************************************************************/
-static boolean Os_WorkStEpProc(const Os_STCBType* const pStNode, const Os_SchedTblCfgType* pStCfgRef)
+OS_LOCAL boolean Os_WorkSchedTblEp(
+    const Os_STCBType *const pSchedTblNode,
+    const Os_SchedTblCfgType *schedTblCfgRef)
 {
-    boolean LastEP = FALSE;
+    boolean lastEp = FALSE;
 
     /* Active task. */
-    Os_StEpActiveTask(pStNode->stNextEP->osActivateTaskList, pStNode->stNextEP->osActivateTaskListSize);
+    Os_SchedTblEpActiveTask(pSchedTblNode->SchedTblNextEP->ActivateTaskList,
+                            pSchedTblNode->SchedTblNextEP->ActivateTaskListSize);
 
 /* Set event. */
 #if (CFG_EXTENDED_TASK_MAX > 0)
-    Os_StEpSetEvent(pStNode->stNextEP->osSetEventList, pStNode->stNextEP->osSetEventListSize);
+    Os_SchedTblEpSetEvent(pSchedTblNode->SchedTblNextEP->SetEventList,
+                          pSchedTblNode->SchedTblNextEP->SetEventListSize);
 #endif
 
     /* Last EP ? */
-    if (pStNode->stEpId >= (pStCfgRef->osSchedTblEPsize - 1u))
+    if (pSchedTblNode->SchedTblEpId >= (schedTblCfgRef->SchedTblEPsize - 1u))
     {
-        LastEP = TRUE;
+        lastEp = TRUE;
     }
 
-    return LastEP;
+    return lastEp;
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <A schedule table may repeat after the final expiry point is processed.
- *                       So the API can work>
- * Service ID           <none>
- * Sync/Async           <none>
- * Reentrancy           <none>
- * param-eventId[in]    <counterCurval, pStNode, pStCfgRef, pstCounterCfg>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * CallByAPI            <Os_WorkStRunningState>
- * REQ ID               <None>
+/**
+ * A schedule table may repeat after the final expiry point is processed.
+ *                       So the API can work
  */
-/********************************************************************/
-static void Os_WorkStRepeatProc(
-
-    Os_STCBType* const pStNode,
-
-    const Os_SchedTblCfgType* pStCfgRef)
+OS_LOCAL void Os_WorkSchedTblRepeat(
+    Os_STCBType *const pSchedTblNode, /* PRQA S 3432 */ /* VL_Os_3432 */
+    const Os_SchedTblCfgType *schedTblCfgRef)
 {
-    pStNode->stNextEP = pStCfgRef->osSchedTblEP;
-    pStNode->stEpId   = 0u;
+    pSchedTblNode->SchedTblNextEP = schedTblCfgRef->SchedTblEP;
+    pSchedTblNode->SchedTblEpId = 0u;
 
 /* Update start abs tick. */
-#if ((OS_SC2 == CFG_SC) || (OS_SC4 == CFG_SC))
-    if (ST_SYNC_IMPLICIT == pStCfgRef->osSchedTblSync.osSchedTblSyncStrategy)
-    {
-        pStNode->stStartAbsTick  = 0u;
-        pStNode->stNextEpAbsTick = pStCfgRef->osSchedTblEP[0].osSchedTblEPOffset;
-    }
-    else
-#endif /* OS_SC2 == CFG_SC || OS_SC4 == CFG_SC */
-    {
-        pStNode->stNextEpAbsTick =
-            Os_CalcAbsTicks(pStNode->stNextEpAbsTick, pStNode->stDelay, pStCfgRef->osSchedTblCounterRef);
-
-        pStNode->stDelay = Os_StGetEpDelay(pStCfgRef, pStNode);
-    }
+    pSchedTblNode->SchedTblNextEpAbsTick = Os_CalcAbsTicks(pSchedTblNode->SchedTblNextEpAbsTick,
+                                                            pSchedTblNode->SchedTblDelay,
+                                                            schedTblCfgRef->SchedTblCounterRef);
+    pSchedTblNode->SchedTblDelay = Os_GetEpDelay(schedTblCfgRef, pSchedTblNode);
 
     /* Re-sort by abs tick of next EP. */
-    Os_DelStNode(pStNode->stId);
-    Os_InsertSTNode(pStNode->stId);
+    Os_DelSchedTblNode(pSchedTblNode->SchedTblId);
+    Os_InsertSchedTblNode(pSchedTblNode->SchedTblId);
 
     return;
 }
@@ -743,36 +1018,21 @@ static void Os_WorkStRepeatProc(
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <Procedures for handling the next expiry point>
- * Service ID           <none>
- * Sync/Async           <none>
- * Reentrancy           <none>
- * param-eventId[in]    <pStNode, pStCfgRef>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * CallByAPI            <Os_WorkStRunningState>
- * REQ ID               <None>
+/**
+ * Procedures for handling the next expiry point
  */
-/********************************************************************/
-static void Os_WorkStToNextEp(
-
-    Os_STCBType* const pStNode,
-
-    const Os_SchedTblCfgType* pStCfgRef)
+OS_LOCAL void Os_WorkSchedTblToNextEp(
+    Os_STCBType *const pSchedTblNode,
+    const Os_SchedTblCfgType *schedTblCfgRef)
 {
     /* Next EP. */
-    pStNode->stEpId   = pStNode->stEpId + 1u;
-    pStNode->stNextEP = &pStCfgRef->osSchedTblEP[pStNode->stEpId];
-
-    pStNode->stNextEpAbsTick =
-        Os_CalcAbsTicks(pStNode->stNextEpAbsTick, pStNode->stDelay, pStCfgRef->osSchedTblCounterRef);
-
+    pSchedTblNode->SchedTblEpId = pSchedTblNode->SchedTblEpId + 1u;
+    pSchedTblNode->SchedTblNextEP = &schedTblCfgRef->SchedTblEP[pSchedTblNode->SchedTblEpId];
+    pSchedTblNode->SchedTblNextEpAbsTick = Os_CalcAbsTicks(pSchedTblNode->SchedTblNextEpAbsTick,
+                                                           pSchedTblNode->SchedTblDelay,
+                                                           schedTblCfgRef->SchedTblCounterRef);
     /* Update delay. */
-    pStNode->stDelay = Os_StGetEpDelay(pStCfgRef, pStNode);
+    pSchedTblNode->SchedTblDelay = Os_GetEpDelay(schedTblCfgRef, pSchedTblNode);
 
     return;
 }
@@ -783,104 +1043,111 @@ static void Os_WorkStToNextEp(
 #if ((OS_SC2 == CFG_SC) || (OS_SC4 == CFG_SC))
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <The API can use When expiry point need synchronization>
- * Service ID           <none>
- * Sync/Async           <none>
- * Reentrancy           <none>
- * param-eventId[in]    <pStCfgRef, pstCounterCfg>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <pStCB>
- * return               <None>
- * PreCondition         <None>
- * CallByAPI            <Os_WorkStRunningState>
- * REQ ID               <None>
+/**
+ * Complete EPs synchronization using addition.
  */
-/********************************************************************/
-static void Os_StWorkEpSyncAdjust(
-
-    Os_STCBType* const pStCB,
-
-    const Os_SchedTblCfgType* pStCfgRef,
-    const Os_CounterCfgType*  pstCounterCfg)
+OS_LOCAL void Os_SyncAdjustEpByAdd(
+    Os_STCBType *const pStcb,
+    const Os_SchedTblCfgType *schedTblCfgRef)
 {
-    Os_TickType osPreEpOffset;
+    /* Deviatifon. */
+    pStcb->SchedTblDev = (((pStcb->SchedTblDiff - pStcb->SchedTblAdjustDevTotal) > pStcb->SchedTblNextEP->SchedTblMaxAdvance) ? (pStcb->SchedTblNextEP->SchedTblMaxAdvance) : (pStcb->SchedTblDiff - pStcb->SchedTblAdjustDevTotal));
 
-    /* Offset of pre EP. */
-    osPreEpOffset = ((0u == pStCB->stEpId) ? (0u) : (pStCfgRef->osSchedTblEP[pStCB->stEpId - 1u].osSchedTblEPOffset));
+    /* pStcb->SchedTblAdjustDevTotal <= pStcb->SchedTblDiff. */
+    if ((pStcb->SchedTblDiff - pStcb->SchedTblAdjustDevTotal) <= schedTblCfgRef->SchedTblSync.SchedTblExplicitPrecision)
+    {
+        /* Sync success. */
+        pStcb->SchedTblIsAdjust = FALSE;
+        pStcb->SchedTblAdjustDevTotal = 0u;
+        pStcb->SchedTblDiff = 0u;
+        pStcb->SchedTblDev = 0u;
+    }
+    else
+    {
+        /* SchedTblNextEP need adjust. */
+        pStcb->SchedTblIsAdjust = TRUE;
+        pStcb->SchedTblAdjustDevTotal += pStcb->SchedTblDev;
 
+        /* Update delay of SchedTblNextEP. */
+        pStcb->SchedTblDelay += pStcb->SchedTblDev;
+    }
+
+    return;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * Complete EPs synchronization using subtraction.
+ */
+OS_LOCAL void Os_SyncAdjustEpBySub(
+    Os_STCBType *const pStcb,
+    const Os_SchedTblCfgType *schedTblCfgRef)
+{
+    /* Deviatifon. */
+    pStcb->SchedTblDev = (((pStcb->SchedTblDiff - pStcb->SchedTblAdjustDevTotal) > pStcb->SchedTblNextEP->SchedTblMaxRetard) ? (pStcb->SchedTblNextEP->SchedTblMaxRetard) : (pStcb->SchedTblDiff - pStcb->SchedTblAdjustDevTotal));
+
+    /* pStcb->SchedTblAdjustDevTotal <= pStcb->SchedTblDiff. */
+    if ((pStcb->SchedTblDiff - pStcb->SchedTblAdjustDevTotal) <= schedTblCfgRef->SchedTblSync.SchedTblExplicitPrecision)
+    {
+        /* Sync success. */
+        pStcb->SchedTblIsAdjust = FALSE;
+        pStcb->SchedTblAdjustDevTotal = 0u;
+        pStcb->SchedTblDiff = 0u;
+        pStcb->SchedTblDev = 0u;
+    }
+    else
+    {
+        /* SchedTblNextEP need adjust. */
+        pStcb->SchedTblIsAdjust = TRUE;
+        pStcb->SchedTblAdjustDevTotal += pStcb->SchedTblDev;
+
+        /* Update delay of SchedTblNextEP. */
+        pStcb->SchedTblDelay -= pStcb->SchedTblDev;
+    }
+
+    return;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * The API can use When expiry point need synchronization
+ */
+OS_LOCAL void Os_WorkSyncAdjustEp(
+    Os_STCBType *const pStcb,
+    const Os_SchedTblCfgType *schedTblCfgRef,
+    const Os_CounterCfgType *counterCfgRef)
+{
     /* Delay + Deviatifon. */
-    if (TRUE == pStCB->stIsAdjAdd)
+    if (TRUE == pStcb->SchedTblIsAdjustAdd)
     {
         /* OS437 */
-        if (((pStCB->stNextEP->osSchedTblEPOffset) + (pStCB->stNextEP->osSchedTblMaxAdvance))
-            > (pStCfgRef->osSchedTblDuration))
+        if (((pStcb->SchedTblNextEP->SchedTblEPOffset) + (pStcb->SchedTblNextEP->SchedTblMaxAdvance)) > (schedTblCfgRef->SchedTblDuration))
         {
             /*nothing to do*/
         }
         else
         {
-            /* Deviatifon. */
-            pStCB->stDev =
-                (((pStCB->stDiff - pStCB->stAdjDevTotal) > pStCB->stNextEP->osSchedTblMaxAdvance)
-                     ? (pStCB->stNextEP->osSchedTblMaxAdvance)
-                     : (pStCB->stDiff - pStCB->stAdjDevTotal));
-
-            /* pStCB->stAdjDevTotal <= pStCB->stDiff. */
-            if ((pStCB->stDiff - pStCB->stAdjDevTotal) <= pStCfgRef->osSchedTblSync.osSchedTblExplicitPrecision)
-            {
-                /* Sync success. */
-                pStCB->stIsAdjust    = FALSE;
-                pStCB->stAdjDevTotal = 0u;
-                pStCB->stDiff        = 0u;
-                pStCB->stDev         = 0u;
-            }
-            else
-            {
-                /* stNextEP need adjust. */
-                pStCB->stIsAdjust = TRUE;
-                pStCB->stAdjDevTotal += pStCB->stDev;
-
-                /* Update delay of stNextEP. */
-                pStCB->stDelay += pStCB->stDev;
-            }
+            Os_SyncAdjustEpByAdd(pStcb, schedTblCfgRef);
         }
     }
     else /* Delay - Deviatifon. */
     {
+        /* Offset of pre EP. */
+        Os_TickType preEpOffset = ((0u == pStcb->SchedTblEpId) ? (0u) : (schedTblCfgRef->SchedTblEP[pStcb->SchedTblEpId - 1u].SchedTblEPOffset));
         /* OS436 */
-        if (((pStCB->stNextEP->osSchedTblEPOffset) - (pStCB->stNextEP->osSchedTblMaxRetard))
-            < ((osPreEpOffset) + (pstCounterCfg->osCounterMinCycle)))
+        if (((pStcb->SchedTblNextEP->SchedTblEPOffset) - (pStcb->SchedTblNextEP->SchedTblMaxRetard)) < ((preEpOffset) + (counterCfgRef->CounterMinCycle)))
         {
             /*nothing to do*/
         }
         else
         {
-            /* Deviatifon. */
-            pStCB->stDev =
-                (((pStCB->stDiff - pStCB->stAdjDevTotal) > pStCB->stNextEP->osSchedTblMaxRetard)
-                     ? (pStCB->stNextEP->osSchedTblMaxRetard)
-                     : (pStCB->stDiff - pStCB->stAdjDevTotal));
-
-            /* pStCB->stAdjDevTotal <= pStCB->stDiff. */
-            if ((pStCB->stDiff - pStCB->stAdjDevTotal) <= pStCfgRef->osSchedTblSync.osSchedTblExplicitPrecision)
-            {
-                /* Sync success. */
-                pStCB->stIsAdjust    = FALSE;
-                pStCB->stAdjDevTotal = 0u;
-                pStCB->stDiff        = 0u;
-                pStCB->stDev         = 0u;
-            }
-            else
-            {
-                /* stNextEP need adjust. */
-                pStCB->stIsAdjust = TRUE;
-                pStCB->stAdjDevTotal += pStCB->stDev;
-
-                /* Update delay of stNextEP. */
-                pStCB->stDelay -= pStCB->stDev;
-            }
+            Os_SyncAdjustEpBySub(pStcb, schedTblCfgRef);
         }
     }
 
@@ -888,151 +1155,121 @@ static void Os_StWorkEpSyncAdjust(
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
-#endif /* OS_SC2 == CFG_SC || OS_SC4 == CFG_SC */
+#endif
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <Os_WorkStRunningState.>
- * Service ID           <none>
- * Sync/Async           <none>
- * Reentrancy           <none>
- * param-eventId[in]    <counterCurval, pStNode, pStCfgRef, pstCounterCfg>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * CallByAPI            <Os_WorkSchedTbl>
- * REQ ID               <None>
+/**
+ * Os_WorkSchedTblRunningState.
  */
-/********************************************************************/
-static void Os_WorkStRunningState(
-
-    Os_STCBType* const pStNode,
-
-    const Os_SchedTblCfgType* pStCfgRef,
-    const Os_CounterCfgType*  pstCounterCfg)
+OS_LOCAL void Os_WorkSchedTblRunningState(
+    Os_STCBType *const pSchedTblNode,
+    const Os_SchedTblCfgType *schedTblCfgRef,
+    const Os_CounterCfgType *counterCfgRef)
 {
-    boolean osIsLastEp;
-
-    osIsLastEp = Os_WorkStEpProc(pStNode, pStCfgRef);
+    boolean lastEp = Os_WorkSchedTblEp(pSchedTblNode, schedTblCfgRef);
 
 /* Sync: adjust. */
 #if ((OS_SC2 == CFG_SC) || (OS_SC4 == CFG_SC))
-    if ((FALSE == pStNode->stIsStopAdjust) && (TRUE == pStNode->stIsAdjust))
+    if ((FALSE == pSchedTblNode->SchedTblIsStopAdjust) && (TRUE == pSchedTblNode->SchedTblIsAdjust))
     {
-        Os_StWorkEpSyncAdjust(pStNode, pStCfgRef, pstCounterCfg);
+        Os_WorkSyncAdjustEp(pSchedTblNode, schedTblCfgRef, counterCfgRef);
 
-        if (TRUE != pStNode->stIsAdjust)
+        if (TRUE != pSchedTblNode->SchedTblIsAdjust)
         {
-            pStNode->stState = SCHEDULETABLE_RUNNING_AND_SYNCHRONOUS;
+            pSchedTblNode->SchedTblState = SCHEDULETABLE_RUNNING_AND_SYNCHRONOUS;
         }
     }
+#else
+    UNUSED_PARAMETER(counterCfgRef);
 #endif
 
     /* Last EP. */
-    if (TRUE == osIsLastEp)
+    if (TRUE == lastEp)
     {
         /* Repeating. */
-        /* Note: in standard, from 7.3.2.4 && Figure 7.8, we conclude that a schedule table which can synchronous
-           explicitly might be repeating. But we can not conclude that explicit synchronous schedule table must be
-           repeating, because there is a next state in Figure7.5. */
-        if (TRUE == pStCfgRef->osSchedTblRepeating)
+        /* Note: in standard, from 7.3.2.4 && Figure 7.8, we conclude that a schedule table which can synchronous explicitly
+                 might be repeating. But we can not conclude that explicit synchronous schedule table must be repeating,
+                 because there is a next state in Figure7.5. */
+        if (TRUE == schedTblCfgRef->SchedTblRepeating)
         {
-            Os_WorkStRepeatProc(pStNode, pStCfgRef);
+            Os_WorkSchedTblRepeat(pSchedTblNode, schedTblCfgRef);
         }
         else
         {
             /* If has next schedule table, set state of schedule table to SCHEDULETABLE_RUNNING. */
-            if (OS_SCHEDTABLE_INVALID != pStNode->NextStID)
+            if (OS_SCHEDTABLE_INVALID != pSchedTblNode->NextSchedTblId) /* PRQA S 4342 */ /* VL_Os_4342 */
             {
                 /*SWS_Os_00505*/
-                if (pStNode->stState == SCHEDULETABLE_RUNNING_AND_SYNCHRONOUS)
+                if (pSchedTblNode->SchedTblState == SCHEDULETABLE_RUNNING_AND_SYNCHRONOUS)
                 {
-                    Os_STCB[pStNode->NextStID].stState = SCHEDULETABLE_RUNNING_AND_SYNCHRONOUS;
+                    Os_STCB[pSchedTblNode->NextSchedTblId]->SchedTblState = SCHEDULETABLE_RUNNING_AND_SYNCHRONOUS;
                 }
                 else
                 {
-                    Os_STCB[pStNode->NextStID].stState = SCHEDULETABLE_RUNNING;
+                    Os_STCB[pSchedTblNode->NextSchedTblId]->SchedTblState = SCHEDULETABLE_RUNNING;
                 }
             }
 
             /* Non-repeating, delete from list. */
-            Os_DelStNode(pStNode->stId);
-            Os_InitSchedTblCB(pStNode->stId);
+            Os_DelSchedTblNode(pSchedTblNode->SchedTblId);
+            Os_InitSchedTblCB(pSchedTblNode->SchedTblId);
         }
     }
     else
     {
-        Os_WorkStToNextEp(pStNode, pStCfgRef);
-
+        Os_WorkSchedTblToNextEp(pSchedTblNode, schedTblCfgRef);
         /* Re-sort by abs tick of next EP. */
-        Os_DelStNode(pStNode->stId);
-        Os_InsertSTNode(pStNode->stId);
+        Os_DelSchedTblNode(pSchedTblNode->SchedTblId);
+        Os_InsertSchedTblNode(pSchedTblNode->SchedTblId);
     }
 
-    UNUSED_PARAMETER(pstCounterCfg);
     return;
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
 
-/********************************************************************/
-/*
- * Brief                <The API will call after schedule table synchronization success>
- * Service ID           <none>
- * Sync/Async           <none>
- * Reentrancy           <none>
- * param-eventId[in]    <counterCurval, pStNode, pStCfgRef, pstCounterCfg>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * CallByAPI            <Os_WorkSchedTbl>
- * REQ ID               <None>
+/**
+ * The API will call after schedule table synchronization success
  */
-/********************************************************************/
 #if ((OS_SC2 == CFG_SC) || (OS_SC4 == CFG_SC))
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-static void Os_WorkStRunningSyncState(
-
-    Os_STCBType* const pStNode,
-
-    const Os_SchedTblCfgType* pStCfgRef)
+/* PRQA S 6030 ++ */ /* VL_MTR_Os_STMIF */
+OS_LOCAL void Os_WorkSchedTblRunningAndSyncState(
+    Os_STCBType *const pSchedTblNode,
+    const Os_SchedTblCfgType *schedTblCfgRef)
+/* PRQA S 6030 -- */
 {
-    boolean osIsLastEp;
-
-    osIsLastEp = Os_WorkStEpProc(pStNode, pStCfgRef);
-    if (TRUE == osIsLastEp)
+    boolean lastEp = Os_WorkSchedTblEp(pSchedTblNode, schedTblCfgRef);
+    if (TRUE == lastEp)
     {
-        if (TRUE == pStCfgRef->osSchedTblRepeating)
+        if (TRUE == schedTblCfgRef->SchedTblRepeating)
         {
-            Os_WorkStRepeatProc(pStNode, pStCfgRef);
+            Os_WorkSchedTblRepeat(pSchedTblNode, schedTblCfgRef);
         }
         else
         {
-            if (ST_SYNC_EXPLICIT == pStCfgRef->osSchedTblSync.osSchedTblSyncStrategy)
+            if (OS_ST_SYNC_EXPLICIT == schedTblCfgRef->SchedTblSync.SchedTblSyncStrategy)
             {
-                if (OS_SCHEDTABLE_INVALID != pStNode->NextStID)
+                if (OS_SCHEDTABLE_INVALID != pSchedTblNode->NextSchedTblId) /* PRQA S 4342 */ /* VL_Os_4342 */
                 {
                     /*SWS_Os_00505*/
-                    if (SCHEDULETABLE_RUNNING_AND_SYNCHRONOUS == pStNode->stState)
+                    if (SCHEDULETABLE_RUNNING_AND_SYNCHRONOUS == pSchedTblNode->SchedTblState)
                     {
-                        Os_STCB[pStNode->NextStID].stState = SCHEDULETABLE_RUNNING_AND_SYNCHRONOUS;
+                        Os_STCB[pSchedTblNode->NextSchedTblId]->SchedTblState = SCHEDULETABLE_RUNNING_AND_SYNCHRONOUS;
                     }
                     else
                     {
-                        Os_STCB[pStNode->NextStID].stState = SCHEDULETABLE_RUNNING;
+                        Os_STCB[pSchedTblNode->NextSchedTblId]->SchedTblState = SCHEDULETABLE_RUNNING;
                     }
                 }
             }
-            else if (ST_SYNC_IMPLICIT == pStCfgRef->osSchedTblSync.osSchedTblSyncStrategy)
+            else if (OS_ST_SYNC_IMPLICIT == schedTblCfgRef->SchedTblSync.SchedTblSyncStrategy)
             {
-                if (OS_SCHEDTABLE_INVALID != pStNode->NextStID)
+                if (OS_SCHEDTABLE_INVALID != pSchedTblNode->NextSchedTblId) /* PRQA S 4342 */ /* VL_Os_4342 */
                 {
-                    Os_STCB[pStNode->NextStID].stState = SCHEDULETABLE_RUNNING_AND_SYNCHRONOUS;
+                    Os_STCB[pSchedTblNode->NextSchedTblId]->SchedTblState = SCHEDULETABLE_RUNNING_AND_SYNCHRONOUS;
                 }
             }
             else
@@ -1040,66 +1277,49 @@ static void Os_WorkStRunningSyncState(
                 /* nothing to do. */
             }
             /* Non-repeating, delete from list. */
-            Os_DelStNode(pStNode->stId);
-            Os_InitSchedTblCB(pStNode->stId);
+            Os_DelSchedTblNode(pSchedTblNode->SchedTblId);
+            Os_InitSchedTblCB(pSchedTblNode->SchedTblId);
         }
     }
     else
     {
-        Os_WorkStToNextEp(pStNode, pStCfgRef);
-
+        Os_WorkSchedTblToNextEp(pSchedTblNode, schedTblCfgRef);
         /* Re-sort by abs tick of next EP. */
-        Os_DelStNode(pStNode->stId);
-        Os_InsertSTNode(pStNode->stId);
+        Os_DelSchedTblNode(pSchedTblNode->SchedTblId);
+        Os_InsertSchedTblNode(pSchedTblNode->SchedTblId);
     }
 
     return;
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
-#endif /* OS_SC2 == CFG_SC || OS_SC4 == CFG_SC */
+#endif
 
 /* ScheduleTable Sync. */
 #if ((OS_SC2 == CFG_SC) || (OS_SC4 == CFG_SC))
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <Sync ScheduleTable: Proc waitting state.>
- * Service ID           <None>
- * Sync/Async           <None>
- * Reentrancy           <Non Reentrant>
- * param-eventId[in]    <SyncVal, oscounterCurVal, pStCB, pStCfgRef, pCounterCfgType>
- * Param-Name[out]      <StatusType>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * CallByAPI            <SyncScheduleTable>
- * REQ ID               <None>
+/**
+ * Sync ScheduleTable: Proc waitting state.
  */
-/********************************************************************/
-static void Os_StWaittingStateProc(
-    Os_TickType osValue,
-    Os_TickType oscounterCurVal,
-
-    Os_STCBType* const pStCB,
-
-    const Os_SchedTblCfgType* pStCfgRef)
+OS_LOCAL void Os_SchedTblSyncInWaittingState(
+    Os_TickType syncVal,
+    Os_TickType counterCurVal,
+    Os_STCBType *const pStcb,
+    const Os_SchedTblCfgType *schedTblCfgRef)
 {
-    /* Save start Abs tick: Now + (Duration - value). */
-    pStCB->stStartAbsTick =
-        Os_CalcAbsTicks(oscounterCurVal, (pStCfgRef->osSchedTblDuration - osValue), pStCfgRef->osSchedTblCounterRef);
-
-    pStCB->stNextEpAbsTick = Os_CalcAbsTicks(
-        pStCB->stStartAbsTick,
-        pStCfgRef->osSchedTblEP[0].osSchedTblEPOffset,
-        pStCfgRef->osSchedTblCounterRef);
-
+    /* Save start Abs tick: Now + (Duration - syncVal). */
+    pStcb->SchedTblStartAbsTick = Os_CalcAbsTicks(counterCurVal,
+                                                  (schedTblCfgRef->SchedTblDuration - syncVal),
+                                                  schedTblCfgRef->SchedTblCounterRef);
+    pStcb->SchedTblNextEpAbsTick = Os_CalcAbsTicks(pStcb->SchedTblStartAbsTick,
+                                                   schedTblCfgRef->SchedTblEP[0].SchedTblEPOffset,
+                                                   schedTblCfgRef->SchedTblCounterRef);
     /* Set state to SCHEDULETABLE_RUNNING_AND_SYNCHRONOUS. */
-    pStCB->stState = SCHEDULETABLE_RUNNING_AND_SYNCHRONOUS;
+    pStcb->SchedTblState = SCHEDULETABLE_RUNNING_AND_SYNCHRONOUS;
 
     /* Insert to list. */
-    Os_InsertSTNode(pStCB->stId);
+    Os_InsertSchedTblNode(pStcb->SchedTblId);
 
     return;
 }
@@ -1108,59 +1328,45 @@ static void Os_StWaittingStateProc(
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <The API can get difference value when schedule table need Sync>
- *
- * Service ID           <None>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * param[in]            <SyncVal, oscounterCurVal, pStCB, pStCfgRef>
- * param[out]           <None>
- * param[in/out]        <None>
- * return               <None>
- * CallByAPI            <Os_StRunningStateProc and so on>
- * REQ ID               <None>
+/**
+ * The API can get difference value when schedule table need Sync
  */
-/******************************************************************************/
-static void Os_StSyncGetDiffVal(
-    Os_TickType SyncVal,
-    Os_TickType oscounterCurVal,
-
-    Os_STCBType* const pStCB,
-
-    const Os_SchedTblCfgType* pStCfgRef)
+OS_LOCAL void Os_SchedTblSyncGetDiffVal(
+    Os_TickType syncVal,
+    Os_TickType counterCurVal,
+    Os_STCBType *const pStcb,
+    const Os_SchedTblCfgType *schedTblCfgRef)
 {
-    Os_TickType osDiff;
-    Os_TickType osPosOnTbl;
-
+    Os_TickType diffVal = 0u;
     /* Position on Tbl. */
-    osPosOnTbl = Os_GetDistance(oscounterCurVal, pStCB->stNextEpAbsTick, pStCfgRef->osSchedTblCounterRef);
+    Os_TickType tickOnSchedTbl = Os_GetDistance(counterCurVal,
+                                                pStcb->SchedTblNextEpAbsTick,
+                                                schedTblCfgRef->SchedTblCounterRef);
 
-    if (pStCB->stNextEP->osSchedTblEPOffset >= osPosOnTbl)
+    if (pStcb->SchedTblNextEP->SchedTblEPOffset >= tickOnSchedTbl)
     {
-        osPosOnTbl = pStCB->stNextEP->osSchedTblEPOffset - osPosOnTbl;
+        tickOnSchedTbl = pStcb->SchedTblNextEP->SchedTblEPOffset - tickOnSchedTbl;
     }
     else
     {
-        osPosOnTbl = (pStCB->stNextEP->osSchedTblEPOffset - osPosOnTbl) + pStCfgRef->osSchedTblDuration - 1u;
+        tickOnSchedTbl = (pStcb->SchedTblNextEP->SchedTblEPOffset - tickOnSchedTbl) + schedTblCfgRef->SchedTblDuration - 1u; /* PRQA S 2911 */ /* VL_Os_2911 */
     }
 
     /* Deviation: added. */
-    if (osPosOnTbl >= SyncVal)
+    if (tickOnSchedTbl >= syncVal)
     {
-        osDiff = osPosOnTbl - SyncVal;
+        diffVal = tickOnSchedTbl - syncVal;
 
-        pStCB->stIsAdjAdd = TRUE;
+        pStcb->SchedTblIsAdjustAdd = TRUE;
     }
     else /* Deviation: subtracted. */
     {
-        osDiff = SyncVal - osPosOnTbl;
+        diffVal = syncVal - tickOnSchedTbl;
 
-        pStCB->stIsAdjAdd = FALSE;
+        pStcb->SchedTblIsAdjustAdd = FALSE;
     }
 
-    pStCB->stDiff = osDiff;
+    pStcb->SchedTblDiff = diffVal;
 
     return;
 }
@@ -1169,49 +1375,35 @@ static void Os_StSyncGetDiffVal(
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <Sync ScheduleTable: Proc running state.>
- * Service ID           <None>
- * Sync/Async           <None>
- * Reentrancy           <Non Reentrant>
- * param-eventId[in]    <SyncVal, oscounterCurVal, pStCB, pStCfgRef, pCounterCfgType>
- * Param-Name[out]      <StatusType>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * CallByAPI            <SyncScheduleTable>
- * REQ ID               <None>
+/**
+ * Sync ScheduleTable: Proc running state.
  */
-/********************************************************************/
-static void Os_StRunningStateProc(
-    Os_TickType SyncVal,
-    Os_TickType oscounterCurVal,
-
-    Os_STCBType* const pStCB,
-
-    const Os_SchedTblCfgType* pStCfgRef)
+OS_LOCAL void Os_SchedTblSyncInRunningState(
+    Os_TickType syncVal,
+    Os_TickType counterCurVal,
+    Os_STCBType *const pStcb,
+    const Os_SchedTblCfgType *schedTblCfgRef)
 {
     /* Get diff value. */
-    Os_StSyncGetDiffVal(SyncVal, oscounterCurVal, pStCB, pStCfgRef);
+    Os_SchedTblSyncGetDiffVal(syncVal, counterCurVal, pStcb, schedTblCfgRef);
 
     /* No need sync. */
-    if (pStCB->stDiff <= pStCfgRef->osSchedTblSync.osSchedTblExplicitPrecision)
+    if (pStcb->SchedTblDiff <= schedTblCfgRef->SchedTblSync.SchedTblExplicitPrecision)
     {
-        pStCB->stState    = SCHEDULETABLE_RUNNING_AND_SYNCHRONOUS;
-        pStCB->stIsAdjust = FALSE;
+        pStcb->SchedTblState = SCHEDULETABLE_RUNNING_AND_SYNCHRONOUS;
+        pStcb->SchedTblIsAdjust = FALSE;
     }
     else
     {
         /* Need sync. */
-        pStCB->stIsAdjust = TRUE;
+        pStcb->SchedTblIsAdjust = TRUE;
 
         /* OS362 */
-        pStCB->stIsStopAdjust = FALSE;
+        pStcb->SchedTblIsStopAdjust = FALSE;
 
         /* Re-sort. */
-        Os_DelStNode(pStCB->stId);
-        Os_InsertSTNode(pStCB->stId);
+        Os_DelSchedTblNode(pStcb->SchedTblId);
+        Os_InsertSchedTblNode(pStcb->SchedTblId);
     }
 
     return;
@@ -1221,149 +1413,131 @@ static void Os_StRunningStateProc(
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <Sync ScheduleTable: Proc running and sync state.>
- * Service ID           <None>
- * Sync/Async           <None>
- * Reentrancy           <Non Reentrant>
- * param-eventId[in]    <SyncVal, oscounterCurVal, pStCB, pStCfgRef, pCounterCfgType>
- * Param-Name[out]      <StatusType>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * CallByAPI            <SyncScheduleTable>
- * REQ ID               <None>
+/**
+ * Sync ScheduleTable: Proc running and sync state.
  */
-/********************************************************************/
-static void Os_StRunningSyncStateProc(
-    Os_TickType SyncVal,
-    Os_TickType oscounterCurVal,
-
-    Os_STCBType* const pStCB,
-
-    const Os_SchedTblCfgType* pStCfgRef)
+OS_LOCAL void Os_SchedTblSyncInRunningAndSyncState(
+    Os_TickType syncVal,
+    Os_TickType counterCurVal,
+    Os_STCBType *const pStcb,
+    const Os_SchedTblCfgType *schedTblCfgRef)
 {
     /* Get diff value. */
-    Os_StSyncGetDiffVal(SyncVal, oscounterCurVal, pStCB, pStCfgRef);
+    Os_SchedTblSyncGetDiffVal(syncVal, counterCurVal, pStcb, schedTblCfgRef);
 
     /* No need sync. */
-    if (pStCB->stDiff <= pStCfgRef->osSchedTblSync.osSchedTblExplicitPrecision)
+    if (pStcb->SchedTblDiff <= schedTblCfgRef->SchedTblSync.SchedTblExplicitPrecision)
     {
-        pStCB->stIsAdjust = FALSE;
+        pStcb->SchedTblIsAdjust = FALSE;
     }
     else
     {
         /* Need sync. */
-        pStCB->stIsAdjust = TRUE;
-
+        pStcb->SchedTblIsAdjust = TRUE;
         /* OS362 */
-        pStCB->stIsStopAdjust = FALSE;
-
-        pStCB->stState = SCHEDULETABLE_RUNNING;
+        pStcb->SchedTblIsStopAdjust = FALSE;
+        pStcb->SchedTblState = SCHEDULETABLE_RUNNING;
 
         /* Re-sort. */
-        Os_DelStNode(pStCB->stId);
-        Os_InsertSTNode(pStCB->stId);
+        Os_DelSchedTblNode(pStcb->SchedTblId);
+        Os_InsertSchedTblNode(pStcb->SchedTblId);
     }
 
     return;
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
-#endif /* OS_SC2 == CFG_SC || OS_SC4 == CFG_SC */
-
-#define OS_START_SEC_CODE
-#include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <Os_WorkSchedTbl.>
- * Service ID           <none>
- * Sync/Async           <none>
- * Reentrancy           <none>
- * param-eventId[in]    <CounterID>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * CallByAPI            <Os_IncrementHardCounter and so on>
- * REQ ID               <None>
- */
-/********************************************************************/
-void Os_WorkSchedTbl(Os_CounterType CounterID)
-{
-    Os_TickType counterCurval;
-
-    Os_STCBType*      pstListHead;
-    const Os_CCBType* pCcb;
-
-    const Os_SchedTblCfgType* pStCfgRef;
-    const Os_CounterCfgType*  pstCounterCfg;
-    OS_ARCH_DECLARE_CRITICAL();
-
-#if (CFG_OSAPPLICATION_MAX > 0U)
-    Os_ApplicationType bakappID;
 #endif
 
-    OS_ARCH_ENTRY_CRITICAL();
-    pCcb = &Os_CCB[CounterID];
-    if (NULL_PTR == pCcb->counterStListHead)
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * Process each EP.
+ */
+/* PRQA S 3673 ++ */ /* VL_QAC_3673 */
+OS_LOCAL void Os_SchedTblEpProc(
+    Os_SCBType *pScb,
+    Os_STCBType *pSchedTblListHead,
+    const Os_CounterCfgType *counterCfgRef)
+/* PRQA S 3673 -- */
+{
+/* Update  SysRunningAppId according to SchedID. */
+#if (CFG_OSAPPLICATION_MAX > 0U)
+    pScb->SysRunningAppId = Os_GetObjectAppID(OS_OBJECT_SCHEDULETABLE, (AppObjectId)pSchedTblListHead->SchedTblId);
+#endif
+
+    const Os_SchedTblCfgType *schedTblCfgRef = &Os_SchedTblCfg[pSchedTblListHead->SchedTblId];
+
+    /* EP process by different state. */
+    switch (pSchedTblListHead->SchedTblState)
+    {
+    case SCHEDULETABLE_RUNNING:
+        Os_WorkSchedTblRunningState(pSchedTblListHead, schedTblCfgRef, counterCfgRef);
+        break;
+
+#if ((OS_SC2 == CFG_SC) || (OS_SC4 == CFG_SC))
+    case SCHEDULETABLE_RUNNING_AND_SYNCHRONOUS:
+        Os_WorkSchedTblRunningAndSyncState(pSchedTblListHead, schedTblCfgRef);
+        break;
+#endif
+
+    /*add comments to pass QAC.*/
+    default:
+        /* Nothing to do. */
+        break;
+    }
+
+    UNUSED_PARAMETER(pScb);
+    return;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * Os_WorkSchedTbl.
+ */
+void Os_WorkSchedTbl(Os_CounterType counterId) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
+{
+    OS_HAL_DECLARE_CRITICAL();
+    OS_HAL_ENTRY_CRITICAL();
+
+    Os_CCBType *pCcb = Os_CCB[counterId]; /* PRQA S 3678 */ /* VL_Os_3678 */
+    if (NULL_PTR == pCcb->CounterStListHead)
     {
         /*nothing to do*/
-
-        OS_ARCH_EXIT_CRITICAL();
+        OS_HAL_EXIT_CRITICAL();
     }
     else
     {
-        pstListHead   = pCcb->counterStListHead;
-        pstCounterCfg = &Os_CounterCfg[CounterID];
-        counterCurval = Os_CCB[CounterID].counterCurVal;
+        Os_SCBType *pScb = Os_GetCurrentContext();
+        Os_STCBType *pSchedTblListHead = pCcb->CounterStListHead;
+        const Os_CounterCfgType *counterCfgRef = &Os_CounterCfg[counterId];
 
 /* Process each SchedTbl(EP) which is reach the offset. */
 #if (CFG_OSAPPLICATION_MAX > 0U)
-        bakappID = Os_SCB.sysRunningAppID;
+        Os_ApplicationType bakAppId = pScb->SysRunningAppId;
 #endif
 
         /* More then one EP may have same tick value. */
-        while (NULL_PTR != pstListHead)
+        while (NULL_PTR != pSchedTblListHead)
         {
-            if (Os_GetDistance(pstListHead->stNextEpAbsTick, counterCurval, CounterID)
-                > pstCounterCfg->osCounterMaxAllowedValue)
+            if (Os_GetDistance(pSchedTblListHead->SchedTblNextEpAbsTick,
+                               pCcb->CounterCurVal,
+                               counterId) > counterCfgRef->CounterMaxAllowedValue)
             {
                 break;
             }
-            pStCfgRef = &Os_SchedTblCfg[pstListHead->stId];
-
-#if (CFG_OSAPPLICATION_MAX > 0U)
-            Os_SCB.sysRunningAppID = Os_ObjectAppCfg[OBJECT_SCHEDULETABLE][pstListHead->stId].hostApp;
-#endif
-
-            /* EP process by different state. */
-            switch (pstListHead->stState)
-            {
-            case SCHEDULETABLE_RUNNING:
-                Os_WorkStRunningState(pstListHead, pStCfgRef, pstCounterCfg);
-                break;
-
-#if ((OS_SC2 == CFG_SC) || (OS_SC4 == CFG_SC))
-            case SCHEDULETABLE_RUNNING_AND_SYNCHRONOUS:
-                Os_WorkStRunningSyncState(pstListHead, pStCfgRef);
-                break;
-#endif
-
-            /*add comments to pass QAC.*/
-            default:
-                /* Nothing to do. */
-                break;
-            }
-
-            pstListHead = pCcb->counterStListHead;
+            /* Process each EP */
+            Os_SchedTblEpProc(pScb, pSchedTblListHead, counterCfgRef);
+            /* Update ST List head */
+            pSchedTblListHead = pCcb->CounterStListHead;
         }
-
-        OS_ARCH_EXIT_CRITICAL();
+        OS_HAL_EXIT_CRITICAL();
 
 #if (CFG_OSAPPLICATION_MAX > 0U)
-        Os_SCB.sysRunningAppID = bakappID;
+        pScb->SysRunningAppId = bakAppId;
 #endif
     }
 
@@ -1374,123 +1548,94 @@ void Os_WorkSchedTbl(Os_CounterType CounterID)
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <Internal implementation of OS service:GetScheduleTableStatus>
- * Service ID           <None>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Yes>
- * param-eventId[in]    <ScheduleTableID, ScheduleStatus>
- * Param-Name[out]      <StatusType>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * REQ ID               <None>
+/**
+ * Internal implementation of OS service:GetScheduleTableStatus
  */
-/********************************************************************/
-void Os_GetScheduleTableStatus(ScheduleTableType ScheduleTableID, ScheduleTableStatusRefType ScheduleStatus)
+OS_LOCAL void Os_GetScheduleTableStatus(
+    ScheduleTableType schedTblId,
+    ScheduleTableStatusRefType schedTblStatus)
 {
-    const Os_STCBType* pStCB;
-
-#if (OS_AUTOSAR_CORES > 1)
-    ScheduleTableID = Os_GetObjLocalId(ScheduleTableID);
-#endif
-
-    pStCB = &Os_STCB[ScheduleTableID];
-    /* Return state of ScheduleTableID. */
-    *ScheduleStatus = pStCB->stState;
+    Os_STCBType *pStcb = Os_STCB[schedTblId]; /* PRQA S 3678 */ /* VL_Os_3678 */
+    /* Return state of schedTblId. */
+    *schedTblStatus = pStcb->SchedTblState;
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <Internal implementation of OS service:StartScheduleTableRel.>
- * Service ID           <None>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Non Reentrant>
- * param-eventId[in]    <ScheduleTableID, Offset>
- * Param-Name[out]      <StatusType>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * REQ ID               <None>
+/**
+ * Status check for the relative start of ScheduleTable.
  */
-/********************************************************************/
-StatusType Os_StartScheduleTableRel(ScheduleTableType ScheduleTableID, TickType Offset)
+OS_LOCAL StatusType Os_StartRelStatusCheck(
+    ScheduleTableType schedTblId,
+    TickType offset)
 {
-    Os_TickType               osCounterCurVal;
-    Os_TickType               osStartAbsTick;
-    const Os_SchedTblCfgType* pStCfgRef;
-    const Os_CounterCfgType*  pCounterCfgRef;
-
-    Os_STCBType* pStCB = NULL_PTR;
-
     StatusType err = E_OK;
-
-#if (OS_STATUS_EXTENDED == CFG_STATUS)
-    Os_TickType stInitOffset;
-#endif
-
-    OS_ARCH_DECLARE_CRITICAL();
-
-#if (OS_AUTOSAR_CORES > 1)
-
-    ScheduleTableID = Os_GetObjLocalId(ScheduleTableID);
-
-#endif
-
-    pStCfgRef      = &Os_SchedTblCfg[ScheduleTableID];
-    pCounterCfgRef = &Os_CounterCfg[pStCfgRef->osSchedTblCounterRef];
+    const Os_SchedTblCfgType *schedTblCfgRef = &Os_SchedTblCfg[schedTblId];
 
 /* OS452 */
 #if ((OS_SC2 == CFG_SC) || (OS_SC4 == CFG_SC))
-    if (ST_SYNC_IMPLICIT == pStCfgRef->osSchedTblSync.osSchedTblSyncStrategy)
+    if (OS_ST_SYNC_IMPLICIT == schedTblCfgRef->SchedTblSync.SchedTblSyncStrategy)
     {
         err = E_OS_ID;
     }
     else
-#endif /* OS_SC2 == CFG_SC || OS_SC4 == CFG_SC */
+#endif
     {
 /* OS332 + OS276 */
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
-        stInitOffset = pStCfgRef->osSchedTblEP[0].osSchedTblEPOffset;
-
-        if ((Offset > (pCounterCfgRef->osCounterMaxAllowedValue - stInitOffset)) || (0u == Offset))
+        if ((offset > (Os_CounterCfg[schedTblCfgRef->SchedTblCounterRef].CounterMaxAllowedValue -
+                       schedTblCfgRef->SchedTblEP[0].SchedTblEPOffset)) ||
+            (0u == offset))
         {
             err = E_OS_VALUE;
         }
         else
-#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
+#endif
         {
-            pStCB = &Os_STCB[ScheduleTableID];
-
             /* OS277 */
-            if (SCHEDULETABLE_STOPPED != pStCB->stState)
+            if (SCHEDULETABLE_STOPPED != Os_STCB[schedTblId]->SchedTblState)
             {
                 err = E_OS_STATE;
             }
         }
     }
 
+    UNUSED_PARAMETER(offset);
+    UNUSED_PARAMETER(schedTblCfgRef);
+    return err;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * Internal implementation of OS service:StartScheduleTableRel.
+ */
+OS_LOCAL StatusType Os_StartScheduleTableRel(
+    ScheduleTableType schedTblId,
+    TickType offset)
+{
+    StatusType err = Os_StartRelStatusCheck(schedTblId, offset);
+
     if ((StatusType)E_OK == err)
     {
-        OS_ARCH_ENTRY_CRITICAL();
+        const Os_SchedTblCfgType *schedTblCfgRef = &Os_SchedTblCfg[schedTblId];
 
-        /* Timer type. */
-        osCounterCurVal = Os_CCB[pStCfgRef->osSchedTblCounterRef].counterCurVal;
-
+        OS_HAL_DECLARE_CRITICAL();
+        OS_HAL_ENTRY_CRITICAL();
         /* Save abs start tick. */
-        osStartAbsTick = Os_CalcAbsTicks(osCounterCurVal, Offset, pStCfgRef->osSchedTblCounterRef);
+        Os_TickType startAbsTick = Os_CalcAbsTicks(Os_CCB[schedTblCfgRef->SchedTblCounterRef]->CounterCurVal,
+                                                   offset,
+                                                   schedTblCfgRef->SchedTblCounterRef);
 
-        Os_StInnerStart(osStartAbsTick, pStCB, pStCfgRef);
+        Os_SchedTblInnerStart(startAbsTick, Os_STCB[schedTblId], schedTblCfgRef);
 
         /* Insert ScheduleTable to list. */
-        Os_InsertSTNode(ScheduleTableID);
-
-        OS_ARCH_EXIT_CRITICAL();
+        Os_InsertSchedTblNode(schedTblId);
+        OS_HAL_EXIT_CRITICAL();
     }
 
     return err;
@@ -1500,69 +1645,45 @@ StatusType Os_StartScheduleTableRel(ScheduleTableType ScheduleTableID, TickType 
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <Internal implementation of OS service:StartScheduleTableAbs.>
- * Service ID           <None>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Non Reentrant>
- * param-eventId[in]    <ScheduleTableID, Start>
- * Param-Name[out]      <StatusType>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * REQ ID               <None>
+/**
+ * Internal implementation of OS service:StartScheduleTableAbs.
  */
-/********************************************************************/
-StatusType Os_StartScheduleTableAbs(ScheduleTableType ScheduleTableID, TickType Start)
+OS_LOCAL StatusType Os_StartScheduleTableAbs(
+    ScheduleTableType schedTblId,
+    TickType start)
 {
-    const Os_SchedTblCfgType* pStCfgRef;
-    const Os_CounterCfgType*  pCounterCfgRef;
-
-    Os_STCBType* pStCB;
-
     StatusType err = E_OK;
-
-    OS_ARCH_DECLARE_CRITICAL();
-
-#if (OS_AUTOSAR_CORES > 1)
-
-    ScheduleTableID = Os_GetObjLocalId(ScheduleTableID);
-
-#endif
-
-    /* OS348 */
-    pStCfgRef      = &Os_SchedTblCfg[ScheduleTableID];
-    pCounterCfgRef = &Os_CounterCfg[pStCfgRef->osSchedTblCounterRef];
+    Os_STCBType *pStcb = NULL_PTR;
+    const Os_SchedTblCfgType *schedTblCfgRef = &Os_SchedTblCfg[schedTblId];
 
 /* OS349 */
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
-    if (Start > pCounterCfgRef->osCounterMaxAllowedValue)
+    if (start > Os_CounterCfg[schedTblCfgRef->SchedTblCounterRef].CounterMaxAllowedValue)
     {
         err = E_OS_VALUE;
     }
     else
-#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
+#endif
     {
-        pStCB = &Os_STCB[ScheduleTableID];
+        pStcb = Os_STCB[schedTblId];
 
         /* OS350 */
-        if (SCHEDULETABLE_STOPPED != pStCB->stState)
+        if (SCHEDULETABLE_STOPPED != pStcb->SchedTblState)
         {
             err = E_OS_STATE;
         }
     }
+
     if ((StatusType)E_OK == err)
     {
-        OS_ARCH_ENTRY_CRITICAL();
-
+        OS_HAL_DECLARE_CRITICAL();
+        OS_HAL_ENTRY_CRITICAL();
         /* Save abs start tick. */
-        Os_StInnerStart(Start, pStCB, pStCfgRef);
+        Os_SchedTblInnerStart(start, pStcb, schedTblCfgRef);
 
         /* Insert ScheduleTable to list. */
-        Os_InsertSTNode(ScheduleTableID);
-
-        OS_ARCH_EXIT_CRITICAL();
+        Os_InsertSchedTblNode(schedTblId);
+        OS_HAL_EXIT_CRITICAL();
     }
 
     return err;
@@ -1572,67 +1693,44 @@ StatusType Os_StartScheduleTableAbs(ScheduleTableType ScheduleTableID, TickType 
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <Internal implementation of OS service:StopScheduleTable.>
- * Service ID           <None>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Non Reentrant>
- * param-eventId[in]    <ScheduleTableID, Start>
- * Param-Name[out]      <StatusType>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * REQ ID               <None>
+/**
+ * Internal implementation of OS service:StopScheduleTable.
  */
-/********************************************************************/
-StatusType Os_StopScheduleTable(ScheduleTableType ScheduleTableID)
+StatusType Os_StopScheduleTable(ScheduleTableType schedTblId) /* PRQA S 1505 */ /* VL_Os_1505 */
 {
-    const Os_STCBType* pStCB;
-
     StatusType err = E_OK;
-
-    OS_ARCH_DECLARE_CRITICAL();
-
-#if (OS_AUTOSAR_CORES > 1)
-
-    ScheduleTableID = Os_GetObjLocalId(ScheduleTableID);
-
-#endif
-
-    pStCB = &Os_STCB[ScheduleTableID];
+    Os_STCBType *pStcb = Os_STCB[schedTblId]; /* PRQA S 3678 */ /* VL_Os_3678 */
 
     /* OS280 */
-    if (SCHEDULETABLE_STOPPED == pStCB->stState)
+    if (SCHEDULETABLE_STOPPED == pStcb->SchedTblState)
     {
         err = E_OS_NOFUNC;
     }
 
     if ((StatusType)E_OK == err)
     {
-        OS_ARCH_ENTRY_CRITICAL();
-
-        /* OS453: Delete next-ScheduleTable releted by ScheduleTableID. */
-        if (OS_SCHEDTABLE_INVALID != pStCB->NextStID)
+        OS_HAL_DECLARE_CRITICAL();
+        OS_HAL_ENTRY_CRITICAL();
+        /* OS453: Delete next-ScheduleTable releted by schedTblId. */
+        if (OS_SCHEDTABLE_INVALID != pStcb->NextSchedTblId) /* PRQA S 4342 */ /* VL_Os_4342 */
         {
-            Os_DelStNode(pStCB->NextStID);
-            Os_InitSchedTblCB(pStCB->NextStID);
+            Os_DelSchedTblNode(pStcb->NextSchedTblId);
+            Os_InitSchedTblCB(pStcb->NextSchedTblId);
         }
 
         /* If state is ST_STATE_NEXT, prev-st should be cared. */
-        if (OS_SCHEDTABLE_INVALID != pStCB->PrevStID)
+        if (OS_SCHEDTABLE_INVALID != pStcb->PrevSchedTblId) /* PRQA S 4342 */ /* VL_Os_4342 */
         {
-            Os_STCB[pStCB->PrevStID].NextStID = OS_SCHEDTABLE_INVALID;
+            Os_STCB[pStcb->PrevSchedTblId]->NextSchedTblId = OS_SCHEDTABLE_INVALID; /* PRQA S 4342 */ /* VL_Os_4342 */
         }
 
         /* Delete node from list. */
-        Os_DelStNode(ScheduleTableID);
+        Os_DelSchedTblNode(schedTblId);
 
         /* Re-init STCB. Note: in function Os_InitSchedTblCB,
             state will be set to ST_STATE_STOPPED. */
-        Os_InitSchedTblCB(ScheduleTableID);
-
-        OS_ARCH_EXIT_CRITICAL();
+        Os_InitSchedTblCB(schedTblId);
+        OS_HAL_EXIT_CRITICAL();
     }
 
     return err;
@@ -1642,70 +1740,49 @@ StatusType Os_StopScheduleTable(ScheduleTableType ScheduleTableID)
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <Internal implementation of OS service:NextScheduleTable.>
- * Service ID           <None>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Non Reentrant>
- * param-eventId[in]    <ScheduleTableID_From, ScheduleTableID_To>
- * Param-Name[out]      <StatusType>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * REQ ID               <None>
+/**
+ * Internal implementation of OS service:NextScheduleTable.
  */
-/********************************************************************/
-static void Os_NextScheduleTable(ScheduleTableType ScheduleTableID_From, ScheduleTableType ScheduleTableID_To)
+OS_LOCAL void Os_NextScheduleTable(
+    ScheduleTableType schedTblIdFrom,
+    ScheduleTableType schedTblIdTo)
 {
-    Os_STCBType* pStFromCB;
-    Os_STCBType* pStToCB;
+    Os_STCBType *pStcbFrom = Os_STCB[schedTblIdFrom];
+    Os_STCBType *pStcbTo = Os_STCB[schedTblIdTo];
+    const Os_SchedTblCfgType *schedTblFromCfgRef = &Os_SchedTblCfg[schedTblIdFrom];
+    const Os_SchedTblCfgType *schedTblToCfgRef = &Os_SchedTblCfg[schedTblIdTo];
 
-    const Os_SchedTblCfgType* pStFromCfgRef;
-    const Os_SchedTblCfgType* pStToCfgRef;
-
-    OS_ARCH_DECLARE_CRITICAL();
-
-    pStFromCfgRef = &Os_SchedTblCfg[ScheduleTableID_From];
-    pStToCfgRef   = &Os_SchedTblCfg[ScheduleTableID_To];
-
-    pStFromCB = &Os_STCB[ScheduleTableID_From];
-    pStToCB   = &Os_STCB[ScheduleTableID_To];
-
-    OS_ARCH_ENTRY_CRITICAL();
+    OS_HAL_DECLARE_CRITICAL();
+    OS_HAL_ENTRY_CRITICAL();
 
     /* OS284 */
-    pStToCB->stStartAbsTick = Os_CalcAbsTicks(
-        pStFromCB->stStartAbsTick,
-        pStFromCfgRef->osSchedTblDuration,
-        pStFromCfgRef->osSchedTblCounterRef);
-
-    pStToCB->stNextEpAbsTick = Os_CalcAbsTicks(
-        pStToCB->stStartAbsTick,
-        pStToCfgRef->osSchedTblEP[0].osSchedTblEPOffset,
-        pStToCfgRef->osSchedTblCounterRef);
-
-    pStToCB->stState     = SCHEDULETABLE_NEXT;
-    pStToCB->stIsStarted = TRUE;
+    pStcbTo->SchedTblStartAbsTick = Os_CalcAbsTicks(pStcbFrom->SchedTblStartAbsTick,
+                                                    schedTblFromCfgRef->SchedTblDuration,
+                                                    schedTblFromCfgRef->SchedTblCounterRef);
+    pStcbTo->SchedTblNextEpAbsTick = Os_CalcAbsTicks(pStcbTo->SchedTblStartAbsTick,
+                                                     schedTblToCfgRef->SchedTblEP[0].SchedTblEPOffset,
+                                                     schedTblToCfgRef->SchedTblCounterRef);
+    pStcbTo->SchedTblState = SCHEDULETABLE_NEXT;
+    pStcbTo->SchedTblIsStarted = TRUE;
 
     /* OS324 */
-    if (OS_SCHEDTABLE_INVALID != pStFromCB->NextStID)
+    if (OS_SCHEDTABLE_INVALID != pStcbFrom->NextSchedTblId) /* PRQA S 4342 */ /* VL_Os_4342 */
     {
-        Os_DelStNode(pStFromCB->NextStID);
-        Os_InitSchedTblCB(pStFromCB->NextStID);
+        Os_DelSchedTblNode(pStcbFrom->NextSchedTblId);
+        Os_InitSchedTblCB(pStcbFrom->NextSchedTblId);
     }
 
-    pStFromCB->NextStID = ScheduleTableID_To;
-    pStToCB->PrevStID   = ScheduleTableID_From;
+    pStcbFrom->NextSchedTblId = schedTblIdTo;
+    pStcbTo->PrevSchedTblId = schedTblIdFrom;
 
     /* OS284: Insert to list. */
-    Os_InsertSTNode(ScheduleTableID_To);
+    Os_InsertSchedTblNode(schedTblIdTo);
 
     /* OS363: Do nothing here. */
 
     /* OS453: in StopScheduleTable. */
 
-    OS_ARCH_EXIT_CRITICAL();
+    OS_HAL_EXIT_CRITICAL();
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
@@ -1713,75 +1790,43 @@ static void Os_NextScheduleTable(ScheduleTableType ScheduleTableID_From, Schedul
 #if ((OS_SC2 == CFG_SC) || (OS_SC4 == CFG_SC))
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <Internal implementation of OS service:StartScheduleTableSynchron.>
- * Service ID           <None>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Non Reentrant>
- * param-eventId[in]    <ScheduleTableID>
- * Param-Name[out]      <StatusType>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * REQ ID               <None>
+/**
+ * Internal implementation of OS service:StartScheduleTableSynchron.
  */
-/********************************************************************/
-static void Os_StartScheduleTableSynchron(ScheduleTableType ScheduleTableID)
+OS_LOCAL void Os_StartScheduleTableSynchron(
+    ScheduleTableType schedTblId)
 {
-    Os_STCBType* pStCB;
+    Os_STCBType *pStcb = Os_STCB[schedTblId];
 
-    pStCB = &Os_STCB[ScheduleTableID];
-
-    OS_ARCH_DECLARE_CRITICAL();
-
-    OS_ARCH_ENTRY_CRITICAL();
-
+    OS_HAL_DECLARE_CRITICAL();
+    OS_HAL_ENTRY_CRITICAL();
     /* OS389 */
-    pStCB->stState = SCHEDULETABLE_WAITING;
-
-    OS_ARCH_EXIT_CRITICAL();
+    pStcb->SchedTblState = SCHEDULETABLE_WAITING;
+    OS_HAL_EXIT_CRITICAL();
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <Internal implementation of OS service:SyncScheduleTable.>
- * Service ID           <None>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Yes>
- * param-eventId[in]    <ScheduleTableID, value>
- * Param-Name[out]      <StatusType>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * REQ ID               <None>
+/**
+ * Internal implementation of OS service:SyncScheduleTable.
  */
-/********************************************************************/
-static StatusType Os_SyncScheduleTable(ScheduleTableType ScheduleTableID, TickType value)
+OS_LOCAL StatusType Os_SyncScheduleTable(
+    ScheduleTableType schedTblId,
+    TickType value)
 {
-    Os_TickType               counterCurval;
-    const Os_SchedTblCfgType* pStCfgRef;
-
-    Os_STCBType* pStCB;
-
     StatusType err = E_OK;
+    Os_STCBType *pStcb = Os_STCB[schedTblId];
+    const Os_SchedTblCfgType *schedTblCfgRef = &Os_SchedTblCfg[schedTblId];
 
-    OS_ARCH_DECLARE_CRITICAL();
-
-    pStCfgRef = &Os_SchedTblCfg[ScheduleTableID];
-    pStCB     = &Os_STCB[ScheduleTableID];
-
-    OS_ARCH_ENTRY_CRITICAL();
-
+    OS_HAL_DECLARE_CRITICAL();
+    OS_HAL_ENTRY_CRITICAL();
     /* Get counterCB. */
-    counterCurval = Os_CCB[pStCfgRef->osSchedTblCounterRef].counterCurVal;
+    Os_TickType counterCurVal = Os_CCB[schedTblCfgRef->SchedTblCounterRef]->CounterCurVal;
 
     /* Proc by different state. */
-    switch (pStCB->stState)
+    switch (pStcb->SchedTblState)
     {
 /* OS456. */
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
@@ -1793,23 +1838,22 @@ static StatusType Os_SyncScheduleTable(ScheduleTableType ScheduleTableID, TickTy
         break;
 
     case SCHEDULETABLE_WAITING:
-        Os_StWaittingStateProc(value, counterCurval, pStCB, pStCfgRef);
+        Os_SchedTblSyncInWaittingState(value, counterCurVal, pStcb, schedTblCfgRef);
         break;
 
     case SCHEDULETABLE_RUNNING:
-        Os_StRunningStateProc(value, counterCurval, pStCB, pStCfgRef);
+        Os_SchedTblSyncInRunningState(value, counterCurVal, pStcb, schedTblCfgRef);
         break;
 
     case SCHEDULETABLE_RUNNING_AND_SYNCHRONOUS:
-        Os_StRunningSyncStateProc(value, counterCurval, pStCB, pStCfgRef);
+        Os_SchedTblSyncInRunningAndSyncState(value, counterCurVal, pStcb, schedTblCfgRef);
         break;
 
     default:
         /* Nothing to do. */
         break;
     }
-
-    OS_ARCH_EXIT_CRITICAL();
+    OS_HAL_EXIT_CRITICAL();
 
     return err;
 }
@@ -1818,47 +1862,30 @@ static StatusType Os_SyncScheduleTable(ScheduleTableType ScheduleTableID, TickTy
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <Internal implementation of OS service:SetScheduleTableAsync.>
- * Service ID           <None>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Yes>
- * param-eventId[in]    <ScheduleTableID>
- * Param-Name[out]      <StatusType>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * REQ ID               <None>
+/**
+ * Internal implementation of OS service:SetScheduleTableAsync.
  */
-/********************************************************************/
-static StatusType Os_SetScheduleTableAsync(ScheduleTableType ScheduleTableID)
+OS_LOCAL StatusType Os_SetScheduleTableAsync(ScheduleTableType schedTblId)
 {
-    const Os_SchedTblCfgType* pStCfgRef;
-
-    Os_STCBType* pStCB;
-
     StatusType err = E_OK;
+    Os_STCBType *pStcb = Os_STCB[schedTblId];
+    const Os_SchedTblCfgType *schedTblCfgRef = &Os_SchedTblCfg[schedTblId];
 
-    OS_ARCH_DECLARE_CRITICAL();
-    pStCfgRef = &Os_SchedTblCfg[ScheduleTableID];
-    pStCB     = &Os_STCB[ScheduleTableID];
-
-    OS_ARCH_ENTRY_CRITICAL();
+    OS_HAL_DECLARE_CRITICAL();
+    OS_HAL_ENTRY_CRITICAL();
 
     /*SWS_Os_00300*/
-    if (ST_SYNC_EXPLICIT == pStCfgRef->osSchedTblSync.osSchedTblSyncStrategy)
+    if (OS_ST_SYNC_EXPLICIT == schedTblCfgRef->SchedTblSync.SchedTblSyncStrategy)
     {
-        pStCB->stState = SCHEDULETABLE_RUNNING;
+        pStcb->SchedTblState = SCHEDULETABLE_RUNNING;
         /* OS362 && OS323 */
-        pStCB->stIsStopAdjust = TRUE;
+        pStcb->SchedTblIsStopAdjust = TRUE;
 
-        OS_ARCH_EXIT_CRITICAL();
+        OS_HAL_EXIT_CRITICAL();
     }
     else /* OS458 */
     {
-        OS_ARCH_EXIT_CRITICAL();
-
+        OS_HAL_EXIT_CRITICAL();
         err = E_OS_ID;
     }
 
@@ -1866,116 +1893,81 @@ static StatusType Os_SetScheduleTableAsync(ScheduleTableType ScheduleTableID)
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
-#endif /* OS_SC2 == CFG_SC || OS_SC4 == CFG_SC */
+#endif
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <GetScheduleTableStatus.>
- * Service ID           <0x0e>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Yes>
- * param-eventId[in]    <ScheduleTableID, ScheduleStatus>
- * Param-Name[out]      <StatusType>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * REQ ID               <None>
+/**
+ * GetScheduleTableStatus.
  */
-/********************************************************************/
-StatusType GetScheduleTableStatus(ScheduleTableType ScheduleTableID, ScheduleTableStatusRefType ScheduleStatus)
+/* PRQA S 1503, 3006, 3408, 6070, 1512 ++ */ /* VL_QAC_NoUsedApi, VL_Os_3006, VL_Os_3408, VL_MTR_Os_STCAL, VL_Os_1512 */
+StatusType GetScheduleTableStatus(
+    ScheduleTableType ScheduleTableID,
+    ScheduleTableStatusRefType ScheduleStatus)
+/* PRQA S 1503, 3006, 3408, 6070, 1512 -- */
 {
-    /* PRQA S 2742, 2880, 3138, 2741 ++ */ /* VL_Os_PlatformDef */
-    OS_ENTER_KERNEL();
-    /* PRQA S 2742, 2880, 3138, 2741 -- */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
+    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
+    OS_HAL_ENTER_KERNEL(); /* PRQA S 1021 */ /* VL_Os_1021 */
+    /* PRQA S 1006 -- */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
 
     StatusType err = E_OK;
-
-#if (TRUE == CFG_TRACE_ENABLE)
-    Os_TraceServiceEnter(OSServiceId_GetScheduleTableStatus);
-#endif /* TRUE == CFG_TRACE_ENABLE */
+    /* PRQA S 3678 ++ */ /* VL_Os_3678 */
+    Os_SCBType *pScb = Os_GetCurrentContext();
+    /* PRQA S 3678 -- */
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 1317, 3432, 4442, 4521, 4544 ++ */ /* VL_Os_1317, VL_Os_3432, VL_Os_4442, VL_Os_4521, VL_Os_4544 */
+    OSRtiEnterApi(pScb, OSApiId_GetScheduleTableStatus);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_GetScheduleTableStatus_Start, ScheduleTableID);
+    /* PRQA S 1317, 3432, 4442, 4521, 4544 -- */
+    /* PRQA S 3138, 3141 -- */
 
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
+    /* Check input_pointor null is better. */
     if (NULL_PTR == ScheduleStatus)
     {
-        err = E_OS_PARAM_POINTER;
+        err = E_OS_ILLEGAL_ADDRESS;
     }
-
-    else if (CHECK_ID_INVALID(ScheduleTableID, Os_CfgSchedTblMax_Inf))
-
+    /* OS293 */
+    else if (Os_ObjectIDCheck((ObjectType)ScheduleTableID, (uint8)OS_OBJECT_SCHEDULETABLE) != TRUE)
     {
         err = E_OS_ID;
     }
     else
-#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
-
+#endif
+    {
 #if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
-        if (Os_WrongContext(OS_CONTEXT_GET_SCHEDULE_TABLE_STATUS) != TRUE)
-    {
-        err = E_OS_CALLEVEL;
-    }
-
-    else if (Os_AddressWritable((uint32)ScheduleStatus) != TRUE)
-
-    {
-        err = E_OS_ILLEGAL_ADDRESS;
-    }
-    else if (Os_IgnoreService() != TRUE)
-    {
-        err = E_OS_DISABLEDINT;
-    }
-    else if (Os_CheckObjAcs(OBJECT_SCHEDULETABLE, ScheduleTableID) != TRUE)
-    {
-        err = E_OS_ACCESS;
-    }
-    else
-#endif /* TRUE == CFG_SERVICE_PROTECTION_ENABLE */
-    {
-/* SWS_Os_00647:The API service "GetScheduleTableStatus" shall
- * be able to get the status of a schedule table that is part
- * of an OS-Application residing on a different core.  */
-#if (OS_AUTOSAR_CORES > 1)
-
-        Os_CoreIdType coreId = Os_GetObjCoreId(ScheduleTableID);
-
-        if (coreId != Os_SCB.sysCore)
-        {
-            RpcInputType rpcData = {
-                .sync         = RPC_SYNC,
-                .remoteCoreId = coreId,
-                .serviceId    = OSServiceId_GetScheduleTableStatus,
-                .srvPara0     = (uint32)ScheduleTableID,
-
-                .srvPara1 = (uint32)ScheduleStatus,
-
-                .srvPara2 = (uint32)NULL_PARA,
-            };
-            err = Os_RpcCallService(&rpcData);
-        }
-        else
-#endif /* OS_AUTOSAR_CORES > 1 */
+        Os_ServicePortParamType SprotParam = {
+            .AllowedContext = OS_SERVICEPORT_CHECK_GET_SCHEDULE_TABLE_STATUS,
+            .ObjectType = OS_OBJECT_SCHEDULETABLE,
+            .ObjectID = ScheduleTableID, /* PRQA S 4424 */ /* VL_Os_4424 */
+            .Address = (uint32)ScheduleStatus, /* PRQA S 0306 */ /* VL_Os_0306 */
+        };
+        err = Os_ServiceProtCheck(pScb, &SprotParam);
+        if (err == E_OK)
+#endif
         {
             Os_GetScheduleTableStatus(ScheduleTableID, ScheduleStatus);
         }
     }
 
 #if (CFG_ERRORHOOK == TRUE)
-    if (err != E_OK)
+    if (err != E_OK) /* PRQA S 2992, 2996 */ /* VL_Os_2992, VL_Os_2996 */
     {
-        Os_TraceErrorHook(
-            OSError_Save_GetScheduleTableStatus(ScheduleTableID, ScheduleStatus),
-            OSServiceId_GetScheduleTableStatus,
-            err);
+        Os_TraceErrorHook(OSError_Save_GetScheduleTableStatus(ScheduleTableID, ScheduleStatus), /* PRQA S 2880 */ /* VL_Os_2880 */
+                          OSServiceId_GetScheduleTableStatus,
+                          err, pScb); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
     }
 #endif
-
-#if (TRUE == CFG_TRACE_ENABLE)
-    Os_TraceServiceExit(OSServiceId_GetScheduleTableStatus);
-#endif /* TRUE == CFG_TRACE_ENABLE */
-
-    OS_EXIT_KERNEL(); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
-
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 3432, 4544, 2812, 1258, 4342, 2995, 2997 ++ */ /* VL_Os_3432, VL_Os_4544, VL_Os_2812, VL_Os_1258, VL_Os_4342, VL_Os_2995, VL_Os_2997 */
+    OSRtiExitApi(pScb, OSApiId_GetScheduleTableStatus);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_GetScheduleTableStatus_Return, (err == E_OK ) ? *ScheduleStatus : (ScheduleTableStatusType)0U);
+    UNUSED_PARAMETER(pScb);
+    OS_HAL_EXIT_KERNEL(); /* PRQA S 2743*/ /* VL_Os_2743*/  
+    /* PRQA S 3432, 4544, 2812, 1258, 4342, 2995, 2997 -- */
+    /* PRQA S 3138, 3141 -- */
     return err;
 }
 #define OS_STOP_SEC_CODE
@@ -1983,98 +1975,113 @@ StatusType GetScheduleTableStatus(ScheduleTableType ScheduleTableID, ScheduleTab
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <Start schedule table in Rel mode.>
- * Service ID           <0x07>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Non Reentrant>
- * param-eventId[in]    <ScheduleTableID, Offset>
- * Param-Name[out]      <StatusType>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * REQ ID               <None>
+/**
+ * Start schedule table in Rel mode.
  */
-/********************************************************************/
-StatusType StartScheduleTableRel(ScheduleTableType ScheduleTableID, TickType Offset)
+#if (OS_AUTOSAR_CORES > 1)
+OS_LOCAL StatusType Os_RpcAction_StartScheduleTableRel(uint32 *inPara) /* PRQA S 3673 */ /* VL_QAC_3673 */
 {
-    /* PRQA S 2742, 2880, 3138, 2741 ++ */ /* VL_Os_PlatformDef */
-    OS_ENTER_KERNEL();
-    /* PRQA S 2742, 2880, 3138, 2741 -- */
-    StatusType err = E_OK;
+    /* PRQA S 4342 ++ */ /* VL_Os_4342 */
+    return Os_StartScheduleTableRel((ScheduleTableType)inPara[0],
+                                    (TickType)inPara[1]);
+    /* PRQA S 4342 -- */
+}
 
-#if (TRUE == CFG_TRACE_ENABLE)
-    Os_TraceServiceEnter(OSServiceId_StartScheduleTableRel);
-#endif /* TRUE == CFG_TRACE_ENABLE */
+OS_LOCAL StatusType Os_RpcCall_StartScheduleTableRel(
+    Os_CoreIdType ownerCore,
+    ScheduleTableType schedTblId,
+    TickType offset)
+{
+    StatusType err = E_OK;
+    Os_RpcInputType rpcData = {
+        .RpcSync = OS_RPC_SYNC,
+        .RemoteCoreId = ownerCore,
+        .ActionFn = Os_RpcAction_StartScheduleTableRel, /* PRQA S 0674 */ /* VL_Os_0674 */
+        .InPara[0] = (uint32)schedTblId,
+        .InPara[1] = (uint32)offset, /* PRQA S 0691 */ /* VL_Os_0691 */
+    }; /* PRQA S 0704 */ /* VL_Os_0704 */
+
+    err = Os_RpcCallService(&rpcData);
+    return err;
+}
+#endif
+
+/* PRQA S 1503, 3006, 3408, 6070, 1512 ++ */ /* VL_QAC_NoUsedApi, VL_Os_3006, VL_Os_3408, VL_MTR_Os_STCAL, VL_Os_1512 */
+StatusType StartScheduleTableRel(
+    ScheduleTableType ScheduleTableID,
+    TickType Offset)
+/* PRQA S 1503, 3006, 3408, 6070, 1512 -- */
+{
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
+    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
+    OS_HAL_ENTER_KERNEL(); /* PRQA S 1021 */ /* VL_Os_1021 */
+    /* PRQA S 1006 -- */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
+
+    StatusType err = E_OK;
+    /* PRQA S 3678 ++ */ /* VL_Os_3678 */
+    Os_SCBType *pScb = Os_GetCurrentContext();
+    /* PRQA S 3678 -- */
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 1317, 3432, 4442, 4521, 4544 ++ */ /* VL_Os_1317, VL_Os_3432, VL_Os_4442, VL_Os_4521, VL_Os_4544 */
+    OSRtiEnterApi(pScb, OSApiId_StartScheduleTableRel);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_StartScheduleTableRel_Start, ScheduleTableID);
+    /* PRQA S 1317, 3432, 4442, 4521, 4544 -- */
+    /* PRQA S 3138, 3141 -- */
 
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
-
-    if (CHECK_ID_INVALID(ScheduleTableID, Os_CfgSchedTblMax_Inf))
-
+    /* OS275 */
+    if (Os_ObjectIDCheck((ObjectType)ScheduleTableID, (uint8)OS_OBJECT_SCHEDULETABLE) != TRUE)
     {
         err = E_OS_ID;
     }
     else
-#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
+#endif
+    {
 #if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
-        if (Os_WrongContext(OS_CONTEXT_START_ST_REL) != TRUE)
-    {
-        err = E_OS_CALLEVEL;
-    }
-    else if (Os_IgnoreService() != TRUE)
-    {
-        err = E_OS_DISABLEDINT;
-    }
-    else if (Os_CheckObjAcs(OBJECT_SCHEDULETABLE, ScheduleTableID) != TRUE)
-    {
-        err = E_OS_ACCESS;
-    }
-    else
-#endif /* TRUE == CFG_SERVICE_PROTECTION_ENABLE */
-    {
+        Os_ServicePortParamType SprotParam = {
+            .AllowedContext = OS_SERVICEPORT_CHECK_START_ST_REL,
+            .ObjectType = OS_OBJECT_SCHEDULETABLE,
+            .ObjectID = ScheduleTableID, /* PRQA S 4424 */ /* VL_Os_4424 */
+            .Address = NULL_PARA, /* PRQA S 1258 */ /* VL_Os_1258 */
+        };
+        err = Os_ServiceProtCheck(pScb, &SprotParam);
+        if (err == E_OK)
+#endif
+        {
 /* SWS_Os_00645:The API call "tartScheduleTableRel" shall
  * be able to start schedule tables of OS-Applications
  * residing on other cores. */
 #if (OS_AUTOSAR_CORES > 1)
-
-        Os_CoreIdType coreId = Os_GetObjCoreId(ScheduleTableID);
-
-        if (coreId != Os_SCB.sysCore)
-        {
-            RpcInputType rpcData = {
-                .sync         = RPC_SYNC,
-                .remoteCoreId = coreId,
-                .serviceId    = OSServiceId_StartScheduleTableRel,
-                .srvPara0     = (uint32)ScheduleTableID,
-                .srvPara1     = (uint32)Offset,
-                .srvPara2     = (uint32)NULL_PARA,
-            };
-            err = Os_RpcCallService(&rpcData);
-        }
-        else
-#endif /* OS_AUTOSAR_CORES > 1 */
-        {
-            err = Os_StartScheduleTableRel(ScheduleTableID, Offset);
+            Os_CoreIdType coreId = OS_SCHEDTBL_GET_COREID(ScheduleTableID);
+            if (coreId != pScb->SysCore)
+            {
+                err = Os_RpcCall_StartScheduleTableRel(coreId, ScheduleTableID, Offset);
+            }
+            else
+#endif
+            {
+                err = Os_StartScheduleTableRel(ScheduleTableID, Offset);
+            }
         }
     }
 
 #if (CFG_ERRORHOOK == TRUE)
     if (err != E_OK)
     {
-        Os_TraceErrorHook(
-            OSError_Save_StartScheduleTableRel(ScheduleTableID, Offset),
-            OSServiceId_StartScheduleTableRel,
-            err);
+        Os_TraceErrorHook(OSError_Save_StartScheduleTableRel(ScheduleTableID, Offset),
+                          OSServiceId_StartScheduleTableRel, err, pScb); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
     }
 #endif
 
-#if (TRUE == CFG_TRACE_ENABLE)
-    Os_TraceServiceExit(OSServiceId_StartScheduleTableRel);
-#endif /* TRUE == CFG_TRACE_ENABLE */
-
-    OS_EXIT_KERNEL(); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
-
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 3432, 4544 ++ */ /* VL_Os_3432, VL_Os_4544 */
+    OSRtiExitApi(pScb, OSApiId_StartScheduleTableRel);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_StartScheduleTableRel_Return, err);
+    UNUSED_PARAMETER(pScb);
+    OS_HAL_EXIT_KERNEL(); /* PRQA S 2743*/ /* VL_Os_2743*/
+    /* PRQA S 3432, 4544 -- */
+    /* PRQA S 3138, 3141 -- */
     return err;
 }
 #define OS_STOP_SEC_CODE
@@ -2082,98 +2089,111 @@ StatusType StartScheduleTableRel(ScheduleTableType ScheduleTableID, TickType Off
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <Start schedule table in Abs mode.>
- * Service ID           <0x08>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Non Reentrant>
- * param-eventId[in]    <ScheduleTableID, Start>
- * Param-Name[out]      <StatusType>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * REQ ID               <None>
+/**
+ * Start schedule table in Abs mode.
  */
-/********************************************************************/
-StatusType StartScheduleTableAbs(ScheduleTableType ScheduleTableID, TickType Start)
+#if (OS_AUTOSAR_CORES > 1)
+OS_LOCAL StatusType Os_RpcAction_StartScheduleTableAbs(uint32 *inPara) /* PRQA S 3673 */ /* VL_QAC_3673 */
 {
-    /* PRQA S 2742, 2880, 3138, 2741 ++ */ /* VL_Os_PlatformDef */
-    OS_ENTER_KERNEL();
-    /* PRQA S 2742, 2880, 3138, 2741 -- */
-    StatusType err = E_OK;
+    /* PRQA S 4342 ++ */ /* VL_Os_4342 */
+    return Os_StartScheduleTableAbs((ScheduleTableType)inPara[0],
+                                    (TickType)inPara[1]);
+    /* PRQA S 4342 -- */
+}
 
-#if (TRUE == CFG_TRACE_ENABLE)
-    Os_TraceServiceEnter(OSServiceId_StartScheduleTableAbs);
-#endif /* TRUE == CFG_TRACE_ENABLE */
+OS_LOCAL StatusType Os_RpcCall_StartScheduleTableAbs(
+    Os_CoreIdType ownerCore,
+    ScheduleTableType schedTblId,
+    TickType start)
+{
+    StatusType err = E_OK;
+    Os_RpcInputType rpcData = {
+        .RpcSync = OS_RPC_SYNC,
+        .RemoteCoreId = ownerCore,
+        .ActionFn = Os_RpcAction_StartScheduleTableAbs, /* PRQA S 0674 */ /* VL_Os_0674 */
+        .InPara[0] = (uint32)schedTblId,
+        .InPara[1] = (uint32)start, /* PRQA S 0691 */ /* VL_Os_0691 */
+    }; /* PRQA S 0704 */ /* VL_Os_0704 */
+
+    err = Os_RpcCallService(&rpcData);
+    return err;
+}
+#endif
+
+/* PRQA S 1503, 3006, 3408, 6070, 1512 ++ */ /* VL_QAC_NoUsedApi, VL_Os_3006, VL_Os_3408, VL_MTR_Os_STCAL, VL_Os_1512 */
+StatusType StartScheduleTableAbs(ScheduleTableType ScheduleTableID, TickType Start)
+/* PRQA S 1503, 3006, 3408, 6070, 1512 -- */
+{
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
+    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
+    OS_HAL_ENTER_KERNEL(); /* PRQA S 1021 */ /* VL_Os_1021 */
+    /* PRQA S 1006 -- */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
+
+    StatusType err = E_OK;
+    /* PRQA S 3678 ++ */ /* VL_Os_3678 */
+    Os_SCBType *pScb = Os_GetCurrentContext();
+    /* PRQA S 3678 -- */
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 1317, 3432, 4442, 4521, 4544 ++ */ /* VL_Os_1317, VL_Os_3432, VL_Os_4442, VL_Os_4521, VL_Os_4544 */
+    OSRtiEnterApi(pScb, OSApiId_StartScheduleTableAbs);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_StartScheduleTableAbs_Start, ScheduleTableID);
+    /* PRQA S 1317, 3432, 4442, 4521, 4544 -- */
+    /* PRQA S 3138, 3141 -- */
 
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
-
-    if (CHECK_ID_INVALID(ScheduleTableID, Os_CfgSchedTblMax_Inf))
-
+    /* OS348 */
+    if (Os_ObjectIDCheck((ObjectType)ScheduleTableID, (uint8)OS_OBJECT_SCHEDULETABLE) != TRUE)
     {
         err = E_OS_ID;
     }
     else
-#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
+#endif
+    {
 #if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
-        if (Os_WrongContext(OS_CONTEXT_START_ST_ABS) != TRUE)
-    {
-        err = E_OS_CALLEVEL;
-    }
-    else if (Os_IgnoreService() != TRUE)
-    {
-        err = E_OS_DISABLEDINT;
-    }
-    else if (Os_CheckObjAcs(OBJECT_SCHEDULETABLE, ScheduleTableID) != TRUE)
-    {
-        err = E_OS_ACCESS;
-    }
-    else
-#endif /* TRUE == CFG_SERVICE_PROTECTION_ENABLE */
-    {
+        Os_ServicePortParamType SprotParam = {
+            .AllowedContext = OS_SERVICEPORT_CHECK_START_ST_ABS,
+            .ObjectType = OS_OBJECT_SCHEDULETABLE,
+            .ObjectID = ScheduleTableID, /* PRQA S 4424 */ /* VL_Os_4424 */
+            .Address = NULL_PARA, /* PRQA S 1258 */ /* VL_Os_1258 */
+        };
+        err = Os_ServiceProtCheck(pScb, &SprotParam);
+        if (err == E_OK)
+#endif
+        {
 /* SWS_Os_00644:The API call "tartScheduleTableAbs"
  * shall be able to start schedule tables of
  * OS-Applications residing on other cores. */
 #if (OS_AUTOSAR_CORES > 1)
-
-        Os_CoreIdType coreId = Os_GetObjCoreId(ScheduleTableID);
-
-        if (coreId != Os_SCB.sysCore)
-        {
-            RpcInputType rpcData = {
-                .sync         = RPC_SYNC,
-                .remoteCoreId = coreId,
-                .serviceId    = OSServiceId_StartScheduleTableAbs,
-                .srvPara0     = (uint32)ScheduleTableID,
-                .srvPara1     = (uint32)Start,
-                .srvPara2     = (uint32)NULL_PARA,
-            };
-            err = Os_RpcCallService(&rpcData);
-        }
-        else
-#endif /* OS_AUTOSAR_CORES > 1 */
-        {
-            err = Os_StartScheduleTableAbs(ScheduleTableID, Start);
+            Os_CoreIdType coreId = OS_SCHEDTBL_GET_COREID(ScheduleTableID);
+            if (coreId != pScb->SysCore)
+            {
+                err = Os_RpcCall_StartScheduleTableAbs(coreId, ScheduleTableID, Start);
+            }
+            else
+#endif
+            {
+                err = Os_StartScheduleTableAbs(ScheduleTableID, Start);
+            }
         }
     }
 
 #if (CFG_ERRORHOOK == TRUE)
     if (err != E_OK)
     {
-        Os_TraceErrorHook(
-            OSError_Save_StartScheduleTableAbs(ScheduleTableID, Start),
-            OSServiceId_StartScheduleTableAbs,
-            err);
+        Os_TraceErrorHook(OSError_Save_StartScheduleTableAbs(ScheduleTableID, Start),
+                          OSServiceId_StartScheduleTableAbs, err, pScb); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
     }
 #endif
 
-#if (TRUE == CFG_TRACE_ENABLE)
-    Os_TraceServiceExit(OSServiceId_StartScheduleTableAbs);
-#endif /* TRUE == CFG_TRACE_ENABLE */
-
-    OS_EXIT_KERNEL(); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
-
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 3432, 4544 ++ */ /* VL_Os_3432, VL_Os_4544 */
+    OSRtiExitApi(pScb, OSApiId_StartScheduleTableAbs);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_StartScheduleTableAbs_Return, err);
+    UNUSED_PARAMETER(pScb);
+    OS_HAL_EXIT_KERNEL(); /* PRQA S 2743*/ /* VL_Os_2743*/
+    /* PRQA S 3432, 4544 -- */
+    /* PRQA S 3138, 3141 -- */
     return err;
 }
 #define OS_STOP_SEC_CODE
@@ -2181,94 +2201,106 @@ StatusType StartScheduleTableAbs(ScheduleTableType ScheduleTableID, TickType Sta
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <Start schedule table in Abs mode.>
- * Service ID           <0x09>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Non Reentrant>
- * param-eventId[in]    <ScheduleTableID, Start>
- * Param-Name[out]      <StatusType>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * REQ ID               <None>
+/**
+ * Start schedule table in Abs mode.
  */
-/********************************************************************/
-StatusType StopScheduleTable(ScheduleTableType ScheduleTableID)
+#if (OS_AUTOSAR_CORES > 1)
+OS_LOCAL StatusType Os_RpcAction_StopScheduleTable(uint32 *inPara) /* PRQA S 3673 */ /* VL_QAC_3673 */
 {
-    /* PRQA S 2742, 2880, 3138, 2741 ++ */ /* VL_Os_PlatformDef */
-    OS_ENTER_KERNEL();
-    /* PRQA S 2742, 2880, 3138, 2741 -- */
-    StatusType err = E_OK;
+    return Os_StopScheduleTable((ScheduleTableType)inPara[0]); /* PRQA S 4342 */ /* VL_Os_4342 */
+}
 
-#if (TRUE == CFG_TRACE_ENABLE)
-    Os_TraceServiceEnter(OSServiceId_StopScheduleTable);
-#endif /* TRUE == CFG_TRACE_ENABLE */
+OS_LOCAL StatusType Os_RpcCall_StopScheduleTable(
+    Os_CoreIdType ownerCore,
+    ScheduleTableType schedTblId)
+{
+    StatusType err = E_OK;
+    Os_RpcInputType rpcData = {
+        .RpcSync = OS_RPC_SYNC,
+        .RemoteCoreId = ownerCore,
+        .ActionFn = Os_RpcAction_StopScheduleTable, /* PRQA S 0674 */ /* VL_Os_0674 */
+        .InPara[0] = (uint32)schedTblId, /* PRQA S 0691 */ /* VL_Os_0691 */
+    }; /* PRQA S 0704 */ /* VL_Os_0704 */
+
+    err = Os_RpcCallService(&rpcData);
+    return err;
+}
+#endif
+
+/* PRQA S 1503, 3006, 3408, 6070, 1512 ++ */ /* VL_QAC_NoUsedApi, VL_Os_3006, VL_Os_3408, VL_MTR_Os_STCAL, VL_Os_1512 */
+StatusType StopScheduleTable(ScheduleTableType ScheduleTableID)
+/* PRQA S 1503, 3006, 3408, 6070, 1512 -- */
+{
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
+    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
+    OS_HAL_ENTER_KERNEL(); /* PRQA S 1021 */ /* VL_Os_1021 */
+    /* PRQA S 1006 -- */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
+
+    StatusType err = E_OK;
+    /* PRQA S 3678 ++ */ /* VL_Os_3678 */
+    Os_SCBType *pScb = Os_GetCurrentContext();
+    /* PRQA S 3678 -- */
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 1317, 3432, 4442, 4521, 4544 ++ */ /* VL_Os_1317, VL_Os_3432, VL_Os_4442, VL_Os_4521, VL_Os_4544 */
+    OSRtiEnterApi(pScb, OSApiId_StopScheduleTable);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_StopScheduleTable_Start, ScheduleTableID);
+    /* PRQA S 1317, 3432, 4442, 4521, 4544 -- */
+    /* PRQA S 3138, 3141 -- */
 
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
-
-    if (CHECK_ID_INVALID(ScheduleTableID, Os_CfgSchedTblMax_Inf))
-
+    /* OS279 */
+    if (Os_ObjectIDCheck((ObjectType)ScheduleTableID, (uint8)OS_OBJECT_SCHEDULETABLE) != TRUE)
     {
         err = E_OS_ID;
     }
     else
-#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
+#endif
+    {
 #if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
-        if (Os_WrongContext(OS_CONTEXT_STOP_SCHEDULE_TABLE) != TRUE)
-    {
-        err = E_OS_CALLEVEL;
-    }
-    else if (Os_IgnoreService() != TRUE)
-    {
-        err = E_OS_DISABLEDINT;
-    }
-    else if (Os_CheckObjAcs(OBJECT_SCHEDULETABLE, ScheduleTableID) != TRUE)
-    {
-        err = E_OS_ACCESS;
-    }
-    else
-#endif /* TRUE == CFG_SERVICE_PROTECTION_ENABLE */
-    {
+        Os_ServicePortParamType SprotParam = {
+            .AllowedContext = OS_SERVICEPORT_CHECK_STOP_SCHEDULE_TABLE,
+            .ObjectType = OS_OBJECT_SCHEDULETABLE,
+            .ObjectID = ScheduleTableID, /* PRQA S 4424 */ /* VL_Os_4424 */
+            .Address = NULL_PARA, /* PRQA S 1258 */ /* VL_Os_1258 */
+        };
+        err = Os_ServiceProtCheck(pScb, &SprotParam);
+        if (err == E_OK)
+#endif
+        {
 /* SWS_Os_00646:The API call StopScheduleTable
  * shall be able to stop schedule tables of
  * OS-Applications residing on other cores.  */
 #if (OS_AUTOSAR_CORES > 1)
-
-        Os_CoreIdType coreId = Os_GetObjCoreId(ScheduleTableID);
-
-        if (coreId != Os_SCB.sysCore)
-        {
-            RpcInputType rpcData = {
-                .sync         = RPC_SYNC,
-                .remoteCoreId = coreId,
-                .serviceId    = OSServiceId_StopScheduleTable,
-                .srvPara0     = (uint32)ScheduleTableID,
-                .srvPara1     = (uint32)NULL_PARA,
-                .srvPara2     = (uint32)NULL_PARA,
-            };
-            err = Os_RpcCallService(&rpcData);
-        }
-        else
-#endif /* OS_AUTOSAR_CORES > 1 */
-        {
-            err = Os_StopScheduleTable(ScheduleTableID);
+            Os_CoreIdType coreId = OS_SCHEDTBL_GET_COREID(ScheduleTableID);
+            if (coreId != pScb->SysCore)
+            {
+                err = Os_RpcCall_StopScheduleTable(coreId, ScheduleTableID);
+            }
+            else
+#endif
+            {
+                err = Os_StopScheduleTable(ScheduleTableID);
+            }
         }
     }
 
 #if (CFG_ERRORHOOK == TRUE)
     if (err != E_OK)
     {
-        Os_TraceErrorHook(OSError_Save_StopScheduleTable(ScheduleTableID), OSServiceId_StopScheduleTable, err);
+        Os_TraceErrorHook(OSError_Save_StopScheduleTable(ScheduleTableID),
+                          OSServiceId_StopScheduleTable, err, pScb); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
     }
 #endif
 
-#if (TRUE == CFG_TRACE_ENABLE)
-    Os_TraceServiceExit(OSServiceId_StopScheduleTable);
-#endif /* TRUE == CFG_TRACE_ENABLE */
-
-    OS_EXIT_KERNEL(); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 3432, 4544 ++ */ /* VL_Os_3432, VL_Os_4544 */
+    OSRtiExitApi(pScb, OSApiId_StopScheduleTable);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_StopScheduleTable_Return, err);
+    UNUSED_PARAMETER(pScb);
+    OS_HAL_EXIT_KERNEL(); /* PRQA S 2743*/ /* VL_Os_2743*/
+    /* PRQA S 3432, 4544 -- */
+    /* PRQA S 3138, 3141 -- */
 
     return err;
 }
@@ -2277,160 +2309,147 @@ StatusType StopScheduleTable(ScheduleTableType ScheduleTableID)
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <Next ScheduleTable Process.>
- * Service ID           <0x0a>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Non Reentrant>
- * param-eventId[in]    <ScheduleTableID_From, ScheduleTableID_To>
- * Param-Name[out]      <StatusType>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * REQ ID               <None>
+/**
+ * Status check when next ScheduleTable.
  */
-/********************************************************************/
-StatusType NextScheduleTable(ScheduleTableType ScheduleTableID_From, ScheduleTableType ScheduleTableID_To)
+OS_LOCAL StatusType Os_NextSTCheckStatus(
+    ScheduleTableType schedTblIdFrom,
+    ScheduleTableType schedTblIdTo)
 {
-    /* PRQA S 2742, 2880, 3138, 2741 ++ */ /* VL_Os_PlatformDef */
-    OS_ENTER_KERNEL();
-    /* PRQA S 2742, 2880, 3138, 2741 -- */
+    StatusType err = E_OK;
+    const Os_SchedTblCfgType *schedTblFromCfgRef = &Os_SchedTblCfg[schedTblIdFrom];
 
-    Os_STCBType* pStFromCB;
-    Os_STCBType* pStToCB;
-
-    const Os_SchedTblCfgType* pStFromCfgRef;
-    const Os_SchedTblCfgType* pStToCfgRef;
-    StatusType                err = E_OK;
-    Os_CoreIdType             coreId_From;
-    Os_CoreIdType             coreId_To;
-
-#if (TRUE == CFG_TRACE_ENABLE)
-    Os_TraceServiceEnter(OSServiceId_NextScheduleTable);
-#endif /* TRUE == CFG_TRACE_ENABLE */
-
-    coreId_From = Os_GetObjCoreId(ScheduleTableID_From);
-
-    coreId_To = Os_GetObjCoreId(ScheduleTableID_To);
-
-    /* Cross core use shall be not supported. */
-    if ((Os_SCB.sysCore != coreId_From) || (Os_SCB.sysCore != coreId_To))
-    {
-        err = E_OS_CORE;
-    }
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
-    /* OS282:If the input parameter <ScheduleTableID_From> or
-     * <ScheduleTableID_To> in a call of NextScheduleTable()
-     * is not valid,NextScheduleTable() shall return E_OS_ID.*/
-
-    else if (
-        (Os_GetObjLocalId(ScheduleTableID_From) >= Os_CfgSchedTblMax_Inf[coreId_From])
-        || (Os_GetObjLocalId(ScheduleTableID_To) >= Os_CfgSchedTblMax_Inf[coreId_To]))
-
+    const Os_SchedTblCfgType *schedTblToCfgRef = &Os_SchedTblCfg[schedTblIdTo];
+    if (schedTblFromCfgRef->SchedTblCounterRef != schedTblToCfgRef->SchedTblCounterRef)
     {
-        err = E_OS_ID;
+        err = E_OS_ID; /* OS330 */
     }
-#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
-#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
-    else if (Os_WrongContext(OS_CONTEXT_NEXT_SCHEDULE_TABLE) != TRUE)
-    {
-        err = E_OS_CALLEVEL;
-    }
-    else if (Os_IgnoreService() != TRUE)
-    {
-        err = E_OS_DISABLEDINT;
-    }
-    else if (Os_CheckObjAcs(OBJECT_SCHEDULETABLE, ScheduleTableID_From) != TRUE)
-    {
-        err = E_OS_ACCESS;
-    }
-    else if (Os_CheckObjAcs(OBJECT_SCHEDULETABLE, ScheduleTableID_To) != TRUE)
-    {
-        err = E_OS_ACCESS;
-    }
-#endif /* TRUE == CFG_SERVICE_PROTECTION_ENABLE */
     else
     {
-        ScheduleTableID_From = Os_GetObjLocalId(ScheduleTableID_From);
-        ScheduleTableID_To   = Os_GetObjLocalId(ScheduleTableID_To);
-
-        pStFromCfgRef = &Os_SchedTblCfg[ScheduleTableID_From];
-        pStToCfgRef   = &Os_SchedTblCfg[ScheduleTableID_To];
-
-#if (OS_STATUS_EXTENDED == CFG_STATUS)
-        /* OS330:If in a call of NextScheduleTable() schedule table
-         * <ScheduleTableID_To> is driven by different counter than
-         * schedule table <ScheduleTableID_From> then NextScheduleTable()
-         * shall return an error E_OS_ID.*/
-        if (pStFromCfgRef->osSchedTblCounterRef != pStToCfgRef->osSchedTblCounterRef)
+#if ((OS_SC2 == CFG_SC) || (OS_SC4 == CFG_SC))
+        if (schedTblFromCfgRef->SchedTblSync.SchedTblSyncStrategy != schedTblToCfgRef->SchedTblSync.SchedTblSyncStrategy)
         {
-            err = E_OS_ID;
+            err = E_OS_ID; /* OS484 */
+        }
+#endif
+    }
+#endif
+
+    if ((StatusType)E_OK == err) /* PRQA S 2991, 2995 */ /* VL_Os_2991, VL_Os_2995 */
+    {
+        Os_STCBType *pStcbFrom = Os_STCB[schedTblIdFrom]; /* PRQA S 3678 */ /* VL_Os_3678 */
+        Os_STCBType *pStcbTo = Os_STCB[schedTblIdTo]; /* PRQA S 3678 */ /* VL_Os_3678 */
+
+        if ((SCHEDULETABLE_STOPPED == pStcbFrom->SchedTblState) || (SCHEDULETABLE_NEXT == pStcbFrom->SchedTblState))
+        {
+            err = E_OS_NOFUNC; /* OS283 */
+        }
+        else if (SCHEDULETABLE_STOPPED != pStcbTo->SchedTblState)
+        {
+            err = E_OS_STATE; /* OS309 */
+        }
+        /* If ScheduleTable From is repeating, The functionality is not support. */
+        else if (TRUE == schedTblFromCfgRef->SchedTblRepeating)
+        {
+            err = E_OS_STATE;
         }
         else
         {
-            /* SWS_Os_00484:If OsScheduleTblSyncStrategy of <ScheduleTableID_To>
-             * in a call of NextScheduleTable() is not equal to the
-             * OsScheduleTblSyncStrategy of <ScheduleTableID_From> then
-             * NextScheduleTable() shall return E_OS_ID.*/
-#if ((OS_SC2 == CFG_SC) || (OS_SC4 == CFG_SC))
-            if (pStFromCfgRef->osSchedTblSync.osSchedTblSyncStrategy
-                != pStToCfgRef->osSchedTblSync.osSchedTblSyncStrategy)
-            {
-                err = E_OS_ID;
-            }
-#endif
-        }
-#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
-
-        if ((StatusType)E_OK == err)
-        {
-            pStFromCB = &Os_STCB[ScheduleTableID_From];
-            pStToCB   = &Os_STCB[ScheduleTableID_To];
-
-            /* OS283 */
-            if ((SCHEDULETABLE_STOPPED == pStFromCB->stState) || (SCHEDULETABLE_NEXT == pStFromCB->stState))
-            {
-                err = E_OS_NOFUNC;
-            }
-            /* OS309 */
-            else if (SCHEDULETABLE_STOPPED != pStToCB->stState)
-            {
-                err = E_OS_STATE;
-            }
-            /* If ScheduleTable From is repeating, The functionality is not support. */
-            else if (TRUE == pStFromCfgRef->osSchedTblRepeating)
-            {
-                err = E_OS_STATE;
-            }
-            else
-            {
-                /*nothing to do*/
-            }
-        }
-
-        if ((StatusType)E_OK == err)
-        {
-            Os_NextScheduleTable(ScheduleTableID_From, ScheduleTableID_To);
+            /*nothing to do*/
         }
     }
+
+    return err;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * Next ScheduleTable Process.
+ */
+/* PRQA S 1503, 3006, 3408, 6030, 6010, 6070, 1512 ++ */ /* VL_QAC_NoUsedApi, VL_Os_3006, VL_Os_3408, VL_MTR_Os_STMIF, VL_MTR_Os_STCYC, VL_MTR_Os_STCAL, VL_Os_1512 */
+StatusType NextScheduleTable(
+    ScheduleTableType ScheduleTableID_From,
+    ScheduleTableType ScheduleTableID_To)
+/* PRQA S 1503, 3006, 3408, 6030, 6010, 6070, 1512 -- */
+{
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
+    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
+    OS_HAL_ENTER_KERNEL(); /* PRQA S 1021 */ /* VL_Os_1021 */
+    /* PRQA S 1006 -- */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
+
+    StatusType err = E_OK;
+    /* PRQA S 3678 ++ */ /* VL_Os_3678 */
+    Os_SCBType *pScb = Os_GetCurrentContext();
+    /* PRQA S 3678 -- */
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 1317, 3432, 4442, 4521, 4544 ++ */ /* VL_Os_1317, VL_Os_3432, VL_Os_4442, VL_Os_4521, VL_Os_4544 */
+    OSRtiEnterApi(pScb, OSApiId_NextScheduleTable);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_NextScheduleTable_Start, ScheduleTableID_To);
+    /* PRQA S 1317, 3432, 4442, 4521, 4544 -- */
+    /* PRQA S 3138, 3141 -- */
+
+#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
+    Os_ServicePortParamType SprotParam = {
+        .AllowedContext = OS_SERVICEPORT_CHECK_STOP_SCHEDULE_TABLE,
+        .ObjectType = OS_OBJECT_SCHEDULETABLE,
+        .ObjectID = ScheduleTableID_From, /* PRQA S 4424 */ /* VL_Os_4424 */
+        .Address = NULL_PARA, /* PRQA S 1258 */ /* VL_Os_1258 */
+    };
+#endif
+
+#if (OS_STATUS_EXTENDED == CFG_STATUS)
+    if ((Os_ObjectIDCheck((ObjectType)ScheduleTableID_From, (uint8)OS_OBJECT_SCHEDULETABLE) != TRUE) ||
+        (Os_ObjectIDCheck((ObjectType)ScheduleTableID_To, (uint8)OS_OBJECT_SCHEDULETABLE) != TRUE))
+    {
+        err = E_OS_ID;
+    }
+    else
+#endif
+        if ((pScb->SysCore != OS_SCHEDTBL_GET_COREID(ScheduleTableID_From)) ||
+            (pScb->SysCore != OS_SCHEDTBL_GET_COREID(ScheduleTableID_To)))
+        {
+            err = E_OS_CORE;
+        }
+        else
+#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
+            if (Os_CheckObjAcs(pScb, OS_OBJECT_SCHEDULETABLE, (Os_AppObjectId)ScheduleTableID_To) != TRUE)
+        {
+            err = E_OS_ACCESS;
+        }
+        else if ((err = Os_ServiceProtCheck(pScb, &SprotParam)) == E_OK) /* PRQA S 3326, 2004 */ /* VL_Os_3326, VL_Os_2004 */
+#endif
+        {
+            err = Os_NextSTCheckStatus(ScheduleTableID_From, ScheduleTableID_To);
+            if ((StatusType)E_OK == err)
+            {
+                Os_NextScheduleTable(ScheduleTableID_From, ScheduleTableID_To);
+            }
+        }
 
 #if (CFG_ERRORHOOK == TRUE)
     if (err != E_OK)
     {
-        Os_TraceErrorHook(
-            OSError_Save_NextScheduleTable(ScheduleTableID_From, ScheduleTableID_To),
-            OSServiceId_NextScheduleTable,
-            err);
+        /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+        /* PRQA S 4424 ++ */ /* VL_Os_4424 */
+        Os_TraceErrorHook(OSError_Save_NextScheduleTable(ScheduleTableID_From, ScheduleTableID_To), 
+                          OSServiceId_NextScheduleTable, err, pScb);
+        /* PRQA S 4424 -- */
+        /* PRQA S 3138, 3141 -- */
     }
 #endif
 
-#if (TRUE == CFG_TRACE_ENABLE)
-    Os_TraceServiceExit(OSServiceId_NextScheduleTable);
-#endif /* TRUE == CFG_TRACE_ENABLE */
-
-    OS_EXIT_KERNEL(); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
-
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 3432, 4544 ++ */ /* VL_Os_3432, VL_Os_4544 */
+    OSRtiExitApi(pScb, OSApiId_NextScheduleTable);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_NextScheduleTable_Return, err);
+    OS_HAL_EXIT_KERNEL(); /* PRQA S 2743*/ /* VL_Os_2743*/
+    /* PRQA S 3432, 4544 -- */
+    /* PRQA S 3138, 3141 -- */
     return err;
 }
 #define OS_STOP_SEC_CODE
@@ -2440,108 +2459,28 @@ StatusType NextScheduleTable(ScheduleTableType ScheduleTableID_From, ScheduleTab
 #if ((OS_SC2 == CFG_SC) || (OS_SC4 == CFG_SC))
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <StartScheduleTableSynchron.>
- * Service ID           <0x0b>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Non Reentrant>
- * param-eventId[in]    <ScheduleTableID>
- * Param-Name[out]      <StatusType>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * REQ ID               <None>
+/**
+ * Status check for synchronized start of ScheduleTable.
  */
-/********************************************************************/
-StatusType StartScheduleTableSynchron(ScheduleTableType ScheduleTableID)
+OS_LOCAL StatusType Os_StartSyncStatusCheck(
+    ScheduleTableType schedTblId)
 {
-    /* PRQA S 2742, 2880, 3138, 2741 ++ */ /* VL_Os_PlatformDef */
-    OS_ENTER_KERNEL();
-    /* PRQA S 2742, 2880, 3138, 2741 -- */
-    StatusType                err = E_OK;
-    const Os_SchedTblCfgType* pStCfgRef;
+    StatusType err = E_OK;
 
-    Os_STCBType*  pStCB;
-    Os_CoreIdType coreId;
-
-#if (TRUE == CFG_TRACE_ENABLE)
-    Os_TraceServiceEnter(OSServiceId_StartScheduleTableSynchron);
-#endif /* TRUE == CFG_TRACE_ENABLE */
-
-    coreId = Os_GetObjCoreId(ScheduleTableID);
-
-    /* Cross core use shall be not supported. */
-    if (Os_SCB.sysCore != coreId)
-    {
-        err = E_OS_CORE;
-    }
-#if (OS_STATUS_EXTENDED == CFG_STATUS)
-
-    else if (Os_GetObjLocalId(ScheduleTableID) >= Os_CfgSchedTblMax_Inf[Os_GetObjCoreId(ScheduleTableID)])
-
+    /* OS387 */
+    if (OS_ST_SYNC_EXPLICIT != Os_SchedTblCfg[schedTblId].SchedTblSync.SchedTblSyncStrategy)
     {
         err = E_OS_ID;
     }
-#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
-#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
-    else if (Os_WrongContext(OS_CONTEXT_START_ST_SYN) != TRUE)
+    /* OS388 */
+    else if (SCHEDULETABLE_STOPPED != Os_STCB[schedTblId]->SchedTblState)
     {
-        err = E_OS_CALLEVEL;
+        err = E_OS_STATE;
     }
-    else if (Os_IgnoreService() != TRUE)
-    {
-        err = E_OS_DISABLEDINT;
-    }
-    else if (Os_CheckObjAcs(OBJECT_SCHEDULETABLE, ScheduleTableID) != TRUE)
-    {
-        err = E_OS_ACCESS;
-    }
-#endif /* TRUE == CFG_SERVICE_PROTECTION_ENABLE */
     else
     {
-        ScheduleTableID = Os_GetObjLocalId(ScheduleTableID);
-
-        pStCfgRef = &Os_SchedTblCfg[ScheduleTableID];
-        pStCB     = &Os_STCB[ScheduleTableID];
-
-        /* OS387 */
-        if (ST_SYNC_EXPLICIT != pStCfgRef->osSchedTblSync.osSchedTblSyncStrategy)
-        {
-            err = E_OS_ID;
-        }
-
-        /* OS388 */
-        else if (SCHEDULETABLE_STOPPED != pStCB->stState)
-        {
-            err = E_OS_STATE;
-        }
-        else
-        {
-            /*nothing to do*/
-        }
-
-        if ((StatusType)E_OK == err)
-        {
-            Os_StartScheduleTableSynchron(ScheduleTableID);
-        }
+        /*nothing to do*/
     }
-
-#if (CFG_ERRORHOOK == TRUE)
-    if (err != E_OK)
-    {
-        Os_TraceErrorHook(
-            OSError_Save_StartScheduleTableSynchron(ScheduleTableID),
-            OSServiceId_StartScheduleTableSynchron,
-            err);
-    }
-#endif
-
-#if (TRUE == CFG_TRACE_ENABLE)
-    Os_TraceServiceExit(OSServiceId_StartScheduleTableSynchron);
-#endif /* TRUE == CFG_TRACE_ENABLE */
-
-    OS_EXIT_KERNEL(); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
 
     return err;
 }
@@ -2550,104 +2489,79 @@ StatusType StartScheduleTableSynchron(ScheduleTableType ScheduleTableID)
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <Sync ScheduleTable.>
- * Service ID           <0x0c>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Yes>
- * param-eventId[in]    <ScheduleTableID, value>
- * Param-Name[out]      <StatusType>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * REQ ID               <None>
+/**
+ * StartScheduleTableSynchron.
  */
-/********************************************************************/
-StatusType SyncScheduleTable(ScheduleTableType ScheduleTableID, TickType value)
+/* PRQA S 1503, 3006, 3408, 6030, 6070, 1512 ++ */ /* VL_QAC_NoUsedApi, VL_Os_3006, VL_Os_3408, VL_MTR_Os_STMIF, VL_MTR_Os_STCAL, VL_Os_1512 */
+StatusType StartScheduleTableSynchron(
+    ScheduleTableType ScheduleTableID)
+/* PRQA S 1503, 3006, 3408, 6030, 6070, 1512 -- */
 {
-    /* PRQA S 2742, 2880, 3138, 2741 ++ */ /* VL_Os_PlatformDef */
-    OS_ENTER_KERNEL();
-    /* PRQA S 2742, 2880, 3138, 2741 -- */
-    const Os_SchedTblCfgType* pStCfgRef;
-    StatusType                err = E_OK;
-    Os_CoreIdType             coreId;
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
+    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
+    OS_HAL_ENTER_KERNEL(); /* PRQA S 1021 */ /* VL_Os_1021 */
+    /* PRQA S 1006 -- */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
 
-#if (TRUE == CFG_TRACE_ENABLE)
-    Os_TraceServiceEnter(OSServiceId_SyncScheduleTable);
-#endif /* TRUE == CFG_TRACE_ENABLE */
+    StatusType err = E_OK;
+    /* PRQA S 3678 ++ */ /* VL_Os_3678 */
+    Os_SCBType *pScb = Os_GetCurrentContext();
+    /* PRQA S 3678 -- */
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 1317, 3432, 4442, 4521, 4544 ++ */ /* VL_Os_1317, VL_Os_3432, VL_Os_4442, VL_Os_4521, VL_Os_4544 */
+    OSRtiEnterApi(pScb, OSApiId_StartScheduleTableSynchron);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_StartScheduleTableSynchron_Start, ScheduleTableID);
+    /* PRQA S 1317, 3432, 4442, 4521, 4544 -- */
+    /* PRQA S 3138, 3141 -- */
 
-    coreId = Os_GetObjCoreId(ScheduleTableID);
-
-    /* Cross core use shall be not supported. */
-    if (Os_SCB.sysCore != coreId)
-    {
-        err = E_OS_CORE;
-    }
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
-
-    else if (Os_GetObjLocalId(ScheduleTableID) >= Os_CfgSchedTblMax_Inf[Os_GetObjCoreId(ScheduleTableID)])
-
+    if (Os_ObjectIDCheck((ObjectType)ScheduleTableID, (uint8)OS_OBJECT_SCHEDULETABLE) != TRUE)
     {
         err = E_OS_ID;
     }
-#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
-#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
-    else if (Os_WrongContext(OS_CONTEXT_SYNC_SCHEDULE_TABLE) != TRUE)
-    {
-        err = E_OS_CALLEVEL;
-    }
-    else if (Os_IgnoreService() != TRUE)
-    {
-        err = E_OS_DISABLEDINT;
-    }
-    else if (Os_CheckObjAcs(OBJECT_SCHEDULETABLE, ScheduleTableID) != TRUE)
-    {
-        err = E_OS_ACCESS;
-    }
-#endif /* TRUE == CFG_SERVICE_PROTECTION_ENABLE */
     else
-    {
-        ScheduleTableID = Os_GetObjLocalId(ScheduleTableID);
-
-        pStCfgRef = &Os_SchedTblCfg[ScheduleTableID];
-
-        /* OS454. */
-#if (OS_STATUS_EXTENDED == CFG_STATUS)
-        if (ST_SYNC_EXPLICIT != pStCfgRef->osSchedTblSync.osSchedTblSyncStrategy)
+#endif
+        /* Cross core use shall be not supported. */
+        if (pScb->SysCore != OS_SCHEDTBL_GET_COREID(ScheduleTableID))
         {
-            err = E_OS_ID;
-        }
-        /* OS455. */
-        else if (value >= pStCfgRef->osSchedTblDuration)
-        {
-            err = E_OS_VALUE;
+            err = E_OS_CORE;
         }
         else
         {
-            /*nothing to do*/
+#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
+            Os_ServicePortParamType SprotParam = {
+                .AllowedContext = OS_SERVICEPORT_CHECK_START_ST_SYN,
+                .ObjectType = OS_OBJECT_SCHEDULETABLE,
+                .ObjectID = ScheduleTableID, /* PRQA S 4424 */ /* VL_Os_4424 */
+                .Address = NULL_PARA, /* PRQA S 1258 */ /* VL_Os_1258 */
+            };
+            err = Os_ServiceProtCheck(pScb, &SprotParam);
+            if (err == E_OK)
+#endif
+            {
+                err = Os_StartSyncStatusCheck(ScheduleTableID);
+                if (err == E_OK)
+                {
+                    Os_StartScheduleTableSynchron(ScheduleTableID);
+                }
+            }
         }
-#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
-
-        if ((StatusType)E_OK == err)
-        {
-            err = Os_SyncScheduleTable(ScheduleTableID, value);
-        }
-    }
 
 #if (CFG_ERRORHOOK == TRUE)
     if (err != E_OK)
     {
-        Os_TraceErrorHook(OSError_Save_SyncScheduleTable(ScheduleTableID, value), OSServiceId_SyncScheduleTable, err);
+        Os_TraceErrorHook(OSError_Save_StartScheduleTableSynchron(ScheduleTableID),
+                          OSServiceId_StartScheduleTableSynchron, err, pScb); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
     }
 #endif
 
-#if (TRUE == CFG_TRACE_ENABLE)
-    Os_TraceServiceExit(OSServiceId_SyncScheduleTable);
-#endif /* TRUE == CFG_TRACE_ENABLE */
-
-    OS_EXIT_KERNEL(); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
-
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 3432, 4544 ++ */ /* VL_Os_3432, VL_Os_4544 */
+    OSRtiExitApi(pScb, OSApiId_StartScheduleTableSynchron);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_StartScheduleTableSynchron_Return, err);
+    OS_HAL_EXIT_KERNEL(); /* PRQA S 2743*/ /* VL_Os_2743*/
+    /* PRQA S 3432, 4544 -- */
+    /* PRQA S 3138, 3141 -- */
     return err;
 }
 #define OS_STOP_SEC_CODE
@@ -2655,107 +2569,204 @@ StatusType SyncScheduleTable(ScheduleTableType ScheduleTableID, TickType value)
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <SetScheduleTableAsync.>
- * Service ID           <0x0d>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Yes>
- * param-eventId[in]    <ScheduleTableID>
- * Param-Name[out]      <StatusType>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * REQ ID               <None>
+/**
+ * Status check during ScheduleTable synchronization.
  */
-/********************************************************************/
+OS_LOCAL StatusType Os_SyncStatusCheck(
+    ScheduleTableType schedTblId,
+    TickType value)
+{
+    StatusType err = E_OK;
+
+/* OS454. */
+#if (OS_STATUS_EXTENDED == CFG_STATUS)
+    const Os_SchedTblCfgType *schedTblCfgRef = &Os_SchedTblCfg[schedTblId];
+    if (OS_ST_SYNC_EXPLICIT != schedTblCfgRef->SchedTblSync.SchedTblSyncStrategy)
+    {
+        err = E_OS_ID;
+    }
+    /* OS455. */
+    else if (value >= schedTblCfgRef->SchedTblDuration)
+    {
+        err = E_OS_VALUE;
+    }
+    else
+    {
+        /*nothing to do*/
+    }
+#endif
+
+    UNUSED_PARAMETER(schedTblId);
+    UNUSED_PARAMETER(value);
+    return err;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * Sync ScheduleTable.
+ */
+/* PRQA S 1503, 3006, 3408, 6030, 6070, 1512 ++ */ /* VL_QAC_NoUsedApi, VL_Os_3006, VL_Os_3408, VL_MTR_Os_STMIF, VL_MTR_Os_STCAL, VL_Os_1512 */
+StatusType SyncScheduleTable(ScheduleTableType ScheduleTableID, TickType Value)
+/* PRQA S 1503, 3006, 3408, 6030, 6070, 1512 -- */
+{
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
+    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
+    OS_HAL_ENTER_KERNEL(); /* PRQA S 1021 */ /* VL_Os_1021 */
+    /* PRQA S 1006 -- */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
+
+    StatusType err = E_OK;
+    /* PRQA S 3678 ++ */ /* VL_Os_3678 */
+    Os_SCBType *pScb = Os_GetCurrentContext();
+    /* PRQA S 3678 -- */
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 1317, 3432, 4442, 4521, 4544 ++ */ /* VL_Os_1317, VL_Os_3432, VL_Os_4442, VL_Os_4521, VL_Os_4544 */
+    OSRtiEnterApi(pScb, OSApiId_SyncScheduleTable);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_SyncScheduleTable_Start, ScheduleTableID);
+    /* PRQA S 1317, 3432, 4442, 4521, 4544 -- */
+    /* PRQA S 3138, 3141 -- */
+
+#if (OS_STATUS_EXTENDED == CFG_STATUS)
+    if (Os_ObjectIDCheck((ObjectType)ScheduleTableID, (uint8)OS_OBJECT_SCHEDULETABLE) != TRUE)
+    {
+        err = E_OS_ID;
+    }
+    else
+#endif
+        /* Cross core use shall be not supported. */
+        if (pScb->SysCore != OS_SCHEDTBL_GET_COREID(ScheduleTableID))
+        {
+            err = E_OS_CORE;
+        }
+        else
+        {
+#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
+            Os_ServicePortParamType SprotParam = {
+                .AllowedContext = OS_SERVICEPORT_CHECK_SYNC_SCHEDULE_TABLE,
+                .ObjectType = OS_OBJECT_SCHEDULETABLE,
+                .ObjectID = ScheduleTableID, /* PRQA S 4424 */ /* VL_Os_4424 */
+                .Address = NULL_PARA, /* PRQA S 1258 */ /* VL_Os_1258 */
+            };
+            err = Os_ServiceProtCheck(pScb, &SprotParam);
+            if (E_OK == err)
+#endif
+            {
+                err = Os_SyncStatusCheck(ScheduleTableID, Value);
+                if ((StatusType)E_OK == err) /* PRQA S 2991, 2995 */ /* VL_Os_2991, VL_Os_2995 */
+                {
+                    err = Os_SyncScheduleTable(ScheduleTableID, Value);
+                }
+            }
+        }
+
+#if (CFG_ERRORHOOK == TRUE)
+    if (err != E_OK)
+    {
+        Os_TraceErrorHook(OSError_Save_SyncScheduleTable(ScheduleTableID, Value),
+                          OSServiceId_SyncScheduleTable, err, pScb); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
+    }
+#endif
+
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 3432, 4544 ++ */ /* VL_Os_3432, VL_Os_4544 */
+    OSRtiExitApi(pScb, OSApiId_SyncScheduleTable);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_SyncScheduleTable_Return, err);
+    OS_HAL_EXIT_KERNEL(); /* PRQA S 2743*/ /* VL_Os_2743*/
+    /* PRQA S 3432, 4544 -- */
+    /* PRQA S 3138, 3141 -- */
+    return err;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * SetScheduleTableAsync.
+ */
+/* PRQA S 1503, 3006, 3408, 6030, 6010, 6070, 1512 ++ */ /* VL_QAC_NoUsedApi, VL_Os_3006, VL_Os_3408, VL_MTR_Os_STMIF, VL_MTR_Os_STCYC, VL_MTR_Os_STCAL, VL_Os_1512 */
 StatusType SetScheduleTableAsync(ScheduleTableType ScheduleTableID)
+/* PRQA S 1503, 3006, 3408, 6030, 6010, 6070, 1512 -- */
 {
-    /* PRQA S 2742, 2880, 3138, 2741 ++ */ /* VL_Os_PlatformDef */
-    OS_ENTER_KERNEL();
-    /* PRQA S 2742, 2880, 3138, 2741 -- */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
+    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
+    OS_HAL_ENTER_KERNEL(); /* PRQA S 1021 */ /* VL_Os_1021 */
+    /* PRQA S 1006 -- */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
 
-    Os_STCBType* pStCB;
+    StatusType err = E_OK;
+    /* PRQA S 3678 ++ */ /* VL_Os_3678 */
+    Os_SCBType *pScb = Os_GetCurrentContext();
+    /* PRQA S 3678 -- */
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 1317, 3432, 4442, 4521, 4544 ++ */ /* VL_Os_1317, VL_Os_3432, VL_Os_4442, VL_Os_4521, VL_Os_4544 */
+    OSRtiEnterApi(pScb, OSApiId_SetScheduleTableAsync);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_SetScheduleTableAsync_Start, ScheduleTableID);
+    /* PRQA S 1317, 3432, 4442, 4521, 4544 -- */
+    /* PRQA S 3138, 3141 -- */
 
-    StatusType    err = E_OK;
-    Os_CoreIdType coreId;
-
-#if (TRUE == CFG_TRACE_ENABLE)
-    Os_TraceServiceEnter(OSServiceId_SetScheduleTableAsync);
-#endif /* TRUE == CFG_TRACE_ENABLE */
-
-    coreId = Os_GetObjCoreId(ScheduleTableID);
-
-    /* Cross core use shall be not supported. */
-    if (Os_SCB.sysCore != coreId)
-    {
-        err = E_OS_CORE;
-    }
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
-
-    else if (Os_GetObjLocalId(ScheduleTableID) >= Os_CfgSchedTblMax_Inf[coreId])
-
+    if (Os_ObjectIDCheck((ObjectType)ScheduleTableID, (uint8)OS_OBJECT_SCHEDULETABLE) != TRUE)
     {
         err = E_OS_ID;
     }
-#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
-#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
-    else if (Os_WrongContext(OS_CONTEXT_SET_SCHEDULE_TABLE_ASYNC) != TRUE)
-    {
-        err = E_OS_CALLEVEL;
-    }
-    else if (Os_IgnoreService() != TRUE)
-    {
-        err = E_OS_DISABLEDINT;
-    }
-    else if (Os_CheckObjAcs(OBJECT_SCHEDULETABLE, ScheduleTableID) != TRUE)
-    {
-        err = E_OS_ACCESS;
-    }
-#endif /* TRUE == CFG_SERVICE_PROTECTION_ENABLE */
     else
-    {
-        ScheduleTableID = Os_GetObjLocalId(ScheduleTableID);
-
-        /*SWS_Os_00458:If OsScheduleTblSyncStrategy of <ScheduleTableID> in
-         * a call of SetScheduleTableAsync() is not equal to EXPLICIT OR if
-         * <ScheduleTableID> is invalid then SetScheduleTableAsync() shall
-         * return E_OS_ID. */
-        pStCB = &Os_STCB[ScheduleTableID];
-
-        /* SWS_Os_00483:If state is STOPPED/NEXT/WAITTING, return E_OS_STATE. */
-        if ((SCHEDULETABLE_STOPPED == pStCB->stState) || (SCHEDULETABLE_NEXT == pStCB->stState)
-            || (SCHEDULETABLE_WAITING == pStCB->stState))
+#endif
+        if (pScb->SysCore != OS_SCHEDTBL_GET_COREID(ScheduleTableID))
         {
-            err = E_OS_STATE;
+            err = E_OS_CORE;
         }
-
-        if ((StatusType)E_OK == err)
+        else
         {
-            err = Os_SetScheduleTableAsync(ScheduleTableID);
+#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
+            Os_ServicePortParamType SprotParam = {
+                .AllowedContext = OS_SERVICEPORT_CHECK_SET_SCHEDULE_TABLE_ASYNC,
+                .ObjectType = OS_OBJECT_SCHEDULETABLE,
+                .ObjectID = ScheduleTableID, /* PRQA S 4424 */ /* VL_Os_4424 */
+                .Address = NULL_PARA, /* PRQA S 1258 */ /* VL_Os_1258 */
+            };
+            err = Os_ServiceProtCheck(pScb, &SprotParam);
+            if (E_OK == err)
+#endif
+            {
+                Os_STCBType *pStcb = Os_STCB[ScheduleTableID]; /* PRQA S 3678 */ /* VL_Os_3678 */
+                if ((SCHEDULETABLE_STOPPED == pStcb->SchedTblState) || (SCHEDULETABLE_NEXT == pStcb->SchedTblState) || (SCHEDULETABLE_WAITING == pStcb->SchedTblState))
+                {
+                    err = E_OS_STATE; /* OS483 */
+                }
+
+                if ((StatusType)E_OK == err)
+                {
+                    err = Os_SetScheduleTableAsync(ScheduleTableID);
+                }
+            }
         }
-    }
 
 #if (CFG_ERRORHOOK == TRUE)
     if (err != E_OK)
     {
-        Os_TraceErrorHook(OSError_Save_SetScheduleTableAsync(ScheduleTableID), OSServiceId_SetScheduleTableAsync, err);
+        Os_TraceErrorHook(OSError_Save_SetScheduleTableAsync(ScheduleTableID),
+                          OSServiceId_SetScheduleTableAsync, err, pScb); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
     }
 #endif
 
-#if (TRUE == CFG_TRACE_ENABLE)
-    Os_TraceServiceExit(OSServiceId_SetScheduleTableAsync);
-#endif /* TRUE == CFG_TRACE_ENABLE */
-
-    OS_EXIT_KERNEL(); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
-
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 3432, 4544 ++ */ /* VL_Os_3432, VL_Os_4544 */
+    OSRtiExitApi(pScb, OSApiId_SetScheduleTableAsync);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_SetScheduleTableAsync_Return, err);
+    OS_HAL_EXIT_KERNEL(); /* PRQA S 2743*/ /* VL_Os_2743*/
+    /* PRQA S 3432, 4544 -- */
+    /* PRQA S 3138, 3141 -- */
     return err;
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
-#endif /* OS_SC2 == CFG_SC || OS_SC4 == CFG_SC */
+#endif
 
-#endif /* CFG_SCHEDTBL_MAX > 0U */
+#endif
 
 /*=======[E N D   O F   F I L E]==============================================*/
 /* PRQA S 0553 EOF */ /* VL_QAC_UnUsedFiles */

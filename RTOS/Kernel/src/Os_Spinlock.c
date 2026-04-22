@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2024 Isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception OR  LicenseRef-Commercial-License
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -11,117 +11,310 @@
  * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  * or see <https://www.gnu.org/licenses/>.
  *
- ********************************************************************************
- **                                                                            **
- **  FILENAME    :  Os_Spinlock.c                                              **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      :  i-soft-os                                                  **
- **  Vendor      :                                                             **
- **  DESCRIPTION :  Spinlock manager                                           **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
- **  Version :   AUTOSAR classic Platform R19--Function Safety                 **
- **                                                                            **
- *******************************************************************************/
+ * Alternatively, this file may be used under the terms of the Isoft Infrastructure Software Co., Ltd.
+ * Commercial License, in which case the provisions of the Isoft Infrastructure Software Co., Ltd.
+ * Commercial License shall apply instead of those of the GNU Lesser General Public License.
+ *
+ * You should have received a copy of the Isoft Infrastructure Software Co., Ltd.  Commercial License
+ * along with this program. If not, please find it at <https://EasyXMen.com/xy/reference/permissions.html>
+ *
+ ************************************************************************************************************************
+ **
+ **  @file               : Os_Spinlock.c
+ **  @author             : i-soft-os
+ **  @date               : 2025/02/10
+ **  @vendor             : isoft
+ **  @description        : Os source file for Spinlock API implementations
+ **
+ ***********************************************************************************************************************/
 
-/*=======[I N C L U D E S]====================================================*/
-#include "Os_Internal.h"
+/* =================================================== inclusions =================================================== */
+#include "Os_Arch_Processor.h"
+#include "Os_Spinlock.h"
+#include "Os_Appl.h"
+#include "Os_Hook.h"
+#include "Os_Sprot.h"
+#include "Os_Resource.h"
+#include "Os_Interrupt.h"
+#include "Os_Task.h"
+#include "Os_ScheduleTable.h"
+#include "Os_ProtectHook.h"
+#include "Os_Kernel.h"
+#include "Os_Err.h"
+#include "Os_Rti.h"
+#include "Os_Arti.h"
 
-/*=======[V E R S I O N  I N F O R M A T I O N]===============================*/
+/* ===================================================== macros ===================================================== */
 
-/*=======[V E R S I O N  C H E C K]===========================================*/
+/* ================================================ type definitions ================================================ */
 
-/*=======[M A C R O S]========================================================*/
-#define OS_SPINLOCK_UNLOCK            0x0u
-#define OS_SPINLOCK_LOCK              0x1u
-#define OS_SPINLOCK_OCCUPY_SUCCESS    0x0u
-#define OS_SPINLOCK_OCCUPY_NO_SUCCESS 0x1u
+/* ============================================ external data definitions =========================================== */
+#if (OS_AUTOSAR_CORES > 1U)
+#define OS_START_SEC_VAR_CLEARED_GLOBAL_32
+#include "Os_MemMap.h"
+Os_SpinlockType Os_SpinlockSync;
+#define OS_STOP_SEC_VAR_CLEARED_GLOBAL_32
+#include "Os_MemMap.h"
+#endif
 
-/*=======[T Y P E   D E F I N I T I O N S]====================================*/
+/* ============================================ internal data definitions =========================================== */
 
-/*=======[E X T E R N A L   D A T A]==========================================*/
+/* ========================================== internal function declarations ======================================== */
+#if (CFG_SPINLOCK_MAX > 0U)
+/**
+ * @brief           Performs safety checks before acquiring a spinlock
+ * @param[in]       pScb: Pointer to the System Control Block
+ * @param[in]       spinlockId: ID of the spinlock to be checked
+ * @return          StatusType
+ * @retval          E_OK: Spinlock can be safely acquired
+ * @retval          E_OS_INTERFERENCE_DEADLOCK: The spinlock is already occupied by this core
+ * @retval          E_OS_NESTING_DEADLOCK: Spinlock acquisition would violate order or grouping rules
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+#if (OS_STATUS_EXTENDED == CFG_STATUS)
+OS_LOCAL StatusType Os_GetSpinlockCheck(const Os_SCBType *pScb, SpinlockIdType spinlockId);
+#endif
 
-/*=======[E X T E R N A L   F U N C T I O N   D E C L A R A T I O N S]========*/
+/**
+ * @brief           Performs safety checks before releasing a spinlock
+ * @param[in]       pScb: Pointer to the System Control Block
+ * @param[in]       spinlockId: ID of the spinlock to be released
+ * @return          StatusType
+ * @retval          E_OK: Spinlock can be safely released
+ * @retval          E_OS_STATE: The spinlock is not owned by the calling task/ISR
+ * @retval          E_OS_NOFUNC: Attempt to release a spinlock not following LIFO order
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+#if (OS_STATUS_EXTENDED == CFG_STATUS)
+OS_LOCAL StatusType Os_ReleaseSpinlockCheck(const Os_SCBType *pScb, SpinlockIdType spinlockId);
+#endif
 
-/*=======[I N T E R N A L   D A T A]==========================================*/
+/**
+ * @brief           Applies the lock method specified for a spinlock
+ * @param[in]       pScb: Pointer to the System Control Block
+ * @param[in]       spinlockId: ID of the spinlock
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_MethodLock(Os_SCBType *pScb, SpinlockIdType spinlockId);
 
-/*=======[I N T E R N A L   F U N C T I O N   D E C L A R A T I O N S]========*/
+/**
+ * @brief           Releases the lock method specified for a spinlock
+ * @param[in]       pScb: Pointer to the System Control Block
+ * @param[in]       spinlockId: ID of the spinlock
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_MethodRelease(Os_SCBType *pScb, SpinlockIdType spinlockId);
 
-/*=======[F U N C T I O N   I M P L E M E N T A T I O N S]====================*/
+/**
+ * @brief           Updates task or ISR control blocks after successfully acquiring a spinlock
+ * @param[in]       pScb: Pointer to the System Control Block
+ * @param[in]       spinlockId: ID of the acquired spinlock
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_GetCBModify(const Os_SCBType *pScb, SpinlockIdType spinlockId);
+
+/**
+ * @brief           Updates task control block after releasing a spinlock
+ * @param[inout]    pTCB: Pointer to the Task Control Block
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_ReleaseTCBModify(Os_TCBType *pTCB);
+
+/**
+ * @brief           Updates ISR control block after releasing a spinlock
+ * @param[inout]    pICB: Pointer to the ISR Control Block
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_ReleaseICBModify(Os_ICBType *pICB);
+
+/**
+ * @brief           Updates task or ISR control blocks after releasing a spinlock
+ * @param[in]       pScb: Pointer to the System Control Block
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_ReleaseCBModify(const Os_SCBType *pScb);
+
+/**
+ * @brief           Internal implementation for acquiring a spinlock
+ * @param[in]       pScb: Pointer to the System Control Block
+ * @param[in]       spinlockId: ID of the spinlock to acquire
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_GetSpinlock(Os_SCBType *pScb, SpinlockIdType spinlockId);
+
+/**
+ * @brief           Internal implementation for attempting to acquire a spinlock
+ * @param[in]       pScb: Pointer to the System Control Block
+ * @param[in]       spinlockId: ID of the spinlock to acquire
+ * @param[out]      success: Pointer to store acquisition result
+ * @return          void
+ * @synchronous     TRUE
+ * @reentrant       TRUE
+ * @trace           -
+ */
+OS_LOCAL void Os_TryToGetSpinlock(Os_SCBType *pScb, SpinlockIdType spinlockId, TryToGetSpinlockType *success);
+#endif
+
+/* ========================================== external function definitions ========================================= */
 #if (CFG_SPINLOCK_MAX > 0U)
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <Initialize the spin lock>
- * Service ID           <None>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * param[in]            <None>
- * param[out]           <None>
- * param[in/out]        <None>
- * return               <None>
- * CallByAPI            <Os_InitSystem>
- * REQ ID               <None>
+/**
+ * Initialize the spin lock
  */
-/******************************************************************************/
-/* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
-void Os_InitSpinlock(void)
-/* PRQA S 1532 -- */
+void Os_InitSpinlock(Os_CoreIdType coreId) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
 {
-    Os_SpinlockIdType i;
-
-    for (i = 0u; i < CFG_SPINLOCK_MAX; i++)
+    if (OS_CORE_ID_MASTER == coreId)
     {
-        Os_SLCB[i].objOccupyType = OBJECT_MAX;
-        Os_SLCB[i].objOccupyId   = OS_OBJECT_INVALID;
+        for (uint16 i = 0u; i < CFG_SPINLOCK_MAX; i++)
+        {
+            Os_SLCB[i].ObjOccupyType = OS_OBJECT_MAX;
+            Os_SLCB[i].ObjOccupyId = OS_OBJECT_INVALID; /* PRQA S 4424 */ /* VL_Os_4424 */
+        }
     }
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
 
+#if (OS_STATUS_EXTENDED == CFG_STATUS)
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <Internal implementation of OS service:GetSpinlock>
- * Service ID           <None>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * param[in]            <SpinlockId>
- * param[out]           <None>
- * param[in/out]        <None>
- * return               <None>
- * CallByAPI            <None>
- * REQ ID               <None>
+/**
+ * obtain a spin lock check
  */
-/******************************************************************************/
-/* PRQA S 3450 ++ */ /* VL_Os_3450 */
-static void Os_GetSpinlock(SpinlockIdType SpinlockId)
-/* PRQA S 3450 -- */
+
+OS_LOCAL StatusType Os_GetSpinlockCheck(const Os_SCBType *pScb, SpinlockIdType spinlockId)
 {
-    OS_ARCH_DECLARE_CRITICAL();
+    StatusType err = E_OK;
+    const Os_SpinlockCfgType *pSpinlockCfg = &Os_SpinlockCfg[spinlockId];
+    Os_TCBType *pTCB = pScb->SysRunningTCB; /* PRQA S 3678 */ /* VL_Os_3678 */
+    Os_ICBType *pICB = Os_ICB[pScb->SysRunningIsrCat2Id]; /* PRQA S 3678 */ /* VL_Os_3678 */
 
-    uint32 result;
-    /* PRQA S 4544, 3120 ++ */ /*  VL_Os_4544, VL_QAC_MagicNum */
-    Os_CoreIdType coreIndex = Os_SCB.sysCore << 12;
-    /* PRQA S 4544, 3120 -- */
-    const Os_SpinlockCfgType* pSpinlockCfg = &Os_SpinlockCfg[SpinlockId];
+    /*Os_00690*/
+    if (pScb->CurrentSpinlockOccupied[spinlockId] == TRUE)
+    {
+        err = E_OS_INTERFERENCE_DEADLOCK;
+    }
+    /* PRQA S 1881, 4342, 3442, 3345 ++ */ /* VL_Os_AutosarBool, VL_Os_4342, VL_Os_3442, VL_Os_3345 */
+    else if ((OS_LEVEL_TASK == pScb->SysOsLevel) && (OS_SPINLOCK_INVALID != pTCB->TaskCurrentSpinlockOccupyLevel) && ((pSpinlockCfg->SpinlockOrder <= Os_SpinlockCfg[pTCB->TaskCurrentSpinlockOccupyLevel].SpinlockOrder) || (Os_SpinlockCfg[pTCB->TaskCurrentSpinlockOccupyLevel].SpinlockGroupsId != pSpinlockCfg->SpinlockGroupsId)))
+    /* PRQA S 1881, 4342, 3442, 3345 -- */
+    {
+        err = E_OS_NESTING_DEADLOCK;
+    }
+    /* PRQA S 1881, 4342, 2004 ++ */ /* VL_Os_AutosarBool, VL_Os_4342,VL_Os_2004 */
+    else if ((OS_LEVEL_ISR2 == pScb->SysOsLevel) && (OS_SPINLOCK_INVALID != pICB->IsrCurrentSpinlockOccupyLevel) && ((pSpinlockCfg->SpinlockOrder <= Os_SpinlockCfg[pICB->IsrCurrentSpinlockOccupyLevel].SpinlockOrder) || (Os_SpinlockCfg[pICB->IsrCurrentSpinlockOccupyLevel].SpinlockGroupsId != pSpinlockCfg->SpinlockGroupsId)))
+    /* PRQA S 1881, 4342, 2004 -- */
+    {
+        /*Os_00691*/
+        err = E_OS_NESTING_DEADLOCK;
+    }
+    return err;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+#endif
 
-    switch (pSpinlockCfg->SpinlockMethod)
+#if (OS_STATUS_EXTENDED == CFG_STATUS)
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * Release a spin lock check
+ */
+OS_LOCAL StatusType Os_ReleaseSpinlockCheck(const Os_SCBType *pScb, SpinlockIdType spinlockId)
+{
+    StatusType err = E_OK;
+    Os_TCBType *pTCB = pScb->SysRunningTCB; /* PRQA S 3678 */ /* VL_Os_3678 */
+    Os_ICBType *pICB = Os_ICB[pScb->SysRunningIsrCat2Id]; /* PRQA S 3678 */ /* VL_Os_3678 */
+
+    /* PRQA S 1881, 4342, 3442 ++ */ /* VL_Os_AutosarBool, VL_Os_4342, VL_Os_3442 */
+    if ((OS_LEVEL_TASK == pScb->SysOsLevel) &&
+        (((Os_SLCB[spinlockId].ObjOccupyId != pScb->SysRunningTaskId) &&
+          (Os_SLCB[spinlockId].ObjOccupyType == OS_OBJECT_TASK)) ||
+         (OS_SPINLOCK_INVALID == pTCB->TaskCurrentSpinlockOccupyLevel)))
+    /* PRQA S 1881, 4342, 3442 -- */
+    {
+        err = E_OS_STATE;
+    }
+    /*Os_00701*/
+    /*res and spinlock should together release as LIFO order*/
+    else if ((OS_LEVEL_TASK == pScb->SysOsLevel) &&
+             ((pTCB->TaskCriticalZoneType[pTCB->TaskCriticalZoneCount - 1u] != OS_OBJECT_SPINLOCK) ||
+              (pTCB->TaskCriticalZoneStack[pTCB->TaskCriticalZoneCount - 1u] != spinlockId))) /* PRQA S 1881 */ /* VL_Os_AutosarBool */
+    {
+        err = E_OS_NOFUNC;
+    }
+
+    /*Os_00699*/
+    /* PRQA S 1881, 4342 ++ */ /* VL_Os_AutosarBool, VL_Os_4342 */
+    else if ((OS_LEVEL_ISR2 == pScb->SysOsLevel) &&
+             (((Os_SLCB[spinlockId].ObjOccupyId != pScb->SysRunningIsrCat2Id) &&
+               (Os_SLCB[spinlockId].ObjOccupyType == OS_OBJECT_ISR)) ||
+              (OS_SPINLOCK_INVALID == pICB->IsrCurrentSpinlockOccupyLevel)))
+    /* PRQA S 1881, 4342 -- */
+    {
+        err = E_OS_STATE;
+    }
+    /*res and spinlock should together release as LIFO order*/
+    else if ((OS_LEVEL_ISR2 == pScb->SysOsLevel) && /* PRQA S 2004 */ /* VL_Os_2004 */
+             ((pICB->Isr2CriticalZoneType[pICB->Isr2CriticalZoneCount - 1u] != OS_OBJECT_SPINLOCK) ||
+              (pICB->Isr2CriticalZoneStack[pICB->Isr2CriticalZoneCount - 1u] != spinlockId))) /* PRQA S 1881 */ /* VL_Os_AutosarBool */
+    {
+        err = E_OS_NOFUNC;
+    }
+
+    return err;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+#endif
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * spin lock locking with method
+ */
+OS_LOCAL void Os_MethodLock(Os_SCBType *pScb, SpinlockIdType spinlockId)
+{
+    OS_HAL_DECLARE_CRITICAL();
+
+    switch (Os_SpinlockCfg[spinlockId].SpinlockMethod)
     {
     case LOCK_ALL_INTERRUPTS:
-        Os_SuspendAllInterrupts();
+        Os_SuspendAllInterrupts(pScb);
         break;
 
     case LOCK_CAT2_INTERRUPTS:
-        Os_SuspendOSInterrupts();
+        Os_SuspendOSInterrupts(pScb);
         break;
 
     case LOCK_WITH_RES_SCHEDULER:
 #if (TRUE == CFG_USERESSCHEDULER)
-        (void)Os_GetResource(RES_SCHEDULER);
+        (void)Os_GetResource(pScb, pScb->ScheduleResId);
 #endif
         break;
 
@@ -134,51 +327,90 @@ static void Os_GetSpinlock(SpinlockIdType SpinlockId)
         break;
     }
 
-    OS_ARCH_ENTRY_CRITICAL();
-    Os_SCB.CurrentSpinlockOccupied[SpinlockId] = TRUE;
-    OS_ARCH_EXIT_CRITICAL();
+    OS_HAL_ENTRY_CRITICAL();
+    pScb->CurrentSpinlockOccupied[spinlockId] = TRUE;
+    OS_HAL_EXIT_CRITICAL();
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
 
-    do
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * modify Tcb or Icb after get spin lock successful
+ */
+OS_LOCAL void Os_MethodRelease(Os_SCBType *pScb, SpinlockIdType spinlockId)
+{
+    OS_HAL_DECLARE_CRITICAL();
+    OS_HAL_ENTRY_CRITICAL();
+    pScb->CurrentSpinlockOccupied[spinlockId] = FALSE;
+    OS_HAL_EXIT_CRITICAL();
+
+    /*Os_00696*/
+    switch (Os_SpinlockCfg[spinlockId].SpinlockMethod)
     {
-        result = Os_CmpSwapW(&Os_Spinlock[SpinlockId], OS_SPINLOCK_UNLOCK, OS_SPINLOCK_LOCK);
-    } while (result > 0u); /*Os_00687*/
+    case LOCK_ALL_INTERRUPTS:
+        Os_ResumeAllInterrupts(pScb);
+        break;
 
-    Os_SLCB[SpinlockId].occupied = TRUE;
+    case LOCK_CAT2_INTERRUPTS:
+        Os_ResumeOSInterrupts(pScb);
+        break;
 
-    if (OS_LEVEL_TASK == Os_SCB.sysOsLevel)
-    {
-        Os_TCBType* pTCB = Os_SCB.sysRunningTCB;
+    case LOCK_WITH_RES_SCHEDULER:
+#if (TRUE == CFG_USERESSCHEDULER)
+        (void)Os_ReleaseResource(pScb, pScb->ScheduleResId);
+#endif
+        break;
 
-        Os_SLCB[SpinlockId].objOccupyId   = (coreIndex | Os_SCB.sysRunningTaskID);
-        Os_SLCB[SpinlockId].objOccupyType = OBJECT_TASK;
+    case LOCK_NOTHING:
+        /* Nothing to do. */
+        break;
 
-        /*res and spinlock should together release as LIFO order*/
-
-        OS_ARCH_ENTRY_CRITICAL();
-
-        pTCB->taskCriticalZoneType[pTCB->taskCriticalZoneCount]  = OBJECT_SPINLOCK;
-        pTCB->taskCriticalZoneStack[pTCB->taskCriticalZoneCount] = SpinlockId;
-        pTCB->taskCurrentSpinlockOccupyLevel                     = SpinlockId;
-        pTCB->taskCriticalZoneCount++;
-
-        OS_ARCH_EXIT_CRITICAL();
+    default:
+        Os_Panic();
+        break;
     }
-    else if (OS_LEVEL_ISR2 == Os_SCB.sysOsLevel)
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * modify Tcb or Icb after get spin lock successful
+ */
+OS_LOCAL void Os_GetCBModify(const Os_SCBType *pScb, SpinlockIdType spinlockId)
+{
+    OS_HAL_DECLARE_CRITICAL();
+    Os_SLCBType *pSLcb = &Os_SLCB[spinlockId];
+    if (OS_LEVEL_TASK == pScb->SysOsLevel)
     {
-        Os_ICBType* pICB = &Os_ICB[Os_SCB.sysRunningIsrCat2Id];
-
-        Os_SLCB[SpinlockId].objOccupyId   = (coreIndex | Os_SCB.sysRunningIsrCat2Id);
-        Os_SLCB[SpinlockId].objOccupyType = OBJECT_ISR;
-
-        OS_ARCH_ENTRY_CRITICAL();
+        Os_TCBType *pTCB = pScb->SysRunningTCB; /* PRQA S 3432 */ /* VL_Os_3432 */
+        pSLcb->ObjOccupyId = pScb->SysRunningTaskId; /* PRQA S 4424 */ /* VL_Os_4424 */
+        pSLcb->ObjOccupyType = OS_OBJECT_TASK;
 
         /*res and spinlock should together release as LIFO order*/
-        pICB->isr2CriticalZoneType[pICB->isr2CriticalZoneCount]  = OBJECT_SPINLOCK;
-        pICB->isr2CriticalZoneStack[pICB->isr2CriticalZoneCount] = SpinlockId;
-        pICB->isrCurrentSpinlockOccupyLevel                      = SpinlockId;
-        pICB->isr2CriticalZoneCount++;
+        OS_HAL_ENTRY_CRITICAL();
+        pTCB->TaskCriticalZoneType[pTCB->TaskCriticalZoneCount] = OS_OBJECT_SPINLOCK;
+        pTCB->TaskCriticalZoneStack[pTCB->TaskCriticalZoneCount] = spinlockId; /* PRQA S 4424 */ /* VL_Os_4424 */
+        pTCB->TaskCurrentSpinlockOccupyLevel = spinlockId; /* PRQA S 4424 */ /* VL_Os_4424 */
+        pTCB->TaskCriticalZoneCount++;
+        OS_HAL_EXIT_CRITICAL();
+    }
+    else if (OS_LEVEL_ISR2 == pScb->SysOsLevel)
+    {
+        Os_ICBType *pICB = Os_ICB[pScb->SysRunningIsrCat2Id]; /* PRQA S 3432 */ /* VL_Os_3432 */
+        pSLcb->ObjOccupyId = pScb->SysRunningIsrCat2Id; /* PRQA S 4424 */ /* VL_Os_4424 */
+        pSLcb->ObjOccupyType = OS_OBJECT_ISR;
 
-        OS_ARCH_EXIT_CRITICAL();
+        OS_HAL_ENTRY_CRITICAL();
+        /*res and spinlock should together release as LIFO order*/
+        pICB->Isr2CriticalZoneType[pICB->Isr2CriticalZoneCount] = OS_OBJECT_SPINLOCK;
+        pICB->Isr2CriticalZoneStack[pICB->Isr2CriticalZoneCount] = spinlockId; /* PRQA S 4424 */ /* VL_Os_4424 */
+        pICB->IsrCurrentSpinlockOccupyLevel = spinlockId; /* PRQA S 4424 */ /* VL_Os_4424 */
+        pICB->Isr2CriticalZoneCount++;
+        OS_HAL_EXIT_CRITICAL();
     }
     else
     {
@@ -190,100 +422,207 @@ static void Os_GetSpinlock(SpinlockIdType SpinlockId)
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <The get spin lock function inside the OS>
- * Service ID           <0x19>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * param[in]            <SpinlockId>
- * param[out]           <None>
- * param[in/out]        <None>
- * return               <None>
- * CallByAPI            <None>
- * REQ ID               <None>
+/**
+ * modify Tcb before release spin lock successful
+ * Service ID           <None
  */
-/******************************************************************************/
-/* PRQA S 6030, 3006 ++ */ /* VL_MTR_Os_STMIF, VL_Os_3006 */
-StatusType GetSpinlock(SpinlockIdType SpinlockId)
-/* PRQA S 6030, 3006 -- */
+OS_LOCAL void Os_ReleaseTCBModify(Os_TCBType *pTCB)
 {
-    /* PRQA S 2742, 2880, 3138, 2741 ++ */ /* VL_Os_PlatformDef */
+    OS_HAL_DECLARE_CRITICAL();
+
+    /*res and spinlock should together release as LIFO order*/
+    OS_HAL_ENTRY_CRITICAL();
+    pTCB->TaskCriticalZoneCount--;
+    pTCB->TaskCriticalZoneType[pTCB->TaskCriticalZoneCount] = OS_OBJECT_MAX;
+    pTCB->TaskCriticalZoneStack[pTCB->TaskCriticalZoneCount] = OS_OBJECT_INVALID; /* PRQA S 4424 */ /* VL_Os_4424 */
+    OS_HAL_EXIT_CRITICAL();
+
+    uint32 spinlockTempCount = pTCB->TaskCriticalZoneCount;
+    pTCB->TaskCurrentSpinlockOccupyLevel = OS_SPINLOCK_INVALID; /* PRQA S 4424, 4342 */ /* VL_Os_4424, VL_Os_4342 */
+    if (spinlockTempCount > 0u)
+    {
+        do
+        {
+            --spinlockTempCount;
+            if (pTCB->TaskCriticalZoneType[spinlockTempCount] == OS_OBJECT_SPINLOCK)
+            {
+                SpinlockIdType spinlockId = pTCB->TaskCriticalZoneStack[spinlockTempCount]; /* PRQA S 4442 */ /* VL_Os_4442 */
+                if (Os_SLCB[spinlockId].Occupied != FALSE)
+                {
+                    pTCB->TaskCurrentSpinlockOccupyLevel = spinlockId; /* PRQA S 4424 */ /* VL_Os_4424 */
+                    break;
+                }
+            }
+        } while (spinlockTempCount > 0u);
+    }
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * modify Icb before release spin lock successful
+ * Service ID           <None
+ */
+OS_LOCAL void Os_ReleaseICBModify(Os_ICBType *pICB)
+{
+    OS_HAL_DECLARE_CRITICAL();
+
+    /*res and spinlock should together release as LIFO order*/
+    OS_HAL_ENTRY_CRITICAL();
+    pICB->Isr2CriticalZoneCount--;
+    pICB->Isr2CriticalZoneType[pICB->Isr2CriticalZoneCount] = OS_OBJECT_MAX;
+    pICB->Isr2CriticalZoneStack[pICB->Isr2CriticalZoneCount] = OS_OBJECT_INVALID; /* PRQA S 4424 */ /* VL_Os_4424 */
+    OS_HAL_EXIT_CRITICAL();
+
+    uint32 spinlockTempCount = pICB->Isr2CriticalZoneCount;
+    pICB->IsrCurrentSpinlockOccupyLevel = OS_SPINLOCK_INVALID; /* PRQA S 4424, 4342 */ /* VL_Os_4424, VL_Os_4342 */
+    if (spinlockTempCount > 0u)
+    {
+        do
+        {
+            --spinlockTempCount;
+            if (pICB->Isr2CriticalZoneType[spinlockTempCount] == OS_OBJECT_SPINLOCK)
+            {
+                SpinlockIdType spinlockId = pICB->Isr2CriticalZoneStack[spinlockTempCount]; /* PRQA S 4442 */ /* VL_Os_4442 */
+                if (Os_SLCB[spinlockId].Occupied != FALSE)
+                {
+                    pICB->IsrCurrentSpinlockOccupyLevel = spinlockId; /* PRQA S 4424 */ /* VL_Os_4424 */
+                    break;
+                }
+            }
+        } while (spinlockTempCount > 0u);
+    }
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * modify Tcb or Icb before release spin lock successful
+ */
+OS_LOCAL void Os_ReleaseCBModify(const Os_SCBType *pScb)
+{
+    if (OS_LEVEL_TASK == pScb->SysOsLevel)
+    {
+        Os_ReleaseTCBModify(pScb->SysRunningTCB);
+    }
+    else if (OS_LEVEL_ISR2 == pScb->SysOsLevel)
+    {
+        Os_ICBType *pICB = Os_ICB[pScb->SysRunningIsrCat2Id];
+        Os_ReleaseICBModify(pICB);
+    }
+    else
+    {
+        Os_Panic();
+    }
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * Internal implementation of OS service:GetSpinlock
+ */
+OS_LOCAL void Os_GetSpinlock(Os_SCBType *pScb, SpinlockIdType spinlockId)
+{
+    uint32 result;
+
+    Os_MethodLock(pScb, spinlockId);
+
+    do
+    {
+        result = Os_Hal_CmpSwapW(&Os_Spinlock[spinlockId],
+                             OS_SPINLOCK_UNLOCK, OS_SPINLOCK_LOCK);
+    } while (result > 0u); /*Os_00687*/
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 1821, 4532, 4544, 4542 ++ */ /* VL_Os_1821, VL_Os_4532, VL_Os_4544, VL_Os_4542 */
+    /* PRQA S 4543, 4523, 3762, 1277 ++ */ /* VL_Os_4543, VL_Os_4523, VL_Os_3762, VL_Os_1277 */
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SPINLOCK, Os, pScb->SysCore, OsSpinlock_Locked, spinlockId);
+    /* PRQA S 4543, 4523, 3762, 1277 -- */
+    /* PRQA S 1821, 4532, 4544, 4542 -- */
+    /* PRQA S 3138, 3141 -- */
+
+    Os_SLCB[spinlockId].Occupied = TRUE;
+
+    Os_GetCBModify(pScb, spinlockId);
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * The get spin lock function inside the OS
+ */
+/* PRQA S 1503, 3006, 3408, 6070, 1512 ++ */ /* VL_QAC_NoUsedApi, VL_Os_3006, VL_Os_3408, VL_MTR_Os_STCAL, VL_Os_1512 */
+StatusType GetSpinlock(SpinlockIdType SpinlockId)
+/* PRQA S 1503, 3006, 3408, 6070, 1512 -- */
+{
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
     /* PRQA S 1006 ++ */ /* VL_Os_1006 */
-    OS_ENTER_KERNEL();
+    OS_HAL_ENTER_KERNEL(); /* PRQA S 1021 */ /* VL_Os_1021 */
     /* PRQA S 1006 -- */
-    /* PRQA S 2742, 2880, 3138, 2741 -- */
-
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
     StatusType err = E_OK;
+    Os_SCBType *pScb = Os_GetCurrentContext();
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 1317, 3432, 4442, 4521, 4544 ++ */ /* VL_Os_1317, VL_Os_3432, VL_Os_4442, VL_Os_4521, VL_Os_4544 */
+    OSRtiEnterApi(pScb, OSApiId_GetSpinlock);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_GetSpinlock_Start, SpinlockId);
+    /* PRQA S 1317, 3432, 4442, 4521, 4544 -- */
+    /* PRQA S 3138, 3141 -- */
 
+/*Os_00689*/
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
-    if (SpinlockId >= CFG_SPINLOCK_MAX)
+    if (SpinlockId >= CFG_SPINLOCK_MAX) /* PRQA S 1880 */ /* VL_Os_1880 */
     {
         err = E_OS_ID;
     }
     else
-#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
-
-    /*service protection*/
+#endif
+    {
+/*service protection*/
 #if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
-        if (Os_WrongContext(OS_CONTEXT_GET_SPINLOCK) != TRUE)
-    {
-        err = E_OS_CALLEVEL;
-    }
-    else if (Os_CheckObjAcs(OBJECT_SPINLOCK, SpinlockId) != TRUE)
-    {
-        err = E_OS_ACCESS;
-    }
-    else
-#endif /* TRUE == CFG_SERVICE_PROTECTION_ENABLE */
-    {
+        Os_ServicePortParamType SprotParam = {
+            .AllowedContext = OS_SERVICEPORT_CHECK_GET_SPINLOCK,
+            .ObjectType = OS_OBJECT_SPINLOCK,
+            .ObjectID = SpinlockId, /* PRQA S 4424 */ /* VL_Os_4424 */
+            .Address = NULL_PARA, /* PRQA S 1258 */ /* VL_Os_1258 */
+        };
+        err = Os_ServiceProtCheck(pScb, &SprotParam);
+        if (E_OK == err)
+#endif
+        {
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
-        const Os_SpinlockCfgType* pSpinlockCfg = &Os_SpinlockCfg[SpinlockId];
-
-        /* PRQA S 3678 ++ */ /* VL_Os_3678 */
-        Os_TCBType* pTCB = Os_SCB.sysRunningTCB;
-        Os_ICBType* pICB = &Os_ICB[Os_SCB.sysRunningIsrCat2Id];
-        /* PRQA S 3678 -- */
-        /*Os_00690*/
-        if (Os_SCB.CurrentSpinlockOccupied[SpinlockId] == TRUE)
-        {
-            err = E_OS_INTERFERENCE_DEADLOCK;
-        }
-        else if (
-            /* PRQA S 3345, 3442 ++ */ /* VL_Os_3442, VL_Os_VolatileAccess */
-            (OS_LEVEL_TASK == Os_SCB.sysOsLevel)
-            && (OS_SPINLOCK_INVALID != pTCB->taskCurrentSpinlockOccupyLevel)
-            /* PRQA S 3345, 3442 -- */
-            && ((pSpinlockCfg->SpinlockOrder <= Os_SpinlockCfg[pTCB->taskCurrentSpinlockOccupyLevel].SpinlockOrder)
-                || (Os_SpinlockCfg[pTCB->taskCurrentSpinlockOccupyLevel].SpinlockGroupsId
-                    != pSpinlockCfg->SpinlockGroupsId)))
-        {
-            err = E_OS_NESTING_DEADLOCK;
-        }
-        else if (
-            (OS_LEVEL_ISR2 == Os_SCB.sysOsLevel) && (OS_SPINLOCK_INVALID != pICB->isrCurrentSpinlockOccupyLevel)
-            && ((pSpinlockCfg->SpinlockOrder <= Os_SpinlockCfg[pICB->isrCurrentSpinlockOccupyLevel].SpinlockOrder)
-                || (Os_SpinlockCfg[pICB->isrCurrentSpinlockOccupyLevel].SpinlockGroupsId
-                    != pSpinlockCfg->SpinlockGroupsId)))
-        {
-            /*Os_00691*/
-            err = E_OS_NESTING_DEADLOCK;
-        }
-        else
-#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
-        {
-            Os_GetSpinlock(SpinlockId);
+            if (E_OK != (err = Os_GetSpinlockCheck(pScb, SpinlockId))) /* PRQA S 3326 */ /* VL_Os_3326 */
+            {
+            }
+            else
+#endif
+            {
+                Os_GetSpinlock(pScb, SpinlockId);
+            }
         }
     }
 
 #if (CFG_ERRORHOOK == TRUE)
-    if (err != E_OK)
+    if (err != E_OK) /* PRQA S 2992, 2996 */ /* VL_Os_2992, VL_Os_2996 */
     {
-        Os_TraceErrorHook(OSError_Save_GetSpinlock(SpinlockId), OSServiceId_GetSpinlock, err);
+        Os_TraceErrorHook(OSError_Save_GetSpinlock(SpinlockId), OSServiceId_GetSpinlock, err, pScb); /* PRQA S 3138, 4424, 2880 */ /* VL_Os_PlatformDef, VL_Os_4424, VL_Os_2880 */
     }
 #endif
 
-    OS_EXIT_KERNEL(); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 3432, 4544 ++ */ /* VL_Os_3432, VL_Os_4544 */
+    OSRtiExitApi(pScb, OSApiId_GetSpinlock);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_GetSpinlock_Return, err);
+    OS_HAL_EXIT_KERNEL(); /* PRQA S 2743*/ /* VL_Os_2743*/
+    /* PRQA S 3432, 4544 -- */
+    /* PRQA S 3138, 3141 -- */
     /*Os_00688*/
     return err;
 }
@@ -292,112 +631,81 @@ StatusType GetSpinlock(SpinlockIdType SpinlockId)
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <ReleaseSpinlock releases a spinlock variable that was occupied before.
- *                       Before terminating a TASK all spinlock variables that have been occupied with
+/**
+ * ReleaseSpinlock releases a spinlock variable that was Occupied before.
+ *                       Before terminating a TASK all spinlock variables that have been Occupied with
  *                       GetSpinlock() shall be released. Before calling WaitEVENT all Spinlocks
- *                       shall be released>
- * Service ID           <0x1a>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * param[in]            <SpinlockId>
- * param[out]           <None>
- * param[in/out]        <None>
- * return               <None>
- * CallByAPI            <None>
- * REQ ID               <None>
+ *                       shall be released
  */
-/******************************************************************************/
-/* PRQA S 6030, 6010, 3006 ++ */ /* VL_MTR_Os_STMIF, VL_MTR_Os_STCYC, VL_Os_3006 */
+/* PRQA S 1503, 3006, 3408, 6070, 1512 ++ */ /* VL_QAC_NoUsedApi, VL_Os_3006, VL_Os_3408, VL_MTR_Os_STCAL, VL_Os_1512 */
 StatusType ReleaseSpinlock(SpinlockIdType SpinlockId)
-/* PRQA S 6030, 6010, 3006 -- */
+/* PRQA S 1503, 3006, 3408, 6070, 1512 -- */
 {
-    /* PRQA S 2742, 2880, 3138, 2741 ++ */ /* VL_Os_PlatformDef */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
     /* PRQA S 1006 ++ */ /* VL_Os_1006 */
-    OS_ENTER_KERNEL();
+    OS_HAL_ENTER_KERNEL(); /* PRQA S 1021 */ /* VL_Os_1021 */
     /* PRQA S 1006 -- */
-    /* PRQA S 2742, 2880, 3138, 2741 -- */
-
-    StatusType    err    = E_OK;
-    Os_CoreIdType coreId = Os_SCB.sysCore;
-    /* PRQA S 4544, 3120 ++ */ /*  VL_Os_4544, VL_QAC_MagicNum */
-    Os_CoreIdType coreIndex = coreId << 12;
-    /* PRQA S 4544, 3120 -- */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
+    StatusType err = E_OK;
+    Os_SCBType *pScb = Os_GetCurrentContext();
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 1317, 3432, 4442, 4521, 4544 ++ */ /* VL_Os_1317, VL_Os_3432, VL_Os_4442, VL_Os_4521, VL_Os_4544 */
+    OSRtiEnterApi(pScb, OSApiId_ReleaseSpinlock);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_ReleaseSpinlock_Start, SpinlockId);
+    /* PRQA S 1317, 3432, 4442, 4521, 4544 -- */
+    /* PRQA S 3138, 3141 -- */
 
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
-    if (SpinlockId >= CFG_SPINLOCK_MAX)
+    if (SpinlockId >= CFG_SPINLOCK_MAX) /* PRQA S 1880 */ /* VL_Os_1880 */
     {
         err = E_OS_ID;
     }
     else
-#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
+#endif
+    {
 /*service protection*/
 #if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
-        if (Os_WrongContext(OS_CONTEXT_RELEASE_SPINLOCK) != TRUE)
-    {
-        err = E_OS_CALLEVEL;
-    }
-    else if (FALSE == Os_CheckObjAcs(OBJECT_SPINLOCK, SpinlockId))
-    {
-        err = E_OS_ACCESS;
-    }
-    else
-#endif /* TRUE == CFG_SERVICE_PROTECTION_ENABLE */
-    {
+        Os_ServicePortParamType SprotParam = {
+            .AllowedContext = OS_SERVICEPORT_CHECK_RELEASE_SPINLOCK,
+            .ObjectType = OS_OBJECT_SPINLOCK,
+            .ObjectID = SpinlockId, /* PRQA S 4424 */ /* VL_Os_4424 */
+            .Address = NULL_PARA, /* PRQA S 1258 */ /* VL_Os_1258 */
+        };
+        err = Os_ServiceProtCheck(pScb, &SprotParam);
+        if (E_OK == err)
+#endif
+        {
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
-        /* PRQA S 3678 ++ */ /* VL_Os_3678 */
-        Os_TCBType* pTCB = Os_SCB.sysRunningTCB;
-        Os_ICBType* pICB = &Os_ICB[Os_SCB.sysRunningIsrCat2Id];
-        /* PRQA S 3678 -- */
-        /*Os_00699*/
-        if ((OS_LEVEL_TASK == Os_SCB.sysOsLevel) /* PRQA S 3442 */ /* VL_Os_3442 */
-            && (((Os_SLCB[SpinlockId].objOccupyId != (coreIndex | Os_SCB.sysRunningTaskID))
-                 && (Os_SLCB[SpinlockId].objOccupyType == OBJECT_TASK))
-                || (OS_SPINLOCK_INVALID == pTCB->taskCurrentSpinlockOccupyLevel)))
-        {
-            err = E_OS_STATE;
-        }
-        /*Os_00701*/
-        /*res and spinlock should together release as LIFO order*/
-        else if (
-            (OS_LEVEL_TASK == Os_SCB.sysOsLevel)
-            && ((pTCB->taskCriticalZoneType[pTCB->taskCriticalZoneCount - 1u] != OBJECT_SPINLOCK)
-                || (pTCB->taskCriticalZoneStack[pTCB->taskCriticalZoneCount - 1u] != SpinlockId)))
-        {
-            err = E_OS_NOFUNC;
-        }
-        /*Os_00699*/
-        else if (
-            (OS_LEVEL_ISR2 == Os_SCB.sysOsLevel)
-            && (((Os_SLCB[SpinlockId].objOccupyId != (coreIndex | Os_SCB.sysRunningIsrCat2Id))
-                 && (Os_SLCB[SpinlockId].objOccupyType == OBJECT_ISR))
-                || (OS_SPINLOCK_INVALID == pICB->isrCurrentSpinlockOccupyLevel)))
-        {
-            err = E_OS_STATE;
-        }
-        /*res and spinlock should together release as LIFO order*/
-        else if (
-            (OS_LEVEL_ISR2 == Os_SCB.sysOsLevel)
-            && ((pICB->isr2CriticalZoneType[pICB->isr2CriticalZoneCount - 1u] != OBJECT_SPINLOCK)
-                || (pICB->isr2CriticalZoneStack[pICB->isr2CriticalZoneCount - 1u] != SpinlockId)))
-        {
-            err = E_OS_NOFUNC;
-        }
-        else
-#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
-        {
-            Os_ReleaseSpinlock(SpinlockId);
+            if (E_OK != (err = Os_ReleaseSpinlockCheck(pScb, SpinlockId))) /* PRQA S 3326 */ /* VL_Os_3326 */
+            {
+            }
+            else
+#endif
+            {
+                Os_ReleaseSpinlock(pScb, SpinlockId);
+            }
         }
     }
+
 #if (CFG_ERRORHOOK == TRUE)
-    if (err != E_OK)
+    if (err != E_OK) /* PRQA S 2992, 2996 */ /* VL_Os_2992, VL_Os_2996 */
     {
-        Os_TraceErrorHook(OSError_Save_ReleaseSpinlock(SpinlockId), OSServiceId_ReleaseSpinlock, err);
+        /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+        /* PRQA S 4424 ++ */ /* VL_Os_4424 */
+        Os_TraceErrorHook(OSError_Save_ReleaseSpinlock(SpinlockId), /* PRQA S 2880 */ /* VL_Os_2880 */
+                          OSServiceId_ReleaseSpinlock, err, pScb);
+        /* PRQA S 4424 -- */
+        /* PRQA S 3138, 3141 -- */
     }
 #endif
 
-    OS_EXIT_KERNEL(); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 3432, 4544 ++ */ /* VL_Os_3432, VL_Os_4544 */
+    OSRtiExitApi(pScb, OSApiId_ReleaseSpinlock);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_ReleaseSpinlock_Return, err);
+    OS_HAL_EXIT_KERNEL(); /* PRQA S 2743*/ /* VL_Os_2743*/
+    /* PRQA S 3432, 4544 -- */
+    /* PRQA S 3138, 3141 -- */
     /*Os_00697*/
     return err;
 }
@@ -406,309 +714,68 @@ StatusType ReleaseSpinlock(SpinlockIdType SpinlockId)
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <Internal implementation of OS service:ReleaseSpinlock>
- * Service ID           <None>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * param[in]            <SpinlockId>
- * param[out]           <None>
- * param[in/out]        <None>
- * return               <None>
- * CallByAPI            <None>
- * REQ ID               <None>
+/**
+ * Internal implementation of OS service:ReleaseSpinlock
  */
-/******************************************************************************/
-/* PRQA S 6030, 6010, 6080, 6050 ++ */ /* VL_MTR_Os_STMIF, VL_MTR_Os_STCYC, VL_MTR_Os_STPTH, VL_MTR_Os_STST3 */
-void Os_ReleaseSpinlock(SpinlockIdType SpinlockId)
-/* PRQA S 6030, 6010, 6080, 6050 -- */
+void Os_ReleaseSpinlock(Os_SCBType *pScb, SpinlockIdType spinlockId)
 {
-    OS_ARCH_DECLARE_CRITICAL();
+    Os_SLCB[spinlockId].ObjOccupyId = OS_TASK_INVALID; /* PRQA S 4424, 4342 */ /* VL_Os_4424, VL_Os_4342 */
+    Os_SLCB[spinlockId].ObjOccupyType = OS_OBJECT_MAX;
+    Os_SLCB[spinlockId].Occupied = FALSE;
 
-    Os_TCBType* pTCB = Os_SCB.sysRunningTCB;
-    Os_ICBType* pICB = &Os_ICB[Os_SCB.sysRunningIsrCat2Id];
-
-    Os_SpinlockIdType preSpinlockId;
-    uint32            spinlockTempCount;
-    uint32            result;
-
-    preSpinlockId                     = SpinlockId;
-    Os_SLCB[SpinlockId].objOccupyId   = OS_TASK_INVALID;
-    Os_SLCB[SpinlockId].objOccupyType = OBJECT_MAX;
-    Os_SLCB[SpinlockId].occupied      = FALSE;
-
-    if (OS_LEVEL_TASK == Os_SCB.sysOsLevel)
-    {
-        /*res and spinlock should together release as LIFO order*/
-
-        OS_ARCH_ENTRY_CRITICAL();
-
-        pTCB->taskCriticalZoneCount--;
-        pTCB->taskCriticalZoneType[pTCB->taskCriticalZoneCount]  = OBJECT_MAX;
-        pTCB->taskCriticalZoneStack[pTCB->taskCriticalZoneCount] = OS_OBJECT_INVALID;
-
-        OS_ARCH_EXIT_CRITICAL();
-
-        spinlockTempCount = pTCB->taskCriticalZoneCount;
-        if (0u != spinlockTempCount)
-        {
-            while (TRUE) /* PRQA S 2740, 0771 */ /* VL_Os_2740, VL_Os_0771 */
-            {
-                spinlockTempCount--;
-                if (pTCB->taskCriticalZoneType[spinlockTempCount] == OBJECT_SPINLOCK)
-                {
-                    /* PRQA S 1338 ++ */ /* VL_Os_1338 */
-                    SpinlockId = pTCB->taskCriticalZoneStack[spinlockTempCount];
-                    /* PRQA S 1338 -- */
-                    if ((boolean)TRUE == Os_SLCB[SpinlockId].occupied)
-                    {
-                        pTCB->taskCurrentSpinlockOccupyLevel = SpinlockId;
-                        break;
-                    }
-                }
-
-                if (0u == spinlockTempCount)
-                {
-                    pTCB->taskCurrentSpinlockOccupyLevel = OS_SPINLOCK_INVALID;
-                    break;
-                }
-            }
-        }
-        else
-        {
-            pTCB->taskCurrentSpinlockOccupyLevel = OS_SPINLOCK_INVALID;
-        }
-    }
-    else if (OS_LEVEL_ISR2 == Os_SCB.sysOsLevel)
-    {
-        /*res and spinlock should together release as LIFO order*/
-
-        OS_ARCH_ENTRY_CRITICAL();
-
-        pICB->isr2CriticalZoneCount--;
-        pICB->isr2CriticalZoneType[pICB->isr2CriticalZoneCount]  = OBJECT_MAX;
-        pICB->isr2CriticalZoneStack[pICB->isr2CriticalZoneCount] = OS_OBJECT_INVALID;
-
-        OS_ARCH_EXIT_CRITICAL();
-
-        spinlockTempCount = pICB->isr2CriticalZoneCount;
-        if (0u != spinlockTempCount)
-        {
-            /* PRQA S 2990, 0771 ++ */ /* VL_Os_2990, VL_Os_0771 */
-            while (spinlockTempCount > 0u)
-            /* PRQA S 2990, 0771 -- */
-            {
-                spinlockTempCount--;
-                if (pICB->isr2CriticalZoneType[spinlockTempCount] == OBJECT_SPINLOCK)
-                {
-                    /* PRQA S 1338 ++ */ /* VL_Os_1338 */
-                    SpinlockId = pICB->isr2CriticalZoneStack[spinlockTempCount];
-                    /* PRQA S 1338 -- */
-                    if ((boolean)TRUE == Os_SLCB[SpinlockId].occupied)
-                    {
-                        pICB->isrCurrentSpinlockOccupyLevel = SpinlockId;
-                        break;
-                    }
-                }
-
-                if (0u == spinlockTempCount)
-                {
-                    pICB->isrCurrentSpinlockOccupyLevel = OS_SPINLOCK_INVALID;
-                    break;
-                }
-            }
-        }
-        else
-        {
-            pICB->isrCurrentSpinlockOccupyLevel = OS_SPINLOCK_INVALID;
-        }
-    }
-    else
-    {
-        Os_Panic();
-    }
+    Os_ReleaseCBModify(pScb);
 
     /*Os_00696*/
+    uint32 result;
     do
     {
-        result = Os_CmpSwapW(&Os_Spinlock[preSpinlockId], OS_SPINLOCK_LOCK, OS_SPINLOCK_UNLOCK);
+        result = Os_Hal_CmpSwapW(&Os_Spinlock[spinlockId], OS_SPINLOCK_LOCK, OS_SPINLOCK_UNLOCK);
     } while (result > 0u); /*Os_00687*/
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 1821, 4532, 4544, 4542 ++ */ /* VL_Os_1821, VL_Os_4532, VL_Os_4544, VL_Os_4542 */
+    /* PRQA S 4543, 4523, 3762, 1277 ++ */ /* VL_Os_4543, VL_Os_4523, VL_Os_3762, VL_Os_1277 */
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SPINLOCK, Os, pScb->SysCore, OsSpinlock_Released, spinlockId);
+    /* PRQA S 4543, 4523, 3762, 1277 -- */
+    /* PRQA S 1821, 4532, 4544, 4542 -- */
+    /* PRQA S 3138, 3141 -- */
 
-    OS_ARCH_ENTRY_CRITICAL();
-
-    Os_SCB.CurrentSpinlockOccupied[preSpinlockId] = FALSE;
-
-    OS_ARCH_EXIT_CRITICAL();
-
-    /*Os_00696*/
-    switch (Os_SpinlockCfg[preSpinlockId].SpinlockMethod)
-    {
-    case LOCK_ALL_INTERRUPTS:
-        Os_ResumeAllInterrupts();
-        break;
-
-    case LOCK_CAT2_INTERRUPTS:
-        Os_ResumeOSInterrupts();
-        break;
-
-    case LOCK_WITH_RES_SCHEDULER:
-#if (TRUE == CFG_USERESSCHEDULER)
-        (void)Os_ReleaseResource(RES_SCHEDULER);
-#endif
-        break;
-
-    case LOCK_NOTHING:
-        /* Nothing to do. */
-        break;
-
-    default:
-        Os_Panic();
-        break;
-    }
+    Os_MethodRelease(pScb, spinlockId);
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <Internal implementation of OS service:TryToGetSpinlock>
- * Service ID           <None>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * param[in]            <SpinlockId>
- * param[out]           <None>
- * param[in/out]        <None>
- * return               <None>
- * CallByAPI            <None>
- * REQ ID               <None>
+/**
+ * Internal implementation of OS service:TryToGetSpinlock
  */
-/******************************************************************************/
-/* PRQA S 6010, 6070, 3450 ++ */ /* VL_MTR_Os_STCYC, VL_MTR_Os_STCAL, VL_Os_3450 */
-static void Os_TryToGetSpinlock(SpinlockIdType SpinlockId, TryToGetSpinlockType* Success)
-/* PRQA S 6010, 6070, 3450 -- */
+OS_LOCAL void Os_TryToGetSpinlock(
+    Os_SCBType *pScb,
+    SpinlockIdType spinlockId,
+    TryToGetSpinlockType *success)
 {
-    OS_ARCH_DECLARE_CRITICAL();
-
-    Os_TCBType* pTCB = Os_SCB.sysRunningTCB;
-    Os_ICBType* pICB = &Os_ICB[Os_SCB.sysRunningIsrCat2Id];
-
-    uint32 result;
-    /* PRQA S 4544, 3120 ++ */ /*  VL_Os_4544, VL_QAC_MagicNum */
-    Os_CoreIdType coreIndex = Os_SCB.sysCore << 12;
-    /* PRQA S 4544, 3120 -- */
-
-    switch (Os_SpinlockCfg[SpinlockId].SpinlockMethod)
-    {
-    case LOCK_ALL_INTERRUPTS:
-        Os_SuspendAllInterrupts();
-        break;
-
-    case LOCK_CAT2_INTERRUPTS:
-        Os_SuspendOSInterrupts();
-        break;
-
-    case LOCK_WITH_RES_SCHEDULER:
-#if (TRUE == CFG_USERESSCHEDULER)
-        (void)Os_GetResource(RES_SCHEDULER);
-#endif
-        break;
-
-    case LOCK_NOTHING:
-        /* Nothing to do. */
-        break;
-
-    /*add to pass QAC*/
-    default:
-        /* Nothing to do. */
-        break;
-    }
-
-    OS_ARCH_ENTRY_CRITICAL();
-
-    Os_SCB.CurrentSpinlockOccupied[SpinlockId] = TRUE;
-
-    OS_ARCH_EXIT_CRITICAL();
+    Os_MethodLock(pScb, spinlockId);
 
     /*Os_00705*/
-    result = Os_CmpSwapW(&Os_Spinlock[SpinlockId], OS_SPINLOCK_UNLOCK, OS_SPINLOCK_LOCK);
+    uint32 result = Os_Hal_CmpSwapW(&Os_Spinlock[spinlockId], OS_SPINLOCK_UNLOCK, OS_SPINLOCK_LOCK);
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 1821, 4532, 4544, 4542 ++ */ /* VL_Os_1821, VL_Os_4532, VL_Os_4544, VL_Os_4542 */
+    /* PRQA S 4543, 4523, 3762, 1277 ++ */ /* VL_Os_4543, VL_Os_4523, VL_Os_3762, VL_Os_1277 */
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SPINLOCK, Os, pScb->SysCore, OsSpinlock_Locked, spinlockId);
+    /* PRQA S 4543, 4523, 3762, 1277 -- */
+    /* PRQA S 1821, 4532, 4544, 4542 -- */
+    /* PRQA S 3138, 3141 -- */
     /*Os_00706*/
     if (OS_SPINLOCK_OCCUPY_SUCCESS == result)
     {
-        *Success                     = TRYTOGETSPINLOCK_SUCCESS;
-        Os_SLCB[SpinlockId].occupied = TRUE;
-        if (OS_LEVEL_TASK == Os_SCB.sysOsLevel)
-        {
-            Os_SLCB[SpinlockId].objOccupyId   = (coreIndex | Os_SCB.sysRunningTaskID);
-            Os_SLCB[SpinlockId].objOccupyType = OBJECT_TASK;
-
-            /*res and spinlock should together release as LIFO order*/
-
-            OS_ARCH_ENTRY_CRITICAL();
-
-            pTCB->taskCriticalZoneType[pTCB->taskCriticalZoneCount]  = OBJECT_SPINLOCK;
-            pTCB->taskCriticalZoneStack[pTCB->taskCriticalZoneCount] = SpinlockId;
-            pTCB->taskCurrentSpinlockOccupyLevel                     = SpinlockId;
-            pTCB->taskCriticalZoneCount++;
-
-            OS_ARCH_EXIT_CRITICAL();
-        }
-        else if (OS_LEVEL_ISR2 == Os_SCB.sysOsLevel)
-        {
-            Os_SLCB[SpinlockId].objOccupyId   = (coreIndex | Os_SCB.sysRunningIsrCat2Id);
-            Os_SLCB[SpinlockId].objOccupyType = OBJECT_ISR;
-
-            OS_ARCH_ENTRY_CRITICAL();
-
-            /*res and spinlock should together release as LIFO order*/
-            pICB->isr2CriticalZoneType[pICB->isr2CriticalZoneCount]  = OBJECT_SPINLOCK;
-            pICB->isr2CriticalZoneStack[pICB->isr2CriticalZoneCount] = SpinlockId;
-            pICB->isrCurrentSpinlockOccupyLevel                      = SpinlockId;
-            pICB->isr2CriticalZoneCount++;
-
-            OS_ARCH_EXIT_CRITICAL();
-        }
-        else
-        {
-            /* Intentionally Empty */
-        }
+        *success = TRYTOGETSPINLOCK_SUCCESS;
+        Os_SLCB[spinlockId].Occupied = TRUE;
+        Os_GetCBModify(pScb, spinlockId);
     }
     else
     {
-        *Success = TRYTOGETSPINLOCK_NOSUCCESS;
-
-        OS_ARCH_ENTRY_CRITICAL();
-
-        Os_SCB.CurrentSpinlockOccupied[SpinlockId] = FALSE;
-
-        OS_ARCH_EXIT_CRITICAL();
-
-        switch (Os_SpinlockCfg[SpinlockId].SpinlockMethod)
-        {
-        case LOCK_ALL_INTERRUPTS:
-            Os_ResumeAllInterrupts();
-            break;
-
-        case LOCK_CAT2_INTERRUPTS:
-            Os_ResumeOSInterrupts();
-            break;
-
-        case LOCK_WITH_RES_SCHEDULER:
-#if (TRUE == CFG_USERESSCHEDULER)
-            (void)Os_ReleaseResource(RES_SCHEDULER);
-#endif
-            break;
-
-        case LOCK_NOTHING:
-            /* Nothing to do. */
-            break;
-
-        default:
-            Os_Panic();
-            break;
-        }
+        *success = TRYTOGETSPINLOCK_NOSUCCESS;
+        Os_MethodRelease(pScb, spinlockId);
     }
 }
 #define OS_STOP_SEC_CODE
@@ -716,112 +783,89 @@ static void Os_TryToGetSpinlock(SpinlockIdType SpinlockId, TryToGetSpinlockType*
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <TryToGetSpinlock has the same functionality as GetSpinlock with
- *                       the difference that if the spinlock is already occupied by
+/**
+ * TryToGetSpinlock has the same functionality as GetSpinlock with
+ *                       the difference that if the spinlock is already Occupied by
  *                       a TASK on a different core the function sets the OUT parameter
- *                       "Success" and returns with E_OK>
- * Service ID           <0x1b>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * param[in]            <SpinlockId>
- * param[out]           <Success>
- * param[in/out]        <None>
- * return               <None>
- * CallByAPI            <None>
- * REQ ID               <None>
+ *                       "Success" and returns with E_OK
  */
-/******************************************************************************/
-/* PRQA S 6030, 6010, 3006, 1503 ++ */ /* VL_MTR_Os_STMIF, VL_MTR_Os_STCYC, VL_Os_3006, VL_QAC_NoUsedApi */
-StatusType TryToGetSpinlock(SpinlockIdType SpinlockId, TryToGetSpinlockType* Success)
-/* PRQA S 6030, 6010, 3006, 1503 -- */
+/* PRQA S 1503, 3006, 3408, 6070, 1512 ++ */ /* VL_QAC_NoUsedApi, VL_Os_3006, VL_Os_3408, VL_MTR_Os_STCAL, VL_Os_1512 */
+ StatusType TryToGetSpinlock(
+    SpinlockIdType SpinlockId,
+    TryToGetSpinlockType *Success)
+/* PRQA S 1503, 3006, 3408, 6070, 1512 -- */
 {
-    /* PRQA S 2742, 2880, 3138, 2741 ++ */ /* VL_Os_PlatformDef */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
     /* PRQA S 1006 ++ */ /* VL_Os_1006 */
-    OS_ENTER_KERNEL();
+    OS_HAL_ENTER_KERNEL(); /* PRQA S 1021 */ /* VL_Os_1021 */
     /* PRQA S 1006 -- */
-    /* PRQA S 2742, 2880, 3138, 2741 -- */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
     StatusType err = E_OK;
+    Os_SCBType *pScb = Os_GetCurrentContext();
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 1317, 3432, 4442, 4521, 4544 ++ */ /* VL_Os_1317, VL_Os_3432, VL_Os_4442, VL_Os_4521, VL_Os_4544 */
+    OSRtiEnterApi(pScb, OSApiId_TryToGetSpinlock);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_TryToGetSpinlock_Start, SpinlockId);
+    /* PRQA S 1317, 3432, 4442, 4521, 4544 -- */
+    /* PRQA S 3138, 3141 -- */
 
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
     /*Os_00689*/
-    if (SpinlockId >= CFG_SPINLOCK_MAX)
+    if (CFG_SPINLOCK_MAX <= SpinlockId) /* PRQA S 1880 */ /* VL_Os_1880 */
     {
         err = E_OS_ID;
     }
     else if (NULL_PTR == Success)
     {
-        err = E_OS_PARAM_POINTER;
-    }
-    else
-#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
-/*service protection*/
-#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
-        if (Os_WrongContext(OS_CONTEXT_GET_SPINLOCK) != TRUE)
-    {
-        err = E_OS_CALLEVEL;
-    }
-    else if (Os_CheckObjAcs(OBJECT_SPINLOCK, SpinlockId) != TRUE)
-    {
-        err = E_OS_ACCESS;
-    }
-    /* PRQA S 0306 ++ */ /* VL_Os_0306 */
-    else if (Os_AddressWritable((uint32)Success) != TRUE)
-    /* PRQA S 0306 -- */
-    {
         err = E_OS_ILLEGAL_ADDRESS;
     }
     else
-#endif /* TRUE == CFG_SERVICE_PROTECTION_ENABLE */
+#endif
     {
+/*service protection*/
+#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
+        Os_ServicePortParamType SprotParam = {
+            .AllowedContext = OS_SERVICEPORT_CHECK_TRY_TO_GET_SPINLOCK,
+            .ObjectType = OS_OBJECT_SPINLOCK,
+            .ObjectID = SpinlockId, /* PRQA S 4424 */ /* VL_Os_4424 */
+            .Address = (uint32)Success, /* PRQA S 0306 */ /* VL_Os_0306 */
+        };
+        err = Os_ServiceProtCheck(pScb, &SprotParam);
+        if (E_OK == err)
+#endif
+        {
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
-        const Os_SpinlockCfgType* pSpinlockCfg = &Os_SpinlockCfg[SpinlockId];
-        /* PRQA S 3678 ++ */ /* VL_Os_3678 */
-        Os_TCBType* pTCB = Os_SCB.sysRunningTCB;
-        Os_ICBType* pICB = &Os_ICB[Os_SCB.sysRunningIsrCat2Id];
-        /* PRQA S 3678 -- */
-        /*Os_00690*/
-        if (Os_SCB.CurrentSpinlockOccupied[SpinlockId] == TRUE)
-        {
-            err = E_OS_INTERFERENCE_DEADLOCK;
-        }
-        else if (
-            /* PRQA S 3345, 3442 ++ */ /* VL_Os_3442, VL_Os_VolatileAccess */
-            (OS_LEVEL_TASK == Os_SCB.sysOsLevel)
-            && (OS_SPINLOCK_INVALID != pTCB->taskCurrentSpinlockOccupyLevel)
-            /* PRQA S 3345, 3442 -- */
-            && ((pSpinlockCfg->SpinlockOrder <= Os_SpinlockCfg[pTCB->taskCurrentSpinlockOccupyLevel].SpinlockOrder)
-                || (Os_SpinlockCfg[pTCB->taskCurrentSpinlockOccupyLevel].SpinlockGroupsId
-                    != pSpinlockCfg->SpinlockGroupsId)))
-        {
-            /*Os_00691*/
-            err = E_OS_NESTING_DEADLOCK;
-        }
-        else if (
-            (OS_LEVEL_ISR2 == Os_SCB.sysOsLevel) && (OS_SPINLOCK_INVALID != pICB->isrCurrentSpinlockOccupyLevel)
-            && ((pSpinlockCfg->SpinlockOrder <= Os_SpinlockCfg[pICB->isrCurrentSpinlockOccupyLevel].SpinlockOrder)
-                || (Os_SpinlockCfg[pICB->isrCurrentSpinlockOccupyLevel].SpinlockGroupsId
-                    != pSpinlockCfg->SpinlockGroupsId)))
-        {
-            /*Os_00691*/
-            err = E_OS_NESTING_DEADLOCK;
-        }
-        else
-#endif /* OS_STATUS_EXTENDED == CFG_STATUS */
-        {
-            Os_TryToGetSpinlock(SpinlockId, Success);
+            if (E_OK != (err = Os_GetSpinlockCheck(pScb, SpinlockId))) /* PRQA S 3326 */ /* VL_Os_3326 */
+            {
+            }
+            else
+#endif
+            {
+                Os_TryToGetSpinlock(pScb, SpinlockId, Success);
+            }
         }
     }
 
 #if (CFG_ERRORHOOK == TRUE)
-    if (err != E_OK)
+    if (err != E_OK) /* PRQA S 2992, 2996 */ /* VL_Os_2992, VL_Os_2996 */
     {
-        Os_TraceErrorHook(OSError_Save_TryToGetSpinlock(SpinlockId, Success), OSServiceId_TryToGetSpinlock, err);
+        /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+        /* PRQA S 4424 ++ */ /* VL_Os_4424 */
+        Os_TraceErrorHook(OSError_Save_TryToGetSpinlock(SpinlockId, Success), /* PRQA S 2880 */ /* VL_Os_2880 */
+                          OSServiceId_TryToGetSpinlock,
+                          err, pScb);
+        /* PRQA S 4424 -- */
+        /* PRQA S 3138, 3141 -- */
     }
 #endif
 
-    OS_EXIT_KERNEL(); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    /* PRQA S 3432, 4544 ++ */ /* VL_Os_3432, VL_Os_4544 */
+    OSRtiExitApi(pScb, OSApiId_TryToGetSpinlock);
+    ARTI_TRACE(NOSUSP, AR_CP_OS_SERVICECALLS, Os, pScb->SysCore, OsServiceCall_TryToGetSpinlock_Return, err);
+    OS_HAL_EXIT_KERNEL(); /* PRQA S 2743*/ /* VL_Os_2743*/
+    /* PRQA S 3432, 4544 -- */
+    /* PRQA S 3138, 3141 -- */
     /*Os_00704*/
     return err;
 }
@@ -830,36 +874,22 @@ StatusType TryToGetSpinlock(SpinlockIdType SpinlockId, TryToGetSpinlockType* Suc
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <TCheck if there are any outstanding spinlocks
- *                         when scheduling is required>
- * Service ID           <None>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * param[in]            <None>
- * param[out]           <None>
- * param[in/out]        <None>
- * return               <None>
- * CallByAPI            <TerminateTask and so on>
- * REQ ID               <None>
+/**
+ * TCheck if there are any outstanding spinlocks
+ *                         when scheduling is required
  */
-/******************************************************************************/
-StatusType Os_SpinlockSafetyCheck(void)
+/* PRQA S 1503 ++ */ /* VL_QAC_NoUsedApi */
+StatusType Os_SpinlockSafetyCheck(Os_TaskType runningTaskId)
+/* PRQA S 1503 -- */
 {
-    StatusType     status = E_OK;
-    SpinlockIdType i;
-    uint16         obj_id;
+    StatusType status = E_OK;
 
     /*Os_00612*/
-    for (i = 0u; i < CFG_SPINLOCK_MAX; i++)
+    for (uint16 i = 0u; i < CFG_SPINLOCK_MAX; i++)
     {
-        if (OBJECT_TASK == Os_SLCB[i].objOccupyType)
+        if (OS_OBJECT_TASK == Os_SLCB[i].ObjOccupyType)
         {
-            obj_id = Os_SLCB[i].objOccupyId;
-
-            if ((Os_GetObjLocalId(obj_id) == Os_SCB.sysRunningTaskID) && (Os_SCB.sysCore == Os_GetObjCoreId(obj_id)))
-
+            if (Os_SLCB[i].ObjOccupyId == runningTaskId) /* PRQA S 1881 */ /* VL_Os_1881 */
             {
                 status = E_OS_SPINLOCK;
                 break;
@@ -871,33 +901,23 @@ StatusType Os_SpinlockSafetyCheck(void)
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
-#endif /* CFG_SPINLOCK_MAX > 0U */
+#endif
 
-#if ((OS_AUTOSAR_CORES > 1U) || (CFG_SPINLOCK_MAX > 0U))
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <The get spin lock function inside the OS>
- * Service ID           <None>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * param[in]            <spinlock>
- * param[out]           <None>
- * param[in/out]        <None>
- * return               <None>
- * CallByAPI            <ShutdownAllCores and so on>
- * REQ ID               <None>
+/**
+ * The get spin lock function inside the OS
  */
-/******************************************************************************/
+/* PRQA S 1503, 3408 ++ */ /* VL_QAC_NoUsedApi, VL_Os_3408 */
 void Os_GetInternalSpinlock(Os_SpinlockRefType spinlock)
+/* PRQA S 1503, 3408 -- */
 {
     uint32 result;
 
     /*Os_00687*/
     do
     {
-        result = Os_CmpSwapW(spinlock, OS_SPINLOCK_UNLOCK, OS_SPINLOCK_LOCK);
+        result = Os_Hal_CmpSwapW(spinlock, OS_SPINLOCK_UNLOCK, OS_SPINLOCK_LOCK);
     } while (result > 0u);
 }
 #define OS_STOP_SEC_CODE
@@ -905,32 +925,21 @@ void Os_GetInternalSpinlock(Os_SpinlockRefType spinlock)
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <The release spin lock function inside the OS>
- * Service ID           <None>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * param[in]            <spinlock>
- * param[out]           <None>
- * param[in/out]        <None>
- * return               <None>
- * CallByAPI            <ShutdownAllCores and so on>
- * REQ ID               <None>
+/**
+ * The release spin lock function inside the OS
  */
-/******************************************************************************/
+/* PRQA S 1503, 3408 ++ */ /* VL_QAC_NoUsedApi, VL_Os_3408 */
 void Os_ReleaseInternalSpinlock(Os_SpinlockRefType spinlock)
+/* PRQA S 1503, 3408 -- */
 {
     uint32 result;
 
     do
     {
-        result = Os_CmpSwapW(spinlock, OS_SPINLOCK_LOCK, OS_SPINLOCK_UNLOCK);
+        result = Os_Hal_CmpSwapW(spinlock, OS_SPINLOCK_LOCK, OS_SPINLOCK_UNLOCK);
     } while (result > 0u);
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
-#endif /* OS_AUTOSAR_CORES > 1U || CFG_SPINLOCK_MAX > 0U */
 
 /*=======[E N D   O F   F I L E]==============================================*/
-/* PRQA S 0553 EOF */ /* VL_QAC_UnUsedFiles */

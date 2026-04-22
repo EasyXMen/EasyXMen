@@ -1,0 +1,45 @@
+/**
+ * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * SPDX-License-Identifier: LGPL-2.1-only-with-exception
+ *
+ * This library is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU Lesser General Public License as published by the Free Software Foundation; version 2.1.
+ * This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU Lesser General Public License for more details.
+ * You should have received a copy of the GNU Lesser General Public License along with this library;
+ * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ * or see <https://www.gnu.org/licenses/>.
+ */
+/*
+********************************************************************************
+**                                                                            **
+**  FILENAME    : Eep_62_Cbk.c                                                **
+**                                                                            **
+**  Created on  : 2022/02/15                                                  **
+**  Author      : Haibin.Shao                                                 **
+**  Vendor      :                                                             **
+**  DESCRIPTION :                                                             **
+**                                                                            **
+**  SPECIFICATION(S) :   AUTOSAR classic Platform R19-11                      **
+**                                                                            **
+*******************************************************************************/
+/* PRQA S 6610 EOF */ /* VL_MTR_Eep_62_STCDN */
+
+/*======================[Revision   History]==================================*/
+/*  <VERSION>   <DATE>      <AUTHOR>        <REVISION LOG>
+ *  V1.0.0      20210123    Haibin.Shao     First Version
+
+ */
+/*============================================================================*/
+#include "Eep_62_Cbk.h"
+
+FUNC(void, EEP_PUBLIC_CODE) Eep_62_JobEndNotification(void)
+{
+    return;
+}
+
+FUNC(void, EEP_PUBLIC_CODE) Eep_62_JobErrorNotification(void)
+{
+    return;
+}
