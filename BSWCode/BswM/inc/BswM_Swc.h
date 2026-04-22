@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -24,6 +24,8 @@
 
 #ifndef BSWM_SWC_H
 #define BSWM_SWC_H
+
+/* PRQA S 1753 EOF */ /* VL_BswM_1753 */
 
 /* =================================================== inclusions =================================================== */
 #include "BswM_Cfg.h"
@@ -89,7 +91,9 @@ void BswM_SwcModeNotification(BswM_ModeGroupType modeGroup);
  * @synchronous TRUE
  * @trace       CPD-66348
  */
+/* PRQA S 1501 ++ */ /* VL_BswM_1501 */
 void BswM_SwcModeRequest(BswM_ModeGroupType modeGroup);
+/* PRQA S 1501 -- */
 
 #endif /*BSWM_RTE_ENABLED == STD_ON*/
 

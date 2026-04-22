@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -310,6 +310,7 @@ DEM_LOCAL boolean Dem_UpdateCheckEventAffected(Dem_EventIdType EventId, uint8 Op
  * @synchronous   TRUE
  * @trace         CPD-PLACEHOLDER
  */
+/* PRQA S 6070 ++ */ /* VL_MTR_Dem_STCAL */
 DEM_LOCAL_INLINE void Dem_UpdateProcessEvent(Dem_EventIdType EventId)
 {
     Dem_UdsStatusByteType oldDtcStatus;
@@ -319,30 +320,79 @@ DEM_LOCAL_INLINE void Dem_UpdateProcessEvent(Dem_EventIdType EventId)
     oldDtcStatus = Dem_DTCApplyExternalStatus(EventId, oldDtcStatus);
     Dem_DTCOperationCycle(EventId);
     newDtcStatus = Dem_GetDTCUDSStatus(EventId);
+#if ((defined(DEM_OCC6)) || (defined(DEM_FAILED_CYCLES)))
+    if (
 #if (defined(DEM_OCC6))
-    /** The counter shall be cleared in the beginning of the operation cycle following an operation cycle where FDC10
-     * did not reach the value +127 at any time but -128 (the counter shall maintain its value if did not reach the
-     * value -128).  */
-    if ((Dem_UDSStatusCheckTFTOC(oldDtcStatus) == FALSE) && (Dem_UDSStatusCheckTNCTOC(oldDtcStatus) == FALSE))
+        /** The counter shall be cleared in the beginning of the operation cycle following an operation cycle where
+         * FDC10 did not reach the value +127 at any time but -128 (the counter shall maintain its value if did not
+         * reach the value -128).  */
+        ((Dem_UDSStatusCheckTFTOC(oldDtcStatus) == FALSE) && (Dem_UDSStatusCheckTNCTOC(oldDtcStatus) == FALSE))
+#endif
+#if ((defined(DEM_OCC6)) && (defined(DEM_FAILED_CYCLES)))
+        ||
+#endif
+#if (defined(DEM_FAILED_CYCLES))
+        /** If the counter  Failed cycles is already stored in event memory, it shall be incremented at the end of
+         * the referenced operation cycle (refer to DemOperationCycleRef) in case the UDS status bit 1 is set to 1.   */
+        (Dem_UDSStatusCheckTFTOC(oldDtcStatus) == TRUE)
+#endif
+    )
     {
         Dem_DTCAttRefNumType lDTCAttr = Dem_GetDTCAttr(EventId);
-        if (Dem_CheckDTCAttr(lDTCAttr) == TRUE)
+        if ((Dem_CheckDTCAttr(lDTCAttr) == TRUE) && (Dem_GetEventstored(EventId) == TRUE))
         {
-            if (Dem_GetEventstored(EventId) == TRUE)
-            {
-                Dem_MemStateInfoConstPtrType memoryInfo  = Dem_MemStateInfoInit(Dem_GetMemRef(lDTCAttr));
-                Dem_NvBlockNumType           memoryIndex = Dem_MemoryFindIndex(memoryInfo, EventId);
-                Dem_SetOCC6OfMemEntry(memoryIndex, 0u);
 #if (DEM_NV_RAM_BLOCK_NUMBER > 0u)
-                Dem_NvmSetSingleBlockState(memoryIndex, DEM_NVM_BLOCKSTATE_DIRTY);
+            boolean isStored = TRUE;
 #endif
+            Dem_MemStateInfoConstPtrType memoryInfo  = Dem_MemStateInfoInit(Dem_GetMemRef(lDTCAttr));
+            Dem_NvBlockNumType           memoryIndex = Dem_MemoryFindIndex(memoryInfo, EventId);
+#if (defined(DEM_FAILED_CYCLES))
+            if (Dem_UDSStatusCheckTFTOC(oldDtcStatus) == TRUE)
+            {
+                if (Dem_MemIncrementFailedCycleCounter(memoryIndex) == FALSE)
+                {
+#if (DEM_NV_RAM_BLOCK_NUMBER > 0u)
+                    isStored = FALSE;
+#endif
+                }
+            }
+            else
+#endif
+            {
+#if (defined(DEM_OCC6))
+                Dem_SetOCC6OfMemEntry(memoryIndex, 0u);
+#endif
+            }
+#if (DEM_NV_RAM_BLOCK_NUMBER > 0u)
+            if (isStored == TRUE)
+            {
+                Dem_NvmSetSingleBlockState(memoryIndex, DEM_NVM_BLOCKSTATE_DIRTY);
+            }
+#endif
+        }
+    }
+#endif
+
+#if (DEM_PERMANENT_MEMORY_NUMBER > 0u)
+    {
+        Dem_DTCAttRefNumType lDTCAttr = Dem_GetDTCAttr(EventId);
+        if ((Dem_CheckDTCAttr(lDTCAttr) == TRUE) && (Dem_UDSStatusCheckWIR(oldDtcStatus) == TRUE)
+            && (Dem_UDSStatusCheckWIR(newDtcStatus) == FALSE))
+        {
+            Dem_MemoryNumType            memRef          = Dem_GetMemRef(lDTCAttr);
+            Dem_MemStateInfoConstPtrType memoryInfo      = Dem_MemStateInfoInit(Dem_GetMemRef(lDTCAttr));
+            uint8                        memSetIndex     = memoryInfo->MemIndex;
+            Dem_PermanentNumType         lPermanentIndex = Dem_PermanentEntryFind(memSetIndex, EventId);
+            if (lPermanentIndex != DEM_PERMANENT_MEMORY_NUMBER)
+            {
+                Dem_GetPermanentMemoryEntry()[lPermanentIndex].EventId = DEM_EVENT_INVALID;
             }
         }
     }
 #endif
     Dem_NotiDtcStatusChanged(EventId, oldDtcStatus, Dem_DTCApplyExternalStatus(EventId, newDtcStatus));
 }
-
+/* PRQA S 6070 -- */
 /**
  * @brief         Processes operation cycle updates
  * This function processes the operation cycle updates for all events using that cycle as operation cycle.

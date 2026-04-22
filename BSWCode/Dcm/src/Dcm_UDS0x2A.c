@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -21,7 +21,7 @@
  **  @description        : Dcm UDS service 0x2A function implementation
  **
  ***********************************************************************************************************************/
-/* PRQA S 0553 EOF */ /* VL_Dcm_0553 */
+/* PRQA S 3120,3132,0553,1505 EOF */ /* VL_QAC_MagicNum,VL_QAC_MagicNum,VL_Dcm_0553,VL_QAC_OneFunRef */
 /* =================================================== inclusions =================================================== */
 #include "Dcm_Cfg.h"
 #if (STD_ON == DCM_UDS_0X2A)
@@ -40,14 +40,14 @@
 /**
  * @brief UDS 0x2A scheduler manager structure type
  */
-typedef struct SchedulerType /* PRQA S 1536,3213  */ /* VL_Dcm_1536,VL_Dcm_3213 */
+typedef struct /* PRQA S 3213  */ /* VL_Dcm_3213 */
 {
     /* the status of dynamic reading */
     Dcm_OpStatusType OpStatus;
     /* timer for counting time to send */
     uint16 Timer;
     /* the scheduling dynamic did index */
-    uint16 DDDIdIndex;
+    uint16 DidIndex;
     /* the rate of periodic transmission */
     uint16 Rate;
     /* store the dynamic data length (if have) */
@@ -58,17 +58,23 @@ typedef struct SchedulerType /* PRQA S 1536,3213  */ /* VL_Dcm_1536,VL_Dcm_3213 
     uint8 TransMode;
     /* the current did */
     uint16 Did;
+    /* the current did range index */
+    boolean IsDDDID;
 } Dcm_SchedulerType;
 /* ============================================ internal data definitions =========================================== */
-#if (STD_ON == DCM_DYN_DID)
+
 /**
  * @brief UDS 0x2A scheduler manager structure
  */
 #define DCM_START_SEC_VAR_CLEARED_UNSPECIFIED
 #include "Dcm_MemMap.h"
 DCM_LOCAL Dcm_SchedulerType Dcm_Scheduler[DCM_MAX_SCHEDULER_NUM];
+#if (DCM_PERIODIC_CONNECTION_NUM > 0u)
+#if (DCM_DDDID_NUM > 0u)
 /* UDS 0x2A scheduler manager structure */
 DCM_LOCAL PduInfoType Dcm_PeriodicPduInfo; /* PRQA S 3218 */ /* VL_Dcm_3218 */
+#endif
+#endif
 #define DCM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
 #include "Dcm_MemMap.h"
 /**
@@ -77,11 +83,15 @@ DCM_LOCAL PduInfoType Dcm_PeriodicPduInfo; /* PRQA S 3218 */ /* VL_Dcm_3218 */
 #define DCM_START_SEC_VAR_CLEARED_8
 #include "Dcm_MemMap.h"
 DCM_LOCAL uint8 Dcm_ScheduledRate[4u];
+#if (DCM_PERIODIC_CONNECTION_NUM > 0u)
+#if (DCM_DDDID_NUM > 0u)
 DCM_LOCAL uint8 Dcm_PeriodicDataBuffer[64u]; /* PRQA S 3218 */ /* VL_Dcm_3218 */
 DCM_LOCAL uint8 Dcm_SchedulerMetaData[4u]; /* PRQA S 3218 */   /* VL_Dcm_3218 */
+#endif
+#endif
 #define DCM_STOP_SEC_VAR_CLEARED_8
 #include "Dcm_MemMap.h"
-#endif
+
 /* ============================================ external data definitions =========================================== */
 #if (DCM_PERIODIC_CONNECTION_NUM > 0u)
 /**
@@ -94,7 +104,7 @@ boolean Dcm_PeriodicConnectionSent[DCM_PERIODIC_CONNECTION_NUM]; /* PRQA S 1037,
 #include "Dcm_MemMap.h"
 #endif
 /* ========================================= internal function declarations ========================================= */
-#if (STD_ON == DCM_DYN_DID)
+
 /**
  * @brief         Called by UDS 0x2A to initialize the scheduler
  * @param[in]     schedulerPtr : the scheduler ptr
@@ -120,7 +130,7 @@ DCM_LOCAL void Dcm_UDS0x2A_SchedulerInit(Dcm_SchedulerType* schedulerPtr);
  * @trace         CPD-PLACEHOLDE
  */
 DCM_LOCAL Std_ReturnType
-    Dcm_UDS0x2A_ConditionCheck(Dcm_MsgContextType* pMsgContext, Dcm_NegativeResponseCodeType* ErrorCode);
+    Dcm_UDS0x2A_ConditionCheck(const Dcm_MsgContextType* pMsgContext, Dcm_NegativeResponseCodeType* ErrorCode);
 
 /**
  * @brief         handle did read for UDS 0x2A
@@ -140,7 +150,7 @@ DCM_LOCAL Std_ReturnType
  */
 DCM_LOCAL Std_ReturnType Dcm_UDS0x2A_HandleDid(
     Dcm_ExtendedOpStatusType      OpStatus,
-    Dcm_MsgContextType*           pMsgContext,
+    const Dcm_MsgContextType*     pMsgContext,
     uint16                        connectionId,
     Dcm_NegativeResponseCodeType* ErrorCode);
 
@@ -181,10 +191,12 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2A_HandleDidConditionCheck(
  * @trace         CPD-PLACEHOLDE
  */
 DCM_LOCAL Std_ReturnType Dcm_UDS0x2A_DidReadPrepare(
-    uint16                        connectionId,
-    uint16                        didIndex,
-    Dcm_ExtendedOpStatusType      OpStatus,
-    uint16*                       dataLength,
+    uint16 connectionId,
+    uint16 didIndex,
+#if (STD_ON == DCM_DYN_DATA)
+    Dcm_ExtendedOpStatusType OpStatus,
+    uint16*                  dataLength,
+#endif
     Dcm_NegativeResponseCodeType* ErrorCode);
 
 /**
@@ -208,8 +220,19 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2A_SetScheduler(
     uint16                        didIndex,
     uint16                        connectionId,
     uint16                        dataLength,
-    Dcm_MsgContextType*           pMsgContext,
+    const Dcm_MsgContextType*     pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode);
+
+/**
+ * @brief         When the middle scheduling information is deleted, the subsequent ones shall fill in the gaps in
+ * sequence.
+ * @param[in]     Index     : the Scheduler did index
+ * @return        void
+ * @reentrant     TRUE
+ * @synchronous   Synchronous
+ * @trace         CPD-PLACEHOLDE
+ */
+DCM_LOCAL void Dcm_UDS0x2A_Move_Scheduler(uint16 Index);
 
 /**
  * @brief         setup scheduler for requested periodic read for nonStop subfunction
@@ -232,6 +255,8 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2A_SetNonStopScheduler(
     uint8              transMode,
     uint16             dataLength);
 
+#if (DCM_PERIODIC_CONNECTION_NUM > 0u)
+#if (DCM_DDDID_NUM > 0u)
 /**
  * @brief         handle a operating scheduler
  * @param[in]     schedulerPtr : the target scheduler
@@ -253,6 +278,8 @@ DCM_LOCAL void Dcm_UDS0x2A_MainFunctionHandle(Dcm_SchedulerType* schedulerPtr);
  */
 DCM_LOCAL void Dcm_UDS0x2A_PeriodicSend(uint16 connIndex, Dcm_SchedulerType* schedulerPtr);
 #endif
+#endif
+
 /* ========================================== external function definitions ========================================= */
 #define DCM_START_SEC_CODE
 #include "Dcm_MemMap.h"
@@ -266,7 +293,6 @@ Std_ReturnType Dcm_UDS0x2A(
     Dcm_NegativeResponseCodeType* ErrorCode)
 /* PRQA S 1532,3673 -- */
 {
-#if (STD_ON == DCM_DYN_DID)
     Std_ReturnType result     = E_OK;
     Dcm_MsgLenType reqDataLen = pMsgContext->reqDataLen;
     uint8          transMode;
@@ -274,7 +300,6 @@ Std_ReturnType Dcm_UDS0x2A(
 
     (void)DslInternal_FindProtocolRowByRxPduId(pMsgContext->dcmRxPduId, NULL_PTR, &connectionId);
     result = Dcm_UDS0x2A_ConditionCheck(pMsgContext, ErrorCode);
-
     if (E_OK == result)
     {
         transMode = pMsgContext->reqData[0u];
@@ -293,15 +318,9 @@ Std_ReturnType Dcm_UDS0x2A(
     }
 
     return result;
-#else
-    DCM_UNUSED(OpStatus);
-    DCM_UNUSED(pMsgContext);
-    *ErrorCode = DCM_E_REQUESTOUTOFRANGE;
-    return E_NOT_OK;
-#endif
 }
 
-#if (STD_ON == DCM_DYN_DID)
+#if (DCM_PERIODIC_CONNECTION_NUM > 0u)
 /**
  * MainFunction handle for 0x2A to periodically read and send data of dynamic did
  */
@@ -311,9 +330,8 @@ void Dcm_UDS0x2A_MainFunction(void)
     {
 #if (DCM_DDDID_NUM > 0u)
         Dcm_SchedulerType* schedulerPtr = &Dcm_Scheduler[index];
-        uint16             DDDIdIndex   = schedulerPtr->DDDIdIndex;
-        if ((0u != schedulerPtr->Rate) && (DDDIdIndex < DCM_DDDID_NUM)
-            && (DCM_NOT_DEFINED != Dcm_DDDID[DDDIdIndex].DDDIDStatus[0]))
+        uint16             DIdIndex     = schedulerPtr->DidIndex;
+        if ((0u != schedulerPtr->Rate) && (DIdIndex < DCM_DID_NUM))
         {
             if (0u != schedulerPtr->Timer)
             {
@@ -327,35 +345,50 @@ void Dcm_UDS0x2A_MainFunction(void)
 #endif
     }
 }
+#endif
 
 /**
  * Deal with session/security/authentication/modeRule change to decide whether to continue onging periodic tranmission
  */
 void Dcm_UDS0x2A_StatusChangeHandle(void)
 {
+    Std_ReturnType result = E_OK;
     for (uint8 index = 0u; index < DCM_MAX_SCHEDULER_NUM; index++)
     {
-        Dcm_SchedulerType* schedulerPtr = &Dcm_Scheduler[index];
+        const Dcm_SchedulerType* schedulerPtr = &Dcm_Scheduler[index];
         if (0u != schedulerPtr->Rate)
         {
-#if (DCM_DDDID_NUM > 0u)
-            const Dcm_DDDIDType* DDDIdPtr = &Dcm_DDDID[schedulerPtr->DDDIdIndex];
-            for (uint8 subIndex = 0u; subIndex < DDDIdPtr->SourceElementsNum; subIndex++)
+            if (schedulerPtr->IsDDDID == FALSE)
             {
-                Std_ReturnType result = Dcm_UDS_CheckReadWriteDid(
+                result = Dcm_UDS_CheckReadWriteDid(
                     schedulerPtr->ConnectionId,
-                    Dcm_DspDid[DDDIdPtr->DDDIDDefine[subIndex].SourceDidIndex].DidIdentifier,
-                    DCM_DID_INFO(DDDIdPtr->DDDIDDefine[subIndex].SourceDidIndex).DidRead,
+                    schedulerPtr->Did,
+                    DCM_DID_INFO(schedulerPtr->DidIndex).DidRead,
                     NULL_PTR);
-                if (E_NOT_OK == result)
+            }
+#if (DCM_DDDID_NUM > 0u)
+            else
+            {
+                uint16               DDDIdIndex = DCM_DID_INFO(schedulerPtr->DidIndex).DDDidIndex;
+                const Dcm_DDDIDType* DDDIdPtr   = &Dcm_DDDID[DDDIdIndex];
+                for (uint8 subIndex = 0u; subIndex < DDDIdPtr->SourceElementsNum; subIndex++)
                 {
-                    uint8 transMode = schedulerPtr->TransMode;
-                    Dcm_UDS0x2A_SchedulerInit(schedulerPtr);
-                    Dcm_ScheduledRate[0u]--;
-                    Dcm_ScheduledRate[transMode]--;
+                    result = Dcm_UDS_CheckReadWriteDid(
+                        schedulerPtr->ConnectionId,
+                        Dcm_DspDid[DDDIdPtr->DDDIDDefine[subIndex].SourceDidIndex].DidIdentifier,
+                        DCM_DID_INFO(DDDIdPtr->DDDIDDefine[subIndex].SourceDidIndex).DidRead,
+                        NULL_PTR);
+                    if (E_NOT_OK == result)
+                    {
+                        break;
+                    }
                 }
             }
 #endif
+            if (result == E_NOT_OK)
+            {
+                Dcm_UDS0x2A_Remove_Scheduler(schedulerPtr->DidIndex);
+            }
         }
     }
 }
@@ -369,18 +402,19 @@ DCM_LOCAL void Dcm_UDS0x2A_SchedulerInit(Dcm_SchedulerType* schedulerPtr)
     schedulerPtr->OpStatus      = DCM_INITIAL;
     schedulerPtr->Timer         = 0u;
     schedulerPtr->Did           = DCM_INVALID_UINT16;
-    schedulerPtr->DDDIdIndex    = DCM_INVALID_UINT16;
+    schedulerPtr->DidIndex      = DCM_INVALID_UINT16;
     schedulerPtr->Rate          = 0u;
     schedulerPtr->TransMode     = 0u;
     schedulerPtr->DynDataLength = 0u;
+    schedulerPtr->IsDDDID       = FALSE;
     SchM_Exit_Dcm_ExclusiveArea();
 }
-#endif
 
-#if (STD_ON == DCM_DYN_DID)
 /* check conditions such as minimum length, invalid transmode for UDS 0x2A */
+/* PRQA S 6030++ */ /* VL_MTR_Dcm_STMIF */
 DCM_LOCAL Std_ReturnType
-    Dcm_UDS0x2A_ConditionCheck(Dcm_MsgContextType* pMsgContext, Dcm_NegativeResponseCodeType* ErrorCode)
+    Dcm_UDS0x2A_ConditionCheck(const Dcm_MsgContextType* pMsgContext, Dcm_NegativeResponseCodeType* ErrorCode)
+/* PRQA S 6030-- */
 {
     Std_ReturnType result     = E_NOT_OK;
     Dcm_MsgLenType reqDataLen = pMsgContext->reqDataLen;
@@ -429,13 +463,11 @@ DCM_LOCAL Std_ReturnType
 
     return result;
 }
-#endif
 
-#if (STD_ON == DCM_DYN_DID)
 /* iterate over requested did to initiate read */
 DCM_LOCAL Std_ReturnType Dcm_UDS0x2A_HandleDid(
     Dcm_ExtendedOpStatusType      OpStatus,
-    Dcm_MsgContextType*           pMsgContext,
+    const Dcm_MsgContextType*     pMsgContext,
     uint16                        connectionId,
     Dcm_NegativeResponseCodeType* ErrorCode)
 {
@@ -465,7 +497,14 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2A_HandleDid(
         uint16 dataLength = 0u;
         if (E_OK == result)
         {
-            result = Dcm_UDS0x2A_DidReadPrepare(connectionId, didIndex, OpStatus, &dataLength, ErrorCode);
+            result = Dcm_UDS0x2A_DidReadPrepare(
+                connectionId,
+                didIndex,
+#if (STD_ON == DCM_DYN_DATA)
+                OpStatus,
+                &dataLength,
+#endif
+                ErrorCode);
         }
 
         if (E_OK == result)
@@ -518,20 +557,30 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2A_HandleDidConditionCheck(
 
 /* iterate over sourc elements and do check if configured checkSource and get dynamic dataLength */
 DCM_LOCAL Std_ReturnType Dcm_UDS0x2A_DidReadPrepare(
-    uint16                        connectionId,
-    uint16                        didIndex,
-    Dcm_ExtendedOpStatusType      OpStatus,
-    uint16*                       dataLength,
-    Dcm_NegativeResponseCodeType* ErrorCode)
+    uint16 connectionId,
+    uint16 didIndex,
+#if (STD_ON == DCM_DYN_DATA)
+    Dcm_ExtendedOpStatusType OpStatus,
+    uint16*                  dataLength,
+#endif
+    Dcm_NegativeResponseCodeType* ErrorCode) /* PRQA S 3673 */ /* VL_QAC_3673 */
 {
-    Std_ReturnType            finalResult      = E_OK;
-    uint16                    DDDIdIndex       = DCM_DID_INFO(didIndex).DDDidIndex;
+    Std_ReturnType finalResult = E_OK;
+
     const Dcm_DspDidInfoType* DcmDspDidInfoPtr = &DCM_DID_INFO(didIndex);
-#if ((STD_ON == DCM_DDDID_CHECK_SOURCE) && (DCM_DDDID_NUM > 0u))
+
     if (TRUE == DcmDspDidInfoPtr->DynamicallyDefined)
     {
-        Std_ReturnType result = E_OK;
-        for (uint8 subdIndex = 0u; (subdIndex < Dcm_DDDID[DDDIdIndex].SourceElementsNum) && (E_NOT_OK != result);
+#if ((STD_ON == DCM_DDDID_CHECK_SOURCE) && (DCM_DDDID_NUM > 0u))
+        Std_ReturnType result     = E_OK;
+        uint16         DDDIdIndex = DCM_DID_INFO(didIndex).DDDidIndex;
+        if ((DCM_NOT_DEFINED == Dcm_DDDID[DDDIdIndex].DDDIDStatus[0]) && (NULL_PTR != ErrorCode))
+        {
+            *ErrorCode  = DCM_E_REQUESTOUTOFRANGE;
+            finalResult = E_NOT_OK;
+        }
+        for (uint8 subdIndex = 0u;
+             (subdIndex < Dcm_DDDID[DDDIdIndex].SourceElementsNum) && (E_NOT_OK != result) && (E_NOT_OK != finalResult);
              subdIndex++)
         {
             if (DCM_DEFINED_SOURCE_DID == Dcm_DDDID[DDDIdIndex].DDDIDStatus[subdIndex])
@@ -557,21 +606,62 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2A_DidReadPrepare(
                         finalResult = result;
                     }
                 }
-#else
-                DCM_UNUSED(OpStatus);
-                DCM_UNUSED(dataLength);
 #endif
             }
         }
-    }
 #else
-    DCM_UNUSED(connectionId);
-    DCM_UNUSED(ErrorCode);
-    DCM_UNUSED(OpStatus);
-    DCM_UNUSED(dataLength);
+        DCM_UNUSED(connectionId);
+        DCM_UNUSED(ErrorCode);
 #endif
-
+    }
+    else
+    {
+#if (STD_ON == DCM_DYN_DATA)
+        const Dcm_DspDataCfgType* dspDataCfg = Dcm_DspDidSignal[Dcm_DspDid[didIndex].DidSignalIndexEnd].DidDataRef;
+        Std_ReturnType            result     = E_OK;
+        if (DCM_UINT8_DYN == dspDataCfg->DspDataType)
+        {
+            result = dspDataCfg->ReadDataLengthFnc(OpStatus, dataLength);
+            if ((E_OK == result) && (*dataLength > dspDataCfg->DspDataByteSize))
+            {
+                result = E_NOT_OK;
+            }
+            if (E_OK != result)
+            {
+                finalResult = result;
+            }
+        }
+#endif
+    }
     return finalResult;
+}
+
+DCM_LOCAL void Dcm_UDS0x2A_Move_Scheduler(uint16 Index)
+{
+    uint16             Cnt;
+    Dcm_SchedulerType* schedulerPtr  = NULL_PTR; /* PRQA S 3678 */ /* VL_Dcm_3678 */
+    uint8              scheduledRate = Dcm_ScheduledRate[0u];
+    /* PRQA S 4391 ++ */ /* VL_Dcm_4391 */
+    uint16 maxCount = (scheduledRate > 0u) ? (uint16)(scheduledRate - 1u) : 0u;
+    /* PRQA S 4391 -- */
+    for (Cnt = Index; (Cnt < maxCount) && (Dcm_ScheduledRate[0u] <= DCM_MAX_SCHEDULER_NUM); Cnt++)
+    {
+        schedulerPtr                     = &Dcm_Scheduler[Cnt + 1u];
+        Dcm_Scheduler[Cnt].Did           = schedulerPtr->Did;
+        Dcm_Scheduler[Cnt].OpStatus      = schedulerPtr->OpStatus;
+        Dcm_Scheduler[Cnt].Timer         = schedulerPtr->Timer;
+        Dcm_Scheduler[Cnt].DidIndex      = schedulerPtr->DidIndex;
+        Dcm_Scheduler[Cnt].Rate          = schedulerPtr->Rate;
+        Dcm_Scheduler[Cnt].DynDataLength = schedulerPtr->DynDataLength;
+        Dcm_Scheduler[Cnt].ConnectionId  = schedulerPtr->ConnectionId;
+        Dcm_Scheduler[Cnt].TransMode     = schedulerPtr->TransMode;
+        Dcm_Scheduler[Cnt].IsDDDID       = schedulerPtr->IsDDDID;
+    }
+    Dcm_UDS0x2A_SchedulerInit(&Dcm_Scheduler[Cnt]);
+    if (Dcm_ScheduledRate[0u] > 0u)
+    {
+        Dcm_ScheduledRate[0u]--;
+    }
 }
 
 /* find matched scheduler and reset if existed, otherwise find a idle scheduler and do initial setup */
@@ -579,17 +669,16 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2A_SetScheduler(
     uint16                        didIndex,
     uint16                        connectionId,
     uint16                        dataLength,
-    Dcm_MsgContextType*           pMsgContext,
+    const Dcm_MsgContextType*     pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode)
 {
     Std_ReturnType     result = E_NOT_OK;
     uint8              schedulerIndex;
     Dcm_SchedulerType* schedulerPtr = NULL_PTR;
-    uint16             DDDIdIndex   = DCM_DID_INFO(didIndex).DDDidIndex;
 
     for (schedulerIndex = 0u; schedulerIndex < Dcm_ScheduledRate[0u]; schedulerIndex++)
     {
-        if ((Dcm_Scheduler[schedulerIndex].DDDIdIndex == DDDIdIndex) && (Dcm_Scheduler[schedulerIndex].Rate == 0u))
+        if ((Dcm_Scheduler[schedulerIndex].DidIndex == didIndex) && (Dcm_Scheduler[schedulerIndex].Rate != 0u))
         {
             schedulerPtr = &Dcm_Scheduler[schedulerIndex];
             result       = E_OK;
@@ -608,9 +697,8 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2A_SetScheduler(
     }
     else if (E_OK == result)
     {
+        Dcm_UDS0x2A_Move_Scheduler(schedulerIndex);
         transMode = schedulerPtr->TransMode;
-        Dcm_UDS0x2A_SchedulerInit(schedulerPtr);
-        Dcm_ScheduledRate[0u]--;
         Dcm_ScheduledRate[transMode]--;
     }
     else
@@ -620,7 +708,27 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2A_SetScheduler(
 
     return result;
 }
-
+void Dcm_UDS0x2A_Remove_Scheduler(uint16 DidIndex)
+{
+    boolean            isDidExist = FALSE;
+    uint8              schedulerIndex;
+    Dcm_SchedulerType* schedulerPtr = NULL_PTR; /* PRQA S 3678 */ /* VL_Dcm_3678 */
+    for (schedulerIndex = 0u; schedulerIndex < Dcm_ScheduledRate[0u]; schedulerIndex++)
+    {
+        if ((Dcm_Scheduler[schedulerIndex].DidIndex == DidIndex) && (Dcm_Scheduler[schedulerIndex].Rate != 0u))
+        {
+            schedulerPtr = &Dcm_Scheduler[schedulerIndex];
+            isDidExist   = TRUE;
+            break;
+        }
+    }
+    if (isDidExist == TRUE)
+    {
+        uint8 transMode = schedulerPtr->TransMode;
+        Dcm_UDS0x2A_Move_Scheduler(schedulerIndex);
+        Dcm_ScheduledRate[transMode]--;
+    }
+}
 /* setup the scheduler for nonStop subfunctions */
 DCM_LOCAL Std_ReturnType Dcm_UDS0x2A_SetNonStopScheduler(
     Dcm_SchedulerType* schedulerPtr,
@@ -640,6 +748,7 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2A_SetNonStopScheduler(
             {
                 tempSchedulerPtr = &Dcm_Scheduler[schedulerIndex];
                 result           = E_OK;
+                break;
             }
         }
     }
@@ -648,16 +757,15 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2A_SetNonStopScheduler(
         result = E_OK;
     }
 
+#if (DCM_DDDID_NUM > 0u)
     uint16 DDDIdIndex = DCM_DID_INFO(didIndex).DDDidIndex;
     if ((E_OK == result)
-        && ((FALSE == DCM_DID_INFO(didIndex).DynamicallyDefined)
-#if (DCM_DDDID_NUM > 0u)
-            || (DCM_NOT_DEFINED == Dcm_DDDID[DDDIdIndex].DDDIDStatus)
-#endif
-                ))
+        && ((TRUE == DCM_DID_INFO(didIndex).DynamicallyDefined)
+            && (DCM_NOT_DEFINED == Dcm_DDDID[DDDIdIndex].DDDIDStatus[0])))
     {
         result = E_NOT_OK;
     }
+#endif
 
     if (E_OK == result)
     {
@@ -666,16 +774,19 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2A_SetNonStopScheduler(
         Dcm_ScheduledRate[transMode]++;
         tempSchedulerPtr->DynDataLength = dataLength;
         tempSchedulerPtr->Did           = Dcm_DspDid[didIndex].DidIdentifier;
-        tempSchedulerPtr->DDDIdIndex    = DDDIdIndex;
+        tempSchedulerPtr->DidIndex      = didIndex;
         tempSchedulerPtr->Rate          = rate;
         tempSchedulerPtr->Timer         = rate;
         tempSchedulerPtr->ConnectionId  = connectionId;
         tempSchedulerPtr->TransMode     = transMode;
+        tempSchedulerPtr->IsDDDID       = DCM_DID_INFO(didIndex).DynamicallyDefined;
     }
 
     return result;
 }
 
+#if (DCM_PERIODIC_CONNECTION_NUM > 0u)
+#if (DCM_DDDID_NUM > 0u)
 /* try to send periodic message */
 DCM_LOCAL void Dcm_UDS0x2A_MainFunctionHandle(Dcm_SchedulerType* schedulerPtr)
 {
@@ -685,12 +796,10 @@ DCM_LOCAL void Dcm_UDS0x2A_MainFunctionHandle(Dcm_SchedulerType* schedulerPtr)
     for (uint16 subIndex = 0u; subIndex < connection->PeriodicConnectionIdNum; subIndex++)
     {
         connIndex = connection->PeriodicConnectionId + subIndex;
-#if (DCM_PERIODIC_CONNECTION_NUM > 0u)
         if (FALSE == Dcm_PeriodicConnectionSent[connIndex])
         {
             connectionAvail = TRUE;
         }
-#endif
     }
 
     if (TRUE == connectionAvail)
@@ -701,37 +810,62 @@ DCM_LOCAL void Dcm_UDS0x2A_MainFunctionHandle(Dcm_SchedulerType* schedulerPtr)
     else
     {
         /* was ready but not sent */
-        schedulerPtr->Timer = schedulerPtr->Rate;
+        if (schedulerPtr->Rate != 0u)
+        {
+            schedulerPtr->Timer = schedulerPtr->Rate - 1u;
+        }
     }
 #endif
 }
 
 DCM_LOCAL void Dcm_UDS0x2A_PeriodicSend(uint16 connIndex, Dcm_SchedulerType* schedulerPtr)
 {
-    Dcm_MsgLenType offset  = 0u;
-    Dcm_MsgLenType bufSize = 64u;
-#if (STD_ON == DCM_DDDID_CHECK_SOURCE)
+    Dcm_MsgLenType               offset  = 0u;
+    Dcm_MsgLenType               bufSize = 64u;
+    Dcm_NegativeResponseCodeType ErrorCode;
+    Std_ReturnType               result = E_OK;
+#if ((STD_ON == DCM_DDDID_CHECK_SOURCE) && (STD_ON == DCM_DYN_DID))
     boolean checkFail = FALSE;
 #endif
-    Dcm_NegativeResponseCodeType ErrorCode;
-    Std_ReturnType               result = Dcm_UDS_DynDidHandle(
-        schedulerPtr->OpStatus,
-        schedulerPtr->ConnectionId,
-        schedulerPtr->DDDIdIndex,
-        &Dcm_PeriodicDataBuffer[offset + 1u],
-        &bufSize,
+    if (FALSE == schedulerPtr->IsDDDID)
+    {
+        result = Dcm_UDS_DidReadHandle(
+            schedulerPtr->OpStatus,
+            schedulerPtr->DidIndex,
+            &Dcm_PeriodicDataBuffer[offset + 1u],
+            &bufSize,
+            &ErrorCode);
+    }
+#if (STD_ON == DCM_DYN_DID)
+    else
+    {
+        uint16 DDDIdIndex = DCM_DID_INFO(schedulerPtr->DidIndex).DDDidIndex;
+        result            = Dcm_UDS_DynDidHandle(
+            schedulerPtr->OpStatus,
+            schedulerPtr->ConnectionId,
+            DDDIdIndex,
+            &Dcm_PeriodicDataBuffer[offset + 1u],
+            &bufSize,
 #if (STD_ON == DCM_DDDID_CHECK_SOURCE)
-        &checkFail,
+            &checkFail,
 #endif
-        &ErrorCode);
+            &ErrorCode);
+    }
+#endif
 
-    uint8 transMode;
     if (E_OK == result)
     {
         Dcm_PeriodicDataBuffer[offset] = (uint8)(schedulerPtr->Did);
         /* PRQA S 2986 ++ */ /* VL_Dcm_2986 */
-        offset +=
-            (0u == schedulerPtr->DynDataLength) ? (bufSize + 1u) : ((Dcm_MsgLenType)schedulerPtr->DynDataLength + 1u);
+        if (FALSE == schedulerPtr->IsDDDID)
+        {
+            offset += bufSize + 1u;
+        }
+        else
+        {
+            offset += (0u == schedulerPtr->DynDataLength) ? (bufSize + 1u)
+                                                          : ((Dcm_MsgLenType)schedulerPtr->DynDataLength + 1u);
+        }
         /* PRQA S 2986 -- */
         Dcm_PeriodicPduInfo.SduDataPtr = Dcm_PeriodicDataBuffer;
         Dcm_PeriodicPduInfo.SduLength  = offset;
@@ -752,53 +886,54 @@ DCM_LOCAL void Dcm_UDS0x2A_PeriodicSend(uint16 connIndex, Dcm_SchedulerType* sch
 
         if (DCM_COMM_FULL_COMMUNICATION == Dcm_CommState[schedulerPtr->ConnectionId])
         {
+#if (DCM_PERIODIC_CONNECTION_NUM > 0u)
             result = PduR_DcmTransmit(Dcm_DslPeriodicTxPduId[connIndex], &Dcm_PeriodicPduInfo);
+#endif
             if (E_OK == result)
             {
 #if (DCM_PERIODIC_CONNECTION_NUM > 0u)
                 Dcm_PeriodicConnectionSent[connIndex] = TRUE;
 #endif
             }
-            schedulerPtr->Timer    = schedulerPtr->Rate;
+            if (schedulerPtr->Rate != 0u)
+            {
+                schedulerPtr->Timer = schedulerPtr->Rate - 1u;
+            }
             schedulerPtr->OpStatus = DCM_INITIAL;
         }
         else
         {
-            transMode = schedulerPtr->TransMode;
-            Dcm_UDS0x2A_SchedulerInit(schedulerPtr);
-            Dcm_ScheduledRate[0u]--;
-            Dcm_ScheduledRate[transMode]--;
+            Dcm_UDS0x2A_Remove_Scheduler(schedulerPtr->DidIndex);
         }
     }
     else if (DCM_E_PENDING == result)
     {
         schedulerPtr->OpStatus = DCM_PENDING;
     }
-#if (STD_ON == DCM_DDDID_CHECK_SOURCE)
+#if ((STD_ON == DCM_DDDID_CHECK_SOURCE) && (STD_ON == DCM_DYN_DID))
     else if (TRUE == checkFail)
     {
         if (DCM_PENDING == schedulerPtr->OpStatus)
         {
+            uint16 DDDIdIndex = DCM_DID_INFO(schedulerPtr->DidIndex).DDDidIndex;
             (void)Dcm_UDS_DynDidHandle(
                 DCM_CANCEL,
                 schedulerPtr->ConnectionId,
-                schedulerPtr->DDDIdIndex,
+                DDDIdIndex,
                 &Dcm_PeriodicDataBuffer[offset],
                 &bufSize,
                 NULL_PTR,
                 &ErrorCode);
         }
-        transMode = schedulerPtr->TransMode;
-        Dcm_UDS0x2A_SchedulerInit(schedulerPtr);
-        Dcm_ScheduledRate[0u]--;
-        Dcm_ScheduledRate[transMode]--;
+        Dcm_UDS0x2A_Remove_Scheduler(schedulerPtr->DidIndex);
     }
 #endif
     else
     {
-        /* idle */
+        /* for qac idle */
     }
 }
+#endif
 #endif
 #define DCM_STOP_SEC_CODE
 #include "Dcm_MemMap.h"

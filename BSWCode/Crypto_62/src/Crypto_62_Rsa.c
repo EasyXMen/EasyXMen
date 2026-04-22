@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -22,19 +22,6 @@
  **
  ***********************************************************************************************************************/
 
-/* PRQA S 0311,0314,0316,0488,1339,2016,2023,2024,2052,2105,3102,3103,3208,3326,3345 ++ */ /* VL_QAC_Crypto */
-/* PRQA S 1253,0288,0317,0432,0489,0490,0693,0770,0772,0780,0842,1252,1258,1259,1277 ++ */ /* VL_QAC_Crypto */
-/* PRQA S 1290,1291,1336,1338,1840,1820,1821,1823,1841,1842,1843,1844,1851,1853,1860 ++ */ /* VL_QAC_Crypto */
-/* PRQA S 1861,1863,1880,1881,1890,1891,2001,2015,2205,2106,2140,2462,2463,2472,2487 ++ */ /* VL_QAC_Crypto */
-/* PRQA S 2740,3101,3120,3122,3123,3140,3200,3206,3209,3218,3219,3226,3332,3344,3387 ++ */ /* VL_QAC_Crypto */
-/* PRQA S 3395,3396,3397,3400,3408,3410,3418,3450,3440,3455,3610,3625,3672,3678,3715 ++ */ /* VL_QAC_Crypto */
-/* PRQA S 3717,3762,3769,3772,3779,4115,4116,4393,4394,4403,4404,4413,4414,4423,4432 ++ */ /* VL_QAC_Crypto */
-/* PRQA S 4434,4443,4446,4447,4460,4461,4464,4470,4480,4491,4499,4501,4538,4542,4544 ++ */ /* VL_QAC_Crypto */
-/* PRQA S 4532,4533,4543,4558,3673,3795,4150,4522,3391,3432,3442,2743,1505,2889,2834 ++ */ /* VL_QAC_Crypto */
-/* PRQA S 6050,6060,6070,6080,6010,6030,6040,2996,2992,2911,1503,2822,2896,2986,2755 ++ */ /* VL_QAC_Crypto */
-/* PRQA S 2834,2982,2983,2955,1532,2986,2982,2983,5022,5143,5014,5031,5045,2839,2998 ++ */ /* VL_QAC_Crypto */
-/* PRQA S 2995,2997,2871,2990,4825 ++ */                                                   /* VL_QAC_Crypto */
-
 /* PRQA S 6010 EOF */ /* VL_MTR_Crypto_62_STCYC */
 /* PRQA S 6020 EOF */ /* VL_MTR_Crypto_62_STLIN */
 /* PRQA S 6030 EOF */ /* VL_MTR_Crypto_62_STMIF */
@@ -45,6 +32,19 @@
 /* PRQA S 6080 EOF */ /* VL_MTR_Crypto_62_STPTH */
 /* PRQA S 6520 EOF */ /* VL_MTR_Crypto_62_STVAR */
 /* PRQA S 6540 EOF */ /* VL_MTR_Crypto_62_STTPP */
+
+/* PRQA S 0311,0314,0316,0488,1339,2016,2023,2024,2052,2105,3102,3103,3208,3326,3345 ++ */ /* VL_Crypto_62_General */
+/* PRQA S 1253,0288,0317,0432,0489,0490,0693,0770,0772,0780,0842,1252,1258,1259,1277 ++ */ /* VL_Crypto_62_General */
+/* PRQA S 1290,1291,1336,1338,1840,1820,1821,1823,1841,1842,1843,1844,1851,1853,1860 ++ */ /* VL_Crypto_62_General */
+/* PRQA S 1861,1863,1880,1881,1890,1891,2001,2015,2205,2106,2140,2462,2463,2472,2487 ++ */ /* VL_Crypto_62_General */
+/* PRQA S 2740,3101,3120,3122,3123,3140,3200,3206,3209,3218,3219,3226,3332,3344,3387 ++ */ /* VL_Crypto_62_General */
+/* PRQA S 3395,3396,3397,3400,3408,3410,3418,3450,3440,3455,3610,3625,3672,3678,3715 ++ */ /* VL_Crypto_62_General */
+/* PRQA S 3717,3762,3769,3772,4115,4116,4393,4394,4403,4404,4413,4414,4423,4432 ++ */      /* VL_Crypto_62_General */
+/* PRQA S 4434,4443,4446,4447,4460,4461,4464,4470,4480,4491,4499,4501,4538,4542,4544 ++ */ /* VL_Crypto_62_General */
+/* PRQA S 4532,4533,4543,4558,3673,3795,4150,4522,3391,3432,3442,2743,1505,2889,2834 ++ */ /* VL_Crypto_62_General */
+/* PRQA S 2996,2992,2911,1503,2822,2896,2986 ++ */                                         /* VL_Crypto_62_General */
+/* PRQA S 2834,2982,2983,1532,2986,2982,2983,5022,5143,5014,5031,5045,2839,2998 ++ */      /* VL_Crypto_62_General */
+/* PRQA S 2995,2997,2871,2990 ++ */                                                        /* VL_Crypto_62_General */
 
 /* =================================================== inclusions =================================================== */
 #include "Crypto_62_Internal.h"
@@ -3948,11 +3948,12 @@ int Crypto_rsa_parse_key(Crypto_rsa_context* rsa, const unsigned char* key, uint
     {
         goto cleanup;
     }
-
+#if 0
     if (p != end)
     {
         ret = E_NOT_OK;
     }
+#endif
 
 cleanup:
     Crypto_mpi_free(&T);
@@ -4622,7 +4623,7 @@ CRYPTO_62_LOCAL int Crypto_ct_rsaes_pkcs1_v15_unpadding(
      * secrets. */
     if (output_max_len != 0)
     {
-        (void)IStdLib_MemCpy(output, input + ilen - plaintext_max_size, plaintext_max_size);
+        (void)IStdLib_MemCpy(output, input + ilen - plaintext_max_size, plaintext_size);
     }
 
     /* Report the amount of data we copied to the output buffer. In case
@@ -6928,12 +6929,16 @@ int Crypto_rsa_rsaes_oaep_encrypt(
 
     p += hlen;
 
-    /* Construct DB */
-    ret = compute_hash((Crypto_AlgorithmFamilyType)ctx->hash_id, label, label_len, p);
-    if (ret != 0)
+    if (label_len > 0)
     {
-        return ret;
+        /* Construct DB */
+        ret = compute_hash((Crypto_AlgorithmFamilyType)ctx->hash_id, label, label_len, p);
+        if (ret != 0)
+        {
+            return ret;
+        }
     }
+
     p += hlen;
     p += olen - 2 * hlen - 2 - ilen;
     *p++ = 1;
@@ -7066,7 +7071,6 @@ int Crypto_rsa_pkcs1_encrypt(
     unsigned char*       output)
 {
     Std_ReturnType          ret = E_NOT_OK;
-    uint32                  Plaint_Len;
     const Crypto_Md_Info_t* md_info;
     uint32                  hlen;
     md_info = Crypto_Md_info_from_type(ctx->hash_id);
@@ -7075,39 +7079,23 @@ int Crypto_rsa_pkcs1_encrypt(
     switch (ctx->padding)
     {
     case CRYPTO_ALGOMODE_RSAES_PKCS1_v1_5:
-        Plaint_Len = ctx->len - 11U;
-        if (ilen <= Plaint_Len)
+        if (ilen <= ctx->len - 11U)
         {
             ret = Crypto_rsa_rsaes_pkcs1_v15_encrypt(ctx, f_rng, p_rng, ilen, input, output);
         }
         else
         {
-            while (ilen > Plaint_Len)
-            {
-                ret = Crypto_rsa_rsaes_pkcs1_v15_encrypt(ctx, f_rng, p_rng, Plaint_Len, input, output);
-                ilen -= Plaint_Len;
-                input += Plaint_Len;
-                output += ctx->len;
-            }
+            ret = E_NOT_OK; // input message too long
         }
         break;
     case CRYPTO_ALGOMODE_RSAES_OAEP:
-
-        Plaint_Len = ctx->len - 2u * hlen - 2;
-        if (ilen <= Plaint_Len)
+        if (ilen <= ctx->len - 2u * hlen - 2)
         {
-            ret = Crypto_rsa_rsaes_oaep_encrypt(ctx, f_rng, p_rng, NULL_PTR, 0u, Plaint_Len, input, output);
+            ret = Crypto_rsa_rsaes_oaep_encrypt(ctx, f_rng, p_rng, NULL_PTR, 0u, ilen, input, output);
         }
         else
         {
-            while (ilen > Plaint_Len)
-            {
-                ret = Crypto_rsa_rsaes_oaep_encrypt(ctx, f_rng, p_rng, NULL_PTR, 0u, Plaint_Len, input, output);
-
-                ilen -= Plaint_Len;
-                input += Plaint_Len;
-                output += ctx->len;
-            }
+            ret = E_NOT_OK; // input message too long
         }
         break;
 
@@ -7161,7 +7149,7 @@ int Crypto_rsa_rsaes_oaep_decrypt(
     unsigned char* p;
     uint64         bad, in_padding;
     unsigned char  buf[CRYPTO_MPI_MAX_SIZE];
-    unsigned char  lhash[CRYPTO_MD_MAX_SIZE];
+    unsigned char  lhash[CRYPTO_MD_MAX_SIZE] = {0x00};
     unsigned int   hlen;
 
     /*
@@ -7213,11 +7201,14 @@ int Crypto_rsa_rsaes_oaep_decrypt(
         goto cleanup;
     }
 
-    /* Generate lHash */
-    ret = compute_hash((Crypto_AlgorithmFamilyType)ctx->hash_id, label, label_len, lhash);
-    if (ret != 0)
+    if (label_len > 0)
     {
-        goto cleanup;
+        /* Generate lHash */
+        ret = compute_hash((Crypto_AlgorithmFamilyType)ctx->hash_id, label, label_len, lhash);
+        if (ret != 0)
+        {
+            goto cleanup;
+        }
     }
 
     /*
@@ -7368,43 +7359,19 @@ int Crypto_rsa_pkcs1_decrypt(
     void*                p_rng,
     uint32*              olen,
     const unsigned char* input,
-    uint32               ilen,
     unsigned char*       output,
     uint32               output_max_len)
 {
-    Std_ReturnType          ret = E_NOT_OK;
-    const Crypto_Md_Info_t* md_info;
-    uint32                  hlen;
-    uint32                  mLen = ctx->len;
-    *olen                        = 0u;
-
-    md_info = Crypto_Md_info_from_type(ctx->hash_id);
-    hlen    = Crypto_md_get_size(md_info);
+    Std_ReturnType ret = E_NOT_OK;
+    *olen              = 0u;
 
     switch (ctx->padding)
     {
     case CRYPTO_ALGOMODE_RSAES_PKCS1_v1_5:
-
-        while (ilen >= mLen)
-        {
-            ret = Crypto_rsa_rsaes_pkcs1_v15_decrypt(ctx, f_rng, p_rng, olen, input, output, output_max_len);
-            ilen -= mLen;
-            input += mLen;
-            output += mLen - 11u;
-            *olen += mLen - 11u;
-        }
-
+        ret = Crypto_rsa_rsaes_pkcs1_v15_decrypt(ctx, f_rng, p_rng, olen, input, output, output_max_len);
         break;
     case CRYPTO_ALGOMODE_RSAES_OAEP:
-
-        while (ilen >= mLen)
-        {
-            ret = Crypto_rsa_rsaes_oaep_decrypt(ctx, f_rng, p_rng, NULL_PTR, 0u, olen, input, output, output_max_len);
-            ilen -= mLen;
-            input += mLen;
-            output += mLen - 2u * hlen - 2;
-            *olen += mLen - 2u * hlen - 2;
-        }
+        ret = Crypto_rsa_rsaes_oaep_decrypt(ctx, f_rng, p_rng, NULL_PTR, 0u, olen, input, output, output_max_len);
         break;
     default:
         return E_NOT_OK;
@@ -8465,7 +8432,7 @@ Std_ReturnType
 
     if (ret == E_OK)
     {
-        Crypto_rsa_pkcs1_encrypt(&rsa, myrand, NULL_PTR, inLen, rsa_plaintext, rsa_ciphertext);
+        ret = Crypto_rsa_pkcs1_encrypt(&rsa, myrand, NULL_PTR, inLen, rsa_plaintext, rsa_ciphertext);
     }
     (void)IStdLib_MemSet(key, 0, keylength);
     (void)IStdLib_MemHeapFree(Crypto_62_MemPool, key);
@@ -8510,7 +8477,6 @@ Std_ReturnType
     uint32* outLen         = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr;
     uint8*  rsa_ciphertext = (uint8*)(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputPtr);
     uint8*  rsa_plaintext  = (uint8*)(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr);
-    uint32  inLen          = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputLength;
 
     Crypto_rsa_init(&rsa, mode, secondaryFam);
     ret = Crypto_62_KeyElementGet(Crypto_62_StoredJob[objectId].cryptoKeyId, CRYPTO_KE_CIPHER_KEY, key, &keylength);
@@ -8521,7 +8487,7 @@ Std_ReturnType
     }
     if (ret == E_OK)
     {
-        ret = Crypto_rsa_pkcs1_decrypt(&rsa, myrand, NULL_PTR, outLen, rsa_ciphertext, inLen, rsa_plaintext, keylength);
+        ret = Crypto_rsa_pkcs1_decrypt(&rsa, myrand, NULL_PTR, outLen, rsa_ciphertext, rsa_plaintext, keylength);
     }
     (void)IStdLib_MemSet(key, 0, keylength);
     (void)IStdLib_MemHeapFree(Crypto_62_MemPool, key);
@@ -8570,11 +8536,11 @@ Std_ReturnType Crypto_Rsa_SignatureGenerate_Process(
     const uint8* input    = (uint8*)(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputPtr);
     uint32       inputlen = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputLength;
 
-    uint32 keylength      = Crypto_62_StoredJob[objectId].jobPrimitiveInfo->primitiveInfo->algorithm.keyLength;
-    uint8* key            = (uint8*)IStdLib_MemHeapCalloc(Crypto_62_MemPool, 1u, keylength);
-    uint8* output         = (uint8*)IStdLib_MemHeapCalloc(Crypto_62_MemPool, 1u, keylength);
-    uint8* rsa_ciphertext = (uint8*)IStdLib_MemHeapCalloc(Crypto_62_MemPool, 1u, keylength);
-    uint32 outputlen      = *Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr;
+    uint32 keylength     = Crypto_62_StoredJob[objectId].jobPrimitiveInfo->primitiveInfo->algorithm.keyLength;
+    uint8* key           = (uint8*)IStdLib_MemHeapCalloc(Crypto_62_MemPool, 1u, keylength);
+    uint8* output        = (uint8*)IStdLib_MemHeapCalloc(Crypto_62_MemPool, 1u, keylength);
+    uint8* rsa_signature = (uint8*)IStdLib_MemHeapCalloc(Crypto_62_MemPool, 1u, keylength);
+    uint32 outputlen     = *Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr;
 
     (void)IStdLib_MemSet(&ctx, 0, sizeof(Crypto_Md_Context_t));
     Crypto_rsa_init(&rsa, mode, secondaryFam);
@@ -8593,7 +8559,9 @@ Std_ReturnType Crypto_Rsa_SignatureGenerate_Process(
         ret = Crypto_Md_Finish(&ctx, output);
         (void)IStdLib_MemSet(ctx.hmac_ctx, 0, 2 * (ctx.md_info->size));
         (void)IStdLib_MemHeapFree(Crypto_62_MemPool, ctx.hmac_ctx);
+#if (CRYPTO_SERVICE_HASH == STD_ON)
         Crypto_Md_Free(&ctx);
+#endif
     }
     if (ret == E_OK)
     {
@@ -8610,21 +8578,30 @@ Std_ReturnType Crypto_Rsa_SignatureGenerate_Process(
         }
         if (ret == E_OK)
         {
-            ret =
-                Crypto_rsa_pkcs1_sign(&rsa, myrand, NULL_PTR, secondaryFam, ctx.md_info->size, output, rsa_ciphertext);
+            ret = Crypto_rsa_pkcs1_sign(&rsa, myrand, NULL_PTR, secondaryFam, ctx.md_info->size, output, rsa_signature);
         }
     }
     (void)IStdLib_MemCpy(
         (uint8*)(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr),
-        rsa_ciphertext,
+        rsa_signature,
         outputlen);
 
     (void)IStdLib_MemSet(key, 0, keylength);
     (void)IStdLib_MemSet(output, 0, keylength);
-    (void)IStdLib_MemSet(rsa_ciphertext, 0, keylength);
+    (void)IStdLib_MemSet(rsa_signature, 0, keylength);
     (void)IStdLib_MemHeapFree(Crypto_62_MemPool, key);
     (void)IStdLib_MemHeapFree(Crypto_62_MemPool, output);
-    (void)IStdLib_MemHeapFree(Crypto_62_MemPool, rsa_ciphertext);
+    (void)IStdLib_MemHeapFree(Crypto_62_MemPool, rsa_signature);
+
+    if (ctx.hmac_ctx != NULL)
+    {
+        if (ctx.md_info != NULL)
+        {
+            (void)IStdLib_MemSet(ctx.hmac_ctx, 0, 2 * (ctx.md_info->size));
+        }
+        (void)IStdLib_MemHeapFree(Crypto_62_MemPool, ctx.hmac_ctx);
+        ctx.hmac_ctx = NULL;
+    }
 
     Crypto_mpi_free(&rsa.Vi);
     Crypto_mpi_free(&rsa.Vf);
@@ -8686,9 +8663,6 @@ Std_ReturnType Crypto_Rsa_SignatureVerifyProcess(
     if (ret == E_OK)
     {
         ret = Crypto_Md_Finish(&ctx, hash);
-        (void)IStdLib_MemSet(ctx.hmac_ctx, 0, 2 * (ctx.md_info->size));
-        (void)IStdLib_MemHeapFree(Crypto_62_MemPool, ctx.hmac_ctx);
-        Crypto_Md_Free(&ctx);
     }
 
     Crypto_rsa_init(&rsa, mode, secondaryFam);
@@ -8716,6 +8690,16 @@ Std_ReturnType Crypto_Rsa_SignatureVerifyProcess(
     (void)IStdLib_MemHeapFree(Crypto_62_MemPool, key);
     (void)IStdLib_MemHeapFree(Crypto_62_MemPool, hash);
 
+    if (ctx.hmac_ctx != NULL)
+    {
+        if (ctx.md_info != NULL)
+        {
+            (void)IStdLib_MemSet(ctx.hmac_ctx, 0, 2 * (ctx.md_info->size));
+        }
+        (void)IStdLib_MemHeapFree(Crypto_62_MemPool, ctx.hmac_ctx);
+        ctx.hmac_ctx = NULL;
+    }
+
     Crypto_mpi_free(&rsa.Vi);
     Crypto_mpi_free(&rsa.Vf);
     Crypto_mpi_free(&rsa.RN);
@@ -8741,9 +8725,9 @@ Std_ReturnType Crypto_Rsa_SignatureVerifyProcess(
 /* PRQA S 1861,1863,1880,1881,1890,1891,2001,2015,2205,2106,2140,2462,2463,2472,2487 -- */
 /* PRQA S 2740,3101,3120,3122,3123,3140,3200,3206,3209,3218,3219,3226,3332,3344,3387 -- */
 /* PRQA S 3395,3396,3397,3400,3408,3410,3418,3450,3440,3455,3610,3625,3672,3678,3715 -- */
-/* PRQA S 3717,3762,3769,3772,3779,4115,4116,4393,4394,4403,4404,4413,4414,4423,4432 -- */
+/* PRQA S 3717,3762,3769,3772,4115,4116,4393,4394,4403,4404,4413,4414,4423,4432 -- */
 /* PRQA S 4434,4443,4446,4447,4460,4461,4464,4470,4480,4491,4499,4501,4538,4542,4544 -- */
 /* PRQA S 4532,4533,4543,4558,3673,3795,4150,4522,3391,3432,3442,2743,1505,2889,2834 -- */
-/* PRQA S 6050,6060,6070,6080,6010,6030,6040,2996,2992,2911,1503,2822,2896,2986,2755 -- */
-/* PRQA S 2834,2982,2983,2955,1532,2986,2982,2983,5022,5143,5014,5031,5045,2839,2998 -- */
-/* PRQA S 2995,2997,2871,2990,4825 -- */
+/* PRQA S 2996,2992,2911,1503,2822,2896,2986 -- */
+/* PRQA S 2834,2982,2983,1532,2986,2982,2983,5022,5143,5014,5031,5045,2839,2998 -- */
+/* PRQA S 2995,2997,2871,2990 -- */

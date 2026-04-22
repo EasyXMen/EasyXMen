@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -32,6 +32,12 @@
       Reason: Configuration variables design needs
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
+
+    \li VL_MemIf_0553
+      Reason:  the MemIf shall be implemented as a set of macros mapping the MemIf API to the API of the corresponding
+  memory abstraction module.
+      Risk: No risk.
+      Prevention: None.
 
     \li VL_MemIf_5004
       Reason: pointer type definition is essential

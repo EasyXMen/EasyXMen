@@ -1,6 +1,6 @@
 /* PRQA S 3108++ */
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -35,33 +35,130 @@
 
 /*=======[M A C R O S]=======================================================*/
 #define MPU_RASR_ENABLE_MASK 0xFFFFFFFEu
+
 /*=======[E X T E R N A L   D A T A]=========================================*/
 
 /*=======[I N T E R N A L   D A T A]==========================================*/
 #if (TRUE == CFG_MEMORY_PROTECTION_ENABLE)
 /* PRQA S 0791++ */ /* MISRA Rule 5.4 */
-#define OS_START_SEC_VAR_CLONE_UNSPECIFIED
+#define OS_START_SEC_VAR_CLONE_8
 #include "Os_MemMap.h"
-Os_ArchMpuRgnType* Os_ArchTaskMpuRegion; /* PRQA S 3432 */ /* MISRA Rule 20.7 */ /* ARCH_MPU_MACRO_DEFINE_003 */
-#define OS_STOP_SEC_VAR_CLONE_UNSPECIFIED
-#include "Os_MemMap.h"
-
-#define OS_START_SEC_VAR_CLONE_UNSPECIFIED
-#include "Os_MemMap.h"
-Os_ArchMpuRgnType* Os_ArchIsrMpuRegion; /* PRQA S 3432 */ /* MISRA Rule 20.7 */ /* ARCH_MPU_MACRO_DEFINE_003 */
-#define OS_STOP_SEC_VAR_CLONE_UNSPECIFIED
+Os_MpSetType Os_PreAppTrustState;
+#define OS_STOP_SEC_VAR_CLONE_8
 #include "Os_MemMap.h"
 
-#if (0 < CFG_OSAPPLICATION_MAX)
-#define OS_START_SEC_VAR_CLEARED_GLOBAL_32
+#define OS_START_SEC_VAR_CLONE_8
 #include "Os_MemMap.h"
-static Os_ArchMpuRgnType Os_ArchAppMpuRegion[CFG_OSAPPLICATION_MAX][3];
-#define OS_STOP_SEC_VAR_CLEARED_GLOBAL_32
+Os_MpSetType Os_CurAppTrustState;
+#define OS_STOP_SEC_VAR_CLONE_8
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_VAR_CLONE_8
+#include "Os_MemMap.h"
+static uint8 Os_PublicAreaCfg = FALSE;
+#define OS_STOP_SEC_VAR_CLONE_8
+#include "Os_MemMap.h"
+#endif              /*TRUE == CFG_MEMORY_PROTECTION_ENABLE*/
+
+#define OS_START_SEC_VAR_CLONE_PTR
+#include "Os_MemMap.h"
+Os_MpuRegionType Os_TaskMpuRegion;
+#define OS_STOP_SEC_VAR_CLONE_PTR
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_VAR_CLONE_PTR
+#include "Os_MemMap.h"
+Os_MpuRegionType Os_Isr2MpuRegion;
+#define OS_STOP_SEC_VAR_CLONE_PTR
+#include "Os_MemMap.h"
+
+/* PRQA S 0791-- */ /* MISRA Rule 5.4 */
+#if ((OS_SC3 == CFG_SC) || (OS_SC4 == CFG_SC))
+#define OS_START_SEC_CONST_UNSPECIFIED
+#include "Os_MemMap.h"
+static const uint32 MpuRegionSize[] = /* PRQA S 3218 */ /* MISRA Rule 8.9 */ /*ARCH_MPU_DATA_DEFINE_001*/
+    {
+        /* obyte, 32byte, 64byte, 128byte, 256byte, 512byte, 1KB */
+        0u,
+        32u,
+        64u,
+        128u,
+        256u,
+        512u,
+        1024u,
+        /* 2KB, 4KB, 8KB, 16KB, 32KB */
+        2048u,
+        4096u,
+        8192u,
+        16384u,
+        32768u,
+        /* 64KB, 128KB, 256KB, 512KB, 1MB */
+        65536u,
+        131072u,
+        262144u,
+        524288u,
+        1048576u,
+        /* 2MB, 4MB, 8MB, 16MB*/
+        2097152u,
+        4194304u,
+        8388608u,
+        16777216u,
+        /* 32MB, 64MB, 128MB, 256MB */
+        33554432u,
+        67108864u,
+        134217728u,
+        268435456u,
+        /* 512MB, 1GB, 2GB, 4GB */
+        536870912u,
+        1073741824u,
+        2147483648u,
+        4294967295u};
+#define OS_STOP_SEC_CONST_UNSPECIFIED
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CONST_UNSPECIFIED
+#include "Os_MemMap.h"
+static const uint32 MpuRegionBitMap[] = /* PRQA S 3218 */ /* MISRA Rule 8.9 */ /*ARCH_MPU_DATA_DEFINE_001*/
+    {
+        /*obyte, 32byte, 64byte, 128byte, 256byte */
+        0u,
+        MPU_RGN_SIZE_32B,
+        MPU_RGN_SIZE_64B,
+        MPU_RGN_SIZE_128B,
+        MPU_RGN_SIZE_256B,
+        /* 512byte, 1KB, 2KB, 4KB */
+        MPU_RGN_SIZE_512B,
+        MPU_RGN_SIZE_1KB,
+        MPU_RGN_SIZE_2KB,
+        MPU_RGN_SIZE_4KB,
+        /* 8KB, 16KB, 32KB, 64KB */
+        MPU_RGN_SIZE_8KB,
+        MPU_RGN_SIZE_16KB,
+        MPU_RGN_SIZE_32KB,
+        MPU_RGN_SIZE_64KB,
+        /* 128KB, 256KB, 512KB, 1MB */
+        MPU_RGN_SIZE_128KB,
+        MPU_RGN_SIZE_256KB,
+        MPU_RGN_SIZE_512KB,
+        MPU_RGN_SIZE_1MKB,
+        /* 2MB, 4MB, 8MB, 16MB */
+        MPU_RGN_SIZE_2MKB,
+        MPU_RGN_SIZE_4MKB,
+        MPU_RGN_SIZE_8MKB,
+        MPU_RGN_SIZE_16MKB,
+        /* 32MB, 64MB, 128MB, 256MB */
+        MPU_RGN_SIZE_32MKB,
+        MPU_RGN_SIZE_64MKB,
+        MPU_RGN_SIZE_128MKB,
+        MPU_RGN_SIZE_256MKB,
+        /* 512MB, 1GB, 2GB, 4GB */
+        MPU_RGN_SIZE_512MKB,
+        MPU_RGN_SIZE_1GB,
+        MPU_RGN_SIZE_2GB,
+        MPU_RGN_SIZE_4GB};
+#define OS_STOP_SEC_CONST_UNSPECIFIED
 #include "Os_MemMap.h"
 #endif
-
-#endif              /*TRUE == CFG_MEMORY_PROTECTION_ENABLE*/
-/* PRQA S 0791-- */ /* MISRA Rule 5.4 */
 /*=======[I N T E R N A L   F U N C T I O N   D E C L A R A T I O N S]========*/
 #if (TRUE == CFG_MEMORY_PROTECTION_ENABLE)
 #define OS_START_SEC_CODE
@@ -70,50 +167,85 @@ static void Os_MpuPriDefMemMap(void);
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
 
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+static void Os_MpuTaskCalc(TaskType TaskId, ApplicationType HostAppId, Os_MpSetType Set);
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+static void Os_MpuIsrCalc(ISRType IsrId, ApplicationType HostAppId, Os_MpSetType Set);
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+static void MPU_SetRegionConfig(const mpu_config* pUserConfigPtr, uint16 threadId, Os_CallLevelType threadLevel);
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
 /*=======[F U N C T I O N   I M P L E M E N T A T I O N S]====================*/
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-uint32 Os_ArchMpuCalculateRasr(uint32 RegionLength, uint32 AcessRight, uint32 MemType)
+/******************************************************************************/
+/*
+ * Brief                <Memory protection settings Region register.>
+ * Service ID           <None>
+ * Sync/Async           <Synchronous>
+ * Reentrancy           <Reentrant>
+ * param-region[in]     <Region Number>
+ * param-base[in]       <Region Base Address>
+ * param-size[in]       <Region size>
+ * param-access[in]     <Region access>
+ * param-Name[out]      <None>
+ * param-Name[in/out]   <None>
+ * return               <None>
+ * PreCondition         <None>
+ * CallByAPI            <None>
+ * REQ ID               <None>
+ */
+/******************************************************************************/
+void Os_SetMpuRegion(uint8 region, uint32 base, uint32 size, uint32 access)
 {
-    uint32 vRasr;
-    uint32 vSizeEncode = 0;
-    static CONST(uint8, OS_CONST) Os_MpSizeMpuTable[16] =
-        {0, 0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3};
-    if(RegionLength >= 32u)
-    {
-        /* [33:64] ==> 0x5 */
-        RegionLength -= 1u;
-        if ((RegionLength & 0xFFFF0000U) != 0u)
-        {
-            vSizeEncode += 16u;
-            RegionLength >>= 16u;
-        }
-        if ((RegionLength & 0xFF00U) != 0u)
-        {
-            vSizeEncode += 8u;
-            RegionLength >>= 8u;
-        }
-        if ((RegionLength & 0xF0U) != 0u)
-        {
-            vSizeEncode += 4u;
-            RegionLength >>= 4u;
-        }
-        vSizeEncode += Os_MpSizeMpuTable[RegionLength];
-    }
-    else if(RegionLength > 0u)
-    {
-        vSizeEncode = 4u;
-    }
-    else
-    {
-        while(1)
-        {
-        }
-        /* DO NOTHING */
-    }
+    /* PRQA S 0303 ++*/ /* MISRA Rule 11.4 */
+    MPU_RNR_REG = region;
+    MPU_RBAR_REG = base;
+    MPU_RASR_REG = (size | access);
+    /* PRQA S 0303 --*/ /* MISRA Rule 11.4 */
+    OS_ARCH_DSYNC();
+    OS_ARCH_ISYNC();
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
 
-    vRasr = AcessRight | MemType | (vSizeEncode << 1) | OS_MPU_RASR_ENABLE;
-    return vRasr;
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/******************************************************************************/
+/*
+ * Brief                <Memory protection disable region>
+ * Service ID           <None>
+ * Sync/Async           <Synchronous>
+ * Reentrancy           <Reentrant>
+ * param-region[in]     <Region Number>
+ * param-Name[out]      <None>
+ * param-Name[in/out]   <None>
+ * return               <None>
+ * PreCondition         <None>
+ * CallByAPI            <None>
+ * REQ ID               <None>
+ */
+/******************************************************************************/
+void Os_DisableMpuRegion(uint8 region)
+{
+    uint32 tpRasr = 0U;
+    /* PRQA S 0303 ++*/ /* MISRA Rule 11.4 */
+    MPU_RNR_REG = region;
+    tpRasr = MPU_RASR_REG;
+    tpRasr = tpRasr & (uint32)(MPU_RASR_ENABLE_MASK);
+    MPU_RASR_REG = tpRasr;
+    /* PRQA S 0303 --*/ /* MISRA Rule 11.4 */
+    OS_ARCH_DSYNC();
+    OS_ARCH_ISYNC();
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
@@ -137,6 +269,7 @@ uint32 Os_ArchMpuCalculateRasr(uint32 RegionLength, uint32 AcessRight, uint32 Me
 /******************************************************************************/
 static void Os_MpuPriDefMemMap(void)
 {
+
     MPU_CTRL_REG |= OS_MPU_CTRL_PRIVDEFENA_MASK; /* PRQA S 0303,3442 */ /* MISRA Rule 11.4,CWE-398 */
     OS_ARCH_DSYNC();
     OS_ARCH_ISYNC();
@@ -197,59 +330,129 @@ void Os_MpuDisable(void)
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
 #endif /* TRUE == CFG_MEMORY_PROTECTION_ENABLE */
-/*=======[E X C I P T I O N]==================================================*/
-/* For memory protection. */
-#if (TRUE == CFG_MEMORY_PROTECTION_ENABLE)
+
+#if ((OS_SC3 == CFG_SC) || (OS_SC4 == CFG_SC))
+
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
 /******************************************************************************/
 /*
- * Brief                <In MPU Trust or NO Task Configuration, All permissions are
- *                      allowed in privilege mode ,but in user mode,Peripheral is restrict>
- * Service ID           <Os_ArchMpuTaskSwitch>
+ * Brief                <Caculate memory protection region size>
+ * Service ID           <None>
  * Sync/Async           <Synchronous>
  * Reentrancy           <Reentrant>
- * param-Name[in]       <None>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <StatusType>
+ * param-startAddr[in]  <start address>
+ * param-endAddr[in]    <end address>
+ * param-Name[out]      <None>
+ * param-Name[in/out]   <None>
+ * return               <None>
  * PreCondition         <None>
- * CallByAPI            <None>
+ * CallByAPI            <Os_ArchMpTrustIsrThreadSwitch and so on>
  * REQ ID               <None>
  */
 /******************************************************************************/
-static FUNC(void, OS_CODE) Os_ArchMpuTaskSwitch(TaskType TaskId, ApplicationType HostAppId)
+uint32 Os_CaculateMemSize(const uint8* startAddr, const uint8* endAddr)
 {
-    OS_ARCH_DSYNC();
-    OS_ARCH_ISYNC();
+    uint32 size = 0u;
+    uint32 memSize = 0u;
+    uint32 idex = 0u;
 
-    // /* PRQA S 0303 ++ */ /* MISRA Rule 11.4 */ /* ARCH_MPU_VTYPE_CAST_006 */
-    if (TRUE == Os_AppCfg[HostAppId].OsTrustedAppWithProtection)
+    size = (uint32)(endAddr - startAddr); /* PRQA S 0488 */ /* MISRA Rule 18.4 */ /*ARCH_MPU_PTR_OPERATIONS_003*/
+    while (TRUE) /*PRQA S 2740*/                                                  /* MISRA CWE-569,CWE-571 */
     {
-        /* PERIPHERAL */
-        OS_REG32(OS_MPU_RNR_ADDRESS) = MPU_REGION_12;
-        OS_REG32(OS_MPU_RASR_ADDRESS) = OS_MPU_RASR_RESET_VALUE;    /* Disable Region */
-        OS_REG32(OS_MPU_RBAR_ADDRESS) = (uint32)PERIPHERAL_START;
-        OS_REG32(OS_MPU_RASR_ADDRESS) = Os_ArchMpuCalculateRasr((uint32)PERIPHERAL_END - (uint32)PERIPHERAL_START, OS_MPU_AR_RW_R, OS_MPU_TYPE_AHB);
-        /* other app data */
-        OS_REG32(OS_MPU_RNR_ADDRESS) = MPU_REGION_13;
-        OS_REG32(OS_MPU_RASR_ADDRESS) = OS_MPU_RASR_RESET_VALUE;    /* Disable Region */
-        OS_REG32(OS_MPU_RBAR_ADDRESS) = (uint32)(Os_Core_App_DAddr[Os_SCB.sysCore].APP_ADDR_START);
-        OS_REG32(OS_MPU_RASR_ADDRESS) = Os_ArchMpuCalculateRasr((uint32)(Os_Core_App_DAddr[Os_SCB.sysCore].APP_ADDR_END) - (uint32)(Os_Core_App_DAddr[Os_SCB.sysCore].APP_ADDR_START), OS_MPU_AR_RW_R, OS_MPU_TYPE_SRAMCACHE);
+        if (MpuRegionSize[idex] >= size)
+        {
+            memSize = MpuRegionBitMap[idex];
+            break;
+        }
+        idex++;
     }
-    /* App's PriData */
-    OS_REG32(OS_MPU_RNR_ADDRESS) = MPU_REGION_14;
-    OS_REG32(OS_MPU_RASR_ADDRESS) = OS_MPU_RASR_RESET_VALUE;    /* Disable Region */
-    OS_REG32(OS_MPU_RBAR_ADDRESS) = Os_ArchAppMpuRegion[HostAppId][0].RBAR;
-    OS_REG32(OS_MPU_RASR_ADDRESS) = Os_ArchAppMpuRegion[HostAppId][0].RASR;
-    /* Task Data */
-    OS_REG32(OS_MPU_RNR_ADDRESS) = MPU_REGION_15;
-    OS_REG32(OS_MPU_RASR_ADDRESS) = OS_MPU_RASR_RESET_VALUE;    /* Disable Region */
-    OS_REG32(OS_MPU_RBAR_ADDRESS) = Os_ArchTaskMpuRegion[TaskId].RBAR;
-    OS_REG32(OS_MPU_RASR_ADDRESS) = Os_ArchTaskMpuRegion[TaskId].RASR;
-    /* PRQA S 0303 -- */ /* MISRA Rule 11.4 */ /* ARCH_MPU_VTYPE_CAST_006 */
-    OS_ARCH_DSYNC();
-    OS_ARCH_ISYNC();
+    return memSize;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+#endif
+/*=======[E X C I P T I O N]==================================================*/
+/* For memory protection. */
+#if (TRUE == CFG_MEMORY_PROTECTION_ENABLE)
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/******************************************************************************/
+/*
+ * Brief                < Switch MPU settings for task >
+ *
+ * Service ID   :       <None>
+ * Sync/Async   :       <Synchronous>
+ * Reentrancy           <Non Reentrant>
+ * param-Name[in]       <None>
+ * param-Name[out]      <None>
+ * param-Name[in/out]   <None>
+ * return               <None>
+ * PreCondition         <None>
+ * CallByAPI            <Os_SwitchTask>
+ * REQ ID               <None>
+ */
+/******************************************************************************/
+void Os_MpuTaskSwitch(TaskType TaskId, ApplicationType HostAppId)
+{
+    UNUSED_PARAMETER(HostAppId);
+    Os_MpuDisable();
+    /* PRQA S 0303 ++*/                              /* MISRA Rule 11.4*/
+    if (Os_PublicAreaCfg == FALSE) /* PRQA S 2109 */ /* MISRA CWE-192 */
+    {
+        MPU_RNR_REG = OS_MPU_REGION_NUM_ALL_PFLASH_SPACE;
+        MPU_RBAR_REG = Os_TaskMpuRegion.RegionRbarPtr[TaskId][OS_MPU_REGION_NUM_ALL_PFLASH_SPACE];
+        MPU_RASR_REG = Os_TaskMpuRegion.RegionRasrPtr[TaskId][OS_MPU_REGION_NUM_ALL_PFLASH_SPACE];
+
+        MPU_RNR_REG = OS_MPU_REGION_NUM_ALL_SRAM_SPACE;
+        MPU_RBAR_REG = Os_TaskMpuRegion.RegionRbarPtr[TaskId][OS_MPU_REGION_NUM_ALL_SRAM_SPACE];
+        MPU_RASR_REG = Os_TaskMpuRegion.RegionRasrPtr[TaskId][OS_MPU_REGION_NUM_ALL_SRAM_SPACE];
+
+        MPU_RNR_REG = OS_MPU_REGION_NUM_SHARED_SPACE;
+        MPU_RBAR_REG = Os_TaskMpuRegion.RegionRbarPtr[TaskId][OS_MPU_REGION_NUM_SHARED_SPACE];
+        MPU_RASR_REG = Os_TaskMpuRegion.RegionRasrPtr[TaskId][OS_MPU_REGION_NUM_SHARED_SPACE];
+        Os_PublicAreaCfg = TRUE;
+    }
+    if (Os_CurAppTrustState != Os_PreAppTrustState)
+    {
+#if (REGION_16 == CFG_REGION_NUM)
+        MPU_RNR_REG = OS_MPU_REGION_NUM_ALL_APP_CODE;
+        MPU_RBAR_REG = Os_TaskMpuRegion.RegionRbarPtr[TaskId][OS_MPU_REGION_NUM_ALL_APP_CODE];
+        MPU_RASR_REG = Os_TaskMpuRegion.RegionRasrPtr[TaskId][OS_MPU_REGION_NUM_ALL_APP_CODE];
+#endif
+
+        MPU_RNR_REG = OS_MPU_REGION_NUM_ALL_APP_DATA;
+        MPU_RBAR_REG = Os_TaskMpuRegion.RegionRbarPtr[TaskId][OS_MPU_REGION_NUM_ALL_APP_DATA];
+        MPU_RASR_REG = Os_TaskMpuRegion.RegionRasrPtr[TaskId][OS_MPU_REGION_NUM_ALL_APP_DATA];
+
+        MPU_RNR_REG = OS_MPU_REGION_NUM_ALL_PERI_SPACE;
+        MPU_RBAR_REG = Os_TaskMpuRegion.RegionRbarPtr[TaskId][OS_MPU_REGION_NUM_ALL_PERI_SPACE];
+        MPU_RASR_REG = Os_TaskMpuRegion.RegionRasrPtr[TaskId][OS_MPU_REGION_NUM_ALL_PERI_SPACE];
+    }
+#if (REGION_16 == CFG_REGION_NUM)
+    MPU_RNR_REG = OS_MPU_REGION_NUM_CUR_APP_CODE;
+    MPU_RBAR_REG = Os_TaskMpuRegion.RegionRbarPtr[TaskId][OS_MPU_REGION_NUM_CUR_APP_CODE];
+    MPU_RASR_REG = Os_TaskMpuRegion.RegionRasrPtr[TaskId][OS_MPU_REGION_NUM_CUR_APP_CODE];
+#endif
+
+    MPU_RNR_REG = OS_MPU_REGION_NUM_CUR_APP_PRI_DATA;
+    MPU_RBAR_REG = Os_TaskMpuRegion.RegionRbarPtr[TaskId][OS_MPU_REGION_NUM_CUR_APP_PRI_DATA];
+    MPU_RASR_REG = Os_TaskMpuRegion.RegionRasrPtr[TaskId][OS_MPU_REGION_NUM_CUR_APP_PRI_DATA];
+
+    MPU_RNR_REG = OS_MPU_REGION_NUM_CUR_TASK_DATA;
+    MPU_RBAR_REG = Os_TaskMpuRegion.RegionRbarPtr[TaskId][OS_MPU_REGION_NUM_CUR_TASK_DATA];
+    MPU_RASR_REG = Os_TaskMpuRegion.RegionRasrPtr[TaskId][OS_MPU_REGION_NUM_CUR_TASK_DATA];
+    /* PRQA S 0303 --*/ /* MISRA Rule 11.4*/
+    if (OS_MP_SET_NON_TRUST == Os_CurAppTrustState)
+    {
+        Os_PreAppTrustState = OS_MP_SET_NON_TRUST;
+    }
+    else
+    {
+        Os_PreAppTrustState = OS_MP_SET_TRUST_WITH_PROT;
+    }
+    Os_MpuEnable();
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
@@ -258,53 +461,79 @@ static FUNC(void, OS_CODE) Os_ArchMpuTaskSwitch(TaskType TaskId, ApplicationType
 #include "Os_MemMap.h"
 /******************************************************************************/
 /*
- * Brief                <In MPU Trust or NO Task Configuration, All permissions are
- *                      allowed in privilege mode ,but in user mode,Peripheral is restrict>
- * Service ID           <Os_ArchMpuTaskSwitch>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
+ * Brief                <Switch MPU settings for Isr>
+ *
+ * Service ID   :       <None>
+ * Sync/Async   :       <Synchronous>
+ * Reentrancy           <Non Reentrant>
  * param-Name[in]       <None>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <StatusType>
+ * param-Name[out]      <None>
+ * param-Name[in/out]   <None>
+ * return               <None>
  * PreCondition         <None>
- * CallByAPI            <None>
+ * CallByAPI            <Os_SwitchTask>
  * REQ ID               <None>
  */
 /******************************************************************************/
-static FUNC(void, OS_CODE) Os_ArchMpuIsrSwitch(ISRType IsrId, ApplicationType HostAppId)
+void Os_MpuIsrSwitch(ISRType IsrId, ApplicationType HostAppId)
 {
-    OS_ARCH_DSYNC();
-    OS_ARCH_ISYNC();
-    /* PRQA S 0303 ++ */ /* MISRA Rule 11.4 */ /* ARCH_MPU_VTYPE_CAST_006 */
-    if (TRUE == Os_AppCfg[HostAppId].OsTrustedAppWithProtection)
+    UNUSED_PARAMETER(HostAppId);
+    Os_MpuDisable();
+    /* PRQA S 0303 ++*/                              /* MISRA Rule 11.4*/
+    if (Os_PublicAreaCfg == FALSE) /* PRQA S 2109 */ /* MISRA CWE-192 */
     {
-        /* PERIPHERAL */
-        OS_REG32(OS_MPU_RNR_ADDRESS) = MPU_REGION_12;
-        OS_REG32(OS_MPU_RASR_ADDRESS) = OS_MPU_RASR_RESET_VALUE;    /* Disable Region */
-        OS_REG32(OS_MPU_RBAR_ADDRESS) = (uint32)PERIPHERAL_START;
-        OS_REG32(OS_MPU_RASR_ADDRESS) = Os_ArchMpuCalculateRasr((uint32)PERIPHERAL_END - (uint32)PERIPHERAL_START, OS_MPU_AR_RW_R, OS_MPU_TYPE_AHB);
-        /* other app data */
-        OS_REG32(OS_MPU_RNR_ADDRESS) = MPU_REGION_13;
-        OS_REG32(OS_MPU_RASR_ADDRESS) = OS_MPU_RASR_RESET_VALUE;    /* Disable Region */
-        OS_REG32(OS_MPU_RBAR_ADDRESS) = (uint32)(Os_Core_App_DAddr[Os_SCB.sysCore].APP_ADDR_START);
-        OS_REG32(OS_MPU_RASR_ADDRESS) = Os_ArchMpuCalculateRasr((uint32)(Os_Core_App_DAddr[Os_SCB.sysCore].APP_ADDR_END) - (uint32)(Os_Core_App_DAddr[Os_SCB.sysCore].APP_ADDR_START), OS_MPU_AR_RW_R, OS_MPU_TYPE_SRAMCACHE);
+        MPU_RNR_REG = OS_MPU_REGION_NUM_ALL_PFLASH_SPACE;
+        MPU_RBAR_REG = Os_Isr2MpuRegion.RegionRbarPtr[IsrId][OS_MPU_REGION_NUM_ALL_PFLASH_SPACE];
+        MPU_RASR_REG = Os_Isr2MpuRegion.RegionRasrPtr[IsrId][OS_MPU_REGION_NUM_ALL_PFLASH_SPACE];
+
+        MPU_RNR_REG = OS_MPU_REGION_NUM_ALL_SRAM_SPACE;
+        MPU_RBAR_REG = Os_Isr2MpuRegion.RegionRbarPtr[IsrId][OS_MPU_REGION_NUM_ALL_SRAM_SPACE];
+        MPU_RASR_REG = Os_Isr2MpuRegion.RegionRasrPtr[IsrId][OS_MPU_REGION_NUM_ALL_SRAM_SPACE];
+
+        MPU_RNR_REG = OS_MPU_REGION_NUM_SHARED_SPACE;
+        MPU_RBAR_REG = Os_Isr2MpuRegion.RegionRbarPtr[IsrId][OS_MPU_REGION_NUM_SHARED_SPACE];
+        MPU_RASR_REG = Os_Isr2MpuRegion.RegionRasrPtr[IsrId][OS_MPU_REGION_NUM_SHARED_SPACE];
+        Os_PublicAreaCfg = TRUE;
     }
+    if (Os_CurAppTrustState != Os_PreAppTrustState)
+    {
+#if (REGION_16 == CFG_REGION_NUM)
+        MPU_RNR_REG = OS_MPU_REGION_NUM_ALL_APP_CODE;
+        MPU_RBAR_REG = Os_Isr2MpuRegion.RegionRbarPtr[IsrId][OS_MPU_REGION_NUM_ALL_APP_CODE];
+        MPU_RASR_REG = Os_Isr2MpuRegion.RegionRasrPtr[IsrId][OS_MPU_REGION_NUM_ALL_APP_CODE];
+#endif
 
-    /* App's PriData */
-    OS_REG32(OS_MPU_RNR_ADDRESS) = MPU_REGION_14;
-    OS_REG32(OS_MPU_RASR_ADDRESS) = OS_MPU_RASR_RESET_VALUE;    /* Disable Region */
-    OS_REG32(OS_MPU_RBAR_ADDRESS) = Os_ArchAppMpuRegion[HostAppId][1].RBAR;
-    OS_REG32(OS_MPU_RASR_ADDRESS) = Os_ArchAppMpuRegion[HostAppId][1].RASR;
-    /* Isr Data */
-    OS_REG32(OS_MPU_RNR_ADDRESS) = MPU_REGION_15;
-    OS_REG32(OS_MPU_RASR_ADDRESS) = OS_MPU_RASR_RESET_VALUE;    /* Disable Region */
-    OS_REG32(OS_MPU_RBAR_ADDRESS) = Os_ArchIsrMpuRegion[IsrId].RBAR;
-    OS_REG32(OS_MPU_RASR_ADDRESS) = Os_ArchIsrMpuRegion[IsrId].RASR;
+        MPU_RNR_REG = OS_MPU_REGION_NUM_ALL_APP_DATA;
+        MPU_RBAR_REG = Os_Isr2MpuRegion.RegionRbarPtr[IsrId][OS_MPU_REGION_NUM_ALL_APP_DATA];
+        MPU_RASR_REG = Os_Isr2MpuRegion.RegionRasrPtr[IsrId][OS_MPU_REGION_NUM_ALL_APP_DATA];
 
-    /* PRQA S 0303 -- */ /* MISRA Rule 11.4 */ /* ARCH_MPU_VTYPE_CAST_006 */
-    OS_ARCH_DSYNC();
-    OS_ARCH_ISYNC();
+        MPU_RNR_REG = OS_MPU_REGION_NUM_ALL_PERI_SPACE;
+        MPU_RBAR_REG = Os_Isr2MpuRegion.RegionRbarPtr[IsrId][OS_MPU_REGION_NUM_ALL_PERI_SPACE];
+        MPU_RASR_REG = Os_Isr2MpuRegion.RegionRasrPtr[IsrId][OS_MPU_REGION_NUM_ALL_PERI_SPACE];
+    }
+#if (REGION_16 == CFG_REGION_NUM)
+    MPU_RNR_REG = OS_MPU_REGION_NUM_CUR_APP_CODE;
+    MPU_RBAR_REG = Os_Isr2MpuRegion.RegionRbarPtr[IsrId][OS_MPU_REGION_NUM_CUR_APP_CODE];
+    MPU_RASR_REG = Os_Isr2MpuRegion.RegionRasrPtr[IsrId][OS_MPU_REGION_NUM_CUR_APP_CODE];
+#endif
+
+    MPU_RNR_REG = OS_MPU_REGION_NUM_CUR_APP_PRI_DATA;
+    MPU_RBAR_REG = Os_Isr2MpuRegion.RegionRbarPtr[IsrId][OS_MPU_REGION_NUM_CUR_APP_PRI_DATA];
+    MPU_RASR_REG = Os_Isr2MpuRegion.RegionRasrPtr[IsrId][OS_MPU_REGION_NUM_CUR_APP_PRI_DATA];
+
+    MPU_RNR_REG = OS_MPU_REGION_NUM_CUR_ISR_DATA;
+    MPU_RBAR_REG = Os_Isr2MpuRegion.RegionRbarPtr[IsrId][OS_MPU_REGION_NUM_CUR_ISR_DATA];
+    MPU_RASR_REG = Os_Isr2MpuRegion.RegionRasrPtr[IsrId][OS_MPU_REGION_NUM_CUR_ISR_DATA];
+    /* PRQA S 0303 --*/ /* MISRA Rule 11.4*/
+    if (OS_MP_SET_NON_TRUST == Os_CurAppTrustState)
+    {
+        Os_PreAppTrustState = OS_MP_SET_NON_TRUST;
+    }
+    else
+    {
+        Os_PreAppTrustState = OS_MP_SET_TRUST_WITH_PROT;
+    }
+    Os_MpuEnable();
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
@@ -327,21 +556,32 @@ static FUNC(void, OS_CODE) Os_ArchMpuIsrSwitch(ISRType IsrId, ApplicationType Ho
  * REQ ID               <None>
  */
 /******************************************************************************/
-FUNC(void, OS_CODE) Os_MemProtTaskCat1Map(void)
+void Os_MemProtTaskCat1Map(void)
 {
     TaskType TaskId = Os_GetObjLocalId(Os_SCB.sysRunningTaskID);
     ApplicationType HostAppId = Os_SCB.sysRunningAppID;
-
-    if ((Os_SCB.sysAppId == Os_SCB.sysRunningAppID) || ((TRUE == Os_AppCfg[HostAppId].OsTrusted) && (TRUE != Os_AppCfg[HostAppId].OsTrustedAppWithProtection)))
+    /* PRQA S 2109 ++*/ /* MISRA CWE-192 */
+    if ((Os_SCB.sysAppId == HostAppId)
+        || ((TRUE == Os_AppCfg[HostAppId].OsTrusted) && (TRUE != Os_AppCfg[HostAppId].OsTrustedAppWithProtection)))
     {
-        /*SYS_APP, as OS kernel, have all access rights*/ /*Trusted APP and no memory protection*/
+        /*SYS_APP, as OS kernel, have all access rights*/
+        Os_CurAppTrustState = OS_MP_SET_TRUST_WITHOUT_PROT;
         Os_ArchMpDefaultConfigSwitch();
+        Os_PreAppTrustState = OS_MP_SET_TRUST_WITHOUT_PROT;
+    }
+    else if (FALSE == Os_AppCfg[HostAppId].OsTrusted)
+    {
+        /*Non trusted apps or trusted apps protected by MPU*/
+        Os_CurAppTrustState = OS_MP_SET_NON_TRUST;
+        Os_MpuTaskSwitch(TaskId, HostAppId);
     }
     else
     {
         /*Non trusted apps or trusted apps protected by MPU*/
-        Os_ArchMpuTaskSwitch(TaskId, HostAppId);
+        Os_CurAppTrustState = OS_MP_SET_TRUST_WITH_PROT;
+        Os_MpuTaskSwitch(TaskId, HostAppId);
     }
+    /* PRQA S 2109-- */ /* MISRA CWE-192 */
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
@@ -364,21 +604,32 @@ FUNC(void, OS_CODE) Os_MemProtTaskCat1Map(void)
  * REQ ID               <None>
  */
 /******************************************************************************/
-FUNC(void, OS_CODE) Os_MemProtTaskCat2Map(void)
+void Os_MemProtTaskCat2Map(void)
 {
-    TaskType TaskId = Os_GetObjLocalId(Os_SCB.sysRunningTaskID); /* PRQA S 3469 */ /* MISRA Dir 4.9 */
+    TaskType TaskId = Os_GetObjLocalId(Os_SCB.sysRunningTaskID);
     ApplicationType HostAppId = Os_SCB.sysRunningAppID;
-
-    if ((Os_SCB.sysAppId == Os_SCB.sysRunningAppID) || ((TRUE == Os_AppCfg[HostAppId].OsTrusted) && (TRUE != Os_AppCfg[HostAppId].OsTrustedAppWithProtection)))
+    /* PRQA S 2109++ */ /* MISRA CWE-192 */
+    if ((Os_SCB.sysAppId == HostAppId)
+        || ((TRUE == Os_AppCfg[HostAppId].OsTrusted) && (TRUE != Os_AppCfg[HostAppId].OsTrustedAppWithProtection)))
     {
-        /*SYS_APP, as OS kernel, have all access rights*/ /*Trusted APP and no memory protection*/
+        /*SYS_APP, as OS kernel, have all access rights*/
+        Os_CurAppTrustState = OS_MP_SET_TRUST_WITHOUT_PROT;
         Os_ArchMpDefaultConfigSwitch();
+        Os_PreAppTrustState = OS_MP_SET_TRUST_WITHOUT_PROT;
+    }
+    else if (FALSE == Os_AppCfg[HostAppId].OsTrusted)
+    {
+        /*Non trusted apps or trusted apps protected by MPU*/
+        Os_CurAppTrustState = OS_MP_SET_NON_TRUST;
+        Os_MpuTaskSwitch(TaskId, HostAppId);
     }
     else
     {
         /*Non trusted apps or trusted apps protected by MPU*/
-        Os_ArchMpuTaskSwitch(TaskId, HostAppId);
+        Os_CurAppTrustState = OS_MP_SET_TRUST_WITH_PROT;
+        Os_MpuTaskSwitch(TaskId, HostAppId);
     }
+    /* PRQA S 2109-- */ /* MISRA CWE-192 */
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
@@ -406,72 +657,26 @@ void Os_MemProtIsrMap(void)
     ISRType IsrId = Os_SCB.sysRunningIsrCat2Id;
     ApplicationType HostAppId = Os_SCB.sysRunningAppID;
     /* PRQA S 2109++ */ /* MISRA CWE-192 */
-    if ((Os_SCB.sysAppId == Os_SCB.sysRunningAppID) || (TRUE == Os_AppCfg[HostAppId].OsTrusted) && (TRUE != Os_AppCfg[HostAppId].OsTrustedAppWithProtection))
+    if ((Os_SCB.sysAppId == Os_SCB.sysRunningAppID)
+        || ((TRUE == Os_AppCfg[HostAppId].OsTrusted) && (TRUE != Os_AppCfg[HostAppId].OsTrustedAppWithProtection)))
     {
-        /*SYS_APP, as OS kernel, have all access rights*/ /*Trusted APP and no memory protection*/
+        /*SYS_APP, as OS kernel, have all access rights*/
+        Os_CurAppTrustState = OS_MP_SET_TRUST_WITHOUT_PROT;
         Os_ArchMpDefaultConfigSwitch();
+        Os_PreAppTrustState = OS_MP_SET_TRUST_WITHOUT_PROT;
     }
-    else
+    else if (FALSE == Os_AppCfg[HostAppId].OsTrusted)
     {
         /*Non trusted apps or trusted apps protected by MPU*/
-        Os_ArchMpuIsrSwitch(IsrId, HostAppId);
-    }
-}
-#define OS_STOP_SEC_CODE
-#include "Os_MemMap.h"
-
-#define OS_START_SEC_CODE
-#include "Os_MemMap.h"
-static uint32 GetMaxAlignment(uint32 size) 
-{
-    uint32 base = size >> 10;
- 
-    base |= base >> 1;
-    base |= base >> 2;
-    base |= base >> 4;
-    base |= base >> 8;
-    base |= base >> 16;
-    base = (base >> 1) + 1;
-    return base << 10;
-}
-#define OS_STOP_SEC_CODE
-#include "Os_MemMap.h"
-
-#define OS_START_SEC_CODE
-#include "Os_MemMap.h"
-static void Os_ArchSetDefaultMpu(uint32 startAddr, uint32 endAddr, uint32* curRegion, uint32 access, uint32 regionType)
-{
-    if (startAddr >= endAddr)
-    {
-        return;
+        Os_CurAppTrustState = OS_MP_SET_NON_TRUST;
+        Os_MpuIsrSwitch(IsrId, HostAppId);
     }
     else
     {
-        uint32 size = endAddr - startAddr + 1;
-        uint32 remainSize = size;
-        uint32 curAddr = startAddr;
-        while (remainSize > 0)
-        {
-            if (*curRegion > 15)
-            {
-                return;
-            }
-            uint32 alignSize = GetMaxAlignment(remainSize);
-            while ((curAddr % alignSize) != 0)
-            {
-                alignSize >>= 1;
-            }
-
-            OS_REG32(OS_MPU_RNR_ADDRESS) = *curRegion;
-            OS_REG32(OS_MPU_RBAR_ADDRESS) = curAddr;
-            OS_REG32(OS_MPU_RASR_ADDRESS) = Os_ArchMpuCalculateRasr(alignSize, access, regionType);
-
-            curAddr += alignSize;
-            remainSize -= alignSize;
-            (*curRegion)++;
-        }
+        Os_CurAppTrustState = OS_MP_SET_TRUST_WITH_PROT;
+        Os_MpuIsrSwitch(IsrId, HostAppId);
     }
-    return;
+    /* PRQA S 2109-- */ /* MISRA CWE-192 */
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
@@ -496,46 +701,6 @@ static void Os_ArchSetDefaultMpu(uint32 startAddr, uint32 endAddr, uint32* curRe
 /******************************************************************************/
 void Os_ArchInitKnMemMap(void)
 {
-    /* PRQA S 0303,0306 ++*/ /* MISRA Rule 11.4 */ /* ARCH_MPU_MULTI_WARNING_004 */
-    uint32 vLength;
-    uint32 curRegion;
-    Os_MpuDisable();
-    /* 0.Background */
-    vLength = 0xFFFFFFFFu;
-    OS_REG32(OS_MPU_RNR_ADDRESS) = MPU_REGION_0;
-    OS_REG32(OS_MPU_RBAR_ADDRESS) = (uint32)0u;
-    OS_REG32(OS_MPU_RASR_ADDRESS) = Os_ArchMpuCalculateRasr(vLength, OS_MPU_AR_NONE_NONE, OS_MPU_TYPE_DEFAULT);
-
-    /* 1.ITCM */ 
-    curRegion = MPU_REGION_0 + 1;
-    Os_ArchSetDefaultMpu((uint32)ITCM_START, (uint32)ITCM_END, &curRegion, OS_MPU_AR_RX_RX, OS_MPU_TYPE_ITCM);
-
-    /* 2.PFLASH() */ 
-    Os_ArchSetDefaultMpu((uint32)PFLASH_START, (uint32)PFLASH_END, &curRegion, OS_MPU_AR_RX_RX, OS_MPU_TYPE_PFALSH);
-
-    /* 3.DTCM */ 
-    Os_ArchSetDefaultMpu((uint32)DTCM_START, (uint32)DTCM_END, &curRegion, OS_MPU_AR_RW_RW, OS_MPU_TYPE_DTCM);
-
-    /* 4.SRAM */ 
-    Os_ArchSetDefaultMpu((uint32)SRAM_START, (uint32)SRAM_END, &curRegion, OS_MPU_AR_RW_RW, OS_MPU_TYPE_SRAMCACHE);
-
-    /* 5.SRAM SHAREABLE(in SRAM) */
-    Os_ArchSetDefaultMpu((uint32)SHARED_START, (uint32)SHARED_END, &curRegion, OS_MPU_AR_RW_RW, OS_MPU_TYPE_SRAMSHARE);
-
-    /* 6.PERIPHERAL */
-    Os_ArchSetDefaultMpu((uint32)PERIPHERAL_START, (uint32)PERIPHERAL_END, &curRegion, OS_MPU_AR_RW_NONE, OS_MPU_TYPE_AHB);
-
-    /* 7.DFLASH */
-    Os_ArchSetDefaultMpu((uint32)DATA_FLASH_START, (uint32)DATA_FLASH_END, &curRegion, OS_MPU_AR_R_R, OS_MPU_TYPE_DFALSH);
-
-    /* 8.COREx DATA */
-    vLength = (uint32)(Os_Core_App_DAddr[Os_SCB.sysCore].APP_ADDR_END) - (uint32)(Os_Core_App_DAddr[Os_SCB.sysCore].APP_ADDR_START);
-    OS_REG32(OS_MPU_RNR_ADDRESS) = curRegion;
-    OS_REG32(OS_MPU_RBAR_ADDRESS) = (uint32)Os_Core_App_DAddr[Os_SCB.sysCore].APP_ADDR_START;
-    OS_REG32(OS_MPU_RASR_ADDRESS) = Os_ArchMpuCalculateRasr(vLength, OS_MPU_AR_RW_NONE, OS_MPU_TYPE_SRAMCACHE);
-
-    Os_MpuEnable();
-    /* PRQA S 0303,0306 --*/ /* MISRA Rule 11.4 */ /* ARCH_MPU_MULTI_WARNING_004 */
     Os_MpuConfigTableInit();
     Os_MpuPriDefMemMap();
 }
@@ -569,76 +734,419 @@ void Os_ArchMemProtEnable(void)
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-void Os_ArchMpuAppRegionInit(void)
+/******************************************************************************/
+/*
+ * Brief                <Configure the region attributes of the MPU and store
+ *                       them in a configuration table>
+ * Service ID   :       <None>
+ * Sync/Async   :       <Synchronous>
+ * Reentrancy           <Non Reentrant>
+ * param-Name[in]       <None>
+ * param-Name[out]      <None>
+ * param-Name[in/out]   <None>
+ * return               <None>
+ * PreCondition         <None>
+ * CallByAPI            <Os_ArchMpTrustIsrThreadSwitch and so on>
+ * REQ ID               <None>
+ */
+/******************************************************************************/
+static void MPU_SetRegionConfig(const mpu_config* pUserConfigPtr, uint16 threadId, Os_CallLevelType threadLevel)
 {
-    ApplicationType vAppId;
-    uint32 vLength;
-    for(vAppId = 0;vAppId < CFG_OSAPPLICATION_MAX; vAppId++)
-    {
-        /* App Private Data */
-        vLength = (uint32)(Os_AppPriDataAddr[vAppId].APP_ADDR_END) - (uint32)(Os_AppPriDataAddr[vAppId].APP_ADDR_START);
-        if(vLength > 0u)
-        {
-            Os_ArchAppMpuRegion[vAppId][0].RBAR = (uint32)Os_AppPriDataAddr[vAppId].APP_ADDR_START;
-            Os_ArchAppMpuRegion[vAppId][0].RASR = Os_ArchMpuCalculateRasr(vLength, OS_MPU_AR_RW_RW, OS_MPU_TYPE_SRAMCACHE);
-        }
-        else
-        {
-            Os_ArchAppMpuRegion[vAppId][0].RBAR = OS_MPU_RBAR_RESET_VALUE;
-            Os_ArchAppMpuRegion[vAppId][0].RASR = OS_MPU_RASR_RESET_VALUE;
-        }
+    uint32 regionAttributes = 0U;
+    uint32 regionRbar = 0U;
 
+    regionRbar = pUserConfigPtr->u32StartAddr;
+
+    /* Set the region size */
+    regionAttributes |= pUserConfigPtr->size;
+
+    regionAttributes |= pUserConfigPtr->u32access;
+
+    if (pUserConfigPtr->u32EndAddr > pUserConfigPtr->u32StartAddr)
+    {
+        /* Enable Region */
+        regionAttributes |= MPU_REGION_ENABLE;
     }
+    else
+    {
+        regionAttributes |= MPU_REGION_DISABLE;
+    }
+
+    /* PRQA S 0303 ++*/ /* MISRA Rule 11.4 */
+    if (threadLevel == OS_LEVEL_TASK)
+    {
+        Os_TaskMpuRegion.RegionRbarPtr[threadId][pUserConfigPtr->u8RegionNum] = regionRbar;
+        Os_TaskMpuRegion.RegionRasrPtr[threadId][pUserConfigPtr->u8RegionNum] = regionAttributes;
+    }
+    else
+    {
+        Os_Isr2MpuRegion.RegionRbarPtr[threadId][pUserConfigPtr->u8RegionNum] = regionRbar;
+        Os_Isr2MpuRegion.RegionRasrPtr[threadId][pUserConfigPtr->u8RegionNum] = regionAttributes;
+    }
+    /* PRQA S 0303 --*/ /* MISRA Rule 11.4 */ /*ARCH_MPU_TYPE_CAST_002*/
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-void Os_ArchMpuTaskRegionInit(void)
+/******************************************************************************/
+/*
+ * Brief                <Configure the memory protection unit for the task of
+ *                       application>
+ * Service ID   :       <None>
+ * Sync/Async   :       <Synchronous>
+ * Reentrancy           <Non Reentrant>
+ * @param[in]           <None>
+ * @param[out]          <None>
+ * @param[in/out]       <None>
+ * @return              <None>
+ * PreCondition         <None>
+ * CallByAPI            <Os_ArchSetTaskMemMap>
+ * REQ ID               <None>
+ */
+/******************************************************************************/
+static void Os_MpuTaskCalc(TaskType TaskId, ApplicationType HostAppId, Os_MpSetType Set)
 {
-    TaskType vTaskId;
-    uint32 vLength;
-    for(vTaskId = 0;vTaskId < Os_SCB.sysTaskMax; vTaskId++)
+    mpu_config Mpu_Config;
+
+    if (OS_MP_SET_TRUST_WITHOUT_PROT != Set)
     {
-        /* Task's All Data */
-        vLength = (uint32)(Os_TaskDAddr[vTaskId].Task_ADDR_END) - (uint32)(Os_TaskDAddr[vTaskId].Task_ADDR_START);
-        if(vLength > 0u)
+        /*By default, all code segments allow both privileged and user modes to read and execute.*/
+        Mpu_Config.u8RegionNum = OS_MPU_REGION_NUM_ALL_PFLASH_SPACE;
+        Mpu_Config.u32StartAddr = (uint32)CODE_ADDR_START; /* PRQA S 0306 */ /* MISRA Rule 11.4 */
+        Mpu_Config.u32EndAddr = (uint32)CODE_ADDR_END; /* PRQA S 0306 */     /* MISRA Rule 11.4 */
+        Mpu_Config.size = Os_CaculateMemSize((uint8*)CODE_ADDR_START, (uint8*)CODE_ADDR_END);
+        Mpu_Config.u32access = MPU_PRIV_RO_USER_RO_EXEC | MPU_NORMAL_OIWTNOWA_NONSHARED;
+        MPU_SetRegionConfig(&Mpu_Config, TaskId, OS_LEVEL_TASK);
+
+        /*By default, all RAM space is read-write accessible in privileged mode and read-only in user mode.*/
+        Mpu_Config.u8RegionNum = OS_MPU_REGION_NUM_ALL_SRAM_SPACE;
+        Mpu_Config.u32StartAddr = (uint32)SRAM_START; /* PRQA S 0306 */ /* MISRA Rule 11.4 */
+        Mpu_Config.u32EndAddr = (uint32)SRAM_END; /* PRQA S 0306 */     /* MISRA Rule 11.4 */
+        Mpu_Config.size = Os_CaculateMemSize((uint8*)SRAM_START, (uint8*)SRAM_END);
+        Mpu_Config.u32access = MPU_PRIV_RW_USER_RO_EXEC | MPU_NORMAL_OIWTNOWA_NONSHARED;
+        MPU_SetRegionConfig(&Mpu_Config, TaskId, OS_LEVEL_TASK);
+
+        /*The shared space has read-write access in privileged mode and is read-only in user mode.*/
+        Mpu_Config.u8RegionNum = OS_MPU_REGION_NUM_SHARED_SPACE;
+        Mpu_Config.u32StartAddr = (uint32)SHARED_START; /* PRQA S 0306 */ /* MISRA Rule 11.4 */
+        Mpu_Config.u32EndAddr = (uint32)SHARED_END; /* PRQA S 0306 */     /* MISRA Rule 11.4 */
+        Mpu_Config.size = Os_CaculateMemSize((uint8*)SHARED_START, (uint8*)SHARED_END);
+        Mpu_Config.u32access = MPU_PRIV_RW_USER_RO_EXEC | MPU_NORMAL_OINC_SHARED;
+        MPU_SetRegionConfig(&Mpu_Config, TaskId, OS_LEVEL_TASK);
+
+        /*The App private space belonging to the thread has read-write access in both privileged and user modes.*/
+        Mpu_Config.u8RegionNum = OS_MPU_REGION_NUM_CUR_APP_PRI_DATA;
+        /* PRQA S 0306 ++*/ /* MISRA Rule 11.4 */
+        Mpu_Config.u32StartAddr = (uint32)Os_AppPriDataAddr[HostAppId].APP_ADDR_START;
+        Mpu_Config.u32EndAddr = (uint32)Os_AppPriDataAddr[HostAppId].APP_ADDR_END;
+        /* PRQA S 0306 --*/ /* MISRA Rule 11.4 */
+        Mpu_Config.size = Os_CaculateMemSize(
+            (uint8*)Os_AppPriDataAddr[HostAppId].APP_ADDR_START,
+            (uint8*)Os_AppPriDataAddr[HostAppId].APP_ADDR_END);
+        Mpu_Config.u32access = MPU_PRIV_RW_USER_RW_NOEXEC | MPU_NORMAL_OIWTNOWA_NONSHARED;
+        MPU_SetRegionConfig(&Mpu_Config, TaskId, OS_LEVEL_TASK);
+
+        /*The thread own private space has read-write permissions in both privileged and user modes.*/
+        Mpu_Config.u8RegionNum = OS_MPU_REGION_NUM_CUR_TASK_DATA;
+        Mpu_Config.u32StartAddr = (uint32)Os_TaskDAddr[TaskId].Task_ADDR_START; /* PRQA S 0306 */ /* MISRA Rule 11.4 */
+        Mpu_Config.u32EndAddr = (uint32)Os_TaskDAddr[TaskId].Task_ADDR_END; /* PRQA S 0306 */     /* MISRA Rule 11.4 */
+        Mpu_Config.size = Os_CaculateMemSize(
+            (uint8*)Os_TaskDAddr[TaskId].Task_ADDR_START,
+            (uint8*)Os_TaskDAddr[TaskId].Task_ADDR_END);
+        Mpu_Config.u32access = MPU_PRIV_RW_USER_RW_NOEXEC | MPU_NORMAL_OIWTNOWA_NONSHARED;
+        MPU_SetRegionConfig(&Mpu_Config, TaskId, OS_LEVEL_TASK);
+
+        if (OS_MP_SET_NON_TRUST == Set)
         {
-            Os_ArchTaskMpuRegion[vTaskId].RBAR = (uint32)Os_TaskDAddr[vTaskId].Task_ADDR_START;
-            Os_ArchTaskMpuRegion[vTaskId].RASR = Os_ArchMpuCalculateRasr(vLength, OS_MPU_AR_RW_RW, OS_MPU_TYPE_SRAMCACHE);
+#if (REGION_16 == CFG_REGION_NUM)
+            /*By default, threads belonging to an untrusted partition have read and execute permissions for all app code
+             * spaces in privileged mode, and no permissions in user mode.*/
+            Mpu_Config.u8RegionNum = OS_MPU_REGION_NUM_ALL_APP_CODE;
+            /* PRQA S 0306,1840 ++*/ /* MISRA Rule 11.4,Rule-10.4 */
+            Mpu_Config.u32StartAddr = (uint32)Os_Core_App_CAddr[0u].APP_ADDR_START;
+            Mpu_Config.u32EndAddr = (uint32)Os_Core_App_CAddr[OS_AUTOSAR_CORES - 1].APP_ADDR_END;
+            /* PRQA S 0306,1840 --*/ /* MISRA Rule 11.4,Rule-10.4 */
+            /* PRQA S 1840 ++*/      /* Rule-10.4 */
+            Mpu_Config.size = Os_CaculateMemSize(
+                (uint8*)Os_Core_App_CAddr[0u].APP_ADDR_START,
+                (uint8*)Os_Core_App_CAddr[OS_AUTOSAR_CORES - 1].APP_ADDR_END);
+            /* PRQA S 1840 --*/ /* Rule-10.4 */
+            Mpu_Config.u32access = MPU_PRIV_RO_USER_NA_EXEC | MPU_NORMAL_OIWTNOWA_NONSHARED;
+            MPU_SetRegionConfig(&Mpu_Config, TaskId, OS_LEVEL_TASK);
+
+            /*Threads belonging to an untrusted partition have read and execute permissions for their own code space in
+             * both privileged and user modes.*/
+            Mpu_Config.u8RegionNum = OS_MPU_REGION_NUM_CUR_APP_CODE;
+            /* PRQA S 0306 ++ */ /* MISRA Rule 11.4 */
+            Mpu_Config.u32StartAddr = (uint32)Os_App_CAddr[HostAppId].APP_ADDR_START;
+            Mpu_Config.u32EndAddr = (uint32)Os_App_CAddr[HostAppId].APP_ADDR_END;
+            /* PRQA S 0306 --*/ /* MISRA Rule 11.4 */
+            Mpu_Config.size = Os_CaculateMemSize(
+                (uint8*)Os_App_CAddr[HostAppId].APP_ADDR_START,
+                (uint8*)Os_App_CAddr[HostAppId].APP_ADDR_END);
+            Mpu_Config.u32access = MPU_PRIV_RO_USER_RO_EXEC | MPU_NORMAL_OIWTNOWA_NONSHARED;
+            MPU_SetRegionConfig(&Mpu_Config, TaskId, OS_LEVEL_TASK);
+#endif
+
+            /*By default, threads belonging to an untrusted partition have read and write permissions for all app data
+             * segments in privileged mode, and no permissions in user mode.*/
+            Mpu_Config.u8RegionNum = OS_MPU_REGION_NUM_ALL_APP_DATA;
+            /* PRQA S 0306,1840 ++*/ /* MISRA Rule 11.4,Rule-10.4 */
+            Mpu_Config.u32StartAddr = (uint32)Os_Core_App_DAddr[0u].APP_ADDR_START;
+            Mpu_Config.u32EndAddr = (uint32)Os_Core_App_DAddr[OS_AUTOSAR_CORES - 1].APP_ADDR_END;
+            /* PRQA S 0306,1840 --*/ /* MISRA Rule 11.4,Rule-10.4 */
+            /* PRQA S 1840 ++*/      /* Rule-10.4 */
+            Mpu_Config.size = Os_CaculateMemSize(
+                (uint8*)Os_Core_App_DAddr[0u].APP_ADDR_START,
+                (uint8*)Os_Core_App_DAddr[OS_AUTOSAR_CORES - 1].APP_ADDR_END);
+            /* PRQA S 1840 --*/ /* Rule-10.4 */
+            Mpu_Config.u32access = MPU_PRIV_RW_USER_NA_NOEXEC | MPU_NORMAL_OIWTNOWA_NONSHARED;
+            MPU_SetRegionConfig(&Mpu_Config, TaskId, OS_LEVEL_TASK);
+
+            /*Threads belonging to an untrusted partition have read and write permissions for peripheral regions in
+             * privileged mode, and no permissions in user mode.*/
+            Mpu_Config.u8RegionNum = OS_MPU_REGION_NUM_ALL_PERI_SPACE;
+            /* PRQA S 0306 ++*/ /* MISRA Rule 11.4 */
+            Mpu_Config.u32StartAddr = (uint32)PERIPHERAL_START;
+            Mpu_Config.u32EndAddr = (uint32)PERIPHERAL_END;
+            /* PRQA S 0306 --*/ /* MISRA Rule 11.4 */
+            Mpu_Config.size = Os_CaculateMemSize((uint8*)PERIPHERAL_START, (uint8*)PERIPHERAL_END);
+            Mpu_Config.u32access = MPU_PRIV_RW_USER_NA_EXEC | MPU_DEVICE_NONSHAREABLE;
+            MPU_SetRegionConfig(&Mpu_Config, TaskId, OS_LEVEL_TASK);
         }
         else
         {
-            Os_ArchTaskMpuRegion[vTaskId].RBAR = OS_MPU_RBAR_RESET_VALUE;
-            Os_ArchTaskMpuRegion[vTaskId].RASR = OS_MPU_RASR_RESET_VALUE;
+#if (REGION_16 == CFG_REGION_NUM)
+            /*The code space access permissions for a trusted app with a protected partition inherit the permissions of
+             * `OS_MPU_REGION_NUM_ALL_PFLASH_SPACE`.*/
+            Mpu_Config.u8RegionNum = OS_MPU_REGION_NUM_ALL_APP_CODE;
+            /* PRQA S 0306,1840 ++*/ /* MISRA Rule 11.4,Rule-10.4 */
+            Mpu_Config.u32StartAddr = (uint32)Os_Core_App_CAddr[0u].APP_ADDR_START;
+            Mpu_Config.u32EndAddr = (uint32)Os_Core_App_CAddr[OS_AUTOSAR_CORES - 1].APP_ADDR_END;
+            /* PRQA S 0306,1840 --*/ /* MISRA Rule 11.4,Rule-10.4 */
+            /* PRQA S 1840 ++*/      /* Rule-10.4 */
+            Mpu_Config.size = Os_CaculateMemSize(
+                (uint8*)Os_Core_App_CAddr[0u].APP_ADDR_START,
+                (uint8*)Os_Core_App_CAddr[OS_AUTOSAR_CORES - 1].APP_ADDR_END);
+            /* PRQA S 1840 --*/ /* Rule-10.4 */
+            Mpu_Config.u32access = MPU_PRIV_RO_USER_RO_EXEC | MPU_NORMAL_OIWTNOWA_NONSHARED;
+            MPU_SetRegionConfig(&Mpu_Config, TaskId, OS_LEVEL_TASK);
+#endif
+
+            /*a trusted app with a protected partition have read and write permissions for all app data segments in
+             * privileged mode, and read permissions in user mode.*/
+            Mpu_Config.u8RegionNum = OS_MPU_REGION_NUM_ALL_APP_DATA;
+            /* PRQA S 0306,1840 ++*/ /* MISRA Rule 11.4,Rule-10.4 */
+            Mpu_Config.u32StartAddr = (uint32)Os_Core_App_DAddr[0u].APP_ADDR_START;
+            Mpu_Config.u32EndAddr = (uint32)Os_Core_App_DAddr[OS_AUTOSAR_CORES - 1].APP_ADDR_END;
+            /* PRQA S 0306,1840 --*/ /* MISRA Rule 11.4,Rule-10.4 */
+            /* PRQA S 1840 ++*/      /* Rule-10.4 */
+            Mpu_Config.size = Os_CaculateMemSize(
+                (uint8*)Os_Core_App_DAddr[0u].APP_ADDR_START,
+                (uint8*)Os_Core_App_DAddr[OS_AUTOSAR_CORES - 1].APP_ADDR_END);
+            /* PRQA S 1840 --*/ /* Rule-10.4 */
+            Mpu_Config.u32access = MPU_PRIV_RW_USER_RO_NOEXEC | MPU_NORMAL_OIWTNOWA_NONSHARED;
+            MPU_SetRegionConfig(&Mpu_Config, TaskId, OS_LEVEL_TASK);
+
+            /*Threads belonging to a trusted and protected partition have read and write permissions for peripheral
+             * regions in privileged mode, and read-only permissions in user mode.*/
+            Mpu_Config.u8RegionNum = OS_MPU_REGION_NUM_ALL_PERI_SPACE;
+            /* PRQA S 0306 ++*/ /* MISRA Rule 11.4 */
+            Mpu_Config.u32StartAddr = (uint32)PERIPHERAL_START;
+            Mpu_Config.u32EndAddr = (uint32)PERIPHERAL_END;
+            /* PRQA S 0306 --*/ /* MISRA Rule 11.4 */
+            Mpu_Config.size = Os_CaculateMemSize((uint8*)PERIPHERAL_START, (uint8*)PERIPHERAL_END);
+            Mpu_Config.u32access = MPU_PRIV_RW_USER_RO_EXEC | MPU_DEVICE_NONSHAREABLE;
+            MPU_SetRegionConfig(&Mpu_Config, TaskId, OS_LEVEL_TASK);
         }
     }
+
+    return;
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-void Os_ArchMpuIsrRegionInit(void)
+/******************************************************************************/
+/*
+ * Brief                <Configure the memory protection unit for the task of
+ *                       application>
+ * Service ID   :       <None>
+ * Sync/Async   :       <Synchronous>
+ * Reentrancy           <Non Reentrant>
+ * @param[in]           <None>
+ * @param[out]          <None>
+ * @param[in/out]       <None>
+ * @return              <None>
+ * PreCondition         <None>
+ * CallByAPI            <Os_ArchSetTaskMemMap>
+ * REQ ID               <None>
+ */
+/******************************************************************************/
+static void Os_MpuIsrCalc(ISRType IsrId, ApplicationType HostAppId, Os_MpSetType Set)
 {
-    ISRType isrId;
-    uint32 vLength;
-    for(isrId = 0;isrId < Os_CfgIsr2Max; isrId++)
+    mpu_config Mpu_Config;
+
+    if (OS_MP_SET_TRUST_WITHOUT_PROT != Set)
     {
-        /* Task's All Data */
-        vLength = (uint32)(Os_IsrDAddr[isrId].ISR_ADDR_END) - (uint32)(Os_IsrDAddr[isrId].ISR_ADDR_START);
-        if(vLength > 0u)
+        /*By default, all code segments allow both privileged and user modes to read and execute.*/
+        Mpu_Config.u8RegionNum = OS_MPU_REGION_NUM_ALL_PFLASH_SPACE;
+        Mpu_Config.u32StartAddr = (uint32)CODE_ADDR_START; /* PRQA S 0306 */ /* MISRA Rule 11.4 */
+        Mpu_Config.u32EndAddr = (uint32)CODE_ADDR_END; /* PRQA S 0306 */     /* MISRA Rule 11.4 */
+        Mpu_Config.size = Os_CaculateMemSize((uint8*)CODE_ADDR_START, (uint8*)CODE_ADDR_END);
+        Mpu_Config.u32access = MPU_PRIV_RO_USER_RO_EXEC | MPU_NORMAL_OIWTNOWA_NONSHARED;
+        MPU_SetRegionConfig(&Mpu_Config, IsrId, OS_LEVEL_ISR2);
+
+        /*By default, all RAM space is read-write accessible in privileged mode and read-only in user mode.*/
+        Mpu_Config.u8RegionNum = OS_MPU_REGION_NUM_ALL_SRAM_SPACE;
+        Mpu_Config.u32StartAddr = (uint32)SRAM_START; /* PRQA S 0306 */ /* MISRA Rule 11.4 */
+        Mpu_Config.u32EndAddr = (uint32)SRAM_END; /* PRQA S 0306 */     /* MISRA Rule 11.4 */
+        Mpu_Config.size = Os_CaculateMemSize((uint8*)SRAM_START, (uint8*)SRAM_END);
+        Mpu_Config.u32access = MPU_PRIV_RW_USER_RO_EXEC | MPU_NORMAL_OIWTNOWA_NONSHARED;
+        MPU_SetRegionConfig(&Mpu_Config, IsrId, OS_LEVEL_ISR2);
+
+        /*The shared space has read-write access in privileged mode and is read-only in user mode.*/
+        Mpu_Config.u8RegionNum = OS_MPU_REGION_NUM_SHARED_SPACE;
+        /* PRQA S 0306 ++*/ /* MISRA Rule 11.4 */
+        Mpu_Config.u32StartAddr = (uint32)SHARED_START;
+        Mpu_Config.u32EndAddr = (uint32)SHARED_END;
+        /* PRQA S 0306 --*/ /* MISRA Rule 11.4 */
+        Mpu_Config.size = Os_CaculateMemSize((uint8*)SHARED_START, (uint8*)SHARED_END);
+        Mpu_Config.u32access = MPU_PRIV_RW_USER_RO_EXEC | MPU_NORMAL_OINC_SHARED;
+        MPU_SetRegionConfig(&Mpu_Config, IsrId, OS_LEVEL_ISR2);
+
+        /*The App private space belonging to the thread has read-write access in both privileged and user modes.*/
+        Mpu_Config.u8RegionNum = OS_MPU_REGION_NUM_CUR_APP_PRI_DATA;
+        /* PRQA S 0306 ++*/ /* MISRA Rule 11.4 */
+        Mpu_Config.u32StartAddr = (uint32)Os_AppPriDataAddr[HostAppId].APP_ADDR_START;
+        Mpu_Config.u32EndAddr = (uint32)Os_AppPriDataAddr[HostAppId].APP_ADDR_END;
+        /* PRQA S 0306 --*/ /* MISRA Rule 11.4 */
+        Mpu_Config.size = Os_CaculateMemSize(
+            (uint8*)Os_AppPriDataAddr[HostAppId].APP_ADDR_START,
+            (uint8*)Os_AppPriDataAddr[HostAppId].APP_ADDR_END);
+        Mpu_Config.u32access = MPU_PRIV_RW_USER_RW_NOEXEC | MPU_NORMAL_OIWTNOWA_NONSHARED;
+        MPU_SetRegionConfig(&Mpu_Config, IsrId, OS_LEVEL_ISR2);
+
+        /*The thread own private space has read-write permissions in both privileged and user modes.*/
+        Mpu_Config.u8RegionNum = OS_MPU_REGION_NUM_CUR_ISR_DATA;
+        /* PRQA S 0306 ++*/ /* MISRA Rule 11.4 */
+        Mpu_Config.u32StartAddr = (uint32)Os_IsrDAddr[IsrId].ISR_ADDR_START;
+        Mpu_Config.u32EndAddr = (uint32)Os_IsrDAddr[IsrId].ISR_ADDR_END;
+        /* PRQA S 0306 --*/ /* MISRA Rule 11.4 */
+        Mpu_Config.size =
+            Os_CaculateMemSize((uint8*)Os_IsrDAddr[IsrId].ISR_ADDR_START, (uint8*)Os_IsrDAddr[IsrId].ISR_ADDR_END);
+        Mpu_Config.u32access = MPU_PRIV_RW_USER_RW_NOEXEC | MPU_NORMAL_OIWTNOWA_NONSHARED;
+        MPU_SetRegionConfig(&Mpu_Config, IsrId, OS_LEVEL_ISR2);
+
+        if (OS_MP_SET_NON_TRUST == Set)
         {
-            Os_ArchIsrMpuRegion[isrId].RBAR = (uint32)Os_IsrDAddr[isrId].ISR_ADDR_START;
-            Os_ArchIsrMpuRegion[isrId].RASR = Os_ArchMpuCalculateRasr(vLength, OS_MPU_AR_RW_RW, OS_MPU_TYPE_SRAMCACHE);
+#if (REGION_16 == CFG_REGION_NUM)
+            /*By default, threads belonging to an untrusted partition have read and execute permissions for all app code
+             * spaces in privileged mode, and no permissions in user mode.*/
+            Mpu_Config.u8RegionNum = OS_MPU_REGION_NUM_ALL_APP_CODE;
+            /* PRQA S 0306,1840 ++*/ /* MISRA Rule 11.4,Rule-10.4 */
+            Mpu_Config.u32StartAddr = (uint32)Os_Core_App_CAddr[0u].APP_ADDR_START;
+            Mpu_Config.u32EndAddr = (uint32)Os_Core_App_CAddr[OS_AUTOSAR_CORES - 1].APP_ADDR_END;
+            /* PRQA S 0306,1840 --*/ /* MISRA Rule 11.4,Rule-10.4 */
+            /* PRQA S 1840 ++*/      /* MISRA Rule-10.4 */
+            Mpu_Config.size = Os_CaculateMemSize(
+                (uint8*)Os_Core_App_CAddr[0u].APP_ADDR_START,
+                (uint8*)Os_Core_App_CAddr[OS_AUTOSAR_CORES - 1].APP_ADDR_END);
+            /* PRQA S 1840 --*/ /* MISRA Rule-10.4 */
+            Mpu_Config.u32access = MPU_PRIV_RO_USER_NA_EXEC | MPU_NORMAL_OIWTNOWA_NONSHARED;
+            MPU_SetRegionConfig(&Mpu_Config, IsrId, OS_LEVEL_ISR2);
+
+            /*Threads belonging to an untrusted partition have read and execute permissions for their own code space in
+             * both privileged and user modes.*/
+            Mpu_Config.u8RegionNum = OS_MPU_REGION_NUM_CUR_APP_CODE;
+            /* PRQA S 0306 ++*/ /* MISRA Rule 11.4 */
+            Mpu_Config.u32StartAddr = (uint32)Os_App_CAddr[HostAppId].APP_ADDR_START;
+            Mpu_Config.u32EndAddr = (uint32)Os_App_CAddr[HostAppId].APP_ADDR_END;
+            /* PRQA S 0306 --*/ /* MISRA Rule 11.4 */
+            Mpu_Config.size = Os_CaculateMemSize(
+                (uint8*)Os_App_CAddr[HostAppId].APP_ADDR_START,
+                (uint8*)Os_App_CAddr[HostAppId].APP_ADDR_END);
+            Mpu_Config.u32access = MPU_PRIV_RO_USER_RO_EXEC | MPU_NORMAL_OIWTNOWA_NONSHARED;
+            MPU_SetRegionConfig(&Mpu_Config, IsrId, OS_LEVEL_ISR2);
+#endif
+
+            /*By default, threads belonging to an untrusted partition have read and write permissions for all app data
+             * segments in privileged mode, and no permissions in user mode.*/
+            Mpu_Config.u8RegionNum = OS_MPU_REGION_NUM_ALL_APP_DATA;
+            /* PRQA S 0306,1840 ++*/ /* MISRA Rule 11.4,Rule-10.4 */
+            Mpu_Config.u32StartAddr = (uint32)Os_Core_App_DAddr[0u].APP_ADDR_START;
+            Mpu_Config.u32EndAddr = (uint32)Os_Core_App_DAddr[OS_AUTOSAR_CORES - 1].APP_ADDR_END;
+            /* PRQA S 0306,1840 --*/ /* MISRA Rule 11.4,Rule-10.4 */
+            /* PRQA S 1840 ++*/      /* MISRA Rule-10.4 */
+            Mpu_Config.size = Os_CaculateMemSize(
+                (uint8*)Os_Core_App_DAddr[0u].APP_ADDR_START,
+                (uint8*)Os_Core_App_DAddr[OS_AUTOSAR_CORES - 1].APP_ADDR_END);
+            /* PRQA S 1840 --*/ /* MISRA Rule-10.4 */
+            Mpu_Config.u32access = MPU_PRIV_NA_USER_NA_NOEXEC | MPU_NORMAL_OIWTNOWA_NONSHARED;
+            MPU_SetRegionConfig(&Mpu_Config, IsrId, OS_LEVEL_ISR2);
+
+            /*Threads belonging to an untrusted partition have read and write permissions for peripheral regions in
+             * privileged mode, and no permissions in user mode.*/
+            Mpu_Config.u8RegionNum = OS_MPU_REGION_NUM_ALL_PERI_SPACE;
+            /* PRQA S 0306 ++*/ /* MISRA Rule 11.4 */
+            Mpu_Config.u32StartAddr = (uint32)PERIPHERAL_START;
+            Mpu_Config.u32EndAddr = (uint32)PERIPHERAL_END;
+            /* PRQA S 0306 --*/ /* MISRA Rule 11.4 */
+            Mpu_Config.size = Os_CaculateMemSize((uint8*)PERIPHERAL_START, (uint8*)PERIPHERAL_END);
+            Mpu_Config.u32access = MPU_PRIV_NA_USER_NA_EXEC | MPU_DEVICE_NONSHAREABLE;
+            MPU_SetRegionConfig(&Mpu_Config, IsrId, OS_LEVEL_ISR2);
         }
         else
         {
-            Os_ArchIsrMpuRegion[isrId].RBAR = OS_MPU_RBAR_RESET_VALUE;
-            Os_ArchIsrMpuRegion[isrId].RASR = OS_MPU_RASR_RESET_VALUE;
+#if (REGION_16 == CFG_REGION_NUM)
+            /*The code space access permissions for a trusted app with a protected partition inherit the permissions of
+             * `OS_MPU_REGION_NUM_ALL_PFLASH_SPACE`.*/
+            Mpu_Config.u8RegionNum = OS_MPU_REGION_NUM_ALL_APP_CODE;
+            /* PRQA S 0306,1840 ++*/ /* MISRA Rule 11.4,Rule-10.4 */
+            Mpu_Config.u32StartAddr = (uint32)Os_Core_App_CAddr[0u].APP_ADDR_START;
+            Mpu_Config.u32EndAddr = (uint32)Os_Core_App_CAddr[OS_AUTOSAR_CORES - 1].APP_ADDR_END;
+            /* PRQA S 0306,1840 --*/ /* MISRA Rule 11.4,Rule-10.4 */
+            /* PRQA S 1840 ++*/      /* MISRA Rule-10.4 */
+            Mpu_Config.size = Os_CaculateMemSize(
+                (uint8*)Os_Core_App_CAddr[0u].APP_ADDR_START,
+                (uint8*)Os_Core_App_CAddr[OS_AUTOSAR_CORES - 1].APP_ADDR_END);
+            /* PRQA S 1840 --*/ /* MISRA Rule-10.4 */
+            Mpu_Config.u32access = MPU_PRIV_RO_USER_RO_EXEC | MPU_NORMAL_OIWTNOWA_NONSHARED;
+            MPU_SetRegionConfig(&Mpu_Config, IsrId, OS_LEVEL_ISR2);
+#endif
+
+            /*a trusted app with a protected partition have read and write permissions for all app data segments in
+             * privileged mode, and read permissions in user mode.*/
+            Mpu_Config.u8RegionNum = OS_MPU_REGION_NUM_ALL_APP_DATA;
+            /* PRQA S 0306,1840 ++*/ /* MISRA Rule 11.4,Rule-10.4 */
+            Mpu_Config.u32StartAddr = (uint32)Os_Core_App_DAddr[0u].APP_ADDR_START;
+            Mpu_Config.u32EndAddr = (uint32)Os_Core_App_DAddr[OS_AUTOSAR_CORES - 1].APP_ADDR_END;
+            /* PRQA S 0306,1840 --*/ /* MISRA Rule 11.4,Rule-10.4 */
+            /* PRQA S 1840 ++*/      /* MISRA Rule-10.4 */
+            Mpu_Config.size = Os_CaculateMemSize(
+                (uint8*)Os_Core_App_DAddr[0u].APP_ADDR_START,
+                (uint8*)Os_Core_App_DAddr[OS_AUTOSAR_CORES - 1].APP_ADDR_END);
+            /* PRQA S 1840 --*/ /* MISRA Rule-10.4 */
+            Mpu_Config.u32access = MPU_PRIV_RO_USER_RO_NOEXEC | MPU_NORMAL_OIWTNOWA_NONSHARED;
+            MPU_SetRegionConfig(&Mpu_Config, IsrId, OS_LEVEL_ISR2);
+
+            /*Threads belonging to a trusted and protected partition have read and write permissions for peripheral
+             * regions in privileged mode, and read-only permissions in user mode.*/
+            Mpu_Config.u8RegionNum = OS_MPU_REGION_NUM_ALL_PERI_SPACE;
+            /* PRQA S 0306 ++*/ /* MISRA Rule 11.4 */
+            Mpu_Config.u32StartAddr = (uint32)PERIPHERAL_START;
+            Mpu_Config.u32EndAddr = (uint32)PERIPHERAL_END;
+            /* PRQA S 0306 --*/ /* MISRA Rule 11.4 */
+            Mpu_Config.size = Os_CaculateMemSize((uint8*)PERIPHERAL_START, (uint8*)PERIPHERAL_END);
+            Mpu_Config.u32access = MPU_PRIV_RO_USER_RO_EXEC | MPU_DEVICE_NONSHAREABLE;
+            MPU_SetRegionConfig(&Mpu_Config, IsrId, OS_LEVEL_ISR2);
         }
     }
+
+    return;
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
@@ -663,12 +1171,43 @@ void Os_ArchMpuIsrRegionInit(void)
 /******************************************************************************/
 void Os_MpuConfigTableInit(void)
 {
-    if (0 == Os_SCB.sysCore)
-    {
-        Os_ArchMpuAppRegionInit();
+    uint8 region = 0u;
+    Os_MpSetType set;
+    Os_TaskType Os_MpCurTaskId = OS_TASK_INVALID;
+    ApplicationType Os_MpCurIsr2Id = INVALID_ISR;
+    Os_ApplicationType curAppId;
+    uint16 id;
+    Os_PreAppTrustState = OS_MP_SET_INIT;
+    Os_CurAppTrustState = OS_MP_SET_INIT;
+    Os_MpuDisable();
+
+    for (region = 0U; region < CFG_REGION_NUM; region++)
+    { /* PRQA S 0303 ++*/ /* MISRA Rule 11.4 */
+        MPU_RNR_REG = (uint32)region;
+        MPU_RASR_REG = 0U;
+        MPU_RBAR_REG = 0U;
+        /* PRQA S 0303 --*/ /* MISRA Rule 11.4 */
     }
-    Os_ArchMpuTaskRegionInit();
-    Os_ArchMpuIsrRegionInit();
+
+    for (id = 0u; id < Os_SCB.sysTaskMax; id++)
+    {
+        Os_MpCurTaskId = id;
+        curAppId = Os_ObjectAppCfg[OBJECT_TASK][Os_MpCurTaskId].hostApp;
+        /* PRQA S 3138,2109 ++*/ /* MISRA CWE-398,CWE-192 */
+        OS_MPU_GET_APP_MP_TYPE(Os_AppCfg[curAppId].OsTrusted, Os_AppCfg[curAppId].OsTrustedAppWithProtection);
+        /* PRQA S 3138,2109 --*/ /* MISRA CWE-398,CWE-192 */
+        Os_MpuTaskCalc(Os_MpCurTaskId, curAppId, set);
+    }
+
+    for (id = 0u; id < Os_CfgIsr2Max; id++)
+    {
+        Os_MpCurIsr2Id = id;
+        curAppId = Os_ObjectAppCfg[OBJECT_ISR][Os_MpCurIsr2Id].hostApp;
+        /* PRQA S 3138,2109 ++*/ /* MISRA CWE-398,CWE-192 */
+        OS_MPU_GET_APP_MP_TYPE(Os_AppCfg[curAppId].OsTrusted, Os_AppCfg[curAppId].OsTrustedAppWithProtection);
+        /* PRQA S 3138,2109 --*/ /* MISRA CWE-398,CWE-192 */
+        Os_MpuIsrCalc(Os_MpCurIsr2Id, curAppId, set);
+    }
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
@@ -691,9 +1230,10 @@ void Os_MpuConfigTableInit(void)
  * REQ ID               <None>
  */
 /******************************************************************************/
+
 void Os_ArchMpDefaultConfigSwitch(void)
 {
-    /* do nothing */
+    Os_MpuDisable();
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
@@ -716,7 +1256,7 @@ void Os_ArchMpDefaultConfigSwitch(void)
  * REQ ID               <None>
  */
 /******************************************************************************/
-uint8 Os_GetFault(void)
+FUNC(uint8, OS_CODE) Os_GetFault(void)
 {
     uint8 retErr = NO_FAULT_BEHAVIOR;
     uint32 reg = 0u;

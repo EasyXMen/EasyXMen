@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -21,9 +21,18 @@
  **  @description        : Rebuid for Crypto
  **
  ***********************************************************************************************************************/
+/* PRQA S 1712 EOF */ /* VL_IdsM_1712 */
+/* PRQA S 6010 EOF */ /* VL_MTR_Crypto_62_STCYC */
+/* PRQA S 6020 EOF */ /* VL_MTR_Crypto_62_STLIN */
+/* PRQA S 6030 EOF */ /* VL_MTR_Crypto_62_STMIF */
+/* PRQA S 6040 EOF */ /* VL_MTR_Crypto_62_STPAR */
+/* PRQA S 6050 EOF */ /* VL_MTR_Crypto_62_STST3 */
+/* PRQA S 6060 EOF */ /* VL_MTR_Crypto_62_STM19 */
+/* PRQA S 6070 EOF */ /* VL_MTR_Crypto_62_STCAL */
+/* PRQA S 6080 EOF */ /* VL_MTR_Crypto_62_STPTH */
 
-/* PRQA S 0314,0316,0570,0597,1258,1290,1291,2109,3120,3206,3625,3673,3762,4434 ++ */   /* VL_QAC_Crypto */
-/* PRQA S 6050,6060,6070,6080,6010,6030,6040,1751,1533,1532,1503,2889,3556,1505   ++ */ /* VL_QAC_Crypto */
+/* PRQA S 0314,0316,0570,0597,1258,1290,1291,2109,3120,3206,3625,3673,3762,4434 ++ */ /* VL_Crypto_62_General */
+/* PRQA S 1751,1533,1532,1503,2889,3556,1505 ++ */                                    /* VL_Crypto_62_General */
 /* =================================================== inclusions =================================================== */
 #include "Crypto_62_Internal.h"
 #if (CRYPTO_ALGORITHMFAM_RSA == STD_ON)
@@ -76,7 +85,7 @@ uint16 Crypto_62_Key_RetryCount[CRYPTO_MAXNVBLOCK_CONFIGURED];
 /***************************************************************************************/
 Std_ReturnType Crypto_62_KeyElementSet(uint32 cryptokeyId, uint32 keyElementId, const uint8* keyPtr, uint32 keyLength)
 {
-    Std_ReturnType status = E_NOT_OK; /* PRQA S 2981  */ /* VL_QAC_Crypto */
+    Std_ReturnType status = E_NOT_OK; /* PRQA S 2981  */ /* VL_Crypto_62_General */
 #if (CRYPTO_DEV_ERROR_DETECT == STD_ON)
     /*@req SWS_Crypto_00075*/
     if (CRYPTO_DRIVER_UNINIT == Crypto_62_DriverStatus)
@@ -124,7 +133,7 @@ Std_ReturnType Crypto_62_KeyElementSet(uint32 cryptokeyId, uint32 keyElementId, 
 /***************************************************************************************/
 Std_ReturnType Crypto_62_KeySetValid(uint32 cryptoKeyId)
 {
-    Std_ReturnType status = E_NOT_OK; /* PRQA S 2981  */ /* VL_QAC_Crypto */
+    Std_ReturnType status = E_NOT_OK; /* PRQA S 2981  */ /* VL_Crypto_62_General */
 #if (CRYPTO_DEV_ERROR_DETECT == STD_ON)
     /*@req SWS_Crypto_00196*/
     if (CRYPTO_DRIVER_UNINIT == Crypto_62_DriverStatus)
@@ -199,7 +208,7 @@ Std_ReturnType Crypto_62_KeySetValid(uint32 cryptoKeyId)
 /***************************************************************************************/
 Std_ReturnType Crypto_62_KeySetInValid(uint32 cryptoKeyId)
 {
-    Std_ReturnType status = E_NOT_OK; /* PRQA S 2981  */ /* VL_QAC_Crypto */
+    Std_ReturnType status = E_NOT_OK; /* PRQA S 2981  */ /* VL_Crypto_62_General */
 #if (CRYPTO_DEV_ERROR_DETECT == STD_ON)
     /*@req SWS_Crypto_00236*/
     if (CRYPTO_DRIVER_UNINIT == Crypto_62_DriverStatus)
@@ -249,7 +258,7 @@ Std_ReturnType Crypto_62_KeySetInValid(uint32 cryptoKeyId)
 Std_ReturnType
     Crypto_62_KeyElementGet(uint32 cryptoKeyId, uint32 keyElementId, uint8* resultPtr, uint32* resultLengthPtr)
 {
-    Std_ReturnType status = (Std_ReturnType)E_NOT_OK; /* PRQA S 2981  */ /* VL_QAC_Crypto */
+    Std_ReturnType status = (Std_ReturnType)E_NOT_OK; /* PRQA S 2981  */ /* VL_Crypto_62_General */
 #if (CRYPTO_DEV_ERROR_DETECT == STD_ON)
     /*@req SWS_Crypto_00085*/
     if (CRYPTO_DRIVER_UNINIT == Crypto_62_DriverStatus)
@@ -334,7 +343,7 @@ Std_ReturnType
 
 Std_ReturnType Crypto_62_KeyGetStatus(uint32 cryptoKeyId, Crypto_KeyStatusType* keyStatusPtr)
 {
-    Std_ReturnType status = (Std_ReturnType)E_NOT_OK; /* PRQA S 2981  */ /* VL_QAC_Crypto */
+    Std_ReturnType status = (Std_ReturnType)E_NOT_OK; /* PRQA S 2981  */ /* VL_Crypto_62_General */
 #if (CRYPTO_DEV_ERROR_DETECT == STD_ON)
     /*@req SWS_Crypto_00085*/
     if (CRYPTO_DRIVER_UNINIT == Crypto_62_DriverStatus)
@@ -393,7 +402,7 @@ Std_ReturnType Crypto_62_KeyElementCopy(
     uint32 targetCryptoKeyId,
     uint32 targetKeyElementId)
 {
-    Std_ReturnType status = (Std_ReturnType)E_NOT_OK; /* PRQA S 2981  */ /* VL_QAC_Crypto */
+    Std_ReturnType status = (Std_ReturnType)E_NOT_OK; /* PRQA S 2981  */ /* VL_Crypto_62_General */
 #if (CRYPTO_DEV_ERROR_DETECT == STD_ON)
     /*@req SWS_Crypto_00149*/
     if (CRYPTO_DRIVER_UNINIT == Crypto_62_DriverStatus)
@@ -508,7 +517,7 @@ Std_ReturnType Crypto_62_KeyElementCopyPartial(
     uint32 targetCryptoKeyId,
     uint32 targetKeyElementId)
 {
-    Std_ReturnType status = (Std_ReturnType)E_NOT_OK; /* PRQA S 2981  */ /* VL_QAC_Crypto */
+    Std_ReturnType status = (Std_ReturnType)E_NOT_OK; /* PRQA S 2981  */ /* VL_Crypto_62_General */
 #if (CRYPTO_DEV_ERROR_DETECT == STD_ON)
     /*@req SWS_Crypto_00205*/
     if (CRYPTO_DRIVER_UNINIT == Crypto_62_DriverStatus)
@@ -684,13 +693,13 @@ Std_ReturnType Crypto_62_KeyCopy(uint32 cryptoKeyId, uint32 targetCryptoKeyId)
 /***************************************************************************************/
 Std_ReturnType Crypto_62_KeyElementIdsGet(
     uint32 cryptoKeyId,
-    /* PRQA S 2980 ++ */ /* VL_QAC_Crypto */
+    /* PRQA S 2980 ++ */ /* VL_Crypto_62_General */
     uint32* keyElementIdsPtr,
 
     uint32* keyElementIdsLengthPtr)
 /* PRQA S 2980 -- */
 {
-    /* PRQA S 2981 ++ */ /* VL_QAC_Crypto */
+    /* PRQA S 2981 ++ */ /* VL_Crypto_62_General */
     Std_ReturnType status = E_NOT_OK;
     /* PRQA S 2981 -- */
 #if (CRYPTO_DEV_ERROR_DETECT == STD_ON)
@@ -749,7 +758,7 @@ Std_ReturnType Crypto_62_KeyElementIdsGet(
 /***************************************************************************************/
 Std_ReturnType Crypto_62_RandomSeed(uint32 cryptoKeyId, const uint8* seedPtr, uint32 seedLength)
 {
-    Std_ReturnType status = E_NOT_OK; /* PRQA S 2981 */ /* VL_QAC_Crypto */
+    Std_ReturnType status = E_NOT_OK; /* PRQA S 2981 */ /* VL_Crypto_62_General */
 #if (CRYPTO_DEV_ERROR_DETECT == STD_ON)
     /*@req SWS_Crypto_00128*/
     if (CRYPTO_DRIVER_UNINIT == Crypto_62_DriverStatus)
@@ -862,13 +871,9 @@ Std_ReturnType Crypto_62_KeyGenerate(uint32 cryptoKeyId)
                 ctr_drbg.entropy_len           = CRYPTO_CONST_32;
                 ctr_drbg.reseed_counter        = CRYPTO_CONST_16;
                 ctr_drbg.prediction_resistance = 1U;
-                status                         = Crypto_ctr_drbg_seed(
-                    &ctr_drbg,
-                    Crypto_entropy_func,
-                    &entropy,
-                    (const unsigned char*)pers,
-                    CRYPTO_CONST_7);
-                /* PRQA S 1252++ */ /* VL_QAC_Crypto */
+                status =
+                    Crypto_ctr_drbg_seed(&ctr_drbg, Crypto_entropy_func, &entropy, (const uint8*)pers, CRYPTO_CONST_7);
+                /* PRQA S 1252++ */ /* VL_Crypto_62_General */
                 if (E_OK == status)
                 {
                     status = Crypto_62_KeyElementIndexFind(cryptoKeyId, CRYPTO_KE_KEYGENERATE_KEY, &keyEleIdx);
@@ -912,7 +917,7 @@ Std_ReturnType Crypto_62_KeyGenerate(uint32 cryptoKeyId)
                         private_keylen = CRYPTO_RSA3072_PRIVATE_KEY_SIZE;
                     }
                     p              = (uint8*)IStdLib_MemHeapCalloc(Crypto_62_MemPool, 1, private_keylen);
-                    end            = p + private_keylen; /* PRQA S 0488 */ /* VL_QAC_Crypto */
+                    end            = p + private_keylen; /* PRQA S 0488 */ /* VL_Crypto_62_General */
                     private_keylen = Crypto_rsa_write_key(&rsa, p, &end);
                     status         = Crypto_62_KeyElementSet(cryptoKeyId, CRYPTO_KE_KEYGENERATE_KEY, p, private_keylen);
                     (void)IStdLib_MemSet(p, 0, private_keylen);
@@ -974,7 +979,7 @@ Std_ReturnType Crypto_62_KeyGenerate(uint32 cryptoKeyId)
 /***************************************************************************************/
 Std_ReturnType Crypto_62_KeyDerive(uint32 cryptoKeyId, uint32 targetCryptoKeyId)
 {
-    Std_ReturnType status = (Std_ReturnType)E_NOT_OK; /* PRQA S 2981 */ /* VL_QAC_Crypto */
+    Std_ReturnType status = (Std_ReturnType)E_NOT_OK; /* PRQA S 2981 */ /* VL_Crypto_62_General */
 #if (CRYPTO_DEV_ERROR_DETECT == STD_ON)
     /*@req SWS_Crypto_00097*/
     if (CRYPTO_DRIVER_UNINIT == Crypto_62_DriverStatus)
@@ -1023,7 +1028,7 @@ Std_ReturnType Crypto_62_KeyDerive(uint32 cryptoKeyId, uint32 targetCryptoKeyId)
 /***************************************************************************************/
 Std_ReturnType Crypto_62_KeyExchangeCalcPubVal(uint32 cryptoKeyId, uint8* publicValuePtr, uint32* publicValueLengthPtr)
 {
-    Std_ReturnType status = (Std_ReturnType)E_NOT_OK; /* PRQA S 2981 */ /* VL_QAC_Crypto */
+    Std_ReturnType status = (Std_ReturnType)E_NOT_OK; /* PRQA S 2981 */ /* VL_Crypto_62_General */
 
 #if (CRYPTO_DEV_ERROR_DETECT == STD_ON)
     /*@req SWS_Crypto_00103*/
@@ -1085,7 +1090,7 @@ Std_ReturnType Crypto_62_KeyExchangeCalcSecret(
     const uint8* partnerPublicValuePtr,
     uint32       partnerPublicValueLength)
 {
-    Std_ReturnType status = (Std_ReturnType)E_NOT_OK; /* PRQA S 2981 */ /* VL_QAC_Crypto */
+    Std_ReturnType status = (Std_ReturnType)E_NOT_OK; /* PRQA S 2981 */ /* VL_Crypto_62_General */
 #if (CRYPTO_DEV_ERROR_DETECT == STD_ON)
     /*@req SWS_Crypto_00111*/
     if (CRYPTO_DRIVER_UNINIT == Crypto_62_DriverStatus)
@@ -1486,5 +1491,5 @@ Std_ReturnType Crypto_RandomSeedInternal(uint32 cryptoKeyId, const uint8* seedPt
 #define CRYPTO_62_STOP_SEC_CODE
 #include "Crypto_62_MemMap.h"
 
+/* PRQA S 1751,1533,1532,1503,2889,3556,1505 -- */
 /* PRQA S 0314,0316,0570,0597,1258,1290,1291,2109,3120,3206,3625,3673,3762,4434 -- */
-/* PRQA S 6050,6060,6070,6080,6010,6030,6040,1751,1533,1532,1503,2889,3556,1505   -- */

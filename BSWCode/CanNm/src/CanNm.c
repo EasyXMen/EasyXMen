@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -53,6 +53,9 @@ typedef enum
 /* ========================================== internal function declarations ======================================== */
 #define CANNM_START_SEC_CODE
 #include "CanNm_MemMap.h"
+#ifdef QAC_ANALYZE
+#pragma PRQA_NO_SIDE_EFFECTS CanNm_TestAndClear
+#endif
 
 CANNM_LOCAL_INLINE boolean         CanNm_TestAndClear(boolean* flagPtr);
 CANNM_LOCAL void                   CanNm_SetTxPduCbvBit(CanNm_ChannelIndexType chIndex, uint8 mask, boolean flag);
@@ -108,12 +111,13 @@ CANNM_LOCAL void CanNm_TimerManagement(CanNm_ChannelIndexType chIndex);
 /**
  *  Function to handle state machine switching.
  *  */
-CANNM_LOCAL void CanNm_StateChange(CanNm_ChannelIndexType chIndex, Nm_StateType nmNewState);
+CANNM_LOCAL void CanNm_StateChange(CanNm_ChannelIndexType chIndex, Nm_StateType nmOldState, Nm_StateType nmNewState);
 #if CANNM_PASSIVE_MODE_ENABLED == STD_OFF
 CANNM_LOCAL void CanNm_StartTransmissionNmPdu(CanNm_ChannelIndexType chIndex, boolean isNetWorkRequest);
 #endif
-CANNM_LOCAL void CanNm_EnterRepeatMessageState(CanNm_ChannelIndexType chIndex, boolean isNetWorkRequest);
-CANNM_LOCAL void CanNm_EnterPrepareBusSleepModeHandle(uint8 chIndex);
+CANNM_LOCAL void
+    CanNm_EnterRepeatMessageState(CanNm_ChannelIndexType chIndex, Nm_StateType nmOldState, boolean isNetWorkRequest);
+CANNM_LOCAL void CanNm_EnterPrepareBusSleepModeHandle(CanNm_ChannelIndexType chIndex);
 
 #if CANNM_NODE_DETECTION_ENABLED == STD_ON
 CANNM_LOCAL boolean CanNm_NodeDetectStateHandle(CanNm_ChannelIndexType chIndex);
@@ -145,7 +149,9 @@ CANNM_LOCAL boolean CanNm_ValidateInitStatus(uint8 apiId);
 CANNM_LOCAL boolean CanNm_ValidateNetworkHandle(uint8 apiId, NetworkHandleType nmChannelHandle);
 CANNM_LOCAL boolean CanNm_ValidatePointer(uint8 apiId, const void* pointer);
 CANNM_LOCAL boolean CanNm_ValidateTxPduId(uint8 apiId, PduIdType txPduId);
+#if CANNM_TRIGGER_TRANSMIT_API == STD_ON
 CANNM_LOCAL boolean CanNm_ValidateTxPdu(uint8 apiId, PduIdType txPduId, const PduInfoType* pduInfoPtr);
+#endif
 CANNM_LOCAL boolean CanNm_ValidateRxPdu(uint8 apiId, PduIdType rxPduId, const PduInfoType* pduInfoPtr);
 CANNM_LOCAL boolean CanNm_ValidateUserDataPdu(uint8 apiId, PduIdType rxPduId, const PduInfoType* pduInfoPtr);
 CANNM_LOCAL boolean CanNm_ValidateDeInit(void);
@@ -511,15 +517,14 @@ Std_ReturnType CanNm_SetUserData(NetworkHandleType nmChannelHandle, const uint8*
     {
         const CanNm_ChannelIndexType     chIndex    = CanNm_FindChannelIndex(nmChannelHandle);
         const CanNm_ChannelPBConfigType* chPBCfgPtr = &CanNm_ChlPBCfgPtr[chIndex];
-        const CanNm_InnerChannelType*    chRTPtr    = CanNm_ChannelLCfgData[chIndex].RuntimePrt;
+        CanNm_InnerChannelType*          chRTPtr    = CanNm_ChannelLCfgData[chIndex].RuntimePrt;
 
         /** SWS_CanNm_00159 */
-        uint8  userDataLength = chPBCfgPtr->UserDataLength;
-        uint8  userDataOffset = chPBCfgPtr->UserDataOffset;
-        uint8* userDataPtr    = &chRTPtr->TxPduData[userDataOffset];
+        uint8 userDataLength = chPBCfgPtr->UserDataLength;
+        uint8 userDataOffset = chPBCfgPtr->UserDataOffset;
 
         SchM_Enter_CanNm_Context();
-        (void)IStdLib_MemCpy(userDataPtr, nmUserDataPtr, userDataLength);
+        (void)IStdLib_MemCpy(&chRTPtr->TxPduData[userDataOffset], nmUserDataPtr, userDataLength);
         SchM_Exit_CanNm_Context();
 
         ret = E_OK;
@@ -990,6 +995,7 @@ void CanNm_ConfirmPnAvailability(NetworkHandleType nmChannelHandle)
 }
 #endif
 
+#if CANNM_TRIGGER_TRANSMIT_API == STD_ON
 /**
  * Within this API, the upper layer module (called module) shall check whether the available data
  * fits into the buffer size reported by PduInfoPtr->SduLength. If it fits, it shall copy its data into the
@@ -1035,6 +1041,7 @@ Std_ReturnType CanNm_TriggerTransmit(PduIdType TxPduId, PduInfoType* PduInfoPtr)
 
     return ret;
 }
+#endif
 
 /**
  * Main function of the CanNm which processes the algorithm describes in that document.
@@ -1191,23 +1198,27 @@ CANNM_LOCAL boolean CanNm_RxPnFilter(CanNm_ChannelIndexType chIndex, const uint8
  */
 CANNM_LOCAL void CanNm_InnerTxConfHandle(CanNm_ChannelIndexType chIndex, Std_ReturnType result)
 {
+    const CanNm_ChannelLConfigType* chCfgPtr = &CanNm_ChannelLCfgData[chIndex];
+    CanNm_InnerChannelType*         chRTPtr  = chCfgPtr->RuntimePrt;
     if (result == E_OK)
     {
-        CanNm_InnerChannelType* chRTPtr = CanNm_ChannelLCfgData[chIndex].RuntimePrt;
-        SchM_Enter_CanNm_Context();
         /** SWS_CanNm_00099 */
         if (chRTPtr->CanNmMode == NM_MODE_NETWORK)
         {
-            chRTPtr->TickTimers[CANNM_NM_TIMEOUT_TIMER] = CanNm_ChannelLCfgData[chIndex].TimeoutTime;
+            chRTPtr->TickTimers[CANNM_NM_TIMEOUT_TIMER] = chCfgPtr->TimeoutTime;
         }
+    }
+    else
+    {
+        /** SWS_CanNm_00066 */
+        Nm_TxTimeoutException(chCfgPtr->ComMNetworkHandleRef);
+    }
 
 #if CANNM_GLOBAL_PN_SUPPORT == STD_ON
-        /** SWS_CanNm_00065 */
-        chRTPtr->TickTimers[CANNM_TXMSG_TIMEOUT_TIMER]  = 0u;
-        chRTPtr->TimeoutFlag[CANNM_TXMSG_TIMEOUT_TIMER] = FALSE;
+    /** SWS_CanNm_00065 */
+    chRTPtr->TickTimers[CANNM_TXMSG_TIMEOUT_TIMER]  = 0u;
+    chRTPtr->TimeoutFlag[CANNM_TXMSG_TIMEOUT_TIMER] = FALSE;
 #endif
-        SchM_Exit_CanNm_Context();
-    }
 
 #if (CANNM_COM_USERDATA_SUPPORT == STD_ON) && (CANNM_USERDATA_TX_PDU_NUM > 0)
     const CanNm_UserDataTxPduType* userDataPduPtr = CanNm_ChlPBCfgPtr[chIndex].UserDataTxPdu;
@@ -1574,17 +1585,17 @@ CANNM_LOCAL void CanNm_TimerManagement(CanNm_ChannelIndexType chIndex)
  * @synchronous TRUE
  * @trace       CPD-70094
  */
-CANNM_LOCAL void CanNm_StateChange(CanNm_ChannelIndexType chIndex, Nm_StateType nmNewState)
+CANNM_LOCAL void CanNm_StateChange(CanNm_ChannelIndexType chIndex, Nm_StateType nmOldState, Nm_StateType nmNewState)
 {
-    CanNm_InnerChannelType* chRTPtr = CanNm_ChannelLCfgData[chIndex].RuntimePrt;
-
 /** SWS_CanNm_00166 */
 #if CANNM_STATE_CHANGE_IND_ENABLED == STD_ON
-    Nm_StateChangeNotification(CanNm_ChannelLCfgData[chIndex].ComMNetworkHandleRef, chRTPtr->CanNmState, nmNewState);
+    Nm_StateChangeNotification(CanNm_ChannelLCfgData[chIndex].ComMNetworkHandleRef, nmOldState, nmNewState);
+#else
+    CANNM_UNUSED(nmOldState);
 #endif
 
     SchM_Enter_CanNm_Context();
-    chRTPtr->CanNmState = nmNewState;
+    CanNm_ChannelLCfgData[chIndex].RuntimePrt->CanNmState = nmNewState;
     SchM_Exit_CanNm_Context();
 }
 
@@ -1663,7 +1674,8 @@ CANNM_LOCAL void CanNm_StartTransmissionNmPdu(CanNm_ChannelIndexType chIndex, bo
  * @synchronous TRUE
  * @trace       CPD-70096
  */
-CANNM_LOCAL void CanNm_EnterRepeatMessageState(CanNm_ChannelIndexType chIndex, boolean isNetWorkRequest)
+CANNM_LOCAL void
+    CanNm_EnterRepeatMessageState(CanNm_ChannelIndexType chIndex, Nm_StateType nmOldState, boolean isNetWorkRequest)
 {
     const CanNm_ChannelLConfigType* chCfgPtr = &CanNm_ChannelLCfgData[chIndex];
     CanNm_InnerChannelType*         chRTPtr  = chCfgPtr->RuntimePrt;
@@ -1699,7 +1711,7 @@ CANNM_LOCAL void CanNm_EnterRepeatMessageState(CanNm_ChannelIndexType chIndex, b
         Nm_NetworkMode(chCfgPtr->ComMNetworkHandleRef);
     }
 
-    CanNm_StateChange(chIndex, NM_STATE_REPEAT_MESSAGE);
+    CanNm_StateChange(chIndex, nmOldState, NM_STATE_REPEAT_MESSAGE);
 }
 
 /**
@@ -1709,12 +1721,12 @@ CANNM_LOCAL void CanNm_EnterRepeatMessageState(CanNm_ChannelIndexType chIndex, b
  * @synchronous TRUE
  * @trace       CPD-70097
  */
-CANNM_LOCAL void CanNm_EnterPrepareBusSleepModeHandle(uint8 chIndex)
+CANNM_LOCAL void CanNm_EnterPrepareBusSleepModeHandle(CanNm_ChannelIndexType chIndex)
 {
     const CanNm_ChannelLConfigType* chCfgPtr = &CanNm_ChannelLCfgData[chIndex];
     CanNm_InnerChannelType*         chRTPtr  = chCfgPtr->RuntimePrt;
 
-    CanNm_StateChange(chIndex, NM_STATE_PREPARE_BUS_SLEEP);
+    CanNm_StateChange(chIndex, NM_STATE_READY_SLEEP, NM_STATE_PREPARE_BUS_SLEEP);
     chRTPtr->CanNmMode = NM_MODE_PREPARE_BUS_SLEEP;
 
     /** SWS_CanNm_00114 */
@@ -1757,7 +1769,6 @@ CANNM_LOCAL boolean CanNm_NodeDetectStateHandle(CanNm_ChannelIndexType chIndex)
     if ((chRTPtr->RepeatMessageRequest || chRTPtr->RepeatMessageDetected)
         && ((currState == NM_STATE_NORMAL_OPERATION) || (currState == NM_STATE_READY_SLEEP)))
     {
-        CanNm_EnterRepeatMessageState(chIndex, FALSE);
         if (chRTPtr->RepeatMessageRequest)
         {
             CanNm_SetTxPduCbvBit(chIndex, CANNM_CBV_BIT_RMP_MASK, TRUE);
@@ -1784,6 +1795,7 @@ CANNM_LOCAL boolean CanNm_NetworkStateHandle(CanNm_ChannelIndexType chIndex)
     const CanNm_ChannelLConfigType* chCfgPtr     = &CanNm_ChannelLCfgData[chIndex];
     CanNm_InnerChannelType*         chRTPtr      = chCfgPtr->RuntimePrt;
     boolean                         stateChanged = FALSE;
+    Nm_StateType                    currState    = chRTPtr->CanNmState;
 
 #if CANNM_PASSIVE_MODE_ENABLED == STD_OFF
     if (CanNm_TestAndClear(&chRTPtr->NetRequestFlg))
@@ -1791,7 +1803,7 @@ CANNM_LOCAL boolean CanNm_NetworkStateHandle(CanNm_ChannelIndexType chIndex)
 #if CANNM_GLOBAL_PN_SUPPORT == STD_ON
         if (chCfgPtr->PnHandleMultipleNetworkRequests)
         {
-            CanNm_EnterRepeatMessageState(chIndex, TRUE);
+            CanNm_EnterRepeatMessageState(chIndex, currState, TRUE);
             stateChanged = TRUE;
         }
 #endif
@@ -1802,10 +1814,9 @@ CANNM_LOCAL boolean CanNm_NetworkStateHandle(CanNm_ChannelIndexType chIndex)
     if (!stateChanged)
 #endif
     {
-        Nm_StateType currState = chRTPtr->CanNmState;
         if ((chRTPtr->NetRequestStatus == CANNM_NETWORK_REQUESTED) && (currState != NM_STATE_NORMAL_OPERATION))
         {
-            CanNm_StateChange(chIndex, NM_STATE_NORMAL_OPERATION);
+            CanNm_StateChange(chIndex, currState, NM_STATE_NORMAL_OPERATION);
 #if CANNM_REMOTE_SLEEP_IND_ENABLED == STD_ON
             chRTPtr->TickTimers[CANNM_REMOTE_SLEEP_TIMER] = chCfgPtr->RemoteSleepIndTime;
 #endif
@@ -1814,7 +1825,7 @@ CANNM_LOCAL boolean CanNm_NetworkStateHandle(CanNm_ChannelIndexType chIndex)
 
         if ((chRTPtr->NetRequestStatus == CANNM_NETWORK_RELEASED) && (currState != NM_STATE_READY_SLEEP))
         {
-            CanNm_StateChange(chIndex, NM_STATE_READY_SLEEP);
+            CanNm_StateChange(chIndex, currState, NM_STATE_READY_SLEEP);
 #if CANNM_PASSIVE_MODE_ENABLED == STD_OFF
             chRTPtr->TickTimers[CANNM_TXMSG_CYCLE_TIMER] = 0u;
 #if CANNM_RETRY_FIRST_MESSAGE_REQUEST == STD_ON
@@ -1853,7 +1864,16 @@ CANNM_LOCAL void CanNm_RepeatMessageStateHandle(CanNm_ChannelIndexType chIndex)
         }
 #endif
 
-        (void)CanNm_NetworkStateHandle(chIndex);
+        boolean stateChanged = CanNm_NetworkStateHandle(chIndex);
+#if CANNM_NODE_DETECTION_ENABLED == STD_ON
+        if (stateChanged)
+        {
+            chRTPtr->RepeatMessageRequest  = FALSE;
+            chRTPtr->RepeatMessageDetected = FALSE;
+        }
+#else
+        (void)stateChanged;
+#endif
     }
 }
 
@@ -1869,6 +1889,7 @@ CANNM_LOCAL void CanNm_NormalOperationStateHandle(CanNm_ChannelIndexType chIndex
 #if CANNM_PASSIVE_MODE_ENABLED == STD_OFF
 #if (CANNM_NODE_DETECTION_ENABLED == STD_ON) || (CANNM_BUSLOAD_REDUCTION_ENABLED == STD_ON)
     const CanNm_ChannelLConfigType* chCfgPtr     = &CanNm_ChannelLCfgData[chIndex];
+    CanNm_InnerChannelType*         chRTPtr      = chCfgPtr->RuntimePrt;
     boolean                         stateChanged = FALSE;
     stateChanged                                 = CanNm_NetworkStateHandle(chIndex);
 #else
@@ -1878,13 +1899,16 @@ CANNM_LOCAL void CanNm_NormalOperationStateHandle(CanNm_ChannelIndexType chIndex
 #if CANNM_NODE_DETECTION_ENABLED == STD_ON
     if (!stateChanged && chCfgPtr->NodeDetectionEnabled)
     {
-        stateChanged = CanNm_NodeDetectStateHandle(chIndex);
+        if (CanNm_NodeDetectStateHandle(chIndex))
+        {
+            stateChanged = TRUE;
+            CanNm_EnterRepeatMessageState(chIndex, chRTPtr->CanNmState, FALSE);
+        }
     }
 #endif
 
 /** SWS_CanNm_00157 */
 #if CANNM_BUSLOAD_REDUCTION_ENABLED == STD_ON
-    CanNm_InnerChannelType* chRTPtr = chCfgPtr->RuntimePrt;
     if (!stateChanged && chRTPtr->RxPduExtFlg)
     {
         if (chCfgPtr->BusLoadReductionActive)
@@ -1905,9 +1929,8 @@ CANNM_LOCAL void CanNm_NormalOperationStateHandle(CanNm_ChannelIndexType chIndex
  */
 CANNM_LOCAL void CanNm_ReadySleepStateHandle(CanNm_ChannelIndexType chIndex)
 {
-    const CanNm_ChannelLConfigType* chCfgPtr     = &CanNm_ChannelLCfgData[chIndex];
-    CanNm_InnerChannelType*         chRTPtr      = chCfgPtr->RuntimePrt;
-    boolean                         stateChanged = FALSE;
+    const CanNm_ChannelLConfigType* chCfgPtr = &CanNm_ChannelLCfgData[chIndex];
+    CanNm_InnerChannelType*         chRTPtr  = chCfgPtr->RuntimePrt;
 
 /** SWS_CanNm_00110
  *  Ready Sleep State shall enter Normal Operation State
@@ -1929,23 +1952,42 @@ CANNM_LOCAL void CanNm_ReadySleepStateHandle(CanNm_ChannelIndexType chIndex)
     }
 #endif
 
-    stateChanged = CanNm_NetworkStateHandle(chIndex);
-
+    if (!CanNm_NetworkStateHandle(chIndex))
+    {
+        SchM_Enter_CanNm_Context();
 #if CANNM_NODE_DETECTION_ENABLED == STD_ON
-    if (!stateChanged && chCfgPtr->NodeDetectionEnabled)
-    {
-        stateChanged = CanNm_NodeDetectStateHandle(chIndex);
-    }
+        if (chCfgPtr->NodeDetectionEnabled && CanNm_NodeDetectStateHandle(chIndex))
+        {
+            chRTPtr->CanNmState = NM_STATE_REPEAT_MESSAGE;
+        }
 #endif
+        /**
+         *  Depends on the Network Management PDU transmission ability is enabled,
+         *  because NM-Timeout will stop if function CanNm_DisableCommunication has bean called.
+         *  */
+        if ((chRTPtr->CanNmState == NM_STATE_READY_SLEEP)
+            && (CanNm_TestAndClear(&chRTPtr->TimeoutFlag[CANNM_NM_TIMEOUT_TIMER])
+                || (chRTPtr->TickTimers[CANNM_NM_TIMEOUT_TIMER] == 0u)))
+        {
+            /** SWS_CanNm_00109 */
+            chRTPtr->CanNmState = NM_STATE_PREPARE_BUS_SLEEP;
+        }
+        SchM_Exit_CanNm_Context();
 
-    /**
-     *  Depends on the Network Management PDU transmission ability is enabled,
-     *  because NM-Timeout will stop if function CanNm_DisableCommunication has bean called.
-     *  */
-    if (!stateChanged && CanNm_TestAndClear(&chRTPtr->TimeoutFlag[CANNM_NM_TIMEOUT_TIMER]))
-    {
-        /** SWS_CanNm_00109 */
-        CanNm_EnterPrepareBusSleepModeHandle(chIndex);
+        switch (chRTPtr->CanNmState)
+        {
+        case NM_STATE_REPEAT_MESSAGE:
+            CanNm_EnterRepeatMessageState(chIndex, NM_STATE_READY_SLEEP, FALSE);
+            break;
+
+        case NM_STATE_PREPARE_BUS_SLEEP:
+            CanNm_EnterPrepareBusSleepModeHandle(chIndex);
+            break;
+
+        default:
+            /*nothing*/
+            break;
+        }
     }
 }
 
@@ -1964,12 +2006,9 @@ CANNM_LOCAL boolean CanNm_WakeUpSignalHandle(CanNm_ChannelIndexType chIndex)
     boolean rxWakeup = (chRTPtr->RxPduExtFlg && (chRTPtr->CanNmState == NM_STATE_PREPARE_BUS_SLEEP)) ? TRUE : FALSE;
 
     boolean isNetWorkRequest = FALSE;
+    boolean isPassiveStartUp = CanNm_TestAndClear(&chRTPtr->PassiveStartUp) || rxWakeup;
 #if CANNM_PASSIVE_MODE_ENABLED == STD_OFF
-    isNetWorkRequest = chRTPtr->NetRequestFlg;
-    /**
-     *  TRUE only if network request and not passive startup.
-     *  */
-    boolean activeWakeUpBit = (chRTPtr->NetRequestFlg && !chRTPtr->PassiveStartUp) ? TRUE : FALSE;
+    isNetWorkRequest = CanNm_TestAndClear(&chRTPtr->NetRequestFlg);
 #endif
 
     /** SWS_CanNm_00128 SWS_CanNm_00123 SWS_CanNm_00124
@@ -1977,16 +2016,15 @@ CANNM_LOCAL boolean CanNm_WakeUpSignalHandle(CanNm_ChannelIndexType chIndex)
      *  2. if the network is requested in the Prepare Bus-Sleep Mode
      *  3. At successful reception of a Network Management PDU in the Prepare Bus-Sleep Mode
      *  */
-    if (CanNm_TestAndClear(&chRTPtr->PassiveStartUp) || rxWakeup
-#if CANNM_PASSIVE_MODE_ENABLED == STD_OFF
-        || CanNm_TestAndClear(&chRTPtr->NetRequestFlg)
-#endif
-    )
+    if (isNetWorkRequest || isPassiveStartUp)
     {
-        CanNm_EnterRepeatMessageState(chIndex, isNetWorkRequest);
+        CanNm_EnterRepeatMessageState(chIndex, chRTPtr->CanNmState, isNetWorkRequest);
 
 #if CANNM_PASSIVE_MODE_ENABLED == STD_OFF
-        if (CanNm_ChannelLCfgData[chIndex].ActiveWakeupBitEnabled && activeWakeUpBit)
+        /**
+         *  Only if network request and not passive startup.
+         *  */
+        if (CanNm_ChannelLCfgData[chIndex].ActiveWakeupBitEnabled && (isNetWorkRequest && !isPassiveStartUp))
         {
             /** SWS_CanNm_00401 */
             CanNm_SetTxPduCbvBit(chIndex, CANNM_CBV_BIT_AW_MASK, TRUE);
@@ -2014,7 +2052,7 @@ CANNM_LOCAL void CanNm_PrepareBusSleepStateHandle(CanNm_ChannelIndexType chIndex
 
     if (!stateChanged && CanNm_TestAndClear(&chRTPtr->TimeoutFlag[CANNM_STATE_HOLE_TIMER]))
     {
-        CanNm_StateChange(chIndex, NM_STATE_BUS_SLEEP);
+        CanNm_StateChange(chIndex, chRTPtr->CanNmState, NM_STATE_BUS_SLEEP);
         chRTPtr->CanNmMode = NM_MODE_BUS_SLEEP;
 
         /** SWS_CanNm_00126 */
@@ -2031,11 +2069,18 @@ CANNM_LOCAL void CanNm_PrepareBusSleepStateHandle(CanNm_ChannelIndexType chIndex
  */
 CANNM_LOCAL void CanNm_BusSleepStateHandle(CanNm_ChannelIndexType chIndex)
 {
-    const CanNm_ChannelLConfigType* chCfgPtr = &CanNm_ChannelLCfgData[chIndex];
-    if (chCfgPtr->RuntimePrt->RxPduExtFlg)
+    const CanNm_InnerChannelType* chRTPtr = CanNm_ChannelLCfgData[chIndex].RuntimePrt;
+    SchM_Enter_CanNm_Context();
+    if (!chRTPtr->PassiveStartUp
+#if CANNM_PASSIVE_MODE_ENABLED == STD_OFF
+        && !chRTPtr->NetRequestFlg
+#endif
+        && chRTPtr->RxPduExtFlg)
     {
         /** SWS_CanNm_00127 */
-        Nm_NetworkStartIndication(chCfgPtr->ComMNetworkHandleRef);
+        /** To prevent duplicate reporting of Nm_NetworkStartIndication, this function shall be executed exclusively
+         * with Nm_PassiveStartUp */
+        Nm_NetworkStartIndication(CanNm_ChannelLCfgData[chIndex].ComMNetworkHandleRef);
         /** SWS_CanNm_00336 */
         (void)Det_ReportRuntimeError(
             CANNM_MODULE_ID,
@@ -2043,6 +2088,7 @@ CANNM_LOCAL void CanNm_BusSleepStateHandle(CanNm_ChannelIndexType chIndex)
             CANNM_SERVICE_ID_RXINDICATION,
             CANNM_E_NET_START_IND);
     }
+    SchM_Exit_CanNm_Context();
 
     (void)CanNm_WakeUpSignalHandle(chIndex);
 }
@@ -2410,6 +2456,7 @@ boolean CanNm_ValidateTxPduId(uint8 apiId, PduIdType txPduId)
     return ret;
 }
 
+#if CANNM_TRIGGER_TRANSMIT_API == STD_ON
 /**
  * @brief       Development error validation of Tx-Pdu.
  * @param[in]   apiId : ID of API service in which error is detected
@@ -2426,6 +2473,7 @@ CANNM_LOCAL boolean CanNm_ValidateTxPdu(uint8 apiId, PduIdType txPduId, const Pd
     return CanNm_ValidateTxPduId(apiId, txPduId) && CanNm_ValidatePointer(apiId, pduInfoPtr)
            && CanNm_ValidatePointer(apiId, pduInfoPtr->SduDataPtr);
 }
+#endif
 
 /**
  * @brief       Development error validation of Rx-Pdu.

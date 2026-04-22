@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -78,7 +78,7 @@ typedef enum
 /**
  * @brief     Runtime variables
  */
-typedef struct LinSM_RunTimeTag
+typedef struct
 {
     uint32          TimerCnt;
     LinSM_TimerType TimerType;
@@ -89,8 +89,13 @@ typedef struct LinSM_RunTimeTag
     LinSM_HandlingRequestType  RunningReq;
     ComM_ModeType              ReqComMode;
     boolean                    ReqComModeFlag;
-    LinIf_SchHandleType        CurSchedule;
-    boolean                    ReportSchedule;
+#if LINSM_MASTER_NODE_SUPPORT == STD_ON
+    LinIf_SchHandleType CurSchedule;
+    boolean             ReportSchedule;
+#endif
+#if LINSM_SLAVE_NODE_SUPPORT == STD_ON
+    boolean GotoSleepIndicated;
+#endif
 } LinSM_RunTimeType;
 
 /**
@@ -102,18 +107,19 @@ typedef enum
     LINSM_SLAVE
 } LinSM_NodeType;
 
+#if LINSM_MASTER_NODE_SUPPORT == STD_ON
 /** ECUC_LinSM_00146 */
 /**
  * @brief     Record the schedule table configuration of a channel
  */
-
 typedef uint8 LinSM_ScheduleType;
+#endif
 
 /** ECUC_LinSM_00142 */
 /**
  * @brief     Channel-related configuration parameter structure
  */
-typedef struct LinSM_ChannelTag
+typedef struct
 {
 #if LINSM_MULTIPLE_PARTITION_USED == STD_ON
     ApplicationType ApplicationID;
@@ -148,8 +154,11 @@ typedef struct LinSM_ChannelTag
     /** ECUC_LinSM_00145 */
     NetworkHandleType ComMNetworkHandleRef;
 
-    uint8              ScheduleIndex;
-    uint8              ScheduleNum;
+#if LINSM_DEV_ERROR_DETECT == STD_ON
+    uint8 ScheduleIndex;
+    uint8 ScheduleNum;
+#endif
+
     LinSM_RunTimeType* RuntimePtr;
 } LinSM_ChannelType;
 
@@ -157,7 +166,7 @@ typedef struct LinSM_ChannelTag
 /**
  * @brief     The root struct configuration parameters of LinSM.
  */
-typedef struct LinSM_ConfigTag
+typedef struct
 {
     /** Specifies the maximal amount of mode request repetitions without a
      *  respective mode indication from the LinIf module until the LinSM module
@@ -170,8 +179,10 @@ typedef struct LinSM_ConfigTag
     /** ECUC_LinSM_00142 */
     const LinSM_ChannelType* ChannelPtr;
 
+#if LINSM_MASTER_NODE_SUPPORT == STD_ON
     /** Record all schedule table configurations for a variant. */
     const LinSM_ScheduleType* SchedulePtr;
+#endif
 } LinSM_ConfigType;
 /* ========================================== internal function definitions ========================================= */
 

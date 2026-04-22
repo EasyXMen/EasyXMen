@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -48,10 +48,10 @@
 /**
  * @brief indicate processing ecuReset
  */
-#define DCM_START_SEC_VAR_INIT_BOOLEAN
+#define DCM_START_SEC_VAR_CLEARED_BOOLEAN
 #include "Dcm_MemMap.h"
-boolean Dcm_ResetProcessing = FALSE;
-#define DCM_STOP_SEC_VAR_INIT_BOOLEAN
+boolean Dcm_ResetProcessing;
+#define DCM_STOP_SEC_VAR_CLEARED_BOOLEAN
 #include "Dcm_MemMap.h"
 #endif
 /* ========================================== internal function declarations ======================================== */
@@ -72,7 +72,7 @@ DCM_LOCAL void DcmInternal_FindResetIndex(uint8 subFunction, uint8* resetIndex);
 /**
  * The service interpreter for UDS 0x11
  */
-/* PRQA S 1532++ */ /* VL_QAC_OneFunRef */
+/* PRQA S 1532,6030++ */ /* VL_QAC_OneFunRef,VL_MTR_Dcm_STMIF */
 Std_ReturnType Dcm_UDS0x11(
     Dcm_ExtendedOpStatusType      OpStatus,
     Dcm_MsgContextType*           pMsgContext,
@@ -121,6 +121,7 @@ Std_ReturnType Dcm_UDS0x11(
         default:
         {
             (void)Rte_Switch_EcuResetModeSwitchInterface_ecuReset(subFunction);
+            (void)SchM_Switch_Dcm_DcmEcuReset(subFunction);
             break;
         }
         }
@@ -144,6 +145,10 @@ Std_ReturnType Dcm_UDS0x11(
                     Dcm_ProgConditions.ReprogramingRequest = FALSE;
                     Dcm_ProgConditions.ResponseRequired    = TRUE;
                     result                                 = DcmInternal_SetProgConditions(OpStatus);
+                    if (E_OK == result)
+                    {
+                        Dcm_ResRejectedDueToAFTER_RESET = TRUE;
+                    }
                 }
                 else
                 {
@@ -161,7 +166,7 @@ Std_ReturnType Dcm_UDS0x11(
 
     return result;
 }
-/* PRQA S 1532-- */ /* VL_QAC_OneFunRef */
+/* PRQA S 1532,6030-- */ /* VL_QAC_OneFunRef,VL_MTR_Dcm_STMIF */
 #define DCM_STOP_SEC_CODE
 #include "Dcm_MemMap.h"
 /* ========================================== internal function definitions ========================================= */

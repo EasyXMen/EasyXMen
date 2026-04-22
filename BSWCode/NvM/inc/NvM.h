@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -57,6 +57,18 @@
  *                                      CPT-14979,Fix the CRC comparison anomaly issue
  *                                      CPT-15530,Fix the result to E_NOT_OK if initialization callback returns E_NOT_OK
  *                                      CPT-15531,Fix NvMSelectBlockForWriteAll block checked
+ * V03.00.06 2025-10-24  haibin.shao    CPT-16144,Remove the allocation of redundant RAM
+ *           2025-10-28  peng.wu        CPT-16159, Fix the mirror buffer used by the alignment function
+ *                                      CPT-16038, Fix the issue of obtaining the encrypted length
+ * V03.00.07 2025-11-24  haibin.shao    CPD-85532,For the functional points, add corresponding macro switch restrictions
+ *                                      CPD-85533,Improve the processing logic and optimize the algorithm for the
+ *                                                functional points
+ *                                      CPD-85534,Optimize the algorithm for functional points to improve execution
+ *                                                efficiency
+ * V03.00.08 2025-12-05  peng.wu        CPT-16407, Fixed the data disorder when compress was configured
+ *                                      CPD-16384, Fix the null buffer
+ *                                      CPD-17183, Delete partition protect in get status api
+ * V03.00.09 2026-02-09  peng.wu        CPT-18018, Fix the error in the pre-compilation switch for getting Ram Address
  *
  ==================================================================================================================== */
 /* PRQA S 2053 -- */
@@ -66,11 +78,6 @@
   \page ISOFT_MISRA_Exceptions  MISRA-C:2012 Compliance Exceptions
     ModeName:NvM<br>
   RuleSorce:puhua_rules-2024.12.rcf
-
-    \li VL_NvM_2814
-      Reason: Need to look up data through a configured array.
-      Risk: This array is configuration data and will always be generated, there is no null pointer case, no risk.
-      Prevention: Correctness and reliability have been guaranteed through unit and functional testing.
 
     \li VL_NvM_2824
       Reason: Operations are performed through blocks in the configured array.
@@ -152,12 +159,7 @@
       Risk: The configured function interfaces need to define the same parameters, no risk.
       Prevention:Correctness and reliability have been guaranteed through unit and functional testing.
 
-    \li VL_NvM_3451
-      Reason: multiple declaration is necessary for RTE
-      Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
-
-    \li VL_NvM_3449
+    \li VL_NvM_1512
       Reason: multiple declaration is necessary for RTE
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
@@ -194,42 +196,104 @@
       Risk: The code is difficult to maintain.
       Prevention: Design and code review, and have a clear structure and annotated code.
 
-    \li VL_NvM_1536
+    \li VL_NvM_1501
       Reason: The tag '%1s' is declared but not used within this project.
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
 
-    \li VL_NvM_1512
-      Reason: Identifier '${name}' with external linkage has separate declarations in multiple translation units.
+    \li VL_NvM_4397
+      Reason: Macro Conveniently determining authenticity.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_NvM_4399
+      Reason: Macro Conveniently determining authenticity.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_NvM_4391
+      Reason: Macro Conveniently determining authenticity.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_NvM_3678
+      Reason: non-const type declaration is necessary depends on the config
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_MTR_NvM_STCAL
+      Reason: The software architecture is defined according to the AUTOSAR standard.
+      Risk: Due to the fan distribution to many functions, understandability and testability can become overly complex.
+      Prevention: Design and code review, and have a clear structure and annotated code.
+
+    \li VL_NvM_2880
+      Reason: the issue shall be avoided in actual running environment and configs
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_NvM_3209
+      Reason: '%1s()' returns a value which is always ignored.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_MTR_NvM_STPTH
+      Reason: Due to the implementation requirements of some diagnostic message functions, the functions were not
+  separated into sub-functions
+      Risk: Understandability and testability become overly complex
+      Prevention: Design and code review, and have a clear structure and annotated code.
+
+    \li VL_NvM_3415
+      Reason: Right hand operand of '&&' or '||' is an expression with persistent side effects.
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
 
     \li VL_NvM_1881
-      Reason: The code is designed so
-      Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
-
-    \li VL_NvM_2053
-      Reason: Special code design of the Os.
-      Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
-
-    \li VL_NvM_1513
-      Reason: Identifier '${name}' with external linkage has separate non-defining declarations in more than one
-  location. Risk: No risk. Prevention: Functional reliability guaranteed by design.
-
-    \li VL_NvM_1707
-      Reason: Function '${name}' is not using the same aliases.
-      Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
-
-    \li VL_NvM_3120
-      Reason: In the generated code, there are a lot of devil numbers, don't have to define a macro.
-      Risk: The reader can derive the meaning of the number based on the annotation or structure type, no risk.
-      Prevention: Correctness and reliability have been guaranteed through unit and functional testing.
+      Reason: The operands of this equality operator are expressions of different 'essential type' categories (%1s and
+  %2s). Risk: No risk. Prevention: Functional reliability guaranteed by design.
 
     \li VL_NvM_1502
       Reason: Configuration variables design needs
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_MTR_NvM_STCYC
+      Reason: Due to the implementation requirements of some diagnostic message functions, the functions were not
+  separated into sub-functions
+      Risk: Understandability and testability become overly complex
+      Prevention: Design and code review, and have a clear structure and annotated code.
+
+    \li VL_NvM_2981
+      Reason: This assignment is redundant. The value of this object is never used before being modified.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_NvM_2982
+      Reason: The assignment is reserved for better readibility.
+      Risk: No risk.
+      Prevention: Ensure that the project is working properly through unit testing.
+
+     \li VL_NvM_2741
+      Reason: This 'if' controlling expression is a constant expression and its value is 'true'.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+     \li VL_NvM_1531
+      Reason: The object '%1s' is referenced in only one translation unit - but not the one in which it is defined.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+     \li VL_MTR_NvM_STLIN
+      Reason: Splitting them into smaller parts will lead to performance degradation.
+      Risk: No risk.
+      Prevention: Design and code review + clear structure and well-commented code.
+
+     \li VL_MTR_NvM_STST3
+      Reason: Splitting them into smaller parts will lead to performance degradation.
+      Risk: No risk.
+      Prevention: Design and code review + clear structure and well-commented code.
+
+    \li VL_NvM_2053
+      Reason: Special code design of the NvM.
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
 
@@ -237,25 +301,7 @@
       Reason:Configuration parameter, design needs.
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
-
-    \li VL_NvM_3132
-      Reason: This cast is converting a complex floating point expression to an integral type.
-      Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
-
-    \li VL_NvM_1503
-      Reason: external interface
-      Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
-
-    \li VL_NvM_2962
-      Reason: This value is configured in the configuration file.
-      Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
-
-
-
- */
+*/
 
 #ifndef NVM_H
 #define NVM_H
@@ -281,7 +327,7 @@ extern "C" {
 /** Software version information */
 #define NVM_SW_MAJOR_VERSION (3u) /**< Value of module major version */
 #define NVM_SW_MINOR_VERSION (0u) /**< Value of module minor version */
-#define NVM_SW_PATCH_VERSION (5u) /**< Value of module patch version */
+#define NVM_SW_PATCH_VERSION (9u) /**< Value of module patch version */
 
 /* ===================================================== macros ===================================================== */
 
@@ -309,7 +355,8 @@ extern uint8 NVM_RamMirror[NVM_MAX_LENGTH_CONFIGED_RAM_MIRROR];
 #endif
 
 /* ========================================= external function declarations ========================================= */
-/* PRQA S 3449,3451 ++ */ /* VL_NvM_3449,VL_NvM_3451 */
+/* PRQA S 1512 EOF */          /* VL_NvM_1512 */
+/* PRQA S 3449,3451,3209 ++ */ /* VL_QAC_MultiDeclaration,VL_QAC_MultiDeclaration,VL_NvM_3209 */
 /**
  * @brief       Service for resetting all internal variables
  * @param[in]   ConfigPtr: Pointer to the selected configuration set
@@ -341,7 +388,7 @@ extern void NvM_GetVersionInfo(Std_VersionInfoType* VersionInfo);
  * @synchronous TRUE
  * @trace       CPD-76599
  */
-/* PRQA S 1512,1513 ++ */ /* VL_NvM_1512,VL_NvM_1513 */
+/* PRQA S 1513 ++ */ /* VL_QAC_MultiDeclaration */
 extern Std_ReturnType NvM_GetErrorStatus(NvM_BlockIdType BlockId, NvM_RequestResultType* RequestResultPtr);
 
 #if (STD_ON == NVM_SET_RAM_BLOCK_STATUS_API)
@@ -359,9 +406,9 @@ extern Std_ReturnType NvM_GetErrorStatus(NvM_BlockIdType BlockId, NvM_RequestRes
  * @synchronous TRUE
  * @trace       CPD-76600
  */
-/* PRQA S 0624,1707 ++ */ /* VL_NvM_0624,VL_NvM_1707 */
+/* PRQA S 0624 ++ */ /* VL_NvM_0624 */
 extern Std_ReturnType NvM_SetRamBlockStatus(NvM_BlockIdType BlockId, boolean BlockChanged);
-/* PRQA S 0624,1707 -- */
+/* PRQA S 0624 -- */
 #endif
 /**
  * @brief       Service to cancel a running NvM_WriteAll request
@@ -387,7 +434,7 @@ extern void NvM_ReadAll(void);
  */
 extern void NvM_WriteAll(void);
 
-#if (NVM_API_CONFIG_CLASS_3 == NVM_API_CONFIG_CLASS)
+#if ((NVM_API_CONFIG_CLASS_3 == NVM_API_CONFIG_CLASS) && (STD_ON == NVM_SELECT_BLOCK_FOR_FIRST_INIT_ALL))
 /**
  * @brief       The function initiates a multi block first initialization request
  * @reentrant   Non Reentrant
@@ -446,9 +493,9 @@ extern Std_ReturnType NvM_SetDataIndex(NvM_BlockIdType BlockId, uint8 DataIndex)
  * @synchronous TRUE
  * @trace       CPD-76608
  */
-/* PRQA S 0624,1707 ++ */ /* VL_NvM_0624,VL_NvM_1707 */
+/* PRQA S 0624 ++ */ /* VL_NvM_0624 */
 extern Std_ReturnType NvM_GetDataIndex(NvM_BlockIdType BlockId, uint8* DataIndexPtr);
-/* PRQA S 0624,1707 -- */
+/* PRQA S 0624 -- */
 
 /**
  * @brief       Service to copy the data of the NV block to its corresponding permanent RAM block
@@ -491,7 +538,7 @@ extern Std_ReturnType NvM_WriteBlock(NvM_BlockIdType BlockId, const void* NvM_Sr
 /**
  * @brief       Service to restore the default data to its corresponding RAM block
  * @param[in]   BlockId: The block identifier uniquely identifies one NVRAM block descriptor
- * @param[in]   NvM_DestPtr: Pointer to the RAM data block
+ * @param[out]  NvM_DestPtr: Pointer to the RAM data block
  * @return      Std_ReturnType
  * @retval      E_OK: request has been accepted
  * @retval      E_NOT_OK: request has not been accepted
@@ -536,9 +583,9 @@ extern void NvM_ValidateAll(void);
  * @synchronous TRUE
  * @trace       CPD-76615
  */
-/* PRQA S 0624,1707 ++ */ /* VL_NvM_0624,VL_NvM_1707 */
+/* PRQA S 0624 ++ */ /* VL_NvM_0624 */
 extern Std_ReturnType NvM_SetBlockProtection(NvM_BlockIdType BlockId, boolean ProtectionEnabled);
-/* PRQA S 0624,1707 -- */
+/* PRQA S 0624 -- */
 
 /**
  * @brief       Service to invalidate a NV block
@@ -564,8 +611,8 @@ extern Std_ReturnType NvM_InvalidateNvBlock(NvM_BlockIdType BlockId);
  */
 extern Std_ReturnType NvM_EraseNvBlock(NvM_BlockIdType BlockId);
 #endif
-/* PRQA S 3449,3451 -- */
-/* PRQA S 1512,1513 -- */
+/* PRQA S 3449,3451,3209 -- */
+/* PRQA S 1513 -- */
 #ifdef __cplusplus
 }
 #endif

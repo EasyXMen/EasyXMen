@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -36,6 +36,7 @@
  *  V03.00.01 2025-02-25  peng.wu     CPT-12936, Fix config variable name
  *                                    CPT-13117, Fixed overflow when executing the last block
  *                                    CPT-13386,CPT-13388, Fixed coverage and Null pointer problem
+ *                                    CPT-17248, Delete develop error report in main function
  *
  ==================================================================================================================== */
 
@@ -55,6 +56,21 @@
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
 
+    \li VL_RamTst_1501
+      Reason: The function '${name}' is declared but is not used within this project.
+      Risk: No risk.
+      Prevention: Ensure that the project is working properly through unit testing.
+
+    \li VL_RamTst_3472
+      Reason: Macro definitions for easy reuse.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_RamTst_5004
+      Reason: Parameter passing requires
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
     \li VL_RamTst_1532
       Reason: Configuration variables design needs
       Risk: No risk.
@@ -70,6 +86,11 @@
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
 
+    \li VL_RamTst_1753
+      Reason: The function '${name}' with external linkage is declared but not defined within this project.
+      Risk: No risk.
+      Prevention: Ensure that the project is working properly through unit testing.
+
     \li VL_RamTst_1505
       Reason: external interface
       Risk: No risk.
@@ -77,6 +98,11 @@
 
     \li VL_RamTst_4461
       Reason: Datatype conversion is necessary for functional usage
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_RamTst_3223
+      Reason: Bitmap initialization usage.
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
 
@@ -108,61 +134,22 @@
 
     \li VL_MTR_RamTst_STCAL
       Reason: The software structure of RamTst is defined according to the AUTOSAR standard,resulting in its metric
-  being above the threshold+
+  being above the threshold
       Risk: Understandability and testability become overly complex
       Prevention: Design and code review, and have a clear structure and annotated code.
 
-    \li VL_RamTst_1536
-      Reason: The tag '%1s' is declared but not used within this project.
-      Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
-
-    \li VL_RamTst_3472
-      Reason: Macro definitions for easy reuse.
-      Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
-
-    \li VL_RamTst_5004
-      Reason: Parameter passing requires
-      Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
-
-    \li VL_RamTst_1501
-      Reason: The function '${name}' is declared but is not used within this project.
-      Risk: No risk.
-      Prevention: Ensure that the project is working properly through unit testing.
-
     \li VL_RamTst_3461
-      Reason: Macro defines a storage-class specifier/type qualifier sequence.
-      Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Reason: A macro was defined to represent "static const", as during unit testing, this address variable can be
+  modified.
+      Risk: No risk.It is merely a macro definition, which is convenient for modification during unit testing
+  through CMake. Prevention: Functional reliability guaranteed by design.
 
     \li VL_RamTst_3428
-      Reason: Macro defines a type qualifier keyword.
-      Risk: No risk.
+      Reason: A macro was defined to represent "const", as during unit testing, this address variable can be modified.
+      Risk: No risk.It is merely a macro definition, which is convenient for modification during unit testing through
+  CMake.
       Prevention: Functional reliability guaranteed by design.
-
-    \li VL_RamTst_1531
-      Reason: The object '%1s' is referenced in only one translation unit - but not the one in which it is defined.
-      Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
-
-    \li VL_RamTst_3120
-      Reason: In the generated code, there are a lot of devil numbers, don't have to define a macro.
-      Risk: The reader can derive the meaning of the number based on the annotation or structure type, no risk.
-      Prevention: Correctness and reliability have been guaranteed through unit and functional testing.
-
-    \li VL_RamTst_3223
-      Reason: Bitmap initialization usage.
-      Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
-
-    \li VL_RamTst_1753
-      Reason: The function '${name}' with external linkage is declared but not defined within this project.
-      Risk: No risk.
-      Prevention: Ensure that the project is working properly through unit testing.
-
-*/
+ */
 
 #ifndef RAMTST_H_
 #define RAMTST_H_
@@ -194,7 +181,7 @@ extern "C" {
 #define RAMTST_SW_PATCH_VERSION            0u  /**< Value of module patch version */
 
 /* ===================================================== macros ===================================================== */
-/* PRQA S 3414 ++ */ /* VL_RamTst_3414 */
+/* PRQA S 3414 ++ */ /* VL_QAC_FctLikeMacro */
 #if !defined(RAMTST_LOCAL)
 #define RAMTST_LOCAL static /**< Defines used as the local keyword for variables or functions */
 #endif
@@ -268,12 +255,12 @@ RAMTST_LOCAL_INLINE void RamTst_Det_ReportError(uint8 ApiId, uint8 ErrorId)
 /**
  * @brief       Get partition id of the algorithm parameters set
  * @param[in]   AlgParamsId: Identification of the algorithm
- * @return      Std_ReturnType
+ * @return      ApplicationType
  * @reentrant   Non Reentrant
  * @synchronous TRUE
  * @trace       CPD-77202
  */
-RAMTST_LOCAL_INLINE Std_ReturnType RamTst_GetPartitionId(RamTst_AlgParamsIdType AlgParamsId)
+RAMTST_LOCAL_INLINE ApplicationType RamTst_GetPartitionId(RamTst_AlgParamsIdType AlgParamsId)
 {
     const RamTst_AlgParams* algotirhmParamsPtr = &RamTst_GetConfigAlgParams(AlgParamsId - 1u);
     return algotirhmParamsPtr->BlockParamsEcucPartitionRef;

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -24,7 +24,7 @@
 
 #ifndef ETHIF_CBK_H
 #define ETHIF_CBK_H
-
+/* PRQA S 1501,1753 EOF */ /* VL_EthIf_1501,VL_EthIf_1753 */
 /* =================================================== inclusions =================================================== */
 #include "ComStack_Types.h"
 #include "EthIf_Types.h"

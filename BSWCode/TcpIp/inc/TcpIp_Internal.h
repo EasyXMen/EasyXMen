@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -21,6 +21,7 @@
  **  @description        : TcpIp header file for internal API declarations
  **
  ***********************************************************************************************************************/
+/* PRQA S 1536 EOF */ /* VL_TcpIp_1536 */
 
 #ifndef TCPIP_INTERNAL_H_
 #define TCPIP_INTERNAL_H_
@@ -82,17 +83,17 @@ extern "C" {
 #endif
 
 /* ===================================================== macros ===================================================== */
-#if !defined(TCPIP_LOCAL)
+#ifndef TCPIP_LOCAL
 /** Represents an internal function */
 #define TCPIP_LOCAL static /* PRQA S 3414 */ /* VL_QAC_KeyWord */
 #endif
 
-#if !defined(TCPIP_LOCAL_INLINE)
+#ifndef TCPIP_LOCAL_INLINE
 /** Represents an internal inline function */
 #define TCPIP_LOCAL_INLINE static inline
 #endif
 
-#if !defined(TCPIP_UNUSED_ARG)
+#ifndef TCPIP_UNUSED_ARG
 /** Represents an unused parameter */
 #define TCPIP_UNUSED_ARG(x) (void)(x)
 #endif
@@ -128,6 +129,25 @@ extern "C" {
 /** unused macro */
 #define TCPIP_LWIP_HOOKS 0
 #endif
+
+#define TCPIP_FLAG_MASK(type, pos)              ((type)(((type)1u) << (pos)))
+#define TCPIP_FLAG_IS_SET(type, ptr, mbr, mask) (((type)0u) != (((type)(mask)) & ((ptr)->mbr)))
+#define TCPIP_FLAG_SET(type, ptr, mbr, mask)    (((ptr)->mbr) |= ((type)(mask)))
+#define TCPIP_FLAG_RESET(type, ptr, mbr, mask)  (((ptr)->mbr) &= ((type)(~(mask))))
+
+#define TCPIP_CTRL_LOCALADDR_FLAG(localAddrIndex) TCPIP_FLAG_MASK(uint32, TCPIP_MASK_U32_BIT_POS(localAddrIndex))
+
+#define TCPIP_CTRL_STATE_FLAG(state) TCPIP_FLAG_MASK(uint8, state)
+
+#define TCPIP_LOCALADDR_FLAG(pos)        TCPIP_FLAG_MASK(uint8, pos)
+#define TCPIP_LOCALADDR_FLAG_REQUEST_IP  TCPIP_LOCALADDR_FLAG(0x01u)
+#define TCPIP_LOCALADDR_FLAG_IP_IS_VALID TCPIP_LOCALADDR_FLAG(0x02u)
+
+#define TCPIP_SOCKET_FLAG(pos) TCPIP_FLAG_MASK(uint8, pos)
+/* retrieve and store all AvailableLength data as a single pbuf node, i.e. pbuf->next == NULL_PTR */
+#define TCPIP_SOCKET_FLAG_TCP_FORCERETRIEVE TCPIP_SOCKET_FLAG(0x01u)
+#define TCPIP_SOCKET_FLAG_TCP_SERVERSOCKET  TCPIP_SOCKET_FLAG(0x02u)
+#define TCPIP_SOCKET_FLAG_TCP_PENDING_EVENT TCPIP_SOCKET_FLAG(0x04u)
 
 /**
  * TCPIP_REPEAT_GET_NETIF_MAC =1 :switch comm mode shall be regain get mac addr write to netif.

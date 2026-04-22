@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -54,6 +54,11 @@ typedef struct
 /* ============================================ external data definition ============================================ */
 
 /* ========================================= internal function declarations ========================================= */
+
+#ifdef QAC_ANALYZE
+#pragma PRQA_NO_SIDE_EFFECTS ComM_GetBit
+#endif
+
 /**
  * Store current pnc mode and notify to SW-C if current mode of user changed.
  * @param[in]    pnc      See PNCHandleType

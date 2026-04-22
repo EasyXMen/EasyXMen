@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -21,12 +21,21 @@
  **  @description        : Rebuid for Crypto
  **
  ***********************************************************************************************************************/
-/* PRQA S 0488,0842,1252,1253,1290,1840,1842,1860,1862,2741 ++ */ /* VL_QAC_Crypto */
-/* PRQA S 0314,0684,1338,1863,1881,2001,2015,2109,2216,3120 ++ */ /* VL_QAC_Crypto */
-/* PRQA S 3138,3218,3326,3387,3397,3400,3440,3446,3472,3473 ++ */ /* VL_QAC_Crypto */
-/* PRQA S 3493,3678,4115,4116,4393,4397,4461,4544,4558,4559 ++ */ /* VL_QAC_Crypto */
-/* PRQA S 0342,1505,2755,2743,2880,2889,2784,2995,2991,1532 ++ */ /* VL_QAC_Crypto */
-/* PRQA S 6050,6060,6070,6080,6010,6030,6040   ++ */              /* VL_QAC_Crypto */
+
+/* PRQA S 6010 EOF */ /* VL_MTR_Crypto_62_STCYC */
+/* PRQA S 6020 EOF */ /* VL_MTR_Crypto_62_STLIN */
+/* PRQA S 6030 EOF */ /* VL_MTR_Crypto_62_STMIF */
+/* PRQA S 6040 EOF */ /* VL_MTR_Crypto_62_STPAR */
+/* PRQA S 6050 EOF */ /* VL_MTR_Crypto_62_STST3 */
+/* PRQA S 6060 EOF */ /* VL_MTR_Crypto_62_STM19 */
+/* PRQA S 6070 EOF */ /* VL_MTR_Crypto_62_STCAL */
+/* PRQA S 6080 EOF */ /* VL_MTR_Crypto_62_STPTH */
+
+/* PRQA S 0488,0842,1252,1253,1290,1840,1842,1860,1862,2741 ++ */ /* VL_Crypto_62_General */
+/* PRQA S 0314,0684,1338,1863,1881,2001,2015,2109,2216,3120 ++ */ /* VL_Crypto_62_General */
+/* PRQA S 3138,3218,3326,3387,3397,3400,3440,3446,3472,3473 ++ */ /* VL_Crypto_62_General */
+/* PRQA S 3493,3678,4115,4116,4393,4397,4461,4544,4558,4559 ++ */ /* VL_Crypto_62_General */
+/* PRQA S 0342,1505,2743,2880,2889,2784,2995,2991,1532 ++ */      /* VL_Crypto_62_General */
 /* =================================================== inclusions =================================================== */
 #include "Crypto_62_Internal.h"
 #if (CRYPTO_ALGORITHMFAM_SHA2_512 == STD_ON)
@@ -535,15 +544,41 @@ Std_ReturnType Crypto_Sha512_Process(uint32 objectId, boolean is384)
     uint8          output[CRYPTO_CONST_64];
 
     uint32 ilen = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputLength;
-    if (*(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr) >= 64u)
-    {
-        /* PRQA S 0311 ++ */ /*VL_QAC_0311 */
-        uint8* input = (uint8*)(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputPtr);
-        /* PRQA S 0311 -- */
+    /* PRQA S 0311 ++ */ /*VL_Crypto_62_General */
+    uint8* input = (uint8*)(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputPtr);
+    /* PRQA S 0311 -- */
 
-        ret = Crypto_Sha512(input, ilen, output, is384);
-        (void)IStdLib_MemCpy(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr, output, 64u);
+    ret = Crypto_Sha512(input, ilen, output, is384);
+    if (ret == E_OK)
+    {
+        if (*(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr) >= CRYPTO_CONST_64
+            && is384 == FALSE)
+        {
+            (void)IStdLib_MemCpy(
+                Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr,
+                output,
+                CRYPTO_CONST_64);
+            *(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr) = CRYPTO_CONST_64;
+        }
+        else if (
+            *(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr) >= CRYPTO_CONST_48
+            && is384 == TRUE)
+        {
+            (void)IStdLib_MemCpy(
+                Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr,
+                output,
+                CRYPTO_CONST_48);
+            *(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr) = CRYPTO_CONST_48;
+        }
+        else
+        {
+            (void)IStdLib_MemCpy(
+                Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr,
+                output,
+                *(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr));
+        }
     }
+
     return ret;
 }
 
@@ -590,18 +625,27 @@ Std_ReturnType Crypto_sha512_224(const unsigned char* input, uint32 ilen, unsign
 Std_ReturnType Crypto_Sha512_224_Process(uint32 objectId)
 {
     Std_ReturnType ret = E_NOT_OK;
-    uint8          output[CRYPTO_CONST_64];
+    uint8          output[CRYPTO_CONST_28];
 
     uint32 ilen = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputLength;
-    if (*(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr) >= 64u)
-    {
-        /* PRQA S 0311 ++ */ /*VL_QAC_0311 */
-        uint8* input = (uint8*)(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputPtr);
-        /* PRQA S 0311 -- */
+    /* PRQA S 0311 ++ */ /*VL_Crypto_62_General */
+    uint8* input = (uint8*)(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputPtr);
+    /* PRQA S 0311 -- */
 
-        ret = Crypto_sha512_224(input, ilen, output);
-        (void)IStdLib_MemCpy(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr, output, 64u);
+    ret = Crypto_sha512_224(input, ilen, output);
+    if (*(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr) >= CRYPTO_CONST_28 && ret == E_OK)
+    {
+        (void)IStdLib_MemCpy(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr, output, CRYPTO_CONST_28);
+        *(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr) = CRYPTO_CONST_28;
     }
+    else
+    {
+        (void)IStdLib_MemCpy(
+            Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr,
+            output,
+            *(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr));
+    }
+
     return ret;
 }
 
@@ -650,17 +694,24 @@ Std_ReturnType Crypto_Sha512_256_Process(uint32 objectId)
     Std_ReturnType ret = E_NOT_OK;
     uint8          output[CRYPTO_CONST_64];
 
-    uint32 ilen = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputLength;
-    uint32 olen = *Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr;
-    if (olen <= 64u)
-    {
-        /* PRQA S 0311 ++ */ /*VL_QAC_0311 */
-        uint8* input = (uint8*)(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputPtr);
-        /* PRQA S 0311 -- */
+    uint32  ilen = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputLength;
+    uint32* olen = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr;
 
-        ret = Crypto_sha512_256(input, ilen, output);
-        (void)IStdLib_MemCpy(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr, output, olen);
+    /* PRQA S 0311 ++ */ /*VL_Crypto_62_General */
+    uint8* input = (uint8*)(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputPtr);
+    /* PRQA S 0311 -- */
+
+    ret = Crypto_sha512_256(input, ilen, output);
+    if (*olen >= CRYPTO_CONST_32 && ret == E_OK)
+    {
+        (void)IStdLib_MemCpy(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr, output, CRYPTO_CONST_32);
+        *olen = CRYPTO_CONST_32;
     }
+    else
+    {
+        (void)IStdLib_MemCpy(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr, output, *olen);
+    }
+
     return ret;
 }
 #define CRYPTO_62_STOP_SEC_CODE
@@ -672,5 +723,4 @@ Std_ReturnType Crypto_Sha512_256_Process(uint32 objectId)
 /* PRQA S 0314,0684,1338,1863,1881,2001,2015,2109,2216,3120 -- */
 /* PRQA S 3138,3218,3326,3387,3397,3400,3440,3446,3472,3473 -- */
 /* PRQA S 3493,3678,4115,4116,4393,4397,4461,4544,4558,4559 -- */
-/* PRQA S 0342,1505,2755,2743,2880,2889,2784,2995,2991,1532 -- */
-/* PRQA S 6050,6060,6070,6080,6010,6030,6040   -- */
+/* PRQA S 0342,1505,2743,2880,2889,2784,2995,2991,1532 -- */

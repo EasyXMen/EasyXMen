@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -48,7 +48,7 @@
  * @synchronous TRUE
  * @trace       CPD-69088
  */
-ECUM_LOCAL void EcuM_WakeupMainFunction(const EcuM_RunTimeLcType* pRt);
+ECUM_LOCAL void EcuM_WakeupMainFunction(EcuM_RunTimeLcType* pRt);
 
 #if (ECUM_MODE_HANDING == STD_ON)
 /**
@@ -138,7 +138,7 @@ void EcuM_MainFunction(void)
  * It also stops the wakeup sources if they are expired or invalid.
  * The function loops through all configured wakeup sources and performs the necessary checks and actions.
  */
-ECUM_LOCAL void EcuM_WakeupMainFunction(const EcuM_RunTimeLcType* pRt)
+ECUM_LOCAL void EcuM_WakeupMainFunction(EcuM_RunTimeLcType* pRt)
 {
     const EcuM_WakeupSourceCfgType* pWks;
     uint32                          spanTime;
@@ -156,7 +156,7 @@ ECUM_LOCAL void EcuM_WakeupMainFunction(const EcuM_RunTimeLcType* pRt)
     {
         pWks = EcuM_GetWakeupSourceCfgPtr(wksIdx);
         /* Check that a wakeup occurred but no wakeup event set timeout */
-        if ((pWks->checkWkupTimeout != 0uL) && (pRt->Wks.timerState[wksIdx] == ECUM_TIMER_VALID)
+        if ((pWks->checkWkupTimeout != 0uL) && (pRt->Wks.timerState[wksIdx] == ECUM_TIMER_CHECKING)
 #if (ECUM_MAX_MCU_CORE_NUM > 1)
             && (pRt->coreId == pRt->Wks.coreId)
 #endif /* ECUM_MAX_MCU_CORE_NUM > 1 */
@@ -175,6 +175,7 @@ ECUM_LOCAL void EcuM_WakeupMainFunction(const EcuM_RunTimeLcType* pRt)
             {
                 /*notify BSWM for expired wake up source*/
                 BswM_EcuM_CurrentWakeup(pWks->wkSource, ECUM_WKSTATUS_EXPIRED);
+                pRt->Wks.timerState[wksIdx] = ECUM_TIMER_STOP;
                 /*stop wake up source*/
                 EcuM_StopWakeupSources(pWks->wkSource);
 #if (ECUM_DEV_ERROR_DETECT == STD_ON)
@@ -211,6 +212,7 @@ ECUM_LOCAL void EcuM_WakeupMainFunction(const EcuM_RunTimeLcType* pRt)
                 *pRt->Wks.Pending &= ~(pWks->wkSource);
                 /*Update internal variable(record expired wake up source.)*/
                 (*pRt->Wks.Expired) |= pWks->wkSource;
+                pRt->Wks.timerState[wksIdx] = ECUM_TIMER_STOP;
                 /*notify BSWM for expired wake up source*/
                 BswM_EcuM_CurrentWakeup(pWks->wkSource, ECUM_WKSTATUS_EXPIRED);
                 /*stop wake up source*/

@@ -1,6 +1,5 @@
-/*******************************************************************************
-**                                                                            **
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+/**
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -11,8 +10,8 @@
  * You should have received a copy of the GNU Lesser General Public License along with this library;
  * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  * or see <https://www.gnu.org/licenses/>.
-**                                                                            **
-********************************************************************************
+ */
+/*******************************************************************************
 **                                                                            **
 **  FILENAME    :  Mcu_Mpu.h                                                  **
 **                                                                            **
@@ -74,7 +73,11 @@ typedef struct
 } Os_MemProtKnCfgType;
 
 /*=======[M A C R O S]=====================================================*/
+#define SRAM_START_ADDR (0x10000000u)
+#define FLASH_START_ADDR (0x80000000u)
+#define FLASH_END_ADDR (0x81000000u)
 
+#if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
 /* PRQA S 3472 ++*/ /* VL_Os_3472 */
 #define OS_ADDRESS_IS_IN_ALL_RAM(Address, Size)                                              \
     (((((uint32)Os_MemProtKnAddrCfg.OsKernelAddr.pCPU5DataRamStart) <= (Address))            \
@@ -91,13 +94,15 @@ typedef struct
         || (((uint32)Os_App_DAddr[appsuborID].APP_ADDR_START <= (Address))                        \
             && ((uint32)Os_App_DAddr[appsuborID].APP_ADDR_END >= ((Address) + (Size))))
 /* PRQA S 3409 -- */
+#endif
+
 #if (TRUE == CFG_MEMORY_PROTECTION_ENABLE)
 /*=======[M A C R O S]========================================================*/
 /* Set up areas that can be accessed by a trusted APP. */
 /* PRQA S 3458 ++ */ /* VL_Os_3458 */
 #define Os_ArchSetTruReg(D_Addrbase, C_Addrbase, DBitPos, CBitPos, D_RModeAddr, D_WModeAddr, C_ModeAddr) \
     {                                                                                                    \
-        OS_ARCH_MTCR((D_Addrbase), (uint32)0x10000000u);                                                 \
+        OS_ARCH_MTCR((D_Addrbase), (uint32)SRAM_START_ADDR);                                                 \
         OS_ARCH_MTCR((D_Addrbase) + 0x04U, (uint32)Os_MemProtKnAddrCfg.OsKernelAddr.pPeripheralEnd);     \
         OS_ARCH_MTCR((C_Addrbase), (uint32)Os_MemProtKnAddrCfg.OsKernelAddr.pRomStart);                  \
         OS_ARCH_MTCR((C_Addrbase) + 0x04U, (uint32)Os_MemProtKnAddrCfg.OsKernelAddr.pRomEnd);            \
@@ -119,7 +124,7 @@ typedef struct
     HostApp,                                                                                                       \
     CoreId)                                                                                                        \
     {                                                                                                              \
-        OS_ARCH_MTCR((D_Addrbase), (uint32)0x10000000u);                                                           \
+        OS_ARCH_MTCR((D_Addrbase), (uint32)SRAM_START_ADDR);                                                           \
         OS_ARCH_MTCR((D_Addrbase) + 0x04U, (uint32)Os_Core_App_DAddr[CoreId].APP_ADDR_START);                      \
         OS_ARCH_MTCR((D_Addrbase) + 0x08U, (uint32)Os_Core_App_DAddr[CoreId].APP_ADDR_END);                        \
         OS_ARCH_MTCR((D_Addrbase) + 0x0CU, (uint32)Os_MemProtKnAddrCfg.OsKernelAddr.pPeripheralEnd);               \
@@ -131,8 +136,8 @@ typedef struct
         OS_ARCH_MTCR((D_Addrbase) + 0x24U, (uint32)Os_IsrDAddr[Isr].ISR_ADDR_END);                                 \
         OS_ARCH_MTCR((D_Addrbase) + 0x28U, (uint32)Os_AppCfg[HostApp].OsAppAssignedPeripheralAddr.APP_ADDR_START); \
         OS_ARCH_MTCR((D_Addrbase) + 0x2CU, (uint32)Os_AppCfg[HostApp].OsAppAssignedPeripheralAddr.APP_ADDR_END);   \
-        OS_ARCH_MTCR((D_Addrbase) + 0x30U, (uint32)0x80000000u);                                                   \
-        OS_ARCH_MTCR((D_Addrbase) + 0x34U, (uint32)0x81000000u);                                                   \
+        OS_ARCH_MTCR((D_Addrbase) + 0x30U, (uint32)FLASH_START_ADDR);                                                   \
+        OS_ARCH_MTCR((D_Addrbase) + 0x34U, (uint32)FLASH_END_ADDR);                                                   \
         OS_ARCH_MTCR((C_Addrbase), (uint32)Os_MemProtKnAddrCfg.OsKernelAddr.pRomStart);                            \
         OS_ARCH_MTCR((C_Addrbase) + 0x04U, (uint32)Os_Core_App_CAddr[CoreId].APP_ADDR_START);                      \
         OS_ARCH_MTCR((C_Addrbase) + 0x08U, (uint32)Os_Core_App_CAddr[CoreId].APP_ADDR_END);                        \
@@ -156,7 +161,7 @@ typedef struct
     Isr,                                                                                             \
     HostApp)                                                                                         \
     {                                                                                                \
-        OS_ARCH_MTCR((D_Addrbase), (uint32)0x10000000u);                                             \
+        OS_ARCH_MTCR((D_Addrbase), (uint32)SRAM_START_ADDR);                                             \
         OS_ARCH_MTCR((D_Addrbase) + 0x04U, (uint32)Os_MemProtKnAddrCfg.OsKernelAddr.pPeripheralEnd); \
         OS_ARCH_MTCR((D_Addrbase) + 0x08U, (uint32)Os_AppPriDataAddr[HostApp].APP_ADDR_START);       \
         OS_ARCH_MTCR((D_Addrbase) + 0x0CU, (uint32)Os_AppPriDataAddr[HostApp].APP_ADDR_END);         \
@@ -182,7 +187,7 @@ typedef struct
     HostApp,                                                                                                       \
     CoreId)                                                                                                        \
     {                                                                                                              \
-        OS_ARCH_MTCR((D_Addrbase), (uint32)0x10000000u);                                                           \
+        OS_ARCH_MTCR((D_Addrbase), (uint32)SRAM_START_ADDR);                                                           \
         OS_ARCH_MTCR((D_Addrbase) + 0x04U, (uint32)Os_Core_App_DAddr[CoreId].APP_ADDR_START);                      \
         OS_ARCH_MTCR((D_Addrbase) + 0x08U, (uint32)Os_Core_App_DAddr[CoreId].APP_ADDR_END);                        \
         OS_ARCH_MTCR((D_Addrbase) + 0x0CU, (uint32)Os_MemProtKnAddrCfg.OsKernelAddr.pPeripheralEnd);               \
@@ -194,8 +199,8 @@ typedef struct
         OS_ARCH_MTCR((D_Addrbase) + 0x24U, (uint32)Os_TaskDAddr[Task].Task_ADDR_END);                              \
         OS_ARCH_MTCR((D_Addrbase) + 0x28U, (uint32)Os_AppCfg[HostApp].OsAppAssignedPeripheralAddr.APP_ADDR_START); \
         OS_ARCH_MTCR((D_Addrbase) + 0x2CU, (uint32)Os_AppCfg[HostApp].OsAppAssignedPeripheralAddr.APP_ADDR_END);   \
-        OS_ARCH_MTCR((D_Addrbase) + 0x30U, (uint32)0x80000000u);                                                   \
-        OS_ARCH_MTCR((D_Addrbase) + 0x34U, (uint32)0x81000000u);                                                   \
+        OS_ARCH_MTCR((D_Addrbase) + 0x30U, (uint32)FLASH_START_ADDR);                                                   \
+        OS_ARCH_MTCR((D_Addrbase) + 0x34U, (uint32)FLASH_END_ADDR);                                                   \
         OS_ARCH_MTCR((C_Addrbase), (uint32)Os_MemProtKnAddrCfg.OsKernelAddr.pRomStart);                            \
         OS_ARCH_MTCR((C_Addrbase) + 0x04U, (uint32)Os_Core_App_CAddr[CoreId].APP_ADDR_START);                      \
         OS_ARCH_MTCR((C_Addrbase) + 0x08U, (uint32)Os_Core_App_CAddr[CoreId].APP_ADDR_END);                        \
@@ -219,7 +224,7 @@ typedef struct
     Task,                                                                                            \
     HostApp)                                                                                         \
     {                                                                                                \
-        OS_ARCH_MTCR((D_Addrbase), (uint32)0x10000000u);                                             \
+        OS_ARCH_MTCR((D_Addrbase), (uint32)SRAM_START_ADDR);                                             \
         OS_ARCH_MTCR((D_Addrbase) + 0x04U, (uint32)Os_MemProtKnAddrCfg.OsKernelAddr.pPeripheralEnd); \
         OS_ARCH_MTCR((D_Addrbase) + 0x08U, (uint32)Os_AppPriDataAddr[HostApp].APP_ADDR_START);       \
         OS_ARCH_MTCR((D_Addrbase) + 0x0CU, (uint32)Os_AppPriDataAddr[HostApp].APP_ADDR_END);         \

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -22,9 +22,18 @@
  **
  ***********************************************************************************************************************/
 
-/* PRQA S 4544,4542,0488,1252,1253,1290,3387,3440,2463,3138,3218,3228,3418,3472 ++ */ /* VL_QAC_Crypto */
-/* PRQA S 1338,1842,1844,1862,1863,3226,3344,4461,2985,0342 ++ */                     /* VL_QAC_Crypto */
-/* PRQA S 6050,6060,6070,6080,6010,6030,6040,1532,1503,2889  ++ */                    /* VL_QAC_Crypto */
+/* PRQA S 6010 EOF */ /* VL_MTR_Crypto_62_STCYC */
+/* PRQA S 6020 EOF */ /* VL_MTR_Crypto_62_STLIN */
+/* PRQA S 6030 EOF */ /* VL_MTR_Crypto_62_STMIF */
+/* PRQA S 6040 EOF */ /* VL_MTR_Crypto_62_STPAR */
+/* PRQA S 6050 EOF */ /* VL_MTR_Crypto_62_STST3 */
+/* PRQA S 6060 EOF */ /* VL_MTR_Crypto_62_STM19 */
+/* PRQA S 6070 EOF */ /* VL_MTR_Crypto_62_STCAL */
+/* PRQA S 6080 EOF */ /* VL_MTR_Crypto_62_STPTH */
+
+/* PRQA S 4544,4542,0488,1252,1253,1290,3387,3440,2463,3138,3218,3228,3418,3472 ++ */ /* VL_Crypto_62_General */
+/* PRQA S 1338,1842,1844,1862,1863,3226,3344,4461,2985,0342 ++ */                     /* VL_Crypto_62_General */
+/* PRQA S 1532,1503,2889 ++ */                                                        /* VL_Crypto_62_General */
 /* =================================================== inclusions =================================================== */
 #include "Crypto_62_Internal.h"
 #if (CRYPTO_ALGORITHMFAM_AES == STD_ON)
@@ -34,7 +43,7 @@
 #include "Crypto_62_MemMap.h"
 
 /* ===================================================== macros ===================================================== */
-/* PRQA S 3412 ++ */ /* VL_QAC_Crypto */
+/* PRQA S 3412 ++ */ /* VL_Crypto_62_General */
 #define GET_UINT32_LE(n, b, i)                                                       \
     (n) = ((uint32)(b)[(i)]) | ((uint32)(b)[(i) + CRYPTO_CONST_1] << CRYPTO_CONST_8) \
           | ((uint32)(b)[(i) + CRYPTO_CONST_2] << CRYPTO_CONST_16)                   \
@@ -112,7 +121,7 @@
         V(C6, 42, 42, 84), V(B8, 68, 68, D0), V(C3, 41, 41, 82), V(B0, 99, 99, 29), V(77, 2D, 2D, 5A),                \
         V(11, 0F, 0F, 1E), V(CB, B0, B0, 7B), V(FC, 54, 54, A8), V(D6, BB, BB, 6D), V(3A, 16, 16, 2C)
 
-/* PRQA S 3613 ++ */ /* VL_QAC_Crypto */
+/* PRQA S 3613 ++ */ /* VL_Crypto_62_General */
 #define V(a, b, c, d) 0x##a##b##c##d##u
 CRYPTO_62_LOCAL const uint32 FT0[CRYPTO_CONST_256] = {FT};
 #undef V
@@ -329,7 +338,7 @@ CRYPTO_62_LOCAL const uint32 RCON[CRYPTO_CONST_10] = {
  * Return              None
  */
 /******************************************************************************/
-/* PRQA S 3673 ++ */ /* VL_QAC_Crypto */
+/* PRQA S 3673 ++ */ /* VL_Crypto_62_General */
 void Crypto_Aes_Setkey_Enc(Crypto_AESData* ctx, uint8* key, uint16 keybits)
 /* PRQA S 3673 -- */
 {
@@ -355,7 +364,7 @@ void Crypto_Aes_Setkey_Enc(Crypto_AESData* ctx, uint8* key, uint16 keybits)
 
     for (i = 0; i < (keybits >> CRYPTO_CONST_5); i++)
     {
-        GET_UINT32_LE(RK[i], key, i << CRYPTO_CONST_2); /* PRQA S 4397 */ /* VL_QAC_Crypto */
+        GET_UINT32_LE(RK[i], key, i << CRYPTO_CONST_2); /* PRQA S 4397 */ /* VL_Crypto_62_General */
     }
 
     switch (ctx->nr)
@@ -441,7 +450,7 @@ void Crypto_Aes_Setkey_Dec(Crypto_AESData* ctx, uint8* key, uint16 keybits)
     uint8          i, j;
     Crypto_AESData cty;
     uint32*        RK;
-    uint32*        SK; /* PRQA S 3678 */ /* VL_QAC_Crypto */
+    uint32*        SK; /* PRQA S 3678 */ /* VL_Crypto_62_General */
 
     (void)IStdLib_MemSet(&cty, 0, sizeof(Crypto_AESData));
     ctx->rk = RK = ctx->buf;
@@ -450,13 +459,13 @@ void Crypto_Aes_Setkey_Dec(Crypto_AESData* ctx, uint8* key, uint16 keybits)
     Crypto_Aes_Setkey_Enc(&cty, key, keybits);
     ctx->nr = cty.nr;
 
-    SK = cty.rk + cty.nr * CRYPTO_CONST_4; /* PRQA S 3395 */ /* VL_QAC_Crypto */
+    SK = cty.rk + cty.nr * CRYPTO_CONST_4; /* PRQA S 3395 */ /* VL_Crypto_62_General */
 
     *RK++ = *SK++;
     *RK++ = *SK++;
     *RK++ = *SK++;
     *RK++ = *SK++;
-    /* PRQA S 2462 ++ */ /* VL_QAC_Crypto */
+    /* PRQA S 2462 ++ */ /* VL_Crypto_62_General */
     for (i = ctx->nr - CRYPTO_CONST_1, SK -= CRYPTO_CONST_8; i > 0; i--, SK -= CRYPTO_CONST_8)
     /* PRQA S 2462 -- */
     {
@@ -471,7 +480,7 @@ void Crypto_Aes_Setkey_Dec(Crypto_AESData* ctx, uint8* key, uint16 keybits)
     *RK++ = *SK++;
     *RK++ = *SK++;
     *RK++ = *SK++;
-    *RK++ = *SK++; /* PRQA S 2983 */ /* VL_QAC_Crypto */
+    *RK++ = *SK++; /* PRQA S 2983 */ /* VL_Crypto_62_General */
 }
 
 /******************************************************************************/
@@ -488,7 +497,7 @@ void Crypto_Aes_Setkey_Dec(Crypto_AESData* ctx, uint8* key, uint16 keybits)
  *                                      E_NOT_OK: State not accepted
  */
 /******************************************************************************/
-/* PRQA S 3673 ++ */ /* VL_QAC_Crypto */
+/* PRQA S 3673 ++ */ /* VL_Crypto_62_General */
 Std_ReturnType
     Internal_Aes_Encrypt(Crypto_AESData* ctx, const uint8 input[CRYPTO_CONST_16], uint8 output[CRYPTO_CONST_16])
 /* PRQA S 3673 -- */
@@ -496,11 +505,11 @@ Std_ReturnType
     uint8          i;
     Std_ReturnType ret = E_OK;
 
-    uint32 *RK, X0, X1, X2, X3, Y0, Y1, Y2, Y3; /* PRQA S 3678 */ /* VL_QAC_Crypto */
+    uint32 *RK, X0, X1, X2, X3, Y0, Y1, Y2, Y3; /* PRQA S 3678 */ /* VL_Crypto_62_General */
 
     RK = ctx->rk;
 
-    GET_UINT32_LE(X0, input, 0); /* PRQA S 1840  */ /* VL_QAC_Crypto */
+    GET_UINT32_LE(X0, input, 0); /* PRQA S 1840  */ /* VL_Crypto_62_General */
     X0 ^= *RK++;
     GET_UINT32_LE(X1, input, CRYPTO_CONST_4);
     X1 ^= *RK++;
@@ -511,11 +520,11 @@ Std_ReturnType
 
     for (i = (ctx->nr >> CRYPTO_CONST_1) - CRYPTO_CONST_1; i > 0; i--)
     {
-        AES_FROUND(Y0, Y1, Y2, Y3, X0, X1, X2, X3); /* PRQA S 3473,2743 */ /* VL_QAC_Crypto */
-        AES_FROUND(X0, X1, X2, X3, Y0, Y1, Y2, Y3); /* PRQA S 3473,2743 */ /* VL_QAC_Crypto */
+        AES_FROUND(Y0, Y1, Y2, Y3, X0, X1, X2, X3); /* PRQA S 3473,2743 */ /* VL_Crypto_62_General */
+        AES_FROUND(X0, X1, X2, X3, Y0, Y1, Y2, Y3); /* PRQA S 3473,2743 */ /* VL_Crypto_62_General */
     }
 
-    AES_FROUND(Y0, Y1, Y2, Y3, X0, X1, X2, X3); /* PRQA S 3473,2743 */ /* VL_QAC_Crypto */
+    AES_FROUND(Y0, Y1, Y2, Y3, X0, X1, X2, X3); /* PRQA S 3473,2743 */ /* VL_Crypto_62_General */
 
     X0 = *RK++ ^ ((uint32)FSb[(Y0)&CRYPTO_CONST_0xFF])
          ^ ((uint32)FSb[(Y1 >> CRYPTO_CONST_8) & CRYPTO_CONST_0xFF] << CRYPTO_CONST_8)
@@ -571,14 +580,14 @@ Std_ReturnType
  *                                      E_NOT_OK: State not accepted
  */
 /******************************************************************************/
-/* PRQA S 3673 ++ */ /* VL_QAC_Crypto */
+/* PRQA S 3673 ++ */ /* VL_Crypto_62_General */
 Std_ReturnType
     Internal_Aes_Decrypt(Crypto_AESData* ctx, const uint8 input[CRYPTO_CONST_16], uint8 output[CRYPTO_CONST_16])
 /* PRQA S 3673 -- */
 {
     uint8          i;
     Std_ReturnType ret = E_OK;
-    uint32 *       RK, X0, X1, X2, X3, Y0, Y1, Y2, Y3; /* PRQA S 3678 */ /* VL_QAC_Crypto */
+    uint32 *       RK, X0, X1, X2, X3, Y0, Y1, Y2, Y3; /* PRQA S 3678 */ /* VL_Crypto_62_General */
 
     RK = ctx->rk;
 
@@ -593,11 +602,11 @@ Std_ReturnType
 
     for (i = (ctx->nr >> CRYPTO_CONST_1) - CRYPTO_CONST_1; i > 0; i--)
     {
-        AES_RROUND(Y0, Y1, Y2, Y3, X0, X1, X2, X3); /* PRQA S 3473,2743 */ /* VL_QAC_Crypto */
-        AES_RROUND(X0, X1, X2, X3, Y0, Y1, Y2, Y3); /* PRQA S 3473,2743 */ /* VL_QAC_Crypto */
+        AES_RROUND(Y0, Y1, Y2, Y3, X0, X1, X2, X3); /* PRQA S 3473,2743 */ /* VL_Crypto_62_General */
+        AES_RROUND(X0, X1, X2, X3, Y0, Y1, Y2, Y3); /* PRQA S 3473,2743 */ /* VL_Crypto_62_General */
     }
 
-    AES_RROUND(Y0, Y1, Y2, Y3, X0, X1, X2, X3); /* PRQA S 3473,2743 */ /* VL_QAC_Crypto */
+    AES_RROUND(Y0, Y1, Y2, Y3, X0, X1, X2, X3); /* PRQA S 3473,2743 */ /* VL_Crypto_62_General */
 
     X0 = *RK++ ^ ((uint32)RSb[(Y0)&CRYPTO_CONST_0xFF])
          ^ ((uint32)RSb[(Y3 >> CRYPTO_CONST_8) & CRYPTO_CONST_0xFF] << CRYPTO_CONST_8)
@@ -659,30 +668,39 @@ Std_ReturnType
  *                                      E_NOT_OK: State not accepted
  */
 /******************************************************************************/
-Std_ReturnType Crypto_Aes_Crypt_Ecb(Crypto_AESData* ctx, uint8 mode, uint32 length, const uint8* input, uint8* output)
+Std_ReturnType Crypto_Aes_Crypt_Ecb(
+    Crypto_AESData* ctx,
+    uint8           mode,
+    uint32          length,
+    const uint8*    input,
+    uint8*          output,
+    uint32*         outputLen)
 {
     uint8          temp[CRYPTO_CONST_16];
     Std_ReturnType ret = E_NOT_OK;
+    *outputLen         = 0;
 
     if (mode == CRYPTO_MODE_DECRYPT)
     {
         while (length > 0)
         {
             (void)IStdLib_MemCpy(temp, input, CRYPTO_CONST_16);
-            ret = Internal_Aes_Decrypt(ctx, input, output); /* PRQA S 2784 */ /* VL_QAC_Crypto */
+            ret = Internal_Aes_Decrypt(ctx, input, output); /* PRQA S 2784 */ /* VL_Crypto_62_General */
             input += CRYPTO_CONST_16;
             output += CRYPTO_CONST_16;
             length = (length >= CRYPTO_CONST_16) ? (length - CRYPTO_CONST_16) : 0;
+            *outputLen += CRYPTO_CONST_16;
         }
     }
     else
     {
         while (length > 0)
         {
-            ret = Internal_Aes_Encrypt(ctx, input, output); /* PRQA S 2784 */ /* VL_QAC_Crypto */
+            ret = Internal_Aes_Encrypt(ctx, input, output); /* PRQA S 2784 */ /* VL_Crypto_62_General */
             input += CRYPTO_CONST_16;
             output += CRYPTO_CONST_16;
             length = (length >= CRYPTO_CONST_16) ? (length - CRYPTO_CONST_16) : 0;
+            *outputLen += CRYPTO_CONST_16;
         }
     }
     return ret;
@@ -742,7 +760,7 @@ Std_ReturnType Crypto_Aes_Crypt_Ctr(
     {
         while (length > 0)
         {
-            ret = Internal_Aes_Encrypt(ctx, iv, output); /* PRQA S 2784 */ /* VL_QAC_Crypto */
+            ret = Internal_Aes_Encrypt(ctx, iv, output); /* PRQA S 2784 */ /* VL_Crypto_62_General */
 
             for (j = 0; j < CRYPTO_CONST_16; j++)
             {
@@ -766,7 +784,7 @@ Std_ReturnType Crypto_Aes_Crypt_Ctr(
     {
         while (length > 0)
         {
-            ret = Internal_Aes_Encrypt(ctx, iv, output); /* PRQA S 2784 */ /* VL_QAC_Crypto */
+            ret = Internal_Aes_Encrypt(ctx, iv, output); /* PRQA S 2784 */ /* VL_Crypto_62_General */
 
             for (j = 0; j < CRYPTO_CONST_16; j++)
             {
@@ -815,18 +833,20 @@ Std_ReturnType Crypto_Aes_Crypt_Cbc(
     uint32          length,
     uint8           iv[CRYPTO_CONST_16],
     const uint8*    input,
-    uint8*          output)
+    uint8*          output,
+    uint32*         outputLen)
 {
     uint8          i;
     uint8          temp[CRYPTO_CONST_16];
     Std_ReturnType ret = E_NOT_OK;
+    *outputLen         = 0;
 
     if (mode == CRYPTO_MODE_DECRYPT)
     {
         while (length > 0)
         {
             (void)IStdLib_MemCpy(temp, input, CRYPTO_CONST_16);
-            ret = Internal_Aes_Decrypt(ctx, input, output); /* PRQA S 2784 */ /* VL_QAC_Crypto */
+            ret = Internal_Aes_Decrypt(ctx, input, output); /* PRQA S 2784 */ /* VL_Crypto_62_General */
 
             for (i = 0; i < CRYPTO_CONST_16; i++)
             {
@@ -838,6 +858,7 @@ Std_ReturnType Crypto_Aes_Crypt_Cbc(
             input += CRYPTO_CONST_16;
             output += CRYPTO_CONST_16;
             length = (length >= CRYPTO_CONST_16) ? (length - CRYPTO_CONST_16) : 0;
+            *outputLen += CRYPTO_CONST_16;
         }
     }
     else
@@ -849,13 +870,14 @@ Std_ReturnType Crypto_Aes_Crypt_Cbc(
                 output[i] = (uint8)(input[i] ^ iv[i]);
             }
 
-            ret = Internal_Aes_Encrypt(ctx, output, output); /* PRQA S 2784 */ /* VL_QAC_Crypto */
+            ret = Internal_Aes_Encrypt(ctx, output, output); /* PRQA S 2784 */ /* VL_Crypto_62_General */
 
             (void)IStdLib_MemCpy(iv, output, CRYPTO_CONST_16);
 
             input += CRYPTO_CONST_16;
             output += CRYPTO_CONST_16;
             length = (length >= CRYPTO_CONST_16) ? (length - CRYPTO_CONST_16) : 0;
+            *outputLen += CRYPTO_CONST_16;
         }
     }
     return ret;
@@ -905,7 +927,7 @@ Std_ReturnType Crypto_Aes_Crypt_Cmac(Crypto_AESData* ctx, uint8 mode, uint8 leng
         while (length > 0)
         {
             (void)IStdLib_MemCpy(temp, input, CRYPTO_CONST_16);
-            ret = Internal_Aes_Decrypt(ctx, input, output); /* PRQA S 2784 */ /* VL_QAC_Crypto */
+            ret = Internal_Aes_Decrypt(ctx, input, output); /* PRQA S 2784 */ /* VL_Crypto_62_General */
 
             for (i = 0; i < CRYPTO_CONST_16; i++)
             {
@@ -928,7 +950,7 @@ Std_ReturnType Crypto_Aes_Crypt_Cmac(Crypto_AESData* ctx, uint8 mode, uint8 leng
                 input[i] = (uint8)(input[i] ^ iv[i]);
             }
 
-            ret = Internal_Aes_Encrypt(ctx, input, output); /* PRQA S 2784 */ /* VL_QAC_Crypto */
+            ret = Internal_Aes_Encrypt(ctx, input, output); /* PRQA S 2784 */ /* VL_Crypto_62_General */
             (void)IStdLib_MemCpy(iv, output, CRYPTO_CONST_16);
             input += CRYPTO_CONST_16;
             output += CRYPTO_CONST_16;
@@ -987,7 +1009,7 @@ Std_ReturnType Crypto_Aes_Crypt_Cfb128(
                 ret = Internal_Aes_Encrypt(ctx, iv, iv);
                 if (ret != 0)
                 {
-                    goto exit; /* PRQA S 2001 */ /* VL_QAC_Crypto */
+                    goto exit; /* PRQA S 2001 */ /* VL_Crypto_62_General */
                 }
             }
 
@@ -1007,7 +1029,7 @@ Std_ReturnType Crypto_Aes_Crypt_Cfb128(
                 ret = Internal_Aes_Encrypt(ctx, iv, iv);
                 if (ret != 0)
                 {
-                    goto exit; /* PRQA S 2001 */ /* VL_QAC_Crypto */
+                    goto exit; /* PRQA S 2001 */ /* VL_Crypto_62_General */
                 }
             }
 
@@ -1020,7 +1042,7 @@ Std_ReturnType Crypto_Aes_Crypt_Cfb128(
     *iv_off = n;
     ret     = E_OK;
 
-exit: /* PRQA S 2015 */ /* VL_QAC_Crypto */
+exit: /* PRQA S 2015 */ /* VL_Crypto_62_General */
     return ret;
 }
 
@@ -1065,7 +1087,7 @@ Std_ReturnType Crypto_Aes_Crypt_Cfb8(
         ret = Internal_Aes_Encrypt(ctx, iv, iv);
         if (ret != E_OK)
         {
-            goto exit; /* PRQA S 2001 */ /* VL_QAC_Crypto */
+            goto exit; /* PRQA S 2001 */ /* VL_Crypto_62_General */
         }
 
         if (mode == CRYPTO_MODE_DECRYPT)
@@ -1079,13 +1101,13 @@ Std_ReturnType Crypto_Aes_Crypt_Cfb8(
         {
             ov[CRYPTO_CONST_16] = c;
         }
-        /* PRQA S 0489 ++ */ /* VL_QAC_Crypto */
+        /* PRQA S 0489 ++ */ /* VL_Crypto_62_General */
         (void)IStdLib_MemCpy(iv, ov + 1U, CRYPTO_CONST_16);
         /* PRQA S 0489 -- */
     }
     ret = E_OK;
 
-exit: /* PRQA S 2015 */ /* VL_QAC_Crypto */
+exit: /* PRQA S 2015 */ /* VL_Crypto_62_General */
     return ret;
 }
 
@@ -1131,7 +1153,7 @@ Std_ReturnType Crypto_Aes_Crypt_Ofb(
             ret = Internal_Aes_Encrypt(ctx, iv, iv);
             if (ret != E_OK)
             {
-                goto exit; /* PRQA S 2001 */ /* VL_QAC_Crypto */
+                goto exit; /* PRQA S 2001 */ /* VL_Crypto_62_General */
             }
         }
         *output++ = *input++ ^ iv[n];
@@ -1141,7 +1163,7 @@ Std_ReturnType Crypto_Aes_Crypt_Ofb(
 
     *iv_off = n;
 
-exit: /* PRQA S 2015 */ /* VL_QAC_Crypto */
+exit: /* PRQA S 2015 */ /* VL_Crypto_62_General */
     return ret;
 }
 
@@ -1150,4 +1172,4 @@ exit: /* PRQA S 2015 */ /* VL_QAC_Crypto */
 #endif /* CRYPTO_ALGORITHMFAM_AES == STD_ON */
 /* PRQA S 4544,4542,0488,1252,1253,1290,3387,3440,2463,3138,3218,3228,3418,3472 -- */
 /* PRQA S 1338,1842,1844,1862,1863,3226,3344,4461,2985,0342 -- */
-/* PRQA S 6050,6060,6070,6080,6010,6030,6040,1532,1503,2889  -- */
+/* PRQA S 1532,1503,2889 -- */

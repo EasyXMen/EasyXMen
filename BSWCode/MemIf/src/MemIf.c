@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -70,6 +70,7 @@ MEMIF_LOCAL_INLINE void MemIf_DetReportError(uint8 ApiId, uint8 ErrorId)
 }
 #endif
 
+/* PRQA S 0553 EOF */ /* VL_MemIf_0553 */
 /* ========================================== external function definitions ========================================= */
 /* PRQA S 1503,1532 ++ */ /* VL_MemIf_1503,VL_QAC_OneFunRef */
 #if (MEMIF_DEV_ERROR_DETECT == STD_ON)

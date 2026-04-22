@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -47,7 +47,7 @@
     \li VL_EcuM_3432
       Reason: Function-like macros are used to allow more efficient code.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_EcuM_2743
       Reason: The macro defines format requirements.
@@ -57,7 +57,7 @@
     \li VL_EcuM_2740
       Reason:Necessary logical design for while(1) and have "break" to stop.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_EcuM_3469
       Reason: A function should be used in preference to a function-like macro where they are interchangeable.
@@ -77,7 +77,7 @@
     \li VL_EcuM_3218
       Reason: file scoped variables only used in one function are necessary for functional usage
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_EcuM_2991
       Reason: The control statement has no effect, but is reserved for better readability.
@@ -96,18 +96,18 @@
 
     \li VL_EcuM_FlexibleArray
       Reason:Misidentify flexible array.
-      Risk: None.
+      Risk: No risk.
       Prevention:None.
 
     \li VL_EcuM_3472
       Reason: Macro definitions for easy reuse.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_EcuM_3408
       Reason:Configuration parameter, design needs.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_EcuM_ComputeInvalidPtr
       Reason: Use [] on pointer.
@@ -137,55 +137,74 @@
     \li VL_EcuM_0553
       Reason: The usage of this file depends on the config
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_EcuM_2877
       Reason: The usage of this file depends on the config
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_EcuM_3332
       Reason:The corresponding macro definition has been obtained through the header file inclusion.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_EcuM_5016
       Reason: Parameter passing requires
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_EcuM_4397
       Reason: Macro Conveniently determining authenticity.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_MTR_EcuM_STMIF
       Reason: Functions handle specific tasks in the behavior of the entire component.
     Task has different scenarios that need to be covered, which depends on local conditions - this
     leads to deep nesting of the control structure.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_MTR_EcuM_STCAL
       Reason: The standard compliance vote was higher than the measurement threshold. In addition, a typical way to
     reduce STCAL is to deepen function nesting, which increases call stack usage and runtime
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_MTR_EcuM_STECT
       Reason: The total number of variables is related to the user configuration, allowing dynamic
     code to violate this under extreme conditions.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_EcuM_1253
       Reason: Converted to different integer type.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
+
+    \li VL_EcuM_1502
+      Reason: The generated global configuration variables are used in the source code according to the configuration.
+      Risk: No risk.
+      Prevention: None.
+
+    \li VL_EcuM_1501
+      Reason: Whether a function is used or not depends on the generated macro definition.
+      Risk: No risk.
+      Prevention: None.
+
+    \li VL_EcuM_1753
+      Reason: The definition of the function is generated in the configuration file, and when a module uses the
+        function, the definition is generated.
+      Risk: No risk.
+      Prevention: None.
 
  */
 #ifndef ECUM_H_
 #define ECUM_H_
+
+/* PRQA S 1501 EOF */ /* VL_EcuM_1501 */
+/* PRQA S 1753 EOF */ /* VL_EcuM_1753 */
 
 /* =================================================== inclusions =================================================== */
 #include "EcuM_PBcfg.h"
@@ -401,7 +420,7 @@ typedef uint8 EcuM_StateType;
  * @brief The type describes the possible shutdown targets of the ECU State Manager.
  *
  */
-typedef struct EcuM_TargetTag
+typedef struct
 {
     EcuM_ShutdownTargetType Target; /**< Target to shutdown to. @range 0x00 ~ 0xFF.  */
     EcuM_ShutdownModeType
@@ -814,6 +833,7 @@ void EcuM_ValidateWakeupEvent(EcuM_WakeupSourceType sources);
  */
 void EcuM_CheckWakeup(EcuM_WakeupSourceType wakeupSource);
 
+#if (STD_ON == ECUM_DRIVER_INIT_LIST_BSWMS)
 /**
  * @brief       This callback shall provide BSW module initializations to be called by the BSW Mode Manager.
  * @param[in]   drvInitIdx : Index of the driver to initialize.
@@ -823,6 +843,7 @@ void EcuM_CheckWakeup(EcuM_WakeupSourceType wakeupSource);
  * @trace       CPD-68943
  */
 void EcuM_AL_DriverInitBswM(uint8 drvInitIdx);
+#endif
 
 #ifdef __cplusplus
 }

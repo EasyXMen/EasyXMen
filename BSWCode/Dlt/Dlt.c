@@ -1,6 +1,6 @@
 /* PRQA S 3108++ */
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -143,7 +143,7 @@ static
 #if ((DLT_GPT_SUPPORT == STD_OFF) && ((DLT_TIME_STAMP_SUPPORT == STD_ON)))
 #define DLT_START_SEC_VAR_NO_INIT_UNSPECIFIED
 #include "Dlt_MemMap.h"
-static StbM_TimeStampType Dlt_TimeStamp;
+static StbM_TimeTupleType Dlt_TimeStamp;
 #define DLT_STOP_SEC_VAR_NO_INIT_UNSPECIFIED
 #include "Dlt_MemMap.h"
 #endif
@@ -248,7 +248,8 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_InterSendLogMessage(
     uint16 logDataLength);
 static FUNC(void, DLT_CODE) Dlt_Tx_RemoveBuffer(uint16 ChannelIndex, uint32 RemoveOffset, uint32 Length);
 static FUNC(void, DLT_CODE) Dlt_MemSet(uint8* Dest, uint8 Value, uint32 Size);
-static FUNC(void, DLT_CODE) Dlt_CreateStandardHeader(const Dlt_CreateStandardHeaderInfoTypes* CreateStandardHeader);
+static FUNC(void, DLT_CODE)
+    Dlt_CreateStandardHeader(const Dlt_CreateStandardHeaderInfoTypes* CreateStandardHeader, uint16* CorrectionLength);
 static FUNC(void, DLT_CODE) Dlt_CreateExtendedHeader(const Dlt_CreateExtendedHeaderInfoTypes* CreateExtendedHeader);
 #define DLT_STOP_SEC_CODE
 #include "Dlt_MemMap.h"
@@ -294,6 +295,8 @@ FUNC(void, DLT_APPL_CODE) Dlt_Init(P2CONST(Dlt_ConfigType, AUTOMATIC, DLT_APPL_C
 #if ((DLT_RX_DATA_PATH_SUPPORT == STD_ON) && (DLT_RXPDU_NUM > 0))
         Dlt_MemSet((uint8*)Dlt_RxStatus, 0u, (sizeof(Dlt_RxStatusTypes) * DLT_RXPDU_NUM));
 #endif
+
+        Dlt_MemSet((uint8*)(&Dlt_RunTime), 0u, sizeof(Dlt_RunTimeType));
 
 #if (DLT_TIME_STAMP_SUPPORT == STD_ON)
 #if (DLT_GPT_SUPPORT == STD_ON)
@@ -515,19 +518,25 @@ Dlt_RegisterContext(
     {
         /* Note: If DLT is not initialized, there is no need to report error to DET */
     }
+    else if ((lenAppDescription == 0) || (lenContextDescription == 0))
+    {
+        DLT_DETREPORT(DLT_API_ID_REGISTERCONTEXT, DLT_E_PARAM);
+    }
+    else if ((appDescription == NULL_PTR) || (contextDescription == NULL_PTR))
+    {
+        DLT_DETREPORT(DLT_API_ID_REGISTERCONTEXT, DLT_E_PARAM_POINTER);
+    }
     else
 #endif
     {
         /* The Swc index number is extracted by the session identifier */
         uint16 SwcIndex = Dlt_GetSwcSessionIdIndex(sessionId);
-#if (1u < DLT_SWC_NUM)
         if (SwcIndex == DLT_SWC_NUM)
         {
             /* Return unknown session identifier */
             ret = DLT_E_UNKNOWN_SESSION_ID;
         }
         else
-#endif /* 1u < DLT_SWC_NUM */
         {
 #if ((DLT_SWC_NUM > 0) && (DLT_SWC_MAX_CONTEXT_NUM > 0))
             /* The Swc context number is extracted by Swc index */
@@ -541,31 +550,38 @@ Dlt_RegisterContext(
                 /* Check if the incoming appId/contextId parameter is matche */
                 if ((appId == SwcApplicationId) && (contextId == SwcContextId))
                 {
-                    SchM_Enter_Dlt_SwcContext();
-                    /* Set the Swc context information to registered */
-                    SwcContextInfoPtr->Register = TRUE;
-                    /* PRQA S 0311++ */ /* MISRA Rule 11.8 */
-                    /* Attach the application description for the Swc context information */
-                    SwcContextInfoPtr->appDescription = (uint8*)appDescription;
-                    /* Attach the context description for the Swc context information */
-                    SwcContextInfoPtr->contextDescription = (uint8*)contextDescription;
-                    /* PRQA S 0311-- */ /* MISRA Rule 11.8 */
-                    /* Set the application description length for the Swc context information */
-                    SwcContextInfoPtr->lenAppDescription = lenAppDescription;
-                    /* Set the context description length for the Swc context information */
-                    SwcContextInfoPtr->lenContextDescription = lenContextDescription;
-                    SchM_Exit_Dlt_SwcContext();
+                    if (SwcContextInfoPtr->Register == TRUE)
+                    {
+                        ret = DLT_E_CONTEXT_ALREADY_REG;
+                    }
+                    else
+                    {
+                        SchM_Enter_Dlt_SwcContext();
+                        /* Set the Swc context information to registered */
+                        SwcContextInfoPtr->Register = TRUE;
+                        /* PRQA S 0311++ */ /* MISRA Rule 11.8 */
+                        /* Attach the application description for the Swc context information */
+                        SwcContextInfoPtr->appDescription = (uint8*)appDescription;
+                        /* Attach the context description for the Swc context information */
+                        SwcContextInfoPtr->contextDescription = (uint8*)contextDescription;
+                        /* PRQA S 0311-- */ /* MISRA Rule 11.8 */
+                        /* Set the application description length for the Swc context information */
+                        SwcContextInfoPtr->lenAppDescription = lenAppDescription;
+                        /* Set the context description length for the Swc context information */
+                        SwcContextInfoPtr->lenContextDescription = lenContextDescription;
+                        SchM_Exit_Dlt_SwcContext();
 #if (DLT_REGISTER_CONTEXT_NOTIFICATION_SUPPORT == STD_ON)
 #if (DLT_GET_INFO_STATUS7_SUPPORT == STD_ON)
-                    options = 7;
+                        options = 7;
 #else  /* DLT_GET_INFO_STATUS7_SUPPORT == STD_ON */
-                    options = 6;
+                        options = 6;
 #endif /* DLT_GET_INFO_STATUS7_SUPPORT == STD_ON */
-                    /* If DLT supports context notification, the response message is sent to get log information */
-                    ret = Dlt_SendGetLogInfo(options, SwcIndex, SwcContextIndex);
+                        /* If DLT supports context notification, the response message is sent to get log information */
+                        ret = Dlt_SendGetLogInfo(options, SwcIndex, SwcContextIndex);
 #else
-                    ret = E_OK;
+                        ret = E_OK;
 #endif /* STD_ON == DLT_REGISTER_CONTEXT_NOTIFICATION_SUPPORT */
+                    }
                 }
             }
 #endif /* DLT_SWC_NUM > 0 && DLT_SWC_MAX_CONTEXT_NUM > 0 */
@@ -610,14 +626,12 @@ Dlt_UnregisterContext(Dlt_SessionIDType sessionId, Dlt_ApplicationIDType appId, 
     {
         /* The Swc index number is extracted by the session identifier */
         uint16 SwcIndex = Dlt_GetSwcSessionIdIndex(sessionId);
-#if (1u < DLT_SWC_NUM)
         if (SwcIndex == DLT_SWC_NUM)
         {
             /* Return unknown session identifier */
             ret = DLT_E_UNKNOWN_SESSION_ID;
         }
         else
-#endif /* 1u < DLT_SWC_NUM */
         {
 #if ((DLT_SWC_NUM > 0) && (DLT_SWC_MAX_CONTEXT_NUM > 0))
             /* The Swc context number is extracted by Swc index */
@@ -631,24 +645,31 @@ Dlt_UnregisterContext(Dlt_SessionIDType sessionId, Dlt_ApplicationIDType appId, 
                 /* Check if the incoming appId/contextId parameter is matche */
                 if ((appId == SwcApplicationId) && (contextId == SwcContextId))
                 {
-                    SchM_Enter_Dlt_SwcContext();
-                    /* Set the Swc context information to unregistered */
-                    SwcContextInfoPtr->Register = FALSE;
-                    /* Set the application description length for the Swc context information */
-                    SwcContextInfoPtr->lenAppDescription = 0U;
-                    /* Set the context description length for the Swc context information */
-                    SwcContextInfoPtr->lenContextDescription = 0U;
-                    /* Clear the application description for the Swc context information */
-                    SwcContextInfoPtr->appDescription = NULL_PTR;
-                    /* Clear the context description for the Swc context information */
-                    SwcContextInfoPtr->contextDescription = NULL_PTR;
-                    SchM_Exit_Dlt_SwcContext();
+                    if (SwcContextInfoPtr->Register == FALSE)
+                    {
+                        ret = DLT_E_CONTEXT_NOT_YET_REG;
+                    }
+                    else
+                    {
+                        SchM_Enter_Dlt_SwcContext();
+                        /* Set the Swc context information to unregistered */
+                        SwcContextInfoPtr->Register = FALSE;
+                        /* Set the application description length for the Swc context information */
+                        SwcContextInfoPtr->lenAppDescription = 0U;
+                        /* Set the context description length for the Swc context information */
+                        SwcContextInfoPtr->lenContextDescription = 0U;
+                        /* Clear the application description for the Swc context information */
+                        SwcContextInfoPtr->appDescription = NULL_PTR;
+                        /* Clear the context description for the Swc context information */
+                        SwcContextInfoPtr->contextDescription = NULL_PTR;
+                        SchM_Exit_Dlt_SwcContext();
 #if (DLT_REGISTER_CONTEXT_NOTIFICATION_SUPPORT == STD_ON)
-                    /* If DLT supports context notification, the response message is sent to get log information */
-                    ret = Dlt_SendGetLogInfo(options, SwcIndex, SwcContextIndex);
+                        /* If DLT supports context notification, the response message is sent to get log information */
+                        ret = Dlt_SendGetLogInfo(options, SwcIndex, SwcContextIndex);
 #else
-                    ret = E_OK;
+                        ret = E_OK;
 #endif
+                    }
                 }
             }
 #endif /* DLT_SWC_NUM > 0 && DLT_SWC_MAX_CONTEXT_NUM > 0 */
@@ -696,11 +717,11 @@ FUNC(void, DLT_APPL_CODE) Dlt_DetForwardErrorTrace(uint16 moduleId, uint8 instan
         uint32                 timestamp = 0U;
         Dlt_MessageLogInfoType logInfo;
 
-        logInfo.logLevel                      = DLT_LOG_ERROR;
-        logInfo.argCount                      = 4;
-        logInfo.appId                         = Dlt_Det_ApplId;
-        logInfo.contextId                     = Dlt_Det_ContextId;
-        logInfo.options.Dlt_Bits.message_type = (uint8)DLT_TYPE_LOG;
+        logInfo.logLevel  = DLT_LOG_ERROR;
+        logInfo.argCount  = 4;
+        logInfo.appId     = Dlt_Det_ApplId;
+        logInfo.contextId = Dlt_Det_ContextId;
+        logInfo.options &= DLT_OPTIONS_MESSAGE_TYPE_RESET_MASK;
         /*Generating the timestamp*/
         if (Dlt_ConfigPtr->Protocol->DltHeaderUseTimestamp == TRUE)
         {
@@ -708,10 +729,8 @@ FUNC(void, DLT_APPL_CODE) Dlt_DetForwardErrorTrace(uint16 moduleId, uint8 instan
         }
         /* The Swc index number is extracted by the session identifier */
         uint16 SwcIndex = Dlt_GetSwcSessionIdIndex(DLT_DET_SESSIONID);
-#if (1u < DLT_SWC_NUM)
         /* Check if the Swc index number is valid */
         if (SwcIndex != DLT_SWC_NUM)
-#endif /* 1u < DLT_SWC_NUM */
         {
             boolean                 Filter;
             Dlt_MessageLogLevelType CurrentLogLevel;
@@ -739,7 +758,13 @@ FUNC(void, DLT_APPL_CODE) Dlt_DetForwardErrorTrace(uint16 moduleId, uint8 instan
                     /* Set the index number of the log channel */
                     uint16 ChannelIndex = ChannelIndexList[iloop];
                     /* Check if the DLT message extension header is support verbose mode */
-                    boolean VerboseMode = Dlt_ConfigPtr->Protocol->DltUseExtHeaderInNonVerbMode;
+                    boolean ExtHeaderInNonVerbMode = (Dlt_ConfigPtr->Protocol != NULL_PTR)
+                                                         ? Dlt_ConfigPtr->Protocol->DltUseExtHeaderInNonVerbMode
+                                                         : FALSE;
+                    boolean UseVerboseMode =
+                        (Dlt_ConfigPtr->Protocol != NULL_PTR) ? Dlt_ConfigPtr->Protocol->DltUseVerboseMode : FALSE;
+                    boolean VerboseModeFlag =
+                        (UseVerboseMode == TRUE) ? TRUE : ((ExtHeaderInNonVerbMode == TRUE) ? TRUE : FALSE);
                     /* Check if the DLT log data is support verbose mode */
                     if (Dlt_ConfigPtr->Protocol->DltUseVerboseMode == FALSE)
                     {
@@ -751,9 +776,12 @@ FUNC(void, DLT_APPL_CODE) Dlt_DetForwardErrorTrace(uint16 moduleId, uint8 instan
                         /* Calculate the byte length of the DLT log data */
                         logDataLength = 21;
                     }
+                    Dlt_OptionalFlagType OptionFlag;
+                    OptionFlag.AllBits = 0u;
+                    Dlt_GetOptionFlag(&OptionFlag);
                     uint16 logChannelMaxMessageLength =
                         Dlt_ConfigPtr->LogOutput->LogChannel[ChannelIndex].DltLogChannelMaxMessageLength;
-                    uint16 Messagelength = Dlt_GetMessageLength(VerboseMode, logDataLength);
+                    uint16 Messagelength = Dlt_GetMessageLength(VerboseModeFlag, logDataLength, OptionFlag);
                     /* Check if the message length is within valid range */
                     if (logChannelMaxMessageLength >= Messagelength)
                     {
@@ -794,6 +822,7 @@ FUNC(void, DLT_APPL_CODE) Dlt_DetForwardErrorTrace(uint16 moduleId, uint8 instan
                             else
                             {
                                 uint8                             logData[21];
+                                uint16                            CorrectionLength = 0u;
                                 Dlt_CreateExtendedHeaderInfoTypes CreateExtendedHeaderInfo;
                                 Dlt_CreateStandardHeaderInfoTypes CreateStandardHeaderInfo;
 
@@ -803,9 +832,9 @@ FUNC(void, DLT_APPL_CODE) Dlt_DetForwardErrorTrace(uint16 moduleId, uint8 instan
                                 CreateStandardHeaderInfo.Messagelength = Messagelength;
                                 CreateStandardHeaderInfo.SessionId     = DLT_DET_SESSIONID;
                                 CreateStandardHeaderInfo.timestamp     = timestamp;
-                                Dlt_CreateStandardHeader(&CreateStandardHeaderInfo);
+                                Dlt_CreateStandardHeader(&CreateStandardHeaderInfo, &CorrectionLength);
                                 /* Check if the DLT message extension header is support verbose mode */
-                                if (Dlt_ConfigPtr->Protocol->DltUseExtHeaderInNonVerbMode == TRUE)
+                                if (VerboseModeFlag == TRUE)
                                 {
                                     /* Create extended header for the message of the DLT given log channel */
                                     CreateExtendedHeaderInfo.ChannelIndex   = ChannelIndex;
@@ -1038,42 +1067,35 @@ Dlt_GetLogInfo(
                     uint8             lenContextDescription = SwcContextInfoPtr->lenContextDescription;
                     Dlt_SessionIDType SwcSessionId          = Dlt_RunTime.SwcInfo[SwcIndex].DltSwcSessionId;
 
-                    Dlt_ApplicationIdInfoType appIdInfo[1];
-                    Dlt_ContextIdInfoType     contextInfoList[1];
+                    Dlt_ApplicationIdInfoType* appIdInfo       = logInfo->appIdInfo;
+                    Dlt_ContextIdInfoType*     contextInfoList = appIdInfo->contextInfoList;
 
                     /* Copy the "contextId" described by the Swc context to the log information */
-                    contextInfoList[0].contextId = contextId;
-                    /* Copy the "VerboseMode" described by the Swc context to the log information */
-                    /* PRQA S 4304++ */ /* MISRA Rule 10.5 */
-                    contextInfoList[0].verbose_mode = (uint8)useVerboseMode;
-                    /* PRQA S 4304-- */ /* MISRA Rule 10.5 */
-                    /* Copy the "SessionId" described by the Swc context to the log information */
-                    contextInfoList[0].session_id = SwcSessionId;
+                    contextInfoList->contextId = contextId;
                     /* Copy the "logLevel" described by the Swc context to the log information */
-                    contextInfoList[0].logLevel = SwcContextInfoPtr->DltThreshold;
+                    contextInfoList->logLevel = SwcContextInfoPtr->DltThreshold;
                     /* Copy the "traceStatus" described by the Swc context to the log information */
-                    contextInfoList[0].traceStatus = SwcContextInfoPtr->TraceStatus;
+                    contextInfoList->traceStatus = SwcContextInfoPtr->TraceStatus;
                     /* Copy the "lenContextDescription" described by the Swc context to the log information */
-                    contextInfoList[0].lenContextDescription = lenContextDescription;
+                    contextInfoList->lenContextDescription = lenContextDescription;
                     /* Copy the "contextDescription" described by the Swc context to the log information */
-                    contextInfoList[0].contextDescription = SwcContextInfoPtr->contextDescription;
+                    Dlt_MemCopy(
+                        contextInfoList->contextDesc,
+                        SwcContextInfoPtr->contextDescription,
+                        lenContextDescription);
 
                     /* Copy the "AppId" of the Swc application description to the log information */
-                    appIdInfo[0].appId = appId;
+                    appIdInfo->appId = appId;
                     /* Copy the "lenAppDescription" described by the Swc application into the log information */
-                    appIdInfo[0].appDescLen = lenAppDescription;
+                    appIdInfo->appDescLen = lenAppDescription;
                     /* Copy the "appDescription" of the Swc application description to the log information */
-                    appIdInfo[0].appDesc = SwcContextInfoPtr->appDescription;
+                    Dlt_MemCopy(appIdInfo->appDesc, SwcContextInfoPtr->appDescription, lenAppDescription);
                     /* Copy the "contextIdCount" of Swc context descriptions into the log information */
-                    appIdInfo[0].contextIdCount = 1;
-                    /* Copy the "contextInfoList" described in the Swc context into the log information */
-                    appIdInfo[0].contextInfoList = &(contextInfoList[0]);
+                    appIdInfo->contextIdCount = 1;
 
-                    *status = (uint8)SwcContextInfoPtr->TraceStatus; /* PRQA S 4304 */ /* MISRA Rule 10.5 */
+                    *status = SwcContextInfoPtr->TraceStatus; /* PRQA S 4304 */ /* MISRA Rule 10.5 */
                     /* Copy the number of Swc application descriptions to the log information */
                     logInfo->appIdCount = 1;
-                    /* Copy the Swc application description packet into the log information */
-                    logInfo->appIdInfo = &(appIdInfo[0]); /* PRQA S 3225 */ /* MISRA Rule 18.6 */
 
                     ret = E_OK;
                 }
@@ -1292,7 +1314,7 @@ FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_SetDefaultLogLevel(Dlt_MessageLogLevelTy
  *                     E_NOT_OK: Default Trace Status could not be set
  */
 FUNC(Std_ReturnType, DLT_APPL_CODE)
-Dlt_SetDefaultTraceStatus(boolean newTraceStatus, Dlt_LogChannelNameType logChannelName)
+Dlt_SetDefaultTraceStatus(boolean newTraceStatus, const Dlt_LogChannelNameType logChannelName)
 {
     Std_ReturnType ret;
     DLT_UNUSED(logChannelName);
@@ -1330,7 +1352,9 @@ Dlt_SetDefaultTraceStatus(boolean newTraceStatus, Dlt_LogChannelNameType logChan
  */
 /* PRQA S 3432++ */ /* MISRA Rule 20.7 */
 FUNC(Std_ReturnType, DLT_APPL_CODE)
-Dlt_GetDefaultTraceStatus(Dlt_LogChannelNameType logChannelName, P2VAR(boolean, AUTOMATIC, DLT_APPL_DATA) traceStatus)
+Dlt_GetDefaultTraceStatus(
+    const Dlt_LogChannelNameType logChannelName,
+    P2VAR(boolean, AUTOMATIC, DLT_APPL_DATA) traceStatus)
 /* PRQA S 3432-- */ /* MISRA Rule 20.7 */
 {
     Std_ReturnType ret;
@@ -1394,7 +1418,7 @@ Dlt_GetLogChannelNames(
     {
 #if (DLT_CHANNEL_NUM > 0)
         *numberOfLogChannels = DLT_CHANNEL_NUM;
-        uint16 index         = 0;
+        uint16 index         = 0u;
 #if (1u < DLT_CHANNEL_NUM)
         for (; index < DLT_CHANNEL_NUM; index++)
 #endif /* 1u < DLT_CHANNEL_NUM */
@@ -1403,7 +1427,11 @@ Dlt_GetLogChannelNames(
             const Dlt_LogChannelType* logChannelPtr =
                 (Dlt_LogChannelType*)&(Dlt_ConfigPtr->LogOutput->LogChannel[index]);
             /* PRQA S 0311-- */ /* MISRA Rule 11.8 */
-            logChannelNames[index] = logChannelPtr->DltLogChannelId;
+#if (CPU_BYTE_ORDER == HIGH_BYTE_FIRST)
+            Dlt_CopyLongToArrayBigEndian(logChannelPtr->DltLogChannelId, logChannelNames[index]);
+#else
+            Dlt_CopyLongToArrayLittleEndian(logChannelPtr->DltLogChannelId, logChannelNames[index]);
+#endif
         }
 #endif
         ret = E_OK;
@@ -1492,10 +1520,10 @@ Dlt_GetTraceStatus(
  */
 FUNC(Std_ReturnType, DLT_APPL_CODE)
 Dlt_SetLogChannelAssignment(
-    Dlt_ApplicationIDType   appId,
-    Dlt_ContextIDType       contextId,
-    Dlt_LogChannelNameType  logChannelName,
-    Dlt_AssignmentOperation addRemoveOp)
+    Dlt_ApplicationIDType        appId,
+    Dlt_ContextIDType            contextId,
+    const Dlt_LogChannelNameType logChannelName,
+    Dlt_AssignmentOperation      addRemoveOp)
 {
     Std_ReturnType ret;
 #if (STD_ON == DLT_DEV_ERROR_DETECT)
@@ -1507,7 +1535,13 @@ Dlt_SetLogChannelAssignment(
     else
 #endif
     {
-        ret = Dlt_InterSetLogChannelAssignment(appId, contextId, logChannelName, addRemoveOp);
+        uint32 channelId = 0u;
+#if (CPU_BYTE_ORDER == HIGH_BYTE_FIRST)
+        Dlt_CopyArrayToLongBigEndian(&channelId, logChannelName);
+#else
+        Dlt_CopyArrayToLongLittleEndian(&channelId, logChannelName);
+#endif
+        ret = Dlt_InterSetLogChannelAssignment(appId, contextId, channelId, addRemoveOp);
     }
     return ret;
 }
@@ -1530,9 +1564,9 @@ Dlt_SetLogChannelAssignment(
  */
 FUNC(Std_ReturnType, DLT_APPL_CODE)
 Dlt_SetLogChannelThreshold(
-    Dlt_LogChannelNameType  logChannelName,
-    Dlt_MessageLogLevelType newThreshold,
-    boolean                 newTraceStatus)
+    const Dlt_LogChannelNameType logChannelName,
+    Dlt_MessageLogLevelType      newThreshold,
+    boolean                      newTraceStatus)
 {
     Std_ReturnType ret;
 #if (STD_ON == DLT_DEV_ERROR_DETECT)
@@ -1548,7 +1582,13 @@ Dlt_SetLogChannelThreshold(
     else
 #endif
     {
-        uint16 ChannelIndex = Dlt_GetChannelIndexByChannelName(logChannelName);
+        uint32 channelId;
+#if (CPU_BYTE_ORDER == HIGH_BYTE_FIRST)
+        Dlt_CopyArrayToLongBigEndian(&channelId, logChannelName);
+#else
+        Dlt_CopyArrayToLongLittleEndian(&channelId, logChannelName);
+#endif
+        uint16 ChannelIndex = Dlt_GetChannelIndexByChannelName(channelId);
 #if (1u < DLT_CHANNEL_NUM)
         if (ChannelIndex != DLT_CHANNEL_NUM)
 #endif /* 1u < DLT_CHANNEL_NUM */
@@ -1585,15 +1625,14 @@ Dlt_SetLogChannelThreshold(
  */
 FUNC(Std_ReturnType, DLT_APPL_CODE)
 Dlt_GetLogChannelThreshold(
-    Dlt_LogChannelNameType logChannelName,
+    const Dlt_LogChannelNameType logChannelName,
     /* PRQA S 3432++ */ /* MISRA Rule 20.7 */
     P2VAR(Dlt_MessageLogLevelType, AUTOMATIC, DLT_APPL_DATA) logChannelThreshold,
     P2VAR(boolean, AUTOMATIC, DLT_APPL_DATA) traceStatus)
 /* PRQA S 3432-- */ /* MISRA Rule 20.7 */
 {
-    Std_ReturnType ret;
+    Std_ReturnType ret = E_NOT_OK;
 #if (STD_ON == DLT_DEV_ERROR_DETECT)
-    ret = E_NOT_OK;
     if (DLT_STATE_UNINIT == Dlt_ModeState)
     {
         /* Note: If DLT is not initialized, there is no need to report error to DET */
@@ -1605,8 +1644,14 @@ Dlt_GetLogChannelThreshold(
     else
 #endif
     {
+        uint32 channelId;
+#if (CPU_BYTE_ORDER == HIGH_BYTE_FIRST)
+        Dlt_CopyArrayToLongBigEndian(&channelId, logChannelName);
+#else
+        Dlt_CopyArrayToLongLittleEndian(&channelId, logChannelName);
+#endif
         /* The channel index number is extracted by the log channel name */
-        uint16 ChannelIndex = Dlt_GetChannelIndexByChannelName(logChannelName);
+        uint16 ChannelIndex = Dlt_GetChannelIndexByChannelName(channelId);
         if (DLT_CHANNEL_NUM != ChannelIndex)
         {
 #if (DLT_CHANNEL_NUM > 0)
@@ -1640,28 +1685,8 @@ FUNC(void, DLT_APPL_CODE) Dlt_TxFunction(void)
     /* Check if the DLT module has been initialized */
     if (DLT_STATE_INIT == Dlt_ModeState)
     {
-#if ((DLT_RX_DATA_PATH_SUPPORT == STD_ON) && (DLT_BUFFER_MAX_LENGTH > 0) && (DLT_RXPDU_NUM > 0))
-        /*if channel is busy deal the rx data in main*/
-#if (1u < DLT_RXPDU_NUM)
-        /* Traversal all the received PDU in the DLT module */
-        for (; index < DLT_RXPDU_NUM; index++)
-#endif /* 1u < DLT_RXPDU_NUM */
-        {
-            Dlt_RxStatusTypes* RxStatusPtr = &(Dlt_RxStatus[index]);
-            /* Check if there are unprocessed messages in the receiving status information of the DLT module */
-            if ((RxStatusPtr->Used == TRUE) && (RxStatusPtr->RxOffset == RxStatusPtr->RxLength))
-            {
-                /* The unprocessed received messages of the DLT module are refined */
-                if (E_OK == Dlt_DealRxData(index, RxStatusPtr->RxBuffer, RxStatusPtr->RxLength))
-                {
-                    SchM_Enter_Dlt_RxStatus();
-                    RxStatusPtr->Used     = FALSE;
-                    RxStatusPtr->NeedDeal = FALSE;
-                    SchM_Exit_Dlt_RxStatus();
-                }
-            }
-        }
-#endif /* DLT_RX_DATA_PATH_SUPPORT == STD_ON */
+        const uint16 StartUpDelayThreshold = (uint16)(DLT_START_UP_DELAY_TIMER / DLT_TASK_TIME);
+        Dlt_StartUpDelayTimer = (Dlt_StartUpDelayTimer > 0u) ? (Dlt_StartUpDelayTimer - StartUpDelayThreshold) : 0u;
         /* Check if the startup delay time of the DLT module has reached */
         if (Dlt_StartUpDelayTimer == 0u)
         {
@@ -1707,17 +1732,6 @@ FUNC(void, DLT_APPL_CODE) Dlt_TxFunction(void)
                     Dlt_Tx_Channel(index);
                 }
 #endif
-            }
-        }
-        else
-        {
-            if (Dlt_StartUpDelayTimer <= DLT_TASK_TIME)
-            {
-                Dlt_StartUpDelayTimer = 0;
-            }
-            else
-            {
-                Dlt_StartUpDelayTimer -= DLT_TASK_TIME;
             }
         }
     }
@@ -2063,17 +2077,20 @@ FUNC(Std_ReturnType, DLT_CODE) Dlt_Store(void)
 FUNC(uint32, DLT_CODE) Dlt_GetTimeElapsed(void)
 {
     uint32 Timer;
+    uint64 tempTimer;
 #if (DLT_TIME_STAMP_SUPPORT == STD_ON)
 #if (DLT_GPT_SUPPORT == STD_ON)
     Timer = (uint32)(Gpt_GetTimeElapsed(DLT_TIME_REF) / DLT_GPT_TICK_TIME);
 #else
     StbM_UserDataType  userData;
-    StbM_TimeStampType TimeStamp;
+    StbM_TimeTupleType TimeStamp;
     if (E_OK == StbM_GetCurrentTime(DLT_TIME_REF, &TimeStamp, &userData))
     {
-        uint32 nanoseconds = TimeStamp.nanoseconds - Dlt_TimeStamp.nanoseconds;
-        uint32 seconds     = TimeStamp.seconds - Dlt_TimeStamp.seconds;
-        Timer              = (uint32)((nanoseconds) / 100000u) + (uint32)((seconds) * 100000u);
+        uint32 nanoseconds = TimeStamp.globalTime.nanoseconds - Dlt_TimeStamp.globalTime.nanoseconds;
+        uint32 seconds     = TimeStamp.globalTime.seconds - Dlt_TimeStamp.globalTime.seconds;
+        uint16 secondsHi   = TimeStamp.globalTime.secondsHi - Dlt_TimeStamp.globalTime.secondsHi;
+        tempTimer          = (uint64)(((uint64)secondsHi << 32u) + (uint64)seconds);
+        Timer              = (uint32)((uint64)(nanoseconds) / 100000u) + (uint64)((tempTimer) * 10000u);
     }
     else
     {
@@ -2121,7 +2138,7 @@ Dlt_GetChannelIndex(
     /*2. From all mapping elements, where ApplicationID of mapping element equals to the ApplicationID
      * of the log/trace message AND the ContextId of mapping element equals wildcard (value 0x00000000),
      *  the LogChannel shall be added to the list of output LogChannels.*/
-    for (uint16 iloop = 0U; iloop < Dlt_RunTime.SwcInfo[SwcIndex].DltSwcContextNum; iloop++)
+    for (uint16 iloop = 0U; iloop < SwcContextNum; iloop++)
     {
         SwcContextInfoPtr                      = &(Dlt_RunTime.SwcInfo[SwcIndex].SwcContextInfo[iloop]);
         Dlt_ApplicationIDType SwcApplicationId = SwcContextInfoPtr->SwcContext.SwcApplicationId;
@@ -2144,7 +2161,7 @@ Dlt_GetChannelIndex(
     }
 }
 
-FUNC(uint16, DLT_CODE) Dlt_GetChannelIndexByChannelName(Dlt_LogChannelNameType DltLogChannelId)
+FUNC(uint16, DLT_CODE) Dlt_GetChannelIndexByChannelName(uint32 DltLogChannelId)
 {
     uint16 retVal = DLT_CHANNEL_NUM;
     uint16 iloop  = 0;
@@ -2261,7 +2278,7 @@ static FUNC(boolean, DLT_CODE)
         SwcContextInfoPtr = &(SwcInfoPtr->SwcContextInfo[iloop]);
         SwcApplicationId  = SwcContextInfoPtr->SwcContext.SwcApplicationId;
         SwcContextId      = SwcContextInfoPtr->SwcContext.SwcContextId;
-        if ((traceInfo->appId == SwcApplicationId) && (traceInfo->contextId == SwcContextId))
+        if ((traceInfo->appId == SwcApplicationId) && (traceInfo->context == SwcContextId))
         {
             ret  = SwcContextInfoPtr->TraceStatus;
             Find = TRUE;
@@ -2276,7 +2293,7 @@ static FUNC(boolean, DLT_CODE)
     {
         SwcContextInfoPtr = &(SwcInfoPtr->SwcContextInfo[iloop]);
         SwcApplicationId  = SwcContextInfoPtr->SwcContext.SwcApplicationId;
-        if ((traceInfo->appId == SwcApplicationId) && (0u == traceInfo->contextId))
+        if ((traceInfo->appId == SwcApplicationId) && (0u == traceInfo->context))
         {
             ret  = SwcContextInfoPtr->TraceStatus;
             Find = TRUE;
@@ -2306,8 +2323,8 @@ static FUNC(Dlt_MessageLogLevelType, DLT_CODE) Dlt_GetChannelLogLevel(uint16 Cha
 
 FUNC(uint16, DLT_CODE) Dlt_GetSwcSessionIdIndex(Dlt_SessionIDType sessionId)
 {
-    uint16 index = 0U;
-
+    uint16 retval = DLT_SWC_NUM;
+    uint16 index  = 0U;
 #if (1u < DLT_SWC_NUM)
     for (; index < DLT_SWC_NUM; index++)
 #endif /* 1u < DLT_SWC_NUM */
@@ -2315,13 +2332,14 @@ FUNC(uint16, DLT_CODE) Dlt_GetSwcSessionIdIndex(Dlt_SessionIDType sessionId)
 #if (DLT_SWC_NUM > 0)
         if (sessionId == Dlt_RunTime.SwcInfo[index].DltSwcSessionId)
         {
+            retval = index;
 #if (1u < DLT_SWC_NUM)
             break;
 #endif /* 1u < DLT_SWC_NUM */
         }
 #endif /* (DLT_SWC_NUM > 0 */
     }
-    return index;
+    return retval;
 }
 
 static FUNC(void, DLT_CODE) Dlt_MoveWriteIndexCopy(uint16 ChannelIndex, uint8 value)
@@ -2403,12 +2421,12 @@ FUNC(uint32, DLT_CODE) Dlt_GetEcuId(void)
     return EcuId;
 }
 
-uint16 Dlt_GetMessageLength(boolean VerboseMode, uint16 PayloadLength)
+uint16 Dlt_GetMessageLength(boolean VerboseMode, uint16 PayloadLength, Dlt_OptionalFlagType OptionFlag)
 {
     uint16 Headerlength;
     uint16 messageLength;
     /* Check if the DLT use to verbose mode */
-    if (FALSE == VerboseMode)
+    if ((FALSE == VerboseMode) && (OptionFlag.Bits.UEH == 0u))
     {
         /* Get the number of bytes in the message header */
         Headerlength = DLT_STANDARD_HEADER_LENGTH;
@@ -2417,6 +2435,18 @@ uint16 Dlt_GetMessageLength(boolean VerboseMode, uint16 PayloadLength)
     {
         /* Get the number of bytes in the message header */
         Headerlength = DLT_STANDARD_HEADER_LENGTH + DLT_EXTENED_HEADER_LENGTH;
+    }
+    if (OptionFlag.Bits.WEID == 0u)
+    {
+        Headerlength -= 4u;
+    }
+    if (OptionFlag.Bits.WSID == 0u)
+    {
+        Headerlength -= 4u;
+    }
+    if (OptionFlag.Bits.WTMS == 0u)
+    {
+        Headerlength -= 4u;
     }
     /* Get the total number of bytes of the message */
     messageLength = Headerlength + PayloadLength;
@@ -2514,8 +2544,11 @@ static FUNC(void, DLT_CODE) Dlt_SendOverFlow(uint16 ChannelIndex)
     {
         VerboseMode = Dlt_ConfigPtr->Protocol->DltUseExtHeaderInNonVerbMode;
     }
+    Dlt_OptionalFlagType OptionFlag;
+    OptionFlag.AllBits = 0u;
+    Dlt_GetOptionFlag(&OptionFlag);
     /* Calculate the byte length of the DLT service response message */
-    uint16 Messagelength = Dlt_GetMessageLength(VerboseMode, DLT_BUFFER_OVER_FLOW_LENGTH);
+    uint16 Messagelength = Dlt_GetMessageLength(VerboseMode, DLT_BUFFER_OVER_FLOW_LENGTH, OptionFlag);
 
 #if ((DLT_CHANNEL_NUM > 0) && (DLT_CHANNEL_MAX_BUFFER_LENGTH > 0))
     Dlt_ChannelType* ChannelPtr = &(Dlt_Channel[ChannelIndex]);
@@ -2528,11 +2561,17 @@ static FUNC(void, DLT_CODE) Dlt_SendOverFlow(uint16 ChannelIndex)
     CreateStandardHeaderInfo.Messagelength = Messagelength;
     CreateStandardHeaderInfo.SessionId     = ChannelPtr->OverFlowInfo.SessionId;
     CreateStandardHeaderInfo.timestamp     = ChannelPtr->OverFlowInfo.timestamp;
-    uint8 offset                           = 0;
+    uint8  offset                          = 0;
+    uint16 CorrectionLength                = 0u;
+
     SchM_Enter_Dlt_MsgChannel();
 #if (STD_ON == DLT_RX_DATA_PATH_SUPPORT)
     /* Specify field fill "Standard Header" to the DLT message buffer */
-    Dlt_CreateControlStandardHeader(&CreateStandardHeaderInfo, &(ChannelPtr->SendControlBuffer[offset]));
+    Dlt_CreateControlStandardHeader(
+        &CreateStandardHeaderInfo,
+        &(ChannelPtr->SendControlBuffer[offset]),
+        &CorrectionLength,
+        OptionFlag);
 #endif /* STD_ON == DLT_RX_DATA_PATH_SUPPORT */
     offset = DLT_STANDARD_HEADER_LENGTH;
     /* Check if the extended header is support verbose mode */
@@ -2633,17 +2672,21 @@ FUNC(Std_ReturnType, DLT_CODE) Dlt_SendGetLogInfo(uint8 options, uint16 SwcIndex
         {
             /* options about registered ApplicationID/ContextID with logLevel/traceStatus information and all textual
              * descriptions of each Application ID and Context ID */
-            info_length = 23u;
+            info_length = 27u;
         }
         /* Check if the option word for the given log message is 6 */
         else if (options == 6u)
         {
             /* options about registered ApplicationID/ContextID with logLevel/traceStatus information */
-            info_length = 19u;
+            info_length = 23u;
+        }
+        else if (options == 5u)
+        {
+            info_length = 21u;
         }
         else
         {
-            info_length = 17u;
+            info_length = 9u;
         }
 
         /* Calculate the byte length of the application description in the log message */
@@ -2654,9 +2697,13 @@ FUNC(Std_ReturnType, DLT_CODE) Dlt_SendGetLogInfo(uint8 options, uint16 SwcIndex
         /* Check if the DLT message extension header is support verbose mode */
         boolean VerboseMode = Dlt_ConfigPtr->Protocol->DltUseExtHeaderInNonVerbMode;
         /* Calculate the byte length of the DLT payload content */
-        uint16 Payloadlength = lenAppDescription + lenContextDescription + info_length;
+        uint16 Payloadlength =
+            (options == 7u) ? (lenAppDescription + lenContextDescription + info_length) : (info_length);
+        Dlt_OptionalFlagType OptionFlag;
+        OptionFlag.AllBits = 0u;
+        Dlt_GetOptionFlag(&OptionFlag);
         /* Calculate the byte length of the DLT service response message */
-        uint16 Messagelength = Dlt_GetMessageLength(VerboseMode, Payloadlength);
+        uint16 Messagelength = Dlt_GetMessageLength(VerboseMode, Payloadlength, OptionFlag);
 
         /* Set the index number of the log channel */
         uint16           ChannelIndex = SwcContextInfoPtr->DltLogChannelRef[iloop];
@@ -2664,14 +2711,20 @@ FUNC(Std_ReturnType, DLT_CODE) Dlt_SendGetLogInfo(uint8 options, uint16 SwcIndex
         /* Check if the last send status of the given log channel was "DLT_WAIT_SEND". */
         if (ChannelPtr->LastSendStatus == DLT_WAIT_SEND)
         {
+            uint16 CorrectionLength = 0u;
             SchM_Enter_Dlt_MsgChannel();
             /* Create standard header for the message of the DLT given log channel */
             CreateStandardHeaderInfo.ChannelIndex  = ChannelIndex;
             CreateStandardHeaderInfo.Messagelength = Messagelength;
 #if (STD_ON == DLT_RX_DATA_PATH_SUPPORT)
-            Dlt_CreateControlStandardHeader(&CreateStandardHeaderInfo, &(ChannelPtr->SendControlBuffer[0]));
+            Dlt_CreateControlStandardHeader(
+                &CreateStandardHeaderInfo,
+                &(ChannelPtr->SendControlBuffer[0]),
+                &CorrectionLength,
+                OptionFlag);
 #endif /* STD_ON == DLT_RX_DATA_PATH_SUPPORT */
-            uint16 offset = DLT_STANDARD_HEADER_LENGTH;
+            Messagelength -= CorrectionLength;
+            uint16 offset = DLT_STANDARD_HEADER_LENGTH - CorrectionLength;
             /* Check if the DLT message extension header is support verbose mode */
             if (VerboseMode == TRUE)
             {
@@ -2690,83 +2743,112 @@ FUNC(Std_ReturnType, DLT_CODE) Dlt_SendGetLogInfo(uint8 options, uint16 SwcIndex
             /* Specify field fill "ServiceID" to the DLT message buffer */
             Dlt_CopyLongToArrayBigEndian((uint32)0x00000003, &(ChannelPtr->SendControlBuffer[offset]));
             offset += 4u;
-            /* Check if the option word for the given log message not is 5 */
-            if (options != 5u)
+            /* Check if the total length of DLT messages is greater than the maximum limit size */
+            if (Messagelength > DLT_CHANNEL_MAX_BUFFER_LENGTH)
             {
-                /* Check if the total length of DLT messages is greater than the maximum limit size */
-                if (Messagelength > DLT_CHANNEL_MAX_BUFFER_LENGTH)
-                {
-                    /* Response data OverFlow 鈥� If the generated response is too large. */
-                    /* Specify field fill "STATUS" to the DLT message buffer */
-                    ChannelPtr->SendControlBuffer[offset] = 9;
-                }
-                else
-                {
-                    /* Specify field fill "STATUS" to the DLT message buffer */
-                    ChannelPtr->SendControlBuffer[offset] = options;
-                    offset += 1u;
-                    /* Specify field fill "appIdCount" to the DLT message buffer */
-                    Dlt_CopyIntToArrayBigEndian((uint16)1, &(ChannelPtr->SendControlBuffer[offset]));
-                    offset += 2u;
-                    /* Specify field fill "appIdInfo.appID" to the DLT message buffer */
-                    Dlt_CopyLongToArrayBigEndian(SwcApplicationId, &(ChannelPtr->SendControlBuffer[offset]));
-                    offset += 4u;
-                    /* Specify field fill "contextIdCount" to the DLT message buffer */
-                    Dlt_CopyIntToArrayBigEndian((uint16)1, &(ChannelPtr->SendControlBuffer[offset]));
-                    offset += 2u;
-                    /* Specify field fill "contextIdInfoList.contextId" to the DLT message buffer */
-                    Dlt_CopyLongToArrayBigEndian(SwcContextId, &(ChannelPtr->SendControlBuffer[offset]));
-                    offset += 4u;
-                    /* Specify field fill "contextIdInfoList.logLevel" to the DLT message buffer */
-                    ChannelPtr->SendControlBuffer[offset] = (uint8)SwcContextInfoPtr->DltThreshold;
-                    offset += 1u;
-                    /* Specify field fill "contextIdInfoList.traceStatus" to the DLT message buffer */
-                    /* PRQA S 4304++ */ /* MISRA Rule 10.5 */
-                    ChannelPtr->SendControlBuffer[offset] = (uint8)SwcContextInfoPtr->TraceStatus;
-                    /* PRQA S 4304-- */ /* MISRA Rule 10.5 */
-                    offset += 1u;
-                    /* Check if the option word for the given log message is 7 */
-                    if (options == 7u)
-                    {
-                        lenAppDescription     = (uint16)SwcContextInfoPtr->lenAppDescription;
-                        lenContextDescription = (uint16)SwcContextInfoPtr->lenContextDescription;
-                        /* Specify field fill "contextIdInfoList.lenContextDescription" to the DLT message buffer */
-                        Dlt_CopyIntToArrayBigEndian(lenContextDescription, &(ChannelPtr->SendControlBuffer[offset]));
-                        offset += 2u;
-                        /* Specify field fill "contextIdInfoList.contextDesc" to the DLT message buffer */
-                        Dlt_MemCopy(
-                            &(ChannelPtr->SendControlBuffer[offset]),
-                            SwcContextInfoPtr->contextDescription,
-                            (uint32)lenContextDescription);
-                        offset += (uint16)lenContextDescription;
-                        /* Specify field fill "contextIdInfoList.appDescLen" to the DLT message buffer */
-                        Dlt_CopyIntToArrayBigEndian(lenContextDescription, &(ChannelPtr->SendControlBuffer[offset]));
-                        offset += 2u;
-                        /* Specify field fill "contextIdInfoList.appDesc" to the DLT message buffer */
-                        Dlt_MemCopy(
-                            &(ChannelPtr->SendControlBuffer[offset]),
-                            SwcContextInfoPtr->appDescription,
-                            lenAppDescription);
-                    }
-                }
+                /* Response data OverFlow If the generated response is too large. */
+                /* Specify field fill "STATUS" to the DLT message buffer */
+                ChannelPtr->SendControlBuffer[offset] = 0x09u;
+                offset += 1u;
             }
             else
             {
-                /* Specify field fill "STATUS" to the DLT message buffer */
-                ChannelPtr->SendControlBuffer[offset] = options;
-                offset += 1u;
-                /* Specify field fill "appIdCount" to the DLT message buffer */
-                Dlt_CopyIntToArrayBigEndian((uint16)1, &(ChannelPtr->SendControlBuffer[offset]));
-                offset += 2u;
-                /* Specify field fill "appIdInfo.appID" to the DLT message buffer */
-                Dlt_CopyLongToArrayBigEndian(SwcApplicationId, &(ChannelPtr->SendControlBuffer[offset]));
-                offset += 4u;
-                /* Specify field fill "contextIdCount" to the DLT message buffer */
-                Dlt_CopyIntToArrayBigEndian((uint16)1, &(ChannelPtr->SendControlBuffer[offset]));
-                offset += 2u;
-                /* Specify field fill "contextIdInfoList.contextId" to the DLT message buffer */
-                Dlt_CopyLongToArrayBigEndian(SwcContextId, &(ChannelPtr->SendControlBuffer[offset]));
+                if ((options > 4u) && (options < 8u))
+                {
+                    /* Check if the option word for the given log message not is 5 */
+                    if (options != 5u)
+                    {
+                        /* Specify field fill "STATUS" to the DLT message buffer */
+                        ChannelPtr->SendControlBuffer[offset] = options;
+                        offset += 1u;
+                        /* Specify field fill "appIdCount" to the DLT message buffer */
+                        Dlt_CopyIntToArrayBigEndian((uint16)1, &(ChannelPtr->SendControlBuffer[offset]));
+                        offset += 2u;
+                        /* Specify field fill "appIdInfo.appID" to the DLT message buffer */
+                        Dlt_CopyLongToArrayBigEndian(SwcApplicationId, &(ChannelPtr->SendControlBuffer[offset]));
+                        offset += 4u;
+                        /* Specify field fill "contextIdCount" to the DLT message buffer */
+                        Dlt_CopyIntToArrayBigEndian((uint16)1, &(ChannelPtr->SendControlBuffer[offset]));
+                        offset += 2u;
+                        /* Specify field fill "contextIdInfoList.contextId" to the DLT message buffer */
+                        Dlt_CopyLongToArrayBigEndian(SwcContextId, &(ChannelPtr->SendControlBuffer[offset]));
+                        offset += 4u;
+                        /* Specify field fill "contextIdInfoList.logLevel" to the DLT message buffer */
+                        ChannelPtr->SendControlBuffer[offset] = (uint8)SwcContextInfoPtr->DltThreshold;
+                        offset += 1u;
+                        /* Specify field fill "contextIdInfoList.traceStatus" to the DLT message buffer */
+                        /* PRQA S 4304++ */ /* MISRA Rule 10.5 */
+                        ChannelPtr->SendControlBuffer[offset] = (uint8)SwcContextInfoPtr->TraceStatus;
+                        /* PRQA S 4304-- */ /* MISRA Rule 10.5 */
+                        offset += 1u;
+                        /* Check if the option word for the given log message is 7 */
+                        if (options == 7u)
+                        {
+                            lenAppDescription     = (uint16)SwcContextInfoPtr->lenAppDescription;
+                            lenContextDescription = (uint16)SwcContextInfoPtr->lenContextDescription;
+                            /* Specify field fill "contextIdInfoList.lenContextDescription" to the DLT message buffer */
+                            Dlt_CopyIntToArrayBigEndian(
+                                lenContextDescription,
+                                &(ChannelPtr->SendControlBuffer[offset]));
+                            offset += 2u;
+                            /* Specify field fill "contextIdInfoList.contextDesc" to the DLT message buffer */
+                            Dlt_MemCopy(
+                                &(ChannelPtr->SendControlBuffer[offset]),
+                                SwcContextInfoPtr->contextDescription,
+                                (uint32)lenContextDescription);
+                            offset += (uint16)lenContextDescription;
+                            /* Specify field fill "contextIdInfoList.appDescLen" to the DLT message buffer */
+                            Dlt_CopyIntToArrayBigEndian(lenAppDescription, &(ChannelPtr->SendControlBuffer[offset]));
+                            offset += 2u;
+                            /* Specify field fill "contextIdInfoList.appDesc" to the DLT message buffer */
+                            Dlt_MemCopy(
+                                &(ChannelPtr->SendControlBuffer[offset]),
+                                SwcContextInfoPtr->appDescription,
+                                lenAppDescription);
+                            offset += (uint16)lenAppDescription;
+                        }
+                    }
+                    else
+                    {
+                        /* Specify field fill "STATUS" to the DLT message buffer */
+                        ChannelPtr->SendControlBuffer[offset] = options;
+                        offset += 1u;
+                        /* Specify field fill "appIdCount" to the DLT message buffer */
+                        Dlt_CopyIntToArrayBigEndian((uint16)1, &(ChannelPtr->SendControlBuffer[offset]));
+                        offset += 2u;
+                        /* Specify field fill "appIdInfo.appID" to the DLT message buffer */
+                        Dlt_CopyLongToArrayBigEndian(SwcApplicationId, &(ChannelPtr->SendControlBuffer[offset]));
+                        offset += 4u;
+                        /* Specify field fill "contextIdCount" to the DLT message buffer */
+                        Dlt_CopyIntToArrayBigEndian((uint16)1, &(ChannelPtr->SendControlBuffer[offset]));
+                        offset += 2u;
+                        /* Specify field fill "contextIdInfoList.contextId" to the DLT message buffer */
+                        Dlt_CopyLongToArrayBigEndian(SwcContextId, &(ChannelPtr->SendControlBuffer[offset]));
+                        offset += 4u;
+                    }
+                }
+                else
+                {
+                    if (options == 1u)
+                    {
+                        /* Specify field fill "STATUS" to the DLT message buffer */
+                        ChannelPtr->SendControlBuffer[offset] = DLT_STATUS_NOT_SUPPORTED;
+                    }
+                    else if ((options == 2u) || (options >= 8u))
+                    {
+                        /* Specify field fill "STATUS" to the DLT message buffer */
+                        ChannelPtr->SendControlBuffer[offset] = DLT_STATUS_ERROR;
+                    }
+                    else
+                    {
+                        /* Specify field fill "STATUS" to the DLT message buffer */
+                        ChannelPtr->SendControlBuffer[offset] = DLT_STATUS_OK;
+                    }
+                    offset += 1u;
+                }
             }
+            /* Load "reserved" for the message of the DLT service control response */
+            Dlt_CopyLongToArrayBigEndian(0u, &(ChannelPtr->SendControlBuffer[offset]));
             SchM_Exit_Dlt_MsgChannel();
 
             /* PRQA S 0311++ */ /* MISRA Rule 11.8 */
@@ -2906,16 +2988,15 @@ FUNC(Std_ReturnType, DLT_APPL_CODE)
 Dlt_InterSetLogChannelAssignment(
     Dlt_ApplicationIDType   appId,
     Dlt_ContextIDType       contextId,
-    Dlt_LogChannelNameType  logChannelName,
+    uint32                  channelId,
     Dlt_AssignmentOperation addRemoveOp)
 {
     Std_ReturnType ret = E_NOT_OK;
 
     boolean Find = FALSE;
     uint16  logChannelRefNum;
-
     /* The index number of the log channel is extracted by the log channel name */
-    uint16 DltLogChannelIndex = Dlt_GetChannelIndexByChannelName(logChannelName);
+    uint16 DltLogChannelIndex = Dlt_GetChannelIndexByChannelName(channelId);
 #if (1u < DLT_CHANNEL_NUM)
     /* Check if the log channel index number is valid */
     if (DltLogChannelIndex != DLT_CHANNEL_NUM)
@@ -2949,7 +3030,7 @@ Dlt_InterSetLogChannelAssignment(
                                 break;
                             }
                         }
-                        if (Find == FALSE)
+                        if ((Find == FALSE) && (logChannelRefNum < DLT_CHANNEL_NUM))
                         {
                             SchM_Enter_Dlt_SwcContext();
                             SwcContextInfoPtr->DltLogChannelRef[logChannelRefNum] = DltLogChannelIndex;
@@ -3013,7 +3094,6 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_InterSendTraceMessage(
     }
     /* The Swc index number is extracted by the session identifier */
     uint16 SwcIndex = Dlt_GetSwcSessionIdIndex(sessionId);
-#if (1u < DLT_SWC_NUM)
     /* Check if the Swc index number is valid*/
     if (SwcIndex == DLT_SWC_NUM)
     {
@@ -3021,7 +3101,6 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_InterSendTraceMessage(
         ret = DLT_E_UNKNOWN_SESSION_ID;
     }
     else
-#endif /* 1u < DLT_SWC_NUM */
     {
         /* The Swc index and trace information are used to extract the current trace status */
         boolean CurrentTraceStatus = Dlt_GetSwcTraceStatus(SwcIndex, traceInfo);
@@ -3032,8 +3111,7 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_InterSendTraceMessage(
         if (CurrentTraceStatus == TRUE)
         {
             /* Select target LogChannel */
-            Dlt_GetChannelIndex(SwcIndex, traceInfo->appId, traceInfo->contextId, ChannelIndexList);
-
+            Dlt_GetChannelIndex(SwcIndex, traceInfo->appId, traceInfo->context, ChannelIndexList);
             uint16 iloop = 0u;
             /* Traverse the list of all log channel index */
 #if (1u < DLT_CHANNEL_NUM)
@@ -3044,11 +3122,19 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_InterSendTraceMessage(
             {
                 /* Set the index number of the log channel */
                 uint16 ChannelIndex = ChannelIndexList[iloop];
-
                 /* Check if the DLT message extension header is support verbose mode */
-                boolean VerboseMode = Dlt_ConfigPtr->Protocol->DltUseExtHeaderInNonVerbMode;
+                boolean ExtHeaderInNonVerbMode = (Dlt_ConfigPtr->Protocol != NULL_PTR)
+                                                     ? Dlt_ConfigPtr->Protocol->DltUseExtHeaderInNonVerbMode
+                                                     : FALSE;
+                boolean UseVerboseMode =
+                    (Dlt_ConfigPtr->Protocol != NULL_PTR) ? Dlt_ConfigPtr->Protocol->DltUseVerboseMode : FALSE;
+                boolean VerboseModeFlag =
+                    (UseVerboseMode == TRUE) ? TRUE : ((ExtHeaderInNonVerbMode == TRUE) ? TRUE : FALSE);
+                Dlt_OptionalFlagType OptionFlag;
+                OptionFlag.AllBits = 0u;
+                Dlt_GetOptionFlag(&OptionFlag);
                 /* Calculate the byte length of the DLT service response message */
-                uint16 Messagelength = Dlt_GetMessageLength(VerboseMode, traceDataLength);
+                uint16 Messagelength = Dlt_GetMessageLength(VerboseModeFlag, traceDataLength, OptionFlag);
                 uint16 logChannelMaxMessageLength =
                     Dlt_ConfigPtr->LogOutput->LogChannel[ChannelIndex].DltLogChannelMaxMessageLength;
 #if (DLT_SWC_NUM > 0)
@@ -3091,11 +3177,12 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_InterSendTraceMessage(
                             OverFlowInfoPtr->SessionId                   = sessionId;
                             OverFlowInfoPtr->timestamp                   = timestamp;
                             OverFlowInfoPtr->SwcContext.SwcApplicationId = traceInfo->appId;
-                            OverFlowInfoPtr->SwcContext.SwcContextId     = traceInfo->contextId;
+                            OverFlowInfoPtr->SwcContext.SwcContextId     = traceInfo->context;
                             SchM_Exit_Dlt_MsgChannel();
                         }
                         else
                         {
+                            uint16                            CorrectionLength = 0u;
                             Dlt_CreateExtendedHeaderInfoTypes CreateExtendedHeaderInfo;
                             Dlt_CreateStandardHeaderInfoTypes CreateStandardHeaderInfo;
 
@@ -3105,9 +3192,9 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_InterSendTraceMessage(
                             CreateStandardHeaderInfo.Messagelength = Messagelength;
                             CreateStandardHeaderInfo.SessionId     = sessionId;
                             CreateStandardHeaderInfo.timestamp     = timestamp;
-                            Dlt_CreateStandardHeader(&CreateStandardHeaderInfo);
+                            Dlt_CreateStandardHeader(&CreateStandardHeaderInfo, &CorrectionLength);
                             /* Check if the DLT message extension header is support verbose mode */
-                            if (VerboseMode == TRUE)
+                            if (VerboseModeFlag == TRUE)
                             {
                                 /* Create extended header for the message of the DLT given log channel */
                                 CreateExtendedHeaderInfo.ChannelIndex   = ChannelIndex;
@@ -3117,7 +3204,7 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_InterSendTraceMessage(
                                 CreateExtendedHeaderInfo.traceInfo = (Dlt_MessageTraceInfoType*)traceInfo;
                                 /* PRQA S 0311-- */ /* MISRA Rule 11.8 */
                                 CreateExtendedHeaderInfo.SwcContext.SwcApplicationId = traceInfo->appId;
-                                CreateExtendedHeaderInfo.SwcContext.SwcContextId     = traceInfo->contextId;
+                                CreateExtendedHeaderInfo.SwcContext.SwcContextId     = traceInfo->context;
                                 Dlt_CreateExtendedHeader(&CreateExtendedHeaderInfo);
                             }
                             /* Copies the user's trace data into the buffer of the given log channel */
@@ -3159,7 +3246,6 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_InterSendLogMessage(
     }
     /* The Swc index number is extracted by the session identifier */
     uint16 SwcIndex = Dlt_GetSwcSessionIdIndex(sessionId);
-#if (1u < DLT_SWC_NUM)
     /* Check if the Swc index number is valid*/
     if (SwcIndex == DLT_SWC_NUM)
     {
@@ -3167,7 +3253,6 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_InterSendLogMessage(
         ret = DLT_E_UNKNOWN_SESSION_ID;
     }
     else
-#endif /* 1u < DLT_CHANNEL_NUM */
     {
 #if (DLT_CHANNEL_NUM > 0)
         boolean Filter;
@@ -3194,11 +3279,19 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_InterSendLogMessage(
             {
                 /* Set the index number of the log channel */
                 uint16 ChannelIndex = ChannelIndexList[iloop];
-
                 /* Check if the DLT message extension header is support verbose mode */
-                boolean VerboseMode = Dlt_ConfigPtr->Protocol->DltUseExtHeaderInNonVerbMode;
+                boolean ExtHeaderInNonVerbMode = (Dlt_ConfigPtr->Protocol != NULL_PTR)
+                                                     ? Dlt_ConfigPtr->Protocol->DltUseExtHeaderInNonVerbMode
+                                                     : FALSE;
+                boolean UseVerboseMode =
+                    (Dlt_ConfigPtr->Protocol != NULL_PTR) ? Dlt_ConfigPtr->Protocol->DltUseVerboseMode : FALSE;
+                boolean VerboseModeFlag =
+                    (UseVerboseMode == TRUE) ? TRUE : ((ExtHeaderInNonVerbMode == TRUE) ? TRUE : FALSE);
+                Dlt_OptionalFlagType OptionFlag;
+                OptionFlag.AllBits = 0u;
+                Dlt_GetOptionFlag(&OptionFlag);
                 /* Calculate the byte length of the DLT service response message */
-                uint16 Messagelength = Dlt_GetMessageLength(VerboseMode, logDataLength);
+                uint16 Messagelength = Dlt_GetMessageLength(VerboseModeFlag, logDataLength, OptionFlag);
                 uint16 logChannelMaxMessageLength =
                     Dlt_ConfigPtr->LogOutput->LogChannel[ChannelIndex].DltLogChannelMaxMessageLength;
 #if (DLT_SWC_NUM > 0)
@@ -3246,6 +3339,7 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_InterSendLogMessage(
                         }
                         else
                         {
+                            uint16                            CorrectionLength = 0u;
                             Dlt_CreateExtendedHeaderInfoTypes CreateExtendedHeaderInfo;
                             Dlt_CreateStandardHeaderInfoTypes CreateStandardHeaderInfo;
 
@@ -3255,9 +3349,9 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_InterSendLogMessage(
                             CreateStandardHeaderInfo.Messagelength = Messagelength;
                             CreateStandardHeaderInfo.SessionId     = sessionId;
                             CreateStandardHeaderInfo.timestamp     = timestamp;
-                            Dlt_CreateStandardHeader(&CreateStandardHeaderInfo);
+                            Dlt_CreateStandardHeader(&CreateStandardHeaderInfo, &CorrectionLength);
                             /* Check if the DLT message extension header is support verbose mode */
-                            if (VerboseMode == TRUE)
+                            if (VerboseModeFlag == TRUE)
                             {
                                 /* Create extended header for the message of the DLT given log channel */
                                 CreateExtendedHeaderInfo.ChannelIndex   = ChannelIndex;
@@ -3308,8 +3402,7 @@ static FUNC(void, DLT_CODE) Dlt_Tx_RemoveBuffer(uint16 ChannelIndex, uint32 Remo
         ChannelPtr->buffer[Offset] = 0u;
         if (tmp_len != Length)
         {
-            Offset  = 0u;
-            tmp_len = Length - tmp_len;
+            Offset = 0u;
             Offset++;
             ChannelPtr->buffer[Offset] = 0u;
         }
@@ -3348,7 +3441,8 @@ static FUNC(void, DLT_CODE) Dlt_MemSet(uint8* Dest, uint8 Value, uint32 Size)
 
 /* Header Type format: UEH(0),MSBF(1),WEID(2),WSID(3),WTMS(4),VERS(5-7) */
 /* Standard Header format: HTYP(1),MCNT(1),LEN(2),ECUID(4),SEID(4),TMSP(4) */
-static FUNC(void, DLT_CODE) Dlt_CreateStandardHeader(const Dlt_CreateStandardHeaderInfoTypes* CreateStandardHeader)
+static FUNC(void, DLT_CODE)
+    Dlt_CreateStandardHeader(const Dlt_CreateStandardHeaderInfoTypes* CreateStandardHeader, uint16* CorrectionLength)
 {
 #if (DLT_CHANNEL_NUM > 0)
     uint8 HeaderType = 0;
@@ -3359,6 +3453,8 @@ static FUNC(void, DLT_CODE) Dlt_CreateStandardHeader(const Dlt_CreateStandardHea
     const Dlt_ChannelType* ChannelPtr = &(Dlt_Channel[ChannelIndex]);
 
     uint8 MessageCounter = ChannelPtr->MessageCounter;
+
+    *CorrectionLength = 0u;
 
     /* Specify field fill "UEH" to the DLT message buffer */
     if (Dlt_ConfigPtr->Protocol->DltUseExtHeaderInNonVerbMode == TRUE)
@@ -3374,16 +3470,30 @@ static FUNC(void, DLT_CODE) Dlt_CreateStandardHeader(const Dlt_CreateStandardHea
     {
         HeaderType |= 0x04u;
     }
+    else
+    {
+        *CorrectionLength += 4u;
+    }
     /* Specify field fill "WSID" to the DLT message buffer */
     if (Dlt_ConfigPtr->Protocol->DltHeaderUseSessionID == TRUE)
     {
         HeaderType |= 0x08u;
+    }
+    else
+    {
+        *CorrectionLength += 4u;
     }
     /* Specify field fill "WTMS" to the DLT message buffer */
     if (Dlt_ConfigPtr->Protocol->DltHeaderUseTimestamp == TRUE)
     {
         HeaderType |= 0x10u;
     }
+    else
+    {
+        *CorrectionLength += 4u;
+    }
+
+    Messagelength -= *CorrectionLength;
 
     /* Specify field fill "VERS" to the DLT message buffer */
     HeaderType |= 0x20u;
@@ -3404,13 +3514,6 @@ static FUNC(void, DLT_CODE) Dlt_CreateStandardHeader(const Dlt_CreateStandardHea
         Dlt_MoveWriteIndexCopy(ChannelIndex, (uint8)(EcuId >> 8u));
         Dlt_MoveWriteIndexCopy(ChannelIndex, (uint8)(EcuId));
     }
-    else
-    {
-        Dlt_MoveWriteIndexCopy(ChannelIndex, 0);
-        Dlt_MoveWriteIndexCopy(ChannelIndex, 0);
-        Dlt_MoveWriteIndexCopy(ChannelIndex, 0);
-        Dlt_MoveWriteIndexCopy(ChannelIndex, 0);
-    }
     /* Specify field fill "WSID" to the DLT message buffer */
     if (Dlt_ConfigPtr->Protocol->DltHeaderUseSessionID == TRUE)
     {
@@ -3420,13 +3523,6 @@ static FUNC(void, DLT_CODE) Dlt_CreateStandardHeader(const Dlt_CreateStandardHea
         Dlt_MoveWriteIndexCopy(ChannelIndex, (uint8)(SessionId >> 8u));
         Dlt_MoveWriteIndexCopy(ChannelIndex, (uint8)(SessionId));
     }
-    else
-    {
-        Dlt_MoveWriteIndexCopy(ChannelIndex, 0);
-        Dlt_MoveWriteIndexCopy(ChannelIndex, 0);
-        Dlt_MoveWriteIndexCopy(ChannelIndex, 0);
-        Dlt_MoveWriteIndexCopy(ChannelIndex, 0);
-    }
     /* Specify field fill "WTMS" to the DLT message buffer */
     if (Dlt_ConfigPtr->Protocol->DltHeaderUseTimestamp == TRUE)
     {
@@ -3435,13 +3531,6 @@ static FUNC(void, DLT_CODE) Dlt_CreateStandardHeader(const Dlt_CreateStandardHea
         Dlt_MoveWriteIndexCopy(ChannelIndex, (uint8)(timestamp >> 16u));
         Dlt_MoveWriteIndexCopy(ChannelIndex, (uint8)(timestamp >> 8u));
         Dlt_MoveWriteIndexCopy(ChannelIndex, (uint8)(timestamp));
-    }
-    else
-    {
-        Dlt_MoveWriteIndexCopy(ChannelIndex, 0);
-        Dlt_MoveWriteIndexCopy(ChannelIndex, 0);
-        Dlt_MoveWriteIndexCopy(ChannelIndex, 0);
-        Dlt_MoveWriteIndexCopy(ChannelIndex, 0);
     }
 #endif
 }
@@ -3474,7 +3563,7 @@ static FUNC(void, DLT_CODE) Dlt_CreateExtendedHeader(const Dlt_CreateExtendedHea
     {
         if (NULL_PTR != CreateExtendedHeader->traceInfo)
         {
-            message_type = (uint8)(CreateExtendedHeader->traceInfo->options.Dlt_Bits.message_type);
+            message_type = (uint8)(CreateExtendedHeader->traceInfo->options & DLT_OPTIONS_MESSAGE_TYPE_MASK);
             /* Specify field fill "MSTP" to the DLT message buffer */
             MessageInfo |= (uint8)((uint8)message_type << 1u);
             /* PRQA S 4442++ */ /* MISRA Rule 10.3 */
@@ -3498,7 +3587,7 @@ static FUNC(void, DLT_CODE) Dlt_CreateExtendedHeader(const Dlt_CreateExtendedHea
         if (NULL_PTR != CreateExtendedHeader->logInfo)
         {
             /* PRQA S 4442++ */ /* MISRA Rule 10.3 */
-            message_type = (uint8)(CreateExtendedHeader->logInfo->options.Dlt_Bits.message_type);
+            message_type = (uint8)(CreateExtendedHeader->logInfo->options & DLT_OPTIONS_MESSAGE_TYPE_MASK);
             /* Specify field fill "MSTP" to the DLT message buffer */
             MessageInfo |= (uint8)((uint8)message_type << 1u);
             /* Specify field fill "MTIN" to the DLT message buffer */
@@ -3511,7 +3600,7 @@ static FUNC(void, DLT_CODE) Dlt_CreateExtendedHeader(const Dlt_CreateExtendedHea
     /* Specify field fill "NOAR" to the DLT message buffer */
     if ((useVerboseMode == TRUE) && (NULL_PTR != CreateExtendedHeader->logInfo))
     {
-        Dlt_MessageArgumentCountType argCount = CreateExtendedHeader->logInfo->argCount;
+        Dlt_MessageArgumentCount argCount = CreateExtendedHeader->logInfo->argCount;
         Dlt_MoveWriteIndexCopy(ChannelIndex, (uint8)argCount);
     }
     else

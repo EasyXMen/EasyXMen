@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -34,6 +34,7 @@
 /* ========================================== internal function declarations ======================================== */
 #define ECUM_START_SEC_CODE
 #include "EcuM_MemMap.h"
+#if (ECUM_SLEEP_MODE_ENABLED == STD_ON)
 /**
  * @brief Puts the ECU into the specified sleep mode.
  * @details This function transitions the ECU into the specified sleep mode by configuring the wake-up sources and
@@ -97,21 +98,6 @@ ECUM_LOCAL void EcuM_HaltSequenceExit(const EcuM_RunTimeLcType* pRt);
 ECUM_LOCAL void EcuM_SleepNotifyBswM(const EcuM_RunTimeLcType* pRt);
 
 /**
- * @brief Sets the wakeup source as valid.
- * @details This function checks if the wakeup source requires validation. If it does, it starts the validation timer
- *          and sets the timer state to valid. If no validation is required, it updates the pending and validated wakeup
- *          sources and calls the EcuM_ValidateWkEvAction function if the current state is greater than or equal to
- *          ECUM_STATE_STARTUP.
- * @param[in] pRt : Pointer to the runtime data structure containing the current state and wakeup source information.
- * @param[in] sources : The wakeup sources that need to be validated.
- * @param[in] wksIdx : Index of the wakeup source in the configuration array.
- * @reentrant FALSE
- * @synchronous TRUE
- * @trace       CPD-69019
- */
-ECUM_LOCAL void EcuM_SetWakeupIsValid(EcuM_RunTimeLcType* pRt, EcuM_WakeupSourceType sources, uint8 wksIdx);
-
-/**
  * @brief Restarts the wakeup process.
  * @details This function cancels any active alarms, restores the MCU to its normal mode if necessary,
  *          processes pending and validated wakeup sources, and initializes drivers that need restarting.
@@ -163,6 +149,22 @@ ECUM_LOCAL void EcuM_SetSlaveReadySleepFlag(void);
 #endif /*ECUM_MAX_MCU_CORE_NUM > 1*/
 
 /**
+ * @brief Executes the sleep phase of the ECU.
+ * @details This function prepares the ECU to enter a sleep mode. It determines the appropriate sleep mode based on the
+ * runtime data, and performs the necessary actions to either halt the MCU or enter a polling state. After the sleep
+ * phase, it restarts the activities required for wake-up from the polling state.
+ * @param[in] pRt : Pointer to the runtime data structure.
+ * @return Std_ReturnType
+ * @retval E_OK : The sleep phase was successfully executed.
+ * @retval E_NOT_OK : An error occurred during the sleep phase.
+ * @reentrant FALSE
+ * @synchronous TRUE
+ * @trace       CPD-64773
+ */
+ECUM_LOCAL Std_ReturnType EcuM_DoSleepPhase(EcuM_RunTimeLcType* pRt);
+#endif /*ECUM_SLEEP_MODE_ENABLED == STD_ON*/
+
+/**
  * @brief Processes pending and validated wake-up sources.
  * @details This function retrieves the pending and validated wake-up sources, and then disables them.
  *          Other wake-up sources are retained for subsequent wake-ups.
@@ -186,19 +188,6 @@ ECUM_LOCAL void EcuM_ProcessPendingAndValidatedWakeupSources(void);
 ECUM_LOCAL void EcuM_ValidateWkEvAction(uint8 wkSrcIdx);
 
 /**
- * @brief Sets the pending wake-up sources.
- * @details This function sets the specified wake-up sources as pending in the runtime data structure.
- *          It uses a critical section to ensure thread safety.
- * @param[in] pRt : Pointer to the runtime data structure.
- * @param[in] sources : Wake-up sources to be set as pending.
- * @return None
- * @reentrant FALSE
- * @synchronous TRUE
- * @trace       CPD-69022
- */
-ECUM_LOCAL void EcuM_SetPendingWakeupSources(EcuM_RunTimeLcType* pRt, EcuM_WakeupSourceType sources);
-
-/**
  * @brief Handles expired wake-up sources.
  * @details This function processes wake-up sources that have timed out. It stops the timer for the specified wake-up
  * source, clears the pending status, sets the expired status, and notifies the BSWM (Basic Software Module) of the
@@ -214,19 +203,33 @@ ECUM_LOCAL void EcuM_SetPendingWakeupSources(EcuM_RunTimeLcType* pRt, EcuM_Wakeu
 ECUM_LOCAL void EcuM_HandleExpiredWakeupSources(EcuM_RunTimeLcType* pRt, uint8 wksIdx, EcuM_WakeupSourceType sources);
 
 /**
- * @brief Executes the sleep phase of the ECU.
- * @details This function prepares the ECU to enter a sleep mode. It determines the appropriate sleep mode based on the
- * runtime data, and performs the necessary actions to either halt the MCU or enter a polling state. After the sleep
- * phase, it restarts the activities required for wake-up from the polling state.
- * @param[in] pRt : Pointer to the runtime data structure.
- * @return Std_ReturnType
- * @retval E_OK : The sleep phase was successfully executed.
- * @retval E_NOT_OK : An error occurred during the sleep phase.
+ * @brief Sets the wakeup source as valid.
+ * @details This function checks if the wakeup source requires validation. If it does, it starts the validation timer
+ *          and sets the timer state to valid. If no validation is required, it updates the pending and validated wakeup
+ *          sources and calls the EcuM_ValidateWkEvAction function if the current state is greater than or equal to
+ *          ECUM_STATE_STARTUP.
+ * @param[in] pRt : Pointer to the runtime data structure containing the current state and wakeup source information.
+ * @param[in] sources : The wakeup sources that need to be validated.
+ * @param[in] wksIdx : Index of the wakeup source in the configuration array.
  * @reentrant FALSE
  * @synchronous TRUE
- * @trace       CPD-64773
+ * @trace       CPD-69019
  */
-ECUM_LOCAL Std_ReturnType EcuM_DoSleepPhase(EcuM_RunTimeLcType* pRt);
+ECUM_LOCAL void EcuM_SetWakeupIsValid(EcuM_RunTimeLcType* pRt, EcuM_WakeupSourceType sources, uint8 wksIdx);
+
+/**
+ * @brief Sets the pending wake-up sources.
+ * @details This function sets the specified wake-up sources as pending in the runtime data structure.
+ *          It uses a critical section to ensure thread safety.
+ * @param[in] pRt : Pointer to the runtime data structure.
+ * @param[in] sources : Wake-up sources to be set as pending.
+ * @return None
+ * @reentrant FALSE
+ * @synchronous TRUE
+ * @trace       CPD-69022
+ */
+ECUM_LOCAL void EcuM_SetPendingWakeupSources(EcuM_RunTimeLcType* pRt, EcuM_WakeupSourceType sources);
+
 #define ECUM_STOP_SEC_CODE
 #include "EcuM_MemMap.h"
 /* ============================================ internal data definitions =========================================== */
@@ -269,10 +272,12 @@ Std_ReturnType EcuM_GoDownHaltPoll(EcuM_UserType UserID)
             /*EcuM_GoDownHaltPoll with shutdown target RESET or OFF initiates the SHUTDOWN Phase.*/
             ret = EcuM_DoShutDownPhase(UserID);
             break;
+#if (ECUM_SLEEP_MODE_ENABLED == STD_ON)
         case ECUM_SHUTDOWN_TARGET_SLEEP:
             /*EcuM_GoDownHaltPoll with shutdown target SLEEP initiate the SLEEP phase.*/
             ret = EcuM_DoSleepPhase(pRt);
             break;
+#endif /* ECUM_SLEEP_MODE_ENABLED == STD_ON */
         default:
             ret        = E_NOT_OK;
             detErrorId = ECUM_E_STATE_PAR_OUT_OF_RANGE;
@@ -470,7 +475,7 @@ void EcuM_CheckWakeup(EcuM_WakeupSourceType wakeupSource)
     }
 #endif /* ECUM_DEV_ERROR_DETECT == STD_ON */
 }
-/* PRQA S 1503,1505, 2814 -- */
+/* PRQA S 1503, 1505, 2814 -- */
 
 #define ECUM_STOP_SEC_CODE
 #include "EcuM_MemMap.h"
@@ -489,10 +494,8 @@ void EcuM_CheckWakeup(EcuM_WakeupSourceType wakeupSource)
  */
 void EcuM_SetWakeupEvent(EcuM_WakeupSourceType sources)
 {
-    uint32                spanTime;
-    EcuM_ShutdownModeType sleepModeId;
-    uint8                 wksIdx;
-    EcuM_RunTimeLcType*   pRt;
+    uint32              spanTime;
+    EcuM_RunTimeLcType* pRt;
 
 #if (ECUM_USE_TIMER == ECUM_TIMER_USE_GPT)
     Std_ReturnType ret;
@@ -522,13 +525,15 @@ void EcuM_SetWakeupEvent(EcuM_WakeupSourceType sources)
             /*SWS_EcuM_04138
              * Ignore all events passed in the sources parameter that are not associated
              * to the selected sleep mode*/
-            sleepModeId = pRt->SdtgNext.Mode;
+#if (ECUM_SLEEP_MODE_ENABLED == STD_ON)
+            EcuM_ShutdownModeType sleepModeId = pRt->SdtgNext.Mode;
             if ((sources & EcuM_SleepModeCfgs[sleepModeId].wkMask) != ECUM_WKSOURCE_NONE)
+#endif /*ECUM_SLEEP_MODE_ENABLED == STD_ON*/
             {
                 EcuM_SetPendingWakeupSources(pRt, sources);
 
                 /*Calculate config wake up index.*/
-                wksIdx = EcuM_WkSrcMap2CfgWkIdx(sources);
+                uint8 wksIdx = EcuM_WkSrcMap2CfgWkIdx(sources);
                 if (wksIdx != (uint8)EcuM_ConfigPtr->wkSourceNum)
                 {
                     if (EcuM_GetWakeupSourceCfgPtr(wksIdx)->checkWkupTimeout != 0uL)
@@ -660,6 +665,7 @@ uint8 EcuM_WkSrcMap2CfgWkIdx(EcuM_WakeupSourceType wkSrc)
     return wkIdx;
 }
 /* PRQA S 1505 -- */
+
 #define ECUM_STOP_SEC_CODE_FAST
 #include "EcuM_MemMap.h"
 
@@ -667,6 +673,7 @@ uint8 EcuM_WkSrcMap2CfgWkIdx(EcuM_WakeupSourceType wkSrc)
 #define ECUM_START_SEC_CODE
 #include "EcuM_MemMap.h"
 
+#if (ECUM_SLEEP_MODE_ENABLED == STD_ON)
 /* PRQA S 2814,2824 ++ */ /* VL_QAC_MultiReturn */
 /**
  * Prepares the ECU module to enter the sleep mode.
@@ -742,23 +749,26 @@ ECUM_LOCAL void EcuM_GoSleep(EcuM_RunTimeLcType* pRt)
  */
 ECUM_LOCAL void EcuM_SetWakeupIsValid(EcuM_RunTimeLcType* pRt, EcuM_WakeupSourceType sources, uint8 wksIdx)
 {
-    if ((EcuM_GetWakeupSourceCfgPtr(wksIdx)->validationTimeout != 0uL)
-        && (pRt->Wks.timerState[wksIdx] != ECUM_TIMER_VALID))
+    if (EcuM_GetWakeupSourceCfgPtr(wksIdx)->validationTimeout != 0uL)
     {
         /* Modify the process, put EcuM_StartWakeupSources into
          * EcuM_SetWakeupEvent and execute(For pending wake up source).*/
         EcuM_StartWakeupSources(sources);
+        /* req to SWS_EcuM_02712*/
+        if (pRt->Wks.timerState[wksIdx] != ECUM_TIMER_VALID)
+        {
 #if (ECUM_USE_TIMER == ECUM_TIMER_USE_GPT)
-        /*SWS_EcuM_02707
-         * Start validation timer*/
-        (void)Tm_ResetTimer100us32bit(&(pRt->Wks.wkTime[wksIdx]));
+            /*SWS_EcuM_02707
+             * Start validation timer*/
+            (void)Tm_ResetTimer100us32bit(&(pRt->Wks.wkTime[wksIdx]));
 #else  /*Use Os counter.*/
-        pRt->Wks.wkTime[wksIdx] = EcuM_CurrentTimestampMS();
+            pRt->Wks.wkTime[wksIdx] = EcuM_CurrentTimestampMS();
 #endif /*ECUM_USE_TIMER == ECUM_TIMER_USE_GPT*/
-        pRt->Wks.timerState[wksIdx] = ECUM_TIMER_VALID;
+            pRt->Wks.timerState[wksIdx] = ECUM_TIMER_VALID;
 #if (ECUM_MAX_MCU_CORE_NUM > 1)
-        pRt->Wks.coreId = pRt->coreId;
+            pRt->Wks.coreId = pRt->coreId;
 #endif /* ECUM_MAX_MCU_CORE_NUM > 1 */
+        }
     }
     else /*No validation.*/
     {
@@ -776,13 +786,13 @@ ECUM_LOCAL void EcuM_SetWakeupIsValid(EcuM_RunTimeLcType* pRt, EcuM_WakeupSource
 /**
  * @brief Setting the pending wake-up source
  */
-/* PRQA S 2814, 3673 ++ */ /* VL_QAC_MultiReturn, VL_QAC_3673 */
 /**
  * Sets the specified wakeup sources as pending for the ECU module.
  *
  * This function enters a critical section to ensure thread safety, sets the specified wakeup sources as pending, and
  * then exits the critical section.
  */
+/* PRQA S 2814, 3673 ++ */ /* VL_QAC_MultiReturn, VL_QAC_3673 */
 ECUM_LOCAL void EcuM_SetPendingWakeupSources(EcuM_RunTimeLcType* pRt, EcuM_WakeupSourceType sources)
 {
     SchM_Enter_EcuM_WkEv();
@@ -793,7 +803,7 @@ ECUM_LOCAL void EcuM_SetPendingWakeupSources(EcuM_RunTimeLcType* pRt, EcuM_Wakeu
 #endif /* ECUM_MAX_MCU_CORE_NUM > 1 */
     SchM_Exit_EcuM_WkEv();
 }
-/* PRQA S 2814,3673 -- */
+/* PRQA S 2814, 3673 -- */
 
 /* PRQA S 2814 ++ */ /* VL_QAC_MultiReturn */
 /**
@@ -950,7 +960,7 @@ ECUM_LOCAL void EcuM_PollSequence(const EcuM_RunTimeLcType* pRt)
 #if (ECUM_ALARM_CLOCK_PRESENT == STD_ON)
         /*Get the expired wakeup sources*/
         if ((ECUM_WKSOURCE_ALARMCLOCK == ((*pRt->Wks.Validated) & ECUM_WKSOURCE_ALARMCLOCK))
-            || ((pRt->GlobalClock >= pRt->MasterAlarm)) && (pRt->MasterAlarm != ECUM_MAX_ALARM_VALUES))
+            || ((pRt->GlobalClock >= pRt->MasterAlarm) && (pRt->MasterAlarm != ECUM_MAX_ALARM_VALUES)))
         {
             /*Additional Confidition to Loop: While (AlarmClockService Present AND EcuM_AlarmClock
              *  only pending event AND Alarm not expired)*/
@@ -1272,8 +1282,7 @@ ECUM_LOCAL void EcuM_ProcessPendingAndValidatedWakeupSources(void)
     EcuM_DisableWakeupSources(pendingWkSrc | validatedWkSrc);
 }
 
-/* PRQA S 2814 ++ */      /* VL_EcuM_ComputeInvalidPtr */
-/* PRQA S 2824,2934 ++ */ /* VL_EcuM_ComputeInvalidPtr */
+/* PRQA S 2814, 2824 ,2934 ++ */ /* VL_EcuM_ComputeInvalidPtr */
 /**
  * Validates a wakeup source and performs associated actions.
  *
@@ -1307,8 +1316,7 @@ ECUM_LOCAL void EcuM_ValidateWkEvAction(uint8 wkSrcIdx)
     }
 #endif /*ECUM_COMM_PNC_ENABLED == STD_ON*/
 }
-/* PRQA S 2824 ,2934 -- */
-/* PRQA S 2814 -- */
+/* PRQA S 2814, 2824 ,2934 -- */
 
 /* PRQA S 2814 ++ */ /* VL_QAC_MultiReturn */
 /**
@@ -1350,5 +1358,6 @@ ECUM_LOCAL Std_ReturnType EcuM_DoSleepPhase(EcuM_RunTimeLcType* pRt)
     return ret;
 }
 /* PRQA S 2814 -- */
+#endif /* ECUM_SLEEP_MODE_ENABLED == STD_ON */
 #define ECUM_STOP_SEC_CODE
 #include "EcuM_MemMap.h"

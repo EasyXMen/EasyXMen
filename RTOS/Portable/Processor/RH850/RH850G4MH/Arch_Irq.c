@@ -1,6 +1,6 @@
 /* PRQA S 3108++ */
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -41,11 +41,7 @@ VAR(uint32, OS_VAR) Os_IsrFE_SP;
 /*The level of the system call when a type of ISR1 is triggered.*/
 /*Provided for external use*/
 VAR(Os_CallLevelType, OS_VAR) Os_SaveLevelISR1;
-#if (TRUE == CFG_TIMING_PROTECTION_ENABLE)
-/*Trigger time protection after termination of the flag.*/
-/*Provided for external use*/
-VAR(volatile uint32, OS_VAR) Os_TprotTerminateIsr;
-#endif
+
 /* When an interrupt occurs, the stacked SP is stored in Os_ArchTempSp, and Os_ArchTempSp is stored in this parameter.
  */
 /* PRQA S 3432 ++ */ /* MISRA Rule 20.7 */
@@ -53,6 +49,9 @@ P2VAR(uint32, AUTOMATIC, OS_VAR) Os_IsrNestPcxStack;
 /*Isr1 stack top.*/
 P2VAR(uint32, AUTOMATIC, OS_VAR) Os_ISR1SP;
 /* PRQA S 3432 -- */ /* MISRA Rule 20.7 */
+/* save the physical core id */
+VAR(uint16, OS_VAR) Os_ArchPhyCoreId;
+
 #define OS_STOP_SEC_VAR_CLONE_32
 #include "Os_MemMap.h"
 
@@ -61,6 +60,21 @@ P2VAR(uint32, AUTOMATIC, OS_VAR) Os_ISR1SP;
 VAR(uint32, OS_VAR) InitInterruptFlag;
 #define OS_STOP_SEC_VAR_CLONE_32
 #include "Os_MemMap.h"
+
+#if (TRUE == CFG_TIMING_PROTECTION_ENABLE)
+#define OS_START_SEC_VAR_CLONE_8
+#include "Os_MemMap.h"
+volatile uint8 Os_TprotTerminateIsr;
+#define OS_STOP_SEC_VAR_CLONE_8
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_VAR_CLONE_8
+#include "Os_MemMap.h"
+volatile boolean Os_TprotTerminateTask;
+#define OS_STOP_SEC_VAR_CLONE_8
+#include "Os_MemMap.h"
+#endif
+
 /*=======[I N T E R N A L   D A T A]==========================================*/
 #define OS_START_SEC_VAR_CLONE_32
 #include "Os_MemMap.h"
@@ -179,7 +193,7 @@ FUNC(Os_IPLType, OS_CODE) Os_ArchGetIpl(void)
  * CallByAPI            <SuspendAllInterrupts>
  */
 /******************************************************************************/
-FUNC(void, OS_CODE) Os_ArchSuspendInt(Os_ArchMsrRefType msr)
+FUNC(uint32, OS_CODE) Os_ArchSuspendInt()
 {
     uint32 psw = OS_ARCH_REG_READ(OS_PSW_NUM);
     uint32 id = psw & 0x00000020u;
@@ -188,7 +202,7 @@ FUNC(void, OS_CODE) Os_ArchSuspendInt(Os_ArchMsrRefType msr)
     {
         Os_ArchDisableInt();
     }
-    *msr = id;
+    return id;
 }
 
 /******************************************************************************/
@@ -234,7 +248,7 @@ FUNC(void, OS_CODE) Os_EnableInterruptSource(uint32 vIsrSrc, uint32 vIsrSrcType)
     (void)vIsrSrcType;
     VAR(Os_ArchMsrType, OS_VAR) state;
 
-    Os_ArchSuspendInt(&state);
+    state = Os_ArchSuspendInt();
     OS_INTERRUPT_ENABLEREQ(vIsrSrc); /* PRQA S 0303 */ /* MISRA Rule 11.4 */
     Os_ArchRestoreInt(state);
 }
@@ -258,7 +272,7 @@ FUNC(void, OS_CODE) Os_DisableInterruptSource(uint32 vIsrSrc, uint32 vIsrSrcType
     (void)vIsrSrcType;
     VAR(Os_ArchMsrType, OS_VAR) state;
 
-    Os_ArchSuspendInt(&state);
+    state = Os_ArchSuspendInt();
     OS_INTERRUPT_DISABLEREQ(vIsrSrc); /* PRQA S 0303 */ /* MISRA Rule 11.4 */
     Os_ArchRestoreInt(state);
 }
@@ -286,7 +300,7 @@ FUNC(void, OS_CODE) Os_ClearPendingInterrupt(uint32 vIsrSrc, uint32 vIsrSrcType)
 {
     (void)vIsrSrcType;
     VAR(Os_ArchMsrType, OS_VAR) state;
-    Os_ArchSuspendInt(&state);
+    state = Os_ArchSuspendInt();
     OS_INTERRUPT_CLEARREQ(vIsrSrc); /* PRQA S 0303 */ /* MISRA Rule 11.4 */
     Os_ArchRestoreInt(state);
 }
@@ -320,6 +334,7 @@ FUNC(Os_IsrStateType, OS_CODE) Os_GetIsrSourceState(uint32 vIsrSrc, uint32 vIsrS
     }
     return isrSourceState;
 }
+
 /* OS447: Disable all interrupts in os_app during TerminateApplication. */
 #if ((OS_SC2 == CFG_SC) || (OS_SC3 == CFG_SC) || (OS_SC4 == CFG_SC))
 #if (CFG_ISR_MAX > 0)

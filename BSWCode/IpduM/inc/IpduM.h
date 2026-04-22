@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -71,6 +71,37 @@
       Risk:  Sometimes it not easy to notice what it really means.
       Prevention: None.
 
+    \li VL_IpduM_RedundantOperation
+      Reason: This operation is redundant. The value of the result is always that of the left-hand operand.
+      Risk:  Sometimes it not easy to notice what it really means.
+      Prevention: None.
+
+    \li VL_IpduM_2905
+      Reason: Constant: Positive integer value truncated by cast to a smaller unsigned type.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_IpduM_4461
+      Reason: Datatype conversion is necessary for functional usage
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_IpduM_1536
+      Reason: The tag '%1s' is declared but not used within this project.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_IpduM_1512
+      Reason: Identifier '${name}' with external linkage has separate declarations in multiple translation units.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_IpduM_1513
+      Reason: Identifier '${name}' with external linkage has separate non-defining declarations in more than one
+              location.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
     \li VL_IpduM_NotUsedWithinThisTranslationUnit
       Reason: Under some condition function will be used.
       Risk:  Not used within this translation unit.
@@ -96,7 +127,7 @@
       Risk:  Not easy to maintain or understand
       Prevention: Design and code review, and have a clear structure and annotated code.
  */
-
+/* PRQA S 1512,1513 EOF */ /* VL_IpduM_1512,VL_IpduM_1513 */
 #ifndef IPDUM_H_
 #define IPDUM_H_
 

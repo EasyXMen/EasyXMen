@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -62,12 +62,7 @@ ECUM_LOCAL EcuM_TimeType EcuM_FindNextEarliestAlarm(const EcuM_RunTimeLcType* pR
 #define ECUM_STOP_SEC_CODE
 #include "EcuM_MemMap.h"
 /* ============================================ internal data definitions =========================================== */
-#define ECUM_START_SEC_VAR_CLEARED_16
-#include "EcuM_MemMap.h"
-/* time record for the current alarm */
-ECUM_LOCAL uint16 EcuM_TimeRecord; /* PRQA S 3218 */ /* VL_EcuM_3218 */
-#define ECUM_STOP_SEC_VAR_CLEARED_16
-#include "EcuM_MemMap.h"
+
 /* ============================================ external data definitions =========================================== */
 
 /* ========================================== external function definitions ========================================= */
@@ -236,6 +231,7 @@ Std_ReturnType EcuM_AbortWakeupAlarm(EcuM_UserType user)
         }
         else
         {
+            ret        = ECUM_E_NOT_ACTIVE;
             detErrorId = ECUM_E_INVALID_PAR;
         }
     }
@@ -377,12 +373,12 @@ Std_ReturnType EcuM_SetClock(EcuM_UserType user, EcuM_TimeType time)
  */
 void EcuM_UpdateEcuMClock(EcuM_RunTimeLcType* pRt)
 {
-    EcuM_TimeRecord += ECUM_MAINFUNC_PERIOD;
+    pRt->EcuM_TimeRecord += ECUM_MAINFUNC_PERIOD;
     /*Up to 1 second.*/
-    if (ECUM_MS_TO_SECOND <= EcuM_TimeRecord)
+    if (ECUM_MS_TO_SECOND <= pRt->EcuM_TimeRecord)
     {
         SchM_Enter_EcuM_GlobalClock();
-        EcuM_TimeRecord = 0u;
+        pRt->EcuM_TimeRecord = 0u;
         pRt->GlobalClock++;
         if (pRt->GlobalClock >= pRt->MasterAlarm)
         {

@@ -1,6 +1,6 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
- * SPDX-License-Identifier: LGPL-2.1-only-with-exception OR  LicenseRef-Commercial-License
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
+ * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
  * GNU Lesser General Public License as published by the Free Software Foundation; version 2.1.
@@ -10,7 +10,8 @@
  * You should have received a copy of the GNU Lesser General Public License along with this library;
  * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  * or see <https://www.gnu.org/licenses/>.
- *
+ */
+/*
  ********************************************************************************
  **                                                                            **
  **  FILENAME    : Os_Mprot.c                                                  **
@@ -55,9 +56,9 @@
  * REQ ID               <None>
  */
 /******************************************************************************/
-/* PRQA S 3006, 1503 ++ */ /* VL_Os_3006, VL_QAC_NoUsedApi */
+/* PRQA S 3006, 1503, 6070 ++ */ /* VL_Os_3006, VL_QAC_NoUsedApi, VL_MTR_Os_STCAL */
 AccessType CheckISRMemoryAccess(ISRType ISRID, MemoryStartAddressType Address, MemorySizeType Size)
-/* PRQA S 3006, 1503 -- */
+/* PRQA S 3006, 1503, 6070 -- */
 {
     /* PRQA S 2742, 2880, 3138, 2741 ++ */ /* VL_Os_PlatformDef */
     /* PRQA S 1006 ++ */ /* VL_Os_1006 */
@@ -73,9 +74,9 @@ AccessType CheckISRMemoryAccess(ISRType ISRID, MemoryStartAddressType Address, M
 
     /* OS268 */
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
-    /* PRQA S 3432 ++ */ /* VL_Os_3432 */
+    /* PRQA S 3432, 2986 ++ */ /* VL_Os_3432, VL_Os_2986 */
     if (CHECK_ID_INVALID(ISRID, Os_CfgIsrMax_Inf))
-    /* PRQA S 3432 -- */
+    /* PRQA S 3432, 2986 -- */
     {
         Status = E_OS_ID;
     }
@@ -102,7 +103,7 @@ AccessType CheckISRMemoryAccess(ISRType ISRID, MemoryStartAddressType Address, M
         Os_TraceErrorHook(
             OSError_Save_CheckISRMemoryAccess(ISRID, Address, Size),
             OSServiceId_CheckISRMemoryAccess,
-            Status);
+            Status); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
     }
 #endif
 
@@ -516,9 +517,9 @@ AccessType Os_CheckISRMemoryAccess(ISRType ISRID, MemoryStartAddressType Address
  * REQ ID               <None>
  */
 /******************************************************************************/
-/* PRQA S 3006, 1503 ++ */ /* VL_Os_3006, VL_QAC_NoUsedApi */
+/* PRQA S 3006, 1503, 6070 ++ */ /* VL_Os_3006, VL_QAC_NoUsedApi, VL_MTR_Os_STCAL */
 AccessType CheckTaskMemoryAccess(TaskType TaskID, MemoryStartAddressType Address, MemorySizeType Size)
-/* PRQA S 3006, 1503 -- */
+/* PRQA S 3006, 1503, 6070 -- */
 {
     /* PRQA S 2742, 2880, 3138, 2741 ++ */ /* VL_Os_PlatformDef */
     /* PRQA S 1006 ++ */ /* VL_Os_1006 */
@@ -534,9 +535,9 @@ AccessType CheckTaskMemoryAccess(TaskType TaskID, MemoryStartAddressType Address
 
     /* OS268 */
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
-    /* PRQA S 3432 ++ */ /* VL_Os_3432 */
+    /* PRQA S 3432, 2986 ++ */ /* VL_Os_3432, VL_Os_2986 */
     if (CHECK_ID_INVALID(TaskID, Os_CfgTaskMax_Inf))
-    /* PRQA S 3432 -- */
+    /* PRQA S 3432, 2986 -- */
     {
         Status = E_OS_ID;
     }
@@ -563,7 +564,7 @@ AccessType CheckTaskMemoryAccess(TaskType TaskID, MemoryStartAddressType Address
         Os_TraceErrorHook(
             OSError_Save_CheckTaskMemoryAccess(TaskID, Address, Size),
             OSServiceId_CheckTaskMemoryAccess,
-            Status);
+            Status); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
     }
 #endif
     OS_EXIT_KERNEL(); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */

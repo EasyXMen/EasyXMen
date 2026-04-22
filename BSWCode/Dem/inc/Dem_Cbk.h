@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -48,7 +48,7 @@ extern "C" {
  * @synchronous   TRUE
  * @trace         CPD-67518
  */
-/* PRQA S 1512 ++ */ /* VL_Dem_1512 */
+/* PRQA S 1512 EOF */ /* VL_Dem_1512 */
 extern Std_ReturnType Dem_NvMInitAdminData(NvM_InitBlockRequestType InitBlockRequest);
 
 /**
@@ -101,7 +101,6 @@ extern Std_ReturnType Dem_NvMInitDebounceData(NvM_InitBlockRequestType InitBlock
  * @trace         CPD-67541
  */
 extern Std_ReturnType Dem_NvMJobFinished(NvM_BlockRequestType ServiceId, NvM_RequestResultType JobResult);
-/* PRQA S 1512 -- */
 
 #ifdef __cplusplus
 }

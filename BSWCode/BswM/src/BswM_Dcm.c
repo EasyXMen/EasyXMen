@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -254,7 +254,7 @@ Dcm_CommunicationModeType BswM_GetDcmCurModeStatus(NetworkHandleType dcmChIdx)
  */
 /* PRQA S 1503 ++*/ /* VL_QAC_NoUsedApi */
 BswM_EventRquestPortRuntimeType BswM_GetDcmAppUpdatedStatus(void)
-/* PRQA S 1503 ++*/ /* VL_QAC_NoUsedApi */
+/* PRQA S 1503 --*/ /* VL_QAC_NoUsedApi */
 {
     BswM_EventRquestPortRuntimeType dcmAppStatus = BSWM_INVALID_U8;
 #if (BSWM_EVENT_DCM_APPLICATION_UPDATED_INDICATION_ENABLE == STD_ON)

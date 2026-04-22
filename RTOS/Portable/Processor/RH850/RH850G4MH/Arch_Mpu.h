@@ -1,6 +1,6 @@
 /* PRQA S 3108++ */
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -63,6 +63,26 @@ Bit0: User Read
 #endif
 
 #if (TRUE == CFG_MEMORY_PROTECTION_ENABLE)
+#define OS_MPU_MPM_MPE(val)            (uint32)(val << 0U)
+#define OS_MPU_MPM_SVP(val)            (uint32)(val << 1U)
+
+#define OS_MPU_MPAT_E(val)             (uint32)(val << 7U)
+#define OS_MPU_MPAT_RG(val)            (uint32)(val << 14U)
+#define OS_MPU_MPAT_WG(val)            (uint32)(val << 15U)
+
+#define OS_MPU_USER_NONE               (0x0U)
+#define OS_MPU_USER_R                  (0x1U)
+#define OS_MPU_USER_W                  (0x2U)
+#define OS_MPU_USER_RW                 (0x3U)
+#define OS_MPU_USER_E                  (0x5U)
+#define OS_MPU_USER_N                  (0x0U)
+
+#define OS_MPU_SVC_R                   (0x1U<<3)
+#define OS_MPU_SVC_W                   (0x2U<<3)
+#define OS_MPU_SVC_RW                  (0x3U<<3)
+#define OS_MPU_SVC_E                   (0x5U<<3)
+#define OS_MPU_SVC_N                   (0x0U<<3)
+
 #define Os_ArchMemProtEnable()                                                     \
     {                                                                              \
         OS_ARCH_REG_WRITE(OS_MPM_NUM, OS_ARCH_REG_READ(OS_MPM_NUM) | 0x00000001U); \
@@ -71,6 +91,25 @@ Bit0: User Read
     {                                                                              \
         OS_ARCH_REG_WRITE(OS_MPM_NUM, OS_ARCH_REG_READ(OS_MPM_NUM) & 0xFFFFFFFEU); \
     }
+#define OS_MPU_DISABLE_REGION(region)                  \
+{                                                      \
+	OS_ARCH_REG_WRITE(OS_MPIDX_NUM, region);           \
+	OS_ARCH_REG_WRITE(OS_MPAT_NUM, OS_MPU_MPAT_E(0));  \
+}
+#define OS_MPU_ENABLE_REGION(region, access, start, end)                                        \
+{                                                                                               \
+	if ((start) <= (end))                                                                       \
+    {                                                                                           \
+	    OS_ARCH_REG_WRITE(OS_MPIDX_NUM, (region));                                              \
+	    OS_ARCH_REG_WRITE(OS_MPLA_NUM, (start) & 0xFFFFFFFCU);                                  \
+	    OS_ARCH_REG_WRITE(OS_MPUA_NUM, (end)  & 0xFFFFFFFCU);                                   \
+	    OS_ARCH_REG_WRITE(OS_MPAT_NUM, OS_MPU_MPAT_RG(1) | OS_MPU_MPAT_WG(1) | OS_MPU_MPAT_E(1) | access);  \
+    }                                                                                           \
+	else                                                                                        \
+    {                                                                                           \
+    	OS_MPU_DISABLE_REGION(region);                                                          \
+    }                                                                                           \
+}
 #else
 #define Os_ArchMemProtEnable()
 #define Os_ArchMemProtDisable()

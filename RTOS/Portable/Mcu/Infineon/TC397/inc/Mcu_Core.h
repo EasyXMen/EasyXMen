@@ -1,6 +1,5 @@
-/*******************************************************************************
-**                                                                            **
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.            **
+/**
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -10,9 +9,9 @@
  * See the GNU Lesser General Public License for more details.
  * You should have received a copy of the GNU Lesser General Public License along with this library;
  * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
- * or see <https://www.gnu.org/licenses/>.                                    **
-**                                                                            **
-********************************************************************************
+ * or see <https://www.gnu.org/licenses/>.
+ */
+/*******************************************************************************
 **                                                                            **
 **  FILENAME    :  Mcu_Core.h                                                 **
 **                                                                            **
@@ -38,12 +37,19 @@
 #define OS_REG_CUS_ID  (0xFE50U)
 
 /* Csa Management */
-#define CFG_CSA_MAX_CORE0 128U
-#define CFG_CSA_MAX_CORE1 128U
-#define CFG_CSA_MAX_CORE2 128U
-#define CFG_CSA_MAX_CORE3 128U
-#define CFG_CSA_MAX_CORE4 128U
-#define CFG_CSA_MAX_CORE5 128U
+#define CFG_CSA_MAX_CORE0 (128U)
+#define CFG_CSA_MAX_CORE1 (128U)
+#define CFG_CSA_MAX_CORE2 (128U)
+#define CFG_CSA_MAX_CORE3 (128U)
+#define CFG_CSA_MAX_CORE4 (128U)
+#define CFG_CSA_MAX_CORE5 (128U)
+
+#define OS_CPU0_CPU_ID  (0xF881FE18u)
+#define OS_CPU1_CPU_ID  (0xF883FE18u)
+#define OS_CPU2_CPU_ID  (0xF885FE18u)
+#define OS_CPU3_CPU_ID  (0xF887FE18u)
+#define OS_CPU4_CPU_ID  (0xF889FE18u)
+#define OS_CPU5_CPU_ID  (0xF88DFE18u)
 
 #define OS_CPU0_PC OS_REG32(0xF881FE08u)
 #define OS_CPU1_PC OS_REG32(0xF883FE08u)
@@ -51,13 +57,6 @@
 #define OS_CPU3_PC OS_REG32(0xF887FE08u)
 #define OS_CPU4_PC OS_REG32(0xF889FE08u)
 #define OS_CPU5_PC OS_REG32(0xF88DFE08u)
-
-#define OS_CPU0_ISP OS_REG32(0xF881FE28u)
-#define OS_CPU1_ISP OS_REG32(0xF883FE28u)
-#define OS_CPU2_ISP OS_REG32(0xF885FE28u)
-#define OS_CPU3_ISP OS_REG32(0xF887FE28u)
-#define OS_CPU4_ISP OS_REG32(0xF889FE28u)
-#define OS_CPU5_ISP OS_REG32(0xF88DFE28u)
 
 #define OS_CPU0_SYSCON OS_REG32(0xF881FE14u)
 #define OS_CPU1_SYSCON OS_REG32(0xF883FE14u)
@@ -73,6 +72,10 @@
 #define OS_CPU4_DBGSR_ADDR (0xF889FD00u)
 #define OS_CPU5_DBGSR_ADDR (0xF88DFD00u)
 
+#define CPU_ID_REG      (0xFE18U)
+#define PMU0_ID         (0xF8038508U)
+#define SMU_ID          (0xF0036808U)
+#define LMU0_MODID      (0xF8100008U)
 /*
  * SCU register
  */
@@ -82,6 +85,9 @@
 #define OS_SCU_PMCSR3 OS_REG32(0xF00360C8u)
 #define OS_SCU_PMCSR4 OS_REG32(0xF00360CCu)
 #define OS_SCU_PMCSR5 OS_REG32(0xF00360D0u)
+
+#define PERIPHERAL_VALID_ADDRESS (0xF003A000u)
+#define PERIPHERAL_INVALID_ADDRESS (0xF802A000u)
 
 /*=======[T Y P E   D E F I N I T I O N S]====================================*/
 /* Type of the core mode. */
@@ -195,48 +201,31 @@ extern void Arch_CheckCPUInformation(void);
  * REQ ID               <None>
  */
 /******************************************************************************/
-/* PRQA S 3449,3451,1512,1513 ++ */  /* VL_Os_3449, VL_Os_3451, VL_Os_1512, VL_Os_1513 */
+/* PRQA S 3449,3451,1512,1513,1753 ++ */  /* VL_Os_3449, VL_Os_3451, VL_Os_1512, VL_Os_1513, VL_Os_1753 */
 #if (CFG_TASK_MAX_CORE0 > 0U)
 extern void Os_TaskEntry_IdleCore0(void);
-#endif
-#if (CFG_TASK_MAX_CORE1 > 0U)
-extern void Os_TaskEntry_IdleCore1(void);
-#endif
-#if (CFG_TASK_MAX_CORE2 > 0U)
-extern void Os_TaskEntry_IdleCore2(void);
-#endif
-#if (CFG_TASK_MAX_CORE3 > 0U)
-extern void Os_TaskEntry_IdleCore3(void);
-#endif
-#if (CFG_TASK_MAX_CORE4 > 0U)
-extern void Os_TaskEntry_IdleCore4(void);
-#endif
-#if (CFG_TASK_MAX_CORE5 > 0U)
-extern void Os_TaskEntry_IdleCore5(void);
-#endif
-/* PRQA S 3449,3451,1512,1513 --*/
-
-/* PRQA S 1753 ++ */ /* VL_Os_1753 */
-#if (CFG_TASK_MAX_CORE0 > 0U)
 extern void IdleHook_Core0(void);
 #endif
 #if (CFG_TASK_MAX_CORE1 > 0U)
+extern void Os_TaskEntry_IdleCore1(void);
 extern void IdleHook_Core1(void);
 #endif
 #if (CFG_TASK_MAX_CORE2 > 0U)
+extern void Os_TaskEntry_IdleCore2(void);
 extern void IdleHook_Core2(void);
 #endif
-
 #if (CFG_TASK_MAX_CORE3 > 0U)
+extern void Os_TaskEntry_IdleCore3(void);
 extern void IdleHook_Core3(void);
 #endif
 #if (CFG_TASK_MAX_CORE4 > 0U)
+extern void Os_TaskEntry_IdleCore4(void);
 extern void IdleHook_Core4(void);
 #endif
 #if (CFG_TASK_MAX_CORE5 > 0U)
+extern void Os_TaskEntry_IdleCore5(void);
 extern void IdleHook_Core5(void);
 #endif
-/* PRQA S 1753 -- */
-
+/* PRQA S 3449,3451,1512,1513,1753 --*/
 #endif /* MCU_CORE_H */
 /*=======[E N D   O F   F I L E]==============================================*/

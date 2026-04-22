@@ -1,6 +1,6 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
- * SPDX-License-Identifier: LGPL-2.1-only-with-exception OR  LicenseRef-Commercial-License
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
+ * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
  * GNU Lesser General Public License as published by the Free Software Foundation; version 2.1.
@@ -10,7 +10,8 @@
  * You should have received a copy of the GNU Lesser General Public License along with this library;
  * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  * or see <https://www.gnu.org/licenses/>.
- *
+ */
+/*
  ********************************************************************************
  **                                                                            **
  **  FILENAME    : Os_Hook.c                                                   **
@@ -529,11 +530,13 @@ void Os_ApplShutdownHook(StatusType Fatalerror)
  * REQ ID               <None>
  */
 /********************************************************************/
+/* PRQA S 3450, 1290 ++ */  /* VL_Os_3450, VL_Os_1290 */
 static void Os_ProtHookTaskIsrOpt(Os_TaskIsrOptType osOpt)
+/* PRQA S 3450, 1290 -- */
 {
     Os_TaskType osRunningTaskID;
 
-    Os_TCBType* pTcb;
+    Os_TCBType* pTcb; /* PRQA S 3678 */ /* VL_Os_3678 */
 
     osRunningTaskID = Os_SCB.sysRunningTaskID;
     pTcb            = &Os_TCB[osRunningTaskID];
@@ -548,13 +551,13 @@ static void Os_ProtHookTaskIsrOpt(Os_TaskIsrOptType osOpt)
 #if ((OS_SC3 == CFG_SC) || (OS_SC4 == CFG_SC))
         if (pTcb->taskSuspendOSCount > 0u)
         {
-            pTcb->taskSuspendOSCount = 0;
+            pTcb->taskSuspendOSCount = 0u;
         }
 #endif
 
         Os_TCB[Os_SCB.sysRunningTaskID].taskIsrOpt = TP_OPT_BUTT;
         Os_TmProtTaskEnd(osRunningTaskID, TP_TASK_SUS_OS_INT);
-        Os_SuspendOsCount = 0;
+        Os_SuspendOsCount = 0u;
         Os_ArchSetIpl(Os_SaveOsIntNested, OS_ISR_ENABLE);
         break;
 
@@ -563,13 +566,13 @@ static void Os_ProtHookTaskIsrOpt(Os_TaskIsrOptType osOpt)
 #if ((OS_SC3 == CFG_SC) || (OS_SC4 == CFG_SC))
         if (pTcb->taskSuspendAllCount > 0u)
         {
-            pTcb->taskSuspendAllCount = 0;
+            pTcb->taskSuspendAllCount = 0u;
         }
 #endif
 
         Os_TCB[Os_SCB.sysRunningTaskID].taskIsrOpt = TP_OPT_BUTT;
         Os_TmProtTaskEnd(osRunningTaskID, TP_TASK_SUS_ALL_INT);
-        Os_SuspendAllCount = 0;
+        Os_SuspendAllCount = 0u;
         Os_ArchEnableAllInt_ButTimingProtInt();
         break;
 
@@ -578,7 +581,7 @@ static void Os_ProtHookTaskIsrOpt(Os_TaskIsrOptType osOpt)
 #if ((OS_SC3 == CFG_SC) || (OS_SC4 == CFG_SC))
         if (pTcb->taskDisableAllCount > 0u)
         {
-            pTcb->taskDisableAllCount = 0;
+            pTcb->taskDisableAllCount = 0u;
         }
 #endif
 
@@ -592,6 +595,7 @@ static void Os_ProtHookTaskIsrOpt(Os_TaskIsrOptType osOpt)
         break;
     }
 
+    UNUSED_PARAMETER(pTcb);
     return;
 }
 #define OS_STOP_SEC_CODE
@@ -614,12 +618,14 @@ static void Os_ProtHookTaskIsrOpt(Os_TaskIsrOptType osOpt)
  * REQ ID               <None>
  */
 /********************************************************************/
+/* PRQA S 3450 ++ */  /* VL_Os_3450 */
 static void Os_ProtHookIsr2IsrOpt(Os_TaskIsrOptType osOpt)
+/* PRQA S 3450 -- */
 {
-    Os_ICBType* pOsICB;
+    Os_ICBType* pOsICB; /* PRQA S 3678 */ /* VL_Os_3678 */
     Os_IsrType  OsIsrID;
 
-    OsIsrID = Os_SCB.sysIsrNestQueue[Os_IntNestISR2 - 2U];
+    OsIsrID = Os_SCB.sysIsrNestQueue[Os_IntNestISR2 - NUM_TWO];
     pOsICB  = &Os_ICB[OsIsrID];
     switch (osOpt)
     {
@@ -632,13 +638,13 @@ static void Os_ProtHookIsr2IsrOpt(Os_TaskIsrOptType osOpt)
 #if ((OS_SC3 == CFG_SC) || (OS_SC4 == CFG_SC))
         if (pOsICB->isrC2SuspendOSCount > 0u)
         {
-            pOsICB->isrC2SuspendOSCount = 0;
+            pOsICB->isrC2SuspendOSCount = 0u;
         }
 #endif
 
         Os_ICB[Os_SCB.sysRunningIsrCat2Id].IsrC2IsrOpt = TP_OPT_BUTT;
         Os_TmProtIsrEnd(OsIsrID, TP_ISR_CAT2_SUS_OS_INT);
-        Os_SuspendOsCount = 0;
+        Os_SuspendOsCount = 0u;
         Os_ArchSetIpl(Os_SaveOsIntNested, OS_ISR_ENABLE);
         break;
 
@@ -647,13 +653,13 @@ static void Os_ProtHookIsr2IsrOpt(Os_TaskIsrOptType osOpt)
 #if ((OS_SC3 == CFG_SC) || (OS_SC4 == CFG_SC))
         if (pOsICB->isrC2SuspendAllCount > 0u)
         {
-            pOsICB->isrC2SuspendAllCount = 0;
+            pOsICB->isrC2SuspendAllCount = 0u;
         }
 #endif
 
         Os_ICB[Os_SCB.sysRunningIsrCat2Id].IsrC2IsrOpt = TP_OPT_BUTT;
         Os_TmProtIsrEnd(OsIsrID, TP_ISR_CAT2_SUS_ALL_INT);
-        Os_SuspendAllCount = 0;
+        Os_SuspendAllCount = 0u;
         Os_ArchEnableAllInt_ButTimingProtInt();
         break;
 
@@ -676,6 +682,7 @@ static void Os_ProtHookIsr2IsrOpt(Os_TaskIsrOptType osOpt)
         break;
     }
 
+    UNUSED_PARAMETER(pOsICB);
     return;
 }
 #define OS_STOP_SEC_CODE
@@ -700,9 +707,9 @@ static void Os_ProtHookIsr2IsrOpt(Os_TaskIsrOptType osOpt)
  * REQ ID               <None>
  */
 /********************************************************************/
-/* PRQA S 6020, 6080, 3450 ++ */ /* VL_MTR_Os_STLIN, VL_MTR_Os_STPTH, VL_Os_3450 */
+/* PRQA S 6010, 6020, 6080, 3450, 6070 ++ */ /* VL_MTR_Os_STMIF, VL_MTR_Os_STLIN, VL_MTR_Os_STPTH, VL_Os_3450, VL_MTR_Os_STCAL */
 static void Os_ProtHookTerminateTask(StatusType osErrType)
-/* PRQA S 6020, 6080, 3450 -- */
+/* PRQA S 6010, 6020, 6080, 3450, 6070 -- */
 {
     (void)osErrType;
     Os_TaskType       osRunningTaskID;
@@ -973,18 +980,26 @@ static void Os_ProtHookTerminateIsrC2(StatusType osErrType)
     /* Timing protection do task_dispatch at the end of tm_prot_isr. */
     if ((E_OS_PROTECTION_LOCKED != osErrType) && (E_OS_PROTECTION_TIME != osErrType) && (E_OS_STACKFAULT != osErrType))
     {
+        /* PRQA S 3442, 2481,0306, 0310, 2743 ++ */ /* VL_Os_3442,VL_Os_2481,VL_Os_0306,VL_Os_0310,VL_Os_2743 */
+        /* PRQA S 0404, 3345 ++ */                  /*VL_Os_VolatileAccess*/
+        /* PRQA S 1006, 3415 ++ */                  /* VL_Os_1006, VL_Os_3415 */
         OS_ARCH_ISR2_EPILOGUE();
+        /* PRQA S 1006, 3415 -- */
+        /* PRQA S 0404, 3345 -- */
+        /* PRQA S 3442, 2481,0306, 0310, 2743 -- */
     }
 #else
     if (E_OS_STACKFAULT != osErrType)
     {
-        /* PRQA S 3442,2481,0306,0310,2743 ++ */ /* VL_Os_3442,VL_Os_2481,VL_Os_0306,VL_Os_0310,VL_Os_2743 */
-        /* PRQA S 0404,3345 ++ */                /*VL_Os_VolatileAccess*/
-        /* PRQA S 1006, 3415 ++ */                     /* VL_Os_1006, VL_Os_3415 */
+        /* PRQA S 3442, 2481, 0306, 0310, 2743 ++ */ /* VL_Os_3442,VL_Os_2481,VL_Os_0306,VL_Os_0310,VL_Os_2743 */
+        /* PRQA S 0404, 3345 ++ */                   /*VL_Os_VolatileAccess*/
+        /* PRQA S 1006, 3415, 0499, 4397 ++ */      /* VL_Os_1006, VL_Os_3415, VL_Os_0499, VL_Os_4397 */
+        /* PRQA S 1520 ++ */ /* VL_Os_1520 */
         OS_ARCH_ISR2_EPILOGUE();
-        /* PRQA S 1006, 3415 -- */
-        /* PRQA S 0404,3345 -- */
-        /* PRQA S 3442,2481,0306,0310,2743 -- */
+        /* PRQA S 1520 -- */
+        /* PRQA S 1006, 3415, 0499, 4397 -- */
+        /* PRQA S 0404, 3345 -- */
+        /* PRQA S 3442, 2481, 0306, 0310, 2743 -- */
     }
 #endif /* TRUE == CFG_TIMING_PROTECTION_ENABLE */
 
@@ -1023,7 +1038,9 @@ static void Os_ProtHookTermTaskIsr(uint32 osWhoHook, StatusType osErrType)
 #if (CFG_ISR2_MAX > 0)
     if (OS_TMPROT_HOOK_ISR == osWhoHook)
     {
+        /* PRQA S 1520 ++ */ /* VL_Os_1520 */
         Os_ProtHookTerminateIsrC2(osErrType);
+        /* PRQA S 1520 -- */
     }
 #endif
 
@@ -1099,7 +1116,9 @@ static void Os_ProtHookTermAppl(StatusType osErrType, RestartType RestartOption,
     else
     {
         /* Call TerminateApplication. */
+        /* PRQA S 1520 ++ */ /* VL_Os_1520 */
         Os_TerminateApplication(Os_SCB.sysRunningAppID, RestartOption);
+        /* PRQA S 1520 -- */
 
         Os_SCB.sysRunningAppID = RunApplIdTemp;
     }
@@ -1202,9 +1221,9 @@ static void Os_ProtHookShutdownOS(StatusType Error) /* PRQA S 3450 */ /* VL_Os_3
  * REQ ID               <None>
  */
 /********************************************************************/
-/* PRQA S 6010, 6070 ++ */ /* VL_MTR_Os_STCYC, VL_MTR_Os_STCAL */
+/* PRQA S 6010, 6070, 1532 ++ */ /* VL_MTR_Os_STCYC, VL_MTR_Os_STCAL, VL_QAC_OneFunRef */
 ProtectionReturnType Os_CallProtectionHook(StatusType osErrType, uint32 osWhoHook)
-/* PRQA S 6010, 6070 -- */
+/* PRQA S 6010, 6070, 1532 -- */
 {
     ProtectionReturnType osRet;
 
@@ -1243,11 +1262,13 @@ ProtectionReturnType Os_CallProtectionHook(StatusType osErrType, uint32 osWhoHoo
         break;
 
     case PRO_TERMINATETASKISR:
-        /* PRQA S 1881 ++ */ /* VL_QAC_AutosarBool */
+        /* PRQA S 1881 ++ */ /* VL_Os_AutosarBool */
         if ((boolean)E_OK == Os_CheckRunningTaskIDandIsr2ID(osWhoHook))
         /* PRQA S 1881 -- */
         {
+            /* PRQA S 1520 ++ */ /* VL_Os_1520 */
             Os_ProtHookTermTaskIsr(osWhoHook, osErrType);
+            /* PRQA S 1520 -- */
             break; /* PRQA S 3333 */ /* VL_Os_3333 */
         }
 /*OS243
@@ -1262,7 +1283,9 @@ terminated by the Operating System
         if (Os_SCB.sysRunningAppID < Os_SCB.sysAppId)
 #endif /* TRUE == CFG_TIMING_PROTECTION_ENABLE */
         {
+            /* PRQA S 1520 ++ */ /* VL_Os_1520 */
             Os_ProtHookTermAppl(osErrType, NO_RESTART, osWhoHook);
+            /* PRQA S 1520 -- */
             break; /* PRQA S 3333 */ /* VL_Os_3333 */
         }
 #endif /* OS_SC3 == CFG_SC || OS_SC4 == CFG_SC */
@@ -1281,7 +1304,9 @@ terminated by the Operating System
         if (Os_SCB.sysRunningAppID < Os_SCB.sysAppId)
 #endif /* TRUE == CFG_TIMING_PROTECTION_ENABLE */
         {
+            /* PRQA S 1520 ++ */ /* VL_Os_1520 */
             Os_ProtHookTermAppl(osErrType, NO_RESTART, osWhoHook);
+            /* PRQA S 1520 -- */
             break; /* PRQA S 3333 */ /* VL_Os_3333 */
         }
 #endif /* OS_SC3 == CFG_SC || OS_SC4 == CFG_SC */
@@ -1296,7 +1321,9 @@ terminated by the Operating System
         if (Os_SCB.sysRunningAppID < Os_SCB.sysAppId)
 #endif /* TRUE == CFG_TIMING_PROTECTION_ENABLE */
         {
+            /* PRQA S 1520 ++ */ /* VL_Os_1520 */
             Os_ProtHookTermAppl(osErrType, RESTART, osWhoHook);
+            /* PRQA S 1520 -- */
             break; /* PRQA S 3333 */ /* VL_Os_3333 */
         }
 #endif /* OS_SC3 == CFG_SC || OS_SC4 == CFG_SC */

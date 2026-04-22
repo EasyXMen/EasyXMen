@@ -1,6 +1,6 @@
 /* PRQA S 3108++ */
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -87,11 +87,6 @@
 #define OS_REG_VTOR OS_REG32(0xE000ED08u)
 
 /* Interrupt priority conversion */
-#ifdef COMPLIER_IAR
-#define OS_NVIC_PRIO_BITS (5u)
-#else
-#define OS_NVIC_PRIO_BITS     (4u)
-#endif
 #define OS_NVIC_PRIO_SHIFT (8u - OS_NVIC_PRIO_BITS)
 #define OS_NVIC_PRIO_MIN 0x00u
 #define OS_NVIC_PRIO_MAX 0xFFu
@@ -101,7 +96,8 @@
 #define OS_NVIC_CONVERT_GET_PRIO(prio) (uint8)(((prio) ^ 0xFFu) >> OS_NVIC_PRIO_SHIFT)
 #define OS_NVIC_CONVERT_SET_PRIO(prio) (uint8)(((prio) ^ 0xFFu) << OS_NVIC_PRIO_SHIFT)
 
-#define OS_NVIC_NUM (255u)
+#define OS_ISR_EXTERNAL_NUM 16u
+#define OS_ISR_SYSTICK_ID 15u
 
 /*-----------------------------Interrupt Macro-------------------------------*/
 /* PRQA S 3472,2013 ++*/ /* MISRA Dir-4.9,Rule 15.7 */
@@ -142,7 +138,7 @@
 /* PRQA S 3472,2013 --*/ /* MISRA Dir-4.9,Rule 15.7 */
 /*Set interrupt pending */
 #define OS_INTERRUPT_SET_PENDING(id) OS_NVIC_STIR = ((uint32)(id) - 16u) & 0x1FFu /* PRQA S 3409*/ /* MISRA PRE02 */
-#define OS_INTERRUPT_TRIGGER(isrId) OS_INTERRUPT_SET_PENDING(Os_GetNvicIrqId(Os_IsrCfg[Os_GetObjLocalId(isrId)].OsIsrSrc))
+#define OS_INTERRUPT_TRIGGER(isrId) OS_INTERRUPT_SET_PENDING(Os_IsrCfg[Os_GetObjLocalId(isrId)].OsIsrSrc)
 /*Clear interrupt pending */
 /* PRQA S 3409++*/ /* MISRA PRE02 */
 #define OS_INTERRUPT_CLEAR_PENDING(id)                              \
@@ -216,9 +212,9 @@
 /* Critical Macro */
 #define OS_ARCH_DECLARE_CRITICAL() Os_ArchMsrType msr
 /* PRQA S 3472++ */ /* MISRA Dir-4.9 */
-#define OS_ARCH_ENTRY_CRITICAL() Os_ArchSuspendOsInt(&msr)
+#define OS_ARCH_ENTRY_CRITICAL() (msr = Os_ArchSuspendOsInt())
 #define OS_ARCH_EXIT_CRITICAL()  Os_ArchRestoreOsInt(msr)
-#define OS_ARCH_SUSPEND_ALLINT() Os_ArchSuspendInt(&msr)
+#define OS_ARCH_SUSPEND_ALLINT() (msr = Os_ArchSuspendInt())
 #define OS_ARCH_RESTORE_ALLINT() Os_ArchRestoreInt(msr)
 #define OS_TASK_SWITCH_PROC() Os_ArchDispatch_ISR()
 /* PRQA S 3472-- */ /* MISRA Dir-4.9 */
@@ -480,74 +476,74 @@
 
 /*=======[T Y P E   D E F I N I T I O N S]====================================*/
 /* type of an Interrupt Service Routine (ISR) */
-
+typedef void (*Os_isrhnd)(void);
 typedef uint32 Os_ArchMsrType;
 /*=======[E X T E R N A L   D A T A   D E C L A R A T I O N S]================*/
-extern VAR(uint32, OS_VAR) Os_ISRxPSRStack[CFG_ISR_MAX];
+extern uint32 Os_ISRxPSRStack[CFG_ISR_MAX];
 
 #if (CFG_ISR_MAX > 0U)
-extern VAR(Os_CallLevelType, OS_VAR) Os_SaveLevelISR1;
+extern Os_CallLevelType Os_SaveLevelISR1;
 #endif /* #if (CFG_ISR_MAX > 0U) */ /* PRQA S 2053 */ /* MISRA Rule 18.8 */
 
 #if (TRUE == CFG_MEMORY_PROTECTION_ENABLE)
-extern VAR(uint16, OS_VAR) HardFault_Flag;
+extern uint16 HardFault_Flag;
 #endif
 
 #if (TRUE == CFG_TIMING_PROTECTION_ENABLE)
-extern VAR(volatile uint32, OS_VAR) Os_TprotTerminateIsr;
+extern volatile uint32 Os_TprotTerminateIsr;
 #endif
 #if (TRUE == CFG_TIMING_PROTECTION_ENABLE)
-extern VAR(volatile uint32, OS_VAR) Os_TprotTerminateTask;
+extern volatile uint32 Os_TprotTerminateTask;
 #endif
 
-extern VAR(uint32, OS_VAR) Os_ArchTempSysSp;
-extern VAR(uint32, OS_VAR) Os_ArchMasterSp_ARRAY[CFG_ISR_MAX];
-extern VAR(uint32, OS_VAR) Os_IsrTempIPSR;
+extern uint32 Os_ArchTempSysSp;
+extern uint32 Os_ArchMasterSp_ARRAY[CFG_ISR_MAX];
+extern uint32 Os_IsrTempIPSR;
 
 extern uint32 Os_GlobalVector[OS_NVIC_NUM + 1u];
 extern uint32 Os_LocalVector[OS_NVIC_NUM + 1u];
 
 /*=======[E X T E R N A L   F U N C T I O N   D E C L A R A T I O N S]========*/
 /* PRQA S 3432++ */ /* MISRA Rule 20.7 */
-extern FUNC(void, OS_CODE) Os_ArchSuspendInt(P2VAR(Os_ArchMsrType, AUTOMATIC, OS_VAR) msr);
+extern Os_ArchMsrType Os_ArchSuspendInt(void);
 /* PRQA S 3432-- */ /* MISRA Rule 20.7 */
-extern FUNC(void, OS_CODE) Os_ArchRestoreInt(Os_ArchMsrType msr);
+extern void Os_ArchRestoreInt(Os_ArchMsrType msr);
 #if ((OS_SC3 == CFG_SC) || (OS_SC4 == CFG_SC))
 #if (CFG_ISR_MAX > 0)
-extern FUNC(void, OS_CODE) Os_ArchAppTerminateIsrProc(Os_IsrType OsIsrID);
-extern FUNC(void, OS_CODE) Os_ArchDisableIntInApp(P2CONST(Os_ApplicationCfgType, AUTOMATIC, OS_VAR) posCurAppCfg);
+extern void Os_ArchAppTerminateIsrProc(Os_IsrType OsIsrID);
+extern void Os_ArchDisableIntInApp(P2CONST(Os_ApplicationCfgType, AUTOMATIC, OS_VAR) posCurAppCfg);
 #endif
 #endif
 
-extern FUNC(void, OS_CODE) TERMINATEISR_ISR(void);
+extern void TERMINATEISR_ISR(void);
 
-extern FUNC(void, OS_CODE) HardFault_Handler(void);
-extern FUNC(void, OS_CODE) PendSV_Handler(void);
-extern FUNC(void, OS_CODE) Os_IntHandler(void);
-extern FUNC(void, OS_CODE) Reset_Handler(void);
-extern FUNC(void, OS_CODE) NMI_Handler(void);
-extern FUNC(void, OS_CODE) MemManage_Handler(void);
-extern FUNC(void, OS_CODE) BusFault_Handler(void);
-extern FUNC(void, OS_CODE) UsageFault_Handler(void);
-extern FUNC(void, OS_CODE) Os_SVC_Handler(void);
-extern FUNC(void, OS_CODE) DebugMon_Handler(void);
-extern FUNC(void, OS_CODE) SysTick_Handler(void);
-extern FUNC(void, OS_CODE) armv7_default_isr(void);
+extern void HardFault_Handler(void);
+extern void PendSV_Handler(void);
+extern void Os_IntHandler(void);
+extern void Reset_Handler(void);
+extern void NMI_Handler(void);
+extern void MemManage_Handler(void);
+extern void BusFault_Handler(void);
+extern void UsageFault_Handler(void);
+extern void Os_SVC_Handler(void);
+extern void DebugMon_Handler(void);
+extern void SysTick_Handler(void);
+extern void armv7_default_isr(void);
 
 extern uint32 Os_Isr2_Ipl_Limit;
 /*PRQA S 3672 ++*/ /*MISRA CWE-398*/
-extern FUNC(void, OS_CODE) Os_InterruptInstall(uint8 id, uint8 prio, uint32 srcType, Os_isrhnd isrProc);
+extern void Os_InterruptInstall(uint8 id, uint8 prio, uint32 srcType, Os_isrhnd isrProc);
 /*PRQA S 3672 --*/ /*MISRA CWE-398*/
-extern FUNC(void, OS_CODE) Os_InterruptInit(void);
-extern FUNC(Os_IPLType, OS_CODE) Os_ArchGetIpl(void);
-extern FUNC(void, OS_CODE) Os_ArchSetIpl(Os_IPLType ipl, Os_IsrDescriptionType isrdesc);
-extern FUNC(void, OS_CODE) Os_DisableInterruptSource(uint32 vIsrSrc, uint32 vIsrSrcType);
-extern FUNC(void, OS_CODE) Os_ClearPendingInterrupt(uint32 vIsrSrc, uint32 vIsrSrcType);
-extern FUNC(Os_IsrStateType, OS_CODE) Os_GetIsrSourceState(uint32 vIsrSrc, uint32 vIsrSrcType);
-extern FUNC(void, OS_CODE) Os_EnableInterruptSource(uint32 vIsrSrc, uint32 vIsrSrcType);
+extern void Os_InterruptInit(void);
+extern Os_IPLType Os_ArchGetIpl(void);
+extern void Os_ArchSetIpl(Os_IPLType ipl, Os_IsrDescriptionType isrdesc);
+extern void Os_DisableInterruptSource(uint32 vIsrSrc, uint32 vIsrSrcType);
+extern void Os_ClearPendingInterrupt(uint32 vIsrSrc, uint32 vIsrSrcType);
+extern Os_IsrStateType Os_GetIsrSourceState(uint32 vIsrSrc, uint32 vIsrSrcType);
+extern void Os_EnableInterruptSource(uint32 vIsrSrc, uint32 vIsrSrcType);
 /* PRQA S 3432++ */ /* MISRA Rule 20.7 */
-extern FUNC(void, OS_CODE) Os_ArchSuspendOsInt(P2VAR(Os_ArchMsrType, AUTOMATIC, OS_VAR) msr);
+extern Os_ArchMsrType Os_ArchSuspendOsInt(void);
 /* PRQA S 3432-- */ /* MISRA Rule 20.7 */
-extern FUNC(void, OS_CODE) Os_ArchRestoreOsInt(Os_ArchMsrType msr);
+extern void Os_ArchRestoreOsInt(Os_ArchMsrType msr);
 #endif /* #ifndef ARCH_IRQ_H */ /* PRQA S 2053 */ /* MISRA Rule 18.8 */
 /*=======[E N D   O F   F I L E]==============================================*/

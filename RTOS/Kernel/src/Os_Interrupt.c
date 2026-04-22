@@ -1,6 +1,6 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
- * SPDX-License-Identifier: LGPL-2.1-only-with-exception OR  LicenseRef-Commercial-License
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
+ * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
  * GNU Lesser General Public License as published by the Free Software Foundation; version 2.1.
@@ -10,7 +10,8 @@
  * You should have received a copy of the GNU Lesser General Public License along with this library;
  * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  * or see <https://www.gnu.org/licenses/>.
- *
+ */
+/*
  ********************************************************************************
  **                                                                            **
  **  FILENAME    : Interrupt.c                                                 **
@@ -202,7 +203,7 @@ static void Os_DisableAllInterrupts(void)
 
     Os_ArchDisableAllInt_ButTimingProtInt();
 #else
-    Os_ArchSuspendInt(&Os_SaveAllInt);
+    Os_SaveAllInt = Os_ArchSuspendInt();
 #endif /* TRUE == CFG_TIMING_PROTECTION_ENABLE */
 }
 #define OS_STOP_SEC_CODE
@@ -427,9 +428,9 @@ void SuspendOSInterrupts(void)
  * REQ ID               <None>
  */
 /******************************************************************************/
-/* PRQA S 6030, 6070, 3006, 1503 ++ */ /* VL_MTR_Os_STMIF, VL_MTR_Os_STCAL, VL_Os_3006, VL_QAC_NoUsedApi */
+/* PRQA S 6030, 6070, 3006, 1503, 6010 ++ */ /* VL_MTR_Os_STMIF, VL_MTR_Os_STCAL, VL_Os_3006, VL_QAC_NoUsedApi, VL_MTR_Os_STCYC */
 StatusType EnableInterruptSource(ISRType ISRID, boolean ClearPending)
-/* PRQA S 6030, 6070, 3006, 1503 -- */
+/* PRQA S 6030, 6070, 3006, 1503, 6010 -- */
 {
     /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
     /* PRQA S 1006 ++ */ /* VL_Os_1006 */
@@ -439,11 +440,13 @@ StatusType EnableInterruptSource(ISRType ISRID, boolean ClearPending)
 
     StatusType err   = E_OK;
     ISRType    isrId = Os_GetObjLocalId(ISRID);
+    uint32 vIsrSrc     = Os_IsrCfg[isrId].OsIsrSrc;
+    uint32 vIsrSrcType = Os_IsrCfg[isrId].OsIsrSrcType;
 
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
-    /* PRQA S 3432 ++ */ /* VL_Os_3432 */
+    /* PRQA S 3432, 2986 ++ */ /* VL_Os_3432, VL_Os_2986 */
     if (CHECK_ID_INVALID(ISRID, Os_CfgIsr2Max_Inf))
-    /* PRQA S 3432 -- */
+    /* PRQA S 3432, 2986 -- */
     {
         err = E_OS_ID;
     }
@@ -451,19 +454,16 @@ StatusType EnableInterruptSource(ISRType ISRID, boolean ClearPending)
     {
         err = E_OS_ID;
     }
+    else if (OS_ISR_ENABLED == Os_GetIsrSourceState(vIsrSrc, vIsrSrcType))
+    {
+        err = E_OS_NOFUNC;
+    }
     /*SWS_Os_00809*/
     else
 #endif
     {
-        uint32 vIsrSrc     = Os_IsrCfg[isrId].OsIsrSrc;
-        uint32 vIsrSrcType = Os_IsrCfg[isrId].OsIsrSrcType;
-
-        if (OS_ISR_ENABLED == Os_GetIsrSourceState(vIsrSrc, vIsrSrcType))
-        {
-            err = E_OS_NOFUNC;
-        }
 #if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
-        else if (Os_WrongContext(OS_CONTEXT_ENABLE_INTERRUPT_SOURCE) != TRUE)
+        if (Os_WrongContext(OS_CONTEXT_ENABLE_INTERRUPT_SOURCE) != TRUE)
         {
             err = E_OS_CALLEVEL;
         }
@@ -485,10 +485,12 @@ StatusType EnableInterruptSource(ISRType ISRID, boolean ClearPending)
 #if (CFG_ERRORHOOK == TRUE)
     if (err != E_OK)
     {
+        /* PRQA S 3138, 3141 ++ */ /* VL_Os_3138, VL_Os_3141 */
         Os_TraceErrorHook(
             OSError_Save_EnableInterruptSource(ISRID, ClearPending),
             OSServiceId_EnableInterruptSource,
             err);
+        /* PRQA S 3138, 3141 -- */
     }
 #endif
 
@@ -519,9 +521,9 @@ StatusType EnableInterruptSource(ISRType ISRID, boolean ClearPending)
  * REQ ID               <None>
  */
 /******************************************************************************/
-/* PRQA S 6030, 3006, 1503 ++ */ /* VL_MTR_Os_STMIF, VL_Os_3006, VL_QAC_NoUsedApi */
+/* PRQA S 6030, 3006, 1503, 6070 ++ */ /* VL_MTR_Os_STMIF, VL_Os_3006, VL_QAC_NoUsedApi, VL_MTR_Os_STCAL */
 StatusType DisableInterruptSource(ISRType ISRID)
-/* PRQA S 6030, 3006, 1503 -- */
+/* PRQA S 6030, 3006, 1503, 6070 -- */
 {
     /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
     /* PRQA S 1006 ++ */ /* VL_Os_1006 */
@@ -532,11 +534,13 @@ StatusType DisableInterruptSource(ISRType ISRID)
     StatusType err = E_OK;
 
     ISRType isrId = Os_GetObjLocalId(ISRID);
+    uint32 vIsrSrc     = Os_IsrCfg[isrId].OsIsrSrc;
+    uint32 vIsrSrcType = Os_IsrCfg[isrId].OsIsrSrcType;
 
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
-    /* PRQA S 3432 ++ */ /* VL_Os_3432 */
+    /* PRQA S 3432, 2986 ++ */ /* VL_Os_3432, VL_Os_2986 */
     if (CHECK_ID_INVALID(ISRID, Os_CfgIsr2Max_Inf))
-    /* PRQA S 3432 -- */
+    /* PRQA S 3432, 2986 -- */
     {
         err = E_OS_ID;
     }
@@ -544,19 +548,16 @@ StatusType DisableInterruptSource(ISRType ISRID)
     {
         err = E_OS_ID;
     }
+    else if (OS_ISR_DISABLED == Os_GetIsrSourceState(vIsrSrc, vIsrSrcType))
+    {
+        err = E_OS_NOFUNC;
+    }
     /*SWS_Os_00809*/
     else
 #endif
     {
-        uint32 vIsrSrc     = Os_IsrCfg[isrId].OsIsrSrc;
-        uint32 vIsrSrcType = Os_IsrCfg[isrId].OsIsrSrcType;
-
-        if (OS_ISR_DISABLED == Os_GetIsrSourceState(vIsrSrc, vIsrSrcType))
-        {
-            err = E_OS_NOFUNC;
-        }
 #if (TRUE == CFG_SERVICE_PROTECTION_ENABLE)
-        else if (Os_WrongContext(OS_CONTEXT_DISABLE_INTERRUPT_SOURCE) != TRUE)
+        if (Os_WrongContext(OS_CONTEXT_DISABLE_INTERRUPT_SOURCE) != TRUE)
         {
             err = E_OS_CALLEVEL;
         }
@@ -574,7 +575,9 @@ StatusType DisableInterruptSource(ISRType ISRID)
 #if (CFG_ERRORHOOK == TRUE)
     if (err != E_OK)
     {
+        /* PRQA S 3138 ++ */ /* VL_Os_3138 */
         Os_TraceErrorHook(OSError_Save_DisableInterruptSource(ISRID), OSServiceId_DisableInterruptSource, err);
+        /* PRQA S 3138 -- */
     }
 #endif
 
@@ -618,9 +621,9 @@ StatusType ClearPendingInterrupt(ISRType ISRID)
     ISRType isrId = Os_GetObjLocalId(ISRID);
 
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
-    /* PRQA S 3432 ++ */ /* VL_Os_3432 */
+    /* PRQA S 3432, 2986 ++ */ /* VL_Os_3432, VL_Os_2986 */
     if (CHECK_ID_INVALID(ISRID, Os_CfgIsr2Max_Inf))
-    /* PRQA S 3432 -- */
+    /* PRQA S 3432, 2986 -- */
     {
         err = E_OS_ID;
     }
@@ -652,7 +655,9 @@ StatusType ClearPendingInterrupt(ISRType ISRID)
 #if (CFG_ERRORHOOK == TRUE)
     if (err != E_OK)
     {
+        /* PRQA S 3138 ++ */ /* VL_Os_3138 */
         Os_TraceErrorHook(OSError_Save_ClearPendingInterrupt(ISRID), OSServiceId_ClearPendingInterrupt, err);
+        /* PRQA S 3138 -- */
     }
 #endif
 
@@ -822,7 +827,7 @@ void Os_ResumeAllInterrupts(void) /* PRQA S 1505 */ /* VL_Os_1505 */
 #if (CFG_INTERRUPT_MONITOR_ENABLE == TRUE)
             if (TRUE == Os_InterInitFlag)
             {
-                Os_InterMonitorEndRecord(OS_ALL_SUSPEND);
+                Os_InterMonitorEndRecord(OS_ALL_SUSPEND); /* PRQA S 3200 */ /* VL_Os_3200 */
             }
 #endif
             Os_ArchEnableAllInt_ButTimingProtInt();
@@ -832,7 +837,7 @@ void Os_ResumeAllInterrupts(void) /* PRQA S 1505 */ /* VL_Os_1505 */
 #if (CFG_INTERRUPT_MONITOR_ENABLE == TRUE)
             if (TRUE == Os_InterInitFlag)
             {
-                Os_InterMonitorEndRecord(OS_ALL_SUSPEND);
+                Os_InterMonitorEndRecord(OS_ALL_SUSPEND); /* PRQA S 3200 */ /* VL_Os_3200 */
             }
 #endif
             Os_ArchRestoreInt(Os_SaveAllIntNested);
@@ -913,7 +918,7 @@ void Os_SuspendAllInterrupts(void) /* PRQA S 1505 */ /* VL_Os_1505 */
             Os_InterMonitorStartRecord(OS_ALL_SUSPEND);
         }
 #endif
-        Os_ArchSuspendInt(&Os_SaveAllIntNested);
+        Os_SaveAllIntNested = Os_ArchSuspendInt();
     }
 #endif /* TRUE == CFG_TIMING_PROTECTION_ENABLE */
     Os_SuspendAllCount++;
@@ -938,72 +943,75 @@ void Os_SuspendAllInterrupts(void) /* PRQA S 1505 */ /* VL_Os_1505 */
  * REQ ID               <None>
  */
 /******************************************************************************/
-void Os_ResumeOSInterrupts(void) /* PRQA S 1505 */ /* VL_Os_1505 */
+void Os_ResumeOSInterrupts(void) /* PRQA S 1505, 6030 */ /* VL_Os_1505, VL_MTR_Os_STMIF */
 {
+    if (OS_LEVEL_ISR1 != Os_SCB.sysOsLevel)
+    {
 #if ((OS_SC3 == CFG_SC) || (OS_SC4 == CFG_SC))
-    StatusType err = E_OK;
-    if (OS_LEVEL_TASK == Os_SCB.sysOsLevel)
-    {
-        /*OS092*/
-        if (Os_SCB.sysRunningTCB->taskSuspendOSCount > 0u)
+        StatusType err = E_OK;
+        if (OS_LEVEL_TASK == Os_SCB.sysOsLevel)
         {
-            Os_SCB.sysRunningTCB->taskSuspendOSCount = Os_SCB.sysRunningTCB->taskSuspendOSCount - 1u;
+            /*OS092*/
+            if (Os_SCB.sysRunningTCB->taskSuspendOSCount > 0u)
+            {
+                Os_SCB.sysRunningTCB->taskSuspendOSCount = Os_SCB.sysRunningTCB->taskSuspendOSCount - 1u;
+            }
+            else
+            {
+                err = E_NOT_OK;
+            }
         }
-        else
-        {
-            err = E_NOT_OK;
-        }
-    }
 #if (CFG_ISR_MAX > 0)
-    else if (OS_LEVEL_ISR2 == Os_SCB.sysOsLevel)
-    {
-        /*OS092, OS368*/
-        if (Os_ICB[Os_SCB.sysRunningIsrCat2Id].isrC2SuspendOSCount > 0u)
+        else if (OS_LEVEL_ISR2 == Os_SCB.sysOsLevel)
         {
-            Os_ICB[Os_SCB.sysRunningIsrCat2Id].isrC2SuspendOSCount =
-                Os_ICB[Os_SCB.sysRunningIsrCat2Id].isrC2SuspendOSCount - 1u;
+            /*OS092, OS368*/
+            if (Os_ICB[Os_SCB.sysRunningIsrCat2Id].isrC2SuspendOSCount > 0u)
+            {
+                Os_ICB[Os_SCB.sysRunningIsrCat2Id].isrC2SuspendOSCount =
+                    Os_ICB[Os_SCB.sysRunningIsrCat2Id].isrC2SuspendOSCount - 1u;
+            }
+            else
+            {
+                err = E_NOT_OK;
+            }
         }
         else
         {
-            err = E_NOT_OK;
+            /*nothing to do*/
         }
-    }
-    else
-    {
-        /*nothing to do*/
-    }
 #endif /* CFG_ISR_MAX > 0 */
-    if (E_OK == err)
+        if (E_OK == err)
 #endif /* OS_SC3 == CFG_SC || OS_SC4 == CFG_SC */
-    {
-        Os_SuspendOsCount--;
-        if (0U == Os_SuspendOsCount)
         {
+            Os_SuspendOsCount--;
+            if (0U == Os_SuspendOsCount)
+            {
 /* AutoSar SC2: Timing protection, resource lock. */
 #if (TRUE == CFG_TIMING_PROTECTION_ENABLE)
 #if (CFG_ISR2_MAX > 0)
-            if (TRUE == Os_SCB.sysInIsrCat2)
-            {
-                Os_ICB[Os_SCB.sysRunningIsrCat2Id].IsrC2IsrOpt = TP_OPT_BUTT;
-                Os_TmProtIsrEnd(Os_SCB.sysRunningIsrCat2Id, TP_ISR_CAT2_SUS_OS_INT);
-            }
-            else
-#endif /* CFG_ISR2_MAX > 0 */
-            {
-                if (OS_LEVEL_TASK == Os_SCB.sysOsLevel)
+                if (TRUE == Os_SCB.sysInIsrCat2)
                 {
-                    Os_TCB[Os_SCB.sysRunningTaskID].taskIsrOpt = TP_OPT_BUTT;
-                    Os_TmProtTaskEnd(Os_SCB.sysRunningTaskID, TP_TASK_SUS_OS_INT);
+                    Os_ICB[Os_SCB.sysRunningIsrCat2Id].IsrC2IsrOpt = TP_OPT_BUTT;
+                    Os_TmProtIsrEnd(Os_SCB.sysRunningIsrCat2Id, TP_ISR_CAT2_SUS_OS_INT);
                 }
-            }
+                else
+#endif /* CFG_ISR2_MAX > 0 */
+                {
+                    if (OS_LEVEL_TASK == Os_SCB.sysOsLevel)
+                    {
+                        Os_TCB[Os_SCB.sysRunningTaskID].taskIsrOpt = TP_OPT_BUTT;
+                        Os_TmProtTaskEnd(Os_SCB.sysRunningTaskID, TP_TASK_SUS_OS_INT);
+                    }
+                }
 #endif /* TRUE == CFG_TIMING_PROTECTION_ENABLE */
 #if (CFG_INTERRUPT_MONITOR_ENABLE == TRUE)
-            if (TRUE == Os_InterInitFlag)
-            {
-                Os_InterMonitorEndRecord(OS_OS_SUSPEND);
-            }
+                if (TRUE == Os_InterInitFlag)
+                {
+                    Os_InterMonitorEndRecord(OS_OS_SUSPEND); /* PRQA S 3200 */ /* VL_Os_3200 */
+                }
 #endif
-            Os_ArchSetIpl(Os_SaveOsIntNested, OS_ISR_ENABLE);
+                Os_ArchSetIpl(Os_SaveOsIntNested, OS_ISR_ENABLE);
+            }
         }
     }
 }
@@ -1029,56 +1037,59 @@ void Os_ResumeOSInterrupts(void) /* PRQA S 1505 */ /* VL_Os_1505 */
 /******************************************************************************/
 void Os_SuspendOSInterrupts(void) /* PRQA S 1505 */ /* VL_Os_1505 */
 {
-    OS_ARCH_DECLARE_CRITICAL();
+    if (OS_LEVEL_ISR1 != Os_SCB.sysOsLevel)
+    {
+        OS_ARCH_DECLARE_CRITICAL();
 
 #if ((OS_SC3 == CFG_SC) || (OS_SC4 == CFG_SC))
-    if (OS_LEVEL_TASK == Os_SCB.sysOsLevel)
-    {
-        Os_SCB.sysRunningTCB->taskSuspendOSCount = Os_SCB.sysRunningTCB->taskSuspendOSCount + 1u;
-    }
+        if (OS_LEVEL_TASK == Os_SCB.sysOsLevel)
+        {
+            Os_SCB.sysRunningTCB->taskSuspendOSCount = Os_SCB.sysRunningTCB->taskSuspendOSCount + 1u;
+        }
 /*OS368*/
 #if (CFG_ISR2_MAX > 0)
-    if (OS_LEVEL_ISR2 == Os_SCB.sysOsLevel)
-    {
-        Os_ICB[Os_SCB.sysRunningIsrCat2Id].isrC2SuspendOSCount =
-            Os_ICB[Os_SCB.sysRunningIsrCat2Id].isrC2SuspendOSCount + 1u;
-    }
+        if (OS_LEVEL_ISR2 == Os_SCB.sysOsLevel)
+        {
+            Os_ICB[Os_SCB.sysRunningIsrCat2Id].isrC2SuspendOSCount =
+                Os_ICB[Os_SCB.sysRunningIsrCat2Id].isrC2SuspendOSCount + 1u;
+        }
 #endif
 #endif /* OS_SC3 == CFG_SC || OS_SC4 == CFG_SC */
-    if (0U == Os_SuspendOsCount)
-    {
+        if (0U == Os_SuspendOsCount)
+        {
 /* AutoSar SC2: Timing protection, resource lock. */
 #if (TRUE == CFG_TIMING_PROTECTION_ENABLE)
 #if (CFG_ISR2_MAX > 0)
-        if (TRUE == Os_SCB.sysInIsrCat2)
-        {
-            Os_ICB[Os_SCB.sysRunningIsrCat2Id].IsrC2IsrOpt = TP_SUS_OS_INT;
-            Os_TmProtIsrStart(Os_SCB.sysRunningIsrCat2Id, TP_ISR_CAT2_SUS_OS_INT);
-        }
-        else
-#endif /* CFG_ISR2_MAX > 0 */
-        {
-            if (OS_LEVEL_TASK == Os_SCB.sysOsLevel)
+            if (TRUE == Os_SCB.sysInIsrCat2)
             {
-                Os_TCB[Os_SCB.sysRunningTaskID].taskIsrOpt = TP_SUS_OS_INT;
-                Os_TmProtTaskStart(Os_SCB.sysRunningTaskID, TP_TASK_SUS_OS_INT);
+                Os_ICB[Os_SCB.sysRunningIsrCat2Id].IsrC2IsrOpt = TP_SUS_OS_INT;
+                Os_TmProtIsrStart(Os_SCB.sysRunningIsrCat2Id, TP_ISR_CAT2_SUS_OS_INT);
             }
-        }
+            else
+#endif /* CFG_ISR2_MAX > 0 */
+            {
+                if (OS_LEVEL_TASK == Os_SCB.sysOsLevel)
+                {
+                    Os_TCB[Os_SCB.sysRunningTaskID].taskIsrOpt = TP_SUS_OS_INT;
+                    Os_TmProtTaskStart(Os_SCB.sysRunningTaskID, TP_TASK_SUS_OS_INT);
+                }
+            }
 #endif /* TRUE == CFG_TIMING_PROTECTION_ENABLE */
 
-        OS_ARCH_SUSPEND_ALLINT();
-        Os_SaveOsIntNested = Os_ArchGetIpl();
+            OS_ARCH_SUSPEND_ALLINT();
+            Os_SaveOsIntNested = Os_ArchGetIpl();
 #if (CFG_INTERRUPT_MONITOR_ENABLE == TRUE)
-        if (TRUE == Os_InterInitFlag)
-        {
-            Os_InterMonitorStartRecord(OS_OS_SUSPEND);
-        }
+            if (TRUE == Os_InterInitFlag)
+            {
+                Os_InterMonitorStartRecord(OS_OS_SUSPEND);
+            }
 #endif
-        Os_ArchSetIpl(Os_cfgIsr2IplMax, OS_ISR_DISABLE);
-        OS_ARCH_RESTORE_ALLINT();
-    }
+            Os_ArchSetIpl(Os_cfgIsr2IplMax, OS_ISR_DISABLE);
+            OS_ARCH_RESTORE_ALLINT();
+        }
 
-    Os_SuspendOsCount++;
+        Os_SuspendOsCount++;
+    }
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
@@ -1300,7 +1311,9 @@ void Os_ExitISR2(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
                 Os_SCB.sysRunningTCB->taskSelfActCount = Os_SCB.sysRunningTCB->taskSelfActCount - 1u;
             }
 #endif
+            /* PRQA S 1520 ++ */ /* VL_Os_1520 */
             OS_TASK_SWITCH_PROC();
+            /* PRQA S 1520 -- */
         }
         else
         {
@@ -1313,11 +1326,13 @@ void Os_ExitISR2(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
             {
                 Os_SCB.sysRunningAppID = Os_ObjectAppCfg[OBJECT_TASK][Os_SCB.sysRunningTaskID].hostApp;
             }
-            Os_SCB.sysRunningAppObj = OBJECT_TASK;
+            Os_SCB.sysRunningAppObj = OBJECT_TASK; /* PRQA S 2982 */ /* VL_Os_2982 */
 #endif
 
 #if (TRUE == CFG_MEMORY_PROTECTION_ENABLE)
+            /* PRQA S 1520 ++ */ /* VL_Os_1520 */
             Os_MemProtTaskCat2Map();
+            /* PRQA S 1520 -- */
 #endif
         }
 
@@ -1467,7 +1482,9 @@ void Os_ExitISR1(void) /* PRQA S 1503 */ /* VL_QAC_NoUsedApi */
 #if (TRUE == CFG_TRACE_ENABLE)
     if ((Os_IntNestISR2 + Os_IntNestISR1) > 1u)
     {
+        /* PRQA S 3120 ++ */ /* VL_Os_3120 */
         Os_TraceIsrExit(Os_IntCfgIsrId, Os_SCB.sysIsrNestQueue[Os_IntNestISR2 + Os_IntNestISR1 - 2u]);
+        /* PRQA S 3120 -- */
     }
     else
     {

@@ -1,6 +1,6 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
- * SPDX-License-Identifier: LGPL-2.1-only-with-exception OR  LicenseRef-Commercial-License
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
+ * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
  * GNU Lesser General Public License as published by the Free Software Foundation; version 2.1.
@@ -10,7 +10,8 @@
  * You should have received a copy of the GNU Lesser General Public License along with this library;
  * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  * or see <https://www.gnu.org/licenses/>.
- *
+ */
+/*
  ********************************************************************************
  **                                                                            **
  **  FILENAME    :  Os_Sprot.c                                                 **
@@ -66,7 +67,7 @@ void Os_InitTrustedFunction(void)
     uint8  i;
     uint16 vCoreId     = Os_SCB.sysCore;
     uint16 Os_CfgTrustedServiceMax = 0u;
-    Os_TrustedFuncNest = 0;
+    Os_TrustedFuncNest = 0u;
 
     Os_TrustedFuncTp.TrustedFuncTportDelayCall = FALSE;
     Os_TrustedFuncTp.TrustedFuncTporFlag       = FALSE;
@@ -106,10 +107,14 @@ void Os_InitTrustedFunction(void)
  * REQ ID               <None>
  */
 /********************************************************************/
+/* PRQA S 6030, 3006, 6010, 6080, 6070 ++ */ /* VL_MTR_Os_STMIF, VL_Os_3006, VL_MTR_Os_STCYC, VL_MTR_Os_STPTH, VL_MTR_Os_STCAL */
 StatusType CallTrustedFunction(TrustedFunctionIndexType FunctionIndex, TrustedFunctionParameterRefType FunctionParams)
+/* PRQA S 6030, 3006, 6010, 6080, 6070 -- */
 {
     /* PRQA S 2742, 2880, 3138, 2741 ++ */ /* VL_Os_PlatformDef */
+    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
     OS_ENTER_KERNEL();
+    /* PRQA S 1006 -- */
     /* PRQA S 2742, 2880, 3138, 2741 -- */
     OS_ARCH_DECLARE_CRITICAL();
     StatusType      err = E_OK;
@@ -128,7 +133,7 @@ StatusType CallTrustedFunction(TrustedFunctionIndexType FunctionIndex, TrustedFu
         err = E_OS_CALLEVEL;
     }
 
-    else if (Os_AddressWritable((uint32)FunctionParams) != TRUE)
+    else if (Os_AddressWritable((uint32)FunctionParams) != TRUE) /* PRQA S 0326 */ /* VL_Os_0326 */
 
     {
         err = E_OS_ILLEGAL_ADDRESS;
@@ -142,13 +147,13 @@ StatusType CallTrustedFunction(TrustedFunctionIndexType FunctionIndex, TrustedFu
     {
         OS_ARCH_ENTRY_CRITICAL();
         /* Save Trusted Function host App ID. */
-        Os_TrustedFuncNestQueue[Os_TrustedFuncNest] = (0xFF00u & FunctionIndex) >> 8u;
+        Os_TrustedFuncNestQueue[Os_TrustedFuncNest] = (0xFF00u & FunctionIndex) >> 8u; /* PRQA S 3120 */ /* VL_QAC_MagicNum */
         ApplID = Os_TrustedFuncNestQueue[Os_TrustedFuncNest];
         /* Save Trusted Function time protection delay call flag*/
         Os_TrustedFuncTp.TrustedFuncTportDelayCall = Os_AppCfg[ApplID].OsTrustedApplicationDelayTimingViolationCall;
         Os_TrustedFuncNest++;
         OS_ARCH_EXIT_CRITICAL();
-        FunctionIndex = 0x00FFU & FunctionIndex;
+        FunctionIndex = 0x00FFU & FunctionIndex; /* PRQA S 3120, 1338 */ /* VL_QAC_MagicNum, VL_Os_1338 */
 /* On a Multi-Core system, these trusted function calls from
  * one OS-Application to another are limited to the same core.*/
 #if (OS_AUTOSAR_CORES > 1)
@@ -209,7 +214,7 @@ StatusType CallTrustedFunction(TrustedFunctionIndexType FunctionIndex, TrustedFu
         Os_TraceErrorHook(
             OSError_Save_CallTrustedFunction(FunctionIndex, FunctionParams),
             OSServiceId_CallTrustedFunction,
-            err);
+            err); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
     }
 #endif
 
@@ -473,9 +478,9 @@ boolean Os_WrongContext(uint16 AllowedContext)
  * REQ ID               <None>
  */
 /********************************************************************/
-/* PRQA S 6080 ++ */ /* VL_MTR_Os_STPTH */
+/* PRQA S 6080, 6070 ++ */ /* VL_MTR_Os_STPTH, VL_MTR_Os_STCAL */
 static void Os_SProTerminateTask(void)
-/* PRQA S 6080 -- */
+/* PRQA S 6080, 6070 -- */
 {
 /*Reference to current Task CB*/
 #if (CFG_STD_RESOURCE_MAX > 0U)
@@ -706,7 +711,7 @@ void Os_Isr2OccupyIntRes(void)
         }
         pOsICB->IsrC2ResCount = 0u;
 
-        Os_ErrorHook(E_OS_RESOURCE);
+        Os_ErrorHook(E_OS_RESOURCE); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
     }
 #endif
 

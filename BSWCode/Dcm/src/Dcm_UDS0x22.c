@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -376,6 +376,7 @@ Std_ReturnType Dcm_UDS0x22(
 #define DCM_START_SEC_CODE
 #include "Dcm_MemMap.h"
 /* setup read did status and iterate over did to read */
+/* PRQA S 6030++ */ /* VL_MTR_Dcm_STMIF */
 DCM_LOCAL Std_ReturnType Dcm_UDS0x22_ReadDidPrepare(
     Dcm_ExtendedOpStatusType OpStatus,
 #if (STD_ON == DCM_PAGEDBUFFER_ENABLED)
@@ -383,8 +384,9 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x22_ReadDidPrepare(
 #endif
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode)
+/* PRQA S 6030-- */
 {
-    Std_ReturnType finalResult = E_OK;
+    Std_ReturnType finalResult = E_NOT_OK;
     uint32         offset      = 0u;
     uint16         didNum      = (uint16)(pMsgContext->reqDataLen / DCM_DID_LENGTH);
     if ((DCM_INITIAL == OpStatus)
@@ -397,13 +399,30 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x22_ReadDidPrepare(
         DcmInternal_Memset((uint8*)Dcm_ReadDidSize, 0u, (uint32)didNum);
         pMsgContext->resDataLen = 0u;
     }
-    for (uint16 index = 0u; (index < didNum) && (E_NOT_OK != finalResult); index++)
+    for (uint16 index = 0u; index < didNum; index++)
     {
         Std_ReturnType result = Dcm_UDS0x22_ReadDid(OpStatus, index, pMsgContext, &offset, ErrorCode);
 
-        if ((E_OK != result) && ((DCM_E_FORCE_RCRRP != finalResult) || (E_NOT_OK == result)))
+        if ((result == E_OK) && (finalResult != DCM_E_FORCE_RCRRP) && (finalResult != DCM_E_PENDING))
         {
-            finalResult = result;
+            finalResult = E_OK;
+        }
+        else if ((*ErrorCode == DCM_E_RESPONSETOOLONG) || (*ErrorCode == DCM_E_SECURITYACCESSDENIED))
+        {
+            finalResult = E_NOT_OK;
+            break;
+        }
+        else if (result == DCM_E_FORCE_RCRRP)
+        {
+            finalResult = DCM_E_FORCE_RCRRP;
+        }
+        else if ((result == DCM_E_PENDING) && (finalResult != DCM_E_FORCE_RCRRP))
+        {
+            finalResult = DCM_E_PENDING;
+        }
+        else
+        {
+            // for qac
         }
     }
 

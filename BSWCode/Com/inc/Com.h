@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -57,6 +57,12 @@
  *  V2.3.2    20250619  tong.zhao     Fix bug the signal value init logical.
  *  V2.3.3    20250620  tong.zhao     Remove the restriction that the sending condition for the periodic Pdu in the If
  *                                    cycle is based on receiving the previous transmission's Confirmation.
+ *  V2.3.4    20251225  jianyu.yang   Add procedure to clear TxIpduStatePtr->RptNum in Com_MainFunction_SendPdu to meet
+ SWS_Com_00467.
+ *  V2.3.5    20260119  jianyu.yang   Modify transmiting condition in Com_TriggerIPDUSend only valid in TP type and fix
+ build bug in Com_ResetTxIpduMDT.
+ *  V2.3.6    20260228  jianyu.yang   Modify buiding conditions of functions related to Gateway.
+ *  V2.3.7    20260322  jianyu.yang   Put TMC of TxSignal,TxGroupSignal and DescriptionSignal in to a same buffer.
  ==================================================================================================================== */
 
 /* ================================================ misar justifications ============================================ */
@@ -195,6 +201,22 @@
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
 
+    \li VL_Com_1712
+      Reason: xternal identifiers have the same first '${n}' characters '${name}'.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_Com_1512
+      Reason: Identifier '${name}' with external linkage has separate declarations in multiple translation units.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_Com_1513
+      Reason: Identifier '${name}' with external linkage has separate non-defining declarations in more than one
+              location.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
     \li VL_MTR_Com_STVAR
       Reason: The total number of variables is related to the user configuration, allowing
     dynamic code to violate this under extreme conditions
@@ -257,7 +279,7 @@ extern "C" {
 #define COM_AR_RELEASE_REVISION_VERSION (0u)
 #define COM_SW_MAJOR_VERSION            (2u)
 #define COM_SW_MINOR_VERSION            (3u)
-#define COM_SW_PATCH_VERSION            (3u)
+#define COM_SW_PATCH_VERSION            (6u)
 /* ===================================================== macros ===================================================== */
 #define COM_SERVICE_NOT_AVAILABLE ((uint8)0x80u)
 #define COM_BUSY                  ((uint8)0x81u)
@@ -565,7 +587,9 @@ extern Std_ReturnType Com_TriggerIPDUSend(PduIdType PduId);
  * @synchronous   TRUE
  * @trace         CPD-61737
  */
+/* PRQA S 1712 ++ */ /* VL_Com_1712 */
 extern Std_ReturnType Com_TriggerIPDUSendWithMetaData(PduIdType PduId, const uint8* MetaData);
+/* PRQA S 1712 -- */
 #endif
 /**
  * @brief         The service Com_SwitchIpduTxMode sets the transmission mode of the I-PDU referenced by PduId to

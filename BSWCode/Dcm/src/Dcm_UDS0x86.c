@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -78,17 +78,17 @@
  */
 #define DCM_UDS_READDTCINFO_SID 0x19u
 /* ============================================ internal data definitions =========================================== */
-#define DCM_START_SEC_VAR_INIT_8
+#define DCM_START_SEC_VAR_CLEARED_8
 #include "Dcm_MemMap.h"
 /**
  * @brief total requested number of trigger on DTC roe @range 0..255
  */
-DCM_LOCAL uint8 Dcm_RoeCtrlDtcNum = 0u;
+DCM_LOCAL uint8 Dcm_RoeCtrlDtcNum;
 /**
  * @brief total requested number of trigger on Did roe @range 0..255
  */
-DCM_LOCAL uint8 Dcm_RoeCtrlDidNum = 0u;
-#define DCM_STOP_SEC_VAR_INIT_8
+DCM_LOCAL uint8 Dcm_RoeCtrlDidNum;
+#define DCM_STOP_SEC_VAR_CLEARED_8
 #include "Dcm_MemMap.h"
 #define DCM_START_SEC_VAR_CLEARED_32
 #include "Dcm_MemMap.h"
@@ -116,6 +116,7 @@ Dcm_RoeCtrlType Dcm_RoeCtrl[DCM_MAX_ROE_DID + DCM_MAX_ROE_DTC];
 #define DCM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
 #include "Dcm_MemMap.h"
 /* ========================================== internal function declarations ======================================== */
+#if ((defined(DCM_UDS_0X86_0X1)) || ((defined(DCM_UDS_0X86_0X3)) && (DCM_DID_NUM > 0)) || (defined(DCM_UDS_0X86_0X8)))
 /**
  * @brief         called to set the roeEvent to Dcm_RoeCtrl
  * @param[in]     protocolType    : current protocolType
@@ -136,6 +137,7 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x86_SetEvent(
     Dcm_RoeEventType              roeEvent,
     Dcm_RoeEventWindowTimeType    eventWindowTime,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#endif
 
 /**
  * @brief         called by Dcm_UDS0x86_CheckTimer to act as the roe scheduler
@@ -339,6 +341,7 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x86_HandleSubFunction(
 DCM_LOCAL void Dcm_UDS0x86_SetRoeStatus(Dcm_RoeStatusType RoeStatus);
 #endif
 
+#if ((defined(DCM_UDS_0X86_0X1)) || ((defined(DCM_UDS_0X86_0X3)) && (DCM_DID_NUM > 0)) || (defined(DCM_UDS_0X86_0X8)))
 /**
  * @brief         get roe PduId and protocolId based on requested protocolType
  * @param[in]     protocolType : the requested protocolType
@@ -372,6 +375,7 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x86_CheckService(
     uint8*                        reqData,
     Dcm_MsgLenType                reqDataLen,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#endif
 
 #if ((STD_ON == DCM_UDS_0X22) && (STD_ON == DCM_UDS_0X86_0X3))
 /**
@@ -388,6 +392,7 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x86_CheckService(
  */
 Std_ReturnType Dcm_UDS0x86_DIDChangeCheck(uint16 did, boolean* change, uint8* oldDidBuffer, uint16 conId);
 
+#if (STD_ON == DCM_DID_RANGE_ENABLED)
 /**
  * @brief         This function reads data of range did
  * @param[in]     OpStatus          : Indicates the current operation status
@@ -415,6 +420,7 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x86_RangeDidReadData(
     uint8*                        DestBuffer,
     Dcm_MsgLenType*               BufSize,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#endif
 
 #if (STD_ON == DCM_DID_RANGE_ENABLED)
 /**
@@ -513,6 +519,7 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x86_OBDDidHandle(
         *ErrorCode = DCM_E_RESPONSETOOLONG;
         result     = E_NOT_OK;
     }
+    return result;
 }
 #define DCM_STOP_SEC_CODE
 #include "Dcm_MemMap.h"
@@ -569,6 +576,7 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x86_RangeDidHandle(
 #include "Dcm_MemMap.h"
 #endif
 
+#if (STD_ON == DCM_DID_RANGE_ENABLED)
 #define DCM_START_SEC_CODE
 #include "Dcm_MemMap.h"
 DCM_LOCAL Std_ReturnType Dcm_UDS0x86_RangeDidReadData(
@@ -647,6 +655,7 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x86_RangeDidReadData(
 }
 #define DCM_STOP_SEC_CODE
 #include "Dcm_MemMap.h"
+#endif
 
 #define DCM_START_SEC_CODE
 #include "Dcm_MemMap.h"
@@ -656,7 +665,6 @@ Std_ReturnType Dcm_UDS0x86_DIDChangeCheck(uint16 did, boolean* change, uint8* ol
     Dcm_DidType                  didType;
     Dcm_ExtendedOpStatusType     OpStatus  = DCM_INITIAL;
     Std_ReturnType               result    = Dcm_UDS_FindDid(did, &didType, &didIndex, NULL_PTR);
-    const Dcm_DspDidType*        didCfg    = &Dcm_DspDid[didIndex];
     Dcm_NegativeResponseCodeType ErrorCode = DCM_POS_RESP;
     uint8                        DestBuffer[DCM_ROE_MAX_DID_LENGTH];
     Dcm_MsgLenType               bufSize = DCM_ROE_MAX_DID_LENGTH;
@@ -891,6 +899,7 @@ void Dcm_UDS0x86_CheckTimer(void)
 /* ========================================== internal function definitions ========================================= */
 #define DCM_START_SEC_CODE
 #include "Dcm_MemMap.h"
+#if ((defined(DCM_UDS_0X86_0X1)) || ((defined(DCM_UDS_0X86_0X3)) && (DCM_DID_NUM > 0)) || (defined(DCM_UDS_0X86_0X8)))
 /**
  * called to set the roeEvent to Dcm_RoeCtrl
  */
@@ -990,6 +999,7 @@ DCM_LOCAL void
         *protocolId = Dcm_DslMainConnection[Dcm_DslProtocolRx[*roePduId].ParentMainConnectionId].ParentProtocolId;
     }
 }
+#endif
 
 /**
  * periodically check for pending roe service request
@@ -1009,7 +1019,7 @@ DCM_LOCAL void Dcm_UDS0x86_MainFunction(void)
             uint16         conId     = Dcm_DslProtocolRx[roeCtrlPtr->RoePduId].ParentMainConnectionId;
             Std_ReturnType result =
                 Dcm_UDS0x86_DIDChangeCheck(roeCtrlPtr->Did, &didChange, roeCtrlPtr->DidSignalData, conId);
-            if (didChange == true && result == E_OK)
+            if (didChange == TRUE && result == E_OK)
             {
                 roeCtrlPtr->PendingServiceReq = TRUE;
             }
@@ -1468,6 +1478,8 @@ DCM_LOCAL void Dcm_UDS0x86_06(void)
     Dcm_RoeCtrlDidNum = 0u;
 }
 #endif
+
+#if ((defined(DCM_UDS_0X86_0X1)) || ((defined(DCM_UDS_0X86_0X3)) && (DCM_DID_NUM > 0)) || (defined(DCM_UDS_0X86_0X8)))
 DCM_LOCAL Std_ReturnType Dcm_UDS0x86_CheckService(
     Dcm_ProtocolType              protocolType,
     Dcm_RoeCtrlType*              roeCtrl,
@@ -1476,7 +1488,7 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x86_CheckService(
     Dcm_NegativeResponseCodeType* ErrorCode)
 {
     uint16    servIndex;
-    PduIdType pduId;
+    PduIdType pduId = 0u;
     uint8     protocolId;
     Dcm_UDS0x86_getRoePduIdAndProtocolId(protocolType, &pduId, &protocolId);
     Std_ReturnType result = DsdInternal_CheckService(protocolId, &servIndex, &reqData[0u]);
@@ -1507,6 +1519,7 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x86_CheckService(
 
     return result;
 }
+#endif
 
 #define DCM_STOP_SEC_CODE
 #include "Dcm_MemMap.h"

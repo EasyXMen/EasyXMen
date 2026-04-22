@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -110,6 +110,12 @@
   being above the threshold
       Risk: Understandability and testability become overly complex
       Prevention: Design and code review, and have a clear structure and annotated code.
+
+    \li VL_CanSM_NotUsed
+      Reason: Identifier is locally declared to avoid unnecessary header inclusion and prevent
+  circular dependencies.
+      Risk: No risk
+      Prevention: No action required.
  */
 
 #ifndef CANSM_H_
@@ -195,7 +201,7 @@ extern "C" {
 /**
  * @brief Defines the values of the internal states of the CanSM module
  */
-typedef enum CanSM_ModuleStatusTypeTag
+typedef enum
 {
     CANSM_UNINITED, /**< Module is not initialized @range 0 */
     CANSM_INITED    /**< Module is initialized @range 1 */
@@ -204,7 +210,7 @@ typedef enum CanSM_ModuleStatusTypeTag
 /**
  * @brief Defines the values of the major state machine
  */
-typedef enum CanSM_BSM_StateTypeTag
+typedef enum
 {
     CANSM_BSM_DEINITPNNOTSUPPORTED, /**< CANSM_BSW - CANSM_BSM_S_PRE_NOCOM @range 0 */
 #if (STD_ON == CANSM_PNC_SUPPORT)
@@ -225,7 +231,7 @@ typedef enum CanSM_BSM_StateTypeTag
 /**
  * @brief Defines the values of the Sub state machine CANSM_BSM_DeinitPnSupported
  */
-typedef enum CanSM_DeinitPnSupportedStateTypeTag
+typedef enum
 {
     DEINITPN_S_PN_CLEAR_WUF,                /**< CANSM_BSM_DeinitPnSupported - S_PN_CLEAR_WUF @range 0 */
     DEINITPN_S_PN_CLEAR_WUF_WAIT,           /**< CANSM_BSM_DeinitPnSupported - S_PN_CLEAR_WUF_WAIT @range 1 */
@@ -249,7 +255,7 @@ typedef enum CanSM_DeinitPnSupportedStateTypeTag
 /**
  * @brief Defines the values of the Sub state machine CANSM_BSM_DeinitPnNotSupported
  */
-typedef enum CanSM_DeinitPnNotSupportedStateTypetag
+typedef enum
 {
     DEINITPNNOT_S_CC_STOPPED,       /**< CANSM_BSM_DeinitPnNotSupported - S_CC_STOPPED @range 0 */
     DEINITPNNOT_S_CC_STOPPED_WAIT,  /**< CANSM_BSM_DeinitPnNotSupported - S_CC_STOPPED_WAIT @range 1 */
@@ -264,7 +270,7 @@ typedef enum CanSM_DeinitPnNotSupportedStateTypetag
 /**
  * @brief Defines the values of the Sub state machine CANSM_BSM_WUVALIDATION
  */
-typedef enum CanSM_WUValidationStateTypeTag
+typedef enum
 {
     WUVALIDATION_S_TRCV_NORMAL,          /**< CANSM_BSM_WUVALIDATION - S_TRCV_NORMAL @range 0 */
     WUVALIDATION_S_TRCV_NORMAL_WAIT,     /**< CANSM_BSM_WUVALIDATION - S_TRCV_NORMAL_WAIT @range 1 */
@@ -278,7 +284,7 @@ typedef enum CanSM_WUValidationStateTypeTag
 /**
  * @brief Defines the values of the Sub state machine CANSM_BSM_S_PRE_FULLCOM
  */
-typedef enum CanSM_PreFullComStateTypeTag
+typedef enum
 {
     PREFULLCOM_S_TRCV_NORMAL,      /**< CANSM_BSM_S_PRE_FULLCOM - S_TRCV_NORMAL @range 0 */
     PREFULLCOM_S_TRCV_NORMAL_WAIT, /**< CANSM_BSM_S_PRE_FULLCOM - S_TRCV_NORMAL_WAIT @range 1 */
@@ -291,7 +297,7 @@ typedef enum CanSM_PreFullComStateTypeTag
 /**
  * @brief Defines the values of the Sub state machine CANSM_BSM_S_FULLCOM
  */
-typedef enum CanSM_FullComStateTypeTag
+typedef enum
 {
     FULLCOM_S_BUS_OFF_CHECK,   /**< CANSM_BSM_S_FULLCOM - S_BUS_OFF_CHECK @range 0 */
     FULLCOM_S_NO_BUS_OFF,      /**< CANSM_BSM_S_FULLCOM - S_NO_BUS_OFF @range 1 */
@@ -307,7 +313,7 @@ typedef enum CanSM_FullComStateTypeTag
 /**
  * @brief Defines the values of the Sub state machine CANSM_BSM_S_CHANGE_BAUDRATE
  */
-typedef enum CanSM_ChangeBaudrateStateTypeTag
+typedef enum
 {
     CHANGEBR_CHANGE_BR_SYNC,    /**< CANSM_BSM_S_CHANGE_BAUDRATE - CANSM_BSM_CHANGE_BR_SYNC @range 0 */
     CHANGEBR_S_CC_STOPPED,      /**< CANSM_BSM_S_CHANGE_BAUDRATE - S_CC_STOPPED @range 1 */
@@ -319,7 +325,7 @@ typedef enum CanSM_ChangeBaudrateStateTypeTag
 /**
  * @brief Defines the values of the Sub state machine CANSM_BSM_S_SILENTCOM_BOR
  */
-typedef enum CanSM_SilentComBORStateTypeTag
+typedef enum
 {
     SILENTBOR_S_RESTART_CC,     /**< CANSM_BSM_S_SILENTCOM_BOR - S_RESTART_CC @range 0 */
     SILENTBOR_S_RESTART_CC_WAIT /**< CANSM_BSM_S_SILENTCOM_BOR - S_RESTART_CC_WAIT @range 1 */
@@ -328,7 +334,7 @@ typedef enum CanSM_SilentComBORStateTypeTag
 /**
  * @brief Defines the values of the request communication mode
  */
-typedef enum CanSM_RequestModeTypeTag
+typedef enum
 {
     CANSM_NO_REQUEST,           /**< No request for request mode @range 0 */
     CANSM_NO_COMMUNICATION,     /**< No communication for request mode @range 1 */
@@ -339,7 +345,7 @@ typedef enum CanSM_RequestModeTypeTag
 /**
  * @brief Defines the values of CanIf API indication type
  */
-typedef enum CanSM_CanIfIndicatedTypeTag
+typedef enum
 {
     T_NO_INDICATED, /**< No CanIf API indicated @range 0 */
 #if (STD_ON == CANSM_PNC_SUPPORT)
@@ -353,7 +359,7 @@ typedef enum CanSM_CanIfIndicatedTypeTag
 /**
  * @brief Can specific communication modes / states notified to the BswM module
  */
-typedef enum CanSM_BswMCurrentStateTypeTag
+typedef enum
 {
     CANSM_BSWM_NO_COMMUNICATION,     /**< No communication for notified to thr BswM module @range 0 */
     CANSM_BSWM_SILENT_COMMUNICATION, /**< Silent communication for notified to thr BswM module @range 1 */
@@ -370,7 +376,7 @@ typedef uint8 CanSM_NetworkIndexType;
 /**
  * @brief Transceiver parameters of each CAN network
  */
-typedef struct CanSM_TrcvRefTypeTag
+typedef struct
 {
     uint8   TransceiverId;    /**< ID of the CAN transceiver assigned to the configured network handle @range 0..255 */
     boolean CanTrcvPnEnabled; /**<the transceiver support PN or not @range true/false */
@@ -379,7 +385,7 @@ typedef struct CanSM_TrcvRefTypeTag
 /**
  * @brief CAN controller ID parameters of each CAN network
  */
-typedef struct CanSM_ControllerRefTypeTag
+typedef struct
 {
     uint8        NetWorkRefControllerNumber; /**< Number of controllers which reference the network @range 0..255 */
     const uint8* ControllerId; /**< ID of the CAN controller assigned to the configured network handle @range 0..255 */
@@ -391,7 +397,7 @@ typedef struct CanSM_ControllerRefTypeTag
 /**
  * @brief Reference to configured DEM event to report dem errors for this CAN network
  */
-typedef struct CanSM_DemEventParameterRefTypeTag
+typedef struct
 {
     const Dem_EventIdType*
         BusOffPara; /**< Reference to configured DEM event,CANSM_E_BUS_OFF parameter @range pointer */
@@ -403,7 +409,7 @@ typedef struct CanSM_DemEventParameterRefTypeTag
 /**
  * @brief type of CanSM module's runtime state
  */
-typedef struct CanSM_NetWorkRunTimeTypeTag
+typedef struct
 {
     uint32 ModeRequestRepetitionTime;   /**< time for repeat CanIf API @range 0..4294967295 */
     uint32 WaitCanIfIndicatedStartTime; /**< timer for CanIf API indicated state machine @range 0..4294967295 */
@@ -446,7 +452,7 @@ typedef struct CanSM_NetWorkRunTimeTypeTag
 /**
  * @brief This type contains the CAN network specific parameters of each CAN network
  */
-typedef struct CanSM_ManagerNetworkTypeTag
+typedef struct CanSM_ManagerNetworkTypeTag /* PRQA S 1536 */ /* VL_CanSM_NotUsed */
 {
 #if CANSM_MULTIPLE_PARTITION_USED == STD_ON
     ApplicationType ApplicationID; /**< Application Id @range ApplicationType */

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -415,7 +415,7 @@ Std_ReturnType CanIf_Transmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr)
                 /* get SDU */
                 canPdu.sdu = PduInfoPtr->SduDataPtr;
 
-#if (CANIF_CAN_AUTOSAR_VERSION >= CANIF_CAN_AUTOSAR_431)
+#if (CANIF_CAN_AUTOSAR_VERSION >= CANIF_CAN_AUTOSAR_R431)
                 Std_ReturnType retVal = E_NOT_OK;
 #else
                 Can_ReturnType retVal = CAN_NOT_OK;
@@ -949,10 +949,6 @@ Std_ReturnType CanIf_CheckWakeup(EcuM_WakeupSourceType WakeupSource)
             result = CanIf_CheckTrcvWakeup(partitionIndex, WakeupSource);
         }
 #endif
-        if (controllerNotSleep)
-        {
-            CanIf_DetReportRuntimeError(CANIF_CHECKWAKEUP_ID, CANIF_E_NOT_SLEEP);
-        }
 #endif
     }
     return result;
@@ -1105,6 +1101,61 @@ Std_ReturnType CanIf_SetBaudrate(uint8 ControllerId, uint16 BaudRateConfigID)
 }
 #endif
 
+#if (CANIF_CAN_AUTOSAR_VERSION >= CANIF_CAN_AUTOSAR_R431)
+Std_ReturnType CanIf_GetControllerErrorState(uint8 ControllerId, Can_ErrorStateType* ErrorStatePtr)
+{
+    Std_ReturnType result = E_NOT_OK;
+
+#if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
+    if (E_OK == CanIf_ValidateGetControllerErrorState(ControllerId, ErrorStatePtr))
+#endif
+    {
+        const CanIf_CtrlConfigType* ctrlConfigPtr = &CanIf_CtrlCfgData[ControllerId];
+        uint8                       canDrvId      = ctrlConfigPtr->CanDriverId;
+        uint8                       canCtrlId     = ctrlConfigPtr->CanCtrlId;
+
+        result = Can_DriverApi[canDrvId].CanGetControllerErrorStateApi(canCtrlId, ErrorStatePtr);
+    }
+    return result;
+}
+#endif
+
+#if (CANIF_CAN_AUTOSAR_VERSION >= CANIF_CAN_AUTOSAR_R440)
+Std_ReturnType CanIf_GetControllerRxErrorCounter(uint8 ControllerId, uint8* RxErrorCounterPtr)
+{
+    Std_ReturnType result = E_NOT_OK;
+
+#if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
+    if (E_OK == CanIf_ValidateGetControllerRxErrorCounter(ControllerId, RxErrorCounterPtr))
+#endif
+    {
+        const CanIf_CtrlConfigType* ctrlConfigPtr = &CanIf_CtrlCfgData[ControllerId];
+        uint8                       canDrvId      = ctrlConfigPtr->CanDriverId;
+        uint8                       canCtrlId     = ctrlConfigPtr->CanCtrlId;
+
+        result = Can_DriverApi[canDrvId].CanGetControllerRxErrorCounterApi(canCtrlId, RxErrorCounterPtr);
+    }
+    return result;
+}
+
+Std_ReturnType CanIf_GetControllerTxErrorCounter(uint8 ControllerId, uint8* TxErrorCounterPtr)
+{
+    Std_ReturnType result = E_NOT_OK;
+
+#if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
+    if (E_OK == CanIf_ValidateGetControllerTxErrorCounter(ControllerId, TxErrorCounterPtr))
+#endif
+    {
+        const CanIf_CtrlConfigType* ctrlConfigPtr = &CanIf_CtrlCfgData[ControllerId];
+        uint8                       canDrvId      = ctrlConfigPtr->CanDriverId;
+        uint8                       canCtrlId     = ctrlConfigPtr->CanCtrlId;
+
+        result = Can_DriverApi[canDrvId].CanGetControllerTxErrorCounterApi(canCtrlId, TxErrorCounterPtr);
+    }
+    return result;
+}
+#endif
+
 #if (STD_ON == CANIF_TRIGGER_TRANSMIT_SUPPORT)
 /**
  * Within this API, the upper layer module (called module) shall check
@@ -1121,6 +1172,7 @@ Std_ReturnType CanIf_TriggerTransmit(PduIdType TxPduId, PduInfoType* PduInfoPtr)
     if (E_OK == CanIf_ValidateTriggerTransmit(TxPduId, PduInfoPtr))
 #endif
     {
+#if (STD_ON == CANIF_UP_TRIGGER_TRANSMIT_ENABLE)
         PduIdType                    txPduIndex     = CanIf_TxPduId2VarIndex(TxPduId);
         const CanIf_TxPduConfigType* txPduConfigPtr = &CANIF_TXPDU(txPduIndex);
 
@@ -1130,6 +1182,7 @@ Std_ReturnType CanIf_TriggerTransmit(PduIdType TxPduId, PduInfoType* PduInfoPtr)
                 txPduConfigPtr->CanIfUpPduId,
                 PduInfoPtr);
         }
+#endif
     }
     return result;
 }
@@ -1226,7 +1279,7 @@ void CanIf_RxIndication(const Can_HwType* Mailbox, const PduInfoType* PduInfoPtr
 #if (STD_ON == CANIF_PRIVATE_DLC_CHECK)
             if (PduInfoPtr->SduLength < rxPduConfigPtr->CanIfRxPduDlc)
             {
-                CanIf_DetReportRuntimeError(CANIF_RXINDICATION_ID, CANIF_E_INVALID_DLC);
+                CanIf_DetReportRuntimeError(CANIF_RXINDICATION_ID, CANIF_E_INVALID_DATA_LENGTH);
             }
             else
 #endif
@@ -1420,7 +1473,7 @@ CANIF_LOCAL Std_ReturnType CanIf_SetControllStarted(uint8 canDrvId, uint8 canCtr
 {
     Std_ReturnType result = E_NOT_OK;
 
-#if (CANIF_CAN_AUTOSAR_VERSION >= CANIF_CAN_AUTOSAR_431)
+#if (CANIF_CAN_AUTOSAR_VERSION >= CANIF_CAN_AUTOSAR_R431)
     if (CAN_OK == Can_DriverApi[canDrvId].CanSetControllerModeApi(canCtrlId, CAN_CS_STARTED))
 #else /*The default version of can driver is 4.2.2*/
     if (CAN_OK == Can_DriverApi[canDrvId].CanSetControllerModeApi(canCtrlId, CAN_T_START))
@@ -1445,7 +1498,7 @@ CANIF_LOCAL Std_ReturnType CanIf_SetControllSleep(
 
     CANIF_NOUSED(ctrlConfigPtr);
 
-#if (CANIF_CAN_AUTOSAR_VERSION >= CANIF_CAN_AUTOSAR_431)
+#if (CANIF_CAN_AUTOSAR_VERSION >= CANIF_CAN_AUTOSAR_R431)
     if (CAN_OK == Can_DriverApi[canDrvId].CanSetControllerModeApi(canCtrlId, CAN_CS_SLEEP))
 #else /*The default version of can driver is 4.2.2*/
     if (CAN_OK == Can_DriverApi[canDrvId].CanSetControllerModeApi(canCtrlId, CAN_T_SLEEP))
@@ -1491,7 +1544,7 @@ CANIF_LOCAL Std_ReturnType CanIf_SetControllStopped(
     if (CAN_CS_SLEEP == ctrlRuntimePtr->ControllerMode)
     {
         /* wake up the controller */
-#if (CANIF_CAN_AUTOSAR_VERSION >= CANIF_CAN_AUTOSAR_431)
+#if (CANIF_CAN_AUTOSAR_VERSION >= CANIF_CAN_AUTOSAR_R431)
         if (CAN_OK == Can_DriverApi[canDrvId].CanSetControllerModeApi(canCtrlId, CAN_CS_STOPPED))
 #else /*The default version of can driver is 4.2.2*/
         if (CAN_OK == Can_DriverApi[canDrvId].CanSetControllerModeApi(canCtrlId, CAN_T_WAKEUP))
@@ -1505,7 +1558,7 @@ CANIF_LOCAL Std_ReturnType CanIf_SetControllStopped(
     else
     {
         /* set controller mode STOP */
-#if (CANIF_CAN_AUTOSAR_VERSION >= CANIF_CAN_AUTOSAR_431)
+#if (CANIF_CAN_AUTOSAR_VERSION >= CANIF_CAN_AUTOSAR_R431)
         if (CAN_OK == Can_DriverApi[canDrvId].CanSetControllerModeApi(canCtrlId, CAN_CS_STOPPED))
 #else /*The default version of can driver is 4.2.2*/
         if (CAN_OK == Can_DriverApi[canDrvId].CanSetControllerModeApi(canCtrlId, CAN_T_STOP))

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -67,10 +67,6 @@ COMM_LOCAL_INLINE void ComM_ClrBit(uint8* data, uint32 bitPn)
 {
     data[bitPn / COMM_CHAR_BIT] &= (uint8) ~(uint8)(1u << (bitPn % COMM_CHAR_BIT));
 }
-
-#ifdef QAC_ANALYZE
-#pragma PRQA_NO_SIDE_EFFECTS ComM_GetBit
-#endif
 
 /**
  * This function shall return the logical status of the input data for the requested bit position.

@@ -67,6 +67,36 @@ typedef u32_t mem_size_t;
 typedef u16_t mem_size_t;
 #define MEM_SIZE_F U16_F
 #endif /* MEM_SIZE > 64000 */
+
+/**
+ * The heap is made up as a list of structs of this type.
+ * This does not have to be aligned since for getting its size,
+ * we only use the macro SIZEOF_STRUCT_MEM, which automatically aligns.
+ */
+struct mem {
+  /** index (-> ram[next]) of the next struct */
+  mem_size_t next;
+  /** index (-> ram[prev]) of the previous struct */
+  mem_size_t prev;
+  /** 1: this area is used; 0: this area is unused */
+  u8_t used;
+#if MEM_OVERFLOW_CHECK
+  /** this keeps track of the user allocation size for guard checks */
+  mem_size_t user_size;
+#endif
+};
+
+/** All allocated blocks will be MIN_SIZE bytes big, at least!
+ * MIN_SIZE can be overridden to suit your needs. Smaller values save space,
+ * larger values could prevent too small blocks to fragment the RAM too much. */
+#ifndef MIN_SIZE
+#define MIN_SIZE             12
+#endif /* MIN_SIZE */
+/* some alignment macros: we define them here for better source code layout */
+#define MIN_SIZE_ALIGNED     LWIP_MEM_ALIGN_SIZE(MIN_SIZE)
+#define SIZEOF_STRUCT_MEM    LWIP_MEM_ALIGN_SIZE(sizeof(struct mem))
+#define MEM_SIZE_ALIGNED     LWIP_MEM_ALIGN_SIZE(MEM_SIZE)
+
 #endif
 
 void  mem_init(void);

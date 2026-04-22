@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -380,7 +380,7 @@ DOIP_LOCAL_INLINE BufReq_ReturnType
 DOIP_LOCAL_INLINE boolean DoIP_SoAdIfRxIndication_DET(PduIdType soadRxPduId, const PduInfoType* pduInfoPtr)
 /* PRQA S 3406,1505 -- */
 {
-    boolean Det_Status = FALSE;
+    boolean DetStatus = FALSE;
 
     if (DOIP_STATUS_UNINITED == DoIP_InitStatus) /*SWS_DoIP_00246*/
     {
@@ -396,10 +396,10 @@ DOIP_LOCAL_INLINE boolean DoIP_SoAdIfRxIndication_DET(PduIdType soadRxPduId, con
     }
     else
     {
-        Det_Status = TRUE;
+        DetStatus = TRUE;
     }
 
-    return Det_Status;
+    return DetStatus;
 }
 
 /**

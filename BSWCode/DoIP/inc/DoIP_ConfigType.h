@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -54,7 +54,7 @@ typedef Std_ReturnType (*DoIP_FurtherActionByteCbkType)(
 /**
  * @brief General config of DoIP
  */
-typedef struct DoIP_GeneralCfgTag /* PRQA S 1536 */ /* VL_DoIP_1536 */
+typedef struct
 {
     const DoIP_GetPowerModeCbkType      PowerModeDirect;         /**< DoIPPowerModeDirect @range NA */
     const DoIP_GetGidCbkType            GetGidDirect;            /**< DoIPGetGidDirect @range NA */
@@ -71,7 +71,7 @@ typedef struct DoIP_GeneralCfgTag /* PRQA S 1536 */ /* VL_DoIP_1536 */
 /**
  * @brief PC configuration of connection
  */
-typedef struct DoIP_PCConnectionsCfgTag /* PRQA S 1536 */ /* VL_DoIP_1536 */
+typedef struct
 {
     uint8          TcpConnNum;                       /**< Num of TcpRequestAddressAssignmentArray @range 0..255 */
     const boolean* TcpRequestAddressAssignmentArray; /** DoIPRequestAddressAssignment @range NA*/
@@ -86,7 +86,7 @@ typedef struct DoIP_PCConnectionsCfgTag /* PRQA S 1536 */ /* VL_DoIP_1536 */
 /**
  * @brief Configuration of RA authentication callback
  */
-typedef struct DoIP_RaAuthenticationCbkTag /* PRQA S 1536 */ /* VL_DoIP_1536 */
+typedef struct
 {
     Std_ReturnType (*RaAuthenticationFunc)(
         boolean*     authentified,
@@ -99,7 +99,7 @@ typedef struct DoIP_RaAuthenticationCbkTag /* PRQA S 1536 */ /* VL_DoIP_1536 */
 /**
  * @brief Configuration of RA confirmation callback
  */
-typedef struct DoIP_RaConfirmationCbkTag /* PRQA S 1536 */ /* VL_DoIP_1536 */
+typedef struct
 {
     Std_ReturnType (*RaConfirmationFunc)(
         boolean*     authentified,
@@ -112,7 +112,7 @@ typedef struct DoIP_RaConfirmationCbkTag /* PRQA S 1536 */ /* VL_DoIP_1536 */
 /**
  * @brief PC configuration of routing activation
  */
-typedef struct DoIP_PCRaCfgTag /* PRQA S 1536 */ /* VL_DoIP_1536 */
+typedef struct
 {
     const DoIP_RaAuthenticationCbkType* AuthenticationCbk; /**< DoIPRoutingActivationAuthenticationCallback @range NA */
     const DoIP_RaConfirmationCbkType*   ConfirmationCbk;   /**< DoIPRoutingActivationConfirmationCallback @range NA */
@@ -121,7 +121,7 @@ typedef struct DoIP_PCRaCfgTag /* PRQA S 1536 */ /* VL_DoIP_1536 */
 /**
  * @brief PC configuration
  */
-typedef struct DoIP_PCConfigTag /* PRQA S 1536 */ /* VL_DoIP_1536 */
+typedef struct
 {
     uint8                            RaNum;      /**< Num of routing activation @range 0..255 */
     const DoIP_PCRaCfgType*          RaCfgArray; /**< DoIPRoutingActivation @range NA */

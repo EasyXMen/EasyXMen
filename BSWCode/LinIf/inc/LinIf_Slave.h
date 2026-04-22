@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -172,13 +172,13 @@ void LinIf_SlaveLinErrorIndication(NetworkHandleType ch, Lin_SlaveErrorType Erro
 void LinIf_SlaveGotoSleep(NetworkHandleType ch);
 
 /**
- * @brief               Main function of slave node.
- * @param[in]           ch: Identification of the LIN channel
- * @reentrant           TRUE
- * @synchronous         TRUE
- * @trace               -
+ * @brief           LinIf slave main function
+ * @param[in]       channel: Identification of the LinIf channel
+ * @reentrant       TRUE
+ * @synchronous     TRUE
+ * @trace        -
  */
-void LinIf_SlaveMainFunction(NetworkHandleType ch);
+void LinIf_SlaveMainHandle(NetworkHandleType ch);
 
 #endif
 

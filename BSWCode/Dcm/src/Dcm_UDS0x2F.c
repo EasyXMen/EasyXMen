@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -294,7 +294,7 @@ Std_ReturnType Dcm_UDS0x2F(
 /**
  * deal with session/security change for 0x2F to return control
  */
-void Dcm_UDS0x2F_StatusChangeHandle(void)
+void Dcm_UDS0x2F_StatusChangeHandle(Dcm_SesCtrlType newSession)
 {
     for (uint16 index = 0u; index < DCM_DID_NUM; index++)
     {
@@ -315,7 +315,7 @@ void Dcm_UDS0x2F_StatusChangeHandle(void)
             }
 #endif
 
-            if (E_NOT_OK == result)
+            if ((E_NOT_OK == result) || (newSession == DCM_DEFAULT_SESSION))
             {
                 Dcm_UDS0x2F_ControlRestore(index, didControlCfg);
             }
@@ -517,8 +517,8 @@ DCM_LOCAL void Dcm_UDS0x2F_ControlRestore(uint16 didIndex, const Dcm_DspDidContr
         }
         else
         {
-                }
-
+            /* for qac */
+        }
         if ((DCM_CONTROLMASK_INTERNAL != didControlCfg->ControlMask) || (0u != controlMask))
         {
             if (DcmDspDataCfg->DspDataUsePort == DCM_USE_ECU_SIGNAL)

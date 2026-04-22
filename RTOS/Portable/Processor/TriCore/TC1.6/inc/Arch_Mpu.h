@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -39,7 +39,7 @@
     {                                           \
         uint32 temp = 0u;                       \
         temp        = OS_ARCH_MFCR(OS_REG_PSW); \
-        temp &= 0XFFFFFF80u;                    \
+        temp &= CDC_MASK;                    \
         OS_ARCH_MTCR(OS_REG_PSW, temp);         \
     } while (0)
 #endif /* OS_NOSC == CFG_SC || OS_SC1 == CFG_SC || OS_SC2 == CFG_SC */
@@ -211,7 +211,7 @@
     {                                           \
         uint32 temp = 0u;                       \
         temp        = OS_ARCH_MFCR(OS_REG_PSW); \
-        temp &= 0xFFFF4FFFu;                    \
+        temp &= PPRS_MASK;                    \
         OS_ARCH_MTCR(OS_REG_PSW, temp);         \
     }
 /* PRQA S 3458 -- */
@@ -220,8 +220,15 @@
 #define Os_ArchMemProtSwithToSystem()
 #endif /* TRUE == CFG_MEMORY_PROTECTION_ENABLE */
 
-#define PPRS_SET_BITS    (12U)
-#define CLERA_PSWIO_MASK (0xfffff3ffu)
+#define PPRS_SET_BITS (12U)
+#define PPRS_SET2     (0x02U)
+#define PPRS_SET1     (0x01U)
+#define PPRS_SET0     (0x00U)
+#define PSWIO_MASK    (0xfffff3ffu)
+#define PPRS_MASK     (0xFFFF4FFFu)
+#define PSWIO_USER1_MODE      (0x00000400u)
+#define PSWIO_SUPERVISOR_MODE (0x00000800u)
+#define PSW_DEFAULT_VALUE (0x00000980u)
 /*=======[T Y P E   D E F I N I T I O N S]====================================*/
 
 /*=======[E X T E R N A L   D A T A]==========================================*/

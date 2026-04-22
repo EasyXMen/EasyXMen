@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -65,8 +65,41 @@
     Reason: Reducing the number of function calls will increase the nesting depth and cyclomatic complexity.
     Risk: The code is difficult to maintain.
     Prevention: Design and code review + clear structure and well-commented code.
+
+    \li PRQA S 3415 VL_LinTp_3415 .<br>
+    Reason: The LinTp module guarantees the correctness of the right-hand operand in '&&' or '||'.
+    Risk: No risk.
+    Prevention: Functional reliability guaranteed by design.
+
+    \li PRQA S 1536 VL_LinTp_1536
+    Reason: The tag '%1s' is declared but not used within this project.
+    Risk: No risk.
+    Prevention: Functional reliability guaranteed by design.
+
+    \li PRQA S 5209 VL_LinTp_5209
+    Reason: The LinTp module ensures the correctness that unsigned long is used.
+    Risk: No risk.
+    Prevention: Functional reliability guaranteed by design.
+
+    \li PRQA S 2982 VL_LinTp_2982
+    Reason: The operation is not redundant, because it must be emptied.
+    Risk: No risk.
+    Prevention: Functional reliability guaranteed by design.
+
+    \li VL_LinTp_1512
+      Reason: The issue shall be avoided in actual running environment and configs.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_LinTp_1510
+      Reason: The issue shall be avoided in actual running environment and configs.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
 */
 
+/* PRQA S 1513 EOF */ /* VL_QAC_MultiDeclaration */
+/* PRQA S 1512 EOF */ /* VL_LinTp_1512 */
+/* PRQA S 1510 EOF */ /* VL_LinTp_1510 */
 #ifndef LINTP_H_
 #define LINTP_H_
 

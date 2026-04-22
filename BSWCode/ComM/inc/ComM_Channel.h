@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -62,7 +62,7 @@ typedef enum
 #endif
 
 /** @ingroup ComMChannelTypes */
-typedef struct ComM_ChannelConfigType_Tag
+typedef struct ComM_ChannelConfigTypeTag /* PRQA S 1536 */ /* VL_ComM_NotUsed */
 {
     Std_ReturnType (*BusSMRequestComMode)(NetworkHandleType Channel, ComM_ModeType ComMode);
     uint32             NmLightTimeout;

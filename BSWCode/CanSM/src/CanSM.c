@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -755,7 +755,16 @@ CANSM_LOCAL void CanSM_ModeRequestTimeout(const CanSM_ManagerNetworkType* config
 CANSM_LOCAL_INLINE uint16 CanSM_GetPartitionIndex(void);
 
 #if (STD_ON == CANSM_DEV_ERROR_DETECT)
+#ifdef QAC_ANALYZE
+#pragma PRQA_NO_SIDE_EFFECTS CanSM_ValidateInitStatus
+#pragma PRQA_NO_SIDE_EFFECTS CanSM_ValidateAllNetworksNoCom
+#pragma PRQA_NO_SIDE_EFFECTS CanSM_ValidateNetworkRange
+#endif
 #if CANSM_MULTIPLE_PARTITION_USED == STD_ON
+#ifdef QAC_ANALYZE
+#pragma PRQA_NO_SIDE_EFFECTS CanSM_ValidatePartitionContext
+#pragma PRQA_NO_SIDE_EFFECTS CanSM_ValidateNetworkParition
+#endif
 /**
  * @brief        Check that the current running partition is valid in range.
  * @param[in]    apiId   : The ID of the API to use when calling this function.
@@ -1373,7 +1382,9 @@ void CanSM_ControllerBusOff(uint8 ControllerId) /* PRQA S 1532, 6030 */ /* VL_QA
                 {
                     findController = TRUE;
 #if CANSM_DEV_ERROR_DETECT == STD_ON && CANSM_MULTIPLE_PARTITION_USED == STD_ON
-                    if (CanSM_ValidateNetworkParition(SERVICE_ID_CANSM_CONTROLLERBUSOFF, netLoop))
+                    if (CanSM_ValidateNetworkParition(
+                            SERVICE_ID_CANSM_CONTROLLERBUSOFF,
+                            configPtr->ComMNetworkHandleRef))
 #endif
                     {
                         controllerRef->RuntimeControlModePtr[controllerIndex] = CAN_CS_STOPPED;
@@ -1426,7 +1437,9 @@ void CanSM_ControllerModeIndication(uint8 ControllerId, Can_ControllerStateType 
                 {
                     findController = TRUE;
 #if CANSM_DEV_ERROR_DETECT == STD_ON && CANSM_MULTIPLE_PARTITION_USED == STD_ON
-                    if (CanSM_ValidateNetworkParition(SERVICE_ID_CANSM_CONTROLLERMODEINDICATION, networkIndex))
+                    if (CanSM_ValidateNetworkParition(
+                            SERVICE_ID_CANSM_CONTROLLERMODEINDICATION,
+                            configPtr->ComMNetworkHandleRef))
 #endif
                     {
                         controllerRef->RuntimeControlModePtr[controllerIndex] = ControllerMode;
@@ -1473,7 +1486,9 @@ void CanSM_TransceiverModeIndication(uint8 TransceiverId, CanTrcv_TrcvModeType T
                 if (TransceiverId == trcvRef->TransceiverId)
                 {
 #if CANSM_DEV_ERROR_DETECT == STD_ON && CANSM_MULTIPLE_PARTITION_USED == STD_ON
-                    if (CanSM_ValidateNetworkParition(SERVICE_ID_CANSM_TRANCEIVERMODEINDICATION, netLoop))
+                    if (CanSM_ValidateNetworkParition(
+                            SERVICE_ID_CANSM_TRANCEIVERMODEINDICATION,
+                            configPtr->ComMNetworkHandleRef))
 #endif
                     {
                         varPtr = configPtr->RuntimeNetPtr;
@@ -1633,7 +1648,9 @@ void CanSM_CheckTransceiverWakeFlagIndication(uint8 Transceiver) /* PRQA S 1532 
                 if (Transceiver == trcvRef->TransceiverId)
                 {
 #if CANSM_DEV_ERROR_DETECT == STD_ON && CANSM_MULTIPLE_PARTITION_USED == STD_ON
-                    if (CanSM_ValidateNetworkParition(SERVICE_ID_CANSM_CHECKTRANSCEIVERWAKEFLAGINDICATION, netLoop))
+                    if (CanSM_ValidateNetworkParition(
+                            SERVICE_ID_CANSM_CHECKTRANSCEIVERWAKEFLAGINDICATION,
+                            configPtr->ComMNetworkHandleRef))
 #endif
                     {
                         varPtr = configPtr->RuntimeNetPtr;
@@ -1683,7 +1700,9 @@ void CanSM_ConfirmPnAvailability(uint8 TransceiverId) /* PRQA S 1532 */ /* VL_QA
                 {
 #if CANSM_CANNM_CONF_PN_AVA == STD_ON
 #if CANSM_DEV_ERROR_DETECT == STD_ON && CANSM_MULTIPLE_PARTITION_USED == STD_ON
-                    if (CanSM_ValidateNetworkParition(SERVICE_ID_CANSM_CONFIRMPNAVAILABILITY, netLoop))
+                    if (CanSM_ValidateNetworkParition(
+                            SERVICE_ID_CANSM_CONFIRMPNAVAILABILITY,
+                            configPtr->ComMNetworkHandleRef))
 #endif
                     {
                         CanNm_ConfirmPnAvailability(configPtr->ComMNetworkHandleRef);
@@ -3862,6 +3881,10 @@ CANSM_LOCAL_INLINE boolean CanSM_ValidateInitStatus(uint8 apiId)
     {
         (void)Det_ReportError(CANSM_MODULE_ID, CANSM_INSTANCE_ID, apiId, CANSM_E_UNINIT);
         return FALSE;
+    }
+    else
+    {
+        /* do nothing */
     }
     return TRUE;
 }

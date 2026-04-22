@@ -1,6 +1,6 @@
 /* PRQA S 3108++ */
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -209,6 +209,16 @@ FUNC(void, OS_CODE) Os_MultiCoreInitProcessor(void)
         /* Nothing to do */
         break;
     }
+/*Initialize system timer for system counter */
+#if (TRUE == CFG_SYSTEM_TIMER_ENABLE)
+    Os_ArchInitSystemTimer();
+#endif
+
+/*Initialize system timer for time protection */
+#if (TRUE == CFG_TIMING_PROTECTION_ENABLE)
+    Os_ArchInitTimingProtTimer();
+#endif
+
 }
 
 /******************************************************************************/

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -39,7 +39,8 @@ extern "C" {
  *                along with configuration information determines which module is to be called.
  *
  * @param[in]     SocketId: Socket identifier of the related local socket resource.
- * @param[in]     RemoteAddrPtr: Pointer to memory containing IP address and port of the
+ * @param[in]     RemoteAddrPtr: Pointer to memory containing IP address and port of the remote host which sent the
+ *                               data.
  * @param[in]     BufPtr: Pointer to the received data
  * @param[in]     Length: Data length of the received TCP segment or UDP datagram
  * @reentrant     Reentrant for different SocketIds. Non reentrant for the same SocketId.

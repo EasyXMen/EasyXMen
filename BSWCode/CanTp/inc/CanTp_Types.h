@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -217,9 +217,9 @@ extern "C" {
 /** @} */
 
 /**
- * @name CanTpInternalLength&OffsetMacros
+ * @name CanTpInternalLength&Offset&ResultMacros
  * @{
- * @brief macros group contain various CanTp Internal length and offset information
+ * @brief macros group contain various CanTp Internal length&offset&checkresult information
  */
 #define CANTP_CANID_INIT           0x00u                /**< CanID highest byte init value*/
 #define CANTP_PARALLEL_LENGTH      0x02u                /**< 3E80 Length*/
@@ -237,6 +237,9 @@ extern "C" {
 #define CANTP_FF_DL_12BIT_LENGTH   (PduLengthType)4095u /**< data length which FFDL have 12 bits */
 #define CANTP_CAN20_FRAME_LEN_MAX  (PduLengthType)8u    /**< Can2.0 frame max length */
 #define CANTP_CANFD_FRAME_LEN_MAX  (PduLengthType)64u   /**< CanFD frame max length */
+#define CANTP_CHECK_OK             0x00u /**< Check passed: No error in FF (First Frame) length or data validation */
+#define CANTP_CHECK_NOT_OK         0x01u /**< Check failed: FF length or data validation error detected */
+#define CANTP_CHECK_OVERFLOW       0x02u /**< Buffer overflow: FF_DL length exceeds available pdu length size */
 /** @} */
 
 /* ================================================ type definitions ================================================ */
@@ -244,6 +247,10 @@ extern "C" {
  * @brief Type definition for the CAN Transport Protocol frame PCI type
  */
 typedef uint8 CanTp_FramePCIType;
+/**
+ * @brief Type definition for CAN Transport Protocol check result
+ */
+typedef uint8 CanTp_CheckResultType;
 /**
  * @brief  State of the CanTp module. Initialized or not.
  */
@@ -305,7 +312,7 @@ typedef enum
 /**
  * @brief  This data type is used to record the state of pre txPdu and corresponding connection
  */
-typedef struct CanTp_ConfirmDirectionTypeTag /* PRQA S 1536 */ /* VL_CanTp_1536 */
+typedef struct
 {
     PduIdType             ConnectionId; /**< corresponding connection @range 0x00*/
     CanTp_TxDirectionType TxDirection;  /**< the state of the txPdu @range 0x01*/

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -24,6 +24,9 @@
 
 #ifndef BSWM_INTERNAL_H
 #define BSWM_INTERNAL_H
+
+/* PRQA S 1501 EOF */ /* VL_BswM_1501 */
+/* PRQA S 1753 EOF */ /* VL_BswM_1753 */
 
 /* =================================================== inclusions =================================================== */
 #include "BswM.h"
@@ -72,7 +75,7 @@ extern "C" {
  * @brief type definition for event request port Pre-compile time configure
  *
  */
-typedef struct BswM_EvRqstPortPCCfgTag
+typedef struct
 {
 #if (BSWM_EVENT_RQSTPORT_ENABLE == STD_ON) /*EventRequestPort configuration exists*/
 #if (BSWM_EVENT_COMM_INITIATE_RESET_LIST_ENABLE == STD_ON)
@@ -111,7 +114,7 @@ typedef struct BswM_EvRqstPortPCCfgTag
  * @brief type definition for mode request port Pre-compile time configure
  *
  */
-typedef struct swM_ModeRqstPortPCCfgTag
+typedef struct
 {
 #if (BSWM_MODE_RQSTPORT_ENABLE == STD_ON) /*ModeRequestPort configuration exists*/
 #if (BSWM_BSWMODENOTIFICATION_ENABLED == STD_ON)
@@ -249,7 +252,7 @@ typedef struct swM_ModeRqstPortPCCfgTag
  * @brief type definition of runtime information for BswMModeRequestPort
  *
  */
-typedef struct BswM_ModeRqstPortRuntimeTag
+typedef struct
 {
 #if (BSWM_CANSMINDICATION_ENABLED == STD_ON)
     /**> BswMCanSMIndication. @range None */
@@ -374,7 +377,7 @@ typedef uint8 BswM_EventRquestPortRuntimeType;
  * @brief type definition for BSWM partition Pre-compile time configure
  *
  */
-typedef struct BswM_PartitionPCCfgTag
+typedef struct
 {
 #if (BSWM_MULTI_PARTITION_ENABLED == STD_ON)
     ApplicationType partitionId;                     /**> id of this partition. @range 0 ~ 0xFFFF */
@@ -394,7 +397,7 @@ typedef struct BswM_PartitionPCCfgTag
  * @brief runtime information for BSWM module in a core
  *
  */
-typedef struct BswM_RuntimeStatusTag
+typedef struct
 {
     BswM_InitStatusType bswmInitState; /**> Initial state of BSWM module. @range 0 ~ 1*/
 #if (BSWM_ECUM_ENABLED == STD_ON)
@@ -406,7 +409,7 @@ typedef struct BswM_RuntimeStatusTag
  * @brief type definition for BSWM Pre-compile time configuration root in core
  *
  */
-typedef struct swM_PCCfgTag
+typedef struct
 {
 #if (BSWM_MAX_NUM_CORE > 1u)
     CoreIdType bswmCoreId; /**> the core these BSWM belong to. @range 0 ~ 0xFF */

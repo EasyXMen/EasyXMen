@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -49,20 +49,22 @@
 
 /* ===================================================== macros ===================================================== */
 /* Handle events of LINIF */
-#define LINIF_EVENT_MASK            0xFFFFu
-#define LINIF_EVENT_NONE            0x0000u
-#define LINIF_EVENT_SLEEP           0x0001u
-#define LINIF_EVENT_GOTO_SLEEP      0x0002u
-#define LINIF_EVENT_WAKEUP_E_OK     0x0004u
-#define LINIF_EVENT_WAKEUP_E_NOT_OK 0x0008u
-#define LINIF_EVENT_COLLISION       0x0010u
-#define LINIF_EVENT_INTERRUPT_BACK  0x0020u
-#define LINIF_EVENT_HEADER          0x0040u
-#define LINIF_EVENT_RESPONSE        0x0080u
-#define LINIF_EVENT_SCHEDULE_CONF   0x0100u
-#define LINIF_EVENT_SCHEDULE_REQ    0x0200u
-#define LINIF_EVENT_NCMRF_SEND      0x0400u
-#define LINIF_EVENT_NCSRF_SEND      0x0800u
+#define LINIF_EVENT_MASK                          0xFFFFu
+#define LINIF_EVENT_NONE                          0x0000u
+#define LINIF_EVENT_SLEEP                         0x0001u
+#define LINIF_EVENT_GOTO_SLEEP                    0x0002u
+#define LINIF_EVENT_WAKEUP_E_OK                   0x0004u
+#define LINIF_EVENT_WAKEUP_E_NOT_OK               0x0008u
+#define LINIF_EVENT_COLLISION                     0x0010u
+#define LINIF_EVENT_INTERRUPT_BACK                0x0020u
+#define LINIF_EVENT_HEADER                        0x0040u
+#define LINIF_EVENT_RESPONSE                      0x0080u
+#define LINIF_EVENT_SCHEDULE_CONF                 0x0100u
+#define LINIF_EVENT_SCHEDULE_REQ                  0x0200u
+#define LINIF_EVENT_SKIP_SLOT_TIMER               0x2000u
+#define LINIF_EVENT_NCMRF_SEND                    0x0400u
+#define LINIF_EVENT_NCSRF_SEND                    0x0800u
+#define LINIF_EVENT_ENTRY_NOT_END_SCHEDULE_CHANGE 0x1000u
 
 #define LINIF_NC_FRAME_PID_0X3C 0x3Cu
 #define LINIF_NC_FRAME_PID_0XFE 0xFEu
@@ -236,6 +238,11 @@ LINIF_LOCAL_INLINE void LinIf_DetReportError(uint8 ApiId, uint8 ErrorId)
 LINIF_LOCAL_INLINE void LinIf_ReportRuntimeError(uint8 ApiId, uint8 ErrorId)
 {
     (void)Det_ReportRuntimeError(LINIF_MODULE_ID, LINIF_INSTANCE_ID, ApiId, ErrorId);
+}
+
+LINIF_LOCAL_INLINE boolean LinIf_IsSupportTpTransmit(uint8 ch)
+{
+    return LinIf_GetChannel(ch)->IsRefByTpChannel;
 }
 
 /**

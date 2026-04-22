@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -297,7 +297,7 @@
 #define XCP_FLASH_PAGE_NUM 1u
 
 /* ================================================ type definitions ================================================ */
-typedef struct Xcp_ChannelCommonTag
+typedef struct
 {
     uint32 TxTimeOutCnt;
     uint32 MTA;
@@ -347,7 +347,7 @@ typedef Xcp_ChannelCommonType* Xcp_ChannelCommonPtr;
 /* PRQA S 5004 -- */
 
 #if (XCP_PL_DAQ == (XCP_PL_DAQ & XCP_RESOURCE))
-typedef struct Xcp_DaqTag
+typedef struct
 {
     uint8 sendStatus;
     uint8 mode;
@@ -372,20 +372,20 @@ typedef struct Xcp_DaqTag
 } Xcp_DaqType;
 
 /* PRQA S 0750 ++ */ /* VL_Xcp_0750 */
-typedef union Xcp_OdtPtrUnionTag
+typedef union
 {
     uint8*       u8ptr;
     Xcp_OdtType* odtPtr;
 } Xcp_OdtPtrUnion;
 
-typedef union Xcp_OdtEntryPtrUnionTag
+typedef union
 {
     uint8*         u8ptr;
     Xcp_EntryType* odtEntryPtr;
 } Xcp_OdtEntryPtrUnion;
 /* PRQA S 0750 -- */
 
-typedef struct Xcp_ChannelDaqTag
+typedef struct
 {
     uint16      SessionCfgId;
     Xcp_DaqType DaqInfo[XCP_MAX_DAQ];
@@ -413,7 +413,7 @@ typedef struct Xcp_ChannelDaqTag
 typedef Xcp_ChannelDaqType* Xcp_ChannelDaqPtr;
 /* PRQA S 5004 -- */
 
-typedef struct Xcp_ChannelEvChTag
+typedef struct
 {
     uint32         EvChBufferUsage[XCP_MAX_EVENT_CHANNEL];
     uint8          EvChActivCnt[XCP_MAX_EVENT_CHANNEL];
@@ -447,7 +447,7 @@ typedef enum
     XCP_PGM_PROGRAMMED
 } Xcp_PgmStautsType;
 
-typedef struct Xcp_ChannelPgmTag
+typedef struct
 {
     uint32             PgmAreaSelect;
     uint32             PgmTargetAddr;
@@ -494,7 +494,9 @@ extern uint8 Xcp_RespBuffer[XCP_MAX_CTO];
 extern uint8 Xcp_EvBuffer[XCP_MAX_CTO];
 extern uint8 Xcp_ServBuffer[XCP_MAX_CTO];
 #if (STD_ON == XCP_CHECK_MEA_ADDR)
+/* PRQA S 1512 ++ */ /* VL_Xcp_1512 */
 extern const Xcp_MeaAddrCheckType Xcp_MeaAddrCfgSet[XCP_CHECK_MEASET_NUM];
+/* PRQA S 1512 -- */
 #endif
 /*
  * DAQ
@@ -936,6 +938,8 @@ extern boolean Xcp_CheckCalMem(uint32 addr, uint32 size, Xcp_MemAddrType type);
  */
 extern void Xcp_Download(void);
 
+#if (XCP_PL_CAL == (XCP_PL_CAL & XCP_RESOURCE))
+#if (XCP_MAX_CTO > 8u)
 /**
  * @brief       Performs a short download operation, transferring a small amount of data from the
  *              master to the target system's memory.
@@ -943,7 +947,11 @@ extern void Xcp_Download(void);
  * @synchronous TRUE
  * @trace       CPD-63965
  */
+/* PRQA S 1501 ++ */ /* VL_Xcp_1501 */
 extern void Xcp_ShortDownload(void);
+/* PRQA S 1501 -- */
+#endif
+#endif
 /*
  * CAL/PAG Optional Function
  */

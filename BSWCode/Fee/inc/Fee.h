@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -35,7 +35,9 @@
  *  V03.00.01 2024-10-22  peng.wu         CPT-10925, Fix coverage issues with some code
  *                                        Add QAC
  *                                        CPT-13146, Delete CALLBACK_CODE
- * V03.01.00 2025-09-18  haibin.shao      Add the Cluster group feature function for the Fee
+ *  V03.01.00 2025-09-18  haibin.shao      Add the Cluster group feature function for the Fee
+ *  V03.01.01 2025-11-21  peng.wu          Fix the swap trap issue
+ *  V03.01.02 2025-01-08  peng.wu         CPT-17546, Fix page switching, the issue of inconsistent data read back.
  *
  ==================================================================================================================== */
 
@@ -166,6 +168,12 @@
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
 
+    \li VL_Fee_1513
+      Reason: Identifier '${name}' with external linkage has separate non-defining declarations in more than one
+location.
+      Risk: No risk.
+      Prevention: None.
+
  */
 
 #ifndef FEE_H
@@ -195,7 +203,7 @@ extern "C" {
 /** Software version information */
 #define FEE_SW_MAJOR_VERSION (3u)
 #define FEE_SW_MINOR_VERSION (1u)
-#define FEE_SW_PATCH_VERSION (0u)
+#define FEE_SW_PATCH_VERSION (2u)
 
 /* ===================================================== macros ===================================================== */
 /** Defines used as the local keyword for variables or functions */
@@ -232,6 +240,7 @@ FEE_LOCAL_INLINE void Fee_Det_ReportRunTimeError(uint8 ApiId, uint8 ErrorId)
 /* =========================================== external data declarations =========================================== */
 
 /* ========================================= external function declarations ========================================= */
+/* PRQA S 1513,1512 EOF */ /* VL_Fee_1513,VL_Fee_1512 */
 /**
  * @brief       Service to initialize the FEE module
  * @param[in]   ConfigPtr   : Pointer to the selected configuration set

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -324,12 +324,16 @@ void Xcp_DownloadNext(void)
         {
             Xcp_SetErrorCode(XCP_ERR_ACCESS_LOCKED);
         }
+        /* PRQA S 2985 ++ */ /* VL_QAC_2985_2986 */
         else if (
             (boolean)FALSE
             == Xcp_CheckAddress(u4DestAddr, ((uint32)Xcp_ChannelCommonData.BlockBuflen * XCP_AG), XCP_MEM_CAL_RAM))
+        /* PRQA S 2985 -- */
         {
+            /* PRQA S 2985 ++ */ /* VL_QAC_2985_2986 */
             if ((boolean)TRUE
                 == Xcp_CheckAddress(u4DestAddr, ((uint32)Xcp_ChannelCommonData.BlockBuflen * XCP_AG), XCP_MEM_CAL_ROM))
+            /* PRQA S 2985 -- */
             {
                 Xcp_SetErrorCode(XCP_ERR_WRITE_PROTECTED);
             }
@@ -348,7 +352,9 @@ void Xcp_DownloadNext(void)
                 destPtr[pos] = sourPtr[pos];
             }
             /*updata the MTA*/
+            /* PRQA S 2985 ++ */ /* VL_QAC_2985_2986 */
             Xcp_UpdateMTA((uint32)Xcp_ChannelCommonData.BlockBuflen * XCP_AG);
+            /* PRQA S 2985 -- */
         }
     Xcp_SendResp();
     return;
@@ -363,7 +369,7 @@ void Xcp_DownloadNext(void)
  * Memory Transfer Address (MTA). If any check fails, it sets an appropriate error
  * code and sends a response.
  */
-/* PRQA S 1532,6030 ++ */ /* VL_QAC_OneFunRef */ /* VL_MTR_Xcp_STMIF */
+/* PRQA S 1532,6030 ++ */ /* VL_QAC_OneFunRef,VL_MTR_Xcp_STMIF */
 void Xcp_DownloadMax(void)
 /* PRQA S 1532,6030 -- */
 {
@@ -656,11 +662,9 @@ XCP_LOCAL void Xcp_SetCalPageHal(void)
  * is enabled, it calls the application-specific function to get the calibration
  * page. If any check fails, it sets an appropriate error code and sends a response.
  */
-/* PRQA S 6030 ++ */ /* VL_MTR_Xcp_STMIF */
-/* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
+/* PRQA S 1532,6030 ++ */ /* VL_QAC_OneFunRef,VL_MTR_Xcp_STMIF */
 void Xcp_GetCalPage(void)
-/* PRQA S 6030 -- */
-/* PRQA S 1532 -- */
+/* PRQA S 1532,6030 -- */
 {
     uint8 accessMode = Xcp_CmdBuffer[XCP_CONST_1];
     uint8 segNum     = Xcp_CmdBuffer[XCP_CONST_2];

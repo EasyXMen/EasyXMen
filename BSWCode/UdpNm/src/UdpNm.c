@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -48,6 +48,9 @@ typedef enum
 #define UDPNM_START_SEC_CODE
 #include "UdpNm_MemMap.h"
 
+#ifdef QAC_ANALYZE
+#pragma PRQA_NO_SIDE_EFFECTS UdpNm_TestAndClear
+#endif
 UDPNM_LOCAL_INLINE boolean         UdpNm_TestAndClear(boolean* flagPtr);
 UDPNM_LOCAL void                   UdpNm_SetTxPduCbvBit(UdpNm_ChannelIndexType chIndex, uint8 mask);
 UDPNM_LOCAL void                   UdpNm_ClrTxPduCbvBit(UdpNm_ChannelIndexType chIndex, uint8 mask);
@@ -97,11 +100,12 @@ UDPNM_LOCAL void UdpNm_TimerManagement(UdpNm_ChannelIndexType chIndex);
 /**
  *  Function to handle state machine switching.
  *  */
-UDPNM_LOCAL void UdpNm_StateChange(UdpNm_ChannelIndexType chIndex, Nm_StateType nmNewState);
+UDPNM_LOCAL void UdpNm_StateChange(UdpNm_ChannelIndexType chIndex, Nm_StateType nmOldState, Nm_StateType nmNewState);
 #if UDPNM_PASSIVE_MODE_ENABLED == STD_OFF
 UDPNM_LOCAL void UdpNm_StartTransmissionNmPdu(UdpNm_ChannelIndexType chIndex, boolean isNetWorkRequest);
 #endif
-UDPNM_LOCAL void UdpNm_EnterRepeatMessageState(UdpNm_ChannelIndexType chIndex, boolean isNetWorkRequest);
+UDPNM_LOCAL void
+    UdpNm_EnterRepeatMessageState(UdpNm_ChannelIndexType chIndex, Nm_StateType nmOldState, boolean isNetWorkRequest);
 UDPNM_LOCAL void UdpNm_EnterPrepareBusSleepModeHandle(UdpNm_ChannelIndexType chIndex);
 #if UDPNM_NODE_DETECTION_ENABLED == STD_ON
 UDPNM_LOCAL boolean UdpNm_NodeDetectStateHandle(UdpNm_ChannelIndexType chIndex);
@@ -133,7 +137,9 @@ UDPNM_LOCAL boolean UdpNm_ValidateInitStatus(uint8 apiId);
 UDPNM_LOCAL boolean UdpNm_ValidateNetworkHandle(uint8 apiId, NetworkHandleType nmChannelHandle);
 UDPNM_LOCAL boolean UdpNm_ValidatePointer(uint8 apiId, const void* pointer);
 UDPNM_LOCAL boolean UdpNm_ValidateTxPduId(uint8 apiId, PduIdType txPduId);
+#if UDPNM_TRIGGER_TRANSMIT_API == STD_ON
 UDPNM_LOCAL boolean UdpNm_ValidateTxPdu(uint8 apiId, PduIdType txPduId, const PduInfoType* pduInfoPtr);
+#endif
 UDPNM_LOCAL boolean UdpNm_ValidateRxPdu(uint8 apiId, PduIdType rxPduId, const PduInfoType* pduInfoPtr);
 UDPNM_LOCAL boolean UdpNm_ValidateUserDataPdu(uint8 apiId, PduIdType rxPduId, const PduInfoType* pduInfoPtr);
 #endif
@@ -482,15 +488,14 @@ Std_ReturnType UdpNm_SetUserData(NetworkHandleType nmChannelHandle, const uint8*
     {
         const UdpNm_ChannelIndexType     chIndex    = UdpNm_FindChannelIndex(nmChannelHandle);
         const UdpNm_ChannelPBConfigType* chPBCfgPtr = &UdpNm_CfgPtr->ChlPBCfgPtr[chIndex];
-        const UdpNm_InnerChannelType*    chRTPtr    = UdpNm_ChannelLCfgData[chIndex].RuntimePtr;
+        UdpNm_InnerChannelType*          chRTPtr    = UdpNm_ChannelLCfgData[chIndex].RuntimePtr;
 
         /** SWS_UdpNm_00159 */
         uint16 userDataLength = chPBCfgPtr->UserDataLength;
         uint16 userDataOffset = chPBCfgPtr->UserDataOffset;
-        uint8* userDataPtr    = &chRTPtr->TxPduData[userDataOffset];
 
         SchM_Enter_UdpNm_Context();
-        (void)IStdLib_MemCpy(userDataPtr, nmUserDataPtr, userDataLength);
+        (void)IStdLib_MemCpy(&chRTPtr->TxPduData[userDataOffset], nmUserDataPtr, userDataLength);
         SchM_Exit_UdpNm_Context();
 
         ret = E_OK;
@@ -960,6 +965,7 @@ void UdpNm_SoAdIfRxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr)
     }
 }
 
+#if UDPNM_TRIGGER_TRANSMIT_API == STD_ON
 /**
  * Within this API, the upper layer module (called module) shall check whether the available data
  * fits into the buffer size reported by PduInfoPtr->SduLength. If it fits, it shall copy its data into the
@@ -1005,6 +1011,7 @@ Std_ReturnType UdpNm_SoAdIfTriggerTransmit(PduIdType TxPduId, PduInfoType* PduIn
 
     return ret;
 }
+#endif
 
 /**
  * Main function of the UdpNm which processes the algorithm describes in that document.
@@ -1474,17 +1481,17 @@ UDPNM_LOCAL void UdpNm_TimerManagement(UdpNm_ChannelIndexType chIndex)
  * @synchronous TRUE
  * @trace       CPD-71929
  */
-UDPNM_LOCAL void UdpNm_StateChange(UdpNm_ChannelIndexType chIndex, Nm_StateType nmNewState)
+UDPNM_LOCAL void UdpNm_StateChange(UdpNm_ChannelIndexType chIndex, Nm_StateType nmOldState, Nm_StateType nmNewState)
 {
-    UdpNm_InnerChannelType* chRTPtr = UdpNm_ChannelLCfgData[chIndex].RuntimePtr;
-
 /** SWS_UdpNm_00166 */
 #if UDPNM_STATE_CHANGE_IND_ENABLED == STD_ON
-    Nm_StateChangeNotification(UdpNm_ChannelLCfgData[chIndex].ComMNetworkHandleRef, chRTPtr->UdpNmState, nmNewState);
+    Nm_StateChangeNotification(UdpNm_ChannelLCfgData[chIndex].ComMNetworkHandleRef, nmOldState, nmNewState);
+#else
+    UDPNM_UNUSED(nmOldState);
 #endif
 
     SchM_Enter_UdpNm_Context();
-    chRTPtr->UdpNmState = nmNewState;
+    UdpNm_ChannelLCfgData[chIndex].RuntimePtr->UdpNmState = nmNewState;
     SchM_Exit_UdpNm_Context();
 }
 
@@ -1557,7 +1564,8 @@ UDPNM_LOCAL void UdpNm_StartTransmissionNmPdu(UdpNm_ChannelIndexType chIndex, bo
  * @synchronous TRUE
  * @trace       CPD-71931
  */
-UDPNM_LOCAL void UdpNm_EnterRepeatMessageState(UdpNm_ChannelIndexType chIndex, boolean isNetWorkRequest)
+UDPNM_LOCAL void
+    UdpNm_EnterRepeatMessageState(UdpNm_ChannelIndexType chIndex, Nm_StateType nmOldState, boolean isNetWorkRequest)
 {
     const UdpNm_ChannelLConfigType* chCfgPtr = &UdpNm_ChannelLCfgData[chIndex];
     UdpNm_InnerChannelType*         chRTPtr  = chCfgPtr->RuntimePtr;
@@ -1591,7 +1599,7 @@ UDPNM_LOCAL void UdpNm_EnterRepeatMessageState(UdpNm_ChannelIndexType chIndex, b
         Nm_NetworkMode(chCfgPtr->ComMNetworkHandleRef);
     }
 
-    UdpNm_StateChange(chIndex, NM_STATE_REPEAT_MESSAGE);
+    UdpNm_StateChange(chIndex, nmOldState, NM_STATE_REPEAT_MESSAGE);
 }
 
 /**
@@ -1606,7 +1614,7 @@ UDPNM_LOCAL void UdpNm_EnterPrepareBusSleepModeHandle(UdpNm_ChannelIndexType chI
     const UdpNm_ChannelLConfigType* chCfgPtr = &UdpNm_ChannelLCfgData[chIndex];
     UdpNm_InnerChannelType*         chRTPtr  = chCfgPtr->RuntimePtr;
 
-    UdpNm_StateChange(chIndex, NM_STATE_PREPARE_BUS_SLEEP);
+    UdpNm_StateChange(chIndex, NM_STATE_READY_SLEEP, NM_STATE_PREPARE_BUS_SLEEP);
     chRTPtr->UdpnmMode = NM_MODE_PREPARE_BUS_SLEEP;
 
     /** SWS_UdpNm_00114 */
@@ -1649,7 +1657,6 @@ UDPNM_LOCAL boolean UdpNm_NodeDetectStateHandle(UdpNm_ChannelIndexType chIndex)
     if ((chRTPtr->RepeatMessageRequest || chRTPtr->RepeatMessageDetected)
         && ((currState == NM_STATE_NORMAL_OPERATION) || (currState == NM_STATE_READY_SLEEP)))
     {
-        UdpNm_EnterRepeatMessageState(chIndex, FALSE);
         if (chRTPtr->RepeatMessageRequest)
         {
             UdpNm_SetTxPduCbvBit(chIndex, UDPNM_CBV_BIT_RMP_MASK);
@@ -1676,6 +1683,7 @@ UDPNM_LOCAL boolean UdpNm_NetworkStateHandle(UdpNm_ChannelIndexType chIndex)
     const UdpNm_ChannelLConfigType* chCfgPtr     = &UdpNm_ChannelLCfgData[chIndex];
     UdpNm_InnerChannelType*         chRTPtr      = chCfgPtr->RuntimePtr;
     boolean                         stateChanged = FALSE;
+    Nm_StateType                    currState    = chRTPtr->UdpNmState;
 
 #if UDPNM_PASSIVE_MODE_ENABLED == STD_OFF
     if (UdpNm_TestAndClear(&chRTPtr->NetRequestFlg))
@@ -1684,7 +1692,7 @@ UDPNM_LOCAL boolean UdpNm_NetworkStateHandle(UdpNm_ChannelIndexType chIndex)
         /** SWS_UdpNm_00362 */
         if (chCfgPtr->PnHandleMultipleNetworkRequests)
         {
-            UdpNm_EnterRepeatMessageState(chIndex, TRUE);
+            UdpNm_EnterRepeatMessageState(chIndex, currState, TRUE);
             stateChanged = TRUE;
         }
 #endif
@@ -1695,10 +1703,9 @@ UDPNM_LOCAL boolean UdpNm_NetworkStateHandle(UdpNm_ChannelIndexType chIndex)
     if (!stateChanged)
 #endif
     {
-        Nm_StateType currState = chRTPtr->UdpNmState;
         if ((chRTPtr->NetRequestStatus == UDPNM_NETWORK_REQUESTED) && (currState != NM_STATE_NORMAL_OPERATION))
         {
-            UdpNm_StateChange(chIndex, NM_STATE_NORMAL_OPERATION);
+            UdpNm_StateChange(chIndex, currState, NM_STATE_NORMAL_OPERATION);
 #if UDPNM_REMOTE_SLEEP_IND_ENABLED == STD_ON
             /** SWS_UdpNm_00150 */
             chRTPtr->TickTimers[UDPNM_REMOTE_SLEEP_TIMER] = chCfgPtr->RemoteSleepIndTime;
@@ -1708,7 +1715,7 @@ UDPNM_LOCAL boolean UdpNm_NetworkStateHandle(UdpNm_ChannelIndexType chIndex)
 
         if ((chRTPtr->NetRequestStatus == UDPNM_NETWORK_RELEASED) && (currState != NM_STATE_READY_SLEEP))
         {
-            UdpNm_StateChange(chIndex, NM_STATE_READY_SLEEP);
+            UdpNm_StateChange(chIndex, currState, NM_STATE_READY_SLEEP);
 #if UDPNM_PASSIVE_MODE_ENABLED == STD_OFF
             chRTPtr->TickTimers[UDPNM_TXMSG_CYCLE_TIMER] = 0u;
 #if UDPNM_RETRY_FIRST_MESSAGE_REQUEST == STD_ON
@@ -1748,7 +1755,16 @@ UDPNM_LOCAL void UdpNm_RepeatMessageStateHandle(UdpNm_ChannelIndexType chIndex)
         }
 #endif
 
-        (void)UdpNm_NetworkStateHandle(chIndex);
+        boolean stateChanged = UdpNm_NetworkStateHandle(chIndex);
+#if UDPNM_NODE_DETECTION_ENABLED == STD_ON
+        if (stateChanged)
+        {
+            chRTPtr->RepeatMessageRequest  = FALSE;
+            chRTPtr->RepeatMessageDetected = FALSE;
+        }
+#else
+        (void)stateChanged;
+#endif
     }
 }
 
@@ -1769,7 +1785,10 @@ UDPNM_LOCAL void UdpNm_NormalOperationStateHandle(UdpNm_ChannelIndexType chIndex
 #if UDPNM_NODE_DETECTION_ENABLED == STD_ON
     if (!stateChanged && UdpNm_ChannelLCfgData[chIndex].NodeDetectionEnabled)
     {
-        (void)UdpNm_NodeDetectStateHandle(chIndex);
+        if (UdpNm_NodeDetectStateHandle(chIndex))
+        {
+            UdpNm_EnterRepeatMessageState(chIndex, UdpNm_ChannelLCfgData[chIndex].RuntimePtr->UdpNmState, FALSE);
+        }
     }
 #endif
     UDPNM_UNUSED(stateChanged);
@@ -1785,9 +1804,8 @@ UDPNM_LOCAL void UdpNm_NormalOperationStateHandle(UdpNm_ChannelIndexType chIndex
  */
 UDPNM_LOCAL void UdpNm_ReadySleepStateHandle(UdpNm_ChannelIndexType chIndex)
 {
-    const UdpNm_ChannelLConfigType* chCfgPtr     = &UdpNm_ChannelLCfgData[chIndex];
-    UdpNm_InnerChannelType*         chRTPtr      = chCfgPtr->RuntimePtr;
-    boolean                         stateChanged = FALSE;
+    const UdpNm_ChannelLConfigType* chCfgPtr = &UdpNm_ChannelLCfgData[chIndex];
+    UdpNm_InnerChannelType*         chRTPtr  = chCfgPtr->RuntimePtr;
 
 #if UDPNM_PASSIVE_MODE_ENABLED == STD_OFF
     if (chRTPtr->NetRequestFlg
@@ -1806,25 +1824,43 @@ UDPNM_LOCAL void UdpNm_ReadySleepStateHandle(UdpNm_ChannelIndexType chIndex)
     }
 #endif
 
-    stateChanged = UdpNm_NetworkStateHandle(chIndex);
-
-#if UDPNM_NODE_DETECTION_ENABLED == STD_ON
-    if (!stateChanged && chCfgPtr->NodeDetectionEnabled)
+    if (!UdpNm_NetworkStateHandle(chIndex))
     {
-        stateChanged = UdpNm_NodeDetectStateHandle(chIndex);
-    }
+        SchM_Enter_UdpNm_Context();
+#if UDPNM_NODE_DETECTION_ENABLED == STD_ON
+        if (chCfgPtr->NodeDetectionEnabled && UdpNm_NodeDetectStateHandle(chIndex))
+        {
+            chRTPtr->UdpNmState = NM_STATE_REPEAT_MESSAGE;
+        }
 #endif
 
-    /**
-     *  Depends on the Network Management PDU transmission ability is enabled,
-     *  because NM-Timeout will stop if function UdpNm_DisableCommunication has bean called.
-     *  */
-    if (!stateChanged && UdpNm_TestAndClear(&chRTPtr->TimeoutFlag[UDPNM_NM_TIMEOUT_TIMER]))
-    {
-        UdpNm_EnterPrepareBusSleepModeHandle(chIndex);
-        stateChanged = TRUE;
+        /**
+         *  Depends on the Network Management PDU transmission ability is enabled,
+         *  because NM-Timeout will stop if function UdpNm_DisableCommunication has bean called.
+         *  */
+        if ((chRTPtr->UdpNmState == NM_STATE_READY_SLEEP)
+            && (UdpNm_TestAndClear(&chRTPtr->TimeoutFlag[UDPNM_NM_TIMEOUT_TIMER])
+                || (chRTPtr->TickTimers[UDPNM_NM_TIMEOUT_TIMER] == 0u)))
+        {
+            chRTPtr->UdpNmState = NM_STATE_PREPARE_BUS_SLEEP;
+        }
+        SchM_Exit_UdpNm_Context();
+
+        switch (chRTPtr->UdpNmState)
+        {
+        case NM_STATE_REPEAT_MESSAGE:
+            UdpNm_EnterRepeatMessageState(chIndex, NM_STATE_READY_SLEEP, FALSE);
+            break;
+
+        case NM_STATE_PREPARE_BUS_SLEEP:
+            UdpNm_EnterPrepareBusSleepModeHandle(chIndex);
+            break;
+
+        default:
+            /*nothing*/
+            break;
+        }
     }
-    UDPNM_UNUSED(stateChanged);
 }
 
 /**
@@ -1842,12 +1878,9 @@ UDPNM_LOCAL boolean UdpNm_WakeUpSignalHandle(UdpNm_ChannelIndexType chIndex)
     boolean rxWakeup = (chRTPtr->RxPduExtFlg && (chRTPtr->UdpNmState == NM_STATE_PREPARE_BUS_SLEEP)) ? TRUE : FALSE;
 
     boolean isNetWorkRequest = FALSE;
+    boolean isPassiveStartUp = UdpNm_TestAndClear(&chRTPtr->PassiveStartUp) || rxWakeup;
 #if UDPNM_PASSIVE_MODE_ENABLED == STD_OFF
-    isNetWorkRequest = chRTPtr->NetRequestFlg;
-    /**
-     *  TRUE only if network request and not passive startup.
-     *  */
-    boolean activeWakeUpBit = (chRTPtr->NetRequestFlg && !chRTPtr->PassiveStartUp) ? TRUE : FALSE;
+    isNetWorkRequest = UdpNm_TestAndClear(&chRTPtr->NetRequestFlg);
 #endif
 
     /** SWS_UdpNm_00128 SWS_UdpNm_00129 SWS_UdpNm_00123 SWS_UdpNm_00124
@@ -1855,16 +1888,15 @@ UDPNM_LOCAL boolean UdpNm_WakeUpSignalHandle(UdpNm_ChannelIndexType chIndex)
      *  2. if the network is requested in Bus-Sleep Mode or Prepare Bus-Sleep Mode
      *  3. At successful reception of a Network Management PDU in the Prepare Bus-Sleep Mode
      *  */
-    if (UdpNm_TestAndClear(&chRTPtr->PassiveStartUp) || rxWakeup
-#if UDPNM_PASSIVE_MODE_ENABLED == STD_OFF
-        || UdpNm_TestAndClear(&chRTPtr->NetRequestFlg)
-#endif
-    )
+    if (isNetWorkRequest || isPassiveStartUp)
     {
-        UdpNm_EnterRepeatMessageState(chIndex, isNetWorkRequest);
+        UdpNm_EnterRepeatMessageState(chIndex, chRTPtr->UdpNmState, isNetWorkRequest);
 
 #if UDPNM_PASSIVE_MODE_ENABLED == STD_OFF
-        if (UdpNm_ChannelLCfgData[chIndex].ActiveWakeupBitEnabled && activeWakeUpBit)
+        /**
+         *  Only if network request and not passive startup.
+         *  */
+        if (UdpNm_ChannelLCfgData[chIndex].ActiveWakeupBitEnabled && (isNetWorkRequest && !isPassiveStartUp))
         {
             /** SWS_UdpNm_00366 */
             UdpNm_SetTxPduCbvBit(chIndex, UDPNM_CBV_BIT_AW_MASK);
@@ -1892,7 +1924,7 @@ UDPNM_LOCAL void UdpNm_PrepareBusSleepStateHandle(UdpNm_ChannelIndexType chIndex
 
     if (!stateChanged && UdpNm_TestAndClear(&chRTPtr->TimeoutFlag[UDPNM_STATE_HOLE_TIMER]))
     {
-        UdpNm_StateChange(chIndex, NM_STATE_BUS_SLEEP);
+        UdpNm_StateChange(chIndex, chRTPtr->UdpNmState, NM_STATE_BUS_SLEEP);
         chRTPtr->UdpnmMode = NM_MODE_BUS_SLEEP;
 
         /** SWS_UdpNm_00126 */
@@ -1909,11 +1941,20 @@ UDPNM_LOCAL void UdpNm_PrepareBusSleepStateHandle(UdpNm_ChannelIndexType chIndex
  */
 UDPNM_LOCAL void UdpNm_BusSleepStateHandle(UdpNm_ChannelIndexType chIndex)
 {
-    if (UdpNm_ChannelLCfgData[chIndex].RuntimePtr->RxPduExtFlg)
+    const UdpNm_InnerChannelType* chRTPtr = UdpNm_ChannelLCfgData[chIndex].RuntimePtr;
+    SchM_Enter_UdpNm_Context();
+    if (!chRTPtr->PassiveStartUp
+#if UDPNM_PASSIVE_MODE_ENABLED == STD_OFF
+        && !chRTPtr->NetRequestFlg
+#endif
+        && chRTPtr->RxPduExtFlg)
     {
         /** SWS_UdpNm_00127 */
+        /** To prevent duplicate reporting of Nm_NetworkStartIndication, this function shall be executed exclusively
+         * with Nm_PassiveStartUp */
         Nm_NetworkStartIndication(UdpNm_ChannelLCfgData[chIndex].ComMNetworkHandleRef);
     }
+    SchM_Exit_UdpNm_Context();
 
     (void)UdpNm_WakeUpSignalHandle(chIndex);
 }
@@ -2005,7 +2046,7 @@ UDPNM_LOCAL Std_ReturnType UdpNm_SendNmPdu(UdpNm_ChannelIndexType chIndex)
 {
     Std_ReturnType                  ret      = E_NOT_OK;
     const UdpNm_ChannelLConfigType* chCfgPtr = &UdpNm_ChannelLCfgData[chIndex];
-    const UdpNm_InnerChannelType*   chRTPtr  = chCfgPtr->RuntimePtr;
+    UdpNm_InnerChannelType*         chRTPtr  = chCfgPtr->RuntimePtr;
 
 #if UDPNM_COM_CONTROL_ENABLED == STD_ON
     if (!chRTPtr->UdpNmTxEnable)
@@ -2267,6 +2308,7 @@ UDPNM_LOCAL boolean UdpNm_ValidateTxPduId(uint8 apiId, PduIdType txPduId)
     return ret;
 }
 
+#if UDPNM_TRIGGER_TRANSMIT_API == STD_ON
 /**
  * @brief       Development error validation of Tx-Pdu.
  * @param[in]   apiId : ID of API service in which error is detected
@@ -2283,6 +2325,7 @@ UDPNM_LOCAL boolean UdpNm_ValidateTxPdu(uint8 apiId, PduIdType txPduId, const Pd
     return UdpNm_ValidateTxPduId(apiId, txPduId) && UdpNm_ValidatePointer(apiId, pduInfoPtr)
            && UdpNm_ValidatePointer(apiId, pduInfoPtr->SduDataPtr);
 }
+#endif
 
 /**
  * @brief       Development error validation of Rx-Pdu.

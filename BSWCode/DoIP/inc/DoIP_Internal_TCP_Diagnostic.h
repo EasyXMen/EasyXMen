@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -36,6 +36,7 @@ extern "C" {
 /* ========================================= external function declarations ========================================= */
 
 /* connect */
+/* PRQA S 1512 EOF */ /* VL_DoIP_1512 */
 
 /**
  * @brief       Notify PdurR when close tcp connection.

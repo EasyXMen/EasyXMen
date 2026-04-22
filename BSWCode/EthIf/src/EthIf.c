@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -21,7 +21,7 @@
  **  @description        : Ethernet Interface
  **
  ***********************************************************************************************************************/
-
+/* =================================================== inclusions =================================================== */
 #include "EthIf.h"
 #if (STD_ON == ETHIF_DEV_ERROR_DETECT)
 #include "Det.h"
@@ -44,44 +44,6 @@
 #if !defined(ETHIF_LOCAL)
 #define ETHIF_LOCAL static /* PRQA S 3414 */ /* VL_EthIf_MacroDefineSpecifierKeyword */
 #endif
-/*******************************************************************************
-**                       Version Information Definitions                       **
-*******************************************************************************/
-#define ETHIF_C_AR_RELEASE_MAJOR_VERSION    4U
-#define ETHIF_C_AR_RELEASE_MINOR_VERSION    9U
-#define ETHIF_C_AR_RELEASE_REVISION_VERSION 0U
-
-#define ETHIF_C_SW_MAJOR_VERSION 2U
-#define ETHIF_C_SW_MINOR_VERSION 0U
-#define ETHIF_C_SW_PATCH_VERSION 19U
-
-/*******************************************************************************
-**                             Version Check                                  **
-*******************************************************************************/
-#if (ETHIF_C_AR_RELEASE_MAJOR_VERSION != ETHIF_AR_RELEASE_MAJOR_VERSION)
-#error "EthIf.c : Mismatch in Specification Major Version"
-#endif
-#if (ETHIF_C_AR_RELEASE_MINOR_VERSION != ETHIF_AR_RELEASE_MINOR_VERSION)
-#error "EthIf.c : Mismatch in Specification Minor Version"
-#endif
-#if (ETHIF_C_AR_RELEASE_REVISION_VERSION != ETHIF_AR_RELEASE_REVISION_VERSION)
-#error "EthIf.c : Mismatch in Specification Revision Version"
-#endif
-#if (ETHIF_C_SW_MAJOR_VERSION != ETHIF_H_SW_MAJOR_VERSION)
-#error "EthIf.c : Mismatch in Software Major Version"
-#endif
-#if (ETHIF_C_SW_MINOR_VERSION != ETHIF_H_SW_MINOR_VERSION)
-#error "EthIf.c : Mismatch in Software Minor Version"
-#endif
-
-#if (STD_ON == ETHIF_DEV_ERROR_DETECT)
-static inline void ETHIF_DET_REPORT(uint8 appiId, uint8 errorId)
-{
-    (void)Det_ReportError(ETHIF_MODULE_ID, ETHIF_INSTANCE_ID, appiId, errorId);
-}
-#else
-#define ETHIF_DET_REPORT(appiId, errorId)
-#endif
 
 #define VLAN_TAG_SIZE        (uint16)4u
 #define PRIORITY_MAX         (uint8)8u
@@ -101,8 +63,6 @@ static inline void ETHIF_DET_REPORT(uint8 appiId, uint8 errorId)
 #define ETHIF_FRAME_TYPE_POS_3_OFFSET        (3u)
 #define ETHIF_BIT_MAST_TO_GET_LOW_8_BITS     (0xFFu)
 
-/* ----------------------------------------- Hardware configuration
- * ---------------------------------------------------*/
 #define ETHIF_CONTROLLER_CFG_CONTROLLER(ctrlIdx)               EthIf_ConfigPtr->EthIfCtrlCfg[ctrlIdx]
 #define ETHIF_PHYCONTROLLER_CFG_PHYCONTROLLER(ctrlIdx)         EthIf_ConfigPtr->EthIf_PhysControllerCfg[ctrlIdx]
 #define ETHIF_TRANSCEIVER_CFG_TRANSCEIVER(trcvIdx)             EthIf_ConfigPtr->EthIfTrcvCfg[trcvIdx]
@@ -110,14 +70,10 @@ static inline void ETHIF_DET_REPORT(uint8 appiId, uint8 errorId)
 #define ETHIF_SWITCHPORTGROUP_CFG_SWITCHPORTGROUP(swtGroupIdx) EthIf_ConfigPtr->EthIfSwtPortGroupCfg[swtGroupIdx]
 #define ETHIF_SWITCHPORT_CFG_SWITCHPORT(portIdx)               EthIf_ConfigPtr->EthIfEthSwtPortCfg[portIdx]
 
-/* -------------------------------------- Hardware driver index location
- * ----------------------------------------------*/
 #define ETHIF_ETH_DRIVER_API_CFG(ethIdx)       EthIf_ConfigPtr->EthIfEthDrvApiCfg[ethIdx]
 #define ETHIF_ETHTRCV_DRIVER_API_CFG(trcvIdx)  EthIf_ConfigPtr->EthIfEthTrcvApiCfg[trcvIdx]
 #define ETHIF_SWITCH_DRIVER_API_CFG(switchIdx) EthIf_ConfigPtr->EthIfEthSwitchApiCfg[switchIdx]
 
-/* ----------------------------------------- Hardware Index location
- * --------------------------------------------------*/
 #define ETHIF_TRANSCEIVER_CFG_ETHTRCV_IDX(TrcvIdx)     EthIf_ConfigPtr->EthIfTrcvCfg[TrcvIdx].EthIfEthTrcvIdx
 #define ETHIF_TRANSCEIVER_CFG_TRCV_DRIVER_IDX(TrcvIdx) EthIf_ConfigPtr->EthIfTrcvCfg[TrcvIdx].EthTrcvDriverId
 
@@ -126,8 +82,12 @@ static inline void ETHIF_DET_REPORT(uint8 appiId, uint8 errorId)
 
 #define ETHIF_CONTROLLER_CFG_ETH_IDX(ctrlIdx)        EthIf_ConfigPtr->EthIfCtrlCfg[ctrlIdx].EthIfEthCtrlIdx
 #define ETHIF_CONTROLLER_CFG_ETH_DRIVER_IDX(ctrlIdx) EthIf_ConfigPtr->EthIfCtrlCfg[ctrlIdx].EthIfEthIfDriverIdx
-/* ================================================ type definitions ================================================ */
 
+/* ================================================ type definitions ================================================ */
+/* PRQA S 1503,1532 ++*/  /* VL_QAC_NoUsedApi,  VL_QAC_OneFunRef */
+/* PRQA S 6040,6030 ++*/  /* VL_MTR_EthIf_QacSTPAR,  VL_MTR_EthIf_QacSTMIF */
+/* PRQA S 6520,6510 EOF*/ /* VL_MTR_EthIf_QacSTVAR, VL_MTR_EthIf_QacSTCONF */
+/* PRQA S 1536 EOF */     /* VL_EthIf_1536 */
 typedef struct
 {
     Eth_ModeType          EthIfTrcvMode;
@@ -148,6 +108,7 @@ typedef struct
     EthTrcv_LinkStateType SwtPortLinkState;
 } EthIf_EthSwtPortStateType;
 
+/* PRQA S 3213 ++ */ /* VL_EthIf_3213 */
 typedef struct EthIf_ElementIndexRangeTag
 {
     uint8 EqualStart;
@@ -161,12 +122,19 @@ typedef struct EthIf_MainFuncRunningCountTag
     uint8 TrcvQualityCheckRunCount;
 #endif
 } EthIf_MainFuncRunningCountType;
-
-/* PRQA S 1503,1532 ++*/  /* VL_QAC_NoUsedApi,  VL_QAC_OneFunRef */
-/* PRQA S 6040,6030 ++*/  /* VL_MTR_EthIf_QacSTPAR,  VL_MTR_EthIf_QacSTMIF */
-/* PRQA S 6520,6510 EOF*/ /* VL_MTR_EthIf_QacSTVAR, VL_MTR_EthIf_QacSTCONF */
+/* PRQA S 3213 -- */
 
 /* ========================================== internal function declarations ======================================== */
+#if (STD_ON == ETHIF_DEV_ERROR_DETECT)
+/* @Brief   report error to Det */
+ETHIF_LOCAL_INLINE void ETHIF_DET_REPORT(uint8 appiId, uint8 errorId)
+{
+    (void)Det_ReportError(ETHIF_MODULE_ID, ETHIF_INSTANCE_ID, appiId, errorId);
+}
+#else
+#define ETHIF_DET_REPORT(appiId, errorId)
+#endif
+
 /* @Brief   call configured RxIndication functions. */
 ETHIF_LOCAL void EthIf_InternalUpperLayerRxIndication(
     uint8               ethifCtrlId,
@@ -237,7 +205,7 @@ ETHIF_LOCAL_INLINE void
 ETHIF_LOCAL Std_ReturnType EthIf_InternalSetEthCtrlMode(uint8 ctrlIdx, Eth_ModeType mode);
 
 /* @brief get EthIfCtrl Id by PhyCtrl and VlanId */
-static Std_ReturnType EthIf_GetMatchedEthIfCtrl(uint8* EthifCtrlId, uint8 EthCtrlId, uint16 frameVlanId);
+ETHIF_LOCAL Std_ReturnType EthIf_GetMatchedEthIfCtrl(uint8* EthifCtrlId, uint8 EthCtrlId, uint16 frameVlanId);
 
 #if (STD_ON == ETHIF_ECUC_MULTIPLE_PARTITION_USED)
 ETHIF_LOCAL_INLINE uint8 EthIf_GetEthIfPartionByEcuCParttion(uint8 ecuCPartition);
@@ -287,7 +255,14 @@ ETHIF_LOCAL void EthIf_InteralCheckSwitchPortTimer(uint8 ethIfSwitchPortIdx);
 #endif
 
 /* internal used function to polling  transceiver link state and quality. */
-ETHIF_LOCAL void EthIf_InternalPollingTrcvLinkStateAndQuality(uint8 ethIfPartition);
+ETHIF_LOCAL void EthIf_InternalPollingTrcvLinkStateAndQuality(
+    uint8   ethIfPartition,
+    boolean reqGetLinkState
+#if (ETHIF_SIGNAL_QUALITY_CHECK_PERIOD > 0)
+    ,
+    boolean reqGetSignal
+#endif
+);
 
 #if (ETHIF_SWITCHPORT_PORTS_NUM > 0)
 /* to switch link state  */
@@ -328,9 +303,9 @@ ETHIF_LOCAL const EthIf_ConfigType* EthIf_ConfigPtr;
 
 #define ETHIF_START_SEC_VAR_CLEARED_GLOBAL_UNSPECIFIED
 #include "EthIf_MemMap.h"
-/* PRQA S 3218 ++ */ /* VL_EthIf_FileScopOnlyAccessedInOneFunction */
+/* PRQA S 3218,3229 ++ */ /* VL_EthIf_FileScopOnlyAccessedInOneFunction,VL_EthIf_3229 */
 ETHIF_LOCAL EthIf_MainFuncRunningCountType EthIf_TrcvPollingCnt[ETHIF_USED_PARTITION_NUM];
-/* PRQA S 3218 -- */
+/* PRQA S 3218,3229 -- */
 #define ETHIF_STOP_SEC_VAR_CLEARED_GLOBAL_UNSPECIFIED
 #include "EthIf_MemMap.h"
 
@@ -362,73 +337,81 @@ void EthIf_Init(const EthIf_ConfigType* CfgPtr)
     {
         ETHIF_DET_REPORT(ETHIF_SERVICE_ID_INIT, ETHIF_E_INIT_FAILED);
     }
+#if (STD_ON == ETHIF_ECUC_MULTIPLE_PARTITION_USED)
     else if (ethIfPartition >= ETHIF_USED_PARTITION_NUM)
     {
         ETHIF_DET_REPORT(ETHIF_SERVICE_ID_INIT, ETHIF_E_INVALID_PARTITION);
     }
+#endif
     else
 #endif
     {
-        EthIf_ConfigPtr = CfgPtr;
-        for (index = 0u; index < ETHIF_FRAME_OWNER_FRAME_OWNER_NUM; index++)
+        if (EthIf_ConfigPtr == NULL_PTR)
         {
-            EthIf_FrameOwnerRuntimeInformation[index].FrameType = EthIf_ConfigPtr->EthIfOwnerCfg[index].EthIfFrameType;
-            EthIf_FrameOwnerRuntimeInformation[index].BufferIdx = INVALID_BUFFER_INDEX;
-            EthIf_FrameOwnerRuntimeInformation[index].EthIfCrlIdx = ETHIF_CONTROLLER_CONTROLLER_NUM;
-        }
-        for (index = 0u; index < ETHIF_CONTROLLER_CONTROLLER_NUM; index++)
-        {
-            EthIf_ControllerInformation[index].CtrlMode                   = ETH_MODE_DOWN;
-            EthIf_ControllerInformation[index].ReqCtrlMode                = ETH_MODE_DOWN;
-            EthIf_ControllerInformation[index].HasModeReq                 = FALSE;
-            EthIf_ControllerInformation[index].NoHardwareRefReportLinkChg = FALSE;
-        }
-        for (index = 0u; index < ETHIF_PHYCONTROLLER_PHYCONTROLLER_NUM; index++)
-        {
-            EthIf_PhyControllerInformation[index].CtrlMode = ETH_MODE_DOWN;
-        }
+            /* first time to init, clear all runtime information */
+            /* if re-init, only update the pointer of configuration, other runtime information will not be cleared */
+            EthIf_ConfigPtr = CfgPtr;
+            for (index = 0u; index < ETHIF_FRAME_OWNER_FRAME_OWNER_NUM; index++)
+            {
+                EthIf_FrameOwnerRuntimeInformation[index].FrameType =
+                    EthIf_ConfigPtr->EthIfOwnerCfg[index].EthIfFrameType;
+                EthIf_FrameOwnerRuntimeInformation[index].BufferIdx   = INVALID_BUFFER_INDEX;
+                EthIf_FrameOwnerRuntimeInformation[index].EthIfCrlIdx = ETHIF_CONTROLLER_CONTROLLER_NUM;
+            }
+            for (index = 0u; index < ETHIF_CONTROLLER_CONTROLLER_NUM; index++)
+            {
+                EthIf_ControllerInformation[index].CtrlMode                   = ETH_MODE_DOWN;
+                EthIf_ControllerInformation[index].ReqCtrlMode                = ETH_MODE_DOWN;
+                EthIf_ControllerInformation[index].HasModeReq                 = FALSE;
+                EthIf_ControllerInformation[index].NoHardwareRefReportLinkChg = FALSE;
+            }
+            for (index = 0u; index < ETHIF_PHYCONTROLLER_PHYCONTROLLER_NUM; index++)
+            {
+                EthIf_PhyControllerInformation[index].CtrlMode = ETH_MODE_DOWN;
+            }
 #if (ETHIF_TRANSCEIVER_TRANSCEIVERS_NUM > 0)
-        for (index = 0u; index < ETHIF_TRANSCEIVER_TRANSCEIVERS_NUM; index++)
-        {
-            EthIf_TransceiverInformation[index].TrcvMode                               = ETH_MODE_DOWN;
-            EthIf_TransceiverInformation[index].TrcvLinkState                          = ETHTRCV_LINK_STATE_DOWN;
-            EthIf_TransceiverInformation[index].TrcvSignalQuality.HighestSignalQuality = 0u;
-            EthIf_TransceiverInformation[index].TrcvSignalQuality.ActualSignalQuality  = 0u;
-            EthIf_TransceiverInformation[index].TrcvSignalQuality.LowestSignalQuality  = INVALID_UINT32;
-        }
+            for (index = 0u; index < ETHIF_TRANSCEIVER_TRANSCEIVERS_NUM; index++)
+            {
+                EthIf_TransceiverInformation[index].TrcvMode                               = ETH_MODE_DOWN;
+                EthIf_TransceiverInformation[index].TrcvLinkState                          = ETHTRCV_LINK_STATE_DOWN;
+                EthIf_TransceiverInformation[index].TrcvSignalQuality.HighestSignalQuality = 0u;
+                EthIf_TransceiverInformation[index].TrcvSignalQuality.ActualSignalQuality  = 0u;
+                EthIf_TransceiverInformation[index].TrcvSignalQuality.LowestSignalQuality  = INVALID_UINT32;
+            }
 #endif
 #if (ETHIF_SWITCHPORT_PORTS_NUM > 0)
-        for (index = 0u; index < ETHIF_SWITCHPORT_PORTS_NUM; index++)
-        {
-            EthIf_SwitchPortRuntimeInformation[index].PortLinkState                          = ETHTRCV_LINK_STATE_DOWN;
-            EthIf_SwitchPortRuntimeInformation[index].PortSignalQuality.HighestSignalQuality = 0u;
-            EthIf_SwitchPortRuntimeInformation[index].PortSignalQuality.ActualSignalQuality  = 0u;
-            EthIf_SwitchPortRuntimeInformation[index].PortSignalQuality.LowestSignalQuality  = INVALID_UINT32;
-            EthIf_SwitchPortRuntimeInformation[index].PortMode                               = ETH_MODE_DOWN;
-            EthIf_SwitchPortRuntimeInformation[index].SwitchOffPortTimer                     = 0u;
-            EthIf_SwitchPortRuntimeInformation[index].StartActiveTimer                       = 0u;
-        }
+            for (index = 0u; index < ETHIF_SWITCHPORT_PORTS_NUM; index++)
+            {
+                EthIf_SwitchPortRuntimeInformation[index].PortLinkState = ETHTRCV_LINK_STATE_DOWN;
+                EthIf_SwitchPortRuntimeInformation[index].PortSignalQuality.HighestSignalQuality = 0u;
+                EthIf_SwitchPortRuntimeInformation[index].PortSignalQuality.ActualSignalQuality  = 0u;
+                EthIf_SwitchPortRuntimeInformation[index].PortSignalQuality.LowestSignalQuality  = INVALID_UINT32;
+                EthIf_SwitchPortRuntimeInformation[index].PortMode                               = ETH_MODE_DOWN;
+                EthIf_SwitchPortRuntimeInformation[index].SwitchOffPortTimer                     = 0u;
+                EthIf_SwitchPortRuntimeInformation[index].StartActiveTimer                       = 0u;
+            }
 #endif
 #if (ETHIF_SWITCH_SWITCHS_NUM > 0)
-        for (index = 0u; index < ETHIF_SWITCH_SWITCHS_NUM; index++)
-        {
-            EthIf_SwitchLinkState[index] = ETHTRCV_LINK_STATE_DOWN;
-        }
+            for (index = 0u; index < ETHIF_SWITCH_SWITCHS_NUM; index++)
+            {
+                EthIf_SwitchLinkState[index] = ETHTRCV_LINK_STATE_DOWN;
+            }
 #endif
 #if (ETHIF_SWITCH_PORT_GROUP_GROUP_NUM > 0)
-        for (index = 0u; index < ETHIF_SWITCH_PORT_GROUP_GROUP_NUM; index++)
-        {
-            EthIf_SwitchPortGroupRuntimeInformation[index].GroupLinkState       = ETHTRCV_LINK_STATE_DOWN;
-            EthIf_SwitchPortGroupRuntimeInformation[index].IsNotRequestModeDown = FALSE;
-        }
+            for (index = 0u; index < ETHIF_SWITCH_PORT_GROUP_GROUP_NUM; index++)
+            {
+                EthIf_SwitchPortGroupRuntimeInformation[index].GroupLinkState       = ETHTRCV_LINK_STATE_DOWN;
+                EthIf_SwitchPortGroupRuntimeInformation[index].IsNotRequestModeDown = FALSE;
+            }
 #endif
 #if (STD_ON == ETHIF_GET_AND_RESET_MEASUREMENT_DATA_API)
-        EthIf_MeasurementData[ethIfPartition].MeasureDropInvControllerVLAN = 0u;
+            EthIf_MeasurementData[ethIfPartition].MeasureDropInvControllerVLAN = 0u;
 #endif
-        EthIf_TrcvPollingCnt[ethIfPartition].TrcvLinkChgRunCount = 0u;
+            EthIf_TrcvPollingCnt[ethIfPartition].TrcvLinkChgRunCount = 0u;
 #if (ETHIF_SIGNAL_QUALITY_CHECK_PERIOD > 0)
-        EthIf_TrcvPollingCnt[ethIfPartition].TrcvQualityCheckRunCount = 0u;
+            EthIf_TrcvPollingCnt[ethIfPartition].TrcvQualityCheckRunCount = 0u;
 #endif
+        }
         EthIf_InitStatus[ethIfPartition] = TRUE;
     }
 }
@@ -449,9 +432,9 @@ void EthIf_GetVersionInfo(Std_VersionInfoType* VersionInfoPtr)
 #endif
     {
         VersionInfoPtr->moduleID         = ETHIF_MODULE_ID;
-        VersionInfoPtr->sw_major_version = ETHIF_C_SW_MAJOR_VERSION;
-        VersionInfoPtr->sw_minor_version = ETHIF_C_SW_MINOR_VERSION;
-        VersionInfoPtr->sw_patch_version = ETHIF_C_SW_PATCH_VERSION;
+        VersionInfoPtr->sw_major_version = ETHIF_SW_MAJOR_VERSION;
+        VersionInfoPtr->sw_minor_version = ETHIF_SW_MINOR_VERSION;
+        VersionInfoPtr->sw_patch_version = ETHIF_SW_PATCH_VERSION;
         VersionInfoPtr->vendorID         = ETHIF_VENDOR_ID;
     }
 }
@@ -486,10 +469,12 @@ Std_ReturnType EthIf_SetControllerMode(uint8 CtrlIdx, Eth_ModeType CtrlMode)
             case ETH_MODE_ACTIVE:
                 ret = EthIf_InternalSetCtrlModeActive(CtrlIdx);
                 break;
-#if (ETHIF_ETHTRCV_AUTOSAR_VERSION >= ETHIF_ETH_AUTOSAR_R20_11)
+#if (ETHIF_ETHTRCV_AUTOSAR_VERSION >= ETHIF_ETHTRCV_AUTOSAR_R20_11)
             case ETH_MODE_ACTIVE_WITH_WAKEUP_REQUEST:
                 ret = EthIf_InternalSetCtrlModeActiveWithWakeup(CtrlIdx);
                 break;
+#endif
+#if (ETHIF_ETHTRCV_AUTOSAR_VERSION >= ETHIF_ETHTRCV_AUTOSAR_R21_11)
             case ETH_MODE_ACTIVE_TX_OFFLINE:
                 ret = EthIf_InternalSetCtrlModeTxOffLine(CtrlIdx);
                 break;
@@ -1127,7 +1112,10 @@ Std_ReturnType EthIf_GetIngressTimeStamp(
         ETHIF_ETH_DRIVER_API_CFG(driverId).Eth_GetIngressTimeStamp(ethContrllerId, DataPtr, timeQualPtr, timeStampPtr);
         ret = E_OK;
 #else
-        ETHIF_ETH_DRIVER_API_CFG(driverId).Eth_GetIngressTimeStamp(ethContrllerId, DataPtr, timeQualPtr, timeStampPtr);
+        /* PRQA S 0311 ++ */ /* VL_Com_PointerObjectType */
+        ETHIF_ETH_DRIVER_API_CFG(driverId)
+            .Eth_GetIngressTimeStamp(ethContrllerId, (Eth_DataType*)DataPtr, timeQualPtr, timeStampPtr);
+        /* PRQA S 0311 -- */
         ret = E_OK;
 #endif
     }
@@ -2179,6 +2167,24 @@ void EthIf_MainFunctionTx(uint8 ethIfPartition)
 #endif
         {
             uint8 lastPhyCtrlIdx = INVALID_UINT8;
+#if (ETHIF_MAIN_FUNCTION_STATE_PERIOD == 0u)
+            boolean reqGetLinkState = FALSE;
+            EthIf_TrcvPollingCnt[ethIfPartition].TrcvLinkChgRunCount++;
+            if (EthIf_TrcvPollingCnt[ethIfPartition].TrcvLinkChgRunCount >= ETHIF_TRCV_LINK_STATE_CHG_MAIN_RELOAD)
+            {
+                EthIf_TrcvPollingCnt[ethIfPartition].TrcvLinkChgRunCount = 0u;
+                reqGetLinkState                                          = TRUE;
+            }
+#endif
+#if (ETHIF_SIGNAL_QUALITY_CHECK_PERIOD > 0)
+            boolean reqGetSignal = FALSE;
+            EthIf_TrcvPollingCnt[ethIfPartition].TrcvQualityCheckRunCount++;
+            if (EthIf_TrcvPollingCnt[ethIfPartition].TrcvQualityCheckRunCount >= ETHIF_SIGNAL_QUALITY_CHECK_PERIOD)
+            {
+                EthIf_TrcvPollingCnt[ethIfPartition].TrcvQualityCheckRunCount = 0u;
+                reqGetSignal                                                  = TRUE;
+            }
+#endif
 #if (ETHIF_USED_PARTITION_NUM > 1)
             EthIf_ElementRangeType ctrlIdxRange;
             EthIf_InternalGetElementRange(EthIf_ConfigPtr->CtrlIndexRangeMap, ethIfPartition, &ctrlIdxRange);
@@ -2202,11 +2208,17 @@ void EthIf_MainFunctionTx(uint8 ethIfPartition)
                 (void)ETHIF_ETH_DRIVER_API_CFG(driverId).Eth_TxConfirmation(currentPhyCtrlIdx);
             }
 #if (ETHIF_MAIN_FUNCTION_STATE_PERIOD == 0u)
-            EthIf_InternalPollingTrcvLinkStateAndQuality(ethIfPartition);
+            EthIf_InternalPollingTrcvLinkStateAndQuality(
+                ethIfPartition,
+                reqGetLinkState
+#if (ETHIF_SIGNAL_QUALITY_CHECK_PERIOD > 0)
+                ,
+                reqGetSignal
+#endif
+            );
 #if (ETHIF_SWITCHPORT_PORTS_NUM > 0)
             EthIf_InteralPollEthSwitchPortTimer(ethIfPartition);
 #endif
-
 #endif
         }
     }
@@ -2233,7 +2245,23 @@ void EthIf_MainFunctionState(uint8 ethIfPartition)
         else
 #endif
         {
-            EthIf_InternalPollingTrcvLinkStateAndQuality(ethIfPartition);
+#if (ETHIF_SIGNAL_QUALITY_CHECK_PERIOD > 0)
+            boolean reqGetSignal = FALSE;
+            EthIf_TrcvPollingCnt[ethIfPartition].TrcvQualityCheckRunCount++;
+            if (EthIf_TrcvPollingCnt[ethIfPartition].TrcvQualityCheckRunCount >= ETHIF_SIGNAL_QUALITY_CHECK_PERIOD)
+            {
+                EthIf_TrcvPollingCnt[ethIfPartition].TrcvQualityCheckRunCount = 0u;
+                reqGetSignal                                                  = TRUE;
+            }
+#endif
+            EthIf_InternalPollingTrcvLinkStateAndQuality(
+                ethIfPartition,
+                TRUE
+#if (ETHIF_SIGNAL_QUALITY_CHECK_PERIOD > 0)
+                ,
+                reqGetSignal
+#endif
+            );
 #if (ETHIF_SWITCHPORT_PORTS_NUM > 0)
             EthIf_InteralPollEthSwitchPortTimer(ethIfPartition);
 #endif
@@ -3733,8 +3761,7 @@ ETHIF_LOCAL void EthIf_InternalSetCtrlModeSetSwitchPortMode(uint8 ctrlIdx, Eth_M
         {
             const uint8* indexPtr  = ETHIF_SWITCH_CFG_SWITCH(ethIfSwtIdx).RefEthSwtPortList;
             uint8        portIndex = indexPtr[iterateIdx];
-            if ((checkMode == EthIf_SwitchPortRuntimeInformation[portIndex].PortMode)
-                || (ETH_MODE_ACTIVE_WITH_WAKEUP_REQUEST == setMode))
+            if (checkMode == EthIf_SwitchPortRuntimeInformation[portIndex].PortMode)
             {
                 if (NULL_PTR != ETHIF_SWITCH_DRIVER_API_CFG(driverIdx).EthSwt_PortLinkStateRequest)
                 {
@@ -3959,8 +3986,7 @@ ETHIF_LOCAL void
         for (uint8 iterateIdx = 0u; iterateIdx < portNum; iterateIdx++)
         {
             uint8 portIndex = indexPtr[iterateIdx];
-            if ((checkMode == EthIf_SwitchPortRuntimeInformation[portIndex].PortMode)
-                || (ETH_MODE_ACTIVE_WITH_WAKEUP_REQUEST == setMode))
+            if (checkMode == EthIf_SwitchPortRuntimeInformation[portIndex].PortMode)
             {
                 uint8 ethIfSwtIdx = ETHIF_SWITCHPORT_CFG_SWITCHPORT(portIndex).EthIfEthIfSwtIdx;
                 uint8 port        = ETHIF_SWITCHPORT_CFG_SWITCHPORT(portIndex).EthPortIdx;
@@ -4177,29 +4203,17 @@ ETHIF_LOCAL_INLINE void
 }
 #endif
 
-ETHIF_LOCAL void EthIf_InternalPollingTrcvLinkStateAndQuality(uint8 ethIfPartition)
+ETHIF_LOCAL void EthIf_InternalPollingTrcvLinkStateAndQuality(
+    uint8   ethIfPartition,
+    boolean reqGetLinkState
+#if (ETHIF_SIGNAL_QUALITY_CHECK_PERIOD > 0)
+    ,
+    boolean reqGetSignal
+#endif
+)
 {
     Std_ReturnType        ret = E_NOT_OK;
     EthTrcv_LinkStateType linkState;
-    boolean               reqGetLinkState = FALSE;
-#if (ETHIF_SIGNAL_QUALITY_CHECK_PERIOD > 0)
-    boolean reqGetSignal = FALSE;
-#endif
-
-    EthIf_TrcvPollingCnt[ethIfPartition].TrcvLinkChgRunCount++;
-    if (EthIf_TrcvPollingCnt[ethIfPartition].TrcvLinkChgRunCount >= ETHIF_TRCV_LINK_STATE_CHG_MAIN_RELOAD)
-    {
-        EthIf_TrcvPollingCnt[ethIfPartition].TrcvLinkChgRunCount = 0u;
-        reqGetLinkState                                          = TRUE;
-    }
-#if (ETHIF_SIGNAL_QUALITY_CHECK_PERIOD > 0)
-    EthIf_TrcvPollingCnt[ethIfPartition].TrcvQualityCheckRunCount++;
-    if (EthIf_TrcvPollingCnt[ethIfPartition].TrcvQualityCheckRunCount >= ETHIF_SIGNAL_QUALITY_CHECK_PERIOD)
-    {
-        EthIf_TrcvPollingCnt[ethIfPartition].TrcvQualityCheckRunCount = 0u;
-        reqGetSignal                                                  = TRUE;
-    }
-#endif
 #if (ETHIF_TRANSCEIVER_TRANSCEIVERS_NUM > 0u)
     for (uint8 trcvIdx = 0u; trcvIdx < ETHIF_TRANSCEIVER_TRANSCEIVERS_NUM; trcvIdx++)
     {
@@ -4268,10 +4282,13 @@ ETHIF_LOCAL void EthIf_InternalPollingTrcvLinkStateAndQuality(uint8 ethIfPartiti
 #endif
         if (EthIf_ControllerInformation[cfgCtrlIndex].NoHardwareRefReportLinkChg)
         {
-            EthIf_InternalTrcvLinkChgNotificationToUser(cfgCtrlIndex, ETH_MODE_ACTIVE);
+            EthIf_InternalTrcvLinkChgNotificationToUser(cfgCtrlIndex, ETHTRCV_LINK_STATE_ACTIVE);
             EthIf_ControllerInformation[cfgCtrlIndex].NoHardwareRefReportLinkChg = FALSE;
         }
     }
+#endif
+#if (STD_OFF == ETHIF_ECUC_MULTIPLE_PARTITION_USED)
+    (void)ethIfPartition;
 #endif
 }
 
@@ -4545,8 +4562,8 @@ ETHIF_LOCAL_INLINE Std_ReturnType
 }
 #endif
 
-ETHIF_LOCAL_INLINE Std_ReturnType
-    EthIf_InternalTransceiverGetLinkState(uint8 TrcvIdx, EthTrcv_LinkStateType* LinkStatePtr)
+ETHIF_LOCAL_INLINE
+Std_ReturnType EthIf_InternalTransceiverGetLinkState(uint8 TrcvIdx, EthTrcv_LinkStateType* LinkStatePtr)
 {
     Std_ReturnType ret        = E_NOT_OK;
     uint8          ethTrcvIdx = ETHIF_TRANSCEIVER_CFG_ETHTRCV_IDX(TrcvIdx);
@@ -4879,7 +4896,7 @@ void EthIf_RxIndication(
 }
 
 /* @brief get EthIfCtrl Id by PhyCtrl and VlanId */
-static Std_ReturnType EthIf_GetMatchedEthIfCtrl(uint8* EthifCtrlId, uint8 EthCtrlId, uint16 frameVlanId)
+ETHIF_LOCAL Std_ReturnType EthIf_GetMatchedEthIfCtrl(uint8* EthifCtrlId, uint8 EthCtrlId, uint16 frameVlanId)
 {
     Std_ReturnType ret = E_NOT_OK;
     for (uint8 index = 0u; index < ETHIF_CONTROLLER_CONTROLLER_NUM; index++)

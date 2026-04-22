@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -139,6 +139,22 @@ STBM_LOCAL_INLINE uint64 StbM_Abs(sint64 value)
 
 /* ========================================= internal function declarations ========================================= */
 #if (STBM_DEV_ERROR_DETECT == STD_ON)
+#ifdef QAC_ANALYZE
+#pragma PRQA_NO_SIDE_EFFECTS StbM_ValidateInit
+#pragma PRQA_NO_SIDE_EFFECTS StbM_ValidatePointer
+#pragma PRQA_NO_SIDE_EFFECTS StbM_ValidateCommom
+#pragma PRQA_NO_SIDE_EFFECTS StbM_ValidatePartition
+#pragma PRQA_NO_SIDE_EFFECTS StbM_ValidateNanoseconds
+#pragma PRQA_NO_SIDE_EFFECTS StbM_ValidateUserData
+#pragma PRQA_NO_SIDE_EFFECTS StbM_ValidateGlobalTimeMaster
+#pragma PRQA_NO_SIDE_EFFECTS StbM_ValidateSynchronizedTimeBase
+#if (STBM_TIME_CORRECTION_SUPPORT == STD_ON)
+#pragma PRQA_NO_SIDE_EFFECTS StbM_ValidateAllowMasterRateCorrection
+#endif
+#if (STBM_NOTIFICATION_CUSTOMER_NUM > 0)
+#pragma PRQA_NO_SIDE_EFFECTS StbM_ValidateNotificationCustomer
+#endif
+#endif
 STBM_LOCAL boolean StbM_ValidateInit(const StbM_ConfigType* configPtr);
 STBM_LOCAL boolean StbM_ValidatePointer(uint8 apiId, const void* pointer);
 STBM_LOCAL boolean StbM_ValidateCommom(uint8 apiId, StbM_SynchronizedTimeBaseType timeBaseId, uint16 timeBaseIndex);
@@ -151,8 +167,8 @@ STBM_LOCAL boolean StbM_ValidateSynchronizedTimeBase(uint8 apiId, uint16 timeBas
 STBM_LOCAL boolean StbM_ValidateAllowMasterRateCorrection(uint8 apiId, uint16 timeBaseIndex);
 #endif
 #if (STBM_NOTIFICATION_CUSTOMER_NUM > 0)
-STBM_LOCAL boolean
-    StbM_ValidateNotificationCustomer(StbM_SynchronizedTimeBaseType timeBaseId, StbM_CustomerIdType customerId);
+STBM_LOCAL
+boolean StbM_ValidateNotificationCustomer(StbM_SynchronizedTimeBaseType timeBaseId, StbM_CustomerIdType customerId);
 #endif
 #endif
 STBM_LOCAL uint16 StbM_GetPartitionIndex(void);
@@ -1776,8 +1792,9 @@ STBM_LOCAL void StbM_CalculateRrc(
     uint64 TVstop = *TVPtr;
     uint64 TGstop = *TGPtr;
 
-    if ((timeBaseStatus & STBM_TIMEBASE_STATUS_SYNC_TO_GATEWAY)
-        != (timeBasePtr->TimeBaseStatus & STBM_TIMEBASE_STATUS_SYNC_TO_GATEWAY))
+    if (((timeBaseStatus & STBM_TIMEBASE_STATUS_SYNC_TO_GATEWAY)
+         != (timeBasePtr->TimeBaseStatus & STBM_TIMEBASE_STATUS_SYNC_TO_GATEWAY))
+        || ((timeBasePtr->TimeBaseStatus & (StbM_TimeBaseStatusType)STBM_TIMEBASE_STATUS_TIMEOUT) != 0U))
     {
         rataCorrection->Array[0].TGstart = TGstop;
         rataCorrection->Array[0].TVstart = TVstop;

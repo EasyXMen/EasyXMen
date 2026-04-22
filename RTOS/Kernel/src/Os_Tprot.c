@@ -1,6 +1,6 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
- * SPDX-License-Identifier: LGPL-2.1-only-with-exception OR  LicenseRef-Commercial-License
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
+ * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
  * GNU Lesser General Public License as published by the Free Software Foundation; version 2.1.
@@ -10,7 +10,8 @@
  * You should have received a copy of the GNU Lesser General Public License along with this library;
  * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  * or see <https://www.gnu.org/licenses/>.
- *
+ */
+/*
  ********************************************************************************
  **                                                                            **
  **  FILENAME    :  Os_Tprot.c                                                 **
@@ -30,10 +31,12 @@
 #if (TRUE == CFG_TIMING_PROTECTION_ENABLE)
 /*=======[M A C R O S]========================================================*/
 /* Initialize the time protection control block. */
+/* PRQA S 3412 ++ */ /* VL_Os_3412 */
 #define Os_TmProtInitCbData(pCbData, budget) \
     (pCbData)->osIsTpStart = FALSE;          \
     (pCbData)->osTpTime    = 0u;             \
     (pCbData)->osTpBudget  = (budget)
+/* PRQA S 3412 -- */
 /*=======[T Y P E   D E F I N I T I O N S]====================================*/
 
 /*=======[E X T E R N A L   D A T A]==========================================*/
@@ -135,7 +138,7 @@ static void Os_TmProtTaskProc(void);
  * REQ ID               <None>
  */
 /********************************************************************/
-void Os_TmProtResStart(ResourceType osResId, Os_TmProtResOccupyType osOccupyType)
+void Os_TmProtResStart(ResourceType osResId, Os_TmProtResOccupyType osOccupyType) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
 {
     uint8               osWhoHook;
     Os_TickType         osBudget;
@@ -171,7 +174,7 @@ void Os_TmProtResStart(ResourceType osResId, Os_TmProtResOccupyType osOccupyType
 #endif
 
         /* Timing protection start for task or isr. */
-        if (OS_TICK_INVALID != osBudget)
+        if (OS_TICK_INVALID != osBudget) /* PRQA S 1258 */ /* VL_Os_1258 */
         {
             pCbData = &(pRcb->osResTpData);
 
@@ -340,7 +343,9 @@ void Os_TmProtResEnd(ResourceType osResId)
  * REQ ID               <None>
  */
 /********************************************************************/
+/* PRQA S 6030, 1532 ++ */ /* VL_MTR_Os_STMIF, VL_QAC_OneFunRef */
 StatusType Os_TmProtTaskFrameChk(Os_TaskType osTaskId)
+/* PRQA S 6030, 1532 -- */
 {
     StatusType          osRet = E_OK;
     Os_TCBType*         pTcb;
@@ -353,7 +358,7 @@ StatusType Os_TmProtTaskFrameChk(Os_TaskType osTaskId)
         pCbData = &pTcb->osTpTask[TP_TASK_ARRIVAL];
 
         /* Timing frame for this task is not configed. */
-        if (OS_TICK_INVALID != pCbData->osTpBudget)
+        if (OS_TICK_INVALID != pCbData->osTpBudget) /* PRQA S 1258 */ /* VL_Os_1258 */
         {
             /* Timing frame: arrive so frequently. */
             if (TRUE != pTcb->taskTpFrameflag)
@@ -370,7 +375,9 @@ StatusType Os_TmProtTaskFrameChk(Os_TaskType osTaskId)
 #endif
                 {
                     /* Hook. */
+                    /* PRQA S 1520 ++ */ /* VL_Os_1520 */
                     if (PRO_IGNORE != Os_CallProtectionHook(E_OS_PROTECTION_ARRIVAL, OS_TMPROT_HOOK_TASK))
+                    /* PRQA S 1520 -- */
                     {
                         osRet = E_OS_ID;
                     }
@@ -462,7 +469,7 @@ void Os_TmProtTaskStart(Os_TaskType osTaskId, Os_TmProtOptTaskType osOptType)
         pCbData = &(pTcb->osTpTask[osOptType]);
 
         /* This task cfg timing protection. */
-        if (OS_TICK_INVALID != pCbData->osTpBudget)
+        if (OS_TICK_INVALID != pCbData->osTpBudget) /* PRQA S 1258 */ /* VL_Os_1258 */
         {
             if (TRUE != pCbData->osIsTpStart)
             {
@@ -494,7 +501,9 @@ void Os_TmProtTaskStart(Os_TaskType osTaskId, Os_TmProtOptTaskType osOptType)
  * REQ ID               <None>
  */
 /********************************************************************/
+/* PRQA S 6030 ++ */ /* VL_MTR_Os_STMIF */
 static void Os_TmProtTaskCounter(Os_TaskType osTaskId, Os_TmProtOptTaskType osOptType)
+/* PRQA S 6030-- */
 {
     StatusType          osErrType;
     Os_TCBType*         pTcb;
@@ -618,7 +627,9 @@ void Os_TmProtTaskEnd(Os_TaskType osTaskId, Os_TmProtOptTaskType osOptType)
  * REQ ID               <None>
  */
 /********************************************************************/
+/* PRQA S 6030, 1532 ++ */ /* VL_MTR_Os_STMIF, VL_QAC_OneFunRef */
 StatusType Os_TmProtIsrFrameChk(Os_IsrType osIsrId)
+/* PRQA S 6030, 1532 -- */
 {
     StatusType          osRet = E_OK;
     Os_ICBType*         pIcb;
@@ -633,7 +644,7 @@ StatusType Os_TmProtIsrFrameChk(Os_IsrType osIsrId)
         pCbData = &pIcb->osTpIsr[TP_ISR_CAT2_ARRIVAL];
 
         /* Timing frame for this isr is configed. */
-        if (OS_TICK_INVALID != pCbData->osTpBudget)
+        if (OS_TICK_INVALID != pCbData->osTpBudget) /* PRQA S 1258 */ /* VL_Os_1258 */
         {
             /* Timing frame: arrive so frequently. */
             if (TRUE != pIcb->osIsrTpFrameflag)
@@ -730,7 +741,7 @@ static void Os_TmProtIsrFrameCounter(Os_IsrType osIsrId, Os_TmProtOptIsrType osO
  * REQ ID               <None>
  */
 /********************************************************************/
-void Os_TmProtIsrStart(Os_IsrType osIsrId, Os_TmProtOptIsrType osOptType)
+void Os_TmProtIsrStart(Os_IsrType osIsrId, Os_TmProtOptIsrType osOptType) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
 {
     Os_ICBType*         pIcb;
     Os_TmProtCbDataDef* pCbData;
@@ -739,7 +750,7 @@ void Os_TmProtIsrStart(Os_IsrType osIsrId, Os_TmProtOptIsrType osOptType)
     pCbData = &(pIcb->osTpIsr[osOptType]);
 
     /* This isr cfg timing protection. */
-    if (OS_TICK_INVALID != pCbData->osTpBudget)
+    if (OS_TICK_INVALID != pCbData->osTpBudget) /* PRQA S 1258 */ /* VL_Os_1258 */
     {
         if (TRUE != pCbData->osIsTpStart)
         {
@@ -959,11 +970,13 @@ static void Os_InitIsrTmProt(
     /* Set budget of each type. */
     if (NULL_PTR == pIsrTimePt)
     {
+        /* PRQA S 1258 ++ */ /* VL_Os_1258 */
         Os_TmProtInitCbData(&pIcb->osTpIsr[TP_ISR_CAT2_EXE], OS_TICK_INVALID);
         Os_TmProtInitCbData(&pIcb->osTpIsr[TP_ISR_CAT2_ARRIVAL], OS_TICK_INVALID);
         Os_TmProtInitCbData(&pIcb->osTpIsr[TP_ISR_CAT2_SUS_OS_INT], OS_TICK_INVALID);
         Os_TmProtInitCbData(&pIcb->osTpIsr[TP_ISR_CAT2_SUS_ALL_INT], OS_TICK_INVALID);
         Os_TmProtInitCbData(&pIcb->osTpIsr[TP_ISR_CAT2_DIS_ALL_INT], OS_TICK_INVALID);
+        /* PRQA S 1258 -- */
     }
     else
     {
@@ -1071,11 +1084,13 @@ static void Os_InitTaskTmProt(Os_TaskType osTaskId, const Os_TaskCfgType* pTaskC
     /* Set budget of each type. NULL_PTR means not configed. */
     if (NULL_PTR == pTaskTmProtCfgRef)
     {
+        /* PRQA S 1258 ++ */ /* VL_Os_1258 */
         Os_TmProtInitCbData(&pTcb->osTpTask[TP_TASK_EXE], OS_TICK_INVALID);
         Os_TmProtInitCbData(&pTcb->osTpTask[TP_TASK_ARRIVAL], OS_TICK_INVALID);
         Os_TmProtInitCbData(&pTcb->osTpTask[TP_TASK_SUS_OS_INT], OS_TICK_INVALID);
         Os_TmProtInitCbData(&pTcb->osTpTask[TP_TASK_SUS_ALL_INT], OS_TICK_INVALID);
         Os_TmProtInitCbData(&pTcb->osTpTask[TP_TASK_DIS_ALL_INT], OS_TICK_INVALID);
+        /* PRQA S 1258 -- */
     }
     else
     {
@@ -1113,7 +1128,7 @@ static void Os_InitTaskTmProt(Os_TaskType osTaskId, const Os_TaskCfgType* pTaskC
  * REQ ID               <None>
  */
 /********************************************************************/
-void Os_InitTmProt(void)
+void Os_InitTmProt(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
 {
     uint16 i;
 
@@ -1272,7 +1287,7 @@ static void Os_TmProtTaskProc(void)
  * REQ ID               <None>
  */
 /********************************************************************/
-void Os_TmProtMainProc(void)
+void Os_TmProtMainProc(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
 {
     uint16 i;
 

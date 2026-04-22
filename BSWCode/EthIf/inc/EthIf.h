@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -36,7 +36,7 @@
  *  V02.00.07 2023-03-02  fupeng.yu         Add "Result" parameter to the EthIf_TxConfirmation for Autosar 4.4,R19.
  *  V02.00.08 2023-04-07  fupeng.yu         In EthIf_SetControllerMode, Modify logic when CtrlMode is ETH_MODE_DOWN.
  *  V02.00.09 2023-07-31  rongbo.hu         Modify precompile condition in EthIf_GetTransceiverMode,Resolve compile
- error.
+ *                                          error.
  *  V02.00.10 2023-08-02  fupeng.yu         Add ETHIF_ETH_MAIJORVERSION==19u precompile condition for FifoIdx in
  *                                          EthIf_MainFunctionRx. Modify precompile condition in EthIf_TxConfirmation.
  *  V02.00.11 2023-08-28  fupeng.yu         1. In EthIf_SetControllerMode, Resolve Incorrect function return value.
@@ -49,16 +49,17 @@
  *  V02.00.13 2023-10-07  tong.zhao         Adaptation of different AutoSar versions of eth driver, currently supporting
  *                                          versions 4.2.2, 4.3.1, 4.4.0, 4.5.0.
  *  V02.00.14 2023-11-14  fupeng.yu         1.In EthIf_CtrlModeIndication, add Invalid value handling for transceiver
- index.
+ *                                          index.
  *  V02.00.15 2023-12-12  fupeng.yu         add switch feature.
  *  V02.00.16 2024-03-13  fupeng.yu         Compatible with Upper Layer defined TxConfirmation callback.
  *  V02.00.17 2024-04-25  fupeng.yu         add the judgment of module initialization fo EthIf_MainFunction<XX>.
  *  V02.00.18 2024-08-06  fupeng.yu         In EthIf_SetCtrlModeDown, update the correct inner state.
  *  V02.00.19 2024-08-13  fupeng.yu         Modify EthIfULTxConfirmationType.
  *  V02.01.00 2025-04-29  jianyu.yang       Developed according to R23-11 specification.
- *  V02.01.01 2025-08-19  jianyu.yang       Fix condiational compilation using CtrlIndexMap.
- *  V02.01.02 2025-09-05  fupeng.yu         Fix compilation error when ETHIF_TRANSCEIVER_TRANSCEIVERS_NUM = 0.
-
+ *  V02.01.01 2026-01-04  jianyu.yang       In EthIf_MainFunctionState remove EthIfTrcvLinkStateChgMainReload tactics.
+ *  V02.01.02 2026-04-05  jianyu.yang       In EthIf_SetControllerMode make transceiver version to switch conditional
+ *                                          compilation.
+ *  V02.01.03 2026-04-10  tong.zhao         Add first time to init condication in EthIf_Init.
  ==================================================================================================================== */
 
 /* ================================================ misar justifications ============================================ */
@@ -121,10 +122,57 @@
       Reason: To trace AUTOSAR SWS requirements.
       Risk:  Not easy to maintain
       Prevention: None
- */
+
+    \li VL_EthIf_PointerObjectType
+      Reason:Necessary type conversions.
+      Risk:No risk.
+      Prevention:None.
+
+    \li VL_EthIf_McalConflict .<br>
+      Reason: The Mcal implementation does not comply with the specifications.
+      Risk: No risk.
+      Prevention: Ensure that the project is working properly through unit testing.
+
+    \li VL_EthIf_1536
+      Reason: The tag '%1s' is declared but not used within this project.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_EthIf_3213
+      Reason: The tag '%1s' is not used and could be removed.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+     \li VL_EthIf_3229
+      Reason:The initialization state should not be masked as it is used to indicate the module's initialization status.
+      Risk:No risk.
+      Prevention:No need to check.
+
+
+    \li VL_EthIf_1501
+      Reason: The function '${name}' is declared but is not used within this project.
+      Risk: No risk.
+      Prevention: Ensure that the project is working properly through unit testing.
+
+    \li VL_EthIf_1753
+      Reason: The function '${name}' with external linkage is declared but not defined within this project.
+      Risk: No risk.
+      Prevention: Ensure that the project is working properly through unit testing.
+
+    \li VL_EthIf_1756
+      Reason: External identifier '${name}' shall be unique.
+      Risk: No risk.
+      Prevention: Ensure that the project is working properly through unit testing.
+
+      \li VL_EthIf_1758
+      Reason: External type '${name}' shall be unique.
+      Risk: No risk.
+      Prevention: Ensure that the project is working properly through unit testing.
+*/
 #ifndef ETHIF_H
 #define ETHIF_H
 
+/* PRQA S 1501,1753 EOF */ /* VL_EthIf_1501,VL_EthIf_1753 */
 /* =================================================== inclusions =================================================== */
 
 #include "EthIf_Cfg.h"
@@ -136,6 +184,7 @@
 #include "EthSM.h"
 #include "ComStack_Types.h"
 #include "EthIf_PBcfg.h"
+#include "EthIf_Cbk.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -148,9 +197,9 @@ extern "C" {
 #define ETHIF_AR_RELEASE_MINOR_VERSION    (9u)
 #define ETHIF_AR_RELEASE_REVISION_VERSION (0u)
 
-#define ETHIF_H_SW_MAJOR_VERSION (2u)
-#define ETHIF_H_SW_MINOR_VERSION (0u)
-#define ETHIF_H_SW_PATCH_VERSION (14u)
+#define ETHIF_SW_MAJOR_VERSION (2u)
+#define ETHIF_SW_MINOR_VERSION (1u)
+#define ETHIF_SW_PATCH_VERSION (3u)
 
 #define ETHIF_MODULE_ID   (65u)
 #define ETHIF_INSTANCE_ID (0u)

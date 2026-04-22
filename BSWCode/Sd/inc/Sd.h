@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -117,6 +117,7 @@
  *  V02.00.26  2024/07/17  hurongbo       1> Remove the ues of Frt module function
  *  V02.01.00  2024/12/17  zouzhijia      1> R23-11 development first release.
  *  V02.02.00  2025/04/29  zouzhijia      1> Optimize Code.
+ *  V02.02.01  2025/9/30   zouzhijia      fix bug CPT-15379,CPT-15841
  ==================================================================================================================== */
 
 /* ================================================ misar justifications ============================================ */
@@ -224,6 +225,16 @@
     Reason: Splitting the function into sub-functions will lead to an increase in the stack.
     Risk: The code is difficult to maintain.
     Prevention: Design and code review + clear structure and well-commented code.
+
+  \li PRQA S 1536 VL_Sd_1536
+  Reason: The tag '%1s' is declared but not used within this project.
+  Risk: No risk.
+  Prevention: Functional reliability guaranteed by design.
+
+  \li PRQA S 3415 VL_Sd_3415 .<br>
+  Reason: The Sd module guarantees the correctness of the right-hand operand in '&&' or '||'.
+  Risk: No risk.
+  Prevention: Functional reliability guaranteed by design.
 
   \li PRQA S 6050 VL_MTR_Sd_STST3 .<br>
     Reason: Splitting their implementation will result in a decrease in performance.

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -22,8 +22,8 @@
  **
  ***********************************************************************************************************************/
 
-/* PRQA S 0488,0316,0772,1253,1258,1291,1290,1331,1336,1823,1840,1842,1843 ++ */ /* VL_QAC_Crypto */
-/* PRQA S 2001,2015,4434,1252,3219,3396,3397,3672,3715,4443 ++ */                /* VL_QAC_Crypto */
+/* PRQA S 0488,0316,0772,1253,1258,1291,1290,1331,1336,1823,1840,1842,1843 ++ */ /* VL_Crypto_62_General */
+/* PRQA S 2001,2015,4434,1252,3219,3396,3397,3672,3715,4443 ++ */                /* VL_Crypto_62_General */
 /* =================================================== inclusions =================================================== */
 #include "Crypto_62_Internal.h"
 #if (CRYPTO_SERVICE_RANDOM == STD_ON)
@@ -130,7 +130,7 @@ CRYPTO_62_LOCAL int
     Crypto_hmac_drbg_update(Crypto_hmac_drbg_context* ctx, const unsigned char* additional, uint32 add_len)
 {
     uint32 md_len = Crypto_md_get_size(ctx->md_ctx.md_info);
-    /* PRQA S 3400,4461,3844,1844 ++ */ /* VL_QAC_Crypto */
+    /* PRQA S 3400,4461,3844,1844 ++ */ /* VL_Crypto_62_General */
     unsigned char rounds = (additional != NULL_PTR && add_len != 0) ? CRYPTO_CONST_2 : 1;
     /* PRQA S 3400,4461,3844,1844 -- */
     unsigned char sep[1];
@@ -288,7 +288,7 @@ CRYPTO_62_LOCAL int
 
     /* For initial seeding, allow adding of nonce generated
      * from the entropy source. See Sect 8.6.7 in SP800-90A. */
-    if (use_nonce) /* PRQA S 3344 */ /* VL_QAC_Crypto */
+    if (use_nonce) /* PRQA S 3344 */ /* VL_Crypto_62_General */
     {
         /* Note: We don't merge the two calls to f_entropy() in order
          *       to avoid requesting too much entropy from f_entropy()
@@ -414,7 +414,7 @@ CRYPTO_62_LOCAL Std_ReturnType Crypto_hmac_drbg_seed(
          *
          * (This also matches the sizes used in the NIST test vectors.)
          */
-        /* PRQA S 1824,3391 ++ */                                         /* VL_QAC_Crypto */
+        /* PRQA S 1824,3391 ++ */                                         /* VL_Crypto_62_General */
         ctx->entropy_len = md_size <= CRYPTO_CONST_20 ? CRYPTO_CONST_16 : /* 160-bits hash -> 128 bits */
                                md_size <= CRYPTO_CONST_28 ? CRYPTO_CONST_24
                                                           : /* 224-bits hash -> 192 bits */

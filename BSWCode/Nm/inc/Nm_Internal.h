@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -32,6 +32,7 @@
 #include "Os.h"
 #endif
 /* ===================================================== macros ===================================================== */
+#define NM_UNUSED(v)             (void)(v)
 #define NM_STATE_CHANGE_TYPE_NUM ((uint8)(6u))
 
 /* magic number */
@@ -88,12 +89,12 @@ typedef struct
 {
     boolean               TopMostCoor;
     Nm_ShutdownStatusType ShutdownStatus;
-    uint8                 ReadySleepInChMask;
+    uint8                 ReadySleepInChMask[NM_NUMBER_OF_CHANNELS / NM_SINGLEBYTE_BASENUM + 1u];
     boolean               CoorRsbInCluster;
-    uint8                 ShutdownTimerLoadOkInChMask;
-    uint8                 SleepAllowedInChMask;
-    uint8                 ShutdownAbortFinishedInChMask;
-    uint8                 PassiveChannelReadySleepInChMask;
+    uint8                 ShutdownTimerLoadOkInChMask[NM_NUMBER_OF_CHANNELS / NM_SINGLEBYTE_BASENUM + 1u];
+    uint8                 SleepAllowedInChMask[NM_NUMBER_OF_CHANNELS / NM_SINGLEBYTE_BASENUM + 1u];
+    uint8                 ShutdownAbortFinishedInChMask[NM_NUMBER_OF_CHANNELS / NM_SINGLEBYTE_BASENUM + 1u];
+    uint8                 PassiveChannelReadySleepInChMask[NM_NUMBER_OF_CHANNELS / NM_SINGLEBYTE_BASENUM + 1u];
 } Nm_InnerClusterType;
 
 #endif

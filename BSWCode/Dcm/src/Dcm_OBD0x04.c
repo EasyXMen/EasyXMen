@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -37,18 +37,22 @@ Std_ReturnType Dcm_OBD0x04(
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode)
 {
-    uint8 protocolId;
+    uint8          protocolId;
+    Std_ReturnType result = E_OK;
     DCM_UNUSED(OpStatus);
 
     /* find protocol for DemclientRef */
     (void)DslInternal_FindProtocolRowByRxPduId(pMsgContext->dcmRxPduId, &protocolId, NULL_PTR);
 
-    /* select target DTC */
-    Std_ReturnType result = Dem_SelectDTC(
-        Dcm_DslProtocolRow[protocolId].DemClientRef,
-        DEM_DTC_GROUP_ALL_DTCS,
-        DEM_DTC_FORMAT_OBD,
-        DEM_DTC_ORIGIN_OBD_RELEVANT_MEMORY);
+    if (DCM_INITIAL == OpStatus)
+    {
+        /* select target DTC */
+        result = Dem_SelectDTC(
+            Dcm_DslProtocolRow[protocolId].DemClientRef,
+            DEM_DTC_GROUP_ALL_DTCS,
+            DEM_DTC_FORMAT_OBD,
+            DEM_DTC_ORIGIN_OBD_RELEVANT_MEMORY);
+    }
 
     if (E_OK == result)
     {

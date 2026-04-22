@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -30,7 +30,7 @@
 
 #if (TRUE == CFG_MEMORY_PROTECTION_ENABLE)
 /*=======[M A C R O S]========================================================*/
-
+#define MPROT_ENABLE_BIT (1u)
 /*=======[T Y P E   D E F I N I T I O N S]====================================*/
 
 /*=======[E X T E R N A L   D A T A]==========================================*/
@@ -120,8 +120,8 @@ void Os_ModeModify(void) /* PRQA S 3408 */ /* VL_Os_3408 */
         /* PRQA S 3469 --*/
 
         /*change csa PSW.IO bits to User-1 Mode*/
-        Csa1->reg[1] &= CLERA_PSWIO_MASK;
-        Csa1->reg[1] |= 0x00000400u; /* PRQA S 3120 */ /* VL_QAC_MagicNum */
+        Csa1->reg[1] &= PSWIO_MASK;
+        Csa1->reg[1] |= PSWIO_USER1_MODE; /* PRQA S 3120 */ /* VL_QAC_MagicNum */
     }
 #endif /* TRUE == CFG_SRV_SHELLOS */
 
@@ -178,10 +178,10 @@ void Os_ArchMemProtEnable(void) /* PRQA S 3006 */ /* VL_Os_3006 */
 /* PRQA S 1532 -- */
 {
     Os_ArchCsaType* csa = OS_PCX_TO_EA(OS_ARCH_MFCR(OS_REG_PCX)); /* PRQA S 0306 */ /* VL_Os_0306 */
-    csa->reg[1] &= 0xFFFFCFFFu; /* PRQA S 3120 */                                   /* VL_QAC_MagicNum */
+    csa->reg[1] &= PPRS_MASK; /* PRQA S 3120 */                                   /* VL_QAC_MagicNum */
     uint32 temp = 0x0u;
     temp        = OS_ARCH_MFCR(OS_REG_SYSCON);
-    temp |= 0x00000002u; /* PRQA S 3120 */               /* VL_QAC_MagicNum */
+    temp |= (1u << MPROT_ENABLE_BIT); 
     OS_ARCH_MTCR(OS_REG_SYSCON, temp); /* PRQA S 3138, 1006 */ /* VL_Os_3138, VL_Os_1006 */
 }
 #define OS_STOP_SEC_CODE

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -44,10 +44,10 @@ Dcm_ProgConditionsType Dcm_ProgConditions;
 /**
  * @brief the config pointer
  */
-#define DCM_START_SEC_VAR_INIT_PTR
+#define DCM_START_SEC_VAR_CLEARED_PTR
 #include "Dcm_MemMap.h"
-const Dcm_ConfigType* Dcm_CfgPtr = NULL_PTR;
-#define DCM_STOP_SEC_VAR_INIT_PTR
+const Dcm_ConfigType* Dcm_CfgPtr;
+#define DCM_STOP_SEC_VAR_CLEARED_PTR
 #include "Dcm_MemMap.h"
 /* ========================================== internal function declarations ======================================== */
 /**
@@ -196,20 +196,23 @@ void DcmInternal_Memset(uint8* dest, uint8 data, uint32 size)
 /**
  * Dcm  Compares two blocks of memory byte by byte
  */
+/* PRQA S 5209 ++ */ /* VL_Dcm_5209 */
 int DcmInternal_MemCmp(const void* ptr1, const void* ptr2, int num)
 {
-    const uint8* p1 = (const uint8*)ptr1;
-    const uint8* p2 = (const uint8*)ptr2;
+    const uint8* p1  = (const uint8*)ptr1; /* PRQA S 0316 */ /* VL_QAC_0316 */
+    const uint8* p2  = (const uint8*)ptr2; /* PRQA S 0316 */ /* VL_QAC_0316 */
+    int          ret = 0;
     for (int i = 0; i < num; i++)
     {
         if (p1[i] != p2[i])
         {
-            return p1[i] - p2[i];
+            ret = p1[i] - p2[i]; /* PRQA S 4443 */ /* VL_Dcm_4443 */
+            break;
         }
     }
-    return 0u;
+    return ret;
 }
-
+/* PRQA S 5209 -- */
 #else
 /* API mapping for memcpy/memset */
 #define DcmInternal_Memcpy(dest, src, size)  IStdLib_MemCpy(dest, src, size)
@@ -432,10 +435,8 @@ Std_ReturnType DcmInternal_SetProgConditions(Dcm_OpStatusType OpStatus)
              * communication */
             Dcm_ProcessingSetProg = FALSE;
             (void)Rte_Switch_EcuResetModeSwitchInterface_ecuReset(RTE_MODE_DcmEcuReset_DCM_EXECUTE);
-            for (uint16 index = 0u; index < DCM_MAINCONNECTION_NUM; index++)
-            {
-                Dcm_CommState[index] = DCM_COMM_NO_COMMUNICATION;
-            }
+            (void)SchM_Switch_Dcm_DcmEcuReset(RTE_MODE_DcmEcuReset_DCM_EXECUTE);
+            Dcm_RequestRejectedDueToBoot = TRUE;
         }
         else if ((DCM_E_PENDING == result) || (DCM_E_FORCE_RCRRP == result))
         {
@@ -660,6 +661,7 @@ DCM_LOCAL void DcmInternal_CheckP2Timer(void)
         if ((DcmInternal_DecreaseTimer(&Dcm_ProtocolCtrl[index].P2Timer))
             && (DCM_MSG_PROCESSING == Dcm_ProtocolCtrl[index].State))
         {
+            Dcm_MsgContext[index].msgAddInfo.suppressPosResponse = 0u;
             DsdInternal_SendResponse(index, DCM_E_RESPONSE_PENDING);
         }
     }
@@ -767,10 +769,6 @@ DCM_LOCAL void DcmInternal_DispatchService(uint8 protocolId)
     if ((TRUE == protocolCtrlPtr->PagedBufferStarted) && (0u != protocolCtrlPtr->RemainPageLength))
     {
         msgContextPtr->resMaxDataLen = protocolCtrlPtr->FirstPageLength - protocolCtrlPtr->RemainPageLength;
-    }
-    else
-    {
-        msgContextPtr->resMaxDataLen = Dcm_DslProtocolRow[protocolId].TxBufferSize;
     }
 #endif
     Dcm_NegativeResponseCodeType errorCode = DCM_POS_RESP;
@@ -915,7 +913,7 @@ DCM_LOCAL void
         tempErrorCode                         = DCM_E_GENERALREJECT;
         DCM_DET_REPORTRUNTIME(DCM_TPRXINDICATION_ID, DCM_E_INVALID_VALUE);
     }
-    else if ((DCM_E_PENDING == result) || (DCM_E_FORCE_RCRRP == result))
+    else if (DCM_E_FORCE_RCRRP == result)
     {
         Dcm_MsgContext[protocolId].msgAddInfo.suppressPosResponse = 0u;
     }

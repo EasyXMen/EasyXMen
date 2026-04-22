@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -30,7 +30,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-/* PRQA S 3332,1252 ++ */ /* VL_QAC_3332,VL_QAC_1252 */
+/* PRQA S 3332,1252,1536 ++ */ /* VL_QAC_3332,VL_QAC_1252,VL_PduR_1536 */
 #if (STD_OFF == PDUR_ZERO_COST_OPERATION)
 /* =============================================== version information ============================================== */
 
@@ -442,7 +442,7 @@ typedef struct
 } PduR_QueueRuntimeType;
 
 #endif /*end of PDUR_ZERO_COST_OPERATION*/
-/* PRQA S 3332,1252 -- */
+/* PRQA S 3332,1252,1536 -- */
 #ifdef __cplusplus
 }
 #endif

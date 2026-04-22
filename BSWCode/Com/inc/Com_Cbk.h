@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -21,6 +21,7 @@
  **  @description        : Callback declaration supplied by Com
  **
  ***********************************************************************************************************************/
+/* PRQA S 1512,1513 EOF */ /* VL_Com_1512,VL_Com_1513 */
 #ifndef COM_CBK_H_
 #define COM_CBK_H_
 
@@ -39,7 +40,7 @@ extern "C" {
  *                 If it fits, it shall copy its data into the buffer provided by PduInfoPtr->SduDataPtr
  *                 and update the length of the actual copied data in PduInfoPtr->SduLength.
  *                 If not, it returns E_NOT_OK without changing PduInfoPtr.
- * @param[in]     TxIpduId: ID of the SDU that is requested to be transmitted.
+ * @param[in]     TxPduId: ID of the SDU that is requested to be transmitted.
  * @param[inout]  PduInfoPtr: Contains a pointer to a buffer (SduDataPtr) to where the SDU data shall be copied, and the
  *                available buffer size in SduLengh.On return, the service will indicate the length of the copied SDU
  *                data in SduLength.
@@ -50,17 +51,17 @@ extern "C" {
  * @synchronous   TRUE
  * @trace         CPD-66396
  */
-extern Std_ReturnType Com_TriggerTransmit(PduIdType TxIpduId, PduInfoType* PduInfoPtr);
+extern Std_ReturnType Com_TriggerTransmit(PduIdType TxPduId, PduInfoType* PduInfoPtr);
 /**
  * @brief         Indication of a received I-PDU from a lower layer communication interface module.
- * @param[in]     RxIpduId: ID of the received I-PDU.
+ * @param[in]     RxPduId: ID of the received I-PDU.
  * @param[in]     PduInfoPtr: Contains the length (SduLength) of the received I-PDU and a pointer to a buffer
  *                (SduDataPtr) containing the I-PDU.
  * @reentrant     Reentrant for different PduIds. Non reentrant for the same PduId.
  * @synchronous   TRUE
  * @trace         CPD-66395
  */
-extern void Com_RxIndication(PduIdType RxIpduId, const PduInfoType* PduInfoPtr);
+extern void Com_RxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr);
 /**
  * @brief         This service Initializes internal and external interfaces of the CAN Interface for the further
  * processing.
@@ -73,13 +74,13 @@ extern void Com_RxIndication(PduIdType RxIpduId, const PduInfoType* PduInfoPtr);
 extern void Com_TpRxIndication(PduIdType id, Std_ReturnType result);
 /**
  * @brief         The lower layer communication interface module confirms the transmission of an IPDU.
- * @param[in]     TxIpduId: ID of the I-PDU that has been transmitted.
+ * @param[in]     TxPduId: ID of the I-PDU that has been transmitted.
  * @param[in]     result: E_OK: The PDU was transmitted. E_NOT_OK: Transmission of the PDU failed.
  * @reentrant     Reentrant for different PduIds. Non reentrant for the same PduId.
  * @synchronous   TRUE
  * @trace         CPD-66398
  */
-extern void Com_TxConfirmation(PduIdType TxIpduId, Std_ReturnType result);
+extern void Com_TxConfirmation(PduIdType TxPduId, Std_ReturnType result);
 /**
  * @brief         This function is called after the I-PDU has been transmitted on its network, the result indicates
  *                whether the transmission was successful or not.

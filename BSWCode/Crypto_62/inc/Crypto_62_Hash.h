@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -24,6 +24,8 @@
 
 #ifndef CRYPTO_HASH_H
 #define CRYPTO_HASH_H
+
+/* PRQA S 1501,1753 EOF */ /* VL_Crypto_62_1501,VL_Crypto_62_1753 */
 
 /* =================================================== inclusions =================================================== */
 #include "Crypto_62_Internal.h"
@@ -58,10 +60,10 @@ typedef struct
     Crypto_AlgorithmFamilyType algorithmfamily;
 
     /** Output length of the digest function in bytes */
-    unsigned char size;
+    uint8 size;
 
     /** Block length of the digest function in bytes */
-    unsigned char block_size;
+    uint8 block_size;
 
 } Crypto_Md_Info_t;
 /** @brief Message Digest Context*/
@@ -111,7 +113,7 @@ const Crypto_Md_Info_t* Crypto_Md_info_from_type(Crypto_AlgorithmFamilyType algo
  *
  * @return  Size of the message digest in bytes.
  */
-unsigned char Crypto_md_get_size(const Crypto_Md_Info_t* md_info);
+uint8 Crypto_md_get_size(const Crypto_Md_Info_t* md_info);
 
 /**
  * @brief   Sets up the message digest context with the specified message digest information.
@@ -147,7 +149,7 @@ Std_ReturnType Crypto_Md_Start(Crypto_Md_Context_t* ctx);
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
-Std_ReturnType Crypto_Md_Update(Crypto_Md_Context_t* ctx, const unsigned char* input, uint32 ilen);
+Std_ReturnType Crypto_Md_Update(Crypto_Md_Context_t* ctx, const uint8* input, uint32 ilen);
 
 /**
  * @brief   Finalizes the message digest context and produces the hash output.
@@ -184,8 +186,7 @@ void Crypto_Md_Free(Crypto_Md_Context_t* ctx);
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
-Std_ReturnType
-    Crypto_md(const Crypto_Md_Info_t* md_info, const unsigned char* input, uint32 ilen, unsigned char* output);
+Std_ReturnType Crypto_md(const Crypto_Md_Info_t* md_info, const uint8* input, uint32 ilen, uint8* output);
 
 /**
  * @brief   Processes the Blake2s hash operation for a given object ID.
@@ -205,7 +206,7 @@ Std_ReturnType Crypto_Blake2s_Process(uint32 objectId);
  *
  * @return  Size of the message digest in bytes.
  */
-CRYPTO_62_LOCAL inline unsigned char Crypto_md_get_size_from_type(Crypto_AlgorithmFamilyType algorithmfamily)
+CRYPTO_62_LOCAL inline uint8 Crypto_md_get_size_from_type(Crypto_AlgorithmFamilyType algorithmfamily)
 {
     return Crypto_md_get_size(Crypto_Md_info_from_type(algorithmfamily));
 }

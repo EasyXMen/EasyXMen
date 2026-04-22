@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -65,6 +65,9 @@ extern "C" {
 #define DCM_LOCAL static /* PRQA S 3414 */ /* VL_Dcm_3414 */
 #endif
 
+#if (DCM_DSL_RX_TX_SHARED_BUGGER == STD_ON)
+#define DCM_MIN_TX_BUFFER_SIZE 0x05u /**< Minimum buffer size required for transmitting a response to avoid NRC14.*/
+#endif
 #define DCM_POSITIVE_RSPMASK   0x40u /**< positive response mask */
 #define DCM_NEGATIVE_RSPCODE   0x7Fu /**< negative response code */
 #define DCM_NEGATIVE_RSPMSGLEN 3uL   /**< negative response code */
@@ -140,8 +143,9 @@ void DcmInternal_Memcpy(uint8* dest, const uint8* src, uint32 size);
  * @synchronous   TRUE
  * @trace         CPD-PLACEHOLDE
  */
+/* PRQA S 5209 ++ */ /* VL_Dcm_5209 */
 int DcmInternal_MemCmp(const void* ptr1, const void* ptr2, int num);
-
+/* PRQA S 5209 -- */
 /**
  * @brief         Dcm internal memory set function
  * @param[out]    dest : the output data

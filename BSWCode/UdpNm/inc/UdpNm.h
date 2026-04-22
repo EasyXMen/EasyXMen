@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -30,7 +30,12 @@
  *  V02.00.00 2020-06-09  rongbo.hu     1. Update code according AUTOSAR R19-11 Specification
  *                                      2. Modify code with the new coding rule
  *                                      3. Fix bugs find in V1.0.4
- *
+ *  V02.01.00 2024-12-30  caihong.liu   R23-11 development first release.
+ *  V02.01.01 2025-10-22  caihong.liu
+ *      1. Fixed CPT-14266, Redundant passive wake-up event flags lead to repeated wake-up actions.
+ *      2. Fixed CPT-14866, Fixed race condition in ReadySleepState causing unhandled UdpNm_RepeatMessageRequest due to
+ *         immediate transition to PrepareBusSleepMode.
+ *      3. Fixed CPT-14491, state machine stuck in ReadySleepState due to nmTimeoutTimer is 0 but nmToutFlg is FALSE.
  ==================================================================================================================== */
 
 /* ================================================ misar justifications ============================================ */
@@ -70,7 +75,7 @@ extern "C" {
 #define UDPNM_AR_RELEASE_REVISION_VERSION (0u)
 #define UDPNM_SW_MAJOR_VERSION            (2u)
 #define UDPNM_SW_MINOR_VERSION            (1u)
-#define UDPNM_SW_PATCH_VERSION            (0u)
+#define UDPNM_SW_PATCH_VERSION            (1u)
 /** @} */
 
 /* ===================================================== macros ===================================================== */
@@ -391,6 +396,7 @@ void UdpNm_SoAdIfTxConfirmation(PduIdType TxPduId, Std_ReturnType result);
  */
 void UdpNm_SoAdIfRxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr);
 
+#if UDPNM_TRIGGER_TRANSMIT_API == STD_ON
 /**
  * @brief       Within this API, the upper layer module (called module) shall check whether the available data
                 fits into the buffer size reported by PduInfoPtr->SduLength. If it fits, it shall copy its data into the
@@ -406,6 +412,7 @@ void UdpNm_SoAdIfRxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr);
  * @trace       CPD-71911
  */
 Std_ReturnType UdpNm_SoAdIfTriggerTransmit(PduIdType TxPduId, PduInfoType* PduInfoPtr);
+#endif
 
 /**
  * @brief       Main function of the UdpNm which processes the algorithm describes in that document.

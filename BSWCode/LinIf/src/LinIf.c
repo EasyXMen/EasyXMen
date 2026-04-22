@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -21,6 +21,8 @@
  **  @description : API definitions of LinIf
  **
  ***********************************************************************************************************************/
+/* PRQA S 3415 EOF */ /* VL_LinIf_3415 */
+/* PRQA S 1756 EOF */ /* VL_LinIf_1756 */
 /* =================================================== inclusions =================================================== */
 #include "LinIf_Cfg.h"
 #include "LinIf_Cbk.h"
@@ -78,30 +80,9 @@ LINIF_LOCAL const LinIf_SubstitutionFramesType* LinIf_GetSubstitution(PduIdType 
 
 LINIF_LOCAL NetworkHandleType LinIf_GetLinIfChannel(NetworkHandleType channel, ApplicationType applicationId);
 
-#if (STD_ON == LINIF_MASTER_SUPPORT)
-/**
- * @brief           The main processing function of the LinIf master node. This function process
-                    master node wakeup and sleep, message transmit and update schedule table.
- * @param[in]       channel: Identification of the LinIf channel
- * @reentrant       TRUE
- * @synchronous     TRUE
- * @trace        -
- */
-LINIF_LOCAL void LinIf_MasterMainHandle(NetworkHandleType ch);
-#endif
-
 #if (STD_ON == LINIF_SLAVE_SUPPORT)
-/**
- * @brief           LinIf slave main function
- * @param[in]       channel: Identification of the LinIf channel
- * @reentrant       TRUE
- * @synchronous     TRUE
- * @trace        -
- */
-LINIF_LOCAL void LinIf_SlaveMainHandle(NetworkHandleType ch);
-
-LINIF_LOCAL NetworkHandleType
-    LinIf_GetLinIfChannelByDriverChId(NetworkHandleType channel, ApplicationType applicationId);
+LINIF_LOCAL
+NetworkHandleType LinIf_GetLinIfChannelByDriverChId(NetworkHandleType channel, ApplicationType applicationId);
 #endif
 
 #define LINIF_STOP_SEC_CODE
@@ -1184,40 +1165,6 @@ LINIF_LOCAL_INLINE boolean LinIf_ValidatePointer(uint8 appId, const void* pointe
 }
 #endif
 
-/* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
-/**
- * @brief           LinIf slot timer handle
- * @param[in]       masterChRtDataPtr: Runtime data of linif channel
- * @reentrant       TRUE
- * @synchronous     TRUE
- * @trace           -
- */
-LINIF_LOCAL_INLINE void LinIf_SlotTimer(LinIf_MasterRuntimeType* masterChRtDataPtr)
-{
-    LinIf_MasterRuntimeType* LinIf_MasterChRtData = masterChRtDataPtr;
-
-    if (LinIf_MasterChRtData->Timer > 0u)
-    {
-        /* The current frame slot counter minus 1 */
-        LinIf_MasterChRtData->Timer--;
-    }
-}
-/* PRQA S 1532 -- */
-
-/**
- * @brief           Get LinIf channel state
- * @param[in]       masterChRtDataPtr: Runtime data of linif channel
- * @return          ChannelState
- * @reentrant       TRUE
- * @synchronous     TRUE
- * @trace        -
- */
-LINIF_LOCAL_INLINE LinIf_ChannelStateType LinIf_GetChannelState(const LinIf_MasterRuntimeType* masterChRtDataPtr)
-{
-    const LinIf_MasterRuntimeType* LinIf_MasterChRtData = masterChRtDataPtr;
-    return LinIf_MasterChRtData->ChannelState;
-}
-
 /**
  * @brief           Gets the frame reference by Tx PduId
  * @param[in]       TxPduId: LinIf tx pdu id
@@ -1306,58 +1253,6 @@ LINIF_LOCAL NetworkHandleType LinIf_GetLinIfChannel(NetworkHandleType channel, A
 
     return idx;
 }
-
-#if (STD_ON == LINIF_MASTER_SUPPORT)
-/**
- * The main processing function of the LinIf master node. This function process
- * master node wakeup and sleep, message transmit and update schedule table.
- */
-/* PRQA S 6070 ++ */ /* VL_MTR_LinIf_STCAL*/
-LINIF_LOCAL void LinIf_MasterMainHandle(NetworkHandleType ch)
-/* PRQA S 6070 -- */
-{
-    LinIf_MasterRuntimeType* masterChRtDataPtr = LinIf_GetMasterRtDataPtr(ch);
-    LinIf_SlotTimer(masterChRtDataPtr);
-    LinIf_WakeUpProcess(masterChRtDataPtr, ch);
-    LinIf_SleepProcess(masterChRtDataPtr, ch);
-
-    if (LINIF_CHANNEL_OPERATIONAL == LinIf_GetChannelState(masterChRtDataPtr))
-    {
-        if (LinIf_IsEntryDelayTimeout(masterChRtDataPtr))
-        {
-            LinIf_PrevTransmit(masterChRtDataPtr, ch);
-        }
-
-#if ((LINIF_TP_SUPPORTED == STD_ON) && (LINTP_MASTER_SUPPORT == STD_ON))
-        LinTp_MasterMainFunction(ch);
-#endif
-
-        if (LinIf_IsEntryDelayTimeout(masterChRtDataPtr))
-        {
-#if ((LINIF_TP_SUPPORTED == STD_ON) && (LINTP_MASTER_SUPPORT == STD_ON))
-            if (!LinTp_IsWaitEventSet(ch))
-#endif
-            {
-                LinIf_UpdateSchedule(masterChRtDataPtr, ch);
-                LinIf_NextTransmit(masterChRtDataPtr, ch);
-            }
-        }
-    }
-}
-#endif
-
-/**
- * LinIf slave main function
- */
-#if (STD_ON == LINIF_SLAVE_SUPPORT)
-LINIF_LOCAL void LinIf_SlaveMainHandle(NetworkHandleType ch)
-{
-    LinIf_SlaveMainFunction(ch);
-#if (LINTP_SLAVE_SUPPORT == STD_ON)
-    LinTp_SlaveMainFunction(ch);
-#endif
-}
-#endif
 
 #define LINIF_STOP_SEC_CODE
 #include "LinIf_MemMap.h"

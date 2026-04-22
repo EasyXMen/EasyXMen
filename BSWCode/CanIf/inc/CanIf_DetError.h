@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -36,12 +36,12 @@ extern "C" {
 #endif
 
 /* ===================================================== macros ===================================================== */
-/*Service ID*/
-#if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
+/** Service ID */
 #define CANIF_INIT_ID                        (0x01u)
 #define CANIF_DEINIT_ID                      (0x02u)
 #define CANIF_SETCONTROLLER_MODE_ID          (0x03u)
 #define CANIF_GETCONTROLLER_MODE_ID          (0x04u)
+#define CANIF_TRANSMIT_ID                    (0x05u)
 #define CANIF_READRXPDUDATA_ID               (0x06u)
 #define CANIF_READTXNOTIFSTATUS_ID           (0x07u)
 #define CANIF_READRXNOTIFSTATUS_ID           (0x08u)
@@ -53,29 +53,28 @@ extern "C" {
 #define CANIF_GETTRCVMODE_ID                 (0x0Eu)
 #define CANIF_GETTRCVWAKEUPREASON_ID         (0x0Fu)
 #define CANIF_SETTRCVWAKEUPMODE_ID           (0x10u)
+#define CANIF_CHECKWAKEUP_ID                 (0x11u)
 #define CANIF_CHECKVALIDATION_ID             (0x12u)
-#define CANIF_GETTXCONFIRMATIONSTATE         (0x19u)
+#define CANIF_GETTXCONFIRMATIONSTATE_ID      (0x19u)
 #define CANIF_CLEARTRCVWUFFLAG_ID            (0x1Eu)
 #define CANIF_CHECKTRCVWAKEFLAG_ID           (0x1Fu)
 #define CANIF_SETBAUDRATE_ID                 (0x27u)
-#define CANIF_ENABLEBUSMIRRORING_ID          (0x4cu)
+#define CANIF_GETCONTROLLERERRORSTATE_ID     (0x4Bu)
+#define CANIF_GETCONTROLLERRXERRORCOUNTER_ID (0x4Du)
+#define CANIF_GETCONTROLLERTXERRORCOUNTER_ID (0x4EU)
 #define CANIF_TRIGGERTRANSMIT_ID             (0x41u)
 #define CANIF_TXCONFIRMATION_ID              (0x13u)
+#define CANIF_RXINDICATION_ID                (0x14u)
 #define CANIF_CONTROLLERBUSOFF_ID            (0x16u)
 #define CANIF_CONFIRMPNAVAILABILITY_ID       (0x1Au)
 #define CANIF_CLEARTRCVWUFFLAGINDICATION_ID  (0x20u)
 #define CANIF_CHECKTRCVWAKEFLAGINDICATION_ID (0x21u)
+#define CANIF_CONFIRMCTRLPNAVAILABILITY_ID   (0x56u)
 #define CANIF_CONTROLLERMODEINDICATION_ID    (0x17u)
 #define CANIF_TRCVMODEINDICATION_ID          (0x22u)
-#define CANIF_CURRENTICOMCONFIGURATION_ID    (0x26u)
-#endif
-#define CANIF_CHECKWAKEUP_ID  (0x11u)
-#define CANIF_TRANSMIT_ID     (0x05u)
-#define CANIF_RXINDICATION_ID (0x14u)
 
-/* Error detection */
-#if ((STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT) || (CANIF_VARIANT_NUMBER > 1u))
-#define CANIF_E_NO_ERROR             (00u)
+/** Development errors */
+#define CANIF_E_NO_ERROR             (0u)
 #define CANIF_E_PARAM_CANID          (10u)
 #define CANIF_E_PARAM_HOH            (12u)
 #define CANIF_E_PARAM_LPDU           (13u)
@@ -84,19 +83,20 @@ extern "C" {
 #define CANIF_E_PARAM_TRCV           (17u)
 #define CANIF_E_PARAM_TRCVMODE       (18u)
 #define CANIF_E_PARAM_TRCVWAKEUPMODE (19u)
+#define CANIF_E_PARAM_POINTER        (20u)
 #define CANIF_E_PARAM_CTRLMODE       (21u)
 #define CANIF_E_PARAM_PDU_MODE       (22u)
-#define CANIF_E_PARAM_POINTER        (20u)
+#define CANIF_E_PARAM_CAN_ERROR      (23u)
 #define CANIF_E_UNINIT               (30u)
 #define CANIF_E_INVALID_TXPDUID      (50u)
 #define CANIF_E_INVALID_RXPDUID      (60u)
 #define CANIF_E_INIT_FAILED          (80u)
 #define CANIF_E_INVALID_PARTITION    (40u)
-#endif
-#define CANIF_E_INVALID_DLC           (61u)
+
+/** Runtime errors */
+#define CANIF_E_INVALID_DATA_LENGTH   (61u)
 #define CANIF_E_DATA_LENGTH_MISMATCH  (62u)
 #define CANIF_E_STOPPED               (70u)
-#define CANIF_E_NOT_SLEEP             (71u)
 #define CANIF_E_TXPDU_LENGTH_EXCEEDED (90u)
 
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
@@ -122,7 +122,7 @@ extern "C" {
  * @retval             E_NOT_OK: fail validation
  * @synchronous        TRUE
  * @reentrant          FALSE
- * @trace              -
+ * @trace              CPD-68970
  */
 extern Std_ReturnType CanIf_ValidateInit(const CanIf_ConfigType* ConfigPtr);
 
@@ -133,7 +133,7 @@ extern Std_ReturnType CanIf_ValidateInit(const CanIf_ConfigType* ConfigPtr);
  * @retval             E_NOT_OK: fail validation
  * @synchronous        TRUE
  * @reentrant          FALSE
- * @trace              -
+ * @trace              CPD-68972
  */
 extern Std_ReturnType CanIf_ValidateDeInit(void);
 
@@ -146,7 +146,7 @@ extern Std_ReturnType CanIf_ValidateDeInit(void);
  * @retval             E_NOT_OK: fail validation
  * @synchronous        TRUE
  * @reentrant          FALSE
- * @trace              -
+ * @trace              CPD-68973
  */
 extern Std_ReturnType CanIf_ValidateSetControllerMode(uint8 ControllerId, Can_ControllerStateType ControllerMode);
 
@@ -159,7 +159,7 @@ extern Std_ReturnType CanIf_ValidateSetControllerMode(uint8 ControllerId, Can_Co
  * @retval             E_NOT_OK: fail validation
  * @synchronous        TRUE
  * @reentrant          FALSE
- * @trace              -
+ * @trace              CPD-68974
  */
 extern Std_ReturnType
     CanIf_ValidateGetControllerMode(uint8 ControllerId, const Can_ControllerStateType* ControllerModePtr);
@@ -173,7 +173,7 @@ extern Std_ReturnType
  * @return             Std_ReturnType
  * @retval             E_OK: pass validation
  * @retval             E_NOT_OK: fail validation
- * @trace              -
+ * @trace              CPD-68977
  */
 extern Std_ReturnType CanIf_ValidateTransmit(PduIdType CanIfTxSduId, const PduInfoType* PduInfoPtr);
 
@@ -187,7 +187,7 @@ extern Std_ReturnType CanIf_ValidateTransmit(PduIdType CanIfTxSduId, const PduIn
  * @return             Std_ReturnType
  * @retval             E_OK: pass validation
  * @retval             E_NOT_OK: fail validation
- * @trace              -
+ * @trace              CPD-68978
  */
 extern Std_ReturnType CanIf_ValidateReadRxPduData(PduIdType CanIfRxSduId, const PduInfoType* CanIfRxInfoPtr);
 #endif
@@ -201,7 +201,7 @@ extern Std_ReturnType CanIf_ValidateReadRxPduData(PduIdType CanIfRxSduId, const 
  * @retval             E_NOT_OK: fail validation
  * @synchronous        TRUE
  * @reentrant          FALSE
- * @trace              -
+ * @trace              CPD-68979
  */
 extern Std_ReturnType CanIf_ValidateReadTxNotifStatus(PduIdType CanIfTxSduId);
 #endif
@@ -215,7 +215,7 @@ extern Std_ReturnType CanIf_ValidateReadTxNotifStatus(PduIdType CanIfTxSduId);
  * @retval             E_NOT_OK: fail validation
  * @synchronous        TRUE
  * @reentrant          FALSE
- * @trace              -
+ * @trace              CPD-68980
  */
 extern Std_ReturnType CanIf_ValidateReadRxNotifStatus(PduIdType CanIfRxSduId);
 #endif
@@ -229,7 +229,7 @@ extern Std_ReturnType CanIf_ValidateReadRxNotifStatus(PduIdType CanIfRxSduId);
  * @retval             E_NOT_OK: fail validation
  * @synchronous        TRUE
  * @reentrant          FALSE
- * @trace              -
+ * @trace              CPD-68982
  */
 extern Std_ReturnType CanIf_ValidateSetPduMode(uint8 ControllerId, CanIf_PduModeType PduModeRequest);
 
@@ -242,7 +242,7 @@ extern Std_ReturnType CanIf_ValidateSetPduMode(uint8 ControllerId, CanIf_PduMode
  * @retval             E_NOT_OK: fail validation
  * @synchronous        TRUE
  * @reentrant          FALSE
- * @trace              -
+ * @trace              CPD-68983
  */
 extern Std_ReturnType CanIf_ValidateGetPduMode(uint8 ControllerId, const CanIf_PduModeType* PduModePtr);
 
@@ -256,7 +256,7 @@ extern Std_ReturnType CanIf_ValidateGetPduMode(uint8 ControllerId, const CanIf_P
  * @retval             E_NOT_OK: fail validation
  * @synchronous        TRUE
  * @reentrant          FALSE
- * @trace              -
+ * @trace              CPD-68984
  */
 extern Std_ReturnType CanIf_ValidateSetDynamicTxId(PduIdType CanIfTxSduId, Can_IdType CanId);
 #endif
@@ -271,7 +271,7 @@ extern Std_ReturnType CanIf_ValidateSetDynamicTxId(PduIdType CanIfTxSduId, Can_I
  * @retval             E_NOT_OK: fail validation
  * @synchronous        TRUE
  * @reentrant          FALSE
- * @trace              -
+ * @trace              CPD-68985
  */
 extern Std_ReturnType CanIf_ValidateSetTrcvMode(uint8 TransceiverId, CanTrcv_TrcvModeType TransceiverMode);
 
@@ -284,7 +284,7 @@ extern Std_ReturnType CanIf_ValidateSetTrcvMode(uint8 TransceiverId, CanTrcv_Trc
  * @retval             E_NOT_OK: fail validation
  * @synchronous        TRUE
  * @reentrant          FALSE
- * @trace              -
+ * @trace              CPD-68986
  */
 extern Std_ReturnType CanIf_ValidateGetTrcvMode(uint8 TransceiverId, const CanTrcv_TrcvModeType* TransceiverModePtr);
 
@@ -297,7 +297,7 @@ extern Std_ReturnType CanIf_ValidateGetTrcvMode(uint8 TransceiverId, const CanTr
  * @retval             E_NOT_OK: fail validation
  * @synchronous        TRUE
  * @reentrant          FALSE
- * @trace              -
+ * @trace              CPD-68988
  */
 extern Std_ReturnType
     CanIf_ValidateGetTrcvWakeupReason(uint8 TransceiverId, const CanTrcv_TrcvWakeupReasonType* TrcvWuReasonPtr);
@@ -311,7 +311,7 @@ extern Std_ReturnType
  * @retval             E_NOT_OK: fail validation
  * @synchronous        TRUE
  * @reentrant          FALSE
- * @trace              -
+ * @trace              CPD-68989
  */
 extern Std_ReturnType CanIf_ValidateSetTrcvWakeupMode(uint8 TransceiverId, CanTrcv_TrcvWakeupModeType TrcvWakeupMode);
 #endif
@@ -325,7 +325,7 @@ extern Std_ReturnType CanIf_ValidateSetTrcvWakeupMode(uint8 TransceiverId, CanTr
  * @retval             E_NOT_OK: fail validation
  * @synchronous        TRUE
  * @reentrant          FALSE
- * @trace              -
+ * @trace              CPD-68990
  */
 extern Std_ReturnType CanIf_ValidateCheckWakeup(EcuM_WakeupSourceType WakeupSource);
 #endif
@@ -339,7 +339,7 @@ extern Std_ReturnType CanIf_ValidateCheckWakeup(EcuM_WakeupSourceType WakeupSour
  * @retval             E_NOT_OK: fail validation
  * @synchronous        TRUE
  * @reentrant          FALSE
- * @trace              -
+ * @trace              CPD-68991
  */
 extern Std_ReturnType CanIf_ValidateCheckValidation(EcuM_WakeupSourceType WakeupSource);
 #endif
@@ -353,7 +353,7 @@ extern Std_ReturnType CanIf_ValidateCheckValidation(EcuM_WakeupSourceType Wakeup
  * @retval             E_NOT_OK: fail validation
  * @synchronous        TRUE
  * @reentrant          FALSE
- * @trace              -
+ * @trace              CPD-68993
  */
 extern Std_ReturnType CanIf_ValidateGetTxConfirmationState(uint8 ControllerId);
 #endif
@@ -367,7 +367,7 @@ extern Std_ReturnType CanIf_ValidateGetTxConfirmationState(uint8 ControllerId);
  * @retval             E_NOT_OK: fail validation
  * @synchronous        TRUE
  * @reentrant          FALSE
- * @trace              -
+ * @trace              CPD-68994
  */
 extern Std_ReturnType CanIf_ValidateClearTrcvWufFlag(uint8 TransceiverId);
 
@@ -379,7 +379,7 @@ extern Std_ReturnType CanIf_ValidateClearTrcvWufFlag(uint8 TransceiverId);
  * @retval             E_NOT_OK: fail validation
  * @synchronous        TRUE
  * @reentrant          FALSE
- * @trace              -
+ * @trace              CPD-68995
  */
 extern Std_ReturnType CanIf_ValidateCheckTrcvWakeFlag(uint8 TransceiverId);
 #endif
@@ -394,9 +394,52 @@ extern Std_ReturnType CanIf_ValidateCheckTrcvWakeFlag(uint8 TransceiverId);
  * @retval             E_NOT_OK: fail validation
  * @synchronous        TRUE
  * @reentrant          FALSE
- * @trace              -
+ * @trace              CPD-68996
  */
 extern Std_ReturnType CanIf_ValidateSetBaudrate(uint8 ControllerId, uint16 BaudRateConfigID);
+#endif
+
+#if (CANIF_CAN_AUTOSAR_VERSION >= CANIF_CAN_AUTOSAR_R431)
+/**
+ * @brief              Development error validation
+ * @param[in]          ControllerId: Controller Id
+ * @param[out]         ErrorStatePtr: Pointer to error state
+ * @return             Std_ReturnType
+ * @retval             E_OK: pass validation
+ * @retval             E_NOT_OK: fail validation
+ * @synchronous        TRUE
+ * @reentrant          FALSE
+ * @trace              CPD-85799
+ */
+extern Std_ReturnType CanIf_ValidateGetControllerErrorState(uint8 ControllerId, Can_ErrorStateType* ErrorStatePtr);
+#endif
+
+#if (CANIF_CAN_AUTOSAR_VERSION >= CANIF_CAN_AUTOSAR_R440)
+/**
+ * @brief              Development error validation
+ * @param[in]          ControllerId: Controller Id
+ * @param[out]         RxErrorCounterPtr: Pointer to Rx error counter
+ * @return             Std_ReturnType
+ * @retval             E_OK: pass validation
+ * @retval             E_NOT_OK: fail validation
+ * @synchronous        TRUE
+ * @reentrant          Non reentrant for the same ControllerId.
+ * @trace              CPD-85800
+ */
+extern Std_ReturnType CanIf_ValidateGetControllerRxErrorCounter(uint8 ControllerId, uint8* RxErrorCounterPtr);
+
+/**
+ * @brief              Development error validation
+ * @param[in]          ControllerId: Controller Id
+ * @param[out]         TxErrorCounterPtr: Pointer to Tx error counter
+ * @return             Std_ReturnType
+ * @retval             E_OK: pass validation
+ * @retval             E_NOT_OK: fail validation
+ * @synchronous        TRUE
+ * @reentrant          Non reentrant for the same ControllerId.
+ * @trace              CPD-85801
+ */
+extern Std_ReturnType CanIf_ValidateGetControllerTxErrorCounter(uint8 ControllerId, uint8* TxErrorCounterPtr);
 #endif
 
 #if (STD_ON == CANIF_TRIGGER_TRANSMIT_SUPPORT)
@@ -409,7 +452,7 @@ extern Std_ReturnType CanIf_ValidateSetBaudrate(uint8 ControllerId, uint16 BaudR
  * @retval             E_NOT_OK: fail validation
  * @synchronous        TRUE
  * @reentrant          FALSE
- * @trace              -
+ * @trace              CPD-68998
  */
 extern Std_ReturnType CanIf_ValidateTriggerTransmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr);
 #endif
@@ -422,7 +465,7 @@ extern Std_ReturnType CanIf_ValidateTriggerTransmit(PduIdType TxPduId, const Pdu
  * @retval             E_NOT_OK: fail validation
  * @synchronous        TRUE
  * @reentrant          FALSE
- * @trace              -
+ * @trace              CPD-69000
  */
 extern Std_ReturnType CanIf_ValidateTxConfirmation(PduIdType CanTxPduId);
 #endif
@@ -437,7 +480,7 @@ extern Std_ReturnType CanIf_ValidateTxConfirmation(PduIdType CanTxPduId);
  * @retval             E_NOT_OK: fail validation
  * @synchronous        TRUE
  * @reentrant          FALSE
- * @trace              -
+ * @trace              CPD-69001
  */
 extern Std_ReturnType CanIf_ValidateRxIndication(const Can_HwType* Mailbox, const PduInfoType* PduInfoPtr);
 #endif
@@ -451,7 +494,7 @@ extern Std_ReturnType CanIf_ValidateRxIndication(const Can_HwType* Mailbox, cons
  * @retval             E_NOT_OK: fail validation
  * @synchronous        TRUE
  * @reentrant          FALSE
- * @trace              -
+ * @trace              CPD-69003
  */
 extern Std_ReturnType CanIf_ValidateControllerBusOff(uint8 ControllerId);
 
@@ -464,7 +507,7 @@ extern Std_ReturnType CanIf_ValidateControllerBusOff(uint8 ControllerId);
  * @retval             E_NOT_OK: fail validation
  * @synchronous        TRUE
  * @reentrant          FALSE
- * @trace              -
+ * @trace              CPD-69004
  */
 extern Std_ReturnType CanIf_ValidateConfirmPnAvailability(uint8 TransceiverId);
 
@@ -476,7 +519,7 @@ extern Std_ReturnType CanIf_ValidateConfirmPnAvailability(uint8 TransceiverId);
  * @retval             E_NOT_OK: fail validation
  * @synchronous        TRUE
  * @reentrant          FALSE
- * @trace              -
+ * @trace              CPD-69005
  */
 extern Std_ReturnType CanIf_ValidateClearTrcvWufFlagIndication(uint8 TransceiverId);
 
@@ -488,7 +531,7 @@ extern Std_ReturnType CanIf_ValidateClearTrcvWufFlagIndication(uint8 Transceiver
  * @retval             E_NOT_OK: fail validation
  * @synchronous        TRUE
  * @reentrant          FALSE
- * @trace              -
+ * @trace              CPD-69006
  */
 extern Std_ReturnType CanIf_ValidateCheckTrcvWakeFlagIndication(uint8 TransceiverId);
 #endif
@@ -502,7 +545,7 @@ extern Std_ReturnType CanIf_ValidateCheckTrcvWakeFlagIndication(uint8 Transceive
  * @retval             E_NOT_OK: fail validation
  * @synchronous        TRUE
  * @reentrant          FALSE
- * @trace              -
+ * @trace              CPD-69007
  */
 extern Std_ReturnType
     CanIf_ValidateControllerModeIndication(uint8 ControllerId, Can_ControllerStateType ControllerMode);
@@ -517,7 +560,7 @@ extern Std_ReturnType
  * @retval             E_NOT_OK: fail validation
  * @synchronous        TRUE
  * @reentrant          FALSE
- * @trace              -
+ * @trace              CPD-69008
  */
 extern Std_ReturnType CanIf_ValidateTrcvModeIndication(uint8 TransceiverId, CanTrcv_TrcvModeType TransceiverMode);
 #endif

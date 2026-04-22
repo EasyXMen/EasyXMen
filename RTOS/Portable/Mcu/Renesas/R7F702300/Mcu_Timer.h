@@ -1,6 +1,6 @@
 /* PRQA S 3108++ */
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -80,11 +80,11 @@ malfunction and the like */
 #define OS_ARCH_CLEAR_TPTIMER(Pen)
 #endif /* TRUE == CFG_TIMING_PROTECTION_ENABLE */
 
-#if (TRUE == CFG_LOAD_RATIO_CALC_ENABLE)
+#if (TRUE == CFG_OS_MONITOR_ENABLE)
 #define OS_SYSTEM_TIMER_MAX_TICK_VALUE      0xFFFFFFFFU
 #define OS_SYSTEM_TIMER_REG_PER_MS_VALUE    400000U
 #define Os_ArchTptmPtr                      ((Os_ArchTptmTypeRef)(0xFFFBB000U))
-#endif /* TRUE == CFG_LOAD_RATIO_CALC_ENABLE */
+#endif /* TRUE == CFG_OS_MONITOR_ENABLE */
 
 /*=======[T Y P E   D E F I N I T I O N S]====================================*/
 typedef struct
@@ -163,11 +163,13 @@ extern volatile STMn_t* systickTimerArray[OS_AUTOSAR_CORES];
 extern volatile STMn_t* tpTimerkArray[OS_AUTOSAR_CORES];
 #endif
 /*=======[E X T E R N A L   F U N C T I O N   D E C L A R A T I O N S]========*/
+FUNC(void, OS_CODE) Os_ArchInitCPU(void);
+
 #if (TRUE == CFG_SYSTEM_TIMER_ENABLE)
 extern FUNC(void, OS_CODE) Os_ArchInitSystemTimer(void);
 #endif /* #if (TRUE == CFG_SYSTEM_TIMER_ENABLE) */
 
-#if (TRUE == CFG_LOAD_RATIO_CALC_ENABLE)
+#if (TRUE == CFG_OS_MONITOR_ENABLE)
 extern FUNC(uint32, OS_CODE) Os_ArchLoadRatioInit(void);
 extern FUNC(uint32, OS_CODE) Os_ArchGetTimeTicks(void);
 #endif

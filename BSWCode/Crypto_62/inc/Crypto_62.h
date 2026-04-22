@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -38,105 +38,149 @@
     \li VL_Crypto_62_1336
       Reason: Defining function pointer types
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Crypto_62_3457
       Reason: Macro defines a braced initializer
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Crypto_62_1271
       Reason: non-init expression for enum definition is necessary
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Crypto_62_3412
       Reason: Macro defines an unrecognized code-fragment
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Crypto_62_3672
       Reason: function pointer needs to be assigned depends on configuration
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Crypto_62_General
-      Reason: Algorithm-related, not processed for the time being
+      Reason: Generic masking annotations for Crypto_62 that mask common QAC issues in this module.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_MTR_Crypto_62_STCYC
       Reason: Functionality is not separated into subfunctions because there are higher requirements for minimizing the
     stack and applying it to runtime use of the code.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_MTR_Crypto_62_STLIN
       Reason: Some function logics are overly complex. Splitting and implementing them will lead to reduced performance.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_MTR_Crypto_62_STMIF
       Reason: Functions handle specific tasks in the behavior of the entire component.
     Task has different scenarios that need to be covered, which depends on local conditions - this
     leads to deep nesting of the control structure.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_MTR_Crypto_62_STPAR
       Reason: The parameters of the function need.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_MTR_Crypto_62_STST3
       Reason: Some function logics are overly complex. Splitting and implementing them will lead to reduced performance.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_MTR_Crypto_62_STM19
       Reason: In principle, a function is not allowed to have multiple exit points,
     but it can help improve code performance in special circumstances.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_MTR_Crypto_62_STCAL
       Reason: The standard compliance vote was higher than the measurement threshold. In addition, a typical way to
     reduce STCAL is to deepen function nesting, which increases call stack usage and runtime
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_MTR_Crypto_62_STPTH
       Reason: The functions were not separated into sub-functions because there were higher requirements for
     minimizing the stack and applying them to the runtime usage of the code
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_MTR_Crypto_62_STVAR
       Reason: The total number of variables is related to the user configuration, allowing
     dynamic code to violate this under extreme conditions
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_MTR_Crypto_62_STTPP
       Reason: The number of lines of code is related to the user configuration, allowing
     dynamic code to violate this under extreme conditions
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Crypto_62_2982
       Reason: The operation is not redundant, because it must be emptied.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Crypto_62_3408
       Reason: There is no declaration before the definition.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Crypto_62_1502
       Reason: Configuration variables design needs.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
+
+    \li VL_Crypto_62_5209
+      Reason: The unsigned type identifier is used, as is the design of the code.
+      Risk: No risk.
+      Prevention: None.
+
+    \li VL_Crypto_62_3494
+      Reason: The value of the first condition in a compound conditional expression is
+        configurable and will not always be "false".
+      Risk: No risk.
+      Prevention: None.
+
+    \li VL_Crypto_62_1512
+      Reason: Rte-generated headers and module headers may contain the same declaration for the same
+        function, so they are compatible with each other.
+      Risk: No risk.
+      Prevention: None.
+
+    \li VL_Crypto_62_1501
+      Reason: Whether a function is used or not depends on the generated macro definition.
+      Risk: No risk.
+      Prevention: None.
+
+    \li VL_Crypto_62_1753
+      Reason: The definition of the function is generated in the configuration file, and when a module uses the
+        function, the definition is generated.
+      Risk: No risk.
+      Prevention: None.
+
+    \li VL_Crypto_62_1712
+      Reason: The interface names are designed in such a way that it is easy to classify the interfaces.
+      Risk: No risk.
+      Prevention: None.
+
+    \li VL_Crypto_62_0686
+      Reason: Array has fewer initializers than its declared size.
+      Risk: No risk.
+      Prevention: None.
+
+    \li VL_Crypto_62_1759
+      Reason: In the configuration generation of this module, the generated global array variable is the
+        definition of the structure member.
+      Risk: No risk.
+      Prevention: None.
 
  */
 
@@ -522,10 +566,12 @@ Std_ReturnType Crypto_62_KeyExchangeCalcPubVal(uint32 cryptoKeyId, uint8* public
  * @synchronous    TRUE
  * @trace       CPD-71654
  */
+/* PRQA S 1712 ++ */ /* VL_Crypto_62_1712 */
 Std_ReturnType Crypto_62_KeyExchangeCalcSecret(
     uint32       cryptoKeyId,
     const uint8* partnerPublicValuePtr,
     uint32       partnerPublicValueLength);
+/* PRQA S 1712 -- */
 
 /**
  * @brief          Performs a custom synchronous cryptographic operation.

@@ -1,6 +1,6 @@
 /* PRQA S 3108++ */
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -30,6 +30,7 @@
 
 /*=======[I N C L U D E S]====================================================*/
 #include "Os_Internal.h"
+#include "Os_Cfg_S.h"
 #include <v800_ghs.h>
 /*=======[M A C R O S]========================================================*/
 
@@ -65,40 +66,6 @@ static VAR(volatile uint32, OS_VAR) Os_IsrPriority; /* PRQA S 3218 */ /* MISRA R
 /*=======[F U N C T I O N   I M P L E M E N T A T I O N S]====================*/
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <Initialization of the CPU in the OS.>
- * ServiceId            <None>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Non Reentrant>
- * Param-Name[in]       <None>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * Return               <void>
- * PreCondition         <None>
- * CallByAPI            <StartOS>
- */
-/******************************************************************************/
-FUNC(void, OS_CODE) Os_ArchInitCPU(void)
-{
-    /* Enables write access of protected registers */
-    OS_MSRKCPROT = OS_KCPORT_ENABLE;
-
-    /* The clocks of OSTM0 - OSTM9 Setting are supplied */
-    OS_MSR_OSTM = 0x00;
-    ASM("SYNCM");
-
-/*Initialize system timer for system counter */
-#if (TRUE == CFG_SYSTEM_TIMER_ENABLE)
-    Os_ArchInitSystemTimer();
-#endif
-
-/*Initialize system timer for time protection */
-#if (TRUE == CFG_TIMING_PROTECTION_ENABLE)
-    Os_ArchInitTimingProtTimer();
-#endif
-}
-
 /******************************************************************************/
 /*
  * Brief                <first entry task>
@@ -175,15 +142,6 @@ FUNC(void, OS_CODE) Os_ArchFirstEnterTask(void)
 /******************************************************************************/
 FUNC(void, OS_CODE) Os_ArchStartScheduler(void)
 {
-#if (TRUE == CFG_SYSTEM_TIMER_ENABLE)
-    /*notes: the code of start system timer must be lightweight, otherwise the
-     * previous step 'synchronization' will not make sense*/
-    OS_ARCH_ENABLE_SYSTIMER(Os_SCB.sysCore); /* PRQA S 0303 */ /* MISRA Rule 11.4 */
-#endif
-#if (TRUE == CFG_TIMING_PROTECTION_ENABLE)
-    OS_ARCH_ENABLE_TPTIMER(Os_SCB.sysCore);
-#endif
-
     Os_ArchFirstDispatch();
 }
 /*****************************************************************************/
@@ -252,10 +210,39 @@ FUNC(void, OS_CODE) OS_SaveTaskStackPointer(void)
 /******************************************************************************/
 uint32 Os_CmpSwapW(uint32* address, uint32 compareVal, uint32 exchangedVal)
 {
-    uint32 ret;
-    ret = __CAXI2((int*)address, compareVal, exchangedVal);
+    uint32 oldVal;
+    uint32 result = 0U;
 
-    return !ret;
+    OS_ARCH_DECLARE_CRITICAL();
+    OS_ARCH_ENTRY_CRITICAL();
+
+    /* Load Link - Read current value and establish monitoring */
+    ASM("ldl.w [%1], %0" : "=r" (oldVal) : "r" (address));
+
+    if (oldVal != compareVal) {
+        /* Current value does not equal expected value; swap failed.  */
+        /* Must execute one STC to clear link state. Write back original value. */
+        ASM("stc.w %2, [%1]" : "=r" (result) : "r" (address), "r" (oldVal): "memory");
+        ASM("snooze");
+        result = 0;
+    }
+    else
+    {
+        /* If the current value equals the expected value, attempt conditional storage. */ 
+        ASM("stc.w %2, [%1] \n\t"
+            "mov %2, %0 \n\t"
+            "snooze \n\t"
+            : "=r" (result)
+            : "r" (address), "r" (exchangedVal)
+            : "memory");
+    }
+
+    OS_ARCH_EXIT_CRITICAL();
+    if (result == 1U) {
+        return E_OK;
+    } else {
+        return E_NOT_OK;
+    }
 }
 
 /* OS447: Disable all interrupts in os_app during TerminateApplication. */

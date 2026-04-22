@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -80,13 +80,16 @@ void Xcp_SoAdRxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr)
  * errors are detected, it calls the `Xcp_TxConfirmation` function to handle
  * the transmission confirmation. This function is intended for internal use.
  */
-void Xcp_SoAdTxConfirmation(PduIdType TxPduId)
+void Xcp_SoAdTxConfirmation(PduIdType TxPduId, Std_ReturnType result)
 {
-#if (XCP_DEV_ERROR_DETECT == STD_ON)
-    if ((boolean)FALSE == Xcp_TxIndCheckDetErr())
-#endif /*XCP_DEV_ERROR_DETECT == STD_ON*/
+    if (E_OK == result)
     {
-        Xcp_TxConfirmation(TxPduId);
+#if (XCP_DEV_ERROR_DETECT == STD_ON)
+        if ((boolean)FALSE == Xcp_TxIndCheckDetErr())
+#endif /*XCP_DEV_ERROR_DETECT == STD_ON*/
+        {
+            Xcp_TxConfirmation(TxPduId);
+        }
     }
     return;
 }

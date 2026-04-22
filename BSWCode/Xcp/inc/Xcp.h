@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -80,43 +80,43 @@
     \li VL_Xcp_3218
       Reason: file scoped variables only used in one function are necessary for functional usage
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Xcp_3233
       Reason: file scoped variables only used in one function are necessary for functional usage
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Xcp_2995
       Reason: the issue shall be avoided in actual running environment and configs
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Xcp_2985
       Reason: the issue shall be avoided in actual running environment and configs
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Xcp_2986
       Reason: the issue shall be avoided in actual running environment and configs
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Xcp_1039
       Reason: Configure the length of the generated array, it depends on the configuration, may be configured as 1
               length.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Xcp_1252
       Reason: suffixed constant comparison is necessary
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Xcp_1258
       Reason: pduLength type will variy depnding on the config
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Xcp_5017
       Reason: High cyclomatic complexity is reserved for better readability.
@@ -126,27 +126,27 @@
     \li VL_Xcp_5004
       Reason: pointer type definition is essential
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Xcp_4440
       Reason: function-like macros are necessary
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Xcp_3414
       Reason: specific keyword macro is necessary for unit testing
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Xcp_3678
       Reason: non-const type declaration is necessary depends on the config
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Xcp_0832
       Reason: Defining header files using generated references for macros
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Xcp_IndirectUse
       Reason: This variable needs to be used in the user's callback interface.
@@ -156,144 +156,189 @@
     \li VL_Xcp_0553
       Reason: The usage of this file depends on the config
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Xcp_2841
       Reason: the issue shall be avoided in actual running environment and configs
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Xcp_0750
       Reason: It may lead to memory alignment and filling issues, byte order issues, and type safety issues.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Xcp_0759
       Reason: It may lead to memory alignment and filling issues, byte order issues, and type safety issues.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Xcp_TYPE_CAST_001
       Reason: Global variables are used in the code.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Xcp_0306
       Reason: The code needs to convert integer Pointers into Pointers pointing to objects.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Xcp_0309
       Reason: The code is designed so.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Xcp_0326
       Reason: Forced conversions of void Pointers and Pointers of other types will be used in the code.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_MTR_Xcp_STMIF
       Reason: Functions handle specific tasks in the behavior of the entire component.
     Task has different scenarios that need to be covered, which depends on local conditions - this
     leads to deep nesting of the control structure.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_MTR_Xcp_STCYC
       Reason: Functionality is not separated into subfunctions because there are higher requirements for minimizing the
     stack and applying it to runtime use of the code.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_MTR_Xcp_STPTH
       Reason: The functions were not separated into sub-functions because there were higher requirements for
     minimizing the stack and applying them to the runtime usage of the code
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Xcp_4391
       Reason: In the code, it is necessary to convert a small range of unsigned integers into a larger range of
     unsigned integers.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Xcp_4397
       Reason: The code is designed so
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Xcp_4399
       Reason: The code is designed so
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Xcp_2001
       Reason: The code is designed so
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Xcp_2015
       Reason: The code is designed so
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_MTR_Xcp_STM19
       Reason: In principle, a function is not allowed to have multiple exit points,
     but it can help improve code performance in special circumstances.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Xcp_3305
       Reason: The code is designed so
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Xcp_0310
       Reason: Compatible with different types.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Xcp_3472
       Reason: Macro definitions for easy reuse.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Xcp_0722
       Reason: Enum constant not explicitly initialized.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Xcp_1338
       Reason: The parameter is an in/out parameter, and is intended to be modified.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Xcp_3469
       Reason: A function should be used in preference to a function-like macro where they are interchangeable.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Xcp_4558
       Reason: Boolean types are used on the right side of logical expressions.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Xcp_3223
       Reason: Static variables need to be defined and used within the function, and there is no need for
     global declaration.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Xcp_1502
       Reason: Configuration variables design needs.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Xcp_3408
       Reason: There is no declaration before the definition.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
+
+    \li VL_Xcp_1752
+      Reason: The array is declared in the header file of the module, but the definition is generated in the
+        configuration file, and since the generation condition of the array definition cannot be defined in the
+        header file, the declaration of the array is saved in the header file.
+      Risk: No risk.
+      Prevention: None.
+
+    \li VL_Xcp_1512
+      Reason: Rte-generated headers and module headers may contain the same declaration for the same
+        function, so they are compatible with each other.
+      Risk: No risk.
+      Prevention: None.
+
+    \li VL_Xcp_1501
+      Reason: Whether a function is used or not depends on the generated macro definition.
+      Risk: No risk.
+      Prevention: None.
+
+    \li VL_MTR_Xcp_STCAL
+      Reason : The standard compliance vote was higher than the measurement threshold. In addition, a typical way to
+        reduce STCAL is to deepen function nesting, which increases call stack usage and runtime.
+      Risk : Due to fanning out over many functions, comprehensibility and testability can become too complex.
+      Prevention : Design and code review and clear structure and comment code.
+
+    \li VL_Xcp_1505
+      Reason: The macro definition generated by the configuration determines whether the function will be used.
+      Risk: No risk.
+      Prevention: None.
+
+    \li VL_Xcp_1712
+      Reason: The identifier of the module is generated dynamically by the configuration, and the first 64 characters of
+        different identifiers may be the same, because the first 64 characters have some representative meaning.
+      Risk: No risk.
+      Prevention: None.
+
+    \li VL_Xcp_2911
+      Reason: The 16-bit Crc algorithm is required, and the actual usage depends on the implementation.
+      Risk: No risk.
+      Prevention: None.
+
+    \li VL_Xcp_1500
+      Reason: Whether to use it depends on the configuration.
+      Risk: No risk.
+      Prevention: None.
 
 */
 
@@ -346,7 +391,7 @@
 
 /* ================================================ type definitions ================================================ */
 typedef Xcp_PbConfigType Xcp_ConfigType;
-typedef struct Xcp_MeaAddrCheckTag
+typedef struct
 {
     uint32 MeaAddr;
     uint32 MeaLen;
@@ -359,7 +404,7 @@ typedef enum
 } Xcp_TransmissionModeType;
 
 #if (XCP_GET_ID == STD_ON)
-typedef struct Xcp_IdInfoTag
+typedef struct
 {
     uint8        type;
     uint8        mode;
@@ -369,12 +414,12 @@ typedef struct Xcp_IdInfoTag
 #endif
 
 #if (XCP_PL_DAQ == (XCP_PL_DAQ & XCP_RESOURCE))
-typedef struct XcpDtoTag
+typedef struct
 {
     uint32 LowLayerPduId;
 } XcpDtoType;
 
-typedef struct Xcp_EntryTag
+typedef struct
 {
     uint8       XcpOdtEntryBitOffset; /*now dont support*/
     uint8       XcpOdtEntryNumber;
@@ -382,14 +427,14 @@ typedef struct Xcp_EntryTag
     Xcp_AGType* XcpOdtEntryAddr;
 } Xcp_EntryType;
 
-typedef struct Xcp_OdtTag
+typedef struct
 {
     uint8          XcpOdtEntryCount;
     Xcp_EntryType* XcpOdtEntry;
 } Xcp_OdtType;
 
 #if (XCP_DAQ_STATIC == XCP_DAQ_CONFIG_TYPE)
-typedef struct Xcp_DaqListConfigTag
+typedef struct
 {
     uint16               XcpFirstPid;
     Xcp_DaqDirectionType XcpDaqListType;
@@ -400,7 +445,7 @@ typedef struct Xcp_DaqListConfigTag
 } Xcp_DaqListConfigType;
 #endif
 
-typedef struct Xcp_EvChConfigTag
+typedef struct
 {
     const uint8*         XcpEvChNamePtr;
     uint8                XcpEvChNameLength;
@@ -419,7 +464,7 @@ typedef struct Xcp_EvChConfigTag
 } Xcp_EvChConfigType;
 #endif
 
-typedef struct Xcp_PCConfigTag
+typedef struct
 {
 #if (XCP_PL_DAQ == (XCP_PL_DAQ & XCP_RESOURCE))
 #if (XCP_DAQ_STATIC == XCP_DAQ_CONFIG_TYPE)
@@ -435,7 +480,7 @@ typedef struct Xcp_PCConfigTag
 } Xcp_PCConfigType;
 
 #if (XCP_PL_CAL == (XCP_PL_CAL & XCP_RESOURCE))
-typedef struct Xcp_SegmentInfoTag
+typedef struct
 {
     uint32 size;
     uint32 wpStartAddr;
@@ -449,7 +494,7 @@ typedef struct Xcp_SegmentInfoTag
 #endif /* XCP_PL_CAL == XCP_PL_CAL&XCP_RESOURCE */
 
 #if (XCP_PL_CAL == (XCP_PL_CAL & XCP_RESOURCE))
-typedef struct Xcp_SegmentCfgTag
+typedef struct
 {
     uint8                      maxSegNum;
     const Xcp_SegmentInfoType* segInfoPtr;
@@ -458,7 +503,7 @@ typedef struct Xcp_SegmentCfgTag
 
 #if (XCP_PL_PGM == (XCP_PL_PGM & XCP_RESOURCE))
 /* xcp sector information,used in GET_SECTOR_INFO command */
-typedef struct Xcp_SectorInfoTag
+typedef struct
 {
     const uint8* sectorNamePtr;       /**< SECTOR_NAME */
     uint8        sectorNameLength;    /**< SECTOR_NAME length */
@@ -472,7 +517,7 @@ typedef struct Xcp_SectorInfoTag
     uint8        sectorPgmMethod;     /**< PROGRAM_METHOD */
 } Xcp_SectorInfoType;
 
-typedef struct Xcp_FlsFuncPtrTag
+typedef struct
 {
     Std_ReturnType (
         *flsWrite)(Xcp_FlsAddressType TargetAddress, const uint8* SourceAddressPtr, Xcp_FlsLengthType Length);
@@ -487,7 +532,9 @@ typedef struct Xcp_FlsFuncPtrTag
 /* =========================================== external data declarations =========================================== */
 /**********Post-Build configuration parameter declarations*************/
 #if (XCP_PL_DAQ == (XCP_PL_DAQ & XCP_RESOURCE))
+/* PRQA S 1752,1500 ++ */ /* VL_Xcp_1752,VL_Xcp_1500 */
 extern const Xcp_PduType Xcp_Daq_Pdu[XCP_MAX_DAQ];
+/* PRQA S 1752,1500 -- */
 #endif
 
 extern const Xcp_PCConfigType Xcp_PConfig;

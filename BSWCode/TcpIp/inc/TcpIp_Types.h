@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -386,6 +386,22 @@ typedef uint8 TcpIp_ParamIdType;
  * parameter ID for VLAN
  */
 #define TCPIP_PARAMID_SOCKET_VLAN ((TcpIp_ParamIdType)0x81u)
+/**
+ * @}
+ */
+
+/**
+ * @name TcpIp_ArpEntryStateType
+ * @{
+ * @brief state of ARP entry.
+ */
+typedef uint8 TcpIp_ArpEntryStateType;
+/** static arp entry. */
+#define TCPIP_ARP_ENTRY_STATIC ((TcpIp_ArpEntryStateType)(0x00u))
+/** valid arp entry. */
+#define TCPIP_ARP_ENTRY_VALID ((TcpIp_ArpEntryStateType)(0x01u))
+/** stale arp entry. */
+#define TCPIP_ARP_ENTRY_STALE ((TcpIp_ArpEntryStateType)(0x02u))
 /**
  * @}
  */

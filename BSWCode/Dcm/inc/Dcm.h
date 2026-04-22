@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -57,7 +57,41 @@
  *            2025-10-16  li.feng      CPT-15742.fix Sending a DID that does not support the session with 2c 01 responds
  *                                     with NRC10.
  *                                     CPT-15677.The 2E service request for RANGDID causes a crash.
-==================================================================================================================== */
+ *            2025-10-16  li.feng      CPT-16098.When the PDID requested by the 2A service is a dynamic DID that is not
+ *                                     defined, the DCM is expected to return 7F 2A 31.
+ *            2025-10-17  xue.han      CPD-84863,Support dynamically adjust the shared RxTx buffer size based on request
+ *                                     length.
+ *            2025-10-24  li.feng      CPT-16000,DID config read failure from NVM, return NRC22.
+ *            2025-10-27  li.feng      CPT-15522.When 2A 04 DID stops, periodic transmission does not cease.
+ *            2025-10-31  li.feng      CPT-15521.clearing DDDID with 2C 04, it was not removed from the dispatch table.
+ *            2025-11-04  li.feng      CPT-15516.Add reading of pDID to 0x2A.
+ *            2025-11-05  li.feng      CPT-16223,Abnormal Processing of Service 28 and Service 22
+ *            2025-11-07  li.feng      CPT-16293.Issue with Dcm_GetVin Implementation
+ *            2025-11-10  li.feng      CPT-15697.Positive Response Suppression Configuration
+ *            2025-11-12  li.feng      CPT-16313.No ECU control recovery in default session.
+ *            2025-11-18  li.feng      CPT-16313.fix Code is missing in Dcm_Externals.h.
+ *            2025-11-28  li.feng      CPT-16506,After executing the boot via 10 02, the NRC 0x78 fails to be
+ *                                     transmitted continuously.
+ *            2025-12-17  li.feng      CPT-17088.fix NRC 31 is returned when requesting to read NVM data.
+ *            2025-12-18  li.feng      CPT-16947,CPT-17064.19 04/06 Read non-existent number error.
+ *            2025-12-22  li.feng      CPT-17021.Fix: Compilation error (DCM_DDDID_CHECK_SOURCE unconfigured + 2A/2C
+ *                                     enabled)
+ *            2025-12-23  li.feng      CPT-17010.Fix:2E Variable DID Length Check Error
+ *            2025-12-25  li.feng      CPT-17304.Fix: Positive Response Suppression Issue.
+ *            2025-12-30  li.feng      CPT-17424.Fix: Request for service 0x2A failed due to incorrect transmission
+ *                                                    cycle.
+ *            2025-02-05  li.feng      CPT-18017.Fix: When the Service 22 reads multiple DIDs (Data Identifiers), among
+ *                                               which some are configured with USE_BLOCK_ID, the total length of the
+ *                                               response is incorrect.
+ *            2026-02-12  li.feng      CPTASK-462.Fix: Optimize the execution time of Dcm_SatelliteMainFunction.
+ *  V03.00.03 2026-04-04  tao.yu       CPT-18414,fix CommunicationMode calculate error in 04 and 05 subfunction of 0x28
+ *                                     CPT-18344, fix NRC 33 in the 0x22 service
+ *                                     CPT-18415, fix NRC 10 in the 0x22 service
+ *            2026-04-05  tao.yu       CPT-18416, Fix the abnormal session state when the repair agreement is preempted.
+ *                                     CPT-18417, fix error process in the 0x04 service
+ *
+ *====================================================================================================================
+ */
 #ifndef DCM_H_
 #define DCM_H_
 
@@ -172,16 +206,6 @@
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
 
-    \li VL_Dcm_3451
-      Reason: multiple declaration is necessary for RTE
-      Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
-
-    \li VL_Dcm_3449
-      Reason: multiple declaration is necessary for RTE
-      Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
-
     \li VL_Dcm_3472
       Reason: function-like macros are necessary
       Risk: No risk.
@@ -290,11 +314,6 @@
       Risk: Understandability and testability become overly complex
       Prevention: Design and code review.
 
-    \li VL_Dcm_1536
-      Reason: The tag '%1s' is declared but not used within this project.
-      Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
-
     \li VL_Dcm_3415
       Reason: Right hand operand of '&&' or '||' is an expression with persistent side effects.
       Risk: No risk.
@@ -335,10 +354,6 @@
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
 
-    \li VL_Dcm_1513
-      Reason: Identifier '${name}' with external linkage has separate non-defining declarations in more than one
-  location. Risk: No risk. Prevention: Functional reliability guaranteed by design.
-
     \li VL_Dcm_1712
       Reason: xternal identifiers have the same first '${n}' characters '${name}'.
       Risk: No risk.
@@ -348,8 +363,34 @@
       Reason: Configuration variables design needs
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
+
+    \li VL_Dcm_5209
+      Reason: The module ensures the correctness that unsigned long is used.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_Dcm_4443
+      Reason: A non-constant expression of 'essentially unsigned' type (%1s).
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_Dcm_2985
+      Reason: This operation is redundant. The value of the result is always that of the left-hand operand.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_Dcm_2982
+      Reason: The operation is not redundant, because it must be emptied.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_Dcm_4391
+      Reason: In the code, it is necessary to convert a small range of unsigned integers into a larger range of
+    unsigned integers.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
 */
-/* PRQA S 1271, 3451, 3449 EOF */ /* VL_Dcm_1271, VL_Dcm_3451, VL_Dcm_3449 */
+/* PRQA S 1271, 3451, 3449 EOF */ /* VL_Dcm_1271, VL_QAC_MultiDeclaration, VL_QAC_MultiDeclaration */
 /* =================================================== inclusions =================================================== */
 #include "ComStack_Cfg.h"
 #include "ComStack_Types.h"
@@ -375,9 +416,9 @@ extern "C" {
 #define DCM_AR_RELEASE_MAJOR_VERSION    (4u) /**< Dcm AR Release Major Version */
 #define DCM_AR_RELEASE_MINOR_VERSION    (9u) /**< Dcm AR Release Minor Version */
 #define DCM_AR_RELEASE_REVISION_VERSION (0u) /**< Dcm AR Release Patch Version */
-#define DCM_SW_MAJOR_VERSION            2U   /**<Software major version */
-#define DCM_SW_MINOR_VERSION            2U   /**<Software minor version */
-#define DCM_SW_PATCH_VERSION            1U   /**<Software patch version*/
+#define DCM_SW_MAJOR_VERSION            3U   /**<Software major version */
+#define DCM_SW_MINOR_VERSION            0U   /**<Software minor version */
+#define DCM_SW_PATCH_VERSION            3U   /**<Software patch version*/
 #define DCM_VENDOR_ID                   62U  /**<AUTOSAR vendor ID (assigned by AUTOSAR) */
 #define DCM_MODULE_ID                   53U  /**<Module ID for Diagnostic */
 #define DCM_INSTANCE_ID                 0u   /**<Instance ID */
@@ -521,7 +562,7 @@ typedef enum
  * @brief Used in Dcm_SetProgConditions() to allow the integrator to store relevant information prior to jumping to
  * bootloader jump due to ECUReset request.
  */
-typedef struct ProgConditionsType /* PRQA S 1536  */ /* VL_Dcm_1536 */
+typedef struct
 {
     uint16 ConnectionId;  /**< Unique id of the connection on which the request has been received @range 0..65535*/
     uint16 TesterAddress; /**< Source address of the received request if meta data is enabled, otherwise the value as
@@ -553,7 +594,7 @@ typedef uint32 Dcm_MsgLenType;
 /**
  * @brief Additional information on message request.
  */
-typedef struct MsgAddInfoType /* PRQA S 1536  */ /* VL_Dcm_1536 */
+typedef struct
 {
     unsigned int reqType             : 1; /**< (Pos LSB+0) 0 = physical request 1 = functional request @range 0..1*/
     unsigned int suppressPosResponse : 1; /**< Position LSB+1 0 = no (do not suppress) 1 = yes (no positive response
@@ -570,7 +611,7 @@ typedef uint8 Dcm_IdContextType;
  * @brief This data structure contains all information which is necessary to process a diagnostic message from request
  * to response and response confirmation.
  */
-typedef struct MsgContextType /* PRQA S 1536  */ /* VL_Dcm_1536 */
+typedef struct
 {
     Dcm_MsgType reqData; /**< Request data, starting directly after service identifier (which is not part of this data)
                             @range NA*/
@@ -696,7 +737,7 @@ void Dcm_BndMWriteBlockFinish(BndM_BlockIdType BlockId, BndM_ResultType result);
 Std_ReturnType Dcm_SetDeauthenticatedRole(uint16 connectionId, const Dcm_AuthenticationRoleType deauthenticatedRole);
 #endif
 
-/* PRQA S 1512,1513 ++ */ /* VL_Dcm_1512,VL_Dcm_1513 */
+/* PRQA S 1512,1513 ++ */ /* VL_Dcm_1512,VL_QAC_MultiDeclaration */
 /**
  * @brief         This function provides the active security level value.
  * @param[out]    SecLevel : Active Security Level value Conversion formula to calculate SecurityLevel out of tester

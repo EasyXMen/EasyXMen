@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -92,6 +92,7 @@ DCM_LOCAL Std_ReturnType Dcm_OBD0x01_ReadAvailabilityPid(
     Dcm_MsgLenType* BufSize,
     uint8*          DestBuffer);
 
+#if (DCM_PID_NUM > 0u)
 /**
  * @brief         read Pid Data
  * @param[in]     pidIndex   : input pid configuration index
@@ -127,6 +128,7 @@ DCM_LOCAL Std_ReturnType
  */
 DCM_LOCAL Std_ReturnType
     Dcm_OBD0x01_ProcessPidData(const Dcm_DspPidType* DcmDspPidPtr, Dcm_MsgLenType* BufSize, uint8* DestBuffer);
+#endif
 #endif
 
 #if ((STD_ON == DCM_OBD_0X6) || ((STD_ON == DCM_UDS_0X22) && (STD_ON == DCM_OBD_DID_MIRROR)))
@@ -722,10 +724,11 @@ DCM_LOCAL Std_ReturnType Dcm_OBD0x01_ReadAvailabilityPid(
 #endif
 
 #if ((STD_ON == DCM_OBD_0X1) || ((STD_ON == DCM_UDS_0X22) && (STD_ON == DCM_OBD_DID_MIRROR)))
+#if (DCM_PID_NUM > 0u)
 #define DCM_START_SEC_CODE
 #include "Dcm_MemMap.h"
-DCM_LOCAL Std_ReturnType
-    Dcm_OBD0x01_ReadPidData(uint8 pidIndex, uint8* mixPid, Dcm_MsgLenType* BufSize, uint8* DestBuffer)
+DCM_LOCAL
+Std_ReturnType Dcm_OBD0x01_ReadPidData(uint8 pidIndex, uint8* mixPid, Dcm_MsgLenType* BufSize, uint8* DestBuffer)
 {
     Std_ReturnType result = E_OK;
 
@@ -814,12 +817,13 @@ DCM_LOCAL Std_ReturnType
 #define DCM_STOP_SEC_CODE
 #include "Dcm_MemMap.h"
 #endif
+#endif
 
 #if ((STD_ON == DCM_OBD_0X6) || ((STD_ON == DCM_UDS_0X22) && (STD_ON == DCM_OBD_DID_MIRROR)))
 #define DCM_START_SEC_CODE
 #include "Dcm_MemMap.h"
-DCM_LOCAL Std_ReturnType
-    Dcm_OBD0x06_ReadAvailabilityMid(uint8 mid, uint8* mixMid, Dcm_MsgLenType* BufSize, uint8* DestBuffer)
+DCM_LOCAL
+Std_ReturnType Dcm_OBD0x06_ReadAvailabilityMid(uint8 mid, uint8* mixMid, Dcm_MsgLenType* BufSize, uint8* DestBuffer)
 {
     Std_ReturnType result = E_OK;
     /* mixed availability and regular tid, not allowed */

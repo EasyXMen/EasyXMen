@@ -1,6 +1,6 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
- * SPDX-License-Identifier: LGPL-2.1-only-with-exception OR  LicenseRef-Commercial-License
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
+ * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
  * GNU Lesser General Public License as published by the Free Software Foundation; version 2.1.
@@ -10,7 +10,8 @@
  * You should have received a copy of the GNU Lesser General Public License along with this library;
  * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  * or see <https://www.gnu.org/licenses/>.
- *
+ */
+/*
  ********************************************************************************
  **                                                                            **
  **  FILENAME    :  Os.h                                                       **
@@ -431,6 +432,11 @@
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
 
+      \li VL_Os_1504
+      Reason: Special code design of the Os.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
       \li VL_Os_0286
       Reason: Special code design of the Os.
       Risk: No risk.
@@ -581,6 +587,21 @@
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
 
+      \li VL_Os_2985
+      Reason: The OS module ensures that the left-hand operand is correct.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+      \li VL_Os_AutosarBool
+      Reason: The Autosar specification defines the boolean type as an unsigned char.
+      Risk: The behavior of Boolean logic does not align with expectations.
+      Prevention: Ensure normal functionality through unit testing.
+
+      \li VL_Os_1520
+      Reason: The OS module ensures the correctness that the functions are indirectly recursive.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
       \li VL_Os_1006
       Reason: Code may expand under certain architectures.
       Risk: No risk.
@@ -625,6 +646,81 @@
       \li VL_Os_1500
       Reason:The object is declared but is not used within this project.
       Risk:No risk
+      Prevention: Functional reliability guaranteed by design.
+
+      \li VL_Os_2982
+      Reason: Control variables are used to reflect the current status, the value of this object might be never used before being modified.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design. 
+
+      \li VL_Os_3200
+      Reason: The return value is not used because it is not needed in the current scenario.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+      \li VL_Os_2813
+      Reason: The OS logic code ensures that pointer dereferencing will not result in a null pointer situation.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+      \li VL_Os_4152
+      Reason: The standard interface specified by AUTOSAR.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+      \li VL_Os_4153
+      Reason: Naming by users may lead to confusion.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+      \li VL_Os_4391
+      Reason: A composite expression of essentially unsigned type is being cast to a wider unsigned type.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+      \li VL_Os_1712
+      Reason:The OS module guarantees the correctness that external identifiers have some the same on characters.
+      Risk:No risk
+      Prevention: Functional reliability guaranteed by design.
+
+      \li VL_Os_0499
+      Reason: The OS service protection module ensures the correctness of shift operator operations.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+      \li VL_Os_0326
+      Reason: The cast of a null pointer to an integer type is a requirement of the code design.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+      \li VL_Os_3120
+      Reason: Special code design of the Os.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+      \li VL_Os_1531
+      Reason: Special code design of the Os.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+      \li VL_Os_4399
+      Reason: An expression resulting from a ~ or << operation, even when cast to a wider type, will not cause data overflow.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+      \li VL_Os_1756
+      Reason: Function identifiers and parameter identifiers can be the same, but these two external identifiers do not cause functional errors or confusion.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+      \li VL_Os_3315
+      Reason: This switch statement is for compatibility with multi-core scenarios, therefore, in multi-core contexts, this switch statement is not a redundant construct.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+      \li VL_MTR_Os_CONF
+      Reason: For certain special files that contain little or no code, it is acceptable to reduce or omit extraneous comments.
+      Risk: Reduced code readability
       Prevention: Functional reliability guaranteed by design.
 
       \li VL_MTR_Os_STPTH
@@ -688,6 +784,8 @@
 /*=======[I N C L U D E S]====================================================*/
 #include "Os_Err.h"
 #include "Os_CfgData.h"
+/* PRQA S 1753 EOF */ /* VL_Os_1753 */
+/* PRQA S 1501 EOF */ /* VL_Os_1501 */
 
 /*=======[M A C R O S]========================================================*/
 #define OS_VENDOR_ID 62
@@ -790,7 +888,9 @@ extern StatusType ChainTask(TaskType TaskID);
  * @reentrant       Non Reentrant
  * @trace           CPD-58356
  */
+/* PRQA S 1756 ++ */ /* VL_Os_1756 */
 extern StatusType Schedule(void);
+/* PRQA S 1756 -- */
 
 /**
  * @brief           GetTaskID  returns the information about the TaskID of
@@ -973,9 +1073,9 @@ extern StatusType GetEvent(TaskType TaskID, EventMaskRefType Event);
  * @reentrant       Non Reentrant
  * @trace           CPD-58314
  */
-/* PRQA S 3209 ++ */ /* VL_Os_UserApi  */
+/* PRQA S 3209, 3208 ++ */ /* VL_Os_UserApi, VL_Os_UserApi */
 extern StatusType WaitEvent(EventMaskType Mask);
-/* PRQA S 3209 -- */
+/* PRQA S 3209, 3208 -- */
 
 /**
  * @brief           The state of the calling task is set to waiting, must
@@ -1888,7 +1988,9 @@ extern StatusType ReadPeripheral8(AreaIdType Area, const uint8* Address, uint8* 
  * @reentrant       Non Reentrant
  * @trace           -
  */
+/* PRQA S 4152 ++ */ /* VL_Os_4152 */
 extern StatusType ReadPeripheral16(AreaIdType Area, const uint16* Address, uint16* ReadValue);
+/* PRQA S 4152 -- */
 
 /**
  * @brief           This service returns the content of a given memory location (<Address>).
@@ -1939,7 +2041,9 @@ extern StatusType WritePeripheral8(AreaIdType Area, uint8* Address, uint8 WriteV
  * @reentrant       Non Reentrant
  * @trace           -
  */
+/* PRQA S 4152 ++ */ /* VL_Os_4152 */
 extern StatusType WritePeripheral16(AreaIdType Area, uint16* Address, uint16 WriteValue);
+/* PRQA S 4152 -- */
 
 /**
  * @brief           This service writes the <value> to a given memory location (<memory address>).
@@ -1994,7 +2098,9 @@ extern StatusType ModifyPeripheral8(AreaIdType Area, uint8* Address, uint8 Clear
  * @reentrant       Non Reentrant
  * @trace           -
  */
+/* PRQA S 4152 ++ */ /* VL_Os_4152 */
 extern StatusType ModifyPeripheral16(AreaIdType Area, uint16* Address, uint16 Clearmask, uint16 Setmask);
+/* PRQA S 4152 -- */
 
 /**
  * @brief           This service modifies a given memory location (<memory address>) with the

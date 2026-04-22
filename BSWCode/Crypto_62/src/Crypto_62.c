@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -27,7 +27,7 @@
 #include "CryIf_Cbk.h"
 
 #include "Crypto_62_Internal.h"
-/* PRQA S 1503,1532 ++ */ /* VL_QAC_Crypto */
+/* PRQA S 1503,1532 ++ */ /* VL_Crypto_62_General */
 
 /* ===================================================== macros ===================================================== */
 #define CRYPTO_H_AR_MAJOR_VERSION 4U
@@ -102,7 +102,7 @@ void Crypto_62_Init(const Crypto_62_ConfigType* configPtr)
             Crypto_62_ClearStoredJob(objectindex);
 
 #if (CRYPTO_JOB_QUEUING == STD_ON)
-            /* PRQA S 1252 ++ */ /* VL_QAC_Crypto */
+            /* PRQA S 1252 ++ */ /* VL_Crypto_62_General */
             for (index = 0U; index < CRYPTO_MAX_QUEUE_SIZE; index++)
             /* PRQA S 1252 -- */
             {
@@ -120,7 +120,7 @@ void Crypto_62_Init(const Crypto_62_ConfigType* configPtr)
 #endif
         }
 #if (CRYPTO_MAXKEY_CONFIGURED > 0)
-        /* PRQA S 1252 ++ */ /* VL_QAC_Crypto */
+        /* PRQA S 1252 ++ */ /* VL_Crypto_62_General */
         for (Keyindex = 0U; Keyindex < CRYPTO_MAXKEY_CONFIGURED; Keyindex++)
         /* PRQA S 1252 -- */
         {
@@ -263,7 +263,7 @@ Std_ReturnType Crypto_62_ProcessJob(uint32 objectId, Crypto_JobType* job)
                     || (CRYPTO_OPERATIONMODE_SINGLECALL == operationMode))
                 {
 #if (STD_ON == CRYPTO_JOB_QUEUING)
-                    /* PRQA S 1252 ++ */ /* VL_QAC_Crypto */
+                    /* PRQA S 1252 ++ */ /* VL_Crypto_62_General */
                     if (Crypto_62_QueueFilledSize[objectId] < CRYPTO_MAX_QUEUE_SIZE)
                     /* PRQA S 1252 -- */
                     {
@@ -316,7 +316,7 @@ Std_ReturnType Crypto_62_ProcessJob(uint32 objectId, Crypto_JobType* job)
 /***************************************************************************************/
 Std_ReturnType Crypto_62_CancelJob(uint32 objectId, Crypto_JobType* job)
 {
-    Std_ReturnType status = E_OK; /* PRQA S 2981  */ /* VL_QAC_Crypto */
+    Std_ReturnType status = E_OK; /* PRQA S 2981  */ /* VL_Crypto_62_General */
 #if (CRYPTO_DEV_ERROR_DETECT == STD_ON)
     /*@req SWS_Crypto_00123*/
     if (CRYPTO_DRIVER_UNINIT == Crypto_62_DriverStatus)
@@ -353,7 +353,7 @@ Std_ReturnType Crypto_62_CancelJob(uint32 objectId, Crypto_JobType* job)
             {
                 if (&Crypto_62_StoredJob[objectId] == job)
                 {
-                    if (0U < Crypto_62_QueueFilledSize[objectId]) /* PRQA S 1252  */ /* VL_QAC_Crypto */
+                    if (0U < Crypto_62_QueueFilledSize[objectId]) /* PRQA S 1252  */ /* VL_Crypto_62_General */
                     {
                         Crypto_62_StoredJob[objectId] = Crypto_62_JobInQueue[objectId][0];
                         (void)Crypto_62_CancelQueuedJob(objectId, &Crypto_62_JobInQueue[objectId][0]);
@@ -408,12 +408,13 @@ is called cyclically to process queued jobs.
 /***************************************************************************************/
 void Crypto_62_MainFunction(void)
 {
-    Std_ReturnType           status = E_NOT_OK; /* PRQA S 2981 */ /* VL_QAC_Crypto */
+    Std_ReturnType           status = E_NOT_OK; /* PRQA S 2981 */ /* VL_Crypto_62_General */
     uint8                    objectId;
     Crypto_OperationModeType operationMode;
-    uint32                   cryptokeyId;
+
 #if (CRYPTO_MAXNVBLOCK_CONFIGURED > 0)
-    /* PRQA S 1252 ++ */ /* VL_QAC_Crypto */
+    uint32 cryptokeyId;
+    /* PRQA S 1252 ++ */ /* VL_Crypto_62_General */
     for (cryptokeyId = 0U; cryptokeyId < CRYPTO_MAXKEY_CONFIGURED; cryptokeyId++)
     /* PRQA S 1252 -- */
     {
@@ -422,7 +423,7 @@ void Crypto_62_MainFunction(void)
             && (Crypto_62_Key_RetryCount[Crypto_62_Key[cryptokeyId].CryptoKeyNvBlockRef->Crypto_62_NvmBlockId]
                 < Crypto_62_Key[cryptokeyId].CryptoKeyNvBlockRef->CryptoNvBlockFailedRetries))
         {
-            /* PRQA S 0314 ++ */ /* VL_QAC_Crypto */
+            /* PRQA S 0314 ++ */ /* VL_Crypto_62_General */
             status = NvM_WriteBlock(
                 Crypto_62_Key[cryptokeyId].CryptoKeyNvBlockRef->Crypto_62_NvmBlockId,
                 (void*)&Crypto_62_Key_Store0[0]);
@@ -447,11 +448,11 @@ void Crypto_62_MainFunction(void)
             /* PRQA S 2982 -- */
         }
 #if (STD_ON == CRYPTO_JOB_QUEUING)
-        /* PRQA S 1252 ++ */ /* VL_QAC_Crypto */
+        /* PRQA S 1252 ++ */ /* VL_Crypto_62_General */
         while (Crypto_62_QueueFilledSize[objectId] > 0U)
         /* PRQA S 1252 -- */
         {
-            /* PRQA S 2982 ++ */ /* VL_QAC_Crypto */
+            /* PRQA S 2982 ++ */ /* VL_Crypto_62_General */
             status = Crypto_62_QueueOutJob(objectId, &Crypto_62_StoredJob[objectId]);
             if (E_OK == status)
             {

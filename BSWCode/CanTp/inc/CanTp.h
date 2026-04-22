@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -43,6 +43,11 @@
  *  v3.0.2  2025-09-16    xue.han      CPT-15622,fix SF_DL valid range check when received SF
  *                                     CPT-14950,fix FF_DL min check
  *                                     CPT-15628,fix BS calculate
+ *                                     CPT-16089,fix CanTp_GetRxCurrentBs()
+ *  v3.0.3  2025-10-27    xue.han      CPD-84862,Optimization of memory space
+ *                        xue.han      CPT-16401,fix FF_DL overflow risk by checking CANTP_PDU_LENGTH_TYPE_MAX
+ *                                     CPT-16371:exchanged SA and TA processes; CPT-17197: added const qualifiers.
+ *  v3.0.4  2026-01-28    chao.sun     CPTASK-129,update CanTp_GetRxNSduCfg()
  ==================================================================================================================== */
 /*===================================================================================================================*/
 /* ================================================ misar justifications ============================================ */
@@ -175,11 +180,6 @@
       Risk: Understandability and testability become overly complex
       Prevention: Design and code review, and have a clear structure and annotated code.
 
-    \li VL_CanTp_1536
-      Reason: The tag '%1s' is declared but not used within this project.
-      Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
-
     \li VL_CanTp_3415
       Reason: Right hand operand of '&&' or '||' is an expression with persistent side effects.
       Risk: No risk.
@@ -240,12 +240,14 @@
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
 
-    \li VL_CanTp_1513
-      Reason: Identifier '${name}' with external linkage has separate non-defining declarations in more than one
-  location. Risk: No risk. Prevention: Functional reliability guaranteed by design.
-
     \li VL_CanTp_0499
       Reason: The arithmetic is safe.
+      Risk: No risk.
+      Prevention: Ensure that the project is working properly through unit testing.
+
+    \li VL_CanTp_4464
+      Reason: A constant expression of 'essentially unsigned' type (%1s) is being c
+              onverted to narrower unsigned type, '%2s' on assignment.
       Risk: No risk.
       Prevention: Ensure that the project is working properly through unit testing.
  */
@@ -288,7 +290,7 @@ extern "C" {
  */
 #define CANTP_SW_MAJOR_VERSION 3U /**< Software Major version */
 #define CANTP_SW_MINOR_VERSION 0U /**< Software Minor version */
-#define CANTP_SW_PATCH_VERSION 2U /**< Software Patch version */
+#define CANTP_SW_PATCH_VERSION 4U /**< Software Patch version */
 /** @} */
 /* ===================================================== macros ===================================================== */
 /** This macro definition indicates the data copy, setup, and comparison of whether or not the library functions
@@ -361,7 +363,7 @@ extern void CanTp_GetVersionInfo(Std_VersionInfoType* versioninfo);
  */
 extern void CanTp_Shutdown(void);
 
-/* PRQA S 1512,1513 ++ */ /* VL_CanTp_1512,VL_CanTp_1513 */
+/* PRQA S 1512,1513 ++ */ /* VL_CanTp_1512,VL_QAC_MultiDeclaration */
 /**
  * @brief         The transmission of segmented or unsegmented message is requested.
  * @param[in]     TxPduId      : Identification of the transmitted N-PDU.
@@ -389,6 +391,7 @@ extern Std_ReturnType CanTp_Transmit(PduIdType TxPduId, const PduInfoType* PduIn
 extern Std_ReturnType CanTp_CancelTransmit(PduIdType TxPduId);
 #endif
 
+#if (CANTP_RC == STD_ON)
 /**
  * @brief         Requests cancellation of an ongoing reception of a PDU in a lower layer transport protocol module.
  * @param[in]     RxPduId        : Identification of the PDU to be cancelled.
@@ -400,6 +403,7 @@ extern Std_ReturnType CanTp_CancelTransmit(PduIdType TxPduId);
  * @trace       CPD-73230
  */
 extern Std_ReturnType CanTp_CancelReceive(PduIdType RxPduId);
+#endif
 /* PRQA S 1512,1513 -- */
 
 #if (CANTP_CHANGE_PARAMETER == STD_ON)

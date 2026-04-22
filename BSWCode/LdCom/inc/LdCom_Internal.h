@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -39,7 +39,7 @@ extern "C" {
 /* ===================================================== macros ===================================================== */
 /** LdCom local var or function */
 #if !defined(LDCOM_LOCAL)
-#define LDCOM_LOCAL static /* PRQA S 3414 */ /* VL_QAC_3414 */
+#define LDCOM_LOCAL static /* PRQA S 3414 */ /* VL_QAC_KeyWord */
 #endif
 
 /** LdCom inline function */

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -75,7 +75,7 @@ typedef enum
 /**
  * @brief Dcm protocol control type
  */
-typedef struct ProtocolCtrlType /* PRQA S 1536  */ /* VL_Dcm_1536 */
+typedef struct
 {
     PduIdType                    RxPduId;        /**< requested RxPduId @range NA*/
     uint16                       ConnectionId;   /**< requested mainConnectionId @range 0..65535*/
@@ -106,7 +106,7 @@ typedef struct ProtocolCtrlType /* PRQA S 1536  */ /* VL_Dcm_1536 */
 /**
  * @brief Dcm confirmation info type
  */
-typedef struct ConfirmationHandleType /* PRQA S 1536  */ /* VL_Dcm_1536 */
+typedef struct
 {
     boolean      Pending;      /**< whether there is a pending confirmation notification @range 0..1*/
     uint8        Sid;          /**< The requested service Id @range 0..255*/
@@ -118,7 +118,7 @@ typedef struct ConfirmationHandleType /* PRQA S 1536  */ /* VL_Dcm_1536 */
 /**
  * @brief Dcm session control unit
  */
-typedef struct SessionCtrlType /* PRQA S 1536  */ /* VL_Dcm_1536 */
+typedef struct
 {
     uint8 CurrentSessionProtocolId; /**< the protocol id that is current holding the non-default session @range 0..255*/
     Dcm_SesCtrlType CurrentSession; /**< current session id @range NA*/
@@ -130,7 +130,7 @@ typedef struct SessionCtrlType /* PRQA S 1536  */ /* VL_Dcm_1536 */
 /**
  * @brief Dcm security control unit
  */
-typedef struct SecurityCtrlType /* PRQA S 1536  */ /* VL_Dcm_1536 */
+typedef struct
 {
     uint32 SecurityTimer;  /**< the current security timer for delayed request @range 0..0xFFFFFFFF*/
     uint8  AttemptCounter; /**< current attempt counter @range 0..255*/
@@ -158,6 +158,9 @@ typedef enum
  * @brief current comm State @range NA
  */
 extern Dcm_CommStateType Dcm_CommState[DCM_MAINCONNECTION_NUM];
+
+extern boolean Dcm_RequestRejectedDueToBoot;
+extern boolean Dcm_ResRejectedDueToAFTER_RESET;
 /**
  * @brief indicates if there is pending setProgramConditions globally  @range 0..1
  */

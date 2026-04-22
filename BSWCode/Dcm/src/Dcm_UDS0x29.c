@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -257,10 +257,10 @@ DCM_LOCAL uint8 Dcm_challengeData[DCM_DSP_AUTHENTICATION_MAX_ECU_CHALLENGE_LENGT
 #include "Dcm_MemMap.h"
 #ifdef DCM_UDS_0X29_0X4
 /* ============================================ external data definitions =========================================== */
-#define DCM_START_SEC_VAR_INIT_BOOLEAN
+#define DCM_START_SEC_VAR_CLEARED_BOOLEAN
 #include "Dcm_MemMap.h"
-boolean Dcm_TransmitCertificate = FALSE;
-#define DCM_STOP_SEC_VAR_INIT_BOOLEAN
+boolean Dcm_TransmitCertificate;
+#define DCM_STOP_SEC_VAR_CLEARED_BOOLEAN
 #include "Dcm_MemMap.h"
 #endif
 #define DCM_START_SEC_VAR_CLEARED_8
@@ -470,6 +470,9 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x29_01_02_InitialHandle(
 #endif
 
 #ifdef DCM_UDS_0X29_0X3
+#if (                                                                                                                \
+    (defined DCM_AUTHENTICATION_WHITE_LIST_SERVICE_MAX_SIZE) || (defined DCM_AUTHENTICATION_WHITE_LIST_DID_MAX_SIZE) \
+    || (defined DCM_AUTHENTICATION_WHITE_LIST_RID_MAX_SIZE))
 /**
  * @brief         gets the specific lists
  * @param[in]     Dcm_KeyMCertInfo : the input cerfication info
@@ -491,6 +494,7 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x29_0x03_getlist(
     uint8*                        DataPtr,
     uint8*                        DataLength,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#endif
 #if (                                                                                                            \
     (defined DCM_AUTHENTICATION_WHITE_LIST_DID_MAX_SIZE) || (defined DCM_AUTHENTICATION_WHITE_LIST_RID_MAX_SIZE) \
     || (defined DCM_AUTHENTICATION_WHITE_LIST_SERVICE_MAX_SIZE))
@@ -1631,6 +1635,9 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x29_01_02_InitialHandle(
 #endif
 
 #ifdef DCM_UDS_0X29_0X3
+#if (                                                                                                                \
+    (defined DCM_AUTHENTICATION_WHITE_LIST_SERVICE_MAX_SIZE) || (defined DCM_AUTHENTICATION_WHITE_LIST_DID_MAX_SIZE) \
+    || (defined DCM_AUTHENTICATION_WHITE_LIST_RID_MAX_SIZE))
 /**
  * deal with subfunction 0x03, gets the specific lists
  */
@@ -1698,6 +1705,7 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x29_0x03_getlist(
     }
     return result;
 }
+#endif
 
 #if (                                                                                                            \
     (defined DCM_AUTHENTICATION_WHITE_LIST_DID_MAX_SIZE) || (defined DCM_AUTHENTICATION_WHITE_LIST_RID_MAX_SIZE) \

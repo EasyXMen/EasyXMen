@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -61,7 +61,7 @@ extern "C" {
 /**
  * @brief    Define SecOC Buffer configuration that may be used by a collection of Pdus.
  */
-typedef struct SecOC_SameBufferPduCollectionTag
+typedef struct
 {
     uint32   SecOCBufferLength;    /**< Length of same buffer. @range 0x00 ~ 0xFFFFFFFF */
     boolean* SecOCSameBufferInUse; /**< Indicate that the same buffer is in use. @range 0x00 ~ 0x01 */
@@ -70,7 +70,7 @@ typedef struct SecOC_SameBufferPduCollectionTag
 /**
  * @brief    Define strategy for handling PDUs when the received buffer overflows.
  */
-typedef enum SecOC_ReceptionOverflowStrategyTag
+typedef enum
 {
     SECOC_QUEUE,  /**< Queue the PDU. @range 0x00 */
     SECOC_REJECT, /**< Reject the PDU. @range 0x01 */
@@ -80,7 +80,7 @@ typedef enum SecOC_ReceptionOverflowStrategyTag
 /**
  * @brief    Define which authentication state is passed to the SWC.
  */
-typedef enum SecOC_VeriStatusPropModeTag
+typedef enum
 {
     SECOC_BOTH,         /**< Both True and False AuthenticationStatus is propagated to SWC. @range 0x00 */
     SECOC_FAILURE_ONLY, /**< Only False AuthenticationStatus is propagated to SWC. @range 0x01 */
@@ -90,7 +90,7 @@ typedef enum SecOC_VeriStatusPropModeTag
 /**
  * @brief    Define the type of API.
  */
-typedef enum SecOC_PduTag
+typedef enum
 {
     SECOC_IFPDU, /**< Indicate the Pdu is an I-F PDU. @range 0x00 */
     SECOC_TPPDU  /**< Indicate the Pdu is a TP PDU. @range 0x01 */
@@ -99,7 +99,7 @@ typedef enum SecOC_PduTag
 /**
  * @brief    Define the encryption and decryption process, synchronous or asynchronous.
  */
-typedef enum SecOC_CryptoProcessingTag
+typedef enum
 {
     SECOC_CRYPTO_PROCESSING_ASYNC, /**< Indicate the encryption and decryption process is asynchronous. @range 0x00 */
     SECOC_CRYPTO_PROCESSING_SYNC   /**< Indicate the encryption and decryption process is synchronous. @range 0x01 */
@@ -108,7 +108,7 @@ typedef enum SecOC_CryptoProcessingTag
 /**
  * @brief    Define the Csm primitive, MAC or SIGNATURE.
  */
-typedef enum SecOC_CsmPrimitivesTag
+typedef enum
 {
     SECOC_CSMMAC,      /**< Indicate the Csm primitive is MAC. @range 0x00 */
     SECOC_CSMSIGNATURE /**< Indicate the Csm primitive is SIGNATURE. @range 0x01 */
@@ -117,7 +117,7 @@ typedef enum SecOC_CsmPrimitivesTag
 /**
  * @brief    Define information about the Csm job.
  */
-typedef struct SecOC_CsmJobTag
+typedef struct
 {
     uint32                     SecOCJobId;                /**< Csm job identifier of SecOC. @range 0x00 ~ 0xFFFFFFFF */
     SecOC_CryptoProcessingType SecOCCryptoProcessingType; /**< Indicate the encryption and decryption process,
@@ -128,7 +128,7 @@ typedef struct SecOC_CsmJobTag
 /**
  * @brief    Define the Pdu that is received by the SecOC module from the PduR.
  */
-typedef struct SecOC_RxSecuredPduTag
+typedef struct
 {
     uint8
         SecOCAuthPduHeaderLength; /**< Indicate the length (in bytes) of the Secured I-PDU Header in the Secured I-PDU.
@@ -147,7 +147,7 @@ typedef struct SecOC_RxSecuredPduTag
 /**
  * @brief    Define the Authentic Pdu that is received by the SecOC module from the PduR.
  */
-typedef struct SecOC_RxAuthenticPduTag
+typedef struct
 {
     uint8
         SecOCAuthPduHeaderLength; /**< Indicate the length (in bytes) of the Secured I-PDU Header in the Secured I-PDU.
@@ -164,7 +164,7 @@ typedef struct SecOC_RxAuthenticPduTag
 /**
  * @brief    Define the Cryptographic Pdu that is received by the SecOC module from the PduR.
  */
-typedef struct SecOC_RxCryptographicPduTag
+typedef struct
 {
     PduIdType SecOCRxCryptographicPduId;    /**< Rx Cryptographic Pdu identifier. @range 0x00 ~ 0xFFFF */
     PduIdType SecOCRxPduRAsLowerLayerPduId; /**< Save lower layer pduid. @range 0x00 ~ 0xFFFF */
@@ -180,7 +180,7 @@ typedef struct SecOC_RxCryptographicPduTag
  *           and Cryptographic I-Pdu together by repeating a specific part (Message Linker)
  *           of the Authentic I-Pdu in the Cryptographic I-Pdu.
  */
-typedef struct SecOC_UseMessageLinkTag
+typedef struct
 {
     uint16 SecOCMessageLinkLen; /**< Length of the Message Linker inside the Authentic I-PDU in bits. @range 0x00 ~
                                    0xFFFF */
@@ -191,7 +191,7 @@ typedef struct SecOC_UseMessageLinkTag
 /**
  * @brief    Define information about the queue where PDUs reside.
  */
-typedef struct SecOC_QueueInfoTag
+typedef struct
 {
     PduLengthType pduLength; /**< Length of Pdu. @range 0x00 ~ 0xFFFF */
     PduIdType     pduId;     /**< Pdu identifier. @range 0x00 ~ 0xFFFF */
@@ -200,7 +200,7 @@ typedef struct SecOC_QueueInfoTag
 /**
  * @brief    Define the processing information of the Rx Pdu.
  */
-typedef struct SecOC_RxPduProcessingTag
+typedef struct
 {
     uint16 SecOCAuthDataFreshnessLen; /**< Indicate the length of the external authentic PDU data in bits (uint16).
                                          @range 0x00 ~ 0xFFFF */
@@ -230,7 +230,7 @@ typedef struct SecOC_RxPduProcessingTag
 /**
  * @brief    Define the processing information of the Tx Pdu.
  */
-typedef struct SecOC_TxPduProcessingTag
+typedef struct
 {
     uint16 SecOCAuthenticationBuildAttempts; /**< Indicate the number of authentication build attempts. @range 0x00 ~
                                                 0xFFFF */
@@ -252,7 +252,7 @@ typedef struct SecOC_TxPduProcessingTag
  * @brief    When Secured I-Pdu is received in Authentic I-Pdu and CryptoGraphic I-Pdu,
  *           specify all information of this Secured I-Pdu.
  */
-typedef struct SecOC_RxSecuredPduCollectionTag
+typedef struct
 {
     boolean SecOCSecuredRxPduVerification; /**< Indicate whether the signature authentication or MAC verification shall
                                               be performed on this Secured I-PDU. @range 0x00 ~ 0x01 */
@@ -265,7 +265,7 @@ typedef struct SecOC_RxSecuredPduCollectionTag
 /**
  * @brief    Define information about the two types of Rx Secured I-PDUs.
  */
-typedef struct SecOC_RxSecuredPduLayerTag
+typedef struct
 {
     const SecOC_RxSecuredPduType*
         SecOCRxSecuredPdu; /**< Point to the Pdu that is received by the SecOC module from the
@@ -279,7 +279,7 @@ typedef struct SecOC_RxSecuredPduLayerTag
  * @brief    Define an area in the Authentic I-Pdu that will be the input to the
  *           Authenticator verification algorithm.
  */
-typedef struct SecOC_RxPduSecuredAreaTag
+typedef struct
 {
     uint32 SecOCSecuredRxPduLength; /**< Indicate the length(in bytes) of the area within the Pdu which is secured.
                                        @range 0x00 ~ 0xFFFFFFFF */
@@ -290,7 +290,7 @@ typedef struct SecOC_RxPduSecuredAreaTag
 /**
  * @brief    Define the Pdu that is received by the SecOC module from the PduR.
  */
-typedef struct SecOC_RxAuthenticPduLayerTag
+typedef struct
 {
     PduIdType     SecOCRxPduRAsUpLayerId; /**< the up layer pdu id. @range 0x00 ~ 0xFFFF */
     SecOC_PduType SecOCPduType;   /**< Indicate API Type to use for communication with PduR. @range 0x00 ~ 0x01 */
@@ -301,7 +301,7 @@ typedef struct SecOC_RxAuthenticPduLayerTag
  * @brief    Define the information at the post-build phase to configure the RxPdus to be verified by the
  *           SecOC module.
  */
-typedef struct SecOC_PbRxPduProcessingTag
+typedef struct
 {
     uint16 SecOCAuthInfoTruncLength; /**< Indicate the length in bits of the authentication code to be included in the
                                         payload of the Secured I-Pdu. @range 0x00 ~ 0xFFFF */
@@ -338,7 +338,7 @@ typedef struct SecOC_PbRxPduProcessingTag
  * @brief    Define one Pdu that is transmitted by the SecOC module to the PduR
  *           after the Mac was generated.
  */
-typedef struct SecOC_TxSecuredPduTag
+typedef struct
 {
     uint8 SecOCAuthPduHeaderLength; /**< This parameter indicates the length (in bytes) of the Secured I-Pdu Header in
                                        the Secured I-Pdu. The length of zero means there's no header in the Pdu.
@@ -354,7 +354,7 @@ typedef struct SecOC_TxSecuredPduTag
  * @brief    Define the Pdu (that is transmitted by the SecOC module to the PduR)
  *           which contains the Secured I-Pdu Header and the Authentic I-Pdu.
  */
-typedef struct SecOC_TxAuthenticPduTag
+typedef struct
 {
     uint8 SecOCAuthPduHeaderLength;  /**< This parameter indicates the length (in bytes) of the Secured I-Pdu Header in
                                         the Secured I-Pdu. The length of zero means there's no header in the Pdu.
@@ -371,7 +371,7 @@ typedef struct SecOC_TxAuthenticPduTag
 /**
  * @brief    Define the Cryptographic Pdu that is transmitted.
  */
-typedef struct SecOC_TxCryptographicPduTag
+typedef struct
 {
     PduIdType SecOCTxCryptographicPduId; /**< Pdu identifier of the Cryptographic I-Pdu assigned by SecOC module.
                                         @range 0x00 ~ 0xFFFF */
@@ -386,7 +386,7 @@ typedef struct SecOC_TxCryptographicPduTag
  *           after the Mac was generated.Two separate Pdus are transmitted to the
  *           PduR:Authentic I-Pdu and Cryptographic I-Pdu.
  */
-typedef struct SecOC_TxSecuredPduCollectionTag
+typedef struct
 {
     const SecOC_TxAuthenticPduType* SecOCTxAuthenticPdu; /**< Point to the Indicate the Pdu which contains the Secured
                                                             I-Pdu Header and the Authentic I-Pdu. @range NA */
@@ -400,7 +400,7 @@ typedef struct SecOC_TxSecuredPduCollectionTag
  * @brief    Define the Pdu that is transmitted by the SecOC module to the PduR
  *           after the Mac was generated.
  */
-typedef struct SecOC_TxSecuredPduLayerTag
+typedef struct
 {
     const SecOC_TxSecuredPduType* SecOCTxSecuredPdu; /**< Point to the Pdu that is transmitted by the SecOC module to
                                                         the PduR after the Mac was generated. @range NA */
@@ -413,7 +413,7 @@ typedef struct SecOC_TxSecuredPduLayerTag
  * @brief    Define an area in the Authentic I-Pdu that will be the input to
  *           the Authenticator generation algorithm.
  */
-typedef struct SecOC_TxPduSecuredAreaTag
+typedef struct
 {
     uint32 SecOCSecuredTxPduLength; /**< Indicate the length (in bytes) of the area within the Pdu which shall be
                                        secured. @range 0x00 ~ 0xFFFFFFFF */
@@ -425,7 +425,7 @@ typedef struct SecOC_TxPduSecuredAreaTag
  * @brief    Define the Pdu that is transmitted by the SecOC module to the PduR
  *           after the Mac was verified.
  */
-typedef struct SecOC_TxAuthenticPduLayerTag
+typedef struct
 {
     SecOC_PduType SecOCPduType; /**< Indicate API Type to use for communication with PduR. @range 0x00 ~ 0x01 */
     PduIdType     SecOCTxAuthenticLayerPduId; /**< Pdu identifier assigned by SecOC module. @range 0x00 ~ 0xFFFF */
@@ -436,7 +436,7 @@ typedef struct SecOC_TxAuthenticPduLayerTag
  * @brief    Define the information at the post-build phase to configure the TxPdus
  *           to be secured by the SecOC module.
  */
-typedef struct SecOC_PbTxPduProcessingTag
+typedef struct
 {
     uint16 SecOCAuthInfoTruncLength; /**< Indicate the length in bits of the authentication code to be included in the
                                         payload of the Secured I-Pdu. @range 0x00 ~ 0xFFFF */
@@ -466,13 +466,15 @@ typedef struct SecOC_PbTxPduProcessingTag
 /**
  * @brief    Define configuration information at the post-build phase for the SecOC module.
  */
-typedef struct SecOC_PbConfigTag
+/* PRQA S 1759 ++ */ /* VL_SecOC_1759 */
+typedef struct
 {
     const SecOC_PbRxPduProcessingType*
         SecOC_PbRxPduProcessing; /**< Point to the Rx Pdu to be verified by SecOC. @range NA */
     const SecOC_PbTxPduProcessingType*
         SecOC_PbTxPduProcessing; /**< Point to the Rx Pdu to be secured by SecOC. @range NA */
 } SecOC_PbConfigType;
+/* PRQA S 1759 -- */
 
 /* ========================================== internal function definitions ========================================= */
 

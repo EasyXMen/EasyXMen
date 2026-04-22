@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -21,7 +21,7 @@
  **  @description : LinIf master implementation source file
  **
  ***********************************************************************************************************************/
-
+/* PRQA S 1505 EOF */ /* VL_LinIf_1505 */
 /* =================================================== inclusions =================================================== */
 #include "LinIf.h"
 #include "IStdLib.h"
@@ -176,6 +176,40 @@ LINIF_LOCAL_INLINE void LinIf_MemCopyFixedFrame(uint8* Dst, const LinIf_FixedFra
 }
 #endif
 
+/* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
+/**
+ * @brief           LinIf slot timer handle
+ * @param[in]       masterChRtDataPtr: Runtime data of linif channel
+ * @reentrant       TRUE
+ * @synchronous     TRUE
+ * @trace           -
+ */
+LINIF_LOCAL_INLINE void LinIf_SlotTimer(LinIf_MasterRuntimeType* masterChRtDataPtr)
+{
+    LinIf_MasterRuntimeType* LinIf_MasterChRtData = masterChRtDataPtr;
+
+    if (LinIf_MasterChRtData->Timer > 0u)
+    {
+        /* The current frame slot counter minus 1 */
+        LinIf_MasterChRtData->Timer--;
+    }
+}
+/* PRQA S 1532 -- */
+
+/**
+ * @brief           Get LinIf channel state
+ * @param[in]       masterChRtDataPtr: Runtime data of linif channel
+ * @return          ChannelState
+ * @reentrant       TRUE
+ * @synchronous     TRUE
+ * @trace        -
+ */
+LINIF_LOCAL_INLINE LinIf_ChannelStateType LinIf_GetChannelState(const LinIf_MasterRuntimeType* masterChRtDataPtr)
+{
+    const LinIf_MasterRuntimeType* LinIf_MasterChRtData = masterChRtDataPtr;
+    return LinIf_MasterChRtData->ChannelState;
+}
+
 #define LINIF_STOP_SEC_CODE
 #include "LinIf_MemMap.h"
 
@@ -309,6 +343,85 @@ void LinIf_MasterGotoSleep(NetworkHandleType ch)
 }
 
 /**
+ * The main processing function of the LinIf master node. This function process
+ * master node wakeup and sleep, message transmit and update schedule table.
+ */
+/* PRQA S 6070 ++ */ /* VL_MTR_LinIf_STCAL*/
+void LinIf_MasterMainHandle(NetworkHandleType ch)
+/* PRQA S 6070 -- */
+{
+    LinIf_MasterRuntimeType* masterChRtDataPtr = LinIf_GetMasterRtDataPtr(ch);
+
+#if (LINIF_SCHEDULE_CHANGE_NEXT_TIME_BASE_SUPPORT == STD_ON)
+    const LinIf_ChannelType* chCfgPtr = LinIf_GetChannel(ch);
+#endif
+
+#if ((LINIF_TP_SUPPORTED == STD_ON) && (LINTP_MASTER_SUPPORT == STD_ON))
+    NetworkHandleType        lintpChannelId = LinTp_GetLinTpChannel(ch);
+    LinTp_MasterRuntimeType* tpRtDataPtr    = LinTp_MasterRtDataPtr(lintpChannelId);
+#endif
+
+    LinIf_SlotTimer(masterChRtDataPtr);
+    LinIf_WakeUpProcess(masterChRtDataPtr, ch);
+    LinIf_SleepProcess(masterChRtDataPtr, ch);
+
+    if (LINIF_CHANNEL_OPERATIONAL == LinIf_GetChannelState(masterChRtDataPtr))
+    {
+        if (LinIf_IsEntryDelayTimeout(masterChRtDataPtr)
+#if (LINIF_SCHEDULE_CHANGE_NEXT_TIME_BASE_SUPPORT == STD_ON)
+            /* @req SWS_LinIf_00727 */
+            /* When LinIfScheduleChangeNextTimeBase is TRUE, the entry has not ended, should determine the message
+               transmission or reception within the entry is complete or not */
+            || (LinIf_IsEvent(masterChRtDataPtr, LINIF_EVENT_SCHEDULE_REQ | LINIF_EVENT_SKIP_SLOT_TIMER)
+                && (TRUE == chCfgPtr->ScheduleChangeNextTimeBase)
+                && (!LinIf_IsEvent(masterChRtDataPtr, LINIF_EVENT_ENTRY_NOT_END_SCHEDULE_CHANGE)))
+#endif
+        )
+        {
+            LinIf_PrevTransmit(masterChRtDataPtr, ch);
+
+#if ((LINIF_TP_SUPPORTED == STD_ON) && (LINTP_MASTER_SUPPORT == STD_ON))
+            if (LinIf_IsSupportTpTransmit(ch))
+            {
+                LinTp_RxProcess(tpRtDataPtr);
+                LinTp_TxProcess(tpRtDataPtr);
+            }
+#endif
+        }
+
+#if ((LINIF_TP_SUPPORTED == STD_ON) && (LINTP_MASTER_SUPPORT == STD_ON))
+        /* Load transmit request */
+        if (LinIf_IsSupportTpTransmit(ch))
+        {
+            LinTp_LoadTxRequest(lintpChannelId, tpRtDataPtr);
+            LinTp_HandleTimers(tpRtDataPtr, ch);
+        }
+#endif
+
+        if (LinIf_IsEntryDelayTimeout(masterChRtDataPtr)
+#if (LINIF_SCHEDULE_CHANGE_NEXT_TIME_BASE_SUPPORT == STD_ON)
+            /* @req SWS_LinIf_00727 */
+            /* Transmission or reception within the entry is complete, Schedule table can be change */
+            || LinIf_IsEvent(masterChRtDataPtr, LINIF_EVENT_ENTRY_NOT_END_SCHEDULE_CHANGE)
+#endif
+        )
+        {
+#if ((LINIF_TP_SUPPORTED == STD_ON) && (LINTP_MASTER_SUPPORT == STD_ON))
+            if ((!LinIf_IsSupportTpTransmit(ch)) || (!LinTp_IsWaitEventSet(ch)))
+#endif
+            {
+#if (LINIF_SCHEDULE_CHANGE_NEXT_TIME_BASE_SUPPORT == STD_ON)
+                LinIf_ClrEvent(masterChRtDataPtr, LINIF_EVENT_ENTRY_NOT_END_SCHEDULE_CHANGE);
+#endif
+
+                LinIf_UpdateSchedule(masterChRtDataPtr, ch);
+                LinIf_NextTransmit(masterChRtDataPtr, ch);
+            }
+        }
+    }
+}
+
+/**
  * Process sleep state transmit
  */
 /* PRQA S 6070 ++ */ /* VL_MTR_LinIf_STCAL*/
@@ -375,7 +488,10 @@ void LinIf_SleepProcess(LinIf_MasterRuntimeType* masterChRtDataPtr, uint8 ch)
                 chPtr->ResEntryIndex = 0u;
                 chPtr->RootEvent     = LINIF_EVENT_NONE;
 #if ((LINIF_TP_SUPPORTED == STD_ON) && (LINTP_MASTER_SUPPORT == STD_ON))
-                LinTp_MasterChannelInit(ch);
+                if (LinIf_IsSupportTpTransmit(ch))
+                {
+                    LinTp_MasterChannelInit(ch);
+                }
 #endif
 
                 /*@req <SWS_LinIf_00495> */
@@ -563,7 +679,7 @@ void LinIf_PrevTransmit(LinIf_MasterRuntimeType* masterChRtDataPtr, uint8 ch)
 
     if ((LinIf_IsEvent(masterChRtDataPtr, LINIF_EVENT_HEADER | LINIF_EVENT_RESPONSE))
 #if ((LINIF_TP_SUPPORTED == STD_ON) && (LINTP_MASTER_SUPPORT == STD_ON))
-        || (TRUE == LinTp_IsWaitEventSet(ch))
+        || ((LinIf_IsSupportTpTransmit(ch)) && (LinTp_IsWaitEventSet(ch)))
 #endif
     )
     {
@@ -571,9 +687,6 @@ void LinIf_PrevTransmit(LinIf_MasterRuntimeType* masterChRtDataPtr, uint8 ch)
         uint8          linDriver  = LinIf_GetLinDriverId(ch);
         uint8          linChannel = LinIf_GetLinChannelId(ch);
         Lin_StatusType st         = Lin_DriverApi[linDriver].LinGetStatus(linChannel, &sduDataPtr);
-
-        /* Clear flag of header and response */
-        LinIf_ClrEvent(masterChRtDataPtr, LINIF_EVENT_HEADER | LINIF_EVENT_RESPONSE);
 
         switch (frame->PduDirection->PduDirectionId)
         {
@@ -594,6 +707,16 @@ void LinIf_PrevTransmit(LinIf_MasterRuntimeType* masterChRtDataPtr, uint8 ch)
             /* Other type PDU */
             break;
         }
+
+#if (LINIF_SCHEDULE_CHANGE_NEXT_TIME_BASE_SUPPORT == STD_ON)
+        /* @req SWS_LinIf_00727 */
+        /* Transmission or reception within the entry has been completed,in this TimeBase can change schedule
+         * table*/
+        if ((!LinIf_IsEntryDelayTimeout(masterChRtDataPtr)) && (st != LIN_TX_BUSY) && (st != LIN_RX_BUSY))
+        {
+            LinIf_SetEvent(masterChRtDataPtr, LINIF_EVENT_ENTRY_NOT_END_SCHEDULE_CHANGE);
+        }
+#endif
     }
 #if (LINIF_MASTER_SPORADIC_FRAME_SUPPORT == STD_ON)
     else if (LINIF_SPORADIC == frame->FrameType)
@@ -722,7 +845,10 @@ void LinIf_UpdateSchedule(LinIf_MasterRuntimeType* masterChRtDataPtr, uint8 ch)
             masterChRtDataPtr->RootEvent     = LINIF_EVENT_NONE;
             masterChRtDataPtr->Timer         = 0u;
 #if ((LINIF_TP_SUPPORTED == STD_ON) && (LINTP_MASTER_SUPPORT == STD_ON))
-            LinTp_MasterChannelInit(ch);
+            if (LinIf_IsSupportTpTransmit(ch))
+            {
+                LinTp_MasterChannelInit(ch);
+            }
 #endif
 
             /* Clear Schedule Request flag */
@@ -1270,7 +1396,7 @@ LINIF_LOCAL void LinIf_SwitchNewSchedule(LinIf_MasterRuntimeType* masterChRtData
     (LINIF_TP_SUPPORTED == STD_ON) && (LINTP_MASTER_SUPPORT == STD_ON) \
     && (STD_ON == LINTP_SCHEDULE_CHANGE_DIAG_SUPPORT))
                 || (((LINIF_MRF == frame->FrameType) || (LINIF_SRF == frame->FrameType))
-                    && (TRUE == LinTp_GetScheduleChangeDiag(ch)))
+                    && (!LinIf_IsSupportTpTransmit(ch) || TRUE == LinTp_GetScheduleChangeDiag(ch)))
 #endif
             )
             {
@@ -1335,7 +1461,7 @@ LINIF_LOCAL void LinIf_SwitchNewEntry(LinIf_MasterRuntimeType* masterChRtDataPtr
         if (!LinIf_IsEntryTail(masterChRtDataPtr)
 #if ((LINIF_TP_SUPPORTED == STD_ON) && (LINTP_MASTER_SUPPORT == STD_ON))
             /* TP buffer not enough */
-            && (FALSE == LinTp_IsStopMRFOrSRFSendEventSet(ch))
+            && (!LinIf_IsSupportTpTransmit(ch) || FALSE == LinTp_IsStopMRFOrSRFSendEventSet(ch))
 #endif
         )
         {
@@ -1440,6 +1566,16 @@ LINIF_LOCAL void LinIf_RxEventErrorHandle(
     const LinIf_FrameType*   frame)
 /* PRQA S 3673 -- */
 {
+#if (LINIF_SCHEDULE_CHANGE_NEXT_TIME_BASE_SUPPORT == STD_ON)
+    /* @req SWS_LinIf_00727 */
+    /* Reception is ongoing,keep waiting */
+    if ((st == LIN_RX_BUSY) && (!LinIf_IsEntryDelayTimeout(masterChRtDataPtr)))
+    {
+        return;
+    }
+#endif
+    LinIf_ClrEvent(masterChRtDataPtr, ((uint16)(LINIF_EVENT_HEADER) | (uint16)(LINIF_EVENT_RESPONSE)));
+
     switch (frame->FrameType)
     {
     case LINIF_UNCONDITIONAL:
@@ -1587,6 +1723,16 @@ LINIF_LOCAL void LinIf_MasterTxErrorHandle(
     LinIf_MasterRuntimeType* masterChRtDataPtr,
     const LinIf_FrameType*   frame)
 {
+#if (LINIF_SCHEDULE_CHANGE_NEXT_TIME_BASE_SUPPORT == STD_ON)
+    /* @req SWS_LinIf_00727 */
+    /* Transmission is ongoing,keep waiting */
+    if ((st == LIN_TX_BUSY) && (!LinIf_IsEntryDelayTimeout(masterChRtDataPtr)))
+    {
+        return;
+    }
+#endif
+    LinIf_ClrEvent(masterChRtDataPtr, ((uint16)(LINIF_EVENT_HEADER) | (uint16)(LINIF_EVENT_RESPONSE)));
+
 #if (LINIF_DEV_ERROR_DETECT == STD_ON)
     if ((st == LIN_TX_ERROR) || (st == LIN_TX_BUSY))
     {
@@ -1648,6 +1794,7 @@ LINIF_LOCAL void LinIf_PrevTransmitRxPduHandle(
 {
     if (st == LIN_RX_OK)
     {
+        LinIf_ClrEvent(masterChRtDataPtr, ((uint16)(LINIF_EVENT_HEADER) | (uint16)(LINIF_EVENT_RESPONSE)));
 #if ((LINIF_TP_SUPPORTED == STD_ON) && (LINTP_MASTER_SUPPORT == STD_ON))
         if (frame->FrameType == LINIF_SRF)
         {
@@ -1688,6 +1835,7 @@ LINIF_LOCAL void LinIf_PrevTransmitTxPduHandle(
 {
     if (st == LIN_TX_OK)
     {
+        LinIf_ClrEvent(masterChRtDataPtr, ((uint16)(LINIF_EVENT_HEADER) | (uint16)(LINIF_EVENT_RESPONSE)));
 #if ((LINIF_TP_SUPPORTED == STD_ON) && (LINTP_MASTER_SUPPORT == STD_ON))
         if (frame->FrameType == LINIF_MRF)
         {

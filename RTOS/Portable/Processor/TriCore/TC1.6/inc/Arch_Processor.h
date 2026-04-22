@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -37,22 +37,25 @@
 
 /*=======[M A C R O S]=====================================================*/
 /*================@+General+@================*/
+#define CDC_MASK (0XFFFFFF80u)
+#define PSWIO_BIT (10u)
+
 #if (TRUE == CFG_SRV_SHELLOS)
 #define OS_CPUMODE_USER (OS_CPUMODE_USER1)
 /* PRQA S 3458 ++ */ /* VL_Os_3458 */
 #define OS_CHANGCPUMODE(mode)                                                                       \
     {                                                                                               \
-        if ((uint32)OS_CPUMODE_SUPERVISOR == ((OS_ARCH_MFCR(OS_REG_PSW) & 0x00000c00u) >> 10u))     \
+        if ((uint32)OS_CPUMODE_SUPERVISOR == ((OS_ARCH_MFCR(OS_REG_PSW) & (~PSWIO_MASK)) >> PSWIO_BIT))     \
         {                                                                                           \
             if (OS_CPUMODE_USER == (mode))                                                          \
             {                                                                                       \
                 OS_ASM("isync");                                                                    \
-                OS_ARCH_MTCR(OS_REG_PSW, ((OS_ARCH_MFCR(OS_REG_PSW) & 0xfffff3ffu) | 0x00000400u)); \
+                OS_ARCH_MTCR(OS_REG_PSW, ((OS_ARCH_MFCR(OS_REG_PSW) & PSWIO_MASK) | PSWIO_USER1_MODE)); \
             }                                                                                       \
             else                                                                                    \
             {                                                                                       \
                 OS_ASM("isync");                                                                    \
-                OS_ARCH_MTCR(OS_REG_PSW, (OS_ARCH_MFCR(OS_REG_PSW) & 0xffff4fffu));                 \
+                OS_ARCH_MTCR(OS_REG_PSW, (OS_ARCH_MFCR(OS_REG_PSW) & PPRS_MASK));                 \
             }                                                                                       \
         }                                                                                           \
         else                                                                                        \
@@ -65,7 +68,7 @@
     }
 
 #define OS_GETCPUMODE()                                                                                   \
-    ((OS_CPUMODE_SUPERVISOR == ((OS_ARCH_MFCR(OS_REG_PSW) & 0x00000c00u) >> 10u)) ? OS_CPUMODE_SUPERVISOR \
+    ((OS_CPUMODE_SUPERVISOR == ((OS_ARCH_MFCR(OS_REG_PSW) & (~PSWIO_MASK)) >> PSWIO_BIT)) ? OS_CPUMODE_SUPERVISOR \
                                                                                   : OS_CPUMODE_USER)
 #endif /* TRUE == CFG_SRV_SHELLOS */
 
@@ -82,7 +85,7 @@
 #endif /* TRUE == CFG_MEMORY_PROTECTION_ENABLE */
 
 #define OS_EXIT_KERNEL()
-
+#define Os_ArchInitCPU()
 #define OS_MODE_SUPERVISOR_ENTRY() OS_ENTER_KERNEL()
 #define OS_MODE_SUPERVISOR_EXIT()  OS_EXIT_KERNEL()
 /*================@-General-@================*/
@@ -264,23 +267,6 @@ extern uint32 Os_CmpSwapW(uint32* address, uint32 compareVal, uint32 exchangedVa
  */
 /******************************************************************************/
 extern void Os_ModeModify(void);
-
-/******************************************************************************/
-/*
- * Brief                <Initialization of the CPU in the OS.>
- * ServiceId            <None>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Non Reentrant>
- * Param-Name[in]       <None>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * Return               <None>
- * PreCondition         <None>
- * CallByAPI            <StartOS>
- * REQ ID               <None>
- */
-/******************************************************************************/
-void Os_ArchInitCPU(void);
 
 /*=======[F U N C T I O N   I M P L E M E N T A T I O N S]====================*/
 #endif /* ARCH_PROCESSOR_H */

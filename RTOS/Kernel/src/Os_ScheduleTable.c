@@ -1,6 +1,6 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
- * SPDX-License-Identifier: LGPL-2.1-only-with-exception OR  LicenseRef-Commercial-License
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
+ * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
  * GNU Lesser General Public License as published by the Free Software Foundation; version 2.1.
@@ -10,7 +10,8 @@
  * You should have received a copy of the GNU Lesser General Public License along with this library;
  * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  * or see <https://www.gnu.org/licenses/>.
- *
+ */
+/*
  ********************************************************************************
  **                                                                            **
  **  FILENAME    : Os_ScheduleTable.c                                          **
@@ -363,7 +364,7 @@ static void Os_InsertSTNode(Os_ScheduleTableType InsertStId)
 
             pInsertStCB->stNextNode = pCurStCB;
             pInsertStCB->stPreNode  = NULL_PTR;
-            pCurStCB->stPreNode     = pInsertStCB;
+            pCurStCB->stPreNode     = pInsertStCB; /* PRQA S 2813 */ /* VL_Os_2813 */
         }
         else
         {
@@ -403,7 +404,9 @@ static void Os_InsertSTNode(Os_ScheduleTableType InsertStId)
  * REQ ID               <None>
  */
 /********************************************************************/
+/* PRQA S 3450 ++ */ /* VL_Os_3450 */
 static void Os_DelStNode(ScheduleTableType DelStId)
+/* PRQA S 3450 -- */
 {
     Os_CounterType stCounterId;
 
@@ -556,7 +559,9 @@ static void Os_StInnerStart(
  * REQ ID               <None>
  */
 /********************************************************************/
+/* PRQA S 3450 ++ */ /* VL_Os_3450 */
 static void Os_StEpActiveTask(const Os_EPActivateTaskAction* pTaskList, uint16 osTaskCnt)
+/* PRQA S 3450 -- */
 {
     uint16      i;
     Os_TaskType TaskID;
@@ -574,8 +579,10 @@ static void Os_StEpActiveTask(const Os_EPActivateTaskAction* pTaskList, uint16 o
                 .remoteCoreId = coreId,
                 .serviceId    = OSServiceId_ActivateTask,
                 .srvPara0     = (uint32)TaskID,
+                /* PRQA S 1258 ++ */  /* VL_Os_1258 */
                 .srvPara1     = (uint32)NULL_PARA,
                 .srvPara2     = (uint32)NULL_PARA,
+                /* PRQA S 1258 -- */
             };
             (void)Os_RpcCallService(&rpcData);
         }
@@ -609,7 +616,9 @@ static void Os_StEpActiveTask(const Os_EPActivateTaskAction* pTaskList, uint16 o
  * REQ ID               <None>
  */
 /********************************************************************/
+/* PRQA S 3450 ++ */ /* VL_Os_3450 */
 static void Os_StEpSetEvent(const Os_EPSetEventAction* pEventList, uint16 osEventCnt)
+/* PRQA S 3450 -- */
 {
     uint16           i;
     Os_TaskType      TaskID;
@@ -632,7 +641,9 @@ static void Os_StEpSetEvent(const Os_EPSetEventAction* pEventList, uint16 osEven
                 .serviceId    = OSServiceId_SetEvent,
                 .srvPara0     = (uint32)TaskID,
                 .srvPara1     = (uint32)Mask,
+                /* PRQA S 1258 ++ */  /* VL_Os_1258 */
                 .srvPara2     = (uint32)NULL_PARA,
+                /* PRQA S 1258 -- */
             };
             (void)Os_RpcCallService(&rpcData);
         }
@@ -666,7 +677,9 @@ static void Os_StEpSetEvent(const Os_EPSetEventAction* pEventList, uint16 osEven
  * REQ ID               <None>
  */
 /********************************************************************/
+/* PRQA S 3450 ++ */ /* VL_Os_3450 */
 static boolean Os_WorkStEpProc(const Os_STCBType* const pStNode, const Os_SchedTblCfgType* pStCfgRef)
+/* PRQA S 3450 -- */
 {
     boolean LastEP = FALSE;
 
@@ -707,10 +720,10 @@ static boolean Os_WorkStEpProc(const Os_STCBType* const pStNode, const Os_SchedT
  * REQ ID               <None>
  */
 /********************************************************************/
+/* PRQA S 3450 ++ */ /* VL_Os_3450 */
 static void Os_WorkStRepeatProc(
-
+/* PRQA S 3450 -- */
     Os_STCBType* const pStNode,
-
     const Os_SchedTblCfgType* pStCfgRef)
 {
     pStNode->stNextEP = pStCfgRef->osSchedTblEP;
@@ -758,10 +771,10 @@ static void Os_WorkStRepeatProc(
  * REQ ID               <None>
  */
 /********************************************************************/
+/* PRQA S 3450 ++ */ /* VL_Os_3450 */
 static void Os_WorkStToNextEp(
-
+/* PRQA S 3450 -- */
     Os_STCBType* const pStNode,
-
     const Os_SchedTblCfgType* pStCfgRef)
 {
     /* Next EP. */
@@ -798,8 +811,9 @@ static void Os_WorkStToNextEp(
  * REQ ID               <None>
  */
 /********************************************************************/
+/* PRQA S 3450 ++ */ /* VL_Os_3450 */
 static void Os_StWorkEpSyncAdjust(
-
+/* PRQA S 3450 -- */
     Os_STCBType* const pStCB,
 
     const Os_SchedTblCfgType* pStCfgRef,
@@ -907,10 +921,10 @@ static void Os_StWorkEpSyncAdjust(
  * REQ ID               <None>
  */
 /********************************************************************/
+/* PRQA S 3450 ++ */ /* VL_Os_3450 */
 static void Os_WorkStRunningState(
-
+/* PRQA S 3450 -- */
     Os_STCBType* const pStNode,
-
     const Os_SchedTblCfgType* pStCfgRef,
     const Os_CounterCfgType*  pstCounterCfg)
 {
@@ -996,8 +1010,9 @@ static void Os_WorkStRunningState(
 #if ((OS_SC2 == CFG_SC) || (OS_SC4 == CFG_SC))
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
+/* PRQA S 6030, 3450 ++ */ /* VL_MTR_Os_STMIF, VL_Os_3450 */
 static void Os_WorkStRunningSyncState(
-
+/* PRQA S 6030, 3450 -- */
     Os_STCBType* const pStNode,
 
     const Os_SchedTblCfgType* pStCfgRef)
@@ -1078,7 +1093,9 @@ static void Os_WorkStRunningSyncState(
  * REQ ID               <None>
  */
 /********************************************************************/
+/* PRQA S 3450 ++ */ /* VL_Os_3450 */
 static void Os_StWaittingStateProc(
+/* PRQA S 3450 -- */
     Os_TickType osValue,
     Os_TickType oscounterCurVal,
 
@@ -1123,7 +1140,9 @@ static void Os_StWaittingStateProc(
  * REQ ID               <None>
  */
 /******************************************************************************/
+/* PRQA S 3450 ++ */ /* VL_Os_3450 */
 static void Os_StSyncGetDiffVal(
+/* PRQA S 3450 -- */
     Os_TickType SyncVal,
     Os_TickType oscounterCurVal,
 
@@ -1143,7 +1162,9 @@ static void Os_StSyncGetDiffVal(
     }
     else
     {
+	/* PRQA S 2911 ++ */ /* VL_Os_2911 */
         osPosOnTbl = (pStCB->stNextEP->osSchedTblEPOffset - osPosOnTbl) + pStCfgRef->osSchedTblDuration - 1u;
+	/* PRQA S 2911 -- */
     }
 
     /* Deviation: added. */
@@ -1184,7 +1205,9 @@ static void Os_StSyncGetDiffVal(
  * REQ ID               <None>
  */
 /********************************************************************/
+/* PRQA S 3450 ++ */ /* VL_Os_3450 */
 static void Os_StRunningStateProc(
+/* PRQA S 3450 -- */
     Os_TickType SyncVal,
     Os_TickType oscounterCurVal,
 
@@ -1236,7 +1259,9 @@ static void Os_StRunningStateProc(
  * REQ ID               <None>
  */
 /********************************************************************/
+/* PRQA S 3450 ++ */ /* VL_Os_3450 */
 static void Os_StRunningSyncStateProc(
+/* PRQA S 3450 -- */
     Os_TickType SyncVal,
     Os_TickType oscounterCurVal,
 
@@ -1388,12 +1413,12 @@ void Os_WorkSchedTbl(Os_CounterType CounterID)
  * REQ ID               <None>
  */
 /********************************************************************/
-void Os_GetScheduleTableStatus(ScheduleTableType ScheduleTableID, ScheduleTableStatusRefType ScheduleStatus)
+void Os_GetScheduleTableStatus(ScheduleTableType ScheduleTableID, ScheduleTableStatusRefType ScheduleStatus) /* PRQA S 1505 */ /* VL_Os_1505 */
 {
     const Os_STCBType* pStCB;
 
 #if (OS_AUTOSAR_CORES > 1)
-    ScheduleTableID = Os_GetObjLocalId(ScheduleTableID);
+    ScheduleTableID = Os_GetObjLocalId(ScheduleTableID); /* PRQA S 1338 */ /* VL_Os_1338 */
 #endif
 
     pStCB = &Os_STCB[ScheduleTableID];
@@ -1419,7 +1444,7 @@ void Os_GetScheduleTableStatus(ScheduleTableType ScheduleTableID, ScheduleTableS
  * REQ ID               <None>
  */
 /********************************************************************/
-StatusType Os_StartScheduleTableRel(ScheduleTableType ScheduleTableID, TickType Offset)
+StatusType Os_StartScheduleTableRel(ScheduleTableType ScheduleTableID, TickType Offset) /* PRQA S 1505 */ /* VL_Os_1505 */
 {
     Os_TickType               osCounterCurVal;
     Os_TickType               osStartAbsTick;
@@ -1438,7 +1463,7 @@ StatusType Os_StartScheduleTableRel(ScheduleTableType ScheduleTableID, TickType 
 
 #if (OS_AUTOSAR_CORES > 1)
 
-    ScheduleTableID = Os_GetObjLocalId(ScheduleTableID);
+    ScheduleTableID = Os_GetObjLocalId(ScheduleTableID); /* PRQA S 1338 */ /* VL_Os_1338 */
 
 #endif
 
@@ -1514,7 +1539,7 @@ StatusType Os_StartScheduleTableRel(ScheduleTableType ScheduleTableID, TickType 
  * REQ ID               <None>
  */
 /********************************************************************/
-StatusType Os_StartScheduleTableAbs(ScheduleTableType ScheduleTableID, TickType Start)
+StatusType Os_StartScheduleTableAbs(ScheduleTableType ScheduleTableID, TickType Start) /* PRQA S 1505 */ /* VL_Os_1505 */
 {
     const Os_SchedTblCfgType* pStCfgRef;
     const Os_CounterCfgType*  pCounterCfgRef;
@@ -1527,7 +1552,7 @@ StatusType Os_StartScheduleTableAbs(ScheduleTableType ScheduleTableID, TickType 
 
 #if (OS_AUTOSAR_CORES > 1)
 
-    ScheduleTableID = Os_GetObjLocalId(ScheduleTableID);
+    ScheduleTableID = Os_GetObjLocalId(ScheduleTableID); /* PRQA S 1338 */ /* VL_Os_1338 */
 
 #endif
 
@@ -1586,7 +1611,7 @@ StatusType Os_StartScheduleTableAbs(ScheduleTableType ScheduleTableID, TickType 
  * REQ ID               <None>
  */
 /********************************************************************/
-StatusType Os_StopScheduleTable(ScheduleTableType ScheduleTableID)
+StatusType Os_StopScheduleTable(ScheduleTableType ScheduleTableID) /* PRQA S 1505 */ /* VL_Os_1505 */
 {
     const Os_STCBType* pStCB;
 
@@ -1596,7 +1621,7 @@ StatusType Os_StopScheduleTable(ScheduleTableType ScheduleTableID)
 
 #if (OS_AUTOSAR_CORES > 1)
 
-    ScheduleTableID = Os_GetObjLocalId(ScheduleTableID);
+    ScheduleTableID = Os_GetObjLocalId(ScheduleTableID); /* PRQA S 1338 */ /* VL_Os_1338 */
 
 #endif
 
@@ -1656,7 +1681,9 @@ StatusType Os_StopScheduleTable(ScheduleTableType ScheduleTableID)
  * REQ ID               <None>
  */
 /********************************************************************/
+/* PRQA S 3450 ++ */ /* VL_Os_3450 */
 static void Os_NextScheduleTable(ScheduleTableType ScheduleTableID_From, ScheduleTableType ScheduleTableID_To)
+/* PRQA S 3450 -- */
 {
     Os_STCBType* pStFromCB;
     Os_STCBType* pStToCB;
@@ -1727,7 +1754,9 @@ static void Os_NextScheduleTable(ScheduleTableType ScheduleTableID_From, Schedul
  * REQ ID               <None>
  */
 /********************************************************************/
+/* PRQA S 3450 ++ */ /* VL_Os_3450 */
 static void Os_StartScheduleTableSynchron(ScheduleTableType ScheduleTableID)
+/* PRQA S 3450 -- */
 {
     Os_STCBType* pStCB;
 
@@ -1761,7 +1790,9 @@ static void Os_StartScheduleTableSynchron(ScheduleTableType ScheduleTableID)
  * REQ ID               <None>
  */
 /********************************************************************/
+/* PRQA S 3450 ++ */ /* VL_Os_3450 */
 static StatusType Os_SyncScheduleTable(ScheduleTableType ScheduleTableID, TickType value)
+/* PRQA S 3450 -- */
 {
     Os_TickType               counterCurval;
     const Os_SchedTblCfgType* pStCfgRef;
@@ -1832,7 +1863,9 @@ static StatusType Os_SyncScheduleTable(ScheduleTableType ScheduleTableID, TickTy
  * REQ ID               <None>
  */
 /********************************************************************/
+/* PRQA S 3450 ++ */ /* VL_Os_3450 */
 static StatusType Os_SetScheduleTableAsync(ScheduleTableType ScheduleTableID)
+/* PRQA S 3450 -- */
 {
     const Os_SchedTblCfgType* pStCfgRef;
 
@@ -1884,11 +1917,15 @@ static StatusType Os_SetScheduleTableAsync(ScheduleTableType ScheduleTableID)
  * REQ ID               <None>
  */
 /********************************************************************/
+/* PRQA S 3006, 6030, 6010, 6070 ++ */ /* VL_Os_3006, VL_MTR_Os_STMIF, VL_MTR_Os_STCYC, VL_MTR_Os_STCAL */
 StatusType GetScheduleTableStatus(ScheduleTableType ScheduleTableID, ScheduleTableStatusRefType ScheduleStatus)
+/* PRQA S 3006, 6030, 6010, 6070 -- */
 {
-    /* PRQA S 2742, 2880, 3138, 2741 ++ */ /* VL_Os_PlatformDef */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
+    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
     OS_ENTER_KERNEL();
-    /* PRQA S 2742, 2880, 3138, 2741 -- */
+    /* PRQA S 1006 -- */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
 
     StatusType err = E_OK;
 
@@ -1901,9 +1938,9 @@ StatusType GetScheduleTableStatus(ScheduleTableType ScheduleTableID, ScheduleTab
     {
         err = E_OS_PARAM_POINTER;
     }
-
+    /* PRQA S 3432, 2986 ++ */ /* VL_Os_3432, VL_Os_2986 */
     else if (CHECK_ID_INVALID(ScheduleTableID, Os_CfgSchedTblMax_Inf))
-
+    /* PRQA S 3432, 2986 -- */
     {
         err = E_OS_ID;
     }
@@ -1916,7 +1953,7 @@ StatusType GetScheduleTableStatus(ScheduleTableType ScheduleTableID, ScheduleTab
         err = E_OS_CALLEVEL;
     }
 
-    else if (Os_AddressWritable((uint32)ScheduleStatus) != TRUE)
+    else if (Os_AddressWritable((uint32)ScheduleStatus) != TRUE) /* PRQA S 0306 */ /* VL_Os_0306 */
 
     {
         err = E_OS_ILLEGAL_ADDRESS;
@@ -1946,10 +1983,10 @@ StatusType GetScheduleTableStatus(ScheduleTableType ScheduleTableID, ScheduleTab
                 .remoteCoreId = coreId,
                 .serviceId    = OSServiceId_GetScheduleTableStatus,
                 .srvPara0     = (uint32)ScheduleTableID,
-
-                .srvPara1 = (uint32)ScheduleStatus,
-
+                .srvPara1 = (uint32)ScheduleStatus,/* PRQA S 0306 */ /* VL_Os_0306 */
+                /* PRQA S 1258 ++ */  /* VL_Os_1258 */
                 .srvPara2 = (uint32)NULL_PARA,
+                /* PRQA S 1258 -- */
             };
             err = Os_RpcCallService(&rpcData);
         }
@@ -1963,10 +2000,12 @@ StatusType GetScheduleTableStatus(ScheduleTableType ScheduleTableID, ScheduleTab
 #if (CFG_ERRORHOOK == TRUE)
     if (err != E_OK)
     {
+        /* PRQA S 3138, 3141 ++ */ /* VL_Os_3138, VL_Os_3141 */
         Os_TraceErrorHook(
             OSError_Save_GetScheduleTableStatus(ScheduleTableID, ScheduleStatus),
             OSServiceId_GetScheduleTableStatus,
             err);
+        /* PRQA S 3138, 3141 -- */
     }
 #endif
 
@@ -1997,11 +2036,15 @@ StatusType GetScheduleTableStatus(ScheduleTableType ScheduleTableID, ScheduleTab
  * REQ ID               <None>
  */
 /********************************************************************/
+/* PRQA S 3006, 6030, 6010, 6070 ++ */ /* VL_Os_3006, VL_MTR_Os_STMIF, VL_MTR_Os_STCYC, VL_MTR_Os_STCAL */
 StatusType StartScheduleTableRel(ScheduleTableType ScheduleTableID, TickType Offset)
+/* PRQA S 3006, 6030, 6010, 6070 -- */
 {
-    /* PRQA S 2742, 2880, 3138, 2741 ++ */ /* VL_Os_PlatformDef */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
+    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
     OS_ENTER_KERNEL();
-    /* PRQA S 2742, 2880, 3138, 2741 -- */
+    /* PRQA S 1006 -- */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
     StatusType err = E_OK;
 
 #if (TRUE == CFG_TRACE_ENABLE)
@@ -2009,9 +2052,9 @@ StatusType StartScheduleTableRel(ScheduleTableType ScheduleTableID, TickType Off
 #endif /* TRUE == CFG_TRACE_ENABLE */
 
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
-
+    /* PRQA S 3432, 2986 ++ */ /* VL_Os_3432, VL_Os_2986 */
     if (CHECK_ID_INVALID(ScheduleTableID, Os_CfgSchedTblMax_Inf))
-
+    /* PRQA S 3432, 2986 -- */
     {
         err = E_OS_ID;
     }
@@ -2048,7 +2091,9 @@ StatusType StartScheduleTableRel(ScheduleTableType ScheduleTableID, TickType Off
                 .serviceId    = OSServiceId_StartScheduleTableRel,
                 .srvPara0     = (uint32)ScheduleTableID,
                 .srvPara1     = (uint32)Offset,
+                /* PRQA S 1258 ++ */  /* VL_Os_1258 */
                 .srvPara2     = (uint32)NULL_PARA,
+                /* PRQA S 1258 -- */
             };
             err = Os_RpcCallService(&rpcData);
         }
@@ -2062,10 +2107,12 @@ StatusType StartScheduleTableRel(ScheduleTableType ScheduleTableID, TickType Off
 #if (CFG_ERRORHOOK == TRUE)
     if (err != E_OK)
     {
+        /* PRQA S 3138, 3141 ++ */ /* VL_Os_3138, VL_Os_3141 */
         Os_TraceErrorHook(
             OSError_Save_StartScheduleTableRel(ScheduleTableID, Offset),
             OSServiceId_StartScheduleTableRel,
             err);
+        /* PRQA S 3138, 3141 -- */
     }
 #endif
 
@@ -2096,11 +2143,15 @@ StatusType StartScheduleTableRel(ScheduleTableType ScheduleTableID, TickType Off
  * REQ ID               <None>
  */
 /********************************************************************/
+/* PRQA S 3006, 6030, 6010, 6070 ++ */ /* VL_Os_3006, VL_MTR_Os_STMIF, VL_MTR_Os_STCYC, VL_MTR_Os_STCAL */
 StatusType StartScheduleTableAbs(ScheduleTableType ScheduleTableID, TickType Start)
+/* PRQA S 3006, 6030, 6010, 6070 -- */
 {
-    /* PRQA S 2742, 2880, 3138, 2741 ++ */ /* VL_Os_PlatformDef */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
+    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
     OS_ENTER_KERNEL();
-    /* PRQA S 2742, 2880, 3138, 2741 -- */
+    /* PRQA S 1006 -- */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
     StatusType err = E_OK;
 
 #if (TRUE == CFG_TRACE_ENABLE)
@@ -2108,9 +2159,9 @@ StatusType StartScheduleTableAbs(ScheduleTableType ScheduleTableID, TickType Sta
 #endif /* TRUE == CFG_TRACE_ENABLE */
 
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
-
+    /* PRQA S 3432, 2986 ++ */ /* VL_Os_3432, VL_Os_2986 */
     if (CHECK_ID_INVALID(ScheduleTableID, Os_CfgSchedTblMax_Inf))
-
+    /* PRQA S 3432, 2986 -- */
     {
         err = E_OS_ID;
     }
@@ -2147,7 +2198,9 @@ StatusType StartScheduleTableAbs(ScheduleTableType ScheduleTableID, TickType Sta
                 .serviceId    = OSServiceId_StartScheduleTableAbs,
                 .srvPara0     = (uint32)ScheduleTableID,
                 .srvPara1     = (uint32)Start,
+                /* PRQA S 1258 ++ */  /* VL_Os_1258 */
                 .srvPara2     = (uint32)NULL_PARA,
+                /* PRQA S 1258 -- */
             };
             err = Os_RpcCallService(&rpcData);
         }
@@ -2161,10 +2214,12 @@ StatusType StartScheduleTableAbs(ScheduleTableType ScheduleTableID, TickType Sta
 #if (CFG_ERRORHOOK == TRUE)
     if (err != E_OK)
     {
+        /* PRQA S 3138, 3141 ++ */ /* VL_Os_3138, VL_Os_3141 */
         Os_TraceErrorHook(
             OSError_Save_StartScheduleTableAbs(ScheduleTableID, Start),
             OSServiceId_StartScheduleTableAbs,
             err);
+        /* PRQA S 3138, 3141 -- */
     }
 #endif
 
@@ -2195,11 +2250,15 @@ StatusType StartScheduleTableAbs(ScheduleTableType ScheduleTableID, TickType Sta
  * REQ ID               <None>
  */
 /********************************************************************/
+/* PRQA S 3006, 6030, 6010, 6070 ++ */ /* VL_Os_3006, VL_MTR_Os_STMIF, VL_MTR_Os_STCYC, VL_MTR_Os_STCAL */
 StatusType StopScheduleTable(ScheduleTableType ScheduleTableID)
+/* PRQA S 3006, 6030, 6010, 6070 -- */
 {
-    /* PRQA S 2742, 2880, 3138, 2741 ++ */ /* VL_Os_PlatformDef */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
+    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
     OS_ENTER_KERNEL();
-    /* PRQA S 2742, 2880, 3138, 2741 -- */
+    /* PRQA S 1006 -- */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
     StatusType err = E_OK;
 
 #if (TRUE == CFG_TRACE_ENABLE)
@@ -2207,9 +2266,9 @@ StatusType StopScheduleTable(ScheduleTableType ScheduleTableID)
 #endif /* TRUE == CFG_TRACE_ENABLE */
 
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
-
+    /* PRQA S 3432, 2986 ++ */ /* VL_Os_3432, VL_Os_2986 */
     if (CHECK_ID_INVALID(ScheduleTableID, Os_CfgSchedTblMax_Inf))
-
+    /* PRQA S 3432, 2986 -- */
     {
         err = E_OS_ID;
     }
@@ -2245,8 +2304,10 @@ StatusType StopScheduleTable(ScheduleTableType ScheduleTableID)
                 .remoteCoreId = coreId,
                 .serviceId    = OSServiceId_StopScheduleTable,
                 .srvPara0     = (uint32)ScheduleTableID,
+                /* PRQA S 1258 ++ */  /* VL_Os_1258 */
                 .srvPara1     = (uint32)NULL_PARA,
                 .srvPara2     = (uint32)NULL_PARA,
+                /* PRQA S 1258 -- */
             };
             err = Os_RpcCallService(&rpcData);
         }
@@ -2260,7 +2321,9 @@ StatusType StopScheduleTable(ScheduleTableType ScheduleTableID)
 #if (CFG_ERRORHOOK == TRUE)
     if (err != E_OK)
     {
+        /* PRQA S 3138 ++ */ /* VL_Os_3138 */
         Os_TraceErrorHook(OSError_Save_StopScheduleTable(ScheduleTableID), OSServiceId_StopScheduleTable, err);
+        /* PRQA S 3138 -- */
     }
 #endif
 
@@ -2291,14 +2354,18 @@ StatusType StopScheduleTable(ScheduleTableType ScheduleTableID)
  * REQ ID               <None>
  */
 /********************************************************************/
+/* PRQA S 3006, 6030, 6010, 6070, 6080 ++ */ /* VL_Os_3006, VL_MTR_Os_STMIF, VL_MTR_Os_STCYC, VL_MTR_Os_STCAL, VL_MTR_Os_STPTH */
 StatusType NextScheduleTable(ScheduleTableType ScheduleTableID_From, ScheduleTableType ScheduleTableID_To)
+/* PRQA S 3006, 6030, 6010, 6070, 6080 -- */
 {
-    /* PRQA S 2742, 2880, 3138, 2741 ++ */ /* VL_Os_PlatformDef */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
+    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
     OS_ENTER_KERNEL();
-    /* PRQA S 2742, 2880, 3138, 2741 -- */
+    /* PRQA S 1006 -- */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
 
-    Os_STCBType* pStFromCB;
-    Os_STCBType* pStToCB;
+    Os_STCBType* pStFromCB; /* PRQA S 3678 */ /* VL_Os_3678 */
+    Os_STCBType* pStToCB; /* PRQA S 3678 */ /* VL_Os_3678 */
 
     const Os_SchedTblCfgType* pStFromCfgRef;
     const Os_SchedTblCfgType* pStToCfgRef;
@@ -2352,8 +2419,8 @@ StatusType NextScheduleTable(ScheduleTableType ScheduleTableID_From, ScheduleTab
 #endif /* TRUE == CFG_SERVICE_PROTECTION_ENABLE */
     else
     {
-        ScheduleTableID_From = Os_GetObjLocalId(ScheduleTableID_From);
-        ScheduleTableID_To   = Os_GetObjLocalId(ScheduleTableID_To);
+        ScheduleTableID_From = Os_GetObjLocalId(ScheduleTableID_From);/* PRQA S 1338 */ /* VL_Os_1338 */
+        ScheduleTableID_To   = Os_GetObjLocalId(ScheduleTableID_To);/* PRQA S 1338 */ /* VL_Os_1338 */
 
         pStFromCfgRef = &Os_SchedTblCfg[ScheduleTableID_From];
         pStToCfgRef   = &Os_SchedTblCfg[ScheduleTableID_To];
@@ -2418,10 +2485,12 @@ StatusType NextScheduleTable(ScheduleTableType ScheduleTableID_From, ScheduleTab
 #if (CFG_ERRORHOOK == TRUE)
     if (err != E_OK)
     {
+        /* PRQA S 3138, 3141 ++ */ /* VL_Os_3138, VL_Os_3141 */
         Os_TraceErrorHook(
             OSError_Save_NextScheduleTable(ScheduleTableID_From, ScheduleTableID_To),
             OSServiceId_NextScheduleTable,
             err);
+        /* PRQA S 3138, 3141 -- */
     }
 #endif
 
@@ -2454,15 +2523,21 @@ StatusType NextScheduleTable(ScheduleTableType ScheduleTableID_From, ScheduleTab
  * REQ ID               <None>
  */
 /********************************************************************/
+/* PRQA S 6010, 6030, 6070 ++ */ /* VL_MTR_Os_STCYC, VL_MTR_Os_STMIF, VL_MTR_Os_STCAL */
+/* PRQA S 3006, 6080 ++ */ /* VL_Os_3006, VL_MTR_Os_STPTH */
 StatusType StartScheduleTableSynchron(ScheduleTableType ScheduleTableID)
+/* PRQA S 3006, 6080 -- */
+/* PRQA S 6010, 6030, 6070 -- */
 {
     /* PRQA S 2742, 2880, 3138, 2741 ++ */ /* VL_Os_PlatformDef */
+    /* PRQA S 1006, 3141 ++ */ /* VL_Os_1006, VL_Os_3141 */
     OS_ENTER_KERNEL();
+    /* PRQA S 1006, 3141 -- */
     /* PRQA S 2742, 2880, 3138, 2741 -- */
     StatusType                err = E_OK;
     const Os_SchedTblCfgType* pStCfgRef;
 
-    Os_STCBType*  pStCB;
+    Os_STCBType*  pStCB; /* PRQA S 3678 */ /* VL_Os_3678 */
     Os_CoreIdType coreId;
 
 #if (TRUE == CFG_TRACE_ENABLE)
@@ -2500,7 +2575,7 @@ StatusType StartScheduleTableSynchron(ScheduleTableType ScheduleTableID)
 #endif /* TRUE == CFG_SERVICE_PROTECTION_ENABLE */
     else
     {
-        ScheduleTableID = Os_GetObjLocalId(ScheduleTableID);
+        ScheduleTableID = Os_GetObjLocalId(ScheduleTableID); /* PRQA S 1338 */ /* VL_Os_1338 */
 
         pStCfgRef = &Os_SchedTblCfg[ScheduleTableID];
         pStCB     = &Os_STCB[ScheduleTableID];
@@ -2533,7 +2608,7 @@ StatusType StartScheduleTableSynchron(ScheduleTableType ScheduleTableID)
         Os_TraceErrorHook(
             OSError_Save_StartScheduleTableSynchron(ScheduleTableID),
             OSServiceId_StartScheduleTableSynchron,
-            err);
+            err); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
     }
 #endif
 
@@ -2564,10 +2639,16 @@ StatusType StartScheduleTableSynchron(ScheduleTableType ScheduleTableID)
  * REQ ID               <None>
  */
 /********************************************************************/
+/* PRQA S 6010, 6030, 6070 ++ */ /* VL_MTR_Os_STCYC, VL_MTR_Os_STMIF, VL_MTR_Os_STCAL */
+/* PRQA S 3006, 6080 ++ */ /* VL_Os_3006, VL_MTR_Os_STPTH */
 StatusType SyncScheduleTable(ScheduleTableType ScheduleTableID, TickType value)
+/* PRQA S 3006, 6080 -- */
+/* PRQA S 6010, 6030, 6070 -- */
 {
     /* PRQA S 2742, 2880, 3138, 2741 ++ */ /* VL_Os_PlatformDef */
+    /* PRQA S 1006, 3141 ++ */ /* VL_Os_1006, VL_Os_3141 */
     OS_ENTER_KERNEL();
+    /* PRQA S 1006, 3141 -- */
     /* PRQA S 2742, 2880, 3138, 2741 -- */
     const Os_SchedTblCfgType* pStCfgRef;
     StatusType                err = E_OK;
@@ -2608,7 +2689,7 @@ StatusType SyncScheduleTable(ScheduleTableType ScheduleTableID, TickType value)
 #endif /* TRUE == CFG_SERVICE_PROTECTION_ENABLE */
     else
     {
-        ScheduleTableID = Os_GetObjLocalId(ScheduleTableID);
+        ScheduleTableID = Os_GetObjLocalId(ScheduleTableID); /* PRQA S 1338 */ /* VL_Os_1338 */
 
         pStCfgRef = &Os_SchedTblCfg[ScheduleTableID];
 
@@ -2638,7 +2719,9 @@ StatusType SyncScheduleTable(ScheduleTableType ScheduleTableID, TickType value)
 #if (CFG_ERRORHOOK == TRUE)
     if (err != E_OK)
     {
+	/* PRQA S 3138 ++ */ /* VL_Os_3138 */
         Os_TraceErrorHook(OSError_Save_SyncScheduleTable(ScheduleTableID, value), OSServiceId_SyncScheduleTable, err);
+	/* PRQA S 3138 -- */
     }
 #endif
 
@@ -2669,13 +2752,17 @@ StatusType SyncScheduleTable(ScheduleTableType ScheduleTableID, TickType value)
  * REQ ID               <None>
  */
 /********************************************************************/
+/* PRQA S 6030, 6010, 6070, 3006 ++ */ /* VL_MTR_Os_STMIF, VL_MTR_Os_STCYC, VL_MTR_Os_STCAL, VL_Os_3006 */
 StatusType SetScheduleTableAsync(ScheduleTableType ScheduleTableID)
+/* PRQA S 6030, 6010, 6070, 3006 -- */
 {
     /* PRQA S 2742, 2880, 3138, 2741 ++ */ /* VL_Os_PlatformDef */
+    /* PRQA S 1006, 3141 ++ */ /* VL_Os_1006, VL_Os_3141 */
     OS_ENTER_KERNEL();
+    /* PRQA S 1006, 3141 -- */
     /* PRQA S 2742, 2880, 3138, 2741 -- */
 
-    Os_STCBType* pStCB;
+    Os_STCBType* pStCB; /* PRQA S 3678 */ /* VL_Os_3678 */
 
     StatusType    err = E_OK;
     Os_CoreIdType coreId;
@@ -2715,7 +2802,7 @@ StatusType SetScheduleTableAsync(ScheduleTableType ScheduleTableID)
 #endif /* TRUE == CFG_SERVICE_PROTECTION_ENABLE */
     else
     {
-        ScheduleTableID = Os_GetObjLocalId(ScheduleTableID);
+        ScheduleTableID = Os_GetObjLocalId(ScheduleTableID); /* PRQA S 1338 */ /* VL_Os_1338 */
 
         /*SWS_Os_00458:If OsScheduleTblSyncStrategy of <ScheduleTableID> in
          * a call of SetScheduleTableAsync() is not equal to EXPLICIT OR if
@@ -2739,7 +2826,9 @@ StatusType SetScheduleTableAsync(ScheduleTableType ScheduleTableID)
 #if (CFG_ERRORHOOK == TRUE)
     if (err != E_OK)
     {
+	/* PRQA S 3138 ++ */ /* VL_Os_3138 */
         Os_TraceErrorHook(OSError_Save_SetScheduleTableAsync(ScheduleTableID), OSServiceId_SetScheduleTableAsync, err);
+	/* PRQA S 3138 -- */
     }
 #endif
 

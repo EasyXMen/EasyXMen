@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -21,7 +21,7 @@
  **  @description        : Large Data Communication callback header
  **
  ***********************************************************************************************************************/
-
+/* PRQA S 1512,1513 EOF */ /* VL_LdCom_1512,VL_LdCom_1513 */
 #ifndef LDCOM_CBK_H_
 #define LDCOM_CBK_H_
 /* =================================================== inclusions =================================================== */

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -181,6 +181,7 @@ DEM_LOCAL void Dem_ExtendedDataPassedUpdate(Dem_EventContextType* EventContext)
 DEM_LOCAL boolean Dem_DataReportCopyED(Dem_DataInfoConstPtrType DataInfoPtr, Dem_EDRecordRefNumType CfgEDIndex)
 {
     boolean ret = TRUE;
+#if (DEM_DATA_ELEMENT_CLASS_NUMBER > 0u)
     /** Each ED consists of 1-* data elements. */
     for (Dem_DataElementClassNumType start = Dem_GetEDRRStartOfEDRC(CfgEDIndex);
          start < Dem_GetEDRREndOfEDRC(CfgEDIndex);
@@ -192,6 +193,11 @@ DEM_LOCAL boolean Dem_DataReportCopyED(Dem_DataInfoConstPtrType DataInfoPtr, Dem
             ret = FALSE;
         }
     }
+#else
+    DEM_UNUSED_PARAM(DataInfoPtr);
+    DEM_UNUSED_PARAM(CfgEDIndex);
+    ret = FALSE;
+#endif
     return ret;
 }
 

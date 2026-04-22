@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -44,10 +44,10 @@ DCM_LOCAL uint8 Dcm_Vin[DCM_VIN_SIZE];
 /**
  * @brief whether vehicle info data has been retrived or not
  */
-#define DCM_START_SEC_VAR_INIT_BOOLEAN
+#define DCM_START_SEC_VAR_CLEARED_BOOLEAN
 #include "Dcm_MemMap.h"
-DCM_LOCAL boolean Dcm_VinObtained = FALSE; /* PRQA S 3218 */ /* VL_Dcm_3218 */
-#define DCM_STOP_SEC_VAR_INIT_BOOLEAN
+DCM_LOCAL boolean Dcm_VinObtained; /* PRQA S 3218 */ /* VL_Dcm_3218 */
+#define DCM_STOP_SEC_VAR_CLEARED_BOOLEAN
 #include "Dcm_MemMap.h"
 #endif
 /* ========================================== external function definitions ========================================= */
@@ -139,7 +139,7 @@ void Dcm_MainFunction(void) /* PRQA S 6070 */ /* VL_MTR_Dcm_STCAL */
     && ((DCM_COMCONTROL_ALL_NUM > 0) || (DCM_COMCONTROL_SPE_NUM > 0) || (DCM_COMCONTROL_SUB_NUM > 0)))
         Dcm_UDS0x28_MainFunction();
 #endif
-#if ((STD_ON == DCM_UDS_0X2A) && (STD_ON == DCM_DYN_DID))
+#if ((STD_ON == DCM_UDS_0X2A) && (STD_ON == DCM_DYN_DID) && (DCM_PERIODIC_CONNECTION_NUM > 0u))
         Dcm_UDS0x2A_MainFunction();
 #endif
 #if (STD_ON == DCM_UDS_0X29)
@@ -159,13 +159,13 @@ void Dcm_MainFunction(void) /* PRQA S 6070 */ /* VL_MTR_Dcm_STCAL */
  */
 void Dcm_SatelliteMainFunction(void)
 {
+    ApplicationType CurrentApplication = GetApplicationID();
     /* iterate over protocolrows to find message pending to be sent due to different application */
     for (uint8 index = 0u; index < DCM_PROTOCOLROW_NUM; index++)
     {
-        const Dcm_ProtocolCtrlType* protocolCtrlPtr    = &Dcm_ProtocolCtrl[index];
-        ApplicationType             CurrentApplication = GetApplicationID();
+        const Dcm_ProtocolCtrlType* protocolCtrlPtr = &Dcm_ProtocolCtrl[index];
         if ((DCM_MSG_SENDING == protocolCtrlPtr->State)
-            && (CurrentApplication == Dcm_DslMainConnection[Dcm_ProtocolCtrl[index].ConnectionId].ApplicationId))
+            && (CurrentApplication == Dcm_DslMainConnection[protocolCtrlPtr->ConnectionId].ApplicationId))
         {
             DslInternal_ProcessTransmit(index);
         }
@@ -252,18 +252,24 @@ Std_ReturnType Dcm_GetVin(uint8* Data)
                  sigIndex++)
             {
                 Dcm_NegativeResponseCodeType errorCode;
-                (void)Dcm_DspData[sigIndex].DspDataReadFnc(
+                result = Dcm_DspData[sigIndex].DspDataReadFnc(
                     DCM_INITIAL,
                     &Data[Dcm_DspDidSignal[sigIndex].DidByteOffset],
                     &errorCode);
+                if (result != E_OK)
+                {
+                    break;
+                }
             }
-
-            result          = E_OK;
-            Dcm_VinObtained = TRUE;
+            if (result == E_OK)
+            {
+                Dcm_VinObtained = TRUE;
+            }
         }
         else
         {
             DcmInternal_Memcpy(Data, Dcm_Vin, DCM_VIN_SIZE);
+            result = E_OK;
         }
 #else
         DCM_UNUSED(Data);

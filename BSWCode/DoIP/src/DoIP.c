@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -29,7 +29,7 @@
 #include "DoIP_Internal_TCP.h"
 #include "DoIP_Internal_UDP.h"
 #include "DoIP_Internal_DET.h"
-
+#include "SchM_DoIP.h"
 /* ============================================ external data definitions =========================================== */
 
 #define DOIP_START_SEC_VAR_INIT_UNSPECIFIED
@@ -52,9 +52,11 @@ const DoIP_PBConfigType* DoIP_PBCfgPtr;
 
 /* ========================================== external function definitions ========================================= */
 
+/* PRQA S 1512 EOF */ /* VL_DoIP_1512 */
 #define DOIP_START_SEC_CODE
 #include "DoIP_MemMap.h"
 /* PRQA S 3415 ++ */ /* VL_DoIP_3415 */
+/* PRQA S 4461 ++ */ /* VL_DoIP_4461 */
 /**
  * @brief This service initializes all global variables of the DoIP module. After return of
  *        this service the DoIP module is operational.
@@ -131,7 +133,7 @@ void DoIP_ActivationLineSwitch(boolean* active) /* PRQA S 1503 */ /* VL_QAC_NoUs
         }
         else
         {
-            // for qac
+            /* for qac idle */
         }
     }
 }
@@ -140,9 +142,9 @@ void DoIP_ActivationLineSwitch(boolean* active) /* PRQA S 1503 */ /* VL_QAC_NoUs
  * @brief This function is called to acquire the transmit data of an I-PDU segment (N-PDU).
  *        Each call to this function provides the next part of the I-PDU data unless retry->TpDataState is TP_DATARETRY.
  */
-/* PRQA S 1503,3408 ++ */ /* VL_QAC_NoUsedApi,VL_DoIP_WithoutPreDeclaration */
+/* PRQA S 3408,1503 ++ */ /* VL_DoIP_WithoutPreDeclaration,VL_QAC_NoUsedApi */
 BufReq_ReturnType DoIP_SoAdTpCopyTxData(
-    /* PRQA S 1503,3408 -- */
+    /* PRQA S 3408,1503 -- */
     PduIdType            soadTxPduId,
     const PduInfoType*   pduInfoPtr,
     const RetryInfoType* retry,
@@ -198,7 +200,7 @@ BufReq_ReturnType DoIP_SoAdTpCopyTxData(
  */
 /* PRQA S 3408,1503 ++ */ /* VL_DoIP_WithoutPreDeclaration,VL_QAC_NoUsedApi */
 void DoIP_SoAdTpTxConfirmation(PduIdType soadTxPduId, Std_ReturnType result)
-/* PRQA S 3408,1503 -- */ /* VL_DoIP_WithoutPreDeclaration,VL_QAC_NoUsedApi */
+/* PRQA S 3408,1503 -- */
 {
     if (TRUE == DOIP_SOADTPTXCONFIRMATION_DET(soadTxPduId, result))
     {
@@ -246,7 +248,7 @@ void DoIP_SoAdTpTxConfirmation(PduIdType soadTxPduId, Std_ReturnType result)
 /* PRQA S 3408,1503 ++ */ /* VL_DoIP_WithoutPreDeclaration,VL_QAC_NoUsedApi */
 BufReq_ReturnType
     DoIP_SoAdTpCopyRxData(PduIdType soadRxPduId, const PduInfoType* pduInfoPtr, PduLengthType* bufferSizePtr)
-/* PRQA S 3408,1503 -- */ /* VL_DoIP_WithoutPreDeclaration,VL_QAC_NoUsedApi */
+/* PRQA S 3408,1503 -- */
 {
     uint8                      txRxCtxIdx   = 0u;
     uint16                     soadTxPduRef = 0u;
@@ -509,7 +511,6 @@ void DoIP_SoAdIfTxConfirmation(PduIdType soadTxPduId, Std_ReturnType result)
  */
 /* PRQA S 3408,1503 ++ */ /* VL_DoIP_WithoutPreDeclaration,VL_QAC_NoUsedApi */
 void DoIP_SoConModeChg(SoAd_SoConIdType soConId, SoAd_SoConModeType mode)
-/* PRQA S 3408,1503 -- */
 {
     if (TRUE == DOIP_SOCONMODECFG_DET(soConId, mode))
     {
@@ -524,7 +525,6 @@ void DoIP_SoConModeChg(SoAd_SoConIdType soConId, SoAd_SoConModeType mode)
 /**
  * @brief This function gets called by the SoAd if an IP address assignment related to a socket connection changes.
  */
-/* PRQA S 3408,1503 ++ */ /* VL_DoIP_WithoutPreDeclaration,VL_QAC_NoUsedApi */
 void DoIP_LocalIpAddrAssignmentChg(SoAd_SoConIdType soConId, TcpIp_IpAddrStateType state)
 /* PRQA S 3408,1503 -- */
 {
@@ -557,35 +557,51 @@ void DoIP_LocalIpAddrAssignmentChg(SoAd_SoConIdType soConId, TcpIp_IpAddrStateTy
  *        It is used to indicate the transmission which will be performed in the DoIP_Mainfunction.
  */
 /* PRQA S 1503 ++ */ /* VL_QAC_NoUsedApi */
-Std_ReturnType DoIP_TpTransmit(PduIdType pdurTxPduId, const PduInfoType* pduInfoPtr)
+/* PRQA S 6070 ++ */ /* VL_MTR_DoIP_STCAL */
+Std_ReturnType DoIP_TpTransmit(PduIdType DoIPPduRTxId, const PduInfoType* DoIPPduRTxInfoPtr)
 /* PRQA S 1503 -- */
+/* PRQA S 6070 -- */
 {
-    Std_ReturnType ret = DOIP_TPTRANSMIT_DET(pdurTxPduId, pduInfoPtr);
+    Std_ReturnType ret = DOIP_TPTRANSMIT_DET(DoIPPduRTxId, DoIPPduRTxInfoPtr);
 
     if (E_OK == ret) /*SWS_DoIP_00284*/
     {
         uint8  txRxCtxIdx;
         uint16 channelIdx;
 
-        if ((E_OK == DoIP_GetChannelIdxByPduRTxPduId(pdurTxPduId, DOIP_TPPDU, &channelIdx))
-            && (TRUE == DoIP_IsValidMatadata(channelIdx, pduInfoPtr))
+        if ((E_OK == DoIP_GetChannelIdxByPduRTxPduId(DoIPPduRTxId, DOIP_TPPDU, &channelIdx))
+            && (TRUE == DoIP_IsValidMatadata(channelIdx, DoIPPduRTxInfoPtr))
             && (E_OK == DoIP_GetTcpTxRxCtxIdxByChannelIdx(channelIdx, &txRxCtxIdx))
             && (TRUE == DoIP_IsSoConOnline(channelIdx)))
         {
+            SchM_Enter_DoIP_ExclusiveArea();
             /* PRQA S 2844 ++ */ /* VL_DoIP_DerefInvalidPtr */
             const DoIP_TcpTxCtrlType* txCtrl = &(DoIP_TcpTxRxContext[txRxCtxIdx].TxCtrl);
             /* PRQA S 2844 -- */
+            const DoIP_TpQueueType* pendingQueue = &DoIP_TcpTxRxContext[txRxCtxIdx].TxTpQueue;
+            uint8                   pendingQueueNum;
 
-            /* PRQA S 2814 ++ */ /* VL_QAC_DerefNullPtr */
-            if ((txCtrl->TxBufState == DOIP_BUFFER_IDLE) && (txCtrl->TxState == DOIP_TX_STATE_IDLE))
-            /* PRQA S 2814 -- */
+            if ((pendingQueue->Tail > pendingQueue->Head) || (pendingQueue->Count == 0u))
             {
-                ret = DoIP_TpTransmitInternal(pdurTxPduId, pduInfoPtr);
+                pendingQueueNum = pendingQueue->Tail - pendingQueue->Head;
             }
             else
             {
-                ret = DoIP_EnqueueTpMsg(&DoIP_TcpTxRxContext[txRxCtxIdx].TxTpQueue, pdurTxPduId, pduInfoPtr);
+                pendingQueueNum = (DOIP_TP_QUEUE_BUFFER_NUM - pendingQueue->Head) + pendingQueue->Tail;
             }
+
+            /* PRQA S 2814 ++ */ /* VL_QAC_DerefNullPtr */
+            if ((txCtrl->TxBufState == DOIP_BUFFER_IDLE) && (txCtrl->TxState == DOIP_TX_STATE_IDLE)
+                && (pendingQueueNum == 0u))
+            /* PRQA S 2814 -- */
+            {
+                ret = DoIP_TpTransmitInternal(DoIPPduRTxId, DoIPPduRTxInfoPtr);
+            }
+            else
+            {
+                ret = DoIP_EnqueueTpMsg(&DoIP_TcpTxRxContext[txRxCtxIdx].TxTpQueue, DoIPPduRTxId, DoIPPduRTxInfoPtr);
+            }
+            SchM_Exit_DoIP_ExclusiveArea();
         }
         else
         {
@@ -600,17 +616,17 @@ Std_ReturnType DoIP_TpTransmit(PduIdType pdurTxPduId, const PduInfoType* pduInfo
  * @brief This service primitive is used to cancel the transfer of pending DoIPPduRTxIds. The connection is
  *        identified by DoIPPduRTxId. When the function returns, no transmission is in progress anymore
  */
-Std_ReturnType DoIP_TpCancelTransmit(PduIdType pdurTxPduId) /* PRQA S 1503 */ /* VL_QAC_NoUsedApi */
+Std_ReturnType DoIP_TpCancelTransmit(PduIdType DoIPPduRTxId) /* PRQA S 1503 */ /* VL_QAC_NoUsedApi */
 {
     /*SWS_DoIP_00166*/
-    Std_ReturnType ret = DOIP_TPCANCELTRANSMIT_DET(pdurTxPduId);
+    Std_ReturnType ret = DOIP_TPCANCELTRANSMIT_DET(DoIPPduRTxId);
 
     if (E_OK == ret)
     {
         ret = E_NOT_OK;
         uint8 txRxCtxIdx;
 
-        if (E_OK == DoIP_GetTcpTxRxCtxIdxByPduRTxPduId(pdurTxPduId, &txRxCtxIdx))
+        if (E_OK == DoIP_GetTcpTxRxCtxIdxByPduRTxPduId(DoIPPduRTxId, &txRxCtxIdx))
         {
             uint16 soadTxPduRef;
 
@@ -644,10 +660,10 @@ Std_ReturnType DoIP_TpCancelTransmit(PduIdType pdurTxPduId) /* PRQA S 1503 */ /*
  *        is terminated immediately. When the function returns, no reception is in progress anymore with
  *        the given DoIPPduRRxId identifier.
  */
-Std_ReturnType DoIP_TpCancelReceive(PduIdType pdurRxPduId) /* PRQA S 1503 */ /* VL_QAC_NoUsedApi */
+Std_ReturnType DoIP_TpCancelReceive(PduIdType DoIPPduRRxId) /* PRQA S 1503 */ /* VL_QAC_NoUsedApi */
 {
     /*SWS_DoIP_00169*/
-    Std_ReturnType ret = DOIP_TPCANCELRECEIVE_DET(pdurRxPduId);
+    Std_ReturnType ret = DOIP_TPCANCELRECEIVE_DET(DoIPPduRRxId);
 
     if (E_OK == ret)
     {
@@ -656,7 +672,7 @@ Std_ReturnType DoIP_TpCancelReceive(PduIdType pdurRxPduId) /* PRQA S 1503 */ /* 
         uint16    index;
         PduIdType soadRxPduId;
 
-        if (E_OK == DoIP_GetChannelIdxByPduRRxPduId(pdurRxPduId, &index))
+        if (E_OK == DoIP_GetChannelIdxByPduRRxPduId(DoIPPduRRxId, &index))
         {
             const DoIP_TcpRxCtrlType* rxCtrl;
             /* PRQA S 2814,2824 ++ */ /* VL_QAC_DerefNullPtr,VL_DoIP_ArithNullptr */
@@ -698,22 +714,23 @@ Std_ReturnType DoIP_TpCancelReceive(PduIdType pdurRxPduId) /* PRQA S 1503 */ /* 
 /**
  * @brief Requests transmission of an I-PDU.
  */
-/* PRQA S 1503 ++ */ /* VL_QAC_NoUsedApi */
-Std_ReturnType DoIP_IfTransmit(PduIdType pdurTxPduId, const PduInfoType* pduInfoPtr)
-/* PRQA S 1503 -- */ /* VL_QAC_NoUsedApi */
+/* PRQA S 1503, 6070 ++ */ /* VL_QAC_NoUsedApi, VL_MTR_DoIP_STCAL */
+Std_ReturnType DoIP_IfTransmit(PduIdType id, const PduInfoType* info)
+/* PRQA S 1503, 6070 -- */
 {
-    Std_ReturnType ret = DOIP_IFTRANSMIT_DET(pdurTxPduId, pduInfoPtr);
+    Std_ReturnType ret = DOIP_IFTRANSMIT_DET(id, info);
 
     if (E_OK == ret)
     {
         uint8  txRxCtxIdx;
         uint16 channelIdx;
 
-        if ((E_OK == DoIP_GetChannelIdxByPduRTxPduId(pdurTxPduId, DOIP_IFPDU, &channelIdx))
-            && (TRUE == DoIP_IsValidMatadata(channelIdx, pduInfoPtr))
+        if ((E_OK == DoIP_GetChannelIdxByPduRTxPduId(id, DOIP_IFPDU, &channelIdx))
+            && (TRUE == DoIP_IsValidMatadata(channelIdx, info))
             && (E_OK == DoIP_GetTcpTxRxCtxIdxByChannelIdx(channelIdx, &txRxCtxIdx))
             && (TRUE == DoIP_IsSoConOnline(channelIdx)))
         {
+            SchM_Enter_DoIP_ExclusiveArea();
             /* PRQA S 2844 ++ */ /* VL_DoIP_2844 */
             const DoIP_TcpTxCtrlType* txCtrl = &DoIP_TcpTxRxContext[txRxCtxIdx].TxCtrl;
             /* PRQA S 2844 -- */
@@ -722,12 +739,13 @@ Std_ReturnType DoIP_IfTransmit(PduIdType pdurTxPduId, const PduInfoType* pduInfo
             if ((txCtrl->TxBufState == DOIP_BUFFER_IDLE) && (txCtrl->TxState == DOIP_TX_STATE_IDLE))
             /* PRQA S 2814 -- */
             {
-                ret = DoIP_IfTransmitInternal(pdurTxPduId, pduInfoPtr);
+                ret = DoIP_IfTransmitInternal(id, info);
             }
             else
             {
-                ret = DoIP_EnqueueIfMsg(&DoIP_TcpTxRxContext[txRxCtxIdx].TxIfQueue, pdurTxPduId, pduInfoPtr);
+                ret = DoIP_EnqueueIfMsg(&DoIP_TcpTxRxContext[txRxCtxIdx].TxIfQueue, id, info);
             }
+            SchM_Exit_DoIP_ExclusiveArea();
         }
         else
         {
@@ -741,9 +759,9 @@ Std_ReturnType DoIP_IfTransmit(PduIdType pdurTxPduId, const PduInfoType* pduInfo
 /**
  * @brief Requests cancellation of an ongoing transmission of an I-PDU in a lower layer communication interface module.
  */
-Std_ReturnType DoIP_IfCancelTransmit(PduIdType pdurTxPduId) /* PRQA S 1503 */ /* VL_QAC_NoUsedApi */
+Std_ReturnType DoIP_IfCancelTransmit(PduIdType id) /* PRQA S 1503 */ /* VL_QAC_NoUsedApi */
 {
-    Std_ReturnType ret = DOIP_IFCANCELTRANSMIT_DET(pdurTxPduId);
+    Std_ReturnType ret = DOIP_IFCANCELTRANSMIT_DET(id);
 
     if (E_OK == ret)
     {
@@ -751,7 +769,7 @@ Std_ReturnType DoIP_IfCancelTransmit(PduIdType pdurTxPduId) /* PRQA S 1503 */ /*
 
         ret = E_NOT_OK;
 
-        if (E_OK == DoIP_GetTcpTxRxCtxIdxByPduRTxPduId(pdurTxPduId, &txRxCtxIdx))
+        if (E_OK == DoIP_GetTcpTxRxCtxIdxByPduRTxPduId(id, &txRxCtxIdx))
         {
             /* PRQA S 2844 ++ */ /* VL_DoIP_2844 */
             const DoIP_TcpTxCtrlType* txCtrl = &DoIP_TcpTxRxContext[txRxCtxIdx].TxCtrl;
@@ -784,7 +802,7 @@ Std_ReturnType DoIP_IfCancelTransmit(PduIdType pdurTxPduId) /* PRQA S 1503 */ /*
 
     return ret;
 }
-
+/* PRQA S 4461 -- */
 /**
  * @brief Schedules the Diagnostic over IP module. (Entry point for scheduling)
  */

@@ -1,6 +1,6 @@
 /* PRQA S 3108++ */
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -141,12 +141,10 @@ void Os_ArchFirstEnterTask(void)
 void Os_ArchDispatch(void)
 {
     /* Call PendSV to switch task */
-    OS_ASM("cpsid i                            \n"
-           "ldr r0, =0xE000ED04             \n"
-           "ldr r1, =0x10000000            \n"
-           "str r1, [r0]                       \n"
-           "dsb                                \n"
-           "cpsie i                            \n");
+    uint32 NVIC_PENDSVSET = 0x10000000;
+    Os_ArchDisableInt();
+    OS_SCB_ICSE_BASE |= NVIC_PENDSVSET;
+    Os_ArchEnableInt();
 }
 
 #if ((OS_SC3 == CFG_SC) || (OS_SC4 == CFG_SC))
@@ -193,13 +191,10 @@ void Os_ArchFirstDispatch(void)
            "ldr r0, [r0]                        \n"
            "ldr r0, [r0]                        \n"
            "bic r1,r0,#7                        \n"
-           "msr msp,r1                          \n"
-           "ldr r0, =0xE000ED04              \n"
-           "ldr r1, =0x10000000             \n"
-           "str r1, [r0]                        \n"
-           "dsb                                 \n"
-           "cpsie i                             \n"
-           "nop                                 \n");
+           "msr msp,r1                          \n");
+    uint32 NVIC_PENDSVSET = 0x10000000;
+    OS_SCB_ICSE_BASE |= NVIC_PENDSVSET;
+    Os_ArchEnableInt();
 }
 
 /*****************************************************************************/
@@ -218,9 +213,6 @@ void Os_ArchFirstDispatch(void)
 /*****************************************************************************/
 void Os_ArchStartScheduler(void)
 {
-    /*notes: the code of start system timer must be lightweight, otherwise the
-     * previous step 'synchronization' will not make sense*/
-    Os_StartSysTimer();
     /*Run the scheduler*/
     Os_ArchFirstDispatch();   /* Switch stack and System call */
     while (1) /*PRQA S 2740*/ /* MISRA CWE-569,CWE-571 */
@@ -258,7 +250,7 @@ void Os_InitSysTimer(void)
         OS_SYSTICK_CTRL_REG = 0x0u;
         OS_SYSTICK_COUNTER_REG = 0x0u;
         OS_SYSTICK_RELOAD_REG = CFG_REG_OSTIMER_VALUE_CORE0 - 0x1u;
-        OS_SYSTICK_CTRL_REG = (OS_SYSTICK_CLK_BIT | OS_SYSTICK_INT_BIT);
+        OS_SYSTICK_CTRL_REG = (OS_SYSTICK_CLK_BIT | OS_SYSTICK_INT_BIT | OS_SYSTICK_ENABLE_BIT);
         /* PRQA S 0303 --*/ /* MISRA Rule 11.4 */
         break;
 #endif
@@ -270,7 +262,7 @@ void Os_InitSysTimer(void)
         OS_SYSTICK_CTRL_REG = 0x0u;
         OS_SYSTICK_COUNTER_REG = 0x0u;
         OS_SYSTICK_RELOAD_REG = CFG_REG_OSTIMER_VALUE_CORE1 - 0x1u;
-        OS_SYSTICK_CTRL_REG = (OS_SYSTICK_CLK_BIT | OS_SYSTICK_INT_BIT);
+        OS_SYSTICK_CTRL_REG = (OS_SYSTICK_CLK_BIT | OS_SYSTICK_INT_BIT | OS_SYSTICK_ENABLE_BIT);
         /* PRQA S 0303 --*/ /* MISRA Rule 11.4 */
         break;
 #endif
@@ -282,7 +274,7 @@ void Os_InitSysTimer(void)
         OS_SYSTICK_CTRL_REG = 0x0u;
         OS_SYSTICK_COUNTER_REG = 0x0u;
         OS_SYSTICK_RELOAD_REG = CFG_REG_OSTIMER_VALUE_CORE2 - 0x1u;
-        OS_SYSTICK_CTRL_REG = (OS_SYSTICK_CLK_BIT | OS_SYSTICK_INT_BIT);
+        OS_SYSTICK_CTRL_REG = (OS_SYSTICK_CLK_BIT | OS_SYSTICK_INT_BIT | OS_SYSTICK_ENABLE_BIT);
         /* PRQA S 0303 --*/ /* MISRA Rule 11.4 */
         break;
 #endif
@@ -294,7 +286,7 @@ void Os_InitSysTimer(void)
         OS_SYSTICK_CTRL_REG = 0x0u;
         OS_SYSTICK_COUNTER_REG = 0x0u;
         OS_SYSTICK_RELOAD_REG = CFG_REG_OSTIMER_VALUE_CORE3 - 0x1u;
-        OS_SYSTICK_CTRL_REG = (OS_SYSTICK_CLK_BIT | OS_SYSTICK_INT_BIT);
+        OS_SYSTICK_CTRL_REG = (OS_SYSTICK_CLK_BIT | OS_SYSTICK_INT_BIT | OS_SYSTICK_ENABLE_BIT);
         /* PRQA S 0303 --*/ /* MISRA Rule 11.4 */
         break;
 #endif

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -21,7 +21,9 @@
  **  @description        : I-PDU Multiplexer
  **
  ***********************************************************************************************************************/
-
+/* PRQA S 2985 EOF */ /* VL_IpduM_RedundantOperation */
+/* PRQA S 2905 EOF */ /* VL_IpduM_2905 */
+/* PRQA S 4461 EOF */ /* VL_IpduM_4461 */
 /* =================================================== inclusions =================================================== */
 #include "IpduM_Cbk.h"
 #include "IpduM_Cfg.h"
@@ -59,7 +61,7 @@ notify PDUR router to upper layer */
 #endif
 
 #define IPDUM_UNUSED_CONTAINEDTX_INDEX ((PduIdType)(0xFFFFu))
-#define IPDUM_UNUSED_UINT8             (255)
+#define IPDUM_UNUSED_UINT8             (255u)
 #define IPDUM_BITSHIFT_THREE           (3u)
 #define IPDUM_SHOT_HEADER_ID_SIZE      (3u)
 #define IPDUM_SHOT_HEADER_DLC_SIZE     (1u)
@@ -1432,7 +1434,7 @@ IPDUM_LOCAL void IpduM_MultiplexRxIndication(PduIdType rxIndIndex, const PduInfo
     /* @SWS_IpduM_00042: forwards Dynamic part */
     const IpduM_RxDynamicPartType* rxDynamicPartPtr;
     uint16                         selcetVal  = 0x0u;
-    PduIdType                      startIndex = rxIndicationCfgPtr->RxDynamicPartStartIndex;
+    uint16                         startIndex = rxIndicationCfgPtr->RxDynamicPartStartIndex;
     boolean                        findFlag   = FALSE;
     /* find selcetor value */
     Std_ReturnType ret = IpduM_MultiplexFindSelectVal(
@@ -1990,7 +1992,7 @@ IPDUM_LOCAL Std_ReturnType IpduM_ContainerTxAssemble(
             IpduMUnusedAreasDefault value */
         (void)IStdLib_MemSet(
             txInstancePtr->BufPtr,
-            (int)containerTxCfgPtr->IpduMUnusedAreasDefault,
+            containerTxCfgPtr->IpduMUnusedAreasDefault,
             containerTxCfgPtr->PduLen);
     }
     uint8 headerSize = containerTxCfgPtr->IpduMContainerHeaderSize;
@@ -2129,7 +2131,7 @@ IPDUM_LOCAL void IpduM_FillContainedHeaderInContainer(uint8 headerSizeCfg, uint8
     for (uint8 byteLoop = 0u; byteLoop < idSizeInByte; byteLoop++)
     {
 #if (IPDUM_BIG_ENDIAN == IPDUM_HEADER_BYTE_ORDER)
-        dataPtr[byteLoop] = (uint8)(idVal >> (((byteSize - byteLoop) - 1u) * 8u));
+        dataPtr[byteLoop] = (uint8)(idVal >> (((idSizeInByte - byteLoop) - 1u) * 8u));
 #else
         dataPtr[byteLoop] = (uint8)(idVal >> (byteLoop * IPDUM_MAGIC_NUM_EIGHT));
 #endif
@@ -2138,7 +2140,7 @@ IPDUM_LOCAL void IpduM_FillContainedHeaderInContainer(uint8 headerSizeCfg, uint8
     for (uint8 byteLoop = 0u; byteLoop < dlcSizeInByte; byteLoop++)
     {
 #if (IPDUM_BIG_ENDIAN == IPDUM_HEADER_BYTE_ORDER)
-        dataPtr[byteLoop] = (uint8)(dlcVal >> (((byteSize - byteLoop) - 1u) * 8u));
+        dataPtr[byteLoop] = (uint8)(dlcVal >> (((dlcSizeInByte - byteLoop) - 1u) * 8u));
 #else
         dataPtr[byteLoop] = (uint8)(dlcVal >> (byteLoop * IPDUM_MAGIC_NUM_EIGHT));
 #endif
@@ -2990,9 +2992,9 @@ IPDUM_LOCAL void IpduM_ContainerRxExtractStatic(
     const IpduM_ContainedRxPduCfgType* containedRxPtr;
     PduLengthType                      containedIndex     = containerRxCfgPtr->RxContainedStartIndexInContainedPdu;
     PduIdType                          containedCnt       = containerRxCfgPtr->ContainerRxContainContainedCnt;
-    uint16                             acceptContainedCnt = 0u;
+    PduIdType                          acceptContainedCnt = 0u;
     /* containerRxPdu length check */
-    for (uint16 loop = containedCnt; loop > 0u; loop--)
+    for (PduIdType loop = containedCnt; loop > 0u; loop--)
     {
         containedRxPtr = &IpduM_CfgPtr->IpduMContainedRxPduPtr[containedIndex + loop - 1u];
         if (rxInstancePtr->PayloadSize > containedRxPtr->IpduMContainedRxPduOffset)
@@ -3015,7 +3017,7 @@ IPDUM_LOCAL void IpduM_ContainerRxExtractStatic(
         }
     }
 
-    for (uint16 loop = 0u; loop < acceptContainedCnt; loop++)
+    for (PduIdType loop = 0u; loop < acceptContainedCnt; loop++)
     {
         PduInfoType outPdu;
         containedRxPtr    = &IpduM_CfgPtr->IpduMContainedRxPduPtr[containedIndex + loop];

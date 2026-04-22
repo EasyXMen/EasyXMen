@@ -25,25 +25,22 @@ https://atomgit.com/easyxmen/XMen
 
 https://atomgit.com/easyxmen/docs
 
-* 快速预览（Instant view the page at）：https://easyxmen.atomgit.net/docs/
+* 快速预览（Instant view the page at）：https://easyxmen.atomgit.com/
 
 # 目录结构 Directory Structure
 
 ```
 ├── BSWCode                 # 模块静态代码(Module static code)
-│   ├── Bfx
 │   ├── BswM
 │   ├── CanIf
 │   ├── CanNm
 │   ├── CanSM
 │   ├── CanTp
-│   ├── CanTrcv
 │   ├── CanTSyn
 │   ├── CDD_FVM
 │   ├── Com
 │   ├── ComM
 │   ├── CommonInclude       # 共用的头文件(Common header files)
-│   ├── Crc
 │   ├── CryIf
 │   ├── Crypto_62
 │   ├── Csm
@@ -52,20 +49,15 @@ https://atomgit.com/easyxmen/docs
 │   ├── Det
 │   ├── Dlt
 │   ├── DoIP
-│   ├── E2E
 │   ├── Ea
 │   ├── EcuM
 │   ├── Eep_62
 │   ├── EthIf
 │   ├── EthSM
-│   ├── EthSwt
-│   ├── EthTrcv_62
 │   ├── EthTSyn
 │   ├── Fee
 │   ├── FiM
-│   ├── FlsTst
 │   ├── IpduM
-│   ├── IStdLib
 │   ├── KeyM
 │   ├── LdCom
 │   ├── LinIf
@@ -74,11 +66,9 @@ https://atomgit.com/easyxmen/docs
 │   ├── Nm
 │   ├── NvM
 │   ├── PduR
-│   ├── RamTst
 │   ├── Sd
 │   ├── SecOC
 │   ├── SoAd
-│   ├── SOMEIPTP
 │   ├── StbM
 │   ├── TcpIp
 │   ├── Tm

@@ -1,6 +1,6 @@
 /* PRQA S 3108++ */
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -41,7 +41,7 @@
 #if (TRUE == CFG_CORE0_AUTOSAROS_ENABLE)
 #define OS_START_SEC_VAR_CLEARED_CORE0_UNSPECIFIED
 #include "Os_MemMap.h"
-VAR(uint32, OS_VAR) Os_IsrNestPcxStackCore0[CFG_ISR_MAX_CORE0] = {0};
+uint32 Os_IsrNestPcxStackCore0[CFG_ISR_MAX_CORE0] = {0};
 #define OS_STOP_SEC_VAR_CLEARED_CORE0_UNSPECIFIED
 #include "Os_MemMap.h"
 #endif
@@ -49,7 +49,7 @@ VAR(uint32, OS_VAR) Os_IsrNestPcxStackCore0[CFG_ISR_MAX_CORE0] = {0};
 #if (TRUE == CFG_CORE0_AUTOSAROS_ENABLE)
 #define OS_START_SEC_VAR_CLEARED_CORE0_UNSPECIFIED
 #include "Os_MemMap.h"
-VAR(uint32, OS_VAR) Os_Isr2_Ipl_MaxCore0 = CFG_ISR2_IPL_MAX_CORE0;
+uint32 Os_Isr2_Ipl_MaxCore0 = CFG_ISR2_IPL_MAX_CORE0;
 #define OS_STOP_SEC_VAR_CLEARED_CORE0_UNSPECIFIED
 #include "Os_MemMap.h"
 #endif
@@ -57,13 +57,13 @@ VAR(uint32, OS_VAR) Os_Isr2_Ipl_MaxCore0 = CFG_ISR2_IPL_MAX_CORE0;
 #if (TRUE == CFG_MEMORY_PROTECTION_ENABLE)
 #define OS_START_SEC_VAR_CLONE_PTR
 #include "Os_MemMap.h"
-P2CONST(OS_ISR_ADDR, AUTOMATIC, OS_VAR) Os_IsrDAddr;
+const OS_ISR_ADDR * Os_IsrDAddr;
 #define OS_STOP_SEC_VAR_CLONE_PTR
 #include "Os_MemMap.h"
 
 #define OS_START_SEC_VAR_CLONE_PTR
 #include "Os_MemMap.h"
-P2CONST(OS_TASK_ADDR, AUTOMATIC, OS_VAR) Os_TaskDAddr;
+const OS_TASK_ADDR * Os_TaskDAddr;
 #define OS_STOP_SEC_VAR_CLONE_PTR
 #include "Os_MemMap.h"
 #endif
@@ -84,13 +84,12 @@ P2CONST(OS_TASK_ADDR, AUTOMATIC, OS_VAR) Os_TaskDAddr;
 /******************************************************************************/
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-FUNC(void, OS_CODE) Os_MultiCoreInitProcessor(void)
+void Os_MultiCoreInitProcessor(void)
 {
     switch (Os_SCB.sysCore)
     {
 #if (TRUE == CFG_CORE0_AUTOSAROS_ENABLE)
     case OS_CORE_ID_0:
-        Os_IsrNestPcxStack = Os_IsrNestPcxStackCore0;
         Os_Isr2_Ipl_Limit = OS_NVIC_CONVERT_SET_PRIO(Os_Isr2_Ipl_MaxCore0);
 #if (TRUE == CFG_MEMORY_PROTECTION_ENABLE)
         Os_IsrDAddr = Os_Isr_DAddr_Core0;
@@ -142,7 +141,7 @@ FUNC(Os_CoreIdType, OS_CODE) Os_ArchGetCoreID(void)
  * CallByAPI            <StartCore>
  */
 /******************************************************************************/
-FUNC(void, OS_CODE) Os_ArchStartCore(Os_CoreIdType coreId)
+void Os_ArchStartCore(Os_CoreIdType coreId)
 {
     while (1)
     {
@@ -166,7 +165,7 @@ FUNC(void, OS_CODE) Os_ArchStartCore(Os_CoreIdType coreId)
  * REQ ID               <DD_1_0779, DD_1_0780, DD_1_1543, DD_1_1544>
  */
 /******************************************************************************/
-FUNC(CoreIdType, OS_CODE) Os_GetCoreLogID(CoreIdType phyCoreId)
+CoreIdType Os_GetCoreLogID(CoreIdType phyCoreId)
 {
     CoreIdType logCoreId;
 
@@ -201,7 +200,7 @@ FUNC(CoreIdType, OS_CODE) Os_GetCoreLogID(CoreIdType phyCoreId)
  * REQ ID               <None>
  */
 /******************************************************************************/
-FUNC(CoreIdType, OS_CODE) Os_GetCorePhyID(CoreIdType logCoreId)
+CoreIdType Os_GetCorePhyID(CoreIdType logCoreId)
 {
     CoreIdType phyCoreId;
 
@@ -235,7 +234,7 @@ FUNC(CoreIdType, OS_CODE) Os_GetCorePhyID(CoreIdType logCoreId)
  * CallByAPI            <Os_SetCoreMode>
  */
 /******************************************************************************/
-FUNC(Os_CoreModeType, OS_CODE) Os_GetCoreMode(Os_CoreIdType coreId)
+Os_CoreModeType Os_GetCoreMode(Os_CoreIdType coreId)
 {
     UNUSED_PARAMETER(coreId);
     Os_CoreModeType coreMode = OS_CORE_MODE_UNKNOWN;
@@ -258,7 +257,7 @@ FUNC(Os_CoreModeType, OS_CODE) Os_GetCoreMode(Os_CoreIdType coreId)
  * CallByAPI            <ControlIdle>
  */
 /******************************************************************************/
-FUNC(boolean, OS_CODE) Os_SetCoreMode(Os_CoreIdType core, Os_CoreModeType coreMode)
+boolean Os_SetCoreMode(Os_CoreIdType core, Os_CoreModeType coreMode)
 {
     UNUSED_PARAMETER(core);
     UNUSED_PARAMETER(coreMode);
@@ -285,7 +284,7 @@ FUNC(boolean, OS_CODE) Os_SetCoreMode(Os_CoreIdType core, Os_CoreModeType coreMo
  * REQ ID               <None>
  */
 /******************************************************************************/
-FUNC(void, OS_CODE) Os_TaskEntry_IdleCore0(void)
+void Os_TaskEntry_IdleCore0(void)
 {
     while (1)
     {
@@ -311,9 +310,8 @@ FUNC(void, OS_CODE) Os_TaskEntry_IdleCore0(void)
  * CallByAPI            <StartOS>
  */
 /******************************************************************************/
-FUNC(void, OS_CODE) Os_ArchInitCPU(void)
+void Os_ArchInitCPU()
 {
-
     OS_REG32(CM7_SCB_CCR_ADDRESS) |= 0x01U; /* PRQA S 0306 */ /* MISRA Rule 11.4 */ /* ARCH_PROCESSOR_TYPE_CAST_006 */
 #if defined(ENABLE_FPU)
     FPU_Init();
@@ -334,7 +332,4 @@ FUNC(void, OS_CODE) Os_ArchInitCPU(void)
 #endif
 }
 #define OS_STOP_SEC_CODE
-#include "Os_MemMap.h"
-
-#define OS_START_SEC_CODE
 #include "Os_MemMap.h"

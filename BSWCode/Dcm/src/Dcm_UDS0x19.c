@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -376,6 +376,9 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x19_PostProcess(
     Std_ReturnType                subFunctionResult,
     Dcm_NegativeResponseCodeType* ErrorCode);
 
+#if (                                                                                            \
+    (STD_ON == DCM_UDS_0X19_0X2) || (STD_ON == DCM_UDS_0X19_0XA) || (STD_ON == DCM_UDS_0X19_0X6) \
+    || (STD_ON == DCM_UDS_0X19_0X4) || (STD_ON == DCM_UDS_0X19_0X3))
 /**
  * @brief         deal with total response length
  * @param[in]     pMsgContext : Message-related information for one diagnostic protocol identifier. The pointers in
@@ -390,6 +393,7 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x19_PostProcess(
  */
 DCM_LOCAL Std_ReturnType
     Dcm_UDS0x19_HandleTotalLength(const Dcm_MsgContextType* pMsgContext, Dcm_NegativeResponseCodeType* ErrorCode);
+#endif
 /* ========================================== external function definitions ========================================= */
 #define DCM_START_SEC_CODE
 #include "Dcm_MemMap.h"
@@ -602,9 +606,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x19_02_0A_Process(
             break;
         }
 #endif
-
+        /* PRQA S 2985 ++ */ /* VL_Dcm_2985 */
         if ((*offset + DCM_DTC_STATUS_LENGTH + transmittedLength) <= pMsgContext->resDataLen)
         {
+            /* PRQA S 2985 -- */
             result = Dem_GetNextFilteredDTC(clientId, &DTC, &DTCStatus);
             if (E_OK == result)
             {
@@ -896,7 +901,8 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x19_04_Prepare(
         }
         else if (DEM_NO_SUCH_ELEMENT == result)
         {
-            pMsgContext->resDataLen = 5u;
+            *ErrorCode = DCM_E_REQUESTOUTOFRANGE;
+            result     = E_NOT_OK;
         }
         else
         {
@@ -1040,7 +1046,8 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x19_06_Prepare(
         }
         else if (DEM_NO_SUCH_ELEMENT == result)
         {
-            pMsgContext->resDataLen = 5u;
+            *ErrorCode = DCM_E_REQUESTOUTOFRANGE;
+            result     = E_NOT_OK;
         }
         else
         {
@@ -1303,6 +1310,9 @@ DCM_LOCAL Std_ReturnType
     return result;
 }
 
+#if (                                                                                            \
+    (STD_ON == DCM_UDS_0X19_0X2) || (STD_ON == DCM_UDS_0X19_0XA) || (STD_ON == DCM_UDS_0X19_0X6) \
+    || (STD_ON == DCM_UDS_0X19_0X4) || (STD_ON == DCM_UDS_0X19_0X3))
 DCM_LOCAL Std_ReturnType
     Dcm_UDS0x19_HandleTotalLength(const Dcm_MsgContextType* pMsgContext, Dcm_NegativeResponseCodeType* ErrorCode)
 {
@@ -1330,6 +1340,7 @@ DCM_LOCAL Std_ReturnType
 
     return result;
 }
+#endif
 #define DCM_STOP_SEC_CODE
 #include "Dcm_MemMap.h"
 #endif

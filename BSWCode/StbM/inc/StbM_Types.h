@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -66,7 +66,7 @@ typedef enum
 /**
  * @brief defines Configuration of The triggered customer.
  */
-typedef struct StbM_TriggeredCustomerCfgTag
+typedef struct
 {
     /* The triggering period of the triggered customer */
     uint16 TriggeredCustomerPeriod;
@@ -96,7 +96,7 @@ typedef enum
 /**
  * @brief defines Configuration of the rate and offset correction.
  */
-typedef struct StbM_TimeCorrectionCfgTag
+typedef struct
 {
     /* This attribute describes whether the rate correction value of a Time Base
 can be set by StbM_SetRateCorrection() */
@@ -121,7 +121,7 @@ corrected by a linear reduction over a defined timespan. */
 /**
  * @brief defines Configuration of the hardware reference clock.
  */
-typedef struct StbM_LocalTimeClockCfgTag
+typedef struct
 {
     /* Represents the frequency [Hz] of the HW reference clock used by the StbM. */
     uint32 ClockFrequency;
@@ -138,7 +138,7 @@ reference clock used by the StbM. */
 /**
  * @brief defines Configuration of the time recording.
  */
-typedef struct StbM_TimeRecordingCfgTag
+typedef struct
 {
     /* Name of the customer specific callback function, which shall be called, if a
     measurement data for a Synchronized Time Base are available. */
@@ -152,7 +152,7 @@ events for the Synchronized Time Base Record Table. */
 /**
  * @brief defines Configuration of the Notification Customer.
  */
-typedef struct StbM_NotificationCustomerCfgTag
+typedef struct
 {
     StbM_SynchronizedTimeBaseType TimeBaseId;
     /* Name of the customer specific notification callback function, which shall be
@@ -163,7 +163,7 @@ called, if the time previously set by the customer is reached. */
 /**
  * @brief defines the information about a specific time-base.
  */
-typedef struct StbM_SynchronizedTimeBaseCfgTag
+typedef struct
 {
     /* This attribute describes the required number of updates to the Time Base */
     uint16 ClearTimeleapCount;
@@ -209,7 +209,7 @@ notified is informed about the occurance of a Time-base related event. */
 #endif
 } StbM_SynchronizedTimeBaseCfgType;
 
-typedef struct StbM_ConfigTag
+typedef struct
 {
 #if STBM_TRIGGERED_CUSTOMER_NUM > 0u
     const StbM_TriggeredCustomerCfgType* TriggeredCustomer;

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -30,7 +30,7 @@
 #if (STD_ON == NVM_DEM_PRODUCTION_ERROR_DETECT)
 #include "Dem.h"
 #endif
-#if (NVM_ECUC_PARTITION_NUM > 1U)
+#if (NVM_MULTI_PARTITION == STD_ON)
 #include "Os.h"
 #endif
 
@@ -300,7 +300,7 @@ NVM_LOCAL const NvM_VoidFuncVoidPtr NvM_InterServFuncMatrix[] = {
     NULL_PTR,           /** IDLE */
     NULL_PTR,           /** IDLE */
     NULL_PTR,           /** IDLE */
-#if (NVM_API_CONFIG_CLASS_3 == NVM_API_CONFIG_CLASS)
+#if ((NVM_API_CONFIG_CLASS_3 == NVM_API_CONFIG_CLASS) && (STD_ON == NVM_SELECT_BLOCK_FOR_FIRST_INIT_ALL))
     &NvM_InterFirstInitAll, /** NVM_FIRSTINIT_ALL_SERV_ID */
 #else
     NULL_PTR, /** NVM_FIRSTINIT_ALL_SERV_ID */
@@ -313,7 +313,7 @@ NVM_LOCAL const NvM_VoidFuncVoidPtr NvM_InterServFuncMatrix[] = {
     &NvM_InterValidateAll,          /** NVM_VALIDATE_ALL_SERV_ID */
 #else
     NULL_PTR, /** NVM_RESTORE_PRAM_BLOCK_DEFAULTS_SERV_ID */
-    NULL_PTR  /** NVM_VALIDATE_ALL_SERV_ID */
+    NULL_PTR, /** NVM_VALIDATE_ALL_SERV_ID */
 #endif
 };
 
@@ -331,7 +331,7 @@ NVM_LOCAL const NvM_VoidFuncVoidPtr NvM_AtomJobFuncMatrix[] = {
     NULL_PTR,
 #endif
 #if (NVM_API_CONFIG_CLASS_3 == NVM_API_CONFIG_CLASS)
-    &NvM_InterInvalidateNvBlock
+    &NvM_InterInvalidateNvBlock,
 #endif
 };
 /* PRQA S 3218 -- */
@@ -343,13 +343,13 @@ NVM_LOCAL const NvM_VoidFuncVoidPtr NvM_AtomJobFuncMatrix[] = {
 /* ========================================== external function definition ========================================== */
 #define NVM_START_SEC_CODE
 #include "NvM_MemMap.h"
-/* PRQA S 1503,1532 ++ */ /* VL_NvM_1503,VL_QAC_OneFunRef */
+/* PRQA S 1503,1532 ++ */ /* VL_QAC_NoUsedApi,VL_QAC_OneFunRef */
 /**
  * @brief Initialize global variables and all state machines, but reading the block data is not here
  */
 void NvM_Init(const NvM_ConfigType* ConfigPtr)
 {
-#if (NVM_ECUC_PARTITION_NUM > 1U)
+#if (NVM_MULTI_PARTITION == STD_ON)
     if (TRUE == NvM_CheckMasterEcucPartition())
 #endif
     {
@@ -382,25 +382,34 @@ void NvM_Init(const NvM_ConfigType* ConfigPtr)
             /** The last element is the summary for previous 16 elements, one bit stands for one element */
         }
 #endif
+        NvM_AdminBlockType* AdminBlockPtr;
+#if (STD_ON == NVM_BLOCK_WRITE_PROTECT)
+        const NvM_BlockDescriptorType* BlockDescriptorPtr;
+#endif
         for (uint16 iLoop = 0u; iLoop < NVM_BLOCK_NUM_ALL; ++iLoop)
         {
-            NvM_AdminBlock[iLoop].FlagGroup       = 0u;
-            NvM_AdminBlock[iLoop].CurrentIndex    = 0u;
-            NvM_AdminBlock[iLoop].ServiceID       = NVM_NONE_SERV_ID;
-            NvM_AdminBlock[iLoop].SingleReqResult = NVM_REQ_NOT_OK;
-#if (NVM_ECUC_PARTITION_NUM > 1U)
-            NvM_AdminBlock[iLoop].SatelliteFeedBack = FALSE;
+            AdminBlockPtr = &(NvM_AdminBlock[iLoop]);
+#if (STD_ON == NVM_BLOCK_WRITE_PROTECT)
+            BlockDescriptorPtr = &(NvM_BlockDescriptor[iLoop]);
 #endif
-            NVM_SETFLAGOFF(&NvM_AdminBlock[iLoop].FlagGroup, NVM_ADMIN_READ_REQUEST);
-
-            if (TRUE == NVM_ISFLAGON(NvM_BlockDescriptor[iLoop].FlagGroup, (uint16)NVM_BLOCK_DESC_WRITEPROT))
+            AdminBlockPtr->FlagGroup       = 0u;
+            AdminBlockPtr->CurrentIndex    = 0u;
+            AdminBlockPtr->ServiceID       = NVM_NONE_SERV_ID;
+            AdminBlockPtr->SingleReqResult = NVM_REQ_NOT_OK;
+#if (NVM_ECUC_PARTITION_NUM > 1U)
+            AdminBlockPtr->SatelliteFeedBack = FALSE;
+#endif
+            NVM_SETFLAGOFF(&AdminBlockPtr->FlagGroup, NVM_ADMIN_READ_REQUEST);
+#if (STD_ON == NVM_BLOCK_WRITE_PROTECT)
+            if (TRUE == NVM_ISFLAGON(BlockDescriptorPtr->FlagGroup, (uint16)NVM_BLOCK_DESC_WRITEPROT))
             {
-                NVM_SETFLAGON(&NvM_AdminBlock[iLoop].FlagGroup, NVM_ADMIN_NV_WRPRO);
+                NVM_SETFLAGON(&AdminBlockPtr->FlagGroup, NVM_ADMIN_NV_WRPRO);
             }
             else
             {
-                NVM_SETFLAGOFF(&NvM_AdminBlock[iLoop].FlagGroup, NVM_ADMIN_NV_WRPRO);
+                NVM_SETFLAGOFF(&AdminBlockPtr->FlagGroup, NVM_ADMIN_NV_WRPRO);
             }
+#endif
         }
         NvM_Module.JobStep = NVM_JOB_STEP_IDLE;
         NvM_Module.Init    = TRUE;
@@ -443,7 +452,12 @@ Std_ReturnType NvM_SetBlockProtection(NvM_BlockIdType BlockId, boolean Protectio
     Std_ReturnType retVal = E_NOT_OK;
 
 #if (STD_ON == NVM_DEV_ERROR_DETECT)
-    uint8 errorId = NVM_E_NO_ERROR;
+    uint8                     errorId       = NVM_E_NO_ERROR;
+    NvM_BlockIdType           intBlockId    = NvM_GetIntBlockId(BlockId);
+    const NvM_AdminBlockType* AdminBlockPtr = &(NvM_AdminBlock[intBlockId]);
+#if (STD_ON == NVM_WRITE_BLOCK_ONCE)
+    const NvM_BlockDescriptorType* BlockDescriptorPtr = &(NvM_BlockDescriptor[intBlockId]);
+#endif
 
     if (TRUE != NvM_Module.Init)
     {
@@ -453,23 +467,25 @@ Std_ReturnType NvM_SetBlockProtection(NvM_BlockIdType BlockId, boolean Protectio
     {
         errorId = NVM_E_PARAM_BLOCK_ID;
     }
-#if (NVM_ECUC_PARTITION_NUM > 1U)
+#if (NVM_ECUC_PARTITION_NUM > 1u)
     else if (FALSE == NvM_CheckBlockEcucPartition(BlockId))
     {
         errorId = NVM_E_WRONG_CONDITION;
     }
 #endif
     else if (
-        (TRUE == NVM_ISFLAGON(NvM_AdminBlock[BlockId - 1U].FlagGroup, NVM_ADMIN_ENQUEUE))
-        || (NvM_AdminBlock[BlockId - 1U].SingleReqResult == NVM_REQ_PENDING))
+        (TRUE == NVM_ISFLAGON(AdminBlockPtr->FlagGroup, NVM_ADMIN_ENQUEUE))
+        || (AdminBlockPtr->SingleReqResult == NVM_REQ_PENDING))
     {
         errorId = NVM_E_BLOCK_PENDING;
     }
-    else if (TRUE == NVM_ISFLAGON(NvM_BlockDescriptor[BlockId - 1U].FlagGroup, (uint16)NVM_BLOCK_DESC_WRITEBLOCKONCE))
+#if (STD_ON == NVM_WRITE_BLOCK_ONCE)
+    else if (TRUE == NVM_ISFLAGON(BlockDescriptorPtr->FlagGroup, (uint16)NVM_BLOCK_DESC_WRITEBLOCKONCE))
     {
         errorId = NVM_E_BLOCK_CONFIG;
     }
-    else if (TRUE == NVM_ISFLAGON(NvM_AdminBlock[BlockId - 1U].FlagGroup, NVM_ADMIN_BLOCK_LOCKED))
+#endif
+    else if (TRUE == NVM_ISFLAGON(AdminBlockPtr->FlagGroup, NVM_ADMIN_BLOCK_LOCKED))
     {
         errorId = NVM_E_BLOCK_LOCKED;
     }
@@ -498,7 +514,8 @@ Std_ReturnType NvM_InvalidateNvBlock(NvM_BlockIdType BlockId)
     Std_ReturnType retVal = E_NOT_OK;
 
 #if (STD_ON == NVM_DEV_ERROR_DETECT)
-    uint8 errorId = NVM_E_NO_ERROR;
+    uint8           errorId    = NVM_E_NO_ERROR;
+    NvM_BlockIdType intBlockId = NvM_GetIntBlockId(BlockId);
 
     if (TRUE != NvM_Module.Init)
     {
@@ -508,20 +525,20 @@ Std_ReturnType NvM_InvalidateNvBlock(NvM_BlockIdType BlockId)
     {
         errorId = NVM_E_PARAM_BLOCK_ID;
     }
-#if (NVM_ECUC_PARTITION_NUM > 1U)
+#if (NVM_ECUC_PARTITION_NUM > 1u)
     else if (FALSE == NvM_CheckBlockEcucPartition(BlockId))
     {
         errorId = NVM_E_WRONG_CONDITION;
     }
 #endif
-    else if (NvM_InvalidateNvBlockCheck((BlockId - 1U), &errorId) == TRUE)
+    else if (NvM_InvalidateNvBlockCheck(intBlockId, &errorId) == TRUE)
     {
         /** do nothing and report the recorded error */
     }
     else
 #endif
 #if ((STD_ON == NVM_DEV_ERROR_DETECT) || (STD_ON == NVM_DEM_E_WRITE_PROTECTED))
-        if (TRUE == NVM_ISFLAGON(NvM_AdminBlock[BlockId - 1U].FlagGroup, NVM_ADMIN_NV_WRPRO))
+        if (TRUE == NVM_ISFLAGON(NvM_AdminBlock[intBlockId].FlagGroup, NVM_ADMIN_NV_WRPRO))
     {
 #if (STD_ON == NVM_DEV_ERROR_DETECT)
         errorId = NVM_E_WRITE_PROTECTED_DET;
@@ -554,7 +571,8 @@ Std_ReturnType NvM_EraseNvBlock(NvM_BlockIdType BlockId)
     Std_ReturnType retVal = E_NOT_OK;
 
 #if (STD_ON == NVM_DEV_ERROR_DETECT)
-    uint8 errorId = NVM_E_NO_ERROR;
+    uint8           errorId    = NVM_E_NO_ERROR;
+    NvM_BlockIdType intBlockId = NvM_GetIntBlockId(BlockId);
 
     if (TRUE != NvM_Module.Init)
     {
@@ -564,20 +582,20 @@ Std_ReturnType NvM_EraseNvBlock(NvM_BlockIdType BlockId)
     {
         errorId = NVM_E_PARAM_BLOCK_ID;
     }
-#if (NVM_ECUC_PARTITION_NUM > 1U)
+#if (NVM_ECUC_PARTITION_NUM > 1u)
     else if (FALSE == NvM_CheckBlockEcucPartition(BlockId))
     {
         errorId = NVM_E_WRONG_CONDITION;
     }
 #endif
-    else if (NvM_EraseNvBlockCheck((BlockId - 1U), &errorId) == TRUE)
+    else if (NvM_EraseNvBlockCheck(intBlockId, &errorId) == TRUE)
     {
         /** do nothing and report the recorded error */
     }
     else
 #endif
 #if ((STD_ON == NVM_DEV_ERROR_DETECT) || (STD_ON == NVM_DEM_E_WRITE_PROTECTED))
-        if (TRUE == NVM_ISFLAGON(NvM_AdminBlock[BlockId - 1U].FlagGroup, NVM_ADMIN_NV_WRPRO))
+        if (TRUE == NVM_ISFLAGON(NvM_AdminBlock[intBlockId].FlagGroup, NVM_ADMIN_NV_WRPRO))
     {
 #if (STD_ON == NVM_DEV_ERROR_DETECT)
         errorId = NVM_E_WRITE_PROTECTED_DET;
@@ -625,12 +643,6 @@ Std_ReturnType NvM_GetErrorStatus(NvM_BlockIdType BlockId, NvM_RequestResultType
     {
         errorId = NVM_E_PARAM_DATA;
     }
-#if (NVM_ECUC_PARTITION_NUM > 1U)
-    else if (FALSE == NvM_CheckBlockEcucPartition(BlockId))
-    {
-        errorId = NVM_E_WRONG_CONDITION;
-    }
-#endif
     else
 #endif
     {
@@ -666,7 +678,9 @@ Std_ReturnType NvM_SetRamBlockStatus(NvM_BlockIdType BlockId, boolean BlockChang
     Std_ReturnType retVal = E_NOT_OK;
 
 #if (STD_ON == NVM_DEV_ERROR_DETECT)
-    uint8 errorId = NVM_E_NO_ERROR;
+    uint8                     errorId       = NVM_E_NO_ERROR;
+    NvM_BlockIdType           intBlockId    = NvM_GetIntBlockId(BlockId);
+    const NvM_AdminBlockType* AdminBlockPtr = &(NvM_AdminBlock[intBlockId]);
 
     if (TRUE != NvM_Module.Init)
     {
@@ -683,12 +697,12 @@ Std_ReturnType NvM_SetRamBlockStatus(NvM_BlockIdType BlockId, boolean BlockChang
     }
 #endif
     else if (
-        (TRUE == NVM_ISFLAGON(NvM_AdminBlock[BlockId - 1U].FlagGroup, NVM_ADMIN_ENQUEUE))
-        || (NvM_AdminBlock[BlockId - 1U].SingleReqResult == NVM_REQ_PENDING))
+        (TRUE == NVM_ISFLAGON(AdminBlockPtr->FlagGroup, NVM_ADMIN_ENQUEUE))
+        || (AdminBlockPtr->SingleReqResult == NVM_REQ_PENDING))
     {
         errorId = NVM_E_BLOCK_PENDING;
     }
-    else if (TRUE == NVM_ISFLAGON(NvM_AdminBlock[BlockId - 1U].FlagGroup, NVM_ADMIN_BLOCK_LOCKED))
+    else if (TRUE == NVM_ISFLAGON(AdminBlockPtr->FlagGroup, NVM_ADMIN_BLOCK_LOCKED))
     {
         errorId = NVM_E_BLOCK_LOCKED;
     }
@@ -716,7 +730,10 @@ Std_ReturnType NvM_SetRamBlockStatus(NvM_BlockIdType BlockId, boolean BlockChang
 /* PRQA S 6030 ++ */ /* VL_MTR_NvM_STMIF */
 Std_ReturnType NvM_SetDataIndex(NvM_BlockIdType BlockId, uint8 DataIndex)
 {
-    Std_ReturnType retVal = E_NOT_OK;
+    Std_ReturnType                 retVal             = E_NOT_OK;
+    NvM_BlockIdType                intBlockId         = NvM_GetIntBlockId(BlockId);
+    NvM_AdminBlockType*            AdminBlockPtr      = &(NvM_AdminBlock[intBlockId]);
+    const NvM_BlockDescriptorType* BlockDescriptorPtr = &(NvM_BlockDescriptor[intBlockId]);
 
 #if (STD_ON == NVM_DEV_ERROR_DETECT)
     uint8 errorId = NVM_E_NO_ERROR;
@@ -736,24 +753,24 @@ Std_ReturnType NvM_SetDataIndex(NvM_BlockIdType BlockId, uint8 DataIndex)
     }
 #endif
     else if (
-        (TRUE == NVM_ISFLAGON(NvM_AdminBlock[BlockId - 1U].FlagGroup, NVM_ADMIN_ENQUEUE))
-        || (NvM_AdminBlock[BlockId - 1U].SingleReqResult == NVM_REQ_PENDING))
+        (TRUE == NVM_ISFLAGON(AdminBlockPtr->FlagGroup, NVM_ADMIN_ENQUEUE))
+        || (AdminBlockPtr->SingleReqResult == NVM_REQ_PENDING))
     {
         errorId = NVM_E_BLOCK_PENDING;
     }
-    else if (
-        (NvM_BlockDescriptor[BlockId - 1U].NvmNvBlockNum + NvM_BlockDescriptor[BlockId - 1U].NvmRomBlockNum)
-        <= DataIndex)
+    else if ((BlockDescriptorPtr->NvmNvBlockNum + BlockDescriptorPtr->NvmRomBlockNum) <= DataIndex)
     {
         errorId = NVM_E_PARAM_BLOCK_DATA_IDX;
     }
     else
 #endif
     {
-        if (NVM_BLOCK_DATASET == NvM_BlockDescriptor[BlockId - 1U].NvmBlockManagementType)
+        if (NVM_BLOCK_DATASET == BlockDescriptorPtr->NvmBlockManagementType)
         {
-            NvM_AdminBlock[BlockId - 1U].CurrentIndex = DataIndex;
-            retVal                                    = E_OK;
+            SchM_Enter_NvM_Queue();
+            AdminBlockPtr->CurrentIndex = DataIndex;
+            SchM_Exit_NvM_Queue();
+            retVal = E_OK;
         }
     }
 
@@ -798,12 +815,14 @@ Std_ReturnType NvM_GetDataIndex(NvM_BlockIdType BlockId, uint8* DataIndexPtr)
     else
 #endif
     {
-        NvM_BlockIdType intBlockId = (NvM_BlockIdType)(BlockId - 1U);
-        if (NVM_BLOCK_DATASET == NvM_BlockDescriptor[intBlockId].NvmBlockManagementType)
+        NvM_BlockIdType                intBlockId         = NvM_GetIntBlockId(BlockId);
+        const NvM_AdminBlockType*      AdminBlockPtr      = &(NvM_AdminBlock[intBlockId]);
+        const NvM_BlockDescriptorType* BlockDescriptorPtr = &(NvM_BlockDescriptor[intBlockId]);
+
+        if (NVM_BLOCK_DATASET == BlockDescriptorPtr->NvmBlockManagementType)
         {
-            *DataIndexPtr = NvM_AdminBlock[intBlockId].CurrentIndex;
-            if ((NvM_BlockDescriptor[intBlockId].NvmNvBlockNum + NvM_BlockDescriptor[intBlockId].NvmRomBlockNum)
-                > *DataIndexPtr)
+            *DataIndexPtr = AdminBlockPtr->CurrentIndex;
+            if ((BlockDescriptorPtr->NvmNvBlockNum + BlockDescriptorPtr->NvmRomBlockNum) > *DataIndexPtr)
             {
                 retVal = E_OK;
             }
@@ -833,7 +852,10 @@ Std_ReturnType NvM_ReadBlock(NvM_BlockIdType BlockId, void* NvM_DstPtr)
     Std_ReturnType retVal = E_NOT_OK;
 
 #if (STD_ON == NVM_DEV_ERROR_DETECT)
-    uint8 errorId = NVM_E_NO_ERROR;
+    uint8                          errorId            = NVM_E_NO_ERROR;
+    NvM_BlockIdType                intBlockId         = NvM_GetIntBlockId(BlockId);
+    const NvM_AdminBlockType*      AdminBlockPtr      = &(NvM_AdminBlock[intBlockId]);
+    const NvM_BlockDescriptorType* BlockDescriptorPtr = &(NvM_BlockDescriptor[intBlockId]);
 
     if (TRUE != NvM_Module.Init)
     {
@@ -850,14 +872,17 @@ Std_ReturnType NvM_ReadBlock(NvM_BlockIdType BlockId, void* NvM_DstPtr)
     }
 #endif
     else if (
-        (NULL_PTR == NvM_DstPtr) && (NULL_PTR == NvM_BlockDescriptor[BlockId - 1U].NvmRamBlockDataAddress)
-        && (TRUE == NVM_ISFLAGOFF(NvM_BlockDescriptor[BlockId - 1U].FlagGroup, (uint8)NVM_BLOCK_DESC_SYNCMECHANISM)))
+        (NULL_PTR == NvM_DstPtr) && (NULL_PTR == BlockDescriptorPtr->NvmRamBlockDataAddress)
+#if (STD_ON == NVM_BLOCK_USE_SYNC_MECHANISM)
+        && (TRUE == NVM_ISFLAGOFF(BlockDescriptorPtr->FlagGroup, (uint8)NVM_BLOCK_DESC_SYNCMECHANISM))
+#endif
+    )
     {
         errorId = NVM_E_PARAM_ADDRESS;
     }
     else if (
-        (TRUE == NVM_ISFLAGON(NvM_AdminBlock[BlockId - 1U].FlagGroup, NVM_ADMIN_ENQUEUE))
-        || (NvM_AdminBlock[BlockId - 1U].SingleReqResult == NVM_REQ_PENDING))
+        (TRUE == NVM_ISFLAGON(AdminBlockPtr->FlagGroup, NVM_ADMIN_ENQUEUE))
+        || (AdminBlockPtr->SingleReqResult == NVM_REQ_PENDING))
     {
         errorId = NVM_E_BLOCK_PENDING;
     }
@@ -885,7 +910,10 @@ Std_ReturnType NvM_ReadPRAMBlock(NvM_BlockIdType BlockId)
     Std_ReturnType retVal = E_NOT_OK;
 
 #if (STD_ON == NVM_DEV_ERROR_DETECT)
-    uint8 errorId = NVM_E_NO_ERROR;
+    uint8                          errorId            = NVM_E_NO_ERROR;
+    NvM_BlockIdType                intBlockId         = NvM_GetIntBlockId(BlockId);
+    const NvM_AdminBlockType*      AdminBlockPtr      = &(NvM_AdminBlock[intBlockId]);
+    const NvM_BlockDescriptorType* BlockDescriptorPtr = &(NvM_BlockDescriptor[intBlockId]);
 
     if (TRUE != NvM_Module.Init)
     {
@@ -902,14 +930,17 @@ Std_ReturnType NvM_ReadPRAMBlock(NvM_BlockIdType BlockId)
     }
 #endif
     else if (
-        (NULL_PTR == NvM_BlockDescriptor[BlockId - 1U].NvmRamBlockDataAddress)
-        && (TRUE == NVM_ISFLAGOFF(NvM_BlockDescriptor[BlockId - 1U].FlagGroup, (uint8)NVM_BLOCK_DESC_SYNCMECHANISM)))
+        (NULL_PTR == BlockDescriptorPtr->NvmRamBlockDataAddress)
+#if (STD_ON == NVM_BLOCK_USE_SYNC_MECHANISM)
+        && (TRUE == NVM_ISFLAGOFF(BlockDescriptorPtr->FlagGroup, (uint8)NVM_BLOCK_DESC_SYNCMECHANISM))
+#endif
+    )
     {
         errorId = NVM_E_PARAM_ADDRESS;
     }
     else if (
-        (TRUE == NVM_ISFLAGON(NvM_AdminBlock[BlockId - 1U].FlagGroup, NVM_ADMIN_ENQUEUE))
-        || (NvM_AdminBlock[BlockId - 1U].SingleReqResult == NVM_REQ_PENDING))
+        (TRUE == NVM_ISFLAGON(AdminBlockPtr->FlagGroup, NVM_ADMIN_ENQUEUE))
+        || (AdminBlockPtr->SingleReqResult == NVM_REQ_PENDING))
     {
         errorId = NVM_E_BLOCK_PENDING;
     }
@@ -937,7 +968,8 @@ Std_ReturnType NvM_WriteBlock(NvM_BlockIdType BlockId, const void* NvM_SrcPtr)
     Std_ReturnType retVal = E_NOT_OK;
 
 #if (STD_ON == NVM_DEV_ERROR_DETECT)
-    uint8 errorId = NVM_E_NO_ERROR;
+    uint8           errorId    = NVM_E_NO_ERROR;
+    NvM_BlockIdType intBlockId = NvM_GetIntBlockId(BlockId);
 
     if (TRUE != NvM_Module.Init)
     {
@@ -953,14 +985,14 @@ Std_ReturnType NvM_WriteBlock(NvM_BlockIdType BlockId, const void* NvM_SrcPtr)
         errorId = NVM_E_WRONG_CONDITION;
     }
 #endif
-    else if (NvM_WriteBlockCheck(BlockId - 1U, NvM_SrcPtr, &errorId) == TRUE) /* PRQA S 0317 */ /* VL_NvM_0317 */
+    else if (NvM_WriteBlockCheck(intBlockId, NvM_SrcPtr, &errorId) == TRUE) /* PRQA S 0317 */ /* VL_NvM_0317 */
     {
         /** do nothing and report the recorded error */
     }
     else
 #endif
 #if ((STD_ON == NVM_DEV_ERROR_DETECT) || (STD_ON == NVM_DEM_E_WRITE_PROTECTED))
-        if (TRUE == NVM_ISFLAGON(NvM_AdminBlock[BlockId - 1U].FlagGroup, NVM_ADMIN_NV_WRPRO))
+        if (TRUE == NVM_ISFLAGON(NvM_AdminBlock[intBlockId].FlagGroup, NVM_ADMIN_NV_WRPRO))
     {
 #if (STD_ON == NVM_DEV_ERROR_DETECT)
         errorId = NVM_E_WRITE_PROTECTED_DET;
@@ -993,8 +1025,8 @@ Std_ReturnType NvM_WritePRAMBlock(NvM_BlockIdType BlockId)
     Std_ReturnType retVal = E_NOT_OK;
 
 #if (STD_ON == NVM_DEV_ERROR_DETECT)
-    uint8 errorId = NVM_E_NO_ERROR;
-
+    uint8           errorId    = NVM_E_NO_ERROR;
+    NvM_BlockIdType intBlockId = NvM_GetIntBlockId(BlockId);
     if (TRUE != NvM_Module.Init)
     {
         errorId = NVM_E_UNINIT;
@@ -1009,14 +1041,14 @@ Std_ReturnType NvM_WritePRAMBlock(NvM_BlockIdType BlockId)
         errorId = NVM_E_WRONG_CONDITION;
     }
 #endif
-    else if (NvM_WriteBlockCheck(BlockId - 1U, NULL_PTR, &errorId) == TRUE)
+    else if (NvM_WriteBlockCheck(intBlockId, NULL_PTR, &errorId) == TRUE)
     {
         /** do nothing and report the recorded error */
     }
     else
 #endif
 #if ((STD_ON == NVM_DEV_ERROR_DETECT) || (STD_ON == NVM_DEM_E_WRITE_PROTECTED))
-        if (TRUE == NVM_ISFLAGON(NvM_AdminBlock[BlockId - 1U].FlagGroup, NVM_ADMIN_NV_WRPRO))
+        if (TRUE == NVM_ISFLAGON(NvM_AdminBlock[intBlockId].FlagGroup, NVM_ADMIN_NV_WRPRO))
     {
 #if (STD_ON == NVM_DEV_ERROR_DETECT)
         errorId = NVM_E_WRITE_PROTECTED_DET;
@@ -1050,7 +1082,10 @@ Std_ReturnType NvM_RestoreBlockDefaults(NvM_BlockIdType BlockId, void* NvM_DestP
     Std_ReturnType retVal = E_NOT_OK;
 
 #if (STD_ON == NVM_DEV_ERROR_DETECT)
-    uint8 errorId = NVM_E_NO_ERROR;
+    uint8                          errorId            = NVM_E_NO_ERROR;
+    NvM_BlockIdType                intBlockId         = NvM_GetIntBlockId(BlockId);
+    const NvM_AdminBlockType*      AdminBlockPtr      = &(NvM_AdminBlock[intBlockId]);
+    const NvM_BlockDescriptorType* BlockDescriptorPtr = &(NvM_BlockDescriptor[intBlockId]);
 
     if (TRUE != NvM_Module.Init)
     {
@@ -1067,23 +1102,23 @@ Std_ReturnType NvM_RestoreBlockDefaults(NvM_BlockIdType BlockId, void* NvM_DestP
     }
 #endif
     else if (((NULL_PTR == NvM_DestPtr)
-              && ((NULL_PTR == NvM_BlockDescriptor[BlockId - 1U].NvmRamBlockDataAddress)
-                  && (TRUE
-                      == NVM_ISFLAGOFF(
-                          NvM_BlockDescriptor[BlockId - 1U].FlagGroup,
-                          (uint8)NVM_BLOCK_DESC_SYNCMECHANISM)))))
+              && ((NULL_PTR == BlockDescriptorPtr->NvmRamBlockDataAddress)
+#if (STD_ON == NVM_BLOCK_USE_SYNC_MECHANISM)
+                  && (TRUE == NVM_ISFLAGOFF(BlockDescriptorPtr->FlagGroup, (uint16)NVM_BLOCK_DESC_SYNCMECHANISM))
+#endif
+                      )))
     {
         errorId = NVM_E_PARAM_ADDRESS;
     }
     else if (
-        (NULL_PTR == NvM_BlockDescriptor[BlockId - 1U].NvmRomBlockDataAddress)
-        && (NULL_PTR == NvM_BlockDescriptor[BlockId - 1U].NvmInitBlockCallback))
+        (NULL_PTR == BlockDescriptorPtr->NvmRomBlockDataAddress)
+        && (NULL_PTR == BlockDescriptorPtr->NvmInitBlockCallback))
     {
         errorId = NVM_E_BLOCK_WITHOUT_DEFAULTS;
     }
     else if (
-        (TRUE == NVM_ISFLAGON(NvM_AdminBlock[BlockId - 1U].FlagGroup, NVM_ADMIN_ENQUEUE))
-        || (NvM_AdminBlock[BlockId - 1U].SingleReqResult == NVM_REQ_PENDING))
+        (TRUE == NVM_ISFLAGON(AdminBlockPtr->FlagGroup, NVM_ADMIN_ENQUEUE))
+        || (AdminBlockPtr->SingleReqResult == NVM_REQ_PENDING))
     {
         errorId = NVM_E_BLOCK_PENDING;
     }
@@ -1112,7 +1147,10 @@ Std_ReturnType NvM_RestorePRAMBlockDefaults(NvM_BlockIdType BlockId)
     Std_ReturnType retVal = E_NOT_OK;
 
 #if (STD_ON == NVM_DEV_ERROR_DETECT)
-    uint8 errorId = NVM_E_NO_ERROR;
+    uint8                          errorId            = NVM_E_NO_ERROR;
+    NvM_BlockIdType                intBlockId         = NvM_GetIntBlockId(BlockId);
+    const NvM_AdminBlockType*      AdminBlockPtr      = &(NvM_AdminBlock[intBlockId]);
+    const NvM_BlockDescriptorType* BlockDescriptorPtr = &(NvM_BlockDescriptor[intBlockId]);
 
     if (TRUE != NvM_Module.Init)
     {
@@ -1129,20 +1167,23 @@ Std_ReturnType NvM_RestorePRAMBlockDefaults(NvM_BlockIdType BlockId)
     }
 #endif
     else if (
-        (NULL_PTR == NvM_BlockDescriptor[BlockId - 1U].NvmRamBlockDataAddress)
-        && (TRUE == NVM_ISFLAGOFF(NvM_BlockDescriptor[BlockId - 1U].FlagGroup, (uint8)NVM_BLOCK_DESC_SYNCMECHANISM)))
+        (NULL_PTR == BlockDescriptorPtr->NvmRamBlockDataAddress)
+#if (STD_ON == NVM_BLOCK_USE_SYNC_MECHANISM)
+        && (TRUE == NVM_ISFLAGOFF(BlockDescriptorPtr->FlagGroup, (uint16)NVM_BLOCK_DESC_SYNCMECHANISM))
+#endif
+    )
     {
         errorId = NVM_E_PARAM_ADDRESS;
     }
     else if (
-        (NULL_PTR == NvM_BlockDescriptor[BlockId - 1U].NvmRomBlockDataAddress)
-        && (NULL_PTR == NvM_BlockDescriptor[BlockId - 1U].NvmInitBlockCallback))
+        (NULL_PTR == BlockDescriptorPtr->NvmRomBlockDataAddress)
+        && (NULL_PTR == BlockDescriptorPtr->NvmInitBlockCallback))
     {
         errorId = NVM_E_BLOCK_WITHOUT_DEFAULTS;
     }
     else if (
-        (TRUE == NVM_ISFLAGON(NvM_AdminBlock[BlockId - 1U].FlagGroup, NVM_ADMIN_ENQUEUE))
-        || (NvM_AdminBlock[BlockId - 1U].SingleReqResult == NVM_REQ_PENDING))
+        (TRUE == NVM_ISFLAGON(AdminBlockPtr->FlagGroup, NVM_ADMIN_ENQUEUE))
+        || (AdminBlockPtr->SingleReqResult == NVM_REQ_PENDING))
     {
         errorId = NVM_E_BLOCK_PENDING;
     }
@@ -1178,10 +1219,7 @@ void NvM_ValidateAll(void)
     {
         if (TRUE != NvM_MultiJob.Enqueue)
         {
-            if (E_NOT_OK == NvM_JobEnqueue(0u, NVM_VALIDATE_ALL_SERV_ID, NULL_PTR))
-            {
-                /** This will not happen */
-            }
+            (void)NvM_JobEnqueue(0u, NVM_VALIDATE_ALL_SERV_ID, NULL_PTR);
         }
         else
         {
@@ -1252,13 +1290,17 @@ void NvM_CancelWriteAll(void)
     else
 #endif
     {
+        NvM_MultiJobType* MultiJobPtr = &NvM_MultiJob;
+
 #if (NVM_API_CONFIG_CLASS_1 != NVM_API_CONFIG_CLASS)
-        if ((TRUE == NvM_MultiJob.Enqueue) && (NVM_WRITE_ALL_SERV_ID == NvM_MultiJob.ServiceId))
+        if ((TRUE == MultiJobPtr->Enqueue) && (NVM_WRITE_ALL_SERV_ID == MultiJobPtr->ServiceId))
 #else
-        if ((TRUE == NvM_MultiJob.Enqueue) && (NVM_WRITE_ALL_SERV_ID == NvM_CurRunning.ServiceId))
+        if ((TRUE == MultiJobPtr->Enqueue) && (NVM_WRITE_ALL_SERV_ID == NvM_CurRunning.ServiceId))
 #endif
         {
-            NvM_MultiJob.CancelWriteAll = TRUE;
+            SchM_Enter_NvM_Queue();
+            MultiJobPtr->CancelWriteAll = TRUE;
+            SchM_Exit_NvM_Queue();
         }
     }
 }
@@ -1278,10 +1320,7 @@ void NvM_ReadAll(void)
     {
         if (TRUE != NvM_MultiJob.Enqueue)
         {
-            if (E_NOT_OK == NvM_JobEnqueue(0u, NVM_READ_ALL_SERV_ID, NULL_PTR))
-            {
-                /** This will not happen */
-            }
+            (void)NvM_JobEnqueue(0u, NVM_READ_ALL_SERV_ID, NULL_PTR);
         }
         else
         {
@@ -1307,25 +1346,30 @@ void NvM_WriteAll(void)
     else
 #endif
     {
+#if (NVM_SELECT_BLOCK_FOR_WRITE_ALL == STD_ON)
         boolean errorFlag = FALSE;
+#if (STD_ON == NVM_WRITE_BLOCK_ONCE)
+        NvM_AdminBlockType*            AdminBlockPtr;
+        const NvM_BlockDescriptorType* BlockDescriptorPtr;
+
         for (uint16 iLoop = 0u; ((iLoop < NVM_BLOCK_NUM_ALL) && (errorFlag == FALSE)); ++iLoop)
         {
-            if ((TRUE
-                 == NVM_ISFLAGON(NvM_BlockDescriptor[iLoop].FlagGroup, (uint16)NVM_BLOCK_DESC_SELECTBLOCKFORWRITEALL))
-                && (TRUE == NVM_ISFLAGON(NvM_BlockDescriptor[iLoop].FlagGroup, (uint16)NVM_BLOCK_DESC_WRITEBLOCKONCE))
-                && (TRUE == NVM_ISFLAGOFF(NvM_AdminBlock[iLoop].FlagGroup, NVM_ADMIN_READ_REQUEST)))
+            AdminBlockPtr      = &(NvM_AdminBlock[iLoop]);
+            BlockDescriptorPtr = &(NvM_BlockDescriptor[iLoop]);
+            if ((TRUE == NVM_ISFLAGON(BlockDescriptorPtr->FlagGroup, (uint16)NVM_BLOCK_DESC_SELECTBLOCKFORWRITEALL))
+                && (TRUE == NVM_ISFLAGON(BlockDescriptorPtr->FlagGroup, (uint16)NVM_BLOCK_DESC_WRITEBLOCKONCE))
+                && (TRUE == NVM_ISFLAGOFF(AdminBlockPtr->FlagGroup, NVM_ADMIN_READ_REQUEST)))
             {
                 errorFlag = TRUE;
             }
         }
-        if (errorFlag == FALSE)
+#endif
+
+        if (errorFlag == FALSE) /* PRQA S 2991,2995 */ /* VL_NvM_2991,VL_NvM_2995 */
         {
             if (TRUE != NvM_MultiJob.Enqueue)
             {
-                if (E_OK == NvM_JobEnqueue(0u, NVM_WRITE_ALL_SERV_ID, NULL_PTR))
-                {
-                    /** Nothing */
-                }
+                (void)NvM_JobEnqueue(0u, NVM_WRITE_ALL_SERV_ID, NULL_PTR);
             }
             else
             {
@@ -1337,8 +1381,9 @@ void NvM_WriteAll(void)
 #if (STD_ON == NVM_DEV_ERROR_DETECT)
         else
         {
-            errorId = NVM_E_WRITE_ONCE_STATUS_UNKNOWN;
+            errorId = NVM_E_WRITE_ONCE_STATUS_UNKNOWN; /* PRQA S 2880 */ /* VL_NvM_2880 */
         }
+#endif
 #endif
     }
 #if (STD_ON == NVM_DEV_ERROR_DETECT)
@@ -1357,42 +1402,48 @@ void NvM_WriteAll(void)
  */
 void NvM_MainFunction(void)
 {
-    if (TRUE == NvM_Module.Init)
+    NvM_ModuleType* ModulePtr = &NvM_Module;
+
+    if (TRUE == ModulePtr->Init)
     {
-#if (NVM_ECUC_PARTITION_NUM > 1U)
+#if (NVM_MULTI_PARTITION == STD_ON)
         if (TRUE == NvM_CheckMasterEcucPartition())
 #endif
         {
+            const NvM_CurRunningType* CurRunningPtr = &NvM_CurRunning;
+
             /** Check whether finished the previous task */
-            if (NVM_JOB_STEP_IDLE == NvM_Module.JobStep)
+            if (NVM_JOB_STEP_IDLE == ModulePtr->JobStep)
             {
                 if (E_OK == NvM_JobDequeue())
                 {
-                    NvM_Module.JobStep = NVM_JOB_STEP_PENDING;
+                    ModulePtr->JobStep = NVM_JOB_STEP_PENDING;
                     /** ServiceID overflow, return to the NVM_JOB_STEP_IDLE */
-                    if (NVM_NONE_SERV_ID <= NvM_CurRunning.ServiceId)
+                    if (NVM_NONE_SERV_ID <= CurRunningPtr->ServiceId)
                     {
-                        NvM_Module.JobStep = NVM_JOB_STEP_IDLE;
+                        ModulePtr->JobStep = NVM_JOB_STEP_IDLE;
                     }
                 }
             }
 
-            if ((NVM_JOB_STEP_IDLE != NvM_Module.JobStep) && (0U == NvM_AtomJob.Count))
+            const NvM_AtomJobType* AtomJobPtr = &NvM_AtomJob;
+
+            if ((NVM_JOB_STEP_IDLE != ModulePtr->JobStep) && (0U == AtomJobPtr->Count))
             {
-                /* PRQA S 2814, 2844 ++ */ /* VL_NvM_2814, VL_NvM_2844 */
-                if (NvM_InterServFuncMatrix[NvM_CurRunning.ServiceId] != NULL_PTR)
+                /* PRQA S 2814, 2844 ++ */ /* VL_QAC_DerefNullPtr, VL_NvM_2844 */
+                if (NvM_InterServFuncMatrix[CurRunningPtr->ServiceId] != NULL_PTR)
                 {
-                    (*NvM_InterServFuncMatrix[NvM_CurRunning.ServiceId])();
+                    (*NvM_InterServFuncMatrix[CurRunningPtr->ServiceId])();
                 }
                 /* PRQA S 2814, 2844 -- */
             }
 
-            if (0U != NvM_AtomJob.Count)
+            if (0U != AtomJobPtr->Count)
             {
-                /* PRQA S 2814, 2842,2844 ++ */ /* VL_NvM_2814, VL_NvM_2842,VL_NvM_2844 */
-                if (NvM_InterServFuncMatrix[NvM_CurRunning.ServiceId] != NULL_PTR)
+                /* PRQA S 2814, 2842,2844 ++ */ /* VL_QAC_DerefNullPtr, VL_NvM_2842,VL_NvM_2844 */
+                if (NvM_InterServFuncMatrix[CurRunningPtr->ServiceId] != NULL_PTR)
                 {
-                    (*NvM_AtomJobFuncMatrix[NvM_AtomJob.ReqId[NvM_AtomJob.Count]])();
+                    (*NvM_AtomJobFuncMatrix[AtomJobPtr->ReqId[AtomJobPtr->Count]])();
                 }
                 /* PRQA S 2814, 2842,2844 -- */
             }
@@ -1408,7 +1459,7 @@ void NvM_MainFunction(void)
     }
 }
 
-#if (NVM_API_CONFIG_CLASS_3 == NVM_API_CONFIG_CLASS)
+#if ((NVM_API_CONFIG_CLASS_3 == NVM_API_CONFIG_CLASS) && (STD_ON == NVM_SELECT_BLOCK_FOR_FIRST_INIT_ALL))
 /**
  * @brief Queue the first initialization service if no multi jobs are in the queue
  */
@@ -1426,10 +1477,7 @@ void NvM_FirstInitAll(void)
     {
         if (TRUE != NvM_MultiJob.Enqueue)
         {
-            if (E_OK == NvM_JobEnqueue(0u, NVM_FIRSTINIT_ALL_SERV_ID, NULL_PTR))
-            {
-                /** Nothing */
-            }
+            (void)NvM_JobEnqueue(0u, NVM_FIRSTINIT_ALL_SERV_ID, NULL_PTR);
         }
 #if (STD_ON == NVM_DEV_ERROR_DETECT)
         else
@@ -1457,7 +1505,7 @@ void NvM_JobEndNotification(void)
 
     if ((uint8)NVM_NONE_SERV_ID != serviceId)
     {
-        /* PRQA S 2814, 2842, 2844 ++ */ /* VL_NvM_2814, VL_NvM_2842, VL_NvM_2844 */
+        /* PRQA S 2814, 2842, 2844 ++ */ /* VL_QAC_DerefNullPtr, VL_NvM_2842, VL_NvM_2844 */
         (*NvM_MemIfAsyncFuncTable[MEMIF_JOB_OK][serviceId])();
         /* PRQA S 2814, 2842, 2844 -- */
         NvM_EMultiReqResultCheck();
@@ -1470,10 +1518,11 @@ void NvM_JobEndNotification(void)
 void NvM_JobErrorNotification(void)
 {
     uint8 serviceId = NvM_JobNotiGetId(FALSE);
+
     if ((uint8)NVM_NONE_SERV_ID != serviceId)
     {
         MemIf_JobResultType result = MemIf_GetJobResult(NvM_CurRunning.DeviceId);
-        /* PRQA S 2814, 2842, 2844 ++ */ /* VL_NvM_2814, VL_NvM_2842, VL_NvM_2844 */
+        /* PRQA S 2814, 2842, 2844 ++ */ /* VL_QAC_DerefNullPtr, VL_NvM_2842, VL_NvM_2844 */
         (*NvM_MemIfAsyncFuncTable[result][serviceId])();
         /* PRQA S 2814, 2842, 2844 -- */
         NvM_EMultiReqResultCheck();
@@ -1489,9 +1538,11 @@ void NvM_JobErrorNotification(void)
 #if (NVM_API_CONFIG_CLASS_1 != NVM_API_CONFIG_CLASS)
 NVM_LOCAL Std_ReturnType NvM_CancelJobInQueue(NvM_BlockIdType BlockId)
 {
-    Std_ReturnType  retVal = E_NOT_OK;
-    Std_ReturnType  normalRet;
-    NvM_BlockIdType intBlockId = BlockId - 1U;
+    Std_ReturnType      retVal = E_NOT_OK;
+    Std_ReturnType      normalRet;
+    NvM_BlockIdType     intBlockId    = NvM_GetIntBlockId(BlockId);
+    NvM_AdminBlockType* AdminBlockPtr = &(NvM_AdminBlock[intBlockId]);
+
 #if (STD_ON == NVM_JOB_PRIORITIZATION)
     Std_ReturnType  immedRet;
     NvM_JobTypeType jobType;
@@ -1499,8 +1550,8 @@ NVM_LOCAL Std_ReturnType NvM_CancelJobInQueue(NvM_BlockIdType BlockId)
 
     /* PRQA S 2844 ++ */ /* VL_NvM_2844 */
     if ((0U == jobPri)
-        && ((NVM_WRITE_PRAM_BLOCK_SERV_ID == NvM_AdminBlock[intBlockId].ServiceID)
-            || (NVM_WRITE_BLOCK_SERV_ID == NvM_AdminBlock[intBlockId].ServiceID)))
+        && ((NVM_WRITE_PRAM_BLOCK_SERV_ID == AdminBlockPtr->ServiceID)
+            || (NVM_WRITE_BLOCK_SERV_ID == AdminBlockPtr->ServiceID)))
     /* PRQA S 2844 -- */
     {
         jobType  = NVM_JOB_TYPE_SINGLE_IMMED;
@@ -1518,16 +1569,20 @@ NVM_LOCAL Std_ReturnType NvM_CancelJobInQueue(NvM_BlockIdType BlockId)
     if (E_OK == normalRet)
 #endif
     {
-        NVM_SETFLAGOFF(&NvM_AdminBlock[intBlockId].FlagGroup, NVM_ADMIN_ENQUEUE); /* PRQA S 2844 */ /* VL_NvM_2844 */
-        /* PRQA S 2995 ++ */                                                                        /* VL_NvM_2995 */
-        if ((BlockId != NvM_CurRunning.BlockId)
-            || ((BlockId == NvM_CurRunning.BlockId) && (NvM_Module.JobStep == NVM_JOB_STEP_IDLE)))
+        const NvM_CurRunningType* CurRunningPtr = &NvM_CurRunning;
+
+        SchM_Enter_NvM_Queue();
+        NVM_SETFLAGOFF(&AdminBlockPtr->FlagGroup, NVM_ADMIN_ENQUEUE); /* PRQA S 2844 */ /* VL_NvM_2844 */
+        /* PRQA S 2995 ++ */                                                            /* VL_NvM_2995 */
+        if ((BlockId != CurRunningPtr->BlockId)
+            || ((BlockId == CurRunningPtr->BlockId) && (NvM_Module.JobStep == NVM_JOB_STEP_IDLE)))
         /* PRQA S 2995 -- */
         {
-            NvM_AdminBlock[intBlockId].SingleReqResult = NVM_REQ_CANCELED; /* PRQA S 2844 */ /* VL_NvM_2844 */
-            NVM_SETFLAGOFF(&NvM_AdminBlock[intBlockId].FlagGroup, NVM_ADMIN_RAM_VALID);
-            NVM_SETFLAGOFF(&NvM_AdminBlock[intBlockId].FlagGroup, NVM_ADMIN_RAM_CHANGED);
+            AdminBlockPtr->SingleReqResult = NVM_REQ_CANCELED; /* PRQA S 2844 */ /* VL_NvM_2844 */
+            NVM_SETFLAGOFF(&AdminBlockPtr->FlagGroup, NVM_ADMIN_RAM_VALID);
+            NVM_SETFLAGOFF(&AdminBlockPtr->FlagGroup, NVM_ADMIN_RAM_CHANGED);
         }
+        SchM_Exit_NvM_Queue();
         retVal = E_OK;
     }
     return retVal;
@@ -1538,10 +1593,11 @@ NVM_LOCAL Std_ReturnType NvM_CancelJobInQueue(NvM_BlockIdType BlockId)
  * @brief     Check whether the current block is in the queue. If it is not, the queue flag is clear. Otherwise, check
  * the position of the current task in the queue and update the corresponding index
  */
+/* PRQA S 6010,6080 ++ */ /* VL_MTR_NvM_STCYC,VL_MTR_NvM_STPTH */
 NVM_LOCAL Std_ReturnType NvM_QueueSortWithoutPriority(NvM_BlockIdType BlockId)
 {
-    uint8 curIndex     = 0;
-    uint8 blockIdIndex = 0;
+    uint8 curIndex     = 0u;
+    uint8 blockIdIndex = 0u;
 
     for (; curIndex < NVM_SIZE_STANDARD_JOB_QUEUE; ++curIndex)
     {
@@ -1552,66 +1608,72 @@ NVM_LOCAL Std_ReturnType NvM_QueueSortWithoutPriority(NvM_BlockIdType BlockId)
         }
     }
 
-    Std_ReturnType retVal = E_OK;
+    Std_ReturnType                 retVal              = E_OK;
+    NvM_RoundRobinQueueManageType* StandQueueManagePtr = &NvM_StandQueueManage;
+
     /** This block takes the last position in the NvM_StandQueueManage */
-    if (((0u != NvM_StandQueueManage.TailIndex) && (blockIdIndex == (NvM_StandQueueManage.TailIndex - 1u)))
-        || ((0u == NvM_StandQueueManage.TailIndex) && (blockIdIndex == (NVM_SIZE_STANDARD_JOB_QUEUE - 1u))))
+    if (((0u != StandQueueManagePtr->TailIndex) && (blockIdIndex == (StandQueueManagePtr->TailIndex - 1u)))
+        || ((0u == StandQueueManagePtr->TailIndex) && (blockIdIndex == (NVM_SIZE_STANDARD_JOB_QUEUE - 1u))))
     {
-        --NvM_StandQueueManage.Count;
+        --StandQueueManagePtr->Count;
         if (0U < blockIdIndex)
         {
-            NvM_StandQueueManage.TailIndex = blockIdIndex;
+            StandQueueManagePtr->TailIndex = blockIdIndex;
         }
         else
         {
-            NvM_StandQueueManage.TailIndex = 0U;
+            StandQueueManagePtr->TailIndex = 0U;
         }
     }
     /** This block takes the middle or fist position of the NvM_StandQueueManage */
     else
     {
         boolean blockFind    = FALSE;
-        uint8   queueCounter = 0;
-        uint8   preIndex     = 0;
+        uint8   queueCounter = 0u;
+        uint8   preIndex     = 0u;
         /** Find the position of the block among the NvM_StandQueueManage.Count */
-        curIndex = NvM_StandQueueManage.HeadIndex;
-        for (; queueCounter < NvM_StandQueueManage.Count; ++queueCounter)
+        curIndex                    = StandQueueManagePtr->HeadIndex;
+        uint8 StandQueueManageCount = StandQueueManagePtr->Count;
+
+        for (; queueCounter < StandQueueManageCount; ++queueCounter)
         {
             if (NvM_StandQueue[curIndex].BlockId == BlockId)
             {
                 preIndex = curIndex;
-                --NvM_StandQueueManage.Count;
+                --StandQueueManageCount;
                 blockFind = TRUE;
                 break;
             }
             ++curIndex;
             if (NVM_SIZE_STANDARD_JOB_QUEUE <= curIndex)
             {
-                curIndex = 0;
+                curIndex = 0u;
             }
         }
+        StandQueueManagePtr->Count = StandQueueManageCount;
         if (blockFind == TRUE)
         {
             /** Move forward */
-            for (; queueCounter < NvM_StandQueueManage.Count; ++queueCounter)
+            StandQueueManageCount = StandQueueManagePtr->Count;
+            for (; queueCounter < StandQueueManageCount; ++queueCounter)
             {
                 ++curIndex;
                 if (NVM_SIZE_STANDARD_JOB_QUEUE <= curIndex)
                 {
-                    curIndex = 0;
+                    curIndex = 0u;
                 }
                 NvM_StandQueue[preIndex].BlockId    = NvM_StandQueue[curIndex].BlockId;
                 NvM_StandQueue[preIndex].ServiceId  = NvM_StandQueue[curIndex].ServiceId;
                 NvM_StandQueue[preIndex].DestSrcPtr = NvM_StandQueue[curIndex].DestSrcPtr;
                 preIndex                            = curIndex;
             }
-            if (0u == NvM_StandQueueManage.TailIndex)
+            if (0u == StandQueueManagePtr->TailIndex)
             {
-                NvM_StandQueueManage.TailIndex = NVM_SIZE_STANDARD_JOB_QUEUE - 1;
+                StandQueueManagePtr->TailIndex = NVM_SIZE_STANDARD_JOB_QUEUE - 1u;
             }
             else
             {
-                --NvM_StandQueueManage.TailIndex;
+                --StandQueueManagePtr->TailIndex;
             }
         }
         else
@@ -1622,6 +1684,7 @@ NVM_LOCAL Std_ReturnType NvM_QueueSortWithoutPriority(NvM_BlockIdType BlockId)
 
     return retVal;
 }
+/* PRQA S 6010,6080 -- */
 #endif
 
 #if (STD_ON == NVM_JOB_PRIORITIZATION)
@@ -1630,6 +1693,7 @@ NVM_LOCAL Std_ReturnType NvM_QueueSortWithoutPriority(NvM_BlockIdType BlockId)
  */
 NVM_LOCAL void NvM_NormalQueueFindBLockId(const uint8 blockIdIndex, const uint8 curActPriTable, const uint8 jobPri)
 {
+    SchM_Enter_NvM_Queue();
     /** Only task for this priority */ /* PRQA S 3120 ++ */                       /* VL_QAC_MagicNum */
     if (NvM_StandQueue[blockIdIndex].NextIndex == blockIdIndex) /* PRQA S 2844 */ /* VL_NvM_2844 */
     {
@@ -1651,6 +1715,7 @@ NVM_LOCAL void NvM_NormalQueueFindBLockId(const uint8 blockIdIndex, const uint8 
         NvM_StandQueue[blockIdIndex].NextIndex               = blockIdIndex;
         /* PRQA S 2844 -- */
     }
+    SchM_Exit_NvM_Queue();
 }
 
 /**
@@ -1662,25 +1727,25 @@ NVM_LOCAL void NvM_NormalQueueSubSort(
     const uint8 jobPri,
     const uint8 preIndex)
 {
+    NvM_PriTable2QueueType* PriorityQueuePtr = &(NvM_PriTable2Queue[curActPriTable][jobPri]);
+    SchM_Enter_NvM_Queue();
     /* PRQA S 2844 ++ */ /* VL_NvM_2844 */
     if (NvM_StandQueue[blockIdIndex].NextIndex == blockIdIndex)
     {
         /** This block is the last task for this priority */
-        NvM_StandQueue[preIndex].NextIndex                   = preIndex;
-        NvM_PriTable2Queue[curActPriTable][jobPri].TailIndex = preIndex;
+        NvM_StandQueue[preIndex].NextIndex = preIndex;
+        PriorityQueuePtr->TailIndex        = preIndex;
     }
     else if (blockIdIndex == preIndex)
     {
-        if (blockIdIndex == NvM_PriTable2Queue[curActPriTable][jobPri].TailIndex)
+        if (blockIdIndex == PriorityQueuePtr->TailIndex)
         {
-            NvM_StandQueue[NvM_PriTable2Queue[curActPriTable][jobPri].HeadIndex].NextIndex =
-                NvM_PriTable2Queue[curActPriTable][jobPri].HeadIndex;
-            NvM_PriTable2Queue[curActPriTable][jobPri].TailIndex = NvM_PriTable2Queue[curActPriTable][jobPri].HeadIndex;
+            NvM_StandQueue[PriorityQueuePtr->HeadIndex].NextIndex = PriorityQueuePtr->HeadIndex;
+            PriorityQueuePtr->TailIndex                           = PriorityQueuePtr->HeadIndex;
         }
         else
         {
-            NvM_StandQueue[NvM_PriTable2Queue[curActPriTable][jobPri].HeadIndex].NextIndex =
-                NvM_StandQueue[blockIdIndex].NextIndex;
+            NvM_StandQueue[PriorityQueuePtr->HeadIndex].NextIndex = NvM_StandQueue[blockIdIndex].NextIndex;
         }
         NvM_StandQueue[blockIdIndex].NextIndex = blockIdIndex;
     }
@@ -1689,6 +1754,7 @@ NVM_LOCAL void NvM_NormalQueueSubSort(
         NvM_StandQueue[preIndex].NextIndex     = NvM_StandQueue[blockIdIndex].NextIndex;
         NvM_StandQueue[blockIdIndex].NextIndex = blockIdIndex;
     }
+    SchM_Exit_NvM_Queue();
     /* PRQA S 2844 -- */
 }
 
@@ -1698,8 +1764,10 @@ NVM_LOCAL void NvM_NormalQueueSubSort(
  */
 NVM_LOCAL Std_ReturnType NvM_NormalQueueSort(NvM_BlockIdType BlockId)
 {
-    uint8 blockIdIndex;
-    uint8 curIndex = 0u;
+    Std_ReturnType retVal       = E_OK;
+    uint8          curIndex     = 0u;
+    uint8          blockIdIndex = 0u;
+
     for (; curIndex < NVM_SIZE_STANDARD_JOB_QUEUE; ++curIndex)
     {
         if (NvM_StandQueue[curIndex].BlockId == BlockId)
@@ -1708,15 +1776,12 @@ NVM_LOCAL Std_ReturnType NvM_NormalQueueSort(NvM_BlockIdType BlockId)
             break;
         }
     }
+    NvM_BlockIdType intBlockId     = NvM_GetIntBlockId(BlockId);
+    uint8           curActPriTable = NvM_Module.CurActPriTable;
+    uint8           jobPri = NvM_BlockDescriptor[intBlockId].NvmBlockJobPriority; /* PRQA S 2844 */ /* VL_NvM_2844 */
+    const NvM_PriTable2QueueType* PriorityQueuePtr = &(NvM_PriTable2Queue[curActPriTable][jobPri]);
 
-    Std_ReturnType  retVal     = E_OK;
-    NvM_BlockIdType intBlockId = BlockId - 1U;
-
-    uint8 curActPriTable = NvM_Module.CurActPriTable;
-    uint8 jobPri         = NvM_BlockDescriptor[intBlockId].NvmBlockJobPriority; /* PRQA S 2844 */ /* VL_NvM_2844 */
-    /* PRQA S 2844,2962 ++ */ /* VL_NvM_2844,VL_NvM_2962 */
-    if (blockIdIndex == NvM_PriTable2Queue[curActPriTable][jobPri].HeadIndex)
-    /* PRQA S 2844,2962 -- */
+    if (blockIdIndex == PriorityQueuePtr->HeadIndex)
     {
         NvM_NormalQueueFindBLockId(blockIdIndex, curActPriTable, jobPri);
     }
@@ -1726,9 +1791,10 @@ NVM_LOCAL Std_ReturnType NvM_NormalQueueSort(NvM_BlockIdType BlockId)
         uint8 queueCounter = 0u;
 
         /** More than one task for this priority */ /* PRQA S 2844 ++ */ /* VL_NvM_2844 */
-        curIndex = NvM_PriTable2Queue[curActPriTable][jobPri].HeadIndex;
+        curIndex = PriorityQueuePtr->HeadIndex;
         /* PRQA S 2844 -- */
         uint8 preIndex = curIndex;
+
         while ((curIndex != blockIdIndex) && (retVal == E_OK))
         {
             ++queueCounter;
@@ -1750,8 +1816,10 @@ NVM_LOCAL Std_ReturnType NvM_NormalQueueSort(NvM_BlockIdType BlockId)
     if (retVal == E_OK)
     {
         /** Clear the bit in NvM_QueueSpaceTalbe */ /* PRQA S 2985, 3120 ++ */ /* VL_NvM_2985, VL_QAC_MagicNum */
+        SchM_Enter_NvM_Queue();
         NvM_QueueSpaceTalbe[NVM_TABLE_SIZE_JOB_QUEUE - 1U] |= (uint16)((uint16)0x01U << ((blockIdIndex & 0xF0U) >> 4U));
         NvM_QueueSpaceTalbe[((blockIdIndex & 0xF0U) >> 4u)] |= (uint16)((uint16)0x01U << (blockIdIndex & 0x0FU));
+        SchM_Exit_NvM_Queue();
         /* PRQA S 2985, 3120 -- */
     }
 
@@ -1763,10 +1831,13 @@ NVM_LOCAL Std_ReturnType NvM_NormalQueueSort(NvM_BlockIdType BlockId)
  */
 NVM_LOCAL void NvM_ImmedQueueSortSubInternal(uint8 QueueCounter, uint8 CurIndex, uint8 PreIndex)
 {
-    uint8 queueCnt = QueueCounter;
-    uint8 preIndex = PreIndex;
-    uint8 index    = CurIndex;
-    for (; queueCnt < (NvM_ImmedQueueManage.Count - 1U); ++queueCnt)
+    uint8                          queueCnt              = QueueCounter;
+    uint8                          preIndex              = PreIndex;
+    uint8                          index                 = CurIndex;
+    NvM_RoundRobinQueueManageType* ImmedQueueManagePtr   = &NvM_ImmedQueueManage;
+    uint8                          ImmedQueueManageCount = ImmedQueueManagePtr->Count - 1U;
+
+    for (; queueCnt < ImmedQueueManageCount; ++queueCnt)
     {
         ++index;
         if (NVM_SIZE_IMMEDIATE_JOB_QUEUE <= index)
@@ -1778,15 +1849,15 @@ NVM_LOCAL void NvM_ImmedQueueSortSubInternal(uint8 QueueCounter, uint8 CurIndex,
         preIndex                            = index;
         NvM_ImmedQueue[index].BlockId       = 0u;
     }
-    if (NvM_ImmedQueueManage.TailIndex == 0U)
+    if (ImmedQueueManagePtr->TailIndex == 0U)
     {
-        NvM_ImmedQueueManage.TailIndex = NvM_ImmedQueueManage.Count - 1U; /* PRQA S 2903 */ /* VL_NvM_2903 */
+        ImmedQueueManagePtr->TailIndex = ImmedQueueManagePtr->Count - 1U; /* PRQA S 2903 */ /* VL_NvM_2903 */
     }
     else
     {
-        --NvM_ImmedQueueManage.TailIndex;
+        --ImmedQueueManagePtr->TailIndex;
     }
-    --NvM_ImmedQueueManage.Count;
+    --ImmedQueueManagePtr->Count;
 }
 
 /**
@@ -1794,10 +1865,12 @@ NVM_LOCAL void NvM_ImmedQueueSortSubInternal(uint8 QueueCounter, uint8 CurIndex,
  */
 NVM_LOCAL void NvM_ImmedQueueSortSub(uint8 blockIdIndex)
 {
-    uint8 preIndex     = 0u;
-    uint8 queueCounter = 0u;
+    uint8                          preIndex            = 0u;
+    uint8                          queueCounter        = 0u;
+    NvM_RoundRobinQueueManageType* ImmedQueueManagePtr = &NvM_ImmedQueueManage;
     /** This block takes the last position in the NvM_ImmedQueueManage */
-    uint8 curIndex = NvM_ImmedQueueManage.HeadIndex;
+    uint8 curIndex = ImmedQueueManagePtr->HeadIndex;
+
     for (; queueCounter < NVM_SIZE_IMMEDIATE_JOB_QUEUE; ++queueCounter)
     {
         if (curIndex == blockIdIndex)
@@ -1811,29 +1884,29 @@ NVM_LOCAL void NvM_ImmedQueueSortSub(uint8 blockIdIndex)
             curIndex = 0u;
         }
     }
-    if (blockIdIndex == NvM_ImmedQueueManage.HeadIndex) /** First element */
+    if (blockIdIndex == ImmedQueueManagePtr->HeadIndex) /** First element */
     {
         NvM_ImmedQueue[blockIdIndex].BlockId = 0u;
-        --NvM_ImmedQueueManage.Count;
-        if ((NVM_SIZE_IMMEDIATE_JOB_QUEUE - 1U) <= NvM_ImmedQueueManage.HeadIndex)
+        --ImmedQueueManagePtr->Count;
+        if ((NVM_SIZE_IMMEDIATE_JOB_QUEUE - 1U) <= ImmedQueueManagePtr->HeadIndex)
         {
-            NvM_ImmedQueueManage.HeadIndex = 0u;
+            ImmedQueueManagePtr->HeadIndex = 0u;
         }
         else
         {
-            ++NvM_ImmedQueueManage.HeadIndex;
+            ++ImmedQueueManagePtr->HeadIndex;
         }
     }
-    else if (queueCounter == (NvM_ImmedQueueManage.Count - 1U)) /** Last element */
+    else if (queueCounter == (ImmedQueueManagePtr->Count - 1U)) /** Last element */
     {
         NvM_ImmedQueue[blockIdIndex].BlockId = 0u;
-        if (NvM_ImmedQueueManage.TailIndex == 0U)
+        if (ImmedQueueManagePtr->TailIndex == 0U)
         {
-            NvM_ImmedQueueManage.TailIndex = NvM_ImmedQueueManage.Count - 1u;
+            ImmedQueueManagePtr->TailIndex = ImmedQueueManagePtr->Count - 1u;
         }
         else
         {
-            --NvM_ImmedQueueManage.TailIndex;
+            --ImmedQueueManagePtr->TailIndex;
         }
         --NvM_ImmedQueueManage.Count;
     }
@@ -1849,8 +1922,10 @@ NVM_LOCAL void NvM_ImmedQueueSortSub(uint8 blockIdIndex)
  */
 NVM_LOCAL Std_ReturnType NvM_ImmedQueueSort(NvM_BlockIdType BlockId)
 {
-    uint8 queueIndex = NvM_ImmedQueueManage.TailIndex;
-    uint8 blockIdIndex;
+    uint8 queueIndex   = NvM_ImmedQueueManage.TailIndex;
+    uint8 blockIdIndex = 0u;
+
+    SchM_Enter_NvM_Queue();
     for (uint8 curIndex = 0u; curIndex < NVM_SIZE_IMMEDIATE_JOB_QUEUE; ++curIndex)
     {
         if (NvM_ImmedQueue[queueIndex].BlockId == BlockId)
@@ -1865,7 +1940,8 @@ NVM_LOCAL Std_ReturnType NvM_ImmedQueueSort(NvM_BlockIdType BlockId)
         }
     }
 
-    NvM_ImmedQueueSortSub(blockIdIndex); /* PRQA S 2962 */ /* VL_NvM_2962 */
+    NvM_ImmedQueueSortSub(blockIdIndex);
+    SchM_Exit_NvM_Queue();
 
     return E_OK;
 }
@@ -1878,15 +1954,19 @@ NVM_LOCAL Std_ReturnType NvM_ImmedQueueSort(NvM_BlockIdType BlockId)
  */
 NVM_LOCAL Std_ReturnType NvM_SetBlockProtectionSub(NvM_BlockIdType BlockId, boolean ProtectionEnabled)
 {
-    NvM_BlockIdType intBlockId = BlockId - 1U;
+    NvM_BlockIdType     intBlockId    = NvM_GetIntBlockId(BlockId);
+    NvM_AdminBlockType* AdminBlockPtr = &(NvM_AdminBlock[intBlockId]);
+
+    SchM_Enter_NvM_Queue();
     if (TRUE == ProtectionEnabled)
     {
-        NVM_SETFLAGON(&NvM_AdminBlock[intBlockId].FlagGroup, NVM_ADMIN_NV_WRPRO); /* PRQA S 2844 */ /* VL_NvM_2844 */
+        NVM_SETFLAGON(&AdminBlockPtr->FlagGroup, NVM_ADMIN_NV_WRPRO); /* PRQA S 2844 */ /* VL_NvM_2844 */
     }
     else
     {
-        NVM_SETFLAGOFF(&NvM_AdminBlock[intBlockId].FlagGroup, NVM_ADMIN_NV_WRPRO);
+        NVM_SETFLAGOFF(&AdminBlockPtr->FlagGroup, NVM_ADMIN_NV_WRPRO);
     }
+    SchM_Exit_NvM_Queue();
     return E_OK;
 }
 
@@ -1896,13 +1976,15 @@ NVM_LOCAL Std_ReturnType NvM_SetBlockProtectionSub(NvM_BlockIdType BlockId, bool
  */
 NVM_LOCAL Std_ReturnType NvM_InvalidateNvBlockSub(NvM_BlockIdType BlockId)
 {
-    Std_ReturnType  retVal     = E_NOT_OK;
-    NvM_BlockIdType intBlockId = BlockId - 1U;
+    Std_ReturnType                 retVal             = E_NOT_OK;
+    NvM_BlockIdType                intBlockId         = NvM_GetIntBlockId(BlockId);
+    const NvM_AdminBlockType*      AdminBlockPtr      = &(NvM_AdminBlock[intBlockId]);
+    const NvM_BlockDescriptorType* BlockDescriptorPtr = &(NvM_BlockDescriptor[intBlockId]);
 
     /* PRQA S 2844 ++ */ /* VL_NvM_2844 */
-    if ((NVM_BLOCK_DATASET != NvM_BlockDescriptor[intBlockId].NvmBlockManagementType)
-        || ((NvM_BlockDescriptor[intBlockId].NvmNvBlockNum > NvM_AdminBlock[intBlockId].CurrentIndex)
-            && (NVM_BLOCK_DATASET == NvM_BlockDescriptor[intBlockId].NvmBlockManagementType)))
+    if ((NVM_BLOCK_DATASET != BlockDescriptorPtr->NvmBlockManagementType)
+        || ((BlockDescriptorPtr->NvmNvBlockNum > AdminBlockPtr->CurrentIndex)
+            && (NVM_BLOCK_DATASET == BlockDescriptorPtr->NvmBlockManagementType)))
     /* PRQA S 2844 -- */
     {
         retVal = NvM_JobEnqueue(BlockId, NVM_INVALIDATE_NV_BLOCK_SERV_ID, NULL_PTR);
@@ -1916,13 +1998,15 @@ NVM_LOCAL Std_ReturnType NvM_InvalidateNvBlockSub(NvM_BlockIdType BlockId)
  */
 NVM_LOCAL Std_ReturnType NvM_EraseNvBlockSub(NvM_BlockIdType BlockId)
 {
-    Std_ReturnType  retVal     = E_NOT_OK;
-    NvM_BlockIdType intBlockId = BlockId - 1U;
+    Std_ReturnType                 retVal             = E_NOT_OK;
+    NvM_BlockIdType                intBlockId         = NvM_GetIntBlockId(BlockId);
+    const NvM_AdminBlockType*      AdminBlockPtr      = &(NvM_AdminBlock[intBlockId]);
+    const NvM_BlockDescriptorType* BlockDescriptorPtr = &(NvM_BlockDescriptor[intBlockId]);
 
     /* PRQA S 2844++  */ /* VL_NvM_2844 */
-    if ((NVM_BLOCK_DATASET != NvM_BlockDescriptor[intBlockId].NvmBlockManagementType)
-        || ((NvM_BlockDescriptor[intBlockId].NvmNvBlockNum > NvM_AdminBlock[intBlockId].CurrentIndex)
-            && (NVM_BLOCK_DATASET == NvM_BlockDescriptor[intBlockId].NvmBlockManagementType)))
+    if ((NVM_BLOCK_DATASET != BlockDescriptorPtr->NvmBlockManagementType)
+        || ((BlockDescriptorPtr->NvmNvBlockNum > AdminBlockPtr->CurrentIndex)
+            && (NVM_BLOCK_DATASET == BlockDescriptorPtr->NvmBlockManagementType)))
     /* PRQA S 2844 -- */
     {
         retVal = NvM_JobEnqueue(BlockId, NVM_ERASE_NV_BLOCK_SERV_ID, NULL_PTR);
@@ -1937,30 +2021,36 @@ NVM_LOCAL Std_ReturnType NvM_EraseNvBlockSub(NvM_BlockIdType BlockId)
 #if (STD_ON == NVM_DEV_ERROR_DETECT)
 NVM_LOCAL boolean NvM_InvalidateNvBlockCheck(NvM_BlockIdType intBlockId, uint8* errorId)
 {
-    boolean errorflag = FALSE;
+    boolean                   errorflag     = FALSE;
+    const NvM_AdminBlockType* AdminBlockPtr = &(NvM_AdminBlock[intBlockId]);
+#if (STD_ON == NVM_WRITE_BLOCK_ONCE)
+    const NvM_BlockDescriptorType* BlockDescriptorPtr = &(NvM_BlockDescriptor[intBlockId]);
+#endif
 
-    if ((TRUE == NVM_ISFLAGON(NvM_AdminBlock[intBlockId].FlagGroup, NVM_ADMIN_ENQUEUE))
-        || (NvM_AdminBlock[intBlockId].SingleReqResult == NVM_REQ_PENDING))
+    if ((TRUE == NVM_ISFLAGON(AdminBlockPtr->FlagGroup, NVM_ADMIN_ENQUEUE))
+        || (AdminBlockPtr->SingleReqResult == NVM_REQ_PENDING))
     {
-        *errorId  = NVM_E_BLOCK_PENDING; /* PRQA S 2814 */ /* VL_NvM_2814 */
+        *errorId  = NVM_E_BLOCK_PENDING; /* PRQA S 2814 */ /* VL_QAC_DerefNullPtr */
         errorflag = TRUE;
     }
     /* PRQA S 2844 ++ */ /* VL_NvM_2844 */
-    else if (TRUE == NVM_ISFLAGON(NvM_AdminBlock[intBlockId].FlagGroup, NVM_ADMIN_BLOCK_LOCKED))
+    else if (TRUE == NVM_ISFLAGON(AdminBlockPtr->FlagGroup, NVM_ADMIN_BLOCK_LOCKED))
     /* PRQA S 2844 -- */
     {
         *errorId  = NVM_E_BLOCK_LOCKED;
         errorflag = TRUE;
     }
+#if (STD_ON == NVM_WRITE_BLOCK_ONCE)
     /* PRQA S 2844 ++ */ /* VL_NvM_2844 */
     else if (
-        (TRUE == NVM_ISFLAGON(NvM_BlockDescriptor[intBlockId].FlagGroup, (uint16)NVM_BLOCK_DESC_WRITEBLOCKONCE))
-        && (TRUE == NVM_ISFLAGOFF(NvM_AdminBlock[intBlockId].FlagGroup, NVM_ADMIN_READ_REQUEST)))
+        (TRUE == NVM_ISFLAGON(BlockDescriptorPtr->FlagGroup, (uint16)NVM_BLOCK_DESC_WRITEBLOCKONCE))
+        && (TRUE == NVM_ISFLAGOFF(AdminBlockPtr->FlagGroup, NVM_ADMIN_READ_REQUEST)))
     /* PRQA S 2844 -- */
     {
         *errorId  = NVM_E_WRITE_ONCE_STATUS_UNKNOWN;
         errorflag = TRUE;
     }
+#endif
     else
     {
         /** idle */
@@ -1973,19 +2063,24 @@ NVM_LOCAL boolean NvM_InvalidateNvBlockCheck(NvM_BlockIdType intBlockId, uint8* 
  * @brief     Check that the administrative flag bit for the current block is valid and record the error value for erase
  * request
  */
+/* PRQA S 2741 ++ */ /* VL_NvM_2741  */
 NVM_LOCAL boolean NvM_EraseNvBlockCheck(NvM_BlockIdType intBlockId, uint8* errorId)
 {
-    boolean errorflag = FALSE;
+    boolean                   errorflag     = FALSE;
+    const NvM_AdminBlockType* AdminBlockPtr = &(NvM_AdminBlock[intBlockId]);
+#if ((STD_ON == NVM_WRITE_BLOCK_ONCE) || (STD_ON == NVM_JOB_PRIORITIZATION))
+    const NvM_BlockDescriptorType* BlockDescriptorPtr = &(NvM_BlockDescriptor[intBlockId]);
+#endif
 
-    if ((TRUE == NVM_ISFLAGON(NvM_AdminBlock[intBlockId].FlagGroup, NVM_ADMIN_ENQUEUE))
-        || (NvM_AdminBlock[intBlockId].SingleReqResult == NVM_REQ_PENDING))
+    if ((TRUE == NVM_ISFLAGON(AdminBlockPtr->FlagGroup, NVM_ADMIN_ENQUEUE))
+        || (AdminBlockPtr->SingleReqResult == NVM_REQ_PENDING))
     {
-        *errorId  = NVM_E_BLOCK_PENDING; /* PRQA S 2814 */ /* VL_NvM_2814 */
+        *errorId  = NVM_E_BLOCK_PENDING; /* PRQA S 2814 */ /* VL_QAC_DerefNullPtr */
         errorflag = TRUE;
     }
     else if
 #if (STD_ON == NVM_JOB_PRIORITIZATION)
-        (0U != NvM_BlockDescriptor[intBlockId].NvmBlockJobPriority) /* PRQA S 2844 */ /* VL_NvM_2844 */
+        (0U != BlockDescriptorPtr->NvmBlockJobPriority) /* PRQA S 2844 */ /* VL_NvM_2844 */
 #else
         (STD_OFF == NVM_JOB_PRIORITIZATION)
 #endif
@@ -1993,20 +2088,22 @@ NVM_LOCAL boolean NvM_EraseNvBlockCheck(NvM_BlockIdType intBlockId, uint8* error
         *errorId  = NVM_E_BLOCK_CONFIG;
         errorflag = TRUE;
     }
-    /* PRQA S 2844 ++ */ /* VL_NvM_2844 */
-    else if (TRUE == NVM_ISFLAGON(NvM_AdminBlock[intBlockId].FlagGroup, NVM_ADMIN_BLOCK_LOCKED))
+    /* PRQA S 2844,2880 ++ */ /* VL_NvM_2844,VL_NvM_2880 */
+    else if (TRUE == NVM_ISFLAGON(AdminBlockPtr->FlagGroup, NVM_ADMIN_BLOCK_LOCKED))
     {
         *errorId  = NVM_E_BLOCK_LOCKED;
         errorflag = TRUE;
     }
+#if (STD_ON == NVM_WRITE_BLOCK_ONCE)
     else if (
-        (TRUE == NVM_ISFLAGON(NvM_BlockDescriptor[intBlockId].FlagGroup, (uint16)NVM_BLOCK_DESC_WRITEBLOCKONCE))
-        && (TRUE == NVM_ISFLAGOFF(NvM_AdminBlock[intBlockId].FlagGroup, NVM_ADMIN_READ_REQUEST)))
-    /* PRQA S 2844 -- */
+        (TRUE == NVM_ISFLAGON(BlockDescriptorPtr->FlagGroup, (uint16)NVM_BLOCK_DESC_WRITEBLOCKONCE))
+        && (TRUE == NVM_ISFLAGOFF(AdminBlockPtr->FlagGroup, NVM_ADMIN_READ_REQUEST)))
+    /* PRQA S 2844,2880 -- */
     {
         *errorId  = NVM_E_WRITE_ONCE_STATUS_UNKNOWN;
         errorflag = TRUE;
     }
+#endif
     else
     {
         /** idle */
@@ -2014,6 +2111,7 @@ NVM_LOCAL boolean NvM_EraseNvBlockCheck(NvM_BlockIdType intBlockId, uint8* error
 
     return errorflag;
 }
+/* PRQA S 2741 -- */
 #endif
 #endif
 
@@ -2022,50 +2120,63 @@ NVM_LOCAL boolean NvM_EraseNvBlockCheck(NvM_BlockIdType intBlockId, uint8* error
  * @brief     Check whether the management flag bit of the current block is valid, and set the corresponding flag
  * according to the blockchange flag bit passed in
  */
+/* PRQA S 2982,6070 ++*/ /* VL_NvM_2982,VL_MTR_NvM_STCAL */
 NVM_LOCAL Std_ReturnType NvM_SetRamBlockStatusSub(NvM_BlockIdType BlockId, boolean BlockChanged)
 {
-    Std_ReturnType  retVal     = E_NOT_OK;
-    NvM_BlockIdType intBlockId = BlockId - 1U;
+    Std_ReturnType                 retVal             = E_NOT_OK;
+    NvM_BlockIdType                intBlockId         = NvM_GetIntBlockId(BlockId);
+    NvM_AdminBlockType*            AdminBlockPtr      = &(NvM_AdminBlock[intBlockId]);
+    const NvM_BlockDescriptorType* BlockDescriptorPtr = &(NvM_BlockDescriptor[intBlockId]);
 
     /* PRQA S 2844 ++*/ /* VL_NvM_2844 */
-    if ((TRUE == NVM_ISFLAGOFF(NvM_AdminBlock[intBlockId].FlagGroup, NVM_ADMIN_NV_WRPRO))
-        && ((NULL_PTR != NvM_BlockDescriptor[intBlockId].NvmRamBlockDataAddress)
-            || (TRUE == NVM_ISFLAGON(NvM_BlockDescriptor[intBlockId].FlagGroup, (uint16)NVM_BLOCK_DESC_SYNCMECHANISM)))
-        && (TRUE == NVM_ISFLAGON(NvM_BlockDescriptor[intBlockId].FlagGroup, (uint16)NVM_BLOCK_DESC_SETRAMSTATUS)))
+    if ((TRUE == NVM_ISFLAGOFF(AdminBlockPtr->FlagGroup, NVM_ADMIN_NV_WRPRO))
+        && ((NULL_PTR != BlockDescriptorPtr->NvmRamBlockDataAddress)
+#if (STD_ON == NVM_BLOCK_USE_SYNC_MECHANISM)
+            || (TRUE == NVM_ISFLAGON(BlockDescriptorPtr->FlagGroup, (uint16)NVM_BLOCK_DESC_SYNCMECHANISM))
+#endif
+                )
+#if (STD_ON == NVM_BLOCK_USE_SET_RAMBLOCK_STATUS)
+        && (TRUE == NVM_ISFLAGON(BlockDescriptorPtr->FlagGroup, (uint16)NVM_BLOCK_DESC_SETRAMSTATUS))
+#endif
+    )
     /* PRQA S 2844 -- */
     {
+        SchM_Enter_NvM_Queue();
         if (TRUE == BlockChanged)
         {
             /* PRQA S 2844 ++*/ /* VL_NvM_2844 */
-            NVM_SETFLAGON(&NvM_AdminBlock[intBlockId].FlagGroup, NVM_ADMIN_RAM_VALID);
-            NVM_SETFLAGON(&NvM_AdminBlock[intBlockId].FlagGroup, NVM_ADMIN_RAM_CHANGED);
+            NVM_SETFLAGON(&AdminBlockPtr->FlagGroup, NVM_ADMIN_RAM_VALID);
+            NVM_SETFLAGON(&AdminBlockPtr->FlagGroup, NVM_ADMIN_RAM_CHANGED);
             /* PRQA S 2844 -- */
-            if (TRUE == NVM_ISFLAGON(NvM_BlockDescriptor[intBlockId].FlagGroup, (uint16)NVM_BLOCK_DESC_CALCRAMBLOCKCRC))
+#if (NVM_CALC_RAM_BLOCK_CRC == STD_ON)
+            if (TRUE == NVM_ISFLAGON(BlockDescriptorPtr->FlagGroup, (uint16)NVM_BLOCK_DESC_CALCRAMBLOCKCRC))
             {
                 /** The Req is useless, no further clarification about the use of Crc */
-                if (E_NOT_OK == NvM_JobEnqueue(BlockId, NVM_SET_RAM_BLOCK_STATUS_SERV_ID, NULL_PTR))
-                {
-                    /** Reserved */
-                }
+                /* PRQA S 2981 ++*/ /* VL_NvM_2981 */
+                retVal = NvM_JobEnqueue(BlockId, NVM_SET_RAM_BLOCK_STATUS_SERV_ID, NULL_PTR);
+                /* PRQA S 2981 --*/
             }
+#endif
             /* PRQA S 2844 ++*/ /* VL_NvM_2844 */
-            if (TRUE == NVM_ISFLAGON(NvM_AdminBlock[intBlockId].FlagGroup, NVM_ADMIN_NV_REPAIR))
+            if (TRUE == NVM_ISFLAGON(AdminBlockPtr->FlagGroup, NVM_ADMIN_NV_REPAIR))
             {
-                NVM_SETFLAGOFF(&NvM_AdminBlock[intBlockId].FlagGroup, NVM_ADMIN_NV_REPAIR);
+                NVM_SETFLAGOFF(&AdminBlockPtr->FlagGroup, NVM_ADMIN_NV_REPAIR);
             }
             /* PRQA S 2844 -- */
         }
         else
         {
             /* PRQA S 2844 ++*/ /* VL_NvM_2844 */
-            NVM_SETFLAGOFF(&NvM_AdminBlock[intBlockId].FlagGroup, NVM_ADMIN_RAM_VALID);
-            NVM_SETFLAGOFF(&NvM_AdminBlock[intBlockId].FlagGroup, NVM_ADMIN_RAM_CHANGED);
+            NVM_SETFLAGOFF(&AdminBlockPtr->FlagGroup, NVM_ADMIN_RAM_VALID);
+            NVM_SETFLAGOFF(&AdminBlockPtr->FlagGroup, NVM_ADMIN_RAM_CHANGED);
             /* PRQA S 2844 -- */
         }
+        SchM_Exit_NvM_Queue();
         retVal = E_OK;
     }
     return retVal;
 }
+/* PRQA S 2982,6070 --*/
 #endif
 
 #if (NVM_API_CONFIG_CLASS_1 != NVM_API_CONFIG_CLASS)
@@ -2075,8 +2186,10 @@ NVM_LOCAL Std_ReturnType NvM_SetRamBlockStatusSub(NvM_BlockIdType BlockId, boole
  */
 NVM_LOCAL Std_ReturnType NvM_ReadBlockSub(NvM_BlockIdType BlockId, void* NvM_DstPtr, const boolean readPRAMflag)
 {
-    Std_ReturnType  retVal     = E_NOT_OK;
-    NvM_BlockIdType intBlockId = BlockId - 1U;
+    Std_ReturnType                 retVal             = E_NOT_OK;
+    NvM_BlockIdType                intBlockId         = NvM_GetIntBlockId(BlockId);
+    NvM_AdminBlockType*            AdminBlockPtr      = &(NvM_AdminBlock[intBlockId]);
+    const NvM_BlockDescriptorType* BlockDescriptorPtr = &(NvM_BlockDescriptor[intBlockId]);
 
     if (readPRAMflag == FALSE)
     {
@@ -2092,28 +2205,23 @@ NVM_LOCAL Std_ReturnType NvM_ReadBlockSub(NvM_BlockIdType BlockId, void* NvM_Dst
 
     if (E_OK == retVal)
     {
-        if (readPRAMflag == TRUE)
+        SchM_Enter_NvM_Queue();
+        /** execute for read NVRAM/PRAM block service */ /* PRQA S 2844 ++ */ /* VL_NvM_2844 */
+        if (
+#if (STD_ON == NVM_BLOCK_USE_SYNC_MECHANISM)
+            ((readPRAMflag == TRUE)
+             && (TRUE == NVM_ISFLAGOFF(BlockDescriptorPtr->FlagGroup, (uint8)NVM_BLOCK_DESC_SYNCMECHANISM)))
+            ||
+#endif
+            ((readPRAMflag == FALSE)
+             && (((NULL_PTR != NvM_DstPtr) && (NvM_DstPtr == BlockDescriptorPtr->NvmRamBlockDataAddress))
+                 || ((NULL_PTR == NvM_DstPtr) && (NULL_PTR != BlockDescriptorPtr->NvmRamBlockDataAddress)))))
         {
-            /** execute for read PRAM block service */ /* PRQA S 2844 ++ */ /* VL_NvM_2844 */
-            if (TRUE == NVM_ISFLAGOFF(NvM_BlockDescriptor[intBlockId].FlagGroup, (uint8)NVM_BLOCK_DESC_SYNCMECHANISM))
-            {
-                NVM_SETFLAGOFF(&NvM_AdminBlock[intBlockId].FlagGroup, (uint16)(NVM_ADMIN_RAM_VALID));
-                NVM_SETFLAGOFF(&NvM_AdminBlock[intBlockId].FlagGroup, (uint16)(NVM_ADMIN_RAM_CHANGED));
-            }
-            /* PRQA S 2844 -- */
+            NVM_SETFLAGOFF(&AdminBlockPtr->FlagGroup, (uint16)(NVM_ADMIN_RAM_VALID));
+            NVM_SETFLAGOFF(&AdminBlockPtr->FlagGroup, (uint16)(NVM_ADMIN_RAM_CHANGED));
         }
-        else
-        {
-            /** execute for read block service */
-            if (((NULL_PTR != NvM_DstPtr) && (NvM_DstPtr == NvM_BlockDescriptor[intBlockId].NvmRamBlockDataAddress))
-                || ((NULL_PTR == NvM_DstPtr) && (NULL_PTR != NvM_BlockDescriptor[intBlockId].NvmRamBlockDataAddress)))
-            {
-                NVM_SETFLAGOFF(&NvM_AdminBlock[intBlockId].FlagGroup, (uint16)(NVM_ADMIN_RAM_VALID));
-                NVM_SETFLAGOFF(&NvM_AdminBlock[intBlockId].FlagGroup, (uint16)(NVM_ADMIN_RAM_CHANGED));
-            }
-        }
-        /* PRQA S 2844 ++*/ /* VL_NvM_2844 */
-        NVM_SETFLAGON(&NvM_AdminBlock[intBlockId].FlagGroup, NVM_ADMIN_READ_REQUEST);
+        NVM_SETFLAGON(&AdminBlockPtr->FlagGroup, NVM_ADMIN_READ_REQUEST);
+        SchM_Exit_NvM_Queue();
         /* PRQA S 2844 -- */
     }
     return retVal;
@@ -2126,37 +2234,44 @@ NVM_LOCAL Std_ReturnType NvM_ReadBlockSub(NvM_BlockIdType BlockId, void* NvM_Dst
  */
 NVM_LOCAL boolean NvM_WriteBlockCheck(NvM_BlockIdType intBlockId, const uint8* NvM_SrcPtr, uint8* errorId)
 {
-    boolean errorflag = FALSE;
+    boolean                        errorflag          = FALSE;
+    const NvM_AdminBlockType*      AdminBlockPtr      = &(NvM_AdminBlock[intBlockId]);
+    const NvM_BlockDescriptorType* BlockDescriptorPtr = &(NvM_BlockDescriptor[intBlockId]);
 
     /* PRQA S 2844 ++ */ /* VL_NvM_2844 */
-    if ((NULL_PTR == NvM_SrcPtr) && (NULL_PTR == NvM_BlockDescriptor[intBlockId].NvmRamBlockDataAddress)
-        && (TRUE == NVM_ISFLAGOFF(NvM_BlockDescriptor[intBlockId].FlagGroup, (uint8)NVM_BLOCK_DESC_SYNCMECHANISM)))
+    if ((NULL_PTR == NvM_SrcPtr) && (NULL_PTR == BlockDescriptorPtr->NvmRamBlockDataAddress)
+#if (STD_ON == NVM_BLOCK_USE_SYNC_MECHANISM)
+        && (TRUE == NVM_ISFLAGOFF(BlockDescriptorPtr->FlagGroup, (uint8)NVM_BLOCK_DESC_SYNCMECHANISM))
+#endif
+    )
     /* PRQA S 2844 -- */
     {
-        *errorId  = NVM_E_PARAM_ADDRESS; /* PRQA S 2814 */ /* VL_NvM_2814 */
+        *errorId  = NVM_E_PARAM_ADDRESS; /* PRQA S 2814 */ /* VL_QAC_DerefNullPtr */
         errorflag = TRUE;
     }
     else if (
-        (TRUE == NVM_ISFLAGON(NvM_AdminBlock[intBlockId].FlagGroup, NVM_ADMIN_ENQUEUE))
-        || (NvM_AdminBlock[intBlockId].SingleReqResult == NVM_REQ_PENDING))
+        (TRUE == NVM_ISFLAGON(AdminBlockPtr->FlagGroup, NVM_ADMIN_ENQUEUE))
+        || (AdminBlockPtr->SingleReqResult == NVM_REQ_PENDING))
     {
         *errorId  = NVM_E_BLOCK_PENDING;
         errorflag = TRUE;
     }
     /* PRQA S 2844 ++*/ /* VL_NvM_2844 */
-    else if (TRUE == NVM_ISFLAGON(NvM_AdminBlock[intBlockId].FlagGroup, NVM_ADMIN_BLOCK_LOCKED))
+    else if (TRUE == NVM_ISFLAGON(AdminBlockPtr->FlagGroup, NVM_ADMIN_BLOCK_LOCKED))
     {
         *errorId  = NVM_E_BLOCK_LOCKED;
         errorflag = TRUE;
     }
+#if (STD_ON == NVM_WRITE_BLOCK_ONCE)
     else if (
-        (TRUE == NVM_ISFLAGON(NvM_BlockDescriptor[intBlockId].FlagGroup, (uint16)NVM_BLOCK_DESC_WRITEBLOCKONCE))
-        && (TRUE == NVM_ISFLAGOFF(NvM_AdminBlock[intBlockId].FlagGroup, NVM_ADMIN_READ_REQUEST)))
+        (TRUE == NVM_ISFLAGON(BlockDescriptorPtr->FlagGroup, (uint16)NVM_BLOCK_DESC_WRITEBLOCKONCE))
+        && (TRUE == NVM_ISFLAGOFF(AdminBlockPtr->FlagGroup, NVM_ADMIN_READ_REQUEST)))
     /* PRQA S 2844 -- */
     {
         *errorId  = NVM_E_WRITE_ONCE_STATUS_UNKNOWN;
         errorflag = TRUE;
     }
+#endif
     else
     {
         /** idle */
@@ -2174,12 +2289,18 @@ NVM_LOCAL Std_ReturnType
     NvM_WriteBlockSub(NvM_BlockIdType BlockId, const uint8* NvM_SrcPtr, const boolean writePRAMflag)
 {
     Std_ReturnType  retVal     = E_NOT_OK;
-    NvM_BlockIdType intBlockId = BlockId - 1U;
+    NvM_BlockIdType intBlockId = NvM_GetIntBlockId(BlockId);
+#if (STD_ON == NVM_JOB_PRIORITIZATION)
+    NvM_ModuleType*     ModulePtr     = &NvM_Module;
+    NvM_CurRunningType* CurRunningPtr = &NvM_CurRunning; /* PRQA S 3678 */ /* VL_NvM_3678 */
+#endif
+    NvM_AdminBlockType*            AdminBlockPtr      = &(NvM_AdminBlock[intBlockId]);
+    const NvM_BlockDescriptorType* BlockDescriptorPtr = &(NvM_BlockDescriptor[intBlockId]);
 
 #if (NVM_API_CONFIG_CLASS_1 != NVM_API_CONFIG_CLASS)
     /** Beyond the Block quantity */ /* PRQA S 2844 ++ */ /* VL_NvM_2844 */
-    if ((NVM_BLOCK_DATASET == NvM_BlockDescriptor[intBlockId].NvmBlockManagementType)
-        && (NvM_BlockDescriptor[intBlockId].NvmNvBlockNum <= NvM_AdminBlock[intBlockId].CurrentIndex))
+    if ((NVM_BLOCK_DATASET == BlockDescriptorPtr->NvmBlockManagementType)
+        && (BlockDescriptorPtr->NvmNvBlockNum <= AdminBlockPtr->CurrentIndex))
     /* PRQA S 2844 -- */
     {
         /** idle */
@@ -2202,41 +2323,35 @@ NVM_LOCAL Std_ReturnType
         if (E_OK == retVal)
         {
 #if (STD_ON == NVM_JOB_PRIORITIZATION)
-            if ((0U == NvM_BlockDescriptor[intBlockId].NvmBlockJobPriority) && (NVM_JOB_STEP_IDLE != NvM_Module.JobStep)
-                && (NVM_JOB_TYPE_SINGLE_IMMED != NvM_Module.CurrentJobType)
-                && (NVM_JOB_TYPE_MULTI_GAP_SINGLE_IMMED != NvM_Module.CurrentJobType))
+            if ((0U == BlockDescriptorPtr->NvmBlockJobPriority) && (NVM_JOB_STEP_IDLE != ModulePtr->JobStep)
+                && (NVM_JOB_TYPE_SINGLE_IMMED != ModulePtr->CurrentJobType)
+                && (NVM_JOB_TYPE_MULTI_GAP_SINGLE_IMMED != ModulePtr->CurrentJobType))
             {
-                NvM_Module.JobStep = NVM_JOB_STEP_CANCEL;
-                MemIf_Cancel(NvM_CurRunning.DeviceId);
+                SchM_Enter_NvM_Queue();
+                ModulePtr->JobStep = NVM_JOB_STEP_CANCEL;
+                SchM_Exit_NvM_Queue();
+                MemIf_Cancel(CurRunningPtr->DeviceId);
                 /** re-enqueue the preempted job */
-                (void)NvM_JobEnqueue(NvM_CurRunning.BlockId, NvM_CurRunning.ServiceId, NvM_CurRunning.RamAddr);
+                (void)NvM_JobEnqueue(CurRunningPtr->BlockId, CurRunningPtr->ServiceId, CurRunningPtr->RamAddr);
             }
 #endif
-            /** treat the current block as valid */
-            if (writePRAMflag == TRUE)
+            /** treat the current block as valid and execute for Write NVRAM/PRAM block service */
+            if (
+#if (STD_ON == NVM_BLOCK_USE_SYNC_MECHANISM)
+                ((writePRAMflag == TRUE)
+                 && (TRUE == NVM_ISFLAGOFF(BlockDescriptorPtr->FlagGroup, (uint8)NVM_BLOCK_DESC_SYNCMECHANISM)))
+                ||
+#endif
+                ((writePRAMflag == FALSE)
+                 && (((NULL_PTR != NvM_SrcPtr) && (NvM_SrcPtr == BlockDescriptorPtr->NvmRamBlockDataAddress))
+                     || ((NULL_PTR == NvM_SrcPtr) && (NULL_PTR != BlockDescriptorPtr->NvmRamBlockDataAddress)))))
             {
-                /** execute for Write PRAM block service */
-                if (TRUE
-                    == NVM_ISFLAGOFF(NvM_BlockDescriptor[intBlockId].FlagGroup, (uint8)NVM_BLOCK_DESC_SYNCMECHANISM))
-                {
-                    /* PRQA S 2844 ++ */ /* VL_NvM_2844 */
-                    NVM_SETFLAGON(&NvM_AdminBlock[intBlockId].FlagGroup, (uint8)(NVM_ADMIN_RAM_VALID));
-                    NVM_SETFLAGON(&NvM_AdminBlock[intBlockId].FlagGroup, (uint8)(NVM_ADMIN_RAM_CHANGED));
-                    /* PRQA S 2844 -- */
-                }
-            }
-            else
-            {
-                /** execute for Write block service */
-                if (((NULL_PTR != NvM_SrcPtr) && (NvM_SrcPtr == NvM_BlockDescriptor[intBlockId].NvmRamBlockDataAddress))
-                    || ((NULL_PTR == NvM_SrcPtr)
-                        && (NULL_PTR != NvM_BlockDescriptor[intBlockId].NvmRamBlockDataAddress)))
-                {
-                    /* PRQA S 2844 ++ */ /* VL_NvM_2844 */
-                    NVM_SETFLAGON(&NvM_AdminBlock[intBlockId].FlagGroup, (uint8)(NVM_ADMIN_RAM_VALID));
-                    NVM_SETFLAGON(&NvM_AdminBlock[intBlockId].FlagGroup, (uint8)(NVM_ADMIN_RAM_CHANGED));
-                    /* PRQA S 2844 -- */
-                }
+                SchM_Enter_NvM_Queue();
+                /* PRQA S 2844 ++ */ /* VL_NvM_2844 */
+                NVM_SETFLAGON(&AdminBlockPtr->FlagGroup, (uint8)(NVM_ADMIN_RAM_VALID));
+                NVM_SETFLAGON(&AdminBlockPtr->FlagGroup, (uint8)(NVM_ADMIN_RAM_CHANGED));
+                /* PRQA S 2844 -- */
+                SchM_Exit_NvM_Queue();
             }
         }
     }
@@ -2247,21 +2362,23 @@ NVM_LOCAL Std_ReturnType
  * @brief     Set the corresponding administrative flag bit when the restore default request is queued and the correct
  * value is returned
  */
+/* PRQA S 2995,2991 ++ */ /* VL_NvM_2995,VL_NvM_2991 */
 NVM_LOCAL Std_ReturnType
     NvM_RestoreBlockDefaultsSub(NvM_BlockIdType BlockId, void* NvM_DestPtr, const boolean restorePRAMflag)
 {
-    Std_ReturnType  retVal     = E_NOT_OK;
-    NvM_BlockIdType intBlockId = BlockId - 1U;
+    Std_ReturnType                 retVal             = E_NOT_OK;
+    NvM_BlockIdType                intBlockId         = NvM_GetIntBlockId(BlockId);
+    NvM_AdminBlockType*            AdminBlockPtr      = &(NvM_AdminBlock[intBlockId]);
+    const NvM_BlockDescriptorType* BlockDescriptorPtr = &(NvM_BlockDescriptor[intBlockId]);
 
 #if (NVM_API_CONFIG_CLASS_1 != NVM_API_CONFIG_CLASS)
     /* PRQA S 2844 ++ */ /* VL_NvM_2844 */
-    if ((((NVM_BLOCK_DATASET == NvM_BlockDescriptor[intBlockId].NvmBlockManagementType)
-          && (NvM_AdminBlock[intBlockId].CurrentIndex
-              < (NvM_BlockDescriptor[intBlockId].NvmNvBlockNum + NvM_BlockDescriptor[intBlockId].NvmRomBlockNum))
-          && (NvM_BlockDescriptor[intBlockId].NvmNvBlockNum <= NvM_AdminBlock[intBlockId].CurrentIndex))
-         || (NVM_BLOCK_DATASET != NvM_BlockDescriptor[intBlockId].NvmBlockManagementType))
-        && ((NULL_PTR != NvM_BlockDescriptor[intBlockId].NvmRomBlockDataAddress)
-            || (NULL_PTR != NvM_BlockDescriptor[intBlockId].NvmInitBlockCallback)))
+    if ((((NVM_BLOCK_DATASET == BlockDescriptorPtr->NvmBlockManagementType)
+          && (AdminBlockPtr->CurrentIndex < (BlockDescriptorPtr->NvmNvBlockNum + BlockDescriptorPtr->NvmRomBlockNum))
+          && (BlockDescriptorPtr->NvmNvBlockNum <= AdminBlockPtr->CurrentIndex))
+         || (NVM_BLOCK_DATASET != BlockDescriptorPtr->NvmBlockManagementType))
+        && ((NULL_PTR != BlockDescriptorPtr->NvmRomBlockDataAddress)
+            || (NULL_PTR != BlockDescriptorPtr->NvmInitBlockCallback)))
     /* PRQA S 2844 -- */
 #endif
     {
@@ -2271,7 +2388,7 @@ NVM_LOCAL Std_ReturnType
             retVal = NvM_JobEnqueue(BlockId, NVM_RESTORE_BLOCK_DEFAULTS_SERV_ID, (uint8*)NvM_DestPtr);
             /* PRQA S 0316 -- */
         }
-        else if (restorePRAMflag == TRUE) /* PRQA S 2991,2995 */ /* VL_QAC_2991,VL_NvM_2995 */
+        else if (restorePRAMflag == TRUE)
         {
             /** Retore PRAM */
             retVal = NvM_JobEnqueue(BlockId, NVM_RESTORE_PRAM_BLOCK_DEFAULTS_SERV_ID, NULL_PTR);
@@ -2280,38 +2397,33 @@ NVM_LOCAL Std_ReturnType
         {
             /** idle */
         }
-
-        if (E_OK == retVal)
+        /* PRQA S 2995 ++ */ /*VL_NvM_2995 */
+        if ((E_OK == retVal)
+            && ((restorePRAMflag == TRUE)
+                || ((restorePRAMflag == FALSE)
+                    && (((NULL_PTR != NvM_DestPtr) && (NvM_DestPtr == BlockDescriptorPtr->NvmRamBlockDataAddress))
+                        || ((NULL_PTR == NvM_DestPtr)
+                            && ((NULL_PTR != BlockDescriptorPtr->NvmRamBlockDataAddress)
+#if (STD_ON == NVM_BLOCK_USE_SYNC_MECHANISM)
+                                || (TRUE
+                                    == NVM_ISFLAGON(
+                                        BlockDescriptorPtr->FlagGroup,
+                                        (uint16)NVM_BLOCK_DESC_SYNCMECHANISM))
+#endif
+                                    ))))))
         {
-            if (restorePRAMflag == TRUE)
-            {
-                /** execute for restore PRAM block service */ /* PRQA S 2844 ++ */ /* VL_NvM_2844 */
-                NVM_SETFLAGOFF(&NvM_AdminBlock[intBlockId].FlagGroup, (uint16)(NVM_ADMIN_RAM_VALID));
-                NVM_SETFLAGOFF(&NvM_AdminBlock[intBlockId].FlagGroup, (uint16)(NVM_ADMIN_RAM_CHANGED));
-                /* PRQA S 2844 -- */
-            }
-            else
-            {
-                /** execute for restore block service */
-                if (((NULL_PTR != NvM_DestPtr)
-                     && (NvM_DestPtr == NvM_BlockDescriptor[intBlockId].NvmRamBlockDataAddress))
-                    || ((NULL_PTR == NvM_DestPtr)
-                        && ((NULL_PTR != NvM_BlockDescriptor[intBlockId].NvmRamBlockDataAddress)
-                            || (TRUE
-                                == NVM_ISFLAGON(
-                                    NvM_BlockDescriptor[intBlockId].FlagGroup,
-                                    (uint16)NVM_BLOCK_DESC_SYNCMECHANISM)))))
-                {
-                    /* PRQA S 2844 ++ */ /* VL_NvM_2844 */
-                    NVM_SETFLAGOFF(&NvM_AdminBlock[intBlockId].FlagGroup, (uint16)(NVM_ADMIN_RAM_VALID));
-                    NVM_SETFLAGOFF(&NvM_AdminBlock[intBlockId].FlagGroup, (uint16)(NVM_ADMIN_RAM_CHANGED));
-                    /* PRQA S 2844 -- */
-                }
-            }
+            /** execute for restore PRAM or NvRam block service */ /* PRQA S 2844 ++ */ /* VL_NvM_2844 */
+            SchM_Enter_NvM_Queue();
+            NVM_SETFLAGOFF(&AdminBlockPtr->FlagGroup, (uint16)(NVM_ADMIN_RAM_VALID));
+            NVM_SETFLAGOFF(&AdminBlockPtr->FlagGroup, (uint16)(NVM_ADMIN_RAM_CHANGED));
+            SchM_Exit_NvM_Queue();
+            /* PRQA S 2844 -- */
         }
+        /* PRQA S 2995 -- */
     }
     return retVal;
 }
+/* PRQA S 2995,2991 -- */
 #endif
 
 #if (STD_OFF == NVM_POLLING_MODE)
@@ -2321,19 +2433,24 @@ NVM_LOCAL Std_ReturnType
  */
 NVM_LOCAL uint8 NvM_JobNotiGetId(const boolean JobSuccess)
 {
-    uint8 serviceId = (uint8)NVM_NONE_SERV_ID;
-    if (0U != NvM_AtomJob.Count)
+    uint8                     serviceId     = (uint8)NVM_NONE_SERV_ID;
+    const NvM_AtomJobType*    AtomJobPtr    = &NvM_AtomJob;
+    NvM_AtomJobEType          requestId     = AtomJobPtr->ReqId[AtomJobPtr->Count];
+    NvM_ModuleType*           ModulePtr     = &NvM_Module; /* PRQA S 3678 */ /* VL_NvM_3678 */
+    const NvM_CurRunningType* CurRunningPtr = &NvM_CurRunning;
+
+    if (0U != AtomJobPtr->Count)
     {
 #if (STD_ON == NVM_WRITE_VERIFY)
-        if (NVM_ATOMJOB_WRITEVERIFICATION == NvM_AtomJob.ReqId[NvM_AtomJob.Count]) /* PRQA S 2844 */ /* VL_NvM_2844 */
+        if (NVM_ATOMJOB_WRITEVERIFICATION == requestId) /* PRQA S 2844 */ /* VL_NvM_2844 */
         {
             if (TRUE == JobSuccess)
             {
                 NvM_InterWriteVerificationOK();
                 /** The job is finished and verify data is necessary, change the state to pending */
-                if (NvM_Module.MemIfJobState != NVM_MEMIF_JOB_IDLE)
+                if (ModulePtr->MemIfJobState != NVM_MEMIF_JOB_IDLE)
                 {
-                    NvM_Module.MemIfJobState = NVM_MEMIF_JOB_ASYNC_PENDING;
+                    ModulePtr->MemIfJobState = NVM_MEMIF_JOB_ASYNC_PENDING;
                 }
             }
             else
@@ -2352,30 +2469,25 @@ NVM_LOCAL uint8 NvM_JobNotiGetId(const boolean JobSuccess)
 #endif
         {
             /* PRQA S 3120 ++ */ /* VL_QAC_MagicNum */
-            serviceId =
-                (NVM_ATOMJOB_READBLOCK == NvM_AtomJob.ReqId[NvM_AtomJob.Count])
-                    ? 0u
-                    : ((NVM_ATOMJOB_WRITEBLOCK == NvM_AtomJob.ReqId[NvM_AtomJob.Count])
-                           ? 1u
-                           : ((NVM_ATOMJOB_INVALIDATE == NvM_AtomJob.ReqId[NvM_AtomJob.Count]) ? 5u : serviceId));
+            serviceId = (NVM_ATOMJOB_READBLOCK == requestId)
+                            ? 0u
+                            : ((NVM_ATOMJOB_WRITEBLOCK == requestId)
+                                   ? 1u
+                                   : ((NVM_ATOMJOB_INVALIDATE == requestId) ? 5u : serviceId));
         }
     }
-    if ((NVM_JOB_STEP_IDLE != NvM_Module.JobStep) && (0U == NvM_AtomJob.Count)
-        && (NvM_Module.MemIfJobState != NVM_MEMIF_JOB_IDLE))
+    if ((NVM_JOB_STEP_IDLE != ModulePtr->JobStep) && (0U == AtomJobPtr->Count)
+        && (ModulePtr->MemIfJobState != NVM_MEMIF_JOB_IDLE))
     {
-        serviceId = (NVM_READ_BLOCK_SERV_ID == NvM_CurRunning.ServiceId)
+        serviceId = ((NVM_READ_BLOCK_SERV_ID == CurRunningPtr->ServiceId)
+                     || (NVM_READ_PRAM_BLOCK_SERV_ID == CurRunningPtr->ServiceId))
                         ? 0u
-                        : ((NVM_READ_PRAM_BLOCK_SERV_ID == NvM_CurRunning.ServiceId)
-                               ? 0u
-                               : ((NVM_WRITE_BLOCK_SERV_ID == NvM_CurRunning.ServiceId)
-                                      ? 1u
-                                      : ((NVM_WRITE_PRAM_BLOCK_SERV_ID == NvM_CurRunning.ServiceId)
-                                             ? 1u
-                                             : ((NVM_INVALIDATE_NV_BLOCK_SERV_ID == NvM_CurRunning.ServiceId)
-                                                    ? 5u
-                                                    : ((NVM_ERASE_NV_BLOCK_SERV_ID == NvM_CurRunning.ServiceId)
-                                                           ? 3u
-                                                           : serviceId)))));
+                        : (((NVM_WRITE_BLOCK_SERV_ID == CurRunningPtr->ServiceId)
+                            || (NVM_WRITE_PRAM_BLOCK_SERV_ID == CurRunningPtr->ServiceId))
+                               ? 1u
+                               : ((NVM_INVALIDATE_NV_BLOCK_SERV_ID == CurRunningPtr->ServiceId)
+                                      ? 5u
+                                      : ((NVM_ERASE_NV_BLOCK_SERV_ID == CurRunningPtr->ServiceId) ? 3u : serviceId)));
         /* PRQA S 3120 -- */
     }
     return serviceId;

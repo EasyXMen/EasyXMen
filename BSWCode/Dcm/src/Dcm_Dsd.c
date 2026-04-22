@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -224,7 +224,9 @@ void DsdInternal_RxIndication(uint8 protocolId)
 void DsdInternal_HandleConfirmation(uint8 protocolId, Dcm_ConfirmationStatusType confirmationStatus)
 {
 #if ((DCM_SUPPLIER_NOTIFICATION_NUM != 0u) || (DCM_SUPPLIER_NOTIFICATION_NUM != 0u))
-    Std_ReturnType                result;
+#if (STD_ON == DCM_DEV_ERROR_DETECT)
+    Std_ReturnType result;
+#endif
     const Dcm_DslProtocolRowType* DcmDslProtocolRowPtr = &Dcm_DslProtocolRow[protocolId];
     const Dcm_MsgContextType*     msgContextPtr        = &Dcm_MsgContext[protocolId];
     uint8                         sid                  = Dcm_ProtocolCtrl[protocolId].Sid;
@@ -240,13 +242,18 @@ void DsdInternal_HandleConfirmation(uint8 protocolId, Dcm_ConfirmationStatusType
 #if (DCM_MANUFACTURER_NOTIFICATION_NUM > 0u)
     for (uint8 index = 0u; index < DCM_MANUFACTURER_NOTIFICATION_NUM; index++)
     {
-        result = Dcm_DsdServiceRequestManufacturerNotification[index].Confirmation(
-            sid,
-            msgContextPtr->msgAddInfo.reqType,
-            connectionId,
-            confirmationStatus,
-            DcmDslProtocolRowPtr->ProtocolType,
-            sourceAddress);
+#if (STD_ON == DCM_DEV_ERROR_DETECT)
+        result =
+#else
+        (void)
+#endif
+            Dcm_DsdServiceRequestManufacturerNotification[index].Confirmation(
+                sid,
+                msgContextPtr->msgAddInfo.reqType,
+                connectionId,
+                confirmationStatus,
+                DcmDslProtocolRowPtr->ProtocolType,
+                sourceAddress);
 #if (STD_ON == DCM_DEV_ERROR_DETECT)
         if ((E_OK != result) && (E_NOT_OK == result))
         {
@@ -259,13 +266,18 @@ void DsdInternal_HandleConfirmation(uint8 protocolId, Dcm_ConfirmationStatusType
 #if (DCM_SUPPLIER_NOTIFICATION_NUM > 0u)
     for (uint8 index = 0u; index < DCM_SUPPLIER_NOTIFICATION_NUM; index++)
     {
-        result = Dcm_DsdServiceRequestSupplierNotification[index].Confirmation(
-            sid,
-            msgContextPtr->msgAddInfo.reqType,
-            connectionId,
-            confirmationStatus,
-            DcmDslProtocolRowPtr->ProtocolType,
-            DcmDslProtocolRowPtr->EcuAddr);
+#if (STD_ON == DCM_DEV_ERROR_DETECT)
+        result =
+#else
+        (void)
+#endif
+            Dcm_DsdServiceRequestSupplierNotification[index].Confirmation(
+                sid,
+                msgContextPtr->msgAddInfo.reqType,
+                connectionId,
+                confirmationStatus,
+                DcmDslProtocolRowPtr->ProtocolType,
+                DcmDslProtocolRowPtr->EcuAddr);
 #if (STD_ON == DCM_DEV_ERROR_DETECT)
         if ((E_OK != result) && (E_NOT_OK == result))
         {
@@ -310,7 +322,13 @@ void DsdInternal_SendResponse(uint8 ProtocolId, Dcm_NegativeResponseCodeType err
         /* PRQA S 2120++ */ /* VL_Dcm_2120 */
         else if (
             (DCM_INVALID_UINT8 != protocolCtrlPtr->ServIndex)
-            && (Dcm_DsdService[protocolCtrlPtr->ServIndex].SubfuncAvail) && (1u == msgAddInfo->suppressPosResponse)
+            && (Dcm_DsdService[protocolCtrlPtr->ServIndex].SubfuncAvail)
+#if (STD_ON == DCM_SUPPRESS_POS_RSP)
+            && (1u == msgAddInfo->suppressPosResponse)
+            && (TRUE == Dcm_DsdService[protocolCtrlPtr->ServIndex].SuppressPosRsp)
+#else
+            && (1u == msgAddInfo->suppressPosResponse)
+#endif
             && (DCM_POS_RESP == errorCode))
         /* PRQA S 2120-- */ /* VL_Dcm_2120 */
         {
@@ -394,7 +412,7 @@ DCM_LOCAL void DsdInternal_HandleTransmit(uint8 ProtocolId, Dcm_NegativeResponse
         pduInfo->SduLength = (PduLengthType)msgContextPtr->resDataLen + 1u;
     }
 
-    if (DCM_COMM_FULL_COMMUNICATION == Dcm_CommState[connectionId])
+    if ((DCM_COMM_FULL_COMMUNICATION == Dcm_CommState[connectionId]) && (Dcm_ResRejectedDueToAFTER_RESET == FALSE))
     {
         protocolCtrlPtr->TxCopyLen = 0u;
 #if (STD_ON == DCM_MULTICORE_ENABLED)

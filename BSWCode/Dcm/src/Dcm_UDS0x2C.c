@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -168,6 +168,9 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2C_02_ConditionCheck(
  * @trace         CPD-PLACEHOLDE
  */
 DCM_LOCAL Std_ReturnType Dcm_UDS0x2C_03(Dcm_MsgLenType reqDataLen, uint16 DDDIDIndex);
+#if ((STD_ON == DCM_UDS_0X2A) && (DCM_DDDID_NUM > 0u))
+DCM_LOCAL void Dcm_UDS0x2C_GetDidIndex(uint16 DDDIDIndex, uint16* Didindex);
+#endif
 #endif
 /* ========================================== external function definitions ========================================= */
 #define DCM_START_SEC_CODE
@@ -282,7 +285,9 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2C_ConditionCheck(
     }
 
     /* length check for different subfunctions */
+#ifdef DCM_UDS_0X2C_0X3
     uint8 subFunction = reqData[0u];
+#endif
     if ((E_OK == result)
 #ifdef DCM_UDS_0X2C_0X3
         && (DCM_UDS2C_CLEARDEFINE != subFunction)
@@ -349,7 +354,9 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2C_01(
     }
     else
     {
+        /* PRQA S 2985 ++ */ /* VL_Dcm_2985 */
         SourceElementsNum = (sourceLen / 4uL) + currentSourceElementsCount;
+        /* PRQA S 2985 -- */
         if ((0u != DcmDspDidInfoPtr->DDDIDMaxElements) && (SourceElementsNum > DcmDspDidInfoPtr->DDDIDMaxElements))
         {
             *ErrorCode = DCM_E_REQUESTOUTOFRANGE;
@@ -424,9 +431,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2C_02(
     uint8*         reqData = pMsgContext->reqData;
     Dcm_MsgLenType SourceElementsNum;
     Std_ReturnType result = Dcm_UDS0x2C_02_ConditionCheck(pMsgContext, DcmDspDidInfoPtr, &SourceElementsNum, ErrorCode);
-    uint16         currentSourceElementsCount = 0u;
+
 #if (DCM_DDDID_NUM > 0u)
-    currentSourceElementsCount = Dcm_DDDID[DDDIDIndex].SourceElementsNum;
+    uint16 currentSourceElementsCount = 0u;
+    currentSourceElementsCount        = Dcm_DDDID[DDDIDIndex].SourceElementsNum;
 #endif
     /* iterate over source elements and set to the Dcm_DDDID */
     for (uint8 index = 0u; (E_NOT_OK != result) && (index < SourceElementsNum); index++)
@@ -529,17 +537,35 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2C_02_ConditionCheck(
 }
 #endif
 /* PRQA S 3673 -- */
-
 #ifdef DCM_UDS_0X2C_0X3
+#if ((STD_ON == DCM_UDS_0X2A) && (DCM_DDDID_NUM > 0u))
+DCM_LOCAL void Dcm_UDS0x2C_GetDidIndex(uint16 DDDIDIndex, uint16* Didindex)
+{
+    for (uint16 i = 0u; i < DCM_DID_NUM; i++)
+    {
+        if (DCM_DID_INFO(i).DDDidIndex == DDDIDIndex)
+        {
+            *Didindex = i;
+            break;
+        }
+    }
+}
+#endif
 DCM_LOCAL Std_ReturnType Dcm_UDS0x2C_03(Dcm_MsgLenType reqDataLen, uint16 DDDIDIndex)
 {
     Std_ReturnType result = E_OK;
-
 #if (DCM_DDDID_NUM > 0u)
+#if (STD_ON == DCM_UDS_0X2A)
+    uint16 Didindex = 0u;
+#endif
     if (3uL == reqDataLen)
     {
         DcmInternal_Memset((uint8*)Dcm_DDDID[DDDIDIndex].DDDIDStatus, DCM_NOT_DEFINED, DCM_DSP_DDDID_MAX_ELEMENTS);
         Dcm_DDDID[DDDIDIndex].SourceElementsNum = 0u;
+#if (STD_ON == DCM_UDS_0X2A)
+        Dcm_UDS0x2C_GetDidIndex(DDDIDIndex, &Didindex);
+        Dcm_UDS0x2A_Remove_Scheduler(Didindex);
+#endif
     }
     else
     {
@@ -547,6 +573,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2C_03(Dcm_MsgLenType reqDataLen, uint16 DDDIDI
         {
             DcmInternal_Memset((uint8*)Dcm_DDDID[index].DDDIDStatus, DCM_NOT_DEFINED, DCM_DSP_DDDID_MAX_ELEMENTS);
             Dcm_DDDID[index].SourceElementsNum = 0u;
+#if (STD_ON == DCM_UDS_0X2A)
+            Dcm_UDS0x2C_GetDidIndex(index, &Didindex);
+            Dcm_UDS0x2A_Remove_Scheduler(Didindex);
+#endif
         }
     }
 #else

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -23,6 +23,8 @@
  ***********************************************************************************************************************/
 /* PRQA S 1503 EOF */ /* VL_QAC_NoUsedApi */
 /* PRQA S 1505 EOF */ /* VL_TcpIp_1505 */
+/* PRQA S 1501 EOF */ /* VL_TcpIp_1501 */
+/* PRQA S 1753 EOF */ /* VL_TcpIp_1753 */
 /* PRQA S 1532 EOF */ /* VL_QAC_OneFunRef */
 /* PRQA S 6510 EOF */ /* VL_MTR_TcpIp_CONF */
 /* PRQA S 6040 EOF */ /* VL_MTR_TcpIp_STPAR */

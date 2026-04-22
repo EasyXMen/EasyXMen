@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -22,10 +22,10 @@
  **
  ***********************************************************************************************************************/
 
-/* PRQA S 0311,0488,1253,1259,1277,1280,1290,1338,1821,1840,1841,1842,1843 EOF*/ /*VL_QAC_0311 */
-/* PRQA S 1852,1860,1862,1863,2001,2015,3120,3132,3218,3226,3332,3344,3397 EOF*/ /*VL_QAC_0311 */
-/* PRQA S 3410,3432,3440,3446,3450,3454,3472,3473,3493,4434,4436,4461,4532 EOF*/ /*VL_QAC_0311 */
-/* PRQA S 4533,4534,4542,4543,4544,4559,4603,1861,2016,3326,3387,0553 EOF*/      /*VL_QAC_0311 */
+/* PRQA S 0311,0488,1253,1259,1277,1280,1290,1338,1821,1840,1841,1842,1843 EOF*/ /*VL_Crypto_62_General */
+/* PRQA S 1852,1860,1862,1863,2001,2015,3120,3132,3218,3226,3332,3344,3397 EOF*/ /*VL_Crypto_62_General */
+/* PRQA S 3410,3432,3440,3446,3450,3454,3472,3473,3493,4434,4436,4461,4532 EOF*/ /*VL_Crypto_62_General */
+/* PRQA S 4533,4534,4542,4543,4544,4559,4603,1861,2016,3326,3387,0553 EOF*/      /*VL_Crypto_62_General */
 /* =================================================== inclusions =================================================== */
 #include "Crypto_62_Internal.h"
 
@@ -77,7 +77,7 @@ Std_ReturnType Crypto_Sha3_Finish(Crypto_Sha3_Context* ctx, uint8* output, uint3
         olen = ctx->olen;
     }
 
-    ABSORB(ctx, ctx->index, XOR_BYTE);
+    ABSORB(ctx, ctx->index, BYTE_XOR);
     ABSORB(ctx, ctx->max_block_size - 1, 0x80);
     keccak_f1600(ctx);
     ctx->index = 0;
@@ -440,7 +440,7 @@ CRYPTO_62_LOCAL void keccak_f1600(Crypto_Sha3_Context* ctx)
  *                                     E_NOT_OK: State not accepted
  */
 /******************************************************************************/
-Std_ReturnType Crypto_Sha3(Crypto_Sha3_Id id, const uint8* input, uint32 ilen, uint8* output, uint32 olen)
+Std_ReturnType Crypto_Sha3(Crypto_Sha3_Id id, const uint8* input, uint32 ilen, uint8* output, uint32* olen)
 {
     Std_ReturnType      ret = E_NOT_OK;
     Crypto_Sha3_Context ctx;
@@ -451,9 +451,14 @@ Std_ReturnType Crypto_Sha3(Crypto_Sha3_Id id, const uint8* input, uint32 ilen, u
 
     ret = Crypto_Sha3_Update(&ctx, input, ilen);
 
-    if (ret == 0)
+    if (ret == E_OK)
     {
-        ret = Crypto_Sha3_Finish(&ctx, output, olen);
+        ret = Crypto_Sha3_Finish(&ctx, output, *olen);
+    }
+
+    if (ret == E_OK)
+    {
+        *olen = ctx.olen;
     }
     return ret;
 }
@@ -472,14 +477,25 @@ Std_ReturnType Crypto_Sha3(Crypto_Sha3_Id id, const uint8* input, uint32 ilen, u
 /******************************************************************************/
 Std_ReturnType Crypto_Sha3_Process(uint32 objectId, Crypto_Sha3_Id Id)
 {
-    Std_ReturnType ret    = E_NOT_OK;
-    const uint8*   input  = (uint8*)Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputPtr;
-    uint8*         output = (uint8*)Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr;
-    uint32         ilen   = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputLength;
-    uint32         olen   = *Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr;
+    Std_ReturnType ret            = E_NOT_OK;
+    const uint8*   input          = (uint8*)Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputPtr;
+    uint8*         output         = (uint8*)Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr;
+    uint32         ilen           = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputLength;
+    uint32*        olen           = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr;
+    uint32         computedOutLen = CRYPTO_CONST_64;
+    uint8          computedOutput[CRYPTO_CONST_64] = {0x00};
 
-    ret = Crypto_Sha3(Id, input, ilen, output, olen);
-    (void)IStdLib_MemCpy(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr, output, olen);
+    ret = Crypto_Sha3(Id, input, ilen, computedOutput, &computedOutLen);
+    if (ret == E_OK && *olen > computedOutLen)
+    {
+        *olen = computedOutLen;
+        (void)IStdLib_MemCpy(output, computedOutput, *olen);
+    }
+    else
+    {
+        (void)IStdLib_MemCpy(output, computedOutput, *olen);
+    }
+
     return ret;
 }
 

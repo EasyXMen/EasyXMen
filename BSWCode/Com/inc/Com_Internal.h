@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -475,12 +475,8 @@ extern uint32 Com_GWSignal32BitBuff[COM_MAX_GWSIGNAL_32BITBUFF_SIZE];
 extern uint64 Com_GWSignal64BitBuff[COM_MAX_GWSIGNAL_64BITBUFF_SIZE];
 #endif
 
-#if (0u < COM_MAX_TMCTXSIGNAL_NUMBER)
+#if (0u < COM_MAX_TMC_TX_ALL_TYPE_SIGNAL_NUMBER)
 extern boolean* Com_TxSignalTMCRunTime[COM_MAX_NUMBER_OF_MAIN_FUNCTION_TX];
-#endif
-
-#if (COM_MAX_TXGRPSIG_FILTERTYPE_MAX_NUMBER > 0u)
-extern boolean* Com_TxGroupSignalTMCBuffer[COM_MAX_NUMBER_OF_MAIN_FUNCTION_TX];
 #endif
 
 #if (COM_MAX_ONEEVERYNFILTERSIGNAL_NUMBER > 0u)
@@ -783,7 +779,7 @@ extern uint8 Com_ReceiveDynGroupSignalHandle(Com_SignalIdType SignalId, void* Si
  * @synchronous   TRUE
  * @trace         CPD-66539
  */
-#if (0u < COM_MAX_TMCTXSIGNAL_NUMBER)
+#if (0u < COM_MAX_TMC_TX_ALL_TYPE_SIGNAL_NUMBER)
 extern boolean Com_DestSignalTMCCalculate(
     Com_SignalType          SignalType,
     Com_FilterAlgorithmType FilterType,
@@ -902,6 +898,7 @@ extern Std_ReturnType Com_TriggerIPDUSendHandle(
  * @trace         CPD-66467
  */
 #if (STD_ON == COM_METADATA_SUPPORT)
+/* PRQA S 1712 ++ */ /* VL_Com_1712 */
 extern Std_ReturnType Com_TriggerIPDUSendWithMetaDataHandle(
     const Com_TxIPduType*       TxIpduPtr,
     Com_TxIPduRunTimeStateType* TxIpduStatePtr,
@@ -910,6 +907,7 @@ extern Std_ReturnType Com_TriggerIPDUSendWithMetaDataHandle(
 #endif
     Com_MainFunctionIdType TxMainfunctionId,
     const uint8*           MetaData);
+/* PRQA S 1712 -- */
 #endif
 /**
  * @brief         Switch Ipdu Transmit Mode Handle

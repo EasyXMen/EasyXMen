@@ -1,6 +1,6 @@
 /* PRQA S 3108++ */
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -50,6 +50,8 @@ rules caused by SWC are not configured
  * V2.0.12      2024-07-04  haibin.shao update data type for cunit-big-end
  * V2.0.13      2024-08-13  haibin.shao Append QAC remarks and remove main function declarations from header files
  * V2.0.14      2024-09-12  haibin.shao Adjust the interface condition judgment
+ * V2.0.15      2025-10-27  xue.han     fix Service Sync Time Stamp
+ * V2.0.16      2026-03-04  haibin.shao Resolve the processing logic in the verbose mode
 
 ============================================================================*/
 /*==============================================================================
@@ -63,7 +65,7 @@ rules caused by SWC are not configured
 #define DLT_AR_RELEASE_PATCH_VERSION 0U
 #define DLT_SW_MAJOR_VERSION         2U
 #define DLT_SW_MINOR_VERSION         0U
-#define DLT_SW_PATCH_VERSION         14U
+#define DLT_SW_PATCH_VERSION         16U
 
 #if (DLT_SWC_NUM > 0)
 extern CONST(Dlt_SwcType, DLT_CONST) Dlt_Swc;
@@ -331,7 +333,7 @@ extern FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_SetDefaultLogLevel(Dlt_MessageLog
  *                     E_NOT_OK: Default Trace Status could not be set
  */
 extern FUNC(Std_ReturnType, DLT_APPL_CODE)
-    Dlt_SetDefaultTraceStatus(boolean newTraceStatus, Dlt_LogChannelNameType logChannelName);
+    Dlt_SetDefaultTraceStatus(boolean newTraceStatus, const Dlt_LogChannelNameType logChannelName);
 
 /*
  * Brief               Returns the current Trace Status of the addressed LogChannel.
@@ -345,7 +347,7 @@ extern FUNC(Std_ReturnType, DLT_APPL_CODE)
  *                     E_NOT_OK: Default Trace Status could not be returned
  */
 extern FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_GetDefaultTraceStatus(
-    Dlt_LogChannelNameType logChannelName,
+    const Dlt_LogChannelNameType logChannelName,
     /* PRQA S 3432++ */ /* MISRA Rule 20.7 */
     P2VAR(boolean, AUTOMATIC, DLT_APPL_DATA) traceStatus);
 /* PRQA S 3432-- */ /* MISRA Rule 20.7 */
@@ -401,10 +403,10 @@ extern FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_GetTraceStatus(
  * error occurred E_NOT_OK:LogChannel assignment failed
  */
 extern FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_SetLogChannelAssignment(
-    Dlt_ApplicationIDType   appId,
-    Dlt_ContextIDType       contextId,
-    Dlt_LogChannelNameType  logChannelName,
-    Dlt_AssignmentOperation addRemoveOp);
+    Dlt_ApplicationIDType        appId,
+    Dlt_ContextIDType            contextId,
+    const Dlt_LogChannelNameType logChannelName,
+    Dlt_AssignmentOperation      addRemoveOp);
 
 /*
  * Brief               Sets the filter threshold for the given LogChannel.
@@ -419,9 +421,9 @@ extern FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_SetLogChannelAssignment(
  * error occurred E_NOT_OK:Setting of LogChannelThreshold failed
  */
 extern FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_SetLogChannelThreshold(
-    Dlt_LogChannelNameType  logChannelName,
-    Dlt_MessageLogLevelType newThreshold,
-    boolean                 newTraceStatus);
+    const Dlt_LogChannelNameType logChannelName,
+    Dlt_MessageLogLevelType      newThreshold,
+    boolean                      newTraceStatus);
 
 /*
  * Brief               Returns the filter threshold for the given LogChannel.
@@ -437,7 +439,7 @@ extern FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_SetLogChannelThreshold(
  *                     E_NOT_OK:LogChannelThreshold could not be returned
  */
 extern FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_GetLogChannelThreshold(
-    Dlt_LogChannelNameType logChannelName,
+    const Dlt_LogChannelNameType logChannelName,
     /* PRQA S 3432++ */ /* MISRA Rule 20.7 */
     P2VAR(Dlt_MessageLogLevelType, AUTOMATIC, DLT_APPL_DATA) logChannelThreshold,
     P2VAR(boolean, AUTOMATIC, DLT_APPL_DATA) traceStatus);

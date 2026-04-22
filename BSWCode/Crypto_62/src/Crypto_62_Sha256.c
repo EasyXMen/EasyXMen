@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -22,10 +22,19 @@
  **
  ***********************************************************************************************************************/
 
-/* PRQA S 0488,0314,1252,1253,1255,1277,1281,1290,1338,1840,1841,1842,1843 ++ */ /* VL_QAC_Crypto */
-/* PRQA S 1863,2001,2015,2109,2216,3120,3218,3226,3232,3326,3387,3440,3472 ++ */ /* VL_QAC_Crypto */
-/* PRQA S 3473,3678,4115,4542,4544,4558,2889,2985,2743 ++ */                     /* VL_QAC_Crypto */
-/* PRQA S 6050,6060,6070,6080,6010,6020,6030,6040,2784,2755,1532   ++ */         /* VL_QAC_Crypto */
+/* PRQA S 6010 EOF */ /* VL_MTR_Crypto_62_STCYC */
+/* PRQA S 6020 EOF */ /* VL_MTR_Crypto_62_STLIN */
+/* PRQA S 6030 EOF */ /* VL_MTR_Crypto_62_STMIF */
+/* PRQA S 6040 EOF */ /* VL_MTR_Crypto_62_STPAR */
+/* PRQA S 6050 EOF */ /* VL_MTR_Crypto_62_STST3 */
+/* PRQA S 6060 EOF */ /* VL_MTR_Crypto_62_STM19 */
+/* PRQA S 6070 EOF */ /* VL_MTR_Crypto_62_STCAL */
+/* PRQA S 6080 EOF */ /* VL_MTR_Crypto_62_STPTH */
+
+/* PRQA S 0488,0314,1252,1253,1255,1277,1281,1290,1338,1840,1841,1842,1843 ++ */ /* VL_Crypto_62_General */
+/* PRQA S 1863,2001,2015,2109,2216,3120,3218,3226,3232,3326,3387,3440,3472 ++ */ /* VL_Crypto_62_General */
+/* PRQA S 3473,3678,4115,4542,4544,4558,2889,2985,2743 ++ */                     /* VL_Crypto_62_General */
+/* PRQA S 2784,1532 ++ */                                                        /* VL_Crypto_62_General */
 /* =================================================== inclusions =================================================== */
 #include "Crypto_62_Internal.h"
 #if (CRYPTO_ALGORITHMFAM_SHA2_256 == STD_ON)
@@ -187,7 +196,7 @@ Std_ReturnType Crypto_Sha256_Update(Crypto_Sha256_Context* ctx, const uint8* inp
         ctx->total[1]++;
     }
 
-    if (left && ilen >= fill) /* PRQA S 3397,3400 */ /*VL_QAC_0311 */
+    if (left && ilen >= fill) /* PRQA S 3397,3400 */ /*VL_Crypto_62_General */
     {
         (void)IStdLib_MemCpy((void*)(ctx->buffer + left), input, fill);
 
@@ -247,7 +256,7 @@ Std_ReturnType Crypto_Sha256_Finish(Crypto_Sha256_Context* ctx, uint8 output[CRY
      */
     used = ctx->total[0] & 0x3F;
 
-    ctx->buffer[used++] = 0x80; /* PRQA S 3440  */ /* VL_QAC_Crypto */
+    ctx->buffer[used++] = 0x80; /* PRQA S 3440  */ /* VL_Crypto_62_General */
 
     if (used <= CRYPTO_CONST_56)
     {
@@ -564,7 +573,7 @@ Std_ReturnType Crypto_Sha256(const uint8* input, uint32 ilen, uint8* output, boo
     ret = Crypto_Sha256_Update(&ctx, input, ilen);
     if (E_OK == ret)
     {
-        ret = Crypto_Sha256_Finish(&ctx, output); /* PRQA S 2784 */ /* VL_QAC_Crypto */
+        ret = Crypto_Sha256_Finish(&ctx, output); /* PRQA S 2784 */ /* VL_Crypto_62_General */
     }
 
     return ret;
@@ -586,17 +595,39 @@ Std_ReturnType Crypto_Sha256_Process(uint32 objectId, boolean is224)
     Std_ReturnType ret = E_NOT_OK;
     uint8          output[CRYPTO_CONST_32];
 
-    uint32 ilen = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputLength;
-    uint32 olen = *Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr;
-    if (olen <= 32u)
-    {
-        /* PRQA S 0311 ++ */ /*VL_QAC_0311 */
-        const uint8* input = (uint8*)(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputPtr);
-        /* PRQA S 0311 -- */
+    uint32  ilen = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputLength;
+    uint32* olen = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr;
 
-        ret = Crypto_Sha256(input, ilen, output, is224);
-        (void)IStdLib_MemCpy(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr, output, olen);
+    /* PRQA S 0311 ++ */ /*VL_Crypto_62_General */
+    const uint8* input = (uint8*)(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputPtr);
+    /* PRQA S 0311 -- */
+
+    ret = Crypto_Sha256(input, ilen, output, is224);
+
+    if (ret == E_OK)
+    {
+        if (*olen >= CRYPTO_CONST_32 && is224 == FALSE)
+        {
+            (void)IStdLib_MemCpy(
+                Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr,
+                output,
+                CRYPTO_CONST_32);
+            *olen = CRYPTO_CONST_32;
+        }
+        else if (*olen >= CRYPTO_CONST_28 && is224 == TRUE)
+        {
+            (void)IStdLib_MemCpy(
+                Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr,
+                output,
+                CRYPTO_CONST_28);
+            *olen = CRYPTO_CONST_28;
+        }
+        else
+        {
+            (void)IStdLib_MemCpy(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr, output, *olen);
+        }
     }
+
     return ret;
 }
 #define CRYPTO_62_STOP_SEC_CODE
@@ -606,4 +637,4 @@ Std_ReturnType Crypto_Sha256_Process(uint32 objectId, boolean is224)
 /* PRQA S 0488,0314,1252,1253,1255,1277,1281,1290,1338,1840,1841,1842,1843 -- */
 /* PRQA S 1863,2001,2015,2109,2216,3120,3218,3226,3232,3326,3387,3440,3472 -- */
 /* PRQA S 3473,3678,4115,4542,4544,4558,2889,2985,2743 -- */
-/* PRQA S 6050,6060,6070,6080,6010,6020,6030,6040,2784,2755,1532   -- */
+/* PRQA S 2784,1532   -- */

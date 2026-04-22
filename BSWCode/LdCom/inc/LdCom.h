@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -54,6 +54,38 @@
       Reason: Dependent on configuration.
       Risk: No risk
       Prevention: Configure shorter names as much as possible
+
+    \li VL_LdCom_3415
+      Reason: Right hand operand of '&&' or '||' is an expression with persistent side effects.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_LdCom_1536
+      Reason: The tag '%1s' is declared but not used within this project.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_MTR_LdCom_6510
+      Reason: Some special files have less code or no code at all.
+      Risk: The code is difficult to maintain.
+      Prevention: Design and code review + clear structure and well-commented code.
+
+    \li VL_LdCom_0553
+      Reason: The usage of this file depends on the config.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_LdCom_1512
+      Reason: Identifier '${name}' with external linkage has separate declarations in multiple translation units.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_LdCom_1513
+      Reason: Identifier '${name}' with external linkage has separate non-defining declarations in more than one
+              location.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
  */
 
 #ifndef LDCOM_H_

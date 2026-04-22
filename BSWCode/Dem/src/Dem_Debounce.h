@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -102,7 +102,7 @@ typedef const Dem_DebounceFunctionTableType* Dem_DebounceFunctionTablePtrType;
  * @brief Debounce algorithm management data.
  * Data common to all debounce algorithms.
  */
-typedef struct Dem_BaseInfoTag /* PRQA S 1536 */ /* VL_Dem_1536 */
+typedef struct
 {
     Dem_DebounceFunctionTablePtrType FunctionTable; /**< Function pointer table for the debouncing type @range NA */
     Dem_EventIdType                  EventId;       /**< debounced event id @range 0..65535 */
@@ -243,7 +243,7 @@ struct Dem_DebounceFunctionTableType_s
 /**
  * @brief Data for counter-based debouncing
  */
-typedef struct Dem_CounterBasedInfoTag /* PRQA S 1536 */ /* VL_Dem_1536 */
+typedef struct
 {
     Dem_BaseInfoType Base;             /**< Base class object. This attribute must come first! @range NA */
     sint16           OldDebounceValue; /**< [in] debounce counter before processing @range -32768..32767 */
@@ -253,7 +253,7 @@ typedef struct Dem_CounterBasedInfoTag /* PRQA S 1536 */ /* VL_Dem_1536 */
 /**
  * @brief Data for monitor internal debouncing
  */
-typedef struct Dem_MonitorInternalInfoTag /* PRQA S 1536 */ /* VL_Dem_1536 */
+typedef struct
 {
     Dem_BaseInfoType Base;             /**< Base class object. This attribute must come first! @range NA */
     uint8            OldMonitorStatus; /**< [in] Last monitor result before processing @range 0..255 */
@@ -263,7 +263,7 @@ typedef struct Dem_MonitorInternalInfoTag /* PRQA S 1536 */ /* VL_Dem_1536 */
 /**
  * @brief Data for time-based debouncing
  */
-typedef struct Dem_TimeBasedInfoTag /* PRQA S 1536 */ /* VL_Dem_1536 */
+typedef struct
 {
     Dem_BaseInfoType Base;          /**< Base class object. This attribute must come first! @range NA */
     sint16           OldTimerValue; /**< [in] debounce timer before processing @range -32768..32767 */
@@ -275,11 +275,11 @@ typedef struct Dem_TimeBasedInfoTag /* PRQA S 1536 */ /* VL_Dem_1536 */
 /**
  * @brief General debounce type.
  */
-typedef union Dem_DebounceInfoTag /* PRQA S 1536 */ /* VL_Dem_1536 */
-{ /* PRQA S 0750 */                                 /* VL_Dem_0750 */
-    Dem_CounterBasedInfoType    CounterBased;       /**< counter based debouncing. @range NA */
-    Dem_MonitorInternalInfoType MonitorInternal;    /**< monitor internal debouncing. @range NA */
-    Dem_TimeBasedInfoType       TimeBased;          /**< time based debouncing. @range NA */
+typedef union
+{ /* PRQA S 0750 */                              /* VL_Dem_0750 */
+    Dem_CounterBasedInfoType    CounterBased;    /**< counter based debouncing. @range NA */
+    Dem_MonitorInternalInfoType MonitorInternal; /**< monitor internal debouncing. @range NA */
+    Dem_TimeBasedInfoType       TimeBased;       /**< time based debouncing. @range NA */
 } Dem_DebounceInfoType;
 
 /**

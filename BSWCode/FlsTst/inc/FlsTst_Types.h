@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -96,7 +96,7 @@ typedef enum
 /**
  * @brief     Definition of Background test result datatype
  */
-typedef struct FlsTst_TestResultBgndTypeTag /* PRQA S 1536 */ /* VL_FlsTst_1536 */
+typedef struct
 {
     uint32 ResultIntervalID; /**< FlsTstTestIntervalId,which is incremented by each new start of an test interval @range
                                 0..0xFFFFFFFF*/
@@ -106,7 +106,7 @@ typedef struct FlsTst_TestResultBgndTypeTag /* PRQA S 1536 */ /* VL_FlsTst_1536 
 /**
  * @brief     Definition of detail error information datatype
  */
-typedef struct FlsTst_ErrorDetailsTypeTag /* PRQA S 1536 */ /* VL_FlsTst_1536 */
+typedef struct
 {
     uint32               ErrorBlockID;    /**< Record the block ID value when the error occurred @range 0..0xFFFFFFFF*/
     FlsTst_AlgorithmType Algorithm;       /**< The test algorithm used by the current block @range NA*/
@@ -116,7 +116,7 @@ typedef struct FlsTst_ErrorDetailsTypeTag /* PRQA S 1536 */ /* VL_FlsTst_1536 */
 /**
  * @brief     Definition of Foreground test signature datatype
  */
-typedef struct FlsTst_TestSignatureFgndTypeTag /* PRQA S 1536 */ /* VL_FlsTst_1536 */
+typedef struct
 {
     uint32 FgndSignature; /**< Signature result of foreground test @range 0.. 0xFFFFFFFF*/
 } FlsTst_TestSignatureFgndType;
@@ -124,7 +124,7 @@ typedef struct FlsTst_TestSignatureFgndTypeTag /* PRQA S 1536 */ /* VL_FlsTst_15
 /**
  * @brief     Definition of Background test signature information datatype
  */
-typedef struct FlsTst_TestSignatureBgndTypeTag /* PRQA S 1536 */ /* VL_FlsTst_1536 */
+typedef struct
 {
     uint32 SignatureIntervalID; /**< current value of FlsTstTestIntervalId @range 0..@range 0x00*/
     uint32 BgndSignature;       /**< Signature result of background test @range 0.. 0xFFFFFFFF*/

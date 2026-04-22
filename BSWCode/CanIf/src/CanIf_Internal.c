@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -280,7 +280,7 @@ Std_ReturnType CanIf_TxBusyHandle(const CanIf_TxPduConfigType* txPduConfigPtr, c
         if (NULL_PTR != idleTxPduBufferPtr)
         {
             idleTxPduBufferPtr->CanId = canPduPtr->id;
-#if (STD_ON == CANIF_TRIGGER_TRANSMIT_SUPPORT)
+#if ((STD_ON == CANIF_TRIGGER_TRANSMIT_SUPPORT) && (STD_ON == CANIF_UP_TRIGGER_TRANSMIT_ENABLE))
             if (txPduConfigPtr->UpTriggerTransmitApiIndex < CANIF_UPTRIGGERTRANSMIT_API_NUMBER)
             {
                 idleTxPduBufferPtr->Length = 0u;
@@ -387,7 +387,7 @@ void CanIf_TransmitBufferedPdu(const CanIf_TxPduConfigType* txPduConfigPtr)
             canPdu.swPduHandle = usedTxPduBufferPtr->TxPduId;
             canPdu.id          = usedTxPduBufferPtr->CanId;
 
-#if (CANIF_CAN_AUTOSAR_VERSION >= CANIF_CAN_AUTOSAR_431)
+#if (CANIF_CAN_AUTOSAR_VERSION >= CANIF_CAN_AUTOSAR_R431)
             Std_ReturnType canRetValue = Can_DriverApi[canDrvId].CanWriteApi(canHthId, &canPdu);
 #else /*The default version of can driver is 4.2.2*/
             Can_ReturnType canRetValue = Can_DriverApi[canDrvId].CanWriteApi(canHthId, &canPdu);

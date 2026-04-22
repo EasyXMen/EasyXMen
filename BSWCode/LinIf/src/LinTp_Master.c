@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -58,17 +58,11 @@ LINTP_LOCAL void LinTp_MasterCancelRxHandler(
     const LinTp_ChannelConfigType* chCfgPtr,
     const LinTp_RxNSduType*        rx);
 
-LINTP_LOCAL void LinTp_TxProcess(LinTp_MasterRuntimeType* LinTpMasterRtDataPtr, NetworkHandleType LinIfChannelId);
-
-LINTP_LOCAL void LinTp_RxProcess(LinTp_MasterRuntimeType* masterChRtDataPtr);
-
-LINTP_LOCAL void LinTp_HandleTimers(LinTp_MasterRuntimeType* masterChRtDataPtr, NetworkHandleType LinIfChannelId);
-
 LINTP_LOCAL void LinTp_HandleCopyTxDataFailure(LinTp_MasterRuntimeType* tpChPtr);
 
-LINTP_LOCAL void LinTp_CopyTxDataFromPduR(LinTp_MasterRuntimeType* tpChPtr);
+LINTP_LOCAL boolean LinTp_CopyTxDataFromPduR(LinTp_MasterRuntimeType* tpChPtr);
 
-LINTP_LOCAL void LinTp_TxEventRequest(LinTp_MasterRuntimeType* tpChPtr);
+LINTP_LOCAL boolean LinTp_TxEventRequest(LinTp_MasterRuntimeType* tpChPtr);
 
 LINTP_LOCAL void LinTp_TxEventHandler(LinTp_MasterRuntimeType* tpChPtr);
 
@@ -100,10 +94,6 @@ LINTP_LOCAL void LinTp_RxEventHandler(LinTp_MasterRuntimeType* tpChPtr);
 
 LINTP_LOCAL void LinTp_RxEventIndication(LinTp_MasterRuntimeType* tpChPtr);
 
-LINTP_LOCAL void LinTp_LoadTxRequest(NetworkHandleType ch, LinTp_MasterRuntimeType* tpChPtr);
-
-LINTP_LOCAL NetworkHandleType LinTp_GetLinTpChannel(NetworkHandleType LinIfChannelId);
-
 #define LINIF_STOP_SEC_CODE
 #include "LinIf_MemMap.h"
 /* ============================================ internal data definition ============================================ */
@@ -129,7 +119,9 @@ void LinTp_MasterInit(void)
     {
         /*@req <SWS_LinIf_00320>,<SWS_LinIf_00710> */
         LinTp_MasterChReset(tpChPtr);
-        tpChPtr->TrsEvent = LINTP_TRS_EVT_NONE;
+        tpChPtr->TrsEvent          = LINTP_TRS_EVT_NONE;
+        tpChPtr->RecoverMode       = LINTP_APPLICATIVE_SCHEDULE;
+        tpChPtr->NeedRestoreScence = FALSE;
         tpChPtr++;
 
         idx--;
@@ -160,7 +152,7 @@ Std_ReturnType LinTp_MasterTransmit(const LinTp_TxNSduType* txNSdu, const PduInf
     /* Handle Functional Request*/
     if (LINTP_FUNCTIONAL_REQ_NAD == txNSdu->TxNSduNad)
     {
-        if (LinTp_IsTrsEvent(tpChPtr, LINTP_TRS_EVT_FUN_TX_REQ))
+        if (LinTp_IsTrsEvent(tpChPtr, LINTP_TRS_EVT_FUN_TX_REQ | LINTP_TRS_EVT_FUN_TX))
         {
             ret = E_NOT_OK;
         }
@@ -181,13 +173,6 @@ Std_ReturnType LinTp_MasterTransmit(const LinTp_TxNSduType* txNSdu, const PduInf
     /* Handle Physic Request*/
     else
     {
-        /*@req <SWS_LinIf_00616>,<SWS_LinIf_00708>*/
-        if (LinTp_IsTrsEvent(tpChPtr, LINTP_TRS_EVT_PHY_TX))
-        {
-            /* Drop the old physical request */
-            LinTp_MasterChReset(tpChPtr);
-        }
-
         /*@req <SWS_LinIf_00413>*/
         /* Set the status of channel */
         tpChPtr->ChannelState = LINTP_CHANNEL_BUSY;
@@ -327,11 +312,6 @@ void LinTp_RxEventParse(uint8 LinIfChannelId, const uint8* sdu)
             /* Reload P2 timer with the time P2*max */
             tpChPtr->TpP2Timer.EnabledTimer = LINTP_TIMER_P2MAX;
             tpChPtr->TpP2Timer.Timer        = chCfgPtr->P2MaxCnt;
-
-            LinTp_SetEvent(tpChPtr, LINTP_EVENT_WAIT);
-            /* Send a head again */
-            LinIf_MasterRuntimeType* masterChRtDataPtr = LinIf_GetMasterRtDataPtr(LinIfChannelId);
-            LinIf_NextTransmit(masterChRtDataPtr, LinIfChannelId);
         }
         return;
     }
@@ -355,6 +335,12 @@ Std_ReturnType LinTp_MasterGetMRFResponse(NetworkHandleType LinIfChannelId, uint
     NetworkHandleType        linTpChId = LinTp_GetLinTpChannel(LinIfChannelId);
     LinTp_MasterRuntimeType* tpChPtr   = LinTp_MasterRtDataPtr(linTpChId);
     Std_ReturnType           ret       = E_NOT_OK;
+
+    if (!LinTp_TxEventRequest(tpChPtr))
+    {
+        return ret;
+    }
+    LinTp_TxEventHandler(tpChPtr);
 
     if ((LinTp_IsEvent(tpChPtr, LINTP_EVENT_TX_REQ)) && !(LinTp_IsEvent(tpChPtr, LINTP_EVENT_STOP_MRF)))
     {
@@ -463,17 +449,251 @@ boolean LinTp_GetScheduleChangeDiag(NetworkHandleType LinIfChannelId)
 #endif
 
 /**
- * LinTp master main function
+ * Transmitting process
  */
-void LinTp_MasterMainFunction(uint8 LinIfChannelId)
+void LinTp_TxProcess(LinTp_MasterRuntimeType* LinTpMasterRtDataPtr)
 {
-    NetworkHandleType        linTpChId = LinTp_GetLinTpChannel(LinIfChannelId);
-    LinTp_MasterRuntimeType* tpChPtr   = LinTp_MasterRtDataPtr(linTpChId);
+    LinTp_MasterRuntimeType* tpChPtr = LinTpMasterRtDataPtr;
 
-    LinTp_RxProcess(tpChPtr);
-    LinTp_TxProcess(tpChPtr, LinIfChannelId);
-    LinTp_HandleTimers(tpChPtr, LinIfChannelId);
+    /* Transmit confirmation */
+    LinTp_TxEventConfirmation(tpChPtr);
 }
+
+/**
+ * Receiving process
+ */
+void LinTp_RxProcess(LinTp_MasterRuntimeType* masterChRtDataPtr)
+{
+    LinTp_MasterRuntimeType* tpChPtr = masterChRtDataPtr;
+
+    /* Receive request */
+    LinTp_RxEventRequest(tpChPtr);
+
+    /* Receive handler */
+    LinTp_RxEventHandler(tpChPtr);
+
+    /* Receive indication */
+    LinTp_RxEventIndication(tpChPtr);
+}
+
+/**
+ * Load transmit request information
+ */
+void LinTp_LoadTxRequest(NetworkHandleType ch, LinTp_MasterRuntimeType* tpChPtr)
+{
+    /* If tx or rx is ongoing,shall not to load transmit request */
+    if (LinTp_IsTrsEvent(tpChPtr, LINTP_TRS_EVT_FUN_TX_REQ | LINTP_TRS_EVT_PHY_TX_REQ))
+    {
+        tpChPtr->ChCfgPtr                       = LinTp_GetChannelRefConfig((uint8)ch);
+        NetworkHandleType        linifChannelId = tpChPtr->ChCfgPtr->LinIfChannelRef;
+        LinIf_MasterRuntimeType* linifChPtr     = LinIf_GetMasterRtDataPtr(linifChannelId);
+
+        if (!LinIf_IsEvent(linifChPtr, LINIF_EVENT_SKIP_SLOT_TIMER))
+        {
+            LinIf_SetEvent(linifChPtr, LINIF_EVENT_SKIP_SLOT_TIMER);
+        }
+
+        if (!LinIf_IsEvent(linifChPtr, LINIF_EVENT_HEADER))
+        {
+            LinIf_ClrEvent(linifChPtr, LINIF_EVENT_SKIP_SLOT_TIMER);
+
+            SchM_Enter_LinTp_ExclusiveArea_Channel();
+
+            if ((tpChPtr->RecoverMode != LINTP_APPLICATIVE_SCHEDULE)
+                && (LinTp_IsTrsEvent(tpChPtr, LINTP_TRS_EVT_FUN_TX_REQ)))
+            {
+                LinTp_MasterRuntimeType* backupRtDataPtr = LinTp_BackupMasterRtDataPtr(ch);
+                (void)IStdLib_MemCpy(backupRtDataPtr, tpChPtr, sizeof(LinTp_MasterRuntimeType));
+                backupRtDataPtr->TrsEvent &= ~(LINTP_TRS_EVT_FUN_TX_REQ);
+                LinTp_MasterChReset(tpChPtr);
+                tpChPtr->ChannelState      = LINTP_CHANNEL_BUSY;
+                tpChPtr->NeedRestoreScence = TRUE;
+            }
+
+            if (LinTp_IsTrsEvent(tpChPtr, LINTP_TRS_EVT_FUN_TX_REQ))
+            {
+                tpChPtr->TxNSduPtr = tpChPtr->FuncReqNSduPtr;
+                tpChPtr->SduSize   = tpChPtr->FuncReqSduSize;
+
+                /* Set functional request ongoing flag */
+                LinTp_ClrTrsEvent(tpChPtr, LINTP_TRS_EVT_FUN_TX_REQ);
+                LinTp_SetTrsEvent(tpChPtr, LINTP_TRS_EVT_FUN_TX);
+            }
+            else
+            {
+                if (LinTp_IsEvent(tpChPtr, LINTP_EVENT_RX))
+                {
+                    PduR_LinTpRxIndication(tpChPtr->RxNSduPtr->RxNSduPduRef, E_NOT_OK);
+                }
+
+                if (LinTp_IsEvent(tpChPtr, LINTP_EVENT_TX))
+                {
+                    PduR_LinTpTxConfirmation(tpChPtr->TxNSduPtr->TxNSduPduRef, E_NOT_OK);
+                }
+
+                /*@req <SWS_LinIf_00616>,<SWS_LinIf_00708>*/
+                LinTp_MasterChReset(tpChPtr);
+                tpChPtr->TxNSduPtr    = tpChPtr->PhyReqNSduPtr;
+                tpChPtr->SduSize      = tpChPtr->PhyReqSduSize;
+                tpChPtr->ChannelState = LINTP_CHANNEL_BUSY;
+#if (STD_ON == LINTP_SCHEDULE_CHANGE_DIAG_SUPPORT)
+                if (tpChPtr->ChCfgPtr->ScheduleChangeDiag)
+                {
+                    tpChPtr->RecoverMode = LINTP_DIAG_REQUEST;
+                }
+#endif
+
+                /* Set physic request ongoing flag */
+                LinTp_ClrTrsEvent(tpChPtr, LINTP_TRS_EVT_PHY_TX_REQ);
+                LinTp_SetTrsEvent(tpChPtr, LINTP_TRS_EVT_PHY_TX);
+            }
+
+            SchM_Exit_LinTp_ExclusiveArea_Channel();
+
+            tpChPtr->BufReqNum    = tpChPtr->TxNSduPtr->MaxBufReq;
+            tpChPtr->SduRemaining = tpChPtr->SduSize;
+
+            /* Set transmit events */
+            LinTp_SetEvent(tpChPtr, LINTP_EVENT_TX | LINTP_EVENT_COPY_REQ);
+            if (tpChPtr->SduSize > (LINTP_FRAME_LEN_MAX - LINTP_PDU_OFS_SF_DATA))
+            {
+                LinTp_SetEvent(tpChPtr, LINTP_EVENT_FF_REQ);
+            }
+            else
+            {
+                LinTp_SetEvent(tpChPtr, LINTP_EVENT_SF_REQ);
+            }
+
+#if (STD_ON == LINTP_SCHEDULE_CHANGE_DIAG_SUPPORT)
+            /*@req <SWS_LinIf_00646>*/
+            if (tpChPtr->ChCfgPtr->ScheduleChangeDiag)
+            {
+                /*@req <SWS_LinIf_00641>*/
+                BswM_LinTp_RequestMode(tpChPtr->TxNSduPtr->TxNSduChannelRef, LINTP_DIAG_REQUEST);
+            }
+#endif /* STD_ON == LINTP_SCHEDULE_CHANGE_DIAG_SUPPORT */
+        }
+    }
+}
+
+/**
+ * Get the LinIf channel corresponding LinTp channel
+ */
+NetworkHandleType LinTp_GetLinTpChannel(NetworkHandleType LinIfChannelId)
+{
+    const LinTp_ChannelConfigType* tpChCfgPtr        = LinTp_GetChannelConfig(0u);
+    NetworkHandleType              retLinTpChannelId = 0u;
+
+    for (NetworkHandleType ch = 0u; ch < LinTp_ConfigPtr->NumOfChannel; ch++)
+    {
+        if (tpChCfgPtr->LinIfChannelRef == LinIfChannelId)
+        {
+            retLinTpChannelId = ch;
+        }
+
+        tpChCfgPtr++;
+    }
+    return retLinTpChannelId;
+}
+
+/**
+ * Handle the timer for specific channel.
+ */
+void LinTp_HandleTimers(LinTp_MasterRuntimeType* masterChRtDataPtr, NetworkHandleType LinIfChannelId)
+{
+    LinTp_MasterRuntimeType* tpChPtr = masterChRtDataPtr;
+    NetworkHandleType        network;
+    NetworkHandleType        linIfChannel;
+
+    /* Update N_As,N_Cs,N_Cr timer */
+    if (LINTP_TIMER_NONE != tpChPtr->TpTimer.EnabledTimer)
+    {
+        if (tpChPtr->TpTimer.Timer > 0u)
+        {
+            tpChPtr->TpTimer.Timer--;
+            if (0u == tpChPtr->TpTimer.Timer)
+            {
+                /* Abort transmission process */
+                if ((LINTP_TIMER_NAS == tpChPtr->TpTimer.EnabledTimer)
+                    || (LINTP_TIMER_NCS == tpChPtr->TpTimer.EnabledTimer))
+                {
+                    /*@req <SWS_LinIf_00658>,<SWS_LinIf_00662>*/
+                    PduR_LinTpTxConfirmation(tpChPtr->TxNSduPtr->TxNSduPduRef, E_NOT_OK);
+
+                    network      = tpChPtr->TxNSduPtr->TxNSduChannelRef;
+                    linIfChannel = tpChPtr->TxNSduPtr->LinIfChannelRef;
+                }
+                else
+                {
+                    /*@req <SWS_LinIf_00666>*/
+                    PduR_LinTpRxIndication(tpChPtr->RxNSduPtr->RxNSduPduRef, E_NOT_OK);
+
+                    network      = tpChPtr->RxNSduPtr->RxNSduChannelRef;
+                    linIfChannel = tpChPtr->RxNSduPtr->LinIfChannelRef;
+                }
+#if (STD_ON == LINTP_SCHEDULE_CHANGE_DIAG_SUPPORT)
+                /*@req <SWS_LinIf_00646>*/
+                if (tpChPtr->ChCfgPtr->ScheduleChangeDiag)
+                {
+                    /*@req <SWS_LinIf_00658>,<SWS_LinIf_00662>,
+                      <SWS_LinIf_00666>*/
+                    /* Change schedule table by BswM */
+                    BswM_LinTp_RequestMode(network, LINTP_APPLICATIVE_SCHEDULE);
+                    tpChPtr->RecoverMode = LINTP_APPLICATIVE_SCHEDULE;
+                }
+                else
+                {
+                }
+#endif
+                /* Reset channel */
+                LinTp_MasterChReset(tpChPtr);
+                /* Clear the flag of header and response */
+                LinIf_ClearEvent(linIfChannel, LINIF_EVENT_HEADER | LINIF_EVENT_RESPONSE);
+                /* Next entry */
+                LinIf_MoveScheduleToNextEntry(linIfChannel);
+            }
+        }
+    }
+
+    /* Update P2(P2*Max) timer */
+    if (LINTP_TIMER_NONE != tpChPtr->TpP2Timer.EnabledTimer)
+    {
+        if (tpChPtr->TpP2Timer.Timer > 0u)
+        {
+            tpChPtr->TpP2Timer.Timer--;
+            if (0u == tpChPtr->TpP2Timer.Timer)
+            {
+                /*@req <SWS_LinIf_00619>*/
+                const LinTp_RxNSduType* rx = LinTp_GetRxNSduByNad(LinIfChannelId, tpChPtr->MRFRequestedNad);
+                PduR_LinTpRxIndication(rx->RxNSduPduRef, E_NOT_OK);
+                linIfChannel = rx->LinIfChannelRef;
+#if (STD_ON == LINTP_SCHEDULE_CHANGE_DIAG_SUPPORT)
+                /* Notify PduR,Change schedule table */
+                /*@req <SWS_LinIf_00646>*/
+                if (tpChPtr->ChCfgPtr->ScheduleChangeDiag)
+                {
+                    network = rx->RxNSduChannelRef;
+                    /*@req <SWS_LinIf_00619>*/
+                    /* Change schedule table by BswM */
+                    BswM_LinTp_RequestMode(network, LINTP_APPLICATIVE_SCHEDULE);
+                    tpChPtr->RecoverMode = LINTP_APPLICATIVE_SCHEDULE;
+                }
+                else
+                {
+                }
+#endif
+
+                /* Reset channel */
+                LinTp_MasterChReset(tpChPtr);
+                /* Clear the flag of header and response */
+                LinIf_ClearEvent(linIfChannel, LINIF_EVENT_HEADER | LINIF_EVENT_RESPONSE);
+                /* Next entry */
+                LinIf_MoveScheduleToNextEntry(linIfChannel);
+            }
+        }
+    }
+}
+
 /* PRQA S 1532 -- */
 
 /* ========================================== internal function definition ========================================== */
@@ -490,7 +710,7 @@ LINTP_LOCAL void LinTp_MasterRxHandler(
 
     if ((LINTP_PDU_PCI_SF == pciType) || (LINTP_PDU_PCI_FF == pciType))
     {
-        if (LINTP_FRAMETYPE_CF == tpChPtr->LastFrameType)
+        if ((LINTP_FRAMETYPE_CF == tpChPtr->LastFrameType) || (LINTP_FRAMETYPE_FF == tpChPtr->LastFrameType))
         {
             /*@req <SWS_LinIf_00653>*/
             PduR_LinTpRxIndication(rx->RxNSduPduRef, E_NOT_OK);
@@ -594,170 +814,6 @@ LINTP_LOCAL void LinTp_MasterCancelRxHandler(
 #endif
 }
 
-/* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
-
-/**
- * @brief               Transmitting process
- * @param[inout]        LinTpMasterRtDataPtr: The runtime data of lintp master channel
- * @param[in]           LinIfChannelId: Identification of the LIN channel
- * @reentrant           TRUE
- * @synchronous         TRUE
- * @trace               -
- */
-LINTP_LOCAL void LinTp_TxProcess(LinTp_MasterRuntimeType* LinTpMasterRtDataPtr, NetworkHandleType LinIfChannelId)
-{
-    LinTp_MasterRuntimeType*       tpChPtr             = LinTpMasterRtDataPtr;
-    const LinIf_MasterRuntimeType* linifMasterRtChData = LinIf_GetMasterRtDataPtr(LinIfChannelId);
-    boolean                        entryDelayTimeout   = LinIf_IsEntryDelayTimeout(linifMasterRtChData);
-
-    if (entryDelayTimeout)
-    {
-        LinIf_FrameTypeType frameType;
-        Std_ReturnType      ret = LinIf_GetCurFrameType(LinIfChannelId, &frameType);
-        if ((E_OK == ret) && (LINIF_MRF == frameType))
-        {
-            /* Transmit request */
-            LinTp_TxEventRequest(tpChPtr);
-
-            /* Transmit handler */
-            LinTp_TxEventHandler(tpChPtr);
-
-            /* Transmit confirmation */
-            LinTp_TxEventConfirmation(tpChPtr);
-        }
-    }
-
-    /* Load transmit request */
-    NetworkHandleType linTpChId = LinTp_GetLinTpChannel(LinIfChannelId);
-    LinTp_LoadTxRequest(linTpChId, tpChPtr);
-}
-
-/**
- * @brief               Receiving process
- * @param[inout]        masterChRtDataPtr: The runtime data of lintp master channel
- * @reentrant           TRUE
- * @synchronous         TRUE
- * @trace               -
- */
-LINTP_LOCAL void LinTp_RxProcess(LinTp_MasterRuntimeType* masterChRtDataPtr)
-{
-    LinTp_MasterRuntimeType* tpChPtr = masterChRtDataPtr;
-
-    /* Receive request */
-    LinTp_RxEventRequest(tpChPtr);
-
-    /* Receive handler */
-    LinTp_RxEventHandler(tpChPtr);
-
-    /* Receive indication */
-    LinTp_RxEventIndication(tpChPtr);
-}
-
-/**
- * @brief               Handle the timer for specific channel.
- * @param[inout]        masterChRtDataPtr: The runtime data of lintp master channel
- * @param[in]           LinIfChannelId: Identification of the LIN channel
- * @reentrant           TRUE
- * @synchronous         TRUE
- * @trace               -
- */
-LINTP_LOCAL void LinTp_HandleTimers(LinTp_MasterRuntimeType* masterChRtDataPtr, NetworkHandleType LinIfChannelId)
-{
-    LinTp_MasterRuntimeType* tpChPtr = masterChRtDataPtr;
-    NetworkHandleType        network;
-    NetworkHandleType        linIfChannel;
-
-    /* Update N_As,N_Cs,N_Cr timer */
-    if (LINTP_TIMER_NONE != tpChPtr->TpTimer.EnabledTimer)
-    {
-        if (tpChPtr->TpTimer.Timer > 0u)
-        {
-            tpChPtr->TpTimer.Timer--;
-            if (0u == tpChPtr->TpTimer.Timer)
-            {
-                /* Abort transmission process */
-                if ((LINTP_TIMER_NAS == tpChPtr->TpTimer.EnabledTimer)
-                    || (LINTP_TIMER_NCS == tpChPtr->TpTimer.EnabledTimer))
-                {
-                    /*@req <SWS_LinIf_00658>,<SWS_LinIf_00662>*/
-                    PduR_LinTpTxConfirmation(tpChPtr->TxNSduPtr->TxNSduPduRef, E_NOT_OK);
-
-                    network      = tpChPtr->TxNSduPtr->TxNSduChannelRef;
-                    linIfChannel = tpChPtr->TxNSduPtr->LinIfChannelRef;
-                }
-                else
-                {
-                    /*@req <SWS_LinIf_00666>*/
-                    PduR_LinTpRxIndication(tpChPtr->RxNSduPtr->RxNSduPduRef, E_NOT_OK);
-
-                    network      = tpChPtr->RxNSduPtr->RxNSduChannelRef;
-                    linIfChannel = tpChPtr->RxNSduPtr->LinIfChannelRef;
-                }
-#if (STD_ON == LINTP_SCHEDULE_CHANGE_DIAG_SUPPORT)
-                /*@req <SWS_LinIf_00646>*/
-                if (tpChPtr->ChCfgPtr->ScheduleChangeDiag)
-                {
-                    /*@req <SWS_LinIf_00658>,<SWS_LinIf_00662>,
-                      <SWS_LinIf_00666>*/
-                    /* Change schedule table by BswM */
-                    BswM_LinTp_RequestMode(network, LINTP_APPLICATIVE_SCHEDULE);
-                    tpChPtr->RecoverMode = LINTP_APPLICATIVE_SCHEDULE;
-                }
-                else
-                {
-                }
-#endif
-                /* Reset channel */
-                LinTp_MasterChReset(tpChPtr);
-                /* Clear the flag of header and response */
-                LinIf_ClearEvent(linIfChannel, LINIF_EVENT_HEADER | LINIF_EVENT_RESPONSE);
-                /* Next entry */
-                LinIf_MoveScheduleToNextEntry(linIfChannel);
-            }
-        }
-    }
-
-    /* Update P2(P2*Max) timer */
-    if (LINTP_TIMER_NONE != tpChPtr->TpP2Timer.EnabledTimer)
-    {
-        if (tpChPtr->TpP2Timer.Timer > 0u)
-        {
-            tpChPtr->TpP2Timer.Timer--;
-            if (0u == tpChPtr->TpP2Timer.Timer)
-            {
-                /*@req <SWS_LinIf_00619>*/
-                const LinTp_RxNSduType* rx = LinTp_GetRxNSduByNad(LinIfChannelId, tpChPtr->MRFRequestedNad);
-                PduR_LinTpRxIndication(rx->RxNSduPduRef, E_NOT_OK);
-                linIfChannel = rx->LinIfChannelRef;
-#if (STD_ON == LINTP_SCHEDULE_CHANGE_DIAG_SUPPORT)
-                /* Notify PduR,Change schedule table */
-                /*@req <SWS_LinIf_00646>*/
-                if (tpChPtr->ChCfgPtr->ScheduleChangeDiag)
-                {
-                    network = rx->RxNSduChannelRef;
-                    /*@req <SWS_LinIf_00619>*/
-                    /* Change schedule table by BswM */
-                    BswM_LinTp_RequestMode(network, LINTP_APPLICATIVE_SCHEDULE);
-                    tpChPtr->RecoverMode = LINTP_APPLICATIVE_SCHEDULE;
-                }
-                else
-                {
-                }
-#endif
-
-                /* Reset channel */
-                LinTp_MasterChReset(tpChPtr);
-                /* Clear the flag of header and response */
-                LinIf_ClearEvent(linIfChannel, LINIF_EVENT_HEADER | LINIF_EVENT_RESPONSE);
-                /* Next entry */
-                LinIf_MoveScheduleToNextEntry(linIfChannel);
-            }
-        }
-    }
-}
-
-/* PRQA S 1532 -- */
-
 /**
  * @brief               Copy transfer data failure process
  * @param[inout]        tpChPtr: The runtime data of lintp master channel
@@ -769,19 +825,47 @@ LINTP_LOCAL void LinTp_HandleCopyTxDataFailure(LinTp_MasterRuntimeType* tpChPtr)
 {
     /*@req <SWS_LinIf_00073>*/
     PduR_LinTpTxConfirmation(tpChPtr->TxNSduPtr->TxNSduPduRef, E_NOT_OK);
-#if (STD_ON == LINTP_SCHEDULE_CHANGE_DIAG_SUPPORT)
-    if (tpChPtr->ChCfgPtr->ScheduleChangeDiag)
+    if (LinTp_IsTrsEvent(tpChPtr, LINTP_TRS_EVT_FUN_TX))
     {
-        /*@req <SWS_LinIf_00673>*/
-        BswM_LinTp_RequestMode(tpChPtr->TxNSduPtr->TxNSduChannelRef, LINTP_APPLICATIVE_SCHEDULE);
-        tpChPtr->RecoverMode = LINTP_APPLICATIVE_SCHEDULE;
-    }
-#endif
+#if (STD_ON == LINTP_SCHEDULE_CHANGE_DIAG_SUPPORT)
+        if (tpChPtr->ChCfgPtr->ScheduleChangeDiag)
+        {
+            /*@req <SWS_LinIf_00673>*/
+            BswM_LinTp_RequestMode(tpChPtr->TxNSduPtr->TxNSduChannelRef, LINTP_APPLICATIVE_SCHEDULE);
+            tpChPtr->RecoverMode = LINTP_APPLICATIVE_SCHEDULE;
+        }
 
-    /* Next entry */
-    LinIf_MoveScheduleToNextEntry(tpChPtr->TxNSduPtr->LinIfChannelRef);
-    /* Reset channel */
-    LinTp_MasterChReset(tpChPtr);
+        NetworkHandleType lintpCh = LinTp_GetLinTpChannel(tpChPtr->ChCfgPtr->LinIfChannelRef);
+        LinTp_MasterChReset(tpChPtr);
+        if (tpChPtr->NeedRestoreScence)
+        {
+            if (!LinTp_IsTrsEvent(tpChPtr, LINTP_TRS_EVT_PHY_TX_REQ))
+            {
+                LinTp_MasterRuntimeType* backupRtData = LinTp_BackupMasterRtDataPtr(lintpCh);
+                (void)IStdLib_MemCpy(tpChPtr, backupRtData, sizeof(LinTp_MasterRuntimeType));
+            }
+
+            tpChPtr->ChannelState      = LINTP_CHANNEL_BUSY;
+            tpChPtr->NeedRestoreScence = FALSE;
+        }
+#endif
+    }
+    else
+    {
+#if (STD_ON == LINTP_SCHEDULE_CHANGE_DIAG_SUPPORT)
+        if (tpChPtr->ChCfgPtr->ScheduleChangeDiag)
+        {
+            /*@req <SWS_LinIf_00673>*/
+            BswM_LinTp_RequestMode(tpChPtr->TxNSduPtr->TxNSduChannelRef, LINTP_APPLICATIVE_SCHEDULE);
+            tpChPtr->RecoverMode = LINTP_APPLICATIVE_SCHEDULE;
+        }
+#endif /* STD_ON == LINTP_SCHEDULE_CHANGE_DIAG_SUPPORT */
+
+        /* Next entry */
+        LinIf_MoveScheduleToNextEntry(tpChPtr->TxNSduPtr->LinIfChannelRef);
+        /* Reset channel */
+        LinTp_MasterChReset(tpChPtr);
+    }
 }
 
 /**
@@ -791,8 +875,10 @@ LINTP_LOCAL void LinTp_HandleCopyTxDataFailure(LinTp_MasterRuntimeType* tpChPtr)
  * @synchronous         TRUE
  * @trace               -
  */
-LINTP_LOCAL void LinTp_CopyTxDataFromPduR(LinTp_MasterRuntimeType* tpChPtr)
+LINTP_LOCAL boolean LinTp_CopyTxDataFromPduR(LinTp_MasterRuntimeType* tpChPtr)
 {
+    boolean result = FALSE;
+
     if (tpChPtr->BufReqNum > 0u)
     {
         PduInfoType   infoData;
@@ -820,7 +906,7 @@ LINTP_LOCAL void LinTp_CopyTxDataFromPduR(LinTp_MasterRuntimeType* tpChPtr)
             tpChPtr->SduRemaining -= len;
             /* reload retry counter */
             tpChPtr->BufReqNum = tpChPtr->TxNSduPtr->MaxBufReq;
-
+            result             = TRUE;
             break;
 
         case BUFREQ_E_NOT_OK:
@@ -844,6 +930,8 @@ LINTP_LOCAL void LinTp_CopyTxDataFromPduR(LinTp_MasterRuntimeType* tpChPtr)
     {
         LinTp_HandleCopyTxDataFailure(tpChPtr);
     }
+
+    return result;
 }
 
 /**
@@ -853,12 +941,14 @@ LINTP_LOCAL void LinTp_CopyTxDataFromPduR(LinTp_MasterRuntimeType* tpChPtr)
  * @synchronous         TRUE
  * @trace               -
  */
-LINTP_LOCAL void LinTp_TxEventRequest(LinTp_MasterRuntimeType* tpChPtr)
+LINTP_LOCAL boolean LinTp_TxEventRequest(LinTp_MasterRuntimeType* tpChPtr)
 {
     if (!(LinTp_IsEvent(tpChPtr, LINTP_EVENT_TX)))
     {
-        return;
+        return FALSE;
     }
+
+    boolean result = FALSE;
 
     if (!(LinTp_IsEvent(tpChPtr, LINTP_EVENT_CONF | LINTP_EVENT_OK)))
     {
@@ -889,9 +979,10 @@ LINTP_LOCAL void LinTp_TxEventRequest(LinTp_MasterRuntimeType* tpChPtr)
         if (LinTp_IsEvent(tpChPtr, LINTP_EVENT_COPY_REQ))
         {
             /* Copy data from PduR */
-            LinTp_CopyTxDataFromPduR(tpChPtr);
+            result = LinTp_CopyTxDataFromPduR(tpChPtr);
         }
     }
+    return result;
 }
 
 /**
@@ -922,7 +1013,7 @@ LINTP_LOCAL void LinTp_TxEventHandler(LinTp_MasterRuntimeType* tpChPtr)
             if (tpChPtr->SduIdx != LINTP_FRAME_LEN_MAX)
             {
                 PduLengthType len = LINTP_FRAME_LEN_MAX - tpChPtr->SduIdx;
-                (void)IStdLib_MemSet(&tpChPtr->SduBuf[tpChPtr->SduIdx], (int)LINTP_PADDING_VALUE, len);
+                (void)IStdLib_MemSet(&tpChPtr->SduBuf[tpChPtr->SduIdx], LINTP_PADDING_VALUE, len);
             }
             LinTp_SetEvent(tpChPtr, LINTP_EVENT_TX_REQ | LINTP_EVENT_CONF_REQ);
         }
@@ -948,38 +1039,54 @@ LINTP_LOCAL void LinTp_TxEventConfirmation(LinTp_MasterRuntimeType* tpChPtr)
         /*@req <SWS_LinIf_00068>*/
         /* Notify upper */
         PduR_LinTpTxConfirmation(tpChPtr->TxNSduPtr->TxNSduPduRef, E_OK);
-#if (STD_ON == LINTP_SCHEDULE_CHANGE_DIAG_SUPPORT)
         /*@req <SWS_LinIf_00646>*/
-        if (tpChPtr->ChCfgPtr->ScheduleChangeDiag)
+        if (LinTp_IsTrsEvent(tpChPtr, LINTP_TRS_EVT_FUN_TX))
         {
-            if (LinTp_IsTrsEvent(tpChPtr, LINTP_TRS_EVT_FUN_TX))
+#if (STD_ON == LINTP_SCHEDULE_CHANGE_DIAG_SUPPORT)
+            if ((tpChPtr->ChCfgPtr->ScheduleChangeDiag) && (tpChPtr->RecoverMode != LINTP_DIAG_REQUEST))
             {
                 /*@req <SWS_LinIf_00707>*/
                 BswM_LinTp_RequestMode(tpChPtr->TxNSduPtr->TxNSduChannelRef, tpChPtr->RecoverMode);
             }
-            else
+#endif
+
+            NetworkHandleType lintpCh = LinTp_GetLinTpChannel(tpChPtr->ChCfgPtr->LinIfChannelRef);
+            LinTp_MasterChReset(tpChPtr);
+            if (tpChPtr->NeedRestoreScence)
+            {
+                if (!LinTp_IsTrsEvent(tpChPtr, LINTP_TRS_EVT_PHY_TX_REQ))
+                {
+                    LinTp_MasterRuntimeType* backupRtData = LinTp_BackupMasterRtDataPtr(lintpCh);
+                    (void)IStdLib_MemCpy(tpChPtr, backupRtData, sizeof(LinTp_MasterRuntimeType));
+                }
+
+                tpChPtr->ChannelState      = LINTP_CHANNEL_BUSY;
+                tpChPtr->NeedRestoreScence = FALSE;
+            }
+        }
+        else
+        {
+#if (STD_ON == LINTP_SCHEDULE_CHANGE_DIAG_SUPPORT)
+            if (tpChPtr->ChCfgPtr->ScheduleChangeDiag)
             {
                 /*@req <SWS_LinIf_00642>*/
                 BswM_LinTp_RequestMode(tpChPtr->TxNSduPtr->TxNSduChannelRef, LINTP_DIAG_RESPONSE);
                 tpChPtr->RecoverMode = LINTP_DIAG_RESPONSE;
             }
-        }
 #endif
 
-        /* Next entry */
-        LinIf_MoveScheduleToNextEntry(tpChPtr->TxNSduPtr->LinIfChannelRef);
-
-        /* MRF send OK,P2 timer should not be cleared */
-        LinTp_TimerType bakupTimerType = tpChPtr->TpP2Timer.EnabledTimer;
-        /* MRF Requested Nad and SID should not be cleared*/
-        uint8 bakupMRFRequestedNad = tpChPtr->MRFRequestedNad;
-        uint8 bakupMRFRequestedSID = tpChPtr->MRFRequestedSID;
-        /* Reset channel */
-        LinTp_MasterChReset(tpChPtr);
-        /* recover */
-        tpChPtr->TpP2Timer.EnabledTimer = bakupTimerType;
-        tpChPtr->MRFRequestedNad        = bakupMRFRequestedNad;
-        tpChPtr->MRFRequestedSID        = bakupMRFRequestedSID;
+            /* MRF send OK,P2 timer should not be cleared */
+            LinTp_TimerType bakupTimerType = tpChPtr->TpP2Timer.EnabledTimer;
+            /* MRF Requested Nad and SID should not be cleared*/
+            uint8 bakupMRFRequestedNad = tpChPtr->MRFRequestedNad;
+            uint8 bakupMRFRequestedSID = tpChPtr->MRFRequestedSID;
+            /* Reset channel */
+            LinTp_MasterChReset(tpChPtr); /* PRQA S 2982 */ /* VL_LinTp_2982 */
+            /* recover */
+            tpChPtr->TpP2Timer.EnabledTimer = bakupTimerType;
+            tpChPtr->MRFRequestedNad        = bakupMRFRequestedNad;
+            tpChPtr->MRFRequestedSID        = bakupMRFRequestedSID;
+        }
     }
 }
 
@@ -1402,90 +1509,6 @@ LINTP_LOCAL void LinTp_RxEventIndication(LinTp_MasterRuntimeType* tpChPtr)
     }
 }
 
-/**
- * @brief               Load transmit request information
- * @param[in]           ch: Identification of the LIN channel
- * @param[inout]        tpChPtr: Runtime data of lintp master channel
- * @reentrant           TRUE
- * @synchronous         TRUE
- * @trace               -
- */
-LINTP_LOCAL void LinTp_LoadTxRequest(NetworkHandleType ch, LinTp_MasterRuntimeType* tpChPtr)
-{
-    /* If tx or rx is ongoing,shall not to load transmit request */
-    if (!(LinTp_IsEvent(tpChPtr, LINTP_EVENT_TX | LINTP_EVENT_RX))
-        && (LinTp_IsTrsEvent(tpChPtr, LINTP_TRS_EVT_FUN_TX_REQ | LINTP_TRS_EVT_PHY_TX_REQ)))
-    {
-        if (LinTp_IsTrsEvent(tpChPtr, LINTP_TRS_EVT_FUN_TX_REQ))
-        {
-            tpChPtr->TxNSduPtr = tpChPtr->FuncReqNSduPtr;
-            tpChPtr->SduSize   = tpChPtr->FuncReqSduSize;
-
-            /* Set functional request ongoing flag */
-            LinTp_ClrTrsEvent(tpChPtr, LINTP_TRS_EVT_FUN_TX_REQ);
-            LinTp_SetTrsEvent(tpChPtr, LINTP_TRS_EVT_FUN_TX);
-        }
-        else
-        {
-            tpChPtr->TxNSduPtr = tpChPtr->PhyReqNSduPtr;
-            tpChPtr->SduSize   = tpChPtr->PhyReqSduSize;
-
-            /* Set physic request ongoing flag */
-            LinTp_ClrTrsEvent(tpChPtr, LINTP_TRS_EVT_PHY_TX_REQ);
-            LinTp_SetTrsEvent(tpChPtr, LINTP_TRS_EVT_PHY_TX);
-        }
-        tpChPtr->ChCfgPtr     = LinTp_GetChannelRefConfig((uint8)ch);
-        tpChPtr->BufReqNum    = tpChPtr->TxNSduPtr->MaxBufReq;
-        tpChPtr->SduRemaining = tpChPtr->SduSize;
-
-        /* Last Tx confirmation process may change channel state to IDLE->_MASTER_CH_RESET(tpChPtr)*/
-        tpChPtr->ChannelState = LINTP_CHANNEL_BUSY;
-
-        /* Set transmit events */
-        LinTp_SetEvent(tpChPtr, LINTP_EVENT_TX | LINTP_EVENT_COPY_REQ);
-        if (tpChPtr->SduSize > (LINTP_FRAME_LEN_MAX - LINTP_PDU_OFS_SF_DATA))
-        {
-            LinTp_SetEvent(tpChPtr, LINTP_EVENT_FF_REQ);
-        }
-        else
-        {
-            LinTp_SetEvent(tpChPtr, LINTP_EVENT_SF_REQ);
-        }
-#if (STD_ON == LINTP_SCHEDULE_CHANGE_DIAG_SUPPORT)
-        /*@req <SWS_LinIf_00646>*/
-        if (tpChPtr->ChCfgPtr->ScheduleChangeDiag)
-        {
-            /*@req <SWS_LinIf_00641>*/
-            BswM_LinTp_RequestMode(tpChPtr->TxNSduPtr->TxNSduChannelRef, LINTP_DIAG_REQUEST);
-        }
-#endif
-    }
-}
-
-/**
- * @brief               Get the LinIf channel corresponding LinTp channel
- * @param[in]           ch: Identification of the LIN channel
- * @return              retLinTpChannelId: Identification of the Lintp channel
- * @reentrant           TRUE
- * @synchronous         TRUE
- * @trace               -
- */
-LINTP_LOCAL NetworkHandleType LinTp_GetLinTpChannel(NetworkHandleType LinIfChannelId)
-{
-    const LinTp_ChannelConfigType* tpChCfgPtr        = LinTp_GetChannelConfig(0u);
-    NetworkHandleType              retLinTpChannelId = 0u;
-
-    for (NetworkHandleType ch = 0u; ch < LinTp_ConfigPtr->NumOfChannel; ch++)
-    {
-        if (tpChCfgPtr->LinIfChannelRef == LinIfChannelId)
-        {
-            retLinTpChannelId = ch;
-        }
-
-        tpChCfgPtr++;
-    }
-    return retLinTpChannelId;
-}
 #define LINIF_STOP_SEC_CODE
 #include "LinIf_MemMap.h"
 

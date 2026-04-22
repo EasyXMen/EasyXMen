@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -28,7 +28,7 @@
 #include "DoIP_Internal_TCP_Common.h"
 #include "DoIP_Internal_TCP_Diagnostic.h"
 #include "DoIP_Internal_TCP_Non_Diagnostic.h"
-
+#include "SchM_DoIP.h"
 /* ===================================================== macros ===================================================== */
 
 #define DOIP_MAX_NON_DIAGNOSTIC_DATA_LENGTH 0x19u /**< MAX length of non diagnostic message. */
@@ -90,6 +90,18 @@ DOIP_LOCAL_INLINE void DoIP_ResetQueue(DoIP_TcpTxRxContextType* ctx);
 DOIP_LOCAL boolean DoIP_IsUdpMsg(uint16 payloadType);
 
 /**
+ * @brief       Whether it is a TCP message.
+ * @param[in]   payloadType: Payload type.
+ * @return      boolean
+ * @retval      TRUE: It's TCP message.
+ * @retval      FALSE: It not TCP message.
+ * @reentrant   TRUE
+ * @synchronous TRUE
+ * @trace       CPD-PLACEHOLDER
+ */
+DOIP_LOCAL boolean DoIP_IsTcpMsg(uint16 payloadType);
+
+/**
  * @brief       Whether the payloadlen field value of the message is correct.
  * @param[in]   soadTxPduRef: Used for send NACK message.
  * @param[in]   txRxCtxIdx: Provide context for send message.
@@ -102,8 +114,7 @@ DOIP_LOCAL boolean DoIP_IsUdpMsg(uint16 payloadType);
  * @synchronous TRUE
  * @trace       CPD-PLACEHOLDER
  */
-DOIP_LOCAL boolean
-    DoIP_IsValidPayloadLen(uint16 soadTxPduRef, uint8 txRxCtxIdx, uint16 payloadType, PduLengthType payloadLen);
+DOIP_LOCAL boolean DoIP_IsValidPayloadLen(uint16 payloadType, PduLengthType payloadLen);
 
 /**
  * @brief       Check whether the payload of the message is valid.
@@ -166,13 +177,13 @@ DoIP_TcpTxRxContextType DoIP_TcpTxRxContext[DOIP_TCP_MAX_CONNECTION];
 #define DOIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
 #include "DoIP_MemMap.h"
 
-#define DOIP_START_SEC_VAR_INIT_8
+#define DOIP_START_SEC_VAR_CLEARED_8
 #include "DoIP_MemMap.h"
 /**
  * @brief Number of connections that have been established
  */
-uint8 DoIP_CurrentTcpConnCnt = 0u;
-#define DOIP_STOP_SEC_VAR_INIT_8
+uint8 DoIP_CurrentTcpConnCnt;
+#define DOIP_STOP_SEC_VAR_CLEARED_8
 #include "DoIP_MemMap.h"
 
 /* ========================================== external function definitions ========================================= */
@@ -267,7 +278,8 @@ const DoIP_PBConnectionCfgType* DoIP_GetTcpConnBySoAdRxPduId(PduIdType soadRxPdu
 /**
  * @brief Get PdurRxPdu.
  */
-/* PRQA S 1532 ++ */ /* VL_DoIP_RefeOneFile */
+/* PRQA S 1532 ++ */      /* VL_DoIP_RefeOneFile */
+/* PRQA S 4461,2905 ++ */ /* VL_DoIP_4461,VL_DoIP_2905 */
 Std_ReturnType DoIP_GetPduRRxPduRef(uint16 sa, uint16 ta, PduIdType* pdurRxPduRef)
 /* PRQA S 1532 -- */
 {
@@ -657,6 +669,7 @@ Std_ReturnType DoIP_GetTcpTxRxCtxIdxByChannelIdx(uint16 channelIdx, uint8* txRxC
  */
 void DoIP_ResetTcpTxContext(uint8 txRxCtxIdx)
 {
+    SchM_Enter_DoIP_ExclusiveArea();
     for (uint32 i = 0u; i < DOIP_TX_BUFFER_SIZE; i++)
     {
         DoIP_TcpTxRxContext[txRxCtxIdx].TxBuf[i] = DOIP_INVALID_UINT8; /* PRQA S 2844 */ /* VL_DoIP_DerefInvalidPtr */
@@ -675,6 +688,7 @@ void DoIP_ResetTcpTxContext(uint8 txRxCtxIdx)
     txCtrl->TxMsgType       = DOIP_TX_NON_MSG;
     txCtrl->TxState         = DOIP_TX_STATE_IDLE;
     /* PRQA S 2814 -- */
+    SchM_Exit_DoIP_ExclusiveArea();
 }
 
 /**
@@ -734,20 +748,23 @@ void DoIP_HandlePendingMsg(void) /* PRQA S 1532 */ /* VL_DoIP_RefeOneFile */
 
     for (uint8 i = 0u; i < DOIP_TCP_MAX_CONNECTION; i++)
     {
+        SchM_Enter_DoIP_ExclusiveArea();
         txCtrl = &DoIP_TcpTxRxContext[i].TxCtrl;
 
         /* PRQA S 2814 ++ */ /* VL_QAC_DerefNullPtr */
         if ((txCtrl->TxBufState == DOIP_BUFFER_IDLE) && (txCtrl->TxState == DOIP_TX_STATE_IDLE))
         /* PRQA S 2814 -- */
         {
+            boolean ret;
             /* PRQA S 4558,4404,4115 ++ */ /* VL_DoIP_4558,VL_DoIP_4404,VL_DoIP_4115 */
-            boolean ret = DoIP_HandlePendingTpMsg(&DoIP_TcpTxRxContext[i]);
-            ret         = ret && DoIP_HandlePendingIfMsg(&DoIP_TcpTxRxContext[i]);
+            ret = DoIP_HandlePendingTpMsg(&DoIP_TcpTxRxContext[i]);
+            ret = ret && DoIP_HandlePendingIfMsg(&DoIP_TcpTxRxContext[i]);
             /* PRQA S 2982 ++ */ /* VL_DoIP_UsedBeforModify */
             ret = ret && DoIP_HandlePendingNonDiagMsg(&DoIP_TcpTxRxContext[i]);
             /* PRQA S 2982 -- */
             /* PRQA S 4558,4404,4115 -- */
         }
+        SchM_Exit_DoIP_ExclusiveArea();
     }
 }
 
@@ -963,14 +980,17 @@ DOIP_LOCAL Std_ReturnType DoIP_GetChannelIdxBySaTa(uint16 sa, uint16 ta, uint16*
 DOIP_LOCAL_INLINE void DoIP_ResetQueue(DoIP_TcpTxRxContextType* ctx) /* PRQA S 1505 */ /* VL_DoIP_RefeOneFile */
 {
     /* PRQA S 2814 ++ */ /* VL_QAC_DerefNullPtr */
-    ctx->TxTpQueue.Tail = 0u;
-    ctx->TxTpQueue.Head = 0u;
+    ctx->TxTpQueue.Tail  = 0u;
+    ctx->TxTpQueue.Head  = 0u;
+    ctx->TxTpQueue.Count = 0u;
 
-    ctx->TxIfQueue.Tail = 0u;
-    ctx->TxIfQueue.Head = 0u;
+    ctx->TxIfQueue.Tail  = 0u;
+    ctx->TxIfQueue.Head  = 0u;
+    ctx->TxIfQueue.Count = 0u;
 
-    ctx->TxNonDiagQueue.Tail = 0u;
-    ctx->TxNonDiagQueue.Head = 0u;
+    ctx->TxNonDiagQueue.Tail  = 0u;
+    ctx->TxNonDiagQueue.Head  = 0u;
+    ctx->TxNonDiagQueue.Count = 0u;
     /* PRQA S 2814 -- */
 }
 
@@ -1006,10 +1026,32 @@ DOIP_LOCAL boolean DoIP_IsUdpMsg(uint16 payloadType)
 }
 
 /**
+ * @brief Whether it is a TCP message.
+ */
+DOIP_LOCAL boolean DoIP_IsTcpMsg(uint16 payloadType)
+{
+    boolean ret = FALSE;
+
+    switch (payloadType)
+    {
+    case DOIP_MSG_TYPE_ROUTING_ACTIVATION_REQ:
+    case DOIP_MSG_TYPE_ALIVE_CHECK_RSP:
+    case DOIP_MSG_TYPE_DIAG:
+        ret = TRUE;
+        break;
+
+    default: /* PRQA S 2016 */ /* VL_DoIP_2016 */
+
+        break;
+    }
+
+    return ret;
+}
+
+/**
  * @brief Whether the payloadlen field value of the message is correct.
  */
-DOIP_LOCAL boolean
-    DoIP_IsValidPayloadLen(uint16 soadTxPduRef, uint8 txRxCtxIdx, uint16 payloadType, PduLengthType payloadLen)
+DOIP_LOCAL boolean DoIP_IsValidPayloadLen(uint16 payloadType, PduLengthType payloadLen)
 {
     boolean ret = FALSE;
 
@@ -1045,9 +1087,7 @@ DOIP_LOCAL boolean
     /* Invalid type */
     default:
 
-        DoIP_SendTcpNack(soadTxPduRef, DOIP_HEADER_NACK_UNKNOWN_PAYLOAD_TYPE, txRxCtxIdx);
-
-        ret = TRUE; /* Shoud't send DOIP_HEADER_NACK_INVALID_PAYLOAD_LENGTH message. */
+        ret = FALSE; /* Shoud't send DOIP_HEADER_NACK_INVALID_PAYLOAD_LENGTH message. */
 
         break;
     }
@@ -1058,7 +1098,9 @@ DOIP_LOCAL boolean
 /**
  * @brief Check whether the payload of the message is valid.
  */
+/* PRQA S 6030 ++ */ /* VL_MTR_DoIP_STMIF */
 DOIP_LOCAL Std_ReturnType DoIP_CheckTcpMsgPayload(uint16 soadTxPduRef, uint8 txRxCtxIdx, SoAd_SoConIdType soConId)
+/* PRQA S 6030 -- */
 {
     uint8          index;
     Std_ReturnType ret = DoIP_GetTcpConnStatusIdxBySoConId(soConId, &index);
@@ -1075,21 +1117,34 @@ DOIP_LOCAL Std_ReturnType DoIP_CheckTcpMsgPayload(uint16 soadTxPduRef, uint8 txR
         {
             PduLengthType payloadLen = DoIP_TcpTxRxContext[txRxCtxIdx].RxCtrl.PayloadLen;
             /* PRQA S 2844 -- */ /* VL_DoIP_DerefInvalidPtr */
+            /*SWS_DoIP_00331 SWS_DoIP_00330*/
 
-            if ((payloadType == DOIP_MSG_TYPE_ALIVE_CHECK_RSP)
+            if (((payloadType == DOIP_MSG_TYPE_ALIVE_CHECK_RSP) || (payloadType == DOIP_MSG_TYPE_DIAG))
                 && (DoIP_TcpConnStatus[index].RaState == DOIP_SOCKET_NONACTIVATED))
             {
                 ret = E_NOT_OK;
             }
-            else if (DoIP_IsValidPayloadLen(soadTxPduRef, txRxCtxIdx, payloadType, payloadLen) != TRUE)
+            else if (DoIP_IsValidPayloadLen(payloadType, payloadLen) != TRUE)
             {
-                DoIP_SendTcpNack(soadTxPduRef, DOIP_HEADER_NACK_INVALID_PAYLOAD_LENGTH, txRxCtxIdx);
-                DoIP_TcpConnStatus[index].WaitCloseSocket = TRUE;
-                ret                                       = E_NOT_OK;
+                if (DoIP_IsTcpMsg(payloadType) == TRUE)
+                {
+                    DoIP_SendTcpNack(soadTxPduRef, DOIP_HEADER_NACK_INVALID_PAYLOAD_LENGTH, txRxCtxIdx);
+                    DoIP_TcpConnStatus[index].WaitCloseSocket = TRUE;
+                }
+                else if (DoIP_TcpConnStatus[index].RaState == DOIP_SOCKET_ACTIVATED)
+                {
+                    DoIP_SendTcpNack(soadTxPduRef, DOIP_HEADER_NACK_UNKNOWN_PAYLOAD_TYPE, txRxCtxIdx);
+                }
+                else
+                {
+                    /* for qac idle */
+                }
+
+                ret = E_NOT_OK;
             }
             else
             {
-                // for qac
+                /* for qac idle */
             }
         }
     }
@@ -1146,20 +1201,22 @@ DOIP_LOCAL Std_ReturnType DoIP_IsValidHeader(uint16 soadTxPduRef, uint8 txRxCtxI
 
     return ret;
 }
-
+/* PRQA S 4461,2905 -- */
 /* ----------------------------------------- send ----------------------------------------- */
 
 /**
  * @brief Send TCP NACK message.
  */
+/* PRQA S 6070 ++ */ /* VL_MTR_DoIP_STCAL */
 DOIP_LOCAL void DoIP_SendTcpNack(PduIdType soadTxPduRef, uint8 nack, uint8 txRxCtxIdx)
+/* PRQA S 6070 -- */
 {
     uint8 buf[DOIP_NON_DIAG_QUEUE_BUFFER_SIZE];
 
     /* PRQA S 2844 ++ */ /* VL_DoIP_DerefInvalidPtr */
     DoIP_TcpTxCtrlType* txCtrl = &DoIP_TcpTxRxContext[txRxCtxIdx].TxCtrl;
     /* PRQA S 2844 -- */
-
+    SchM_Enter_DoIP_ExclusiveArea();
     buf[DOIP_HEADER_FIELD_POSITION_VERSION]         = DOIP_PROTOCOL_VERSION;
     buf[DOIP_HEADER_FIELD_POSITION_INVERSE_VERSION] = DOIP_PROTOCOL_INVERSE_VERSION;
 
@@ -1183,13 +1240,18 @@ DOIP_LOCAL void DoIP_SendTcpNack(PduIdType soadTxPduRef, uint8 nack, uint8 txRxC
     {
         /* PRQA S 2844 ++ */ /* VL_DoIP_DerefInvalidPtr */
         DoIP_MemCpy(DoIP_TcpTxRxContext[txRxCtxIdx].TxBuf, buf, pduInfo.SduLength);
-        (void)DoIP_TriggerTpTransmit(soadTxPduRef, &pduInfo, txCtrl, DOIP_TX_NON_DIAG_MSG);
+        if (E_NOT_OK == DoIP_TriggerTpTransmit(soadTxPduRef, &pduInfo, txCtrl, DOIP_TX_NON_DIAG_MSG))
+        {
+            (void)DoIP_EnqueueNonDiagMsg(&DoIP_TcpTxRxContext[txRxCtxIdx].TxNonDiagQueue, soadTxPduRef, &pduInfo);
+            DoIP_ResetTcpTxContext(txRxCtxIdx);
+        }
     }
     else
     {
         (void)DoIP_EnqueueNonDiagMsg(&DoIP_TcpTxRxContext[txRxCtxIdx].TxNonDiagQueue, soadTxPduRef, &pduInfo);
         /* PRQA S 2844 -- */
     }
+    SchM_Exit_DoIP_ExclusiveArea();
 }
 /* PRQA S 3415 -- */
 #define DOIP_STOP_SEC_CODE

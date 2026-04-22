@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -21,7 +21,7 @@
  **  @description        : Implementation for WdgM
  **
  ***********************************************************************************************************************/
-/* PRQA S 6520 EOF */ /* VL_MTR_WdgM_STVAR */
+/* PRQA S 6520, 3415 EOF */ /* VL_MTR_WdgM_STVAR, VL_WdgM_3415 */
 /* =================================================== inclusions =================================================== */
 #include "WdgIf.h" /* PRQA S 0380 */ /* VL_WdgM_0380 */
 #include "WdgM_Internal.h"
@@ -1090,7 +1090,7 @@ WDGM_LOCAL Std_ReturnType WdgM_DoParamsCheckforCheckpointReached(
 #if (WDGM_DEV_ERROR_DETECT == STD_ON)
     uint16 modeSETabIndex = 0u;
 #endif /*WDGM_DEV_ERROR_DETECT == STD_ON*/
-    Std_ReturnType lReturnValue = E_OK;
+    Std_ReturnType lReturnValue;
 
     if ((WDGM_GLOBAL_STATUS_DEACTIVATED == *currentGlobalResult))
     {
@@ -1117,6 +1117,11 @@ WDGM_LOCAL Std_ReturnType WdgM_DoParamsCheckforCheckpointReached(
             Det_ReportRuntimeError(WDGM_MODULE_ID, WDGM_INSTANCE_ID, WDGM_CHECKPOINT_REACHED_ID, WDGM_E_SEDEACTIVATED);
         lReturnValue = E_NOT_OK;
     }
+    else
+    {
+        lReturnValue = E_OK;
+    }
+
     (void)modeCfg;
     (void)CheckpointID;
     return lReturnValue;
@@ -1804,7 +1809,7 @@ WDGM_LOCAL void WdgM_UpdateExtLogSup(
 }
 #endif /*WDGM_EXT_LOGICAL_SUPERVISION_ENABLE == STD_ON*/
 
-/* PRQA S 2982,2983 ++ */ /* VL_WdgM_UsedBeforModify */
+/* PRQA S 2982,2983 ++ */ /* VL_WdgM_UsedBeforModify,VL_WdgM_2983 */
 WDGM_LOCAL void WdgM_ClearExtlogStatus(const WdgM_RuntimeType* runDataPtr, const WdgM_ModeCfgType* oldModeCfg)
 {
     uint16 oldIndex;
@@ -1890,7 +1895,7 @@ WDGM_LOCAL void WdgM_ClearNoUseAliveDeadlineStatus(
                 break;
             }
         }
-        /* PRQA S 2982,2983 ++ */ /* VL_WdgM_UsedBeforModify */
+        /* PRQA S 2982,2983 ++ */ /* VL_WdgM_UsedBeforModify,VL_WdgM_2983 */
         if (newIndex >= newIndexMax)
         {
             WdgM_AliveSupIDType    aliveId          = oldSE->WdgMAliveSupCfg[oldIndex].WdgMAliveSupID;
@@ -2450,7 +2455,7 @@ WDGM_LOCAL void WdgM_InitLocalSupStatus(const WdgM_RuntimeType* runDataPtr, cons
     uint16 index = 0u;
 
 #if (WDGM_INT_LOGICAL_SUPERVISION_ENABLE == STD_ON)
-    for (index = 0; index < modeCfg->ModeSECnt; index++)
+    for (index = 0u; index < modeCfg->ModeSECnt; index++)
     {
         WdgM_SupervisedEntityIdType seid     = modeCfg->WdgMSERelated[index].WdgMSupervisedEntityID;
         WdgM_LogSupIDType           intLogId = WdgM_SupervisedEntityPcCfg[seid].WdgMIntLogSupId;
@@ -2462,7 +2467,7 @@ WDGM_LOCAL void WdgM_InitLocalSupStatus(const WdgM_RuntimeType* runDataPtr, cons
 #endif /*WDGM_INT_LOGICAL_SUPERVISION_ENABLE*/
 
 #if (WDGM_ALIVE_SUPERVISION_ENABLE == STD_ON)
-    for (index = 0; index < runDataPtr->WdgMTabCfg->WdgM_AliveTabMaxCnt; index++)
+    for (index = 0u; index < runDataPtr->WdgMTabCfg->WdgM_AliveTabMaxCnt; index++)
     {
         runDataPtr->WdgMAliveSupervisionInfo[index].WdgMAliveCycleCounter      = 0u;
         runDataPtr->WdgMAliveSupervisionInfo[index].WdgMAliveIndicationCounter = 0u;
@@ -2471,7 +2476,7 @@ WDGM_LOCAL void WdgM_InitLocalSupStatus(const WdgM_RuntimeType* runDataPtr, cons
 #endif /*WDGM_ALIVE_SUPERVISION_ENABLE == STD_ON*/
 
 #if (WDGM_DEADLINE_SUPERVISION_ENABLE == STD_ON)
-    for (index = 0; index < runDataPtr->WdgMTabCfg->WdgM_DeadlineTabMaxCnt; index++)
+    for (index = 0u; index < runDataPtr->WdgMTabCfg->WdgM_DeadlineTabMaxCnt; index++)
     {
         runDataPtr->WdgMDeadlineSupervisionInfo[index].WdgMTimeStampStart    = 0u;
         runDataPtr->WdgMDeadlineSupervisionInfo[index].WdgMDeadlineSupResult = WDGM_CORRECT;
@@ -2479,7 +2484,7 @@ WDGM_LOCAL void WdgM_InitLocalSupStatus(const WdgM_RuntimeType* runDataPtr, cons
 #endif /*WDGM_DEADLINE_SUPERVISION_ENABLE == STD_ON*/
 
 #if (WDGM_EXT_LOGICAL_SUPERVISION_ENABLE == STD_ON)
-    for (index = 0; index < runDataPtr->WdgMTabCfg->WdgM_ExternalTabMaxCnt; index++)
+    for (index = 0u; index < runDataPtr->WdgMTabCfg->WdgM_ExternalTabMaxCnt; index++)
     {
         runDataPtr->WdgMExtLogicalSupervisionInfo[index].WdgMExtLastReachedCPID = WDGM_NO_CP_REACH;
         runDataPtr->WdgMExtLogicalSupervisionInfo[index].WdgMExtLastReachedSEID = WDGM_NO_SE_REACH;
@@ -2619,7 +2624,7 @@ WDGM_LOCAL void WdgM_ChangeSEStatus(
             uint16 seIndex;
             if (WdgM_GetModeSEIndex(newIndex, &seIndex, newModeCfg) == E_OK)
             {
-                /* PRQA S 2982,2983 */ /* VL_WdgM_UsedBeforModify */
+                /* PRQA S 2982,2983 ++ */ /* VL_WdgM_UsedBeforModify,VL_WdgM_2983 */
 #if (WDGM_ALIVE_SUPERVISION_ENABLE == STD_ON)
                 if (newModeCfg->WdgMSERelated[seIndex].SEAliveCnt > 0u)
                 {
@@ -2685,7 +2690,7 @@ WDGM_LOCAL void WdgM_SEDeactivateInternal(
 #if (WDGM_ALIVE_SUPERVISION_ENABLE == STD_ON)
     if (seInfo->SEAliveCnt > 0u)
     {
-        /* PRQA S 2982,2983 ++ */ /* VL_WdgM_UsedBeforModify */
+        /* PRQA S 2982,2983 ++ */ /* VL_WdgM_UsedBeforModify,VL_WdgM_2983 */
         for (index = 0u; index < seInfo->SEAliveCnt; index++)
         {
             WdgM_AliveSupIDType    aliveId          = seInfo->WdgMAliveSupCfg[index].WdgMAliveSupID;

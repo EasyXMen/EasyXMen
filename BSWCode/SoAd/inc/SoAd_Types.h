@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -188,8 +188,8 @@ typedef enum SoAd_UpLayerModuleTypeTag
  */
 typedef struct SoAd_SoBufferCfgTypeTag
 {
-    PduLengthType BuffLen; /**< Buffer length. @range [0, 0xFFFFu] */
-    PduLengthType BuffPos; /**< Buffer position. @range [0, 0xFFFFu]  */
+    const PduLengthType BuffLen; /**< Buffer length. @range [0, 0xFFFFu] */
+    const PduLengthType BuffPos; /**< Buffer position. @range [0, 0xFFFFu]  */
 } SoAd_SoBufferCfgType;
 
 #if (STD_ON == SOAD_SUPPORT_UDP)
@@ -602,7 +602,7 @@ typedef struct SoAd_SoRxBufferManTypeTag
  */
 typedef struct SoAd_ConfigTypeTag
 {
-    const SoAd_uintx                       PduRouteNum;         /**< Number of PDU routes. @range [0, 0xFFFFu] */
+    const PduIdType                        PduRouteNum;         /**< Number of PDU routes. @range [0, 0xFFFFu] */
     const SoAd_PduRouteType* const         PduRoute;            /**< Array of PDU routes. @range NA */
     const SoAd_RoutingGroupIdType          RoutingGroupNum;     /**< Number of routing groups. @range [0, 0xFFu] */
     const SoAd_RoutingGroupType* const     RoutingGroup;        /**< Array of routing groups. @range NA */

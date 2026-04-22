@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -22,10 +22,18 @@
  **
  ***********************************************************************************************************************/
 
-/* PRQA S 0311,0316,0772,0780,1252,1253,1290,1842,1863,2001,2015,3120 ++ */ /* VL_QAC_Crypto */
-/* PRQA S 3326,3440,3672,3673,4116,4434,4461,4558,1843,1505,5022,5045 ++ */ /* VL_QAC_Crypto */
-/* PRQA S 6050,6060,6070,6080,6010,6030,6040   ++ */                        /* VL_QAC_Crypto */
-/* PRQA S 5014,5143,3332,2985,2889,5031,1532 ++ */                          /* VL_QAC_Crypto */
+/* PRQA S 6010 EOF */ /* VL_MTR_Crypto_62_STCYC */
+/* PRQA S 6020 EOF */ /* VL_MTR_Crypto_62_STLIN */
+/* PRQA S 6030 EOF */ /* VL_MTR_Crypto_62_STMIF */
+/* PRQA S 6040 EOF */ /* VL_MTR_Crypto_62_STPAR */
+/* PRQA S 6050 EOF */ /* VL_MTR_Crypto_62_STST3 */
+/* PRQA S 6060 EOF */ /* VL_MTR_Crypto_62_STM19 */
+/* PRQA S 6070 EOF */ /* VL_MTR_Crypto_62_STCAL */
+/* PRQA S 6080 EOF */ /* VL_MTR_Crypto_62_STPTH */
+
+/* PRQA S 0311,0316,0772,0780,1252,1253,1290,1842,1863,2001,2015,3120 ++ */ /* VL_Crypto_62_General */
+/* PRQA S 3326,3440,3672,3673,4116,4434,4461,4558,1843,1505,5022,5045 ++ */ /* VL_Crypto_62_General */
+/* PRQA S 5014,5143,3332,2985,2889,5031,1532 ++ */                          /* VL_Crypto_62_General */
 /* =================================================== inclusions =================================================== */
 #include "Crypto_62_Internal.h"
 
@@ -358,7 +366,7 @@ int Crypto_platform_entropy_poll(void* data, unsigned char* output, uint32 len, 
  *
  * Param-Name[in]      f_source :Entropy function.
  *                      threshold: Minimum required from source before entropy is released
- *                       ( with mbedtls_entropy_func() ) (in bytes)
+ *                       ( with entropy_func() ) (in bytes)
  *                     strong:   At least one strong source needs to be added.
  *                            Weaker sources (such as the cycle counter) can be used as
  *                             a complement.
@@ -464,5 +472,4 @@ Std_ReturnType Crypto_62_RandomGenerate_Process(
 
 /* PRQA S 0311,0316,0772,0780,1252,1253,1290,1842,1863,2001,2015,3120 -- */
 /* PRQA S 3326,3440,3672,3673,4116,4434,4461,4558,1843,1505,5022,5045 -- */
-/* PRQA S 6050,6060,6070,6080,6010,6030,6040 -- */
 /* PRQA S 5014,5143,3332,2985,2889,5031,1532 -- */

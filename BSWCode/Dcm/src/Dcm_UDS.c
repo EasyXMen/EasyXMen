@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -126,6 +126,29 @@ DCM_LOCAL Std_ReturnType
  * @param[in]     dspData       : Data configuration pointer
  * @param[out]    DestBuffer    : Target storage buffer
  *                                ErrorCode parameter value.
+ * @param[out]    ErrorCode     : If the operation <Module>_<DiagnosticService> returns value E_NOT_OK, the Dcm
+ *                                module shall send a negative response with NRC code equal to the parameter
+ *                                ErrorCode parameter value.
+ * @return        Std_ReturnType
+ * @retval        E_OK     : Request was successful
+ * @retval        E_NOT_OK : Request was unsuccessful
+ * @reentrant     TRUE
+ * @synchronous   TRUE
+ * @trace         CPD-PLACEHOLDE
+ */
+DCM_LOCAL Std_ReturnType Dcm_UDS_SignalHandleNvM(
+    Dcm_ExtendedOpStatusType      OpStatus,
+    const Dcm_DspDataCfgType*     dspData,
+    uint8*                        DestBuffer,
+    Dcm_NegativeResponseCodeType* ErrorCode);
+#endif
+
+/**
+ * @brief         read data from signal using callouts(CS/SR/Callout) handle return value
+ * @param[in]     inResult      : return value
+ * @param[out]    ErrorCode     : If the operation <Module>_<DiagnosticService> returns value E_NOT_OK, the Dcm
+ *                                module shall send a negative response with NRC code equal to the parameter
+ *                                ErrorCode parameter value.
  * @return        Std_ReturnType
  * @retval        E_OK     : Request was successful
  * @retval        E_NOT_OK : Request was unsuccessful
@@ -134,8 +157,7 @@ DCM_LOCAL Std_ReturnType
  * @trace         CPD-PLACEHOLDE
  */
 DCM_LOCAL Std_ReturnType
-    Dcm_UDS_SignalHandleNvM(Dcm_ExtendedOpStatusType OpStatus, const Dcm_DspDataCfgType* dspData, uint8* DestBuffer);
-#endif
+    Dcm_UDS_SignalReturnValueHandle(Std_ReturnType inResult, Dcm_NegativeResponseCodeType* ErrorCode);
 
 /**
  * @brief         read data from signal using callouts(CS/SR/Callout)
@@ -578,7 +600,7 @@ Std_ReturnType Dcm_UDS_SignalHandle(
             if (NULL_PTR != DestBuffer)
             {
                 /* read data from configured nvm block */
-                result = Dcm_UDS_SignalHandleNvM(OpStatus, dspData, &DestBuffer[offset]);
+                result = Dcm_UDS_SignalHandleNvM(OpStatus, dspData, &DestBuffer[offset], ErrorCode);
             }
             break;
         }
@@ -937,8 +959,11 @@ DCM_LOCAL Std_ReturnType
 #include "Dcm_MemMap.h"
 #if ((STD_ON == DCM_USE_NVM) && (STD_ON == DCM_USE_BLOCK_ID_ENABLED))
 /* Calls NvM APIs to read data from nvm block */
-DCM_LOCAL Std_ReturnType
-    Dcm_UDS_SignalHandleNvM(Dcm_ExtendedOpStatusType OpStatus, const Dcm_DspDataCfgType* dspData, uint8* DestBuffer)
+DCM_LOCAL Std_ReturnType Dcm_UDS_SignalHandleNvM(
+    Dcm_ExtendedOpStatusType      OpStatus,
+    const Dcm_DspDataCfgType*     dspData,
+    uint8*                        DestBuffer,
+    Dcm_NegativeResponseCodeType* ErrorCode)
 {
     Std_ReturnType result = E_OK;
 
@@ -949,6 +974,10 @@ DCM_LOCAL Std_ReturnType
         if (E_OK == result)
         {
             result = DCM_E_PENDING;
+        }
+        else
+        {
+            *ErrorCode = DCM_E_CONDITIONSNOTCORRECT;
         }
     }
     else if ((DCM_PENDING == OpStatus) || (DCM_E_FORCE_RCRRP == OpStatus))
@@ -961,7 +990,8 @@ DCM_LOCAL Std_ReturnType
         }
         else if ((NVM_REQ_OK != requestResult) && (NVM_REQ_RESTORED_FROM_ROM != requestResult))
         {
-            result = E_NOT_OK;
+            result     = E_NOT_OK;
+            *ErrorCode = DCM_E_CONDITIONSNOTCORRECT;
         }
         else
         {
@@ -981,6 +1011,34 @@ DCM_LOCAL Std_ReturnType
 }
 #endif
 
+/* read data from signal using callouts(CS/SR/Callout) handle return value */
+DCM_LOCAL Std_ReturnType
+    Dcm_UDS_SignalReturnValueHandle(Std_ReturnType inResult, Dcm_NegativeResponseCodeType* ErrorCode)
+{
+    Std_ReturnType result = inResult;
+#if (STD_ON == DCM_DEV_ERROR_DETECT)
+    if ((E_OK != inResult) && (E_NOT_OK != inResult) && (DCM_E_PENDING != inResult))
+    {
+        DCM_DET_REPORT(DCM_MAIN_FUNCTION_ID, DCM_E_INTERFACE_RETURN_VALUE);
+        if (NULL_PTR != ErrorCode)
+        {
+            *ErrorCode = DCM_E_GENERALREJECT;
+        }
+        result = E_NOT_OK;
+    }
+    else
+#endif
+        if ((E_NOT_OK == inResult) && (DCM_POS_RESP == *ErrorCode))
+    {
+        *ErrorCode = DCM_E_GENERALREJECT;
+    }
+    else
+    {
+        /* idle */
+    }
+    return result;
+}
+
 /* read data from signal using callouts(CS/SR/Callout) */
 /* PRQA S 3673 ++ */ /* VL_QAC_3673 */
 DCM_LOCAL Std_ReturnType Dcm_UDS_SignalHandleDefault(
@@ -996,14 +1054,7 @@ DCM_LOCAL Std_ReturnType Dcm_UDS_SignalHandleDefault(
     if ((NULL_PTR != dspData->ConditionCheckReadFnc) && (NULL_PTR != ErrorCode))
     {
         result = dspData->ConditionCheckReadFnc(OpStatus, ErrorCode);
-#if (STD_ON == DCM_DEV_ERROR_DETECT)
-        if ((E_OK != result) && (E_NOT_OK != result))
-        {
-            DCM_DET_REPORT(DCM_MAIN_FUNCTION_ID, DCM_E_INTERFACE_RETURN_VALUE);
-            *ErrorCode = DCM_E_GENERALREJECT;
-            result     = E_NOT_OK;
-        }
-#endif
+        result = Dcm_UDS_SignalReturnValueHandle(result, ErrorCode);
     }
 
 #if (STD_ON == DCM_DYN_DATA)
@@ -1016,26 +1067,24 @@ DCM_LOCAL Std_ReturnType Dcm_UDS_SignalHandleDefault(
             {
                 result = E_NOT_OK;
             }
+            else if ((E_NOT_OK == result) && (DCM_POS_RESP == *ErrorCode))
+            {
+                *ErrorCode = DCM_E_GENERALREJECT;
+            }
+            else
+            {
+                /* idle */
+            }
         }
     }
 #else
     DCM_UNUSED(DataLength);
 #endif
 
-    if ((E_OK == result) && (NULL_PTR != DestBuffer))
+    if ((E_OK == result) && (NULL_PTR != DestBuffer) && (NULL_PTR != ErrorCode))
     {
         result = dspData->DspDataReadFnc(OpStatus, DestBuffer, ErrorCode);
-#if (STD_ON == DCM_DEV_ERROR_DETECT)
-        if ((E_OK != result) && (E_NOT_OK != result) && (DCM_E_PENDING != result))
-        {
-            DCM_DET_REPORT(DCM_MAIN_FUNCTION_ID, DCM_E_INTERFACE_RETURN_VALUE);
-            if (NULL_PTR != ErrorCode)
-            {
-                *ErrorCode = DCM_E_GENERALREJECT;
-            }
-            result = E_NOT_OK;
-        }
-#endif
+        result = Dcm_UDS_SignalReturnValueHandle(result, ErrorCode);
     }
 
     return result;

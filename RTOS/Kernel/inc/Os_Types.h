@@ -1,6 +1,6 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
- * SPDX-License-Identifier: LGPL-2.1-only-with-exception OR  LicenseRef-Commercial-License
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
+ * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
  * GNU Lesser General Public License as published by the Free Software Foundation; version 2.1.
@@ -10,7 +10,8 @@
  * You should have received a copy of the GNU Lesser General Public License along with this library;
  * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  * or see <https://www.gnu.org/licenses/>.
- *
+ */
+/*
  ********************************************************************************
  **                                                                            **
  **  FILENAME    :  Os_Types.h                                                 **
@@ -28,7 +29,7 @@
 #ifndef OS_TYPES_H
 #define OS_TYPES_H
 /*=======[I N C L U D E S]====================================================*/
-#include "Os_Marcos.h"
+#include "Os_Macros.h"
 #include "Os_Cfg.h"
 #include "Os_ECode.h"
 /*=======[M A C R O S]========================================================*/
@@ -375,7 +376,7 @@ typedef enum
     ST_START_RELATIVE = 1,
 
 #if ((OS_SC2 == CFG_SC) || (OS_SC4 == CFG_SC))
-    ST_START_SYNCHRON = 2U
+    ST_START_SYNCHRON = 2U /* PRQA S 1271 */ /* VL_Os_1271 */
 #endif
 } Os_SchedTblAutostartType;
 typedef uint16 Os_ScheduleTableType;
@@ -406,12 +407,14 @@ typedef struct
 /* OsScheduleTableSync. AutoSar3.1: AUTOSAR_SWS_OS.pdf: 10.2.28. */
 #if ((OS_SC2 == CFG_SC) || (OS_SC4 == CFG_SC))
 /* Enumeration type of synchronization policy. */
+/* PRQA S 1271 ++ */ /* VL_Os_1271 */
 typedef enum
 {
     ST_SYNC_EXPLICIT = 0U,
     ST_SYNC_IMPLICIT = 1U,
     ST_SYNC_NONE     = 2U
 } Os_SchedTblSyncStrategy;
+/* PRQA S 1271 -- */
 
 /* Schedule table synchronization type. */
 typedef struct
@@ -468,7 +471,7 @@ typedef enum
     TP_SUS_ALL_INT = 1,
     TP_DIS_ALL_INT = 2,
 
-    TP_OPT_BUTT = 3U
+    TP_OPT_BUTT = 3
 } Os_TaskIsrOptType;
 
 /* Add: AutoSar SC2: Time protection operation type definitions. */
@@ -1218,11 +1221,8 @@ typedef struct
 {
     Os_EventMaskType                eventMask;
     uint8*                          Address8;
-    uint8*                          Value8;
     uint16*                         Address16;
-    uint16*                         Value16;
     uint32*                         Address32;
-    uint32*                         Value32;
     StatusType*                     Status;
     TryToGetSpinlockType*           Success;
     Os_EventMaskRefType             eventRef;
@@ -1238,6 +1238,7 @@ typedef struct
     uint32                          Clearmask32;
     uint32                          Setmask32;
     uint32                          Value;
+    uint32                          Value32;
     TickType                        Offset;
     TickType                        Start;
     TickType                        ScheduleTableOffset;
@@ -1262,6 +1263,7 @@ typedef struct
     CoreIdType                      CoreID;
     TrustedFunctionIndexType        FunctionIndex;
     uint16                          DataLenth;
+    uint16                          Value16;
 #if (CFG_OSAPPLICATION_MAX > 0U)
     Os_ApplicationType              ApplID;
     Os_AppObjectId                  ObjectID;
@@ -1273,6 +1275,7 @@ typedef struct
     uint8                           Clearmask8;
     uint8                           Setmask8;
     IdleModeType                    IdleMode;
+    uint8                           Value8;
 } Os_RunTimeSrvPrarmType;
 
 /*=======Os Control Block struct type definitions ==========================================*/
@@ -1483,11 +1486,11 @@ typedef struct
 #endif
     Os_LockerType      sysDispatchLocker;
     Os_CallLevelType   sysOsLevel;
+#if (CFG_SPINLOCK_MAX > 0)
+    boolean            CurrentSpinlockOccupied[CFG_SPINLOCK_MAX]; /* PRQA S 1039 */ /* VL_Os_1039 */
+#endif
 #if (TRUE == CFG_USEGETSERVICEID)
     Os_ServiceIdType   sysOsServiceId;
-#endif
-#if (CFG_SPINLOCK_MAX > 0)
-    boolean            CurrentSpinlockOccupied[CFG_SPINLOCK_MAX];
 #endif
 } Os_SCBType;
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -90,7 +90,7 @@ COM_LOCAL void Com_TxGroupSignalPack(
  * @synchronous   TRUE
  * @trace         CPD-66407
  */
-#if (0u < COM_MAX_TMCTXSIGNAL_NUMBER) && (STD_ON == COM_TMS_ENABLE)
+#if (0u < COM_MAX_TMC_TX_ALL_TYPE_SIGNAL_NUMBER) && (STD_ON == COM_TMS_ENABLE)
 COM_LOCAL boolean Com_TxSignalTMCCalculate(
     Com_SignalConfigType DestSignalType,
     const void*          SignalValuePtr,
@@ -107,7 +107,7 @@ COM_LOCAL boolean Com_TxSignalTMCCalculate(
  * @synchronous   TRUE
  * @trace         CPD-66410
  */
-#if (0u < COM_MAX_TMCTXSIGNAL_NUMBER) && (STD_ON == COM_TMS_ENABLE)
+#if (0u < COM_MAX_TMC_TX_ALL_TYPE_SIGNAL_NUMBER) && (STD_ON == COM_TMS_ENABLE)
 COM_LOCAL uint64 Com_GetTxSignalValue(Com_SignalType SignalType, const void* SignalValuePtr, uint8 ComBitSize);
 #endif
 /**
@@ -203,8 +203,8 @@ COM_LOCAL void Com_TxDMTimeOutNotification(const Com_TxIPduType* TxIpduPtr);
  * @trace
  */
 #if (0u < COM_MAX_TXIPDU_NUMBER)
-COM_LOCAL boolean
-    Com_MainTxDMTimeoutMdtCal(Com_TxIPduRunTimeStateType* TxIpduStatePtr, const Com_TxIPduType* TxIpduPtr);
+COM_LOCAL
+boolean Com_MainTxDMTimeoutMdtCal(Com_TxIPduRunTimeStateType* TxIpduStatePtr, const Com_TxIPduType* TxIpduPtr);
 #endif
 /**
  * @brief         When the tx mode is direct.return the boolean value for the tx pdu need to transmit or not.
@@ -296,7 +296,7 @@ COM_LOCAL void Com_MainFunction_SendPdu(
  * @synchronous   TRUE
  * @trace         CPD-66438
  */
-#if (0u < COM_MAX_TMCTXSIGNAL_NUMBER) && (STD_ON == COM_TMS_ENABLE)
+#if (0u < COM_MAX_TMC_TX_ALL_TYPE_SIGNAL_NUMBER) && (STD_ON == COM_TMS_ENABLE)
 COM_LOCAL uint64 Com_GetOldSignalValue(Com_SignalType SignalType, uint16 SignalBufferId, uint16 PartitionId);
 #endif
 /**
@@ -979,8 +979,7 @@ uint8 Com_SendSignalGroupHandle(Com_SignalGroupIdType SignalGroupId, Com_MainFun
         else
 #endif
         {
-            /*pack the Tx signal group into ipdu Tx buffer,copy Com_TxGroupSignalTMCBuffer to
-             * Com_TxSignalTMCRunTime*/
+            /*pack the Tx signal group into ipdu Tx buffer,copy Com_TxSignalTMCRunTime to Com_TxSignalTMCRunTime */
             Com_TxSignalGroupPack(SignalGroupId, TxMainfunctionId);
             /*update the Tx Pdu length(if the signal group include dynamic group signal)*/
             /* PRQA S 2934 ++ */ /* VL_Com_NullPtrValue */
@@ -1328,7 +1327,7 @@ Std_ReturnType Com_TriggerIPDUSendHandle(
 #if (STD_ON == COM_MDT_ENABLE)
             (0u < TxIpduStatePtr->MDTCnt) ||
 #endif
-            (COM_TX_TRANSMITING_EN == Transmiting))
+            ((COM_PDU_TP == TxIpduPtr->ComIPduType) && (COM_TX_TRANSMITING_EN == Transmiting)))
         {
             TxIpduStatePtr->TxIpduRTStFlag |= COM_TX_DELAY_EN;
             returnValue = E_OK;
@@ -1784,7 +1783,8 @@ void Com_ResetTxIpduMDT(Com_TxIPduRunTimeStateType* TxIpduStatePtr, const Com_Tx
 #elif (0u < COM_MAX_TX_MODE_TRUE_DIRECT_NUMBER) || (0u < COM_MAX_TX_MODE_FALSE_DIRECT_NUMBER) \
     || (0u < COM_MAX_TX_MODE_TRUE_DIRECT_NOREPETITION_NUMBER)                                 \
     || (0u < COM_MAX_TX_MODE_FALSE_DIRECT_NOREPETITION_NUMBER)
-    if ((COM_TX_MODE_DIRECT == ipduTxMode) || (COM_TX_MODE_DIRECT_WITHOUT_REPETITION == ipduTxMode))
+    if ((COM_TX_MODE_DIRECT == TxIpduStatePtr->IpduTxMode)
+        || (COM_TX_MODE_DIRECT_WITHOUT_REPETITION == TxIpduStatePtr->IpduTxMode))
     {
         if (TxIpduStatePtr->RptNum <= 1u)
         {
@@ -2002,7 +2002,6 @@ COM_LOCAL void Com_ResetTxPduBufferAndSignalBuffer(
     uint16                signalInitValueId;
     uint16                signalLength = 0u;
     Com_SignalType        signalType;
-    Com_SignalIdType      txSignalTMCId;
 
 /*init the tx ipdu buffer,all signal buffer(included in the ipdu) and init the TMC*/
 #if (0u < COM_MAX_TXIPDUBUFF_SIZE)
@@ -2037,7 +2036,7 @@ COM_LOCAL void Com_ResetTxPduBufferAndSignalBuffer(
 #if (0u < COM_MAX_TXSIGNAL_FILTERTYPE_MAX_NUMBER)
         if (COM_UNUSED_TXSIGNALFILTERID != txSignalPtr->FilterIndex)
         {
-            txSignalTMCId                        = txSignalPtr->TMCBufferId;
+            Com_SignalIdType txSignalTMCId       = txSignalPtr->TMCBufferId;
             txSignalTMCRuntimePtr[txSignalTMCId] = txSignalInitTMCPtr[txSignalTMCId];
         }
 #endif
@@ -2059,7 +2058,7 @@ COM_LOCAL void Com_ResetTxPduBufferAndSignalBuffer(
 #if (COM_MAX_DESTSIG_FILTERTYPE_MAX_NUMBER > 0u)
         if (COM_UNUSED_DESTSIGNALFILTERID != gwDestSignalPtr->FilterIndex)
         {
-            txSignalTMCId                        = gwDestSignalPtr->TMCBufferId;
+            Com_SignalIdType txSignalTMCId       = gwDestSignalPtr->TMCBufferId;
             txSignalTMCRuntimePtr[txSignalTMCId] = txSignalInitTMCPtr[txSignalTMCId];
         }
 #endif
@@ -2086,13 +2085,13 @@ COM_LOCAL void Com_ResetTxPduBufferAndSignalBuffer(
             signalLength = (COM_UINT8_N == signalType) ? (txGroupSignalPtr->ComSignalLength) : signalLength;
 #endif
             Com_InitSignalBuffer(signalType, signalInitValueId, signalLength, txIpduPtr->IpduPartitionId);
-#if ((0u < COM_MAX_TMCTXSIGNAL_NUMBER) && (0u < COM_MAX_TXGRPSIG_FILTERTYPE_MAX_NUMBER))
+#if ((0u < COM_MAX_TMC_TX_ALL_TYPE_SIGNAL_NUMBER) && (0u < COM_MAX_TXGRPSIG_FILTERTYPE_MAX_NUMBER))
             if (COM_UNUSED_TXGRPSIGFILTERID != txGroupSignalPtr->FilterIndex)
             {
-                boolean* TxGroupSignalTMCBuffPtr       = Com_TxGroupSignalTMCBuffer[TxMainfunctionId];
-                txSignalTMCId                          = txGroupSignalPtr->TMCBufferId;
-                TxGroupSignalTMCBuffPtr[txSignalTMCId] = txSignalInitTMCPtr[txSignalTMCId];
-                txSignalTMCRuntimePtr[txSignalTMCId]   = txSignalInitTMCPtr[txSignalTMCId];
+                boolean*         TxGroupSignalTMCBuffPtr = Com_TxSignalTMCRunTime[TxMainfunctionId];
+                Com_SignalIdType txSignalTMCId           = txGroupSignalPtr->TMCBufferId;
+                TxGroupSignalTMCBuffPtr[txSignalTMCId]   = txSignalInitTMCPtr[txSignalTMCId];
+                txSignalTMCRuntimePtr[txSignalTMCId]     = txSignalInitTMCPtr[txSignalTMCId];
             }
 #endif
         }
@@ -2205,7 +2204,7 @@ COM_LOCAL void Com_TxGroupSignalPack(
  *        the group signal value changed,judge it will trigger calculate the new TMC of the signal new value.
  *
  */
-#if (0u < COM_MAX_TMCTXSIGNAL_NUMBER) && (STD_ON == COM_TMS_ENABLE)
+#if (0u < COM_MAX_TMC_TX_ALL_TYPE_SIGNAL_NUMBER) && (STD_ON == COM_TMS_ENABLE)
 COM_LOCAL boolean Com_TxSignalTMCCalculate(
     Com_SignalConfigType DestSignalType,
     const void*          SignalValuePtr,
@@ -2290,7 +2289,7 @@ COM_LOCAL boolean Com_TxSignalTMCCalculate(
  * @brief change the signal value to uint64 type.
  *
  */
-#if (0u < COM_MAX_TMCTXSIGNAL_NUMBER) && (STD_ON == COM_TMS_ENABLE)
+#if (0u < COM_MAX_TMC_TX_ALL_TYPE_SIGNAL_NUMBER) && (STD_ON == COM_TMS_ENABLE)
 COM_LOCAL uint64 Com_GetTxSignalValue(Com_SignalType SignalType, const void* SignalValuePtr, uint8 ComBitSize)
 {
     uint64 signalNewValue = 0u;
@@ -2900,6 +2899,12 @@ COM_LOCAL void Com_MainFunction_SendPdu(
     {
         pduInfo.MetaDataPtr = NULL_PTR;
     }
+#if (STD_ON != COM_RETRY_FAILED_TRANSMIT_REQUESTS)
+    if (1u == TxIpduStatePtr->RptNum)
+    {
+        (TxIpduStatePtr->RptNum) = 0u;
+    }
+#endif
 #if (STD_ON == COM_TX_IPDU_CALLOUT_ENABLE)
     boolean ret = TRUE;
     /*invoke the callout API*/
@@ -2958,7 +2963,7 @@ COM_LOCAL void Com_MainFunction_SendPdu(
 }
 #endif
 
-#if (0u < COM_MAX_TMCTXSIGNAL_NUMBER) && (STD_ON == COM_TMS_ENABLE)
+#if (0u < COM_MAX_TMC_TX_ALL_TYPE_SIGNAL_NUMBER) && (STD_ON == COM_TMS_ENABLE)
 COM_LOCAL uint64 Com_GetOldSignalValue(Com_SignalType SignalType, uint16 SignalBufferId, uint16 PartitionId)
 {
     uint64 oldValue = COM_UNUSED_UINT64;
@@ -3031,12 +3036,12 @@ COM_LOCAL void Com_TxSignalTMHandle(
     const void*                 TxSignalDataPtr,
     Com_MainFunctionIdType      TxMainfunctionId)
 {
-    boolean* txSignalTMCRuntimePtr = Com_TxSignalTMCRunTime[TxMainfunctionId];
 #if (0u < COM_MAX_TXSIGNAL_FILTERTYPE_MAX_NUMBER)
     const Com_TxSignalType* txSignalPtr = &Com_CfgTxSignalPtr[TxSignalId];
     if (COM_UNUSED_TXSIGNALFILTERID != txSignalPtr->FilterIndex)
     {
-        uint64 oldValue = Com_GetOldSignalValue(
+        boolean* txSignalTMCRuntimePtr = Com_TxSignalTMCRunTime[TxMainfunctionId];
+        uint64   oldValue              = Com_GetOldSignalValue(
             txSignalPtr->ComSignalType,
             txSignalPtr->SignalInitValueId,
             TxIpduPtr->IpduPartitionId);
@@ -3128,7 +3133,7 @@ COM_LOCAL boolean Com_SetTxSignalBuff(
     {
         uint8* signal8BitRuntimeBuffPtr = Com_Signal8BitRuntimeBuff[PartitionId];
         /* Copy Uint8N signal value one byte by one */
-        if (0
+        if (0u
             != IStdLib_MemCmp(
                 &signal8BitRuntimeBuffPtr[SignalBufferId],
                 (const uint8*)SignalNewDataPtr,
@@ -3436,7 +3441,7 @@ COM_LOCAL uint8 Com_SendTxGroupSignalHandle(Com_SignalIdType TxGroupSignalId, co
         if (COM_UNUSED_TXGRPSIGFILTERID != txGroupSignalPtr->FilterIndex)
         {
             const Com_MainFunctionIdType txMainfunctionId        = txSignalGroupPtr->TxMainfunctionId;
-            boolean*                     txGroupSignalTMCBuffPtr = Com_TxGroupSignalTMCBuffer[txMainfunctionId];
+            boolean*                     txGroupSignalTMCBuffPtr = Com_TxSignalTMCRunTime[txMainfunctionId];
             Com_SignalIdType             txSignalTMCId           = txGroupSignalPtr->TMCBufferId;
             uint64                       oldValue                = Com_GetOldSignalValue(
                 txGroupSignalPtr->ComSignalType,
@@ -3536,7 +3541,7 @@ void Com_TxIpduControl(
         {
             if (IpduGroupId == Com_ConfigStd->IpduGroupRefPtr->TxIpduGroupRef[counter])
             {
-                uint16                      idpduIdPerMainfunction = cirCnt - startTxIpduId;
+                PduIdType                   idpduIdPerMainfunction = cirCnt - startTxIpduId;
                 Com_TxIPduRunTimeStateType* txIpduStatePtr =
                     &Com_TxIPduRunTimeState[TxMainfunctionId][idpduIdPerMainfunction];
                 uint8 activeEnable = txIpduStatePtr->TxIpduRTStFlag & COM_TX_ACTIVE_EN;

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -91,10 +91,7 @@ COM_LOCAL void Com_GwSignalOfPduHandle(
  * @synchronous   TRUE
  * @trace
  */
-#if (0u < COM_MAX_GWSIGNAL_8BITBUFF_SIZE) && (0u < COM_MAX_TXSIGNAL_NUMBER)                                         \
-    && ((STD_ON == COM_RX_SIGNAL_TYPE_UINT8_N_ENABLE) || (STD_ON == COM_RX_SIGNAL_TYPE_UINT8_DYN_ENABLE)            \
-        || (STD_ON == COM_RX_GRP_SIGNAL_TYPE_UINT8_N_ENABLE) || (STD_ON == COM_RX_GRP_SIGNAL_TYPE_UINT8_DYN_ENABLE) \
-        || (STD_ON == COM_GW_SRC_DSP_SIG_TYPE_UINT8_N_ENABLE) || (STD_ON == COM_GW_SRC_DSP_SIG_TYPE_UINT8_DYN_ENABLE))
+#if (0u < COM_MAX_GW_DESTINATION_NDYN_SIGNAL_NUMBER)
 COM_LOCAL void Com_GwUint8NDYNTxSigHandle(
     Com_SignalType   SignalType,
     uint16           SignalBufferId,
@@ -112,11 +109,7 @@ COM_LOCAL void Com_GwUint8NDYNTxSigHandle(
  * @synchronous   TRUE
  * @trace
  */
-#if (0u < COM_MAX_GWSIGNAL_8BITBUFF_SIZE)                                                                           \
-    && ((0u < COM_MAX_TXGROUPSIGNAL_NUMBER) && (0u < COM_MAX_TXSIGNALGROUP_NUMBER))                                 \
-    && ((STD_ON == COM_RX_SIGNAL_TYPE_UINT8_N_ENABLE) || (STD_ON == COM_RX_SIGNAL_TYPE_UINT8_DYN_ENABLE)            \
-        || (STD_ON == COM_RX_GRP_SIGNAL_TYPE_UINT8_N_ENABLE) || (STD_ON == COM_RX_GRP_SIGNAL_TYPE_UINT8_DYN_ENABLE) \
-        || (STD_ON == COM_GW_SRC_DSP_SIG_TYPE_UINT8_N_ENABLE) || (STD_ON == COM_GW_SRC_DSP_SIG_TYPE_UINT8_DYN_ENABLE))
+#if (COM_MAX_GW_DESTINATION_NDYN_GROUP_SIGNAL_NUMBER)
 COM_LOCAL void Com_GwUint8NDYNTxGrpSigHandle(
     Com_SignalType   SignalType,
     uint16           SignalBufferId,
@@ -134,10 +127,7 @@ COM_LOCAL void Com_GwUint8NDYNTxGrpSigHandle(
  * @synchronous   TRUE
  * @trace
  */
-#if (0u < COM_MAX_GWSIGNAL_8BITBUFF_SIZE) && (0u < COM_MAX_GW_DESTINATION_DESCRIPTION_NUMBER)                       \
-    && ((STD_ON == COM_RX_SIGNAL_TYPE_UINT8_N_ENABLE) || (STD_ON == COM_RX_SIGNAL_TYPE_UINT8_DYN_ENABLE)            \
-        || (STD_ON == COM_RX_GRP_SIGNAL_TYPE_UINT8_N_ENABLE) || (STD_ON == COM_RX_GRP_SIGNAL_TYPE_UINT8_DYN_ENABLE) \
-        || (STD_ON == COM_GW_SRC_DSP_SIG_TYPE_UINT8_N_ENABLE) || (STD_ON == COM_GW_SRC_DSP_SIG_TYPE_UINT8_DYN_ENABLE))
+#if (0u < COM_MAX_GW_DESTINATION_NDYN_DESCRIPTION_NUMBER)
 COM_LOCAL void Com_GwUint8NDYNDestSigHandle(
     Com_SignalType   SignalType,
     uint16           SignalBufferId,
@@ -155,10 +145,9 @@ COM_LOCAL void Com_GwUint8NDYNDestSigHandle(
  * @synchronous   TRUE
  * @trace         CPD-66535
  */
-#if (0u < COM_MAX_GWSIGNAL_8BITBUFF_SIZE)                                                                           \
-    && ((STD_ON == COM_RX_SIGNAL_TYPE_UINT8_N_ENABLE) || (STD_ON == COM_RX_SIGNAL_TYPE_UINT8_DYN_ENABLE)            \
-        || (STD_ON == COM_RX_GRP_SIGNAL_TYPE_UINT8_N_ENABLE) || (STD_ON == COM_RX_GRP_SIGNAL_TYPE_UINT8_DYN_ENABLE) \
-        || (STD_ON == COM_GW_SRC_DSP_SIG_TYPE_UINT8_N_ENABLE) || (STD_ON == COM_GW_SRC_DSP_SIG_TYPE_UINT8_DYN_ENABLE))
+#if (                                                                                                \
+    (0u < COM_MAX_GW_SOURCE_NDYN_SIGNAL_NUMBER) || (0u < COM_MAX_GW_SOURCE_NDYN_GROUP_SIGNAL_NUMBER) \
+    || (0u < COM_MAX_GW_SOURCE_NDYN_DESCRIPTION_NUMBER))
 COM_LOCAL void Com_GwUint8NDYNSignal(
     Com_SignalType       SignalType,
     uint16               SignalBufferId,
@@ -409,7 +398,7 @@ COM_LOCAL void
     /*if configuration update bit,set update bit to 1*/
     Com_SetSignalUpdateBit(ipduBufferIndex, updateBitPosition, updateBitMask, txIpduRuntimeBuffPtr);
 #endif
-#if (0u < COM_MAX_TMCTXSIGNAL_NUMBER)
+#if (0u < COM_MAX_TMC_TX_ALL_TYPE_SIGNAL_NUMBER)
     boolean* txSignalTMCRuntimePtr = Com_TxSignalTMCRunTime[txMainfunctionId];
 #endif
     PduIdType                   ipduIdPerMainfunction = txIpduId - Com_GetStartOfMainFunctionTx(txMainfunctionId);
@@ -489,7 +478,7 @@ COM_LOCAL void
     /*if configuration update bit,set update bit to 1*/
     Com_SetSignalUpdateBit(ipduBufferIndex, updateBitPosition, updateBitMask, txIpduRuntimeBuffPtr);
 #endif
-#if (0u < COM_MAX_TMCTXSIGNAL_NUMBER)
+#if (0u < COM_MAX_TMC_TX_ALL_TYPE_SIGNAL_NUMBER)
     boolean* txSignalTMCRuntimePtr = Com_TxSignalTMCRunTime[txMainfunctionId];
 #endif
     PduIdType                   ipduIdPerMainfunction = txIpduId - Com_GetStartOfMainFunctionTx(txMainfunctionId);
@@ -555,10 +544,7 @@ COM_LOCAL void Com_GwNotArraySignal(
  *        gateway signal which signal type is COM_UINT8_DYN,UINT8_N
  *
  */
-#if (0u < COM_MAX_GWSIGNAL_8BITBUFF_SIZE) && (0u < COM_MAX_TXSIGNAL_NUMBER)                                         \
-    && ((STD_ON == COM_RX_SIGNAL_TYPE_UINT8_N_ENABLE) || (STD_ON == COM_RX_SIGNAL_TYPE_UINT8_DYN_ENABLE)            \
-        || (STD_ON == COM_RX_GRP_SIGNAL_TYPE_UINT8_N_ENABLE) || (STD_ON == COM_RX_GRP_SIGNAL_TYPE_UINT8_DYN_ENABLE) \
-        || (STD_ON == COM_GW_SRC_DSP_SIG_TYPE_UINT8_N_ENABLE) || (STD_ON == COM_GW_SRC_DSP_SIG_TYPE_UINT8_DYN_ENABLE))
+#if (0u < COM_MAX_GW_DESTINATION_NDYN_SIGNAL_NUMBER)
 COM_LOCAL void Com_GwUint8NDYNTxSigHandle(
     Com_SignalType   SignalType,
     uint16           SignalBufferId,
@@ -586,7 +572,7 @@ COM_LOCAL void Com_GwUint8NDYNTxSigHandle(
     {
         (void)IStdLib_MemCpy(&len, &Com_GWSignal8BitBuff[SignalBufferId], sizeof(len));
     }
-    if (0 != IStdLib_MemCmp(&txIpduRuntimeBuffPtr[txIPduBufId], &Com_GWSignal8BitBuff[SigBufId], len))
+    if (0u != IStdLib_MemCmp(&txIpduRuntimeBuffPtr[txIPduBufId], &Com_GWSignal8BitBuff[SigBufId], len))
     {
         (void)IStdLib_MemCpy(&txIpduRuntimeBuffPtr[txIPduBufId], &Com_GWSignal8BitBuff[SigBufId], len);
         valueChanged = TRUE;
@@ -633,11 +619,7 @@ COM_LOCAL void Com_GwUint8NDYNTxSigHandle(
  *        gateway group signal which signal type is COM_UINT8_DYN,UINT8_N
  *
  */
-#if (0u < COM_MAX_GWSIGNAL_8BITBUFF_SIZE)                                                                           \
-    && ((0u < COM_MAX_TXGROUPSIGNAL_NUMBER) && (0u < COM_MAX_TXSIGNALGROUP_NUMBER))                                 \
-    && ((STD_ON == COM_RX_SIGNAL_TYPE_UINT8_N_ENABLE) || (STD_ON == COM_RX_SIGNAL_TYPE_UINT8_DYN_ENABLE)            \
-        || (STD_ON == COM_RX_GRP_SIGNAL_TYPE_UINT8_N_ENABLE) || (STD_ON == COM_RX_GRP_SIGNAL_TYPE_UINT8_DYN_ENABLE) \
-        || (STD_ON == COM_GW_SRC_DSP_SIG_TYPE_UINT8_N_ENABLE) || (STD_ON == COM_GW_SRC_DSP_SIG_TYPE_UINT8_DYN_ENABLE))
+#if (COM_MAX_GW_DESTINATION_NDYN_GROUP_SIGNAL_NUMBER)
 COM_LOCAL void Com_GwUint8NDYNTxGrpSigHandle(
     Com_SignalType   SignalType,
     uint16           SignalBufferId,
@@ -670,7 +652,7 @@ COM_LOCAL void Com_GwUint8NDYNTxGrpSigHandle(
         (void)IStdLib_MemCpy(&len, &Com_GWSignal8BitBuff[SignalBufferId], sizeof(len));
     }
     /* PRQA S 2934 ++ */ /* VL_Com_NullPtrValue */
-    if (0 != IStdLib_MemCmp(&txIpduRuntimeBuffPtr[txIPduBufId], &Com_GWSignal8BitBuff[SigBufId], len))
+    if (0u != IStdLib_MemCmp(&txIpduRuntimeBuffPtr[txIPduBufId], &Com_GWSignal8BitBuff[SigBufId], len))
     {
         (void)IStdLib_MemCpy(&txIpduRuntimeBuffPtr[txIPduBufId], &Com_GWSignal8BitBuff[SigBufId], len);
         valueChanged = TRUE;
@@ -717,10 +699,7 @@ COM_LOCAL void Com_GwUint8NDYNTxGrpSigHandle(
  *        gateway description signal which signal type is COM_UINT8_DYN,UINT8_N
  *
  */
-#if (0u < COM_MAX_GWSIGNAL_8BITBUFF_SIZE) && (0u < COM_MAX_GW_DESTINATION_DESCRIPTION_NUMBER)                       \
-    && ((STD_ON == COM_RX_SIGNAL_TYPE_UINT8_N_ENABLE) || (STD_ON == COM_RX_SIGNAL_TYPE_UINT8_DYN_ENABLE)            \
-        || (STD_ON == COM_RX_GRP_SIGNAL_TYPE_UINT8_N_ENABLE) || (STD_ON == COM_RX_GRP_SIGNAL_TYPE_UINT8_DYN_ENABLE) \
-        || (STD_ON == COM_GW_SRC_DSP_SIG_TYPE_UINT8_N_ENABLE) || (STD_ON == COM_GW_SRC_DSP_SIG_TYPE_UINT8_DYN_ENABLE))
+#if (0u < COM_MAX_GW_DESTINATION_NDYN_DESCRIPTION_NUMBER)
 COM_LOCAL void Com_GwUint8NDYNDestSigHandle(
     Com_SignalType   SignalType,
     uint16           SignalBufferId,
@@ -788,10 +767,9 @@ COM_LOCAL void Com_GwUint8NDYNDestSigHandle(
  *        gateway signal/group signal/description signal which signal type is COM_UINT8_DYN,UINT8_N
  *
  */
-#if (0u < COM_MAX_GWSIGNAL_8BITBUFF_SIZE)                                                                           \
-    && ((STD_ON == COM_RX_SIGNAL_TYPE_UINT8_N_ENABLE) || (STD_ON == COM_RX_SIGNAL_TYPE_UINT8_DYN_ENABLE)            \
-        || (STD_ON == COM_RX_GRP_SIGNAL_TYPE_UINT8_N_ENABLE) || (STD_ON == COM_RX_GRP_SIGNAL_TYPE_UINT8_DYN_ENABLE) \
-        || (STD_ON == COM_GW_SRC_DSP_SIG_TYPE_UINT8_N_ENABLE) || (STD_ON == COM_GW_SRC_DSP_SIG_TYPE_UINT8_DYN_ENABLE))
+#if (                                                                                                \
+    (0u < COM_MAX_GW_SOURCE_NDYN_SIGNAL_NUMBER) || (0u < COM_MAX_GW_SOURCE_NDYN_GROUP_SIGNAL_NUMBER) \
+    || (0u < COM_MAX_GW_SOURCE_NDYN_DESCRIPTION_NUMBER))
 COM_LOCAL void Com_GwUint8NDYNSignal(
     Com_SignalType       SignalType,
     uint16               SignalBufferId,
@@ -801,17 +779,17 @@ COM_LOCAL void Com_GwUint8NDYNSignal(
 {
     switch (DestSignalType)
     {
-#if (0u < COM_MAX_TXSIGNAL_NUMBER)
+#if (0u < COM_MAX_GW_DESTINATION_NDYN_SIGNAL_NUMBER)
     case COM_TX_SIGNAL:
         Com_GwUint8NDYNTxSigHandle(SignalType, SignalBufferId, ComSignalLength, DestSignalId);
         break;
 #endif
-#if ((0u < COM_MAX_TXGROUPSIGNAL_NUMBER) && (0u < COM_MAX_TXSIGNALGROUP_NUMBER))
+#if (COM_MAX_GW_DESTINATION_NDYN_GROUP_SIGNAL_NUMBER)
     case COM_TX_GROUP_SIGNAL:
         Com_GwUint8NDYNTxGrpSigHandle(SignalType, SignalBufferId, ComSignalLength, DestSignalId);
         break;
 #endif
-#if (0u < COM_MAX_GW_DESTINATION_DESCRIPTION_NUMBER)
+#if (0u < COM_MAX_GW_DESTINATION_NDYN_DESCRIPTION_NUMBER)
     case COM_TX_DESCRIPTION:
         Com_GwUint8NDYNDestSigHandle(SignalType, SignalBufferId, ComSignalLength, DestSignalId);
         break;
@@ -1037,10 +1015,9 @@ COM_LOCAL void Com_GwSignal(
         Com_SignalConfigType gwDestSignalType = GwDestPtr->GwDestSignalType;
         Com_SignalIdType     gwDestSignalId   = GwDestPtr->GwDestSignalId;
 /*Except COM_UINT8_N,COM_UINT8_DYN Type Signal*/
-#if (0u < COM_MAX_GWSIGNAL_8BITBUFF_SIZE)                                                                           \
-    && ((STD_ON == COM_RX_SIGNAL_TYPE_UINT8_N_ENABLE) || (STD_ON == COM_RX_SIGNAL_TYPE_UINT8_DYN_ENABLE)            \
-        || (STD_ON == COM_RX_GRP_SIGNAL_TYPE_UINT8_N_ENABLE) || (STD_ON == COM_RX_GRP_SIGNAL_TYPE_UINT8_DYN_ENABLE) \
-        || (STD_ON == COM_GW_SRC_DSP_SIG_TYPE_UINT8_N_ENABLE) || (STD_ON == COM_GW_SRC_DSP_SIG_TYPE_UINT8_DYN_ENABLE))
+#if (                                                                                                \
+    (0u < COM_MAX_GW_SOURCE_NDYN_SIGNAL_NUMBER) || (0u < COM_MAX_GW_SOURCE_NDYN_GROUP_SIGNAL_NUMBER) \
+    || (0u < COM_MAX_GW_SOURCE_NDYN_DESCRIPTION_NUMBER))
         if ((COM_UINT8_N == signalType) || (COM_UINT8_DYN == signalType))
         {
             Com_GwUint8NDYNSignal(signalType, gwSignalBufferId, signalLength, gwDestSignalType, gwDestSignalId);
@@ -1062,7 +1039,7 @@ COM_LOCAL void Com_GwSignal(
  */
 void Com_GwInitDestinationRequest(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
 {
-    (void)IStdLib_MemSet(&Com_GwDestinationRequest[0], 0, COM_MAX_GW_DESTINATION_NUM);
+    (void)IStdLib_MemSet(&Com_GwDestinationRequest[0], 0u, COM_MAX_GW_DESTINATION_NUM);
 }
 /**
  * @brief Set every destination request flag in the Gateway

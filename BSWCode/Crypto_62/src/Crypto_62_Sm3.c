@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -22,10 +22,10 @@
  **
  ***********************************************************************************************************************/
 
-/* PRQA S 0317,0488,0551,1252,1253,1255,1277,1281,1290,1330 EOF */ /* VL_QAC_Crypto */
-/* PRQA S 1338,1840,3387,3397,3400,3410,3417,3426,3430,3432 EOF */ /* VL_QAC_Crypto */
-/* PRQA S 3440,3472,3473,3673,4150,4542,4544,1841,1842,1843 EOF */ /* VL_QAC_Crypto */
-/* PRQA S 2011,2741,3120,3132,3344,0553 EOF */                     /* VL_QAC_Crypto */
+/* PRQA S 0317,0488,0551,1252,1253,1255,1277,1281,1290,1330 EOF */ /* VL_Crypto_62_General */
+/* PRQA S 1338,1840,3387,3397,3400,3410,3417,3426,3430,3432 EOF */ /* VL_Crypto_62_General */
+/* PRQA S 3440,3472,3473,3673,4150,4542,4544,1841,1842,1843 EOF */ /* VL_Crypto_62_General */
+/* PRQA S 2011,2741,3120,3132,3344,0553 EOF */                     /* VL_Crypto_62_General */
 /* =================================================== inclusions =================================================== */
 #include "Crypto_62_Internal.h"
 
@@ -469,7 +469,7 @@ Std_ReturnType Crypto_Sm3(uint8* input, uint32 ilen, uint8* output)
     ret = Crypto_Sm3_Update(&ctx, input, ilen);
     if (E_OK == ret)
     {
-        Crypto_Sm3_Finish(&ctx, output); /* PRQA S 2784 */ /* VL_QAC_Crypto */
+        Crypto_Sm3_Finish(&ctx, output); /* PRQA S 2784 */ /* VL_Crypto_62_General */
     }
     return ret;
 }
@@ -490,18 +490,27 @@ Std_ReturnType Crypto_Sm3(uint8* input, uint32 ilen, uint8* output)
 Std_ReturnType Crypto_Sm3_Process(uint32 objectId)
 {
     Std_ReturnType ret = E_NOT_OK;
-    uint8          output[32];
+    uint8          output[CRYPTO_CONST_32];
 
     uint32 ilen = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputLength;
-    if (*(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr) >= 32u)
-    {
-        /* PRQA S 0311 ++ */ /*VL_QAC_0311 */
-        uint8* input = (uint8*)(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputPtr);
-        /* PRQA S 0311 -- */
+    /* PRQA S 0311 ++ */ /*VL_Crypto_62_General */
+    uint8* input = (uint8*)(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputPtr);
+    /* PRQA S 0311 -- */
 
-        ret = Crypto_Sm3(input, ilen, output);
-        (void)IStdLib_MemCpy(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr, output, 32u);
+    ret = Crypto_Sm3(input, ilen, output);
+    if (*(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr) >= CRYPTO_CONST_32 && ret == E_OK)
+    {
+        (void)IStdLib_MemCpy(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr, output, CRYPTO_CONST_32);
+        *(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr) = CRYPTO_CONST_32;
     }
+    else
+    {
+        (void)IStdLib_MemCpy(
+            Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr,
+            output,
+            *(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr));
+    }
+
     return ret;
 }
 #define CRYPTO_62_STOP_SEC_CODE

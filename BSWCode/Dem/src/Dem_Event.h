@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -183,6 +183,7 @@ DEM_LOCAL void Dem_EventConfirmed(Dem_EventIdType EventId);
 
 #if (DEM_AVAILABILITY_SUPPORT == DEM_EVENT_AVAILABILITY)
 #if (DEM_EVENT_COMBINATION_SUPPORT != DEM_EVCOMB_DISABLED)
+#if (DEM_COMBINATION_NUMBER > 0u)
 /**
  * @brief         For Stored DTCs having a combined group, test if another event is available beside the event to set
  * unavailable.
@@ -195,6 +196,7 @@ DEM_LOCAL void Dem_EventConfirmed(Dem_EventIdType EventId);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL boolean Dem_TestRemainingEventforDtc(Dem_EventIdType EventId);
+#endif
 #endif
 
 /**
@@ -1832,7 +1834,7 @@ DEM_LOCAL void Dem_NotiEventDataChanged(Dem_EventIdType EventId)
         const DemTriggerOnEventDataType fnc = Dem_GetTriggerOnEventDataFncOfEvent(lEDCRef);
         if (fnc != NULL_PTR)
         {
-            (void)fnc(EventId);
+            (void)fnc();
         }
     }
 #endif
@@ -2138,9 +2140,9 @@ DEM_LOCAL void Dem_EventCleared(Dem_EventIdType EventId, const Dem_CombinedArgPt
 /**
  * @brief Updates an event due to aging
  */
-/* PRQA S 3673 ++ */ /* VL_QAC_3673 */
+/* PRQA S 3673,6070 ++ */ /* VL_QAC_3673,VL_MTR_Dem_STCAL */
 DEM_LOCAL void Dem_EventAged(Dem_EventIdType EventId, const Dem_CombinedArgPtrType ArgPtr)
-/* PRQA S 3673 -- */
+/* PRQA S 3673,6070 -- */
 {
     Dem_UdsStatusByteType       oldEventStatus = Dem_GetEventUDSStatus(EventId);
     Dem_UdsStatusByteType       newEventStatus = oldEventStatus;
@@ -2523,7 +2525,7 @@ DEM_LOCAL void Dem_EventFailed(Dem_EventIdType EventId)
                 Dem_EventCalculateStatusOnFailedOnStorage(&eventContext);
                 Dem_CalculateDTCStatus(&lDTCContext);
 
-                if ((storage == TRUE) && (lDTCContext.Dtctriggers != DEM_TRIGGER_NONE))
+                if (lDTCContext.Dtctriggers != DEM_TRIGGER_NONE)
                 {
                     Dem_DTCProcessFailedEffects(&lDTCContext);
                 }
@@ -2597,6 +2599,7 @@ DEM_LOCAL void Dem_EventConfirmed(Dem_EventIdType EventId)
 #if (DEM_AVAILABILITY_SUPPORT == DEM_EVENT_AVAILABILITY)
 
 #if (DEM_EVENT_COMBINATION_SUPPORT != DEM_EVCOMB_DISABLED)
+#if (DEM_COMBINATION_NUMBER > 0u)
 /**
  * @brief For Stored DTCs having a combined group, test if another event is available beside the event to set
  * unavailable.
@@ -2623,6 +2626,7 @@ DEM_LOCAL boolean Dem_TestRemainingEventforDtc(Dem_EventIdType EventId)
     return ret;
 }
 #endif
+#endif
 
 /**
  * @brief Check precondition for event unavailable
@@ -2640,7 +2644,9 @@ DEM_LOCAL boolean Dem_EventMayDisable(Dem_EventIdType EventId)
         if (Dem_GetEventstored(EventId) == TRUE)
         {
 #if (DEM_EVENT_COMBINATION_SUPPORT != DEM_EVCOMB_DISABLED)
+#if (DEM_COMBINATION_NUMBER > 0u)
             ret = Dem_TestRemainingEventforDtc(EventId);
+#endif
 #endif
         }
         else

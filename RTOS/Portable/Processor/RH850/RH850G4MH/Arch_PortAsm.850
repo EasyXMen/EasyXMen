@@ -1,6 +1,6 @@
 /* PRQA S 3108++ */
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -28,15 +28,25 @@
 **                                                                            **
 *******************************************************************************/
 /*=======[I N C L U D E S]====================================================*/
-
+#include "Os_Cfg_S.h"
 /*=======[E X T E R N A L   D A T A]==========================================*/
+#ifdef RH850U2A
+    #define RH850RESET _RESET
+    .extern _RESET
+#elif defined(RH850U2B)
+    #define RH850RESET _reset
+    .extern _reset
+#else
+    #error "The specific series of the current RH850 is not predefined!"
+#endif
+
     .extern _OS_GetSystemStackPointer
     .extern _OS_GetTaskStackPointer
     .extern _Os_ArchMasterSp
     .extern _Os_ArchTempSp
     .extern _OS_SaveTaskStackPointer
     .extern _Os_SwitchTask
-    .extern _RESET
+    
     
     .extern _Os_Vector_Handler
     .extern _Os_FE_Handler
@@ -397,7 +407,7 @@ Os_FeISRExit:
     .align 0x200
 _Os_ExceptionTable:
     /* 0x00 */
-    jr _RESET
+    jr RH850RESET
 
     /* 0x10 SYSERR */
     .align 0x10

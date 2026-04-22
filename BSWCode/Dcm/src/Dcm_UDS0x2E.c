@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -275,7 +275,7 @@ Std_ReturnType Dcm_UDS0x2E_WriteDspData(
 #if (STD_ON == DCM_DYN_DATA)
     if (((isDynamic)
          && (((reqDataLen - 2uL) > DcmDspDidCfg->DidSize)
-             || ((DcmDspDidCfg->DidSize - reqDataLen - 2uL)
+             || ((DcmDspDidCfg->DidSize - reqDataLen + 2uL)
                  > Dcm_DspDidSignal[DcmDspDidCfg->DidSignalIndexEnd].DidDataRef->DspDataByteSize)))
         || ((!isDynamic) && ((reqDataLen - 2uL) != DcmDspDidCfg->DidSize)))
 #else
@@ -346,6 +346,7 @@ void Dcm_UDS0x2E_Init(void)
 /* ========================================== internal function definitions ========================================= */
 #define DCM_START_SEC_CODE
 #include "Dcm_MemMap.h"
+/* PRQA S 6010,6080 ++ */ /* VL_MTR_Dcm_STCYC,VL_MTR_Dcm_STPTH*/
 DCM_LOCAL Std_ReturnType Dcm_UDS0x2E_ConditionCheck(
     const Dcm_MsgContextType*     pMsgContext,
     uint16*                       did,
@@ -381,7 +382,7 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2E_ConditionCheck(
             }
             else
             {
-                result     = E_NOT_OK;
+                result     = E_NOT_OK; /* PRQA S 2982 */ /* VL_Dcm_2982 */
                 *ErrorCode = DCM_E_REQUESTOUTOFRANGE;
             }
 
@@ -404,7 +405,7 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2E_ConditionCheck(
     Dcm_MsgLenType        writeSize = reqDataLen - 2uL;
     if (E_OK == result)
     {
-        if (DCM_REGULAR_DID == *didType)
+        if (DCM_REGULAR_DID == *didType) /* PRQA S 2991,2995 */ /* VL_Dcm_2991,VL_Dcm_2995 */
         {
 #if (DCM_DID_NUM > 0)
             DcmDspDidCfg = &Dcm_DspDid[*didIndex];
@@ -457,7 +458,7 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x2E_ConditionCheck(
 
     return result;
 }
-
+/* PRQA S 6010,6080 -- */
 #ifdef DCM_SECURE_CODING_DID_NUM
 DCM_LOCAL Std_ReturnType Dcm_UDS0x2E_SecureCoding(
     boolean*                      secureCoding,

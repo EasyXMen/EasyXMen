@@ -1,6 +1,6 @@
 /* PRQA S 3108++ */
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -40,8 +40,9 @@
 #include "Std_Types.h"
 /*============================================================================*/
 /* Nested Vectored Interrupt Controller(NVIC) */
-#define OS_IRQ_ID_OFFSET (16u)
-#define OS_NVIC_NUM      (255u)
+#define OS_IRQ_ID_OFFSET        (16u)
+#define OS_NVIC_PRIO_BITS       (4u)
+#define OS_NVIC_NUM             (255u)
 
 /* Device specific interrupts id */
 #define OS_ISR_DMA0_ADDR                (OS_IRQ_ID_OFFSET + 0)  /**< DMA channel 0 transfer complete */

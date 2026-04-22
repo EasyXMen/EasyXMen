@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -54,7 +54,7 @@
     (0x02u) /**< Internal data changed, update NV ram but no data change notification \
              */
 #define DEM_DATA_OCCURRENCE_MAX           (0xFFu) /**< Maximum value for 1 byte occurrence counter */
-#define DEM_DATA_FAILED_CYCLE_COUNTER_MAX (0x7Fu) /**< Maximum value for 1 byte Failed Cycle counter */
+#define DEM_DATA_FAILED_CYCLE_COUNTER_MAX (0xFFu) /**< Maximum value for 1 byte Failed Cycle counter */
 #define DEM_ENTRY_UPDATE_STARTED          (0x80u) /**< Set flag in memory state which indicate an ongoing commit */
 #define DEM_ENTRY_UPDATE_INIT             (0x00u) /**< Initial transaction number of NV transaction state */
 /** @} */
@@ -105,7 +105,7 @@
 /**
  * @brief Displacement info data type for selecting the "best" element for displacement
  */
-typedef struct Dem_MemDisplacementInfoTag /* PRQA S 1536 */ /* VL_Dem_1536 */
+typedef struct
 {
     uint16            EventId;     /**< EventId of current element @range 0..65535 */
     Dem_MemoryNumType MemoryIndex; /**< Memory index of current element @range 0..255 */
@@ -420,7 +420,7 @@ DEM_LOCAL void Dem_NvMTask(void);
  */
 DEM_LOCAL_INLINE void Dem_NvmInit(void);
 
-#if (DEM_FREEZE_FRAME_REC_NUM_CLASS_NUMBER > 0u)
+#if (DEM_MAX_SIZE_FREEZEFRAME > 0u)
 /**
  * @brief         get Freeze Frame Ptr of MemEntry by MemoryIndex
  * @param[in]     MemoryIndex: Memory Index
@@ -779,6 +779,20 @@ DEM_LOCAL_INLINE uint8* Dem_GetJ1939FreezeFramePtrOfMemEntry(Dem_NvBlockNumType 
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL_INLINE uint8* Dem_GetJ1939ExFreezeFramePtrOfMemEntry(Dem_NvBlockNumType MemoryIndex);
+#endif
+#if (defined(DEM_FAILED_CYCLES))
+/**
+ * @brief         Increment the 'Failed Cycle Counter' in the memory entry, if it is lower than the maximum value (latch
+ * at maximum value).
+ * @param[in]     MemoryIndex: Memory index
+ * @return        boolean
+ * @retval        TRUE: Valid
+ * @retval        FALSE: Invalid
+ * @reentrant     FALSE
+ * @synchronous   TRUE
+ * @trace         CPD-PLACEHOLDER
+ */
+DEM_LOCAL_INLINE boolean Dem_MemIncrementFailedCycleCounter(Dem_NvBlockNumType MemoryIndex);
 #endif
 /* PRQA S 5016 -- */
 #endif

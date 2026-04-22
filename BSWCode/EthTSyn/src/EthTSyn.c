@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -60,6 +60,10 @@
 #define ETHTSYN_UNUSED(var) (void)(var)
 /* ================================================ type definitions ================================================ */
 /* ========================================== internal function declarations ======================================== */
+#ifdef QAC_ANALYZE
+#pragma PRQA_NO_SIDE_EFFECTS EthTSyn_IsPortIdentityEqual
+#pragma PRQA_NO_SIDE_EFFECTS StbM_GetCurrentVirtualLocalTime
+#endif
 ETHTSYN_LOCAL Std_ReturnType
     EthTSyn_GetEgressTV(uint8 ctrlIdx, uint8 portId, EthTSyn_TimeStampType* tv, Eth_BufIdxType bufIdx);
 ETHTSYN_LOCAL EthTSyn_TimeStampType EthTSyn_DataToTime(const uint8* data);
@@ -74,8 +78,8 @@ ETHTSYN_LOCAL EthTSyn_TimeStampType EthTSyn_GetCorrectionField(const uint8* data
 ETHTSYN_LOCAL void
     EthTSyn_CalculateTimeSecuredCrc(uint16 portId, const uint8* data, uint16 offset, uint8* crc0, uint8* crc1);
 #endif
-ETHTSYN_LOCAL Std_ReturnType
-    EthTSyn_VerifyTimeSecuredSubTlv(const uint8* data, uint16 length, uint16 offset, uint16 portId);
+ETHTSYN_LOCAL
+Std_ReturnType EthTSyn_VerifyTimeSecuredSubTlv(const uint8* data, uint16 length, uint16 offset, uint16 portId);
 ETHTSYN_LOCAL Std_ReturnType EthTSyn_VerifyStatusNotSecuredSubTlv(
     const uint8* data,
     uint16       length,
@@ -150,6 +154,21 @@ ETHTSYN_LOCAL uint16 EthTSyn_FollowUpMessagePack(const EthTSyn_PortType* port, u
 ETHTSYN_LOCAL uint16 EthTSyn_ReqMessagePack(EthTSyn_PortType* port, uint8* data);
 ETHTSYN_LOCAL void   EthTSyn_PublicInformationPack(const EthTSyn_PortType* port, uint8* data, uint8 ethTSynMessage);
 #if (ETHTSYN_DEV_ERROR_DETECT == STD_ON)
+#ifdef QAC_ANALYZE
+#pragma PRQA_NO_SIDE_EFFECTS EthTSyn_ValidatePointer
+#pragma PRQA_NO_SIDE_EFFECTS EthTSyn_ValidateCtrlIdx
+#pragma PRQA_NO_SIDE_EFFECTS EthTSyn_ValidateInitStatus
+#pragma PRQA_NO_SIDE_EFFECTS EthTSyn_ValidateInit
+#pragma PRQA_NO_SIDE_EFFECTS EthTSyn_ValidateRxindication
+#if (ETHTSYN_MULTIPLE_PARTITION_USED == STD_ON)
+#pragma PRQA_NO_SIDE_EFFECTS EthTSyn_ValidatePartitionContext
+#endif
+#pragma PRQA_NO_SIDE_EFFECTS EthTSyn_GetPartitionIndex
+#pragma PRQA_NO_SIDE_EFFECTS EthTSyn_ValidateInit
+#pragma PRQA_NO_SIDE_EFFECTS EthTSyn_ValidateTransmissionMode
+#pragma PRQA_NO_SIDE_EFFECTS EthTSyn_ValidateSetOrGetProtocolParam
+#pragma PRQA_NO_SIDE_EFFECTS EthTSyn_ValidateICVIndication
+#endif
 ETHTSYN_LOCAL boolean EthTSyn_ValidatePointer(uint8 apiId, const void* pointer);
 ETHTSYN_LOCAL boolean EthTSyn_ValidateCtrlIdx(uint8 apiId, uint8 ctrlIdx);
 ETHTSYN_LOCAL boolean EthTSyn_ValidateInitStatus(uint8 apiId);
@@ -157,17 +176,22 @@ ETHTSYN_LOCAL boolean EthTSyn_ValidateInit(const EthTSyn_ConfigType* configPtr);
 ETHTSYN_LOCAL boolean EthTSyn_ValidateRxindication(uint8 ctrlIdx, const void* pointer);
 ETHTSYN_LOCAL boolean EthTSyn_ValidateTransmissionMode(uint8 ctrlIdx, EthTSyn_TransmissionModeType mode);
 ETHTSYN_LOCAL uint8   EthTSyn_GetPartitionIndex(void);
+#if (ETHTSYN_MULTIPLE_PARTITION_USED == STD_ON)
 ETHTSYN_LOCAL boolean EthTSyn_ValidatePartitionContext(uint8 apiId);
 #endif
+#endif
 ETHTSYN_LOCAL void EthTSyn_InitPortStatus(EthTSyn_PortType* portPtr);
-/* ============================================ internal data definitions =========================================== */
 
-/* ============================================ external data definitions =========================================== */
+/* ============================================ internal data definitions =========================================== */
 
 /** Module initialize status, TRUE initialized, FALSE not initialized*/
 #define ETHTSYN_START_SEC_VAR_CLEARED_BOOLEAN
 #include "EthTSyn_MemMap.h"
-ETHTSYN_LOCAL boolean EthTSyn_Initialized[ETHTSYN_PARTITION_NUMBER_MAX];
+/**
+ * @brief Initialization status array for EthTSyn module partitions
+ * @range 0..1
+ */
+ETHTSYN_LOCAL boolean EthTSyn_Initialized[ETHTSYN_PARTITION_NUMBER];
 #define ETHTSYN_STOP_SEC_VAR_CLEARED_BOOLEAN
 #include "EthTSyn_MemMap.h"
 
@@ -177,6 +201,8 @@ ETHTSYN_LOCAL const EthTSyn_ConfigType* EthTSyn_ConfigData;
 ETHTSYN_LOCAL uint8 EthTSyn_ReceivedPdelayReqSourcePortId[ETHTSYN_ETH_PORT_NUM_MAX][ETHTSYN_PORT_IDENTITY_LENGTH];
 #define ETHTSYN_STOP_SEC_VAR_CLEARED_UNSPECIFIED
 #include "EthTSyn_MemMap.h"
+
+/* ============================================ external data definitions =========================================== */
 
 /* ========================================== external function definitions ========================================= */
 
@@ -189,11 +215,15 @@ void EthTSyn_Init(
     const EthTSyn_ConfigType*
         configPtr) /* PRQA S 6030 */ /* VL_MTR_EthTSyn_STMIF */ /* PRQA S 6070 */ /* VL_MTR_EthTSyn_STCAL*/
 {
-    EthTSyn_ConfigData = configPtr;
 #if (ETHTSYN_DEV_ERROR_DETECT == STD_ON)
-    if (EthTSyn_ValidatePartitionContext(ETHTSYN_SID_INIT) && EthTSyn_ValidateInit(configPtr))
+    if (
+#if (ETHTSYN_MULTIPLE_PARTITION_USED == STD_ON)
+        EthTSyn_ValidatePartitionContext(ETHTSYN_SID_INIT) &&
+#endif
+        EthTSyn_ValidateInit(configPtr))
 #endif
     {
+        EthTSyn_ConfigData    = configPtr;
         uint16 ethTSynPortNum = 0u;
         for (uint8 domainIndex = 0u; domainIndex < ETHTSYN_GLOBALTIME_DOMAIN_NUM; domainIndex++)
         {
@@ -227,7 +257,7 @@ void EthTSyn_Init(
                     /* Initialize data */
                     (void)IStdLib_MemSet(
                         EthTSyn_ReceivedPdelayReqSourcePortId[ethTSynPortNum],
-                        0,
+                        0u,
                         ETHTSYN_PORT_IDENTITY_LENGTH);
 
                     uint8 srcPhyAddr[ETHTSYN_PHYS_ADDR_LENGTH];
@@ -248,7 +278,7 @@ void EthTSyn_Init(
                     port->ThisPortIdentity[9u] = (uint8)portNumber;
                     /* PRQA S 3120 -- */
 
-                    (void)IStdLib_MemSet(&port->PortIdentity, 0, ETHTSYN_PORT_IDENTITY_LENGTH);
+                    (void)IStdLib_MemSet(&port->PortIdentity, 0u, ETHTSYN_PORT_IDENTITY_LENGTH);
                     port->UserData.userByte0                 = 0u;
                     port->UserData.userByte1                 = 0u;
                     port->UserData.userByte2                 = 0u;
@@ -293,8 +323,11 @@ void EthTSyn_GetVersionInfo(Std_VersionInfoType* versioninfo)
 void EthTSyn_SetTransmissionMode(uint8 ctrlIdx, EthTSyn_TransmissionModeType mode)
 {
 #if (ETHTSYN_DEV_ERROR_DETECT == STD_ON)
-    if (EthTSyn_ValidatePartitionContext(ETHTSYN_SID_SETTRANSMISSIONMODE)
-        && EthTSyn_ValidateTransmissionMode(ctrlIdx, mode))
+    if (
+#if (ETHTSYN_MULTIPLE_PARTITION_USED == STD_ON)
+        EthTSyn_ValidatePartitionContext(ETHTSYN_SID_SETTRANSMISSIONMODE) &&
+#endif
+        EthTSyn_ValidateInitStatus(ETHTSYN_SID_SETTRANSMISSIONMODE) && EthTSyn_ValidateTransmissionMode(ctrlIdx, mode))
 #endif
     {
         EthTSyn_PortType* port = EthTSyn_FindPort(ctrlIdx, NULL_PTR);
@@ -316,81 +349,86 @@ void EthTSyn_RxIndication(
 /* PRQA S 6070 -- */
 /* PRQA S 6040 -- */
 {
-#if (ETHTSYN_HARDWARE_TIMESTAMP_SUPPORT == STD_OFF)
-    /* SWS_EthTSyn_00180 */
-    SchM_Enter_EthTSyn_Context();
-#endif
-    ETHTSYN_UNUSED(isBroadcast);
-    ETHTSYN_UNUSED(physAddrPtr);
-    uint8             portIndex = 0u;
-    EthTSyn_PortType* port      = EthTSyn_FindPort(ctrlIdx, &portIndex);
-#if (ETHTSYN_MESSAGE_COMPLIANCE == STD_ON)
-    ETHTSYN_UNUSED(lenByte);
-#endif
-    if (
 #if (ETHTSYN_DEV_ERROR_DETECT == STD_ON)
-        EthTSyn_ValidatePartitionContext(ETHTSYN_SID_RXINDICATION) && EthTSyn_ValidateRxindication(ctrlIdx, dataPtr) &&
+    if (
+#if (ETHTSYN_MULTIPLE_PARTITION_USED == STD_ON)
+        EthTSyn_ValidatePartitionContext(ETHTSYN_SID_RXINDICATION) &&
 #endif
-        ((port != NULL_PTR) && (frameType == ETHTSYN_TIME_SYNCHRONIZATION_FRAMETYPE)
-         && (port->EthtrcvLinkState == ETHTRCV_LINK_STATE_ACTIVE)
-         && (port->Timedomainid == dataPtr[ETHTSYN_TIMEDOMAINID_BYTE_OFFSET])))
+        EthTSyn_ValidateInitStatus(ETHTSYN_SID_RXINDICATION) && EthTSyn_ValidateRxindication(ctrlIdx, dataPtr))
+#endif
     {
-        EthTSynMessageType    ethTSynMessage = (dataPtr[0u] & ETHTSYN_LOW_4_BITS_MASK);
-        EthTSyn_TimeStampType tVnow;
-        boolean               isValidIngressTime = FALSE;
-#if (ETHTSYN_HARDWARE_TIMESTAMP_SUPPORT == STD_ON)
-        isValidIngressTime = EthTSyn_GetHardIngressTime(ctrlIdx, dataPtr, &tVnow);
-#else
-        isValidIngressTime = EthTSyn_GetSoftIngressTime(port, &tVnow);
-        SchM_Exit_EthTSyn_Context();
+#if (ETHTSYN_HARDWARE_TIMESTAMP_SUPPORT == STD_OFF)
+        /* SWS_EthTSyn_00180 */
+        SchM_Enter_EthTSyn_Context();
 #endif
-        switch (ethTSynMessage)
+        ETHTSYN_UNUSED(isBroadcast);
+        ETHTSYN_UNUSED(physAddrPtr);
+        uint8             portIndex = 0u;
+        EthTSyn_PortType* port      = EthTSyn_FindPort(ctrlIdx, &portIndex);
+#if (ETHTSYN_MESSAGE_COMPLIANCE == STD_ON)
+        ETHTSYN_UNUSED(lenByte);
+#endif
+        if ((port != NULL_PTR) && (frameType == ETHTSYN_TIME_SYNCHRONIZATION_FRAMETYPE)
+            && (port->EthtrcvLinkState == ETHTRCV_LINK_STATE_ACTIVE)
+            && (port->Timedomainid == dataPtr[ETHTSYN_TIMEDOMAINID_BYTE_OFFSET]))
         {
-        case SYNC:
-        {
-            EthTSyn_RxHandleSyncMessage(port, dataPtr, tVnow, isValidIngressTime);
-        }
-        break;
-        case FOLLOW_UP:
-        {
-            EthTSyn_RxHandleFollowUpMessage(port, dataPtr, tVnow, isValidIngressTime, lenByte);
-        }
-        break;
-        case PDELAY_REQ:
-            if (isValidIngressTime)
+            EthTSynMessageType    ethTSynMessage = (dataPtr[0u] & ETHTSYN_LOW_4_BITS_MASK);
+            EthTSyn_TimeStampType tVnow;
+            boolean               isValidIngressTime = FALSE;
+#if (ETHTSYN_HARDWARE_TIMESTAMP_SUPPORT == STD_ON)
+            isValidIngressTime = EthTSyn_GetHardIngressTime(ctrlIdx, dataPtr, &tVnow);
+#else
+            isValidIngressTime = EthTSyn_GetSoftIngressTime(port, &tVnow);
+            SchM_Exit_EthTSyn_Context();
+#endif
+            switch (ethTSynMessage)
             {
-                port->PdelayResponderTimestamp.PdelayReqEventIngressTimestamp = tVnow;
-                port->PdelayRXStatusType                                      = ETHTSYN_SEND_PDELAY_RESP;
-                uint16 sequenceId =
-                    (uint16)(((uint16)((uint16)dataPtr[ETHTSYN_SEQUENCEID_BYTE_OFFSET_HIGH] << ETHTSYN_BIT_SHIFT_8))
-                             + (uint16)dataPtr[ETHTSYN_SEQUENCEID_BYTE_OFFSET_LOW]);
-                port->ReceivedPdelayReqSequenceId = sequenceId;
-                (void)IStdLib_MemCpy(
-                    &EthTSyn_ReceivedPdelayReqSourcePortId[portIndex][0],
-                    &dataPtr[ETHTSYN_PDELAY_REQ_SOURCE_PORTID_BYTE_OFFSET],
-                    ETHTSYN_PDELAY_REQ_SOURCE_PORTID_BYTE_LENGTH);
+            case SYNC:
+            {
+                EthTSyn_RxHandleSyncMessage(port, dataPtr, tVnow, isValidIngressTime);
             }
             break;
-        case PDELAY_RESP:
-        {
-            EthTSyn_RxHandlePdelayResPonseMessage(port, dataPtr, tVnow, isValidIngressTime);
-        }
-        break;
-        case PDELAY_RESP_FOLLOW_UP:
-        {
-            EthTSyn_RxHandlePdelayResPonseFUMessage(port, dataPtr, tVnow, isValidIngressTime);
-        }
-        break;
-        default:
-            /* do nothing */
+            case FOLLOW_UP:
+            {
+                EthTSyn_RxHandleFollowUpMessage(port, dataPtr, tVnow, isValidIngressTime, lenByte);
+            }
             break;
+            case PDELAY_REQ:
+                if (isValidIngressTime)
+                {
+                    port->PdelayResponderTimestamp.PdelayReqEventIngressTimestamp = tVnow;
+                    port->PdelayRXStatusType                                      = ETHTSYN_SEND_PDELAY_RESP;
+                    uint16 sequenceId =
+                        (uint16)(((uint16)((uint16)dataPtr[ETHTSYN_SEQUENCEID_BYTE_OFFSET_HIGH] << ETHTSYN_BIT_SHIFT_8))
+                                 + (uint16)dataPtr[ETHTSYN_SEQUENCEID_BYTE_OFFSET_LOW]);
+                    port->ReceivedPdelayReqSequenceId = sequenceId;
+                    (void)IStdLib_MemCpy(
+                        &EthTSyn_ReceivedPdelayReqSourcePortId[portIndex][0],
+                        &dataPtr[ETHTSYN_PDELAY_REQ_SOURCE_PORTID_BYTE_OFFSET],
+                        ETHTSYN_PDELAY_REQ_SOURCE_PORTID_BYTE_LENGTH);
+                }
+                break;
+            case PDELAY_RESP:
+            {
+                EthTSyn_RxHandlePdelayResPonseMessage(port, dataPtr, tVnow, isValidIngressTime);
+            }
+            break;
+            case PDELAY_RESP_FOLLOW_UP:
+            {
+                EthTSyn_RxHandlePdelayResPonseFUMessage(port, dataPtr, tVnow, isValidIngressTime);
+            }
+            break;
+            default:
+                /* do nothing */
+                break;
+            }
         }
-    }
-    else
-    {
+        else
+        {
 #if (ETHTSYN_HARDWARE_TIMESTAMP_SUPPORT == STD_OFF)
-        SchM_Exit_EthTSyn_Context();
+            SchM_Exit_EthTSyn_Context();
 #endif
+        }
     }
 }
 /**
@@ -404,7 +442,10 @@ void EthTSyn_TxConfirmation(uint8 ctrlIdx, Eth_BufIdxType bufIdx, Std_ReturnType
     EthTSyn_PortType* port      = EthTSyn_FindPort(ctrlIdx, &portIndex);
     if (
 #if (ETHTSYN_DEV_ERROR_DETECT == STD_ON)
-        EthTSyn_ValidatePartitionContext(ETHTSYN_SID_TXCONFIRMATION)
+#if (ETHTSYN_MULTIPLE_PARTITION_USED == STD_ON)
+        EthTSyn_ValidatePartitionContext(ETHTSYN_SID_TXCONFIRMATION) &&
+#endif
+        EthTSyn_ValidateInitStatus(ETHTSYN_SID_TXCONFIRMATION)
         && EthTSyn_ValidateCtrlIdx(ETHTSYN_SID_TXCONFIRMATION, ctrlIdx) &&
 #endif
         (port->EthtrcvLinkState == ETHTRCV_LINK_STATE_ACTIVE) && (result == E_OK))
@@ -462,6 +503,10 @@ void EthTSyn_TxConfirmation(uint8 ctrlIdx, Eth_BufIdxType bufIdx, Std_ReturnType
     {
         EthTSyn_InitPortStatus(port);
     }
+    else
+    {
+        /* do nothing */
+    }
 }
 /**
  * Allows resetting state machine in case of unexpected Link loss to avoid inconsistent Sync and Follow_Up sequences.
@@ -469,7 +514,12 @@ void EthTSyn_TxConfirmation(uint8 ctrlIdx, Eth_BufIdxType bufIdx, Std_ReturnType
 void EthTSyn_TrcvLinkStateChg(uint8 ctrlIdx, EthTrcv_LinkStateType trcvLinkState)
 {
 #if (ETHTSYN_DEV_ERROR_DETECT == STD_ON)
-    if (EthTSyn_ValidateInitStatus(ETHTSYN_SID_TRCVLINKSTATECHG))
+    if (
+#if (ETHTSYN_MULTIPLE_PARTITION_USED == STD_ON)
+        EthTSyn_ValidatePartitionContext(ETHTSYN_SID_TRCVLINKSTATECHG) &&
+#endif
+        EthTSyn_ValidateInitStatus(ETHTSYN_SID_TRCVLINKSTATECHG)
+        && EthTSyn_ValidateCtrlIdx(ETHTSYN_SID_TRCVLINKSTATECHG, ctrlIdx))
 #endif
     {
         EthTSyn_PortType* port = EthTSyn_FindPort(ctrlIdx, NULL_PTR);
@@ -500,8 +550,11 @@ void EthTSyn_MainFunction(uint8 portIndex) /* PRQA S 6030 */ /* VL_MTR_EthTSyn_S
 {
     EthTSyn_PortType* port = EthTSyn_ConfigData->RuntimeVariables[portIndex];
     if (
+#if (ETHTSYN_DEV_ERROR_DETECT == STD_ON)
 #if (ETHTSYN_MULTIPLE_PARTITION_USED == STD_ON)
         EthTSyn_ValidatePartitionContext(ETHTSYN_SID_MAINFUNCTION) &&
+#endif
+        EthTSyn_ValidateInitStatus(ETHTSYN_SID_MAINFUNCTION) &&
 #endif
         EthTSyn_Initialized[EthTSyn_GetPartitionIndex()] && (port->EthtrcvLinkState == ETHTRCV_LINK_STATE_ACTIVE))
     {
@@ -523,6 +576,10 @@ void EthTSyn_MainFunction(uint8 portIndex) /* PRQA S 6030 */ /* VL_MTR_EthTSyn_S
             {
                 port->PdelayReqPeriod -= ETHTSYN_MAIN_FUNCTION_PERIOD;
             }
+        }
+        else
+        {
+            /* do nothing */
         }
 
         uint64 debounceCounter = portCfg->GlobalTimeDebounceTime * ETHTSYN_MAIN_FUNCTION_PERIOD;
@@ -546,6 +603,10 @@ void EthTSyn_MainFunction(uint8 portIndex) /* PRQA S 6030 */ /* VL_MTR_EthTSyn_S
             {
                 port->PdelaydebounceCounter -= ETHTSYN_MAIN_FUNCTION_PERIOD;
             }
+        }
+        else
+        {
+            /* do nothing */
         }
 
         if (transsmitMsgType != MSG_NONE)
@@ -1544,7 +1605,7 @@ ETHTSYN_LOCAL void EthTSyn_TimeStampSub(EthTSyn_TimeStampType t1, EthTSyn_TimeSt
  */
 ETHTSYN_LOCAL boolean EthTSyn_IsPortIdentityEqual(const uint8* portIdentity1, const uint8* portIdentity2)
 {
-    return IStdLib_MemCmp(portIdentity1, portIdentity2, ETHTSYN_PORT_IDENTITY_LENGTH) == 0;
+    return IStdLib_MemCmp(portIdentity1, portIdentity2, ETHTSYN_PORT_IDENTITY_LENGTH) == 0u;
 }
 /**
  * @brief         The implementation of handling the port of master.
@@ -1673,18 +1734,18 @@ ETHTSYN_LOCAL boolean EthTSyn_ValidatePointer(uint8 apiId, const void* pointer)
  */
 ETHTSYN_LOCAL boolean EthTSyn_ValidateInit(const EthTSyn_ConfigType* configPtr)
 {
-    boolean valid = !EthTSyn_Initialized[EthTSyn_GetPartitionIndex()];
-    if (!valid)
+    boolean valid = FALSE;
+    if (EthTSyn_Initialized[EthTSyn_GetPartitionIndex()] == TRUE)
     {
         (void)Det_ReportError(ETHTSYN_MODULE_ID, ETHTSYN_INSTANCE_ID, ETHTSYN_SID_INIT, ETHTSYN_E_ALREADY_INITIALIZED);
     }
+    else if (configPtr == NULL_PTR)
+    {
+        (void)Det_ReportError(ETHTSYN_MODULE_ID, ETHTSYN_INSTANCE_ID, ETHTSYN_SID_INIT, ETHTSYN_E_INIT_FAILED);
+    }
     else
     {
-        valid = configPtr != NULL_PTR;
-        if (!valid)
-        {
-            (void)Det_ReportError(ETHTSYN_MODULE_ID, ETHTSYN_INSTANCE_ID, ETHTSYN_SID_INIT, ETHTSYN_E_INIT_FAILED);
-        }
+        valid = TRUE;
     }
     return valid;
 }
@@ -1807,6 +1868,7 @@ ETHTSYN_LOCAL boolean EthTSyn_ValidateTransmissionMode(uint8 ctrlIdx, EthTSyn_Tr
     }
     return valid;
 }
+#if (ETHTSYN_MULTIPLE_PARTITION_USED == STD_ON)
 /**
  * @brief        the implementation of validating of invalid partition context
  * @param[in]    apiId  ID of API service in which error is detected
@@ -1820,13 +1882,14 @@ ETHTSYN_LOCAL boolean EthTSyn_ValidateTransmissionMode(uint8 ctrlIdx, EthTSyn_Tr
 ETHTSYN_LOCAL boolean EthTSyn_ValidatePartitionContext(uint8 apiId)
 /* PRQA S 2889 -- */
 {
-    if (EthTSyn_GetPartitionIndex() >= EthTSyn_ConfigData->PartitionNum)
+    if (EthTSyn_GetPartitionIndex() >= ETHTSYN_PARTITION_NUMBER)
     {
         (void)Det_ReportError(ETHTSYN_MODULE_ID, ETHTSYN_INSTANCE_ID, apiId, ETHTSYN_E_INVALID_PARTITION_CONTEXT);
         return FALSE;
     }
     return TRUE;
 }
+#endif
 #endif
 /**
  * @brief        the implementation of getting the index of partition.
@@ -1840,9 +1903,9 @@ ETHTSYN_LOCAL uint8 EthTSyn_GetPartitionIndex(void)
     uint8 partitionIndex = 0u;
 #if ETHTSYN_MULTIPLE_PARTITION_USED == STD_ON
     ApplicationType application = GetApplicationID();
-    for (; partitionIndex < EthTSyn_ConfigData->PartitionNum; ++partitionIndex)
+    for (; partitionIndex < ETHTSYN_PARTITION_NUMBER; ++partitionIndex)
     {
-        if (EthTSyn_ConfigData->OsApplications[partitionIndex] == application)
+        if (EthTSyn_OsApplicationList[partitionIndex] == application)
         {
             break;
         }
@@ -1930,7 +1993,7 @@ ETHTSYN_LOCAL boolean
     {
         EthTSyn_TimeStampType     t3vlt;
         EthTSyn_TimeStampType     t4vlt;
-        StbM_VirtualLocalTimeType virtualLocalTime;
+        StbM_VirtualLocalTimeType virtualLocalTime = {0u, 0u};
         TimeTupleType             timeTuple;
         timeTuple.timeQuality = TSQ_INVALID;
         SchM_Enter_EthTSyn_Context();
@@ -2357,10 +2420,10 @@ ETHTSYN_LOCAL void EthTSyn_OriginalTimeStampCaculation(
             return;
         }
 
-        t3vlt.Nanoseconds = timeTuple.timestampClockValue.nanoseconds;
-        t3vlt.Seconds     = timeTuple.timestampClockValue.seconds;
-        t3vlt.SecondsHi   = timeTuple.timestampClockValue.secondsHi;
-        StbM_VirtualLocalTimeType VirtualLocalTime;
+        t3vlt.Nanoseconds                          = timeTuple.timestampClockValue.nanoseconds;
+        t3vlt.Seconds                              = timeTuple.timestampClockValue.seconds;
+        t3vlt.SecondsHi                            = timeTuple.timestampClockValue.secondsHi;
+        StbM_VirtualLocalTimeType VirtualLocalTime = {0u, 0u};
         if (StbM_GetCurrentVirtualLocalTime(
                 PORT_TOCFGDOMIN(port->PortIndexInPortList).SynchronizedTimeBaseRef,
                 &VirtualLocalTime)

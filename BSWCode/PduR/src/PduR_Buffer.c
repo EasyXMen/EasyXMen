@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -46,7 +46,7 @@
 #include "PduR_MemMap.h"
 /* PRQA S 1514,3218 ++ */ /* VL_PduR_IndirectUse,VL_PduR_IndirectUse */
 PDUR_LOCAL PduR_BufferType* PduR_BufferPtrsOfQueue[PDUR_NUM_OF_QUEUES_DEPTH_SUM_MAX];
-/* PRQA S 1514,3218 -- */ /* VL_PduR_IndirectUse,VL_PduR_IndirectUse */
+/* PRQA S 1514,3218 -- */
 #define PDUR_STOP_SEC_VAR_CLEARED_PTR
 #include "PduR_MemMap.h"
 #endif
@@ -145,11 +145,13 @@ static void PduR_QueueFlush(PduR_QueueRuntimeType* queuePtr)
 /**
  * request a available buffer for the queue
  */
+/* PRQA S 1505 ++ */ /* VL_PduR_1505 */
 PduR_BufferType* PduR_QueueProvideBuffer(
     PduR_QueueRuntimeType* queuePtr,
     PduLengthType          requiredSize,
     uint8                  apiId,
     boolean*               flushFlag)
+/* PRQA S 1505 -- */
 {
     if (PduR_QueueIsFull(queuePtr))
     {
@@ -239,7 +241,7 @@ void PduR_QueueDataConf(PduR_QueueRuntimeType* queuePtr, uint8 metaDataLength) /
 /**
  * Queue handle for disable a routing path group.
  */
-/* PRQA S 1532,1503 ++ */ /* VL_QAC_OneFunRef,VL_PduR_DiffProject */
+/* PRQA S 1532,1503 ++ */ /* VL_QAC_OneFunRef,VL_QAC_NoUsedApi */
 void PduR_DisableRoutingQueueHandle(PduIdType destPduId, boolean initialize)
 /* PRQA S 1532,1503 -- */
 {
@@ -247,9 +249,9 @@ void PduR_DisableRoutingQueueHandle(PduIdType destPduId, boolean initialize)
     PduR_QueueRuntimeType* queuePtr = PduR_GetQueuePtrOfDestPdu(destPduId);
     if (queuePtr != NULL_PTR)
     {
-        /* PRQA S 3678 ++ */ /* VL_PduR_DiffProject */
+        /* PRQA S 3678 ++ */ /* VL_QAC_NoUsedApi */
         PduR_BufferType* bufferPtr = PduR_QueueGetHead(queuePtr);
-        /* PRQA S 3678 -- */ /* VL_PduR_DiffProject */
+        /* PRQA S 3678 -- */ /* VL_QAC_NoUsedApi */
         if (bufferPtr != NULL_PTR)
         {
             if (queuePtr->Depth == 1u)
@@ -319,7 +321,7 @@ void PduR_BufferInit(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
     {
         bufferIterPtr->SduLength    = 0u;
         bufferIterPtr->PduCurLength = 0u;
-        (void)IStdLib_MemSet(bufferIterPtr->Data, 0, bufferIterPtr->PduMaxLength);
+        (void)IStdLib_MemSet(bufferIterPtr->Data, 0u, bufferIterPtr->PduMaxLength);
         bufferIterPtr->LockState  = PDUR_BUFFER_UNLOCK;
         bufferIterPtr->WriteState = PDUR_BUFFER_WRITE_NOT_OK;
         bufferIterPtr++;

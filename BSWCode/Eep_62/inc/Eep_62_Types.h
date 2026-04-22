@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -64,7 +64,7 @@ typedef enum
 /**
  * @brief Prototype of EEprom driver routine
  */
-typedef struct Eep_62_RuntimeTypeTag /* PRQA S 1536 */ /* VL_Eep_62_1536 */
+typedef struct
 {
     boolean               StateForRunMainFunction; /**< Control flag for main function execution @range 0..1*/
     MemIf_ModeType        currentMode;             /**< The currently mode @range NA*/

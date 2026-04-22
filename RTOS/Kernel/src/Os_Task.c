@@ -1,6 +1,6 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
- * SPDX-License-Identifier: LGPL-2.1-only-with-exception OR  LicenseRef-Commercial-License
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
+ * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
  * GNU Lesser General Public License as published by the Free Software Foundation; version 2.1.
@@ -10,7 +10,8 @@
  * You should have received a copy of the GNU Lesser General Public License along with this library;
  * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  * or see <https://www.gnu.org/licenses/>.
- *
+ */
+/*
  ********************************************************************************
  **                                                                            **
  **  FILENAME    :  Os_Task.c                                                  **
@@ -186,7 +187,9 @@ StatusType Os_ActivateTask(TaskType TaskID) /* PRQA S 1505 */ /* VL_Os_1505 */
 /* PRQA S 3469 -- */
 /* Timing protection: Check inter-arrival time. */
 #if (TRUE == CFG_TIMING_PROTECTION_ENABLE)
+    /* PRQA S 1520 ++ */ /* VL_Os_1520 */
     if ((StatusType)E_OK != Os_TmProtTaskFrameChk(TaskID))
+    /* PRQA S 1520 -- */
     {
         /* PRQA S 3469 ++ */ /* VL_Os_3469 */
         OS_ARCH_EXIT_CRITICAL();
@@ -274,7 +277,9 @@ StatusType Os_ActivateTask(TaskType TaskID) /* PRQA S 1505 */ /* VL_Os_1505 */
  * REQ ID               <None>
  */
 /******************************************************************************/
-static StatusType Os_TerminateTask(void) /* PRQA S 3450 */ /* VL_Os_3450 */
+/* PRQA S 3450, 6070, 6080 ++ */ /* VL_Os_3450, VL_MTR_Os_STCAL, VL_MTR_Os_STPTH */
+static StatusType Os_TerminateTask(void)
+/* PRQA S 3450, 6070, 6080 -- */
 {
     StatusType status = E_OK;
     OS_ARCH_DECLARE_CRITICAL();
@@ -412,9 +417,9 @@ static StatusType Os_TerminateTask(void) /* PRQA S 3450 */ /* VL_Os_3450 */
  * REQ ID               <None>
  */
 /******************************************************************************/
-/* PRQA S 6080, 3450 ++ */ /* VL_MTR_Os_STPTH, VL_Os_3450 */
+/* PRQA S 6080, 3450, 6070 ++ */ /* VL_MTR_Os_STPTH, VL_Os_3450, VL_MTR_Os_STCAL */
 static StatusType Os_ChainTask(TaskType TaskID)
-/* PRQA S 6080, 3450 -- */
+/* PRQA S 6080, 3450, 6070 -- */
 {
     StatusType status = E_OK;
     OS_ARCH_DECLARE_CRITICAL();
@@ -641,9 +646,9 @@ StatusType GetTaskState(TaskType TaskID, TaskStateRefType State)
     {
         status = E_OS_PARAM_POINTER;
     }
-    /* PRQA S 3432 ++ */ /* VL_Os_3432  */
+    /* PRQA S 3432, 2986 ++ */ /* VL_Os_3432, VL_Os_2986 */
     else if (CHECK_ID_INVALID(TaskID, Os_CfgTaskMax_Inf))
-    /* PRQA S 3432 -- */
+    /* PRQA S 3432, 2986 -- */
     {
         status = E_OS_ID;
     }
@@ -701,7 +706,9 @@ StatusType GetTaskState(TaskType TaskID, TaskStateRefType State)
 #if (CFG_ERRORHOOK == TRUE)
     if (status != E_OK)
     {
+        /* PRQA S 3138 ++ */ /* VL_Os_3138 */
         Os_TraceErrorHook(OSError_Save_GetTaskState(TaskID, State), OSServiceId_GetTaskState, status);
+        /* PRQA S 3138 -- */
     }
 #endif
 
@@ -734,9 +741,9 @@ StatusType GetTaskState(TaskType TaskID, TaskStateRefType State)
  * REQ ID               <None>
  */
 /******************************************************************************/
-/* PRQA S 6070, 6030, 3006, 1532 ++ */ /* VL_MTR_Os_STCAL, VL_MTR_Os_STMIF, VL_Os_3006, VL_QAC_OneFunRef */
+/* PRQA S 6070, 6030, 3006, 1532, 6010 ++ */ /* VL_MTR_Os_STCAL, VL_MTR_Os_STMIF, VL_Os_3006, VL_QAC_OneFunRef, VL_MTR_Os_STCYC */
 StatusType ActivateTask(TaskType TaskID)
-/* PRQA S 6070, 6030, 3006, 1532 -- */
+/* PRQA S 6070, 6030, 3006, 1532, 6010 -- */
 {
     /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
     /* PRQA S 1006 ++ */ /* VL_Os_1006 */
@@ -750,9 +757,9 @@ StatusType ActivateTask(TaskType TaskID)
 #endif /* TRUE == CFG_TRACE_ENABLE */
 
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
-    /* PRQA S 3432 ++ */ /* VL_Os_3442 */
+    /* PRQA S 3432, 2986 ++ */ /* VL_Os_3432, VL_Os_2986 */
     if (CHECK_ID_INVALID(TaskID, Os_CfgTaskMax_Inf))
-    /* PRQA S 3432 -- */
+    /* PRQA S 3432, 2986 -- */
     {
         status = E_OS_ID;
     }
@@ -807,7 +814,9 @@ StatusType ActivateTask(TaskType TaskID)
 #if (CFG_ERRORHOOK == TRUE)
     if (status != E_OK)
     {
+        /* PRQA S 3138 ++ */ /* VL_Os_3138 */
         Os_TraceErrorHook(OSError_Save_ActivateTask(TaskID), OSServiceId_ActivateTask, status);
+        /* PRQA S 3138 -- */
     }
 #endif
 
@@ -839,9 +848,9 @@ StatusType ActivateTask(TaskType TaskID)
  * REQ ID               <None>
  */
 /******************************************************************************/
-/* PRQA S 6070,6030, 1503, 3006 ++ */ /* VL_MTR_Os_STCAL,VL_MTR_Os_STMIF, VL_QAC_NoUsedApi,VL_Os_3006 */
+/* PRQA S 6070,6030, 1503, 3006, 6010 ++ */ /* VL_MTR_Os_STCAL,VL_MTR_Os_STMIF, VL_QAC_NoUsedApi,VL_Os_3006, VL_MTR_Os_STCYC */
 StatusType ActivateTaskAsyn(TaskType TaskID)
-/* PRQA S 6070,6030, 1503, 3006 -- */
+/* PRQA S 6070,6030, 1503, 3006, 6010 -- */
 {
     /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
     /* PRQA S 1006 ++ */ /* VL_Os_1006 */
@@ -856,9 +865,9 @@ StatusType ActivateTaskAsyn(TaskType TaskID)
 #endif /* TRUE == CFG_TRACE_ENABLE */
 
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
-    /* PRQA S 3432 ++ */ /* VL_Os_3432 */
+    /* PRQA S 3432, 2986 ++ */ /* VL_Os_3432, VL_Os_2986 */
     if (CHECK_ID_INVALID(TaskID, Os_CfgTaskMax_Inf))
-    /* PRQA S 3432 -- */
+    /* PRQA S 3432, 2986 -- */
     {
         status = E_OS_ID;
     }
@@ -913,7 +922,9 @@ StatusType ActivateTaskAsyn(TaskType TaskID)
 #if (CFG_ERRORHOOK == TRUE)
     if (status != E_OK)
     {
+        /* PRQA S 3138 ++ */ /* VL_Os_3138 */
         Os_TraceErrorHook(OSError_Save_ActivateTaskAsyn(TaskID), OSServiceId_ActivateTaskAsyn, status);
+        /* PRQA S 3138 -- */
     }
 #endif
 
@@ -944,9 +955,9 @@ StatusType ActivateTaskAsyn(TaskType TaskID)
  * REQ ID               <None>
  */
 /******************************************************************************/
-/* PRQA S 3006, 1532, 1503 ++ */ /* VL_Os_3006, VL_QAC_OneFunRef, VL_QAC_NoUsedApi */
+/* PRQA S 3006, 1532, 1503, 6070 ++ */ /* VL_Os_3006, VL_QAC_OneFunRef, VL_QAC_NoUsedApi, VL_MTR_Os_STCAL */
 StatusType TerminateTask(void)
-/* PRQA S 3006, 1532, 1503 -- */
+/* PRQA S 3006, 1532, 1503, 6070 -- */
 {
     /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
     /* PRQA S 1006 ++ */ /* VL_Os_1006 */
@@ -985,7 +996,9 @@ StatusType TerminateTask(void)
 #if (CFG_ERRORHOOK == TRUE)
     if (status != E_OK)
     {
+        /* PRQA S 3138 ++ */ /* VL_Os_3138 */
         Os_TraceErrorHook(OSError_Save_TerminateTask(), OSServiceId_TerminateTask, status);
+        /* PRQA S 3138 -- */
     }
 #endif
 
@@ -1018,7 +1031,7 @@ StatusType TerminateTask(void)
  * REQ ID               <None>
  */
 /******************************************************************************/
-StatusType GetTaskID(TaskRefType TaskID) /* PRQA S 3006 */ /* VL_Os_3006 */ /* PRQA S 1503 */ /* VL_QAC_NoUsedApi */
+StatusType GetTaskID(TaskRefType TaskID) /* PRQA S 3006, 1503, 6070 */ /* VL_Os_3006, VL_QAC_NoUsedApi, VL_MTR_Os_STCAL */
 {
     /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
     /* PRQA S 1006 ++ */ /* VL_Os_1006 */
@@ -1060,7 +1073,9 @@ StatusType GetTaskID(TaskRefType TaskID) /* PRQA S 3006 */ /* VL_Os_3006 */ /* P
 #if (CFG_ERRORHOOK == TRUE)
     if (status != E_OK)
     {
+        /* PRQA S 3138 ++ */ /* VL_Os_3138 */
         Os_TraceErrorHook(OSError_Save_GetTaskID(TaskID), OSServiceId_GetTaskID, status);
+        /* PRQA S 3138 -- */
     }
 #endif
 
@@ -1095,9 +1110,9 @@ StatusType GetTaskID(TaskRefType TaskID) /* PRQA S 3006 */ /* VL_Os_3006 */ /* P
  * REQ ID               <None>
  */
 /******************************************************************************/
-/* PRQA S 6070,6030, 3006, 1503 ++ */ /* VL_MTR_Os_STCAL,VL_MTR_Os_STMIF, VL_Os_3006, VL_QAC_NoUsedApi */
+/* PRQA S 6070,6030, 3006, 1503, 6010, 1756 ++ */ /* VL_MTR_Os_STCAL,VL_MTR_Os_STMIF, VL_Os_3006, VL_QAC_NoUsedApi, VL_MTR_Os_STCYC, VL_Os_1756 */
 StatusType Schedule(void)
-/* PRQA S 6070,6030, 3006, 1503 -- */
+/* PRQA S 6070,6030, 3006, 1503, 6010, 1756 -- */
 {
     /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
     /* PRQA S 1006 ++ */ /* VL_Os_1006 */
@@ -1205,7 +1220,9 @@ StatusType Schedule(void)
 #if (CFG_ERRORHOOK == TRUE)
     if (status != E_OK)
     {
+        /* PRQA S 3138 ++ */ /* VL_Os_3138 */
         Os_TraceErrorHook(OSError_Save_Schedule(), OSServiceId_Schedule, status);
+        /* PRQA S 3138 -- */
     }
 #endif
 
@@ -1240,11 +1257,11 @@ StatusType Schedule(void)
  * REQ ID               <None>
  */
 /******************************************************************************/
-/* PRQA S 6070,6030,6010 ++ */ /* VL_MTR_Os_STCAL,VL_MTR_Os_STMIF,VL_MTR_Os_STCYC */
+/* PRQA S 6070,6030,6010, 6080 ++ */ /* VL_MTR_Os_STCAL,VL_MTR_Os_STMIF,VL_MTR_Os_STCYC, VL_MTR_Os_STPTH */
 /* PRQA S 3006,1503,1532 ++ */ /* VL_Os_3006,VL_QAC_NoUsedApi,VL_QAC_OneFunRef */
 StatusType ChainTask(TaskType TaskID)
 /* PRQA S 3006,1503,1532 -- */
-/* PRQA S 6070,6030,6010 -- */
+/* PRQA S 6070,6030,6010, 6080 -- */
 {
     /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
     /* PRQA S 1006 ++ */ /* VL_Os_1006 */
@@ -1263,9 +1280,9 @@ StatusType ChainTask(TaskType TaskID)
     {
         status = E_OS_CALLEVEL;
     }
-    /* PRQA S 3432 ++ */ /* VL_Os_3432 */
+    /* PRQA S 3432, 2986 ++ */ /* VL_Os_3432, VL_Os_2986 */
     else if (CHECK_ID_INVALID(TaskID, Os_CfgTaskMax_Inf))
-    /* PRQA S 3432 -- */
+    /* PRQA S 3432, 2986 -- */
     {
         status = E_OS_ID;
     }
@@ -1337,7 +1354,9 @@ StatusType ChainTask(TaskType TaskID)
 #if (CFG_ERRORHOOK == TRUE)
     if (status != E_OK)
     {
+        /* PRQA S 3138 ++ */ /* VL_Os_3138 */
         Os_TraceErrorHook(OSError_Save_ChainTask(TaskID), OSServiceId_ChainTask, status);
+        /* PRQA S 3138 -- */
     }
 #endif
 

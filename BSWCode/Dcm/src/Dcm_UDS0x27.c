@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -35,13 +35,13 @@
  */
 #define DCM_UDS27_MINREQLEN 1uL
 /* ============================================ external data definitions =========================================== */
-#define DCM_START_SEC_VAR_INIT_8
+#define DCM_START_SEC_VAR_CLEARED_8
 #include "Dcm_MemMap.h"
 /**
  * @brief store the previous requested seed security level
  */
-uint8 Dcm_reqSeedSecurityLevel = 0u;
-#define DCM_STOP_SEC_VAR_INIT_8
+uint8 Dcm_reqSeedSecurityLevel;
+#define DCM_STOP_SEC_VAR_CLEARED_8
 #include "Dcm_MemMap.h"
 #define DCM_START_SEC_VAR_CLEARED_UNSPECIFIED
 #include "Dcm_MemMap.h"
@@ -52,13 +52,13 @@ Dcm_SecurityCtrlType Dcm_SecurityCtrl[DCM_SECURITY_NUM];
 #define DCM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
 #include "Dcm_MemMap.h"
 #if (STD_ON == DCM_SECURITY_READOUT)
-#define DCM_START_SEC_VAR_INIT_16
+#define DCM_START_SEC_VAR_CLEARED_16
 #include "Dcm_MemMap.h"
 /**
  * @brief current security readout timer for initial read
  */
-uint32 Dcm_SecurityReadoutTimer = 0u;
-#define DCM_STOP_SEC_VAR_INIT_16
+uint32 Dcm_SecurityReadoutTimer;
+#define DCM_STOP_SEC_VAR_CLEARED_16
 #include "Dcm_MemMap.h"
 #define DCM_START_SEC_VAR_INIT_BOOLEAN
 #include "Dcm_MemMap.h"
@@ -338,8 +338,10 @@ void Dcm_UDS0x27_SetAttemptCounterHandle(void)
  */
 void Dcm_UDS0x27_SetAttemptCounter(Dcm_OpStatusType OpStatus, uint8 securityIndex, uint8 attemptCounter)
 {
+#if (STD_ON == DCM_SECURITY_READOUT)
     const Dcm_DspSecurityRowType* securityRowCfg = &Dcm_DspSecurityRow[securityIndex];
-    Dcm_SecurityCtrlType*         securityCtrPtr = &Dcm_SecurityCtrl[securityIndex];
+#endif
+    Dcm_SecurityCtrlType* securityCtrPtr = &Dcm_SecurityCtrl[securityIndex];
 
     securityCtrPtr->AttemptCounter = attemptCounter;
 #if (STD_ON == DCM_SECURITY_READOUT)

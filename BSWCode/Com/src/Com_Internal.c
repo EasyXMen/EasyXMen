@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -135,20 +135,15 @@ uint16 Com_PartitonIdFromList(ApplicationType osApplicationId)
 void Com_TxSignalTMCStateInit(Com_MainFunctionIdType TxMainfunctionId)
 /* PRQA S 1532 -- */
 {
-#if (0u < COM_MAX_TMCTXSIGNAL_NUMBER)
+#if (0u < COM_MAX_TMC_TX_ALL_TYPE_SIGNAL_NUMBER)
     const boolean* txSigTMCInitPtr = Com_CfgTxModeAndSignalFilterPtr->TxSignalTMCInitVale[TxMainfunctionId];
     if (NULL_PTR != txSigTMCInitPtr)
     {
-        const Com_TxTMCSizeType* txTMCSizePtr = &Com_CfgTxModeAndSignalFilterPtr->TxTMCSize[TxMainfunctionId];
-#if (0u < COM_MAX_TXGRPSIG_FILTERTYPE_MAX_NUMBER)
-        (void)IStdLib_MemCpy(
-            Com_TxGroupSignalTMCBuffer[TxMainfunctionId],
-            txSigTMCInitPtr,
-            txTMCSizePtr->TxGroupSignalSize);
-#endif
-        (void)IStdLib_MemCpy(Com_TxSignalTMCRunTime[TxMainfunctionId], txSigTMCInitPtr, txTMCSizePtr->TxSignalSize);
+        const Com_TxTMCSizeType txTMCSize = Com_CfgTxModeAndSignalFilterPtr->TxTMCSize[TxMainfunctionId];
+        (void)IStdLib_MemCpy(Com_TxSignalTMCRunTime[TxMainfunctionId], txSigTMCInitPtr, txTMCSize);
     }
 #endif
+    COM_NOUSED(TxMainfunctionId);
 }
 
 /**
@@ -579,7 +574,7 @@ boolean Com_NewIsWInWOtFilterCalculate(
 }
 #endif
 
-#if (0u < COM_MAX_TMCTXSIGNAL_NUMBER)
+#if (0u < COM_MAX_TMC_TX_ALL_TYPE_SIGNAL_NUMBER)
 /**
  * @brief Called by Com_GwNotArraySignal.
  *        calculate dest signal/group signal/description signal TMC
@@ -682,7 +677,7 @@ boolean Com_DestSignalTMCCalculate(
 boolean Com_TxIpduTMSCalculate(const Com_TxIPduType* TxIpduPtr, Com_MainFunctionIdType TxMainfunctionId)
 {
     boolean ret = TRUE;
-#if (0u < COM_MAX_TMCTXSIGNAL_NUMBER)
+#if (0u < COM_MAX_TMC_TX_ALL_TYPE_SIGNAL_NUMBER)
     const boolean* txSignalTMCRuntimePtr = Com_TxSignalTMCRunTime[TxMainfunctionId];
     /*just configuration two TxMode,need to Calculate the TMS of TxPdu.
      *ComTxModeTrue must be configured,ComTxModeFalse select configuration*/

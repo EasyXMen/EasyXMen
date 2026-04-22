@@ -1,6 +1,6 @@
 /* PRQA S 3108++ */
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -36,16 +36,18 @@
 #define OS_ISR_EXTERNAL_NUM 16u
 /*=======[E X T E R N A L   D A T A]=========================================*/
 #define OS_START_SEC_VAR_INTVECTOR_GLOBAL_32
-#include "MemMapVector.h"
+#include "Os_MemMap.h"
+__attribute__((aligned(1024)))
 uint32 Os_GlobalVector[OS_NVIC_NUM + 1u];
 #define OS_STOP_SEC_VAR_INTVECTOR_GLOBAL_32
-#include "MemMapVector.h"
+#include "Os_MemMap.h"
 
 #define OS_START_SEC_VAR_INTVECTOR_LOCAL_32
-#include "MemMapVector.h"
+#include "Os_MemMap.h"
+__attribute__((aligned(1024)))
 uint32 Os_LocalVector[OS_NVIC_NUM + 1u];
 #define OS_STOP_SEC_VAR_INTVECTOR_LOCAL_32
-#include "MemMapVector.h"
+#include "Os_MemMap.h"
 
 /* PRQA S 0791++ */ /* MISRA Rule 5.4 */
 #define OS_START_SEC_VAR_CLONE_PTR
@@ -234,14 +236,13 @@ void Os_ArchAppTerminateIsrProc(Os_IsrType OsIsrID)
  * CallByAPI            <SuspendAllInterrupts>
  */
 /******************************************************************************/
-void Os_ArchSuspendOsInt(P2VAR(Os_ArchMsrType, AUTOMATIC, OS_VAR) msr) /*PRQA S 3006,3432*/ /*MISRA Dir 4.3,Rule 20.7*/
+Os_ArchMsrType Os_ArchSuspendOsInt(void) /*PRQA S 3006,3432*/ /*MISRA Dir 4.3,Rule 20.7*/
 {
     register Os_ArchMsrType result; /* PRQA S 2011 */ /* MISRA CWE-398 */
     OS_ASM("MRS %0, basepri_max" : "=r"(result));
     result = OS_NVIC_CONVERT_GET_PRIO(result);
-    *msr = result;
-    result = Os_Isr2_Ipl_Limit;
-    OS_ASM("msr basepri, %0" : : "r"(result));
+    OS_ASM("msr basepri, %0" : : "r"(Os_Isr2_Ipl_Limit));
+    return result;
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
@@ -288,12 +289,12 @@ void Os_ArchRestoreOsInt(Os_ArchMsrType msr) /*PRQA S 3006*/ /*MISRA Dir 4.3*/
  * CallByAPI            <SuspendAllInterrupts>
  */
 /******************************************************************************/
-void Os_ArchSuspendInt(P2VAR(Os_ArchMsrType, AUTOMATIC, OS_VAR) msr) /*PRQA S 3006,3432*/ /*MISRA Dir 4.3,Rule 20.7*/
+Os_ArchMsrType Os_ArchSuspendInt(void) /*PRQA S 3006,3432*/ /*MISRA Dir 4.3,Rule 20.7*/
 {
     register Os_ArchMsrType result; /* PRQA S 2011 */ /* MISRA CWE-398 */
     OS_ASM("MRS %0, primask" : "=r"(result));
     OS_ASM("MSR primask, %0" : : "r"(OS_MSR_PRIMASK_BIT0));
-    *msr = result;
+    return result;
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
@@ -380,7 +381,6 @@ void Os_InterruptInstall(uint8 id, uint8 prio, uint32 srcType, Os_isrhnd isrProc
 void Os_InterruptInit(void)
 {
     uint32 index;
-    uint32 i;
     OS_REG_VTOR = (uint32)&Os_GlobalVector[0u];
     Os_GlobalVector[0] = (uint32)0u;
     Os_GlobalVector[1] = (uint32)(&Reset_Handler);
@@ -397,9 +397,9 @@ void Os_InterruptInit(void)
     Os_GlobalVector[12] = (uint32)(&DebugMon_Handler);
     Os_GlobalVector[13] = (uint32)0u;
     Os_GlobalVector[14] = (uint32)(&PendSV_Handler);
-    for (i = 15; i < 256; i++)
+    for (index = OS_ISR_SYSTICK_ID; index < OS_NVIC_NUM; index++)
     {
-        Os_GlobalVector[i] = (uint32)(&armv7_default_isr);
+        Os_GlobalVector[index] = (uint32)(&armv7_default_isr);
     }
 
     /* PRQA S 0303,0306*/ /*Rule-11.4*/
@@ -496,8 +496,7 @@ Os_IPLType Os_ArchGetIpl(void) /*PRQA S 3006*/ /*MISRA Dir 4.3*/
 void Os_DisableInterruptSource(uint32 vIsrSrc, uint32 vIsrSrcType)
 {
     UNUSED_PARAMETER(vIsrSrcType);
-    uint32 convertId = Os_GetNvicIrqId(vIsrSrc);
-    OS_INTERRUPT_DISABLE(convertId); /* PRQA S 0303,3345,3442 */ /* MISRA Rule 11.4,CWE-398 */
+    OS_INTERRUPT_DISABLE(vIsrSrc); /* PRQA S 0303,3345,3442 */ /* MISRA Rule 11.4,CWE-398 */
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
@@ -523,8 +522,7 @@ void Os_DisableInterruptSource(uint32 vIsrSrc, uint32 vIsrSrcType)
 void Os_ClearPendingInterrupt(uint32 vIsrSrc, uint32 vIsrSrcType)
 {
     UNUSED_PARAMETER(vIsrSrcType);
-    uint32 convertId = Os_GetNvicIrqId(vIsrSrc);
-    OS_INTERRUPT_CLEAR_PENDING(convertId); /* PRQA S 0303 */ /* MISRA Rule 11.4 */
+    OS_INTERRUPT_CLEAR_PENDING(vIsrSrc); /* PRQA S 0303 */ /* MISRA Rule 11.4 */
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
@@ -549,8 +547,7 @@ Os_IsrStateType Os_GetIsrSourceState(uint32 vIsrSrc, uint32 vIsrSrcType)
 {
     UNUSED_PARAMETER(vIsrSrcType);
     Os_IsrStateType isrSourceState = OS_ISR_DISABLED;
-    uint32 convertId = Os_GetNvicIrqId(vIsrSrc);
-    if (1U == OS_INTERRUPT_CHECK_STATUS(convertId)) /* PRQA S 0303,3442 */ /* MISRA Rule 11.4,CWE-398 */
+    if (1U == OS_INTERRUPT_CHECK_STATUS(vIsrSrc)) /* PRQA S 0303,3442 */ /* MISRA Rule 11.4,CWE-398 */
     {
         isrSourceState = OS_ISR_ENABLED;
     }
@@ -577,8 +574,7 @@ Os_IsrStateType Os_GetIsrSourceState(uint32 vIsrSrc, uint32 vIsrSrcType)
 void Os_EnableInterruptSource(uint32 vIsrSrc, uint32 vIsrSrcType)
 {
     UNUSED_PARAMETER(vIsrSrcType);
-    uint32 convertId = Os_GetNvicIrqId(vIsrSrc);
-    OS_INTERRUPT_ENABLE(convertId); /* PRQA S 0303,3345,3442 */ /* MISRA Rule 11.4,CWE-398 */
+    OS_INTERRUPT_ENABLE(vIsrSrc); /* PRQA S 0303,3345,3442 */ /* MISRA Rule 11.4,CWE-398 */
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
@@ -615,9 +611,8 @@ void Os_ArchDisableIntInApp(P2CONST(Os_ApplicationCfgType, AUTOMATIC, OS_VAR) po
         osIsrId = Os_GetObjLocalId(posCurAppCfg->OsAppObjectRef[OBJECT_ISR][i]);
 
         osIsrRegVal = Os_IsrCfg[osIsrId].OsIsrSrc;
-        uint32 convertId = Os_GetNvicIrqId(osIsrRegVal);
-        OS_INTERRUPT_CLEAR_PENDING(convertId); /* PRQA S 0303 */     /* MISRA Rule 11.4 */
-        OS_INTERRUPT_DISABLE(convertId); /* PRQA S 0303,3345,3442 */ /* MISRA Rule 11.4,CWE-398 */
+        OS_INTERRUPT_CLEAR_PENDING(osIsrRegVal); /* PRQA S 0303 */     /* MISRA Rule 11.4 */
+        OS_INTERRUPT_DISABLE(osIsrRegVal); /* PRQA S 0303,3345,3442 */ /* MISRA Rule 11.4,CWE-398 */
     }
 }
 
@@ -645,11 +640,9 @@ void Os_ArchDisableIntInApp(P2CONST(Os_ApplicationCfgType, AUTOMATIC, OS_VAR) po
 void Os_ArchDispatch_ISR(void)
 {
     /* Call PendSV to switch task */
-    OS_ASM("cpsid i                            \n"
-           "ldr r0, =0xE000ED04             \n"
-           "ldr r1, =0x10000000            \n"
-           "str r1, [r0]                       \n"
-           "dsb                                \n");
+    uint32 NVIC_PENDSVSET = 0x10000000;
+    Os_ArchDisableInt();
+    OS_SCB_ICSE_BASE |= NVIC_PENDSVSET;
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"

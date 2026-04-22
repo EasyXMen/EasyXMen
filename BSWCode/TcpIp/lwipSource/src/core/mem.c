@@ -341,35 +341,6 @@ mem_free(void *rmem)
 #else /* MEM_USE_POOLS */
 /* lwIP replacement for your libc malloc() */
 
-/**
- * The heap is made up as a list of structs of this type.
- * This does not have to be aligned since for getting its size,
- * we only use the macro SIZEOF_STRUCT_MEM, which automatically aligns.
- */
-struct mem {
-  /** index (-> ram[next]) of the next struct */
-  mem_size_t next;
-  /** index (-> ram[prev]) of the previous struct */
-  mem_size_t prev;
-  /** 1: this area is used; 0: this area is unused */
-  u8_t used;
-#if MEM_OVERFLOW_CHECK
-  /** this keeps track of the user allocation size for guard checks */
-  mem_size_t user_size;
-#endif
-};
-
-/** All allocated blocks will be MIN_SIZE bytes big, at least!
- * MIN_SIZE can be overridden to suit your needs. Smaller values save space,
- * larger values could prevent too small blocks to fragment the RAM too much. */
-#ifndef MIN_SIZE
-#define MIN_SIZE             12
-#endif /* MIN_SIZE */
-/* some alignment macros: we define them here for better source code layout */
-#define MIN_SIZE_ALIGNED     LWIP_MEM_ALIGN_SIZE(MIN_SIZE)
-#define SIZEOF_STRUCT_MEM    LWIP_MEM_ALIGN_SIZE(sizeof(struct mem))
-#define MEM_SIZE_ALIGNED     LWIP_MEM_ALIGN_SIZE(MEM_SIZE)
-
 /** If you want to relocate the heap to external memory, simply define
  * LWIP_RAM_HEAP_POINTER as a void-pointer to that location.
  * If so, make sure the memory at that location is big enough (see below on
@@ -380,8 +351,8 @@ struct mem {
 #include "arch/Lwip_MemMap.h"
 #endif/* AUTOSAR_MEMMAP_SUPPORT */
 /** the heap. we need one struct mem at the end and some room for alignment */
-LWIP_DECLARE_MEMORY_ALIGNED(ram_heap[TCPIP_MULTICORE_NUMBER], MEM_SIZE_ALIGNED + (2U * SIZEOF_STRUCT_MEM));
-#define LWIP_RAM_HEAP_POINTER ram_heap[TcpIp_MulticoreIndex]
+/* LWIP_DECLARE_MEMORY_ALIGNED(ram_heap[TCPIP_MULTICORE_NUMBER], MEM_SIZE_ALIGNED + (2U * SIZEOF_STRUCT_MEM)); */
+#define LWIP_RAM_HEAP_POINTER TcpIp_LwipRuntime[TcpIp_MulticoreIndex].RamHeap
 #if AUTOSAR_MEMMAP_SUPPORT
 #define LWIP_HEAP_STOP_SEC_VAR_NO_INIT_UNSPECIFIED
 #include "arch/Lwip_MemMap.h"

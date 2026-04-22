@@ -1,6 +1,6 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
- * SPDX-License-Identifier: LGPL-2.1-only-with-exception OR  LicenseRef-Commercial-License
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
+ * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
  * GNU Lesser General Public License as published by the Free Software Foundation; version 2.1.
@@ -10,7 +10,8 @@
  * You should have received a copy of the GNU Lesser General Public License along with this library;
  * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  * or see <https://www.gnu.org/licenses/>.
- *
+ */
+/*
  ********************************************************************************
  **                                                                            **
  **  FILENAME    : Os_Counter.c                                                **
@@ -449,7 +450,9 @@ StatusType IncrementCounter(CounterType CounterID)
 #if (CFG_ERRORHOOK == TRUE)
     if (err != E_OK)
     {
+        /* PRQA S 3138 ++ */ /* VL_Os_3138 */
         Os_TraceErrorHook(OSError_Save_IncrementCounter(CounterID), OSServiceId_IncrementCounter, err);
+        /* PRQA S 3138 -- */
     }
 #endif
 
@@ -499,9 +502,9 @@ StatusType GetCounterValue(CounterType CounterID, TickRefType Value)
     {
         err = E_OS_PARAM_POINTER;
     }
-    /* PRQA S 3432 ++ */ /* VL_Os_3432 */
+    /* PRQA S 3432, 2986 ++ */ /* VL_Os_3432, VL_Os_2986 */
     else if (CHECK_ID_INVALID(CounterID, Os_CfgCounterMax_Inf))
-    /* PRQA S 3432 -- */
+    /* PRQA S 3432, 2986 -- */
     {
         err = E_OS_ID;
     }
@@ -557,7 +560,9 @@ StatusType GetCounterValue(CounterType CounterID, TickRefType Value)
 #if (CFG_ERRORHOOK == TRUE)
     if (err != E_OK)
     {
+        /* PRQA S 3138 ++ */ /* VL_Os_3138 */
         Os_TraceErrorHook(OSError_Save_GetCounterValue(CounterID, Value), OSServiceId_GetCounterValue, err);
+        /* PRQA S 3138 -- */
     }
 #endif
 
@@ -611,9 +616,9 @@ StatusType GetElapsedValue(CounterType CounterID, TickRefType Value, TickRefType
     {
         err = E_OS_PARAM_POINTER;
     }
-    /* PRQA S 3432 ++ */ /* VL_Os_3432 */
+    /* PRQA S 3432, 2986 ++ */ /* VL_Os_3432, VL_Os_2986 */
     else if (CHECK_ID_INVALID(CounterID, Os_CfgCounterMax_Inf))
-    /* PRQA S 3432 -- */
+    /* PRQA S 3432, 2986 -- */
     {
         err = E_OS_ID;
     }
@@ -675,10 +680,12 @@ StatusType GetElapsedValue(CounterType CounterID, TickRefType Value, TickRefType
 #if (CFG_ERRORHOOK == TRUE)
     if (err != E_OK)
     {
+        /* PRQA S 3138, 3141 ++ */ /* VL_Os_3138, VL_Os_3141 */
         Os_TraceErrorHook(
             OSError_Save_GetElapsedValue(CounterID, Value, ElapsedValue),
             OSServiceId_GetElapsedValue,
             err);
+        /* PRQA S 3138, 3141 -- */
     }
 #endif
 

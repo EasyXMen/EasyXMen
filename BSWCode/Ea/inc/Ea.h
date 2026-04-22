@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -34,6 +34,8 @@
  *  V02.00.03 2024-06-15  tao.yu          update memmap
  *  V03.00.00 2024-12-11  peng.wu         Update to R23-11
  *  V03.00.01 2025-03-03  peng.wu         CPT-12915, Fix runtime error report
+ *  V03.00.02 2025-11-25  peng.wu         CPT-16556, report fail if lower layer driver is not initialized
+ *                                        CPT-15419, Update the result before notify upper layer
  *
  ==================================================================================================================== */
 
@@ -144,7 +146,7 @@ extern "C" {
 #define EA_AR_RELEASE_REVISION_VERSION 0U  /**< Value of Autosar patch version */
 #define EA_SW_MAJOR_VERSION            3U  /**< Value of module major version */
 #define EA_SW_MINOR_VERSION            0U  /**< Value of module minor version */
-#define EA_SW_PATCH_VERSION            0U  /**< Value of module patch version */
+#define EA_SW_PATCH_VERSION            2U  /**< Value of module patch version */
 
 /* ===================================================== macros ===================================================== */
 /* PRQA S 3414 ++*/ /* VL_Ea_3414 */

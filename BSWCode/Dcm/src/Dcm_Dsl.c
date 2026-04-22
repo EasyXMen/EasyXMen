@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -46,13 +46,13 @@ Dcm_ProtocolCtrlType Dcm_ProtocolCtrl[DCM_PROTOCOLROW_NUM];
 Dcm_MsgContextType Dcm_MsgContext[DCM_PROTOCOLROW_NUM];
 #define DCM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
 #include "Dcm_MemMap.h"
-#define DCM_START_SEC_VAR_INIT_8
+#define DCM_START_SEC_VAR_CLEARED_8
 #include "Dcm_MemMap.h"
 /**
  * @brief current active diagnostic status @range NA
  */
-Dcm_ActiveDiagnosticType Dcm_ActiveDiagnostic = DCM_COMM_ACTIVE;
-#define DCM_STOP_SEC_VAR_INIT_8
+Dcm_ActiveDiagnosticType Dcm_ActiveDiagnostic;
+#define DCM_STOP_SEC_VAR_CLEARED_8
 #include "Dcm_MemMap.h"
 #define DCM_START_SEC_VAR_CLEARED_8
 #include "Dcm_MemMap.h"
@@ -60,6 +60,8 @@ Dcm_ActiveDiagnosticType Dcm_ActiveDiagnostic = DCM_COMM_ACTIVE;
  * @brief current comm State @range NA
  */
 Dcm_CommStateType Dcm_CommState[DCM_MAINCONNECTION_NUM];
+boolean           Dcm_RequestRejectedDueToBoot    = FALSE;
+boolean           Dcm_ResRejectedDueToAFTER_RESET = FALSE;
 #define DCM_STOP_SEC_VAR_CLEARED_8
 #include "Dcm_MemMap.h"
 #define DCM_START_SEC_VAR_CLEARED_8
@@ -84,17 +86,17 @@ uint8 Dcm_MetaData[DCM_METADATA_NUM * DCM_METADATA_SIZE];
 PduInfoType Dcm_TempPduInfo[DCM_PROTOCOLROW_NUM];
 #define DCM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
 #include "Dcm_MemMap.h"
-#define DCM_START_SEC_VAR_INIT_BOOLEAN
+#define DCM_START_SEC_VAR_CLEARED_BOOLEAN
 #include "Dcm_MemMap.h"
 /**
  * @brief indicates if there is pending setProgramConditions globally @range 0..1
  */
-boolean Dcm_PendingSetProg = FALSE;
+boolean Dcm_PendingSetProg;
 /**
  * @brief indicates if there is onging setProgramConditions which is process in Dcm_MainFunction @range 0..1
  */
-boolean Dcm_ProcessingSetProg = FALSE;
-#define DCM_STOP_SEC_VAR_INIT_BOOLEAN
+boolean Dcm_ProcessingSetProg;
+#define DCM_STOP_SEC_VAR_CLEARED_BOOLEAN
 #include "Dcm_MemMap.h"
 
 #if (STD_ON == DCM_REQUEST_QUEUED_ENABLED)
@@ -361,13 +363,14 @@ BufReq_ReturnType
     uint16                connectionId = 0u;
     Dcm_ProtocolCtrlType* protocolCtrlPtr;
     Dcm_MsgContextType*   msgContextPtr;
-
+    /* PRQA S 3415 ++ */ /* VL_Dcm_3415 */
     if (
 #if (STD_ON == DCM_DEV_ERROR_DETECT)
         (0u == DslInternal_RxCheckParam(id, info, bufferSizePtr, DCM_STARTOFRECEPTION_ID)) &&
 #endif
-        (E_OK
-         == DslInternal_FindProtocolRowByRxPduId(id, &protocolId, &connectionId))) /* PRQA S 3415 */ /* VL_Dcm_3415 */
+        (E_OK == DslInternal_FindProtocolRowByRxPduId(id, &protocolId, &connectionId))
+        && (Dcm_RequestRejectedDueToBoot == FALSE))
+    /* PRQA S 3415 -- */
     {
         const Dcm_DslProtocolRowType* DcmDslProtocolRowPtr = &Dcm_DslProtocolRow[protocolId];
         protocolCtrlPtr                                    = &Dcm_ProtocolCtrl[protocolId];
@@ -516,8 +519,8 @@ BufReq_ReturnType Dcm_CopyRxData(PduIdType id, const PduInfoType* info, PduLengt
  */
 void Dcm_TpRxIndication(PduIdType id, Std_ReturnType result)
 {
-    uint8  protocolId;
-    uint16 connectionId;
+    uint8  protocolId   = 0u;
+    uint16 connectionId = 0u;
 #if (STD_ON == DCM_DEV_ERROR_DETECT)
     uint8 errorId = 0u;
     if (NULL_PTR == Dcm_CfgPtr)
@@ -1074,6 +1077,7 @@ void DslInternal_SetSecurityLevel(Dcm_SecLevelType SecurityLevel)
         Dcm_CurrentSecurity = SecurityLevel;
         SchM_Exit_Dcm_ExclusiveArea();
         (void)Rte_Switch_SecurityAccessModeSwitchInterface_securityAccess(SecurityLevel);
+        (void)SchM_Switch_Dcm_DcmSecurityAccess(SecurityLevel);
 #if ((STD_ON == DCM_UDS_0X2A) && (STD_ON == DCM_DYN_DID) && (STD_ON == DCM_DDDID_CHECK_SOURCE))
         Dcm_UDS0x2A_StatusChangeHandle();
 #endif
@@ -1206,8 +1210,6 @@ void DslInternal_SetStateIdle(
             Dcm_MsgContext[protocolId].resDataLen = 0u;
             protocolCtrlPtr->P2Timer              = 0u;
             protocolCtrlPtr->PendingCounter       = 0u;
-            Dcm_SessionCtrl.NewSession            = DCM_INVALID_UINT8;
-            Dcm_SessionCtrl.NewSessionProtocolId  = DCM_INVALID_UINT8;
 #if (STD_ON == DCM_PAGEDBUFFER_ENABLED)
             protocolCtrlPtr->PagedBufferStarted = FALSE;
             protocolCtrlPtr->FirstPageLength    = 0u;
@@ -1513,6 +1515,16 @@ DCM_LOCAL void DslInternal_RxProcessRequest(PduIdType id, uint8 protocolId, uint
         {
             furtherProcess = E_NOT_OK;
         }
+#if (DCM_DSL_RX_TX_SHARED_BUGGER == STD_ON)
+        else
+        {
+            if (DcmDslProtocolRowPtr->SharedRxTxBuffer)
+            {
+                msgContextPtr->resMaxDataLen = DcmDslProtocolRowPtr->TxBufferSize - msgContextPtr->reqDataLen;
+                msgContextPtr->resData       = &msgContextPtr->reqData[protocolCtrlPtr->RxCopyLen];
+            }
+        }
+#endif
     }
 
     if (E_OK == furtherProcess)
@@ -1809,8 +1821,18 @@ DCM_LOCAL BufReq_ReturnType DslInternal_HandleStartOfReception(
     if ((DCM_MSG_IDLE == protocolCtrlPtr->State)
         && (E_OK == DslInternal_CheckProtocolWithSameBuffer(&Dcm_DslProtocolRow[protocolId])))
     {
-        bufResult              = BUFREQ_OK;
-        protocolCtrlPtr->State = DCM_MSG_RECEIVING;
+#if (DCM_DSL_RX_TX_SHARED_BUGGER == STD_ON)
+        if ((Dcm_DslProtocolRow[protocolId].SharedRxTxBuffer)
+            && ((Dcm_DslProtocolRow[protocolId].TxBufferSize - TpSduLength) < DCM_MIN_TX_BUFFER_SIZE))
+        {
+            bufResult = BUFREQ_E_OVFL;
+        }
+        else
+#endif
+        {
+            bufResult              = BUFREQ_OK;
+            protocolCtrlPtr->State = DCM_MSG_RECEIVING;
+        }
         SchM_Exit_Dcm_ExclusiveArea();
     }
     else

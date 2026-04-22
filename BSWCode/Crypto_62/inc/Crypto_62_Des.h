@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -38,7 +38,7 @@ extern "C" {
 
 /* ================================================ type definitions ================================================ */
 /** @brief 3DES context structure. */
-typedef struct Crypto_Des3Data_Tag
+typedef struct
 {
     uint32 sk[CRYPTO_CONST_96]; /*!<  3DES subkeys      */
 } Crypto_Des3Data;
@@ -65,6 +65,18 @@ typedef struct
 void Crypto_3Des_Crypt_Ecb(Crypto_Des3Data* ctx, const uint8 input[CRYPTO_CONST_8], uint8 output[CRYPTO_CONST_8]);
 
 /**
+ * @brief   Sets the encryption key for DES.
+ *
+ * @param[in,out] ctx     Pointer to the DES context structure.
+ * @param[in]     key     Pointer to the encryption key (8 bytes).
+ *
+ * @return  Status of the operation.
+ *          - E_OK: Operation successful.
+ *          - E_NOT_OK: Operation failed.
+ */
+Std_ReturnType Crypto_Des_Setkey_Enc(Crypto_DesData* ctx, const unsigned char key[CRYPTO_DES_KEY_SIZE]);
+
+/**
  * @brief   Sets the decryption key for DES.
  *
  * @param[in,out] ctx     Pointer to the DES context structure.
@@ -75,6 +87,44 @@ void Crypto_3Des_Crypt_Ecb(Crypto_Des3Data* ctx, const uint8 input[CRYPTO_CONST_
  *          - E_NOT_OK: Operation failed.
  */
 Std_ReturnType Crypto_Des_Setkey_Dec(Crypto_DesData* ctx, const unsigned char key[CRYPTO_CONST_8]);
+
+/**
+ * @brief   Sets the encryption and decryption keys for 3DES.
+ *
+ * @param[out] esk     Pointer to the encryption subkeys (96 words).
+ * @param[out] dsk     Pointer to the decryption subkeys (96 words).
+ * @param[in]  key     Pointer to the 3DES key (16 bytes).
+ *
+ * @return  None.
+ */
+void Crypto_Des3_Set2key(
+    uint32              esk[CRYPTO_CONST_96],
+    uint32              dsk[CRYPTO_CONST_96],
+    const unsigned char key[CRYPTO_CONST_16]);
+
+/**
+ * @brief   Sets the decryption key for DES.
+ *
+ * @param[in,out] ctx     Pointer to the DES context structure.
+ * @param[in]     key     Pointer to the decryption key (16 bytes).
+ *
+ * @return  Status of the operation.
+ *          - E_OK: Operation successful.
+ *          - E_NOT_OK: Operation failed.
+ */
+Std_ReturnType Crypto_Des3_Set2key_Dec(Crypto_Des3Data* ctx, const unsigned char key[CRYPTO_CONST_16]);
+
+/**
+ * @brief   Sets the encryption key for DES.
+ *
+ * @param[in,out] ctx     Pointer to the DES context structure.
+ * @param[in]     key     Pointer to the encryption key (16 bytes).
+ *
+ * @return  Status of the operation.
+ *          - E_OK: Operation successful.
+ *          - E_NOT_OK: Operation failed.
+ */
+Std_ReturnType Crypto_Des3_Set2key_Enc(Crypto_Des3Data* ctx, const unsigned char key[CRYPTO_CONST_16]);
 
 /**
  * @brief   Sets the encryption and decryption keys for 3DES.
@@ -132,7 +182,8 @@ Std_ReturnType Crypto_3Des_Crypt_Cbc(
     uint32           length,
     uint8            iv[CRYPTO_CONST_8],
     const uint8*     input,
-    uint8*           output);
+    uint8*           output,
+    uint32*          outputLength);
 
 /**
  * @brief   Computes the CMAC using 3DES.

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -88,7 +88,7 @@
 /**
  * @brief info for the calculation of a FID depending on the inhibition configuration.
  */
-typedef struct FiM_InhMaskInfoTag /* PRQA S 1536,3213*/ /* VL_FiM_1536 */
+typedef struct
 {
     Dem_MonitorStatusType Mask;   /** Status information of concern */
     Dem_MonitorStatusType Result; /** Desired state results */
@@ -109,13 +109,12 @@ FIM_LOCAL void FiM_DoFidCalculateByInhIndex(FiM_FidContextType FidContext);
 
 /**
  * @brief         Calculate the corresponding FID state based on the EventTableRef
- * @param[in]     satelliteId: satellite Id
  * @param[in]     EventTableRef: Event Table Ref value
  * @reentrant     Non Reentrant
  * @synchronous   Synchronous
  * @trace       CPD-71133
  */
-FIM_LOCAL void FiM_CalculateByEvent(FiM_SatelliteIdType satelliteId, FiM_EventNumType EventTableRef);
+FIM_LOCAL void FiM_CalculateByEvent(FiM_EventNumType EventTableRef);
 
 /**
  * @brief         get the EventTableRef by Event Id.
@@ -135,7 +134,6 @@ FIM_LOCAL boolean FiM_SearchEventTable(Dem_EventIdType EventId, FiM_EventNumType
 /**
  * @brief         Dem_GetComponentFailed returns E_OK, the FIM shall consider this event in its inhibition mask
  *                calculation
- * @param[in]     SatelliteId: satellite Id
  * @param[in]     FID: Identification of a functionality by assigned FID.
  * @param[in]     ComponentStatusStart: Component Status after the Dem_GetComponentFailed call
  * @param[in]     OldComponentStatus: Component Status before the Dem_GetComponentFailed call
@@ -143,21 +141,17 @@ FIM_LOCAL boolean FiM_SearchEventTable(Dem_EventIdType EventId, FiM_EventNumType
  * @synchronous   Synchronous
  * @trace       CPD-71135
  */
-FIM_LOCAL void FiM_ComponentResultCalculate(
-    FiM_SatelliteIdType SatelliteId,
-    FiM_FunctionIdType  FID,
-    boolean             ComponentStatusStart,
-    boolean             OldComponentStatus);
+FIM_LOCAL void
+    FiM_ComponentResultCalculate(FiM_FunctionIdType FID, boolean ComponentStatusStart, boolean OldComponentStatus);
 
 /**
  * @brief         Calculate the corresponding FID state based on the ComponentRef
- * @param[in]     satelliteId: satellite Id
  * @param[in]     ComponentRef: Component Ref value
  * @reentrant     Non Reentrant
  * @synchronous   Synchronous
  * @trace       CPD-71136
  */
-FIM_LOCAL void FiM_CalculateByComponent(FiM_SatelliteIdType satelliteId, FiM_ComponentNumType ComponentRef);
+FIM_LOCAL void FiM_CalculateByComponent(FiM_ComponentNumType ComponentRef);
 
 /**
  * @brief         get the ComponentRef by Component Id.
@@ -175,7 +169,6 @@ FIM_LOCAL boolean FiM_SearchComponentTable(Dem_ComponentIdType ComponentId, FiM_
 
 /**
  * @brief         get the permission state by Fid Counter.
- * @param[in]     satelliteId: satellite Id
  * @param[in]     FID: Identification of a functionality by assigned FID.
  * @return        boolean
  * @retval        TRUE: FID has permission to run
@@ -184,7 +177,7 @@ FIM_LOCAL boolean FiM_SearchComponentTable(Dem_ComponentIdType ComponentId, FiM_
  * @synchronous   Synchronous
  * @trace       CPD-71138
  */
-FIM_LOCAL boolean FiM_GetFidPermission(FiM_SatelliteIdType satelliteId, FiM_FunctionIdType FID);
+FIM_LOCAL boolean FiM_GetFidPermission(FiM_FunctionIdType FID);
 #endif
 
 #if (FIM_EVENT_UPDATE_TRIGGERED_BY_DEM == STD_OFF)
@@ -256,10 +249,10 @@ FIM_LOCAL void FiM_HandleFid(FiM_FunctionIdType FID);
 /**
  * @brief store nm post build configuration data pointer
  */
-#define FIM_START_SEC_VAR_INIT_PTR
+#define FIM_START_SEC_VAR_CLEARED_PTR
 #include "FiM_MemMap.h"
-FIM_LOCAL const FiM_ConfigType* FiM_PBcfgPtr = NULL_PTR;
-#define FIM_STOP_SEC_VAR_INIT_PTR
+FIM_LOCAL const FiM_ConfigType* FiM_PBcfgPtr;
+#define FIM_STOP_SEC_VAR_CLEARED_PTR
 #include "FiM_MemMap.h"
 
 /**
@@ -443,9 +436,10 @@ FIM_LOCAL_INLINE FiM_FidCounterType FiM_GetFidCounterByFid(FiM_SatelliteIdType S
 FIM_LOCAL_INLINE void
     FiM_SetFidCounter(FiM_SatelliteIdType SatelliteId, FiM_FunctionIdType Fid, FiM_FidCounterType FidCounter)
 {
+    FiM_FunctionIdType FidIndex = Fid - FiM_GetFIDStartOfSatellite(SatelliteId);
+#if (FIM_SATELLITE_NUMBER > 1u)
     FiM_FidCounterType oldFidCounter;
     FiM_FidCounterType newFidCounter;
-    FiM_FunctionIdType FidIndex = Fid - FiM_GetFIDStartOfSatellite(SatelliteId);
     do
     {
         oldFidCounter = FiM_GetFidCounterByFid(SatelliteId, Fid);
@@ -453,58 +447,63 @@ FIM_LOCAL_INLINE void
     } while (
         FiM_ComSyncCompareAndSwap((&FiM_GetFidCounterOfSatellite(SatelliteId)[FidIndex]), oldFidCounter, newFidCounter)
         == FALSE);
+#else
+
+    *(&FiM_GetFidCounterOfSatellite(SatelliteId)[FidIndex]) = FidCounter;
+
+#endif
 }
 
 /**
  * @brief         Decrease counter
- * @param[in]     SatelliteId: Satellite id
  * @param[in]     FID: Identification of a functionality by assigned FID.
  * @reentrant     Non Reentrant
  * @synchronous   Synchronous
  * @trace       CPD-71151
  */
-FIM_LOCAL_INLINE void FiM_DecreaseFidCounter(FiM_SatelliteIdType SatelliteId, FiM_FunctionIdType Fid)
+FIM_LOCAL_INLINE void FiM_DecreaseFidCounter(FiM_FunctionIdType Fid)
 {
-    FiM_FidCounterType counter = FiM_GetFidCounterByFid(SatelliteId, Fid);
+    FiM_SatelliteIdType satelliteId = FiM_GetSatelliteIdOfFID(Fid);
+    FiM_FidCounterType  counter     = FiM_GetFidCounterByFid(satelliteId, Fid);
     if (counter > 0u)
     {
         counter--;
-        FiM_SetFidCounter(SatelliteId, Fid, counter);
+        FiM_SetFidCounter(satelliteId, Fid, counter);
     }
 }
 
 /**
  * @brief         Increase counter
- * @param[in]     SatelliteId: Satellite id
  * @param[in]     FID: Identification of a functionality by assigned FID.
  * @reentrant     Non Reentrant
  * @synchronous   Synchronous
  * @trace       CPD-71152
  */
-FIM_LOCAL_INLINE void FiM_IncreaseFidCounter(FiM_SatelliteIdType SatelliteId, FiM_FunctionIdType Fid)
+FIM_LOCAL_INLINE void FiM_IncreaseFidCounter(FiM_FunctionIdType Fid)
 {
-    FiM_FidCounterType counter = FiM_GetFidCounterByFid(SatelliteId, Fid);
+    FiM_SatelliteIdType satelliteId = FiM_GetSatelliteIdOfFID(Fid);
+    FiM_FidCounterType  counter     = FiM_GetFidCounterByFid(satelliteId, Fid);
     if (counter < FIM_FID_COUNTER_MAX_VALUE)
     {
         counter++;
-        FiM_SetFidCounter(SatelliteId, Fid, counter);
+        FiM_SetFidCounter(satelliteId, Fid, counter);
     }
 }
 
 /**
  * @brief         Get Satellite partition current id of Event
  * @param[in]     CurrentApplication: Application id
- * @return        FiM_SatelliteIdType: Satellite Id
+ * @return        FiM_EventSatelliteIdType: event Satellite Id
  * @reentrant     Non Reentrant
  * @synchronous   Synchronous
  * @trace       CPD-71153
  */
-FIM_LOCAL_INLINE FiM_SatelliteIdType FiM_GetEventCurrentSatelliteId(ApplicationType CurrentApplication)
+FIM_LOCAL_INLINE FiM_EventSatelliteIdType FiM_GetEventCurrentSatelliteId(ApplicationType CurrentApplication)
 {
-    FiM_SatelliteIdType satelliteId;
-#if (FIM_SATELLITE_NUMBER > 1u)
+    FiM_EventSatelliteIdType           satelliteId;
     const FiM_EventSatelliteTableType* eventSatelliteTable = FiM_PBcfgPtr->EventSatelliteTable;
-    for (satelliteId = 0u; satelliteId < FIM_SATELLITE_NUMBER; ++satelliteId)
+    FiM_EventSatelliteIdType           eventSatelliteNum   = FiM_PBcfgPtr->EventSatelliteNum;
+    for (satelliteId = 0u; satelliteId < eventSatelliteNum; ++satelliteId)
     {
         if (CurrentApplication == eventSatelliteTable->ApplicationIdOfSatellite)
         {
@@ -512,15 +511,6 @@ FIM_LOCAL_INLINE FiM_SatelliteIdType FiM_GetEventCurrentSatelliteId(ApplicationT
         }
         eventSatelliteTable++;
     }
-#if (FIM_DEV_ERROR_DETECT == STD_ON)
-    if (satelliteId >= FIM_SATELLITE_NUMBER)
-    {
-        FIM_DET_REPORT(FIM_SID_INTERNALAPIID, FIM_E_INIT_FAILED);
-    }
-#endif
-#else
-    satelliteId = FIM_SATELLITE_APPLICATION_ZERO;
-#endif
     return satelliteId;
 }
 
@@ -552,7 +542,6 @@ FIM_LOCAL void FiM_DoFidCalculateByInhIndex(FiM_FidContextType FidContext)
     boolean                                oldInhibStat;
     FiM_InhCfgNumType                      inhStart         = FidContext.InhStart;
     FiM_InhCfgNumType                      inhEnd           = FidContext.InhEnd;
-    FiM_SatelliteIdType                    satelliteId      = FidContext.SatelliteId;
     Dem_MonitorStatusType                  neWMonitorStatus = FidContext.NeWMonitorStatus;
     Dem_MonitorStatusType                  oldMonitorStatus = FidContext.OldMonitorStatus;
     const FiM_InhibitionConfigurationType* inhCfgPtr        = FiM_PBcfgPtr->InhibitionConfiguration;
@@ -569,10 +558,11 @@ FIM_LOCAL void FiM_DoFidCalculateByInhIndex(FiM_FidContextType FidContext)
         oldInhibStat = ((mask & oldMonitorStatus) == result);
         if (newInhibStat == TRUE)
         {
+            FiM_SatelliteIdType satelliteId = FiM_GetSatelliteIdOfFID(fid);
             if ((oldInhibStat == FALSE) || (FIM_PREINITIALIZED == FiM_GetSatelliteInitStatus(satelliteId)))
             {
                 /** Increase counter */
-                FiM_IncreaseFidCounter(satelliteId, fid);
+                FiM_IncreaseFidCounter(fid);
             }
         }
         else
@@ -580,7 +570,7 @@ FIM_LOCAL void FiM_DoFidCalculateByInhIndex(FiM_FidContextType FidContext)
             if (oldInhibStat == TRUE)
             {
                 /** Decrease Counter */
-                FiM_DecreaseFidCounter(satelliteId, fid);
+                FiM_DecreaseFidCounter(fid);
             }
         }
     }
@@ -594,7 +584,7 @@ FIM_LOCAL void FiM_DoFidCalculateByInhIndex(FiM_FidContextType FidContext)
  * @synchronous   Synchronous
  * @trace       CPD-71133
  */
-FIM_LOCAL void FiM_CalculateByEvent(FiM_SatelliteIdType satelliteId, FiM_EventNumType EventTableRef)
+FIM_LOCAL void FiM_CalculateByEvent(FiM_EventNumType EventTableRef)
 {
     const FiM_EventTableType eventTable       = FiM_PBcfgPtr->EventTable[EventTableRef];
     Dem_MonitorStatusType    oldMonitorStatus = *(eventTable.MonitorStatus);
@@ -606,7 +596,6 @@ FIM_LOCAL void FiM_CalculateByEvent(FiM_SatelliteIdType satelliteId, FiM_EventNu
     FiM_InhRefNumType eventInhEnd   = eventTable.EventInhEnd;
 #endif
     FiM_FidContextType FidContext;
-    FidContext.SatelliteId = satelliteId;
 
     /** get monitor status for event from DEM   */
     retEnd = Dem_GetMonitorStatus(eventId, &monitorStatusEnd);
@@ -711,7 +700,6 @@ FIM_LOCAL_INLINE boolean FiM_GetComponentStatus(FiM_ComponentNumType ComponentRe
 /**
  * @brief         Dem_GetComponentFailed returns E_OK, the FIM shall consider this event in its inhibition mask
  *                calculation
- * @param[in]     SatelliteId: satellite Id
  * @param[in]     FID: Identification of a functionality by assigned FID.
  * @param[in]     ComponentStatusStart: Component Status after the Dem_GetComponentFailed call
  * @param[in]     OldComponentStatus: Component Status before the Dem_GetComponentFailed call
@@ -719,18 +707,16 @@ FIM_LOCAL_INLINE boolean FiM_GetComponentStatus(FiM_ComponentNumType ComponentRe
  * @synchronous   Synchronous
  * @trace       CPD-71135
  */
-FIM_LOCAL void FiM_ComponentResultCalculate(
-    FiM_SatelliteIdType SatelliteId,
-    FiM_FunctionIdType  FID,
-    boolean             ComponentStatusStart,
-    boolean             OldComponentStatus)
+FIM_LOCAL void
+    FiM_ComponentResultCalculate(FiM_FunctionIdType FID, boolean ComponentStatusStart, boolean OldComponentStatus)
 {
     if (ComponentStatusStart == TRUE)
     {
-        if ((OldComponentStatus == FALSE) || (FIM_PREINITIALIZED == FiM_GetSatelliteInitStatus(SatelliteId)))
+        FiM_SatelliteIdType satelliteId = FiM_GetSatelliteIdOfFID(FID);
+        if ((OldComponentStatus == FALSE) || (FIM_PREINITIALIZED == FiM_GetSatelliteInitStatus(satelliteId)))
         {
             /** Increase counter */
-            FiM_IncreaseFidCounter(SatelliteId, FID);
+            FiM_IncreaseFidCounter(FID);
         }
     }
     else
@@ -738,20 +724,19 @@ FIM_LOCAL void FiM_ComponentResultCalculate(
         if (OldComponentStatus == TRUE)
         {
             /** Decrease Counter */
-            FiM_DecreaseFidCounter(SatelliteId, FID);
+            FiM_DecreaseFidCounter(FID);
         }
     }
 }
 
 /**
  * @brief         Calculate the corresponding FID state based on the ComponentRef
- * @param[in]     satelliteId: satellite Id
  * @param[in]     ComponentRef: Component Ref value
  * @reentrant     Non Reentrant
  * @synchronous   Synchronous
  * @trace       CPD-71136
  */
-FIM_LOCAL void FiM_CalculateByComponent(FiM_SatelliteIdType satelliteId, FiM_ComponentNumType ComponentRef)
+FIM_LOCAL void FiM_CalculateByComponent(FiM_ComponentNumType ComponentRef)
 {
     FiM_ComponentTableType componentTable = FiM_PBcfgPtr->ComponentTable[ComponentRef];
     Dem_ComponentIdType    componentId    = componentTable.ComponentId;
@@ -781,7 +766,7 @@ FIM_LOCAL void FiM_CalculateByComponent(FiM_SatelliteIdType satelliteId, FiM_Com
             {
                 const FiM_InhibitionConfigurationType inhCfg = inhCfgPtr[InhRef[inhIndex]];
                 FiM_FunctionIdType                    fid    = inhCfg.InhFunctionIdRef;
-                FiM_ComponentResultCalculate(satelliteId, fid, componentStatusStart, oldComponentStatus);
+                FiM_ComponentResultCalculate(fid, componentStatusStart, oldComponentStatus);
             }
         }
         /** get status for component from DEM   */
@@ -827,7 +812,6 @@ FIM_LOCAL boolean FiM_SearchComponentTable(Dem_ComponentIdType ComponentId, FiM_
 
 /**
  * @brief         get the permission state by Fid Counter.
- * @param[in]     satelliteId: satellite Id
  * @param[in]     FID: Identification of a functionality by assigned FID.
  * @return        boolean
  * @retval        TRUE: FID has permission to run
@@ -836,10 +820,11 @@ FIM_LOCAL boolean FiM_SearchComponentTable(Dem_ComponentIdType ComponentId, FiM_
  * @synchronous   Synchronous
  * @trace       CPD-71138
  */
-FIM_LOCAL boolean FiM_GetFidPermission(FiM_SatelliteIdType satelliteId, FiM_FunctionIdType FID)
+FIM_LOCAL boolean FiM_GetFidPermission(FiM_FunctionIdType FID)
 {
-    boolean            fidPermission;
-    FiM_FidCounterType counter = FiM_GetFidCounterByFid(satelliteId, FID);
+    boolean             fidPermission;
+    FiM_SatelliteIdType satelliteId = FiM_GetSatelliteIdOfFID(FID);
+    FiM_FidCounterType  counter     = FiM_GetFidCounterByFid(satelliteId, FID);
     if (0u == counter)
     {
         fidPermission = TRUE;
@@ -1115,7 +1100,7 @@ void FiM_Init(const FiM_ConfigType* FiMConfigPtr)
         /** permission state  Availability Status use CLEARED, so not need to init again */
 
 #if (FIM_SATELLITE_NUMBER <= 1u)
-        ApplicationType applicationId = 0u;
+        ApplicationType applicationId = FIM_DEM_MASTER_APPLICATION;
 #else
         ApplicationType applicationId = GetApplicationID();
 #endif
@@ -1190,7 +1175,9 @@ void FiM_DemInitSatellite(ApplicationType ApplicationId)
     /** ***** Development Error Checks ***** */
     if (satelliteId >= FIM_SATELLITE_NUMBER)
     {
-        errorId = FIM_E_PARTITION_ERROR;
+        /** In the trigger mode, the FID can only reference and must reference the events of the corresponding
+         * partition.It is not allowed to reference events from other partitions. */
+        /** There may be no FID in this partition, so no processing will be carried out. */
     }
     else if (FIM_UNINITIALIZED == FiM_GetSatelliteInitStatus(satelliteId))
     {
@@ -1200,15 +1187,19 @@ void FiM_DemInitSatellite(ApplicationType ApplicationId)
 #endif
     {
 #if (FIM_EVENT_INHBITION == STD_ON)
-        FiM_EventSatelliteTableType eventSatelliteTable =
-            FiM_PBcfgPtr->EventSatelliteTable[FiM_GetEventCurrentSatelliteId(ApplicationId)];
-        FiM_EventNumType        eventSatStart    = eventSatelliteTable.EventSatelliteStart;
-        FiM_EventNumType        eventSatEnd      = eventSatelliteTable.EventSatelliteEnd;
-        const FiM_EventNumType* eventSatRefTable = FiM_PBcfgPtr->EventSatelliteRefTable;
-        for (; eventSatStart < eventSatEnd; ++eventSatStart)
+        FiM_EventSatelliteIdType eventSatelliteNum = FiM_PBcfgPtr->EventSatelliteNum;
+        FiM_EventSatelliteIdType eventSatelliteId  = FiM_GetEventCurrentSatelliteId(ApplicationId);
+        if (eventSatelliteNum > eventSatelliteId)
         {
-            FiM_EventNumType eventTableRef = eventSatRefTable[eventSatStart];
-            FiM_CalculateByEvent(satelliteId, eventTableRef);
+            FiM_EventSatelliteTableType eventSatelliteTable = FiM_PBcfgPtr->EventSatelliteTable[eventSatelliteId];
+            FiM_EventNumType            eventSatStart       = eventSatelliteTable.EventSatelliteStart;
+            FiM_EventNumType            eventSatEnd         = eventSatelliteTable.EventSatelliteEnd;
+            const FiM_EventNumType*     eventSatRefTable    = FiM_PBcfgPtr->EventSatelliteRefTable;
+            for (; eventSatStart < eventSatEnd; ++eventSatStart)
+            {
+                FiM_EventNumType eventTableRef = eventSatRefTable[eventSatStart];
+                FiM_CalculateByEvent(eventTableRef);
+            }
         }
 #endif
 #if (FIM_COMPONENT_INHBITION == STD_ON)
@@ -1217,11 +1208,14 @@ void FiM_DemInitSatellite(ApplicationType ApplicationId)
             FiM_ComponentNumType componentRefNum = FiM_PBcfgPtr->ComponentRefNum;
             for (FiM_ComponentNumType componentRef = 0u; componentRef < componentRefNum; ++componentRef)
             {
-                FiM_CalculateByComponent(satelliteId, componentRef);
+                FiM_CalculateByComponent(componentRef);
             }
         }
 #endif
-        FiM_SetSatelliteInitStatus(satelliteId, FIM_INITIALIZED);
+        if (satelliteId < FIM_SATELLITE_NUMBER)
+        {
+            FiM_SetSatelliteInitStatus(satelliteId, FIM_INITIALIZED);
+        }
     }
 
 #if (FIM_DEV_ERROR_DETECT == STD_ON)
@@ -1242,7 +1236,7 @@ void FiM_DemInitSatellite(ApplicationType ApplicationId)
 void FiM_DemInit(void)
 {
 #if (FIM_SATELLITE_NUMBER <= 1u)
-    ApplicationType currentApplication = 0u;
+    ApplicationType currentApplication = FIM_DEM_MASTER_APPLICATION;
 #else
     ApplicationType currentApplication = GetApplicationID();
 #endif
@@ -1262,15 +1256,13 @@ void FiM_DemInit(void)
 void FiM_DemTriggerOnMonitorStatus(Dem_EventIdType EventId)
 {
 #if (FIM_SATELLITE_NUMBER <= 1u)
-    ApplicationType applicationId = 0u;
+    ApplicationType applicationId = FIM_DEM_MASTER_APPLICATION;
 #else
     ApplicationType applicationId = GetApplicationID();
 #endif
-#if ((FIM_DEV_ERROR_DETECT == STD_ON) || (FIM_EVENT_INHBITION == STD_ON))
-    FiM_SatelliteIdType satelliteId = FiM_GetFidCurrentSatelliteId(applicationId);
-#endif
 #if (FIM_DEV_ERROR_DETECT == STD_ON)
-    uint8 errorId = FIM_E_NO_ERROR;
+    uint8               errorId     = FIM_E_NO_ERROR;
+    FiM_SatelliteIdType satelliteId = FiM_GetFidCurrentSatelliteId(applicationId);
     /** ***** Development Error Checks ***** */
     if (satelliteId >= FIM_SATELLITE_NUMBER)
     {
@@ -1291,7 +1283,7 @@ void FiM_DemTriggerOnMonitorStatus(Dem_EventIdType EventId)
         FiM_EventNumType eventTableRef;
         if (TRUE == FiM_SearchEventTable(EventId, &eventTableRef))
         {
-            FiM_CalculateByEvent(satelliteId, eventTableRef);
+            FiM_CalculateByEvent(eventTableRef);
         }
 #endif
     }
@@ -1316,15 +1308,13 @@ void FiM_DemTriggerOnMonitorStatus(Dem_EventIdType EventId)
 void FiM_DemTriggerOnComponentStatus(Dem_ComponentIdType ComponentId, boolean ComponentFailedStatus)
 {
 #if (FIM_SATELLITE_NUMBER <= 1u)
-    ApplicationType applicationId = 0u;
+    ApplicationType applicationId = FIM_DEM_MASTER_APPLICATION;
 #else
     ApplicationType applicationId = GetApplicationID();
 #endif
-#if ((FIM_DEV_ERROR_DETECT == STD_ON) || (FIM_COMPONENT_INHBITION == STD_ON))
-    FiM_SatelliteIdType satelliteId = FiM_GetFidCurrentSatelliteId(applicationId);
-#endif
 #if (FIM_DEV_ERROR_DETECT == STD_ON)
-    uint8 errorId = FIM_E_NO_ERROR;
+    uint8               errorId     = FIM_E_NO_ERROR;
+    FiM_SatelliteIdType satelliteId = FiM_GetFidCurrentSatelliteId(applicationId);
 
     /** ***** Development Error Checks ***** */
     if (satelliteId >= FIM_SATELLITE_NUMBER)
@@ -1348,7 +1338,7 @@ void FiM_DemTriggerOnComponentStatus(Dem_ComponentIdType ComponentId, boolean Co
             FiM_ComponentNumType componentRef;
             if (TRUE == FiM_SearchComponentTable(ComponentId, &componentRef))
             {
-                FiM_CalculateByComponent(satelliteId, componentRef);
+                FiM_CalculateByComponent(componentRef);
             }
         }
 #endif
@@ -1384,33 +1374,33 @@ Std_ReturnType FiM_GetFunctionPermission(FiM_FunctionIdType FID, boolean* Permis
 {
     Std_ReturnType ret;
 #if (FIM_SATELLITE_NUMBER <= 1u)
-    ApplicationType applicationId = 0u;
+    ApplicationType applicationId = FIM_DEM_MASTER_APPLICATION;
 #else
     ApplicationType applicationId = GetApplicationID();
 #endif
-#if ((FIM_DEV_ERROR_DETECT == STD_ON) || (FIM_EVENT_UPDATE_TRIGGERED_BY_DEM == STD_ON))
-    FiM_SatelliteIdType satelliteId = FiM_GetFidCurrentSatelliteId(applicationId);
-#endif
 #if (FIM_DEV_ERROR_DETECT == STD_ON)
-    uint8 errorId = FIM_E_NO_ERROR;
-    ret           = E_NOT_OK;
+    uint8               errorId     = FIM_E_NO_ERROR;
+    FiM_SatelliteIdType satelliteId = FiM_GetFidCurrentSatelliteId(applicationId);
+    ret                             = E_NOT_OK;
     /** ***** Development Error Checks ***** */
     if (NULL_PTR == Permission)
     {
         errorId = FIM_E_PARAM_POINTER;
     }
-    else if (satelliteId >= FIM_SATELLITE_NUMBER) /* PRQA S 2992,2996 */ /* VL_FiM_2992,VL_Dcm_2996 */
+    else if ((FIM_FID_NUM < FID) || (FIM_FUNCTION_ID_INVALID == FID))
+    {
+        errorId     = FIM_E_FID_OUT_OF_RANGE;
+        *Permission = FALSE;
+    }
+    /* PRQA S 2992,2996 ++ */ /* VL_FiM_2992,VL_FiM_2996 */
+    else if ((satelliteId >= FIM_SATELLITE_NUMBER) || (satelliteId != FiM_GetSatelliteIdOfFID(FID)))
+    /* PRQA S 2992,2996 -- */
     {
         errorId = FIM_E_PARTITION_ERROR;
     }
     else if (FIM_INITIALIZED != FiM_GetSatelliteInitStatus(satelliteId)) /* PRQA S 1252 */ /* VL_QAC_1252 */
     {
         errorId     = FIM_E_UNINIT;
-        *Permission = FALSE;
-    }
-    else if ((FIM_FID_NUM < FID) || (FIM_FUNCTION_ID_INVALID == FID))
-    {
-        errorId     = FIM_E_FID_OUT_OF_RANGE;
         *Permission = FALSE;
     }
     else
@@ -1425,7 +1415,7 @@ Std_ReturnType FiM_GetFunctionPermission(FiM_FunctionIdType FID, boolean* Permis
 #endif
     {
 #if (FIM_EVENT_UPDATE_TRIGGERED_BY_DEM == STD_ON)
-        *Permission = FiM_GetFidPermission(satelliteId, FID);
+        *Permission = FiM_GetFidPermission(FID);
 #else
 #if (FIM_FEATURE_POLLING_MODE_ASY == STD_ON)
         *Permission = FiM_GetFidPermissionFlag(FID);
@@ -1467,24 +1457,26 @@ Std_ReturnType FiM_SetFunctionAvailable(FiM_FunctionIdType FID, boolean Availabi
 #if (FIM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = FIM_E_NO_ERROR;
 #if (FIM_SATELLITE_NUMBER <= 1u)
-    ApplicationType applicationId = 0u;
+    ApplicationType applicationId = FIM_DEM_MASTER_APPLICATION;
 #else
     ApplicationType applicationId = GetApplicationID();
 #endif
     FiM_SatelliteIdType satelliteId = FiM_GetFidCurrentSatelliteId(applicationId);
     ret                             = E_NOT_OK;
     /** ***** Development Error Checks ***** */
-    if (satelliteId >= FIM_SATELLITE_NUMBER) /* PRQA S 2992,2996 */ /* VL_FiM_2992,VL_Dcm_2996 */
+    /* PRQA S 2992,2996 ++ */ /* VL_FiM_2992,VL_FiM_2996 */
+    if ((satelliteId >= FIM_SATELLITE_NUMBER) || (satelliteId != FiM_GetSatelliteIdOfFID(FID)))
+    /* PRQA S 2992,2996 -- */
     {
         errorId = FIM_E_PARTITION_ERROR;
-    }
-    else if (FIM_INITIALIZED != FiM_GetSatelliteInitStatus(satelliteId)) /* PRQA S 1252 */ /* VL_QAC_1252 */
-    {
-        errorId = FIM_E_UNINIT;
     }
     else if ((FIM_FID_NUM < FID) || (FIM_FUNCTION_ID_INVALID == FID))
     {
         errorId = FIM_E_FID_OUT_OF_RANGE;
+    }
+    else if (FIM_INITIALIZED != FiM_GetSatelliteInitStatus(satelliteId)) /* PRQA S 1252 */ /* VL_QAC_1252 */
+    {
+        errorId = FIM_E_UNINIT;
     }
     else
 #endif
@@ -1543,12 +1535,12 @@ void FiM_MainFunction(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
 {
 #if (FIM_FEATURE_POLLING_MODE_ASY == STD_ON)
 #if (FIM_SATELLITE_NUMBER <= 1u)
-    ApplicationType applicationId = 0u;
+    ApplicationType applicationId = FIM_DEM_MASTER_APPLICATION;
 #else
     ApplicationType applicationId = GetApplicationID();
 #endif
     FiM_SatelliteIdType satelliteId = FiM_GetFidCurrentSatelliteId(applicationId);
-    if (satelliteId >= FIM_SATELLITE_NUMBER) /* PRQA S 2992,2996 */ /* VL_FiM_2992,VL_Dcm_2996 */
+    if (satelliteId >= FIM_SATELLITE_NUMBER) /* PRQA S 2992,2996 */ /* VL_FiM_2992,VL_FiM_2996 */
     {
 #if (FIM_DEV_ERROR_DETECT == STD_ON)
         FIM_DET_REPORT(FIM_SID_MAINFUNCTION, FIM_E_PARTITION_ERROR);
