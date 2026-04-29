@@ -1,6 +1,6 @@
 /* PRQA S 3108++ */
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -188,6 +188,11 @@
 #define DLT_DET_APPLID_DESC_LENGTH    0x0Au
 #define DLT_DET_CONTEXTID_DESC_LENGTH 0x04u
 
+#define DLT_OPTIONS_MESSAGE_TYPE_MASK       0x0Eu
+#define DLT_OPTIONS_MESSAGE_TYPE_RESET_MASK 0xF1u
+#define DLT_OPTIONS_VERBOSE_MODE_MASK       0x01u
+#define DLT_OPTIONS_VERBOSE_MODE_RESET_MASK 0xFEu
+
 typedef enum
 {
     DLT_LOG_DATA     = 0u,
@@ -313,7 +318,6 @@ typedef struct
     uint16  RxLength;
     uint16  RxOffset;
     boolean Used;
-    boolean NeedDeal;
 #if (DLT_BUFFER_MAX_LENGTH > 0)
     uint8 RxBuffer[DLT_BUFFER_MAX_LENGTH];
 #endif
@@ -336,6 +340,33 @@ typedef struct
     uint32            timestamp;
 } Dlt_CreateStandardHeaderInfoTypes;
 
+typedef union
+{
+    uint32 AllBits;
+    struct
+    {
+#if (CPU_BYTE_ORDER == LOW_BYTE_FIRST)
+        uint32 UEH     : 1;
+        uint32 MSBF    : 1;
+        uint32 WEID    : 1;
+        uint32 WSID    : 1;
+        uint32 WTMS    : 1;
+        uint32 VERS    : 3;
+        uint32 ErrFlag : 8;
+        uint32 status  : 16;
+#else
+        uint32 status  : 16;
+        uint32 ErrFlag : 8;
+        uint32 VERS    : 3;
+        uint32 WTMS    : 1;
+        uint32 WSID    : 1;
+        uint32 WEID    : 1;
+        uint32 MSBF    : 1;
+        uint32 UEH     : 1;
+#endif
+    } Bits;
+} Dlt_OptionalFlagType;
+
 #if ((DLT_RX_DATA_PATH_SUPPORT == STD_ON) && (DLT_RXPDU_NUM > 0))
 extern VAR(Dlt_RxStatusTypes, AUTOMATIC) Dlt_RxStatus[DLT_RXPDU_NUM];
 #endif
@@ -350,6 +381,17 @@ extern P2CONST(Dlt_ConfigType, AUTOMATIC, DLT_APPL_CONST) Dlt_ConfigPtr;
 #if (DLT_CHANNEL_NUM > 0)
 extern VAR(Dlt_ChannelType, AUTOMATIC) Dlt_Channel[DLT_CHANNEL_NUM];
 #endif
+
+static inline void Dlt_GetOptionFlag(Dlt_OptionalFlagType* OptionFlagPtr)
+{
+    const Dlt_ProtocolType* protocolPtr = Dlt_ConfigPtr->Protocol;
+    OptionFlagPtr->Bits.UEH =
+        ((protocolPtr->DltUseExtHeaderInNonVerbMode == TRUE) && (protocolPtr->DltUseVerboseMode == TRUE)) ? 1u : 0u;
+    OptionFlagPtr->Bits.WEID    = (protocolPtr->DltHeaderUseEcuId == TRUE) ? 1u : 0u;
+    OptionFlagPtr->Bits.WSID    = (protocolPtr->DltHeaderUseSessionID == TRUE) ? 1u : 0u;
+    OptionFlagPtr->Bits.WTMS    = (protocolPtr->DltHeaderUseTimestamp == TRUE) ? 1u : 0u;
+    OptionFlagPtr->Bits.ErrFlag = 0u;
+}
 
 extern FUNC(void, DLT_CODE) Dlt_GetChannelIndex(
     uint16                SwcIndex,
@@ -393,7 +435,8 @@ extern FUNC(void, DLT_CODE) Dlt_CopyArrayToIntBigEndian(
 /* PRQA S 3432-- */ /* MISRA Rule 20.7 */
 
 extern FUNC(uint32, DLT_CODE) Dlt_GetEcuId(void);
-extern FUNC(uint16, DLT_CODE) Dlt_GetMessageLength(boolean VerboseMode, uint16 PayloadLength);
+extern FUNC(uint16, DLT_CODE)
+    Dlt_GetMessageLength(boolean VerboseMode, uint16 PayloadLength, Dlt_OptionalFlagType OptionFlag);
 extern FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_InterSetLogLevel(
     uint16                  ChannelIndex,
     Dlt_ApplicationIDType   appId,
@@ -408,18 +451,21 @@ extern FUNC(Std_ReturnType, DLT_CODE) Dlt_SendGetLogInfo(uint8 options, uint16 S
 extern FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_InterSetLogChannelAssignment(
     Dlt_ApplicationIDType   appId,
     Dlt_ContextIDType       contextId,
-    Dlt_LogChannelNameType  logChannelName,
+    uint32                  channelId,
     Dlt_AssignmentOperation addRemoveOp);
 #if (DLT_NVM_RAM_SUPPORT == STD_ON)
 extern FUNC(Std_ReturnType, DLT_CODE) Dlt_Store(void);
 #endif
-extern FUNC(uint16, DLT_CODE) Dlt_GetChannelIndexByChannelName(Dlt_LogChannelNameType DltLogChannelId);
+extern FUNC(uint16, DLT_CODE) Dlt_GetChannelIndexByChannelName(uint32 DltLogChannelId);
 extern FUNC(uint16, DLT_CODE) Dlt_GetChannelIndexByTxPduId(PduIdType id);
 extern FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_DealRxData(uint16 RxIndex, const uint8* Data, uint16 Length);
 extern FUNC(uint32, DLT_CODE) Dlt_GetTimeElapsed(void);
 extern FUNC(void, DLT_CODE) Dlt_Init_From_Cfg(const Dlt_ConfigType* config);
-extern FUNC(void, DLT_CODE)
-    Dlt_CreateControlStandardHeader(const Dlt_CreateStandardHeaderInfoTypes* CreateStandardHeader, uint8* Dest);
+extern FUNC(void, DLT_CODE) Dlt_CreateControlStandardHeader(
+    Dlt_CreateStandardHeaderInfoTypes* CreateStandardHeader,
+    uint8*                             Dest,
+    uint16*                            CorrectionLength,
+    Dlt_OptionalFlagType               OptionFlag);
 extern FUNC(void, DLT_CODE)
     Dlt_CreateControlExtendedHeader(const Dlt_CreateExtendedHeaderInfoTypes* CreateExtendedHeader, uint8* Dest);
 extern FUNC(void, DLT_CODE) Dlt_MoveReadIndex(uint16 ChannelIndex, uint32 length);

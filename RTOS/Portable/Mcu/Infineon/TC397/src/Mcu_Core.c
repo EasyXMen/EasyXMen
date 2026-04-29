@@ -1,6 +1,5 @@
-/*******************************************************************************
-**                                                                            **
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+/**
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -11,8 +10,8 @@
  * You should have received a copy of the GNU Lesser General Public License along with this library;
  * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  * or see <https://www.gnu.org/licenses/>.
-**                                                                            **
-********************************************************************************
+ */
+/*******************************************************************************
 **                                                                            **
 **  FILENAME    :  Mcu_Core.c                                                 **
 **                                                                            **
@@ -31,21 +30,13 @@
 /*=======[M A C R O S]========================================================*/
 #define CPU_SYSCON_BITS (24U)
 #define REQSLP_MASK     (0xfffffffcu)
+#define REQSLP_IDLE_VALUE  (0x01u)
 #define DeviceNumber    (8u)
-#define OS_CPU0_CPU_ID  (0xF881FE18u)
-#define OS_CPU1_CPU_ID  (0xF883FE18u)
-#define OS_CPU2_CPU_ID  (0xF885FE18u)
-#define OS_CPU3_CPU_ID  (0xF887FE18u)
-#define OS_CPU4_CPU_ID  (0xF889FE18u)
-#define OS_CPU5_CPU_ID  (0xF88DFE18u)
-#define PMU0_ID         (0xF8038508U)
-#define SMU_ID          (0xF0036808U)
-#define LMU0_MODID      (0xF8100008U)
 #define OS_CPU_ID_RST   (0x00C0C021U)
 #define PMU0_ID_RST     (0x00E6C001U)
 #define SMU_ID_RST      (0x0089C001U)
 #define LMU0_MODID_RST  (0x0088C002U)
-#define CPU_ID_REG      (0xFE18U)
+
 /*=======[E X T E R N A L   D A T A]==========================================*/
 
 /*=======[I N T E R N A L   D A T A]==========================================*/
@@ -55,33 +46,64 @@ static Os_CoreModeType Os_CpuCoreState[CFG_CORE_MAX];
 #define OS_STOP_SEC_VAR_CLEARED_GLOBAL_UNSPECIFIED
 #include "Os_MemMap.h"
 
+/* PRQA S 3218 ++ */ /* VL_Os_3218 */
 #if (TRUE == CFG_CORE0_AUTOSAROS_ENABLE)
 #define OS_START_SEC_VAR_CLEARED_CORE0_32
 #include "Os_MemMap.h"
-/* PRQA S 3218 ++ */ /* VL_Os_3218 */
 static uint32 Os_IsrNestPcxStackCore0[CFG_ISR_MAX_CORE0];
-/* PRQA S 3218 -- */
 #define OS_STOP_SEC_VAR_CLEARED_CORE0_32
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_VAR_CLEARED_CORE0_UNSPECIFIED
+#include "Os_MemMap.h"
+static Os_TaskCBExtType Os_TaskCBExtCore0[CFG_TASK_MAX_CORE0];
+#define OS_STOP_SEC_VAR_CLEARED_CORE0_UNSPECIFIED
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_VAR_CLEARED_CORE0_UNSPECIFIED
+#include "Os_MemMap.h"
+static OS_ALIGN(64) Os_ArchCsaType Os_Csas_Core0[CFG_CSA_MAX_CORE0];
+#define OS_STOP_SEC_VAR_CLEARED_CORE0_UNSPECIFIED
 #include "Os_MemMap.h"
 #endif /* TRUE == CFG_CORE0_AUTOSAROS_ENABLE */
 
 #if (TRUE == CFG_CORE1_AUTOSAROS_ENABLE)
 #define OS_START_SEC_VAR_CLEARED_CORE1_32
 #include "Os_MemMap.h"
-/* PRQA S 3218 ++ */ /* VL_Os_3218 */
 static uint32 Os_IsrNestPcxStackCore1[CFG_ISR_MAX_CORE1];
-/* PRQA S 3218 -- */
 #define OS_STOP_SEC_VAR_CLEARED_CORE1_32
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_VAR_CLEARED_CORE1_UNSPECIFIED
+#include "Os_MemMap.h"
+static Os_TaskCBExtType Os_TaskCBExtCore1[CFG_TASK_MAX_CORE1];
+#define OS_STOP_SEC_VAR_CLEARED_CORE1_UNSPECIFIED
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_VAR_CLEARED_CORE1_UNSPECIFIED
+#include "Os_MemMap.h"
+static OS_ALIGN(64) Os_ArchCsaType Os_Csas_Core1[CFG_CSA_MAX_CORE1];
+#define OS_STOP_SEC_VAR_CLEARED_CORE1_UNSPECIFIED
 #include "Os_MemMap.h"
 #endif /* TRUE == CFG_CORE1_AUTOSAROS_ENABLE */
 
 #if (TRUE == CFG_CORE2_AUTOSAROS_ENABLE)
 #define OS_START_SEC_VAR_CLEARED_CORE2_32
 #include "Os_MemMap.h"
-/* PRQA S 3218 ++ */ /* VL_Os_3218 */
 static uint32 Os_IsrNestPcxStackCore2[CFG_ISR_MAX_CORE2];
-/* PRQA S 3218 -- */
 #define OS_STOP_SEC_VAR_CLEARED_CORE2_32
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_VAR_CLEARED_CORE2_UNSPECIFIED
+#include "Os_MemMap.h"
+static Os_TaskCBExtType Os_TaskCBExtCore2[CFG_TASK_MAX_CORE2];
+#define OS_STOP_SEC_VAR_CLEARED_CORE2_UNSPECIFIED
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_VAR_CLEARED_CORE2_UNSPECIFIED
+#include "Os_MemMap.h"
+static OS_ALIGN(64) Os_ArchCsaType Os_Csas_Core2[CFG_CSA_MAX_CORE2];
+#define OS_STOP_SEC_VAR_CLEARED_CORE2_UNSPECIFIED
 #include "Os_MemMap.h"
 #endif /* TRUE == CFG_CORE2_AUTOSAROS_ENABLE */
 
@@ -91,7 +113,19 @@ static uint32 Os_IsrNestPcxStackCore2[CFG_ISR_MAX_CORE2];
 static uint32 Os_IsrNestPcxStackCore3[CFG_ISR_MAX_CORE3];
 #define OS_STOP_SEC_VAR_CLEARED_CORE3_32
 #include "Os_MemMap.h"
-#endif
+
+#define OS_START_SEC_VAR_CLEARED_CORE3_UNSPECIFIED
+#include "Os_MemMap.h"
+static Os_TaskCBExtType Os_TaskCBExtCore3[CFG_TASK_MAX_CORE3];
+#define OS_STOP_SEC_VAR_CLEARED_CORE3_UNSPECIFIED
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_VAR_CLEARED_CORE3_UNSPECIFIED
+#include "Os_MemMap.h"
+static OS_ALIGN(64) Os_ArchCsaType Os_Csas_Core3[CFG_CSA_MAX_CORE3];
+#define OS_STOP_SEC_VAR_CLEARED_CORE3_UNSPECIFIED
+#include "Os_MemMap.h"
+#endif /* TRUE == CFG_CORE3_AUTOSAROS_ENABLE */
 
 #if (TRUE == CFG_CORE4_AUTOSAROS_ENABLE)
 #define OS_START_SEC_VAR_CLEARED_CORE4_32
@@ -99,7 +133,19 @@ static uint32 Os_IsrNestPcxStackCore3[CFG_ISR_MAX_CORE3];
 static uint32 Os_IsrNestPcxStackCore4[CFG_ISR_MAX_CORE4];
 #define OS_STOP_SEC_VAR_CLEARED_CORE4_32
 #include "Os_MemMap.h"
-#endif
+
+#define OS_START_SEC_VAR_CLEARED_CORE4_UNSPECIFIED
+#include "Os_MemMap.h"
+static Os_TaskCBExtType Os_TaskCBExtCore4[CFG_TASK_MAX_CORE4];
+#define OS_STOP_SEC_VAR_CLEARED_CORE4_UNSPECIFIED
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_VAR_CLEARED_CORE4_UNSPECIFIED
+#include "Os_MemMap.h"
+static OS_ALIGN(64) Os_ArchCsaType Os_Csas_Core4[CFG_CSA_MAX_CORE4];
+#define OS_STOP_SEC_VAR_CLEARED_CORE4_UNSPECIFIED
+#include "Os_MemMap.h"
+#endif /* TRUE == CFG_CORE4_AUTOSAROS_ENABLE */
 
 #if (TRUE == CFG_CORE5_AUTOSAROS_ENABLE)
 #define OS_START_SEC_VAR_CLEARED_CORE5_32
@@ -107,115 +153,20 @@ static uint32 Os_IsrNestPcxStackCore4[CFG_ISR_MAX_CORE4];
 static uint32 Os_IsrNestPcxStackCore5[CFG_ISR_MAX_CORE5];
 #define OS_STOP_SEC_VAR_CLEARED_CORE5_32
 #include "Os_MemMap.h"
-#endif
 
-#if (TRUE == CFG_CORE0_AUTOSAROS_ENABLE)
-#define OS_START_SEC_VAR_CLEARED_CORE0_UNSPECIFIED
-#include "Os_MemMap.h"
-/* PRQA S 3218 ++ */ /* VL_Os_3218 */
-static Os_TaskCBExtType Os_TaskCBExtCore0[CFG_TASK_MAX_CORE0];
-/* PRQA S 3218 -- */
-#define OS_STOP_SEC_VAR_CLEARED_CORE0_UNSPECIFIED
-#include "Os_MemMap.h"
-#endif
-
-#if (TRUE == CFG_CORE1_AUTOSAROS_ENABLE)
-#define OS_START_SEC_VAR_CLEARED_CORE1_UNSPECIFIED
-#include "Os_MemMap.h"
-/* PRQA S 3218 ++ */ /* VL_Os_3218 */
-static Os_TaskCBExtType Os_TaskCBExtCore1[CFG_TASK_MAX_CORE1];
-/* PRQA S 3218 -- */
-#define OS_STOP_SEC_VAR_CLEARED_CORE1_UNSPECIFIED
-#include "Os_MemMap.h"
-#endif
-
-#if (TRUE == CFG_CORE2_AUTOSAROS_ENABLE)
-#define OS_START_SEC_VAR_CLEARED_CORE2_UNSPECIFIED
-#include "Os_MemMap.h"
-/* PRQA S 3218 ++ */ /* VL_Os_3218 */
-static Os_TaskCBExtType Os_TaskCBExtCore2[CFG_TASK_MAX_CORE2];
-/* PRQA S 3218 -- */
-#define OS_STOP_SEC_VAR_CLEARED_CORE2_UNSPECIFIED
-#include "Os_MemMap.h"
-#endif
-
-#if (TRUE == CFG_CORE3_AUTOSAROS_ENABLE)
-#define OS_START_SEC_VAR_CLEARED_CORE3_UNSPECIFIED
-#include "Os_MemMap.h"
-static Os_TaskCBExtType Os_TaskCBExtCore3[CFG_TASK_MAX_CORE3];
-#define OS_STOP_SEC_VAR_CLEARED_CORE3_UNSPECIFIED
-#include "Os_MemMap.h"
-#endif
-
-#if (TRUE == CFG_CORE4_AUTOSAROS_ENABLE)
-#define OS_START_SEC_VAR_CLEARED_CORE4_UNSPECIFIED
-#include "Os_MemMap.h"
-static Os_TaskCBExtType Os_TaskCBExtCore4[CFG_TASK_MAX_CORE4];
-#define OS_STOP_SEC_VAR_CLEARED_CORE4_UNSPECIFIED
-#include "Os_MemMap.h"
-#endif
-
-#if (TRUE == CFG_CORE5_AUTOSAROS_ENABLE)
 #define OS_START_SEC_VAR_CLEARED_CORE5_UNSPECIFIED
 #include "Os_MemMap.h"
 static Os_TaskCBExtType Os_TaskCBExtCore5[CFG_TASK_MAX_CORE5];
 #define OS_STOP_SEC_VAR_CLEARED_CORE5_UNSPECIFIED
 #include "Os_MemMap.h"
-#endif
 
-#if (TRUE == CFG_CORE0_AUTOSAROS_ENABLE)
-#define OS_START_SEC_VAR_CLEARED_CORE0_UNSPECIFIED
-#include "Os_MemMap.h"
-/* PRQA S 3218 ++ */ /* VL_Os_3218 */
-static OS_ALIGN(64) Os_ArchCsaType Os_Csas_Core0[CFG_CSA_MAX_CORE0];
-/* PRQA S 3218 -- */
-#define OS_STOP_SEC_VAR_CLEARED_CORE0_UNSPECIFIED
-#include "Os_MemMap.h"
-#endif
-
-#if (TRUE == CFG_CORE1_AUTOSAROS_ENABLE)
-#define OS_START_SEC_VAR_CLEARED_CORE1_UNSPECIFIED
-#include "Os_MemMap.h"
-/* PRQA S 3218 ++ */ /* VL_Os_3218 */
-static OS_ALIGN(64) Os_ArchCsaType Os_Csas_Core1[CFG_CSA_MAX_CORE1];
-/* PRQA S 3218 -- */
-#define OS_STOP_SEC_VAR_CLEARED_CORE1_UNSPECIFIED
-#include "Os_MemMap.h"
-#endif
-
-#if (TRUE == CFG_CORE2_AUTOSAROS_ENABLE)
-#define OS_START_SEC_VAR_CLEARED_CORE2_UNSPECIFIED
-#include "Os_MemMap.h"
-/* PRQA S 3218 ++ */ /* VL_Os_3218 */
-static OS_ALIGN(64) Os_ArchCsaType Os_Csas_Core2[CFG_CSA_MAX_CORE2];
-/* PRQA S 3218 -- */
-#define OS_STOP_SEC_VAR_CLEARED_CORE2_UNSPECIFIED
-#include "Os_MemMap.h"
-#endif /* TRUE == CFG_CORE2_AUTOSAROS_ENABLE */
-
-#if (TRUE == CFG_CORE3_AUTOSAROS_ENABLE)
-#define OS_START_SEC_VAR_CLEARED_CORE3_UNSPECIFIED
-#include "Os_MemMap.h"
-static OS_ALIGN(64) Os_ArchCsaType Os_Csas_Core3[CFG_CSA_MAX_CORE3];
-#define OS_STOP_SEC_VAR_CLEARED_CORE3_UNSPECIFIED
-#include "Os_MemMap.h"
-#endif
-
-#if (TRUE == CFG_CORE4_AUTOSAROS_ENABLE)
-#define OS_START_SEC_VAR_CLEARED_CORE4_UNSPECIFIED
-#include "Os_MemMap.h"
-static OS_ALIGN(64) Os_ArchCsaType Os_Csas_Core4[CFG_CSA_MAX_CORE4];
-#define OS_STOP_SEC_VAR_CLEARED_CORE4_UNSPECIFIED
-#include "Os_MemMap.h"
-#endif
-
-#if (TRUE == CFG_CORE5_AUTOSAROS_ENABLE)
 #define OS_START_SEC_VAR_CLEARED_CORE5_UNSPECIFIED
 #include "Os_MemMap.h"
 static OS_ALIGN(64) Os_ArchCsaType Os_Csas_Core5[CFG_CSA_MAX_CORE5];
 #define OS_STOP_SEC_VAR_CLEARED_CORE5_UNSPECIFIED
 #include "Os_MemMap.h"
-#endif
+#endif /* TRUE == CFG_CORE5_AUTOSAROS_ENABLE */
+/* PRQA S 3218 -- */
 
 /*=======[F U N C T I O N   I M P L E M E N T A T I O N S]====================*/
 #define OS_START_SEC_CODE
@@ -264,6 +215,9 @@ void Os_MultiCoreInitProcessor(void)
 #if (TRUE == CFG_MEMORY_PROTECTION_ENABLE)
         Os_IsrDAddr  = Os_Isr_DAddr_Core0;
         Os_TaskDAddr = Os_Task_DAddr_Core0;
+#endif
+#if (TRUE == CFG_SYSTEM_TIMER_ENABLE)
+        Os_SetSystemClock();
 #endif
         break;
 #endif
@@ -339,11 +293,11 @@ void Os_MultiCoreInitProcessor(void)
         break;
     }
 #if (TRUE == CFG_SYSTEM_TIMER_ENABLE)
-    Os_ArchInitSystemTimer();
+    Os_InitSystemTimer();
 #endif
 
 #if (TRUE == CFG_TIMING_PROTECTION_ENABLE)
-    Os_ArchInitTimingProtTimer();
+    Os_InitTimingProtTimer();
 #endif
 }
 #define OS_STOP_SEC_CODE
@@ -554,7 +508,7 @@ boolean Os_SetCoreMode(Os_CoreIdType core, Os_CoreModeType coreMode)
                     Os_ArchResetENDINIT(); /* PRQA S 3469 */ /* VL_Os_3469 */
                     temp = *pmcsr; /* PRQA S 3345 */         /* VL_Os_3345 */
                     temp &= REQSLP_MASK; /* PRQA S 3442 */   /* VL_Os_3442 */
-                    temp |= 0x00000001u; /* PRQA S 3442 */   /* VL_Os_3442 */
+                    temp |= REQSLP_IDLE_VALUE; /* PRQA S 3442 */   /* VL_Os_3442 */
                     *pmcsr = temp; /* PRQA S 3345 */         /* VL_Os_3345 */
                     Os_ArchSetENDINIT(); /* PRQA S 3469 */   /* VL_Os_3469 */
                 }

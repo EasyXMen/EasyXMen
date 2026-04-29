@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -86,9 +86,9 @@ CANTP_LOCAL_INLINE void CANTP_DET_REPORTERROR(uint8 ApiId, uint8 ErrorId)
 CANTP_LOCAL_INLINE uint16 CanTp_InternalRxNSduIndex(const PduIdType rxNSduId)
 {
     uint16 index;
-    for (index = 0u; index < CanTp_ConfigPtr->CanTp_RxNSduNum; index++)
+    for (index = 0u; index < CanTp_ConfigPtr->CanTpRxNSduNum; index++)
     {
-        if (rxNSduId == CanTp_ConfigPtr->CanTp_RxNSduMapping[index])
+        if (rxNSduId == CanTp_ConfigPtr->CanTpRxNSduMapping[index])
         {
             break;
         }
@@ -107,9 +107,9 @@ CANTP_LOCAL_INLINE uint16 CanTp_InternalRxNSduIndex(const PduIdType rxNSduId)
 CANTP_LOCAL_INLINE uint16 CanTp_InternalTxNSduIndex(const PduIdType txNSduId)
 {
     uint16 index;
-    for (index = 0u; index < CanTp_ConfigPtr->CanTp_TxNSduNum; index++)
+    for (index = 0u; index < CanTp_ConfigPtr->CanTpTxNSduNum; index++)
     {
-        if (txNSduId == CanTp_ConfigPtr->CanTp_TxNSduMapping[index])
+        if (txNSduId == CanTp_ConfigPtr->CanTpTxNSduMapping[index])
         {
             break;
         }
@@ -127,9 +127,9 @@ CANTP_LOCAL_INLINE uint16 CanTp_InternalTxNSduIndex(const PduIdType txNSduId)
 CANTP_LOCAL_INLINE uint16 CanTp_InternalRxPduIndex(const PduIdType rxPduId)
 {
     uint16 index;
-    for (index = 0u; index < CanTp_ConfigPtr->CanTp_RxNPduNum; index++)
+    for (index = 0u; index < CanTp_ConfigPtr->CanTpRxNPduNum; index++)
     {
-        if (rxPduId == CanTp_ConfigPtr->CanTp_RxNPduMapping[index])
+        if (rxPduId == CanTp_ConfigPtr->CanTpRxNPduMapping[index])
         {
             break;
         }
@@ -148,9 +148,9 @@ CANTP_LOCAL_INLINE uint16 CanTp_InternalRxPduIndex(const PduIdType rxPduId)
 CANTP_LOCAL_INLINE uint16 CanTp_InternalTxPduIndex(const PduIdType txPduId)
 {
     uint16 index;
-    for (index = 0u; index < CanTp_ConfigPtr->CanTp_TxNPduNum; index++)
+    for (index = 0u; index < CanTp_ConfigPtr->CanTpTxNPduNum; index++)
     {
-        if (txPduId == CanTp_ConfigPtr->CanTp_TxNPduMapping[index])
+        if (txPduId == CanTp_ConfigPtr->CanTpTxNPduMapping[index])
         {
             break;
         }
@@ -172,7 +172,7 @@ CANTP_LOCAL_INLINE uint8 CanTp_GetTxNSduIndex_FC(const PduIdType rxPduId)
 #if (CANTP_SUPPORT_VARIANT == STD_ON)
     index = CanTp_InternalRxPduIndex(rxPduId);
 #endif
-    return CanTp_ConfigPtr->CanTp_RxPduMap[index].TxNSduFc_index;
+    return CanTp_ConfigPtr->RxPduMap[index].TxNSduFc_index;
 }
 /**
  * @brief       Get corresponding RxNSdu index according to FC TxPduId
@@ -189,7 +189,7 @@ CANTP_LOCAL_INLINE uint8 CanTp_GetRxNSduIndex_FC(const PduIdType txPduId)
 #if (CANTP_SUPPORT_VARIANT == STD_ON)
     index = CanTp_InternalTxPduIndex(txPduId);
 #endif
-    return CanTp_ConfigPtr->CanTp_TxPduMap[index].RxNSduFc_index;
+    return CanTp_ConfigPtr->TxPduMap[index].RxNSduFc_index;
 }
 /**
  * @brief       Get corresponding TxNSdu index when transmition
@@ -205,7 +205,7 @@ CANTP_LOCAL_INLINE uint8 CanTp_GetTxNSduIndex(const PduIdType txPduId)
 #if (CANTP_SUPPORT_VARIANT == STD_ON)
     index = CanTp_InternalTxPduIndex(txPduId);
 #endif
-    return CanTp_ConfigPtr->CanTp_TxPduMap[index].TxNSdu_index;
+    return CanTp_ConfigPtr->TxPduMap[index].TxNSdu_index;
 }
 
 /**
@@ -222,7 +222,7 @@ CANTP_LOCAL_INLINE uint8 CanTp_GetRxNSduIndex(const PduIdType rxPduId)
 #if (CANTP_SUPPORT_VARIANT == STD_ON)
     index = CanTp_InternalRxPduIndex(rxPduId);
 #endif
-    return CanTp_ConfigPtr->CanTp_RxPduMap[index].RxNSdu_index;
+    return CanTp_ConfigPtr->RxPduMap[index].RxNSdu_index;
 }
 /* PRQA S 4461 -- */
 
@@ -237,11 +237,7 @@ CANTP_LOCAL_INLINE uint8 CanTp_GetRxNSduIndex(const PduIdType rxPduId)
 /* PRQA S 5016 ++ */ /* VL_CanTp_5016 */
 CANTP_LOCAL_INLINE const CanTp_RxNSduType* CanTp_GetRxNSduCfg(const PduIdType rxNSduId)
 {
-    const CanTp_RxNSduType* rxNSduCfgPtr = (const CanTp_RxNSduType*)NULL_PTR;
-    if (rxNSduId <= CanTp_ConfigPtr->CanTp_RxNSduNum)
-    {
-        rxNSduCfgPtr = &CanTp_ConfigPtr->CanTp_RxNSduCfg[rxNSduId];
-    }
+    const CanTp_RxNSduType* rxNSduCfgPtr = &CanTp_ConfigPtr->CanTpRxNSduCfg[rxNSduId];
     return rxNSduCfgPtr;
 }
 /**
@@ -255,9 +251,9 @@ CANTP_LOCAL_INLINE const CanTp_RxNSduType* CanTp_GetRxNSduCfg(const PduIdType rx
 CANTP_LOCAL_INLINE const CanTp_TxNSduType* CanTp_GetTxNSduCfg(const PduIdType txNSduInd)
 {
     const CanTp_TxNSduType* txNSduCfgPtr = (const CanTp_TxNSduType*)NULL_PTR;
-    if (txNSduInd <= CanTp_ConfigPtr->CanTp_TxNSduNum)
+    if (txNSduInd <= CanTp_ConfigPtr->CanTpTxNSduNum)
     {
-        txNSduCfgPtr = &CanTp_ConfigPtr->CanTp_TxNSduCfg[txNSduInd];
+        txNSduCfgPtr = &CanTp_ConfigPtr->CanTpTxNSduCfg[txNSduInd];
     }
     return txNSduCfgPtr;
 }
@@ -430,16 +426,6 @@ CANTP_LOCAL_INLINE void CanTp_MemSet(uint8* dst, uint8 val, uint32 len)
 extern CanTp_FramePCIType CanTp_GetFramePCIType(const PduIdType rxpduId, const PduInfoType* pduInfoPtr);
 
 /**
- * @brief       Get Frame PCI Offset
- * @param[in]   addressingFormat   : Frame AddressingFormat
- * @return      uint8
- * @reentrant   No-Reentrant.
- * @synchronous TRUE
- * @trace       CPD-73107
- */
-extern uint8 CanTp_GetPCIOffset(CanTp_AddressingFormatType addressingFormat);
-
-/**
  * @brief       Assemble Padding data information of the Nsdu
  * @param[in]   txpduInfo       : pointer to the lower L-PDU data
  * @param[in]   txStatus        : pointer to the transmitted N-PDU status
@@ -503,18 +489,18 @@ extern boolean CanTp_CheckReceivedSFDL(
  * @param[out]  totalLength   : segmented reception total length
  * @param[out]  datalength    : received datalength
  * @param[out]  dataOffset    : data offset
- * @return      boolean
- * @retval      TRUE          : check ok
- * @retval      FALSE         : check failed
+ * @return      CanTp_CheckResultType
+ * @retval      CANTP_CHECK_OK : Check passed
+ * @retval      CANTP_CHECK_NOT_OK : Check failed
+ * @retval      CANTP_CHECK_OVERFLOW : Buffer overflow
  * @reentrant   No-Reentrant.
  * @synchronous TRUE
  * @trace       CPD-73112
  */
-extern boolean CanTp_CheckReceivedFFDL(
+CanTp_CheckResultType CanTp_CheckReceivedFFDL(
     const PduInfoType*      pduInfoPtr,
     const CanTp_RxNSduType* rxNSduCfgPtr,
     PduLengthType*          totalLength,
-    PduLengthType*          datalength,
     uint8*                  dataOffset);
 
 /**

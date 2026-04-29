@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -37,6 +37,7 @@
 #define DEM_START_SEC_CODE
 #include "Dem_MemMap.h"
 
+/* PRQA S 3415 EOF */             /* VL_Dem_3415 */
 /* PRQA S 3406, 1252, 1503  ++ */ /* VL_Dem_3406, VL_Dem_1252, VL_QAC_NoUsedApi */
 #if (DEM_VERSION_INFO_API == STD_ON)
 /**
@@ -68,9 +69,33 @@ void Dem_GetVersionInfo(Std_VersionInfoType* versionInfo)
 void Dem_PreInit(const Dem_ConfigType* ConfigPtr)
 {
     Dem_MasterPreInit(ConfigPtr);
-    /** Dem_SatellitePreInit is called directly for pre-initialization in case of single partition, or executed by the
-     * corresponding partition in case of multiple partitions. */
-    Dem_SatellitePreInit();
+    if (Dem_CheckMasterInitStatus(DEM_PREINITIALIZED) == FALSE)
+    {
+        Dem_DetReportError(DEM_SID_INTERNALAPIID, DEM_E_WRONG_CONDITION);
+    }
+    else
+    {
+#if (DEM_EVENT_PARTITION_NUMBER > 1u)
+        Dem_SatelliteIdType satelliteId;
+        for (satelliteId = 0u; satelliteId < Dem_GetNumOfSatellite(); ++satelliteId)
+        {
+            if (DEM_MASTER_APPLICATION_ID == Dem_GetSatelliteApplicationId(satelliteId))
+            {
+                break;
+            }
+        }
+        if (satelliteId >= Dem_GetNumOfSatellite())
+        {
+            Dem_DetReportError(DEM_SID_INTERNALAPIID, DEM_E_WRONG_CONFIGURATION);
+        }
+        else
+        {
+            Dem_SatelliteSatPreInit(satelliteId);
+        }
+#else
+        Dem_SatelliteSatPreInit(DEM_SATELLITE_APPLICATION_ZERO);
+#endif
+    }
 }
 
 /**
@@ -133,6 +158,7 @@ void Dem_Shutdown(void)
 #endif
 }
 
+#if (DEM_SUPPORT_CLEARDTC_API == STD_ON)
 /**
  * @brief Clears single DTCs, as well as groups of DTCs.
  */
@@ -192,6 +218,7 @@ Std_ReturnType Dem_ClearDTC(uint8 ClientId)
 #endif
     return ret;
 }
+#endif
 
 #if (DEM_MAX_NUMBER_PRESTORED_FF > 0u)
 /**
@@ -241,6 +268,7 @@ Std_ReturnType Dem_ClearPrestoredFreezeFrame(Dem_EventIdType EventId)
 }
 #endif
 
+#if (DEM_COMPONENT_NUMBER > 0u)
 /**
  * @brief         Gets the failed status of a DemComponent.
  */
@@ -253,7 +281,9 @@ Std_ReturnType Dem_GetComponentFailed(Dem_ComponentIdType ComponentId, boolean* 
     DEM_PARAM_UNUSED(ComponentFailed);
     return E_NOT_OK;
 }
+#endif
 
+#if (STD_ON == DCM_UDS_0X14)
 /**
  * @brief         Provides information if the last call to Dem_SelectDTC has selected a valid DTC or group of DTCs.
  */
@@ -299,7 +329,9 @@ Std_ReturnType Dem_GetDTCSelectionResult(uint8 ClientId)
 #endif
     return ret;
 }
+#endif
 
+#if (STD_ON == DCM_UDS_0X14)
 /**
  * @brief         Provides information if the last call to Dem_SelectDTC has selected a valid DTC or group of DTCs,
  * respecting the settings if the Dem shall clear only all DTCs.
@@ -346,6 +378,7 @@ Std_ReturnType Dem_GetDTCSelectionResultForClearDTC(uint8 ClientId)
 #endif
     return ret;
 }
+#endif
 
 /**
  * @brief         Gets the current UDS status byte assigned to the DTC for the event
@@ -395,7 +428,11 @@ Std_ReturnType Dem_GetMonitorStatus(Dem_EventIdType EventID, Dem_MonitorStatusTy
     uint8 errorId = DEM_E_NO_ERROR;
     ret           = E_NOT_OK;
     /** ***** Development Error Checks ***** */
+#if (DEM_TRIGGER_FIM_REPORTS == STD_ON)
     if (Dem_CheckMasterInitStatus(DEM_INITIALIZED) == FALSE)
+#else
+    if (Dem_CheckLeastMasterInitStatus(DEM_PREINITIALIZED) == FALSE)
+#endif
     {
         errorId = DEM_E_UNINIT;
     }
@@ -410,7 +447,13 @@ Std_ReturnType Dem_GetMonitorStatus(Dem_EventIdType EventID, Dem_MonitorStatusTy
     else
 #endif
     {
-        ret = Dem_MonitorGetStatus(EventID, MonitorStatus);
+#if (DEM_TRIGGER_FIM_REPORTS == STD_OFF)
+        if (Dem_CheckMasterInitStatus(DEM_INITIALIZED) == TRUE)
+#endif
+        {
+            /* return not ok, may be after shutdown be call by fim in cycle mode */
+            ret = Dem_MonitorGetStatus(EventID, MonitorStatus);
+        }
     }
 
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
@@ -563,6 +606,7 @@ Std_ReturnType Dem_GetDTCSuppression(uint8 ClientId, boolean* SuppressionStatus)
 }
 #endif
 
+#if (DEM_AVAILABILITY_SUPPORT == DEM_EVENT_AVAILABILITY)
 /**
  * @brief         Get the Event availability.
  */
@@ -615,6 +659,7 @@ Std_ReturnType Dem_GetEventAvailable(Dem_EventIdType EventId, boolean* Available
 #endif
     return ret;
 }
+#endif
 
 /**
  * @brief         Gets the fault detection counter of an event. This API can only be used through the RTE, and
@@ -703,6 +748,7 @@ Std_ReturnType Dem_GetIndicatorStatus(uint8 IndicatorId, Dem_IndicatorStatusType
 }
 #endif
 
+#if (DEM_FEATURE_SWC_GET_FF_ED == STD_ON)
 /**
  * @brief         Gets the data of a freeze frame by event.
  */
@@ -715,7 +761,6 @@ Std_ReturnType Dem_GetEventFreezeFrameDataEx(
     uint16*         BufSize)
 /* PRQA S 3673 -- */
 {
-#if (DEM_FEATURE_SWC_GET_FF_ED == STD_ON)
     Std_ReturnType ret;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -753,14 +798,6 @@ Std_ReturnType Dem_GetEventFreezeFrameDataEx(
     }
 #endif
     return ret;
-#else
-    DEM_PARAM_UNUSED(EventId);
-    DEM_PARAM_UNUSED(RecordNumber);
-    DEM_PARAM_UNUSED(DataId);
-    DEM_PARAM_UNUSED(DestBuffer);
-    DEM_PARAM_UNUSED(BufSize);
-    return E_NOT_OK;
-#endif
 }
 
 /**
@@ -771,7 +808,6 @@ Std_ReturnType
     Dem_GetEventExtendedDataRecordEx(Dem_EventIdType EventId, uint8 RecordNumber, uint8* DestBuffer, uint16* BufSize)
 /* PRQA S 3673 -- */
 {
-#if (DEM_FEATURE_SWC_GET_FF_ED == STD_ON)
     Std_ReturnType ret;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -809,15 +845,10 @@ Std_ReturnType
     }
 #endif
     return ret;
-#else
-    DEM_PARAM_UNUSED(EventId);
-    DEM_PARAM_UNUSED(RecordNumber);
-    DEM_PARAM_UNUSED(DestBuffer);
-    DEM_PARAM_UNUSED(BufSize);
-    return E_NOT_OK;
-#endif
 }
+#endif
 
+#if (DEM_USER_SUPPORT_OVFLIND_API == STD_ON)
 /**
  * @brief         Gets the event memory overflow indication status.
  */
@@ -914,6 +945,7 @@ Std_ReturnType
 #endif
     return ret;
 }
+#endif
 
 /**
  * @brief         Control the internal debounce counter/timer by BSW modules and SW-Cs. The event qualification
@@ -1165,6 +1197,7 @@ Std_ReturnType Dem_PrestoreFreezeFrame(Dem_EventIdType EventId)
 }
 #endif
 
+#if (DEM_SUPPORT_SELECTDTC_API == STD_ON)
 /**
  * @brief         Selects a DTC or DTC group as target for further operations.
  */
@@ -1227,8 +1260,10 @@ Std_ReturnType Dem_SelectDTC(uint8 ClientId, uint32 DTC, Dem_DTCFormatType DTCFo
 #endif
     return ret;
 }
+#endif
 /* PRQA S 6030 -- */
 
+#if (DEM_COMPONENT_NUMBER > 0u)
 /**
  * @brief         Set the availability of a specific DemComponent.
  */
@@ -1239,6 +1274,7 @@ Std_ReturnType Dem_SetComponentAvailable(Dem_ComponentIdType ComponentId, boolea
     DEM_PARAM_UNUSED(AvailableStatus);
     return E_NOT_OK;
 }
+#endif
 
 #if (DEM_SUPPRESSION_SUPPORT == DEM_DTC_SUPPRESSION)
 /**
@@ -1413,12 +1449,12 @@ Std_ReturnType Dem_SetEventAvailable(Dem_EventIdType EventId, boolean AvailableS
 }
 #endif
 
+#if (DEM_EVENT_CONFIRMATION_THRESHOLD_ADAPTABLE == STD_ON)
 /**
  * @brief         Set the failure confirmation threshold of an event.
  */
 Std_ReturnType Dem_SetEventConfirmationThresholdCounter(Dem_EventIdType EventId, uint8 FailureCycleCounterThreshold)
 {
-#if (DEM_EVENT_CONFIRMATION_THRESHOLD_ADAPTABLE == STD_ON)
     Std_ReturnType ret;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -1470,12 +1506,8 @@ Std_ReturnType Dem_SetEventConfirmationThresholdCounter(Dem_EventIdType EventId,
     }
 #endif
     return ret;
-#else
-    DEM_PARAM_UNUSED(FailureCycleCounterThreshold);
-    DEM_PARAM_UNUSED(EventId);
-    return E_NOT_OK;
-#endif
 }
+#endif
 
 #if (DEM_EVENT_REPORTING_STANDARD == STD_ON)
 /**
@@ -1651,6 +1683,7 @@ Std_ReturnType Dem_SetStorageCondition(uint8 StorageConditionID, boolean Conditi
 }
 #endif
 
+#if (DEM_USER_CONTROLLED_WIR == STD_ON)
 /**
  * @brief         Sets the WIR status bit via failsafe SW-Cs. This API can only be used through the RTE and
  *                therefore no declaration is exported via Dem.h.
@@ -1691,9 +1724,9 @@ Std_ReturnType Dem_SetWIRStatus(Dem_EventIdType EventId, boolean WIRStatus)
 #endif
     return ret;
 }
+#endif
 
-#if (DEM_DCM_CLIENT_NUMBER > 0u)
-
+#if (DEM_SUPPORT_GETTRANSLATIONTYPE_API == STD_ON)
 /**
  * @brief         Gets the supported DTC formats of the ECU.The supported formats are configured via Dem
  *                TypeOfDTCSupported.
@@ -1733,7 +1766,9 @@ Dem_DTCTranslationFormatType Dem_GetTranslationType(uint8 ClientId)
 #endif
     return ret;
 }
+#endif
 
+#if (DEM_SUPPORT_GETDTCSTATUSAVAILABILITYMASK_API == STD_ON)
 /**
  * @brief         Gets the DTC Status availability mask of the selected fault memory.
  */
@@ -1781,7 +1816,9 @@ Std_ReturnType
 #endif
     return ret;
 }
+#endif
 
+#if (DEM_SUPPORT_GETSTATUSOFDTC_API == STD_ON)
 /**
  * @brief         Gets the status of a DTC. For large configurations and DTC-calibration, the interface behavior
  *                can be asynchronous (splitting the DTC-search into segments). The DTCs of OBD Events Suppression
@@ -1837,8 +1874,9 @@ Std_ReturnType Dem_GetStatusOfDTC(uint8 ClientId, uint8* DTCStatus)
 #endif
     return ret;
 }
+#endif
 
-#if (DEM_FEATURE_DCM_0X19_0X09_ENABLE == STD_ON)
+#if (DEM_SUPPORT_GETSEVERITYOFDTC_API == STD_ON)
 /**
  * @brief         Gets the severity of the requested DTC. For large configurations and DTC-calibration, the
  *                interface behavior can be asynchronous (splitting the DTC-search into segments).
@@ -1949,6 +1987,7 @@ Std_ReturnType Dem_GetFunctionalUnitOfDTC(uint8 ClientId, uint8* DTCFunctionalUn
 }
 #endif
 
+#if (DEM_SUPPORT_SETDTCFILTER_AND_GETNUMBER_API == STD_ON)
 /**
  * @brief         Sets the DTC Filter. The server shall perform a bit-wise logical AND-ing operation between the
  *                parameter DTCStatusMask and the current UDS status in the server. In addition to the DTCStatus
@@ -2065,7 +2104,9 @@ Std_ReturnType Dem_GetNumberOfFilteredDTC(uint8 ClientId, uint16* NumberOfFilter
 #endif
     return ret;
 }
+#endif
 
+#if (DEM_SUPPORT_GETNEXT_FILTEREDDTC_API == STD_ON)
 /**
  * @brief         Gets the next filtered DTC matching the filter criteria. For UDS services, the interface has an
  *                asynchronous behavior, because a large number of DTCs has to be processed.
@@ -2120,8 +2161,9 @@ Std_ReturnType Dem_GetNextFilteredDTC(uint8 ClientId, uint32* DTC, uint8* DTCSta
 #endif
     return ret;
 }
+#endif
 
-#if (DEM_FEATURE_DCM_0X19_0X14_ENABLE == STD_ON)
+#if (DEM_SUPPORT_GETNEXT_FILTEREDDTCANDFDC_API == STD_ON)
 /**
  * @brief         Gets the next filtered DTC and its associated Fault Detection Counter (FDC) matching the filter
  *                criteria. The interface has an asynchronous behavior, because a large number of DTCs has to be
@@ -2178,6 +2220,7 @@ Std_ReturnType Dem_GetNextFilteredDTCAndFDC(uint8 ClientId, uint32* DTC, sint8* 
 }
 #endif
 
+#if (DEM_SUPPORT_GETNEXT_FILTEREDDTCANDSEVERITY_API == STD_ON)
 /**
  * @brief         Gets the next filtered DTC and its associated Severity matching the filter criteria. The
  *                interface has an asynchronous behavior, because a large number of DTCs has to be processed.
@@ -2190,8 +2233,7 @@ Std_ReturnType Dem_GetNextFilteredDTCAndSeverity(
     Dem_DTCSeverityType* DTCSeverity,
     uint8*               DTCFunctionalUnit)
 {
-/* PRQA S 3673 -- */
-#if ((DEM_FEATURE_DCM_0X19_0X08_ENABLE == STD_ON) || (DEM_FEATURE_DCM_0X19_0X42_ENABLE == STD_ON))
+    /* PRQA S 3673 -- */
     Std_ReturnType ret = E_NOT_OK;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -2241,17 +2283,11 @@ Std_ReturnType Dem_GetNextFilteredDTCAndSeverity(
     }
 #endif
     return ret;
-#else
-    DEM_PARAM_UNUSED(ClientId);
-    DEM_PARAM_UNUSED(DTC);
-    DEM_PARAM_UNUSED(DTCStatus);
-    DEM_PARAM_UNUSED(DTCSeverity);
-    DEM_PARAM_UNUSED(DTCFunctionalUnit);
-    return E_NOT_OK;
-#endif
 }
 /* PRQA S 6030 -- */
+#endif
 
+#if (DEM_SUPPORT_SETFREEZEFRAMERECORD_AND_GET_API == STD_ON)
 /**
  * @brief         Sets a freeze frame record filter.
  */
@@ -2412,7 +2448,9 @@ Std_ReturnType Dem_GetNextFilteredRecord(uint8 ClientId, uint32* DTC, uint8* Rec
 #endif
     return ret;
 }
+#endif
 
+#if (DEM_SUPPORT_GETDTCOCCURRENCETIME_API == STD_ON)
 /**
  * @brief         Gets the DTC by occurrence time. There is no explicit parameter for the DTC-origin as the origin
  *                always is DEM_DTC_ORIGIN_PRIMARY_MEMORY.
@@ -2461,7 +2499,9 @@ Std_ReturnType Dem_GetDTCByOccurrenceTime(uint8 ClientId, Dem_DTCRequestType DTC
 #endif
     return ret;
 }
+#endif
 
+#if (DEM_SUPPORT_DISABLE_ENABLE_DTCRECORD_UPDATE_API == STD_ON)
 /**
  * @brief         Disables the event memory update of a specific DTC (only one at one time).
  */
@@ -2552,7 +2592,9 @@ Std_ReturnType Dem_EnableDTCRecordUpdate(uint8 ClientId)
 #endif
     return ret;
 }
+#endif
 
+#if (DEM_SUPPORT_SELECT_GETSIZE_GETNEXT_EXTENDEDDATARECORD_API == STD_ON)
 /**
  * @brief         Sets the filter to be used by Dem_GetNextExtendedDataRecord and
  *                Dem_GetSizeOfExtendedDataRecordSelection.
@@ -2722,7 +2764,9 @@ Std_ReturnType Dem_GetNextExtendedDataRecord(uint8 ClientId, uint8* DestBuffer, 
     return ret;
 }
 /* PRQA S 6030,6070 -- */
+#endif
 
+#if (DEM_SUPPORT_SELECT_GETSIZE_GETNEXT_FREEZEFRAMEDATA_API == STD_ON)
 /**
  * @brief         Sets the filter to be used by Dem_GetNextFreezeFrameData and Dem_GetSizeOfFreezeFrame Selection.
  */
@@ -2890,8 +2934,10 @@ Std_ReturnType Dem_GetNextFreezeFrameData(uint8 ClientId, uint8* DestBuffer, uin
 #endif
     return ret;
 }
+#endif
 /* PRQA S 6030,6070 -- */
 
+#if (STD_ON == DCM_UDS_0X85)
 /**
  * @brief         Disables the DTC setting for all DTCs assigned to the DemEventMemorySet of the addressed client.
  */
@@ -2974,6 +3020,7 @@ Std_ReturnType Dem_EnableDTCSetting(uint8 ClientId)
 #endif
 
 #if (DEM_OBD_SUPPORT != DEM_OBD_NO_OBD_SUPPORT)
+#if (DEM_OBD_READINESS_GROUP_HANDING == STD_ON)
 /**
  * @brief         Service for reporting the event as disabled to the Dem for the PID $41 computation. API is
  *                needed in OBD-relevant ECUs only. API Availability: This API will be available only if
@@ -2985,7 +3032,9 @@ Std_ReturnType Dem_SetEventDisabled(Dem_EventIdType EventId)
     DEM_PARAM_UNUSED(EventId);
     return E_NOT_OK;
 }
+#endif
 
+#if (DEM_RATIO_NUMBER > 0u)
 /**
  * @brief         Service for reporting that faults are possibly found because all conditions are fullfilled. API
  *                is needed in OBD-relevant ECUs only API Availability: This API will be available only if
@@ -3041,7 +3090,9 @@ Std_ReturnType Dem_RepIUMPRDenRelease(Dem_RatioIdType RatioID)
     DEM_PARAM_UNUSED(RatioID);
     return E_NOT_OK;
 }
+#endif
 
+#if (DEM_USER_SUPPORT_SET_PTO_API == STD_ON)
 /**
  * @brief         API is needed in OBD-relevant ECUs only API Availability: This API will be available only if
  *                ({ecuc(Dem/DemGeneral.DemOBDSupport)} != DEM_OBD_NO_OBD_SUPPORT)
@@ -3052,6 +3103,7 @@ Std_ReturnType Dem_SetPtoStatus(boolean PtoStatus)
     DEM_PARAM_UNUSED(PtoStatus);
     return E_NOT_OK;
 }
+#endif
 
 /**
  * @brief         Service to report the value of PID $01 computed by the Dem. API is needed in OBD relevant ECUs only
@@ -3078,6 +3130,7 @@ Std_ReturnType Dem_GetDataOfPID21(uint8* PID21value) /* PRQA S 3673 */ /* VL_QAC
 }
 #endif
 
+#if (DEM_USER_SUPPORT_SET_PID_API == STD_ON)
 /**
  * @brief         Service to set the value of PID $21 in the Dem by a software component. API is needed in
  *                OBD-relevant ECUs only. API Availability: This API will be available only if
@@ -3126,6 +3179,7 @@ Std_ReturnType Dem_SetDataOfPID4E(const uint8* PID4Evalue)
     return E_NOT_OK;
 }
 #endif
+#endif
 
 /**
  * @brief         Returns the qualification state of the dependent operation cycle. API Availability: This API
@@ -3151,6 +3205,7 @@ Std_ReturnType Dem_SetCycleQualified(uint8 OperationCycleId)
 }
 
 #if (DEM_DCM_CLIENT_NUMBER > 0u)
+#if (DEM_SUPPORT_GETDTCSERVERITYAVAILABILITYMASK_API == STD_ON)
 /**
  * @brief         Gets the DTC Severity availability mask.
  */
@@ -3158,7 +3213,6 @@ Std_ReturnType Dem_SetCycleQualified(uint8 OperationCycleId)
 Std_ReturnType Dem_GetDTCSeverityAvailabilityMask(uint8 ClientId, Dem_DTCSeverityType* DTCSeverityMask)
 /* PRQA S 3673 -- */
 {
-#if (DEM_FEATURE_DCM_0X19_0X42_ENABLE == STD_ON)
     Std_ReturnType ret = E_NOT_OK;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -3195,14 +3249,12 @@ Std_ReturnType Dem_GetDTCSeverityAvailabilityMask(uint8 ClientId, Dem_DTCSeverit
     }
 #endif
     return ret;
-#else
-    DEM_PARAM_UNUSED(ClientId);
-    DEM_PARAM_UNUSED(DTCSeverityMask);
-    return E_NOT_OK;
-#endif
 }
 #endif
+#endif
 
+#if (DEM_OBDII_SUPPORT == STD_ON)
+#if (DEM_DTR_NUMBER > 0u)
 /**
  * @brief         Service to report the value of the B1 counter computed by the Dem. API is needed in WWH-OBD
  *                relevant ECUs only
@@ -3213,6 +3265,8 @@ Std_ReturnType Dem_GetB1Counter(uint16* B1Counter) /* PRQA S 3673 */ /* VL_QAC_3
     DEM_PARAM_UNUSED(B1Counter);
     return E_NOT_OK;
 }
+#endif
+#endif
 
 #if (DEM_OBD_SUPPORT != DEM_OBD_NO_OBD_SUPPORT)
 /**

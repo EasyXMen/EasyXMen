@@ -1,6 +1,6 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
- * SPDX-License-Identifier: LGPL-2.1-only-with-exception OR  LicenseRef-Commercial-License
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
+ * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
  * GNU Lesser General Public License as published by the Free Software Foundation; version 2.1.
@@ -10,7 +10,8 @@
  * You should have received a copy of the GNU Lesser General Public License along with this library;
  * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  * or see <https://www.gnu.org/licenses/>.
- *
+ */
+/*
  ********************************************************************************
  **                                                                            **
  **  FILENAME    : Os_Trace.h                                               **
@@ -29,11 +30,14 @@
 
 /*=======[I N C L U D E S]====================================================*/
 #include "Os_Types.h"
+/* PRQA S 1753 EOF */ /* VL_Os_1753 */
 
 /*=======[M A C R O S]========================================================*/
 #if (TRUE == CFG_TRACE_ENABLE)
-
+/* PRQA S 3472 ++ */ /* VL_Os_3472 */
+/* PRQA S 3410 ++ */ /* VL_Os_3410 */
 #define OS_TRACE_GET_OBJECT_LOCAL_ID(coreId, objId) ((coreId << 12u) | (objId))
+/* PRQA S 3410 -- */
 
 #define OS_TRACE_GET_OBJECT_TASK_ID(coreId, objId) OS_TRACE_GET_OBJECT_LOCAL_ID(coreId, objId)
 #define OS_TRACE_GET_OBJECT_ISR_ID(coreId, objId)  (0x8000u + OS_TRACE_GET_OBJECT_LOCAL_ID(coreId, objId))
@@ -70,7 +74,7 @@
 #define OS_TRACE_ALARM_START_HOOK(coreId, alarmId) TraceAlarmStartHook(coreId, alarmId)
 
 #define OS_TRACE_ALARM_STOP_HOOK(coreId, alarmId) TraceAlarmStopHook(coreId, alarmId)
-
+/* PRQA S 3472 -- */
 #else /* FALSE == CFG_TRACE_HOOK_ENABLE */
 
 #define OS_TRACE_LAST_ERROR_HOOK(coreId, error)

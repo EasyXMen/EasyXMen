@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -102,6 +102,11 @@
       Risk: No risk.
       Prevention: Ensure that the project is working properly through unit testing.
 
+    \li VL_CanIf_1536
+      Reason: The tag '%1s' is declared but not used within this project.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
     \li VL_CanIf_2983
       Reason: The issue shall be avoided in actual running environment and configs.
       Risk: No risk.
@@ -113,6 +118,11 @@
       Prevention: Functional reliability guaranteed by design.
 
     \li VL_CanIf_3315
+      Reason: The issue shall be avoided in actual running environment and configs.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_CanIf_1512
       Reason: The issue shall be avoided in actual running environment and configs.
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
@@ -134,6 +144,8 @@
       Prevention: Design and code review, and have a clear structure and annotated code.
  */
 
+/* PRQA S 1513 EOF */ /* VL_QAC_MultiDeclaration */
+/* PRQA S 1512 EOF */ /* VL_CanIf_1512 */
 #ifndef CANIF_H_
 #define CANIF_H_
 
@@ -481,6 +493,56 @@ extern Std_ReturnType CanIf_CheckTrcvWakeFlag(uint8 TransceiverId);
  * @trace           CPD-61413
  */
 extern Std_ReturnType CanIf_SetBaudrate(uint8 ControllerId, uint16 BaudRateConfigID);
+#endif
+
+#if (CANIF_CAN_AUTOSAR_VERSION >= CANIF_CAN_AUTOSAR_R431)
+/**
+ * @brief           This service calls the corresponding CAN Driver service for obtaining the error
+ *                  state of the CAN controller.
+ * @param[in]       ControllerId: Abstracted CanIf ControllerId which is assigned to a CAN controller,
+ *                  which is requested for ErrorState.
+ * @param[out]      ErrorStatePtr: Pointer to a memory location, where the error state of the CAN
+ *                  controller will be stored.
+ * @return          Std_ReturnType
+ * @retval          E_OK: Error state request has been accepted.
+ * @retval          E_NOT_OK: Error state request has not been accepted.
+ * @synchronous     TRUE
+ * @reentrant       Non reentrant for the same ControllerId.
+ * @trace           CPD-85798
+ */
+extern Std_ReturnType CanIf_GetControllerErrorState(uint8 ControllerId, Can_ErrorStateType* ErrorStatePtr);
+#endif
+
+#if (CANIF_CAN_AUTOSAR_VERSION >= CANIF_CAN_AUTOSAR_R440)
+/**
+ * @brief           This service calls the corresponding CAN Driver service for obtaining the Rx error
+                    counter of the CAN controller.
+ * @param[in]       ControllerId: Abstracted CanIf ControllerId which is assigned to a CAN controller.
+ * @param[out]      RxErrorCounterPtr: Pointer to a memory location, where the current Rx error counter
+                    of the CAN controller will be stored.
+ * @return          Std_ReturnType
+ * @retval          E_OK: Rx error counter available.
+ * @retval          E_NOT_OK: Wrong ControllerId, or Rx error counter not available.
+ * @synchronous     TRUE
+ * @reentrant       Non reentrant for the same ControllerId.
+ * @trace           CPD-85460
+ */
+extern Std_ReturnType CanIf_GetControllerRxErrorCounter(uint8 ControllerId, uint8* RxErrorCounterPtr);
+
+/**
+ * @brief           This service calls the corresponding CAN Driver service for obtaining the Tx error
+                    counter of the CAN controller.
+ * @param[in]       ControllerId: Abstracted CanIf ControllerId which is assigned to a CAN controller.
+ * @param[out]      TxErrorCounterPtr: Pointer to a memory location, where the current Tx error counter
+                    of the CAN controller will be stored.
+ * @return          Std_ReturnType
+ * @retval          E_OK: Tx error counter available.
+ * @retval          E_NOT_OK: Wrong ControllerId, or Tx error counter not available.
+ * @synchronous     TRUE
+ * @reentrant       Non reentrant for the same ControllerId.
+ * @trace           CPD-85461
+ */
+extern Std_ReturnType CanIf_GetControllerTxErrorCounter(uint8 ControllerId, uint8* TxErrorCounterPtr);
 #endif
 
 #ifdef __cplusplus

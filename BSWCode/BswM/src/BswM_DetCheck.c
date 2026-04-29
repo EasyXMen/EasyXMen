@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -198,6 +198,7 @@ Std_ReturnType BswM_DetChkComMInitRst(void)
 #endif /*BSWM_COMM_ENABLED == STD_ON*/
 
 #if (BSWM_DCM_ENABLED == STD_ON)
+#if (BSWM_DEV_ERROR_DETECT == STD_ON)
 /**
  * Checks the initialization status of the BSW Manager core and validates the DCM application update status.
  * It reports a DET error if the core is not initialized.
@@ -214,6 +215,7 @@ Std_ReturnType BswM_DetChkDcmUpdate(void)
     }
     return ret;
 }
+#endif
 
 /**
  * Checks the initialization status of the BSW Manager core and validates the requested Dcm communication mode.

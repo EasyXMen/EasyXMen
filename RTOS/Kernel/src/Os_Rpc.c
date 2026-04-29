@@ -1,6 +1,6 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
- * SPDX-License-Identifier: LGPL-2.1-only-with-exception OR  LicenseRef-Commercial-License
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
+ * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
  * GNU Lesser General Public License as published by the Free Software Foundation; version 2.1.
@@ -10,7 +10,8 @@
  * You should have received a copy of the GNU Lesser General Public License along with this library;
  * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  * or see <https://www.gnu.org/licenses/>.
- *
+ */
+/*
  ********************************************************************************
  **                                                                            **
  **  FILENAME    : Os_Rpc.c                                                   **
@@ -344,9 +345,9 @@ static StatusType Os_RpcWaitResult(Os_CoreIdType vCoreId, srvNodeRefType srvNode
     /* CORE1: FREE -> START  ===> CORE2: WORK -> DONE  ===> CORE1: FREE */
     StatusType vRet    = E_OK;
     uint64     counter = 0U;
-    /* PRQA S 3442 ++ */ /* VL_Os_3442 */
+    /* PRQA S 3442, 0771 ++ */ /* VL_Os_3442, VL_Os_0771 */
     while (RPC_DONE != srvNode->procState)
-    /* PRQA S 3442 -- */
+    /* PRQA S 3442, 0771 -- */
     {
         counter++;
         if (Os_CoreCB.coreStatus[vCoreId] != OS_RUN) /* PRQA S 3442 */ /* VL_Os_3442 */
@@ -441,7 +442,9 @@ static void Os_RpcProcessResult(RpcInputRefType rpcData, srvNodeRefType srvNode)
 
 #if (CFG_SCHEDTBL_MAX > 0U)
     case OSServiceId_GetScheduleTableStatus:
+        /* PRQA S 3432, 0306, 4342 ++ */ /* VL_Os_3432, VL_Os_0306, VL_Os_4342 */
         *(ScheduleTableStatusRefType)rpcData->srvPara1 = (Os_SchedTblStateType)srvNode->interParameter[1];
+        /* PRQA S 3432, 0306, 4342 -- */
         break;
 #endif /* CFG_SCHEDTBL_MAX > 0U */
 
@@ -511,7 +514,7 @@ StatusType Os_RpcCallService(RpcInputRefType rpcData)
             /* OS_RPC_MACRO_TO_FUNCTION_008 */
             Os_ArchRemoteCall(Os_GetCorePhyID(rpcData->remoteCoreId));
             /* PRQA S 1258, 3138, 3455, 0303 -- */
-            if (srvNode->sync == RPC_SYNC)
+            if (rpcData->sync == RPC_SYNC)
             {
                 StatusType status = E_OK;
                 status            = Os_RpcWaitResult(vCoreId, srvNode, nodeId);
@@ -644,10 +647,11 @@ static void Os_RpcServiceAction(srvNodeRefType srvNode)
 
 #if (CFG_SCHEDTBL_MAX > 0U)
         case OSServiceId_GetScheduleTableStatus:
+            /* PRQA S 0310 ++ */ /* VL_Os_0310 */
             Os_GetScheduleTableStatus(
                 (ScheduleTableType)srvNode->interParameter[0],
-
                 (ScheduleTableStatusRefType)&srvNode->interParameter[1]);
+            /* PRQA S 0310 -- */
 
             srvNode->retValue = E_OK;
             break;
@@ -693,7 +697,7 @@ static void Os_RpcServiceAction(srvNodeRefType srvNode)
                 (ApplicationType)srvNode->interParameter[0],
                 /* PRQA S 4342 ++ */ /* VL_Os_4342 */
                 (RestartType)srvNode->interParameter[1]);
-            /* PRQA S 4342 -- */
+                /* PRQA S 4342 -- */
             srvNode->retValue = E_OK;
             break;
 #endif /* OS_SC3 == CFG_SC || OS_SC4 == CFG_SC */

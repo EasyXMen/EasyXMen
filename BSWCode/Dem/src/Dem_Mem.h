@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -44,6 +44,7 @@
 #endif
 
 /* ========================================== internal function declarations ======================================== */
+/* PRQA S 1512 EOF */ /* VL_Dem_1512 */
 /**
  * @brief         Check if candidate has an event priority, that qualifies it or disqualifies it for the displacement.
  * Otherwise it needs further tests.
@@ -123,28 +124,6 @@ DEM_LOCAL Dem_NvBlockNumType Dem_MemSelectDisplacedIndex(
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL Dem_NvBlockNumType Dem_MemoryAllocateIndex(Dem_MemStateInfoConstPtrType MemoryInfo, Dem_EventIdType EventId);
-
-/**
- * @brief         Function updates environmental data of an event on a Test Failed trigger.
- * @param[in]     MemoryIndex: Memory index
- * @param[in]     EventId: Event Id
- * @return        uint8
- * @reentrant     FALSE
- * @synchronous   TRUE
- * @trace         CPD-PLACEHOLDER
- */
-DEM_LOCAL uint8 Dem_MemUpdateEntryOnTF(Dem_EventIdType EventId, Dem_NvBlockNumType MemoryIndex);
-
-/**
- * @brief         Function updates environmental data of an event on a Test Failed this cycle trigger.
- * @param[in]     MemoryIndex: Memory index
- * @param[in]     EventId: Event Id
- * @return        uint8
- * @reentrant     FALSE
- * @synchronous   TRUE
- * @trace         CPD-PLACEHOLDER
- */
-DEM_LOCAL uint8 Dem_MemUpdateEntryOnTFTOC(Dem_EventIdType EventId, Dem_NvBlockNumType MemoryIndex);
 
 /**
  * @brief         This function will look for every snapshot record of the event that needs updating due to the status
@@ -325,6 +304,18 @@ DEM_LOCAL void Dem_MemoryInitRestoreMemory(Dem_MemoryNumType MemIndex);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_NvMMemoryInit(void);
+
+/**
+
+ * @brief         Function updates environmental data of an event on a Test Failed this cycle trigger.
+ * @param[in]     MemoryIndex: Memory index
+ * @param[in]     EventId: Event Id
+ * @return        uint8
+ * @reentrant     FALSE
+ * @synchronous   TRUE
+ * @trace         CPD-PLACEHOLDER
+ */
+DEM_LOCAL uint8 Dem_MemUpdateEntryOnTFTOC(Dem_EventIdType EventId, Dem_NvBlockNumType MemoryIndex);
 
 #if (DEM_FEATURE_NVM_IMMEDIATE == STD_ON)
 #if (DEM_FEATURE_SUPPORT_NVM_POLLING == STD_ON)
@@ -1379,6 +1370,7 @@ DEM_LOCAL_INLINE uint8* Dem_GetExtendedDataRecordPtrOfMemEntry(Dem_NvBlockNumTyp
 }
 #endif
 
+#if (DEM_MAX_SIZE_FREEZEFRAME > 0u)
 /**
  * @brief         get Freeze Frame Ptr of MemEntry by MemoryIndex
  */
@@ -1394,6 +1386,7 @@ DEM_LOCAL_INLINE uint8* Dem_GetFreezeFrameRecordPtrOfMemEntry(Dem_NvBlockNumType
 {
     return Dem_GetMemoryEntry()[MemoryIndex].FFRecord;
 }
+#endif
 
 #if (DEM_MAX_SIZE_OBDFREEZEFRAME > 0u)
 /**
@@ -2067,13 +2060,6 @@ DEM_LOCAL_INLINE boolean Dem_MemIncrementOCC6(Dem_NvBlockNumType MemoryIndex)
 /**
  * @brief         Increment the 'Failed Cycle Counter' in the memory entry, if it is lower than the maximum value (latch
  * at maximum value).
- * @param[in]     MemoryIndex: Memory index
- * @return        boolean
- * @retval        TRUE: Valid
- * @retval        FALSE: Invalid
- * @reentrant     FALSE
- * @synchronous   TRUE
- * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL_INLINE boolean Dem_MemIncrementFailedCycleCounter(Dem_NvBlockNumType MemoryIndex)
 {
@@ -2091,9 +2077,16 @@ DEM_LOCAL_INLINE boolean Dem_MemIncrementFailedCycleCounter(Dem_NvBlockNumType M
 #endif
 
 /**
- * @brief Function updates environmental data of an event on a Test Failed trigger.
+
+ * @brief         Function updates environmental data of an event on a Test Failed trigger.
+ * @param[in]     MemoryIndex: Memory index
+ * @param[in]     EventId: Event Id
+ * @return        uint8
+ * @reentrant     FALSE
+ * @synchronous   TRUE
+ * @trace         CPD-PLACEHOLDER
  */
-DEM_LOCAL uint8 Dem_MemUpdateEntryOnTF(Dem_EventIdType EventId, Dem_NvBlockNumType MemoryIndex)
+DEM_LOCAL_INLINE uint8 Dem_MemUpdateEntryOnTF(Dem_EventIdType EventId, Dem_NvBlockNumType MemoryIndex)
 {
     uint8 blockModification = DEM_DATA_NO_CHANGES;
 
@@ -2118,22 +2111,17 @@ DEM_LOCAL uint8 Dem_MemUpdateEntryOnTF(Dem_EventIdType EventId, Dem_NvBlockNumTy
 }
 
 /**
- * @brief Function updates environmental data of an event on a Test Failed this cycle trigger.
+ * @brief         Function updates environmental data of an event on a Test Failed this cycle trigger.
  */
 DEM_LOCAL uint8 Dem_MemUpdateEntryOnTFTOC(Dem_EventIdType EventId, Dem_NvBlockNumType MemoryIndex)
 {
     uint8 blockModification = DEM_DATA_NO_CHANGES;
-#if (defined(DEM_FAILED_CYCLES))
-    if (Dem_MemIncrementFailedCycleCounter(MemoryIndex) == TRUE)
-    {
-        DEM_FLAG_SET(blockModification, DEM_DATA_STATISTICS_CHANGED); /* PRQA S 3473 */ /* VL_Dem_3473 */
-    }
-#endif
 #if ((defined(DEM_CYCLES_SINCE_LAST_FAILED)) || (defined(DEM_OCC1)))
     Dem_SetCyclesSinceLastFailedOfMemEntry(MemoryIndex, Dem_GetCycleCounter(Dem_GetOCRefOfEvent(EventId)));
     DEM_FLAG_SET(blockModification, DEM_DATA_STATISTICS_CHANGED); /* PRQA S 3473 */ /* VL_Dem_3473 */
 #else
     DEM_PARAM_UNUSED(EventId);
+    DEM_PARAM_UNUSED(MemoryIndex);
 #endif
     return blockModification;
 }
@@ -3403,7 +3391,7 @@ DEM_LOCAL void Dem_NvmCommitBlock(void)
     if (NvM_WriteBlock(Dem_GetNvBlockRef(blockIndex), &Dem_NvmCommitBuffer.MRaw[0]) != E_OK)
     {
         /** Write attempt failed - act as if callback had returned failed.
-         * This case is handled by Dem_NvM_MainFunction */
+         * This case is handled by Dem_NvMTask */
         Dem_NvmSetCurrentCommitState(DEM_NVM_COMMIT_FAILED);
     }
 }

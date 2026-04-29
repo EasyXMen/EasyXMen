@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -44,13 +44,13 @@ DCM_LOCAL uint8 Dcm_ClearDTCProcessStep;
 #define DCM_STOP_SEC_VAR_CLEARED_8
 #include "Dcm_MemMap.h"
 /* ============================================ external data definitions =========================================== */
-#define DCM_START_SEC_VAR_INIT_BOOLEAN
+#define DCM_START_SEC_VAR_CLEARED_BOOLEAN
 #include "Dcm_MemMap.h"
 /**
  * @brief Indicates whether the diagnostic information clearing process is in progress @range 0..1.
  */
-boolean Dcm_ProcessingClearingDiagInfo = FALSE; /* PRQA S 1514 */ /* VL_QAC_OneRefSymbol */
-#define DCM_STOP_SEC_VAR_INIT_BOOLEAN
+boolean Dcm_ProcessingClearingDiagInfo; /* PRQA S 1514 */ /* VL_QAC_OneRefSymbol */
+#define DCM_STOP_SEC_VAR_CLEARED_BOOLEAN
 #include "Dcm_MemMap.h"
 /* ========================================== internal function declarations ======================================== */
 /**

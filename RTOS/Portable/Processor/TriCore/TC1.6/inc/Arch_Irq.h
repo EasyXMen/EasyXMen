@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -43,9 +43,9 @@
 
 #define OS_ARCH_DECLARE_CRITICAL() Os_ArchMsrType msr
 /* PRQA S 3472 ++ */ /* VL_Os_3472 */
-#define OS_ARCH_ENTRY_CRITICAL() Os_ArchSuspendInt(&msr)
+#define OS_ARCH_ENTRY_CRITICAL() (msr = Os_ArchSuspendInt())
 #define OS_ARCH_EXIT_CRITICAL()  Os_ArchRestoreInt(msr)
-#define OS_ARCH_SUSPEND_ALLINT() Os_ArchSuspendInt(&msr)
+#define OS_ARCH_SUSPEND_ALLINT() (msr = Os_ArchSuspendInt())
 #define OS_ARCH_RESTORE_ALLINT() Os_ArchRestoreInt(msr)
 /* PRQA S 3472 -- */
 /* PRQA S 3458 ++ */ /* VL_Os_3458 */
@@ -136,7 +136,7 @@
 #define OS_ARCH_ISR1_PROLOGUE(isrId)    \
     do                                  \
     {                                   \
-        Os_ArchSetMemProtSet(0x00UL);   \
+        Os_ArchSetMemProtSet(PPRS_SET0);   \
         OS_ARCH_ISR1_PROLOGUE_1(isrId); \
         Os_UpdatePsw();                 \
     } while (0)
@@ -404,7 +404,7 @@ extern void Os_ArchSetIpl(Os_IPLType ipl, Os_IsrDescriptionType isrdesc);
  */
 /******************************************************************************/
 /* PRQA S 3432 ++ */ /* VL_Os_3432 */
-extern void Os_ArchSuspendInt(Os_ArchMsrType* msr);
+extern Os_ArchMsrType Os_ArchSuspendInt(void);
 /* PRQA S 3432 -- */
 /******************************************************************************/
 /*

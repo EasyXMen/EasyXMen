@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -49,7 +49,7 @@ typedef enum
     NM_STATE_NORMAL_OPERATION  = 4,
     NM_STATE_REPEAT_MESSAGE    = 5,
     NM_STATE_SYNCHRONIZE       = 6,
-    NM_STATE_OFFLINE           = 255,
+    NM_STATE_OFFLINE           = 7,
 } Nm_StateType;
 
 /**

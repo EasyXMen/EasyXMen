@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -29,6 +29,8 @@
  *  -------------------------------------------------------------------------------------------------------------------
  *  V2.2.1    2024-08-21 xiaojian.liang
  *      1. Support multi-partition distribution and post-build variant
+ *  V2.2.2    2025-10-22 caihong.liu
+ *      1. CPT-14266 - Redundant passive wake-up event flags lead to repeated wake-up actions.
  *
  ==================================================================================================================== */
 
@@ -42,12 +44,20 @@
       Reason: QAC false positives
       Risk: No risk
       Prevention: No action required.
+
     \li VL_ComM_DevelopmentError
       Reason: API parameter checking is enabled if ComMDevErrorDetect is TRUE.
       Risk: No risk
       Prevention: No action required.
+
     \li VL_ComM_UseStructTagPtr
       Reason: It is permissible to define or declare a pointer to an incomplete struct or union type.
+      Risk: No risk
+      Prevention: No action required.
+
+    \li VL_ComM_NotUsed
+      Reason: Identifier is locally declared to avoid unnecessary header inclusion and prevent
+  circular dependencies.
       Risk: No risk
       Prevention: No action required.
 
@@ -61,6 +71,16 @@
   being above the threshold.
       Risk: Understandability and testability become overly complex.
       Prevention: Design and code review, and have a clear structure and annotated code.
+
+    \li VL_ComM_AlwaysFalse
+      Reason: Generation because of the configurations.
+      Risk: No risk.
+      Prevention: None.
+
+    \li VL_ComM_AlwaysTrue
+      Reason: Generation because of the configurations.
+      Risk: No risk.
+      Prevention: None.
  */
 
 #ifndef COMM_H_
@@ -84,7 +104,7 @@ extern "C" {
 #define COMM_AR_RELEASE_REVISION_VERSION (0u)
 #define COMM_SW_MAJOR_VERSION            (2u)
 #define COMM_SW_MINOR_VERSION            (2u)
-#define COMM_SW_PATCH_VERSION            (0u)
+#define COMM_SW_PATCH_VERSION            (2u)
 
 /* ===================================================== macros ===================================================== */
 /* Development Errors */

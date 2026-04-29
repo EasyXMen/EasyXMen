@@ -1,6 +1,6 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
- * SPDX-License-Identifier: LGPL-2.1-only-with-exception OR  LicenseRef-Commercial-License
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
+ * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
  * GNU Lesser General Public License as published by the Free Software Foundation; version 2.1.
@@ -10,7 +10,8 @@
  * You should have received a copy of the GNU Lesser General Public License along with this library;
  * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  * or see <https://www.gnu.org/licenses/>.
- *
+ */
+/*
  ********************************************************************************
  **                                                                            **
  **  FILENAME    : Os_Kernel.c                                                 **
@@ -186,7 +187,7 @@ void StartOS(AppModeType Mode)
         /* 07. Init os. */
         Os_InitSystem();
         /* 08. Init OS CPU arch. */
-        Os_InitCPU();
+        Os_InitCPU(); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
 
 /* 09. Init IOC. */
 #if (CFG_IOC_MAX > 0U)
@@ -336,9 +337,9 @@ void Os_ShutdownOS(StatusType Error, Os_ShutdownAction Action) /* PRQA S 1505 */
  * REQ ID               <None>
  */
 /******************************************************************************/
-/* PRQA S 3006, 1503 ++ */ /* VL_Os_3006, VL_QAC_NoUsedApi */
+/* PRQA S 3006, 1503, 6070 ++ */ /* VL_Os_3006, VL_QAC_NoUsedApi, VL_MTR_Os_STCAL */
 void ShutdownOS(StatusType Error)
-/* PRQA S 3006, 1503 -- */
+/* PRQA S 3006, 1503, 6070 -- */
 {
     /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
     /* PRQA S 1006 ++ */ /* VL_Os_1006 */
@@ -373,9 +374,12 @@ void ShutdownOS(StatusType Error)
     }
 
 #if (CFG_ERRORHOOK == TRUE)
-    if (E_OK != err)
+    if (E_OK != err)/* PRQA S 2880, 2991, 2995 */ /* VL_Os_2880, VL_Os_2991, VL_Os_2995 */
     {
+        /* PRQA S 3138 ++ */ /* VL_Os_3138 */
         Os_TraceErrorHook(OSError_Save_ShutDownOs(Error), OSServiceId_ShutdownOS, err);
+        /* PRQA S 3138 -- */
+
     }
 #endif
 
@@ -883,7 +887,7 @@ Os_TaskType Os_ReadyQueueGetFirst(Os_PriorityType prio)
  * REQ ID               <None>
  */
 /******************************************************************************/
-void Os_SwitchTask(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
+void Os_SwitchTask(void) /* PRQA S 1532, 6070 */ /* VL_QAC_OneFunRef, VL_MTR_Os_STCAL */
 {
     Os_TaskStateType tempState;
 #if (TRUE == CFG_LOAD_RATIO_CALC_ENABLE)
@@ -958,7 +962,9 @@ void Os_SwitchTask(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
             Os_TaskStack[Os_GetObjLocalId(Os_TaskCfg[Os_SCB.sysRunningTaskID].osTaskStackId)].stackTop;
 
 #if (TRUE == CFG_MEMORY_PROTECTION_ENABLE)
+        /* PRQA S 1520 ++ */ /* VL_Os_1520 */
         Os_MemProtTaskCat1Map();
+        /* PRQA S 1520 -- */
 #endif
 
         Os_ArchFirstEnterTask();
@@ -970,7 +976,9 @@ void Os_SwitchTask(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
     else
     {
 #if (TRUE == CFG_MEMORY_PROTECTION_ENABLE)
+        /* PRQA S 1520 ++ */ /* VL_Os_1520 */
         Os_MemProtTaskCat2Map();
+        /* PRQA S 1520 -- */
 #endif
     }
 
@@ -1223,12 +1231,12 @@ void Os_SynPoint(uint8 point) /* PRQA S 6010 */ /* VL_MTR_Os_STCYC */
     {
     /* Multi core state Synchronous point0 ,for check start os appmode. */
     case 0u: /* PRQA S 3120 */ /* VL_QAC_MagicNum */
-        /* PRQA S 4404 ++ */   /* VL_QAC_AutosarBool */
+        /* PRQA S 4404 ++ */   /* VL_Os_AutosarBool */
         Os_CoreCB.coreStateSynPoint0[vCoreId] = TRUE;
         /* PRQA S 4404 -- */
         while (coreId < OS_AUTOSAR_CORES)
         {
-            /* PRQA S 3442, 1881 ++ */ /* VL_Os_3442, VL_QAC_AutosarBool */
+            /* PRQA S 3442, 1881 ++ */ /* VL_Os_3442, VL_Os_AutosarBool */
             if (TRUE == Os_CoreCB.coreStateSynPoint0[coreId])
             /* PRQA S 3442, 1881 -- */
             {
@@ -1239,12 +1247,12 @@ void Os_SynPoint(uint8 point) /* PRQA S 6010 */ /* VL_MTR_Os_STCYC */
 
     /* SWS_Os_00580:synchronize before the global StartupHook. */
     case 1u: /* PRQA S 3120 */ /* VL_QAC_MagicNum */
-        /* PRQA S 4404 ++ */   /* VL_QAC_AutosarBool */
+        /* PRQA S 4404 ++ */   /* VL_Os_AutosarBool */
         Os_CoreCB.coreStateSynPoint1[vCoreId] = TRUE;
         /* PRQA S 4404 -- */
         while (coreId < OS_AUTOSAR_CORES)
         {
-            /* PRQA S 3442, 1881 ++ */ /* VL_Os_3442, VL_QAC_AutosarBool */
+            /* PRQA S 3442, 1881 ++ */ /* VL_Os_3442, VL_Os_AutosarBool */
             if (TRUE == Os_CoreCB.coreStateSynPoint1[coreId])
             /* PRQA S 3442, 1881 -- */
             {
@@ -1255,12 +1263,12 @@ void Os_SynPoint(uint8 point) /* PRQA S 6010 */ /* VL_MTR_Os_STCYC */
 
         /* SWS_Os_00579:synchronize after the global StartupHook. */
     case 2u: /* PRQA S 3120 */ /* VL_QAC_MagicNum */
-        /* PRQA S 4404 ++ */   /* VL_QAC_AutosarBool */
+        /* PRQA S 4404 ++ */   /* VL_Os_AutosarBool */
         Os_CoreCB.coreStateSynPoint2[vCoreId] = TRUE;
         /* PRQA S 4404 -- */
         while (coreId < OS_AUTOSAR_CORES)
         {
-            /* PRQA S 3442, 1881 ++ */ /* VL_Os_3442, VL_QAC_AutosarBool */
+            /* PRQA S 3442, 1881 ++ */ /* VL_Os_3442, VL_Os_AutosarBool */
             if (TRUE == Os_CoreCB.coreStateSynPoint2[coreId])
             /* PRQA S 3442, 1881 -- */
             {
@@ -1271,12 +1279,12 @@ void Os_SynPoint(uint8 point) /* PRQA S 6010 */ /* VL_MTR_Os_STCYC */
 
         /* SWS_Os_00587:synchronize before calling the global ShutdownHook. */
     case 3u: /* PRQA S 3120 */ /* VL_QAC_MagicNum */
-        /* PRQA S 4404 ++ */   /* VL_QAC_AutosarBool */
+        /* PRQA S 4404 ++ */   /* VL_Os_AutosarBool */
         Os_CoreCB.coreStateSynPoint3[vCoreId] = TRUE;
         /* PRQA S 4404 -- */
         while (coreId < OS_AUTOSAR_CORES)
         {
-            /* PRQA S 3442, 1881 ++ */ /* VL_Os_3442, VL_QAC_AutosarBool*/
+            /* PRQA S 3442, 1881 ++ */ /* VL_Os_3442, VL_Os_AutosarBool*/
             if (TRUE == Os_CoreCB.coreStateSynPoint3[coreId])
             /* PRQA S 3442, 1881 -- */
             {

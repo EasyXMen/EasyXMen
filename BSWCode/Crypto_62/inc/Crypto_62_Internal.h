@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -33,6 +33,8 @@
 #ifndef CRYPTO_INTERNAL_H
 #define CRYPTO_INTERNAL_H
 
+/* PRQA S 1501,1753,1512 EOF */ /* VL_Crypto_62_1501,VL_Crypto_62_1753,VL_Crypto_62_1512 */
+
 /* =================================================== inclusions =================================================== */
 #include "Crypto_62_Cfg.h"
 #include "Crypto_62.h"
@@ -52,7 +54,7 @@ extern "C" {
 
 /* ===================================================== macros ===================================================== */
 #if !defined(CRYPTO_62_LOCAL)
-#define CRYPTO_62_LOCAL static /* PRQA S 3414 */ /* VL_QAC_3414 */
+#define CRYPTO_62_LOCAL static /* PRQA S 3414 */ /* VL_QAC_FctLikeMacro */
 #endif
 
 #define CRYPTO_JOB_NOT_VALID (0xffffU) /**< Value indicating that a cryptographic job is not valid */
@@ -114,6 +116,7 @@ extern "C" {
 #define CRYPTO_CONST_34  (34U)  /**< Constant 34 */
 #define CRYPTO_CONST_39  (39U)  /**< Constant 39 */
 #define CRYPTO_CONST_41  (41U)  /**< Constant 41 */
+#define CRYPTO_CONST_48  (48U)  /**< Constant 41 */
 #define CRYPTO_CONST_56  (56U)  /**< Constant 56 */
 #define CRYPTO_CONST_60  (60U)  /**< Constant 60 */
 #define CRYPTO_CONST_61  (61U)  /**< Constant 61 */
@@ -145,7 +148,7 @@ extern "C" {
         (error)); /**< Reports a development error using the Det_ReportError function.*/
 #endif
 
-#define CRYPTO_IS_BIG_ENDIAN 1U
+#define CRYPTO_IS_BIG_ENDIAN 0U
 
 #define CRYPTO_MODE_ENCRYPT 1U /**< AES encryption. */
 #define CRYPTO_MODE_DECRYPT 0U /**< AES decryption. */
@@ -180,17 +183,17 @@ extern uint16 Crypto_62_Key_RetryCount[CRYPTO_MAXNVBLOCK_CONFIGURED];
 #if (CRYPTO_MAXKEY_CONFIGURED > 0)
 /*Enumeration of the current Key state*/
 
-extern Crypto_62_KeyCfgType Crypto_62_Key[CRYPTO_MAXKEY_CONFIGURED];
+extern const Crypto_62_KeyCfgType Crypto_62_Key[CRYPTO_MAXKEY_CONFIGURED];
 
 extern Crypto_KeyStatusType CryptoKeyStatus[CRYPTO_MAXKEY_CONFIGURED];
 
 #endif /* CRYPTO_MAXKEY_CONFIGURED > 0 */
 
-extern Crypto_62_DriverStatusType    Crypto_62_DriverStatus;
-extern Crypto_JobType                Crypto_62_StoredJob[CRYPTO_MAX_DRIVER_OBJECT];
-extern Crypto_62_ObjectStatusType    Crypto_ObjectStatus[CRYPTO_MAX_DRIVER_OBJECT];
-extern Crypto_62_DriverObjectCfgType Crypto_DriverObjects[CRYPTO_MAX_DRIVER_OBJECT];
-extern uint8                         Crypto_62_MemPool[CRYPTO_MEMPOOL_SIZE];
+extern Crypto_62_DriverStatusType          Crypto_62_DriverStatus;
+extern Crypto_JobType                      Crypto_62_StoredJob[CRYPTO_MAX_DRIVER_OBJECT];
+extern Crypto_62_ObjectStatusType          Crypto_ObjectStatus[CRYPTO_MAX_DRIVER_OBJECT];
+extern const Crypto_62_DriverObjectCfgType Crypto_DriverObjects[CRYPTO_MAX_DRIVER_OBJECT];
+extern uint8                               Crypto_62_MemPool[CRYPTO_MEMPOOL_SIZE];
 
 /* ========================================= external function declarations ========================================= */
 /**
@@ -412,10 +415,12 @@ Std_ReturnType Crypto_62_KeyExchangeCalcPubval_Process(
  * @synchronous    TRUE
  * @trace       CPD-71667
  */
+/* PRQA S 1712 ++ */ /* VL_Crypto_62_1712 */
 Std_ReturnType Crypto_62_KeyExchangeCalcSecret_Process(
     uint32                     objectId,
     Crypto_AlgorithmFamilyType algorithmfamily,
     Crypto_AlgorithmModeType   mode);
+/* PRQA S 1712 -- */
 
 #if (CRYPTO_SERVICE_CUSTOM == STD_ON)
 /**
@@ -640,10 +645,12 @@ Std_ReturnType
  * @synchronous    TRUE
  * @trace       CPD-71682
  */
+/* PRQA S 1712 ++ */ /* VL_Crypto_62_1712 */
 Std_ReturnType Crypto_62_KeyExchangeCalcSecret_internal(
     uint32       cryptoKeyId,
     const uint8* partnerPublicValuePtr,
     uint32       partnerPublicValueLength);
+/* PRQA S 1712 -- */
 
 /**
  * @brief          Clears the stored job for a given object ID.
@@ -701,8 +708,10 @@ CRYPTO_62_LOCAL inline uint32 Crypto_Bswap32(uint32 x)
 #define CRYPTO_PUT_UINT32_BE(n, data, offset) Crypto_put_unaligned_uint32((data) + (offset), (uint32)(n));
 /* PRQA S 3412 -- */ /* VL_Crypto_62_General */
 #else
+/* PRQA S 3412 ++ */ /* VL_Crypto_62_General */
 #define CRYPTO_PUT_UINT32_BE(n, data, offset) \
     Crypto_put_unaligned_uint32((data) + (offset), CRYPTO_BSWAP32((uint32)(n)));
+/* PRQA S 3412 -- */ /* VL_Crypto_62_General */
 #endif
 
 #endif
@@ -717,9 +726,11 @@ CRYPTO_62_LOCAL inline uint32 Crypto_Bswap32(uint32 x)
         Crypto_put_unaligned_uint32((data) + (offset), ((uint32)(n)));               \
     }
 /* PRQA S 3412 -- */ /* VL_Crypto_62_General */
+/* PRQA S 3472 ++ */ /* VL_Crypto_62_General */
 #define CRYPTO_GET_UINT32_LE(data, offset)                                                   \
     ((CRYPTO_IS_BIG_ENDIAN) ? CRYPTO_BSWAP32(Crypto_Get_Unaligned_Uint32((data) + (offset))) \
                             : Crypto_Get_Unaligned_Uint32((data) + (offset)))
+/* PRQA S 3472 -- */
 #if !defined(Crypto_BSWAP64)
 CRYPTO_62_LOCAL inline uint64 Crypto_bswap64(uint64 x)
 {
@@ -769,33 +780,35 @@ CRYPTO_62_LOCAL inline uint64 Crypto_get_unaligned_uint64(const void* p)
 #if (CRYPTO_IS_BIG_ENDIAN)
 
 /* PRQA S 3410 ++ */ /* VL_Crypto_62_General */
-#define HOST_c2l(c, l)                         \
-    (l = (((unsigned long)(*((c)++))) << 24),  \
-     l |= (((unsigned long)(*((c)++))) << 16), \
-     l |= (((unsigned long)(*((c)++))) << 8),  \
-     l |= (((unsigned long)(*((c)++)))))
-/* PRQA S 3410 -- */ /* VL_Crypto_62_General */
+#define HOST_c2l(c, l)                  \
+    (l = (((uint32)(*((c)++))) << 24),  \
+     l |= (((uint32)(*((c)++))) << 16), \
+     l |= (((uint32)(*((c)++))) << 8),  \
+     l |= (((uint32)(*((c)++)))))
 
-#define HOST_l2c(l, c)                               \
-    (*((c)++) = (unsigned char)(((l) >> 24) & 0xff), \
-     *((c)++) = (unsigned char)(((l) >> 16) & 0xff), \
-     *((c)++) = (unsigned char)(((l) >> 8) & 0xff),  \
-     *((c)++) = (unsigned char)(((l)) & 0xff),       \
+#define HOST_l2c(l, c)                       \
+    (*((c)++) = (uint8)(((l) >> 24) & 0xff), \
+     *((c)++) = (uint8)(((l) >> 16) & 0xff), \
+     *((c)++) = (uint8)(((l) >> 8) & 0xff),  \
+     *((c)++) = (uint8)(((l)) & 0xff),       \
      l)
+/* PRQA S 3410 -- */ /* VL_Crypto_62_General */
 
 #else
 
-#define HOST_c2l(c, l)                         \
-    (l = (((unsigned long)(*((c)++)))),        \
-     l |= (((unsigned long)(*((c)++))) << 8),  \
-     l |= (((unsigned long)(*((c)++))) << 16), \
-     l |= (((unsigned long)(*((c)++))) << 24))
-#define HOST_l2c(l, c)                               \
-    (*((c)++) = (unsigned char)(((l)) & 0xff),       \
-     *((c)++) = (unsigned char)(((l) >> 8) & 0xff),  \
-     *((c)++) = (unsigned char)(((l) >> 16) & 0xff), \
-     *((c)++) = (unsigned char)(((l) >> 24) & 0xff), \
+/* PRQA S 3410 ++ */ /* VL_Crypto_62_General */
+#define HOST_c2l(c, l)                  \
+    (l = (((uint32)(*((c)++)))),        \
+     l |= (((uint32)(*((c)++))) << 8),  \
+     l |= (((uint32)(*((c)++))) << 16), \
+     l |= (((uint32)(*((c)++))) << 24))
+#define HOST_l2c(l, c)                       \
+    (*((c)++) = (uint8)(((l)) & 0xff),       \
+     *((c)++) = (uint8)(((l) >> 8) & 0xff),  \
+     *((c)++) = (uint8)(((l) >> 16) & 0xff), \
+     *((c)++) = (uint8)(((l) >> 24) & 0xff), \
      l)
+/* PRQA S 3410 -- */ /* VL_Crypto_62_General */
 
 #endif
 /******************************************************************************/
@@ -865,10 +878,12 @@ CRYPTO_62_LOCAL inline uint64 Crypto_ct_size_if(uint64 condition, uint64 if1, ui
     return (uint64)Crypto_ct_if(condition, (uint64)if1, (uint64)if0);
 }
 
+/* PRQA S 5209 ++ */ /* VL_Crypto_62_5209 */
 CRYPTO_62_LOCAL inline unsigned Crypto_ct_uint_if(uint64 condition, unsigned if1, unsigned if0)
 {
     return (unsigned)Crypto_ct_if(condition, (uint64)if1, (uint64)if0);
 }
+/* PRQA S 5209 -- */
 
 CRYPTO_62_LOCAL inline uint64 Crypto_ct_bool_if(uint64 condition, uint64 if1, uint64 if0)
 {
@@ -889,10 +904,12 @@ CRYPTO_62_LOCAL inline uint64 Crypto_ct_size_if_else_0(uint64 condition, uint64 
     return (uint64)(condition & if1);
 }
 
+/* PRQA S 5209 ++ */ /* VL_Crypto_62_5209 */
 CRYPTO_62_LOCAL inline unsigned Crypto_ct_uint_if_else_0(uint64 condition, unsigned if1)
 {
     return (unsigned)(condition & if1);
 }
+/* PRQA S 5209 -- */
 
 CRYPTO_62_LOCAL inline uint64 Crypto_ct_bool_if_else_0(uint64 condition, uint64 if1)
 {
@@ -922,14 +939,14 @@ CRYPTO_62_LOCAL inline void Crypto_Ctr_Increment_Counter(uint8 n[CRYPTO_CONST_16
     // The 32-bit version seems to perform about the same as a 64-bit version
     // on 64-bit architectures, so no need to define a 64-bit version.
     /* PRQA S 2471 ++ */ /* VL_Crypto_62_General */
-    for (int i = CRYPTO_CONST_3;; i--)
+    for (sint32 i = CRYPTO_CONST_3;; i--)
     /* PRQA S 2471 -- */ /* VL_Crypto_62_General */
     {
-        /* PRQA S 4533 ++ */ /* VL_Crypto_62_General */
+        /* PRQA S 4533,3494 ++ */ /* VL_Crypto_62_General,VL_Crypto_62_3494 */
         uint32 x = CRYPTO_GET_UINT32_BE(n, i << CRYPTO_CONST_2);
         x += 1;
         CRYPTO_PUT_UINT32_BE(x, n, i << CRYPTO_CONST_2);
-        /* PRQA S 4533 -- */ /* VL_Crypto_62_General */
+        /* PRQA S 4533,3494 -- */ /* VL_Crypto_62_General */
 
         /* PRQA S 1843 ++ */ /* VL_Crypto_62_General */
         if ((x != 0) || (i == 0))
@@ -939,7 +956,7 @@ CRYPTO_62_LOCAL inline void Crypto_Ctr_Increment_Counter(uint8 n[CRYPTO_CONST_16
         }
     }
 }
-CRYPTO_62_LOCAL inline int Crypto_ct_error_if(uint64 condition, int if1, int if0)
+CRYPTO_62_LOCAL inline sint32 Crypto_ct_error_if(uint64 condition, sint32 if1, sint32 if0)
 {
     /* Coverting int -> uint -> int here is safe, because we require if1 and if0 to be
      * in the range -32767..0, and we require 32-bit int and uint types.
@@ -947,13 +964,13 @@ CRYPTO_62_LOCAL inline int Crypto_ct_error_if(uint64 condition, int if1, int if0
      * This means that (0 <= -if0 < INT_MAX), so negating if0 is safe, and similarly for
      * converting back to int.
      */
-    return -((int)Crypto_ct_if(condition, (uint64)(-if1), (uint64)(-if0)));
+    return -((sint32)Crypto_ct_if(condition, (uint64)(-if1), (uint64)(-if0)));
 }
 
-CRYPTO_62_LOCAL inline int Crypto_ct_error_if_else_0(uint64 condition, int if1)
+CRYPTO_62_LOCAL inline sint32 Crypto_ct_error_if_else_0(uint64 condition, sint32 if1)
 {
     /* PRQA S 1821,4532,4394 ++ */ /* VL_Crypto_62_General */
-    return -((int)(condition & (-if1)));
+    return -((sint32)(condition & (-if1)));
     /* PRQA S 1821,4532,4394 -- */ /* VL_Crypto_62_General */
 }
 CRYPTO_62_LOCAL inline uint64 Crypto_ct_uint_lt(uint64 x, uint64 y)

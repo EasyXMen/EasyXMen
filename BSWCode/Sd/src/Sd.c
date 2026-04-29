@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -21,7 +21,7 @@
  **  @description        : Implementation Of Sd
  **
  ***********************************************************************************************************************/
-/* PRQA S 6540,6520,6510 EOF */ /* VL_MTR_Sd_STTPP, VL_MTR_Sd_STVAR, VL_MTR_Sd_CONF */
+/* PRQA S 6540,6520,6510,3415 EOF */ /* VL_MTR_Sd_STTPP, VL_MTR_Sd_STVAR, VL_MTR_Sd_CONF,VL_Sd_3415 */
 /* =================================================== inclusions =================================================== */
 
 #include "Sd.h"
@@ -64,8 +64,8 @@ SD_LOCAL_INLINE boolean Sd_ValidateRxPduId(uint8 apiId, PduIdType rxPduId);
 SD_LOCAL_INLINE boolean Sd_ValidateSoConMode(uint8 apiId, SoAd_SoConModeType mode);
 SD_LOCAL_INLINE boolean Sd_ValidateServiceGroupId(uint8 apiId, Sd_ServiceGroupIdType serviceGroupId);
 #if (SD_MULTIPLE_PARTITION_SUPPORT == STD_ON)
-SD_LOCAL_INLINE boolean
-    Sd_ValidatePartitionServerService(uint8 apiId, ApplicationType applicationId, uint16 serverServiceHandleId);
+SD_LOCAL_INLINE
+boolean Sd_ValidatePartitionServerService(uint8 apiId, ApplicationType applicationId, uint16 serverServiceHandleId);
 SD_LOCAL_INLINE boolean
     Sd_ValidatePartitionClientService(uint8 apiId, ApplicationType applicationId, uint16 clientServiceHandleId);
 SD_LOCAL_INLINE boolean
@@ -78,8 +78,8 @@ SD_LOCAL_INLINE boolean Sd_ValidatePartitionRxPdu(uint8 apiId, ApplicationType a
 #endif
 #endif
 
-SD_LOCAL_INLINE boolean
-    Sd_GlobalHandlerIdToVariant(const Sd_ConvertMapType* map, uint16 srcHandlerId, uint16* outputHandlerId);
+SD_LOCAL_INLINE
+boolean Sd_GlobalHandlerIdToVariant(const Sd_ConvertMapType* map, uint16 srcHandlerId, uint16* outputHandlerId);
 
 SD_LOCAL ApplicationType Sd_GetApplicationId(void);
 
@@ -455,6 +455,20 @@ SD_LOCAL void Sd_ConsumedEventGroupRetryStatusHandler(const Sd_ConsumedEventGrou
 SD_LOCAL boolean Sd_RxMessageMatchInstance(const Sd_RxQueueType* rxQueueItem, ApplicationType applicationId);
 
 #if (SD_EVENT_HANDLER_NUM > 0)
+
+static void Sd_AddClientToTriggerTransmitList(
+    Sd_TriggerTransmitManagerType** head,
+    SoAd_RoutingGroupIdType         routingGroupId,
+    SoAd_SoConIdType                soConId,
+    ApplicationType                 applicationId);
+
+static void Sd_DelClientFromTriggerTransmitListBySoConId(
+    Sd_TriggerTransmitManagerType** head,
+    SoAd_SoConIdType                soConId,
+    ApplicationType                 applicationId);
+
+static Sd_TriggerTransmitManagerType* Sd_PopFirstClientFromTriggerTransmitList(Sd_TriggerTransmitManagerType** head);
+
 /* PRQA S 5016 ++ */ /* VL_Sd_ReturnValue */
 SD_LOCAL Sd_SubscribeManageType* Sd_GetSubscribeManageObjAddr(
     Sd_SubscribeManageType* header,
@@ -573,7 +587,8 @@ SD_LOCAL void Sd_UpdateSubscribeSoConId(
 SD_LOCAL void Sd_FanOutMulticastUnicastCtrlAddClient(
     const Sd_EventHandlerType* eventHandlerPtr,
     Sd_EventHandlerRTType*     ehRTDataPtr,
-    SoAd_SoConIdType           assignedSoConId);
+    SoAd_SoConIdType           assignedSoConId,
+    ApplicationType            applicationId);
 #endif
 
 SD_LOCAL void Sd_FanOutMulticastUnicastCtrlDelClient(
@@ -755,14 +770,17 @@ SD_LOCAL boolean Sd_IsLeastOneSoConValid(const Sd_ServerServiceType* serverServi
 SD_LOCAL void Sd_CloseAllSoCon(const Sd_ServerServiceType* serverServicePtr);
 
 #if (SD_EVENT_HANDLER_NUM > 0)
-SD_LOCAL void Sd_RebootStopSubscribeEventHandle(uint16 serverServiceHandleId, ApplicationType applicationId);
+SD_LOCAL void Sd_RebootStopSubscribeEventHandle(
+    uint16                serverServiceHandleId,
+    const Sd_RxQueueType* rxQueueItem,
+    ApplicationType       applicationId);
 #endif /* SD_EVENT_HANDLER_NUM > 0 */
 
 SD_LOCAL Std_ReturnType Sd_OptionFormatCheck(const uint8 sdMsg[]);
 
 SD_LOCAL Std_ReturnType Sd_OptionEachItemFormatCheck(const uint8 optionArray[]);
 
-SD_LOCAL void Sd_IfSpecificRoutingGroupTransmit(void);
+SD_LOCAL void Sd_IfSpecificRoutingGroupTransmit(ApplicationType applicationId);
 
 SD_LOCAL uint8 Sd_GetClientNumFromSubscribeList(
     const Sd_SubscribeManageType* headerPtr,
@@ -1875,7 +1893,7 @@ void Sd_MainFunction(void)
         Sd_TransmitMessage(applicationId);
 
         /* PATCH for TC8 */
-        Sd_IfSpecificRoutingGroupTransmit();
+        Sd_IfSpecificRoutingGroupTransmit(applicationId);
 #endif
     }
 #endif
@@ -2335,8 +2353,8 @@ SD_LOCAL_INLINE boolean
 #endif
 #endif
 
-SD_LOCAL_INLINE boolean
-    Sd_GlobalHandlerIdToVariant(const Sd_ConvertMapType* map, uint16 srcHandlerId, uint16* outputHandlerId)
+SD_LOCAL_INLINE
+boolean Sd_GlobalHandlerIdToVariant(const Sd_ConvertMapType* map, uint16 srcHandlerId, uint16* outputHandlerId)
 {
     boolean bRet = FALSE;
     if ((outputHandlerId != NULL_PTR) && (map != NULL_PTR))
@@ -2452,10 +2470,10 @@ SD_LOCAL void Sd_ServerServiceInit(ApplicationType applicationId)
             Sd_EventHandlerRTData[eventHandlePtr->SdEventHandlerHandleId]->TcpSubscribeList = NULL_PTR;
             Sd_EventHandlerRTData[eventHandlePtr->SdEventHandlerHandleId]->CurState         = SD_EVENT_HANDLER_RELEASED;
             Sd_EventHandlerRTData[eventHandlePtr->SdEventHandlerHandleId]->UdpSubsClientNum = 0u;
-            Sd_EventHandlerRTData[eventHandlePtr->SdEventHandlerHandleId]->UdpSubsEndPointNum            = 0u;
-            Sd_EventHandlerRTData[eventHandlePtr->SdEventHandlerHandleId]->TcpSubsClientNum              = 0u;
-            Sd_EventHandlerRTData[eventHandlePtr->SdEventHandlerHandleId]->IfSpecificRoutingTransTcpFlag = FALSE;
-            Sd_EventHandlerRTData[eventHandlePtr->SdEventHandlerHandleId]->IfSpecificRoutingTransUdpFlag = FALSE;
+            Sd_EventHandlerRTData[eventHandlePtr->SdEventHandlerHandleId]->UdpSubsEndPointNum     = 0u;
+            Sd_EventHandlerRTData[eventHandlePtr->SdEventHandlerHandleId]->TcpSubsClientNum       = 0u;
+            Sd_EventHandlerRTData[eventHandlePtr->SdEventHandlerHandleId]->TcpTriggerTransmitList = NULL_PTR;
+            Sd_EventHandlerRTData[eventHandlePtr->SdEventHandlerHandleId]->UdpTriggerTransmitList = NULL_PTR;
 
             eventHandlePtr++;
         }
@@ -2956,67 +2974,70 @@ SD_LOCAL void Sd_ParseRxMessage(ApplicationType applicationId)
         uint16                optionArrayLen =
             (uint16)Sd_NPtrtoHl(&sdMsg[SD_ENTRIES_ARRAY_LENGTH_INDEX + SD_MESSAGE_ENTRYLEN_FILED_LEN + entryArrayLen]);
 
-        /* Find instance use rxPduId */
-        const Sd_InstanceType* instancePtr     = Sd_CfgPtr->Instance;
-        boolean                isMatchInstance = Sd_RxMessageMatchInstance(rxQueueItem, applicationId);
+        boolean isMatchInstance = Sd_RxMessageMatchInstance(rxQueueItem, applicationId);
         if (!isMatchInstance)
         {
             continue; /* PRQA S 0770 */ /* VL_Sd_Continue */
         }
 
-        boolean bRxOptionCheck =
-            Sd_RxMessageOptionCheck(instancePtr, sdMsg, optStartPos, entryArrayLen, optionArrayLen);
-
-        boolean isRxUseMulticast;
-        if (rxQueueItem->RxPduId == instancePtr->SdInstanceMulticastRxPdu)
+        for (uint16 instanceIdx = 0u; instanceIdx < SD_INSTANCE_NUM; instanceIdx++)
         {
-            isRxUseMulticast = TRUE;
-        }
-        else
-        {
-            isRxUseMulticast = FALSE;
-        }
+            const Sd_InstanceType* instancePtr = &Sd_CfgPtr->Instance[instanceIdx];
 
-        (void)Sd_RemoteRebootHandle(instancePtr, rxQueueItem, isRxUseMulticast, applicationId);
+            boolean bRxOptionCheck =
+                Sd_RxMessageOptionCheck(instancePtr, sdMsg, optStartPos, entryArrayLen, optionArrayLen);
 
-        /* Parse Entries */
-        uint16 loopEndPos = entryArrayLen + SD_FIRST_ENTRY_INDEX;
-        for (uint16 index = SD_FIRST_ENTRY_INDEX; index < loopEndPos; index += SD_ENTRY_SIZE)
-        {
-            uint8   entryType   = sdMsg[index];
-            boolean isReplyNAck = FALSE;
-
-            Std_ReturnType entryRefOptCheckRet = E_NOT_OK;
-            if (bRxOptionCheck)
+            boolean isRxUseMulticast;
+            if (rxQueueItem->RxPduId == instancePtr->SdInstanceMulticastRxPdu)
             {
-                entryRefOptCheckRet =
-                    Sd_EntryRefOptionFormatCheck(instancePtr, sdMsg, index, optionArrayLen, optStartPos);
+                isRxUseMulticast = TRUE;
+            }
+            else
+            {
+                isRxUseMulticast = FALSE;
             }
 
-            if ((E_NOT_OK == entryRefOptCheckRet))
-            {
-                if (SD_ENTRY_TYPE_SUBSCRIBE_EVENT_GROUP != entryType)
-                {
-                    /* Security check not pass,ignore the entry */
-                    /* An entry references two or more options that are in conflict,Ignored the entry*/
-                    continue; /* PRQA S 0770 */ /* VL_Sd_Continue */
-                }
-                else
-                {
-                    /* SubscribeEventgroup Message Option check not pass,Send SubscribeEventgroupNAck*/
-                    isReplyNAck = TRUE;
-                }
-            }
+            (void)Sd_RemoteRebootHandle(instancePtr, rxQueueItem, isRxUseMulticast, applicationId);
 
-            Sd_ProcessRxEnrty(
-                instancePtr,
-                rxQueueItem,
-                index,
-                optStartPos,
-                entryType,
-                isRxUseMulticast,
-                isReplyNAck,
-                applicationId);
+            /* Parse Entries */
+            uint16 loopEndPos = entryArrayLen + SD_FIRST_ENTRY_INDEX;
+            for (uint16 index = SD_FIRST_ENTRY_INDEX; index < loopEndPos; index += SD_ENTRY_SIZE)
+            {
+                uint8   entryType   = sdMsg[index];
+                boolean isReplyNAck = FALSE;
+
+                Std_ReturnType entryRefOptCheckRet = E_NOT_OK;
+                if (bRxOptionCheck)
+                {
+                    entryRefOptCheckRet =
+                        Sd_EntryRefOptionFormatCheck(instancePtr, sdMsg, index, optionArrayLen, optStartPos);
+                }
+
+                if ((E_NOT_OK == entryRefOptCheckRet))
+                {
+                    if (SD_ENTRY_TYPE_SUBSCRIBE_EVENT_GROUP != entryType)
+                    {
+                        /* Security check not pass,ignore the entry */
+                        /* An entry references two or more options that are in conflict,Ignored the entry*/
+                        continue; /* PRQA S 0770 */ /* VL_Sd_Continue */
+                    }
+                    else
+                    {
+                        /* SubscribeEventgroup Message Option check not pass,Send SubscribeEventgroupNAck*/
+                        isReplyNAck = TRUE;
+                    }
+                }
+
+                Sd_ProcessRxEnrty(
+                    instancePtr,
+                    rxQueueItem,
+                    index,
+                    optStartPos,
+                    entryType,
+                    isRxUseMulticast,
+                    isReplyNAck,
+                    applicationId);
+            }
         }
 
         Sd_RxQueueHead[applicationId] = rxQueueItem->Next;
@@ -3149,8 +3170,8 @@ SD_LOCAL Std_ReturnType
     Std_ReturnType ret = E_NOT_OK;
 
     /* PATCH for TC8: check if remoteAddr equal to DUT local Address */
-    sint32 cmpResult = IStdLib_MemCmp(ipAddr1, ipAddr2, addrLen);
-    if (0L != cmpResult)
+    StatusType cmpResult = IStdLib_MemCmp(ipAddr1, ipAddr2, addrLen);
+    if (0u != cmpResult)
     {
         uint8 addr1AndResult[SD_ARRAY_LEN_16] = {0};
         uint8 addr2AndResult[SD_ARRAY_LEN_16] = {0};
@@ -3177,7 +3198,7 @@ SD_LOCAL Std_ReturnType
         }
 
         cmpResult = IStdLib_MemCmp(addr1AndResult, addr2AndResult, addrLen);
-        if (0L == cmpResult)
+        if (0u == cmpResult)
         {
             ret = E_OK;
         }
@@ -3982,6 +4003,10 @@ SD_LOCAL void Sd_RxSubscribeEventgroupHandle(
                                     ehRTDataPtr->SoConIdTcp,
                                     counter,
                                     applicationId);
+                                Sd_DelClientFromTriggerTransmitListBySoConId(
+                                    &ehRTDataPtr->TcpTriggerTransmitList,
+                                    ehRTDataPtr->SoConIdTcp,
+                                    applicationId);
                             }
                         }
                         /* PRQA S 2995 -- */ /* VL_Sd_LoopLogical */
@@ -4454,8 +4479,8 @@ SD_LOCAL Std_ReturnType Sd_BuildFindServiceEntry(
     else
     {
         /* Clear new allocated memory */
-        (void)IStdLib_MemSet(sendQueueObjPtr, 0, sizeof(Sd_SendQueueType));
-        (void)IStdLib_MemSet(findSvsPtr, 0, sizeof(Sd_Type1EntryType));
+        (void)IStdLib_MemSet(sendQueueObjPtr, 0u, sizeof(Sd_SendQueueType));
+        (void)IStdLib_MemSet(findSvsPtr, 0u, sizeof(Sd_Type1EntryType));
 #if (SD_CLIENT_CAPABILITY_CFG_USED == STD_ON)
         if (optionsLen > 0u)
         {
@@ -4485,6 +4510,10 @@ SD_LOCAL Std_ReturnType Sd_BuildFindServiceEntry(
         {
             /*@req <SWS_Sd_10503> */
             findSvsPtr->MinorVersion = SD_MESSAGE_MINOR_VERSION_ANY;
+        }
+        else
+        {
+            // Do Nothing
         }
 
         uint8 optCnt = 0u;
@@ -4552,7 +4581,7 @@ SD_LOCAL void Sd_BuildOfferServiceEntry(
     if (NULL_PTR != sendQueueObjPtr)
     {
         /* Clear new allocated memory */
-        (void)IStdLib_MemSet(sendQueueObjPtr, 0, sizeof(Sd_SendQueueType));
+        (void)IStdLib_MemSet(sendQueueObjPtr, 0u, sizeof(Sd_SendQueueType));
     }
     Sd_Type1EntryType* offerServerEntryPtr =
         Sd_CreateOfferServiceEntry(serverServicePtr, isStopOfferService, applicationId);
@@ -4759,11 +4788,11 @@ SD_LOCAL Std_ReturnType Sd_BuildSubscribeEventgroupEntry(
             Sd_ConsumedEventGroupRTData[eventGroupPtr->SdConsumedEventGroupHandleId];
 
         /* Clear new allocated memory */
-        (void)IStdLib_MemSet(sendQueueObjPtr, 0, sizeof(Sd_SendQueueType));
-        (void)IStdLib_MemSet(entryPtr, 0, sizeof(Sd_Type2EntryType));
+        (void)IStdLib_MemSet(sendQueueObjPtr, 0u, sizeof(Sd_SendQueueType));
+        (void)IStdLib_MemSet(entryPtr, 0u, sizeof(Sd_Type2EntryType));
         if (optionsLen > 0u)
         {
-            (void)IStdLib_MemSet(optionPtr, 0, optionsLen);
+            (void)IStdLib_MemSet(optionPtr, 0u, optionsLen);
         }
 
         /* Send Queue object initialization */
@@ -4946,11 +4975,11 @@ SD_LOCAL Std_ReturnType Sd_BuildStopSubscribeEventgroupEntry(
     else
     {
         /* Clear new allocated memory */
-        (void)IStdLib_MemSet(sendQueueObjPtr, 0, sizeof(Sd_SendQueueType));
-        (void)IStdLib_MemSet(entryPtr, 0, sizeof(Sd_Type2EntryType));
+        (void)IStdLib_MemSet(sendQueueObjPtr, 0u, sizeof(Sd_SendQueueType));
+        (void)IStdLib_MemSet(entryPtr, 0u, sizeof(Sd_Type2EntryType));
         if (optionsLen > 0u)
         {
-            (void)IStdLib_MemSet(optionPtr, 0, optionsLen);
+            (void)IStdLib_MemSet(optionPtr, 0u, optionsLen);
         }
 
         /* Send Queue object initialization */
@@ -5026,8 +5055,8 @@ SD_LOCAL Std_ReturnType Sd_BuildStopSubscribeEventgroupEntry(
  * @trace              CPD-74079
  */
 #if (SD_CONSUMED_EVENTGROUP_NUM > 0)
-SD_LOCAL uint32
-    Sd_CalcClientServiceDelayTime(const Sd_ConsumedEventGroupType* eventHandlerPtr, boolean isRxUseMulticast)
+SD_LOCAL
+uint32 Sd_CalcClientServiceDelayTime(const Sd_ConsumedEventGroupType* eventHandlerPtr, boolean isRxUseMulticast)
 {
     uint32 tRandom = 0UL;
 
@@ -5120,11 +5149,11 @@ SD_LOCAL Std_ReturnType Sd_BuildSubscribeEventgroupAckEntry(
         else
         {
             /* Clear new allocated memory */
-            (void)IStdLib_MemSet(sendQueueObjPtr, 0, sizeof(Sd_SendQueueType));
-            (void)IStdLib_MemSet(egAckPtr, 0, sizeof(Sd_Type1EntryType));
+            (void)IStdLib_MemSet(sendQueueObjPtr, 0u, sizeof(Sd_SendQueueType));
+            (void)IStdLib_MemSet(egAckPtr, 0u, sizeof(Sd_Type1EntryType));
             if (optionsLen > 0u)
             {
-                (void)IStdLib_MemSet(optionPtr, 0, optionsLen);
+                (void)IStdLib_MemSet(optionPtr, 0u, optionsLen);
             }
 
             /* Build SubscribeEventgroupAck Entry */
@@ -5250,8 +5279,8 @@ SD_LOCAL Std_ReturnType Sd_BuildSubscribeEventgroupNAckEntry(
     else
     {
         /* Clear new allocated memory */
-        (void)IStdLib_MemSet(sendQueueObjPtr, 0, sizeof(Sd_SendQueueType));
-        (void)IStdLib_MemSet(egAckPtr, 0, sizeof(Sd_Type1EntryType));
+        (void)IStdLib_MemSet(sendQueueObjPtr, 0u, sizeof(Sd_SendQueueType));
+        (void)IStdLib_MemSet(egAckPtr, 0u, sizeof(Sd_Type1EntryType));
 
         Sd_Type2EntryType type2Entry;
         (void)IStdLib_MemCpy((uint8*)&type2Entry, &rxQueueItem->BufPtr[entryPos], sizeof(Sd_Type2EntryType));
@@ -5317,7 +5346,7 @@ SD_LOCAL Sd_Type1EntryType* Sd_CreateOfferServiceEntry(
     if (ofSevsPtr != NULL_PTR)
     {
         /* Clear new allocated memory */
-        (void)IStdLib_MemSet(ofSevsPtr, 0, sizeof(Sd_Type1EntryType));
+        (void)IStdLib_MemSet(ofSevsPtr, 0u, sizeof(Sd_Type1EntryType));
 
         ofSevsPtr->Type            = SD_ENTRY_TYPE_OFFER_SERVICE;
         ofSevsPtr->Index1stOptions = 0u;
@@ -5482,7 +5511,7 @@ SD_LOCAL uint8* Sd_CreateOfferServiceOptions(
     if (NULL_PTR != bufPtr)
     {
         /* Set all memory to 0x00 */
-        (void)IStdLib_MemSet(bufPtr, 0, bufLenSum);
+        (void)IStdLib_MemSet(bufPtr, 0u, bufLenSum);
 
         uint16 bufRunIdx = 0u;
 
@@ -5903,7 +5932,7 @@ SD_LOCAL void
     uint16*            sessionIdCntPtr = NULL_PTR;
     Sd_HeaderType      header;
 
-    (void)IStdLib_MemSet(&header, 0, sizeof(Sd_HeaderType));
+    (void)IStdLib_MemSet(&header, 0u, sizeof(Sd_HeaderType));
 
     header.ClientID = 0u;
     /* Set SessionId*/
@@ -5962,7 +5991,7 @@ SD_LOCAL void Sd_SetIPv4EndpointOption(uint8* ipv4OptionPtr, const uint8* ipv4Ad
 {
     Sd_IPv4OptionsType ipv4Option;
 
-    (void)IStdLib_MemSet(&ipv4Option, 0, sizeof(Sd_IPv4OptionsType));
+    (void)IStdLib_MemSet(&ipv4Option, 0u, sizeof(Sd_IPv4OptionsType));
     ipv4Option.Length = Sd_HtoNs(SD_IPV4_ENDPOINT_OPTION_LENGTH);
     ipv4Option.Type   = SD_IPV4_ENDPOINT_OPTION;
     (void)IStdLib_MemCpy(ipv4Option.IPv4Address, ipv4Address, SD_IPV4_ADDRESS_LEN);
@@ -7756,6 +7785,118 @@ SD_LOCAL void Sd_AppendToRxBuffTail(Sd_RxQueueType* rxQueueItemPtr, ApplicationT
 }
 #endif
 
+#if (SD_EVENT_HANDLER_NUM > 0)
+
+/**
+ * @brief              Add first subscriber to trigger transmit list
+ * @param[inout]       head: Header of the UDP/TCP Trigger transmit list.
+ * @param[in]          routingGroupId: routing group id
+ * @param[in]          soConId: Socket connection id
+ * @return             Sd_TriggerTransmitManagerType*
+ * @reentrant          TRUE
+ * @synchronous        TRUE
+ * @trace
+ */
+/* PRQA S 2889 ++ */ /* VL_QAC_DerefNullPtr */
+static void Sd_AddClientToTriggerTransmitList(
+    Sd_TriggerTransmitManagerType** head,
+    SoAd_RoutingGroupIdType         routingGroupId,
+    SoAd_SoConIdType                soConId,
+    ApplicationType                 applicationId)
+{
+    /* PRQA S 0316 ++ */ /* VL_QAC_0316 */
+    Sd_TriggerTransmitManagerType* tmpNode =
+        (Sd_TriggerTransmitManagerType*)Sd_MallocEx(sizeof(Sd_TriggerTransmitManagerType), Sd_TxMemPool[applicationId]);
+    /* PRQA S 0316 -- */ /* VL_QAC_0316 */
+    if (tmpNode == NULL_PTR)
+    {
+        return;
+    }
+
+    tmpNode->Next           = NULL_PTR;
+    tmpNode->RoutingGroupId = routingGroupId;
+    tmpNode->SoConId        = soConId;
+
+    if (*head == NULL_PTR)
+    {
+        *head = tmpNode;
+    }
+    else
+    {
+        Sd_TriggerTransmitManagerType* nextNodePtr = *head;
+        while (nextNodePtr->Next != NULL_PTR)
+        {
+            nextNodePtr = nextNodePtr->Next;
+        }
+        nextNodePtr->Next = tmpNode;
+    }
+}
+/* PRQA S 2889 -- */
+
+/**
+ * @brief              Pop first subscriber from trigger transmit list
+ * @param[in]          head: Header of the UDP/TCP Trigger transmit list.
+ * @return             Sd_TriggerTransmitManagerType*
+ * @reentrant          TRUE
+ * @synchronous        TRUE
+ * @trace
+ */
+static Sd_TriggerTransmitManagerType* Sd_PopFirstClientFromTriggerTransmitList(Sd_TriggerTransmitManagerType** head)
+{
+    Sd_TriggerTransmitManagerType* firstNode = *head;
+
+    if (firstNode != NULL_PTR)
+    {
+        *head = firstNode->Next;
+    }
+
+    return firstNode;
+}
+
+/**
+ * @brief              Delete subscriber from trigger transmit list by socinid
+ * @param[in]          soConId: Socket connection id.
+ * @param[inout]          head: Header of the UDP/TCP Trigger transmit list.
+ * @reentrant          TRUE
+ * @synchronous        TRUE
+ * @trace
+ */
+/* PRQA S 2889 ++ */ /* VL_QAC_MultiReturn */
+static void Sd_DelClientFromTriggerTransmitListBySoConId(
+    Sd_TriggerTransmitManagerType** head,
+    SoAd_SoConIdType                soConId,
+    ApplicationType                 applicationId)
+{
+    Sd_TriggerTransmitManagerType* tmpNode = *head;
+    Sd_TriggerTransmitManagerType* preNode = *head;
+
+    if (tmpNode == NULL_PTR)
+    {
+        return;
+    }
+
+    if (tmpNode->SoConId == soConId)
+    {
+        *head = tmpNode->Next;
+        Sd_FreeEx(tmpNode, Sd_TxMemPool[applicationId]);
+    }
+    else
+    {
+        while (NULL_PTR != tmpNode->Next)
+        {
+            tmpNode = tmpNode->Next;
+            if (soConId == tmpNode->SoConId)
+            {
+                preNode->Next = tmpNode->Next;
+                Sd_FreeEx(tmpNode, Sd_TxMemPool[applicationId]);
+                break;
+            }
+            preNode = tmpNode;
+        }
+    }
+}
+/* PRQA S 2889 -- */
+
 /**
  * @brief              Return a Sd_SubscribeManageType opinter that match soConId and counter
  * @param[in]          header: Header of the subscribe entry list.
@@ -7767,7 +7908,7 @@ SD_LOCAL void Sd_AppendToRxBuffTail(Sd_RxQueueType* rxQueueItemPtr, ApplicationT
  * @synchronous        TRUE
  * @trace              CPD-74122
  */
-#if (SD_EVENT_HANDLER_NUM > 0)
+/* PRQA S 2889 ++ */ /* VL_QAC_MultiReturn */
 SD_LOCAL Sd_SubscribeManageType* Sd_GetSubscribeManageObjAddr(
     Sd_SubscribeManageType* header,
     TcpIp_SockAddrType      sockRemoteAddr,
@@ -7780,7 +7921,7 @@ SD_LOCAL Sd_SubscribeManageType* Sd_GetSubscribeManageObjAddr(
     {
         if ((counter == ptr->Counter) && (TCPIP_EQ_IPADDR(ptr->SockRemoteAddr, sockRemoteAddr))
             && (ptr->SockRemoteAddr.port == sockRemoteAddr.port)
-            && (0
+            && (0u
                 == IStdLib_MemCmp(
                     (uint8*)&ptr->ClientIpAddr.addr,
                     (uint8*)&clientIpAddr.addr,
@@ -7794,6 +7935,7 @@ SD_LOCAL Sd_SubscribeManageType* Sd_GetSubscribeManageObjAddr(
 
     return ptr;
 }
+/* PRQA S 2889 -- */ /* VL_QAC_MultiReturn */
 
 #if (SD_EVENT_HANDLER_MULICAST_USED == STD_ON)
 /**
@@ -7921,7 +8063,7 @@ SD_LOCAL uint8 Sd_GetClientNumFromSubscribeList(
     {
         if ((soConId == ptr->SoConId) && ((SD_SUBSCRIBE_COUNTER_FIELD_RESERVED == counter) || (counter == ptr->Counter))
             && ((clientIpAddr == NULL_PTR)
-                || (0
+                || (0u
                     == IStdLib_MemCmp(
                         (const uint8*)clientIpAddr,
                         (const uint8*)&ptr->ClientIpAddr,
@@ -7957,7 +8099,7 @@ SD_LOCAL void Sd_DeleteClientFromSubscribeList(
     SoAd_SoConIdType            soConId,
     uint8                       counter,
     ApplicationType             applicationId)
-/* PRQA S 6040 -- */
+/* PRQA S 6040,6080 -- */
 {
     boolean isTcpSoCon;
 
@@ -7977,7 +8119,7 @@ SD_LOCAL void Sd_DeleteClientFromSubscribeList(
     {
         if ((soConId == ptr->SoConId) && ((SD_SUBSCRIBE_COUNTER_FIELD_RESERVED == counter) || (counter == ptr->Counter))
             && ((clientIpAddr == NULL_PTR)
-                || (0
+                || (0u
                     == IStdLib_MemCmp(
                         (const uint8*)clientIpAddr,
                         (const uint8*)&ptr->ClientIpAddr,
@@ -8578,36 +8720,43 @@ SD_LOCAL Std_ReturnType Sd_FanoutTcpAddSubscriber(
 {
     /*Enable Routing */
     const Sd_EventHandlerTcpType* eventHandlerTcpPtr = eventHandlerPtr->SdEventHandlerTcp;
+    boolean                       isInitialEvent     = FALSE;
 
     if ((NULL_PTR != eventHandlerTcpPtr) && (NULL_PTR != eventHandlerTcpPtr->SdEventActivationRef))
     {
         SoAd_RoutingGroupIdType routingGroupId = eventHandlerTcpPtr->SdEventActivationRef->RoutingGroupId;
         (void)SoAd_EnableSpecificRouting(routingGroupId, soConId);
     }
+
+    SoAd_RoutingGroupIdType triggerRoutingGroupId;
     if ((NULL_PTR != eventHandlerTcpPtr) && (NULL_PTR != eventHandlerTcpPtr->SdEventTriggeringRef))
     {
-        SoAd_RoutingGroupIdType routingGroupId = eventHandlerTcpPtr->SdEventTriggeringRef->RoutingGroupId;
+        triggerRoutingGroupId = eventHandlerTcpPtr->SdEventTriggeringRef->RoutingGroupId;
         /* PATCH for TC8: Field event transmit befor ACK */
-        ehRTDataPtr->IfSpecificRoutingTransTcpFlag = TRUE;
-        ehRTDataPtr->RoutingGroupIdTcp             = routingGroupId;
+        isInitialEvent = TRUE;
     }
     ehRTDataPtr->SoConIdTcp = soConId; /* Used also for close Tcp routing */
 
-    Std_ReturnType ret = E_OK;
-    if (ehRTDataPtr->TcpSubsClientNum < SD_MAX_SUBSCRIBE_CLIENT_NUM) /* max 16 client */
+    /* Add client to subscribe list */
+    Std_ReturnType ret = Sd_AddClientToSubscribeList(
+        &ehRTDataPtr->TcpSubscribeList,
+        soConId,
+        sockAddr,
+        clientIpAddr,
+        ttl,
+        counter,
+        applicationId);
+    if (E_OK == ret)
     {
-        /* Add client to subscribe list */
-        ret = Sd_AddClientToSubscribeList(
-            &ehRTDataPtr->TcpSubscribeList,
-            soConId,
-            sockAddr,
-            clientIpAddr,
-            ttl,
-            counter,
-            applicationId);
-        if (E_OK == ret)
+        ehRTDataPtr->TcpSubsClientNum++;
+        if (isInitialEvent)
         {
-            ehRTDataPtr->TcpSubsClientNum++;
+            /* PATCH for TC8: Field event transmit befor ACK */
+            Sd_AddClientToTriggerTransmitList(
+                &ehRTDataPtr->TcpTriggerTransmitList,
+                triggerRoutingGroupId,
+                soConId,
+                applicationId);
         }
     }
 
@@ -8646,7 +8795,7 @@ SD_LOCAL Std_ReturnType Sd_FanOutControlTcpHandle(
 /* PRQA S 6040,6070 -- */
 {
     TcpIp_SockAddrType sockAddr = {0};
-    Std_ReturnType     ret      = E_OK;
+    Std_ReturnType     ret      = E_NOT_OK;
 
     if (ttl > 0UL)
     {
@@ -8701,6 +8850,11 @@ SD_LOCAL Std_ReturnType Sd_FanOutControlTcpHandle(
                 Sd_GetSubscribeManageObjAddr(ehRTDataPtr->TcpSubscribeList, sockAddr, clientIpAddr, counter);
             if (NULL_PTR == subscribeManagePtr)
             {
+                if (ehRTDataPtr->TcpSubsClientNum >= SD_MAX_SUBSCRIBE_CLIENT_NUM)
+                {
+                    return ret;
+                }
+
                 ret = Sd_FanoutTcpAddSubscriber(
                     eventHandlerPtr,
                     soConId,
@@ -8714,6 +8868,7 @@ SD_LOCAL Std_ReturnType Sd_FanOutControlTcpHandle(
             else
             {
                 Sd_FanoutTcpUpdateSubscriber(eventHandlerPtr, soConId, subscribeManagePtr, ehRTDataPtr, ttl);
+                ret = E_OK;
             }
         }
         else
@@ -8739,6 +8894,7 @@ SD_LOCAL Std_ReturnType Sd_FanOutControlTcpHandle(
         }
 #endif
         Sd_FanoutTcpDeleteSubscriber(serverServicePtr, eventHandlerPtr, sockAddr, clientIpAddr, counter, applicationId);
+        ret = E_OK;
     }
 
     return ret;
@@ -8795,9 +8951,11 @@ SD_LOCAL void Sd_UpdateUdpSubscribeList(
                 {
                     routingGroupId = eventHandlerUdpPtr->SdEventTriggeringRef->RoutingGroupId;
                     /* PATCH for TC8: Field event transmit befor ACK */
-                    ehRTDataPtr->IfSpecificRoutingTransUdpFlag = TRUE;
-                    ehRTDataPtr->RoutingGroupIdUdp             = routingGroupId;
-                    ehRTDataPtr->SoConIdUdp                    = soConId;
+                    Sd_AddClientToTriggerTransmitList(
+                        &ehRTDataPtr->UdpTriggerTransmitList,
+                        routingGroupId,
+                        soConId,
+                        applicationId);
                 }
             }
 
@@ -8960,7 +9118,7 @@ SD_LOCAL Std_ReturnType Sd_FanOutControlUdpHandle(
                 {
                     ehRTDataPtr->UdpSubsEndPointNum++;
                 }
-                Sd_FanOutMulticastUnicastCtrlAddClient(eventHandlerPtr, ehRTDataPtr, assignedSoConId);
+                Sd_FanOutMulticastUnicastCtrlAddClient(eventHandlerPtr, ehRTDataPtr, assignedSoConId, applicationId);
             }
         }
         else
@@ -8987,7 +9145,7 @@ SD_LOCAL Std_ReturnType Sd_FanOutControlUdpHandle(
 
     return E_OK;
 }
-/* PRQA S 2889,6040,6070 -- */
+/* PRQA S 2889,6040,6060,6070 -- */
 #endif
 
 /**
@@ -9032,7 +9190,8 @@ SD_LOCAL void Sd_UpdateSubscribeSoConId(
 SD_LOCAL void Sd_FanOutMulticastUnicastCtrlAddClient(
     const Sd_EventHandlerType* eventHandlerPtr,
     Sd_EventHandlerRTType*     ehRTDataPtr,
-    SoAd_SoConIdType           assignedSoConId)
+    SoAd_SoConIdType           assignedSoConId,
+    ApplicationType            applicationId)
 {
     /*@req <SWS_SD_00454>,<SWS_SD_00455> */
     /* client was not subscribe before receiving the subscribe eventgroup entry */
@@ -9078,9 +9237,11 @@ SD_LOCAL void Sd_FanOutMulticastUnicastCtrlAddClient(
     {
         SoAd_RoutingGroupIdType routingGroupId = eventHandlerUdpPtr->SdEventTriggeringRef->RoutingGroupId;
         /* PATCH for TC8: Field event transmit befor ACK */
-        ehRTDataPtr->IfSpecificRoutingTransUdpFlag = TRUE;
-        ehRTDataPtr->RoutingGroupIdUdp             = routingGroupId;
-        ehRTDataPtr->SoConIdUdp                    = assignedSoConId;
+        Sd_AddClientToTriggerTransmitList(
+            &ehRTDataPtr->UdpTriggerTransmitList,
+            routingGroupId,
+            assignedSoConId,
+            applicationId);
     }
 }
 #endif
@@ -9921,7 +10082,7 @@ SD_LOCAL Std_ReturnType Sd_PackageMessage(
     if (NULL_PTR != messagePtr)
     {
         /* Clear allocate memory */
-        (void)IStdLib_MemSet(messagePtr, 0, messageLength);
+        (void)IStdLib_MemSet(messagePtr, 0u, messageLength);
 
         /* Package entries and options to one buffer */
         /* Header */
@@ -10058,7 +10219,7 @@ SD_LOCAL void Sd_TransmitUnicastMessage(
     uint8 sendQueEleList[SD_MAX_ENTRIES_PER_FRAME][SD_MAX_ENTRIES_PER_FRAME] = {{0}};
     /* PRQA S 0686 -- */
 
-    (void)IStdLib_MemSet(numPerAddrKind, 0, SD_MAX_ENTRIES_PER_FRAME);
+    (void)IStdLib_MemSet(numPerAddrKind, 0u, SD_MAX_ENTRIES_PER_FRAME);
     numPerAddrKind[0u]     = 1u;
     sendQueEleList[0u][0u] = 0u;
     uint8 numAllKind       = 1u;
@@ -10068,11 +10229,11 @@ SD_LOCAL void Sd_TransmitUnicastMessage(
         uint8 j = 0u;
         for (j = 0u; j < numAllKind; j++)
         {
-            sint32 isSame = IStdLib_MemCmp(
+            StatusType isSame = IStdLib_MemCmp(
                 (uint8*)&uniSendQue[i]->DestAddr,
                 (uint8*)&uniSendQue[sendQueEleList[numAllKind][0u]]->DestAddr,
                 sizeof(uniSendQue[i]->DestAddr));
-            if (0L == isSame)
+            if (0u == isSame)
             {
                 sendQueEleList[j][numPerAddrKind[j]] = i;
                 numPerAddrKind[j]++;
@@ -10686,7 +10847,7 @@ SD_LOCAL Sd_SessionIdCtrlType*
         sesIdCtrlPtr = instanceRtPtr->SessionIdHandle.SesIdCtrlList;
         while (sesIdCtrlPtr != NULL_PTR)
         {
-            if (0
+            if (0u
                 == IStdLib_MemCmp(
                     (uint8*)&sesIdCtrlPtr->RemoteAddr,
                     (const uint8*)remoteAddrPtr,
@@ -10751,7 +10912,7 @@ SD_LOCAL boolean Sd_IsOfferServiceBeIgnore(
     boolean                          bRet                  = FALSE;
     const Sd_ConsumedEventGroupType* consumedEventGroupPtr = clientServicePtr->SdConsumedEventGroup;
 
-    int ipAddrIsSame = IStdLib_MemCmp(
+    StatusType ipAddrIsSame = IStdLib_MemCmp(
         (const uint8*)&cRtDataPtr->ServerUdpAddr,
         (const uint8*)&rxQueueItem->RemoteAddr,
         sizeof(TcpIp_SockAddrType));
@@ -10761,7 +10922,7 @@ SD_LOCAL boolean Sd_IsOfferServiceBeIgnore(
         const Sd_ConsumedEventGroupRTType* consumedEgRTPtr =
             Sd_ConsumedEventGroupRTData[consumedEventGroupPtr->SdConsumedEventGroupHandleId];
 
-        if ((ipAddrIsSame != 0) && consumedEgRTPtr->IsSubscribed)
+        if ((ipAddrIsSame != 0u) && consumedEgRTPtr->IsSubscribed)
         {
             bRet = TRUE;
             break;
@@ -10804,7 +10965,7 @@ SD_LOCAL Sd_SessionIdCtrlType* Sd_AddRemoteAddrToSessionIdCtrlList(
             sesIdCtrlPtr = instanceRtPtr->SessionIdHandle.SesIdCtrlList;
             while (sesIdCtrlPtr != NULL_PTR)
             {
-                if (0
+                if (0u
                     == IStdLib_MemCmp(
                         (uint8*)&sesIdCtrlPtr->RemoteAddr,
                         (uint8*)&remoteAddr,
@@ -11016,7 +11177,10 @@ SD_LOCAL void
         {
             for (uint8 index = 0u; index < serverServiceList->HandleIdNum; index++)
             {
-                Sd_RebootStopSubscribeEventHandle(serverServiceList->ServiceHandleId[index], applicationId);
+                Sd_RebootStopSubscribeEventHandle(
+                    serverServiceList->ServiceHandleId[index],
+                    rxQueueItem,
+                    applicationId);
             }
             serverServiceList = serverServiceList->Next;
         }
@@ -11101,7 +11265,10 @@ SD_LOCAL void Sd_RxStopOfferServiceHandle(uint16 clientServiceHandleId)
  * @synchronous        TRUE
  * @trace              CPD-74166
  */
-SD_LOCAL void Sd_RebootStopSubscribeEventHandle(uint16 serverServiceHandleId, ApplicationType applicationId)
+SD_LOCAL void Sd_RebootStopSubscribeEventHandle(
+    uint16                serverServiceHandleId,
+    const Sd_RxQueueType* rxQueueItem,
+    ApplicationType       applicationId)
 {
     const Sd_ServerServiceType* serverServicePtr = &Sd_CfgPtr->GlbServerService[serverServiceHandleId];
     const Sd_EventHandlerType*  eventHandlerPtr  = serverServicePtr->SdEventHandler;
@@ -11116,23 +11283,26 @@ SD_LOCAL void Sd_RebootStopSubscribeEventHandle(uint16 serverServiceHandleId, Ap
         subsMangPtr = ehRTDataPtr->TcpSubscribeList;
         while (NULL_PTR != subsMangPtr)
         {
-            /* Disable Routing Path*/
-            const Sd_EventHandlerTcpType* eventHandlerTcpPtr = eventHandlerPtr->SdEventHandlerTcp;
-            if ((NULL_PTR != eventHandlerTcpPtr) && (NULL_PTR != eventHandlerTcpPtr->SdEventActivationRef))
+            if (subsMangPtr->SockRemoteAddr.addr[0] == rxQueueItem->RemoteAddr.addr[0])
             {
-                SoAd_RoutingGroupIdType routingGroupId = eventHandlerTcpPtr->SdEventActivationRef->RoutingGroupId;
-                (void)SoAd_DisableSpecificRouting(routingGroupId, subsMangPtr->SoConId);
-            }
+                /* Disable Routing Path*/
+                const Sd_EventHandlerTcpType* eventHandlerTcpPtr = eventHandlerPtr->SdEventHandlerTcp;
+                if ((NULL_PTR != eventHandlerTcpPtr) && (NULL_PTR != eventHandlerTcpPtr->SdEventActivationRef))
+                {
+                    SoAd_RoutingGroupIdType routingGroupId = eventHandlerTcpPtr->SdEventActivationRef->RoutingGroupId;
+                    (void)SoAd_DisableSpecificRouting(routingGroupId, subsMangPtr->SoConId);
+                }
 
-            ehRTDataPtr->TcpSubsClientNum--;
-            Sd_DeleteClientFromSubscribeList(
-                serverServicePtr,
-                eventHandlerPtr,
-                &ehRTDataPtr->TcpSubscribeList,
-                NULL_PTR,
-                subsMangPtr->SoConId,
-                subsMangPtr->Counter,
-                applicationId);
+                ehRTDataPtr->TcpSubsClientNum--;
+                Sd_DeleteClientFromSubscribeList(
+                    serverServicePtr,
+                    eventHandlerPtr,
+                    &ehRTDataPtr->TcpSubscribeList,
+                    NULL_PTR,
+                    subsMangPtr->SoConId,
+                    subsMangPtr->Counter,
+                    applicationId);
+            }
 
             subsMangPtr = subsMangPtr->Next;
         }
@@ -11143,27 +11313,30 @@ SD_LOCAL void Sd_RebootStopSubscribeEventHandle(uint16 serverServiceHandleId, Ap
         subsMangPtr = ehRTDataPtr->UdpSubscribeList;
         while (NULL_PTR != subsMangPtr)
         {
-            ehRTDataPtr->UdpSubsClientNum--;
-            uint8 clientNum = Sd_GetClientNumFromSubscribeList(
-                ehRTDataPtr->UdpSubscribeList,
-                NULL_PTR,
-                subsMangPtr->SoConId,
-                SD_SUBSCRIBE_COUNTER_FIELD_RESERVED);
-            if (clientNum == 1u)
+            if (subsMangPtr->SockRemoteAddr.addr[0] == rxQueueItem->RemoteAddr.addr[0])
             {
-                ehRTDataPtr->UdpSubsEndPointNum--;
-            }
+                ehRTDataPtr->UdpSubsClientNum--;
+                uint8 clientNum = Sd_GetClientNumFromSubscribeList(
+                    ehRTDataPtr->UdpSubscribeList,
+                    NULL_PTR,
+                    subsMangPtr->SoConId,
+                    SD_SUBSCRIBE_COUNTER_FIELD_RESERVED);
+                if (clientNum == 1u)
+                {
+                    ehRTDataPtr->UdpSubsEndPointNum--;
+                }
 
-            /* Fan out control*/
-            Sd_FanOutMulticastUnicastCtrlDelClient(eventHandlerPtr, ehRTDataPtr, subsMangPtr->SoConId);
-            Sd_DeleteClientFromSubscribeList(
-                serverServicePtr,
-                eventHandlerPtr,
-                &ehRTDataPtr->UdpSubscribeList,
-                &subsMangPtr->ClientIpAddr,
-                subsMangPtr->SoConId,
-                subsMangPtr->Counter,
-                applicationId);
+                /* Fan out control*/
+                Sd_FanOutMulticastUnicastCtrlDelClient(eventHandlerPtr, ehRTDataPtr, subsMangPtr->SoConId);
+                Sd_DeleteClientFromSubscribeList(
+                    serverServicePtr,
+                    eventHandlerPtr,
+                    &ehRTDataPtr->UdpSubscribeList,
+                    &subsMangPtr->ClientIpAddr,
+                    subsMangPtr->SoConId,
+                    subsMangPtr->Counter,
+                    applicationId);
+            }
 
             subsMangPtr = subsMangPtr->Next;
         }
@@ -11294,29 +11467,33 @@ SD_LOCAL Std_ReturnType Sd_OptionEachItemFormatCheck(const uint8 optionArray[])
  * @synchronous        TRUE
  * @trace              CPD-74169
  */
-SD_LOCAL void Sd_IfSpecificRoutingGroupTransmit(void)
+/* PRQA S 2812 ++ */ /* VL_Sd_PointerIsNull */
+SD_LOCAL void Sd_IfSpecificRoutingGroupTransmit(ApplicationType applicationId)
 {
     Sd_EventHandlerRTType* ehRTDataPtr = Sd_EventHandlerRTData[0u];
 
     for (uint16 index = 0u; index < SD_EVENT_HANDLER_NUM; index++)
     {
-        if (ehRTDataPtr->IfSpecificRoutingTransTcpFlag)
+        while (ehRTDataPtr->TcpTriggerTransmitList != NULL_PTR)
         {
-            ehRTDataPtr->IfSpecificRoutingTransTcpFlag = FALSE;
-
-            (void)SoAd_IfSpecificRoutingGroupTransmit(ehRTDataPtr->RoutingGroupIdTcp, ehRTDataPtr->SoConIdTcp);
+            const Sd_TriggerTransmitManagerType* tmpNode =
+                Sd_PopFirstClientFromTriggerTransmitList(&ehRTDataPtr->TcpTriggerTransmitList);
+            (void)SoAd_IfSpecificRoutingGroupTransmit(tmpNode->RoutingGroupId, tmpNode->SoConId);
+            Sd_FreeEx(tmpNode, Sd_TxMemPool[applicationId]);
         }
 
-        if (ehRTDataPtr->IfSpecificRoutingTransUdpFlag)
+        while (ehRTDataPtr->UdpTriggerTransmitList != NULL_PTR)
         {
-            ehRTDataPtr->IfSpecificRoutingTransUdpFlag = FALSE;
-
-            (void)SoAd_IfSpecificRoutingGroupTransmit(ehRTDataPtr->RoutingGroupIdUdp, ehRTDataPtr->SoConIdUdp);
+            const Sd_TriggerTransmitManagerType* tmpNode =
+                Sd_PopFirstClientFromTriggerTransmitList(&ehRTDataPtr->UdpTriggerTransmitList);
+            (void)SoAd_IfSpecificRoutingGroupTransmit(tmpNode->RoutingGroupId, tmpNode->SoConId);
+            Sd_FreeEx(tmpNode, Sd_TxMemPool[applicationId]);
         }
 
         ehRTDataPtr++; /* PRQA S 2983 */ /* VL_Sd_PointerCalu */
     }
 }
+/* PRQA S 2812 -- */
 
 /**
  * @brief              If SoCon not used by Service(Include EventHandler),Reset it to wildcard

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -21,7 +21,9 @@
  **  @description        : Socket Adaptor
  **
  ***********************************************************************************************************************/
-/* PRQA S 6540, 6520 EOF */ /* VL_MTR_SoAd_STTPP, VL_MTR_SoAd_STVAR */
+/* PRQA S 6540, 6520, 3415 EOF */ /* VL_MTR_SoAd_STTPP, VL_MTR_SoAd_STVAR, VL_SoAd_3415 */
+/* PRQA S 3213 EOF */             /* VL_SoAd_3213 */
+/* PRQA S 1536 EOF */             /* VL_SoAd_1536 */
 /* =================================================== inclusions =================================================== */
 #include "IStdLib.h"
 #include "SoAd_Internal.h"
@@ -35,7 +37,7 @@
  * Defines the local variable or function scope as static.
  */
 #if !defined(SOAD_LOCAL)
-#define SOAD_LOCAL static /* PRQA S 3414 */ /* VL_QAC_3414 */
+#define SOAD_LOCAL static /* PRQA S 3414 */ /* VL_QAC_KeyWord */
 #endif
 
 /**
@@ -429,7 +431,19 @@ typedef struct SoAd_FindTheValidSoConTypeTag
     TcpIp_SockAddrType RemoteAddr;        /**< Remote address. @range ref TcpIp_SockAddrType */
 } SoAd_FindTheValidSoConType;
 #endif
-
+#if (STD_ON == SOAD_SUPPORT_RX_BUFFER)
+/**
+ * @brief     handle RxBuffer information
+ */
+typedef struct SoAd_HandleRxBufferTypeTag
+{
+    SoAd_SoConIdType SoConId;        /**< Socket connection ID. @range [0, 0xFFu] */
+    PduLengthType    BufferLength;   /**< Length of the RxBuffer. @range [0, 0xFFFFu] */
+    PduLengthType    BufferStartPos; /**< Start position of the RxBuffer. @range [0, 0xFFFFu] */
+    PduLengthType    EnterPosition;  /**< Write position of the RxBuffer. @range [0, 0xFFFFu] */
+    PduLengthType    ExitPosition;   /**< Read position of the RxBuffer. @range [0, 0xFFFFu] */
+} SoAd_HandleRxBufferType;
+#endif
 /* ============================================ internal data definition ============================================ */
 #define SOAD_START_SEC_VAR_CLEARED_PTR
 #include "SoAd_MemMap.h"
@@ -446,13 +460,13 @@ SOAD_LOCAL const SoAd_ConfigType* SoAd_PbCfgPtr;
  */
 #define SoAd_InitStatus (*SoAd_MultiPartitionInitStatusPtr[partIndex])
 #else
-#define SOAD_START_SEC_VAR_INIT_8
+#define SOAD_START_SEC_VAR_CLEARED_8
 #include "SoAd_MemMap.h"
         /**
          * @brief         Module initialization status.
          */
-        SOAD_LOCAL SoAd_Init_StateType SoAd_InitStatus = SOAD_STATE_UNINIT;
-#define SOAD_STOP_SEC_VAR_INIT_8
+        SOAD_LOCAL SoAd_Init_StateType SoAd_InitStatus;
+#define SOAD_STOP_SEC_VAR_CLEARED_8
 #include "SoAd_MemMap.h"
 #endif
 
@@ -996,9 +1010,8 @@ SOAD_LOCAL void SoAd_RxBufferInit(SoAd_uintx RxBufferId, uint16 partIndex);
  * @trace       CPD-74681
  */
 SOAD_LOCAL void SoAd_HeaderEnableNewPduHandle(
-    SoAd_SoConIdType               SoConId,
     SoAd_InnerSocketConManageType* soConMgmtPtr,
-    SoAd_uintx                     BufferManageId,
+    SoAd_HandleRxBufferType*       handleRxBufferPtr,
     SoAd_SoRxBufferManType*        soRxBuffMgmtPtr);
 /**
  * @brief         Handles the old PDU for header enable.
@@ -1011,9 +1024,8 @@ SOAD_LOCAL void SoAd_HeaderEnableNewPduHandle(
  * @trace       CPD-74682
  */
 SOAD_LOCAL void SoAd_HeaderEnableOldPduHandle(
-    SoAd_SoConIdType               SoConId,
     SoAd_InnerSocketConManageType* soConMgmtPtr,
-    SoAd_uintx                     BufferManageId,
+    const SoAd_HandleRxBufferType* handleRxBufferPtr,
     SoAd_SoRxBufferManType*        soRxBuffMgmtPtr);
 /**
  * @brief         Handles the TP PDU for header enable.
@@ -1026,7 +1038,7 @@ SOAD_LOCAL void SoAd_HeaderEnableOldPduHandle(
  * @trace       CPD-74683
  */
 SOAD_LOCAL void SoAd_HeaderEnableTpPduHandle(
-    SoAd_SoConIdType               SoConId,
+    const SoAd_HandleRxBufferType* handleRxBufferPtr,
     SoAd_InnerSocketConManageType* soConMgmtPtr,
     PduLengthType                  UpBufferSize,
     SoAd_SoRxBufferManType*        soRxBuffMgmtPtr);
@@ -1044,9 +1056,8 @@ SOAD_LOCAL void SoAd_HeaderEnableTpPduHandle(
  * @trace       CPD-74684
  */
 SOAD_LOCAL void SoAd_HeaderEnableIfPduHandle(
-    SoAd_SoConIdType                     SoConId,
     const SoAd_InnerSocketConManageType* soConMgmtPtr,
-    SoAd_uintx                           BufferManageId,
+    const SoAd_HandleRxBufferType*       handleRxBufferPtr,
     SoAd_SoRxBufferManType*              soRxBuffMgmtPtr);
 #endif
 
@@ -1061,9 +1072,8 @@ SOAD_LOCAL void SoAd_HeaderEnableIfPduHandle(
  * @trace       CPD-74685
  */
 SOAD_LOCAL void SoAd_RxDataMainFunctionHeaderDisableHandle(
-    SoAd_SoConIdType               SoConId,
     SoAd_InnerSocketConManageType* soConMgmtPtr,
-    SoAd_uintx                     BufferManageId,
+    const SoAd_HandleRxBufferType* handleRxBufferPtr,
     SoAd_SoRxBufferManType*        soRxBuffMgmtPtr);
 
 /**
@@ -1955,8 +1965,7 @@ SOAD_LOCAL void SoAd_CloseTcpSoConGroup(
  */
 SOAD_LOCAL void SoAd_RxTpPduHeaderEnableHandle(
     PduLengthType                  pduLength,
-    SoAd_SoConIdType               soConId,
-    SoAd_uintx                     socketRouteId,
+    const SoAd_HandleRxBufferType* handleRxBufferPtr,
     SoAd_InnerSocketConManageType* soConMgmtPtr,
     SoAd_SoRxBufferManType*        soRxBuffMgmtPtr);
 #endif
@@ -2014,7 +2023,6 @@ void SoAd_Init(const SoAd_ConfigType* SoAdConfigPtr)
     {
         if (SoAd_InitStatus != SOAD_STATE_INIT)
         {
-            SoAd_uintx                          cnt;
             SoAd_InnerSocketConGroupManageType* soConGroupMgmtPtr;
 
             /*SWS_SoAd_00211*/
@@ -2063,7 +2071,7 @@ void SoAd_Init(const SoAd_ConfigType* SoAdConfigPtr)
             const SoAd_SocketConnectionGroupType* soConGroupCfgPtr;
 #endif
             /*init SoAd_SoConGroupManage parameter*/
-            for (cnt = 0u; cnt < SOAD_SO_CON_GROUP_NUM; cnt++)
+            for (SoAd_uintx cnt = 0u; cnt < SOAD_SO_CON_GROUP_NUM; cnt++)
             {
 #if (STD_ON == SOAD_SUPPORT_MULTIPLE_PARTITION) && (SOAD_PARTITION_NUM > 1u)
                 soConGroupCfgPtr = &SoAd_SoConGroupCfgPtr[cnt];
@@ -2091,7 +2099,7 @@ void SoAd_Init(const SoAd_ConfigType* SoAdConfigPtr)
 #endif
 
 #if (0u < SOAD_PDU_ROUTE_MAX)
-            for (cnt = 0u; cnt < SOAD_PDU_ROUTE_NUM; cnt++)
+            for (PduIdType cnt = 0u; cnt < SOAD_PDU_ROUTE_NUM; cnt++)
             {
                 SoAd_PduRouteManagerInit(cnt);
             }
@@ -2199,7 +2207,6 @@ Std_ReturnType SoAd_IfTransmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr)
 
                 for (SoAd_uintx cnt = 0u; cnt < pduRouteDestNum; cnt++)
                 {
-                    pduRouteDestId += cnt;
                     pduRouteDestCfgPtr = &SoAd_PduRouteDestCfgPtr[pduRouteDestId];
 #if (SOAD_PARTITION_NUM > 1u)
                     PduIdType id = pduRouteDestCfgPtr->PartitionPduRouteDestId;
@@ -2249,6 +2256,7 @@ Std_ReturnType SoAd_IfTransmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr)
                             }
                         }
                     }
+                    pduRouteDestId++;
                 }
             }
         }
@@ -2317,7 +2325,8 @@ Std_ReturnType SoAd_IfRoutingGroupTransmit(SoAd_RoutingGroupIdType id)
 #endif
 
             if ((SOAD_UPPER_LAYER_IF == pduRouteCfgPtr->TxUpperLayerType)
-                && (SOAD_UNUSED_UINT8 == pduRouteMgmtPtr->TxPendingNum) && pduRouteDestMgmtPtr->PduRouteDestEnable)
+                && ((txPduId == pduRouteId) || (SOAD_UNUSED_UINT8 == pduRouteMgmtPtr->TxPendingNum))
+                && pduRouteDestMgmtPtr->PduRouteDestEnable)
             {
                 SoAd_SoConIdType soConId = pduRouteDestCfgPtr->TxSocketConRefIndexPtr[0];
 #if (SOAD_PARTITION_NUM > 1u)
@@ -2390,6 +2399,7 @@ Std_ReturnType SoAd_IfSpecificRoutingGroupTransmit(SoAd_RoutingGroupIdType id, S
         const SoAd_InnerPduRouteDestManagerType* pduRouteDestMgmtPtr;
         const SoAd_PduRouteDestType*             pduRouteDestCfgPtr;
         const SoAd_PduRouteType*                 pduRouteCfgPtr;
+        PduIdType                                txPduId = SOAD_PDUID_INVALID;
 
 #if (SOAD_PARTITION_NUM > 1u)
         uint16 partIndex    = SoAd_GetPartitionIndex(routingGroupCfgPtr->PartitionId);
@@ -2412,9 +2422,17 @@ Std_ReturnType SoAd_IfSpecificRoutingGroupTransmit(SoAd_RoutingGroupIdType id, S
             pduRouteDestMgmtPtr = &SoAd_PduRouteDestManagerPtr[pduRouteDestId];
 #endif
 
-            if ((SOAD_UPPER_LAYER_IF == pduRouteCfgPtr->TxUpperLayerType)
-                && (SOAD_UNUSED_UINT8 == pduRouteMgmtPtr->TxPendingNum) && pduRouteDestMgmtPtr->PduRouteDestEnable)
+            boolean needGetData = FALSE;
+            if (txPduId != pduRouteId)
             {
+                needGetData = TRUE;
+            }
+
+            if ((SOAD_UPPER_LAYER_IF == pduRouteCfgPtr->TxUpperLayerType)
+                && ((txPduId == pduRouteId) || (SOAD_UNUSED_UINT8 == pduRouteMgmtPtr->TxPendingNum))
+                && pduRouteDestMgmtPtr->PduRouteDestEnable)
+            {
+                txPduId                  = pduRouteId;
                 SoAd_SoConIdType soConId = pduRouteDestCfgPtr->TxSocketConRefIndexPtr[0];
 #if (SOAD_PARTITION_NUM > 1u)
                 soConMgmtPtr = soConMgmtPtr + SoAd_SoConCfgPtr[soConId].PartitionSoConId;
@@ -2426,17 +2444,18 @@ Std_ReturnType SoAd_IfSpecificRoutingGroupTransmit(SoAd_RoutingGroupIdType id, S
                     && (!SoAd_CheckTCPTpTransmiting(soConId, soConMgmtPtr->TpPduTransmitting))
                     && (!SoAd_CheckUDPSoConOnlyListen(soConId)))
                 {
-                    (void)SoAd_GetIfPduData(pduRouteCfgPtr, pduRouteMgmtPtr, NULL_PTR);
+                    if (needGetData)
+                    {
+                        (void)SoAd_GetIfPduData(pduRouteCfgPtr, pduRouteMgmtPtr, NULL_PTR);
+                    }
                     if ((NULL_PTR != pduRouteMgmtPtr->PduDataPtr)
                         && ((SOAD_NO_TXMETADATA == pduRouteMgmtPtr->TxSoConId)
                             || (soConId == pduRouteMgmtPtr->TxSoConId)))
                     {
                         (void)SoAd_IfTransmitSoCon(pduRouteId, pduRouteMgmtPtr, pduRouteDestId, soConMgmtPtr, soConId);
                     }
-                    if (E_NOT_OK == result)
-                    {
-                        result = E_OK;
-                    }
+
+                    result = E_OK;
                 }
             }
         }
@@ -3551,6 +3570,7 @@ BufReq_ReturnType SoAd_CopyTxData(TcpIp_SocketIdType SocketId, uint8* BufPtr, ui
                 ret = SoAd_UpperLayerPCCfgPtr[upModule].TpCopyTxDataFunc(upPduId, &pduInfo, NULL_PTR, &validDataLength);
                 if (BUFREQ_OK == ret)
                 {
+                    SchM_Enter_SoAd_ExclusiveArea();
 #if (SOAD_PARTITION_NUM > 1u)
                     SoAd_uintx           startId         = txBufferId - SOAD_MULTI_PART_INFO.SocketTxBuffStartId;
                     SoAd_SoTxBufManType* soTxBuffMgmtPtr = &SoAd_SoTxBuffManagerPtr[partIndex][startId];
@@ -3558,15 +3578,6 @@ BufReq_ReturnType SoAd_CopyTxData(TcpIp_SocketIdType SocketId, uint8* BufPtr, ui
                     SoAd_SoTxBufManType* soTxBuffMgmtPtr = &SoAd_SoTxBuffManagerPtr[txBufferId];
 #endif
                     soTxBuffMgmtPtr->UpCopyLength += BufLength;
-                    if (SOAD_SOCONGROUP_TCPIMME_TXCONF(SOAD_SOCON_REFGORUP(soConId))
-                        && (soTxBuffMgmtPtr->TxPduTotalLength == soTxBuffMgmtPtr->UpCopyLength))
-                    {
-                        soTxBuffMgmtPtr->TxPduTotalLength = 0u;
-                        soTxBuffMgmtPtr->UpCopyLength     = 0u;
-                        soConMgmtPtr->TpPduTransmitting   = FALSE;
-
-                        SoAd_UpperLayerPCCfgPtr[upModule].TpTxConfirmationFunc(upPduId, E_OK);
-                    }
                     soConMgmtPtr->TxNoAckLength += BufLength;
                     SoAd_uintx pduRouteDestId = pduRouteCfgPtr->PduRouteDestStartId;
 #if (SOAD_PARTITION_NUM > 1u)
@@ -3575,6 +3586,19 @@ BufReq_ReturnType SoAd_CopyTxData(TcpIp_SocketIdType SocketId, uint8* BufPtr, ui
 #else
                     SoAd_PduRouteDestManagerPtr[pduRouteDestId].TxPendingLength = soConMgmtPtr->TxNoAckLength;
 #endif
+                    SchM_Exit_SoAd_ExclusiveArea();
+                    if (SOAD_SOCONGROUP_TCPIMME_TXCONF(SOAD_SOCON_REFGORUP(soConId))
+                        && (soTxBuffMgmtPtr->TxPduTotalLength == soTxBuffMgmtPtr->UpCopyLength))
+                    {
+                        SchM_Enter_SoAd_ExclusiveArea();
+                        soTxBuffMgmtPtr->TxPduTotalLength  = 0u;
+                        soTxBuffMgmtPtr->UpCopyLength      = 0u;
+                        soConMgmtPtr->TpPduTransmitting    = FALSE;
+                        soConMgmtPtr->ActiveSoAdPduRouteId = SOAD_PDUID_INVALID;
+                        SchM_Exit_SoAd_ExclusiveArea();
+
+                        SoAd_UpperLayerPCCfgPtr[upModule].TpTxConfirmationFunc(upPduId, E_OK);
+                    }
                 }
                 else
                 {
@@ -4014,11 +4038,15 @@ void SoAd_LocalIpAddrAssignmentChg(TcpIp_LocalAddrIdType IpAddrId, TcpIp_IpAddrS
  * @synchronous   TRUE
  * @trace       CPD-74647
  */
-#if (STD_ON == SOAD_SUPPORT_MULTIPLE_PARTITION)
 /* PRQA S 1532,6070 ++*/ /* VL_QAC_OneFunRef,VL_MTR_SoAd_STCAL */
+#if (STD_ON == SOAD_SUPPORT_MULTIPLE_PARTITION)
 void SoAd_MainFunction(uint16 PartitionId)
+#else
+        void SoAd_MainFunction(void)
+#endif
 /* PRQA S 1532,6070 --*/
 {
+#if (STD_ON == SOAD_SUPPORT_MULTIPLE_PARTITION)
 #if (STD_ON == SOAD_DEV_ERROR_DETECT)
     ApplicationType curAppId = GetApplicationID();
     if (curAppId != PartitionId)
@@ -4031,11 +4059,6 @@ void SoAd_MainFunction(uint16 PartitionId)
 #else
     uint16 partIndex = 0u;
 #endif
-#else
-        /* PRQA S 1532,6070 ++*/ /* VL_QAC_OneFunRef,VL_MTR_SoAd_STCAL */
-        void SoAd_MainFunction(void)
-        /* PRQA S 1532,6070 --*/
-        {
 #endif
     if (SOAD_STATE_INIT == SoAd_InitStatus)
     {
@@ -4396,7 +4419,7 @@ SOAD_LOCAL Std_ReturnType SoAd_GetIfPduData(
     else
     {
         /* store data to buffer */
-        if (pduInfoPtr->SduLength <= (SOAD_MAX_IF_PDU_SIZE - SOAD_HEADER_SIZE))
+        if ((pduInfoPtr->SduLength > 0u) && (pduInfoPtr->SduLength <= (SOAD_MAX_IF_PDU_SIZE - SOAD_HEADER_SIZE)))
         {
             SchM_Enter_SoAd_ExclusiveArea();
             (void)IStdLib_MemCpy(&SoAd_IfPduBuffer[SOAD_HEADER_SIZE], pduInfoPtr->SduDataPtr, pduInfoPtr->SduLength);
@@ -4511,6 +4534,7 @@ SOAD_LOCAL void SoAd_ReleaseRemoteAddrHandle(
     /*Standard undefined,release to wildcards*/
     else
     {
+        soConMgmtPtr->RemoteAddrIsSet     = FALSE;
         soConMgmtPtr->RemoteAddr.addr[0u] = 0x00000000u;
         soConMgmtPtr->RemoteAddr.port     = TCPIP_PORT_ANY;
     }
@@ -4553,16 +4577,15 @@ SOAD_LOCAL void SoAd_ReleaseRemoteAddrMainFunctionHandle(SoAd_SoConIdType SoConI
  */
 /* PRQA S 6070 ++*/ /* VL_MTR_SoAd_STCAL */
 SOAD_LOCAL void SoAd_HeaderEnableNewPduHandle(
-    SoAd_SoConIdType               SoConId,
     SoAd_InnerSocketConManageType* soConMgmtPtr,
-    SoAd_uintx                     BufferManageId,
+    SoAd_HandleRxBufferType*       handleRxBufferPtr,
     SoAd_SoRxBufferManType*        soRxBuffMgmtPtr)
 /* PRQA S 6070 --*/
 {
-    PduLengthType enterPos       = soRxBuffMgmtPtr->EnterPosition;
-    PduLengthType exitPos        = soRxBuffMgmtPtr->ExitPosition;
-    PduLengthType bufferLength   = SoAd_SocketBufferCfgPtr[BufferManageId + SoAd_TxBufferNum].BuffLen;
-    PduLengthType bufferStartPos = SoAd_SocketBufferCfgPtr[BufferManageId + SoAd_TxBufferNum].BuffPos;
+    PduLengthType       enterPos       = handleRxBufferPtr->EnterPosition;
+    PduLengthType       exitPos        = handleRxBufferPtr->ExitPosition;
+    const PduLengthType bufferLength   = handleRxBufferPtr->BufferLength;
+    const PduLengthType bufferStartPos = handleRxBufferPtr->BufferStartPos;
 
     PduLengthType bufferedDataLength = SoAd_CalculateU16ValueByCondition(
         (exitPos < enterPos),
@@ -4595,10 +4618,11 @@ SOAD_LOCAL void SoAd_HeaderEnableNewPduHandle(
 
         boolean    findValidSocketRoute = FALSE;
         SoAd_uintx socketRouteId;
-        findValidSocketRoute = SoAd_FindHeaderIDAndSocketRouteId(SoConId, header, &socketRouteId);
+        findValidSocketRoute = SoAd_FindHeaderIDAndSocketRouteId(handleRxBufferPtr->SoConId, header, &socketRouteId);
         /*find the valid socket route(dest),and the socket route dest is enabled(according to the RouteGroup Manager)*/
 #if (SOAD_PARTITION_NUM > 1u)
-        uint16    partIndex  = SoAd_GetPartitionIndex(SoAd_SoConGroupCfgPtr[SOAD_SOCON_REFGORUP(SoConId)].PartitionId);
+        uint16 partIndex =
+            SoAd_GetPartitionIndex(SoAd_SoConGroupCfgPtr[SOAD_SOCON_REFGORUP(handleRxBufferPtr->SoConId)].PartitionId);
         PduIdType id         = SoAd_SoRouteDestCfgPtr[socketRouteId].PartitionSocketRouteDestId;
         boolean   destEnable = SoAd_SoRouteDestManagerPtr[partIndex][id].SocketRouteDestEnable;
 #else
@@ -4608,34 +4632,42 @@ SOAD_LOCAL void SoAd_HeaderEnableNewPduHandle(
         {
             soRxBuffMgmtPtr->SocketRouteId        = socketRouteId;
             soRxBuffMgmtPtr->ExitPduResidueLength = pduLength;
-            exitPos += SOAD_HEADER_SIZE;
-            exitPos = SoAd_CalculateU16ValueByCondition((exitPos >= bufferLength), (exitPos - bufferLength), exitPos);
-            soRxBuffMgmtPtr->ExitPosition = exitPos;
+            PduLengthType tempExitPos             = exitPos + SOAD_HEADER_SIZE;
+            tempExitPos                           = SoAd_CalculateU16ValueByCondition(
+                (tempExitPos >= bufferLength),
+                (tempExitPos - bufferLength),
+                tempExitPos);
+            soRxBuffMgmtPtr->ExitPosition   = tempExitPos;
+            handleRxBufferPtr->ExitPosition = tempExitPos;
+            SoAd_UpdateTcpReceived(handleRxBufferPtr->SoConId, soConMgmtPtr->TcpIpSocketId, SOAD_HEADER_SIZE);
 
-            SoAd_UpdateTcpReceived(SoConId, soConMgmtPtr->TcpIpSocketId, SOAD_HEADER_SIZE);
 #if (0u < SOAD_MAX_IF_PDU_SIZE)
             /*IF PDU data are in the SoAd Rx Buffer,just is TCP(Header Enable)*/
             if (SOAD_UPPER_LAYER_IF == SoAd_SoRouteDestCfgPtr[socketRouteId].RxUpperLayerType)
             {
-                SoAd_HeaderEnableIfPduHandle(SoConId, soConMgmtPtr, BufferManageId, soRxBuffMgmtPtr);
+                if (handleRxBufferPtr->ExitPosition != handleRxBufferPtr->EnterPosition)
+                {
+                    SoAd_HeaderEnableIfPduHandle(soConMgmtPtr, handleRxBufferPtr, soRxBuffMgmtPtr);
+                }
             }
             else
 #endif
             {
-                SoAd_RxTpPduHeaderEnableHandle(pduLength, SoConId, socketRouteId, soConMgmtPtr, soRxBuffMgmtPtr);
+                SoAd_RxTpPduHeaderEnableHandle(pduLength, handleRxBufferPtr, soConMgmtPtr, soRxBuffMgmtPtr);
             }
         }
         else
         {
             if (bufferedDataLength >= (pduLength + SOAD_HEADER_SIZE))
             {
-                soRxBuffMgmtPtr->ExitPosition += (pduLength + SOAD_HEADER_SIZE);
-                soRxBuffMgmtPtr->ExitPosition = SoAd_CalculateU16ValueByCondition(
-                    (soRxBuffMgmtPtr->ExitPosition >= bufferLength),
-                    (soRxBuffMgmtPtr->ExitPosition - bufferLength),
-                    soRxBuffMgmtPtr->ExitPosition);
-                uint32 tempLen = (uint32)(pduLength) + SOAD_HEADER_DATA_SIZE + SOAD_HEADER_LENGTH_SIZE;
-                SoAd_UpdateTcpReceived(SoConId, soConMgmtPtr->TcpIpSocketId, tempLen);
+                PduLengthType tempExitPos = exitPos + pduLength + SOAD_HEADER_SIZE;
+                tempExitPos               = SoAd_CalculateU16ValueByCondition(
+                    (tempExitPos >= bufferLength),
+                    (tempExitPos - bufferLength),
+                    tempExitPos);
+                soRxBuffMgmtPtr->ExitPosition = tempExitPos;
+                uint32 tempLen                = (uint32)(pduLength) + SOAD_HEADER_DATA_SIZE + SOAD_HEADER_LENGTH_SIZE;
+                SoAd_UpdateTcpReceived(handleRxBufferPtr->SoConId, soConMgmtPtr->TcpIpSocketId, tempLen);
                 (void)Det_ReportRuntimeError(
                     SOAD_MODULE_ID,
                     SOAD_INSTANCE,
@@ -4645,7 +4677,7 @@ SOAD_LOCAL void SoAd_HeaderEnableNewPduHandle(
 
             /*received TCP FIN, never receive data*/
             if ((soConMgmtPtr->SocketNeedClose == SOAD_SOCKET_CLOSE_DEFERRED)
-                && (SOAD_TCP == SoAd_SoConCfgPtr[SoConId].TcpUdpProtocol))
+                && (SOAD_TCP == SoAd_SoConCfgPtr[handleRxBufferPtr->SoConId].TcpUdpProtocol))
             {
                 soRxBuffMgmtPtr->ExitPosition = soRxBuffMgmtPtr->EnterPosition;
             }
@@ -4655,7 +4687,7 @@ SOAD_LOCAL void SoAd_HeaderEnableNewPduHandle(
     {
         /*received TCP FIN, never receive data*/
         if ((soConMgmtPtr->SocketNeedClose == SOAD_SOCKET_CLOSE_DEFERRED)
-            && (SOAD_TCP == SoAd_SoConCfgPtr[SoConId].TcpUdpProtocol))
+            && (SOAD_TCP == SoAd_SoConCfgPtr[handleRxBufferPtr->SoConId].TcpUdpProtocol))
         {
             soRxBuffMgmtPtr->ExitPosition = soRxBuffMgmtPtr->EnterPosition;
         }
@@ -4666,9 +4698,8 @@ SOAD_LOCAL void SoAd_HeaderEnableNewPduHandle(
  * @brief         Handles the old PDU for header enable.
  */
 SOAD_LOCAL void SoAd_HeaderEnableOldPduHandle(
-    SoAd_SoConIdType               SoConId,
     SoAd_InnerSocketConManageType* soConMgmtPtr,
-    SoAd_uintx                     BufferManageId,
+    const SoAd_HandleRxBufferType* handleRxBufferPtr,
     SoAd_SoRxBufferManType*        soRxBuffMgmtPtr)
 {
     SoAd_uintx                      socketRouteId        = soRxBuffMgmtPtr->SocketRouteId;
@@ -4677,7 +4708,7 @@ SOAD_LOCAL void SoAd_HeaderEnableOldPduHandle(
 #if (0u < SOAD_MAX_IF_PDU_SIZE)
     if (SOAD_UPPER_LAYER_IF == socketRoutDestCfgPtr->RxUpperLayerType)
     {
-        SoAd_HeaderEnableIfPduHandle(SoConId, soConMgmtPtr, BufferManageId, soRxBuffMgmtPtr);
+        SoAd_HeaderEnableIfPduHandle(soConMgmtPtr, handleRxBufferPtr, soRxBuffMgmtPtr);
     }
     else
 #endif
@@ -4689,7 +4720,8 @@ SOAD_LOCAL void SoAd_HeaderEnableOldPduHandle(
         pduInfo.MetaDataPtr = NULL_PTR;
 #if (STD_ON == SOAD_SOCKET_ROUTE_METADATA_SUPPORT)
         uint8 metaData[2u]; /* PRQA S 3132 */ /* VL_QAC_MagicNum */
-        pduInfo.MetaDataPtr = SoAd_MetaDataFillHandle(SoConId, socketRoutDestCfgPtr->MetaDataEnable, &metaData[0u]);
+        pduInfo.MetaDataPtr =
+            SoAd_MetaDataFillHandle(handleRxBufferPtr->SoConId, socketRoutDestCfgPtr->MetaDataEnable, &metaData[0u]);
 #endif
 #if (SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u)
         PduLengthType          upBufferSize;
@@ -4698,7 +4730,7 @@ SOAD_LOCAL void SoAd_HeaderEnableOldPduHandle(
 
         if (BUFREQ_OK == SoAd_UpperLayerPCCfgPtr[upModule].TpCopyRxDataFunc(upPduId, &pduInfo, &upBufferSize))
         {
-            SoAd_HeaderEnableTpPduHandle(SoConId, soConMgmtPtr, upBufferSize, soRxBuffMgmtPtr);
+            SoAd_HeaderEnableTpPduHandle(handleRxBufferPtr, soConMgmtPtr, upBufferSize, soRxBuffMgmtPtr);
         }
         else
         {
@@ -4716,43 +4748,45 @@ SOAD_LOCAL void SoAd_HeaderEnableOldPduHandle(
  * @brief         Handles the TP PDU for header enable.
  */
 SOAD_LOCAL void SoAd_HeaderEnableTpPduHandle(
-    SoAd_SoConIdType               SoConId,
+    const SoAd_HandleRxBufferType* handleRxBufferPtr,
     SoAd_InnerSocketConManageType* soConMgmtPtr,
     PduLengthType                  UpBufferSize,
     SoAd_SoRxBufferManType*        soRxBuffMgmtPtr)
 {
-    PduLengthType                   copyToUpLength;
-    SoAd_uintx                      bufferId             = SoAd_SoConCfgPtr[SoConId].RxBuffCfgIndexPtr[0u];
-    PduLengthType                   bufferLength         = SoAd_SocketBufferCfgPtr[bufferId].BuffLen;
-    PduLengthType                   bufferStartPos       = SoAd_SocketBufferCfgPtr[bufferId].BuffPos;
-    SoAd_uintx                      socketRouteId        = soRxBuffMgmtPtr->SocketRouteId;
-    const SoAd_SocketRouteDestType* socketRoutDestCfgPtr = &SoAd_SoRouteDestCfgPtr[socketRouteId];
+    PduLengthType       copyToUpLength;
+    const PduLengthType bufferLength      = handleRxBufferPtr->BufferLength;
+    const PduLengthType bufferStartPos    = handleRxBufferPtr->BufferStartPos;
+    PduLengthType       enterPos          = handleRxBufferPtr->EnterPosition;
+    PduLengthType       exitPos           = handleRxBufferPtr->ExitPosition;
+    PduLengthType       exitPduResidueLen = soRxBuffMgmtPtr->ExitPduResidueLength;
 
-    if (soRxBuffMgmtPtr->ExitPosition < soRxBuffMgmtPtr->EnterPosition)
+    if (exitPos < enterPos)
     {
-        copyToUpLength = soRxBuffMgmtPtr->EnterPosition - soRxBuffMgmtPtr->ExitPosition;
+        copyToUpLength = enterPos - exitPos;
     }
     else
     {
-        copyToUpLength = bufferLength - soRxBuffMgmtPtr->ExitPosition;
+        copyToUpLength = bufferLength - exitPos;
     }
     if (copyToUpLength > UpBufferSize)
     {
         copyToUpLength = UpBufferSize;
     }
-    if (copyToUpLength >= soRxBuffMgmtPtr->ExitPduResidueLength)
+    if (copyToUpLength >= exitPduResidueLen)
     {
-        copyToUpLength = soRxBuffMgmtPtr->ExitPduResidueLength;
+        copyToUpLength = exitPduResidueLen;
     }
     if (copyToUpLength > 0u)
     {
-        PduInfoType pduInfo;
-        pduInfo.SduDataPtr  = &SoAd_PduBuffer[bufferStartPos + soRxBuffMgmtPtr->ExitPosition];
+        const SoAd_SocketRouteDestType* socketRoutDestCfgPtr = &SoAd_SoRouteDestCfgPtr[soRxBuffMgmtPtr->SocketRouteId];
+        PduInfoType                     pduInfo;
+        pduInfo.SduDataPtr  = &SoAd_PduBuffer[bufferStartPos + exitPos];
         pduInfo.SduLength   = copyToUpLength;
         pduInfo.MetaDataPtr = NULL_PTR;
 #if (STD_ON == SOAD_SOCKET_ROUTE_METADATA_SUPPORT)
         uint8 metaData[2u]; /* PRQA S 3132 */ /* VL_QAC_MagicNum */
-        pduInfo.MetaDataPtr = SoAd_MetaDataFillHandle(SoConId, socketRoutDestCfgPtr->MetaDataEnable, &metaData[0u]);
+        pduInfo.MetaDataPtr =
+            SoAd_MetaDataFillHandle(handleRxBufferPtr->SoConId, socketRoutDestCfgPtr->MetaDataEnable, &metaData[0u]);
 #endif
 
 #if (SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u)
@@ -4761,15 +4795,14 @@ SOAD_LOCAL void SoAd_HeaderEnableTpPduHandle(
         SoAd_UpLayerModuleType upModule = socketRoutDestCfgPtr->RefUpModule;
         if (BUFREQ_OK == SoAd_UpperLayerPCCfgPtr[upModule].TpCopyRxDataFunc(upPduId, &pduInfo, &upBufferSize))
         {
-            SoAd_UpdateTcpReceived(SoConId, soConMgmtPtr->TcpIpSocketId, copyToUpLength);
-            soRxBuffMgmtPtr->ExitPosition += copyToUpLength;
-            if (soRxBuffMgmtPtr->ExitPosition >= bufferLength)
+            SoAd_UpdateTcpReceived(handleRxBufferPtr->SoConId, soConMgmtPtr->TcpIpSocketId, copyToUpLength);
+            PduLengthType temp = exitPos + copyToUpLength;
+            temp               = SoAd_CalculateU16ValueByCondition((temp >= bufferLength), (temp - bufferLength), temp);
+            soRxBuffMgmtPtr->ExitPosition = temp;
+            temp                          = soRxBuffMgmtPtr->ExitPduResidueLength - copyToUpLength;
+            if (0u == temp)
             {
-                soRxBuffMgmtPtr->ExitPosition -= bufferLength;
-            }
-            soRxBuffMgmtPtr->ExitPduResidueLength -= copyToUpLength;
-            if (0u == soRxBuffMgmtPtr->ExitPduResidueLength)
-            {
+                soRxBuffMgmtPtr->ExitPduResidueLength = 0u;
                 SoAd_UpperLayerPCCfgPtr[upModule].TpRxindicationFunc(upPduId, E_OK);
             }
         }
@@ -4792,18 +4825,17 @@ SOAD_LOCAL void SoAd_HeaderEnableTpPduHandle(
  * @brief         Handles the IF PDU for header enable.
  */
 SOAD_LOCAL void SoAd_HeaderEnableIfPduHandle(
-    SoAd_SoConIdType                     SoConId,
     const SoAd_InnerSocketConManageType* soConMgmtPtr,
-    SoAd_uintx                           BufferManageId,
+    const SoAd_HandleRxBufferType*       handleRxBufferPtr,
     SoAd_SoRxBufferManType*              soRxBuffMgmtPtr)
 {
     PduLengthType                   bufferedDataLength;
-    PduLengthType                   enterPos          = soRxBuffMgmtPtr->EnterPosition;
-    PduLengthType                   exitPos           = soRxBuffMgmtPtr->ExitPosition;
-    PduLengthType                   exitPduResidueLen = soRxBuffMgmtPtr->ExitPduResidueLength;
-    PduLengthType                   bufferLength   = SoAd_SocketBufferCfgPtr[BufferManageId + SoAd_TxBufferNum].BuffLen;
-    PduLengthType                   bufferStartPos = SoAd_SocketBufferCfgPtr[BufferManageId + SoAd_TxBufferNum].BuffPos;
-    SoAd_uintx                      socketRouteId  = soRxBuffMgmtPtr->SocketRouteId;
+    PduLengthType                   enterPos             = handleRxBufferPtr->EnterPosition;
+    PduLengthType                   exitPos              = handleRxBufferPtr->ExitPosition;
+    PduLengthType                   exitPduResidueLen    = soRxBuffMgmtPtr->ExitPduResidueLength;
+    const PduLengthType             bufferLength         = handleRxBufferPtr->BufferLength;
+    const PduLengthType             bufferStartPos       = handleRxBufferPtr->BufferStartPos;
+    SoAd_uintx                      socketRouteId        = soRxBuffMgmtPtr->SocketRouteId;
     const SoAd_SocketRouteDestType* socketRoutDestCfgPtr = &SoAd_SoRouteDestCfgPtr[socketRouteId];
 
     if (exitPos < enterPos)
@@ -4824,7 +4856,8 @@ SOAD_LOCAL void SoAd_HeaderEnableIfPduHandle(
         pduInfo.MetaDataPtr   = NULL_PTR;
 #if (STD_ON == SOAD_SOCKET_ROUTE_METADATA_SUPPORT)
         uint8 metaData[2u]; /* PRQA S 3132 */ /* VL_QAC_MagicNum */
-        pduInfo.MetaDataPtr = SoAd_MetaDataFillHandle(SoConId, socketRoutDestCfgPtr->MetaDataEnable, &metaData[0u]);
+        pduInfo.MetaDataPtr =
+            SoAd_MetaDataFillHandle(handleRxBufferPtr->SoConId, socketRoutDestCfgPtr->MetaDataEnable, &metaData[0u]);
 #endif
 #if (SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u)
         PduIdType              upPduId  = socketRoutDestCfgPtr->UpRxPduId;
@@ -4851,13 +4884,12 @@ SOAD_LOCAL void SoAd_HeaderEnableIfPduHandle(
 #endif
         /*IF PDU used Rx Buffer must be TCP.
         SWS_SoAd_00564:SoAd shall confirm the reception of all data*/
-        SoAd_UpdateTcpReceived(SoConId, soConMgmtPtr->TcpIpSocketId, exitPduResidueLen);
+        SoAd_UpdateTcpReceived(handleRxBufferPtr->SoConId, soConMgmtPtr->TcpIpSocketId, exitPduResidueLen);
 
-        soRxBuffMgmtPtr->ExitPosition = destPos;
-        if (soRxBuffMgmtPtr->ExitPosition >= bufferLength)
-        {
-            soRxBuffMgmtPtr->ExitPosition -= bufferLength;
-        }
+        PduLengthType tempExitPos = destPos;
+        tempExitPos =
+            SoAd_CalculateU16ValueByCondition((tempExitPos >= bufferLength), (tempExitPos - bufferLength), tempExitPos);
+        soRxBuffMgmtPtr->ExitPosition         = tempExitPos;
         soRxBuffMgmtPtr->ExitPduResidueLength = 0u;
     }
 }
@@ -4867,13 +4899,12 @@ SOAD_LOCAL void SoAd_HeaderEnableIfPduHandle(
  * @brief         Handles the reception data in the main function with header disable.
  */
 SOAD_LOCAL void SoAd_RxDataMainFunctionHeaderDisableHandle(
-    SoAd_SoConIdType               SoConId,
     SoAd_InnerSocketConManageType* soConMgmtPtr,
-    SoAd_uintx                     BufferManageId,
+    const SoAd_HandleRxBufferType* handleRxBufferPtr,
     SoAd_SoRxBufferManType*        soRxBuffMgmtPtr)
 {
     PduInfoType                     pduInfo;
-    SoAd_uintx                      socketRouteId        = SoAd_SoConCfgPtr[SoConId].RefSocketRoutePtr[0u];
+    SoAd_uintx                      socketRouteId = SoAd_SoConCfgPtr[handleRxBufferPtr->SoConId].RefSocketRoutePtr[0u];
     const SoAd_SocketRouteDestType* socketRoutDestCfgPtr = &SoAd_SoRouteDestCfgPtr[socketRouteId];
 
     pduInfo.SduDataPtr  = NULL_PTR;
@@ -4881,7 +4912,8 @@ SOAD_LOCAL void SoAd_RxDataMainFunctionHeaderDisableHandle(
     pduInfo.MetaDataPtr = NULL_PTR;
 #if (STD_ON == SOAD_SOCKET_ROUTE_METADATA_SUPPORT)
     uint8 metaData[2u]; /* PRQA S 3132 */ /* VL_QAC_MagicNum */
-    pduInfo.MetaDataPtr = SoAd_MetaDataFillHandle(SoConId, socketRoutDestCfgPtr->MetaDataEnable, &metaData[0u]);
+    pduInfo.MetaDataPtr =
+        SoAd_MetaDataFillHandle(handleRxBufferPtr->SoConId, socketRoutDestCfgPtr->MetaDataEnable, &metaData[0u]);
 #endif
 
 #if (SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u)
@@ -4893,16 +4925,18 @@ SOAD_LOCAL void SoAd_RxDataMainFunctionHeaderDisableHandle(
     if (BUFREQ_OK == SoAd_UpperLayerPCCfgPtr[upModule].TpCopyRxDataFunc(upPduId, &pduInfo, &upBufferSize))
     {
         PduLengthType copyToUpLength;
-        PduLengthType bufferLength   = SoAd_SocketBufferCfgPtr[BufferManageId + SoAd_TxBufferNum].BuffLen;
-        PduLengthType bufferStartPos = SoAd_SocketBufferCfgPtr[BufferManageId + SoAd_TxBufferNum].BuffPos;
+        PduLengthType bufferLength   = handleRxBufferPtr->BufferLength;
+        PduLengthType bufferStartPos = handleRxBufferPtr->BufferStartPos;
+        PduLengthType enterPos       = handleRxBufferPtr->EnterPosition;
+        PduLengthType exitPos        = handleRxBufferPtr->ExitPosition;
 
-        if (soRxBuffMgmtPtr->ExitPosition < soRxBuffMgmtPtr->EnterPosition)
+        if (exitPos < enterPos)
         {
-            copyToUpLength = soRxBuffMgmtPtr->EnterPosition - soRxBuffMgmtPtr->ExitPosition;
+            copyToUpLength = enterPos - exitPos;
         }
         else
         {
-            copyToUpLength = (bufferLength - soRxBuffMgmtPtr->ExitPosition);
+            copyToUpLength = (bufferLength - exitPos);
         }
         if (copyToUpLength > upBufferSize)
         {
@@ -4910,16 +4944,17 @@ SOAD_LOCAL void SoAd_RxDataMainFunctionHeaderDisableHandle(
         }
         if (copyToUpLength > 0u)
         {
-            pduInfo.SduDataPtr = &SoAd_PduBuffer[bufferStartPos + soRxBuffMgmtPtr->ExitPosition];
+            pduInfo.SduDataPtr = &SoAd_PduBuffer[bufferStartPos + exitPos];
             pduInfo.SduLength  = copyToUpLength;
             if (BUFREQ_OK == SoAd_UpperLayerPCCfgPtr[upModule].TpCopyRxDataFunc(upPduId, &pduInfo, &upBufferSize))
             {
-                SoAd_UpdateTcpReceived(SoConId, soConMgmtPtr->TcpIpSocketId, copyToUpLength);
-                soRxBuffMgmtPtr->ExitPosition += copyToUpLength;
-                if (soRxBuffMgmtPtr->ExitPosition >= bufferLength)
-                {
-                    soRxBuffMgmtPtr->ExitPosition -= bufferLength;
-                }
+                SoAd_UpdateTcpReceived(handleRxBufferPtr->SoConId, soConMgmtPtr->TcpIpSocketId, copyToUpLength);
+                PduLengthType tempExitPos = exitPos + copyToUpLength;
+                tempExitPos               = SoAd_CalculateU16ValueByCondition(
+                    (tempExitPos >= bufferLength),
+                    (tempExitPos - bufferLength),
+                    tempExitPos);
+                soRxBuffMgmtPtr->ExitPosition = tempExitPos;
             }
             else
             {
@@ -4960,10 +4995,16 @@ SOAD_LOCAL void SoAd_SoConRxDataMainFunctionHandle(SoAd_SoConIdType SoConId)
         SoAd_SoRxBufferManType* soRxBuffMgmtPtr = &SoAd_SoRxBuffManagerPtr[bufferId];
         soConMgmtPtr                            = &SoAd_SoConManagerPtr[SoConId];
 #endif
+        SoAd_HandleRxBufferType handleRxBuffer;
+        handleRxBuffer.EnterPosition = soRxBuffMgmtPtr->EnterPosition;
+        handleRxBuffer.ExitPosition  = soRxBuffMgmtPtr->ExitPosition;
 
         /*the EnterPosition is not equal to ExitPosition:the Rx Buffer have store receive data*/
-        if (soRxBuffMgmtPtr->EnterPosition != soRxBuffMgmtPtr->ExitPosition)
+        if (handleRxBuffer.EnterPosition != handleRxBuffer.ExitPosition)
         {
+            handleRxBuffer.SoConId        = SoConId;
+            handleRxBuffer.BufferLength   = SoAd_SocketBufferCfgPtr[bufferId + SoAd_TxBufferNum].BuffLen;
+            handleRxBuffer.BufferStartPos = SoAd_SocketBufferCfgPtr[bufferId + SoAd_TxBufferNum].BuffPos;
 #if (STD_ON == SOAD_SUPPORT_HEADERID)
             SoAd_uintx soConGroupId  = soConCfgPtr->SocketConnectionGroupRef;
             boolean    headerEnabled = SoAd_SoConGroupCfgPtr[soConGroupId].PduHeaderEnable;
@@ -4973,19 +5014,19 @@ SOAD_LOCAL void SoAd_SoConRxDataMainFunctionHandle(SoAd_SoConIdType SoConId)
                 /*need to analysis the newly PDU header*/
                 if (0u == soRxBuffMgmtPtr->ExitPduResidueLength)
                 {
-                    SoAd_HeaderEnableNewPduHandle(SoConId, soConMgmtPtr, bufferId, soRxBuffMgmtPtr);
+                    SoAd_HeaderEnableNewPduHandle(soConMgmtPtr, &handleRxBuffer, soRxBuffMgmtPtr);
                 }
                 /*don't need to analysis the newly PDU header*/
                 else
                 {
-                    SoAd_HeaderEnableOldPduHandle(SoConId, soConMgmtPtr, bufferId, soRxBuffMgmtPtr);
+                    SoAd_HeaderEnableOldPduHandle(soConMgmtPtr, &handleRxBuffer, soRxBuffMgmtPtr);
                 }
             }
             /*header disabled handle:just TP PDU may use the Rx Buffer*/
             else
 #endif
             {
-                SoAd_RxDataMainFunctionHeaderDisableHandle(SoConId, soConMgmtPtr, bufferId, soRxBuffMgmtPtr);
+                SoAd_RxDataMainFunctionHeaderDisableHandle(soConMgmtPtr, &handleRxBuffer, soRxBuffMgmtPtr);
             }
         }
         else
@@ -5086,15 +5127,16 @@ SOAD_LOCAL boolean SoAd_HeaderEnableUdpSoConRxTpPduHandle(
                 == SoAd_UpperLayerPCCfgPtr[upModule]
                        .TpStartOfReceptionFunc(upPduId, &pduInfo, pduLength, &upBufferSize))
             {
-                if ((upBufferSize >= pduLength) || (upBufferSize > 0u))
+                boolean sufficient = upBufferSize >= pduLength;
+                if (sufficient || (upBufferSize > 0u))
                 {
                     pduInfo.SduDataPtr = &DataPtr[dataPos + SOAD_HEADER_SIZE];
-                    pduInfo.SduLength  = (upBufferSize >= pduLength) ? pduLength : upBufferSize;
+                    pduInfo.SduLength  = sufficient ? pduLength : upBufferSize;
                     PduLengthType copyUpBufferSize;
                     if (BUFREQ_OK
                         == SoAd_UpperLayerPCCfgPtr[upModule].TpCopyRxDataFunc(upPduId, &pduInfo, &copyUpBufferSize))
                     {
-                        if (upBufferSize >= pduLength)
+                        if (sufficient)
                         {
                             SoAd_UpperLayerPCCfgPtr[upModule].TpRxindicationFunc(upPduId, E_OK);
                         }
@@ -5210,24 +5252,31 @@ SOAD_LOCAL boolean SoAd_HeaderEnableUdpSoConRxHandle(
                         upModule          = soRouteDestCfgPtr->RefUpModule;
                         if (SOAD_UPPER_LAYER_IF == soRouteDestCfgPtr->RxUpperLayerType)
                         {
-                            pduInfo.SduDataPtr  = &DataPtr[dataPosition + SOAD_HEADER_SIZE];
-                            pduInfo.SduLength   = pduLength;
-                            pduInfo.MetaDataPtr = NULL_PTR;
-#if (STD_ON == SOAD_SOCKET_ROUTE_METADATA_SUPPORT)
-                            uint8 metaData[2u]; /* PRQA S 3132 */ /* VL_QAC_MagicNum */
-                            pduInfo.MetaDataPtr =
-                                SoAd_MetaDataFillHandle(SoConId, soRouteDestCfgPtr->MetaDataEnable, &metaData[0u]);
-#endif
                             /* maybe Multiple header for one udp packet */
                             if ((remainLen + SOAD_HEADER_SIZE + pduLength) <= RxMessageLength)
                             {
                                 soConMgmtPtr->RxIfProcessing = TRUE;
                             }
-#if (SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u)
-                            SoAd_UpperLayerPCCfgPtr[upModule].IfRxIndicationFunc(
-                                soRouteDestCfgPtr->UpRxPduId,
-                                &pduInfo);
+                            if (pduLength > 0u)
+                            {
+                                pduInfo.SduDataPtr  = &DataPtr[dataPosition + SOAD_HEADER_SIZE];
+                                pduInfo.SduLength   = pduLength;
+                                pduInfo.MetaDataPtr = NULL_PTR;
+#if (STD_ON == SOAD_SOCKET_ROUTE_METADATA_SUPPORT)
+                                uint8 metaData[2u]; /* PRQA S 3132 */ /* VL_QAC_MagicNum */
+                                pduInfo.MetaDataPtr =
+                                    SoAd_MetaDataFillHandle(SoConId, soRouteDestCfgPtr->MetaDataEnable, &metaData[0u]);
 #endif
+#if (SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u)
+                                SoAd_UpperLayerPCCfgPtr[upModule].IfRxIndicationFunc(
+                                    soRouteDestCfgPtr->UpRxPduId,
+                                    &pduInfo);
+#endif
+                            }
+                            else
+                            {
+                                validPduData = FALSE;
+                            }
                             dataPosition = remainLen;
                         }
                         else
@@ -5495,6 +5544,7 @@ SOAD_LOCAL void SoAd_RxFullTpPduHandle(
 /**
  * @brief     Handle received TP PDU with disabled header
  */
+/* PRQA S 6030 ++ */ /* VL_MTR_SoAd_STMIF */
 SOAD_LOCAL void SoAd_HeaderDisableSoConRxTpPduHandle(
     SoAd_SoConIdType               SoConId,
     SoAd_InnerSocketConManageType* soConMgmtPtr,
@@ -5547,12 +5597,16 @@ SOAD_LOCAL void SoAd_HeaderDisableSoConRxTpPduHandle(
                 /*copy data to SoAd Rx Buffer*/
                 if (pduInfo.SduLength < RxMessageLength)
                 {
-                    (void)SoAd_CopyDataToRxBuffer(
+                    boolean ret = SoAd_CopyDataToRxBuffer(
                         SoConId,
                         (RxMessageLength - pduInfo.SduLength),
                         &DataPtr[pduInfo.SduLength],
                         soConMgmtPtr,
                         soRxBuffMgmtPtr);
+                    if (ret)
+                    {
+                        soRxBuffMgmtPtr->SocketRouteId = SocketRouteId;
+                    }
                 }
             }
             else
@@ -5580,6 +5634,7 @@ SOAD_LOCAL void SoAd_HeaderDisableSoConRxTpPduHandle(
         (void)SoAd_CopyDataToRxBuffer(SoConId, RxMessageLength, &DataPtr[0u], soConMgmtPtr, soRxBuffMgmtPtr);
     }
 }
+/* PRQA S 6030 -- */
 
 #if (STD_ON == SOAD_SUPPORT_HEADERID)
 
@@ -5618,8 +5673,7 @@ SOAD_LOCAL void SoAd_HeaderEnableTcpSoConRxHandle(
 
             findValidSocketRoute = SoAd_FindHeaderIDAndSocketRouteId(SoConId, header, &socketRouteId);
 #if (SOAD_PARTITION_NUM > 1u)
-            uint16 partIndex = SoAd_GetPartitionIndex(SoAd_SoConGroupCfgPtr[SOAD_SOCON_REFGORUP(SoConId)].PartitionId);
-            id               = SoAd_SoRouteDestCfgPtr[socketRouteId].PartitionSocketRouteDestId;
+            id                 = SoAd_SoRouteDestCfgPtr[socketRouteId].PartitionSocketRouteDestId;
             boolean destEnable = SoAd_SoRouteDestManagerPtr[partIndex][id].SocketRouteDestEnable;
 #else
             boolean destEnable = SoAd_SoRouteDestManagerPtr[socketRouteId].SocketRouteDestEnable;
@@ -5650,7 +5704,7 @@ SOAD_LOCAL void SoAd_HeaderEnableTcpSoConRxHandle(
                     else
                     {
                         /*the message's data belong to more than one PDU*/
-                        if (pduLength <= rxDataLength)
+                        if ((pduLength > 0u) && (pduLength <= rxDataLength))
                         {
                             PduInfoType pduInfo;
                             pduInfo.SduDataPtr  = &DataPtr[SOAD_HEADER_SIZE];
@@ -5756,23 +5810,22 @@ SOAD_LOCAL boolean SoAd_CopyDataToRxBuffer(
         PduLengthType bufferPosition = SoAd_SocketBufferCfgPtr[bufferId].BuffPos;
         PduLengthType bufferLength   = SoAd_SocketBufferCfgPtr[bufferId].BuffLen;
         /*used for SoAd_RxBuffer Manage*/
-        PduLengthType srcPos   = soRxBuffMgmtPtr->EnterPosition;
-        PduLengthType destPos  = srcPos + RxMessageLength;
-        PduLengthType startPos = bufferPosition + srcPos;
+        PduLengthType enterPos = soRxBuffMgmtPtr->EnterPosition;
+        PduLengthType exitPos  = soRxBuffMgmtPtr->ExitPosition;
+        PduLengthType destPos  = enterPos + RxMessageLength;
+        PduLengthType startPos = bufferPosition + enterPos;
 
-        if (soRxBuffMgmtPtr->ExitPosition <= soRxBuffMgmtPtr->EnterPosition)
+        if (exitPos <= enterPos)
         {
             if (destPos >= bufferLength)
             {
-                if ((destPos - bufferLength) < soRxBuffMgmtPtr->ExitPosition)
+                PduLengthType overflowLength = destPos - bufferLength;
+                if (overflowLength < exitPos)
                 {
-                    PduLengthType copyLength = bufferLength - srcPos;
+                    PduLengthType copyLength = bufferLength - enterPos;
                     (void)IStdLib_MemCpy(&SoAd_PduBuffer[startPos], DataPtr, copyLength);
-                    (void)IStdLib_MemCpy(
-                        &SoAd_PduBuffer[bufferPosition],
-                        &DataPtr[copyLength],
-                        (PduLengthType)(destPos - bufferLength));
-                    soRxBuffMgmtPtr->EnterPosition = destPos - bufferLength;
+                    (void)IStdLib_MemCpy(&SoAd_PduBuffer[bufferPosition], &DataPtr[copyLength], overflowLength);
+                    soRxBuffMgmtPtr->EnterPosition = overflowLength;
                 }
                 /*SWS_SoAd_00693:larger than the remaining available buffer size */
                 else
@@ -5788,7 +5841,7 @@ SOAD_LOCAL boolean SoAd_CopyDataToRxBuffer(
         }
         else
         {
-            if (destPos < soRxBuffMgmtPtr->ExitPosition)
+            if (destPos < exitPos)
             {
                 (void)IStdLib_MemCpy(&SoAd_PduBuffer[startPos], DataPtr, RxMessageLength);
                 soRxBuffMgmtPtr->EnterPosition = destPos;
@@ -6027,11 +6080,13 @@ SOAD_LOCAL boolean SoAd_GetBestMatchAlgorithmSoCon(
     SoAd_BestMatchStateType   CheckSoConState)
 /* PRQA S 6030 -- */
 {
-    uint8                                 priority         = 0u;
     const SoAd_SocketConnectionGroupType* soConGroupCfgPtr = &SoAd_SoConGroupCfgPtr[SoConGroupId];
     SoAd_SoConIdType                      socketConNum     = soConGroupCfgPtr->SocketConNum;
+    SoAd_SoConIdType                      soConStartId     = soConGroupCfgPtr->SocketConStartId;
     const SoAd_InnerSocketConManageType*  soConMgmtPtr;
-    SoAd_SoConIdType                      soConStartId = soConGroupCfgPtr->SocketConStartId;
+    uint8                                 priority    = 0u;
+    boolean                               result      = FALSE;
+    SoAd_SoConIdType                      bestSoConId = SOAD_NO_TXMETADATA;
 
 #if (SOAD_PARTITION_NUM > 1u)
     uint16 partIndex = SoAd_GetPartitionIndex(soConGroupCfgPtr->PartitionId);
@@ -6053,25 +6108,25 @@ SOAD_LOCAL boolean SoAd_GetBestMatchAlgorithmSoCon(
             || ((SOAD_SOCON_MATCH_REQUEST_ONLINE_RECONNECT == CheckSoConState)
                 && (soConMgmtPtr->SoConMode != SOAD_SOCON_OFFLINE)))
         {
-            uint8 currentPrio;
+            uint8   currentPrio;
+            boolean isCfgRemoteIpAny   = SOAD_IS_IPADDR_ANY(soConMgmtPtr->RemoteAddr);
+            boolean isCfgRemotePortAny = (TCPIP_PORT_ANY == soConMgmtPtr->RemoteAddr.port);
+            boolean isIpMatch          = SOAD_EQ_IPADDR(*RemoteAddrPtr, soConMgmtPtr->RemoteAddr);
+            boolean isPortMatch        = (RemoteAddrPtr->port == soConMgmtPtr->RemoteAddr.port);
 
-            if (SOAD_EQ_IPADDR(*RemoteAddrPtr, soConMgmtPtr->RemoteAddr)
-                && (RemoteAddrPtr->port == soConMgmtPtr->RemoteAddr.port))
+            if (isIpMatch && isPortMatch)
             {
                 currentPrio = SOAD_BEST_MATCH_ALG_PRIORITY_4;
             }
-            else if (
-                SOAD_EQ_IPADDR(*RemoteAddrPtr, soConMgmtPtr->RemoteAddr)
-                && (TCPIP_PORT_ANY == soConMgmtPtr->RemoteAddr.port))
+            else if (isIpMatch && isCfgRemotePortAny)
             {
                 currentPrio = SOAD_BEST_MATCH_ALG_PRIORITY_3;
             }
-            else if (
-                SOAD_IS_IPADDR_ANY(soConMgmtPtr->RemoteAddr) && (RemoteAddrPtr->port == soConMgmtPtr->RemoteAddr.port))
+            else if (isCfgRemoteIpAny && isPortMatch)
             {
                 currentPrio = SOAD_BEST_MATCH_ALG_PRIORITY_2;
             }
-            else if (SOAD_IS_IPADDR_ANY(soConMgmtPtr->RemoteAddr) && (TCPIP_PORT_ANY == soConMgmtPtr->RemoteAddr.port))
+            else if (isCfgRemoteIpAny && isCfgRemotePortAny)
             {
                 currentPrio = SOAD_BEST_MATCH_ALG_PRIORITY_1;
             }
@@ -6082,13 +6137,19 @@ SOAD_LOCAL boolean SoAd_GetBestMatchAlgorithmSoCon(
 
             if (currentPrio > priority)
             {
-                *SoConId = soConIndex;
-                priority = currentPrio;
+                bestSoConId = soConIndex;
+                priority    = currentPrio;
             }
         }
     }
 
-    return ((priority > 0u) && (priority <= SOAD_BEST_MATCH_ALG_PRIORITY_4));
+    if (priority > 0u)
+    {
+        *SoConId = bestSoConId;
+        result   = TRUE;
+    }
+
+    return result;
 }
 
 /**
@@ -6557,6 +6618,7 @@ SOAD_LOCAL void SoAd_CloseRxTpPduHandle(SoAd_SoConIdType SoConId)
 #else
     const SoAd_SoRxBufferManType* soRxBuffMgmtPtr = &SoAd_SoRxBuffManagerPtr[rxBufferId];
 #endif
+
     if (SOAD_UNUSED_UINT16 == soRxBuffMgmtPtr->SocketRouteId)
     {
         if (NULL_PTR != soConCfgPtr->RefSocketRoutePtr)
@@ -6568,8 +6630,10 @@ SOAD_LOCAL void SoAd_CloseRxTpPduHandle(SoAd_SoConIdType SoConId)
     {
         soAdSocketRouteId = soRxBuffMgmtPtr->SocketRouteId;
     }
+
     if ((soAdSocketRouteId < SOAD_SOCKET_ROUTE_DEST_NUM)
-        && (SOAD_UPPER_LAYER_TP == SoAd_SoRouteDestCfgPtr[soAdSocketRouteId].RxUpperLayerType))
+        && (SOAD_UPPER_LAYER_TP == SoAd_SoRouteDestCfgPtr[soAdSocketRouteId].RxUpperLayerType)
+        && (soRxBuffMgmtPtr->ExitPosition != soRxBuffMgmtPtr->EnterPosition))
     {
         PduIdType              pduId    = SoAd_SoRouteDestCfgPtr[soAdSocketRouteId].UpRxPduId;
         SoAd_UpLayerModuleType upModule = SoAd_SoRouteDestCfgPtr[soAdSocketRouteId].RefUpModule;
@@ -6590,7 +6654,33 @@ SOAD_LOCAL void SoAd_CloseRxTpPduHandle(SoAd_SoConIdType SoConId)
             SoAd_UpperLayerPCCfgPtr[upModule].TpRxindicationFunc(pduId, E_NOT_OK);
         }
 #endif
+
+        if (SOAD_TCP == soConCfgPtr->TcpUdpProtocol)
+        {
+            PduLengthType storeLength;
+            PduLengthType bufferLength = SoAd_SocketBufferCfgPtr[rxBufferId + SoAd_TxBufferNum].BuffLen;
+            if (soRxBuffMgmtPtr->ExitPosition < soRxBuffMgmtPtr->EnterPosition)
+            {
+                storeLength = soRxBuffMgmtPtr->EnterPosition - soRxBuffMgmtPtr->ExitPosition;
+            }
+            else
+            {
+                storeLength = bufferLength - soRxBuffMgmtPtr->ExitPosition;
+            }
+
+            if (storeLength > 0u)
+            {
+                const SoAd_InnerSocketConManageType* soConMgmtPtr;
+#if (SOAD_PARTITION_NUM > 1u)
+                soConMgmtPtr = &SoAd_SoConManagerPtr[partIndex][SoAd_SoConCfgPtr[soConId].PartitionSoConId];
+#else
+                soConMgmtPtr = &SoAd_SoConManagerPtr[SoConId];
+#endif
+                SoAd_UpdateTcpReceived(SoConId, soConMgmtPtr->TcpIpSocketId, storeLength);
+            }
+        }
     }
+
     /*clear the SoCon Rx Buffer*/
     SoAd_RxBufferInit(rxBufferId, partIndex);
 }
@@ -6682,10 +6772,8 @@ SOAD_LOCAL void SoAd_SoConCloseHandle(
         {
 #if (SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u)
             SoAd_UpLayerModuleType upModule = SoAd_PduRouteCfgPtr[pduRouteId].RefUpModule;
-
             /*TP transmitting,call the up TpTxConfirmation with E_NOT_OK*/
             SoAd_UpperLayerPCCfgPtr[upModule].TpTxConfirmationFunc(SoAd_PduRouteCfgPtr[pduRouteId].UpPduId, E_NOT_OK);
-
 #endif
         }
     }
@@ -7026,13 +7114,12 @@ SOAD_LOCAL void SoAd_MainFunctionTxConfirmationHandle(void)
 #endif
         if (0u == txPendingNum)
         {
+            SoAd_PduRouteManagerInit(txPduId);
+
 #if (SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u)
             SoAd_UpLayerModuleType upModule = SoAd_PduRouteCfgPtr[txPduId].RefUpModule;
-
             SoAd_UpperLayerPCCfgPtr[upModule].IfTxConfirmationFunc(SoAd_PduRouteCfgPtr[txPduId].UpPduId, E_OK);
-
 #endif
-            SoAd_PduRouteManagerInit(txPduId);
         }
     }
 }
@@ -7288,13 +7375,11 @@ SOAD_LOCAL Std_ReturnType SoAd_IfTransmitSoCon(
                 if ((SOAD_UDPTYPE_CFG(soConGroupId)->SocketUdpImmediateTxConfirmEnabled)
                     && (pduRouteCfgPtr->UDPImmediateTxConfirmation))
                 {
+                    SoAd_PduRouteManagerInit(TxPduId);
 #if (SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u)
                     SoAd_UpLayerModuleType upModule = pduRouteCfgPtr->RefUpModule;
-
                     SoAd_UpperLayerPCCfgPtr[upModule].IfTxConfirmationFunc(pduRouteCfgPtr->UpPduId, E_OK);
-
 #endif
-                    SoAd_PduRouteManagerInit(TxPduId);
                 }
                 else
 #endif
@@ -7391,10 +7476,12 @@ SOAD_LOCAL void SoAd_MainFunctionTpTransmitHandle(SoAd_SoConIdType SoConId)
                             (uint16)soTxBuffMgmtPtr->TxPduTotalLength);
                         if (E_OK == resultLo)
                         {
-                            soTxBuffMgmtPtr->TxPduTotalLength = 0u;
-                            soTxBuffMgmtPtr->UpCopyLength     = 0u;
-                            soConMgmtPtr->TpPduTransmitting   = FALSE;
-
+                            SchM_Enter_SoAd_ExclusiveArea();
+                            soTxBuffMgmtPtr->TxPduTotalLength  = 0u;
+                            soTxBuffMgmtPtr->UpCopyLength      = 0u;
+                            soConMgmtPtr->TpPduTransmitting    = FALSE;
+                            soConMgmtPtr->ActiveSoAdPduRouteId = SOAD_PDUID_INVALID;
+                            SchM_Exit_SoAd_ExclusiveArea();
                             SoAd_UpperLayerPCCfgPtr[upModule].TpTxConfirmationFunc(upPduId, E_OK);
                         }
                         else
@@ -7449,14 +7536,15 @@ SOAD_LOCAL void SoAd_TpPduTxErrorHandle(
     }
     else
     {
+        SchM_Enter_SoAd_ExclusiveArea();
         /* SWS_SoAd_00652 SWS_SoAd_00670 */
         SoAd_TxBufferInit(TxBufferId, partIndex);
-        soConMgmtPtr->TpPduTransmitting = FALSE;
+        soConMgmtPtr->TpPduTransmitting    = FALSE;
+        soConMgmtPtr->ActiveSoAdPduRouteId = SOAD_PDUID_INVALID;
+        SchM_Exit_SoAd_ExclusiveArea();
 
 #if (SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u)
-
         SoAd_UpperLayerPCCfgPtr[UpModule].TpTxConfirmationFunc(UpPduId, E_NOT_OK);
-
 #endif
     }
 }
@@ -7618,7 +7706,8 @@ SOAD_LOCAL void SoAd_TxConfirmationHandle(SoAd_SoConIdType soConId, uint16 Lengt
 
     if (pduRouteDestMPtr->TxPendingLength <= Length)
     {
-        PduIdType                      pduRouteId = SoAd_PduRouteDestCfgPtr[pduRouteDestId].PduRouteIndex;
+        PduIdType                      pduRouteId     = SoAd_PduRouteDestCfgPtr[pduRouteDestId].PduRouteIndex;
+        const SoAd_PduRouteType*       pduRouteCfgPtr = &SoAd_PduRouteCfgPtr[pduRouteId];
         SoAd_InnerSocketConManageType* soConMgmtPtr;
 #if (SOAD_PARTITION_NUM > 1u)
         soConMgmtPtr = &SoAd_SoConManagerPtr[partIndex][SoAd_SoConCfgPtr[soConId].PartitionSoConId];
@@ -7627,7 +7716,7 @@ SOAD_LOCAL void SoAd_TxConfirmationHandle(SoAd_SoConIdType soConId, uint16 Lengt
 #endif
         pduRouteDestMPtr->TxPendingLength = 0u;
 #if (STD_ON == SOAD_SUPPORT_TX_BUFFER)
-        if (SOAD_UPPER_LAYER_TP == SoAd_PduRouteCfgPtr[pduRouteId].TxUpperLayerType)
+        if (SOAD_UPPER_LAYER_TP == pduRouteCfgPtr->TxUpperLayerType)
         {
             if (!soConMgmtPtr->TpPduTransmitting)
             {
@@ -7646,18 +7735,18 @@ SOAD_LOCAL void SoAd_TxConfirmationHandle(SoAd_SoConIdType soConId, uint16 Lengt
 #endif
                 if (soTxBuffMgmtPtr->UpCopyLength == soTxBuffMgmtPtr->TxPduTotalLength)
                 {
-#if (SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u)
-                    SoAd_UpLayerModuleType upModule = SoAd_PduRouteCfgPtr[pduRouteId].RefUpModule;
-
-                    SoAd_UpperLayerPCCfgPtr[upModule].TpTxConfirmationFunc(
-                        SoAd_PduRouteCfgPtr[pduRouteId].UpPduId,
-                        E_OK);
-
-#endif
-                    soTxBuffMgmtPtr->TxPduTotalLength = 0u;
-                    soTxBuffMgmtPtr->UpCopyLength     = 0u;
-                    soConMgmtPtr->TpPduTransmitting   = FALSE;
+                    SchM_Enter_SoAd_ExclusiveArea();
+                    soTxBuffMgmtPtr->TxPduTotalLength  = 0u;
+                    soTxBuffMgmtPtr->UpCopyLength      = 0u;
+                    soConMgmtPtr->TpPduTransmitting    = FALSE;
+                    soConMgmtPtr->ActiveSoAdPduRouteId = SOAD_PDUID_INVALID;
+                    SchM_Exit_SoAd_ExclusiveArea();
                     SoAd_SocnTransmitAutomaticSoConSetupHandle(soConId, soConMgmtPtr, SOAD_TCP);
+
+#if (SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u)
+                    SoAd_UpLayerModuleType upModule = pduRouteCfgPtr->RefUpModule;
+                    SoAd_UpperLayerPCCfgPtr[upModule].TpTxConfirmationFunc(pduRouteCfgPtr->UpPduId, E_OK);
+#endif
                 }
             }
         }
@@ -7667,7 +7756,7 @@ SOAD_LOCAL void SoAd_TxConfirmationHandle(SoAd_SoConIdType soConId, uint16 Lengt
         {
             SoAd_InnerPduRoutManageType* pduRouteMgmtPtr;
 #if (SOAD_PARTITION_NUM > 1u)
-            pduRouteMgmtPtr = &SoAd_PduRouteManagerPtr[partIndex][SoAd_PduRouteCfgPtr[pduRouteId].PartitionPduRouteId];
+            pduRouteMgmtPtr = &SoAd_PduRouteManagerPtr[partIndex][pduRouteCfgPtr->PartitionPduRouteId];
 #else
             pduRouteMgmtPtr = &SoAd_PduRouteManagerPtr[pduRouteId];
 #endif
@@ -7676,16 +7765,12 @@ SOAD_LOCAL void SoAd_TxConfirmationHandle(SoAd_SoConIdType soConId, uint16 Lengt
                 pduRouteMgmtPtr->TxPendingNum -= 1u;
                 if (0u == pduRouteMgmtPtr->TxPendingNum)
                 {
-#if (SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u)
-                    SoAd_UpLayerModuleType upModule = SoAd_PduRouteCfgPtr[pduRouteId].RefUpModule;
-
-                    SoAd_UpperLayerPCCfgPtr[upModule].IfTxConfirmationFunc(
-                        SoAd_PduRouteCfgPtr[pduRouteId].UpPduId,
-                        E_OK);
-
-#endif
                     SoAd_PduRouteManagerInit(pduRouteId);
                     SoAd_SocnTransmitAutomaticSoConSetupHandle(soConId, soConMgmtPtr, SOAD_TCP);
+#if (SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u)
+                    SoAd_UpLayerModuleType upModule = pduRouteCfgPtr->RefUpModule;
+                    SoAd_UpperLayerPCCfgPtr[upModule].IfTxConfirmationFunc(pduRouteCfgPtr->UpPduId, E_OK);
+#endif
                 }
             }
         }
@@ -7848,7 +7933,7 @@ SOAD_LOCAL boolean SoAd_DetCheckInitStatus(uint8 apiId, ApplicationType* applica
         ret = FALSE;
     }
 
-    if ((ret) && (applicationIdPtr))
+    if ((ret) && (NULL_PTR != applicationIdPtr))
     {
         *applicationIdPtr = 0u;
     }
@@ -8609,34 +8694,34 @@ SOAD_LOCAL void SoAd_CloseTcpSoConGroup(
 #if (STD_ON == SOAD_SUPPORT_HEADERID)
 SOAD_LOCAL void SoAd_RxTpPduHeaderEnableHandle(
     PduLengthType                  pduLength,
-    SoAd_SoConIdType               soConId,
-    SoAd_uintx                     socketRouteId,
+    const SoAd_HandleRxBufferType* handleRxBufferPtr,
     SoAd_InnerSocketConManageType* soConMgmtPtr,
     SoAd_SoRxBufferManType*        soRxBuffMgmtPtr)
 {
     if (pduLength > 0u)
     {
-        PduInfoType pduInfo;
+        const SoAd_SocketRouteDestType* socketRoutDestCfgPtr = &SoAd_SoRouteDestCfgPtr[soRxBuffMgmtPtr->SocketRouteId];
+        PduInfoType                     pduInfo;
         pduInfo.SduDataPtr  = NULL_PTR;
         pduInfo.SduLength   = 0u;
         pduInfo.MetaDataPtr = NULL_PTR;
 #if (STD_ON == SOAD_SOCKET_ROUTE_METADATA_SUPPORT)
         uint8 metaData[2u]; /* PRQA S 3132 */ /* VL_QAC_MagicNum */
         pduInfo.MetaDataPtr =
-            SoAd_MetaDataFillHandle(soConId, SoAd_SoRouteDestCfgPtr[socketRouteId].MetaDataEnable, &metaData[0u]);
+            SoAd_MetaDataFillHandle(handleRxBufferPtr->SoConId, socketRoutDestCfgPtr->MetaDataEnable, &metaData[0u]);
 #endif
 
 #if (SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u)
-        SoAd_UpLayerModuleType upModule = SoAd_SoRouteDestCfgPtr[socketRouteId].RefUpModule;
+        SoAd_UpLayerModuleType upModule = socketRoutDestCfgPtr->RefUpModule;
+        PduIdType              upPduId  = socketRoutDestCfgPtr->UpRxPduId;
         PduLengthType          upBufferSize;
         if (BUFREQ_OK
-            == SoAd_UpperLayerPCCfgPtr[upModule].TpStartOfReceptionFunc(
-                SoAd_SoRouteDestCfgPtr[socketRouteId].UpRxPduId,
-                &pduInfo,
-                pduLength,
-                &upBufferSize))
+            == SoAd_UpperLayerPCCfgPtr[upModule].TpStartOfReceptionFunc(upPduId, &pduInfo, pduLength, &upBufferSize))
         {
-            SoAd_HeaderEnableTpPduHandle(soConId, soConMgmtPtr, upBufferSize, soRxBuffMgmtPtr);
+            if (handleRxBufferPtr->ExitPosition != handleRxBufferPtr->EnterPosition)
+            {
+                SoAd_HeaderEnableTpPduHandle(handleRxBufferPtr, soConMgmtPtr, upBufferSize, soRxBuffMgmtPtr);
+            }
         }
         else
         {

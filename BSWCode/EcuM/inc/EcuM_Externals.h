@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -24,6 +24,9 @@
 
 #ifndef ECUM_EXTERNAL_H
 #define ECUM_EXTERNAL_H
+
+/* PRQA S 1753 EOF */ /* VL_EcuM_1753 */
+
 /* =================================================== inclusions =================================================== */
 #include "Std_Types.h"
 #include "EcuM.h"
@@ -146,7 +149,9 @@ void EcuM_OnGoOffOne(void);
  * @synchronous TRUE
  * @trace       CPD-68954
  */
+/* PRQA S 1753 ++ */ /* VL_EcuM_1753 */
 void EcuM_OnGoOffTwo(void);
+/* PRQA S 1753 -- */
 
 /**
  * @brief       This callout shall take the code for shutting off the power supply of the ECU.

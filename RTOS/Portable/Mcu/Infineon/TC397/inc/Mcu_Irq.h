@@ -1,6 +1,5 @@
-/*******************************************************************************
-**                                                                            **
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+/**
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -11,8 +10,8 @@
  * You should have received a copy of the GNU Lesser General Public License along with this library;
  * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  * or see <https://www.gnu.org/licenses/>.
-**                                                                            **
-********************************************************************************
+ */
+/*******************************************************************************
 **                                                                            **
 **  FILENAME    :  Mcu_Irq.h                                                  **
 **                                                                            **
@@ -33,7 +32,11 @@
 #include "Os_Types.h"
 
 /*=======[M A C R O S]=====================================================*/
-#define OS_SRC_SRE_BIT 10u
+#define OS_SRC_SRE_BIT (10u)
+#define OS_SRC_SRR_BIT (24U)
+#define OS_SRC_CLRR_BIT (25U)
+#define OS_SRC_SETR_BIT (26U)
+#define SRPN_MASK (0xFFFFFF00u)
 
 /* Interrupt Service Provider */
 #define OS_ARCH_INT_CPU0 (0x00000000u)
@@ -974,7 +977,7 @@
 /* Install interrupt on tc275. If set prio to 0, this interrupt is disabled. */
 /* PRQA S 3472 ++ */ /* VL_Os_3472 */
 #define OS_INTERRUPT_INSTALL(src, prio, srcType) \
-    ((*(uint32 volatile*)(src)) = (((*(uint32 volatile*)(src)) & 0xFFFFFF00u) | 0x00000400u | (srcType)) + (prio))
+    ((*(uint32 volatile*)(src)) = (((*(uint32 volatile*)(src)) & SRPN_MASK) | (1u << OS_SRC_SRE_BIT) | (srcType)) + (prio))
 /* PRQA S 3472 -- */
 /* Clear the bit10 SRE(source request enable) */
 /* PRQA S 3412 ++ */ /* VL_Os_3412 */
@@ -989,22 +992,24 @@
     }
 /* PRQA S 3458 -- */
 /* Write 1 to the bit25 CLRR(clear request) */
-#define OS_INTERRUPT_CLEARREQ(src) (((*(uint32 volatile*)(src)) = ((*(uint32 volatile*)(src)) | 0x02000000u)))
+#define OS_INTERRUPT_CLEARREQ(src) (((*(uint32 volatile*)(src)) = ((*(uint32 volatile*)(src)) | (1u << OS_SRC_CLRR_BIT))))
 
 /* Check the bit24 SRR(service request flag) */
-
-#define OS_INTERRUPT_CHKREQ(src) (((*(uint32 volatile*)(src)) >> 24u) & 0x01u)
+#define OS_INTERRUPT_CHKREQ(src)                       \
+    {                                                  \
+        uint32 status = ((*(uint32 volatile*)(src)) >> OS_SRC_SRR_BIT); \
+    }
 
 /* Set SRPN to 0 in src */
-#define OS_INTERRUPT_SET_SRPN_ZERO(src) ((*(uint32 volatile*)(src)) = ((*(uint32 volatile*)(src)) & 0xFFFFFF00u))
+#define OS_INTERRUPT_SET_SRPN_ZERO(src) ((*(uint32 volatile*)(src)) = ((*(uint32 volatile*)(src)) & SRPN_MASK))
 /* PRQA S 3472 -- */
-#define OS_INTERRUPT_SETREQ(src) ((*(uint32 volatile*)(src)) = ((*(uint32 volatile*)(src)) | 0x04000000u))
+#define OS_INTERRUPT_SETREQ(src) ((*(uint32 volatile*)(src)) = ((*(uint32 volatile*)(src)) | (1u << OS_SRC_SETR_BIT)))
 
 /* Get the value of the ISRid's status register */
-#define OS_GETISRSTR(isrId) OS_INTERRUPT_CHKREQ(Os_IsrCfg[isrId].OsIsrSrc)
+#define OS_GETISRSTR(isrId) OS_INTERRUPT_CHKREQ(Os_IsrCfg[Os_GetObjLocalId(isrId)].OsIsrSrc)
 
 /* Clear the status register of the ISR id */
-#define OS_CLRISRSTR(isrId) OS_INTERRUPT_CLEARREQ(Os_IsrCfg[isrId].OsIsrSrc)
+#define OS_CLRISRSTR(isrId) OS_INTERRUPT_CLEARREQ(Os_IsrCfg[Os_GetObjLocalId(isrId)].OsIsrSrc)
 
 /* cpu0 = bit0 set to 1, ..., DMA = bit3 set to 1 */
 /* Request an interrupt service to the specified core. */
@@ -1017,6 +1022,9 @@
         OS_INTERRUPT_SRB_SETREQ(coreId);                             \
     }
 /* PRQA S 3458 -- */
+#define OS_INTERRUPT_TRIGGER(isrId) OS_INTERRUPT_SETREQ(Os_IsrCfg[Os_GetObjLocalId(isrId)].OsIsrSrc)
+#define OS_INTERRUPT_CLEAR(isrId)   OS_INTERRUPT_CLEARREQ(Os_IsrCfg[Os_GetObjLocalId(isrId)].OsIsrSrc)
+
 /*=======[T Y P E   D E F I N I T I O N S]==================================*/
 /* Type of the interrupt service routine (ISR). */
 typedef void (*Os_isrhnd)(void);

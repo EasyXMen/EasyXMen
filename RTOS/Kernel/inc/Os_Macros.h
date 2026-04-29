@@ -1,6 +1,6 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
- * SPDX-License-Identifier: LGPL-2.1-only-with-exception OR  LicenseRef-Commercial-License
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
+ * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
  * GNU Lesser General Public License as published by the Free Software Foundation; version 2.1.
@@ -10,10 +10,11 @@
  * You should have received a copy of the GNU Lesser General Public License along with this library;
  * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  * or see <https://www.gnu.org/licenses/>.
- *
+ */
+/*
  ********************************************************************************
  **                                                                            **
- **  FILENAME    : Os_Marcos.h                                                 **
+ **  FILENAME    : Os_Macros.h                                                 **
  **                                                                            **
  **  Created on  :                                                             **
  **  Author      : i-soft-os                                                   **
@@ -24,8 +25,8 @@
  **  Version :   AUTOSAR classic Platform R19--Function Safety                 **
  **                                                                            **
  *******************************************************************************/
-#ifndef OS_MARCOS_H
-#define OS_MARCOS_H
+#ifndef OS_MACROS_H
+#define OS_MACROS_H
 /*=======[I N C L U D E S]====================================================*/
 #include "Arch_Define.h"
 /*=======[M A C R O S]========================================================*/
@@ -194,13 +195,14 @@
 /* Determine if the memory area is readable. */
 #define OSMEMORY_IS_READABLE(Number) OS_BIT_GET(Number, READBIT)
 /* Determine if the memory area is writable. */
-#define OSMEMORY_IS_WRITEABLE(Number) OS_BIT_GET(Number, WRITEBIT)
+#define OSMEMORY_IS_WRITEABLE(Number) OS_BIT_GET(Number, WRITEBIT) /* PRQA S 3472 */ /* VL_Os_3472 */
 /* Determine if the memory area is executable. */
 #define OSMEMORY_IS_EXECUTABLE(Number) OS_BIT_GET(Number, EXECUTBIT)
 /* Determine if the memory area is stack space. */
 #define OSMEMORY_IS_STACKSPACE(Number) OS_BIT_GET(Number, STACKSPACEBIT)
 
 /* Set the memory area to be readable. */
+/* PRQA S 3472 ++ */ /* VL_Os_3472 */
 #define OSMEMORY_SET_READABLE(Number) OS_BIT_SET(Number, READBIT)
 /* Set the memory area to be writable. */
 #define OSMEMORY_SET_WRITEABLE(Number) OS_BIT_SET(Number, WRITEBIT)
@@ -208,6 +210,7 @@
 #define OSMEMORY_SET_EXECUTABLE(Number) OS_BIT_SET(Number, EXECUTBIT)
 /* Set the memory area to stack space. */
 #define OSMEMORY_SET_STACKSPACE(Number) OS_BIT_SET(Number, STACKSPACEBIT)
+/* PRQA S 3472 -- */
 /* Indicates that memory protection is sent out without access. */
 #define OSMEMORY_SET_NOACCESS(Number) (NO_PERMISSION)
 
@@ -247,6 +250,6 @@
 
 #define UNUSED_PARAMETER(VariableName) (void)(VariableName)
 
-#endif /* OS_MARCOS_H */
+#endif /* OS_MACROS_H */
 
 /*=======[E N D   O F   F I L E]==============================================*/

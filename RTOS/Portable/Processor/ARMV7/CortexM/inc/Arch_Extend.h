@@ -1,6 +1,6 @@
 /* PRQA S 3108++ */
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -60,7 +60,7 @@
  * REQ ID               <None>
  */
 /********************************************************************/
-extern FUNC(void, OS_CODE) Arch_CheckCPUInformation(void);
+extern void Arch_CheckCPUInformation(void);
 
 #endif /* #ifndef ARCH_EXTEND_H */ /* PRQA S 2053 */ /* MISRA Rule 18.8 */
 

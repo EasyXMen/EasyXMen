@@ -1,6 +1,6 @@
 /* PRQA S 3108++ */
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -49,6 +49,15 @@
         || (((uint32)Os_App_DAddr[appsuborID].APP_ADDR_START <= (Address))                        \
             && ((uint32)Os_App_DAddr[appsuborID].APP_ADDR_END >= ((Address) + (Size))))
 
+#define CFG_REGION_NUM             (16u)
+/* RPC */
+#define E_BUSY      0x02u
+#define RPC_TIMEOUT (100)
+#define TIMER_FRE   (100)
+/* stimate the number of instructions that will run */
+#define RPC_INS_NUM   (5)
+#define RPC_WAIT_TIME ((RPC_TIMEOUT * TIMER_FRE * 1000 / RPC_INS_NUM))
+
 /*=======[T Y P E   D E F I N I T I O N S]====================================*/
 /* Core Mode */
 typedef enum
@@ -61,22 +70,19 @@ typedef enum
     OS_CORE_MODE_UNKNOWN = 5U /*PRQA S 1271*/  /* MISRA CWE-682 */
 } Os_CoreModeType;
 
-extern P2VAR(uint32, AUTOMATIC, OS_VAR) Os_IsrNestPcxStack; /*PRQA S 3449,3451,3432*/ /* MISRA Rule 8.5,Rule-20.7 */
-extern VAR(uint32, OS_VAR) Os_Isr2_Ipl_Limit;
+extern uint32 Os_Isr2_Ipl_Limit;
 /*=======[E X T E R N A L   F U N C T I O N   D E C L A R A T I O N S]========*/
 
-extern FUNC(Os_CoreIdType, OS_CODE) Os_ArchGetCoreID(void);
-extern FUNC(void, OS_CODE) Os_ArchStartCore(Os_CoreIdType coreId);
-extern FUNC(Os_CoreModeType, OS_CODE) Os_GetCoreMode(Os_CoreIdType core);
-extern FUNC(boolean, OS_CODE) Os_SetCoreMode(Os_CoreIdType core, Os_CoreModeType coreMode);
-extern FUNC(void, OS_CODE) Os_MultiCoreInitProcessor(void); /*PRQA S 3449,3451*/             /* MISRA Rule 8.5 */
-extern FUNC(CoreIdType, OS_CODE) Os_GetCoreLogID(CoreIdType phyCoreId); /*PRQA S 3449,3451*/ /* MISRA Rule 8.5 */
-extern FUNC(CoreIdType, OS_CODE) Os_GetCorePhyID(CoreIdType logCoreId); /*PRQA S 3449,3451*/ /* MISRA Rule 8.5 */
-extern FUNC(void, OS_CODE) Os_ArchInitCPU(void);
+extern void Os_ArchInitCPU(void);
+extern Os_CoreIdType Os_ArchGetCoreID(void);
+extern void Os_ArchStartCore(Os_CoreIdType coreId);
+extern Os_CoreModeType Os_GetCoreMode(Os_CoreIdType core);
+extern boolean Os_SetCoreMode(Os_CoreIdType core, Os_CoreModeType coreMode);
+extern void Os_MultiCoreInitProcessor(void); /*PRQA S 3449,3451*/             /* MISRA Rule 8.5 */
+extern CoreIdType Os_GetCoreLogID(CoreIdType phyCoreId); /*PRQA S 3449,3451*/ /* MISRA Rule 8.5 */
+extern CoreIdType Os_GetCorePhyID(CoreIdType logCoreId); /*PRQA S 3449,3451*/ /* MISRA Rule 8.5 */
 
-extern FUNC(void, OS_CODE) Os_StartSysTimer(void);
-
-extern FUNC(void, OS_APPL_CODE) IdleHook_Core0(void);
-extern FUNC(void, OS_CODE) Os_TaskEntry_IdleCore0(void);
+extern void IdleHook_Core0(void);
+extern void Os_TaskEntry_IdleCore0(void);
 
 #endif

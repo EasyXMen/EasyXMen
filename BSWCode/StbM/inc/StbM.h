@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -30,6 +30,7 @@
  *  V2.2.0    2024-12-26 xiongfei.shi   1.Refactor and update to R23-11
  *                                      2.Removed offset Time base
  *                                      3.support multi-partition distribution
+ *  V2.2.1    2025-10-22 caihong.liu    Fixed CPT-9350,correct the logic of rate correction
  *
  ==================================================================================================================== */
 
@@ -117,9 +118,7 @@
 /* =================================================== inclusions =================================================== */
 #include "StbM_Types.h"
 #include "SchM_StbM.h"
-#if (STBM_ETHTSYN_ENABLE == STD_ON)
-#include "Eth_GeneralTypes.h"
-#endif
+#include "ComStack_Types.h"
 #include "StbM_PBcfg.h"
 
 #ifdef __cplusplus
@@ -136,7 +135,7 @@ extern "C" {
 #define STBM_AR_RELEASE_REVISION_VERSION (0u)
 #define STBM_SW_MAJOR_VERSION            (2u)
 #define STBM_SW_MINOR_VERSION            (2u)
-#define STBM_SW_PATCH_VERSION            (0u)
+#define STBM_SW_PATCH_VERSION            (1u)
 
 /* ===================================================== macros ===================================================== */
 /*Development errors*/
@@ -176,11 +175,11 @@ extern "C" {
 
 /* ================================================ type definitions ================================================ */
 /* Structure which contains additional measurement data */
-typedef struct StbM_MeasurementTag
+typedef struct
 {
     uint32 pathDelay;
 #if (STBM_ETHTSYN_ENABLE == STD_ON)
-    Eth_RateDeviationType rateDeviation;
+    RateDeviationWithStatusType rateDeviation;
 #endif
 } StbM_MeasurementType;
 

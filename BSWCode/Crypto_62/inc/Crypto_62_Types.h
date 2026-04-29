@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -71,7 +71,7 @@ typedef enum
     CRYPTO_KE_FORMAT_BIN_RSA_PUBLICKEY          = 6,
     CRYPTO_KE_FORMAT_BIN_CERT_X509_V3           = 7,
     CRYPTO_KE_FORMAT_BIN_CERT_CVC               = 8,
-} CryptoKeyElementFormat;
+} CryptoKeyElementFormatType;
 
 /**
  * @brief crypto key element access type
@@ -116,12 +116,12 @@ typedef enum
 /**
  * @brief key element config type
  */
-typedef struct Crypto_62_KeyElementCfgTag
+typedef struct
 {
     /*  Enable or disable writing and reading the key element with data smaller than the size of the element */
     boolean CryptoKeyElementAllowPartialAccess;
     /*  Defines the format for the key element  */
-    CryptoKeyElementFormat CryptoKeyElementFormat;
+    CryptoKeyElementFormatType CryptoKeyElementFormat;
     /*  Holds the Identifier of the CRYPTO Key element */
     uint32 CryptoKeyElementId;
     /*  Holds the Value which will be used to fill the key element during startup */
@@ -135,13 +135,15 @@ typedef struct Crypto_62_KeyElementCfgTag
     /*  Define the writing access rights of the key element  */
     Crypto_62_KeyElemWriteAccessType CryptoKeyElementWriteAccess;
     /*  Define the actual Size size of a CRYPTO key element in bytes  */
+    /* PRQA S 1759 ++ */ /* VL_Crypto_62_1759 */
     uint32* CryptoKeyElementLength;
+    /* PRQA S 1759 -- */
 } Crypto_62_KeyElementCfgType;
 
 /**
  *@brief  Structure of a key type.
  */
-typedef struct Crypto_62_KeyTypeCfgTag
+typedef struct
 {
     /* the Number of KeyElement  */
     uint8 KeyElementNum;
@@ -153,7 +155,7 @@ typedef struct Crypto_62_KeyTypeCfgTag
 /**
  * @brief Structure of a non-volatile block.
  */
-typedef struct Crypto_62_NvStorageCfgTag
+typedef struct
 {
     uint16                          Crypto_62_NvmBlockId;
     uint16                          CryptoNvBlockFailedRetries;
@@ -163,7 +165,7 @@ typedef struct Crypto_62_NvStorageCfgTag
 /**
  * @brief Structure of a CRYPTO Key.
  */
-typedef struct Crypto_62_KeyCfgTag
+typedef struct
 {
     /*  Holds the Identifier of the CRYPTO Key  */
     uint32 CryptoKeyId;
@@ -180,7 +182,7 @@ typedef struct Crypto_62_KeyCfgTag
 /**
  *@brief  structure of a driver object
  */
-typedef struct Crypto_62_DriverObjectCfgTag
+typedef struct
 {
     uint32 CryptoDriverObjectId;
     uint32 CryptoQueueSize;
@@ -198,7 +200,7 @@ typedef struct Crypto_62_DriverObjectCfgTag
 /**
  * @brief structure of a primitive
  */
-typedef struct Crypto_62_PrimitiveCfgTag
+typedef struct
 {
     Crypto_ServiceInfoType     CryptoPrimitiveService;
     Crypto_AlgorithmFamilyType CryptoPrimitiveAlgorithmFamily;

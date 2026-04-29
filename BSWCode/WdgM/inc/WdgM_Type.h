@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -132,7 +132,7 @@ typedef enum
 /**
  * @brief Struct type of external supervision.
  */
-typedef struct WdgM_ExtLogSupInfoTypeTag
+typedef struct
 {
     WdgM_ActiveStatusType WdgMExtLogActiveFlag;   /**< External logical activity flag. @range 0u */
     WdgM_CheckpointIdType WdgMExtLastReachedCPID; /**< Last reached checkpoint id in external supervision. @range 1u */
@@ -144,7 +144,7 @@ typedef struct WdgM_ExtLogSupInfoTypeTag
 /**
  * @brief Struct type of Alive supervision
  */
-typedef struct WdgM_AliveSupInfoTypeTag
+typedef struct
 {
     uint16             WdgMAliveCycleCounter;      /**< Alive supervision cycle counter. @range 0u */
     uint16             WdgMAliveIndicationCounter; /**< The time that Checkpoint has been reached. @range 1u */
@@ -154,7 +154,7 @@ typedef struct WdgM_AliveSupInfoTypeTag
 /**
  * @brief Struct type of deadline supervision.
  */
-typedef struct WdgM_DeadlineSupInfoTypeTag
+typedef struct
 {
     WdgM_DeadlineTimeType WdgMTimeStampStart;    /**< The os time tick when checkpoint has been reached. @range 0u */
     WdgM_SupResultType    WdgMDeadlineSupResult; /**< Deadline supervision result. @range 1u */
@@ -163,7 +163,7 @@ typedef struct WdgM_DeadlineSupInfoTypeTag
 /**
  * @brief Struct type of internal supervision.
  */
-typedef struct WdgM_IntLogSupInfoTypeTag
+typedef struct
 {
     WdgM_ActiveStatusType WdgMIntLogActiveFlag;   /**< Internal logical activity flag. @range 0u */
     WdgM_CheckpointIdType WdgMIntLastReachedCPID; /**< Last reached checkpoint id in internal supervision. @range 1u */
@@ -173,7 +173,7 @@ typedef struct WdgM_IntLogSupInfoTypeTag
 /**
  * @brief Struct type of Supervised Entity.
  */
-typedef struct WdgM_SEInfoTypeTag
+typedef struct
 {
     WdgM_LocalStatusType WdgMLocalStatus;           /**< Supervised Entity local status. @range 0..4 */
     uint8                WdgMFailedAliveSupCounter; /**< Failed alive supervision counter @range 0..255 */
@@ -183,7 +183,7 @@ typedef struct WdgM_SEInfoTypeTag
 /**
  * @brief Struct type of Mode information.
  */
-typedef struct WdgM_ModeInfoTypeTag
+typedef struct
 {
     WdgM_ModeType WdgMModeCurrentID; /**< Current mode id. @range 0..255 */
     WdgM_ExpiredSupTolCounterType
@@ -196,7 +196,7 @@ typedef struct WdgM_ModeInfoTypeTag
 /**
  * @brief Struct type of global information.
  */
-typedef struct WdgM_GlobalInfoTypeTag
+typedef struct
 {
     WdgM_GlobalStatusType WdgMGlobalResult; /**< WdgM Global status. @range 0..4 */
 } WdgM_GlobalInfoType;

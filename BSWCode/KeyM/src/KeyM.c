@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -116,7 +116,9 @@ void KeyM_Init(const KeyM_ConfigType* ConfigPtr)
 #if (KEYM_NVM_BLOCK_NUM > 0u)
             else if (certCfgPtr->certStorage == KEYM_STORAGE_IN_NVM)
             {
-                (void)NvM_ReadBlock((*KeyM_CertPCfg[certId].certNvmBlkRef), KeyM_CertPCfg[certId].tbsCert->dataEle);
+                (void)NvM_ReadBlock(
+                    KeyM_NvmBlockPCfg[*certCfgPtr->certNvmBlkRef].blkId,
+                    KeyM_CertPCfg[certId].CertData->dataEle);
                 (void)KeyM_CertSetStatus(certId, KEYM_CERTIFICATE_NOT_PARSED);
             }
 #endif /*KEYM_NVM_BLOCK_NUM > 0*/
@@ -215,7 +217,7 @@ void KeyM_MainBackgroundFunction(void)
         (void)KeyM_CertGetStatus(certId, &certStatu);
         if ((certCfgPtr->certStorage == KEYM_STORAGE_IN_NVM) && (certStatu == KEYM_CERTIFICATE_NOT_PARSED))
         {
-            (void)KeyM_HandleParseCert(certId, certCfgPtr->tbsCert->dataEle, certCfgPtr->tbsCert->len);
+            (void)KeyM_HandleParseCert(certId, certCfgPtr->CertData->dataEle, certCfgPtr->CertData->len);
         }
         if (certStatu == KEYM_CERTIFICATE_PARSED_NOT_VALIDATED)
         {

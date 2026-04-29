@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -778,11 +778,13 @@ void Xcp_RxStimHal(const uint8* dataPtr)
 #elif (XCP_IDENTIFICATION_FIELD_TYPE == XCP_PID_RELATIVE_BYTE)
     daqNum = dataPtr[XCP_DAQ_NUM_OFFSET];
     pos    = XCP_DATA_OFFSET;
-#else  /*XCP_PID_RELATIVE_WORD & XCP_PID_RELATIVE_WORD_ALIGNED*/
+#else                    /*XCP_PID_RELATIVE_WORD & XCP_PID_RELATIVE_WORD_ALIGNED*/
     Xcp_CopyU1BufferToU2(&(dataPtr[XCP_DAQ_NUM_OFFSET]), &daqNum, (uint8)CPU_BYTE_ORDER);
     pos = XCP_DATA_OFFSET;
-#endif /*XCP_IDENTIFICATION_FIELD_TYPE == XCP_PID_ABSOLUTE*/
+#endif                   /*XCP_IDENTIFICATION_FIELD_TYPE == XCP_PID_ABSOLUTE*/
+    /* PRQA S 2995 ++ */ /* VL_Xcp_2995 */
     if ((daqNum < XCP_MAX_DAQ) && (NULL_PTR != daqPtr))
+    /* PRQA S 2995 -- */
     {
         evchCfgPtr = &(Xcp_PConfig.XcpEvCh[daqPtr->eventChannelNum]);
         if ((XCP_DAQ_MOD_DIR_STIM != (daqPtr->mode & XCP_DAQ_MOD_DIR_STIM)) || (DAQ == evchCfgPtr->XcpEvChType))

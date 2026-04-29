@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -362,13 +362,13 @@ RAMTST_LOCAL RamTst_NumberOfTestedCellsType RamTst_NumberOfTestedCell = 1u;
 #define RAMTST_STOP_SEC_VAR_INIT_32
 #include "RamTst_MemMap.h"
 
-#define RAMTST_START_SEC_VAR_INIT_8
+#define RAMTST_START_SEC_VAR_CLEARED_8
 #include "RamTst_MemMap.h"
 /**
  * @brief Record the current algorithm params index @range 0..255
  */
-RAMTST_LOCAL RamTst_AlgParamsIdType RamTst_CurAlgParamsId = 0u;
-#define RAMTST_STOP_SEC_VAR_INIT_8
+RAMTST_LOCAL RamTst_AlgParamsIdType RamTst_CurAlgParamsId;
+#define RAMTST_STOP_SEC_VAR_CLEARED_8
 #include "RamTst_MemMap.h"
 
 #define RAMTST_START_SEC_VAR_CLEARED_8
@@ -399,7 +399,8 @@ RAMTST_LOCAL uint32 RamTst_CurTestedBlock;
 /* ========================================== external function definitions ========================================= */
 #define RAMTST_START_SEC_CODE
 #include "RamTst_MemMap.h"
-/* PRQA S 1252,1258,1503,1532,3120 ++ */ /* VL_QAC_1252,VL_RamTst_1258,VL_RamTst_1503,VL_RamTst_1532,VL_RamTst_3120 */
+/* PRQA S 1252 ++ */                /* VL_QAC_1252 */
+/* PRQA S 1258,1503,1532,3120 ++ */ /* VL_RamTst_1258,VL_QAC_NoUsedApi,VL_QAC_OneFunRef,VL_QAC_MagicNum */
 /**
  * @brief Check initialization status and do self check, then initialize global variables and all state machines
  */
@@ -418,6 +419,12 @@ void RamTst_Init(const RamTst_ConfigType* ConfigPtr)
         errorId = RAMTST_E_SELF_CHECK_ERR;
     }
 #endif
+#if (RAMTST_ECUC_PARTITION_NUM > 1U)
+    else if (FALSE == (RamTst_CheckPartition(RamTst_GetDefaultAlgParamsId)))
+    {
+        errorId = RAMTST_E_WRONG_CONDITION;
+    }
+#endif
     else
 #endif
     {
@@ -427,7 +434,7 @@ void RamTst_Init(const RamTst_ConfigType* ConfigPtr)
         RamTst_AlgParams algParam = RamTst_GetConfigAlgParams(RamTst_CurAlgParamsId - 1u);
         RamTst_NumberOfTestedCell = algParam.NumberOfTestedCells;
         RamTst_CurBlockIndex      = algParam.BlockParams[0].BlockId;
-        for (uint32 index = 0u; index < RAMTST_ALL_BLOCK_NUM; index++) /* PRQA S 1252 */ /* VL_QAC_1252 */
+        for (uint32 index = 0u; index < RAMTST_ALL_BLOCK_NUM; index++)
         {
             RamTst_BlockInfo[index].BlockTestResult = RAMTST_RESULT_NOT_TESTED;
         }
@@ -453,10 +460,16 @@ void RamTst_DeInit(void)
     {
         RamTst_Det_ReportError((uint8)(RAMTST_DEINIT_ID), (RAMTST_E_UNINIT));
     }
+#if (RAMTST_ECUC_PARTITION_NUM > 1U)
+    else if (FALSE == (RamTst_CheckPartition(RamTst_CurAlgParamsId)))
+    {
+        RamTst_Det_ReportError((uint8)(RAMTST_DEINIT_ID), (RAMTST_E_WRONG_CONDITION));
+    }
+#endif
     else
 #endif
     {
-        for (uint32 index = 0u; index < RAMTST_ALL_BLOCK_NUM; index++) /* PRQA S 1252 */ /* VL_QAC_1252 */
+        for (uint32 index = 0u; index < RAMTST_ALL_BLOCK_NUM; index++)
         {
             RamTst_BlockInfo[index].BlockTestResult = RAMTST_RESULT_NOT_TESTED;
         }
@@ -485,6 +498,12 @@ void RamTst_Stop(void)
     {
         errorId = RAMTST_E_STATUS_FAILURE;
     }
+#if (RAMTST_ECUC_PARTITION_NUM > 1U)
+    else if (FALSE == (RamTst_CheckPartition(RamTst_CurAlgParamsId)))
+    {
+        errorId = RAMTST_E_WRONG_CONDITION;
+    }
+#endif
     else
 #endif
     {
@@ -522,6 +541,12 @@ void RamTst_Allow(void)
     {
         errorId = RAMTST_E_STATUS_FAILURE;
     }
+#if (RAMTST_ECUC_PARTITION_NUM > 1U)
+    else if (FALSE == (RamTst_CheckPartition(RamTst_CurAlgParamsId)))
+    {
+        errorId = RAMTST_E_WRONG_CONDITION;
+    }
+#endif
     else
 #endif
     {
@@ -553,6 +578,12 @@ void RamTst_Suspend(void)
     {
         errorId = RAMTST_E_STATUS_FAILURE;
     }
+#if (RAMTST_ECUC_PARTITION_NUM > 1U)
+    else if (FALSE == (RamTst_CheckPartition(RamTst_CurAlgParamsId)))
+    {
+        errorId = RAMTST_E_WRONG_CONDITION;
+    }
+#endif
     else
 #endif
     {
@@ -584,6 +615,12 @@ void RamTst_Resume(void)
     {
         errorId = RAMTST_E_STATUS_FAILURE;
     }
+#if (RAMTST_ECUC_PARTITION_NUM > 1U)
+    else if (FALSE == (RamTst_CheckPartition(RamTst_CurAlgParamsId)))
+    {
+        errorId = RAMTST_E_WRONG_CONDITION;
+    }
+#endif
     else
 #endif
     {
@@ -796,6 +833,12 @@ void RamTst_SelectAlgParams(RamTst_AlgParamsIdType NewAlgParamsId)
     {
         errorId = RAMTST_E_OUT_OF_RANGE;
     }
+#if (RAMTST_ECUC_PARTITION_NUM > 1U)
+    else if (FALSE == (RamTst_CheckPartition(NewAlgParamsId)))
+    {
+        errorId = RAMTST_E_WRONG_CONDITION;
+    }
+#endif
     else
 #endif
     {
@@ -840,11 +883,17 @@ void RamTst_ChangeNumberOfTestedCells(RamTst_NumberOfTestedCellsType NewNumberOf
     {
         errorId = RAMTST_E_OUT_OF_RANGE;
     }
-    else if (0u != (NewNumberOfTestedCells % 4u)) /* PRQA S 1252 */ /* VL_QAC_1252 */
+    else if (0u != (NewNumberOfTestedCells % 4u))
     {
         /** NewNumberOfTestedCells Must be Multiple of 4 */
         errorId = RAMTST_E_OUT_OF_RANGE;
     }
+#if (RAMTST_ECUC_PARTITION_NUM > 1U)
+    else if (FALSE == (RamTst_CheckPartition(RamTst_CurAlgParamsId)))
+    {
+        errorId = RAMTST_E_WRONG_CONDITION;
+    }
+#endif
     else
 #endif
     {
@@ -952,75 +1001,58 @@ void RamTst_RunPartialTest(RamTst_NumberOfBlocksType BlockId)
  */
 void RamTst_MainFunction(void)
 {
-#if (STD_ON == RAMTST_DEV_ERROR_DETECT)
-    uint8 errorId = RAMTST_E_NO_ERROR;
-    if (RAMTST_EXECUTION_UNINIT == RamTst_CuExecStatus)
+    if (RAMTST_EXECUTION_UNINIT != RamTst_CuExecStatus)
     {
-        errorId = RAMTST_E_UNINIT;
-    }
 #if (RAMTST_ECUC_PARTITION_NUM > 1U)
-    else if (FALSE == (RamTst_CheckPartition(RamTst_CurAlgParamsId)))
-    {
-        errorId = RAMTST_E_WRONG_CONDITION;
-    }
+        if (TRUE == (RamTst_CheckPartition(RamTst_CurAlgParamsId)))
 #endif
-    else
-#endif
-    {
-        boolean                 allTestdone        = FALSE;
-        RamTst_AlgParamsIdType  algParamsId        = RamTst_CurAlgParamsId - 1u;
-        const RamTst_AlgParams* algotirhmParamsPtr = &RamTst_GetConfigAlgParams(algParamsId);
-
-        if (RAMTST_EXECUTION_RUNNING == RamTst_CuExecStatus)
         {
-            boolean TestCondMatch = RamTst_CheckBgndCondIsValid();
-            /** match the test conditions */
-            if (TRUE == TestCondMatch)
+            boolean                 allTestdone        = FALSE;
+            RamTst_AlgParamsIdType  algParamsId        = RamTst_CurAlgParamsId - 1u;
+            const RamTst_AlgParams* algotirhmParamsPtr = &RamTst_GetConfigAlgParams(algParamsId);
+
+            if (RAMTST_EXECUTION_RUNNING == RamTst_CuExecStatus)
             {
-                allTestdone = RamTst_MainFunctionSub();
-            }
-            else
-            {
-                /** this block not match the test conditions or this block has tested, test next block */
-                /* PRQA S 1252 ++ */ /* VL_QAC_1252 */
-                if ((uint16)(RamTst_CurTestedBlock + 1u) <= algotirhmParamsPtr->NumberOfBlocks)
-                /* PRQA S 1252 -- */
+                boolean TestCondMatch = RamTst_CheckBgndCondIsValid();
+                /** match the test conditions */
+                if (TRUE == TestCondMatch)
                 {
-                    RamTst_CurTestedBlock++;
-                    RamTst_CurBlockIndex++;
-#if (STD_ON == RAMTST_DEM_MAIN_RAM_FAILURE_ENABLE)
-                    if (RamTst_OverallResult == RAMTST_RESULT_OK)
-                    {
-                        /** report the production error RAMTST_MAIN_RAM_FAILURE as pass */
-                        Dem_SetEventStatus(RAMTST_MAIN_RAM_FAILURE, DEM_EVENT_STATUS_PASSED);
-                    }
-#endif
+                    allTestdone = RamTst_MainFunctionSub();
                 }
                 else
                 {
-                    allTestdone = TRUE;
+                    /** this block not match the test conditions or this block has tested, test next block */
+                    if ((uint16)(RamTst_CurTestedBlock + 1u) <= algotirhmParamsPtr->NumberOfBlocks)
+                    {
+                        RamTst_CurTestedBlock++;
+                        RamTst_CurBlockIndex++;
+#if (STD_ON == RAMTST_DEM_MAIN_RAM_FAILURE_ENABLE)
+                        if (RamTst_OverallResult == RAMTST_RESULT_OK)
+                        {
+                            /** report the production error RAMTST_MAIN_RAM_FAILURE as pass */
+                            Dem_SetEventStatus(RAMTST_MAIN_RAM_FAILURE, DEM_EVENT_STATUS_PASSED);
+                        }
+#endif
+                    }
+                    else
+                    {
+                        allTestdone = TRUE;
+                    }
                 }
             }
-        }
-        /** check if all test has finished */
-        if (TRUE == allTestdone)
-        {
-            /** Once you've tested over, start over from the first block */
-            RamTst_CurBlockIndex  = algotirhmParamsPtr->BlockParams[0].BlockId;
-            RamTst_CurTestedBlock = 0u;
+            /** check if all test has finished */
+            if (TRUE == allTestdone)
+            {
+                /** Once you've tested over, start over from the first block */
+                RamTst_CurBlockIndex  = algotirhmParamsPtr->BlockParams[0].BlockId;
+                RamTst_CurTestedBlock = 0u;
 #if (RAMTST_TEST_COMPLETE_NOTIFICATION_API_ENABLE == STD_ON)
-            RamTst_TestCompletedNotification();
+                RamTst_TestCompletedNotification();
 #endif
-            RamTst_InitAllBlockStatus();
+                RamTst_InitAllBlockStatus();
+            }
         }
     }
-
-#if (STD_ON == RAMTST_DEV_ERROR_DETECT)
-    if (errorId != RAMTST_E_NO_ERROR)
-    {
-        RamTst_Det_ReportError((uint8)RAMTST_GET_MAIN_FUNCTION_ID, errorId);
-    }
-#endif
 }
 
 #if (RAMTST_TEST_COMPLETE_NOTIFICATION_API_ENABLE == STD_ON)
@@ -1591,8 +1623,9 @@ RAMTST_LOCAL Std_ReturnType RamTest_DoGalpatAlgorithm(
 
     return testResult;
 }
-/* PRQA S 6070 -- */
 /* PRQA S 4461 -- */
+/* PRQA S 6070 -- */
+
 /**
  * @brief a) Calculates the first signature value of the current RAM cell.
  *        b) Invert the value of the RAM cell.
@@ -2133,6 +2166,7 @@ RAMTST_LOCAL boolean RamTst_CheckAlgParamsId(RamTst_AlgParamsIdType NewAlgParams
     return *foundAlgParams;
 }
 
-/* PRQA S 1252,1258,1503,1532,3120 -- */
+/* PRQA S 1252 -- */
+/* PRQA S 1258,1503,1532,3120 -- */
 #define RAMTST_STOP_SEC_CODE
 #include "RamTst_MemMap.h"

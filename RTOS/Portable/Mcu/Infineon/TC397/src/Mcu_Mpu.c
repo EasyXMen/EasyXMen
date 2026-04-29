@@ -1,6 +1,5 @@
-/*******************************************************************************
-**                                                                            **
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+/**
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -11,8 +10,8 @@
  * You should have received a copy of the GNU Lesser General Public License along with this library;
  * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  * or see <https://www.gnu.org/licenses/>.
-**                                                                            **
-********************************************************************************
+ */
+/*******************************************************************************
 **                                                                            **
 **  FILENAME    :  Mcu_Mpu.c                                                  **
 **                                                                            **
@@ -28,9 +27,6 @@
 /*=======[I N C L U D E S]====================================================*/
 #include "Os_Internal.h"
 /*=======[M A C R O S]========================================================*/
-#define PPRS_MASK      (0x00003000U)
-#define ISR_PPRS_SET   (0x02U)
-#define TASK_PPRS_SET  (0x01U)
 #define ISR_DPR_START  (7U)
 #define ISR_CPR_START  (4U)
 #define TASK_DPR_START (1U)
@@ -113,7 +109,7 @@ void Os_ArchInitKnMemMap(void) /* PRQA S 3006 */ /* VL_Os_3006 */
     OS_ARCH_MTCR(OS_CPXE0, 0x0001u); /* All code regions are E */
     /* PRQA S 3138, 1006 -- */
 
-    Os_ArchSetMemProtSet(0x00UL);
+    Os_ArchSetMemProtSet(PPRS_SET0);
     return;
 }
 #define OS_STOP_SEC_CODE
@@ -141,14 +137,14 @@ void Os_ArchSetIsrMemMap(ISRType IsrId, ApplicationType HostAppId, boolean isTru
 /* PRQA S 1505 -- */
 {
     CoreIdType coreId;
-    uint32     temp = (Os_ArchGetMemProtSet() & PPRS_MASK) >> PPRS_SET_BITS;
+    uint32     temp = (Os_ArchGetMemProtSet() & ~(PPRS_MASK)) >> PPRS_SET_BITS;
     uint8      OsDPRStart;
     uint8      OsCPRStart;
 
     coreId = Os_SCB.sysCore;
 
     /* Find out which register set in use  register 0 should not be used here */
-    if (ISR_PPRS_SET == temp)
+    if (PPRS_SET2 == temp)
     {
         /*set 2: OS_DPR_7~OS_DPR_12, OS_CPR_4~OS_CPR_6*/
         OsDPRStart = ISR_DPR_START;
@@ -233,14 +229,14 @@ void Os_ArchSetTaskMemMap(TaskType TaskId, ApplicationType HostAppId, boolean is
 /* PRQA S 3006, 1505 --*/
 {
     CoreIdType coreId;
-    uint32     temp = (Os_ArchGetMemProtSet() & PPRS_MASK) >> PPRS_SET_BITS;
+    uint32     temp = (Os_ArchGetMemProtSet() & ~(PPRS_MASK)) >> PPRS_SET_BITS;
     uint8      OsDPRStart;
     uint8      OsCPRStart;
 
     coreId = Os_SCB.sysCore;
 
     /* Find out which register set in use  register 0 should not be used here */
-    if (TASK_PPRS_SET == temp)
+    if (PPRS_SET1 == temp)
     {
         /*set 1: OS_DPR_1~OS_DPR_6, OS_CPR_1~OS_CPR_3*/
         OsDPRStart = 1u;
@@ -330,7 +326,7 @@ void Os_MemProtTaskCat1Map(void)
     if (Os_SCB.sysAppId != runAppId)
     {
         /* Memory protection: Set memory map according to new running task. */
-        Os_ArchSetMemProtSet(0x01U);
+        Os_ArchSetMemProtSet(PPRS_SET1);
         /* PRQA S 3469 ++*/ /*  VL_Os_3469 */
         Os_ArchSetTaskMemMap(
             runTaskID,
@@ -341,7 +337,7 @@ void Os_MemProtTaskCat1Map(void)
     else
     {
         /*SYS_APP, as OS kernel, have all access rights*/
-        Os_ArchSetMemProtSet(0x00U);
+        Os_ArchSetMemProtSet(PPRS_SET0);
     }
 }
 #define OS_STOP_SEC_CODE
@@ -371,7 +367,7 @@ void Os_MemProtTaskCat2Map(void)
     if (Os_SCB.sysAppId != runAppId)
     {
         /* Memory protection: Set memory map according to new running task. */
-        Os_ArchSetMemProtSet(TASK_PPRS_SET);
+        Os_ArchSetMemProtSet(PPRS_SET1);
         /* PRQA S 3469 ++*/ /* VL_Os_3469 */
         Os_ArchSetTaskMemMap(
             runTaskID,
@@ -382,7 +378,7 @@ void Os_MemProtTaskCat2Map(void)
     else
     {
         /*SYS_APP, as OS kernel, have all access rights*/
-        Os_ArchSetMemProtSet(0x00U);
+        Os_ArchSetMemProtSet(PPRS_SET0);
     }
 }
 #define OS_STOP_SEC_CODE
@@ -410,20 +406,22 @@ void Os_MemProtTaskCat2Map(void)
 void Os_MemProtIsrMap(void)
 /* PRQA S 1532 -- */
 {
-    if (Os_SCB.sysAppId != Os_SCB.sysRunningAppID)
+    Os_IsrType runIsrID = Os_GetObjLocalId(Os_SCB.sysRunningIsrCat2Id);
+    Os_ApplicationType runAppId = Os_ObjectAppCfg[OBJECT_ISR][runIsrID].hostApp;
+    if (Os_SCB.sysAppId != runAppId)
     {
         /*Preparing to enter the ISR2 routine defined by user with its memory region table*/
         /*New ISR, defualt set register 2*/
-        Os_ArchSetMemProtSet(ISR_PPRS_SET);
+        Os_ArchSetMemProtSet(PPRS_SET2);
         Os_ArchSetIsrMemMap(
-            Os_SCB.sysRunningIsrCat2Id,
-            Os_SCB.sysRunningAppID,
-            Os_AppCfg[Os_SCB.sysRunningAppID].OsTrusted);
+            runIsrID,
+            runAppId,
+            Os_AppCfg[runAppId].OsTrusted);
     }
     else
     {
         /*SYS_APP, as OS kernel, have all access rights*/
-        Os_ArchSetMemProtSet(0x00U);
+        Os_ArchSetMemProtSet(PPRS_SET0);
     }
 }
 #define OS_STOP_SEC_CODE

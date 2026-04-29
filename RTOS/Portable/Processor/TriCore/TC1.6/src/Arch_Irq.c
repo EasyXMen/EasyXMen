@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -465,18 +465,14 @@ Os_IPLType Os_ArchGetIpl(void)
  * REQ ID               <None>
  */
 /******************************************************************************/
-void Os_ArchSuspendInt(
-    /* PRQA S 3432 ++*/ /* VL_Os_3432 */
-    Os_ArchMsrType* msr
-    /* PRQA S 3432 --*/
-)
+Os_ArchMsrType Os_ArchSuspendInt(void)
 {
     Os_ArchMsrType temp;
     /* PRQA S 1258 ++ */ /* VL_Os_1258 */
     temp = (Os_ArchMsrType)OS_ARCH_MFCR(OS_REG_ICR) & (Os_ArchMsrType)((uint32)1U << (uint32)OS_ICR_IE_BIT);
     /* PRQA S 1258 -- */
     Os_ArchDisableInt();
-    *msr = temp;
+    return temp;
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
@@ -835,14 +831,14 @@ void Os_UpdatePsw(void)
     Os_ArchCsaType* csa = OS_PCX_TO_EA(OS_ARCH_MFCR(OS_REG_PCX)); /* PRQA S 0306 */ /* VL_Os_0306 */
 /* PRQA S 3120 ++ */                                                                /* VL_QAC_MagicNum */
 #if (TRUE == CFG_MEMORY_PROTECTION_ENABLE)
-    csa->reg[1] &= 0xFFFFCFFFu;
+    csa->reg[1] &= PPRS_MASK;
     csa->reg[1] |= Os_PSW_PRS; /* SET PSW.PRS  */
 #endif
 
     if (TRUE != Os_AppCfg[Os_SCB.sysRunningAppID].OsTrusted)
     {
-        csa->reg[1] &= 0xfffff3ffu; /* CLEAR PSW.IO  */
-        csa->reg[1] |= 0x00000400u; /* SET PSW.IO  */
+        csa->reg[1] &= PSWIO_MASK; /* CLEAR PSW.IO  */
+        csa->reg[1] |= PSWIO_USER1_MODE; /* SET PSW.IO  */
     }
     /* PRQA S 3120 -- */
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -22,9 +22,16 @@
  **
  ***********************************************************************************************************************/
 
-/* PRQA S 1252,1290,3335,3673,4434,1533,1505,1532,1503 ++ */ /* VL_QAC_Crypto */
-/* PRQA S 6050,6060,6070,6080,6010,6030,6040   ++ */         /* VL_QAC_Crypto */
+/* PRQA S 6010 EOF */ /* VL_MTR_Crypto_62_STCYC */
+/* PRQA S 6020 EOF */ /* VL_MTR_Crypto_62_STLIN */
+/* PRQA S 6030 EOF */ /* VL_MTR_Crypto_62_STMIF */
+/* PRQA S 6040 EOF */ /* VL_MTR_Crypto_62_STPAR */
+/* PRQA S 6050 EOF */ /* VL_MTR_Crypto_62_STST3 */
+/* PRQA S 6060 EOF */ /* VL_MTR_Crypto_62_STM19 */
+/* PRQA S 6070 EOF */ /* VL_MTR_Crypto_62_STCAL */
+/* PRQA S 6080 EOF */ /* VL_MTR_Crypto_62_STPTH */
 
+/* PRQA S 1252,1290,3335,3673,4434,1533,1505,1532,1503 ++ */ /* VL_Crypto_62_General */
 /* =================================================== inclusions =================================================== */
 #include "Crypto_62_Internal.h"
 #include "Crypto_62_Hash.h"
@@ -541,7 +548,7 @@ Std_ReturnType Crypto_62_CustomSync(
     uint8*       secondaryOutputPtr,
     uint32*      secondaryOutputLengthPtr)
 {
-    Std_ReturnType status = E_NOT_OK; /* PRQA S 2981  */ /* VL_QAC_Crypto */
+    Std_ReturnType status = E_NOT_OK; /* PRQA S 2981  */ /* VL_Crypto_62_General */
 #if (CRYPTO_DEV_ERROR_DETECT == STD_ON)
     /*@req SWS_Crypto_00075*/
     if (CRYPTO_DRIVER_UNINIT == Crypto_62_DriverStatus)
@@ -574,4 +581,3 @@ Std_ReturnType Crypto_62_CustomSync(
 #include "Crypto_62_MemMap.h"
 
 /* PRQA S 1252,1290,3335,3673,4434,1533,1505,1532,1503 -- */
-/* PRQA S 6050,6060,6070,6080,6010,6030,6040   -- */

@@ -1,8 +1,8 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
- * SPDX-License-Identifier: LGPL-2.1-only-with-exception OR  LicenseRef-Commercial-License
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
+ * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
- * * This library is free software; you can redistribute it and/or modify it under the terms of the
+ * This library is free software; you can redistribute it and/or modify it under the terms of the
  * GNU Lesser General Public License as published by the Free Software Foundation; version 2.1.
  * This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
@@ -10,7 +10,8 @@
  * You should have received a copy of the GNU Lesser General Public License along with this library;
  * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  * or see <https://www.gnu.org/licenses/>.
- *
+ */
+/*
  ********************************************************************************
  **                                                                            **
  **  FILENAME    : Os_Internal.h                                               **
@@ -319,19 +320,19 @@ OS_EXTERN OS_KNL_BSS(const Os_ObjectAppCfgType** Os_ObjectAppCfg);
 
 #define OS_START_SEC_VAR_CLONE_PTR
 #include "Os_MemMap.h"
-OS_EXTERN OS_KNL_BSS(TrustedFunctionIndexType* Os_TrustedFuncNestQueue);
+OS_EXTERN OS_KNL_BSS(TrustedFunctionIndexType* Os_TrustedFuncNestQueue); /* PRQA S 3406 */ /* VL_Os_3406 */
 #define OS_STOP_SEC_VAR_CLONE_PTR
 #include "Os_MemMap.h"
 
 #define OS_START_SEC_VAR_CLONE_8
 #include "Os_MemMap.h"
-OS_EXTERN OS_KNL_BSS(uint8 Os_TrustedFuncNest);
+OS_EXTERN OS_KNL_BSS(uint8 Os_TrustedFuncNest); /* PRQA S 3406 */ /* VL_Os_3406 */
 #define OS_STOP_SEC_VAR_CLONE_8
 #include "Os_MemMap.h"
 
 #define OS_START_SEC_VAR_CLONE_UNSPECIFIED
 #include "Os_MemMap.h"
-OS_EXTERN OS_KNL_BSS(Os_TrustedFuncTpDataDef Os_TrustedFuncTp);
+OS_EXTERN OS_KNL_BSS(Os_TrustedFuncTpDataDef Os_TrustedFuncTp); /* PRQA S 3406, 1531 */ /* VL_Os_3406, VL_QAC_OneRefSymbol */
 #define OS_STOP_SEC_VAR_CLONE_UNSPECIFIED
 #include "Os_MemMap.h"
 #endif /* CFG_TRUSTED_SYSTEM_SERVICE_MAX > 0U */
@@ -606,7 +607,9 @@ extern void Os_GetInternalResource(void); /* PRQA S 1753 */ /* VL_Os_1753 */
  * REQ ID               <None>
  */
 /******************************************************************************/
+/* PRQA S 1753 ++ */ /* VL_Os_1753 */
 extern void Os_ReleaseInternalResource(Os_TaskType osTaskId);
+/* PRQA S 1753 -- */
 #endif /*CFG_RESOURCE_MAX > 0U*/
 /*============================ @-RESOURCE-@===================================*/
 
@@ -804,7 +807,7 @@ extern void Os_TaskErrBack(void);
  * REQ ID               <None>
  */
 /******************************************************************************/
-extern void Os_MultiCoreInitProcessor(void);
+extern void Os_MultiCoreInitProcessor(void); /* PRQA S 1753 */ /* VL_Os_1753 */
 /********************************************************************/
 /*
  * Brief                <Clear priority ready map>
@@ -1584,7 +1587,9 @@ extern StatusType Os_TmProtIsrFrameChk(Os_IsrType osIsrId);
  * REQ ID               <None>
  */
 /********************************************************************/
+/* PRQA S 1753 ++ */ /* VL_Os_1753 */
 extern void Os_InitScheduleTable(void);
+/* PRQA S 1753 -- */
 /********************************************************************/
 /*
  * Brief                <Os_WorkSchedTbl.>
@@ -1600,7 +1605,9 @@ extern void Os_InitScheduleTable(void);
  * REQ ID               <None>
  */
 /********************************************************************/
+/* PRQA S 1753 ++ */ /* VL_Os_1753 */
 extern void Os_WorkSchedTbl(Os_CounterType CounterID);
+/* PRQA S 1753 -- */
 /********************************************************************/
 /*
  * Brief                <Internal implementation of OS service:GetScheduleTableStatus>
@@ -1615,7 +1622,9 @@ extern void Os_WorkSchedTbl(Os_CounterType CounterID);
  * REQ ID               <None>
  */
 /********************************************************************/
+/* PRQA S 1753 ++ */ /* VL_Os_1753 */
 extern void Os_GetScheduleTableStatus(ScheduleTableType ScheduleTableID, ScheduleTableStatusRefType ScheduleStatus);
+/* PRQA S 1753 -- */
 /********************************************************************/
 /*
  * Brief                <Internal implementation of OS service:StartScheduleTableRel.>
@@ -1630,7 +1639,9 @@ extern void Os_GetScheduleTableStatus(ScheduleTableType ScheduleTableID, Schedul
  * REQ ID               <None>
  */
 /********************************************************************/
+/* PRQA S 1753 ++ */ /* VL_Os_1753 */
 extern StatusType Os_StartScheduleTableRel(ScheduleTableType ScheduleTableID, TickType Offset);
+/* PRQA S 1753 -- */
 /********************************************************************/
 /*
  * Brief                <Internal implementation of OS service:StartScheduleTableAbs.>
@@ -1645,7 +1656,9 @@ extern StatusType Os_StartScheduleTableRel(ScheduleTableType ScheduleTableID, Ti
  * REQ ID               <None>
  */
 /********************************************************************/
+/* PRQA S 1753 ++ */ /* VL_Os_1753 */
 extern StatusType Os_StartScheduleTableAbs(ScheduleTableType ScheduleTableID, TickType Start);
+/* PRQA S 1753 -- */
 /********************************************************************/
 /*
  * Brief                <Internal implementation of OS service:StopScheduleTable.>
@@ -1660,7 +1673,9 @@ extern StatusType Os_StartScheduleTableAbs(ScheduleTableType ScheduleTableID, Ti
  * REQ ID               <None>
  */
 /********************************************************************/
+/* PRQA S 1753 ++ */ /* VL_Os_1753 */
 extern StatusType Os_StopScheduleTable(ScheduleTableType ScheduleTableID);
+/* PRQA S 1753 -- */
 /*============================ @-Schedule table-@==========================*/
 
 /*============================ @+Service protection+@==========================*/
@@ -1777,7 +1792,9 @@ extern boolean Os_CheckObjAcs(ObjectTypeType ObjectType, Os_AppObjectId ObjectID
  * REQ ID               <None>
  */
 /******************************************************************************/
+/* PRQA S 1753 ++ */ /* VL_Os_1753 */
 extern ObjectAccessType Os_CheckObjectAccess(ApplicationType ApplID, ObjectTypeType ObjectType, AppObjectId ObjectID);
+/* PRQA S 1753 -- */ 
 /*============================ @-Service protection-@==========================*/
 
 /*============================ @+RPC+@==========================*/
@@ -1829,7 +1846,7 @@ extern void Os_InitTrustedFunction(void);
  * REQ ID               <None>
  */
 /******************************************************************************/
-extern CoreIdType Os_GetCoreLogID(CoreIdType phyCoreId);
+extern CoreIdType Os_GetCoreLogID(CoreIdType phyCoreId);/* PRQA S 1753 */ /* VL_Os_1753 */
 /******************************************************************************/
 /*
  * Brief                <The function returns a unique physical Core ID .>
@@ -1843,7 +1860,7 @@ extern CoreIdType Os_GetCoreLogID(CoreIdType phyCoreId);
  * REQ ID               <None>
  */
 /******************************************************************************/
-extern CoreIdType Os_GetCorePhyID(CoreIdType logCoreId);
+extern CoreIdType Os_GetCorePhyID(CoreIdType logCoreId);/* PRQA S 1753 */ /* VL_Os_1753 */
 
 #if (OS_AUTOSAR_CORES > 1)
 /******************************************************************************/
@@ -2067,7 +2084,7 @@ extern void Os_SynPoint(uint8 point);
  * REQ ID               <>
  */
 /******************************************************************************/
-extern void Os_MemProtTaskCat1Map(void);
+extern void Os_MemProtTaskCat1Map(void); /* PRQA S 1753 */ /* VL_Os_1753 */
 
 /******************************************************************************/
 /*
@@ -2085,7 +2102,7 @@ extern void Os_MemProtTaskCat1Map(void);
  * REQ ID               <>
  */
 /******************************************************************************/
-extern void Os_MemProtTaskCat2Map(void);
+extern void Os_MemProtTaskCat2Map(void); /* PRQA S 1753 */ /* VL_Os_1753 */
 
 /******************************************************************************/
 /*
@@ -2103,7 +2120,7 @@ extern void Os_MemProtTaskCat2Map(void);
  * REQ ID               <>
  */
 /******************************************************************************/
-extern void Os_MemProtIsrMap(void);
+extern void Os_MemProtIsrMap(void); /* PRQA S 1753 */ /* VL_Os_1753 */
 #endif /* TRUE == CFG_MEMORY_PROTECTION_ENABLE */
 
 #if (CFG_TASK_MAX > 0U)

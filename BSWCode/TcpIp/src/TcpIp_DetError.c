@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -25,6 +25,8 @@
 /* PRQA S 3673 EOF */ /* VL_QAC_3673 */
 /* PRQA S 6030 EOF */ /* VL_MTR_TcpIp_STMIF */
 /* PRQA S 6040 EOF */ /* VL_MTR_TcpIp_STPAR */
+/* PRQA S 1501 EOF */ /* VL_TcpIp_1501 */
+/* PRQA S 1753 EOF */ /* VL_TcpIp_1753 */
 /* =================================================== inclusions =================================================== */
 #include "Os_Types.h"
 #include "ComStack_Types.h"

@@ -1,6 +1,5 @@
-/*******************************************************************************
-**                                                                            **
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+/**
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -11,8 +10,8 @@
  * You should have received a copy of the GNU Lesser General Public License along with this library;
  * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  * or see <https://www.gnu.org/licenses/>.
-**                                                                            **
-********************************************************************************
+ */
+/*******************************************************************************
 **                                                                            **
 **  FILENAME    : Mcu_Timer.c                                                 **
 **                                                                            **
@@ -30,13 +29,17 @@
 #include "Mcu_Timer.h"
 #include "Os_CfgData.h"
 /*=======[M A C R O S]========================================================*/
-#define CMP_TYPE_VALUE    (2U)
-#define TIMER_TYPE_VALUE  (2U)
 #define CLOCK_STAT_BITS   (31U)
 #define STMDIV_MASK       (0xFFFFFFF0u)
 #define CLOCK_UP_VALUE    (0x50000003u)
-#define CMCON_SET_VALUE   (0x0000001Fu)
-#define STM_ICR_SET_VALUE (0x00000002u)
+#define SYSTIMER_CMCON_SET_VALUE   (0x0000001Fu)
+#define TPTIMER_CMCON_SET_VALUE   (0x001F0000u)
+#define CMP0IR_VALUE (0x00000002u)
+#define CMP1IR_VALUE (0x00000020u)
+#define CMP0OS_CMP0EN_VALUE (0x00000001u)
+#define CMP1OS_CMP1EN_VALUE (0x00000050u)
+#define CMP0IRR_BIT (0)
+#define CMP1IRR_BIT (2U)
 
 /*=======[T Y P E   D E F I N I T I O N S]====================================*/
 
@@ -47,7 +50,7 @@
 /*=======[I N T E R N A L   D A T A]==========================================*/
 #define OS_START_SEC_CONST_UNSPECIFIED
 #include "Os_MemMap.h"
-static const uint32 OS_STM_CMP_SET[CMP_TYPE_VALUE][CFG_CORE_MAX] = {
+static const uint32 OS_STM_CMP_SET[][CFG_CORE_MAX] = {
     {OS_STM0_CMP0, OS_STM1_CMP0, OS_STM2_CMP0, OS_STM3_CMP0, OS_STM4_CMP0, OS_STM5_CMP0},
     {OS_STM0_CMP1, OS_STM1_CMP1, OS_STM2_CMP1, OS_STM3_CMP1, OS_STM4_CMP1, OS_STM5_CMP1}};
 #define OS_STOP_SEC_CONST_UNSPECIFIED
@@ -76,7 +79,7 @@ static const uint32 OS_STM_ICR_SET[CFG_CORE_MAX] =
 #include "Os_MemMap.h"
 #define OS_START_SEC_CONST_UNSPECIFIED
 #include "Os_MemMap.h"
-static const uint32 OS_STM_VALUE_SET[TIMER_TYPE_VALUE][CFG_CORE_MAX] = {
+static const uint32 OS_STM_VALUE_SET[][CFG_CORE_MAX] = {
     {CFG_REG_OSTIMER_VALUE_CORE0,
      CFG_REG_OSTIMER_VALUE_CORE1,
      CFG_REG_OSTIMER_VALUE_CORE2,
@@ -126,9 +129,9 @@ void Os_ClearSysTimer(void)
 {
     /* PRQA S 1259, 0303, 1258 ++ */ /* VL_Os_1259, VL_Os_0303, VL_Os_1258 */
     /* PRQA S 3442, 0404, 3345 ++ */ /* VL_Os_3442, VL_Os_0404, VL_Os_3345 */
-    if ((uint32)STM_ICR_SET_VALUE == (OS_REG32(OS_STM_ICR_SET[Os_SCB.sysCore]) & ((uint32)STM_ICR_SET_VALUE)))
+    if ((uint32)CMP0IR_VALUE == (OS_REG32(OS_STM_ICR_SET[Os_SCB.sysCore]) & ((uint32)CMP0IR_VALUE)))
     {
-        OS_REG32(OS_STM_ISCR_SET[Os_SCB.sysCore]) |= (uint32)0x00000001u;
+        OS_REG32(OS_STM_ISCR_SET[Os_SCB.sysCore]) |= (uint32)(1u << CMP0IRR_BIT);
 
         OS_REG32(OS_STM_CMP_SET[0][Os_SCB.sysCore]) += OS_STM_VALUE_SET[0][Os_SCB.sysCore];
 
@@ -148,7 +151,7 @@ void Os_ClearSysTimer(void)
 #include "Os_MemMap.h"
 /******************************************************************************/
 /*
- * Brief                <Os_ArchInitSystemTimer>
+ * Brief                <SystemClock set>
  * ServiceId            <None>
  * Sync/Async           <Synchronous>
  * Reentrancy           <Non Reentrant>
@@ -157,15 +160,14 @@ void Os_ClearSysTimer(void)
  * Param-Name[in/out]   <None>
  * Return               <None>
  * PreCondition         <None>
- * CallByAPI            <Os_ArchInitCPU>
+ * CallByAPI            <Os_MultiCoreInitProcessor>
  * REQ ID               <None>
  */
 /******************************************************************************/
 /* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
-void Os_ArchInitSystemTimer(void)
+void Os_SetSystemClock(void)
 /* PRQA S 1532 -- */
 {
-    /*only logic master core need Running this code.*/
     /* PRQA S 0303 ++ */ /* VL_Os_0303 */
     if (0u == Os_SCB.sysCore)
     {
@@ -183,9 +185,33 @@ void Os_ArchInitSystemTimer(void)
 
         Os_ArchSetENDINIT(); /* PRQA S 3469 */ /* VL_Os_3469 */
     }
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
 
-    OS_REG32(OS_STM_CMCON_SET[Os_SCB.sysCore]) |= CMCON_SET_VALUE;
-    OS_REG32(OS_STM_ICR_SET[Os_SCB.sysCore]) |= 0x00000001u;
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/******************************************************************************/
+/*
+ * Brief                <Os_InitSystemTimer>
+ * ServiceId            <None>
+ * Sync/Async           <Synchronous>
+ * Reentrancy           <Non Reentrant>
+ * Param-Name[in]       <None>
+ * Param-Name[out]      <None>
+ * Param-Name[in/out]   <None>
+ * Return               <None>
+ * PreCondition         <None>
+ * CallByAPI            <Os_ArchInitCPU>
+ * REQ ID               <None>
+ */
+/******************************************************************************/
+/* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
+void Os_InitSystemTimer(void)
+/* PRQA S 1532 -- */
+{
+    OS_REG32(OS_STM_CMCON_SET[Os_SCB.sysCore]) |= SYSTIMER_CMCON_SET_VALUE;
+    OS_REG32(OS_STM_ICR_SET[Os_SCB.sysCore]) |= CMP0OS_CMP0EN_VALUE;
     OS_REG32(OS_STM_CMP_SET[0][Os_SCB.sysCore]) = /* PRQA S 3345 */ /* VL_Os_3345 */
                                                   OS_REG32(OS_STM_ABS_SET[Os_SCB.sysCore])
                                                   + OS_STM_VALUE_SET[0][Os_SCB.sysCore];
@@ -212,10 +238,10 @@ void Os_ArchInitSystemTimer(void)
  * REQ ID               <None>
  */
 /******************************************************************************/
-void Os_ArchInitTimingProtTimer(void)
+void Os_InitTimingProtTimer(void)
 {
-    OS_REG32(OS_STM_CMCON_SET[Os_SCB.sysCore]) |= 0x001F0000u;
-    OS_REG32(OS_STM_ICR_SET[Os_SCB.sysCore]) |= 0x00000050u;
+    OS_REG32(OS_STM_CMCON_SET[Os_SCB.sysCore]) |= TPTIMER_CMCON_SET_VALUE;
+    OS_REG32(OS_STM_ICR_SET[Os_SCB.sysCore]) |= CMP1OS_CMP1EN_VALUE;
     OS_REG32(OS_STM_CMP_SET[1][Os_SCB.sysCore]) =
         OS_REG32(OS_STM_ABS_SET[Os_SCB.sysCore]) + OS_STM_VALUE_SET[1][Os_SCB.sysCore];
 }
@@ -239,11 +265,11 @@ void Os_ArchInitTimingProtTimer(void)
  * REQ ID               <None>
  */
 /******************************************************************************/
-void Os_ClearTmProtTimer()
+void Os_ClearTmProtTimer(void)
 {
-    if ((uint32)0x00000020 == (OS_REG32(OS_STM_ICR_SET[Os_SCB.sysCore]) & ((uint32)0x00000020)))
+    if ((uint32)CMP1IR_VALUE == (OS_REG32(OS_STM_ICR_SET[Os_SCB.sysCore]) & ((uint32)CMP1IR_VALUE)))
     {
-        OS_REG32(OS_STM_ISCR_SET[Os_SCB.sysCore]) |= (uint32)0x00000004;
+        OS_REG32(OS_STM_ISCR_SET[Os_SCB.sysCore]) |= (uint32)(1u << CMP1IRR_BIT);
 
         OS_REG32(OS_STM_CMP_SET[1][Os_SCB.sysCore]) =
             OS_STM_VALUE_SET[1][Os_SCB.sysCore] + OS_REG32(OS_STM_ABS_SET[Os_SCB.sysCore]);
@@ -253,7 +279,7 @@ void Os_ClearTmProtTimer()
 #include "Os_MemMap.h"
 #endif /* TRUE == CFG_TIMING_PROTECTION_ENABLE */
 
-#if (TRUE == CFG_LOAD_RATIO_CALC_ENABLE)
+#if (TRUE == CFG_OS_MONITOR_ENABLE)
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
 /******************************************************************************/
@@ -278,6 +304,6 @@ uint32 Os_ArchGetTimeTicks(void)
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
-#endif /* TRUE == CFG_LOAD_RATIO_CALC_ENABLE */
+#endif /* TRUE == CFG_OS_MONITOR_ENABLE */
 
 /*=======[E N D   O F   F I L E]==============================================*/

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -46,15 +46,6 @@
 /* ========================================= internal function declarations ========================================= */
 #define NVM_START_SEC_CODE
 #include "NvM_MemMap.h"
-/**
- * @brief       Save the repaired data
- * @param[in]   DataSourceAddress: The source address of data
- * @param[in]   Length: The length of data
- * @reentrant   Non Reentrant
- * @synchronous TRUE
- * @trace       CPD-76709
- */
-NVM_LOCAL void NvM_RepireDataSave(const uint8* DataSourceAddress, uint16 Length);
 
 /**
  * @brief       The requested task enters the replication data phase
@@ -266,15 +257,19 @@ NVM_LOCAL Std_ReturnType NvM_DecompressionAndDeciphering(void);
 /* ============================================ internal data definition ============================================ */
 
 /* ============================================ external data definition ============================================ */
-#define NVM_START_SEC_VAR_INIT_UNSPECIFIED
-#include "NvM_MemMap.h"
 #if (STD_ON == NVM_CIPHERING_ENABLE)
+#define NVM_START_SEC_VAR_CLEARED_8
+#include "NvM_MemMap.h"
 /**
  * @brief Data buffer for ciphering
  */
 uint8 NvM_CipheringBuffer[NVM_BLOCKMAXLENGTH];
+#define NVM_STOP_SEC_VAR_CLEARED_8
+#include "NvM_MemMap.h"
 #endif
 
+#define NVM_START_SEC_VAR_INIT_UNSPECIFIED
+#include "NvM_MemMap.h"
 /**
  * @brief Record the schema information in NvM module
  */
@@ -286,7 +281,8 @@ NvM_ModuleType NvM_Module = {
     NVM_JOB_TYPE_NONE,
     NVM_RUNTIME_NONE,
     NVM_MEMIF_JOB_IDLE,
-    NVM_JOB_STEP_IDLE};
+    NVM_JOB_STEP_IDLE,
+};
 
 /**
  * @brief Record the multi-block job information in NvM module
@@ -309,12 +305,15 @@ NvM_MultiJobType NvM_MultiJob = {
  */
 NvM_AtomJobType NvM_AtomJob = {
     0u,
-    {NVM_ATOMJOB_MAX_NONE,
-     NVM_ATOMJOB_MAX_NONE,
-     NVM_ATOMJOB_MAX_NONE,
-     NVM_ATOMJOB_MAX_NONE,
-     NVM_ATOMJOB_MAX_NONE,
-     NVM_ATOMJOB_MAX_NONE}};
+    {
+        NVM_ATOMJOB_MAX_NONE,
+        NVM_ATOMJOB_MAX_NONE,
+        NVM_ATOMJOB_MAX_NONE,
+        NVM_ATOMJOB_MAX_NONE,
+        NVM_ATOMJOB_MAX_NONE,
+        NVM_ATOMJOB_MAX_NONE,
+    },
+};
 
 /**
  * @brief Record the block-related information currently processed
@@ -354,7 +353,7 @@ NvM_CurRunningType NvM_CurRunning = {
     NULL_PTR,         /*NvM_ReadRamBlockFromNvm*/
     NULL_PTR,         /*NvM_WriteRamBlockToNvm*/
     NULL_PTR,         /*InitCallback*/
-    NULL_PTR          /*SingleCallback*/
+    NULL_PTR,         /*SingleCallback*/
 };
 
 #if (NVM_API_CONFIG_CLASS_1 != NVM_API_CONFIG_CLASS)
@@ -404,11 +403,6 @@ NvM_AdminBlockType NvM_AdminBlock[NVM_BLOCK_NUM_ALL];
  * @brief BUffer of NVRAM block
  */
 uint8 NvM_NvDataBuffer[NVM_MAX_LENGTH_NV_BLOCK + NVM_NV_CRC_MAX_LENGTH];
-
-/**
- * @brief Buffer for temporary to store the repair data
- */
-uint8 NVM_TemporaryRAMForRepaire[NVM_REDUNDANT_ALL][NVM_MAX_LENGTH_REDUNDANT_BLOCK];
 #define NVM_STOP_SEC_VAR_CLEARED_8
 #include "NvM_MemMap.h"
 
@@ -432,33 +426,39 @@ uint16 NvM_QueueSpaceTalbe[NVM_TABLE_SIZE_JOB_QUEUE];
  */
 void NvM_InterReadRom(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
 {
+    NvM_CurRunningType* CurRunningPtr = &NvM_CurRunning; /* PRQA S 3678 */ /* VL_NvM_3678 */
+
     if (NVM_JOB_STEP_CALC_CRC == NvM_Module.JobStep)
     {
-        NvM_InterReadRomSub(NvM_CurRunning.BlockId);
+        NvM_InterReadRomSub(CurRunningPtr->BlockId);
     }
     else
     {
-        NvM_BlockIdType intBlockId = NvM_CurRunning.BlockId - 1U;
-        if ((NULL_PTR != NvM_BlockDescriptor[intBlockId].NvmRomBlockDataAddress) /* PRQA S 2844 */ /* VL_NvM_2844 */
-            && (NvM_CurRunning.RepeatMirrorCounter > 0U))
+        NvM_BlockIdType                intBlockId      = NvM_GetIntBlockId(CurRunningPtr->BlockId);
+        NvM_AdminBlockType*            AdminBlockPtr   = &(NvM_AdminBlock[intBlockId]);
+        const NvM_BlockDescriptorType* BlockDescriptor = &(NvM_BlockDescriptor[intBlockId]);
+
+        /* PRQA S 2844 ++ */ /* VL_NvM_2844 */
+        if ((NULL_PTR != BlockDescriptor->NvmRomBlockDataAddress) && (CurRunningPtr->RepeatMirrorCounter > 0U))
+        /* PRQA S 2844 -- */
         {
-            if ((Std_ReturnType)E_OK == NvM_MemCpy(NvM_CurRunning.RomAddr, NvM_CurRunning.RamAddr))
+            if ((Std_ReturnType)E_OK == NvM_MemCpy(CurRunningPtr->RomAddr, CurRunningPtr->RamAddr))
             {
                 NvM_InterReadRomSubDeal();
             }
         }
-        else if (NULL_PTR != NvM_CurRunning.InitCallback)
+        else if (NULL_PTR != CurRunningPtr->InitCallback)
         {
             NvM_InterReadRomSubTwo();
         }
         else
         {
             /* PRQA S 2824, 2844 ++ */ /* VL_NvM_2824, VL_NvM_2844 */
-            NvM_AdminBlock[intBlockId].SingleReqResult = (NvM_CurRunning.ESingleReqResult == NVM_REQ_INTEGRITY_FAILED)
-                                                             ? NVM_REQ_INTEGRITY_FAILED
-                                                             : NvM_AdminBlock[intBlockId].SingleReqResult;
+            AdminBlockPtr->SingleReqResult = (CurRunningPtr->ESingleReqResult == NVM_REQ_INTEGRITY_FAILED)
+                                                 ? NVM_REQ_INTEGRITY_FAILED
+                                                 : AdminBlockPtr->SingleReqResult;
             NvM_UpdateValidandChangeStatus(STD_OFF, STD_OFF);
-            NvM_JobOverSetFlag(NvM_AdminBlock[intBlockId].SingleReqResult, NVM_CRC_DELETE);
+            NvM_JobOverSetFlag(AdminBlockPtr->SingleReqResult, NVM_CRC_DELETE);
             /* PRQA S 2824, 2844 -- */
         }
     }
@@ -474,21 +474,24 @@ void NvM_InterCalcCrc(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
 #if (STD_ON == NVM_INCLUDE_CRC)
     boolean crcIsFirstCall;
 #endif
+    NvM_CurRunningType* CurRunningPtr = &NvM_CurRunning;
 
 #if (0xFFFFU != NVM_CRC_NUM_OF_BYTES)
-    if (0U == NvM_CurRunning.CrcFlag)
+    if (0U == CurRunningPtr->CrcFlag)
     {
-        NvM_CurRunning.CrcFlag = 1U;
+        CurRunningPtr->CrcFlag = 1U;
 #endif
 #if (STD_ON == NVM_CIPHERING_ENABLE)
-        /* PRQA S 2814, 2844 ++ */ /* VL_NvM_2814, VL_NvM_2844 */
-        NvM_CurRunning.Length =
-            (NULL_PTR != NvM_BlockDescriptor[NvM_CurRunning.BlockId - 1u].NvMBlockCipheringRef)
-                ? (NvM_BlockDescriptor[NvM_CurRunning.BlockId - 1u].NvMBlockCipheringRef->NvMNvBlockNVRAMDataLength)
-                : NvM_CurRunning.Length;
+        NvM_BlockIdType                intBlockId      = NvM_GetIntBlockId(CurRunningPtr->BlockId);
+        const NvM_BlockDescriptorType* BlockDescriptor = &(NvM_BlockDescriptor[intBlockId]);
+
+        /* PRQA S 2814, 2844 ++ */ /* VL_QAC_DerefNullPtr, VL_NvM_2844 */
+        CurRunningPtr->Length = (NULL_PTR != BlockDescriptor->NvMBlockCipheringRef)
+                                    ? (BlockDescriptor->NvMBlockCipheringRef->NvMNvBlockNVRAMDataLength)
+                                    : CurRunningPtr->Length;
         /* PRQA S 2814, 2844 -- */
 #endif
-        NvM_CurRunning.CrcLength = NvM_CurRunning.Length;
+        CurRunningPtr->CrcLength = CurRunningPtr->Length;
 #if (STD_ON == NVM_INCLUDE_CRC)
         crcIsFirstCall = TRUE;
 #endif
@@ -500,16 +503,16 @@ void NvM_InterCalcCrc(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
         crcIsFirstCall = FALSE;
     }
 #endif
-    if (NVM_CRC_NUM_OF_BYTES < NvM_CurRunning.CrcLength)
+    if (NVM_CRC_NUM_OF_BYTES < CurRunningPtr->CrcLength)
     {
         crcLength = NVM_CRC_NUM_OF_BYTES;
     }
     else
 #endif
     {
-        crcLength = NvM_CurRunning.CrcLength;
+        crcLength = CurRunningPtr->CrcLength;
 #if (0xFFFFU != NVM_CRC_NUM_OF_BYTES)
-        NvM_CurRunning.CrcFlag = 0U;
+        CurRunningPtr->CrcFlag = 0U;
 #endif
         if (0U != NvM_AtomJob.Count)
         {
@@ -517,23 +520,23 @@ void NvM_InterCalcCrc(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
         }
     }
 #if (STD_ON == NVM_INCLUDE_CRC)
-    switch (NvM_CurRunning.CRCType)
+    switch (CurRunningPtr->CRCType)
     {
 #if (STD_ON == NVM_CRC_TYPE_8)
     case NVM_CRC8:
-        NvM_CurRunning.Crc =
-            Crc_CalculateCRC8(NvM_CurRunning.CrcAddr, crcLength, (uint8)NvM_CurRunning.Crc, crcIsFirstCall);
+        CurRunningPtr->Crc =
+            Crc_CalculateCRC8(CurRunningPtr->CrcAddr, crcLength, (uint8)CurRunningPtr->Crc, crcIsFirstCall);
         break;
 #endif
 #if (STD_ON == NVM_CRC_TYPE_16)
     case NVM_CRC16:
-        NvM_CurRunning.Crc =
-            Crc_CalculateCRC16(NvM_CurRunning.CrcAddr, crcLength, (uint16)NvM_CurRunning.Crc, crcIsFirstCall);
+        CurRunningPtr->Crc =
+            Crc_CalculateCRC16(CurRunningPtr->CrcAddr, crcLength, (uint16)CurRunningPtr->Crc, crcIsFirstCall);
         break;
 #endif
 #if (STD_ON == NVM_CRC_TYPE_32)
     case NVM_CRC32:
-        NvM_CurRunning.Crc = Crc_CalculateCRC32(NvM_CurRunning.CrcAddr, crcLength, NvM_CurRunning.Crc, crcIsFirstCall);
+        CurRunningPtr->Crc = Crc_CalculateCRC32(CurRunningPtr->CrcAddr, crcLength, CurRunningPtr->Crc, crcIsFirstCall);
         break;
 #endif
     default:
@@ -541,8 +544,8 @@ void NvM_InterCalcCrc(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
         break;
     }
 #endif
-    NvM_CurRunning.CrcLength -= crcLength;
-    NvM_CurRunning.CrcAddr = &NvM_CurRunning.CrcAddr[crcLength]; /* PRQA S 2824 */ /* VL_NvM_2824 */
+    CurRunningPtr->CrcLength -= crcLength;
+    CurRunningPtr->CrcAddr = &CurRunningPtr->CrcAddr[crcLength]; /* PRQA S 2824 */ /* VL_NvM_2824 */
 }
 
 /**
@@ -555,6 +558,7 @@ void NvM_InterReadBlock(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
     {
 #if ((STD_ON == NVM_COMPRESSION_ENABLE) || (STD_ON == NVM_CIPHERING_ENABLE))
         Std_ReturnType retVal;
+
         retVal = NvM_DecompressionAndDeciphering();
         if (CRYPTO_E_BUSY == retVal)
         {
@@ -592,7 +596,8 @@ void NvM_InterWriteBlock(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
     if (NVM_MEMIF_JOB_ASYNC_PENDING == NvM_Module.MemIfJobState)
     {
         MemIf_JobResultType retValue = MemIf_GetJobResult(NvM_CurRunning.DeviceId);
-        /* PRQA S 2814, 2844, 3120 ++ */ /* VL_NvM_2814, VL_NvM_2844, VL_QAC_MagicNum */
+
+        /* PRQA S 2814, 2844, 3120 ++ */ /* VL_QAC_DerefNullPtr, VL_NvM_2844, VL_QAC_MagicNum */
         (*NvM_MemIfAsyncFuncTable[retValue][(uint8)NVM_WRITE_BLOCK_SERV_ID - 6U])();
         /* PRQA S 2814, 2844, 3120 -- */
     }
@@ -609,7 +614,9 @@ void NvM_InterWriteBlock(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
  */
 void NvM_InterSetRamStatus(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
 {
-    if (NVM_JOB_STEP_CALC_CRC == NvM_Module.JobStep)
+    NvM_ModuleType* ModulePtr = &NvM_Module;
+
+    if (NVM_JOB_STEP_CALC_CRC == ModulePtr->JobStep)
     {
         NvM_JobOverSetFlag(NVM_REQ_OK, NVM_CRC_UPDATE);
 #if (STD_ON == NVM_DEM_E_REQ_FAILED)
@@ -618,12 +625,14 @@ void NvM_InterSetRamStatus(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
     }
     else
     {
-        if (NvM_CurRunning.RepeatMirrorCounter > 0U)
+        NvM_CurRunningType* CurRunningPtr = &NvM_CurRunning;
+
+        if (CurRunningPtr->RepeatMirrorCounter > 0U)
         {
-            if (E_OK == NvM_MemCpy(NvM_CurRunning.RamAddr, NvM_NvDataBuffer))
+            if (E_OK == NvM_MemCpy(CurRunningPtr->RamAddr, NvM_NvDataBuffer))
             {
-                NvM_CurRunning.CrcAddr = NvM_NvDataBuffer;
-                NvM_Module.JobStep     = NVM_JOB_STEP_CALC_CRC;
+                CurRunningPtr->CrcAddr = NvM_NvDataBuffer;
+                ModulePtr->JobStep     = NVM_JOB_STEP_CALC_CRC;
                 NvM_AtomJobReq(NVM_ATOMJOB_CALCCRC);
             }
         }
@@ -645,18 +654,22 @@ void NvM_InterSetRamStatus(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
  */
 void NvM_InterRestoreBlockDefaults(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
 {
-    if (NVM_JOB_STEP_PENDING == NvM_Module.JobStep)
+    NvM_ModuleType* ModulePtr = &NvM_Module;
+
+    if (NVM_JOB_STEP_PENDING == ModulePtr->JobStep)
     {
-        NvM_BlockIdType intBlockId = NvM_CurRunning.BlockId - 1U;
+        NvM_BlockIdType                intBlockId      = NvM_GetIntBlockId(NvM_CurRunning.BlockId);
+        const NvM_BlockDescriptorType* BlockDescriptor = &(NvM_BlockDescriptor[intBlockId]);
+
         /* PRQA S 2844 ++ */ /* VL_NvM_2844 */
-        if ((NULL_PTR != NvM_BlockDescriptor[intBlockId].NvmRomBlockDataAddress)
-            || (NULL_PTR != NvM_BlockDescriptor[intBlockId].NvmInitBlockCallback))
+        if ((NULL_PTR != BlockDescriptor->NvmRomBlockDataAddress)
+            || (NULL_PTR != BlockDescriptor->NvmInitBlockCallback))
         {
             NvM_AdminBlock[intBlockId].SingleReqResult = NVM_REQ_PENDING;
-            /* PRQA S 2844 -- */
-            NvM_Module.JobStep = NVM_JOB_STEP_READ_ROM;
+            ModulePtr->JobStep                         = NVM_JOB_STEP_READ_ROM;
             NvM_AtomJobReq(NVM_ATOMJOB_READROM);
         }
+        /* PRQA S 2844 -- */
     }
 }
 #endif
@@ -669,18 +682,21 @@ void NvM_InterRestoreBlockDefaults(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef *
  */
 void NvM_InterEraseNvBlock(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
 {
+    NvM_ModuleType* ModulePtr = &NvM_Module;
+
     /** whether this func ia active when priority strategy not used */
-    if (NVM_JOB_STEP_PENDING == NvM_Module.JobStep)
+    if (NVM_JOB_STEP_PENDING == ModulePtr->JobStep)
     {
-        NvM_Module.JobStep       = NVM_JOB_STEP_ERASE_1ST_NV;
-        NvM_Module.MemIfJobState = NVM_MEMIF_JOB_ASYNC_READY;
+        ModulePtr->JobStep       = NVM_JOB_STEP_ERASE_1ST_NV;
+        ModulePtr->MemIfJobState = NVM_MEMIF_JOB_ASYNC_READY;
     }
     NvM_MemIfReq(NVM_MEMIF_REQ_ERASE);
 #if (STD_ON == NVM_POLLING_MODE)
-    if (NVM_MEMIF_JOB_ASYNC_PENDING == NvM_Module.MemIfJobState)
+    if (NVM_MEMIF_JOB_ASYNC_PENDING == ModulePtr->MemIfJobState)
     {
         MemIf_JobResultType retVal = MemIf_GetJobResult(NvM_CurRunning.DeviceId);
-        /* PRQA S 2814, 2844, 3120 ++ */ /* VL_NvM_2814, VL_NvM_2844, VL_QAC_MagicNum */
+
+        /* PRQA S 2814, 2844, 3120 ++ */ /* VL_QAC_DerefNullPtr, VL_NvM_2844, VL_QAC_MagicNum */
         (*NvM_MemIfAsyncFuncTable[retVal][(uint8)NVM_ERASE_NV_BLOCK_SERV_ID - 6U])();
         /* PRQA S 2814, 2844, 3120 -- */
     }
@@ -694,17 +710,20 @@ void NvM_InterEraseNvBlock(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
  */
 void NvM_InterInvalidateNvBlock(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
 {
-    if (NVM_JOB_STEP_PENDING == NvM_Module.JobStep)
+    NvM_ModuleType* ModulePtr = &NvM_Module;
+
+    if (NVM_JOB_STEP_PENDING == ModulePtr->JobStep)
     {
-        NvM_Module.JobStep       = NVM_JOB_STEP_INVALID_1ST_NV;
-        NvM_Module.MemIfJobState = NVM_MEMIF_JOB_ASYNC_READY;
+        ModulePtr->JobStep       = NVM_JOB_STEP_INVALID_1ST_NV;
+        ModulePtr->MemIfJobState = NVM_MEMIF_JOB_ASYNC_READY;
     }
     NvM_MemIfReq(NVM_MEMIF_REQ_INVALID);
 #if (STD_ON == NVM_POLLING_MODE)
-    if (NVM_MEMIF_JOB_ASYNC_PENDING == NvM_Module.MemIfJobState)
+    if (NVM_MEMIF_JOB_ASYNC_PENDING == ModulePtr->MemIfJobState)
     {
         MemIf_JobResultType retVal = MemIf_GetJobResult(NvM_CurRunning.DeviceId);
-        /* PRQA S 2814, 2844, 3120 ++ */ /* VL_NvM_2814, VL_NvM_2844, VL_QAC_MagicNum */
+
+        /* PRQA S 2814, 2844, 3120 ++ */ /* VL_QAC_DerefNullPtr, VL_NvM_2844, VL_QAC_MagicNum */
         (*NvM_MemIfAsyncFuncTable[retVal][(uint8)NVM_INVALIDATE_NV_BLOCK_SERV_ID - 6U])();
         /* PRQA S 2814, 2844, 3120 -- */
     }
@@ -718,26 +737,29 @@ void NvM_InterInvalidateNvBlock(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
  */
 void NvM_InterReadAll(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
 {
-    NvM_BlockIdType intBlockId = NvM_CurRunning.BlockId - 1U;
+#if (NVM_SELECT_BLOCK_FOR_READ_ALL == STD_ON)
+    const NvM_CurRunningType*      CurRunningPtr   = &NvM_CurRunning;
+    NvM_BlockIdType                intBlockId      = NvM_GetIntBlockId(CurRunningPtr->BlockId);
+    const NvM_BlockDescriptorType* BlockDescriptor = &(NvM_BlockDescriptor[intBlockId]);
 
 #if (NVM_API_CONFIG_CLASS_1 != NVM_API_CONFIG_CLASS)
     /* PRQA S 2844 ++ */ /* VL_NvM_2844 */
-    if ((TRUE == NVM_ISFLAGON(NvM_BlockDescriptor[intBlockId].FlagGroup, (uint8)NVM_BLOCK_DESC_SELECTBLOCKFORREADALL))
-        && (TRUE == NVM_ISFLAGOFF(NvM_CurRunning.AdminFlagGroup, NVM_ADMIN_RAM_CHANGED))
-        && (NVM_BLOCK_DATASET != NvM_CurRunning.ManagementType))
+    if ((TRUE == NVM_ISFLAGON(BlockDescriptor->FlagGroup, (uint8)NVM_BLOCK_DESC_SELECTBLOCKFORREADALL))
+        && (TRUE == NVM_ISFLAGOFF(CurRunningPtr->AdminFlagGroup, NVM_ADMIN_RAM_CHANGED))
+        && (NVM_BLOCK_DATASET != CurRunningPtr->ManagementType))
 #else
-    if ((TRUE == NVM_ISFLAGON(NvM_BlockDescriptor[intBlockId].FlagGroup, NVM_BLOCK_DESC_SELECTBLOCKFORREADALL))
-        && (TRUE == NVM_ISFLAGOFF(NvM_CurRunning.AdminFlagGroup, NVM_ADMIN_RAM_CHANGED)))
+    if ((TRUE == NVM_ISFLAGON(BlockDescriptor->FlagGroup, NVM_BLOCK_DESC_SELECTBLOCKFORREADALL))
+        && (TRUE == NVM_ISFLAGOFF(CurRunningPtr->AdminFlagGroup, NVM_ADMIN_RAM_CHANGED)))
 #endif
     /* PRQA S 2844 -- */
     {
-        if (NVM_READALL_FIRST_BLOCKID == NvM_CurRunning.BlockId) /*For MultiJob,start from first block*/
+        if (NVM_READALL_FIRST_BLOCKID == CurRunningPtr->BlockId) /*For MultiJob,start from first block*/
         {
             NvM_AtomJobReq(NVM_ATOMJOB_READBLOCK);
         }
-        else if (NVM_READALL_FIRST_BLOCKID < NvM_CurRunning.BlockId)
+        else if (NVM_READALL_FIRST_BLOCKID < CurRunningPtr->BlockId)
         {
-            if ((NVM_READALL_FIRST_BLOCKID + 1U) == NvM_CurRunning.BlockId)
+            if ((NVM_READALL_FIRST_BLOCKID + 1U) == CurRunningPtr->BlockId)
             {
                 NvM_RunTimeHandle();
             }
@@ -749,10 +771,11 @@ void NvM_InterReadAll(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
         }
         else
         {
-            // for qac
+            /* for qac idle */
         }
     }
     else
+#endif
     {
         NvM_JobOverSetFlag(NVM_REQ_BLOCK_SKIPPED, NVM_CRC_REMAIN);
     }
@@ -764,41 +787,50 @@ void NvM_InterReadAll(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
  */
 void NvM_InterWriteAll(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
 {
-    NvM_BlockIdType intBlockId = NvM_CurRunning.BlockId - 1U;
-    if (TRUE == NvM_MultiJob.CancelWriteAll)
+    NvM_BlockIdType     intBlockId    = NvM_GetIntBlockId(NvM_CurRunning.BlockId);
+    NvM_MultiJobType*   MultiJobPtr   = &NvM_MultiJob;
+    NvM_CurRunningType* CurRunningPtr = &NvM_CurRunning;
+    NvM_AdminBlockType* AdminBlockPtr = NULL_PTR;
+
+    if (TRUE == MultiJobPtr->CancelWriteAll)
     {
-        NvM_BlockIdType blockId = NvM_CurRunning.BlockId;
+        NvM_BlockIdType blockId = CurRunningPtr->BlockId;
         while (NVM_BLOCK_NUM_ALL >= blockId)
         {
+            AdminBlockPtr = &(NvM_AdminBlock[intBlockId]);
+
             NvM_UpdateValidandChangeStatus(STD_ON, STD_OFF);
-            NVM_SETFLAGOFF(&NvM_CurRunning.AdminFlagGroup, NVM_ADMIN_ENQUEUE);
-            NvM_AdminBlock[intBlockId].SingleReqResult = NVM_REQ_CANCELED;
-            NvM_AdminBlock[intBlockId].ServiceID       = NVM_NONE_SERV_ID;
+            NVM_SETFLAGOFF(&CurRunningPtr->AdminFlagGroup, NVM_ADMIN_ENQUEUE);
+            AdminBlockPtr->SingleReqResult = NVM_REQ_CANCELED;
+            AdminBlockPtr->ServiceID       = NVM_NONE_SERV_ID;
             ++blockId;
-            ++NvM_CurRunning.BlockId;
+            ++CurRunningPtr->BlockId;
 #if ((NVM_API_CONFIG_CLASS_1 != NVM_API_CONFIG_CLASS) && (STD_ON == NVM_JOB_PRIORITIZATION))
-            NvM_MultiJob.BlockId = NvM_CurRunning.BlockId;
+            MultiJobPtr->BlockId = CurRunningPtr->BlockId;
 #endif
         }
-        if (TRUE == NvM_MultiJob.ID1WriteMark)
+        if (TRUE == MultiJobPtr->ID1WriteMark)
         {
-            NvM_AdminBlock[0].SingleReqResult = NVM_REQ_CANCELED;
+            AdminBlockPtr                  = &(NvM_AdminBlock[0]);
+            AdminBlockPtr->SingleReqResult = NVM_REQ_CANCELED;
         }
 #if (STD_ON == NVM_DEM_E_REQ_FAILED)
         Dem_SetEventStatus(NVM_E_REQ_FAILED, DEM_EVENT_STATUS_FAILED);
 #endif
-        NvM_MultiJob.CancelWriteAll = FALSE;
-        NvM_MultiJob.Enqueue        = FALSE;
+        MultiJobPtr->CancelWriteAll = FALSE;
+        MultiJobPtr->Enqueue        = FALSE;
 #if (NVM_API_CONFIG_CLASS_1 != NVM_API_CONFIG_CLASS)
         NvM_MultiJobResultFeedBack(NVM_CANCEL_WRITE_ALL_SERV_ID, NVM_REQ_CANCELED);
-        NvM_MultiJob.ServiceId = NVM_NONE_SERV_ID;
+        MultiJobPtr->ServiceId = NVM_NONE_SERV_ID;
 #else
         NvM_MultiJobResultFeedBack(NVM_CANCEL_WRITE_ALL_SERV_ID, NVM_REQ_CANCELED);
-        NvM_CurRunning.ServiceId = NVM_NONE_SERV_ID;
+        CurRunningPtr->ServiceId = NVM_NONE_SERV_ID;
 #endif
-        NvM_Module.CurrentJobType = NVM_JOB_TYPE_NONE;
-        NvM_Module.MemIfJobState  = NVM_MEMIF_JOB_IDLE;
-        NvM_Module.JobStep        = NVM_JOB_STEP_IDLE;
+        NvM_ModuleType* ModulePtr = &NvM_Module;
+
+        ModulePtr->CurrentJobType = NVM_JOB_TYPE_NONE;
+        ModulePtr->MemIfJobState  = NVM_MEMIF_JOB_IDLE;
+        ModulePtr->JobStep        = NVM_JOB_STEP_IDLE;
     }
     else
     {
@@ -806,33 +838,36 @@ void NvM_InterWriteAll(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
     }
 }
 
-#if (NVM_API_CONFIG_CLASS_3 == NVM_API_CONFIG_CLASS)
+#if ((NVM_API_CONFIG_CLASS_3 == NVM_API_CONFIG_CLASS) && (STD_ON == NVM_SELECT_BLOCK_FOR_FIRST_INIT_ALL))
 /**
  * @brief Check whether firstinitall is configured for all blocks. If FirstinitAll is configured, set and update the
  * corresponding flag bits and job steps according to different block types
  */
 void NvM_InterFirstInitAll(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
 {
-    boolean         isProcessed = FALSE;
-    NvM_BlockIdType intBlockId  = NvM_CurRunning.BlockId - 1U;
+    boolean                        isProcessed        = FALSE;
+    NvM_ModuleType*                ModulePtr          = &NvM_Module;
+    NvM_CurRunningType*            CurRunningPtr      = &NvM_CurRunning;
+    NvM_BlockIdType                intBlockId         = NvM_GetIntBlockId(CurRunningPtr->BlockId);
+    const NvM_BlockDescriptorType* BlockDescriptorPtr = &(NvM_BlockDescriptor[intBlockId]);
+
     /* PRQA S 2844 ++ */ /* VL_NvM_2844 */
-    if (TRUE
-        == NVM_ISFLAGON(NvM_BlockDescriptor[intBlockId].FlagGroup, (uint16)NVM_BLOCK_DESC_SELECTBLOCKFORFIRSTINITALL))
+    if (TRUE == NVM_ISFLAGON(BlockDescriptorPtr->FlagGroup, (uint16)NVM_BLOCK_DESC_SELECTBLOCKFORFIRSTINITALL))
     /* PRQA S 2844 -- */
     {
-        switch (NvM_CurRunning.ManagementType)
+        switch (CurRunningPtr->ManagementType)
         {
         case NVM_BLOCK_NATIVE:
-            if ((NULL_PTR != NvM_BlockDescriptor[intBlockId].NvmRomBlockDataAddress)
-                || (NULL_PTR != NvM_BlockDescriptor[intBlockId].NvmInitBlockCallback))
+            if ((NULL_PTR != BlockDescriptorPtr->NvmRomBlockDataAddress)
+                || (NULL_PTR != BlockDescriptorPtr->NvmInitBlockCallback))
             {
                 NVM_GetRepeatMirrorOperation();
-                NvM_Module.JobStep = NVM_JOB_STEP_READ_ROM;
+                ModulePtr->JobStep = NVM_JOB_STEP_READ_ROM;
                 NvM_AtomJobReq(NVM_ATOMJOB_READROM);
             }
             else
             {
-                NvM_Module.JobStep = NVM_JOB_STEP_PENDING;
+                ModulePtr->JobStep = NVM_JOB_STEP_PENDING;
                 NvM_AtomJobReq(NVM_ATOMJOB_INVALIDATE);
             }
             isProcessed = TRUE;
@@ -840,32 +875,32 @@ void NvM_InterFirstInitAll(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
         case NVM_BLOCK_REDUNDANT:
             isProcessed = TRUE;
 #if (STD_OFF == NVM_DYNAMIC_CONFIGURATION)
-            if (NVM_READALL_FIRST_BLOCKID == NvM_CurRunning.BlockId)
+            if (NVM_READALL_FIRST_BLOCKID == CurRunningPtr->BlockId)
             {
                 isProcessed = FALSE;
             }
             if (isProcessed == TRUE)
 #endif
             {
-                if ((NULL_PTR != NvM_BlockDescriptor[intBlockId].NvmRomBlockDataAddress)
-                    || (NULL_PTR != NvM_BlockDescriptor[intBlockId].NvmInitBlockCallback))
+                if ((NULL_PTR != BlockDescriptorPtr->NvmRomBlockDataAddress)
+                    || (NULL_PTR != BlockDescriptorPtr->NvmInitBlockCallback))
                 {
                     NVM_GetRepeatMirrorOperation();
-                    NvM_Module.JobStep = NVM_JOB_STEP_READ_ROM;
+                    ModulePtr->JobStep = NVM_JOB_STEP_READ_ROM;
                     NvM_AtomJobReq(NVM_ATOMJOB_READROM);
                 }
                 else
                 {
-                    NvM_Module.JobStep = NVM_JOB_STEP_PENDING;
+                    ModulePtr->JobStep = NVM_JOB_STEP_PENDING;
                     NvM_AtomJobReq(NVM_ATOMJOB_INVALIDATE);
                 }
             }
             break;
 #if (NVM_API_CONFIG_CLASS_1 != NVM_API_CONFIG_CLASS)
         case NVM_BLOCK_DATASET:
-            NvM_CurRunning.Index     = 0u;
-            NvM_CurRunning.FailedNum = 0u;
-            NvM_Module.JobStep       = NVM_JOB_STEP_PENDING;
+            CurRunningPtr->Index     = 0u;
+            CurRunningPtr->FailedNum = 0u;
+            ModulePtr->JobStep       = NVM_JOB_STEP_PENDING;
             NvM_AtomJobReq(NVM_ATOMJOB_INVALIDATE);
             isProcessed = TRUE;
             break;
@@ -889,13 +924,16 @@ void NvM_InterFirstInitAll(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
  */
 void NvM_InterWriteVerification(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
 {
-    if ((NvM_Module.JobStep == NVM_JOB_STEP_READ_1ST_NV) || (NvM_Module.JobStep == NVM_JOB_STEP_READ_2ND_NV))
+    NvM_ModuleType* ModulePtr = &NvM_Module;
+
+    if ((ModulePtr->JobStep == NVM_JOB_STEP_READ_1ST_NV) || (ModulePtr->JobStep == NVM_JOB_STEP_READ_2ND_NV))
     {
         NvM_MemIfReq(NVM_MEMIF_REQ_READ);
-        if (NVM_MEMIF_JOB_ASYNC_PENDING == NvM_Module.MemIfJobState)
+        if (NVM_MEMIF_JOB_ASYNC_PENDING == ModulePtr->MemIfJobState)
         {
 #if (STD_ON == NVM_POLLING_MODE)
             MemIf_JobResultType retVal = MemIf_GetJobResult(NvM_CurRunning.DeviceId);
+
             if (MEMIF_JOB_OK == retVal)
             {
                 NvM_InterWriteVerificationOK();
@@ -927,22 +965,26 @@ void NvM_InterWriteVerification(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
  */
 void NvM_InterWriteVerificationOK(void)
 {
-    if ((NvM_CurRunning.VerificationCounter <= NvM_CurRunning.Length) && (NvM_CurRunning.VerificationSize != 0u))
+    NvM_ModuleType*     ModulePtr     = &NvM_Module;
+    NvM_CurRunningType* CurRunningPtr = &NvM_CurRunning;
+
+    if ((CurRunningPtr->VerificationCounter <= CurRunningPtr->Length) && (CurRunningPtr->VerificationSize != 0u))
     {
         uint8* buffPtr = NULL_PTR;
-
 #if (STD_ON == NVM_CIPHERING_ENABLE)
-        if (NvM_BlockDescriptor[NvM_CurRunning.BlockId - 1u].NvMBlockCipheringRef != NULL_PTR)
+        NvM_BlockIdType                intBlockId         = NvM_GetIntBlockId(CurRunningPtr->BlockId);
+        const NvM_BlockDescriptorType* BlockDescriptorPtr = &(NvM_BlockDescriptor[intBlockId]);
+        if (BlockDescriptorPtr->NvMBlockCipheringRef != NULL_PTR)
         {
             buffPtr = NvM_CipheringBuffer;
         }
         else
 #endif
         {
-            buffPtr = NvM_CurRunning.RamAddr;
+            buffPtr = CurRunningPtr->RamAddr;
         }
 
-        if ((NvM_CurRunning.Length - NvM_CurRunning.VerificationCounter) >= NvM_CurRunning.VerificationSize)
+        if ((CurRunningPtr->Length - CurRunningPtr->VerificationCounter) >= CurRunningPtr->VerificationSize)
         {
             NvM_SuboneInterWriteVerification(buffPtr);
         }
@@ -953,21 +995,12 @@ void NvM_InterWriteVerificationOK(void)
     }
     else
     {
-        if (NVM_BLOCK_REDUNDANT == NvM_CurRunning.ManagementType)
+        if ((NVM_BLOCK_REDUNDANT == CurRunningPtr->ManagementType) && (NVM_JOB_STEP_READ_2ND_NV != ModulePtr->JobStep))
         {
-            if (NVM_JOB_STEP_READ_2ND_NV != NvM_Module.JobStep)
-            {
-                NVM_SETFLAGOFF(&NvM_CurRunning.AdminFlagGroup, NVM_ADMIN_NV_REPAIR);
-            }
-            NvM_UpdateValidandChangeStatus(STD_ON, STD_OFF);
-            NvM_JobOverSetFlag(NVM_REQ_OK, NVM_CRC_UPDATE);
+            NVM_SETFLAGOFF(&CurRunningPtr->AdminFlagGroup, NVM_ADMIN_NV_REPAIR);
         }
-        else
-        {
-            NvM_UpdateValidandChangeStatus(STD_ON, STD_OFF);
-            NvM_JobOverSetFlag(NVM_REQ_OK, NVM_CRC_UPDATE);
-        }
-
+        NvM_UpdateValidandChangeStatus(STD_ON, STD_OFF);
+        NvM_JobOverSetFlag(NVM_REQ_OK, NVM_CRC_UPDATE);
 #if ((STD_ON == NVM_DEM_E_HARDWARE) || (STD_ON == NVM_DEM_E_VERIFY_FAILED))
 #if (STD_ON == NVM_DEM_E_HARDWARE)
         Dem_SetEventStatus(NVM_E_HARDWARE, DEM_EVENT_STATUS_PASSED);
@@ -985,16 +1018,21 @@ void NvM_InterWriteVerificationOK(void)
  * @brief If the current job is to calculate crc, the corresponding job result and tag bit are updated. Otherwise, set
  * the corresponding flag bit, job request, and result based on the block configuration
  */
-/* PRQA S 6030 ++ */                              /* VL_MTR_NvM_STMIF */
+/* PRQA S 6070,6030 ++ */                         /* VL_MTR_NvM_STCAL,VL_MTR_NvM_STMIF */
 void NvM_InterValidateAll(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
+/* PRQA S 6070,6030 -- */
 {
-    NvM_BlockIdType intBlockId = NvM_CurRunning.BlockId - 1U;
-    if (NVM_JOB_STEP_CALC_CRC == NvM_Module.JobStep)
+    NvM_ModuleType*     ModulePtr     = &NvM_Module;
+    NvM_CurRunningType* CurRunningPtr = &NvM_CurRunning;
+    NvM_BlockIdType     intBlockId    = NvM_GetIntBlockId(CurRunningPtr->BlockId);
+    NvM_AdminBlockType* AdminBlockPtr = &(NvM_AdminBlock[intBlockId]);
+
+    if (NVM_JOB_STEP_CALC_CRC == ModulePtr->JobStep)
     {
         /* PRQA S 2844 ++ */ /* VL_NvM_2844 */
-        if (TRUE == NVM_ISFLAGON(NvM_AdminBlock[intBlockId].FlagGroup, NVM_ADMIN_NV_REPAIR))
+        if (TRUE == NVM_ISFLAGON(AdminBlockPtr->FlagGroup, NVM_ADMIN_NV_REPAIR))
         {
-            NVM_SETFLAGOFF(&NvM_AdminBlock[intBlockId].FlagGroup, NVM_ADMIN_NV_REPAIR);
+            NVM_SETFLAGOFF(&AdminBlockPtr->FlagGroup, NVM_ADMIN_NV_REPAIR);
         }
         /* PRQA S 2844 -- */
         NvM_UpdateValidandChangeStatus(STD_ON, STD_ON);
@@ -1002,31 +1040,37 @@ void NvM_InterValidateAll(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
     }
     else
     {
+#if (STD_ON == NVM_BLOCK_USE_AUTO_VALIDATION)
+        const NvM_BlockDescriptorType* BlockDescriptorPtr = &(NvM_BlockDescriptor[intBlockId]);
+
         /* PRQA S 2844 ++ */ /* VL_NvM_2844 */
-        if ((TRUE == NVM_ISFLAGON(NvM_BlockDescriptor[intBlockId].FlagGroup, (uint16)NVM_BLOCK_DESC_AUTOVALIDATION))
-            && (TRUE == NVM_ISFLAGON(NvM_CurRunning.AdminFlagGroup, NVM_ADMIN_RAM_VALID))
-            && ((NULL_PTR != NvM_BlockDescriptor[intBlockId].NvmRamBlockDataAddress)
-                || (TRUE
-                    == NVM_ISFLAGON(NvM_BlockDescriptor[intBlockId].FlagGroup, (uint16)NVM_BLOCK_DESC_SYNCMECHANISM))))
+        if ((TRUE == NVM_ISFLAGON(BlockDescriptorPtr->FlagGroup, (uint16)NVM_BLOCK_DESC_AUTOVALIDATION))
+            && (TRUE == NVM_ISFLAGON(CurRunningPtr->AdminFlagGroup, NVM_ADMIN_RAM_VALID))
+            && ((NULL_PTR != BlockDescriptorPtr->NvmRamBlockDataAddress)
+#if (STD_ON == NVM_BLOCK_USE_SYNC_MECHANISM)
+                || (TRUE == NVM_ISFLAGON(BlockDescriptorPtr->FlagGroup, (uint16)NVM_BLOCK_DESC_SYNCMECHANISM))
+#endif
+                    ))
         {
-            if (TRUE
-                == NVM_ISFLAGOFF(NvM_BlockDescriptor[intBlockId].FlagGroup, (uint16)NVM_BLOCK_DESC_CALCRAMBLOCKCRC))
+#if (NVM_CALC_RAM_BLOCK_CRC == STD_ON)
+            if (TRUE == NVM_ISFLAGOFF(BlockDescriptorPtr->FlagGroup, (uint16)NVM_BLOCK_DESC_CALCRAMBLOCKCRC))
             {
-                if (TRUE == NVM_ISFLAGON(NvM_AdminBlock[intBlockId].FlagGroup, NVM_ADMIN_NV_REPAIR))
+                if (TRUE == NVM_ISFLAGON(AdminBlockPtr->FlagGroup, NVM_ADMIN_NV_REPAIR))
                 {
-                    NVM_SETFLAGOFF(&NvM_AdminBlock[intBlockId].FlagGroup, NVM_ADMIN_NV_REPAIR);
+                    NVM_SETFLAGOFF(&AdminBlockPtr->FlagGroup, NVM_ADMIN_NV_REPAIR);
                 }
-                /* PRQA S 2844 -- */
                 NvM_UpdateValidandChangeStatus(STD_ON, STD_ON);
                 NvM_JobOverSetFlag(NVM_REQ_OK, NVM_CRC_REMAIN);
             }
-            else if (NvM_CurRunning.RepeatMirrorCounter > 0U)
+            else
+#endif
+                if (CurRunningPtr->RepeatMirrorCounter > 0U)
             {
-                if (E_OK == NvM_MemCpy(NvM_CurRunning.RamAddr, NvM_NvDataBuffer))
+                if (E_OK == NvM_MemCpy(CurRunningPtr->RamAddr, NvM_NvDataBuffer))
                 {
-                    NvM_CurRunning.CrcAddr = NvM_NvDataBuffer;
+                    CurRunningPtr->CrcAddr = NvM_NvDataBuffer;
                     /** After copy nvmbuffer to ram or mirror */
-                    NvM_Module.JobStep = NVM_JOB_STEP_CALC_CRC;
+                    ModulePtr->JobStep = NVM_JOB_STEP_CALC_CRC;
                     NvM_AtomJobReq(NVM_ATOMJOB_CALCCRC);
                 }
             }
@@ -1035,13 +1079,14 @@ void NvM_InterValidateAll(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
                 NvM_JobOverSetFlag(NVM_REQ_OK, NVM_CRC_REMAIN);
             }
         }
+        /* PRQA S 2844 -- */
         else
+#endif
         {
             NvM_JobOverSetFlag(NVM_REQ_OK, NVM_CRC_REMAIN);
         }
     }
 }
-/* PRQA S 6030 -- */
 #endif
 
 /**
@@ -1050,43 +1095,46 @@ void NvM_InterValidateAll(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
  */
 void NvM_JobOverSetFlag(NvM_RequestResultType SingleReqResult, NvM_CrcChangeType CrcChange)
 {
-    NvM_BlockIdType intBlockId = NvM_CurRunning.BlockId - 1U;
+    NvM_CurRunningType*            CurRunningPtr      = &NvM_CurRunning;
+    NvM_BlockIdType                intBlockId         = NvM_GetIntBlockId(CurRunningPtr->BlockId);
+    NvM_AdminBlockType*            AdminBlockPtr      = &(NvM_AdminBlock[intBlockId]);
+    const NvM_BlockDescriptorType* BlockDescriptorPtr = &(NvM_BlockDescriptor[intBlockId]);
 
-    NvM_SingleJobResultFeedBack(NvM_CurRunning.BlockId, SingleReqResult);
-    NvM_AdminBlock[intBlockId].ServiceID = NVM_NONE_SERV_ID;
+    NvM_SingleJobResultFeedBack(CurRunningPtr->BlockId, SingleReqResult);
+    AdminBlockPtr->ServiceID = NVM_NONE_SERV_ID;
 #if (STD_ON == NVM_JOB_PRIORITIZATION)
-    NVM_SETFLAGOFF(&NvM_CurRunning.AdminFlagGroup, NVM_ADMIN_ENQUEUE);
+    NVM_SETFLAGOFF(&CurRunningPtr->AdminFlagGroup, NVM_ADMIN_ENQUEUE);
 #endif
-
+#if (STD_ON == NVM_WRITE_BLOCK_ONCE)
     /** calculate the write once flag for each block */ /* PRQA S 2844 ++ */ /* VL_NvM_2844 */
-    if ((NvM_CurRunning.ServiceId != NVM_ERASE_NV_BLOCK_SERV_ID)
-        && (NvM_CurRunning.ServiceId != NVM_INVALIDATE_NV_BLOCK_SERV_ID)
-        && ((TRUE == NVM_ISFLAGON(NvM_BlockDescriptor[intBlockId].FlagGroup, (uint16)NVM_BLOCK_DESC_WRITEBLOCKONCE))
-            && (NVM_REQ_OK == NvM_AdminBlock[intBlockId].SingleReqResult)))
+    if ((CurRunningPtr->ServiceId != NVM_ERASE_NV_BLOCK_SERV_ID)
+        && (CurRunningPtr->ServiceId != NVM_INVALIDATE_NV_BLOCK_SERV_ID)
+        && (TRUE == NVM_ISFLAGON(NvM_AdminBlock[intBlockId].FlagGroup, NVM_ADMIN_READ_REQUEST))
+        && ((TRUE == NVM_ISFLAGON(BlockDescriptorPtr->FlagGroup, (uint16)NVM_BLOCK_DESC_WRITEBLOCKONCE))
+            && (NVM_REQ_OK == AdminBlockPtr->SingleReqResult)))
     /* PRQA S 2844 -- */
     {
-        NVM_SETFLAGON(&NvM_CurRunning.AdminFlagGroup, NVM_ADMIN_NV_WRPRO);
+        NVM_SETFLAGON(&CurRunningPtr->AdminFlagGroup, NVM_ADMIN_NV_WRPRO);
     }
-
+#endif
     if (NVM_CRC_UPDATE == CrcChange)
     {
-        uint8 index = NvM_AdminBlock[intBlockId].CurrentIndex;
-        if (NvM_BlockDescriptor[intBlockId].NvmBlockCrcBuffAddress != NULL_PTR)
+        if (BlockDescriptorPtr->NvmBlockCrcBuffAddress != NULL_PTR)
         {
-            NvM_BlockDescriptor[intBlockId].NvmBlockCrcBuffAddress[index] = NvM_CurRunning.Crc;
+            BlockDescriptorPtr->NvmBlockCrcBuffAddress[AdminBlockPtr->CurrentIndex] = CurRunningPtr->Crc;
         }
-        NVM_SETFLAGON(&NvM_CurRunning.AdminFlagGroup, NVM_ADMIN_CRC_VALID);
+        NVM_SETFLAGON(&CurRunningPtr->AdminFlagGroup, NVM_ADMIN_CRC_VALID);
     }
     else if (NVM_CRC_DELETE == CrcChange)
     {
-        NVM_SETFLAGOFF(&NvM_CurRunning.AdminFlagGroup, NVM_ADMIN_CRC_VALID);
+        NVM_SETFLAGOFF(&CurRunningPtr->AdminFlagGroup, NVM_ADMIN_CRC_VALID);
     }
     else
     {
         /** idle */
     }
-    NvM_AdminBlock[intBlockId].FlagGroup = NvM_CurRunning.AdminFlagGroup; /* PRQA S 2844 */ /* VL_NvM_2844 */
-    NVM_SETFLAGOFF(&NvM_CurRunning.AdminFlagGroup, NVM_ADMIN_REDUNDANCY_LOSS);
+    AdminBlockPtr->FlagGroup = CurRunningPtr->AdminFlagGroup; /* PRQA S 2844 */ /* VL_NvM_2844 */
+    NVM_SETFLAGOFF(&CurRunningPtr->AdminFlagGroup, NVM_ADMIN_REDUNDANCY_LOSS);
     NvM_Module.MemIfJobState = NVM_MEMIF_JOB_IDLE;
     NvM_Module.JobStep       = NVM_JOB_STEP_IDLE;
     NvM_AtomJob.Count        = 0u;
@@ -1098,12 +1146,15 @@ void NvM_JobOverSetFlag(NvM_RequestResultType SingleReqResult, NvM_CrcChangeType
  */
 void NvM_SatelliteMainFunction(void)
 {
+    NvM_AdminBlockType* AdminBlockPtr;
+
     for (uint8 blockIndex = 0u; blockIndex < NVM_BLOCK_NUM_ALL; ++blockIndex)
     {
-        if (TRUE == NvM_AdminBlock[blockIndex].SatelliteFeedBack)
+        AdminBlockPtr = &(NvM_AdminBlock[blockIndex]);
+        if (TRUE == AdminBlockPtr->SatelliteFeedBack)
         {
-            NvM_AdminBlock[blockIndex].SatelliteFeedBack = FALSE;
-            BswM_NvM_CurrentBlockMode(blockIndex + 1u, NvM_AdminBlock[blockIndex].SingleReqResult);
+            AdminBlockPtr->SatelliteFeedBack = FALSE;
+            BswM_NvM_CurrentBlockMode(blockIndex + 1u, AdminBlockPtr->SingleReqResult);
         }
     }
 }
@@ -1116,17 +1167,20 @@ void NvM_SatelliteMainFunction(void)
 void NvM_SingleJobResultFeedBack(NvM_BlockIdType BlockId, NvM_RequestResultType Result)
 {
     /** Only for single job */
-    NvM_BlockIdType intBlockId = BlockId - 1U;
+    NvM_BlockIdType     intBlockId    = NvM_GetIntBlockId(BlockId);
+    NvM_AdminBlockType* AdminBlockPtr = &(NvM_AdminBlock[intBlockId]);
 
 #if (STD_ON == NVM_BSWM_SINGLEBLOCK_JOBSTATUS_INFORMATION)
-    if (NVM_ISFLAGON(NvM_BlockDescriptor[intBlockId].FlagGroup, NVM_BLOCK_DESC_BSWBLOCKSTATUSINFO))
+    const NvM_BlockDescriptorType* BlockDescriptorPtr = &(NvM_BlockDescriptor[intBlockId]);
+
+    if (NVM_ISFLAGON(BlockDescriptorPtr->FlagGroup, NVM_BLOCK_DESC_BSWBLOCKSTATUSINFO))
     {
 #if (NVM_ECUC_PARTITION_NUM <= 1U)
         BswM_NvM_CurrentBlockMode(BlockId, Result);
 #else
         if (FALSE == NvM_CheckBlockEcucPartition(BlockId))
         {
-            NvM_AdminBlock[intBlockId].SatelliteFeedBack = TRUE;
+            AdminBlockPtr->SatelliteFeedBack = TRUE;
         }
         else
         {
@@ -1136,14 +1190,17 @@ void NvM_SingleJobResultFeedBack(NvM_BlockIdType BlockId, NvM_RequestResultType 
     }
 #endif
 
-    NvM_AdminBlock[intBlockId].SingleReqResult = Result; /* PRQA S 2844 */ /* VL_NvM_2844 */
+    AdminBlockPtr->SingleReqResult = Result; /* PRQA S 2844 */ /* VL_NvM_2844 */
     /** CallBack function for BlockID */
-    if (TRUE == NVM_ISFLAGOFF(NvM_AdminBlock[intBlockId].FlagGroup, NVM_ADMIN_ENQUEUE))
+    if (TRUE == NVM_ISFLAGOFF(AdminBlockPtr->FlagGroup, NVM_ADMIN_ENQUEUE))
     {
-        if (NULL_PTR != NvM_CurRunning.SingleCallback)
+        const NvM_CurRunningType* CurRunningPtr = &NvM_CurRunning;
+
+        if (NULL_PTR != CurRunningPtr->SingleCallback)
         {
             NvM_BlockRequestType blockRequest;
-            switch (NvM_CurRunning.ServiceId)
+
+            switch (CurRunningPtr->ServiceId)
             {
             case NVM_READ_BLOCK_SERV_ID:
             case NVM_READ_PRAM_BLOCK_SERV_ID:
@@ -1171,7 +1228,7 @@ void NvM_SingleJobResultFeedBack(NvM_BlockIdType BlockId, NvM_RequestResultType 
                 break;
             }
             /* PRQA S 2844 ++ */ /* VL_NvM_2844 */
-            (*NvM_CurRunning.SingleCallback)(blockRequest, NvM_AdminBlock[intBlockId].SingleReqResult);
+            (*CurRunningPtr->SingleCallback)(blockRequest, AdminBlockPtr->SingleReqResult);
             /* PRQA S 2844 -- */
         }
     }
@@ -1184,7 +1241,8 @@ void NvM_SingleJobResultFeedBack(NvM_BlockIdType BlockId, NvM_RequestResultType 
 void NvM_MultiJobResultFeedBack(NvM_ServiceIdType ServiceId, NvM_RequestResultType Result)
 {
     NvM_MultiBlockRequestType notiServiceId = NVM_READ_ALL;
-    NvM_MultiJob.ReqResult                  = Result;
+
+    NvM_MultiJob.ReqResult = Result;
     switch (ServiceId)
     {
     case NVM_WRITE_ALL_SERV_ID:
@@ -1220,19 +1278,25 @@ void NvM_MultiJobResultFeedBack(NvM_ServiceIdType ServiceId, NvM_RequestResultTy
  */
 NVM_LOCAL void NvM_InterReadRomSubDeal(void)
 {
-    NvM_BlockIdType intBlockId = NvM_CurRunning.BlockId - 1U;
+    NvM_CurRunningType*            CurRunningPtr = &NvM_CurRunning;
+    NvM_BlockIdType                intBlockId    = NvM_GetIntBlockId(CurRunningPtr->BlockId);
+    NvM_AdminBlockType*            AdminBlockPtr = &(NvM_AdminBlock[intBlockId]); /* PRQA S 3678 */ /* VL_NvM_3678 */
+    const NvM_BlockDescriptorType* BlockDescriptorPtr = &(NvM_BlockDescriptor[intBlockId]);
+
+#if (NVM_CALC_RAM_BLOCK_CRC == STD_ON)
     /* PRQA S 2844 ++ */ /* VL_NvM_2844 */
-    if (TRUE == NVM_ISFLAGON(NvM_BlockDescriptor[intBlockId].FlagGroup, (uint16)NVM_BLOCK_DESC_CALCRAMBLOCKCRC))
+    if (TRUE == NVM_ISFLAGON(BlockDescriptorPtr->FlagGroup, (uint16)NVM_BLOCK_DESC_CALCRAMBLOCKCRC))
     /* PRQA S 2844 -- */
     {
-        NvM_CurRunning.CrcAddr = NvM_CurRunning.RamAddr;
+        CurRunningPtr->CrcAddr = CurRunningPtr->RamAddr;
         NvM_Module.JobStep     = NVM_JOB_STEP_CALC_CRC;
         NvM_AtomJobReq(NVM_ATOMJOB_CALCCRC);
     }
     else
+#endif
     {
 #if (NVM_API_CONFIG_CLASS_3 == NVM_API_CONFIG_CLASS)
-        if (NvM_CurRunning.ServiceId == NVM_FIRSTINIT_ALL_SERV_ID)
+        if (CurRunningPtr->ServiceId == NVM_FIRSTINIT_ALL_SERV_ID)
         {
             NvM_Module.JobStep = NVM_JOB_STEP_PENDING;
             NvM_AtomJobReq(NVM_ATOMJOB_WRITEBLOCK);
@@ -1242,10 +1306,10 @@ NVM_LOCAL void NvM_InterReadRomSubDeal(void)
         {
             NvM_UpdateValidandChangeStatus(STD_ON, STD_ON);
             /* PRQA S 2844 ++ */ /* VL_NvM_2844 */
-            if ((NvM_CurRunning.ESingleReqResult == NVM_REQ_INTEGRITY_FAILED)
-                || (NvM_CurRunning.ESingleReqResult == NVM_REQ_NV_INVALIDATED)
-                || (NvM_AdminBlock[intBlockId].SingleReqResult == NVM_REQ_NV_INVALIDATED)
-                || (NvM_AdminBlock[intBlockId].SingleReqResult == NVM_REQ_NOT_OK))
+            if ((CurRunningPtr->ESingleReqResult == NVM_REQ_INTEGRITY_FAILED)
+                || (CurRunningPtr->ESingleReqResult == NVM_REQ_NV_INVALIDATED)
+                || (AdminBlockPtr->SingleReqResult == NVM_REQ_NV_INVALIDATED)
+                || (AdminBlockPtr->SingleReqResult == NVM_REQ_NOT_OK))
             /* PRQA S 2844 -- */
             {
                 NvM_JobOverSetFlag(NVM_REQ_RESTORED_FROM_ROM, NVM_CRC_DELETE);
@@ -1263,8 +1327,10 @@ NVM_LOCAL void NvM_InterReadRomSubDeal(void)
  */
 NVM_LOCAL void NvM_InterReadRomSub(NvM_BlockIdType BlockId)
 {
+    const NvM_CurRunningType* CurRunningPtr = &NvM_CurRunning;
+
 #if (NVM_API_CONFIG_CLASS_3 == NVM_API_CONFIG_CLASS)
-    if (NvM_CurRunning.ServiceId == NVM_FIRSTINIT_ALL_SERV_ID)
+    if (CurRunningPtr->ServiceId == NVM_FIRSTINIT_ALL_SERV_ID)
     {
         NvM_Module.JobStep = NVM_JOB_STEP_PENDING;
         NvM_AtomJobReq(NVM_ATOMJOB_WRITEBLOCK);
@@ -1272,13 +1338,15 @@ NVM_LOCAL void NvM_InterReadRomSub(NvM_BlockIdType BlockId)
     else
 #endif
     {
-        NvM_BlockIdType intBlockId = BlockId - 1U;
+        NvM_BlockIdType     intBlockId    = NvM_GetIntBlockId(BlockId);
+        NvM_AdminBlockType* AdminBlockPtr = &(NvM_AdminBlock[intBlockId]); /* PRQA S 3678 */ /* VL_NvM_3678 */
+
         NvM_UpdateValidandChangeStatus(STD_ON, STD_ON);
         /* PRQA S 2844 ++ */ /* VL_NvM_2844 */
-        if ((NvM_CurRunning.ESingleReqResult == NVM_REQ_INTEGRITY_FAILED)
-            || (NvM_CurRunning.ESingleReqResult == NVM_REQ_NV_INVALIDATED)
-            || (NvM_AdminBlock[intBlockId].SingleReqResult == NVM_REQ_NV_INVALIDATED)
-            || (NvM_AdminBlock[intBlockId].SingleReqResult == NVM_REQ_NOT_OK))
+        if ((CurRunningPtr->ESingleReqResult == NVM_REQ_INTEGRITY_FAILED)
+            || (CurRunningPtr->ESingleReqResult == NVM_REQ_NV_INVALIDATED)
+            || (AdminBlockPtr->SingleReqResult == NVM_REQ_NV_INVALIDATED)
+            || (AdminBlockPtr->SingleReqResult == NVM_REQ_NOT_OK))
         /* PRQA S 2844 -- */
         {
             NvM_JobOverSetFlag(NVM_REQ_RESTORED_FROM_ROM, NVM_CRC_DELETE);
@@ -1296,8 +1364,10 @@ NVM_LOCAL void NvM_InterReadRomSub(NvM_BlockIdType BlockId)
  */
 NVM_LOCAL void NvM_InterReadRomSubTwo(void)
 {
-    NvM_InitBlockRequestType initBlockRequest = NVM_INIT_READ_BLOCK;
-    switch (NvM_CurRunning.ServiceId)
+    const NvM_CurRunningType* CurRunningPtr    = &NvM_CurRunning;
+    NvM_InitBlockRequestType  initBlockRequest = NVM_INIT_READ_BLOCK;
+
+    switch (CurRunningPtr->ServiceId)
     {
     case NVM_READ_BLOCK_SERV_ID:
         initBlockRequest = NVM_INIT_READ_BLOCK;
@@ -1316,14 +1386,15 @@ NVM_LOCAL void NvM_InterReadRomSubTwo(void)
         /** idle, never happen */
         break;
     }
-    if ((Std_ReturnType)E_OK == (*NvM_CurRunning.InitCallback)(initBlockRequest)) /* PRQA S 2814 */ /* VL_NvM_2814 */
+    if ((Std_ReturnType)E_OK
+        == (*CurRunningPtr->InitCallback)(initBlockRequest)) /* PRQA S 2814 */ /* VL_QAC_DerefNullPtr */
     {
         NvM_InterReadRomSubDeal();
     }
     else
     {
 #if (NVM_API_CONFIG_CLASS_3 == NVM_API_CONFIG_CLASS)
-        if (NvM_CurRunning.ServiceId == NVM_FIRSTINIT_ALL_SERV_ID)
+        if (CurRunningPtr->ServiceId == NVM_FIRSTINIT_ALL_SERV_ID)
         {
             NvM_Module.JobStep = NVM_JOB_STEP_PENDING;
             NvM_AtomJobReq(NVM_ATOMJOB_INVALIDATE);
@@ -1339,51 +1410,58 @@ NVM_LOCAL void NvM_InterReadRomSubTwo(void)
 /**
  * @brief     Perform crc checks and staticId
  */
-NVM_LOCAL void NvM_InterWriteBlockProcessSub(boolean* processOn)
+NVM_LOCAL void NvM_InterWriteBlockProcessSub(boolean* processOn) /* PRQA S 3673 */ /* VL_NvM_3673 */
 {
-    NvM_BlockIdType intBlockId = NvM_CurRunning.BlockId - 1U;
+    NvM_CurRunningType* CurRunningPtr = &NvM_CurRunning; /* PRQA S 3678 */ /* VL_NvM_3678 */
+
+#if ((STD_ON == NVM_BLOCK_USE_CRC_COMP_MECHANISM) || (STD_ON == NVM_STATIC_BLOCKID_CHK))
+    NvM_BlockIdType                intBlockId         = NvM_GetIntBlockId(CurRunningPtr->BlockId);
+    const NvM_BlockDescriptorType* BlockDescriptorPtr = &(NvM_BlockDescriptor[intBlockId]);
+#endif
+#if ((NVM_CALC_RAM_BLOCK_CRC == STD_ON) && (STD_ON == NVM_BLOCK_USE_CRC_COMP_MECHANISM))
     /* PRQA S 2844 ++ */ /* VL_NvM_2844 */
-    if ((TRUE == NVM_ISFLAGON(NvM_BlockDescriptor[intBlockId].FlagGroup, (uint16)NVM_BLOCK_DESC_CALCRAMBLOCKCRC))
-        && (TRUE == NVM_ISFLAGON(NvM_BlockDescriptor[intBlockId].FlagGroup, (uint16)NVM_BLOCK_DESC_CRCCOMPMECHANISM))
-        && (TRUE == NVM_ISFLAGOFF(NvM_CurRunning.AdminFlagGroup, NVM_ADMIN_NV_REPAIR))
-        && (TRUE == NVM_ISFLAGON(NvM_CurRunning.AdminFlagGroup, NVM_ADMIN_CRC_VALID)))
+    if ((TRUE == NVM_ISFLAGON(BlockDescriptorPtr->FlagGroup, (uint16)NVM_BLOCK_DESC_CALCRAMBLOCKCRC))
+        && (TRUE == NVM_ISFLAGON(BlockDescriptorPtr->FlagGroup, (uint16)NVM_BLOCK_DESC_CRCCOMPMECHANISM))
+        && (TRUE == NVM_ISFLAGOFF(CurRunningPtr->AdminFlagGroup, NVM_ADMIN_NV_REPAIR))
+        && (TRUE == NVM_ISFLAGON(CurRunningPtr->AdminFlagGroup, NVM_ADMIN_CRC_VALID)))
     /* PRQA S 2844 -- */
     {
-        if (NvM_CurRunning.Crc == NvM_CurRunning.TempCrc)
+        if (CurRunningPtr->Crc == CurRunningPtr->TempCrc)
         {
             NvM_UpdateValidandChangeStatus(STD_ON, STD_OFF);
             NvM_JobOverSetFlag(NVM_REQ_OK, NVM_CRC_REMAIN);
-            *processOn = FALSE; /* PRQA S 2814 */ /* VL_NvM_2814 */
+            *processOn = FALSE; /* PRQA S 2814 */ /* VL_QAC_DerefNullPtr */
         }
     }
+#endif
     if (*processOn == TRUE)
     {
         /* PRQA S 2844 ++ */ /* VL_NvM_2844 */
-        if (NVM_CRC16 == NvM_CurRunning.CRCType)
+        if (NVM_CRC16 == CurRunningPtr->CRCType)
         {
-            NvM_NvDataBuffer[NvM_CurRunning.Length] = (uint8)NvM_CurRunning.Crc;
+            NvM_NvDataBuffer[CurRunningPtr->Length] = (uint8)CurRunningPtr->Crc;
             /* PRQA S 3120 ++ */ /* VL_QAC_MagicNum */
-            NvM_NvDataBuffer[NvM_CurRunning.Length + 1U] = (uint8)(NvM_CurRunning.Crc >> 8U);
+            NvM_NvDataBuffer[CurRunningPtr->Length + 1U] = (uint8)(CurRunningPtr->Crc >> 8U);
             /* PRQA S 3120 -- */
         }
-        else if (NVM_CRC32 == NvM_CurRunning.CRCType)
+        else if (NVM_CRC32 == CurRunningPtr->CRCType)
         {
-            NvM_NvDataBuffer[NvM_CurRunning.Length] = (uint8)NvM_CurRunning.Crc;
+            NvM_NvDataBuffer[CurRunningPtr->Length] = (uint8)CurRunningPtr->Crc;
             /* PRQA S 3120 ++ */ /* VL_QAC_MagicNum */
-            NvM_NvDataBuffer[NvM_CurRunning.Length + 1U] = (uint8)(NvM_CurRunning.Crc >> 8U);
-            NvM_NvDataBuffer[NvM_CurRunning.Length + 2U] = (uint8)(NvM_CurRunning.Crc >> 16U);
-            NvM_NvDataBuffer[NvM_CurRunning.Length + 3U] = (uint8)(NvM_CurRunning.Crc >> 24U);
+            NvM_NvDataBuffer[CurRunningPtr->Length + 1U] = (uint8)(CurRunningPtr->Crc >> 8U);
+            NvM_NvDataBuffer[CurRunningPtr->Length + 2U] = (uint8)(CurRunningPtr->Crc >> 16U);
+            NvM_NvDataBuffer[CurRunningPtr->Length + 3U] = (uint8)(CurRunningPtr->Crc >> 24U);
             /* PRQA S 3120 -- */
         }
         else
         {
-            NvM_NvDataBuffer[NvM_CurRunning.Length] = (uint8)(NvM_CurRunning.Crc);
+            NvM_NvDataBuffer[CurRunningPtr->Length] = (uint8)(CurRunningPtr->Crc);
         }
         /* PRQA S 2844 -- */
-#if (STD_ON == NVM_STATIC_BLOCKID)
-        if (TRUE == NVM_ISFLAGON(NvM_BlockDescriptor[intBlockId].FlagGroup, (uint16)NVM_BLOCK_DESC_STATICBLOCKIDCHECK))
+#if (STD_ON == NVM_STATIC_BLOCKID_CHK)
+        if (TRUE == NVM_ISFLAGON(BlockDescriptorPtr->FlagGroup, (uint16)NVM_BLOCK_DESC_STATICBLOCKIDCHECK))
         {
-            NvM_WriteStaticBlockID(NvM_NvDataBuffer, NvM_CurRunning.CRCType);
+            NvM_WriteStaticBlockID(NvM_NvDataBuffer, CurRunningPtr->CRCType);
         }
 #endif
         NvM_WriteSequenceForManagementType();
@@ -1395,30 +1473,32 @@ NVM_LOCAL void NvM_InterWriteBlockProcessSub(boolean* processOn)
  */
 NVM_LOCAL void NvM_InterWriteBlockProcess(void)
 {
-    boolean processOn = TRUE;
+    boolean             processOn     = TRUE;
+    NvM_CurRunningType* CurRunningPtr = &NvM_CurRunning;
 
-    if (TRUE == NVM_ISFLAGON(NvM_CurRunning.AdminFlagGroup, NVM_ADMIN_WRITE_COPY_RESULT))
+    if (TRUE == NVM_ISFLAGON(CurRunningPtr->AdminFlagGroup, NVM_ADMIN_WRITE_COPY_RESULT))
     {
-        NVM_SETFLAGOFF(&NvM_CurRunning.AdminFlagGroup, NVM_ADMIN_WRITE_COPY_RESULT);
+        NVM_SETFLAGOFF(&CurRunningPtr->AdminFlagGroup, NVM_ADMIN_WRITE_COPY_RESULT);
         /** Whether the Block use the CRC */
-        if (NVM_CRC_NOT_USED != NvM_CurRunning.CRCType)
+        if (NVM_CRC_NOT_USED != CurRunningPtr->CRCType)
         {
-            NvM_CurRunning.TempCrc = NvM_CurRunning.Crc;
-            NvM_CurRunning.CrcAddr = NvM_NvDataBuffer;
+            CurRunningPtr->TempCrc = CurRunningPtr->Crc;
+            CurRunningPtr->CrcAddr = NvM_NvDataBuffer;
             NvM_Module.JobStep     = NVM_JOB_STEP_CALC_CRC;
             NvM_AtomJobReq(NVM_ATOMJOB_CALCCRC); /** Shift the job to the CALCCRC */
             processOn = FALSE;
         }
         else
         {
+#if (STD_ON == NVM_STATIC_BLOCKID_CHK)
             /** If Block no CRC,write nv directly */ /* PRQA S 2844 ++ */ /* VL_NvM_2844 */
-#if (STD_ON == NVM_STATIC_BLOCKID)
-            NvM_BlockIdType intBlockId = NvM_CurRunning.BlockId - 1U;
             if (TRUE
-                == NVM_ISFLAGON(NvM_BlockDescriptor[intBlockId].FlagGroup, (uint16)NVM_BLOCK_DESC_STATICBLOCKIDCHECK))
+                == NVM_ISFLAGON(
+                    NvM_BlockDescriptor[NvM_CurRunning.BlockId - 1u].FlagGroup,
+                    (uint16)NVM_BLOCK_DESC_STATICBLOCKIDCHECK))
             /* PRQA S 2844 -- */
             {
-                NvM_WriteStaticBlockID(NvM_NvDataBuffer, NvM_CurRunning.CRCType);
+                NvM_WriteStaticBlockID(NvM_NvDataBuffer, CurRunningPtr->CRCType);
             }
 #endif
             NvM_WriteSequenceForManagementType();
@@ -1441,26 +1521,30 @@ NVM_LOCAL void NvM_InterReadBlockSub(
     uint32                     tempCrc)
 /* PRQA S 3673 -- */
 {
-    if (NvM_CurRunning.Crc == tempCrc)
+    const NvM_CurRunningType* CurRunningPtr = &NvM_CurRunning;
+
+    if (CurRunningPtr->Crc == tempCrc)
     {
-        *tempCrcResultPtr = NVM_CRC_STATICID_OK; /* PRQA S 2814 */ /* VL_NvM_2814 */
+        *tempCrcResultPtr = NVM_CRC_STATICID_OK; /* PRQA S 2814 */ /* VL_QAC_DerefNullPtr */
     }
     else
     {
         *tempCrcResultPtr = NVM_CRC_STATICID_NOT_OK;
     }
-#if (STD_ON == NVM_STATIC_BLOCKID)
-    NvM_BlockIdType intBlockId = NvM_CurRunning.BlockId - 1U;
+#if (STD_ON == NVM_STATIC_BLOCKID_CHK)
     /* PRQA S 2844 ++ */ /* VL_NvM_2844 */
-    if (TRUE == NVM_ISFLAGON(NvM_BlockDescriptor[intBlockId].FlagGroup, (uint16)NVM_BLOCK_DESC_STATICBLOCKIDCHECK))
+    if (TRUE
+        == NVM_ISFLAGON(
+            NvM_BlockDescriptor[NvM_CurRunning.BlockId - 1U].FlagGroup,
+            (uint16)NVM_BLOCK_DESC_STATICBLOCKIDCHECK))
     /* PRQA S 2844 -- */
     {
-        if (NvM_CurRunning.StaticId == NvM_CurRunning.BlockId)
+        if (CurRunningPtr->StaticId == CurRunningPtr->BlockId)
         {
 #if (STD_ON == NVM_DEM_E_WRONG_BLOCK_ID)
             Dem_SetEventStatus(NVM_E_WRONG_BLOCK_ID, DEM_EVENT_STATUS_PASSED);
 #endif
-            *tempStaticIdResultPtr = NVM_CRC_STATICID_OK; /* PRQA S 2814 */ /* VL_NvM_2814 */
+            *tempStaticIdResultPtr = NVM_CRC_STATICID_OK; /* PRQA S 2814 */ /* VL_QAC_DerefNullPtr */
             if (NVM_CRC_STATICID_OK == *tempCrcResultPtr)
             {
                 NvM_Module.JobStep = NVM_JOB_STEP_COPY;
@@ -1500,9 +1584,11 @@ NVM_LOCAL void NvM_InterWriteBlockSub(void)
     /** First Step */
     if (NVM_JOB_STEP_PENDING == NvM_Module.JobStep)
     {
-        if (NvM_CurRunning.RepeatMirrorCounter > 0U)
+        NvM_CurRunningType* CurRunningPtr = &NvM_CurRunning;
+
+        if (CurRunningPtr->RepeatMirrorCounter > 0U)
         {
-            if (E_OK == NvM_MemCpy(NvM_CurRunning.RamAddr, NvM_NvDataBuffer))
+            if (E_OK == NvM_MemCpy(CurRunningPtr->RamAddr, NvM_NvDataBuffer))
             {
 #if ((STD_ON == NVM_COMPRESSION_ENABLE) || (STD_ON == NVM_CIPHERING_ENABLE))
                 Std_ReturnType retVal = NvM_CompressionAndCiphering();
@@ -1519,7 +1605,7 @@ NVM_LOCAL void NvM_InterWriteBlockSub(void)
                 else
 #endif
                 {
-                    NVM_SETFLAGON(&NvM_CurRunning.AdminFlagGroup, NVM_ADMIN_WRITE_COPY_RESULT);
+                    NVM_SETFLAGON(&CurRunningPtr->AdminFlagGroup, NVM_ADMIN_WRITE_COPY_RESULT);
                 }
             }
             else
@@ -1543,29 +1629,33 @@ NVM_LOCAL void NvM_InterWriteBlockSub(void)
  */
 NVM_LOCAL void NvM_InterReadBlockSubTwo(void)
 {
+    NvM_ModuleType*           ModulePtr     = &NvM_Module;
+    const NvM_CurRunningType* CurRunningPtr = &NvM_CurRunning;
+
 #if (STD_ON == NVM_POLLING_MODE)
-    if (NVM_MEMIF_JOB_ASYNC_PENDING == NvM_Module.MemIfJobState)
+    if (NVM_MEMIF_JOB_ASYNC_PENDING == ModulePtr->MemIfJobState)
     {
-        MemIf_JobResultType retValue = MemIf_GetJobResult(NvM_CurRunning.DeviceId);
-        /* PRQA S 2814, 2844, 3120 ++ */ /* VL_NvM_2814, VL_NvM_2844, VL_QAC_MagicNum */
+        MemIf_JobResultType retValue = MemIf_GetJobResult(CurRunningPtr->DeviceId);
+
+        /* PRQA S 2814, 2844, 3120 ++ */ /* VL_QAC_DerefNullPtr, VL_NvM_2844, VL_QAC_MagicNum */
         (*NvM_MemIfAsyncFuncTable[retValue][(uint8)NVM_READ_BLOCK_SERV_ID - 6U])();
         /* PRQA S 2814, 2844, 3120 -- */
     }
 #endif
-    if (NVM_JOB_STEP_PENDING == NvM_Module.JobStep)
+    if (NVM_JOB_STEP_PENDING == ModulePtr->JobStep)
     {
 #if (NVM_API_CONFIG_CLASS_1 != NVM_API_CONFIG_CLASS)
-        if ((NVM_BLOCK_DATASET == NvM_CurRunning.ManagementType) && (NvM_CurRunning.NvNum <= NvM_CurRunning.Index))
+        if ((NVM_BLOCK_DATASET == CurRunningPtr->ManagementType) && (CurRunningPtr->NvNum <= CurRunningPtr->Index))
         {
             NVM_GetRepeatMirrorOperation();
-            NvM_Module.JobStep = NVM_JOB_STEP_READ_ROM;
+            ModulePtr->JobStep = NVM_JOB_STEP_READ_ROM;
             NvM_AtomJobReq(NVM_ATOMJOB_READROM);
         }
         else
 #endif
         {
-            NvM_Module.JobStep       = NVM_JOB_STEP_READ_1ST_NV;
-            NvM_Module.MemIfJobState = NVM_MEMIF_JOB_ASYNC_READY;
+            ModulePtr->JobStep       = NVM_JOB_STEP_READ_1ST_NV;
+            ModulePtr->MemIfJobState = NVM_MEMIF_JOB_ASYNC_READY;
         }
     }
 }
@@ -1575,41 +1665,44 @@ NVM_LOCAL void NvM_InterReadBlockSubTwo(void)
  */
 NVM_LOCAL void NvM_InterReadBlockSubOne(void)
 {
-    uint32 tempCrc;
+    uint32                    tempCrc;
+    NvM_ModuleType*           ModulePtr     = &NvM_Module;
+    const NvM_CurRunningType* CurRunningPtr = &NvM_CurRunning;
 
-    if ((NVM_JOB_STEP_CALC_CRC_READ_1ST_NV == NvM_Module.JobStep)
-        || (NVM_JOB_STEP_CALC_CRC_READ_2ND_NV == NvM_Module.JobStep))
+    if ((NVM_JOB_STEP_CALC_CRC_READ_1ST_NV == ModulePtr->JobStep)
+        || (NVM_JOB_STEP_CALC_CRC_READ_2ND_NV == ModulePtr->JobStep))
     {
-        if (NVM_CRC16 == NvM_CurRunning.CRCType)
+        if (NVM_CRC16 == CurRunningPtr->CRCType)
         {
-            tempCrc = NvM_NvDataBuffer[NvM_CurRunning.Length]; /* PRQA S 2844 */ /* VL_NvM_2844 */
+            tempCrc = NvM_NvDataBuffer[CurRunningPtr->Length]; /* PRQA S 2844 */ /* VL_NvM_2844 */
             /* PRQA S 3120 ++ */                                                 /* VL_QAC_MagicNum */
-            tempCrc |= ((uint32)NvM_NvDataBuffer[NvM_CurRunning.Length + 1U]) << 8U;
+            tempCrc |= ((uint32)NvM_NvDataBuffer[CurRunningPtr->Length + 1U]) << 8U;
             /* PRQA S 3120 -- */
         }
-        else if (NVM_CRC32 == NvM_CurRunning.CRCType)
+        else if (NVM_CRC32 == CurRunningPtr->CRCType)
         {
-            tempCrc = NvM_NvDataBuffer[NvM_CurRunning.Length];
+            tempCrc = NvM_NvDataBuffer[CurRunningPtr->Length];
             /* PRQA S 3120 ++ */ /* VL_QAC_MagicNum */
-            tempCrc |= ((uint32)NvM_NvDataBuffer[NvM_CurRunning.Length + 1U]) << 8U;
-            tempCrc |= ((uint32)NvM_NvDataBuffer[NvM_CurRunning.Length + 2U]) << 16U;
-            tempCrc |= ((uint32)NvM_NvDataBuffer[NvM_CurRunning.Length + 3U]) << 24U;
+            tempCrc |= ((uint32)NvM_NvDataBuffer[CurRunningPtr->Length + 1U]) << 8U;
+            tempCrc |= ((uint32)NvM_NvDataBuffer[CurRunningPtr->Length + 2U]) << 16U;
+            tempCrc |= ((uint32)NvM_NvDataBuffer[CurRunningPtr->Length + 3U]) << 24U;
             /* PRQA S 3120 -- */
         }
         else
         {
-            tempCrc = NvM_NvDataBuffer[NvM_CurRunning.Length];
+            tempCrc = NvM_NvDataBuffer[CurRunningPtr->Length];
         }
     }
 
     NvM_CrcStaticIdStatusType tempCrcResult      = NVM_CRC_STATICID_NO_USE;
     NvM_CrcStaticIdStatusType tempStaticIdResult = NVM_CRC_STATICID_NO_USE;
-    if (NVM_JOB_STEP_CHECK == NvM_Module.JobStep)
+
+    if (NVM_JOB_STEP_CHECK == ModulePtr->JobStep)
     {
-        if (NvM_CurRunning.StaticId == NvM_CurRunning.BlockId)
+        if (CurRunningPtr->StaticId == CurRunningPtr->BlockId)
         {
             tempStaticIdResult = NVM_CRC_STATICID_OK;
-            NvM_Module.JobStep = NVM_JOB_STEP_COPY;
+            ModulePtr->JobStep = NVM_JOB_STEP_COPY;
 #if (STD_ON == NVM_DEM_E_WRONG_BLOCK_ID)
             Dem_SetEventStatus(NVM_E_WRONG_BLOCK_ID, DEM_EVENT_STATUS_PASSED);
 #endif
@@ -1620,8 +1713,8 @@ NVM_LOCAL void NvM_InterReadBlockSubOne(void)
         }
     }
     else if (
-        (NVM_JOB_STEP_CALC_CRC_READ_1ST_NV == NvM_Module.JobStep)
-        || (NVM_JOB_STEP_CALC_CRC_READ_2ND_NV == NvM_Module.JobStep))
+        (NVM_JOB_STEP_CALC_CRC_READ_1ST_NV == ModulePtr->JobStep)
+        || (NVM_JOB_STEP_CALC_CRC_READ_2ND_NV == ModulePtr->JobStep))
     {
         NvM_InterReadBlockSub(&tempCrcResult, &tempStaticIdResult, tempCrc);
     }
@@ -1641,41 +1734,41 @@ NVM_LOCAL void NvM_InterReadBlockSubOne(void)
  */
 NVM_LOCAL void NvM_InterWriteAllSub(NvM_BlockIdType intBlockId)
 {
+    NvM_CurRunningType*            CurRunningPtr = &NvM_CurRunning;
+    const NvM_BlockDescriptorType* BlockDescriptorPtr;
+
 #if (STD_OFF == NVM_SET_RAM_BLOCK_STATUS_API)
     /** treat the current block as valid and changed */
     NvM_UpdateValidandChangeStatus(STD_ON, STD_ON);
 #else
+#if (STD_ON == NVM_BLOCK_USE_SET_RAMBLOCK_STATUS)
+    BlockDescriptorPtr = &(NvM_BlockDescriptor[CurRunningPtr->BlockId - 1U]);
     /* PRQA S 2844 ++ */ /* VL_NvM_2844 */
-    if (TRUE
-        == NVM_ISFLAGOFF(
-            NvM_BlockDescriptor[NvM_CurRunning.BlockId - 1U].FlagGroup,
-            (uint8)NVM_BLOCK_DESC_SETRAMSTATUS))
+    if (TRUE == NVM_ISFLAGOFF(BlockDescriptorPtr->FlagGroup, (uint8)NVM_BLOCK_DESC_SETRAMSTATUS))
     /* PRQA S 2844 -- */
     {
         /*treat the current block as valid and changed.*/
         NvM_UpdateValidandChangeStatus(STD_ON, STD_ON);
     }
 #endif
+#endif
+    BlockDescriptorPtr = &(NvM_BlockDescriptor[intBlockId]);
     /** if block1 need to be write,treat the block1 as valid and changed */
-    if ((1U == NvM_CurRunning.BlockId)
-        && (NvM_CurRunning.RamAddr == NvM_BlockDescriptor[intBlockId].NvmRamBlockDataAddress))
+    if ((1U == CurRunningPtr->BlockId) && (CurRunningPtr->RamAddr == BlockDescriptorPtr->NvmRamBlockDataAddress))
     {
-        NVM_SETFLAGON(&NvM_CurRunning.AdminFlagGroup, NVM_ADMIN_RAM_VALID);
-        NVM_SETFLAGON(&NvM_CurRunning.AdminFlagGroup, NVM_ADMIN_RAM_CHANGED);
+        NVM_SETFLAGON(&CurRunningPtr->AdminFlagGroup, NVM_ADMIN_RAM_VALID);
+        NVM_SETFLAGON(&CurRunningPtr->AdminFlagGroup, NVM_ADMIN_RAM_CHANGED);
     }
-
-    if ((TRUE == NVM_ISFLAGON(NvM_CurRunning.AdminFlagGroup, NVM_ADMIN_NV_REPAIR))
-        || ((TRUE == NVM_ISFLAGON(NvM_CurRunning.AdminFlagGroup, NVM_ADMIN_RAM_VALID))
-            && (TRUE == NVM_ISFLAGON(NvM_CurRunning.AdminFlagGroup, NVM_ADMIN_RAM_CHANGED))
-            && (TRUE == NVM_ISFLAGOFF(NvM_CurRunning.AdminFlagGroup, NVM_ADMIN_NV_WRPRO))
-            && (TRUE == NVM_ISFLAGOFF(NvM_CurRunning.AdminFlagGroup, NVM_ADMIN_BLOCK_LOCKED))
-            && (TRUE
-                == NVM_ISFLAGON(
-                    NvM_BlockDescriptor[intBlockId].FlagGroup,
-                    (uint16)NVM_BLOCK_DESC_SELECTBLOCKFORWRITEALL))))
+#if (NVM_SELECT_BLOCK_FOR_WRITE_ALL == STD_ON)
+    if ((TRUE == NVM_ISFLAGON(CurRunningPtr->AdminFlagGroup, NVM_ADMIN_NV_REPAIR))
+        || ((TRUE == NVM_ISFLAGON(CurRunningPtr->AdminFlagGroup, NVM_ADMIN_RAM_VALID))
+            && (TRUE == NVM_ISFLAGON(CurRunningPtr->AdminFlagGroup, NVM_ADMIN_RAM_CHANGED))
+            && (TRUE == NVM_ISFLAGOFF(CurRunningPtr->AdminFlagGroup, NVM_ADMIN_NV_WRPRO))
+            && (TRUE == NVM_ISFLAGOFF(CurRunningPtr->AdminFlagGroup, NVM_ADMIN_BLOCK_LOCKED))
+            && (TRUE == NVM_ISFLAGON(BlockDescriptorPtr->FlagGroup, (uint16)NVM_BLOCK_DESC_SELECTBLOCKFORWRITEALL))))
     {
 #if (NVM_API_CONFIG_CLASS_1 != NVM_API_CONFIG_CLASS)
-        if ((NVM_BLOCK_DATASET == NvM_CurRunning.ManagementType) && (NvM_CurRunning.NvNum <= NvM_CurRunning.Index))
+        if ((NVM_BLOCK_DATASET == CurRunningPtr->ManagementType) && (CurRunningPtr->NvNum <= CurRunningPtr->Index))
         {
             NvM_UpdateValidandChangeStatus(STD_OFF, STD_OFF);
             NvM_JobOverSetFlag(NVM_REQ_NOT_OK, NVM_CRC_REMAIN);
@@ -1688,10 +1781,11 @@ NVM_LOCAL void NvM_InterWriteAllSub(NvM_BlockIdType intBlockId)
         }
     }
     else
+#endif
     {
-        if (TRUE == NVM_ISFLAGON(NvM_CurRunning.AdminFlagGroup, NVM_ADMIN_RAM_VALID_CHANGE_STATUS_USED))
+        if (TRUE == NVM_ISFLAGON(CurRunningPtr->AdminFlagGroup, NVM_ADMIN_RAM_VALID_CHANGE_STATUS_USED))
         {
-            NVM_SETFLAGOFF(&NvM_CurRunning.AdminFlagGroup, NVM_ADMIN_RAM_CHANGED);
+            NVM_SETFLAGOFF(&CurRunningPtr->AdminFlagGroup, NVM_ADMIN_RAM_CHANGED);
         }
         NvM_JobOverSetFlag(NVM_REQ_BLOCK_SKIPPED, NVM_CRC_REMAIN);
     }
@@ -1704,18 +1798,20 @@ NVM_LOCAL void NvM_InterWriteAllSub(NvM_BlockIdType intBlockId)
  */
 NVM_LOCAL void NvM_MemCpyStep(void)
 {
-    NvM_BlockIdType blockId = NvM_CurRunning.BlockId;
+    NvM_CurRunningType* CurRunningPtr = &NvM_CurRunning;
+    NvM_BlockIdType     intBlockId    = NvM_GetIntBlockId(CurRunningPtr->BlockId);
+    NvM_AdminBlockType* AdminBlockPtr = &(NvM_AdminBlock[intBlockId]); /* PRQA S 3678 */ /* VL_NvM_3678 */
+
     /* PRQA S 2842, 2844 ++ */ /* VL_NvM_2842, VL_NvM_2844 */
-    if ((TRUE == NVM_ISFLAGON(NvM_AdminBlock[blockId - 1u].FlagGroup, NVM_ADMIN_RAMMIRROR_OR_NOT))
-        && (NvM_CurRunning.RepeatMirrorCounter > 0U))
+    if ((TRUE == NVM_ISFLAGON(AdminBlockPtr->FlagGroup, NVM_ADMIN_RAMMIRROR_OR_NOT))
+        && (CurRunningPtr->RepeatMirrorCounter > 0U))
     /* PRQA S 2842, 2844 -- */
     {
-        if (E_OK == NvM_MemCpy(NvM_NvDataBuffer, NvM_CurRunning.RamAddr))
+        if (E_OK == NvM_MemCpy(NvM_NvDataBuffer, CurRunningPtr->RamAddr))
         {
-            if (TRUE == NVM_ISFLAGON(NvM_CurRunning.AdminFlagGroup, NVM_ADMIN_REDUNDANCY_LOSS))
+            if (TRUE == NVM_ISFLAGON(CurRunningPtr->AdminFlagGroup, NVM_ADMIN_REDUNDANCY_LOSS))
             {
-                NVM_SETFLAGON(&NvM_CurRunning.AdminFlagGroup, NVM_ADMIN_NV_REPAIR);
-                NvM_RepireDataSave(NvM_CurRunning.RamAddr, NvM_CurRunning.Length);
+                NVM_SETFLAGON(&CurRunningPtr->AdminFlagGroup, NVM_ADMIN_NV_REPAIR);
 #if (STD_ON == NVM_DEM_E_LOSS_OF_REDUNDANCY)
                 Dem_SetEventStatus(NVM_E_LOSS_OF_REDUNDANCY, DEM_EVENT_STATUS_FAILED);
 #endif
@@ -1726,7 +1822,7 @@ NVM_LOCAL void NvM_MemCpyStep(void)
             Dem_SetEventStatus(NVM_E_REQ_FAILED, DEM_EVENT_STATUS_PASSED);
 #endif
         }
-        else if (NvM_CurRunning.RepeatMirrorCounter == 0U)
+        else if (CurRunningPtr->RepeatMirrorCounter == 0U)
         {
             NvM_UpdateValidandChangeStatus(STD_OFF, STD_OFF);
             NvM_JobOverSetFlag(NVM_REQ_NOT_OK, NVM_CRC_REMAIN);
@@ -1740,15 +1836,14 @@ NVM_LOCAL void NvM_MemCpyStep(void)
         }
     }
     /* PRQA S 2842, 2844 ++ */ /* VL_NvM_2842, VL_NvM_2844 */
-    else if (TRUE == NVM_ISFLAGOFF(NvM_AdminBlock[blockId - 1u].FlagGroup, NVM_ADMIN_RAMMIRROR_OR_NOT))
+    else if (TRUE == NVM_ISFLAGOFF(AdminBlockPtr->FlagGroup, NVM_ADMIN_RAMMIRROR_OR_NOT))
     /* PRQA S 2842, 2844 -- */
     {
-        if (E_OK == NvM_MemCpy(NvM_NvDataBuffer, NvM_CurRunning.RamAddr))
+        if (E_OK == NvM_MemCpy(NvM_NvDataBuffer, CurRunningPtr->RamAddr))
         {
-            if (TRUE == NVM_ISFLAGON(NvM_CurRunning.AdminFlagGroup, NVM_ADMIN_REDUNDANCY_LOSS))
+            if (TRUE == NVM_ISFLAGON(CurRunningPtr->AdminFlagGroup, NVM_ADMIN_REDUNDANCY_LOSS))
             {
-                NVM_SETFLAGON(&NvM_CurRunning.AdminFlagGroup, NVM_ADMIN_NV_REPAIR);
-                NvM_RepireDataSave(NvM_CurRunning.RamAddr, NvM_CurRunning.Length);
+                NVM_SETFLAGON(&CurRunningPtr->AdminFlagGroup, NVM_ADMIN_NV_REPAIR);
 #if (STD_ON == NVM_DEM_E_LOSS_OF_REDUNDANCY)
                 Dem_SetEventStatus(NVM_E_LOSS_OF_REDUNDANCY, DEM_EVENT_STATUS_FAILED);
 #endif
@@ -1770,22 +1865,24 @@ NVM_LOCAL void NvM_MemCpyStep(void)
  */
 NVM_LOCAL void NvM_SuboneInterWriteVerification(const uint8* buffPtr)
 {
-    Std_ReturnType tempStatus = E_OK;
+    Std_ReturnType      tempStatus       = E_OK;
+    NvM_CurRunningType* CurRunningPtr    = &NvM_CurRunning;
+    uint16              VerificationSize = CurRunningPtr->VerificationSize;
 
-    for (uint16 iLoop = 0u; iLoop < NvM_CurRunning.VerificationSize; ++iLoop)
+    for (uint16 iLoop = 0u; iLoop < VerificationSize; ++iLoop)
     {
         /* PRQA S 2824, 2844 ++ */ /* VL_NvM_2824, VL_NvM_2844 */
-        if (buffPtr[NvM_CurRunning.VerificationCounter + iLoop]
-            != NvM_NvDataBuffer[iLoop + NvM_CurRunning.VerificationCounter])
+        if (buffPtr[CurRunningPtr->VerificationCounter + iLoop]
+            != NvM_NvDataBuffer[iLoop + CurRunningPtr->VerificationCounter])
         /* PRQA S 2824, 2844 -- */
         {
-            NVM_SETFLAGOFF(&NvM_CurRunning.AdminFlagGroup, NVM_ADMIN_CRC_VALID);
+            NVM_SETFLAGOFF(&CurRunningPtr->AdminFlagGroup, NVM_ADMIN_CRC_VALID);
             tempStatus                         = E_NOT_OK;
-            NvM_CurRunning.VerificationCounter = 0u;
-            if (NvM_CurRunning.WriteTimesCounter > 0U)
+            CurRunningPtr->VerificationCounter = 0u;
+            if (CurRunningPtr->WriteTimesCounter > 0U)
             {
                 NvM_Module.JobStep = NVM_JOB_STEP_PENDING;
-                NVM_SETFLAGON(&NvM_CurRunning.AdminFlagGroup, NVM_ADMIN_WRITE_COPY_RESULT);
+                NVM_SETFLAGON(&CurRunningPtr->AdminFlagGroup, NVM_ADMIN_WRITE_COPY_RESULT);
                 NvM_Module.MemIfJobState = NVM_MEMIF_JOB_IDLE;
                 --NvM_AtomJob.Count;
             }
@@ -1802,7 +1899,7 @@ NVM_LOCAL void NvM_SuboneInterWriteVerification(const uint8* buffPtr)
     }
     if (E_OK == tempStatus)
     {
-        NvM_CurRunning.VerificationCounter = NvM_CurRunning.VerificationCounter + NvM_CurRunning.VerificationSize;
+        CurRunningPtr->VerificationCounter = CurRunningPtr->VerificationCounter + CurRunningPtr->VerificationSize;
     }
 }
 
@@ -1812,21 +1909,23 @@ NVM_LOCAL void NvM_SuboneInterWriteVerification(const uint8* buffPtr)
  */
 NVM_LOCAL void NvM_SubtwoInterWriteVerification(const uint8* buffPtr)
 {
-    boolean needtoReset = TRUE;
+    boolean             needtoReset      = TRUE;
+    NvM_CurRunningType* CurRunningPtr    = &NvM_CurRunning;
+    uint16              bufferProcLength = CurRunningPtr->Length - CurRunningPtr->VerificationCounter;
 
-    for (uint16 iLoop = 0u; iLoop < (NvM_CurRunning.Length - NvM_CurRunning.VerificationCounter); ++iLoop)
+    for (uint16 iLoop = 0u; iLoop < bufferProcLength; ++iLoop)
     {
         /* PRQA S 2824, 2844 ++ */ /* VL_NvM_2824, VL_NvM_2844 */
-        if (buffPtr[NvM_CurRunning.VerificationCounter + iLoop]
-            != NvM_NvDataBuffer[iLoop + NvM_CurRunning.VerificationCounter])
+        if (buffPtr[CurRunningPtr->VerificationCounter + iLoop]
+            != NvM_NvDataBuffer[iLoop + CurRunningPtr->VerificationCounter])
         /* PRQA S 2824, 2844 -- */
         {
-            NVM_SETFLAGOFF(&NvM_CurRunning.AdminFlagGroup, NVM_ADMIN_CRC_VALID);
-            if (NvM_CurRunning.WriteTimesCounter > 0U)
+            NVM_SETFLAGOFF(&CurRunningPtr->AdminFlagGroup, NVM_ADMIN_CRC_VALID);
+            if (CurRunningPtr->WriteTimesCounter > 0U)
             {
                 NvM_Module.JobStep = NVM_JOB_STEP_PENDING;
                 --NvM_AtomJob.Count;
-                NVM_SETFLAGON(&NvM_CurRunning.AdminFlagGroup, NVM_ADMIN_WRITE_COPY_RESULT);
+                NVM_SETFLAGON(&CurRunningPtr->AdminFlagGroup, NVM_ADMIN_WRITE_COPY_RESULT);
                 NvM_Module.MemIfJobState = NVM_MEMIF_JOB_IDLE;
             }
             else
@@ -1842,11 +1941,11 @@ NVM_LOCAL void NvM_SubtwoInterWriteVerification(const uint8* buffPtr)
         }
     }
 
-    NvM_CurRunning.VerificationCounter = 0u;
+    CurRunningPtr->VerificationCounter = 0u;
     if (TRUE == needtoReset)
     {
         /** Verify is ok, reset the counter */
-        NvM_CurRunning.VerificationSize = 0u;
+        CurRunningPtr->VerificationSize = 0u;
     }
 }
 #endif
@@ -1860,40 +1959,44 @@ NVM_LOCAL void NvM_SubtwoInterWriteVerification(const uint8* buffPtr)
 NVM_LOCAL void
     NvM_ReadErrorHandleRedundant(NvM_CrcStaticIdStatusType CRCResult, NvM_CrcStaticIdStatusType StaticIDResult)
 {
-    NvM_BlockIdType intBlockId = NvM_CurRunning.BlockId - 1U;
-    if ((NVM_JOB_STEP_CALC_CRC_READ_1ST_NV == NvM_Module.JobStep) || (NVM_JOB_STEP_CHECK == NvM_Module.JobStep))
+    NvM_ModuleType*                ModulePtr          = &NvM_Module;
+    NvM_CurRunningType*            CurRunningPtr      = &NvM_CurRunning;
+    NvM_BlockIdType                intBlockId         = NvM_GetIntBlockId(CurRunningPtr->BlockId);
+    const NvM_BlockDescriptorType* BlockDescriptorPtr = &(NvM_BlockDescriptor[intBlockId]);
+
+    if ((NVM_JOB_STEP_CALC_CRC_READ_1ST_NV == ModulePtr->JobStep) || (NVM_JOB_STEP_CHECK == ModulePtr->JobStep))
     {
-        if (NvM_CurRunning.ReadRetryCounter > 0U)
+        if (CurRunningPtr->ReadRetryCounter > 0U)
         {
-            --NvM_CurRunning.ReadRetryCounter;
-            NvM_Module.JobStep       = NVM_JOB_STEP_READ_1ST_NV;
-            NvM_Module.MemIfJobState = NVM_MEMIF_JOB_ASYNC_READY;
+            --CurRunningPtr->ReadRetryCounter;
+            ModulePtr->JobStep       = NVM_JOB_STEP_READ_1ST_NV;
+            ModulePtr->MemIfJobState = NVM_MEMIF_JOB_ASYNC_READY;
         }
         else
         {
             /* PRQA S 2844 ++ */ /* VL_NvM_2844 */
-            NvM_CurRunning.ReadRetryCounter = NvM_BlockDescriptor[intBlockId].NvMMaxNumOfReadRetries;
+            CurRunningPtr->ReadRetryCounter = BlockDescriptorPtr->NvMMaxNumOfReadRetries;
             /* PRQA S 2844 -- */
             /** Repeat time is N+1 via code structure */
-            NvM_Module.JobStep       = NVM_JOB_STEP_READ_2ND_NV;
-            NvM_Module.MemIfJobState = NVM_MEMIF_JOB_ASYNC_READY;
-            NvM_CurRunning.Index     = 1u;
+            ModulePtr->JobStep       = NVM_JOB_STEP_READ_2ND_NV;
+            ModulePtr->MemIfJobState = NVM_MEMIF_JOB_ASYNC_READY;
+            CurRunningPtr->Index     = 1u;
         }
     }
     else
     {
-        if (NvM_CurRunning.ReadRetryCounter > 0U)
+        if (CurRunningPtr->ReadRetryCounter > 0U)
         {
-            --NvM_CurRunning.ReadRetryCounter;
-            NvM_Module.JobStep       = NVM_JOB_STEP_READ_2ND_NV;
-            NvM_Module.MemIfJobState = NVM_MEMIF_JOB_ASYNC_READY;
+            --CurRunningPtr->ReadRetryCounter;
+            ModulePtr->JobStep       = NVM_JOB_STEP_READ_2ND_NV;
+            ModulePtr->MemIfJobState = NVM_MEMIF_JOB_ASYNC_READY;
         }
         else if (
-            (NULL_PTR != NvM_BlockDescriptor[intBlockId].NvmRomBlockDataAddress)
-            || (NULL_PTR != NvM_BlockDescriptor[intBlockId].NvmInitBlockCallback))
+            (NULL_PTR != BlockDescriptorPtr->NvmRomBlockDataAddress)
+            || (NULL_PTR != BlockDescriptorPtr->NvmInitBlockCallback))
         {
             NvM_UpdateValidandChangeStatus(STD_OFF, STD_OFF);
-            NvM_CurRunning.ESingleReqResult = NVM_REQ_INTEGRITY_FAILED;
+            CurRunningPtr->ESingleReqResult = NVM_REQ_INTEGRITY_FAILED;
 #if (                                                                        \
     (STD_ON == NVM_DEM_E_INTEGRITY_FAILED) || (STD_ON == NVM_DEM_E_HARDWARE) \
     || (STD_ON == NVM_DEM_E_LOSS_OF_REDUNDANCY))
@@ -1907,7 +2010,7 @@ NVM_LOCAL void
 #endif
 #if (STD_ON == NVM_DEM_E_LOSS_OF_REDUNDANCY)
                 /** Recovery fails if the result is fail */
-                if (TRUE == NVM_ISFLAGON(NvM_CurRunning.AdminFlagGroup, NVM_ADMIN_REDUNDANCY_LOSS))
+                if (TRUE == NVM_ISFLAGON(CurRunningPtr->AdminFlagGroup, NVM_ADMIN_REDUNDANCY_LOSS))
                 {
                     Dem_SetEventStatus(NVM_E_LOSS_OF_REDUNDANCY, DEM_EVENT_STATUS_FAILED);
                 }
@@ -1925,7 +2028,7 @@ NVM_LOCAL void
             NVM_PARAM_UNUSED(StaticIDResult);
 #endif
             NVM_GetRepeatMirrorOperation();
-            NvM_Module.JobStep = NVM_JOB_STEP_READ_ROM;
+            ModulePtr->JobStep = NVM_JOB_STEP_READ_ROM;
             NvM_AtomJobReq(NVM_ATOMJOB_READROM);
         }
         else
@@ -1960,18 +2063,21 @@ NVM_LOCAL void
 /* PRQA S 6030 ++ */ /* VL_MTR_NvM_STMIF */
 NVM_LOCAL void NvM_ReadErrorHandle(NvM_CrcStaticIdStatusType CRCResult, NvM_CrcStaticIdStatusType StaticIDResult)
 {
-    if ((NVM_JOB_STEP_CHECK == NvM_Module.JobStep) || (NVM_JOB_STEP_CALC_CRC_READ_1ST_NV == NvM_Module.JobStep)
-        || (NVM_JOB_STEP_CALC_CRC_READ_2ND_NV == NvM_Module.JobStep))
+    NvM_ModuleType*     ModulePtr     = &NvM_Module;
+    NvM_CurRunningType* CurRunningPtr = &NvM_CurRunning;
+
+    if ((NVM_JOB_STEP_CHECK == ModulePtr->JobStep) || (NVM_JOB_STEP_CALC_CRC_READ_1ST_NV == ModulePtr->JobStep)
+        || (NVM_JOB_STEP_CALC_CRC_READ_2ND_NV == ModulePtr->JobStep))
     {
 #if (NVM_API_CONFIG_CLASS_1 != NVM_API_CONFIG_CLASS)
         /** DATASET Block Type */
-        if (NVM_BLOCK_DATASET == NvM_CurRunning.ManagementType)
+        if (NVM_BLOCK_DATASET == CurRunningPtr->ManagementType)
         {
-            if (NvM_CurRunning.ReadRetryCounter > 0U)
+            if (CurRunningPtr->ReadRetryCounter > 0U)
             {
-                --NvM_CurRunning.ReadRetryCounter;
-                NvM_Module.JobStep       = NVM_JOB_STEP_READ_1ST_NV;
-                NvM_Module.MemIfJobState = NVM_MEMIF_JOB_ASYNC_READY;
+                --CurRunningPtr->ReadRetryCounter;
+                ModulePtr->JobStep       = NVM_JOB_STEP_READ_1ST_NV;
+                ModulePtr->MemIfJobState = NVM_MEMIF_JOB_ASYNC_READY;
             }
             else
             {
@@ -1997,22 +2103,24 @@ NVM_LOCAL void NvM_ReadErrorHandle(NvM_CrcStaticIdStatusType CRCResult, NvM_CrcS
             }
         }
         /** NATIVE Block Type */
-        else if (NVM_BLOCK_NATIVE == NvM_CurRunning.ManagementType)
+        else if (NVM_BLOCK_NATIVE == CurRunningPtr->ManagementType)
 #else
-        if (NVM_BLOCK_NATIVE == NvM_CurRunning.ManagementType)
+        if (NVM_BLOCK_NATIVE == CurRunningPtr->ManagementType)
 #endif
         {
-            NvM_BlockIdType intBlockId = NvM_CurRunning.BlockId - 1U;
-            if (NvM_CurRunning.ReadRetryCounter > 0U)
+            NvM_BlockIdType                intBlockId         = NvM_GetIntBlockId(CurRunningPtr->BlockId);
+            const NvM_BlockDescriptorType* BlockDescriptorPtr = &(NvM_BlockDescriptor[intBlockId]);
+
+            if (CurRunningPtr->ReadRetryCounter > 0U)
             {
-                --NvM_CurRunning.ReadRetryCounter;
-                NvM_Module.JobStep       = NVM_JOB_STEP_READ_1ST_NV;
-                NvM_Module.MemIfJobState = NVM_MEMIF_JOB_ASYNC_READY;
+                --CurRunningPtr->ReadRetryCounter;
+                ModulePtr->JobStep       = NVM_JOB_STEP_READ_1ST_NV;
+                ModulePtr->MemIfJobState = NVM_MEMIF_JOB_ASYNC_READY;
             }
             else
             {
                 NvM_UpdateValidandChangeStatus(STD_OFF, STD_OFF);
-                NvM_CurRunning.ESingleReqResult = NVM_REQ_INTEGRITY_FAILED;
+                CurRunningPtr->ESingleReqResult = NVM_REQ_INTEGRITY_FAILED;
 #if ((STD_ON == NVM_DEM_E_INTEGRITY_FAILED) || (STD_ON == NVM_DEM_E_HARDWARE))
                 if (NVM_CRC_STATICID_NOT_OK == CRCResult)
                 {
@@ -2031,12 +2139,12 @@ NVM_LOCAL void NvM_ReadErrorHandle(NvM_CrcStaticIdStatusType CRCResult, NvM_CrcS
                 }
 #endif
                 /* PRQA S 2844 ++ */ /* VL_NvM_2844 */
-                if ((NULL_PTR != NvM_BlockDescriptor[intBlockId].NvmRomBlockDataAddress)
-                    || (NULL_PTR != NvM_BlockDescriptor[intBlockId].NvmInitBlockCallback))
+                if ((NULL_PTR != BlockDescriptorPtr->NvmRomBlockDataAddress)
+                    || (NULL_PTR != BlockDescriptorPtr->NvmInitBlockCallback))
                 /* PRQA S 2844 -- */
                 {
                     NVM_GetRepeatMirrorOperation();
-                    NvM_Module.JobStep = NVM_JOB_STEP_READ_ROM;
+                    ModulePtr->JobStep = NVM_JOB_STEP_READ_ROM;
                     NvM_AtomJobReq(NVM_ATOMJOB_READROM);
                 }
                 else
@@ -2054,23 +2162,6 @@ NVM_LOCAL void NvM_ReadErrorHandle(NvM_CrcStaticIdStatusType CRCResult, NvM_CrcS
 }
 /* PRQA S 6030 -- */
 
-/**
- * @brief     Copy the data of the source address to the repair buffer in the Ram area
- */
-NVM_LOCAL void NvM_RepireDataSave(const uint8* DataSourceAddress, uint16 Length)
-{
-    /* PRQA S 2844 ++ */ /* VL_NvM_2844 */
-    NvM_BlockIdType repairIndex = NvM_BlockDescriptor[NvM_CurRunning.BlockId - 1U].RepairIndex;
-    uint8*          destPtr     = &NVM_TemporaryRAMForRepaire[repairIndex][0u];
-    /* PRQA S 2844 -- */
-    for (uint16 iLoop = 0u; iLoop < Length; ++iLoop)
-    {
-        /* PRQA S 2824, 2844 ++ */ /* VL_NvM_2824, VL_NvM_2844 */
-        destPtr[iLoop] = DataSourceAddress[iLoop];
-        /* PRQA S 2824, 2844 -- */
-    }
-}
-
 #if ((STD_ON == NVM_COMPRESSION_ENABLE) || (STD_ON == NVM_CIPHERING_ENABLE))
 /**
  * @brief     If the compression function is enabled, the corresponding compression callout interface is invoked. If the
@@ -2080,27 +2171,32 @@ NVM_LOCAL void NvM_RepireDataSave(const uint8* DataSourceAddress, uint16 Length)
  */
 NVM_LOCAL Std_ReturnType NvM_CompressionAndCiphering(void)
 {
-    Std_ReturnType  retVal     = E_OK;
-    NvM_BlockIdType intBlockId = (NvM_CurRunning.BlockId >= 1u) ? (NvM_CurRunning.BlockId - 1U) : 0u;
-#if (STD_ON == NVM_CIPHERING_ENABLE)
-    uint32 cipheringOutLength = NVM_BLOCKMAXLENGTH;
-#endif
+    Std_ReturnType                 retVal             = E_OK;
+    NvM_CurRunningType*            CurRunningPtr      = &NvM_CurRunning;
+    NvM_BlockIdType                intBlockId         = NvM_GetIntBlockId(CurRunningPtr->BlockId);
+    const NvM_BlockDescriptorType* BlockDescriptorPtr = &(NvM_BlockDescriptor[intBlockId]);
+
 #if (STD_ON == NVM_COMPRESSION_ENABLE)
-    uint8  NvM_CompressionBuffer[NVM_BLOCKMAXLENGTH];
-    uint16 compressionOutLength = NVM_BLOCKMAXLENGTH;
+    boolean copyFlag = FALSE;
+    uint8   NvM_CompressionBuffer[NVM_BLOCKMAXLENGTH];
+    uint16  compressionOutLength = BlockDescriptorPtr->NvmNvBlockLength;
 
     /** NvM_CompressionCallout :reserved
     Param1[in]: NvM_NvDataBuffer :Nv data ptr in
     Param2[in]: NvM_CurRunning.Length :Nv data length in
     Param3[out]: NvM_CompressionBuffer :Nv data ptr out
     Param4[out]: compressionOutLength :Nv data length out */
-    if (TRUE == NVM_ISFLAGON(NvM_BlockDescriptor[intBlockId].FlagGroup, (uint16)NVM_BLOCK_DESC_BLOCKUSECOMPRESSION))
+    if (TRUE == NVM_ISFLAGON(BlockDescriptorPtr->FlagGroup, (uint16)NVM_BLOCK_DESC_BLOCKUSECOMPRESSION))
     {
         retVal = NvM_CompressionCallout(
             NvM_NvDataBuffer,
-            NvM_CurRunning.Length,
+            CurRunningPtr->Length,
             NvM_CompressionBuffer,
             &compressionOutLength);
+        if (E_OK == retVal)
+        {
+            copyFlag = TRUE;
+        }
     }
     /** do not deal NvM_CurRunning.Length,because read length is get from configuration not get from calculate, so
      * now Compression not recommended */
@@ -2108,18 +2204,20 @@ NVM_LOCAL Std_ReturnType NvM_CompressionAndCiphering(void)
 #endif
     {
 #if (STD_ON == NVM_CIPHERING_ENABLE)
-        if (NvM_BlockDescriptor[intBlockId].NvMBlockCipheringRef != NULL_PTR) /* PRQA S 2844 */ /* VL_NvM_2844 */
+        const NvM_BlockCipheringType* blockCipherPtr = BlockDescriptorPtr->NvMBlockCipheringRef;
+        if (blockCipherPtr != NULL_PTR) /* PRQA S 2844 */ /* VL_NvM_2844 */
         {
-            /* PRQA S 2814 ++ */ /* VL_NvM_2814 */
+            uint32 cipheringOutLength = (uint32)blockCipherPtr->NvMNvBlockNVRAMDataLength;
+            /* PRQA S 2814 ++ */ /* VL_QAC_DerefNullPtr */
             retVal = Csm_Encrypt(
-                NvM_BlockDescriptor[intBlockId].NvMBlockCipheringRef->NvMCsmEncryptJobId,
+                blockCipherPtr->NvMCsmEncryptJobId,
                 CRYPTO_OPERATIONMODE_SINGLECALL,
 #if (STD_ON == NVM_COMPRESSION_ENABLE)
                 NvM_CompressionBuffer,
                 compressionOutLength,
 #else
                 NvM_NvDataBuffer,
-                NvM_CurRunning.Length,
+                CurRunningPtr->Length,
 #endif
                 NvM_CipheringBuffer,
                 &cipheringOutLength);
@@ -2127,16 +2225,12 @@ NVM_LOCAL Std_ReturnType NvM_CompressionAndCiphering(void)
             if (retVal == E_OK)
             {
                 /** check length */
-                if (cipheringOutLength
-                    == NvM_BlockDescriptor[intBlockId].NvMBlockCipheringRef->NvMNvBlockNVRAMDataLength)
+                if (cipheringOutLength == blockCipherPtr->NvMNvBlockNVRAMDataLength)
                 {
                     /** copy Ciphering data*/
-                    for (uint16 iLoop = 0u; iLoop < cipheringOutLength; ++iLoop)
-                    {
-                        NvM_NvDataBuffer[iLoop] = NvM_CipheringBuffer[iLoop]; /* PRQA S 2844 */ /* VL_NvM_2844 */
-                    }
+                    NvM_InterMemCpy(NvM_NvDataBuffer, NvM_CipheringBuffer, cipheringOutLength);
                     /** update length */
-                    NvM_CurRunning.Length = (uint16)cipheringOutLength;
+                    CurRunningPtr->Length = (uint16)cipheringOutLength;
                 }
                 else
                 {
@@ -2148,10 +2242,10 @@ NVM_LOCAL Std_ReturnType NvM_CompressionAndCiphering(void)
             }
             else if (CRYPTO_E_BUSY == retVal)
             {
-                if (NvM_CurRunning.NvMCsmRetryCounter > 0u)
+                if (CurRunningPtr->NvMCsmRetryCounter > 0u)
                 {
                     /** Repeat again */
-                    --NvM_CurRunning.NvMCsmRetryCounter;
+                    --CurRunningPtr->NvMCsmRetryCounter;
                 }
                 else
                 {
@@ -2170,10 +2264,12 @@ NVM_LOCAL Std_ReturnType NvM_CompressionAndCiphering(void)
         }
 
 #else
+#if (STD_ON == NVM_COMPRESSION_ENABLE)
         /** copy Compression data */
-        for (uint16 iLoop = 0; iLoop < compressionOutLength; ++iLoop)
+        if (copyFlag == TRUE)
+#endif
         {
-            NvM_NvDataBuffer[iLoop] = NvM_CompressionBuffer[iLoop];
+            NvM_InterMemCpy(NvM_NvDataBuffer, NvM_CompressionBuffer, compressionOutLength);
         }
 #endif
     }
@@ -2187,28 +2283,32 @@ NVM_LOCAL Std_ReturnType NvM_CompressionAndCiphering(void)
  */
 NVM_LOCAL Std_ReturnType NvM_DecompressionAndDeciphering(void)
 {
-    Std_ReturnType  retVal     = E_OK;
-    NvM_BlockIdType intBlockId = (NvM_CurRunning.BlockId >= 1u) ? (NvM_CurRunning.BlockId - 1U) : 0u;
-#if (STD_ON == NVM_CIPHERING_ENABLE)
-    uint8  NvM_DecipheringBuffer[NVM_BLOCKMAXLENGTH];
-    uint32 decipheringOutLength = NVM_BLOCKMAXLENGTH;
-#endif
+    Std_ReturnType                 retVal             = E_OK;
+    NvM_CurRunningType*            CurRunningPtr      = &NvM_CurRunning;
+    NvM_BlockIdType                intBlockId         = NvM_GetIntBlockId(CurRunningPtr->BlockId);
+    const NvM_BlockDescriptorType* BlockDescriptorPtr = &(NvM_BlockDescriptor[intBlockId]);
+
 #if (STD_ON == NVM_COMPRESSION_ENABLE)
-    uint8  NvM_DecompressionBuffer[NVM_BLOCKMAXLENGTH];
-    uint16 decompressionOutLength = NVM_BLOCKMAXLENGTH;
+    boolean copyFlag = FALSE;
+    uint8   NvM_DecompressionBuffer[NVM_BLOCKMAXLENGTH];
+    uint16  decompressionOutLength = BlockDescriptorPtr->NvmNvBlockLength;
 
     /** NvM_DecompressionCallout :reserved
     Param1[in]: NvM_NvDataBuffer :Nv data ptr in
     Param2[in]: NvM_CurRunning.Length :Nv data length in
     Param3[out]: NvM_DecompressionBuffer :Nv data ptr out
     Param4[out]: decompressionOutLength :Nv data length out */
-    if (TRUE == NVM_ISFLAGON(NvM_BlockDescriptor[intBlockId].FlagGroup, (uint16)NVM_BLOCK_DESC_BLOCKUSECOMPRESSION))
+    if (TRUE == NVM_ISFLAGON(BlockDescriptorPtr->FlagGroup, (uint16)NVM_BLOCK_DESC_BLOCKUSECOMPRESSION))
     {
         retVal = NvM_DecompressionCallout(
             NvM_NvDataBuffer,
-            NvM_CurRunning.Length,
+            CurRunningPtr->Length,
             NvM_DecompressionBuffer,
             &decompressionOutLength);
+        if (E_OK == retVal)
+        {
+            copyFlag = TRUE;
+        }
     }
     /** do not deal NvM_CurRunning.Length,because read length is get from configuration not get from calculate, so
      * now decompression not recommended */
@@ -2216,18 +2316,23 @@ NVM_LOCAL Std_ReturnType NvM_DecompressionAndDeciphering(void)
 #endif
     {
 #if (STD_ON == NVM_CIPHERING_ENABLE)
-        if (NvM_BlockDescriptor[intBlockId].NvMBlockCipheringRef != NULL_PTR) /* PRQA S 2844 */ /* VL_NvM_2844 */
+        const NvM_BlockCipheringType* blockCipherPtr = BlockDescriptorPtr->NvMBlockCipheringRef;
+
+        if (blockCipherPtr != NULL_PTR) /* PRQA S 2844 */ /* VL_NvM_2844 */
         {
-            /* PRQA S 2814 ++ */ /* VL_NvM_2814 */
+            uint8  NvM_DecipheringBuffer[NVM_BLOCKMAXLENGTH];
+            uint32 decipheringOutLength = blockCipherPtr->NvMNvBlockNVRAMDataLength;
+
+            /* PRQA S 2814 ++ */ /* VL_QAC_DerefNullPtr */
             retVal = Csm_Decrypt(
-                NvM_BlockDescriptor[intBlockId].NvMBlockCipheringRef->NvMCsmDecryptJobId,
+                blockCipherPtr->NvMCsmDecryptJobId,
                 CRYPTO_OPERATIONMODE_SINGLECALL,
 #if (STD_ON == NVM_COMPRESSION_ENABLE)
                 NvM_DecompressionBuffer,
                 decompressionOutLength,
 #else
                 NvM_NvDataBuffer,
-                NvM_CurRunning.Length,
+                CurRunningPtr->Length,
 #endif
                 NvM_DecipheringBuffer,
                 &decipheringOutLength);
@@ -2235,15 +2340,12 @@ NVM_LOCAL Std_ReturnType NvM_DecompressionAndDeciphering(void)
             if (retVal == E_OK)
             {
                 /** check length */
-                if (decipheringOutLength == NvM_BlockDescriptor[intBlockId].NvmNvBlockLength)
+                if (decipheringOutLength == BlockDescriptorPtr->NvmNvBlockLength)
                 {
                     /** copy Deciphering data */
-                    for (uint16 iLoop = 0u; iLoop < decipheringOutLength; ++iLoop)
-                    {
-                        NvM_NvDataBuffer[iLoop] = NvM_DecipheringBuffer[iLoop]; /* PRQA S 2844 */ /* VL_NvM_2844 */
-                    }
+                    NvM_InterMemCpy(NvM_NvDataBuffer, NvM_DecipheringBuffer, decipheringOutLength);
                     /** update length */
-                    NvM_CurRunning.Length = (uint16)decipheringOutLength;
+                    CurRunningPtr->Length = (uint16)decipheringOutLength;
                 }
                 else
                 {
@@ -2255,10 +2357,10 @@ NVM_LOCAL Std_ReturnType NvM_DecompressionAndDeciphering(void)
             }
             else if (CRYPTO_E_BUSY == retVal)
             {
-                if (NvM_CurRunning.NvMCsmRetryCounter > 0u)
+                if (CurRunningPtr->NvMCsmRetryCounter > 0u)
                 {
                     /** Repeat again */
-                    --NvM_CurRunning.NvMCsmRetryCounter;
+                    --CurRunningPtr->NvMCsmRetryCounter;
                 }
                 else
                 {
@@ -2277,10 +2379,12 @@ NVM_LOCAL Std_ReturnType NvM_DecompressionAndDeciphering(void)
         }
 
 #else
+#if (STD_ON == NVM_COMPRESSION_ENABLE)
         /** copy Decompression data */
-        for (uint16 iLoop = 0; iLoop < decompressionOutLength; ++iLoop)
+        if (copyFlag == TRUE)
+#endif
         {
-            NvM_NvDataBuffer[iLoop] = NvM_DecompressionBuffer[iLoop];
+            NvM_InterMemCpy(NvM_NvDataBuffer, NvM_DecompressionBuffer, decompressionOutLength);
         }
 #endif
     }
@@ -2298,60 +2402,57 @@ NVM_LOCAL Std_ReturnType NvM_MemCpy(const uint8* SrcAddrPtr, uint8* DstAddrPtr)
 
     if ((SrcAddrPtr != NULL_PTR) && (DstAddrPtr != NULL_PTR))
     {
-        NvM_BlockIdType intBlockId = NvM_CurRunning.BlockId - 1U;
+        NvM_CurRunningType* CurRunningPtr = &NvM_CurRunning;
+        NvM_BlockIdType     intBlockId    = NvM_GetIntBlockId(CurRunningPtr->BlockId);
+        NvM_AdminBlockType* AdminBlockPtr = &(NvM_AdminBlock[intBlockId]);
+
         /* PRQA S 2844 ++ */ /* VL_NvM_2844 */
-        if (TRUE == NVM_ISFLAGON(NvM_AdminBlock[intBlockId].FlagGroup, NVM_ADMIN_RAMMIRROR_OR_NOT))
+        if (TRUE == NVM_ISFLAGON(AdminBlockPtr->FlagGroup, NVM_ADMIN_RAMMIRROR_OR_NOT))
         /* PRQA S 2844 -- */
         {
-            --NvM_CurRunning.RepeatMirrorCounter;
+            --CurRunningPtr->RepeatMirrorCounter;
 #if (STD_ON == NVM_SET_RAM_BLOCK_STATUS_API)
-            if ((NVM_WRITE_BLOCK_SERV_ID == NvM_CurRunning.ServiceId)
-                || (NVM_WRITE_PRAM_BLOCK_SERV_ID == NvM_CurRunning.ServiceId)
-                || (NVM_WRITE_ALL_SERV_ID == NvM_CurRunning.ServiceId)
-                || (NVM_SET_RAM_BLOCK_STATUS_SERV_ID == NvM_CurRunning.ServiceId)
-                || (NVM_VALIDATE_ALL_SERV_ID == NvM_CurRunning.ServiceId))
+            if ((NVM_WRITE_BLOCK_SERV_ID == CurRunningPtr->ServiceId)
+                || (NVM_WRITE_PRAM_BLOCK_SERV_ID == CurRunningPtr->ServiceId)
+                || (NVM_WRITE_ALL_SERV_ID == CurRunningPtr->ServiceId)
+                || (NVM_SET_RAM_BLOCK_STATUS_SERV_ID == CurRunningPtr->ServiceId)
+                || (NVM_VALIDATE_ALL_SERV_ID == CurRunningPtr->ServiceId))
 #else
-            if ((NVM_WRITE_BLOCK_SERV_ID == NvM_CurRunning.ServiceId)
-                || (NVM_WRITE_PRAM_BLOCK_SERV_ID == NvM_CurRunning.ServiceId)
-                || (NVM_WRITE_ALL_SERV_ID == NvM_CurRunning.ServiceId))
+            if ((NVM_WRITE_BLOCK_SERV_ID == CurRunningPtr->ServiceId)
+                || (NVM_WRITE_PRAM_BLOCK_SERV_ID == CurRunningPtr->ServiceId)
+                || (NVM_WRITE_ALL_SERV_ID == CurRunningPtr->ServiceId))
 #endif
             {
                 retVal = NvM_MemCpySub(SrcAddrPtr, DstAddrPtr);
             }
             else if (
-                (NVM_READ_BLOCK_SERV_ID == NvM_CurRunning.ServiceId)
-                || (NVM_READ_ALL_SERV_ID == NvM_CurRunning.ServiceId)
-                || (NVM_READ_PRAM_BLOCK_SERV_ID == NvM_CurRunning.ServiceId)
+                (NVM_READ_BLOCK_SERV_ID == CurRunningPtr->ServiceId)
+                || (NVM_READ_ALL_SERV_ID == CurRunningPtr->ServiceId)
+                || (NVM_READ_PRAM_BLOCK_SERV_ID == CurRunningPtr->ServiceId)
                 || (NvM_Module.JobStep == NVM_JOB_STEP_READ_ROM))
             {
                 /** Parameter is ok, copy data */
-                for (uint32 iLoop = 0u; iLoop < NvM_CurRunning.Length; ++iLoop)
-                {
-                    DstAddrPtr[iLoop] = SrcAddrPtr[iLoop];
-                }
+                NvM_InterMemCpy(DstAddrPtr, SrcAddrPtr, (uint32)CurRunningPtr->Length);
                 if (NVM_JOB_STEP_READ_ROM != NvM_Module.JobStep)
                 {
                     /* PRQA S 2844 ++ */ /* VL_NvM_2844 */
-                    NVM_SETFLAGOFF(&NvM_AdminBlock[intBlockId].FlagGroup, NVM_ADMIN_RAM_VALID);
-                    NVM_SETFLAGOFF(&NvM_AdminBlock[intBlockId].FlagGroup, NVM_ADMIN_RAM_CHANGED);
+                    NVM_SETFLAGOFF(&AdminBlockPtr->FlagGroup, NVM_ADMIN_RAM_VALID);
+                    NVM_SETFLAGOFF(&AdminBlockPtr->FlagGroup, NVM_ADMIN_RAM_CHANGED);
                     /* PRQA S 2844 -- */
                     NvM_UpdateValidandChangeStatus(STD_OFF, STD_OFF);
                 }
-                /* PRQA S 2814, 0314 ++ */ /* VL_NvM_2814, VL_NvM_0314 */
-                retVal = (*NvM_CurRunning.NvM_ReadRamBlockFromNvm)((void*)DstAddrPtr);
+                /* PRQA S 2814, 0314 ++ */ /* VL_QAC_DerefNullPtr, VL_NvM_0314 */
+                retVal = (*CurRunningPtr->NvM_ReadRamBlockFromNvm)((void*)DstAddrPtr);
                 /* PRQA S 2814, 0314 -- */
             }
             else if (
-                (NVM_FIRSTINIT_ALL_SERV_ID == NvM_CurRunning.ServiceId)
-                && ((NvM_CurRunning.ManagementType == NVM_BLOCK_REDUNDANT)
-                    || (NvM_CurRunning.ManagementType == NVM_BLOCK_NATIVE))
+                (NVM_FIRSTINIT_ALL_SERV_ID == CurRunningPtr->ServiceId)
+                && ((CurRunningPtr->ManagementType == NVM_BLOCK_REDUNDANT)
+                    || (CurRunningPtr->ManagementType == NVM_BLOCK_NATIVE))
                 && (0U != NvM_AtomJob.Count))
             {
                 /** Parameter is ok, copy data */
-                for (uint32 iLoop = 0u; iLoop < NvM_CurRunning.Length; ++iLoop)
-                {
-                    DstAddrPtr[iLoop] = SrcAddrPtr[iLoop];
-                }
+                NvM_InterMemCpy(DstAddrPtr, SrcAddrPtr, (uint32)CurRunningPtr->Length);
                 retVal = E_OK;
             }
             else
@@ -2362,10 +2463,7 @@ NVM_LOCAL Std_ReturnType NvM_MemCpy(const uint8* SrcAddrPtr, uint8* DstAddrPtr)
         else
         {
             /** Parameter is ok, copy data */
-            for (uint32 iLoop = 0u; iLoop < NvM_CurRunning.Length; ++iLoop)
-            {
-                DstAddrPtr[iLoop] = SrcAddrPtr[iLoop];
-            }
+            NvM_InterMemCpy(DstAddrPtr, SrcAddrPtr, (uint32)CurRunningPtr->Length);
             retVal = E_OK;
         }
     }
@@ -2381,12 +2479,14 @@ NVM_LOCAL void NvM_RunTimeHandle(void)
 #if (STD_OFF == NVM_DYNAMIC_CONFIGURATION)
     NvM_Module.RuntimeType = NVM_RUNTIME_NORMAL;
 #else
-    if (((NVM_REQ_OK != NvM_AdminBlock[NVM_READALL_FIRST_BLOCKID - 1U].SingleReqResult)
-         && (NVM_REQ_PENDING != NvM_AdminBlock[NVM_READALL_FIRST_BLOCKID - 1U].SingleReqResult))
-        || (((((uint16)NVM_COMPILED_CONFIG_ID) & 0x00ffU)
-             != *(uint8*)(NvM_BlockDescriptor[NVM_READALL_FIRST_BLOCKID - 1U].NvmRamBlockDataAddress))
+    NvM_BlockIdType                intBlockId         = NvM_GetIntBlockId(NVM_READALL_FIRST_BLOCKID);
+    NvM_AdminBlockType*            AdminBlockPtr      = &(NvM_AdminBlock[intBlockId]);
+    const NvM_BlockDescriptorType* BlockDescriptorPtr = &(NvM_BlockDescriptor[intBlockId]);
+
+    if (((NVM_REQ_OK != AdminBlockPtr->SingleReqResult) && (NVM_REQ_PENDING != AdminBlockPtr->SingleReqResult))
+        || (((((uint16)NVM_COMPILED_CONFIG_ID) & 0x00ffU) != *(uint8*)(BlockDescriptorPtr->NvmRamBlockDataAddress))
             || (((((uint16)NVM_COMPILED_CONFIG_ID) >> 8U) & 0x00ffU)
-                != *(uint8*)(NvM_BlockDescriptor[NVM_READALL_FIRST_BLOCKID - 1U].NvmRamBlockDataAddress + 1U))))
+                != *(uint8*)(BlockDescriptorPtr->NvmRamBlockDataAddress + 1U))))
     {
         /** the runtime need more information to charge */
         NvM_Module.RuntimeType    = NVM_RUNTIME_EXTENDED;
@@ -2404,24 +2504,25 @@ NVM_LOCAL void NvM_RunTimeHandle(void)
  */
 NVM_LOCAL Std_ReturnType NvM_MemCpySub(const uint8* SrcAddrPtr, uint8* DstAddrPtr)
 {
-    Std_ReturnType  retVal;
-    NvM_BlockIdType intBlockId = NvM_CurRunning.BlockId - 1U;
-    /* PRQA S 2814, 0311, 0314 ++ */ /* VL_NvM_2814, VL_NvM_0311, VL_NvM_0314 */
-    if (E_OK == (*NvM_CurRunning.NvM_WriteRamBlockToNvm)((void*)SrcAddrPtr))
+    Std_ReturnType      retVal;
+    NvM_CurRunningType* CurRunningPtr = &NvM_CurRunning; /* PRQA S 3678 */ /* VL_NvM_3678 */
+
+    /* PRQA S 2814, 0311, 0314 ++ */ /* VL_QAC_DerefNullPtr, VL_NvM_0311, VL_NvM_0314 */
+    if (E_OK == (*CurRunningPtr->NvM_WriteRamBlockToNvm)((void*)SrcAddrPtr))
     /* PRQA S 2814, 0311, 0314 -- */
     {
         /** Parameter is ok, copy data */
-        for (uint32 iLoop = 0u; iLoop < NvM_CurRunning.Length; ++iLoop)
-        {
-            DstAddrPtr[iLoop] = SrcAddrPtr[iLoop]; /* PRQA S 2824 */ /* VL_NvM_2824 */
-        }
+        NvM_InterMemCpy(DstAddrPtr, SrcAddrPtr, (uint32)CurRunningPtr->Length);
         retVal = E_OK;
-        if ((NVM_SET_RAM_BLOCK_STATUS_SERV_ID != NvM_CurRunning.ServiceId)
-            && (NVM_VALIDATE_ALL_SERV_ID != NvM_CurRunning.ServiceId))
+        if ((NVM_SET_RAM_BLOCK_STATUS_SERV_ID != CurRunningPtr->ServiceId)
+            && (NVM_VALIDATE_ALL_SERV_ID != CurRunningPtr->ServiceId))
         {
+            NvM_BlockIdType     intBlockId    = NvM_GetIntBlockId(CurRunningPtr->BlockId);
+            NvM_AdminBlockType* AdminBlockPtr = &(NvM_AdminBlock[intBlockId]);
+
             /** Confirm that using the RAM mirror, so the RAM status is used */ /* PRQA S 2844 ++ */ /* VL_NvM_2844 */
-            NVM_SETFLAGON(&NvM_AdminBlock[intBlockId].FlagGroup, NVM_ADMIN_RAM_VALID);
-            NVM_SETFLAGON(&NvM_AdminBlock[intBlockId].FlagGroup, NVM_ADMIN_RAM_CHANGED);
+            NVM_SETFLAGON(&AdminBlockPtr->FlagGroup, NVM_ADMIN_RAM_VALID);
+            NVM_SETFLAGON(&AdminBlockPtr->FlagGroup, NVM_ADMIN_RAM_CHANGED);
             /* PRQA S 2844 -- */
             NvM_UpdateValidandChangeStatus(STD_ON, STD_ON);
         }
@@ -2438,17 +2539,21 @@ NVM_LOCAL Std_ReturnType NvM_MemCpySub(const uint8* SrcAddrPtr, uint8* DstAddrPt
  */
 NVM_LOCAL void NvM_InterReadAllSub(NvM_BlockIdType intBlockId)
 {
+#if ((STD_ON == NVM_DYNAMIC_CONFIGURATION) && (NVM_RESISTANT_TO_CHANGED_SW == STD_ON))
+    const NvM_BlockDescriptorType* BlockDescriptorPtr = &(NvM_BlockDescriptor[intBlockId]);
+
     /* PRQA S 2844 ++ */ /* VL_NvM_2844 */
     if ((NVM_RUNTIME_EXTENDED == NvM_Module.RuntimeType)
-        && (TRUE
-            == NVM_ISFLAGOFF(NvM_BlockDescriptor[intBlockId].FlagGroup, (uint8)NVM_BLOCK_DESC_RESISTANTTOCHANGEDSW)))
+        && (TRUE == NVM_ISFLAGOFF(BlockDescriptorPtr->FlagGroup, (uint8)NVM_BLOCK_DESC_RESISTANTTOCHANGEDSW)))
     /* PRQA S 2844 -- */
     {
+#if (STD_ON == NVM_BLOCK_WRITE_PROTECT)
         NVM_SETFLAGOFF(&NvM_CurRunning.AdminFlagGroup, NVM_ADMIN_NV_WRPRO);
+#endif
         NvM_UpdateValidandChangeStatus(STD_OFF, STD_OFF);
 
-        if ((NULL_PTR != NvM_BlockDescriptor[intBlockId].NvmRomBlockDataAddress)
-            || (NULL_PTR != NvM_BlockDescriptor[intBlockId].NvmInitBlockCallback))
+        if ((NULL_PTR != BlockDescriptorPtr->NvmRomBlockDataAddress)
+            || (NULL_PTR != BlockDescriptorPtr->NvmInitBlockCallback))
         {
             /* PRQA S 2844 ++ */ /* VL_NvM_2844 */
             NvM_AdminBlock[NvM_CurRunning.BlockId - 1U].SingleReqResult = NVM_REQ_NOT_OK;
@@ -2463,6 +2568,9 @@ NVM_LOCAL void NvM_InterReadAllSub(NvM_BlockIdType intBlockId)
         }
     }
     else
+#else
+    NVM_PARAM_UNUSED(intBlockId);
+#endif
     {
         NvM_UpdateValidandChangeStatus(STD_OFF, STD_OFF);
         NvM_Module.JobStep = NVM_JOB_STEP_PENDING;

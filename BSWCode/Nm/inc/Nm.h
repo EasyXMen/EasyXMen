@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -62,8 +62,9 @@
 #include "Nm_Internal.h"
 #include "ComStack_Types.h"
 #include "NmStack_Types.h"
-#include "Com_Types.h"
-
+#if NM_STATE_CHANGE_IND_ENABLED == STD_ON
+#include "Com.h"
+#endif
 /* =============================================== version information ============================================== */
 /** Published Information */
 #define NM_VENDOR_ID                   ((uint16)(62u))
@@ -120,13 +121,6 @@
 #define NM_SERVICE_ID_PNCBITVECTORTXINDICATION      ((uint8)0x27u)
 #define NM_SERVICE_ID_PNCBITVECTORRXINDICATION      ((uint8)0x28u)
 
-#if !defined(NM_LOCAL)
-#ifdef UNI_TEST_EXTERN
-#define NM_LOCAL
-#else
-#define NM_LOCAL static /* PRQA S 3414 */ /* VL_QAC_KeyWord */
-#endif
-#endif
 /* ================================================ type definitions ================================================ */
 typedef uint8 Nm_ChannelIndexType;
 

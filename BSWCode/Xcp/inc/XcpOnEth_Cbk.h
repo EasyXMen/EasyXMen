@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -40,11 +40,12 @@
  * @brief       The lower layer communication interface module confirms the transmission of a PDU, or the failure to
  * transmit a PDU.
  * @param[in]   TxPduId   : The PDU ID to be notified as having been sent.
+ * @param[in]   result    : The transmission result of the lower layer.
  * @reentrant   FALSE
  * @synchronous TRUE
  * @trace       CPD-63959
  */
-extern void Xcp_SoAdTxConfirmation(PduIdType TxPduId);
+extern void Xcp_SoAdTxConfirmation(PduIdType TxPduId, Std_ReturnType result);
 
 /**
  * @brief       Indication of a received PDU from a lower layer communication interface module.

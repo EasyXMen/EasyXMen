@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -163,7 +163,7 @@ typedef uint8 Dem_FilterDataFilterType;
 /**
  * @brief Storage for the original selection request
  */
-typedef struct Dem_ClientRequestTag /* PRQA S 1536 */ /* VL_Dem_1536 */
+typedef struct
 {
     uint32            DTC;       /**< Selected DTC value @range 0..0xFFFFFFFFu */
     Dem_DTCFormatType DTCFormat; /**< Selected DTC format @range 0..3 */
@@ -173,10 +173,10 @@ typedef struct Dem_ClientRequestTag /* PRQA S 1536 */ /* VL_Dem_1536 */
 /**
  * @brief Storage for selection data
  */
-typedef union Dem_ClientSelectionTag /* PRQA S 1536 */ /* VL_Dem_1536 */
-{ /* PRQA S 0750 */                                    /* VL_Dem_0750 */
-    Dem_EventIdType       EventId;                     /**< Selected EventId @range 0..0xFFFFu */
-    Dem_ClientGroupIdType GroupId;                     /**< Selected GroupId @range 0..0xFFu */
+typedef union
+{ /* PRQA S 0750 */                /* VL_Dem_0750 */
+    Dem_EventIdType       EventId; /**< Selected EventId @range 0..0xFFFFu */
+    Dem_ClientGroupIdType GroupId; /**< Selected GroupId @range 0..0xFFu */
 #if (DEM_DTC_GROUP_NUMBER > 0u)
     Dem_GroupOfDTCNumType GroupDTCIndex; /**< Selected GroupDTCIndex @range 0..0xFFFFu */
 #endif
@@ -185,7 +185,7 @@ typedef union Dem_ClientSelectionTag /* PRQA S 1536 */ /* VL_Dem_1536 */
 /**
  * @brief Storage for the Client request
  */
-typedef struct Dem_ClientInfoTag /* PRQA S 1536 */ /* VL_Dem_1536 */
+typedef struct
 {
     Dem_ClearDTCStatusType  ClearDTCStatus; /**< The status of the clear operation @range 0..0xFFu */
     Dem_ClientRequestType   Request;        /**< Selection Request @range 0..0xFFFFFFFFu */
@@ -211,7 +211,7 @@ typedef enum
 /**
  * @brief Filter data for Dcm requests
  */
-typedef struct Dem_FilterDataInfoTag /* PRQA S 1536 */ /* VL_Dem_1536 */
+typedef struct
 {
     union IteratorTag
     { /* PRQA S 0750 */                 /* VL_Dem_0750 */
@@ -232,7 +232,7 @@ typedef struct Dem_FilterDataInfoTag /* PRQA S 1536 */ /* VL_Dem_1536 */
 /**
  * @brief Filter data result type
  */
-typedef struct Dem_FilterDataResultTag /* PRQA S 1536 */ /* VL_Dem_1536 */
+typedef struct
 {
     uint32                     DTC;               /**< DTC value @range 0..0xFFFFFFFFu */
     sint8                      FDC;               /**< FaultDetectionCounter @range 0..0xFFu */
@@ -351,6 +351,7 @@ DEM_LOCAL Std_ReturnType
     Dem_DTCReadoutBufferCheckAndSetState(uint8 ClientId, Dem_EventIdType EventId, Dem_MemoryNumType MemIndex);
 #endif
 
+#if (STD_ON == DCM_UDS_0X14)
 /**
  * @brief         Provides information if the last call to Dem_SelectDTC has selected a valid DTC or group of DTCs.
  * @param[in]     ClientId: Unique client id, assigned to the instance of the calling module.
@@ -388,7 +389,9 @@ DEM_LOCAL Std_ReturnType Dem_ClientResultForClearDTCGetDTCSelection(
     uint8* ErrorId
 #endif
 );
+#endif
 
+#if (DEM_SUPPORT_DISABLE_ENABLE_DTCRECORD_UPDATE_API == STD_ON)
 /**
  * @brief         Disables the event memory update of a specific DTC (only one at one time).
  * @param[in]     ClientId: Unique client id, assigned to the instance of the calling module.
@@ -407,6 +410,7 @@ DEM_LOCAL Std_ReturnType Dem_ClientDisableDTCRecordUpdate(
     uint8* ErrorId
 #endif
 );
+#endif
 
 #if (DEM_DCM_CLIENT_NUMBER > 0u)
 /**
@@ -450,6 +454,7 @@ DEM_LOCAL void Dem_FilterEventDataTask(void);
  */
 DEM_LOCAL boolean Dem_CheckEventDTCSettingState(Dem_EventIdType EventId);
 
+#if (STD_ON == DCM_UDS_0X85)
 /**
  * @brief         Enable the DTC setting State
  * @param[in]     ClientId: Unique client id, assigned to the instance of the calling module.
@@ -467,6 +472,7 @@ DEM_LOCAL void Dem_DTCSettingEnable(uint8 ClientId);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_DTCSettingDisable(uint8 ClientId);
+#endif
 
 /**
  * @brief         Processes changes of DTC setting
@@ -513,6 +519,7 @@ DEM_LOCAL Std_ReturnType Dem_ClientSetDTCSuppression(uint8 ClientId, boolean Sup
 #endif
 
 #if (DEM_DCM_CLIENT_NUMBER > 0u)
+#if ((DEM_SUPPORT_GETDTCSTATUSAVAILABILITYMASK_API == STD_ON) || (DEM_SUPPORT_SETDTCFILTER_AND_GETNUMBER_API == STD_ON))
 /**
  * @brief         Gets the DTC Status availability mask of the selected fault memory.
  * @param[in]     ClientId: Unique client id, assigned to the instance of the calling module.
@@ -534,8 +541,10 @@ DEM_LOCAL Std_ReturnType Dem_ClientGetDTCStatusAvailabilityMask(
     uint8                  ClientId,
     Dem_UdsStatusByteType* DTCStatusMask,
     Dem_DTCOriginType      DTCOrigin);
+#endif
 
 #if (DEM_DCM_CLIENT_NUMBER > 0u)
+#if (DEM_SUPPORT_GETSTATUSOFDTC_API == STD_ON)
 /**
  * @brief         Get the current Uds status of a selected DTC
  * @param[in]     ClientId: Unique client id, assigned to the instance of the calling module.
@@ -558,8 +567,9 @@ DEM_LOCAL Std_ReturnType Dem_ClientGetStatusOfDTC(
     uint8* ErrorId
 #endif
 );
+#endif
 
-#if (DEM_FEATURE_DCM_0X19_0X09_ENABLE == STD_ON)
+#if (DEM_SUPPORT_GETSEVERITYOFDTC_API == STD_ON)
 /**
  * @brief         Get the severity of a selected DTC
  * @param[in]     ClientId: Unique client id, assigned to the instance of the calling module.
@@ -621,6 +631,7 @@ DEM_LOCAL Std_ReturnType Dem_ClientGetFunctionalUnitOfDTC(
 DEM_LOCAL void
     Dem_FilterDataInit(uint8 ClientId, Dem_DTCOriginType DTCOrigin, Dem_MemoryNumType MemIndex, uint8 StatusMask);
 
+#if (DEM_SUPPORT_SETDTCFILTER_AND_GETNUMBER_API == STD_ON)
 /**
  * @brief         Initialize a filter for a 'filter DTC' request.
  * @param[in]     ClientId: Unique client id, assigned to the instance of the calling module.
@@ -659,8 +670,10 @@ DEM_LOCAL Std_ReturnType Dem_ClientSetDTCFilter(
     boolean             FilterWithSeverity,
     Dem_DTCSeverityType DTCSeverityMask,
     boolean             FilterForFaultDetectionCounter);
+#endif
 
-#if (DEM_OBDII_SUPPORT == STD_ON)
+#if ((DEM_OBDII_SUPPORT == STD_ON) && (DEM_PERMANENT_MEMORY_NUMBER > 0u))
+#if (DEM_SUPPORT_SETDTCFILTER_AND_GETNUMBER_API == STD_ON)
 /**
  * @brief         Calculates the number of filtered DTCs for permanent memory.
  * @param[in]     ClientId: Unique client id, assigned to the instance of the calling module.
@@ -670,6 +683,7 @@ DEM_LOCAL Std_ReturnType Dem_ClientSetDTCFilter(
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL uint16 Dem_FilterDataCountMatchesInPermanentMemory(uint8 ClientId);
+#endif
 #endif
 
 /**
@@ -685,6 +699,7 @@ DEM_LOCAL uint16 Dem_FilterDataCountMatchesInPermanentMemory(uint8 ClientId);
  */
 DEM_LOCAL Std_ReturnType Dem_FilterDataFilterForEventMatch(uint8 DcmClientId, Dem_EventIdType EventId);
 
+#if (DEM_SUPPORT_SETDTCFILTER_AND_GETNUMBER_API == STD_ON)
 /**
  * @brief         Calculates the number of filtered events in a standard event memory.
  * @param[in]     DcmClientId: Identification of a client.
@@ -694,7 +709,9 @@ DEM_LOCAL Std_ReturnType Dem_FilterDataFilterForEventMatch(uint8 DcmClientId, De
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL uint16 Dem_FilterDataCountMatchesInEventMemory(uint8 DcmClientId);
+#endif
 
+#if (DEM_SUPPORT_SETDTCFILTER_AND_GETNUMBER_API == STD_ON)
 /**
  * @brief         Fetch number of DTCs matching the client specific filter settings.
  * @param[in]     ClientId: Identification of a client.
@@ -704,6 +721,7 @@ DEM_LOCAL uint16 Dem_FilterDataCountMatchesInEventMemory(uint8 DcmClientId);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL uint16 Dem_ClientFilterNumberMemory(uint8 ClientId);
+#endif
 
 #if (DEM_RESET_CONFIRMED_BIT_ON_OVERFLOW == STD_ON)
 /**
@@ -745,6 +763,7 @@ DEM_LOCAL Dem_EventIdType Dem_FilterDataFilterMemoryChrono(uint8 ClientId, const
 #endif
 
 #if (DEM_OBDII_SUPPORT == STD_ON)
+#if (DEM_PERMANENT_MEMORY_NUMBER > 0u)
 /**
  * @brief         Iterates events in permanent memory matching the Dcm DTC filter.
  * @param[in]     ClientId: Identification of a client.
@@ -755,6 +774,7 @@ DEM_LOCAL Dem_EventIdType Dem_FilterDataFilterMemoryChrono(uint8 ClientId, const
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL Dem_EventIdType Dem_FilterDataFilterPermanentByEvent(uint8 ClientId, const Dem_MemStateInfoType* MemoryInfo);
+#endif
 #endif
 
 /* PRQA S 5016 ++ */ /* VL_Dem_5016 */
@@ -770,6 +790,9 @@ DEM_LOCAL Dem_FilterDataFuncPtrType
     Dem_FilterDataGetDTCFilterFunction(Dem_FilterDataDTCFilteringStrategyType DTCFilteringStrategy);
 /* PRQA S 5016 -- */
 
+#if (                                                                                                        \
+    (DEM_SUPPORT_GETNEXT_FILTEREDDTC_API == STD_ON) || (DEM_SUPPORT_GETNEXT_FILTEREDDTCANDFDC_API == STD_ON) \
+    || (DEM_SUPPORT_GETNEXT_FILTEREDDTCANDSEVERITY_API == STD_ON))
 /**
  * @brief         Get the next matching event the filter criteria set with Dem_ClientSetDTCFilter
  * @param[in]     ClientId: Identification of a client.
@@ -782,7 +805,10 @@ DEM_LOCAL Dem_FilterDataFuncPtrType
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL Std_ReturnType Dem_FilterDataGetNextFilteredDTC(uint8 ClientId, Dem_FilterDataResultType* FilterResult);
+#endif
 
+#if (DEM_SUPPORT_SETFREEZEFRAMERECORD_AND_GET_API == STD_ON)
+#if (DEM_MAX_SIZE_FREEZEFRAME > 0u)
 /**
  * @brief         Sets a freeze frame record filter with the given criteria.
  * @param[in]     ClientId: Identification of a client.
@@ -795,7 +821,10 @@ DEM_LOCAL Std_ReturnType Dem_FilterDataGetNextFilteredDTC(uint8 ClientId, Dem_Fi
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL Std_ReturnType Dem_ClientStartFreezeFrameIterator(uint8 ClientId, Dem_DTCFormatType DTCFormat);
+#endif
+#endif
 
+#if (DEM_SUPPORT_GETDTCOCCURRENCETIME_API == STD_ON)
 /**
  * @brief         Get a DTC based on occurrence time.
  * @param[in]     ClientId: Identification of a client.
@@ -809,6 +838,7 @@ DEM_LOCAL Std_ReturnType Dem_ClientStartFreezeFrameIterator(uint8 ClientId, Dem_
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL Std_ReturnType Dem_ClientGetDTCByOccurrenceTime(uint8 ClientId, Dem_DTCRequestType DTCRequest, uint32* DTC);
+#endif
 
 /**
  * @brief         Select the the given extended data record
@@ -878,7 +908,6 @@ DEM_LOCAL Std_ReturnType
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL boolean Dem_ClientGetNextEDChecktRecordMatch(uint8 ClientId, uint8 RecordNumberFilter, uint8 RecordNumber);
-#endif
 
 /**
  * @brief         Get the size of one or all extended data record(s)
@@ -913,6 +942,7 @@ DEM_LOCAL Std_ReturnType
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL Std_ReturnType Dem_ClientGetNextExtendedDataRecord(uint8 ClientId, uint8* DestBuffer, uint16* BufSize);
+#endif
 
 /**
  * @brief         Initializes the iterator for the selected event.
@@ -1139,6 +1169,7 @@ DEM_LOCAL_INLINE boolean Dem_ClientCheckDcmClientIdValid(uint8 ClientId)
  * @synchronous   TRUE
  * @trace         CPD-PLACEHOLDER
  */
+/* PRQA S 2742 ++ */ /* VL_Dem_2742 */
 DEM_LOCAL_INLINE boolean Dem_ClientCheckJ1939DcmClientIdValid(uint8 ClientId)
 {
     boolean ret = FALSE;
@@ -1151,6 +1182,7 @@ DEM_LOCAL_INLINE boolean Dem_ClientCheckJ1939DcmClientIdValid(uint8 ClientId)
     }
     return ret;
 }
+/* PRQA S 2742 -- */
 
 /**
  * @brief         Checking DTC Origin Validity
@@ -1564,7 +1596,7 @@ DEM_LOCAL_INLINE uint8 Dem_FilterDataGetSeverityMask(uint8 DcmClientId)
     return Dem_FilterDataInfo[DcmClientId].SeverityMask;
 }
 
-#if (DEM_FEATURE_DCM_0X19_0X14_ENABLE == STD_ON)
+#if (DEM_SUPPORT_GETNEXT_FILTEREDDTCANDFDC_API == STD_ON)
 /**
  * @brief 		  Get the fault detection counter in the given filter object.
  * @param[in]     DcmClientId: Unique client id, assigned to the instance of the calling module.
@@ -1869,35 +1901,16 @@ DEM_LOCAL void Dem_ClientSelectDTC(uint8 ClientId, uint32 DTC, Dem_DTCFormatType
 
 #if (DEM_DCM_CLIENT_NUMBER > 0u)
 /**
- * @brief 		  Set the readout buffer entry
- * @param[in]     DcmClientId: Identification of a client.
- * @param[in]     ReadoutBuffer: The buffer to store readout data
- * @reentrant     FALSE
- * @synchronous   TRUE
- * @trace         CPD-PLACEHOLDER
- */
-DEM_LOCAL_INLINE void Dem_ClientSetReadoutBuffer(uint8 DcmClientId, Dem_ReadoutBufferEntryType ReadoutBuffer)
-{
-    Dem_GetReadoutBuffer()[DcmClientId] = ReadoutBuffer;
-}
-
-/**
  * @brief 		  Returns the readout buffer entry
  * @param[in]     DcmClientId: Identification of a client.
- * @retval        Dem_ReadoutBufferEntryType
- * @retval        State: Internal state of this buffer
- * @retval        MemIndex: MemoryIndex of this Data record
- * @retval        ExtendedIterator: Internal state for reporting ExtendedData record(s)
- * @retval        FFIterator: Internal state for reporting SnapshotData record(s)
- * @retval        EventId: EventId of this Data record
- * @retval        Data: Backed event data
+ * @retval        Dem_ReadoutBufferEntryType*
  * @reentrant     FALSE
  * @synchronous   TRUE
  * @trace         CPD-PLACEHOLDER
  */
-DEM_LOCAL_INLINE Dem_ReadoutBufferEntryType Dem_ClientGetReadoutBuffer(uint8 DcmClientId)
+DEM_LOCAL_INLINE Dem_ReadoutBufferEntryType* Dem_ClientGetReadoutBuffer(uint8 DcmClientId)
 {
-    return Dem_GetReadoutBuffer()[DcmClientId];
+    return &Dem_GetReadoutBuffer()[DcmClientId];
 }
 
 #if (DEM_EXTENDED_DATA_CLASS_NUMBER > 0u)
@@ -1905,13 +1918,6 @@ DEM_LOCAL_INLINE Dem_ReadoutBufferEntryType Dem_ClientGetReadoutBuffer(uint8 Dcm
  * @brief 		  Init the readout buffer entry  Extend Data Iterator
  * @param[in]     OldEDIterator: Extend Data Iterator
  * @retval        Dem_ReadoutBufferEDIteratorType
- * @retval        ExtendedRecordSelected: Specifies whether a record is selected or not
- * @retval        ExtendedEntryIndex: Extended entry index
- * @retval        ExtendedDataNumber: The selected extended data number
- * @retval        EDRNStart: Iterator for the extended entries
- * @retval        EDRNEnd: Iterator for the extended entries
- * @retval        MemoryIndex: Memory entry handle
- * @retval        EventId: Event Id
  * @reentrant     FALSE
  * @synchronous   TRUE
  * @trace         CPD-PLACEHOLDER
@@ -1948,7 +1954,7 @@ DEM_LOCAL_INLINE Dem_ReadoutBufferEDIteratorType
  */
 DEM_LOCAL_INLINE Dem_ReadoutBufferEDIteratorType Dem_ReadoutBufferGetEDIterator(uint8 DcmClientId)
 {
-    return Dem_ClientGetReadoutBuffer(DcmClientId).ExtendedIterator;
+    return Dem_ClientGetReadoutBuffer(DcmClientId)->ExtendedIterator;
 }
 
 /**
@@ -1962,9 +1968,8 @@ DEM_LOCAL_INLINE Dem_ReadoutBufferEDIteratorType Dem_ReadoutBufferGetEDIterator(
 DEM_LOCAL_INLINE void
     Dem_ReadoutBufferSetEDIterator(uint8 DcmClientId, Dem_ReadoutBufferEDIteratorType ExtendedIterator)
 {
-    Dem_ReadoutBufferEntryType readoutBuffer = Dem_ClientGetReadoutBuffer(DcmClientId);
-    readoutBuffer.ExtendedIterator           = ExtendedIterator;
-    Dem_ClientSetReadoutBuffer(DcmClientId, readoutBuffer);
+    Dem_ReadoutBufferEntryType* readoutBuffer = Dem_ClientGetReadoutBuffer(DcmClientId);
+    readoutBuffer->ExtendedIterator           = ExtendedIterator;
 }
 #endif
 
@@ -1982,7 +1987,7 @@ DEM_LOCAL_INLINE void
  */
 DEM_LOCAL_INLINE Dem_ReadoutBufferFFIteratorType Dem_ReadoutBufferGetFFIterator(uint8 DcmClientId)
 {
-    return Dem_ClientGetReadoutBuffer(DcmClientId).FFIterator;
+    return Dem_ClientGetReadoutBuffer(DcmClientId)->FFIterator;
 }
 
 /**
@@ -1995,9 +2000,8 @@ DEM_LOCAL_INLINE Dem_ReadoutBufferFFIteratorType Dem_ReadoutBufferGetFFIterator(
  */
 DEM_LOCAL_INLINE void Dem_ReadoutBufferSetFFIterator(uint8 DcmClientId, Dem_ReadoutBufferFFIteratorType FFIterator)
 {
-    Dem_ReadoutBufferEntryType readoutBuffer = Dem_ClientGetReadoutBuffer(DcmClientId);
-    readoutBuffer.FFIterator                 = FFIterator;
-    Dem_ClientSetReadoutBuffer(DcmClientId, readoutBuffer);
+    Dem_ReadoutBufferEntryType* readoutBuffer = Dem_ClientGetReadoutBuffer(DcmClientId);
+    readoutBuffer->FFIterator                 = FFIterator;
 }
 
 /**
@@ -2085,18 +2089,17 @@ DEM_LOCAL void Dem_ClientReadoutBufferInit(uint8 ClientId)
     uint8 dcmClientId = Dem_GetDcmClientIdOfClient(ClientId);
     if (dcmClientId != DEM_CLIENT_NUMBER)
     {
-        Dem_ReadoutBufferEntryType readoutBuffer;
+        Dem_ReadoutBufferEntryType* readoutBuffer;
 
         readoutBuffer = Dem_ClientGetReadoutBuffer(dcmClientId);
 
-        readoutBuffer.State = DEM_READOUTBUFFER_STATUS_UNUSED;
+        readoutBuffer->State = DEM_READOUTBUFFER_STATUS_UNUSED;
 #if (DEM_EXTENDED_DATA_CLASS_NUMBER > 0u)
-        readoutBuffer.ExtendedIterator = Dem_ReadoutBufferEDRecordInit(readoutBuffer.ExtendedIterator);
+        readoutBuffer->ExtendedIterator = Dem_ReadoutBufferEDRecordInit(readoutBuffer->ExtendedIterator);
 #endif
 #if ((DEM_MAX_SIZE_OBDFREEZEFRAME > 0u) || (DEM_FREEZE_FRAME_CLASS_NUMBER > 0u))
-        readoutBuffer.FFIterator = Dem_ReadoutBufferFFInit(readoutBuffer.FFIterator);
+        readoutBuffer->FFIterator = Dem_ReadoutBufferFFInit(readoutBuffer->FFIterator);
 #endif
-        Dem_ClientSetReadoutBuffer(dcmClientId, readoutBuffer);
     }
 }
 
@@ -2135,35 +2138,34 @@ DEM_LOCAL_INLINE void Dem_FilterDataInitDefault(uint8 ClientId)
 DEM_LOCAL Std_ReturnType
     Dem_DTCReadoutBufferCheckAndSetState(uint8 ClientId, Dem_EventIdType EventId, Dem_MemoryNumType MemIndex)
 {
-    Std_ReturnType             ret           = E_NOT_OK;
-    uint8                      dcmClientId   = Dem_GetDcmClientIdOfClient(ClientId);
-    Dem_ReadoutBufferEntryType readoutBuffer = Dem_ClientGetReadoutBuffer(dcmClientId);
+    Std_ReturnType              ret           = E_NOT_OK;
+    uint8                       dcmClientId   = Dem_GetDcmClientIdOfClient(ClientId);
+    Dem_ReadoutBufferEntryType* readoutBuffer = Dem_ClientGetReadoutBuffer(dcmClientId);
 
-    if (readoutBuffer.State == DEM_READOUTBUFFER_STATUS_UNUSED)
+    if (readoutBuffer->State == DEM_READOUTBUFFER_STATUS_UNUSED)
     {
         /** new request */
         Dem_LockClient(ClientId);
-        readoutBuffer.EventId  = EventId;
-        readoutBuffer.MemIndex = MemIndex;
+        readoutBuffer->EventId  = EventId;
+        readoutBuffer->MemIndex = MemIndex;
 #if (DEM_EXTENDED_DATA_CLASS_NUMBER > 0u)
-        readoutBuffer.ExtendedIterator = Dem_ReadoutBufferEDRecordInit(readoutBuffer.ExtendedIterator);
+        readoutBuffer->ExtendedIterator = Dem_ReadoutBufferEDRecordInit(readoutBuffer->ExtendedIterator);
 #endif
 #if ((DEM_MAX_SIZE_OBDFREEZEFRAME > 0u) || (DEM_FREEZE_FRAME_CLASS_NUMBER > 0u))
-        readoutBuffer.FFIterator = Dem_ReadoutBufferFFInit(readoutBuffer.FFIterator);
+        readoutBuffer->FFIterator = Dem_ReadoutBufferFFInit(readoutBuffer->FFIterator);
 #endif
         /** The task function could be active already due to another client. Set the state last, otherwise the task
          * could process this entry before it is copmletely initialized */
-        readoutBuffer.State = DEM_READOUTBUFFER_STATUS_QUEUED;
+        readoutBuffer->State = DEM_READOUTBUFFER_STATUS_QUEUED;
         Dem_EnableTaskOnce(Dem_Task_FilterEventData);
-        Dem_ClientSetReadoutBuffer(dcmClientId, readoutBuffer);
         ret = DEM_PENDING;
     }
-    else if (EventId == readoutBuffer.EventId)
+    else if (EventId == readoutBuffer->EventId)
     {
-        if (MemIndex == readoutBuffer.MemIndex)
+        if (MemIndex == readoutBuffer->MemIndex)
         {
             /** repeated request with identical parameters */
-            if (readoutBuffer.State == DEM_READOUTBUFFER_STATUS_QUEUED)
+            if (readoutBuffer->State == DEM_READOUTBUFFER_STATUS_QUEUED)
             {
                 /** request is still queued, copying of data is not finished */
                 ret = DEM_PENDING;
@@ -2194,15 +2196,16 @@ DEM_LOCAL Std_ReturnType
  */
 DEM_LOCAL_INLINE boolean Dem_ClientCheckDTCRecordUpdateDisabled(uint8 ClientId)
 {
-    Dem_ReadoutBufferEntryType readoutBuffer = Dem_ClientGetReadoutBuffer(Dem_GetDcmClientIdOfClient(ClientId));
+    const Dem_ReadoutBufferEntryType* readoutBuffer = Dem_ClientGetReadoutBuffer(Dem_GetDcmClientIdOfClient(ClientId));
     /* PRQA S 4404 ++ */ /* VL_Dem_4404 */
     return (
-        (readoutBuffer.State == DEM_READOUTBUFFER_STATUS_IN_USE)
-        || (readoutBuffer.State == DEM_READOUTBUFFER_STATUS_NOT_STORED));
+        (readoutBuffer->State == DEM_READOUTBUFFER_STATUS_IN_USE)
+        || (readoutBuffer->State == DEM_READOUTBUFFER_STATUS_NOT_STORED));
     /* PRQA S 4404 -- */
 }
 #endif
 
+#if (STD_ON == DCM_UDS_0X14)
 /**
  * @brief Provides information if the last call to Dem_SelectDTC has selected a valid DTC or group of DTCs.
  */
@@ -2296,7 +2299,9 @@ DEM_LOCAL Std_ReturnType Dem_ClientResultForClearDTCGetDTCSelection(
     }
     return ret;
 }
+#endif
 
+#if (DEM_SUPPORT_DISABLE_ENABLE_DTCRECORD_UPDATE_API == STD_ON)
 /**
  * @brief Disables the event memory update of a specific DTC (only one at one time).
  */
@@ -2348,6 +2353,7 @@ DEM_LOCAL Std_ReturnType Dem_ClientDisableDTCRecordUpdate(
     }
     return ret;
 }
+#endif
 
 #if (DEM_DCM_CLIENT_NUMBER > 0u)
 /**
@@ -2355,20 +2361,18 @@ DEM_LOCAL Std_ReturnType Dem_ClientDisableDTCRecordUpdate(
  */
 DEM_LOCAL Std_ReturnType Dem_ClientEnableDTCRecordUpdate(uint8 ClientId)
 {
-    Std_ReturnType             ret         = E_NOT_OK;
-    uint8                      dcmClientId = Dem_GetDcmClientIdOfClient(ClientId);
-    Dem_ReadoutBufferEntryType readoutBuffer;
+    Std_ReturnType ret         = E_NOT_OK;
+    uint8          dcmClientId = Dem_GetDcmClientIdOfClient(ClientId);
     if (dcmClientId != DEM_CLIENT_NUMBER)
     {
-        readoutBuffer = Dem_ClientGetReadoutBuffer(dcmClientId);
+        Dem_ReadoutBufferEntryType* readoutBuffer = Dem_ClientGetReadoutBuffer(dcmClientId);
         /** Enter Critical Section: DcmApi */
         Dem_EnterCritical_DcmApi();
-        if (readoutBuffer.State == DEM_READOUTBUFFER_STATUS_QUEUED)
+        if (readoutBuffer->State == DEM_READOUTBUFFER_STATUS_QUEUED)
         {
             Dem_ReleaseClient(ClientId);
         }
-        readoutBuffer.State = DEM_READOUTBUFFER_STATUS_UNUSED;
-        Dem_ClientSetReadoutBuffer(dcmClientId, readoutBuffer);
+        readoutBuffer->State = DEM_READOUTBUFFER_STATUS_UNUSED;
         Dem_LeaveCritical_DcmApi();
         /** Leave Critical Section: DcmApi */
         ret = E_OK;
@@ -2382,23 +2386,21 @@ DEM_LOCAL Std_ReturnType Dem_ClientEnableDTCRecordUpdate(uint8 ClientId)
 /* PRQA S 6070 ++ */ /* VL_MTR_Dem_STCAL */
 DEM_LOCAL void Dem_ReadoutBufferFillData(uint8 ClientId)
 {
-    uint8                      dcmClientId   = Dem_GetDcmClientIdOfClient(ClientId);
-    Dem_ReadoutBufferEntryType ReadoutBuffer = Dem_ClientGetReadoutBuffer(dcmClientId);
+    uint8                       dcmClientId   = Dem_GetDcmClientIdOfClient(ClientId);
+    Dem_ReadoutBufferEntryType* ReadoutBuffer = Dem_ClientGetReadoutBuffer(dcmClientId);
     /** copy memory entry only for readout buffer in state QUEUED */
-    if (ReadoutBuffer.State == DEM_READOUTBUFFER_STATUS_QUEUED)
+    if (ReadoutBuffer->State == DEM_READOUTBUFFER_STATUS_QUEUED)
     {
-        Dem_EventIdType              eventId     = ReadoutBuffer.EventId;
-        Dem_MemStateInfoConstPtrType memoryInfo  = Dem_MemStateInfoInit(ReadoutBuffer.MemIndex);
+        Dem_EventIdType              eventId     = ReadoutBuffer->EventId;
+        Dem_MemStateInfoConstPtrType memoryInfo  = Dem_MemStateInfoInit(ReadoutBuffer->MemIndex);
         Dem_NvBlockNumType           memoryIndex = Dem_MemoryFindIndex(memoryInfo, eventId);
         if (memoryIndex == DEM_MEM_INVALID_MEMORY_INDEX)
         {
             /** Enter Critical Section: DcmApi */
             Dem_EnterCritical_DcmApi();
-            ReadoutBuffer = Dem_ClientGetReadoutBuffer(dcmClientId);
-            if (ReadoutBuffer.State == DEM_READOUTBUFFER_STATUS_QUEUED)
+            if (ReadoutBuffer->State == DEM_READOUTBUFFER_STATUS_QUEUED)
             {
-                ReadoutBuffer.State = DEM_READOUTBUFFER_STATUS_NOT_STORED;
-                Dem_ClientSetReadoutBuffer(dcmClientId, ReadoutBuffer);
+                ReadoutBuffer->State = DEM_READOUTBUFFER_STATUS_NOT_STORED;
                 Dem_ReleaseClient(ClientId);
             }
             Dem_LeaveCritical_DcmApi();
@@ -2406,14 +2408,12 @@ DEM_LOCAL void Dem_ReadoutBufferFillData(uint8 ClientId)
         }
         else
         {
-            Dem_MemCpy((uint8*)&ReadoutBuffer.Data, (uint8*)&Dem_GetMemoryEntry()[memoryIndex], sizeof(Dem_EntryType));
+            Dem_MemCpy((uint8*)&ReadoutBuffer->Data, (uint8*)&Dem_GetMemoryEntry()[memoryIndex], sizeof(Dem_EntryType));
             /** Enter Critical Section: DcmApi */
             Dem_EnterCritical_DcmApi();
-            ReadoutBuffer = Dem_ClientGetReadoutBuffer(dcmClientId);
-            if (ReadoutBuffer.State == DEM_READOUTBUFFER_STATUS_QUEUED)
+            if (ReadoutBuffer->State == DEM_READOUTBUFFER_STATUS_QUEUED)
             {
-                ReadoutBuffer.State = DEM_READOUTBUFFER_STATUS_IN_USE;
-                Dem_ClientSetReadoutBuffer(dcmClientId, ReadoutBuffer);
+                ReadoutBuffer->State = DEM_READOUTBUFFER_STATUS_IN_USE;
                 Dem_ReleaseClient(ClientId);
             }
             Dem_LeaveCritical_DcmApi();
@@ -2718,6 +2718,7 @@ DEM_LOCAL boolean Dem_CheckEventDTCSettingState(Dem_EventIdType EventId)
     return ret;
 }
 
+#if (STD_ON == DCM_UDS_0X85)
 /**
  * @brief Enable the DTC setting State
  */
@@ -2772,6 +2773,7 @@ DEM_LOCAL void Dem_DTCSettingDisable(uint8 ClientId)
         Dem_EnableTaskOnce(Dem_Task_DTCSetting);
     }
 }
+#endif
 /* PRQA S 6070 -- */
 
 /**
@@ -2884,7 +2886,9 @@ DEM_LOCAL_INLINE void Dem_InitClientInfo(void)
         Dem_ClientReadoutBufferInit(clientId);
 #endif
         Dem_FilterDataInitDefault(clientId);
+#if (DEM_MAX_SIZE_FREEZEFRAME > 0u)
         Dem_FFIteratorInitIterator(clientId);
+#endif
     }
 #if (DEM_DCM_CLIENT_NUMBER > 0u)
     Dem_InitClientDTCSetting();
@@ -2939,6 +2943,7 @@ DEM_LOCAL Std_ReturnType Dem_ClientGetDTCSuppression(
 }
 #endif
 
+#if (DEM_USER_SUPPORT_OVFLIND_API == STD_ON)
 /**
  * @brief         Gets the event memory overflow indication status.
  * @param[in]     ClientId: Unique client id, assigned to the instance of the calling module
@@ -2964,7 +2969,9 @@ DEM_LOCAL_INLINE Std_ReturnType
     }
     return ret;
 }
+#endif
 
+#if (DEM_USER_SUPPORT_OVFLIND_API == STD_ON)
 /**
  * @brief         Returns the number of entries currently stored in the requested event memory.
  * @param[in]     ClientId: Unique client id, assigned to the instance of the calling module
@@ -2992,6 +2999,7 @@ DEM_LOCAL_INLINE Std_ReturnType Dem_ClientGetNumberOfEventMemoryEntries(
     }
     return ret;
 }
+#endif
 
 #if (DEM_SUPPRESSION_SUPPORT == DEM_DTC_SUPPRESSION)
 /**
@@ -3011,6 +3019,7 @@ DEM_LOCAL Std_ReturnType Dem_ClientSetDTCSuppression(uint8 ClientId, boolean Sup
 #endif
 
 #if (DEM_DCM_CLIENT_NUMBER > 0u)
+#if ((DEM_SUPPORT_GETDTCSTATUSAVAILABILITYMASK_API == STD_ON) || (DEM_SUPPORT_SETDTCFILTER_AND_GETNUMBER_API == STD_ON))
 /**
  * @brief Gets the DTC Status availability mask of the selected fault memory.
  */
@@ -3035,7 +3044,9 @@ DEM_LOCAL Std_ReturnType Dem_ClientGetDTCStatusAvailabilityMask(
 #endif
     return ret;
 }
+#endif
 
+#if (DEM_SUPPORT_GETSTATUSOFDTC_API == STD_ON)
 /**
  * @brief Get the current Uds status of a selected DTC
  */
@@ -3092,8 +3103,9 @@ DEM_LOCAL Std_ReturnType Dem_ClientGetStatusOfDTC(
     }
     return ret;
 }
+#endif
 
-#if (DEM_FEATURE_DCM_0X19_0X09_ENABLE == STD_ON)
+#if (DEM_SUPPORT_GETSEVERITYOFDTC_API == STD_ON)
 /**
  * @brief Get the severity of a selected DTC
  */
@@ -3262,6 +3274,7 @@ DEM_LOCAL void
     Dem_SetFilterData(ClientId, filterData);
 }
 
+#if (DEM_SUPPORT_SETDTCFILTER_AND_GETNUMBER_API == STD_ON)
 /* PRQA S 3473, 4399, 4461,6040 ++ */ /* VL_Dem_3473, VL_Dem_4399, VL_Dem_4461,VL_MTR_Dem_STPAR */
 /**
  * @brief Initializes a DTC filter with the given criteria.
@@ -3374,8 +3387,10 @@ DEM_LOCAL Std_ReturnType Dem_ClientSetDTCFilter(
     return ret;
 }
 /* PRQA S 3473, 4399, 4461,6040 -- */
+#endif
 
-#if (DEM_OBDII_SUPPORT == STD_ON)
+#if ((DEM_OBDII_SUPPORT == STD_ON) && (DEM_PERMANENT_MEMORY_NUMBER > 0u))
+#if (DEM_SUPPORT_SETDTCFILTER_AND_GETNUMBER_API == STD_ON)
 /**
  * @brief         Calculates the number of filtered DTCs for permanent memory.
  */
@@ -3404,6 +3419,7 @@ DEM_LOCAL uint16 Dem_FilterDataCountMatchesInPermanentMemory(uint8 ClientId)
     }
     return numberOfEvents;
 }
+#endif
 #endif
 
 /* PRQA S 1258,6030,6070 ++ */ /* VL_Dem_1258,VL_MTR_Dem_STMIF,VL_MTR_Dem_STCAL */
@@ -3463,6 +3479,7 @@ DEM_LOCAL Std_ReturnType Dem_FilterDataFilterForEventMatch(uint8 DcmClientId, De
 }
 /* PRQA S 1258,6030,6070 -- */
 
+#if (DEM_SUPPORT_SETDTCFILTER_AND_GETNUMBER_API == STD_ON)
 /**
  * @brief Calculates the number of filtered events in a standard event memory.
  */
@@ -3485,7 +3502,9 @@ DEM_LOCAL uint16 Dem_FilterDataCountMatchesInEventMemory(uint8 DcmClientId)
     }
     return numberOfEvents;
 }
+#endif
 
+#if (DEM_SUPPORT_SETDTCFILTER_AND_GETNUMBER_API == STD_ON)
 /**
  * @brief Fetch number of DTCs matching the client specific filter settings.
  */
@@ -3507,6 +3526,7 @@ DEM_LOCAL uint16 Dem_ClientFilterNumberMemory(uint8 ClientId)
     }
     return numberOfEvents;
 }
+#endif
 
 #if (DEM_RESET_CONFIRMED_BIT_ON_OVERFLOW == STD_ON)
 /* PRQA S 1252 ++ */ /* VL_Dem_1252 */
@@ -3668,6 +3688,7 @@ DEM_LOCAL Dem_EventIdType Dem_FilterDataFilterMemoryChrono(uint8 ClientId, const
 #endif
 
 #if (DEM_OBDII_SUPPORT == STD_ON)
+#if (DEM_PERMANENT_MEMORY_NUMBER > 0u)
 /**
  * @brief         Iterates events in permanent memory matching the Dcm DTC filter.
  */
@@ -3703,6 +3724,7 @@ DEM_LOCAL Dem_EventIdType Dem_FilterDataFilterPermanentByEvent(uint8 ClientId, c
     return eventId;
 }
 #endif
+#endif
 
 /**
  * @brief Get the DTC filter function corresponding to the DTC filtering strategy.
@@ -3722,9 +3744,11 @@ DEM_LOCAL Dem_FilterDataFuncPtrType
         lDTCFilterFunction = Dem_FilterDataFilterMemoryByEvent;
         break;
 #if (DEM_OBDII_SUPPORT == STD_ON)
+#if (DEM_PERMANENT_MEMORY_NUMBER > 0u)
     case Dem_FilterDataFilterEventBasedPermanentMemory:
         lDTCFilterFunction = Dem_FilterDataFilterPermanentByEvent;
         break;
+#endif
 #endif
     default:
         lDTCFilterFunction = Dem_FilterDataFilterMemoryByEvent;
@@ -3733,6 +3757,9 @@ DEM_LOCAL Dem_FilterDataFuncPtrType
     return lDTCFilterFunction;
 }
 
+#if (                                                                                                        \
+    (DEM_SUPPORT_GETNEXT_FILTEREDDTC_API == STD_ON) || (DEM_SUPPORT_GETNEXT_FILTEREDDTCANDFDC_API == STD_ON) \
+    || (DEM_SUPPORT_GETNEXT_FILTEREDDTCANDSEVERITY_API == STD_ON))
 /**
  * @brief Get the next matching event the filter criteria set with Dem_ClientSetDTCFilter
  */
@@ -3766,13 +3793,13 @@ DEM_LOCAL Std_ReturnType Dem_FilterDataGetNextFilteredDTC(uint8 ClientId, Dem_Fi
         }
         FilterResult->DTCStatus = (uint8)(Dem_DTCApplyExternalStatus(nextEvent, Dem_GetDTCUDSStatus(nextEvent)));
         FilterResult->DTCStatus &= Dem_GetDTCStatusMaskByMem(memIndex);
-#if (DEM_FEATURE_DCM_0X19_0X14_ENABLE == STD_ON)
+#if (DEM_SUPPORT_GETNEXT_FILTEREDDTCANDFDC_API == STD_ON)
         if (Dem_FilterDataCheckUseFdc(dcmClientId) == TRUE)
         {
             FilterResult->FDC = Dem_FilterDataGetFDC(dcmClientId);
         }
 #endif
-#if ((DEM_FEATURE_DCM_0X19_0X08_ENABLE == STD_ON) || (DEM_FEATURE_DCM_0X19_0X42_ENABLE == STD_ON))
+#if (DEM_SUPPORT_GETNEXT_FILTEREDDTCANDSEVERITY_API == STD_ON)
         if (Dem_FilterDataCheckUseSeverity(dcmClientId) == TRUE)
         {
             FilterResult->Severity       = Dem_GetCfgSeverityOfDTC(Dem_GetDTCRefOfEvent(nextEvent));
@@ -3784,7 +3811,11 @@ DEM_LOCAL Std_ReturnType Dem_FilterDataGetNextFilteredDTC(uint8 ClientId, Dem_Fi
     return ret;
 }
 /* PRQA S 6070 -- */
+#endif
 
+#if (                                                                                                        \
+    (DEM_SUPPORT_GETNEXT_FILTEREDDTC_API == STD_ON) || (DEM_SUPPORT_GETNEXT_FILTEREDDTCANDFDC_API == STD_ON) \
+    || (DEM_SUPPORT_GETNEXT_FILTEREDDTCANDSEVERITY_API == STD_ON))
 /**
  * @brief         Get the next matching event the filter criteria set with Dem_ClientSetDTCFilter
  * @param[in]     ClientId: Unique client id, assigned to the instance of the calling module
@@ -3800,6 +3831,7 @@ DEM_LOCAL_INLINE Std_ReturnType Dem_ClientGetNextFilteredDTC(uint8 ClientId, Dem
 {
     return Dem_FilterDataGetNextFilteredDTC(ClientId, FilterResult);
 }
+#endif
 
 #if (DEM_MAX_SIZE_FREEZEFRAME > 0u)
 
@@ -3820,6 +3852,8 @@ DEM_LOCAL_INLINE boolean Dem_ClientCheckFreezeFrameFilterSet(uint8 ClientId)
     /* PRQA S 4404 -- */
 }
 
+#if (DEM_SUPPORT_SETFREEZEFRAMERECORD_AND_GET_API == STD_ON)
+#if (DEM_MAX_SIZE_FREEZEFRAME > 0u)
 /**
  * @brief Sets a freeze frame record filter with the given criteria.
  */
@@ -3860,6 +3894,8 @@ DEM_LOCAL Std_ReturnType Dem_ClientStartFreezeFrameIterator(uint8 ClientId, Dem_
     Dem_FFIteratorStartIterator(dcmClientId, lDtcFormat, memoryIndex);
     return E_OK;
 }
+#endif
+#endif
 
 /**
  * @brief         Gets the total number of stored FreezeFrame records
@@ -3896,6 +3932,7 @@ DEM_LOCAL_INLINE Std_ReturnType Dem_ClientGetNextFreezeFrameRecord(uint8 ClientI
 }
 #endif
 
+#if (DEM_SUPPORT_GETDTCOCCURRENCETIME_API == STD_ON)
 /**
  * @brief Get a DTC based on occurrence time.
  */
@@ -3933,6 +3970,7 @@ DEM_LOCAL Std_ReturnType Dem_ClientGetDTCByOccurrenceTime(uint8 ClientId, Dem_DT
     }
     return ret;
 }
+#endif
 
 /**
  * @brief         Test if the DTC record update was requested
@@ -3946,8 +3984,8 @@ DEM_LOCAL Std_ReturnType Dem_ClientGetDTCByOccurrenceTime(uint8 ClientId, Dem_DT
  */
 DEM_LOCAL_INLINE boolean Dem_ClientCheckDTCRecordUpdateRequested(uint8 ClientId)
 {
-    Dem_ReadoutBufferEntryType readoutBuffer = Dem_ClientGetReadoutBuffer(Dem_GetDcmClientIdOfClient(ClientId));
-    return (readoutBuffer.State != DEM_READOUTBUFFER_STATUS_UNUSED); /* PRQA S 4404 */ /* VL_Dem_4404 */
+    const Dem_ReadoutBufferEntryType* readoutBuffer = Dem_ClientGetReadoutBuffer(Dem_GetDcmClientIdOfClient(ClientId));
+    return (readoutBuffer->State != DEM_READOUTBUFFER_STATUS_UNUSED); /* PRQA S 4404 */ /* VL_Dem_4404 */
 }
 
 /**
@@ -3969,13 +4007,13 @@ DEM_LOCAL Std_ReturnType Dem_ClientSelectExtendedDataRecord(
         if (Dem_ClientCheckDTCRecordUpdateDisabled(ClientId) == TRUE)
         {
 #if (DEM_EXTENDED_DATA_CLASS_NUMBER > 0u)
-            uint8                           dcmClientId   = Dem_GetDcmClientIdOfClient(ClientId);
-            Dem_ReadoutBufferEntryType      readoutBuffer = Dem_ClientGetReadoutBuffer(dcmClientId);
-            Dem_ReadoutBufferEDIteratorType lEDIterator   = readoutBuffer.ExtendedIterator;
-            Dem_EventIdType                 eventId       = readoutBuffer.EventId;
-            Dem_MemStateInfoConstPtrType    memoryInfo    = Dem_MemStateInfoInit(readoutBuffer.MemIndex);
-            Dem_DTCAttRefNumType            lDTCAttr      = Dem_GetDTCAttr(eventId);
-            Dem_EDRefNumType                lEDRef        = Dem_GetEDRefOfDTCAttr(lDTCAttr);
+            uint8                             dcmClientId   = Dem_GetDcmClientIdOfClient(ClientId);
+            const Dem_ReadoutBufferEntryType* readoutBuffer = Dem_ClientGetReadoutBuffer(dcmClientId);
+            Dem_ReadoutBufferEDIteratorType   lEDIterator   = readoutBuffer->ExtendedIterator;
+            Dem_EventIdType                   eventId       = readoutBuffer->EventId;
+            Dem_MemStateInfoConstPtrType      memoryInfo    = Dem_MemStateInfoInit(readoutBuffer->MemIndex);
+            Dem_DTCAttRefNumType              lDTCAttr      = Dem_GetDTCAttr(eventId);
+            Dem_EDRefNumType                  lEDRef        = Dem_GetEDRefOfDTCAttr(lDTCAttr);
 
             if (lEDRef != DEM_ATTRI_INVALID_EXTENDDATA)
             {
@@ -4034,8 +4072,8 @@ DEM_LOCAL Std_ReturnType Dem_ClientSelectExtendedDataRecord(
  */
 DEM_LOCAL_INLINE boolean Dem_ClientCheckExtendedRecordSelected(uint8 ClientId)
 {
-    Dem_ReadoutBufferEntryType readoutBuffer = Dem_ClientGetReadoutBuffer(Dem_GetDcmClientIdOfClient(ClientId));
-    return readoutBuffer.ExtendedIterator.ExtendedRecordSelected;
+    const Dem_ReadoutBufferEntryType* readoutBuffer = Dem_ClientGetReadoutBuffer(Dem_GetDcmClientIdOfClient(ClientId));
+    return readoutBuffer->ExtendedIterator.ExtendedRecordSelected;
 }
 
 /**
@@ -4050,10 +4088,11 @@ DEM_LOCAL_INLINE boolean Dem_ClientCheckExtendedRecordSelected(uint8 ClientId)
  */
 DEM_LOCAL_INLINE boolean Dem_ClientCheckFFRecordSelected(uint8 ClientId)
 {
-    Dem_ReadoutBufferEntryType readoutBuffer = Dem_ClientGetReadoutBuffer(Dem_GetDcmClientIdOfClient(ClientId));
-    return readoutBuffer.FFIterator.SnapshotSelected;
+    const Dem_ReadoutBufferEntryType* readoutBuffer = Dem_ClientGetReadoutBuffer(Dem_GetDcmClientIdOfClient(ClientId));
+    return readoutBuffer->FFIterator.SnapshotSelected;
 }
 
+#if (DEM_EXTENDED_DATA_CLASS_NUMBER > 0u)
 /* PRQA S 1252 ++ */ /* VL_Dem_1252 */
 /**
  * @brief Calculates the size of an extended data record
@@ -4066,15 +4105,18 @@ DEM_LOCAL uint32 Dem_GetSizeOfEDCalculateSize(
 {
     uint32 sizeOfExtRec = 0u;
     /** Test if event has a memory entry */
-    if (Dem_ReadoutBufferCheckStoredDataAvailable(DcmClientId) == TRUE)
+    if (MemoryIndex != DEM_MEM_INVALID_MEMORY_INDEX)
     {
-        if ((Dem_GetHaveUserDataOfEDRC(CfgEDIndex) == FALSE)
-            /** Test if requested record is stored for event */
-            || (Dem_CheckEDStored(MemoryIndex, ExtendedEntryIndex) == TRUE)) /* PRQA S 3415 */ /* VL_Dem_3415 */
+        if (Dem_ReadoutBufferCheckStoredDataAvailable(DcmClientId) == TRUE)
         {
-            sizeOfExtRec = (uint32)Dem_GetEDSizeOfEDRC(CfgEDIndex) + 1u;
+            if ((Dem_GetHaveUserDataOfEDRC(CfgEDIndex) == FALSE)
+                /** Test if requested record is stored for event */
+                || (Dem_CheckEDStored(MemoryIndex, ExtendedEntryIndex) == TRUE)) /* PRQA S 3415 */ /* VL_Dem_3415 */
+            {
+                sizeOfExtRec = (uint32)Dem_GetEDSizeOfEDRC(CfgEDIndex) + 1u;
+            }
+            /** else sizeOfExtRec is already set to 0 */
         }
-        /** else sizeOfExtRec is already set to 0 */
     }
     /** else sizeOfExtRec is already set to 0 */
 
@@ -4082,7 +4124,6 @@ DEM_LOCAL uint32 Dem_GetSizeOfEDCalculateSize(
 }
 /* PRQA S 1252 -- */
 
-#if (DEM_EXTENDED_DATA_CLASS_NUMBER > 0u)
 /**
  * @brief Copies an extended data record into the given buffer
  */
@@ -4172,7 +4213,6 @@ DEM_LOCAL boolean Dem_ClientGetNextEDChecktRecordMatch(uint8 ClientId, uint8 Rec
     }
     return match;
 }
-#endif
 
 /**
  * @brief Get the size of one or all extended data record(s)
@@ -4190,9 +4230,34 @@ DEM_LOCAL Std_ReturnType
     recordNumber                                = lEDIterator.ExtendedDataNumber;
     Dem_NvBlockNumType memoryIndex              = lEDIterator.MemoryIndex;
 
-    if (memoryIndex != DEM_MEM_INVALID_MEMORY_INDEX)
+    if (recordNumber < DEM_RECORD_NUMBER_SPECIAL)
     {
-        if (recordNumber < DEM_RECORD_NUMBER_SPECIAL)
+        uint8                  extendedEntryIndex = 0u;
+        Dem_EDRecordRefNumType lEDRNStart         = lEDIterator.EDRNStart;
+        Dem_EDRecordRefNumType lEDRNEnd           = lEDIterator.EDRNEnd;
+        /** Look for one specific record */
+        for (; lEDRNStart < lEDRNEnd; ++lEDRNStart)
+        {
+            Dem_EDRecordRefNumType CfgEDIndex = Dem_GetValueOfEDRecordRef(lEDRNStart);
+            if (recordNumber == Dem_GetEDRNumberOfEDRC(CfgEDIndex))
+            {
+                /** If the record is supported, the result is always 'OK' */
+                ret = E_OK;
+                accumulatedSize =
+                    Dem_GetSizeOfEDCalculateSize(CfgEDIndex, dcmClientId, memoryIndex, extendedEntryIndex);
+                break;
+            }
+            ++extendedEntryIndex;
+        }
+    }
+    else
+    {
+        /** Look for all supported records */
+        if ((recordNumber == DEM_RECORD_NUMBER_ALL)
+#if (DEM_OBDII_SUPPORT == STD_ON)
+            || (recordNumber == DEM_RECORD_NUMBER_OBDALL)
+#endif
+        )
         {
             uint8                  extendedEntryIndex = 0u;
             Dem_EDRecordRefNumType lEDRNStart         = lEDIterator.EDRNStart;
@@ -4200,46 +4265,18 @@ DEM_LOCAL Std_ReturnType
             /** Look for one specific record */
             for (; lEDRNStart < lEDRNEnd; ++lEDRNStart)
             {
-                Dem_EDRecordRefNumType CfgEDIndex = Dem_GetValueOfEDRecordRef(lEDRNStart);
-                if (recordNumber == Dem_GetEDRNumberOfEDRC(CfgEDIndex))
+                Dem_EDRecordRefNumType cfgEDIndex = Dem_GetValueOfEDRecordRef(lEDRNStart);
+                /** If the extended data number matches */
+                if (Dem_ClientGetNextEDChecktRecordMatch(ClientId, recordNumber, Dem_GetEDRNumberOfEDRC(cfgEDIndex))
+                    == TRUE)
                 {
-                    /** If the record is supported, the result is always 'OK' */
+                    /** At least one record found - the result should be negative in case the event doesn't support
+                     * any of the requested extended records. */
                     ret = E_OK;
-                    accumulatedSize =
-                        Dem_GetSizeOfEDCalculateSize(CfgEDIndex, dcmClientId, memoryIndex, extendedEntryIndex);
-                    break;
+                    accumulatedSize +=
+                        Dem_GetSizeOfEDCalculateSize(cfgEDIndex, dcmClientId, memoryIndex, extendedEntryIndex);
                 }
-                ++extendedEntryIndex;
-            }
-        }
-        else
-        {
-            /** Look for all supported records */
-            if ((recordNumber == DEM_RECORD_NUMBER_ALL)
-#if (DEM_OBDII_SUPPORT == STD_ON)
-                || (recordNumber == DEM_RECORD_NUMBER_OBDALL)
-#endif
-            )
-            {
-                uint8                  extendedEntryIndex = 0u;
-                Dem_EDRecordRefNumType lEDRNStart         = lEDIterator.EDRNStart;
-                Dem_EDRecordRefNumType lEDRNEnd           = lEDIterator.EDRNEnd;
-                /** Look for one specific record */
-                for (; lEDRNStart < lEDRNEnd; ++lEDRNStart)
-                {
-                    Dem_EDRecordRefNumType cfgEDIndex = Dem_GetValueOfEDRecordRef(lEDRNStart);
-                    /** If the extended data number matches */
-                    if (Dem_ClientGetNextEDChecktRecordMatch(ClientId, recordNumber, Dem_GetEDRNumberOfEDRC(cfgEDIndex))
-                        == TRUE)
-                    {
-                        /** At least one record found - the result should be negative in case the event doesn't support
-                         * any of the requested extended records. */
-                        ret = E_OK;
-                        accumulatedSize +=
-                            Dem_GetSizeOfEDCalculateSize(cfgEDIndex, dcmClientId, memoryIndex, extendedEntryIndex);
-                    }
-                    extendedEntryIndex += 1u;
-                }
+                extendedEntryIndex += 1u;
             }
         }
     }
@@ -4298,17 +4335,17 @@ DEM_LOCAL Std_ReturnType Dem_ClientGetNextExtendedDataRecord(uint8 ClientId, uin
 #endif
     return ret;
 }
-
+#endif
 /**
  * @brief Initializes the iterator for the selected event.
  */
 DEM_LOCAL void Dem_ReadoutBufferSelectFF(uint8 DcmClientId, uint8 RecordNumber)
 {
-    Dem_ReadoutBufferEntryType      readoutBuffer = Dem_ClientGetReadoutBuffer(DcmClientId);
-    Dem_ReadoutBufferFFIteratorType lFFIterator   = readoutBuffer.FFIterator;
+    const Dem_ReadoutBufferEntryType* readoutBuffer = Dem_ClientGetReadoutBuffer(DcmClientId);
+    Dem_ReadoutBufferFFIteratorType   lFFIterator   = readoutBuffer->FFIterator;
 #if (DEM_MAX_SIZE_FREEZEFRAME > 0u)
-    Dem_EventIdType              eventId    = readoutBuffer.EventId;
-    Dem_MemStateInfoConstPtrType memoryInfo = Dem_MemStateInfoInit(readoutBuffer.MemIndex);
+    Dem_EventIdType              eventId    = readoutBuffer->EventId;
+    Dem_MemStateInfoConstPtrType memoryInfo = Dem_MemStateInfoInit(readoutBuffer->MemIndex);
 
     Dem_FFEntryIteratorInit(eventId, Dem_MemoryFindIndex(memoryInfo, eventId), &(lFFIterator.FFEntryIter));
 #endif
@@ -4334,9 +4371,12 @@ DEM_LOCAL void Dem_GetFFInitFFIterator(uint8 DcmClientId)
 #endif
     case Dem_ReadoutBuffer_FF_Srec:
     {
-        Dem_ReadoutBufferEntryType readoutBuffer = Dem_ClientGetReadoutBuffer(DcmClientId);
+        const Dem_ReadoutBufferEntryType* readoutBuffer = Dem_ClientGetReadoutBuffer(DcmClientId);
 #if (DEM_MAX_SIZE_FREEZEFRAME > 0u)
-        Dem_FFEntryIteratorInit(readoutBuffer.EventId, lFFIterator.FFEntryIter.MemoryIndex, &(lFFIterator.FFEntryIter));
+        Dem_FFEntryIteratorInit(
+            readoutBuffer->EventId,
+            lFFIterator.FFEntryIter.MemoryIndex,
+            &(lFFIterator.FFEntryIter));
 #endif
         break;
     }
@@ -4425,19 +4465,19 @@ DEM_LOCAL Std_ReturnType Dem_ClientSelectFirstSource(
  */
 DEM_LOCAL Std_ReturnType Dem_ClientGetSizeOfFFSelection(uint8 ClientId, uint32* SizeOfFreezeFrame)
 {
-    Std_ReturnType             ret           = DEM_NO_SUCH_ELEMENT;
-    uint8                      dcmClientId   = Dem_GetDcmClientIdOfClient(ClientId);
-    Dem_ReadoutBufferEntryType readoutBuffer = Dem_ClientGetReadoutBuffer(dcmClientId);
+    Std_ReturnType                    ret           = DEM_NO_SUCH_ELEMENT;
+    uint8                             dcmClientId   = Dem_GetDcmClientIdOfClient(ClientId);
+    const Dem_ReadoutBufferEntryType* readoutBuffer = Dem_ClientGetReadoutBuffer(dcmClientId);
 #if ((DEM_MAX_SIZE_FREEZEFRAME > 0u) || (DEM_OBDII_SUPPORT == STD_ON))
-    Dem_ReadoutBufferFFIteratorType lFFIterator  = readoutBuffer.FFIterator;
+    Dem_ReadoutBufferFFIteratorType lFFIterator  = readoutBuffer->FFIterator;
     uint8                           recordNumber = lFFIterator.RecordNumber;
 
     if (recordNumber == DEM_DCM_SNAPSHOTDATARECORD_OBD)
     {
 #if (DEM_OBDII_SUPPORT == STD_ON)
         Dem_NvBlockNumType memoryIndex = lFFIterator.FFEntryIter.MemoryIndex;
-        Dem_EventIdType    eventId     = readoutBuffer.EventId;
-        if (Dem_GetPrimaryRefOfMemSet(Dem_GetMemorySetRefOfClient(ClientId)) == readoutBuffer.MemIndex)
+        Dem_EventIdType    eventId     = readoutBuffer->EventId;
+        if (Dem_GetPrimaryRefOfMemSet(Dem_GetMemorySetRefOfClient(ClientId)) == readoutBuffer->MemIndex)
         {
             ret = Dem_GetSizeOfFFSelectionCalculateSizeObd(eventId, memoryIndex, SizeOfFreezeFrame);
         }
@@ -4463,17 +4503,17 @@ DEM_LOCAL Std_ReturnType Dem_ClientGetSizeOfFFSelection(uint8 ClientId, uint32* 
  */
 DEM_LOCAL Std_ReturnType Dem_GetNextFFDataObd(uint8 ClientId, Dem_DestinationBufferPtrType DestinationBuffer)
 {
-    uint8                           dcmClientId   = Dem_GetDcmClientIdOfClient(ClientId);
-    Dem_ReadoutBufferEntryType      readoutBuffer = Dem_ClientGetReadoutBuffer(dcmClientId);
-    Dem_ReadoutBufferFFIteratorType lFFIterator   = readoutBuffer.FFIterator;
-    Dem_FFEntryIterType             lFFEntryIter  = lFFIterator.FFEntryIter;
-    Std_ReturnType                  ret           = DEM_NO_SUCH_ELEMENT;
+    uint8                             dcmClientId   = Dem_GetDcmClientIdOfClient(ClientId);
+    const Dem_ReadoutBufferEntryType* readoutBuffer = Dem_ClientGetReadoutBuffer(dcmClientId);
+    Dem_ReadoutBufferFFIteratorType   lFFIterator   = readoutBuffer->FFIterator;
+    Dem_FFEntryIterType               lFFEntryIter  = lFFIterator.FFEntryIter;
+    Std_ReturnType                    ret           = DEM_NO_SUCH_ELEMENT;
 
     if (lFFEntryIter.FFRNStart < lFFEntryIter.FFRNEnd)
     {
         if (Dem_GetNextFFDataCheckRecordMatch(lFFIterator.RecordNumber, 0x00) == TRUE)
         {
-            if (Dem_GetPrimaryRefOfMemSet(Dem_GetMemorySetRefOfClient(ClientId)) == readoutBuffer.MemIndex)
+            if (Dem_GetPrimaryRefOfMemSet(Dem_GetMemorySetRefOfClient(ClientId)) == readoutBuffer->MemIndex)
             {
                 ret = Dem_GetNextFFDataCopyNextRecordObd(readoutBuffer, DestinationBuffer);
             }
@@ -4492,21 +4532,21 @@ DEM_LOCAL Std_ReturnType Dem_GetNextFFDataObd(uint8 ClientId, Dem_DestinationBuf
 /* PRQA S 6070 ++ */ /* VL_MTR_Dem_STCAL */
 DEM_LOCAL Std_ReturnType Dem_GetNextFFDataStd(uint8 ClientId, Dem_DestinationBufferPtrType DestinationBuffer)
 {
-    uint8                           dcmClientId   = Dem_GetDcmClientIdOfClient(ClientId);
-    Dem_ReadoutBufferEntryType      readoutBuffer = Dem_ClientGetReadoutBuffer(dcmClientId);
-    Dem_ReadoutBufferFFIteratorType lFFIterator   = readoutBuffer.FFIterator;
-    Dem_FFEntryIterType             lFFEntryIter  = lFFIterator.FFEntryIter;
-    Std_ReturnType                  ret           = DEM_NO_SUCH_ELEMENT;
+    uint8                             dcmClientId   = Dem_GetDcmClientIdOfClient(ClientId);
+    const Dem_ReadoutBufferEntryType* readoutBuffer = Dem_ClientGetReadoutBuffer(dcmClientId);
+    Dem_ReadoutBufferFFIteratorType   lFFIterator   = readoutBuffer->FFIterator;
+    Dem_FFEntryIterType               lFFEntryIter  = lFFIterator.FFEntryIter;
+    Std_ReturnType                    ret           = DEM_NO_SUCH_ELEMENT;
 
     while (Dem_FFEntryIteratorExists(&lFFEntryIter) == TRUE) /* PRQA S 0771 */ /* VL_Dem_0771 */
     {
         uint8                lFFEntryIndex = lFFEntryIter.FFEntryIndex;
         uint8                recordNumber  = lFFIterator.RecordNumber;
-        Dem_EventIdType      eventId       = readoutBuffer.EventId;
+        Dem_EventIdType      eventId       = readoutBuffer->EventId;
         Dem_DTCAttRefNumType lDTCAttr      = Dem_GetDTCAttr(eventId);
 
 #if (DEM_GENERAL_FF_RECNUM_CALCULATED == STD_ON)
-        if ((Dem_GetFFRecordOfMemory(readoutBuffer.MemIndex) == DEM_FF_RECNUM_CALCULATED)
+        if ((Dem_GetFFRecordOfMemory(readoutBuffer->MemIndex) == DEM_FF_RECNUM_CALCULATED)
             && (recordNumber < Dem_GetMaxNumFFROfDTCAttr(lDTCAttr)))
         {
             /** overshoot -> snapshot not supported */
@@ -4574,9 +4614,9 @@ DEM_LOCAL Std_ReturnType Dem_GetNextFFDataStd(uint8 ClientId, Dem_DestinationBuf
  */
 DEM_LOCAL Std_ReturnType Dem_ClientSelectNextSource(uint8 DcmClientId)
 {
-    Std_ReturnType                  ret;
-    Dem_ReadoutBufferEntryType      readoutBuffer = Dem_ClientGetReadoutBuffer(DcmClientId);
-    Dem_ReadoutBufferFFIteratorType lFFIterator   = readoutBuffer.FFIterator;
+    Std_ReturnType                    ret;
+    const Dem_ReadoutBufferEntryType* readoutBuffer = Dem_ClientGetReadoutBuffer(DcmClientId);
+    Dem_ReadoutBufferFFIteratorType   lFFIterator   = readoutBuffer->FFIterator;
 
     if (lFFIterator.RecordNumber == DEM_DCM_SNAPSHOTDATARECORD_ALL)
     {

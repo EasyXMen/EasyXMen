@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -40,27 +40,27 @@
   \li VL_WdgIf_0380
     Reason: Macro definitions are necessary
     Risk: No risk.
-    Prevention: Functional reliability guaranteed by design.
+    Prevention: None.
 
   \li VL_WdgIf_0553
     Reason: The usage of this file depends on the config
     Risk: No risk.
-    Prevention: Functional reliability guaranteed by design.
+    Prevention: None.
 
   \li VL_WdgIf_3432
     Reason: Function-like macros are used to allow more efficient code.
     Risk: No risk.
-    Prevention: Functional reliability guaranteed by design.
+    Prevention: None.
 
   \li VL_MTR_WdgIf_CONF
     Reason: Some special files have less or no code, allowing for the reduction of useless comments.
     Risk: No risk.
-    Prevention: Functional reliability guaranteed by design.
+    Prevention: None.
 
   \li VL_WdgIf_3472
     Reason: Macro definitions for easy reuse.
     Risk: No risk.
-    Prevention: Functional reliability guaranteed by design.
+    Prevention: None.
 
 */
 
@@ -98,7 +98,7 @@ extern "C" {
 
 /* ================================================= type definition ================================================ */
 /* Type for function macro of wdg driver */
-typedef struct Wdg_GeneralTypeTag
+typedef struct
 {
     /* PRQA S 3432 ++ */ /* VL_WdgIf_3432 */
     void (*Wdg_SetTriggerCondition)(uint16 timeout);
@@ -107,7 +107,7 @@ typedef struct Wdg_GeneralTypeTag
 } Wdg_GeneralType;
 
 /* Type for wdg driver */
-typedef struct WdgIf_DeviceTypeTag
+typedef struct
 {
     Wdg_GeneralType WdgRef;
 } WdgIf_DeviceType;

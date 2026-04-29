@@ -1,6 +1,6 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
- * SPDX-License-Identifier: LGPL-2.1-only-with-exception OR  LicenseRef-Commercial-License
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
+ * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
  * GNU Lesser General Public License as published by the Free Software Foundation; version 2.1.
@@ -10,7 +10,8 @@
  * You should have received a copy of the GNU Lesser General Public License along with this library;
  * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  * or see <https://www.gnu.org/licenses/>.
- *
+ */
+/*
  ********************************************************************************
  **                                                                            **
  **  FILENAME    : Os_Alarm.c                                                  **
@@ -197,7 +198,9 @@ StatusType Os_GetAlarm(AlarmType AlarmID, TickRefType Tick) /* PRQA S 1505 */ /*
  * REQ ID               <None>
  */
 /******************************************************************************/
+/* PRQA S 6030, 6010 ++ */ /* VL_MTR_Os_STMIF, VL_MTR_Os_STCYC */
 void Os_WorkAlarm(Os_CounterType CounterID) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
+/* PRQA S 6030, 6010 -- */
 {
     Os_TickType  counterCurval;
     Os_TickType  counterMaxAllowedValue;
@@ -772,9 +775,9 @@ StatusType GetAlarm(AlarmType AlarmID, TickRefType Tick)
     {
         err = E_OS_PARAM_POINTER;
     }
-    /* PRQA S 3432 ++ */ /* VL_Os_3432 */
+    /* PRQA S 3432, 2986 ++ */ /* VL_Os_3432, VL_Os_2986 */
     else if (CHECK_ID_INVALID(AlarmID, Os_CfgAlarmMax_Inf))
-    /* PRQA S 3432 -- */
+    /* PRQA S 3432, 2986 -- */
     {
         err = E_OS_ID;
     }
@@ -831,7 +834,9 @@ StatusType GetAlarm(AlarmType AlarmID, TickRefType Tick)
 #if (CFG_ERRORHOOK == TRUE)
     if (err != E_OK)
     {
+        /* PRQA S 3138 ++ */ /* VL_Os_3138 */
         Os_TraceErrorHook(OSError_Save_GetAlarm(AlarmID, Tick), OSServiceId_GetAlarm, err);
+        /* PRQA S 3138 -- */
     }
 #endif
 
@@ -887,9 +892,9 @@ StatusType GetAlarmBase(AlarmType AlarmID, AlarmBaseRefType Info)
     {
         err = E_OS_PARAM_POINTER;
     }
-    /* PRQA S 3432 ++ */ /* VL_Os_3432 */
+    /* PRQA S 3432, 2986 ++ */ /* VL_Os_3432, VL_Os_2986 */
     else if (CHECK_ID_INVALID(AlarmID, Os_CfgAlarmMax_Inf))
-    /* PRQA S 3432 -- */
+    /* PRQA S 3432, 2986 -- */
     {
         err = E_OS_ID;
     }
@@ -948,7 +953,9 @@ StatusType GetAlarmBase(AlarmType AlarmID, AlarmBaseRefType Info)
 #if (CFG_ERRORHOOK == TRUE)
     if (err != E_OK)
     {
+        /* PRQA S 3138 ++ */ /* VL_Os_3138 */
         Os_TraceErrorHook(OSError_Save_GetAlarmBase(AlarmID, Info), OSServiceId_GetAlarmBase, err);
+        /* PRQA S 3138 -- */
     }
 #endif
 
@@ -996,9 +1003,9 @@ StatusType CancelAlarm(AlarmType AlarmID)
 
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
 
-    /* PRQA S 3432 ++ */ /* VL_Os_3432 */
+    /* PRQA S 3432, 2986 ++ */ /* VL_Os_3432, VL_Os_2986 */
     if (CHECK_ID_INVALID(AlarmID, Os_CfgAlarmMax_Inf))
-    /* PRQA S 3432 -- */
+    /* PRQA S 3432, 2986 -- */
     {
         err = E_OS_ID;
     }
@@ -1048,7 +1055,9 @@ StatusType CancelAlarm(AlarmType AlarmID)
 #if (CFG_ERRORHOOK == TRUE)
     if (err != E_OK)
     {
+        /* PRQA S 3138 ++ */ /* VL_Os_3138 */
         Os_TraceErrorHook(OSError_Save_CancelAlarm(AlarmID), OSServiceId_CancelAlarm, err);
+        /* PRQA S 3138 -- */
     }
 #endif
 
@@ -1104,9 +1113,9 @@ StatusType SetRelAlarm(AlarmType AlarmID, TickType increment, TickType cycle)
 
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
 
-    /* PRQA S 3432 ++ */ /* VL_Os_3432 */
+    /* PRQA S 3432, 2986 ++ */ /* VL_Os_3432, VL_Os_2986 */
     if (CHECK_ID_INVALID(AlarmID, Os_CfgAlarmMax_Inf))
-    /* PRQA S 3432 -- */
+    /* PRQA S 3432, 2986 -- */
     {
         err = E_OS_ID;
     }
@@ -1154,7 +1163,9 @@ StatusType SetRelAlarm(AlarmType AlarmID, TickType increment, TickType cycle)
 #if (CFG_ERRORHOOK == TRUE)
     if (err != E_OK)
     {
+        /* PRQA S 3138 ++ */ /* VL_Os_3138 */
         Os_TraceErrorHook(OSError_Save_SetRelAlarm(AlarmID, increment, cycle), OSServiceId_SetRelAlarm, err);
+        /* PRQA S 3138 -- */
     }
 #endif
 
@@ -1210,9 +1221,9 @@ StatusType SetAbsAlarm(AlarmType AlarmID, TickType start, TickType cycle)
 
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
 
-    /* PRQA S 3432 ++ */ /* VL_Os_3432 */
+    /* PRQA S 3432, 2986 ++ */ /* VL_Os_3432, VL_Os_2986 */
     if (CHECK_ID_INVALID(AlarmID, Os_CfgAlarmMax_Inf))
-    /* PRQA S 3432 -- */
+    /* PRQA S 3432, 2986 -- */
     {
         err = E_OS_ID;
     }
@@ -1260,7 +1271,9 @@ StatusType SetAbsAlarm(AlarmType AlarmID, TickType start, TickType cycle)
 #if (CFG_ERRORHOOK == TRUE)
     if (err != E_OK)
     {
+        /* PRQA S 3138 ++ */ /* VL_Os_3138 */
         Os_TraceErrorHook(OSError_Save_SetAbsAlarm(AlarmID, start, cycle), OSServiceId_SetAbsAlarm, err);
+        /* PRQA S 3138 -- */
     }
 #endif
 

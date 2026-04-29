@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -38,7 +38,7 @@ extern "C" {
 /**
  * @brief    Define the initialization state of the FVM module.
  */
-typedef enum CDD_FVM_StateTag
+typedef enum
 {
     CDD_FVM_UNINIT, /**<  Initialization state @range 0 */
     CDD_FVM_INIT    /**<  Initialization state @range 1 */
@@ -47,7 +47,7 @@ typedef enum CDD_FVM_StateTag
 /**
  * @brief    Define the mode of the FVM module.
  */
-typedef enum CDD_FVM_ModeTag
+typedef enum
 {
     CDD_FVM_MODE_SINGLE_COUNTER,             /**<  Single counter mode @range 0 */
     CDD_FVM_MODE_SINGLE_TIMESTAMP,           /**<  Single timestamp mode @range 1 */
@@ -59,7 +59,7 @@ typedef enum CDD_FVM_ModeTag
 /**
  * @brief    Define the type of the API.
  */
-typedef enum CDD_FVM_PduTag
+typedef enum
 {
     CDD_FVM_IFPDU, /**<  Interface descriptor descriptor @range 0 */
     CDD_FVM_TPPDU  /**<   Transport protocol descriptor @range 1 */
@@ -68,7 +68,7 @@ typedef enum CDD_FVM_PduTag
 /**
  * @brief    Define the configuration of the freshness value in Tx mode.
  */
-typedef struct CDD_FVM_TxFreshnessConfigTag
+typedef struct
 {
     uint16 FvmFreshnessId; /**<  Indicate the freshness management ID from the SecOCFreshnessValueId configuration item.
                               @range 0 ~ 0xFFFF  */
@@ -79,7 +79,7 @@ typedef struct CDD_FVM_TxFreshnessConfigTag
 /**
  * @brief    Define the configuration of the freshness value in Rx mode.
  */
-typedef struct CDD_FVM_RxFreshnessConfigTag
+typedef struct
 {
     uint16 FvmFreshnessId; /**<  Indicate the freshness management ID from the SecOCFreshnessValueId configuration item.
                               @range 0 ~ 0xFFFF */
@@ -91,7 +91,7 @@ typedef struct CDD_FVM_RxFreshnessConfigTag
 /**
  * @brief    Define a single counter send configuration.
  */
-typedef struct CDD_FVM_TxSingleFreshnessCounterConfigTag
+typedef struct
 {
     uint8 FvmFreshnessLength; /**<  Define the length of freshness, in bits, that needs to be sent. @range 0 ~ 64 */
 } CDD_FVM_TxSingleFreshnessCounterConfigType;
@@ -101,7 +101,7 @@ typedef struct CDD_FVM_TxSingleFreshnessCounterConfigTag
 /**
  * @brief    Define a single counter receive configuration.
  */
-typedef struct CDD_FVM_RxSingleFreshnessCounterConfigTag
+typedef struct
 {
     uint8 FvmFreshnessLength; /**<  Define the freshness length of the actual freshness value, in bits. @range 0 ~ 64 */
     uint16 MaxDeltaCounter;   /**<  Delta counter. @range 0 ~ 0xFFFF */
@@ -112,7 +112,7 @@ typedef struct CDD_FVM_RxSingleFreshnessCounterConfigTag
 /**
  * @brief    Define the PDU corresponding to the synchronization message.
  */
-typedef struct CDD_FVM_SyncMsgCtrlPudTag
+typedef struct
 {
     PduIdType FvMIfTxPduHandleId;   /**<  Indicate the PDU identifier assigned by FVM module. Used by PduR for
                                        PduR_CDD_FVMTransmit. @range 0 ~ 0xFFFF */
@@ -130,7 +130,7 @@ CDD_FVM_MASTER_ECU_ENABLED == STD_ON */
 /**
  * @brief    Define the configuration of the freshness counter.
  */
-typedef struct CDD_FVM_FreshnessCounterConfigTag
+typedef struct
 {
     uint8 CounterPos; /**<  Position of the Counter. @range 0 ~ 64 */
     uint8 CounterLen; /**<  Length of the Counter. @range 0 ~ 64 */
@@ -139,7 +139,7 @@ typedef struct CDD_FVM_FreshnessCounterConfigTag
 /**
  * @brief    Define the structure of the freshness value in the multiple freshness value mode.
  */
-typedef struct CDD_FVM_MultipleFreshnessValueStructureTag
+typedef struct
 {
     CDD_FVM_FreshnessCounterConfigType tirpCnt;     /**<  Indicate the trip counter. @range NA */
     CDD_FVM_FreshnessCounterConfigType resetCnt;    /**<  Indicate the reset counter. @range NA */
@@ -155,7 +155,7 @@ typedef struct CDD_FVM_MultipleFreshnessValueStructureTag
 /**
  * @brief    Define the configuration of the PDU corresponding to the synchronization message from the slave ECU.
  */
-typedef struct CDD_FVM_SlaveSyncMsgPduTag
+typedef struct
 {
     CDD_FVM_PduType pduType;         /**<  Indicate the API type to use for communication with PduR. @range 0 ~ 1 */
     PduIdType       RxPduHandleId;   /**<  Indicate the PDU identifier assigned by FVM module. Used by PduR for
@@ -166,7 +166,7 @@ typedef struct CDD_FVM_SlaveSyncMsgPduTag
 /**
  * @brief    Define slave ECU configurations related to synchronization.
  */
-typedef struct CDD_FVM_SlaveECUSyncConfigTag
+typedef struct
 {
     uint16 FvMSyncMsgId;      /**<  Message ID associated with this message. @range 0 ~ 0xFFFF */
     uint8  FvMTripCntLength;  /**<  Indicate the length of trip counter, in bits. @range 0 ~ 64 */
@@ -201,7 +201,7 @@ typedef struct CDD_FVM_SlaveECUSyncConfigTag
 /**
  * @brief    Define the configuration in Tx Multiple Freshness Truncated Counter mode.
  */
-typedef struct CDD_FVM_TxMultipleFreshnessTruncatedCounterConfigTag
+typedef struct
 {
     /**<  Indicate the ID of the synchronised message frame, the multicounter freshness value
      * for truncation to get reset counter and trip counter information. @range 0 ~ 0xFFFF */
@@ -216,7 +216,7 @@ typedef struct CDD_FVM_TxMultipleFreshnessTruncatedCounterConfigTag
 /**
  * @brief    Define the configuration in Rx Multiple Freshness Truncated Counter mode.
  */
-typedef struct CDD_FVM_RxMultipleFreshnessTruncatedCounterConfigTag
+typedef struct
 {
     /**<  The ID of the synchronised message frame, the multicounter freshness value
      * for truncation to get reset counter and trip counter information. @range 0 ~ 0xFFFF */
@@ -232,7 +232,7 @@ typedef struct CDD_FVM_RxMultipleFreshnessTruncatedCounterConfigTag
 /**
  * @brief    Define the configuration of the PDU corresponding to the synchronization message from the master ECU.
  */
-typedef struct CDD_FVM_MasterSyncMsgPduTag
+typedef struct
 {
     CDD_FVM_PduType pduType;       /**<  Indicate the API type to use for communication with PduR. @range 0 ~ 1 */
     PduIdType       TxPduHandleId; /**<  Indicate the PDU identifier assigned by FVM module. Used by PduR for
@@ -244,7 +244,7 @@ typedef struct CDD_FVM_MasterSyncMsgPduTag
 /**
  * @brief    Define master ECU configurations related to synchronization.
  */
-typedef struct CDD_FVM_MasterConfigTag
+typedef struct
 {
     uint16 FvMSyncMsgId;      /**<  Message ID associated with this message. @range 0 ~ 0xFFFF */
     uint8  FvMTripCntLength;  /**<  Indicate the length of trip counter, in bits. @range 0 ~ 64 */
@@ -266,7 +266,7 @@ typedef struct CDD_FVM_MasterConfigTag
 /**
  * @brief    Define configuration data structure of FVM module.
  */
-typedef struct CDD_FVM_ConfigTag
+typedef struct
 {
 #if (CDD_FVM_MASTER_ECU_CONFIG_NUM > 0u)
     const CDD_FVM_MasterConfigType* FvmMasterEcuConfig; /**<  Point to the structure of the master ECU configurations

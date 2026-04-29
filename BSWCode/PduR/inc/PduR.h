@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -53,11 +53,6 @@
     ModeName:PduR<br>
     RuleSorce:puhua_rules-2024.12.rcf
 
-    \li VL_PduR_Struct
-      Reason:In order to make the module code structure clear, the functions are classified.
-      Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
-
     \li VL_PduR_IndirectUse
       Reason:This pointer variable can be indirectly used in multiple functions.
       Risk: No risk.
@@ -68,20 +63,10 @@
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
 
-    \li VL_PduR_Standard
-      Reason:autosar require.
-      Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
-
     \li VL_PduR_FuncPtrNonConst
       Reason:To adapt to multi-partition and non-partition condition.
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
-
-    \li VL_PduR_DiffProject
-      Reason:May be different in other Configuration projects.
-      Risk: No risk.
-      Prevention: Ensure that the project is working properly through unit testing and functional test.
 
     \li VL_PduR_ConfigDesign
       Reason:Configuration parameter, design needs.
@@ -120,6 +105,27 @@
 
     \li VL_PduR_1334
       Reason: Only parameter name is different.
+      Risk: No risk.
+      Prevention: Ensure that the project is working properly through unit testing.
+
+    \li VL_PduR_3415
+      Reason: Right hand operand of '&&' or '||' is an expression with persistent side effects.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_PduR_1536
+      Reason: The tag '%1s' is declared but not used within this project.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_PduR_0770
+      Reason: Loop back retry logic requires early continuation to simplify error
+              handling and avoid deep nesting.
+      Risk: None control flow is well-defined and reviewed.
+      Prevention: Verified by code review and unit tests; behaviour unchanged.
+
+    \li VL_PduR_1505
+      Reason: In order to make the module code structure clear, the functions are classified.
       Risk: No risk.
       Prevention: Ensure that the project is working properly through unit testing.
 

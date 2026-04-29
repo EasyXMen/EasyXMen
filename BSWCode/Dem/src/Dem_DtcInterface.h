@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -152,6 +152,7 @@ DEM_LOCAL_INLINE void Dem_NotiDtcStatusChanged(
 DEM_LOCAL_INLINE boolean Dem_CheckDTCSuppressed(Dem_EventIdType EventId);
 
 #if (DEM_EVENT_COMBINATION_SUPPORT != DEM_EVCOMB_DISABLED)
+#if (DEM_COMBINATION_NUMBER > 0u)
 /**
  * @brief         Calculate Combine DTC Status
  * @param[in]     GroupId: Group ID
@@ -161,6 +162,7 @@ DEM_LOCAL_INLINE boolean Dem_CheckDTCSuppressed(Dem_EventIdType EventId);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL_INLINE Dem_UdsStatusByteType Dem_CalculateCombineUdsStatus(Dem_CombinationNumType GroupId);
+#endif
 #endif
 
 /**
@@ -428,6 +430,7 @@ DEM_LOCAL_INLINE void Dem_ChangeDTCSuppression(Dem_EventIdType EventId, boolean 
 DEM_LOCAL_INLINE Std_ReturnType Dem_DTCGetFaultDetectionCounter(Dem_EventIdType EventId, sint8* FaultDetectionCounter);
 
 #if (DEM_EVENT_COMBINATION_SUPPORT != DEM_EVCOMB_DISABLED)
+#if (DEM_COMBINATION_NUMBER > 0u)
 /**
  * @brief         Calculates the maximum fault detection counter this cycle of a combined event
  * @param[in]     GroupId: Group ID
@@ -437,6 +440,7 @@ DEM_LOCAL_INLINE Std_ReturnType Dem_DTCGetFaultDetectionCounter(Dem_EventIdType 
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL sint8 Dem_GetFDCMaxOfDTCCombined(Dem_CombinationNumType GroupId);
+#endif
 #endif
 
 /**

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -59,33 +59,33 @@ typedef void (*StbMTimeNtfCallbackType)(StbM_TimeDiffType diff);
 typedef uint64 StbM_HwCounterType;
 typedef uint64 StbM_LocalTimeType;
 
-typedef struct StbM_MainTimeTupleTag
+typedef struct
 {
     uint64 GlobalTime;
     uint64 VirtualLocalTime;
 } StbM_MainTimeTupleType;
 
-typedef struct StbM_RateCorrectionTupleTag
+typedef struct
 {
     uint64 TGstart;
     uint64 TVstart;
 } StbM_RateCorrectionTupleType;
 
-typedef struct StbM_RateCorrectionTag
+typedef struct
 {
     StbM_RateCorrectionTupleType* Array;
     uint32                        StartIndex;
     uint32                        StopIndex;
 } StbM_RateCorrectionType;
 
-typedef struct StbM_LocalClockTimeTag
+typedef struct
 {
     StbM_HwCounterType PreHwCounter;
     StbM_LocalTimeType LocalTimeFraction;
     StbM_LocalTimeType LocalTime;
 } StbM_LocalClockTimeType;
 
-typedef struct StbM_CurrentRateTag
+typedef struct
 {
     sint32  RrcValue;
     sint32  RocValue;
@@ -93,7 +93,7 @@ typedef struct StbM_CurrentRateTag
 } StbM_CurrentRateType;
 
 #if (STBM_NOTIFICATION_CUSTOMER_NUM > 0)
-typedef struct StbM_NotificationTag
+typedef struct
 {
     uint64  CustomerTimerExpireTime;
     boolean IsSet;
@@ -102,7 +102,7 @@ typedef struct StbM_NotificationTag
 } StbM_NotificationType;
 #endif
 
-typedef struct StbM_TimeBaseTag
+typedef struct
 {
     StbM_TimeBaseStatusType TimeBaseStatus;
     uint8                   TimeBaseUpdateCounter;

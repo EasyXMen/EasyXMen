@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -52,24 +52,26 @@ DET_LOCAL boolean Det_CheckFilterMatch(uint16 moduleId, uint8 instanceId, uint8 
 #endif
 
 /* ============================================ internal data definitions =========================================== */
-#define DET_START_SEC_VAR_INIT_8
+#define DET_START_SEC_VAR_CLEARED_8
 #include "Det_MemMap.h"
-DET_LOCAL Det_StateType Det_RunState = DET_UNINITIALIZED;
-#define DET_STOP_SEC_VAR_INIT_8
+DET_LOCAL Det_StateType Det_RunState;
+#define DET_STOP_SEC_VAR_CLEARED_8
 #include "Det_MemMap.h"
 
-#define DET_START_SEC_VAR_INIT_8
+#define DET_START_SEC_VAR_CLEARED_8
 #include "Det_MemMap.h"
 /* use this variable to configure DET debug operation */
 DET_LOCAL Det_StatusType Det_Status;
-#define DET_STOP_SEC_VAR_INIT_8
+#define DET_STOP_SEC_VAR_CLEARED_8
 #include "Det_MemMap.h"
 
-#define DET_START_SEC_VAR_INIT_PTR
+#if (DET_SIZE_OF_NON_BSW_MODULE_CFG > 0)
+#define DET_START_SEC_VAR_CLEARED_PTR
 #include "Det_MemMap.h"
-DET_LOCAL const Det_ConfigType* Det_ConfigPtr = NULL_PTR;
-#define DET_STOP_SEC_VAR_INIT_PTR
+DET_LOCAL const Det_ConfigType* Det_ConfigPtr;
+#define DET_STOP_SEC_VAR_CLEARED_PTR
 #include "Det_MemMap.h"
+#endif
 
 /* ============================================ external data definitions =========================================== */
 #define DET_START_SEC_VAR_CLEARED_8
@@ -93,8 +95,10 @@ void Det_Init(const Det_ConfigType* configPtr) /* PRQA S 1503 */ /* VL_Det_1503 
     /* Checks if the Det module is not initialized and configPtr is not null pointer */
     if ((Det_RunState == DET_UNINITIALIZED) && (NULL_PTR != configPtr))
     {
+#if (DET_SIZE_OF_NON_BSW_MODULE_CFG > 0)
         /* Copy global Configuration item to store the configuration pointer. */
         Det_ConfigPtr = configPtr;
+#endif
         /* Set the initial value for the DET module's logging */
         Det_Status.LogActive = (boolean)FALSE;
         /* Set the status of the DET module to initialized */
@@ -144,9 +148,10 @@ void Det_Start(void) /* PRQA S 1503 */ /* VL_Det_1503 */
     }
 }
 
+/* PRQA S 6030,2991,2995 ++ */ /* VL_MTR_Det_STMIF,VL_Det_2991,VL_Det_2995 */
+
 /* This API is used to report development error for DET modules */
 /* PRQA S 1503 ++ */ /* VL_Det_1503 */
-/* PRQA S 6030 ++ */ /* VL_MTR_Det_STMIF */
 Std_ReturnType Det_ReportError(uint16 moduleId, uint8 instanceId, uint8 apiId, uint8 errorId)
 /* PRQA S 1503 -- */
 {
@@ -410,7 +415,7 @@ DET_LOCAL boolean Det_CheckFilterMatch(uint16 moduleId, uint8 instanceId, uint8 
     DET_PARAM_UNUSED((faultId));
     return retVal;
 }
-/* PRQA S 6030 -- */
+/* PRQA S 6030,2991,2995 -- */
 
 #define DET_STOP_SEC_CODE
 #include "Det_MemMap.h"

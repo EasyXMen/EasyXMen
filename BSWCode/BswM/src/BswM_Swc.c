@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -265,9 +265,9 @@ void BswM_SwcModeNotification(BswM_ModeGroupType modeGroup)
  * processes any associated rules. It iterates through the mode requests, evaluates the rules if applicable, and updates
  * the mode request port runtime data accordingly.
  */
-/* PRQA S 1503,1505,1532 ++*/ /* VL_QAC_NoUsedApi, VL_BswM_1505, VL_QAC_OneFunRef */
+/* PRQA S 1503,1505,1532,1501 ++ */ /* VL_QAC_NoUsedApi, VL_BswM_1505, VL_QAC_OneFunRef, VL_BswM_1501 */
 void BswM_SwcModeRequest(BswM_ModeGroupType modeGroup)
-/* PRQA S 1503,1505,1532 --*/
+/* PRQA S 1503,1505,1532,1501 --*/
 {
     const BswM_PartitionPCCfgType* bswmPartPCCfgPtr;
 #if (BSWM_PB_CONFIG_ENABLED == STD_ON)

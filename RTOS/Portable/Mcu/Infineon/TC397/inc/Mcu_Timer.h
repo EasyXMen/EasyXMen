@@ -1,6 +1,5 @@
-/*******************************************************************************
-**                                                                            **
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+/**
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -11,8 +10,8 @@
  * You should have received a copy of the GNU Lesser General Public License along with this library;
  * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  * or see <https://www.gnu.org/licenses/>.
-**                                                                            **
-********************************************************************************
+ */
+/*******************************************************************************
 **                                                                            **
 **  FILENAME    :  Mcu_Timer.h                                                **
 **                                                                            **
@@ -91,14 +90,11 @@
 
 #define Os_TmProtFaultProc()
 
-#if (TRUE == CFG_LOAD_RATIO_CALC_ENABLE)
-
+#if (TRUE == CFG_OS_MONITOR_ENABLE)
 #define Os_ArchLoadRatioInit()
-
 #define OS_SYSTEM_TIMER_MAX_TICK_VALUE (0xFFFFFFFFU)
-
 #define OS_SYSTEM_TIMER_REG_PER_MS_VALUE (100000U)
-#endif /* TRUE == CFG_LOAD_RATIO_CALC_ENABLE */
+#endif /* TRUE == CFG_OS_MONITOR_ENABLE */
 
 /*=======[T Y P E   D E F I N I T I O N S]==================================*/
 
@@ -106,6 +102,23 @@
 
 /*=======[E X T E R N A L   F U N C T I O N   D E C L A R A T I O N S]======*/
 #if (TRUE == CFG_SYSTEM_TIMER_ENABLE)
+/******************************************************************************/
+/*
+ * Brief                <SystemClock set>
+ * ServiceId            <None>
+ * Sync/Async           <Synchronous>
+ * Reentrancy           <Non Reentrant>
+ * Param-Name[in]       <None>
+ * Param-Name[out]      <None>
+ * Param-Name[in/out]   <None>
+ * Return               <None>
+ * PreCondition         <None>
+ * CallByAPI            <Os_MultiCoreInitProcessor>
+ * REQ ID               <None>
+ */
+/******************************************************************************/
+extern void Os_SetSystemClock(void);
+
 /******************************************************************************/
 /*
  * Brief                <Initialize the system clock for each CPU running OS.>
@@ -121,7 +134,7 @@
  * REQ ID               <None>
  */
 /******************************************************************************/
-extern void Os_ArchInitSystemTimer(void);
+extern void Os_InitSystemTimer(void);
 
 /******************************************************************************/
 /*
@@ -156,13 +169,29 @@ extern void Os_ClearSysTimer(void);
  * REQ ID               <None>
  */
 /******************************************************************************/
-extern void Os_ArchInitTimingProtTimer(void);
+extern void Os_InitTimingProtTimer(void);
+
+/******************************************************************************/
+/*
+ * Brief                <Update TimingProtTimer>
+ * Service ID   :       <None>
+ * Sync/Async   :       <Synchronous>
+ * Reentrancy           <Non Reentrant>
+ * param[in]            <None>
+ * param[out]           <None>
+ * param[in/out]        <None>
+ * return               <None>
+ * CallByAPI            <Os_MultiCoreInitProcessor>
+ * REQ ID               <None>
+ */
+/******************************************************************************/
+extern void Os_ClearTmProtTimer(void);
 #endif /* TRUE == CFG_SYSTEM_TIMER_ENABLE */
 /*=======[I N T E R N A L   D A T A]========================================*/
 
 /*=======[I N T E R N A L   F U N C T I O N   D E C L A R A T I O N S]======*/
 
-#if (TRUE == CFG_LOAD_RATIO_CALC_ENABLE)
+#if (TRUE == CFG_OS_MONITOR_ENABLE)
 /******************************************************************************/
 /*
  * Brief                <Get current time in the OS.>
@@ -179,7 +208,7 @@ extern void Os_ArchInitTimingProtTimer(void);
  */
 /******************************************************************************/
 extern uint32 Os_ArchGetTimeTicks(void);
-#endif /* TRUE == CFG_LOAD_RATIO_CALC_ENABLE */
+#endif /* TRUE == CFG_OS_MONITOR_ENABLE */
 
 /*=======[I N T E R N A L   D A T A]========================================*/
 

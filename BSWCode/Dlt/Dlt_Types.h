@@ -1,6 +1,6 @@
 /* PRQA S 3108++ */
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -192,12 +192,12 @@ typedef struct
 } Dlt_ConfigType;
 
 /* PRQA S 3432++ */ /* MISRA Rule 20.7 */
-typedef P2FUNC(void, DCM_APPL_CODE, LogLevelChangedNotificationType)(
+typedef P2FUNC(Std_ReturnType, DCM_APPL_CODE, LogLevelChangedNotificationType)(
     Dlt_ApplicationIDType   appId,
     Dlt_ContextIDType       contextId,
-    Dlt_MessageLogLevelType newLogLevel);
+    Dlt_MessageLogLevelType logLevel);
 
-typedef P2FUNC(void, DCM_APPL_CODE, TraceStatusChangedNotificationType)(
+typedef P2FUNC(Std_ReturnType, DCM_APPL_CODE, TraceStatusChangedNotificationType)(
     Dlt_ApplicationIDType appId,
     Dlt_ContextIDType     contextId,
     boolean               newTraceStatus);

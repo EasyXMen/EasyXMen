@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -32,7 +32,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-/* PRQA S 1536 ++ */ /* VL_DoIP_1536 */
 /* ===================================================== macros ===================================================== */
 
 #define DOIP_SA_TA_LEN 4u /**< Length of source adddress and target address  */
@@ -52,7 +51,7 @@ typedef enum
 /**
  * @brief Used when the routing activation request is need suspended.
  */
-typedef struct DoIP_PendingRaTag
+typedef struct
 {
     boolean          IsPending;    /**< Whether or not pended @range 0..1 */
     uint8            TxRxCtxIdx;   /**< Send/receive context @range 0..255 */
@@ -73,7 +72,7 @@ typedef enum
 /**
  * @brief TCP connection status.
  */
-typedef struct DoIP_TcpConnStatusTag
+typedef struct
 {
     boolean WaitAliveCheckRsp; /**< Wait alive check response message @range 0..1 */
     boolean WaitCloseSocket;   /**< Will close this TCP connection @range 0...1 */
@@ -148,7 +147,7 @@ typedef enum
 /**
  * @brief Receive message context of TCP
  */
-typedef struct DoIP_TcpRxCtrlTag
+typedef struct
 {
     DoIP_TcpRxStateType RxState; /**< Receiving message status @range NA */
 
@@ -171,7 +170,7 @@ typedef struct DoIP_TcpRxCtrlTag
 /**
  * @brief TP queue
  */
-typedef struct DoIP_TpPduDataTag
+typedef struct
 {
     uint8 SduDataPtr[DOIP_TP_QUEUE_BUFFER_SIZE]; /**< Buffer @range NA*/
 } DoIP_TpPduDataType;
@@ -179,7 +178,7 @@ typedef struct DoIP_TpPduDataTag
 /**
  * @brief The item saved in the queue
  */
-typedef struct DoIP_TpItemTag
+typedef struct
 {
     PduIdType          PdurTxPduId; /**< The connection to send the message @range 0..255 */
     PduInfoType        PduInfo;     /**< Saved PduInfoType @range NA */
@@ -189,19 +188,20 @@ typedef struct DoIP_TpItemTag
 /**
  * @brief Struct of queue
  */
-typedef struct DoIP_TpQueueTag
+typedef struct
 {
     uint8 Head;                                     /**< Head of queue @range 0..255 */
     uint8 Tail;                                     /**< Tail of queue @range 0..255 */
     /* PRQA S 1039 ++ */                            /* VL_DoIP_FlexibleArray */
     DoIP_TpItemType Item[DOIP_TP_QUEUE_BUFFER_NUM]; /**< Saved item @range NA*/
     /* PRQA S 1039 -- */
+    uint8 Count;
 } DoIP_TpQueueType;
 
 /**
  * @brief IF queue
  */
-typedef struct DoIP_IfPduDataTag
+typedef struct
 {
     uint8 MetaDataPtr[DOIP_SA_TA_LEN];           /**< Saved metadata @range NA */
     uint8 SduDataPtr[DOIP_IF_QUEUE_BUFFER_SIZE]; /**< buffer @range NA */
@@ -210,7 +210,7 @@ typedef struct DoIP_IfPduDataTag
 /**
  * @brief The item saved in the queue
  */
-typedef struct DoIP_IfItemTag
+typedef struct
 {
     PduIdType          PdurTxPduId; /**< The connection to send the message @range 0..255 */
     PduInfoType        PduInfo;     /**< Saved PduInfoType @range NA */
@@ -220,19 +220,20 @@ typedef struct DoIP_IfItemTag
 /**
  * @brief Struct of queue
  */
-typedef struct DoIP_IfQueueTag
+typedef struct
 {
     uint8 Head;                                     /**< Head of queue @range 0..255 */
     uint8 Tail;                                     /**< Tail of queue @range 0..255 */
     /* PRQA S 1039 ++ */                            /* VL_DoIP_FlexibleArray */
     DoIP_IfItemType Item[DOIP_IF_QUEUE_BUFFER_NUM]; /**< Saved item @range NA */
     /* PRQA S 1039 -- */
+    uint8 Count;
 } DoIP_IfQueueType;
 
 /**
  * @brief Non diagnostic queue
  */
-typedef struct DoIP_NonDiagPduDataTag
+typedef struct
 {
     uint8 SduDataPtr[DOIP_NON_DIAG_QUEUE_BUFFER_SIZE]; /**< Buffer @range NA */
 } DoIP_NonDiagPduDataType;
@@ -240,7 +241,7 @@ typedef struct DoIP_NonDiagPduDataTag
 /**
  * @brief The item saved in the queue
  */
-typedef struct DoIP_NonDiagItemTag
+typedef struct
 {
     PduIdType               SoadTxPduRef; /**< The connection to send the message @range 0..255 */
     PduInfoType             PduInfo;      /**< Saved PduInfoType @range NA */
@@ -250,19 +251,20 @@ typedef struct DoIP_NonDiagItemTag
 /**
  * @brief Struct of queue
  */
-typedef struct DoIP_NonDiagQueueTag
+typedef struct
 {
     uint8 Head;                                                /**< Head of queue @range 0..255 */
     uint8 Tail;                                                /**< Tail of queue @range 0..255 */
     /* PRQA S 1039 ++ */                                       /* VL_DoIP_FlexibleArray */
     DoIP_NonDiagItemType Item[DOIP_NON_DIAG_QUEUE_BUFFER_NUM]; /**< Saved item @range NA */
     /* PRQA S 1039 -- */
+    uint8 Count;
 } DoIP_NonDiagQueueType;
 
 /**
  * @brief Send message context of TCP
  */
-typedef struct DoIP_TcpTxCtrlTag
+typedef struct
 {
     DoIP_TcpTxStateType TxState; /**< Send message status @range NA */
 
@@ -279,7 +281,7 @@ typedef struct DoIP_TcpTxCtrlTag
 /**
  * @brief Send/Receive context of TCP
  */
-typedef struct DoIP_TcpTxRxContextTag
+typedef struct
 {
     DoIP_TcpRxCtrlType RxCtrl; /**< Receive message context of TCP @range NA */
     DoIP_TcpTxCtrlType TxCtrl; /**< Send message context of TCP @range NA */
@@ -296,7 +298,7 @@ typedef struct DoIP_TcpTxRxContextTag
 /**
  * @brief Handle diagnostic context
  */
-typedef struct DoIP_HandleDiagContextTag
+typedef struct
 {
     uint8            TxRxCtxIdx;   /**< Index of DoIP_TcpTxRxContext @range 0..255 */
     uint16           SoadTxPduRef; /**< Used for send diagnsitc ack @range 0..65535 */
@@ -809,7 +811,6 @@ BufReq_ReturnType DoIP_HandleTpCFRx(
  * @trace       CPD-PLACEHOLDER
  */
 void DoIP_HandleTcpTimeout(void);
-/* PRQA S 1536 -- */
 #ifdef __cplusplus
 }
 #endif

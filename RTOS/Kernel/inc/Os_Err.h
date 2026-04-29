@@ -1,6 +1,6 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
- * SPDX-License-Identifier: LGPL-2.1-only-with-exception OR  LicenseRef-Commercial-License
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
+ * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
  * GNU Lesser General Public License as published by the Free Software Foundation; version 2.1.
@@ -10,7 +10,8 @@
  * You should have received a copy of the GNU Lesser General Public License along with this library;
  * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  * or see <https://www.gnu.org/licenses/>.
- *
+ */
+/*
  ********************************************************************************
  **                                                                            **
  **  FILENAME    : Os_Err.h                                                    **
@@ -32,6 +33,7 @@
 
 /*=======[M A C R O S]========================================================*/
 #if (TRUE == CFG_USEGETSERVICEID)
+/* PRQA S 3412 ++ */ /* VL_Os_3412 */
 #define OSErrorGetServiceId() Os_SCB.sysOsServiceId;
 
 #define OSError_Save_ServiceId(ServiceId) Os_SCB.sysOsServiceId = (ServiceId);
@@ -286,7 +288,8 @@
 
 #define OSError_Save_IocEmptyQueue(param1) Os_SCB.sysRunTimeSrvPrarm.Value = (param1);
 
-#define OSError_Save_ShutDownOs(param1) Os_SCB.sysRunTimeSrvPrarm.Value = (param1);
+#define OSError_Save_ShutDownOs(param1) Os_SCB.sysRunTimeSrvPrarm.ShutdownError = (param1);
+/* PRQA S 3412 -- */
 #else
 #define OSError_Save_ActivateTask(param1)
 #define OSError_Save_TerminateTask()

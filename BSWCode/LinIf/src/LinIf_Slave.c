@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -261,7 +261,7 @@ void LinIf_SlaveInit(ApplicationType applicationId)
 
         slaveRTDataPtr->NcResponsePendingFlag = FALSE;
         slaveRTDataPtr->ResponseError         = FALSE;
-        (void)IStdLib_MemSet(slaveRTDataPtr->NcResponse, 0, LINIF_NC_RESPONSE_LEN);
+        (void)IStdLib_MemSet(slaveRTDataPtr->NcResponse, 0u, LINIF_NC_RESPONSE_LEN);
     }
 
     LINIF_NOUSED(applicationId);
@@ -657,7 +657,7 @@ void LinIf_SlaveTxConfirmation(NetworkHandleType ch)
                 /* Transmit finish,Reset channel runtime data */
                 LinIf_SlaveResetRtData(slaveRTDataPtr);
                 slaveRTDataPtr->NcResponsePendingFlag = FALSE;
-                (void)IStdLib_MemSet(slaveRTDataPtr->NcResponse, 0, LINIF_NC_RESPONSE_LEN);
+                (void)IStdLib_MemSet(slaveRTDataPtr->NcResponse, 0u, LINIF_NC_RESPONSE_LEN);
             }
 #if ((LINIF_TP_SUPPORTED == STD_ON) && (LINTP_SLAVE_SUPPORT == STD_ON))
             else
@@ -751,9 +751,9 @@ void LinIf_SlaveGotoSleep(NetworkHandleType ch)
 }
 
 /**
- * Main function of slave node.
+ * LinIf slave main function
  */
-void LinIf_SlaveMainFunction(NetworkHandleType ch)
+void LinIf_SlaveMainHandle(NetworkHandleType ch)
 {
     LinIf_SlaveRuntimeType* slaveRTDataPtr = LinIf_GetSlaveRtDataPtr(ch);
 
@@ -774,6 +774,13 @@ void LinIf_SlaveMainFunction(NetworkHandleType ch)
            invoke the function <User>_GotoSleepConfirmation with parameter TRUE.*/
         LinIf_UserGotoSleepConfirmation(ch, LinIf_GetComMNetwork(ch), TRUE);
     }
+
+#if (LINTP_SLAVE_SUPPORT == STD_ON)
+    if (LinIf_IsSupportTpTransmit(ch))
+    {
+        LinTp_SlaveMainFunction(ch);
+    }
+#endif
 }
 
 /* PRQA S 1532,1503 -- */
@@ -1059,7 +1066,7 @@ LINIF_LOCAL Std_ReturnType LinIf_SlaveSRFHeaderHandle(
             ret = E_OK;
         }
     }
-    else
+    else if (LinIf_IsSupportTpTransmit(ch))
     {
 #if ((LINIF_TP_SUPPORTED == STD_ON) && (LINTP_SLAVE_SUPPORT == STD_ON))
         if (!LinTp_SlaveCheckFunctionAddressFlag(ch))
@@ -1087,6 +1094,10 @@ LINIF_LOCAL Std_ReturnType LinIf_SlaveSRFHeaderHandle(
             }
         }
 #endif
+    }
+    else
+    {
+        /* Do nothing */
     }
 
     return ret;
@@ -1131,7 +1142,7 @@ LINIF_LOCAL void LinIf_SlaveUnconditionalRxHandle(LinIf_SlaveRuntimeType* slaveR
  * @synchronous         TRUE
  * @trace               -
  */
-/* PRQA S 2002,6070 ++ */ /* VL_QAC_NoDefaultCase */
+/* PRQA S 2002,6070,6010 ++ */ /* VL_QAC_NoDefaultCase,VL_MTR_LinIf_STCAL,VL_MTR_LinIf_STCYC */
 LINIF_LOCAL void
     LinIf_SlaveMRFRxHandle(NetworkHandleType ch, const uint8* Lin_SduPtr, LinIf_SlaveRuntimeType* slaveRTDataPtr)
 {
@@ -1171,7 +1182,10 @@ LINIF_LOCAL void
                 && (LINIF_NC_SID_SAVECONFIGURATION == Lin_SduPtr[LINIF_NC_SID_POS])))
         {
             /* If LinTp response is pending,receive NC request,cancel TP process */
-            LinTp_SlavePreInit(ch);
+            if (LinIf_IsSupportTpTransmit(ch))
+            {
+                LinTp_SlavePreInit(ch);
+            }
 #endif /* LINTP_SLAVE_SUPPORT == STD_ON */
 
             switch (Lin_SduPtr[LINIF_NC_SID_POS])
@@ -1199,15 +1213,19 @@ LINIF_LOCAL void
             case LINIF_NC_SID_DATADUMP:
                 break;
             }
-#if ((LINIF_TP_SUPPORTED == STD_ON) && (LINTP_SLAVE_SUPPORT == STD_ON))
         }
-        else
+#if ((LINIF_TP_SUPPORTED == STD_ON) && (LINTP_SLAVE_SUPPORT == STD_ON))
+        else if (LinIf_IsSupportTpTransmit(ch))
         {
             tpFlag = TRUE;
             LinTp_SlaveMRFIndication(ch, Lin_SduPtr);
             LinIf_SlaveResetRtData(slaveRTDataPtr);
         }
 #endif
+        else
+        {
+            /* Do nothing */
+        }
 
         /*@req <SWS_LinIf_00734> */
         if ((!tpFlag) && (E_OK == ret))
@@ -1217,7 +1235,7 @@ LINIF_LOCAL void
         }
     }
 }
-/* PRQA S 2002,6070 -- */
+/* PRQA S 2002,6070,6010 -- */
 #endif
 
 /**
@@ -1328,7 +1346,10 @@ LINIF_LOCAL Std_ReturnType
 /* Identifier not directly support by LinIf Node configuration */
 /* Forwarded over Transport Layer to upper layer */
 #if ((LINIF_TP_SUPPORTED == STD_ON) && (LINTP_SLAVE_SUPPORT == STD_ON))
-            LinTp_SlaveMRFIndication(ch, Lin_SduPtr);
+            if (LinIf_IsSupportTpTransmit(ch))
+            {
+                LinTp_SlaveMRFIndication(ch, Lin_SduPtr);
+            }
             ret = E_NOT_OK; /*Not start Nas timer*/
 #endif
         }
@@ -1573,7 +1594,7 @@ LINIF_LOCAL void
     {
         const LinIf_FrameType* framePtr = slaveRTDataPtr->CurFrame;
         /*@req <SWS_LinIf_00796> */
-        if (framePtr->FrameType == LINIF_SRF)
+        if (framePtr->FrameType == LINIF_SRF && !slaveRTDataPtr->NcResponsePendingFlag)
         {
 #if (LINIF_TP_SUPPORTED == STD_ON)
             LinTp_SlaveTxErrorSignalHandler(ch);
@@ -1666,7 +1687,7 @@ LINIF_LOCAL void LinIf_SlaveBuildNCResponse(
     LinIf_SlaveRuntimeType* slaveRTDataPtr)
 {
     uint8* ncResponse = slaveRTDataPtr->NcResponse;
-    (void)IStdLib_MemSet(ncResponse, (int)LINTP_PADDING_VALUE, LINIF_NC_RESPONSE_LEN);
+    (void)IStdLib_MemSet(ncResponse, LINTP_PADDING_VALUE, LINIF_NC_RESPONSE_LEN);
     ncResponse[LINIF_NC_NAD_POS] = nad;
     if (LINIF_NC_SID_READBYIDENTIFIER != sid)
     {
@@ -1723,7 +1744,7 @@ LINIF_LOCAL void LinIf_SlaveTimerHandle(NetworkHandleType ch, LinIf_SlaveRuntime
             /* N_As timeout occurrence,abort pending node config response.*/
             LinIf_SlaveResetRtData(slaveRTDataPtr);
             slaveRTDataPtr->NcResponsePendingFlag = FALSE;
-            (void)IStdLib_MemSet(slaveRTDataPtr->NcResponse, 0, LINIF_NC_RESPONSE_LEN);
+            (void)IStdLib_MemSet(slaveRTDataPtr->NcResponse, 0u, LINIF_NC_RESPONSE_LEN);
         }
     }
 

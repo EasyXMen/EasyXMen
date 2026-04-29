@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -40,7 +40,7 @@ extern "C" {
 typedef uint8 Com_RxIpduGroupIdType;
 #elif ((COM_MAX_RXIPDUGROUP_NUMBER <= 0xFFFFu) && (COM_MAX_RXIPDUGROUP_NUMBER > 0xFFu))
 typedef uint16 Com_RxIpduGroupIdType;
-#elif ((COM_MAX_RXIPDUGROUP_NUMBER <= 0xFFFFFFu) && (COM_MAX_RXIPDUGROUP_NUMBER > 0xFFFFu))
+#elif ((COM_MAX_RXIPDUGROUP_NUMBER <= 0xFFFFFFFFu) && (COM_MAX_RXIPDUGROUP_NUMBER > 0xFFFFu))
 typedef uint32 Com_RxIpduGroupIdType;
 #else
 #error "Error Type"
@@ -50,7 +50,7 @@ typedef uint32 Com_RxIpduGroupIdType;
 typedef uint8 Com_TxIpduGroupIdType;
 #elif ((COM_MAX_TXIPDUGROUP_NUMBER <= 0xFFFFu) && (COM_MAX_TXIPDUGROUP_NUMBER > 0xFFu))
 typedef uint16 Com_TxIpduGroupIdType;
-#elif ((COM_MAX_TXIPDUGROUP_NUMBER <= 0xFFFFFFu) && (COM_MAX_TXIPDUGROUP_NUMBER > 0xFFFFu))
+#elif ((COM_MAX_TXIPDUGROUP_NUMBER <= 0xFFFFFFFFu) && (COM_MAX_TXIPDUGROUP_NUMBER > 0xFFFFu))
 typedef uint32 Com_TxIpduGroupIdType;
 #else
 #error "Error Type"
@@ -65,8 +65,8 @@ typedef uint8 Com_RxSigTimeoutIdType;
     defined(COM_MAX_RXSIG_TIMEOUT_NUMBER) && (COM_MAX_RXSIG_TIMEOUT_NUMBER <= 0xFFFFu) \
     && (COM_MAX_RXSIG_TIMEOUT_NUMBER > 0xFFu))
 typedef uint16 Com_RxSigTimeoutIdType;
-#elif (                                                                                  \
-    defined(COM_MAX_RXSIG_TIMEOUT_NUMBER) && (COM_MAX_RXSIG_TIMEOUT_NUMBER <= 0xFFFFFFu) \
+#elif (                                                                                    \
+    defined(COM_MAX_RXSIG_TIMEOUT_NUMBER) && (COM_MAX_RXSIG_TIMEOUT_NUMBER <= 0xFFFFFFFFu) \
     && (COM_MAX_RXSIG_TIMEOUT_NUMBER > 0xFFFFu))
 typedef uint32 Com_RxSigTimeoutIdType;
 #endif
@@ -79,8 +79,8 @@ typedef uint8 Com_RxSigGrpTimeoutIdType;
     defined(COM_MAX_RXSIGGRP_TIMEOUT_NUMBER) && (COM_MAX_RXSIGGRP_TIMEOUT_NUMBER <= 0xFFFFu) \
     && (COM_MAX_RXSIGGRP_TIMEOUT_NUMBER > 0xFFu))
 typedef uint16 Com_RxSigGrpTimeoutIdType;
-#elif (                                                                                        \
-    defined(COM_MAX_RXSIGGRP_TIMEOUT_NUMBER) && (COM_MAX_RXSIGGRP_TIMEOUT_NUMBER <= 0xFFFFFFu) \
+#elif (                                                                                          \
+    defined(COM_MAX_RXSIGGRP_TIMEOUT_NUMBER) && (COM_MAX_RXSIGGRP_TIMEOUT_NUMBER <= 0xFFFFFFFFu) \
     && (COM_MAX_RXSIGGRP_TIMEOUT_NUMBER > 0xFFFFu))
 typedef uint32 Com_RxSigGrpTimeoutIdType;
 #endif
@@ -90,7 +90,7 @@ typedef uint32 Com_RxSigGrpTimeoutIdType;
 typedef uint8 Com_GwSourceDescriptionIdType;
 #elif ((COM_MAX_GW_SOURCE_DESCRIPTION_NUMBER <= 0xFFFFu) && (COM_MAX_GW_SOURCE_DESCRIPTION_NUMBER > 0xFFu))
 typedef uint16 Com_GwSourceDescriptionIdType;
-#elif ((COM_MAX_GW_SOURCE_DESCRIPTION_NUMBER <= 0xFFFFFFu) && (COM_MAX_GW_SOURCE_DESCRIPTION_NUMBER > 0xFFFFu))
+#elif ((COM_MAX_GW_SOURCE_DESCRIPTION_NUMBER <= 0xFFFFFFFFu) && (COM_MAX_GW_SOURCE_DESCRIPTION_NUMBER > 0xFFFFu))
 typedef uint32 Com_GwSourceDescriptionIdType;
 #else
 #error "Error Type"
@@ -100,7 +100,7 @@ typedef uint32 Com_GwSourceDescriptionIdType;
 typedef uint8 Com_RxSignalIdType;
 #elif ((COM_MAX_RXSIGNAL_NUMBER <= 0xFFFFu) && (COM_MAX_RXSIGNAL_NUMBER > 0xFFu))
 typedef uint16 Com_RxSignalIdType;
-#elif ((COM_MAX_RXSIGNAL_NUMBER <= 0xFFFFFFu) && (COM_MAX_RXSIGNAL_NUMBER > 0xFFFFu))
+#elif ((COM_MAX_RXSIGNAL_NUMBER <= 0xFFFFFFFFu) && (COM_MAX_RXSIGNAL_NUMBER > 0xFFFFu))
 typedef uint32 Com_RxSignalIdType;
 #else
 #error "Error Type"
@@ -110,7 +110,7 @@ typedef uint32 Com_RxSignalIdType;
 typedef uint8 Com_RxSignalGroupIdType;
 #elif ((COM_MAX_RXSIGNALGROUP_NUMBER <= 0xFFFFu) && (COM_MAX_RXSIGNALGROUP_NUMBER > 0xFFu))
 typedef uint16 Com_RxSignalGroupIdType;
-#elif ((COM_MAX_RXSIGNALGROUP_NUMBER <= 0xFFFFFFu) && (COM_MAX_RXSIGNALGROUP_NUMBER > 0xFFFFu))
+#elif ((COM_MAX_RXSIGNALGROUP_NUMBER <= 0xFFFFFFFFu) && (COM_MAX_RXSIGNALGROUP_NUMBER > 0xFFFFu))
 typedef uint32 Com_RxSignalGroupIdType;
 #else
 #error "Error Type"
@@ -120,8 +120,9 @@ typedef uint32 Com_RxSignalGroupIdType;
 typedef uint8 Com_GwDestinationDescriptionIdType;
 #elif ((COM_MAX_GW_DESTINATION_DESCRIPTION_NUMBER <= 0xFFFFu) && (COM_MAX_GW_DESTINATION_DESCRIPTION_NUMBER > 0xFFu))
 typedef uint16 Com_GwDestinationDescriptionIdType;
-#elif ( \
-    (COM_MAX_GW_DESTINATION_DESCRIPTION_NUMBER <= 0xFFFFFFu) && (COM_MAX_GW_DESTINATION_DESCRIPTION_NUMBER > 0xFFFFu))
+#elif (                                                        \
+    (COM_MAX_GW_DESTINATION_DESCRIPTION_NUMBER <= 0xFFFFFFFFu) \
+    && (COM_MAX_GW_DESTINATION_DESCRIPTION_NUMBER > 0xFFFFu))
 typedef uint32 Com_GwDestinationDescriptionIdType;
 #else
 #error "Error Type"
@@ -131,7 +132,7 @@ typedef uint32 Com_GwDestinationDescriptionIdType;
 typedef uint8 Com_TxSignalIdType;
 #elif ((COM_MAX_TXSIGNAL_NUMBER <= 0xFFFFu) && (COM_MAX_TXSIGNAL_NUMBER > 0xFFu))
 typedef uint16 Com_TxSignalIdType;
-#elif ((COM_MAX_TXSIGNAL_NUMBER <= 0xFFFFFFu) && (COM_MAX_TXSIGNAL_NUMBER > 0xFFFFu))
+#elif ((COM_MAX_TXSIGNAL_NUMBER <= 0xFFFFFFFFu) && (COM_MAX_TXSIGNAL_NUMBER > 0xFFFFu))
 typedef uint32 Com_TxSignalIdType;
 #else
 #error "Error Type"
@@ -141,7 +142,7 @@ typedef uint32 Com_TxSignalIdType;
 typedef uint8 Com_TxSignalGroupIdType;
 #elif ((COM_MAX_TXSIGNALGROUP_NUMBER <= 0xFFFFu) && (COM_MAX_TXSIGNALGROUP_NUMBER > 0xFFu))
 typedef uint16 Com_TxSignalGroupIdType;
-#elif ((COM_MAX_TXSIGNALGROUP_NUMBER <= 0xFFFFFFu) && (COM_MAX_TXSIGNALGROUP_NUMBER > 0xFFFFu))
+#elif ((COM_MAX_TXSIGNALGROUP_NUMBER <= 0xFFFFFFFFu) && (COM_MAX_TXSIGNALGROUP_NUMBER > 0xFFFFu))
 typedef uint32 Com_TxSignalGroupIdType;
 #else
 #error "Error Type"
@@ -151,7 +152,7 @@ typedef uint32 Com_TxSignalGroupIdType;
 typedef uint8 Com_RxSignalInvalidIdType;
 #elif ((COM_MAX_RXSIGNAL_INVALID_NUMBER <= 0xFFFFu) && (COM_MAX_RXSIGNAL_INVALID_NUMBER > 0xFFu))
 typedef uint16 Com_RxSignalInvalidIdType;
-#elif ((COM_MAX_RXSIGNAL_INVALID_NUMBER <= 0xFFFFFFu) && (COM_MAX_RXSIGNAL_INVALID_NUMBER > 0xFFFFu))
+#elif ((COM_MAX_RXSIGNAL_INVALID_NUMBER <= 0xFFFFFFFFu) && (COM_MAX_RXSIGNAL_INVALID_NUMBER > 0xFFFFu))
 typedef uint32 Com_RxSignalInvalidIdType;
 #else
 #error "Error Type"
@@ -161,7 +162,7 @@ typedef uint32 Com_RxSignalInvalidIdType;
 typedef uint8 Com_RxSignalFilterIdType;
 #elif ((COM_MAX_RXSIGNAL_FILTERTYPE_MAX_NUMBER <= 0xFFFFu) && (COM_MAX_RXSIGNAL_FILTERTYPE_MAX_NUMBER > 0xFFu))
 typedef uint16 Com_RxSignalFilterIdType;
-#elif ((COM_MAX_RXSIGNAL_FILTERTYPE_MAX_NUMBER <= 0xFFFFFFu) && (COM_MAX_RXSIGNAL_FILTERTYPE_MAX_NUMBER > 0xFFFFu))
+#elif ((COM_MAX_RXSIGNAL_FILTERTYPE_MAX_NUMBER <= 0xFFFFFFFFu) && (COM_MAX_RXSIGNAL_FILTERTYPE_MAX_NUMBER > 0xFFFFu))
 typedef uint32 Com_RxSignalFilterIdType;
 #else
 #error "Error Type"
@@ -173,7 +174,7 @@ typedef PduLengthType Com_SignalPositionType;
 typedef uint8 Com_TxSignalInvalidIdType;
 #elif ((COM_MAX_TXSIGNAL_INVALID_NUMBER <= 0xFFFFu) && (COM_MAX_TXSIGNAL_INVALID_NUMBER > 0xFFu))
 typedef uint16 Com_TxSignalInvalidIdType;
-#elif ((COM_MAX_TXSIGNAL_INVALID_NUMBER <= 0xFFFFFFu) && (COM_MAX_TXSIGNAL_INVALID_NUMBER > 0xFFFFu))
+#elif ((COM_MAX_TXSIGNAL_INVALID_NUMBER <= 0xFFFFFFFFu) && (COM_MAX_TXSIGNAL_INVALID_NUMBER > 0xFFFFu))
 typedef uint32 Com_TxSignalInvalidIdType;
 #else
 #error "Error Type"
@@ -183,7 +184,7 @@ typedef uint32 Com_TxSignalInvalidIdType;
 typedef uint8 Com_TxSignalFilterIdType;
 #elif ((COM_MAX_TXSIGNAL_FILTERTYPE_MAX_NUMBER <= 0xFFFFu) && (COM_MAX_TXSIGNAL_FILTERTYPE_MAX_NUMBER > 0xFFu))
 typedef uint16 Com_TxSignalFilterIdType;
-#elif ((COM_MAX_TXSIGNAL_FILTERTYPE_MAX_NUMBER <= 0xFFFFFFu) && (COM_MAX_TXSIGNAL_FILTERTYPE_MAX_NUMBER > 0xFFFFu))
+#elif ((COM_MAX_TXSIGNAL_FILTERTYPE_MAX_NUMBER <= 0xFFFFFFFFu) && (COM_MAX_TXSIGNAL_FILTERTYPE_MAX_NUMBER > 0xFFFFu))
 typedef uint32 Com_TxSignalFilterIdType;
 #else
 #error "Error Type"
@@ -193,7 +194,7 @@ typedef uint32 Com_TxSignalFilterIdType;
 typedef uint8 Com_TxSigErrAndNotifyIdType;
 #elif ((COM_MAX_TXSIG_ERROR_AND_NOTIFY_NUMBER <= 0xFFFFu) && (COM_MAX_TXSIG_ERROR_AND_NOTIFY_NUMBER > 0xFFu))
 typedef uint16 Com_TxSigErrAndNotifyIdType;
-#elif ((COM_MAX_TXSIG_ERROR_AND_NOTIFY_NUMBER <= 0xFFFFFFu) && (COM_MAX_TXSIG_ERROR_AND_NOTIFY_NUMBER > 0xFFFFu))
+#elif ((COM_MAX_TXSIG_ERROR_AND_NOTIFY_NUMBER <= 0xFFFFFFFFu) && (COM_MAX_TXSIG_ERROR_AND_NOTIFY_NUMBER > 0xFFFFu))
 typedef uint32 Com_TxSigErrAndNotifyIdType;
 #else
 #error "Error Type"
@@ -203,7 +204,7 @@ typedef uint32 Com_TxSigErrAndNotifyIdType;
 typedef uint8 Com_TxSignalTimeoutIdType;
 #elif ((COM_MAX_TXSIGNAL_TIMEOUT_NUMBER <= 0xFFFFu) && (COM_MAX_TXSIGNAL_TIMEOUT_NUMBER > 0xFFu))
 typedef uint16 Com_TxSignalTimeoutIdType;
-#elif ((COM_MAX_TXSIGNAL_TIMEOUT_NUMBER <= 0xFFFFFFu) && (COM_MAX_TXSIGNAL_TIMEOUT_NUMBER > 0xFFFFu))
+#elif ((COM_MAX_TXSIGNAL_TIMEOUT_NUMBER <= 0xFFFFFFFFu) && (COM_MAX_TXSIGNAL_TIMEOUT_NUMBER > 0xFFFFu))
 typedef uint32 Com_TxSignalTimeoutIdType;
 #else
 #error "Error Type"
@@ -213,7 +214,7 @@ typedef uint32 Com_TxSignalTimeoutIdType;
 typedef uint8 Com_RxGroupSignalIdType;
 #elif ((COM_MAX_RXGROUPSIGNAL_NUMBER <= 0xFFFFu) && (COM_MAX_RXGROUPSIGNAL_NUMBER > 0xFFu))
 typedef uint16 Com_RxGroupSignalIdType;
-#elif ((COM_MAX_RXGROUPSIGNAL_NUMBER <= 0xFFFFFFu) && (COM_MAX_RXGROUPSIGNAL_NUMBER > 0xFFFFu))
+#elif ((COM_MAX_RXGROUPSIGNAL_NUMBER <= 0xFFFFFFFFu) && (COM_MAX_RXGROUPSIGNAL_NUMBER > 0xFFFFu))
 typedef uint32 Com_RxGroupSignalIdType;
 #else
 #error "Error Type"
@@ -223,7 +224,7 @@ typedef uint32 Com_RxGroupSignalIdType;
 typedef uint8 Com_TxGroupSignalIdType;
 #elif ((COM_MAX_TXGROUPSIGNAL_NUMBER <= 0xFFFFu) && (COM_MAX_TXGROUPSIGNAL_NUMBER > 0xFFu))
 typedef uint16 Com_TxGroupSignalIdType;
-#elif ((COM_MAX_TXGROUPSIGNAL_NUMBER <= 0xFFFFFFu) && (COM_MAX_TXGROUPSIGNAL_NUMBER > 0xFFFFu))
+#elif ((COM_MAX_TXGROUPSIGNAL_NUMBER <= 0xFFFFFFFFu) && (COM_MAX_TXGROUPSIGNAL_NUMBER > 0xFFFFu))
 typedef uint32 Com_TxGroupSignalIdType;
 #else
 #error "Error Type"
@@ -233,7 +234,8 @@ typedef uint32 Com_TxGroupSignalIdType;
 typedef uint8 Com_TxSigGrpErrAndNotifyIdType;
 #elif ((COM_MAX_TXSIGGRP_ERROR_AND_NOTIFY_NUMBER <= 0xFFFFu) && (COM_MAX_TXSIGGRP_ERROR_AND_NOTIFY_NUMBER > 0xFFu))
 typedef uint16 Com_TxSigGrpErrAndNotifyIdType;
-#elif ((COM_MAX_TXSIGGRP_ERROR_AND_NOTIFY_NUMBER <= 0xFFFFFFu) && (COM_MAX_TXSIGGRP_ERROR_AND_NOTIFY_NUMBER > 0xFFFFu))
+#elif ( \
+    (COM_MAX_TXSIGGRP_ERROR_AND_NOTIFY_NUMBER <= 0xFFFFFFFFu) && (COM_MAX_TXSIGGRP_ERROR_AND_NOTIFY_NUMBER > 0xFFFFu))
 typedef uint32 Com_TxSigGrpErrAndNotifyIdType;
 #else
 #error "Error Type"
@@ -243,7 +245,7 @@ typedef uint32 Com_TxSigGrpErrAndNotifyIdType;
 typedef uint8 Com_TxSigGrpTimeoutIdType;
 #elif ((COM_MAX_TXSIGGRP_TIMEOUT_NUMBER <= 0xFFFFu) && (COM_MAX_TXSIGGRP_TIMEOUT_NUMBER > 0xFFu))
 typedef uint16 Com_TxSigGrpTimeoutIdType;
-#elif ((COM_MAX_TXSIGGRP_TIMEOUT_NUMBER <= 0xFFFFFFu) && (COM_MAX_TXSIGGRP_TIMEOUT_NUMBER > 0xFFFFu))
+#elif ((COM_MAX_TXSIGGRP_TIMEOUT_NUMBER <= 0xFFFFFFFFu) && (COM_MAX_TXSIGGRP_TIMEOUT_NUMBER > 0xFFFFu))
 typedef uint32 Com_TxSigGrpTimeoutIdType;
 #else
 #error "Error Type"
@@ -253,7 +255,7 @@ typedef uint32 Com_TxSigGrpTimeoutIdType;
 typedef uint8 Com_RxGrpSigFilterIdType;
 #elif ((COM_MAX_RXGRPSIG_FILTERTYPE_MAX_NUMBER <= 0xFFFFu) && (COM_MAX_RXGRPSIG_FILTERTYPE_MAX_NUMBER > 0xFFu))
 typedef uint16 Com_RxGrpSigFilterIdType;
-#elif ((COM_MAX_RXGRPSIG_FILTERTYPE_MAX_NUMBER <= 0xFFFFFFu) && (COM_MAX_RXGRPSIG_FILTERTYPE_MAX_NUMBER > 0xFFFFu))
+#elif ((COM_MAX_RXGRPSIG_FILTERTYPE_MAX_NUMBER <= 0xFFFFFFFFu) && (COM_MAX_RXGRPSIG_FILTERTYPE_MAX_NUMBER > 0xFFFFu))
 typedef uint32 Com_RxGrpSigFilterIdType;
 #else
 #error "Error Type"
@@ -263,7 +265,7 @@ typedef uint32 Com_RxGrpSigFilterIdType;
 typedef uint8 Com_TxGrpSigFilterIdType;
 #elif ((COM_MAX_TXGRPSIG_FILTERTYPE_MAX_NUMBER <= 0xFFFFu) && (COM_MAX_TXGRPSIG_FILTERTYPE_MAX_NUMBER > 0xFFu))
 typedef uint16 Com_TxGrpSigFilterIdType;
-#elif ((COM_MAX_TXGRPSIG_FILTERTYPE_MAX_NUMBER <= 0xFFFFFFu) && (COM_MAX_TXGRPSIG_FILTERTYPE_MAX_NUMBER > 0xFFFFu))
+#elif ((COM_MAX_TXGRPSIG_FILTERTYPE_MAX_NUMBER <= 0xFFFFFFFFu) && (COM_MAX_TXGRPSIG_FILTERTYPE_MAX_NUMBER > 0xFFFFu))
 typedef uint32 Com_TxGrpSigFilterIdType;
 #else
 #error "Error Type"
@@ -273,7 +275,7 @@ typedef uint32 Com_TxGrpSigFilterIdType;
 typedef uint8 Com_DestSignalFilterIdType;
 #elif ((COM_MAX_DESTSIG_FILTERTYPE_MAX_NUMBER <= 0xFFFFu) && (COM_MAX_DESTSIG_FILTERTYPE_MAX_NUMBER > 0xFFu))
 typedef uint16 Com_DestSignalFilterIdType;
-#elif ((COM_MAX_DESTSIG_FILTERTYPE_MAX_NUMBER <= 0xFFFFFFu) && (COM_MAX_DESTSIG_FILTERTYPE_MAX_NUMBER > 0xFFFFu))
+#elif ((COM_MAX_DESTSIG_FILTERTYPE_MAX_NUMBER <= 0xFFFFFFFFu) && (COM_MAX_DESTSIG_FILTERTYPE_MAX_NUMBER > 0xFFFFu))
 typedef uint32 Com_DestSignalFilterIdType;
 #else
 #error "Error Type"
@@ -283,7 +285,7 @@ typedef uint32 Com_DestSignalFilterIdType;
 typedef uint8 Com_RxIpduBufIdType;
 #elif ((COM_MAX_RXIPDUBUFF_SIZE <= 0xFFFFu) && (COM_MAX_RXIPDUBUFF_SIZE > 0xFFu))
 typedef uint16 Com_RxIpduBufIdType;
-#elif ((COM_MAX_RXIPDUBUFF_SIZE <= 0xFFFFFFu) && (COM_MAX_RXIPDUBUFF_SIZE > 0xFFFFu))
+#elif ((COM_MAX_RXIPDUBUFF_SIZE <= 0xFFFFFFFFu) && (COM_MAX_RXIPDUBUFF_SIZE > 0xFFFFu))
 typedef uint32 Com_RxIpduBufIdType;
 #else
 #error "Error Type"
@@ -293,7 +295,7 @@ typedef uint32 Com_RxIpduBufIdType;
 typedef uint8 Com_TxIpduBufIdType;
 #elif ((COM_MAX_TXIPDUBUFF_SIZE <= 0xFFFFu) && (COM_MAX_TXIPDUBUFF_SIZE > 0xFFu))
 typedef uint16 Com_TxIpduBufIdType;
-#elif ((COM_MAX_TXIPDUBUFF_SIZE <= 0xFFFFFFu) && (COM_MAX_TXIPDUBUFF_SIZE > 0xFFFFu))
+#elif ((COM_MAX_TXIPDUBUFF_SIZE <= 0xFFFFFFFFu) && (COM_MAX_TXIPDUBUFF_SIZE > 0xFFFFu))
 typedef uint32 Com_TxIpduBufIdType;
 #else
 #error "Error Type"
@@ -303,7 +305,7 @@ typedef uint32 Com_TxIpduBufIdType;
 typedef uint8 Com_SignalGroupArryIdType;
 #elif ((COM_MAX_SIGNALGROUPARRY_NUMBER <= 0xFFFFu) && (COM_MAX_SIGNALGROUPARRY_NUMBER > 0xFFu))
 typedef uint16 Com_SignalGroupArryIdType;
-#elif ((COM_MAX_SIGNALGROUPARRY_NUMBER <= 0xFFFFFFu) && (COM_MAX_SIGNALGROUPARRY_NUMBER > 0xFFFFu))
+#elif ((COM_MAX_SIGNALGROUPARRY_NUMBER <= 0xFFFFFFFFu) && (COM_MAX_SIGNALGROUPARRY_NUMBER > 0xFFFFu))
 typedef uint32 Com_SignalGroupArryIdType;
 #else
 #error "Error Type"
@@ -1142,11 +1144,16 @@ typedef struct
 #endif
 
 #if (STD_ON == COM_TXMODE_AND_FILTER_SUPPORT)
-typedef struct
-{
-    Com_TxSignalIdType      TxSignalSize;
-    Com_TxGroupSignalIdType TxGroupSignalSize;
-} Com_TxTMCSizeType;
+
+#if ((COM_MAX_TMC_TX_ALL_TYPE_SIGNAL_NUMBER <= 0xFFu) && (COM_MAX_TMC_TX_ALL_TYPE_SIGNAL_NUMBER >= 0u))
+typedef uint8 Com_TxTMCSizeType;
+#elif ((COM_MAX_TMC_TX_ALL_TYPE_SIGNAL_NUMBER <= 0xFFFFu) && (COM_MAX_TMC_TX_ALL_TYPE_SIGNAL_NUMBER > 0xFFu))
+typedef uint16 Com_TxTMCSizeType;
+#elif ((COM_MAX_TMC_TX_ALL_TYPE_SIGNAL_NUMBER <= 0xFFFFFFFFu) && (COM_MAX_TMC_TX_ALL_TYPE_SIGNAL_NUMBER > 0xFFFFFFu))
+typedef uint32 Com_TxTMCSizeType;
+#else
+#error "Error Type"
+#endif
 
 typedef struct
 {
@@ -1168,7 +1175,7 @@ typedef struct
 #if (0u < COM_MAX_TX_MODE_FALSE_MIXED_NUMBER)
     const Com_TxModeMixedRepetitionsType* TxModeFalseMixedRepetitions;
 #endif
-#if (0u < COM_MAX_TMCTXSIGNAL_NUMBER)
+#if (0u < COM_MAX_TMC_TX_ALL_TYPE_SIGNAL_NUMBER)
     const boolean* const*    TxSignalTMCInitVale;
     const Com_TxTMCSizeType* TxTMCSize;
 #if (0u < COM_MAX_TXMASKNEWDIFFERMASKOLD_NUMBER)

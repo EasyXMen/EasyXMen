@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -42,7 +42,7 @@
     \li VL_SecOC_5016
       Reason: Parameter passing requires
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_SecOC_5017
       Reason: High cyclomatic complexity is reserved for better readability.
@@ -69,7 +69,7 @@
     \li VL_SecOC_4397
       Reason: Macro Conveniently determining authenticity.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_SecOC_2834
       Reason:When the scheduling table has no entries, the modulo operation will not be executed.
@@ -89,27 +89,27 @@
     \li VL_SecOC_3414
       Reason: specific keyword macro is necessary for unit testing
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_SecOC_1336
       Reason: Defining function pointer types
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_SecOC_0771
       Reason: Ability to quickly jump out of loops in different situations with different configurations.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_SecOC_3472
       Reason: Macro definitions for easy reuse.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_SecOC_5004
       Reason: Parameter passing requires
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_SecOC_0488
       Reason: Calculates the offset value of the array.
@@ -129,85 +129,129 @@
     \li VL_SecOC_3469
       Reason: A function should be used in preference to a function-like macro where they are interchangeable.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_MTR_SecOC_STTPP
       Reason: The number of lines of code is related to the user configuration, allowing
     dynamic code to violate this under extreme conditions
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_MTR_SecOC_STVAR
       Reason: The total number of variables is related to the user configuration, allowing
     dynamic code to violate this under extreme conditions
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_MTR_SecOC_STCAL
       Reason: The standard compliance vote was higher than the measurement threshold. In addition, a typical way to
     reduce STCAL is to deepen function nesting, which increases call stack usage and runtime
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_MTR_SecOC_STCYC
       Reason: Functionality is not separated into subfunctions because there are higher requirements for minimizing the
     stack and applying it to runtime use of the code
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_MTR_SecOC_STPTH
       Reason: The functions were not separated into sub-functions because there were higher requirements for
     minimizing the stack and applying them to the runtime usage of the code
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_MTR_SecOC_STST3
       Reason: Some function logics are overly complex. Splitting and implementing them will lead to reduced performance.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_MTR_SecOC_STMIF
       Reason: Functions handle specific tasks in the behavior of the entire component.
     Task has different scenarios that need to be covered, which depends on local conditions - this
     leads to deep nesting of the control structure.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_MTR_SecOC_STLIN
       Reason: Some function logics are overly complex. Splitting and implementing them will lead to reduced performance.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
-
-    \li VL_SecOC_2755
-      Reason: There is a lot of logic in the code and it is deeply nested, which makes the processing time longer.
-      Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_MTR_SecOC_STM19
       Reason: In principle, a function is not allowed to have multiple exit points,
     but it can help improve code performance in special circumstances.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_MTR_SecOC_STPAR
       Reason: The parameters of the function need.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_SecOC_3232
       Reason: A pointer array is needed.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_SecOC_1502
       Reason: Configuration variables design needs.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
+
+    \li VL_SecOC_3415
+      Reason: Complex logical expressions may have short circuits. Logical short circuits are designed to
+        account for operational efficiency and expected behavior.
+      Risk: No risk.
+      Prevention: None.
+
+    \li VL_SecOC_1512
+      Reason: Rte-generated headers and module headers may contain the same declaration for the same
+        function, so they are compatible with each other.
+      Risk: No risk.
+      Prevention: None.
+
+    \li VL_SecOC_1707
+      Reason: There are no multiple declaration types of the same object. In AUTOSAR standard, there may be different
+        situations between the object declaration type of Rte and the declaration of SecOC module, and they are
+        compatible with each other as long as they are in different scopes.
+      Risk: No risk.
+      Prevention: None.
+
+    \li VL_SecOC_1759
+      Reason: The name of the array of global variables is determined at generation time and may be the same as the
+        member name of the array of structures.
+      Risk: No risk.
+      Prevention: None.
+
+    \li VL_SecOC_1753
+      Reason: The definition of the function is generated in the configuration file, and when a module uses the
+        function, the definition is generated.
+      Risk: No risk.
+      Prevention: None.
+
+    \li VL_SecOC_2996
+      Reason: Functions defined out are not used in the project and have no impact on the integration application.
+      Risk: No risk.
+      Prevention: None.
+
+    \li VL_SecOC_2880
+      Reason: Some code branches will never be reached due to the different macro definition values
+        generated by the configuration.
+      Risk: No risk.
+      Prevention: None.
+
+    \li VL_SecOC_1501
+      Reason: Whether the feature is used or not depends on the generated configuration.
+      Risk: No risk.
+      Prevention: None.
 
  */
 
 #ifndef SECOC_H
 #define SECOC_H
+
+/* PRQA S 1707,1512 EOF */ /* VL_SecOC_1707,VL_SecOC_1512 */
 
 /* =================================================== inclusions =================================================== */
 #include "SecOC_Cfg.h"
@@ -316,7 +360,7 @@ extern "C" {
 /**
  * @brief    States of the SecOC module.
  */
-typedef enum SecOC_StateTag
+typedef enum
 {
     SECOC_UNINIT, /**< The SecOC module is uninitialized. @range 0 */
     SECOC_INIT    /**< The SecOC module is initialized. @range 1 */
@@ -460,10 +504,12 @@ Std_ReturnType SecOC_TpCancelReceive(PduIdType RxPduId);
  * @synchronous    TRUE
  * @trace       CPD-70342
  */
+/* PRQA S 1513 ++ */ /* VL_QAC_MultiDeclaration */
 Std_ReturnType SecOC_VerifyStatusOverride(
     uint16                   ValueID,
     SecOC_OverrideStatusType overrideStatus,
     uint8                    numberOfMessagesToOverride);
+/* PRQA S 1513 -- */
 
 #if defined(SECOC_DEFAULT_AUTHENTICATION_INFORMATION_PATTERN)
 /**

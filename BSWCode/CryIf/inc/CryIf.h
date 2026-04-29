@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -43,51 +43,51 @@
     \li VL_CryIf_3432
       Reason: Function-like macros are used to allow more efficient code.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_CryIf_3218
       Reason: file scoped variables only used in one function are necessary for functional usage.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_CryIf_3229
       Reason: The initialization state should not be masked as it is used to indicate the
     module's initialization status.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_CryIf_1252
       Reason: suffixed constant comparison is necessary
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_CryIf_2981
       Reason: Init may be necessary for return variant.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_MTR_CryIf_STM19
       Reason: In principle, a function is not allowed to have multiple exit points,
     but it can help improve code performance in special circumstances.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_CryIf_1258
       Reason: The cast conversion from a constant is safe.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_MTR_CryIf_STPAR
       Reason: The parameters of the function need.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_MTR_CryIf_STMIF
       Reason: Functions handle specific tasks in the behavior of the entire component.
     Task has different scenarios that need to be covered, which depends on local conditions - this
     leads to deep nesting of the control structure.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
  */
 
 /* =================================================== inclusions =================================================== */
@@ -152,7 +152,7 @@ extern "C" {
 /* Constants */
 #define CRYIF_CONSTANT_2 ((uint32)(0x2U)) /**< Constant value 2 @range 0x2U */
 #if !defined(CRYIF_LOCAL)
-#define CRYIF_LOCAL static /* PRQA S 3414 */ /* VL_QAC_3414 */
+#define CRYIF_LOCAL static /* PRQA S 3414 */ /* VL_QAC_FctLikeMacro */
 #endif
 
 /* ================================================ type definitions ================================================ */
@@ -173,7 +173,7 @@ typedef uint8 CryIf_ConfigType; /**< Configuration type for CryIf @range any val
  *
  * @typedef CryIf_FuncNameConfigType
  */
-typedef struct CryIf_FuncNameConfigTag
+typedef struct
 {
     /**
      * @brief Function pointer to the Crypto_ProcessJob function.
@@ -283,7 +283,7 @@ typedef struct CryIf_FuncNameConfigTag
  *
  * @typedef CryIf_KeyCfgType
  */
-typedef struct CryIf_KeyCfgTag
+typedef struct
 {
     uint32 KeyId;       /**< Key ID for the configuration @range any valid uint32 value */
     uint32 CryptoKeyId; /**< Crypto Key ID for the configuration @range any valid uint32 value */
@@ -296,7 +296,7 @@ typedef struct CryIf_KeyCfgTag
  *
  * @typedef CryIf_ChannelCfgType
  */
-typedef struct CryIf_ChannelCfgTag
+typedef struct
 {
     uint32 ChannelId;            /**< Channel ID for the configuration @range any valid uint32 value */
     uint32 CryptoDriverObjectId; /**< Crypto Driver Object ID for the configuration @range any valid uint32 value */

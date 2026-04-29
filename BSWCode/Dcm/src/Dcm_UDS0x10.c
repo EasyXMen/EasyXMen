@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -242,14 +242,15 @@ void Dcm_UDS0x10_SessionChange(void)
         Dcm_SessionCtrl.NewSessionProtocolId = DCM_INVALID_UINT8;
         SchM_Exit_Dcm_ExclusiveArea();
         (void)Rte_Switch_DiagnosticSessionControlModeSwitchInterface_diagnosticSession(newSession);
+        (void)SchM_Switch_Dcm_DcmDiagnosticSessionControl(newSession);
 
         DslInternal_SetSecurityLevel(DCM_SEC_LEV_LOCKED);
         if (DCM_DEFAULT_SESSION != Dcm_SessionCtrl.CurrentSession)
         {
             DcmInternal_SetActiveDiagnostic(TRUE);
-            Dcm_SessionCtrl.SessionTimer              = DCM_S3_TIMEOUT;
-            const Dcm_DslProtocolRowType* protocolRow = &Dcm_DslProtocolRow[Dcm_SessionCtrl.CurrentSessionProtocolId];
+            Dcm_SessionCtrl.SessionTimer = DCM_S3_TIMEOUT;
 #if (STD_ON == DCM_UDS_0X85)
+            const Dcm_DslProtocolRowType* protocolRow = &Dcm_DslProtocolRow[Dcm_SessionCtrl.CurrentSessionProtocolId];
             if (NULL_PTR != protocolRow->UDSControlDTCSessionRef)
             {
                 if (E_NOT_OK
@@ -287,7 +288,7 @@ void Dcm_UDS0x10_SessionChange(void)
         Dcm_UDS0x2A_StatusChangeHandle();
 #endif
 #if ((STD_ON == DCM_UDS_0X2F) && (DCM_DID_NUM > 0))
-        Dcm_UDS0x2F_StatusChangeHandle();
+        Dcm_UDS0x2F_StatusChangeHandle(Dcm_SessionCtrl.NewSession);
 #endif
     }
     else
@@ -321,6 +322,7 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x10_HandleForBoot(
             resetMode = RTE_MODE_DcmEcuReset_DCM_JUMPTOSYSSUPPLIERBOOTLOADER;
         }
         result = Rte_Switch_EcuResetModeSwitchInterface_ecuReset(resetMode);
+        (void)SchM_Switch_Dcm_DcmEcuReset(resetMode);
     }
 
     if (E_OK == result)

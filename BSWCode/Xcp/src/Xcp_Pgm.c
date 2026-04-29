@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -184,7 +184,9 @@ XCP_LOCAL Std_ReturnType Xcp_CheckPgmStatus(void)
  * any valid sector's range. If a valid sector is found, it returns true; otherwise,
  * it returns false. This function is intended for internal use.
  */
+/* PRQA S 1505 ++ */ /* VL_Xcp_1505 */
 boolean Xcp_CheckPgmMem(uint32 addr, uint32 size)
+/* PRQA S 1505 -- */
 {
     boolean result = FALSE;
     uint8   secNum;
@@ -818,7 +820,7 @@ XCP_LOCAL void Xcp_FlsBlockProgramPending(void)
             Xcp_ChannelPtgmData.PgmPendingFlag |= XCP_BLOCK_PROGRAM_TASK;
             /* PRQA S 1258 ++ */ /* VL_Xcp_1258 */
             Xcp_UpdateMTA((uint32)XCP_FLS_MIN_WRITE_SIZE);
-            /* PRQA S 1258 ++ */ /* VL_Xcp_1258 */
+            /* PRQA S 1258 -- */ /* VL_Xcp_1258 */
         }
         else
         {
@@ -1616,8 +1618,9 @@ void Xcp_ProgramNext(void)
                 {
                     (Xcp_ChannelPtgmData.PgmBufAlignPtr)[Xcp_ChannelPtgmData.PgmBufSize + cnt] = Xcp_BlockBuffer[cnt];
                 }
-
+                /* PRQA S 2986 ++ */ /* VL_QAC_2985_2986 */
                 Xcp_ChannelCommonData.BlockBufPos += cnt;
+                /* PRQA S 2986 -- */
                 /* set fls buffer size to min write size */
                 Xcp_ChannelPtgmData.PgmBufSize = XCP_FLS_MIN_WRITE_SIZE;
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -53,22 +53,22 @@
     \li VL_WdgM_1505
       Reason: External interface.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_WdgM_0686
       Reason: Array has fewer initializers than its declared size.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_WdgM_EndLessLoop
       Reason: Necessary logical design for while(1) and have "break" to stop.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_WdgM_5016
       Reason: Parameter passing requires
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_WdgM_5017
       Reason: High cyclomatic complexity indicates inadequate modularization or too much logic in one function.
@@ -83,67 +83,95 @@
     \li VL_WdgM_0380
       Reason: Macro definitions are necessary
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_MTR_WdgM_STVAR
       Reason: The total number of variables is related to the user configuration, allowing
     dynamic code to violate this under extreme conditions
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_MTR_WdgM_STMIF
       Reason: Functions handle specific tasks in the behavior of the entire component.
     Task has different scenarios that need to be covered, which depends on local conditions - this
     leads to deep nesting of the control structure.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_WdgM_2987
       Reason: Code design requirements.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_WdgM_3219
       Reason: The static function has been called in other functions.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_WdgM_2962
       Reason: This value is configured in the configuration file.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_MTR_WdgM_STCYC
       Reason: Functionality is not separated into subfunctions because there are higher requirements for minimizing the
     stack and applying it to runtime use of the code.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_MTR_WdgM_STPTH
       Reason: The functions were not separated into sub-functions because there were higher requirements for
     minimizing the stack and applying them to the runtime usage of the code.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_WdgM_3207
       Reason: Depend on the configuration file.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_WdgM_NameLength
       Reason: Depend on the configuration, The configuration determines the length of the final generated array name.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_WdgM_1502
       Reason: Configuration variables design needs.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_WdgM_3218
       Reason: file scoped variables only used in one function are necessary for functional usage.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
+
+    \li VL_WdgM_3415
+      Reason: Complex logical expressions may have short circuits. Logical short circuits are designed to
+        account for operational efficiency and expected behavior.
+      Risk: No risk.
+      Prevention: None.
+
+    \li VL_WdgM_2983
+      Reason: Whether this value is used or not is determined by the generated macro.
+      Risk: No risk.
+      Prevention: None.
+
+    \li VL_WdgM_1500
+      Reason: Whether the feature is used or not depends on the generated configuration.
+      Risk: No risk.
+      Prevention: None.
+
+    \li VL_WdgM_1501
+      Reason: Whether the feature is used or not depends on the generated configuration.
+      Risk: No risk.
+      Prevention: None.
+
+    \li VL_WdgM_1752
+      Reason: The array is declared in the header file of the module, but the definition is generated in the
+        configuration file, and since the generation condition of the array definition cannot be defined in the
+        header file, the declaration of the array is saved in the header file.
+      Risk: No risk.
+      Prevention: None.
 
 */
 #ifndef WDGM_H_

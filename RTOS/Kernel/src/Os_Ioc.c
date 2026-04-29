@@ -1,8 +1,8 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
- * SPDX-License-Identifier: LGPL-2.1-only-with-exception OR  LicenseRef-Commercial-License
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
+ * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
-  * This library is free software; you can redistribute it and/or modify it under the terms of the
+ * This library is free software; you can redistribute it and/or modify it under the terms of the
  * GNU Lesser General Public License as published by the Free Software Foundation; version 2.1.
  * This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
@@ -10,7 +10,8 @@
  * You should have received a copy of the GNU Lesser General Public License along with this library;
  * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  * or see <https://www.gnu.org/licenses/>.
- *
+ */
+/*
  ********************************************************************************
  **                                                                            **
  **  FILENAME    : Os_Ioc.c                                                    **
@@ -54,11 +55,13 @@
 /*=======[E X T E R N A L   F U N C T I O N   D E C L A R A T I O N S]========*/
 
 /*=======[I N T E R N A L   D A T A]==========================================*/
+#if (OS_AUTOSAR_CORES > 1U)
 #define OS_START_SEC_VAR_CLEARED_GLOBAL_32
 #include "Os_MemMap.h"
 static Os_SpinlockType Os_IocSpinlock[CFG_IOC_MAX];
 #define OS_STOP_SEC_VAR_CLEARED_GLOBAL_32
 #include "Os_MemMap.h"
+#endif
 
 /* Global */
 #define OS_START_SEC_VAR_CLEARED_GLOBAL_UNSPECIFIED
@@ -171,7 +174,7 @@ static Os_IocBlockIdType Os_IocGetBlock(Os_IocComIdType comId)
     Os_IocBlockType* pBlockBase = pIocCom->IocBlockPtr;
 
     OS_ARCH_ENTRY_CRITICAL();
-    IOC_LOCK(comId); /* PRQA S 3138 */ /* VL_Os_3138 */
+    IOC_LOCK(comId); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
 
     if (OS_OBJECT_INVALID != Os_IocCB[comId].IocBlockFreeHead)
     {
@@ -184,7 +187,7 @@ static Os_IocBlockIdType Os_IocGetBlock(Os_IocComIdType comId)
         pBlockBase[vBlockId].IocBlockState = BLOCK_WRITING;
     }
 
-    IOC_UNLOCK(comId); /* PRQA S 3138 */ /* VL_Os_3138 */
+    IOC_UNLOCK(comId); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
     OS_ARCH_EXIT_CRITICAL();
 
     return (vBlockId);
@@ -218,7 +221,7 @@ static void Os_IocReleaseBlock(Os_IocComIdType comId, Os_IocBlockIdType blockId)
     if (blockId != OS_OBJECT_INVALID)
     {
         OS_ARCH_ENTRY_CRITICAL();
-        IOC_LOCK(comId); /* PRQA S 3138 */ /* VL_Os_3138 */
+        IOC_LOCK(comId); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
 
         /* add to free block list. */
         pBlockBase[blockId].IocBlockLink.IocBlockNext = pIocCom->IocBlockFreeHead;
@@ -229,7 +232,7 @@ static void Os_IocReleaseBlock(Os_IocComIdType comId, Os_IocBlockIdType blockId)
         /* modify the block state */
         pBlockBase[blockId].IocBlockState = BLOCK_IDLE;
 
-        IOC_UNLOCK(comId); /* PRQA S 3138 */ /* VL_Os_3138 */
+        IOC_UNLOCK(comId); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
         OS_ARCH_EXIT_CRITICAL();
     }
 }
@@ -288,7 +291,7 @@ static void Os_IocWriteDataToBlock(
             else
             {
                 /* PRQA S 3120 ++ */ /* VL_QAC_MagicNum */
-                /* PRQA S 2985 ++ */ /* VL_QAC_2985_2986 */
+                /* PRQA S 2985 ++ */ /* VL_Os_2985 */
                 pBufferBase[offset + 0U] = (Os_IocBufferType)(length >> 8U);
                 /* PRQA S 2985 -- */
                 pBufferBase[offset + 1U] = (Os_IocBufferType)(length & 0xFFU);
@@ -355,7 +358,7 @@ static void Os_IocReadDataFromBlock(
             }
             else
             {
-                length = pBufferBase[offset + 0U]; /* PRQA S 2985 */ /* VL_QAC_2985_2986 */
+                length = pBufferBase[offset + 0U]; /* PRQA S 2985 */ /* VL_Os_2985 */
                 /* PRQA S 3120, 4397 ++ */                           /* VL_QAC_MagicNum, VL_Os_4397 */
                 length = pBufferBase[offset + 1U] + (length << 8U);
                 /* PRQA S 3120, 4397 -- */
@@ -459,7 +462,7 @@ static void Os_IocAppendReadyBlock(Os_IocComIdType comId, Os_IocBlockIdType vBlo
     pBlockBase[vBlockId].IocBlockState = BLOCK_READY;
 
     OS_ARCH_ENTRY_CRITICAL();
-    IOC_LOCK(comId); /* PRQA S 3138 */ /* VL_Os_3138 */
+    IOC_LOCK(comId); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
 
     if (OS_OBJECT_INVALID == pIocCom->IocBlockHead)
     {
@@ -478,7 +481,7 @@ static void Os_IocAppendReadyBlock(Os_IocComIdType comId, Os_IocBlockIdType vBlo
         pIocCom->IocBlockTail                            = vBlockId;
     }
 
-    IOC_UNLOCK(comId); /* PRQA S 3138 */ /* VL_Os_3138 */
+    IOC_UNLOCK(comId); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
     OS_ARCH_EXIT_CRITICAL();
 }
 #define OS_STOP_SEC_CODE
@@ -511,7 +514,7 @@ static Os_IocBlockIdType Os_IocRemoveReadyBlock(Os_IocComIdType comId)
     Os_IocBlockIdType vBlockReady;
 
     OS_ARCH_ENTRY_CRITICAL();
-    IOC_LOCK(comId); /* PRQA S 3138 */ /* VL_Os_3138 */
+    IOC_LOCK(comId); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
 
     vBlockHead  = pIocCom->IocBlockHead;
     vBlockReady = vBlockHead;
@@ -532,7 +535,7 @@ static Os_IocBlockIdType Os_IocRemoveReadyBlock(Os_IocComIdType comId)
         pBlockBase[vBlockReady].IocBlockState = BLOCK_READING;
     }
 
-    IOC_UNLOCK(comId); /* PRQA S 3138 */ /* VL_Os_3138 */
+    IOC_UNLOCK(comId); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
     OS_ARCH_EXIT_CRITICAL();
 
     return (vBlockReady);
@@ -711,14 +714,14 @@ static void Os_IocSwitchCommonBlock(Os_IocComIdType comId, Os_IocU16Type senderI
     Os_IocBlockType* pBlockBase = pIocCom->IocBlockPtr;
 
     OS_ARCH_ENTRY_CRITICAL();
-    IOC_LOCK(comId); /* PRQA S 3138 */ /* VL_Os_3138 */
+    IOC_LOCK(comId); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
     if (pBlockBase[blockId].IocBlockState == BLOCK_WRITING)
     {
         pBlockBase[senderId].IocBlockLink.IocBlockCurrent = pIocCom->IocBlockRead;
         pIocCom->IocBlockRead                             = blockId;
         pBlockBase[blockId].IocBlockState                 = BLOCK_READY;
     }
-    IOC_UNLOCK(comId); /* PRQA S 3138 */ /* VL_Os_3138 */
+    IOC_UNLOCK(comId); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
     OS_ARCH_EXIT_CRITICAL();
 }
 #define OS_STOP_SEC_CODE
@@ -866,7 +869,18 @@ static void Os_IocTriggerReceiveCallBack(
         OS_ARCH_ENTRY_CRITICAL();
 #if (CFG_OSAPPLICATION_MAX > 0U)
         Os_SCB.sysRunningAppID = vRecAppId;
-        Os_TCB[Os_SCB.sysRunningTaskID].CallBackAppID = vRecAppId;
+        if(Os_SCB.sysOsLevel == OS_LEVEL_TASK)
+        {
+            Os_TCB[Os_SCB.sysRunningTaskID].CallBackAppID = vRecAppId;
+        }
+        else if(Os_SCB.sysOsLevel == OS_LEVEL_ISR2)
+        {
+            Os_ICB[Os_SCB.sysRunningIsrCat2Id].CallBackAppID = vRecAppId;
+        }
+        else
+        {
+            /*nothing to do*/
+        }
 #endif
         OS_ARCH_EXIT_CRITICAL();
 
@@ -874,7 +888,18 @@ static void Os_IocTriggerReceiveCallBack(
 
         OS_ARCH_ENTRY_CRITICAL();
 #if (CFG_OSAPPLICATION_MAX > 0U)
-        Os_TCB[Os_SCB.sysRunningTaskID].CallBackAppID = INVALID_OSAPPLICATION;
+        if(Os_SCB.sysOsLevel == OS_LEVEL_TASK)
+        {
+            Os_TCB[Os_SCB.sysRunningTaskID].CallBackAppID = INVALID_OSAPPLICATION;
+        }
+        else if(Os_SCB.sysOsLevel == OS_LEVEL_ISR2)
+        {
+            Os_ICB[Os_SCB.sysRunningIsrCat2Id].CallBackAppID = INVALID_OSAPPLICATION;
+        }
+        else
+        {
+            /*nothing to do*/
+        }
         Os_SCB.sysRunningAppID = bakappID;
 #endif
         OS_ARCH_EXIT_CRITICAL();
@@ -949,9 +974,9 @@ StatusType Os_IocTransmit(
 /* PRQA S 6010, 6070, 6080 -- */
 {
     /* PRQA S 2742, 2880, 3138, 2741 ++ */ /* VL_Os_PlatformDef */
-    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
+    /* PRQA S 1006, 3141 ++ */ /* VL_Os_1006, VL_Os_3141 */
     OS_ENTER_KERNEL();
-    /* PRQA S 1006 -- */
+    /* PRQA S 1006, 3141 -- */
     /* PRQA S 2742, 2880, 3138, 2741 -- */
     OS_ARCH_DECLARE_CRITICAL();
 
@@ -1066,9 +1091,9 @@ StatusType Os_IocReceive(Os_IocComIdType comId, Os_IocReceiveDataSourceType* pDa
 /* PRQA S 6010, 6070, 3006, 1532 -- */
 {
     /* PRQA S 2742, 2880, 3138, 2741 ++ */ /* VL_Os_PlatformDef */
-    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
+    /* PRQA S 1006, 3141 ++ */ /* VL_Os_1006, VL_Os_3141 */
     OS_ENTER_KERNEL();
-    /* PRQA S 1006 -- */
+    /* PRQA S 1006, 3141 -- */
     /* PRQA S 2742, 2880, 3138, 2741 -- */
     OS_ARCH_DECLARE_CRITICAL();
 
@@ -1107,11 +1132,11 @@ StatusType Os_IocReceive(Os_IocComIdType comId, Os_IocReceiveDataSourceType* pDa
         else
         {
             OS_ARCH_ENTRY_CRITICAL();
-            IOC_LOCK(comId); /* PRQA S 3138 */ /* VL_Os_3138 */
+            IOC_LOCK(comId); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
 
             vBlockId = Os_IocGetReadyBlock(comId);
 
-            IOC_UNLOCK(comId); /* PRQA S 3138 */ /* VL_Os_3138 */
+            IOC_UNLOCK(comId); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
             OS_ARCH_EXIT_CRITICAL();
 
             if (OS_OBJECT_INVALID != vBlockId)
@@ -1156,9 +1181,9 @@ StatusType Os_IocEmpty(Os_IocComIdType comId)
 /* PRQA S 6010, 3006, 1505 -- */
 {
     /* PRQA S 2742, 2880, 3138, 2741 ++ */ /* VL_Os_PlatformDef */
-    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
+    /* PRQA S 1006, 3141 ++ */ /* VL_Os_1006, VL_Os_3141 */
     OS_ENTER_KERNEL();
-    /* PRQA S 1006 -- */
+    /* PRQA S 1006, 3141 -- */
     /* PRQA S 2742, 2880, 3138, 2741 -- */
 
     StatusType                        vRet       = IOC_E_NOK;
@@ -1222,7 +1247,8 @@ StatusType Os_IocEmpty(Os_IocComIdType comId)
                 }
                 else
                 {
-                    /* PRQA S 3120 ++ */ /* VL_QAC_MagicNum */ /* PRQA S 2985 ++ */ /* VL_QAC_2985_2986 */
+                    /* PRQA S 3120 ++ */ /* VL_QAC_MagicNum */ 
+                    /* PRQA S 2985 ++ */ /* VL_Os_2985 */
                     pBufferBase[offset + 0U] = (Os_IocBufferType)(length >> 8U);
                     /* PRQA S 2985 -- */
                     pBufferBase[offset + 1U] = (Os_IocBufferType)(length & 0xFFU);

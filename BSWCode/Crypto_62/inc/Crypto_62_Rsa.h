@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -342,7 +342,7 @@ typedef enum
 } Crypto_mpi_gen_prime_flag_t;
 /* PRQA S 1271 -- */ /* VL_Crypto_62_1271 */
 /** @brief ASN.1 buffer structure. */
-typedef struct Crypto_asn1_buf_tag
+typedef struct
 {
     int    tag; /**< ASN1 type, e.g. TLS_ASN1_UTF8_STRING. */
     uint32 len; /**< ASN1 length, in octets. */
@@ -350,14 +350,14 @@ typedef struct Crypto_asn1_buf_tag
 } Crypto_asn1_buf;
 
 /** @brief ASN.1 Sequence Item Structure*/
-typedef struct Crypto_asn1_sequence_tag
+typedef struct
 {
     Crypto_asn1_buf                  buf;  /**< Buffer containing the given ASN.1 item. */
     struct Crypto_asn1_sequence_tag* next; /**< The next entry in the sequence. */
 } Crypto_asn1_sequence;
 
 /** @brief MPI structure  */
-typedef struct Crypto_mpi_tag
+typedef struct
 {
     /** Pointer to limbs.
      *
@@ -1040,7 +1040,6 @@ int Crypto_rsa_pkcs1_decrypt(
     void*                p_rng,
     uint32*              olen,
     const unsigned char* input,
-    uint32               ilen,
     unsigned char*       output,
     uint32               output_max_len);
 

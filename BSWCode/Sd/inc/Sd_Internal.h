@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -24,7 +24,7 @@
 
 #ifndef SD_INTERNAL_H
 #define SD_INTERNAL_H
-
+/* PRQA S 1536 EOF */ /* VL_Sd_1536 */
 /* =================================================== inclusions =================================================== */
 
 #include "ComStack_Types.h"
@@ -404,7 +404,7 @@ extern "C" {
 /**
  * Reserved value for the network mask.
  */
-#define SD_NETWORK_MASK_VALUE_RESERVED 255
+#define SD_NETWORK_MASK_VALUE_RESERVED 0xffu
 
 /**
  * Index 0 for entry reference options.
@@ -734,25 +734,27 @@ typedef struct Sd_SubscribeManageTypeTag
     uint8                             Counter;        /**< Counter. @range 0..255 */
 } Sd_SubscribeManageType;
 
+typedef struct Sd_TriggerTransmitManagerTypeTag
+{
+    struct Sd_TriggerTransmitManagerTypeTag* Next;
+    SoAd_RoutingGroupIdType                  RoutingGroupId;
+    SoAd_SoConIdType                         SoConId;
+} Sd_TriggerTransmitManagerType;
+
 /**
  * @brief  Structure for the event handler runtime data.
  */
 typedef struct Sd_EventHandlerRTTypeTag
 {
-    Sd_SubscribeManageType*         UdpSubscribeList;   /**< Pointer to the UDP subscribe list. @range NA */
-    Sd_SubscribeManageType*         TcpSubscribeList;   /**< Pointer to the TCP subscribe list. @range NA */
-    Sd_EventHandlerCurrentStateType CurState;           /**< Current state of the event handler. @range NA */
-    uint8                           UdpSubsEndPointNum; /**< Number of UDP subscription endpoints. @range 0..255 */
-    uint8                           UdpSubsClientNum;   /**< Number of UDP subscription clients. @range 0..16 */
-    uint8                           TcpSubsClientNum;   /**< Number of TCP subscription clients. @range 0..16 */
-    SoAd_SoConIdType                SoConIdUdp;         /**< UDP socket connection ID. @range 0..255 */
-    SoAd_RoutingGroupIdType         RoutingGroupIdUdp;  /**< UDP routing group ID. @range 0..65535 */
-    SoAd_SoConIdType                SoConIdTcp;         /**< TCP socket connection ID. @range 0..255 */
-    SoAd_RoutingGroupIdType         RoutingGroupIdTcp;  /**< TCP routing group ID. @range 0..65535 */
-    boolean
-        IfSpecificRoutingTransUdpFlag; /**< Flag indicating specific routing for UDP transmission. @range TRUE/FALSE */
-    boolean
-        IfSpecificRoutingTransTcpFlag; /**< Flag indicating specific routing for TCP transmission. @range TRUE/FALSE */
+    Sd_SubscribeManageType*         UdpSubscribeList;       /**< Pointer to the UDP subscribe list. @range NA */
+    Sd_SubscribeManageType*         TcpSubscribeList;       /**< Pointer to the TCP subscribe list. @range NA */
+    Sd_TriggerTransmitManagerType*  UdpTriggerTransmitList; /**< List for UDP trigger transmit */
+    Sd_TriggerTransmitManagerType*  TcpTriggerTransmitList; /**< List for TCP trigger transmit */
+    Sd_EventHandlerCurrentStateType CurState;               /**< Current state of the event handler. @range NA */
+    uint8                           UdpSubsEndPointNum;     /**< Number of UDP subscription endpoints. @range 0..255 */
+    uint8                           UdpSubsClientNum;       /**< Number of UDP subscription clients. @range 0..16 */
+    uint8                           TcpSubsClientNum;       /**< Number of TCP subscription clients. @range 0..16 */
+    SoAd_SoConIdType                SoConIdTcp;             /**< TCP socket connection ID. @range 0..255 */
 } Sd_EventHandlerRTType;
 
 /**

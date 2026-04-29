@@ -1,6 +1,6 @@
 /* PRQA S 3108++ */
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -63,11 +63,7 @@ THUMB_FUNC
 .global PendSV_Handler
 
 PendSV_Handler:
-	mrs r3, basepri 
-    push {r3}
-    ldr r3, =Os_Isr2_Ipl_Limit
-    ldr r3, [r3]
-    msr basepri, r3                            
+	cpsid i                         
     ldr r2, =Os_SCB     
     ldr r2, [r2]              
     cbz r2, lable   
@@ -110,8 +106,7 @@ lable:
     msr psp, r0                      
     dsb                 
     isb                 
-    pop {r3}
-    msr basepri, r3
+    cpsie i
     bx lr
 
 /*****************************************************************************/
@@ -167,6 +162,7 @@ TERMINATEISR_ISR_1:
  * REQ ID               <None>
  */
 /*****************************************************************************/
+.thumb_func
 .global armv7_default_isr
 
 armv7_default_isr:
@@ -204,7 +200,7 @@ OS_SIMULATE_EXIT:
     msr     msp, r2
     tst     r14, #0x10
     bne     NO_FLOAT
-    add     r1, r2,#96
+    add     r1, r2,#104
     b       END_SIMULATE
 NO_FLOAT:
     add     r1, r2,#32

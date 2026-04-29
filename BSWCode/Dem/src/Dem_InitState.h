@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -41,14 +41,14 @@
 /** @} */
 
 /* ============================================ internal data definitions =========================================== */
-#define DEM_START_SEC_VAR_INIT_8
+#define DEM_START_SEC_VAR_CLEARED_8
 #include "Dem_MemMap.h"
 /**
  * @brief     Type definition for master initialization status
  * @range       0 ~ 3
  */
-DEM_LOCAL uint8 Dem_MasterInitStatus = DEM_UNINITIALIZED;
-#define DEM_STOP_SEC_VAR_INIT_8
+DEM_LOCAL uint8 Dem_MasterInitStatus;
+#define DEM_STOP_SEC_VAR_CLEARED_8
 #include "Dem_MemMap.h"
 
 #define DEM_START_SEC_VAR_CLEARED_UNSPECIFIED

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -29,6 +29,10 @@
 #include "Os_Internal.h"
 
 /*=======[M A C R O S]========================================================*/
+#define PSW_IS_BIT (9u)
+#define PSW_GW_MASK (0xFFFFFEFFu)
+
+/*=======[E X T E R N A L   D A T A]==========================================*/
 #define OS_START_SEC_VAR_CLONE_32
 #include "Os_MemMap.h"
 volatile uint32 Os_LoopPcx;
@@ -135,12 +139,12 @@ void Os_ArchFirstEnterTask(void)
     /* PRQA S 3432 --*/
 
     /* PRQA S 0305 ++ */           /* VL_Os_0305 */
-    lowCsa->reg[0] |= 0x00300000u; /* PCXI */
+    lowCsa->reg[0] |= ((1u << PCXI_PIE_BIT) | (1u << PCXI_UL_BIT)); /* PCXI */
 
     lowCsa->reg[1] = (uint32)Os_TaskCfg[Os_SCB.sysRunningTaskID].osTaskEntry; /* A11(RA) */
 
-    upperCsa->reg[0] |= 0x00100000u;                                               /* PCXI */
-    upperCsa->reg[1] = 0x00000981u;                                                /* PSW  */
+    upperCsa->reg[0] |= (1u << PCXI_UL_BIT);                                               /* PCXI */
+    upperCsa->reg[1] = PSW_DEFAULT_VALUE | 0x1u;                                                /* PSW  */
     upperCsa->reg[2] = OS_ARCH_STACK_ALIGN((uint32)Os_SCB.sysRunningTCB->taskTop); /* A10(SP) */
     /* PRQA S 3469 -- */
     upperCsa->reg[3] = (uint32)Os_TaskErrBack; /* A11(RA) */
@@ -159,7 +163,7 @@ void Os_ArchFirstEnterTask(void)
     upperCsa->reg[15] = 0U; /* D15  */
 
     upperCsa1->reg[0] = 0U;          /* PCXI */
-    upperCsa1->reg[1] = 0x00000980u; /* PSW  */
+    upperCsa1->reg[1] = PSW_DEFAULT_VALUE; /* PSW  */
     /* PRQA S 0306 -- */
 }
 #else
@@ -185,20 +189,20 @@ void Os_ArchFirstEnterTask(void) /* PRQA S 3006 */ /* VL_Os_3006 */
 
     /* PRQA S 0305 ++ */ /* VL_Os_0305 */
     /* PRQA S 3120 ++ */ /* VL_QAC_MagicNum */
-    lowcsa_1->reg[0] |= 0x00300000u;
+    lowcsa_1->reg[0] |= ((1u << PCXI_PIE_BIT) | (1u << PCXI_UL_BIT));
     lowcsa_1->reg[1] = (uint32)Os_ModeModify; /* PRQA S 0428 */ /* VL_Os_0428 */
 
-    lowCsa->reg[0] |= 0x00100000u; /* PCXI */
-    lowCsa->reg[1] = 0x00000981u;  /* PSW  */
+    lowCsa->reg[0] |= (1u << PCXI_UL_BIT); /* PCXI */
+    lowCsa->reg[1] = PSW_DEFAULT_VALUE | 0x1u;  /* PSW  */
 
     lowCsa->reg[2] = (uint32)Os_SCB.sysRunningTCB->taskTop;                   /* A10(SP)  */
     lowCsa->reg[3] = (uint32)Os_TaskCfg[Os_SCB.sysRunningTaskID].osTaskEntry; /* A11(RA) */
 
-    upperCsa->reg[0] |= 0x00100000u; /* PCXI */
+    upperCsa->reg[0] |= (1u << PCXI_UL_BIT); /* PCXI */
 #if (TRUE == CFG_MEMORY_PROTECTION_ENABLE)
-    upperCsa->reg[1] = 0x00000981u | Os_PSW_PRS; /* PSW  */
+    upperCsa->reg[1] = PSW_DEFAULT_VALUE | 0x1u | Os_PSW_PRS; /* PSW  */
 #else
-    upperCsa->reg[1] = 0x00000981u; /* PSW  */
+    upperCsa->reg[1] = PSW_DEFAULT_VALUE | 0x1u; /* PSW  */
 #endif /* TRUE == CFG_MEMORY_PROTECTION_ENABLE */
     /* PRQA S 3469 ++*/                                                            /* VL_Os_3469 */
     upperCsa->reg[2] = OS_ARCH_STACK_ALIGN((uint32)Os_SCB.sysRunningTCB->taskTop); /* A10(SP)  */
@@ -219,13 +223,13 @@ void Os_ArchFirstEnterTask(void) /* PRQA S 3006 */ /* VL_Os_3006 */
 
     upperCsa1->reg[0] = 0U; /* PCXI */
 #if (TRUE == CFG_MEMORY_PROTECTION_ENABLE)
-    upperCsa1->reg[1] = 0x00000A81U; /* PSW  */
+    upperCsa1->reg[1] = (PSW_DEFAULT_VALUE & PSW_GW_MASK) | (1u << PSW_IS_BIT) | 0x1u; /* PSW  */
     /* PRQA S 3469 ++*/              /* VL_Os_3469 */
     upperCsa1->reg[2] = OS_ARCH_STACK_ALIGN((uint32)Os_SystemStack->stackTop);
 /* PRQA S 3120 --*/
 /* PRQA S 3469 --*/
 #else
-    upperCsa1->reg[1] = 0x00000980u; /* PSW  */
+    upperCsa1->reg[1] = PSW_DEFAULT_VALUE; /* PSW  */
 #endif /* TRUE == CFG_MEMORY_PROTECTION_ENABLE */
     /* PRQA S 0305 -- */
     /* PRQA S 0306 -- */
@@ -261,7 +265,7 @@ void Os_ArchStartScheduler(void) /* PRQA S 3006 */ /* VL_Os_3006 */
 
     /*clear CDC*/
     temp = (Os_ArchMsrType)OS_ARCH_MFCR(OS_REG_PSW);
-    temp &= 0XFFFFFF80u; /* PRQA S 3120 */            /* VL_QAC_MagicNum */
+    temp &= CDC_MASK; /* PRQA S 3120 */            /* VL_QAC_MagicNum */
     /* PRQA S 1006 ++ */ /* VL_Os_1006 */
     OS_ARCH_MTCR(OS_REG_PSW, temp); /* PRQA S 3138 */ /* VL_Os_3138 */
     /* PRQA S 0306, 0310, 2481, 3345 ++ */            /* VL_Os_0306, VL_Os_0310, VL_Os_2481, VL_Os_3345 */
@@ -351,32 +355,6 @@ void Os_ArchInitCsas(void)
         /* PRQA S 0306 -- */
         Os_Csas[i].reg[1] = 0U;
     }
-}
-#define OS_STOP_SEC_CODE
-#include "Os_MemMap.h"
-
-#define OS_START_SEC_CODE
-#include "Os_MemMap.h"
-/******************************************************************************/
-/*
- * Brief                <Initialization of the CPU in the OS.>
- * ServiceId            <None>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Non Reentrant>
- * Param-Name[in]       <None>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * Return               <None>
- * PreCondition         <None>
- * CallByAPI            <StartOS>
- * REQ ID               <None>
- */
-/******************************************************************************/
-/* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
-void Os_ArchInitCPU(void)
-/* PRQA S 1532 -- */
-{
-    /* FIXME:DELETE */
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"

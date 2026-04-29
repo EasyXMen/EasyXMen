@@ -1,6 +1,6 @@
 /* PRQA S 3108++ */
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -49,9 +49,7 @@ static VAR(Os_ApplicationType, OS_VAR) Os_MpuCurrentAppId;
 #define OS_STOP_SEC_VAR_CLONE_32
 #include "Os_MemMap.h"
 /*=======[I N T E R N A L   F U N C T I O N   D E C L A R A T I O N S]========*/
-static FUNC(void, OS_CODE) Os_MpuIsrSwitch(ISRType IsrId, ApplicationType HostAppId);
 
-static FUNC(void, OS_CODE) Os_MpuTaskSwitch(TaskType TaskId, ApplicationType HostAppId);
 /*=======[F U N C T I O N   I M P L E M E N T A T I O N S]====================*/
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
@@ -70,69 +68,90 @@ static FUNC(void, OS_CODE) Os_MpuTaskSwitch(TaskType TaskId, ApplicationType Hos
  * REQ ID               <xxx>
  */
 /******************************************************************************/
+/******************************************************************************/
+/*
+ * Brief                <Initialize the memory protection mapping for the os>
+ *
+ * Service ID   :       <None>
+ * Sync/Async   :       <xxx>
+ * Reentrancy           <Non Reentrant>
+ * param[in]            <xxx>
+ * param[out]           <None>
+ * param[in/out]        <None>
+ * return               <None>
+ * CallByAPI            <xxx>
+ * REQ ID               <xxx>
+ */
+/******************************************************************************/
 FUNC(void, OS_CODE) Os_ArchInitKnMemMap(void)
 {
-    Os_MpuCurrentAppId = 0xFFU;
+    /* All Flash area, RX */
+    OS_MPU_ENABLE_REGION(OS_MPU_REGION_0, OS_MPU_USER_E, 
+                        (uint32)OS_ARCH_FLASH_ADDR_START, 
+                        (uint32)OS_ARCH_FLASH_ADDR_END);
 
-#if defined(OS_ARCH_MPU_ISR2_SUPPORTED)
-    OS_ARCH_REG_WRITE(OS_MPM_NUM, OS_ARCH_REG_READ(OS_MPM_NUM) & ~(1U << 1U)); /* MPM.SVP = 0 */
-#endif
-    OS_ARCH_REG_WRITE(OS_MPRC_NUM, (uint32)0x00);
+    /* All Peripheral area, RW */    
+    OS_MPU_ENABLE_REGION(OS_MPU_REGION_1, OS_MPU_USER_RW, 
+                        (uint32)OS_ARCH_PERIPH_ADDR_START, 
+                        (uint32)OS_ARCH_PERIPH_ADDR_END);
 
-    /*fixed region 0-1 */
-    /* RX*/
-    OS_ARCH_REG_WRITE(OS_MPLA0_NUM, (uint32)OS_ARCH_FLASH_ADDR_START);
-    OS_ARCH_REG_WRITE(OS_MPUA0_NUM, (uint32)OS_ARCH_FLASH_ADDR_END);
-    OS_ARCH_REG_WRITE(OS_MPAT0_NUM, (MPU_RDP_ACCESS_E | MPU_RDP_ACCESS_R));
-
-    /* RW*/
-    OS_ARCH_REG_WRITE(OS_MPLA1_NUM, (uint32)OS_ARCH_PERIPH_ADDR_START);
-    OS_ARCH_REG_WRITE(OS_MPUA1_NUM, (uint32)OS_ARCH_PERIPH_ADDR_END);
-    OS_ARCH_REG_WRITE(OS_MPAT1_NUM, MPU_RDP_ACCESS_RW);
-
-    /*Trusted  region 2*/
-    /* RW*/
-    OS_ARCH_REG_WRITE(OS_MPLA2_NUM, (uint32)OS_ARCH_RAM_ADDR_START);
-    OS_ARCH_REG_WRITE(OS_MPUA2_NUM, (uint32)OS_ARCH_RAM_ADDR_END);
-    OS_ARCH_REG_WRITE(OS_MPAT2_NUM, MPU_RDP_ACCESS_RW);
-
-    /*NON-Trusted  3-7*/
-    /* RW */
-    /* PRQA S 0306++ */ /* MISRA Rule 11.4 */
-    if ((uint32)OS_ARCH_RAM_ADDR_START != (uint32)Os_Core_App_DAddr[0].APP_ADDR_START)
+    /* Run time modification  */
+    if ((uint32)Os_Core_App_DAddr[0].APP_ADDR_START < (uint32)Os_Core_App_DAddr[OS_AUTOSAR_CORES - 1U].APP_ADDR_START)
     {
-        OS_ARCH_REG_WRITE(OS_MPLA3_NUM, (uint32)OS_ARCH_RAM_ADDR_START);
-        OS_ARCH_REG_WRITE(OS_MPUA3_NUM, (uint32)Os_Core_App_DAddr[0].APP_ADDR_START - 4U);
-        OS_ARCH_REG_WRITE(OS_MPAT3_NUM, MPU_RDP_ACCESS_RW);
+        /* the address of CoreN is greater than the address of Core0
+         * e.g. CoreN application data is mapped to cluster ram
+         */
+
+        /* RAM area out of Os-Application, RW */
+        if ((uint32)OS_ARCH_RAM_ADDR_START != (uint32)Os_Core_App_DAddr[0U].APP_ADDR_START)
+        {
+            OS_MPU_ENABLE_REGION(OS_MPU_REGION_2,  OS_MPU_USER_RW, 
+                                (uint32)OS_ARCH_RAM_ADDR_START, 
+                                (uint32)Os_Core_App_DAddr[0].APP_ADDR_START - 4U);
+        }
+
+        /* RAM area in Os-Application, R */
+        OS_MPU_ENABLE_REGION(OS_MPU_REGION_3,  OS_MPU_USER_R, 
+                            (uint32)Os_Core_App_DAddr[0].APP_ADDR_START,
+                            (uint32)Os_Core_App_DAddr[OS_AUTOSAR_CORES - 1U].APP_ADDR_END - 4);
+
+        /* RAM area out of Os-Application, RW */
+        if ((uint32)OS_ARCH_RAM_ADDR_END != (uint32)Os_Core_App_DAddr[OS_AUTOSAR_CORES - 1U].APP_ADDR_END)
+        {
+            OS_MPU_ENABLE_REGION(OS_MPU_REGION_4,  OS_MPU_USER_RW, 
+                            (uint32)Os_Core_App_DAddr[OS_AUTOSAR_CORES - 1U].APP_ADDR_END, 
+                            (uint32)OS_ARCH_RAM_ADDR_END - 4U);
+        }
     }
-    /* NONE */
-    OS_ARCH_REG_WRITE(OS_MPLA4_NUM, (uint32)Os_Core_App_DAddr[0].APP_ADDR_START);
-    OS_ARCH_REG_WRITE(OS_MPUA4_NUM, (uint32)Os_Core_App_DAddr[OS_AUTOSAR_CORES - 1U].APP_ADDR_END - 4U);
-    OS_ARCH_REG_WRITE(OS_MPAT4_NUM, MPU_SV_NONE_UM_NONE);
+    else
+    {
+        /* the address of Core0 is greater than the address of CoreN
+         * e.g. CoreN application data is mapped to local ram 
+         */
 
-    /* RW */
-    OS_ARCH_REG_WRITE(OS_MPLA5_NUM, (uint32)Os_Core_App_DAddr[OS_AUTOSAR_CORES - 1U].APP_ADDR_END);
-    OS_ARCH_REG_WRITE(OS_MPUA5_NUM, (uint32)_OS_SYSTEM_STACK_START - 4U);
-    OS_ARCH_REG_WRITE(OS_MPAT5_NUM, MPU_RDP_ACCESS_RW);
+        /* RAM area out of Os-Application, RW */
+        if ((uint32)OS_ARCH_RAM_ADDR_START != (uint32)Os_Core_App_DAddr[OS_AUTOSAR_CORES - 1U].APP_ADDR_START)
+        {
+            OS_MPU_ENABLE_REGION(OS_MPU_REGION_2, OS_MPU_USER_RW, 
+                                (uint32)OS_ARCH_RAM_ADDR_START, 
+                                (uint32)Os_Core_App_DAddr[OS_AUTOSAR_CORES - 1U].APP_ADDR_START - 4U);
+        }
 
-    /* RW */
-    OS_ARCH_REG_WRITE(OS_MPLA6_NUM, (uint32)_OS_SYSTEM_STACK_START);
-    OS_ARCH_REG_WRITE(OS_MPUA6_NUM, (uint32)_OS_SYSTEM_STACK_END - 4U);
-    OS_ARCH_REG_WRITE(OS_MPAT6_NUM, MPU_RDP_ACCESS_RW);
+        /* RAM area in Os-Application, R */
+        OS_MPU_ENABLE_REGION(OS_MPU_REGION_3, OS_MPU_USER_R, 
+                            (uint32)Os_Core_App_DAddr[OS_AUTOSAR_CORES - 1U].APP_ADDR_START,
+                            (uint32)Os_Core_App_DAddr[0].APP_ADDR_END - 4);
 
-    /* RW */
-    OS_ARCH_REG_WRITE(OS_MPLA7_NUM, (uint32)_OS_SYSTEM_STACK_END);
-    OS_ARCH_REG_WRITE(OS_MPUA7_NUM, (uint32)OS_ARCH_RAM_ADDR_END);
-    OS_ARCH_REG_WRITE(OS_MPAT7_NUM, MPU_RDP_ACCESS_RW);
-    /* PRQA S 0306-- */ /* MISRA Rule 11.4 */
-
-    /*0000 0000 0000 0111*/
-    OS_ARCH_REG_WRITE(OS_MPRC_NUM, (uint32)0x0007);
-
-#if defined(OS_ARCH_MPU_ISR2_SUPPORTED)
-    OS_ARCH_REG_WRITE(OS_MPM_NUM, OS_ARCH_REG_READ(OS_MPM_NUM) | (1U << 1U)); /* MPM.SVP = 1 */
-#endif
+        /* RAM area out of Os-Application, RW */
+        if ((uint32)OS_ARCH_RAM_ADDR_END != (uint32)Os_Core_App_DAddr[0].APP_ADDR_END)
+        {
+            OS_MPU_ENABLE_REGION(OS_MPU_REGION_4, OS_MPU_USER_RW, 
+                            (uint32)Os_Core_App_DAddr[0].APP_ADDR_END, 
+                            (uint32)OS_ARCH_RAM_ADDR_END - 4U);
+        }
+    }
 }
+
 
 /******************************************************************************/
 /*
@@ -149,10 +168,470 @@ FUNC(void, OS_CODE) Os_ArchInitKnMemMap(void)
  * REQ ID               <xxx>
  */
 /******************************************************************************/
-static FUNC(void, OS_CODE) Os_ArchSetTruReg(void)
+STATIC FUNC(void, OS_CODE) Os_ArchSetTruReg(void)
 {
-    /*0000 0000 0000 0111*/
-    OS_ARCH_REG_WRITE(OS_MPRC_NUM, (uint32)0x0007);
+    /* Run time modification  */
+    if ((uint32)Os_Core_App_DAddr[0].APP_ADDR_START < (uint32)Os_Core_App_DAddr[OS_AUTOSAR_CORES - 1U].APP_ADDR_START)
+    {
+        /* the address of CoreN is greater than the address of Core0
+         * e.g. CoreN application data is mapped to cluster ram
+         */
+
+        /* RAM area out of Os-Application, RW */
+        if ((uint32)OS_ARCH_RAM_ADDR_START != (uint32)Os_Core_App_DAddr[0U].APP_ADDR_START)
+        {
+            OS_MPU_ENABLE_REGION(OS_MPU_REGION_2,  OS_MPU_USER_RW, 
+                                (uint32)OS_ARCH_RAM_ADDR_START, 
+                                (uint32)Os_Core_App_DAddr[0].APP_ADDR_START - 4U);
+        }
+
+        /* RAM area in Os-Application, R */
+        OS_MPU_ENABLE_REGION(OS_MPU_REGION_3,  OS_MPU_USER_RW, 
+                            (uint32)Os_Core_App_DAddr[0].APP_ADDR_START,
+                            (uint32)Os_Core_App_DAddr[OS_AUTOSAR_CORES - 1U].APP_ADDR_END - 4);
+
+        /* RAM area out of Os-Application, RW */
+        if ((uint32)OS_ARCH_RAM_ADDR_END != (uint32)Os_Core_App_DAddr[OS_AUTOSAR_CORES - 1U].APP_ADDR_END)
+        {
+            OS_MPU_ENABLE_REGION(OS_MPU_REGION_4,  OS_MPU_USER_RW, 
+                            (uint32)Os_Core_App_DAddr[OS_AUTOSAR_CORES - 1U].APP_ADDR_END, 
+                            (uint32)OS_ARCH_RAM_ADDR_END - 4U);
+        }
+    }
+    else
+    {
+        /* the address of Core0 is greater than the address of CoreN
+         * e.g. CoreN application data is mapped to local ram 
+         */
+
+        /* RAM area out of Os-Application, RW */
+        if ((uint32)OS_ARCH_RAM_ADDR_START != (uint32)Os_Core_App_DAddr[OS_AUTOSAR_CORES - 1U].APP_ADDR_START)
+        {
+            OS_MPU_ENABLE_REGION(OS_MPU_REGION_2, OS_MPU_USER_RW, 
+                                (uint32)OS_ARCH_RAM_ADDR_START, 
+                                (uint32)Os_Core_App_DAddr[OS_AUTOSAR_CORES - 1U].APP_ADDR_START - 4U);
+        }
+
+        /* RAM area in Os-Application, R */
+        OS_MPU_ENABLE_REGION(OS_MPU_REGION_3, OS_MPU_USER_RW, 
+                            (uint32)Os_Core_App_DAddr[OS_AUTOSAR_CORES - 1U].APP_ADDR_START,
+                            (uint32)Os_Core_App_DAddr[0].APP_ADDR_END - 4);
+
+        /* RAM area out of Os-Application, RW */
+        if ((uint32)OS_ARCH_RAM_ADDR_END != (uint32)Os_Core_App_DAddr[0].APP_ADDR_END)
+        {
+            OS_MPU_ENABLE_REGION(OS_MPU_REGION_4, OS_MPU_USER_RW, 
+                            (uint32)Os_Core_App_DAddr[0].APP_ADDR_END, 
+                            (uint32)OS_ARCH_RAM_ADDR_END - 4U);
+        }
+    }
+}
+
+/******************************************************************************/
+/*
+ * Brief                <Set memory protection map for isr of trusted app>
+ *
+ * Service ID   :       <None>
+ * Sync/Async   :       <xxx>
+ * Reentrancy           <Non Reentrant>
+ * param[in]            <xxx>
+ * param[out]           <None>
+ * param[in/out]        <None>
+ * return               <None>
+ * CallByAPI            <xxx>
+ * REQ ID               <xxx>
+ */
+/******************************************************************************/
+STATIC FUNC(void, OS_CODE) Os_ArchSetTruIsrReg(ISRType IsrId, ApplicationType HostAppId)
+{
+    (void)IsrId;
+
+    /* Run time modification  */
+    if ((uint32)Os_Core_App_DAddr[0].APP_ADDR_START < (uint32)Os_Core_App_DAddr[OS_AUTOSAR_CORES - 1U].APP_ADDR_START)
+    {
+        /* the address of CoreN is greater than the address of Core0
+         * e.g. CoreN application data is mapped to cluster ram
+         */
+
+        /* RAM area out of Os-Application, RW */
+        if ((uint32)OS_ARCH_RAM_ADDR_START != (uint32)Os_Core_App_DAddr[0U].APP_ADDR_START)
+        {
+            OS_MPU_ENABLE_REGION(OS_MPU_REGION_2,  OS_MPU_USER_RW, 
+                                (uint32)OS_ARCH_RAM_ADDR_START, 
+                                (uint32)Os_Core_App_DAddr[0].APP_ADDR_START - 4U);
+        }
+
+        /* RAM area in Os-Application, R */
+        OS_MPU_ENABLE_REGION(OS_MPU_REGION_3,  OS_MPU_USER_R, 
+                            (uint32)Os_Core_App_DAddr[0].APP_ADDR_START,
+                            (uint32)Os_Core_App_DAddr[OS_AUTOSAR_CORES - 1U].APP_ADDR_END - 4);
+
+        /* RAM area out of Os-Application, RW */
+        if ((uint32)OS_ARCH_RAM_ADDR_END != (uint32)Os_Core_App_DAddr[OS_AUTOSAR_CORES - 1U].APP_ADDR_END)
+        {
+            OS_MPU_ENABLE_REGION(OS_MPU_REGION_4,  OS_MPU_USER_RW, 
+                            (uint32)Os_Core_App_DAddr[OS_AUTOSAR_CORES - 1U].APP_ADDR_END, 
+                            (uint32)OS_ARCH_RAM_ADDR_END - 4U);
+        }
+
+    }
+    else
+    {
+        /* the address of Core0 is greater than the address of CoreN
+         * e.g. CoreN application data is mapped to local ram 
+         */
+
+        /* RAM area out of Os-Application, RW */
+        if ((uint32)OS_ARCH_RAM_ADDR_START != (uint32)Os_Core_App_DAddr[OS_AUTOSAR_CORES - 1U].APP_ADDR_START)
+        {
+            OS_MPU_ENABLE_REGION(OS_MPU_REGION_2, OS_MPU_USER_RW, 
+                                (uint32)OS_ARCH_RAM_ADDR_START, 
+                                (uint32)Os_Core_App_DAddr[OS_AUTOSAR_CORES - 1U].APP_ADDR_START - 4U);
+        }
+
+        /* RAM area in Os-Application, R */
+        OS_MPU_ENABLE_REGION(OS_MPU_REGION_3, OS_MPU_USER_R, 
+                            (uint32)Os_Core_App_DAddr[OS_AUTOSAR_CORES - 1U].APP_ADDR_START,
+                            (uint32)Os_Core_App_DAddr[0].APP_ADDR_END - 4);
+
+        /* RAM area out of Os-Application, RW */
+        if ((uint32)OS_ARCH_RAM_ADDR_END != (uint32)Os_Core_App_DAddr[0].APP_ADDR_END)
+        {
+            OS_MPU_ENABLE_REGION(OS_MPU_REGION_4, OS_MPU_USER_RW, 
+                            (uint32)Os_Core_App_DAddr[0].APP_ADDR_END, 
+                            (uint32)OS_ARCH_RAM_ADDR_END - 4U);
+        }
+    }
+
+    /* RW */
+    OS_MPU_ENABLE_REGION(OS_MPU_REGION_5, OS_MPU_USER_W, 
+                        (uint32)Os_App_DAddr[HostAppId].APP_ADDR_START, 
+                        (uint32)Os_App_DAddr[HostAppId].APP_ADDR_END - 4U);
+}
+
+/******************************************************************************/
+/*
+ * Brief                <>
+ *
+ * Service ID   :       <None>
+ * Sync/Async   :       <xxx>
+ * Reentrancy           <Non Reentrant>
+ * param[in]            <xxx>
+ * param[out]           <None>
+ * param[in/out]        <None>
+ * return               <None>
+ * CallByAPI            <xxx>
+ * REQ ID               <xxx>
+ */
+/******************************************************************************/
+STATIC FUNC(void, OS_CODE) Os_ArchSetNonTruIsrReg(ISRType IsrId, ApplicationType HostAppId)
+{
+    (void)IsrId;
+
+    /* Run time modification  */
+    if ((uint32)Os_Core_App_DAddr[0].APP_ADDR_START < (uint32)Os_Core_App_DAddr[OS_AUTOSAR_CORES - 1U].APP_ADDR_START)
+    {
+        /* the address of CoreN is greater than the address of Core0
+         * e.g. CoreN application data is mapped to cluster ram
+         */
+
+        /* RAM area out of Os-Application, R */
+        if ((uint32)OS_ARCH_RAM_ADDR_START != (uint32)Os_Core_App_DAddr[0U].APP_ADDR_START)
+        {
+            OS_MPU_ENABLE_REGION(OS_MPU_REGION_2,  OS_MPU_USER_R, 
+                                (uint32)OS_ARCH_RAM_ADDR_START, 
+                                (uint32)Os_Core_App_DAddr[0].APP_ADDR_START - 4U);
+        }
+
+        /* RAM area in Os-Application, R */
+        OS_MPU_ENABLE_REGION(OS_MPU_REGION_3,  OS_MPU_USER_NONE, 
+                            (uint32)Os_Core_App_DAddr[0].APP_ADDR_START,
+                            (uint32)Os_Core_App_DAddr[OS_AUTOSAR_CORES - 1U].APP_ADDR_END - 4);
+
+        /* RAM area out of Os-Application, R */
+        if ((uint32)OS_ARCH_RAM_ADDR_END != (uint32)Os_Core_App_DAddr[OS_AUTOSAR_CORES - 1U].APP_ADDR_END)
+        {
+            OS_MPU_ENABLE_REGION(OS_MPU_REGION_4,  OS_MPU_USER_R, 
+                            (uint32)Os_Core_App_DAddr[OS_AUTOSAR_CORES - 1U].APP_ADDR_END, 
+                            (uint32)OS_ARCH_RAM_ADDR_END - 4U);
+        }
+    }
+    else
+    {
+        /* the address of Core0 is greater than the address of CoreN
+         * e.g. CoreN application data is mapped to local ram 
+         */
+
+        /* RAM area out of Os-Application, R */
+        if ((uint32)OS_ARCH_RAM_ADDR_START != (uint32)Os_Core_App_DAddr[OS_AUTOSAR_CORES - 1U].APP_ADDR_START)
+        {
+            OS_MPU_ENABLE_REGION(OS_MPU_REGION_2, OS_MPU_USER_R, 
+                                (uint32)OS_ARCH_RAM_ADDR_START, 
+                                (uint32)Os_Core_App_DAddr[OS_AUTOSAR_CORES - 1U].APP_ADDR_START - 4U);
+        }
+
+        /* RAM area in Os-Application, R */
+        OS_MPU_ENABLE_REGION(OS_MPU_REGION_3, OS_MPU_USER_NONE, 
+                            (uint32)Os_Core_App_DAddr[OS_AUTOSAR_CORES - 1U].APP_ADDR_START,
+                            (uint32)Os_Core_App_DAddr[0].APP_ADDR_END - 4);
+
+        /* RAM area out of Os-Application, R */
+        if ((uint32)OS_ARCH_RAM_ADDR_END != (uint32)Os_Core_App_DAddr[0].APP_ADDR_END)
+        {
+            OS_MPU_ENABLE_REGION(OS_MPU_REGION_4, OS_MPU_USER_R, 
+                            (uint32)Os_Core_App_DAddr[0].APP_ADDR_END, 
+                            (uint32)OS_ARCH_RAM_ADDR_END - 4U);
+        }
+    }
+
+    /* RW */
+    OS_MPU_ENABLE_REGION(OS_MPU_REGION_5, OS_MPU_USER_RW, 
+                        (uint32)Os_App_DAddr[HostAppId].APP_ADDR_START, 
+                        (uint32)Os_App_DAddr[HostAppId].APP_ADDR_END - 4U);
+}
+
+/******************************************************************************/
+/*
+ * Brief                <MPU init state or trusted application>
+ *
+ * Service ID   :       <None>
+ * Sync/Async   :       <xxx>
+ * Reentrancy           <Non Reentrant>
+ * param[in]            <xxx>
+ * param[out]           <None>
+ * param[in/out]        <None>
+ * return               <None>
+ * CallByAPI            <xxx>
+ * REQ ID               <xxx>
+ */
+/******************************************************************************/
+STATIC FUNC(void, OS_CODE) Os_ArchSetTruTaskReg(TaskType TaskId, ApplicationType HostAppId)
+{
+    (void)TaskId;
+
+    /* Run time modification  */
+    if ((uint32)Os_Core_App_DAddr[0].APP_ADDR_START < (uint32)Os_Core_App_DAddr[OS_AUTOSAR_CORES - 1U].APP_ADDR_START)
+    {
+        /* the address of CoreN is greater than the address of Core0
+         * e.g. CoreN application data is mapped to cluster ram
+         */
+
+        /* RAM area out of Os-Application, R */
+        if ((uint32)OS_ARCH_RAM_ADDR_START != (uint32)Os_Core_App_DAddr[0U].APP_ADDR_START)
+        {
+            OS_MPU_ENABLE_REGION(OS_MPU_REGION_2,  OS_MPU_USER_R, 
+                                (uint32)OS_ARCH_RAM_ADDR_START, 
+                                (uint32)Os_Core_App_DAddr[0].APP_ADDR_START - 4U);
+        }
+
+        /* RAM area in Os-Application, R */
+        OS_MPU_ENABLE_REGION(OS_MPU_REGION_3,  OS_MPU_USER_R, 
+                            (uint32)Os_Core_App_DAddr[0].APP_ADDR_START,
+                            (uint32)Os_Core_App_DAddr[OS_AUTOSAR_CORES - 1U].APP_ADDR_END - 4);
+
+        /* RAM area out of Os-Application, R */
+        if ((uint32)OS_ARCH_RAM_ADDR_END != (uint32)Os_Core_App_DAddr[OS_AUTOSAR_CORES - 1U].APP_ADDR_END)
+        {
+            OS_MPU_ENABLE_REGION(OS_MPU_REGION_4,  OS_MPU_USER_R, 
+                            (uint32)Os_Core_App_DAddr[OS_AUTOSAR_CORES - 1U].APP_ADDR_END, 
+                            (uint32)OS_ARCH_RAM_ADDR_END - 4U);
+        }
+    }
+    else
+    {
+        /* the address of Core0 is greater than the address of CoreN
+         * e.g. CoreN application data is mapped to local ram 
+         */
+
+        /* RAM area out of Os-Application, R */
+        if ((uint32)OS_ARCH_RAM_ADDR_START != (uint32)Os_Core_App_DAddr[OS_AUTOSAR_CORES - 1U].APP_ADDR_START)
+        {
+            OS_MPU_ENABLE_REGION(OS_MPU_REGION_2, OS_MPU_USER_R, 
+                                (uint32)OS_ARCH_RAM_ADDR_START, 
+                                (uint32)Os_Core_App_DAddr[OS_AUTOSAR_CORES - 1U].APP_ADDR_START - 4U);
+        }
+
+        /* RAM area in Os-Application, R */
+        OS_MPU_ENABLE_REGION(OS_MPU_REGION_3, OS_MPU_USER_R, 
+                            (uint32)Os_Core_App_DAddr[OS_AUTOSAR_CORES - 1U].APP_ADDR_START,
+                            (uint32)Os_Core_App_DAddr[0].APP_ADDR_END - 4);
+
+        /* RAM area out of Os-Application, R */
+        if ((uint32)OS_ARCH_RAM_ADDR_END != (uint32)Os_Core_App_DAddr[0].APP_ADDR_END)
+        {
+            OS_MPU_ENABLE_REGION(OS_MPU_REGION_4, OS_MPU_USER_R, 
+                            (uint32)Os_Core_App_DAddr[0].APP_ADDR_END, 
+                            (uint32)OS_ARCH_RAM_ADDR_END - 4U);
+        }
+    }
+
+    /* RW */
+    OS_MPU_ENABLE_REGION(OS_MPU_REGION_5, OS_MPU_USER_RW, 
+                        (uint32)Os_App_DAddr[HostAppId].APP_ADDR_START, 
+                        (uint32)Os_App_DAddr[HostAppId].APP_ADDR_END - 4U);
+}
+
+/******************************************************************************/
+/*
+ * Brief                <>
+ *
+ * Service ID   :       <None>
+ * Sync/Async   :       <xxx>
+ * Reentrancy           <Non Reentrant>
+ * param[in]            <xxx>
+ * param[out]           <None>
+ * param[in/out]        <None>
+ * return               <None>
+ * CallByAPI            <xxx>
+ * REQ ID               <xxx>
+ */
+/******************************************************************************/
+STATIC FUNC(void, OS_CODE) Os_ArchSetNonTruTaskReg(TaskType TaskId, ApplicationType HostAppId)
+{
+    (void)TaskId;
+
+    /* Run time modification  */
+    if ((uint32)Os_Core_App_DAddr[0].APP_ADDR_START < (uint32)Os_Core_App_DAddr[OS_AUTOSAR_CORES - 1U].APP_ADDR_START)
+    {
+        /* the address of CoreN is greater than the address of Core0
+         * e.g. CoreN application data is mapped to cluster ram
+         */
+
+        /* RAM area out of Os-Application, R */
+        if ((uint32)OS_ARCH_RAM_ADDR_START != (uint32)Os_Core_App_DAddr[0U].APP_ADDR_START)
+        {
+            OS_MPU_ENABLE_REGION(OS_MPU_REGION_2,  OS_MPU_USER_R, 
+                                (uint32)OS_ARCH_RAM_ADDR_START, 
+                                (uint32)Os_Core_App_DAddr[0].APP_ADDR_START - 4U);
+        }
+
+        /* RAM area in Os-Application, None */
+        OS_MPU_ENABLE_REGION(OS_MPU_REGION_3,  OS_MPU_USER_NONE, 
+                            (uint32)Os_Core_App_DAddr[0].APP_ADDR_START,
+                            (uint32)Os_Core_App_DAddr[OS_AUTOSAR_CORES - 1U].APP_ADDR_END - 4);
+
+        /* RAM area out of Os-Application, R */
+        if ((uint32)OS_ARCH_RAM_ADDR_END != (uint32)Os_Core_App_DAddr[OS_AUTOSAR_CORES - 1U].APP_ADDR_END)
+        {
+            OS_MPU_ENABLE_REGION(OS_MPU_REGION_4, OS_MPU_USER_R, 
+                            (uint32)Os_Core_App_DAddr[OS_AUTOSAR_CORES - 1U].APP_ADDR_END, 
+                            (uint32)OS_ARCH_RAM_ADDR_END - 4U);
+        }
+    }
+    else
+    {
+        /* the address of Core0 is greater than the address of CoreN
+         * e.g. CoreN application data is mapped to local ram 
+         */
+
+        /* RAM area out of Os-Application, R */
+        if ((uint32)OS_ARCH_RAM_ADDR_START != (uint32)Os_Core_App_DAddr[OS_AUTOSAR_CORES - 1U].APP_ADDR_START)
+        {
+            OS_MPU_ENABLE_REGION(OS_MPU_REGION_2, OS_MPU_USER_R, 
+                                (uint32)OS_ARCH_RAM_ADDR_START, 
+                                (uint32)Os_Core_App_DAddr[OS_AUTOSAR_CORES - 1U].APP_ADDR_START - 4U);
+        }
+
+        /* RAM area in Os-Application, None */
+        OS_MPU_ENABLE_REGION(OS_MPU_REGION_3, OS_MPU_USER_NONE, 
+                            (uint32)Os_Core_App_DAddr[OS_AUTOSAR_CORES - 1U].APP_ADDR_START,
+                            (uint32)Os_Core_App_DAddr[0].APP_ADDR_END - 4);
+
+        /* RAM area out of Os-Application, R */
+        if ((uint32)OS_ARCH_RAM_ADDR_END != (uint32)Os_Core_App_DAddr[0].APP_ADDR_END)
+        {
+            OS_MPU_ENABLE_REGION(OS_MPU_REGION_4, OS_MPU_USER_R, 
+                            (uint32)Os_Core_App_DAddr[0].APP_ADDR_END, 
+                            (uint32)OS_ARCH_RAM_ADDR_END - 4U);
+        }
+    }
+
+    /* RW */
+    OS_MPU_ENABLE_REGION(OS_MPU_REGION_5, OS_MPU_USER_RW, 
+                        (uint32)Os_App_DAddr[HostAppId].APP_ADDR_START, 
+                        (uint32)Os_App_DAddr[HostAppId].APP_ADDR_END - 4U);
+}
+
+/******************************************************************************/
+/*
+ * Brief                <Os_ArchSetIsrMemMap>
+ *
+ * Service ID   :       <None>
+ * Sync/Async   :       <Synchronous>
+ * Reentrancy           <Non Reentrant>
+ * @param[in]           <None>
+ * @param[out]          <None>
+ * @param[in/out]       <None>
+ * @return              <None>
+ * PreCondition         <None>
+ * CallByAPI            <Os_EnterISR2,Os_ExitISR2>
+ * REQ ID               <DD_1_0758, DD_1_0759, DD_1_1308, DD_1_1309, DD_1_1310>
+ */
+/******************************************************************************/
+FUNC(void,OS_CODE) Os_ArchSetIsrMemMap
+(
+    ISRType         IsrId, 
+    ApplicationType HostAppId, 
+    uint32          isTrusted
+)
+{
+    if (TRUE != isTrusted) /* Non-trusted app running. */
+    {
+        Os_ArchSetNonTruIsrReg(IsrId, HostAppId);
+    }
+    else  /* Trusted app or os_kernel running. */
+    {
+        /*OSTrustedApplicationWithProtection != TRUE*/
+        if (Os_AppCfg[HostAppId].OsTrustedAppWithProtection != TRUE)
+        {
+            Os_ArchSetTruReg();
+        }
+        else
+        {
+            Os_ArchSetTruIsrReg(IsrId,HostAppId);
+        }
+    }
+}
+
+/******************************************************************************/
+/*
+ * Brief                <MemMap for Memory Protection Settings Task>
+ *
+ * Service ID   :       <None>
+ * Sync/Async   :       <Synchronous>
+ * Reentrancy           <Non Reentrant>
+ * @param[in]           <None>
+ * @param[out]          <None>
+ * @param[in/out]       <None>
+ * @return              <None>
+ * PreCondition         <None>
+ * CallByAPI            <Os_ExitISR2, Os_SwitchTask>
+ * REQ ID               <DD_1_0760, DD_1_0761, DD_1_1311, DD_1_1312, DD_1_1313>
+ */
+/******************************************************************************/
+FUNC(void,OS_CODE) Os_ArchSetTaskMemMap
+(
+    TaskType        TaskId, 
+    ApplicationType HostAppId, 
+    uint32          isTrusted
+)
+{
+    if (TRUE != isTrusted) /* Non-trusted app running. */
+    {
+        Os_ArchSetNonTruTaskReg(TaskId, HostAppId);
+    }
+    else  /* Trusted app or os_kernel running. */
+    {
+        /*OSTrustedApplicationWithProtection != TRUE*/
+        if (Os_AppCfg[HostAppId].OsTrustedAppWithProtection != TRUE)
+        {
+            Os_ArchSetTruReg();
+        }
+        else
+        {
+            Os_ArchSetTruTaskReg(TaskId, HostAppId);
+        }
+    }
 }
 
 /******************************************************************************/
@@ -162,35 +641,33 @@ static FUNC(void, OS_CODE) Os_ArchSetTruReg(void)
  * Service ID   :       <None>
  * Sync/Async   :       <Synchronous>
  * Reentrancy           <Non Reentrant>
- * param-Name[in]       <None>
- * param-Name[out]      <None>
- * param-Name[in/out]   <None>
- * return               <None>
+ * @param[in]           <None>
+ * @param[out]          <None>
+ * @param[in/out]       <None>
+ * @return              <None>
  * PreCondition         <None>
- * CallByAPI            <Os_SwitchTask>
- * REQ ID               <None>
+ * CallByAPI            <>
+ * REQ ID               <>
  */
 /******************************************************************************/
-void Os_MemProtTaskCat1Map(void)
+FUNC(void, OS_CODE) Os_MemProtTaskCat1Map(void)
 {
-    TaskType TaskId = Os_GetObjLocalId(Os_SCB.sysRunningTaskID);
-    /* PRQA S 3469 */ /* MISRA Rule 4.9 */ /*ARCH_MPU_C_MACRO_008*/
-    ApplicationType HostAppId = Os_SCB.sysRunningAppID;
+    VAR(ApplicationType, OS_VAR) sysAppId = Os_SCB.sysAppId;
+    VAR(Os_ApplicationType, OS_VAR) sysRunningAppID = Os_SCB.sysRunningAppID;
 
-    if (Os_SCB.sysAppId == Os_SCB.sysRunningAppID)
+    if (sysAppId != sysRunningAppID)
     {
-        /*SYS_APP, as OS kernel, have all access rights*/
-        Os_ArchSetTruReg();
-    }
-    else if ((TRUE == Os_AppCfg[HostAppId].OsTrusted) && (TRUE != Os_AppCfg[HostAppId].OsTrustedAppWithProtection))
-    {
-        /*Trusted APP and no memory protection*/
-        Os_ArchSetTruReg();
+        /* Memory protection: Set memory map according to new running task. */
+        /*new task,default set register 03*/
+        Os_ArchSetTaskMemMap(
+            Os_GetObjLocalId(Os_SCB.sysRunningTaskID),
+            sysRunningAppID,
+            (uint32)Os_AppCfg[sysRunningAppID].OsTrusted);
     }
     else
     {
-        /*Non trusted apps or trusted apps protected by MPU*/
-        Os_MpuTaskSwitch(TaskId, HostAppId);
+        /*SYS_APP, as OS kernel, have all access rights*/
+        Os_ArchSetTruReg();
     }
 }
 
@@ -201,35 +678,32 @@ void Os_MemProtTaskCat1Map(void)
  * Service ID   :       <None>
  * Sync/Async   :       <Synchronous>
  * Reentrancy           <Non Reentrant>
- * param-Name[in]       <None>
- * param-Name[out]      <None>
- * param-Name[in/out]   <None>
- * return               <None>
+ * @param[in]           <None>
+ * @param[out]          <None>
+ * @param[in/out]       <None>
+ * @return              <None>
  * PreCondition         <None>
- * CallByAPI            <Os_SwitchTask>
- * REQ ID               <None>
+ * CallByAPI            <>
+ * REQ ID               <>
  */
 /******************************************************************************/
-void Os_MemProtTaskCat2Map(void)
+FUNC(void, OS_CODE) Os_MemProtTaskCat2Map(void)
 {
-    TaskType TaskId = Os_GetObjLocalId(Os_SCB.sysRunningTaskID);
-    /* PRQA S 3469 */ /* MISRA Rule 4.9 */ /*ARCH_MPU_C_MACRO_008*/
-    ApplicationType HostAppId = Os_SCB.sysRunningAppID;
+    VAR(ApplicationType, OS_VAR) sysAppId = Os_SCB.sysAppId;
+    VAR(Os_ApplicationType, OS_VAR) sysRunningAppID = Os_SCB.sysRunningAppID;
 
-    if (Os_SCB.sysAppId == Os_SCB.sysRunningAppID)
+    if (sysAppId != sysRunningAppID)
     {
-        /*SYS_APP, as OS kernel, have all access rights*/
-        Os_ArchSetTruReg();
-    }
-    else if ((TRUE == Os_AppCfg[HostAppId].OsTrusted) && (TRUE != Os_AppCfg[HostAppId].OsTrustedAppWithProtection))
-    {
-        /*Trusted APP and no memory protection*/
-        Os_ArchSetTruReg();
+        /* Memory protection: Set memory map according to new running task. */
+        Os_ArchSetTaskMemMap(
+            Os_GetObjLocalId(Os_SCB.sysRunningTaskID),
+            sysRunningAppID,
+            (uint32)Os_AppCfg[sysRunningAppID].OsTrusted);
     }
     else
     {
-        /*Non trusted apps or trusted apps protected by MPU*/
-        Os_MpuTaskSwitch(TaskId, HostAppId);
+        /*SYS_APP, as OS kernel, have all access rights*/
+        Os_ArchSetTruReg();
     }
 }
 
@@ -240,109 +714,35 @@ void Os_MemProtTaskCat2Map(void)
  * Service ID   :       <None>
  * Sync/Async   :       <Synchronous>
  * Reentrancy           <Non Reentrant>
- * param-Name[in]       <None>
- * param-Name[out]      <None>
- * param-Name[in/out]   <None>
- * return               <None>
+ * @param[in]           <None>
+ * @param[out]          <None>
+ * @param[in/out]       <None>
+ * @return              <None>
  * PreCondition         <None>
- * CallByAPI            <Os_EnterISR2><Os_ExitISR2>
- * REQ ID               <None>
+ * CallByAPI            <>
+ * REQ ID               <>
  */
 /******************************************************************************/
-void Os_MemProtIsrMap(void)
+FUNC(void, OS_CODE) Os_MemProtIsrMap(void)
 {
-    ISRType IsrId = Os_SCB.sysRunningIsrCat2Id;
-    ApplicationType HostAppId = Os_SCB.sysRunningAppID;
+    /*if memory protection is configured*/
+    /*Preparing to enter the ISR2 outside with its memory region table*/
+    VAR(Os_IsrType, OS_VAR) epilogueISR = Os_SCB.sysRunningIsrCat2Id;
+    VAR(Os_ApplicationType, OS_VAR) epilogueapp = Os_SCB.sysRunningAppID;
 
-    if (Os_SCB.sysAppId == Os_SCB.sysRunningAppID)
+    /*find pre ISR's PSW*/
+    if (Os_SCB.sysAppId != epilogueapp)
+    {
+        Os_ArchSetIsrMemMap(epilogueISR, epilogueapp, (uint32)Os_AppCfg[epilogueapp].OsTrusted);
+    }
+    else
     {
         /*SYS_APP, as OS kernel, have all access rights*/
         Os_ArchSetTruReg();
     }
-    else if ((TRUE == Os_AppCfg[HostAppId].OsTrusted) && (TRUE != Os_AppCfg[HostAppId].OsTrustedAppWithProtection))
-    {
-        /*Trusted APP and no memory protection*/
-        Os_ArchSetTruReg();
-    }
-    else
-    {
-        /*Non trusted apps or trusted apps protected by MPU*/
-        Os_MpuIsrSwitch(IsrId, HostAppId);
-    }
 }
 
-/******************************************************************************/
-/*
- * Brief                <In MPU Trust Isr Configuration, All permissions are
- *               allowed in privilege mode ,but in user mode,it has some restrict>
- * Service ID           <Os_ArchMpTrustIsrThreadSwitch>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * param-Name[in]       <None>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * CallByAPI            <None>
- * REQ ID               <None>
- */
-/******************************************************************************/
-static FUNC(void, OS_CODE) Os_MpuIsrSwitch(ISRType IsrId, ApplicationType HostAppId)
-{
-    if (Os_MpuCurrentAppId != HostAppId)
-    {
-        Os_MpuCurrentAppId = HostAppId;
 
-        OS_ARCH_REG_WRITE(OS_MPLA8_NUM, (uint32)Os_AppPriDataAddr[HostAppId].APP_ADDR_START);
-        OS_ARCH_REG_WRITE(OS_MPUA8_NUM, (uint32)Os_AppPriDataAddr[HostAppId].APP_ADDR_END - 4U);
-        /* PRQA S 0306-- */ /* MISRA Rule 11.4 */
-        OS_ARCH_REG_WRITE(OS_MPAT8_NUM, MPU_RDP_ACCESS_RW);
-    }
-    OS_ARCH_REG_WRITE(OS_MPLA9_NUM, (uint32)Os_IsrDAddr[IsrId].ISR_ADDR_START);
-    OS_ARCH_REG_WRITE(OS_MPUA9_NUM, (uint32)Os_IsrDAddr[IsrId].ISR_ADDR_END - 4U);
-    /* PRQA S 0306-- */ /* MISRA Rule 11.4 */
-    OS_ARCH_REG_WRITE(OS_MPAT9_NUM, MPU_RDP_ACCESS_RW);
-
-    /*0000 0011 1111 1001*/
-    OS_ARCH_REG_WRITE(OS_MPRC_NUM, (uint32)0x03f9);
-}
-
-/******************************************************************************/
-/*
- * Brief                <In MPU No Trust Task Configuration, All permissions are
- *                      allowed in privilege mode ,but in user mode,it has some restrict>
- * Service ID           <Os_ArchMpNonTrustTaskThreadSwitch>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Reentrant>
- * param-Name[in]       <None>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * CallByAPI            <None>
- * REQ ID               <None>
- */
-/******************************************************************************/
-static FUNC(void, OS_CODE) Os_MpuTaskSwitch(TaskType TaskId, ApplicationType HostAppId)
-{
-    if (Os_MpuCurrentAppId != HostAppId)
-    {
-        Os_MpuCurrentAppId = HostAppId;
-
-        OS_ARCH_REG_WRITE(OS_MPLA8_NUM, (uint32)Os_AppPriDataAddr[HostAppId].APP_ADDR_START);
-        OS_ARCH_REG_WRITE(OS_MPUA8_NUM, (uint32)Os_AppPriDataAddr[HostAppId].APP_ADDR_END - 4U);
-        /* PRQA S 0306-- */ /* MISRA Rule 11.4 */
-        OS_ARCH_REG_WRITE(OS_MPAT8_NUM, MPU_RDP_ACCESS_RW);
-    }
-    OS_ARCH_REG_WRITE(OS_MPLA9_NUM, (uint32)Os_TaskDAddr[TaskId].Task_ADDR_START);
-    OS_ARCH_REG_WRITE(OS_MPUA9_NUM, (uint32)Os_TaskDAddr[TaskId].Task_ADDR_END - 4U);
-    /* PRQA S 0306-- */ /* MISRA Rule 11.4 */
-    OS_ARCH_REG_WRITE(OS_MPAT9_NUM, MPU_RDP_ACCESS_RW);
-
-    /*0000 0011 1111 1001*/
-    OS_ARCH_REG_WRITE(OS_MPRC_NUM, (uint32)0x03f9);
-}
-#define OS_STOP_SEC_CODE
-#include "Os_MemMap.h"
 #endif /* TRUE == CFG_MEMORY_PROTECTION_ENABLE */
 /*=======[E N D   O F   F I L E]==============================================*/
+

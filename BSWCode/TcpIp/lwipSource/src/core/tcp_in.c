@@ -1274,7 +1274,7 @@ tcp_receive(struct tcp_pcb *pcb)
   struct tcp_hdr *const tcphdr = TCPIP_VAR_TCPHDR(coreIndex);
   u32_t *const seqno = &TCPIP_VAR_SEQNO(coreIndex);
   const u32_t ackno = TCPIP_VAR_ACKNO(coreIndex);
-  const tcpwnd_size_t recv_acked = TCPIP_VAR_RECV_ACKED(coreIndex);
+  tcpwnd_size_t *const recv_acked = &TCPIP_VAR_RECV_ACKED(coreIndex);
   u16_t *const tcplen = &TCPIP_VAR_TCPLEN(coreIndex);
   const u8_t flags = TCPIP_VAR_FLAGS(coreIndex);
   u8_t *const recv_flags = &TCPIP_VAR_RECV_FLAGS(coreIndex);
@@ -1446,7 +1446,7 @@ tcp_receive(struct tcp_pcb *pcb)
       }
 #endif /* LWIP_IPV6 && LWIP_ND6_TCP_REACHABILITY_HINTS*/
 
-      pcb->snd_buf = (tcpwnd_size_t)(pcb->snd_buf + recv_acked);
+      pcb->snd_buf = (tcpwnd_size_t)(pcb->snd_buf + *recv_acked);
       /* check if this ACK ends our retransmission of in-flight data */
       if (pcb->flags & TF_RTO) {
         /* RTO is done if
@@ -1691,7 +1691,7 @@ tcp_receive(struct tcp_pcb *pcb)
           *recv_data = inseg->p;
           /* Since this pbuf now is the responsibility of the
              application, we delete our reference to it so that we won't
-             (mistakingly) deallocate it. */
+             (mistakenly) deallocate it. */
           inseg->p = NULL;
         }
         if (TCPH_FLAGS(inseg->tcphdr) & TCP_FIN) {
@@ -1814,6 +1814,14 @@ tcp_receive(struct tcp_pcb *pcb)
                  ->ooseq. We check the lengths to see which one to
                  discard. */
               if (inseg->len > next->len) {
+                /* If next segment is the last segment in ooseq
+                  and smaller than inseg, that means it has been
+                  trimmed before to fit our window, so we just
+                  break here. */
+                if (next->next == NULL) {
+                  break;
+                }
+
                 /* The incoming segment is larger than the old
                    segment. We replace some segments with the new
                    one. */

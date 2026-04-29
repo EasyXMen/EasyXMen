@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -44,11 +44,11 @@
  */
 CanTp_FramePCIType CanTp_GetFramePCIType(const PduIdType rxpduId, const PduInfoType* pduInfoPtr)
 {
-    uint8 index = rxpduId; /* PRQA S 4461 */ /* VL_CanTp_4461 */
+    PduIdType index = rxpduId;
 #if (CANTP_SUPPORT_VARIANT == STD_ON)
     index = CanTp_InternalRxPduIndex(rxpduId);
 #endif
-    CanTp_AddressingFormatType AddressingFormat = CanTp_ConfigPtr->CanTp_RxPduMap[index].AddressingFormat;
+    CanTp_AddressingFormatType AddressingFormat = CanTp_ConfigPtr->RxPduMap[index].AddressingFormat;
     CanTp_FramePCIType         framePCIType     = CANTP_FTYPE_RESEVED;
     switch (AddressingFormat)
     {
@@ -78,36 +78,6 @@ CanTp_FramePCIType CanTp_GetFramePCIType(const PduIdType rxpduId, const PduInfoT
         break;
     }
     return framePCIType;
-}
-
-/**
- * @brief Get Frame PCI Offset
- */
-uint8 CanTp_GetPCIOffset(CanTp_AddressingFormatType addressingFormat)
-{
-    uint8 offset = 0x00u;
-    switch (addressingFormat)
-    {
-    case CANTP_STANDARD:
-#if (CANTP_NORMAL_FIXED_ADDRESSING_SUPPORT == STD_ON)
-    case CANTP_NORMALFIXED:
-#endif
-        offset = CANTP_PCI_OFFSET_STD_NF;
-        break;
-#if (                                                                                          \
-    (CANTP_MIXED_ADDRESSING_SUPPORT == STD_ON) || (CANTP_MIXED29_ADDRESSING_SUPPORT == STD_ON) \
-    || (CANTP_EXTENDED_ADDRESSING_SUPPORT == STD_ON))
-    case CANTP_EXTENDED:
-    case CANTP_MIXED:
-    case CANTP_MIXED29BIT:
-        offset = CANTP_PCI_OFFSET_EX_MIX;
-        break;
-#endif
-    default:
-        /*idle*/
-        break;
-    }
-    return offset;
 }
 
 /* PRQA S 3120 ++ */ /* VL_QAC_MagicNum */
@@ -149,10 +119,10 @@ boolean CanTp_CheckReceivedSFDL(
 #endif
 )
 {
-    boolean checkResult = FALSE;
-    uint8   offset      = CanTp_GetPCIOffset(rxNSduCfgPtr->AddressingFormat);
-    uint8   CAN_DL      = pduInfoPtr->SduLength;
-    uint8   SF_DL       = (pduInfoPtr->SduDataPtr[offset] & CANTP_SF_DL_MASK);
+    boolean     checkResult = FALSE;
+    uint8       offset      = CANTP_RXGETADROFFSET(rxNSduCfgPtr->AddressingFormat);
+    uint8       SF_DL       = (pduInfoPtr->SduDataPtr[offset] & CANTP_SF_DL_MASK);
+    const uint8 CAN_DL      = (uint8)pduInfoPtr->SduLength;
 
     /**< If the network layer receives a SF where SF_DL is equal to 0, then the network layer shall ignore the
      * received SF N_PDU;*/
@@ -161,8 +131,15 @@ boolean CanTp_CheckReceivedSFDL(
         /**< see 9.6.2.2 SF_DL error handling */
         /* PRQA S 2985 ++ */ /* VL_CanTp_2985 */
         if (((SF_DL + offset + CANTP_PCI_LENGTH_SF) <= CAN_DL) && (CAN_DL <= rxNSduCfgPtr->RxNPduDLC)
-            && (((CAN_DL <= CANTP_CAN20_FRAME_LEN_MAX) && (rxNSduCfgPtr->RxPaddingActivation == CANTP_PADDING_OFF))
-                || ((CAN_DL == CANTP_CAN20_FRAME_LEN_MAX) && (rxNSduCfgPtr->RxPaddingActivation == CANTP_PADDING_ON))))
+            && (((CAN_DL <= CANTP_CAN20_FRAME_LEN_MAX)
+#if (CANTP_ENABLED_RX_BYTE_PADDING == STD_ON)
+                 && (rxNSduCfgPtr->RxPaddingActivation == CANTP_PADDING_OFF)
+#endif
+                     )
+#if (CANTP_ENABLED_RX_BYTE_PADDING == STD_ON)
+                || ((CAN_DL == CANTP_CAN20_FRAME_LEN_MAX) && (rxNSduCfgPtr->RxPaddingActivation == CANTP_PADDING_ON))
+#endif
+                    ))
         /* PRQA S 2985 -- */
         {
             checkResult = TRUE;
@@ -214,17 +191,17 @@ boolean CanTp_CheckReceivedSFDL(
 /**
  * @brief Check FF datalength
  */
-boolean CanTp_CheckReceivedFFDL(
+CanTp_CheckResultType CanTp_CheckReceivedFFDL(
     const PduInfoType*      pduInfoPtr,
     const CanTp_RxNSduType* rxNSduCfgPtr,
     PduLengthType*          totalLength,
-    PduLengthType*          datalength,
     uint8*                  dataOffset)
 {
-    boolean       checkResult = FALSE;
-    uint8         offset      = CanTp_GetPCIOffset(rxNSduCfgPtr->AddressingFormat);
-    PduLengthType RX_DL       = CanTp_CheckVaildLen(pduInfoPtr->SduLength) ? pduInfoPtr->SduLength : 0u;
-    PduLengthType FF_DLmin;
+    CanTp_CheckResultType result = CANTP_CHECK_NOT_OK;
+    uint8                 offset = CANTP_RXGETADROFFSET(rxNSduCfgPtr->AddressingFormat);
+    PduLengthType         RX_DL  = CanTp_CheckVaildLen(pduInfoPtr->SduLength) ? pduInfoPtr->SduLength : 0u;
+    PduLengthType         FF_DLmin;
+
     /* PRQA S 3120,4391 ++ */ /* VL_QAC_MagicNum ,VL_CanTp_DataConverteToWider */
     PduLengthType FF_DL =
         (((PduLengthType)(pduInfoPtr->SduDataPtr[offset] & CANTP_FF_DL_MASK)
@@ -235,40 +212,47 @@ boolean CanTp_CheckReceivedFFDL(
 
     if ((FF_DL != 0u) && (RX_DL != 0u))
     {
+        /* PRQA S 2985 ++ */ /* VL_CanTp_2985 */
         FF_DLmin = (RX_DL > CANTP_CAN20_FRAME_LEN_MAX) ? (PduLengthType)(RX_DL - offset - CANTP_PCI_LENGTH_FF + 1u)
                                                        : (PduLengthType)(CANTP_CAN20_FRAME_LEN_MAX - offset);
+        /* PRQA S 2985 -- */
         if ((FF_DL >= FF_DLmin) && (RX_DL <= rxNSduCfgPtr->RxNPduDLC))
         {
-            checkResult  = TRUE;
+            result       = CANTP_CHECK_OK;
             *totalLength = FF_DL;
             *dataOffset  = offset + CANTP_PCI_LENGTH_FF;
-            *datalength  = RX_DL - *dataOffset;
         }
     }
 #ifndef CANTP_MATCH_ISO_2004
     else
     {
-        /* PRQA S 3120,4461 ++ */ /* VL_QAC_MagicNum,VL_CanTp_4461 */
-        FF_DL =
+        /* PRQA S 3120,4461,2985 ++ */ /* VL_QAC_MagicNum,VL_CanTp_4461,VL_CanTp_2985 */
+        uint32 FF_DL_U32 =
             (((uint32)(pduInfoPtr->SduDataPtr[offset + 2u]) << 24u)
              | ((uint32)(pduInfoPtr->SduDataPtr[offset + 3u]) << 16u)
              | ((uint32)(pduInfoPtr->SduDataPtr[offset + 4u]) << 8u) | ((uint32)(pduInfoPtr->SduDataPtr[offset + 5u])));
-        /* PRQA S 3120,4461 -- */
         FF_DLmin = (RX_DL > CANTP_CAN20_FRAME_LEN_MAX)
                        ? (RX_DL - offset - CANTP_PCI_LENGTH_FF_12BIT + 1u)
                        : (CANTP_CAN20_FRAME_LEN_MAX - offset - CANTP_PCI_LENGTH_FF_12BIT + 1u);
-
-        if ((RX_DL != 0u) && (FF_DL > CANTP_FF_DL_12BIT_LENGTH) && (RX_DL <= rxNSduCfgPtr->RxNPduDLC)
-            && (FF_DL >= FF_DLmin))
+        /* PRQA S 3120,4461,2985 -- */
+        /**< ensure that the value of FF_DL_U32 does not exceed the maximum value representable by the PduLengthType.*/
+        if ((RX_DL != 0u) && (FF_DL_U32 > CANTP_FF_DL_12BIT_LENGTH) && (RX_DL <= rxNSduCfgPtr->RxNPduDLC)
+            && (FF_DL_U32 >= FF_DLmin))
         {
-            checkResult  = TRUE;
-            *totalLength = FF_DL;
-            *dataOffset  = offset + CANTP_PCI_LENGTH_FF_12BIT;
-            *datalength  = RX_DL - *dataOffset;
+            if (FF_DL_U32 < CANTP_PDU_LENGTH_TYPE_MAX)
+            {
+                result       = CANTP_CHECK_OK;
+                *totalLength = (PduLengthType)FF_DL_U32;
+                *dataOffset  = offset + CANTP_PCI_LENGTH_FF_12BIT;
+            }
+            else
+            {
+                result = CANTP_CHECK_OVERFLOW;
+            }
         }
     }
 #endif
-    return checkResult;
+    return result;
 }
 /**
  * @brief get Current Bs
@@ -280,14 +264,14 @@ uint8 CanTp_GetRxCurrentBs(PduIdType rxNSduId, const CanTp_GPartInfoType* global
 #else
     uint16 index = rxNSduId;
 #endif
-    CanTp_RxStatusType* rxStatus = &(globalInfo->CanTp_RxConnectionStatus[index]);
+    CanTp_RxStatusType* rxStatus = &(globalInfo->CanTpRxConnectionStatus[index]);
 
 #if (CANTP_CHANGE_PARAMETER == STD_ON)
-    const CanTp_ChangeParameterType* changeRxParameter = &globalInfo->CanTp_ChangeRxParameter[index];
+    const CanTp_ChangeParameterType* changeRxParameter = &globalInfo->CanTpChangeRxParameter[index];
     uint8 bs_cfg = (changeRxParameter->FcBs != CANTP_INVALID_U8) ? changeRxParameter->FcBs : 0u;
 #else
-    CanTp_RxNSduType* rxNSduCfgPtr = &CanTp_ConfigPtr->CanTp_RxNSduCfg[rxNsduId];
-    uint8             bs_cfg       = (rxNSduCfgPtr->Bs != CANTP_INVALID_U8) ? rxNSduCfgPtr->Bs : 0u;
+    const CanTp_RxNSduType* rxNSduCfgPtr = &CanTp_ConfigPtr->CanTpRxNSduCfg[rxNSduId];
+    uint8                   bs_cfg       = (rxNSduCfgPtr->Bs != CANTP_INVALID_U8) ? rxNSduCfgPtr->Bs : 0u;
 #endif
 
     if (rxStatus->ChannelState != CANTP_RX_IDLE)
@@ -321,11 +305,11 @@ uint8 CanTp_GetRxCurrentSTmin(
 #else
     uint8 index = (uint8)rxNSduId;
 #endif
-    const CanTp_ChangeParameterType* changeRxParameter = &globalInfo->CanTp_ChangeRxParameter[index];
+    const CanTp_ChangeParameterType* changeRxParameter = &globalInfo->CanTpChangeRxParameter[index];
     uint8 stmin = (changeRxParameter->FcSTmin != CANTP_STMIN_INVALID) ? changeRxParameter->FcSTmin : 0u;
 #else
-    CanTp_RxNSduType* rxNSduCfgPtr = &CanTp_ConfigPtr->CanTp_RxNSduCfg[rxNSduId];
-    uint8             stmin        = (rxNSduCfgPtr->STmin != CANTP_STMIN_INVALID) ? rxNSduCfgPtr->STmin : 0u;
+    const CanTp_RxNSduType* rxNSduCfgPtr = &CanTp_ConfigPtr->CanTpRxNSduCfg[rxNSduId];
+    uint8                   stmin        = (rxNSduCfgPtr->STmin != CANTP_STMIN_INVALID) ? rxNSduCfgPtr->STmin : 0u;
 #endif
     return stmin;
 }
@@ -357,19 +341,18 @@ Std_ReturnType CanTp_CompareRxBufferWithBs(const CanTp_RxStatusType* rxStatus, P
  */
 void CanTp_TxConstructPCI(CanTp_TxStatusType* txStatus, uint8* dataOffset)
 {
-    PduLengthType len;
     switch (txStatus->ChannelState)
     {
     case CANTP_TX_TRANSMIT_SF:
-
-        len = txStatus->DatalenTotal + txStatus->PCIOffset + CANTP_PCI_LENGTH_SF;
-        if (len > CANTP_CAN20_FRAME_LEN_MAX)
+#if (STD_ON == CANTP_FD)
+        if ((txStatus->DatalenTotal + txStatus->PCIOffset + CANTP_PCI_LENGTH_SF) > CANTP_CAN20_FRAME_LEN_MAX)
         {
             *dataOffset                                  = CANTP_PCI_LENGTH_SF_FD;
             txStatus->LocalBuf[txStatus->PCIOffset]      = CANTP_FTYPE_SF | 0x00u;
             txStatus->LocalBuf[txStatus->PCIOffset + 1u] = (uint8)(txStatus->DatalenTotal);
         }
         else
+#endif
         {
             *dataOffset                             = CANTP_PCI_LENGTH_SF;
             txStatus->LocalBuf[txStatus->PCIOffset] = (uint8)(txStatus->DatalenTotal & CANTP_SF_DL_MASK);
@@ -501,7 +484,7 @@ Std_ReturnType CanTp_SaveRxMetaDataInfo(
             {
                 ret = E_NOT_OK;
             }
-            else if (rxStatus->MetaDataNTa != rxNSduCfgPtr->NSa)
+            else if (rxStatus->MetaDataNTa != rxNSduCfgPtr->NTa)
             {
                 ret = E_NOT_OK;
             }
@@ -533,11 +516,11 @@ Std_ReturnType CanTp_SaveRxMetaDataInfo(
             ret = E_NOT_OK;
         }
 #if (CANTP_GENERIC_CONNECTION_SUPPORT != STD_ON)
-        if ((rxNSduCfgPtr->NSa == CANTP_INVALID_U8) || (rxStatus->MetaDataNTa != rxNSduCfgPtr->NSa))
+        if ((rxNSduCfgPtr->NSa == CANTP_INVALID_U8) || (rxStatus->MetaDataNSa != rxNSduCfgPtr->NSa))
         {
             ret = E_NOT_OK;
         }
-        if ((rxNSduCfgPtr->NTa == CANTP_INVALID_U8) || (rxStatus->MetaDataNSa != rxNSduCfgPtr->NTa))
+        if ((rxNSduCfgPtr->NTa == CANTP_INVALID_U8) || (rxStatus->MetaDataNTa != rxNSduCfgPtr->NTa))
         {
             ret = E_NOT_OK;
         }
@@ -561,11 +544,11 @@ Std_ReturnType CanTp_SaveRxMetaDataInfo(
             ret = E_NOT_OK;
         }
 #if (CANTP_GENERIC_CONNECTION_SUPPORT != STD_ON)
-        else if ((rxNSduCfgPtr->NSa == CANTP_INVALID_U8) || (rxStatus->MetaDataNTa != rxNSduCfgPtr->NSa))
+        else if ((rxNSduCfgPtr->NSa == CANTP_INVALID_U8) || (rxStatus->MetaDataNSa != rxNSduCfgPtr->NSa))
         {
             ret = E_NOT_OK;
         }
-        else if ((rxNSduCfgPtr->NTa == CANTP_INVALID_U8) || (rxStatus->MetaDataNSa != rxNSduCfgPtr->NTa))
+        else if ((rxNSduCfgPtr->NTa == CANTP_INVALID_U8) || (rxStatus->MetaDataNTa != rxNSduCfgPtr->NTa))
         {
             ret = E_NOT_OK;
         }
@@ -802,7 +785,7 @@ Std_ReturnType CanTp_CheckRxFCMetaData(
 void CanTp_ConstructTxMetaDataInfo(
     const CanTp_TxStatusType* txStatus,
     const CanTp_TxNSduType*   txNSduCfgPtr,
-    PduInfoType*              pduInfoPtr) /* PRQA S 3673 */ /* VL_CanTp_3673 */
+    PduInfoType*              pduInfoPtr) /* PRQA S 3673 */ /*  VL_CanTp_3673*/
 {
 #if (CANTP_TRANSMIT_CAN20_WITH_CANFD == STD_ON)
     boolean isProcessed = FALSE;

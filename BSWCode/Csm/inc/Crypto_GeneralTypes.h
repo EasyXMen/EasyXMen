@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -154,29 +154,30 @@ typedef enum
 /* PRQA S 1271++ */  /* VL_Csm_1271 */
 typedef enum
 {
-    CRYPTO_ALGOMODE_12ROUNDS = 0x01u,
-    CRYPTO_ALGOMODE_20ROUNDS,
-    CRYPTO_ALGOMODE_8ROUNDS,
-    CRYPTO_ALGOMODE_CBC,
-    CRYPTO_ALGOMODE_CFB,
-    CRYPTO_ALGOMODE_CMAC,
-    CRYPTO_ALGOMODE_CTR,
-    CRYPTO_ALGOMODE_CTRDRBG,
-    CRYPTO_ALGOMODE_CUSTOM,
-    CRYPTO_ALGOMODE_ECB,
-    CRYPTO_ALGOMODE_GCM,
-    CRYPTO_ALGOMODE_GMAC,
-    CRYPTO_ALGOMODE_HMAC,
-    CRYPTO_ALGOMODE_NOT_SET,
-    CRYPTO_ALGOMODE_OFB,
-    CRYPTO_ALGOMODE_PXXXR,
-    CRYPTO_ALGOMODE_RSAES_OAEP,
-    CRYPTO_ALGOMODE_RSAES_PKCS1_v1_5,
-    CRYPTO_ALGOMODE_RSASSA_PKCS1_v1_5,
-    CRYPTO_ALGOMODE_RSASSA_PSS,
-    CRYPTO_ALGOMODE_SIPHASH_2_4,
-    CRYPTO_ALGOMODE_SIPHASH_4_8,
-    CRYPTO_ALGOMODE_XTS
+    CRYPTO_ALGOMODE_NOT_SET           = 0x00u,
+    CRYPTO_ALGOMODE_ECB               = 0x01u,
+    CRYPTO_ALGOMODE_CBC               = 0x02u,
+    CRYPTO_ALGOMODE_CFB               = 0x03u,
+    CRYPTO_ALGOMODE_OFB               = 0x04u,
+    CRYPTO_ALGOMODE_CTR               = 0x05u,
+    CRYPTO_ALGOMODE_GCM               = 0x06u,
+    CRYPTO_ALGOMODE_XTS               = 0x07u,
+    CRYPTO_ALGOMODE_RSAES_OAEP        = 0x08u,
+    CRYPTO_ALGOMODE_RSAES_PKCS1_v1_5  = 0x09u,
+    CRYPTO_ALGOMODE_RSASSA_PSS        = 0x0au,
+    CRYPTO_ALGOMODE_RSASSA_PKCS1_v1_5 = 0x0bu,
+    CRYPTO_ALGOMODE_8ROUNDS           = 0x0cu,
+    CRYPTO_ALGOMODE_12ROUNDS          = 0x0du,
+    CRYPTO_ALGOMODE_20ROUNDS          = 0x0eu,
+    CRYPTO_ALGOMODE_HMAC              = 0x0fu,
+    CRYPTO_ALGOMODE_CMAC              = 0x10u,
+    CRYPTO_ALGOMODE_GMAC              = 0x11u,
+    CRYPTO_ALGOMODE_CTRDRBG           = 0x12u,
+    CRYPTO_ALGOMODE_SIPHASH_2_4       = 0x13u,
+    CRYPTO_ALGOMODE_SIPHASH_4_8       = 0x14u,
+    CRYPTO_ALGOMODE_PXXXR1            = 0x15u,
+    CRYPTO_ALGOMODE_AESKEYWRAP        = 0x16u,
+    CRYPTO_ALGOMODE_CUSTOM            = 0xfFu
 } Crypto_AlgorithmModeType;
 /* PRQA S 1271-- */
 /* PRQA S 0722 -- */
@@ -206,7 +207,7 @@ typedef enum
 
 /** @brief Structure which contains input and output information depending on the job and
  * the crypto primitive.,ref@01009*/
-typedef struct Crypto_JobPrimitiveInputOutputTag
+typedef struct
 {
     const uint8*             inputPtr;
     uint32                   inputLength;
@@ -255,7 +256,7 @@ typedef enum
 /* PRQA S 1271-- */
 
 /** @brief Structure which determines the exact algorithm.*/
-typedef struct Crypto_AlgorithmInfoTag
+typedef struct
 {
     Crypto_AlgorithmFamilyType family;
     Crypto_AlgorithmFamilyType secondaryFamily;
@@ -264,9 +265,8 @@ typedef struct Crypto_AlgorithmInfoTag
 } Crypto_AlgorithmInfoType;
 
 /** @brief Structure which contains basic information about the crypto primitive.*/
-typedef struct Crypto_PrimitiveInfoTag
+typedef struct
 {
-    const uint32                   resultLength;
     const Crypto_ServiceInfoType   service;
     const Crypto_AlgorithmInfoType algorithm;
 } Crypto_PrimitiveInfoType;
@@ -282,19 +282,18 @@ typedef enum
 
 /** @brief Structure which contains further information, which depends on the job and
  * the crypto primitive.*/
-typedef struct Crypto_JobPrimitiveInfoTag
+typedef struct
 {
     uint32                          callbackId;
     const Crypto_PrimitiveInfoType* primitiveInfo;
     uint32                          cryIfKeyId;
     Crypto_ProcessingType           processingType;
-    boolean                         callbackUpdateNotification;
 } Crypto_JobPrimitiveInfoType;
 
 /** @brief Structure which holds the identifiers of the keys and key elements which shall be used
  * as input and output for a job and a bit structure which indicates which buffers shall
  * be redirected to those key elements.*/
-typedef struct Crypto_JobRedirectionInfoTag
+typedef struct
 {
     uint8  redirectionConfig;
     uint32 inputKeyId;
@@ -311,7 +310,7 @@ typedef struct Crypto_JobRedirectionInfoTag
 
 /** @brief Structure which contains further information, which depends on the job and the
  * crypto primitive.*/
-typedef struct Crypto_JobTag
+typedef struct
 {
     uint32                             jobId;
     Crypto_JobStateType                jobState;

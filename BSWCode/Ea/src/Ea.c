@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -265,14 +265,14 @@ EA_LOCAL void Ea_InterPrepareWriteHeader(uint8 status);
 #include "Ea_MemMap.h"
 
 /* ============================================ internal data definition ============================================ */
-#define EA_START_SEC_VAR_INIT_8
+#define EA_START_SEC_VAR_CLEARED_8
 #include "Ea_MemMap.h"
 /* PRQA S 3408 ++ */ /* VL_Fee_3408 */
 /**
  * @brief Record the status of the Ea module @range 0..3
  */
-EA_LOCAL MemIf_StatusType Ea_State = MEMIF_UNINIT;
-#define EA_STOP_SEC_VAR_INIT_8
+EA_LOCAL MemIf_StatusType Ea_State;
+#define EA_STOP_SEC_VAR_CLEARED_8
 #include "Ea_MemMap.h"
 
 #define EA_START_SEC_VAR_CLEARED_8
@@ -665,7 +665,10 @@ void Ea_JobEndNotification(void)
 #if (EA_POLLING_MODE == STD_OFF)
         if (MEMIF_JOB_PENDING == Ea_RunTimeData.LastJobResult)
         {
-            EA_InterServFunc[Ea_RunTimeData.RequestJob]();
+            if (Ea_RunTimeData.RequestJob != EA_JOB_IDLE)
+            {
+                EA_InterServFunc[Ea_RunTimeData.RequestJob]();
+            }
         }
         else
         {
@@ -700,8 +703,11 @@ void Ea_MainFunction(void)
             Ea_InterInvalidate, /** EA_JOB_INVALIDATE */
             Ea_InterErase,      /** EA_JOB_ERASE */
         };
+        if (Ea_RunTimeData.RequestJob != EA_JOB_IDLE)
+        {
+            (*EA_InterServFunc[Ea_RunTimeData.RequestJob])();
+        }
 #endif
-        (*EA_InterServFunc[Ea_RunTimeData.RequestJob])();
     }
 }
 /* PRQA S 3408,1532,1512 -- */
@@ -735,6 +741,7 @@ EA_LOCAL void Ea_JobFinish(MemIf_JobResultType JobResult)
 {
     uint16 blockIndex = Ea_RunTimeData.PendReq.BlockIndex;
 
+    Ea_RunTimeData.LastJobResult = JobResult; /** Update the result before notify upper layer */
     switch (JobResult)
     {
     case MEMIF_JOB_OK:
@@ -779,7 +786,6 @@ EA_LOCAL void Ea_JobFinish(MemIf_JobResultType JobResult)
         break;
     }
 
-    Ea_RunTimeData.LastJobResult              = JobResult;
     Ea_RunTimeData.RequestJob                 = EA_JOB_IDLE;
     Ea_RunTimeData.SubJobStatus               = EA_SUB_JOB_IDLE;
     Ea_RunTimeData.EepState                   = EA_EEP_JOB_IDLE;
@@ -1244,7 +1250,12 @@ EA_LOCAL void Ea_MemAccReq(Ea_RequestJobType Ea_RequestJob)
                                                     + Ea_Config.BlockCfg->BlockCfg[blockIndex].BlockStartAddress);
     uint8           deviceIndex   = Ea_Config.BlockCfg->BlockCfg[blockIndex].DeviceIndex;
 
-    if ((EA_EEP_JOB_ASYNC_READY == Ea_RunTimeData.EepState)
+    if (MEMIF_UNINIT == Ea_Config.EepApiCfg[deviceIndex].EepGetStatusApi())
+    {
+        Ea_JobFinish(MEMIF_JOB_FAILED); /** Lower layer driver is not initialized */
+    }
+    else if (
+        (EA_EEP_JOB_ASYNC_READY == Ea_RunTimeData.EepState)
         && (MEMIF_IDLE == Ea_Config.EepApiCfg[deviceIndex].EepGetStatusApi()))
     {
         switch (Ea_RequestJob)
@@ -1286,6 +1297,10 @@ EA_LOCAL void Ea_MemAccReq(Ea_RequestJobType Ea_RequestJob)
             /** idle */
             break;
         }
+    }
+    else
+    {
+        /** idle */
     }
 }
 /* PRQA S 3415 -- */

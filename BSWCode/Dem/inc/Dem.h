@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -44,7 +44,17 @@
  *            2025-09-23  li.feng      CPD-84625,QAC issues
  *            2025-09-25  chao.sun     CPD-84308,Update handle in internal debounce
  *            2025-09-25  chao.sun     CPD-84308,Update handle in aging
- ==================================================================================================================== */
+ *  V03.00.06 2025-10-17  chao.sun     CPD-84308,DEM Module Optimization
+ *  V03.00.07 2025-11-10  chao.sun     CPT-16318,Timing for counting the update of the failed cycle counter
+ *  V03.00.08 2025-12-22  chao.sun     CPT-17177,Handling errors caused by unconfigured frozen frame compilation
+ *            2025-12-30  chao.sun     CPT-17415,Add invalid index value check for memoryIndex
+ *  V03.00.09 2026-01-07  chao.sun     CPT-17540,Dem_GetMonitorStatus adds an initialization check
+ *            2026-01-08  chao.sun     In the Dem_SatellitePreInit interface, the partition ID is changed
+ *                                     to be obtained via parameters.
+ *  V03.00.10 2026-03-25  chao.sun     CPTASK-611,Fix compilation issues caused by incorrect modifications.
+ *  V03.00.11 2026-04-04  tao.yu       CPT-18413, Fix the problem of excessive stack exception occupation.
+ *            2026-04-10  chao.sun     CPT-18500, Set the value of DEM_FAILED_CYCLES to 0xFF.
+ ====================================================================================================================*/
 
 /* ================================================ misar justifications ============================================ */
 /**
@@ -313,17 +323,12 @@
       Risk: The code is difficult to maintain and the data flow is complex
       Prevention: Design and code review, and have a clear structure and annotated code.
 
-    \li VL_Dem_1536
-      Reason: The tag '%1s' is declared but not used within this project.
-      Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
-
     \li VL_Dem_3415
       Reason: Right hand operand of '&&' or '||' is an expression with persistent side effects.
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
 
-    \li VL_Dem_6510
+    \li VL_MTR_Dem_6510
       Reason: Some special files have less code or no code at all.
       Risk: The code is difficult to maintain.
       Prevention: Design and code review + clear structure and well-commented code.
@@ -338,17 +343,13 @@
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
 
-    \li VL_Dem_1513
-      Reason: Identifier '${name}' with external linkage has separate non-defining declarations in more than one
-  location. Risk: No risk. Prevention: Functional reliability guaranteed by design.
-
     \li VL_Dem_1707
       Reason: Function '${name}' is not using the same aliases.
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
 
     \li VL_Dem_2053
-      Reason: Special code design of the Os.
+      Reason: Special code design of the Dem.
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
 
@@ -381,6 +382,16 @@
       Reason: In the generated code, there are a lot of devil numbers, don't have to define a macro.
       Risk: The reader can derive the meaning of the number based on the annotation or structure type, no risk.
       Prevention: Correctness and reliability have been guaranteed through unit and functional testing.
+
+    \li VL_Dem_3332
+      Reason: The corresponding macro definition has been obtained through the header file inclusion.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_Dem_2742
+      Reason: This 'if' controlling expression is a constant expression and its value is 'false'.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
  */
 
 /* =================================================== inclusions =================================================== */
@@ -404,7 +415,7 @@ extern "C" {
 #define DEM_AR_RELEASE_REVISION_VERSION (0U)  /**< Value of Autosar patch version */
 #define DEM_SW_MAJOR_VERSION            (3U)  /**< Value of module major version */
 #define DEM_SW_MINOR_VERSION            (0U)  /**< Value of module minor version */
-#define DEM_SW_PATCH_VERSION            (5U)  /**< Value of module patch version */
+#define DEM_SW_PATCH_VERSION            (11U) /**< Value of module patch version */
 
 /* ========================================= external function declarations ========================================= */
 #if (DEM_VERSION_INFO_API == STD_ON)
@@ -445,6 +456,7 @@ extern void Dem_Init(const Dem_ConfigType* ConfigPtr);
  */
 extern void Dem_Shutdown(void);
 
+#if (DEM_SUPPORT_CLEARDTC_API == STD_ON)
 /**
  * @brief         Clears single DTCs, as well as groups of DTCs.
  * @param[in]     ClientId: Unique client id, assigned to the instance of the calling module.
@@ -469,8 +481,9 @@ extern void Dem_Shutdown(void);
  * @trace         CPD-61156
  */
 extern Std_ReturnType Dem_ClearDTC(uint8 ClientId);
-/* PRQA S 3449, 3451 ++ */ /* VL_Dem_3449, VL_Dem_3451 */
-/* PRQA S 1512, 1513 ++ */ /* VL_Dcm_1512,VL_Dcm_1513 */
+#endif
+/* PRQA S 3449, 3451 ++ */ /* VL_QAC_MultiDeclaration, VL_QAC_MultiDeclaration */
+/* PRQA S 1512, 1513 ++ */ /* VL_Dcm_1512,VL_QAC_MultiDeclaration */
 #if (DEM_MAX_NUMBER_PRESTORED_FF > 0u)
 /**
  * @brief         Clears a prestored freeze frame of a specific event. This API can only be used through the RTE
@@ -487,6 +500,7 @@ extern Std_ReturnType Dem_ClearDTC(uint8 ClientId);
 extern Std_ReturnType Dem_ClearPrestoredFreezeFrame(Dem_EventIdType EventId);
 #endif
 
+#if (DEM_COMPONENT_NUMBER > 0u)
 /**
  * @brief         Gets the failed status of a DemComponent.
  * @param[in]     ComponentId: Identification of a DemComponent
@@ -499,7 +513,9 @@ extern Std_ReturnType Dem_ClearPrestoredFreezeFrame(Dem_EventIdType EventId);
  * @trace         CPD-61154
  */
 extern Std_ReturnType Dem_GetComponentFailed(Dem_ComponentIdType ComponentId, boolean* ComponentFailed);
+#endif
 
+#if (STD_ON == DCM_UDS_0X14)
 /**
  * @brief         Provides information if the last call to Dem_SelectDTC has selected a valid DTC or group of DTCs.
  * @param[in]     ClientId: Unique client id, assigned to the instance of the calling module.
@@ -538,6 +554,7 @@ extern Std_ReturnType Dem_GetDTCSelectionResult(uint8 ClientId);
  * @trace         CPD-61152
  */
 extern Std_ReturnType Dem_GetDTCSelectionResultForClearDTC(uint8 ClientId);
+#endif
 
 /**
  * @brief         Gets the current UDS status byte assigned to the DTC for the event
@@ -625,6 +642,7 @@ extern Std_ReturnType Dem_GetDTCOfEvent(Dem_EventIdType EventId, Dem_DTCFormatTy
 extern Std_ReturnType Dem_GetDTCSuppression(uint8 ClientId, boolean* SuppressionStatus);
 #endif
 
+#if (DEM_AVAILABILITY_SUPPORT == DEM_EVENT_AVAILABILITY)
 /**
  * @brief         Get the Event availability.
  * @param[in]     EventId: Identification of an event by assigned EventId.
@@ -637,6 +655,7 @@ extern Std_ReturnType Dem_GetDTCSuppression(uint8 ClientId, boolean* Suppression
  * @trace         CPD-61147
  */
 extern Std_ReturnType Dem_GetEventAvailable(Dem_EventIdType EventId, boolean* AvailableStatus);
+#endif
 
 /**
  * @brief         Gets the fault detection counter of an event. This API can only be used through the RTE, and
@@ -672,6 +691,7 @@ extern Std_ReturnType Dem_GetFaultDetectionCounter(Dem_EventIdType EventId, sint
 extern Std_ReturnType Dem_GetIndicatorStatus(uint8 IndicatorId, Dem_IndicatorStatusType* IndicatorStatus);
 #endif
 
+#if (DEM_FEATURE_SWC_GET_FF_ED == STD_ON)
 /**
  * @brief         Gets the data of a freeze frame by event.
  * @param[in]     EventId: Identification of an event by assigned EventId.
@@ -726,7 +746,9 @@ extern Std_ReturnType Dem_GetEventFreezeFrameDataEx(
  */
 extern Std_ReturnType
     Dem_GetEventExtendedDataRecordEx(Dem_EventIdType EventId, uint8 RecordNumber, uint8* DestBuffer, uint16* BufSize);
+#endif
 
+#if (DEM_USER_SUPPORT_OVFLIND_API == STD_ON)
 /**
  * @brief         Gets the event memory overflow indication status.
  * @param[in]     ClientId: DemClientID identifying the DemEventMemorySet indicating in which event memory the
@@ -744,7 +766,6 @@ extern Std_ReturnType
  */
 extern Std_ReturnType
     Dem_GetEventMemoryOverflow(uint8 ClientId, Dem_DTCOriginType DTCOrigin, boolean* OverflowIndication);
-
 /**
  * @brief         Returns the number of entries currently stored in the requested event memory.
  * @param[in]     ClientId: DemClientID identifying the DemEventMemorySet to which the requested event memory
@@ -761,7 +782,7 @@ extern Std_ReturnType
  */
 extern Std_ReturnType
     Dem_GetNumberOfEventMemoryEntries(uint8 ClientId, Dem_DTCOriginType DTCOrigin, uint8* NumberOfEventMemoryEntries);
-
+#endif
 /**
  * @brief         Control the internal debounce counter/timer by BSW modules and SW-Cs. The event qualification
  *                will not be affected by these debounce state changes. This API is available for BSW modules as
@@ -837,6 +858,7 @@ extern Std_ReturnType Dem_PrestoreFreezeFrame(Dem_EventIdType EventId);
 #endif
 /* PRQA S 3449, 3451 -- */
 
+#if (DEM_SUPPORT_SELECTDTC_API == STD_ON)
 /**
  * @brief         Selects a DTC or DTC group as target for further operations.
  * @param[in]     ClientId: Unique client id, assigned to the instance of the calling module.
@@ -854,7 +876,9 @@ extern Std_ReturnType Dem_PrestoreFreezeFrame(Dem_EventIdType EventId);
  */
 extern Std_ReturnType
     Dem_SelectDTC(uint8 ClientId, uint32 DTC, Dem_DTCFormatType DTCFormat, Dem_DTCOriginType DTCOrigin);
+#endif
 
+#if (DEM_COMPONENT_NUMBER > 0u)
 /**
  * @brief         Set the availability of a specific DemComponent.
  * @param[in]     ComponentId: Identification of a DemComponent.
@@ -868,6 +892,7 @@ extern Std_ReturnType
  * @trace         CPD-61134
  */
 extern Std_ReturnType Dem_SetComponentAvailable(Dem_ComponentIdType ComponentId, boolean AvailableStatus);
+#endif
 
 #if (DEM_SUPPRESSION_SUPPORT == DEM_DTC_SUPPRESSION)
 /**
@@ -925,6 +950,7 @@ extern Std_ReturnType Dem_SetEnableCondition(uint8 EnableConditionID, boolean Co
 extern Std_ReturnType Dem_SetEventAvailable(Dem_EventIdType EventId, boolean AvailableStatus);
 #endif
 
+#if (DEM_EVENT_CONFIRMATION_THRESHOLD_ADAPTABLE == STD_ON)
 /**
  * @brief         Set the failure confirmation threshold of an event.
  * @param[in]     EventId: Identification of an event by assigned EventId.
@@ -939,6 +965,7 @@ extern Std_ReturnType Dem_SetEventAvailable(Dem_EventIdType EventId, boolean Ava
  */
 extern Std_ReturnType
     Dem_SetEventConfirmationThresholdCounter(Dem_EventIdType EventId, uint8 FailureCycleCounterThreshold);
+#endif
 
 #if (DEM_EVENT_REPORTING_STANDARD == STD_ON)
 /**
@@ -996,6 +1023,7 @@ extern Std_ReturnType Dem_SetEventStatusWithMonitorData(
 extern Std_ReturnType Dem_SetStorageCondition(uint8 StorageConditionID, boolean ConditionFulfilled);
 #endif
 
+#if (DEM_USER_CONTROLLED_WIR == STD_ON)
 /**
  * @brief         Sets the WIR status bit via failsafe SW-Cs. This API can only be used through the RTE and
  *                therefore no declaration is exported via Dem.h.
@@ -1014,7 +1042,9 @@ extern Std_ReturnType Dem_SetStorageCondition(uint8 StorageConditionID, boolean 
  * @trace         CPD-61125
  */
 extern Std_ReturnType Dem_SetWIRStatus(Dem_EventIdType EventId, boolean WIRStatus);
+#endif
 
+#if (DEM_SUPPORT_GETTRANSLATIONTYPE_API == STD_ON)
 /**
  * @brief         Gets the supported DTC formats of the ECU.The supported formats are configured via Dem
  *                TypeOfDTCSupported.
@@ -1031,7 +1061,9 @@ extern Std_ReturnType Dem_SetWIRStatus(Dem_EventIdType EventId, boolean WIRStatu
  * @trace         CPD-61122
  */
 extern Dem_DTCTranslationFormatType Dem_GetTranslationType(uint8 ClientId);
+#endif
 
+#if (DEM_SUPPORT_GETDTCSTATUSAVAILABILITYMASK_API == STD_ON)
 /**
  * @brief         Gets the DTC Status availability mask of the selected fault memory.
  * @param[in]     ClientId: Unique client id, assigned to the instance of the calling module.
@@ -1050,7 +1082,9 @@ extern Dem_DTCTranslationFormatType Dem_GetTranslationType(uint8 ClientId);
  */
 extern Std_ReturnType
     Dem_GetDTCStatusAvailabilityMask(uint8 ClientId, Dem_UdsStatusByteType* DTCStatusMask, Dem_DTCOriginType DTCOrigin);
+#endif
 
+#if (DEM_SUPPORT_GETSTATUSOFDTC_API == STD_ON)
 /**
  * @brief         Gets the status of a DTC. For large configurations and DTC-calibration, the interface behavior
  *                can be asynchronous (splitting the DTC-search into segments). The DTCs of OBD Events Suppression
@@ -1074,7 +1108,9 @@ extern Std_ReturnType
  * @trace         CPD-61127
  */
 extern Std_ReturnType Dem_GetStatusOfDTC(uint8 ClientId, uint8* DTCStatus);
+#endif
 
+#if (DEM_SUPPORT_GETSEVERITYOFDTC_API == STD_ON)
 /**
  * @brief         Gets the severity of the requested DTC. For large configurations and DTC-calibration, the
  *                interface behavior can be asynchronous (splitting the DTC-search into segments).
@@ -1115,7 +1151,9 @@ extern Std_ReturnType Dem_GetSeverityOfDTC(Dem_DTCSeverityType* DTCSeverity, uin
  * @trace         CPD-61124
  */
 extern Std_ReturnType Dem_GetFunctionalUnitOfDTC(uint8 ClientId, uint8* DTCFunctionalUnit);
+#endif
 
+#if (DEM_SUPPORT_SETDTCFILTER_AND_GETNUMBER_API == STD_ON)
 /**
  * @brief         Sets the DTC Filter. The server shall perform a bit-wise logical AND-ing operation between the
  *                parameter DTCStatusMask and the current UDS status in the server. In addition to the DTCStatus
@@ -1185,7 +1223,9 @@ extern Std_ReturnType Dem_SetDTCFilter(
  * @trace         CPD-61117
  */
 extern Std_ReturnType Dem_GetNumberOfFilteredDTC(uint8 ClientId, uint16* NumberOfFilteredDTC);
+#endif
 
+#if (DEM_SUPPORT_GETNEXT_FILTEREDDTC_API == STD_ON)
 /**
  * @brief         Gets the next filtered DTC matching the filter criteria. For UDS services, the interface has an
  *                asynchronous behavior, because a large number of DTCs has to be processed.
@@ -1208,7 +1248,9 @@ extern Std_ReturnType Dem_GetNumberOfFilteredDTC(uint8 ClientId, uint16* NumberO
  * @trace         CPD-61119
  */
 extern Std_ReturnType Dem_GetNextFilteredDTC(uint8 ClientId, uint32* DTC, uint8* DTCStatus);
+#endif
 
+#if (DEM_SUPPORT_GETNEXT_FILTEREDDTCANDFDC_API == STD_ON)
 /**
  * @brief         Gets the next filtered DTC and its associated Fault Detection Counter (FDC) matching the filter
  *                criteria. The interface has an asynchronous behavior, because a large number of DTCs has to be
@@ -1232,7 +1274,9 @@ extern Std_ReturnType Dem_GetNextFilteredDTC(uint8 ClientId, uint32* DTC, uint8*
  * @trace         CPD-61120
  */
 extern Std_ReturnType Dem_GetNextFilteredDTCAndFDC(uint8 ClientId, uint32* DTC, sint8* DTCFaultDetectionCounter);
+#endif
 
+#if (DEM_SUPPORT_GETNEXT_FILTEREDDTCANDSEVERITY_API == STD_ON)
 /**
  * @brief         Gets the next filtered DTC and its associated Severity matching the filter criteria. The
  *                interface has an asynchronous behavior, because a large number of DTCs has to be processed.
@@ -1261,7 +1305,9 @@ extern Std_ReturnType Dem_GetNextFilteredDTCAndSeverity(
     uint8*               DTCStatus,
     Dem_DTCSeverityType* DTCSeverity,
     uint8*               DTCFunctionalUnit);
+#endif
 
+#if (DEM_SUPPORT_SETFREEZEFRAMERECORD_AND_GET_API == STD_ON)
 /**
  * @brief         Sets a freeze frame record filter.
  * @param[in]     ClientId: Unique client id, assigned to the instance of the calling module.
@@ -1295,7 +1341,9 @@ extern Std_ReturnType Dem_SetFreezeFrameRecordFilter(uint8 ClientId, Dem_DTCForm
  * @trace         CPD-61114
  */
 extern Std_ReturnType Dem_GetNextFilteredRecord(uint8 ClientId, uint32* DTC, uint8* RecordNumber);
+#endif
 
+#if (DEM_SUPPORT_GETDTCOCCURRENCETIME_API == STD_ON)
 /**
  * @brief         Gets the DTC by occurrence time. There is no explicit parameter for the DTC-origin as the origin
  *                always is DEM_DTC_ORIGIN_PRIMARY_MEMORY.
@@ -1313,7 +1361,9 @@ extern Std_ReturnType Dem_GetNextFilteredRecord(uint8 ClientId, uint32* DTC, uin
  * @trace         CPD-61113
  */
 extern Std_ReturnType Dem_GetDTCByOccurrenceTime(uint8 ClientId, Dem_DTCRequestType DTCRequest, uint32* DTC);
+#endif
 
+#if (DEM_SUPPORT_DISABLE_ENABLE_DTCRECORD_UPDATE_API == STD_ON)
 /**
  * @brief         Disables the event memory update of a specific DTC (only one at one time).
  * @param[in]     ClientId: Unique client id, assigned to the instance of the calling module.
@@ -1346,7 +1396,9 @@ extern Std_ReturnType Dem_DisableDTCRecordUpdate(uint8 ClientId);
  * @trace         CPD-61110
  */
 extern Std_ReturnType Dem_EnableDTCRecordUpdate(uint8 ClientId);
+#endif
 
+#if (DEM_SUPPORT_SELECT_GETSIZE_GETNEXT_EXTENDEDDATARECORD_API == STD_ON)
 /**
  * @brief         Gets the size of Extended Data Record by DTC selected by the call of Dem_SelectExtended DataRecord.
  * @param[in]     ClientId: Unique client id, assigned to the instance of the calling module.
@@ -1366,7 +1418,9 @@ extern Std_ReturnType Dem_EnableDTCRecordUpdate(uint8 ClientId);
  * @trace         CPD-61108
  */
 extern Std_ReturnType Dem_GetSizeOfExtendedDataRecordSelection(uint8 ClientId, uint32* SizeOfExtendedDataRecord);
+#endif
 
+#if (DEM_SUPPORT_SELECT_GETSIZE_GETNEXT_FREEZEFRAMEDATA_API == STD_ON)
 /**
  * @brief         Gets the size of Extended Data Record by DTC selected by the call of Dem_SelectExtended DataRecord.
  * @param[in]     ClientId: Unique client id, assigned to the instance of the calling module.
@@ -1384,7 +1438,9 @@ extern Std_ReturnType Dem_GetSizeOfExtendedDataRecordSelection(uint8 ClientId, u
  * @trace         CPD-61107
  */
 extern Std_ReturnType Dem_GetSizeOfFreezeFrameSelection(uint8 ClientId, uint32* SizeOfFreezeFrame);
+#endif
 
+#if (DEM_SUPPORT_SELECT_GETSIZE_GETNEXT_EXTENDEDDATARECORD_API == STD_ON)
 /**
  * @brief         Gets extended data record for the DTC selected by Dem_SelectExtendedDataRecord. The function
  *                stores the data in the provided DestBuffer.
@@ -1409,7 +1465,9 @@ extern Std_ReturnType Dem_GetSizeOfFreezeFrameSelection(uint8 ClientId, uint32* 
  * @trace         CPD-61106
  */
 extern Std_ReturnType Dem_GetNextExtendedDataRecord(uint8 ClientId, uint8* DestBuffer, uint16* BufSize);
+#endif
 
+#if (DEM_SUPPORT_SELECT_GETSIZE_GETNEXT_FREEZEFRAMEDATA_API == STD_ON)
 /**
  * @brief         Gets extended data record for the DTC selected by Dem_SelectExtendedDataRecord. The function
  *                stores the data in the provided DestBuffer.
@@ -1434,7 +1492,9 @@ extern Std_ReturnType Dem_GetNextExtendedDataRecord(uint8 ClientId, uint8* DestB
  * @trace         CPD-61102
  */
 extern Std_ReturnType Dem_GetNextFreezeFrameData(uint8 ClientId, uint8* DestBuffer, uint16* BufSize);
+#endif
 
+#if (DEM_SUPPORT_SELECT_GETSIZE_GETNEXT_EXTENDEDDATARECORD_API == STD_ON)
 /**
  * @brief         Sets the filter to be used by Dem_GetNextExtendedDataRecord and
  *                Dem_GetSizeOfExtendedDataRecordSelection.
@@ -1457,7 +1517,9 @@ extern Std_ReturnType Dem_GetNextFreezeFrameData(uint8 ClientId, uint8* DestBuff
  * @trace         CPD-61106
  */
 extern Std_ReturnType Dem_SelectExtendedDataRecord(uint8 ClientId, uint8 ExtendedDataNumber);
+#endif
 
+#if (DEM_SUPPORT_SELECT_GETSIZE_GETNEXT_FREEZEFRAMEDATA_API == STD_ON)
 /**
  * @brief         Sets the filter to be used by Dem_GetNextFreezeFrameData and Dem_GetSizeOfFreezeFrame Selection.
  * @param[in]     ClientId: Unique client id, assigned to the instance of the calling module.
@@ -1477,7 +1539,9 @@ extern Std_ReturnType Dem_SelectExtendedDataRecord(uint8 ClientId, uint8 Extende
  * @trace         CPD-61101
  */
 extern Std_ReturnType Dem_SelectFreezeFrameData(uint8 ClientId, uint8 RecordNumber);
+#endif
 
+#if (DEM_SUPPORT_SETFREEZEFRAMERECORD_AND_GET_API == STD_ON)
 /**
  * @brief         This function returns the number of all freeze frame records currently stored in the primary
  *                event memory
@@ -1493,7 +1557,9 @@ extern Std_ReturnType Dem_SelectFreezeFrameData(uint8 ClientId, uint8 RecordNumb
  * @trace         CPD-61103
  */
 extern Std_ReturnType Dem_GetNumberOfFreezeFrameRecords(uint8 ClientId, uint16* NumberOfFilteredRecords);
+#endif
 
+#if (STD_ON == DCM_UDS_0X85)
 /**
  * @brief         Disables the DTC setting for all DTCs assigned to the DemEventMemorySet of the addressed client.
  * @param[in]     ClientId: Unique client id, assigned to the instance of the calling module.
@@ -1519,8 +1585,10 @@ extern Std_ReturnType Dem_DisableDTCSetting(uint8 ClientId);
  * @trace         CPD-61105
  */
 extern Std_ReturnType Dem_EnableDTCSetting(uint8 ClientId);
+#endif
 
 #if (DEM_OBD_SUPPORT != DEM_OBD_NO_OBD_SUPPORT)
+#if (DEM_OBD_READINESS_GROUP_HANDING == STD_ON)
 /**
  * @brief         Service for reporting the event as disabled to the Dem for the PID $41 computation. API is
  *                needed in OBD-relevant ECUs only. API Availability: This API will be available only if
@@ -1534,7 +1602,9 @@ extern Std_ReturnType Dem_EnableDTCSetting(uint8 ClientId);
  * @trace         CPD-61066
  */
 extern Std_ReturnType Dem_SetEventDisabled(Dem_EventIdType EventId);
+#endif
 
+#if (DEM_RATIO_NUMBER > 0u)
 /**
  * @brief         Service for reporting that faults are possibly found because all conditions are fullfilled. API
  *                is needed in OBD-relevant ECUs only API Availability: This API will be available only if
@@ -1601,7 +1671,9 @@ extern Std_ReturnType
  * @trace         CPD-61062
  */
 extern Std_ReturnType Dem_RepIUMPRDenRelease(Dem_RatioIdType RatioID);
+#endif
 
+#if (DEM_USER_SUPPORT_SET_PTO_API == STD_ON)
 /**
  * @brief         API is needed in OBD-relevant ECUs only API Availability: This API will be available only if
  *                ({ecuc(Dem/DemGeneral.DemOBDSupport)} != DEM_OBD_NO_OBD_SUPPORT)
@@ -1614,6 +1686,7 @@ extern Std_ReturnType Dem_RepIUMPRDenRelease(Dem_RatioIdType RatioID);
  * @trace         CPD-61063
  */
 extern Std_ReturnType Dem_SetPtoStatus(boolean PtoStatus);
+#endif
 
 /**
  * @brief         Service to report the value of PID $01 computed by the Dem. API is needed in OBD relevant ECUs only
@@ -1643,6 +1716,7 @@ extern Std_ReturnType Dem_ReadDataOfPID01(uint8* PID01value);
 extern Std_ReturnType Dem_GetDataOfPID21(uint8* PID21value);
 #endif
 
+#if (DEM_USER_SUPPORT_SET_PID_API == STD_ON)
 /**
  * @brief         Service to set the value of PID $21 in the Dem by a software component. API is needed in
  *                OBD-relevant ECUs only. API Availability: This API will be available only if
@@ -1703,6 +1777,7 @@ extern Std_ReturnType Dem_SetDataOfPID4D(const uint8* PID4Dvalue);
  */
 extern Std_ReturnType Dem_SetDataOfPID4E(const uint8* PID4Evalue);
 #endif
+#endif
 
 /**
  * @brief         Returns the qualification state of the dependent operation cycle. API Availability: This API
@@ -1729,8 +1804,10 @@ extern Std_ReturnType Dem_GetCycleQualified(uint8 OperationCycleId, boolean* isQ
  * @trace         CPD-61054
  */
 extern Std_ReturnType Dem_SetCycleQualified(uint8 OperationCycleId);
+
 /* PRQA S 1707 -- */
 /* PRQA S 1512, 1513 -- */
+#if (DEM_SUPPORT_GETDTCSERVERITYAVAILABILITYMASK_API == STD_ON)
 /**
  * @brief         Gets the DTC Severity availability mask.
  * @param[in]     ClientId: Unique client id, assigned to the instance of the calling module.
@@ -1745,7 +1822,10 @@ extern Std_ReturnType Dem_SetCycleQualified(uint8 OperationCycleId);
  * @trace         CPD-61052
  */
 extern Std_ReturnType Dem_GetDTCSeverityAvailabilityMask(uint8 ClientId, Dem_DTCSeverityType* DTCSeverityMask);
+#endif
 
+#if (DEM_OBDII_SUPPORT == STD_ON)
+#if (DEM_DTR_NUMBER > 0u)
 /**
  * @brief         Service to report the value of the B1 counter computed by the Dem. API is needed in WWH-OBD
  *                relevant ECUs only
@@ -1758,6 +1838,8 @@ extern Std_ReturnType Dem_GetDTCSeverityAvailabilityMask(uint8 ClientId, Dem_DTC
  * @trace         CPD-61051
  */
 extern Std_ReturnType Dem_GetB1Counter(uint16* B1Counter);
+#endif
+#endif
 
 #if (DEM_OBD_SUPPORT != DEM_OBD_NO_OBD_SUPPORT)
 /**
@@ -1789,7 +1871,7 @@ extern Std_ReturnType
  * @synchronous   TRUE
  * @trace         CPD-61037
  */
-/* PRQA S 3449,3451 ++ */ /* VL_Dem_3449,VL_Dem_3451 */
+/* PRQA S 3449,3451 ++ */ /* VL_QAC_MultiDeclaration,VL_QAC_MultiDeclaration */
 extern void Dem_MainFunction(void);
 /* PRQA S 3449,3451 -- */
 

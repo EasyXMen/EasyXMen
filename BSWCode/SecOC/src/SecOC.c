@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -22,6 +22,7 @@
  **
  ***********************************************************************************************************************/
 /* PRQA S 6540, 6520 EOF */ /* VL_MTR_SecOC_STTPP, VL_MTR_SecOC_STVAR */
+/* PRQA S 3415 EOF */       /* VL_SecOC_3415 */
 /* =================================================== inclusions =================================================== */
 
 #include "SecOC_Internal.h"
@@ -1217,12 +1218,16 @@ Std_ReturnType SecOC_TpTransmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr
         detErrorId = SECOC_E_UNINIT;
     }
     /*TxPduId error*/
+    /* PRQA S 2991,2995,2996 ++ */ /* VL_SecOC_2991,VL_SecOC_2995,VL_SecOC_2996 */
     else if (!((TxPduId >= SECOC_TX_IF_PDU_NUM) && (TxPduId < SECOC_TX_PDU_PRO_NUM)))
+    /* PRQA S 2991,2995,2996 -- */
     {
         detErrorId = SECOC_E_INVALID_PDU_SDU_ID;
     }
     /*NULL POINTER*/
+    /* PRQA S 2880 ++ */ /* VL_SecOC_2880 */
     else if (PduInfoPtr == NULL_PTR)
+    /* PRQA S 2880 -- */
     {
         detErrorId = SECOC_E_PARAM_POINTER;
     }
@@ -1260,7 +1265,9 @@ Std_ReturnType SecOC_TpTransmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr
 #endif /* SECOC_TX_TP_PDU_NUM > SECOC_CONST_0U */
     }
 #if (STD_ON == SECOC_DEV_ERROR_DETECT)
+    /* PRQA S 2991,2995 ++ */ /* VL_SecOC_2991,VL_SecOC_2995 */
     if (detErrorId != E_OK)
+    /* PRQA S 2991,2995 -- */
     {
         SECOC_DET_REPORT(SECOC_TPTRANSMIT_ID, detErrorId);
     }
@@ -1360,7 +1367,9 @@ Std_ReturnType SecOC_TpCancelTransmit(PduIdType TxPduId)
         detErrorId = SECOC_E_UNINIT;
     }
     /*id error*/
+    /* PRQA S 2991,2995 ++ */ /* VL_SecOC_2991,VL_SecOC_2995 */
     else if ((TxPduId < SECOC_TX_IF_PDU_NUM) || (TxPduId >= SECOC_TX_PDU_PRO_NUM))
+    /* PRQA S 2991,2995 -- */
     {
         detErrorId = SECOC_E_INVALID_PDU_SDU_ID;
     }
@@ -1394,11 +1403,15 @@ Std_ReturnType SecOC_TpCancelTransmit(PduIdType TxPduId)
             /* Return E_NOT_OK */
         }
 #else
+        /* PRQA S 2880 ++ */ /* VL_SecOC_2880 */
         (void)(TxPduId);
+        /* PRQA S 2880 -- */
 #endif
     }
 #if (STD_ON == SECOC_DEV_ERROR_DETECT)
+    /* PRQA S 2991,2995 ++ */ /* VL_SecOC_2991,VL_SecOC_2995 */
     if (detErrorId != E_OK)
+    /* PRQA S 2991,2995 -- */
     {
         SECOC_DET_REPORT(SECOC_TPCANCELTRANSMIT_ID, detErrorId);
     }
@@ -1430,7 +1443,9 @@ Std_ReturnType SecOC_TpCancelReceive(PduIdType RxPduId)
         detErrorId = SECOC_E_UNINIT;
     }
     /*id error*/
+    /* PRQA S 2991,2995 ++ */ /* VL_SecOC_2991,VL_SecOC_2995 */
     else if ((RxPduId < SECOC_RX_IF_PDU_NUM) || (RxPduId >= SECOC_RX_PDU_PRO_NUM))
+    /* PRQA S 2991,2995 -- */
     {
         detErrorId = SECOC_E_INVALID_PDU_SDU_ID;
     }
@@ -1464,11 +1479,15 @@ Std_ReturnType SecOC_TpCancelReceive(PduIdType RxPduId)
             /* Return E_NOT_OK */
         }
 #else
+        /* PRQA S 2880 ++ */ /* VL_SecOC_2880 */
         (void)(RxPduId);
+        /* PRQA S 2880 -- */
 #endif
     }
 #if (STD_ON == SECOC_DEV_ERROR_DETECT)
+    /* PRQA S 2991,2995 ++ */ /* VL_SecOC_2991,VL_SecOC_2995 */
     if (detErrorId != E_OK)
+    /* PRQA S 2991,2995 -- */
     {
         SECOC_DET_REPORT(SECOC_TPCANCELRECEIVE_ID, detErrorId);
     }
@@ -1707,7 +1726,9 @@ void SecOC_TpRxIndication(PduIdType id, Std_ReturnType result)
         detErrorId = SECOC_E_UNINIT;
     }
     /*id error*/
+    /* PRQA S 2991,2995 ++ */ /* VL_SecOC_2991,VL_SecOC_2995 */
     else if ((id >= SECOC_RX_SEC_PDU_NUM) || (id < SECOC_RX_SEC_IF_PDU_NUM))
+    /* PRQA S 2991,2995 -- */
     {
         detErrorId = SECOC_E_INVALID_PDU_SDU_ID;
     }
@@ -1782,12 +1803,16 @@ void SecOC_TpRxIndication(PduIdType id, Std_ReturnType result)
             /* Reception of a Secured I-PDU not completed,Directly return */
         }
 #else
+        /* PRQA S 2880 ++ */ /* VL_SecOC_2880 */
         (void)(id);
         (void)(result);
+        /* PRQA S 2880 -- */
 #endif
     }
 #if (STD_ON == SECOC_DEV_ERROR_DETECT)
+    /* PRQA S 2991,2995 ++ */ /* VL_SecOC_2991,VL_SecOC_2995 */
     if (detErrorId != E_OK)
+    /* PRQA S 2991,2995 -- */
     {
         SECOC_DET_REPORT(SECOC_TPRXINDICATION_ID, detErrorId);
     }
@@ -1980,9 +2005,9 @@ void SecOC_TpTxConfirmation(PduIdType id, Std_ReturnType result)
 /* PRQA S 1503, 6070, 6010 ++ */ /* VL_QAC_NoUsedApi, VL_MTR_SecOC_STCAL, VL_MTR_SecOC_STCYC */
 /* PRQA S 6080, 6050, 6030 ++ */ /* VL_MTR_SecOC_STPTH, VL_MTR_SecOC_STST3, VL_MTR_SecOC_STMIF */
 /* PRQA S 6020, 6080, 1532 ++ */ /* VL_MTR_SecOC_STLIN, VL_MTR_SecOC_STPTH, VL_QAC_OneFunRef */
-/* PRQA S 5017, 2755 ++ */       /* VL_SecOC_5017, VL_SecOC_2755 */
+/* PRQA S 5017 ++ */             /* VL_SecOC_5017 */
 Std_ReturnType SecOC_TriggerTransmit(PduIdType TxPduId, PduInfoType* PduInfoPtr)
-/* PRQA S 5017, 2755 -- */
+/* PRQA S 5017 -- */
 /* PRQA S 6020, 6080, 1532 -- */
 /* PRQA S 6080, 6050, 6030 -- */
 /* PRQA S 1503, 6070, 6010 -- */
@@ -2184,12 +2209,16 @@ BufReq_ReturnType SecOC_CopyRxData(PduIdType id, const PduInfoType* info, PduLen
         detErrorId = SECOC_E_UNINIT;
     }
     /*id error*/
+    /* PRQA S 2991,2995 ++ */ /* VL_SecOC_2991,VL_SecOC_2995 */
     else if ((id >= SECOC_RX_SEC_PDU_NUM) || (id < SECOC_RX_SEC_IF_PDU_NUM))
+    /* PRQA S 2991,2995 -- */
     {
         detErrorId = SECOC_E_INVALID_PDU_SDU_ID;
     }
     /*NULL POINTER*/
+    /* PRQA S 2880 ++ */ /* VL_SecOC_2880 */
     else if ((NULL_PTR == info) || (NULL_PTR == bufferSizePtr))
+    /* PRQA S 2880 -- */
     {
         detErrorId = SECOC_E_PARAM_POINTER;
     }
@@ -2280,7 +2309,9 @@ BufReq_ReturnType SecOC_CopyRxData(PduIdType id, const PduInfoType* info, PduLen
 #endif
     }
 #if (STD_ON == SECOC_DEV_ERROR_DETECT)
+    /* PRQA S 2991,2995 ++ */ /* VL_SecOC_2991,VL_SecOC_2995 */
     if (detErrorId != E_OK)
+    /* PRQA S 2991,2995 -- */
     {
         SECOC_DET_REPORT(SECOC_COPYRXDATA_ID, detErrorId);
     }
@@ -2300,12 +2331,12 @@ BufReq_ReturnType SecOC_CopyRxData(PduIdType id, const PduInfoType* info, PduLen
 /* PRQA S 1503, 6010, 6060 ++ */ /* VL_QAC_NoUsedApi, VL_MTR_SecOC_STCYC, VL_MTR_SecOC_STCAL */
 /* PRQA S 6070, 6010, 6080 ++ */ /* VL_MTR_SecOC_STCYC, VL_MTR_SecOC_STPTH, VL_MTR_SecOC_STST3 */
 /* PRQA S 6050, 6030, 6020 ++ */ /* VL_MTR_SecOC_STM19, VL_MTR_SecOC_STMIF, VL_MTR_SecOC_STLIN */
-/* PRQA S 1532, 5017, 2755 ++ */ /* VL_QAC_OneFunRef, VL_SecOC_5017, VL_SecOC_2755 */
+/* PRQA S 1532, 5017 ++ */       /* VL_QAC_OneFunRef, VL_SecOC_5017 */
 /* PRQA S 2889 ++ */             /* VL_QAC_OneFunRef */
 BufReq_ReturnType
     SecOC_CopyTxData(PduIdType id, const PduInfoType* info, const RetryInfoType* retry, PduLengthType* availableDataPtr)
 /* PRQA S 2889 -- */
-/* PRQA S 1532, 5017, 2755 -- */
+/* PRQA S 1532, 5017 -- */
 /* PRQA S 6050, 6030, 6020 -- */
 /* PRQA S 6070, 6010, 6080 -- */
 /* PRQA S 1503, 6010, 6060 -- */
@@ -2321,12 +2352,16 @@ BufReq_ReturnType
         detErrorId = SECOC_E_UNINIT;
     }
     /*id error*/
+    /* PRQA S 2991,2995 ++ */ /* VL_SecOC_2991,VL_SecOC_2995 */
     else if ((id >= SECOC_TX_SEC_PDU_NUM) || (id < SECOC_TX_SEC_IF_PDU_NUM))
+    /* PRQA S 2991,2995 -- */
     {
         detErrorId = SECOC_E_INVALID_PDU_SDU_ID;
     }
     /*NULL POINTER*/
+    /* PRQA S 2880 ++ */ /* VL_SecOC_2880 */
     else if ((NULL_PTR == info) || (NULL_PTR == availableDataPtr))
+    /* PRQA S 2880 -- */
     {
         detErrorId = SECOC_E_PARAM_POINTER;
     }
@@ -2455,7 +2490,9 @@ BufReq_ReturnType
 #endif
     }
 #if (STD_ON == SECOC_DEV_ERROR_DETECT)
+    /* PRQA S 2991,2995 ++ */ /* VL_SecOC_2991,VL_SecOC_2995 */
     if (detErrorId != E_OK)
+    /* PRQA S 2991,2995 -- */
     {
         SECOC_DET_REPORT(SECOC_COPYTXDATA_ID, detErrorId);
     }
@@ -2496,12 +2533,16 @@ BufReq_ReturnType SecOC_StartOfReception(
         detErrorId = SECOC_E_UNINIT;
     }
     /*id error*/
+    /* PRQA S 2991,2995 ++ */ /* VL_SecOC_2991,VL_SecOC_2995 */
     else if ((id >= SECOC_RX_SEC_PDU_NUM) || (id < SECOC_RX_SEC_IF_PDU_NUM))
+    /* PRQA S 2991,2995 -- */
     {
         detErrorId = SECOC_E_INVALID_PDU_SDU_ID;
     }
     /*NULL POINTER*/
+    /* PRQA S 2880 ++ */ /* VL_SecOC_2880 */
     else if (NULL_PTR == bufferSizePtr)
+    /* PRQA S 2880 -- */
     {
         detErrorId = SECOC_E_PARAM_POINTER;
     }
@@ -2596,7 +2637,9 @@ BufReq_ReturnType SecOC_StartOfReception(
 #endif
     }
 #if (STD_ON == SECOC_DEV_ERROR_DETECT)
+    /* PRQA S 2991,2995 ++ */ /* VL_SecOC_2991,VL_SecOC_2995 */
     if (detErrorId != E_OK)
+    /* PRQA S 2991,2995 -- */
     {
         SECOC_DET_REPORT(SECOC_STARTOFRECEPTION_ID, detErrorId);
     }
@@ -5201,6 +5244,10 @@ SECOC_LOCAL void SecOC_RxPassAuthenticPduToUpperLayer(uint16 index)
                 && (SECOC_OVERRIDE_SKIP_UNTIL_LIMIT != rxRtPtr->rxOverrideStatus))
             {
                 rxRtPtr->rxVeryfyResult = SECOC_VERIFICATIONFAILURE;
+            }
+            else
+            {
+                /* Do nothing */
             }
         }
         SchM_Exit_SecOC_RxData();

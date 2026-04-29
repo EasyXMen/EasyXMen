@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -62,7 +62,7 @@
     \li VL_CDD_FVM_4397
       Reason: Macro Conveniently determining authenticity.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_CDD_FVM_3673
       Reason: The parameter will be modified, it could not be qulified as "const".
@@ -79,36 +79,53 @@
       Reason: The number of lines of code is related to the user configuration, allowing
     dynamic code to violate this under extreme conditions
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_MTR_CDD_FVM_STVAR
       Reason: The total number of variables is related to the user configuration, allowing
     dynamic code to violate this under extreme conditions
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_MTR_CDD_FVM_STCAL
       Reason: The total number of variables is related to the user configuration, allowing
     dynamic code to violate this under extreme conditions
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_MTR_CDD_FVM_STMIF
       Reason: Functions handle specific tasks in the behavior of the entire component.
     Task has different scenarios that need to be covered, which depends on local conditions - this
     leads to deep nesting of the control structure.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_MTR_CDD_FVM_STPAR
       Reason: The parameters of the function need.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_CDD_FVM_3408
       Reason: There is no declaration before the definition.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
+
+    \li VL_CDD_FVM_1512
+      Reason: Rte-generated headers and module headers may contain the same declaration for the same
+        function, so they are compatible with each other.
+      Risk: No risk.
+      Prevention: None.
+
+    \li VL_CDD_FVM_1753
+      Reason: The definition of the function is generated in the configuration file, and when a module uses the
+        function, the definition is generated.
+      Risk: No risk.
+      Prevention: None.
+
+    \li VL_CDD_FVM_1501
+      Reason: Whether a function is used or not depends on the generated macro definition.
+      Risk: No risk.
+      Prevention: None.
 
  */
 
@@ -203,7 +220,9 @@ CDD_FVM_LOCAL_INLINE void CDD_FVM_DET_REPORTERROR(uint8 ApiId, uint8 ErrorId)
 /**
  * @brief    Configuration structure variable of CDD_FVM. @range NA
  */
+/* PRQA S 1512 ++ */ /* VL_CDD_FVM_1512 */
 extern const CDD_FVM_ConfigType CDD_FVM_Config;
+/* PRQA S 1512 -- */
 
 /* ========================================= external function declarations ========================================= */
 /**
@@ -231,7 +250,9 @@ void CDD_FVM_DeInit(void);
  * @synchronous    TRUE
  * @trace       CPD-70856
  */
+/* PRQA S 1753,1501 ++ */ /* VL_CDD_FVM_1753,VL_CDD_FVM_1501 */
 void CDD_FVM_GetVersionInfo(Std_VersionInfoType* versioninfo);
+/* PRQA S 1753,1501 -- */
 
 /**
  * @brief          This interface is used by the FVM to obtain the current

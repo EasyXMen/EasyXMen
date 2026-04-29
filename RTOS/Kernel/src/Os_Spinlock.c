@@ -1,6 +1,6 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
- * SPDX-License-Identifier: LGPL-2.1-only-with-exception OR  LicenseRef-Commercial-License
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
+ * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
  * GNU Lesser General Public License as published by the Free Software Foundation; version 2.1.
@@ -10,7 +10,8 @@
  * You should have received a copy of the GNU Lesser General Public License along with this library;
  * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  * or see <https://www.gnu.org/licenses/>.
- *
+ */
+/*
  ********************************************************************************
  **                                                                            **
  **  FILENAME    :  Os_Spinlock.c                                              **
@@ -204,14 +205,14 @@ static void Os_GetSpinlock(SpinlockIdType SpinlockId)
  * REQ ID               <None>
  */
 /******************************************************************************/
-/* PRQA S 6030, 3006 ++ */ /* VL_MTR_Os_STMIF, VL_Os_3006 */
+/* PRQA S 6030, 3006, 6010 ++ */ /* VL_MTR_Os_STMIF, VL_Os_3006, VL_MTR_Os_STCYC */
 StatusType GetSpinlock(SpinlockIdType SpinlockId)
-/* PRQA S 6030, 3006 -- */
+/* PRQA S 6030, 3006, 6010 -- */
 {
     /* PRQA S 2742, 2880, 3138, 2741 ++ */ /* VL_Os_PlatformDef */
-    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
+    /* PRQA S 1006, 3141 ++ */ /* VL_Os_1006, VL_Os_3141 */
     OS_ENTER_KERNEL();
-    /* PRQA S 1006 -- */
+    /* PRQA S 1006, 3141 -- */
     /* PRQA S 2742, 2880, 3138, 2741 -- */
 
     StatusType err = E_OK;
@@ -279,7 +280,9 @@ StatusType GetSpinlock(SpinlockIdType SpinlockId)
 #if (CFG_ERRORHOOK == TRUE)
     if (err != E_OK)
     {
+        /* PRQA S 3138 ++ */ /* VL_Os_3138 */
         Os_TraceErrorHook(OSError_Save_GetSpinlock(SpinlockId), OSServiceId_GetSpinlock, err);
+        /* PRQA S 3138 -- */
     }
 #endif
 
@@ -314,9 +317,9 @@ StatusType ReleaseSpinlock(SpinlockIdType SpinlockId)
 /* PRQA S 6030, 6010, 3006 -- */
 {
     /* PRQA S 2742, 2880, 3138, 2741 ++ */ /* VL_Os_PlatformDef */
-    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
+    /* PRQA S 1006, 3141 ++ */ /* VL_Os_1006, VL_Os_3141 */
     OS_ENTER_KERNEL();
-    /* PRQA S 1006 -- */
+    /* PRQA S 1006, 3141 -- */
     /* PRQA S 2742, 2880, 3138, 2741 -- */
 
     StatusType    err    = E_OK;
@@ -393,7 +396,9 @@ StatusType ReleaseSpinlock(SpinlockIdType SpinlockId)
 #if (CFG_ERRORHOOK == TRUE)
     if (err != E_OK)
     {
+        /* PRQA S 3138 ++ */ /* VL_Os_3138 */
         Os_TraceErrorHook(OSError_Save_ReleaseSpinlock(SpinlockId), OSServiceId_ReleaseSpinlock, err);
+        /* PRQA S 3138 -- */
     }
 #endif
 
@@ -733,14 +738,14 @@ static void Os_TryToGetSpinlock(SpinlockIdType SpinlockId, TryToGetSpinlockType*
  * REQ ID               <None>
  */
 /******************************************************************************/
-/* PRQA S 6030, 6010, 3006, 1503 ++ */ /* VL_MTR_Os_STMIF, VL_MTR_Os_STCYC, VL_Os_3006, VL_QAC_NoUsedApi */
+/* PRQA S 6030, 6010, 3006, 1503, 6070 ++ */ /* VL_MTR_Os_STMIF, VL_MTR_Os_STCYC, VL_Os_3006, VL_QAC_NoUsedApi, VL_MTR_Os_STCAL */
 StatusType TryToGetSpinlock(SpinlockIdType SpinlockId, TryToGetSpinlockType* Success)
-/* PRQA S 6030, 6010, 3006, 1503 -- */
+/* PRQA S 6030, 6010, 3006, 1503, 6070 -- */
 {
     /* PRQA S 2742, 2880, 3138, 2741 ++ */ /* VL_Os_PlatformDef */
-    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
+    /* PRQA S 1006, 3141 ++ */ /* VL_Os_1006, VL_Os_3141 */
     OS_ENTER_KERNEL();
-    /* PRQA S 1006 -- */
+    /* PRQA S 1006, 3141 -- */
     /* PRQA S 2742, 2880, 3138, 2741 -- */
     StatusType err = E_OK;
 
@@ -817,7 +822,9 @@ StatusType TryToGetSpinlock(SpinlockIdType SpinlockId, TryToGetSpinlockType* Suc
 #if (CFG_ERRORHOOK == TRUE)
     if (err != E_OK)
     {
+        /* PRQA S 3138 ++ */ /* VL_Os_3138 */
         Os_TraceErrorHook(OSError_Save_TryToGetSpinlock(SpinlockId, Success), OSServiceId_TryToGetSpinlock, err);
+        /* PRQA S 3138 -- */
     }
 #endif
 

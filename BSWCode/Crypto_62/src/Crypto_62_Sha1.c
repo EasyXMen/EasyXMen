@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -22,10 +22,10 @@
  **
  ***********************************************************************************************************************/
 
-/* PRQA S 0314,0488,0842,1253,1255,1277,1281,1290,1338,1840,1841 EOF */ /* VL_QAC_Crypto */
-/* PRQA S 1842,1843,1863,2001,2015,2216,3120,3132,3138,3226,3417 EOF */ /* VL_QAC_Crypto */
-/* PRQA S 3440,3446,3472,3473,3493,4542,4559,4558,1252,3387,3397 EOF */ /* VL_QAC_Crypto */
-/* PRQA S 3400,3412,3678,4115,4544,0553 EOF */                          /* VL_QAC_Crypto */
+/* PRQA S 0314,0488,0842,1253,1255,1277,1281,1290,1338,1840,1841 EOF */ /* VL_Crypto_62_General */
+/* PRQA S 1842,1843,1863,2001,2015,2216,3120,3132,3138,3226,3417 EOF */ /* VL_Crypto_62_General */
+/* PRQA S 3440,3446,3472,3473,3493,4542,4559,4558,1252,3387,3397 EOF */ /* VL_Crypto_62_General */
+/* PRQA S 3400,3412,3678,4115,4544,0553 EOF */                          /* VL_Crypto_62_General */
 /* =================================================== inclusions =================================================== */
 #include "Crypto_62_Internal.h"
 #if (CRYPTO_ALGORITHMFAM_SHA1 == STD_ON)
@@ -434,18 +434,24 @@ Std_ReturnType Crypto_Sha1(const unsigned char* input, uint32 ilen, unsigned cha
 Std_ReturnType Crypto_Sha1_Process(uint32 objectId)
 {
     Std_ReturnType ret = E_NOT_OK;
-    uint8          output[20];
+    uint8          output[CRYPTO_CONST_20];
 
-    uint32 ilen = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputLength;
-    uint32 olen = *Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr;
-    if (olen <= 20u)
+    uint32  ilen = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputLength;
+    uint32* olen = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr;
+
+    /* PRQA S 0311 ++ */ /*VL_Crypto_62_General */
+    uint8* input = (uint8*)(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputPtr);
+    /* PRQA S 0311 -- */
+
+    ret = Crypto_Sha1(input, ilen, output);
+    if (*olen >= CRYPTO_CONST_20 && ret == E_OK)
     {
-        /* PRQA S 0311 ++ */ /*VL_QAC_0311 */
-        uint8* input = (uint8*)(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputPtr);
-        /* PRQA S 0311 -- */
-
-        ret = Crypto_Sha1(input, ilen, output);
-        (void)IStdLib_MemCpy(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr, output, olen);
+        (void)IStdLib_MemCpy(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr, output, CRYPTO_CONST_20);
+        *olen = CRYPTO_CONST_20;
+    }
+    else
+    {
+        (void)IStdLib_MemCpy(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr, output, *olen);
     }
 
     return ret;

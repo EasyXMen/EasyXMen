@@ -1,6 +1,5 @@
-/*******************************************************************************
-**                                                                            **
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+/**
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -11,8 +10,8 @@
  * You should have received a copy of the GNU Lesser General Public License along with this library;
  * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  * or see <https://www.gnu.org/licenses/>.
-**                                                                            **
-********************************************************************************
+ */
+/*******************************************************************************
 **                                                                            **
 **  FILENAME    : Mcu_Irq.c                                                   **
 **                                                                            **
@@ -158,7 +157,7 @@ Os_IsrStateType Os_GetIsrSourceState(uint32 vIsrSrc, uint32 vIsrSrcType)
     (void)vIsrSrcType;
     Os_IsrStateType isrSourceState;
     /* PRQA S 0303, 1259, 3442 ++ */ /* VL_Os_0303, VL_Os_1259, VL_Os_3442 */
-    if (((uint32)1 << OS_SRC_SRE_BIT) == ((*((volatile uint32*)vIsrSrc)) & ((uint32)1 << OS_SRC_SRE_BIT)))
+    if (((uint32)1u << OS_SRC_SRE_BIT) == ((*((volatile uint32*)vIsrSrc)) & ((uint32)1u << OS_SRC_SRE_BIT)))
     /* PRQA S 0303, 1259, 3442 -- */
     {
         isrSourceState = OS_ISR_ENABLED;

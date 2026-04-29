@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -33,10 +33,6 @@
 #include "Det.h"
 #endif
 
-#if NM_STATE_CHANGE_IND_ENABLED == STD_ON
-#include "Com.h"
-#endif
-
 #if NM_PARTIAL_NETWORK_SUPPORT_ENABLED == STD_ON
 #include "IStdLib.h"
 #endif
@@ -53,7 +49,6 @@
 #define NM_GET_PARTITION_OF_CHANNEL(chIdx) Nm_ChLConfig[chIdx].ChannelReferencedPartitionId
 #endif
 
-#define NM_UNUSED(v) (void)(v)
 /* ================================================ type definitions ================================================ */
 /* ========================================== internal function declarations ======================================== */
 NM_LOCAL uint8 Nm_GetPartitionIndex(void);
@@ -86,7 +81,21 @@ NM_LOCAL void Nm_CoorShutdownTimerLoader(
     const Nm_PerClusterConfigType* perClusPtr,
     uint8                          chIdx,
     uint8*                         shutdownTimerLoadOkInChMask);
-NM_LOCAL Std_ReturnType Nm_CheckChannelMaskInCluster(uint8 channelMask, uint8 clusterIndex);
+NM_LOCAL Std_ReturnType Nm_CheckChannelMaskInCluster(uint8* channelMask, uint8 clusterIndex);
+/**
+ * clear a specific bit in a bit mask
+ */
+NM_LOCAL_INLINE void Nm_ClrBit(uint8* channelMask, uint8 chIdx);
+
+/**
+ * set a specific bit in a bit mask
+ */
+NM_LOCAL_INLINE void Nm_SetBit(uint8* channelMask, uint8 chIdx);
+
+/**
+ * get the state of a specific bit
+ */
+NM_LOCAL_INLINE boolean Nm_GetBit(const uint8* channelMask, uint8 chIdx);
 /**
  * coordinator shutdown timer handle function.
  */
@@ -210,16 +219,18 @@ void Nm_Init(const Nm_ConfigType* configPtr)
         {
             Nm_GlobalVariableInitialized = TRUE;
 #if NM_NUMBER_OF_CLUSTERS > 0u
+            const uint8 ClusterChannelMaxcount = (NM_NUMBER_OF_CHANNELS / NM_SINGLEBYTE_BASENUM) + 1u;
             for (uint8 index = 0u; index < NM_NUMBER_OF_CLUSTERS; index++)
             {
-                Nm_InnerCluster[index].TopMostCoor                      = TRUE;
-                Nm_InnerCluster[index].ShutdownStatus                   = NM_SHUTDOWN_STU_INIT;
-                Nm_InnerCluster[index].ReadySleepInChMask               = 0u;
-                Nm_InnerCluster[index].CoorRsbInCluster                 = FALSE;
-                Nm_InnerCluster[index].ShutdownTimerLoadOkInChMask      = 0u;
-                Nm_InnerCluster[index].SleepAllowedInChMask             = 0u;
-                Nm_InnerCluster[index].ShutdownAbortFinishedInChMask    = 0u;
-                Nm_InnerCluster[index].PassiveChannelReadySleepInChMask = 0u;
+                Nm_InnerCluster[index].TopMostCoor    = TRUE;
+                Nm_InnerCluster[index].ShutdownStatus = NM_SHUTDOWN_STU_INIT;
+                (void)IStdLib_MemSet(Nm_InnerCluster[index].ReadySleepInChMask, 0u, ClusterChannelMaxcount);
+                Nm_InnerCluster[index].CoorRsbInCluster = FALSE;
+                (void)IStdLib_MemSet(Nm_InnerCluster[index].ShutdownTimerLoadOkInChMask, 0u, ClusterChannelMaxcount);
+                (void)IStdLib_MemSet(Nm_InnerCluster[index].SleepAllowedInChMask, 0u, ClusterChannelMaxcount);
+                (void)IStdLib_MemSet(Nm_InnerCluster[index].ShutdownAbortFinishedInChMask, 0u, ClusterChannelMaxcount);
+                (void)
+                    IStdLib_MemSet(Nm_InnerCluster[index].PassiveChannelReadySleepInChMask, 0u, ClusterChannelMaxcount);
             }
 #endif
 
@@ -1044,16 +1055,6 @@ void Nm_SynchronizeMode(NetworkHandleType nmNetworkHandle)
     }
 }
 
-#if (STD_ON == NM_PDU_RX_INDICATION_ENABLED)
-/**
- *   Notification that a NM message has been received.
- */
-void Nm_PduRxIndication(NetworkHandleType nmNetworkHandle)
-{
-    NM_UNUSED(nmNetworkHandle);
-}
-#endif
-
 #if (NM_STATE_CHANGE_IND_ENABLED == STD_ON)
 /**
  *   notification that the state of the lower layer <Bus>Nm has changed.
@@ -1112,22 +1113,6 @@ void Nm_StateChangeNotification(
     }
 }
 #endif
-/**
- *   Service to indicate that an NM message with set Repeat
- *   Message Request Bit has been received
- */
-void Nm_RepeatMessageIndication(NetworkHandleType nmNetworkHandle)
-{
-    NM_UNUSED(nmNetworkHandle);
-}
-/**
- *   Service to indicate that an attempt to send an NM message
- *   failed.
- */
-void Nm_TxTimeoutException(NetworkHandleType nmNetworkHandle)
-{
-    NM_UNUSED(nmNetworkHandle);
-}
 
 #if (NM_CAR_WAKE_UP_RX_ENABLED == STD_ON)
 /**
@@ -1416,14 +1401,14 @@ NM_LOCAL Std_ReturnType Nm_FindClusterIndex(uint8 chIndex, uint8* clusterIndexPt
  * @synchronous  TRUE
  * @trace        -
  */
-NM_LOCAL Std_ReturnType Nm_CheckChannelMaskInCluster(uint8 channelMask, uint8 clusterIndex)
+NM_LOCAL Std_ReturnType Nm_CheckChannelMaskInCluster(uint8* channelMask, uint8 clusterIndex)
 {
     Std_ReturnType                 ret        = E_OK;
     const Nm_PerClusterConfigType* perClusPtr = &Nm_Config.PerCluPtr[clusterIndex];
     for (uint8 i = 0u; i < perClusPtr->IncNumCh; i++)
     {
         uint8 chIdx = perClusPtr->IncCh[i];
-        if ((channelMask & (uint8)(1u << chIdx)) == 0u)
+        if (Nm_GetBit(channelMask, chIdx))
         {
             ret = E_NOT_OK;
             break;
@@ -1529,12 +1514,12 @@ NM_LOCAL void Nm_PassivelyCoordinatedChannelRelease(uint8 clusterIndex, uint8 ch
 {
     const Nm_ChannelLConfigType* chCfgPtr = &Nm_ChLConfig[chIdx];
     SchM_Enter_Nm_Coordinator();
-    Nm_InnerCluster[clusterIndex].PassiveChannelReadySleepInChMask |= (uint8)(1u << chIdx);
+    Nm_SetBit(Nm_InnerCluster[clusterIndex].PassiveChannelReadySleepInChMask, chIdx);
     SchM_Exit_Nm_Coordinator();
     if (Nm_InnerChannel[chIdx]->UpLayNetRequest)
     {
         SchM_Enter_Nm_Coordinator();
-        Nm_InnerCluster[clusterIndex].PassiveChannelReadySleepInChMask &= (uint8)(~(uint8)(1u << chIdx));
+        Nm_ClrBit(Nm_InnerCluster[clusterIndex].PassiveChannelReadySleepInChMask, chIdx);
         SchM_Exit_Nm_Coordinator();
     }
     else if (
@@ -1542,7 +1527,7 @@ NM_LOCAL void Nm_PassivelyCoordinatedChannelRelease(uint8 clusterIndex, uint8 ch
         && !chCfgPtr->ChannelSleepMaster)
     {
         SchM_Enter_Nm_Coordinator();
-        Nm_InnerCluster[clusterIndex].PassiveChannelReadySleepInChMask &= (uint8)(~(uint8)(1u << chIdx));
+        Nm_ClrBit(Nm_InnerCluster[clusterIndex].PassiveChannelReadySleepInChMask, chIdx);
         SchM_Exit_Nm_Coordinator();
     }
 }
@@ -1566,7 +1551,7 @@ NM_LOCAL void Nm_CoorShutdownReady(boolean* topMostCoor, uint8 chIdx, uint8* clu
     const Nm_InnerChannelType*   chRTPtr  = Nm_InnerChannel[chIdx];
 
     SchM_Enter_Nm_Coordinator();
-    *clusterReadySleepInChMask |= (uint8)(1u << chIdx);
+    Nm_SetBit(clusterReadySleepInChMask, chIdx);
     SchM_Exit_Nm_Coordinator();
     /* new check mode */
     /*  pre-condition,special bus is awake */
@@ -1575,7 +1560,7 @@ NM_LOCAL void Nm_CoorShutdownReady(boolean* topMostCoor, uint8 chIdx, uint8* clu
         if (chRTPtr->UpLayNetRequest)
         {
             SchM_Enter_Nm_Coordinator();
-            *clusterReadySleepInChMask &= (uint8)(~(uint8)(1u << chIdx));
+            Nm_ClrBit(clusterReadySleepInChMask, chIdx);
             SchM_Exit_Nm_Coordinator();
         }
         else
@@ -1596,7 +1581,7 @@ NM_LOCAL void Nm_CoorShutdownReady(boolean* topMostCoor, uint8 chIdx, uint8* clu
             )
             {
                 SchM_Enter_Nm_Coordinator();
-                *clusterReadySleepInChMask &= (uint8)(~(uint8)(1u << chIdx));
+                Nm_ClrBit(clusterReadySleepInChMask, chIdx);
                 SchM_Exit_Nm_Coordinator();
             }
 #if (STD_ON == NM_COORDINATOR_SYNC_SUPPORT)
@@ -1609,7 +1594,7 @@ NM_LOCAL void Nm_CoorShutdownReady(boolean* topMostCoor, uint8 chIdx, uint8* clu
                     {
                         /*not ready to coor shutdown*/
                         SchM_Enter_Nm_Coordinator();
-                        *clusterReadySleepInChMask &= (uint8)(~(uint8)(1u << chIdx));
+                        Nm_ClrBit(clusterReadySleepInChMask, chIdx);
                         SchM_Exit_Nm_Coordinator();
                     }
                 }
@@ -1622,7 +1607,7 @@ NM_LOCAL void Nm_CoorShutdownReady(boolean* topMostCoor, uint8 chIdx, uint8* clu
         if (chRTPtr->UpLayNetRequest)
         {
             SchM_Enter_Nm_Coordinator();
-            *clusterReadySleepInChMask &= (uint8)(~(uint8)(1u << chIdx));
+            Nm_ClrBit(clusterReadySleepInChMask, chIdx);
             SchM_Exit_Nm_Coordinator();
         }
     }
@@ -1653,13 +1638,13 @@ NM_LOCAL void Nm_CoorShutdownTimerLoader(
         if (Nm_InnerChannel[chIdx]->BusAwakeFlg && Nm_ChLConfig[chIdx].SynchronizingNetwork
             && !Nm_InnerChannel[chIdx]->LowLayBusSyncPoint)
         {
-            *shutdownTimerLoadOkInChMask &= (uint8)(~(uint8)(1u << chIdx));
+            Nm_ClrBit(shutdownTimerLoadOkInChMask, chIdx);
             nextFlag = E_NOT_OK;
         }
     }
     if (E_OK == nextFlag)
     {
-        *shutdownTimerLoadOkInChMask |= (uint8)(1u << chIdx);
+        Nm_SetBit(shutdownTimerLoadOkInChMask, chIdx);
         Nm_InnerChannelType* chRTPtr = Nm_InnerChannel[chIdx];
         if (chRTPtr->BusAwakeFlg)
         {
@@ -1690,6 +1675,52 @@ NM_LOCAL void Nm_CoorShutdownTimerLoader(
             }
         }
     }
+}
+#endif
+
+#if (NM_COORDINATOR_SUPPORT_ENABLED == STD_ON)
+/**
+ * @brief        Get the state of a specific bit in a byte-based bit mask array
+ * @param[in]    channelMask   Pointer to the byte array containing the bit mask
+ * @param[in]    chIdx         The channel index to check (bit position)
+ * @return       boolean       TRUE if the specified bit is set, FALSE otherwise
+ * @reentrant    TRUE
+ * @synchronous  TRUE
+ * @trace        CPD-86546
+ */
+NM_LOCAL_INLINE boolean Nm_GetBit(const uint8* channelMask, uint8 chIdx)
+{
+    return (channelMask[chIdx / NM_SINGLEBYTE_BASENUM] & (uint8)(1u << (chIdx % NM_SINGLEBYTE_BASENUM))) == 0u;
+}
+#endif
+
+#if (NM_COORDINATOR_SUPPORT_ENABLED == STD_ON)
+/**
+ * @brief        Clear a specific bit in a bit mask
+ * @param[out]   bitMask   Pointer to the bit mask where the bit will be cleared
+ * @param[in]    bitPos    The position of the bit to clear (0-7)
+ * @reentrant    TRUE
+ * @synchronous  TRUE
+ * @trace        CPD-86547
+ */
+NM_LOCAL_INLINE void Nm_ClrBit(uint8* channelMask, uint8 chIdx)
+{
+    channelMask[chIdx / NM_SINGLEBYTE_BASENUM] &= (uint8)(~(uint8)(1u << (chIdx % NM_SINGLEBYTE_BASENUM)));
+}
+#endif
+
+#if (NM_COORDINATOR_SUPPORT_ENABLED == STD_ON)
+/**
+ * @brief        Set a specific bit in a bit mask
+ * @param[out]   bitMask   Pointer to the bit mask where the bit will be set
+ * @param[in]    bitPos    The position of the bit to set (0-7)
+ * @reentrant    TRUE
+ * @synchronous  TRUE
+ * @trace        CPD-86548
+ */
+NM_LOCAL_INLINE void Nm_SetBit(uint8* channelMask, uint8 chIdx)
+{
+    channelMask[chIdx / NM_SINGLEBYTE_BASENUM] |= (uint8)(1u << (chIdx % NM_SINGLEBYTE_BASENUM));
 }
 #endif
 
@@ -1744,10 +1775,10 @@ NM_LOCAL Std_ReturnType Nm_CoorShutDownTimerHandle(uint8 chIdx, uint8* sleepAllo
             }
         }
     }
-    *sleepAllowedInChMask &= (uint8)(~(uint8)(1u << chIdx));
+    Nm_ClrBit(sleepAllowedInChMask, chIdx);
     if (sleepAllowFlg)
     {
-        *sleepAllowedInChMask |= (uint8)(1u << chIdx);
+        Nm_SetBit(sleepAllowedInChMask, chIdx);
     }
     return ret;
 }
@@ -1802,7 +1833,7 @@ NM_LOCAL void Nm_CoorShutdownAbortHandle(uint8 chIdx, uint8* shutdownAbortFinish
         }
     }
 #endif
-    *shutdownAbortFinishedInChMask |= (uint8)(1u << chIdx);
+    Nm_SetBit(shutdownAbortFinishedInChMask, chIdx);
 }
 #endif
 
@@ -2263,8 +2294,8 @@ NM_LOCAL void Nm_ShutdownStatusStartHandle(uint8 chIdx, uint8 clusterIndex)
     const Nm_PerClusterConfigType* perClusPtr         = &Nm_Config.PerCluPtr[clusterIndex];
     Nm_ShutdownStatusType*         ShutdownStatus     = &Nm_InnerCluster[clusterIndex].ShutdownStatus;
     boolean*                       CoorRsbInCluster   = &Nm_InnerCluster[clusterIndex].CoorRsbInCluster;
-    uint8*                         ReadySleepInChMask = &Nm_InnerCluster[clusterIndex].ReadySleepInChMask;
-    uint8*   ShutdownTimerLoadOkInChMask              = &Nm_InnerCluster[clusterIndex].ShutdownTimerLoadOkInChMask;
+    uint8*                         ReadySleepInChMask = Nm_InnerCluster[clusterIndex].ReadySleepInChMask;
+    uint8*   ShutdownTimerLoadOkInChMask              = Nm_InnerCluster[clusterIndex].ShutdownTimerLoadOkInChMask;
     boolean* topMostCoor                              = &Nm_InnerCluster[clusterIndex].TopMostCoor;
     /*handle not topmost CSRBit change*/
 #if (NM_COORDINATOR_SYNC_SUPPORT == STD_ON)
@@ -2273,7 +2304,7 @@ NM_LOCAL void Nm_ShutdownStatusStartHandle(uint8 chIdx, uint8 clusterIndex)
 #endif
     /*all channel not in alive,shutdown ready*/
     Nm_CoorShutdownReady(topMostCoor, chIdx, ReadySleepInChMask);
-    if (Nm_CheckChannelMaskInCluster(*ReadySleepInChMask, clusterIndex) == E_OK)
+    if (Nm_CheckChannelMaskInCluster(ReadySleepInChMask, clusterIndex) == E_OK)
     {
 #if (NM_COORDINATOR_SYNC_SUPPORT == STD_ON)
         /*shutdown ready set topmost active channel CSRBit = 1*/
@@ -2282,7 +2313,7 @@ NM_LOCAL void Nm_ShutdownStatusStartHandle(uint8 chIdx, uint8 clusterIndex)
         /*start CSR=1 channel's coordinate shutdown,start
          shutdown timer*/
         Nm_CoorShutdownTimerLoader(perClusPtr, chIdx, ShutdownTimerLoadOkInChMask);
-        if (Nm_CheckChannelMaskInCluster(*ShutdownTimerLoadOkInChMask, clusterIndex) == E_OK)
+        if (Nm_CheckChannelMaskInCluster(ShutdownTimerLoadOkInChMask, clusterIndex) == E_OK)
         {
             *ShutdownStatus = NM_SHUTDOWN_STU_RUN;
         }
@@ -2300,17 +2331,17 @@ NM_LOCAL void Nm_ShutdownStatusRunHandle(uint8 chIdx, uint8 clusterIndex)
 {
     const Nm_PerClusterConfigType* perClusPtr           = &Nm_Config.PerCluPtr[clusterIndex];
     Nm_ShutdownStatusType*         ShutdownStatus       = &Nm_InnerCluster[clusterIndex].ShutdownStatus;
-    uint8*                         ReadySleepInChMask   = &Nm_InnerCluster[clusterIndex].ReadySleepInChMask;
-    uint8*                         SleepAllowedInChMask = &Nm_InnerCluster[clusterIndex].SleepAllowedInChMask;
+    uint8*                         ReadySleepInChMask   = Nm_InnerCluster[clusterIndex].ReadySleepInChMask;
+    uint8*                         SleepAllowedInChMask = Nm_InnerCluster[clusterIndex].SleepAllowedInChMask;
     boolean*                       topMostCoor          = &Nm_InnerCluster[clusterIndex].TopMostCoor;
     Nm_CoorShutdownReady(topMostCoor, chIdx, ReadySleepInChMask);
-    if (Nm_CheckChannelMaskInCluster(*ReadySleepInChMask, clusterIndex) == E_OK)
+    if (Nm_CheckChannelMaskInCluster(ReadySleepInChMask, clusterIndex) == E_OK)
     {
         if (Nm_CoorShutDownTimerHandle(chIdx, SleepAllowedInChMask) == E_NOT_OK)
         {
             *ShutdownStatus = NM_SHUTDOWN_STU_ABORT;
         }
-        else if (Nm_CheckChannelMaskInCluster(*SleepAllowedInChMask, clusterIndex) == E_OK)
+        else if (Nm_CheckChannelMaskInCluster(SleepAllowedInChMask, clusterIndex) == E_OK)
         {
             *ShutdownStatus = NM_SHUTDOWN_STU_STOP;
         }
@@ -2326,16 +2357,18 @@ NM_LOCAL void Nm_ShutdownStatusRunHandle(uint8 chIdx, uint8 clusterIndex)
  */
 NM_LOCAL void Nm_ShutdownStatusAbortHandle(uint8 chIdx, uint8 clusterIndex)
 {
-    uint8* ShutdownAbortFinishedInChMask = &Nm_InnerCluster[clusterIndex].ShutdownAbortFinishedInChMask;
+    uint8*      ShutdownAbortFinishedInChMask = Nm_InnerCluster[clusterIndex].ShutdownAbortFinishedInChMask;
+    const uint8 ClusterChannelMaxcount        = (NM_NUMBER_OF_CHANNELS / NM_SINGLEBYTE_BASENUM) + 1u;
     Nm_CoorShutdownAbortHandle(chIdx, ShutdownAbortFinishedInChMask);
-    if (Nm_CheckChannelMaskInCluster(*ShutdownAbortFinishedInChMask, clusterIndex) == E_OK)
+    if (Nm_CheckChannelMaskInCluster(ShutdownAbortFinishedInChMask, clusterIndex) == E_OK)
     {
-        Nm_InnerCluster[clusterIndex].ShutdownStatus                   = NM_SHUTDOWN_STU_START;
-        Nm_InnerCluster[clusterIndex].ReadySleepInChMask               = 0u;
-        Nm_InnerCluster[clusterIndex].ShutdownTimerLoadOkInChMask      = 0u;
-        Nm_InnerCluster[clusterIndex].SleepAllowedInChMask             = 0u;
-        Nm_InnerCluster[clusterIndex].ShutdownAbortFinishedInChMask    = 0u;
-        Nm_InnerCluster[clusterIndex].PassiveChannelReadySleepInChMask = 0u;
+        Nm_InnerCluster[clusterIndex].ShutdownStatus = NM_SHUTDOWN_STU_START;
+        (void)IStdLib_MemSet(Nm_InnerCluster[clusterIndex].ReadySleepInChMask, 0u, ClusterChannelMaxcount);
+        (void)IStdLib_MemSet(Nm_InnerCluster[clusterIndex].ShutdownTimerLoadOkInChMask, 0u, ClusterChannelMaxcount);
+        (void)IStdLib_MemSet(Nm_InnerCluster[clusterIndex].SleepAllowedInChMask, 0u, ClusterChannelMaxcount);
+        (void)IStdLib_MemSet(Nm_InnerCluster[clusterIndex].ShutdownAbortFinishedInChMask, 0u, ClusterChannelMaxcount);
+        (void)
+            IStdLib_MemSet(Nm_InnerCluster[clusterIndex].PassiveChannelReadySleepInChMask, 0u, ClusterChannelMaxcount);
     }
 }
 /**

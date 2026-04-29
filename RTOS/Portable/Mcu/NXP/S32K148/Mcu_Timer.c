@@ -1,6 +1,6 @@
 /* PRQA S 3108++ */
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -38,50 +38,6 @@
 #include "S32K148_PCC.h"
 #endif
 
-#if (TRUE == CFG_SYSTEM_TIMER_ENABLE)
-#define OS_START_SEC_CODE
-#include "Os_MemMap.h"
-/*****************************************************************************/
-/*
- * Brief                <start system timer>
- * ServiceId            <None>
- * Sync/Async           <Synchronous>
- * Reentrancy           <Non Reentrant>
- * Param-Name[in]       <None>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * Return               <None>
- * PreCondition         <None>
- * CallByAPI            <Os_ArchInitCPU>
- */
-/*****************************************************************************/
-FUNC(void, OS_CODE) Os_StartSysTimer(void)
-{
-#if (TRUE == CFG_SYSTEM_TIMER_ENABLE)
-    /*Start SysTick counter*/
-    OS_SYSTICK_CTRL_REG |= OS_SYSTICK_ENABLE_BIT;
-    /* PRQA S 0303 */ /* MISRA Rule 11.4 */ /* ARCH_TIMER_VTYPE_CAST_001 */
-#endif                                      /*TRUE == CFG_SYSTEM_TIMER_ENABLE*/
-
-#if (TRUE == CFG_TIMING_PROTECTION_ENABLE)
-    /*Start timing protection timer*/
-    switch (Os_SCB.sysCore)
-    {
-    /*Enable hw Channel*/
-    case 0:
-        /* TimerEnable */
-        break;
-
-    /*add comments to pass QAC.*/
-    default:
-        /* Nothing to do. */
-        break;
-    }
-#endif /*TRUE == CFG_TIMING_PROTECTION_ENABLE*/
-}
-#define OS_STOP_SEC_CODE
-#include "Os_MemMap.h"
-#endif
 
 #if (TRUE == CFG_TIMING_PROTECTION_ENABLE)
 #define OS_START_SEC_CODE
@@ -100,7 +56,7 @@ FUNC(void, OS_CODE) Os_StartSysTimer(void)
  * CallByAPI            <Os_ArchInitCPU>
  */
 /*****************************************************************************/
-FUNC(void, OS_CODE) Os_InitTmProtTimer(void)
+void Os_InitTmProtTimer(void)
 {
     switch (Os_SCB.sysCore)
     {
@@ -159,7 +115,7 @@ FUNC(void, OS_CODE) Os_InitTmProtTimer(void)
  * REQ ID               <>
  */
 /******************************************************************************/
-FUNC(void, OS_CODE) Os_ClearTmProtTimer(void)
+void Os_ClearTmProtTimer(void)
 {
     while (1)
     {
@@ -169,7 +125,7 @@ FUNC(void, OS_CODE) Os_ClearTmProtTimer(void)
 #include "Os_MemMap.h"
 #endif
 
-#if (TRUE == CFG_LOAD_RATIO_CALC_ENABLE)
+#if (TRUE == CFG_OS_MONITOR_ENABLE)
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
 /******************************************************************************/

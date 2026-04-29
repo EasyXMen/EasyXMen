@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -21,6 +21,8 @@
  **  @description        : Implementation for PduR
  **
  ***********************************************************************************************************************/
+
+/* PRQA S 3415 EOF */ /* VL_PduR_3415 */
 
 /* =================================================== inclusions =================================================== */
 #include "PduR_Internal.h"
@@ -62,7 +64,7 @@ static boolean PduR_ValidateIsTpRoute(uint8 apiId, boolean flag);
 /**
  * Initializes the PDU Router
  */
-void PduR_Init(const PduR_PBConfigType* ConfigPtr) /* PRQA S 1503,1532 */ /* VL_PduR_DiffProject,VL_QAC_OneFunRef */
+void PduR_Init(const PduR_PBConfigType* ConfigPtr) /* PRQA S 1503,1532 */ /* VL_QAC_NoUsedApi,VL_QAC_OneFunRef */
 {
 #if (STD_ON == PDUR_DEV_ERROR_DETECT)
     if (PduR_ValidatePointer(PDUR_INIT_ID, PDUR_E_INIT_FAILED, ConfigPtr)
@@ -103,7 +105,7 @@ void PduR_Init(const PduR_PBConfigType* ConfigPtr) /* PRQA S 1503,1532 */ /* VL_
 /**
  * Returns the version information of this module.
  */
-void PduR_GetVersionInfo(Std_VersionInfoType* versionInfo) /* PRQA S 1503 */ /* VL_PduR_DiffProject */
+void PduR_GetVersionInfo(Std_VersionInfoType* versionInfo) /* PRQA S 1503 */ /* VL_QAC_NoUsedApi */
 {
 #if (STD_ON == PDUR_DEV_ERROR_DETECT)
     if (PduR_ValidatePointer(PDUR_GETVERSIONINFO_ID, PDUR_E_PARAM_POINTER, (const Std_VersionInfoType*)versionInfo))
@@ -120,7 +122,7 @@ void PduR_GetVersionInfo(Std_VersionInfoType* versionInfo) /* PRQA S 1503 */ /* 
 /**
  * Returns the unique identifier of the post-build time configuration of the PDU Router
  */
-PduR_PBConfigIdType PduR_GetConfigurationId(void) /* PRQA S 1503 */ /* VL_PduR_DiffProject */
+PduR_PBConfigIdType PduR_GetConfigurationId(void) /* PRQA S 1503 */ /* VL_QAC_NoUsedApi */
 {
     PduR_PBConfigIdType configId = 0u;
 #if (STD_ON == PDUR_DEV_ERROR_DETECT)
@@ -134,7 +136,7 @@ PduR_PBConfigIdType PduR_GetConfigurationId(void) /* PRQA S 1503 */ /* VL_PduR_D
 /**
  * Enables a routing path group.
  */
-void PduR_EnableRouting(PduR_RoutingPathGroupIdType id) /* PRQA S 1503 */ /* VL_PduR_DiffProject */
+void PduR_EnableRouting(PduR_RoutingPathGroupIdType id) /* PRQA S 1503 */ /* VL_QAC_NoUsedApi */
 {
 #if (STD_ON == PDUR_DEV_ERROR_DETECT)
     if (PduR_ValidateInitStatus(PDUR_ENABLEROUTING_ID))
@@ -182,9 +184,9 @@ void PduR_EnableRouting(PduR_RoutingPathGroupIdType id) /* PRQA S 1503 */ /* VL_
 /**
  * Disables a routing path group.
  */
-/* PRQA S 1503 ++ */ /* VL_PduR_DiffProject */
+/* PRQA S 1503 ++ */ /* VL_QAC_NoUsedApi */
 void PduR_DisableRouting(PduR_RoutingPathGroupIdType id, boolean initialize)
-/* PRQA S 1503 -- */ /* VL_PduR_DiffProject */
+/* PRQA S 1503 -- */ /* VL_QAC_NoUsedApi */
 {
 #if (STD_ON == PDUR_DEV_ERROR_DETECT)
     if (PduR_ValidateInitStatus(PDUR_DISABLEROUTING_ID))
@@ -215,10 +217,12 @@ void PduR_DisableRouting(PduR_RoutingPathGroupIdType id, boolean initialize)
                     PduR_DestinationRouteStatus[destPduId] = PDUR_RES_INITIAL;
                     if (PduR_RoutingPathEnabled[destPduId] > 0u)
                     {
+#if (PDUR_NUMBER_OF_QUEUES_MAX > 0u)
                         if (PduR_RoutingPathEnabled[destPduId] == 1u)
                         {
                             PduR_DisableRoutingQueueHandle(destPduId, initialize);
                         }
+#endif
                         PduR_RoutingPathEnabled[destPduId]--;
                     }
                 }
@@ -236,7 +240,7 @@ void PduR_DisableRouting(PduR_RoutingPathGroupIdType id, boolean initialize)
 /**
  * Requests transmission of a PDU.
  */
-/* PRQA S 1503,6070, 6030 ++ */ /* VL_PduR_DiffProject,VL_MTR_PduR_STCAL, VL_MTR_PduR_STMIF */
+/* PRQA S 1503,6070, 6030 ++ */ /* VL_QAC_NoUsedApi,VL_MTR_PduR_STCAL, VL_MTR_PduR_STMIF */
 Std_ReturnType PduR_Transmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr)
 /* PRQA S 1503,6070, 6030 -- */
 {
@@ -316,7 +320,7 @@ Std_ReturnType PduR_Transmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr)
 /**
  * Requests cancellation of an ongoing transmission of a PDU in a lower layer communication module.
  */
-/* PRQA S 1503,1532 ++ */ /* VL_PduR_DiffProject, VL_QAC_OneFunRef */
+/* PRQA S 1503,1532 ++ */ /* VL_QAC_NoUsedApi, VL_QAC_OneFunRef */
 Std_ReturnType PduR_CancelTransmit(PduIdType TxPduId)
 /* PRQA S 1503,1532 -- */
 {
@@ -368,7 +372,7 @@ Std_ReturnType PduR_CancelTransmit(PduIdType TxPduId)
 /**
  * Requests cancellation of an ongoing reception of a PDU in a lower layer transport protocol module.
  */
-/* PRQA S 1503,1532 ++ */ /* VL_PduR_DiffProject,VL_QAC_OneFunRef */
+/* PRQA S 1503,1532 ++ */ /* VL_QAC_NoUsedApi,VL_QAC_OneFunRef */
 Std_ReturnType PduR_CancelReceive(PduIdType RxPduId)
 /* PRQA S 1503,1532 -- */
 {
@@ -412,7 +416,7 @@ Std_ReturnType PduR_CancelReceive(PduIdType RxPduId)
 /**
  * Indication of a received PDU from a lower layer communication interface module.
  */
-/* PRQA S 1503,6070 ++ */ /* VL_MTR_PduR_STCAL, VL_PduR_DiffProject */
+/* PRQA S 1503,6070 ++ */ /* VL_MTR_PduR_STCAL, VL_QAC_NoUsedApi */
 void PduR_IfRxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr)
 /* PRQA S 1503,6070 -- */
 {
@@ -471,7 +475,7 @@ void PduR_IfRxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr)
 /**
  * The lower layer communication interface module confirms the transmission of a PDU, or the failure to transmit a PDU.
  */
-void PduR_IfTxConfirmation(PduIdType TxPduId, Std_ReturnType result) /* PRQA S 1503 */ /* VL_PduR_DiffProject */
+void PduR_IfTxConfirmation(PduIdType TxPduId, Std_ReturnType result) /* PRQA S 1503 */ /* VL_QAC_NoUsedApi */
 {
 #if (STD_ON == PDUR_DEV_ERROR_DETECT)
     if (PduR_ValidateInitStatus(PDUR_IFTXCONFIRMATION_ID))
@@ -507,7 +511,7 @@ void PduR_IfTxConfirmation(PduIdType TxPduId, Std_ReturnType result) /* PRQA S 1
 /**
  * The function called by TriggerTransmit function of the respective communication interface module.
  */
-/* PRQA S 1503,3673,6070 ++ */ /* VL_PduR_DiffProject, VL_PduR_Standard, VL_MTR_PduR_STCAL */
+/* PRQA S 1503,3673,6070 ++ */ /* VL_QAC_NoUsedApi, VL_QAC_3673, VL_MTR_PduR_STCAL */
 Std_ReturnType PduR_IfTriggerTransmit(PduIdType TxPduId, PduInfoType* PduInfoPtr)
 /* PRQA S 1503,3673,6070 -- */
 {
@@ -577,7 +581,7 @@ Std_ReturnType PduR_IfTriggerTransmit(PduIdType TxPduId, PduInfoType* PduInfoPtr
 /**
  * The function called by TpCopyRxData function of transport protocol module.
  */
-/* PRQA S 1503, 5017, 6070, 6030 ++ */ /* VL_PduR_DiffProject, VL_PduR_5017, VL_MTR_PduR_STCAL, VL_MTR_PduR_STMIF */
+/* PRQA S 1503, 5017, 6070, 6030 ++ */ /* VL_QAC_NoUsedApi, VL_PduR_5017, VL_MTR_PduR_STCAL, VL_MTR_PduR_STMIF */
 /* PRQA S 6010 ++ */                   /* VL_MTR_PduR_STCYC */
 BufReq_ReturnType PduR_TpCopyRxData(PduIdType id, const PduInfoType* info, PduLengthType* bufferSizePtr)
 /* PRQA S 1503, 5017, 6070, 6030 -- */
@@ -671,9 +675,9 @@ BufReq_ReturnType PduR_TpCopyRxData(PduIdType id, const PduInfoType* info, PduLe
 /**
  * The function called by TpRxIndication function of transport protocol module.
  */
-/* PRQA S 1503, 6030 ++ */ /* VL_PduR_DiffProject, VL_MTR_PduR_STMIF */
+/* PRQA S 1503, 6030 ++ */ /* VL_QAC_NoUsedApi, VL_MTR_PduR_STMIF */
 void PduR_TpRxIndication(PduIdType id, Std_ReturnType result)
-/* PRQA S 1503, 6030 -- */ /* VL_PduR_DiffProject, VL_MTR_PduR_STMIF */
+/* PRQA S 1503, 6030 -- */
 {
 #if (STD_ON == PDUR_DEV_ERROR_DETECT)
     if (PduR_ValidateInitStatus(PDUR_TPRXINDICATION_ID))
@@ -738,7 +742,7 @@ void PduR_TpRxIndication(PduIdType id, Std_ReturnType result)
 /**
  * The function called by TpStartOfReception function of transport protocol module.
  */
-/* PRQA S 1503, 5017, 6070, 6030 ++ */ /* VL_PduR_DiffProject, VL_PduR_5017, VL_MTR_PduR_STCAL, VL_MTR_PduR_STMIF */
+/* PRQA S 1503, 5017, 6070, 6030 ++ */ /* VL_QAC_NoUsedApi, VL_PduR_5017, VL_MTR_PduR_STCAL, VL_MTR_PduR_STMIF */
 /* PRQA S 6010 ++ */                   /* VL_MTR_PduR_STCYC */
 BufReq_ReturnType PduR_TpStartOfReception(
     PduIdType          id,
@@ -858,7 +862,7 @@ BufReq_ReturnType PduR_TpStartOfReception(
 /**
  * The function called by TpCopyTxData function of transport protocol module.
  */
-/* PRQA S 1503, 6070 ++ */ /* VL_PduR_DiffProject, VL_MTR_PduR_STCAL */
+/* PRQA S 1503, 6070 ++ */ /* VL_QAC_NoUsedApi, VL_MTR_PduR_STCAL */
 BufReq_ReturnType PduR_TpCopyTxData(
     PduIdType            id,
     const PduInfoType*   info,
@@ -929,7 +933,7 @@ BufReq_ReturnType PduR_TpCopyTxData(
 /**
  * The function called by TpTxConfirmation function of transport protocol module.
  */
-void PduR_TpTxConfirmation(PduIdType id, Std_ReturnType result) /* PRQA S 1503 */ /* VL_PduR_DiffProject */
+void PduR_TpTxConfirmation(PduIdType id, Std_ReturnType result) /* PRQA S 1503 */ /* VL_QAC_NoUsedApi */
 {
 #if (STD_ON == PDUR_DEV_ERROR_DETECT)
     if (PduR_ValidateInitStatus(PDUR_TPTXCONFIRMATION_ID))

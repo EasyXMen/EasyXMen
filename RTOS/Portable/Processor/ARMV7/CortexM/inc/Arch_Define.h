@@ -1,6 +1,6 @@
 /* PRQA S 3108++ */
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -30,7 +30,7 @@
 #ifndef ARCH_DEFINE_H
 #define ARCH_DEFINE_H
 /*=======[I N C L U D E S]====================================================*/
-#include "PlatformTypes.h"
+#include "Std_Types.h"
 
 /*=======[M A C R O S]========================================================*/
 

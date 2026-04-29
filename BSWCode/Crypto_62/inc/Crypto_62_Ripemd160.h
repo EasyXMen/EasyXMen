@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -35,7 +35,7 @@ extern "C" {
 
 /* ===================================================== macros ===================================================== */
 #define S(x, n) (((x) << (n)) | ((x) >> (32 - (n))))
-/* PRQA S 3410 ++ */ /* VL_QAC_Crypto */
+/* PRQA S 3410 ++ */ /* VL_Crypto_62_General */
 #define P(a, b, c, d, e, r, s, f, k)                \
     do                                              \
     {                                               \

@@ -1,6 +1,6 @@
 /* PRQA S 3108++ */
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -93,7 +93,7 @@ FUNC(void, OS_CODE) Os_ArchInitSystemTimer(void)
 }
 #endif /* #if (TRUE == CFG_SYSTEM_TIMER_ENABLE) */
 
-#if (TRUE == CFG_LOAD_RATIO_CALC_ENABLE)
+#if (TRUE == CFG_OS_MONITOR_ENABLE)
 /******************************************************************************/
 /*
  * Brief                <Start global timer.>
@@ -160,6 +160,36 @@ FUNC(void, OS_CODE) Os_ArchInitTimingProtTimer(void)
     pOSTM->CTL |= (uint8)(1U << 7);
 }
 #endif /* #if (TRUE == CFG_TIMING_PROTECTION_ENABLE) */
+
+/******************************************************************************/
+/*
+ * Brief                <Initialization of the CPU in the OS.>
+ * ServiceId            <None>
+ * Sync/Async           <Synchronous>
+ * Reentrancy           <Non Reentrant>
+ * Param-Name[in]       <None>
+ * Param-Name[out]      <None>
+ * Param-Name[in/out]   <None>
+ * Return               <void>
+ * PreCondition         <None>
+ * CallByAPI            <StartOS>
+ */
+/******************************************************************************/
+FUNC(void, OS_CODE) Os_ArchInitCPU(void)
+{
+    /*Initialize system timer for system counter */
+    #if (TRUE == CFG_SYSTEM_TIMER_ENABLE)
+    OS_ARCH_ENABLE_SYSTIMER(Os_SCB.sysCore);
+    #endif
+
+    /*Initialize system timer for time protection */
+    #if (TRUE == CFG_TIMING_PROTECTION_ENABLE)
+    OS_ARCH_ENABLE_TPTIMER(Os_SCB.sysCore);
+    #endif
+}
+
+
+
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
 /*=======[E N D   O F   F I L E]==============================================*/

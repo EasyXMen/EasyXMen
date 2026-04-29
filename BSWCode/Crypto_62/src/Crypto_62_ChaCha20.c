@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -22,7 +22,7 @@
  **
  ***********************************************************************************************************************/
 
-/* PRQA S 0311,1252,1253,0488,3446,4549,4559,0553 EOF */ /* VL_QAC_Crypto */
+/* PRQA S 0311,1252,1253,0488,3446,4549,4559,0553 EOF */ /* VL_Crypto_62_General */
 /* =================================================== inclusions =================================================== */
 #include "Crypto_62_Internal.h"
 #if (CRYPTO_ALGORITHMFAM_CHACHA == STD_ON)
@@ -31,7 +31,7 @@
 #include "Crypto_62_MemMap.h"
 
 /* ===================================================== macros ===================================================== */
-/* PRQA S 3472 ++ */ /* VL_QAC_Crypto */
+/* PRQA S 3472 ++ */ /* VL_Crypto_62_General */
 #define ROTL32(value, amount) ((uint32)((value) << (amount)) | ((value) >> (32 - (amount))))
 /* PRQA S 3472 -- */
 #define CHACHA20_CTR_INDEX (12U)
@@ -68,7 +68,7 @@ CRYPTO_62_LOCAL void chacha20_block(const uint32 initial_state[CRYPTO_CONST_16],
 CRYPTO_62_LOCAL inline void
     chacha20_quarter_round(uint32 state[CRYPTO_CONST_16], uint32 a, uint32 b, uint32 c, uint32 d)
 {
-    /* PRQA S 1840 ++ */ /* VL_QAC_Crypto */
+    /* PRQA S 1840 ++ */ /* VL_Crypto_62_General */
     /* a += b; d ^= a; d <<<= 16; */
     state[a] += state[b];
     state[d] ^= state[a];
@@ -157,7 +157,7 @@ CRYPTO_62_LOCAL void chacha20_block(const uint32 initial_state[CRYPTO_CONST_16],
     for (i = 0U; i < CRYPTO_CONST_16; i++)
     {
         uint32 offset = i * CRYPTO_CONST_4;
-        /* PRQA S 2741,3138 ++ */ /* VL_QAC_Crypto */
+        /* PRQA S 2741,3138 ++ */ /* VL_Crypto_62_General */
         CRYPTO_PUT_UINT32_LE(working_state[i], keystream, offset);
         /* PRQA S 2741,3138 -- */
     }
@@ -195,7 +195,7 @@ void Crypto_chacha20_init(Crypto_Chacha20_Context* ctx)
 void Crypto_chacha20_setkey(Crypto_Chacha20_Context* ctx, const uint8 key[CRYPTO_CONST_32])
 {
     /* ChaCha20 constants - the string "expand 32-byte k" */
-    /* PRQA S 3120 ++ */ /* VL_QAC_Crypto */
+    /* PRQA S 3120 ++ */ /* VL_Crypto_62_General */
     ctx->state[0]              = 0x61707865U;
     ctx->state[1]              = 0x3320646eU;
     ctx->state[CRYPTO_CONST_2] = 0x79622d32U;
@@ -203,7 +203,7 @@ void Crypto_chacha20_setkey(Crypto_Chacha20_Context* ctx, const uint8 key[CRYPTO
     /* PRQA S 3120 -- */
 
     /* Set key */
-    /* PRQA S 3493 ++ */ /* VL_QAC_Crypto */
+    /* PRQA S 3493 ++ */ /* VL_Crypto_62_General */
     ctx->state[CRYPTO_CONST_4]  = CRYPTO_GET_UINT32_LE(key, CRYPTO_CONST_0);
     ctx->state[CRYPTO_CONST_5]  = CRYPTO_GET_UINT32_LE(key, CRYPTO_CONST_4);
     ctx->state[CRYPTO_CONST_6]  = CRYPTO_GET_UINT32_LE(key, CRYPTO_CONST_8);
@@ -233,7 +233,7 @@ void Crypto_chacha20_starts(Crypto_Chacha20_Context* ctx, const uint8 nonce[CRYP
     ctx->state[CRYPTO_CONST_12] = counter;
 
     /* Nonce */
-    /* PRQA S 3493 ++ */ /* VL_QAC_Crypto */
+    /* PRQA S 3493 ++ */ /* VL_Crypto_62_General */
     ctx->state[CRYPTO_CONST_13] = CRYPTO_GET_UINT32_LE(nonce, CRYPTO_CONST_0);
     ctx->state[CRYPTO_CONST_14] = CRYPTO_GET_UINT32_LE(nonce, CRYPTO_CONST_4);
     ctx->state[CRYPTO_CONST_15] = CRYPTO_GET_UINT32_LE(nonce, CRYPTO_CONST_8);

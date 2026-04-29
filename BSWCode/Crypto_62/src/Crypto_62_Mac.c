@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -22,9 +22,19 @@
  **
  ***********************************************************************************************************************/
 
-/* PRQA S 0316,0488,0686,1253,1258,1277,1290,1338,1840,1843,1852,1860,1862,1863 ++ */                /* VL_QAC_Crypto */
-/* PRQA S 2001,2015,3120,3200,3326,3395,3396,3397,3400,3673,3678,3793,4397,4434,4446,4461,4544 ++ */ /* VL_QAC_Crypto */
-/* PRQA S 6050,6060,6070,6080,6010,6030,6040,1505,2982,1505,1503,1532,2889   ++ */                   /* VL_QAC_Crypto */
+/* PRQA S 6010 EOF */ /* VL_MTR_Crypto_62_STCYC */
+/* PRQA S 6020 EOF */ /* VL_MTR_Crypto_62_STLIN */
+/* PRQA S 6030 EOF */ /* VL_MTR_Crypto_62_STMIF */
+/* PRQA S 6040 EOF */ /* VL_MTR_Crypto_62_STPAR */
+/* PRQA S 6050 EOF */ /* VL_MTR_Crypto_62_STST3 */
+/* PRQA S 6060 EOF */ /* VL_MTR_Crypto_62_STM19 */
+/* PRQA S 6070 EOF */ /* VL_MTR_Crypto_62_STCAL */
+/* PRQA S 6080 EOF */ /* VL_MTR_Crypto_62_STPTH */
+
+/* PRQA S 0316,0488,0686,1253,1258,1277,1290,1338,1840,1843,1852,1860,1862,1863 ++ */ /* VL_Crypto_62_General */
+/* PRQA S 2001,2015,3120,3200,3326,3395,3396,3397,3400,3673,3678,3793,4397,4434 ++ */ /* VL_Crypto_62_General */
+/* PRQA S 1505,2982,1505,1503,1532,2889,4446,4461,4544 ++ */                          /* VL_Crypto_62_General */
+
 /* =================================================== inclusions =================================================== */
 
 #include "Crypto_62_Internal.h"
@@ -293,7 +303,7 @@ CRYPTO_62_LOCAL void Crypto_GenerateCmac_Aes(
         if (len == 0)
         {
             Crypto_Aes_Setkey_Enc(aes, Key, 128); // load mac key
-            block        = 1; /* PRQA S 2983  */  /* VL_QAC_Crypto */
+            block        = 1; /* PRQA S 2983  */  /* VL_Crypto_62_General */
             Blocktemp[0] = 0x80;                  // padding the first bit with 1
             Crypto_Xor(16, Blocktemp, k2, Blocktemp);
             (void)Crypto_Aes_Crypt_Cmac(aes, CRYPTO_MODE_ENCRYPT, 16, Blocktemp, macvalue);
@@ -378,7 +388,7 @@ CRYPTO_62_LOCAL void Crypto_GenerateCmac_3Des(
         if (len == 0)
         {
             Crypto_Des3_Set3key_Enc(Ctx, Key);   // load mac key
-            block        = 1; /* PRQA S 2983  */ /* VL_QAC_Crypto */
+            block        = 1; /* PRQA S 2983  */ /* VL_Crypto_62_General */
             Blocktemp[0] = 0x80;                 // padding the first bit with 1
             Crypto_Xor(8, Blocktemp, k2, Blocktemp);
             (void)Crypto_3Des_Crypt_Cmac(Ctx, CRYPTO_MODE_ENCRYPT, 8U, Blocktemp, macvalue);
@@ -429,17 +439,17 @@ CRYPTO_62_LOCAL void Crypto_GenerateCmac_3Des(
 Std_ReturnType Crypto_VerifyCmac(uint32 objectId, Crypto_AlgorithmFamilyType algorithmfamily)
 {
     Std_ReturnType ret                       = E_NOT_OK;
-    uint8          k1[CRYPTO_CONST_16]       = {0X00};
-    uint8          k2[CRYPTO_CONST_16]       = {0X00};
-    uint8          key[CRYPTO_CONST_16]      = {0X00};
-    uint8          macValue[CRYPTO_CONST_16] = {0X00};
+    uint8          k1[CRYPTO_CONST_24]       = {0X00};
+    uint8          k2[CRYPTO_CONST_24]       = {0X00};
+    uint8          key[CRYPTO_CONST_24]      = {0X00};
+    uint8          macValue[CRYPTO_CONST_24] = {0X00};
 #if (CRYPTO_ALGORITHMFAM_AES == STD_ON)
     Crypto_AESData aes;
 #endif
 #if (CRYPTO_ALGORITHMFAM_3DES == STD_ON)
     Crypto_Des3Data ctx;
 #endif
-    uint32       keylength     = 16u;
+    uint32       keylength     = 24u;
     uint32       inputlength   = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputLength;
     const uint8* add           = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputPtr;
     uint32       Verifylength  = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.secondaryInputLength;
@@ -512,18 +522,19 @@ Std_ReturnType Crypto_VerifyCmac(uint32 objectId, Crypto_AlgorithmFamilyType alg
 Std_ReturnType Crypto_GenerateCmac_Process(uint32 objectId, Crypto_AlgorithmFamilyType algorithmfamily)
 {
     Std_ReturnType ret                       = E_NOT_OK;
-    uint8          k1[CRYPTO_CONST_16]       = {0X00};
-    uint8          k2[CRYPTO_CONST_16]       = {0X00};
-    uint8          key[CRYPTO_CONST_16]      = {0X00};
-    uint8          macValue[CRYPTO_CONST_16] = {0X00};
+    uint8          k1[CRYPTO_CONST_24]       = {0X00};
+    uint8          k2[CRYPTO_CONST_24]       = {0X00};
+    uint8          key[CRYPTO_CONST_24]      = {0X00};
+    uint8          macValue[CRYPTO_CONST_24] = {0X00};
     uint32         inputlength               = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputLength;
+    uint32*        outputlength              = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr;
 #if (CRYPTO_ALGORITHMFAM_AES == STD_ON)
     Crypto_AESData aes;
 #endif
 #if (CRYPTO_ALGORITHMFAM_3DES == STD_ON)
     Crypto_Des3Data ctx;
 #endif
-    uint32       keylength = 16u;
+    uint32       keylength = 24u;
     const uint8* add       = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputPtr;
 #if (CRYPTO_ALGORITHMFAM_AES == STD_ON)
     (void)IStdLib_MemSet(&aes, 0, sizeof(Crypto_AESData));
@@ -537,27 +548,39 @@ Std_ReturnType Crypto_GenerateCmac_Process(uint32 objectId, Crypto_AlgorithmFami
     {
         if (algorithmfamily == CRYPTO_ALGOFAM_AES)
         {
+            if (*outputlength < 16u)
+            {
+                return E_NOT_OK;
+            }
 #if (CRYPTO_ALGORITHMFAM_AES == STD_ON)
             ret = Crypto_Generate_Subkey_Aes(&aes, &key[0], k1, k2);
             if (E_OK == ret)
             {
                 Crypto_GenerateCmac_Aes(&aes, inputlength, add, macValue, &key[0], k1, k2);
-                *Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr = 16u;
+                *outputlength = 16u;
+                (void)IStdLib_MemCpy(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr, macValue, 16u);
             }
-            (void)IStdLib_MemCpy(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr, macValue, 16u);
 #else
             ret = E_NOT_OK;
 #endif
         }
         else if (algorithmfamily == CRYPTO_ALGOFAM_3DES)
         {
+            if (*outputlength < 8u)
+            {
+                return E_NOT_OK;
+            }
 #if (CRYPTO_ALGORITHMFAM_3DES == STD_ON)
             ret = Crypto_Generate_Subkey_Des3(&ctx, &key[0], k1, k2);
             if (E_OK == ret)
             {
                 Crypto_GenerateCmac_3Des(&ctx, inputlength, add, macValue, key, k1, k2);
+                *outputlength = 8u;
+                (void)IStdLib_MemCpy(
+                    Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr,
+                    macValue,
+                    *outputlength);
             }
-            (void)IStdLib_MemCpy(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr, macValue, 8u);
 #else
             ret = E_NOT_OK;
 #endif
@@ -768,8 +791,12 @@ Std_ReturnType Crypto_GenerateHmac(uint32 objectId, Crypto_AlgorithmFamilyType a
     uint32*                 olen      = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr;
 
     (void)IStdLib_MemSet(&ctx, 0, sizeof(Crypto_Md_Context_t));
-    md_info = Crypto_Md_info_from_type(algorithmfamily);
-
+    md_info       = Crypto_Md_info_from_type(algorithmfamily);
+    uint32 mdSize = Crypto_md_get_size(md_info);
+    if (*olen < mdSize)
+    {
+        return result;
+    }
     result = Crypto_md_setup(&ctx, md_info);
     if (result == E_OK)
     {
@@ -789,7 +816,7 @@ Std_ReturnType Crypto_GenerateHmac(uint32 objectId, Crypto_AlgorithmFamilyType a
     }
     if (result == E_OK)
     {
-        *olen = Crypto_md_get_size(md_info);
+        *olen = mdSize;
     }
     (void)IStdLib_MemHeapFree(Crypto_62_MemPool, ctx.md_ctx);
     (void)IStdLib_MemHeapFree(Crypto_62_MemPool, ctx.hmac_ctx);
@@ -820,6 +847,7 @@ Std_ReturnType
     uint8                   key[CRYPTO_MD_MAX_SIZE];
     uint32                  keyLength = CRYPTO_MD_MAX_SIZE;
     const uint8*            inputMac  = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.secondaryInputPtr;
+    uint32                  macLen    = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.secondaryInputLength;
     uint8                   output[CRYPTO_MD_MAX_SIZE];
     const uint8*            input = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputPtr;
     uint32                  ilen  = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputLength;
@@ -856,10 +884,14 @@ Std_ReturnType
         }
         if (result == E_OK)
         {
-            result = IStdLib_MemCmp(
-                inputMac,
-                output,
-                Crypto_62_StoredJob[objectId].jobPrimitiveInfo->primitiveInfo->resultLength);
+            if (macLen < ctx.md_info->size)
+            {
+                result = IStdLib_MemCmp(inputMac, output, macLen);
+            }
+            else
+            {
+                result = IStdLib_MemCmp(inputMac, output, macLen);
+            }
 
             if (E_OK == result)
             {
@@ -1012,5 +1044,5 @@ Std_ReturnType Crypto_62_MacVerify_Process(
 #endif
 
 /* PRQA S 0316,0488,0686,1253,1258,1277,1290,1338,1840,1843,1852,1860,1862,1863 -- */
-/* PRQA S 2001,2015,3120,3200,3326,3395,3396,3397,3400,3673,3678,3793,4397,4434,4446,4461,4544 -- */
-/* PRQA S 6050,6060,6070,6080,6010,6030,6040,1505,2982,1505,1503,1532,2889   -- */
+/* PRQA S 2001,2015,3120,3200,3326,3395,3396,3397,3400,3673,3678,3793,4397,4434 -- */
+/* PRQA S 1505,2982,1505,1503,1532,2889,4446,4461,4544 -- */

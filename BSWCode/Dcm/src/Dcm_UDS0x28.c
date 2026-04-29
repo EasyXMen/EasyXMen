@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -48,7 +48,7 @@
 /**
  * @brief The communicationType mask
  */
-#define DCM_COMMTYPE_MASK 0x03u
+#define DCM_COMMTYPE_MASK 0x0Fu
 /**
  * @brief The SubnetNumber mask
  */
@@ -83,20 +83,34 @@ DCM_LOCAL boolean Dcm_ControlledSubNode[DCM_COMCONTROL_SUB_NUM]; /* PRQA S 3218 
  * @trace         CPD-PLACEHOLDER
  */
 DCM_LOCAL void Dcm_UDS0x28_ReEnableCommunication(void);
+/**
+ * @brief         This function calculate communicationMode
+ * @param[in]     controlType              : the requested cotrolType
+ * @param[in]     communicationType        : the requested communicationType
+ * @return        uint8
+ * @reentrant     TRUE
+ * @synchronous   TRUE
+ * @trace         CPD-PLACEHOLDER
+ */
+DCM_LOCAL uint8 Dcm_UDS0x28_GetCommunicationMode(uint8 controlType, uint8 communicationType);
 #endif
 #if ((defined DCM_UDS_0X28_0X4) || (defined DCM_UDS_0X28_0X5))
 /**
  * @brief         This function handels txConfirmation of extended address subfunction
  * @param[in]     controlType              : the requested cotrolType
  * @param[in]     communicationType        : the requested communicationType
+ * @param[in]     communicationMode : the requested communicationMode
  * @param[in]     nodeIdentificationNumber : the requested nodeIdentiferNumber
  * @return        void
  * @reentrant     TRUE
  * @synchronous   TRUE
  * @trace         CPD-PLACEHOLDER
  */
-DCM_LOCAL void
-    Dcm_UDS0x28_TxConfirmationExtHandle(uint8 controlType, uint8 communicationType, uint16 nodeIdentificationNumber);
+DCM_LOCAL void Dcm_UDS0x28_TxConfirmationExtHandle(
+    uint8  controlType,
+    uint8  communicationType,
+    uint8  communicationMode,
+    uint16 nodeIdentificationNumber);
 /**
  * @brief         This function finds matched subNode cfg based on input nodeId
  * @param[in]     nodeIdentificationNumber : the requested nodeIdentiferNumber
@@ -172,7 +186,7 @@ Std_ReturnType Dcm_UDS0x28(
     if (E_OK == result)
     {
         uint8 communicationType = reqData[1u] & DCM_COMMTYPE_MASK;
-        if (communicationType == 0u)
+        if ((communicationType == 0u) || (communicationType > 3u))
         {
             *ErrorCode = DCM_E_REQUESTOUTOFRANGE;
             result     = E_NOT_OK;
@@ -250,10 +264,10 @@ void Dcm_UDS0x28_TxConfirmation(uint16 ConnectionId)
     uint8                            controlType       = reqData[0u];
     uint8                            communicationType = reqData[1u] & DCM_COMMTYPE_MASK;
     uint8                            subnetNumber      = (reqData[1u] & DCM_SUBNET_MASK) >> 4u;
-    uint8                            communicationMode = controlType + ((communicationType - 1u) * 4u);
+    uint8 communicationMode = Dcm_UDS0x28_GetCommunicationMode(controlType, communicationType);
 
 #if ((defined DCM_UDS_0X28_0X4) || (defined DCM_UDS_0X28_0X5))
-    Dcm_UDS0x28_TxConfirmationExtHandle(controlType, communicationType, DCM_U8N_TO_U16(&reqData[2]));
+    Dcm_UDS0x28_TxConfirmationExtHandle(controlType, communicationType, communicationMode, DCM_U8N_TO_U16(&reqData[2]));
 #endif
 
     switch (subnetNumber)
@@ -311,7 +325,11 @@ void Dcm_UDS0x28_TxConfirmation(uint16 ConnectionId)
                 }
 #if (STD_ON == DCM_USE_BSWM)
                 /* PRQA S 1441,4442 ++ */ /* VL_Dcm_1441,VL_Dcm_4442 */
-                BswM_Dcm_CommunicationMode_CurrentState(speCom->SpecificComMChannelRef, communicationMode);
+                /* PRQA S 4342 ++ */      /* VL_Dcm_4342 */
+                BswM_Dcm_CommunicationMode_CurrentState(
+                    speCom->SpecificComMChannelRef,
+                    (Dcm_CommunicationModeType)communicationMode);
+                /* PRQA S 4342 -- */
                 /* PRQA S 1441,4442 -- */
 #endif
             }
@@ -429,6 +447,29 @@ DCM_LOCAL void Dcm_UDS0x28_ReEnableCommunication(void)
 #endif
 }
 
+/* This function calculate communicationMode */
+DCM_LOCAL uint8 Dcm_UDS0x28_GetCommunicationMode(uint8 controlType, uint8 communicationType)
+{
+    uint8 communicationMode;
+#if ((defined DCM_UDS_0X28_0X4) || (defined DCM_UDS_0X28_0X5))
+    if (DCM_UDS28_ENRX_DISTX_EAI > controlType)
+#endif
+    {
+        communicationMode = controlType + ((communicationType - 1u) * 4u);
+    }
+#if ((defined DCM_UDS_0X28_0X4) || (defined DCM_UDS_0X28_0X5))
+    else if (DCM_UDS28_ENRX_DISTX_EAI == controlType)
+    {
+        communicationMode = 1u + ((communicationType - 1u) * 4u);
+    }
+    else
+    {
+        communicationMode = (communicationType - 1u) * 4u;
+    }
+#endif
+    return communicationMode;
+}
+
 #if ((defined DCM_UDS_0X28_0X4) || (defined DCM_UDS_0X28_0X5))
 /* This function finds matched subNode cfg based on input nodeId */
 DCM_LOCAL Std_ReturnType
@@ -456,21 +497,14 @@ DCM_LOCAL Std_ReturnType
 }
 
 /* This function handels txConfirmation of extended address subfunction */
-DCM_LOCAL void
-    Dcm_UDS0x28_TxConfirmationExtHandle(uint8 controlType, uint8 communicationType, uint16 nodeIdentificationNumber)
+DCM_LOCAL void Dcm_UDS0x28_TxConfirmationExtHandle(
+    uint8  controlType,
+    uint8  communicationType,
+    uint8  communicationMode,
+    uint16 nodeIdentificationNumber)
 {
     if ((DCM_UDS28_ENRX_DISTX_EAI == controlType) || (DCM_UDS28_EN_RXTX_EAI == controlType))
     {
-        uint8 communicationMode;
-        if (DCM_UDS28_ENRX_DISTX_EAI == controlType)
-        {
-            communicationMode = 1u + ((communicationType - 1u) * 4u);
-        }
-        else
-        {
-            communicationMode = (communicationType - 1u) * 4u;
-        }
-
         for (uint16 index = 0u; index < DCM_COMCONTROL_SUB_NUM; index++)
         {
             const Dcm_DspComControlSubNodeType* subNode = &Dcm_DspComControlSubNode[index];
@@ -486,7 +520,11 @@ DCM_LOCAL void
                     Dcm_ControlledSubNode[index] = TRUE;
                 }
 #if (STD_ON == DCM_USE_BSWM)
-                BswM_Dcm_CommunicationMode_CurrentState(subNode->SubNodeComMChannelRef, communicationMode);
+                /* PRQA S 4342 ++ */ /* VL_Dcm_4342 */
+                BswM_Dcm_CommunicationMode_CurrentState(
+                    subNode->SubNodeComMChannelRef,
+                    (Dcm_CommunicationModeType)communicationMode);
+                /* PRQA S 4342 -- */
 #endif
                 break;
             }

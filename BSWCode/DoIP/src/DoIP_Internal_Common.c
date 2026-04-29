@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -39,13 +39,13 @@ DOIP_InitStatusType DoIP_InitStatus = DOIP_STATUS_UNINITED; /* PRQA S 1531 */ /*
 #define DOIP_STOP_SEC_VAR_INIT_32
 #include "DoIP_MemMap.h"
 
-#define DOIP_START_SEC_VAR_INIT_BOOLEAN
+#define DOIP_START_SEC_VAR_CLEARED_BOOLEAN
 #include "DoIP_MemMap.h"
 /**
  * @brief GID synchronization Status
  */
-boolean DoIP_GidSynStatus = FALSE; /* PRQA S 1533 */ /* VL_DoIP_OnlyRefeByOneFunc */
-#define DOIP_STOP_SEC_VAR_INIT_BOOLEAN
+boolean DoIP_GidSynStatus; /* PRQA S 1533 */ /* VL_DoIP_OnlyRefeByOneFunc */
+#define DOIP_STOP_SEC_VAR_CLEARED_BOOLEAN
 #include "DoIP_MemMap.h"
 
 /* ========================================== external function definitions ========================================= */
@@ -153,7 +153,7 @@ boolean DoIP_SwitchConnection(uint16 soadTxPduRef, boolean assignment, boolean i
     Std_ReturnType   ret;
     SoAd_SoConIdType soConId;
 
-    if (E_OK == SoAd_GetSoConId(soadTxPduRef, &soConId))
+    if (E_OK == SoAd_GetSoConId(soadTxPduRef, &soConId)) /* PRQA S 4461 */ /* VL_DoIP_4461 */
     {
         if (isOpen == TRUE)
         {

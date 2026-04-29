@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -26,6 +26,8 @@
 #if (XCP_ON_CAN_ENABLE == STD_ON)
 #include "XcpOnCan_Cbk.h"
 #endif
+
+/* PRQA S 6070 EOF */ /* VL_MTR_Xcp_STCAL */
 
 /* ===================================================== macros ===================================================== */
 #define XCP_CONNECT_MODE_OFFSET 0x01u
@@ -71,7 +73,7 @@ typedef enum
 #if (XCP_SEED_AND_UNLOCK == STD_ON)
 XCP_LOCAL void Xcp_CopySeedIntoFrame(void);
 XCP_LOCAL void Xcp_GetSeedHal(void);
-XCP_LOCAL void Xcp_KeyHandler(uint8 len);
+XCP_LOCAL void Xcp_KeyHandler(uint8 len, uint8* normalExitPtr);
 
 #endif /*XCP_SEED_AND_UNLOCK == STD_ON*/
 
@@ -306,22 +308,25 @@ void Xcp_GetCommModeInfo(void)
     else
 #endif
     {
-        Xcp_RespBuffer[XCP_CONST_2] = 0x00u;
-        Xcp_RespBuffer[XCP_CONST_4] = 0x00u;
-        Xcp_RespBuffer[XCP_CONST_5] = 0x00u;
-        Xcp_RespBuffer[XCP_CONST_6] = 0x00u;
-
 #if (XCP_MASTER_BLOCK_MODE == STD_ON)
         Xcp_RespBuffer[XCP_CONST_2] = 0x01u;
         Xcp_RespBuffer[XCP_CONST_4] = XCP_MAX_BS;
         Xcp_RespBuffer[XCP_CONST_5] = XCP_MIN_ST;
+        Xcp_RespBuffer[XCP_CONST_6] = 0x00u;
 #elif (XCP_INTERLEAVED_MODE == STD_ON)
         Xcp_RespBuffer[XCP_CONST_2] = XCP_CONST_2;
+        Xcp_RespBuffer[XCP_CONST_4] = 0x00u;
+        Xcp_RespBuffer[XCP_CONST_5] = 0x00u;
         Xcp_RespBuffer[XCP_CONST_6] = XCP_QUEUE_SIZE;
-#endif /*XCP_INTERLEAVED_MODE == STD_ON*/
+#else /* XCP_INTERLEAVED_MODE == STD_ON */
+        Xcp_RespBuffer[XCP_CONST_2] = 0x00u;
+        Xcp_RespBuffer[XCP_CONST_4] = 0x00u;
+        Xcp_RespBuffer[XCP_CONST_5] = 0x00u;
+        Xcp_RespBuffer[XCP_CONST_6] = 0x00u;
+#endif
         /* XCP Driver Version Number */
         Xcp_RespBuffer[XCP_CONST_7] =
-            ((uint8)((XCP_H_SW_MAJOR_VERSION & XCP_U8_MASK) << XCP_CONST_4)) | (XCP_H_SW_MINOR_VERSION & XCP_U8_MASK);
+            ((uint8)((XCP_H_SW_MAJOR_VERSION & XCP_U8_MAX) << XCP_CONST_4)) | (XCP_H_SW_MINOR_VERSION & XCP_U8_MAX);
         Xcp_ChannelCommonData.RespLength = XCP_CONST_8;
     }
     Xcp_SendResp();
@@ -628,7 +633,7 @@ void Xcp_GetSeed(void)
  * if the key is valid. If the key is invalid, it disconnects and sets an access
  * locked error code. This function is intended for internal use.
  */
-XCP_LOCAL void Xcp_KeyHandler(uint8 len)
+XCP_LOCAL void Xcp_KeyHandler(uint8 len, uint8* normalExitPtr)
 {
     uint8              pos;
     uint8              resCto = XCP_MAX_CTO - XCP_UNLOCK_DATA_OFFSET;
@@ -673,6 +678,7 @@ XCP_LOCAL void Xcp_KeyHandler(uint8 len)
         else
         {
             Xcp_DisconnectHal();
+            *normalExitPtr = 0u;
             Xcp_SetErrorCode(XCP_ERR_ACCESS_LOCKED);
         }
         Xcp_ChannelCommonData.KeyRunStatus = XCP_PRE_SEED;
@@ -692,10 +698,8 @@ XCP_LOCAL void Xcp_KeyHandler(uint8 len)
 void Xcp_Unlock(void)
 /* PRQA S 6030 -- */
 {
-    uint8 len = Xcp_CmdBuffer[1u];
-#if (XCP_ON_ETHERNET_ENABLE == STD_ON)
+    uint8 len        = Xcp_CmdBuffer[1u];
     uint8 normalExit = 1u;
-#endif /*XCP_ON_ETHERNET_ENABLE == STD_ON*/
 /* length check */
 #if ((STD_OFF == XCP_CAN_MAX_DLC_REQUIRED) && (STD_ON == XCP_ON_CAN_ENABLE))
     if ((Xcp_ChannelCommonData.CmdLength != (len + XCP_CONST_2))
@@ -723,9 +727,7 @@ void Xcp_Unlock(void)
             {
                 Xcp_ChannelCommonData.KeyRunStatus = XCP_PRE_SEED;
                 Xcp_DisconnectHal();
-#if (XCP_ON_ETHERNET_ENABLE == STD_ON)
                 normalExit = 0u;
-#endif /*XCP_ON_ETHERNET_ENABLE == STD_ON*/
                 Xcp_SetErrorCode(XCP_ERR_ACCESS_LOCKED);
             }
             else
@@ -735,7 +737,7 @@ void Xcp_Unlock(void)
                 Xcp_ChannelCommonData.SeedandKeyPos = 0u;
                 Xcp_ChannelCommonData.KeyRunStatus  = XCP_KEY;
                 /* call key handler */
-                Xcp_KeyHandler(len);
+                Xcp_KeyHandler(len, &normalExit);
             }
         }
         else if (XCP_KEY == Xcp_ChannelCommonData.KeyRunStatus)
@@ -743,7 +745,7 @@ void Xcp_Unlock(void)
             if (len == Xcp_ChannelCommonData.SeedandKeyLen)
             {
                 /* call key handler */
-                Xcp_KeyHandler(len);
+                Xcp_KeyHandler(len, &normalExit);
             }
             else
             {
@@ -759,14 +761,15 @@ void Xcp_Unlock(void)
         }
     }
     Xcp_SendResp();
-#if (XCP_ON_ETHERNET_ENABLE == STD_ON)
+
     /* First send the counter, and then clear the count value */
     if (0u == normalExit)
     {
+#if (XCP_ON_ETHERNET_ENABLE == STD_ON)
         Xcp_ChannelCommonData.EthRxCounter = 0u;
         Xcp_ChannelCommonData.EthTxCounter = 0u;
-    }
 #endif /*XCP_ON_ETHERNET_ENABLE == STD_ON*/
+    }
     return;
 }
 #endif /* XCP_SEED_AND_UNLOCK == STD_ON */
@@ -1069,9 +1072,13 @@ void Xcp_BuildChecksum(void)
             /* set checksum type */
             Xcp_RespBuffer[1u] = XCP_CHECKSUM_TYPE_CRC_16_CITT;
             /* call user interface  Ccp_ChecksumCompute to set the crcResult and retrun the size of cheksum*/
+            /* PRQA S 2985 ++ */ /* VL_Xcp_2985 */
             Xcp_ChecksumCompute(checksumStartAddress, (blockSize * XCP_AG), &crcResult);
+            /* PRQA S 2985 -- */
             Xcp_CopyU4ToU1Buffer(crcResult, &(Xcp_RespBuffer[XCP_CONST_4]), (uint8)CPU_BYTE_ORDER);
+            /* PRQA S 2985 ++ */ /* VL_Xcp_2985 */
             Xcp_UpdateMTA(blockSize * XCP_AG);
+            /* PRQA S 2985 -- */
             Xcp_ChannelCommonData.RespLength = XCP_CONST_8;
         }
     }

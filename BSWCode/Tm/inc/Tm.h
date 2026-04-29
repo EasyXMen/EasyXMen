@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -148,7 +148,7 @@ RuleSorce:puhua_rules-2024.12.rcf
 /**
  * @brief 1us16bit timer type.
  */
-typedef struct Tm_PredefTimer1us16bitTypeTag
+typedef struct
 {
     uint16 ui16RefTime; /**< Type definition for 1us16bit type clock @range 0..65535 */
 } Tm_PredefTimer1us16bitType;
@@ -156,7 +156,7 @@ typedef struct Tm_PredefTimer1us16bitTypeTag
 /**
  * @brief 1us24bit timer type.
  */
-typedef struct Tm_PredefTimer1us24bitTypeTag
+typedef struct
 {
     uint32 ui24RefTime; /**< Type definition for 1us24bit type clock @range 0..16777215 */
 
@@ -165,7 +165,7 @@ typedef struct Tm_PredefTimer1us24bitTypeTag
 /**
  * @brief 1us32bit timer type.
  */
-typedef struct Tm_PredefTimer1us32bitTypeTag
+typedef struct
 {
     uint32 ui32RefTime; /**< Type definition for 1us32bit type clock @range 0..4294967295 */
 
@@ -174,7 +174,7 @@ typedef struct Tm_PredefTimer1us32bitTypeTag
 /**
  * @brief 100us32bit timer type.
  */
-typedef struct Tm_PredefTimer100us32bitTypeTag
+typedef struct
 {
     uint32 ui32RefTime; /**< Type definition for 100us32bit type clock @range 0..4294967295*/
 

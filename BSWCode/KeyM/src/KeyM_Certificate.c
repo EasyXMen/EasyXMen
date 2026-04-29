@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -981,12 +981,12 @@ Std_ReturnType KeyM_GetCertificate(KeyM_CertificateIdType CertId, KeyM_CertDataT
 #endif /*STD_ON == KEYM_DEVERROR_DETECT*/
     {
         certCfgPtr = &KeyM_CertPCfg[CertId];
-        if (certCfgPtr->tbsCert->len > CertificateDataPtr->certDataLength)
+        if (certCfgPtr->CertData->len > CertificateDataPtr->certDataLength)
         {
             ret = KEYM_E_KEY_CERT_SIZE_MISMATCH;
         }
         /* PRQA S 1252 ++ */ /* VL_KeyM_1252 */
-        else if (certCfgPtr->tbsCert->len == 0u)
+        else if (certCfgPtr->CertData->len == 0u)
         /* PRQA S 1252 -- */
         {
             ret = KEYM_E_KEY_CERT_EMPTY;
@@ -994,9 +994,12 @@ Std_ReturnType KeyM_GetCertificate(KeyM_CertificateIdType CertId, KeyM_CertDataT
         else
         {
             /* PRQA S 0311 ++*/ /* VL_KeyM_0311 */
-            KeyM_CopyData((void*)CertificateDataPtr->certData, certCfgPtr->tbsCert->dataEle, certCfgPtr->tbsCert->len);
+            KeyM_CopyData(
+                (void*)CertificateDataPtr->certData,
+                certCfgPtr->CertData->dataEle,
+                certCfgPtr->CertData->len);
             /* PRQA S 0311 --*/
-            CertificateDataPtr->certDataLength = certCfgPtr->tbsCert->len;
+            CertificateDataPtr->certDataLength = certCfgPtr->CertData->len;
             ret                                = E_OK;
         }
     }
@@ -1405,7 +1408,7 @@ Std_ReturnType KeyM_CertElementGetNext(
  * @Brief  This function provides the status of a certificate.
  */
 /*************************************************************************/
-/* PRQA S 1532 ++ */ /* VL_KeyM_1532 */
+/* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
 Std_ReturnType KeyM_CertGetStatus(
     /* PRQA S 1532 -- */
     KeyM_CertificateIdType      CertId,
@@ -1537,9 +1540,9 @@ Std_ReturnType KeyM_HandleParseCert(KeyM_CertificateIdType CertId, const uint8* 
         ret = E_NOT_OK;
         goto PARSE_CERT_EXIT;
     }
-    certCfgPtr->tbsCert->len = (uint32)(certendPtr - tbsPtr);
+    certCfgPtr->CertData->len = certDataLength;
     /*Use tag record TBS position.*/
-    certCfgPtr->tbsCert->tag = (uint32)(tbsPtr - certDataPtr);
+    certCfgPtr->CertData->tag = (uint32)(tbsPtr - certDataPtr);
 
     if (*certStartPtr == KEYM_CERT_ASN1_TAG)
     {
@@ -1688,7 +1691,7 @@ Std_ReturnType KeyM_HandleParseCert(KeyM_CertificateIdType CertId, const uint8* 
             /*Parsing operation has been completed without failure*/
             KeyM_CertStatus[CertId] = KEYM_CERTIFICATE_PARSED_NOT_VALIDATED;
             /*only tbs*/
-            KeyM_CopyData(certCfgPtr->tbsCert->dataEle, &certDataPtr[KEYM_CONST_4], certCfgPtr->tbsCert->len);
+            KeyM_CopyData(certCfgPtr->CertData->dataEle, certDataPtr, certCfgPtr->CertData->len);
         }
     }
 PARSE_CERT_EXIT: /* PRQA S 2015 */ /* VL_KeyM_2015 */
@@ -1798,7 +1801,7 @@ KEYM_LOCAL Std_ReturnType KeyM_CheckGeneralParam(
 {
     Std_ReturnType ret;
 
-    if (!KeyM_InitStatus) /* PRQA S 2109 */
+    if (!KeyM_InitStatus) /* PRQA S 2109 */ /* VL_KeyM_2109 */
     {
 #if (STD_ON == KEYM_DEVERROR_DETECT)
         KEYM_DET_REPORT(ApiId, KEYM_E_UNINIT);
@@ -1991,20 +1994,20 @@ KEYM_LOCAL Std_ReturnType KeyM_CertGetAsn1Len(uint8** cerS, const uint8* cerE, u
         case KEYM_CONST_1:
             /* PRQA S 1822,1852 ++ */ /* VL_KeyM_1822,VL_KeyM_1852 */
             if ((cerE - *cerS) < KEYM_CONST_2)
-            /* PRQA S 1822,1852 */
+            /* PRQA S 1822,1852 -- */
             {
                 ret = E_NOT_OK;
             }
             else
             {
                 *cerLen = (*cerS)[1];
-                (*cerS) += 2; /* PRQA S 3120 */
+                (*cerS) += 2; /* PRQA S 3120 */ /* VL_QAC_MagicNum */
             }
             break;
         case KEYM_CONST_2:
             /* PRQA S 1822,1852 ++ */ /* VL_KeyM_1822,VL_KeyM_1852 */
             if ((cerE - *cerS) < KEYM_CONST_3)
-            /* PRQA S 1822,1852 */
+            /* PRQA S 1822,1852 -- */
             {
                 ret = E_NOT_OK;
             }
@@ -2019,7 +2022,7 @@ KEYM_LOCAL Std_ReturnType KeyM_CertGetAsn1Len(uint8** cerS, const uint8* cerE, u
         case KEYM_CONST_3:
             /* PRQA S 1822,1852 ++ */ /* VL_KeyM_1822,VL_KeyM_1852 */
             if ((cerE - *cerS) < KEYM_CONST_4)
-            /* PRQA S 1822,1852 */
+            /* PRQA S 1822,1852 -- */
             {
                 ret = E_NOT_OK;
             }
@@ -2034,7 +2037,7 @@ KEYM_LOCAL Std_ReturnType KeyM_CertGetAsn1Len(uint8** cerS, const uint8* cerE, u
         case KEYM_CONST_4:
             /* PRQA S 1822,1852 ++ */ /* VL_KeyM_1822,VL_KeyM_1852 */
             if ((cerE - *cerS) < KEYM_CONST_5)
-            /* PRQA S 1822,1852 */
+            /* PRQA S 1822,1852 -- */
             {
                 ret = E_NOT_OK;
             }
@@ -2137,7 +2140,7 @@ KEYM_LOCAL Std_ReturnType KeyM_CertGetSerialVersion(KeyM_CertificateIdType certI
     }
     else
     {
-        tag = *(*cerS)++; /* PRQA S 3440,3387 */ /* VL_KeyMN_3440,VL_KeyM_3387 */
+        tag = *(*cerS)++; /* PRQA S 3440,3387 */ /* VL_KeyM_3440,VL_KeyM_3387 */
         ret = KeyM_CertGetAsn1Len(cerS, cerE, &cerLen);
         if (ret == (Std_ReturnType)E_OK)
         {
@@ -2356,7 +2359,7 @@ KEYM_LOCAL Std_ReturnType KeyM_CertParseTimeEle(uint8** ele, uint32 len, uint32*
             /* PRQA S 1252,3120 ++ */ /* VL_KeyM_1252,VL_QAC_MagicNum */
             /*ASCII convert*/
             *time *= 10u;
-            *time += *(*ele)++; /* PRQA S 3440,3387 */ /* VL_KeyMN_3440,VL_KeyM_3387 */
+            *time += *(*ele)++; /* PRQA S 3440,3387 */ /* VL_KeyM_3440,VL_KeyM_3387 */
             *time -= 0x30u;
             /* PRQA S 1252,3120 -- */
         }
@@ -2364,7 +2367,7 @@ KEYM_LOCAL Std_ReturnType KeyM_CertParseTimeEle(uint8** ele, uint32 len, uint32*
     return ret;
 }
 
-/* PRQA S 6060,2889 ++ */ /* VL_MTR_KeyM_STM19,VL_KeyM_2889 */
+/* PRQA S 6060,2889 ++ */ /* VL_MTR_KeyM_STM19,VL_QAC_MultiReturn */
 KEYM_LOCAL Std_ReturnType KeyM_CertCheckDate(const KeyM_CertTimeType* time)
 /* PRQA S 6060,2889 -- */
 {
@@ -2942,12 +2945,13 @@ Std_ReturnType KeyM_HandleCertcVerify(const KeyM_CertPCfgType* certCfgPtr, const
 {
     KeyM_Asn1DesType* certEleBuf;
     KeyM_Asn1DesType* upCertEleBuf;
-    /* PRQA S 3678 ++ */ /* VL_QAC_3678 */
+    /* PRQA S 3678 ++ */ /* VL_KeyM_3678 */
     KeyM_Asn1DesType* sigBuf;
     KeyM_Asn1DesType* pbKeyBuf;
     /* PRQA S 3678 -- */
     uint32 sigVerJob;
     uint32 tarKey;
+    uint32 tbsCertLen;
     uint16 CertId = certCfgPtr->certId;
 #if (KEYM_NVM_BLOCK_NUM > 0)
     uint16 nvmRefBloId;
@@ -3037,11 +3041,13 @@ Std_ReturnType KeyM_HandleCertcVerify(const KeyM_CertPCfgType* certCfgPtr, const
                         /*SWS_KeyM_00032*/
                         if (ret == E_OK)
                         {
+                            tbsCertLen = (uint32)(((uint32)certCfgPtr->CertData->dataEle[KEYM_CONST_6]) << KEYM_CONST_8)
+                                         + certCfgPtr->CertData->dataEle[KEYM_CONST_7] + KEYM_CONST_4;
                             ret = Csm_SignatureVerify(
                                 sigVerJob,
                                 CRYPTO_OPERATIONMODE_SINGLECALL,
-                                certCfgPtr->tbsCert->dataEle,
-                                certCfgPtr->tbsCert->len,
+                                &certCfgPtr->CertData->dataEle[KEYM_CONST_4],
+                                tbsCertLen,
                                 sigBuf->dataEle,
                                 sigBuf->len,
                                 &verifyRes);
@@ -3086,7 +3092,7 @@ Std_ReturnType KeyM_HandleCertcVerify(const KeyM_CertPCfgType* certCfgPtr, const
                                     /*Public-Key is Written immediately*/
                                     (void)NvM_WriteBlock(
                                         KeyM_NvmBlockPCfg[nvmRefBloId].blkId,
-                                        certCfgPtr->tbsCert->dataEle);
+                                        certCfgPtr->CertData->dataEle);
                                 }
                                 else
                                 {
@@ -3094,7 +3100,7 @@ Std_ReturnType KeyM_HandleCertcVerify(const KeyM_CertPCfgType* certCfgPtr, const
                                     KeyM_BlkWriDelayRun[nvmRefBloId].delayTime =
                                         KeyM_NvmBlockPCfg[nvmRefBloId].blkWriDelay;
                                     /*Record certificate start address.*/
-                                    KeyM_BlkWriDelayRun[nvmRefBloId].nvmCertEle = certCfgPtr->tbsCert;
+                                    KeyM_BlkWriDelayRun[nvmRefBloId].nvmCertEle = certCfgPtr->CertData;
                                 }
                             }
 #endif

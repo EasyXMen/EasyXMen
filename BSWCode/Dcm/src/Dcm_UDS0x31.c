@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -77,10 +77,10 @@ DCM_LOCAL Dcm_RoutineStatusType Dcm_RoutineStatus[DCM_ROUTINE_NUM];
 #define DCM_STOP_SEC_VAR_CLEARED_8
 #include "Dcm_MemMap.h"
 #ifdef DCM_SECURE_CODING_VALIDATION_ROUTINE
-#define DCM_START_SEC_VAR_INIT_8
+#define DCM_START_SEC_VAR_CLEARED_8
 #include "Dcm_MemMap.h"
-DCM_LOCAL Dcm_ExtendedOpStatusType Dcm_SecureCodingOpStatus = DCM_INITIAL;
-#define DCM_STOP_SEC_VAR_INIT_8
+DCM_LOCAL Dcm_ExtendedOpStatusType Dcm_SecureCodingOpStatus;
+#define DCM_STOP_SEC_VAR_CLEARED_8
 #include "Dcm_MemMap.h"
 #endif
 /* ========================================== internal function declarations ======================================== */
@@ -143,7 +143,7 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x31_HandleOBDRID(
 DCM_LOCAL Std_ReturnType Dcm_UDS0x31_SecureCoding(
     Dcm_ExtendedOpStatusType      OpStatus,
     uint16                        routineIndex,
-    Dcm_MsgContextType*           pMsgContext,
+    const Dcm_MsgContextType*     pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode);
 
 /**
@@ -158,7 +158,7 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x31_SecureCoding(
  * @synchronous   TRUE
  * @trace         CPD-PLACEHOLDE
  */
-DCM_LOCAL Std_ReturnType Dcm_UDS0x31_SecureCodingInitial(Dcm_MsgContextType* pMsgContext, uint16 routineIndex);
+DCM_LOCAL Std_ReturnType Dcm_UDS0x31_SecureCodingInitial(const Dcm_MsgContextType* pMsgContext, uint16 routineIndex);
 
 /**
  * @brief         handle secure coding for DCM_PENDING opstatus
@@ -456,7 +456,7 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x31_HandleOBDRID(
 DCM_LOCAL Std_ReturnType Dcm_UDS0x31_SecureCoding(
     Dcm_ExtendedOpStatusType      OpStatus,
     uint16                        routineIndex,
-    Dcm_MsgContextType*           pMsgContext,
+    const Dcm_MsgContextType*     pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode)
 {
     Std_ReturnType result  = E_OK;
@@ -502,7 +502,7 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x31_SecureCoding(
     return result;
 }
 
-DCM_LOCAL Std_ReturnType Dcm_UDS0x31_SecureCodingInitial(Dcm_MsgContextType* pMsgContext, uint16 routineIndex)
+DCM_LOCAL Std_ReturnType Dcm_UDS0x31_SecureCodingInitial(const Dcm_MsgContextType* pMsgContext, uint16 routineIndex)
 {
     Crypto_VerifyResultType verifyResult;
     Std_ReturnType          result = Csm_SignatureVerify(

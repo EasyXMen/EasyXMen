@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -85,7 +85,9 @@ Std_ReturnType Dcm_UDS0x85(
     uint8          protocolId;
     DCM_UNUSED(OpStatus);
     (void)DslInternal_FindProtocolRowByRxPduId(pMsgContext->dcmRxPduId, &protocolId, NULL_PTR);
+#if ((defined(DCM_UDS_0X85_0X1)) || (defined(DCM_UDS_0X85_0X2)))
     uint8 clientId = Dcm_DslProtocolRow[protocolId].DemClientRef;
+#endif
 
     result = Dcm_UDS0x85_ConditionCheck(pMsgContext, ErrorCode);
 
@@ -139,6 +141,7 @@ Std_ReturnType Dcm_UDS0x85(
         pMsgContext->resData[0u] = subfunction;
         pMsgContext->resDataLen++;
         (void)Rte_Switch_ControlDTCSettingModeSwitchInterface_controlDTCSetting(controlDTCSetting);
+        (void)SchM_Switch_Dcm_DcmControlDTCSetting(controlDTCSetting);
     }
 
     return result;
@@ -157,6 +160,7 @@ void Dcm_UDS0x85_EnableDTCSetting(void)
             Dcm_DTCSettingDisabled[index] = FALSE;
             (void)Rte_Switch_ControlDTCSettingModeSwitchInterface_controlDTCSetting(
                 RTE_MODE_DcmControlDTCSetting_DCM_ENABLEDTCSETTING);
+            (void)SchM_Switch_Dcm_DcmControlDTCSetting(RTE_MODE_DcmControlDTCSetting_DCM_ENABLEDTCSETTING);
         }
     }
 }

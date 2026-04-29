@@ -1,6 +1,6 @@
 /* PRQA S 3108++ */
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -29,18 +29,18 @@
  *******************************************************************************/
 #ifndef ARCH_PROCESSOR_H
 #define ARCH_PROCESSOR_H
-
 /*=======[I N C L U D E S]====================================================*/
-#include "Os_Types.h"
 
+#include "Os_Types.h"
+#include "Mcu_Core.h"
 #include "Arch_Irq.h"
 #include "Arch_Mpu.h"
-#include "Mcu_Core.h"
 #include "Mcu_Int.h"
 #include "Mcu_Timer.h"
 
 /*=======[Porting Macro]======================================================*/
 /* Provided for external use */
+#define IPL_RPC (6U)
 
 #define OS_ARCH_STACK_ALIGN(addr) ((addr) & 0xFFFFFFFCU)
 
@@ -48,7 +48,7 @@
 
 /* RPC */
 #define E_BUSY      0x02u
-#define RPC_TIMEOUT (100)
+#define RPC_TIMEOUT (100000000000)
 #define TIMER_FRE   (100)
 /* stimate the number of instructions that will run */
 #define RPC_INS_NUM   (5)
@@ -70,6 +70,18 @@ static inline uint32 OS_ARCH_REG_READ(uint32 regId, uint32 selId)
 /* PRQA S 3206,3008,6008-- */ /* MISRA Rule 2.7 Dir 4.3 */
 
 #define OS_ARCH_SUPERVISOR_MODE (0x00U)
+
+/* Hazard Control */
+#define OS_ARCH_SYNCP() ASM("SYNCP")    /* Synchronize pipeline */
+#define OS_ARCH_SYNCM() ASM("SYNCM")    /* Synchronize memory */
+#define OS_ARCH_SYNCI() ASM("SYNCI")    /* Synchronize instruction fetch */
+#define OS_ARCH_SYNCE() ASM("SYNCE")    /* Synchronize exceptions */
+
+/* Bit manipulation instruction */
+#define OS_ARCH_SET1_BIT_SPECIFY(addr, bitnum)  ASM("SET1 %1, 0[%0]" ::"r"(addr), "i"(bitnum):"memory") /* Clear bit by "Format VIII" */
+#define OS_ARCH_CLR1_BIT_SPECIFY(addr, bitnum)  ASM("CLR1 %1, 0[%0]" ::"r"(addr), "i"(bitnum):"memory") /* Not bit by "Format VIII"  */
+#define OS_ARCH_SET1_GP_REGISTER(addr, bitnum)  ASM("SET1 %1, [%0]" ::"r"(addr), "r"(bitnum):"memory")  /* Clear bit by "Format IX" */
+#define OS_ARCH_CLR1_GP_REGISTER(addr, bitnum)  ASM("CLR1 %1, [%0]" ::"r"(addr), "r"(bitnum):"memory")  /* Not bit by "Format IX" */
 
 /* SP = Os_ArchTempSp */
 #define OS_SET_SP_VAL()                      \
@@ -103,10 +115,10 @@ static inline uint32 OS_ARCH_REG_READ(uint32 regId, uint32 selId)
 /* Provided for external use */
 #define OS_TASK_SWITCH_PROC()      Os_SwitchTask()
 
-#define OS_ARCH_DECLARE_CRITICAL() Os_ArchMsrType msr
-#define OS_ARCH_ENTRY_CRITICAL()   Os_ArchSuspendInt(&msr)
+#define OS_ARCH_DECLARE_CRITICAL() uint32 msr
+#define OS_ARCH_ENTRY_CRITICAL()   msr = Os_ArchSuspendInt()
 #define OS_ARCH_EXIT_CRITICAL()    Os_ArchRestoreInt(msr)
-#define OS_ARCH_SUSPEND_ALLINT()   Os_ArchSuspendInt(&msr)
+#define OS_ARCH_SUSPEND_ALLINT()   msr = Os_ArchSuspendInt()
 #define OS_ARCH_RESTORE_ALLINT()   Os_ArchRestoreInt(msr)
 
 #if (TRUE == CFG_MEMORY_PROTECTION_ENABLE)
@@ -190,7 +202,6 @@ extern P2VAR(Os_TaskCBExtType, AUTOMATIC, OS_VAR) Os_TaskCBExt;
 extern VAR(volatile uint32, OS_VAR) Os_ArchMasterSp;
 
 /*=======[E X T E R N A L   F U N C T I O N   D E C L A R A T I O N S]========*/
-extern FUNC(void, OS_CODE) Os_ArchInitCPU(void);
 extern FUNC(void, OS_CODE) Os_ArchFirstEnterTask(void);
 extern FUNC(void, OS_CODE) Os_ArchStartScheduler(void);
 

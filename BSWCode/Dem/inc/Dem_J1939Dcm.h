@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -34,8 +34,8 @@ extern "C" {
 
 /* ========================================= external function declarations ========================================= */
 
+/* PRQA S 1512 EOF */ /* VL_Dem_1512 */
 #if (DEM_J1939_READING_DTC_SUPPORT == STD_ON)
-/* PRQA S 1512 ++ */ /* VL_Dem_1512 */
 /**
  * @brief         The function sets the DTC filter for a specific node and returns the composite lamp status of
  *                the filtered DTCs.
@@ -92,7 +92,6 @@ extern Std_ReturnType Dem_J1939DcmGetNumberOfFilteredDTC(uint16* NumberOfFiltere
  * @trace         CPD-61081
  */
 extern Std_ReturnType Dem_J1939DcmGetNextFilteredDTC(uint32* J1939DTC, uint8* OccurenceCounter, uint8 ClientId);
-/* PRQA S 1512 -- */
 #endif
 
 #if ((DEM_J1939_READING_DTC_SUPPORT == STD_ON) || (DEM_J1939_DM31_SUPPORT == STD_ON))

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -40,6 +40,8 @@
 /* PRQA S 6070 EOF */                   /* VL_MTR_TcpIp_STCAL */
 /* PRQA S 6510 EOF */                   /* VL_MTR_TcpIp_CONF */
 /* PRQA S 6520 EOF */                   /* VL_MTR_TcpIp_STVAR */
+/* PRQA S 1501 EOF */                   /* VL_TcpIp_1501 */
+/* PRQA S 1753 EOF */                   /* VL_TcpIp_1753 */
 /* =================================================== inclusions =================================================== */
 #include "Os_Types.h"
 #include "ComStack_Types.h"
@@ -70,7 +72,7 @@
 #endif
 
 /* ===================================================== macros ===================================================== */
-#define ERR_ENUM_MAX ((int)ERR_ARG - 1)
+#define ERR_ENUM_MAX ((err_t)ERR_ARG - 1)
 
 #define TCPIP_CHANGEPARAMETER_DECODE_U16(value) (uint16)((((value)[0]) << 8u) | ((value)[1]))
 #define TCPIP_CHANGEPARAMETER_DECODE_U32(value) \
@@ -78,25 +80,6 @@
 
 #define TCPIP_MASK_U32_BYTE_POS(x) ((x) / 32u)
 #define TCPIP_MASK_U32_BIT_POS(x)  ((uint8)((x) & 0x1Fu))
-
-#define TCPIP_FLAG_MASK(type, pos)              ((type)(((type)1u) << (pos)))
-#define TCPIP_FLAG_IS_SET(type, ptr, mbr, mask) (((type)0u) != (((type)(mask)) & ((ptr)->mbr)))
-#define TCPIP_FLAG_SET(type, ptr, mbr, mask)    (((ptr)->mbr) |= ((type)(mask)))
-#define TCPIP_FLAG_RESET(type, ptr, mbr, mask)  (((ptr)->mbr) &= ((type)(~(mask))))
-
-#define TCPIP_CTRL_LOCALADDR_FLAG(localAddrIndex) TCPIP_FLAG_MASK(uint32, TCPIP_MASK_U32_BIT_POS(localAddrIndex))
-
-#define TCPIP_CTRL_STATE_FLAG(state) TCPIP_FLAG_MASK(uint8, state)
-
-#define TCPIP_LOCALADDR_FLAG(pos)        TCPIP_FLAG_MASK(uint8, pos)
-#define TCPIP_LOCALADDR_FLAG_REQUEST_IP  TCPIP_LOCALADDR_FLAG(0x01u)
-#define TCPIP_LOCALADDR_FLAG_IP_IS_VALID TCPIP_LOCALADDR_FLAG(0x02u)
-
-#define TCPIP_SOCKET_FLAG(pos) TCPIP_FLAG_MASK(uint8, pos)
-/* retrieve and store all AvailableLength data as a single pbuf node, i.e. pbuf->next == NULL_PTR */
-#define TCPIP_SOCKET_FLAG_TCP_FORCERETRIEVE TCPIP_SOCKET_FLAG(0x01u)
-#define TCPIP_SOCKET_FLAG_TCP_SERVERSOCKET  TCPIP_SOCKET_FLAG(0x02u)
-#define TCPIP_SOCKET_FLAG_TCP_PENDING_EVENT TCPIP_SOCKET_FLAG(0x04u)
 
 #define TCPIP_NETIF_NSC_REASON_IPCHANGED                                                                         \
     (netif_nsc_reason_t)(                                                                                        \
@@ -445,7 +428,7 @@ TCPIP_LOCAL err_t TcpIp_TcpRecvCallback(void* arg, struct tcp_pcb* tpcb, struct 
  * @reentrant       Non reentrant
  * @trace           CPD-PLACEHOLDER
  */
-TCPIP_LOCAL err_t TcpIp_TcpSentCallback(void* arg, struct tcp_pcb* tpcb, uint16 len);
+TCPIP_LOCAL err_t TcpIp_TcpSentCallback(void* arg, struct tcp_pcb* tpcb, u16_t len);
 
 /**
  * @brief           Callback of TCP error event.
@@ -1136,7 +1119,7 @@ Std_ReturnType TcpIp_InnerBind(TcpIp_SocketRuntimeType* socketRtPtr, TcpIp_Local
     else /* TODO: to listen to all EthIf controller, TCPIP_LOCALADDRID_ANY has to be specified as LocalAddrId. */
     {
         toBindFlag = FALSE;
-        // TODO assign ctrlIndex to EthIf controller of current partition
+        /* TODO assign ctrlIndex to EthIf controller of current partition */
 
         TcpIp_EnterExclusiveArea();
     }
@@ -1152,10 +1135,7 @@ Std_ReturnType TcpIp_InnerBind(TcpIp_SocketRuntimeType* socketRtPtr, TcpIp_Local
         if ((err_t)ERR_OK == err)
         {
             socketRtPtr->CtrlIndex = ctrlIndex;
-            if (NULL_PTR != ctrlRtPtr)
-            {
-                ctrlRtPtr->SocketUsedNum += 1u;
-            }
+            ctrlRtPtr->SocketUsedNum += 1u;
             TcpIp_ExitExclusiveArea();
 
             ret = E_OK;
@@ -1284,12 +1264,17 @@ Std_ReturnType TcpIp_InnerTcpListen(TcpIp_SocketRuntimeType* socketRtPtr, uint8 
             }
             else
 #if defined(TCPIP_INNER_CHECK)
-                if ((NULL_PTR == socketRtPtr->PcbPtr) && (NULL_PTR != pcbPtr)
-                    && (((err_t)ERR_USE == err) || ((err_t)ERR_MEM == err)))
+                if ((NULL_PTR == socketRtPtr->PcbPtr) && (((err_t)ERR_USE == err) || ((err_t)ERR_MEM == err)))
 #endif
             {
                 socketRtPtr->PcbPtr = pcbPtr;
             }
+#if defined(TCPIP_INNER_CHECK)
+            else
+            {
+                /* Do nothing */
+            }
+#endif
         }
     }
     TcpIp_ExitExclusiveArea();
@@ -2445,6 +2430,7 @@ void TcpIp_PeriodTimerMainHandle(ApplicationType partitionIndex)
 {
     TcpIP_PeriodTimerType* timerRtPtr = TCPIP_PERIODTIMER(partitionIndex);
 
+    TcpIp_EnterExclusiveArea();
 #if (defined TCPIP_TCP_SYNISN_RECALC) && (STD_ON == TCPIP_TCP_SYNISN_RECALC)
 #if (4u <= TCPIP_MAINFUNCTION_PERIOD)
     TcpIp_TcpIsnCount += (TCPIP_MAINFUNCTION_PERIOD / 4u);
@@ -2487,9 +2473,7 @@ void TcpIp_PeriodTimerMainHandle(ApplicationType partitionIndex)
     {
         timerRtPtr->tmr_250ms = TCPIP_TIMER_PERIOD(250u);
 #if (STD_ON == TCPIP_TCP_ENABLED)
-        TcpIp_EnterExclusiveArea();
         tcp_tmr();
-        TcpIp_ExitExclusiveArea();
 #endif
     }
 #endif
@@ -2544,6 +2528,7 @@ void TcpIp_PeriodTimerMainHandle(ApplicationType partitionIndex)
 #endif
     }
 #endif
+    TcpIp_ExitExclusiveArea();
 
     TcpIp_UpTcpIpEventNotify();
 }
@@ -3360,7 +3345,7 @@ TCPIP_LOCAL err_t TcpIp_TcpRecvCallback(void* arg, struct tcp_pcb* tpcb, struct 
 /**
  * called in rx indication
  */
-TCPIP_LOCAL err_t TcpIp_TcpSentCallback(void* arg, struct tcp_pcb* tpcb, uint16 len)
+TCPIP_LOCAL err_t TcpIp_TcpSentCallback(void* arg, struct tcp_pcb* tpcb, u16_t len)
 {
     err_t                          retErr      = (err_t)ERR_ABRT;
     const TcpIp_SocketRuntimeType* socketRtPtr = (TcpIp_SocketRuntimeType*)arg;
@@ -3672,7 +3657,7 @@ TCPIP_LOCAL err_t TcpIp_InitNetif(struct netif* netif)
         netif->hostname = "DoIP-ISoft";
 #endif
 
-#if LWIP_IPV6 && LWIP_IPV6_MLD
+#if (LWIP_IPV6 && LWIP_IPV6_MLD)
         /*
          * For hardware/netifs that implement MAC filtering.
          * All-nodes link-local is handled by default, so we must let the hardware know

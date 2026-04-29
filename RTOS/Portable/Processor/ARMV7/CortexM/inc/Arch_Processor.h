@@ -1,6 +1,6 @@
 /* PRQA S 3108++ */
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -59,12 +59,6 @@
 #define OS_REG16(address) (*(volatile uint16 *)(address))                                         /* 16-bit register */
 #define OS_REG8(address) (*(volatile uint8 *)(address))                                           /* 8-bit register  */
 
-#define RPC_TIMEOUT (100U)
-#define TIMER_FRE (100U)
-/* stimate the number of instructions that will run */
-#define RPC_INS_NUM (5U)
-#define RPC_WAIT_TIME (uint64)((RPC_TIMEOUT * TIMER_FRE * 1000U / RPC_INS_NUM))
-#define E_BUSY 0x02u
 /*----------------------------Cortex-CM7 Register-----------------------------*/
 /*
  * Floating Point Unit
@@ -115,7 +109,7 @@
 #define OS_ARCH_DSYNC() OS_ASM("dsb")
 
 #define OS_START_DISPATCH()
-#define Os_ArchInitCPU()
+
 #if (TRUE == CFG_SRV_SHELLOS)
 /* PRQA S 3412++ */ /* MISRA PRE10 */
 #define OS_ENTER_KERNEL()                           \
@@ -180,30 +174,30 @@ typedef enum
 } Os_ThreadModeType;
 
 /*=======[E X T E R N A L   D A T A]==========================================*/
-extern VAR(volatile uint32, OS_VAR) Os_ArchControl;
+extern volatile uint32 Os_ArchControl;
 
 /*=======[E X T E R N A L   F U N C T I O N   D E C L A R A T I O N S]========*/
-extern FUNC(uint32, OS_CODE) Os_CmpSwapW(uint32 *address, uint32 compareVal, uint32 exchangedVal);
-extern FUNC(void, OS_CODE) Os_ArchInitIntPrio(void);
-extern FUNC(void, OS_CODE) Os_ArchFirstEnterTask(void);
-extern FUNC(void, OS_CODE) Os_ArchStartScheduler(void);
-extern FUNC(void, OS_CODE) Os_ArchDispatch(void);
-extern FUNC(void, OS_CODE) Os_ArchDispatch_ISR(void);
-extern FUNC(uint32, OS_CODE) Os_GetControlVale(void);
-extern FUNC(void, OS_CODE) Os_SetCpuMode(Os_CPUModeType mode);
-extern FUNC(Os_ThreadModeType, OS_CODE) Os_GetThreadMode(void);
+extern uint32 Os_CmpSwapW(uint32 *address, uint32 compareVal, uint32 exchangedVal);
+extern void Os_ArchInitIntPrio(void);
+extern void Os_ArchFirstEnterTask(void);
+extern void Os_ArchStartScheduler(void);
+extern void Os_ArchDispatch(void);
+extern void Os_ArchDispatch_ISR(void);
+extern uint32 Os_GetControlVale(void);
+extern void Os_SetCpuMode(Os_CPUModeType mode);
+extern Os_ThreadModeType Os_GetThreadMode(void);
 #if defined(ENABLE_FPU)
-extern FUNC(void, OS_CODE) FPU_Init(void);
+extern void FPU_Init(void);
 #endif
 
 /* Shell protection */
 #if ((OS_SC3 == CFG_SC) || (OS_SC4 == CFG_SC))
-extern FUNC(void, OS_CODE) Os_ArchSyscall(void);
-extern FUNC(void, OS_CODE) Os_ArchAppTerminateTaskProc(Os_TaskType OsTaskID);
+extern void Os_ArchSyscall(void);
+extern void Os_ArchAppTerminateTaskProc(Os_TaskType OsTaskID);
 #endif
 
 #if (TRUE == CFG_SYSTEM_TIMER_ENABLE)
-extern FUNC(void, OS_CODE) Os_InitSysTimer(void);
+extern void Os_InitSysTimer(void);
 #endif
 
 /*============[STACK CHECK]=====================*/

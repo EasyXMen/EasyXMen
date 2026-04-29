@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -29,6 +29,9 @@
 #if (STD_ON == NVM_DEV_ERROR_DETECT)
 #include "Det.h"
 #endif
+#ifdef NvM_FEATURE_MEMCOPY_USED_ILIB
+#include "IStdLib.h"
+#endif
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -36,7 +39,7 @@ extern "C" {
 /* =============================================== version information ============================================== */
 
 /* ===================================================== macros ===================================================== */
-/* PRQA S 3414 ++ */ /* VL_NvM_3414 */
+/* PRQA S 3414 ++ */ /* VL_QAC_FctLikeMacro */
 #ifndef NVM_LOCAL
 #define NVM_LOCAL static /**< Defines used as the local keyword for variables or functions */
 #endif
@@ -56,8 +59,6 @@ extern "C" {
 #define NVM_TABLE_SIZE_JOB_QUEUE \
     ((((NVM_SIZE_STANDARD_JOB_QUEUE + 16u)) / 16u) + 1u) /**< Defined as parameters for the job queue table size */
 #endif
-
-#define NVM_NV_CRC_MAX_LENGTH 4U /**< Defines used as parameters for the CRC space byte size */
 
 /** Defines used as parameters for the Administrative block flag */
 #define NVM_ADMIN_ENQUEUE                      0U  /**< Enqueue flag */
@@ -215,11 +216,10 @@ typedef enum
     NVM_CRC_STATICID_OK      /**< Static Id is consistent @range 0x02*/
 } NvM_CrcStaticIdStatusType;
 
-/* PRQA S 1536 ++ */ /* VL_NvM_1536 */
 /**
  * @brief NvM Module Schema Information Type
  */
-typedef struct NvM_ModuleTypeTag
+typedef struct
 {
     boolean Init; /**< Initial status @range 0..255*/
 #if ((NVM_API_CONFIG_CLASS_1 != NVM_API_CONFIG_CLASS) && (STD_ON == NVM_JOB_PRIORITIZATION))
@@ -234,7 +234,7 @@ typedef struct NvM_ModuleTypeTag
 /**
  * @brief NvM Module Multi-Block Task Mode Information Type
  */
-typedef struct NvM_MultiJobTypeTag
+typedef struct
 {
     boolean               Enqueue;        /**< Queue status flag @range 0..255*/
     boolean               CancelWriteAll; /**< Cancel write all flag @range 0..255*/
@@ -251,7 +251,7 @@ typedef struct NvM_MultiJobTypeTag
 /**
  * @brief NvM Module Automated Task Record Information Type
  */
-typedef struct NvM_AtomJobTypeTag
+typedef struct
 {
     uint8            Count;                       /**< Automated job counter @range 0..255*/
     NvM_AtomJobEType ReqId[NVM_ATOMJOB_MAX_NONE]; /**< Request Id for Automated job @range NA*/
@@ -260,7 +260,7 @@ typedef struct NvM_AtomJobTypeTag
 /**
  * @brief Type of block-related information currently processed by the NvM module
  */
-typedef struct NvM_CurRunningTypeTag
+typedef struct
 {
     uint8             DeviceId;            /**< Device ID for layer module @range 0..255*/
     NvM_ServiceIdType ServiceId;           /**< Service ID value @range NA*/
@@ -305,7 +305,7 @@ typedef struct NvM_CurRunningTypeTag
 /**
  * @brief NvM Module Management Block Information Type
  */
-typedef struct NvM_AdminBlockTypeTag
+typedef struct
 {
     uint8                 CurrentIndex;    /**< Current index for dataset type @range 0..255*/
     NvM_ServiceIdType     ServiceID;       /**< Request service ID @range NA*/
@@ -321,7 +321,7 @@ typedef struct NvM_AdminBlockTypeTag
 /**
  * @brief NvM Module Priority List Record Information Type
  */
-typedef struct NvM_PriTable2QueueTypeTag
+typedef struct
 {
     uint8 HeadIndex; /**< Head index of the queue @range 0..255*/
     uint8 TailIndex; /**< Tail index of the queue @range 0..255*/
@@ -330,7 +330,7 @@ typedef struct NvM_PriTable2QueueTypeTag
 /**
  * @brief NvM Module Immediate Queue Type
  */
-typedef struct NvM_ImmedQueueTypeTag
+typedef struct
 {
     NvM_BlockIdType BlockId;    /**< Block ID of the queue with immediate data @range 0..65535*/
     uint8*          DestSrcPtr; /**< Pointer of the Destination or source address @range NA*/
@@ -341,7 +341,7 @@ typedef struct NvM_ImmedQueueTypeTag
 /**
  * @brief NvM Module Queue Management Message Type
  */
-typedef struct NvM_RoundRobinQueueManageTypeTag
+typedef struct
 {
     uint8 Count;     /**< Number of the job in the queue @range 0..255*/
     uint8 HeadIndex; /**< Head index of the queue @range 0..255*/
@@ -351,7 +351,7 @@ typedef struct NvM_RoundRobinQueueManageTypeTag
 /**
  * @brief NvM Module Standard Queue Types
  */
-typedef struct NvM_StandQueueTypeTag
+typedef struct
 {
 #if (STD_ON == NVM_JOB_PRIORITIZATION)
     uint8 NextIndex; /**< Point to the head index of the linked list @range 0..255*/
@@ -361,7 +361,7 @@ typedef struct NvM_StandQueueTypeTag
     uint8*            DestSrcPtr; /**< Pointer of the Destination or source address @range NA*/
 } NvM_StandQueueType;
 #endif
-/* PRQA S 1536 -- */
+
 /**
  * @brief       Function Pointer type define, with void parameter and void return value
  * @reentrant   Non Reentrant
@@ -468,12 +468,6 @@ extern uint16 NvM_PriorityTable[NVM_PRI_TAB_MAX_NUM][NVM_TABLE_SIZE_PRIORITY];
  * @brief BUffer of NVRAM block @range NA
  */
 extern uint8 NvM_NvDataBuffer[NVM_MAX_LENGTH_NV_BLOCK + NVM_NV_CRC_MAX_LENGTH];
-
-/**
- * @brief Buffer for temporary to store the repair data @range NA
- */
-extern uint8 NVM_TemporaryRAMForRepaire[NVM_REDUNDANT_ALL][NVM_MAX_LENGTH_REDUNDANT_BLOCK];
-
 #if (STD_ON == NVM_CIPHERING_ENABLE)
 /**
  * @brief Data buffer for ciphering
@@ -482,6 +476,40 @@ extern uint8 NvM_CipheringBuffer[NVM_BLOCKMAXLENGTH];
 #endif
 
 /* ========================================== internal function definitions ========================================= */
+/**
+ * @brief        Service is used to get the pointer of the runtime data.
+ * @return       void
+ * @reentrant    TRUE
+ * @synchronous  TRUE
+ * @trace        CPD-PLACEHOLDE
+ */
+NVM_LOCAL_INLINE void NvM_InterMemCpy(uint8* dest, const uint8* src, uint32 size)
+{
+#ifndef NvM_FEATURE_MEMCOPY_USED_ILIB
+    for (uint32 iloop = 0u; iloop < size; ++iloop)
+    {
+        dest[iloop] = src[iloop];
+    }
+#else
+    IStdLib_MemCpy(dest, src, size);
+#endif
+}
+
+/**
+ * @brief       Service to get init block identifier of NVRAM block descriptor
+ * @param[in]   BlockId: The block identifier uniquely identifies one NVRAM block descriptor
+ * @return      Std_ReturnType
+ * @retval      E_OK: request has been accepted
+ * @retval      E_NOT_OK: request has not been accepted
+ * @reentrant   Non Reentrant
+ * @synchronous FALSE
+ * @trace       CPD-PLACEHOLDE
+ */
+NVM_LOCAL_INLINE NvM_BlockIdType NvM_GetIntBlockId(NvM_BlockIdType BlockId)
+{
+    return (NvM_BlockIdType)((BlockId > 1u) ? (BlockId - 1U) : 0u);
+}
+
 /**
  * @brief       Get the specfied bit value of the byte depending on the GetBit value passed in
  * @param[in]   WordNum: The word number
@@ -602,7 +630,7 @@ NVM_LOCAL_INLINE void NvM_Det_ReportError(uint8 ApiId, uint8 ErrorId)
 }
 #endif
 
-#if (NVM_ECUC_PARTITION_NUM > 1U)
+#if (NVM_MULTI_PARTITION == STD_ON)
 /**
  * @brief       Check master partition id
  * @return      boolean
@@ -616,7 +644,9 @@ NVM_LOCAL_INLINE boolean NvM_CheckMasterEcucPartition()
 {
     return (boolean)(NVM_MASTER_ECUC_PARTITION == GetApplicationID());
 }
+#endif
 
+#if (NVM_ECUC_PARTITION_NUM > 1U)
 /**
  * @brief       Get partition id of the block
  * @param[in]   BlockId: The block identifier uniquely identifies one NVRAM block descriptor
@@ -655,21 +685,23 @@ NVM_LOCAL_INLINE boolean NvM_CheckBlockEcucPartition(NvM_BlockIdType BlockId)
  */
 NVM_LOCAL_INLINE void NvM_EMultiReqResultCheck(void)
 {
+    NvM_CurRunningType*       CurRunningPtr = &NvM_CurRunning;
+    NvM_BlockIdType           intBlockId    = NvM_GetIntBlockId(CurRunningPtr->BlockId);
+    const NvM_AdminBlockType* AdminBlockPtr = &(NvM_AdminBlock[intBlockId]);
     if ((NVM_JOB_TYPE_MULTI == NvM_Module.CurrentJobType) && (NVM_JOB_STEP_IDLE == NvM_Module.JobStep)
-        && (NVM_REQ_OK != NvM_AdminBlock[NvM_CurRunning.BlockId - 1U].SingleReqResult)
-        && (NVM_REQ_BLOCK_SKIPPED != NvM_AdminBlock[NvM_CurRunning.BlockId - 1U].SingleReqResult))
+        && (NVM_REQ_OK != AdminBlockPtr->SingleReqResult) && (NVM_REQ_BLOCK_SKIPPED != AdminBlockPtr->SingleReqResult))
     {
 #if ((NVM_API_CONFIG_CLASS_1 == NVM_API_CONFIG_CLASS) || (STD_OFF == NVM_JOB_PRIORITIZATION))
-        if ((NvM_CurRunning.BlockId == 1U) && (NVM_READ_ALL_SERV_ID == NvM_CurRunning.ServiceId))
+        if ((CurRunningPtr->BlockId == 1U) && (NVM_READ_ALL_SERV_ID == CurRunningPtr->ServiceId))
 #else
-        if ((NvM_CurRunning.BlockId == 1U) && (NVM_READ_ALL_SERV_ID == NvM_MultiJob.ServiceId))
+        if ((CurRunningPtr->BlockId == 1U) && (NVM_READ_ALL_SERV_ID == NvM_MultiJob.ServiceId))
 #endif
         {
-            NvM_CurRunning.EMultiReqResult = NVM_REQ_OK;
+            CurRunningPtr->EMultiReqResult = NVM_REQ_OK;
         }
         else
         {
-            NvM_CurRunning.EMultiReqResult = NVM_REQ_NOT_OK;
+            CurRunningPtr->EMultiReqResult = NVM_REQ_NOT_OK;
         }
     }
 }
@@ -694,10 +726,11 @@ NVM_LOCAL_INLINE void NvM_AtomJobReq(NvM_AtomJobEType AtomJobReqId)
  */
 NVM_LOCAL_INLINE void NvM_UpdateValidandChangeStatus(uint8 ValidStatus, uint8 ChangeStatus)
 {
-    if (TRUE == NVM_ISFLAGON(NvM_CurRunning.AdminFlagGroup, NVM_ADMIN_RAM_VALID_CHANGE_STATUS_USED))
+    NvM_CurRunningType* CurRunningPtr = &NvM_CurRunning;
+    if (TRUE == NVM_ISFLAGON(CurRunningPtr->AdminFlagGroup, NVM_ADMIN_RAM_VALID_CHANGE_STATUS_USED))
     {
-        NvM_SetWordBitState(&NvM_CurRunning.AdminFlagGroup, NVM_ADMIN_RAM_VALID, ValidStatus);
-        NvM_SetWordBitState(&NvM_CurRunning.AdminFlagGroup, NVM_ADMIN_RAM_CHANGED, ChangeStatus);
+        NvM_SetWordBitState(&CurRunningPtr->AdminFlagGroup, NVM_ADMIN_RAM_VALID, ValidStatus);
+        NvM_SetWordBitState(&CurRunningPtr->AdminFlagGroup, NVM_ADMIN_RAM_CHANGED, ChangeStatus);
     }
 }
 
@@ -709,16 +742,18 @@ NVM_LOCAL_INLINE void NvM_UpdateValidandChangeStatus(uint8 ValidStatus, uint8 Ch
  */
 NVM_LOCAL_INLINE void NvM_WriteSequenceForManagementType(void)
 {
-    if (NVM_BLOCK_REDUNDANT == NvM_CurRunning.ManagementType)
+    NvM_ModuleType*     ModulePtr     = &NvM_Module;
+    NvM_CurRunningType* CurRunningPtr = &NvM_CurRunning;
+    if (NVM_BLOCK_REDUNDANT == CurRunningPtr->ManagementType)
     {
-        NvM_Module.JobStep       = NVM_JOB_STEP_WRITE_2ND_NV;
-        NvM_Module.MemIfJobState = NVM_MEMIF_JOB_ASYNC_READY;
-        NvM_CurRunning.Index     = 1u;
+        ModulePtr->JobStep       = NVM_JOB_STEP_WRITE_2ND_NV;
+        ModulePtr->MemIfJobState = NVM_MEMIF_JOB_ASYNC_READY;
+        CurRunningPtr->Index     = 1u;
     }
     else
     {
-        NvM_Module.JobStep       = NVM_JOB_STEP_WRITE_1ST_NV;
-        NvM_Module.MemIfJobState = NVM_MEMIF_JOB_ASYNC_READY;
+        ModulePtr->JobStep       = NVM_JOB_STEP_WRITE_1ST_NV;
+        ModulePtr->MemIfJobState = NVM_MEMIF_JOB_ASYNC_READY;
     }
 }
 
@@ -732,12 +767,13 @@ NVM_LOCAL_INLINE void NvM_WriteSequenceForManagementType(void)
  */
 NVM_LOCAL_INLINE void NvM_WriteStaticBlockID(uint8* Dest, NvM_BlockCRCType crctype)
 {
+    const NvM_CurRunningType* CurRunningPtr = &NvM_CurRunning;
     /* PRQA S 3120 ++ */ /* VL_QAC_MagicNum */
     uint16 offSet =
         (NVM_CRC_NOT_USED == crctype) ? 0u : ((NVM_CRC8 == crctype) ? 1u : ((NVM_CRC16 == crctype) ? 2u : 4u));
-    Dest[NvM_CurRunning.Length + offSet] = (uint8)(NvM_CurRunning.BlockId >> 8U);
+    Dest[CurRunningPtr->Length + offSet] = (uint8)(CurRunningPtr->BlockId >> 8U);
     /* PRQA S 3120 -- */
-    Dest[NvM_CurRunning.Length + offSet + 1u] = (uint8)NvM_CurRunning.BlockId;
+    Dest[CurRunningPtr->Length + offSet + 1u] = (uint8)CurRunningPtr->BlockId;
 }
 
 /**
@@ -750,11 +786,12 @@ NVM_LOCAL_INLINE void NvM_WriteStaticBlockID(uint8* Dest, NvM_BlockCRCType crcty
  */
 NVM_LOCAL_INLINE void NvM_ReadStaticBlockID(const uint8* Src, NvM_BlockCRCType crctype)
 {
+    NvM_CurRunningType* CurRunningPtr = &NvM_CurRunning;
     /* PRQA S 3120 ++ */ /* VL_QAC_MagicNum */
     uint16 offSet =
         (NVM_CRC_NOT_USED == crctype) ? 0u : ((NVM_CRC8 == crctype) ? 1u : ((NVM_CRC16 == crctype) ? 2u : 4u));
-    NvM_CurRunning.StaticId = (uint16)((uint16)Src[NvM_CurRunning.Length + offSet] << 8U)
-                              + (uint16)(Src[NvM_CurRunning.Length + offSet + 1u]);
+    CurRunningPtr->StaticId = (uint16)((uint16)Src[CurRunningPtr->Length + offSet] << 8U)
+                              + (uint16)(Src[CurRunningPtr->Length + offSet + 1u]);
     /* PRQA S 3120 -- */
 }
 
@@ -766,16 +803,19 @@ NVM_LOCAL_INLINE void NvM_ReadStaticBlockID(const uint8* Src, NvM_BlockCRCType c
  */
 NVM_LOCAL_INLINE void NVM_GetRepeatMirrorOperation(void)
 {
+    NvM_CurRunningType* CurRunningPtr = &NvM_CurRunning;
+#if (STD_ON == NVM_BLOCK_USE_SYNC_MECHANISM)
     if (TRUE
         == NVM_ISFLAGON(
             NvM_BlockDescriptor[NvM_CurRunning.BlockId - 1U].FlagGroup,
             (uint8)NVM_BLOCK_DESC_SYNCMECHANISM))
     {
-        NvM_CurRunning.RepeatMirrorCounter = NVM_REPEAT_MIRROR_OPERATIONS + 1u;
+        CurRunningPtr->RepeatMirrorCounter = NVM_REPEAT_MIRROR_OPERATIONS + 1u;
     }
     else
+#endif
     {
-        NvM_CurRunning.RepeatMirrorCounter = 1u;
+        CurRunningPtr->RepeatMirrorCounter = 1u;
     }
 }
 
@@ -891,14 +931,14 @@ extern void NvM_InterWriteVerification(void);
  */
 extern void NvM_InterWriteAll(void);
 
-#if (NVM_API_CONFIG_CLASS_3 == NVM_API_CONFIG_CLASS)
+#if ((NVM_API_CONFIG_CLASS_3 == NVM_API_CONFIG_CLASS) && (STD_ON == NVM_SELECT_BLOCK_FOR_FIRST_INIT_ALL))
 /**
  * @brief       The module internal function to process first init all block request
  * @reentrant   Non Reentrant
  * @synchronous TRUE
  * @trace       CPD-76650
  */
-extern void NvM_InterFirstInitAll(void);
+extern void NvM_InterFirstInitAll(void); /* PRQA S 1501 */ /* VL_NvM_1501 */
 #endif
 
 /**

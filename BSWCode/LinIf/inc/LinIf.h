@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -62,6 +62,8 @@
  *  V02.01.02 2024-07-05  ZhaoTong   Add macro condition for the call to API BswM_LinTp_RequestMode.
  *  V02.02.00 2024-12-05  ZouZhiJia  R23-11 development first release.
  *  V02.03.00 2025-04-29   ZouZhiJia  Optimize Code.
+ *  V02.03.01 2025-10-16   ZouZhijia  fix bug
+ CPT-15176,CPT-15536,CPT-15645,CPT-15222,CPT-15176,CPT-15674,CPT-15681,CPT-15682
  ==================================================================================================================== */
 
 /* ================================================ misar justifications ============================================ */
@@ -124,8 +126,34 @@
     Reason: Multiple exit points can improve function execution efficiency.
     Risk: The code is difficult to maintain.
     Prevention: Design and code review + clear structure and well-commented code.
+
+    \li PRQA S 6010 VL_MTR_LinIf_STCYC  .<br>
+    Reason: Solving the cyclomatic complexity will affect the complete logic of the code.
+    Risk: The code is difficult to maintain.
+    Prevention: Design and code review + clear structure and well-commented code.
+
+    \li PRQA S 3415 VL_LinIf_3415 .<br>
+    Reason: The LinIf module guarantees the correctness of the right-hand operand in '&&' or '||'.
+    Risk: No risk.
+    Prevention: Functional reliability guaranteed by design.
+
+    \li PRQA S 1505 VL_LinIf_1505
+    Reason: Functions defined out are not used in the project and have no impact on the integration application.
+    Risk: No impact on integrated functions.
+    Prevention: Provided to the application to use, the application use need to use the corresponding interface.
+
+    \li PRQA S 1536 VL_LinIf_1536
+    Reason: The tag '%1s' is declared but not used within this project.
+    Risk: No risk.
+    Prevention: Functional reliability guaranteed by design.
+
+    \li VL_LinIf_1756
+      Reason: The issue shall be avoided in actual running environment and configs.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
 */
 
+/* PRQA S 1756 EOF */ /* VL_LinIf_1756 */
 #ifndef LINIF_H_
 #define LINIF_H_
 
@@ -149,7 +177,7 @@
 
 #define LINIF_SW_MAJOR_VERSION 2U
 #define LINIF_SW_MINOR_VERSION 3U
-#define LINIF_SW_PATCH_VERSION 0U
+#define LINIF_SW_PATCH_VERSION 1U
 
 /*instance id*/
 #define LINIF_INSTANCE_ID (uint8)0x00u

@@ -1,6 +1,6 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
- * SPDX-License-Identifier: LGPL-2.1-only-with-exception OR  LicenseRef-Commercial-License
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
+ * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
  * GNU Lesser General Public License as published by the Free Software Foundation; version 2.1.
@@ -10,7 +10,8 @@
  * You should have received a copy of the GNU Lesser General Public License along with this library;
  * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  * or see <https://www.gnu.org/licenses/>.
- *
+ */
+/*
  ********************************************************************************
  **                                                                            **
  **  FILENAME    : Os_Core.c                                                   **
@@ -81,7 +82,7 @@ void StartCore(CoreIdType CoreID, StatusType* Status)
     {
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
         /* SWS_Os_00606,SWS_Os_00678:StartCore is called after StartOS.*/
-        /* PRQA S 3442, 4340, 1881 ++ */ /* VL_Os_3442, VL_Os_4340, VL_QAC_AutosarBool */
+        /* PRQA S 3442, 4340, 1881 ++ */ /* VL_Os_3442, VL_Os_4340, VL_Os_AutosarBool */
         if (TRUE == Os_CoreCB.coreStateSynPoint2[Os_SCB.sysCore])
         /* PRQA S 3442, 4340, 1881 -- */
         {
@@ -121,7 +122,9 @@ void StartCore(CoreIdType CoreID, StatusType* Status)
         }
 
 #if (CFG_ERRORHOOK == TRUE)
+        /* PRQA S 3138 ++ */ /* VL_Os_3138 */
         Os_TraceErrorHook(OSError_Save_StartCore(CoreID, Status), OSServiceId_StartCore, err);
+        /* PRQA S 3138 -- */
 #endif
     }
 }
@@ -146,9 +149,9 @@ void StartCore(CoreIdType CoreID, StatusType* Status)
  * REQ ID               <None>
  */
 /******************************************************************************/
-/* PRQA S 6010, 6080, 1503, 3006 ++ */ /* VL_MTR_Os_STCYC, VL_MTR_Os_STPTH, VL_QAC_NoUsedApi, VL_Os_3006 */
+/* PRQA S 6010, 6080, 1503, 3006, 6070 ++ */ /* VL_MTR_Os_STCYC, VL_MTR_Os_STPTH, VL_QAC_NoUsedApi, VL_Os_3006, VL_MTR_Os_STCAL */
 void StartNonAutosarCore(CoreIdType CoreID, StatusType* Status)
-/* PRQA S 6010, 6080, 1503, 3006 -- */
+/* PRQA S 6010, 6080, 1503, 3006, 6070 -- */
 {
     /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
     /* PRQA S 1006 ++ */ /* VL_Os_1006 */
@@ -219,7 +222,9 @@ void StartNonAutosarCore(CoreIdType CoreID, StatusType* Status)
         }
 
 #if (CFG_ERRORHOOK == TRUE)
+        /* PRQA S 3138 ++ */ /* VL_Os_3138 */
         Os_TraceErrorHook(OSError_Save_StartNonAutosarCore(CoreID, Status), OSServiceId_StartNonAutosarCore, err);
+        /* PRQA S 3138 -- */
 #endif
     }
 
@@ -337,7 +342,9 @@ StatusType ControlIdle(CoreIdType CoreID, IdleModeType IdleMode)
 #if (CFG_ERRORHOOK == TRUE)
     if (rst != E_OK)
     {
+        /* PRQA S 3138 ++ */ /* VL_Os_3138 */
         Os_TraceErrorHook(OSError_Save_ControlIdle(CoreID, IdleMode), OSServiceId_ControlIdle, rst);
+        /* PRQA S 3138 -- */
     }
 #endif
 
@@ -434,9 +441,11 @@ uint32 GetNumberOfActivatedCores(void)
     }
 
 #if (CFG_ERRORHOOK == TRUE)
-    if (status != E_OK)
+    if (status != E_OK) /* PRQA S 2996, 2992 */ /* VL_Os_2996, VL_Os_2992 */
     {
+        /* PRQA S 3138, 2880 ++ */ /* VL_Os_3138, VL_Os_2880 */
         Os_TraceErrorHook(OSError_Save_GetNumberOfActivatedCores(), OSServiceId_GetNumberOfActivatedCores, status);
+        /* PRQA S 3138, 2880 -- */
     }
 #endif
 
@@ -620,7 +629,7 @@ void ShutdownAllCores(StatusType Error)
             /* PRQA S 3442, 4397 -- */
             for (i = 0; i < OS_AUTOSAR_CORES; i++) /* PRQA S 1290 */ /* VL_Os_1290 */
             {
-                /* PRQA S 4404 ++ */ /* VL_QAC_AutosarBool */
+                /* PRQA S 4404 ++ */ /* VL_Os_AutosarBool */
                 Os_CoreCB.coreStateSynPoint0[i] = FALSE;
                 Os_CoreCB.coreStateSynPoint1[i] = FALSE;
                 Os_CoreCB.coreStateSynPoint2[i] = FALSE;
@@ -641,7 +650,7 @@ void ShutdownAllCores(StatusType Error)
     }
     /* PRQA S 2880 ++ */ /* VL_Os_2880 */
     OS_EXIT_KERNEL(); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
-    /* PRQA S 2880 -- */ /* VL_Os_2880 */
+    /* PRQA S 2880 -- */
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"

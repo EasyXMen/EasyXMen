@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -30,6 +30,10 @@
  *  V2.0.0     2020-08-05    YangBo          Update to R19-11.
  *  V2.0.7     2021-06-16    zhiqiang.huang  add tx queue buffer.
  *  V2.1.0     2025-02-03    hao.wen         Refactor.
+ *  V2.1.1     2025-10-21    li.feng         CPT-15824 fix DoIP queue
+ *             2025-11-07    li.feng         CPT-16292 The vehicle announcement fails to be sent correctly.
+ *  V2.1.1     2025-11-11    li.feng         CPT-16309 fix successful Diagnostic Request on Unactivated TCP
+ *             2025-12-25    li.feng         CPT-16170,CPT-17004 fix Invalid Payload type Handling
 ==================================================================================================================== */
 
 /* ================================================ misar justifications ============================================ */
@@ -123,16 +127,6 @@
       Risk: None.
       Prevention:None.
 
-    \li VL_DoIP_3451
-      Reason: multiple declaration is necessary for RTE
-      Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
-
-    \li VL_DoIP_3449
-      Reason: multiple declaration is necessary for RTE
-      Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
-
     \li VL_DoIP_3414
       Reason: specific keyword macro is necessary for unit testing
       Risk: No risk.
@@ -202,11 +196,6 @@
       Risk: The code is difficult to maintain.
       Prevention: Design and code review, and have a clear structure and annotated code.
 
-    \li VL_DoIP_1536
-      Reason: The tag '%1s' is declared but not used within this project.
-      Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
-
     \li VL_DoIP_3415
       Reason: Right hand operand of '&&' or '||' is an expression with persistent side effects.
       Risk: No risk.
@@ -271,10 +260,6 @@
       Risk: No risk.
       Prevention: Ensure that the project is working properly through unit testing.
 
-    \li VL_DoIP_1513
-      Reason: Identifier '${name}' with external linkage has separate non-defining declarations in more than one
-  location. Risk: No risk. Prevention: Functional reliability guaranteed by design.
-
     \li VL_DoIP_0624
       Reason: function parameter can be considered as the same via typedef
       Risk: No risk.
@@ -290,6 +275,15 @@
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
 
+    \li VL_DoIP_4461
+      Reason: Datatype conversion is necessary for functional usage
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_DoIP_2905
+      Reason: Constant: Positive integer value truncated by cast to a smaller unsigned type.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
  */
 
 #ifndef DOIP_H_
@@ -384,16 +378,16 @@ void DoIP_GetVersionInfo(Std_VersionInfoType* versionInfo);
  * @synchronous TRUE
  * @trace       CPD-PLACEHOLDER
  */
-/* PRQA S 1512,1513 ++ */           /* VL_DoIP_1512,VL_DoIP_1513 */
-/* PRQA S 3449,3451,0624,1707 ++ */ /* VL_DoIP_3449,VL_DoIP_3451,VL_DoIP_0624,VL_DoIP_1707 */
+/* PRQA S 1512,1513 ++ */           /* VL_DoIP_1512,VL_QAC_MultiDeclaration */
+/* PRQA S 3449,3451,0624,1707 ++ */ /* VL_QAC_MultiDeclaration,VL_QAC_MultiDeclaration,VL_DoIP_0624,VL_DoIP_1707 */
 void DoIP_ActivationLineSwitch(boolean* active);
 /* PRQA S 3449,3451,0624,1707 -- */
 
 /**
  * @brief       This service is called to request the transfer data from the PduRouter to the SoAd.
  *              It is used to indicate the transmission which will be performed in the DoIP_Mainfunction.
- * @param[in]   pdurTxPduId: DoIP unique identifier of the PDU to be transmitted by the PduR
- * @param[in]   pduInfoPtr: Tx Pdu information structure which contains the length of the DoIPTxMessage.
+ * @param[in]   DoIPPduRTxId: DoIP unique identifier of the PDU to be transmitted by the PduR
+ * @param[in]   DoIPPduRTxInfoPtr: Tx Pdu information structure which contains the length of the DoIPTxMessage.
  * @return      Std_ReturnType
  * @retval      E_OK: Get The request has been accepted.
  * @retval      E_NOT_OK: The request has not been accepted.
@@ -402,13 +396,13 @@ void DoIP_ActivationLineSwitch(boolean* active);
  * @trace       CPD-PLACEHOLDER
  */
 /* PRQA S 1709 ++ */ /* VL_DoIP_1709 */
-Std_ReturnType DoIP_TpTransmit(PduIdType pdurTxPduId, const PduInfoType* pduInfoPtr);
+Std_ReturnType DoIP_TpTransmit(PduIdType DoIPPduRTxId, const PduInfoType* DoIPPduRTxInfoPtr);
 
 /**
  * @brief       This service primitive is used to cancel the transfer of pending DoIPPduRTxIds. The connection is
  *              identified by DoIPPduRTxId. When the function returns, no transmission is in progress anymore
  *              with the given DoIPPduRTxId identifier.
- * @param[in]   pdurTxPduId: DoIP unique identifier ofthe PDU to be transmitted by the PduR
+ * @param[in]   DoIPPduRTxId: DoIP unique identifier ofthe PDU to be transmitted by the PduR
  * @return      Std_ReturnType
  * @retval      E_OK: Transmit cancellation request of the specified DoIPPduRTxId is accepted.
  * @retval      E_NOT_OK: The transmit cancellation request of the DoIPPduRTxId has been rejected.
@@ -416,13 +410,13 @@ Std_ReturnType DoIP_TpTransmit(PduIdType pdurTxPduId, const PduInfoType* pduInfo
  * @synchronous TRUE
  * @trace       CPD-PLACEHOLDER
  */
-Std_ReturnType DoIP_TpCancelTransmit(PduIdType pdurTxPduId);
+Std_ReturnType DoIP_TpCancelTransmit(PduIdType DoIPPduRTxId);
 
 /**
  * @brief       By calling this API with the corresponding DoIPPduRRxId the currently ongoing data reception
  *              is terminated immediately. When the function returns, no reception is in progress anymore with
  *              the given DoIPPduRRxId identifier.
- * @param[in]   pdurRxPduId: DoIP unique identifier of the PDU for which reception shall be canceled by the PduR
+ * @param[in]   DoIPPduRRxId: DoIP unique identifier of the PDU for which reception shall be canceled by the PduR
  * @return      Std_ReturnType
  * @retval      E_OK: Reception was canceled successfully.
  * @retval      E_NOT_OK:  Reception was not canceled.
@@ -430,12 +424,12 @@ Std_ReturnType DoIP_TpCancelTransmit(PduIdType pdurTxPduId);
  * @synchronous TRUE
  * @trace       CPD-PLACEHOLDER
  */
-Std_ReturnType DoIP_TpCancelReceive(PduIdType pdurRxPduId);
+Std_ReturnType DoIP_TpCancelReceive(PduIdType DoIPPduRRxId);
 
 /**
  * @brief       Requests transmission of an I-PDU.
- * @param[in]   pdurTxPduId: Identification of the I-PDU.
- * @param[in]   pduInfoPtr: Provides the destination buffer (SduDataPtr) and the number of bytes to be copied
+ * @param[in]   id: Identification of the I-PDU.
+ * @param[in]   info: Provides the destination buffer (SduDataPtr) and the number of bytes to be copied
  * (SduLength).
  * @return      Std_ReturnType
  * @retval      E_OK: Request is accepted by the destination module.
@@ -444,12 +438,12 @@ Std_ReturnType DoIP_TpCancelReceive(PduIdType pdurRxPduId);
  * @synchronous TRUE
  * @trace       CPD-PLACEHOLDER
  */
-Std_ReturnType DoIP_IfTransmit(PduIdType pdurTxPduId, const PduInfoType* pduInfoPtr);
+Std_ReturnType DoIP_IfTransmit(PduIdType id, const PduInfoType* info);
 
 /**
  * @brief       Requests cancellation of an ongoing transmission of an I-PDU in a lower layer communication interface
  * module.
- * @param[in]   pdurTxPduId: Identification of the I-PDU to be cancelled.
+ * @param[in]   id: Identification of the I-PDU to be cancelled.
  * @return      Std_ReturnType
  * @retval      E_OK: Cancellation was executed successfully by the destination module.
  * @retval      E_NOT_OK:  Cancellation was rejected by the destination module.
@@ -457,7 +451,7 @@ Std_ReturnType DoIP_IfTransmit(PduIdType pdurTxPduId, const PduInfoType* pduInfo
  * @synchronous TRUE
  * @trace       CPD-PLACEHOLDER
  */
-Std_ReturnType DoIP_IfCancelTransmit(PduIdType pdurTxPduId);
+Std_ReturnType DoIP_IfCancelTransmit(PduIdType id);
 /* PRQA S 1709 -- */
 
 /**
@@ -467,7 +461,7 @@ Std_ReturnType DoIP_IfCancelTransmit(PduIdType pdurTxPduId);
  * @synchronous TRUE
  * @trace       CPD-PLACEHOLDER
  */
-/* PRQA S 3449,3451 ++ */ /* VL_DoIP_3449,VL_DoIP_3451 */
+/* PRQA S 3449,3451 ++ */ /* VL_QAC_MultiDeclaration,VL_QAC_MultiDeclaration */
 void DoIP_MainFunction(void);
 /* PRQA S 3449,3451 -- */
 /* PRQA S 1512,1513 -- */

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -21,9 +21,12 @@
  **  @description        : Ethernet Interface
  **
  ***********************************************************************************************************************/
+/* PRQA S 1536 EOF */ /* VL_EthIf_1536 */
 
 #ifndef ETHIF_TYPES_H
 #define ETHIF_TYPES_H
+
+/* PRQA S 1756,1758 EOF */ /* VL_EthIf_1756,VL_EthIf_1758 */
 
 /* =================================================== inclusions =================================================== */
 #include "EthIf_Cfg.h"
@@ -161,10 +164,16 @@ typedef struct EthIf_EthDriverApiTag
         const Eth_DataType*    DataPtr,
         Eth_TimeStampQualType* timeQualPtr,
         Eth_TimeStampType*     timeStampPtr);
-#else
+#elif (ETHIF_ETH_AUTOSAR_VERSION == ETHIF_ETH_AUTOSAR_431)
     void (*Eth_GetIngressTimeStamp)(
         uint8                  CtrlIdx,
         const Eth_DataType*    DataPtr,
+        Eth_TimeStampQualType* timeQualPtr,
+        Eth_TimeStampType*     timeStampPtr);
+#else
+    void (*Eth_GetIngressTimeStamp)(
+        uint8                  CtrlIdx,
+        Eth_DataType*          DataPtr,
         Eth_TimeStampQualType* timeQualPtr,
         Eth_TimeStampType*     timeStampPtr);
 #endif

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -815,7 +815,7 @@ void CDD_FVM_GetVersionInfo(Std_VersionInfoType* versioninfo)
  * This interface is used to get the freshness value from the FVM according to the configured
  * freshness counter mode.
  */
-/* PRQA S 1503, 1532, 6040 ++ */ /* VL_CDD_FVM_1503 */
+/* PRQA S 1503, 1532, 6040 ++ */ /* VL_CDD_FVM_1503, VL_QAC_OneFunRef, VL_MTR_CDD_FVM_STPAR */
 Std_ReturnType CDD_FVM_GetRxFreshness(
     uint16       FVMFreshnessValueID,
     const uint8* FVMTruncatedFreshnessValue,
@@ -881,7 +881,7 @@ Std_ReturnType CDD_FVM_GetRxFreshness(
  * This interface is used to get the freshness value from the FVM according to the configured
  * freshness counter mode.
  */
-/* PRQA S 1503, 1532, 6040 ++ */ /* VL_CDD_FVM_1503 */
+/* PRQA S 1503, 1532, 6040 ++ */ /* VL_CDD_FVM_1503, VL_QAC_OneFunRef, VL_MTR_CDD_FVM_STPAR */
 Std_ReturnType CDD_FVM_GetRxFreshnessAuthData(
     uint16       FVMFreshnessValueID,
     const uint8* FVMTruncatedFreshnessValue,
@@ -2701,8 +2701,8 @@ CDD_FVM_LOCAL void CDD_FVM_CopySrcFromMbitToDstBits(const uint8* src, uint8* dst
 }
 #endif /* CDD_FVM_TX_MULTIPLE_FRESHNESS_TRUNCATED_COUNTER_NUM > 0u OR \
           CDD_FVM_RX_MULTIPLE_FRESHNESS_TRUNCATED_COUNTER_NUM > 0u */
-CDD_FVM_LOCAL Std_ReturnType
-    CDD_FVM_BitCompare(const uint8* ptr1, const uint8* ptr2, uint8 bitLength, uint16 maxDeltaCounter)
+CDD_FVM_LOCAL
+Std_ReturnType CDD_FVM_BitCompare(const uint8* ptr1, const uint8* ptr2, uint8 bitLength, uint16 maxDeltaCounter)
 {
     Std_ReturnType result   = CDD_FVM_E_NOT_OK;
     const uint8*   bytePtr1 = (const uint8*)ptr1;

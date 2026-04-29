@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -41,6 +41,7 @@ extern "C" {
 /* =========================================== external data declarations =========================================== */
 
 /* ========================================= external function declarations ========================================= */
+#if (PDUR_NUMBER_OF_QUEUES_MAX > 0u)
 void PduR_BufferInit(void);
 void PduR_DisableRoutingQueueHandle(PduIdType destPduId, boolean initialize);
 /* PRQA S 5016 ++ */ /* VL_PduR_5016 */
@@ -61,6 +62,7 @@ PduR_QueueStoreType PduR_QueueStorePduInfo(
     const PduInfoType*     pduInfoPtr,
     uint8                  apiId);
 void PduR_QueueDataConf(PduR_QueueRuntimeType* queuePtr, uint8 metaDataLength);
+#endif
 #ifdef __cplusplus
 }
 #endif

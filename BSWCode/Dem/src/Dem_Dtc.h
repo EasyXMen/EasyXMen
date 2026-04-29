@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -99,6 +99,7 @@ DEM_LOCAL void Dem_DTCAged(Dem_EventIdType EventId, Dem_NvBlockNumType MemoryInd
 
 #if (DEM_AVAILABILITY_SUPPORT == DEM_EVENT_AVAILABILITY)
 #if (DEM_EVENT_COMBINATION_SUPPORT != DEM_EVCOMB_DISABLED)
+#if (DEM_COMBINATION_NUMBER > 0u)
 /**
  * @brief Marks a combined event unavailable
  * @param[in]     EventId: The event ID
@@ -118,6 +119,7 @@ DEM_LOCAL void Dem_DTCDisableCombined(Dem_EventIdType EventId);
 DEM_LOCAL void Dem_DTCEnableCombined(Dem_EventIdType EventId);
 #endif
 #endif
+#endif
 
 /**
  * @brief         Read the DTC number for the given EventId
@@ -134,6 +136,7 @@ DEM_LOCAL void Dem_DTCEnableCombined(Dem_EventIdType EventId);
  */
 DEM_LOCAL Std_ReturnType Dem_GetDTCByEvent(Dem_EventIdType EventId, Dem_DTCFormatType DTCFormat, uint32* DTCOfEvent);
 
+#if (DEM_USER_CONTROLLED_WIR == STD_ON)
 /**
  * @brief         Set DTC WIRS tatus
  * @param[in]     EventId: The event ID
@@ -148,6 +151,7 @@ DEM_LOCAL Std_ReturnType Dem_GetDTCByEvent(Dem_EventIdType EventId, Dem_DTCForma
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL Std_ReturnType Dem_DTCSetWIRStatus(Dem_EventIdType EventId, boolean WIRStatus);
+#endif
 
 /* ========================================== internal function definitions ========================================= */
 #define DEM_START_SEC_CODE
@@ -233,10 +237,12 @@ DEM_LOCAL_INLINE uint32 Dem_GetEventDTC(Dem_EventIdType EventId)
 DEM_LOCAL_INLINE uint32 Dem_GetEventObdDTC(Dem_EventIdType EventId)
 {
     uint32 lOBDDtcValue = DEM_DTC_OBD_INVALID;
+#if (DEM_OBD_DTC_NUMBER > 0u)
     if (Dem_GetObdDTCRefOfEvent(EventId) != DEM_OBD_DTC_NUMBER)
     {
         lOBDDtcValue = Dem_GlobalConfigPtr->PBObdDTC[Dem_GetObdDTCRefOfEvent(EventId)].DtcValue;
     }
+#endif
     return lOBDDtcValue;
 }
 #endif
@@ -293,6 +299,7 @@ DEM_LOCAL_INLINE void Dem_InitDTCContext(Dem_EventIdType EventId, Dem_DTCContext
 }
 
 #if (DEM_EVENT_COMBINATION_SUPPORT != DEM_EVCOMB_DISABLED)
+#if (DEM_COMBINATION_NUMBER > 0u)
 /**
  * @brief         Calculate Combine DTC Status
  */
@@ -358,6 +365,7 @@ DEM_LOCAL Std_ReturnType Dem_DTCCombinedGroupGetFDC(Dem_CombinationNumType Group
     return ret;
 }
 #endif
+#endif
 
 /**
  * @brief         Calculate DTC Status
@@ -369,12 +377,14 @@ DEM_LOCAL Std_ReturnType Dem_DTCCombinedGroupGetFDC(Dem_CombinationNumType Group
 DEM_LOCAL_INLINE void Dem_CalculateDTCStatus(Dem_DTCContextType* const DTCContext)
 {
 #if (DEM_EVENT_COMBINATION_SUPPORT != DEM_EVCOMB_DISABLED)
+#if (DEM_COMBINATION_NUMBER > 0u)
     if (DTCContext->GroupId != DEM_COMBINATION_NUMBER)
     {
         DTCContext->NewDtcStatus = Dem_CalculateCombineUdsStatus(DTCContext->GroupId);
         Dem_SetCombinedEventUDSStatus(DTCContext->GroupId, DTCContext->NewDtcStatus);
     }
     else
+#endif
 #endif
     {
         DTCContext->NewDtcStatus = Dem_GetEventUDSStatus(DTCContext->EventId);
@@ -487,6 +497,7 @@ DEM_LOCAL_INLINE Dem_UdsStatusByteType
 {
     Dem_UdsStatusByteType newDtcStatus = DtcStatus;
 #if (DEM_EVENT_COMBINATION_SUPPORT != DEM_EVCOMB_DISABLED)
+#if (DEM_COMBINATION_NUMBER > 0u)
     Dem_CombinationNumType groupId = Dem_GetGroupIdOfEvent(EventId);
     if (groupId != DEM_COMBINATION_NUMBER)
     {
@@ -511,6 +522,7 @@ DEM_LOCAL_INLINE Dem_UdsStatusByteType
         newDtcStatus = Dem_CheckCombineUdsStatus(newDtcStatus);
     }
     else
+#endif
 #endif
     {
         if (Dem_GetEventWirActiveStatus(EventId) == TRUE)
@@ -748,12 +760,14 @@ DEM_LOCAL_INLINE Std_ReturnType Dem_DTCGetFaultDetectionCounter(Dem_EventIdType 
 {
     Std_ReturnType ret;
 #if (DEM_EVENT_COMBINATION_SUPPORT != DEM_EVCOMB_DISABLED)
+#if (DEM_COMBINATION_NUMBER > 0u)
     Dem_CombinationNumType groupId = Dem_GetGroupIdOfEvent(EventId);
     if (groupId != DEM_COMBINATION_NUMBER)
     {
         ret = Dem_DTCCombinedGroupGetFDC(groupId, FaultDetectionCounter);
     }
     else
+#endif
 #endif
     {
         ret = Dem_SatelliteGetFaultDetectionCounter(EventId, FaultDetectionCounter);
@@ -762,6 +776,7 @@ DEM_LOCAL_INLINE Std_ReturnType Dem_DTCGetFaultDetectionCounter(Dem_EventIdType 
 }
 
 #if (DEM_EVENT_COMBINATION_SUPPORT != DEM_EVCOMB_DISABLED)
+#if (DEM_COMBINATION_NUMBER > 0u)
 /**
  * @brief Calculates the maximum fault detection counter this cycle of a combined event
  */
@@ -790,6 +805,7 @@ DEM_LOCAL sint8 Dem_GetFDCMaxOfDTCCombined(Dem_CombinationNumType GroupId)
 #endif
     return maxFdc;
 }
+#endif
 #endif
 
 /**
@@ -879,6 +895,7 @@ DEM_LOCAL_INLINE void Dem_CombinedEvent(
     const Dem_CombinedArgPtrType   ArgPtr)
 {
 #if (DEM_EVENT_COMBINATION_SUPPORT == DEM_EVCOMB_ONSTORAGE)
+#if (DEM_COMBINATION_NUMBER > 0u)
     Dem_CombinationNumType groupId = Dem_GetGroupIdOfEvent(EventId);
     if (groupId != DEM_COMBINATION_NUMBER)
     {
@@ -903,6 +920,7 @@ DEM_LOCAL_INLINE void Dem_CombinedEvent(
         ArgPtr->NewDtcStatus = DtcStatus;
     }
     else
+#endif
 #endif
     {
         /** EventId is not a combined event */
@@ -1020,12 +1038,14 @@ DEM_LOCAL void Dem_DTCUpdateFdcMax(Dem_EventIdType EventId)
 #if ((defined(DEM_MAX_FDC_SINCE_LAST_CLEAR)) || (defined(DEM_MAX_FDC_DURING_CURRENT_CYCLE)))
             sint8 newFdc;
 #if (DEM_EVENT_COMBINATION_SUPPORT != DEM_EVCOMB_DISABLED)
+#if (DEM_COMBINATION_NUMBER > 0u)
             Dem_CombinationNumType groupId = Dem_GetGroupIdOfEvent(EventId);
             if (groupId != DEM_COMBINATION_NUMBER)
             {
                 newFdc = Dem_GetFDCMaxOfDTCCombined(groupId);
             }
             else
+#endif
 #endif
             {
                 newFdc = Dem_SatelliteGetMaxFaultDetectionCounter(
@@ -1069,6 +1089,7 @@ DEM_LOCAL_INLINE boolean Dem_CheckDtcMayAge(Dem_EventIdType EventId)
  * @brief Starts aging of an event.In case the event already ages (or does not support aging), this function has no
  * effect.
  */
+/* PRQA S 6070 ++ */ /* VL_MTR_Dem_STCAL */
 DEM_LOCAL void Dem_DTCAgingStart(Dem_EventIdType EventId)
 {
     Dem_EventInternalStatusType internalStatus = Dem_GetDtcInterStatus(EventId);
@@ -1139,6 +1160,8 @@ DEM_LOCAL void Dem_DTCAgingStart(Dem_EventIdType EventId)
         }
     }
 }
+
+/* PRQA S 6070 -- */
 #endif
 
 #if (DEM_AGING_ENABLE == STD_ON)
@@ -1272,6 +1295,7 @@ DEM_LOCAL void Dem_DTCAgedTryAgingOther(Dem_MemoryNumType MemIndex)
 /**
  * @brief Completes aging of a DTC.
  */
+/* PRQA S 6070 ++ */ /* VL_MTR_Dem_STCAL */
 DEM_LOCAL void Dem_DTCAged(Dem_EventIdType EventId, Dem_NvBlockNumType MemoryIndex)
 {
     Dem_UdsStatusByteType oldDtcStatus;
@@ -1320,12 +1344,14 @@ DEM_LOCAL void Dem_DTCAged(Dem_EventIdType EventId, Dem_NvBlockNumType MemoryInd
 #endif
     }
 }
+/* PRQA S 6070 -- */
 #endif
 
 #if (DEM_AGING_ENABLE == STD_ON)
 /**
  * @brief Processes the aging cycle for a DTC
  */
+/* PRQA S 6070 ++ */ /* VL_MTR_Dem_STCAL */
 DEM_LOCAL void Dem_DTCAgingCycle(Dem_EventIdType EventId, uint16 CycleCounter, Dem_NvBlockNumType MemoryIndex)
 {
     if (Dem_GetEventAgingThreshold(EventId) != 0u)
@@ -1369,6 +1395,7 @@ DEM_LOCAL void Dem_DTCAgingCycle(Dem_EventIdType EventId, uint16 CycleCounter, D
 #endif
     }
 }
+/* PRQA S 6070 -- */
 #endif
 
 #if (defined(DEM_OCC2))
@@ -1645,6 +1672,7 @@ DEM_LOCAL void Dem_DTCProcessStorage(Dem_EventContextType* EventContext, Dem_DTC
 
 #if (DEM_AVAILABILITY_SUPPORT == DEM_EVENT_AVAILABILITY)
 #if (DEM_EVENT_COMBINATION_SUPPORT != DEM_EVCOMB_DISABLED)
+#if (DEM_COMBINATION_NUMBER > 0u)
 /**
  * @brief Marks a combined event unavailable
  */
@@ -1730,6 +1758,7 @@ DEM_LOCAL void Dem_DTCEnableCombined(Dem_EventIdType EventId)
     }
 }
 #endif
+#endif
 
 /**
  * @brief         Unavailable the DTC's event. If the DTC has a combined group, disconnect all its subevents.
@@ -1737,11 +1766,13 @@ DEM_LOCAL void Dem_DTCEnableCombined(Dem_EventIdType EventId)
 DEM_LOCAL_INLINE void Dem_DTCDisable(Dem_EventIdType EventId)
 {
 #if (DEM_EVENT_COMBINATION_SUPPORT != DEM_EVCOMB_DISABLED)
+#if (DEM_COMBINATION_NUMBER > 0u)
     if (Dem_GetGroupIdOfEvent(EventId) != DEM_COMBINATION_NUMBER)
     {
         Dem_DTCDisableCombined(EventId);
     }
     else
+#endif
 #endif
     {
         Dem_EventDisableNormal(EventId);
@@ -1754,11 +1785,13 @@ DEM_LOCAL_INLINE void Dem_DTCDisable(Dem_EventIdType EventId)
 DEM_LOCAL_INLINE void Dem_DTCEnable(Dem_EventIdType EventId)
 {
 #if (DEM_EVENT_COMBINATION_SUPPORT != DEM_EVCOMB_DISABLED)
+#if (DEM_COMBINATION_NUMBER > 0u)
     if (Dem_GetGroupIdOfEvent(EventId) != DEM_COMBINATION_NUMBER)
     {
         Dem_DTCEnableCombined(EventId);
     }
     else
+#endif
 #endif
     {
         Dem_EventEnableNormal(EventId);
@@ -1855,6 +1888,7 @@ DEM_LOCAL Std_ReturnType Dem_GetDTCByEvent(Dem_EventIdType EventId, Dem_DTCForma
     return ret;
 }
 
+#if (DEM_USER_CONTROLLED_WIR == STD_ON)
 /**
  * @brief Set DTC WIRS tatus
  */
@@ -1898,6 +1932,7 @@ DEM_LOCAL Std_ReturnType Dem_DTCSetWIRStatus(Dem_EventIdType EventId, boolean WI
     return ret;
 }
 /* PRQA S 6070 -- */
+#endif
 
 #define DEM_STOP_SEC_CODE
 #include "Dem_MemMap.h"

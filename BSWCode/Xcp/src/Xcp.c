@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -434,7 +434,7 @@ void Xcp_Init(const Xcp_ConfigType* Xcp_ConfigPtr)
 #endif
     {
         Xcp_PbCfgPtr = Xcp_ConfigPtr;
-        (void)IStdLib_MemSet(&Xcp_ChannelCommonData, 0, sizeof(Xcp_ChannelCommonData));
+        (void)IStdLib_MemSet(&Xcp_ChannelCommonData, 0u, sizeof(Xcp_ChannelCommonData));
         /*Initialize runtime state variables*/
         Xcp_ChannelCommonData.ProtectionStatus = (uint8)(XCP_PROTECTION);
         Xcp_ChannelCommonData.ConnectionStatus = XCP_DISCONNECT;

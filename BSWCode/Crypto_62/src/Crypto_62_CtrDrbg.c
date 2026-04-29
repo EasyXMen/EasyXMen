@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -22,9 +22,17 @@
  **
  ***********************************************************************************************************************/
 
-/* PRQA S 0488,0316,1252,1253,1290,1840,1842,2001,2015,3397,4436,2889,2784,2986,2995 ++ */ /* VL_QAC_Crypto */
-/* PRQA S 2997,2889,2972,1503,1505,1532,6050,6060,6070,6080,6010,6030,6040 ++ */           /* VL_QAC_Crypto */
+/* PRQA S 6010 EOF */ /* VL_MTR_Crypto_62_STCYC */
+/* PRQA S 6020 EOF */ /* VL_MTR_Crypto_62_STLIN */
+/* PRQA S 6030 EOF */ /* VL_MTR_Crypto_62_STMIF */
+/* PRQA S 6040 EOF */ /* VL_MTR_Crypto_62_STPAR */
+/* PRQA S 6050 EOF */ /* VL_MTR_Crypto_62_STST3 */
+/* PRQA S 6060 EOF */ /* VL_MTR_Crypto_62_STM19 */
+/* PRQA S 6070 EOF */ /* VL_MTR_Crypto_62_STCAL */
+/* PRQA S 6080 EOF */ /* VL_MTR_Crypto_62_STPTH */
 
+/* PRQA S 0488,0316,1252,1253,1290,1840,1842,2001,2015,3397,4436,2889,2784,2986,2995 ++ */ /* VL_Crypto_62_General */
+/* PRQA S 2997,2889,2972,1503,1505,1532 ++ */                                              /* VL_Crypto_62_General */
 /* =================================================== inclusions =================================================== */
 #include "Crypto_62_Internal.h"
 #if (CRYPTO_ALGORITHMMODE_CTRDRBG == STD_ON)
@@ -227,9 +235,9 @@ CRYPTO_62_LOCAL Std_ReturnType Crypto_Block_Cipher_Df(
      *     (Total is padded to a multiple of 16-bytes with zeroes)
      */
     p = buf + CRYPTO_CTR_DRBG_BLOCKSIZE;
-    CRYPTO_PUT_UINT32_BE(data_len, p, 0); /* PRQA S 3138 */ /* VL_QAC_Crypto */
+    CRYPTO_PUT_UINT32_BE(data_len, p, 0); /* PRQA S 3138 */ /* VL_Crypto_62_General */
     p += CRYPTO_CONST_4 + CRYPTO_CONST_3;
-    *p++ = CRYPTO_CTR_DRBG_SEEDLEN; /* PRQA S 3387,3440 */ /* VL_QAC_Crypto */
+    *p++ = CRYPTO_CTR_DRBG_SEEDLEN; /* PRQA S 3387,3440 */ /* VL_Crypto_62_General */
     (void)IStdLib_MemCpy(p, data, data_len);
     p[data_len] = CRYPTO_CONST_0x80;
 
@@ -591,7 +599,7 @@ Std_ReturnType Crypto_ctr_drbg_reseed(Crypto_Ctr_Drbg_Context* ctx, const uint8*
 /******************************************************************************/
 Std_ReturnType Crypto_ctr_drbg_seed(
     Crypto_Ctr_Drbg_Context* ctx,
-    /* PRQA S 1336,3672++ */ /* VL_QAC_Crypto */
+    /* PRQA S 1336,3672++ */ /* VL_Crypto_62_General */
     Std_ReturnType (*f_entropy)(void*, uint8*, uint32),
     /* PRQA S 1336,3672-- */
     void*        p_entropy,
@@ -615,7 +623,7 @@ Std_ReturnType Crypto_ctr_drbg_seed(
      * grab for a nonce (see Crypto_ctr_drbg_set_nonce_len()).
      * If it's -1, indicating that the entropy nonce length was not set
      * explicitly, use a sufficiently large nonce for security. */
-    /* PRQA S 3396++ */ /* VL_QAC_Crypto */
+    /* PRQA S 3396++ */ /* VL_Crypto_62_General */
     nonce_len = (uint32)ctx->reseed_counter;
     /* PRQA S 3396-- */
     /* Initialize with an empty key. */
@@ -810,7 +818,7 @@ Std_ReturnType Crypto_CtrDrbgProcess(uint32 objectId, Crypto_AlgorithmFamilyType
     uint32                  outLen    = *Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr;
     ret                               = Crypto_62_KeyElementGet(
         Crypto_62_StoredJob[objectId].cryptoKeyId,
-        /* PRQA S 1258++ */ /* VL_QAC_Crypto */
+        /* PRQA S 1258++ */ /* VL_Crypto_62_General */
         CRYPTO_KE_RANDOM_SEED_STATE,
         /* PRQA S 1258-- */
         &key[0],
@@ -842,4 +850,4 @@ Std_ReturnType Crypto_CtrDrbgProcess(uint32 objectId, Crypto_AlgorithmFamilyType
 #endif
 
 /* PRQA S 0488,0316,1252,1253,1290,1840,1842,2001,2015,3397,4436,2889,2784,2986,2995 -- */
-/* PRQA S 2997,2889,2972,1503,1505,1532,6050,6060,6070,6080,6010,6030,6040 -- */
+/* PRQA S 2997,2889,2972,1503,1505,1532 -- */

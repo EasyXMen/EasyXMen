@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -52,7 +52,7 @@ typedef uint8 CanNm_ChannelIndexType; /**< @range 0..255 */
 /**
  * @brief Network status Types.
  */
-typedef enum CanNm_NetRequestStatusTag
+typedef enum
 {
     CANNM_NETWORK_REQUESTED, /**< network state is requested @range 0 */
     CANNM_NETWORK_RELEASED,  /**< network state is released @range 1 */
@@ -61,7 +61,7 @@ typedef enum CanNm_NetRequestStatusTag
 /**
  * @brief Coordinator indication status type.
  */
-typedef enum CanNm_CSRIndStatusTag
+typedef enum
 {
     CANNM_CSR_IND_INIT,      /**< Coordinator indication status is init @range 0 */
     CANNM_CSR_IND_CANCELLED, /**< Coordinator indication status is cancelled @range 1 */
@@ -71,7 +71,7 @@ typedef enum CanNm_CSRIndStatusTag
 /**
  * @brief Timer kind in CanNm module.
  */
-typedef enum CanNm_TimersTag
+typedef enum
 {
     CANNM_STATE_HOLE_TIMER, /**< state maintenance timer type @range 0 */
     CANNM_NM_TIMEOUT_TIMER, /**< NM-Timeout timer @range 1 */
@@ -90,7 +90,7 @@ typedef enum CanNm_TimersTag
 /**
  * @brief Run time variable.
  */
-typedef struct CanNm_InnerChannelTag
+typedef struct
 {
     Nm_StateType CanNmState; /**< Current canNm state @range 0..7 */
     Nm_ModeType  CanNmMode;  /**< Current network mode @range 0..3 */
@@ -156,7 +156,7 @@ typedef uint8 CanNm_PduPositionType; /**< @range 0/1/255 */
 /**
  * @brief PC item structure in channel configuration.
  */
-typedef struct CanNm_ChannelConfigTag
+typedef struct
 {
 #if CANNM_MULTIPLE_PARTITION_USED == STD_ON
     uint16 ApplicationID; /**< Application Id of this channel @range 0..65535 */
@@ -249,7 +249,7 @@ typedef struct CanNm_ChannelConfigTag
 /**
  * @brief This container is used to configure the Rx PDU properties that are used for the CanNm Channel.
  */
-typedef struct CanNm_RxPduTag
+typedef struct
 {
     PduIdType RxPduId; /**< This parameter defines the Rx PDU ID of the CanIf L-PDU range that is associated with this
                           CanNm channel. @range 0..65535 */
@@ -258,7 +258,7 @@ typedef struct CanNm_RxPduTag
 /**
  * @brief This container contains the CanNmTxConfirmationPduId and the CanNmTxPduRef.
  */
-typedef struct CanNm_TxPduTag
+typedef struct
 {
     PduIdType TxConfirmationPduId; /**< Handle Id to be used by the Lower Layer to confirm the transmission of the
                                       CanNmTx Pdu to the LowerLayer. @range 0..65535 */
@@ -272,7 +272,7 @@ typedef struct CanNm_TxPduTag
 /**
  * @brief This container is used to configure the UserNm PDU.
  */
-typedef struct CanNm_UserDataTxPduTag
+typedef struct
 {
     PduIdType TxUserDataPduId; /**< This parameter defines the Handle ID of the NM User Data I-PDU. @range 0..65535 */
     PduIdType UpperLayerPduId; /**< The macro value of the configuration when CanNmTxUserDataPduRef is referenced by the
@@ -283,7 +283,7 @@ typedef struct CanNm_UserDataTxPduTag
 /**
  * @brief PB entry structure in channel configuration.
  */
-typedef struct CanNm_ChannelPBConfigTag
+typedef struct
 {
     uint16 MsgCycleOffset; /**< Time offset in the periodic transmission node. @range 0..65535 */
 #if CANNM_BUSLOAD_REDUCTION_ENABLED == STD_ON
@@ -320,7 +320,7 @@ typedef struct CanNm_ChannelPBConfigTag
 /**
  * @brief Definition of datatype CanNm_ConfigType.
  */
-typedef struct CanNm_ConfigTag
+typedef struct
 {
     const CanNm_ChannelPBConfigType* ChlPBCfgPtr; /**< CanNm channel PB configuration data address @range NA */
 } CanNm_ConfigType;

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -53,7 +53,19 @@
 /* ================================================ type definitions ================================================ */
 
 /* ========================================= internal function declarations ========================================= */
+#ifdef QAC_ANALYZE
+#pragma PRQA_NO_SIDE_EFFECTS CanTSyn_TransmitSYNC
+#pragma PRQA_NO_SIDE_EFFECTS CanTSyn_TransmitFUP
+#endif
 #if (CANTSYN_DEV_ERROR_DETECT == STD_ON)
+#ifdef QAC_ANALYZE
+#pragma PRQA_NO_SIDE_EFFECTS CanTSyn_ValidatePointer
+#pragma PRQA_NO_SIDE_EFFECTS CanTSyn_ValidateTxMode
+#pragma PRQA_NO_SIDE_EFFECTS CanTSyn_ValidateCtrlIdx
+#pragma PRQA_NO_SIDE_EFFECTS CanTSyn_ValidteTxPduId
+#pragma PRQA_NO_SIDE_EFFECTS CanTSyn_ValidteRxPduId
+#pragma PRQA_NO_SIDE_EFFECTS CanTSyn_ValidteInitStatus
+#endif
 CANTSYN_LOCAL boolean CanTSyn_ValidatePointer(uint8 apiId, const void* pointer);
 CANTSYN_LOCAL boolean CanTSyn_ValidateTxMode(CanTSyn_TransmissionModeType mode);
 CANTSYN_LOCAL boolean CanTSyn_ValidateCtrlIdx(uint8 ctrlIdx);
@@ -894,6 +906,10 @@ CANTSYN_LOCAL void CanTSyn_RxSYNC(uint8 domainIdx, const PduInfoType* PduInfoPtr
                         > maxJumpWidth))))
         {
             result = E_NOT_OK;
+        }
+        else
+        {
+            /* do nothing */
         }
     }
 

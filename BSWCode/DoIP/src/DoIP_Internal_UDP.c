@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -406,6 +406,7 @@ boolean DoIP_SwitchAnc(const boolean* active) /* PRQA S 1532 */ /* VL_DoIP_RefeO
  * @brief Notify status of UDP.
  */
 /* PRQA S 1532 ++ */ /* VL_DoIP_RefeOneFile */
+/* PRQA S 4461 ++ */ /* VL_DoIP_4461 */
 void DoIP_SoConModeChgUdp(SoAd_SoConIdType soConId, SoAd_SoConModeType mode)
 /* PRQA S 1532 -- */ /* VL_DoIP_RefeOneFile */
 {
@@ -579,7 +580,7 @@ Std_ReturnType DoIP_CheckUdpMsgPayload(const PduInfoType* pduInfoPtr, uint16 soa
 
     return ret;
 }
-
+/* PRQA S 4461 -- */
 /**
  * @brief Handle received IF message.
  */
@@ -816,8 +817,8 @@ DOIP_LOCAL void DoIP_GetFurtherActionByteFromCfg(uint8 buf[]) /* PRQA S 3450 */ 
         uint8 index = 0u;
 
         /*SWS_DoIP_00082*/
-        if ((E_OK == DoIP_GetTcpConnStatusIdxBySa(sa, &index))
-            && (DOIP_SOCKET_ACTIVATED != DoIP_TcpConnStatus[index].RaState)) /* PRQA S 2844 */ /* VL_QAC_DerefNullPtr */
+        if ((E_NOT_OK == DoIP_GetTcpConnStatusIdxBySa(sa, &index))
+            || (DOIP_SOCKET_ACTIVATED != DoIP_TcpConnStatus[index].RaState)) /* PRQA S 2844 */ /* VL_QAC_DerefNullPtr */
         {
             buf[0] = DOIP_FURTHER_ACTION_SECURITY; /* PRQA S 2824 */ /* VL_DoIP_ArithNullptr */
         }
@@ -1066,7 +1067,7 @@ DOIP_LOCAL void DoIP_SendVehicleIdentificationRsp(uint16 soadTxPduRef)
 
     /* EID - 27~32 */
     SoAd_SoConIdType soConId;
-    (void)SoAd_GetSoConId(soadTxPduRef, &soConId);
+    (void)SoAd_GetSoConId(soadTxPduRef, &soConId); /* PRQA S 4461 */ /* VL_DoIP_4461 */
     DoIP_GetEid(soConId, &buf[DOIP_IDENTIFICATION_RSP_MSG_FIELD_POSITION_EID]);
 
     /* GID - 33~38 */
@@ -1119,7 +1120,7 @@ DOIP_LOCAL void DoIP_SendVehicleIdentificationRsp(uint16 soadTxPduRef)
     pduInfo.MetaDataPtr = NULL_PTR;
     pduInfo.SduLength   = bufLen;
 
-    (void)SoAd_IfTransmit(soadTxPduRef, &pduInfo);
+    (void)SoAd_IfTransmit(soadTxPduRef, &pduInfo); /* PRQA S 4461 */ /* VL_DoIP_4461 */
 }
 /* PRQA S 6070 -- */
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -370,6 +370,8 @@ CANTP_LOCAL uint8 CanTp_CalculateSTMin(uint8 STminValue);
 /* ========================================= internal function definition ========================================= */
 #define CANTP_START_SEC_CODE
 #include "CanTp_MemMap.h"
+
+/* PRQA S 4464,4461,2995,2991,2992 ++ */ /* VL_CanTp_4464,VL_CanTp_4461,VL_CanTp_2995,VL_CanTp_2991,VL_CanTp_2992 */
 /**
  *@brief  This function get internal STmin timer value.
  */
@@ -406,7 +408,7 @@ CANTP_LOCAL void CanTp_InitRxChannel(CanTp_RxStatusType* rxState)
 #else
         CanTp_GPartInfoType* globalInfo = &CanTp_GlobalPartitionInfo[0];
 #endif
-        CanTp_ClearRxQueue(globalInfo->CanTp_RxQueue, rxState->RxNSduId, &globalInfo->CurrentIndex);
+        CanTp_ClearRxQueue(globalInfo->RxQueue, rxState->RxNSduId, &globalInfo->CurrentIndex);
     }
 #endif
     rxState->RxNSduId       = CANTP_INVALID_U16;
@@ -508,6 +510,7 @@ CANTP_LOCAL void CanTp_SendFC(
     /* PRQA S 4391 ++*/ /* VL_CanTp_DataConverteToWider */
     pduInfo.SduLength = (PduLengthType)(rxStatus->PCIOffset + CANTP_PCI_LENGTH_FC);
     /* PRQA S 4391 --*/
+#if (CANTP_ENABLED_RX_BYTE_PADDING == STD_ON)
     if ((CANTP_PADDING_ON == rxNSduCfgPtr->RxPaddingActivation) && (pduInfo.SduLength < CANTP_CAN20_FRAME_LEN_MAX))
     {
         /** @see SWS_CanTp_00347 If CanTpRxPaddingActivation is equal to CANTP_ON for an Rx N-SDU, the CanTp module
@@ -521,11 +524,12 @@ CANTP_LOCAL void CanTp_SendFC(
         /* PRQA S 4491 -- */
         pduInfo.SduLength = CANTP_CAN20_FRAME_LEN_MAX;
     }
+#endif
 #if (CANTP_MULTIPLE_PARTITION_ENABLED == STD_ON)
     CanTp_ConfirmDirectionType* txDirection =
-        &globalInfo->CanTp_TxDirection[rxNSduCfgPtr->TxFcNPduId - CANTP_GETTXNPDUSTART(globalInfo->index)];
+        &globalInfo->CanTpTxDirection[rxNSduCfgPtr->TxFcNPduId - CANTP_GETTXNPDUSTART(globalInfo->index)];
 #else
-    CanTp_ConfirmDirectionType* txDirection = &globalInfo->CanTp_TxDirection[rxNSduCfgPtr->TxFcNPduId];
+    CanTp_ConfirmDirectionType* txDirection = &globalInfo->CanTpTxDirection[rxNSduCfgPtr->TxFcNPduId];
 #endif
     /* check whether Tx Buffer occupied */
     if (txDirection->ConnectionId == CANTP_INVALID_U16)
@@ -634,9 +638,9 @@ CANTP_LOCAL BufReq_ReturnType CanTp_GetTxBuffer(
         bufRslt = PduR_CanTpCopyTxData(txNSduCfgPtr->TxIPduId, &pduInfo, NULL_PTR, &bufferSize);
 #if (CANTP_MULTIPLE_PARTITION_ENABLED == STD_ON)
         CanTp_ConfirmDirectionType* txDirection =
-            &globalInfo->CanTp_TxDirection[txStatus->TxPduId - CANTP_GETTXNPDUSTART(globalInfo->index)];
+            &globalInfo->CanTpTxDirection[txStatus->TxPduId - CANTP_GETTXNPDUSTART(globalInfo->index)];
 #else
-        CanTp_ConfirmDirectionType* txDirection = &globalInfo->CanTp_TxDirection[txStatus->TxPduId];
+        CanTp_ConfirmDirectionType* txDirection = &globalInfo->CanTpTxDirection[txStatus->TxPduId];
 #endif
         if ((bufRslt == BUFREQ_OK) && (txDirection->ConnectionId == CANTP_INVALID_U16))
         {
@@ -718,7 +722,11 @@ CANTP_LOCAL void CanTp_TxTransmit(
     txDirection->ConnectionId = txStatus->TxNSduId;
 #endif
     /* For DLC values from 9 to 15 only the mandatory padding should be used. */
-    if ((CANTP_PADDING_ON == txNSduCfgPtr->TxPaddingActivation) || (offset > CANTP_CAN20_FRAME_LEN_MAX))
+    if (
+#if (CANTP_ENABLED_TX_BYTE_PADDING == STD_ON)
+        (CANTP_PADDING_ON == txNSduCfgPtr->TxPaddingActivation) ||
+#endif
+        (offset > CANTP_CAN20_FRAME_LEN_MAX))
     {
         CanTp_AssemblePaddingData(txStatus, txpduInfo, offset);
     }
@@ -778,38 +786,35 @@ CANTP_LOCAL Std_ReturnType CanTp_TxSetupConnection(
     Std_ReturnType ret = E_NOT_OK;
 #if (CANTP_MULTIPLE_PARTITION_ENABLED == STD_ON)
     CanTp_TxStatusType* txStatus =
-        &globalInfo->CanTp_TxConnectionStatus[txNSduId - CANTP_GETTXNSDUSTART(globalInfo->index)];
+        &globalInfo->CanTpTxConnectionStatus[txNSduId - CANTP_GETTXNSDUSTART(globalInfo->index)];
 #else
-    CanTp_TxStatusType* txStatus = &globalInfo->CanTp_TxConnectionStatus[txNSduId];
+    CanTp_TxStatusType* txStatus = &globalInfo->CanTpTxConnectionStatus[txNSduId];
 #endif
 
     /* SWS_CanTp_00123 */
     /* SWS_CanTp_00206 */ /* reject a request when transmission session is running */
     if ((pduInfoPtr->SduLength > 0u) && (txStatus->ChannelState == CANTP_TX_IDLE))
     {
-        uint8   pciOffset       = CanTp_GetPCIOffset(txNSduCfgPtr->AddressingFormat);
-        boolean sendSingleFrame = FALSE;
-        uint8   dataOffset      = CANTP_PCI_LENGTH_SF;
+        uint8 pciOffset  = CANTP_RXGETADROFFSET(txNSduCfgPtr->AddressingFormat);
+        uint8 dataOffset = CANTP_PCI_LENGTH_SF;
 #if (CANTP_TRANSMIT_CAN20_WITH_CANFD == STD_ON)
         /* PRQA S 3396 ++ */ /* VL_CanTp_3396 */
-        txStatus->TxDLC = CanTp_ChannelCanWithCanFD[txNSduCfgPtr->ChannelId].IsSupport == TRUE
-                              ? CANTP_CAN20_FRAME_LEN_MAX
-                              : txNSduCfgPtr->TxNPduDLC;
+        txStatus->TxDLC = CanTp_ChannelCanWithCanFD[txNSduCfgPtr->ChannelId].IsSupport ? CANTP_CAN20_FRAME_LEN_MAX
+                                                                                       : txNSduCfgPtr->TxNPduDLC;
         /* PRQA S 3396 -- */
 #else
         txStatus->TxDLC = txNSduCfgPtr->TxNPduDLC;
 #endif
 
-        PduLengthType maxPayloadLen = txStatus->TxDLC - pciOffset - dataOffset;
-        if (maxPayloadLen >= pduInfoPtr->SduLength)
-        {
-            PduLengthType totalFrameSize = (uint16)pciOffset + (uint16)dataOffset + pduInfoPtr->SduLength;
-            sendSingleFrame =
-                (totalFrameSize <= CANTP_CAN20_FRAME_LEN_MAX)
-                || ((maxPayloadLen + CANTP_PCI_LENGTH_SF - CANTP_PCI_LENGTH_SF_FD) >= pduInfoPtr->SduLength);
-        }
+        PduLengthType totalFrameSize = (uint16)pciOffset + (uint16)dataOffset + pduInfoPtr->SduLength;
+        boolean       sendSF         = (totalFrameSize <= CANTP_CAN20_FRAME_LEN_MAX)
+#if (CANTP_FD == STD_ON)
+                         || ((txStatus->TxDLC > CANTP_CAN20_FRAME_LEN_MAX)
+                             && ((pciOffset + CANTP_PCI_LENGTH_SF_FD + pduInfoPtr->SduLength) <= txStatus->TxDLC))
+#endif
+            ;
         /* Unified frame transmission handling */
-        if (sendSingleFrame)
+        if (sendSF)
         {
             /* SWS_CanTp_00231 send a SF N-PDU */
             txStatus->TxNSduId      = txNSduId;
@@ -822,8 +827,9 @@ CANTP_LOCAL Std_ReturnType CanTp_TxSetupConnection(
             ret                     = E_OK;
         }
         else
-        {
-            uint8 dataLenMax = (uint8)(txStatus->TxDLC) - pciOffset;
+        { /* PRQA S 2985 ++ */ /* VL_CanTp_2985 */
+            uint8 payloadMax = (uint8)(txStatus->TxDLC) - pciOffset;
+            /* PRQA S 2985 -- */
             /* SWS_CanTp_00232 initiate a multiple frame transmission session */
             txStatus->ChannelState = CANTP_TX_TRANSMIT_FF;
             if (txNSduCfgPtr->TxTaType != CANTP_FUNCTIONAL)
@@ -836,8 +842,8 @@ CANTP_LOCAL Std_ReturnType CanTp_TxSetupConnection(
                 txStatus->DatalenRemain = pduInfoPtr->SduLength;
                 uint8 ffOffset          = (pduInfoPtr->SduLength <= CANTP_FF_DL_12BIT_LENGTH) ? CANTP_PCI_LENGTH_FF
                                                                                               : CANTP_PCI_LENGTH_FF_12BIT;
-                txStatus->FFDataMax     = dataLenMax - ffOffset;
-                txStatus->CFDataMax     = dataLenMax - CANTP_PCI_LENGTH_CF;
+                txStatus->FFDataMax     = payloadMax - ffOffset;
+                txStatus->CFDataMax     = payloadMax - CANTP_PCI_LENGTH_CF;
                 txStatus->Timer         = txNSduCfgPtr->N_Cs;
                 ret                     = E_OK;
             }
@@ -874,7 +880,7 @@ CANTP_LOCAL Std_ReturnType CanTp_TxSetupConnection(
  */
 CANTP_LOCAL void CanTp_TxFCConfirmation(CanTp_RxStatusType* rxStatus, Std_ReturnType result)
 {
-    const CanTp_RxNSduType* rxNSduCfgPtr = &CanTp_ConfigPtr->CanTp_RxNSduCfg[rxStatus->RxNSduId];
+    const CanTp_RxNSduType* rxNSduCfgPtr = &CanTp_ConfigPtr->CanTpRxNSduCfg[rxStatus->RxNSduId];
     if (NULL_PTR == rxNSduCfgPtr)
     {
 #if (STD_ON == CANTP_DEV_ERROR_DETECT)
@@ -1044,7 +1050,7 @@ CANTP_LOCAL void CanTp_HandleRxChannels(void)
     CanTp_GPartInfoType* globalInfo = CanTp_GlobalPartitionInfo;
 #endif
 
-    if ((globalInfo != NULL_PTR) && (globalInfo->CanTp_RxConnectionStatus != NULL_PTR))
+    if ((globalInfo != NULL_PTR) && (globalInfo->CanTpRxConnectionStatus != NULL_PTR))
     {
 #if (CANTP_RX_QUEUE == STD_ON)
         for (uint8 iloop = 0; iloop < globalInfo->CurrentIndex; iloop++)
@@ -1053,17 +1059,17 @@ CANTP_LOCAL void CanTp_HandleRxChannels(void)
         uint8 num = CANTP_GETRXNSDUEND(globalInfo->index) - CANTP_GETRXNSDUSTART(globalInfo->index);
         for (uint8 index = 0u; index <= num; index++)
 #else
-        for (uint8 index = 0u; index < CanTp_ConfigPtr->CanTp_RxNSduNum; index++)
+        for (uint8 index = 0u; index < CanTp_ConfigPtr->CanTpRxNSduNum; index++)
 #endif
 #endif
         {
 #if (CANTP_RX_QUEUE == STD_ON)
-            uint8 index = globalInfo->CanTp_RxQueue[iloop];
+            uint8 index = globalInfo->RxQueue[iloop];
 #endif
-            rxStatus = &globalInfo->CanTp_RxConnectionStatus[index];
+            rxStatus = &globalInfo->CanTpRxConnectionStatus[index];
             if (rxStatus->ChannelState != CANTP_RX_IDLE)
             {
-                rxNSduCfgPtr = &CanTp_ConfigPtr->CanTp_RxNSduCfg[rxStatus->RxNSduId];
+                rxNSduCfgPtr = &CanTp_ConfigPtr->CanTpRxNSduCfg[rxStatus->RxNSduId];
 #if (STD_OFF == CANTP_SYNCHRONOUS_RXINDICATION)
                 if (CANTP_FLAGISSET(rxStatus->EventFlags, CANTP_EVENT_RXNOTIFIUPPER))
                 {
@@ -1099,7 +1105,7 @@ CANTP_LOCAL void CanTp_HandleTxTimeoutProcess(
     const CanTp_TxNSduType* txNSduCfgPtr,
     CanTp_GPartInfoType*    globalInfo)
 {
-    CanTp_ConfirmDirectionType* txDirection = &globalInfo->CanTp_TxDirection[txStatus->TxPduId];
+    CanTp_ConfirmDirectionType* txDirection = &globalInfo->CanTpTxDirection[txStatus->TxPduId];
     boolean                     timeoutFlag = FALSE;
     switch (txStatus->ChannelState)
     {
@@ -1168,17 +1174,17 @@ CANTP_LOCAL void CanTp_HandleTxChannels(void)
     CanTp_GPartInfoType* globalInfo = CanTp_GlobalPartitionInfo;
 #endif
 
-    if ((globalInfo != NULL_PTR) && (globalInfo->CanTp_TxConnectionStatus != NULL_PTR))
+    if ((globalInfo != NULL_PTR) && (globalInfo->CanTpTxConnectionStatus != NULL_PTR))
     {
-        txStatus = globalInfo->CanTp_TxConnectionStatus;
+        txStatus = globalInfo->CanTpTxConnectionStatus;
 #if (CANTP_MULTIPLE_PARTITION_ENABLED == STD_ON)
         for (uint8 index = CANTP_GETTXNSDUSTART(globalInfo->index); index <= CANTP_GETTXNSDUEND(globalInfo->index);
              index++)
 #else
-        for (uint8 index = 0u; index < CanTp_ConfigPtr->CanTp_TxNSduNum; index++)
+        for (uint8 index = 0u; index < CanTp_ConfigPtr->CanTpTxNSduNum; index++)
 #endif
         {
-            txNSduCfgPtr = &CanTp_ConfigPtr->CanTp_TxNSduCfg[txStatus->TxNSduId];
+            txNSduCfgPtr = &CanTp_ConfigPtr->CanTpTxNSduCfg[txStatus->TxNSduId];
             if (txStatus->ChannelState != CANTP_TX_IDLE)
             {
                 if (txStatus->STminTimer > 0u)
@@ -1215,12 +1221,12 @@ CANTP_LOCAL void CanTp_RxSubDealWithFC(
     const CanTp_TxNSduType* txNSduCfgPtr,
     CanTp_GPartInfoType*    globalInfo) /* PRQA S 3673 */ /* VL_CanTp_3673 */
 {
-    uint8 pciOffset = CanTp_GetPCIOffset(txNSduCfgPtr->AddressingFormat);
+    uint8 pciOffset = CANTP_RXGETADROFFSET(txNSduCfgPtr->AddressingFormat);
 #if (CANTP_MULTIPLE_PARTITION_ENABLED == STD_ON)
     CanTp_TxStatusType* txStatus =
-        &globalInfo->CanTp_TxConnectionStatus[txNSduCfgPtr->TxNSduId - CANTP_GETTXNSDUSTART(globalInfo->index)];
+        &globalInfo->CanTpTxConnectionStatus[txNSduCfgPtr->TxNSduId - CANTP_GETTXNSDUSTART(globalInfo->index)];
 #else
-    CanTp_TxStatusType* txStatus = &globalInfo->CanTp_TxConnectionStatus[txNSduCfgPtr->TxNSduId];
+    CanTp_TxStatusType* txStatus = &globalInfo->CanTpTxConnectionStatus[txNSduCfgPtr->TxNSduId];
 #endif
     if (txStatus->ChannelState == CANTP_TX_WAIT_RECEIVE_FC)
     {
@@ -1228,15 +1234,15 @@ CANTP_LOCAL void CanTp_RxSubDealWithFC(
         {
             PduR_CanTpTxConfirmation(txNSduCfgPtr->TxIPduId, E_NOT_OK);
         }
+#if ((STD_ON == CANTP_RUNTIME_ERROR_DETECT) && (CANTP_ENABLED_TX_BYTE_PADDING == STD_ON))
         else if (
             (txNSduCfgPtr->TxPaddingActivation == CANTP_PADDING_ON)
             && (pduInfoPtr->SduLength < CANTP_CAN20_FRAME_LEN_MAX))
         {
             PduR_CanTpTxConfirmation(txNSduCfgPtr->TxIPduId, E_NOT_OK);
-#if (STD_ON == CANTP_RUNTIME_ERROR_DETECT)
             CANTP_DET_REPORTRUNTIMEERROR(CANTP_SERVICEID_RXINDICATION, CANTP_E_PADDING);
-#endif
         }
+#endif
 #if (                                                                                               \
     (CANTP_DYN_ID_SUPPORT == STD_ON)                                                                \
     && ((CANTP_EXTENDED_ADDRESSING_SUPPORT == STD_ON) || (CANTP_MIXED_ADDRESSING_SUPPORT == STD_ON) \
@@ -1248,7 +1254,7 @@ CANTP_LOCAL void CanTp_RxSubDealWithFC(
 #endif
         else
         {
-            CanTp_ConfirmDirectionType* txDirection = &globalInfo->CanTp_TxDirection[txStatus->TxPduId];
+            CanTp_ConfirmDirectionType* txDirection = &globalInfo->CanTpTxDirection[txStatus->TxPduId];
             switch ((uint8)(pduInfoPtr->SduDataPtr[pciOffset] & CANTP_FC_FS_MASK))
             {
             case CANTP_FC_FS_CTS:
@@ -1261,10 +1267,8 @@ CANTP_LOCAL void CanTp_RxSubDealWithFC(
                      * continue the transmission. */
                     txStatus->ExpectdCfSn  = 0x01u;
                     uint8 blocksizeCounter = pduInfoPtr->SduDataPtr[pciOffset + 1u];
-                    /* PRQA S 3396 ++ */ /* VL_CanTp_3396 */
-                    txStatus->FcBs = blocksizeCounter > 0u ? blocksizeCounter : CANTP_INVALID_U8;
-                    /* PRQA S 3396 -- */
-                    txStatus->FcSTmin = CanTp_CalculateSTMin(pduInfoPtr->SduDataPtr[pciOffset + 2u]);
+                    txStatus->FcBs         = (blocksizeCounter > 0u) ? blocksizeCounter : CANTP_INVALID_U8;
+                    txStatus->FcSTmin      = CanTp_CalculateSTMin(pduInfoPtr->SduDataPtr[pciOffset + 2u]);
                 }
                 txStatus->ChannelState = CANTP_TX_TRANSMIT_CF;
                 txStatus->Timer        = txNSduCfgPtr->N_Cs;
@@ -1301,7 +1305,7 @@ CANTP_LOCAL Std_ReturnType CanTp_RxSubDealWithCFCheck(
 {
     Std_ReturnType ret = E_NOT_OK;
     /* check CFlength */
-    uint8 dataOffSet       = CanTp_GetPCIOffset(rxNSduCfgPtr->AddressingFormat) + CANTP_PCI_LENGTH_CF;
+    uint8 dataOffSet       = CANTP_RXGETADROFFSET(rxNSduCfgPtr->AddressingFormat) + CANTP_PCI_LENGTH_CF;
     rxStatus->ChannelState = CANTP_RX_RECEIVE_CF;
     if ((rxStatus->InitalDLC < (rxStatus->DatalenRemain + dataOffSet))
         && (pduInfoPtr->SduLength == rxStatus->InitalDLC))
@@ -1333,17 +1337,24 @@ CANTP_LOCAL Std_ReturnType CanTp_RxSubDealWithCFCheck(
         }
 #endif
         // last cf length check
-        if (((pduInfoPtr->SduLength == len) && (rxNSduCfgPtr->RxPaddingActivation == CANTP_PADDING_OFF))
+        if (((pduInfoPtr->SduLength == len)
+#if (CANTP_ENABLED_RX_BYTE_PADDING == STD_ON)
+             && (rxNSduCfgPtr->RxPaddingActivation == CANTP_PADDING_OFF)
+#endif
+                 )
+#if (CANTP_ENABLED_RX_BYTE_PADDING == STD_ON)
             || ((((len <= CANTP_CAN20_FRAME_LEN_MAX) && (pduInfoPtr->SduLength == CANTP_CAN20_FRAME_LEN_MAX))
                  || ((len > CANTP_CAN20_FRAME_LEN_MAX) && (pduInfoPtr->SduLength == len)))
-                && (rxNSduCfgPtr->RxPaddingActivation == CANTP_PADDING_ON)))
+                && (rxNSduCfgPtr->RxPaddingActivation == CANTP_PADDING_ON))
+#endif
+        )
         {
             *isLastCF = TRUE;
             ret       = E_OK;
         }
         else
         {
-#if (STD_ON == CANTP_RUNTIME_ERROR_DETECT)
+#if ((STD_ON == CANTP_RUNTIME_ERROR_DETECT) && (CANTP_ENABLED_RX_BYTE_PADDING == STD_ON))
             if (rxNSduCfgPtr->RxPaddingActivation == CANTP_PADDING_ON)
             {
                 CANTP_DET_REPORTRUNTIMEERROR(CANTP_SERVICEID_RXINDICATION, CANTP_E_PADDING);
@@ -1392,9 +1403,9 @@ CANTP_LOCAL void CanTp_RxSubDealWithCF(
 {
 #if (CANTP_MULTIPLE_PARTITION_ENABLED == STD_ON)
     CanTp_RxStatusType* rxStatus =
-        &globalInfo->CanTp_RxConnectionStatus[rxNSduCfgPtr->RxNSduId - CANTP_GETRXNSDUSTART(globalInfo->index)];
+        &globalInfo->CanTpRxConnectionStatus[rxNSduCfgPtr->RxNSduId - CANTP_GETRXNSDUSTART(globalInfo->index)];
 #else
-    CanTp_RxStatusType* rxStatus = &globalInfo->CanTp_RxConnectionStatus[rxNSduCfgPtr->RxNSduId];
+    CanTp_RxStatusType* rxStatus = &globalInfo->CanTpRxConnectionStatus[rxNSduCfgPtr->RxNSduId];
 #endif
     if (CANTP_FUNCTIONAL == rxNSduCfgPtr->RxTaType)
     {
@@ -1410,7 +1421,7 @@ CANTP_LOCAL void CanTp_RxSubDealWithCF(
         {
             PduInfoType        upperpduInfo;
             const PduInfoType* upperpduInfoPtr = &upperpduInfo;
-            uint8              dataOffSet = CanTp_GetPCIOffset(rxNSduCfgPtr->AddressingFormat) + CANTP_PCI_LENGTH_CF;
+            uint8              dataOffSet = CANTP_RXGETADROFFSET(rxNSduCfgPtr->AddressingFormat) + CANTP_PCI_LENGTH_CF;
             PduLengthType      dataLength = rxStatus->InitalDLC - dataOffSet;
             PduLengthType      bufferSize;
             if (isLastCF == TRUE)
@@ -1555,7 +1566,7 @@ CANTP_LOCAL void CanTp_RxSubDealWithFFTOUP(
     case BUFREQ_OK:
         /* SWS_CanTp_00080 */
 #if (STD_ON == CANTP_RX_QUEUE)
-        CanTp_AddRxQueue(globalInfo->CanTp_RxQueue, rxNSduCfgPtr->RxNSduId, &globalInfo->CurrentIndex);
+        CanTp_AddRxQueue(globalInfo->RxQueue, rxNSduCfgPtr->RxNSduId, &globalInfo->CurrentIndex);
 #endif
         if (bufferSize < receivedLength)
         {
@@ -1627,9 +1638,9 @@ CANTP_LOCAL void CanTp_RxSubDealWithFF(
 {
 #if (CANTP_MULTIPLE_PARTITION_ENABLED == STD_ON)
     CanTp_RxStatusType* rxStatus =
-        &globalInfo->CanTp_RxConnectionStatus[rxNSduCfgPtr->RxNSduId - CANTP_GETRXNSDUSTART(globalInfo->index)];
+        &globalInfo->CanTpRxConnectionStatus[rxNSduCfgPtr->RxNSduId - CANTP_GETRXNSDUSTART(globalInfo->index)];
 #else
-    CanTp_RxStatusType* rxStatus = &globalInfo->CanTp_RxConnectionStatus[rxNSduCfgPtr->RxNSduId];
+    CanTp_RxStatusType* rxStatus = &globalInfo->CanTpRxConnectionStatus[rxNSduCfgPtr->RxNSduId];
 #endif
 #if (STD_ON == CANTP_RUNTIME_ERROR_DETECT)
     uint8 lErrorId = CANTP_E_NO_ERROR;
@@ -1660,10 +1671,10 @@ CANTP_LOCAL void CanTp_RxSubDealWithFF(
 #endif
     else
     {
-        PduLengthType totalLength;
-        uint8         dataOffset;
-        PduLengthType receivedLength;
-        if (TRUE == CanTp_CheckReceivedFFDL(pduInfoPtr, rxNSduCfgPtr, &totalLength, &receivedLength, &dataOffset))
+        PduLengthType         totalLength;
+        uint8                 dataOffset;
+        CanTp_CheckResultType ret = CanTp_CheckReceivedFFDL(pduInfoPtr, rxNSduCfgPtr, &totalLength, &dataOffset);
+        if (CANTP_CHECK_NOT_OK != ret)
         {
 #if (CANTP_TRANSMIT_CAN20_WITH_CANFD == STD_ON)
             /* CANFD channel is revicving CAN2.0 Frame ,whether Enable, CanFD channel, Can2.0Frame*/
@@ -1688,9 +1699,9 @@ CANTP_LOCAL void CanTp_RxSubDealWithFF(
 #if (CANTP_MULTIPLE_PARTITION_ENABLED == STD_ON)
                     CanTp_ConfirmDirectionType* txDirection =
                         &globalInfo
-                             ->CanTp_TxDirection[rxNSduCfgPtr->TxFcNPduId - CANTP_GETTXNPDUSTART(globalInfo->index)];
+                             ->CanTpTxDirection[rxNSduCfgPtr->TxFcNPduId - CANTP_GETTXNPDUSTART(globalInfo->index)];
 #else
-                    CanTp_ConfirmDirectionType* txDirection = &globalInfo->CanTp_TxDirection[rxNSduCfgPtr->TxFcNPduId];
+                    CanTp_ConfirmDirectionType* txDirection = &globalInfo->CanTpTxDirection[rxNSduCfgPtr->TxFcNPduId];
 #endif
                     txDirection->TxDirection  = CANTP_DIR_IDLE;
                     txDirection->ConnectionId = CANTP_INVALID_U16;
@@ -1698,42 +1709,52 @@ CANTP_LOCAL void CanTp_RxSubDealWithFF(
                 CanTp_InitRxChannel(rxStatus);
                 PduR_CanTpRxIndication(rxNSduCfgPtr->RxIPduId, E_NOT_OK);
             }
-            rxStatus->ChannelState   = CANTP_RX_RECEIVE_FF;
-            rxStatus->PCIOffset      = CanTp_GetPCIOffset(rxNSduCfgPtr->AddressingFormat);
-            rxStatus->RxNSduId       = rxNSduCfgPtr->RxNSduId;
-            rxStatus->RxPduId        = rxNSduCfgPtr->RxIPduId;
-            rxStatus->InitalDLC      = pduInfoPtr->SduLength;
-            rxStatus->DatalenTotal   = totalLength;
-            rxStatus->DatalenRemain  = totalLength;
-            rxStatus->HandledCfCount = 0u;
-            rxStatus->SentWftCount   = 0u;
-            rxStatus->ExpectdCfSn    = 1u;
-            PduInfoType upperpduInfo;
-            upperpduInfo.SduLength   = 0u;
-            upperpduInfo.SduDataPtr  = &pduInfoPtr->SduDataPtr[dataOffset]; /*SWS_CanTp_00329*/
-            upperpduInfo.MetaDataPtr = NULL_PTR;
+            rxStatus->PCIOffset = CANTP_RXGETADROFFSET(rxNSduCfgPtr->AddressingFormat);
+            rxStatus->RxNSduId  = rxNSduCfgPtr->RxNSduId;
+            rxStatus->RxPduId   = rxNSduCfgPtr->RxIPduId;
+            if (ret == CANTP_CHECK_OVERFLOW)
+            {
+                rxStatus->Timer        = rxNSduCfgPtr->N_Ar;
+                rxStatus->ChannelState = CANTP_RX_TRANSMIT_FC_OVFL;
+                CanTp_SendFC(rxNSduCfgPtr, rxStatus, globalInfo);
+            }
+            else
+            {
+                rxStatus->ChannelState   = CANTP_RX_RECEIVE_FF;
+                rxStatus->InitalDLC      = pduInfoPtr->SduLength;
+                rxStatus->DatalenTotal   = totalLength;
+                rxStatus->DatalenRemain  = totalLength;
+                rxStatus->HandledCfCount = 0u;
+                rxStatus->SentWftCount   = 0u;
+                rxStatus->ExpectdCfSn    = 1u;
+                PduInfoType upperpduInfo;
+                upperpduInfo.SduLength   = 0u;
+                upperpduInfo.SduDataPtr  = &pduInfoPtr->SduDataPtr[dataOffset]; /*SWS_CanTp_00329*/
+                upperpduInfo.MetaDataPtr = NULL_PTR;
 #if (CANTP_DYN_ID_SUPPORT == STD_ON)
 #if ((CANTP_MIXED29_ADDRESSING_SUPPORT == STD_ON) || (CANTP_NORMAL_FIXED_ADDRESSING_SUPPORT == STD_ON))
-            uint8 data[CANTP_METADATA_MAXLENGTH] = {0};
+                uint8 data[CANTP_METADATA_MAXLENGTH] = {0};
 #endif
-            if (E_OK == CanTp_SaveRxMetaDataInfo(rxStatus, rxNSduCfgPtr, pduInfoPtr))
-            {
-#if ((CANTP_MIXED29_ADDRESSING_SUPPORT == STD_ON) || (CANTP_NORMAL_FIXED_ADDRESSING_SUPPORT == STD_ON))
-                if ((rxNSduCfgPtr->AddressingFormat == CANTP_NORMALFIXED)
-                    || (rxNSduCfgPtr->AddressingFormat == CANTP_MIXED29BIT))
+                if (E_OK == CanTp_SaveRxMetaDataInfo(rxStatus, rxNSduCfgPtr, pduInfoPtr))
                 {
-                    /** @see SWS_CanTp_00331
-                     *   for N-SDU with MetaData, the CanTp module shall forward the extracted addressing information
-                     *   via the MetaData of the N-SDU
-                     *  */
-                    data[CANTP_SA_OFFSET_META_UPPER] = rxStatus->MetaDataNSa;
-                    data[CANTP_TA_OFFSET_META_UPPER] = rxStatus->MetaDataNTa;
-                    upperpduInfo.MetaDataPtr         = data;
+#if ((CANTP_MIXED29_ADDRESSING_SUPPORT == STD_ON) || (CANTP_NORMAL_FIXED_ADDRESSING_SUPPORT == STD_ON))
+                    if ((rxNSduCfgPtr->AddressingFormat == CANTP_NORMALFIXED)
+                        || (rxNSduCfgPtr->AddressingFormat == CANTP_MIXED29BIT))
+                    {
+                        /** @see SWS_CanTp_00331
+                         *   for N-SDU with MetaData, the CanTp module shall forward the extracted addressing
+                         * information via the MetaData of the N-SDU
+                         *  */
+                        data[CANTP_SA_OFFSET_META_UPPER] = rxStatus->MetaDataNSa;
+                        data[CANTP_TA_OFFSET_META_UPPER] = rxStatus->MetaDataNTa;
+                        upperpduInfo.MetaDataPtr         = data;
+                    }
+#endif
                 }
 #endif
+                PduLengthType receivedLen = pduInfoPtr->SduLength - dataOffset;
+                CanTp_RxSubDealWithFFTOUP(globalInfo, rxStatus, &upperpduInfo, receivedLen);
             }
-#endif
-            CanTp_RxSubDealWithFFTOUP(globalInfo, rxStatus, &upperpduInfo, receivedLength);
         }
     }
 #if (STD_ON == CANTP_RUNTIME_ERROR_DETECT)
@@ -1769,7 +1790,7 @@ CANTP_LOCAL void CanTp_RxSubDealWithSFToUp(
 #else
         CanTp_GPartInfoType* globalInfo = &CanTp_GlobalPartitionInfo[0];
 #endif
-        CanTp_AddRxQueue(globalInfo->CanTp_RxQueue, rxNSduCfgPtr->RxNSduId, &globalInfo->CurrentIndex);
+        CanTp_AddRxQueue(globalInfo->RxQueue, rxNSduCfgPtr->RxNSduId, &globalInfo->CurrentIndex);
 #endif
         /* SWS_CanTp_00080 */
         if (bufferSize < receivedLength)
@@ -1838,28 +1859,30 @@ CANTP_LOCAL void CanTp_RxSubDealWithSF(
     const CanTp_RxNSduType* rxNSduCfgPtr,
     CanTp_GPartInfoType*    globalInfo) /* PRQA S 3673 */ /* VL_CanTp_3673 */
 {
+    boolean furtherProcess = TRUE;
 #if (CANTP_MULTIPLE_PARTITION_ENABLED == STD_ON)
     CanTp_RxStatusType* rxStatus =
-        &globalInfo->CanTp_RxConnectionStatus[rxNSduCfgPtr->RxNSduId - CANTP_GETRXNSDUSTART(globalInfo->index)];
+        &globalInfo->CanTpRxConnectionStatus[rxNSduCfgPtr->RxNSduId - CANTP_GETRXNSDUSTART(globalInfo->index)];
 #else
-    CanTp_RxStatusType* rxStatus = &globalInfo->CanTp_RxConnectionStatus[rxNSduCfgPtr->RxNSduId];
+    CanTp_RxStatusType* rxStatus = &globalInfo->CanTpRxConnectionStatus[rxNSduCfgPtr->RxNSduId];
 #endif
+#if ((STD_ON == CANTP_RUNTIME_ERROR_DETECT) && (CANTP_ENABLED_RX_BYTE_PADDING == STD_ON))
     if ((rxNSduCfgPtr->RxPaddingActivation == CANTP_PADDING_ON) && (pduInfoPtr->SduLength < CANTP_CAN20_FRAME_LEN_MAX))
     {
-#if (STD_ON == CANTP_RUNTIME_ERROR_DETECT)
-        /* SWS_CanTp_00345 */
+        furtherProcess = FALSE;
         CANTP_DET_REPORTRUNTIMEERROR(CANTP_SERVICEID_RXINDICATION, CANTP_E_PADDING);
-#endif
     }
+#endif
 #if (CANTP_GENERIC_CONNECTION_SUPPORT == STD_ON)
-    else if ((rxStatus->ChannelState != CANTP_RX_IDLE) && (pduInfoPtr->MetaDataPtr != NULL_PTR))
+    if ((furtherProcess) && (rxStatus->ChannelState != CANTP_RX_IDLE) && (pduInfoPtr->MetaDataPtr != NULL_PTR))
     {
         /* SWS_CanTp_00337
          When an SF or FF N-PDU with MetaData (indicating a generic connection) is received, and the corresponding
          connection channel is currently receiving, the SF or FF shall be ignored. */
+        furtherProcess = FALSE;
     }
 #endif
-    else
+    if (furtherProcess)
     { /* check length */
         uint8         dataOffset;
         PduLengthType receivedLength;
@@ -1991,8 +2014,8 @@ CANTP_LOCAL void CanTp_TxConfirmationTx(
     CanTp_GPartInfoType*        globalInfo,
     Std_ReturnType              result)
 {
-    CanTp_TxStatusType*     txStatus     = &globalInfo->CanTp_TxConnectionStatus[txDirection->ConnectionId];
-    const CanTp_TxNSduType* txNSduCfgPtr = &CanTp_ConfigPtr->CanTp_TxNSduCfg[txStatus->TxNSduId];
+    CanTp_TxStatusType*     txStatus     = &globalInfo->CanTpTxConnectionStatus[txDirection->ConnectionId];
+    const CanTp_TxNSduType* txNSduCfgPtr = &CanTp_ConfigPtr->CanTpTxNSduCfg[txStatus->TxNSduId];
     txDirection->TxDirection             = CANTP_DIR_IDLE;
     txDirection->ConnectionId            = CANTP_INVALID_U16;
     if (NULL_PTR == txNSduCfgPtr)
@@ -2095,7 +2118,7 @@ Std_ReturnType CanTp_CancelTransmit(PduIdType TxPduId)
         internalId = CanTp_InternalTxNSduIndex(TxPduId);
 #endif
         const CanTp_TxNSduType* txNSduCfgPtr = CanTp_GetTxNSduCfg(internalId);
-        if ((internalId >= CanTp_ConfigPtr->CanTp_TxNSduNum) || (txNSduCfgPtr == NULL_PTR)
+        if ((internalId >= CanTp_ConfigPtr->CanTpTxNSduNum) || (txNSduCfgPtr == NULL_PTR)
 #if (CANTP_ECUC_MULTIPLE_PARTITION_EXIST == STD_ON)
             || (curAppId != txNSduCfgPtr->ApplicationId)
 #endif
@@ -2117,9 +2140,9 @@ Std_ReturnType CanTp_CancelTransmit(PduIdType TxPduId)
             /* PRQA S 3678 -- */
 #if (CANTP_MULTIPLE_PARTITION_ENABLED == STD_ON)
             CanTp_TxStatusType* txStatus =
-                &(globalInfo->CanTp_TxConnectionStatus[internalId - CANTP_GETTXNSDUSTART(globalInfo->index)]);
+                &(globalInfo->CanTpTxConnectionStatus[internalId - CANTP_GETTXNSDUSTART(globalInfo->index)]);
 #else
-            CanTp_TxStatusType* txStatus = &(globalInfo->CanTp_TxConnectionStatus[internalId]);
+            CanTp_TxStatusType* txStatus = &(globalInfo->CanTpTxConnectionStatus[internalId]);
 #endif
             if (CANTP_TX_IDLE == txStatus->ChannelState)
             {
@@ -2132,9 +2155,9 @@ Std_ReturnType CanTp_CancelTransmit(PduIdType TxPduId)
             {
 #if (CANTP_MULTIPLE_PARTITION_ENABLED == STD_ON)
                 CanTp_ConfirmDirectionType* txDirection =
-                    &globalInfo->CanTp_TxDirection[txStatus->TxPduId - CANTP_GETTXNPDUSTART(globalInfo->index)];
+                    &globalInfo->CanTpTxDirection[txStatus->TxPduId - CANTP_GETTXNPDUSTART(globalInfo->index)];
 #else
-                CanTp_ConfirmDirectionType* txDirection = &globalInfo->CanTp_TxDirection[txStatus->TxPduId];
+                CanTp_ConfirmDirectionType* txDirection = &globalInfo->CanTpTxDirection[txStatus->TxPduId];
 #endif
                 if (txDirection->TxDirection == CANTP_DIR_TX)
                 {
@@ -2156,6 +2179,7 @@ Std_ReturnType CanTp_CancelTransmit(PduIdType TxPduId)
 #endif
 /* PRQA S 6030 -- */
 
+#if (CANTP_RC == STD_ON)
 /**
  * @brief Requests cancellation of an ongoing reception of a PDU in a lower layer transport protocol module.
  */
@@ -2181,9 +2205,10 @@ Std_ReturnType CanTp_CancelReceive(PduIdType RxPduId)
 #if (CANTP_ECUC_MULTIPLE_PARTITION_EXIST == STD_ON)
         ApplicationType curAppId = GetApplicationID();
 #endif
-        const CanTp_RxNSduType* rxNSduCfgPtr = CanTp_GetRxNSduCfg(internalId);
+        const CanTp_RxNSduType* rxNSduCfgPtr =
+            (internalId < CanTp_ConfigPtr->CanTpRxNSduNum) ? CanTp_GetRxNSduCfg(internalId) : NULL_PTR;
 
-        if ((internalId >= CanTp_ConfigPtr->CanTp_RxNSduNum) || (rxNSduCfgPtr == NULL_PTR)
+        if ((rxNSduCfgPtr == NULL_PTR)
 #if (CANTP_ECUC_MULTIPLE_PARTITION_EXIST == STD_ON)
             || (curAppId != rxNSduCfgPtr->ApplicationId)
 #endif
@@ -2208,7 +2233,7 @@ Std_ReturnType CanTp_CancelReceive(PduIdType RxPduId)
 #else
             uint8 index = CanTp_GetRxNSduIndex(internalId);
 #endif
-            CanTp_RxStatusType* rxStatus = &globalInfo->CanTp_RxConnectionStatus[index];
+            CanTp_RxStatusType* rxStatus = &globalInfo->CanTpRxConnectionStatus[index];
             if (CANTP_RX_IDLE == rxStatus->ChannelState)
             {
                 /*not on reception process*/
@@ -2231,6 +2256,7 @@ Std_ReturnType CanTp_CancelReceive(PduIdType RxPduId)
     }
     return result;
 }
+#endif
 
 #if (CANTP_CHANGE_PARAMETER == STD_ON)
 /**
@@ -2256,12 +2282,12 @@ Std_ReturnType CanTp_ChangeParameter(PduIdType id, TPParameterType parameter, ui
 #endif
 #if (CANTP_ECUC_MULTIPLE_PARTITION_EXIST == STD_ON)
         ApplicationType            curAppId     = GetApplicationID();
-        const CanTp_RxNSduType*    rxNSduCfgPtr = &CanTp_ConfigPtr->CanTp_RxNSduCfg[internalId];
+        const CanTp_RxNSduType*    rxNSduCfgPtr = &CanTp_ConfigPtr->CanTpRxNSduCfg[internalId];
         const CanTp_GPartInfoType* globalInfo   = CanTp_GetPartitionInfoPtr(curAppId);
 #else
-        CanTp_GPartInfoType* globalInfo = CanTp_GlobalPartitionInfo;
+        const CanTp_GPartInfoType* globalInfo = CanTp_GlobalPartitionInfo;
 #endif
-        if ((internalId > CanTp_ConfigPtr->CanTp_RxNSduNum)
+        if ((internalId > CanTp_ConfigPtr->CanTpRxNSduNum)
 #if (CANTP_ECUC_MULTIPLE_PARTITION_EXIST == STD_ON)
             || (curAppId != rxNSduCfgPtr->ApplicationId)
 #endif
@@ -2283,8 +2309,8 @@ Std_ReturnType CanTp_ChangeParameter(PduIdType id, TPParameterType parameter, ui
 #else
                     uint16 index = internalId;
 #endif
-                    const CanTp_RxStatusType*  rxStatus          = &(globalInfo->CanTp_RxConnectionStatus[index]);
-                    CanTp_ChangeParameterType* changeRxParameter = &globalInfo->CanTp_ChangeRxParameter[index];
+                    const CanTp_RxStatusType*  rxStatus          = &(globalInfo->CanTpRxConnectionStatus[index]);
+                    CanTp_ChangeParameterType* changeRxParameter = &globalInfo->CanTpChangeRxParameter[index];
                     if (rxStatus->ChannelState == CANTP_RX_IDLE)
                     {
                         if (TP_BS == parameter)
@@ -2335,7 +2361,7 @@ Std_ReturnType CanTp_ReadParameter(PduIdType id, TPParameterType parameter, uint
 #if (CANTP_SUPPORT_VARIANT == STD_ON)
         internalId = CanTp_InternalRxNSduIndex(id);
 #endif
-        if ((internalId > CanTp_ConfigPtr->CanTp_RxNSduNum)
+        if ((internalId > CanTp_ConfigPtr->CanTpRxNSduNum)
 #if (CANTP_ECUC_MULTIPLE_PARTITION_EXIST == STD_ON)
             || (curAppId != CanTp_GetRxNSduCfg(internalId)->ApplicationId)
 #endif
@@ -2431,8 +2457,8 @@ void CanTp_Init(const CanTp_ConfigType* CfgPtr)
         CANTP_DET_REPORTERROR(CANTP_SERVICEID_INIT, CANTP_E_PARAM_POINTER);
     }
     else if (
-        (CfgPtr->CanTp_RxNSduNum > CANTP_MAX_RXNSDU_NUMBER) || (CfgPtr->CanTp_TxNSduNum > CANTP_MAX_TXNSDU_NUMBER)
-        || (CfgPtr->CanTp_RxNPduNum > CANTP_MAX_RXPDU_NUMBER) || (CfgPtr->CanTp_TxNPduNum > CANTP_MAX_TXPDU_NUMBER))
+        (CfgPtr->CanTpRxNSduNum > CANTP_MAX_RXNSDU_NUMBER) || (CfgPtr->CanTpTxNSduNum > CANTP_MAX_TXNSDU_NUMBER)
+        || (CfgPtr->CanTpRxNPduNum > CANTP_MAX_RXPDU_NUMBER) || (CfgPtr->CanTpTxNPduNum > CANTP_MAX_TXPDU_NUMBER))
     {
         CANTP_DET_REPORTERROR(CANTP_SERVICEID_INIT, CANTP_E_INIT_FAILED);
     }
@@ -2457,10 +2483,10 @@ void CanTp_Init(const CanTp_ConfigType* CfgPtr)
             for (index = 0u; index <= rxNum; index++)
 #else
             const CanTp_GPartInfoType* globalInfo = &CanTp_GlobalPartitionInfo[0];
-            for (index = 0u; index < CanTp_ConfigPtr->CanTp_RxNSduNum; index++)
+            for (index = 0u; index < CanTp_ConfigPtr->CanTpRxNSduNum; index++)
 #endif
             {
-                if (globalInfo->CanTp_RxConnectionStatus != NULL_PTR)
+                if (globalInfo->CanTpRxConnectionStatus != NULL_PTR)
                 {
 #if (CANTP_MULTIPLE_PARTITION_ENABLED == STD_ON)
                     uint8 iloop = index + CANTP_GETRXNSDUEND(globalInfo->index);
@@ -2468,38 +2494,38 @@ void CanTp_Init(const CanTp_ConfigType* CfgPtr)
                     uint8 iloop = index;
 #endif
 #if (STD_ON == CANTP_RX_QUEUE)
-                    globalInfo->CanTp_RxQueue[index] = CANTP_INVALID_U8;
+                    globalInfo->RxQueue[index] = CANTP_INVALID_U8;
 #endif
 #if (CANTP_CHANGE_PARAMETER == STD_ON)
-                    globalInfo->CanTp_ChangeRxParameter[index].FcBs    = CanTp_ConfigPtr->CanTp_RxNSduCfg[iloop].Bs;
-                    globalInfo->CanTp_ChangeRxParameter[index].FcSTmin = CanTp_ConfigPtr->CanTp_RxNSduCfg[iloop].STmin;
+                    globalInfo->CanTpChangeRxParameter[index].FcBs    = CanTp_ConfigPtr->CanTpRxNSduCfg[iloop].Bs;
+                    globalInfo->CanTpChangeRxParameter[index].FcSTmin = CanTp_ConfigPtr->CanTpRxNSduCfg[iloop].STmin;
 #endif
-                    CanTp_InitRxChannel(&globalInfo->CanTp_RxConnectionStatus[index]);
+                    CanTp_InitRxChannel(&globalInfo->CanTpRxConnectionStatus[index]);
                 }
             }
 #if (CANTP_MULTIPLE_PARTITION_ENABLED == STD_ON)
             uint8 txNum = CANTP_GETTXNSDUEND(globalInfo->index) - CANTP_GETTXNSDUSTART(globalInfo->index);
             for (index = 0u; index <= txNum; index++)
 #else
-            for (index = 0u; index < CanTp_ConfigPtr->CanTp_TxNSduNum; index++)
+            for (index = 0u; index < CanTp_ConfigPtr->CanTpTxNSduNum; index++)
 #endif
             {
-                if (globalInfo->CanTp_TxConnectionStatus != NULL_PTR)
+                if (globalInfo->CanTpTxConnectionStatus != NULL_PTR)
                 {
-                    CanTp_InitTxChannel(&globalInfo->CanTp_TxConnectionStatus[index]);
+                    CanTp_InitTxChannel(&globalInfo->CanTpTxConnectionStatus[index]);
                 }
             }
 #if (CANTP_MULTIPLE_PARTITION_ENABLED == STD_ON)
             uint8 num = CANTP_GETTXNPDUEND(globalInfo->index) - CANTP_GETTXNPDUSTART(globalInfo->index);
             for (index = 0u; index <= num; index++)
 #else
-            for (index = 0u; index < CanTp_ConfigPtr->CanTp_TxNPduNum; index++)
+            for (index = 0u; index < CanTp_ConfigPtr->CanTpTxNPduNum; index++)
 #endif
             {
-                if (globalInfo->CanTp_TxDirection != NULL_PTR)
+                if (globalInfo->CanTpTxDirection != NULL_PTR)
                 {
-                    globalInfo->CanTp_TxDirection[index].ConnectionId = CANTP_INVALID_U16;
-                    globalInfo->CanTp_TxDirection[index].TxDirection  = CANTP_DIR_IDLE;
+                    globalInfo->CanTpTxDirection[index].ConnectionId = CANTP_INVALID_U16;
+                    globalInfo->CanTpTxDirection[index].TxDirection  = CANTP_DIR_IDLE;
                 }
             }
 #if (CANTP_TRANSMIT_CAN20_WITH_CANFD == STD_ON)
@@ -2585,7 +2611,13 @@ void CanTp_TxConfirmation(PduIdType TxPduId, Std_ReturnType result)
 #else
         CanTp_GPartInfoType* globalInfo = CanTp_GlobalPartitionInfo;
 #endif
-        if (globalInfo == NULL_PTR)
+        PduIdType internalId = TxPduId;
+#if (CANTP_SUPPORT_VARIANT == STD_ON)
+        internalId = CanTp_InternalTxPduIndex(TxPduId);
+#endif
+        /* PRQA S 2996 ++ */ /* VL_CanTp_2996 */
+        if ((globalInfo == NULL_PTR) || (internalId >= CanTp_ConfigPtr->CanTpTxNPduNum))
+        /* PRQA S 2996 -- */
         {
 #if (STD_ON == CANTP_DEV_ERROR_DETECT)
             /**SWS_CanTp_00359 No configured TX SDU matched with this TxSduId*/
@@ -2594,23 +2626,19 @@ void CanTp_TxConfirmation(PduIdType TxPduId, Std_ReturnType result)
         }
         else
         {
-            uint8 internalId = TxPduId; /* PRQA S 4461 */ /* VL_CanTp_4461 */
-#if (CANTP_SUPPORT_VARIANT == STD_ON)
-            internalId = CanTp_InternalTxPduIndex(TxPduId);
-#endif
 #if (CANTP_MULTIPLE_PARTITION_ENABLED == STD_ON)
             uint16 index = internalId - CANTP_GETTXNPDUSTART(globalInfo->index);
 #else
             uint16 index = internalId;
 #endif
-            CanTp_ConfirmDirectionType* txDirection = &globalInfo->CanTp_TxDirection[index];
+            CanTp_ConfirmDirectionType* txDirection = &globalInfo->CanTpTxDirection[index];
             if (txDirection->TxDirection == CANTP_DIR_TX)
             {
                 CanTp_TxConfirmationTx(txDirection, globalInfo, result);
             }
             else if (txDirection->TxDirection == CANTP_DIR_RX)
             {
-                CanTp_RxStatusType* rxStatus = &globalInfo->CanTp_RxConnectionStatus[txDirection->ConnectionId];
+                CanTp_RxStatusType* rxStatus = &globalInfo->CanTpRxConnectionStatus[txDirection->ConnectionId];
                 txDirection->TxDirection     = CANTP_DIR_IDLE;
                 txDirection->ConnectionId    = CANTP_INVALID_U16;
                 CanTp_TxFCConfirmation(rxStatus, result);
@@ -2649,7 +2677,7 @@ Std_ReturnType CanTp_Transmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr)
 #if (CANTP_ECUC_MULTIPLE_PARTITION_EXIST == STD_ON)
         ApplicationType curAppId = GetApplicationID();
 #endif
-        uint8 index = TxPduId; /* PRQA S 4461 */ /* VL_CanTp_4461 */
+        PduIdType index = TxPduId;
 #if (CANTP_SUPPORT_VARIANT == STD_ON)
         index = CanTp_InternalTxNSduIndex(TxPduId);
 #endif
@@ -2682,5 +2710,6 @@ Std_ReturnType CanTp_Transmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr)
 }
 #define CANTP_STOP_SEC_CODE_FAST
 #include "CanTp_MemMap.h"
+/* PRQA S 4464,4461,2995,2991,2992 -- */
 /* PRQA S 1503,1532,1505 -- */
 /* PRQA S 3120 -- */

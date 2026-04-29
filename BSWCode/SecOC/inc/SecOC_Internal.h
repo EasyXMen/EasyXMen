@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -139,7 +139,7 @@ static inline uint16 SECOC_BIT_TO_BYTE(uint16 nbits)
 /**
  * @brief   States of the SecOC module.
  */
-typedef enum SecOC_TxStatusTag
+typedef enum
 {
     SECOC_TX_NONE,  /**< No transmission @range 0x00 */
     SECOC_TX_CALC,  /**< Calculate the authenticator @range 0x01 */
@@ -151,7 +151,7 @@ typedef enum SecOC_TxStatusTag
 /**
  * @brief   States of the SecOC module.
  */
-typedef enum SecOC_RxStatusTag
+typedef enum
 {
     SECOC_RX_NONE, /**< No reception  @range 0x00 */
     SECOC_RX_CALC, /**< Calculate the authenticator @range 0x01 */
@@ -164,7 +164,7 @@ typedef enum SecOC_RxStatusTag
  * @brief  Runtime data of the SecOC module for transmission.
  *
  */
-typedef struct SecOC_TxPduRunTimeTag
+typedef struct
 {
     boolean txDefaultAuthInfoEnable; /**< Default authentication information enable @range true/false */
     boolean txPduReady;              /**< Pdu ready @range true/false */
@@ -191,7 +191,7 @@ typedef struct SecOC_TxPduRunTimeTag
  * @brief SecOC Rx queue management structure
  *
  */
-typedef struct SecOC_QueueManageTag
+typedef struct
 {
     uint16        queueInfoIdx;    /**< Queue information index  @range 0x00 - 0xFFFF */
     PduLengthType freeQueSize;     /**< Free queue size @range 0x00 - 0xFFFF */
@@ -205,7 +205,7 @@ typedef struct SecOC_QueueManageTag
  * @brief  SecOC Rx queue management structure
  *
  */
-typedef struct SecOC_RxPduRunTimeTag
+typedef struct
 {
     boolean rxSkipVerification; /**< Whether to skip verification of the Rx packet. @range true/false */
     uint8   rxParsedFreshnessValue[SECOC_CONST_8U];             /**< Max 64 bits @range SECOC_CONST_8U */

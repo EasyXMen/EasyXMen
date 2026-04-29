@@ -1,6 +1,6 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
- * SPDX-License-Identifier: LGPL-2.1-only-with-exception OR  LicenseRef-Commercial-License
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
+ * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
  * GNU Lesser General Public License as published by the Free Software Foundation; version 2.1.
@@ -10,7 +10,8 @@
  * You should have received a copy of the GNU Lesser General Public License along with this library;
  * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  * or see <https://www.gnu.org/licenses/>.
- *
+ */
+/*
  ********************************************************************************
  **                                                                            **
  **  FILENAME    : Os_Resource.c                                               **
@@ -87,7 +88,9 @@ static Os_PriorityType* Os_OccupyInterRes;
  * REQ ID               <None>
  */
 /******************************************************************************/
-void Os_InitResource(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
+/* PRQA S 6010, 6080, 1532 ++ */ /* VL_MTR_Os_STCYC, VL_MTR_Os_STPTH, VL_QAC_OneFunRef */
+void Os_InitResource(void)
+/* PRQA S 6010, 6080, 1532 -- */
 {
 #if (TRUE == CFG_TIMING_PROTECTION_ENABLE)
     uint16 i = 0U;
@@ -103,6 +106,8 @@ void Os_InitResource(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
     Os_InterResCeiling = Os_InterResCeiling_Inf[vCoreId];
     Os_OccupyInterRes  = Os_OccupyInterRes_Inf[vCoreId];
 #endif
+
+#if (CFG_STD_RESOURCE_MAX > 0U)
     if (Os_CfgStdResourceMax_Inf[vCoreId] > 0U)
     {
 #if (TRUE == CFG_USERESSCHEDULER)
@@ -136,7 +141,9 @@ void Os_InitResource(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
             {
                 for (i = 0U; i < Os_CfgStdResourceMax; i++)
                 {
+                    /* PRQA S 0488 ++ */ /* VL_Os_0488 */
                     Os_RCB_Inf[vCoreId][i].osTmProtResBgtTask = pRCBTmProtResBgtTask + (Os_SCB.sysTaskMax * i);
+                    /* PRQA S 0488 -- */
                 }
             }
             Os_TickType* pRCBTmProtResBgtIsr = Os_RCBTmProtResBgtIsr_Inf[vCoreId];
@@ -144,12 +151,15 @@ void Os_InitResource(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
             {
                 for (i = 0U; i < Os_CfgStdResourceMax; i++)
                 {
+                    /* PRQA S 0488 ++ */ /* VL_Os_0488 */
                     Os_RCB_Inf[vCoreId][i].osTmProtResBgtIsr = pRCBTmProtResBgtIsr + (Os_CfgIsrMax * i);
+                    /* PRQA S 0488 -- */
                 }
             }
         }
 #endif /* TRUE == CFG_TIMING_PROTECTION_ENABLE */
     }
+#endif /* CFG_STD_RESOURCE_MAX > 0 */
 
 #if (CFG_STD_RESOURCE_MAX > 0U)
     for (resId = 0U; resId < Os_CfgStdResourceMax; resId++)
@@ -170,7 +180,9 @@ void Os_InitResource(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
         {
             for (i = 0U; i < Os_SCB.sysTaskMax; i++)
             {
+                /* PRQA S 1258 ++ */  /* VL_Os_1258 */
                 pRcb->osTmProtResBgtTask[i] = OS_TICK_INVALID;
+                /* PRQA S 1258 -- */
             }
         }
 #endif
@@ -180,7 +192,9 @@ void Os_InitResource(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
         {
             for (i = 0U; i < Os_CfgIsrMax; i++)
             {
+                /* PRQA S 1258 ++ */  /* VL_Os_1258 */
                 pRcb->osTmProtResBgtIsr[i] = OS_TICK_INVALID;
+                /* PRQA S 1258 -- */
             }
         }
 #endif
@@ -689,11 +703,11 @@ static StatusType Os_ReleaseResourceByInterrupt(Os_ICBType* pICB, ResourceType R
  * REQ ID               <None>
  */
 /******************************************************************************/
-/* PRQA S 6010, 6030, 6070 ++ */ /* VL_MTR_Os_STCYC, VL_MTR_Os_STMIF, VL_MTR_Os_STCAL */
+/* PRQA S 6010, 6030, 6070, 6080 ++ */ /* VL_MTR_Os_STCYC, VL_MTR_Os_STMIF, VL_MTR_Os_STCAL, VL_MTR_Os_STPTH */
 /* PRQA S 3006, 1532, 1503 ++ */ /* VL_Os_3006, VL_QAC_OneFunRef, VL_QAC_NoUsedApi */
 StatusType GetResource(ResourceType ResID)
 /* PRQA S 3006, 1532, 1503 -- */
-/* PRQA S 6010, 6030, 6070 -- */
+/* PRQA S 6010, 6030, 6070, 6080 -- */
 {
     /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
     /* PRQA S 1006 ++ */ /* VL_Os_1006 */
@@ -705,8 +719,6 @@ StatusType GetResource(ResourceType ResID)
 #if (TRUE == CFG_TRACE_ENABLE)
     Os_TraceServiceEnter(OSServiceId_GetResource);
 #endif /* TRUE == CFG_TRACE_ENABLE */
-
-    OS_ARCH_DECLARE_CRITICAL();
 
     if (Os_SCB.sysCore != Os_GetObjCoreId(ResID))
     {
@@ -738,6 +750,7 @@ StatusType GetResource(ResourceType ResID)
         /* OS_RESOURCE_PARAM_MACRO_008 */
         ResID = Os_GetObjLocalId(ResID); /* PRQA S 1338 */ /* VL_Os_1338 */
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
+        OS_ARCH_DECLARE_CRITICAL();
         OS_ARCH_ENTRY_CRITICAL();
         /* the resource was occupied already */
         if (Os_RCB[ResID].saveCount > 0U)
@@ -779,7 +792,9 @@ StatusType GetResource(ResourceType ResID)
 #if (CFG_ERRORHOOK == TRUE)
     if (err != E_OK)
     {
+        /* PRQA S 3138 ++ */ /* VL_Os_3138 */
         Os_TraceErrorHook(OSError_Save_GetResource(ResID), OSServiceId_GetResource, err);
+        /* PRQA S 3138 -- */
     }
 #endif
 
@@ -811,7 +826,9 @@ StatusType GetResource(ResourceType ResID)
  * REQ ID               <None>
  */
 /******************************************************************************/
-StatusType Os_GetResource(ResourceType ResID) /* PRQA S 1505 */ /* VL_Os_1505 */
+/* PRQA S 6070, 1505 ++ */ /* VL_MTR_Os_STCAL, VL_Os_1505 */
+StatusType Os_GetResource(ResourceType ResID)
+/* PRQA S 6070, 1505 -- */
 {
     StatusType err = E_OK;
 
@@ -922,8 +939,6 @@ StatusType ReleaseResource(ResourceType ResID)
     Os_TraceServiceEnter(OSServiceId_ReleaseResource);
 #endif /* TRUE == CFG_TRACE_ENABLE */
 
-    OS_ARCH_DECLARE_CRITICAL();
-
     if (Os_SCB.sysCore != Os_GetObjCoreId(ResID))
 
     {
@@ -956,6 +971,7 @@ StatusType ReleaseResource(ResourceType ResID)
         /* OS_RESOURCE_PARAM_MACRO_008 */
         ResID = Os_GetObjLocalId(ResID); /* PRQA S 1338 */ /* VL_Os_1338 */
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
+        OS_ARCH_DECLARE_CRITICAL();
         OS_ARCH_ENTRY_CRITICAL();
 
         /* means that no any resource to release */
@@ -975,7 +991,9 @@ StatusType ReleaseResource(ResourceType ResID)
 #if (CFG_ERRORHOOK == TRUE)
     if (err != E_OK)
     {
+        /* PRQA S 3138 ++ */ /* VL_Os_3138 */
         Os_TraceErrorHook(OSError_Save_ReleaseResource(ResID), OSServiceId_ReleaseResource, err);
+        /* PRQA S 3138 -- */
     }
 #endif
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -309,7 +309,10 @@ void LinTp_SlaveTxErrorSignalHandler(NetworkHandleType LinIfChannelId)
     NetworkHandleType             linTpChId = LinTp_SlaveGetLinTpChannel(LinIf_GetComMNetwork(LinIfChannelId));
     const LinTp_SlaveRuntimeType* tpChPtr   = LinTp_GetSlaveRtDataPtr(linTpChId);
 
-    PduR_LinTpTxConfirmation(tpChPtr->TxNSduPtr->TxNSduPduRef, E_NOT_OK);
+    if (tpChPtr != NULL_PTR && tpChPtr->TxNSduPtr != NULL_PTR)
+    {
+        PduR_LinTpTxConfirmation(tpChPtr->TxNSduPtr->TxNSduPduRef, E_NOT_OK);
+    }
 }
 #endif
 
@@ -747,7 +750,7 @@ LINTP_LOCAL void LinTp_SlaveSFTxHandle(NetworkHandleType ch, Lin_PduType* PduPtr
     if (tpSlaveRTPtr->RetryCopyCnt <= tpSlaveRTPtr->TxNSduPtr->MaxBufReq)
     {
         /* Set buffer value to padding data(0xFF) */
-        (void)IStdLib_MemSet(tpSlaveRTPtr->SduBuf, (int)LINTP_PADDING_VALUE, LINTP_FRAME_LEN_MAX);
+        (void)IStdLib_MemSet(tpSlaveRTPtr->SduBuf, LINTP_PADDING_VALUE, LINTP_FRAME_LEN_MAX);
         /* Set destination buffer pointer and he number of bytes to be copied */
         PduInfoType pduInfo;
         pduInfo.SduDataPtr = &(tpSlaveRTPtr->SduBuf[LINTP_PDU_OFS_SF_DATA]);
@@ -837,7 +840,7 @@ LINTP_LOCAL void LinTp_SlaveFFTxHandle(NetworkHandleType ch, Lin_PduType* PduPtr
     if (tpSlaveRTPtr->RetryCopyCnt <= tpSlaveRTPtr->TxNSduPtr->MaxBufReq)
     {
         /* Set buffer value to padding data(0xFF) */
-        (void)IStdLib_MemSet(tpSlaveRTPtr->SduBuf, (int)LINTP_PADDING_VALUE, LINTP_FRAME_LEN_MAX);
+        (void)IStdLib_MemSet(tpSlaveRTPtr->SduBuf, LINTP_PADDING_VALUE, LINTP_FRAME_LEN_MAX);
         /* Set destination buffer pointer and he number of bytes to be copied */
         PduInfoType pduInfo;
         pduInfo.SduDataPtr = &(tpSlaveRTPtr->SduBuf[LINTP_PDU_OFS_FF_DATA]);
@@ -930,7 +933,7 @@ LINTP_LOCAL void LinTp_SlaveCFTxHandle(NetworkHandleType ch, Lin_PduType* PduPtr
         if (tpSlaveRTPtr->RetryCopyCnt <= tpSlaveRTPtr->TxNSduPtr->MaxBufReq)
         {
             /* Set buffer value to padding data(0xFF) */
-            (void)IStdLib_MemSet(tpSlaveRTPtr->SduBuf, (int)LINTP_PADDING_VALUE, LINTP_FRAME_LEN_MAX);
+            (void)IStdLib_MemSet(tpSlaveRTPtr->SduBuf, LINTP_PADDING_VALUE, LINTP_FRAME_LEN_MAX);
             PduInfoType pduInfo;
             /* Set destination buffer pointer and he number of bytes to be copied */
             pduInfo.SduDataPtr = &(tpSlaveRTPtr->SduBuf[LINTP_PDU_OFS_CF_DATA]);
@@ -1133,7 +1136,7 @@ LINTP_LOCAL void LinTp_SlaveResetRtData(LinTp_SlaveRuntimeType* tpSlaveRTPtr)
     tpSlaveRTPtr->RetryCopyCnt        = 0u;
     tpSlaveRTPtr->FunctionAddressFlag = FALSE;
     tpSlaveRTPtr->MRFRequestedNad     = 0x0u;
-    (void)IStdLib_MemSet(tpSlaveRTPtr->SduBuf, 0, LINTP_FRAME_LEN_MAX);
+    (void)IStdLib_MemSet(tpSlaveRTPtr->SduBuf, 0u, LINTP_FRAME_LEN_MAX);
 }
 
 #define LINIF_STOP_SEC_CODE

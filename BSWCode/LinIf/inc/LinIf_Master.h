@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -160,6 +160,16 @@ void LinIf_UpdateSchedule(LinIf_MasterRuntimeType* masterChRtDataPtr, uint8 ch);
  * @trace               -
  */
 Std_ReturnType LinIf_GetCurFrameType(NetworkHandleType ch, LinIf_FrameTypeType* frameType);
+
+/**
+ * @brief           The main processing function of the LinIf master node. This function process
+                    master node wakeup and sleep, message transmit and update schedule table.
+ * @param[in]       channel: Identification of the LinIf channel
+ * @reentrant       TRUE
+ * @synchronous     TRUE
+ * @trace        -
+ */
+void LinIf_MasterMainHandle(NetworkHandleType ch);
 
 #endif
 

@@ -3667,7 +3667,6 @@
 
 #include "TcpIp_Cfg.h"
 #include "TcpIp_PBcfg.h"
-
-extern uint8 TcpIp_MulticoreIndex;
+#include "TcpIp_Lwip.h"
 
 #endif /* LWIP_HDR_OPT_H */

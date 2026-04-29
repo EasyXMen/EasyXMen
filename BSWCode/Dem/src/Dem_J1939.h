@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -137,6 +137,7 @@
 /* PRQA S 3472 -- */
 
 /* ========================================== internal function declarations ======================================== */
+/* PRQA S 1512 EOF */ /* VL_Dem_1512 */
 #if (                                                                                                     \
     ((DEM_OBD_CALLBACK_DTC_STATUS_CHANGED == STD_ON) || (DEM_J1939_CALLBACK_DTC_STATUS_CHANGED == STD_ON) \
      || (DEM_CLIENT_CALLBACK_DTC_STATUS_CHANGED == STD_ON))                                               \

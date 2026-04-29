@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -146,6 +146,15 @@ LINSM_LOCAL LinSM_ChannelIndexType LinSM_GetChannelByNetworkHandle(NetworkHandle
 LINSM_LOCAL uint16 LinSM_GetPartitionIndex(void);
 
 #if LINSM_DEV_ERROR_DETECT == STD_ON
+#ifdef QAC_ANALYZE
+#pragma PRQA_NO_SIDE_EFFECTS LinSM_ValidatePartitionContext
+#pragma PRQA_NO_SIDE_EFFECTS LinSM_ValidateInitStatus
+#pragma PRQA_NO_SIDE_EFFECTS LinSM_ValidateNetworkHandle
+#pragma PRQA_NO_SIDE_EFFECTS LinSM_ValidatePointer
+#if LINSM_MASTER_NODE_SUPPORT == STD_ON
+#pragma PRQA_NO_SIDE_EFFECTS LinSM_ValidateSchedule
+#endif
+#endif
 /**
  * @brief       Check that the current running partition is valid.
  * @param[in]   apiId   : The ID of the API to use when calling this function.
@@ -273,6 +282,9 @@ void LinSM_Init(const LinSM_ConfigType* ConfigPtr)
                 /** SWS_LinSM_00216 */
                 LinSM_RTPtr->CurSchedule    = 0u;
                 LinSM_RTPtr->ReportSchedule = FALSE;
+#endif
+#if LINSM_SLAVE_NODE_SUPPORT == STD_ON
+                LinSM_RTPtr->GotoSleepIndicated = FALSE;
 #endif
             }
         }
@@ -404,7 +416,11 @@ Std_ReturnType LinSM_RequestComMode(NetworkHandleType network, ComM_ModeType mod
             && (LinSM_RTPtr->FullComSubStatus == LINSM_RUN_COMMUNICATION))
         {
             /** SWS_LinSM_10208 SWS_LinSM_10209 */
-            if (LINSM_NODE_TYPE(chl) == LINSM_MASTER)
+            if ((LINSM_NODE_TYPE(chl) == LINSM_MASTER)
+#if LINSM_SLAVE_NODE_SUPPORT == STD_ON
+                || (LinSM_RTPtr->GotoSleepIndicated)
+#endif
+            )
             {
                 ret = LinSM_TriggerGotoSleep(chl);
             }
@@ -454,6 +470,10 @@ void LinSM_MainFunction(LinSM_ChannelIndexType chlIndex)
             {
                 LinSM_HandleSilencePeriod(chlIndex);
             }
+            else
+            {
+                /* do nothing */
+            }
         }
 
 #if LINSM_MASTER_NODE_SUPPORT == STD_ON
@@ -499,14 +519,17 @@ void LinSM_GotoSleepIndication(NetworkHandleType network)
     if (LinSM_ValidatePartitionContext(LINSM_SERVICE_ID_GOTOSLEEP_INDICATION)
         && LinSM_ValidateInitStatus(LINSM_SERVICE_ID_GOTOSLEEP_INDICATION)
         && LinSM_ValidateNetworkHandle(LINSM_SERVICE_ID_GOTOSLEEP_INDICATION, network))
-    {
 #endif
-        LinSM_ChannelIndexType   chl         = LinSM_GetChannelByNetworkHandle(network);
-        const LinSM_RunTimeType* LinSM_RTPtr = LINSM_RUNTIME_PTR(chl);
+    {
+        LinSM_ChannelIndexType chl         = LinSM_GetChannelByNetworkHandle(network);
+        LinSM_RunTimeType*     LinSM_RTPtr = LINSM_RUNTIME_PTR(chl);
 
         if (LinSM_RTPtr->ChannelComMode == LINSM_FULL_COM)
         {
-            (void)LinSM_TriggerGotoSleep(chl);
+            if (LinSM_TriggerGotoSleep(chl) == E_OK)
+            {
+                LinSM_RTPtr->GotoSleepIndicated = TRUE;
+            }
         }
     }
 }
@@ -540,6 +563,9 @@ void LinSM_GotoSleepConfirmation(NetworkHandleType network, boolean success)
                 /* if success = FALSE,new gotosleep request can be handled */
                 LinSM_RTPtr->FullComSubStatus = LINSM_RUN_COMMUNICATION;
                 LinSM_RTPtr->ChannelComMode   = LINSM_NO_COM;
+#if LINSM_SLAVE_NODE_SUPPORT == STD_ON
+                LinSM_RTPtr->GotoSleepIndicated = FALSE;
+#endif
                 SchM_Exit_LinSM_Context();
 
                 /** SWS_LinSM_00027 SWS_LinSM_00193 */
@@ -594,6 +620,9 @@ void LinSM_WakeupConfirmation(NetworkHandleType network, boolean success)
             LinSM_RTPtr->TimerCnt   = 0u;
             LinSM_RTPtr->TimerType  = LINSM_NONE_TIMER;
             LinSM_RTPtr->RunningReq = LINSM_EXE_NOTHING;
+#if LINSM_SLAVE_NODE_SUPPORT == STD_ON
+            LinSM_RTPtr->GotoSleepIndicated = FALSE;
+#endif
             SchM_Exit_LinSM_Context();
 
             if (success)
@@ -782,7 +811,7 @@ LINSM_LOCAL uint16 LinSM_GetPartitionIndex(void)
 LINSM_LOCAL boolean LinSM_ValidatePartitionContext(uint8 apiId)
 {
     boolean ret = TRUE;
-    if (LinSM_GetPartitionIndex() >= LINSM_PARTITION_NUM)
+    if (LinSM_GetPartitionIndex() >= LINSM_PARTITION_NUM) /* PRQA S 2992, 2996 */ /* VL_LinSM_AlwaysFalse */
     {
         (void)Det_ReportError(LINSM_MODULE_ID, LINSM_INSTANCE_ID, apiId, LINSM_E_PARTITION);
         ret = FALSE;
@@ -839,6 +868,10 @@ LINSM_LOCAL boolean LinSM_ValidateNetworkHandle(uint8 apiId, NetworkHandleType n
     else if (GetApplicationID() != LINSM_PARTITION_ID(chlIdx))
     {
         errorId = LINSM_E_PARTITION;
+    }
+    else
+    {
+        /* do nothing */
     }
 #endif
 

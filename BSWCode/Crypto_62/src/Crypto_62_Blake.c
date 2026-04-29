@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -22,7 +22,7 @@
  **
  ***********************************************************************************************************************/
 
-/* PRQA S 4544,1252,1253,1290,3432,0553 EOF */ /* VL_QAC_Crypto */
+/* PRQA S 4544,1252,1253,1290,3432,0553 EOF */ /* VL_Crypto_62_General */
 /* =================================================== inclusions =================================================== */
 #include "Crypto_62_Internal.h"
 
@@ -36,7 +36,7 @@
 #define ROTR32(x, y) (((x) >> (y)) ^ ((x) << (32 - (y))))
 #endif
 
-/* PRQA S 3472,3410,3458 ++ */ /* VL_QAC_Crypto */
+/* PRQA S 3472,3410,3458 ++ */ /* VL_Crypto_62_General */
 
 #define B2S_GET32(p)                                                                                     \
     (((uint32)((uint8*)(p))[0]) ^ (((uint32)((uint8*)(p))[1]) << 8) ^ (((uint32)((uint8*)(p))[2]) << 16) \
@@ -87,7 +87,7 @@ CRYPTO_62_LOCAL Std_ReturnType Crypto_Blake2s(
     const void* in,
     uint32      inlen); /* data to be hashed*/
 /* Compression function. */
-CRYPTO_62_LOCAL void Crypto_Blake2s_Compress(Crypto_Blake2s_Context* ctx, int last);
+CRYPTO_62_LOCAL void Crypto_Blake2s_Compress(Crypto_Blake2s_Context* ctx, sint32 last);
 /* Little-endian byte access. */
 /* =========================================== Internal data Definitions =========================================== */
 
@@ -109,7 +109,7 @@ CRYPTO_62_LOCAL const uint32 blake2s_iv[CRYPTO_CONST_8] =
  * Return              None
  */
 /******************************************************************************/
-CRYPTO_62_LOCAL void Crypto_Blake2s_Compress(Crypto_Blake2s_Context* ctx, int last)
+CRYPTO_62_LOCAL void Crypto_Blake2s_Compress(Crypto_Blake2s_Context* ctx, sint32 last)
 {
     const uint8 sigma[CRYPTO_CONST_10][CRYPTO_CONST_16] = {
         {0U, 1U, 2U, 3U, 4U, 5U, 6U, 7U, 8U, 9U, 10U, 11U, 12U, 13U, 14U, 15U},
@@ -142,7 +142,7 @@ CRYPTO_62_LOCAL void Crypto_Blake2s_Compress(Crypto_Blake2s_Context* ctx, int la
     {
         m[i] = B2S_GET32(&ctx->b[CRYPTO_CONST_4 * i]);
     }
-    /* PRQA S 3422,3138,3141 ++ */ /* VL_QAC_Crypto */
+    /* PRQA S 3422,3138,3141 ++ */ /* VL_Crypto_62_General */
     for (i = 0; i < CRYPTO_CONST_10; i++)
     { // ten rounds
         B2S_G(
@@ -241,7 +241,7 @@ CRYPTO_62_LOCAL Std_ReturnType Crypto_Blake2s_Start(
     {
         ctx->h[i] = blake2s_iv[i];
     }
-    /* PRQA S 3120 ++ */ /* VL_QAC_Crypto */
+    /* PRQA S 3120 ++ */ /* VL_Crypto_62_General */
     ctx->h[0] ^= 0x01010000U ^ (keylen << 8) ^ outlen;
     /* PRQA S 3120 -- */
 
@@ -291,7 +291,7 @@ CRYPTO_62_LOCAL void Crypto_Blake2s_Update(Crypto_Blake2s_Context* ctx, const vo
             Crypto_Blake2s_Compress(ctx, 0); // compress (not last)
             ctx->c = 0;                      // counter to zero
         }
-        /* PRQA S 0316,3440,3387 ++ */ /* VL_QAC_Crypto */
+        /* PRQA S 0316,3440,3387 ++ */ /* VL_Crypto_62_General */
         ctx->b[ctx->c++] = ((const uint8*)in)[i];
         /* PRQA S 0316,3440,3387 -- */
     }
@@ -321,14 +321,14 @@ CRYPTO_62_LOCAL void Crypto_Blake2s_Final(Crypto_Blake2s_Context* ctx, void* out
 
     while (ctx->c < CRYPTO_CONST_64) // fill up with zeros
     {
-        ctx->b[ctx->c++] = 0; /* PRQA S 3387,3440*/ /* VL_QAC_Crypto */
+        ctx->b[ctx->c++] = 0; /* PRQA S 3387,3440*/ /* VL_Crypto_62_General */
     }
     Crypto_Blake2s_Compress(ctx, 1); // final block flag = 1
 
     // little endian convert and store
     for (i = 0; i < ctx->outlen; i++)
     {
-        /* PRQA S 0316,4461 ++ */ /* VL_QAC_Crypto */
+        /* PRQA S 0316,4461 ++ */ /* VL_Crypto_62_General */
         ((uint8*)out)[i] = (ctx->h[i >> CRYPTO_CONST_2] >> (CRYPTO_CONST_8 * (i & CRYPTO_CONST_3))) & CRYPTO_CONST_0xFF;
         /* PRQA S 0316,4461 -- */
     }
@@ -382,16 +382,22 @@ Std_ReturnType Crypto_Blake2s_Process(uint32 objectId)
     Std_ReturnType ret = E_NOT_OK;
     uint8          output[CRYPTO_CONST_32];
 
-    uint32 ilen   = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputLength;
-    uint32 outlen = *(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr);
-    if (outlen <= CRYPTO_CONST_32)
-    {
-        /* PRQA S 0311,3678 ++ */ /*VL_QAC_0311 */
-        uint8* input = (uint8*)(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputPtr);
-        /* PRQA S 0311,3678 -- */
+    uint32  ilen   = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputLength;
+    uint32* outlen = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr;
 
-        ret = Crypto_Blake2s(output, outlen, NULL_PTR, 0u, input, ilen);
-        (void)IStdLib_MemCpy(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr, output, outlen);
+    /* PRQA S 0311,3678 ++ */ /*VL_Crypto_62_General */
+    uint8* input = (uint8*)(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputPtr);
+    /* PRQA S 0311,3678 -- */
+
+    ret = Crypto_Blake2s(output, *outlen, NULL_PTR, 0u, input, ilen);
+    if (*outlen >= CRYPTO_CONST_32 && ret == E_OK)
+    {
+        (void)IStdLib_MemCpy(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr, output, CRYPTO_CONST_32);
+        *outlen = CRYPTO_CONST_32;
+    }
+    else
+    {
+        (void)IStdLib_MemCpy(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr, output, *outlen);
     }
 
     return ret;

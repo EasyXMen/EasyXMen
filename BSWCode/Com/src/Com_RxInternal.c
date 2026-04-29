@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -962,7 +962,7 @@ uint8 Com_ReceiveDynSignalHandle(Com_SignalIdType SignalId, void* SignalDataPtr,
     if (COM_UINT8_DYN == rxSignalPtr->ComSignalType)
     {
         /*IPDU is not receiving data*/
-        uint16 ipduIdPerMainfunction = ipduRef - Com_GetStartOfMainFunctionRx(rxMainfunctionId);
+        PduIdType ipduIdPerMainfunction = ipduRef - Com_GetStartOfMainFunctionRx(rxMainfunctionId);
         const Com_RxIPduRunTimeStateType* rxIpduStatePtr =
             &Com_RxIPduRunTimeState[rxMainfunctionId][ipduIdPerMainfunction];
         uint8 Receiving = rxIpduStatePtr->RxIpduRTStFlag & COM_RX_RECEIVING_EN;
@@ -1130,7 +1130,7 @@ uint8 Com_ReceiveGroupSignalHandle(Com_SignalIdType SignalId, void* SignalDataPt
     const Com_RxSignalGroupType*      rxSignalGroupPtr      = &Com_ConfigStd->RxSignalGroupPtr[signalGroupId];
     PduIdType                         ipduRef               = rxSignalGroupPtr->IpduRefIndex;
     Com_MainFunctionIdType            rxMainfunctionId      = rxSignalGroupPtr->RxMainfunctionId;
-    uint16                            ipduIdPerMainfunction = ipduRef - Com_GetStartOfMainFunctionRx(rxMainfunctionId);
+    PduIdType                         ipduIdPerMainfunction = ipduRef - Com_GetStartOfMainFunctionRx(rxMainfunctionId);
     const Com_RxIPduRunTimeStateType* rxIpduStatePtr = &Com_RxIPduRunTimeState[rxMainfunctionId][ipduIdPerMainfunction];
     const Com_RxIPduType*             rxIpduPtr      = &Com_ConfigStd->RxIPduPtr[rxMainfunctionId];
     uint16                            partitionId    = rxIpduPtr->IpduPartitionId;
@@ -1261,7 +1261,7 @@ uint8 Com_ReceiveSignalHandle(Com_SignalIdType SignalId, void* SignalDataPtr)
 #if (0u < COM_MAX_SIGNAL_64BITBUFF_SIZE)
     const uint64* signal64BitRuntimeBuffPtr = Com_Signal64BitRuntimeBuff[partitionId];
 #endif
-    uint16                            ipduIdPerMainfunction = ipduRef - Com_GetStartOfMainFunctionRx(rxMainfunctionId);
+    PduIdType                         ipduIdPerMainfunction = ipduRef - Com_GetStartOfMainFunctionRx(rxMainfunctionId);
     const Com_RxIPduRunTimeStateType* rxIpduStatePtr = &Com_RxIPduRunTimeState[rxMainfunctionId][ipduIdPerMainfunction];
     /*IPDU is not receiving data*/
     uint8 Receiving = rxIpduStatePtr->RxIpduRTStFlag & COM_RX_RECEIVING_EN;
@@ -3244,7 +3244,7 @@ COM_LOCAL void Com_IndicationProcess(
         updateBitPosition = rxSignalPtr->UpdateLsbBytePos;
         uint8 sigUbOffset = (COM_UNUSED_SIGNALPOSITION != updateBitPosition)
                                 ? rxIpduRuntimeBuffPtr[ipduBufferId + (Com_RxIpduBufIdType)(updateBitPosition)]
-                                : COM_UNUSED_SIGNALPOSITION;
+                                : COM_UNUSED_UINT8;
         updateBitOffset   = rxSignalPtr->UpdateBitMask;
         /*the rx signal have update bit*/
         ubIsAccess = Com_RxUpdateBitIsTure(updateBitPosition, sigUbOffset, updateBitOffset);
@@ -3265,7 +3265,7 @@ COM_LOCAL void Com_IndicationProcess(
         updateBitPosition    = rxSignalGroupPtr->UpdateLsbBytePos;
         uint8 sigGrpUbOffset = (COM_UNUSED_SIGNALPOSITION != updateBitPosition)
                                    ? rxIpduRuntimeBuffPtr[ipduBufferId + (Com_RxIpduBufIdType)(updateBitPosition)]
-                                   : COM_UNUSED_SIGNALPOSITION;
+                                   : COM_UNUSED_UINT8;
         updateBitOffset      = rxSignalGroupPtr->UpdateBitMask;
         /*the rx group signal have update bit*/
         ubIsAccess = Com_RxUpdateBitIsTure(updateBitPosition, sigGrpUbOffset, updateBitOffset);
@@ -3286,7 +3286,7 @@ COM_LOCAL void Com_IndicationProcess(
         updateBitPosition  = gwSourceSignalPtr->UpdateLsbBytePos;
         uint8 despUbOffset = (COM_UNUSED_SIGNALPOSITION != updateBitPosition)
                                  ? rxIpduRuntimeBuffPtr[ipduBufferId + (Com_RxIpduBufIdType)updateBitPosition]
-                                 : COM_UNUSED_SIGNALPOSITION;
+                                 : COM_UNUSED_UINT8;
         updateBitOffset    = gwSourceSignalPtr->UpdateBitMask;
         /*the source signal have update bit*/
         ubIsAccess = Com_RxUpdateBitIsTure(updateBitPosition, despUbOffset, updateBitOffset);

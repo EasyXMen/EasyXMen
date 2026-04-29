@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -105,7 +105,7 @@ extern "C" {
  * @brief  Define the state of the control frame.
  *
  */
-typedef enum CDD_FVM_MultipleCtrlStatusTag
+typedef enum
 {
     CDD_FVM_CTRL_INIT = 0, /**<  initial state @range 0 */
     CDD_FVM_CTRL_WAIT = 1, /**<  State after sending a request frame @range 1 */
@@ -117,7 +117,7 @@ typedef enum CDD_FVM_MultipleCtrlStatusTag
  * @brief  Define the structure of the freshness counter in Tx mode.
  *
  */
-typedef struct CDD_FVM_TxFreshnessCntTag
+typedef struct
 {
     uint8 FVMmsgCnt[CDD_FVM_FRESHNESS_VALUE_MAX_BYTE]; /**<  Freshness counter value. @range NA*/
 } CDD_FVM_TxFreshnessCntType;
@@ -126,7 +126,7 @@ typedef struct CDD_FVM_TxFreshnessCntTag
  * @brief  Define the structure of the freshness counter in Rx mode.
  *
  */
-typedef struct CDD_FVM_RxFreshnessCntTag
+typedef struct
 {
     uint8 FVMmsgCnt[CDD_FVM_FRESHNESS_VALUE_MAX_BYTE];              /**<  Freshness counter value. @range NA */
     uint8 FVMmsgRxFreshnessValue[CDD_FVM_FRESHNESS_VALUE_MAX_BYTE]; /**<  Freshness counter value. @range NA */
@@ -136,7 +136,7 @@ typedef struct CDD_FVM_RxFreshnessCntTag
  * @brief  Define the structure of the freshness counter in Tx mode.
  *
  */
-typedef struct CDD_FVM_MultipleFreshnessCntTag
+typedef struct
 {
     uint8 FVMFreshnessValue[CDD_FVM_FRESHNESS_VALUE_MAX_BYTE]; /**<  Freshness counter value. @range NA */
     uint8 FvmMsgCnt[CDD_FVM_MESSAGE_COUNTER_VALUE_MAX_BYTE];   /**<  Message counter value. @range NA */
@@ -146,7 +146,7 @@ typedef struct CDD_FVM_MultipleFreshnessCntTag
 /**
  * @brief  Define the structure of the freshness counter in slave Ecu
  */
-typedef struct CDD_FVM_SlaveECUSyncMsgTag
+typedef struct
 {
     CDD_FVM_MultipleCtrlStatusType status;                   /**<  Status of the control frame. @range 0 ~ 3 */
     uint8 FvMTripCnt[CDD_FVM_TRIP_COUNTER_VALUE_MAX_BYTE];   /**<  Trip counter value. @range NA */
@@ -161,7 +161,7 @@ typedef struct CDD_FVM_SlaveECUSyncMsgTag
  * @brief defeine control frame structure for master ECU
  *
  */
-typedef struct CDD_FVM_MasterRxSlveCtrlInfoTag
+typedef struct
 {
     uint8                          FvmEcuInstanceId; /**<  ECU instance ID. @range 0 ~ 0xFF */
     uint16                         FvmSyncMsgId;     /**<  Message ID. @range 0 ~ 0xFFFF */
@@ -174,7 +174,7 @@ typedef struct CDD_FVM_MasterRxSlveCtrlInfoTag
  * @brief  Define the structure of the synchronization message from the master ECU.
  *
  */
-typedef struct CDD_FVM_MasterECUSyncMsgTag
+typedef struct
 {
     CDD_FVM_MultipleCtrlStatusType status;                   /**<  Status of the control frame. @range 0 ~ 3 */
     uint8 FvMTripCnt[CDD_FVM_TRIP_COUNTER_VALUE_MAX_BYTE];   /**<  Trip counter value. @range NA */

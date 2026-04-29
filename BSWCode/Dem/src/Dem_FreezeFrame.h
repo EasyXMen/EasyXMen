@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -72,7 +72,7 @@ typedef uint8 Dem_FFIteratorDTCFormatType;
 /**
  * @brief FreezeFrameIterator data for Dcm requests
  */
-typedef struct Dem_FFIteratorFilterTag /* PRQA S 1536 */ /* VL_Dem_1536 */
+typedef struct
 {
     Dem_FFIteratorDTCFormatType FilterDTCFormat; /**< DTCFormat: UDS, OBD, J1939, INIT (no filter) @range 0..3 */
     uint8                       MemoryIndex;     /**< Memory entry type @range 0..255 */
@@ -269,6 +269,7 @@ DEM_LOCAL Std_ReturnType Dem_EnvDataSwcApiGetEventFreezeFrameDataEx(
 #endif
 
 #if (DEM_DCM_CLIENT_NUMBER > 0u)
+#if (DEM_MAX_SIZE_FREEZEFRAME > 0u)
 /**
  * @brief         Counts the number of snapshot records stored in a memory entry
  * @param[in]     MemoryIndex: Memory index
@@ -278,6 +279,7 @@ DEM_LOCAL Std_ReturnType Dem_EnvDataSwcApiGetEventFreezeFrameDataEx(
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL uint8 Dem_FFEntryGetNumberOfFFRecords(Dem_NvBlockNumType MemoryIndex);
+#endif
 #endif
 
 #if ((DEM_DCM_CLIENT_NUMBER > 0u) || (DEM_J1939DCM_CLIENT_NUMBER > 0u))
@@ -357,8 +359,9 @@ DEM_LOCAL Std_ReturnType Dem_GetSizeOfFFSelectionCalculateSizeObd(
  * @synchronous   TRUE
  * @trace         CPD-PLACEHOLDER
  */
-DEM_LOCAL Std_ReturnType
-    Dem_GetSizeOfFFSelectionCalculateSizeAll(Dem_ReadoutBufferEntryType ReadoutBuffer, uint32* SizeOfFreezeFrame);
+DEM_LOCAL Std_ReturnType Dem_GetSizeOfFFSelectionCalculateSizeAll(
+    const Dem_ReadoutBufferEntryType* ReadoutBuffer,
+    uint32*                           SizeOfFreezeFrame);
 
 /**
  * @brief         Test whether filter for snapshot record(s) matches
@@ -392,9 +395,9 @@ DEM_LOCAL boolean Dem_GetNextFFDataCheckRecordMatch(uint8 RecordNumberFilter, ui
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL Std_ReturnType Dem_GetSizeOfFFSelectionCalculateSizeStd(
-    Dem_ReadoutBufferEntryType ReadoutBuffer,
-    uint8                      RecordNumber,
-    uint32*                    SizeOfFreezeFrame);
+    const Dem_ReadoutBufferEntryType* ReadoutBuffer,
+    uint8                             RecordNumber,
+    uint32*                           SizeOfFreezeFrame);
 
 /**
  * @brief         Copies the contents of a stored snapshot record
@@ -440,8 +443,8 @@ DEM_LOCAL void Dem_DataReportObdFreezeFrameCopyUdsData(
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL Std_ReturnType Dem_GetNextFFDataCopyNextRecordObd(
-    Dem_ReadoutBufferEntryType   ReadoutBuffer,
-    Dem_DestinationBufferPtrType DestinationBuffer);
+    const Dem_ReadoutBufferEntryType* ReadoutBuffer,
+    Dem_DestinationBufferPtrType      DestinationBuffer);
 #endif
 #endif
 
@@ -768,6 +771,7 @@ DEM_LOCAL void
 }
 
 #if (DEM_FEATURE_SWC_GET_FF_ED == STD_ON)
+#if (DEM_MAX_SIZE_FREEZEFRAME > 0u)
 /* PRQA S 5016 ++ */ /* VL_Dem_5016 */
 /**
  * @brief Get the snapshot data buffer
@@ -782,6 +786,7 @@ DEM_LOCAL_INLINE const uint8* Dem_FFEntryIteratorGetFFRecordPtr(const Dem_FFEntr
     return Dem_GetFreezeFramePtrOfMemEntry(FFEntryIter->MemoryIndex, FFEntryIter->FFEntryIndex);
 }
 /* PRQA S 5016 -- */
+#endif
 #endif
 
 /**
@@ -871,13 +876,12 @@ DEM_LOCAL void Dem_FFEntryIteratorFindEntryWithRecordNumber(
     Dem_FFEntryIterType* FFEntryIter)
 {
     Dem_FFEntryIteratorInit(EventId, MemoryIndex, FFEntryIter);
-    while (Dem_FFEntryIteratorExists(FFEntryIter) == TRUE) /* PRQA S 2487 */ /* VL_Dem_2487 */
+    while (FFEntryIter->FFRNStart < FFEntryIter->FFRNEnd) /* PRQA S 2487 */ /* VL_Dem_2487 */
     {
 #if ((DEM_GENERAL_FF_RECNUM_CONFIGURED == STD_ON) && (DEM_GENERAL_FF_RECNUM_CALCULATED == STD_ON))
         Dem_MemoryNumType memRef = Dem_GetMemRef(Dem_GetDTCAttr(EventId));
 #endif
         Dem_TypeOfFreezeFrameRecordNumerationType typeOfFFRecordNumeration = Dem_GetFFRecordOfMemory(memRef);
-        uint8                                     lFFEntryIndex            = FFEntryIter->FFEntryIndex;
 #if (DEM_GENERAL_FF_RECNUM_CONFIGURED == STD_ON)
         Dem_FFRRefNumType lFFRecordRef = Dem_GetValueOfDFFRRef(FFEntryIter->FFRNStart);
 #endif
@@ -886,7 +890,8 @@ DEM_LOCAL void Dem_FFEntryIteratorFindEntryWithRecordNumber(
             (
 #endif
 #if (DEM_GENERAL_FF_RECNUM_CALCULATED == STD_ON)
-                ((typeOfFFRecordNumeration == DEM_FF_RECNUM_CALCULATED) && ((lFFEntryIndex + 1u) == RecordNumber))
+                ((typeOfFFRecordNumeration == DEM_FF_RECNUM_CALCULATED)
+                 && ((FFEntryIter->FFEntryIndex + 1u) == RecordNumber))
 #endif
 #if ((DEM_GENERAL_FF_RECNUM_CALCULATED == STD_ON) && (DEM_GENERAL_FF_RECNUM_CONFIGURED == STD_ON))
                 ||
@@ -898,11 +903,12 @@ DEM_LOCAL void Dem_FFEntryIteratorFindEntryWithRecordNumber(
 #if ((DEM_GENERAL_FF_RECNUM_CALCULATED == STD_ON) && (DEM_GENERAL_FF_RECNUM_CONFIGURED == STD_ON))
                     )
 #endif
-            && (Dem_CheckFFStored(lFFEntryIndex, MemoryIndex) == TRUE)) /* PRQA S 3415 */ /* VL_Dem_3415 */
+        )
         {
             break;
         }
-        Dem_FFEntryIteratorNext(FFEntryIter);
+        FFEntryIter->FFRNStart++;
+        FFEntryIter->FFEntryIndex++;
     }
 }
 
@@ -945,8 +951,10 @@ DEM_LOCAL Std_ReturnType Dem_DataReportCopyDidFF(
             }
             else
             {
+#if (DEM_DATA_ELEMENT_CLASS_NUMBER > 0u)
                 /** not the requested DID */
                 Dem_DataReportSkipDid(&copyDidInfo, didRef);
+#endif
             }
         }
     }
@@ -1011,7 +1019,8 @@ DEM_LOCAL Std_ReturnType Dem_EnvDataCopyDidFromFF(
                                 &lFFEntryIter);
                         }
 
-                        if (Dem_FFEntryIteratorExists(&lFFEntryIter) == TRUE)
+                        if ((Dem_FFEntryIteratorExists(&lFFEntryIter) == TRUE)
+                            && ((Dem_CheckFFStored(lFFEntryIter.FFEntryIndex, memoryIndex) == TRUE)))
                         {
                             ret = Dem_DataReportCopyDidFF(
                                 DataId,
@@ -1099,6 +1108,7 @@ DEM_LOCAL Std_ReturnType Dem_EnvDataSwcApiGetEventFreezeFrameDataEx(
 #endif
 
 #if (DEM_DCM_CLIENT_NUMBER > 0u)
+#if (DEM_MAX_SIZE_FREEZEFRAME > 0u)
 /**
  * @brief Counts the number of snapshot records stored in a memory entry
  */
@@ -1117,6 +1127,7 @@ DEM_LOCAL uint8 Dem_FFEntryGetNumberOfFFRecords(Dem_NvBlockNumType MemoryIndex)
     }
     return numberOfRecords;
 }
+#endif
 #endif
 
 #if ((DEM_DCM_CLIENT_NUMBER > 0u) || (DEM_J1939DCM_CLIENT_NUMBER > 0u))
@@ -1159,6 +1170,7 @@ DEM_LOCAL_INLINE Dem_FFIteratorDTCFormatType Dem_FFIteratorGetDTCFormat(uint8 Dc
     return Dem_FFIteratorTable[DcmClientId].FilterDTCFormat;
 }
 
+#if (DEM_MAX_SIZE_FREEZEFRAME > 0u)
 /**
  * @brief Initialize FreezeFrameIterator
  * @param[in]     DcmClientId: Identification of a client.
@@ -1181,6 +1193,7 @@ DEM_LOCAL_INLINE void Dem_FFIteratorInitIterator(uint8 DcmClientId)
 #endif
     Dem_FFIteratorSetFreezeFrameFilterData(DcmClientId, lFFFilterData);
 }
+#endif
 
 #if (DEM_MAX_SIZE_FREEZEFRAME > 0u)
 /**
@@ -1416,11 +1429,11 @@ DEM_LOCAL Std_ReturnType Dem_GetSizeOfFFSelectionCalculateSizeObd(
  * @brief Calculates the size of all snapshot records
  */
 DEM_LOCAL Std_ReturnType
-    Dem_GetSizeOfFFSelectionCalculateSizeAll(Dem_ReadoutBufferEntryType ReadoutBuffer, uint32* SizeOfFreezeFrame)
+    Dem_GetSizeOfFFSelectionCalculateSizeAll(const Dem_ReadoutBufferEntryType* ReadoutBuffer, uint32* SizeOfFreezeFrame)
 {
     Std_ReturnType     ret;
-    Dem_NvBlockNumType memoryIndex = ReadoutBuffer.FFIterator.FFEntryIter.MemoryIndex;
-    Dem_EventIdType    eventId     = ReadoutBuffer.EventId;
+    Dem_NvBlockNumType memoryIndex = ReadoutBuffer->FFIterator.FFEntryIter.MemoryIndex;
+    Dem_EventIdType    eventId     = ReadoutBuffer->EventId;
 
     /** No data is a positive result for 0xff */
 #if (DEM_MAX_SIZE_FREEZEFRAME > 0u)
@@ -1496,29 +1509,36 @@ DEM_LOCAL boolean Dem_GetNextFFDataCheckRecordMatch(uint8 RecordNumberFilter, ui
  * @brief Calculates the size of a standard snapshot record
  */
 DEM_LOCAL Std_ReturnType Dem_GetSizeOfFFSelectionCalculateSizeStd(
-    Dem_ReadoutBufferEntryType ReadoutBuffer,
-    uint8                      RecordNumber,
-    uint32*                    SizeOfFreezeFrame)
+    const Dem_ReadoutBufferEntryType* ReadoutBuffer,
+    uint8                             RecordNumber,
+    uint32*                           SizeOfFreezeFrame)
 {
     Std_ReturnType ret = E_OK;
     /** Specific record not found is a negative result */
     Dem_FFEntryIterType lFFEntryIter;
-    Dem_EventIdType     eventId = ReadoutBuffer.EventId;
+    Dem_EventIdType     eventId     = ReadoutBuffer->EventId;
+    Dem_NvBlockNumType  memoryIndex = ReadoutBuffer->FFIterator.FFEntryIter.MemoryIndex;
 
-    Dem_FFEntryIteratorFindEntryWithRecordNumber(
-        eventId,
-        RecordNumber,
-        ReadoutBuffer.FFIterator.FFEntryIter.MemoryIndex,
-        &lFFEntryIter);
+    Dem_FFEntryIteratorFindEntryWithRecordNumber(eventId, RecordNumber, memoryIndex, &lFFEntryIter);
 
-    if (Dem_FFEntryIteratorExists(&lFFEntryIter) == FALSE)
+    if (lFFEntryIter.FFRNStart >= lFFEntryIter.FFRNEnd)
     {
         ret = DEM_NO_SUCH_ELEMENT;
     }
     else
     {
-        Dem_FFRefNumType ref = Dem_GetFFRef(Dem_GetDTCAttr(eventId));
-        *SizeOfFreezeFrame   = Dem_GetFFSizeOfFF(ref) + 1u; /* PRQA S 4491 */ /* VL_Dem_4491 */
+        /* PRQA S 3415 ++ */ /* VL_Dem_3415 */
+        if ((memoryIndex != DEM_MEM_INVALID_MEMORY_INDEX)
+            && (Dem_CheckFFStored(lFFEntryIter.FFEntryIndex, memoryIndex) == TRUE))
+        /* PRQA S 3415 -- */
+        {
+            Dem_FFRefNumType ref = Dem_GetFFRef(Dem_GetDTCAttr(eventId));
+            *SizeOfFreezeFrame   = Dem_GetFFSizeOfFF(ref) + 1u; /* PRQA S 4491 */ /* VL_Dem_4491 */
+        }
+        else
+        {
+            *SizeOfFreezeFrame = 0u;
+        }
     }
     return ret;
 }
@@ -1631,11 +1651,11 @@ DEM_LOCAL void Dem_DataReportObdFreezeFrameCopyUdsData(
  * @brief Validates the request to get the OBD FreezeFrame in UDS Format, and copies the data.
  */
 DEM_LOCAL Std_ReturnType Dem_GetNextFFDataCopyNextRecordObd(
-    Dem_ReadoutBufferEntryType   ReadoutBuffer,
-    Dem_DestinationBufferPtrType DestinationBuffer)
+    const Dem_ReadoutBufferEntryType* ReadoutBuffer,
+    Dem_DestinationBufferPtrType      DestinationBuffer)
 {
     Std_ReturnType  ret;
-    Dem_EventIdType eventId = ReadoutBuffer.EventId;
+    Dem_EventIdType eventId = ReadoutBuffer->EventId;
 
     if (Dem_CheckEventObdRelated(eventId) == FALSE)
     {
@@ -1643,7 +1663,7 @@ DEM_LOCAL Std_ReturnType Dem_GetNextFFDataCopyNextRecordObd(
     }
     else
     {
-        Dem_NvBlockNumType memoryIndex = ReadoutBuffer.FFIterator.FFEntryIter.MemoryIndex;
+        Dem_NvBlockNumType memoryIndex = ReadoutBuffer->FFIterator.FFEntryIter.MemoryIndex;
         if (FALSE == Dem_CheckOBDFFStored(memoryIndex))
         {
             /** FreezeFrame is not stored */

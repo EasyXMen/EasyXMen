@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -35,12 +35,17 @@
 
 /*=======[M A C R O S]=====================================================*/
 /*================@+General+@================*/
+#define ALIGN_MASK (0xFFFFFFFCU)
+#define PCX_MASK (0x000FFFFFu)
+#define PCXI_UL_BIT (20u)
+#define PCXI_PIE_BIT (21u)
+
 #define OS_ASM            __asm__ /* Embedded assembly. */
 #define CHECK_STACK_USAGE (0U)
 
 #define OS_ALIGN(exp) __attribute__((aligned(exp)))
 /* PRQA S 3472 ++ */ /* VL_Os_3472 */
-#define OS_ARCH_STACK_ALIGN(addr) ((addr) & 0xFFFFFFFCU)
+#define OS_ARCH_STACK_ALIGN(addr) ((addr) & ALIGN_MASK)
 
 #define OS_REG32(address) (*(volatile uint32*)(address))
 /* PRQA S 3472 -- */
@@ -93,14 +98,14 @@
 #define PCX_TO_PCXI(pcx) (*((volatile uint32*)OS_PCX_TO_EA((pcx))))
 
 /* Point to the PCX precursor. */
-#define OS_PCX_PREV(pcx) (((Os_ArchCsaType*)OS_PCX_TO_EA(pcx))->reg[0] & 0x000FFFFFU)
+#define OS_PCX_PREV(pcx) (((Os_ArchCsaType*)OS_PCX_TO_EA(pcx))->reg[0] & PCX_MASK)
 
 /* Get the PCXprecursor. */
 #define GET_PREV_PCX(nextPcx, pcx)                  \
     do                                              \
     {                                               \
         OS_ARCH_DSYNC();                            \
-        (nextPcx) = PCX_TO_PCXI(pcx) & 0x000FFFFFU; \
+        (nextPcx) = PCX_TO_PCXI(pcx) & PCX_MASK; \
     } while (0)
 
 /* Set the PCX precursor. */
@@ -141,7 +146,7 @@
         {                                                                          \
             Os_LoopPcx = Os_TempPcx;                                               \
             GET_PREV_PCX(Os_NextPcx, Os_LoopPcx);                                  \
-            while ((((endPcx) & 0x000FFFFFu) != Os_NextPcx) && (0U != Os_NextPcx)) \
+            while ((((endPcx) & PCX_MASK) != Os_NextPcx) && (0U != Os_NextPcx)) \
             {                                                                      \
                 Os_LoopPcx = Os_NextPcx;                                           \
                 GET_PREV_PCX(Os_NextPcx, Os_LoopPcx);                              \
@@ -160,11 +165,11 @@
         {                                                                      \
             Os_LoopPcxTermApp = Os_TempPcxTermApp;                             \
             GET_PREV_PCX(Os_NextPcxTermApp, Os_LoopPcxTermApp);                \
-            while (((endPcx) & 0x000FFFFFu) != Os_NextPcxTermApp)              \
+            while (((endPcx) & PCX_MASK) != Os_NextPcxTermApp)              \
             {                                                                  \
                 Os_LoopPcxTermApp = Os_NextPcxTermApp;                         \
                 GET_PREV_PCX(Os_NextPcxTermApp, Os_LoopPcxTermApp);            \
-                if (((pcx) & 0x000FFFFFu) == Os_NextPcxTermApp)                \
+                if (((pcx) & PCX_MASK) == Os_NextPcxTermApp)                \
                 {                                                              \
                     Os_BeginPcxTermApp = Os_LoopPcxTermApp;                    \
                 }                                                              \
@@ -183,7 +188,7 @@
         if (0U != OS_ARCH_MFCR(OS_REG_PCX))                             \
         {                                                               \
             Os_EndPcx = OS_ARCH_MFCR(OS_REG_PCX);                       \
-            while (0U != (Os_EndPcx & 0x00100000u))                     \
+            while (0U != (Os_EndPcx & (1u << PCXI_UL_BIT)))                     \
             {                                                           \
                 Os_EndPcx = PCX_TO_PCXI(Os_EndPcx);                     \
             }                                                           \

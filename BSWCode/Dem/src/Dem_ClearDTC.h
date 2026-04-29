@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -61,7 +61,7 @@
 /**
  * @brief     Clear DTC request structure definition
  */
-typedef struct Dem_ClearRequestTag /* PRQA S 1536 */ /* VL_Dem_1536 */
+typedef struct
 {
     Dem_EventIdType   ClearEventId;  /**< Specific EventId to clear @range 0..DEM_MAX_EVENT_ID */
     Dem_MemoryNumType ClearMemIndex; /**< Memory Index to clear @range 0..DEM_MAX_MEMORY_NUMBER */
@@ -924,6 +924,7 @@ DEM_LOCAL boolean Dem_DTCCleared(Dem_EventIdType EventId)
 
 #if (DEM_EVENT_CALLBACK_CLEAR_ALLOWED > 0u)
 #if (DEM_EVENT_COMBINATION_SUPPORT != DEM_EVCOMB_DISABLED)
+#if (DEM_COMBINATION_NUMBER > 0u)
     if (groupId != DEM_COMBINATION_NUMBER)
     {
         doClear = TRUE;
@@ -945,6 +946,7 @@ DEM_LOCAL boolean Dem_DTCCleared(Dem_EventIdType EventId)
     }
     else
 #endif
+#endif
     {
         doClear = Dem_ClearEventAllowed(EventId);
     }
@@ -954,6 +956,7 @@ DEM_LOCAL boolean Dem_DTCCleared(Dem_EventIdType EventId)
         Dem_DTCInternalCleared(EventId);
         /** Always call init monitor callbacks */
 #if (DEM_EVENT_COMBINATION_SUPPORT != DEM_EVCOMB_DISABLED)
+#if (DEM_COMBINATION_NUMBER > 0u)
         if (groupId != DEM_COMBINATION_NUMBER)
         {
             for (Dem_ComDTCEventRefNumType start = Dem_GetStartRefOfCombinationDTC(groupId);
@@ -969,6 +972,7 @@ DEM_LOCAL boolean Dem_DTCCleared(Dem_EventIdType EventId)
             }
         }
         else
+#endif
 #endif
         {
             Dem_NotiInitMonitorForEvent(EventId, DEM_INIT_MONITOR_CLEAR);
@@ -994,6 +998,7 @@ DEM_LOCAL boolean Dem_DTCCleared(Dem_EventIdType EventId)
     Dem_DTCInternalCleared(EventId);
     /** Always call init monitor callbacks */
 #if (DEM_EVENT_COMBINATION_SUPPORT != DEM_EVCOMB_DISABLED)
+#if (DEM_COMBINATION_NUMBER > 0u)
     if (groupId != DEM_COMBINATION_NUMBER)
     {
         for (Dem_ComDTCEventRefNumType start = Dem_GetStartRefOfCombinationDTC(groupId);
@@ -1009,6 +1014,7 @@ DEM_LOCAL boolean Dem_DTCCleared(Dem_EventIdType EventId)
         }
     }
     else
+#endif
 #endif
     {
         Dem_NotiInitMonitorForEvent(EventId, DEM_INIT_MONITOR_CLEAR);

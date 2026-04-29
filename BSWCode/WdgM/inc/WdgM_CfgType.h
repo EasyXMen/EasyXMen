@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -36,7 +36,7 @@ extern "C" {
 
 /* ================================================ type definitions ================================================ */
 /*Configuration type of internal logical transition */
-typedef struct WdgM_IntTransitionTypeTag
+typedef struct
 {
     /* Source checkpoint id in internal transition */
     WdgM_CheckpointIdType WdgMTransitionSourCPID;
@@ -45,7 +45,7 @@ typedef struct WdgM_IntTransitionTypeTag
 } WdgM_IntTransitionType;
 
 /*Configuration type of external logical transition */
-typedef struct WdgM_ExtTransitionTypeTag
+typedef struct
 {
     /* Source Supervised Entity id in external transition */
     WdgM_SupervisedEntityIdType WdgMTransitionSourSEID;
@@ -58,7 +58,7 @@ typedef struct WdgM_ExtTransitionTypeTag
 } WdgM_ExtTransitionType;
 
 /*Configuration type of trigger condition */
-typedef struct WdgM_TriggerTypeTag
+typedef struct
 {
     /* WdgM mode mapping to WdgIf mode */
     WdgIf_ModeType WdgMWatchdogMode;
@@ -69,7 +69,7 @@ typedef struct WdgM_TriggerTypeTag
 } WdgM_TriggerType;
 
 /*Configuration type of alive supervision */
-typedef struct WdgM_AliveSupCfgTypeTag
+typedef struct
 {
     /* Alive supervision id */
     WdgM_AliveSupIDType WdgMAliveSupID;
@@ -84,7 +84,7 @@ typedef struct WdgM_AliveSupCfgTypeTag
 } WdgM_AliveSupCfgType;
 
 /*configuration type of deadline supervision */
-typedef struct WdgM_DeadlineSupCfgTypeTag
+typedef struct
 {
     /* Deadline supervision id */
     WdgM_DeadlineSupIDType WdgMDeadlineSupID;
@@ -101,7 +101,7 @@ typedef struct WdgM_DeadlineSupCfgTypeTag
 } WdgM_DeadlineSupCfgType;
 
 /*Configuration type of internal logical supervision */
-typedef struct WdgM_IntLogSupCfgTypeTag
+typedef struct
 {
     /* Internal logical supervision id */
     WdgM_LogSupIDType WdgMIntLogSupID;
@@ -112,7 +112,7 @@ typedef struct WdgM_IntLogSupCfgTypeTag
 } WdgM_IntLogSupCfgType;
 
 /*Configuration type of external logical supervision */
-typedef struct WdgM_ExtLogSupCfgTypeTag
+typedef struct
 {
     /* External logical supervision id */
     WdgM_LogSupIDType WdgMExtLogSupID;
@@ -127,7 +127,7 @@ typedef struct WdgM_ExtLogSupCfgTypeTag
 } WdgM_ExtLogSupCfgType;
 
 /*Configuration type of checkpoint supporting deadline logical supervision */
-typedef struct WdgM_CPSupportDeadLineInfoTypeTag
+typedef struct
 {
     /* Deadline supervision id */
     WdgM_DeadlineSupIDType WdgM_DeadlineSupID;
@@ -136,7 +136,7 @@ typedef struct WdgM_CPSupportDeadLineInfoTypeTag
 } WdgM_CPSupportDeadLineInfoType;
 
 /*Configuration type of checkpoint */
-typedef struct WdgM_CheckpointCfgTypeTag
+typedef struct
 {
     /* Checkpoint id */
     WdgM_CheckpointIdType WdgMCheckpointID;
@@ -153,7 +153,7 @@ typedef struct WdgM_CheckpointCfgTypeTag
 } WdgM_CheckpointCfgType;
 
 /*configuration Type of supervision entity */
-typedef struct WdgM_SECfgTypeTag
+typedef struct
 {
     /*WdgM Supervised Entity id*/
     WdgM_SupervisedEntityIdType WdgMSupervisedEntityID;
@@ -174,7 +174,7 @@ typedef struct WdgM_SECfgTypeTag
 } WdgM_SECfgType;
 
 /*Configuration type of WdgM Mode */
-typedef struct WdgM_ModeCfgTypeTag
+typedef struct
 {
     /* Mode id */
     WdgM_ModeType WdgMModeID;
@@ -196,7 +196,7 @@ typedef struct WdgM_ModeCfgTypeTag
     const uint8 WdgMMainFunctionExceptTick;
 } WdgM_ModeCfgType;
 
-typedef struct WdgM_TabCntCfgTypeTag
+typedef struct
 {
     uint16 WdgM_AliveTabMaxCnt;
     uint16 WdgM_DeadlineTabMaxCnt;

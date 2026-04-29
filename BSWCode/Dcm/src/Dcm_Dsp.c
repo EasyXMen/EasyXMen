@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -55,6 +55,7 @@ void DspInternal_DcmConfirmation(uint8 protocolId, uint16 connectionId)
             IdsM_SetSecurityEvent(SEV_UDS_ECU_RESET);
 #endif
             (void)Rte_Switch_EcuResetModeSwitchInterface_ecuReset(RTE_MODE_DcmEcuReset_DCM_EXECUTE);
+            (void)SchM_Switch_Dcm_DcmEcuReset(RTE_MODE_DcmEcuReset_DCM_EXECUTE);
         }
 #endif
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -50,6 +50,11 @@
  *                                       2. Replace the std library with the istd library
  *                                       3. CPD-33700 Multiple partition support
  *  V02.01.00 2024-12-30  caihong.liu  R23-11 development first release.
+ *  V02.01.01 2025-10-22  caihong.liu
+ *      1. Fixed CPT-14266, Redundant passive wake-up event flags lead to repeated wake-up actions.
+ *      2. Fixed CPT-14866, Fixed race condition in ReadySleepState causing unhandled CanNm_RepeatMessageRequest due to
+ *         immediate transition to PrepareBusSleepMode.
+ *      3. Fixed CPT-14491, state machine stuck in ReadySleepState due to nmTimeoutTimer is 0 but nmToutFlg is FALSE.
  ==================================================================================================================== */
 
 /* ================================================ misar justifications ============================================ */
@@ -90,7 +95,7 @@ extern "C" {
 #define CANNM_AR_RELEASE_REVISION_VERSION (0u)
 #define CANNM_SW_MAJOR_VERSION            (2u)
 #define CANNM_SW_MINOR_VERSION            (1u)
-#define CANNM_SW_PATCH_VERSION            (0u)
+#define CANNM_SW_PATCH_VERSION            (1u)
 /** @} */
 
 /* ===================================================== macros ===================================================== */
@@ -436,6 +441,7 @@ void CanNm_TxConfirmation(PduIdType TxPduId, Std_ReturnType result);
 void CanNm_ConfirmPnAvailability(NetworkHandleType nmChannelHandle);
 #endif
 
+#if CANNM_TRIGGER_TRANSMIT_API == STD_ON
 /**
  * @brief        Within this API, the upper layer module (called module) shall check whether the available data fits
  *               into the buffer size reported by PduInfoPtr->SduLength.
@@ -452,6 +458,7 @@ void CanNm_ConfirmPnAvailability(NetworkHandleType nmChannelHandle);
  * @trace       CPD-70072
  */
 Std_ReturnType CanNm_TriggerTransmit(PduIdType TxPduId, PduInfoType* PduInfoPtr);
+#endif
 
 /**
  * @brief        Main function of the CanNm which processes the algorithm describes in that document.

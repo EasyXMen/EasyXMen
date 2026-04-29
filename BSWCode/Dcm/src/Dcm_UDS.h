@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -86,7 +86,7 @@ typedef enum
 /**
  * @brief dynamically defined did definition structure
  */
-typedef struct DDDIDDefineType /* PRQA S 1536  */ /* VL_Dcm_1536 */
+typedef struct
 {
     uint8  SourceDidPosition; /**<the source did positition @range 0..255*/
     uint8  SourceDidSize;     /**<the source did size  @range 0..255*/
@@ -99,7 +99,7 @@ typedef struct DDDIDDefineType /* PRQA S 1536  */ /* VL_Dcm_1536 */
 /**
  * @brief dynamically defined did structure
  */
-typedef struct DDDIDType /* PRQA S 1536  */ /* VL_Dcm_1536 */
+typedef struct
 {
     Dcm_DDDIDStatusType DDDIDStatus[DCM_DSP_DDDID_MAX_ELEMENTS]; /**<the current definition status @range NA*/
     Dcm_MsgLenType      SourceElementsNum;                       /**<the number of sourceElements @range NA*/
@@ -123,7 +123,7 @@ typedef enum
 /**
  * @brief UDS 0x36 transfer data management unit
  */
-typedef struct TransferDataType /* PRQA S 1536  */ /* VL_Dcm_1536 */
+typedef struct
 {
     Dcm_TransferStatusType TransferStatus;       /**<current transfering status @range NA*/
     uint8                  BlockSequenceCounter; /**<the previous sequenceCounter @range 0..255 */
@@ -791,7 +791,7 @@ Std_ReturnType Dcm_UDS0x2A(
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode);
 
-#if (STD_ON == DCM_DYN_DID)
+#if (DCM_PERIODIC_CONNECTION_NUM > 0u)
 /**
  * @brief         Called by Dcm_MainFunction to deal with 2A scheduler counter and message sending
  * @return        void
@@ -800,6 +800,7 @@ Std_ReturnType Dcm_UDS0x2A(
  * @trace         CPD-PLACEHOLDE
  */
 void Dcm_UDS0x2A_MainFunction(void);
+#endif
 
 /**
  * @brief         Called by UDS 0x10, 0x29 and 0x27 to notify the session/security/authenticationState change so as to
@@ -810,7 +811,16 @@ void Dcm_UDS0x2A_MainFunction(void);
  * @trace         CPD-PLACEHOLDE
  */
 void Dcm_UDS0x2A_StatusChangeHandle(void);
-#endif
+
+/**
+ * @brief         Remove the corresponding DID reading service from the 0x2A service dispatch table.
+ * @return        void
+ * @reentrant     TRUE
+ * @synchronous   TRUE
+ * @trace         CPD-PLACEHOLDE
+ */
+void Dcm_UDS0x2A_Remove_Scheduler(uint16 DidIndex);
+
 #endif
 
 #if (STD_ON == DCM_UDS_0X2C)
@@ -924,7 +934,7 @@ Std_ReturnType Dcm_UDS0x2F(
  * @synchronous   TRUE
  * @trace         CPD-PLACEHOLDE
  */
-void Dcm_UDS0x2F_StatusChangeHandle(void);
+void Dcm_UDS0x2F_StatusChangeHandle(Dcm_SesCtrlType newSession);
 #endif
 #endif
 

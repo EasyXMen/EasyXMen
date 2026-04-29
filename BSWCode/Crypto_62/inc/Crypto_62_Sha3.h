@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -153,7 +153,7 @@ Std_ReturnType Crypto_Sha3_Finish(Crypto_Sha3_Context* ctx, uint8* output, uint3
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
-Std_ReturnType Crypto_Sha3(Crypto_Sha3_Id id, const uint8* input, uint32 ilen, uint8* output, uint32 olen);
+Std_ReturnType Crypto_Sha3(Crypto_Sha3_Id id, const uint8* input, uint32 ilen, uint8* output, uint32* olen);
 
 /**
  * @brief   Processes the SHA-3 hash computation for a given object ID.

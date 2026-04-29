@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -414,4 +414,15 @@ DEM_LOCAL Dem_J1939DcmLampStatusType Dem_CalculateEventJ1939LampStatus(uint8 Cli
 DEM_LOCAL void Dem_SatelliteRestoreDebounceValue(Dem_EventIdType EventId, sint16 Value, boolean ExpectedThreshold);
 #endif
 
+#if (DEM_EVENT_PARTITION_NUMBER > 1u)
+/**
+ * @brief         Get ApplicationId of Satellite Info by SatelliteId
+ * @param[in]     SatelliteId: Satellite Id
+ * @return        ApplicationType
+ * @reentrant     FALSE
+ * @synchronous   TRUE
+ * @trace         CPD-PLACEHOLDER
+ */
+DEM_LOCAL_INLINE ApplicationType Dem_GetSatelliteApplicationId(Dem_SatelliteIdType SatelliteId);
+#endif
 #endif

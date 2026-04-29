@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -28,7 +28,7 @@
 #include "DoIP_Internal_TCP_Common.h"
 #include "DoIP_Internal_TCP_Non_Diagnostic.h"
 #include "PduR_DoIP.h"
-
+#include "SchM_DoIP.h"
 /* ===================================================== macros ===================================================== */
 
 #define DOIP_DIAG_MSG_FIELD_POSITION_SA  8u  /**< Location of SA field in diagnostic message */
@@ -96,7 +96,13 @@ DOIP_LOCAL_INLINE DoIP_TpItemType* DoIP_DequeueTpMsg(DoIP_TpQueueType* queue); /
  * @trace       CPD-PLACEHOLDER
  */
 DOIP_LOCAL_INLINE DoIP_IfItemType* DoIP_DequeueIfMsg(DoIP_IfQueueType* queue); /* PRQA S 5016 */ /* VL_DoIP_5016 */
+/* PRQA S 5016 ++ */                                                                             /* VL_DoIP_5016 */
+DOIP_LOCAL_INLINE Std_ReturnType
+    DoIP_UnreadqueueTpMsg(DoIP_TpQueueType* queue, PduIdType pdurTxPduId, const PduInfoType* pduInfoPtr);
 
+DOIP_LOCAL_INLINE Std_ReturnType
+    DoIP_UnreadqueueIfMsg(DoIP_IfQueueType* queue, PduIdType pdurTxPduId, const PduInfoType* pduInfoPtr);
+/* PRQA S 5016 -- */
 /* rcv */
 
 /**
@@ -266,12 +272,14 @@ DOIP_LOCAL void DoIP_SendDiagnosticNack(uint16 soadTxPduRef, uint8 txRxCtxIdx, u
 
 /* ----------------------------------------- connect ----------------------------------------- */
 
+/* PRQA S 1512 EOF */ /* VL_DoIP_1512 */
 /**
  * @brief Notify PdurR when close tcp connection.
  */
-/* PRQA S 3408,1532 ++ */ /* VL_DoIP_WithoutPreDeclaration,VL_DoIP_RefeOneFile */
+/* PRQA S 3408,1503 ++ */ /* VL_DoIP_WithoutPreDeclaration,VL_QAC_NoUsedApi */
+/* PRQA S 2905 ++ */      /* VL_DoIP_2905 */
 void DoIP_NotifyPduRWhenCloseTcpConnection(uint8 txRxCtxIdx)
-/* PRQA S 3408,1532 -- */
+/* PRQA S 3408,1503 -- */
 {
     /* PRQA S 2844,2934 ++ */ /* VL_DoIP_DerefInvalidPtr,VL_DoIP_ComputeInvalidPtr */
     const DoIP_TcpTxCtrlType* txCtrl = &DoIP_TcpTxRxContext[txRxCtxIdx].TxCtrl; /* PRQA S 3408 */ /* VL_DoIP_3408 */
@@ -296,7 +304,7 @@ void DoIP_NotifyPduRWhenCloseTcpConnection(uint8 txRxCtxIdx)
     DOIP_ClearTpQueue(&DoIP_TcpTxRxContext[txRxCtxIdx], TRUE);
     /* PRQA S 2844,2934 -- */
 }
-
+/* PRQA S 2905 -- */
 /* ----------------------------------------- send ----------------------------------------- */
 
 /**
@@ -352,14 +360,14 @@ Std_ReturnType DoIP_TriggerTpTransmit(
     DoIP_TcpTxMsgType   msgType)
 {
     Std_ReturnType ret;
-
+    SchM_Enter_DoIP_ExclusiveArea();
     /* PRQA S 2814 ++ */ /* VL_QAC_DerefNullPtr */
     txCtrl->TxBufState      = DOIP_BUFFER_OCCUPIED;
     txCtrl->TxMsgType       = msgType;
     txCtrl->TxState         = DOIP_TX_STATE_START;
     txCtrl->TxMaxDataLength = pduInfoPtr->SduLength;
     /* PRQA S 2814 -- */
-
+    SchM_Exit_DoIP_ExclusiveArea();
     if (E_OK == SoAd_TpTransmit(soadTxPduRef, pduInfoPtr))
     {
         ret = E_OK;
@@ -376,6 +384,7 @@ Std_ReturnType DoIP_TriggerTpTransmit(
  * @brief Trigger send TP message.
  */
 /* PRQA S 6070 ++ */ /* VL_MTR_DoIP_STCAL */
+/* PRQA S 4461 ++ */ /* VL_DoIP_4461 */
 Std_ReturnType DoIP_TpTransmitInternal(PduIdType pdurTxPduId, const PduInfoType* pduInfoPtr)
 {
     uint8  txRxCtxIdx;
@@ -405,25 +414,20 @@ Std_ReturnType DoIP_TpTransmitInternal(PduIdType pdurTxPduId, const PduInfoType*
             pduInfo.MetaDataPtr = NULL_PTR;
             pduInfo.SduLength   = DOIP_HEADER_LEN + DOIP_SA_TA_LEN + pduInfoPtr->SduLength;
             /* PRQA S 2814 -- */
-
+            SchM_Enter_DoIP_ExclusiveArea();
             DoIP_FillDiagnosticHeader(pduInfoPtr, txRxCtxIdx, sa, ta);
-
-            /* PRQA S 2844 ++ */ /* VL_DoIP_DerefInvalidPtr */
+            /* PRQA S 2844 ++ */ /* VL_QAC_DerefNullPtr */
+            txCtrl->PdurTxPduId  = pdurTxPduId;
+            txCtrl->PdurTxPduRef = DoIP_GetPduRTxPduRef(channelIdx);
             ret = DoIP_TriggerTpTransmit(DoIP_TcpConnStatus[index].SoadTxPduRef, &pduInfo, txCtrl, DOIP_TX_DIAG_TP_MSG);
             /* PRQA S 2844 -- */
 
             /*SWS_DoIP_00220*/
-            if (ret == E_OK)
-            {
-                /* PRQA S 2814 ++ */ /* VL_QAC_DerefNullPtr */
-                txCtrl->PdurTxPduId  = pdurTxPduId;
-                txCtrl->PdurTxPduRef = DoIP_GetPduRTxPduRef(channelIdx);
-                /* PRQA S 2814 -- */
-            }
-            else
+            if (ret != E_OK)
             {
                 DoIP_ResetTcpTxContext(txRxCtxIdx);
             }
+            SchM_Exit_DoIP_ExclusiveArea();
         }
     }
 
@@ -468,14 +472,16 @@ Std_ReturnType DoIP_IfTransmitInternal(PduIdType pdurTxPduId, const PduInfoType*
             /* PRQA S 2934 ++ */ /* VL_DoIP_ComputeInvalidPtr */
             DoIP_TcpTxRxContextType* ctx = &DoIP_TcpTxRxContext[txRxCtxIdx];
             /* PRQA S 2934 -- */
+            SchM_Enter_DoIP_ExclusiveArea();
             DoIP_FillDiagnosticHeader(pduInfoPtr, txRxCtxIdx, sa, ta);
 
             /* PRQA S 2844 ++ */ /* VL_DoIP_DerefInvalidPtr */
             DoIP_MemCpy(&ctx->TxBuf[DOIP_HEADER_LEN + DOIP_SA_TA_LEN], pduInfoPtr->SduDataPtr, pduInfoPtr->SduLength);
             /* PRQA S 2844 -- */
-            pduInfo.SduDataPtr = &ctx->TxBuf[0];
-
-            ret = DoIP_TriggerTpTransmit(
+            pduInfo.SduDataPtr       = &ctx->TxBuf[0];
+            ctx->TxCtrl.PdurTxPduId  = pdurTxPduId;
+            ctx->TxCtrl.PdurTxPduRef = DoIP_GetPduRTxPduRef(channelIdx);
+            ret                      = DoIP_TriggerTpTransmit(
                 /* PRQA S 2844 ++ */ /* VL_DoIP_DerefInvalidPtr */
                 DoIP_TcpConnStatus[index]
                     .SoadTxPduRef,
@@ -483,11 +489,12 @@ Std_ReturnType DoIP_IfTransmitInternal(PduIdType pdurTxPduId, const PduInfoType*
                 &pduInfo,
                 &ctx->TxCtrl,
                 DOIP_TX_DIAG_IF_MSG);
-            if (ret == E_OK)
+            if (ret != E_OK)
             {
-                ctx->TxCtrl.PdurTxPduId  = pdurTxPduId;
-                ctx->TxCtrl.PdurTxPduRef = DoIP_GetPduRTxPduRef(channelIdx);
+                ctx->TxCtrl.TxBufState = DOIP_BUFFER_IDLE;
+                ctx->TxCtrl.TxState    = DOIP_TX_STATE_IDLE;
             }
+            SchM_Exit_DoIP_ExclusiveArea();
         }
     }
 
@@ -590,15 +597,22 @@ boolean DoIP_HandlePendingTpMsg(DoIP_TcpTxRxContextType* ctx)
 /* PRQA S 3408,1532 -- */
 {
     boolean ret = TRUE;
-
+    SchM_Enter_DoIP_ExclusiveArea();
     const DoIP_TpItemType* item = DoIP_DequeueTpMsg(&ctx->TxTpQueue); /* PRQA S 2814 */ /* VL_QAC_DerefNullPtr */
+    SchM_Exit_DoIP_ExclusiveArea();
     if (NULL_PTR != item)
     {
         /* PRQA S 2844 ++ */ /* VL_DoIP_DerefInvalidPtr */
         if (E_NOT_OK == DoIP_TpTransmitInternal(item->PdurTxPduId, &item->PduInfo))
         /* PRQA S 2844 -- */
         {
-            (void)DoIP_EnqueueTpMsg(&ctx->TxTpQueue, item->PdurTxPduId, &item->PduInfo);
+            if (E_NOT_OK == DoIP_UnreadqueueTpMsg(&ctx->TxTpQueue, item->PdurTxPduId, &item->PduInfo))
+            {
+                PduR_DoIPTpTxConfirmation(ctx->TxCtrl.PdurTxPduRef, E_NOT_OK);
+            }
+            ctx->TxCtrl.TxBufState = DOIP_BUFFER_IDLE;
+            ctx->TxCtrl.TxMsgType  = DOIP_TX_NON_MSG;
+            ctx->TxCtrl.TxState    = DOIP_TX_STATE_IDLE;
         }
 
         ret = FALSE;
@@ -615,15 +629,22 @@ boolean DoIP_HandlePendingIfMsg(DoIP_TcpTxRxContextType* ctx)
 /* PRQA S 3408,1532 -- */
 {
     boolean ret = TRUE;
-
+    SchM_Enter_DoIP_ExclusiveArea();
     const DoIP_IfItemType* item = DoIP_DequeueIfMsg(&ctx->TxIfQueue); /* PRQA S 2814 */ /* VL_QAC_DerefNullPtr */
+    SchM_Exit_DoIP_ExclusiveArea();
     if (NULL_PTR != item)
     {
         /* PRQA S 2844 ++ */ /* VL_DoIP_DerefInvalidPtr */
         if (E_NOT_OK == DoIP_IfTransmitInternal(item->PdurTxPduId, &item->PduInfo))
         /* PRQA S 2844 -- */
         {
-            (void)DoIP_EnqueueIfMsg(&ctx->TxIfQueue, item->PdurTxPduId, &item->PduInfo);
+            if (E_NOT_OK == DoIP_UnreadqueueIfMsg(&ctx->TxIfQueue, item->PdurTxPduId, &item->PduInfo))
+            {
+                PduR_DoIPIfTxConfirmation(ctx->TxCtrl.PdurTxPduRef, E_NOT_OK);
+            }
+            ctx->TxCtrl.TxBufState = DOIP_BUFFER_IDLE;
+            ctx->TxCtrl.TxMsgType  = DOIP_TX_NON_MSG;
+            ctx->TxCtrl.TxState    = DOIP_TX_STATE_IDLE;
         }
 
         ret = FALSE;
@@ -638,42 +659,124 @@ boolean DoIP_HandlePendingIfMsg(DoIP_TcpTxRxContextType* ctx)
 Std_ReturnType DoIP_EnqueueTpMsg(DoIP_TpQueueType* queue, PduIdType pdurTxPduId, const PduInfoType* pduInfoPtr)
 {
     Std_ReturnType ret = E_OK;
+    uint8          pendingQueueNum;
 
+    SchM_Enter_DoIP_ExclusiveArea();
     /* PRQA S 2814,2934,2844 ++ */ /* VL_QAC_DerefNullPtr,VL_DoIP_ComputeInvalidPtr,VL_DoIP_DerefInvalidPtr */
-    if ((queue->Tail - queue->Head) != DOIP_TP_QUEUE_BUFFER_NUM) /*buffer full*/
+    if ((queue->Tail > queue->Head) || (queue->Count == 0u))
     {
-        DoIP_TpItemType* item = &queue->Item[queue->Tail % DOIP_TP_QUEUE_BUFFER_NUM];
+        pendingQueueNum = queue->Tail - queue->Head;
+    }
+    else
+    {
+        pendingQueueNum = (DOIP_TP_QUEUE_BUFFER_NUM - queue->Head) + queue->Tail;
+    }
 
+    if (pendingQueueNum < DOIP_TP_QUEUE_BUFFER_NUM)
+    {
+        DoIP_TpItemType* item   = &queue->Item[queue->Tail];
         item->PdurTxPduId       = pdurTxPduId;
         item->PduInfo.SduLength = pduInfoPtr->SduLength;
-        /* PRQA S 2814,2934,2844 -- */
-
-        /*  metadata has no memory space, so use SduDataPtr memory space */
-        item->PduInfo.MetaDataPtr = item->PduData.SduDataPtr;
         if (pduInfoPtr->MetaDataPtr != NULL_PTR)
         {
+            item->PduInfo.MetaDataPtr = item->PduData.SduDataPtr;
             DoIP_MemCpy(item->PduInfo.MetaDataPtr, pduInfoPtr->MetaDataPtr, DOIP_SA_TA_LEN);
+        }
+        else
+        {
+            item->PduInfo.MetaDataPtr = NULL_PTR;
         }
 
         queue->Tail++;
+        if (queue->Tail >= DOIP_TP_QUEUE_BUFFER_NUM)
+        {
+            queue->Tail = 0u;
+        }
+        if (queue->Count < DOIP_TP_QUEUE_BUFFER_NUM)
+        {
+            queue->Count++;
+        }
     }
     else
     {
         ret = E_NOT_OK;
     }
-
+    SchM_Exit_DoIP_ExclusiveArea();
+    /* PRQA S 2814,2934,2844 -- */
     return ret;
 }
 
+DOIP_LOCAL_INLINE Std_ReturnType
+    DoIP_UnreadqueueTpMsg(DoIP_TpQueueType* queue, PduIdType pdurTxPduId, const PduInfoType* pduInfoPtr)
+{
+    Std_ReturnType ret = E_OK;
+    uint8          pendingQueueNum;
+
+    SchM_Enter_DoIP_ExclusiveArea();
+    if ((queue->Tail > queue->Head) || (queue->Count == 0u))
+    {
+        pendingQueueNum = queue->Tail - queue->Head;
+    }
+    else
+    {
+        pendingQueueNum = (DOIP_TP_QUEUE_BUFFER_NUM - queue->Head) + queue->Tail;
+    }
+    if (pendingQueueNum < DOIP_TP_QUEUE_BUFFER_NUM) /*buffer full*/
+    {
+        if (queue->Head == 0u)
+        {
+            queue->Head = DOIP_TP_QUEUE_BUFFER_NUM - 1u;
+        }
+        else
+        {
+            queue->Head -= 1u;
+        }
+        DoIP_TpItemType* item   = &queue->Item[queue->Head];
+        item->PdurTxPduId       = pdurTxPduId;
+        item->PduInfo.SduLength = pduInfoPtr->SduLength;
+        if (pduInfoPtr->MetaDataPtr != NULL_PTR)
+        {
+            item->PduInfo.MetaDataPtr = item->PduData.SduDataPtr;
+            DoIP_MemCpy(item->PduInfo.MetaDataPtr, pduInfoPtr->MetaDataPtr, DOIP_SA_TA_LEN);
+        }
+        else
+        {
+            item->PduInfo.MetaDataPtr = NULL_PTR;
+        }
+
+        if (queue->Count < DOIP_TP_QUEUE_BUFFER_NUM)
+        {
+            queue->Count++;
+        }
+    }
+    else
+    {
+        ret = E_NOT_OK;
+    }
+    SchM_Exit_DoIP_ExclusiveArea();
+
+    return ret;
+}
 /**
  * @brief Enqueue IF message.
  */
 Std_ReturnType DoIP_EnqueueIfMsg(DoIP_IfQueueType* queue, PduIdType pdurTxPduId, const PduInfoType* pduInfoPtr)
 {
     Std_ReturnType ret = E_OK;
+    uint8          pendingQueueNum;
 
+    SchM_Enter_DoIP_ExclusiveArea();
     /* PRQA S 2814 ++ */ /* VL_QAC_DerefNullPtr */
-    if (((queue->Tail - queue->Head) == DOIP_IF_QUEUE_BUFFER_NUM)
+    if ((queue->Tail > queue->Head) || (queue->Count == 0u))
+    {
+        pendingQueueNum = queue->Tail - queue->Head;
+    }
+    else
+    {
+        pendingQueueNum = (DOIP_IF_QUEUE_BUFFER_NUM - queue->Head) + queue->Tail;
+    }
+
+    if ((pendingQueueNum >= DOIP_IF_QUEUE_BUFFER_NUM)
         || ((PduLengthType)DOIP_TX_BUFFER_SIZE
             < ((PduLengthType)DOIP_HEADER_LEN + (PduLengthType)DOIP_SA_TA_LEN + pduInfoPtr->SduLength))) /*buffer full*/
     /* PRQA S 2814 -- */
@@ -683,28 +786,99 @@ Std_ReturnType DoIP_EnqueueIfMsg(DoIP_IfQueueType* queue, PduIdType pdurTxPduId,
     else
     {
         /* PRQA S 2934 ++ */ /* VL_DoIP_ComputeInvalidPtr */
-        DoIP_IfItemType* item = &queue->Item[queue->Tail % DOIP_IF_QUEUE_BUFFER_NUM];
+        DoIP_IfItemType* item = &queue->Item[queue->Tail];
         /* PRQA S 2934 -- */
-
         item->PdurTxPduId       = pdurTxPduId; /* PRQA S 2844 */ /* VL_DoIP_DerefInvalidPtr */
         item->PduInfo.SduLength = pduInfoPtr->SduLength;
 
-        item->PduInfo.MetaDataPtr = item->PduData.MetaDataPtr;
-        item->PduInfo.SduDataPtr  = item->PduData.SduDataPtr;
-
+        item->PduInfo.SduDataPtr = item->PduData.SduDataPtr;
+        DoIP_MemCpy(item->PduData.SduDataPtr, pduInfoPtr->SduDataPtr, pduInfoPtr->SduLength);
         if (pduInfoPtr->MetaDataPtr != NULL_PTR)
         {
+            item->PduInfo.MetaDataPtr = item->PduData.MetaDataPtr;
             DoIP_MemCpy(item->PduInfo.MetaDataPtr, pduInfoPtr->MetaDataPtr, DOIP_SA_TA_LEN);
         }
-
-        DoIP_MemCpy(item->PduData.SduDataPtr, pduInfoPtr->SduDataPtr, pduInfoPtr->SduLength);
-
+        else
+        {
+            item->PduInfo.MetaDataPtr = NULL_PTR;
+        }
         queue->Tail++;
+
+        if (queue->Tail >= DOIP_IF_QUEUE_BUFFER_NUM)
+        {
+            queue->Tail = 0u;
+        }
+        if (queue->Count < DOIP_IF_QUEUE_BUFFER_NUM)
+        {
+            queue->Count++;
+        }
     }
+    SchM_Exit_DoIP_ExclusiveArea();
 
     return ret;
 }
 
+DOIP_LOCAL_INLINE Std_ReturnType
+    DoIP_UnreadqueueIfMsg(DoIP_IfQueueType* queue, PduIdType pdurTxPduId, const PduInfoType* pduInfoPtr)
+{
+    Std_ReturnType ret = E_OK;
+    uint8          pendingQueueNum;
+
+    SchM_Enter_DoIP_ExclusiveArea();
+    /* PRQA S 2814 ++ */ /* VL_QAC_DerefNullPtr */
+    if ((queue->Tail > queue->Head) || (queue->Count == 0u))
+    {
+        pendingQueueNum = queue->Tail - queue->Head;
+    }
+    else
+    {
+        pendingQueueNum = (DOIP_IF_QUEUE_BUFFER_NUM - queue->Head) + queue->Tail;
+    }
+
+    if ((pendingQueueNum >= DOIP_IF_QUEUE_BUFFER_NUM)
+        || ((PduLengthType)DOIP_TX_BUFFER_SIZE
+            < ((PduLengthType)DOIP_HEADER_LEN + (PduLengthType)DOIP_SA_TA_LEN + pduInfoPtr->SduLength))) /*buffer full*/
+    /* PRQA S 2814 -- */
+    {
+        ret = E_NOT_OK;
+    }
+    else
+    {
+        /* PRQA S 2934 ++ */ /* VL_DoIP_ComputeInvalidPtr */
+        if (queue->Head == 0u)
+        {
+            queue->Head = DOIP_IF_QUEUE_BUFFER_NUM - 1u;
+        }
+        else
+        {
+            queue->Head -= 1u;
+        }
+        DoIP_IfItemType* item = &queue->Item[queue->Head];
+        /* PRQA S 2934 -- */
+        item->PdurTxPduId       = pdurTxPduId; /* PRQA S 2844 */ /* VL_DoIP_DerefInvalidPtr */
+        item->PduInfo.SduLength = pduInfoPtr->SduLength;
+
+        item->PduInfo.SduDataPtr = item->PduData.SduDataPtr;
+        DoIP_MemCpy(item->PduData.SduDataPtr, pduInfoPtr->SduDataPtr, pduInfoPtr->SduLength);
+        if (pduInfoPtr->MetaDataPtr != NULL_PTR)
+        {
+            item->PduInfo.MetaDataPtr = item->PduData.MetaDataPtr;
+            DoIP_MemCpy(item->PduInfo.MetaDataPtr, pduInfoPtr->MetaDataPtr, DOIP_SA_TA_LEN);
+        }
+        else
+        {
+            item->PduInfo.MetaDataPtr = NULL_PTR;
+        }
+
+        if (queue->Count < DOIP_IF_QUEUE_BUFFER_NUM)
+        {
+            queue->Count++;
+        }
+    }
+    SchM_Exit_DoIP_ExclusiveArea();
+
+    return ret;
+}
 /**
  * @brief Clear IF queue.
  */
@@ -827,16 +1001,25 @@ DOIP_LOCAL_INLINE PduIdType DoIP_GetPduRTxPduRef(uint16 channelIdx) /* PRQA S 15
 DOIP_LOCAL_INLINE DoIP_TpItemType* DoIP_DequeueTpMsg(DoIP_TpQueueType* queue)
 /* PRQA S 1505 -- */
 {
+    SchM_Enter_DoIP_ExclusiveArea();
     DoIP_TpItemType* item = NULL_PTR;
 
-    /* PRQA S 2814,2934 ++ */         /* VL_QAC_DerefNullPtr,VL_DoIP_ComputeInvalidPtr */
-    if ((queue->Tail != queue->Head)) /*queueMsg not empty*/
+    /* PRQA S 2814,2934 ++ */                                /* VL_QAC_DerefNullPtr,VL_DoIP_ComputeInvalidPtr */
+    if ((queue->Tail != queue->Head) || (queue->Count > 0u)) /*queueMsg not empty*/
     {
-        item = &queue->Item[queue->Head % DOIP_TP_QUEUE_BUFFER_NUM];
+        item = &queue->Item[queue->Head];
         queue->Head++;
         /* PRQA S 2814,2934 -- */
     }
-
+    if (queue->Head >= DOIP_TP_QUEUE_BUFFER_NUM)
+    {
+        queue->Head = 0u;
+    }
+    if (queue->Count > 0u)
+    {
+        queue->Count--;
+    }
+    SchM_Exit_DoIP_ExclusiveArea();
     return item;
 }
 
@@ -847,16 +1030,25 @@ DOIP_LOCAL_INLINE DoIP_TpItemType* DoIP_DequeueTpMsg(DoIP_TpQueueType* queue)
 DOIP_LOCAL_INLINE DoIP_IfItemType* DoIP_DequeueIfMsg(DoIP_IfQueueType* queue)
 /* PRQA S 1505 -- */
 {
+    SchM_Enter_DoIP_ExclusiveArea();
     DoIP_IfItemType* item = NULL_PTR;
 
-    /* PRQA S 2814,2934 ++ */         /* VL_QAC_DerefNullPtr,VL_DoIP_ComputeInvalidPtr */
-    if ((queue->Tail != queue->Head)) /*queueMsg not empty*/
+    /* PRQA S 2814,2934 ++ */                                /* VL_QAC_DerefNullPtr,VL_DoIP_ComputeInvalidPtr */
+    if ((queue->Tail != queue->Head) || (queue->Count > 0u)) /*queueMsg not empty*/
     {
-        item = &queue->Item[queue->Head % DOIP_IF_QUEUE_BUFFER_NUM];
+        item = &queue->Item[queue->Head];
         queue->Head++;
         /* PRQA S 2814,2934 -- */
     }
-
+    if (queue->Head >= DOIP_IF_QUEUE_BUFFER_NUM)
+    {
+        queue->Head = 0u;
+    }
+    if (queue->Count > 0u)
+    {
+        queue->Count--;
+    }
+    SchM_Exit_DoIP_ExclusiveArea();
     return item;
 }
 
@@ -1052,11 +1244,20 @@ DOIP_LOCAL BufReq_ReturnType DoIP_StartTransDataToPduR(
 
         if (BUFREQ_OK == localRet)
         {
-            pduInfo.SduLength  = rxCtrl->RxBufPos - (PduLengthType)DOIP_HEADER_LEN - (PduLengthType)DOIP_SA_TA_LEN;
-            pduInfo.SduDataPtr = &rxBuf[DOIP_SA_TA_LEN + DOIP_HEADER_LEN];
+            pduInfo.SduLength = rxCtrl->RxBufPos - (PduLengthType)DOIP_HEADER_LEN - (PduLengthType)DOIP_SA_TA_LEN;
+
             /* PRQA S 2977 ++ */ /* VL_DoIP_PartialInit */
-            ret = DoIP_TransferDiagMsgToPduR(pdurRxPdu->PdurRxPduRef, &pduInfo, bufferSizePtr, handleDiagCtx, nack);
-            /* PRQA S 2977 -- */
+            if (*bufferSizePtr >= pduInfo.SduLength)
+            {
+                pduInfo.SduDataPtr = &rxBuf[DOIP_SA_TA_LEN + DOIP_HEADER_LEN];
+                ret = DoIP_TransferDiagMsgToPduR(pdurRxPdu->PdurRxPduRef, &pduInfo, bufferSizePtr, handleDiagCtx, nack);
+                /* PRQA S 2977 -- */
+            }
+            else
+            {
+                PduR_DoIPTpRxIndication(pdurRxPdu->PdurRxPduRef, E_NOT_OK);
+                rxCtrl->RxState = DOIP_RX_STATE_DISCARD;
+            }
         }
         else if (BUFREQ_E_OVFL == localRet) /*req 13400 DoIP_073*/
         {
@@ -1271,11 +1472,13 @@ DOIP_LOCAL BufReq_ReturnType DoIP_SoAdTpCopyTxTpHeader(
 /**
  * @brief Send diagnostic ACK.
  */
+/* PRQA S 6070 ++ */ /* VL_MTR_DoIP_STCAL */
 DOIP_LOCAL void DoIP_SendDiagnosticAck(uint16 soadTxPduRef, uint8 txRxCtxIdx)
+/* PRQA S 6070 -- */
 {
     uint16 payloadLen = 0u;
     uint8  buf[DOIP_NON_DIAG_QUEUE_BUFFER_SIZE];
-
+    SchM_Enter_DoIP_ExclusiveArea();
     for (uint8 i = 0u; i < DoIP_PCCfgPtr->TesterNum; i++) /* PRQA S 2814 */ /* VL_QAC_DerefNullPtr */
     {
         /* PRQA S 2814,2844,2824 ++ */ /* VL_QAC_DerefNullPtr,VL_DoIP_DerefInvalidPtr,VL_DoIP_ArithNullptr */
@@ -1348,7 +1551,13 @@ DOIP_LOCAL void DoIP_SendDiagnosticAck(uint16 soadTxPduRef, uint8 txRxCtxIdx)
     /* PRQA S 2814 -- */
     {
         DoIP_MemCpy(DoIP_TcpTxRxContext[txRxCtxIdx].TxBuf, buf, pduInfo.SduLength);
-        (void)DoIP_TriggerTpTransmit(soadTxPduRef, &pduInfo, txCtrl, DOIP_TX_NON_DIAG_MSG);
+        if (E_NOT_OK == DoIP_TriggerTpTransmit(soadTxPduRef, &pduInfo, txCtrl, DOIP_TX_NON_DIAG_MSG))
+        {
+            /* PRQA S 2844 ++ */ /* VL_DoIP_DerefInvalidPtr */
+            (void)DoIP_EnqueueNonDiagMsg(&DoIP_TcpTxRxContext[txRxCtxIdx].TxNonDiagQueue, soadTxPduRef, &pduInfo);
+            /* PRQA S 2844 -- */ /* VL_DoIP_DerefInvalidPtr */
+            DoIP_ResetTcpTxContext(txRxCtxIdx);
+        }
     }
     else
     {
@@ -1356,17 +1565,20 @@ DOIP_LOCAL void DoIP_SendDiagnosticAck(uint16 soadTxPduRef, uint8 txRxCtxIdx)
         (void)DoIP_EnqueueNonDiagMsg(&DoIP_TcpTxRxContext[txRxCtxIdx].TxNonDiagQueue, soadTxPduRef, &pduInfo);
         /* PRQA S 2844 -- */ /* VL_DoIP_DerefInvalidPtr */
     }
+    SchM_Exit_DoIP_ExclusiveArea();
 }
 
 /**
  * @brief Send diagnostic NACK.
  */
+/* PRQA S 6070 ++ */ /* VL_MTR_DoIP_STCAL */
 DOIP_LOCAL void DoIP_SendDiagnosticNack(uint16 soadTxPduRef, uint8 txRxCtxIdx, uint8 nack)
+/* PRQA S 6070 -- */
 {
     PduLengthType payloadLen = DOIP_DIAG_ACK_NACK_MSG_LEN;
     uint8         buf[DOIP_NON_DIAG_QUEUE_BUFFER_SIZE];
     const uint8*  rxBuf = DoIP_TcpTxRxContext[txRxCtxIdx].RxBuf; /* PRQA S 2844 */ /* VL_DoIP_DerefInvalidPtr */
-
+    SchM_Enter_DoIP_ExclusiveArea();
     uint16 sa = DOIP_U8_2_U16(&rxBuf[DOIP_DIAG_MSG_FIELD_POSITION_SA]);
     for (uint8 i = 0u; i < DoIP_PCCfgPtr->TesterNum; i++) /* PRQA S 2814 */ /* VL_QAC_DerefNullPtr */
     {
@@ -1419,14 +1631,19 @@ DOIP_LOCAL void DoIP_SendDiagnosticNack(uint16 soadTxPduRef, uint8 txRxCtxIdx, u
     if ((txCtrl->TxBufState == DOIP_BUFFER_IDLE) && (txCtrl->TxState == DOIP_TX_STATE_IDLE))
     {
         DoIP_MemCpy(DoIP_TcpTxRxContext[txRxCtxIdx].TxBuf, buf, pduInfo.SduLength);
-        (void)DoIP_TriggerTpTransmit(soadTxPduRef, &pduInfo, txCtrl, DOIP_TX_NON_DIAG_MSG);
+        if (E_NOT_OK == DoIP_TriggerTpTransmit(soadTxPduRef, &pduInfo, txCtrl, DOIP_TX_NON_DIAG_MSG))
+        {
+            (void)DoIP_EnqueueNonDiagMsg(&DoIP_TcpTxRxContext[txRxCtxIdx].TxNonDiagQueue, soadTxPduRef, &pduInfo);
+            DoIP_ResetTcpTxContext(txRxCtxIdx);
+        }
     }
     else
     {
         (void)DoIP_EnqueueNonDiagMsg(&DoIP_TcpTxRxContext[txRxCtxIdx].TxNonDiagQueue, soadTxPduRef, &pduInfo);
         /* PRQA S 2844, 2814 -- */
     }
+    SchM_Exit_DoIP_ExclusiveArea();
 }
-
+/* PRQA S 4461 -- */
 #define DOIP_STOP_SEC_CODE
 #include "DoIP_MemMap.h"

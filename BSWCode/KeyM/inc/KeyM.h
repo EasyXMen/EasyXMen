@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -41,335 +41,340 @@
     \li VL_KeyM_1271
       Reason: non-init expression for enum definition is necessary
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_KeyM_0779
       Reason: Configure tools to ensure the correctness of character matching.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_KeyM_3332
       Reason: The corresponding macro definition has been obtained through the header file inclusion.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_KeyM_0488
       Reason: Calculates the offset value of the array.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_KeyM_4603
       Reason: Dereference pointer.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_KeyM_4604
       Reason: A reserved identifier or reserved macro name shall not be declared.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_KeyM_3432
       Reason: Function-like macros are used to allow more efficient code.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_KeyM_5016
       Reason: Parameter passing requires
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_KeyM_3218
       Reason: Used to record global information, such as the timestamp of the first entry into the main function, the
     last access to the main function.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_KeyM_1252
       Reason: suffixed constant comparison is necessary.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_KeyM_2981
       Reason: Init may be necessary for return variant.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_KeyM_0311
       Reason: Compatible with different types of functions.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_KeyM_2109
       Reason: Boolean types need to be used as operands
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_KeyM_2991
       Reason: The control statement has no effect, but is reserved for better readability.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_KeyM_2995
       Reason: The control statement has no effect, but is reserved for better readability.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_MTR_KeyM_STMIF
       Reason: Functions handle specific tasks in the behavior of the entire component.
     Task has different scenarios that need to be covered, which depends on local conditions - this
     leads to deep nesting of the control structure.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_KeyM_0771
       Reason: Ability to quickly jump out of loops in different situations with different configurations.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_KeyM_3678
       Reason: non-const type declaration is necessary depends on the config.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_KeyM_2963
       Reason: Strong rotations between different pointer types have no effect.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_KeyM_2880
       Reason: the issue shall be avoided in actual running environment and configs
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_KeyM_2961
       Reason: Strong rotations between different pointer types have no effect.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_MTR_KeyM_STPTH
       Reason: The functions were not separated into sub-functions because there were higher requirements for
     minimizing the stack and applying them to the runtime usage of the code.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_MTR_KeyM_STCAL
       Reason: The standard compliance vote was higher than the measurement threshold. In addition, a typical way to
     reduce STCAL is to deepen function nesting, which increases call stack usage and runtime.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_MTR_KeyM_STCYC
       Reason: Functionality is not separated into subfunctions because there are higher requirements for minimizing the
   stack and applying it to runtime use of the code.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_MTR_KeyM_STST3
       Reason: Some function logics are overly complex. Splitting and implementing them will lead to reduced performance.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_MTR_KeyM_STLIN
       Reason: Some function logics are overly complex. Splitting and implementing them will lead to reduced performance.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_KeyM_5017
       Reason: High cyclomatic complexity is reserved for better readability.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_KeyM_2001
       Reason: The code is designed so
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_KeyM_1258
       Reason: The cast conversion from a constant is safe.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_KeyM_2015
       Reason: The code is designed so
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_KeyM_1881
       Reason: The code is designed so
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_KeyM_3206
       Reason: Variables are used in different configurations due to complex precompilation logic.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_KeyM_3397
       Reason: The code is designed so
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_KeyM_0770
       Reason: Ability to quickly jump of next loops in different situations with different configurations.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_KeyM_1822
       Reason: Pointers are compared with integers.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_KeyM_1852
       Reason: Pointers are compared with integers.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_KeyM_3440
       Reason: Floating-point numbers are used in the for loop
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_KeyM_3387
       Reason: The pointer increases or decreases by itself.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_KeyM_2911
       Reason: Confirmed: enclosed in unsigned arithmetic operations.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_KeyM_0772
       Reason: The loop contains multiple statements to terminate the loop, including goto
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_MTR_KeyM_STM19
       Reason: In principle, a function is not allowed to have multiple exit points,
     but it can help improve code performance in special circumstances.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_KeyM_2743
       Reason: The macro defines format requirements.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_KeyM_2996
       Reason: the issue shall be avoided in actual running environment and configs
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_KeyM_0597
       Reason: Type of case label expression is not consistent with type of controlling expression
     in switch statement.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_KeyM_3123
       Reason: Hard-encoded string constants were used.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_KeyM_0432
       Reason: Function argument is not of compatible pointer type.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_KeyM_1891
       Reason: Macro Conveniently determining authenticity.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_KeyM_4461
       Reason: Datatype conversion is necessary for functional usage
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_KeyM_1840
       Reason: A signed constant is implicitly converted to an unsigned type
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_KeyM_2992
       Reason: Different configurations will result in different values in the if logical expression.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_KeyM_1504
       Reason: Variables are used in different configurations due to complex precompilation logic.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_KeyM_3673
       Reason: Parameter passing requires
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_KeyM_3408
       Reason: Variables are provided externally and need to be declared externally.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_KeyM_2877
       Reason: The usage of this file depends on the config.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_KeyM_0331
       Reason: A const pointer type is forcibly converted to a non-const pointer type.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_MTR_KeyM_STPAR
       Reason: The parameters of the function need.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_KeyM_1505
       Reason: External interface.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_KeyM_0310
       Reason: Compatible with different types.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_KeyM_3305
       Reason: The code is designed so.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_KeyM_1312
       Reason: Only valid characters need to be saved, and no ending character is required
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_KeyM_1290
       Reason: Signed numbers need to be converted to unsigned numbers for use
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_KeyM_3122
       Reason: Hard-coded string constants were used.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_KeyM_3232
       Reason: String constants are saved using arrays.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_KeyM_1257
       Reason: Shorter integers are used to save longer integers.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_MTR_KeyM_CONF
       Reason: Configuration files do not need particularly many useless comments.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
+
+    \li VL_KeyM_0489
+      Reason: Use the pointer to shift back one unit.
+      Risk: No risk.
+      Prevention: None.
 
  */
 

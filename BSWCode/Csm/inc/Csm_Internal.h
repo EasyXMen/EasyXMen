@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -98,7 +98,7 @@ typedef Csm_JobInQueueType* Csm_JobInQueuePtrType;
 /**
  * @brief     Type definition for the runtime status of a channel.
  */
-typedef struct Csm_QueueChStatusTag
+typedef struct
 {
     Csm_JobInQueueType* pendingJobQue; /* PRQA S 3432 */ /* VL_Csm_3432 */
     uint32              maxPriority;                     /*Max job priority in this queue*/
@@ -109,7 +109,7 @@ typedef struct Csm_QueueChStatusTag
 /**
  * @brief     Type definition for job notification callback configuration.
  */
-typedef struct Csm_JobCbkCfgTag
+typedef struct
 {
     uint32               cbkId;  /*Id of call back function*/
     Csm_CallbackFuncType cbkFnc; /* Call back function*/

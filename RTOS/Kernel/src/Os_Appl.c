@@ -1,6 +1,6 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
- * SPDX-License-Identifier: LGPL-2.1-only-with-exception OR  LicenseRef-Commercial-License
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
+ * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
  * GNU Lesser General Public License as published by the Free Software Foundation; version 2.1.
@@ -10,7 +10,8 @@
  * You should have received a copy of the GNU Lesser General Public License along with this library;
  * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  * or see <https://www.gnu.org/licenses/>.
- *
+ */
+/*
  ********************************************************************************
  **                                                                            **
  **  FILENAME    : Os_Appl.c                                                   **
@@ -256,9 +257,9 @@ static void Os_ApplReleaseResource(ResourceType ResID, ObjectTypeType Object, Os
  * REQ ID               <None>
  */
 /******************************************************************************/
-/* PRQA S 3450 ++ */ /* VL_Os_3450 */
+/* PRQA S 6010, 6080, 3450 ++ */ /* VL_MTR_Os_STCYC, VL_MTR_Os_STPTH, VL_Os_3450 */
 static void Os_AppTerminateIsrKernelProc(Os_IsrType OsIsrID)
-/* PRQA S 3450 -- */
+/* PRQA S 6010, 6080, 3450 -- */
 {
 #if ((TRUE == CFG_TIMING_PROTECTION_ENABLE) || (CFG_STD_RESOURCE_MAX > 0) || (CFG_SPINLOCK_MAX > 0U))
     Os_ICBType* pOsICB;
@@ -524,9 +525,9 @@ static void Os_ApplReadyQueueRemove(Os_TaskType OsTaskID, Os_PriorityType OsQueu
  * REQ ID               <None>
  */
 /******************************************************************************/
-/* PRQA S 3450 ++ */ /* VL_Os_3450 */
+/* PRQA S 6010, 6070, 6080, 3450 ++ */ /* VL_MTR_Os_STCYC, VL_MTR_Os_STCAL, VL_MTR_Os_STPTH, VL_Os_3450 */
 static StatusType Os_ApplTerminateOneTask(Os_TaskType OsTaskID)
-/* PRQA S 3450 -- */
+/* PRQA S 6010, 6070, 6080, 3450 -- */
 {
 #if (CFG_STD_RESOURCE_MAX > 0U)
     uint16          i;
@@ -773,7 +774,9 @@ static void Os_TerminateAlarmObjectHandler(const Os_AlarmType* pOsAppAlarmRef, O
  * REQ ID               <None>
  */
 /******************************************************************************/
+/* PRQA S 3450 ++ */  /* VL_Os_3450 */
 static void Os_TerminateScheduleTblObjectHandler(
+/* PRQA S 3450 -- */
     const Os_ScheduleTableType* pOsAppSchTblRef,
     Os_ScheduleTableType        OsAppSchTblCnt)
 {
@@ -890,7 +893,9 @@ static void Os_TerminateObjects(const Os_ApplicationCfgType* pOsCurAppCfg)
  * REQ ID               <None>
  */
 /******************************************************************************/
-ApplicationType GetCurrentApplicationID(void) /* PRQA S 3006 */ /* VL_Os_3006 */
+/* PRQA S 3006, 1503, 6070 ++ */ /* VL_Os_3006, VL_QAC_NoUsedApi, VL_MTR_Os_STCAL */
+ApplicationType GetCurrentApplicationID(void)
+/* PRQA S 3006, 1503, 6070 -- */
 {
     /* PRQA S 2741, 2742, 2880, 3138 ++ */ /* VL_Os_PlatformDef */
     /* PRQA S 1006 ++ */ /* VL_Os_1006 */
@@ -941,7 +946,9 @@ ApplicationType GetCurrentApplicationID(void) /* PRQA S 3006 */ /* VL_Os_3006 */
 #if (CFG_ERRORHOOK == TRUE)
     if (status != E_OK)
     {
+	/* PRQA S 3138 ++ */ /* VL_Os_3138 */
         Os_TraceErrorHook(OSError_Save_GetCurrentApplicationID(), OSServiceId_GetCurrentApplicationID, status);
+	/* PRQA S 3138 -- */
     }
 #endif
 
@@ -971,9 +978,9 @@ ApplicationType GetCurrentApplicationID(void) /* PRQA S 3006 */ /* VL_Os_3006 */
  * REQ ID               <None>
  */
 /******************************************************************************/
-/* PRQA S 3006, 1503 ++ */ /* VL_Os_3006, VL_QAC_NoUsedApi */
+/* PRQA S 3006, 1503, 6070 ++ */ /* VL_Os_3006, VL_QAC_NoUsedApi, VL_MTR_Os_STCAL */
 StatusType AllowAccess(void)
-/* PRQA S 3006, 1503 -- */
+/* PRQA S 3006, 1503, 6070 -- */
 {
     /* PRQA S 2741, 2742, 2880, 3138 ++ */ /* VL_Os_PlatformDef */
     /* PRQA S 1006 ++ */ /* VL_Os_1006 */
@@ -1013,7 +1020,9 @@ StatusType AllowAccess(void)
 #if (CFG_ERRORHOOK == TRUE)
     if (err != E_OK)
     {
+	/* PRQA S 3138 ++ */ /* VL_Os_3138 */
         Os_TraceErrorHook(OSError_Save_AllowAccess(), OSServiceId_AllowAccess, err);
+	/* PRQA S 3138 -- */
     }
 #endif
     OS_EXIT_KERNEL(); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
@@ -1080,7 +1089,9 @@ StatusType GetApplicationState(ApplicationType Application, ApplicationStateRefT
 #if (CFG_ERRORHOOK == TRUE)
     if (err != E_OK)
     {
+	/* PRQA S 3138 ++ */ /* VL_Os_3138 */
         Os_TraceErrorHook(OSError_Save_GetApplicationState(Application, Value), OSServiceId_GetApplicationState, err);
+	/* PRQA S 3138 -- */
     }
 #endif
 
@@ -1110,9 +1121,9 @@ StatusType GetApplicationState(ApplicationType Application, ApplicationStateRefT
  * REQ ID               <None>
  */
 /******************************************************************************/
-/* PRQA S 6030, 3006, 1503 ++ */ /* VL_MTR_Os_STMIF, VL_Os_3006, VL_QAC_NoUsedApi */
+/* PRQA S 6030, 3006, 1503, 6070 ++ */ /* VL_MTR_Os_STMIF, VL_Os_3006, VL_QAC_NoUsedApi, VL_MTR_Os_STCAL */
 ObjectAccessType CheckObjectAccess(ApplicationType ApplID, ObjectTypeType ObjectType, AppObjectId ObjectID)
-/* PRQA S 6030, 3006, 1503 -- */
+/* PRQA S 6030, 3006, 1503, 6070 -- */
 {
     /* PRQA S 2741, 2742, 2880, 3138 ++ */ /* VL_Os_PlatformDef */
     /* PRQA S 1006 ++ */ /* VL_Os_1006 */
@@ -1166,7 +1177,7 @@ ObjectAccessType CheckObjectAccess(ApplicationType ApplID, ObjectTypeType Object
         Os_TraceErrorHook(
             OSError_Save_CheckObjectAccess(ApplID, ObjectType, ObjectID),
             OSServiceId_CheckObjectAccess,
-            Status);
+            Status); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
     }
 #endif
 
@@ -1199,9 +1210,9 @@ ObjectAccessType CheckObjectAccess(ApplicationType ApplID, ObjectTypeType Object
  * REQ ID               <None>
  */
 /******************************************************************************/
-/* PRQA S 6030, 6010, 3006, 1503 ++ */ /* VL_MTR_Os_STMIF, VL_MTR_Os_STCYC, VL_Os_3006, VL_QAC_NoUsedApi */
+/* PRQA S 6030, 6010, 3006, 1503, 6070 ++ */ /* VL_MTR_Os_STMIF, VL_MTR_Os_STCYC, VL_Os_3006, VL_QAC_NoUsedApi, VL_MTR_Os_STCAL */
 StatusType TerminateApplication(ApplicationType Application, RestartType RestartOption)
-/* PRQA S 6030, 6010, 3006, 1503 -- */
+/* PRQA S 6030, 6010, 3006, 1503, 6070 -- */
 {
     /* PRQA S 2741, 2742, 2880, 3138 ++ */ /* VL_Os_PlatformDef */
     /* PRQA S 1006 ++ */ /* VL_Os_1006 */
@@ -1290,7 +1301,7 @@ StatusType TerminateApplication(ApplicationType Application, RestartType Restart
         Os_TraceErrorHook(
             OSError_Save_TerminateApplication(Application, RestartOption),
             OSServiceId_TerminateApplication,
-            err);
+            err); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformNoDef */
     }
 #endif
 
@@ -1380,7 +1391,9 @@ void Os_TerminateApplication(ApplicationType Application, RestartType RestartOpt
 
             /*Activate the RestartTask*/
             Os_SCB.sysDispatchLocker = Os_SCB.sysDispatchLocker + (Os_LockerType)1;
+            /* PRQA S 1520 ++ */ /* VL_Os_1520 */
             (void)Os_ActivateTask((coreIndex | posCurAppCfg->OsRestartTask));
+            /* PRQA S 1520 -- */
             Os_SCB.sysDispatchLocker = Os_SCB.sysDispatchLocker - (Os_LockerType)1;
 
             Os_AppCB[Application].appState = tempAppState;
@@ -1406,9 +1419,11 @@ void Os_TerminateApplication(ApplicationType Application, RestartType RestartOpt
                 /* PRQA S 3442, 2481, 0306 ++ */ /* VL_Os_3442, VL_Os_2481, VL_Os_0306 */
                 /* PRQA S 0310, 2743, 3415 ++ */ /* VL_Os_0310, VL_Os_2743, VL_Os_3415 */
                 /* PRQA S 0404, 3345 ++ */       /* VL_Os_VolatileAccess */
-                /* PRQA S 1006 ++ */             /* VL_Os_1006 */
+                /* PRQA S 1006, 0499, 4397 ++ */ /* VL_Os_1006, VL_Os_0499, VL_Os_4397 */
+                /* PRQA S 1520 ++ */ /* VL_Os_1520 */
                 OS_ARCH_ISR2_EPILOGUE_KILL_ISR();
-                /* PRQA S 1006 -- */
+                /* PRQA S 1520 -- */
+                /* PRQA S 1006, 0499, 4397 -- */
                 /* PRQA S 0404, 3345 -- */
                 /* PRQA S 0310, 2743, 3415 -- */
                 /* PRQA S 3442, 2481, 0306 -- */
@@ -1551,12 +1566,14 @@ ObjectAccessType Os_CheckObjectAccess(ApplicationType ApplID, ObjectTypeType Obj
  * REQ ID               <None>
  */
 /******************************************************************************/
-ApplicationType GetApplicationID(void) /* PRQA S 3006 */ /* VL_Os_3006 */
+/* PRQA S 3006, 1503 ++ */ /* VL_Os_3006, VL_QAC_NoUsedApi */
+ApplicationType GetApplicationID(void)
+/* PRQA S 3006, 1503 -- */
 {
     /* PRQA S 2742, 2880, 3138, 2741 ++ */ /* VL_Os_PlatformDef */
-    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
+    /* PRQA S 1006, 3141 ++ */ /* VL_Os_1006, VL_Os_3141 */
     OS_ENTER_KERNEL();
-    /* PRQA S 1006 -- */
+    /* PRQA S 1006, 3141 -- */
     /* PRQA S 2742, 2880, 3138, 2741 -- */
     ApplicationType ApplID = INVALID_OSAPPLICATION;
     StatusType      status = E_OK;
@@ -1600,9 +1617,11 @@ ApplicationType GetApplicationID(void) /* PRQA S 3006 */ /* VL_Os_3006 */
     }
 
 #if (CFG_ERRORHOOK == TRUE)
-    if (status != E_OK)
+    if (status != E_OK) /* PRQA S 2996, 2992 */ /* VL_Os_2996, VL_Os_2992 */
     {
+        /* PRQA S 3138, 2880 ++ */ /* VL_Os_3138, VL_Os_2880 */
         Os_TraceErrorHook(OSError_Save_GetApplicationID(), OSServiceId_GetApplicationID, status);
+        /* PRQA S 3138, 2880 -- */
     }
 #endif
 
@@ -1699,14 +1718,14 @@ static ApplicationType Os_CheckObjectOwnership(ObjectTypeType ObjectType, AppObj
  * REQ ID               <None>
  */
 /******************************************************************************/
-/* PRQA S 3006, 1503 ++ */ /* VL_Os_3006, VL_QAC_NoUsedApi */
+/* PRQA S 3006, 1503, 6070 ++ */ /* VL_Os_3006, VL_QAC_NoUsedApi, VL_MTR_Os_STCAL */
 ApplicationType CheckObjectOwnership(ObjectTypeType ObjectType, AppObjectId ObjectID)
-/* PRQA S 3006, 1503 -- */
+/* PRQA S 3006, 1503, 6070 -- */
 {
     /* PRQA S 2742, 2880, 3138, 2741 ++ */ /* VL_Os_PlatformDef */
-    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
+    /* PRQA S 1006, 3141 ++ */ /* VL_Os_1006, VL_Os_3141 */
     OS_ENTER_KERNEL();
-    /* PRQA S 1006 -- */
+    /* PRQA S 1006, 3141 -- */
     /* PRQA S 2742, 2880, 3138, 2741 -- */
     ApplicationType ApplID = INVALID_OSAPPLICATION;
     StatusType      Status = E_OK;
@@ -1732,12 +1751,14 @@ ApplicationType CheckObjectOwnership(ObjectTypeType ObjectType, AppObjectId Obje
     }
 
 #if (CFG_ERRORHOOK == TRUE)
-    if (Status != E_OK)
+    if (Status != E_OK) /* PRQA S 2996, 2992 */ /* VL_Os_2996, VL_Os_2992 */
     {
+        /* PRQA S 2880, 3138, 3141 ++ */ /* VL_Os_2880, VL_Os_3138, VL_Os_3141 */
         Os_TraceErrorHook(
             OSError_Save_CheckObjectOwnership(ObjectType, ObjectID),
             OSServiceId_CheckObjectOwnership,
             Status);
+        /* PRQA S 2880, 3138, 3141 -- */
     }
 #endif
 

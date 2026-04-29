@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -38,128 +38,133 @@
     \li VL_Csm_1271
       Reason: non-init expression for enum definition is necessary
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Csm_0722
       Reason: Enum constant not explicitly initialized
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Csm_3432
       Reason: Function-like macros are used to allow more efficient code.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Csm_3430
       Reason: The code requires the use of struct nesting.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Csm_1503
       Reason: Allow some external functions not to be called.Since we're providing an API set, will it be called or not
   depends on how the project is integrated.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Csm_1532
       Reason: autosar requires functions to be defined and declared in specific units.Allow these functions to be
   called, possibly once, in the integration code.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Csm_3218
       Reason: Used to record global information, such as the timestamp of the first entry into the main function, the
   last access to the main function.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Csm_1514
       Reason: Static global variables need to be used
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Csm_2877
       Reason: The usage of this file depends on the config
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_MTR_Csm_STPAR
       Reason: The parameters of the function need.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Csm_3408
       Reason: There is no declaration before the definition.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_MTR_Csm_STCYC
       Reason: Functionality is not separated into subfunctions because there are higher requirements for minimizing the
   stack and applying it to runtime use of the code.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_MTR_Csm_STMIF
       Reason: Functions handle specific tasks in the behavior of the entire component.
     Task has different scenarios that need to be covered, which depends on local conditions - this
     leads to deep nesting of the control structure.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Csm_3673
       Reason: Pointers without const need to be used.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Csm_1317
       Reason: Definitions from other modules are used.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Csm_4522
       Reason: The enumeration type needs to be enumerated for bitwise and operations.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Csm_1823
       Reason: It is necessary to compare signed numbers with unsigned ones.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Csm_2109
       Reason: Boolean types need to be used as operands
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Csm_5016
       Reason: Parameter passing requires
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Csm_UsedBeforModify
       Reason: The operation is not redundant, because it must be emptied.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Csm_3678
       Reason: non-const type declaration is necessary depends on the config
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Csm_0770
       Reason: Ability to quickly jump of next loops in different situations with different configurations.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Csm_5017
       Reason: High cyclomatic complexity is reserved for better readability.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_Csm_0553
-      Reason: The usage of this file depends on the config
+      Reason: The usage of this file depends on the config.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
+
+    \li VL_Csm_3207
+      Reason: It depends on the configuration.
+      Risk: No risk.
+      Prevention: None.
 
  */
 

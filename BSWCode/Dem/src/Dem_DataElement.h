@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -89,7 +89,7 @@
 /**
  * @brief Structure for Destination Buffer
  */
-typedef struct Dem_DestinationBufferTag /* PRQA S 1536 */ /* VL_Dem_1536 */
+typedef struct
 {
     uint8* Buffer;     /**< Destination buffer receiving the data @range NA */
     uint16 BufferSize; /**< Buffer size of the destination buffer @range 0..65535 */
@@ -110,7 +110,7 @@ typedef const Dem_DestinationBufferType* const Dem_DestinationBufferConstPtrType
 /**
  * @brief Structure for Data Info
  */
-typedef struct Dem_DataInfoTag /* PRQA S 1536 */ /* VL_Dem_1536 */
+typedef struct
 {
     Dem_DestinationBufferPtrType DestinationBuffer; /**< destination buffer context @range NA */
     const uint8*                 SourceBuffer;      /**< source buffer providing the DID data @range NA */
@@ -134,6 +134,7 @@ typedef const Dem_DataInfoType* const Dem_DataInfoConstPtrType;
  */
 typedef boolean (*Dem_InterDataElementCallbackType)(Dem_DataInfoConstPtrType CopyDidInfoPtr);
 
+#if (DEM_DATA_ELEMENT_CLASS_NUMBER > 0u)
 /**
  * @brief         Function pointer type for Data Element Callback
  * @param[in]     DestBuffer: Pointer to the destination buffer
@@ -144,9 +145,11 @@ typedef boolean (*Dem_InterDataElementCallbackType)(Dem_DataInfoConstPtrType Cop
  */
 typedef void (
     *Dem_DataElementCallbackType)(Dem_DestinationBufferPtrType DestBuffer, Dem_DataElementClassNumType DataIndex);
+#endif
 /* PRQA S 5004 -- */
 
 /* ========================================== internal function declarations ======================================== */
+#if (DEM_DATA_ELEMENT_CLASS_NUMBER > 0u)
 #if (defined(DEM_DATA_CBK_WITH_EVENTID))
 /**
  * @brief         Call the Data Element with Event ID parameter function
@@ -341,7 +344,9 @@ DEM_LOCAL void
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_GetEnvDataByDataElement(Dem_DataInfoConstPtrType DataInfoPtr, Dem_DataElementClassNumType DataIndex);
+#endif
 
+#if (DEM_DATA_ELEMENT_CLASS_NUMBER > 0u)
 #if (defined(DEM_AGINGCTR_UPCNT_FIRST_ACTIVE))
 /**
  * @brief         Up-counting Dem-internal aging counter
@@ -453,6 +458,7 @@ DEM_LOCAL boolean Dem_DataCopyJ1939LampStatus(Dem_DataInfoConstPtrType CopyDidIn
  */
 DEM_LOCAL boolean Dem_DataCopyMaxFdcSinceLastClear(Dem_DataInfoConstPtrType CopyDidInfoPtr);
 #endif
+#endif
 
 /* ========================================== internal function definitions ========================================= */
 #define DEM_START_SEC_CODE
@@ -521,6 +527,7 @@ DEM_LOCAL_INLINE void Dem_DataReportInitCopyDidInfo(
     DataInfoPtr->EventId           = EventId;
 }
 
+#if (DEM_DATA_ELEMENT_CLASS_NUMBER > 0u)
 /**
  * @brief         Get the Data Element Kind
  * @param[in]     DataIndex: Data index
@@ -560,6 +567,7 @@ DEM_LOCAL_INLINE Dem_ReadDataFPtrType Dem_GetDataElementFnc(Dem_DataElementClass
 {
     return Dem_GetReadFncOfDataElement(DataIndex);
 }
+#endif
 /* PRQA S 5016 -- */
 
 /**
@@ -584,6 +592,7 @@ DEM_LOCAL_INLINE boolean Dem_CheckAndIncreaseDestBufferWriteIndex(Dem_Destinatio
     return ret;
 }
 
+#if (DEM_DATA_ELEMENT_CLASS_NUMBER > 0u)
 /**
  * @brief         Check if the Data Element is internal data
  * @param[in]     DataIndex: Data index
@@ -598,6 +607,7 @@ DEM_LOCAL_INLINE boolean Dem_CheckDataElementInternal(Dem_DataElementClassNumTyp
 {
     return (Dem_GetDataElementKind(DataIndex) >= DEM_DATAELEMENT_INTERNAL_DATA); /* PRQA S 4404 */ /* VL_Dem_4404 */
 }
+#endif
 
 /**
  * @brief         Copy passed uint8 data to destination buffer at passed write index
@@ -707,6 +717,7 @@ DEM_LOCAL_INLINE void Dem_WriteUint32ToBufferIntel(Dem_DestinationBufferPtrType 
     }
 }
 
+#if (DEM_DATA_ELEMENT_CLASS_NUMBER > 0u)
 #if (defined(DEM_DATA_CBK_WITH_EVENTID))
 /**
  * @brief         Check if the Data Element with Event ID parameter
@@ -1125,7 +1136,9 @@ DEM_LOCAL void
     }
 }
 #endif
+#endif
 
+#if (DEM_DATA_ELEMENT_CLASS_NUMBER > 0u)
 /**
  * @brief Get environmental data through Data Element
  */
@@ -1282,8 +1295,10 @@ DEM_LOCAL void Dem_GetEnvDataByDataElement(Dem_DataInfoConstPtrType DataInfoPtr,
         }
     }
 }
+#endif
 
 #if (DEM_FEATURE_SWC_GET_FF_ED == STD_ON)
+#if (DEM_DATA_ELEMENT_CLASS_NUMBER > 0u)
 /**
  * @brief         Skip data elements
  * @param[in]     CopyDidInfo: Copy DID information
@@ -1307,6 +1322,7 @@ DEM_LOCAL_INLINE void Dem_DataReportSkipDid(Dem_DataInfoPtrType CopyDidInfo, Dem
     }
 }
 #endif
+#endif
 
 #if (DEM_MAX_SIZE_FREEZEFRAME > 0u)
 /**
@@ -1319,6 +1335,7 @@ DEM_LOCAL_INLINE void Dem_DataReportSkipDid(Dem_DataInfoPtrType CopyDidInfo, Dem
  */
 DEM_LOCAL_INLINE void Dem_GetEnvDataByDid(Dem_DataInfoConstPtrType DataInfoPtr, Dem_DIDRefNumType DIDRef)
 {
+#if (DEM_DATA_ELEMENT_CLASS_NUMBER > 0u)
     /** Each DID consists of 1-* data elements. */
     for (Dem_DataElementClassNumType start = Dem_GetRefStartOfDidClass(DIDRef); start < Dem_GetRefEndOfDidClass(DIDRef);
          ++start)
@@ -1326,6 +1343,10 @@ DEM_LOCAL_INLINE void Dem_GetEnvDataByDid(Dem_DataInfoConstPtrType DataInfoPtr, 
         Dem_DataElementClassNumType dataIndex = Dem_GetRefValueOfDataElementClassRef(start);
         Dem_GetEnvDataByDataElement(DataInfoPtr, dataIndex);
     }
+#else
+    DEM_PARAM_UNUSED(DataInfoPtr);
+    DEM_PARAM_UNUSED(DIDRef);
+#endif
 }
 #endif
 
@@ -1340,6 +1361,7 @@ DEM_LOCAL_INLINE void Dem_GetEnvDataByDid(Dem_DataInfoConstPtrType DataInfoPtr, 
  */
 DEM_LOCAL_INLINE void Dem_GetEnvDataByPid(Dem_DataInfoPtrType DataInfoPtr, uint8 PIDIndex)
 {
+#if (DEM_DATA_ELEMENT_CLASS_NUMBER > 0u)
     /** Each PID consists of 1-255 data elements. */
     for (Dem_PidDataNumType start = Dem_GetDataRefStartOfPID(PIDIndex); start < Dem_GetDataEndRefEndOfPID(PIDIndex);
          ++start)
@@ -1347,6 +1369,10 @@ DEM_LOCAL_INLINE void Dem_GetEnvDataByPid(Dem_DataInfoPtrType DataInfoPtr, uint8
         Dem_DataElementClassNumType dataIndex = Dem_GetPidDataRefOfPID(start);
         Dem_GetEnvDataByDataElement(DataInfoPtr, dataIndex);
     }
+#else
+    DEM_PARAM_UNUSED(DataInfoPtr);
+    DEM_PARAM_UNUSED(PIDIndex);
+#endif
 }
 #endif
 
@@ -1362,9 +1388,14 @@ DEM_LOCAL_INLINE void Dem_GetEnvDataByPid(Dem_DataInfoPtrType DataInfoPtr, uint8
  */
 DEM_LOCAL_INLINE void Dem_GetEnvDataBySPN(Dem_DataInfoConstPtrType DataInfoPtr, Dem_SPNCRefNumType SPNRef)
 {
+#if (DEM_DATA_ELEMENT_CLASS_NUMBER > 0u)
     /** Each SPN consists of 1 data elements. */
     Dem_DataElementClassNumType dataIndex = Dem_GetDataElementRefOfSPNC(SPNRef);
     Dem_GetEnvDataByDataElement(DataInfoPtr, dataIndex);
+#else
+    DEM_PARAM_UNUSED(DataInfoPtr);
+    DEM_PARAM_UNUSED(SPNRef);
+#endif
 }
 #endif
 
@@ -1379,6 +1410,7 @@ DEM_LOCAL_INLINE void Dem_GetEnvDataBySPN(Dem_DataInfoConstPtrType DataInfoPtr, 
  */
 DEM_LOCAL_INLINE void Dem_GetEnvDataByEDR(Dem_DataInfoConstPtrType DataInfoPtr, Dem_EDRecordRefNumType CfgEDIndex)
 {
+#if (DEM_DATA_ELEMENT_CLASS_NUMBER > 0u)
     /** Each ED consists of 1-* data elements. */
     for (Dem_DataElementClassNumType start = Dem_GetEDRRStartOfEDRC(CfgEDIndex);
          start < Dem_GetEDRREndOfEDRC(CfgEDIndex);
@@ -1387,6 +1419,10 @@ DEM_LOCAL_INLINE void Dem_GetEnvDataByEDR(Dem_DataInfoConstPtrType DataInfoPtr, 
         Dem_DataElementClassNumType dataIndex = Dem_GetRefValueOfDataElementClassRef(start);
         Dem_GetEnvDataByDataElement(DataInfoPtr, dataIndex);
     }
+#else
+    DEM_PARAM_UNUSED(DataInfoPtr);
+    DEM_PARAM_UNUSED(CfgEDIndex);
+#endif
 }
 #endif
 
@@ -1411,6 +1447,7 @@ DEM_LOCAL_INLINE void Dem_DataWriteDestinationBuffer(
     }
 }
 
+#if (DEM_DATA_ELEMENT_CLASS_NUMBER > 0u)
 /**
  * @brief         Retrieves the user data stored in the event memory entry
  * @param[in]     CopyDidInfoPtr: Pointer to copy DID data information buffer
@@ -1670,12 +1707,14 @@ DEM_LOCAL boolean Dem_DataCopyMaxFdcThisCycle(Dem_DataInfoConstPtrType CopyDidIn
     sint8           fdc;
     Dem_EventIdType eventId = CopyDidInfoPtr->EventId;
 #if (DEM_EVENT_COMBINATION_SUPPORT != DEM_EVCOMB_DISABLED)
+#if (DEM_COMBINATION_NUMBER > 0u)
     Dem_CombinationNumType groupId = Dem_GetGroupIdOfEvent(eventId);
     if (groupId != DEM_COMBINATION_NUMBER)
     {
         fdc = Dem_GetFDCMaxOfDTCCombined(groupId);
     }
     else
+#endif
 #endif
     {
         fdc = Dem_SatelliteGetMaxFaultDetectionCounter(
@@ -1979,7 +2018,9 @@ DEM_LOCAL_INLINE boolean Dem_DataCopyAgedCounter(Dem_DataInfoConstPtrType CopyDi
     return TRUE;
 }
 #endif
+#endif
 
+#if (DEM_DATA_ELEMENT_CLASS_NUMBER > 0u)
 /**
  * @brief         Copy stored data element into a buffer.
  * @param[in]     CopyDidInfoPtr: Pointer to copy DID data information buffer
@@ -2185,6 +2226,7 @@ DEM_LOCAL_INLINE boolean
     }
     return ret;
 }
+#endif
 
 #if (DEM_MAX_SIZE_FREEZEFRAME > 0u)
 /**
@@ -2201,6 +2243,7 @@ DEM_LOCAL_INLINE boolean
 DEM_LOCAL_INLINE boolean Dem_DataReportCopyDid(Dem_DataInfoConstPtrType DataInfoPtr, Dem_DIDRefNumType DIDRef)
 {
     boolean ret = TRUE;
+#if (DEM_DATA_ELEMENT_CLASS_NUMBER > 0u)
     /** Each DID consists of 1-* data elements. */
     for (Dem_DataElementClassNumType start = Dem_GetRefStartOfDidClass(DIDRef); start < Dem_GetRefEndOfDidClass(DIDRef);
          ++start)
@@ -2211,6 +2254,10 @@ DEM_LOCAL_INLINE boolean Dem_DataReportCopyDid(Dem_DataInfoConstPtrType DataInfo
             ret = FALSE;
         }
     }
+#else
+    DEM_PARAM_UNUSED(DataInfoPtr);
+    DEM_PARAM_UNUSED(DIDRef);
+#endif
     return ret;
 }
 #endif
@@ -2230,6 +2277,7 @@ DEM_LOCAL_INLINE boolean Dem_DataReportCopyDid(Dem_DataInfoConstPtrType DataInfo
 DEM_LOCAL_INLINE boolean Dem_DataReportCopyPid(Dem_DataInfoPtrType DataInfoPtr, uint8 PidIndex)
 {
     boolean ret = TRUE;
+#if (DEM_DATA_ELEMENT_CLASS_NUMBER > 0u)
     /** Each PID consists of 1-255 data elements. */
     for (Dem_PidDataNumType start = Dem_GetDataRefStartOfPID(PidIndex); start < Dem_GetDataEndRefEndOfPID(PidIndex);
          ++start)
@@ -2240,6 +2288,10 @@ DEM_LOCAL_INLINE boolean Dem_DataReportCopyPid(Dem_DataInfoPtrType DataInfoPtr, 
             ret = FALSE;
         }
     }
+#else
+    DEM_PARAM_UNUSED(DataInfoPtr);
+    DEM_PARAM_UNUSED(PidIndex);
+#endif
     return ret;
 }
 #endif

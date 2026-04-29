@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -21,11 +21,23 @@
  **  @description        : Rebuid for Crypto
  **
  ***********************************************************************************************************************/
-/* PRQA S 0553 EOF */ /* VL_BswM_0553 */
+
 /* =================================================== inclusions =================================================== */
 
-/* PRQA S 0488,4559,4544,3493,3446,3432,3226,3138,3120,2741,2216,1840,1841 ++ */ /* VL_QAC_Crypto */
-/* PRQA S 1842,1252,0842,0314,1253,1290,1338 ++ */                               /* VL_QAC_Crypto */
+/* PRQA S 0553 EOF */ /* VL_BswM_0553 */
+/* PRQA S 6010 EOF */ /* VL_MTR_Crypto_62_STCYC */
+/* PRQA S 6020 EOF */ /* VL_MTR_Crypto_62_STLIN */
+/* PRQA S 6030 EOF */ /* VL_MTR_Crypto_62_STMIF */
+/* PRQA S 6040 EOF */ /* VL_MTR_Crypto_62_STPAR */
+/* PRQA S 6050 EOF */ /* VL_MTR_Crypto_62_STST3 */
+/* PRQA S 6060 EOF */ /* VL_MTR_Crypto_62_STM19 */
+/* PRQA S 6070 EOF */ /* VL_MTR_Crypto_62_STCAL */
+/* PRQA S 6080 EOF */ /* VL_MTR_Crypto_62_STPTH */
+
+/* PRQA S 0488,4559,4544,3493,3446,3432,3226,3138,3120,2741,2216,1840,1841 ++ */ /* VL_Crypto_62_General */
+/* PRQA S 1842,1252,0842,0314,1253,1290,1338 ++ */                               /* VL_Crypto_62_General */
+/* PRQA S 3494,2743,2985,1505,3418,2463 ++ */                                    /* VL_Crypto_62_General */
+/* PRQA S 2784,3397,3400,4152,2742,2880 ++ */                                    /* VL_Crypto_62_General */
 
 #include "Crypto_62_Internal.h"
 #if (CRYPTO_ALGORITHMFAM_RIPEMD160 == STD_ON)
@@ -60,7 +72,7 @@
 CRYPTO_62_LOCAL void
     Crypto_Internal_Ripemd160_process(Crypto_Ripemd160_Context* ctx, const uint8 data[CRYPTO_CONST_64]);
 /* ============================================ internal data definitions =========================================== */
-/* PRQA S 3218 ++ */ /* VL_QAC_Crypto */
+/* PRQA S 3218 ++ */ /* VL_Crypto_62_General */
 CRYPTO_62_LOCAL const uint8 Ripemd160_padding[CRYPTO_CONST_64] = {
     0x80U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U,
     0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U,
@@ -281,9 +293,9 @@ void Crypto_Ripemd160_Update(Crypto_Ripemd160_Context* ctx, const uint8* input, 
             ctx->total[1]++;
         }
 
-        /* PRQA S 4112,4115,4505,4558,3397,3400 ++ */ /* VL_QAC_Crypto */
+        /* PRQA S 4112,4115,4505,4558 ++ */ /* VL_Crypto_62_General */
         if (leave && ilen >= pad)
-        /* PRQA S 4112,4115,4505,4558,3397,3400 -- */
+        /* PRQA S 4112,4115,4505,4558 -- */
         {
             (void)IStdLib_MemCpy((void*)(ctx->buffer + leave), input, pad);
 
@@ -351,14 +363,22 @@ Std_ReturnType Crypto_Ripemd160_Process(uint32 objectId)
     uint8          output[CRYPTO_CONST_20];
 
     uint32 ilen = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputLength;
-    if (*(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr) >= 20U)
-    {
-        /* PRQA S 0311,3678 ++ */ /*VL_QAC_0311 */
-        uint8* input = (uint8*)(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputPtr);
-        /* PRQA S 0311,3678 -- */
+    /* PRQA S 0311,3678 ++ */ /*VL_Crypto_62_General */
+    uint8* input = (uint8*)(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputPtr);
+    /* PRQA S 0311,3678 -- */
 
-        ret = Crypto_Ripemd160(input, ilen, output);
-        (void)IStdLib_MemCpy(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr, output, 20u);
+    ret = Crypto_Ripemd160(input, ilen, output);
+    if (*(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr) >= CRYPTO_CONST_20 && ret == E_OK)
+    {
+        (void)IStdLib_MemCpy(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr, output, CRYPTO_CONST_20);
+        *(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr) = CRYPTO_CONST_20;
+    }
+    else
+    {
+        (void)IStdLib_MemCpy(
+            Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr,
+            output,
+            *(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr));
     }
 
     return ret;
@@ -437,5 +457,8 @@ void Crypto_Ripemd160_Starts(Crypto_Ripemd160_Context* ctx)
 #include "Crypto_62_MemMap.h"
 
 #endif
+
 /* PRQA S 0488,4559,4544,3493,3446,3432,3226,3138,3120,2741,2216,1840,1841 -- */
 /* PRQA S 1842,1252,0842,0314,1253,1290,1338 -- */
+/* PRQA S 3494,2743,2985,1505,3418,2463 -- */
+/* PRQA S 2784,3397,3400,4152,2742,2880 -- */

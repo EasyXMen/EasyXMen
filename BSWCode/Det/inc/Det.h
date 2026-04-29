@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -129,10 +129,6 @@
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
 
-    \li VL_Det_1513
-      Reason: Identifier '${name}' with external linkage has separate non-defining declarations in more than one
-  location. Risk: No risk. Prevention: Functional reliability guaranteed by design.
-
     \li VL_Det_3440
       Reason: Floating-point numbers are used in the for loop
       Risk: No risk.
@@ -147,6 +143,21 @@
       Reason: Function '${name}' is not using the same aliases.
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
+
+    \li VL_Det_2991
+      Reason: The result of this logical operation is always 'true'.
+      Risk: No risk.
+      Prevention: Ensure that the project is working properly through unit testing.
+
+    \li VL_Det_2995
+      Reason: The value of this 'if' controlling expression is always 'true'.
+      Risk: No risk.
+      Prevention: Ensure that the project is working properly through unit testing.
+
+    \li VL_Det_3229
+      Reason: The value of this 'if' controlling expression is always 'true'.
+      Risk: No risk.
+      Prevention: Ensure that the project is working properly through unit testing.
  */
 #ifndef DET_H
 #define DET_H
@@ -248,7 +259,7 @@ extern void Det_GetVersionInfo(Std_VersionInfoType* versionInfoPtr);
  */
 extern void Det_Start(void);
 
-/* PRQA S 1512,1513,1707 ++ */ /* VL_Det_1512,VL_Det_1513,VL_Det_1707 */
+/* PRQA S 1512,1513,1707 ++ */ /* VL_Det_1512,VL_QAC_MultiDeclaration,VL_Det_1707 */
 /**
  * @brief          Service is used to report development errors in Det module
  * @param[in]      moduleId: Module ID of calling module

@@ -1,6 +1,6 @@
 /* PRQA S 3108++ */
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -65,46 +65,85 @@
 
 #define Os_FEINT_UNSTALL(val)
 
+extern VAR(uint16, OS_VAR) Os_ArchPhyCoreId;
 /* set the bit7 EICn.MKn(request mask) */
-#define OS_INTERRUPT_ENABLEREQ(irqNum) (OS_INTC_SELF_EICn(irqNum) &= ~0x0080)
+#define OS_INTERRUPT_ENABLEREQ(src) \
+do \
+{  \
+    (OS_INTC_EICn(Os_ArchPhyCoreId, src)) &= (uint16)(~0x0080); \
+    (void)OS_INTC_EICn(Os_ArchPhyCoreId, src); \
+    ASM("SYNCP");   \
+}while(0)
 
 /* clear the bit7 EICn.MKn(request mask) */
-#define OS_INTERRUPT_DISABLEREQ(irqNum) (OS_INTC_SELF_EICn(irqNum) |= 0x0080)
+#define OS_INTERRUPT_DISABLEREQ(src) \
+do \
+{  \
+    (OS_INTC_EICn(Os_ArchPhyCoreId, src)) |= (uint16)(0x0080); \
+    (void)OS_INTC_EICn(Os_ArchPhyCoreId, src); \
+    ASM("SYNCP");   \
+}while(0)
 
 /* check the bit7 EICn.MKn(request mask) */
-#define OS_INTERRUPT_CHKREQ(irqNum) !((OS_INTC_SELF_EICn(irqNum) >> 12) & 0x01)
+#define OS_INTERRUPT_CHKREQ(src) ((OS_INTC_EICn(Os_ArchPhyCoreId, src)) & (uint16)0x0080U)
 
 /* write 0 to the bit12 EICn.RFn(request flag) */
-#define OS_INTERRUPT_CLEARREQ(irqNum) (OS_INTC_SELF_EICn(irqNum) &= 0xEFFF)
+#define OS_INTERRUPT_CLEARREQ(src) \
+do \
+{  \
+    (OS_INTC_EICn(Os_ArchPhyCoreId, src)) &= (uint16)(0xEFFF); \
+    (void)OS_INTC_EICn(Os_ArchPhyCoreId, src); \
+    ASM("SYNCP");   \
+}while(0)
 
 /* write 1 to the bit12 EICn.RFn(request flag) */
+#define OS_INTERRUPT_SETREQ(src) \
+do \
+{  \
+    (OS_INTC_EICn(Os_ArchPhyCoreId, src)) |= (uint16)(0x1000); \
+    (void)OS_INTC_EICn(Os_ArchPhyCoreId, src); \
+    ASM("SYNCP");   \
+}while(0)
+
 #if (TRUE == CFG_MEMORY_PROTECTION_ENABLE)
-#define OS_INTERRUPT_SETREQ(irqNum)            \
-    {                                          \
-        OS_ENTER_KERNEL();                     \
-        (OS_INTC_SELF_EICn(irqNum) |= 0x1000); \
-        OS_EXIT_KERNEL();                      \
-    }
+#define Os_ArchMemProtSwith2User()                                                    \
+    do                                                                                \
+    {                                                                                 \
+        if ((TRUE != Os_AppCfg[Os_SCB.sysRunningAppID].OsTrusted)                      \
+            || (TRUE == Os_AppCfg[Os_SCB.sysRunningAppID].OsTrustedAppWithProtection)) \
+        {                                                                             \
+            Os_ArchSwith2UserMode();                                                  \
+        }                                                                             \
+    } while (0)
+#define Os_ArchMemProtSwith2Kernel()                                                  \
+    do                                                                                \
+    {                                                                                 \
+        if ((TRUE != Os_AppCfg[Os_SCB.sysRunningAppID].OsTrusted)                      \
+            || (TRUE == Os_AppCfg[Os_SCB.sysRunningAppID].OsTrustedAppWithProtection)) \
+        {                                                                             \
+            Os_ArchSwith2SvMode();                                                    \
+        }                                                                             \
+    } while (0)
 #else
-#define OS_INTERRUPT_SETREQ(irqNum) (OS_INTC_SELF_EICn(irqNum) |= 0x1000)
+#define Os_ArchMemProtSwith2User()
+#define Os_ArchMemProtSwith2Kernel()
 #endif /* TRUE == CFG_MEMORY_PROTECTION_ENABLE */
 
 #define OS_ARCH_ISR2_PROLOGUE(isrId)  \
     {                                 \
         OS_PUSH_STACK();              \
         OS_SAVE_ISR_ID(isrId);        \
-        Os_ArchMemProtDisable();      \
         Os_ArchSwitch2ISR2Stk(isrId); \
         Os_EnterISR2();               \
         OS_TPISR2_ENTER(isrId);       \
-        Os_ArchMemProtEnable();       \
         OS_ISR_NEST_ENABLE(isrId);    \
+        Os_ArchMemProtSwith2User();   \
     }
 
 #define OS_ARCH_ISR2_EPILOGUE() \
     {                           \
         Os_ArchDisableInt();    \
-        Os_ArchSwitch2System(); \
+        Os_ArchMemProtSwith2Kernel(); \
         OS_SERVER_PROTECTION(); \
         Os_ExitISR2();          \
         OS_POP_STACK();         \
@@ -184,7 +223,7 @@
         }                                                          \
         else                                                       \
         {                                                          \
-            Os_IsrNestPcxStack[Os_IntNestISR2] = Os_ArchTempSp;    \
+            Os_IsrNestPcxStack[Os_IntNestISR2 - 1] = Os_ArchTempSp;    \
         }                                                          \
     }
 
@@ -196,7 +235,7 @@
         }                                                          \
         else                                                       \
         {                                                          \
-            Os_ArchTempSp = Os_IsrNestPcxStack[Os_IntNestISR2];    \
+            Os_ArchTempSp = Os_IsrNestPcxStack[Os_IntNestISR2 - 1];    \
         }                                                          \
     }
 
@@ -263,13 +302,14 @@ extern VAR(uint32, OS_VAR) Os_IsrFE_SP;
 extern VAR(Os_CallLevelType, OS_VAR) Os_SaveLevelISR1;
 #endif
 #if (TRUE == CFG_TIMING_PROTECTION_ENABLE)
-extern VAR(volatile uint32, OS_VAR) Os_TprotTerminateIsr;
+extern volatile uint8 Os_TprotTerminateIsr;
+extern volatile boolean Os_TprotTerminateTask;
 #endif
 extern VAR(uint32, OS_VAR) InitInterruptFlag;
 /*=======[E X T E R N A L   F U N C T I O N   D E C L A R A T I O N S]========*/
 extern FUNC(void, OS_CODE) Os_ArchSetIpl(Os_IPLType ipl, Os_IsrDescriptionType isrdesc);
 extern FUNC(Os_IPLType, OS_CODE) Os_ArchGetIpl(void);
-extern FUNC(void, OS_CODE) Os_ArchSuspendInt(Os_ArchMsrRefType msr);
+extern FUNC(uint32, OS_CODE) Os_ArchSuspendInt();
 extern FUNC(void, OS_CODE) Os_ArchRestoreInt(Os_ArchMsrType msr);
 
 extern FUNC(void, OS_CODE) Os_IntHandler(void);
@@ -290,11 +330,6 @@ extern FUNC(void, OS_CODE) Os_FeISRExit(void);
 extern FUNC(void, OS_CODE) Os_MipMdp(void);
 extern FUNC(void, OS_CODE) Os_FENMI(void);
 extern FUNC(void, OS_CODE) Os_FEIntHandler(void);
-
-#if (TRUE == CFG_TIMING_PROTECTION_ENABLE)
-extern FUNC(void, OS_CODE) Os_ArchDisableAllInt_ButTimingProtInt(void);
-extern FUNC(void, OS_CODE) Os_ArchEnableAllInt_ButTimingProtInt(void);
-#endif /* (TRUE == CFG_TIMING_PROTECTION_ENABLE) */
 
 #endif
 /*=======[E N D   O F   F I L E]==============================================*/

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -345,6 +345,10 @@ DOIP_LOCAL void DoIP_HandleGeneralInactiveTimer(DoIP_TcpConnStatusType* tcpConnS
  */
 DOIP_LOCAL void DoIP_HandleAliveCheckTimer(DoIP_TcpConnStatusType* tcpConnStatus);
 
+/* PRQA S 5016 ++ */ /* VL_DoIP_5016 */
+DOIP_LOCAL_INLINE Std_ReturnType
+    DoIP_UnreadqueueNonDiagMsg(DoIP_NonDiagQueueType* queue, PduIdType soadTxPduRef, const PduInfoType* pduInfoPtr);
+/* PRQA S 5016 -- */
 /* ========================================== external function definitions ========================================= */
 
 #define DOIP_START_SEC_CODE
@@ -356,6 +360,7 @@ DOIP_LOCAL void DoIP_HandleAliveCheckTimer(DoIP_TcpConnStatusType* tcpConnStatus
  * @brief Handle routing activation request when close tcp connection.
  */
 /* PRQA S 1532 ++ */ /* VL_DoIP_RefeOneFile */
+/* PRQA S 4461 ++ */ /* VL_DoIP_4461 */
 void DoIP_HandleRaWhenCloseTcpConnection(void)
 /* PRQA S 1532 -- */
 {
@@ -382,11 +387,21 @@ Std_ReturnType
     DoIP_EnqueueNonDiagMsg(DoIP_NonDiagQueueType* queue, PduIdType soadTxPduRef, const PduInfoType* pduInfoPtr)
 {
     Std_ReturnType ret = E_OK;
-
+    uint8          pendingQueueNum;
+    SchM_Enter_DoIP_ExclusiveArea();
     /* PRQA S 2814,2934,2844 ++ */ /* VL_QAC_DerefNullPtr,VL_DoIP_ComputeInvalidPtr,VL_DoIP_DerefInvalidPtr */
-    if ((queue->Tail - queue->Head) != DOIP_NON_DIAG_QUEUE_BUFFER_NUM) /*buffer full*/
+    if ((queue->Tail > queue->Head) || (queue->Count == 0u)) /*buffer full*/
     {
-        DoIP_NonDiagItemType* item = &queue->Item[queue->Tail % DOIP_NON_DIAG_QUEUE_BUFFER_NUM];
+        pendingQueueNum = queue->Tail - queue->Head;
+    }
+    else
+    {
+        pendingQueueNum = (DOIP_NON_DIAG_QUEUE_BUFFER_NUM - queue->Head) + queue->Tail;
+    }
+
+    if (pendingQueueNum < DOIP_NON_DIAG_QUEUE_BUFFER_NUM) /*buffer full*/
+    {
+        DoIP_NonDiagItemType* item = &queue->Item[queue->Tail];
 
         item->SoadTxPduRef       = soadTxPduRef;
         item->PduInfo.SduLength  = pduInfoPtr->SduLength;
@@ -394,13 +409,69 @@ Std_ReturnType
         DoIP_MemCpy(item->PduData.SduDataPtr, pduInfoPtr->SduDataPtr, pduInfoPtr->SduLength);
 
         queue->Tail++;
-        /* PRQA S 2814,2934,2844 -- */
+
+        if (queue->Tail >= DOIP_NON_DIAG_QUEUE_BUFFER_NUM)
+        {
+            queue->Tail = 0u;
+        }
+        if (queue->Count < DOIP_NON_DIAG_QUEUE_BUFFER_NUM)
+        {
+            queue->Count++;
+        }
     }
     else
     {
         ret = E_NOT_OK;
     }
+    SchM_Exit_DoIP_ExclusiveArea();
+    /* PRQA S 2814,2934,2844 -- */
+    return ret;
+}
 
+DOIP_LOCAL_INLINE Std_ReturnType
+    DoIP_UnreadqueueNonDiagMsg(DoIP_NonDiagQueueType* queue, PduIdType soadTxPduRef, const PduInfoType* pduInfoPtr)
+{
+    Std_ReturnType        ret = E_OK;
+    DoIP_NonDiagItemType* item;
+    uint8                 pendingQueueNum;
+    SchM_Enter_DoIP_ExclusiveArea();
+    /* PRQA S 2814,2934,2844 ++ */ /* VL_QAC_DerefNullPtr,VL_DoIP_ComputeInvalidPtr,VL_DoIP_DerefInvalidPtr */
+    if ((queue->Tail > queue->Head) || (queue->Count == 0u)) /*buffer full*/
+    {
+        pendingQueueNum = queue->Tail - queue->Head;
+    }
+    else
+    {
+        pendingQueueNum = (DOIP_NON_DIAG_QUEUE_BUFFER_NUM - queue->Head) + queue->Tail;
+    }
+
+    if (pendingQueueNum < DOIP_NON_DIAG_QUEUE_BUFFER_NUM) /*buffer full*/
+    {
+        if (queue->Head == 0u)
+        {
+            queue->Head = DOIP_NON_DIAG_QUEUE_BUFFER_NUM - 1u;
+        }
+        else
+        {
+            queue->Head -= 1u;
+        }
+        item = &queue->Item[queue->Head];
+
+        item->SoadTxPduRef       = soadTxPduRef;
+        item->PduInfo.SduLength  = pduInfoPtr->SduLength;
+        item->PduInfo.SduDataPtr = item->PduData.SduDataPtr;
+        DoIP_MemCpy(item->PduData.SduDataPtr, pduInfoPtr->SduDataPtr, pduInfoPtr->SduLength);
+        if (queue->Count < DOIP_NON_DIAG_QUEUE_BUFFER_NUM)
+        {
+            queue->Count++;
+        }
+    }
+    else
+    {
+        ret = E_NOT_OK;
+    }
+    SchM_Exit_DoIP_ExclusiveArea();
+    /* PRQA S 2814,2934,2844 -- */
     return ret;
 }
 
@@ -412,11 +483,10 @@ boolean DoIP_HandlePendingNonDiagMsg(DoIP_TcpTxRxContextType* ctx)
 /* PRQA S 1532 -- */
 {
     boolean ret = TRUE;
-
+    SchM_Enter_DoIP_ExclusiveArea();
     /* PRQA S 2814 ++ */ /* VL_QAC_DerefNullPtr */
     const DoIP_NonDiagItemType* item = DoIP_DequeueNonDiagMsg(&ctx->TxNonDiagQueue);
     /* PRQA S 2814 -- */
-
     if (NULL_PTR != item)
     {
         /* PRQA S 2844 ++ */ /* VL_DoIP_DerefInvalidPtr */
@@ -428,11 +498,15 @@ boolean DoIP_HandlePendingNonDiagMsg(DoIP_TcpTxRxContextType* ctx)
         }
         else
         {
-            (void)DoIP_EnqueueNonDiagMsg(&ctx->TxNonDiagQueue, item->SoadTxPduRef, &item->PduInfo);
+            (void)DoIP_UnreadqueueNonDiagMsg(&ctx->TxNonDiagQueue, item->SoadTxPduRef, &item->PduInfo);
+            ctx->TxCtrl.TxBufState = DOIP_BUFFER_IDLE;
+            ctx->TxCtrl.TxMsgType  = DOIP_TX_NON_MSG;
+            ctx->TxCtrl.TxState    = DOIP_TX_STATE_IDLE;
         }
 
         ret = FALSE;
     }
+    SchM_Exit_DoIP_ExclusiveArea();
 
     return ret;
 }
@@ -510,15 +584,24 @@ DOIP_LOCAL_INLINE DoIP_NonDiagItemType* DoIP_DequeueNonDiagMsg(DoIP_NonDiagQueue
 /* PRQA S 1505 -- */
 {
     DoIP_NonDiagItemType* item = NULL_PTR;
-
-    /* PRQA S 2814,2934 ++ */         /* VL_QAC_DerefNullPtr,VL_DoIP_ComputeInvalidPtr */
-    if ((queue->Tail != queue->Head)) /*queueMsg not empty*/
+    SchM_Enter_DoIP_ExclusiveArea();
+    /* PRQA S 2814,2934 ++ */                                /* VL_QAC_DerefNullPtr,VL_DoIP_ComputeInvalidPtr */
+    if ((queue->Tail != queue->Head) || (queue->Count > 0u)) /*queueMsg not empty*/
     {
-        item = &queue->Item[queue->Head % DOIP_NON_DIAG_QUEUE_BUFFER_NUM];
+        item = &queue->Item[queue->Head];
         queue->Head++;
+        if (queue->Head >= DOIP_NON_DIAG_QUEUE_BUFFER_NUM)
+        {
+            queue->Head = 0u;
+        }
+        if (queue->Count > 0u)
+        {
+            queue->Count--;
+        }
         /* PRQA S 2814,2934 -- */
     }
 
+    SchM_Exit_DoIP_ExclusiveArea();
     return item;
 }
 
@@ -819,11 +902,13 @@ DOIP_LOCAL DoIP_SocketAssignmentResultType
 /**
  * @brief Send routing activation response message.
  */
+/* PRQA S 6070 ++ */ /* VL_MTR_DoIP_STCAL */
 DOIP_LOCAL void DoIP_SendRaRsp(uint16 soadTxPduRef, uint16 sa, uint8 raRspCode, uint8 txRxCtxIdx)
+/* PRQA S 6070 -- */
 {
     /** todo*/ /** Consider whether the oem exists */
     uint8 buf[DOIP_NON_DIAG_QUEUE_BUFFER_SIZE] = {0};
-
+    SchM_Enter_DoIP_ExclusiveArea();
     buf[DOIP_HEADER_FIELD_POSITION_VERSION]         = DOIP_PROTOCOL_VERSION;
     buf[DOIP_HEADER_FIELD_POSITION_INVERSE_VERSION] = DOIP_PROTOCOL_INVERSE_VERSION;
     DoIP_u16_2_u8(&buf[DOIP_HEADER_FIELD_POSITION_PAYLOAD_TYPE], DOIP_MSG_TYPE_ROUTING_ACTIVATION_RSP);
@@ -851,7 +936,11 @@ DOIP_LOCAL void DoIP_SendRaRsp(uint16 soadTxPduRef, uint16 sa, uint8 raRspCode, 
             DoIP_TcpTxRxContext[txRxCtxIdx].TxBuf,
             buf,
             pduInfo.SduLength); /*aaa,when dequeue,copy to internal buffer?*/
-        (void)DoIP_TriggerTpTransmit(soadTxPduRef, &pduInfo, txCtrl, DOIP_TX_NON_DIAG_MSG);
+        if (E_NOT_OK == DoIP_TriggerTpTransmit(soadTxPduRef, &pduInfo, txCtrl, DOIP_TX_NON_DIAG_MSG))
+        {
+            (void)DoIP_EnqueueNonDiagMsg(&DoIP_TcpTxRxContext[txRxCtxIdx].TxNonDiagQueue, soadTxPduRef, &pduInfo);
+            DoIP_ResetTcpTxContext(txRxCtxIdx);
+        }
     }
     else
     {
@@ -859,6 +948,7 @@ DOIP_LOCAL void DoIP_SendRaRsp(uint16 soadTxPduRef, uint16 sa, uint8 raRspCode, 
         (void)DoIP_EnqueueNonDiagMsg(&DoIP_TcpTxRxContext[txRxCtxIdx].TxNonDiagQueue, soadTxPduRef, &pduInfo);
         /* PRQA S 2844 -- */
     }
+    SchM_Exit_DoIP_ExclusiveArea();
 }
 
 /**
@@ -965,10 +1055,12 @@ DOIP_LOCAL void DoIP_HandleRaReq(PduIdType soadTxPduRef, uint8 txRxCtxIdx)
 /**
  * @brief Send alive check request.
  */
+/* PRQA S 6070 ++ */ /* VL_MTR_DoIP_STCAL */
 DOIP_LOCAL void DoIP_SendAliveCheckReq(uint16 soadTxPduRef, uint8 txRxCtxIdx)
+/* PRQA S 6070 -- */
 {
     uint8 buf[DOIP_NON_DIAG_QUEUE_BUFFER_SIZE];
-
+    SchM_Enter_DoIP_ExclusiveArea();
     buf[DOIP_HEADER_FIELD_POSITION_VERSION]         = DOIP_PROTOCOL_VERSION;
     buf[DOIP_HEADER_FIELD_POSITION_INVERSE_VERSION] = DOIP_PROTOCOL_INVERSE_VERSION;
 
@@ -995,8 +1087,11 @@ DOIP_LOCAL void DoIP_SendAliveCheckReq(uint16 soadTxPduRef, uint8 txRxCtxIdx)
             DoIP_TcpTxRxContext[txRxCtxIdx].TxBuf,
             buf,
             pduInfo.SduLength); /*aaa,when dequeue,copy to internal buffer?*/
-
-        (void)DoIP_TriggerTpTransmit(soadTxPduRef, &pduInfo, txCtrl, DOIP_TX_NON_DIAG_MSG);
+        if (E_NOT_OK == DoIP_TriggerTpTransmit(soadTxPduRef, &pduInfo, txCtrl, DOIP_TX_NON_DIAG_MSG))
+        {
+            (void)DoIP_EnqueueNonDiagMsg(&DoIP_TcpTxRxContext[txRxCtxIdx].TxNonDiagQueue, soadTxPduRef, &pduInfo);
+            DoIP_ResetTcpTxContext(txRxCtxIdx);
+        }
     }
     else
     {
@@ -1004,6 +1099,7 @@ DOIP_LOCAL void DoIP_SendAliveCheckReq(uint16 soadTxPduRef, uint8 txRxCtxIdx)
         (void)DoIP_EnqueueNonDiagMsg(&DoIP_TcpTxRxContext[txRxCtxIdx].TxNonDiagQueue, soadTxPduRef, &pduInfo);
         /* PRQA S 2844 -- */
     }
+    SchM_Exit_DoIP_ExclusiveArea();
 }
 
 /**
@@ -1178,7 +1274,7 @@ DOIP_LOCAL void DoIP_HandleAliveCheckRsp(uint16 soadTxPduRef, uint8 txRxCtxIdx)
         DoIP_ResetTcpRxContext(txRxCtxIdx);
     }
 }
-
+/* PRQA S 4461 -- */
 /* ----------------------------------------- timer ----------------------------------------- */
 
 /**

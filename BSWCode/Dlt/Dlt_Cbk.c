@@ -1,6 +1,6 @@
 /* PRQA S 3108++ */
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -44,10 +44,12 @@ typedef struct
 } Dlt_DealRxDataTypes;
 
 /* PRQA S 3432++ */ /* MISRA Rule 20.7 */
-typedef P2FUNC(
-    Std_ReturnType,
-    DCM_APPL_CODE,
-    Dlt_ServiceDeal)(uint16 offset, const uint8* Data, uint16 Length, Dlt_DealRxDataTypes DealRxData);
+typedef P2FUNC(Std_ReturnType, DCM_APPL_CODE, Dlt_ServiceDeal)(
+    uint16               offset,
+    const uint8*         Data,
+    uint16               Length,
+    Dlt_DealRxDataTypes  DealRxData,
+    Dlt_OptionalFlagType OptionFlag);
 /* PRQA S 3432-- */ /* MISRA Rule 20.7 */
 
 #if ((DLT_RX_DATA_PATH_SUPPORT == STD_ON) && (DLT_RXPDU_NUM > 0))
@@ -61,53 +63,147 @@ VAR(Dlt_RxStatusTypes, AUTOMATIC) Dlt_RxStatus[DLT_RXPDU_NUM];
 #include "Dlt_MemMap.h"
 
 static FUNC(uint16, DLT_APPL_CODE) Dlt_GetRxIndexByRxPduId(PduIdType id);
-static FUNC(Std_ReturnType, DLT_APPL_CODE)
-    Dlt_SubDealRxData(uint16 offset, const uint8* Data, uint16 Length, Dlt_DealRxDataTypes DealRxData);
+static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_SubDealRxData(
+    uint16               offset,
+    const uint8*         Data,
+    uint16               Length,
+    Dlt_DealRxDataTypes  DealRxData,
+    Dlt_OptionalFlagType OptionFlag);
 static FUNC(void, DLT_APPL_CODE) Dlt_ServicePrepareResponseHeaderData(
-    uint16*             SendOffset,
-    uint16              ChannelIndex,
-    uint16              Messagelength,
-    Dlt_DealRxDataTypes DealRxData);
+    uint16*              SendOffset,
+    uint16               ChannelIndex,
+    uint16               Messagelength,
+    Dlt_DealRxDataTypes  DealRxData,
+    uint16*              CorrectionLength,
+    Dlt_OptionalFlagType OptionFlag);
 static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceSendResponseData(uint16 ChannelIndex, uint16 Messagelength);
-static FUNC(Std_ReturnType, DLT_APPL_CODE)
-    Dlt_ServiceNotSupport(uint16 offset, const uint8* Data, uint16 Length, Dlt_DealRxDataTypes DealRxData);
-static FUNC(Std_ReturnType, DLT_APPL_CODE)
-    Dlt_ServiceSetLogLevel(uint16 offset, const uint8* Data, uint16 Length, Dlt_DealRxDataTypes DealRxData);
-static FUNC(Std_ReturnType, DLT_APPL_CODE)
-    Dlt_ServiceSetTraceStatus(uint16 offset, const uint8* Data, uint16 Length, Dlt_DealRxDataTypes DealRxData);
-static FUNC(Std_ReturnType, DLT_APPL_CODE)
-    Dlt_ServiceGetLogInfo(uint16 offset, const uint8* Data, uint16 Length, Dlt_DealRxDataTypes DealRxData);
-static FUNC(Std_ReturnType, DLT_APPL_CODE)
-    Dlt_ServiceGetDefaultLogLevel(uint16 offset, const uint8* Data, uint16 Length, Dlt_DealRxDataTypes DealRxData);
-static FUNC(Std_ReturnType, DLT_APPL_CODE)
-    Dlt_ServiceStoreConfiguration(uint16 offset, const uint8* Data, uint16 Length, Dlt_DealRxDataTypes DealRxData);
-static FUNC(Std_ReturnType, DLT_APPL_CODE)
-    Dlt_ServiceResetToFactoryDefault(uint16 offset, const uint8* Data, uint16 Length, Dlt_DealRxDataTypes DealRxData);
-static FUNC(Std_ReturnType, DLT_APPL_CODE)
-    Dlt_ServiceSetMessageFiltering(uint16 offset, const uint8* Data, uint16 Length, Dlt_DealRxDataTypes DealRxData);
-static FUNC(Std_ReturnType, DLT_APPL_CODE)
-    Dlt_ServiceSetDefaultLogLevel(uint16 offset, const uint8* Data, uint16 Length, Dlt_DealRxDataTypes DealRxData);
-static FUNC(Std_ReturnType, DLT_APPL_CODE)
-    Dlt_ServiceSetDefaultTraceStatus(uint16 offset, const uint8* Data, uint16 Length, Dlt_DealRxDataTypes DealRxData);
-static FUNC(Std_ReturnType, DLT_APPL_CODE)
-    Dlt_ServiceGetSoftwareVersion(uint16 offset, const uint8* Data, uint16 Length, Dlt_DealRxDataTypes DealRxData);
-static FUNC(Std_ReturnType, DLT_APPL_CODE)
-    Dlt_ServiceGetDefaultTraceStatus(uint16 offset, const uint8* Data, uint16 Length, Dlt_DealRxDataTypes DealRxData);
-static FUNC(Std_ReturnType, DLT_APPL_CODE)
-    Dlt_ServiceGetLogChannelNames(uint16 offset, const uint8* Data, uint16 Length, Dlt_DealRxDataTypes DealRxData);
-static FUNC(Std_ReturnType, DLT_APPL_CODE)
-    Dlt_ServiceGetTraceStatus(uint16 offset, const uint8* Data, uint16 Length, Dlt_DealRxDataTypes DealRxData);
-static FUNC(Std_ReturnType, DLT_APPL_CODE)
-    Dlt_ServiceSetLogChannelAssignment(uint16 offset, const uint8* Data, uint16 Length, Dlt_DealRxDataTypes DealRxData);
-static FUNC(Std_ReturnType, DLT_APPL_CODE)
-    Dlt_ServiceSetLogChannelThreshold(uint16 offset, const uint8* Data, uint16 Length, Dlt_DealRxDataTypes DealRxData);
-static FUNC(Std_ReturnType, DLT_APPL_CODE)
-    Dlt_ServiceGetLogChannelThreshold(uint16 offset, const uint8* Data, uint16 Length, Dlt_DealRxDataTypes DealRxData);
-static FUNC(Std_ReturnType, DLT_APPL_CODE)
-    Dlt_ServiceSyncTimeStamp(uint16 offset, const uint8* Data, uint16 Length, Dlt_DealRxDataTypes DealRxData);
+static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceGetLogInfoSub(
+    uint32               applicationId,
+    uint32               contextId,
+    Dlt_DealRxDataTypes  DealRxData,
+    Dlt_OptionalFlagType OptionFlag,
+    uint8                status);
+static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceError(
+    uint16               offset,
+    const uint8*         Data,
+    uint16               Length,
+    Dlt_DealRxDataTypes  DealRxData,
+    Dlt_OptionalFlagType OptionFlag);
+static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceNotSupport(
+    uint16               offset,
+    const uint8*         Data,
+    uint16               Length,
+    Dlt_DealRxDataTypes  DealRxData,
+    Dlt_OptionalFlagType OptionFlag);
+static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceSetLogLevel(
+    uint16               offset,
+    const uint8*         Data,
+    uint16               Length,
+    Dlt_DealRxDataTypes  DealRxData,
+    Dlt_OptionalFlagType OptionFlag);
+static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceSetTraceStatus(
+    uint16               offset,
+    const uint8*         Data,
+    uint16               Length,
+    Dlt_DealRxDataTypes  DealRxData,
+    Dlt_OptionalFlagType OptionFlag);
+static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceGetLogInfo(
+    uint16               offset,
+    const uint8*         Data,
+    uint16               Length,
+    Dlt_DealRxDataTypes  DealRxData,
+    Dlt_OptionalFlagType OptionFlag);
+static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceGetDefaultLogLevel(
+    uint16               offset,
+    const uint8*         Data,
+    uint16               Length,
+    Dlt_DealRxDataTypes  DealRxData,
+    Dlt_OptionalFlagType OptionFlag);
+static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceStoreConfiguration(
+    uint16               offset,
+    const uint8*         Data,
+    uint16               Length,
+    Dlt_DealRxDataTypes  DealRxData,
+    Dlt_OptionalFlagType OptionFlag);
+static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceResetToFactoryDefault(
+    uint16               offset,
+    const uint8*         Data,
+    uint16               Length,
+    Dlt_DealRxDataTypes  DealRxData,
+    Dlt_OptionalFlagType OptionFlag);
+static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceSetMessageFiltering(
+    uint16               offset,
+    const uint8*         Data,
+    uint16               Length,
+    Dlt_DealRxDataTypes  DealRxData,
+    Dlt_OptionalFlagType OptionFlag);
+static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceSetDefaultLogLevel(
+    uint16               offset,
+    const uint8*         Data,
+    uint16               Length,
+    Dlt_DealRxDataTypes  DealRxData,
+    Dlt_OptionalFlagType OptionFlag);
+static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceSetDefaultTraceStatus(
+    uint16               offset,
+    const uint8*         Data,
+    uint16               Length,
+    Dlt_DealRxDataTypes  DealRxData,
+    Dlt_OptionalFlagType OptionFlag);
+static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceGetSoftwareVersion(
+    uint16               offset,
+    const uint8*         Data,
+    uint16               Length,
+    Dlt_DealRxDataTypes  DealRxData,
+    Dlt_OptionalFlagType OptionFlag);
+static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceGetDefaultTraceStatus(
+    uint16               offset,
+    const uint8*         Data,
+    uint16               Length,
+    Dlt_DealRxDataTypes  DealRxData,
+    Dlt_OptionalFlagType OptionFlag);
+static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceGetLogChannelNames(
+    uint16               offset,
+    const uint8*         Data,
+    uint16               Length,
+    Dlt_DealRxDataTypes  DealRxData,
+    Dlt_OptionalFlagType OptionFlag);
+static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceGetTraceStatus(
+    uint16               offset,
+    const uint8*         Data,
+    uint16               Length,
+    Dlt_DealRxDataTypes  DealRxData,
+    Dlt_OptionalFlagType OptionFlag);
+static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceSetLogChannelAssignment(
+    uint16               offset,
+    const uint8*         Data,
+    uint16               Length,
+    Dlt_DealRxDataTypes  DealRxData,
+    Dlt_OptionalFlagType OptionFlag);
+static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceSetLogChannelThreshold(
+    uint16               offset,
+    const uint8*         Data,
+    uint16               Length,
+    Dlt_DealRxDataTypes  DealRxData,
+    Dlt_OptionalFlagType OptionFlag);
+static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceGetLogChannelThreshold(
+    uint16               offset,
+    const uint8*         Data,
+    uint16               Length,
+    Dlt_DealRxDataTypes  DealRxData,
+    Dlt_OptionalFlagType OptionFlag);
+static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceSyncTimeStamp(
+    uint16               offset,
+    const uint8*         Data,
+    uint16               Length,
+    Dlt_DealRxDataTypes  DealRxData,
+    Dlt_OptionalFlagType OptionFlag);
 #if (DLT_INJECTION_SUPPORT == STD_ON)
-static FUNC(Std_ReturnType, DLT_APPL_CODE)
-    Dlt_ServiceDealWithInjection(uint16 offset, uint8* Data, uint16 Length, Dlt_DealRxDataTypes DealRxData);
+static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceDealWithInjection(
+    uint16               offset,
+    const uint8*         Data,
+    uint16               Length,
+    Dlt_DealRxDataTypes  DealRxData,
+    Dlt_OptionalFlagType OptionFlag);
 #endif
 
 #define DLT_STOP_SEC_CODE
@@ -137,8 +233,11 @@ Dlt_RxIndication(PduIdType RxPduId, P2CONST(PduInfoType, AUTOMATIC, DLT_APPL_CON
     /* Check if the DLT module has been initialized */
     if (DLT_STATE_UNINIT == Dlt_ModeState)
     {
-        /* Report uninitialized development errors to the DET module */
-        DLT_DETREPORT(DLT_API_ID_RXINDICATION, DLT_E_UNINIT);
+        /* Note: If DLT is not initialized, there is no need to report error to DET */
+    }
+    else if (PduInfoPtr == NULL_PTR)
+    {
+        DLT_DETREPORT(DLT_API_ID_RXINDICATION, DLT_E_PARAM_POINTER);
     }
     else
 #endif
@@ -151,22 +250,22 @@ Dlt_RxIndication(PduIdType RxPduId, P2CONST(PduInfoType, AUTOMATIC, DLT_APPL_CON
 #endif /* 1u < DLT_RXPDU_NUM */
         {
             Dlt_RxStatusTypes* RxStatusPtr = &(Dlt_RxStatus[RxIndex]);
-            /* Parse the received message and reply the response message by receiving the index number */
-            ret = Dlt_DealRxData(RxIndex, PduInfoPtr->SduDataPtr, PduInfoPtr->SduLength);
             /* Check if the message receiving task failed and the receiving status is not in use */
-            if ((ret != E_OK) && (RxStatusPtr->Used == FALSE))
+            if (RxStatusPtr->Used == FALSE)
             {
                 SchM_Enter_Dlt_RxStatus();
                 /* Set the status of the given receive index number to used */
                 RxStatusPtr->Used = TRUE;
-                /* Set the "NeedDeal" status to TRUE for the given receive index number */
-                RxStatusPtr->NeedDeal = TRUE;
                 /* Set the data length for the given receive index number */
                 RxStatusPtr->RxLength = PduInfoPtr->SduLength;
                 /* Set the offset for the given receive index number */
                 RxStatusPtr->RxOffset = 0;
                 /* Stores the received message to the specified buffer queue */
                 Dlt_MemCopy(RxStatusPtr->RxBuffer, PduInfoPtr->SduDataPtr, PduInfoPtr->SduLength);
+                /* Parse the received message and reply the response message by receiving the index number */
+                ret = Dlt_DealRxData(RxIndex, RxStatusPtr->RxBuffer, RxStatusPtr->RxLength);
+                /* Set the status of the given receive index number to used */
+                RxStatusPtr->Used = FALSE;
                 SchM_Exit_Dlt_RxStatus();
             }
         }
@@ -207,8 +306,11 @@ Dlt_TriggerTransmit(PduIdType TxPduId, P2CONST(PduInfoType, AUTOMATIC, DLT_APPL_
     /* Check if the DLT module has been initialized */
     if (DLT_STATE_UNINIT == Dlt_ModeState)
     {
-        /* Report uninitialized development errors to the DET module */
-        DLT_DETREPORT(DLT_API_ID_TRIGGERTRANSMIT, DLT_E_UNINIT);
+        /* Note: If DLT is not initialized, there is no need to report error to DET */
+    }
+    else if (PduInfoPtr == NULL_PTR)
+    {
+        DLT_DETREPORT(DLT_API_ID_TRIGGERTRANSMIT, DLT_E_PARAM_POINTER);
     }
     else
 #endif
@@ -249,18 +351,13 @@ Dlt_TriggerTransmit(PduIdType TxPduId, P2CONST(PduInfoType, AUTOMATIC, DLT_APPL_
  * Param-Name[in/out]  N/A
  * Return              N/A
  */
-#ifdef DLT_TX_CONFIRM_R19_USED
 FUNC(void, DLT_APPL_CODE) Dlt_TxConfirmation(PduIdType TxPduId, Std_ReturnType result)
-#else
-FUNC(void, DLT_APPL_CODE) Dlt_TxConfirmation(PduIdType TxPduId)
-#endif
 {
 #if (STD_ON == DLT_DEV_ERROR_DETECT)
     /* Check if the DLT module has been initialized */
     if (DLT_STATE_UNINIT == Dlt_ModeState)
     {
-        /* Report uninitialized development errors to the DET module */
-        DLT_DETREPORT(DLT_API_ID_TXCONFIRMATION, DLT_E_UNINIT);
+        /* Note: If DLT is not initialized, there is no need to report error to DET */
     }
     else
 #endif
@@ -277,9 +374,7 @@ FUNC(void, DLT_APPL_CODE) Dlt_TxConfirmation(PduIdType TxPduId)
             /* Check if the last transmission status of the given channel is not confirmation */
             if (ChannelPtr->LastSendStatus == DLT_SEND_NOT_CONFIRMATION)
             {
-#ifdef DLT_TX_CONFIRM_R19_USED
                 if (result == E_OK)
-#endif
                 {
                     /* Set the last transmission status of the given channel to waiting for transmission */
                     ChannelPtr->LastSendStatus = DLT_WAIT_SEND;
@@ -288,13 +383,11 @@ FUNC(void, DLT_APPL_CODE) Dlt_TxConfirmation(PduIdType TxPduId)
                     /* Reset the access location for the buffer of a given channel */
                     Dlt_MoveReadIndex(ChannelIndex, ChannelPtr->LastSendLength);
                 }
-#ifdef DLT_TX_CONFIRM_R19_USED
                 else
                 {
                     /* Set the last transmission status of the given channel to send need retry */
                     ChannelPtr->LastSendStatus = DLT_SEND_NEED_RETRY;
                 }
-#endif
             }
             /* Check if the last transmission status of the given channel has been sent */
             else if (ChannelPtr->LastSendStatus == DLT_CONTROL_SENDED)
@@ -335,8 +428,7 @@ FUNC(void, DLT_APPL_CODE) Dlt_TpTxConfirmation(PduIdType id, Std_ReturnType resu
     /* Check if the DLT module has been initialized */
     if (DLT_STATE_UNINIT == Dlt_ModeState)
     {
-        /* Report uninitialized development errors to the DET module */
-        DLT_DETREPORT(DLT_API_ID_TPTXCONFIRMATION, DLT_E_UNINIT);
+        /* Note: If DLT is not initialized, there is no need to report error to DET */
     }
     else
 #endif
@@ -431,8 +523,7 @@ Dlt_CopyTxData(
     /* Check if the DLT module has been initialized */
     if (DLT_STATE_UNINIT == Dlt_ModeState)
     {
-        /* Report uninitialized development errors to the DET module */
-        DLT_DETREPORT(DLT_API_ID_COPYTXDATA, DLT_E_UNINIT);
+        /* Note: If DLT is not initialized, there is no need to report error to DET */
     }
     /* Check if the passed parameter is null pointer */
     else if ((availableDataPtr == NULL_PTR) || (retry != NULL_PTR) || (info == NULL_PTR))
@@ -560,11 +651,10 @@ Dlt_StartOfReception(
     /* Check if the DLT module has been initialized */
     if (DLT_STATE_UNINIT == Dlt_ModeState)
     {
-        /* Report uninitialized development errors to the DET module */
-        DLT_DETREPORT(DLT_API_ID_STARTOFRECEPTION, DLT_E_UNINIT);
+        /* Note: If DLT is not initialized, there is no need to report error to DET */
     }
     /* Check if the passed parameter is null pointer */
-    else if (NULL_PTR == bufferSizePtr)
+    else if ((info == NULL_PTR) || (NULL_PTR == bufferSizePtr))
     {
         /* Report null pointer development error to the DET module */
         DLT_DETREPORT(DLT_API_ID_STARTOFRECEPTION, DLT_E_UNINIT);
@@ -593,7 +683,7 @@ Dlt_StartOfReception(
                 SchM_Enter_Dlt_RxStatus();
                 *bufferSizePtr        = DLT_BUFFER_MAX_LENGTH;
                 RxStatusPtr->RxLength = TpSduLength;
-                if (info != NULL_PTR)
+                if (info->SduDataPtr != NULL_PTR)
                 {
                     Dlt_MemCopy(RxStatusPtr->RxBuffer, info->SduDataPtr, info->SduLength);
                     RxStatusPtr->RxOffset = info->SduLength;
@@ -638,8 +728,7 @@ FUNC(void, DLT_APPL_CODE) Dlt_TpRxIndication(PduIdType id, Std_ReturnType result
     /* Check if the DLT module has been initialized */
     if (DLT_STATE_UNINIT == Dlt_ModeState)
     {
-        /* Report uninitialized development errors to the DET module */
-        DLT_DETREPORT(DLT_API_ID_TPRXINDICATION, DLT_E_UNINIT);
+        /* Note: If DLT is not initialized, there is no need to report error to DET */
     }
     else
 #endif
@@ -655,28 +744,11 @@ FUNC(void, DLT_APPL_CODE) Dlt_TpRxIndication(PduIdType id, Std_ReturnType result
             if ((RxStatusPtr->Used == TRUE) && (RxStatusPtr->RxOffset == RxStatusPtr->RxLength) && (result == E_OK))
             {
                 /* If the conditions are met, the received messages from the DLT are parsed */
-                Std_ReturnType ret = Dlt_DealRxData(RxIndex, RxStatusPtr->RxBuffer, RxStatusPtr->RxLength);
-                SchM_Enter_Dlt_RxStatus();
-                if (ret == E_OK)
-                {
-                    /* The DLT received message is parsed */
-                    RxStatusPtr->Used     = FALSE;
-                    RxStatusPtr->NeedDeal = FALSE;
-                }
-                else
-                {
-                    /* The parsing of DLT received messages is suspended, delayed for reprocessing */
-                    RxStatusPtr->NeedDeal = TRUE;
-                }
-                SchM_Exit_Dlt_RxStatus();
+                (void)Dlt_DealRxData(RxIndex, RxStatusPtr->RxBuffer, RxStatusPtr->RxLength);
             }
             SchM_Enter_Dlt_RxStatus();
-            /* Check if the DLT failed to receive messages */
-            if ((RxStatusPtr->NeedDeal == FALSE) && (result == E_NOT_OK))
-            {
-                /* The message receiving action is terminated. */
-                RxStatusPtr->Used = FALSE;
-            }
+            /* The DLT received message is parsed */
+            RxStatusPtr->Used = FALSE;
             SchM_Exit_Dlt_RxStatus();
         }
     }
@@ -716,8 +788,7 @@ Dlt_CopyRxData(
     /* Check if the DLT module has been initialized */
     if (DLT_STATE_UNINIT == Dlt_ModeState)
     {
-        /* Report uninitialized development errors to the DET module */
-        DLT_DETREPORT(DLT_API_ID_COPYRXDATA, DLT_E_UNINIT);
+        /* Note: If DLT is not initialized, there is no need to report error to DET */
     }
     /* Check if the passed parameter is null pointer */
     else if ((NULL_PTR == bufferSizePtr) || (NULL_PTR == info))
@@ -791,36 +862,25 @@ static FUNC(uint16, DLT_APPL_CODE) Dlt_GetRxIndexByRxPduId(PduIdType id)
 
 FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_DealRxData(uint16 RxIndex, const uint8* Data, uint16 Length)
 {
-    Std_ReturnType      ret    = E_OK;
-    uint16              offset = 0;
-    uint8               HeaderType;
-    uint8               MessageCounter;
-    uint16              MessageLength;
-    uint32              ECUID     = 0;
-    uint32              SessionID = 0;
-    uint32              Timestamp;
-    boolean             UEH;
-    boolean             MSBF;
-    boolean             WEID;
-    boolean             WSID;
-    boolean             WithTMS;
-    uint8               VERS;
-    uint8               MessageInfo;
-    uint8               NumberOfArguments;
-    uint32              ApplicationID = 0;
-    uint32              ContextID     = 0;
-    Dlt_DealRxDataTypes DealRxData;
+    Std_ReturnType       ret    = E_OK;
+    uint16               offset = 0;
+    uint8                MessageCounter;
+    uint16               MessageLength;
+    uint32               ECUID     = 0;
+    uint32               SessionID = 0;
+    uint32               Timestamp;
+    uint8                MessageInfo;
+    uint8                NumberOfArguments;
+    uint32               ApplicationID = 0;
+    uint32               ContextID     = 0;
+    Dlt_DealRxDataTypes  DealRxData;
+    Dlt_OptionalFlagType OptionFlag;
+
+    boolean EcuIdChecked     = TRUE;
+    boolean SessionIdChecked = TRUE;
 
     /* Byte 0: HTYP (Header Type) */
-    HeaderType = Data[offset];
-    /* PRQA S 4340,4394++ */ /* MISRA Rule 10.5, Rule 10.8 */
-    UEH     = (boolean)(HeaderType & 0x01u);
-    MSBF    = (boolean)((HeaderType & 0x02u) >> 1u);
-    WEID    = (boolean)((HeaderType & 0x04u) >> 2u);
-    WSID    = (boolean)((HeaderType & 0x08u) >> 3u);
-    WithTMS = (boolean)((HeaderType & 0x10u) >> 4u);
-    /* PRQA S 4340,4394-- */ /* MISRA Rule 10.5, Rule 10.8 */
-    VERS = HeaderType >> 5u;
+    OptionFlag.AllBits = (uint16)Data[offset];
     offset++;
     /* Byte 1: MCNT (Message Counter) */
     MessageCounter = Data[offset];
@@ -830,37 +890,47 @@ FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_DealRxData(uint16 RxIndex, const uint8* 
     Dlt_CopyArrayToIntBigEndian(&MessageLength, &(Data[offset]));
     offset += 2u;
     /* Check if the standard message header support the "ECU ID" field */
-    if (WEID == TRUE)
+    if (OptionFlag.Bits.WEID == 1u)
     {
         /* Byte 4-7: ECU (ECU ID) */
         Dlt_CopyArrayToLongBigEndian(&ECUID, &(Data[offset]));
+        offset += 4u;
+        if (ECUID != Dlt_GetEcuId())
+        {
+            EcuIdChecked = FALSE;
+        }
     }
-    offset += 4u;
     /* Check if the standard message header support the "Session ID" field */
-    if (WSID == TRUE)
+    if (OptionFlag.Bits.WSID == 1u)
     {
         /* Byte 8-11: SEID (Session ID) */
         Dlt_CopyArrayToLongBigEndian(&SessionID, &(Data[offset]));
+        offset += 4u;
+        if (Dlt_GetSwcSessionIdIndex(SessionID) == DLT_SWC_NUM)
+        {
+            SessionIdChecked = FALSE;
+        }
     }
-    offset += 4u;
     /* Check if the standard message header support the "Timestamp" field */
-    if (WithTMS == TRUE)
+    if (OptionFlag.Bits.WTMS == 1u)
     {
         /* Byte 12-15: TMSP (Timestamp) */
         Dlt_CopyArrayToLongBigEndian(&Timestamp, &(Data[offset]));
+        offset += 4u;
     }
-    offset += 4u;
     /*The VERS bits shall always be set to '001'. then check MessageCounter and Length*/
-    if ((VERS == 1u) && (MessageLength <= Length))
+    if ((OptionFlag.Bits.VERS == 1u) && (OptionFlag.Bits.MSBF == 1u)
+        && ((MessageLength != 0) && (MessageLength <= Length)))
     {
-        DealRxData.UEH           = UEH;
-        DealRxData.MSBF          = MSBF;
+        DealRxData.UEH           = OptionFlag.Bits.UEH;
+        DealRxData.MSBF          = OptionFlag.Bits.MSBF;
         DealRxData.RxIndex       = RxIndex;
         DealRxData.ApplicationID = ApplicationID;
         DealRxData.ContextID     = ContextID;
         DealRxData.SessionID     = SessionID;
+        DealRxData.ServiceID     = 0u;
         /* Check if the "UEH" field of the standard message header is "1" */
-        if (UEH == TRUE)
+        if (OptionFlag.Bits.UEH == 1u)
         {
             /* Byte 16: MSIN (Message Info) */
             MessageInfo = Data[offset];
@@ -880,20 +950,59 @@ FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_DealRxData(uint16 RxIndex, const uint8* 
             /* Byte 22-25: CTID (Context ID) */
             Dlt_CopyArrayToLongBigEndian(&ContextID, &(Data[offset]));
             offset += 4u;
-            /* Check if the extended headers support verbose mode and request messages for control command */
-            if ((VERB == FALSE) && (MSTP == (uint8)DLT_TYPE_CONTROL) && (MTIN == (uint8)DLT_CONTROL_REQUEST))
+            if ((EcuIdChecked == TRUE) && (SessionIdChecked == TRUE))
             {
-                DealRxData.ApplicationID = ApplicationID;
-                DealRxData.ContextID     = ContextID;
-                DealRxData.SessionID     = SessionID;
+                /* Check if the extended headers support verbose mode and request messages for control command */
+                if ((VERB == 1u) && (MSTP == (uint8)DLT_TYPE_CONTROL) && (MTIN == (uint8)DLT_CONTROL_REQUEST))
+                {
+                    DealRxData.ApplicationID         = ApplicationID;
+                    DealRxData.ContextID             = ContextID;
+                    DealRxData.SessionID             = SessionID;
+                    boolean                   Find   = FALSE;
+                    uint16                    SwcNum = Dlt_Swc.DltSwcNum;
+                    uint16                    SwcContextNum;
+                    const Dlt_SwcContextType* SwcContextPtr;
+                    for (uint16 iloop = 0U; (iloop < SwcNum) && (Find == FALSE); iloop++)
+                    {
+                        SwcContextNum = Dlt_Swc.DltSwc[iloop].DltSwcContextNum;
+                        for (uint16 jloop = 0U; jloop < SwcContextNum; jloop++)
+                        {
+                            SwcContextPtr = &(Dlt_Swc.DltSwc[iloop].DltSwcContext[jloop]);
+                            if ((ApplicationID == SwcContextPtr->SwcApplicationId)
+                                && (ContextID == SwcContextPtr->SwcContextId))
+                            {
+                                Find = TRUE;
+                                break;
+                            }
+                        }
+                    }
+                    OptionFlag.Bits.status  = (Find == TRUE) ? DLT_STATUS_OK : DLT_STATUS_ERROR;
+                    OptionFlag.Bits.ErrFlag = (MessageLength != Length) ? 1u : ((Find == TRUE) ? 0u : 1u);
+                    /* Perform parsing action for control command request messages */
+                    ret = Dlt_SubDealRxData(offset, Data, Length, DealRxData, OptionFlag);
+                }
+                else
+                {
+                    OptionFlag.Bits.status  = DLT_STATUS_ERROR;
+                    OptionFlag.Bits.ErrFlag = 1u;
+                    /* Perform parsing action for control command request messages */
+                    ret = Dlt_SubDealRxData(offset, Data, Length, DealRxData, OptionFlag);
+                }
+            }
+            else
+            {
+                OptionFlag.Bits.status  = DLT_STATUS_ERROR;
+                OptionFlag.Bits.ErrFlag = 1u;
                 /* Perform parsing action for control command request messages */
-                ret = Dlt_SubDealRxData(offset, Data, Length, DealRxData);
+                ret = Dlt_SubDealRxData(offset, Data, Length, DealRxData, OptionFlag);
             }
         }
         else
         {
+            OptionFlag.Bits.status  = DLT_STATUS_OK;
+            OptionFlag.Bits.ErrFlag = 0u;
             /* Perform parsing action for control command request messages */
-            ret = Dlt_SubDealRxData(offset, Data, Length, DealRxData);
+            ret = Dlt_SubDealRxData(offset, Data, Length, DealRxData, OptionFlag);
         }
     }
     return ret;
@@ -901,9 +1010,15 @@ FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_DealRxData(uint16 RxIndex, const uint8* 
 
 /* Create standard header for control command to send messages for given channel in DLT module */
 FUNC(void, DLT_CODE)
-Dlt_CreateControlStandardHeader(const Dlt_CreateStandardHeaderInfoTypes* CreateStandardHeader, uint8* Dest)
+Dlt_CreateControlStandardHeader(
+    Dlt_CreateStandardHeaderInfoTypes* CreateStandardHeader,
+    uint8*                             Dest,
+    uint16*                            CorrectionLength,
+    Dlt_OptionalFlagType               OptionFlag)
 {
-    uint8 HeaderType = 0;
+    uint8  HeaderType = 0;
+    uint16 offsetIdx  = 4u;
+    *CorrectionLength = 0;
     /* Specify field fill "UEH" to the DLT message buffer */
     if (Dlt_ConfigPtr->Protocol->DltUseExtHeaderInNonVerbMode == TRUE)
     {
@@ -914,24 +1029,40 @@ Dlt_CreateControlStandardHeader(const Dlt_CreateStandardHeaderInfoTypes* CreateS
     HeaderType |= 0x02u;
 #endif
     /* Specify field fill "WEID" to the DLT message buffer */
-    if (Dlt_ConfigPtr->Protocol->DltHeaderUseEcuId == TRUE)
+    if ((Dlt_ConfigPtr->Protocol->DltHeaderUseEcuId == TRUE) && (OptionFlag.Bits.WEID == 1u))
     {
         HeaderType |= 0x04u;
         uint32 EcuId = Dlt_GetEcuId();
-        Dlt_CopyLongToArrayBigEndian(EcuId, &(Dest[4]));
+        Dlt_CopyLongToArrayBigEndian(EcuId, &(Dest[offsetIdx]));
+        offsetIdx += 4u;
+    }
+    else
+    {
+        *CorrectionLength += 4u;
     }
     /* Specify field fill "WSID" to the DLT message buffer */
-    if (Dlt_ConfigPtr->Protocol->DltHeaderUseSessionID == TRUE)
+    if ((Dlt_ConfigPtr->Protocol->DltHeaderUseSessionID == TRUE) && (OptionFlag.Bits.WSID == 1u))
     {
         HeaderType |= 0x08u;
-        Dlt_CopyLongToArrayBigEndian(CreateStandardHeader->SessionId, &(Dest[8]));
+        Dlt_CopyLongToArrayBigEndian(CreateStandardHeader->SessionId, &(Dest[offsetIdx]));
+        offsetIdx += 4u;
+    }
+    else
+    {
+        *CorrectionLength += 4u;
     }
     /* Specify field fill "WTMS" to the DLT message buffer */
-    if (Dlt_ConfigPtr->Protocol->DltHeaderUseTimestamp == TRUE)
+    if ((Dlt_ConfigPtr->Protocol->DltHeaderUseTimestamp == TRUE) && (OptionFlag.Bits.WTMS == 1u))
     {
         HeaderType |= 0x10u;
-        Dlt_CopyLongToArrayBigEndian(CreateStandardHeader->timestamp, &(Dest[12]));
+        Dlt_CopyLongToArrayBigEndian(CreateStandardHeader->timestamp, &(Dest[offsetIdx]));
+        offsetIdx += 4u;
     }
+    else
+    {
+        *CorrectionLength += 4u;
+    }
+    CreateStandardHeader->Messagelength -= *CorrectionLength;
     /* Specify field fill "VERS" to the DLT message buffer */
     HeaderType |= 0x20u;
     /* Specify field fill "Header Type" to the DLT message buffer */
@@ -963,7 +1094,8 @@ Dlt_CreateControlExtendedHeader(const Dlt_CreateExtendedHeaderInfoTypes* CreateE
         if (NULL_PTR != CreateExtendedHeader->traceInfo)
         {
             /* Specify field fill "MSTP" to the DLT message buffer */
-            MessageInfo |= (uint8)((uint8)CreateExtendedHeader->traceInfo->options.Dlt_Bits.message_type << 1u);
+            MessageInfo |=
+                (uint8)((uint8)(CreateExtendedHeader->traceInfo->options & DLT_OPTIONS_MESSAGE_TYPE_MASK) << 1u);
             /* Specify field fill "MTIN" to the DLT message buffer */
             MessageInfo |= (uint8)((uint8)CreateExtendedHeader->traceInfo->traceInfo << 4u);
         }
@@ -982,7 +1114,8 @@ Dlt_CreateControlExtendedHeader(const Dlt_CreateExtendedHeaderInfoTypes* CreateE
         if (NULL_PTR != CreateExtendedHeader->logInfo)
         {
             /* Specify field fill "MSTP" to the DLT message buffer */
-            MessageInfo |= (uint8)((uint8)CreateExtendedHeader->logInfo->options.Dlt_Bits.message_type << 1u);
+            MessageInfo |=
+                (uint8)((uint8)(CreateExtendedHeader->logInfo->options & DLT_OPTIONS_MESSAGE_TYPE_MASK) << 1u);
             /* Specify field fill "MTIN" to the DLT message buffer */
             MessageInfo |= (uint8)((uint8)CreateExtendedHeader->logInfo->logLevel << 4u);
         }
@@ -997,10 +1130,12 @@ Dlt_CreateControlExtendedHeader(const Dlt_CreateExtendedHeaderInfoTypes* CreateE
 
 /* Load the prepare header information for the given channel service response message */
 static FUNC(void, DLT_APPL_CODE) Dlt_ServicePrepareResponseHeaderData(
-    uint16*             SendOffset,
-    uint16              ChannelIndex,
-    uint16              Messagelength,
-    Dlt_DealRxDataTypes DealRxData)
+    uint16*              SendOffset,
+    uint16               ChannelIndex,
+    uint16               Messagelength,
+    Dlt_DealRxDataTypes  DealRxData,
+    uint16*              CorrectionLength,
+    Dlt_OptionalFlagType OptionFlag)
 {
 #if ((DLT_CHANNEL_NUM > 0) && (DLT_CHANNEL_MAX_BUFFER_LENGTH > 0))
     Dlt_CreateExtendedHeaderInfoTypes CreateExtendedHeaderInfo;
@@ -1018,10 +1153,10 @@ static FUNC(void, DLT_APPL_CODE) Dlt_ServicePrepareResponseHeaderData(
     CreateStandardHeaderInfo.SessionId     = DealRxData.SessionID;
     CreateStandardHeaderInfo.timestamp     = Dlt_GetTimeElapsed();
     SendControlBufferPtr                   = &(ChannelPtr->SendControlBuffer[0]);
-    Dlt_CreateControlStandardHeader(&CreateStandardHeaderInfo, SendControlBufferPtr);
-    tx_offset = DLT_STANDARD_HEADER_LENGTH;
+    Dlt_CreateControlStandardHeader(&CreateStandardHeaderInfo, SendControlBufferPtr, CorrectionLength, OptionFlag);
+    tx_offset = (uint16)(DLT_STANDARD_HEADER_LENGTH - *CorrectionLength);
     /* Check if the DLT message extension header is support verbose mode */
-    if (Dlt_ConfigPtr->Protocol->DltUseExtHeaderInNonVerbMode == TRUE)
+    if ((Dlt_ConfigPtr->Protocol->DltUseExtHeaderInNonVerbMode == TRUE) && (OptionFlag.Bits.UEH == 1u))
     {
         Dlt_SwcContextType SwcContext;
         /* Create extended header for the response message of the DLT given log channel */
@@ -1034,6 +1169,10 @@ static FUNC(void, DLT_APPL_CODE) Dlt_ServicePrepareResponseHeaderData(
         CreateExtendedHeaderInfo.SwcContext     = SwcContext;
         Dlt_CreateControlExtendedHeader(&CreateExtendedHeaderInfo, &SendControlBufferPtr[tx_offset]);
         tx_offset += DLT_EXTENED_HEADER_LENGTH;
+    }
+    else
+    {
+        *CorrectionLength -= DLT_EXTENED_HEADER_LENGTH;
     }
     /* Load "ServiceID" for the response message of the DLT given log channel */
     Dlt_CopyLongToArrayBigEndian(DealRxData.ServiceID, &SendControlBufferPtr[tx_offset]);
@@ -1083,7 +1222,7 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceSendResponseData(uint16 Ch
 }
 
 /*
- * Brief               ServiceID == 0u and ServiceID > 0x24u Service Not Support
+ * Brief               Service error response for Get Log Info
  * ServiceId           N/A
  * Sync/Async          Synchronous
  * Reentrancy          Reentrant for different PduIds. Non reentrant for the same PduId.
@@ -1095,12 +1234,97 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceSendResponseData(uint16 Ch
  * Param-Name[in/out]  N/A
  * Return              Std_ReturnType
  */
-static FUNC(Std_ReturnType, DLT_APPL_CODE)
-    Dlt_ServiceNotSupport(uint16 offset, const uint8* Data, uint16 Length, Dlt_DealRxDataTypes DealRxData)
+static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceGetLogInfoSub(
+    uint32               applicationId,
+    uint32               contextId,
+    Dlt_DealRxDataTypes  DealRxData,
+    Dlt_OptionalFlagType OptionFlag,
+    uint8                status)
+{
+    Std_ReturnType ret   = E_NOT_OK;
+    uint16         index = 0u;
+    uint16         ChannelIndexList[DLT_CHANNEL_NUM];
+#if (1u < DLT_SWC_NUM)
+    /* Traverse the list of all Swc index */
+    for (; index < DLT_SWC_NUM; index++)
+#endif /* 1u < DLT_SWC_NUM */
+    {
+        /*Select target LogChannel*/
+        Dlt_GetChannelIndex(index, applicationId, contextId, ChannelIndexList);
+    }
+    index = 0u;
+#if (1u < DLT_SWC_NUM)
+    /* Traverse the list of all log channel index */
+    for (; ((ChannelIndexList[index] != 0xFFFFu) && (index < DLT_CHANNEL_NUM)); index++)
+#else  /* 1u < DLT_SWC_NUM */
+    /* Check if the index number of given log channel is valid */
+    if (ChannelIndexList[index] != 0xFFFFu)
+#endif /* 1u < DLT_SWC_NUM */
+    {
+        uint16           ChannelIndex = ChannelIndexList[index];
+        Dlt_ChannelType* ChannelPtr   = &(Dlt_Channel[ChannelIndex]);
+        /* Check if the last sent status of given log channel was "Waiting for response to be sent". */
+        if (ChannelPtr->LastSendStatus == DLT_WAIT_SEND)
+        {
+            uint16 SendOffset           = 0;
+            uint16 CorrectionLength     = 0u;
+            uint8* SendControlBufferPtr = &(ChannelPtr->SendControlBuffer[0]);
+
+            /* Check if the DLT message extension header is support verbose mode */
+            boolean VerboseMode = Dlt_ConfigPtr->Protocol->DltUseExtHeaderInNonVerbMode;
+            /* Calculate the byte length of the DLT service response message */
+            uint16 Messagelength = Dlt_GetMessageLength(VerboseMode, DLT_GET_LOG_INFO_ERRRES_LENGTH, OptionFlag);
+
+            SchM_Enter_Dlt_MsgChannel();
+
+            /* Prepare the message header for the DLT service control response message */
+            Dlt_ServicePrepareResponseHeaderData(
+                &SendOffset,
+                ChannelIndex,
+                Messagelength,
+                DealRxData,
+                &CorrectionLength,
+                OptionFlag);
+
+            /* Load "status" for the message of the DLT service control response */
+            SendControlBufferPtr[SendOffset] = (uint8)8u;
+            SendOffset += 0x01u;
+
+            /* Load "reserved" for the message of the DLT service control response */
+            Dlt_CopyLongToArrayBigEndian(0u, &(SendControlBufferPtr[SendOffset]));
+
+            SchM_Exit_Dlt_MsgChannel();
+
+            /* Control the response message for the DLT service, triggering the send action */
+            ret = Dlt_ServiceSendResponseData(ChannelIndex, Messagelength);
+        }
+    }
+    return ret;
+}
+
+/*
+ * Brief               ServiceID > 0x24u and ServiceID < 0xFFFu Service Error
+ * ServiceId           N/A
+ * Sync/Async          Synchronous
+ * Reentrancy          Reentrant for different PduIds. Non reentrant for the same PduId.
+ * Param-Name[in]      offset:rx data offset.
+ *                     Data: rx data
+ *                     Length:total length of rx data
+ *                     DealRxData:
+ * Param-Name[out]     N/A
+ * Param-Name[in/out]  N/A
+ * Return              Std_ReturnType
+ */
+static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceError(
+    uint16               offset,
+    const uint8*         Data,
+    uint16               Length,
+    Dlt_DealRxDataTypes  DealRxData,
+    Dlt_OptionalFlagType OptionFlag)
 {
     Std_ReturnType ret = E_NOT_OK;
 
-    /* "ServiceNotSupport" Request message format: StandardHeader(16), ExternHeader(10), Payload(4) */
+    /* "ServiceError" Request message format: StandardHeader(16), ExternHeader(10), Payload(4) */
     /* Header format: {HTYP(1),MCNT(1),LEN(2),ECUID(4),SEID(4),TMSP(4)},{MSIN(1),NOAR(1),APID(4),CTID(4)} */
     /* Payload format: ServiceID(4)} */
 
@@ -1120,17 +1344,98 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
     if (ChannelPtr->LastSendStatus == DLT_WAIT_SEND)
     {
         uint16 SendOffset           = 0U;
+        uint16 CorrectionLength     = 0u;
         uint8* SendControlBufferPtr = &(ChannelPtr->SendControlBuffer[0]);
 
         /* Check if the DLT message extension header is support verbose mode */
-        boolean VerboseMode = Dlt_ConfigPtr->Protocol->DltUseExtHeaderInNonVerbMode;
+        boolean VerboseMode =
+            ((Dlt_ConfigPtr->Protocol->DltUseExtHeaderInNonVerbMode) && (OptionFlag.Bits.UEH == 1u)) ? TRUE : FALSE;
         /* Calculate the byte length of the DLT service response message */
-        uint16 Messagelength = Dlt_GetMessageLength(VerboseMode, DLT_SERVICE_NOT_SUPPORT_LENGTH);
+        uint16 Messagelength = Dlt_GetMessageLength(VerboseMode, DLT_SERVICE_NOT_SUPPORT_LENGTH, OptionFlag);
 
         SchM_Enter_Dlt_MsgChannel();
 
         /* Prepare the message header for the DLT service control response message */
-        Dlt_ServicePrepareResponseHeaderData(&SendOffset, ChannelIndex, Messagelength, DealRxData);
+        Dlt_ServicePrepareResponseHeaderData(
+            &SendOffset,
+            ChannelIndex,
+            Messagelength,
+            DealRxData,
+            &CorrectionLength,
+            OptionFlag);
+
+        /* Load "status" for the message of the DLT service control response */
+        SendControlBufferPtr[SendOffset] = OptionFlag.Bits.status;
+
+        SchM_Exit_Dlt_MsgChannel();
+
+        /* Control the response message for the DLT service, triggering the send action */
+        ret = Dlt_ServiceSendResponseData(ChannelIndex, Messagelength);
+    }
+#endif
+    return ret;
+}
+
+/*
+ * Brief               ServiceID == 0u and ServiceID > 0x24u Service Not Support
+ * ServiceId           N/A
+ * Sync/Async          Synchronous
+ * Reentrancy          Reentrant for different PduIds. Non reentrant for the same PduId.
+ * Param-Name[in]      offset:rx data offset.
+ *                     Data: rx data
+ *                     Length:total length of rx data
+ *                     DealRxData:
+ * Param-Name[out]     N/A
+ * Param-Name[in/out]  N/A
+ * Return              Std_ReturnType
+ */
+static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceNotSupport(
+    uint16               offset,
+    const uint8*         Data,
+    uint16               Length,
+    Dlt_DealRxDataTypes  DealRxData,
+    Dlt_OptionalFlagType OptionFlag)
+{
+    Std_ReturnType ret = E_NOT_OK;
+
+    /* "ServiceNotSupport" Request message format: StandardHeader(16), ExternHeader(10), Payload(4) */
+    /* Header format: {HTYP(1),MCNT(1),LEN(2),ECUID(4),SEID(4),TMSP(4)},{MSIN(1),NOAR(1),APID(4),CTID(4)} */
+    /* Payload format: ServiceID(4)} */
+
+    /* Response message format: standardHeader(16), externHeader(10), Payload(5) */
+    /* Header format: {HTYP(1),MCNT(1),LEN(2),ECUID(4),SEID(4),TMSP(4)},{MSIN(1),NOAR(1),APID(4),CTID(4)} */
+    /* Payload format: ServiceID(4),Status(1) */
+
+    DLT_UNUSED(Data);
+    DLT_UNUSED(offset);
+    DLT_UNUSED(Length);
+
+#if ((DLT_CHANNEL_NUM > 0) && (DLT_CHANNEL_MAX_BUFFER_LENGTH > 0))
+    uint16           ChannelIndex = Dlt_ConfigPtr->LogOutput->DltDefaultLogChannelRef;
+    Dlt_ChannelType* ChannelPtr   = &(Dlt_Channel[ChannelIndex]);
+    /* Check if the last sent status of given log channel was "Waiting for response to be sent". */
+    if (ChannelPtr->LastSendStatus == DLT_WAIT_SEND)
+    {
+        uint16 SendOffset           = 0U;
+        uint16 CorrectionLength     = 0u;
+        uint8* SendControlBufferPtr = &(ChannelPtr->SendControlBuffer[0]);
+
+        /* Check if the DLT message extension header is support verbose mode */
+        boolean VerboseMode =
+            ((Dlt_ConfigPtr->Protocol->DltUseExtHeaderInNonVerbMode) && (OptionFlag.Bits.UEH == 1u)) ? TRUE : FALSE;
+        /* Calculate the byte length of the DLT service response message */
+        uint16 Messagelength = Dlt_GetMessageLength(VerboseMode, DLT_SERVICE_NOT_SUPPORT_LENGTH, OptionFlag);
+
+        SchM_Enter_Dlt_MsgChannel();
+
+        /* Prepare the message header for the DLT service control response message */
+        Dlt_ServicePrepareResponseHeaderData(
+            &SendOffset,
+            ChannelIndex,
+            Messagelength,
+            DealRxData,
+            &CorrectionLength,
+            OptionFlag);
 
         /* Load "status" for the message of the DLT service control response */
         SendControlBufferPtr[SendOffset] = (uint8)DLT_STATUS_NOT_SUPPORTED;
@@ -1157,8 +1462,12 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
  * Param-Name[in/out]  N/A
  * Return              Std_ReturnType
  */
-static FUNC(Std_ReturnType, DLT_APPL_CODE)
-    Dlt_ServiceSetLogLevel(uint16 offset, const uint8* Data, uint16 Length, Dlt_DealRxDataTypes DealRxData)
+static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceSetLogLevel(
+    uint16               offset,
+    const uint8*         Data,
+    uint16               Length,
+    Dlt_DealRxDataTypes  DealRxData,
+    Dlt_OptionalFlagType OptionFlag)
 {
     Std_ReturnType ret = E_NOT_OK;
 #if ((DLT_CHANNEL_NUM > 0) && (DLT_CHANNEL_MAX_BUFFER_LENGTH > 0))
@@ -1220,37 +1529,37 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
     {
         uint16 ChannelIndex = ChannelIndexList[index];
         /* Check if the parameters of the request is meet the matching condition */
-        /* PRQA S 3415++ */ /* MISRA Rule 13.5 */
-        if (((DealRxData.ApplicationID == applicationId) && (DealRxData.ContextID == contextId))
-            && (((DealRxData.UEH == FALSE) && (Length == Dlt_GetMessageLength(FALSE, DLT_SET_LOG_LEVEL_TOTAL_LENGTH)))
-                || ((DealRxData.UEH == TRUE)
-                    && (Length == Dlt_GetMessageLength(TRUE, DLT_SET_LOG_LEVEL_TOTAL_LENGTH)))))
-        /* PRQA S 3415-- */ /* MISRA Rule 13.5 */
+        if ((OptionFlag.Bits.UEH == 0u)
+            || ((OptionFlag.Bits.UEH == 1u)
+                && ((DealRxData.ApplicationID == applicationId) && (DealRxData.ContextID == contextId))))
         {
-            Dlt_MessageLogLevelType destLogLevel;
-            /* Check if the parameter "newLogLevel" of the request is -1 */
-            if (newLogLevel == (sint8)(-1))
+            if (Length == Dlt_GetMessageLength(DealRxData.UEH, DLT_SET_LOG_LEVEL_TOTAL_LENGTH, OptionFlag))
             {
-                destLogLevel = Dlt_RunTime.DefaultLogLevel;
-                /* Call the API "SetLogLevel" to update the current log level for the DLT module */
-                if (E_OK == Dlt_InterSetLogLevel(ChannelIndex, applicationId, contextId, destLogLevel))
+                Dlt_MessageLogLevelType destLogLevel;
+                /* Check if the parameter "newLogLevel" of the request is -1 */
+                if (newLogLevel == (sint8)(-1))
                 {
-                    status = (uint8)DLT_STATUS_OK;
+                    destLogLevel = Dlt_RunTime.DefaultLogLevel;
+                    /* Call the API "SetLogLevel" to update the current log level for the DLT module */
+                    if (E_OK == Dlt_InterSetLogLevel(ChannelIndex, applicationId, contextId, destLogLevel))
+                    {
+                        status = (uint8)DLT_STATUS_OK;
+                    }
                 }
-            }
-            /* Check if the request parameter "newLogLevel" ranges from 0 to 7 */
-            else if ((newLogLevel >= 0) && (newLogLevel < 7))
-            {
-                destLogLevel = (Dlt_MessageLogLevelType)newLogLevel; /* PRQA S 4332 */ /* MISRA Rule 10.5 */
-                /* Call the API "SetLogLevel" to update the current log level for the DLT module */
-                if (E_OK == Dlt_InterSetLogLevel(ChannelIndex, applicationId, contextId, destLogLevel))
+                /* Check if the request parameter "newLogLevel" ranges from 0 to 7 */
+                else if ((newLogLevel >= 0) && (newLogLevel < 7))
                 {
-                    status = (uint8)DLT_STATUS_OK;
+                    destLogLevel = (Dlt_MessageLogLevelType)newLogLevel; /* PRQA S 4332 */ /* MISRA Rule 10.5 */
+                    /* Call the API "SetLogLevel" to update the current log level for the DLT module */
+                    if (E_OK == Dlt_InterSetLogLevel(ChannelIndex, applicationId, contextId, destLogLevel))
+                    {
+                        status = (uint8)DLT_STATUS_OK;
+                    }
                 }
-            }
-            else
-            {
-                /*idle*/
+                else
+                {
+                    /*idle*/
+                }
             }
         }
 
@@ -1259,17 +1568,25 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
         if (ChannelPtr->LastSendStatus == DLT_WAIT_SEND)
         {
             uint16 SendOffset           = 0U;
+            uint16 CorrectionLength     = 0u;
             uint8* SendControlBufferPtr = &(ChannelPtr->SendControlBuffer[0]);
 
             /* Check if the DLT message extension header is support verbose mode */
-            boolean VerboseMode = Dlt_ConfigPtr->Protocol->DltUseExtHeaderInNonVerbMode;
+            boolean VerboseMode =
+                ((Dlt_ConfigPtr->Protocol->DltUseExtHeaderInNonVerbMode) && (OptionFlag.Bits.UEH == 1u)) ? TRUE : FALSE;
             /* Calculate the byte length of the DLT service response message */
-            uint16 Messagelength = Dlt_GetMessageLength(VerboseMode, DLT_SERVICE_SET_LOG_LEVEL_LENGTH);
+            uint16 Messagelength = Dlt_GetMessageLength(VerboseMode, DLT_SERVICE_SET_LOG_LEVEL_LENGTH, OptionFlag);
 
             SchM_Enter_Dlt_MsgChannel();
 
             /* Prepare the message header for the DLT service control response message */
-            Dlt_ServicePrepareResponseHeaderData(&SendOffset, ChannelIndex, Messagelength, DealRxData);
+            Dlt_ServicePrepareResponseHeaderData(
+                &SendOffset,
+                ChannelIndex,
+                Messagelength,
+                DealRxData,
+                &CorrectionLength,
+                OptionFlag);
 
             /* Load "status" for the message of the DLT service control response */
             SendControlBufferPtr[SendOffset] = status;
@@ -1297,8 +1614,12 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
  * Param-Name[in/out]  N/A
  * Return              Std_ReturnType
  */
-static FUNC(Std_ReturnType, DLT_APPL_CODE)
-    Dlt_ServiceSetTraceStatus(uint16 offset, const uint8* Data, uint16 Length, Dlt_DealRxDataTypes DealRxData)
+static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceSetTraceStatus(
+    uint16               offset,
+    const uint8*         Data,
+    uint16               Length,
+    Dlt_DealRxDataTypes  DealRxData,
+    Dlt_OptionalFlagType OptionFlag)
 {
     Std_ReturnType ret = E_NOT_OK;
 #if ((DLT_CHANNEL_NUM > 0) && (DLT_CHANNEL_MAX_BUFFER_LENGTH > 0))
@@ -1360,38 +1681,37 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
     {
         uint16 ChannelIndex = ChannelIndexList[index];
         /* Check if the parameters of the request is meet the matching condition */
-        /* PRQA S 3415 ++ */ /* MISRA Rule 13.5 */
-        if (((DealRxData.ApplicationID == applicationId) && (DealRxData.ContextID == contextId))
-            && (((DealRxData.UEH == FALSE)
-                 && (Length == Dlt_GetMessageLength(FALSE, DLT_SET_TRACE_STATUS_TOTAL_LENGTH)))
-                || ((DealRxData.UEH == TRUE)
-                    && (Length == Dlt_GetMessageLength(TRUE, DLT_SET_TRACE_STATUS_TOTAL_LENGTH)))))
-        /* PRQA S 3415 -- */ /* MISRA Rule 13.5 */
+        if ((OptionFlag.Bits.UEH == 0u)
+            || ((OptionFlag.Bits.UEH == 1u)
+                && ((DealRxData.ApplicationID == applicationId) && (DealRxData.ContextID == contextId))))
         {
-            boolean destTraceStatus;
-            /* Check if the parameter "newTraceStatus" of the request is -1 */
-            if (newTraceStatus == (sint8)(-1))
+            if (Length == Dlt_GetMessageLength(DealRxData.UEH, DLT_SET_TRACE_STATUS_TOTAL_LENGTH, OptionFlag))
             {
-                destTraceStatus = Dlt_RunTime.DefaultTraceStatus;
-                /* Call the API "SetTraceStatus" to update the current trace status for the DLT module */
-                if (E_OK == Dlt_InterSetTraceStatus(ChannelIndex, applicationId, contextId, destTraceStatus))
+                boolean destTraceStatus;
+                /* Check if the parameter "newTraceStatus" of the request is -1 */
+                if (newTraceStatus == (sint8)(-1))
                 {
-                    status = (uint8)DLT_STATUS_OK;
+                    destTraceStatus = Dlt_RunTime.DefaultTraceStatus;
+                    /* Call the API "SetTraceStatus" to update the current trace status for the DLT module */
+                    if (E_OK == Dlt_InterSetTraceStatus(ChannelIndex, applicationId, contextId, destTraceStatus))
+                    {
+                        status = (uint8)DLT_STATUS_OK;
+                    }
                 }
-            }
-            /* Check if the request parameter "newLogLevel" ranges from 0 to 2 */
-            else if ((newTraceStatus >= 0) && (newTraceStatus < 2)) /* PRQA S 4330 */ /* MISRA Rule 10.5 */
-            {
-                destTraceStatus = (boolean)newTraceStatus; /* PRQA S 4330 */ /* MISRA Rule 10.5 */
-                /* Call the API "SetTraceStatus" to update the current trace status for the DLT module */
-                if (E_OK == Dlt_InterSetTraceStatus(ChannelIndex, applicationId, contextId, destTraceStatus))
+                /* Check if the request parameter "newLogLevel" ranges from 0 to 2 */
+                else if ((newTraceStatus >= 0) && (newTraceStatus < 2)) /* PRQA S 4330 */ /* MISRA Rule 10.5 */
                 {
-                    status = (uint8)DLT_STATUS_OK;
+                    destTraceStatus = (boolean)newTraceStatus; /* PRQA S 4330 */ /* MISRA Rule 10.5 */
+                    /* Call the API "SetTraceStatus" to update the current trace status for the DLT module */
+                    if (E_OK == Dlt_InterSetTraceStatus(ChannelIndex, applicationId, contextId, destTraceStatus))
+                    {
+                        status = (uint8)DLT_STATUS_OK;
+                    }
                 }
-            }
-            else
-            {
-                /*idle*/
+                else
+                {
+                    /*idle*/
+                }
             }
         }
 
@@ -1400,17 +1720,25 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
         if (ChannelPtr->LastSendStatus == DLT_WAIT_SEND)
         {
             uint16 SendOffset           = 0;
+            uint16 CorrectionLength     = 0u;
             uint8* SendControlBufferPtr = &(ChannelPtr->SendControlBuffer[0]);
 
             /* Check if the DLT message extension header is support verbose mode */
-            boolean VerboseMode = Dlt_ConfigPtr->Protocol->DltUseExtHeaderInNonVerbMode;
+            boolean VerboseMode =
+                ((Dlt_ConfigPtr->Protocol->DltUseExtHeaderInNonVerbMode) && (OptionFlag.Bits.UEH == 1u)) ? TRUE : FALSE;
             /* Calculate the byte length of the DLT service response message */
-            uint16 Messagelength = Dlt_GetMessageLength(VerboseMode, DLT_SERVICE_SET_TRACE_STATUS_LENGTH);
+            uint16 Messagelength = Dlt_GetMessageLength(VerboseMode, DLT_SERVICE_SET_TRACE_STATUS_LENGTH, OptionFlag);
 
             SchM_Enter_Dlt_MsgChannel();
 
             /* Prepare the message header for the DLT service control response message */
-            Dlt_ServicePrepareResponseHeaderData(&SendOffset, ChannelIndex, Messagelength, DealRxData);
+            Dlt_ServicePrepareResponseHeaderData(
+                &SendOffset,
+                ChannelIndex,
+                Messagelength,
+                DealRxData,
+                &CorrectionLength,
+                OptionFlag);
 
             /* Load "status" for the message of the DLT service control response */
             SendControlBufferPtr[SendOffset] = status;
@@ -1438,8 +1766,12 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
  * Param-Name[in/out]  N/A
  * Return              Std_ReturnType
  */
-static FUNC(Std_ReturnType, DLT_APPL_CODE)
-    Dlt_ServiceGetLogInfo(uint16 offset, const uint8* Data, uint16 Length, Dlt_DealRxDataTypes DealRxData)
+static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceGetLogInfo(
+    uint16               offset,
+    const uint8*         Data,
+    uint16               Length,
+    Dlt_DealRxDataTypes  DealRxData,
+    Dlt_OptionalFlagType OptionFlag)
 {
     Std_ReturnType ret = E_NOT_OK;
 #if ((DLT_CHANNEL_NUM > 0) && (DLT_CHANNEL_MAX_BUFFER_LENGTH > 0))
@@ -1477,88 +1809,54 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
         /* Extract the "contextId" from the DLT service control message */
         Dlt_CopyArrayToLongLittleEndian(&contextId, &(Data[loffset]));
     }
-
     /* Check if the parameters of the request is meet the matching condition */
-    /* PRQA S 3415++ */ /* MISRA Rule 13.5 */
-    if (((FALSE == DealRxData.UEH) && (Length == Dlt_GetMessageLength(FALSE, DLT_GET_LOG_INFO_TOTAL_LENGTH)))
-        || ((TRUE == DealRxData.UEH) && (Length == Dlt_GetMessageLength(TRUE, DLT_GET_LOG_INFO_TOTAL_LENGTH))))
-    /* PRQA S 3415-- */ /* MISRA Rule 13.5 */
+    if ((OptionFlag.Bits.UEH == 0u)
+        || ((OptionFlag.Bits.UEH == 1u)
+            && ((DealRxData.ApplicationID == applicationId) && (DealRxData.ContextID == contextId))))
     {
-        uint16 SwcIndex = 0;
-#if (1u < DLT_SWC_NUM)
-        /* Traverse the list of all log channel index */
-        for (; SwcIndex < DLT_SWC_NUM; SwcIndex++)
-#endif /* 1u < DLT_SWC_NUM */
+        /* Check if the parameters of the request is meet the matching condition */
+        if (Length == Dlt_GetMessageLength(DealRxData.UEH, DLT_GET_LOG_INFO_TOTAL_LENGTH, OptionFlag))
         {
-#if ((DLT_SWC_NUM > 0) & (DLT_SWC_MAX_CONTEXT_NUM > 0))
-            const Dlt_SwcInfoType* SwcInfoPtr = &(Dlt_RunTime.SwcInfo[SwcIndex]);
-            /* All SWC context information is traversed */
-            for (uint16 SwcContextIndex = 0; SwcContextIndex < SwcInfoPtr->DltSwcContextNum; SwcContextIndex++)
+            uint16 SwcIndex = 0;
+#if (1u < DLT_SWC_NUM)
+            /* Traverse the list of all log channel index */
+            for (; SwcIndex < DLT_SWC_NUM; SwcIndex++)
+#endif /* 1u < DLT_SWC_NUM */
             {
-                const Dlt_SwcContextInofType* SwcContextInfoPtr =
-                    &(Dlt_RunTime.SwcInfo[SwcIndex].SwcContextInfo[SwcContextIndex]);
-                /* Check if the parameter applicationId/contextId tuple is matche */
-                if ((applicationId == SwcContextInfoPtr->SwcContext.SwcApplicationId)
-                    && (contextId == SwcContextInfoPtr->SwcContext.SwcContextId))
+#if ((DLT_SWC_NUM > 0) & (DLT_SWC_MAX_CONTEXT_NUM > 0))
+                const Dlt_SwcInfoType* SwcInfoPtr = &(Dlt_RunTime.SwcInfo[SwcIndex]);
+                /* All SWC context information is traversed */
+                for (uint16 SwcContextIndex = 0; (SwcContextIndex < SwcInfoPtr->DltSwcContextNum) && (ret == E_NOT_OK);
+                     SwcContextIndex++)
                 {
-                    /* Call the API "GetLogInfo" to get log information for the DLT module */
-                    if (E_OK == Dlt_SendGetLogInfo(options, SwcIndex, SwcContextIndex))
+                    const Dlt_SwcContextInofType* SwcContextInfoPtr =
+                        &(Dlt_RunTime.SwcInfo[SwcIndex].SwcContextInfo[SwcContextIndex]);
+                    /* Check if the parameter applicationId/contextId tuple is matche */
+                    if ((applicationId == SwcContextInfoPtr->SwcContext.SwcApplicationId)
+                        && (contextId == SwcContextInfoPtr->SwcContext.SwcContextId))
                     {
-                        ret = E_OK;
+                        /* Call the API "GetLogInfo" to get log information for the DLT module */
+                        if (E_OK == Dlt_SendGetLogInfo(options, SwcIndex, SwcContextIndex))
+                        {
+                            ret = E_OK;
+                        }
+                    }
+                    else
+                    {
+                        ret = Dlt_ServiceGetLogInfoSub(applicationId, contextId, DealRxData, OptionFlag, 8u);
                     }
                 }
-            }
 #endif /* DLT_SWC_NUM > 0 && DLT_SWC_MAX_CONTEXT_NUM > 0 */
+            }
+        }
+        else
+        {
+            ret = Dlt_ServiceGetLogInfoSub(applicationId, contextId, DealRxData, OptionFlag, (uint8)DLT_STATUS_ERROR);
         }
     }
     else
     {
-        uint16 index = 0u;
-        uint16 ChannelIndexList[DLT_CHANNEL_NUM];
-#if (1u < DLT_SWC_NUM)
-        /* Traverse the list of all Swc index */
-        for (; index < DLT_SWC_NUM; index++)
-#endif /* 1u < DLT_SWC_NUM */
-        {
-            /*Select target LogChannel*/
-            Dlt_GetChannelIndex(index, applicationId, contextId, ChannelIndexList);
-        }
-        index = 0u;
-#if (1u < DLT_SWC_NUM)
-        /* Traverse the list of all log channel index */
-        for (; ((ChannelIndexList[index] != 0xFFFFu) && (index < DLT_CHANNEL_NUM)); index++)
-#else  /* 1u < DLT_SWC_NUM */
-        /* Check if the index number of given log channel is valid */
-        if (ChannelIndexList[index] != 0xFFFFu)
-#endif /* 1u < DLT_SWC_NUM */
-        {
-            uint16           ChannelIndex = ChannelIndexList[index];
-            Dlt_ChannelType* ChannelPtr   = &(Dlt_Channel[ChannelIndex]);
-            /* Check if the last sent status of given log channel was "Waiting for response to be sent". */
-            if (ChannelPtr->LastSendStatus == DLT_WAIT_SEND)
-            {
-                uint16 SendOffset           = 0;
-                uint8* SendControlBufferPtr = &(ChannelPtr->SendControlBuffer[0]);
-
-                /* Check if the DLT message extension header is support verbose mode */
-                boolean VerboseMode = Dlt_ConfigPtr->Protocol->DltUseExtHeaderInNonVerbMode;
-                /* Calculate the byte length of the DLT service response message */
-                uint16 Messagelength = Dlt_GetMessageLength(VerboseMode, DLT_GET_LOG_INFO_ERRRES_LENGTH);
-
-                SchM_Enter_Dlt_MsgChannel();
-
-                /* Prepare the message header for the DLT service control response message */
-                Dlt_ServicePrepareResponseHeaderData(&SendOffset, ChannelIndex, Messagelength, DealRxData);
-
-                /* Load "status" for the message of the DLT service control response */
-                SendControlBufferPtr[SendOffset] = (uint8)DLT_STATUS_ERROR;
-
-                SchM_Exit_Dlt_MsgChannel();
-
-                /* Control the response message for the DLT service, triggering the send action */
-                ret = Dlt_ServiceSendResponseData(ChannelIndex, Messagelength);
-            }
-        }
+        ret = Dlt_ServiceGetLogInfoSub(applicationId, contextId, DealRxData, OptionFlag, (uint8)0x08u);
     }
 #endif
     return ret;
@@ -1576,8 +1874,12 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
  * Param-Name[in/out]  N/A
  * Return              Std_ReturnType
  */
-static FUNC(Std_ReturnType, DLT_APPL_CODE)
-    Dlt_ServiceGetDefaultLogLevel(uint16 offset, const uint8* Data, uint16 Length, Dlt_DealRxDataTypes DealRxData)
+static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceGetDefaultLogLevel(
+    uint16               offset,
+    const uint8*         Data,
+    uint16               Length,
+    Dlt_DealRxDataTypes  DealRxData,
+    Dlt_OptionalFlagType OptionFlag)
 {
     Std_ReturnType ret = E_NOT_OK;
 #if ((DLT_CHANNEL_NUM > 0) && (DLT_CHANNEL_MAX_BUFFER_LENGTH > 0))
@@ -1595,10 +1897,7 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
     DLT_UNUSED(offset);
 
     /* Check if the parameters of the request is meet the matching condition */
-    /* PRQA S 3415++ */ /* MISRA Rule 13.5 */
-    if (((DealRxData.UEH == FALSE) && (Length == Dlt_GetMessageLength(FALSE, DLT_MESSAGE_NO_OTHER_INFO_LENGTH)))
-        || ((DealRxData.UEH == TRUE) && (Length == Dlt_GetMessageLength(TRUE, DLT_MESSAGE_NO_OTHER_INFO_LENGTH))))
-    /* PRQA S 3415-- */ /* MISRA Rule 13.5 */
+    if (Length == Dlt_GetMessageLength(DealRxData.UEH, DLT_MESSAGE_NO_OTHER_INFO_LENGTH, OptionFlag))
     {
         status = (uint8)DLT_STATUS_OK;
     }
@@ -1608,17 +1907,25 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
     if (ChannelPtr->LastSendStatus == DLT_WAIT_SEND)
     {
         uint16 SendOffset           = 0;
+        uint16 CorrectionLength     = 0u;
         uint8* SendControlBufferPtr = &(ChannelPtr->SendControlBuffer[0]);
 
         /* Check if the DLT message extension header is support verbose mode */
-        boolean VerboseMode = Dlt_ConfigPtr->Protocol->DltUseExtHeaderInNonVerbMode;
+        boolean VerboseMode =
+            ((Dlt_ConfigPtr->Protocol->DltUseExtHeaderInNonVerbMode) && (OptionFlag.Bits.UEH == 1u)) ? TRUE : FALSE;
         /* Calculate the byte length of the DLT service response message */
-        uint16 Messagelength = Dlt_GetMessageLength(VerboseMode, DLT_GET_DEFAULT_LOG_INFO_RES_LENGTH);
+        uint16 Messagelength = Dlt_GetMessageLength(VerboseMode, DLT_GET_DEFAULT_LOG_INFO_RES_LENGTH, OptionFlag);
 
         SchM_Enter_Dlt_MsgChannel();
 
         /* Prepare the message header for the DLT service control response message */
-        Dlt_ServicePrepareResponseHeaderData(&SendOffset, ChannelIndex, Messagelength, DealRxData);
+        Dlt_ServicePrepareResponseHeaderData(
+            &SendOffset,
+            ChannelIndex,
+            Messagelength,
+            DealRxData,
+            &CorrectionLength,
+            OptionFlag);
 
         /* Load "status" for the message of the DLT service control response */
         SendControlBufferPtr[SendOffset] = status;
@@ -1649,8 +1956,12 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
  * Param-Name[in/out]  N/A
  * Return              Std_ReturnType
  */
-static FUNC(Std_ReturnType, DLT_APPL_CODE)
-    Dlt_ServiceStoreConfiguration(uint16 offset, const uint8* Data, uint16 Length, Dlt_DealRxDataTypes DealRxData)
+static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceStoreConfiguration(
+    uint16               offset,
+    const uint8*         Data,
+    uint16               Length,
+    Dlt_DealRxDataTypes  DealRxData,
+    Dlt_OptionalFlagType OptionFlag)
 {
     Std_ReturnType ret = E_NOT_OK;
 #if ((DLT_CHANNEL_NUM > 0) && (DLT_CHANNEL_MAX_BUFFER_LENGTH > 0))
@@ -1668,10 +1979,7 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
     DLT_UNUSED(offset);
 
     /* Check if the parameters of the request is meet the matching condition */
-    /* PRQA S 3415++ */ /* MISRA Rule 13.5 */
-    if (((DealRxData.UEH == FALSE) && (Length == Dlt_GetMessageLength(FALSE, DLT_MESSAGE_NO_OTHER_INFO_LENGTH)))
-        || ((DealRxData.UEH == TRUE) && (Length == Dlt_GetMessageLength(TRUE, DLT_MESSAGE_NO_OTHER_INFO_LENGTH))))
-    /* PRQA S 3415-- */ /* MISRA Rule 13.5 */
+    if (Length == Dlt_GetMessageLength(DealRxData.UEH, DLT_MESSAGE_NO_OTHER_INFO_LENGTH, OptionFlag))
     {
 #if (DLT_NVM_RAM_SUPPORT == STD_ON)
         /* Store DLT module specific configuration parameters to the NVM */
@@ -1687,17 +1995,25 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
     if (ChannelPtr->LastSendStatus == DLT_WAIT_SEND)
     {
         uint16 SendOffset           = 0;
+        uint16 CorrectionLength     = 0u;
         uint8* SendControlBufferPtr = &(ChannelPtr->SendControlBuffer[0]);
 
         /* Check if the DLT message extension header is support verbose mode */
-        boolean VerboseMode = Dlt_ConfigPtr->Protocol->DltUseExtHeaderInNonVerbMode;
+        boolean VerboseMode =
+            ((Dlt_ConfigPtr->Protocol->DltUseExtHeaderInNonVerbMode) && (OptionFlag.Bits.UEH == 1u)) ? TRUE : FALSE;
         /* Calculate the byte length of the DLT service response message */
-        uint16 Messagelength = Dlt_GetMessageLength(VerboseMode, DLT_STORE_CONFIGURATION_TOTAL_LENGTH);
+        uint16 Messagelength = Dlt_GetMessageLength(VerboseMode, DLT_STORE_CONFIGURATION_TOTAL_LENGTH, OptionFlag);
 
         SchM_Enter_Dlt_MsgChannel();
 
         /* Prepare the message header for the DLT service control response message */
-        Dlt_ServicePrepareResponseHeaderData(&SendOffset, ChannelIndex, Messagelength, DealRxData);
+        Dlt_ServicePrepareResponseHeaderData(
+            &SendOffset,
+            ChannelIndex,
+            Messagelength,
+            DealRxData,
+            &CorrectionLength,
+            OptionFlag);
 
         /* Load "status" for the message of the DLT service control response */
         SendControlBufferPtr[SendOffset] = status;
@@ -1724,8 +2040,12 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
  * Param-Name[in/out]  N/A
  * Return              Std_ReturnType
  */
-static FUNC(Std_ReturnType, DLT_APPL_CODE)
-    Dlt_ServiceResetToFactoryDefault(uint16 offset, const uint8* Data, uint16 Length, Dlt_DealRxDataTypes DealRxData)
+static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceResetToFactoryDefault(
+    uint16               offset,
+    const uint8*         Data,
+    uint16               Length,
+    Dlt_DealRxDataTypes  DealRxData,
+    Dlt_OptionalFlagType OptionFlag)
 {
     Std_ReturnType ret = E_NOT_OK;
 #if ((DLT_CHANNEL_NUM > 0) && (DLT_CHANNEL_MAX_BUFFER_LENGTH > 0))
@@ -1743,14 +2063,15 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
     DLT_UNUSED(offset);
 
     /* Check if the parameters of the request is meet the matching condition */
-    /*PRQA S 3415++*/ /* MISRA Rule 13.5 */
-    if (((DealRxData.UEH == FALSE) && (Length == Dlt_GetMessageLength(FALSE, DLT_MESSAGE_NO_OTHER_INFO_LENGTH)))
-        || ((DealRxData.UEH == TRUE) && (Length == Dlt_GetMessageLength(TRUE, DLT_MESSAGE_NO_OTHER_INFO_LENGTH))))
-    /*PRQA S 3415--*/ /* MISRA Rule 13.5 */
+    if (Length == Dlt_GetMessageLength(DealRxData.UEH, DLT_MESSAGE_NO_OTHER_INFO_LENGTH, OptionFlag))
     {
         /* Copy initialization parameters from the global configuration information of the DLT module */
         Dlt_Init_From_Cfg(Dlt_ConfigPtr);
+#if (DLT_NVM_RAM_SUPPORT == STD_ON)
         status = (uint8)DLT_STATUS_OK;
+#else
+        status = (uint8)DLT_STATUS_NOT_SUPPORTED;
+#endif
     }
     uint16           ChannelIndex = Dlt_ConfigPtr->LogOutput->DltDefaultLogChannelRef;
     Dlt_ChannelType* ChannelPtr   = &(Dlt_Channel[ChannelIndex]);
@@ -1758,17 +2079,25 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
     if (ChannelPtr->LastSendStatus == DLT_WAIT_SEND)
     {
         uint16 SendOffset           = 0;
+        uint16 CorrectionLength     = 0u;
         uint8* SendControlBufferPtr = &(ChannelPtr->SendControlBuffer[0]);
 
         /* Check if the DLT message extension header is support verbose mode */
-        boolean VerboseMode = Dlt_ConfigPtr->Protocol->DltUseExtHeaderInNonVerbMode;
+        boolean VerboseMode =
+            ((Dlt_ConfigPtr->Protocol->DltUseExtHeaderInNonVerbMode) && (OptionFlag.Bits.UEH == 1u)) ? TRUE : FALSE;
         /* Calculate the byte length of the DLT service response message */
-        uint16 Messagelength = Dlt_GetMessageLength(VerboseMode, DLT_RESET_TO_FACTORY_DEFAULT_RES_LENGTH);
+        uint16 Messagelength = Dlt_GetMessageLength(VerboseMode, DLT_RESET_TO_FACTORY_DEFAULT_RES_LENGTH, OptionFlag);
 
         SchM_Enter_Dlt_MsgChannel();
 
         /* Prepare the message header for the DLT service control response message */
-        Dlt_ServicePrepareResponseHeaderData(&SendOffset, ChannelIndex, Messagelength, DealRxData);
+        Dlt_ServicePrepareResponseHeaderData(
+            &SendOffset,
+            ChannelIndex,
+            Messagelength,
+            DealRxData,
+            &CorrectionLength,
+            OptionFlag);
 
         /* Load "status" for the message of the DLT service control response */
         SendControlBufferPtr[SendOffset] = status;
@@ -1795,8 +2124,12 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
  * Param-Name[in/out]  N/A
  * Return              Std_ReturnType
  */
-static FUNC(Std_ReturnType, DLT_APPL_CODE)
-    Dlt_ServiceSetMessageFiltering(uint16 offset, const uint8* Data, uint16 Length, Dlt_DealRxDataTypes DealRxData)
+static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceSetMessageFiltering(
+    uint16               offset,
+    const uint8*         Data,
+    uint16               Length,
+    Dlt_DealRxDataTypes  DealRxData,
+    Dlt_OptionalFlagType OptionFlag)
 {
     Std_ReturnType ret = E_NOT_OK;
 #if ((DLT_CHANNEL_NUM > 0) && (DLT_CHANNEL_MAX_BUFFER_LENGTH > 0))
@@ -1811,18 +2144,19 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
     /* Payload format: ServiceID(4),Status(1) */
 
     /* Check if the parameters of the request is meet the matching condition */
-    /* PRQA S 3415++ */ /* MISRA Rule 13.5 */
-    if (((DealRxData.UEH == FALSE) && (Length == Dlt_GetMessageLength(FALSE, DLT_SET_MESSAGE_FILTERING_TOTAL_LENGTH)))
-        || ((DealRxData.UEH == TRUE) && (Length == Dlt_GetMessageLength(TRUE, DLT_SET_MESSAGE_FILTERING_TOTAL_LENGTH))))
-    /* PRQA S 3415-- */ /* MISRA Rule 13.5 */
+    if (Length == Dlt_GetMessageLength(DealRxData.UEH, DLT_SET_MESSAGE_FILTERING_TOTAL_LENGTH, OptionFlag))
     {
-        SchM_Enter_Dlt_SwcContext();
-        /* Update the current message filtering status of the DLT module */
-        /* PRQA S 4340++ */ /* MISRA Rule 10.5 */
-        Dlt_RunTime.MessageFilterEnable = (boolean)Data[offset];
-        /* PRQA S 4340-- */ /* MISRA Rule 10.5 */
-        SchM_Exit_Dlt_SwcContext();
-        status = (uint8)DLT_STATUS_OK;
+        boolean MessageFilterEnable = (boolean)Data[offset];
+        if (MessageFilterEnable <= 1u)
+        {
+            SchM_Enter_Dlt_SwcContext();
+            /* Update the current message filtering status of the DLT module */
+            /* PRQA S 4340++ */ /* MISRA Rule 10.5 */
+            Dlt_RunTime.MessageFilterEnable = MessageFilterEnable;
+            /* PRQA S 4340-- */ /* MISRA Rule 10.5 */
+            SchM_Exit_Dlt_SwcContext();
+            status = (uint8)DLT_STATUS_OK;
+        }
     }
     uint16           ChannelIndex = Dlt_ConfigPtr->LogOutput->DltDefaultLogChannelRef;
     Dlt_ChannelType* ChannelPtr   = &(Dlt_Channel[ChannelIndex]);
@@ -1830,17 +2164,25 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
     if (ChannelPtr->LastSendStatus == DLT_WAIT_SEND)
     {
         uint16 SendOffset           = 0;
+        uint16 CorrectionLength     = 0u;
         uint8* SendControlBufferPtr = &(ChannelPtr->SendControlBuffer[0]);
 
         /* Check if the DLT message extension header is support verbose mode */
-        boolean VerboseMode = Dlt_ConfigPtr->Protocol->DltUseExtHeaderInNonVerbMode;
+        boolean VerboseMode =
+            ((Dlt_ConfigPtr->Protocol->DltUseExtHeaderInNonVerbMode) && (OptionFlag.Bits.UEH == 1u)) ? TRUE : FALSE;
         /* Calculate the byte length of the DLT service response message */
-        uint16 Messagelength = Dlt_GetMessageLength(VerboseMode, DLT_SET_MESSAGE_FILTERING_RES_LENGTH);
+        uint16 Messagelength = Dlt_GetMessageLength(VerboseMode, DLT_SET_MESSAGE_FILTERING_RES_LENGTH, OptionFlag);
 
         SchM_Enter_Dlt_MsgChannel();
 
         /* Prepare the message header for the DLT service control response message */
-        Dlt_ServicePrepareResponseHeaderData(&SendOffset, ChannelIndex, Messagelength, DealRxData);
+        Dlt_ServicePrepareResponseHeaderData(
+            &SendOffset,
+            ChannelIndex,
+            Messagelength,
+            DealRxData,
+            &CorrectionLength,
+            OptionFlag);
 
         /* Load "status" for the message of the DLT service control response */
         SendControlBufferPtr[SendOffset] = status;
@@ -1867,8 +2209,12 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
  * Param-Name[in/out]  N/A
  * Return              Std_ReturnType
  */
-static FUNC(Std_ReturnType, DLT_APPL_CODE)
-    Dlt_ServiceSetDefaultLogLevel(uint16 offset, const uint8* Data, uint16 Length, Dlt_DealRxDataTypes DealRxData)
+static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceSetDefaultLogLevel(
+    uint16               offset,
+    const uint8*         Data,
+    uint16               Length,
+    Dlt_DealRxDataTypes  DealRxData,
+    Dlt_OptionalFlagType OptionFlag)
 {
     Std_ReturnType ret = E_NOT_OK;
 #if ((DLT_CHANNEL_NUM > 0) && (DLT_CHANNEL_MAX_BUFFER_LENGTH > 0))
@@ -1883,10 +2229,7 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
     /* Payload format: ServiceID(4),Status(1) */
 
     /* Check if the parameters of the request is meet the matching condition */
-    /* PRQA S 3415++ */ /* MISRA Rule 13.5 */
-    if (((DealRxData.UEH == FALSE) && (Length == Dlt_GetMessageLength(FALSE, DLT_SET_DEFAULT_LOG_LEVEL_TOTAL_LENGTH)))
-        || ((DealRxData.UEH == TRUE) && (Length == Dlt_GetMessageLength(TRUE, DLT_SET_DEFAULT_LOG_LEVEL_TOTAL_LENGTH))))
-    /* PRQA S 3415-- */ /* MISRA Rule 13.5 */
+    if (Length == Dlt_GetMessageLength(DealRxData.UEH, DLT_SET_DEFAULT_LOG_LEVEL_TOTAL_LENGTH, OptionFlag))
     {
         SchM_Enter_Dlt_SwcContext();
         /* Check if the parameter "MessageFilterStatus" of the request is -1 */
@@ -1930,17 +2273,25 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
     if (ChannelPtr->LastSendStatus == DLT_WAIT_SEND)
     {
         uint16 SendOffset           = 0;
+        uint16 CorrectionLength     = 0u;
         uint8* SendControlBufferPtr = &(ChannelPtr->SendControlBuffer[0]);
 
         /* Check if the DLT message extension header is support verbose mode */
-        boolean VerboseMode = Dlt_ConfigPtr->Protocol->DltUseExtHeaderInNonVerbMode;
+        boolean VerboseMode =
+            ((Dlt_ConfigPtr->Protocol->DltUseExtHeaderInNonVerbMode) && (OptionFlag.Bits.UEH == 1u)) ? TRUE : FALSE;
         /* Calculate the byte length of the DLT service response message */
-        uint16 Messagelength = Dlt_GetMessageLength(VerboseMode, DLT_SET_DEFAULT_LOG_LEVEL_RES_LENGTH);
+        uint16 Messagelength = Dlt_GetMessageLength(VerboseMode, DLT_SET_DEFAULT_LOG_LEVEL_RES_LENGTH, OptionFlag);
 
         SchM_Enter_Dlt_MsgChannel();
 
         /* Prepare the message header for the DLT service control response message */
-        Dlt_ServicePrepareResponseHeaderData(&SendOffset, ChannelIndex, Messagelength, DealRxData);
+        Dlt_ServicePrepareResponseHeaderData(
+            &SendOffset,
+            ChannelIndex,
+            Messagelength,
+            DealRxData,
+            &CorrectionLength,
+            OptionFlag);
 
         /* Load "status" for the message of the DLT service control response */
         SendControlBufferPtr[SendOffset] = status;
@@ -1967,8 +2318,12 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
  * Param-Name[in/out]  N/A
  * Return              Std_ReturnType
  */
-static FUNC(Std_ReturnType, DLT_APPL_CODE)
-    Dlt_ServiceSetDefaultTraceStatus(uint16 offset, const uint8* Data, uint16 Length, Dlt_DealRxDataTypes DealRxData)
+static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceSetDefaultTraceStatus(
+    uint16               offset,
+    const uint8*         Data,
+    uint16               Length,
+    Dlt_DealRxDataTypes  DealRxData,
+    Dlt_OptionalFlagType OptionFlag)
 {
     Std_ReturnType ret = E_NOT_OK;
 #if ((DLT_CHANNEL_NUM > 0) && (DLT_CHANNEL_MAX_BUFFER_LENGTH > 0))
@@ -1983,12 +2338,7 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
     /* Payload format: ServiceID(4),Status(1) */
 
     /* Check if the parameters of the request is meet the matching condition */
-    /* PRQA S 3415++ */ /* MISRA Rule 13.5 */
-    if (((DealRxData.UEH == FALSE)
-         && (Length == Dlt_GetMessageLength(FALSE, DLT_SET_DEFAULT_TRACE_STATUS_TOTAL_LENGTH)))
-        || ((DealRxData.UEH == TRUE)
-            && (Length == Dlt_GetMessageLength(TRUE, DLT_SET_DEFAULT_TRACE_STATUS_TOTAL_LENGTH))))
-    /* PRQA S 3415-- */ /* MISRA Rule 13.5 */
+    if (Length == Dlt_GetMessageLength(DealRxData.UEH, DLT_SET_DEFAULT_TRACE_STATUS_TOTAL_LENGTH, OptionFlag))
     {
         /* Check if the request parameter "DefaultTraceStatus" ranges from 0 to 2 */
         if (((sint8)Data[offset] >= 0) && ((sint8)Data[offset] < 2))
@@ -2008,17 +2358,25 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
     if (ChannelPtr->LastSendStatus == DLT_WAIT_SEND)
     {
         uint16 SendOffset           = 0;
+        uint16 CorrectionLength     = 0u;
         uint8* SendControlBufferPtr = &(ChannelPtr->SendControlBuffer[0]);
 
         /* Check if the DLT message extension header is support verbose mode */
-        boolean VerboseMode = Dlt_ConfigPtr->Protocol->DltUseExtHeaderInNonVerbMode;
+        boolean VerboseMode =
+            ((Dlt_ConfigPtr->Protocol->DltUseExtHeaderInNonVerbMode) && (OptionFlag.Bits.UEH == 1u)) ? TRUE : FALSE;
         /* Calculate the byte length of the DLT service response message */
-        uint16 Messagelength = Dlt_GetMessageLength(VerboseMode, DLT_SET_DEFAULT_TRACE_STATUS_RES_LENGTH);
+        uint16 Messagelength = Dlt_GetMessageLength(VerboseMode, DLT_SET_DEFAULT_TRACE_STATUS_RES_LENGTH, OptionFlag);
 
         SchM_Enter_Dlt_MsgChannel();
 
         /* Prepare the message header for the DLT service control response message */
-        Dlt_ServicePrepareResponseHeaderData(&SendOffset, ChannelIndex, Messagelength, DealRxData);
+        Dlt_ServicePrepareResponseHeaderData(
+            &SendOffset,
+            ChannelIndex,
+            Messagelength,
+            DealRxData,
+            &CorrectionLength,
+            OptionFlag);
 
         /* Load "status" for the message of the DLT service control response */
         SendControlBufferPtr[SendOffset] = status;
@@ -2045,8 +2403,12 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
  * Param-Name[in/out]  N/A
  * Return              Std_ReturnType
  */
-static FUNC(Std_ReturnType, DLT_APPL_CODE)
-    Dlt_ServiceGetSoftwareVersion(uint16 offset, const uint8* Data, uint16 Length, Dlt_DealRxDataTypes DealRxData)
+static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceGetSoftwareVersion(
+    uint16               offset,
+    const uint8*         Data,
+    uint16               Length,
+    Dlt_DealRxDataTypes  DealRxData,
+    Dlt_OptionalFlagType OptionFlag)
 {
     Std_ReturnType ret = E_NOT_OK;
 #if ((DLT_CHANNEL_NUM > 0) && (DLT_CHANNEL_MAX_BUFFER_LENGTH > 0))
@@ -2064,12 +2426,7 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
     DLT_UNUSED(offset);
 
     /* Check if the parameters of the request is meet the matching condition */
-    if (((DealRxData.UEH == FALSE)
-         /* PRQA S 3415++ */ /* MISRA Rule 13.5 */
-         && (Length == Dlt_GetMessageLength(FALSE, DLT_SET_DEFAULT_TRACE_STATUS_TOTAL_LENGTH)))
-        || ((DealRxData.UEH == TRUE)
-            && (Length == Dlt_GetMessageLength(TRUE, DLT_SET_DEFAULT_TRACE_STATUS_TOTAL_LENGTH))))
-    /* PRQA S 3415-- */ /* MISRA Rule 13.5 */
+    if (Length == Dlt_GetMessageLength(DealRxData.UEH, DLT_MESSAGE_NO_OTHER_INFO_LENGTH, OptionFlag))
     {
         status = (uint8)DLT_STATUS_OK;
     }
@@ -2079,17 +2436,25 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
     if (ChannelPtr->LastSendStatus == DLT_WAIT_SEND)
     {
         uint16 SendOffset           = 0;
+        uint16 CorrectionLength     = 0u;
         uint8* SendControlBufferPtr = &(ChannelPtr->SendControlBuffer[0]);
 
         /* Check if the DLT message extension header is support verbose mode */
-        boolean VerboseMode = Dlt_ConfigPtr->Protocol->DltUseExtHeaderInNonVerbMode;
+        boolean VerboseMode =
+            ((Dlt_ConfigPtr->Protocol->DltUseExtHeaderInNonVerbMode) && (OptionFlag.Bits.UEH == 1u)) ? TRUE : FALSE;
         /* Calculate the byte length of the DLT service response message */
-        uint16 Messagelength = Dlt_GetMessageLength(VerboseMode, DLT_GET_SOFT_WARE_VERSION_RES_LENGTH);
+        uint16 Messagelength = Dlt_GetMessageLength(VerboseMode, DLT_GET_SOFT_WARE_VERSION_RES_LENGTH, OptionFlag);
 
         SchM_Enter_Dlt_MsgChannel();
 
         /* Prepare the message header for the DLT service control response message */
-        Dlt_ServicePrepareResponseHeaderData(&SendOffset, ChannelIndex, Messagelength, DealRxData);
+        Dlt_ServicePrepareResponseHeaderData(
+            &SendOffset,
+            ChannelIndex,
+            Messagelength,
+            DealRxData,
+            &CorrectionLength,
+            OptionFlag);
 
         /* Load "status" for the message of the DLT service control response */
         SendControlBufferPtr[SendOffset] = status;
@@ -2140,8 +2505,12 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
  * Param-Name[in/out]  N/A
  * Return              Std_ReturnType
  */
-static FUNC(Std_ReturnType, DLT_APPL_CODE)
-    Dlt_ServiceGetDefaultTraceStatus(uint16 offset, const uint8* Data, uint16 Length, Dlt_DealRxDataTypes DealRxData)
+static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceGetDefaultTraceStatus(
+    uint16               offset,
+    const uint8*         Data,
+    uint16               Length,
+    Dlt_DealRxDataTypes  DealRxData,
+    Dlt_OptionalFlagType OptionFlag)
 {
     Std_ReturnType ret = E_NOT_OK;
 #if ((DLT_CHANNEL_NUM > 0) && (DLT_CHANNEL_MAX_BUFFER_LENGTH > 0))
@@ -2159,10 +2528,7 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
     DLT_UNUSED(offset);
 
     /* Check if the parameters of the request is meet the matching condition */
-    /* PRQA S 3415++ */ /* MISRA Rule 13.5 */
-    if (((FALSE == DealRxData.UEH) && (Length == Dlt_GetMessageLength(FALSE, DLT_MESSAGE_NO_OTHER_INFO_LENGTH)))
-        || ((TRUE == DealRxData.UEH) && (Length == Dlt_GetMessageLength(TRUE, DLT_MESSAGE_NO_OTHER_INFO_LENGTH))))
-    /* PRQA S 3415++ */ /* MISRA Rule 13.5 */
+    if (Length == Dlt_GetMessageLength(DealRxData.UEH, DLT_MESSAGE_NO_OTHER_INFO_LENGTH, OptionFlag))
     {
         status = (uint8)DLT_STATUS_OK;
     }
@@ -2172,17 +2538,25 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
     if (ChannelPtr->LastSendStatus == DLT_WAIT_SEND)
     {
         uint16 SendOffset           = 0;
+        uint16 CorrectionLength     = 0u;
         uint8* SendControlBufferPtr = &(ChannelPtr->SendControlBuffer[0]);
 
         /* Check if the DLT message extension header is support verbose mode */
-        boolean VerboseMode = Dlt_ConfigPtr->Protocol->DltUseExtHeaderInNonVerbMode;
+        boolean VerboseMode =
+            ((Dlt_ConfigPtr->Protocol->DltUseExtHeaderInNonVerbMode) && (OptionFlag.Bits.UEH == 1u)) ? TRUE : FALSE;
         /* Calculate the byte length of the DLT service response message */
-        uint16 Messagelength = Dlt_GetMessageLength(VerboseMode, DLT_GET_DEFAULT_TRACE_STATUS_RES_LENGTH);
+        uint16 Messagelength = Dlt_GetMessageLength(VerboseMode, DLT_GET_DEFAULT_TRACE_STATUS_RES_LENGTH, OptionFlag);
 
         SchM_Enter_Dlt_MsgChannel();
 
         /* Prepare the message header for the DLT service control response message */
-        Dlt_ServicePrepareResponseHeaderData(&SendOffset, ChannelIndex, Messagelength, DealRxData);
+        Dlt_ServicePrepareResponseHeaderData(
+            &SendOffset,
+            ChannelIndex,
+            Messagelength,
+            DealRxData,
+            &CorrectionLength,
+            OptionFlag);
 
         /* Load "status" for the message of the DLT service control response */
         SendControlBufferPtr[SendOffset] = status;
@@ -2215,8 +2589,12 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
  * Param-Name[in/out]  N/A
  * Return              Std_ReturnType
  */
-static FUNC(Std_ReturnType, DLT_APPL_CODE)
-    Dlt_ServiceGetLogChannelNames(uint16 offset, const uint8* Data, uint16 Length, Dlt_DealRxDataTypes DealRxData)
+static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceGetLogChannelNames(
+    uint16               offset,
+    const uint8*         Data,
+    uint16               Length,
+    Dlt_DealRxDataTypes  DealRxData,
+    Dlt_OptionalFlagType OptionFlag)
 {
     Std_ReturnType ret = E_NOT_OK;
 #if ((DLT_CHANNEL_NUM > 0) && (DLT_CHANNEL_MAX_BUFFER_LENGTH > 0))
@@ -2242,10 +2620,7 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
     /* Payload format: ServiceID(4),Status(1),countIf(1),logChannelNames(4) */
 
     /* Check if the parameters of the request is meet the matching condition */
-    /* PRQA S 3415++ */ /* MISRA Rule 13.5 */
-    if (((FALSE == DealRxData.UEH) && (Length == Dlt_GetMessageLength(FALSE, DLT_MESSAGE_NO_OTHER_INFO_LENGTH)))
-        || ((TRUE == DealRxData.UEH) && (Length == Dlt_GetMessageLength(TRUE, DLT_MESSAGE_NO_OTHER_INFO_LENGTH))))
-    /* PRQA S 3415-- */ /* MISRA Rule 13.5 */
+    if (Length == Dlt_GetMessageLength(DealRxData.UEH, DLT_MESSAGE_NO_OTHER_INFO_LENGTH, OptionFlag))
     {
         status = (uint8)DLT_STATUS_OK;
     }
@@ -2255,17 +2630,25 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
     if (ChannelPtr->LastSendStatus == DLT_WAIT_SEND)
     {
         uint16 SendOffset           = 0;
+        uint16 CorrectionLength     = 0u;
         uint8* SendControlBufferPtr = &(ChannelPtr->SendControlBuffer[0]);
 
         /* Check if the DLT message extension header is support verbose mode */
-        boolean VerboseMode = Dlt_ConfigPtr->Protocol->DltUseExtHeaderInNonVerbMode;
+        boolean VerboseMode =
+            ((Dlt_ConfigPtr->Protocol->DltUseExtHeaderInNonVerbMode) && (OptionFlag.Bits.UEH == 1u)) ? TRUE : FALSE;
         /* Calculate the byte length of the DLT service response message */
-        uint16 Messagelength = Dlt_GetMessageLength(VerboseMode, DLT_GET_LOG_CHANNEL_NAMES_RES_LENGTH);
+        uint16 Messagelength = Dlt_GetMessageLength(VerboseMode, DLT_GET_LOG_CHANNEL_NAMES_RES_LENGTH, OptionFlag);
 
         SchM_Enter_Dlt_MsgChannel();
 
         /* Prepare the message header for the DLT service control response message */
-        Dlt_ServicePrepareResponseHeaderData(&SendOffset, ChannelIndex, Messagelength, DealRxData);
+        Dlt_ServicePrepareResponseHeaderData(
+            &SendOffset,
+            ChannelIndex,
+            Messagelength,
+            DealRxData,
+            &CorrectionLength,
+            OptionFlag);
 
         /* Load "status" for the message of the DLT service control response */
         SendControlBufferPtr[SendOffset] = status;
@@ -2277,15 +2660,15 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
         SendOffset++;
         /* Load "logChannelNames" for the message of the DLT service control response */
         uint16 index = 0;
-#if (1u < DLT_SWC_NUM)
+#if (1u < DLT_CHANNEL_NUM)
         /* Traverse the index of each log channel */
         for (; index < DLT_CHANNEL_NUM; index++)
 #endif /* 1u < DLT_SWC_NUM */
         {
             uint32 logChannelId = Dlt_ConfigPtr->LogOutput->LogChannel[index].DltLogChannelId;
             Dlt_CopyLongToArrayBigEndian(logChannelId, &SendControlBufferPtr[SendOffset]);
-#if (1u < DLT_SWC_NUM)
-            SendOffset++;
+#if (1u < DLT_CHANNEL_NUM)
+            SendOffset += 4u;
 #endif /* 1u < DLT_SWC_NUM */
         }
 
@@ -2311,8 +2694,12 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
  * Param-Name[in/out]  N/A
  * Return              Std_ReturnType
  */
-static FUNC(Std_ReturnType, DLT_APPL_CODE)
-    Dlt_ServiceGetTraceStatus(uint16 offset, const uint8* Data, uint16 Length, Dlt_DealRxDataTypes DealRxData)
+static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceGetTraceStatus(
+    uint16               offset,
+    const uint8*         Data,
+    uint16               Length,
+    Dlt_DealRxDataTypes  DealRxData,
+    Dlt_OptionalFlagType OptionFlag)
 {
     Std_ReturnType ret = E_NOT_OK;
 #if ((DLT_CHANNEL_NUM > 0) && (DLT_CHANNEL_MAX_BUFFER_LENGTH > 0))
@@ -2323,8 +2710,9 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
     boolean VerboseMode;
     uint16  Messagelength;
     uint16  ChannelIndex;
-    uint16  SendOffset = 0;
-    uint16  loffset    = offset;
+    uint16  SendOffset       = 0;
+    uint16  loffset          = offset;
+    uint16  CorrectionLength = 0u;
 
     Dlt_ChannelType* ChannelPtr;
     uint8*           SendControlBufferPtr;
@@ -2354,70 +2742,83 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
         /* Extract the "contextId" from the DLT service control message */
         Dlt_CopyArrayToLongLittleEndian(&contextId, &(Data[loffset]));
     }
-
     /* Check if the parameters of the request is meet the matching condition */
-    /* PRQA S 3415++ */ /* MISRA Rule 13.5 */
-    if (((FALSE == DealRxData.UEH) && (Length == Dlt_GetMessageLength(FALSE, DLT_GET_TRACE_STATUS_TOTAL_LENGTH)))
-        || ((TRUE == DealRxData.UEH) && (Length == Dlt_GetMessageLength(TRUE, DLT_GET_TRACE_STATUS_TOTAL_LENGTH))))
-    /* PRQA S 3415-- */ /* MISRA Rule 13.5 */
+    if ((OptionFlag.Bits.UEH == 0u)
+        || ((OptionFlag.Bits.UEH == 1u)
+            && ((DealRxData.ApplicationID == applicationId) && (DealRxData.ContextID == contextId))))
     {
-        uint16 SwcIndex = 0;
-#if (1u < DLT_SWC_NUM)
-        /* Traverse the list of all Swc index */
-        for (; SwcIndex < DLT_SWC_NUM; SwcIndex++)
-#endif /* 1u < DLT_SWC_NUM */
+        /* Check if the parameters of the request is meet the matching condition */
+        if (Length == Dlt_GetMessageLength(DealRxData.UEH, DLT_GET_TRACE_STATUS_TOTAL_LENGTH, OptionFlag))
         {
-#if ((DLT_SWC_NUM > 0) && (DLT_SWC_MAX_CONTEXT_NUM > 0))
-            const Dlt_SwcInfoType* SwcInfoPtr = &(Dlt_RunTime.SwcInfo[SwcIndex]);
-            /* Traverse the list of all Swc Context index */
-            for (uint16 SwcContextIndex = 0; SwcContextIndex < SwcInfoPtr->DltSwcContextNum; SwcContextIndex++)
+            uint16 SwcIndex = 0;
+#if (1u < DLT_SWC_NUM)
+            /* Traverse the list of all Swc index */
+            for (; SwcIndex < DLT_SWC_NUM; SwcIndex++)
+#endif /* 1u < DLT_SWC_NUM */
             {
-                const Dlt_SwcContextInofType* SwcContextInfoPtr =
-                    &(Dlt_RunTime.SwcInfo[SwcIndex].SwcContextInfo[SwcContextIndex]);
-                /* Check if the parameter applicationId/contextId tuple is matche */
-                if ((applicationId == SwcContextInfoPtr->SwcContext.SwcApplicationId)
-                    && (contextId == SwcContextInfoPtr->SwcContext.SwcContextId))
+#if ((DLT_SWC_NUM > 0) && (DLT_SWC_MAX_CONTEXT_NUM > 0))
+                const Dlt_SwcInfoType* SwcInfoPtr = &(Dlt_RunTime.SwcInfo[SwcIndex]);
+                /* Traverse the list of all Swc Context index */
+                for (uint16 SwcContextIndex = 0; SwcContextIndex < SwcInfoPtr->DltSwcContextNum; SwcContextIndex++)
                 {
-                    status = (uint8)DLT_STATUS_OK;
-                    /* Traverse the list of all log channel index */
-                    for (uint16 index = 0; index < SwcContextInfoPtr->DltLogChannelRefNum; index++)
+                    const Dlt_SwcContextInofType* SwcContextInfoPtr =
+                        &(Dlt_RunTime.SwcInfo[SwcIndex].SwcContextInfo[SwcContextIndex]);
+                    /* Check if the parameter applicationId/contextId tuple is matche */
+                    if ((applicationId == SwcContextInfoPtr->SwcContext.SwcApplicationId)
+                        && (contextId == SwcContextInfoPtr->SwcContext.SwcContextId))
                     {
-                        /* Extract target log channel */
-                        ChannelIndex = SwcContextInfoPtr->DltLogChannelRef[index];
-                        ChannelPtr   = &(Dlt_Channel[ChannelIndex]);
-                        /* Check if the last sent status of given log channel was "Waiting for response to be sent". */
-                        if (ChannelPtr->LastSendStatus == DLT_WAIT_SEND)
+                        status = (uint8)DLT_STATUS_OK;
+                        /* Traverse the list of all log channel index */
+                        for (uint16 index = 0; index < SwcContextInfoPtr->DltLogChannelRefNum; index++)
                         {
-                            SendControlBufferPtr = &(ChannelPtr->SendControlBuffer[0]);
+                            /* Extract target log channel */
+                            ChannelIndex = SwcContextInfoPtr->DltLogChannelRef[index];
+                            ChannelPtr   = &(Dlt_Channel[ChannelIndex]);
+                            /* Check if the last sent status of given log channel was "Waiting for response to be sent".
+                             */
+                            if (ChannelPtr->LastSendStatus == DLT_WAIT_SEND)
+                            {
+                                SendControlBufferPtr = &(ChannelPtr->SendControlBuffer[0]);
 
-                            /* Check if the DLT message extension header is support verbose mode */
-                            VerboseMode = Dlt_ConfigPtr->Protocol->DltUseExtHeaderInNonVerbMode;
-                            /* Calculate the byte length of the DLT service response message */
-                            Messagelength = Dlt_GetMessageLength(VerboseMode, DLT_GET_TRACE_STATUS_RES_LENGTH);
+                                /* Check if the DLT message extension header is support verbose mode */
+                                VerboseMode = ((Dlt_ConfigPtr->Protocol->DltUseExtHeaderInNonVerbMode)
+                                               && (OptionFlag.Bits.UEH == 1u))
+                                                  ? TRUE
+                                                  : FALSE;
+                                /* Calculate the byte length of the DLT service response message */
+                                Messagelength =
+                                    Dlt_GetMessageLength(VerboseMode, DLT_GET_TRACE_STATUS_RES_LENGTH, OptionFlag);
 
-                            SchM_Enter_Dlt_MsgChannel();
+                                SchM_Enter_Dlt_MsgChannel();
 
-                            /* Prepare the message header for the DLT service control response message */
-                            Dlt_ServicePrepareResponseHeaderData(&SendOffset, ChannelIndex, Messagelength, DealRxData);
+                                /* Prepare the message header for the DLT service control response message */
+                                Dlt_ServicePrepareResponseHeaderData(
+                                    &SendOffset,
+                                    ChannelIndex,
+                                    Messagelength,
+                                    DealRxData,
+                                    &CorrectionLength,
+                                    OptionFlag);
 
-                            /* Load "status" for the message of the DLT service control response */
-                            SendControlBufferPtr[SendOffset] = status;
+                                /* Load "status" for the message of the DLT service control response */
+                                SendControlBufferPtr[SendOffset] = status;
 
-                            SendOffset++;
-                            /* Load "TraceStatus" for the message of the DLT service control response */
-                            /* PRQA S 4304++ */ /* MISRA Rule 10.5 */
-                            SendControlBufferPtr[SendOffset] = (uint8)SwcContextInfoPtr->TraceStatus;
-                            /* PRQA S 4304-- */ /* MISRA Rule 10.5 */
+                                SendOffset++;
+                                /* Load "TraceStatus" for the message of the DLT service control response */
+                                /* PRQA S 4304++ */ /* MISRA Rule 10.5 */
+                                SendControlBufferPtr[SendOffset] = (uint8)SwcContextInfoPtr->TraceStatus;
+                                /* PRQA S 4304-- */ /* MISRA Rule 10.5 */
 
-                            SchM_Exit_Dlt_MsgChannel();
+                                SchM_Exit_Dlt_MsgChannel();
 
-                            /* Control the response message for the DLT service, triggering the send action */
-                            ret = Dlt_ServiceSendResponseData(ChannelIndex, Messagelength);
+                                /* Control the response message for the DLT service, triggering the send action */
+                                ret = Dlt_ServiceSendResponseData(ChannelIndex, Messagelength);
+                            }
                         }
                     }
                 }
-            }
 #endif /* DLT_SWC_NUM > 0 && DLT_SWC_MAX_CONTEXT_NUM > 0 */
+            }
         }
     }
     /* Check if the response status is EEROR */
@@ -2432,14 +2833,21 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
             SendControlBufferPtr = &(ChannelPtr->SendControlBuffer[0]);
 
             /* Check if the DLT message extension header is support verbose mode */
-            VerboseMode = Dlt_ConfigPtr->Protocol->DltUseExtHeaderInNonVerbMode;
+            VerboseMode =
+                ((Dlt_ConfigPtr->Protocol->DltUseExtHeaderInNonVerbMode) && (OptionFlag.Bits.UEH == 1u)) ? TRUE : FALSE;
             /* Calculate the byte length of the DLT service response message */
-            Messagelength = Dlt_GetMessageLength(VerboseMode, DLT_GET_TRACE_STATUS_RES_LENGTH);
+            Messagelength = Dlt_GetMessageLength(VerboseMode, DLT_GET_TRACE_STATUS_RES_LENGTH, OptionFlag);
 
             SchM_Enter_Dlt_MsgChannel();
 
             /* Prepare the message header for the DLT service control response message */
-            Dlt_ServicePrepareResponseHeaderData(&SendOffset, ChannelIndex, Messagelength, DealRxData);
+            Dlt_ServicePrepareResponseHeaderData(
+                &SendOffset,
+                ChannelIndex,
+                Messagelength,
+                DealRxData,
+                &CorrectionLength,
+                OptionFlag);
 
             /* Load "status" for the message of the DLT service control response */
             SendControlBufferPtr[SendOffset] = status;
@@ -2473,8 +2881,12 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
  * Param-Name[in/out]  N/A
  * Return              Std_ReturnType
  */
-static FUNC(Std_ReturnType, DLT_APPL_CODE)
-    Dlt_ServiceSetLogChannelAssignment(uint16 offset, const uint8* Data, uint16 Length, Dlt_DealRxDataTypes DealRxData)
+static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceSetLogChannelAssignment(
+    uint16               offset,
+    const uint8*         Data,
+    uint16               Length,
+    Dlt_DealRxDataTypes  DealRxData,
+    Dlt_OptionalFlagType OptionFlag)
 {
     Std_ReturnType ret = E_NOT_OK;
 #if ((DLT_CHANNEL_NUM > 0) && (DLT_CHANNEL_MAX_BUFFER_LENGTH > 0))
@@ -2489,50 +2901,69 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
     /* Payload format: ServiceID(4),Status(1),traceStatus(1) */
 
     /* Check if the parameters of the request is meet the matching condition */
-    /* PRQA S 3415++ */ /* MISRA Rule 13.5 */
-    if (((FALSE == DealRxData.UEH)
-         && (Length == Dlt_GetMessageLength(FALSE, DLT_TOTAL_LENGTH_SET_LOG_CHANNEL_ASSIGNMENT)))
-        || ((TRUE == DealRxData.UEH)
-            && (Length == Dlt_GetMessageLength(TRUE, DLT_TOTAL_LENGTH_SET_LOG_CHANNEL_ASSIGNMENT))))
-    /* PRQA S 3415-- */ /* MISRA Rule 13.5 */
+    uint32 applicationId;
+    uint32 contextId;
+    uint32 logChannelName;
+    uint16 loffset = offset;
+    /* Check if the DLT message format is support big-endian mode */
+    if (DealRxData.MSBF == TRUE)
     {
-        uint32 applicationId;
-        uint32 contextId;
-        uint32 logChannelName;
-        uint16 loffset = offset;
-        /* Check if the DLT message format is support big-endian mode */
-        if (DealRxData.MSBF == TRUE)
+        /* Extract the "applicationId" from the DLT service control message */
+        Dlt_CopyArrayToLongBigEndian(&applicationId, &(Data[loffset]));
+        loffset += 4u;
+        /* Extract the "contextId" from the DLT service control message */
+        Dlt_CopyArrayToLongBigEndian(&contextId, &(Data[loffset]));
+        loffset += 4u;
+        /* Extract the "logChannelName" from the DLT service control message */
+        Dlt_CopyArrayToLongBigEndian(&logChannelName, &(Data[loffset]));
+        loffset += 4u;
+    }
+    else
+    {
+        /* Extract the "applicationId" from the DLT service control message */
+        Dlt_CopyArrayToLongLittleEndian(&applicationId, &(Data[loffset]));
+        loffset += 4u;
+        /* Extract the "contextId" from the DLT service control message */
+        Dlt_CopyArrayToLongLittleEndian(&contextId, &(Data[loffset]));
+        loffset += 4u;
+        /* Extract the "logChannelName" from the DLT service control message */
+        Dlt_CopyArrayToLongLittleEndian(&logChannelName, &(Data[loffset]));
+        loffset += 4u;
+    }
+    /* Check if the parameters of the request is meet the matching condition */
+    if ((OptionFlag.Bits.UEH == 0u)
+        || ((OptionFlag.Bits.UEH == 1u)
+            && ((DealRxData.ApplicationID == applicationId) && (DealRxData.ContextID == contextId))))
+    {
+        /* Check if the parameters of the request is meet the matching condition */
+        if (Length == Dlt_GetMessageLength(DealRxData.UEH, DLT_TOTAL_LENGTH_SET_LOG_CHANNEL_ASSIGNMENT, OptionFlag))
         {
-            /* Extract the "applicationId" from the DLT service control message */
-            Dlt_CopyArrayToLongBigEndian(&applicationId, &(Data[loffset]));
-            loffset += 4u;
-            /* Extract the "contextId" from the DLT service control message */
-            Dlt_CopyArrayToLongBigEndian(&contextId, &(Data[loffset]));
-            loffset += 4u;
-            /* Extract the "logChannelName" from the DLT service control message */
-            Dlt_CopyArrayToLongBigEndian(&logChannelName, &(Data[loffset]));
-            loffset += 4u;
-        }
-        else
-        {
-            /* Extract the "applicationId" from the DLT service control message */
-            Dlt_CopyArrayToLongLittleEndian(&applicationId, &(Data[loffset]));
-            loffset += 4u;
-            /* Extract the "contextId" from the DLT service control message */
-            Dlt_CopyArrayToLongLittleEndian(&contextId, &(Data[loffset]));
-            loffset += 4u;
-            /* Extract the "logChannelName" from the DLT service control message */
-            Dlt_CopyArrayToLongLittleEndian(&logChannelName, &(Data[loffset]));
-            loffset += 4u;
-        }
-        /* Extract the "addRemoveOp" from the DLT service control message */
-        uint8 addRemoveOp = Data[loffset];
-        /* PRQA S 4342++ */ /* MISRA Rule 10.5 */
-        Dlt_AssignmentOperation destAddRemoveOp = (Dlt_AssignmentOperation)addRemoveOp;
-        /* PRQA S 4342-- */ /* MISRA Rule 10.5 */
-        if (E_OK == Dlt_InterSetLogChannelAssignment(applicationId, contextId, logChannelName, destAddRemoveOp))
-        {
-            status = (uint8)DLT_STATUS_OK;
+            boolean logChnanelFind = FALSE;
+            /* Extract the "addRemoveOp" from the DLT service control message */
+            uint8 addRemoveOp = Data[loffset];
+            /* PRQA S 4342++ */ /* MISRA Rule 10.5 */
+            Dlt_AssignmentOperation destAddRemoveOp = (Dlt_AssignmentOperation)addRemoveOp;
+            /* PRQA S 4342-- */ /* MISRA Rule 10.5 */
+            uint16 ChannelNum = Dlt_ConfigPtr->LogOutput->ChannelNum;
+            for (uint16 iloop = 0; iloop < ChannelNum; ++iloop)
+            {
+                if (Dlt_ConfigPtr->LogOutput->LogChannel[iloop].DltLogChannelId == logChannelName)
+                {
+                    logChnanelFind = TRUE;
+                    break;
+                }
+            }
+            if (logChnanelFind == TRUE)
+            {
+                if ((destAddRemoveOp == DLT_ASSIGN_ADD) || (destAddRemoveOp == DLT_ASSIGN_REMOVE))
+                {
+                    if (E_OK
+                        == Dlt_InterSetLogChannelAssignment(applicationId, contextId, logChannelName, destAddRemoveOp))
+                    {
+                        status = (uint8)DLT_STATUS_OK;
+                    }
+                }
+            }
         }
     }
 
@@ -2542,17 +2973,25 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
     if (ChannelPtr->LastSendStatus == DLT_WAIT_SEND)
     {
         uint16 SendOffset           = 0;
+        uint16 CorrectionLength     = 0u;
         uint8* SendControlBufferPtr = &(ChannelPtr->SendControlBuffer[0]);
 
         /* Check if the DLT message extension header is support verbose mode */
-        boolean VerboseMode = Dlt_ConfigPtr->Protocol->DltUseExtHeaderInNonVerbMode;
+        boolean VerboseMode =
+            ((Dlt_ConfigPtr->Protocol->DltUseExtHeaderInNonVerbMode) && (OptionFlag.Bits.UEH == 1u)) ? TRUE : FALSE;
         /* Calculate the byte length of the DLT service response message */
-        uint16 Messagelength = Dlt_GetMessageLength(VerboseMode, DLT_RES_LENGTH_SET_LOG_CHANNEL_ASSIGNMENT);
+        uint16 Messagelength = Dlt_GetMessageLength(VerboseMode, DLT_RES_LENGTH_SET_LOG_CHANNEL_ASSIGNMENT, OptionFlag);
 
         SchM_Enter_Dlt_MsgChannel();
 
         /* Prepare the message header for the DLT service control response message */
-        Dlt_ServicePrepareResponseHeaderData(&SendOffset, ChannelIndex, Messagelength, DealRxData);
+        Dlt_ServicePrepareResponseHeaderData(
+            &SendOffset,
+            ChannelIndex,
+            Messagelength,
+            DealRxData,
+            &CorrectionLength,
+            OptionFlag);
 
         /* Load "status" for the message of the DLT service control response */
         SendControlBufferPtr[SendOffset] = status;
@@ -2579,13 +3018,18 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
  * Param-Name[in/out]  N/A
  * Return              Std_ReturnType
  */
-static FUNC(Std_ReturnType, DLT_APPL_CODE)
-    Dlt_ServiceSetLogChannelThreshold(uint16 offset, const uint8* Data, uint16 Length, Dlt_DealRxDataTypes DealRxData)
+static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceSetLogChannelThreshold(
+    uint16               offset,
+    const uint8*         Data,
+    uint16               Length,
+    Dlt_DealRxDataTypes  DealRxData,
+    Dlt_OptionalFlagType OptionFlag)
 {
     Std_ReturnType ret = E_NOT_OK;
 #if ((DLT_CHANNEL_NUM > 0) && (DLT_CHANNEL_MAX_BUFFER_LENGTH > 0))
-    uint8  status  = (uint8)DLT_STATUS_ERROR;
-    uint16 loffset = offset;
+    uint8   status     = (uint8)DLT_STATUS_ERROR;
+    uint16  loffset    = offset;
+    boolean toContinue = FALSE;
 
     /* "SetLogChannelThreshold" Request message format: StandardHeader(16), ExternHeader(10), Payload(10) */
     /* Header format: {HTYP(1),MCNT(1),LEN(2),ECUID(4),SEID(4),TMSP(4)},{MSIN(1),NOAR(1),APID(4),CTID(4)} */
@@ -2599,12 +3043,7 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
     uint16               ChannelIndex = Dlt_ConfigPtr->LogOutput->DltDefaultLogChannelRef;
 
     /* Check if the parameters of the request is meet the matching condition */
-    /* PRQA S 3415++ */ /* MISRA Rule 13.5 */
-    if (((FALSE == DealRxData.UEH)
-         && (Length == Dlt_GetMessageLength(FALSE, DLT_SET_LOG_CHANNEL_THRESHOLD_TOTAL_LENGTH)))
-        || ((TRUE == DealRxData.UEH)
-            && (Length == Dlt_GetMessageLength(TRUE, DLT_SET_LOG_CHANNEL_THRESHOLD_TOTAL_LENGTH))))
-    /* PRQA S 3415-- */ /* MISRA Rule 13.5 */
+    if (Length == Dlt_GetMessageLength(DealRxData.UEH, DLT_SET_LOG_CHANNEL_THRESHOLD_TOTAL_LENGTH, OptionFlag))
     {
         uint32 logChannelName;
         /* Check if the DLT message format is support big-endian mode */
@@ -2620,6 +3059,15 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
             Dlt_CopyArrayToLongLittleEndian(&logChannelName, &(Data[loffset]));
             loffset += 4u;
         }
+        uint16 ChannelNum = Dlt_ConfigPtr->LogOutput->ChannelNum;
+        for (uint16 iloop = 0; iloop < ChannelNum; ++iloop)
+        {
+            if (Dlt_ConfigPtr->LogOutput->LogChannel[iloop].DltLogChannelId == logChannelName)
+            {
+                toContinue = TRUE;
+                break;
+            }
+        }
         /* Extract the "logLevelThreshold" from the DLT service control message */
         uint8 logLevelThreshold = Data[loffset];
         loffset++;
@@ -2627,7 +3075,8 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
         uint8 traceStatus = Data[loffset];
 
         /* The index number of the log channel is extracted by the log channel name */
-        ChannelIndex = Dlt_GetChannelIndexByChannelName(logChannelName);
+        ChannelIndex = (toContinue == TRUE) ? Dlt_GetChannelIndexByChannelName(logChannelName)
+                                            : Dlt_ConfigPtr->LogOutput->DltDefaultLogChannelRef;
 #if (1u < DLT_SWC_NUM)
         /* Check if the log channel index number is valid */
         if (ChannelIndex != DLT_CHANNEL_NUM)
@@ -2645,7 +3094,7 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
                 ChannelInfoPtr->DltLogTraceStatusFlag = (boolean)traceStatus;
                 /* PRQA S 4340-- */ /* MISRA Rule 10.5 */
                 SchM_Exit_Dlt_MsgChannel();
-                status = (uint8)DLT_STATUS_OK;
+                status = (uint8)((toContinue == TRUE) ? DLT_STATUS_OK : DLT_STATUS_ERROR);
             }
         }
     }
@@ -2655,17 +3104,25 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
     if ((ChannelIndex != DLT_CHANNEL_NUM) && (ChannelPtr->LastSendStatus == DLT_WAIT_SEND))
     {
         uint16 SendOffset           = 0;
+        uint16 CorrectionLength     = 0u;
         uint8* SendControlBufferPtr = &(ChannelPtr->SendControlBuffer[0]);
 
         /* Check if the DLT message extension header is support verbose mode */
-        boolean VerboseMode = Dlt_ConfigPtr->Protocol->DltUseExtHeaderInNonVerbMode;
+        boolean VerboseMode =
+            ((Dlt_ConfigPtr->Protocol->DltUseExtHeaderInNonVerbMode) && (OptionFlag.Bits.UEH == 1u)) ? TRUE : FALSE;
         /* Calculate the byte length of the DLT service response message */
-        uint16 Messagelength = Dlt_GetMessageLength(VerboseMode, DLT_SET_LOG_CHANNEL_THRESHOLD_RES_LENGTH);
+        uint16 Messagelength = Dlt_GetMessageLength(VerboseMode, DLT_SET_LOG_CHANNEL_THRESHOLD_RES_LENGTH, OptionFlag);
 
         SchM_Enter_Dlt_MsgChannel();
 
         /* Prepare the message header for the DLT service control response message */
-        Dlt_ServicePrepareResponseHeaderData(&SendOffset, ChannelIndex, Messagelength, DealRxData);
+        Dlt_ServicePrepareResponseHeaderData(
+            &SendOffset,
+            ChannelIndex,
+            Messagelength,
+            DealRxData,
+            &CorrectionLength,
+            OptionFlag);
 
         /* Load "status" for the message of the DLT service control response */
         SendControlBufferPtr[SendOffset] = status;
@@ -2699,8 +3156,12 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
  * Param-Name[in/out]  N/A
  * Return              Std_ReturnType
  */
-static FUNC(Std_ReturnType, DLT_APPL_CODE)
-    Dlt_ServiceGetLogChannelThreshold(uint16 offset, const uint8* Data, uint16 Length, Dlt_DealRxDataTypes DealRxData)
+static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceGetLogChannelThreshold(
+    uint16               offset,
+    const uint8*         Data,
+    uint16               Length,
+    Dlt_DealRxDataTypes  DealRxData,
+    Dlt_OptionalFlagType OptionFlag)
 {
     Std_ReturnType ret = E_NOT_OK;
 #if ((DLT_CHANNEL_NUM > 0) && (DLT_CHANNEL_MAX_BUFFER_LENGTH > 0))
@@ -2718,12 +3179,7 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
 
     /* Calculate the byte length of the DLT payload content */
     /* Check if the parameters of the request is meet the matching condition */
-    /* PRQA S 3415++ */ /* MISRA Rule 13.5 */
-    if (((DealRxData.UEH == FALSE)
-         && (Length == Dlt_GetMessageLength(FALSE, DLT_GET_LOG_CHANNEL_THRESHOLD_TOTAL_LENGTH)))
-        || ((DealRxData.UEH == TRUE)
-            && (Length == Dlt_GetMessageLength(TRUE, DLT_GET_LOG_CHANNEL_THRESHOLD_TOTAL_LENGTH))))
-    /* PRQA S 3415-- */ /* MISRA Rule 13.5 */
+    if (Length == Dlt_GetMessageLength(DealRxData.UEH, DLT_GET_LOG_CHANNEL_THRESHOLD_TOTAL_LENGTH, OptionFlag))
     {
         uint32 logChannelName;
 
@@ -2758,17 +3214,25 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
     if (ChannelPtr->LastSendStatus == DLT_WAIT_SEND)
     {
         uint16 SendOffset           = 0;
+        uint16 CorrectionLength     = 0u;
         uint8* SendControlBufferPtr = &(ChannelPtr->SendControlBuffer[0]);
 
         /* Check if the DLT message extension header is support verbose mode */
-        boolean VerboseMode = Dlt_ConfigPtr->Protocol->DltUseExtHeaderInNonVerbMode;
+        boolean VerboseMode =
+            ((Dlt_ConfigPtr->Protocol->DltUseExtHeaderInNonVerbMode) && (OptionFlag.Bits.UEH == 1u)) ? TRUE : FALSE;
         /* Calculate the byte length of the DLT service response message */
-        uint16 Messagelength = Dlt_GetMessageLength(VerboseMode, DLT_GET_LOG_CHANNEL_THRESHOLD_RES_LENGTH);
+        uint16 Messagelength = Dlt_GetMessageLength(VerboseMode, DLT_GET_LOG_CHANNEL_THRESHOLD_RES_LENGTH, OptionFlag);
 
         SchM_Enter_Dlt_MsgChannel();
 
         /* Prepare the message header for the DLT service control response message */
-        Dlt_ServicePrepareResponseHeaderData(&SendOffset, ChannelIndex, Messagelength, DealRxData);
+        Dlt_ServicePrepareResponseHeaderData(
+            &SendOffset,
+            ChannelIndex,
+            Messagelength,
+            DealRxData,
+            &CorrectionLength,
+            OptionFlag);
 
         /* Load "status" for the message of the DLT service control response */
         SendControlBufferPtr[SendOffset] = status;
@@ -2807,14 +3271,18 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
  * Param-Name[in/out]  N/A
  * Return              Std_ReturnType
  */
-static FUNC(Std_ReturnType, DLT_APPL_CODE)
-    Dlt_ServiceSyncTimeStamp(uint16 offset, const uint8* Data, uint16 Length, Dlt_DealRxDataTypes DealRxData)
+static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceSyncTimeStamp(
+    uint16               offset,
+    const uint8*         Data,
+    uint16               Length,
+    Dlt_DealRxDataTypes  DealRxData,
+    Dlt_OptionalFlagType OptionFlag)
 {
     Std_ReturnType ret = E_NOT_OK;
 #if ((DLT_CHANNEL_NUM > 0) && (DLT_CHANNEL_MAX_BUFFER_LENGTH > 0))
-#if (DLT_TIME_STAMP_SUPPORT == STD_OFF)
+#if ((DLT_TIME_STAMP_SUPPORT == STD_OFF) || (DLT_GPT_SUPPORT == STD_ON))
     /* The response message is service unsupported */
-    ret = Dlt_ServiceNotSupport(offset, Data, Length, DealRxData);
+    ret = Dlt_ServiceNotSupport(offset, Data, Length, DealRxData, OptionFlag);
 #else
     uint8 status = (uint8)DLT_STATUS_ERROR;
 
@@ -2828,11 +3296,8 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
 
     DLT_UNUSED(Data);
     DLT_UNUSED(offset);
-    /* PRQA S 3415++ */ /* MISRA Rule 13.5 */
     /* Check if the parameters of the request is meet the matching condition */
-    if (((FALSE == DealRxData.UEH) && (Length == Dlt_GetMessageLength(FALSE, DLT_MESSAGE_NO_OTHER_INFO_LENGTH)))
-        || ((TRUE == DealRxData.UEH) && (Length == Dlt_GetMessageLength(TRUE, DLT_MESSAGE_NO_OTHER_INFO_LENGTH))))
-    /* PRQA S 3415-- */ /* MISRA Rule 13.5 */
+    if (Length == Dlt_GetMessageLength(DealRxData.UEH, DLT_MESSAGE_NO_OTHER_INFO_LENGTH, OptionFlag))
     {
         status = (uint8)DLT_STATUS_OK;
     }
@@ -2843,17 +3308,25 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
     if (ChannelPtr->LastSendStatus == DLT_WAIT_SEND)
     {
         StbM_UserDataType  userData;
-        StbM_TimeStampType TimeStamp;
-        uint16             SendOffset = 0;
+        StbM_TimeTupleType TimeStamp;
+        uint16             SendOffset       = 0;
+        uint16             CorrectionLength = 0u;
 
         /* Check if the DLT message extension header is support verbose mode */
-        boolean VerboseMode = Dlt_ConfigPtr->Protocol->DltUseExtHeaderInNonVerbMode;
+        boolean VerboseMode =
+            ((Dlt_ConfigPtr->Protocol->DltUseExtHeaderInNonVerbMode) && (OptionFlag.Bits.UEH == 1u)) ? TRUE : FALSE;
         /* Calculate the byte length of the DLT service response message */
-        uint16 Messagelength = Dlt_GetMessageLength(VerboseMode, DLT_SYNC_TIME_STAMP_RES_LENGTH);
+        uint16 Messagelength = Dlt_GetMessageLength(VerboseMode, DLT_SYNC_TIME_STAMP_RES_LENGTH, OptionFlag);
 
         SchM_Enter_Dlt_MsgChannel();
         /* Prepare the message header for the DLT service control response message */
-        Dlt_ServicePrepareResponseHeaderData(&SendOffset, ChannelIndex, Messagelength, DealRxData);
+        Dlt_ServicePrepareResponseHeaderData(
+            &SendOffset,
+            ChannelIndex,
+            Messagelength,
+            DealRxData,
+            &CorrectionLength,
+            OptionFlag);
         SchM_Exit_Dlt_MsgChannel();
 
         /* Gets the current timestamp from the STBM module */
@@ -2872,15 +3345,15 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
 
         SendOffset++;
         /* Load "synctimestamp.nanoseconds" for the message of the DLT service control response */
-        Dlt_CopyLongToArrayBigEndian(TimeStamp.nanoseconds, &SendControlBufferPtr[SendOffset]);
+        Dlt_CopyLongToArrayBigEndian(TimeStamp.globalTime.nanoseconds, &SendControlBufferPtr[SendOffset]);
 
         SendOffset += 4u;
         /* Load "synctimestamp.seconds" for the message of the DLT service control response */
-        Dlt_CopyLongToArrayBigEndian(TimeStamp.seconds, &SendControlBufferPtr[SendOffset]);
+        Dlt_CopyLongToArrayBigEndian(TimeStamp.globalTime.seconds, &SendControlBufferPtr[SendOffset]);
 
         SendOffset += 4u;
         /* Load "synctimestamp.secondsHi" for the message of the DLT service control response */
-        Dlt_CopyIntToArrayBigEndian(TimeStamp.secondsHi, &SendControlBufferPtr[SendOffset]);
+        Dlt_CopyIntToArrayBigEndian(TimeStamp.globalTime.secondsHi, &SendControlBufferPtr[SendOffset]);
 
         SchM_Exit_Dlt_MsgChannel();
 
@@ -2907,8 +3380,12 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
  * Param-Name[in/out]  N/A
  * Return              Std_ReturnType
  */
-static FUNC(Std_ReturnType, DLT_APPL_CODE)
-    Dlt_ServiceDealWithInjection(uint16 offset, uint8* Data, uint16 Length, Dlt_DealRxDataTypes DealRxData)
+static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceDealWithInjection(
+    uint16               offset,
+    const uint8*         Data,
+    uint16               Length,
+    Dlt_DealRxDataTypes  DealRxData,
+    Dlt_OptionalFlagType OptionFlag)
 {
     Std_ReturnType ret = E_NOT_OK;
 #if (DLT_CHANNEL_NUM > 0)
@@ -2924,7 +3401,7 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
     /* Payload format: ServiceID(4),Status(1), */
 
     /* Check if the parameters of the request is meet the matching condition */
-    if ((DealRxData.UEH == TRUE) && (Length >= Dlt_GetMessageLength(TRUE, 4u))) /* PRQA S 3415 */ /* MISRA Rule 13.5 */
+    if (Length >= Dlt_GetMessageLength(DealRxData.UEH, 4u, OptionFlag))
     {
         uint32 dataLength;
         /* Check if the DLT message format is support big-endian mode */
@@ -2940,11 +3417,11 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
             Dlt_CopyArrayToLongLittleEndian(&dataLength, &(Data[loffset]));
             loffset += 4u;
         }
-        uint16 Payloadlength = 4U + dataLength + sizeof(dataLength); /* PRQA S 4461 */ /* MISRA Rule 10.3 */
+        uint16 Payloadlength = (uint16)(4U + dataLength + sizeof(dataLength)); /* PRQA S 4461 */ /* MISRA Rule 10.3 */
         /* Check if the parameters of the request is meet the matching condition */
-        if (Length == Dlt_GetMessageLength(TRUE, Payloadlength))
+        if (Length == Dlt_GetMessageLength(TRUE, Payloadlength, OptionFlag))
         {
-            uint8* Indata = &(Data[loffset]);
+            uint8* Indata = (uint8*)&(Data[loffset]);
             /* The Swc index number is extracted by the session identifier */
             uint16 SwcIndex = Dlt_GetSwcSessionIdIndex(DealRxData.SessionID);
 #if (1u < DLT_SWC_NUM)
@@ -2955,7 +3432,7 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
                 /* PRQA S 0311++ */ /* MISRA Rule 11.8 */
                 const Dlt_SwcTypes* SwcPtr = (Dlt_SwcTypes*)&(Dlt_Swc.DltSwc[SwcIndex]);
                 /* PRQA S 0311-- */ /* MISRA Rule 11.8 */
-                if (NULL_PTR != SwcPtr->InjectionCallback)
+                if ((NULL_PTR != SwcPtr->InjectionCallback) && (dataLength > 0u))
                 {
                     ret = SwcPtr->InjectionCallback(
                         DealRxData.ApplicationID,
@@ -2971,7 +3448,7 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
                 else
 #endif /* 1u < DLT_SWC_NUM */
                 {
-                    ret = E_NOT_OK;
+                    status = (uint8)DLT_STATUS_ERROR;
                 }
             }
         }
@@ -2983,16 +3460,24 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
     if (ChannelPtr->LastSendStatus == DLT_WAIT_SEND)
     {
         uint16 SendOffset           = 0;
+        uint16 CorrectionLength     = 0u;
         uint8* SendControlBufferPtr = &(ChannelPtr->SendControlBuffer[0]);
         /* Check if the DLT message extension header is support verbose mode */
-        boolean VerboseMode = Dlt_ConfigPtr->Protocol->DltUseExtHeaderInNonVerbMode;
+        boolean VerboseMode =
+            ((Dlt_ConfigPtr->Protocol->DltUseExtHeaderInNonVerbMode) && (OptionFlag.Bits.UEH == 1u)) ? TRUE : FALSE;
         /* Calculate the byte length of the DLT service response message */
-        uint16 Messagelength = Dlt_GetMessageLength(VerboseMode, DLT_CALL_SWC_INJECTION_RES_LENGTH);
+        uint16 Messagelength = Dlt_GetMessageLength(VerboseMode, DLT_CALL_SWC_INJECTION_RES_LENGTH, OptionFlag);
 
         SchM_Enter_Dlt_MsgChannel();
 
         /* Prepare the message header for the DLT service control response message */
-        Dlt_ServicePrepareResponseHeaderData(&SendOffset, ChannelIndex, Messagelength, DealRxData);
+        Dlt_ServicePrepareResponseHeaderData(
+            &SendOffset,
+            ChannelIndex,
+            Messagelength,
+            DealRxData,
+            &CorrectionLength,
+            OptionFlag);
 
         /* Load "status" for the message of the DLT service control response */
         SendControlBufferPtr[SendOffset] = status;
@@ -3007,14 +3492,18 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
 }
 #endif
 
-static FUNC(Std_ReturnType, DLT_APPL_CODE)
-    Dlt_SubDealRxData(uint16 offset, const uint8* Data, uint16 Length, Dlt_DealRxDataTypes DealRxData)
+static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_SubDealRxData(
+    uint16               offset,
+    const uint8*         Data,
+    uint16               Length,
+    Dlt_DealRxDataTypes  DealRxData,
+    Dlt_OptionalFlagType OptionFlag)
 {
     uint32         ServiceID;
     uint16         loffset = offset;
     Std_ReturnType ret;
     static CONST(Dlt_ServiceDeal, NVM_CONST) Dlt_ServiceTable[] = {
-        Dlt_ServiceNotSupport,              /* ServiceID == 0u and ServiceID > 0x24u */
+        Dlt_ServiceNotSupport,              /* Service Not Support */
         Dlt_ServiceSetLogLevel,             /* ServiceID: 0x00000001 */
         Dlt_ServiceSetTraceStatus,          /* ServiceID: 0x00000002 */
         Dlt_ServiceGetLogInfo,              /* ServiceID: 0x00000003 */
@@ -3067,25 +3556,42 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE)
     DealRxData.ServiceID = ServiceID;
     loffset += 4u;
 
-    /* Check if the value of the service identifier ranges from 0 to 37 */
-    if ((ServiceID > 0u) && (ServiceID < 0x25u))
+    if (OptionFlag.Bits.ErrFlag == 0u)
     {
-        /* By the service identifier, execute the service response processed of the control command */
-        ret = Dlt_ServiceTable[ServiceID](loffset, Data, Length, DealRxData);
-    }
+        /* Check if the value of the service identifier is 0 */
+        if ((ServiceID > 0u) && (ServiceID < 0x25u))
+        {
+            /* By the service identifier, execute the service response processed of the control command */
+            ret = Dlt_ServiceTable[ServiceID](loffset, Data, Length, DealRxData, OptionFlag);
+        }
 #if (DLT_INJECTION_SUPPORT == STD_ON)
-    /* Check if the value of the service identifier is greater than 0xFFF */
-    else if (ServiceID >= 0x00000FFFu)
-    {
-        /* Service responses are handled by SWC injection control */
-        ret = Dlt_ServiceDealWithInjection(loffset, Data, Length, DealRxData);
-    }
+        /* Check if the value of the service identifier is greater than 0xFFF */
+        else if (ServiceID >= 0x00000FFFu)
+        {
+            /* Service responses are handled by SWC injection control */
+            ret = Dlt_ServiceDealWithInjection(loffset, Data, Length, DealRxData, OptionFlag);
+        }
+#else
+        /* Check if the value of the service identifier is greater than 0xFFF */
+        else if (ServiceID >= 0x00000FFFu)
+        {
+            /* Service responses are handled by SWC injection control */
+            ret = Dlt_ServiceTable[0](loffset, Data, Length, DealRxData, OptionFlag);
+        }
 #endif
-    /* Check if the value of the service identifier is within the invalid range */
+        /* Check if the value of the service identifier is within the invalid range */
+        else
+        {
+            Dlt_OptionalFlagType newOptionFlag = OptionFlag;
+            newOptionFlag.Bits.status          = DLT_STATUS_ERROR;
+            /* By the service identifier, execute the service response processed of the control command */
+            ret = Dlt_ServiceError(loffset, Data, Length, DealRxData, newOptionFlag);
+        }
+    }
     else
     {
         /* By the service identifier, execute the service response processed of the control command */
-        ret = Dlt_ServiceTable[0](loffset, Data, Length, DealRxData);
+        ret = Dlt_ServiceError(loffset, Data, Length, DealRxData, OptionFlag);
     }
     return ret;
 }

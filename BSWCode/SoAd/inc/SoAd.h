@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -60,6 +60,11 @@
  *  V02.00.15 2024-08-30  fupeng.yu     Resolve compilation errors when no SocketRoute is configured.
  *  V02.01.00 2025-01-18  fupeng.yu     Support R23-11.
  *  V02.02.00 2025-04-29  fupeng.yu     optimized code.
+ *  V02.02.01 2025-09-28  fupeng.yu     1. Add ExclusiveArea the logic for Tp transmit.
+ *                                      2. Fix thg flag of remote address setted in SoAd_ReleaseRemoteAddrHandle.
+ *  V02.02.02 2025-10-24  fupeng.yu     1. Fix incorrect pduRouteDestId in SoAd_IfTransmit (CPT-16146).
+ *                                      2. Fix update tcp windown for received Tp data when close socket (CPT-16242).
+ *  V02.02.03 2026-01-19  fupeng.yu     Resolve the inconsistency between read and write positions in the rxbuffer.
  ==================================================================================================================== */
 
 /* ================================================ misar justifications ============================================ */
@@ -87,6 +92,32 @@
       Reason: The Parameter "abort"  has the same symbol as in the common namespace of the C standard.
       Risk: No risk.
       Prevention: Ensure that the project is working properly through unit testing.
+
+    \li VL_SoAd_3415
+      Reason: Right hand operand of '&&' or '||' is an expression with persistent side effects.
+      Risk: No risk.
+      Prevention: Ensure that the project is working properly through unit testing.
+
+    \li VL_SoAd_1536
+      Reason: The tag '%1s' is declared but not used within this project.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_SoAd_3213
+      Reason: The tag '%1s' is not used and could be removed.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_SoAd_1512
+      Reason: Identifier '${name}' with external linkage has separate declarations in multiple translation units.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_SoAd_1513
+      Reason: Identifier '${name}' with external linkage has separate non-defining declarations in more than one
+              location.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_MTR_SoAd_STMIF
       Reason: Functions handle specific tasks in the overall component behavior; Tasks have different scenarios
@@ -127,7 +158,7 @@
       Prevention: Design and code review + clearly structured and commented code.
 
  */
-
+/* PRQA S 1512,1513 EOF */ /* VL_SoAd_1512,VL_SoAd_1513 */
 #ifndef SOAD_H_
 #define SOAD_H_
 
@@ -152,7 +183,7 @@ extern "C" {
 
 #define SOAD_SW_MAJOR_VERSION 2u /**< SoAd software major version*/
 #define SOAD_SW_MINOR_VERSION 2u /**< SoAd software minor version*/
-#define SOAD_SW_PATCH_VERSION 0u /**< SoAd software patch version*/
+#define SOAD_SW_PATCH_VERSION 2u /**< SoAd software patch version*/
 /* ===================================================== macros ===================================================== */
 #define SOAD_VENDOR_ID 62u /**< SoAd vendor id*/
 #define SOAD_MODULE_ID 56u /**< SoAd module id*/

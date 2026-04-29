@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -33,7 +33,10 @@
  *  V02.00.00 2021-04-08  tao.yu       release version
  *  V03.00.00 2024-12-04  tao.yu       ReWork and update to R23-11,support Dem multi-partition
  *  V03.00.01 2025-09-16  li.feng      CPD-84617,To fix the incorrect use of GetApplicationID and the issue with
- obtaining satelliteId
+ *                                     obtaining satelliteId
+ *  V03.00.02 2025-11-07  li.feng      Optimize FIM RAM Usage
+ *  V03.00.03 2026-04-08  tao.yu       CPT-18443, fix the triggering of the Dem master partition is not handled
+ *                                     correctly in the trigger mode.
  ==================================================================================================================== */
 
 /* ================================================ misar justifications ============================================ */
@@ -67,16 +70,6 @@
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
 
-    \li VL_FiM_3451
-      Reason: multiple declaration is necessary for RTE
-      Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
-
-    \li VL_FiM_3449
-      Reason: multiple declaration is necessary for RTE
-      Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
-
     \li VL_FiM_3472
       Reason: Macro definitions for easy reuse.
       Risk: No risk.
@@ -104,11 +97,6 @@
       Risk: The code is difficult to maintain.
       Prevention: Design and code review, and have a clear structure and annotated code.
 
-    \li VL_FiM_1536
-      Reason: The tag '%1s' is declared but not used within this project.
-      Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
-
     \li VL_FiM_3213
       Reason: The tag '%1s' is not used and could be removed.
       Risk: No risk.
@@ -118,10 +106,6 @@
       Reason: Identifier '${name}' with external linkage has separate declarations in multiple translation units.
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
-
-    \li VL_FiM_1513
-      Reason: Identifier '${name}' with external linkage has separate non-defining declarations in more than one
-  location. Risk: No risk. Prevention: Functional reliability guaranteed by design.
 
     \li VL_FiM_3132
       Reason: This cast is converting a complex floating point expression to an integral type.
@@ -172,7 +156,7 @@ extern "C" {
 #define FIM_AR_RELEASE_REVISION_VERSION (0u)
 #define FIM_SW_MAJOR_VERSION            (3u)
 #define FIM_SW_MINOR_VERSION            (0u)
-#define FIM_SW_PATCH_VERSION            (0u)
+#define FIM_SW_PATCH_VERSION            (3u)
 
 /* Error classification */
 
@@ -264,9 +248,11 @@ extern void FiM_GetVersionInfo(Std_VersionInfoType* versioninfo);
  * @synchronous   Synchronous
  * @trace         CPD-69580
  */
-/* PRQA S 3449,3451,1512,1513 ++ */ /* VL_FiM_3449,VL_FiM_3451,VL_FiM_1512,VL_FiM_1513 */
+/* PRQA S 1512,1513 ++ */ /* VL_FiM_1512,VL_QAC_MultiDeclaration */
+/* PRQA S 3449,3451 ++ */ /* VL_QAC_MultiDeclaration,VL_QAC_MultiDeclaration */
 extern void FiM_MainFunction(void);
-/* PRQA S 3449,3451,1512,1513 -- */
+/* PRQA S 1512,1513 -- */
+/* PRQA S 3449,3451 -- */
 #endif
 
 #ifdef __cplusplus

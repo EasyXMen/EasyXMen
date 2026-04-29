@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -24,7 +24,7 @@
 
 #ifndef LINTP_TYPES_H_
 #define LINTP_TYPES_H_
-
+/* PRQA S 1536,5209 EOF */ /* VL_LinTp_1536,VL_LinTp_5209 */
 /* =================================================== inclusions =================================================== */
 #include "ComStack_Types.h"
 #include "LinTp_Cfg.h"
@@ -35,10 +35,10 @@
 
 /* ===================================================== macros ===================================================== */
 #define LINTP_FRAME_LEN_MAX 8u
-#define LINTP_PDU_PCI_MASK  (uint8)0xF0u
-#define LINTP_PDU_PCI_SF    (uint8)0x00u
-#define LINTP_PDU_PCI_FF    (uint8)0x10u
-#define LINTP_PDU_PCI_CF    (uint8)0x20u
+#define LINTP_PDU_PCI_MASK  0xF0u
+#define LINTP_PDU_PCI_SF    0x00u
+#define LINTP_PDU_PCI_FF    0x10u
+#define LINTP_PDU_PCI_CF    0x20u
 
 /* ================================================ type definitions ================================================ */
 #if (STD_ON == LINIF_TP_SUPPORTED)
@@ -71,10 +71,10 @@ typedef enum
 
 typedef enum
 {
-    LINTP_FRAMETYPE_NONE = (int)LINTP_PDU_PCI_MASK,
-    LINTP_FRAMETYPE_SF   = (int)LINTP_PDU_PCI_SF,
-    LINTP_FRAMETYPE_FF   = (int)LINTP_PDU_PCI_FF,
-    LINTP_FRAMETYPE_CF   = (int)LINTP_PDU_PCI_CF
+    LINTP_FRAMETYPE_NONE = (uint8)LINTP_PDU_PCI_MASK,
+    LINTP_FRAMETYPE_SF   = (uint8)LINTP_PDU_PCI_SF,
+    LINTP_FRAMETYPE_FF   = (uint8)LINTP_PDU_PCI_FF,
+    LINTP_FRAMETYPE_CF   = (uint8)LINTP_PDU_PCI_CF
 } LinTp_FrameType;
 
 typedef enum
@@ -170,6 +170,7 @@ typedef struct LinTp_MasterRuntimeTag
     uint8                          MRFRequestedNad;
     uint8                          MRFRequestedSID;
     uint8                          TrsEvent;
+    boolean                        NeedRestoreScence;
 } LinTp_MasterRuntimeType;
 
 typedef struct LinTp_SlaveRuntimeTag
@@ -198,6 +199,7 @@ typedef struct LinTp_SlaveRuntimeTag
 typedef struct LinTp_RtDataVariantMapTypeTag
 {
     LinTp_MasterRuntimeType* const* MasterRtDataPtr;
+    LinTp_MasterRuntimeType* const* BackupMasterRtDataPtr;
     LinTp_SlaveRuntimeType* const*  SlaveRtDataPtr;
 } LinTp_RtDataVariantMapType;
 

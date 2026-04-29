@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -63,55 +63,79 @@
     \li VL_BswM_3432
       Reason: Function-like macros are used to allow more efficient code.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_BswM_0380
       Reason: Macro definitions are necessary
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_BswM_Action
       Reason: Generate code some return values not used
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_BswM_5004
       Reason: The usage of this file depends on the config
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_BswM_0553
       Reason: The usage of this file depends on the config
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_BswM_1317_1297
       Reason: Definitions from other modules are used
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_MTR_BswM_STMIF
       Reason: Functions handle specific tasks in the behavior of the entire component.
     Task has different scenarios that need to be covered, which depends on local conditions - this
     leads to deep nesting of the control structure.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_MTR_BswM_STCAL
       Reason: The standard compliance vote was higher than the measurement threshold. In addition, a typical way to
     reduce STCAL is to deepen function nesting, which increases call stack usage and runtime.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_BswM_0793
       Reason: Dependent on configuration.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
 
     \li VL_BswM_2743
       Reason: Use do while to control program execution.
       Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Prevention: None.
+
+    \li VL_BswM_3415
+      Reason: BswM_LCfg may generate complex logical expressions that include the symbols && or ||, and the result of
+  the logical expression is determined by the configuration, so there may be a short circuit.Logic short circuit is
+    designed to be a consideration for operational efficiency and is expected behavior.
+      Risk: No risk.
+      Prevention: None.
+
+    \li VL_BswM_1501
+      Reason: Whether a function is used or not depends on the generated macro definition.
+      Risk: No risk.
+      Prevention: None.
+
+    \li VL_BswM_1712
+      Reason: The identifier of the module is generated dynamically by the configuration, and the first 64 characters of
+        different identifiers may be the same, because the first 64 characters have some representative meaning.
+      Risk: No risk.
+      Prevention: None.
+
+    \li VL_BswM_1753
+      Reason: The definition of the function is generated in the configuration file, and when a module uses the
+        function, the definition is generated.
+      Risk: No risk.
+      Prevention: None.
 
  */
 
@@ -120,7 +144,6 @@
 
 /* =================================================== inclusions =================================================== */
 #include "BswM_Types.h"
-#include "Os.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -233,7 +256,7 @@ typedef uint16 BswM_ActionListHandlerType;
  * @brief This type identifies the index of a rule.
  *
  */
-typedef struct BswMRulePbIndexTag
+typedef struct
 {
     BswM_RuleIndexType ruleIndex; /**> The index of the rule. @range 0 ~ 0xFF  */
 #if (BSWM_PB_CONFIG_ENABLED == STD_ON)
@@ -246,7 +269,7 @@ typedef struct BswMRulePbIndexTag
  * @brief This type identifies the index of a ETHif port group.
  *
  */
-typedef struct BswMEthIfSwitchPortGroupIdxTag
+typedef struct
 {
     EthIf_SwitchPortGroupIdxType portGroupInx; /**> The index of the port group. @range 0 ~ 0xFF */
 #if (BSWM_PB_CONFIG_ENABLED == STD_ON)
@@ -260,7 +283,7 @@ typedef struct BswMEthIfSwitchPortGroupIdxTag
  * @brief  This type identifies  for the Linif Schedule handler
  *
  */
-typedef struct BswMLinIfSchHandleTag
+typedef struct
 {
     LinIf_SchHandleType schHandle; /**> The index of the Linif Schedule handler. @range 0 ~ 0xFF */
 #if (BSWM_PB_CONFIG_ENABLED == STD_ON)
@@ -272,7 +295,7 @@ typedef struct BswMLinIfSchHandleTag
  * @brief  This type identifies  for the Linif network
  *
  */
-typedef struct BswMNetworkHandleTag
+typedef struct
 {
     NetworkHandleType networkHandle; /**> The index of  linif network. @range 0 ~ 0xFFFF */
 #if (BSWM_PB_CONFIG_ENABLED == STD_ON)
@@ -285,7 +308,7 @@ typedef struct BswMNetworkHandleTag
  * @brief This type identifies the request port configuration.
  *
  */
-typedef struct BswM_RqstPortLcCfgTag
+typedef struct
 {
     const BswMRulePbIndexType* belongToRlue; /**> The rule index that the request port belongs to. @range None */
     BswM_RuleIndexType belongToRlueNum; /**> The number of rules that the request port belongs to. @range 0 ~ 0xFF */
@@ -296,7 +319,7 @@ typedef struct BswM_RqstPortLcCfgTag
  * @brief This type identifies the request port configuration.
  *
  */
-typedef struct BswM_EventRqstPortLCfgTag
+typedef struct
 {
 #if (BSWM_EVENT_RQSTPORT_ENABLE == STD_ON) /**>EventRequestPort configuration exists*/
 #if (BSWM_EVENT_COMM_INITIATE_RESET_LIST_ENABLE == STD_ON)
@@ -344,7 +367,7 @@ typedef struct BswM_EventRqstPortLCfgTag
  * @brief This type identifies the mode request port configuration.
  *
  */
-typedef struct BswM_ModeRqstPortLCfgTag
+typedef struct
 {
 #if (BSWM_MODE_RQSTPORT_ENABLE == STD_ON) /*ModeRequestPort configuration exists*/
 #if (BSWM_BSWMODENOTIFICATION_ENABLED == STD_ON)
@@ -543,7 +566,7 @@ typedef struct BswM_ModeRqstPortLCfgTag
  * @brief   type definition for actionlist configuration
  *
  */
-typedef struct BswM_ActionListLcCfgTag
+typedef struct
 {
     /**> An actionlist to hold all configurations. @range None */
     BswM_ActionListCtrlFuncType actionListCtrlFct;
@@ -553,7 +576,7 @@ typedef struct BswM_ActionListLcCfgTag
  * @brief type definition for link time configure of rules
  *
  */
-typedef struct BswM_RuleLcCfgTag
+typedef struct
 {
     /*BswMRuleExpressionRef*/
     BswM_ActionListHandlerType (*modeArbitraFunc)(
@@ -568,7 +591,7 @@ typedef struct BswM_RuleLcCfgTag
  * @brief type definition for run time of rules
  *
  */
-typedef struct BswM_RuleRunTimeTag
+typedef struct
 {
     BswM_RuleStateType ruleStatus;        /**> old status for Rules. @range 0~2 */
     boolean            ruleNeedArbitrate; /**> TRUE, rule need arbitration. @range 0~1 */
@@ -578,7 +601,7 @@ typedef struct BswM_RuleRunTimeTag
  * @brief type definition for link time configure of partition
  *
  */
-typedef struct BswM_PartitionLCfgTag
+typedef struct
 {
 #if (BSWM_EVENT_RQSTPORT_ENABLE == STD_ON) /*EventRequestPort configuration exists*/
     const BswM_EventRqstPortLCfgType*
@@ -614,7 +637,7 @@ typedef struct BswM_PartitionLCfgTag
 typedef BswM_PbConfigType     BswM_ConfigType;
 extern const BswM_ConfigType* BswM_ConfigPtr;
 #else
-typedef struct BswM_ConfigTag
+typedef struct
 {
     uint8 reserved; /**> dummy */
 } BswM_ConfigType;

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -25,7 +25,7 @@
 /* =================================================== inclusions =================================================== */
 #include "Crypto_62_Internal.h"
 
-/* PRQA S 4549,4544,4542,0488,1252,1253,3387,1841,3473,3440,1338 ++ */ /* VL_QAC_Crypto */
+/* PRQA S 4549,4544,4542,0488,1252,1253,3387,1841,3473,3440,1338 ++ */ /* VL_Crypto_62_General */
 #if (CRYPTO_ALGORITHMFAM_3DES == STD_ON)
 #define CRYPTO_62_START_SEC_CODE
 #include "Crypto_62_MemMap.h"
@@ -33,7 +33,7 @@
 #include "Crypto_62_Des.h"
 
 /* ===================================================== macros ===================================================== */
-/* PRQA S 3472++ */ /* VL_QAC_Crypto */
+/* PRQA S 3472++ */ /* VL_Crypto_62_General */
 
 /*
  * Initial Permutation macro
@@ -115,7 +115,7 @@
 
 /* ============================================ internal data definitions =========================================== */
 
-/* PRQA S 3218 ++ */ /* VL_QAC_Crypto */
+/* PRQA S 3218 ++ */ /* VL_Crypto_62_General */
 CRYPTO_62_LOCAL const uint32 SB1[CRYPTO_CONST_64] = {
     0x01010400U, 0x00000000U, 0x00010000U, 0x01010404U, 0x01010004U, 0x00010404U, 0x00000004U, 0x00010000U,
     0x00000400U, 0x01010400U, 0x01010404U, 0x00000400U, 0x01000404U, 0x01010004U, 0x01000000U, 0x00000004U,
@@ -246,15 +246,15 @@ CRYPTO_62_LOCAL const uint32 RHs[CRYPTO_CONST_16] = {
  * Return              None
  */
 /******************************************************************************/
-/* PRQA S 3673++ */ /* VL_QAC_Crypto */
+/* PRQA S 3673++ */ /* VL_Crypto_62_General */
 void Crypto_3Des_Crypt_Ecb(Crypto_Des3Data* ctx, const uint8 input[CRYPTO_CONST_8], uint8 output[CRYPTO_CONST_8])
 /* PRQA S 3673-- */
 {
     Std_ReturnType i;
-    uint32         X, Y, T, *SK; /* PRQA S 3678 */ /* VL_QAC_Crypto */
+    uint32         X, Y, T, *SK; /* PRQA S 3678 */ /* VL_Crypto_62_General */
 
     SK = ctx->sk;
-    /* PRQA S 3493,3446,4559 ++ */ /* VL_QAC_Crypto */
+    /* PRQA S 3493,3446,4559 ++ */ /* VL_Crypto_62_General */
     X = CRYPTO_GET_UINT32_BE(input, CRYPTO_CONST_0);
     Y = CRYPTO_GET_UINT32_BE(input, CRYPTO_CONST_4);
     /* PRQA S 3493,3446,4559 -- */
@@ -280,7 +280,7 @@ void Crypto_3Des_Crypt_Ecb(Crypto_Des3Data* ctx, const uint8 input[CRYPTO_CONST_
     }
 
     DES_FP(Y, X);
-    /* PRQA S 3138 ++ */ /* VL_QAC_Crypto */
+    /* PRQA S 3138 ++ */ /* VL_Crypto_62_General */
     CRYPTO_PUT_UINT32_BE(Y, output, CRYPTO_CONST_0);
     CRYPTO_PUT_UINT32_BE(X, output, CRYPTO_CONST_4);
     /* PRQA S 3138 -- */
@@ -300,7 +300,7 @@ void Crypto_Des_Setkey(uint32 SK[CRYPTO_CONST_32], const uint8 key[CRYPTO_DES_KE
 {
     uint32 i;
     uint32 X, Y, T;
-    /* PRQA S 3493,3446,4559++ */ /* VL_QAC_Crypto */
+    /* PRQA S 3493,3446,4559++ */ /* VL_Crypto_62_General */
     X = CRYPTO_GET_UINT32_BE(key, 0);
     Y = CRYPTO_GET_UINT32_BE(key, CRYPTO_CONST_4);
     /* PRQA S 3493,3446,4559-- */
@@ -308,7 +308,7 @@ void Crypto_Des_Setkey(uint32 SK[CRYPTO_CONST_32], const uint8 key[CRYPTO_DES_KE
     /*
      * Permuted Choice 1
      */
-    /* PRQA S 3120++ */ /* VL_QAC_Crypto */
+    /* PRQA S 3120++ */ /* VL_Crypto_62_General */
     T = ((Y >> CRYPTO_CONST_4) ^ X) & 0x0F0F0F0FU;
     X ^= T;
     Y ^= (T << CRYPTO_CONST_4);
@@ -373,6 +373,23 @@ void Crypto_Des_Setkey(uint32 SK[CRYPTO_CONST_32], const uint8 key[CRYPTO_DES_KE
 /* PRQA S 3120-- */
 /******************************************************************************/
 /*
+ * Brief               DES key schedule (56-bit, encryption).
+ *
+ * Param-Name[in]      key: 8-byte secret key.
+ * Param-Name[in/out]  None
+ * Param-Name[out]     ctx: The context for 3Des.
+ * Return              Std_ReturnType:  0: State accepted
+ *                           Not 0: State not accepted
+ */
+/******************************************************************************/
+Std_ReturnType Crypto_Des_Setkey_Enc(Crypto_DesData* ctx, const unsigned char key[CRYPTO_DES_KEY_SIZE])
+{
+    Crypto_Des_Setkey(ctx->sk, key);
+    return E_OK;
+}
+
+/******************************************************************************/
+/*
  * Brief               DES key schedule (56-bit, decryption).
  *
  * Param-Name[in]      key: 8-byte secret key.
@@ -390,13 +407,63 @@ Std_ReturnType Crypto_Des_Setkey_Dec(Crypto_DesData* ctx, const unsigned char ke
 
     for (i = CRYPTO_CONST_0; i < CRYPTO_CONST_16; i += CRYPTO_CONST_2)
     {
-        /* PRQA S 1290,1840++ */ /* VL_QAC_Crypto */
+        /* PRQA S 1290,1840++ */ /* VL_Crypto_62_General */
         SWAP(ctx->sk[i], ctx->sk[CRYPTO_CONST_30 - i]);
         SWAP(ctx->sk[i + 1], ctx->sk[CRYPTO_CONST_31 - i]);
         /* PRQA S 1290,1840-- */
     }
 
     return E_OK;
+}
+
+void Crypto_Des3_Set2key(
+    uint32              esk[CRYPTO_CONST_96],
+    uint32              dsk[CRYPTO_CONST_96],
+    const unsigned char key[CRYPTO_CONST_16])
+{
+    int i;
+
+    Crypto_Des_Setkey(esk, key);
+    Crypto_Des_Setkey(dsk + 32, key + 8);
+
+    for (i = 0; i < 32; i += 2)
+    {
+        dsk[i]     = esk[30 - i];
+        dsk[i + 1] = esk[31 - i];
+
+        esk[i + 32] = dsk[62 - i];
+        esk[i + 33] = dsk[63 - i];
+
+        esk[i + 64] = esk[i];
+        esk[i + 65] = esk[i + 1];
+
+        dsk[i + 64] = dsk[i];
+        dsk[i + 65] = dsk[i + 1];
+    }
+}
+
+/*
+ * Triple-DES key schedule (112-bit, encryption)
+ */
+Std_ReturnType Crypto_Des3_Set2key_Enc(Crypto_Des3Data* ctx, const unsigned char key[CRYPTO_CONST_16])
+{
+    uint32 sk[96];
+
+    Crypto_Des3_Set2key(ctx->sk, sk, key);
+
+    return 0;
+}
+
+/*
+ * Triple-DES key schedule (112-bit, decryption)
+ */
+Std_ReturnType Crypto_Des3_Set2key_Dec(Crypto_Des3Data* ctx, const unsigned char key[CRYPTO_CONST_16])
+{
+    uint32 sk[96];
+
+    Crypto_Des3_Set2key(sk, ctx->sk, key);
+
+    return 0;
 }
 
 /******************************************************************************/
@@ -425,7 +492,7 @@ void Crypto_Des3_Set3key(
     for (i = CRYPTO_CONST_0; i < CRYPTO_CONST_32; i += CRYPTO_CONST_2)
     {
         dsk[i]     = esk[CRYPTO_CONST_94 - i];
-        dsk[i + 1] = esk[CRYPTO_CONST_95 - i]; /* PRQA S 1840 */ /* VL_QAC_Crypto */
+        dsk[i + 1] = esk[CRYPTO_CONST_95 - i]; /* PRQA S 1840 */ /* VL_Crypto_62_General */
 
         esk[i + CRYPTO_CONST_32] = dsk[CRYPTO_CONST_62 - i];
         esk[i + CRYPTO_CONST_33] = dsk[CRYPTO_CONST_63 - i];
@@ -493,12 +560,13 @@ Std_ReturnType Crypto_3Des_Crypt_Cbc(
     uint32           length,
     uint8            iv[CRYPTO_CONST_8],
     const uint8*     input,
-    uint8*           output)
+    uint8*           output,
+    uint32*          outputLength)
 {
     Std_ReturnType ret = E_OK;
     uint8          temp[CRYPTO_CONST_8];
     uint8          i;
-    if (length % CRYPTO_CONST_8) /* PRQA S 3344*/ /* VL_QAC_Crypto */
+    if (length % CRYPTO_CONST_8) /* PRQA S 3344*/ /* VL_Crypto_62_General */
     {
         return E_NOT_OK;
     }
@@ -519,10 +587,11 @@ Std_ReturnType Crypto_3Des_Crypt_Cbc(
             input += CRYPTO_CONST_8;
             output += CRYPTO_CONST_8;
             length -= CRYPTO_CONST_8;
+            *outputLength += CRYPTO_CONST_8;
         }
     }
     else
-    { /* MBEDTLS_DES_DECRYPT */
+    { /* DES_DECRYPT */
         while (length > CRYPTO_CONST_0)
         {
             (void)IStdLib_MemCpy(temp, input, CRYPTO_CONST_8);
@@ -538,6 +607,7 @@ Std_ReturnType Crypto_3Des_Crypt_Cbc(
             input += CRYPTO_CONST_8;
             output += CRYPTO_CONST_8;
             length -= CRYPTO_CONST_8;
+            *outputLength += CRYPTO_CONST_8;
         }
     }
 
@@ -564,7 +634,7 @@ Std_ReturnType
     Std_ReturnType ret = E_OK;
     uint8          temp[CRYPTO_CONST_8];
     uint8          i;
-    if (length % CRYPTO_CONST_8) /* PRQA S 3344*/ /* VL_QAC_Crypto */
+    if (length % CRYPTO_CONST_8) /* PRQA S 3344*/ /* VL_Crypto_62_General */
     {
         return E_NOT_OK;
     }
@@ -586,7 +656,7 @@ Std_ReturnType
         }
     }
     else
-    { /* MBEDTLS_DES_DECRYPT */
+    { /* DES_DECRYPT */
         while (length > CRYPTO_CONST_0)
         {
             (void)IStdLib_MemCpy(temp, input, CRYPTO_CONST_8);

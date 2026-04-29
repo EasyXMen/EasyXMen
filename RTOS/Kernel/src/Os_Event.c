@@ -1,6 +1,6 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
- * SPDX-License-Identifier: LGPL-2.1-only-with-exception OR  LicenseRef-Commercial-License
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
+ * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
  * GNU Lesser General Public License as published by the Free Software Foundation; version 2.1.
@@ -10,8 +10,8 @@
  * You should have received a copy of the GNU Lesser General Public License along with this library;
  * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  * or see <https://www.gnu.org/licenses/>.
- *
- *
+ */
+/*
  ********************************************************************************
  **                                                                            **
  **  FILENAME    : Os_Event.c                                                  **
@@ -192,14 +192,14 @@ static inline StatusType Os_EventBitCompare(EventMaskType EventMask, EventMaskTy
  * REQ ID               <None>
  */
 /******************************************************************************/
-/* PRQA S 6030, 6070, 3006 ++ */ /* VL_MTR_Os_STMIF, VL_MTR_Os_STCAL, VL_Os_3006 */
+/* PRQA S 6030, 6070, 3006, 6010 ++ */ /* VL_MTR_Os_STMIF, VL_MTR_Os_STCAL, VL_Os_3006, VL_MTR_Os_STCYC */
 StatusType SetEvent(TaskType TaskID, EventMaskType Mask)
-/* PRQA S 6030, 6070, 3006 -- */
+/* PRQA S 6030, 6070, 3006, 6010 -- */
 {
     /* PRQA S 2742, 2880, 3138, 2741 ++ */ /* VL_Os_PlatformDef */
-    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
+    /* PRQA S 1006, 3141 ++ */ /* VL_Os_1006, VL_Os_3141 */
     OS_ENTER_KERNEL();
-    /* PRQA S 1006 -- */
+    /* PRQA S 1006, 3141 -- */
     /* PRQA S 2742, 2880, 3138, 2741 -- */
 
     StatusType err = E_OK;
@@ -209,9 +209,9 @@ StatusType SetEvent(TaskType TaskID, EventMaskType Mask)
 #endif /* TRUE == CFG_TRACE_ENABLE */
 
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
-    /* PRQA S 3432 ++ */ /* VL_Os_3432 */
+    /* PRQA S 3432, 2986 ++ */ /* VL_Os_3432, VL_Os_2986 */
     if (CHECK_ID_INVALID(TaskID, Os_CfgTaskMax_Inf))
-    /* PRQA S 3432 -- */
+    /* PRQA S 3432, 2986 -- */
     {
         err = E_OS_ID;
     }
@@ -266,7 +266,9 @@ StatusType SetEvent(TaskType TaskID, EventMaskType Mask)
 #if (CFG_ERRORHOOK == TRUE)
     if (err != E_OK)
     {
+        /* PRQA S 3138 ++ */ /* VL_Os_3138 */
         Os_TraceErrorHook(OSError_Save_SetEvent(TaskID, Mask), OSServiceId_SetEvent, err);
+        /* PRQA S 3138 -- */
     }
 #endif
 
@@ -298,14 +300,14 @@ StatusType SetEvent(TaskType TaskID, EventMaskType Mask)
  * REQ ID               <None>
  */
 /******************************************************************************/
-/* PRQA S 6030, 6070, 3006 ++ */ /* VL_MTR_Os_STMIF, VL_MTR_Os_STCAL, VL_Os_3006 */
+/* PRQA S 6030, 6070, 3006, 6010 ++ */ /* VL_MTR_Os_STMIF, VL_MTR_Os_STCAL, VL_Os_3006, VL_MTR_Os_STCYC */
 StatusType SetEventAsyn(TaskType TaskID, EventMaskType Mask)
-/* PRQA S 6030, 6070, 3006 -- */
+/* PRQA S 6030, 6070, 3006, 6010 -- */
 {
     /* PRQA S 2742, 2880, 3138, 2741 ++ */ /* VL_Os_PlatformDef */
-    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
+    /* PRQA S 1006, 3141 ++ */ /* VL_Os_1006, VL_Os_3141 */
     OS_ENTER_KERNEL();
-    /* PRQA S 1006 -- */
+    /* PRQA S 1006, 3141 -- */
     /* PRQA S 2742, 2880, 3138, 2741 -- */
 
     StatusType err = E_OK;
@@ -315,9 +317,9 @@ StatusType SetEventAsyn(TaskType TaskID, EventMaskType Mask)
 #endif /* TRUE == CFG_TRACE_ENABLE */
 
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
-    /* PRQA S 3432 ++ */ /* VL_Os_3432 */
+    /* PRQA S 3432, 2986 ++ */ /* VL_Os_3432, VL_Os_2986 */
     if (CHECK_ID_INVALID(TaskID, Os_CfgTaskMax_Inf))
-    /* PRQA S 3432 -- */
+    /* PRQA S 3432, 2986 -- */
     {
         err = E_OS_ID;
     }
@@ -372,7 +374,9 @@ StatusType SetEventAsyn(TaskType TaskID, EventMaskType Mask)
 #if (CFG_ERRORHOOK == TRUE)
     if (err != E_OK)
     {
+        /* PRQA S 3138 ++ */ /* VL_Os_3138 */
         Os_TraceErrorHook(OSError_Save_SetEvent(TaskID, Mask), OSServiceId_SetEvent, err);
+        /* PRQA S 3138 -- */
     }
 #endif
 
@@ -413,16 +417,16 @@ StatusType SetEventAsyn(TaskType TaskID, EventMaskType Mask)
  * REQ ID               <None>
  */
 /******************************************************************************/
-/* PRQA S 6010, 6030, 6070 ++ */ /* VL_MTR_Os_STCYC, VL_MTR_Os_STMIF, VL_MTR_Os_STCAL */
+/* PRQA S 6010, 6030, 6070, 6080 ++ */ /* VL_MTR_Os_STCYC, VL_MTR_Os_STMIF, VL_MTR_Os_STCAL, VL_MTR_Os_STPTH */
 /* PRQA S 3006, 1532 ++ */       /* VL_Os_3006, VL_QAC_OneFunRef */
 StatusType WaitEvent(EventMaskType Mask)
 /* PRQA S 3006, 1532 -- */
-/* PRQA S 6010, 6030, 6070 -- */
+/* PRQA S 6010, 6030, 6070, 6080 -- */
 {
     /* PRQA S 2742, 2880, 3138, 2741 ++ */ /* VL_Os_PlatformDef */
-    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
+    /* PRQA S 1006, 3141 ++ */ /* VL_Os_1006, VL_Os_3141 */
     OS_ENTER_KERNEL();
-    /* PRQA S 1006 -- */
+    /* PRQA S 1006, 3141 -- */
     /* PRQA S 2742, 2880, 3138, 2741 -- */
 
     StatusType err = E_OK;
@@ -493,7 +497,9 @@ StatusType WaitEvent(EventMaskType Mask)
 #if (CFG_ERRORHOOK == TRUE)
     if (err != E_OK)
     {
+        /* PRQA S 3138 ++ */ /* VL_Os_3138 */
         Os_TraceErrorHook(OSError_Save_WaitEvent(Mask), OSServiceId_WaitEvent, err);
+        /* PRQA S 3138 -- */
     }
 #endif
 
@@ -533,16 +539,16 @@ StatusType WaitEvent(EventMaskType Mask)
  * REQ ID               <None>
  */
 /******************************************************************************/
-/* PRQA S 6010, 6030, 6070 ++ */ /* VL_MTR_Os_STCYC, VL_MTR_Os_STMIF, VL_MTR_Os_STCAL */
+/* PRQA S 6010, 6030, 6070, 6080 ++ */ /* VL_MTR_Os_STCYC, VL_MTR_Os_STMIF, VL_MTR_Os_STCAL, VL_MTR_Os_STPTH */
 /* PRQA S 3006, 1532 ++ */       /* VL_Os_3006, VL_QAC_OneFunRef */
 StatusType WaitAllEvents(EventMaskType Mask)
 /* PRQA S 3006, 1532 -- */
-/* PRQA S 6010, 6030, 6070 -- */
+/* PRQA S 6010, 6030, 6070, 6080 -- */
 {
     /* PRQA S 2742, 2880, 3138, 2741 ++ */ /* VL_Os_PlatformDef */
-    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
+    /* PRQA S 1006, 3141 ++ */ /* VL_Os_1006, VL_Os_3141 */
     OS_ENTER_KERNEL();
-    /* PRQA S 1006 -- */
+    /* PRQA S 1006, 3141 -- */
     /* PRQA S 2742, 2880, 3138, 2741 -- */
 
     StatusType err = E_OK;
@@ -613,7 +619,9 @@ StatusType WaitAllEvents(EventMaskType Mask)
 #if (CFG_ERRORHOOK == TRUE)
     if (err != E_OK)
     {
+        /* PRQA S 3138 ++ */ /* VL_Os_3138 */
         Os_TraceErrorHook(OSError_Save_WaitEvent(Mask), OSServiceId_WaitAllEvents, err);
+        /* PRQA S 3138 -- */
     }
 #endif
 
@@ -653,16 +661,16 @@ StatusType WaitAllEvents(EventMaskType Mask)
  * REQ ID               <None>
  */
 /******************************************************************************/
-/* PRQA S 6010, 6030, 6070 ++ */ /* VL_MTR_Os_STCYC, VL_MTR_Os_STMIF, VL_MTR_Os_STCAL */
+/* PRQA S 6010, 6030, 6070, 6080 ++ */ /* VL_MTR_Os_STCYC, VL_MTR_Os_STMIF, VL_MTR_Os_STCAL, VL_MTR_Os_STPTH */
 /* PRQA S 3006, 1532 ++ */       /* VL_Os_3006, VL_QAC_OneFunRef */
 StatusType GetEvent(TaskType TaskID, EventMaskRefType Event)
 /* PRQA S 3006, 1532 -- */
-/* PRQA S 6010, 6030, 6070 -- */
+/* PRQA S 6010, 6030, 6070, 6080 -- */
 {
     /* PRQA S 2742, 2880, 3138, 2741 ++ */ /* VL_Os_PlatformDef */
-    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
+    /* PRQA S 1006, 3141 ++ */ /* VL_Os_1006, VL_Os_3141 */
     OS_ENTER_KERNEL();
-    /* PRQA S 1006 -- */
+    /* PRQA S 1006, 3141 -- */
     /* PRQA S 2742, 2880, 3138, 2741 -- */
     StatusType err = E_OK;
 
@@ -673,9 +681,9 @@ StatusType GetEvent(TaskType TaskID, EventMaskRefType Event)
     OS_ARCH_DECLARE_CRITICAL();
 
 #if (OS_STATUS_EXTENDED == CFG_STATUS)
-    /* PRQA S 3432 ++ */ /* VL_Os_3432 */
+    /* PRQA S 3432, 2986 ++ */ /* VL_Os_3432, VL_Os_2986 */
     if (CHECK_ID_INVALID(TaskID, Os_CfgTaskMax_Inf))
-    /* PRQA S 3432 -- */
+    /* PRQA S 3432, 2986 -- */
     {
         err = E_OS_ID;
     }
@@ -750,7 +758,9 @@ StatusType GetEvent(TaskType TaskID, EventMaskRefType Event)
 #if (CFG_ERRORHOOK == TRUE)
     if (err != E_OK)
     {
+        /* PRQA S 3138 ++ */ /* VL_Os_3138 */
         Os_TraceErrorHook(OSError_Save_GetEvent(TaskID, Event), OSServiceId_GetEvent, err);
+        /* PRQA S 3138 -- */
     }
 #endif
 
@@ -788,9 +798,9 @@ StatusType ClearEvent(EventMaskType Mask)
 /* PRQA S 6070, 3006, 1532 -- */
 {
     /* PRQA S 2741, 2742, 2880, 3138 ++ */ /* VL_Os_PlatformDef */
-    /* PRQA S 1006 ++ */ /* VL_Os_1006 */
+    /* PRQA S 1006, 3141 ++ */ /* VL_Os_1006, VL_Os_3141 */
     OS_ENTER_KERNEL();
-    /* PRQA S 1006 -- */
+    /* PRQA S 1006, 3141 -- */
     /* PRQA S 2741, 2742, 2880, 3138 -- */
     StatusType err = E_OK;
 
@@ -860,7 +870,9 @@ StatusType ClearEvent(EventMaskType Mask)
 #if (CFG_ERRORHOOK == TRUE)
     if (err != E_OK)
     {
+        /* PRQA S 3138 ++ */ /* VL_Os_3138 */
         Os_TraceErrorHook(OSError_Save_ClearEvent(Mask), OSServiceId_ClearEvent, err);
+        /* PRQA S 3138 -- */
     }
 #endif
 
@@ -897,7 +909,9 @@ StatusType ClearEvent(EventMaskType Mask)
  * REQ ID               <None>
  */
 /******************************************************************************/
+/* PRQA S 6030, 6070, 1505 ++ */ /* VL_MTR_Os_STMIF, VL_MTR_Os_STCAL, VL_Os_1505 */
 StatusType Os_SetEvent(TaskType TaskID, EventMaskType Mask)
+/* PRQA S 6030, 6070, 1505 -- */
 {
     OS_ARCH_DECLARE_CRITICAL();
     StatusType       err           = E_OK;
@@ -1018,7 +1032,9 @@ StatusType Os_SetEvent(TaskType TaskID, EventMaskType Mask)
  * REQ ID               <None>
  */
 /******************************************************************************/
-StatusType Os_WaitEvent(EventMaskType Mask) /* PRQA S 1505 */ /* VL_Os_1505 */
+/* PRQA S 6070, 1505 ++ */ /* VL_MTR_Os_STCAL, VL_Os_1505 */
+StatusType Os_WaitEvent(EventMaskType Mask)
+/* PRQA S 6070, 1505 -- */
 {
     StatusType status = E_OK;
     OS_ARCH_DECLARE_CRITICAL();
@@ -1062,10 +1078,12 @@ StatusType Os_WaitEvent(EventMaskType Mask) /* PRQA S 1505 */ /* VL_Os_1505 */
         Os_Dispatch(); /* PRQA S 1290, 3138 */       /* VL_Os_1290, VL_Os_PlatformDef */
     }
 
-#if (TRUE == CFG_EVENT_RESPONSE_TIME_MONITOR)
-    Os_MonitorEventEndTime(Os_SCB.sysRunningTaskID, Mask);
-#endif
     OS_ARCH_EXIT_CRITICAL();
+#if (TRUE == CFG_EVENT_RESPONSE_TIME_MONITOR)
+    OS_ARCH_ENTRY_CRITICAL();
+    Os_MonitorEventEndTime(Os_SCB.sysRunningTaskID, Mask);
+    OS_ARCH_EXIT_CRITICAL();
+#endif
 
     return status;
 }
@@ -1098,7 +1116,9 @@ StatusType Os_WaitEvent(EventMaskType Mask) /* PRQA S 1505 */ /* VL_Os_1505 */
  * REQ ID               <None>
  */
 /******************************************************************************/
-StatusType Os_WaitAllEvents(EventMaskType Mask) /* PRQA S 1505 */ /* VL_Os_1505 */
+/* PRQA S 1505, 6070 ++ */ /* VL_Os_1505, VL_MTR_Os_STCAL */
+StatusType Os_WaitAllEvents(EventMaskType Mask)
+/* PRQA S 1505, 6070 -- */
 {
     StatusType status = E_OK;
     OS_ARCH_DECLARE_CRITICAL();
@@ -1135,10 +1155,12 @@ StatusType Os_WaitAllEvents(EventMaskType Mask) /* PRQA S 1505 */ /* VL_Os_1505 
         Os_Dispatch(); /* PRQA S 1290, 3138 */       /* VL_Os_1290, VL_Os_PlatformDef */
     }
 
-#if (TRUE == CFG_EVENT_RESPONSE_TIME_MONITOR)
-    Os_MonitorEventEndTime(Os_SCB.sysRunningTaskID, Mask);
-#endif
     OS_ARCH_EXIT_CRITICAL();
+#if (TRUE == CFG_EVENT_RESPONSE_TIME_MONITOR)
+    OS_ARCH_ENTRY_CRITICAL();
+    Os_MonitorEventEndTime(Os_SCB.sysRunningTaskID, Mask);
+    OS_ARCH_EXIT_CRITICAL();
+#endif
 
     return status;
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -46,7 +46,7 @@
 /** This type shall Determine whether the CRC verification is enabled for each specific field under the sub-TLV.
  *
  */
-typedef struct EthTSyn_CrcTimeFlagsTxSecuredCfgTypeTag
+typedef struct
 {
     /** messageLength from the Follow_Up Message Header shall be included in CRC calculation. */
     boolean CrcMessageLength;
@@ -66,7 +66,7 @@ typedef EthTSyn_CrcTimeFlagsTxSecuredCfgType EthTSyn_CrcFlagsRxValidatedCfgType;
 /** This represents the configuration of whether or not CRC is supported.
  *
  */
-typedef enum CrcSecuredTypeTag
+typedef enum
 {
     ETHTSYN_CRC_NOT_SUPPORTED,
     ETHTSYN_CRC_SUPPORTED
@@ -74,7 +74,7 @@ typedef enum CrcSecuredTypeTag
 /** Definition of whether or not validation of the CRC takes place.
  *
  */
-typedef enum CrcValidatedTypeTag
+typedef enum
 {
     ETHTSYN_CRC_IGNORED,
     ETHTSYN_CRC_NOT_VALIDATED,
@@ -84,7 +84,7 @@ typedef enum CrcValidatedTypeTag
 /** This type shall define the configuration of the time slave.
  *
  */
-typedef struct EthTSyn_GlobalTimeSlaveCfgTypeTag
+typedef struct
 {
     /** Timeout value of the Follow_Up message (of the subsequent Sync message). */
     uint64 GlobalTimeFollowUpTimeout;
@@ -111,7 +111,7 @@ typedef struct EthTSyn_GlobalTimeSlaveCfgTypeTag
 /** This type shall define the configuration of the propagation delay.
  *
  */
-typedef struct EthTSyn_PdelayConfigCfgTypeTag
+typedef struct
 {
     /** This parameter allows disabling Pdelay_Resp / Pdelay_Resp_Follow_Up transmission, if no Pdelay_Req messages are
      * expected. */
@@ -133,7 +133,7 @@ typedef struct EthTSyn_PdelayConfigCfgTypeTag
 /** This type shall define the configuration of the time master.
  *
  */
-typedef struct EthTSyn_GlobalTimeMasterCfgTypeTag
+typedef struct
 {
     /** Defines the time where the 1st regular cycle time based message transmission takes place, after an immediate
      * transmission before.  */
@@ -167,7 +167,7 @@ typedef struct EthTSyn_GlobalTimeMasterCfgTypeTag
 /** This type shall define the configuration of role of a port during the synchronization process.
  *
  */
-typedef struct EthTSyn_PortRoleCfgTypeTag
+typedef struct
 {
     /** Configuration of the global time master. Each global time domain is required to have exactly one global time
      * master. */
@@ -178,7 +178,7 @@ typedef struct EthTSyn_PortRoleCfgTypeTag
 /** This type shall define the role of a port during time synchronization process.
  *
  */
-typedef enum EthTSyn_PortRoleTypeTag
+typedef enum
 {
     ETHTSYN_MASTER,
     ETHTSYN_SLAVE,
@@ -186,7 +186,7 @@ typedef enum EthTSyn_PortRoleTypeTag
 /** This type shall define the configuration of the port under a time doamin.
  *
  */
-typedef struct EthTSyn_PortConfigCfgTypeTag
+typedef struct
 {
     /** This optional parameter, if present, indicates the priority of outgoing EthTSyn messages */
     uint8 FramePrio;
@@ -211,7 +211,7 @@ typedef struct EthTSyn_PortConfigCfgTypeTag
 /** This type shall define the data ID,which is used for CRC caculation or message authentication.
  *
  */
-typedef struct EthTSyn_GlobalTimeFollowUpDataIDListElementCfgTypeTag
+typedef struct
 {
     /** Index of the DataIDList for Follow_Up message ensures the identification of data elements due to CRC calculation
      * and message authentication process. */
@@ -223,7 +223,7 @@ typedef struct EthTSyn_GlobalTimeFollowUpDataIDListElementCfgTypeTag
 /** This type shall define the list of  data ID,which is used for CRC caculation or message authentication.
  *
  */
-typedef struct EthTSyn_GlobalTimeFollowUpDataIDListCfgTypeTag
+typedef struct
 {
     /** Element of the DataIDList for Follow_Up message ensures the identification of data elements due to CRC
      * calculation and message authentication process. */
@@ -232,7 +232,7 @@ typedef struct EthTSyn_GlobalTimeFollowUpDataIDListCfgTypeTag
 /** This type shall define the configuration of a time domain.
  *
  */
-typedef struct EthTSyn_GlobalTimeDomainCfgTypeTag
+typedef struct
 {
     /** The global time domain ID. */
     uint8 GlobalTimeDomainId;
@@ -251,7 +251,7 @@ typedef uint8 EthTSynMessageType;
 /** This type shall define the status of Pdelay Delay Measurement Requester during pdelay measurement.
  *
  */
-typedef enum EthTSyn_PdelayTXStatusTypeTag
+typedef enum
 {
     ETHTSYN_SEND_PDELAY_REQ,
     ETHTSYN_WAITFOR_PDELAY_RESP,
@@ -260,7 +260,7 @@ typedef enum EthTSyn_PdelayTXStatusTypeTag
 /** This type shall define the  status of Pdelay Delay Measurement Receiver during pdelay measurement.
  *
  */
-typedef enum EthTSyn_PdelayRXStatusTypeTag
+typedef enum
 {
     ETHTSYN_WAITFOR_PDELAY_REQ,
     ETHTSYN_SEND_PDELAY_RESP,
@@ -269,7 +269,7 @@ typedef enum EthTSyn_PdelayRXStatusTypeTag
 /** This type shall define the status of a port during synchronization process.
  *
  */
-typedef enum EthTSyn_SyncStatusTypeTag
+typedef enum
 {
     ETHTSYN_SEND_SYNC,
     ETHTSYN_SEND_FOLLOWUP,
@@ -279,7 +279,7 @@ typedef enum EthTSyn_SyncStatusTypeTag
 /** This type shall define the mode of transmission.
  *
  */
-typedef enum EthTSyn_TransmissionModeTypeTag
+typedef enum
 {
     ETHTSYN_TX_OFF,
     ETHTSYN_TX_ON
@@ -287,7 +287,7 @@ typedef enum EthTSyn_TransmissionModeTypeTag
 /** This type shall define the format of global timestamp.
  *
  */
-typedef struct EthTSyn_TimeStampTypeTag
+typedef struct
 {
     /** nanoseconds */
     uint32 Nanoseconds;
@@ -299,7 +299,7 @@ typedef struct EthTSyn_TimeStampTypeTag
 /** This type shall define the type of ingress timestamp and egress timestamp during pdelay measurement.
  *
  */
-typedef struct EthTSyn_PdelayResponderTimestampTypeTag
+typedef struct
 {
     /** ingress timestamp for pdelay_req message */
     EthTSyn_TimeStampType PdelayReqEventIngressTimestamp;
@@ -309,7 +309,7 @@ typedef struct EthTSyn_PdelayResponderTimestampTypeTag
 /** This type shall define the type of egress time tuple,which includes the global and local time.
  *
  */
-typedef struct EthTSyn_SyncEgressTupleTypeTag
+typedef struct
 {
     /** The T0 for tx preciseOriginTimestamp */
     EthTSyn_TimeStampType T0;
@@ -319,7 +319,7 @@ typedef struct EthTSyn_SyncEgressTupleTypeTag
 /** This type shall define the runtime variable of a port.
  *
  */
-typedef struct EthTSyn_PortTypeTag
+typedef struct
 {
     /** The id of timedomain */
     uint8 Timedomainid;
@@ -397,7 +397,7 @@ typedef struct EthTSyn_PortTypeTag
 /** This type shall define the configuration of EthTSyn.
  *
  */
-typedef struct EthTSyn_ConfigTypeTag
+typedef struct
 {
     /** specifying the number of TimeDomain in this configuration */
     const EthTSyn_GlobalTimeDomainCfgType* GlobalTimeDomain;
@@ -405,12 +405,6 @@ typedef struct EthTSyn_ConfigTypeTag
     EthTSyn_PortType* const* RuntimeVariables;
     /** specifying the number of Ports in this configuration */
     const uint8 PortNum;
-    /** specifying the number of partitions in this configuration */
-    const uint8 PartitionNum;
-#if (ETHTSYN_MULTIPLE_PARTITION_USED == STD_ON)
-    /** specifying all of the partition informations in this configuration */
-    const ApplicationType* OsApplications;
-#endif
 } EthTSyn_ConfigType;
 
 #endif

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -34,6 +34,7 @@ extern "C" {
 #endif
 
 /* ========================================= external function declarations ========================================= */
+#if (DEM_SUPPORT_SETDTCFILTERBYEXTENDEDDATARECORDNUMBER_API == STD_ON)
 /**
  * @brief         Sets the DTC Filter based on a given extended data record on the primary fault memory. The
  *                server selects all DTCs that have a matching extended data record.
@@ -53,7 +54,9 @@ extern Std_ReturnType Dem_SetDTCFilterByExtendedDataRecordNumber(
     uint8             ClientId,
     Dem_DTCFormatType DTCFormat,
     uint8             ExtendedDataRecordNumber);
+#endif
 
+#if (DEM_SUPPORT_SETDTCFILTERBYREADINESSGROUP_API == STD_ON)
 /**
  * @brief         Sets the DTC Filter based on a given DTC readiness group on the primary fault memory. The server
  *                selects all DTCs that have this DTC readiness group configured.
@@ -72,6 +75,7 @@ extern Std_ReturnType Dem_SetDTCFilterByReadinessGroup(
     uint8                          ClientID,
     Dem_DTCFormatType              DTCFormat,
     Dem_EventOBDReadinessGroupType ReadinessGroupNumber);
+#endif
 
 #if (DEM_OBD_SUPPORT != DEM_OBD_NO_OBD_SUPPORT)
 #if (DEM_OBD_ENGINE_TYPE == DEM_IGNITION_SPARK)

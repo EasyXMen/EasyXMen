@@ -1,6 +1,6 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
- * SPDX-License-Identifier: LGPL-2.1-only-with-exception OR  LicenseRef-Commercial-License
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
+ * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
  * GNU Lesser General Public License as published by the Free Software Foundation; version 2.1.
@@ -10,7 +10,8 @@
  * You should have received a copy of the GNU Lesser General Public License along with this library;
  * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  * or see <https://www.gnu.org/licenses/>.
- *
+ */
+/*
  ********************************************************************************
  **                                                                            **
  **  FILENAME    : Os_Trace.c                                                   **
@@ -77,36 +78,44 @@ void Os_InitTrace(void)
     Os_SCB.trace->runTaskId     = OS_TRACE_NO_TASK_ID;
     Os_SCB.trace->runTaskPrio   = OS_TRACE_NO_TASK_ID;
     Os_SCB.trace->lastError     = OS_TRACE_NO_LAST_ERROR;
-    Os_SCB.trace->isrTrace      = Os_TraceIsr_Inf[coreId];
-    Os_SCB.trace->taskTrace     = Os_TraceTask_Inf[coreId];
-    Os_SCB.trace->alarmTrace    = Os_TraceAlarm_Inf[coreId];
-    Os_SCB.trace->resourceTrace = Os_TraceResource_Inf[coreId];
 
     /* Initialize ISR states. */
+#if (CFG_ISR_MAX > 0)
+    Os_SCB.trace->isrTrace      = Os_TraceIsr_Inf[coreId];
     for (objectId = 0u; objectId < Os_CfgIsrMax; objectId++)
     {
         Os_SCB.trace->isrTrace[objectId].state     = OS_TRACE_ISR_STATE_EXITED;
         Os_SCB.trace->isrTrace[objectId].realState = TASK_STATE_START;
     }
+#endif
+
     /* Initialize task states. */
+    Os_SCB.trace->taskTrace     = Os_TraceTask_Inf[coreId];
     for (objectId = 0u; objectId < Os_SCB.sysTaskMax; objectId++)
     {
         Os_SCB.trace->taskTrace[objectId].switchReason = OS_TRACE_TASK_SWITCH_REASON_NONE;
         Os_SCB.trace->taskTrace[objectId].state        = OS_TRACE_TASK_STATE_TERMINATED;
         Os_SCB.trace->taskTrace[objectId].realState    = TASK_STATE_START;
     }
+
     /* Initialize alarm states. */
+#if (CFG_ALARM_MAX > 0)
+    Os_SCB.trace->alarmTrace    = Os_TraceAlarm_Inf[coreId];
     for (objectId = 0u; objectId < Os_SCB.sysAlarmMax; objectId++)
     {
         Os_SCB.trace->alarmTrace[objectId].state = OS_TRACE_ALARM_STATE_STOPPED;
     }
+#endif
 
     /* Initialize resource states. */
+#if (CFG_STD_RESOURCE_MAX > 0U)
+    Os_SCB.trace->resourceTrace = Os_TraceResource_Inf[coreId];
     for (objectId = 0u; objectId < Os_CfgStdResourceMax_Inf[coreId]; objectId++)
     {
         Os_SCB.trace->resourceTrace[objectId].occupyObjectId = OS_TRACE_NO_OBJECT_ID;
         Os_SCB.trace->resourceTrace[objectId].state          = OS_TRACE_RES_STATE_UNLOCKED;
     }
+#endif
 
     return;
 }
@@ -198,8 +207,9 @@ void Os_TraceTaskRun(Os_TaskType taskId)
     if (NULL_PTR != Os_SCB.trace)
     {
         Os_CoreIdType coreId = Os_SCB.sysCore;
-
+        /* PRQA S 3442, 4397, 3432 ++ */ /* VL_Os_3442, VL_Os_4397, VL_Os_3432 */
         Os_SCB.trace->runTaskId                   = OS_TRACE_GET_OBJECT_TASK_ID(coreId, taskId);
+        /* PRQA S 3442, 4397, 3432 -- */
         Os_SCB.trace->runTaskPrio                 = Os_SCB.sysRunningTCB->taskRunPrio;
         Os_SCB.trace->taskTrace[taskId].realState = TASK_STATE_RUNNING;
         Os_SCB.trace->runObjId                    = Os_SCB.trace->runTaskId;
@@ -321,6 +331,7 @@ void Os_TraceTaskTerminate(Os_TaskType taskId, Os_TraceTaskSwitchReasonType term
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
 
+#if (CFG_ISR_MAX > 0)
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
 /******************************************************************************/
@@ -342,8 +353,9 @@ void Os_TraceIsrEnter(Os_IsrType isrId)
     if (NULL_PTR != Os_SCB.trace)
     {
         Os_CoreIdType coreId = Os_SCB.sysCore;
-
+        /* PRQA S 3442, 4397, 3432 ++ */ /* VL_Os_3442, VL_Os_4397, VL_Os_3432 */
         Os_SCB.trace->runIsrId              = OS_TRACE_GET_OBJECT_ISR_ID(coreId, isrId);
+        /* PRQA S 3442, 4397, 3432 -- */
         Os_SCB.trace->isrTrace[isrId].state = OS_TRACE_ISR_STATE_ENTERED;
 
         Os_SCB.trace->runObjId                  = Os_SCB.trace->runIsrId;
@@ -383,14 +395,18 @@ void Os_TraceIsrExit(Os_IsrType isrId, Os_IsrType nestIsrId)
         Os_SCB.trace->isrTrace[isrId].realState = TASK_STATE_READY;
         if (nestIsrId != isrId)
         {
+            /* PRQA S 3442, 4397, 3432 ++ */ /* VL_Os_3442, VL_Os_4397, VL_Os_3432 */
             Os_SCB.trace->runIsrId                      = OS_TRACE_GET_OBJECT_ISR_ID(coreId, nestIsrId);
+            /* PRQA S 3442, 4397, 3432 -- */
             Os_SCB.trace->runObjId                      = Os_SCB.trace->runIsrId;
             Os_SCB.trace->isrTrace[nestIsrId].realState = TASK_STATE_RUNNING;
         }
         else
         {
             Os_SCB.trace->runIsrId = OS_TRACE_NO_ISR_ID;
+            /* PRQA S 3442, 4397, 3432 ++ */ /* VL_Os_3442, VL_Os_4397, VL_Os_3432 */
             Os_SCB.trace->runObjId = OS_TRACE_GET_OBJECT_TASK_ID(coreId, Os_SCB.sysRunningTaskID);
+            /* PRQA S 3442, 4397, 3432 -- */
         }
 
         OS_TRACE_ISR_EXIT_HOOK(coreId, isrId);
@@ -399,6 +415,7 @@ void Os_TraceIsrExit(Os_IsrType isrId, Os_IsrType nestIsrId)
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
+#endif /* CFG_ISR_MAX > 0 */
 
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
@@ -462,6 +479,7 @@ void Os_TraceServiceExit(Os_ServiceIdType serviceId)
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
 
+#if (CFG_STD_RESOURCE_MAX > 0U)
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
 /******************************************************************************/
@@ -485,8 +503,9 @@ void Os_TraceResourceIsrGet(Os_ResourceType resourceId, Os_IsrType isrId)
     if (NULL_PTR != Os_SCB.trace)
     {
         Os_CoreIdType coreId = Os_SCB.sysCore;
-
+        /* PRQA S 3442, 4397, 3432 ++ */ /* VL_Os_3442, VL_Os_4397, VL_Os_3432 */
         Os_SCB.trace->resourceTrace[resourceId].occupyObjectId = OS_TRACE_GET_OBJECT_ISR_ID(coreId, isrId);
+        /* PRQA S 3442, 4397, 3432 -- */
         Os_SCB.trace->resourceTrace[resourceId].state          = OS_TRACE_RES_STATE_LOCKED;
 
         OS_TRACE_RESOURCE_ISR_GET_HOOK(coreId, resourceId, isrId);
@@ -520,8 +539,9 @@ void Os_TraceResourceTaskGet(Os_ResourceType resourceId, Os_TaskType taskId)
     if (NULL_PTR != Os_SCB.trace)
     {
         Os_CoreIdType coreId = Os_SCB.sysCore;
-
+        /* PRQA S 3442, 4397, 3432 ++ */ /* VL_Os_3442, VL_Os_4397, VL_Os_3432 */
         Os_SCB.trace->resourceTrace[resourceId].occupyObjectId = OS_TRACE_GET_OBJECT_TASK_ID(coreId, taskId);
+        /* PRQA S 3442, 4397, 3432 -- */
         Os_SCB.trace->resourceTrace[resourceId].state          = OS_TRACE_RES_STATE_LOCKED;
 
         OS_TRACE_RESOURCE_TASK_GET_HOOK(coreId, resourceId, taskId);
@@ -564,7 +584,9 @@ void Os_TraceResourceRelease(Os_ResourceType resourceId)
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
+#endif /* CFG_STD_RESOURCE_MAX > 0U */
 
+#if (CFG_ALARM_MAX > 0)
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
 /******************************************************************************/
@@ -628,7 +650,7 @@ void Os_TraceAlarmStop(Os_AlarmType alarmId)
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
-
+#endif /* CFG_ALARM_MAX > 0 */
 #endif /* TRUE == CFG_TRACE_ENABLE */
 
 /*=======[E N D   O F   F I L E]==============================================*/

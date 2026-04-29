@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -204,7 +204,7 @@ Std_ReturnType KeyM_Finalize(
                     if (E_OK == Csm_KeySetValid(*(KeyM_CryptoKeyCfg[keyIdx].keyTargetRef)))
                     {
 #if (STD_OFF == KEYM_CRYPTO_KEYHANDLER_UPDATE_ENABLED)
-                        /* PRQA S 2109 ++*/
+                        /* PRQA S 2109 ++*/ /* VL_KeyM_2109 */
                         if ((boolean)TRUE == KeyM_SheKeyFlag)
                         /* PRQA S 2109 --*/
                         {
@@ -645,7 +645,7 @@ KEYM_LOCAL Std_ReturnType KeyM_SearchByKeyName(const uint8* KeyNamePtr, uint16 K
     {
         if (KeyM_CryptoKeyCfg[keyIdx].KeyNameLen != KeyNameLength)
         {
-            continue; /* PRQA S 0770*/
+            continue; /* PRQA S 0770 */ /* VL_KeyM_0770 */
         }
 
         for (keyPos = 0u; keyPos < KeyNameLength; keyPos++)

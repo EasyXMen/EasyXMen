@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -22,9 +22,27 @@
  **
  ***********************************************************************************************************************/
 
-/* PRQA S 1252,1258,1290,2784,2822,2880,1505,1532 ++ */ /* VL_QAC_Crypto */
-/* PRQA S 6050,6060,6070,6080,6010,6030,6040   ++ */    /* VL_QAC_Crypto */
+/* PRQA S 6010 EOF */ /* VL_MTR_Crypto_62_STCYC */
+/* PRQA S 6020 EOF */ /* VL_MTR_Crypto_62_STLIN */
+/* PRQA S 6030 EOF */ /* VL_MTR_Crypto_62_STMIF */
+/* PRQA S 6040 EOF */ /* VL_MTR_Crypto_62_STPAR */
+/* PRQA S 6050 EOF */ /* VL_MTR_Crypto_62_STST3 */
+/* PRQA S 6060 EOF */ /* VL_MTR_Crypto_62_STM19 */
+/* PRQA S 6070 EOF */ /* VL_MTR_Crypto_62_STCAL */
+/* PRQA S 6080 EOF */ /* VL_MTR_Crypto_62_STPTH */
 
+/* PRQA S 0311,0314,0316,0488,1339,2016,2023,2024,2052,2105,3102,3103,3208,3326,3345 ++ */ /* VL_Crypto_62_General */
+/* PRQA S 1253,0288,0317,0432,0489,0490,0693,0770,0772,0780,0842,1252,1258,1259,1277 ++ */ /* VL_Crypto_62_General */
+/* PRQA S 1290,1291,1336,1338,1840,1820,1821,1823,1841,1842,1843,1844,1851,1853,1860 ++ */ /* VL_Crypto_62_General */
+/* PRQA S 1861,1863,1880,1881,1890,1891,2001,2015,2205,2106,2140,2462,2463,2472,2487 ++ */ /* VL_Crypto_62_General */
+/* PRQA S 2740,3101,3120,3122,3123,3140,3200,3206,3209,3218,3219,3226,3332,3344,3387 ++ */ /* VL_Crypto_62_General */
+/* PRQA S 3395,3396,3397,3400,3408,3410,3418,3450,3440,3455,3610,3625,3672,3678,3715 ++ */ /* VL_Crypto_62_General */
+/* PRQA S 3717,3762,3769,3772,4115,4116,4393,4394,4403,4404,4413,4414,4423,4432 ++ */      /* VL_Crypto_62_General */
+/* PRQA S 4434,4443,4446,4447,4460,4461,4464,4470,4480,4491,4499,4501,4538,4542,4544 ++ */ /* VL_Crypto_62_General */
+/* PRQA S 4532,4533,4543,4558,3673,3795,4150,4522,3391,3432,3442,2743,1505,2889,2834 ++ */ /* VL_Crypto_62_General */
+/* PRQA S 2996,2992,2911,1503,2822,2896,2986 ++ */                                         /* VL_Crypto_62_General */
+/* PRQA S 2834,2982,2983,1532,2986,2982,2983,5022,5143,5014,5031,5045,2839,2998 ++ */      /* VL_Crypto_62_General */
+/* PRQA S 2995,2997,2871,2990,0597,2784,2880 ++ */                                         /* VL_Crypto_62_General */
 /* =================================================== inclusions =================================================== */
 #include "Crypto_62_Internal.h"
 #include "Crypto_62_Aes.h"
@@ -78,7 +96,7 @@ Std_ReturnType Crypto_AesEncryptProcess(uint32 objectId, Crypto_AlgorithmModeTyp
 
     Std_ReturnType ret          = E_NOT_OK;
     const uint8*   inputPtr     = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputPtr;
-    uint32         outputLength = *(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr);
+    uint32*        outputLength = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr;
 
     (void)IStdLib_MemSet(&ctx, 0, sizeof(Crypto_AESData));
     ret = Crypto_62_KeyElementGet(cryptoKeyId, CRYPTO_KE_CIPHER_KEY, key, &KeyLength);
@@ -88,7 +106,7 @@ Std_ReturnType Crypto_AesEncryptProcess(uint32 objectId, Crypto_AlgorithmModeTyp
         switch (mode)
         {
         case CRYPTO_ALGOMODE_ECB:
-            ret = Crypto_Aes_Crypt_Ecb(&ctx, CRYPTO_MODE_ENCRYPT, inputLength, inputPtr, outputPtr);
+            ret = Crypto_Aes_Crypt_Ecb(&ctx, CRYPTO_MODE_ENCRYPT, inputLength, inputPtr, outputPtr, outputLength);
             break;
 
         case CRYPTO_ALGOMODE_CBC:
@@ -96,7 +114,8 @@ Std_ReturnType Crypto_AesEncryptProcess(uint32 objectId, Crypto_AlgorithmModeTyp
             ret       = Crypto_62_KeyElementGet(cryptoKeyId, CRYPTO_KE_CIPHER_IV, iv, &KeyLength);
             if (ret == E_OK)
             {
-                ret = Crypto_Aes_Crypt_Cbc(&ctx, CRYPTO_MODE_ENCRYPT, inputLength, iv, inputPtr, outputPtr);
+                ret =
+                    Crypto_Aes_Crypt_Cbc(&ctx, CRYPTO_MODE_ENCRYPT, inputLength, iv, inputPtr, outputPtr, outputLength);
             }
             break;
 
@@ -105,7 +124,8 @@ Std_ReturnType Crypto_AesEncryptProcess(uint32 objectId, Crypto_AlgorithmModeTyp
             ret       = Crypto_62_KeyElementGet(cryptoKeyId, CRYPTO_KE_CIPHER_IV, iv, &KeyLength);
             if (ret == E_OK)
             {
-                ret = Crypto_Aes_Crypt_Ctr(&ctx, CRYPTO_MODE_ENCRYPT, inputLength, iv, inputPtr, outputPtr);
+                ret           = Crypto_Aes_Crypt_Ctr(&ctx, CRYPTO_MODE_ENCRYPT, inputLength, iv, inputPtr, outputPtr);
+                *outputLength = inputLength;
             }
             break;
 
@@ -115,6 +135,7 @@ Std_ReturnType Crypto_AesEncryptProcess(uint32 objectId, Crypto_AlgorithmModeTyp
             if (ret == E_OK)
             {
                 ret = Crypto_Aes_Crypt_Cfb128(&ctx, CRYPTO_MODE_ENCRYPT, inputLength, &offset, iv, inputPtr, outputPtr);
+                *outputLength = inputLength;
             }
             break;
 
@@ -123,7 +144,8 @@ Std_ReturnType Crypto_AesEncryptProcess(uint32 objectId, Crypto_AlgorithmModeTyp
             ret       = Crypto_62_KeyElementGet(cryptoKeyId, CRYPTO_KE_CIPHER_IV, iv, &KeyLength);
             if (ret == E_OK)
             {
-                ret = Crypto_Aes_Crypt_Ofb(&ctx, inputLength, &offset, iv, inputPtr, outputPtr);
+                ret           = Crypto_Aes_Crypt_Ofb(&ctx, inputLength, &offset, iv, inputPtr, outputPtr);
+                *outputLength = inputLength;
             }
             break;
 
@@ -136,9 +158,9 @@ Std_ReturnType Crypto_AesEncryptProcess(uint32 objectId, Crypto_AlgorithmModeTyp
             break;
         }
     }
-    if ((outputPtr != NULL_PTR) && (E_OK == ret)) /* PRQA S 2982,2995 */ /* VL_QAC_Crypto */
+    if ((outputPtr != NULL_PTR) && (E_OK == ret)) /* PRQA S 2982,2995 */ /* VL_Crypto_62_General */
     {
-        (void)IStdLib_MemCpy(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr, outputPtr, outputLength);
+        (void)IStdLib_MemCpy(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr, outputPtr, *outputLength);
     }
     return ret;
 }
@@ -169,7 +191,7 @@ Std_ReturnType Crypto_AesDecryptProcess(uint32 objectId, Crypto_AlgorithmModeTyp
 
     Std_ReturnType ret          = E_NOT_OK;
     const uint8*   inputPtr     = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputPtr;
-    uint32         outputLength = *(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr);
+    uint32*        outputLength = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr;
     (void)IStdLib_MemSet(&ctx, 0, sizeof(Crypto_AESData));
     ret = Crypto_62_KeyElementGet(cryptoKeyId, CRYPTO_KE_CIPHER_KEY, key, &KeyLength);
     if (E_OK == ret)
@@ -178,7 +200,7 @@ Std_ReturnType Crypto_AesDecryptProcess(uint32 objectId, Crypto_AlgorithmModeTyp
         {
         case CRYPTO_ALGOMODE_ECB:
             Crypto_Aes_Setkey_Dec(&ctx, key, keyBit);
-            ret = Crypto_Aes_Crypt_Ecb(&ctx, CRYPTO_MODE_DECRYPT, inputLength, inputPtr, outputPtr);
+            ret = Crypto_Aes_Crypt_Ecb(&ctx, CRYPTO_MODE_DECRYPT, inputLength, inputPtr, outputPtr, outputLength);
             break;
         case CRYPTO_ALGOMODE_CBC:
             Crypto_Aes_Setkey_Dec(&ctx, key, keyBit);
@@ -186,7 +208,8 @@ Std_ReturnType Crypto_AesDecryptProcess(uint32 objectId, Crypto_AlgorithmModeTyp
             ret       = Crypto_62_KeyElementGet(cryptoKeyId, CRYPTO_KE_CIPHER_IV, iv, &KeyLength);
             if (ret == E_OK)
             {
-                ret = Crypto_Aes_Crypt_Cbc(&ctx, CRYPTO_MODE_DECRYPT, inputLength, iv, inputPtr, outputPtr);
+                ret =
+                    Crypto_Aes_Crypt_Cbc(&ctx, CRYPTO_MODE_DECRYPT, inputLength, iv, inputPtr, outputPtr, outputLength);
             }
             break;
         case CRYPTO_ALGOMODE_CTR:
@@ -195,7 +218,8 @@ Std_ReturnType Crypto_AesDecryptProcess(uint32 objectId, Crypto_AlgorithmModeTyp
             ret       = Crypto_62_KeyElementGet(cryptoKeyId, CRYPTO_KE_CIPHER_IV, iv, &KeyLength);
             if (ret == E_OK)
             {
-                ret = Crypto_Aes_Crypt_Ctr(&ctx, CRYPTO_MODE_DECRYPT, inputLength, iv, inputPtr, outputPtr);
+                ret           = Crypto_Aes_Crypt_Ctr(&ctx, CRYPTO_MODE_DECRYPT, inputLength, iv, inputPtr, outputPtr);
+                *outputLength = inputLength;
             }
             break;
         case CRYPTO_ALGOMODE_CFB:
@@ -205,6 +229,7 @@ Std_ReturnType Crypto_AesDecryptProcess(uint32 objectId, Crypto_AlgorithmModeTyp
             if (ret == E_OK)
             {
                 ret = Crypto_Aes_Crypt_Cfb128(&ctx, CRYPTO_MODE_DECRYPT, inputLength, &offset, iv, inputPtr, outputPtr);
+                *outputLength = inputLength;
             }
             break;
         case CRYPTO_ALGOMODE_OFB:
@@ -213,7 +238,8 @@ Std_ReturnType Crypto_AesDecryptProcess(uint32 objectId, Crypto_AlgorithmModeTyp
             ret       = Crypto_62_KeyElementGet(cryptoKeyId, CRYPTO_KE_CIPHER_IV, iv, &KeyLength);
             if (ret == E_OK)
             {
-                ret = Crypto_Aes_Crypt_Ofb(&ctx, inputLength, &offset, iv, inputPtr, outputPtr);
+                ret           = Crypto_Aes_Crypt_Ofb(&ctx, inputLength, &offset, iv, inputPtr, outputPtr);
+                *outputLength = inputLength;
             }
             break;
         case CRYPTO_ALGOMODE_XTS:
@@ -224,9 +250,9 @@ Std_ReturnType Crypto_AesDecryptProcess(uint32 objectId, Crypto_AlgorithmModeTyp
             break;
         }
     }
-    if ((outputPtr != NULL_PTR) && (E_OK == ret)) /* PRQA S 2982,2995 */ /* VL_QAC_Crypto */
+    if ((outputPtr != NULL_PTR) && (E_OK == ret)) /* PRQA S 2982,2995 */ /* VL_Crypto_62_General */
     {
-        (void)IStdLib_MemCpy(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr, outputPtr, outputLength);
+        (void)IStdLib_MemCpy(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr, outputPtr, *outputLength);
     }
     return ret;
 }
@@ -249,36 +275,75 @@ CRYPTO_62_LOCAL Std_ReturnType Crypto_3DesEncryptProcess(uint32 objectId, Crypto
 {
     Std_ReturnType  ret = E_NOT_OK;
     Crypto_Des3Data ctx;
-    uint8           iv[CRYPTO_CONST_16];
+    uint8           iv[CRYPTO_CONST_8];
     (void)IStdLib_MemSet(&ctx, 0, sizeof(Crypto_Des3Data));
     const uint8* inputPtr     = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputPtr;
     uint8*       outputPtr    = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr;
     uint32       inputLength  = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputLength;
-    uint32       outputLength = *(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr);
-    uint32       KeyLength    = CRYPTO_CONST_32;
+    uint32*      outputLength = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr;
+    uint32       KeyLength    = CRYPTO_CONST_24;
+    uint32       ivLength     = CRYPTO_CONST_8;
+    uint8*       key;
+    key = (uint8*)IStdLib_MemHeapCalloc(Crypto_62_MemPool, 1u, KeyLength);
+    uint8 temp[CRYPTO_CONST_8];
+    *outputLength = 0;
 
-    switch (mode)
+    ret = Crypto_62_KeyElementGet(Crypto_62_StoredJob[objectId].cryptoKeyId, CRYPTO_KE_CIPHER_KEY, key, &KeyLength);
+    // key generation and set key
+    if (ret == 0)
     {
-    case CRYPTO_ALGOMODE_ECB:
-        Crypto_3Des_Crypt_Ecb(&ctx, inputPtr, outputPtr);
-        ret = E_OK;
-        break;
-    case CRYPTO_ALGOMODE_CBC:
-        ret = Crypto_62_KeyElementGet(Crypto_62_StoredJob[objectId].cryptoKeyId, CRYPTO_KE_CIPHER_IV, iv, &KeyLength);
-        if (E_OK == ret)
+        switch (KeyLength)
         {
-            ret = Crypto_3Des_Crypt_Cbc(&ctx, CRYPTO_MODE_ENCRYPT, inputLength, iv, inputPtr, outputPtr);
+        case 16:
+            Crypto_Des3_Set2key_Enc(&ctx, key);
+            break;
+        case 24:
+            Crypto_Des3_Set3key_Enc(&ctx, key);
+            break;
+        default:
+            ret = E_NOT_OK;
+            goto exit;
         }
+    }
 
-        break;
-    default:
-        ret = CRYPTO_ERROR_ALGO_NOT_SUPPORTED;
-        break;
-    }
-    if ((outputPtr != NULL_PTR) && (E_OK == ret)) /* PRQA S 2982,2995 */ /* VL_QAC_Crypto */
+    if (ret == 0)
     {
-        (void)IStdLib_MemCpy(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr, outputPtr, outputLength);
+        switch (mode)
+        {
+        case CRYPTO_ALGOMODE_ECB:
+            while (inputLength > 0)
+            {
+                (void)IStdLib_MemCpy(temp, inputPtr, CRYPTO_CONST_8);
+                Crypto_3Des_Crypt_Ecb(&ctx, temp, outputPtr);
+                inputPtr += CRYPTO_CONST_8;
+                outputPtr += CRYPTO_CONST_8;
+                inputLength = (inputLength >= CRYPTO_CONST_8) ? (inputLength - CRYPTO_CONST_8) : 0;
+                *outputLength += 8;
+            }
+
+            ret = E_OK;
+            break;
+        case CRYPTO_ALGOMODE_CBC:
+            ret =
+                Crypto_62_KeyElementGet(Crypto_62_StoredJob[objectId].cryptoKeyId, CRYPTO_KE_CIPHER_IV, iv, &ivLength);
+            if (E_OK == ret)
+            {
+                ret = Crypto_3Des_Crypt_Cbc(
+                    &ctx,
+                    CRYPTO_MODE_ENCRYPT,
+                    inputLength,
+                    iv,
+                    inputPtr,
+                    outputPtr,
+                    outputLength);
+            }
+            break;
+        default:
+            ret = CRYPTO_ERROR_ALGO_NOT_SUPPORTED;
+            break;
+        }
     }
+exit:
     return ret;
 }
 /******************************************************************************/
@@ -303,30 +368,71 @@ CRYPTO_62_LOCAL Std_ReturnType Crypto_3DesDecryptProcess(uint32 objectId, Crypto
     const uint8* inputPtr     = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputPtr;
     uint8*       outputPtr    = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr;
     uint32       inputLength  = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputLength;
-    uint32       outputLength = *(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr);
-    uint32       KeyLength    = CRYPTO_CONST_32;
-    switch (mode)
-    {
-    case CRYPTO_ALGOMODE_ECB:
-        Crypto_3Des_Crypt_Ecb(&ctx, inputPtr, outputPtr);
-        ret = E_OK;
-        break;
-    case CRYPTO_ALGOMODE_CBC:
-        ret = Crypto_62_KeyElementGet(Crypto_62_StoredJob[objectId].cryptoKeyId, CRYPTO_KE_CIPHER_IV, iv, &KeyLength);
-        if (E_OK == ret)
-        {
-            ret = Crypto_3Des_Crypt_Cbc(&ctx, CRYPTO_MODE_DECRYPT, inputLength, iv, inputPtr, outputPtr);
-        }
+    uint32*      outputLength = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr;
+    uint32       KeyLength    = CRYPTO_CONST_24;
+    uint32       ivLength     = CRYPTO_CONST_8;
+    uint8*       key;
+    uint8        temp[CRYPTO_CONST_8];
+    key           = (uint8*)IStdLib_MemHeapCalloc(Crypto_62_MemPool, 1u, KeyLength);
+    *outputLength = 0;
 
-        break;
-    default:
-        ret = CRYPTO_ERROR_ALGO_NOT_SUPPORTED;
-        break;
-    }
-    if ((outputPtr != NULL_PTR) && (E_OK == ret)) /* PRQA S 2982,2995 */ /* VL_QAC_Crypto */
+    ret = Crypto_62_KeyElementGet(Crypto_62_StoredJob[objectId].cryptoKeyId, CRYPTO_KE_CIPHER_KEY, key, &KeyLength);
+    // key generation and set key
+    if (ret == 0)
     {
-        (void)IStdLib_MemCpy(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr, outputPtr, outputLength);
+        switch (KeyLength)
+        {
+        case 16:
+            Crypto_Des3_Set2key_Dec(&ctx, key);
+            break;
+        case 24:
+            Crypto_Des3_Set3key_Dec(&ctx, key);
+            break;
+        default:
+            ret = E_NOT_OK;
+            goto exit;
+        }
     }
+
+    if (ret == 0)
+    {
+        switch (mode)
+        {
+        case CRYPTO_ALGOMODE_ECB:
+            while (inputLength > 0)
+            {
+                (void)IStdLib_MemCpy(temp, inputPtr, CRYPTO_CONST_8);
+                Crypto_3Des_Crypt_Ecb(&ctx, temp, outputPtr);
+                inputPtr += CRYPTO_CONST_8;
+                outputPtr += CRYPTO_CONST_8;
+                inputLength = (inputLength >= CRYPTO_CONST_8) ? (inputLength - CRYPTO_CONST_8) : 0;
+                *outputLength += 8;
+            }
+
+            ret = E_OK;
+            break;
+        case CRYPTO_ALGOMODE_CBC:
+            ret =
+                Crypto_62_KeyElementGet(Crypto_62_StoredJob[objectId].cryptoKeyId, CRYPTO_KE_CIPHER_IV, iv, &ivLength);
+            if (E_OK == ret)
+            {
+                ret = Crypto_3Des_Crypt_Cbc(
+                    &ctx,
+                    CRYPTO_MODE_DECRYPT,
+                    inputLength,
+                    iv,
+                    inputPtr,
+                    outputPtr,
+                    outputLength);
+            }
+            break;
+        default:
+            ret = CRYPTO_ERROR_ALGO_NOT_SUPPORTED;
+            break;
+        }
+    }
+
+exit:
     return ret;
 }
 #endif
@@ -557,5 +663,15 @@ Std_ReturnType Crypto_62_AeadDecrypt_Process(
 #define CRYPTO_62_STOP_SEC_CODE
 #include "Crypto_62_MemMap.h"
 
-/* PRQA S 1252,1258,1290,2784,2822,2880,1505,1532 -- */
-/* PRQA S 6050,6060,6070,6080,6010,6030,6040   -- */
+/* PRQA S 2995,2997,2871,2990,0597,2784,2880 -- */                                         /* VL_Crypto_62_General */
+/* PRQA S 2834,2982,2983,1532,2986,2982,2983,5022,5143,5014,5031,5045,2839,2998 -- */      /* VL_Crypto_62_General */
+/* PRQA S 2996,2992,2911,1503,2822,2896,2986 -- */                                         /* VL_Crypto_62_General */
+/* PRQA S 4532,4533,4543,4558,3673,3795,4150,4522,3391,3432,3442,2743,1505,2889,2834 -- */ /* VL_Crypto_62_General */
+/* PRQA S 4434,4443,4446,4447,4460,4461,4464,4470,4480,4491,4499,4501,4538,4542,4544 -- */ /* VL_Crypto_62_General */
+/* PRQA S 3717,3762,3769,3772,4115,4116,4393,4394,4403,4404,4413,4414,4423,4432 -- */      /* VL_Crypto_62_General */
+/* PRQA S 3395,3396,3397,3400,3408,3410,3418,3450,3440,3455,3610,3625,3672,3678,3715 -- */ /* VL_Crypto_62_General */
+/* PRQA S 2740,3101,3120,3122,3123,3140,3200,3206,3209,3218,3219,3226,3332,3344,3387 -- */ /* VL_Crypto_62_General */
+/* PRQA S 1861,1863,1880,1881,1890,1891,2001,2015,2205,2106,2140,2462,2463,2472,2487 -- */ /* VL_Crypto_62_General */
+/* PRQA S 1290,1291,1336,1338,1840,1820,1821,1823,1841,1842,1843,1844,1851,1853,1860 -- */ /* VL_Crypto_62_General */
+/* PRQA S 1253,0288,0317,0432,0489,0490,0693,0770,0772,0780,0842,1252,1258,1259,1277 -- */ /* VL_Crypto_62_General */
+/* PRQA S 0311,0314,0316,0488,1339,2016,2023,2024,2052,2105,3102,3103,3208,3326,3345 -- */ /* VL_Crypto_62_General */

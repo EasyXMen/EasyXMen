@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -554,22 +554,22 @@ FEE_LOCAL void Fee_MainFunctionSub(void);
 
 /* ============================================ internal data definition ============================================ */
 /* PRQA S 3408 ++ */ /* VL_Fee_3408 */
-#define FEE_START_SEC_VAR_INIT_PTR
+#define FEE_START_SEC_VAR_CLEARED_PTR
 #include "Fee_MemMap.h"
 /**
  * @brief The PB configuration parameter used to point to the Fee module
  */
-FEE_LOCAL const Fee_ConfigType* Fee_ConfigStd = NULL_PTR;
-#define FEE_STOP_SEC_VAR_INIT_PTR
+FEE_LOCAL const Fee_ConfigType* Fee_ConfigStd;
+#define FEE_STOP_SEC_VAR_CLEARED_PTR
 #include "Fee_MemMap.h"
 
-#define FEE_START_SEC_VAR_INIT_8
+#define FEE_START_SEC_VAR_CLEARED_8
 #include "Fee_MemMap.h"
 /**
  * @brief Record the status of the Fee module
  */
-FEE_LOCAL MemIf_StatusType Fee_ModuleStatus = MEMIF_UNINIT;
-#define FEE_STOP_SEC_VAR_INIT_8
+FEE_LOCAL MemIf_StatusType Fee_ModuleStatus;
+#define FEE_STOP_SEC_VAR_CLEARED_8
 #include "Fee_MemMap.h"
 
 #define FEE_START_SEC_VAR_CLEARED_UNSPECIFIED
@@ -582,11 +582,11 @@ FEE_LOCAL Fee_JobManageType Fee_JobInfo;
 #define FEE_STOP_SEC_VAR_CLEARED_UNSPECIFIED
 #include "Fee_MemMap.h"
 
-#define FEE_START_SEC_VAR_INIT_8
+#define FEE_START_SEC_VAR_CLEARED_8
 #include "Fee_MemMap.h"
-FEE_LOCAL uint8 Fee_ClusterGroupIdx = 0u;
-FEE_LOCAL uint8 Fee_ClusterIdx      = 0u;
-#define FEE_STOP_SEC_VAR_INIT_8
+FEE_LOCAL uint8 Fee_ClusterGroupIdx;
+FEE_LOCAL uint8 Fee_ClusterIdx;
+#define FEE_STOP_SEC_VAR_CLEARED_8
 #include "Fee_MemMap.h"
 
 /**
@@ -1541,7 +1541,8 @@ FEE_LOCAL MemIf_JobResultType Fee_JobWriteHdr(void)
     /* PRQA S 3120 -- */
     {
         /** No enough space,perform cluster swap handle */
-        ret = Fee_JobIntSwap();
+        Fee_ClusterGroupIdx = clusterGrpIdx;
+        ret                 = Fee_JobIntSwap();
     }
     else
     {
@@ -1654,7 +1655,7 @@ FEE_LOCAL MemIf_JobResultType Fee_JobIntSwapClusterClear(void)
                                 .FeeClusterLength;
     uint32 clusterUseID = Fee_ClusterGrpInfo[Fee_ClusterGroupIdx].Fee_ClusterUseID;
     /** Build cluster header information */
-    Fee_PackClusterHdr(clusterUseID, startAddr, length, Fee_DataBuffer);
+    Fee_PackClusterHdr(clusterUseID + 1u, startAddr, length, Fee_DataBuffer);
 
     /** Write the cluster header to flash */
     if (((Std_ReturnType)E_OK) == Fls_Write(startAddr, Fee_DataBuffer, FEE_CLUSTER_HEADER_SIZE - FEE_VIRTUALPAGE_SIZE))
@@ -1684,9 +1685,12 @@ FEE_LOCAL MemIf_JobResultType Fee_JobIntSwapBlock(void)
 
     for (; blockId < Fee_ConfigStd->FeeBlockSum; ++blockId) /* PRQA S 2814 */ /* VL_Fee_2814 */
     {
-        blockStatus    = Fee_BlockInfo[blockId].Fee_BlockStatus; /* PRQA S 2844 */               /* VL_Fee_2844 */
+        uint8 blockClusterGrp = Fee_ConfigStd->FeeBlockRef[blockId].ClusterGrp;
+        blockStatus           = Fee_BlockInfo[blockId].Fee_BlockStatus; /* PRQA S 2844 */        /* VL_Fee_2844 */
         immediateBlock = Fee_ConfigStd->FeeBlockRef[blockId].FeeImmediateData; /* PRQA S 2824 */ /* VL_Fee_2824 */
-        if ((FEE_BLOCK_VALID == blockStatus) || ((TRUE == immediateBlock) && (FEE_BLOCK_INCONSISTENT == blockStatus)))
+        if ((blockClusterGrp == Fee_ClusterGroupIdx)
+            && ((FEE_BLOCK_VALID == blockStatus)
+                || ((TRUE == immediateBlock) && (FEE_BLOCK_INCONSISTENT == blockStatus))))
         {
             break;
         }
@@ -1768,24 +1772,29 @@ FEE_LOCAL MemIf_JobResultType Fee_JobIntSwapClusterVldDone(void)
     /** update all copied block information */
     for (uint16 cnt = 0u; cnt < Fee_ConfigStd->FeeBlockSum; ++cnt) /* PRQA S 2814 */ /* VL_Fee_2814 */
     {
-        /* PRQA S 2824 ++ */ /* VL_Fee_2824 */
-        boolean immediateBlock = Fee_ConfigStd->FeeBlockRef[cnt].FeeImmediateData;
-        if ((FEE_BLOCK_VALID == Fee_BlockInfo[cnt].Fee_BlockStatus)
-            || ((FEE_BLOCK_INCONSISTENT == Fee_BlockInfo[cnt].Fee_BlockStatus) && ((boolean)TRUE == immediateBlock)))
+        uint8 clusterId = Fee_ConfigStd->FeeBlockRef[cnt].ClusterGrp;
+        if (clusterId == Fee_ClusterGroupIdx)
         {
-            uint16 blockSize = Fee_ConfigStd->FeeBlockRef[cnt].FeeBlockSize;
-            dataAddr -= blockSize;
-            hdrAddr += FEE_BLOCK_HEADER_SIZE; /* PRQA S 1252 */ /* VL_QAC_1252 */
-            Fee_BlockInfo[cnt].Fee_DataAddr = dataAddr;
+            /* PRQA S 2824 ++ */ /* VL_Fee_2824 */
+            boolean immediateBlock = Fee_ConfigStd->FeeBlockRef[cnt].FeeImmediateData;
+            if ((FEE_BLOCK_VALID == Fee_BlockInfo[cnt].Fee_BlockStatus)
+                || ((FEE_BLOCK_INCONSISTENT == Fee_BlockInfo[cnt].Fee_BlockStatus)
+                    && ((boolean)TRUE == immediateBlock)))
+            {
+                uint16 blockSize = Fee_ConfigStd->FeeBlockRef[cnt].FeeBlockSize;
+                dataAddr -= blockSize;
+                hdrAddr += FEE_BLOCK_HEADER_SIZE; /* PRQA S 1252 */ /* VL_QAC_1252 */
+                Fee_BlockInfo[cnt].Fee_DataAddr = dataAddr;
 #if (STD_ON == FEE_PAGE_DIRECT_WRITE_SUPPORT)
-            Fee_BlockInfo[cnt].Fee_HdrAddr = hdrAddr - FEE_BLOCK_HEADER_SIZE;
+                Fee_BlockInfo[cnt].Fee_HdrAddr = hdrAddr - FEE_BLOCK_HEADER_SIZE;
 #else
-            /* PRQA S 3120 ++ */ /* VL_QAC_MagicNum */
-            Fee_BlockInfo[cnt].Fee_ValidHdrAddr = (hdrAddr - (2u * FEE_VIRTUALPAGE_SIZE));
-            /* PRQA S 3120 -- */
+                /* PRQA S 3120 ++ */ /* VL_QAC_MagicNum */
+                Fee_BlockInfo[cnt].Fee_ValidHdrAddr = (hdrAddr - (2u * FEE_VIRTUALPAGE_SIZE));
+                /* PRQA S 3120 -- */
 #endif
+            }
+            /* PRQA S 2824 -- */
         }
-        /* PRQA S 2824 -- */
     }
     /** Switch to the new cluster */
     Fee_ClusterGrpInfo[Fee_ClusterGroupIdx].Fee_ClusterUseID += 1uL;
@@ -2142,8 +2151,7 @@ FEE_LOCAL MemIf_JobResultType Fee_JobIntScanBlockHdrRead(void)
 {
     MemIf_JobResultType ret;
     /** Read the block header */
-    if (((Std_ReturnType)E_OK)
-        != Fls_Read(Fee_ClusterGrpInfo[Fee_ClusterGroupIdx].Fee_BlockHdrAddr, Fee_DataBuffer, FEE_BLOCK_HEADER_SIZE))
+    if (((Std_ReturnType)E_OK) != Fls_Read(Fee_BlockHeaderAddr, Fee_DataBuffer, FEE_BLOCK_HEADER_SIZE))
     {
         /** Fls read job hasn't been accepted */
         ret = MEMIF_JOB_FAILED;
@@ -2492,8 +2500,8 @@ FEE_LOCAL MemIf_JobResultType Fee_JobIntScanBlockHdrGet(const boolean BufferVali
     }
     else if (FEE_BLOCK_HEADER_BLANK == blockStatus)
     {
-        Fee_JobInfo.Fee_Job = FEE_JOB_NONE;
-        ret                 = MEMIF_JOB_OK;
+        Fee_ClusterGroupIdx++;
+        ret = Fee_JobIntScanClusterDone();
     }
     else
     {

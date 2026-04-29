@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -21,6 +21,7 @@
  **  @description        : CanIf header file for external type definitions
  **
  ***********************************************************************************************************************/
+/* PRQA S 1536 EOF */ /* VL_CanIf_1536 */
 
 #ifndef CANIF_TYPES_H_
 #define CANIF_TYPES_H_
@@ -175,7 +176,7 @@ typedef unit16 CanIf_UpTxCfmApiNumberType;
 #define CANIF_UPTXCONFIRMATION_API_NUMBER_INVALID CANIF_UNUSED_UINT16
 #endif
 
-#if (STD_ON == CANIF_TRIGGER_TRANSMIT_SUPPORT)
+#if ((STD_ON == CANIF_TRIGGER_TRANSMIT_SUPPORT) && (STD_ON == CANIF_UP_TRIGGER_TRANSMIT_ENABLE))
 /**
  * @brief type of CanIf User Trigger Transmit API number
  */
@@ -199,7 +200,7 @@ typedef uint16 CanIf_UpRxIndApiNumberType;
 #define CANIF_UPRXINDICATION_API_NUMBER_INVALID CANIF_UNUSED_UINT16
 #endif
 
-#if (CANIF_CAN_AUTOSAR_VERSION >= CANIF_CAN_AUTOSAR_431)
+#if (CANIF_CAN_AUTOSAR_VERSION >= CANIF_CAN_AUTOSAR_R431)
 #define CAN_OK     E_OK
 #define CAN_NOT_OK E_NOT_OK
 #else /*The default version of can driver is 4.2.2*/
@@ -390,7 +391,7 @@ typedef struct CanIf_TxPduConfigTag
     boolean TxMetaDataEnable;
     boolean CanIfTxPduTruncation;
     uint8   UpConfirmTxPduMask;
-#if (STD_ON == CANIF_TRIGGER_TRANSMIT_SUPPORT)
+#if ((STD_ON == CANIF_TRIGGER_TRANSMIT_SUPPORT) && (STD_ON == CANIF_UP_TRIGGER_TRANSMIT_ENABLE))
     /*This parameter defines the index for the name of the <User_TriggerTransmit> in array
      * CanIf_UpTriggerTransmitArray*/
     CanIf_UpTrgTxApiNumberType UpTriggerTransmitApiIndex;

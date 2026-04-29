@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -22,7 +22,16 @@
  **
  ***********************************************************************************************************************/
 
-/* PRQA S 6050,6060,6070,6080,6010,6030,6040,0342,2743,2889,2784,1532 ++ */ /* VL_QAC_Crypto */
+/* PRQA S 6010 EOF */ /* VL_MTR_Crypto_62_STCYC */
+/* PRQA S 6020 EOF */ /* VL_MTR_Crypto_62_STLIN */
+/* PRQA S 6030 EOF */ /* VL_MTR_Crypto_62_STMIF */
+/* PRQA S 6040 EOF */ /* VL_MTR_Crypto_62_STPAR */
+/* PRQA S 6050 EOF */ /* VL_MTR_Crypto_62_STST3 */
+/* PRQA S 6060 EOF */ /* VL_MTR_Crypto_62_STM19 */
+/* PRQA S 6070 EOF */ /* VL_MTR_Crypto_62_STCAL */
+/* PRQA S 6080 EOF */ /* VL_MTR_Crypto_62_STPTH */
+
+/* PRQA S 0342,2743,2889,2784,1532 ++ */ /* VL_Crypto_62_General */
 /* =================================================== inclusions =================================================== */
 
 #include "Crypto_62_Internal.h"
@@ -39,7 +48,7 @@
 #include "Crypto_62_MemMap.h"
 
 /* ===================================================== macros ===================================================== */
-/* PRQA S 3410 ++ */ /* VL_QAC_Crypto */
+/* PRQA S 3410 ++ */ /* VL_Crypto_62_General */
 #define MD_INFO(type, out_size, block_size) type, out_size, block_size,
 /* PRQA S 3410 -- */
 
@@ -62,7 +71,7 @@
 /* ========================================== internal function declarations ======================================== */
 
 /* ============================================ internal data definitions =========================================== */
-/* PRQA S 1290,3432,3418,3218,3412 ++ */ /* VL_QAC_Crypto */
+/* PRQA S 1290,3432,3418,3218,3412 ++ */ /* VL_Crypto_62_General */
 CRYPTO_62_LOCAL const Crypto_Md_Info_t Crypto_ripemd160_info = {MD_INFO(CRYPTO_ALGOFAM_RIPEMD160, 20, 64)};
 
 CRYPTO_62_LOCAL const Crypto_Md_Info_t Crypto_sha1_info = {MD_INFO(CRYPTO_ALGOFAM_SHA1, 20, 64)};
@@ -103,7 +112,7 @@ CRYPTO_62_LOCAL const Crypto_Md_Info_t Crypto_sm3_info = {MD_INFO(CRYPTO_ALGOFAM
  *                                              associated with algorithmfamily.
  */
 /******************************************************************************/
-/* PRQA S 2023,2024++ */ /* VL_QAC_Crypto */
+/* PRQA S 2023,2024++ */ /* VL_Crypto_62_General */
 const Crypto_Md_Info_t* Crypto_Md_info_from_type(Crypto_AlgorithmFamilyType algorithmfamily)
 {
     switch (algorithmfamily)
@@ -159,7 +168,7 @@ const Crypto_Md_Info_t* Crypto_Md_info_from_type(Crypto_AlgorithmFamilyType algo
  * Return              unsigned char: The size of the message-digest output in Bytes.
  */
 /******************************************************************************/
-unsigned char Crypto_md_get_size(const Crypto_Md_Info_t* md_info)
+uint8 Crypto_md_get_size(const Crypto_Md_Info_t* md_info)
 {
     if (md_info == NULL_PTR)
     {
@@ -342,7 +351,7 @@ void Crypto_Md_Free(Crypto_Md_Context_t* ctx)
  *                                      E_NOT_OK: State not accepted
  */
 /******************************************************************************/
-/* PRQA S 3673,0317,1294 ++ */ /* VL_QAC_Crypto */
+/* PRQA S 3673,0317,1294 ++ */ /* VL_Crypto_62_General */
 Std_ReturnType Crypto_Md_Start(Crypto_Md_Context_t* ctx)
 {
     Std_ReturnType result = E_OK;
@@ -583,7 +592,8 @@ Std_ReturnType Crypto_Md_Finish(Crypto_Md_Context_t* ctx, uint8* output)
 Std_ReturnType
     Crypto_md(const Crypto_Md_Info_t* md_info, const unsigned char* input, uint32 ilen, unsigned char* output)
 {
-    Std_ReturnType ret = E_NOT_OK;
+    Std_ReturnType ret       = E_NOT_OK;
+    uint32         outputLen = md_info->size;
     if (md_info == NULL_PTR)
     {
         return E_NOT_OK;
@@ -622,22 +632,22 @@ Std_ReturnType
         break;
     case CRYPTO_ALGOFAM_SHA3_224:
 #if (CRYPTO_ALGORITHMFAM_SHA3 == STD_ON)
-        ret = Crypto_Sha3(CRYPTO_SHA3_224, input, ilen, output, md_info->size);
+        ret = Crypto_Sha3(CRYPTO_SHA3_224, input, ilen, output, &outputLen);
 #endif
         break;
     case CRYPTO_ALGOFAM_SHA3_256:
 #if (CRYPTO_ALGORITHMFAM_SHA3 == STD_ON)
-        ret = Crypto_Sha3(CRYPTO_SHA3_256, input, ilen, output, md_info->size);
+        ret = Crypto_Sha3(CRYPTO_SHA3_256, input, ilen, output, &outputLen);
 #endif
         break;
     case CRYPTO_ALGOFAM_SHA3_384:
 #if (CRYPTO_ALGORITHMFAM_SHA3 == STD_ON)
-        ret = Crypto_Sha3(CRYPTO_SHA3_384, input, ilen, output, md_info->size);
+        ret = Crypto_Sha3(CRYPTO_SHA3_384, input, ilen, output, &outputLen);
 #endif
         break;
     case CRYPTO_ALGOFAM_SHA3_512:
 #if (CRYPTO_ALGORITHMFAM_SHA3 == STD_ON)
-        ret = Crypto_Sha3(CRYPTO_SHA3_512, input, ilen, output, md_info->size);
+        ret = Crypto_Sha3(CRYPTO_SHA3_512, input, ilen, output, &outputLen);
 #endif
         break;
 
@@ -773,4 +783,4 @@ Std_ReturnType Crypto_62_Hash_Process(
 #include "Crypto_62_MemMap.h"
 #endif
 
-/* PRQA S 6050,6060,6070,6080,6010,6030,6040,0342,2743,2889,2784,1532 -- */
+/* PRQA S 0342,2743,2889,2784,1532 -- */

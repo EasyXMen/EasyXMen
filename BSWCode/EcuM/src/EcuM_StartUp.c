@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -269,7 +269,8 @@ ECUM_LOCAL void EcuM_InitAndNotifyBswM(EcuM_RunTimeLcType* tempRunData)
 ECUM_LOCAL void EcuM_InternalInit(EcuM_RunTimeLcType* pRt)
 {
 #if (ECUM_ALARM_CLOCK_PRESENT == STD_ON)
-    pRt->GlobalClock = 0u;
+    pRt->GlobalClock     = 0u;
+    pRt->EcuM_TimeRecord = 0u;
 #endif /*ECUM_ALARM_CLOCK_PRESENT == STD_ON*/
 
     pRt->Wks.Pending   = &EcuMWksPending;

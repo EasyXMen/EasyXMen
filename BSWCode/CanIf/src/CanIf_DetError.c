@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -810,7 +810,7 @@ Std_ReturnType CanIf_ValidateCheckValidation(EcuM_WakeupSourceType WakeupSource)
 Std_ReturnType CanIf_ValidateGetTxConfirmationState(uint8 ControllerId)
 {
     Std_ReturnType  result         = E_NOT_OK;
-    uint8           apiId          = CANIF_GETTXCONFIRMATIONSTATE;
+    uint8           apiId          = CANIF_GETTXCONFIRMATIONSTATE_ID;
     uint8           errorId        = CANIF_E_NO_ERROR;
     ApplicationType partitionIndex = CanIf_GetCurrentPartition();
 
@@ -938,6 +938,115 @@ Std_ReturnType CanIf_ValidateSetBaudrate(uint8 ControllerId, uint16 BaudRateConf
 }
 #endif
 
+#if (CANIF_CAN_AUTOSAR_VERSION >= CANIF_CAN_AUTOSAR_R431)
+Std_ReturnType CanIf_ValidateGetControllerErrorState(uint8 ControllerId, Can_ErrorStateType* ErrorStatePtr)
+{
+    Std_ReturnType  result         = E_NOT_OK;
+    uint8           apiId          = CANIF_GETCONTROLLERERRORSTATE_ID;
+    uint8           errorId        = CANIF_E_NO_ERROR;
+    ApplicationType partitionIndex = CanIf_GetCurrentPartition();
+
+    if (NULL_PTR == CanIf_ConfigStd)
+    {
+        errorId = CANIF_E_UNINIT;
+    }
+    else if (E_OK != CanIf_ValidatePartition(apiId, partitionIndex))
+    {
+        /* do nothing */
+    }
+    else if (E_OK != CanIf_ValidateController(apiId, partitionIndex, ControllerId))
+    {
+        /* do nothing */
+    }
+    else if (NULL_PTR == ErrorStatePtr)
+    {
+        errorId = CANIF_E_PARAM_POINTER;
+    }
+    else
+    {
+        result = E_OK;
+    }
+
+    if (CANIF_E_NO_ERROR != errorId)
+    {
+        CanIf_DetReportError(apiId, errorId);
+    }
+    return result;
+}
+#endif
+
+#if (CANIF_CAN_AUTOSAR_VERSION >= CANIF_CAN_AUTOSAR_R440)
+Std_ReturnType CanIf_ValidateGetControllerRxErrorCounter(uint8 ControllerId, uint8* RxErrorCounterPtr)
+{
+    Std_ReturnType  result         = E_NOT_OK;
+    uint8           apiId          = CANIF_GETCONTROLLERRXERRORCOUNTER_ID;
+    uint8           errorId        = CANIF_E_NO_ERROR;
+    ApplicationType partitionIndex = CanIf_GetCurrentPartition();
+
+    if (NULL_PTR == CanIf_ConfigStd)
+    {
+        errorId = CANIF_E_UNINIT;
+    }
+    else if (E_OK != CanIf_ValidatePartition(apiId, partitionIndex))
+    {
+        /* do nothing */
+    }
+    else if (E_OK != CanIf_ValidateController(apiId, partitionIndex, ControllerId))
+    {
+        /* do nothing */
+    }
+    else if (NULL_PTR == RxErrorCounterPtr)
+    {
+        errorId = CANIF_E_PARAM_POINTER;
+    }
+    else
+    {
+        result = E_OK;
+    }
+
+    if (CANIF_E_NO_ERROR != errorId)
+    {
+        CanIf_DetReportError(apiId, errorId);
+    }
+    return result;
+}
+
+Std_ReturnType CanIf_ValidateGetControllerTxErrorCounter(uint8 ControllerId, uint8* TxErrorCounterPtr)
+{
+    Std_ReturnType  result         = E_NOT_OK;
+    uint8           apiId          = CANIF_GETCONTROLLERTXERRORCOUNTER_ID;
+    uint8           errorId        = CANIF_E_NO_ERROR;
+    ApplicationType partitionIndex = CanIf_GetCurrentPartition();
+
+    if (NULL_PTR == CanIf_ConfigStd)
+    {
+        errorId = CANIF_E_UNINIT;
+    }
+    else if (E_OK != CanIf_ValidatePartition(apiId, partitionIndex))
+    {
+        /* do nothing */
+    }
+    else if (E_OK != CanIf_ValidateController(apiId, partitionIndex, ControllerId))
+    {
+        /* do nothing */
+    }
+    else if (NULL_PTR == TxErrorCounterPtr)
+    {
+        errorId = CANIF_E_PARAM_POINTER;
+    }
+    else
+    {
+        result = E_OK;
+    }
+
+    if (CANIF_E_NO_ERROR != errorId)
+    {
+        CanIf_DetReportError(apiId, errorId);
+    }
+    return result;
+}
+#endif
+
 #if (STD_ON == CANIF_TRIGGER_TRANSMIT_SUPPORT)
 Std_ReturnType CanIf_ValidateTriggerTransmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr)
 {
@@ -1021,6 +1130,7 @@ Std_ReturnType CanIf_ValidateTxConfirmation(PduIdType CanTxPduId)
 #endif
 
 #if ((STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT) || (CANIF_VARIANT_NUMBER > 1u))
+/* PRQA S 6030 ++ */ /* VL_MTR_CanIf_STMIF */
 Std_ReturnType CanIf_ValidateRxIndication(const Can_HwType* Mailbox, const PduInfoType* PduInfoPtr)
 {
     Std_ReturnType  result         = E_NOT_OK;
@@ -1103,6 +1213,7 @@ Std_ReturnType CanIf_ValidateRxIndication(const Can_HwType* Mailbox, const PduIn
 #endif
     return result;
 }
+/* PRQA S 6030 -- */
 #endif
 
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)

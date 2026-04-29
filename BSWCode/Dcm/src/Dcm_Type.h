@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -75,7 +75,7 @@ typedef Std_ReturnType (*Dcm_DsdServiceRequestNotificationIndicationFncType)(
 /**
  * @brief service notification callouts
  */
-typedef struct DsdServiceRequestNotificationType /* PRQA S 1536 */ /* VL_Dcm_1536 */
+typedef struct
 {
     Dcm_DsdServiceRequestNotificationConfirmationFncType
         Confirmation; /**<Handles service request notification confirmation @range NA */
@@ -86,7 +86,7 @@ typedef struct DsdServiceRequestNotificationType /* PRQA S 1536 */ /* VL_Dcm_153
 /**
  * @brief authenticationRow type
  */
-typedef struct ServiceRoleType /* PRQA S 1536  */ /* VL_Dcm_1536 */
+typedef struct
 {
     uint8 AuthenticationRoleBitPosition; /**< DcmDspAuthenticationRoleBitPosition: Defines the bit number that
                                           * represents the role in the authentication bit field. The bit mask is aligned
@@ -124,7 +124,7 @@ typedef Std_ReturnType (*Dcm_DspSecuritySetAttemptCounterFncType)(Dcm_OpStatusTy
 /**
  * @brief DcmDspSecurityRow configuration
  */
-typedef struct DspSecurityRowType /* PRQA S 1536  */ /* VL_Dcm_1536 */
+typedef struct
 {
     uint32 AdrSize; /**< DcmDspSecurityADRSize: Size in bytes of the AccessDataRecord used in GetSeed @range
                        0..0xFFFFFFFF*/
@@ -169,7 +169,7 @@ typedef enum
 /**
  * @brief DcmDspSessionRow Configuration
  */
-typedef struct DspSessionRowType /* PRQA S 1536  */ /* VL_Dcm_1536 */
+typedef struct
 {
     Dcm_DspSessionForBootType
         SessionForBoot; /**< DcmDspSessionForBoot: This parameter defines whether this diagnostic session allows to jump
@@ -209,7 +209,7 @@ typedef enum
 /**
  * @brief DcmDsdSubService Configuration
  */
-typedef struct DsdSubServiceType /* PRQA S 1536  */ /* VL_Dcm_1536 */
+typedef struct
 {
     Dcm_ServcieFncType SubServiceFnc; /**< DcmDsdSubServiceFnc: Callback function of the ECU Supplier specific component
                                          for the particular service @range NA */
@@ -240,13 +240,17 @@ typedef struct DsdSubServiceType /* PRQA S 1536  */ /* VL_Dcm_1536 */
 /**
  * @brief DcmDsdService Configuration
  */
-typedef struct DsdServiceType /* PRQA S 1536  */ /* VL_Dcm_1536 */
+typedef struct
 {
     Dcm_ServcieFncType SidTabFnc; /**< DcmDsdSidTabFnc: Callback function of the ECU Supplier specific component for the
                                      particular service @range NA */
     uint8   SidTabServiceId;      /**< DcmDsdSidTabServiceId: Identifier of the service @range 0..255*/
     boolean SubfuncAvail; /**< DcmDsdSidTabSubfuncAvail: Information about whether the service has subfunctions or not
                              @range 0..1 */
+#if (STD_ON == DCM_SUPPRESS_POS_RSP)
+    boolean SuppressPosRsp;
+#endif
+
     uint8        ServiceRoleRefNum; /**< The number of ServiceRoleRef @range 0..255*/
     const uint8* ServiceRoleRef; /**< DcmDsdServiceRoleRef: Reference to DcmDspAuthenticationRow that defines a role in
                                     that the service is allowed to be executed @range NA */
@@ -273,7 +277,7 @@ typedef struct DsdServiceType /* PRQA S 1536  */ /* VL_Dcm_1536 */
 /**
  * @brief DcmDsdServiceTable Configuration
  */
-typedef struct DsdServiceTableType /* PRQA S 1536  */ /* VL_Dcm_1536 */
+typedef struct
 {
     uint16 ServiceNum;   /**< The number of configured DcmDsdService @range 0..0xFFFF*/
     uint16 ServiceIndex; /**< The related DcmDsdService index @range 0..0xFFFF*/
@@ -291,7 +295,7 @@ typedef Std_ReturnType (*Dcm_DslCallbackDCMRequestServiceFncType)(
 /**
  * @brief CallbackDCMRequestService Configuration
  */
-typedef struct DslCallbackDCMRequestServiceType /* PRQA S 1536  */ /* VL_Dcm_1536 */
+typedef struct
 {
     Dcm_DslCallbackDCMRequestServiceFncType StartProtocol; /**< The Function name for start protocol @range NA*/
     Dcm_DslCallbackDCMRequestServiceFncType StopProtocol;  /**< The Function name for stop protocol @range NA*/
@@ -319,7 +323,7 @@ typedef enum
 /**
  * @brief DcmDslProtocolRx Configuration
  */
-typedef struct DslProtocolRxType /* PRQA S 1536  */ /* VL_Dcm_1536 */
+typedef struct
 {
     Dcm_DslProtocolRxAddrType
            AddrType; /**< DcmDslProtocolRxAddrType: Selects the addressing type of the reception channel @range NA */
@@ -334,7 +338,7 @@ typedef Std_ReturnType (*Dcm_ComCtrlFncType)(uint8 mode);
 /**
  * @brief mainConnection configuration
  */
-typedef struct DslMainConnectionType /* PRQA S 1536  */ /* VL_Dcm_1536 */
+typedef struct
 {
     uint16 RxConnectionId; /**< DcmDslProtocolRxConnectionId: Unique identifier of the tester which uses this connection
                             * for diagnostic communication @range 0..0xFFFF*/
@@ -359,7 +363,7 @@ typedef struct DslMainConnectionType /* PRQA S 1536  */ /* VL_Dcm_1536 */
 /**
  * @brief This container contains the configuration of one particular diagnostic protocol used in Dcm.
  */
-typedef struct DslProtocolRowType /* PRQA S 1536  */ /* VL_Dcm_1536 */
+typedef struct
 {
     uint16 MaximumResponseSize; /**< DcmDslProtocolMaximumResponseSize: This parameter defines the maximum length of the
                                  * response message case DcmPagedBufferEnabled == TRUE @range 0..0xFFFF*/
@@ -404,12 +408,16 @@ typedef struct DslProtocolRowType /* PRQA S 1536  */ /* VL_Dcm_1536 */
     boolean ProtocolUseGenericConnection; /**< TRUE when any referenced pdu has configured metadata sa/ta @range 0..1*/
     boolean RequestQueued; /**< DcmDslProtocolRequestQueued: TRUE to support an extra buffer for queueud request @range
                               0..1*/
+#if (DCM_DSL_RX_TX_SHARED_BUGGER == STD_ON)
+    boolean SharedRxTxBuffer; /**< True when Shared buffer between DcmDslProtocolRxBufferRef and
+                                 DcmDslProtocolTxBufferRef @range 0..1*/
+#endif
 } Dcm_DslProtocolRowType;
 
 /**
  * @brief DcmDspAuthenticationConnection Configuration
  */
-typedef struct DspAuthenticationConnectionType /* PRQA S 1536  */ /* VL_Dcm_1536 */
+typedef struct
 {
     uint16 EcuChallengeLength; /**< DcmDspAuthenticationEcuChallengeLength: Length in byte of the ECU challenge @range
                                   0..0xFFFF*/
@@ -447,7 +455,7 @@ typedef struct DspAuthenticationConnectionType /* PRQA S 1536  */ /* VL_Dcm_1536
 /**
  * @brief DcmDspAuthenticationTransmitCertificate Configuration
  */
-typedef struct DspAuthenticationTransmitCertificateType /* PRQA S 1536  */ /* VL_Dcm_1536 */
+typedef struct
 {
     uint16 TransmitCertificateEvaluationId; /**< DcmDspAuthenticationTransmitCertificateEvaluationId: Certificate
                                                evaluation id @range 0..0xFFFF */
@@ -461,7 +469,7 @@ typedef struct DspAuthenticationTransmitCertificateType /* PRQA S 1536  */ /* VL
 /**
  * @brief DcmDspAuthenticationRow Configuration
  */
-typedef struct DspAuthenticationRowType /* PRQA S 1536  */ /* VL_Dcm_1536 */
+typedef struct
 {
     uint8 AuthenticationRoleBitPosition; /**< DcmDspAuthenticationRoleBitPosition: Defines the bit number that
                                           * represents the role in the authentication bit field. The bit mask is aligned
@@ -472,7 +480,7 @@ typedef struct DspAuthenticationRowType /* PRQA S 1536  */ /* VL_Dcm_1536 */
 /**
  * @brief DcmDspAuthentication Configuration
  */
-typedef struct DspAuthenticationType /* PRQA S 1536  */ /* VL_Dcm_1536 */
+typedef struct
 {
     uint8 DeauthenticatedRoleRefNum; /**< The number of DeauthenticatedRoleRef @range 0..255*/
     const uint8*
@@ -495,7 +503,7 @@ typedef Std_ReturnType (*Dcm_DspClearDTCCheckFncType)(uint32 GoDTC, Dcm_Negative
 /**
  * @brief DcmDspClearDTC Configuration
  */
-typedef struct DspClearDTCType /* PRQA S 1536  */ /* VL_Dcm_1536 */
+typedef struct
 {
     Dcm_DspClearDTCCheckFncType
         CheckFnc; /**< DcmDspClearDTCCheckFnc: Callback function for condition check, manufacturer / supplier specific
@@ -506,7 +514,7 @@ typedef struct DspClearDTCType /* PRQA S 1536  */ /* VL_Dcm_1536 */
 /**
  * @brief DcmDspComControlAllChannel Configuration
  */
-typedef struct DspComControlAllChannelType /* PRQA S 1536  */ /* VL_Dcm_1536 */
+typedef struct
 {
     NetworkHandleType  AllComMChannelRef;    /**< DcmDspAllComMChannelRef: Reference to ComM channel @range NA*/
     Dcm_ComCtrlFncType AllChannelComCtrlFnc; /**< ComControl function @range NA*/
@@ -515,7 +523,7 @@ typedef struct DspComControlAllChannelType /* PRQA S 1536  */ /* VL_Dcm_1536 */
 /**
  * @brief DcmDspComControlSpecificChannel Configuration
  */
-typedef struct DspComControlSpecificChannelType /* PRQA S 1536  */ /* VL_Dcm_1536 */
+typedef struct
 {
     uint8 SubnetNumber; /**< DcmDspSubnetNumber: Subnet Number which controls the specific ComMChannel @range NA*/
     NetworkHandleType  SpecificComMChannelRef; /**< DcmDspSpecificComMChannelRef: Reference to ComM channel @range NA*/
@@ -525,7 +533,7 @@ typedef struct DspComControlSpecificChannelType /* PRQA S 1536  */ /* VL_Dcm_153
 /**
  * @brief DcmDspComControlSubNode Configuration
  */
-typedef struct DspComControlSubNodeType /* PRQA S 1536  */ /* VL_Dcm_1536 */
+typedef struct
 {
     uint16 SubNodeId; /**< DcmDspComControlSubNodeId: The node identification number DcmDspComControlSubNodeId is
                        * addressed by the CommunicationControl (0x28) request @range NA*/
@@ -537,7 +545,7 @@ typedef struct DspComControlSubNodeType /* PRQA S 1536  */ /* VL_Dcm_1536 */
 /**
  * @brief DcmDspComControl Configuration
  */
-typedef struct DspComControlType /* PRQA S 1536  */ /* VL_Dcm_1536 */
+typedef struct
 {
     const Dcm_ModeRuleFncType
         ComControlCommunicationReEnableModeRuleRef; /**< DcmDspComControlCommunicationReEnableModeRuleRef: Reference to
@@ -548,7 +556,7 @@ typedef struct DspComControlType /* PRQA S 1536  */ /* VL_Dcm_1536 */
 /**
  * @brief DcmDspCommonAuthorization Configuration
  */
-typedef struct DspCommonAuthorizationType /* PRQA S 1536  */ /* VL_Dcm_1536 */
+typedef struct
 {
     const Dcm_ModeRuleFncType
         CommonAuthorizationModeRuleRef; /**< DcmDspCommonAuthorizationModeRuleRef: Reference to DcmModeRule @range NA*/
@@ -566,7 +574,7 @@ typedef struct DspCommonAuthorizationType /* PRQA S 1536  */ /* VL_Dcm_1536 */
 /**
  * @brief DcmDspControlDTCSetting Configuration
  */
-typedef struct DspControlDTCSettingType /* PRQA S 1536  */ /* VL_Dcm_1536 */
+typedef struct
 {
     const Dcm_ModeRuleFncType ControlDTCSettingReEnableModeRuleRef; /**< DcmDspControlDTCSettingReEnableModeRuleRef:
                                                                        Reference to DcmModeRule @range NA*/
@@ -702,7 +710,7 @@ typedef enum
 /**
  * @brief DcmDspData Configuration
  */
-typedef struct DspDataCfgType /* PRQA S 1536  */ /* VL_Dcm_1536 */
+typedef struct
 {
     uint16 DspDataByteSize; /**< DcmDspDataByteSize: Defines the array length in bytes or the maximum array length for
                                variable datalengths @range 0..65535 */
@@ -766,7 +774,7 @@ typedef enum
 /**
  * @brief DcmDspDidSignal Configuration
  */
-typedef struct DspDidSignalType /* PRQA S 1536  */ /* VL_Dcm_1536 */
+typedef struct
 {
     uint16 DidByteOffset; /**< DcmDspDidByteOffset: Defines the absolute byte offset of the data defined by DidDataRef
                            * reference to DcmDspData container in the DID @range 0..65535*/
@@ -789,7 +797,7 @@ typedef Std_ReturnType (
 /**
  * @brief DcmDspDid Configuration
  */
-typedef struct DspDidType /* PRQA S 1536  */ /* VL_Dcm_1536 */
+typedef struct
 {
     uint16 DidIdentifier; /**< DcmDspDidIdentifier: 2 byte Identifier of the DID @range 0..65535 */
     uint16 DidSize;       /**< DcmDspDidSize: Length of a DID in byte(s) @range 0..65535 */
@@ -826,7 +834,7 @@ typedef enum
 /**
  * @brief didControl Configuration
  */
-typedef struct DspDidControlType /* PRQA S 1536  */ /* VL_Dcm_1536 */
+typedef struct
 {
     Dcm_DspDidControlMaskType
         ControlMask;        /**< DcmDspDidControlMask: This indicates the presence of "controlEnableMask" in SWC service
@@ -855,7 +863,7 @@ typedef struct DspDidControlType /* PRQA S 1536  */ /* VL_Dcm_1536 */
 /**
  * @brief DcmDspDidReadWrite Configuration
  */
-typedef struct DspDidReadWriteType /* PRQA S 1536  */ /* VL_Dcm_1536 */
+typedef struct
 {
     const Dcm_ModeRuleFncType
                  DidReadWriteModeRuleRef;  /**< DcmDspDidReadWriteModeRuleRef: Reference to DcmModeRule @range NA*/
@@ -874,7 +882,7 @@ typedef struct DspDidReadWriteType /* PRQA S 1536  */ /* VL_Dcm_1536 */
 /**
  * @brief DcmDspDidInfo Configuration
  */
-typedef struct DspDidInfoType /* PRQA S 1536  */ /* VL_Dcm_1536 */
+typedef struct
 {
     uint8   DDDIDMaxElements;   /**< DcmDspDDDIDMaxElements: Maximum number of source elements of a DDDID @range NA*/
     boolean DynamicallyDefined; /**< DcmDspDidDynamicallyDefined: Indicates if this DID can be dynamically defined
@@ -920,7 +928,7 @@ typedef Std_ReturnType (*Dcm_DspDidRangeWriteDidFncType)(
 /**
  * @brief DcmDspDidRange Configuration
  */
-typedef struct DspDidRangeType /* PRQA S 1536  */ /* VL_Dcm_1536 */
+typedef struct
 {
     uint16 DidRangeIdentifierLowerLimit; /**< DcmDspDidRangeIdentifierLowerLimit: Lower limit of DID range @range NA */
     uint16 DidRangeIdentifierUpperLimit; /**< DcmDspDidRangeIdentifierUpperLimit: Upper limit of DID range @range NA */
@@ -953,7 +961,7 @@ typedef enum
 /**
  * @brief DcmDspEcuResetRow Configuration
  */
-typedef struct DspEcuResetRowType /* PRQA S 1536  */ /* VL_Dcm_1536 */
+typedef struct
 {
     uint8                      EcuResetId;         /**< DcmDspEcuResetId: Defines the subfunction ID @range NA*/
     Dcm_ResponseToEcuResetType ResponseToEcuReset; /**< DcmResponseToEcuReset: Defines the answer to EcuReset service
@@ -963,7 +971,7 @@ typedef struct DspEcuResetRowType /* PRQA S 1536  */ /* VL_Dcm_1536 */
 /**
  * @brief DcmDspRead/WriteMemoryRangeInfo Configuration
  */
-typedef struct DspMemoryRangeInfoType /* PRQA S 1536 */ /* VL_Dcm_1536 */
+typedef struct
 {
     uint32 MemoryRangeHigh; /**< DcmDspMemoryRangeHigh: High memory address of a range allowed @range NA*/
     uint32 MemoryRangeLow;  /**< DcmDspMemoryRangeLow: Low memory address of a range allowed @range NA*/
@@ -981,7 +989,7 @@ typedef struct DspMemoryRangeInfoType /* PRQA S 1536 */ /* VL_Dcm_1536 */
 /**
  * @brief DcmDspMemoryIdInfo Configuration
  */
-typedef struct DspMemoryIdInfoType /* PRQA S 1536 */ /* VL_Dcm_1536 */
+typedef struct
 {
     const uint8* MemoryIdValue; /**< DcmDspMemoryIdValue: Value of the memory device identifier used @range NA */
     uint16       ReadMemoryRangeInfoNum; /**< The number of configured ReadMemoryRangeInfo @range NA*/
@@ -995,7 +1003,7 @@ typedef struct DspMemoryIdInfoType /* PRQA S 1536 */ /* VL_Dcm_1536 */
 /**
  * @brief DcmDspMemory Configuration
  */
-typedef struct DspMemoryType /* PRQA S 1536 */ /* VL_Dcm_1536 */
+typedef struct
 {
     uint8 SupportedAddressAndLengthFormatIdentifierNum; /**< number of SupportedAddressAndLengthFormatIdentifier  @range
                                                            NA*/
@@ -1021,7 +1029,7 @@ typedef enum
 /**
  * @brief DcmDspDidService01 Configuration
  */
-typedef struct DspPidService01Type /* PRQA S 1536 */ /* VL_Dcm_1536 */
+typedef struct
 {
     Dcm_DspPidDataReadFncType
         PidDataReadFnc; /**<DcmDspPidDataReadFnc: Function name for reading PID data value @range NA*/
@@ -1030,7 +1038,7 @@ typedef struct DspPidService01Type /* PRQA S 1536 */ /* VL_Dcm_1536 */
 /**
  * @brief PidData Configuration
  */
-typedef struct DspPidDataType /* PRQA S 1536 */ /* VL_Dcm_1536 */
+typedef struct
 {
     uint8 PidByteOffset; /**< DcmDspPidByteOffset: This is the position in bytes of the PID structure and will not start
                           * at position 0 in case a support information is available @range NA*/
@@ -1044,7 +1052,7 @@ typedef struct DspPidDataType /* PRQA S 1536 */ /* VL_Dcm_1536 */
 /**
  * @brief DcmDspPid Configuration
  */
-typedef struct DspPidType /* PRQA S 1536 */ /* VL_Dcm_1536 */
+typedef struct
 {
     uint8 PidIdentifier; /**< DcmDspPidIdentifier: 1 byte Identifier of the PID @range NA*/
     Dcm_DspPidServiceType
@@ -1058,12 +1066,12 @@ typedef struct DspPidType /* PRQA S 1536 */ /* VL_Dcm_1536 */
 /**
  * @brief RequestControl function type
  */
-typedef Std_ReturnType (*Dcm_RequestControlFncType)(uint8* OutBuffer, uint8* InBuffer);
+typedef Std_ReturnType (*Dcm_RequestControlFncType)(uint8* OutBuffer, const uint8* InBuffer);
 
 /**
  * @brief DcmDspRequestControl Configuration
  */
-typedef struct DspRequestControlType /* PRQA S 1536 */ /* VL_Dcm_1536 */
+typedef struct
 {
     uint8 InBufferSize; /**< DcmDspRequestControlInBufferSize: Number of bytes to be provided in the input buffer of the
                          * interface RequestControl Services_{Tid} for OBD Service $08 @range NA*/
@@ -1089,7 +1097,7 @@ typedef Std_ReturnType (*Dcm_DspRoutineFncType)(
 /**
  * @brief DcmDspRoutineSignal Configuration
  */
-typedef struct DspRoutineSignalType /* PRQA S 1536 */ /* VL_Dcm_1536 */
+typedef struct
 {
     uint16 ParameterSize; /**< Provide the size of a RoutineControl parameter in bytes @range NA*/
     uint16
@@ -1099,7 +1107,7 @@ typedef struct DspRoutineSignalType /* PRQA S 1536 */ /* VL_Dcm_1536 */
 /**
  * @brief DcmDspStart/Stop/RequestResultsRoutine Configuration
  */
-typedef struct DspRoutineSubType /* PRQA S 1536 */ /* VL_Dcm_1536 */
+typedef struct
 {
     Dcm_DspRoutineFncType RoutineFnc; /**< Start/Stop/Request Routine general function @range NA*/
     const Dcm_DspCommonAuthorizationType*
@@ -1122,7 +1130,7 @@ typedef struct DspRoutineSubType /* PRQA S 1536 */ /* VL_Dcm_1536 */
 /**
  * @brief DcmDspRoutine Configuration
  */
-typedef struct DspRoutineType /* PRQA S 1536 */ /* VL_Dcm_1536 */
+typedef struct
 {
     uint16       RoutineIdentifier; /**< DcmDspRoutineIdentifier: 2 bytes Identifier of the RID @range NA*/
     const uint8* RoutineInfoByte; /**< DcmDspRoutineInfoByte: Manufacturer specific value reported to the tester for the
@@ -1152,7 +1160,7 @@ typedef Std_ReturnType (
 /**
  * @brief vehInfoData Configuration
  */
-typedef struct DspVehInfoDataType /* PRQA S 1536  */ /* VL_Dcm_1536 */
+typedef struct
 {
     Dcm_DspVehInfoDataReadFncType VehInfoDataReadFnc; /**< DcmDspVehInfoDataReadFnc: Callout function name for reading
                                                          InfoType data item @range NA */
@@ -1162,7 +1170,7 @@ typedef struct DspVehInfoDataType /* PRQA S 1536  */ /* VL_Dcm_1536 */
 /**
  * @brief DcmDspVehInfo Configuration
  */
-typedef struct DspVehInfoType /* PRQA S 1536 */ /* VL_Dcm_1536 */
+typedef struct
 {
     uint8                         VehInfoInfoType; /**< DcmDspVehInfoInfoType: value of InfoType @range 0..255. */
     uint8                         VehInfoDataNum;  /**< number of configured vehInfoData @range 0..255 */

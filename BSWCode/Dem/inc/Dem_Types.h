@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -117,7 +117,7 @@ typedef uint8 Dem_J1939DcmSetFreezeFrameFilterType;
 /**
  * @brief For details refer SAE J1939-73.
  */
-typedef struct Dem_J1939DcmLampStatusTag /* PRQA S 1536  */ /* VL_Dem_1536 */
+typedef struct
 {
     uint8 LampStatus;      /**< Lamp status @range 0..3 */
     uint8 FlashLampStatus; /**< Flash lamp status @range 0..3 */
@@ -127,7 +127,7 @@ typedef struct Dem_J1939DcmLampStatusTag /* PRQA S 1536  */ /* VL_Dem_1536 */
  * @brief This structure represents all data elemets of the DM05 message. The encoding shall be done acording SAE
  * J1939-73
  */
-typedef struct Dem_J1939DcmDiagnosticReadiness1Tag /* PRQA S 1536  */ /* VL_Dem_1536 */
+typedef struct
 {
     uint8 ActiveTroubleCodes;                         /**< Number of active DTCs @range 0..255 */
     uint8 PreviouslyActiveDiagnosticTroubleCodes;     /**< Number of previously active DTCs @range 0..255 */
@@ -148,7 +148,7 @@ typedef struct Dem_J1939DcmDiagnosticReadiness1Tag /* PRQA S 1536  */ /* VL_Dem_
  * @brief This structure represents all data elemets of the DM21 message. The encoding shall be done acording SAE
  * J1939-73
  */
-typedef struct Dem_J1939DcmDiagnosticReadiness2Tag /* PRQA S 1536  */ /* VL_Dem_1536 */
+typedef struct
 {
     uint16 DistanceTraveledWhileMILisActivated; /**< The kilometers accumulated while the MIL is activated
                                                     @range 0..65535 */
@@ -164,7 +164,7 @@ typedef struct Dem_J1939DcmDiagnosticReadiness2Tag /* PRQA S 1536  */ /* VL_Dem_
  * @brief This structure represents all data elemets of the DM26 message. The encoding shall be done acording SAE
  * J1939-73
  */
-typedef struct Dem_J1939DcmDiagnosticReadiness3Tag /* PRQA S 1536  */ /* VL_Dem_1536 */
+typedef struct
 {
     uint16 TimeSinceEngineStart; /**< Time since key-on that the engine has been running. @range 0..65535 */
     uint8

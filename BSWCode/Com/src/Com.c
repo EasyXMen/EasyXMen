@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -244,10 +244,10 @@ PduIdType Com_CfgRxPduNum; /* PRQA S 1504 */ /* VL_Com_1504 */
 #define COM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
 #include "Com_MemMap.h"
 
-#define COM_START_SEC_VAR_INIT_BOOLEAN
+#define COM_START_SEC_VAR_CLEARED_BOOLEAN
 #include "Com_MemMap.h"
 COM_LOCAL boolean Com_GlobalInitStatus = FALSE;
-#define COM_STOP_SEC_VAR_INIT_BOOLEAN
+#define COM_STOP_SEC_VAR_CLEARED_BOOLEAN
 #include "Com_MemMap.h"
 
 #if (COM_MAX_IPDUGROUP_NUMBER > 0u)
@@ -259,7 +259,7 @@ COM_LOCAL boolean Com_IpduGroupEnable[COM_MAX_IPDUGROUP_NUMBER];
 #include "Com_MemMap.h"
 #endif
 /* ============================================ external data definitions =========================================== */
-#define COM_START_SEC_VAR_INIT_PTR
+#define COM_START_SEC_VAR_CLEARED_PTR
 #include "Com_MemMap.h"
 const Com_ConfigType* Com_ConfigStd = NULL_PTR;
 
@@ -291,7 +291,7 @@ const Com_TxModeAndSignalFilterPtrType* Com_CfgTxModeAndSignalFilterPtr = NULL_P
 #if (STD_ON == COM_SIGNAL_TIMEOUT_SUPPORT)
 const Com_SignalTimeoutType* Com_CfgSignalTimeoutPtr = NULL_PTR;
 #endif
-#define COM_STOP_SEC_VAR_INIT_PTR
+#define COM_STOP_SEC_VAR_CLEARED_PTR
 #include "Com_MemMap.h"
 /* ========================================== external function definitions ========================================= */
 #define COM_START_SEC_CODE
@@ -1236,7 +1236,7 @@ uint8 Com_ReceiveSignalGroup(Com_SignalGroupIdType SignalGroupId)
 #endif
                 {
                     PduIdType ipduRef               = Com_CfgRxSignalGroupPtr[internalId].IpduRefIndex;
-                    uint16    ipduIdPerMainfunction = ipduRef - Com_GetStartOfMainFunctionRx(rxMainfunctionId);
+                    PduIdType ipduIdPerMainfunction = ipduRef - Com_GetStartOfMainFunctionRx(rxMainfunctionId);
                     Com_RxIPduRunTimeStateType* rxIpduStatePtr =
                         &Com_RxIPduRunTimeState[rxMainfunctionId][ipduIdPerMainfunction];
                     uint8                 Receiving = rxIpduStatePtr->RxIpduRTStFlag & COM_RX_RECEIVING_EN;
@@ -1877,7 +1877,6 @@ void Com_MainFunctionRouteSignals(Com_MainFunctionIdType RouteSignalsMainFunctio
         }
     }
 }
-/* PRQA S 1503,1532 -- */
 #define COM_STOP_SEC_CODE
 #include "Com_MemMap.h"
 /**
@@ -1889,8 +1888,7 @@ void Com_MainFunctionRouteSignals(Com_MainFunctionIdType RouteSignalsMainFunctio
  */
 #define COM_START_SEC_CODE_FAST
 #include "Com_MemMap.h"
-/* PRQA S 1503,1532 ++ */ /* VL_QAC_NoUsedApi,VL_Com_ReferencedOnlyOne */
-Std_ReturnType Com_TriggerTransmit(PduIdType TxIpduId, PduInfoType* PduInfoPtr)
+Std_ReturnType Com_TriggerTransmit(PduIdType TxPduId, PduInfoType* PduInfoPtr)
 {
     Std_ReturnType returnValue = E_NOT_OK; /* PRQA S 2981 */ /* VL_Com_InitReturnVar */
 
@@ -1917,9 +1915,9 @@ Std_ReturnType Com_TriggerTransmit(PduIdType TxIpduId, PduInfoType* PduInfoPtr)
 #endif
         {
 #if (COM_MULITIVARIANT_SUPPORT == STD_ON)
-            PduIdType internalId = Com_GetPduIdFromUserId(COM_TRIGGERTRANSMIT_ID, TxIpduId);
+            PduIdType internalId = Com_GetPduIdFromUserId(COM_TRIGGERTRANSMIT_ID, TxPduId);
 #else
-            PduIdType internalId = TxIpduId;
+            PduIdType internalId = TxPduId;
 #endif
 #if (STD_ON == COM_DEV_ERROR_DETECT)
             if ((internalId >= (Com_CfgRxPduNum + Com_CfgTxPduNum)) || (internalId < Com_CfgRxPduNum))
@@ -1965,7 +1963,7 @@ Std_ReturnType Com_TriggerTransmit(PduIdType TxIpduId, PduInfoType* PduInfoPtr)
         (void)Det_ReportError(COM_MODULE_ID, COM_INSTANCE_ID, COM_TRIGGERTRANSMIT_ID, errorId);
     }
 #endif
-    COM_NOUSED(TxIpduId);
+    COM_NOUSED(TxPduId);
     COM_NOUSED(PduInfoPtr);
     return returnValue;
 }
@@ -1974,7 +1972,7 @@ Std_ReturnType Com_TriggerTransmit(PduIdType TxIpduId, PduInfoType* PduInfoPtr)
  * Indication of a received I-PDU from a lower layer communication interface module.
  *
  */
-void Com_RxIndication(PduIdType RxIpduId, const PduInfoType* PduInfoPtr)
+void Com_RxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr)
 {
 #if (STD_ON == COM_DEV_ERROR_DETECT)
     uint8  errorId     = COM_E_NONE;
@@ -1999,9 +1997,9 @@ void Com_RxIndication(PduIdType RxIpduId, const PduInfoType* PduInfoPtr)
 #endif
         {
 #if (COM_MULITIVARIANT_SUPPORT == STD_ON)
-            PduIdType internalId = Com_GetPduIdFromUserId(COM_RXINDICATION_ID, RxIpduId);
+            PduIdType internalId = Com_GetPduIdFromUserId(COM_RXINDICATION_ID, RxPduId);
 #else
-            PduIdType internalId = RxIpduId;
+            PduIdType internalId = RxPduId;
 #endif
 #if (STD_ON == COM_DEV_ERROR_DETECT)
             if (internalId >= Com_CfgRxPduNum)
@@ -2026,7 +2024,7 @@ void Com_RxIndication(PduIdType RxIpduId, const PduInfoType* PduInfoPtr)
                 if (osApplication == Com_CfgMainFuncRxPartitionRangePtr[rxMainfunctionId])
 #endif
                 {
-                    uint16 ipduIdPerMainfunction = internalId - Com_GetStartOfMainFunctionRx(rxMainfunctionId);
+                    PduIdType ipduIdPerMainfunction = internalId - Com_GetStartOfMainFunctionRx(rxMainfunctionId);
                     Com_RxIPduRunTimeStateType* rxIpduStatePtr =
                         &Com_RxIPduRunTimeState[rxMainfunctionId][ipduIdPerMainfunction];
                     Com_RxIndicationHandle(
@@ -2054,7 +2052,7 @@ void Com_RxIndication(PduIdType RxIpduId, const PduInfoType* PduInfoPtr)
     }
 #endif
 #endif
-    COM_NOUSED(RxIpduId);
+    COM_NOUSED(RxPduId);
     COM_NOUSED(PduInfoPtr);
     return;
 }
@@ -2138,7 +2136,7 @@ void Com_TpRxIndication(PduIdType id, Std_ReturnType result)
  * The lower layer communication interface module confirms the transmission of an IPDU.
  *
  */
-void Com_TxConfirmation(PduIdType TxIpduId, Std_ReturnType result)
+void Com_TxConfirmation(PduIdType TxPduId, Std_ReturnType result)
 {
 #if (STD_ON == COM_DEV_ERROR_DETECT)
     uint8  errorId     = COM_E_NONE;
@@ -2159,9 +2157,9 @@ void Com_TxConfirmation(PduIdType TxIpduId, Std_ReturnType result)
 #endif
         {
 #if (COM_MULITIVARIANT_SUPPORT == STD_ON)
-            PduIdType internalId = Com_GetPduIdFromUserId(COM_TXCONFIRMATION_ID, TxIpduId);
+            PduIdType internalId = Com_GetPduIdFromUserId(COM_TXCONFIRMATION_ID, TxPduId);
 #else
-                        PduIdType internalId = TxIpduId;
+                        PduIdType internalId = TxPduId;
 #endif
 #if (STD_ON == COM_DEV_ERROR_DETECT)
             if ((internalId >= (Com_CfgRxPduNum + Com_CfgTxPduNum)) || (internalId < Com_CfgRxPduNum))
@@ -2207,7 +2205,7 @@ void Com_TxConfirmation(PduIdType TxIpduId, Std_ReturnType result)
         (void)Det_ReportError(COM_MODULE_ID, COM_INSTANCE_ID, COM_TXCONFIRMATION_ID, errorId);
     }
 #endif
-    COM_NOUSED(TxIpduId);
+    COM_NOUSED(TxPduId);
     return;
 }
 
@@ -2466,8 +2464,8 @@ BufReq_ReturnType Com_CopyRxData(PduIdType id, const PduInfoType* info, PduLengt
 /* PRQA S 3673 ++ */ /* VL_QAC_3673 */
 BufReq_ReturnType
     Com_CopyTxData(PduIdType id, const PduInfoType* info, const RetryInfoType* retry, PduLengthType* availableDataPtr)
-/* PRQA S 3673 ++ */ /* VL_QAC_3673 */
 {
+    /* PRQA S 3673 -- */
     BufReq_ReturnType bufReq = BUFREQ_E_NOT_OK; /* PRQA S 2981 */ /* VL_Com_InitReturnVar */
 #if (STD_ON == COM_TXTPPDU_SUPPORT)
 #if (STD_ON == COM_DEV_ERROR_DETECT)
@@ -3322,7 +3320,7 @@ COM_LOCAL void Com_DeInitHandle(
         Com_GlobalInitStatus = FALSE;
 #if (0u < COM_MAX_IPDUGROUP_NUMBER)
         /* clear All IPduGroup Active Flag */
-        (void)IStdLib_MemSet(Com_IpduGroupEnable, 0, COM_MAX_IPDUGROUP_NUMBER);
+        (void)IStdLib_MemSet(Com_IpduGroupEnable, 0u, COM_MAX_IPDUGROUP_NUMBER);
 #endif
     }
     Com_MainFunctionIdType mainfunctionRxNum = Com_ConfigStd->MainFunctionRxNum;

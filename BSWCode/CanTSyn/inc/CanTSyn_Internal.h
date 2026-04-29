@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2008-2025 isoft Infrastructure Software Co., Ltd.
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
  * This library is free software; you can redistribute it and/or modify it under the terms of the
@@ -53,7 +53,7 @@ extern "C" {
 /**
  * @brief define CanTSyn module initiation status
  */
-typedef enum CanTSyn_InitStatusTypeTag
+typedef enum
 {
     CANTSYN_UNINIT,
     CANTSYN_INITED
@@ -62,7 +62,7 @@ typedef enum CanTSyn_InitStatusTypeTag
 /**
  * @brief define CanTSyn master operation status
  */
-typedef enum CanTSyn_MasterStatusTypeTag
+typedef enum
 {
     CANTSYN_SYNC_REQUIRED,
     CANTSYN_FUP_REQUIRED,
@@ -73,7 +73,7 @@ typedef enum CanTSyn_MasterStatusTypeTag
 /**
  * @brief define CanTSyn Slave operation Status
  */
-typedef enum CanTSyn_SlaveStatusTypeTag
+typedef enum
 {
     CANTSYN_SYNC_EXPECTED,
     CANTSYN_FUP_EXPECTED
@@ -82,7 +82,7 @@ typedef enum CanTSyn_SlaveStatusTypeTag
 /**
  * @brief Handles the enabling and disabling of the transmission mode
  */
-typedef enum CanTSyn_TransmissionModeTypeTag
+typedef enum
 {
     CANTSYN_TX_OFF,
     CANTSYN_TX_ON
@@ -91,7 +91,7 @@ typedef enum CanTSyn_TransmissionModeTypeTag
 /**
  * @brief store the time information for a time master
  */
-typedef struct CanTSyn_MasterTimeInfoTag
+typedef struct
 {
     /* nanoseconds part of T0 */
     uint32 T0SYNCns;
@@ -114,7 +114,7 @@ typedef struct CanTSyn_MasterTimeInfoTag
 /**
  * @brief store the time information for a time slave
  */
-typedef struct CanTSyn_SlaveTimeInfoTag
+typedef struct
 {
     /* seconds portion of synchronized time */
     uint32 T0SYNC;
@@ -137,7 +137,7 @@ typedef struct CanTSyn_SlaveTimeInfoTag
 /**
  * @brief define configuration of the global time master
  */
-typedef struct CanTSyn_GlobalTimeMasterTag
+typedef struct
 {
     /* defines the time where the 1st regular cycle time based message transmission takes place */
     uint32 CyclicMsgResumeTime;
@@ -156,7 +156,7 @@ typedef struct CanTSyn_GlobalTimeMasterTag
 /**
  * @brief define configuration of the global time slave
  */
-typedef struct CanTSyn_GlobalTimeSlaveTag
+typedef struct
 {
     /* Rx timeout for the follow-up message */
     uint32 GlobalTimeFollowUpTimeout;
@@ -171,7 +171,7 @@ typedef struct CanTSyn_GlobalTimeSlaveTag
 /**
  * @brief define DataIDList messages
  */
-typedef struct CanTSyn_DataIDListElementTag
+typedef struct
 {
     /* index of data Id list */
     uint8 GlobalTimeDataIDListIndex;
@@ -182,7 +182,7 @@ typedef struct CanTSyn_DataIDListElementTag
 /**
  * @brief define CanTSyn GlobalTimeDomain
  */
-typedef struct CanTSyn_GlobalTimeDomainTag
+typedef struct
 {
     /* The global time domain ID */
     uint8 GlobalTimeDomainId;
@@ -208,7 +208,7 @@ typedef struct CanTSyn_GlobalTimeDomainTag
  *        A pointer to an instance of this structure will be used in the initialization
  *        of the Time Synchronization over CAN.
  */
-typedef struct CanTSyn_ConfigTag
+typedef struct
 {
     const CanTSyn_GlobalTimeDomainType* GlobalTimeDomain;
 } CanTSyn_ConfigType;
