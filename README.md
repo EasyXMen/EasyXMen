@@ -32,12 +32,13 @@ https://atomgit.com/easyxmen/docs
 ```
 ├── BSWCode                 # 模块静态代码(Module static code)
 │   ├── BswM
+│   ├── CDD_FVM
 │   ├── CanIf
 │   ├── CanNm
 │   ├── CanSM
-│   ├── CanTp
 │   ├── CanTSyn
-│   ├── CDD_FVM
+│   ├── CanTp
+│   ├── CanTrcv
 │   ├── Com
 │   ├── ComM
 │   ├── CommonInclude       # 共用的头文件(Common header files)
@@ -54,18 +55,28 @@ https://atomgit.com/easyxmen/docs
 │   ├── Eep_62
 │   ├── EthIf
 │   ├── EthSM
+│   ├── EthSwt
 │   ├── EthTSyn
+│   ├── EthTrcv_62
 │   ├── Fee
 │   ├── FiM
+│   ├── FlsTst
 │   ├── IpduM
 │   ├── KeyM
 │   ├── LdCom
+│   ├── Libraries
+│   │   ├── Bfx
+│   │   ├── Crc
+│   │   ├── E2E
+│   │   └── IStdLib
 │   ├── LinIf
 │   ├── LinSM
 │   ├── MemIf
 │   ├── Nm
 │   ├── NvM
 │   ├── PduR
+│   ├── RamTst
+│   ├── SOMEIPTP
 │   ├── Sd
 │   ├── SecOC
 │   ├── SoAd
@@ -166,4 +177,3 @@ EasyXMen now supports three platforms, i.e. NXP S32K148, Infineon TC397, Renesas
 
 - EasyXMen项目整体基于LGPL V2.1开源，详见[LICENSE.txt](./LICENSE.txt)，并附有例外，例外详见[EXCEPTION.md](./EXCEPTION.md)   
   The EasyXMen project is open-source based on LGPL V2.1, see [LICENSE.txt](./LICENSE.txt) for details, with exceptions outlined in [EXCEPTION.md](./EXCEPTION.md).
-
