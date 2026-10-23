@@ -28,9 +28,9 @@
 #include "LinIf_Slave.h"
 #if (LINIF_TP_SUPPORTED == STD_ON)
 #include "LinTp_Cfg.h"
-#endif
 #if (LINTP_SLAVE_SUPPORT == STD_ON)
 #include "LinTp_Slave.h"
+#endif
 #endif
 #include "LinIf_Internal.h"
 #include "LinIf_PartitionVar.h"
@@ -56,9 +56,12 @@
 #define LINIF_NC_SID_SAVECONFIGURATION  0xB6u
 #define LINIF_NC_SID_ASSIGNFRAMEIDRANGE 0xB7u
 
+#define LINIF_NC_PCI_DATA_LEN_6               0x06u
+#define LINIF_NC_PCI_DATA_LEN_1               0x01u
+#define LINIF_NC_PCI_FRAME_TYPE_OFFSET        0x04u
+#define LINIF_NC_PCI_DL_MASK                  0x0Fu
 #define LINIF_NC_NEGTIVE_RESPONSE             0x7Fu
 #define LINIF_NC_FUNCTIONAL_REQ_NAD           0x7Eu
-#define LINIF_NC_PCI_DATA                     0x06u
 #define LINIF_NC_READBYIDENTIFIER_TIMING_TEST 0x00u
 #define LINIF_NC_READBYIDENTIFIER_PRODUCTID   0x02u
 #define LINIF_NC_IDENTIFIER_UNUSED_VALUE      0xFFu
@@ -68,23 +71,26 @@
 #define LINIF_NC_WILDCARD_FUNCTIONID (uint16)0xFFFFu
 
 #define LINIF_NO_ASSOCIATED_WITH_EVENT 0xffu
+#define LINIF_FRAME_TYPE_SF            0x00u
+#define LINIF_FRAME_TYPE_FF            0x01u
+#define LINIF_FF_SID_FIELD_INDEX       0x03u
 
 /* ============================================ internal data definition ============================================ */
 #define LINIF_START_SEC_VAR_CLEARED_GLOBAL_UNSPECIFIED
 #include "LinIf_MemMap.h"
-
 LINIF_LOCAL uint8 LinIf_SlavePIDTable[LINIF_SLAVE_FRAME_MAX_OF_DIFFER_VARIANTS];
+#define LINIF_STOP_SEC_VAR_CLEARED_GLOBAL_UNSPECIFIED
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_VAR_CLEARED_GLOBAL_UNSPECIFIED
+#include "LinIf_MemMap.h"
 LINIF_LOCAL uint8 LinIf_SlaveConfiguredNAD[LINIF_SLAVE_CHANNEL_NUMBER];
-
 #define LINIF_STOP_SEC_VAR_CLEARED_GLOBAL_UNSPECIFIED
 #include "LinIf_MemMap.h"
 
 /* PRQA S 2814,2824,2844,2889 ++ */ /* VL_QAC_DerefNullPtr */
 
 /* ========================================= internal function declarations ========================================= */
-#define LINIF_START_SEC_CODE
-#include "LinIf_MemMap.h"
 
 LINIF_LOCAL_INLINE uint8* LinIf_GetChannelPidTable(uint8 ch)
 {
@@ -118,88 +124,170 @@ LINIF_LOCAL_INLINE void LinIf_UserGotoSleepIndication(uint8 ch, NetworkHandleTyp
     LinIf_GetChannel(ch)->GotoSleepIndication(channel);
 }
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINIF_LOCAL uint16 LinIf_GetFrameByPid(uint8 ch, uint8 framePid);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINIF_LOCAL Std_ReturnType LinIf_SlaveUnconditionalHeaderHandle(
     LinIf_SlaveRuntimeType* slaveRTDataPtr,
     const LinIf_FrameType*  framePtr,
     Lin_PduType*            PduPtr);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 #if (LINIF_SLAVE_EVENT_TRIGGER_FRAME_SUPPORT == STD_ON)
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINIF_LOCAL Std_ReturnType LinIf_SlaveEventTriggeredHeaderHandle(
     LinIf_SlaveRuntimeType* slaveRTDataPtr,
     const LinIf_FrameType*  framePtr,
     Lin_PduType*            PduPtr);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 #endif
 
 #if (LINIF_SLAVE_MRF_FRAME_SUPPORT == STD_ON)
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINIF_LOCAL Std_ReturnType LinIf_SlaveMRFHeaderHandle(
     LinIf_SlaveRuntimeType* slaveRTDataPtr,
     const LinIf_FrameType*  framePtr,
     Lin_PduType*            PduPtr);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
+LINIF_LOCAL Std_ReturnType
+    LinIf_SlaveNcFrameHandle(NetworkHandleType ch, const uint8* Lin_SduPtr, LinIf_SlaveRuntimeType* slaveRTDataPtr);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+
+#if ((LINIF_TP_SUPPORTED == STD_ON) && (LINTP_SLAVE_SUPPORT == STD_ON))
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
+LINIF_LOCAL LinIf_SlaveNcFrameCheckResult LinIf_SlaveNcFrameCheck(const uint8* Lin_SduPtr);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+#endif
 #endif
 
 #if (LINIF_SLAVE_SRF_FRAME_SUPPORT == STD_ON)
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINIF_LOCAL Std_ReturnType LinIf_SlaveSRFHeaderHandle(
     NetworkHandleType       ch,
     const LinIf_FrameType*  framePtr,
     Lin_PduType*            PduPtr,
     LinIf_SlaveRuntimeType* slaveRTDataPtr);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 #endif
 
-LINIF_LOCAL void LinIf_SlaveUnconditionalRxHandle(LinIf_SlaveRuntimeType* slaveRTDataPtr, uint8* Lin_SduPtr);
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
+LINIF_LOCAL void
+    LinIf_SlaveUnconditionalRxHandle(NetworkHandleType ch, LinIf_SlaveRuntimeType* slaveRTDataPtr, uint8* Lin_SduPtr);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 #if (LINIF_SLAVE_MRF_FRAME_SUPPORT == STD_ON)
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINIF_LOCAL void
     LinIf_SlaveMRFRxHandle(NetworkHandleType ch, const uint8* Lin_SduPtr, LinIf_SlaveRuntimeType* slaveRTDataPtr);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 #endif
 
 #if (LINIF_NC_OPTIONAL_REQUEST_SUPPORTED == STD_ON && LINIF_SLAVE_MRF_FRAME_SUPPORT == STD_ON)
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINIF_LOCAL Std_ReturnType
     LinIf_SlaveNcAssignNAD(NetworkHandleType ch, const uint8* Lin_SduPtr, LinIf_SlaveRuntimeType* slaveRTDataPtr);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 #endif
 
 #if (LINIF_SLAVE_MRF_FRAME_SUPPORT == STD_ON)
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINIF_LOCAL Std_ReturnType LinIf_SlaveNcReadbyIdentifier(
     NetworkHandleType       ch,
     const uint8*            Lin_SduPtr,
     LinIf_SlaveRuntimeType* slaveRTDataPtr);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINIF_LOCAL Std_ReturnType LinIf_SlaveNcSaveConfiguration(
     NetworkHandleType       ch,
     const uint8*            Lin_SduPtr,
     LinIf_SlaveRuntimeType* slaveRTDataPtr);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINIF_LOCAL Std_ReturnType LinIf_SlaveNcAssignFrameIdRange(
     NetworkHandleType       ch,
     const uint8*            Lin_SduPtr,
     LinIf_SlaveRuntimeType* slaveRTDataPtr);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINIF_LOCAL Std_ReturnType LinIf_SlaveNcAssignFrameIdRangeHandler(
     NetworkHandleType       ch,
     LinIf_SlaveRuntimeType* slaveRTDataPtr,
     const uint8*            Lin_SduPtr,
     uint16                  frmIdx);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 #endif
 
 #if (LINIF_SUPPORT_RESPONSE_ERROR_SIGNAL == STD_ON)
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINIF_LOCAL void
     LinIf_SlaveSetResponseErrorBit(LinIf_SlaveRuntimeType* slaveRTDataPtr, NetworkHandleType ch, boolean responseError);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 #endif
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINIF_LOCAL void LinIf_SlaveSetLinPduType(Lin_PduType* PduPtr, const LinIf_FrameType* frame);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 #if (LINIF_SLAVE_MRF_FRAME_SUPPORT == STD_ON)
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINIF_LOCAL void LinIf_SlaveBuildNCResponse(
     NetworkHandleType       ch,
     uint8                   nad,
     uint8                   sid,
     uint8                   identifier,
     LinIf_SlaveRuntimeType* slaveRTDataPtr);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 #endif
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINIF_LOCAL void LinIf_SlaveTimerHandle(NetworkHandleType ch, LinIf_SlaveRuntimeType* slaveRTDataPtr);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINIF_LOCAL void LinIf_SlaveResetRtData(LinIf_SlaveRuntimeType* slaveRTDataPtr);
 #define LINIF_STOP_SEC_CODE
 #include "LinIf_MemMap.h"
@@ -262,12 +350,21 @@ void LinIf_SlaveInit(ApplicationType applicationId)
         slaveRTDataPtr->NcResponsePendingFlag = FALSE;
         slaveRTDataPtr->ResponseError         = FALSE;
         (void)IStdLib_MemSet(slaveRTDataPtr->NcResponse, 0u, LINIF_NC_RESPONSE_LEN);
+#if (STD_ON == LINIF_BUS_MIRROR_SUPPORT)
+        slaveRTDataPtr->BusMirrorEnable = FALSE;
+#endif
+        (void)IStdLib_MemSet(slaveRTDataPtr->NcResponse, 0u, LINIF_NC_RESPONSE_LEN);
     }
 
     LINIF_NOUSED(applicationId);
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /* PRQA S 1532,1503 ++ */ /* VL_QAC_OneFunRef */
+
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * Transmit request process in slave node.
@@ -279,6 +376,11 @@ Std_ReturnType LinIf_SlaveTransmit(uint16 frameIdx)
     LinIf_SetTransmitReq(frameIdx, TRUE);
     return E_OK;
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * Process slave node wakeup request.
@@ -336,6 +438,11 @@ Std_ReturnType LinIf_SlaveWakeUp(NetworkHandleType ch)
 
     return ret;
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * Wakeup confirmation process in slave node
@@ -383,9 +490,32 @@ void LinIf_SlaveWakeupConfirmation(EcuM_WakeupSourceType WakeupSource, Applicati
     LINIF_NOUSED(applicationId);
     LINIF_NOUSED(WakeupSource);
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+
+#if (STD_ON == LINIF_BUS_MIRROR_SUPPORT)
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
+
+void LinIf_SlaveEnableBusMirror(NetworkHandleType ch, boolean enbale)
+{
+    LinIf_SlaveRuntimeType* rtDataPtr = LinIf_GetSlaveRtDataPtr(ch);
+
+    SchM_Enter_LinIf_ExclusiveArea_Channel();
+
+    rtDataPtr->BusMirrorEnable = enbale;
+
+    SchM_Exit_LinIf_ExclusiveArea_Channel();
+}
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+#endif
+
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
- * Copy PID table to provide 'PdiBuffer'
+ * Copy PID table to provide 'PidBuffer'
  */
 void LinIf_SlaveGetPIDTable(NetworkHandleType ch, Lin_FramePidType* PidBuffer, uint8* PidBufferLength)
 {
@@ -419,6 +549,11 @@ void LinIf_SlaveGetPIDTable(NetworkHandleType ch, Lin_FramePidType* PidBuffer, u
         *PidBufferLength = LinIf_GetFrameNum(ch);
     }
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * Set 'PdiBuffer' pointed PID table to internal PID table.
@@ -430,6 +565,11 @@ void LinIf_SlaveSetPIDTable(NetworkHandleType ch, const Lin_FramePidType* PidBuf
 
     (void)IStdLib_MemCpy(&LinIf_SlavePIDTable[pidIdx], PidBuffer, pidTableLen);
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * Get the current configured NAD.
@@ -447,6 +587,11 @@ Std_ReturnType LinIf_SlaveGetConfiguredNAD(NetworkHandleType ch, uint8* Nad)
 
     return ret;
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * Sets the current configured NAD.
@@ -455,6 +600,11 @@ void LinIf_SlaveSetConfiguredNAD(NetworkHandleType ch, uint8 Nad)
 {
     LinIf_SlaveConfiguredNAD[ch - LINIF_MASTER_CHANNEL_NUMBER] = Nad;
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * Header receive process in slave node.
@@ -550,6 +700,11 @@ Std_ReturnType LinIf_SlaveHeaderIndication(NetworkHandleType ch, Lin_PduType* Pd
 
     return ret;
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * Receive indication process in slave node.
@@ -570,7 +725,7 @@ void LinIf_SlaveRxIndication(NetworkHandleType ch, uint8* Lin_SduPtr)
             switch (framePtr->FrameType)
             {
             case LINIF_UNCONDITIONAL:
-                LinIf_SlaveUnconditionalRxHandle(slaveRTDataPtr, Lin_SduPtr);
+                LinIf_SlaveUnconditionalRxHandle(ch, slaveRTDataPtr, Lin_SduPtr);
                 break;
 
 #if (LINIF_SLAVE_MRF_FRAME_SUPPORT == STD_ON)
@@ -595,6 +750,11 @@ void LinIf_SlaveRxIndication(NetworkHandleType ch, uint8* Lin_SduPtr)
         /*No response reception is expected,return without further action.*/
     }
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * Tx confirmation process in slave node.
@@ -634,6 +794,14 @@ void LinIf_SlaveTxConfirmation(NetworkHandleType ch)
             /*@req <SWS_LinIf_00741>*/
             txPduPtr->TxConfirmationUL(txPduPtr->TxPduRef, E_OK);
 
+#if (STD_ON == LINIF_BUS_MIRROR_SUPPORT)
+            /* @req <SWS_LinIf_00839> */
+            if (slaveRTDataPtr->BusMirrorEnable)
+            {
+                LinIf_ReportTxFrameToMirror(ch, &slaveRTDataPtr->TxMirrorBuffer, LIN_TX_OK);
+            }
+#endif
+
 #if (LINIF_SUPPORT_RESPONSE_ERROR_SIGNAL == STD_ON)
             if (txPduPtr->ContainResponseErrorSignal)
             {
@@ -654,6 +822,13 @@ void LinIf_SlaveTxConfirmation(NetworkHandleType ch)
                 /* Stop NAS timeout timer */
                 slaveRTDataPtr->NasTimer = 0u;
 
+#if (STD_ON == LINIF_BUS_MIRROR_SUPPORT)
+                if (slaveRTDataPtr->BusMirrorEnable)
+                {
+                    LinIf_ReportTxFrameToMirror(ch, &slaveRTDataPtr->TxMirrorBuffer, LIN_TX_OK);
+                }
+#endif
+
                 /* Transmit finish,Reset channel runtime data */
                 LinIf_SlaveResetRtData(slaveRTDataPtr);
                 slaveRTDataPtr->NcResponsePendingFlag = FALSE;
@@ -664,6 +839,14 @@ void LinIf_SlaveTxConfirmation(NetworkHandleType ch)
             {
                 boolean isTpTxFinished;
                 LinTp_SlaveTxConfirmation(ch, &isTpTxFinished);
+
+#if (STD_ON == LINIF_BUS_MIRROR_SUPPORT)
+                if (slaveRTDataPtr->BusMirrorEnable)
+                {
+                    LinIf_ReportTxFrameToMirror(ch, &slaveRTDataPtr->TxMirrorBuffer, LIN_TX_OK);
+                }
+#endif
+
                 if (isTpTxFinished)
                 {
                     /* TP transmit finish,Reset channel runtime data */
@@ -689,6 +872,11 @@ void LinIf_SlaveTxConfirmation(NetworkHandleType ch)
         /*No response reception is expected,return without further action.*/
     }
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * Lin error indication process in slave node.
@@ -717,6 +905,14 @@ void LinIf_SlaveLinErrorIndication(NetworkHandleType ch, Lin_SlaveErrorType Erro
                 LinIf_SlaveSetResponseErrorBit(slaveRTDataPtr, ch, TRUE);
             }
 #endif
+
+#if (STD_ON == LINIF_BUS_MIRROR_SUPPORT)
+            /* @req <SWS_LinIf_00869> */
+            if (slaveRTDataPtr->BusMirrorEnable)
+            {
+                LinIf_ReportLinErrorToMirror(ch, slaveRTDataPtr->CurFrame, ErrorStatus);
+            }
+#endif
         }
 
         /*@req <SWS_LinIf_00753>,<SWS_LinIf_00754>*/
@@ -727,6 +923,11 @@ void LinIf_SlaveLinErrorIndication(NetworkHandleType ch, Lin_SlaveErrorType Erro
         }
     }
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * Go-to-sleep process in slave node.
@@ -746,9 +947,18 @@ void LinIf_SlaveGotoSleep(NetworkHandleType ch)
     /* Clear the wakeup flag */
     slaveRTDataPtr->WakeupFlag = FALSE;
 
+    SchM_Enter_LinIf_ExclusiveArea_Channel();
+    slaveRTDataPtr->WaitWakeupConfirmFlag = FALSE;
+    SchM_Exit_LinIf_ExclusiveArea_Channel();
+
     /* Set flag to call GoToSleepConfirmation() in MainFunction */
     slaveRTDataPtr->GotoSleepConfirmationFlag = TRUE;
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * LinIf slave main function
@@ -782,10 +992,14 @@ void LinIf_SlaveMainHandle(NetworkHandleType ch)
     }
 #endif
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /* PRQA S 1532,1503 -- */
 
 /* ========================================== internal function definition ========================================== */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 
 LINIF_LOCAL uint16 LinIf_GetFrameByPid(uint8 ch, uint8 framePid)
 {
@@ -802,6 +1016,11 @@ LINIF_LOCAL uint16 LinIf_GetFrameByPid(uint8 ch, uint8 framePid)
     }
     return frmIdx;
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief               Unconditional frame process in slave node.
@@ -872,19 +1091,27 @@ LINIF_LOCAL Std_ReturnType LinIf_SlaveUnconditionalHeaderHandle(
                 PduPtr->Drc = LIN_SLAVE_TO_SLAVE;
 #endif
             }
-#if (LINIF_SLAVE_EVENT_TRIGGER_FRAME_SUPPORT == STD_ON)
             else
             {
+#if (LINIF_SLAVE_EVENT_TRIGGER_FRAME_SUPPORT == STD_ON)
                 /* Set Uncondition frame PID to first byte */
                 uint8 uncondFrmIdWithEvent = framePtr->FrameIdAssociatedWithEvent;
                 if (uncondFrmIdWithEvent != LINIF_NO_ASSOCIATED_WITH_EVENT)
                 {
                     PduPtr->SduPtr[0] = LinIf_SlavePIDTable[uncondFrmIdWithEvent - LinIf_GetMasterFrameNum()];
                 }
+#endif
                 /*@req <SWS_LinIf_00739>*/
                 LinIf_SlaveSetLinPduType(PduPtr, framePtr);
-            }
+
+#if (STD_ON == LINIF_BUS_MIRROR_SUPPORT)
+                /* @req <SWS_LinIf_00839> */
+                if (slaveRTDataPtr->BusMirrorEnable)
+                {
+                    LinIf_SaveTxDataToMirror(&slaveRTDataPtr->TxMirrorBuffer, framePtr, PduPtr->SduPtr);
+                }
 #endif
+            }
 
             ret = E_OK;
         }
@@ -892,8 +1119,12 @@ LINIF_LOCAL Std_ReturnType LinIf_SlaveUnconditionalHeaderHandle(
 
     return ret;
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 #if (LINIF_SLAVE_EVENT_TRIGGER_FRAME_SUPPORT == STD_ON)
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief               Event-Triggered frame process in slave node.
  * @param[inout]        slaveRTDataPtr: The runtime data of linif channel
@@ -965,6 +1196,14 @@ LINIF_LOCAL Std_ReturnType LinIf_SlaveEventTriggeredHeaderHandle(
                     /* Set Uncondition frame PID to first byte */
                     PduPtr->SduPtr[0u] = LinIf_SlavePIDTable[frameIdx - LinIf_GetMasterFrameNum()];
 
+#if (STD_ON == LINIF_BUS_MIRROR_SUPPORT)
+                    /* @req <SWS_LinIf_00839> */
+                    if (slaveRTDataPtr->BusMirrorEnable)
+                    {
+                        LinIf_SaveTxDataToMirror(&slaveRTDataPtr->TxMirrorBuffer, framePtr, PduPtr->SduPtr);
+                    }
+#endif
+
                     /* Backup frame index transmit in event-triggered frame */
                     slaveRTDataPtr->EventTrgTxFrmIdx = frameIdx;
                 }
@@ -978,9 +1217,13 @@ LINIF_LOCAL Std_ReturnType LinIf_SlaveEventTriggeredHeaderHandle(
 
     return ret;
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 #endif
 
 #if (LINIF_SLAVE_MRF_FRAME_SUPPORT == STD_ON)
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief               MRF frame process in slave node.
  * @param[inout]        slaveRTDataPtr: The runtime data of linif channel
@@ -1012,9 +1255,13 @@ LINIF_LOCAL Std_ReturnType LinIf_SlaveMRFHeaderHandle(
 
     return E_OK;
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 #endif
 
 #if (LINIF_SLAVE_SRF_FRAME_SUPPORT == STD_ON)
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief               SRF frame process in slave node.
  * @param[in]           ch: Identification of the LIN channel
@@ -1028,13 +1275,13 @@ LINIF_LOCAL Std_ReturnType LinIf_SlaveMRFHeaderHandle(
  * @synchronous         TRUE
  * @trace               -
  */
-/* PRQA S 6070 ++ */ /* VL_MTR_LinIf_STCAL*/
+/* PRQA S 6070,6030 ++ */ /* VL_MTR_LinIf_STCAL,VL_MTR_LinIf_STMIF*/
 LINIF_LOCAL Std_ReturnType LinIf_SlaveSRFHeaderHandle(
     NetworkHandleType       ch,
     const LinIf_FrameType*  framePtr,
     Lin_PduType*            PduPtr,
     LinIf_SlaveRuntimeType* slaveRTDataPtr)
-/* PRQA S 6070 -- */
+/* PRQA S 6070,6030 -- */
 {
     Std_ReturnType ret = E_NOT_OK;
 
@@ -1063,6 +1310,14 @@ LINIF_LOCAL Std_ReturnType LinIf_SlaveSRFHeaderHandle(
             /* Copy response to PduPtr->SduPtr */
             (void)IStdLib_MemCpy(PduPtr->SduPtr, slaveRTDataPtr->NcResponse, LINIF_NC_RESPONSE_LEN);
 
+#if (STD_ON == LINIF_BUS_MIRROR_SUPPORT)
+            /* @req <SWS_LinIf_00839> */
+            if (slaveRTDataPtr->BusMirrorEnable)
+            {
+                LinIf_SaveTxDataToMirror(&slaveRTDataPtr->TxMirrorBuffer, framePtr, PduPtr->SduPtr);
+            }
+#endif
+
             ret = E_OK;
         }
     }
@@ -1075,22 +1330,31 @@ LINIF_LOCAL Std_ReturnType LinIf_SlaveSRFHeaderHandle(
             LinIf_SlaveSetLinPduType(PduPtr, framePtr);
         }
         /*@req <SWS_LinIf_00776>*/
-        LinTp_SlaveSRFIndication(ch, PduPtr);
-        if (LinTp_SlaveCheckFunctionAddressFlag(ch))
+        if (LinTp_SlaveSRFIndication(ch, PduPtr))
         {
-            /* Functional addressing with SF,no respond */
-            LinTp_SlaveSetFunctionAddressFlag(ch, FALSE);
-            LinIf_SlaveResetRtData(slaveRTDataPtr);
-        }
-        else
-        {
-#if (LINIF_LIN_AUTOSAR_VERSION >= LINIF_LIN_AUTOSAR_440)
-            if (LIN_FRAMERESPONSE_TX == PduPtr->Drc)
-#else /* The default version of lin driver is 4.2.2 / 4.3.1 */
-            if (LIN_MASTER_RESPONSE == PduPtr->Drc)
-#endif
+            if (LinTp_SlaveCheckFunctionAddressFlag(ch))
             {
-                ret = E_OK;
+                /* Functional addressing with SF,no respond */
+                LinTp_SlaveSetFunctionAddressFlag(ch, FALSE);
+                LinIf_SlaveResetRtData(slaveRTDataPtr);
+            }
+            else
+            {
+#if (LINIF_LIN_AUTOSAR_VERSION >= LINIF_LIN_AUTOSAR_440)
+                if (LIN_FRAMERESPONSE_TX == PduPtr->Drc)
+#else /* The default version of lin driver is 4.2.2 / 4.3.1 */
+                if (LIN_MASTER_RESPONSE == PduPtr->Drc)
+#endif
+                {
+                    ret = E_OK;
+                }
+#if (STD_ON == LINIF_BUS_MIRROR_SUPPORT)
+                /* @req <SWS_LinIf_00839> */
+                if (slaveRTDataPtr->BusMirrorEnable)
+                {
+                    LinIf_SaveTxDataToMirror(&slaveRTDataPtr->TxMirrorBuffer, framePtr, PduPtr->SduPtr);
+                }
+#endif
             }
         }
 #endif
@@ -1102,8 +1366,12 @@ LINIF_LOCAL Std_ReturnType LinIf_SlaveSRFHeaderHandle(
 
     return ret;
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 #endif
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief               Unconditional response receive process in slave node.
  * @param[inout]        slaveRTDataPtr: The runtime data of linif channel
@@ -1113,7 +1381,8 @@ LINIF_LOCAL Std_ReturnType LinIf_SlaveSRFHeaderHandle(
  * @synchronous         TRUE
  * @trace               -
  */
-LINIF_LOCAL void LinIf_SlaveUnconditionalRxHandle(LinIf_SlaveRuntimeType* slaveRTDataPtr, uint8* Lin_SduPtr)
+LINIF_LOCAL void
+    LinIf_SlaveUnconditionalRxHandle(NetworkHandleType ch, LinIf_SlaveRuntimeType* slaveRTDataPtr, uint8* Lin_SduPtr)
 {
     const LinIf_FrameType* framePtr = slaveRTDataPtr->CurFrame;
     PduInfoType            pduInfo;
@@ -1127,11 +1396,132 @@ LINIF_LOCAL void LinIf_SlaveUnconditionalRxHandle(LinIf_SlaveRuntimeType* slaveR
     const LinIf_RxPduType* rxPduPtr = framePtr->PduDirection->RxPdu;
     rxPduPtr->RxIndicationUL(rxPduPtr->RxPduRef, &pduInfo);
 
+#if (STD_ON == LINIF_BUS_MIRROR_SUPPORT)
+    /* @req <SWS_LinIf_00838> */
+    if (slaveRTDataPtr->BusMirrorEnable)
+    {
+        LinIf_ReportRxFrameToMirror(ch, slaveRTDataPtr->CurFrame, Lin_SduPtr, LIN_RX_OK);
+    }
+#else
+    LINIF_NOUSED(ch);
+#endif
+
     /* Receive finish,Reset channel runtime data */
     LinIf_SlaveResetRtData(slaveRTDataPtr);
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 #if (LINIF_SLAVE_MRF_FRAME_SUPPORT == STD_ON)
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
+
+LINIF_LOCAL Std_ReturnType
+    LinIf_SlaveNcFrameHandle(NetworkHandleType ch, const uint8* Lin_SduPtr, LinIf_SlaveRuntimeType* slaveRTDataPtr)
+{
+    Std_ReturnType ret = E_NOT_OK;
+
+    switch (Lin_SduPtr[LINIF_NC_SID_POS])
+    {
+    case LINIF_NC_SID_ASSIGNNAD:
+#if (LINIF_NC_OPTIONAL_REQUEST_SUPPORTED == STD_ON)
+        ret = LinIf_SlaveNcAssignNAD(ch, Lin_SduPtr, slaveRTDataPtr);
+#endif
+        break;
+
+    case LINIF_NC_SID_READBYIDENTIFIER:
+        ret = LinIf_SlaveNcReadbyIdentifier(ch, Lin_SduPtr, slaveRTDataPtr);
+        break;
+
+    case LINIF_NC_SID_SAVECONFIGURATION:
+        ret = LinIf_SlaveNcSaveConfiguration(ch, Lin_SduPtr, slaveRTDataPtr);
+        break;
+
+    case LINIF_NC_SID_ASSIGNFRAMEIDRANGE:
+        ret = LinIf_SlaveNcAssignFrameIdRange(ch, Lin_SduPtr, slaveRTDataPtr);
+        break;
+
+    default:
+        /* Do nothing */
+        break;
+    }
+
+    return ret;
+}
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+
+#if ((LINIF_TP_SUPPORTED == STD_ON) && (LINTP_SLAVE_SUPPORT == STD_ON))
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
+/**
+ * @brief               Check whether the message is a node configuration message.
+ * @param[in]           Lin_SduPtr:  pointer to a shadow buffer or memory mapped LIN
+                                     Hardware receive buffer where the current SDU is stored
+ * @reentrant           TRUE
+ * @synchronous         TRUE
+ * @trace               -
+ */
+/* PRQA S 6030 ++ */ /* VL_MTR_LinIf_STMIF*/
+LINIF_LOCAL LinIf_SlaveNcFrameCheckResult LinIf_SlaveNcFrameCheck(const uint8* Lin_SduPtr)
+/* PRQA S 6030 -- */
+{
+    uint8 frameType = (uint8)(Lin_SduPtr[1] >> LINIF_NC_PCI_FRAME_TYPE_OFFSET);
+    uint8 pci       = 0u;
+    uint8 sidIndex  = (frameType == LINIF_FRAME_TYPE_SF) ? LINIF_NC_SID_POS : LINIF_FF_SID_FIELD_INDEX;
+    uint8 sid       = 0u;
+    LinIf_SlaveNcFrameCheckResult result = LINIF_SLAVE_NC_FRAME_IGNORE;
+
+    if ((LINIF_FRAME_TYPE_FF == frameType) || (LINIF_FRAME_TYPE_SF == frameType))
+    {
+        sid = Lin_SduPtr[sidIndex];
+
+        if ((sid >= LINIF_NC_SID_ASSIGNNAD) && (sid <= LINIF_NC_SID_ASSIGNFRAMEIDRANGE))
+        {
+            /* PRQA S  2991,2995 ++ */ /* VL_LinIf_Logical */
+            if (LINIF_FRAME_TYPE_FF == frameType)
+            {
+                result = LINIF_SLAVE_NC_FRAME_REJECT;
+            }
+            else if (LINIF_FRAME_TYPE_SF == frameType)
+            {
+                pci = (uint8)(Lin_SduPtr[1] & LINIF_NC_PCI_DL_MASK);
+                if ((((LINIF_NC_PCI_DATA_LEN_6 == pci) && (LINIF_NC_SID_ASSIGNNAD == Lin_SduPtr[LINIF_NC_SID_POS]))
+                     || (LINIF_NC_SID_ASSIGNFRAMEIDRANGE == Lin_SduPtr[LINIF_NC_SID_POS])
+                     || (LINIF_NC_ASSIGNFRAMEIDENTIFIER == Lin_SduPtr[LINIF_NC_SID_POS])
+                     || (LINIF_NC_CONDITIONALCHANGENAD == Lin_SduPtr[LINIF_NC_SID_POS])
+                     || (LINIF_NC_SID_DATADUMP == Lin_SduPtr[LINIF_NC_SID_POS])
+                     || (LINIF_NC_SID_READBYIDENTIFIER == Lin_SduPtr[LINIF_NC_SID_POS]))
+                    || ((LINIF_NC_PCI_DATA_LEN_1 == pci)
+                        && (LINIF_NC_SID_SAVECONFIGURATION == Lin_SduPtr[LINIF_NC_SID_POS])))
+                {
+                    result = LINIF_SLAVE_NC_FRAME_ACCEPT;
+                }
+                else
+                {
+                    result = LINIF_SLAVE_NC_FRAME_REJECT;
+                }
+            }
+            else
+            {
+                /* Nothing to do */
+            }
+            /* PRQA S  2991,2995 -- */
+        }
+        else
+        {
+            result = LINIF_SLAVE_NC_FRAME_IGNORE;
+        }
+    }
+
+    return result;
+}
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+#endif
+
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief               MRF response receive process in slave node.
  * @param[in]           ch: Identification of the LIN channel
@@ -1169,17 +1559,8 @@ LINIF_LOCAL void
     else
     {
 #if ((LINIF_TP_SUPPORTED == STD_ON) && (LINTP_SLAVE_SUPPORT == STD_ON))
-        if (((LINIF_NC_PCI_DATA == Lin_SduPtr[LINIF_NC_PCI_POS])
-             && ((LINIF_NC_SID_ASSIGNNAD == Lin_SduPtr[LINIF_NC_SID_POS])
-                 || (LINIF_NC_SID_ASSIGNFRAMEIDRANGE == Lin_SduPtr[LINIF_NC_SID_POS])
-                 || (LINIF_NC_ASSIGNFRAMEIDENTIFIER == Lin_SduPtr[LINIF_NC_SID_POS])
-                 || (LINIF_NC_CONDITIONALCHANGENAD == Lin_SduPtr[LINIF_NC_SID_POS])
-                 || (LINIF_NC_SID_DATADUMP == Lin_SduPtr[LINIF_NC_SID_POS])
-                 || ((LINIF_NC_SID_READBYIDENTIFIER == Lin_SduPtr[LINIF_NC_SID_POS])
-                     && ((LINIF_NC_READBYIDENTIFIER_TIMING_TEST == Lin_SduPtr[LINIF_NC_DATA1_POS])
-                         || (LINIF_NC_READBYIDENTIFIER_PRODUCTID == Lin_SduPtr[LINIF_NC_DATA1_POS])))))
-            || ((0x01u == Lin_SduPtr[LINIF_NC_PCI_POS])
-                && (LINIF_NC_SID_SAVECONFIGURATION == Lin_SduPtr[LINIF_NC_SID_POS])))
+        LinIf_SlaveNcFrameCheckResult result = LinIf_SlaveNcFrameCheck(Lin_SduPtr);
+        if (LINIF_SLAVE_NC_FRAME_ACCEPT == result)
         {
             /* If LinTp response is pending,receive NC request,cancel TP process */
             if (LinIf_IsSupportTpTransmit(ch))
@@ -1188,44 +1569,30 @@ LINIF_LOCAL void
             }
 #endif /* LINTP_SLAVE_SUPPORT == STD_ON */
 
-            switch (Lin_SduPtr[LINIF_NC_SID_POS])
-            {
-            case LINIF_NC_SID_ASSIGNNAD:
-#if (LINIF_NC_OPTIONAL_REQUEST_SUPPORTED == STD_ON)
-                ret = LinIf_SlaveNcAssignNAD(ch, Lin_SduPtr, slaveRTDataPtr);
-#endif
-                break;
+            ret = LinIf_SlaveNcFrameHandle(ch, Lin_SduPtr, slaveRTDataPtr);
 
-            case LINIF_NC_SID_READBYIDENTIFIER:
-                ret = LinIf_SlaveNcReadbyIdentifier(ch, Lin_SduPtr, slaveRTDataPtr);
-                break;
-
-            case LINIF_NC_SID_SAVECONFIGURATION:
-                ret = LinIf_SlaveNcSaveConfiguration(ch, Lin_SduPtr, slaveRTDataPtr);
-                break;
-
-            case LINIF_NC_SID_ASSIGNFRAMEIDRANGE:
-                ret = LinIf_SlaveNcAssignFrameIdRange(ch, Lin_SduPtr, slaveRTDataPtr);
-                break;
-
-            case LINIF_NC_ASSIGNFRAMEIDENTIFIER:
-            case LINIF_NC_CONDITIONALCHANGENAD:
-            case LINIF_NC_SID_DATADUMP:
-                break;
-            }
-        }
 #if ((LINIF_TP_SUPPORTED == STD_ON) && (LINTP_SLAVE_SUPPORT == STD_ON))
-        else if (LinIf_IsSupportTpTransmit(ch))
+        }
+        else if (LinIf_IsSupportTpTransmit(ch) && (LINIF_SLAVE_NC_FRAME_IGNORE == result))
         {
             tpFlag = TRUE;
             LinTp_SlaveMRFIndication(ch, Lin_SduPtr);
+
+#if (STD_ON == LINIF_BUS_MIRROR_SUPPORT)
+            /* @req <SWS_LinIf_00838> */
+            if (slaveRTDataPtr->BusMirrorEnable)
+            {
+                LinIf_ReportRxFrameToMirror(ch, slaveRTDataPtr->CurFrame, Lin_SduPtr, LIN_RX_OK);
+            }
+#endif
+
             LinIf_SlaveResetRtData(slaveRTDataPtr);
         }
-#endif
         else
         {
             /* Do nothing */
         }
+#endif
 
         /*@req <SWS_LinIf_00734> */
         if ((!tpFlag) && (E_OK == ret))
@@ -1235,6 +1602,8 @@ LINIF_LOCAL void
         }
     }
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 /* PRQA S 2002,6070,6010 -- */
 #endif
 
@@ -1251,6 +1620,8 @@ LINIF_LOCAL void
  * @trace               -
  */
 #if (LINIF_NC_OPTIONAL_REQUEST_SUPPORTED == STD_ON && LINIF_SLAVE_MRF_FRAME_SUPPORT == STD_ON)
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINIF_LOCAL Std_ReturnType
     LinIf_SlaveNcAssignNAD(NetworkHandleType ch, const uint8* Lin_SduPtr, LinIf_SlaveRuntimeType* slaveRTDataPtr)
 {
@@ -1275,6 +1646,14 @@ LINIF_LOCAL Std_ReturnType
         /* Update configured NAD with the received new NAD */
         LinIf_SlaveConfiguredNAD[ch - LINIF_MASTER_CHANNEL_NUMBER] = newNAD;
 
+#if (STD_ON == LINIF_BUS_MIRROR_SUPPORT)
+        /* @req <SWS_LinIf_00838> */
+        if (slaveRTDataPtr->BusMirrorEnable)
+        {
+            LinIf_ReportRxFrameToMirror(ch, slaveRTDataPtr->CurFrame, Lin_SduPtr, LIN_RX_OK);
+        }
+#endif
+
         LinIf_SlaveResetRtData(slaveRTDataPtr);
         /* Build positive response for next SRF */
         slaveRTDataPtr->NcResponsePendingFlag = TRUE;
@@ -1295,9 +1674,13 @@ LINIF_LOCAL Std_ReturnType
 
     return ret;
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 #endif
 
 #if (LINIF_SLAVE_MRF_FRAME_SUPPORT == STD_ON)
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief               Read by Identifier process in slave node.
  * @param[in]           ch: Identification of the LIN channel
@@ -1333,6 +1716,14 @@ LINIF_LOCAL Std_ReturnType
     {
         if ((LINIF_NC_READBYIDENTIFIER_FUNCTION_ID == identifier) || (LINIF_NC_READBYIDENTIFIER_NEGTIVE == identifier))
         {
+#if (STD_ON == LINIF_BUS_MIRROR_SUPPORT)
+            /* @req <SWS_LinIf_00838> */
+            if (slaveRTDataPtr->BusMirrorEnable)
+            {
+                LinIf_ReportRxFrameToMirror(ch, slaveRTDataPtr->CurFrame, Lin_SduPtr, LIN_RX_OK);
+            }
+#endif
+
             LinIf_SlaveResetRtData(slaveRTDataPtr);
             /*@req <SWS_LinIf_00783>,<SWS_LinIf_00841> */
             /* Build positive/negative response for next SRF */
@@ -1343,8 +1734,8 @@ LINIF_LOCAL Std_ReturnType
         }
         else
         {
-/* Identifier not directly support by LinIf Node configuration */
-/* Forwarded over Transport Layer to upper layer */
+            /* Identifier not directly support by LinIf Node configuration */
+            /* Forwarded over Transport Layer to upper layer */
 #if ((LINIF_TP_SUPPORTED == STD_ON) && (LINTP_SLAVE_SUPPORT == STD_ON))
             if (LinIf_IsSupportTpTransmit(ch))
             {
@@ -1367,7 +1758,11 @@ LINIF_LOCAL Std_ReturnType
 
     return ret;
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief               Save configuration process in slave node.
  * @param[in]           ch: Identification of the LIN channel
@@ -1396,8 +1791,16 @@ LINIF_LOCAL Std_ReturnType LinIf_SlaveNcSaveConfiguration(
     if (((configedNAD == nad) || (LINIF_NC_WILDCARD_NAD == nad)) && (1u == pci))
     {
 /*@req <SWS_LinIf_00782> */
-#if defined(LinIfSaveConfigurationCallout)
-        LinIfSaveConfigurationCallout(ch);
+#if defined(LinIf_SaveConfigurationCallout)
+        LinIf_SaveConfigurationCallout(ch);
+#endif
+
+#if (STD_ON == LINIF_BUS_MIRROR_SUPPORT)
+        /* @req <SWS_LinIf_00838> */
+        if (slaveRTDataPtr->BusMirrorEnable)
+        {
+            LinIf_ReportRxFrameToMirror(ch, slaveRTDataPtr->CurFrame, Lin_SduPtr, LIN_RX_OK);
+        }
 #endif
 
         LinIf_SlaveResetRtData(slaveRTDataPtr);
@@ -1420,6 +1823,11 @@ LINIF_LOCAL Std_ReturnType LinIf_SlaveNcSaveConfiguration(
 
     return ret;
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINIF_LOCAL Std_ReturnType LinIf_SlaveNcAssignFrameIdRangeHandler(
     NetworkHandleType       ch,
     LinIf_SlaveRuntimeType* slaveRTDataPtr,
@@ -1504,7 +1912,11 @@ LINIF_LOCAL Std_ReturnType LinIf_SlaveNcAssignFrameIdRangeHandler(
 
     return ret;
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief               Assign Frame Id Range process in slave node.
  * @param[in]           ch: Identification of the LIN channel
@@ -1538,6 +1950,15 @@ LINIF_LOCAL Std_ReturnType LinIf_SlaveNcAssignFrameIdRange(
             if (framePtr->FrameIndex == Lin_SduPtr[LINIF_NC_DATA1_POS])
             {
                 ret = LinIf_SlaveNcAssignFrameIdRangeHandler(ch, slaveRTDataPtr, Lin_SduPtr, frmIdx);
+
+#if (STD_ON == LINIF_BUS_MIRROR_SUPPORT)
+                /* @req <SWS_LinIf_00838> */
+                if (slaveRTDataPtr->BusMirrorEnable)
+                {
+                    LinIf_ReportRxFrameToMirror(ch, slaveRTDataPtr->CurFrame, Lin_SduPtr, LIN_RX_OK);
+                }
+#endif
+
                 break;
             }
 
@@ -1557,9 +1978,13 @@ LINIF_LOCAL Std_ReturnType LinIf_SlaveNcAssignFrameIdRange(
 
     return ret;
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 #endif
 
 #if (LINIF_SUPPORT_RESPONSE_ERROR_SIGNAL == STD_ON)
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief               Set Response-Error bit to the value same with parameter
  * @param[inout]        slaveRTDataPtr: The runtime data of linif channel
@@ -1572,12 +1997,12 @@ LINIF_LOCAL Std_ReturnType LinIf_SlaveNcAssignFrameIdRange(
 LINIF_LOCAL void
     LinIf_SlaveSetResponseErrorBit(LinIf_SlaveRuntimeType* slaveRTDataPtr, NetworkHandleType ch, boolean responseError)
 {
-/*@req <SWS_LinIf_00766>*/
-#if defined(LinIfResponseErrorSignalChangedCallout)
+    /*@req <SWS_LinIf_00766>*/
+#if defined(LinIf_ResponseErrorSignalChangedCallout)
     if ((responseError != slaveRTDataPtr->ResponseError) && (TRUE == LinIf_GetResponseErrorSignalConfigured(ch)))
     {
         /*@req <SWS_LinIf_00765>*/
-        LinIfResponseErrorSignalChangedCallout(ch, responseError);
+        LinIf_ResponseErrorSignalChangedCallout(ch, responseError);
     }
 #endif
     /* Set the response_error signal */
@@ -1610,6 +2035,8 @@ LINIF_LOCAL void
         }
     }
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 #endif
 
 /**
@@ -1620,6 +2047,8 @@ LINIF_LOCAL void
  * @synchronous         TRUE
  * @trace               -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINIF_LOCAL void LinIf_SlaveSetLinPduType(Lin_PduType* PduPtr, const LinIf_FrameType* frame)
 {
     /* Set DL */
@@ -1666,8 +2095,12 @@ LINIF_LOCAL void LinIf_SlaveSetLinPduType(Lin_PduType* PduPtr, const LinIf_Frame
         break;
     }
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 #if (LINIF_SLAVE_MRF_FRAME_SUPPORT == STD_ON)
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief               Build Node Configuration Response
  * @param[in]           ch: Identification of the LIN channel
@@ -1687,7 +2120,7 @@ LINIF_LOCAL void LinIf_SlaveBuildNCResponse(
     LinIf_SlaveRuntimeType* slaveRTDataPtr)
 {
     uint8* ncResponse = slaveRTDataPtr->NcResponse;
-    (void)IStdLib_MemSet(ncResponse, LINTP_PADDING_VALUE, LINIF_NC_RESPONSE_LEN);
+    (void)IStdLib_MemSet(ncResponse, LINIF_NC_RESERVED_VALUE, LINIF_NC_RESPONSE_LEN);
     ncResponse[LINIF_NC_NAD_POS] = nad;
     if (LINIF_NC_SID_READBYIDENTIFIER != sid)
     {
@@ -1723,6 +2156,8 @@ LINIF_LOCAL void LinIf_SlaveBuildNCResponse(
         }
     }
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 #endif
 
 /**
@@ -1733,6 +2168,8 @@ LINIF_LOCAL void LinIf_SlaveBuildNCResponse(
  * @synchronous         TRUE
  * @trace               -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINIF_LOCAL void LinIf_SlaveTimerHandle(NetworkHandleType ch, LinIf_SlaveRuntimeType* slaveRTDataPtr)
 {
     if (slaveRTDataPtr->NasTimer > 0u)
@@ -1759,6 +2196,8 @@ LINIF_LOCAL void LinIf_SlaveTimerHandle(NetworkHandleType ch, LinIf_SlaveRuntime
         }
     }
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief               Reset linif slave channel runtime data
@@ -1767,6 +2206,8 @@ LINIF_LOCAL void LinIf_SlaveTimerHandle(NetworkHandleType ch, LinIf_SlaveRuntime
  * @synchronous         TRUE
  * @trace               -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINIF_LOCAL void LinIf_SlaveResetRtData(LinIf_SlaveRuntimeType* slaveRTDataPtr)
 {
     slaveRTDataPtr->CurFrame                  = NULL_PTR;

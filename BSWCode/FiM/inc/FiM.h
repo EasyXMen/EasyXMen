@@ -37,6 +37,11 @@
  *  V03.00.02 2025-11-07  li.feng      Optimize FIM RAM Usage
  *  V03.00.03 2026-04-08  tao.yu       CPT-18443, fix the triggering of the Dem master partition is not handled
  *                                     correctly in the trigger mode.
+*   V03.00.04 2026-06-04  tao.yu       add arti
+*             2026-07-02  li.feng      CPT-19353 Out-of-bounds when calculating suppression status with many FID/event
+*                                      configs
+*             2026-08-13  li.feng      CPT-19776 FiM_SetFunctionAvailable causes out-of-bounds access when passed an
+*                                      invalid FiD.
  ==================================================================================================================== */
 
 /* ================================================ misar justifications ============================================ */
@@ -67,6 +72,16 @@
 
     \li VL_FiM_3218
       Reason: const variable define.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_FiM_3451
+      Reason: multiple declaration is necessary for RTE
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_FiM_3449
+      Reason: multiple declaration is necessary for RTE
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
 
@@ -106,6 +121,10 @@
       Reason: Identifier '${name}' with external linkage has separate declarations in multiple translation units.
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
+
+    \li VL_FiM_1513
+      Reason: Identifier '${name}' with external linkage has separate non-defining declarations in more than one
+  location. Risk: No risk. Prevention: Functional reliability guaranteed by design.
 
     \li VL_FiM_3132
       Reason: This cast is converting a complex floating point expression to an integral type.
@@ -156,26 +175,26 @@ extern "C" {
 #define FIM_AR_RELEASE_REVISION_VERSION (0u)
 #define FIM_SW_MAJOR_VERSION            (3u)
 #define FIM_SW_MINOR_VERSION            (0u)
-#define FIM_SW_PATCH_VERSION            (3u)
+#define FIM_SW_PATCH_VERSION            (4u)
 
 /* Error classification */
 
 /** API function called with no det error */
-#define FIM_E_NO_ERROR (0x0u)
+#define FIM_E_NO_ERROR               (0x0u)
 /**API function called before the FiM module has been full initialized or after the FiM module has been shut down */
-#define FIM_E_UNINIT (0x01u)
+#define FIM_E_UNINIT                 (0x01u)
 /** FiM_GetFunctionPermission called with wrong FID */
-#define FIM_E_FID_OUT_OF_RANGE (0x02u)
+#define FIM_E_FID_OUT_OF_RANGE       (0x02u)
 /** Dem calls FiM with invalid EventId */
-#define FIM_E_EVENTID_OUT_OF_RANGE (0x03u)
+#define FIM_E_EVENTID_OUT_OF_RANGE   (0x03u)
 /** API is invoked with NULL Pointer. */
-#define FIM_E_PARAM_POINTER (0x04u)
+#define FIM_E_PARAM_POINTER          (0x04u)
 /** Invalid configuration set selection */
-#define FIM_E_INIT_FAILED (0x05u)
+#define FIM_E_INIT_FAILED            (0x05u)
 /** Dem calls FiM with invalid ComponentId */
 #define FIM_E_COMPONENT_OUT_OF_RANGE (0x09u)
 /** partition error */
-#define FIM_E_PARTITION_ERROR (0x0Au)
+#define FIM_E_PARTITION_ERROR        (0x0Au)
 
 /* Service ID */
 #define FIM_SID_INIT                        (0x00u) /** FiM_Init */
@@ -188,6 +207,8 @@ extern "C" {
 #define FIM_SID_SETFUNCTIONAVAILABLE        (0x07u) /** FiM_SetFunctionAvailable */
 #define FIM_SID_INTERNALAPIID               (0xffU) /** Internal Functions */
 
+#define FIM_START_SEC_CODE
+#include "FiM_MemMap.h"
 /**
  * @brief         This service initializes the FIM.Initialization needs to be called separately for each partition.
  * @param[in]     FiMConfigPtr: Pointer to the configuration.
@@ -196,6 +217,10 @@ extern "C" {
  * @trace         CPD-69573
  */
 extern void FiM_Init(const FiM_ConfigType* FiMConfigPtr);
+#define FIM_STOP_SEC_CODE
+#include "FiM_MemMap.h"
+#define FIM_START_SEC_CODE
+#include "FiM_MemMap.h"
 
 /**
  * @brief         This service reports the permission state to the functionality.
@@ -212,8 +237,12 @@ extern void FiM_Init(const FiM_ConfigType* FiMConfigPtr);
  * @trace         CPD-69574
  */
 extern Std_ReturnType FiM_GetFunctionPermission(FiM_FunctionIdType FID, boolean* Permission);
-
+#define FIM_STOP_SEC_CODE
+#include "FiM_MemMap.h"
 #if (STD_ON == FIM_AVAILABILITY_SUPPORT)
+#define FIM_START_SEC_CODE
+#include "FiM_MemMap.h"
+
 /**
  * @brief         This service sets the availability of a function. The function is only available if FiMAvailability
  *                Support is configured as True.
@@ -228,9 +257,13 @@ extern Std_ReturnType FiM_GetFunctionPermission(FiM_FunctionIdType FID, boolean*
  * @trace         CPD-69575
  */
 extern Std_ReturnType FiM_SetFunctionAvailable(FiM_FunctionIdType FID, boolean Availability);
+#define FIM_STOP_SEC_CODE
+#include "FiM_MemMap.h"
 #endif /* STD_ON == FIM_AVAILABILITY_SUPPORT */
 
 #if (STD_ON == FIM_VERSION_INFO_API)
+#define FIM_START_SEC_CODE
+#include "FiM_MemMap.h"
 /**
  * @brief         This service returns the version information of this module.
  * @param[out]    versioninfo: Pointer to where to store the version information of this module.
@@ -239,20 +272,24 @@ extern Std_ReturnType FiM_SetFunctionAvailable(FiM_FunctionIdType FID, boolean A
  * @trace         CPD-69579
  */
 extern void FiM_GetVersionInfo(Std_VersionInfoType* versioninfo);
+#define FIM_STOP_SEC_CODE
+#include "FiM_MemMap.h"
 #endif
 
 #if (STD_OFF == FIM_EVENT_UPDATE_TRIGGERED_BY_DEM)
+#define FIM_START_SEC_CODE
+#include "FiM_MemMap.h"
 /**
  * @brief         This function is used to evaluate permission states cyclically.
  * @reentrant     Non Reentrant
  * @synchronous   Synchronous
  * @trace         CPD-69580
  */
-/* PRQA S 1512,1513 ++ */ /* VL_FiM_1512,VL_QAC_MultiDeclaration */
-/* PRQA S 3449,3451 ++ */ /* VL_QAC_MultiDeclaration,VL_QAC_MultiDeclaration */
+/* PRQA S 3449,3451,1512,1513 ++ */ /* VL_FiM_3449,VL_FiM_3451,VL_FiM_1512,VL_FiM_1513 */
 extern void FiM_MainFunction(void);
-/* PRQA S 1512,1513 -- */
-/* PRQA S 3449,3451 -- */
+/* PRQA S 3449,3451,1512,1513 -- */
+#define FIM_STOP_SEC_CODE
+#include "FiM_MemMap.h"
 #endif
 
 #ifdef __cplusplus

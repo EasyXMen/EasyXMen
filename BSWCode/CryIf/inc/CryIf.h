@@ -43,51 +43,58 @@
     \li VL_CryIf_3432
       Reason: Function-like macros are used to allow more efficient code.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
-    \li VL_CryIf_3218
-      Reason: file scoped variables only used in one function are necessary for functional usage.
-      Risk: No risk.
-      Prevention: None.
 
     \li VL_CryIf_3229
       Reason: The initialization state should not be masked as it is used to indicate the
     module's initialization status.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_CryIf_1252
       Reason: suffixed constant comparison is necessary
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_CryIf_2981
       Reason: Init may be necessary for return variant.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_MTR_CryIf_STM19
       Reason: In principle, a function is not allowed to have multiple exit points,
     but it can help improve code performance in special circumstances.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_CryIf_1258
       Reason: The cast conversion from a constant is safe.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_MTR_CryIf_STPAR
       Reason: The parameters of the function need.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_MTR_CryIf_STMIF
       Reason: Functions handle specific tasks in the behavior of the entire component.
     Task has different scenarios that need to be covered, which depends on local conditions - this
     leads to deep nesting of the control structure.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_CryIf_3414
+      Reason: specific keyword macro is necessary for unit testing
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_CryIf_3218
+      Reason:file scoped variables only used in one function are necessary for functional usage. Reserved for future
+  extension by other functions
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
  */
 
 /* =================================================== inclusions =================================================== */
@@ -107,12 +114,12 @@ extern "C" {
 #define CRYIF_INSTANCE_ID 0U   /**< Instance ID for CRYIF @range 0U */
 
 /* Module version constants */
-#define CRYIF_H_AR_MAJOR_VERSION 4U /**< Major AUTOSAR version for CRYIF @range 4U */
-#define CRYIF_H_AR_MINOR_VERSION 9U /**< Minor AUTOSAR version for CRYIF @range 9U */
-#define CRYIF_H_AR_PATCH_VERSION 0U /**< Patch AUTOSAR version for CRYIF @range 0U */
-#define CRYIF_H_SW_MAJOR_VERSION 2U /**< Major software version for CRYIF @range 2U */
-#define CRYIF_H_SW_MINOR_VERSION 2U /**< Minor software version for CRYIF @range 2U */
-#define CRYIF_H_SW_PATCH_VERSION 0U /**< Patch software version for CRYIF @range 0U */
+#define CRYIF_AR_RELEASE_MAJOR_VERSION 4U /**< Major AUTOSAR version for CRYIF @range 4U */
+#define CRYIF_AR_RELEASE_MINOR_VERSION 9U /**< Minor AUTOSAR version for CRYIF @range 9U */
+#define CRYIF_AR_RELEASE_PATCH_VERSION 0U /**< Patch AUTOSAR version for CRYIF @range 0U */
+#define CRYIF_SW_MAJOR_VERSION         2U /**< Major software version for CRYIF @range 2U */
+#define CRYIF_SW_MINOR_VERSION         2U /**< Minor software version for CRYIF @range 2U */
+#define CRYIF_SW_PATCH_VERSION         0U /**< Patch software version for CRYIF @range 0U */
 
 /* ===================================================== macros ===================================================== */
 #if (STD_ON == CRYIF_DEV_ERROR_DETECT)
@@ -123,36 +130,40 @@ extern "C" {
 #define CRYIF_E_PARAM_HANDLE      (0x03u) /**< Error code for invalid parameter handle @range 0x03 */
 #define CRYIF_E_PARAM_VALUE       (0x04u) /**< Error code for invalid parameter value @range 0x04 */
 #define CRYIF_E_KEY_SIZE_MISMATCH (0x05u) /**< Error code for key size mismatch @range 0x05 */
+#endif
 
 /* Service IDs for CRYIF module */
-#define CRYIF_SID_INIT                   (0x00u) /**< Service ID for initialization @range 0x00 */
-#define CRYIF_SID_GETVERSIONINFO         (0x01u) /**< Service ID for getting version information @range 0x01 */
-#define CRYIF_SID_PROCESSJOB             (0x03u) /**< Service ID for processing a job @range 0x03 */
-#define CRYIF_SID_CANCELJOB              (0x0Eu) /**< Service ID for canceling a job @range 0x0E */
-#define CRYIF_SID_KEYELEMENT_SET         (0x04u) /**< Service ID for setting a key element @range 0x04 */
-#define CRYIF_SID_KEYSETVALID            (0x05u) /**< Service ID for setting a key as valid @range 0x05 */
-#define CRYIF_SID_KEYELEMENT_GET         (0x06u) /**< Service ID for getting a key element @range 0x06 */
-#define CRYIF_SID_KEYELEMENT_COPY        (0x0Fu) /**< Service ID for copying a key element @range 0x0F */
-#define CRYIF_SID_KEYELEMENT_COPYPARTIAL (0x12u) /**< Service ID for partially copying a key element @range 0x12 */
-#define CRYIF_SID_KEYCOPY                (0x10u) /**< Service ID for copying a key @range 0x10 */
-#define CRYIF_SID_RANDOM_SEED            (0x07u) /**< Service ID for seeding the random number generator @range 0x07 */
-#define CRYIF_SID_KEYGENERATE            (0x08u) /**< Service ID for generating a key @range 0x08 */
-#define CRYIF_SID_KEYDERIVE              (0x09u) /**< Service ID for deriving a key @range 0x09 */
+#define CRYIF_SID_INIT                   0x00u /**< Service ID for initialization @range 0x00 */
+#define CRYIF_SID_GETVERSIONINFO         0x01u /**< Service ID for getting version information @range 0x01 */
+#define CRYIF_SID_PROCESSJOB             0x03u /**< Service ID for processing a job @range 0x03 */
+#define CRYIF_SID_CANCELJOB              0x0Eu /**< Service ID for canceling a job @range 0x0E */
+#define CRYIF_SID_KEYELEMENT_SET         0x04u /**< Service ID for setting a key element @range 0x04 */
+#define CRYIF_SID_KEYSETVALID            0x05u /**< Service ID for setting a key as valid @range 0x05 */
+#define CRYIF_SID_KEYELEMENT_GET         0x06u /**< Service ID for getting a key element @range 0x06 */
+#define CRYIF_SID_KEYELEMENT_COPY        0x0Fu /**< Service ID for copying a key element @range 0x0F */
+#define CRYIF_SID_KEYELEMENT_COPYPARTIAL 0x12u /**< Service ID for partially copying a key element @range 0x12 */
+#define CRYIF_SID_KEYGETSTATUS           0x13u /**< Service ID for get key status @range 0x13 */
+#define CRYIF_SID_KEYCOPY                0x10u /**< Service ID for copying a key @range 0x10 */
+#define CRYIF_SID_RANDOM_SEED            0x07u /**< Service ID for seeding the random number generator @range 0x07 */
+#define CRYIF_SID_KEYGENERATE            0x08u /**< Service ID for generating a key @range 0x08 */
+#define CRYIF_SID_KEYDERIVE              0x09u /**< Service ID for deriving a key @range 0x09 */
 #define CRYIF_SID_KEYEXCHANGECALCPUBVAL \
-    (0x0Au) /**< Service ID for calculating the public value in key exchange @range 0x0A */
-#define CRYIF_SID_KEYEXCHANGECALCSECRET \
-    (0x0Bu)                              /**< Service ID for calculating the secret in key exchange @range 0x0B */
-#define CRYIF_SID_CBNOTIFICATION (0x0Du) /**< Service ID for callback notification @range 0x0D */
-#define CRYIF_SID_KEYSETINVALID  (0x0Eu)
-#endif
+    0x0Au /**< Service ID for calculating the public value in key exchange @range 0x0A */
+#define CRYIF_SID_KEYEXCHANGECALCSECRET                                                                       \
+    0x0Bu                              /**< Service ID for calculating the secret in key exchange @range 0x0B \
+                                        */
+#define CRYIF_SID_CBNOTIFICATION 0x0Du /**< Service ID for callback notification @range 0x0D */
+#define CRYIF_SID_KEYSETINVALID  0x14u
 
 /* Driver support constants */
 #define CRYIF_SINGLE_DRIVER (0U) /**< Flag indicating single driver support @range 0U */
 
+#define CRYIF_KEY_INVALID_ID (0xFFFFFFFFU)
+
 /* Constants */
 #define CRYIF_CONSTANT_2 ((uint32)(0x2U)) /**< Constant value 2 @range 0x2U */
 #if !defined(CRYIF_LOCAL)
-#define CRYIF_LOCAL static /* PRQA S 3414 */ /* VL_QAC_FctLikeMacro */
+#define CRYIF_LOCAL static /* PRQA S 3414 */ /* VL_CryIf_3414 */
 #endif
 
 /* ================================================ type definitions ================================================ */
@@ -204,7 +215,11 @@ typedef struct
      *
      */
     Std_ReturnType (*Crypto_KeySetInValid_Name)(uint32 cryIfKeyId);
-
+    /**
+     * @brief Function pointer to the Crypto_KeySetValid function.
+     *
+     */
+    Std_ReturnType (*Crypto_KeyGetStatus_Name)(uint32 cryIfKeyId, Crypto_KeyStatusType* keyStatusPtr);
     /**
      * @brief Function pointer to the Crypto_KeyElementGet function.
      *
@@ -306,8 +321,17 @@ typedef struct
 
 /* =========================================== external data declarations =========================================== */
 
-extern const CryIf_KeyCfgType         CryIf_KeyCfg[CRYIF_KEY_MAX_CONFIGURED];
+#define CRYIF_START_SEC_CONST_UNSPECIFIED
+#include "CryIf_MemMap.h"
+extern const CryIf_KeyCfgType CryIf_KeyCfg[CRYIF_KEY_MAX_CONFIGURED];
+#define CRYIF_STOP_SEC_CONST_UNSPECIFIED
+#include "CryIf_MemMap.h"
+
+#define CRYIF_START_SEC_CONST_UNSPECIFIED
+#include "CryIf_MemMap.h"
 extern const CryIf_FuncNameConfigType CryIf_DriverApi[CRYIF_CHANNELS_MAX_CONFIGURED];
+#define CRYIF_STOP_SEC_CONST_UNSPECIFIED
+#include "CryIf_MemMap.h"
 
 /* ========================================= external function declarations ========================================= */
 
@@ -320,7 +344,11 @@ extern const CryIf_FuncNameConfigType CryIf_DriverApi[CRYIF_CHANNELS_MAX_CONFIGU
  * @trace       CPD-71571
  *
  */
+#define CRYIF_START_SEC_CODE
+#include "CryIf_MemMap.h"
 void CryIf_Init(const CryIf_ConfigType* configPtr);
+#define CRYIF_STOP_SEC_CODE
+#include "CryIf_MemMap.h"
 
 /**
  * @brief          Retrieves the version information of the Cryptographic Interface (CryIf) module.
@@ -331,7 +359,11 @@ void CryIf_Init(const CryIf_ConfigType* configPtr);
  * @trace       CPD-71572
  */
 #if (CRYIF_VERSION_INFO_API == STD_ON)
+#define CRYIF_START_SEC_CODE
+#include "CryIf_MemMap.h"
 void CryIf_GetVersionInfo(Std_VersionInfoType* versioninfo);
+#define CRYIF_STOP_SEC_CODE
+#include "CryIf_MemMap.h"
 #endif
 
 /**
@@ -345,7 +377,11 @@ void CryIf_GetVersionInfo(Std_VersionInfoType* versioninfo);
  * @synchronous    TRUE
  * @trace       CPD-71573
  */
+#define CRYIF_START_SEC_CODE
+#include "CryIf_MemMap.h"
 Std_ReturnType CryIf_ProcessJob(uint32 channelId, Crypto_JobType* job);
+#define CRYIF_STOP_SEC_CODE
+#include "CryIf_MemMap.h"
 
 /**
  * @brief          Cancels a cryptographic job using the specified channel.
@@ -358,7 +394,11 @@ Std_ReturnType CryIf_ProcessJob(uint32 channelId, Crypto_JobType* job);
  * @synchronous    TRUE
  * @trace       CPD-71574
  */
+#define CRYIF_START_SEC_CODE
+#include "CryIf_MemMap.h"
 Std_ReturnType CryIf_CancelJob(uint32 channelId, Crypto_JobType* job);
+#define CRYIF_STOP_SEC_CODE
+#include "CryIf_MemMap.h"
 
 /**
  * @brief          Sets a key element for a cryptographic key.
@@ -373,7 +413,11 @@ Std_ReturnType CryIf_CancelJob(uint32 channelId, Crypto_JobType* job);
  * @synchronous    TRUE
  * @trace       CPD-71575
  */
+#define CRYIF_START_SEC_CODE
+#include "CryIf_MemMap.h"
 Std_ReturnType CryIf_KeyElementSet(uint32 cryIfKeyId, uint32 keyElementId, const uint8* keyPtr, uint32 keyLength);
+#define CRYIF_STOP_SEC_CODE
+#include "CryIf_MemMap.h"
 
 /**
  * @brief          Sets a cryptographic key as valid.
@@ -385,7 +429,11 @@ Std_ReturnType CryIf_KeyElementSet(uint32 cryIfKeyId, uint32 keyElementId, const
  * @synchronous    TRUE
  * @trace       CPD-71576
  */
+#define CRYIF_START_SEC_CODE
+#include "CryIf_MemMap.h"
 Std_ReturnType CryIf_KeySetValid(uint32 cryIfKeyId);
+#define CRYIF_STOP_SEC_CODE
+#include "CryIf_MemMap.h"
 /**
  * @brief          Sets a cryptographic key as INvalid.
  * @param[in]      cryIfKeyId : The ID of the cryptographic key to set as INvalid.
@@ -396,7 +444,11 @@ Std_ReturnType CryIf_KeySetValid(uint32 cryIfKeyId);
  * @synchronous    TRUE
  * @trace       CPD-71996
  */
+#define CRYIF_START_SEC_CODE
+#include "CryIf_MemMap.h"
 Std_ReturnType CryIf_KeySetInValid(uint32 cryIfKeyId);
+#define CRYIF_STOP_SEC_CODE
+#include "CryIf_MemMap.h"
 
 /**
  * @brief          Retrieves a key element from a cryptographic key.
@@ -412,7 +464,11 @@ Std_ReturnType CryIf_KeySetInValid(uint32 cryIfKeyId);
  * @synchronous    TRUE
  * @trace       CPD-71577
  */
+#define CRYIF_START_SEC_CODE
+#include "CryIf_MemMap.h"
 Std_ReturnType CryIf_KeyElementGet(uint32 cryIfKeyId, uint32 keyElementId, uint8* resultPtr, uint32* resultLengthPtr);
+#define CRYIF_STOP_SEC_CODE
+#include "CryIf_MemMap.h"
 
 /**
  * @brief          Copies a key element from one cryptographic key to another.
@@ -427,8 +483,12 @@ Std_ReturnType CryIf_KeyElementGet(uint32 cryIfKeyId, uint32 keyElementId, uint8
  * @synchronous    TRUE
  * @trace       CPD-71578
  */
+#define CRYIF_START_SEC_CODE
+#include "CryIf_MemMap.h"
 Std_ReturnType
     CryIf_KeyElementCopy(uint32 cryIfKeyId, uint32 keyElementId, uint32 targetCryIfKeyId, uint32 targetKeyElementId);
+#define CRYIF_STOP_SEC_CODE
+#include "CryIf_MemMap.h"
 
 /**
  * @brief          Copies a partial key element from one cryptographic key to another.
@@ -446,6 +506,8 @@ Std_ReturnType
  * @synchronous    TRUE
  * @trace       CPD-71579
  */
+#define CRYIF_START_SEC_CODE
+#include "CryIf_MemMap.h"
 Std_ReturnType CryIf_KeyElementCopyPartial(
     uint32 cryIfKeyId,
     uint32 keyElementId,
@@ -454,6 +516,8 @@ Std_ReturnType CryIf_KeyElementCopyPartial(
     uint32 keyElementCopyLength,
     uint32 targetCryIfKeyId,
     uint32 targetKeyElementId);
+#define CRYIF_STOP_SEC_CODE
+#include "CryIf_MemMap.h"
 
 /**
  * @brief          Copies a cryptographic key to another key.
@@ -466,7 +530,11 @@ Std_ReturnType CryIf_KeyElementCopyPartial(
  * @synchronous    TRUE
  * @trace       CPD-71580
  */
+#define CRYIF_START_SEC_CODE
+#include "CryIf_MemMap.h"
 Std_ReturnType CryIf_KeyCopy(uint32 cryIfKeyId, uint32 targetCryIfKeyId);
+#define CRYIF_STOP_SEC_CODE
+#include "CryIf_MemMap.h"
 
 /**
  * @brief          Seeds the random number generator with a cryptographic key.
@@ -480,7 +548,11 @@ Std_ReturnType CryIf_KeyCopy(uint32 cryIfKeyId, uint32 targetCryIfKeyId);
  * @synchronous    TRUE
  * @trace       CPD-71581
  */
+#define CRYIF_START_SEC_CODE
+#include "CryIf_MemMap.h"
 Std_ReturnType CryIf_RandomSeed(uint32 cryIfKeyId, const uint8* seedPtr, uint32 seedLength);
+#define CRYIF_STOP_SEC_CODE
+#include "CryIf_MemMap.h"
 
 /**
  * @brief          Generates a key using the Crypto driver.
@@ -499,7 +571,11 @@ Std_ReturnType CryIf_RandomSeed(uint32 cryIfKeyId, const uint8* seedPtr, uint32 
  * @synchronous    TRUE
  * @trace       CPD-71582
  */
+#define CRYIF_START_SEC_CODE
+#include "CryIf_MemMap.h"
 Std_ReturnType CryIf_KeyGenerate(uint32 cryIfKeyId);
+#define CRYIF_STOP_SEC_CODE
+#include "CryIf_MemMap.h"
 
 /**
  * @brief          Derives a key from an existing key using the Crypto driver.
@@ -522,7 +598,11 @@ Std_ReturnType CryIf_KeyGenerate(uint32 cryIfKeyId);
  * @synchronous    TRUE
  * @trace       CPD-71583
  */
+#define CRYIF_START_SEC_CODE
+#include "CryIf_MemMap.h"
 Std_ReturnType CryIf_KeyDerive(uint32 cryIfKeyId, uint32 targetCryIfKeyId);
+#define CRYIF_STOP_SEC_CODE
+#include "CryIf_MemMap.h"
 
 /**
  * @brief          Calculates the public value for a key exchange using a cryptographic key.
@@ -544,7 +624,11 @@ Std_ReturnType CryIf_KeyDerive(uint32 cryIfKeyId, uint32 targetCryIfKeyId);
  * @synchronous    TRUE
  * @trace       CPD-71584
  */
+#define CRYIF_START_SEC_CODE
+#include "CryIf_MemMap.h"
 Std_ReturnType CryIf_KeyExchangeCalcPubVal(uint32 cryIfKeyId, uint8* publicValuePtr, uint32* publicValueLengthPtr);
+#define CRYIF_STOP_SEC_CODE
+#include "CryIf_MemMap.h"
 
 /**
  * @brief          Calculates the secret value for a key exchange using a cryptographic key and a partner's public
@@ -559,8 +643,12 @@ Std_ReturnType CryIf_KeyExchangeCalcPubVal(uint32 cryIfKeyId, uint8* publicValue
  * @synchronous    TRUE
  * @trace       CPD-71585
  */
+#define CRYIF_START_SEC_CODE
+#include "CryIf_MemMap.h"
 Std_ReturnType
     CryIf_KeyExchangeCalcSecret(uint32 cryIfKeyId, const uint8* partnerPublicValuePtr, uint32 partnerPublicValueLength);
+#define CRYIF_STOP_SEC_CODE
+#include "CryIf_MemMap.h"
 
 /**
  * @brief          Performs a custom synchronous cryptographic operation.
@@ -584,6 +672,8 @@ Std_ReturnType
  * @synchronous    TRUE
  * @trace       CPD-71586
  */
+#define CRYIF_START_SEC_CODE
+#include "CryIf_MemMap.h"
 Std_ReturnType CryIf_CustomSync(
     uint32       dispatchId,
     uint32       keyId,
@@ -596,6 +686,8 @@ Std_ReturnType CryIf_CustomSync(
     uint32*      outputLengthPtr,
     uint8*       secondaryOutputPtr,
     uint32*      secondaryOutputLengthPtr);
+#define CRYIF_STOP_SEC_CODE
+#include "CryIf_MemMap.h"
 
 /**
  * @brief          Retrieves the status of a key using the Crypto driver.
@@ -614,7 +706,11 @@ Std_ReturnType CryIf_CustomSync(
  * @synchronous    TRUE
  * @trace       CPD-71587
  */
+#define CRYIF_START_SEC_CODE
+#include "CryIf_MemMap.h"
 Std_ReturnType CryIf_KeyGetStatus(uint32 cryIfKeyId, Crypto_KeyStatusType* keyStatusPtr);
+#define CRYIF_STOP_SEC_CODE
+#include "CryIf_MemMap.h"
 
 #ifdef __cplusplus
 }

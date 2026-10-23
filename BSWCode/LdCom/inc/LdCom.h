@@ -36,7 +36,7 @@
  *  V02.00.06 2024-06-14  tong.zhao    Modify callback funcation logic.
  *  V02.01.00 2024-10-14  fupeng.yu    Support R23-11.
  *  V02.02.00 2025-04-29  fupeng.yu    Optimized code.
- *  V02.02.01 2025-06-05  fupeng.yu    Resolve the conditional judgment on PduId in function LdCom_DetCheckPduId.
+ *  V02.02.01 2026-08-01  fupeng.yu    Resolve compiler warnings.
  ==================================================================================================================== */
 
 /* ================================================ misar justifications ============================================ */
@@ -85,6 +85,11 @@
               location.
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
+
+      \li VL_LdCom_3414
+      Reason: Necessary macro definition
+      Risk: No risk.
+      Prevention: None.
 
  */
 
@@ -147,6 +152,8 @@ extern "C" {
 
 /* ========================================= external function declarations ========================================= */
 
+#define LDCOM_START_SEC_CODE
+#include "LdCom_MemMap.h"
 /**
  * @brief         Initializes internal and external interfaces and variables of the AUTOSAR LdCom module
  *                for the further processing.
@@ -156,7 +163,11 @@ extern "C" {
  * @trace         CPD-56832
  */
 void LdCom_Init(const LdCom_ConfigType* config);
+#define LDCOM_STOP_SEC_CODE
+#include "LdCom_MemMap.h"
 
+#define LDCOM_START_SEC_CODE
+#include "LdCom_MemMap.h"
 /**
  * @brief         With a call to LdCom_DeInit the AUTOSAR LdCom module is put into an not initialized state.
  * @reentrant     FALSE
@@ -164,8 +175,12 @@ void LdCom_Init(const LdCom_ConfigType* config);
  * @trace         CPD-56834
  */
 void LdCom_DeInit(void);
+#define LDCOM_STOP_SEC_CODE
+#include "LdCom_MemMap.h"
 
 #if (STD_ON == LDCOM_VERSION_INFO_API)
+#define LDCOM_START_SEC_CODE
+#include "LdCom_MemMap.h"
 /**
  * @brief         Returns the version information of ldCom module.
  * @param[out]    versioninfo : Pointer to where to store the version information of ldCom module.
@@ -174,8 +189,12 @@ void LdCom_DeInit(void);
  * @trace         CPD-56835
  */
 void LdCom_GetVersionInfo(Std_VersionInfoType* versioninfo);
+#define LDCOM_STOP_SEC_CODE
+#include "LdCom_MemMap.h"
 #endif
 
+#define LDCOM_START_SEC_CODE
+#include "LdCom_MemMap.h"
 /**
  * @brief         Requests transmission of a signal.
  * @param[in]     Id          : Identifier of the signal to be transmitted.
@@ -188,6 +207,8 @@ void LdCom_GetVersionInfo(Std_VersionInfoType* versioninfo);
  * @trace         CPD-56836
  */
 Std_ReturnType LdCom_Transmit(PduIdType Id, const PduInfoType* PduInfoPtr);
+#define LDCOM_STOP_SEC_CODE
+#include "LdCom_MemMap.h"
 
 #ifdef __cplusplus
 }

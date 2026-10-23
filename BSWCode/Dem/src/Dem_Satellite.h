@@ -37,6 +37,7 @@
 #if (DEM_TRIGGER_FIM_REPORTS == STD_ON)
 #include "FiM_Dem.h"
 #endif
+#include "Dem_Arti.h"
 
 /* ===================================================== macros ===================================================== */
 /**
@@ -48,6 +49,8 @@
 #define DEM_SATELLITEINFO_PRESTOREQUEUE_STATUS (0x02u) /**< prestore queue status */
 
 /* ========================================== internal function declarations ======================================== */
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Get Satellite partition current id
  * @return        Dem_SatelliteIdType
@@ -56,6 +59,10 @@
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL Dem_SatelliteIdType Dem_GetCurrentSatelliteId(void);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Monitor Status Changed notification
@@ -65,6 +72,10 @@ DEM_LOCAL Dem_SatelliteIdType Dem_GetCurrentSatelliteId(void);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_NotiMonitorStatusChanged(Dem_EventIdType EventId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Calculate Monitor status based on event status
@@ -77,6 +88,10 @@ DEM_LOCAL void Dem_NotiMonitorStatusChanged(Dem_EventIdType EventId);
  */
 DEM_LOCAL Dem_MonitorStatusType
     Dem_CalculateSatelliteMonitorStatus(Dem_MonitorStatusType MonitorStatusValue, Dem_EventStatusType MonitorTrigger);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Resets the debouncing, the monitor status and all queued actions for an event.
@@ -86,6 +101,10 @@ DEM_LOCAL Dem_MonitorStatusType
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_SatelliteClearEvent(Dem_EventIdType EventId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Resets the debouncing and all queued actions for an event.
@@ -96,6 +115,10 @@ DEM_LOCAL void Dem_SatelliteClearEvent(Dem_EventIdType EventId);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_SatelliteRestartEvent(Dem_EventIdType EventId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Update the corresponding satellite data information according to the debounceing result if the queue
@@ -109,6 +132,10 @@ DEM_LOCAL void Dem_SatelliteRestartEvent(Dem_EventIdType EventId);
  */
 DEM_LOCAL Dem_SatelliteDataType
     Dem_SatelliteUpdateSatelliteData(Dem_SatelliteDataType OldSatelliteData, Dem_BaseInfoConstPtrConstType BaseInfoPtr);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Set Satellite monitor status information
@@ -122,6 +149,10 @@ DEM_LOCAL Dem_SatelliteDataType
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL Std_ReturnType Dem_SatelliteSetMonitorStatus(Dem_EventIdType EventId, Dem_EventStatusType MonitorTrigger);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         report Satellite monitor status information to the Dem
@@ -135,8 +166,12 @@ DEM_LOCAL Std_ReturnType Dem_SatelliteSetMonitorStatus(Dem_EventIdType EventId, 
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL Std_ReturnType Dem_SatelliteSetEventStatus(Dem_EventIdType EventId, Dem_EventStatusType EventStatus);
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_EVENT_REPORTING_WITH_MONITOR == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
+
 /**
  * @brief         report Satellite monitor Data information to the Dem
  * @param[in]     EventId: Event Id
@@ -150,9 +185,13 @@ DEM_LOCAL void Dem_SatelliteSetMonitorData(
     Dem_EventIdType     EventId,
     Dem_MonitorDataType monitorData0,
     Dem_MonitorDataType monitorData1);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (defined(DEM_EVENT_TIME_DEBOUNCCE))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Processes all time debounce of satellite
  * @param[in]     SatelliteId: Satellite Id
@@ -161,7 +200,11 @@ DEM_LOCAL void Dem_SatelliteSetMonitorData(
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_SatelliteMainFunctionDebounceTime(Dem_SatelliteIdType SatelliteId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Gets the monitor status of the given event.
@@ -175,6 +218,10 @@ DEM_LOCAL void Dem_SatelliteMainFunctionDebounceTime(Dem_SatelliteIdType Satelli
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL Std_ReturnType Dem_MonitorGetStatus(Dem_EventIdType EventId, Dem_MonitorStatusType* MonitorStatus);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Calculates the debouncing state of an event.
@@ -189,6 +236,10 @@ DEM_LOCAL Std_ReturnType Dem_MonitorGetStatus(Dem_EventIdType EventId, Dem_Monit
  */
 DEM_LOCAL Std_ReturnType
     Dem_SatelliteGetDebouncingState(Dem_EventIdType EventId, Dem_DebouncingStateType* DebouncingState);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Reads the fault detection counter of an event.
@@ -202,6 +253,10 @@ DEM_LOCAL Std_ReturnType
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL Std_ReturnType Dem_SatelliteGetFaultDetectionCounter(Dem_EventIdType EventId, sint8* FaultDetectionCounter);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Reset the event status of an event.
@@ -214,6 +269,10 @@ DEM_LOCAL Std_ReturnType Dem_SatelliteGetFaultDetectionCounter(Dem_EventIdType E
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL Std_ReturnType Dem_SatelliteResetEventStatus(Dem_EventIdType EventId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Reset the Monitor status of an event.
@@ -226,10 +285,10 @@ DEM_LOCAL Std_ReturnType Dem_SatelliteResetEventStatus(Dem_EventIdType EventId);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL Std_ReturnType Dem_SatelliteResetMonitorStatus(Dem_EventIdType EventId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 
 /* ========================================== internal function definitions ========================================= */
-#define DEM_START_SEC_CODE
-#include "Dem_MemMap.h"
 #if (DEM_EVENT_PARTITION_NUMBER > 1u)
 /**
  * @brief         Get ApplicationId of Satellite Info by SatelliteId
@@ -244,7 +303,6 @@ DEM_LOCAL_INLINE ApplicationType Dem_GetSatelliteApplicationId(Dem_SatelliteIdTy
     return Dem_GetAppIdOfSatellite(SatelliteId);
 }
 #endif
-
 /* PRQA S 0759 ++ */ /* VL_Dem_0759 */
 /****************Satellite sync*******************/
 /**
@@ -259,7 +317,6 @@ DEM_LOCAL_INLINE boolean Dem_SyncSetSatelliteInfo(
     ret = Dem_ComSyncCompareAndSwap(Dem_GetStatusOfSatellite(SatelliteId), OldSatelliteInfo.Raw, NewSatelliteInfo.Raw);
     return ret;
 }
-
 /****************SatelliteInfo*******************/
 /**
  * @brief         Get Satellite Info
@@ -396,7 +453,6 @@ DEM_LOCAL_INLINE boolean Dem_CheckSatelliteInfoEventQueue(Dem_SatelliteIdType Sa
     return DEM_FLAG_ISSET(oldSatelliteInfo.Data.SatelliteStatus, DEM_SATELLITEINFO_EVENTQUEUE_STATUS);
     /* PRQA S 4404-- */
 }
-
 #if ((DEM_MAX_NUMBER_PRESTORED_FF > 0u) && (DEM_EVENT_PARTITION_NUMBER > 1u))
 /**
  * @brief         Set Satellite prestore queue Status
@@ -451,7 +507,6 @@ DEM_LOCAL_INLINE boolean Dem_CheckSatelliteInfoPrestoreQueue(Dem_SatelliteInfoTy
     /* PRQA S 4404-- */
 }
 #endif
-
 /****************Satellite InitStatus*******************/
 /**
  * @brief         Check Satellite Init Status is the same
@@ -740,7 +795,6 @@ DEM_LOCAL_INLINE Dem_SatelliteDataType
     } while (Dem_SyncSetSatelliteData(SatelliteId, MonitorId, oldSatelliteData, newSatelliteData) == FALSE);
     return oldSatelliteData;
 }
-
 /****************Satellite Extended Data*******************/
 
 #if ((DEM_MAX_NUMBER_PRESTORED_FF > 0u) && (DEM_EVENT_PARTITION_NUMBER > 1u))
@@ -806,7 +860,6 @@ DEM_LOCAL_INLINE boolean Dem_SyncSetSatelliteExtendedData(
     return ret;
 }
 #endif
-
 #if (DEM_EVENT_REPORTING_WITH_MONITOR == STD_ON)
 /**
  * @brief         Get Satellite monitorData0
@@ -894,7 +947,6 @@ DEM_LOCAL_INLINE boolean Dem_SyncSatelliteMonitorData1(
     return ret;
 }
 #endif
-
 /****************Satellite Function*******************/
 /**
  * @brief         Get SatelliteId by EventId
@@ -942,7 +994,8 @@ DEM_LOCAL_INLINE Dem_EventIdType Dem_SatelliteGetEventId(Dem_SatelliteIdType Sat
     return Dem_GetEventId(Dem_GetEventStartOfSatellite(SatelliteId) + MonitorId + 1u);
 #endif
 }
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 3406, 1505 ++ */ /* VL_Dem_3406, VL_Dem_1505 */
 /**
  * @brief Satellite partition pre-initialization
@@ -968,9 +1021,13 @@ void Dem_SatelliteSatPreInit(Dem_SatelliteIdType SatelliteId)
         Dem_MaxDebValPreInit(SatelliteId, monitorId);
 #endif
     }
+#if (DEM_LR_TIME_DEBOUNCCE == STD_ON)
+    *Dem_GetDTLoResTimerOfSatellite(SatelliteId) = DEM_DEBOUNCE_LO_RES_TIMER_VALUE;
+#endif
     Dem_SetSatelliteInitStatus(SatelliteId, DEM_PREINITIALIZED);
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_EVENT_PARTITION_NUMBER > 1u)
 /**
  * @brief         Satellite partition check
@@ -989,7 +1046,8 @@ DEM_LOCAL_INLINE boolean Dem_SatelliteCheckEventPartition(Dem_EventIdType EventI
     /* PRQA S 4404-- */
 }
 #endif
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Get Satellite partition current id
  */
@@ -1016,7 +1074,8 @@ DEM_LOCAL Dem_SatelliteIdType Dem_GetCurrentSatelliteId(void)
 #endif
     return satelliteId;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if ((defined(DEM_MAX_FDC_SINCE_LAST_CLEAR)) || (defined(DEM_MAX_FDC_DURING_CURRENT_CYCLE)))
 /**
  * @brief         Gets the maximum fault detection counter of an event.
@@ -1040,7 +1099,8 @@ DEM_LOCAL_INLINE sint8
     return fdc;
 }
 #endif
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Monitor Status Changed notification
  */
@@ -1077,7 +1137,10 @@ DEM_LOCAL void Dem_NotiMonitorStatusChanged(Dem_EventIdType EventId)
     DEM_PARAM_UNUSED(EventId);
 #endif
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Calculate Monitor status based on event status
  */
@@ -1107,7 +1170,10 @@ DEM_LOCAL Dem_MonitorStatusType
     }
     return monitorStatus;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Resets the debouncing, the monitor status and all queued actions for an event.
  */
@@ -1141,7 +1207,10 @@ DEM_LOCAL void Dem_SatelliteClearEvent(Dem_EventIdType EventId)
         Dem_NotiMonitorStatusChanged(EventId);
     }
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Resets the debouncing and all queued actions for an event.
  * Sets the TestNotCompletedThisCycle flag of the monitor status.
@@ -1180,7 +1249,11 @@ DEM_LOCAL void Dem_SatelliteRestartEvent(Dem_EventIdType EventId)
         Dem_NotiMonitorStatusChanged(EventId);
     }
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 3473 -- */
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief Resets the debouncing of an event.
@@ -1202,7 +1275,10 @@ DEM_LOCAL void Dem_SatelliteResetDebounceStatus(Dem_EventIdType EventId)
         newSatelliteData = Dem_ResetDebouncing(baseInfo, newSatelliteData);
     } while (Dem_SyncSetSatelliteData(satelliteId, monitorId, oldSatelliteData, newSatelliteData) == FALSE);
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Freeze the debouncing of an event.
  */
@@ -1223,7 +1299,10 @@ DEM_LOCAL void Dem_SatelliteFreezeDebounceStatus(Dem_EventIdType EventId)
         newSatelliteData = Dem_FreezeDebouncing(baseInfo, newSatelliteData);
     } while (Dem_SyncSetSatelliteData(satelliteId, monitorId, oldSatelliteData, newSatelliteData) == FALSE);
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Update the corresponding satellite data information according to the debounceing result if the queue is not
  * overflowed
@@ -1258,7 +1337,10 @@ DEM_LOCAL Dem_SatelliteDataType
     newSatelliteData = Dem_SetSatelliteQueueStatus(newSatelliteData, newQueueStatus);
     return newSatelliteData;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Set Satellite monitor status information
  */
@@ -1333,8 +1415,11 @@ DEM_LOCAL Std_ReturnType Dem_SatelliteSetMonitorStatus(Dem_EventIdType EventId, 
     }
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_DEBOUNCE_COUNTER_STORAGE_NUM > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Restores the given debouncing value of an event.
  * Value is restored, if
@@ -1359,8 +1444,11 @@ DEM_LOCAL void Dem_SatelliteRestoreDebounceValue(Dem_EventIdType EventId, sint16
         newSatelliteData = Dem_QueueResetQueueStatus(newSatelliteData);
     } while (Dem_SyncSetSatelliteData(satelliteId, monitorId, oldSatelliteData, newSatelliteData) == FALSE);
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief report Satellite monitor status information to the Dem
  */
@@ -1374,8 +1462,11 @@ DEM_LOCAL Std_ReturnType Dem_SatelliteSetEventStatus(Dem_EventIdType EventId, De
     }
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_EVENT_REPORTING_WITH_MONITOR == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief report Satellite monitor Data information to the Dem
  */
@@ -1402,8 +1493,9 @@ DEM_LOCAL void Dem_SatelliteSetMonitorData(
         newMonitorData = monitorData1;
     } while (Dem_SyncSatelliteMonitorData1(satelliteId, monitorId, oldMonitorData, newMonitorData) == FALSE);
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 /**
  * @brief         Satellite partition Memory pre-initialization
  * @reentrant     FALSE
@@ -1417,7 +1509,8 @@ DEM_LOCAL_INLINE void Dem_SatelliteMemoryInit(void)
         Dem_SetSatelliteInitStatus(satelliteId, DEM_UNINITIALIZED);
     }
 }
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Dem_SatellitePreInit is called directly for pre-initialization in case of single partition, or
  *                executed by the corresponding partition in case of multiple partitions.
@@ -1427,6 +1520,7 @@ DEM_LOCAL_INLINE void Dem_SatelliteMemoryInit(void)
  */
 void Dem_SatellitePreInit(void)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 1, 0xF0);
     Dem_SatelliteIdType satelliteId = Dem_GetCurrentSatelliteId();
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -1456,8 +1550,10 @@ void Dem_SatellitePreInit(void)
         Dem_DetReportError(DEM_SID_PREINIT, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 1, 0xF0);
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Initializes the satellite.
  * @param[in]     SatelliteId: Satellite Id
@@ -1472,7 +1568,8 @@ DEM_LOCAL_INLINE void Dem_SatelliteSatInit(Dem_SatelliteIdType SatelliteId)
     FiM_DemInitSatellite(Dem_GetSatelliteApplicationId(SatelliteId));
 #endif
 }
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Dem_SatelliteInit is called directly for initialization in case of single partition, or
  *                executed by the corresponding partition in case of multiple partitions.
@@ -1482,6 +1579,7 @@ DEM_LOCAL_INLINE void Dem_SatelliteSatInit(Dem_SatelliteIdType SatelliteId)
  */
 void Dem_SatelliteInit(void)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 1, 0xF1);
     Dem_SatelliteIdType satelliteId = Dem_GetCurrentSatelliteId();
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -1511,14 +1609,55 @@ void Dem_SatelliteInit(void)
         Dem_DetReportError(DEM_SID_INIT, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 1, 0xF1);
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (defined(DEM_EVENT_TIME_DEBOUNCCE))
+
+/**
+ * @brief         Decrement low resolution tick timer and return if the timer is elapsed.
+ * @param[in]     SatelliteId: Satellite Id
+ * @return        boolean
+ * @retval        TRUE: timer is elapsed
+ * @retval        FALSE: timer is not elapsed
+ * @reentrant     FALSE
+ * @synchronous   TRUE
+ * @trace         CPD-PLACEHOLDER
+ */
+#if (DEM_LR_TIME_DEBOUNCCE == STD_ON)
+DEM_LOCAL_INLINE boolean Dem_SatelliteDecrementAndTestLoResTimerElapsed(Dem_SatelliteIdType SatelliteId)
+{
+    boolean                    ret;
+    Dem_DebounceLoResTimerType loResTimer;
+    loResTimer = *Dem_GetDTLoResTimerOfSatellite(SatelliteId);
+
+    loResTimer--;
+    if (loResTimer == 0u)
+    {
+        ret = TRUE;
+        /* restart low resolution timer */
+        loResTimer = DEM_DEBOUNCE_LO_RES_TIMER_VALUE;
+    }
+    else
+    {
+        ret = FALSE;
+    }
+    *Dem_GetDTLoResTimerOfSatellite(SatelliteId) = loResTimer;
+    return ret;
+}
+#endif
+
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Processes all time debounce of satellite
  */
 DEM_LOCAL void Dem_SatelliteMainFunctionDebounceTime(Dem_SatelliteIdType SatelliteId)
 {
+#if (DEM_LR_TIME_DEBOUNCCE == STD_ON)
+    boolean loResTimerElapsed = Dem_SatelliteDecrementAndTestLoResTimerElapsed(SatelliteId);
+#endif
     for (Dem_EventIdType iloop = Dem_GetDTEventSrartOfSatellite(SatelliteId);
          iloop < Dem_GetDTEventCountOfSatellite(SatelliteId);
          ++iloop)
@@ -1529,11 +1668,21 @@ DEM_LOCAL void Dem_SatelliteMainFunctionDebounceTime(Dem_SatelliteIdType Satelli
         Dem_SatelliteDataType    oldSatelliteData;
         Dem_SatelliteDataType    newSatelliteData;
         Dem_BaseInfoConstPtrType baseInfo;
+#if (DEM_LR_TIME_DEBOUNCCE == STD_ON)
+        boolean loResEnable = Dem_GetLoResOfDB(Dem_GetDebounceRefOfEvent(eventId));
+#endif
 
         oldSatelliteData = Dem_GetSatelliteData(SatelliteId, monitorId);
         baseInfo         = Dem_DebounceInfoInit(eventId, &debounceInfo, oldSatelliteData);
         /** Check if timing debouncing is activated */
-        if (Dem_DebounceTimeIsTimerActive(baseInfo) == TRUE)
+        if
+#if (DEM_LR_TIME_DEBOUNCCE == STD_ON)
+            (
+#endif
+                (Dem_DebounceTimeIsTimerActive(baseInfo) == TRUE)
+#if (DEM_LR_TIME_DEBOUNCCE == STD_ON)
+                && ((loResTimerElapsed && loResEnable) || (!loResEnable)))
+#endif
         {
             do
             {
@@ -1567,8 +1716,11 @@ DEM_LOCAL void Dem_SatelliteMainFunctionDebounceTime(Dem_SatelliteIdType Satelli
         }
     }
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Cyclic DemSatellite timer task.
  *                Processes all time debounce of satellite
@@ -1578,36 +1730,22 @@ DEM_LOCAL void Dem_SatelliteMainFunctionDebounceTime(Dem_SatelliteIdType Satelli
  */
 void Dem_SatelliteMainFunction(void)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 1, 0xF2);
 #if (defined(DEM_EVENT_TIME_DEBOUNCCE))
     Dem_SatelliteIdType satelliteId = Dem_GetCurrentSatelliteId();
-#if (DEM_DEV_ERROR_DETECT == STD_ON)
-    uint8 errorId = DEM_E_NO_ERROR;
-    if (DEM_EVENT_PARTITION_NUMBER == satelliteId)
+    if ((DEM_EVENT_PARTITION_NUMBER != satelliteId)
+        && (Dem_CheckSatelliteInitStatus(satelliteId, DEM_INITIALIZED) == TRUE))
     {
-        errorId = DEM_E_WRONG_CONDITION;
-    }
-    else if (Dem_CheckLeastSatelliteInitStatus(satelliteId, DEM_PREINITIALIZED) == FALSE)
-    {
-        errorId = DEM_E_UNINIT;
-    }
-    else
-#endif
-    {
-        if (Dem_CheckSatelliteInitStatus(satelliteId, DEM_INITIALIZED) == TRUE)
-        {
-            Dem_SatelliteMainFunctionDebounceTime(satelliteId);
-        }
-    }
-#if (DEM_DEV_ERROR_DETECT == STD_ON)
-    /** ***** Development Error Report ***** */
-    if (errorId != DEM_E_NO_ERROR)
-    {
-        Dem_DetReportError(DEM_SID_MAINFUNCTION, errorId);
+        Dem_SatelliteMainFunctionDebounceTime(satelliteId);
     }
 #endif
-#endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 1, 0xF2);
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 3406, 1505 -- */
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief  Gets the monitor status of the given event.
@@ -1627,7 +1765,10 @@ DEM_LOCAL Std_ReturnType Dem_MonitorGetStatus(Dem_EventIdType EventId, Dem_Monit
     }
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Calculates the debouncing state of an event.
  */
@@ -1650,7 +1791,10 @@ DEM_LOCAL Std_ReturnType
     }
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Reads the fault detection counter of an event.
  */
@@ -1671,7 +1815,10 @@ DEM_LOCAL Std_ReturnType Dem_SatelliteGetFaultDetectionCounter(Dem_EventIdType E
     }
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Reset the event status of an event.
  */
@@ -1724,7 +1871,10 @@ DEM_LOCAL Std_ReturnType Dem_SatelliteResetEventStatus(Dem_EventIdType EventId)
     }
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Reset the Monitor status of an event.
  */
@@ -1783,7 +1933,7 @@ DEM_LOCAL Std_ReturnType Dem_SatelliteResetMonitorStatus(Dem_EventIdType EventId
     }
     return ret;
 }
-/* PRQA S 0759 -- */
 #define DEM_STOP_SEC_CODE
 #include "Dem_MemMap.h"
+/* PRQA S 0759 -- */
 #endif

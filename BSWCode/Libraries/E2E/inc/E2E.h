@@ -101,53 +101,53 @@ extern "C" {
 #define E2E_SW_MINOR_VERSION            (1u)
 #define E2E_SW_PATCH_VERSION            (0u)
 /* ===================================================== macros ===================================================== */
-#define E2E_SOURCEID_MAX     (0xFFFFFFFuL)
-#define E2E_BIT_LENGTH       (0x8uL)
-#define E2E_MASK_HIGH_NIBBLE (0xF0u)
-#define E2E_MASK_LOW_NIBBLE  (0x0FuL)
+#define E2E_SOURCEID_MAX                (0xFFFFFFFuL)
+#define E2E_BIT_LENGTH                  (0x8uL)
+#define E2E_MASK_HIGH_NIBBLE            (0xF0u)
+#define E2E_MASK_LOW_NIBBLE             (0x0FuL)
 /* ===================================================== macros ===================================================== */
 
 typedef uint8 E2E_PCheckStatusType;
 /*OK: the checks of the Data in this cycle were successful (including counter check).*/
-#define E2E_P_OK (E2E_PCheckStatusType)0x00u
+#define E2E_P_OK            (E2E_PCheckStatusType)0x00u
 /*Data has a repeated counter.*/
-#define E2E_P_REPEATED (E2E_PCheckStatusType)0x01u
+#define E2E_P_REPEATED      (E2E_PCheckStatusType)0x01u
 /*The checks of the Data in this cycle were successful, with the exception of counter
 jump, which changed more than the allowed delta.*/
 #define E2E_P_WRONGSEQUENCE (E2E_PCheckStatusType)0x02u
 /*Error not related to counters occurred (e.g. wrong crc, wrong length, wrong Data ID)
 or the return of the check function was not OK.*/
-#define E2E_P_ERROR (E2E_PCheckStatusType)0x03u
+#define E2E_P_ERROR         (E2E_PCheckStatusType)0x03u
 /*No value has been received yet (e.g. during initialization). This is used as the initialization
 value for the buffer, it is not returned by any E2E profile.*/
-#define E2E_P_NOTAVAILABLE (E2E_PCheckStatusType)0x04u
+#define E2E_P_NOTAVAILABLE  (E2E_PCheckStatusType)0x04u
 /*No new data is available.*/
-#define E2E_P_NONEWDATA (E2E_PCheckStatusType)0x05u
+#define E2E_P_NONEWDATA     (E2E_PCheckStatusType)0x05u
 
 typedef uint8 E2E_SMStateType;
 /*Communication functioning properly according to E2E, data can be used.*/
-#define E2E_SM_VALID (E2E_SMStateType)0x00u
+#define E2E_SM_VALID   (E2E_SMStateType)0x00u
 /*State before E2E_SMCheckInit() is invoked, data cannot be used.*/
-#define E2E_SM_DEINIT (E2E_SMStateType)0x01u
+#define E2E_SM_DEINIT  (E2E_SMStateType)0x01u
 /*No data from the sender is available since the initialization, data cannot be used.*/
-#define E2E_SM_NODATA (E2E_SMStateType)0x02u
+#define E2E_SM_NODATA  (E2E_SMStateType)0x02u
 /*There has been some data received since startup, but it is not yet possible use it,
 data cannot be used.*/
-#define E2E_SM_INIT (E2E_SMStateType)0x03u
+#define E2E_SM_INIT    (E2E_SMStateType)0x03u
 /*Communication not functioning properly, data cannot be used.*/
 #define E2E_SM_INVALID (E2E_SMStateType)0x04u
 
 /*At least one pointer parameter is a NULL pointer*/
-#define E2E_E_INPUTERR_NULL (Std_ReturnType)0x13u
+#define E2E_E_INPUTERR_NULL  (Std_ReturnType)0x13u
 /*At least one input parameter is erroneous, e.g. out of range*/
 #define E2E_E_INPUTERR_WRONG (Std_ReturnType)0x17u
 /*An internal library error has occurred (e.g. error detected by program
 flow monitoring, violated invariant or postcondition)*/
-#define E2E_E_INTERR (Std_ReturnType)0x19u
+#define E2E_E_INTERR         (Std_ReturnType)0x19u
 /*Function completed successfully*/
-#define E2E_E_OK (Std_ReturnType)0x00u
+#define E2E_E_OK             (Std_ReturnType)0x00u
 /*Function executed in wrong state*/
-#define E2E_E_WRONGSTATE (Std_ReturnType)0x1Au
+#define E2E_E_WRONGSTATE     (Std_ReturnType)0x1Au
 
 #ifndef E2E_LOCAL
 #define E2E_LOCAL static /* PRQA S 3414 */ /* VL_QAC_FctLikeMacro */
@@ -212,6 +212,8 @@ typedef struct
 /* =========================================== external data declarations =========================================== */
 
 /* ========================================= external function declarations ========================================= */
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * @brief         This service returns the version information of this module
  * @param[out]    Versioninfo : Pointer to where to store the version
@@ -220,7 +222,11 @@ typedef struct
  * @trace         CPD-47050
  */
 void E2E_GetVersionInfo(Std_VersionInfoType* versionInfo);
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
 
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * @brief         Checks the communication channel. It determines if the data can be used for safety-related
  *                application, based on history of checks performed by a corresponding E2E_P0XCheck() function.
@@ -239,7 +245,11 @@ void E2E_GetVersionInfo(Std_VersionInfoType* versionInfo);
  */
 Std_ReturnType
     E2E_SMCheck(E2E_PCheckStatusType ProfileStatus, const E2E_SMConfigType* ConfigPtr, E2E_SMCheckStateType* StatePtr);
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
 
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * @brief         Initializes the state machine.
  * @param[in]     ConfigPtr : Pointer to static configuration.
@@ -254,6 +264,8 @@ Std_ReturnType
 
 Std_ReturnType E2E_SMCheckInit(E2E_SMCheckStateType* StatePtr, const E2E_SMConfigType* ConfigPtr);
 
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
 #ifdef __cplusplus
 }
 #endif

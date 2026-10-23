@@ -51,6 +51,8 @@
 #define DEM_EC_VALID_ALL (0xFFu) /**< Initialization valid state */
 
 /* ========================================== internal function declarations ======================================== */
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Sets the enable condition
  * @param[in]     EnableConditionID: This parameter identifies the enable condition.
@@ -59,6 +61,10 @@
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_SetEnableConditionFulfilled(uint8 EnableConditionID);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Clears the enable condition
@@ -68,6 +74,10 @@ DEM_LOCAL void Dem_SetEnableConditionFulfilled(uint8 EnableConditionID);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_ResetEnableConditionFulfilled(uint8 EnableConditionID);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Processes changes of enable condition states
@@ -77,6 +87,10 @@ DEM_LOCAL void Dem_ResetEnableConditionFulfilled(uint8 EnableConditionID);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_ProcessQueueEventEnableConditions(Dem_EventIdType EventId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Process enable condition changes
@@ -85,6 +99,10 @@ DEM_LOCAL void Dem_ProcessQueueEventEnableConditions(Dem_EventIdType EventId);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_EnableConditionTask(void);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Initializes the enable conditions and enable condition groups
@@ -93,10 +111,10 @@ DEM_LOCAL void Dem_EnableConditionTask(void);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_EnableConditionInit(void);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 
 /* ========================================== internal function definitions ========================================= */
-#define DEM_START_SEC_CODE
-#include "Dem_MemMap.h"
 /* PRQA S 3473 ++ */ /* VL_Dem_3473 */
 /**
  * @brief         Set the active state of an enable condition group
@@ -308,6 +326,7 @@ DEM_LOCAL_INLINE uint8 Dem_ResetECGStateProcessEnable(uint8 ECGState)
     DEM_FLAG_RESET(state, DEM_ENABLECONDITIONGROUP_PROCESS_ENABLE);
     return state;
 }
+
 /* PRQA S 4399, 4461 -- */
 /* PRQA S 3473 -- */
 
@@ -431,7 +450,8 @@ DEM_LOCAL_INLINE void Dem_SetEnableConditionGroupState(uint8 ECG, uint8 ECGState
 {
     Dem_GetECGStatus()[ECG] = ECGState;
 }
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Sets the enable condition
  */
@@ -468,7 +488,10 @@ DEM_LOCAL void Dem_SetEnableConditionFulfilled(uint8 EnableConditionID)
         Dem_EnableTaskOnce(Dem_Task_EnableCondition);
     }
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Clears the enable condition
  */
@@ -507,7 +530,10 @@ DEM_LOCAL void Dem_ResetEnableConditionFulfilled(uint8 EnableConditionID)
         Dem_EnableTaskOnce(Dem_Task_EnableCondition);
     }
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Processes changes of enable condition states
  */
@@ -547,7 +573,10 @@ DEM_LOCAL void Dem_ProcessQueueEventEnableConditions(Dem_EventIdType EventId)
         }
     }
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Process enable condition changes
  */
@@ -606,7 +635,10 @@ DEM_LOCAL void Dem_EnableConditionTask(void)
     Dem_LeaveCritical_StateManager();
     /** Leave Critical Section: StateManager */
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Initializes the enable conditions and enable condition groups
  */
@@ -640,7 +672,8 @@ DEM_LOCAL void Dem_EnableConditionInit(void)
         }
     }
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Enables all enable conditions
  * @reentrant     FALSE
@@ -657,12 +690,8 @@ DEM_LOCAL_INLINE void Dem_EnableConditionPreInit(void)
     enableConditionGroupState = Dem_SetECGStateActive(enableConditionGroupState);
     Dem_MemSet(Dem_GetECGStatus(), enableConditionGroupState, DEM_ENABLE_CONDITION_GROUP_NUMBER);
 }
-#define DEM_STOP_SEC_CODE
-#include "Dem_MemMap.h"
 #endif
 
-#define DEM_START_SEC_CODE
-#include "Dem_MemMap.h"
 /**
  * @brief         Get the current state of the request operation cycle
  * @param[in]     EventId: Identification of an event by assigned EventId.
@@ -687,6 +716,4 @@ DEM_LOCAL_INLINE boolean Dem_CheckECFulfilled(Dem_EventIdType EventId)
     return ret;
 }
 
-#define DEM_STOP_SEC_CODE
-#include "Dem_MemMap.h"
 #endif

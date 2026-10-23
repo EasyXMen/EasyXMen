@@ -36,6 +36,8 @@ extern "C" {
 #endif
 
 #if (FIM_EVENT_UPDATE_TRIGGERED_BY_DEM == STD_ON)
+#define FIM_START_SEC_CODE
+#include "FiM_MemMap.h"
 /**
  * @brief         This service is provided to be called by the Dem in order to inform the Fim about monitor status
  *                changes.
@@ -47,6 +49,10 @@ extern "C" {
  * @trace         CPD-69576
  */
 extern void FiM_DemTriggerOnMonitorStatus(Dem_EventIdType EventId);
+#define FIM_STOP_SEC_CODE
+#include "FiM_MemMap.h"
+#define FIM_START_SEC_CODE
+#include "FiM_MemMap.h"
 
 /**
  * @brief         Triggers on changes of the component failed status.
@@ -57,6 +63,10 @@ extern void FiM_DemTriggerOnMonitorStatus(Dem_EventIdType EventId);
  * @trace         CPD-69577
  */
 extern void FiM_DemTriggerOnComponentStatus(Dem_ComponentIdType ComponentId, boolean ComponentFailedStatus);
+#define FIM_STOP_SEC_CODE
+#include "FiM_MemMap.h"
+#define FIM_START_SEC_CODE
+#include "FiM_MemMap.h"
 
 /**
  * @brief         This service re-initializes the FIM.
@@ -65,8 +75,12 @@ extern void FiM_DemTriggerOnComponentStatus(Dem_ComponentIdType ComponentId, boo
  * @trace         CPD-69578
  */
 extern void FiM_DemInit(void);
-
+#define FIM_STOP_SEC_CODE
+#include "FiM_MemMap.h"
 #if (FIM_DEM_EVENT_PARTITION_NUMBER > 1u)
+#define FIM_START_SEC_CODE
+#include "FiM_MemMap.h"
+
 /**
  * @brief         This service re-initializes the FIM Satellite.
  * @param[in]     ApplicationId: Partition (OsApplication identifier) of the satellite.
@@ -75,6 +89,8 @@ extern void FiM_DemInit(void);
  * @trace         CPD-69581
  */
 extern void FiM_DemInitSatellite(ApplicationType ApplicationId);
+#define FIM_STOP_SEC_CODE
+#include "FiM_MemMap.h"
 #endif
 
 #endif

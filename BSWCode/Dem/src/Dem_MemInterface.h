@@ -134,6 +134,8 @@ typedef enum
  */
 DEM_LOCAL_INLINE void Dem_ResetMemoryOverflow(Dem_MemoryNumType MemIndex);
 
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         set Single Block Status
  * @param[in]     MemoryIndex: Memory Index
@@ -143,6 +145,8 @@ DEM_LOCAL_INLINE void Dem_ResetMemoryOverflow(Dem_MemoryNumType MemIndex);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_NvmSetSingleBlockState(Dem_NvBlockNumType MemoryIndex, uint8 Status);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         set Event Status Block need to store
@@ -283,6 +287,8 @@ DEM_LOCAL_INLINE void
     Dem_SetCyclesSinceLastFailedOfMemEntry(Dem_NvBlockNumType MemoryIndex, uint16 CyclesSinceLastFailed);
 #endif
 
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Find Index in Memory by EventId
  * @param[in]     MemoryInfo: Record memory information
@@ -292,6 +298,10 @@ DEM_LOCAL_INLINE void
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL Dem_NvBlockNumType Dem_MemoryFindIndex(Dem_MemStateInfoConstPtrType MemoryInfo, Dem_EventIdType EventId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Frees an event memory entry
@@ -302,6 +312,10 @@ DEM_LOCAL Dem_NvBlockNumType Dem_MemoryFindIndex(Dem_MemStateInfoConstPtrType Me
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_MemoryFreeIndex(Dem_MemStateInfoConstPtrType MemoryInfo, Dem_NvBlockNumType MemoryIndex);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Selects a memory entry for an event
@@ -312,8 +326,12 @@ DEM_LOCAL void Dem_MemoryFreeIndex(Dem_MemStateInfoConstPtrType MemoryInfo, Dem_
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL Dem_NvBlockNumType Dem_AllocateMemory(Dem_EventIdType EventId);
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_RESET_CONFIRMED_BIT_ON_OVERFLOW == STD_OFF)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
+
 /**
  * @brief         Selects a memory entry for an event's aging counter
  * @param[in]     MemoryInfo: Record memory information
@@ -324,9 +342,13 @@ DEM_LOCAL Dem_NvBlockNumType Dem_AllocateMemory(Dem_EventIdType EventId);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL Dem_NvBlockNumType Dem_MemoryAllocateAging(Dem_MemStateInfoConstPtrType MemoryInfo, Dem_EventIdType EventId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_EXTENDED_DATA_CLASS_NUMBER > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Collects the user provided extended data records stored for an event entry.
  * @param[in]     MemoryIndex: Memory Index
@@ -338,7 +360,11 @@ DEM_LOCAL Dem_NvBlockNumType Dem_MemoryAllocateAging(Dem_MemStateInfoConstPtrTyp
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL uint8 Dem_MemUpdateEventExtendData(Dem_EventIdType EventId, Dem_NvBlockNumType MemoryIndex, uint8 Trigger);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Updates all data stored for an event.
@@ -356,6 +382,10 @@ DEM_LOCAL uint8 Dem_MemUpdateEventExtendData(Dem_EventIdType EventId, Dem_NvBloc
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL uint8 Dem_MemUpdateEventEntry(Dem_EventIdType EventId, uint8 Trigger, Dem_NvBlockNumType MemoryIndex);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Update the statistics of an an event entry.
@@ -369,6 +399,10 @@ DEM_LOCAL uint8 Dem_MemUpdateEventEntry(Dem_EventIdType EventId, uint8 Trigger, 
  */
 DEM_LOCAL uint8
     Dem_UpdateEventMemoryStatistics(Dem_EventIdType EventId, Dem_NvBlockNumType MemoryIndex, boolean Occurrence);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         updates Memory failure statistics like first and most recently failed event, first and most recently
@@ -380,8 +414,12 @@ DEM_LOCAL uint8
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_UpdateMemoryFailureStatistics(Dem_EventIdType EventId, uint8 Trigger);
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_DEBOUNCE_COUNTER_STORAGE_NUM > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
+
 /**
  * @brief         Copies debounce values from debounce array to NVRAM mirror
  * @reentrant     FALSE
@@ -389,6 +427,8 @@ DEM_LOCAL void Dem_UpdateMemoryFailureStatistics(Dem_EventIdType EventId, uint8 
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_MemStorageDataDebounce(void);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 /**
@@ -401,6 +441,8 @@ DEM_LOCAL void Dem_MemStorageDataDebounce(void);
 DEM_LOCAL_INLINE void Dem_MemoryInit(void);
 
 #if (DEM_FEATURE_NVM_IMMEDIATE == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Processes NvM Task
  * The function controls NvM commits. Modified blocks are passed to the NvM to write back, and once the write operation
@@ -410,6 +452,8 @@ DEM_LOCAL_INLINE void Dem_MemoryInit(void);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_NvMTask(void);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 /**
@@ -704,21 +748,6 @@ DEM_LOCAL_INLINE Dem_NvBlockNumType Dem_GetMemEntryStartOfMemoryInfo(Dem_MemStat
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL_INLINE boolean Dem_CheckEDStored(Dem_NvBlockNumType MemoryIndex, uint8 EDEntryIndex);
-
-#if (DEM_MAX_SIZE_EXTENDED_DATA > 0u)
-/**
- * @brief         get Extended Data Ptr of MemEntry by MemoryIndex and EntryIndex
- * @param[in]     MemoryIndex: Memory Index
- * @param[in]     EDEntryIndex: Extend data entry index ID
- * @param[in]     EntryIndex: Entry index ID
- * @return        uint8*
- * @reentrant     FALSE
- * @synchronous   TRUE
- * @trace         CPD-PLACEHOLDER
- */
-DEM_LOCAL_INLINE uint8*
-    Dem_GetExtendedDataPtrOfMemEntryByEntryIndex(Dem_NvBlockNumType MemoryIndex, uint8 EDEntryIndex, uint8 EntryIndex);
-#endif
 #endif
 
 /**

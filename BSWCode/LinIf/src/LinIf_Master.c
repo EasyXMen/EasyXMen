@@ -44,88 +44,153 @@
 /* ================================================ type definitions ================================================ */
 
 /* ========================================= internal function declarations ========================================= */
-#define LINIF_START_SEC_CODE
-#include "LinIf_MemMap.h"
 
 #if ((LINIF_MASTER_SPORADIC_FRAME_SUPPORT == STD_ON) || (LINIF_MASTER_EVENT_TRIGGER_FRAME_SUPPORT == STD_ON))
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINIF_LOCAL const LinIf_SubstitutionFramesType* LinIf_GetTransmitPending(const LinIf_FrameType* frame);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 #endif
 
 #if (LINIF_MASTER_SPORADIC_FRAME_SUPPORT == STD_ON)
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINIF_LOCAL void LinIf_SendSporadic(LinIf_MasterRuntimeType* masterChRtDataPtr, uint8 ch, const LinIf_FrameType* frame);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 #endif
 
 #if (LINIF_MASTER_EVENT_TRIGGER_FRAME_SUPPORT == STD_ON)
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINIF_LOCAL void
     LinIf_SendEventTrigger(LinIf_MasterRuntimeType* masterChRtDataPtr, uint8 ch, const LinIf_FrameType* frame);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 #endif
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINIF_LOCAL void
     LinIf_SendUnconditional(LinIf_MasterRuntimeType* masterChRtDataPtr, uint8 ch, const LinIf_FrameType* frame);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 #if (LINIF_MASTER_NODE_CONFIG_FRAME_SUPPORT == STD_ON)
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINIF_LOCAL void
     LinIf_SendNodeConfiguration(LinIf_MasterRuntimeType* masterChRtDataPtr, uint8 ch, const LinIf_FrameType* frame);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 #endif
 
 #if ((LINIF_TP_SUPPORTED == STD_ON) && (LINTP_MASTER_SUPPORT == STD_ON))
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINIF_LOCAL void LinIf_SendMRF(LinIf_MasterRuntimeType* masterChRtDataPtr, uint8 ch, const LinIf_FrameType* frame);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINIF_LOCAL void LinIf_SendSRF(LinIf_MasterRuntimeType* masterChRtDataPtr, uint8 ch, const LinIf_FrameType* frame);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 #endif
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINIF_LOCAL void LinIf_SetPduInfo(Lin_PduType* pdu, const LinIf_FrameType* frame);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINIF_LOCAL void LinIf_HandleEntryTail(LinIf_MasterRuntimeType* masterChRtDataPtr);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINIF_LOCAL void LinIf_SwitchScheduleNotify(LinIf_MasterRuntimeType* masterChRtDataPtr, uint8 ch);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINIF_LOCAL void LinIf_SwitchNewSchedule(LinIf_MasterRuntimeType* masterChRtDataPtr, uint8 ch);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINIF_LOCAL void LinIf_SwitchNewEntry(LinIf_MasterRuntimeType* masterChRtDataPtr, uint8 ch);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINIF_LOCAL void LinIf_RxEventParse(
     uint8                    ch,
     LinIf_MasterRuntimeType* masterChRtDataPtr,
     const uint8*             sduDataPtr,
     const LinIf_FrameType*   frame);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINIF_LOCAL void LinIf_RxEventErrorHandle(
     Lin_StatusType           st,
     LinIf_MasterRuntimeType* masterChRtDataPtr,
     const LinIf_FrameType*   frame);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINIF_LOCAL void
     LinIf_MasterTxSuccessHandle(uint8 ch, const LinIf_FrameType* frame, LinIf_MasterRuntimeType* masterChRtDataPtr);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINIF_LOCAL void LinIf_MasterTxErrorHandle(
     uint8                    ch,
     Lin_StatusType           st,
     LinIf_MasterRuntimeType* masterChRtDataPtr,
     const LinIf_FrameType*   frame);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINIF_LOCAL void LinIf_PrevTransmitRxPduHandle(
     uint8                    ch,
     Lin_StatusType           st,
     LinIf_MasterRuntimeType* masterChRtDataPtr,
     const LinIf_FrameType*   frame,
     const uint8*             sduDataPtr);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINIF_LOCAL void LinIf_PrevTransmitTxPduHandle(
     uint8                    ch,
     Lin_StatusType           st,
     LinIf_MasterRuntimeType* masterChRtDataPtr,
     const LinIf_FrameType*   frame);
-
 #define LINIF_STOP_SEC_CODE
 #include "LinIf_MemMap.h"
 
 /* PRQA S 2814,2824,2813,2889 ++ */ /* VL_QAC_DerefNullPtr */
 
 /* ============================================ internal data definition ============================================ */
-#define LINIF_START_SEC_CODE
-#include "LinIf_MemMap.h"
 
 LINIF_LOCAL_INLINE uint16 LinIf_GetLinChannelSleepDelay(uint8 ch)
 {
@@ -186,12 +251,13 @@ LINIF_LOCAL_INLINE void LinIf_MemCopyFixedFrame(uint8* Dst, const LinIf_FixedFra
  */
 LINIF_LOCAL_INLINE void LinIf_SlotTimer(LinIf_MasterRuntimeType* masterChRtDataPtr)
 {
-    LinIf_MasterRuntimeType* LinIf_MasterChRtData = masterChRtDataPtr;
+    uint32 timer = masterChRtDataPtr->Timer;
 
-    if (LinIf_MasterChRtData->Timer > 0u)
+    if (timer > 0u)
     {
         /* The current frame slot counter minus 1 */
-        LinIf_MasterChRtData->Timer--;
+        timer--;
+        masterChRtDataPtr->Timer = timer;
     }
 }
 /* PRQA S 1532 -- */
@@ -206,19 +272,15 @@ LINIF_LOCAL_INLINE void LinIf_SlotTimer(LinIf_MasterRuntimeType* masterChRtDataP
  */
 LINIF_LOCAL_INLINE LinIf_ChannelStateType LinIf_GetChannelState(const LinIf_MasterRuntimeType* masterChRtDataPtr)
 {
-    const LinIf_MasterRuntimeType* LinIf_MasterChRtData = masterChRtDataPtr;
-    return LinIf_MasterChRtData->ChannelState;
+    LinIf_ChannelStateType channelState = masterChRtDataPtr->ChannelState;
+    return channelState;
 }
-
-#define LINIF_STOP_SEC_CODE
-#include "LinIf_MemMap.h"
 
 /* ============================================ external data definition ============================================ */
 
 /* ========================================== external function definition ========================================== */
 #define LINIF_START_SEC_CODE
 #include "LinIf_MemMap.h"
-
 /* PRQA S 1532,1503 ++ */ /* VL_QAC_OneFunRef */
 /**
  * Initializes the LinIf master channel.
@@ -249,21 +311,30 @@ void LinIf_MasterInit(ApplicationType applicationId)
 
         /*@req <SWS_LinIf_00233>*/
         /* Reset channel */
-        chPtr->CurSchedule   = NULL_PTR;
-        chPtr->ResSchedule   = NULL_PTR;
-        chPtr->RdySchedule   = NULL_PTR;
-        chPtr->CurEntry      = NULL_PTR;
-        chPtr->CurEntryIndex = 0u;
-        chPtr->ResEntryIndex = 0u;
-        chPtr->RootEvent     = LINIF_EVENT_NONE;
-        chPtr->Timer         = 0u;
-        chPtr->WakeupFlag    = FALSE;
+        chPtr->CurSchedule        = NULL_PTR;
+        chPtr->ResSchedule        = NULL_PTR;
+        chPtr->RdySchedule        = NULL_PTR;
+        chPtr->ResCySchedule      = NULL_PTR;
+        chPtr->CurEntry           = NULL_PTR;
+        chPtr->CurEntryIndex      = 0u;
+        chPtr->ResEntryIndex      = 0u;
+        chPtr->ResCySchEntryIndex = 0u;
+        chPtr->RootEvent          = LINIF_EVENT_NONE;
+        chPtr->Timer              = 0u;
+        chPtr->WakeupFlag         = FALSE;
+#if (STD_ON == LINIF_BUS_MIRROR_SUPPORT)
+        chPtr->BusMirrorEnable = FALSE;
+#endif
     }
 
     LINIF_NOUSED(applicationId);
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 #if (LINIF_MASTER_SPORADIC_FRAME_SUPPORT == STD_ON)
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * Transmit request process in master node.
  */
@@ -289,16 +360,19 @@ Std_ReturnType LinIf_MasterTransmit(NetworkHandleType ch, uint16 frameIdx)
 
     return ret;
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 #endif
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * Schedule change request process in master node.
  */
-Std_ReturnType LinIf_MasterScheduleRequest(NetworkHandleType ch, LinIf_SchHandleType LinIfSchedule)
+Std_ReturnType LinIf_MasterScheduleRequest(NetworkHandleType ch, LinIf_SchHandleType schedule)
 {
-    LinIf_MasterRuntimeType* chPtr    = LinIf_GetMasterRtDataPtr(ch);
-    Std_ReturnType           ret      = E_NOT_OK;
-    LinIf_SchHandleType      schedule = LinIfSchedule;
+    LinIf_MasterRuntimeType* chPtr = LinIf_GetMasterRtDataPtr(ch);
+    Std_ReturnType           ret   = E_NOT_OK;
 
 #if (LINIF_DEV_ERROR_DETECT == STD_ON)
     if ((LINIF_CHANNEL_SLEEP == chPtr->ChannelState)
@@ -318,8 +392,8 @@ Std_ReturnType LinIf_MasterScheduleRequest(NetworkHandleType ch, LinIf_SchHandle
         }
         else
         {
-            schedule -= LinIf_GetScheduleOfs(ch);
-            chPtr->RdySchedule = LinIf_GetSchedule(ch, schedule);
+            LinIf_SchHandleType localSchedule = schedule - LinIf_GetScheduleOfs(ch);
+            chPtr->RdySchedule                = LinIf_GetSchedule(ch, localSchedule);
         }
 
         /* Set schedule request flag */
@@ -329,7 +403,11 @@ Std_ReturnType LinIf_MasterScheduleRequest(NetworkHandleType ch, LinIf_SchHandle
 
     return ret;
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * Go-to-sleep process in master node.
  */
@@ -341,7 +419,26 @@ void LinIf_MasterGotoSleep(NetworkHandleType ch)
     /* Set sleep request flag */
     LinIf_SetEvent(chPtr, LINIF_EVENT_SLEEP);
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#if (STD_ON == LINIF_BUS_MIRROR_SUPPORT)
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
+void LinIf_MasterEnableBusMirror(NetworkHandleType ch, boolean enable)
+{
+    LinIf_MasterRuntimeType* rtDataPtr = LinIf_GetMasterRtDataPtr(ch);
+
+    SchM_Enter_LinIf_ExclusiveArea_Channel();
+    rtDataPtr->BusMirrorEnable = enable;
+    SchM_Exit_LinIf_ExclusiveArea_Channel();
+}
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+#endif
+
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * The main processing function of the LinIf master node. This function process
  * master node wakeup and sleep, message transmit and update schedule table.
@@ -420,7 +517,11 @@ void LinIf_MasterMainHandle(NetworkHandleType ch)
         }
     }
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * Process sleep state transmit
  */
@@ -428,7 +529,7 @@ void LinIf_MasterMainHandle(NetworkHandleType ch)
 void LinIf_SleepProcess(LinIf_MasterRuntimeType* masterChRtDataPtr, uint8 ch)
 /* PRQA S 6070 -- */
 {
-    uint8*                   sdu   = NULL_PTR;
+    const uint8*             sdu   = NULL_PTR;
     LinIf_MasterRuntimeType* chPtr = masterChRtDataPtr;
 
     if (!(chPtr->Timer == 0u))
@@ -472,7 +573,7 @@ void LinIf_SleepProcess(LinIf_MasterRuntimeType* masterChRtDataPtr, uint8 ch)
         }
         else
         {
-            Lin_StatusType st = Lin_DriverApi[linDriver].LinGetStatus(linChannel, &sdu);
+            Lin_StatusType st = Lin_DriverApi[linDriver].LinGetStatus(linChannel, (const uint8**)(&sdu));
             if (LIN_CH_SLEEP == st)
             {
                 /*@req <SWS_LinIf_00455>*/
@@ -521,7 +622,11 @@ void LinIf_SleepProcess(LinIf_MasterRuntimeType* masterChRtDataPtr, uint8 ch)
         /* Only for MISRA-C */
     }
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * Process wake-up state transmit
  */
@@ -587,7 +692,11 @@ Std_ReturnType LinIf_MasterWakeUp(NetworkHandleType ch)
 
     return ret;
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * Wakeup confirmation process in master node
  */
@@ -636,7 +745,11 @@ void LinIf_MasterWakeupConfirmation(EcuM_WakeupSourceType WakeupSource, Applicat
     LINIF_NOUSED(applicationId);
     LINIF_NOUSED(WakeupSource);
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * Process wake-up state transmit
  */
@@ -662,7 +775,11 @@ void LinIf_WakeUpProcess(LinIf_MasterRuntimeType* masterChRtDataPtr, uint8 ch)
         /* Only for MISRA-C */
     }
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * Process the preview frame transmission
  */
@@ -683,10 +800,10 @@ void LinIf_PrevTransmit(LinIf_MasterRuntimeType* masterChRtDataPtr, uint8 ch)
 #endif
     )
     {
-        uint8*         sduDataPtr = NULL_PTR;
+        const uint8*   sduDataPtr = NULL_PTR;
         uint8          linDriver  = LinIf_GetLinDriverId(ch);
         uint8          linChannel = LinIf_GetLinChannelId(ch);
-        Lin_StatusType st         = Lin_DriverApi[linDriver].LinGetStatus(linChannel, &sduDataPtr);
+        Lin_StatusType st         = Lin_DriverApi[linDriver].LinGetStatus(linChannel, (const uint8**)&sduDataPtr);
 
         switch (frame->PduDirection->PduDirectionId)
         {
@@ -726,7 +843,11 @@ void LinIf_PrevTransmit(LinIf_MasterRuntimeType* masterChRtDataPtr, uint8 ch)
     }
 #endif
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * Process the next frame transmission
  */
@@ -791,7 +912,11 @@ void LinIf_NextTransmit(LinIf_MasterRuntimeType* masterChRtDataPtr, uint8 ch)
         break;
     }
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * Updates the schedule strategy
  */
@@ -817,10 +942,18 @@ void LinIf_UpdateSchedule(LinIf_MasterRuntimeType* masterChRtDataPtr, uint8 ch)
             masterChRtDataPtr->ResEntryIndex =
                 masterChRtDataPtr->CurEntryIndex % masterChRtDataPtr->CurSchedule->NumOfEntry;
             /* PRQA S 2834 -- */
+            if (LINIF_RUN_CONTINUOUS == masterChRtDataPtr->CurSchedule->RunMode)
+            {
+                masterChRtDataPtr->ResCySchEntryIndex = masterChRtDataPtr->ResEntryIndex;
+            }
         }
         else
         {
             masterChRtDataPtr->ResEntryIndex = 0u;
+            if (LINIF_RUN_CONTINUOUS == masterChRtDataPtr->CurSchedule->RunMode)
+            {
+                masterChRtDataPtr->ResCySchEntryIndex = 0u;
+            }
         }
 
         /*@req <SWS_LinIf_00176> */
@@ -876,7 +1009,11 @@ void LinIf_UpdateSchedule(LinIf_MasterRuntimeType* masterChRtDataPtr, uint8 ch)
     /* Switch to the new entry */
     LinIf_SwitchNewEntry(masterChRtDataPtr, ch);
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * Get current frame type
  */
@@ -894,12 +1031,16 @@ Std_ReturnType LinIf_GetCurFrameType(NetworkHandleType ch, LinIf_FrameTypeType* 
 
     return ret;
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /* PRQA S 1532,1503 -- */
 /* ========================================== internal function definitions ==========================================
  */
 
 #if ((LINIF_MASTER_SPORADIC_FRAME_SUPPORT == STD_ON) || (LINIF_MASTER_EVENT_TRIGGER_FRAME_SUPPORT == STD_ON))
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief               Get transmit pending flag
  * @param[in]           frame: LinIf frame pointer
@@ -925,9 +1066,13 @@ LINIF_LOCAL const LinIf_SubstitutionFramesType* LinIf_GetTransmitPending(const L
 
     return retSub;
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 #endif
 
 #if (LINIF_MASTER_SPORADIC_FRAME_SUPPORT == STD_ON)
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief               Sends a sporadic frame.
  * @param[inout]        masterChRtDataPtr: LinIf master channel runtime data
@@ -964,6 +1109,14 @@ LINIF_LOCAL void LinIf_SendSporadic(LinIf_MasterRuntimeType* masterChRtDataPtr, 
             /* Set the flag of header and response */
             LinIf_SetEvent(masterChRtDataPtr, LINIF_EVENT_HEADER | LINIF_EVENT_RESPONSE);
 
+#if (STD_ON == LINIF_BUS_MIRROR_SUPPORT)
+            /* @req <SWS_LinIf_00874> */
+            if (masterChRtDataPtr->BusMirrorEnable)
+            {
+                LinIf_SaveTxDataToMirror(&masterChRtDataPtr->TxMirrorBuffer, fra, sdu);
+            }
+#endif
+
             /*@req <SWS_LinIf_00226>*/
             /* Send frame */
             uint8 linDriver  = LinIf_GetLinDriverId(ch);
@@ -978,9 +1131,13 @@ LINIF_LOCAL void LinIf_SendSporadic(LinIf_MasterRuntimeType* masterChRtDataPtr, 
         }
     }
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 #endif
 
 #if (LINIF_MASTER_EVENT_TRIGGER_FRAME_SUPPORT == STD_ON)
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief               Sends a event trigger frame
  * @param[inout]        masterChRtDataPtr: LinIf master channel runtime data
@@ -1004,8 +1161,12 @@ LINIF_LOCAL void
     /* Set the flag of header */
     LinIf_SetEvent(masterChRtDataPtr, LINIF_EVENT_HEADER);
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 #endif
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief               Sends a unconditional frame
  * @param[inout]        masterChRtDataPtr: LinIf master channel runtime data
@@ -1038,6 +1199,14 @@ LINIF_LOCAL void
             /* Set the response information */
             masterChRtDataPtr->TxPdu.SduPtr = pduInfo.SduDataPtr;
 
+#if (STD_ON == LINIF_BUS_MIRROR_SUPPORT)
+            /* @req <SWS_LinIf_00874> */
+            if (masterChRtDataPtr->BusMirrorEnable)
+            {
+                LinIf_SaveTxDataToMirror(&masterChRtDataPtr->TxMirrorBuffer, frame, sdu);
+            }
+#endif
+
             /* Set the flag of response */
             LinIf_SetEvent(masterChRtDataPtr, LINIF_EVENT_RESPONSE);
         }
@@ -1067,6 +1236,8 @@ LINIF_LOCAL void
            the frame */
     }
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief               Send a Node Configuration frame
@@ -1078,6 +1249,8 @@ LINIF_LOCAL void
  * @trace               -
  */
 #if (LINIF_MASTER_NODE_CONFIG_FRAME_SUPPORT == STD_ON)
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINIF_LOCAL void
     LinIf_SendNodeConfiguration(LinIf_MasterRuntimeType* masterChRtDataPtr, uint8 ch, const LinIf_FrameType* frame)
 {
@@ -1101,6 +1274,14 @@ LINIF_LOCAL void
         LinIf_SetEvent(masterChRtDataPtr, LINIF_EVENT_HEADER | LINIF_EVENT_RESPONSE);
         /* Set the flag of NC MRF */
         LinIf_SetEvent(masterChRtDataPtr, LINIF_EVENT_NCMRF_SEND);
+
+#if (STD_ON == LINIF_BUS_MIRROR_SUPPORT)
+        /* @req <SWS_LinIf_00874> */
+        if (masterChRtDataPtr->BusMirrorEnable)
+        {
+            LinIf_SaveTxDataToMirror(&masterChRtDataPtr->TxMirrorBuffer, frame, sdu);
+        }
+#endif
 
         /* Send frame */
         (void)Lin_DriverApi[linDriver].LinSendFrame(linChannel, &masterChRtDataPtr->TxPdu);
@@ -1133,10 +1314,13 @@ LINIF_LOCAL void
         /* Only for MISRA-C */
     }
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 #endif
 
 #if ((LINIF_TP_SUPPORTED == STD_ON) && (LINTP_MASTER_SUPPORT == STD_ON))
-
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief               Sends a MRF frame
  * @param[in]           ch: LinIf channel id
@@ -1160,6 +1344,14 @@ LINIF_LOCAL void LinIf_SendMRF(LinIf_MasterRuntimeType* masterChRtDataPtr, uint8
         masterChRtDataPtr->TxPdu.SduPtr = sdu;
         /* PRQA S 3225 -- */
 
+#if (STD_ON == LINIF_BUS_MIRROR_SUPPORT)
+        /* @req <SWS_LinIf_00874> */
+        if (masterChRtDataPtr->BusMirrorEnable)
+        {
+            LinIf_SaveTxDataToMirror(&masterChRtDataPtr->TxMirrorBuffer, frame, sdu);
+        }
+#endif
+
         /* Send header and response */
         LinIf_SetPduInfo(&masterChRtDataPtr->TxPdu, frame);
         uint8 linDriver  = LinIf_GetLinDriverId(ch);
@@ -1167,7 +1359,11 @@ LINIF_LOCAL void LinIf_SendMRF(LinIf_MasterRuntimeType* masterChRtDataPtr, uint8
         (void)Lin_DriverApi[linDriver].LinSendFrame(linChannel, &masterChRtDataPtr->TxPdu);
     }
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief               Sends a SRF frame
  * @param[in]           ch: LinIf channel id
@@ -1192,8 +1388,12 @@ LINIF_LOCAL void LinIf_SendSRF(LinIf_MasterRuntimeType* masterChRtDataPtr, uint8
         LinIf_SetEvent(masterChRtDataPtr, LINIF_EVENT_HEADER);
     }
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 #endif
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief               Sets the PDU information
  * @param[in]           pdu: Lin pdu
@@ -1252,6 +1452,11 @@ LINIF_LOCAL void LinIf_SetPduInfo(Lin_PduType* pdu, const LinIf_FrameType* frame
         break;
     }
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief               Handles the last entry
@@ -1310,12 +1515,26 @@ LINIF_LOCAL void LinIf_HandleEntryTail(LinIf_MasterRuntimeType* masterChRtDataPt
         }
         else
         {
-            /* Update entry information */
-            masterChRtDataPtr->CurEntryIndex = 0u;
+            if (LINIF_RUN_CONTINUOUS == masterChRtDataPtr->RdySchedule->RunMode)
+            {
+                /* Update entry information */
+                masterChRtDataPtr->CurEntryIndex = 0u;
+            }
+            else
+            {
+                /* LINIF_RUN_ONCE == chPtr->RdySchedule->RunMode */
+                /* @req <SWS_LinIf_00397> Switch to the last periodic table. */
+                masterChRtDataPtr->CurSchedule   = masterChRtDataPtr->ResCySchedule;
+                masterChRtDataPtr->CurEntryIndex = masterChRtDataPtr->ResCySchEntryIndex;
+            }
         }
     }
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief               Process switch schedule notify
  * @param[inout]        masterChRtDataPtr: LinIf master channel runtime data
@@ -1348,7 +1567,11 @@ LINIF_LOCAL void LinIf_SwitchScheduleNotify(LinIf_MasterRuntimeType* masterChRtD
         LinIf_UserScheduleRequestConfirmation(ch, LinIf_GetComMNetwork(ch), idx);
     }
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief               Switches to a new schedule
  * @param[inout]        masterChRtDataPtr: LinIf master channel runtime data
@@ -1416,11 +1639,13 @@ LINIF_LOCAL void LinIf_SwitchNewSchedule(LinIf_MasterRuntimeType* masterChRtData
                         /* PRQA S 2834 ++ */ /* VL_LinIf_Division */
                         masterChRtDataPtr->ResEntryIndex =
                             masterChRtDataPtr->CurEntryIndex % masterChRtDataPtr->CurSchedule->NumOfEntry;
+                        masterChRtDataPtr->ResCySchEntryIndex = masterChRtDataPtr->ResEntryIndex;
                         /* PRQA S 2834 -- */
                     }
                     else
                     {
-                        masterChRtDataPtr->ResEntryIndex = 0u;
+                        masterChRtDataPtr->ResEntryIndex      = 0u;
+                        masterChRtDataPtr->ResCySchEntryIndex = 0u;
                     }
                 }
                 LinIf_SetEvent(masterChRtDataPtr, LINIF_EVENT_SCHEDULE_CONF);
@@ -1443,8 +1668,18 @@ LINIF_LOCAL void LinIf_SwitchNewSchedule(LinIf_MasterRuntimeType* masterChRtData
         {
         }
     }
-}
 
+    if (LINIF_RUN_CONTINUOUS == masterChRtDataPtr->RdySchedule->RunMode)
+    {
+        masterChRtDataPtr->ResCySchedule      = masterChRtDataPtr->RdySchedule;
+        masterChRtDataPtr->ResCySchEntryIndex = 0u;
+    }
+}
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief               Switches to a new entry
  * @param[inout]        masterChRtDataPtr: LinIf master channel runtime data
@@ -1473,7 +1708,11 @@ LINIF_LOCAL void LinIf_SwitchNewEntry(LinIf_MasterRuntimeType* masterChRtDataPtr
 
     LINIF_NOUSED(ch);
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief               Master node parse linif message
  * @param[inout]        masterChRtDataPtr: LinIf master channel runtime data
@@ -1549,7 +1788,11 @@ LINIF_LOCAL void LinIf_RxEventParse(
     LINIF_NOUSED(ch);
     LINIF_NOUSED(masterChRtDataPtr);
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief               Master node receive error process
  * @param[inout]        masterChRtDataPtr: LinIf master channel runtime data
@@ -1625,7 +1868,11 @@ LINIF_LOCAL void LinIf_RxEventErrorHandle(
     LINIF_NOUSED(st);
     LINIF_NOUSED(masterChRtDataPtr);
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief               Processing of messages sent by the master node.
  * @param[inout]        masterChRtDataPtr: LinIf master channel runtime data
@@ -1706,7 +1953,11 @@ LINIF_LOCAL void
     }
     LINIF_NOUSED(ch);
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief               Handling of message sending failures for the master node.
  * @param[inout]        masterChRtDataPtr: LinIf master channel runtime data
@@ -1773,7 +2024,11 @@ LINIF_LOCAL void LinIf_MasterTxErrorHandle(
     }
     LINIF_NOUSED(ch);
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief               Master node parse linif message
  * @param[inout]        masterChRtDataPtr: LinIf master channel runtime data
@@ -1807,15 +2062,35 @@ LINIF_LOCAL void LinIf_PrevTransmitRxPduHandle(
             masterChRtDataPtr->CurEntryIndex++;
             LinIf_RxEventParse(ch, masterChRtDataPtr, sduDataPtr, frame);
         }
+
+#if (STD_ON == LINIF_BUS_MIRROR_SUPPORT)
+        /* @req <SWS_LinIf_00873> */
+        if (masterChRtDataPtr->BusMirrorEnable)
+        {
+            LinIf_ReportRxFrameToMirror(ch, frame, sduDataPtr, st);
+        }
+#endif
     }
     else
     {
+#if (STD_ON == LINIF_BUS_MIRROR_SUPPORT)
+        /* @req <SWS_LinIf_00873> */
+        if (masterChRtDataPtr->BusMirrorEnable)
+        {
+            LinIf_ReportRxFrameToMirror(ch, frame, NULL_PTR, st);
+        }
+#endif
         masterChRtDataPtr->CurEntryIndex++;
 
         LinIf_RxEventErrorHandle(st, masterChRtDataPtr, frame);
     }
     LINIF_NOUSED(ch);
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief               Master node parse linif message
@@ -1846,14 +2121,30 @@ LINIF_LOCAL void LinIf_PrevTransmitTxPduHandle(
         {
             LinIf_MasterTxSuccessHandle(ch, frame, masterChRtDataPtr);
         }
+
+#if (STD_ON == LINIF_BUS_MIRROR_SUPPORT)
+        /* @req <SWS_LinIf_00874> */
+        if (masterChRtDataPtr->BusMirrorEnable)
+        {
+            LinIf_ReportTxFrameToMirror(ch, &masterChRtDataPtr->TxMirrorBuffer, LIN_TX_OK);
+        }
+#endif
     }
     else
     {
+#if (STD_ON == LINIF_BUS_MIRROR_SUPPORT)
+        /* @req <SWS_LinIf_00874> */
+        if (masterChRtDataPtr->BusMirrorEnable)
+        {
+            LinIf_MirrorBufferType* mirrorBufferPtr = &masterChRtDataPtr->TxMirrorBuffer;
+            LinIf_ReportTxFrameToMirror(ch, mirrorBufferPtr, st);
+        }
+#endif
+
         LinIf_MasterTxErrorHandle(ch, st, masterChRtDataPtr, frame);
     }
     LINIF_NOUSED(ch);
 }
-
 #define LINIF_STOP_SEC_CODE
 #include "LinIf_MemMap.h"
 

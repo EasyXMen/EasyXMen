@@ -67,8 +67,12 @@ DCM_LOCAL boolean Dcm_DTCSettingDisabled[DCM_PROTOCOLROW_NUM];
  * @synchronous   TRUE
  * @trace         CPD-PLACEHOLDE
  */
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL Std_ReturnType
     Dcm_UDS0x85_ConditionCheck(const Dcm_MsgContextType* pMsgContext, Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 /* ========================================== external function definitions ========================================= */
 #define DCM_START_SEC_CODE
 #include "Dcm_MemMap.h"
@@ -146,7 +150,10 @@ Std_ReturnType Dcm_UDS0x85(
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * enable dtc setting for disabled protocol
  */
@@ -164,8 +171,11 @@ void Dcm_UDS0x85_EnableDTCSetting(void)
         }
     }
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if (STD_ON == DCM_UDS_0X85_MODERULE)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * periodically check mode Rule, enable dtc setting if failed
  */
@@ -180,9 +190,9 @@ void Dcm_UDS0x85_MainFunction(void)
         }
     }
 }
-#endif
 #define DCM_STOP_SEC_CODE
 #include "Dcm_MemMap.h"
+#endif
 /* ========================================== internal function definitions ========================================= */
 #define DCM_START_SEC_CODE
 #include "Dcm_MemMap.h"

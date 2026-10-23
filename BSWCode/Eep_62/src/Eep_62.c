@@ -36,6 +36,7 @@
 #if (EEP_62_ECUC_PARTITION_ENABLE == STD_ON)
 #include "Os.h"
 #endif
+#include "Eep_62_Arti.h"
 
 /* ===================================================== macros ===================================================== */
 /** Size of the buffer used for data verification */
@@ -55,6 +56,10 @@
  * @trace       CPD-76989
  */
 EEP_62_LOCAL void Eep_62_Erase_Handle(uint8 deviceIndex, Eep_62_RuntimeType* Eep_RunData);
+#define EEP_62_STOP_SEC_CODE
+#include "Eep_62_MemMap.h"
+#define EEP_62_START_SEC_CODE
+#include "Eep_62_MemMap.h"
 
 /**
  * @brief       Check the block is valid before unpacking the block header information
@@ -65,6 +70,10 @@ EEP_62_LOCAL void Eep_62_Erase_Handle(uint8 deviceIndex, Eep_62_RuntimeType* Eep
  * @trace       CPD-76990
  */
 EEP_62_LOCAL void Eep_62_Write_Handle(uint8 deviceIndex, Eep_62_RuntimeType* Eep_RunData);
+#define EEP_62_STOP_SEC_CODE
+#include "Eep_62_MemMap.h"
+#define EEP_62_START_SEC_CODE
+#include "Eep_62_MemMap.h"
 
 /**
  * @brief       Check the block is valid before unpacking the block header information
@@ -75,6 +84,10 @@ EEP_62_LOCAL void Eep_62_Write_Handle(uint8 deviceIndex, Eep_62_RuntimeType* Eep
  * @trace       CPD-76991
  */
 EEP_62_LOCAL void Eep_62_Read_Handle(uint8 deviceIndex, Eep_62_RuntimeType* Eep_RunData);
+#define EEP_62_STOP_SEC_CODE
+#include "Eep_62_MemMap.h"
+#define EEP_62_START_SEC_CODE
+#include "Eep_62_MemMap.h"
 
 /**
  * @brief       Check the block is valid before unpacking the block header information
@@ -85,6 +98,10 @@ EEP_62_LOCAL void Eep_62_Read_Handle(uint8 deviceIndex, Eep_62_RuntimeType* Eep_
  * @trace       CPD-76992
  */
 EEP_62_LOCAL void Eep_62_Compare_Handle(uint8 deviceIndex, Eep_62_RuntimeType* Eep_RunData);
+#define EEP_62_STOP_SEC_CODE
+#include "Eep_62_MemMap.h"
+#define EEP_62_START_SEC_CODE
+#include "Eep_62_MemMap.h"
 
 /**
  * @brief       Check the block is valid before unpacking the block header information
@@ -105,12 +122,20 @@ EEP_62_LOCAL void Eep_62_Compare_HandleSub(uint8 deviceIndex, Eep_62_RuntimeType
  * @brief Record the status of the module @range NA
  */
 EEP_62_LOCAL MemIf_StatusType Eep_62_Status[EEP_62_NUMBER_OF_EEP_MODULE];
+#define EEP_62_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Eep_62_MemMap.h"
 
+#define EEP_62_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Eep_62_MemMap.h"
 /**
  * @brief Record the request job of the module @range NA
  */
 EEP_62_LOCAL MemIf_JobResultType Eep_62_JobResult[EEP_62_NUMBER_OF_EEP_MODULE];
+#define EEP_62_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Eep_62_MemMap.h"
 
+#define EEP_62_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Eep_62_MemMap.h"
 /**
  * @brief Record the runtime data of the module @range NA
  */
@@ -141,12 +166,13 @@ EEP_62_LOCAL const Eep_62_ConfigTypeSet* Eep_62_ConfigPtr;
 /* ========================================== external function definitions ========================================= */
 #define EEP_62_START_SEC_CODE
 #include "Eep_62_MemMap.h"
-/* PRQA S 1503,1532 ++ */ /* VL_Eep_62_1503,VL_QAC_OneFunRef */
+/* PRQA S 1503,1532 ++ */ /* VL_QAC_NoUsedApi,VL_QAC_OneFunRef */
 /**
  * @brief Check the develop error, initialize global variables and set state machines
  */
 void Eep_62_Init(const Eep_62_ConfigType* ConfigPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Eep_62, 0, Bsw_Start, 2, 0x00, ConfigPtr);
     uint8 iloop = 0u;
 #if (STD_ON == EEP_62_DEV_ERROR_DETECT)
     uint8 errorId = EEP_62_E_NO_ERROR;
@@ -177,23 +203,26 @@ void Eep_62_Init(const Eep_62_ConfigType* ConfigPtr)
         for (iloop = 0u; iloop < EEP_62_NUMBER_OF_EEP_MODULE; iloop++)
 #endif
         {
-            Eep_62_Status[iloop]    = MEMIF_IDLE;
-            Eep_62_JobResult[iloop] = MEMIF_JOB_OK;
+            Eep_62_RuntimeType* rumtimePtr = &Eep_62_Runtime[iloop];
+            Eep_62_Status[iloop]           = MEMIF_IDLE;
+            Eep_62_JobResult[iloop]        = MEMIF_JOB_OK;
             /** parameter init */
-            Eep_62_Runtime[iloop].currentJob              = EEP_62_JOB_NONE;
-            Eep_62_Runtime[iloop].operateAddr             = 0u;
-            Eep_62_Runtime[iloop].dataBufferPtr           = NULL_PTR;
-            Eep_62_Runtime[iloop].WriteBuffer             = NULL_PTR;
-            Eep_62_Runtime[iloop].length                  = 0u;
-            Eep_62_Runtime[iloop].CompareLength           = 0u;
-            Eep_62_Runtime[iloop].StateForRunMainFunction = FALSE;
+            rumtimePtr->currentJob              = EEP_62_JOB_NONE;
+            rumtimePtr->operateAddr             = 0u;
+            rumtimePtr->dataBufferPtr           = NULL_PTR;
+            rumtimePtr->WriteBuffer             = NULL_PTR;
+            rumtimePtr->length                  = 0u;
+            rumtimePtr->CompareLength           = 0u;
+            rumtimePtr->StateForRunMainFunction = FALSE;
             for (uint16 jloop = 0u; jloop < EEP_COMPARE_BUF_SIZE; jloop++)
             {
                 Eep_62_CompareBuffer[iloop][jloop] = 0u;
             }
-            if (NULL_PTR != Eep_62_DevHwApis_at[iloop].DevInitApi)
+
+            const Eep_62_DevApiType hwApi = Eep_62_DevHwApis_at[iloop];
+            if (NULL_PTR != hwApi.DevInitApi)
             {
-                Eep_62_DevHwApis_at[iloop].DevInitApi();
+                hwApi.DevInitApi();
             }
             /** according to the default mode to set the current mode, read and write size. */
             Eep_62_SetMode(iloop, Eep_62_ConfigPtr[iloop].defaultMode);
@@ -206,13 +235,18 @@ void Eep_62_Init(const Eep_62_ConfigType* ConfigPtr)
         Eep_Det_ReportError(EEP_62_ID_INIT, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Eep_62, 0, Bsw_Return, 1, 0x00);
 }
-
+#define EEP_62_STOP_SEC_CODE
+#include "Eep_62_MemMap.h"
+#define EEP_62_START_SEC_CODE
+#include "Eep_62_MemMap.h"
 /**
  * @brief Check the develop error, set the parameters according to the request mode
  */
 void Eep_62_SetMode(uint8 deviceIndex, MemIf_ModeType Mode)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Eep_62, 0, Bsw_Start, 3, 0x01, deviceIndex, Mode);
 #if (STD_ON == EEP_62_DEV_ERROR_DETECT)
     uint8 errorId = EEP_62_E_NO_ERROR;
     if (MEMIF_UNINIT == Eep_62_Status[deviceIndex])
@@ -232,21 +266,20 @@ void Eep_62_SetMode(uint8 deviceIndex, MemIf_ModeType Mode)
     else
 #endif
     {
-        Eep_62_Runtime[deviceIndex].currentMode = Mode;
-        if (MEMIF_MODE_SLOW == Eep_62_Runtime[deviceIndex].currentMode)
+        Eep_62_RuntimeType*         rumtimePtr = &Eep_62_Runtime[deviceIndex];
+        const Eep_62_ConfigTypeSet* cfgPtr     = &(Eep_62_ConfigPtr[deviceIndex]);
+        rumtimePtr->currentMode                = Mode;
+        if (MEMIF_MODE_SLOW == rumtimePtr->currentMode)
         {
             /** Check if MEMIF_MODE_SLOW mode is set */
-            Eep_62_Runtime[deviceIndex].maxReadSize =
-                Eep_62_ConfigPtr[deviceIndex].DeviceConfigPtr->normalReadBlockSize;
-            Eep_62_Runtime[deviceIndex].maxWriteSize =
-                Eep_62_ConfigPtr[deviceIndex].DeviceConfigPtr->normalWriteBlockSize;
+            rumtimePtr->maxReadSize  = cfgPtr->DeviceConfigPtr->normalReadBlockSize;
+            rumtimePtr->maxWriteSize = cfgPtr->DeviceConfigPtr->normalWriteBlockSize;
         }
-        else if (MEMIF_MODE_FAST == Eep_62_Runtime[deviceIndex].currentMode)
+        else if (MEMIF_MODE_FAST == rumtimePtr->currentMode)
         {
             /** Check if MEMIF_MODE_FAST mode is set */
-            Eep_62_Runtime[deviceIndex].maxReadSize = Eep_62_ConfigPtr[deviceIndex].DeviceConfigPtr->fastReadBlockSize;
-            Eep_62_Runtime[deviceIndex].maxWriteSize =
-                Eep_62_ConfigPtr[deviceIndex].DeviceConfigPtr->fastWriteBlockSize;
+            rumtimePtr->maxReadSize  = cfgPtr->DeviceConfigPtr->fastReadBlockSize;
+            rumtimePtr->maxWriteSize = cfgPtr->DeviceConfigPtr->fastWriteBlockSize;
         }
         else
         {
@@ -260,17 +293,24 @@ void Eep_62_SetMode(uint8 deviceIndex, MemIf_ModeType Mode)
         Eep_Det_ReportError(EEP_62_ID_SETMODE, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Eep_62, 0, Bsw_Return, 1, 0x01);
 }
-
+#define EEP_62_STOP_SEC_CODE
+#include "Eep_62_MemMap.h"
+#define EEP_62_START_SEC_CODE
+#include "Eep_62_MemMap.h"
 /**
  * @brief Check the develop error, set the parameters and request read job
  */
 Std_ReturnType
     Eep_62_Read(uint8 deviceIndex, Eep_62_AddressType EepromAddress, uint8* DataBufferPtr, Eep_62_LengthType Length)
 {
-    Std_ReturnType retVal = E_NOT_OK;
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Eep_62, 0, Bsw_Start, 5, 0x02, deviceIndex, EepromAddress, DataBufferPtr, Length);
+    Std_ReturnType      retVal     = E_NOT_OK;
+    Eep_62_RuntimeType* rumtimePtr = &Eep_62_Runtime[deviceIndex];
 #if (STD_ON == EEP_62_DEV_ERROR_DETECT)
-    uint8 errorId = EEP_62_E_NO_ERROR;
+    const Eep_62_ConfigTypeSet* cfgPtr  = &(Eep_62_ConfigPtr[deviceIndex]);
+    uint8                       errorId = EEP_62_E_NO_ERROR;
     if (MEMIF_UNINIT == Eep_62_Status[deviceIndex])
     {
         errorId = EEP_62_E_UNINT;
@@ -283,11 +323,11 @@ Std_ReturnType
     {
         errorId = EEP_62_E_PARAM_DATA;
     }
-    else if (Length > (Eep_62_ConfigPtr[deviceIndex].DeviceConfigPtr->usedSize - 1U))
+    else if (Length > (cfgPtr->DeviceConfigPtr->usedSize - 1U))
     {
         errorId = EEP_62_E_PARAM_ADDRESS;
     }
-    else if ((Length < 1U) || (Length > (Eep_62_ConfigPtr[deviceIndex].DeviceConfigPtr->usedSize - EepromAddress)))
+    else if ((Length < 1U) || (Length > (cfgPtr->DeviceConfigPtr->usedSize - EepromAddress)))
     {
         errorId = EEP_62_E_PARAM_LENGTH;
     }
@@ -300,13 +340,13 @@ Std_ReturnType
     else
 #endif
     {
-        Eep_62_Status[deviceIndex]                = MEMIF_BUSY;
-        Eep_62_JobResult[deviceIndex]             = MEMIF_JOB_PENDING;
-        Eep_62_Runtime[deviceIndex].currentJob    = EEP_62_JOB_READ;
-        Eep_62_Runtime[deviceIndex].length        = Length;
-        Eep_62_Runtime[deviceIndex].operateAddr   = EepromAddress;
-        Eep_62_Runtime[deviceIndex].dataBufferPtr = (uint8*)DataBufferPtr;
-        retVal                                    = E_OK;
+        Eep_62_Status[deviceIndex]    = MEMIF_BUSY;
+        Eep_62_JobResult[deviceIndex] = MEMIF_JOB_PENDING;
+        rumtimePtr->currentJob        = EEP_62_JOB_READ;
+        rumtimePtr->length            = Length;
+        rumtimePtr->operateAddr       = EepromAddress;
+        rumtimePtr->dataBufferPtr     = (uint8*)DataBufferPtr;
+        retVal                        = E_OK;
     }
 
 #if (STD_ON == EEP_62_DEV_ERROR_DETECT)
@@ -316,9 +356,13 @@ Std_ReturnType
     }
 #endif
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Eep_62, 0, Bsw_Return, 2, 0x02, retVal);
     return retVal;
 }
-
+#define EEP_62_STOP_SEC_CODE
+#include "Eep_62_MemMap.h"
+#define EEP_62_START_SEC_CODE
+#include "Eep_62_MemMap.h"
 /**
  * @brief Check the develop error, set the parameters and request write job
  */
@@ -328,9 +372,12 @@ Std_ReturnType Eep_62_Write(
     const uint8*       DataBufferPtr,
     Eep_62_LengthType  Length)
 {
-    Std_ReturnType retVal = E_NOT_OK;
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Eep_62, 0, Bsw_Start, 5, 0x03, deviceIndex, EepromAddress, DataBufferPtr, Length);
+    Std_ReturnType      retVal     = E_NOT_OK;
+    Eep_62_RuntimeType* rumtimePtr = &Eep_62_Runtime[deviceIndex];
 #if (STD_ON == EEP_62_DEV_ERROR_DETECT)
-    uint8 errorId = EEP_62_E_NO_ERROR;
+    const Eep_62_ConfigTypeSet* cfgPtr  = &(Eep_62_ConfigPtr[deviceIndex]);
+    uint8                       errorId = EEP_62_E_NO_ERROR;
     if (MEMIF_UNINIT == Eep_62_Status[deviceIndex])
     {
         errorId = EEP_62_E_UNINT;
@@ -343,11 +390,11 @@ Std_ReturnType Eep_62_Write(
     {
         errorId = EEP_62_E_PARAM_DATA;
     }
-    else if (Length > (Eep_62_ConfigPtr[deviceIndex].DeviceConfigPtr->usedSize - 1U))
+    else if (Length > (cfgPtr->DeviceConfigPtr->usedSize - 1U))
     {
         errorId = EEP_62_E_PARAM_ADDRESS;
     }
-    else if ((Length < 1u) || (Length > (Eep_62_ConfigPtr[deviceIndex].DeviceConfigPtr->usedSize - EepromAddress)))
+    else if ((Length < 1u) || (Length > (cfgPtr->DeviceConfigPtr->usedSize - EepromAddress)))
     {
         errorId = EEP_62_E_PARAM_LENGTH;
     }
@@ -360,13 +407,13 @@ Std_ReturnType Eep_62_Write(
     else
 #endif
     {
-        Eep_62_Status[deviceIndex]              = MEMIF_BUSY;
-        Eep_62_JobResult[deviceIndex]           = MEMIF_JOB_PENDING;
-        Eep_62_Runtime[deviceIndex].currentJob  = EEP_62_JOB_WRITE;
-        Eep_62_Runtime[deviceIndex].length      = Length;
-        Eep_62_Runtime[deviceIndex].operateAddr = EepromAddress;
-        Eep_62_Runtime[deviceIndex].WriteBuffer = DataBufferPtr;
-        retVal                                  = E_OK;
+        Eep_62_Status[deviceIndex]    = MEMIF_BUSY;
+        Eep_62_JobResult[deviceIndex] = MEMIF_JOB_PENDING;
+        rumtimePtr->currentJob        = EEP_62_JOB_WRITE;
+        rumtimePtr->length            = Length;
+        rumtimePtr->operateAddr       = EepromAddress;
+        rumtimePtr->WriteBuffer       = DataBufferPtr;
+        retVal                        = E_OK;
     }
 
 #if (STD_ON == EEP_62_DEV_ERROR_DETECT)
@@ -376,17 +423,24 @@ Std_ReturnType Eep_62_Write(
     }
 #endif
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Eep_62, 0, Bsw_Return, 2, 0x03, retVal);
     return retVal;
 }
-
+#define EEP_62_STOP_SEC_CODE
+#include "Eep_62_MemMap.h"
+#define EEP_62_START_SEC_CODE
+#include "Eep_62_MemMap.h"
 /**
  * @brief Check the develop error, set the parameters and request erase job
  */
 Std_ReturnType Eep_62_Erase(uint8 deviceIndex, Eep_62_AddressType EepromAddress, Eep_62_LengthType Length)
 {
-    Std_ReturnType retVal = E_NOT_OK;
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Eep_62, 0, Bsw_Start, 4, 0x04, deviceIndex, EepromAddress, Length);
+    Std_ReturnType      retVal     = E_NOT_OK;
+    Eep_62_RuntimeType* rumtimePtr = &Eep_62_Runtime[deviceIndex];
 #if (STD_ON == EEP_62_DEV_ERROR_DETECT)
-    uint8 errorId = EEP_62_E_NO_ERROR;
+    const Eep_62_ConfigTypeSet* cfgPtr  = &(Eep_62_ConfigPtr[deviceIndex]);
+    uint8                       errorId = EEP_62_E_NO_ERROR;
     if (MEMIF_UNINIT == Eep_62_Status[deviceIndex])
     {
         errorId = EEP_62_E_UNINT;
@@ -395,11 +449,11 @@ Std_ReturnType Eep_62_Erase(uint8 deviceIndex, Eep_62_AddressType EepromAddress,
     {
         Eep_Det_ReportRunTimeError(EEP_62_ID_ERASE, EEP_62_E_BUSY);
     }
-    else if (Length > (Eep_62_ConfigPtr[deviceIndex].DeviceConfigPtr->usedSize - 1U))
+    else if (Length > (cfgPtr->DeviceConfigPtr->usedSize - 1U))
     {
         errorId = EEP_62_E_PARAM_ADDRESS;
     }
-    else if ((Length < 1U) || (Length > (Eep_62_ConfigPtr[deviceIndex].DeviceConfigPtr->usedSize - EepromAddress)))
+    else if ((Length < 1U) || (Length > (cfgPtr->DeviceConfigPtr->usedSize - EepromAddress)))
     {
         errorId = EEP_62_E_PARAM_LENGTH;
     }
@@ -412,12 +466,12 @@ Std_ReturnType Eep_62_Erase(uint8 deviceIndex, Eep_62_AddressType EepromAddress,
     else
 #endif
     {
-        Eep_62_Status[deviceIndex]              = MEMIF_BUSY;
-        Eep_62_JobResult[deviceIndex]           = MEMIF_JOB_PENDING;
-        Eep_62_Runtime[deviceIndex].currentJob  = EEP_62_JOB_ERASE;
-        Eep_62_Runtime[deviceIndex].length      = Length;
-        Eep_62_Runtime[deviceIndex].operateAddr = EepromAddress;
-        retVal                                  = E_OK;
+        Eep_62_Status[deviceIndex]    = MEMIF_BUSY;
+        Eep_62_JobResult[deviceIndex] = MEMIF_JOB_PENDING;
+        rumtimePtr->currentJob        = EEP_62_JOB_ERASE;
+        rumtimePtr->length            = Length;
+        rumtimePtr->operateAddr       = EepromAddress;
+        retVal                        = E_OK;
     }
 
 #if (STD_ON == EEP_62_DEV_ERROR_DETECT)
@@ -427,9 +481,13 @@ Std_ReturnType Eep_62_Erase(uint8 deviceIndex, Eep_62_AddressType EepromAddress,
     }
 #endif
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Eep_62, 0, Bsw_Return, 2, 0x04, retVal);
     return retVal;
 }
-
+#define EEP_62_STOP_SEC_CODE
+#include "Eep_62_MemMap.h"
+#define EEP_62_START_SEC_CODE
+#include "Eep_62_MemMap.h"
 /**
  * @brief Check the develop error, set the parameters and request compare job
  */
@@ -439,9 +497,12 @@ Std_ReturnType Eep_62_Compare(
     const uint8*       DataBufferPtr,
     Eep_62_LengthType  Length)
 {
-    Std_ReturnType retVal = E_NOT_OK;
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Eep_62, 0, Bsw_Start, 5, 0x05, deviceIndex, EepromAddress, DataBufferPtr, Length);
+    Std_ReturnType      retVal     = E_NOT_OK;
+    Eep_62_RuntimeType* rumtimePtr = &Eep_62_Runtime[deviceIndex];
 #if (STD_ON == EEP_62_DEV_ERROR_DETECT)
-    uint8 errorId = EEP_62_E_NO_ERROR;
+    const Eep_62_ConfigTypeSet* cfgPtr  = &(Eep_62_ConfigPtr[deviceIndex]);
+    uint8                       errorId = EEP_62_E_NO_ERROR;
     if (MEMIF_UNINIT == Eep_62_Status[deviceIndex])
     {
         errorId = EEP_62_E_UNINT;
@@ -454,11 +515,11 @@ Std_ReturnType Eep_62_Compare(
     {
         errorId = EEP_62_E_PARAM_DATA;
     }
-    else if (Length > (Eep_62_ConfigPtr[deviceIndex].DeviceConfigPtr->usedSize - 1U))
+    else if (Length > (cfgPtr->DeviceConfigPtr->usedSize - 1U))
     {
         errorId = EEP_62_E_PARAM_ADDRESS;
     }
-    else if ((Length < 1u) || (Length > (Eep_62_ConfigPtr[deviceIndex].DeviceConfigPtr->usedSize - EepromAddress)))
+    else if ((Length < 1u) || (Length > (cfgPtr->DeviceConfigPtr->usedSize - EepromAddress)))
     {
         errorId = EEP_62_E_PARAM_LENGTH;
     }
@@ -471,15 +532,15 @@ Std_ReturnType Eep_62_Compare(
     else
 #endif
     {
-        Eep_62_Status[deviceIndex]                = MEMIF_BUSY;
-        Eep_62_JobResult[deviceIndex]             = MEMIF_JOB_PENDING;
-        Eep_62_Runtime[deviceIndex].currentJob    = EEP_62_JOB_COMPARE;
-        Eep_62_Runtime[deviceIndex].length        = Length;
-        Eep_62_Runtime[deviceIndex].CompareLength = Length;
-        Eep_62_Runtime[deviceIndex].operateAddr   = EepromAddress;
-        Eep_62_Runtime[deviceIndex].dataBufferPtr = &Eep_62_CompareBuffer[deviceIndex][0];
-        Eep_62_Runtime[deviceIndex].WriteBuffer   = DataBufferPtr;
-        retVal                                    = E_OK;
+        Eep_62_Status[deviceIndex]    = MEMIF_BUSY;
+        Eep_62_JobResult[deviceIndex] = MEMIF_JOB_PENDING;
+        rumtimePtr->currentJob        = EEP_62_JOB_COMPARE;
+        rumtimePtr->length            = Length;
+        rumtimePtr->CompareLength     = Length;
+        rumtimePtr->operateAddr       = EepromAddress;
+        rumtimePtr->dataBufferPtr     = &Eep_62_CompareBuffer[deviceIndex][0];
+        rumtimePtr->WriteBuffer       = DataBufferPtr;
+        retVal                        = E_OK;
     }
 
 #if (STD_ON == EEP_62_DEV_ERROR_DETECT)
@@ -489,21 +550,27 @@ Std_ReturnType Eep_62_Compare(
     }
 #endif
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Eep_62, 0, Bsw_Return, 2, 0x05, retVal);
     return retVal;
 }
-
+#define EEP_62_STOP_SEC_CODE
+#include "Eep_62_MemMap.h"
+#define EEP_62_START_SEC_CODE
+#include "Eep_62_MemMap.h"
 /**
  * @brief Check the develop error, set the parameters and request cancel job
  */
 void Eep_62_Cancel(uint8 deviceIndex)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Eep_62, 0, Bsw_Start, 2, 0x06, deviceIndex);
+    Eep_62_RuntimeType* rumtimePtr = &Eep_62_Runtime[deviceIndex];
 #if (STD_ON == EEP_62_DEV_ERROR_DETECT)
     uint8 errorId = EEP_62_E_NO_ERROR;
     if (MEMIF_UNINIT == Eep_62_Status[deviceIndex])
     {
         errorId = EEP_62_E_UNINT;
     }
-    else if (Eep_62_Runtime[deviceIndex].StateForRunMainFunction)
+    else if (rumtimePtr->StateForRunMainFunction)
     {
         errorId = EEP_62_E_IN_MAINF;
     }
@@ -516,20 +583,21 @@ void Eep_62_Cancel(uint8 deviceIndex)
     else
 #endif
     {
-        Eep_62_Status[deviceIndex]                = MEMIF_IDLE;
-        Eep_62_Runtime[deviceIndex].currentJob    = EEP_62_JOB_NONE;
-        Eep_62_Runtime[deviceIndex].length        = 0u;
-        Eep_62_Runtime[deviceIndex].CompareLength = 0u;
-        Eep_62_Runtime[deviceIndex].operateAddr   = 0u;
-        Eep_62_Runtime[deviceIndex].dataBufferPtr = NULL_PTR;
-        Eep_62_Runtime[deviceIndex].WriteBuffer   = NULL_PTR;
+        Eep_62_Status[deviceIndex]         = MEMIF_IDLE;
+        rumtimePtr->currentJob             = EEP_62_JOB_NONE;
+        rumtimePtr->length                 = 0u;
+        rumtimePtr->CompareLength          = 0u;
+        rumtimePtr->operateAddr            = 0u;
+        rumtimePtr->dataBufferPtr          = NULL_PTR;
+        rumtimePtr->WriteBuffer            = NULL_PTR;
+        const Eep_62_ConfigTypeSet* cfgPtr = &(Eep_62_ConfigPtr[deviceIndex]);
         if (MEMIF_JOB_PENDING == Eep_62_JobResult[deviceIndex])
         {
             Eep_62_JobResult[deviceIndex] = MEMIF_JOB_CANCELED;
             /** call the job Error notification */
-            if (NULL_PTR != Eep_62_ConfigPtr[deviceIndex].jobErrorNotification)
+            if (NULL_PTR != cfgPtr->jobErrorNotification)
             {
-                Eep_62_ConfigPtr[deviceIndex].jobErrorNotification();
+                cfgPtr->jobErrorNotification();
             }
             else
             {
@@ -548,29 +616,44 @@ void Eep_62_Cancel(uint8 deviceIndex)
         Eep_Det_ReportError(EEP_62_ID_CANCEL, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Eep_62, 0, Bsw_Return, 1, 0x06);
 }
-
+#define EEP_62_STOP_SEC_CODE
+#include "Eep_62_MemMap.h"
+#define EEP_62_START_SEC_CODE
+#include "Eep_62_MemMap.h"
 /**
  * @brief Return the recorded module status
  */
 MemIf_StatusType Eep_62_GetStatus(uint8 deviceIndex)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Eep_62, 0, Bsw_Start, 2, 0x07, deviceIndex);
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Eep_62, 0, Bsw_Return, 1, 0x07);
     return Eep_62_Status[deviceIndex];
 }
-
+#define EEP_62_STOP_SEC_CODE
+#include "Eep_62_MemMap.h"
+#define EEP_62_START_SEC_CODE
+#include "Eep_62_MemMap.h"
 /**
  * @brief Return the recorded job result
  */
 MemIf_JobResultType Eep_62_GetJobResult(uint8 deviceIndex)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Eep_62, 0, Bsw_Start, 2, 0x08, deviceIndex);
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Eep_62, 0, Bsw_Return, 1, 0x08);
     return Eep_62_JobResult[deviceIndex];
 }
-
+#define EEP_62_STOP_SEC_CODE
+#include "Eep_62_MemMap.h"
+#define EEP_62_START_SEC_CODE
+#include "Eep_62_MemMap.h"
 /**
  * @brief Check the develop error, execute the internal API according to request job
  */
 void Eep_62_MainFunction(void)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Eep_62, 0, Bsw_Start, 1, 0x09);
 #if (EEP_62_NUMBER_OF_EEP_MODULE > 1u)
     for (uint8 iloop = 0u; iloop < EEP_62_NUMBER_OF_EEP_MODULE; iloop++)
 #else
@@ -610,15 +693,19 @@ void Eep_62_MainFunction(void)
             Eep_62_Runtime[iloop].StateForRunMainFunction = (boolean)FALSE;
         }
     }
-    return;
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Eep_62, 0, Bsw_Return, 1, 0x09);
 }
-
+#define EEP_62_STOP_SEC_CODE
+#include "Eep_62_MemMap.h"
 #if (EEP_62_VERSION_INFO_API == STD_ON)
+#define EEP_62_START_SEC_CODE
+#include "Eep_62_MemMap.h"
 /**
  * @brief Check the develop error, return the version information
  */
 void Eep_62_GetVersionInfo(Std_VersionInfoType* versioninfo)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Eep_62, 0, Bsw_Start, 2, 0x0A, versioninfo);
 #if (STD_ON == EEP_62_DEV_ERROR_DETECT)
     if (NULL_PTR == versioninfo)
     {
@@ -633,11 +720,12 @@ void Eep_62_GetVersionInfo(Std_VersionInfoType* versioninfo)
         versioninfo->sw_minor_version = EEP_62_SW_MINOR_VERSION;
         versioninfo->sw_patch_version = EEP_62_SW_PATCH_VERSION;
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Eep_62, 0, Bsw_Return, 1, 0x0A);
 }
-#endif
 
 #define EEP_62_STOP_SEC_CODE
 #include "Eep_62_MemMap.h"
+#endif
 
 /* ========================================== internal function definitions ========================================= */
 #define EEP_62_START_SEC_CODE
@@ -648,7 +736,8 @@ void Eep_62_GetVersionInfo(Std_VersionInfoType* versioninfo)
  */
 EEP_62_LOCAL void Eep_62_Erase_Handle(uint8 deviceIndex, Eep_62_RuntimeType* Eep_RunData)
 {
-    Std_ReturnType retVal;
+    Std_ReturnType              retVal;
+    const Eep_62_ConfigTypeSet* cfgPtr = &(Eep_62_ConfigPtr[deviceIndex]);
     if (NULL_PTR == Eep_62_DevHwApis_at[deviceIndex].DevEraseApi)
     {
         retVal = E_NOT_OK;
@@ -669,9 +758,9 @@ EEP_62_LOCAL void Eep_62_Erase_Handle(uint8 deviceIndex, Eep_62_RuntimeType* Eep
         Eep_62_Status[deviceIndex] = MEMIF_IDLE;
         Eep_RunData->currentJob    = EEP_62_JOB_NONE;
         /** call the job Error notification */
-        if (NULL_PTR != Eep_62_ConfigPtr[deviceIndex].jobErrorNotification)
+        if (NULL_PTR != cfgPtr->jobErrorNotification)
         {
-            Eep_62_ConfigPtr[deviceIndex].jobErrorNotification();
+            cfgPtr->jobErrorNotification();
         }
     }
     else if (E_OK == retVal)
@@ -686,9 +775,9 @@ EEP_62_LOCAL void Eep_62_Erase_Handle(uint8 deviceIndex, Eep_62_RuntimeType* Eep
         Eep_62_Status[deviceIndex] = MEMIF_IDLE;
         Eep_RunData->currentJob    = EEP_62_JOB_NONE;
         /** call the job end notification */
-        if (NULL_PTR != Eep_62_ConfigPtr[deviceIndex].jobEndNotification)
+        if (NULL_PTR != cfgPtr->jobEndNotification)
         {
-            Eep_62_ConfigPtr[deviceIndex].jobEndNotification();
+            cfgPtr->jobEndNotification();
         }
     }
     else
@@ -696,7 +785,10 @@ EEP_62_LOCAL void Eep_62_Erase_Handle(uint8 deviceIndex, Eep_62_RuntimeType* Eep
         /** do nothing */
     }
 }
-
+#define EEP_62_STOP_SEC_CODE
+#include "Eep_62_MemMap.h"
+#define EEP_62_START_SEC_CODE
+#include "Eep_62_MemMap.h"
 /**
  * @brief Obtain the write bytes, then check the write API before call it, the error callback is called if the api
  * returns not ok, otherwise the end callback is called
@@ -705,8 +797,9 @@ EEP_62_LOCAL void Eep_62_Write_Handle(uint8 deviceIndex, Eep_62_RuntimeType* Eep
 {
     Std_ReturnType retVal;
     /** get the source address of the Buffer */
-    Eep_62_LengthType bytesRemain = Eep_RunData->length;
-    Eep_62_LengthType writeBytes  = Eep_RunData->maxWriteSize;
+    Eep_62_LengthType           bytesRemain = Eep_RunData->length;
+    Eep_62_LengthType           writeBytes  = Eep_RunData->maxWriteSize;
+    const Eep_62_ConfigTypeSet* cfgPtr      = &(Eep_62_ConfigPtr[deviceIndex]);
     /** if the send is small then is alignment data */
     if (bytesRemain < writeBytes)
     {
@@ -732,9 +825,9 @@ EEP_62_LOCAL void Eep_62_Write_Handle(uint8 deviceIndex, Eep_62_RuntimeType* Eep
         (void)Dem_SetEventStatus((uint8)EEP_62_E_WRITE_FAILED, DEM_EVENT_STATUS_FAILED);
 #endif
         /** call the job Error notification*/
-        if (NULL_PTR != Eep_62_ConfigPtr[deviceIndex].jobErrorNotification)
+        if (NULL_PTR != cfgPtr->jobErrorNotification)
         {
-            Eep_62_ConfigPtr[deviceIndex].jobErrorNotification();
+            cfgPtr->jobErrorNotification();
         }
     }
     else if (E_OK == retVal)
@@ -756,9 +849,9 @@ EEP_62_LOCAL void Eep_62_Write_Handle(uint8 deviceIndex, Eep_62_RuntimeType* Eep
             Eep_62_Status[deviceIndex] = MEMIF_IDLE;
             Eep_RunData->currentJob    = EEP_62_JOB_NONE;
             /** call the job end notification */
-            if (NULL_PTR != Eep_62_ConfigPtr[deviceIndex].jobEndNotification)
+            if (NULL_PTR != cfgPtr->jobEndNotification)
             {
-                Eep_62_ConfigPtr[deviceIndex].jobEndNotification();
+                cfgPtr->jobEndNotification();
             }
         }
     }
@@ -767,7 +860,10 @@ EEP_62_LOCAL void Eep_62_Write_Handle(uint8 deviceIndex, Eep_62_RuntimeType* Eep
         /** do nothing */
     }
 }
-
+#define EEP_62_STOP_SEC_CODE
+#include "Eep_62_MemMap.h"
+#define EEP_62_START_SEC_CODE
+#include "Eep_62_MemMap.h"
 /**
  * @brief Obtain the read bytes, then check the read API before call it, the error callback is called if the api returns
  * not ok, otherwise the end callback is called
@@ -776,8 +872,9 @@ EEP_62_LOCAL void Eep_62_Read_Handle(uint8 deviceIndex, Eep_62_RuntimeType* Eep_
 {
     Std_ReturnType retVal;
     /** get the source address of the Buffer */
-    Eep_62_LengthType* bytesRemain = &Eep_RunData->length;
-    Eep_62_LengthType  readBytes   = Eep_RunData->maxReadSize;
+    Eep_62_LengthType*          bytesRemain = &Eep_RunData->length;
+    Eep_62_LengthType           readBytes   = Eep_RunData->maxReadSize;
+    const Eep_62_ConfigTypeSet* cfgPtr      = &(Eep_62_ConfigPtr[deviceIndex]);
     /** if the read is small then is alignment data */
     if (*bytesRemain < readBytes)
     {
@@ -803,9 +900,9 @@ EEP_62_LOCAL void Eep_62_Read_Handle(uint8 deviceIndex, Eep_62_RuntimeType* Eep_
         Eep_62_Status[deviceIndex] = MEMIF_IDLE;
         Eep_RunData->currentJob    = EEP_62_JOB_NONE;
         /** call the job Error notification */
-        if (NULL_PTR != Eep_62_ConfigPtr[deviceIndex].jobErrorNotification)
+        if (NULL_PTR != cfgPtr->jobErrorNotification)
         {
-            Eep_62_ConfigPtr[deviceIndex].jobErrorNotification();
+            cfgPtr->jobErrorNotification();
         }
     }
     else if (E_OK == retVal)
@@ -827,9 +924,9 @@ EEP_62_LOCAL void Eep_62_Read_Handle(uint8 deviceIndex, Eep_62_RuntimeType* Eep_
             Eep_62_Status[deviceIndex] = MEMIF_IDLE;
             Eep_RunData->currentJob    = EEP_62_JOB_NONE;
             /** call the job end notification */
-            if (NULL_PTR != Eep_62_ConfigPtr[deviceIndex].jobEndNotification)
+            if (NULL_PTR != cfgPtr->jobEndNotification)
             {
-                Eep_62_ConfigPtr[deviceIndex].jobEndNotification();
+                cfgPtr->jobEndNotification();
             }
         }
     }
@@ -838,7 +935,10 @@ EEP_62_LOCAL void Eep_62_Read_Handle(uint8 deviceIndex, Eep_62_RuntimeType* Eep_
         /** do nothing */
     }
 }
-
+#define EEP_62_STOP_SEC_CODE
+#include "Eep_62_MemMap.h"
+#define EEP_62_START_SEC_CODE
+#include "Eep_62_MemMap.h"
 /**
  * @brief Obtain the compare bytes, then check the compare API before call it, the error callback is called if the api
  * returns not ok, otherwise the end callback is called
@@ -847,8 +947,9 @@ EEP_62_LOCAL void Eep_62_Compare_Handle(uint8 deviceIndex, Eep_62_RuntimeType* E
 {
     Std_ReturnType retVal;
     /** get the runtime data/address of the Buffer */
-    const Eep_62_LengthType* bytesRemain  = &Eep_RunData->length;
-    Eep_62_LengthType        compareBytes = Eep_RunData->maxReadSize;
+    const Eep_62_LengthType*    bytesRemain  = &Eep_RunData->length;
+    Eep_62_LengthType           compareBytes = Eep_RunData->maxReadSize;
+    const Eep_62_ConfigTypeSet* cfgPtr       = &(Eep_62_ConfigPtr[deviceIndex]);
 
     /** if the read is small then is alignment data */
     if (*bytesRemain < compareBytes)
@@ -872,9 +973,9 @@ EEP_62_LOCAL void Eep_62_Compare_Handle(uint8 deviceIndex, Eep_62_RuntimeType* E
         Eep_62_Status[deviceIndex]    = MEMIF_IDLE;
         Eep_RunData->currentJob       = EEP_62_JOB_NONE;
         /** call the job Error notification */
-        if (NULL_PTR != Eep_62_ConfigPtr[deviceIndex].jobErrorNotification)
+        if (NULL_PTR != cfgPtr->jobErrorNotification)
         {
-            Eep_62_ConfigPtr[deviceIndex].jobErrorNotification();
+            cfgPtr->jobErrorNotification();
         }
     }
     else
@@ -882,7 +983,10 @@ EEP_62_LOCAL void Eep_62_Compare_Handle(uint8 deviceIndex, Eep_62_RuntimeType* E
         Eep_62_Compare_HandleSub(deviceIndex, Eep_RunData);
     }
 }
-
+#define EEP_62_STOP_SEC_CODE
+#include "Eep_62_MemMap.h"
+#define EEP_62_START_SEC_CODE
+#include "Eep_62_MemMap.h"
 /**
  * @brief Obtain the compare bytes, then check the compare API before call it, the error callback is called if the api
  * returns not ok, otherwise the end callback is called
@@ -902,8 +1006,9 @@ EEP_62_LOCAL void Eep_62_Compare_HandleSub(uint8 deviceIndex, Eep_62_RuntimeType
     {
         Std_ReturnType compareResult;
         /** get the comparison data/address of the Buffer */
-        Eep_62_LengthType compareLength = Eep_RunData->CompareLength;
-        const uint8*      referenceData = Eep_RunData->WriteBuffer;
+        Eep_62_LengthType           compareLength = Eep_RunData->CompareLength;
+        const uint8*                referenceData = Eep_RunData->WriteBuffer;
+        const Eep_62_ConfigTypeSet* cfgPtr        = &(Eep_62_ConfigPtr[deviceIndex]);
 
         for (uint16 index = 0u; index < compareLength; index++)
         {
@@ -926,9 +1031,9 @@ EEP_62_LOCAL void Eep_62_Compare_HandleSub(uint8 deviceIndex, Eep_62_RuntimeType
             Eep_62_Status[deviceIndex] = MEMIF_IDLE;
             Eep_RunData->currentJob    = EEP_62_JOB_NONE;
             /** call the job Error notification */
-            if (NULL_PTR != Eep_62_ConfigPtr[deviceIndex].jobErrorNotification)
+            if (NULL_PTR != cfgPtr->jobErrorNotification)
             {
-                Eep_62_ConfigPtr[deviceIndex].jobErrorNotification();
+                cfgPtr->jobErrorNotification();
             }
         }
         else if (E_OK == compareResult)
@@ -943,9 +1048,9 @@ EEP_62_LOCAL void Eep_62_Compare_HandleSub(uint8 deviceIndex, Eep_62_RuntimeType
             Eep_62_Status[deviceIndex] = MEMIF_IDLE;
             Eep_RunData->currentJob    = EEP_62_JOB_NONE;
             /** call the job end notification */
-            if (NULL_PTR != Eep_62_ConfigPtr[deviceIndex].jobEndNotification)
+            if (NULL_PTR != cfgPtr->jobEndNotification)
             {
-                Eep_62_ConfigPtr[deviceIndex].jobEndNotification();
+                cfgPtr->jobEndNotification();
             }
         }
         else

@@ -12,52 +12,28 @@
  * or see <https://www.gnu.org/licenses/>.
  */
 /*
- ********************************************************************************
- **                                                                            **
- **  FILENAME    :  Os_Extened.c                                               **
- **                                                                            **
- **  Created on  :                                                             **
- **  Author      :  i-soft-os                                                  **
- **  Vendor      :                                                             **
- **  DESCRIPTION :  Extended functions                                         **
- **                                                                            **
- **  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
- **  Version :   AUTOSAR classic Platform R19--Function Safety                 **
- **                                                                            **
- *******************************************************************************/
+ ************************************************************************************************************************
+ **
+ **  @file               : Os_Extened.c
+ **  @author             : i-soft-os
+ **  @date               : 2024/02/10
+ **  @vendor             : isoft
+ **  @description        : Os source file for extended function
+ **
+ ***********************************************************************************************************************/
 
-/*=======[I N C L U D E S]====================================================*/
+/* =================================================== inclusions =================================================== */
+#include "Os_Hal_Define.h"
 #include "Os_Extend.h"
-/*=======[M A C R O S]========================================================*/
+#include "Os_Kernel.h"
+#include "Os_StackMonitor.h"
 
-/*=======[T Y P E   D E F I N I T I O N S]====================================*/
-
-/*=======[E X T E R N A L   D A T A]==========================================*/
-
-/*=======[E X T E R N A L   F U N C T I O N   D E C L A R A T I O N S]========*/
-
-/*=======[I N T E R N A L   D A T A]==========================================*/
-
-/*=======[I N T E R N A L   F U N C T I O N   D E C L A R A T I O N S]========*/
-
-/*=======[F U N C T I O N   I M P L E M E N T A T I O N S]====================*/
-
+/* ========================================== external function definitions ========================================= */
 #define OS_START_SEC_CODE
 #include "Os_MemMap.h"
-/********************************************************************/
-/*
- * Brief                <Provide Version information to user.>
- * Service ID           <0xfd>
- * Sync/Async           <none>
- * Reentrancy           <Yes>
- * param-eventId[in]    <Versioninfo>
- * Param-Name[out]      <no>
- * Param-Name[in/out]   <None>
- * return               <None>
- * PreCondition         <None>
- * REQ ID               <None>
+/**
+ * This function provide version information to user.
  */
-/********************************************************************/
 /* PRQA S 1503 ++ */ /* VL_QAC_NoUsedApi */
 void OSGetVersionInfo(Std_VersionInfoType* osVerInfoPtr)
 /* PRQA S 1503 -- */
@@ -68,129 +44,106 @@ void OSGetVersionInfo(Std_VersionInfoType* osVerInfoPtr)
     }
     else
     {
-        /* PRQA S 1290 ++ */ /* VL_Os_1290 */
         osVerInfoPtr->vendorID = OS_VENDOR_ID;
         osVerInfoPtr->moduleID = OS_MODULE_ID;
-        /* PRQA S 1290 -- */
+
         osVerInfoPtr->sw_major_version = OS_CFG_H_SW_MAJOR_VERSION;
         osVerInfoPtr->sw_minor_version = OS_CFG_H_SW_MINOR_VERSION;
         osVerInfoPtr->sw_patch_version = OS_CFG_H_SW_PATCH_VERSION;
     }
 }
-#if (CHECK_STACK_USAGE > 0)
-/********************************************************************/
-/*
- * Brief                <Get max usage of system,task,ISR2 stack.>
- * Service ID           <0xfe>
- * Sync/Async           <none>
- * Reentrancy           <Yes>
- * param-eventId[in]    <id>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <osStackUsageType>
- * PreCondition         <None>
- * REQ ID               <None>
- */
-/********************************************************************/
-osStackUsageType OSGetStackUsage(osStackObject stack, uint16 id)
-{
-    osStackUsageType MaxUsage    = 0U;
-    const uint32*    ptr         = NULL_PTR;
-    const uint32*    stackBottom = NULL_PTR;
-    const uint32*    stackTop    = NULL_PTR;
-    boolean          Status      = TRUE;
-    OS_ARCH_DECLARE_CRITICAL();
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
 
-    id = Os_GetObjLocalId(id);
+#if (CFG_STACK_USAGE_CHECK == TRUE) && (CFG_STACK_CHECK == TRUE)
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * This service retrieves the maximum stack usage of the system, task, or interrupt.
+ */
+Os_StackUsageType OSGetStackUsage(Os_StackObject stack, uint16 id) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
+{
+    Os_StackUsageType     maxUsage = 0U;
+    boolean               status   = TRUE;
+    const Os_SCBType*     pScb     = Os_GetCurrentContext();
+    const Os_TaskCfgType* pTaskCfg;
+    Os_StackType          stackInfo;
+    OS_HAL_DECLARE_CRITICAL();
 
     switch (stack)
     {
     case OS_STACK_SYSTEM:
-    {
-        stackBottom = Os_SystemStack->stackBottom;
-        stackTop    = Os_SystemStack->stackTop;
-    }
-    break;
+        stackInfo.StackBottom = pScb->SystemStack->StackBottom;
+        stackInfo.StackTop    = pScb->SystemStack->StackTop;
+        break;
 
 #if (CFG_TASK_MAX > 0U)
     case OS_STACK_TASK:
-    {
         /* Input_para check. */
-        if (id >= Os_SCB.sysTaskMax)
+        /* PRQA S 4342 ++ */ /* VL_Os_4342 */
+        if (!CheckCoreTaskId((Os_TaskType)id, pScb->SysCore))
+        /* PRQA S 4342 -- */
         {
-            Status = FALSE;
+            status = FALSE;
         }
-
-        stackBottom = Os_TaskStack[id].stackBottom;
-        stackTop    = Os_TaskStack[id].stackTop;
-    }
-    break;
-#endif /* CFG_TASK_MAX > 0U */
+#if (TRUE == CFG_GLOBAL_TASK_STACK_SHARING)
+        if (Os_TaskCfg[id].StackSharing == TRUE)
+        {
+            status = FALSE;
+        }
+        else
+#endif
+        {
+            pTaskCfg              = &Os_TaskCfg[id];
+            stackInfo.StackBottom = pTaskCfg->TaskStack.StackBottom;
+            stackInfo.StackTop    = pTaskCfg->TaskStack.StackTop;
+        }
+        break;
+#endif
 
 #if (CFG_ISR2_MAX > 0U)
     case OS_STACK_ISR2:
-    {
         /* Input_para check. */
-        if (id >= Os_CfgIsr2Max)
-        {
-            Status = FALSE;
-        }
 
-        stackBottom = Os_ISR2Stack[id].stackBottom;
-        stackTop    = Os_ISR2Stack[id].stackTop;
-    }
-    break;
-#endif /* CFG_ISR2_MAX > 0U */
+        /* PRQA S 4304,4342 ++ */ /* VL_Os_AutosarBool, VL_Os_4342 */
+        if (!Os_CheckIsr2Id((Os_IsrType)id))
+        /* PRQA S 4304,4342 -- */
+        {
+            status = FALSE;
+        }
+        stackInfo.StackBottom = Os_ISR2Stack[id].StackBottom;
+        stackInfo.StackTop    = Os_ISR2Stack[id].StackTop;
+        break;
+#endif
 
     /*add comments to pass QAC.*/
     default:
         /* Nothing to do. */
-        Status = FALSE;
+        status = FALSE;
         break;
     }
 
-    if ((boolean)TRUE == Status)
+    if ((boolean)TRUE == status)
     {
-        OS_ARCH_ENTRY_CRITICAL();
-
-        /*
-         * MISRA-C:2004 Rule 17.4
-         * Msg(4:0489) The integer value 1 is being added or subtracted from a
-         *             pointer.
-         */
-        /* In stack storage area, all bytes are initialized to magic word(0xCC).
-         * if this byte is used, the value will be changed. */
-        for (ptr = stackBottom; ptr < stackTop; ptr++)
-        {
-            if (OS_STACK_FILL_PATTERN != (*ptr))
-            {
-                break;
-            }
-        }
-        MaxUsage = (osStackUsageType)(stackTop - ptr);
-
-        OS_ARCH_EXIT_CRITICAL();
+        OS_HAL_ENTRY_CRITICAL();
+        maxUsage = (Os_StackUsageType)Os_CalcStackUsage(&stackInfo);
+        OS_HAL_EXIT_CRITICAL();
     }
 
-    return MaxUsage;
+    return maxUsage;
 }
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
 #endif
 
-/********************************************************************/
-/*
- * Brief                <check ISR source>
- * Service ID           <0xd8>
- * Sync/Async           <none>
- * Reentrancy           <Yes>
- * param-eventId[in]    <None>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <StatusType>
- * PreCondition         <None>
- * REQ ID               <None>
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * This service check if the input interrupt source is the current interrupt.
  */
-/********************************************************************/
-StatusType OSCheckISRSource(uint32 Source) /* PRQA S 1503 */ /* VL_QAC_NoUsedApi */
+/* PRQA S 1503 ++ */ /* VL_QAC_NoUsedApi */
+StatusType OSCheckISRSource(uint32 source)
+/* PRQA S 1503 -- */
 {
     /* PRQA S 4404 ++ */ /* VL_Os_AutosarBool */
     StatusType osRet = FALSE;
@@ -198,42 +151,64 @@ StatusType OSCheckISRSource(uint32 Source) /* PRQA S 1503 */ /* VL_QAC_NoUsedApi
 
 /* OS263. */
 #if ((CFG_ISR2_MAX > 0) && (CFG_SC == OS_SC4))
-    if (OS_LEVEL_ISR2 == Os_SCB.sysOsLevel)
+    Os_CoreIdType     curCoreId = Os_GetCoreIdLocal();
+    const Os_SCBType* pScb      = Os_GetSystemContext(curCoreId);
+    if (OS_LEVEL_ISR2 == pScb->SysOsLevel)
     {
-        if (OS_ISR_CATEGORY2 == Os_IsrCfg[Os_IntCfgIsrId].OsIsrCatType)
+        if (OS_ISR_CATEGORY2 == Os_IsrCfg[pScb->SysRunningIsrCat2Id].IsrCatType)
         {
-            if (Source == Os_IsrCfg[Os_IntCfgIsrId].OsIsrSrc)
+            if (source == Os_IsrCfg[pScb->SysRunningIsrCat2Id].IsrSrc)
             {
                 osRet = TRUE;
             }
         }
     }
 #else
-    (void)Source;
-#endif /* CFG_ISR2_MAX > 0 && CFG_SC == OS_SC4 */
+    (void)source;
+#endif
 
     return osRet;
-}
-
-/********************************************************************/
-/*
- * Brief                <check whether CPU information is correct.>
- * Service ID           <0xff>
- * Sync/Async           <none>
- * Reentrancy           <Yes>
- * param-eventId[in]    <None>
- * Param-Name[out]      <None>
- * Param-Name[in/out]   <None>
- * return               <StatusType>
- * PreCondition         <None>
- * REQ ID               <None>
- */
-/********************************************************************/
-void OSCheckCPUInformation(void) /* PRQA S 1503 */ /* VL_QAC_NoUsedApi */
-{
-    Arch_CheckCPUInformation();
 }
 #define OS_STOP_SEC_CODE
 #include "Os_MemMap.h"
 
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * This service check whether CPU information is correct.
+ */
+/* PRQA S 1503 ++ */ /* VL_QAC_NoUsedApi */
+void OSCheckCPUInformation(void)
+/* PRQA S 1503 -- */
+{
+    Os_Hal_CheckCPUInformation(); /* PRQA S 3138, 3141 */ /* VL_Os_PlatformDef */
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * Get global time (hardware ticks)
+ */
+/* PRQA S 3006 ++ */ /* VL_Os_3006 */
+Os_TimerTickType OSGetGlobalTime(void)
+/* PRQA S 3006 -- */
+{
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 ++ */ /* VL_Os_PlatformDef */
+    /* PRQA S 1006, 1021 ++ */                   /* VL_Os_1006, VL_Os_1021 */
+    OS_HAL_ENTER_KERNEL();
+    /* PRQA S 1006, 1021 -- */
+    /* PRQA S 2742, 2880, 3138, 2741, 3141 -- */
+
+    Os_TimerTickType curTicks = Os_Hal_GetHwTimerTicks(Os_GetCoreIdLocal());
+
+    /* PRQA S 3138, 3141 ++ */ /* VL_Os_PlatformNoDef */
+    OS_HAL_EXIT_KERNEL(); /* PRQA S 2743, 1006 */ /* VL_Os_2743, VL_Os_1006 */
+    /* PRQA S 3138, 3141 -- */
+
+    return curTicks;
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
 /*=======[E N D   O F   F I L E]==============================================*/

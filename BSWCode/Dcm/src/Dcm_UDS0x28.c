@@ -36,7 +36,7 @@
 /**
  * @brief The minimum request length of UDS 0x28
  */
-#define DCM_UDS28_MINREQLEN 2uL
+#define DCM_UDS28_MINREQLEN      2uL
 /**
  * @brief The subfunction enableRxAndDisableTxWithEnhancedAddressInformation
  */
@@ -44,15 +44,15 @@
 /**
  * @brief The subfunction enableRxAndTxWithEnhancedAddressInformation
  */
-#define DCM_UDS28_EN_RXTX_EAI 5u
+#define DCM_UDS28_EN_RXTX_EAI    5u
 /**
  * @brief The communicationType mask
  */
-#define DCM_COMMTYPE_MASK 0x0Fu
+#define DCM_COMMTYPE_MASK        0x0Fu
 /**
  * @brief The SubnetNumber mask
  */
-#define DCM_SUBNET_MASK 0xF0u
+#define DCM_SUBNET_MASK          0xF0u
 #if ((DCM_COMCONTROL_ALL_NUM > 0) || (DCM_COMCONTROL_SPE_NUM > 0) || (DCM_COMCONTROL_SUB_NUM > 0))
 /* ============================================ internal data definitions =========================================== */
 #define DCM_START_SEC_VAR_CLEARED_BOOLEAN
@@ -63,18 +63,28 @@
  */
 DCM_LOCAL boolean Dcm_ControlledAllChannel[DCM_COMCONTROL_ALL_NUM];
 #endif
+#define DCM_STOP_SEC_VAR_CLEARED_BOOLEAN
+#include "Dcm_MemMap.h"
 #if (DCM_COMCONTROL_SPE_NUM > 0)
+#define DCM_START_SEC_VAR_CLEARED_BOOLEAN
+#include "Dcm_MemMap.h"
 /**
  * @brief Tracks the control status of specific communication channels in DCM @range NA.
  */
 DCM_LOCAL boolean Dcm_ControlledSpecificChannel[DCM_COMCONTROL_SPE_NUM];
-#endif
-#if (DCM_COMCONTROL_SUB_NUM > 0)
-DCM_LOCAL boolean Dcm_ControlledSubNode[DCM_COMCONTROL_SUB_NUM]; /* PRQA S 3218 */ /* VL_Dcm_3218 */
-#endif
 #define DCM_STOP_SEC_VAR_CLEARED_BOOLEAN
 #include "Dcm_MemMap.h"
+#endif
+#if (DCM_COMCONTROL_SUB_NUM > 0)
+#define DCM_START_SEC_VAR_CLEARED_BOOLEAN
+#include "Dcm_MemMap.h"
+DCM_LOCAL boolean Dcm_ControlledSubNode[DCM_COMCONTROL_SUB_NUM]; /* PRQA S 3218 */ /* VL_Dcm_3218 */
+#define DCM_STOP_SEC_VAR_CLEARED_BOOLEAN
+#include "Dcm_MemMap.h"
+#endif
 /* ========================================== internal function declarations ======================================== */
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         This function switchs the communication modes and enables all coomunication
  * @return        void
@@ -83,6 +93,10 @@ DCM_LOCAL boolean Dcm_ControlledSubNode[DCM_COMCONTROL_SUB_NUM]; /* PRQA S 3218 
  * @trace         CPD-PLACEHOLDER
  */
 DCM_LOCAL void Dcm_UDS0x28_ReEnableCommunication(void);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         This function calculate communicationMode
  * @param[in]     controlType              : the requested cotrolType
@@ -93,8 +107,12 @@ DCM_LOCAL void Dcm_UDS0x28_ReEnableCommunication(void);
  * @trace         CPD-PLACEHOLDER
  */
 DCM_LOCAL uint8 Dcm_UDS0x28_GetCommunicationMode(uint8 controlType, uint8 communicationType);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 #if ((defined DCM_UDS_0X28_0X4) || (defined DCM_UDS_0X28_0X5))
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         This function handels txConfirmation of extended address subfunction
  * @param[in]     controlType              : the requested cotrolType
@@ -111,6 +129,10 @@ DCM_LOCAL void Dcm_UDS0x28_TxConfirmationExtHandle(
     uint8  communicationType,
     uint8  communicationMode,
     uint16 nodeIdentificationNumber);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         This function finds matched subNode cfg based on input nodeId
  * @param[in]     nodeIdentificationNumber : the requested nodeIdentiferNumber
@@ -124,6 +146,8 @@ DCM_LOCAL void Dcm_UDS0x28_TxConfirmationExtHandle(
  */
 DCM_LOCAL Std_ReturnType
     Dcm_UDS0x28_FindSubNode(uint16 nodeIdentificationNumber, Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 /* ========================================== external function definitions ========================================= */
 #define DCM_START_SEC_CODE
@@ -251,6 +275,10 @@ Std_ReturnType Dcm_UDS0x28(
 
     return result;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* PRQA S 5017,6010,6080 -- */
 
 /**
@@ -347,8 +375,11 @@ void Dcm_UDS0x28_TxConfirmation(uint16 ConnectionId)
     }
 #endif
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if ((DCM_COMCONTROL_ALL_NUM > 0) || (DCM_COMCONTROL_SPE_NUM > 0) || (DCM_COMCONTROL_SUB_NUM > 0))
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * called when session changes, check whether the new session supports com control, if not, restore communication
  */
@@ -368,9 +399,9 @@ void Dcm_UDS0x28_SessionChange(void)
     }
 }
 /* PRQA S 3415 -- */
-#endif
 #define DCM_STOP_SEC_CODE
 #include "Dcm_MemMap.h"
+#endif
 
 #if ((DCM_COMCONTROL_ALL_NUM > 0) || (DCM_COMCONTROL_SPE_NUM > 0) || (DCM_COMCONTROL_SUB_NUM > 0))
 #define DCM_START_SEC_CODE
@@ -446,7 +477,10 @@ DCM_LOCAL void Dcm_UDS0x28_ReEnableCommunication(void)
     }
 #endif
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* This function calculate communicationMode */
 DCM_LOCAL uint8 Dcm_UDS0x28_GetCommunicationMode(uint8 controlType, uint8 communicationType)
 {
@@ -469,8 +503,11 @@ DCM_LOCAL uint8 Dcm_UDS0x28_GetCommunicationMode(uint8 controlType, uint8 commun
 #endif
     return communicationMode;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if ((defined DCM_UDS_0X28_0X4) || (defined DCM_UDS_0X28_0X5))
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* This function finds matched subNode cfg based on input nodeId */
 DCM_LOCAL Std_ReturnType
     Dcm_UDS0x28_FindSubNode(uint16 nodeIdentificationNumber, Dcm_NegativeResponseCodeType* ErrorCode)
@@ -495,7 +532,11 @@ DCM_LOCAL Std_ReturnType
 
     return result;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* This function handels txConfirmation of extended address subfunction */
 DCM_LOCAL void Dcm_UDS0x28_TxConfirmationExtHandle(
     uint8  controlType,
@@ -531,8 +572,8 @@ DCM_LOCAL void Dcm_UDS0x28_TxConfirmationExtHandle(
         }
     }
 }
-#endif
 #define DCM_STOP_SEC_CODE
 #include "Dcm_MemMap.h"
+#endif
 #endif
 #endif

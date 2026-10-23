@@ -69,6 +69,9 @@ extern "C" {
  */
 #define TCPIP_PHYSICALADDR_BUFFER_SIZE 6u
 
+/* calculate const str length in compile */
+#define CONST_STRLEN(s) (sizeof(s) - 1)
+
 /**
  * @name TcpIpIPAddressManipulatingMacros
  * @{
@@ -186,23 +189,23 @@ typedef uint8 TcpIp_StateType;
  * TCP/IP stack state for a specific EthIf controller is ONLINE,
  * i.e. communication via at least one IP address is possible.
  */
-#define TCPIP_STATE_ONLINE ((TcpIp_StateType)(0x00u))
+#define TCPIP_STATE_ONLINE   ((TcpIp_StateType)(0x00u))
 /**
  * TCP/IP stack state for a specific EthIf controller is ONHOLD,
  * i.e. no communication is currently possible (e.g. link down).
  */
-#define TCPIP_STATE_ONHOLD ((TcpIp_StateType)(0x01u))
+#define TCPIP_STATE_ONHOLD   ((TcpIp_StateType)(0x01u))
 /**
  * TCP/IP stack state for a specific EthIf controller is OFFLINE,
  * i.e. no communication is possible.
  */
-#define TCPIP_STATE_OFFLINE ((TcpIp_StateType)(0x02u))
+#define TCPIP_STATE_OFFLINE  ((TcpIp_StateType)(0x02u))
 /**
  * TCP/IP stack state for a specific EthIf controller is STARTUP,
  * i.e. IP address assignment in progress or ready for manual start,
  * communication is currently not possible.
  */
-#define TCPIP_STATE_STARTUP ((TcpIp_StateType)(0x03u))
+#define TCPIP_STATE_STARTUP  ((TcpIp_StateType)(0x03u))
 /**
  * TCP/IP stack state for a specific EthIf controller is SHUTDOWN,
  * i.e. release of resources using the EthIf controller, release of IP address assignment.
@@ -219,9 +222,9 @@ typedef uint8 TcpIp_StateType;
  */
 typedef uint8 TcpIp_IpAddrStateType;
 /** local IP address is assigned */
-#define TCPIP_IPADDR_STATE_ASSIGNED ((TcpIp_IpAddrStateType)(0x00u))
+#define TCPIP_IPADDR_STATE_ASSIGNED   ((TcpIp_IpAddrStateType)(0x00u))
 /** local IP address is assigned, but cannot be used as the network is not active */
-#define TCPIP_IPADDR_STATE_ONHOLD ((TcpIp_IpAddrStateType)(0x01u))
+#define TCPIP_IPADDR_STATE_ONHOLD     ((TcpIp_IpAddrStateType)(0x01u))
 /** local IP address is unassigned */
 #define TCPIP_IPADDR_STATE_UNASSIGNED ((TcpIp_IpAddrStateType)(0x02u))
 /**
@@ -237,19 +240,19 @@ typedef uint8 TcpIp_EventType;
 /**
  * TCP connection was reset, TCP socket and all related resources have been released.
  */
-#define TCPIP_TCP_RESET ((TcpIp_EventType)(0x01u))
+#define TCPIP_TCP_RESET               ((TcpIp_EventType)(0x01u))
 /**
  * TCP connection was closed successfully, TCP socket and all related resources have been released.
  */
-#define TCPIP_TCP_CLOSED ((TcpIp_EventType)(0x02u))
+#define TCPIP_TCP_CLOSED              ((TcpIp_EventType)(0x02u))
 /**
  * A FIN signal was received on the TCP connection, TCP socket is still valid.
  */
-#define TCPIP_TCP_FIN_RECEIVED ((TcpIp_EventType)(0x03u))
+#define TCPIP_TCP_FIN_RECEIVED        ((TcpIp_EventType)(0x03u))
 /**
  * UDP socket and all related resources have been released.
  */
-#define TCPIP_UDP_CLOSED ((TcpIp_EventType)(0x04u))
+#define TCPIP_UDP_CLOSED              ((TcpIp_EventType)(0x04u))
 /**
  * TLS handshake successfully established, TLS connection available.
  */
@@ -265,17 +268,17 @@ typedef uint8 TcpIp_EventType;
  */
 typedef uint8 TcpIp_IpAddrAssignmentType;
 /** Static configured IPv4/IPv6 address. */
-#define TCPIP_IPADDR_ASSIGNMENT_STATIC ((TcpIp_IpAddrAssignmentType)(0x00u))
+#define TCPIP_IPADDR_ASSIGNMENT_STATIC         ((TcpIp_IpAddrAssignmentType)(0x00u))
 /** Linklocal IPv4/IPv6 address assignment using DoIP parameters. */
 #define TCPIP_IPADDR_ASSIGNMENT_LINKLOCAL_DOIP ((TcpIp_IpAddrAssignmentType)(0x01u))
 /** Dynamic configured IPv4/IPv6 address by DHCP. */
-#define TCPIP_IPADDR_ASSIGNMENT_DHCP ((TcpIp_IpAddrAssignmentType)(0x02u))
+#define TCPIP_IPADDR_ASSIGNMENT_DHCP           ((TcpIp_IpAddrAssignmentType)(0x02u))
 /** Linklocal IPv4/IPv6 address assignment. */
-#define TCPIP_IPADDR_ASSIGNMENT_LINKLOCAL ((TcpIp_IpAddrAssignmentType)(0x03u))
+#define TCPIP_IPADDR_ASSIGNMENT_LINKLOCAL      ((TcpIp_IpAddrAssignmentType)(0x03u))
 /** Dynamic configured IPv4/IPv6 address by Router Advertisement. */
-#define TCPIP_IPADDR_ASSIGNMENT_IPV6_ROUTER ((TcpIp_IpAddrAssignmentType)(0x04u))
+#define TCPIP_IPADDR_ASSIGNMENT_IPV6_ROUTER    ((TcpIp_IpAddrAssignmentType)(0x04u))
 /** All configured TcpIpAssignmentMethods with TcpIpAssignmentTrigger set to TCPIP_MANUAL */
-#define TCPIP_IPADDR_ASSIGNMENT_ALL ((TcpIp_IpAddrAssignmentType)(0x05u))
+#define TCPIP_IPADDR_ASSIGNMENT_ALL            ((TcpIp_IpAddrAssignmentType)(0x05u))
 /**
  * @}
  */
@@ -287,13 +290,13 @@ typedef uint8 TcpIp_IpAddrAssignmentType;
  */
 typedef uint8 TcpIp_ReturnType;
 /** operation completed successfully. */
-#define TCPIP_E_OK ((TcpIp_ReturnType)(0x00u))
+#define TCPIP_E_OK             ((TcpIp_ReturnType)(0x00u))
 /** operation failed. */
-#define TCPIP_E_NOT_OK ((TcpIp_ReturnType)(0x01u))
+#define TCPIP_E_NOT_OK         ((TcpIp_ReturnType)(0x01u))
 /** operation failed because of an ARP/NDP cache miss. */
 #define TCPIP_E_PHYS_ADDR_MISS ((TcpIp_ReturnType)(0x02u))
 /** operation in progress */
-#define TCPIP_E_PENDING ((TcpIp_ReturnType)(0x03u))
+#define TCPIP_E_PENDING        ((TcpIp_ReturnType)(0x03u))
 /**
  * @}
  */
@@ -307,72 +310,72 @@ typedef uint8 TcpIp_ParamIdType;
 /**
  * Specifies the maximum TCP receive window for the socket. [uint16]
  */
-#define TCPIP_PARAMID_TCP_RXWND_MAX ((TcpIp_ParamIdType)0x00u)
+#define TCPIP_PARAMID_TCP_RXWND_MAX              ((TcpIp_ParamIdType)0x00u)
 /**
  * Specifies the frame priority for outgoing frames on the socket. [uint8]
  */
-#define TCPIP_PARAMID_FRAMEPRIO ((TcpIp_ParamIdType)0x01u)
+#define TCPIP_PARAMID_FRAMEPRIO                  ((TcpIp_ParamIdType)0x01u)
 /**
  * Specifies if the Nagle Algorithm according to IETF RFC 1122
  * (chapter 4.2.3.4 When to Send Data) is enabled or not. [boolean]
  */
-#define TCPIP_PARAMID_TCP_NAGLE ((TcpIp_ParamIdType)0x02u)
+#define TCPIP_PARAMID_TCP_NAGLE                  ((TcpIp_ParamIdType)0x02u)
 /**
  * Specifies if TCP Keep Alive Probes are sent on the socket connection. [boolean]
  */
-#define TCPIP_PARAMID_TCP_KEEPALIVE ((TcpIp_ParamIdType)0x03u)
+#define TCPIP_PARAMID_TCP_KEEPALIVE              ((TcpIp_ParamIdType)0x03u)
 /**
  * Specifies the time to live value for outgoing frames on the socket.
  * For IPv6 this parameter specifies the value of the HopLimit field used in the IPv6 header. [uint8]
  */
-#define TCPIP_PARAMID_TTL ((TcpIp_ParamIdType)0x04u)
+#define TCPIP_PARAMID_TTL                        ((TcpIp_ParamIdType)0x04u)
 /**
  * Specifies the time in [s] between the last data packet sent (simple ACKs are not considered data)
  * and the first keepalive probe. [uint32]
  */
-#define TCPIP_PARAMID_TCP_KEEPALIVE_TIME ((TcpIp_ParamIdType)0x05u)
+#define TCPIP_PARAMID_TCP_KEEPALIVE_TIME         ((TcpIp_ParamIdType)0x05u)
 /**
  * Specifies the maximum number of times that a keepalive probe is retransmitted. [uint16]
  */
-#define TCPIP_PARAMID_TCP_KEEPALIVE_PROBES_MAX ((TcpIp_ParamIdType)0x06u)
+#define TCPIP_PARAMID_TCP_KEEPALIVE_PROBES_MAX   ((TcpIp_ParamIdType)0x06u)
 /**
  * Specifies the interval in [s] between subsequent keepalive probes. [uint32]
  */
-#define TCPIP_PARAMID_TCP_KEEPALIVE_INTERVAL ((TcpIp_ParamIdType)0x07u)
+#define TCPIP_PARAMID_TCP_KEEPALIVE_INTERVAL     ((TcpIp_ParamIdType)0x07u)
 /**
  * Specifies which TCP option filter shall be applied on the related socket. [uint8]
  */
-#define TCPIP_PARAMID_TCP_OPTIONFILTER ((TcpIp_ParamIdType)0x08u)
+#define TCPIP_PARAMID_TCP_OPTIONFILTER           ((TcpIp_ParamIdType)0x08u)
 /**
  * Specifies if the Path MTU Discovery shall be performed on the related socket. [boolean]
  */
-#define TCPIP_PARAMID_PATHMTU_ENABLE ((TcpIp_ParamIdType)0x09u)
+#define TCPIP_PARAMID_PATHMTU_ENABLE             ((TcpIp_ParamIdType)0x09u)
 /**
  * The 20-bit Flow Label according to IETF RFC 6437. [uint32]
  */
-#define TCPIP_PARAMID_FLOWLABEL ((TcpIp_ParamIdType)0x0Au)
+#define TCPIP_PARAMID_FLOWLABEL                  ((TcpIp_ParamIdType)0x0Au)
 /**
  * The 6-bit Differentiated Service Code Point according to IETF RFC 2474. [uint8]
  */
-#define TCPIP_PARAMID_DSCP ((TcpIp_ParamIdType)0x0Bu)
+#define TCPIP_PARAMID_DSCP                       ((TcpIp_ParamIdType)0x0Bu)
 /**
  * Specifies if UDP checksum handling shall be enabled (TRUE) or
  * skipped (FALSE) on the related socket. [boolean]
  */
-#define TCPIP_PARAMID_UDP_CHECKSUM ((TcpIp_ParamIdType)0x0Cu)
+#define TCPIP_PARAMID_UDP_CHECKSUM               ((TcpIp_ParamIdType)0x0Cu)
 /**
  * 0x0d is used to assign a TLS connection reference to a TCP socket.
  */
-#define TCPIP_PARAMID_TLS_CONNECTION_ASSIGNMENT ((TcpIp_ParamIdType)0x0Du)
+#define TCPIP_PARAMID_TLS_CONNECTION_ASSIGNMENT  ((TcpIp_ParamIdType)0x0Du)
 /**
  * Initial TCP Retransmission timeout before an unacknowledged segment is retransmitted
  * (overrides TcpIpTcp RetransmissionTimeout (ECUC_ TcpIp_00068))
  */
-#define TCPIP_PARAMID_TCP_RETRANSMIT_TIMEOUT ((TcpIp_ParamIdType)0x0Eu)
+#define TCPIP_PARAMID_TCP_RETRANSMIT_TIMEOUT     ((TcpIp_ParamIdType)0x0Eu)
 /**
  * Specifies the maximum number of TCP retransmissions
  */
-#define TCPIP_PARAMID_TCP_MAXRTX ((TcpIp_ParamIdType)0x0Fu)
+#define TCPIP_PARAMID_TCP_MAXRTX                 ((TcpIp_ParamIdType)0x0Fu)
 /**
  * Maximal TCP Retransmission timeout before an unacknowledged segment is retransmitted
  * (overrides TcpIpTcp MaxRetransmissionTimeout (ECUC_TcpIp_00340))
@@ -381,11 +384,11 @@ typedef uint8 TcpIp_ParamIdType;
 /**
  * Start of vendor specific range of parameter IDs. [vendor specific]
  */
-#define TCPIP_PARAMID_VENDOR_SPECIFIC ((TcpIp_ParamIdType)0x80u)
+#define TCPIP_PARAMID_VENDOR_SPECIFIC            ((TcpIp_ParamIdType)0x80u)
 /**
  * parameter ID for VLAN
  */
-#define TCPIP_PARAMID_SOCKET_VLAN ((TcpIp_ParamIdType)0x81u)
+#define TCPIP_PARAMID_SOCKET_VLAN                ((TcpIp_ParamIdType)0x81u)
 /**
  * @}
  */
@@ -399,9 +402,9 @@ typedef uint8 TcpIp_ArpEntryStateType;
 /** static arp entry. */
 #define TCPIP_ARP_ENTRY_STATIC ((TcpIp_ArpEntryStateType)(0x00u))
 /** valid arp entry. */
-#define TCPIP_ARP_ENTRY_VALID ((TcpIp_ArpEntryStateType)(0x01u))
+#define TCPIP_ARP_ENTRY_VALID  ((TcpIp_ArpEntryStateType)(0x01u))
 /** stale arp entry. */
-#define TCPIP_ARP_ENTRY_STALE ((TcpIp_ArpEntryStateType)(0x02u))
+#define TCPIP_ARP_ENTRY_STALE  ((TcpIp_ArpEntryStateType)(0x02u))
 /**
  * @}
  */
@@ -439,15 +442,15 @@ typedef struct TcpIp_NdpCacheEntryTag
  */
 typedef uint8 TcpIp_MeasurementIdxType;
 /** Measurement index of dropped PDUs caused by invalid destination TCP-Port */
-#define TCPIP_MEAS_DROP_TCP ((TcpIp_MeasurementIdxType)0x01u)
+#define TCPIP_MEAS_DROP_TCP  ((TcpIp_MeasurementIdxType)0x01u)
 /** Measurement index of dropped PDUs caused by invalid destination UDP-Port */
-#define TCPIP_MEAS_DROP_UDP ((TcpIp_MeasurementIdxType)0x02u)
+#define TCPIP_MEAS_DROP_UDP  ((TcpIp_MeasurementIdxType)0x02u)
 /** Measurement index of dropped datagrams caused by invalid IPv4 address */
 #define TCPIP_MEAS_DROP_IPV4 ((TcpIp_MeasurementIdxType)0x03u)
 /** Measurement index of dropped datagrams caused by invalid IPv6 address */
 #define TCPIP_MEAS_DROP_IPV6 ((TcpIp_MeasurementIdxType)0x04u)
 /** represents all measurement indexes */
-#define TCPIP_MEAS_ALL ((TcpIp_MeasurementIdxType)0xFFu)
+#define TCPIP_MEAS_ALL       ((TcpIp_MeasurementIdxType)0xFFu)
 /**
  * @}
  */
@@ -498,6 +501,7 @@ typedef uint8 TcpIp_TlsCsmPRFSupportType;
 #define TLS_PRF_CSM_INOUT_REDIRECT_SUPPORT ((TcpIp_TlsCsmPRFSupportType)(0x1u))
 #define TLS_PRF_CSM_NO_SUPPORT             ((TcpIp_TlsCsmPRFSupportType)(0x2u))
 #define TLS_PRF_NO_SUPPORT                 ((TcpIp_TlsCsmPRFSupportType)(0x3u))
+#define TLS_PRF_INVALID                    ((TcpIp_TlsCsmPRFSupportType)(0x4u))
 #endif
 
 typedef uint32 TcpIp_CsmJobsIdType;
@@ -506,9 +510,111 @@ typedef uint32 TcpIp_CsmKeyIdType;
 
 typedef uint16 TcpIp_KeyMCertificateIdType;
 
+#if (STD_ON == TCPIP_IPSEC_ENABLED)
+
+typedef uint8 IkeRoleType;
+#define IKE_INITIATOR ((IkeRoleType)(0u))
+#define IKE_RESPONDER ((IkeRoleType)(1u))
+
+typedef uint8 IkeConnStatusType;
+#define IKE_CONN_CLOSED      ((IkeConnStatusType)(0u))
+#define IKE_CONN_INIT_SENT   ((IkeConnStatusType)(1u))
+#define IKE_CONN_INIT_RCVD   ((IkeConnStatusType)(2u))
+#define IKE_CONN_AUTH_SENT   ((IkeConnStatusType)(3u))
+#define IKE_CONN_ESTABLISHED ((IkeConnStatusType)(4u))
+
+typedef uint16 IkeTransformIdType;
+
+/* IKEEncrTransform IDs */
+#define IKE_TRANSFORM_ENCR_AES_CBC    ((IkeTransformIdType)(12u))
+#define IKE_TRANSFORM_ENCR_AES_CTR    ((IkeTransformIdType)(13u))
+#define IKE_TRANSFORM_ENCR_AES_CCM_8  ((IkeTransformIdType)(14u))
+#define IKE_TRANSFORM_ENCR_AES_CCM_12 ((IkeTransformIdType)(15u))
+#define IKE_TRANSFORM_ENCR_AES_CCM_16 ((IkeTransformIdType)(16u))
+#define IKE_TRANSFORM_ENCR_AES_GCM_8  ((IkeTransformIdType)(18u))
+#define IKE_TRANSFORM_ENCR_AES_GCM_12 ((IkeTransformIdType)(19u))
+#define IKE_TRANSFORM_ENCR_AES_GCM_16 ((IkeTransformIdType)(20u))
+
+/* IKEPrfTransform IDs */
+#define IKE_TRANSFORM_PRF_HMAC_MD5      ((IkeTransformIdType)(1u))
+#define IKE_TRANSFORM_PRF_HMAC_SHA1     ((IkeTransformIdType)(2u))
+#define IKE_TRANSFORM_PRF_HMAC_TIGER    ((IkeTransformIdType)(3u))
+#define IKE_TRANSFORM_PRF_AES128_XCBC   ((IkeTransformIdType)(4u))
+#define IKE_TRANSFORM_PRF_HMAC_SHA2_256 ((IkeTransformIdType)(5u))
+#define IKE_TRANSFORM_PRF_HMAC_SHA2_384 ((IkeTransformIdType)(6u))
+#define IKE_TRANSFORM_PRF_HMAC_SHA2_512 ((IkeTransformIdType)(7u))
+#define IKE_TRANSFORM_PRF_AES128_CMAC   ((IkeTransformIdType)(8u))
+
+/* IKEIntegTransform IDs */
+#define IKE_TRANSFORM_AUTH_HMAC_MD5_96       ((IkeTransformIdType)(1u))
+#define IKE_TRANSFORM_AUTH_HMAC_SHA1_96      ((IkeTransformIdType)(2u))
+#define IKE_TRANSFORM_AUTH_DES_MAC           ((IkeTransformIdType)(3u))
+#define IKE_TRANSFORM_AUTH_KPDK_MD5          ((IkeTransformIdType)(4u))
+#define IKE_TRANSFORM_AUTH_AES_XCBC_96       ((IkeTransformIdType)(5u))
+#define IKE_TRANSFORM_AUTH_HMAC_MD5_128      ((IkeTransformIdType)(6u))
+#define IKE_TRANSFORM_AUTH_HMAC_SHA1_160     ((IkeTransformIdType)(7u))
+#define IKE_TRANSFORM_AUTH_AES_CMAC_96       ((IkeTransformIdType)(8u))
+#define IKE_TRANSFORM_AUTH_HMAC_SHA2_256_128 ((IkeTransformIdType)(12u))
+#define IKE_TRANSFORM_AUTH_HMAC_SHA2_384_192 ((IkeTransformIdType)(13u))
+#define IKE_TRANSFORM_AUTH_HMAC_SHA2_512_256 ((IkeTransformIdType)(14u))
+
+/* IKEDhTransform IDs */
+#define IKE_TRANSFORM_DH_768_BIT_MODP_GROUP                                    ((IkeTransformIdType)(1u))
+#define IKE_TRANSFORM_DH_1024_BIT_MODP_GROUP                                   ((IkeTransformIdType)(2u))
+#define IKE_TRANSFORM_DH_1536_BIT_MODP_GROUP                                   ((IkeTransformIdType)(5u))
+#define IKE_TRANSFORM_DH_2048_BIT_MODP_GROUP                                   ((IkeTransformIdType)(14u))
+#define IKE_TRANSFORM_DH_3072_BIT_MODP_GROUP                                   ((IkeTransformIdType)(15u))
+#define IKE_TRANSFORM_DH_4096_BIT_MODP_GROUP                                   ((IkeTransformIdType)(16u))
+#define IKE_TRANSFORM_DH_6144_BIT_MODP_GROUP                                   ((IkeTransformIdType)(17u))
+#define IKE_TRANSFORM_DH_8192_BIT_MODP_GROUP                                   ((IkeTransformIdType)(18u))
+#define IKE_TRANSFORM_DH_256_BIT_RANDOM_ECP_GROUP                              ((IkeTransformIdType)(19u))
+#define IKE_TRANSFORM_DH_384_BIT_RANDOM_ECP_GROUP                              ((IkeTransformIdType)(20u))
+#define IKE_TRANSFORM_DH_521_BIT_RANDOM_ECP_GROUP                              ((IkeTransformIdType)(21u))
+#define IKE_TRANSFORM_DH_1024_BIT_MODP_GROUP_WITH_160_BIT_PRIME_ORDER_SUBGROUP ((IkeTransformIdType)(22u))
+#define IKE_TRANSFORM_DH_2048_BIT_MODP_GROUP_WITH_224_BIT_PRIME_ORDER_SUBGROUP ((IkeTransformIdType)(23u))
+#define IKE_TRANSFORM_DH_2048_BIT_MODP_GROUP_WITH_256_BIT_PRIME_ORDER_SUBGROUP ((IkeTransformIdType)(24u))
+#define IKE_TRANSFORM_DH_192_BIT_RANDOM_ECP_GROUP                              ((IkeTransformIdType)(25u))
+#define IKE_TRANSFORM_DH_224_BIT_RANDOM_ECP_GROUP                              ((IkeTransformIdType)(26u))
+#define IKE_TRANSFORM_DH_BRAINPOOLP224R1                                       ((IkeTransformIdType)(27u))
+#define IKE_TRANSFORM_DH_BRAINPOOLP256R1                                       ((IkeTransformIdType)(28u))
+#define IKE_TRANSFORM_DH_BRAINPOOLP384R1                                       ((IkeTransformIdType)(29u))
+#define IKE_TRANSFORM_DH_BRAINPOOLP512R1                                       ((IkeTransformIdType)(30u))
+#define IKE_TRANSFORM_DH_CURVE25519                                            ((IkeTransformIdType)(31u))
+#define IKE_TRANSFORM_DH_CURVE448                                              ((IkeTransformIdType)(32u))
+
+typedef uint8 IKESignatureAlgorithmType;
+#define IKE_SIGNATURE_RSA_ENCRYPTION ((IKESignatureAlgorithmType)(0x00u))
+#define IKE_SIGNATURE_DSA            ((IKESignatureAlgorithmType)(0x01u))
+#define IKE_SIGNATURE_ECDSA          ((IKESignatureAlgorithmType)(0x02u))
+#define IKE_SIGNATURE_RSASSA_PSS     ((IKESignatureAlgorithmType)(0x03u))
+
+typedef uint8 IKEHashAlgorithmType;
+#define IKE_HASH_ALGO_SHA1     ((IKEHashAlgorithmType)(0x00u))
+#define IKE_HASH_ALGO_SHA2_512 ((IKEHashAlgorithmType)(0x01u))
+#define IKE_HASH_ALGO_SHA2_384 ((IKEHashAlgorithmType)(0x02u))
+#define IKE_HASH_ALGO_SHA2_256 ((IKEHashAlgorithmType)(0x03u))
+
+typedef uint8 TcpIp_IntegrityTransformIdentifierType;
+#define TCPIP_IPSEC_TRANSFORM_AUTH_HMAC_MD5_96       ((TcpIp_IntegrityTransformIdentifierType)(1u))
+#define TCPIP_IPSEC_TRANSFORM_AUTH_HMAC_SHA1_96      ((TcpIp_IntegrityTransformIdentifierType)(2u))
+#define TCPIP_IPSEC_TRANSFORM_AUTH_DES_MAC           ((TcpIp_IntegrityTransformIdentifierType)(3u))
+#define TCPIP_IPSEC_TRANSFORM_AUTH_KPDK_MD5          ((TcpIp_IntegrityTransformIdentifierType)(4u))
+#define TCPIP_IPSEC_TRANSFORM_AUTH_AES_XCBC_96       ((TcpIp_IntegrityTransformIdentifierType)(5u))
+#define TCPIP_IPSEC_TRANSFORM_AUTH_HMAC_MD5_128      ((TcpIp_IntegrityTransformIdentifierType)(6u))
+#define TCPIP_IPSEC_TRANSFORM_AUTH_HMAC_SHA1_160     ((TcpIp_IntegrityTransformIdentifierType)(7u))
+#define TCPIP_IPSEC_TRANSFORM_AUTH_AES_CMAC_96       ((TcpIp_IntegrityTransformIdentifierType)(8u))
+#define TCPIP_IPSEC_TRANSFORM_AUTH_AES_128_GMAC      ((TcpIp_IntegrityTransformIdentifierType)(9u))
+#define TCPIP_IPSEC_TRANSFORM_AUTH_AES_192_GMAC      ((TcpIp_IntegrityTransformIdentifierType)(10u))
+#define TCPIP_IPSEC_TRANSFORM_AUTH_AES_256_GMAC      ((TcpIp_IntegrityTransformIdentifierType)(11u))
+#define TCPIP_IPSEC_TRANSFORM_AUTH_HMAC_SHA2_256_128 ((TcpIp_IntegrityTransformIdentifierType)(12u))
+#define TCPIP_IPSEC_TRANSFORM_AUTH_HMAC_SHA2_384_192 ((TcpIp_IntegrityTransformIdentifierType)(13u))
+#define TCPIP_IPSEC_TRANSFORM_AUTH_HMAC_SHA2_512_256 ((TcpIp_IntegrityTransformIdentifierType)(14u))
+
+#endif /* TCPIP_IPSEC_ENABLED */
+
 #if (STD_ON == TCPIP_CTRL_MULTI_LOCALADDR)
 /** ceiling of a integer division */
-#define TCPIP_DIV_CEILING(a, b) (((a) + (b) - 1u) / (b))
+#define TCPIP_DIV_CEILING(a, b)            (((a) + (b) - 1u) / (b))
 /** local address number of controller */
 #define TCPIP_CTRL_LOCALADDR_NUMBER_32BITS TCPIP_DIV_CEILING(TCPIP_CTRL_MULTI_LOCALADDR_NUMBER, 32u)
 #endif

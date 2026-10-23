@@ -72,9 +72,11 @@ typedef enum
 {
     PDUR_ROUTE_IF_TX_NOBUFFERED,
     PDUR_ROUTE_IF_RX_NOBUFFERED,
+    PDUR_ROUTE_IF_RX_BUFFERED,
     PDUR_ROUTE_IF_GW_NOBUFFERED,
     PDUR_ROUTE_IF_GW_BUFFERED,
-    PDUR_ROUTE_TP_TX_NOBUFFERED,
+    PDUR_ROUTE_TP_TX_NOBUFFERED_UNICAST,
+    PDUR_ROUTE_TP_TX_NOBUFFERED_MULTICAST,
     PDUR_ROUTE_TP_RX_NOBUFFERED,
     PDUR_ROUTE_TP_RX_BUFFERED,
     PDUR_ROUTE_TP_GW_BUFFERED
@@ -121,10 +123,18 @@ typedef uint16 PduR_PBConfigIdType;
 typedef uint16 PduR_RoutingPathGroupIdType;
 
 /**
- * @brief     PduR internal type
+ * @brief     PduR queue depth type
  */
-typedef uint8  PduR_QueueDepthType;
-typedef uint8  PduR_BufferPoolSizeType;
+typedef uint8 PduR_QueueDepthType;
+
+/**
+ * @brief     PduR buffer pool size type
+ */
+typedef uint8 PduR_BufferPoolSizeType;
+
+/**
+ * @brief     PduR buffer index type
+ */
 typedef uint16 PduR_BufferIndexType;
 
 /**
@@ -195,11 +205,12 @@ typedef struct PduR_DestPduTypeTag
 #endif
     boolean TransmissionConfirmation; /** PduRTransmissionConfirmation */
 #if (PDUR_NUMBER_OF_BUFFERS > 0u)
-    uint16 PduRDestTxBufferRef;
+    uint16 PduRDestQueueIdRef;
 #endif
-    PduIdType     PduRSrcPduRef;
-    PduIdType     PduRDestModulePduIndex;
-    PduLengthType ConfiguredLength; /** Pdu length */
+    uint8            PduSrcSum;
+    const PduIdType* PduRSrcPduRef;
+    PduIdType        PduRDestModulePduIndex;
+    PduLengthType    ConfiguredLength; /** Pdu length */
 #if (PDUR_NUMBER_OF_QUEUES_MAX > 0u)
     uint32 PduRTpThreshold; /** PduRTpThreshold */
 #endif
@@ -424,6 +435,7 @@ typedef struct
     PduLengthType PduMaxLength; /** Configured PduLength + metadata length (PduRPduMaxLength) */
     PduLengthType SduLength;    /** Total length of the Tp N-SDU to be received or the I-SDU to be transmitted */
     PduLengthType PduCurLength; /** Current length of the data stored in the buffer */
+    PduIdType     SrcPduId;     /* Source Pdu Id */
     uint8*        Data;         /** pointer to address for the saved data  */
     PduR_BufferLockStateType  LockState;  /** Occupied by a queue */
     PduR_BufferWriteStateType WriteState; /** Data receive state */

@@ -35,6 +35,7 @@
 #include "Dem_ClearDTC.h"
 #endif
 #include "Dem_Indicator.h"
+#include "Dem_Arti.h"
 
 /* ===================================================== macros ===================================================== */
 /**
@@ -142,6 +143,8 @@
     ((DEM_OBD_CALLBACK_DTC_STATUS_CHANGED == STD_ON) || (DEM_J1939_CALLBACK_DTC_STATUS_CHANGED == STD_ON) \
      || (DEM_CLIENT_CALLBACK_DTC_STATUS_CHANGED == STD_ON))                                               \
     && (DEM_J1939_SUPPORT == STD_ON))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         call the function J1939Dcm_DemTriggerOnDTCStatus
  * @param[in]     EventId: Event ID
@@ -155,9 +158,13 @@ DEM_LOCAL void Dem_NotiJ1939DtcStatusChanged(
     Dem_EventIdType       EventId,
     Dem_UdsStatusByteType DtcStatusOld,
     Dem_UdsStatusByteType DtcStatusNew);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_J1939_CLEAR_DTC_SUPPORT == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Clear the selected J1939 DTCs
  * @param[in]     DTCTypeFilter: Defines the type of DTCs to be cleared.
@@ -172,9 +179,13 @@ DEM_LOCAL void Dem_NotiJ1939DtcStatusChanged(
  */
 DEM_LOCAL Std_ReturnType
     Dem_J1939ClearDTC(Dem_J1939DcmSetClearFilterType DTCTypeFilter, Dem_DTCOriginType DTCOrigin, uint8 ClientId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if ((DEM_J1939_READING_DTC_SUPPORT == STD_ON) || (DEM_J1939_DM31_SUPPORT == STD_ON))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Gets an event's occurrence counter for J1939 reporting.
  * @param[in]     EventId: Event ID
@@ -184,6 +195,10 @@ DEM_LOCAL Std_ReturnType
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL uint8 Dem_J1939OccurrenceCounter(Dem_EventIdType EventId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Filters the next J1939 DTC with lamp status.
@@ -198,9 +213,13 @@ DEM_LOCAL uint8 Dem_J1939OccurrenceCounter(Dem_EventIdType EventId);
  */
 DEM_LOCAL Std_ReturnType
     Dem_ClientJ1939DcmGetNextDTCwithLampStatus(uint8 ClientId, Dem_FilterDataResultType* FilterResult);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if ((DEM_J1939_READING_DTC_SUPPORT == STD_ON) || (DEM_J1939_READINESS1_SUPPORT == STD_ON))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Checks if the passed EventId matches the J1939 DTC filter criteria.
  * @param[in]     EventId: Event ID
@@ -217,11 +236,15 @@ DEM_LOCAL boolean Dem_FilterDataCheckEventMatchesJ1939DTCFilter(
     Dem_J1939DcmDTCStatusFilterType DTCStatusFilterType,
     uint8                           FilterFlags,
     Dem_EventIdType                 EventId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_J1939_READING_DTC_SUPPORT == STD_ON)
 
 #if (DEM_INDICATOR_NUMBER > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Calculate the node specific J1939 lamp status based on red stop lamp, amber warning lamp, malfunction
  * @param[in]     ClientId: ClientId to address the J1939 event memory
@@ -231,7 +254,11 @@ DEM_LOCAL boolean Dem_FilterDataCheckEventMatchesJ1939DTCFilter(
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL Dem_J1939DcmLampStatusType Dem_CalculateJ1939GlobalLampStatus(uint8 ClientId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Initializes a J1939 DTC filter with the given criteria.
@@ -256,6 +283,10 @@ DEM_LOCAL Std_ReturnType Dem_ClientJ1939DcmSetDTCFilter(
     Dem_DTCOriginType               DTCOrigin,
     uint8                           ClientId,
     Dem_J1939DcmLampStatusType*     LampStatus);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Fetch number of DTCs matching the client specific J1939 DTC filter settings.
@@ -266,6 +297,10 @@ DEM_LOCAL Std_ReturnType Dem_ClientJ1939DcmSetDTCFilter(
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL uint16 Dem_ClientJ1939DcmGetNumberOfFilteredDTC(uint8 ClientId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Get the next matching event.
@@ -280,9 +315,13 @@ DEM_LOCAL uint16 Dem_ClientJ1939DcmGetNumberOfFilteredDTC(uint8 ClientId);
  */
 DEM_LOCAL Std_ReturnType
     Dem_FilterDataGetNextFilteredJ1939DTC(uint8 DcmClientId, Dem_FilterDataResultType* FilterResult);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if ((DEM_J1939_EXPANDED_FREEZE_FRAME_SUPPORT == STD_ON) || (DEM_J1939_FREEZE_FRAME_SUPPORT == STD_ON))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Sets a J1939 freeze frame record filter with the given criteria.
  * @param[in]     ClientId: ClientId to address the J1939 event memory
@@ -294,6 +333,10 @@ DEM_LOCAL Std_ReturnType
  */
 DEM_LOCAL void
     Dem_ClientJ1939DcmSetFreezeFrameFilter(uint8 ClientId, Dem_J1939DcmSetFreezeFrameFilterType FreezeFrameKind);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Filters the next J1939 DTC
@@ -309,6 +352,10 @@ DEM_LOCAL Dem_EventIdType Dem_FreezeFrameIteratorFindNextJ1939DTC(
     uint8                                ClientId,
     Dem_EventIdType                      LastEventId,
     Dem_J1939DcmSetFreezeFrameFilterType FreezeFrameKind);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Get the next matching J1939 freeze frame record event.
@@ -320,6 +367,10 @@ DEM_LOCAL Dem_EventIdType Dem_FreezeFrameIteratorFindNextJ1939DTC(
  */
 DEM_LOCAL boolean
     Dem_FreezeFrameIteratorGetNextJ1939event(uint8 ClientId, Dem_FFIteratorFilterType* FFIteratorFilterData);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Get the next matching J1939 freeze frame record.
@@ -348,8 +399,12 @@ DEM_LOCAL Std_ReturnType Dem_FreezeFrameIteratorGetNextJ1939FreezeFrame(
     uint8*  OccurrenceCounter,
     uint8*  DestBuffer,
     uint16* BufSize);
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_MAX_SIZE_J1939EXFREEZEFRAME > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
+
 /**
  * @brief         Get the next matching SPN.
  * @param[out]    FFIteratorFilterData: The filter FF iterator
@@ -358,6 +413,10 @@ DEM_LOCAL Std_ReturnType Dem_FreezeFrameIteratorGetNextJ1939FreezeFrame(
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_FreezeFrameIteratorGetNextSPN(Dem_FFIteratorFilterType* FFIteratorFilterData);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Get the next matching J1939 freeze frame record event.
@@ -371,6 +430,10 @@ DEM_LOCAL void Dem_FreezeFrameIteratorGetNextSPN(Dem_FFIteratorFilterType* FFIte
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL boolean Dem_FreezeFrameIteratorGetNextEvent(uint8 ClientId, Dem_FFIteratorFilterType* FFIteratorFilterData);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Get the next matching J1939 freeze frame record.
@@ -386,10 +449,14 @@ DEM_LOCAL boolean Dem_FreezeFrameIteratorGetNextEvent(uint8 ClientId, Dem_FFIter
  */
 DEM_LOCAL Std_ReturnType
     Dem_FreezeFrameIteratorGetNextSPNInFreezeFrame(uint8 ClientId, uint32* SPNSupported, uint8* SPNDataLength);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 #endif
 
 #if (DEM_J1939_READINESS1_SUPPORT == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Get the diagnostic readiness for the given client
  * @param[in]     ClientId: ClientId to address the J1939 event memory
@@ -401,12 +468,11 @@ DEM_LOCAL Std_ReturnType
  */
 DEM_LOCAL void
     Dem_ClientJ1939DcmReadDiagnosticReadiness1(Dem_J1939DcmDiagnosticReadiness1Type* DataValue, uint8 ClientId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 /* ========================================== internal function definitions ========================================= */
-#define DEM_START_SEC_CODE
-#include "Dem_MemMap.h"
-
 /* PRQA S 4404 ++ */ /* VL_Dem_4404 */
 /**
  * @brief         check the data of a DTC filter.
@@ -450,6 +516,8 @@ DEM_LOCAL_INLINE boolean Dem_ClientCheckJ1939SPNFreezeFrameFilterSet(uint8 Clien
     ((DEM_OBD_CALLBACK_DTC_STATUS_CHANGED == STD_ON) || (DEM_J1939_CALLBACK_DTC_STATUS_CHANGED == STD_ON) \
      || (DEM_CLIENT_CALLBACK_DTC_STATUS_CHANGED == STD_ON))                                               \
     && (DEM_J1939_SUPPORT == STD_ON))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief call the function J1939Dcm_DemTriggerOnDTCStatus
  */
@@ -486,9 +554,12 @@ DEM_LOCAL void Dem_NotiJ1939DtcStatusChanged(
         }
     }
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_J1939_CLEAR_DTC_SUPPORT == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Clear the selected J1939 DTCs
  */
@@ -527,8 +598,9 @@ DEM_LOCAL Std_ReturnType
     }
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (((DEM_J1939_DM31_SUPPORT == STD_ON) || (DEM_J1939_READING_DTC_SUPPORT == STD_ON)) && (DEM_INDICATOR_NUMBER > 0u))
 /**
  * @brief         Maps indicator behavior to J1939 lamp status
@@ -590,9 +662,10 @@ DEM_LOCAL_INLINE uint8 Dem_J1939FlashLampStatus(uint8 IndicatorState)
     return ret;
 }
 #endif
-
 /* PRQA S 4397 ++ */ /* VL_Dem_4397 */
 #if ((DEM_J1939_READING_DTC_SUPPORT == STD_ON) || (DEM_J1939_DM31_SUPPORT == STD_ON))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Gets an event's occurrence counter for J1939 reporting.
  */
@@ -618,7 +691,8 @@ DEM_LOCAL uint8 Dem_J1939OccurrenceCounter(Dem_EventIdType EventId)
     }
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Initializes a 'First DTC with lamp status' filter for the given client
  * @param[in]     ClientId: ClientId to address the J1939 event memory
@@ -636,7 +710,8 @@ DEM_LOCAL_INLINE void Dem_ClientJ1939DcmFirstDTCwithLampStatus(uint8 ClientId)
     filterData.FilterState = DEM_FILTERDATA_FILTER_J1939DTCLAMP;
     Dem_SetFilterData(dcmClientId, filterData);
 }
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief calculate a 'DTC with lamp status' filter for the given client
  */
@@ -761,7 +836,10 @@ DEM_LOCAL Dem_J1939DcmLampStatusType Dem_CalculateEventJ1939LampStatus(uint8 Cli
     DEM_PARAM_UNUSED(ClientId);
     return status;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Filters the next J1939 DTC with lamp status.
  */
@@ -822,9 +900,12 @@ DEM_LOCAL Std_ReturnType
     /** else return value DEM_NO_SUCH_ELEMENT initially set */
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if ((DEM_J1939_READING_DTC_SUPPORT == STD_ON) || (DEM_J1939_READINESS1_SUPPORT == STD_ON))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Checks if the passed EventId matches the J1939 DTC filter criteria.
  */
@@ -876,11 +957,13 @@ DEM_LOCAL boolean Dem_FilterDataCheckEventMatchesJ1939DTCFilter(
     }
     return match;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_J1939_READING_DTC_SUPPORT == STD_ON)
-
 #if (DEM_INDICATOR_NUMBER > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Calculate the node specific J1939 lamp status based on red stop lamp, amber warning lamp, malfunction
  * indicator lamp and the protect lamp.
@@ -985,9 +1068,13 @@ DEM_LOCAL Dem_J1939DcmLampStatusType Dem_CalculateJ1939GlobalLampStatus(uint8 Cl
     DEM_PARAM_UNUSED(ClientId);
     return status;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 /* PRQA S 4397 -- */
 
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Initializes a J1939 DTC filter with the given criteria.
  */
@@ -1062,7 +1149,10 @@ DEM_LOCAL Std_ReturnType Dem_ClientJ1939DcmSetDTCFilter(
     Dem_SetFilterData(dcmClientId, filterData);
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Fetch number of DTCs matching the client specific J1939 DTC filter settings.
  */
@@ -1087,7 +1177,10 @@ DEM_LOCAL uint16 Dem_ClientJ1939DcmGetNumberOfFilteredDTC(uint8 ClientId)
     }
     return numberOfDTCs;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Get the next matching event.
  */
@@ -1136,7 +1229,8 @@ DEM_LOCAL Std_ReturnType
     /** else ret = DEM_NO_SUCH_ELEMENT initially set */
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Get the next matching DTC
  * @param[in]     ClientId: ClientId to address the J1939 event memory
@@ -1165,8 +1259,9 @@ DEM_LOCAL_INLINE Std_ReturnType
     return ret;
 }
 #endif
-
 #if ((DEM_J1939_EXPANDED_FREEZE_FRAME_SUPPORT == STD_ON) || (DEM_J1939_FREEZE_FRAME_SUPPORT == STD_ON))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Sets a J1939 freeze frame record filter with the given criteria.
  */
@@ -1185,7 +1280,10 @@ DEM_LOCAL void
 #endif
     Dem_FFIteratorSetFreezeFrameFilterData(dcmClientId, lFFIteratorFilter);
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Filters the next J1939 DTC
  */
@@ -1243,7 +1341,10 @@ DEM_LOCAL Dem_EventIdType Dem_FreezeFrameIteratorFindNextJ1939DTC(
 
     return eventId;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Get the next matching J1939 freeze frame record event.
  */
@@ -1288,7 +1389,10 @@ DEM_LOCAL boolean
     }
     return copyData;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Get the next matching J1939 freeze frame record.
  */
@@ -1393,8 +1497,11 @@ DEM_LOCAL Std_ReturnType Dem_FreezeFrameIteratorGetNextJ1939FreezeFrame(
     /** else processing finished ret = DEM_NO_SUCH_ELEMENT initially set */
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_MAX_SIZE_J1939EXFREEZEFRAME > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Get the next matching SPN.
  */
@@ -1414,7 +1521,10 @@ DEM_LOCAL void Dem_FreezeFrameIteratorGetNextSPN(Dem_FFIteratorFilterType* FFIte
         lFFIteratorFilterData->FilterState = DEM_FREEZEFRAMEITERATOR_J1939STATE_USED;
     }
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Get the next matching J1939 freeze frame record event.
  */
@@ -1457,7 +1567,10 @@ DEM_LOCAL boolean Dem_FreezeFrameIteratorGetNextEvent(uint8 ClientId, Dem_FFIter
     }
     return copyData;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Get the next matching J1939 freeze frame record.
  */
@@ -1520,10 +1633,13 @@ DEM_LOCAL Std_ReturnType
     /** else processing finished ret = DEM_NO_SUCH_ELEMENT initially set */
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 #endif
-
 #if (DEM_J1939_READINESS1_SUPPORT == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Get the diagnostic readiness for the given client
  */
@@ -1593,12 +1709,15 @@ DEM_LOCAL void
     DataValue->PreviouslyActiveDiagnosticTroubleCodes = numberOfFilteredDTC;
     Dem_SetFilterData(dcmClientId, filterData);
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 /* ========================================== external function definitions ========================================= */
 /* PRQA S 3406, 1503, 1252 ++ */ /* VL_Dem_3406, VL_QAC_NoUsedApi, VL_Dem_1252 */
 /* PRQA S 1532 ++ */             /* VL_QAC_OneFunRef */
 #if (DEM_J1939_READING_DTC_SUPPORT == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief The function sets the DTC filter for a specific node and returns the composite lamp status of the filtered
  * DTCs.
@@ -1611,6 +1730,19 @@ Std_ReturnType Dem_J1939DcmSetDTCFilter(
     uint8                           ClientId,
     Dem_J1939DcmLampStatusType*     LampStatus)
 {
+    ARTI_TRACE_N(
+        USER,
+        AR_CP_BSW_API,
+        Dem,
+        0,
+        Bsw_Start,
+        6,
+        0x90,
+        DTCStatusFilter,
+        DTCKind,
+        DTCOrigin,
+        ClientId,
+        LampStatus);
     Std_ReturnType ret = E_NOT_OK;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -1657,15 +1789,21 @@ Std_ReturnType Dem_J1939DcmSetDTCFilter(
         Dem_DetReportError(DEM_SID_J1939DCMSETDTCFILTER, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x90, ret);
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 6030 -- */
 
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Gets the number of currently filtered DTCs set by the function Dem_J1939DcmSetDTCFilter.
  */
 Std_ReturnType Dem_J1939DcmGetNumberOfFilteredDTC(uint16* NumberOfFilteredDTC, uint8 ClientId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 3, 0x91, NumberOfFilteredDTC, ClientId);
     Std_ReturnType ret = E_NOT_OK;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -1705,14 +1843,19 @@ Std_ReturnType Dem_J1939DcmGetNumberOfFilteredDTC(uint16* NumberOfFilteredDTC, u
         Dem_DetReportError(DEM_SID_J1939DCMGETNUMBEROFFILTEREDDTC, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x91, ret);
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Gets the next filtered J1939 DTC.
  */
 Std_ReturnType Dem_J1939DcmGetNextFilteredDTC(uint32* J1939DTC, uint8* OccurenceCounter, uint8 ClientId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 4, 0x92, J1939DTC, OccurenceCounter, ClientId);
     Std_ReturnType ret = E_NOT_OK;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -1751,16 +1894,21 @@ Std_ReturnType Dem_J1939DcmGetNextFilteredDTC(uint32* J1939DTC, uint8* Occurence
         Dem_DetReportError(DEM_SID_J1939DCMGETNEXTOFFILTEREDDTC, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x92, ret);
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if ((DEM_J1939_READING_DTC_SUPPORT == STD_ON) || (DEM_J1939_DM31_SUPPORT == STD_ON))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief The function sets the filter to the first applicable DTC for the DM31 response for a specific node.
  */
 void Dem_J1939DcmFirstDTCwithLampStatus(uint8 ClientId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 2, 0x93, ClientId);
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
     /** ***** Development Error Checks ***** */
@@ -1790,8 +1938,12 @@ void Dem_J1939DcmFirstDTCwithLampStatus(uint8 ClientId)
         Dem_DetReportError(DEM_SID_J1939DCMFIRSTDTCWITHLAMPSTATUS, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 1, 0x93);
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Gets the next filtered J1939 DTC for DM31 including current LampStatus.
  */
@@ -1801,6 +1953,7 @@ Std_ReturnType Dem_J1939DcmGetNextDTCwithLampStatus(
     uint8*                      OccurenceCounter,
     uint8                       ClientId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 5, 0x94, LampStatus, J1939DTC, OccurenceCounter, ClientId);
     Std_ReturnType ret = E_NOT_OK;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -1843,11 +1996,15 @@ Std_ReturnType Dem_J1939DcmGetNextDTCwithLampStatus(
         Dem_DetReportError(DEM_SID_J1939DCMGETNEXTDTCWITHLAMPSTATUS, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x94, ret);
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_J1939_CLEAR_DTC_SUPPORT == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Clears the status of all event(s) related to the specified DTC(s), as well as all associated event memory
  * entries for these event(s).
@@ -1855,6 +2012,7 @@ Std_ReturnType Dem_J1939DcmGetNextDTCwithLampStatus(
 Std_ReturnType
     Dem_J1939DcmClearDTC(Dem_J1939DcmSetClearFilterType DTCTypeFilter, Dem_DTCOriginType DTCOrigin, uint8 ClientId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 4, 0x95, DTCTypeFilter, DTCOrigin, ClientId);
     Std_ReturnType ret = DEM_CLEAR_FAILED;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -1893,16 +2051,21 @@ Std_ReturnType
         Dem_DetReportError(DEM_SID_J1939DCMCLEARDTC, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x95, ret);
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if ((DEM_J1939_EXPANDED_FREEZE_FRAME_SUPPORT == STD_ON) || (DEM_J1939_FREEZE_FRAME_SUPPORT == STD_ON))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief The function sets the FreezeFrame filter for a specific node.
  */
 Std_ReturnType Dem_J1939DcmSetFreezeFrameFilter(Dem_J1939DcmSetFreezeFrameFilterType FreezeFrameKind, uint8 ClientId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 3, 0x96, FreezeFrameKind, ClientId);
     Std_ReturnType ret = E_NOT_OK;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -1938,9 +2101,13 @@ Std_ReturnType Dem_J1939DcmSetFreezeFrameFilter(Dem_J1939DcmSetFreezeFrameFilter
         Dem_DetReportError(DEM_SID_J1939DCMSETFREEZEFRAMEFITER, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x96, ret);
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Gets next freeze frame data. The function stores the data in the provided DestBuffer.
  */
@@ -1951,6 +2118,19 @@ Std_ReturnType Dem_J1939DcmGetNextFreezeFrame(
     uint16* BufSize,
     uint8   ClientId)
 {
+    ARTI_TRACE_N(
+        USER,
+        AR_CP_BSW_API,
+        Dem,
+        0,
+        Bsw_Start,
+        6,
+        0x97,
+        J1939DTC,
+        OccurenceCounter,
+        DestBuffer,
+        BufSize,
+        ClientId);
     Std_ReturnType ret = E_NOT_OK;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -1994,14 +2174,19 @@ Std_ReturnType Dem_J1939DcmGetNextFreezeFrame(
         Dem_DetReportError(DEM_SID_J1939DCMGETNEXTFREEZEFRAME, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x97, ret);
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Gets next SPN.
  */
 Std_ReturnType Dem_J1939DcmGetNextSPNInFreezeFrame(uint32* SPNSupported, uint8* SPNDataLength, uint8 ClientId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 4, 0x98, SPNSupported, SPNDataLength, ClientId);
     Std_ReturnType ret = E_NOT_OK;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -2044,11 +2229,15 @@ Std_ReturnType Dem_J1939DcmGetNextSPNInFreezeFrame(uint32* SPNSupported, uint8* 
         Dem_DetReportError(DEM_SID_J1939DCMGETNEXTSPNINFREEZEFRAME, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x98, ret);
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_J1939_RATIO_SUPPORT == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 3673 ++ */ /* VL_QAC_3673 */
 /**
  * @brief The function sets the Ratio filter for a specific node and returns the corresponding Ignition Cycle Counter
@@ -2057,32 +2246,53 @@ Std_ReturnType Dem_J1939DcmGetNextSPNInFreezeFrame(uint32* SPNSupported, uint8* 
 Std_ReturnType
     Dem_J1939DcmSetRatioFilter(uint16* IgnitionCycleCounter, uint16* OBDMonitoringConditionsEncountered, uint8 ClientId)
 {
+    ARTI_TRACE_N(
+        USER,
+        AR_CP_BSW_API,
+        Dem,
+        0,
+        Bsw_Start,
+        4,
+        0x99,
+        IgnitionCycleCounter,
+        OBDMonitoringConditionsEncountered,
+        ClientId);
     DEM_PARAM_UNUSED(IgnitionCycleCounter);
     DEM_PARAM_UNUSED(OBDMonitoringConditionsEncountered);
     DEM_PARAM_UNUSED(ClientId);
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x99, E_NOT_OK);
     return E_NOT_OK;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Gets the next filtered Ratio.
  */
 Std_ReturnType Dem_J1939DcmGetNextFilteredRatio(uint32* SPN, uint16* Numerator, uint16* Denominator, uint8 ClientId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 5, 0x9A, SPN, Numerator, Denominator, ClientId);
     DEM_PARAM_UNUSED(SPN);
     DEM_PARAM_UNUSED(Numerator);
     DEM_PARAM_UNUSED(Denominator);
     DEM_PARAM_UNUSED(ClientId);
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x9A, E_NOT_OK);
     return E_NOT_OK;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 3673 -- */
 #endif
-
 #if (DEM_J1939_READINESS1_SUPPORT == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Service to report the value of Diagnostic Readiness 1 (DM05) computed by the Dem.
  */
 Std_ReturnType Dem_J1939DcmReadDiagnosticReadiness1(Dem_J1939DcmDiagnosticReadiness1Type* DataValue, uint8 ClientId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 3, 0x9B, DataValue, ClientId);
     Std_ReturnType ret = E_NOT_OK;
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
@@ -2118,11 +2328,15 @@ Std_ReturnType Dem_J1939DcmReadDiagnosticReadiness1(Dem_J1939DcmDiagnosticReadin
         Dem_DetReportError(DEM_SID_J1939DCMREADDIAGNOSTICREADINESS1, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x9B, ret);
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_J1939_READINESS2_SUPPORT == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Service to report the value of Diagnostic Readiness 2 (DM21) computed by the Dem.
  */
@@ -2130,13 +2344,18 @@ Std_ReturnType Dem_J1939DcmReadDiagnosticReadiness1(Dem_J1939DcmDiagnosticReadin
 Std_ReturnType Dem_J1939DcmReadDiagnosticReadiness2(Dem_J1939DcmDiagnosticReadiness2Type* DataValue, uint8 ClientId)
 /* PRQA S 3673 -- */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 3, 0x9C, DataValue, ClientId);
     DEM_PARAM_UNUSED(DataValue);
     DEM_PARAM_UNUSED(ClientId);
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x9C, E_NOT_OK);
     return E_NOT_OK;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_J1939_READINESS3_SUPPORT == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Service to report the value of Diagnostic Readiness 3 (DM26) computed by the Dem.
  */
@@ -2144,16 +2363,17 @@ Std_ReturnType Dem_J1939DcmReadDiagnosticReadiness2(Dem_J1939DcmDiagnosticReadin
 Std_ReturnType Dem_J1939DcmReadDiagnosticReadiness3(Dem_J1939DcmDiagnosticReadiness3Type* DataValue, uint8 ClientId)
 /* PRQA S 3673 -- */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 3, 0x9D, DataValue, ClientId);
     DEM_PARAM_UNUSED(DataValue);
     DEM_PARAM_UNUSED(ClientId);
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x9D, E_NOT_OK);
     return E_NOT_OK;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 /* PRQA S 1532 -- */
 /* PRQA S 3406, 1503, 1252 -- */
-
-#define DEM_STOP_SEC_CODE
-#include "Dem_MemMap.h"
 
 #endif
 

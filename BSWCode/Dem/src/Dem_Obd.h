@@ -31,9 +31,6 @@
 #include "Dem_DtcInterface.h"
 
 /* ========================================== internal function definitions ========================================= */
-#define DEM_START_SEC_CODE
-#include "Dem_MemMap.h"
-
 #if (DEM_PID_CLASS_NUMBER > 0u)
 /**
  * @brief         Get DemPidIdentifier information based on Pid Index
@@ -48,7 +45,6 @@ DEM_LOCAL_INLINE uint8 Dem_GetPidIdentifier(uint8 PidIndex)
     return Dem_GlobalConfigPtr->PBPidClass[PidIndex];
 }
 #endif
-
 /**
  * @brief         check Event Obd Related
  * @param[in]     EventId: Identification of an event by assigned EventId.
@@ -63,9 +59,6 @@ DEM_LOCAL_INLINE boolean Dem_CheckEventObdRelated(Dem_EventIdType EventId)
 {
     return (Dem_GetEventObdDTC(EventId) != DEM_OBD_DTC_INVALID_VALUE);
 }
-
-#define DEM_STOP_SEC_CODE
-#include "Dem_MemMap.h"
 
 #endif
 

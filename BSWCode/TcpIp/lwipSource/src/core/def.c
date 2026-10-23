@@ -66,6 +66,8 @@
 #if BYTE_ORDER == LITTLE_ENDIAN
 
 #if !defined(lwip_htons)
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Convert an u16_t from host- to network byte order.
  *
@@ -77,9 +79,13 @@ lwip_htons(u16_t n)
 {
   return PP_HTONS(n);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif /* lwip_htons */
 
 #if !defined(lwip_htonl)
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Convert an u32_t from host- to network byte order.
  *
@@ -91,11 +97,15 @@ lwip_htonl(u32_t n)
 {
   return PP_HTONL(n);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif /* lwip_htonl */
 
 #endif /* BYTE_ORDER == LITTLE_ENDIAN */
 
 #ifndef lwip_strnstr
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup sys_nonstandard
  * lwIP default implementation for strnstr() non-standard function.
@@ -116,9 +126,13 @@ lwip_strnstr(const char *buffer, const char *token, size_t n)
   }
   return NULL;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
 #ifndef lwip_strnistr
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup sys_nonstandard
  * lwIP default implementation for strnistr() non-standard function.
@@ -139,9 +153,13 @@ lwip_strnistr(const char *buffer, const char *token, size_t n)
   }
   return NULL;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
 #ifndef lwip_stricmp
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup sys_nonstandard
  * lwIP default implementation for stricmp() non-standard function.
@@ -174,9 +192,13 @@ lwip_stricmp(const char *str1, const char *str2)
   } while (c1 != 0);
   return 0;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
 #ifndef lwip_strnicmp
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup sys_nonstandard
  * lwIP default implementation for strnicmp() non-standard function.
@@ -210,9 +232,13 @@ lwip_strnicmp(const char *str1, const char *str2, size_t len)
   } while ((len != 0) && (c1 != 0));
   return 0;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
 #ifndef lwip_itoa
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup sys_nonstandard
  * lwIP default implementation for itoa() non-standard function.
@@ -260,4 +286,6 @@ lwip_itoa(char *result, size_t bufsize, int number)
   /* move from temporary buffer to output buffer (sign is not moved) */
   memmove(res, tmp, (size_t)((result + bufsize) - tmp));
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif

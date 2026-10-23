@@ -98,6 +98,11 @@
  */
 E2E_LOCAL void
     E2E_SMAddStatus(E2E_PCheckStatusType ProfileStatus, const E2E_SMConfigType* Config, E2E_SMCheckStateType* State);
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
+
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * @brief        initialize status when the next status is INVALID
  * @param[in]    Config : Pointer to static configuration.
@@ -107,6 +112,11 @@ E2E_LOCAL void
  * @trace         -
  */
 E2E_LOCAL void E2E_SMClearStatus(E2E_SMCheckStateType* State, const E2E_SMConfigType* Config);
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
+
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * @brief        initialize status depending on the next and current status
  * @param[in]    NextState : the next communication state.
@@ -118,6 +128,11 @@ E2E_LOCAL void E2E_SMClearStatus(E2E_SMCheckStateType* State, const E2E_SMConfig
  */
 E2E_LOCAL void
     E2E_SMClearRemainingStatus(E2E_SMCheckStateType* State, const E2E_SMConfigType* Config, E2E_SMStateType NextState);
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
+
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * @brief        verify inputs of E2E_SMCheck()
  * @param[in]     ProfileStatus : Profile-independent status of the reception on one single Data in one cycle.
@@ -137,6 +152,11 @@ E2E_LOCAL Std_ReturnType E2E_SMCheckVerifyInputs(
     E2E_PCheckStatusType        ProfileStatus,
     const E2E_SMConfigType*     ConfigPtr,
     const E2E_SMCheckStateType* StatePtr);
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
+
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * @brief        modify status when the next status is INVALID
  * @param[in]    ConfigPtr    : Pointer to static configuration.
@@ -146,6 +166,11 @@ E2E_LOCAL Std_ReturnType E2E_SMCheckVerifyInputs(
  * @trace         -
  */
 E2E_LOCAL void E2E_SMCheckStatusToInvalid(const E2E_SMConfigType* ConfigPtr, E2E_SMCheckStateType* StatePtr);
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
+
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * @brief         the handle of SMcheck when the status is NODATA.
  * @param[in]     ProfileStatus : Profile-independent status of the reception on one single Data in one cycle.
@@ -159,6 +184,11 @@ E2E_LOCAL void handleofNodata(
     E2E_PCheckStatusType    ProfileStatus,
     const E2E_SMConfigType* ConfigPtr,
     E2E_SMCheckStateType*   StatePtr);
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
+
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * @brief         the handle of SMcheck when the status is INIT.
  * @param[in]     ConfigPtr     : Pointer to static configuration.
@@ -189,6 +219,11 @@ void E2E_GetVersionInfo(Std_VersionInfoType* versionInfo) /*PRQA S 1503*/ /*VL_Q
         versionInfo->sw_patch_version = E2E_SW_PATCH_VERSION;
     }
 }
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
+
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * This service Checks the communication channel.
  */
@@ -242,6 +277,11 @@ Std_ReturnType E2E_SMCheck(
 
     return Ret;
 }
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
+
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * Initializes the state machine.
  */
@@ -283,7 +323,11 @@ Std_ReturnType E2E_SMCheckInit(E2E_SMCheckStateType* StatePtr, const E2E_SMConfi
     }
     return Ret;
 }
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
 /* ========================================== internal function definitions ========================================= */
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 E2E_LOCAL void
     E2E_SMAddStatus(E2E_PCheckStatusType ProfileStatus, const E2E_SMConfigType* Config, E2E_SMCheckStateType* State)
 {
@@ -336,7 +380,11 @@ E2E_LOCAL void
         State->WindowTopIndex++;
     }
 }
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
 
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 E2E_LOCAL void E2E_SMClearStatus(E2E_SMCheckStateType* State, const E2E_SMConfigType* Config)
 {
     uint8 index;
@@ -362,7 +410,11 @@ E2E_LOCAL void E2E_SMClearStatus(E2E_SMCheckStateType* State, const E2E_SMConfig
     State->ErrorCount     = 0u;
     State->WindowTopIndex = 0u;
 }
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
 
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 E2E_LOCAL void
     E2E_SMClearRemainingStatus(E2E_SMCheckStateType* State, const E2E_SMConfigType* Config, E2E_SMStateType NextState)
 {
@@ -396,13 +448,33 @@ E2E_LOCAL void
     }
     if (CurrentWindowSize < NextWindowSize)
     {
-        for (index = 0u; index < (CurrentWindowSize - 1u); index++)
+        uint8  latestIndex;
+        uint16 distance;
+        latestIndex = (State->WindowTopIndex == 0u) ? (NextWindowSize - 1u) : (State->WindowTopIndex - 1u);
+
+        for (index = 0u; index < NextWindowSize; index++)
         {
-            State->ProfileStatusWindow[index] = E2E_P_NOTAVAILABLE; /*PRQA S 2844*/ /*VL_E2E_NULLPointer*/
+            if (latestIndex >= index)
+            {
+                distance = (uint16)latestIndex - (uint16)index;
+            }
+            else
+            {
+                distance = ((uint16)NextWindowSize - (uint16)index) + (uint16)latestIndex;
+            }
+
+            if (distance >= CurrentWindowSize)
+            {
+                State->ProfileStatusWindow[index] = E2E_P_NOTAVAILABLE; /*PRQA S 2844*/ /*VL_E2E_NULLPointer*/
+            }
         }
     }
 }
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
 
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 E2E_LOCAL Std_ReturnType E2E_SMCheckVerifyInputs(
     E2E_PCheckStatusType        ProfileStatus,
     const E2E_SMConfigType*     ConfigPtr,
@@ -423,6 +495,11 @@ E2E_LOCAL Std_ReturnType E2E_SMCheckVerifyInputs(
     }
     return Ret;
 }
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
+
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 E2E_LOCAL void E2E_SMCheckStatusToInvalid(const E2E_SMConfigType* ConfigPtr, E2E_SMCheckStateType* StatePtr)
 {
     if (ConfigPtr->ClearToInvalid)
@@ -435,6 +512,11 @@ E2E_LOCAL void E2E_SMCheckStatusToInvalid(const E2E_SMConfigType* ConfigPtr, E2E
     }
     StatePtr->SMState = E2E_SM_INVALID;
 }
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
+
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 E2E_LOCAL void handleofNodata(
     E2E_PCheckStatusType    ProfileStatus,
     const E2E_SMConfigType* ConfigPtr,
@@ -459,18 +541,26 @@ E2E_LOCAL void handleofNodata(
         {
             if ((ProfileStatus != E2E_P_ERROR) && (ProfileStatus != E2E_P_NONEWDATA))
             {
+                E2E_SMClearStatus(StatePtr, ConfigPtr);
                 StatePtr->SMState = E2E_SM_INIT;
             }
         }
     }
     else
     {
+        E2E_SMAddStatus(ProfileStatus, ConfigPtr, StatePtr);
         if ((ProfileStatus != E2E_P_ERROR) && (ProfileStatus != E2E_P_NONEWDATA))
         {
+            E2E_SMClearStatus(StatePtr, ConfigPtr);
             StatePtr->SMState = E2E_SM_INIT;
         }
     }
 }
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
+
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 E2E_LOCAL void handleofInit(const E2E_SMConfigType* ConfigPtr, E2E_SMCheckStateType* StatePtr)
 {
     if ((StatePtr->ErrorCount <= ConfigPtr->MaxErrorStateInit) && (StatePtr->OkCount >= ConfigPtr->MinOkStateInit))

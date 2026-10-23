@@ -65,8 +65,14 @@
 #define TCPIP_VAR_RAW_PCBS(coreIndex)   g_raw_pcbs[(coreIndex)]
 
 /** The list of RAW PCBs */
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 static struct raw_pcb *g_raw_pcbs[TCPIP_MULTICORE_NUMBER];
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 static u8_t
 raw_input_local_match(struct raw_pcb *pcb, u8_t broadcast)
 {
@@ -115,7 +121,11 @@ raw_input_local_match(struct raw_pcb *pcb, u8_t broadcast)
 
   return 0;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Determine if in incoming IP packet is covered by a RAW PCB
  * and if so, pass it to a user-provided receive callback function.
@@ -203,7 +213,11 @@ raw_input(struct pbuf *p, struct netif *inp)
   }
   return ret;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup raw_raw
  * Bind a RAW PCB.
@@ -238,7 +252,11 @@ raw_bind(struct raw_pcb *pcb, const ip_addr_t *ipaddr)
 #endif /* LWIP_IPV6 && LWIP_IPV6_SCOPES */
   return ERR_OK;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup raw_raw
  * Bind an RAW PCB to a specific netif.
@@ -261,7 +279,11 @@ raw_bind_netif(struct raw_pcb *pcb, const struct netif *netif)
     pcb->netif_idx = NETIF_NO_INDEX;
   }
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup raw_raw
  * Connect an RAW PCB. This function is required by upper layers
@@ -295,7 +317,11 @@ raw_connect(struct raw_pcb *pcb, const ip_addr_t *ipaddr)
   raw_set_flags(pcb, RAW_FLAGS_CONNECTED);
   return ERR_OK;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup raw_raw
  * Disconnect a RAW PCB.
@@ -320,7 +346,11 @@ raw_disconnect(struct raw_pcb *pcb)
   /* mark PCB as unconnected */
   raw_clear_flags(pcb, RAW_FLAGS_CONNECTED);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup raw_raw
  * Set the callback function for received packets that match the
@@ -340,7 +370,11 @@ raw_recv(struct raw_pcb *pcb, raw_recv_fn recv, void *recv_arg)
   pcb->recv = recv;
   pcb->recv_arg = recv_arg;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup raw_raw
  * Send the raw IP packet to the given address. An IP header will be prepended
@@ -405,7 +439,11 @@ raw_sendto(struct raw_pcb *pcb, struct pbuf *p, const ip_addr_t *ipaddr)
 
   return raw_sendto_if_src(pcb, p, ipaddr, netif, src_ip);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup raw_raw
  * Send the raw IP packet to the given address, using a particular outgoing
@@ -536,7 +574,11 @@ raw_sendto_if_src(struct raw_pcb *pcb, struct pbuf *p, const ip_addr_t *dst_ip,
   }
   return err;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup raw_raw
  * Send the raw IP packet to the address given by raw_connect()
@@ -550,7 +592,11 @@ raw_send(struct raw_pcb *pcb, struct pbuf *p)
 {
   return raw_sendto(pcb, p, &pcb->remote_ip);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup raw_raw
  * Remove an RAW PCB.
@@ -582,7 +628,11 @@ raw_remove(struct raw_pcb *pcb)
   }
   memp_free(MEMP_RAW_PCB, pcb);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup raw_raw
  * Create a RAW PCB.
@@ -618,7 +668,11 @@ raw_new(u8_t proto)
   }
   return pcb;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup raw_raw
  * Create a RAW PCB for specific IP type.
@@ -650,7 +704,11 @@ raw_new_ip_type(u8_t type, u8_t proto)
 #endif /* LWIP_IPV4 && LWIP_IPV6 */
   return pcb;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /** This function is called from netif.c when address is changed
  *
  * @param old_addr IP address of the netif before change
@@ -671,5 +729,7 @@ void raw_netif_ip_addr_changed(const ip_addr_t *old_addr, const ip_addr_t *new_a
     }
   }
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #endif /* LWIP_RAW */

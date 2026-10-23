@@ -101,19 +101,63 @@ struct raw_pcb {
 
 /* The following functions is the application layer interface to the
    RAW code. */
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 struct raw_pcb * raw_new        (u8_t proto);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 struct raw_pcb * raw_new_ip_type(u8_t type, u8_t proto);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void             raw_remove     (struct raw_pcb *pcb);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t            raw_bind       (struct raw_pcb *pcb, const ip_addr_t *ipaddr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void             raw_bind_netif (struct raw_pcb *pcb, const struct netif *netif);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t            raw_connect    (struct raw_pcb *pcb, const ip_addr_t *ipaddr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void             raw_disconnect (struct raw_pcb *pcb);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t            raw_sendto     (struct raw_pcb *pcb, struct pbuf *p, const ip_addr_t *ipaddr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t            raw_sendto_if_src(struct raw_pcb *pcb, struct pbuf *p, const ip_addr_t *dst_ip, struct netif *netif, const ip_addr_t *src_ip);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t            raw_send       (struct raw_pcb *pcb, struct pbuf *p);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void             raw_recv       (struct raw_pcb *pcb, raw_recv_fn recv, void *recv_arg);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #define          raw_flags(pcb) ((pcb)->flags)
 #define          raw_setflags(pcb,f)  ((pcb)->flags = (f))

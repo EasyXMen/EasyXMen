@@ -42,17 +42,22 @@
 #define DEM_DCM_EXTENDEDDATARECORD_INVALID      (0x00u) /**< Invalid extended record */
 #define DEM_DCM_EXTENDEDDATARECORD_FIRST        (0x01u) /**< The first valid extended record */
 #define DEM_DCM_EXTENDEDDATARECORD_LAST_PRIMARY (0xEFu) /**< The last valid extended record for primary memory */
-#define DEM_DCM_EXTENDEDDATARECORD_LAST_USER    (0xFEu) /**< The last valid extended record for user defined memory */
-#define DEM_DCM_EXTENDEDDATARECORD_FIRST_OBD    (0x90u) /**< The first valid OBD extended record */
-#define DEM_DCM_EXTENDEDDATARECORD_LAST_OBD     (0x9Fu) /**< The last valid extended record */
-#define DEM_DCM_EXTENDEDDATARECORD_OBD          (0xFEu) /**< Select all OBD records */
-#define DEM_DCM_EXTENDEDDATARECORD_ALL          (0xFFu) /**< Select all extended records */
+#define DEM_DCM_EXTENDEDDATARECORD_LAST_USER \
+    (0xFEu) /**< The last valid extended record for user defined memory */ /* PRQA S 0791 */ /* VL_Dem_0791 */
+#define DEM_DCM_EXTENDEDDATARECORD_FIRST_OBD \
+    (0x90u) /**< The first valid OBD extended record */ /* PRQA S 0791 */ /* VL_Dem_0791 */
+#define DEM_DCM_EXTENDEDDATARECORD_LAST_OBD \
+    (0x9Fu) /**< The last valid extended record */ /* PRQA S 0791 */ /* VL_Dem_0791 */
+#define DEM_DCM_EXTENDEDDATARECORD_OBD (0xFEu)                       /**< Select all OBD records */
+#define DEM_DCM_EXTENDEDDATARECORD_ALL (0xFFu)                       /**< Select all extended records */
 /** @} */
 
 #define DEM_DTC_ORIGIN_USER ((Dem_DTCOriginType)(0x0100u))
 
 /* ========================================== internal function declarations ======================================== */
 #if (DEM_GENERAL_ED_TRIGGER_ON_PASSED == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Process extended data triggers on 'Passed' status report.
  * @param[in]     EventContext: The event context
@@ -61,7 +66,11 @@
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_ExtendedDataPassedUpdate(Dem_EventContextType* EventContext);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Copy environmental data via ED
@@ -75,6 +84,10 @@ DEM_LOCAL void Dem_ExtendedDataPassedUpdate(Dem_EventContextType* EventContext);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL boolean Dem_DataReportCopyED(Dem_DataInfoConstPtrType DataInfoPtr, Dem_EDRecordRefNumType CfgEDIndex);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Copy a record into the given buffer
@@ -96,8 +109,12 @@ DEM_LOCAL Std_ReturnType Dem_DataReportCopyExtendedDataRecord(
     Dem_EDRecordRefNumType       CfgEDIndex,
     Dem_NvBlockNumType           MemoryIndex,
     Dem_DestinationBufferPtrType DestinationBuffer);
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_FEATURE_SWC_GET_FF_ED == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
+
 /**
  * @brief         Extract an extended data record for an event
  * @param[in]     EventId: Event ID
@@ -114,6 +131,10 @@ DEM_LOCAL Std_ReturnType Dem_DataReportCopyExtendedDataRecord(
  */
 DEM_LOCAL Std_ReturnType
     Dem_EnvDataCopyED(Dem_EventIdType EventId, uint8 RecordNumber, Dem_DestinationBufferPtrType DestinationBuffer);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Implementaion of SWC API Dem_GetEventExtendedDataRecordEx().
@@ -135,13 +156,14 @@ DEM_LOCAL Std_ReturnType Dem_EnvDataSwcApiGetEventExtendedDataEx(
     uint8           RecordNumber,
     uint8*          DestBuffer,
     uint16*         BufSize);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 /* ========================================== internal function definitions ========================================= */
+#if (DEM_GENERAL_ED_TRIGGER_ON_PASSED == STD_ON)
 #define DEM_START_SEC_CODE
 #include "Dem_MemMap.h"
-
-#if (DEM_GENERAL_ED_TRIGGER_ON_PASSED == STD_ON)
 /**
  * @brief Process extended data triggers on 'Passed' status report.
  */
@@ -173,8 +195,11 @@ DEM_LOCAL void Dem_ExtendedDataPassedUpdate(Dem_EventContextType* EventContext)
         }
     }
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Copy environmental data via ED
  */
@@ -194,13 +219,16 @@ DEM_LOCAL boolean Dem_DataReportCopyED(Dem_DataInfoConstPtrType DataInfoPtr, Dem
         }
     }
 #else
-    DEM_UNUSED_PARAM(DataInfoPtr);
-    DEM_UNUSED_PARAM(CfgEDIndex);
+    DEM_PARAM_UNUSED(DataInfoPtr);
+    DEM_PARAM_UNUSED(CfgEDIndex);
     ret = FALSE;
 #endif
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Copy a record into the given buffer
  */
@@ -225,7 +253,7 @@ DEM_LOCAL Std_ReturnType Dem_DataReportCopyExtendedDataRecord(
         if (Dem_GetHaveUserDataOfEDRC(CfgEDIndex) == TRUE)
         {
 #if (DEM_MAX_SIZE_EXTENDED_DATA > 0u)
-            sourceBuffer = Dem_GetExtendedDataPtrOfMemEntryByEntryIndex(MemoryIndex, CfgEDIndex, ExtendedEntryIndex);
+            sourceBuffer = Dem_GetExtendedDataPtrOfMemEntry(MemoryIndex, ExtendedEntryIndex);
 #else
             DEM_PARAM_UNUSED(ExtendedEntryIndex);
 #endif
@@ -243,8 +271,11 @@ DEM_LOCAL Std_ReturnType Dem_DataReportCopyExtendedDataRecord(
     }
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_FEATURE_SWC_GET_FF_ED == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Extract an extended data record for an event
  */
@@ -257,7 +288,8 @@ DEM_LOCAL Std_ReturnType
     Dem_EDRefNumType       lEDRef   = Dem_GetEDRefOfDTCAttr(lDTCAttr);
     Dem_EDRecordRefNumType lEDRNStart;
     Dem_EDRecordRefNumType lEDRNEnd;
-    Dem_EDRecordRefNumType cfgEDIndex = 0u;
+    Dem_EDRecordRefNumType cfgEDIndex         = 0u;
+    uint8                  extendedEntryIndex = 0u;
 
     if (lEDRef != DEM_ATTRI_INVALID_EXTENDDATA)
     {
@@ -277,6 +309,7 @@ DEM_LOCAL Std_ReturnType
         {
             break;
         }
+        extendedEntryIndex++;
     }
 
     if (lEDRNStart < lEDRNEnd)
@@ -297,7 +330,7 @@ DEM_LOCAL Std_ReturnType
                 if (updateState == FALSE)
                 {
                     /** Supported record, test if it is currently stored */
-                    if (Dem_CheckEDStored(memoryIndex, 0u) == TRUE)
+                    if (Dem_CheckEDStored(memoryIndex, extendedEntryIndex) == TRUE)
                     {
                         /** The DTC has an event entry, but the requested record was not yet stored */
                         DestinationBuffer->WriteIndex = 0u;
@@ -308,7 +341,7 @@ DEM_LOCAL Std_ReturnType
                         /** This call does not currently interrupt a concurrent data update */
                         ret = Dem_DataReportCopyExtendedDataRecord(
                             EventId,
-                            0u,
+                            extendedEntryIndex,
                             cfgEDIndex,
                             memoryIndex,
                             DestinationBuffer);
@@ -343,11 +376,10 @@ DEM_LOCAL Std_ReturnType
     }
     return ret;
 }
-/* PRQA S 6030 -- */
-#endif
-
 #define DEM_STOP_SEC_CODE
 #include "Dem_MemMap.h"
+/* PRQA S 6030 -- */
+#endif
 #endif
 
 #if (DEM_FEATURE_SWC_GET_FF_ED == STD_ON)

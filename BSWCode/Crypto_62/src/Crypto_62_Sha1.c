@@ -22,16 +22,14 @@
  **
  ***********************************************************************************************************************/
 
-/* PRQA S 0314,0488,0842,1253,1255,1277,1281,1290,1338,1840,1841 EOF */ /* VL_Crypto_62_General */
-/* PRQA S 1842,1843,1863,2001,2015,2216,3120,3132,3138,3226,3417 EOF */ /* VL_Crypto_62_General */
-/* PRQA S 3440,3446,3472,3473,3493,4542,4559,4558,1252,3387,3397 EOF */ /* VL_Crypto_62_General */
-/* PRQA S 3400,3412,3678,4115,4544,0553 EOF */                          /* VL_Crypto_62_General */
+/* PRQA S 0314,0488,0842,1253,1255,1277,1281,1290,1338,1840,1841 EOF */ /* VL_QAC_Crypto */
+/* PRQA S 1842,1843,1863,2001,2015,2216,3120,3132,3138,3226,3417 EOF */ /* VL_QAC_Crypto */
+/* PRQA S 3440,3446,3472,3473,3493,4542,4559,4558,1252,3387,3397 EOF */ /* VL_QAC_Crypto */
+/* PRQA S 3400,3412,3678,4115,4544,0553 EOF */                          /* VL_QAC_Crypto */
 /* =================================================== inclusions =================================================== */
 #include "Crypto_62_Internal.h"
 #if (CRYPTO_ALGORITHMFAM_SHA1 == STD_ON)
 #include "Crypto_62_Sha1.h"
-#define CRYPTO_62_START_SEC_CODE
-#include "Crypto_62_MemMap.h"
 
 /* ===================================================== macros ===================================================== */
 
@@ -54,6 +52,8 @@
  * Return              None
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_Sha1_Starts(Crypto_Sha1_Context* ctx)
 {
     ctx->total[0] = 0;
@@ -65,6 +65,8 @@ void Crypto_Sha1_Starts(Crypto_Sha1_Context* ctx)
     ctx->state[3] = 0x10325476U;
     ctx->state[4] = 0xC3D2E1F0U;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -78,6 +80,8 @@ void Crypto_Sha1_Starts(Crypto_Sha1_Context* ctx)
  *                                     E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Internal_Sha1_Process(Crypto_Sha1_Context* ctx, const unsigned char data[64])
 {
     struct
@@ -240,6 +244,8 @@ Std_ReturnType Crypto_Internal_Sha1_Process(Crypto_Sha1_Context* ctx, const unsi
     /* Zeroise buffers and variables to clear sensitive data from memory. */
     return E_OK;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -256,15 +262,17 @@ Std_ReturnType Crypto_Internal_Sha1_Process(Crypto_Sha1_Context* ctx, const unsi
  *                                     E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Sha1_Update(Crypto_Sha1_Context* ctx, const unsigned char* input, uint32 ilen)
 {
-    Std_ReturnType ret = E_NOT_OK;
+    Std_ReturnType ret = E_OK;
     uint32         fill;
     uint32         left;
 
     if (ilen == 0)
     {
-        return E_NOT_OK;
+        goto exit;
     }
 
     left = ctx->total[0] & 0x3F;
@@ -284,7 +292,7 @@ Std_ReturnType Crypto_Sha1_Update(Crypto_Sha1_Context* ctx, const unsigned char*
         ret = Crypto_Internal_Sha1_Process(ctx, ctx->buffer);
         if (ret != E_OK)
         {
-            return ret;
+            goto exit;
         }
 
         input += fill;
@@ -297,7 +305,7 @@ Std_ReturnType Crypto_Sha1_Update(Crypto_Sha1_Context* ctx, const unsigned char*
         ret = Crypto_Internal_Sha1_Process(ctx, input);
         if (ret != E_OK)
         {
-            return ret;
+            goto exit;
         }
 
         input += 64;
@@ -309,8 +317,11 @@ Std_ReturnType Crypto_Sha1_Update(Crypto_Sha1_Context* ctx, const unsigned char*
         (void)IStdLib_MemCpy((void*)(ctx->buffer + left), input, ilen);
     }
 
-    return E_OK;
+exit:
+    return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -326,6 +337,8 @@ Std_ReturnType Crypto_Sha1_Update(Crypto_Sha1_Context* ctx, const unsigned char*
  *                                     E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Sha1_Finish(Crypto_Sha1_Context* ctx, unsigned char output[20])
 {
     Std_ReturnType ret = E_NOT_OK;
@@ -385,7 +398,22 @@ Std_ReturnType Crypto_Sha1_Finish(Crypto_Sha1_Context* ctx, unsigned char output
 exit:
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+void Crypto_sha1_free(Crypto_Sha1_Context* ctx)
+{
+    if (ctx == NULL_PTR)
+    {
+        return;
+    }
+
+    (void)IStdLib_MemSet(ctx, 0, sizeof(Crypto_Sha1_Context));
+}
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 /******************************************************************************/
 /*
  * Brief               This function calculates the SHA-1 checksum of a buffer.
@@ -403,6 +431,8 @@ exit:
  *                                     E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Sha1(const unsigned char* input, uint32 ilen, unsigned char output[20])
 {
     Std_ReturnType      ret = E_NOT_OK;
@@ -420,6 +450,8 @@ Std_ReturnType Crypto_Sha1(const unsigned char* input, uint32 ilen, unsigned cha
 
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 /******************************************************************************/
 /*
  * Brief               This function calculates the SHA-1 checksum and output result.
@@ -431,6 +463,8 @@ Std_ReturnType Crypto_Sha1(const unsigned char* input, uint32 ilen, unsigned cha
  *                                     E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Sha1_Process(uint32 objectId)
 {
     Std_ReturnType ret = E_NOT_OK;
@@ -439,11 +473,12 @@ Std_ReturnType Crypto_Sha1_Process(uint32 objectId)
     uint32  ilen = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputLength;
     uint32* olen = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr;
 
-    /* PRQA S 0311 ++ */ /*VL_Crypto_62_General */
+    /* PRQA S 0311 ++ */ /*VL_QAC_0311 */
     uint8* input = (uint8*)(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputPtr);
     /* PRQA S 0311 -- */
 
     ret = Crypto_Sha1(input, ilen, output);
+
     if (*olen >= CRYPTO_CONST_20 && ret == E_OK)
     {
         (void)IStdLib_MemCpy(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr, output, CRYPTO_CONST_20);

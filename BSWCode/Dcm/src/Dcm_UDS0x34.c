@@ -35,6 +35,8 @@
  */
 #define DCM_UDS34_MINREQLEN 4u
 /* ========================================== internal function declarations ======================================== */
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         check general conditions for UDS 0x34
  * @param[inout]  pMsgContext      : Message-related information for one diagnostic protocol identifier. The pointers in
@@ -58,6 +60,8 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x34_ConditionCheck(
     uint32*                       memorySize,
     uint8*                        memoryIdentifier,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 /* ========================================== external function definitions ========================================= */
 #define DCM_START_SEC_CODE
 #include "Dcm_MemMap.h"

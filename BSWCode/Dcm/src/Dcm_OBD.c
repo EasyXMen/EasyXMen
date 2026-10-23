@@ -35,25 +35,27 @@
 /**
  * @brief the length of tid and tid available data
  */
-#define DCM_TID_LEN 5u
+#define DCM_TID_LEN               5u
 /**
  * @brief the length of pid and pid available data
  */
-#define DCM_PID_LEN 5u
+#define DCM_PID_LEN               5u
 /**
  * @brief the length of mid and mid available data
  */
-#define DCM_MID_LEN 5u
+#define DCM_MID_LEN               5u
 /**
  * @brief the length of mid data
  */
-#define DCM_MID_DATALEN 9u
+#define DCM_MID_DATALEN           9u
 /**
  * @brief the length of vehInfo and vehInfo available data
  */
-#define DCM_VEHINFO_LEN 5u
+#define DCM_VEHINFO_LEN           5u
 /* ========================================== internal function declarations ======================================== */
 #if ((STD_ON == DCM_OBD_0X9) || ((STD_ON == DCM_UDS_0X22) && (STD_ON == DCM_OBD_DID_MIRROR)))
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         Called by Dcm_OBD0x09 to find vehInfo index
  * @param[in]     infoType     : input infoType
@@ -66,8 +68,12 @@
  * @trace         CPD-PLACEHOLDE
  */
 DCM_LOCAL Std_ReturnType Dcm_OBD0x09_FindVehInfo(uint8 infoType, uint8* vehInfoIndex);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 #if ((STD_ON == DCM_OBD_0X1) || ((STD_ON == DCM_UDS_0X22) && (STD_ON == DCM_OBD_DID_MIRROR)))
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         read availability Pid
  * @param[in]     Pid           : input pid
@@ -91,8 +97,12 @@ DCM_LOCAL Std_ReturnType Dcm_OBD0x01_ReadAvailabilityPid(
     uint8           availPidIndex,
     Dcm_MsgLenType* BufSize,
     uint8*          DestBuffer);
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if (DCM_PID_NUM > 0u)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
+
 /**
  * @brief         read Pid Data
  * @param[in]     pidIndex   : input pid configuration index
@@ -111,6 +121,10 @@ DCM_LOCAL Std_ReturnType Dcm_OBD0x01_ReadAvailabilityPid(
  */
 DCM_LOCAL Std_ReturnType
     Dcm_OBD0x01_ReadPidData(uint8 pidIndex, uint8* mixPid, Dcm_MsgLenType* BufSize, uint8* DestBuffer);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         process Pid Data
@@ -128,10 +142,14 @@ DCM_LOCAL Std_ReturnType
  */
 DCM_LOCAL Std_ReturnType
     Dcm_OBD0x01_ProcessPidData(const Dcm_DspPidType* DcmDspPidPtr, Dcm_MsgLenType* BufSize, uint8* DestBuffer);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 #endif
 
 #if ((STD_ON == DCM_OBD_0X6) || ((STD_ON == DCM_UDS_0X22) && (STD_ON == DCM_OBD_DID_MIRROR)))
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         read availability Mid
  * @param[in]     mid           : input mid
@@ -150,6 +168,10 @@ DCM_LOCAL Std_ReturnType
  */
 DCM_LOCAL Std_ReturnType
     Dcm_OBD0x06_ReadAvailabilityMid(uint8 mid, uint8* mixMid, Dcm_MsgLenType* BufSize, uint8* DestBuffer);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         read Mid Data
@@ -170,6 +192,10 @@ DCM_LOCAL Std_ReturnType
  */
 DCM_LOCAL Std_ReturnType
     Dcm_OBD0x06_ReadMidData(uint8 mid, uint8* mixMid, uint8 numberOfTIDs, Dcm_MsgLenType* BufSize, uint8* DestBuffer);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         process Mid Data
@@ -188,9 +214,13 @@ DCM_LOCAL Std_ReturnType
  */
 DCM_LOCAL Std_ReturnType
     Dcm_OBD0x06_ProcessMidData(uint8 mid, uint8 numberOfTIDs, Dcm_MsgLenType* BufSize, uint8* DestBuffer);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #if ((STD_ON == DCM_OBD_0X8) || ((STD_ON == DCM_UDS_0X31) && (STD_ON == DCM_OBD_RID_MIRROR)))
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         read availability Tid
  * @param[in]     tid           : input tid
@@ -214,6 +244,10 @@ DCM_LOCAL Std_ReturnType Dcm_OBD0x08_ReadAvailabilityTid(
     uint8           availTidIndex,
     Dcm_MsgLenType* BufSize,
     uint8*          DestBuffer);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         read Tid Data
@@ -242,8 +276,12 @@ DCM_LOCAL Std_ReturnType Dcm_OBD0x08_ReadTidData(
     uint8*                        InBuffer,
     Dcm_MsgLenType                InBufferSize,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 #if ((STD_ON == DCM_OBD_0X9) || ((STD_ON == DCM_UDS_0X22) && (STD_ON == DCM_OBD_DID_MIRROR)))
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         read availability vehInfo
  * @param[in]     infoType           : input infoType
@@ -267,6 +305,10 @@ DCM_LOCAL Std_ReturnType Dcm_OBD0x09_ReadAvailabilityVehInfo(
     uint8*          MixInfoType,
     Dcm_MsgLenType* BufSize,
     uint8*          DestBuffer);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         read vehInfo Data
@@ -294,6 +336,10 @@ DCM_LOCAL Std_ReturnType Dcm_OBD0x09_ReadVehInfoData(
     Dcm_MsgLenType*               BufSize,
     uint8*                        DestBuffer,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         process vehInfo Data
@@ -321,6 +367,8 @@ DCM_LOCAL Std_ReturnType Dcm_OBD0x09_ProcessVehInfoData(
     Dcm_MsgLenType*               BufSize,
     uint8*                        DestBuffer,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 /* ========================================== external function definitions ========================================= */
 #if ((STD_ON == DCM_OBD_0X3) || (STD_ON == DCM_OBD_0X7) || (STD_ON == DCM_OBD_0XA))
@@ -777,7 +825,10 @@ Std_ReturnType Dcm_OBD0x01_ReadPidData(uint8 pidIndex, uint8* mixPid, Dcm_MsgLen
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL Std_ReturnType
     Dcm_OBD0x01_ProcessPidData(const Dcm_DspPidType* DcmDspPidPtr, Dcm_MsgLenType* BufSize, uint8* DestBuffer)
 {
@@ -866,7 +917,10 @@ Std_ReturnType Dcm_OBD0x06_ReadAvailabilityMid(uint8 mid, uint8* mixMid, Dcm_Msg
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL Std_ReturnType
     Dcm_OBD0x06_ReadMidData(uint8 mid, uint8* mixMid, uint8 numberOfTIDs, Dcm_MsgLenType* BufSize, uint8* DestBuffer)
 {
@@ -907,9 +961,12 @@ DCM_LOCAL Std_ReturnType
 
     return result;
 }
-
-DCM_LOCAL Std_ReturnType
-    Dcm_OBD0x06_ProcessMidData(uint8 mid, uint8 numberOfTIDs, Dcm_MsgLenType* BufSize, uint8* DestBuffer)
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
+DCM_LOCAL
+Std_ReturnType Dcm_OBD0x06_ProcessMidData(uint8 mid, uint8 numberOfTIDs, Dcm_MsgLenType* BufSize, uint8* DestBuffer)
 {
     Std_ReturnType result = E_OK;
     /* iterate over TID to get DTR Data */
@@ -1003,7 +1060,10 @@ DCM_LOCAL Std_ReturnType Dcm_OBD0x08_ReadAvailabilityTid(
     return E_NOT_OK;
 #endif
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL Std_ReturnType Dcm_OBD0x08_ReadTidData(
     uint8                         tidIndex,
     uint8*                        MixTid,
@@ -1126,7 +1186,10 @@ DCM_LOCAL Std_ReturnType Dcm_OBD0x09_ReadAvailabilityVehInfo(
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL Std_ReturnType Dcm_OBD0x09_ReadVehInfoData(
     Dcm_ExtendedOpStatusType      OpStatus,
     uint8                         vehInfoIndex,
@@ -1172,7 +1235,10 @@ DCM_LOCAL Std_ReturnType Dcm_OBD0x09_ReadVehInfoData(
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL Std_ReturnType Dcm_OBD0x09_ProcessVehInfoData(
     Dcm_ExtendedOpStatusType      OpStatus,
     const Dcm_DspVehInfoType*     vehInfo,

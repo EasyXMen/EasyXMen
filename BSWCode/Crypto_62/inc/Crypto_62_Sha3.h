@@ -48,8 +48,17 @@ CRYPTO_62_LOCAL const uint8 iota_r_packed[24] = {
 
 #define BYTE_XOR 0x6
 
-CRYPTO_62_LOCAL const uint32 pi[6]  = {0x110b070a, 0x10050312, 0x04181508, 0x0d13170f, 0x0e14020c, 0x01060916};
+#define CRYPTO_62_START_SEC_CONST_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
+CRYPTO_62_LOCAL const uint32 pi[6] = {0x110b070a, 0x10050312, 0x04181508, 0x0d13170f, 0x0e14020c, 0x01060916};
+#define CRYPTO_62_STOP_SEC_CONST_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
+
+#define CRYPTO_62_START_SEC_CONST_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL const uint32 rho[6] = {0x3f022425, 0x1c143a09, 0x2c3d3615, 0x27191713, 0x312b382e, 0x3e030832};
+#define CRYPTO_62_STOP_SEC_CONST_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
 
 #define ABSORB(ctx, idx, v)                                              \
     do                                                                   \
@@ -103,7 +112,11 @@ typedef enum
  * @param[in]  id   The SHA-3 variant identifier (e.g., CRYPTO_SHA3_224, CRYPTO_SHA3_256, CRYPTO_SHA3_384,
  * CRYPTO_SHA3_512).
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_Sha3_Starts(Crypto_Sha3_Context* ctx, Crypto_Sha3_Id id);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Updates the SHA-3 context with a new block of data.
@@ -119,7 +132,11 @@ void Crypto_Sha3_Starts(Crypto_Sha3_Context* ctx, Crypto_Sha3_Id id);
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Sha3_Update(Crypto_Sha3_Context* ctx, const uint8* input, uint32 ilen);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Finalizes the SHA-3 hash computation.
@@ -134,7 +151,11 @@ Std_ReturnType Crypto_Sha3_Update(Crypto_Sha3_Context* ctx, const uint8* input, 
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Sha3_Finish(Crypto_Sha3_Context* ctx, uint8* output, uint32 olen);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Computes the SHA-3 hash of a given input data.
@@ -153,7 +174,11 @@ Std_ReturnType Crypto_Sha3_Finish(Crypto_Sha3_Context* ctx, uint8* output, uint3
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Sha3(Crypto_Sha3_Id id, const uint8* input, uint32 ilen, uint8* output, uint32* olen);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Processes the SHA-3 hash computation for a given object ID.
@@ -169,7 +194,17 @@ Std_ReturnType Crypto_Sha3(Crypto_Sha3_Id id, const uint8* input, uint32 ilen, u
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Sha3_Process(uint32 objectId, Crypto_Sha3_Id Id);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+void Crypto_sha3_free(Crypto_Sha3_Context* ctx);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 #ifdef __cplusplus
 }

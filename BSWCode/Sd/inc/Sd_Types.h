@@ -298,7 +298,7 @@ typedef struct Sd_SdBlocklistedVersionTag
 typedef struct Sd_ClientServiceTypeTag
 {
     /*@req <ECUC_SD_00141> */
-    Sd_BlocklistedVersionType* SdBlocklistedVersions; /**< Collection of blocklisted versions. @range NA */
+    const Sd_BlocklistedVersionType* SdBlocklistedVersions; /**< Collection of blocklisted versions. @range NA */
     uint32 SdBlocklistedMinorVersionNum; /**< Minor version number of the blocklisted version. @range 0..0xffffffff */
 
     /*@req <ECUC_SD_00071> */
@@ -493,9 +493,9 @@ typedef struct Sd_SoAdSoConTypeTag
  */
 typedef struct Sd_ServiceGroupTypeTag
 {
-    uint16* ServerServiceRefPtr; /**< Contains all ServerServices associated with the ServiceGroup. @range NA */
+    const uint16* ServerServiceRefPtr; /**< Contains all ServerServices associated with the ServiceGroup. @range NA */
 
-    uint16* ClientServiceRefPtr; /**< Contains all ClientServices associated with the ServiceGroup. @range NA */
+    const uint16* ClientServiceRefPtr; /**< Contains all ClientServices associated with the ServiceGroup. @range NA */
 
     /*@req <ECUC_SD_00135> */
     Sd_ServiceGroupIdType

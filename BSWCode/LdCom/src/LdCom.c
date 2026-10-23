@@ -32,6 +32,7 @@
 #if (STD_ON == LDCOM_SUPPORT_MULTIPLE_PARTITION)
 #include "Os.h"
 #endif
+#include "LdCom_Arti.h"
 
 /* ===================================================== macros ===================================================== */
 
@@ -64,15 +65,38 @@ LDCOM_LOCAL const LdCom_ConfigType* LdCom_CfgPtr;
 /* ========================================= internal function declarations ========================================= */
 
 #if (STD_ON == LDCOM_SUPPORT_MULTIPLE_PARTITION)
+#define LDCOM_START_SEC_CODE
+#include "LdCom_MemMap.h"
 LDCOM_LOCAL uint8 LdCom_GetPartitionIndex(void);
+#define LDCOM_STOP_SEC_CODE
+#include "LdCom_MemMap.h"
 #endif
 
 #if (STD_ON == LDCOM_DEV_ERROR_DETECT)
+#define LDCOM_START_SEC_CODE
+#include "LdCom_MemMap.h"
 LDCOM_LOCAL boolean LdCom_DetCheckInitStatus(uint8 apiId);
+#define LDCOM_STOP_SEC_CODE
+#include "LdCom_MemMap.h"
+
+#define LDCOM_START_SEC_CODE
+#include "LdCom_MemMap.h"
 LDCOM_LOCAL boolean LdCom_DetCheckParaPointer(uint8 apiId, const void* parameterPtr);
+#define LDCOM_STOP_SEC_CODE
+#include "LdCom_MemMap.h"
+
+#define LDCOM_START_SEC_CODE
+#include "LdCom_MemMap.h"
 LDCOM_LOCAL boolean LdCom_DetCheckPduId(uint8 apiId, PduIdType pduId, PduIdType ldComPduId, boolean checkPartition);
+#define LDCOM_STOP_SEC_CODE
+#include "LdCom_MemMap.h"
+
 #if (STD_ON == LDCOM_SUPPORT_MULTIPLE_PARTITION)
+#define LDCOM_START_SEC_CODE
+#include "LdCom_MemMap.h"
 LDCOM_LOCAL boolean LdCom_DetCheckPartitionId(uint8 apiId, uint8 partIndex);
+#define LDCOM_STOP_SEC_CODE
+#include "LdCom_MemMap.h"
 #endif
 #endif
 
@@ -85,6 +109,8 @@ LDCOM_LOCAL boolean LdCom_DetCheckPartitionId(uint8 apiId, uint8 partIndex);
  */
 void LdCom_Init(const LdCom_ConfigType* config) /* PRQA S 1503 */ /* VL_QAC_NoUsedApi */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LdCom, 0, Bsw_Start, 2, 0x01, config);
+
 #if (STD_ON == LDCOM_SUPPORT_MULTIPLE_PARTITION)
     uint8 partIndex = LdCom_GetPartitionIndex();
 #endif
@@ -107,13 +133,21 @@ void LdCom_Init(const LdCom_ConfigType* config) /* PRQA S 1503 */ /* VL_QAC_NoUs
             LdCom_CfgPtr = config;
         }
     }
-}
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LdCom, 0, Bsw_Return, 1, 0x01);
+}
+#define LDCOM_STOP_SEC_CODE
+#include "LdCom_MemMap.h"
+
+#define LDCOM_START_SEC_CODE
+#include "LdCom_MemMap.h"
 /**
  * Deinitialize internal variables of the LdCom module. LdCom module has been switch to uninitialized state.
  */
 void LdCom_DeInit(void) /* PRQA S 1503 */ /* VL_QAC_NoUsedApi */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LdCom, 0, Bsw_Start, 1, 0x02);
+
 #if (STD_ON == LDCOM_SUPPORT_MULTIPLE_PARTITION)
     uint8 partIndex = LdCom_GetPartitionIndex();
 #endif
@@ -133,14 +167,22 @@ void LdCom_DeInit(void) /* PRQA S 1503 */ /* VL_QAC_NoUsedApi */
         LdCom_InitStatus = FALSE;
 #endif
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LdCom, 0, Bsw_Return, 1, 0x02);
 }
+#define LDCOM_STOP_SEC_CODE
+#include "LdCom_MemMap.h"
 
 #if (STD_ON == LDCOM_VERSION_INFO_API)
+#define LDCOM_START_SEC_CODE
+#include "LdCom_MemMap.h"
 /**
  * Set the members of versioninfo
  */
 void LdCom_GetVersionInfo(Std_VersionInfoType* versioninfo) /* PRQA S 1503 */ /* VL_QAC_NoUsedApi */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LdCom, 0, Bsw_Start, 2, 0x03, versioninfo);
+
 #if (STD_ON == LDCOM_DEV_ERROR_DETECT)
     if (LdCom_DetCheckParaPointer(LDCOM_SERVICE_ID_GETVERSIONINFO, versioninfo))
 #endif
@@ -151,9 +193,15 @@ void LdCom_GetVersionInfo(Std_VersionInfoType* versioninfo) /* PRQA S 1503 */ /*
         versioninfo->sw_minor_version = LDCOM_SW_MINOR_VERSION;
         versioninfo->sw_patch_version = LDCOM_SW_PATCH_VERSION;
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LdCom, 0, Bsw_Return, 1, 0x03);
 }
+#define LDCOM_STOP_SEC_CODE
+#include "LdCom_MemMap.h"
 #endif
 
+#define LDCOM_START_SEC_CODE
+#include "LdCom_MemMap.h"
 /**
  * Users transmit signal.
  * 1.Use the Id ("id" parameter in the call) to look-up the correct LdComIPdu in the LdCom configuration.
@@ -164,6 +212,8 @@ void LdCom_GetVersionInfo(Std_VersionInfoType* versioninfo) /* PRQA S 1503 */ /*
 Std_ReturnType LdCom_Transmit(PduIdType Id, const PduInfoType* PduInfoPtr)
 /* PRQA S 1503,1532 --*/
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LdCom, 0, Bsw_Start, 3, 0x49, Id, PduInfoPtr);
+
     Std_ReturnType ret     = E_NOT_OK;
     PduIdType      ldComId = Id;
 
@@ -187,6 +237,9 @@ Std_ReturnType LdCom_Transmit(PduIdType Id, const PduInfoType* PduInfoPtr)
             /* PRQA S 2814, 2824 -- */
         }
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LdCom, 0, Bsw_Return, 2, 0x49, ret);
+
     return ret;
 }
 #define LDCOM_STOP_SEC_CODE
@@ -203,8 +256,9 @@ BufReq_ReturnType
     LdCom_CopyTxData(PduIdType id, const PduInfoType* info, const RetryInfoType* retry, PduLengthType* availableDataPtr)
 /* PRQA S 1503 -- */
 {
-    BufReq_ReturnType ret     = BUFREQ_E_NOT_OK;
-    PduIdType         ldComId = id;
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LdCom, 0, Bsw_Start, 5, 0x43, id, info, retry, availableDataPtr);
+
+    BufReq_ReturnType ret = BUFREQ_E_NOT_OK;
 
 #if (STD_ON == LDCOM_DEV_ERROR_DETECT)
     if (LdCom_DetCheckInitStatus(LDCOM_SERVICE_ID_COPYTXDATA)
@@ -213,6 +267,9 @@ BufReq_ReturnType
         && LdCom_DetCheckParaPointer(LDCOM_SERVICE_ID_COPYTXDATA, availableDataPtr))
 #endif
     {
+#if (STD_ON == LDCOM_SUPPORT_SEND_TP)
+        PduIdType ldComId = id;
+
 #if (STD_ON == LDCOM_SUPPORT_POST_BUILD)
         ldComId = LdCom_GetIpduIdFromUserId(id, LdCom_CfgPtr->UserIdMapLdComIPduIdPtr);
 #if (STD_ON == LDCOM_DEV_ERROR_DETECT)
@@ -220,7 +277,6 @@ BufReq_ReturnType
 #endif
 #endif
         {
-#if (STD_ON == LDCOM_SUPPORT_SEND_TP)
             /* PRQA S 2824 ++ */ /* VL_QAC_DerefNullPtr */
             const LdComTxCopyTxDataFuncPtrType copyTxDataFunc = LdCom_CfgPtr->IPduCfgPtr[ldComId].CbkTxCopyTxDataFunc;
             /* PRQA S 2824 -- */
@@ -228,14 +284,17 @@ BufReq_ReturnType
             {
                 ret = copyTxDataFunc(info, retry, availableDataPtr);
             }
-#else
-            LDCOM_NOUSED(id);
-            LDCOM_NOUSED(info);
-            LDCOM_NOUSED(retry);
-            LDCOM_NOUSED(availableDataPtr);
-#endif
         }
+#else
+        LDCOM_NOUSED(id);
+        LDCOM_NOUSED(info);
+        LDCOM_NOUSED(retry);
+        LDCOM_NOUSED(availableDataPtr);
+#endif
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LdCom, 0, Bsw_Return, 2, 0x43, ret);
+
     return ret;
 }
 #define LDCOM_STOP_SEC_CODE
@@ -249,13 +308,16 @@ BufReq_ReturnType
  */
 void LdCom_TpTxConfirmation(PduIdType id, Std_ReturnType result) /* PRQA S 1503 */ /* VL_QAC_NoUsedApi */
 {
-    PduIdType ldComId = id;
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LdCom, 0, Bsw_Start, 3, 0x48, id, result);
 
 #if (STD_ON == LDCOM_DEV_ERROR_DETECT)
     if (LdCom_DetCheckInitStatus(LDCOM_SERVICE_ID_TPTXCONFIRMATION)
         && LdCom_DetCheckPduId(LDCOM_SERVICE_ID_TPTXCONFIRMATION, id, 0u, FALSE))
 #endif
     {
+#if (STD_ON == LDCOM_SUPPORT_SEND_TP)
+        PduIdType ldComId = id;
+
 #if (STD_ON == LDCOM_SUPPORT_POST_BUILD)
         ldComId = LdCom_GetIpduIdFromUserId(id, LdCom_CfgPtr->UserIdMapLdComIPduIdPtr);
 #if (STD_ON == LDCOM_DEV_ERROR_DETECT)
@@ -263,7 +325,6 @@ void LdCom_TpTxConfirmation(PduIdType id, Std_ReturnType result) /* PRQA S 1503 
 #endif
 #endif
         {
-#if (STD_ON == LDCOM_SUPPORT_SEND_TP)
             /* PRQA S 2824 ++ */ /* VL_QAC_DerefNullPtr */
             const LdComTpTxConfirmationFuncPtrType tpTxConfirFunc =
                 LdCom_CfgPtr->IPduCfgPtr[ldComId].CbkTpTxConfirmationFunc;
@@ -272,13 +333,14 @@ void LdCom_TpTxConfirmation(PduIdType id, Std_ReturnType result) /* PRQA S 1503 
             {
                 tpTxConfirFunc(result);
             }
-
-#else
-            LDCOM_NOUSED(id);
-            LDCOM_NOUSED(result);
-#endif
         }
+#else
+        LDCOM_NOUSED(id);
+        LDCOM_NOUSED(result);
+#endif
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LdCom, 0, Bsw_Return, 1, 0x48);
 }
 #define LDCOM_STOP_SEC_CODE_FAST
 #include "LdCom_MemMap.h"
@@ -297,8 +359,9 @@ BufReq_ReturnType LdCom_StartOfReception(
     PduLengthType*     bufferSizePtr)
 /* PRQA S 1503 -- */
 {
-    BufReq_ReturnType ret     = BUFREQ_E_NOT_OK;
-    PduIdType         ldComId = id;
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LdCom, 0, Bsw_Start, 5, 0x46, id, info, TpSduLength, bufferSizePtr);
+
+    BufReq_ReturnType ret = BUFREQ_E_NOT_OK;
 
 #if (STD_ON == LDCOM_DEV_ERROR_DETECT)
     if (LdCom_DetCheckInitStatus(LDCOM_SERVICE_ID_STARTOFRECEPTION)
@@ -306,6 +369,9 @@ BufReq_ReturnType LdCom_StartOfReception(
         && LdCom_DetCheckParaPointer(LDCOM_SERVICE_ID_STARTOFRECEPTION, bufferSizePtr))
 #endif
     {
+#if (STD_ON == LDCOM_SUPPORT_RECEIVER_TP)
+        PduIdType ldComId = id;
+
 #if (STD_ON == LDCOM_SUPPORT_POST_BUILD)
         ldComId = LdCom_GetIpduIdFromUserId(id, LdCom_CfgPtr->UserIdMapLdComIPduIdPtr);
 #if (STD_ON == LDCOM_DEV_ERROR_DETECT)
@@ -313,7 +379,6 @@ BufReq_ReturnType LdCom_StartOfReception(
 #endif
 #endif
         {
-#if (STD_ON == LDCOM_SUPPORT_RECEIVER_TP)
             /* PRQA S 2824 ++ */ /* VL_QAC_DerefNullPtr */
             const LdComRxStartOfReceptionFuncPtrType rxStartOfReceptionFunc =
                 LdCom_CfgPtr->IPduCfgPtr[ldComId].CbkRxStartOfReceptionFunc;
@@ -322,14 +387,17 @@ BufReq_ReturnType LdCom_StartOfReception(
             {
                 ret = rxStartOfReceptionFunc(info, TpSduLength, bufferSizePtr);
             }
-#else
-            LDCOM_NOUSED(id);
-            LDCOM_NOUSED(info);
-            LDCOM_NOUSED(TpSduLength);
-            LDCOM_NOUSED(bufferSizePtr);
-#endif
         }
+#else
+        LDCOM_NOUSED(id);
+        LDCOM_NOUSED(info);
+        LDCOM_NOUSED(TpSduLength);
+        LDCOM_NOUSED(bufferSizePtr);
+#endif
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LdCom, 0, Bsw_Return, 2, 0x46, ret);
+
     return ret;
 }
 #define LDCOM_STOP_SEC_CODE
@@ -345,8 +413,9 @@ BufReq_ReturnType LdCom_StartOfReception(
 BufReq_ReturnType LdCom_CopyRxData(PduIdType id, const PduInfoType* info, PduLengthType* bufferSizePtr)
 /* PRQA S 1503 -- */
 {
-    BufReq_ReturnType ret     = BUFREQ_E_NOT_OK;
-    PduIdType         ldComId = id;
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LdCom, 0, Bsw_Start, 4, 0x44, id, info, bufferSizePtr);
+
+    BufReq_ReturnType ret = BUFREQ_E_NOT_OK;
 
 #if (STD_ON == LDCOM_DEV_ERROR_DETECT)
     if (LdCom_DetCheckInitStatus(LDCOM_SERVICE_ID_COPYRXDATA)
@@ -355,6 +424,9 @@ BufReq_ReturnType LdCom_CopyRxData(PduIdType id, const PduInfoType* info, PduLen
         && LdCom_DetCheckParaPointer(LDCOM_SERVICE_ID_COPYRXDATA, bufferSizePtr))
 #endif
     {
+#if (STD_ON == LDCOM_SUPPORT_RECEIVER_TP)
+        PduIdType ldComId = id;
+
 #if (STD_ON == LDCOM_SUPPORT_POST_BUILD)
         ldComId = LdCom_GetIpduIdFromUserId(id, LdCom_CfgPtr->UserIdMapLdComIPduIdPtr);
 #if (STD_ON == LDCOM_DEV_ERROR_DETECT)
@@ -362,7 +434,6 @@ BufReq_ReturnType LdCom_CopyRxData(PduIdType id, const PduInfoType* info, PduLen
 #endif
 #endif
         {
-#if (STD_ON == LDCOM_SUPPORT_RECEIVER_TP)
             /* PRQA S 2824 ++ */ /* VL_QAC_DerefNullPtr */
             const LdComRxCopyRxDataFuncPtrType rxCopyRxDataFunc = LdCom_CfgPtr->IPduCfgPtr[ldComId].CbkRxCopyRxDataFunc;
             /* PRQA S 2824 -- */
@@ -370,13 +441,16 @@ BufReq_ReturnType LdCom_CopyRxData(PduIdType id, const PduInfoType* info, PduLen
             {
                 ret = rxCopyRxDataFunc(info, bufferSizePtr);
             }
-#else
-            LDCOM_NOUSED(id);
-            LDCOM_NOUSED(info);
-            LDCOM_NOUSED(bufferSizePtr);
-#endif
         }
+#else
+        LDCOM_NOUSED(id);
+        LDCOM_NOUSED(info);
+        LDCOM_NOUSED(bufferSizePtr);
+#endif
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LdCom, 0, Bsw_Return, 2, 0x44, ret);
+
     return ret;
 }
 #define LDCOM_STOP_SEC_CODE
@@ -390,13 +464,16 @@ BufReq_ReturnType LdCom_CopyRxData(PduIdType id, const PduInfoType* info, PduLen
  */
 void LdCom_TpRxIndication(PduIdType id, Std_ReturnType result) /* PRQA S 1503 */ /* VL_QAC_NoUsedApi */
 {
-    PduIdType ldComId = id;
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LdCom, 0, Bsw_Start, 3, 0x45, id, result);
 
 #if (STD_ON == LDCOM_DEV_ERROR_DETECT)
     if (LdCom_DetCheckInitStatus(LDCOM_SERVICE_ID_TPRXINDICATION)
         && LdCom_DetCheckPduId(LDCOM_SERVICE_ID_TPRXINDICATION, id, 0u, FALSE))
 #endif
     {
+#if (STD_ON == LDCOM_SUPPORT_RECEIVER_TP)
+        PduIdType ldComId = id;
+
 #if (STD_ON == LDCOM_SUPPORT_POST_BUILD)
         ldComId = LdCom_GetIpduIdFromUserId(id, LdCom_CfgPtr->UserIdMapLdComIPduIdPtr);
 #if (STD_ON == LDCOM_DEV_ERROR_DETECT)
@@ -404,7 +481,6 @@ void LdCom_TpRxIndication(PduIdType id, Std_ReturnType result) /* PRQA S 1503 */
 #endif
 #endif
         {
-#if (STD_ON == LDCOM_SUPPORT_RECEIVER_TP)
             /* PRQA S 2824 ++ */ /* VL_QAC_DerefNullPtr */
             const LdComTpRxIndicationFuncPtrType tpRxIndicationFunc =
                 LdCom_CfgPtr->IPduCfgPtr[ldComId].CbkTpRxIndicationFunc;
@@ -413,12 +489,14 @@ void LdCom_TpRxIndication(PduIdType id, Std_ReturnType result) /* PRQA S 1503 */
             {
                 tpRxIndicationFunc(result);
             }
-#else
-            LDCOM_NOUSED(id);
-            LDCOM_NOUSED(result);
-#endif
         }
+#else
+        LDCOM_NOUSED(id);
+        LDCOM_NOUSED(result);
+#endif
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LdCom, 0, Bsw_Return, 1, 0x45);
 }
 #define LDCOM_STOP_SEC_CODE_FAST
 #include "LdCom_MemMap.h"
@@ -431,7 +509,7 @@ void LdCom_TpRxIndication(PduIdType id, Std_ReturnType result) /* PRQA S 1503 */
  */
 void LdCom_RxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr) /* PRQA S 1503 */ /* VL_QAC_NoUsedApi */
 {
-    PduIdType ldComId = RxPduId;
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LdCom, 0, Bsw_Start, 3, 0x42, RxPduId, PduInfoPtr);
 
 #if (STD_ON == LDCOM_DEV_ERROR_DETECT)
     if (LdCom_DetCheckInitStatus(LDCOM_SERVICE_ID_RXINDICATION)
@@ -439,6 +517,8 @@ void LdCom_RxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr) /* PRQ
         && LdCom_DetCheckParaPointer(LDCOM_SERVICE_ID_RXINDICATION, PduInfoPtr))
 #endif
     {
+#if (STD_ON == LDCOM_SUPPORT_RECEIVER_IF)
+        PduIdType ldComId = RxPduId;
 #if (STD_ON == LDCOM_SUPPORT_POST_BUILD)
         ldComId = LdCom_GetIpduIdFromUserId(RxPduId, LdCom_CfgPtr->UserIdMapLdComIPduIdPtr);
 #if (STD_ON == LDCOM_DEV_ERROR_DETECT)
@@ -446,7 +526,6 @@ void LdCom_RxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr) /* PRQ
 #endif
 #endif
         {
-#if (STD_ON == LDCOM_SUPPORT_RECEIVER_IF)
             /* PRQA S 2824 ++ */ /* VL_QAC_DerefNullPtr */
             const LdComRxIndicationFuncPtrType rxIndicationFunc = LdCom_CfgPtr->IPduCfgPtr[ldComId].CbkRxIndicationFunc;
             /* PRQA S 2824 -- */
@@ -454,12 +533,14 @@ void LdCom_RxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr) /* PRQ
             {
                 rxIndicationFunc(PduInfoPtr);
             }
-#else
-            LDCOM_NOUSED(RxPduId);
-            LDCOM_NOUSED(PduInfoPtr);
-#endif
         }
+#else
+        LDCOM_NOUSED(RxPduId);
+        LDCOM_NOUSED(PduInfoPtr);
+#endif
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LdCom, 0, Bsw_Return, 1, 0x42);
 }
 #define LDCOM_STOP_SEC_CODE_FAST
 #include "LdCom_MemMap.h"
@@ -472,13 +553,15 @@ void LdCom_RxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr) /* PRQ
  */
 void LdCom_TxConfirmation(PduIdType TxPduId, Std_ReturnType result) /* PRQA S 1503 */ /* VL_QAC_NoUsedApi */
 {
-    PduIdType ldComId = TxPduId;
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LdCom, 0, Bsw_Start, 3, 0x40, TxPduId, result);
 
 #if (STD_ON == LDCOM_DEV_ERROR_DETECT)
     if (LdCom_DetCheckInitStatus(LDCOM_SERVICE_ID_TXCONFIRMATION)
         && LdCom_DetCheckPduId(LDCOM_SERVICE_ID_TXCONFIRMATION, TxPduId, 0u, FALSE))
 #endif
     {
+#if (STD_ON == LDCOM_SUPPORT_SEND_IF)
+        PduIdType ldComId = TxPduId;
 #if (STD_ON == LDCOM_SUPPORT_POST_BUILD)
         ldComId = LdCom_GetIpduIdFromUserId(TxPduId, LdCom_CfgPtr->UserIdMapLdComIPduIdPtr);
 #if (STD_ON == LDCOM_DEV_ERROR_DETECT)
@@ -486,7 +569,6 @@ void LdCom_TxConfirmation(PduIdType TxPduId, Std_ReturnType result) /* PRQA S 15
 #endif
 #endif
         {
-#if (STD_ON == LDCOM_SUPPORT_SEND_IF)
             /* PRQA S 2824 ++ */ /* VL_QAC_DerefNullPtr */
             const LdComTxConfirmationFuncPtrType txConfirFunc = LdCom_CfgPtr->IPduCfgPtr[ldComId].CbkTxConfirmationFunc;
             /* PRQA S 2824 -- */
@@ -494,11 +576,14 @@ void LdCom_TxConfirmation(PduIdType TxPduId, Std_ReturnType result) /* PRQA S 15
             {
                 txConfirFunc(result);
             }
-#else
-            LDCOM_NOUSED(TxPduId);
-#endif
         }
+#else
+        LDCOM_NOUSED(TxPduId);
+        LDCOM_NOUSED(result);
+#endif
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LdCom, 0, Bsw_Return, 1, 0x40);
 }
 #define LDCOM_STOP_SEC_CODE_FAST
 #include "LdCom_MemMap.h"
@@ -515,8 +600,9 @@ void LdCom_TxConfirmation(PduIdType TxPduId, Std_ReturnType result) /* PRQA S 15
 Std_ReturnType LdCom_TriggerTransmit(PduIdType TxPduId, PduInfoType* PduInfoPtr)
 /* PRQA S 1503,3673 -- */
 {
-    Std_ReturnType ret     = E_NOT_OK;
-    PduIdType      ldComId = TxPduId;
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LdCom, 0, Bsw_Start, 3, 0x41, TxPduId, PduInfoPtr);
+
+    Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == LDCOM_DEV_ERROR_DETECT)
     if (LdCom_DetCheckInitStatus(LDCOM_SERVICE_ID_TRIGGERTRANSMIT)
@@ -525,6 +611,9 @@ Std_ReturnType LdCom_TriggerTransmit(PduIdType TxPduId, PduInfoType* PduInfoPtr)
         && LdCom_DetCheckParaPointer(LDCOM_SERVICE_ID_TRIGGERTRANSMIT, PduInfoPtr->SduDataPtr))
 #endif
     {
+#if (STD_ON == LDCOM_SUPPORT_TRIGGER_TRANSMIT)
+        PduIdType ldComId = TxPduId;
+
 #if (STD_ON == LDCOM_SUPPORT_POST_BUILD)
         ldComId = LdCom_GetIpduIdFromUserId(TxPduId, LdCom_CfgPtr->UserIdMapLdComIPduIdPtr);
 #if (STD_ON == LDCOM_DEV_ERROR_DETECT)
@@ -532,7 +621,6 @@ Std_ReturnType LdCom_TriggerTransmit(PduIdType TxPduId, PduInfoType* PduInfoPtr)
 #endif
 #endif
         {
-#if (STD_ON == LDCOM_SUPPORT_TRIGGER_TRANSMIT)
             /* PRQA S 2824 ++ */ /* VL_QAC_DerefNullPtr */
             const LdComTriggerTransmitFuncPtrType triggerTransmitFunc =
                 LdCom_CfgPtr->IPduCfgPtr[ldComId].CbkTriggerTransmitFunc;
@@ -541,13 +629,15 @@ Std_ReturnType LdCom_TriggerTransmit(PduIdType TxPduId, PduInfoType* PduInfoPtr)
             {
                 ret = triggerTransmitFunc(PduInfoPtr);
             }
-#else
-            LDCOM_NOUSED(ldComId);
-            LDCOM_NOUSED(TxPduId);
-            LDCOM_NOUSED(PduInfoPtr);
-#endif
         }
+#else
+        LDCOM_NOUSED(TxPduId);
+        LDCOM_NOUSED(PduInfoPtr);
+#endif
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LdCom, 0, Bsw_Return, 2, 0x41, ret);
+
     return ret;
 }
 #define LDCOM_STOP_SEC_CODE
@@ -607,6 +697,11 @@ LDCOM_LOCAL boolean LdCom_DetCheckInitStatus(uint8 apiId)
 
     return ret;
 }
+#define LDCOM_STOP_SEC_CODE
+#include "LdCom_MemMap.h"
+
+#define LDCOM_START_SEC_CODE
+#include "LdCom_MemMap.h"
 /**
  * @brief     Check if input pointer parameters is NULL.
  */
@@ -622,7 +717,11 @@ LDCOM_LOCAL boolean LdCom_DetCheckParaPointer(uint8 apiId, const void* parameter
 
     return ret;
 }
+#define LDCOM_STOP_SEC_CODE
+#include "LdCom_MemMap.h"
 
+#define LDCOM_START_SEC_CODE
+#include "LdCom_MemMap.h"
 /**
  * @brief     Check if the validity of the Pdu ID.
  */
@@ -657,8 +756,12 @@ LDCOM_LOCAL boolean LdCom_DetCheckPduId(uint8 apiId, PduIdType pduId, PduIdType 
     LDCOM_NOUSED(checkPartition);
     return ret;
 }
+#define LDCOM_STOP_SEC_CODE
+#include "LdCom_MemMap.h"
 
 #if (STD_ON == LDCOM_SUPPORT_MULTIPLE_PARTITION)
+#define LDCOM_START_SEC_CODE
+#include "LdCom_MemMap.h"
 /**
  * @brief     Check if the validity of the partition ID.
  */
@@ -674,8 +777,7 @@ LDCOM_LOCAL boolean LdCom_DetCheckPartitionId(uint8 apiId, uint8 partIndex)
 
     return ret;
 }
-#endif
-
 #define LDCOM_STOP_SEC_CODE
 #include "LdCom_MemMap.h"
+#endif
 #endif

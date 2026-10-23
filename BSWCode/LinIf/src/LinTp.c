@@ -22,7 +22,7 @@
  **
  ***********************************************************************************************************************/
 /* PRQA S 3415 EOF */ /* VL_LinTp_3415 */
-/* PRQA S 1510 EOF */ /* VL_LinTp_1510 */
+
 /* =================================================== inclusions =================================================== */
 #include "LinIf_Cfg.h"
 #if (LINIF_TP_SUPPORTED == STD_ON)
@@ -35,56 +35,71 @@
 #include "LinTp_Internal.h"
 #include "LinIf_Internal.h"
 #include "LinTp.h"
+#include "LinTp_Arti.h"
 
 /* ===================================================== macros ===================================================== */
 
 /* ================================================ type definitions ================================================ */
 
 /* ========================================= internal function declarations ========================================= */
-#define LINIF_START_SEC_CODE
-#include "LinIf_MemMap.h"
-
 #if (LINIF_DEV_ERROR_DETECT == STD_ON)
 LINTP_LOCAL_INLINE boolean LinTp_ValidateInitStatus(uint8 appId, ApplicationType applicationId);
+
 LINTP_LOCAL_INLINE boolean LinTp_ValidatePointer(uint8 appId, uint8 errorId, const void* pointer);
+
 #if (LINIF_MULTIPLE_PARTITION_USED == STD_ON)
+
 LINTP_LOCAL_INLINE
 boolean LinTp_ValidateRxPduPartition(uint8 appId, ApplicationType applicationId, const LinTp_RxNSduType* rx);
-LINTP_LOCAL_INLINE boolean
-    LinTp_ValidateTxPduPartition(uint8 appId, ApplicationType applicationId, const LinTp_TxNSduType* tx);
+
+LINTP_LOCAL_INLINE
+boolean LinTp_ValidateTxPduPartition(uint8 appId, ApplicationType applicationId, const LinTp_TxNSduType* tx);
 #endif
 #endif
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL const LinTp_TxNSduType* LinTp_GetTxNSdu(PduIdType txSduId, ApplicationType applicationId);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL const LinTp_RxNSduType* LinTp_GetRxNSdu(PduIdType rxSduId, ApplicationType applicationId);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL LinIf_NodeTypeType LinTp_GetNodeType(NetworkHandleType ComMChannel);
-
 #define LINIF_STOP_SEC_CODE
 #include "LinIf_MemMap.h"
 
 /* ============================================ internal data definition ============================================ */
-#define LINIF_START_SEC_VAR_INIT_PTR
+#define LINIF_START_SEC_VAR_CLEARED_PTR
 #include "LinIf_MemMap.h"
-
-const LinTp_ConfigType* LinTp_ConfigPtr = NULL_PTR;
-
-#define LINIF_STOP_SEC_VAR_INIT_PTR
+/* PRQA S 1510 ++ */ /* VL_LinTp_1510 */
+const LinTp_ConfigType* LinTp_ConfigPtr;
+/* PRQA S 1510 -- */
+#define LINIF_STOP_SEC_VAR_CLEARED_PTR
 #include "LinIf_MemMap.h"
 
 /* PRQA S 2814,2824 ++ */ /* VL_QAC_DerefNullPtr */
 /* PRQA S 1503,1532 ++ */ /* VL_QAC_NoUsedApi,VL_QAC_OneFunRef */
 
 /* ========================================== external function definition ========================================== */
-#define LINIF_START_SEC_CODE
-#include "LinIf_MemMap.h"
 
 /**
  * Initializes the LIN Transport Layer.
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
+/* PRQA S 1510 ++ */ /* VL_LinTp_1510 */
 void LinTp_Init(const LinTp_ConfigType* ConfigPtr)
+/* PRQA S 1510 -- */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LinTp, 0, Bsw_Start, 2, 0x40, ConfigPtr);
+
 #if (LINIF_DEV_ERROR_DETECT == STD_ON)
     if (LinTp_ValidatePointer(LINTP_INIT_ID, LINIF_E_PARAM_POINTER, ConfigPtr))
 #endif
@@ -115,13 +130,21 @@ void LinTp_Init(const LinTp_ConfigType* ConfigPtr)
         *LinTp_Status[applicationId] = LINTP_INIT;
 #endif
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LinTp, 0, Bsw_Return, 1, 0x40);
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * Requests transmission of a PDU.
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 Std_ReturnType LinTp_Transmit(PduIdType LinTpTxSduId, const PduInfoType* LinTpTxInfoPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LinTp, 0, Bsw_Start, 3, 0x41, LinTpTxSduId, LinTpTxInfoPtr);
+
     Std_ReturnType          ret           = E_NOT_OK;
     ApplicationType         applicationId = LinIf_GetApplicationID();
     const LinTp_TxNSduType* tx            = LinTp_GetTxNSdu(LinTpTxSduId, applicationId);
@@ -136,30 +159,40 @@ Std_ReturnType LinTp_Transmit(PduIdType LinTpTxSduId, const PduInfoType* LinTpTx
     )
 #endif
     {
-        LinIf_NodeTypeType nodeType = LinTp_GetNodeType(tx->TxNSduChannelRef);
-
-        if (LINIF_MASTER == nodeType)
+        if (LinTpTxInfoPtr->SduLength <= LINTP_MAX_MSG_LENGTH)
         {
+            LinIf_NodeTypeType nodeType = LinTp_GetNodeType(tx->TxNSduChannelRef);
+            if (LINIF_MASTER == nodeType)
+            {
 #if (STD_ON == LINTP_MASTER_SUPPORT)
-            ret = LinTp_MasterTransmit(tx, LinTpTxInfoPtr);
+                ret = LinTp_MasterTransmit(tx, LinTpTxInfoPtr);
 #endif
-        }
-        else
-        {
+            }
+            else
+            {
 #if (STD_ON == LINTP_SLAVE_SUPPORT)
-            ret = LinTp_SlaveTransmit(tx, LinTpTxInfoPtr);
+                ret = LinTp_SlaveTransmit(tx, LinTpTxInfoPtr);
 #endif
+            }
         }
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LinTp, 0, Bsw_Return, 2, 0x41, ret);
+
     return ret;
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * Shutdowns the LIN TP.
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 void LinTp_Shutdown(void)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LinTp, 0, Bsw_Start, 1, 0x43);
+
     ApplicationType applicationId = LinIf_GetApplicationID();
 #if (LINIF_DEV_ERROR_DETECT == STD_ON)
     if (LinTp_ValidateInitStatus(LINTP_SHUTDOWN_ID, applicationId))
@@ -184,13 +217,23 @@ void LinTp_Shutdown(void)
         *LinTp_Status[applicationId] = LINTP_UNINIT;
 #endif
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LinTp, 0, Bsw_Return, 1, 0x43);
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * Request to change a specific transport protocol parameter (e.g. block size).
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 Std_ReturnType LinTp_ChangeParameter(PduIdType id, TPParameterType parameter, uint16 value)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LinTp, 0, Bsw_Start, 4, 0x44, id, parameter, value);
+
+    Std_ReturnType ret = E_NOT_OK;
+
 #if (LINIF_DEV_ERROR_DETECT == STD_ON)
     ApplicationType         applicationId = LinIf_GetApplicationID();
     const LinTp_RxNSduType* rx            = LinTp_GetRxNSdu(id, applicationId);
@@ -208,8 +251,13 @@ Std_ReturnType LinTp_ChangeParameter(PduIdType id, TPParameterType parameter, ui
     LINTP_NOUSED(parameter);
     LINTP_NOUSED(value);
     /*@req <SWS_LinIf_00592> */
-    return E_NOT_OK;
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, LinTp, 0, Bsw_Return, 2, 0x44, ret);
+
+    return ret;
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /* PRQA S 1503,1532 -- */
 
@@ -321,6 +369,8 @@ LINTP_LOCAL_INLINE boolean
  * @synchronous     TRUE
  * @trace        -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL const LinTp_TxNSduType* LinTp_GetTxNSdu(PduIdType txSduId, ApplicationType applicationId)
 {
     const LinTp_TxNSduType* retTxNSdu = NULL_PTR;
@@ -329,25 +379,33 @@ LINTP_LOCAL const LinTp_TxNSduType* LinTp_GetTxNSdu(PduIdType txSduId, Applicati
 #if (LINIF_MULTIPLE_PARTITION_USED == STD_ON)
         ((NULL_PTR != LinTp_Status[applicationId]) && (NULL_PTR != LinIf_Status[applicationId])) &&
 #endif
-        ((LINIF_INIT == *LinIf_Status[applicationId]) && (LINTP_INIT == *LinTp_Status[applicationId])))
+        ((LINIF_INIT == *LinIf_Status[applicationId]) && (LINTP_INIT == *LinTp_Status[applicationId]))
+        && (LinTp_ConfigPtr->TxNSdu != NULL_PTR) && (txSduId < LinTp_ConfigPtr->PbsMap->TxNSduMapLen))
     {
-        const LinTp_TxNSduType* tx = LinTp_GetTxNSduCfg(0u);
-
-        uint16 idx = LinTp_GetTxNSduNum();
-        while (idx > 0u)
+        PduIdType actualPduId = LinTp_ConfigPtr->PbsMap->TxNSduHandlerIdMap[txSduId];
+        if (actualPduId != LINTP_PDU_ID_INVAILD)
         {
-            if (tx->TxNSduId == txSduId)
+            const LinTp_TxNSduType* tx = LinTp_GetTxNSduCfg(0u);
+
+            uint16 idx = LinTp_GetTxNSduNum();
+            while (idx > 0u)
             {
-                retTxNSdu = tx;
-                break;
+                if (tx->TxNSduId == actualPduId)
+                {
+                    retTxNSdu = tx;
+                    break;
+                }
+                tx++;
+                idx--;
             }
-            tx++;
-            idx--;
         }
     }
 
     return retTxNSdu;
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+
 /**
  * @brief           Gets configured RxNSdu pointer by parameter 'rxSduId'
  * @param[in]       txSduId: LinTp rx sdu id
@@ -357,6 +415,8 @@ LINTP_LOCAL const LinTp_TxNSduType* LinTp_GetTxNSdu(PduIdType txSduId, Applicati
  * @synchronous     TRUE
  * @trace        -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL const LinTp_RxNSduType* LinTp_GetRxNSdu(PduIdType rxSduId, ApplicationType applicationId)
 {
     const LinTp_RxNSduType* retRxNSdu = NULL_PTR;
@@ -365,24 +425,31 @@ LINTP_LOCAL const LinTp_RxNSduType* LinTp_GetRxNSdu(PduIdType rxSduId, Applicati
 #if (LINIF_MULTIPLE_PARTITION_USED == STD_ON)
         ((NULL_PTR != LinTp_Status[applicationId]) && (NULL_PTR != LinIf_Status[applicationId])) &&
 #endif
-        ((LINIF_INIT == *LinIf_Status[applicationId]) && (LINTP_INIT == *LinTp_Status[applicationId])))
+        ((LINIF_INIT == *LinIf_Status[applicationId]) && (LINTP_INIT == *LinTp_Status[applicationId]))
+        && (LinTp_ConfigPtr->RxNSdu != NULL_PTR) && (rxSduId < LinTp_ConfigPtr->PbsMap->RxNSduMapLen))
     {
-        const LinTp_RxNSduType* rx  = LinTp_GetRxNSduCfg(0u);
-        uint16                  idx = LinTp_GetRxNSduNum();
-
-        while (idx > 0u)
+        PduIdType actualPduId = LinTp_ConfigPtr->PbsMap->RxNSduHandlerIdMap[rxSduId];
+        if (actualPduId != LINTP_PDU_ID_INVAILD)
         {
-            if (rx->RxNSduId == rxSduId)
+            const LinTp_RxNSduType* rx  = LinTp_GetRxNSduCfg(0u);
+            uint16                  idx = LinTp_GetRxNSduNum();
+
+            while (idx > 0u)
             {
-                retRxNSdu = rx;
+                if (rx->RxNSduId == actualPduId)
+                {
+                    retRxNSdu = rx;
+                }
+                rx++;
+                idx--;
             }
-            rx++;
-            idx--;
         }
     }
 
     return retRxNSdu;
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief           Gets the configuration pointer by transmit 'NSduId'
@@ -392,6 +459,8 @@ LINTP_LOCAL const LinTp_RxNSduType* LinTp_GetRxNSdu(PduIdType rxSduId, Applicati
  * @synchronous     TRUE
  * @trace        -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL LinIf_NodeTypeType LinTp_GetNodeType(NetworkHandleType ComMChannel)
 {
     NetworkHandleType  ch;
@@ -406,7 +475,6 @@ LINTP_LOCAL LinIf_NodeTypeType LinTp_GetNodeType(NetworkHandleType ComMChannel)
     }
     return retNodeType;
 }
-
 #define LINIF_STOP_SEC_CODE
 #include "LinIf_MemMap.h"
 

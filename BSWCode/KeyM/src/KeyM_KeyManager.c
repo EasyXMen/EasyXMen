@@ -51,7 +51,11 @@
  * @synchronous    TRUE
  * @trace       CPD-71463
  */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 KEYM_LOCAL Std_ReturnType KeyM_SearchByKeyName(const uint8* KeyNamePtr, uint16 KeyNameLength, uint16* KeyCfgIdx);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
 /* ============================================ internal data definitions =========================================== */
 #if (KEYM_CRYPTO_KEY_START_FINALIZE_FUNCTION_ENABLED == STD_ON)
@@ -95,9 +99,9 @@ boolean KeyM_SessionOpen; /* PRQA S 1504*/ /* VL_KeyM_1504 */
 #endif
 
 /* ========================================== external function definitions ========================================= */
+#if (KEYM_CRYPTO_KEY_START_FINALIZE_FUNCTION_ENABLED == STD_ON)
 #define KEYM_START_SEC_CODE
 #include "KeyM_MemMap.h"
-#if (KEYM_CRYPTO_KEY_START_FINALIZE_FUNCTION_ENABLED == STD_ON)
 /*************************************************************************/
 /**
  * @brief  This function intents to allow key update operation.
@@ -112,6 +116,8 @@ Std_ReturnType KeyM_Start(
     uint16*        ResponseDataLength)
 /* PRQA S 3673,3408 --*/
 {
+    KeyM_ArtiApiStart(6, KEYM_START_ID, StartType, RequestData, RequestDataLength, ResponseData, ResponseDataLength);
+
     Std_ReturnType ret = E_NOT_OK; /* PRQA S 2981 */ /* VL_KeyM_2981 */
 
 #if (STD_ON == KEYM_DEVERROR_DETECT)
@@ -147,8 +153,16 @@ Std_ReturnType KeyM_Start(
         KeyM_SessionOpen = TRUE;
         SchM_Exit_KeyM_Area_KeyM();
     }
+
+    KeyM_ArtiApiStop(2, KEYM_START_ID, ret);
+
     return ret;
 }
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
+
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 /*************************************************************************/
 /**
  * @brief  This function is used to finalize key update operations.
@@ -162,6 +176,8 @@ Std_ReturnType KeyM_Finalize(
     uint16       ResponseMaxDataLength)
 /* PRQA S 3673,3408 --*/
 {
+    KeyM_ArtiApiStart(5, KEYM_FINAL_ID, RequestDataPtr, RequestDataLength, ResponseDataPtr, ResponseMaxDataLength);
+
     uint16          keyIdx;
     uint16          length = ResponseMaxDataLength;
     Std_ReturnType  ret    = E_OK;
@@ -234,12 +250,19 @@ Std_ReturnType KeyM_Finalize(
         KeyM_SessionOpen = FALSE;
         SchM_Exit_KeyM_Area_KeyM();
     }
+
+    KeyM_ArtiApiStop(2, KEYM_FINAL_ID, ret);
+
     return ret;
 }
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 #endif /*KEYM_CRYPTO_KEY_START_FINALIZE_FUNCTION_ENABLED == STD_ON*/
 
 /*SWS_KeyM_00010*/
 #if (STD_ON == KEYM_CRYPTO_KEY_PREPARE_FUNCTION_ENABLED)
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 /*************************************************************************/
 /**
  * @brief  This function is used to prepare a key update operation.
@@ -250,6 +273,8 @@ Std_ReturnType
     KeyM_Prepare(const uint8* RequestData, uint16 RequestDataLength, uint8* ResponseData, uint16* ResponseDataLength)
 /* PRQA S 3673,3408 -- */
 {
+    KeyM_ArtiApiStart(5, KEYM_PREPARE_ID, RequestData, RequestDataLength, ResponseData, ResponseDataLength);
+
     Std_ReturnType ret = E_NOT_OK;
 
 #if (STD_ON == KEYM_DEVERROR_DETECT)
@@ -281,9 +306,17 @@ Std_ReturnType
 #endif /* STD_ON == KEYM_CRYPTO_KEYHANDLER_PREPARE_ENABLED */
         }
     }
+
+    KeyM_ArtiApiStop(2, KEYM_PREPARE_ID, ret);
+
     return ret;
 }
-#endif /*STD_ON == KEYM_CRYPTO_KEY_PREPARE_FUNCTION_ENABLED*/
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
+#endif /*STD_ON == KEYM_CYPTO_KEY_PREPARE_FUNCTION_ENABLED*/
+
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 /*************************************************************************/
 /**
  * @brief   This function is used to initiate the key generation or update process.
@@ -299,6 +332,16 @@ Std_ReturnType KeyM_Update(
     uint16       ResultDataMaxLength)
 /* PRQA S 3673,6040 --*/
 {
+    KeyM_ArtiApiStart(
+        7,
+        KEYM_UPDATE_ID,
+        KeyNamePtr,
+        KeyNameLength,
+        RequestDataPtr,
+        RequestDataLength,
+        ResultDataPtr,
+        ResultDataMaxLength);
+
 #if (STD_ON == KEYM_CRYPTO_KEYHANDLER_UPDATE_ENABLED)
     KeyM_CryptoKeyIdType        keymId;
     KeyM_KH_UpdateOperationType khUpdate;
@@ -393,8 +436,16 @@ Std_ReturnType KeyM_Update(
 #endif /*STD_OFF == KEYM_CRYPTO_KEYHANDLER_UPDATE_ENABLED*/
         }
     }
+
+    KeyM_ArtiApiStop(2, KEYM_UPDATE_ID, ret);
+
     return ret;
 }
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
+
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 /* PRQA S 1505 ++*/ /* VL_KeyM_1505 */
 Std_ReturnType KeyM_HandleUpdate(
     /* PRQA S 1505 --*/
@@ -407,7 +458,7 @@ Std_ReturnType KeyM_HandleUpdate(
     uint16 blkIdx;
 #endif
     boolean         updateCsmFlag = FALSE;
-    Std_ReturnType  ret;
+    Std_ReturnType  ret           = E_NOT_OK;
     KeyM_ResultType keyMRes;
 
     /*Store or derive Key according to the configuration*/
@@ -453,6 +504,9 @@ Std_ReturnType KeyM_HandleUpdate(
             CRYPTO_KE_KEYDERIVATION_PASSWORD,
             ResultDataPtr,
             (uint32)ResultDataLength);
+
+        (void)Csm_KeySetValid(*(KeyM_CryptoKeyCfg[KeyIdx].keySrcDervRef));
+
         if ((ret == E_OK) && (NULL_PTR != KeyM_CryptoKeyCfg[KeyIdx].keyGenInfo))
         {
             ret = Csm_KeyElementSet(
@@ -494,10 +548,15 @@ Std_ReturnType KeyM_HandleUpdate(
     }
     keyMRes = (ret != E_OK) ? KEYM_RT_NOT_OK : KEYM_RT_OK;
     KeyM_CryptoKeyUpdateCallbackNotification(keyMRes, ResultDataLength, ResultDataPtr);
+
     return ret;
 }
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
 #if (STD_OFF == KEYM_CRYPTO_KEYHANDLER_UPDATE_ENABLED)
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 /* PRQA S 1505 ++ */ /* VL_KeyM_1505 */
 Std_ReturnType KeyM_GetSHEKey_M4M5(
     /* PRQA S 1505 -- */
@@ -522,10 +581,14 @@ Std_ReturnType KeyM_GetSHEKey_M4M5(
 
     return ret;
 }
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 #endif /*STD_OFF == KEYM_CRYPTO_KEYHANDLER_UPDATE_ENABLED*/
 
 /*SWS_KeyM_00107*/
 #if (KEYM_CRYPTO_KEY_VERIFY_FUNCTION_ENABLED == STD_ON)
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 /*************************************************************************/
 /**
  * @brief  This function is used to initiate the key generation or update process.
@@ -540,6 +603,16 @@ Std_ReturnType KeyM_Verify(
     uint8*       ResponseData,
     uint16*      ResponseDataLength)
 {
+    KeyM_ArtiApiStart(
+        7,
+        KEYM_VERIFY_ID,
+        KeyNamePtr,
+        KeyNameLength,
+        RequestData,
+        RequestDataLength,
+        ResponseData,
+        ResponseDataLength);
+
     uint32         verJob;
     uint16         cfgKeyIdx;
     Std_ReturnType ret;
@@ -626,14 +699,19 @@ Std_ReturnType KeyM_Verify(
 #endif
         }
     }
+
+    KeyM_ArtiApiStop(2, KEYM_VERIFY_ID, ret);
+
     return ret;
 }
 /* PRQA S 3408,0310,3305,6040 -- */
-#endif /*KEYM_CRYPTO_KEY_VERIFY_FUNCTION_ENABLED == STD_ON*/
 #define KEYM_STOP_SEC_CODE
 #include "KeyM_MemMap.h"
+#endif /*KEYM_CRYPTO_KEY_VERIFY_FUNCTION_ENABLED == STD_ON*/
 
 /* ========================================== internal function definitions ========================================= */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 KEYM_LOCAL Std_ReturnType KeyM_SearchByKeyName(const uint8* KeyNamePtr, uint16 KeyNameLength, uint16* KeyCfgIdx)
 {
     uint16         keyIdx;
@@ -645,7 +723,7 @@ KEYM_LOCAL Std_ReturnType KeyM_SearchByKeyName(const uint8* KeyNamePtr, uint16 K
     {
         if (KeyM_CryptoKeyCfg[keyIdx].KeyNameLen != KeyNameLength)
         {
-            continue; /* PRQA S 0770 */ /* VL_KeyM_0770 */
+            continue; /* PRQA S 0770*/ /* VL_KeyM_0770 */
         }
 
         for (keyPos = 0u; keyPos < KeyNameLength; keyPos++)
@@ -666,7 +744,8 @@ KEYM_LOCAL Std_ReturnType KeyM_SearchByKeyName(const uint8* KeyNamePtr, uint16 K
 
     return ret;
 }
-
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 #endif /*KEYM_CCRYPTO_KEYMANAGER_ENABLED == STD_ON*/
 /* PRQA S 3432 -- */
 /* PRQA S 1532 -- */

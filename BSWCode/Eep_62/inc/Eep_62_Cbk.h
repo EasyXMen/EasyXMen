@@ -44,6 +44,8 @@ extern "C" {
 /* =========================================== external data declarations =========================================== */
 
 /* ========================================= external function declarations ========================================= */
+#define EEP_62_START_SEC_CODE
+#include "Eep_62_MemMap.h"
 /**
  * @brief       This callback function provided by the module user is called when a job has been completed with a
  * positive result.
@@ -52,6 +54,10 @@ extern "C" {
  * @trace       CPD-76987
  */
 extern void Eep_62_JobEndNotification(void);
+#define EEP_62_STOP_SEC_CODE
+#include "Eep_62_MemMap.h"
+#define EEP_62_START_SEC_CODE
+#include "Eep_62_MemMap.h"
 
 /**
  * @brief       This callback function provided by the module user is called when a job has been canceled or finished
@@ -61,6 +67,8 @@ extern void Eep_62_JobEndNotification(void);
  * @trace       CPD-76988
  */
 extern void Eep_62_JobErrorNotification(void);
+#define EEP_62_STOP_SEC_CODE
+#include "Eep_62_MemMap.h"
 
 #ifdef __cplusplus
 }

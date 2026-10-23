@@ -44,9 +44,20 @@
 #include "lwip/netif.h"
 
 /* used by IP4_ADDR_ANY and IP_ADDR_BROADCAST in ip_addr.h */
+#define TCPIP_START_SEC_CONST_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 const ip_addr_t ip_addr_any = IPADDR4_INIT(IPADDR_ANY);
-const ip_addr_t ip_addr_broadcast = IPADDR4_INIT(IPADDR_BROADCAST);
+#define TCPIP_STOP_SEC_CONST_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CONST_UNSPECIFIED
+#include "TcpIp_MemMap.h"
+const ip_addr_t ip_addr_broadcast = IPADDR4_INIT(IPADDR_BROADCAST);
+#define TCPIP_STOP_SEC_CONST_UNSPECIFIED
+#include "TcpIp_MemMap.h"
+
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Determine if an address is a broadcast address on a network interface
  *
@@ -83,7 +94,11 @@ ip4_addr_isbroadcast_u32(u32_t addr, const struct netif *netif)
     return 0;
   }
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /** Checks if a netmask is valid (starting with ones, then only zeros)
  *
  * @param netmask the IPv4 netmask to check (in network byte order!)
@@ -111,7 +126,11 @@ ip4_addr_netmask_valid(u32_t netmask)
   /* no one after the first zero -> valid */
   return 1;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Ascii internet address interpretation routine.
  * The value returned is in network order.
@@ -129,7 +148,11 @@ ipaddr_addr(const char *cp)
   }
   return (IPADDR_NONE);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Check whether "cp" is a valid ascii representation
  * of an Internet address and convert to a binary address.
@@ -256,10 +279,18 @@ ip4addr_aton(const char *cp, ip4_addr_t *addr)
   }
   return 1;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #define TCPIP_VAR_STR_FOR_IP4ADDR_NTOA(coreIndex)   g_str_for_ip4addr_ntoa[(coreIndex)]
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 static char g_str_for_ip4addr_ntoa[TCPIP_MULTICORE_NUMBER][IP4ADDR_STRLEN_MAX];
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Convert numeric IP address into decimal dotted ASCII representation.
  * returns ptr to static buffer; not reentrant!
@@ -273,7 +304,11 @@ ip4addr_ntoa(const ip4_addr_t *addr)
 {
   return ip4addr_ntoa_r(addr, TCPIP_VAR_STR_FOR_IP4ADDR_NTOA(TcpIp_MulticoreIndex), IP4ADDR_STRLEN_MAX);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Same as ip4addr_ntoa, but reentrant since a user-supplied buffer is used.
  *
@@ -321,5 +356,7 @@ ip4addr_ntoa_r(const ip4_addr_t *addr, char *buf, int buflen)
   *--rp = 0;
   return buf;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #endif /* LWIP_IPV4 */

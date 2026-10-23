@@ -220,99 +220,165 @@ typedef enum
 /* =========================================== external data declarations =========================================== */
 #if (STD_ON == DCM_UDS_0X2C)
 #if (DCM_DDDID_NUM > 0u)
+#define DCM_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Dcm_MemMap.h"
 /**
  * @brief The dynamic defined did manager structure @range NA
  */
 /* PRQA S 3208,1037 ++ */ /* VL_Dcm_3208,VL_Dcm_1037 */
 extern Dcm_DDDIDType Dcm_DDDID[DCM_DDDID_NUM];
+#define DCM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Dcm_MemMap.h"
 #endif
 #endif
 #if (STD_ON == DCM_UDS_0X2A)
 #if (DCM_PERIODIC_CONNECTION_NUM > 0u)
+#define DCM_START_SEC_VAR_CLEARED_BOOLEAN
+#include "Dcm_MemMap.h"
 /**
  * @brief used to check txConfirmation, set to true when sent and false when confirmed @range NA
  */
 extern boolean Dcm_PeriodicConnectionSent[DCM_PERIODIC_CONNECTION_NUM];
+#define DCM_STOP_SEC_VAR_CLEARED_BOOLEAN
+#include "Dcm_MemMap.h"
 /* PRQA S 3208,1037 -- */
 #endif
 #endif
 #if (STD_ON == DCM_UDS_0X36)
+#define DCM_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Dcm_MemMap.h"
 /**
  * @brief The data transfer control unit @range NA
  */
 extern Dcm_TransferDataType Dcm_TransferData;
+#define DCM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Dcm_MemMap.h"
 #endif
 #if (STD_ON == DCM_UDS_0X86)
+#define DCM_START_SEC_VAR_CLEARED_8
+#include "Dcm_MemMap.h"
 /**
  * @brief total requested number roe @range 0..255
  */
 extern uint8 Dcm_RoeCtrlNum;
+#define DCM_STOP_SEC_VAR_CLEARED_8
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Dcm_MemMap.h"
 /**
  * @brief roe control unit @range NA
  */
 extern Dcm_RoeCtrlType Dcm_RoeCtrl[DCM_MAX_ROE_DID + DCM_MAX_ROE_DTC];
+#define DCM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Dcm_MemMap.h"
 #endif
 #if (STD_ON == DCM_UDS_0X2E)
 #if (STD_ON == DCM_USE_BNDM)
+#define DCM_START_SEC_VAR_CLEARED_8
+#include "Dcm_MemMap.h"
 /**
  * @brief store the BndM result for asynchronous BndM write @range NA
  */
 extern BndM_ResultType Dcm_BndMResult[DCM_BNDMDID_NUM];
+#define DCM_STOP_SEC_VAR_CLEARED_8
+#include "Dcm_MemMap.h"
 #endif
 #ifdef DCM_SECURE_CODING_DID_NUM
+#define DCM_START_SEC_VAR_CLEARED_32
+#include "Dcm_MemMap.h"
 /**
  * @brief store the secure coding did offset of the secure coding buffer @range NA
  */
 extern uint32 Dcm_SecureCodingDidOffset[DCM_SECURE_CODING_DID_NUM];
+#define DCM_STOP_SEC_VAR_CLEARED_32
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_VAR_CLEARED_32
+#include "Dcm_MemMap.h"
 /**
  * @brief store the current secure coding total data length @range NA
  */
 extern Dcm_MsgLenType Dcm_SecureCodingDataLength;
+#define DCM_STOP_SEC_VAR_CLEARED_32
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_VAR_CLEARED_8
+#include "Dcm_MemMap.h"
 /**
  * @brief secure coding buffer @range NA
  */
 extern uint8 Dcm_SecureCodingBuffer[DCM_SECURE_CODING_DATA_BUFFER_SIZE];
+#define DCM_STOP_SEC_VAR_CLEARED_8
+#include "Dcm_MemMap.h"
 #endif
 #endif
 #if (STD_ON == DCM_UDS_0X11)
+#define DCM_START_SEC_VAR_CLEARED_BOOLEAN
+#include "Dcm_MemMap.h"
 /**
  * @brief indicate processing ecuReset @range 0..1
  */
 extern boolean Dcm_ResetProcessing;
+#define DCM_STOP_SEC_VAR_CLEARED_BOOLEAN
+#include "Dcm_MemMap.h"
 #endif
 #if (STD_ON == DCM_UDS_0X14)
+#define DCM_START_SEC_VAR_CLEARED_BOOLEAN
+#include "Dcm_MemMap.h"
 /**
  * @brief indicate processing clearingDiagInfo @range 0..1
  */
 extern boolean Dcm_ProcessingClearingDiagInfo;
+#define DCM_STOP_SEC_VAR_CLEARED_BOOLEAN
+#include "Dcm_MemMap.h"
 #endif
 #if (STD_ON == DCM_UDS_0X29)
+#define DCM_START_SEC_VAR_CLEARED_8
+#include "Dcm_MemMap.h"
 /**
  * @brief Csm result for asynchronous Csm request @range NA
  */
 extern Crypto_ResultType Dcm_CsmResult;
+#define DCM_STOP_SEC_VAR_CLEARED_8
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_VAR_CLEARED_32
+#include "Dcm_MemMap.h"
 /**
  * @brief CsmJobId for asynchronous Csm request @range 0..0xFFFFFFFF
  */
 extern uint32 Dcm_CsmJobId;
+#define DCM_STOP_SEC_VAR_CLEARED_32
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_VAR_CLEARED_8
+#include "Dcm_MemMap.h"
 /**
  * @brief async authenticate process status @range NA
  */
 extern Dcm_AuthenticateProcessStatusTypes Dcm_AuthenticateAsync;
+#define DCM_STOP_SEC_VAR_CLEARED_8
+#include "Dcm_MemMap.h"
 #endif
 #ifdef DCM_UDS_0X29_0X4
+#define DCM_START_SEC_VAR_CLEARED_BOOLEAN
+#include "Dcm_MemMap.h"
 /**
  * @brief whether finished transmitting certificate @range 0..1
  */
 extern boolean Dcm_TransmitCertificate;
+#define DCM_STOP_SEC_VAR_CLEARED_BOOLEAN
+#include "Dcm_MemMap.h"
 #endif
 #if (STD_ON == DCM_UDS_0X27)
+#define DCM_START_SEC_VAR_CLEARED_8
+#include "Dcm_MemMap.h"
 /**
  * @brief store the previous requested seed security level @range 0..255
  */
 extern uint8 Dcm_reqSeedSecurityLevel;
+#define DCM_STOP_SEC_VAR_CLEARED_8
+#include "Dcm_MemMap.h"
 #endif
 /* ========================================= external function declarations ========================================= */
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         The service interpreter for UDS 0x10
  * @param[in]     OpStatus    : Indicates the current operation status
@@ -334,6 +400,10 @@ Std_ReturnType Dcm_UDS0x10(
     Dcm_ExtendedOpStatusType      OpStatus,
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         Called by Dcm_MainFunction/DcmInternal_CheckTimer to deal with session timer
  * @return        void
@@ -342,6 +412,10 @@ Std_ReturnType Dcm_UDS0x10(
  * @trace         CPD-PLACEHOLDE
  */
 void Dcm_UDS0x10_CheckTimer(void);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         Called by Dcm_TpTxConfirmation for 0x10 service postivie response confirmation and
  *                ResetToDefaultSession to change the session
@@ -351,6 +425,10 @@ void Dcm_UDS0x10_CheckTimer(void);
  * @trace         CPD-PLACEHOLDE
  */
 void Dcm_UDS0x10_SessionChange(void);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         Called by DsdInternal_RxIndication to check general service/subService session and most of th UDS
  *                services to check did, rid, memory, etc. session.
@@ -368,8 +446,12 @@ void Dcm_UDS0x10_SessionChange(void);
  */
 Std_ReturnType
     Dcm_UDS0x10_CheckSession(const Dcm_SesCtrlType* session, uint8 sessionNum, Dcm_NegativeResponseCodeType* ErrorCode);
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if (STD_ON == DCM_UDS_0X11)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
+
 /**
  * @brief         The service interpreter for UDS 0x11
  * @param[in]     OpStatus    : Indicates the current operation status
@@ -391,9 +473,13 @@ Std_ReturnType Dcm_UDS0x11(
     Dcm_ExtendedOpStatusType      OpStatus,
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #if (STD_ON == DCM_UDS_0X14)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         The service interpreter for UDS 0x14
  * @param[in]     OpStatus    : Indicates the current operation status
@@ -414,9 +500,13 @@ Std_ReturnType Dcm_UDS0x14(
     Dcm_ExtendedOpStatusType      OpStatus,
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #if (STD_ON == DCM_UDS_0X19)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         The service interpreter for UDS 0x19
  * @param[in]     OpStatus    : Indicates the current operation status
@@ -437,9 +527,13 @@ Std_ReturnType Dcm_UDS0x19(
     Dcm_ExtendedOpStatusType      OpStatus,
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #if (STD_ON == DCM_UDS_0X22)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         The service interpreter for UDS 0x22
  * @param[in]     OpStatus    : Indicates the current operation status
@@ -461,9 +555,13 @@ Std_ReturnType Dcm_UDS0x22(
     Dcm_ExtendedOpStatusType      OpStatus,
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #if (STD_ON == DCM_UDS_0X23)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         The service interpreter for UDS 0x23
  * @param[in]     OpStatus    : Indicates the current operation status
@@ -485,9 +583,13 @@ Std_ReturnType Dcm_UDS0x23(
     Dcm_ExtendedOpStatusType      OpStatus,
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #if (STD_ON == DCM_UDS_0X24)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         The service interpreter for UDS 0x24
  * @param[in]     OpStatus    : Indicates the current operation status
@@ -508,9 +610,13 @@ Std_ReturnType Dcm_UDS0x24(
     Dcm_ExtendedOpStatusType      OpStatus,
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #if (STD_ON == DCM_UDS_0X27)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         The service interpreter for UDS 0x27
  * @param[in]     OpStatus    : Indicates the current operation status
@@ -531,6 +637,10 @@ Std_ReturnType Dcm_UDS0x27(
     Dcm_ExtendedOpStatusType      OpStatus,
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         This function checks whether the current security State is supported
  * @param[in]     security    : the requested security
@@ -549,6 +659,10 @@ Std_ReturnType Dcm_UDS0x27_CheckSecurity(
     const Dcm_SecLevelType*       security,
     uint8                         securityNum,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         This function checks the security timer and decrease counter
@@ -558,6 +672,10 @@ Std_ReturnType Dcm_UDS0x27_CheckSecurity(
  * @trace         CPD-PLACEHOLDE
  */
 void Dcm_UDS0x27_CheckTimer(void);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         This function calls the SetAttemptCounterFnc and actually sets the attemptCounter
@@ -570,7 +688,11 @@ void Dcm_UDS0x27_CheckTimer(void);
  * @trace         CPD-PLACEHOLDE
  */
 void Dcm_UDS0x27_SetAttemptCounter(Dcm_OpStatusType OpStatus, uint8 securityIndex, uint8 attemptCounter);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if (STD_ON == DCM_SECURITY_READOUT)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         This function is called by Dcm_MainFunction to process the getAttemptCounter
  * @return        void
@@ -579,6 +701,10 @@ void Dcm_UDS0x27_SetAttemptCounter(Dcm_OpStatusType OpStatus, uint8 securityInde
  * @trace         CPD-PLACEHOLDE
  */
 void Dcm_UDS0x27_GetAttemptCounter(void);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         This function is called by Dcm_MainFunction to process the setAttemptCounter
  * @return        void
@@ -587,10 +713,14 @@ void Dcm_UDS0x27_GetAttemptCounter(void);
  * @trace         CPD-PLACEHOLDE
  */
 void Dcm_UDS0x27_SetAttemptCounterHandle(void);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 #endif
 
 #if (STD_ON == DCM_UDS_0X31)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         The service interpreter for UDS 0x31
  * @param[in]     OpStatus    : Indicates the current operation status
@@ -611,9 +741,13 @@ Std_ReturnType Dcm_UDS0x31(
     Dcm_ExtendedOpStatusType      OpStatus,
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #if (STD_ON == DCM_UDS_0X34)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         The service interpreter for UDS 0x34
  * @param[in]     OpStatus    : Indicates the current operation status
@@ -634,9 +768,13 @@ Std_ReturnType Dcm_UDS0x34(
     Dcm_ExtendedOpStatusType      OpStatus,
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #if (STD_ON == DCM_UDS_0X35)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         The service interpreter for UDS 0x35
  * @param[in]     OpStatus    : Indicates the current operation status
@@ -657,9 +795,13 @@ Std_ReturnType Dcm_UDS0x35(
     Dcm_ExtendedOpStatusType      OpStatus,
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #if (STD_ON == DCM_UDS_0X37)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         The service interpreter for UDS 0x37
  * @param[in]     OpStatus    : Indicates the current operation status
@@ -680,9 +822,13 @@ Std_ReturnType Dcm_UDS0x37(
     Dcm_ExtendedOpStatusType      OpStatus,
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #if (STD_ON == DCM_UDS_0X38)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         The service interpreter for UDS 0x38
  * @param[in]     OpStatus    : Indicates the current operation status
@@ -704,9 +850,13 @@ Std_ReturnType Dcm_UDS0x38(
     Dcm_ExtendedOpStatusType      OpStatus,
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #if (STD_ON == DCM_UDS_0X85)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief        The service interpreter for UDS 0x85
  * @param[in]    OpStatus    : Indicates the current operation status
@@ -727,6 +877,10 @@ Std_ReturnType Dcm_UDS0x85(
     Dcm_ExtendedOpStatusType      OpStatus,
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         enables the DTC setting (session change or 85 req)
  * @return        void
@@ -735,7 +889,11 @@ Std_ReturnType Dcm_UDS0x85(
  * @trace         CPD-PLACEHOLDE
  */
 void Dcm_UDS0x85_EnableDTCSetting(void);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if (STD_ON == DCM_UDS_0X85_MODERULE)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         enables the DTC setting when mode rule fails
  * @return        void
@@ -744,10 +902,14 @@ void Dcm_UDS0x85_EnableDTCSetting(void);
  * @trace         CPD-PLACEHOLDE
  */
 void Dcm_UDS0x85_MainFunction(void);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 #endif
 
 #if (STD_ON == DCM_UDS_0X86)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         The service interpreter for UDS 0x86
  * @param[in]     OpStatus    : Indicates the current operation status
@@ -767,9 +929,13 @@ Std_ReturnType Dcm_UDS0x86(
     Dcm_ExtendedOpStatusType      OpStatus,
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #if (STD_ON == DCM_UDS_0X2A)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         The service interpreter for UDS 0x2A
  * @param[in]     OpStatus    : Indicates the current operation status
@@ -790,8 +956,12 @@ Std_ReturnType Dcm_UDS0x2A(
     Dcm_ExtendedOpStatusType      OpStatus,
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode);
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if (DCM_PERIODIC_CONNECTION_NUM > 0u)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
+
 /**
  * @brief         Called by Dcm_MainFunction to deal with 2A scheduler counter and message sending
  * @return        void
@@ -800,7 +970,11 @@ Std_ReturnType Dcm_UDS0x2A(
  * @trace         CPD-PLACEHOLDE
  */
 void Dcm_UDS0x2A_MainFunction(void);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         Called by UDS 0x10, 0x29 and 0x27 to notify the session/security/authenticationState change so as to
@@ -811,6 +985,10 @@ void Dcm_UDS0x2A_MainFunction(void);
  * @trace         CPD-PLACEHOLDE
  */
 void Dcm_UDS0x2A_StatusChangeHandle(void);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         Remove the corresponding DID reading service from the 0x2A service dispatch table.
@@ -820,10 +998,14 @@ void Dcm_UDS0x2A_StatusChangeHandle(void);
  * @trace         CPD-PLACEHOLDE
  */
 void Dcm_UDS0x2A_Remove_Scheduler(uint16 DidIndex);
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #if (STD_ON == DCM_UDS_0X2C)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
+
 /**
  * @brief         The service interpreter for UDS 0x2C
  * @param[in]     OpStatus    : Indicates the current operation status
@@ -843,9 +1025,13 @@ Std_ReturnType Dcm_UDS0x2C(
     Dcm_ExtendedOpStatusType      OpStatus,
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #if (STD_ON == DCM_UDS_0X2E)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         The service interpreter for UDS 0x2E
  * @param[in]     OpStatus    : Indicates the current operation status
@@ -866,6 +1052,10 @@ Std_ReturnType Dcm_UDS0x2E(
     Dcm_ExtendedOpStatusType      OpStatus,
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         Called to write did data
@@ -890,8 +1080,12 @@ Std_ReturnType Dcm_UDS0x2E_WriteDspData(
     const uint8*                  reqData,
     Dcm_MsgLenType                reqDataLen,
     Dcm_NegativeResponseCodeType* ErrorCode);
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #ifdef DCM_SECURE_CODING_DID_NUM
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
+
 /**
  * @brief         Called by Dcm_Init to initialize secure coding did offset
  * @return        void
@@ -900,10 +1094,14 @@ Std_ReturnType Dcm_UDS0x2E_WriteDspData(
  * @trace         CPD-PLACEHOLDE
  */
 void Dcm_UDS0x2E_Init(void);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 #endif
 
 #if (STD_ON == DCM_UDS_0X2F)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         The service interpreter for UDS 0x2F
  * @param[in]     OpStatus    : Indicates the current operation status
@@ -924,8 +1122,12 @@ Std_ReturnType Dcm_UDS0x2F(
     Dcm_ExtendedOpStatusType      OpStatus,
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode);
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if (DCM_DID_NUM > 0)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
+
 /**
  * @brief         Called by UDS 0x2F and 0x10 to notify session/security/authenticationState change and call
  *                returnControlToEcu accordingly if it is no long supported in current status
@@ -935,10 +1137,14 @@ Std_ReturnType Dcm_UDS0x2F(
  * @trace         CPD-PLACEHOLDE
  */
 void Dcm_UDS0x2F_StatusChangeHandle(Dcm_SesCtrlType newSession);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 #endif
 
 #if ((STD_ON == DCM_UDS_0X23) || (STD_ON == DCM_UDS_0X34) || (STD_ON == DCM_UDS_0X2C))
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         Called by UDS 0x2C, 0x3D, 0x23, 0x34, 0x35 to check whether the input memoryAdd and memorySize is
  *                valid
@@ -970,9 +1176,13 @@ Std_ReturnType Dcm_UDS_CheckMemory(
     uint32*                       MemorySize,
     uint8                         memoryAccess,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #if ((STD_ON == DCM_UDS_0X34) || (STD_ON == DCM_UDS_0X35))
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         Called by UDS 0x34, 0x35 to set the lengthFormatIdentifier and blockLength to resData accordingly
  * @param[in]     BlockLength : the input blockLength
@@ -984,9 +1194,13 @@ Std_ReturnType Dcm_UDS_CheckMemory(
  * @trace         CPD-PLACEHOLDE
  */
 void Dcm_UDS_SetBlockLength(uint32 BlockLength, uint8* ResData, Dcm_MsgLenType* ResDataLen);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #if (STD_ON == DCM_UDS_0X36)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         The service interpreter for UDS 0x36
  * @param[in]     OpStatus    : Indicates the current operation status
@@ -1008,6 +1222,10 @@ Std_ReturnType Dcm_UDS0x36(
     Dcm_ExtendedOpStatusType      OpStatus,
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         Called by UDS 0x34, 0x35 and 0x37 to initialize transferData status
  * @param[in]     transferStatus   : current transfer status
@@ -1026,9 +1244,13 @@ void Dcm_UDS_InitTransferData(
     uint32                 memoryAddress,
     uint32                 blockLength,
     uint32                 memorySize);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #if (STD_ON == DCM_UDS_0X3D)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         The service interpreter for UDS 0x3D
  * @param[in]     OpStatus : Indicates the current operation status
@@ -1050,9 +1272,13 @@ Std_ReturnType Dcm_UDS0x3D(
     Dcm_ExtendedOpStatusType      OpStatus,
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #if (STD_ON == DCM_UDS_0X3E)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         The service interpreter for UDS 0x3E
  * @param[in]     OpStatus    : Indicates the current operation status
@@ -1072,9 +1298,13 @@ Std_ReturnType Dcm_UDS0x3E(
     Dcm_ExtendedOpStatusType      OpStatus,
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #if ((STD_ON == DCM_UDS_0X22) || (STD_ON == DCM_UDS_0X2E) || (STD_ON == DCM_UDS_0X24) || (STD_ON == DCM_UDS_0X2C))
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         Called by UDS 0x22, 0x24, 0x2A, 0x2C and 0x2E to check whether this did is supported to read/write in
  *                the current session/security/mode/authenticationState
@@ -1096,11 +1326,15 @@ Std_ReturnType Dcm_UDS_CheckReadWriteDid(
     uint16                         Did,
     const Dcm_DspDidReadWriteType* DcmDspDidReadWrite,
     Dcm_NegativeResponseCodeType*  ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #if (                                                                                                            \
     (STD_ON == DCM_UDS_0X2E) || (STD_ON == DCM_UDS_0X2F) || (STD_ON == DCM_UDS_0X86) || (STD_ON == DCM_UDS_0X24) \
     || (STD_ON == DCM_UDS_0X2C) || (STD_ON == DCM_UDS_0X2A))
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         This function gets the configured did index, also applying to rangeDid and OBDDid.
  * @param[in]     Did       : the input did
@@ -1117,9 +1351,13 @@ Std_ReturnType Dcm_UDS_CheckReadWriteDid(
  */
 Std_ReturnType
     Dcm_UDS_FindDid(uint16 Did, Dcm_DidType* didType, uint16* DidIndex, Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #if ((STD_ON == DCM_UDS_0X22) || (STD_ON == DCM_UDS_0X2A) || (STD_ON == DCM_UDS_0X2F))
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         Called by UDS 0x22/0x2A/0x2F to read data in did's signals
  * @param[in]     OpStatus   : Indicates the current operation status
@@ -1143,6 +1381,10 @@ Std_ReturnType Dcm_UDS_SignalHandle(
     uint8*                        DestBuffer,
     uint16*                       DataLength,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         Called by UDS 0x22 to read data in did's signals
@@ -1169,8 +1411,12 @@ Std_ReturnType Dcm_UDS_DidReadHandle(
     uint8*                        DestBuffer,
     Dcm_MsgLenType*               BufSize,
     Dcm_NegativeResponseCodeType* ErrorCode);
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if (STD_ON == DCM_DYN_DID)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
+
 /**
  * @brief         Called by UDS 0x22 and 0x2A to read data of a dynamic did
  * @param[in]     OpStatus     : Indicates the current operation status
@@ -1203,10 +1449,14 @@ Std_ReturnType Dcm_UDS_DynDidHandle(
     boolean* checkFail,
 #endif
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 #endif
 
 #if (STD_ON == DCM_UDS_0X86)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         called by Dcm_Init to initialize roe status, only apply for nvm stored roe data
  * @return        void
@@ -1215,6 +1465,10 @@ Std_ReturnType Dcm_UDS_DynDidHandle(
  * @trace         CPD-PLACEHOLDE
  */
 void Dcm_UDS0x86_Init(void);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         called when DTC Status change or did written to trigger established service request
  * @param[in]     roeCtrlPtr : the related roeCtrl unit
@@ -1224,6 +1478,10 @@ void Dcm_UDS0x86_Init(void);
  * @trace         CPD-PLACEHOLDE
  */
 void Dcm_UDS0x86_TriggerServiceRequest(Dcm_RoeCtrlType* roeCtrlPtr);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         called by Dcm_MainFunction to check scheduler rate
  * @return        void
@@ -1232,9 +1490,13 @@ void Dcm_UDS0x86_TriggerServiceRequest(Dcm_RoeCtrlType* roeCtrlPtr);
  * @trace         CPD-PLACEHOLDE
  */
 void Dcm_UDS0x86_CheckTimer(void);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #if (STD_ON == DCM_UDS_0X28)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         The service interpreter for UDS 0x28
  * @param[in]     OpStatus    : Indicates the current operation status
@@ -1254,6 +1516,10 @@ Std_ReturnType Dcm_UDS0x28(
     Dcm_ExtendedOpStatusType      OpStatus,
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         This function switch the comMode and calls the releated function when txConfirmation
  * @param[in]     ConnectionId : the current connectionId
@@ -1263,8 +1529,12 @@ Std_ReturnType Dcm_UDS0x28(
  * @trace         CPD-PLACEHOLDE
  */
 void Dcm_UDS0x28_TxConfirmation(uint16 ConnectionId);
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if ((DCM_COMCONTROL_ALL_NUM > 0) || (DCM_COMCONTROL_SPE_NUM > 0) || (DCM_COMCONTROL_SUB_NUM > 0))
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
+
 /**
  * @brief         This function is called when session is changed and it enables the communication accordingly
  * @return        void
@@ -1273,6 +1543,10 @@ void Dcm_UDS0x28_TxConfirmation(uint16 ConnectionId);
  * @trace         CPD-PLACEHOLDE
  */
 void Dcm_UDS0x28_SessionChange(void);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         This function is called by Dcm_MainFunction when UDS 0x28 is configured with modeRule, it checks
  *                whether the mode rule is no longer effective and enables the communication again
@@ -1282,10 +1556,14 @@ void Dcm_UDS0x28_SessionChange(void);
  * @trace         CPD-PLACEHOLDE
  */
 void Dcm_UDS0x28_MainFunction(void);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 #endif
 
 #if (STD_ON == DCM_UDS_0X29)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         The service interpreter for UDS 0x29
  * @param[in]     OpStatus    : Indicates the current operation status
@@ -1305,6 +1583,10 @@ Std_ReturnType Dcm_UDS0x29(
     Dcm_ExtendedOpStatusType      OpStatus,
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         This function initialize the variables used by UDS 0x29
  * @return        void
@@ -1313,6 +1595,11 @@ Std_ReturnType Dcm_UDS0x29(
  * @trace         CPD-PLACEHOLDE
  */
 void Dcm_UDS0x29_Init(void);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#ifdef DCM_AUTHENTICATION_DEFAULT_SESSION_TIMEOUT
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         called by Dcm_MainFunction to handle timer
  * @return        void
@@ -1320,8 +1607,12 @@ void Dcm_UDS0x29_Init(void);
  * @synchronous   TRUE
  * @trace         CPD-PLACEHOLDE
  */
-#ifdef DCM_AUTHENTICATION_DEFAULT_SESSION_TIMEOUT
 void Dcm_UDS0x29_MainFunction(void);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#endif
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         called by DsdInternal_RxIndication to verify service and subfunction authentication
  * @param[in]     ConnectionId  : the current connection
@@ -1337,12 +1628,15 @@ void Dcm_UDS0x29_MainFunction(void);
  * @synchronous   TRUE
  * @trace         CPD-PLACEHOLDE
  */
-#endif
 Std_ReturnType Dcm_UDS0x29_AuthenticationCheck(
     uint16                        ConnectionId,
     const uint8*                  subRoleRef,
     uint8                         subRoleRefNum,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         This function switches the authenticationStatus to DCM_DEAUTHENTICATED and restore status accordingly
  * @param[in]     ConnectionId : the current connectionId
@@ -1352,7 +1646,11 @@ Std_ReturnType Dcm_UDS0x29_AuthenticationCheck(
  * @trace         CPD-PLACEHOLDE
  */
 void Dcm_UDS0x29_SetDeAuthenticate(uint16 ConnectionId);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #ifdef DCM_AUTHENTICATION_DEFAULT_SESSION_TIMEOUT
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         This function is called by Dcm_TpTxConfirmation to actually set the authenticationState on
  * @param[in]     ConnectionId : the current connection Id
@@ -1362,7 +1660,11 @@ void Dcm_UDS0x29_SetDeAuthenticate(uint16 ConnectionId);
  * @trace         CPD-PLACEHOLDE
  */
 void Dcm_UDS0x29_SetAuthenticationCtrlOn(uint16 ConnectionId);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         This function is called by Dcm_StartOfReception to actually set the authenticationState off
  * @param[in]     ConnectionId : the current connection Id
@@ -1372,8 +1674,12 @@ void Dcm_UDS0x29_SetAuthenticationCtrlOn(uint16 ConnectionId);
  * @trace         CPD-PLACEHOLDE
  */
 void Dcm_UDS0x29_SetAuthenticationCtrlOff(uint16 ConnectionId);
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if ((STD_ON == DCM_UDS_0X22) || (STD_ON == DCM_UDS_0X2A) || (STD_ON == DCM_UDS_0X2E) || (STD_ON == DCM_UDS_0X2F))
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
+
 /**
  * @brief         called by UDS 0x22, 0x24, 0x2A, 0x2C, 0x2E, 0x2F to check did authentication
  * @param[in]     ConnectionId : the current connection
@@ -1394,9 +1700,13 @@ Std_ReturnType Dcm_UDS0x29_DidAuthenticationCheck(
     const Dcm_DspDidReadWriteType* didReadWrite,
     const Dcm_DspDidControlType*   didControl,
     Dcm_NegativeResponseCodeType*  ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #if (STD_ON == DCM_UDS_0X31)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         called by UDS 0x31 to check rid authentication
  * @param[in]     ConnectionId  : the current connection
@@ -1413,6 +1723,8 @@ Std_ReturnType Dcm_UDS0x29_RidAuthenticationCheck(
     uint16                        ConnectionId,
     uint16                        RoutineCfgIdx,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 #endif
 

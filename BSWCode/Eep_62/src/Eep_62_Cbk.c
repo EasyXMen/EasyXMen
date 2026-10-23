@@ -41,12 +41,15 @@
 /**
  * @brief Interface for job end notification
  */
-/* PRQA S 1503 ++ */ /* VL_Eep_62_1503 */
+/* PRQA S 1503 ++ */ /* VL_QAC_NoUsedApi */
 void Eep_62_JobEndNotification(void)
 {
     return;
 }
-
+#define EEP_62_STOP_SEC_CODE
+#include "Eep_62_MemMap.h"
+#define EEP_62_START_SEC_CODE
+#include "Eep_62_MemMap.h"
 /**
  * @brief Interface for job error notification
  */

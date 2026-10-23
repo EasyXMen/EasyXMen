@@ -61,7 +61,11 @@ typedef struct
  *
  * @return  None.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_Aes_Setkey_Enc(Crypto_AESData* ctx, uint8* key, uint16 keybits);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Sets the decryption key for AES.
@@ -72,7 +76,11 @@ void Crypto_Aes_Setkey_Enc(Crypto_AESData* ctx, uint8* key, uint16 keybits);
  *
  * @return  None.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_Aes_Setkey_Dec(Crypto_AESData* ctx, uint8* key, uint16 keybits);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Encrypts or decrypts data using AES in ECB mode.
@@ -87,13 +95,11 @@ void Crypto_Aes_Setkey_Dec(Crypto_AESData* ctx, uint8* key, uint16 keybits);
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
-Std_ReturnType Crypto_Aes_Crypt_Ecb(
-    Crypto_AESData* ctx,
-    uint8           mode,
-    uint32          length,
-    const uint8*    input,
-    uint8*          output,
-    uint32*         outputLen);
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+Std_ReturnType Crypto_Aes_Crypt_Ecb(Crypto_AESData* ctx, uint8 mode, uint32 length, const uint8* input, uint8* output);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Encrypts or decrypts data using AES in CTR mode.
@@ -110,6 +116,8 @@ Std_ReturnType Crypto_Aes_Crypt_Ecb(
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Aes_Crypt_Ctr(
     Crypto_AESData* ctx,
     uint8           mode,
@@ -117,6 +125,8 @@ Std_ReturnType Crypto_Aes_Crypt_Ctr(
     uint8           iv[CRYPTO_CONST_16],
     const uint8*    input,
     uint8*          output);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Encrypts or decrypts data using AES in CBC mode.
@@ -132,14 +142,17 @@ Std_ReturnType Crypto_Aes_Crypt_Ctr(
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Aes_Crypt_Cbc(
     Crypto_AESData* ctx,
     uint8           mode,
     uint32          length,
     uint8           iv[CRYPTO_CONST_16],
     const uint8*    input,
-    uint8*          output,
-    uint32*         outputLen);
+    uint8*          output);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Encrypts or decrypts data using AES in CFB128 mode.
@@ -156,6 +169,8 @@ Std_ReturnType Crypto_Aes_Crypt_Cbc(
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Aes_Crypt_Cfb128(
     Crypto_AESData* ctx,
     uint8           mode,
@@ -164,6 +179,8 @@ Std_ReturnType Crypto_Aes_Crypt_Cfb128(
     uint8           iv[CRYPTO_CONST_16],
     const uint8*    input,
     uint8*          output);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Encrypts or decrypts data using AES in OFB mode.
@@ -179,6 +196,8 @@ Std_ReturnType Crypto_Aes_Crypt_Cfb128(
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Aes_Crypt_Ofb(
     Crypto_AESData* ctx,
     uint32          length,
@@ -186,6 +205,8 @@ Std_ReturnType Crypto_Aes_Crypt_Ofb(
     uint8           iv[CRYPTO_CONST_16],
     const uint8*    input,
     uint8*          output);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Encrypts or decrypts data using AES in CFB8 mode.
@@ -201,6 +222,8 @@ Std_ReturnType Crypto_Aes_Crypt_Ofb(
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Aes_Crypt_Cfb8(
     Crypto_AESData* ctx,
     uint8           mode,
@@ -208,6 +231,8 @@ Std_ReturnType Crypto_Aes_Crypt_Cfb8(
     uint8           iv[CRYPTO_CONST_16],
     const uint8*    input,
     uint8*          output);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Computes the CMAC using AES.
@@ -222,7 +247,11 @@ Std_ReturnType Crypto_Aes_Crypt_Cfb8(
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Aes_Crypt_Cmac(Crypto_AESData* ctx, uint8 mode, uint8 length, uint8* input, uint8* output);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Encrypts a single block of data using AES.
@@ -235,8 +264,12 @@ Std_ReturnType Crypto_Aes_Crypt_Cmac(Crypto_AESData* ctx, uint8 mode, uint8 leng
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType
     Internal_Aes_Encrypt(Crypto_AESData* ctx, const uint8 input[CRYPTO_CONST_16], uint8 output[CRYPTO_CONST_16]);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Decrypts a single block of data using AES.
@@ -249,8 +282,25 @@ Std_ReturnType
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType
     Internal_Aes_Decrypt(Crypto_AESData* ctx, const uint8 input[CRYPTO_CONST_16], uint8 output[CRYPTO_CONST_16]);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+
+/**
+ * \brief          This function releases and clears the specified AES context.
+ *
+ * \param ctx      The AES context to clear.
+ *                 If this is \c NULL, this function does nothing.
+ *                 Otherwise, the context must have been at least initialized.
+ */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+void Crypto_Aes_Free(Crypto_AESData* ctx);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 #ifdef __cplusplus
 }

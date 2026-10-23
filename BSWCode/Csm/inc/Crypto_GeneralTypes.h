@@ -38,60 +38,67 @@ extern "C" {
  * Enumeration of the algorithm family.
  * */
 /*Development errors used by the CRYPTO module*/
-#define CRYPTO_E_UNINIT        ((uint8)0x00)
-#define CRYPTO_E_INIT_FAILED   ((uint8)0x01)
-#define CRYPTO_E_PARAM_POINTER ((uint8)0x02)
-#define CRYPTO_E_PARAM_HANDLE  ((uint8)0x04)
-#define CRYPTO_E_PARAM_VALUE   ((uint8)0x05)
-#define CRYPTO_E_SMALL_BUFFER  ((uint8)0x06)
+#define CRYPTO_E_UNINIT        ((uint8)0x00u)
+#define CRYPTO_E_INIT_FAILED   ((uint8)0x01u)
+#define CRYPTO_E_PARAM_POINTER ((uint8)0x02u)
+#define CRYPTO_E_PARAM_HANDLE  ((uint8)0x04u)
+#define CRYPTO_E_PARAM_VALUE   ((uint8)0x05u)
+#define CRYPTO_E_SMALL_BUFFER  ((uint8)0x06u)
 #define CRYPTO_E_QUEUE_FULL    ((Std_ReturnType)0x05u)
 /*[SWS_Csm_01022]key element id*/
 /*MAC*/
-#define CRYPTO_KE_MAC_KEY   ((uint32)1U)
-#define CRYPTO_KE_MAC_PROOF ((uint32)2U)
+#define CRYPTO_KE_MAC_KEY      (1uL)
+#define CRYPTO_KE_MAC_PROOF    (2uL)
 
 /*Signature*/
-#define CRYPTO_KE_SIGNATURE_KEY ((uint32)1U)
+#define CRYPTO_KE_SIGNATURE_KEY       (1uL)
+#define CRYPTO_KE_SIGNATURE_CURVETYPE (29uL)
+
 /*Random*/
-#define CRYPTO_KE_RANDOM_SEED_STATE ((uint32)3U)
-#define CRYPTO_KE_RANDOM_ALGORITHM  ((uint32)4U)
+#define CRYPTO_KE_RANDOM_SEED_STATE                                    (3uL)
+#define CRYPTO_KE_RANDOM_ALGORITHM                                     (4uL)
 /*Cipher/AEAD*/
-#define CRYPTO_KE_CIPHER_KEY    ((uint32)1U)
-#define CRYPTO_KE_CIPHER_IV     ((uint32)5U)
-#define CRYPTO_KE_CIPHER_PROOF  ((uint32)6U)
-#define CRYPTO_KE_CIPHER_2NDKEY ((uint32)7U)
+#define CRYPTO_KE_CIPHER_KEY                                           (1uL)
+#define CRYPTO_KE_CIPHER_IV                                            (5uL)
+#define CRYPTO_KE_CIPHER_PROOF                                         (6uL)
+#define CRYPTO_KE_CIPHER_2NDKEY                                        (7uL)
 /*Key Exchange*/
-#define CRYPTO_KE_KEYEXCHANGE_BASE        ((uint32)8U)
-#define CRYPTO_KE_KEYEXCHANGE_PRIVKEY     ((uint32)9U)
-#define CRYPTO_KE_KEYEXCHANGE_OWNPUBKEY   ((uint32)10U)
-#define CYRPTO_KE_KEYEXCHANGE_SHAREDVALUE ((uint32)1U)
-#define CRYPTO_KE_KEYEXCHANGE_ALGORITHM   ((uint32)12U)
-#define CRYPTO_KE_KEYEXCHANGE_CURVETYPE   ((uint32)29U)
+#define CRYPTO_KE_KEYEXCHANGE_BASE                                     (8uL)
+#define CRYPTO_KE_KEYEXCHANGE_PRIVKEY                                  (9uL)
+#define CRYPTO_KE_KEYEXCHANGE_OWNPUBKEY                                (10uL)
+#define CRYPTO_KE_KEYEXCHANGE_SHAREDVALUE                              (1uL)
+#define CRYPTO_KE_KEYEXCHANGE_ALGORITHM                                (12uL)
+#define CRYPTO_KE_KEYEXCHANGE_CURVETYPE                                (29uL)
 /*Key Derivation*/
-#define CRYPTO_KE_KEYDERIVATION_PASSWORD   ((uint32)1U)
-#define CRYPTO_KE_KEYDERIVATION_SALT       ((uint32)13U)
-#define CRYPTO_KE_KEYDERIVATION_ITERATIONS ((uint32)14U)
-#define CRYPTO_KE_KEYDERIVATION_ALGORITHM  ((uint32)15U)
-#define CRYPTO_KE_KEYDERIVATION_CURVETYPE  ((uint32)29U)
+#define CRYPTO_KE_KEYDERIVATION_PASSWORD                               (1uL)
+#define CRYPTO_KE_KEYDERIVATION_SALT                                   (13uL)
+#define CRYPTO_KE_KEYDERIVATION_ITERATIONS                             (14uL)
+#define CRYPTO_KE_KEYDERIVATION_ALGORITHM                              (15uL)
+#define CRYPTO_KE_KEYDERIVATION_CURVETYPE                              (29uL)
 /*Key Generate*/
-#define CRYPTO_KE_KEYGENERATE_KEY       ((uint32)1U)
-#define CRYPTO_KE_KEYGENERATE_SEED      ((uint32)16U)
-#define CRYPTO_KE_KEYGENERATE_ALGORITHM ((uint32)17U)
-#define CRYPTO_KE_KEYGENERATE_CURVETYPE ((uint32)29U)
+#define CRYPTO_KE_KEYGENERATE_KEY                                      (1uL)
+#define CRYPTO_KE_KEYGENERATE_SEED                                     (16uL)
+#define CRYPTO_KE_KEYGENERATE_ALGORITHM                                (17uL)
+#define CRYPTO_KE_KEYGENERATE_CURVETYPE                                (29uL)
 /*Certificate Parsing*/
-#define CRYPTO_KE_CERTIFICATE_DATA                ((uint32)0)
-#define CRYPTO_KE_CERTIFICATE_PARSING_FORMAT      ((uint32)18U)
-#define CRYPTO_KE_CERTIFICATE_CURRENT_TIME        ((uint32)19U)
-#define CRYPTO_KE_CERTIFICATE_VERSION             ((uint32)20U)
-#define CRYPTO_KE_CERTIFICATE_SERIALNUMBER        ((uint32)21U)
-#define CRYPTO_KE_CERTIFICATE_SIGNATURE_ALGORITHM ((uint32)22U)
-#define CRYPTO_KE_CERTIFICATE_ISSUER              ((uint32)23U)
-#define CRYPTO_KE_CERTIFICATE_VALIDITY_NOT_BEFORE ((uint32)24U)
-#define CRYPTO_KE_CERTIFICATE_VALIDITY_NOT_AFTER  ((uint32)25U)
-#define CRYPTO_KE_CERTIFICATE_SUBJECT             ((uint32)26U)
-#define CRYPTO_KE_CERTIFICATE_SUBJECT_PUBLIC_KEY  ((uint32)1U)
-#define CRYPTO_KE_CERTIFICATE_EXTENSIONS          ((uint32)27U)
-#define CRYPTO_KE_CERTIFICATE_SIGNATURE           ((uint32)28U)
+#define CRYPTO_KE_CERTIFICATE_DATA                                     (0uL)
+#define CRYPTO_KE_CERTIFICATE_PARSING_FORMAT                           (18uL)
+#define CRYPTO_KE_CERTIFICATE_VERSION                                  (20uL)
+#define CRYPTO_KE_CERTIFICATE_SERIALNUMBER                             (21uL)
+#define CRYPTO_KE_CERTIFICATE_SIGNATURE_ALGORITHM                      (22uL)
+#define CRYPTO_KE_CERTIFICATE_ISSUER                                   (23uL)
+#define CRYPTO_KE_CERTIFICATE_VALIDITY_NOT_BEFORE                      (24uL)
+#define CRYPTO_KE_CERTIFICATE_VALIDITY_NOT_AFTER                       (25uL)
+#define CRYPTO_KE_CERTIFICATE_SUBJECT                                  (26uL)
+#define CRYPTO_KE_CERTIFICATE_SUBJECT_PUBLIC_KEY                       (1uL)
+#define CRYPTO_KE_CERTIFICATE_EXTENSIONS                               (27uL)
+#define CRYPTO_KE_CERTIFICATE_SIGNATURE                                (28uL)
+#define CRYPTO_KE_CERTIFICATE_ISSUER_UNIQUE_IDENTIFIER                 (29uL)
+#define CRYPTO_KE_CERTIFICATE_SIGNATURE_ALGORITHM_ID                   (30uL)
+#define CRYPTO_KE_CERTIFICATE_SUBJECT_PUBLICKEYINFO_PUBLICKEYALGORITHM (31uL)
+#define CRYPTO_KE_CERTIFICATE_SUBJECT_UNIQUE_IDENTIFIER                (32uL)
+#define CRYPTO_KE_CERTIFICATE_REVOKED_CERTIFICATES                     (33uL)
+#define CRYPTO_KE_CERTIFICATE_SUBJECT_AUTHORIZATION                    (34uL)
 
 /* ================================================ type definitions ================================================ */
 /** @brief Enumeration of the algorithm family.*/
@@ -144,6 +151,7 @@ typedef enum
     CRYPTO_ALGOFAM_POLY1305             = 0x2Du,
     CRYPTO_ALGOFAM_X25519               = 0x2Eu,
     CRYPTO_ALGOFAM_ECDH                 = 0x2Fu,
+    CRYPTO_ALGOFAM_SM4                  = 0x30u,
     CRYPTO_ALGOFAM_CUSTOM               = 0xfFu
 
 } Crypto_AlgorithmFamilyType;
@@ -250,10 +258,32 @@ typedef enum
     CRYPTO_KEYEXCHANGECALCSECRET = 0x10u, /* KeyExchangeCalcSecret Service */
     CRYPTO_KEYSETVALID           = 0x13u, /* KeySetValid Service */
     CRYPTO_KEYSETINVALID         = 0x14u, /* KeySetinValid Service */
-    CUSTOM_SERVICE               = 0x15u, /* Custom Service */
+    CRYPTO_CUSTOM_SERVICE        = 0x15u, /* Custom Service */
     CRYPTO_SERVICEMAX            = 0x16u
 } Crypto_ServiceInfoType;
 /* PRQA S 1271-- */
+
+/*
+ * Curve types
+ */
+typedef enum
+{
+    CRYPTO_ECP_DP_NONE       = 0,  /*!< Curve not defined. */
+    CRYPTO_ECP_DP_SECP192R1  = 1,  /*!< Domain parameters for the 192-bit curve defined by FIPS 186-4 and SEC1. */
+    CRYPTO_ECP_DP_SECP224R1  = 2,  /*!< Domain parameters for the 224-bit curve defined by FIPS 186-4 and SEC1. */
+    CRYPTO_ECP_DP_SECP256R1  = 3,  /*!< Domain parameters for the 256-bit curve defined by FIPS 186-4 and SEC1. */
+    CRYPTO_ECP_DP_SECP384R1  = 4,  /*!< Domain parameters for the 384-bit curve defined by FIPS 186-4 and SEC1. */
+    CRYPTO_ECP_DP_SECP521R1  = 5,  /*!< Domain parameters for the 521-bit curve defined by FIPS 186-4 and SEC1. */
+    CRYPTO_ECP_DP_BP256R1    = 6,  /*!< Domain parameters for 256-bit Brainpool curve. */
+    CRYPTO_ECP_DP_BP384R1    = 7,  /*!< Domain parameters for 384-bit Brainpool curve. */
+    CRYPTO_ECP_DP_BP512R1    = 8,  /*!< Domain parameters for 512-bit Brainpool curve. */
+    CRYPTO_ECP_DP_CURVE25519 = 9,  /*!< Domain parameters for Curve25519. */
+    CRYPTO_ECP_DP_SECP192K1  = 10, /*!< Domain parameters for 192-bit "Koblitz" curve. */
+    CRYPTO_ECP_DP_SECP224K1  = 11, /*!< Domain parameters for 224-bit "Koblitz" curve. */
+    CRYPTO_ECP_DP_SECP256K1  = 12, /*!< Domain parameters for 256-bit "Koblitz" curve. */
+    CRYPTO_ECP_DP_CURVE448   = 13, /*!< Domain parameters for Curve448. */
+    CRYPTO_ECP_DP_MAX        = 14,
+} Crypto_ecp_group_id;
 
 /** @brief Structure which determines the exact algorithm.*/
 typedef struct

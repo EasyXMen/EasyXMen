@@ -34,14 +34,15 @@
 #if (STD_ON == CANIF_PARTITION_USED)
 #include "Os.h"
 #endif
+#if (STD_ON == CANIF_PUBLIC_BUS_MIRRORING_SUPPORT)
+#include "Mirror.h"
+#endif
 
 /* ===================================================== macros ===================================================== */
 
 /* ================================================ type definitions ================================================ */
 
 /* ========================================== internal function declarations ======================================== */
-#define CANIF_START_SEC_CODE
-#include "CanIf_MemMap.h"
 
 #if (STD_ON == CANIF_PUBLIC_TX_BUFFERING)
 /**
@@ -61,8 +62,23 @@ CANIF_LOCAL_INLINE void CanIf_TxPduBufferResetUsed(CanIf_TxPduBufferType* txPduB
 }
 #endif
 
-#define CANIF_STOP_SEC_CODE
-#include "CanIf_MemMap.h"
+#if (STD_ON == CANIF_PUBLIC_BUS_MIRRORING_SUPPORT)
+/**
+ * Check if the Hth Pdu Buffer is used
+ */
+CANIF_LOCAL_INLINE boolean CanIf_HthPduBufferIsUsed(const CanIf_HthPduBufferType* hthPduBufferPtr)
+{
+    return (hthPduBufferPtr->TxPduIndex < CanIf_ConfigStd->TxPduConfigNumber);
+}
+
+/**
+ * Reset the Hth Pdu Buffer
+ */
+CANIF_LOCAL_INLINE void CanIf_HthPduBufferResetUsed(CanIf_HthPduBufferType* hthPduBufferPtr)
+{
+    hthPduBufferPtr->TxPduIndex = CanIf_ConfigStd->TxPduConfigNumber;
+}
+#endif
 
 /* ============================================ internal data definitions =========================================== */
 
@@ -71,10 +87,11 @@ CANIF_LOCAL_INLINE void CanIf_TxPduBufferResetUsed(CanIf_TxPduBufferType* txPduB
 /* ========================================== external function definitions ========================================= */
 
 /* ========================================== internal function definitions ========================================= */
+
+#if ((STD_ON == CANIF_PUBLIC_READ_RX_PDU_NOTIFY_STATUS_API) || (STD_ON == CANIF_PUBLIC_READ_TX_PDU_NOTIFY_STATUS_API))
 #define CANIF_START_SEC_CODE
 #include "CanIf_MemMap.h"
 
-#if ((STD_ON == CANIF_PUBLIC_READ_RX_PDU_NOTIFY_STATUS_API) || (STD_ON == CANIF_PUBLIC_READ_TX_PDU_NOTIFY_STATUS_API))
 /**
  *  Re-init rxNotifyStatus and txNotifyStatus of one controller
  */
@@ -127,9 +144,14 @@ void CanIf_FreeRxTxNotifyStatus(const CanIf_CtrlPbConfigType* ctrlPbConfigPtr)
     CANIF_NOUSED(ctrlPbConfigPtr);
 #endif
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if (STD_ON == CANIF_PUBLIC_TX_BUFFERING)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+
 /**
  * init all rxNotifyStatus and txNotifyStatus
  */
@@ -166,9 +188,14 @@ void CanIf_InitTxBuffer(ApplicationType partitionIndex)
     CANIF_NOUSED(partitionIndex);
 #endif
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if (STD_ON == CANIF_PUBLIC_READ_RX_PDU_DATA_API)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+
 /**
  * init RxBuffer
  */
@@ -201,9 +228,14 @@ void CanIf_InitRxBuffer(ApplicationType partitionIndex)
     CANIF_NOUSED(partitionIndex);
 #endif
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if ((STD_ON == CANIF_PUBLIC_READ_RX_PDU_NOTIFY_STATUS_API) || (STD_ON == CANIF_PUBLIC_READ_TX_PDU_NOTIFY_STATUS_API))
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+
 /**
  * init all rxNotifyStatus and txNotifyStatus
  */
@@ -238,9 +270,14 @@ void CanIf_InitRxTxNotifyStatus(ApplicationType partitionIndex)
     }
 #endif
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if (STD_ON == CANIF_PUBLIC_TX_BUFFERING)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+
 /**
  * CanIf call can_write which return CAN_BSUY,then set the write requece and data to tx buffer
  */
@@ -303,6 +340,11 @@ Std_ReturnType CanIf_TxBusyHandle(const CanIf_TxPduConfigType* txPduConfigPtr, c
 
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 
 /**
  * free the txbuffer
@@ -340,6 +382,11 @@ void CanIf_FreeControllerTxBuffer(const CanIf_CtrlPbConfigType* ctrlPbConfigPtr)
     CANIF_NOUSED(ctrlPbConfigPtr);
 #endif
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 
 /**
  * Transmit the buffered tx pdu
@@ -402,7 +449,12 @@ void CanIf_TransmitBufferedPdu(const CanIf_TxPduConfigType* txPduConfigPtr)
     CANIF_NOUSED(txPduConfigPtr);
 #endif
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 
 /**
  * notify negative tx confirmation to upper layer
@@ -436,8 +488,13 @@ void CanIf_NotifyNegativeTxConfirmation(const CanIf_CtrlPbConfigType* ctrlPbConf
         }
     }
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
 #if (STD_ON == CANIF_PUBLIC_READ_RX_PDU_DATA_API)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+
 /**
  * init the Receive Buffer
  */
@@ -472,7 +529,12 @@ void CanIf_FreeControllerRxBuffer(const CanIf_CtrlPbConfigType* ctrlPbConfigPtr)
     CANIF_NOUSED(ctrlPbConfigPtr);
 #endif
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 
 /**
  * Get the base Pdu CanId
@@ -541,6 +603,11 @@ void CanIf_GetBaseCanIdHandle(
 
     *canIdPtr = canId;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 
 /**
  * init the Dynamic Transmit CanId of one controller
@@ -573,6 +640,11 @@ void CanIf_FreeDynamicTxPduCanIds(const CanIf_CtrlPbConfigType* ctrlPbConfigPtr)
     CANIF_NOUSED(ctrlPbConfigPtr);
 #endif
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 
 /**
  * init all Dynamic Transmit CanId
@@ -600,6 +672,11 @@ void CanIf_InitDynamicTxPduCanId(ApplicationType partitionIndex)
     CANIF_NOUSED(partitionIndex);
 #endif
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 
 /**
  * init all tx confirmation status
@@ -622,6 +699,11 @@ void CanIf_InitUpConfirmTxPduStatus(ApplicationType partitionIndex)
     CANIF_NOUSED(partitionIndex);
 #endif
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 
 /**
  * init all controller runtime status
@@ -656,15 +738,208 @@ void CanIf_InitCtrlRuntime(ApplicationType partitionIndex)
                 ctrlRuntimePtr->PnTxFilter = FALSE;
             }
 #endif
+#if (STD_ON == CANIF_PUBLIC_BUS_MIRRORING_SUPPORT)
+            ctrlRuntimePtr->MirroringActive = FALSE;
+#endif
         }
 
         ++ctrlPbConfigPtr;
         ++ctrlConfigPtr;
     }
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+
+#if (STD_ON == CANIF_PUBLIC_BUS_MIRRORING_SUPPORT)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+
+/**
+ * Init the mirror buffer
+ */
+void CanIf_MirrorInitBuffer(ApplicationType partitionIndex)
+{
+#if (CANIF_HTHBUFFER_MAX_NUMBER > 0u)
+    if (CANIF_HTHBUFFER_CONFIG_NUMBER(partitionIndex) > 0u)
+    {
+        CanIf_HthByteBufferNumberType    hthByteBufferIndex = 0u;
+        const CanIf_HthBufferConfigType* bufferConfigPtr    = &CANIF_HTHBUFFER_CONFIG(partitionIndex, 0u);
+        CanIf_HthBufferType*             hthBufferPtr       = &CANIF_HTHBUFFER(partitionIndex, 0u);
+        CanIf_HthPduBufferType*          hthPduBufferPtr    = &CANIF_HTHPDUBUFFER(partitionIndex, 0u);
+
+        for (CanIf_HthBufferNumberType hthBufferIndex = 0u;
+             hthBufferIndex < CANIF_HTHBUFFER_CONFIG_NUMBER(partitionIndex);
+             ++hthBufferIndex)
+        {
+            hthBufferPtr->PduLength          = bufferConfigPtr->PduLength;
+            hthBufferPtr->HthPduBufferNumber = bufferConfigPtr->BufferSize;
+            hthBufferPtr->HthPduBufferRef    = hthPduBufferPtr;
+
+            for (CanIf_HthPduBufferNumberType sizeIndex = 0u; sizeIndex < bufferConfigPtr->BufferSize; ++sizeIndex)
+            {
+                CanIf_HthPduBufferResetUsed(hthPduBufferPtr);
+                hthPduBufferPtr->Data = &CANIF_HTHBYTEBUFFER(partitionIndex, hthByteBufferIndex);
+
+                hthByteBufferIndex += bufferConfigPtr->PduLength;
+                ++hthPduBufferPtr;
+            }
+
+            ++bufferConfigPtr;
+            ++hthBufferPtr;
+        }
+    }
+#else
+    CANIF_NOUSED(partitionIndex);
+#endif
+}
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+
+/**
+ * Free the mirror Tx buffer
+ */
+void CanIf_MirrorFreeTxFrame(const CanIf_CtrlPbConfigType* ctrlPbConfigPtr)
+{
+#if (CANIF_HTHBUFFER_MAX_NUMBER > 0u)
+    ApplicationType partitionIndex = CANIF_PARTITION_INDEX(ctrlPbConfigPtr);
+
+    if ((CANIF_HTHBUFFER_NUMBER(partitionIndex) > 0u)
+        && (ctrlPbConfigPtr->HthIndexMin < ctrlPbConfigPtr->HthIndexMaxExcluded))
+    {
+        Can_HwHandleType           hthIndex     = ctrlPbConfigPtr->HthIndexMin;
+        const CanIf_HthConfigType* hthConfigPtr = &CANIF_HTH(hthIndex);
+
+        for (; hthIndex < ctrlPbConfigPtr->HthIndexMaxExcluded; ++hthIndex)
+        {
+            CanIf_HthBufferNumberType hthBufferIndex = hthConfigPtr->HthBufferIndex;
+
+            if (hthBufferIndex < CANIF_HTHBUFFER_NUMBER(partitionIndex))
+            {
+                const CanIf_HthBufferType* hthBufferPtr    = &CANIF_HTHBUFFER(partitionIndex, hthBufferIndex);
+                CanIf_HthPduBufferType*    hthPduBufferPtr = hthBufferPtr->HthPduBufferRef;
+
+                for (CanIf_HthPduBufferNumberType sizeIndex = 0u; sizeIndex < hthBufferPtr->HthPduBufferNumber;
+                     ++sizeIndex)
+                {
+                    CanIf_HthPduBufferResetUsed(hthPduBufferPtr);
+
+                    ++hthPduBufferPtr;
+                }
+            }
+
+            ++hthConfigPtr;
+        }
+    }
+#else
+    CANIF_NOUSED(ctrlPbConfigPtr);
+#endif
+}
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+
+/**
+ * Store the Tx frame to the mirror buffer
+ */
+void CanIf_MirrorStoreTxFrame(
+    const CanIf_CtrlPbConfigType* ctrlPbConfigPtr,
+    const CanIf_HthConfigType*    hthConfigPtr,
+    PduIdType                     txPduIndex,
+    const Can_PduType*            canPduPtr)
+{
+#if (CANIF_HTHBUFFER_MAX_NUMBER > 0u)
+    ApplicationType           partitionIndex = CANIF_PARTITION_INDEX(ctrlPbConfigPtr);
+    CanIf_HthBufferNumberType hthBufferIndex = hthConfigPtr->HthBufferIndex;
+
+    if (hthBufferIndex < CANIF_HTHBUFFER_NUMBER(partitionIndex))
+    {
+        const CanIf_HthBufferType* hthBufferPtr    = &CANIF_HTHBUFFER(partitionIndex, hthBufferIndex);
+        CanIf_HthPduBufferType*    hthPduBufferPtr = hthBufferPtr->HthPduBufferRef;
+
+        for (CanIf_HthPduBufferNumberType sizeIndex = 0u; sizeIndex < hthBufferPtr->HthPduBufferNumber; ++sizeIndex)
+        {
+            if (!CanIf_HthPduBufferIsUsed(hthPduBufferPtr))
+            {
+                hthPduBufferPtr->CanId  = canPduPtr->id;
+                hthPduBufferPtr->Length = canPduPtr->length;
+                if (hthPduBufferPtr->Length > hthBufferPtr->PduLength)
+                {
+                    hthPduBufferPtr->Length = hthBufferPtr->PduLength;
+                }
+                (void)IStdLib_MemCpy(hthPduBufferPtr->Data, canPduPtr->sdu, hthPduBufferPtr->Length);
+                hthPduBufferPtr->TxPduIndex = txPduIndex;
+                break;
+            }
+
+            ++hthPduBufferPtr;
+        }
+    }
+#else
+    CANIF_NOUSED(ctrlPbConfigPtr);
+    CANIF_NOUSED(hthConfigPtr);
+    CANIF_NOUSED(txPduIndex);
+    CANIF_NOUSED(canPduPtr);
+#endif
+}
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+
+/**
+ * Report the Tx frame
+ */
+void CanIf_MirrorReportTxFrame(
+    const CanIf_CtrlPbConfigType* ctrlPbConfigPtr,
+    const CanIf_HthConfigType*    hthConfigPtr,
+    PduIdType                     txPduIndex)
+{
+#if (CANIF_HTHBUFFER_MAX_NUMBER > 0u)
+    ApplicationType           partitionIndex = CANIF_PARTITION_INDEX(ctrlPbConfigPtr);
+    CanIf_HthBufferNumberType hthBufferIndex = hthConfigPtr->HthBufferIndex;
+
+    if (hthBufferIndex < CANIF_HTHBUFFER_NUMBER(partitionIndex))
+    {
+        const CanIf_HthBufferType* hthBufferPtr    = &CANIF_HTHBUFFER(partitionIndex, hthBufferIndex);
+        CanIf_HthPduBufferType*    hthPduBufferPtr = hthBufferPtr->HthPduBufferRef;
+
+        for (CanIf_HthPduBufferNumberType sizeIndex = 0u; sizeIndex < hthBufferPtr->HthPduBufferNumber; ++sizeIndex)
+        {
+            if (hthPduBufferPtr->TxPduIndex == txPduIndex)
+            {
+                Mirror_ReportCanFrame(
+                    hthConfigPtr->CanIfHthCanCtrlId,
+                    hthPduBufferPtr->CanId,
+                    hthPduBufferPtr->Length,
+                    hthPduBufferPtr->Data);
+                CanIf_HthPduBufferResetUsed(hthPduBufferPtr);
+                break;
+            }
+
+            ++hthPduBufferPtr;
+        }
+    }
+#else
+    CANIF_NOUSED(ctrlPbConfigPtr);
+    CANIF_NOUSED(hthConfigPtr);
+    CANIF_NOUSED(txPduIndex);
+#endif
+}
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+#endif
 
 #if (STD_ON == CANIF_PARTITION_USED)
 #if (CANIF_PARTITION_ID2INDEX_NUMBER > 0u)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+
 /**
  * get partition index of current application ID
  */
@@ -684,8 +959,7 @@ ApplicationType CanIf_GetCurrentPartition(void)
 
     return partitionIndex;
 }
-#endif
-#endif
-
 #define CANIF_STOP_SEC_CODE
 #include "CanIf_MemMap.h"
+#endif
+#endif

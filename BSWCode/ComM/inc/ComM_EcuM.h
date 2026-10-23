@@ -42,6 +42,8 @@ extern "C" {
 /* =========================================== external data declarations =========================================== */
 
 /* ========================================= external function declarations ========================================= */
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief Notification of a wake up on the corresponding channel.
  * @param[in]    Channel  Channel
@@ -50,8 +52,12 @@ extern "C" {
  * @trace        CPD-59642
  */
 void ComM_EcuM_WakeUpIndication(NetworkHandleType Channel);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
 #if COMM_PNC_SUPPORT == STD_ON
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief Notification of a wake up on the corresponding partial network cluster.
  * @param[in]    Pnc  Identifier of the partial network cluster
@@ -60,6 +66,8 @@ void ComM_EcuM_WakeUpIndication(NetworkHandleType Channel);
  * @trace        CPD-59643
  */
 void ComM_EcuM_PNCWakeUpIndication(PNCHandleType Pnc);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 #endif
 #ifdef __cplusplus
 }

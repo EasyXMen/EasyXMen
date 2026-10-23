@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
@@ -37,6 +37,7 @@
 #include "XcpOnEth_Cbk.h"
 #endif /*XCP_ON_ETHERNET_ENABLE == STD_ON*/
 #include "IStdLib.h"
+#include "Xcp_Arti.h"
 
 /* ===================================================== macros ===================================================== */
 #define XCP_CONST_0   0x00u
@@ -59,7 +60,7 @@
 #define XCP_U8_MAX  0xFFu
 #define XCP_U16_MAX 0xFFFFu
 
-#define XCP_PID_OFFSET 0x00u
+#define XCP_PID_OFFSET              0x00u
 /*
  * Command Code
  */
@@ -139,55 +140,55 @@
  * End of Command Code
  */
 
-#define XCP_RESP_ERROR_OFFSET 0x01u
-#define XCP_RESP_POS_PID      0xFFu
-#define XCP_RESP_ERR_PID      0xFEu
-#define XCP_RESP_ERR_LEN      0x2u
+#define XCP_RESP_ERROR_OFFSET         0x01u
+#define XCP_RESP_POS_PID              0xFFu
+#define XCP_RESP_ERR_PID              0xFEu
+#define XCP_RESP_ERR_LEN              0x2u
 /*
  * Error Code
  */
-#define XCP_ERR_CMD_SYNCH         0x00u
-#define XCP_ERR_CMD_BUSY          0x10u
-#define XCP_ERR_DAQ_ACTIVE        0x11u
-#define XCP_ERR_PGM_ACTIVE        0x12u
-#define XCP_ERR_CMD_UNKNOWN       0x20u
-#define XCP_ERR_CMD_SYNTAX        0x21u
-#define XCP_ERR_OUT_OF_RANGE      0x22u
-#define XCP_ERR_WRITE_PROTECTED   0x23u
-#define XCP_ERR_ACCESS_DENIED     0x24u
-#define XCP_ERR_ACCESS_LOCKED     0x25u
-#define XCP_ERR_PAGE_NOT_VALID    0x26u
-#define XCP_ERR_MODE_NOT_VALID    0x27u
-#define XCP_ERR_SEGMENT_NOT_VALID 0x28u
-#define XCP_ERR_SEQUENCE          0x29u
-#define XCP_ERR_DAQ_CONFIG        0x2Au
-#define XCP_ERR_MEMORY_OVERFLOW   0x30u
-#define XCP_ERR_GENERIC           0x31u
-#define XCP_ERR_VERIFY            0x32u
-#define XCP_ERR_RES_TEMP_NOT_A    0x33u
+#define XCP_ERR_CMD_SYNCH             0x00u
+#define XCP_ERR_CMD_BUSY              0x10u
+#define XCP_ERR_DAQ_ACTIVE            0x11u
+#define XCP_ERR_PGM_ACTIVE            0x12u
+#define XCP_ERR_CMD_UNKNOWN           0x20u
+#define XCP_ERR_CMD_SYNTAX            0x21u
+#define XCP_ERR_OUT_OF_RANGE          0x22u
+#define XCP_ERR_WRITE_PROTECTED       0x23u
+#define XCP_ERR_ACCESS_DENIED         0x24u
+#define XCP_ERR_ACCESS_LOCKED         0x25u
+#define XCP_ERR_PAGE_NOT_VALID        0x26u
+#define XCP_ERR_MODE_NOT_VALID        0x27u
+#define XCP_ERR_SEGMENT_NOT_VALID     0x28u
+#define XCP_ERR_SEQUENCE              0x29u
+#define XCP_ERR_DAQ_CONFIG            0x2Au
+#define XCP_ERR_MEMORY_OVERFLOW       0x30u
+#define XCP_ERR_GENERIC               0x31u
+#define XCP_ERR_VERIFY                0x32u
+#define XCP_ERR_RES_TEMP_NOT_A        0x33u
 /*
  * End of Error Code
  */
-#define XCP_EV_PID                0xFDu
-#define XCP_EV_CODE_OFFEST        0x01u
-#define XCP_EV_RESUME_SSID_OFFEST 0x02u
-#define XCP_EV_RESUME_TS_OFFEST   0x04u
+#define XCP_EV_PID                    0xFDu
+#define XCP_EV_CODE_OFFEST            0x01u
+#define XCP_EV_RESUME_SSID_OFFEST     0x02u
+#define XCP_EV_RESUME_TS_OFFEST       0x04u
 /*
  *  Event Code
  */
-#define XCP_EV_RESUME_MODE        0x00u
-#define XCP_EV_CLEAR_DAQ          0x01u
-#define XCP_EV_STORE_DAQ          0x02u
-#define XCP_EV_STORE_CAL          0x03u
-#define XCP_EV_CMD_PENDING        0x05u
-#define XCP_EV_DAQ_OVERLOAD       0x06u
-#define XCP_EV_SESSION_TERMINATED 0x07u
-#define XCP_EV_TIME_SYNC          0x08u
-#define XCP_EV_STIM_TIMEOUT       0x09u
-#define XCP_EV_SLEEP              0x0Au
-#define XCP_EV_WAKE_UP            0x0Bu
-#define XCP_EV_USER               0xFEu
-#define XCP_EV_TRANSPORT          0xFFu
+#define XCP_EV_RESUME_MODE            0x00u
+#define XCP_EV_CLEAR_DAQ              0x01u
+#define XCP_EV_STORE_DAQ              0x02u
+#define XCP_EV_STORE_CAL              0x03u
+#define XCP_EV_CMD_PENDING            0x05u
+#define XCP_EV_DAQ_OVERLOAD           0x06u
+#define XCP_EV_SESSION_TERMINATED     0x07u
+#define XCP_EV_TIME_SYNC              0x08u
+#define XCP_EV_STIM_TIMEOUT           0x09u
+#define XCP_EV_SLEEP                  0x0Au
+#define XCP_EV_WAKE_UP                0x0Bu
+#define XCP_EV_USER                   0xFEu
+#define XCP_EV_TRANSPORT              0xFFu
 /*
  * End of Event Code
  */
@@ -222,22 +223,22 @@
 #define XCP_DAQ_SS_QUEUE   0x02u
 #define XCP_DAQ_SS_SENDING 0x04u
 /* OVERLOAD */
-#define XCP_DAQ_SS_OVL  0x08u
-#define XCP_DAQ_SS_DONE 0x10u
+#define XCP_DAQ_SS_OVL     0x08u
+#define XCP_DAQ_SS_DONE    0x10u
 
-#define XCP_DAQ_MOD_RESUME  0x80u
-#define XCP_DAQ_MOD_RUNNING 0x40u
+#define XCP_DAQ_MOD_RESUME   0x80u
+#define XCP_DAQ_MOD_RUNNING  0x40u
 /* Bit 4 is Time Stamp */
-#define XCP_DAQ_MOD_PIDOFF 0x20u
+#define XCP_DAQ_MOD_PIDOFF   0x20u
 /* Bit 4 is Time Stamp */
-#define XCP_DAQ_MOD_TS 0x10u
+#define XCP_DAQ_MOD_TS       0x10u
 /* Bit 1 is Direction */
 #define XCP_DAQ_MOD_DIR_BIT  0x02u /* DIRECTION */
 #define XCP_DAQ_MOD_DIR_DAQ  0X00u
 #define XCP_DAQ_MOD_DIR_STIM 0x02u
 /* Bit 0 is Alternating */
-#define XCP_DAQ_MOD_SELE   0x01u /* SELECTED */
-#define XCP_DAQ_MOD_AL_BIT 0x01u
+#define XCP_DAQ_MOD_SELE     0x01u /* SELECTED */
+#define XCP_DAQ_MOD_AL_BIT   0x01u
 
 /* XCP checksum types */
 #define XCP_CHECKSUM_TYPE_ADD_11      0x01u
@@ -472,31 +473,74 @@ typedef Xcp_ChannelPgmType* Xcp_ChannelPgmPtr;
 
 /* ========================================== internal function definitions ========================================= */
 
+#define XCP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Xcp_MemMap.h"
 /* =========================================== external data declarations =========================================== */
 extern Xcp_ChannelCommonType Xcp_ChannelCommonData;
+#define XCP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Xcp_MemMap.h"
+
 #if (XCP_PL_DAQ == (XCP_PL_DAQ & XCP_RESOURCE))
-extern Xcp_ChannelDaqType  Xcp_ChannelDaqData;
+#define XCP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Xcp_MemMap.h"
+extern Xcp_ChannelDaqType Xcp_ChannelDaqData;
+#define XCP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Xcp_MemMap.h"
+
+#define XCP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Xcp_MemMap.h"
 extern Xcp_ChannelEvChType Xcp_ChannelEvChData;
+#define XCP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Xcp_MemMap.h"
 #endif
 #if (XCP_PL_PGM == (XCP_PL_PGM & XCP_RESOURCE))
+#define XCP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Xcp_MemMap.h"
 extern Xcp_ChannelPgmType Xcp_ChannelPtgmData;
+#define XCP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Xcp_MemMap.h"
 #endif
+#define XCP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Xcp_MemMap.h"
 extern boolean Xcp_ModuleInit;
+#define XCP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Xcp_MemMap.h"
+
 /*
  * Block transfer
  * */
 #if (XCP_MASTER_BLOCK_MODE == STD_ON)
+#define XCP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Xcp_MemMap.h"
 extern Xcp_AGType Xcp_BlockBuffer[XCP_BLOCK_BUFFER_SIZE];
+#define XCP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Xcp_MemMap.h"
 #endif /*XCP_MASTER_BLOCK_MODE == STD_ON*/
 
+#define XCP_START_SEC_VAR_CLEARED_8
+#include "Xcp_MemMap.h"
 extern uint8 Xcp_CmdBuffer[XCP_MAX_CTO];
+#define XCP_STOP_SEC_VAR_CLEARED_8
+#include "Xcp_MemMap.h"
+
+#define XCP_START_SEC_VAR_CLEARED_8
+#include "Xcp_MemMap.h"
 extern uint8 Xcp_RespBuffer[XCP_MAX_CTO];
+#define XCP_STOP_SEC_VAR_CLEARED_8
+#include "Xcp_MemMap.h"
+
+#define XCP_START_SEC_VAR_CLEARED_8
+#include "Xcp_MemMap.h"
 extern uint8 Xcp_EvBuffer[XCP_MAX_CTO];
-extern uint8 Xcp_ServBuffer[XCP_MAX_CTO];
+#define XCP_STOP_SEC_VAR_CLEARED_8
+#include "Xcp_MemMap.h"
+
 #if (STD_ON == XCP_CHECK_MEA_ADDR)
-/* PRQA S 1512 ++ */ /* VL_Xcp_1512 */
-extern const Xcp_MeaAddrCheckType Xcp_MeaAddrCfgSet[XCP_CHECK_MEASET_NUM];
-/* PRQA S 1512 -- */
+#define XCP_START_SEC_CONST_PTR
+#include "Xcp_MemMap.h"
+extern const Xcp_MeaAddrCheckType Xcp_MeaAddrCfgSet[XCP_CHECK_MEASET_NUM]; /* PRQA S 1512 */ /* VL_Xcp_1512 */
+#define XCP_STOP_SEC_CONST_PTR
+#include "Xcp_MemMap.h"
 #endif
 /*
  * DAQ
@@ -504,17 +548,27 @@ extern const Xcp_MeaAddrCheckType Xcp_MeaAddrCfgSet[XCP_CHECK_MEASET_NUM];
 #if (XCP_PL_DAQ == (XCP_PL_DAQ & XCP_RESOURCE))
 
 #if (XCP_GET_DAQ_CLOCK == STD_ON)
+#define XCP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Xcp_MemMap.h"
 extern uint32 Xcp_RxTimeStamp;
+#define XCP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Xcp_MemMap.h"
 #endif /* XCP_GET_DAQ_CLOCK == STD_ON */
 
 #endif /*XCP_PL_DAQ == XCP_PL_DAQ & XCP_RESOURCE*/
 
+#define XCP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Xcp_MemMap.h"
 /* Global initial point */
 extern const Xcp_ConfigType* Xcp_PbCfgPtr;
+#define XCP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Xcp_MemMap.h"
 
 /* ========================================= external function declarations ========================================= */
 #if (XCP_TIMESTAMP_TYPE != XCP_TS_NO_TIME_STAMP)
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Reads the current system time in milliseconds from the system timer.
  * @return      uint32
@@ -524,6 +578,8 @@ extern const Xcp_ConfigType* Xcp_PbCfgPtr;
  * @trace       CPD-63913
  */
 extern uint32 Xcp_ReadOutMS(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
 #endif /*XCP_TIMESTAMP_TYPE != XCP_TS_NO_TIME_STAMP*/
 
@@ -549,6 +605,8 @@ XCP_LOCAL_INLINE boolean Xcp_CheckMemVaild(uint32 addr, uint32 size, uint32 star
  * common services
  */
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Initialize the status of the command.
  * @reentrant   FALSE
@@ -556,7 +614,11 @@ XCP_LOCAL_INLINE boolean Xcp_CheckMemVaild(uint32 addr, uint32 size, uint32 star
  * @trace       CPD-63922
  */
 extern void Xcp_CommandInit(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Reset all internal states of XCP to their initial states.
  * @reentrant   FALSE
@@ -564,7 +626,11 @@ extern void Xcp_CommandInit(void);
  * @trace       CPD-63921
  */
 extern void Xcp_ClearStatus(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Store a four-byte long data into a single byte.
  * @param[in]   u4Data   : The four-byte source data to be copied.
@@ -575,7 +641,11 @@ extern void Xcp_ClearStatus(void);
  * @trace       CPD-63927
  */
 extern void Xcp_CopyU4ToU1Buffer(const uint32 u4Data, uint8* pu1BufferPtr, uint8 byteOrder);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Copy two-byte data and store it in a single byte.
  * @param[in]   u2Data   : The two-byte source data to be copied.
@@ -586,7 +656,11 @@ extern void Xcp_CopyU4ToU1Buffer(const uint32 u4Data, uint8* pu1BufferPtr, uint8
  * @trace       CPD-63928
  */
 extern void Xcp_CopyU2ToU1Buffer(const uint16 u2Data, uint8* pu1BufferPtr, uint8 byteOrder);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Copy a single byte and store it in four-byte data.
  * @param[in]   pu1BufferPtr   : The source data of a single byte to be copied.
@@ -597,7 +671,11 @@ extern void Xcp_CopyU2ToU1Buffer(const uint16 u2Data, uint8* pu1BufferPtr, uint8
  * @trace       CPD-63930
  */
 extern void Xcp_CopyU1BufferToU4(const uint8* pu1BufferPtr, uint32* pu4Data, uint8 byteOrder);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Copies a single byte buffer to a two-byte data element, considering the byte order.
  * @param[in]   pu1BufferPtr : Pointer to the source buffer containing single byte data.
@@ -612,7 +690,11 @@ extern void Xcp_CopyU1BufferToU2(
     uint16*      pu2Data,
 
     uint8 byteOrder);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Copies data from a source buffer to a destination buffer.
  * @param[in]   srcPtr       : Pointer to the source buffer.
@@ -623,7 +705,11 @@ extern void Xcp_CopyU1BufferToU2(
  * @trace       CPD-63932
  */
 extern void Xcp_BufferCopy(const void* srcPtr, void* destPtr, uint32 u4Length);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Sets an error code in the XCP response buffer.
  * @param[in]   u1ErrorCode : The error code to be set.
@@ -632,7 +718,11 @@ extern void Xcp_BufferCopy(const void* srcPtr, void* destPtr, uint32 u4Length);
  * @trace       CPD-63933
  */
 extern void Xcp_SetErrorCode(uint8 u1ErrorCode);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Sends a response from the XCP layer.
  * @reentrant   FALSE
@@ -640,7 +730,11 @@ extern void Xcp_SetErrorCode(uint8 u1ErrorCode);
  * @trace       CPD-63935
  */
 extern void Xcp_SendResp(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Sends an event from the XCP layer.
  * @reentrant   FALSE
@@ -648,7 +742,11 @@ extern void Xcp_SendResp(void);
  * @trace       CPD-63944
  */
 extern void Xcp_SendEv(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Transmits data over the XCP communication channel.
  * @param[in]   pduId       : The identifier of the PDU to be used for transmission.
@@ -662,7 +760,11 @@ extern void Xcp_SendEv(void);
  * @trace       CPD-63926
  */
 extern Std_ReturnType Xcp_Transmit(PduIdType pduId, PduLengthType len, uint8* dataPtr);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Handles the indication of received data in the XCP communication channel.
  * @param[in]   len         : The length of the received data.
@@ -672,7 +774,11 @@ extern Std_ReturnType Xcp_Transmit(PduIdType pduId, PduLengthType len, uint8* da
  * @trace       CPD-63926
  */
 extern void Xcp_RxIndication(const PduLengthType len, const uint8* dataPtr);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Provides confirmation that the transmission of a PDU (Protocol Data Unit) has been completed.
  * @param[in]   pduId          : Identifier of the PDU for which the transmission confirmation is provided.
@@ -681,7 +787,11 @@ extern void Xcp_RxIndication(const PduLengthType len, const uint8* dataPtr);
  * @trace       CPD-63952
  */
 extern void Xcp_TxConfirmation(const PduIdType pduId);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Checks for detection errors during the reception indication phase of XCP communication.
  * @param[in]   XcpRxPduId    : Identifier of the received PDU for which the reception indication is being processed.
@@ -694,7 +804,11 @@ extern void Xcp_TxConfirmation(const PduIdType pduId);
  * @trace       CPD-63948
  */
 extern boolean Xcp_RxIndCheckDetErr(PduIdType XcpRxPduId, const PduInfoType* XcpRxPduPtr);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Checks for detection errors during the transmission indication phase of XCP communication.
  * @return      boolean
@@ -705,7 +819,11 @@ extern boolean Xcp_RxIndCheckDetErr(PduIdType XcpRxPduId, const PduInfoType* Xcp
  * @trace       CPD-63953
  */
 extern boolean Xcp_TxIndCheckDetErr(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /*
  * STD
  */
@@ -717,7 +835,11 @@ extern boolean Xcp_TxIndCheckDetErr(void);
  * @trace       CPD-64056
  */
 extern void Xcp_Connect(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Processes the XCP Disconnect command to terminate the connection with the slave.
  * @reentrant   FALSE
@@ -725,7 +847,11 @@ extern void Xcp_Connect(void);
  * @trace       CPD-64058
  */
 extern void Xcp_Disconnect(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Executes the hardware abstraction layer (HAL) specific actions for disconnecting from the XCP slave.
  * @reentrant   FALSE
@@ -733,7 +859,11 @@ extern void Xcp_Disconnect(void);
  * @trace       CPD-64057
  */
 extern void Xcp_DisconnectHal(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Retrieves the current status of the XCP connection.
  * @reentrant   FALSE
@@ -741,7 +871,11 @@ extern void Xcp_DisconnectHal(void);
  * @trace       CPD-64059
  */
 extern void Xcp_GetStatus(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Processes the XCP Synchronization command to synchronize the state of the slave with the master.
  * @reentrant   FALSE
@@ -749,9 +883,13 @@ extern void Xcp_GetStatus(void);
  * @trace       CPD-64060
  */
 extern void Xcp_Synch(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
 /* Xcp STD optional commands */
 #if (XCP_GET_COMM_MODE_INFO == STD_ON)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Provides communication mode information as part of the XCP protocol.
  * @reentrant   FALSE
@@ -759,8 +897,12 @@ extern void Xcp_Synch(void);
  * @trace       CPD-64061
  */
 extern void Xcp_GetCommModeInfo(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif
 #if (XCP_GET_ID == STD_ON)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Retrieves identification information according to the XCP protocol.
  * @reentrant   FALSE
@@ -768,8 +910,12 @@ extern void Xcp_GetCommModeInfo(void);
  * @trace       CPD-64062
  */
 extern void Xcp_GetId(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif
 #if (XCP_SET_REQUEST == STD_ON)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Sets various request types for the XCP session such as storing calibration data or managing DAQ lists.
  * @reentrant   FALSE
@@ -777,6 +923,11 @@ extern void Xcp_GetId(void);
  * @trace       CPD-64063
  */
 extern void Xcp_SetRequest(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
+
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Handles the execution of requests set by the `Xcp_SetRequest` function,
  *              such as storing calibration data or DAQ configurations.
@@ -785,9 +936,13 @@ extern void Xcp_SetRequest(void);
  * @trace       CPD-63977
  */
 extern void Xcp_SetRequestHandler(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif
 
 #if (XCP_SEED_AND_UNLOCK == STD_ON)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Retrieves a seed for unlocking protection mechanisms in the XCP protocol.
  * @reentrant   FALSE
@@ -795,6 +950,11 @@ extern void Xcp_SetRequestHandler(void);
  * @trace       CPD-64066
  */
 extern void Xcp_GetSeed(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
+
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Attempts to unlock a protected resource in the XCP protocol by providing a key.
  * @reentrant   FALSE
@@ -802,9 +962,13 @@ extern void Xcp_GetSeed(void);
  * @trace       CPD-64068
  */
 extern void Xcp_Unlock(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif
 /* Xcp STD optional commands */
 #if (XCP_SET_MTA == STD_ON)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Sets the Memory Transfer Address (MTA) used for subsequent data transfer operations.
  * @reentrant   FALSE
@@ -812,6 +976,11 @@ extern void Xcp_Unlock(void);
  * @trace       CPD-64069
  */
 extern void Xcp_SetMta(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
+
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Converts the Memory Transfer Address (MTA) and its extension into a pointer for memory access.
  * @param[in]   u1AddExt : Extension byte for the address.
@@ -823,7 +992,11 @@ extern void Xcp_SetMta(void);
  * @trace       CPD-64070
  */
 uint32 Xcp_Mta2Ptr(const uint8 u1AddExt, const uint32 u4Add);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Validates an address range against the allowed memory areas based on the specified memory type.
  * @param[in]   addr   : The base address to check.
@@ -837,7 +1010,11 @@ uint32 Xcp_Mta2Ptr(const uint8 u1AddExt, const uint32 u4Add);
  * @trace       CPD-64079
  */
 extern boolean Xcp_CheckAddress(uint32 addr, uint32 size, Xcp_MemAddrType type);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Updates the Memory Transfer Address (MTA) by a specified length.
  * @param[in]   u4Length : The length to increment the MTA by.
@@ -846,8 +1023,14 @@ extern boolean Xcp_CheckAddress(uint32 addr, uint32 size, Xcp_MemAddrType type);
  * @trace       CPD-64080
  */
 extern void Xcp_UpdateMTA(uint32 u4Length);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif
 
+#if (0u != ((XCP_PL_CAL | XCP_PL_PGM) & XCP_RESOURCE))
+#if (STD_ON == XCP_CHECK_MEA_ADDR)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Checks if a given address range is valid for measurement memory.
  * @param[in]   addr   : The base address to check.
@@ -860,8 +1043,14 @@ extern void Xcp_UpdateMTA(uint32 u4Length);
  * @trace       CPD-64078
  */
 boolean Xcp_CheckMeaMem(uint32 addr, uint32 size);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
+#endif
+#endif
 
 #if (XCP_UPLOAD == STD_ON)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Uploads data from the target system's memory to the master using the current MTA.
  * @reentrant   FALSE
@@ -869,9 +1058,13 @@ boolean Xcp_CheckMeaMem(uint32 addr, uint32 size);
  * @trace       CPD-64071
  */
 extern void Xcp_Upload(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif
 #if (XCP_SHORT_UPLOAD == STD_ON)
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Performs a short upload operation, transferring a small amount of data from the
  *              target system's memory to the master.
@@ -880,8 +1073,12 @@ extern void Xcp_Upload(void);
  * @trace       CPD-64073
  */
 extern void Xcp_ShortUpload(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif
 #if (XCP_BUILD_CHECKSUM == STD_ON)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Computes a checksum for a specified block of memory.
  * @reentrant   FALSE
@@ -889,8 +1086,12 @@ extern void Xcp_ShortUpload(void);
  * @trace       CPD-64076
  */
 extern void Xcp_BuildChecksum(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif
 #if (XCP_GET_SLAVE_ID == STD_ON)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Retrieves the slave ID of the XCP device, either through an echo or an inverse echo mechanism.
  * @reentrant   FALSE
@@ -898,12 +1099,16 @@ extern void Xcp_BuildChecksum(void);
  * @trace       CPD-64077
  */
 extern void Xcp_GetSlaveId(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif
 
 /*
  * CAL/PAG local Function
  */
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Initializes the calibration pages for the XCP protocol, copying data from read-only
  *              pages to writable pages.
@@ -912,7 +1117,11 @@ extern void Xcp_GetSlaveId(void);
  * @trace       CPD-63961
  */
 extern void Xcp_CALInit(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Validates an address range against the calibration memory areas (ROM or RAM).
  * @param[in]   addr   : The base address to check.
@@ -926,10 +1135,15 @@ extern void Xcp_CALInit(void);
  * @trace       CPD-63962
  */
 extern boolean Xcp_CheckCalMem(uint32 addr, uint32 size, Xcp_MemAddrType type);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
+
 /*
  * CAL/PAG Mandatory Function
  */
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Downloads data from the master to the target system's memory.
  * @reentrant   FALSE
@@ -937,9 +1151,12 @@ extern boolean Xcp_CheckCalMem(uint32 addr, uint32 size, Xcp_MemAddrType type);
  * @trace       CPD-63963
  */
 extern void Xcp_Download(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
-#if (XCP_PL_CAL == (XCP_PL_CAL & XCP_RESOURCE))
 #if (XCP_MAX_CTO > 8u)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Performs a short download operation, transferring a small amount of data from the
  *              master to the target system's memory.
@@ -947,15 +1164,17 @@ extern void Xcp_Download(void);
  * @synchronous TRUE
  * @trace       CPD-63965
  */
-/* PRQA S 1501 ++ */ /* VL_Xcp_1501 */
 extern void Xcp_ShortDownload(void);
-/* PRQA S 1501 -- */
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif
-#endif
+
 /*
  * CAL/PAG Optional Function
  */
 #if (XCP_DOWNLOAD_NEXT == STD_ON)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Downloads the next block of data from the master to the target system's memory,
  *              continuing from the last MTA.
@@ -964,8 +1183,12 @@ extern void Xcp_ShortDownload(void);
  * @trace       CPD-63966
  */
 extern void Xcp_DownloadNext(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif
 #if (XCP_DOWNLOAD_MAX == STD_ON)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Downloads the maximum block of data from the master to the target system's memory.
  * @reentrant   FALSE
@@ -973,8 +1196,12 @@ extern void Xcp_DownloadNext(void);
  * @trace       CPD-63968
  */
 extern void Xcp_DownloadMax(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif
 #if (XCP_MODIFY_BITS == STD_ON)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Modifies bits at a specific memory location using AND and XOR masks.
  * @reentrant   FALSE
@@ -982,8 +1209,12 @@ extern void Xcp_DownloadMax(void);
  * @trace       CPD-63969
  */
 extern void Xcp_ModifyBits(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif
 #if (XCP_PAG_SUPPORT == STD_ON)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Sets the calibration page for the XCP protocol.
  * @reentrant   FALSE
@@ -991,7 +1222,11 @@ extern void Xcp_ModifyBits(void);
  * @trace       CPD-63972
  */
 extern void Xcp_SetCalPage(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Retrieves the currently active calibration page for a specific segment.
  * @reentrant   FALSE
@@ -999,11 +1234,15 @@ extern void Xcp_SetCalPage(void);
  * @trace       CPD-63974
  */
 extern void Xcp_GetCalPage(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif
 /*
  * DAQ
  */
 #if (XCP_PL_DAQ == (XCP_PL_DAQ & XCP_RESOURCE))
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Initializes the DAQ (Data Acquisition) process, optionally resuming previous sessions.
  * @reentrant   FALSE
@@ -1011,7 +1250,11 @@ extern void Xcp_GetCalPage(void);
  * @trace       CPD-63976
  */
 extern void Xcp_DAQInit(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Reinitializes the DAQ (Data Acquisition) process, resetting all DAQ-related structures and counters.
  * @reentrant   FALSE
@@ -1019,7 +1262,11 @@ extern void Xcp_DAQInit(void);
  * @trace       CPD-63978
  */
 extern void Xcp_DAQReinit(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Sends data from a DAQ (Data Acquisition) list to the master, potentially enabling the event channel.
  * @param[in]   evChNum   : Event channel number to send data from.
@@ -1029,11 +1276,15 @@ extern void Xcp_DAQReinit(void);
  * @trace       CPD-63985
  */
 extern void Xcp_SendDaq(uint16 evChNum, boolean rqstEnable);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
 /*
  * DAQ mandatory
  */
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Sets the pointer to a specific DAQ (Data Acquisition) list, ODT (Object Description Table), and ODT
  * entry.
@@ -1042,7 +1293,11 @@ extern void Xcp_SendDaq(uint16 evChNum, boolean rqstEnable);
  * @trace       CPD-63991
  */
 extern void Xcp_SetDaqPtr(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Writes data to a specified DAQ (Data Acquisition) list entry.
  * @reentrant   FALSE
@@ -1050,7 +1305,11 @@ extern void Xcp_SetDaqPtr(void);
  * @trace       CPD-63993
  */
 extern void Xcp_WriteDaq(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Sets the mode for a DAQ (Data Acquisition) list, affecting how data is acquired and transmitted.
  * @reentrant   FALSE
@@ -1058,7 +1317,11 @@ extern void Xcp_WriteDaq(void);
  * @trace       CPD-63995
  */
 extern void Xcp_SetDaqListMode(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Starts or stops a DAQ (Data Acquisition) list, controlling the acquisition of data.
  * @reentrant   FALSE
@@ -1066,7 +1329,11 @@ extern void Xcp_SetDaqListMode(void);
  * @trace       CPD-63997
  */
 extern void Xcp_StartStopDaqList(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Starts or stops synchronization, affecting the timing of data acquisition processes.
  * @reentrant   FALSE
@@ -1074,7 +1341,12 @@ extern void Xcp_StartStopDaqList(void);
  * @trace       CPD-63999
  */
 extern void Xcp_StartStopSynch(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
+
 #if (XCP_PL_STIM == (XCP_PL_STIM & XCP_RESOURCE))
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Processes incoming stimulation data, updating the values of specified DAQ (Data Acquisition) entries.
  * @param[in]   dataPtr : Pointer to the received data containing the stimulation information.
@@ -1083,8 +1355,12 @@ extern void Xcp_StartStopSynch(void);
  * @trace       CPD-63986
  */
 extern void Xcp_RxStimHal(const uint8* dataPtr);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif
 #if (XCP_DAQ_CONFIG_TYPE == XCP_DAQ_STATIC)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Clears a specified DAQ (Data Acquisition) list, stopping its operation if it is running.
  * @reentrant   FALSE
@@ -1092,7 +1368,12 @@ extern void Xcp_RxStimHal(const uint8* dataPtr);
  * @trace       CPD-64010
  */
 extern void Xcp_ClearDaqList(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
+
 #if (XCP_GET_DAQ_LIST_INFO == STD_ON)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Retrieves information about a specified DAQ (Data Acquisition) list, including its
  *               configuration and associated event channel.
@@ -1101,8 +1382,12 @@ extern void Xcp_ClearDaqList(void);
  * @trace       CPD-64011
  */
 extern void Xcp_GetDaqListInfo(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif
 #else
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Frees all DAQ (Data Acquisition) lists, resetting their states and releasing associated resources.
  * @reentrant   FALSE
@@ -1110,7 +1395,11 @@ extern void Xcp_GetDaqListInfo(void);
  * @trace       CPD-64012
  */
 extern void Xcp_FreeDaq(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Allocates a DAQ (Data Acquisition) list, preparing it for data acquisition.
  * @reentrant   FALSE
@@ -1118,7 +1407,11 @@ extern void Xcp_FreeDaq(void);
  * @trace       CPD-64013
  */
 extern void Xcp_AllocDaq(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Allocates an ODT (Object Description Table) within a DAQ (Data Acquisition) list,
  *              preparing it for data acquisition.
@@ -1127,7 +1420,11 @@ extern void Xcp_AllocDaq(void);
  * @trace       CPD-64016
  */
 extern void Xcp_AllocOdt(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Allocates an ODT (Object Description Table) entry within a DAQ (Data Acquisition) list,
  *              preparing it for data acquisition.
@@ -1136,12 +1433,16 @@ extern void Xcp_AllocOdt(void);
  * @trace       CPD-64018
  */
 extern void Xcp_AllocOdtEntry(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif /*XCP_DAQ_CONFIG_TYPE == XCP_DAQ_STATIC*/
 
 /*
  * DAQ optional
  */
 #if (XCP_GET_DAQ_CLOCK == STD_ON)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Retrieves the clock or timestamp associated with the DAQ (Data Acquisition) system.
  * @reentrant   FALSE
@@ -1149,8 +1450,12 @@ extern void Xcp_AllocOdtEntry(void);
  * @trace       CPD-64005
  */
 extern void Xcp_GetDaqClock(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif
 #if (XCP_GET_DAQ_PROCESSOR_INFO == STD_ON)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Retrieves processor-specific information related to DAQ (Data Acquisition) capabilities.
  * @reentrant   FALSE
@@ -1158,8 +1463,12 @@ extern void Xcp_GetDaqClock(void);
  * @trace       CPD-64006
  */
 extern void Xcp_GetDaqProcessorInfo(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif
 #if (XCP_GET_DAQ_RESOLUTION_INFO == STD_ON)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Retrieves resolution information for DAQ (Data Acquisition) and STIM (Stimulation) operations.
  * @reentrant   FALSE
@@ -1167,8 +1476,12 @@ extern void Xcp_GetDaqProcessorInfo(void);
  * @trace       CPD-64007
  */
 extern void Xcp_GetDaqResolutionInfo(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif
 #if (XCP_GET_DAQ_LIST_MODE == STD_ON)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Retrieves the current mode and configuration details of a specified DAQ (Data Acquisition) list.
  * @reentrant   FALSE
@@ -1176,8 +1489,12 @@ extern void Xcp_GetDaqResolutionInfo(void);
  * @trace       CPD-64008
  */
 extern void Xcp_GetDaqListMode(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif
 #if (XCP_GET_DAQ_EVENT_INFO == STD_ON)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Retrieves information about a specified event channel, including its type, consistency,
  *              maximum number of DAQ lists it can trigger, name length, time cycle, time unit, and priority.
@@ -1186,8 +1503,12 @@ extern void Xcp_GetDaqListMode(void);
  * @trace       CPD-64009
  */
 extern void Xcp_GetDaqEventInfo(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif
 #if (XCP_READ_DAQ == STD_ON)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Reads the configuration of a DAQ (Data Acquisition) element, including its size,
  *              address extension, and address.
@@ -1196,6 +1517,8 @@ extern void Xcp_GetDaqEventInfo(void);
  * @trace       CPD-64001
  */
 extern void Xcp_ReadDaq(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif
 #endif /*XCP_PL_DAQ == XCP_PL_DAQ & XCP_RESOURCE*/
 
@@ -1203,6 +1526,8 @@ extern void Xcp_ReadDaq(void);
  * PGM
  */
 #if (XCP_PL_PGM == (XCP_PL_PGM & XCP_RESOURCE))
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Initializes the programming process, clearing buffers and setting initial
  *              conditions for programming operations.
@@ -1211,7 +1536,11 @@ extern void Xcp_ReadDaq(void);
  * @trace       CPD-64040
  */
 extern void Xcp_ProgramInit(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Checks if the given memory range for programming is valid within any of the defined sectors.
  * @param[in]   addr   : Starting address of the memory range to be checked.
@@ -1224,7 +1553,11 @@ extern void Xcp_ProgramInit(void);
  * @trace       CPD-64026
  */
 extern boolean Xcp_CheckPgmMem(uint32 addr, uint32 size);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Handles pending programming tasks based on the current state of the programming process.
  * @reentrant   FALSE
@@ -1232,10 +1565,15 @@ extern boolean Xcp_CheckPgmMem(uint32 addr, uint32 size);
  * @trace       CPD-64041
  */
 extern void Xcp_PgmPendingTask(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
+
 /*
  * PGM mandatory
  */
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Starts the programming session, checking for active DAQ sessions and protection status before
  * proceeding.
@@ -1244,7 +1582,11 @@ extern void Xcp_PgmPendingTask(void);
  * @trace       CPD-64042
  */
 extern void Xcp_ProgramStart(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Clears a specified memory range for programming, ensuring that the operation is
  *              within allowed boundaries and that no DAQ sessions are active.
@@ -1253,7 +1595,11 @@ extern void Xcp_ProgramStart(void);
  * @trace       CPD-64043
  */
 extern void Xcp_ProgramClear(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Executes a programming operation, writing data to the target memory according to the command received.
  * @reentrant   FALSE
@@ -1261,7 +1607,11 @@ extern void Xcp_ProgramClear(void);
  * @trace       CPD-64046
  */
 extern void Xcp_Program(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Resets the programming session, transitioning the system back to an idle state
  *              and disconnecting the hardware abstraction layer.
@@ -1270,10 +1620,15 @@ extern void Xcp_Program(void);
  * @trace       CPD-64047
  */
 extern void Xcp_ProgramReset(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
+
 /*
  * PGM optional
  */
 #if (XCP_GET_PGM_PROCESSOR_INFO == STD_ON)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Retrieves information about the programming processor, including its properties
  *              and the maximum number of sectors.
@@ -1282,8 +1637,12 @@ extern void Xcp_ProgramReset(void);
  * @trace       CPD-64048
  */
 extern void Xcp_GetPgmProcessorInfo(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif
 #if (XCP_GET_SECTOR_INFO == STD_ON)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Retrieves information about a specific sector, such as its start address, length,
  *              or name length, based on the requested mode.
@@ -1292,8 +1651,12 @@ extern void Xcp_GetPgmProcessorInfo(void);
  * @trace       CPD-64049
  */
 extern void Xcp_GetSectorInfo(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif
 #if (XCP_PROGRAM_PREPARE == STD_ON)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Prepares the system for a programming operation, currently not supported by the implementation.
  * @reentrant   FALSE
@@ -1301,8 +1664,12 @@ extern void Xcp_GetSectorInfo(void);
  * @trace       CPD-64050
  */
 extern void Xcp_ProgramPrepare(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif
 #if (XCP_PROGRAM_FORMAT == STD_ON)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Sets the format for the upcoming programming operation, including compression, encryption,
  *              programming, and access methods.
@@ -1311,8 +1678,12 @@ extern void Xcp_ProgramPrepare(void);
  * @trace       CPD-64051
  */
 extern void Xcp_ProgramFormat(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif
 #if (XCP_PROGRAM_NEXT == STD_ON)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Writes the next block of data to the target memory, handling alignment and buffer management
  *              to ensure efficient programming.
@@ -1321,8 +1692,12 @@ extern void Xcp_ProgramFormat(void);
  * @trace       CPD-64052
  */
 extern void Xcp_ProgramNext(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif
 #if (XCP_PROGRAM_MAX == STD_ON)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Programs a large block of data to the target memory, verifying command syntax,
  *              protection status, and current programming state before proceeding.
@@ -1331,8 +1706,12 @@ extern void Xcp_ProgramNext(void);
  * @trace       CPD-64054
  */
 extern void Xcp_ProgramMax(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif
 #if (XCP_PROGRAM_VERIFY == STD_ON)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * @brief       Verifies the programmed data against a specified value or condition, ensuring the
  *              integrity of the programming process.
@@ -1341,6 +1720,8 @@ extern void Xcp_ProgramMax(void);
  * @trace       CPD-64055
  */
 extern void Xcp_ProgramVerify(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif
 /*
  * End of PGM

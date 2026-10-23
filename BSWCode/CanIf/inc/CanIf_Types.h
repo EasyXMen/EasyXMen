@@ -49,19 +49,19 @@ extern "C" {
 /**
  * @brief max extended CanId
  */
-#define CANIF_EXTENDED_CANID_MAX (0x1FFFFFFFu)
+#define CANIF_EXTENDED_CANID_MAX  (0x1FFFFFFFu)
 /**
  * @brief max standard CanId
  */
-#define CANIF_STANDARD_CANID_MAX (0x7FFu)
+#define CANIF_STANDARD_CANID_MAX  (0x7FFu)
 /**
  * @brief CAN FD flag frame mask for 16-bit CanId
  */
-#define CANIF_CANID16_CANFD_MASK (0x4000u)
+#define CANIF_CANID16_CANFD_MASK  (0x4000u)
 /**
  * @brief CAN FD flag frame mask for 32-bit CanId
  */
-#define CANIF_CANID32_CANFD_MASK (0x40000000u)
+#define CANIF_CANID32_CANFD_MASK  (0x40000000u)
 /**
  * @brief CAN extended frame mask
  */
@@ -70,7 +70,7 @@ extern "C" {
 /**
  * @brief max value of uint8
  */
-#define CANIF_UNUSED_UINT8 (0xFFu)
+#define CANIF_UNUSED_UINT8  (0xFFu)
 /**
  * @brief max value of uint16
  */
@@ -115,6 +115,39 @@ typedef uint8 CanIf_TxBufferNumberType;
 #else
 typedef uint16 CanIf_TxBufferNumberType;
 #define CANIF_TXBUFFER_NUMBER_INVALID CANIF_UNUSED_UINT16
+#endif
+
+#if (STD_ON == CANIF_PUBLIC_BUS_MIRRORING_SUPPORT)
+/**
+ * @brief type of CanIf HthByteBuffer number
+ */
+#if (CANIF_HTHBYTEBUFFER_MAX_NUMBER < CANIF_UNUSED_UINT8)
+typedef uint8 CanIf_HthByteBufferNumberType;
+#elif (CANIF_HTHBYTEBUFFER_MAX_NUMBER < CANIF_UNUSED_UINT16)
+typedef uint16 CanIf_HthByteBufferNumberType;
+#else
+typedef uint32 CanIf_HthByteBufferNumberType;
+#endif
+
+/**
+ * @brief type of CanIf HthPduBuffer number
+ */
+#if (CANIF_HTHPDUBUFFER_MAX_NUMBER < CANIF_UNUSED_UINT8)
+typedef uint8 CanIf_HthPduBufferNumberType;
+#else
+typedef uint16 CanIf_HthPduBufferNumberType;
+#endif
+
+/**
+ * @brief type of CanIf HthBuffer number
+ */
+#if (CANIF_HTHBUFFER_MAX_NUMBER < CANIF_UNUSED_UINT8)
+typedef uint8 CanIf_HthBufferNumberType;
+#define CANIF_HTHBUFFER_NUMBER_INVALID CANIF_UNUSED_UINT8
+#else
+typedef uint16 CanIf_HthBufferNumberType;
+#define CANIF_HTHBUFFER_NUMBER_INVALID CANIF_UNUSED_UINT16
+#endif
 #endif
 
 /**
@@ -172,7 +205,7 @@ typedef uint16 CanIf_RxPduRangeNumberType;
 typedef uint8 CanIf_UpTxCfmApiNumberType;
 #define CANIF_UPTXCONFIRMATION_API_NUMBER_INVALID CANIF_UNUSED_UINT8
 #else
-typedef unit16 CanIf_UpTxCfmApiNumberType;
+typedef uint16 CanIf_UpTxCfmApiNumberType;
 #define CANIF_UPTXCONFIRMATION_API_NUMBER_INVALID CANIF_UNUSED_UINT16
 #endif
 
@@ -323,6 +356,9 @@ typedef struct CanIf_CtrlRuntimeTag
 #if (STD_ON == CANIF_PUBLIC_WAKEUP_CHECK_VALID_SUPPORT)
     boolean FirstCallRxInd;
 #endif
+#if (STD_ON == CANIF_PUBLIC_BUS_MIRRORING_SUPPORT)
+    boolean MirroringActive;
+#endif
 #if (STD_ON == CANIF_PUBLIC_TX_CONFIRM_POLLING_SUPPORT)
     CanIf_NotifStatusType TxConfirmationState;
 #endif
@@ -337,6 +373,9 @@ typedef struct CanIf_HthConfigTag
 {
     /* Reference to controller Id to which the HTH belongs to*/
     uint8 CanIfHthCanCtrlId;
+#if (STD_ON == CANIF_PUBLIC_BUS_MIRRORING_SUPPORT)
+    CanIf_HthBufferNumberType HthBufferIndex;
+#endif
     /*The parameter refers to a particular HTH object in the CanDrv configuration*/
     Can_HwHandleType  CanObjectId;
     CanIf_HohTypeType CanIfHthType;
@@ -479,15 +518,39 @@ typedef struct CanIf_BufferConfigPartitionTag
     const CanIf_BufferConfigType* BufferConfigRef;
 } CanIf_BufferConfigPartitionType;
 
+#if (STD_ON == CANIF_PUBLIC_BUS_MIRRORING_SUPPORT)
+/**
+ * @brief type of CanIf HTH buffer configuration
+ */
+typedef struct CanIf_HthBufferConfigTag
+{
+    uint8                        PduLength;
+    CanIf_HthPduBufferNumberType BufferSize;
+} CanIf_HthBufferConfigType;
+
+/**
+ * @brief type of CanIf HTH buffer configuration for each partition
+ */
+typedef struct CanIf_HthBufferConfigPartitionTag
+{
+    Can_HwHandleType                 BufferConfigNumber;
+    const CanIf_HthBufferConfigType* BufferConfigRef;
+} CanIf_HthBufferConfigPartitionType;
+#endif
+
 /**
  * @brief type of Can controller post-build configuration
  */
 typedef struct CanIf_CtrlPbConfigTag
 {
-    PduIdType              RxPduIndexMin;
-    PduIdType              RxPduIndexMaxExcluded;
-    PduIdType              TxPduIndexMin;
-    PduIdType              TxPduIndexMaxExcluded;
+    PduIdType RxPduIndexMin;
+    PduIdType RxPduIndexMaxExcluded;
+    PduIdType TxPduIndexMin;
+    PduIdType TxPduIndexMaxExcluded;
+#if (STD_ON == CANIF_PUBLIC_BUS_MIRRORING_SUPPORT)
+    Can_HwHandleType HthIndexMin;
+    Can_HwHandleType HthIndexMaxExcluded;
+#endif
     ApplicationType        PartitionIndex;
     CanIf_CtrlRuntimeType* RuntimePtr;
 } CanIf_CtrlPbConfigType;
@@ -535,6 +598,10 @@ typedef struct CanIf_ConfigTag
     const CanIf_RxPduConfigType* RxPduConfigRef;
     /* pointer to CanIfBufferCfg for Tx */
     const CanIf_BufferConfigPartitionType* TxBufferConfigRef; /* number == CANIF_PARTITION_NUMBER */
+#if (STD_ON == CANIF_PUBLIC_BUS_MIRRORING_SUPPORT)
+    /* pointer to CanIfBufferCfg for Hth */
+    const CanIf_HthBufferConfigPartitionType* HthBufferConfigRef; /* number == CANIF_PARTITION_NUMBER */
+#endif
     /* pointer to CanIfBufferCfg for Rx */
     const CanIf_BufferConfigPartitionType* RxBufferConfigRef; /* number == CANIF_PARTITION_NUMBER */
     /* pointer to post-build controller configuration */

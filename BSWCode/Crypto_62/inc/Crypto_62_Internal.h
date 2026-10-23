@@ -29,17 +29,18 @@
  *  V1.0.0      2024-07-13   jie.gu         initial versionR
  *
  ==================================================================================================================== */
+/* PRQA S 1712 EOF */           /* VL_Crypto_62_1712 */
+/* PRQA S 2472,4391,4399 EOF */ /* VL_QAC_Crypto */
 
 #ifndef CRYPTO_INTERNAL_H
 #define CRYPTO_INTERNAL_H
-
-/* PRQA S 1501,1753,1512 EOF */ /* VL_Crypto_62_1501,VL_Crypto_62_1753,VL_Crypto_62_1512 */
 
 /* =================================================== inclusions =================================================== */
 #include "Crypto_62_Cfg.h"
 #include "Crypto_62.h"
 #include "SchM_Crypto_62.h"
 #include "IStdLib.h"
+#include "Crypto_62_Arti.h"
 
 #if (CRYPTO_DEV_ERROR_DETECT == STD_ON)
 #include "Det.h"
@@ -54,7 +55,7 @@ extern "C" {
 
 /* ===================================================== macros ===================================================== */
 #if !defined(CRYPTO_62_LOCAL)
-#define CRYPTO_62_LOCAL static /* PRQA S 3414 */ /* VL_QAC_FctLikeMacro */
+#define CRYPTO_62_LOCAL static /* PRQA S 3414 */ /* VL_QAC_3414 */
 #endif
 
 #define CRYPTO_JOB_NOT_VALID (0xffffU) /**< Value indicating that a cryptographic job is not valid */
@@ -116,7 +117,7 @@ extern "C" {
 #define CRYPTO_CONST_34  (34U)  /**< Constant 34 */
 #define CRYPTO_CONST_39  (39U)  /**< Constant 39 */
 #define CRYPTO_CONST_41  (41U)  /**< Constant 41 */
-#define CRYPTO_CONST_48  (48U)  /**< Constant 41 */
+#define CRYPTO_CONST_48  (48U)  /**< Constant 48 */
 #define CRYPTO_CONST_56  (56U)  /**< Constant 56 */
 #define CRYPTO_CONST_60  (60U)  /**< Constant 60 */
 #define CRYPTO_CONST_61  (61U)  /**< Constant 61 */
@@ -130,6 +131,7 @@ extern "C" {
 #define CRYPTO_CONST_95  (95U)  /**< Constant 95 */
 #define CRYPTO_CONST_96  (96U)  /**< Constant 96 */
 #define CRYPTO_CONST_128 (128U) /**< Constant 128 */
+#define CRYPTO_CONST_135 (135U) /**< Constant 135 */
 #define CRYPTO_CONST_192 (192U) /**< Constant 192 */
 #define CRYPTO_CONST_256 (256U) /**< Constant 256 */
 
@@ -140,32 +142,54 @@ extern "C" {
 #define CRYPTO_CONST_0x0FFFFFFF (0x0FFFFFFFU) /**< Constant 0x0FFFFFFF */
 /*report DET error*/
 #if (CRYPTO_DEV_ERROR_DETECT == STD_ON)
+/* PRQA S 3412 ++ */ /* VL_Crypto_62_General */
 #define Crypto_62_ReportDetErr(serviceId, error) \
     (void)Det_ReportError(                       \
         CRYPTO_MODULE_ID,                        \
         CRYPTO_MODULE_INSTANCE_ID,               \
         (serviceId),                             \
         (error)); /**< Reports a development error using the Det_ReportError function.*/
+/* PRQA S 3412 -- */
 #endif
 
+/*
+ * Host endianness:
+ * - Can be overridden by project-level definition of CRYPTO_IS_BIG_ENDIAN.
+ * - Falls back to AUTOSAR CPU_BYTE_ORDER when available.
+ * - Finally falls back to compiler byte-order macros.
+ */
+#ifndef CRYPTO_IS_BIG_ENDIAN
+#if defined(CPU_BYTE_ORDER) && defined(HIGH_BYTE_FIRST) && (CPU_BYTE_ORDER == HIGH_BYTE_FIRST)
+#define CRYPTO_IS_BIG_ENDIAN 1U
+#elif defined(CPU_BYTE_ORDER) && defined(LOW_BYTE_FIRST) && (CPU_BYTE_ORDER == LOW_BYTE_FIRST)
 #define CRYPTO_IS_BIG_ENDIAN 0U
+#elif defined(__BYTE_ORDER__) && defined(__ORDER_BIG_ENDIAN__) && (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)
+#define CRYPTO_IS_BIG_ENDIAN 1U
+#elif defined(__BYTE_ORDER__) && defined(__ORDER_LITTLE_ENDIAN__) && (__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__)
+#define CRYPTO_IS_BIG_ENDIAN 0U
+#else
+/* Keep little-endian default for backward compatibility. */
+#define CRYPTO_IS_BIG_ENDIAN 0U
+#endif
+#endif
 
-#define CRYPTO_MODE_ENCRYPT 1U /**< AES encryption. */
-#define CRYPTO_MODE_DECRYPT 0U /**< AES decryption. */
+#define CRYPTO_MODE_ENCRYPT 1U /**< AES/SM4 encryption. */
+#define CRYPTO_MODE_DECRYPT 0U /**< AES/SM4 decryption. */
+
+#define CRYPTO_STOREDJOB_INUSE 1U
+#define CRYPTO_STOREDJOB_IDLE  0U
 
 /* PRQA S 3472 ++ */ /* VL_Crypto_62_General */
 #define CRYPTO_GET_UINT32_BE(data, offset)                                   \
     ((CRYPTO_IS_BIG_ENDIAN) ? Crypto_Get_Unaligned_Uint32((data) + (offset)) \
                             : Crypto_Bswap32(Crypto_Get_Unaligned_Uint32((data) + (offset))))
-/* PRQA S 3472 -- */ /* VL_Crypto_62_General */
-
 #define CRYPTO_GET_UINT64_BE(data, offset)                                   \
     ((CRYPTO_IS_BIG_ENDIAN) ? Crypto_get_unaligned_uint64((data) + (offset)) \
-                            : Crypto_BSWAP64(Crypto_get_unaligned_uint64((data) + (offset))))
+                            : CRYPTO_BSWAP64(Crypto_get_unaligned_uint64((data) + (offset))))
 #define CRYPTO_GET_UINT64_LE(data, offset)                                                   \
-    ((CRYPTO_IS_BIG_ENDIAN) ? Crypto_BSWAP64(Crypto_get_unaligned_uint64((data) + (offset))) \
+    ((CRYPTO_IS_BIG_ENDIAN) ? CRYPTO_BSWAP64(Crypto_get_unaligned_uint64((data) + (offset))) \
                             : Crypto_get_unaligned_uint64((data) + (offset)))
-
+/* PRQA S 3472 -- */
 /* ================================================ type definitions ================================================ */
 
 /* ========================================== internal function definitions ========================================= */
@@ -174,26 +198,26 @@ extern "C" {
 #if (CRYPTO_JOB_QUEUING == STD_ON)
 extern Crypto_JobType Crypto_62_JobInQueue[CRYPTO_MAX_DRIVER_OBJECT][CRYPTO_MAX_QUEUE_SIZE];
 extern uint32         Crypto_62_QueueFilledSize[CRYPTO_MAX_DRIVER_OBJECT];
+/* @req SWS_Crypto_00199 */
+extern boolean Crypto_62_QueueSkipDequeue[CRYPTO_MAX_DRIVER_OBJECT];
 #endif
 #if (CRYPTO_MAXNVBLOCK_CONFIGURED > 0)
-extern uint8  Crypto_62_Key_Store0[CRYPTO_NVBLOCK_SIZE_0];
 extern uint16 Crypto_62_Key_RetryCount[CRYPTO_MAXNVBLOCK_CONFIGURED];
 #endif
 
 #if (CRYPTO_MAXKEY_CONFIGURED > 0)
 /*Enumeration of the current Key state*/
-
 extern const Crypto_62_KeyCfgType Crypto_62_Key[CRYPTO_MAXKEY_CONFIGURED];
-
-extern Crypto_KeyStatusType CryptoKeyStatus[CRYPTO_MAXKEY_CONFIGURED];
-
+extern Crypto_KeyStatusType       CryptoKeyStatus[CRYPTO_MAXKEY_CONFIGURED];
+extern boolean                    Crypto_KeyReadfromNVM[CRYPTO_MAXKEY_CONFIGURED];
 #endif /* CRYPTO_MAXKEY_CONFIGURED > 0 */
 
 extern Crypto_62_DriverStatusType          Crypto_62_DriverStatus;
 extern Crypto_JobType                      Crypto_62_StoredJob[CRYPTO_MAX_DRIVER_OBJECT];
+extern uint8                               Crypto_62_StoredJobBusy[CRYPTO_MAX_DRIVER_OBJECT];
 extern Crypto_62_ObjectStatusType          Crypto_ObjectStatus[CRYPTO_MAX_DRIVER_OBJECT];
 extern const Crypto_62_DriverObjectCfgType Crypto_DriverObjects[CRYPTO_MAX_DRIVER_OBJECT];
-extern uint8                               Crypto_62_MemPool[CRYPTO_MEMPOOL_SIZE];
+extern uint32                              Crypto_62_MemPool[CRYPTO_MEMPOOL_SIZE / CRYPTO_CONST_4];
 
 /* ========================================= external function declarations ========================================= */
 /**
@@ -210,11 +234,15 @@ extern uint8                               Crypto_62_MemPool[CRYPTO_MEMPOOL_SIZE
  * @synchronous    TRUE
  * @trace       CPD-71656
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_62_Encrypt_Process(
     uint32                     objectId,
     Crypto_AlgorithmFamilyType algorithmfamily,
     Crypto_AlgorithmModeType   mode,
     Crypto_OperationModeType   operateMode);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief          Processes a decryption operation.
@@ -230,52 +258,61 @@ Std_ReturnType Crypto_62_Encrypt_Process(
  * @synchronous    TRUE
  * @trace       CPD-71657
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_62_Decrypt_Process(
     uint32                     objectId,
     Crypto_AlgorithmFamilyType algorithmfamily,
     Crypto_AlgorithmModeType   mode,
     Crypto_OperationModeType   operateMode);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
+#if (CRYPTO_SERVICE_AEADENCRYPT == STD_ON)
 /**
- * @brief          Processes an AEAD (Authenticated Encryption with Associated Data) encryption operation.
+ * @brief          This function do the AEADENCRYPT Service for CSM.
  * @param[in]      objectId : The ID of the cryptographic object.
- * @param[in]      algorithmfamily : The family of the AEAD encryption algorithm.
- * @param[in]      mode : The mode of the AEAD encryption algorithm.
- * @param[in]      operateMode : The operation mode of the AEAD encryption process (e.g., start, update, finish).
+ * @param[in]      algorithmfamily : The family of the decryption algorithm.
+ * @param[in]      mode : The mode of the aead orithm.
+ * @param[in]      operateMode : operateMode choose from modetype,
  * @return         Std_ReturnType
- * @retval         E_OK: The AEAD encryption process was successful.
- * @retval         E_NOT_OK: The AEAD encryption process failed.
+ * @retval         E_OK: The decryption process was successful.
+ * @retval         E_NOT_OK: The decryption process failed.
  * @retval         CRYPTO_ERROR_ALGO_NOT_SUPPORTED: The specified algorithm family is not supported.
- * @reentrant      Not reentrant for the same object ID
- * @synchronous    TRUE
- * @trace       CPD-71658
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_62_AeadEncrypt_Process(
     uint32                     objectId,
     Crypto_AlgorithmFamilyType algorithmfamily,
     Crypto_AlgorithmModeType   mode,
     Crypto_OperationModeType   operateMode);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
- * @brief          Processes an AEAD (Authenticated Encryption with Associated Data) decryption operation.
+ * @brief           This function do the AEADDECRYPT Service for CSM.
  * @param[in]      objectId : The ID of the cryptographic object.
- * @param[in]      algorithmfamily : The family of the AEAD decryption algorithm.
- * @param[in]      mode : The mode of the AEAD decryption algorithm.
- * @param[in]      operateMode : The operation mode of the AEAD decryption process (e.g., start, update, finish).
+ * @param[in]      algorithmfamily : The family of the aead decryption algorithm.
+ * @param[in]      mode : The mode of the decryption algorithm.
+ * @param[in]      operateMode : operateMode choose from modetype,
  * @return         Std_ReturnType
- * @retval         E_OK: The AEAD decryption process was successful.
- * @retval         E_NOT_OK: The AEAD decryption process failed.
+ * @retval         E_OK: The decryption process was successful.
+ * @retval         E_NOT_OK: The decryption process failed.
  * @retval         CRYPTO_ERROR_ALGO_NOT_SUPPORTED: The specified algorithm family is not supported.
- * @reentrant      Not reentrant for the same object ID
- * @synchronous    TRUE
- * @trace       CPD-71659
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_62_AeadDecrypt_Process(
     uint32                     objectId,
     Crypto_AlgorithmFamilyType algorithmfamily,
     Crypto_AlgorithmModeType   mode,
     Crypto_OperationModeType   operateMode);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+#endif /*CRYPTO_SERVICE_AEADENCRYPT == STD_ON*/
 
+#if (CRYPTO_SERVICE_SIGNATURE == STD_ON)
 /**
  * @brief          Processes a signature generation operation.
  * @param[in]      objectId : The ID of the cryptographic object.
@@ -289,11 +326,15 @@ Std_ReturnType Crypto_62_AeadDecrypt_Process(
  * @synchronous    TRUE
  * @trace       CPD-71660
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_62_SignatureGenerate_Process(
     uint32                     objectId,
     Crypto_AlgorithmFamilyType algorithmfamily,
     Crypto_AlgorithmModeType   mode,
     Crypto_OperationModeType   operateMode);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief          Processes a signature verification operation.
@@ -308,12 +349,18 @@ Std_ReturnType Crypto_62_SignatureGenerate_Process(
  * @synchronous    TRUE
  * @trace       CPD-71661
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_62_SignatureVerify_Process(
     uint32                     objectId,
     Crypto_AlgorithmFamilyType algorithmfamily,
     Crypto_AlgorithmModeType   mode,
     Crypto_OperationModeType   operateMode);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+#endif
 
+#if (CRYPTO_SERVICE_RANDOM == STD_ON)
 /**
  * @brief          Processes a random number generation operation.
  * @param[in]      objectId : The ID of the cryptographic object.
@@ -329,11 +376,15 @@ Std_ReturnType Crypto_62_SignatureVerify_Process(
  * @synchronous    TRUE
  * @trace       CPD-71662
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_62_RandomGenerate_Process(
     uint32                     objectId,
     Crypto_AlgorithmFamilyType algorithmfamily,
     Crypto_AlgorithmModeType   mode,
     Crypto_OperationModeType   operateMode);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief          Processes a random number generator (RNG) seeding operation.
@@ -347,11 +398,17 @@ Std_ReturnType Crypto_62_RandomGenerate_Process(
  * @synchronous    TRUE
  * @trace       CPD-71663
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_62_RandomSeed_Process(
     uint32                     objectId,
     Crypto_AlgorithmFamilyType algorithmfamily,
     Crypto_AlgorithmModeType   mode);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+#endif
 
+#if (CRYPTO_MAXKEY_CONFIGURED > 0)
 /**
  * @brief          Processes a key generation operation.
  * @param[in]      objectId : The ID of the cryptographic object.
@@ -364,10 +421,14 @@ Std_ReturnType Crypto_62_RandomSeed_Process(
  * @synchronous    TRUE
  * @trace       CPD-71664
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_62_KeyGenerate_Process(
     uint32                     objectId,
     Crypto_AlgorithmFamilyType algorithmfamily,
     Crypto_AlgorithmModeType   mode);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief          Processes a key derivation operation.
@@ -381,10 +442,14 @@ Std_ReturnType Crypto_62_KeyGenerate_Process(
  * @synchronous    TRUE
  * @trace       CPD-71665
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_62_KeyDerive_Process(
     uint32                     objectId,
     Crypto_AlgorithmFamilyType algorithmfamily,
     Crypto_AlgorithmModeType   mode);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief          Processes a key exchange operation to calculate the public value.
@@ -398,10 +463,14 @@ Std_ReturnType Crypto_62_KeyDerive_Process(
  * @synchronous    TRUE
  * @trace       CPD-71666
  */
-Std_ReturnType Crypto_62_KeyExchangeCalcPubval_Process(
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+Std_ReturnType Crypto_62_KeyExchangeCalcPubVal_Process(
     uint32                     objectId,
     Crypto_AlgorithmFamilyType algorithmfamily,
     Crypto_AlgorithmModeType   mode);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief          Processes a key exchange operation to calculate the shared secret.
@@ -415,12 +484,37 @@ Std_ReturnType Crypto_62_KeyExchangeCalcPubval_Process(
  * @synchronous    TRUE
  * @trace       CPD-71667
  */
-/* PRQA S 1712 ++ */ /* VL_Crypto_62_1712 */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_62_KeyExchangeCalcSecret_Process(
     uint32                     objectId,
     Crypto_AlgorithmFamilyType algorithmfamily,
     Crypto_AlgorithmModeType   mode);
-/* PRQA S 1712 -- */
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+#endif
+
+/******************************************************************************/
+/*
+ * Brief               Constant-time buffer comparison without branches.
+ *
+ * Param-Name[in]      a: Pointer to the first buffer.
+ *                     b: Pointer to the second buffer.
+ *                     n: The number of bytes to compare.
+ * Param-Name[in/out]  None
+ * Param-Name[out]     None
+ * Return              int
+ */
+/******************************************************************************/
+#if (CRYPTO_ALGORITHMFAM_RSA == STD_ON)
+Std_ReturnType Crypto_ct_memcmp(const void* a, const void* b, uint32 n); /*PRQA S 1501*/ /*VL_Crypto_62_1501*/
+#endif /*CRYPTO_ALGORITHMFAM_RSA == STD_ON*/
+
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+Crypto_AlgorithmFamilyType uint8_to_algType(uint8 val);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 #if (CRYPTO_SERVICE_CUSTOM == STD_ON)
 /**
@@ -435,11 +529,17 @@ Std_ReturnType Crypto_62_KeyExchangeCalcSecret_Process(
  * @synchronous    TRUE
  * @trace       CPD-71668
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType
     Custom_Service_Process(uint32 objectId, Crypto_AlgorithmFamilyType algorithmfamily, Crypto_AlgorithmModeType mode);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 #endif
+
 #if (CRYPTO_SERVICE_ENCRYPT == STD_ON)
+#if (CRYPTO_ALGORITHMFAM_AES == STD_ON)
 /**
  * @brief          Processes an AES decryption operation.
  * @param[in]      objectId : The ID of the cryptographic object.
@@ -452,7 +552,12 @@ Std_ReturnType
  * @synchronous    TRUE
  * @trace       CPD-71669
  */
-Std_ReturnType Crypto_AesDecryptProcess(uint32 objectId, Crypto_AlgorithmModeType mode);
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+Std_ReturnType
+    Crypto_AesDecryptProcess(uint32 objectId, Crypto_AlgorithmModeType mode, Crypto_AlgorithmFamilyType secondaryFam);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief          Processes an AES encryption operation.
@@ -466,8 +571,114 @@ Std_ReturnType Crypto_AesDecryptProcess(uint32 objectId, Crypto_AlgorithmModeTyp
  * @synchronous    TRUE
  * @trace       CPD-71670
  */
-Std_ReturnType Crypto_AesEncryptProcess(uint32 objectId, Crypto_AlgorithmModeType mode);
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+Std_ReturnType
+    Crypto_AesEncryptProcess(uint32 objectId, Crypto_AlgorithmModeType mode, Crypto_AlgorithmFamilyType secondaryFam);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 #endif
+
+#if (CRYPTO_ALGORITHMFAM_SM4 == STD_ON)
+/******************************************************************************/
+/*
+ * Brief               This function do the SM4 Encrypt process .
+ *
+ * Param-Name[in]      objectId: objectId configured in crypto.
+ *                      mode: AlgorithmMode configured in crypto,
+ *
+ * Param-Name[in/out]  None.
+ * Param-Name[out]     None.
+ * Return              E_OK;
+ *                     E_NOT_OK
+ */
+/******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+Std_ReturnType
+    Crypto_SM4_EncryptProcess(uint32 objectId, Crypto_AlgorithmModeType mode, Crypto_AlgorithmFamilyType secondaryFam);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+
+/******************************************************************************/
+/*
+ * Brief               This function do the SM4 Decrypt process .
+ *
+ * Param-Name[in]      objectId: objectId configured in crypto.
+ *                     mode: AlgorithmMode configured in crypto,
+ * Param-Name[in/out]  None.
+ * Param-Name[out]     None.
+ * Return              E_OK;
+ *                     E_NOT_OK
+ */
+/******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+Std_ReturnType
+    Crypto_SM4_DecryptProcess(uint32 objectId, Crypto_AlgorithmModeType mode, Crypto_AlgorithmFamilyType secondaryFam);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+#endif
+
+#if (CRYPTO_ALGORITHMFAM_3DES == STD_ON)
+/******************************************************************************/
+/*
+ * Brief               This function do the 3DES Encrypt process .
+ *
+ * Param-Name[in]      objectId: objectId configured in crypto.
+ *                     mode: AlgorithmMode configured in crypto,
+ * Param-Name[in/out]  None.
+ * Param-Name[out]     None.
+ * Return              E_OK;
+ *                     E_NOT_OK
+ */
+/******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+Std_ReturnType
+    Crypto_3DesEncryptProcess(uint32 objectId, Crypto_AlgorithmModeType mode, Crypto_AlgorithmFamilyType secondaryFam);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+/******************************************************************************/
+/*
+ * Brief               This function do the 3DES Decrypt process .
+ *
+ * Param-Name[in]      objectId: objectId configured in crypto.
+ *                     mode: AlgorithmMode configured in crypto,
+ * Param-Name[in/out]  None.
+ * Param-Name[out]     None.
+ * Return              E_OK;
+ *                     E_NOT_OK
+ */
+/******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+Std_ReturnType
+    Crypto_3DesDecryptProcess(uint32 objectId, Crypto_AlgorithmModeType mode, Crypto_AlgorithmFamilyType secondaryFam);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+#endif
+
+#endif
+
+#if ((CRYPTO_ALGORITHMFAM_AES == STD_ON) || (CRYPTO_ALGORITHMFAM_SM4 == STD_ON))
+/******************************************************************************/
+/*
+ * Brief               Function of CTR mode counter raise.
+ *                     default counter len : 8
+ * Param-Name[in]      None.
+ * Param-Name[in/out]  arr [in]counter to raise [out] raised counter
+ * Param-Name[out]     None.
+ * Return              void
+ */
+/******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+void CTR_Counter_Raise(uint8 arr[CRYPTO_CONST_8]);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+#endif
+
 /**
  * @brief          Processes an asynchronous cryptographic job without queuing.
  * @param[in]      objectId : The ID of the cryptographic object.
@@ -479,7 +690,11 @@ Std_ReturnType Crypto_AesEncryptProcess(uint32 objectId, Crypto_AlgorithmModeTyp
  * @synchronous    TRUE
  * @trace       CPD-71671
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_62_ProcessAsyncJob_NonQueue(uint32 objectId, Crypto_JobType* job);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief          Processes the specified cryptographic algorithm based on the given object ID and operation mode.
@@ -494,7 +709,11 @@ Std_ReturnType Crypto_62_ProcessAsyncJob_NonQueue(uint32 objectId, Crypto_JobTyp
  * @synchronous    TRUE
  * @trace       CPD-71672
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_ProcessAlgorithm(uint32 objectId, Crypto_OperationModeType operateMode);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief          Processes a cryptographic job internally based on the specified operation mode.
@@ -509,8 +728,12 @@ Std_ReturnType Crypto_ProcessAlgorithm(uint32 objectId, Crypto_OperationModeType
  * @synchronous    TRUE
  * @trace       CPD-71673
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType
     Crypto_62_ProcessJob_Internal(uint32 objectId, Crypto_JobType* job, Crypto_OperationModeType operationMode);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 #if (CRYPTO_JOB_QUEUING == STD_ON)
 /**
@@ -525,9 +748,35 @@ Std_ReturnType
  * @synchronous    TRUE
  * @trace       CPD-71674
  */
+/* PRQA S 1501 ++ */ /* VL_Crypto_62_1501 */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_62_QueueInJob(uint32 objectId, Crypto_JobType* job);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_QueueOutJob(uint32 objectId, Crypto_JobType* job);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+/* PRQA S 1501 -- */
+
+/**
+ * @brief          Get the highest priority among jobs waiting in the object queue.
+ * @details        Implemented by reading the queue head (index 0). Head equals the
+ *                 highest priority because Crypto_62_QueueInJob keeps the queue sorted
+ *                 descending by jobPriority (SWS_Crypto_00030). Does not scan the queue.
+ * @param[in]      objectId : Crypto driver object identifier.
+ * @return         Highest queued job priority (queue head); 0 if the queue is empty.
+ * @reentrant      TRUE
+ * @synchronous    TRUE
+ */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+uint32 Crypto_62_GetQueueHighestPriority(uint32 objectId);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief          Cancels a queued job for a given object ID.
@@ -540,8 +789,11 @@ Std_ReturnType Crypto_QueueOutJob(uint32 objectId, Crypto_JobType* job);
  * @synchronous    TRUE
  * @trace       CPD-71675
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_62_CancelQueuedJob(uint32 objectId, Crypto_JobType* job);
-void           Crypto_SetQueueBuf(Crypto_JobType* destJob, Crypto_JobType* srcJob);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 #endif
 
 /**
@@ -555,7 +807,11 @@ void           Crypto_SetQueueBuf(Crypto_JobType* destJob, Crypto_JobType* srcJo
  * @synchronous    TRUE
  * @trace       CPD-71676
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Start(uint32 objectId, Crypto_JobType* job);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief          Completes a cryptographic operation for a given object ID.
@@ -567,7 +823,11 @@ Std_ReturnType Crypto_Start(uint32 objectId, Crypto_JobType* job);
  * @synchronous    TRUE
  * @trace       CPD-71677
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Finish(uint32 objectId);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief          Seeds the internal random number generator with a provided seed.
@@ -581,7 +841,11 @@ Std_ReturnType Crypto_Finish(uint32 objectId);
  * @synchronous    TRUE
  * @trace       CPD-71678
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_RandomSeedInternal(uint32 cryptoKeyId, const uint8* seedPtr, uint32 seedLength);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 /**
  * @brief          Finds the index of a key element within a cryptographic key.
  * @param[in]      cryptokeyId : The ID of the cryptographic key to search within.
@@ -594,7 +858,11 @@ Std_ReturnType Crypto_RandomSeedInternal(uint32 cryptoKeyId, const uint8* seedPt
  * @synchronous    TRUE
  * @trace       CPD-71679
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_62_KeyElementIndexFind(uint32 cryptokeyId, uint32 keyElementId, uint32* getkeyElementId);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief          Sets the value of a key element for a given cryptographic key.
@@ -613,8 +881,12 @@ Std_ReturnType Crypto_62_KeyElementIndexFind(uint32 cryptokeyId, uint32 keyEleme
  * @synchronous    TRUE
  * @trace       CPD-71680
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType
     Crypto_62_KeyElementSetInternal(uint32 cryptokeyId, uint32 keyElementId, const uint8* keyPtr, uint32 keyLength);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief          Calculates the public value for a key exchange operation.
@@ -629,8 +901,12 @@ Std_ReturnType
  * @synchronous    TRUE
  * @trace       CPD-71681
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType
     Crypto_62_KeyExchangeCalcPubVal_internal(uint32 cryptoKeyId, uint8* publicValuePtr, uint32* publicValueLengthPtr);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief          Calculates the shared secret for a key exchange operation.
@@ -645,12 +921,14 @@ Std_ReturnType
  * @synchronous    TRUE
  * @trace       CPD-71682
  */
-/* PRQA S 1712 ++ */ /* VL_Crypto_62_1712 */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_62_KeyExchangeCalcSecret_internal(
     uint32       cryptoKeyId,
     const uint8* partnerPublicValuePtr,
     uint32       partnerPublicValueLength);
-/* PRQA S 1712 -- */
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief          Clears the stored job for a given object ID.
@@ -660,7 +938,11 @@ Std_ReturnType Crypto_62_KeyExchangeCalcSecret_internal(
  * @synchronous    TRUE
  * @trace       CPD-71683
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_62_ClearStoredJob(uint32 objectId);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief          Sets the queue buffer by copying the contents of the source job to the destination job.
@@ -671,7 +953,11 @@ void Crypto_62_ClearStoredJob(uint32 objectId);
  * @synchronous    TRUE
  * @trace       CPD-71684
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_62_SetQueueBuf(Crypto_JobType* destJob, Crypto_JobType* srcJob);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief          Removes a job from the queue for a given object ID and returns it.
@@ -684,7 +970,30 @@ void Crypto_62_SetQueueBuf(Crypto_JobType* destJob, Crypto_JobType* srcJob);
  * @synchronous    TRUE
  * @trace       CPD-71685
  */
-Std_ReturnType                Crypto_62_QueueOutJob(uint32 objectId, Crypto_JobType* job);
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+Std_ReturnType Crypto_62_QueueOutJob(uint32 objectId, Crypto_JobType* job);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+#if (CRYPTO_MAXNVBLOCK_CONFIGURED > 0)
+/**
+ * @brief          Writes the key to non-volatile memory (NVM).
+ * @param[in]      cryptoKeyId : Identifier of the cryptographic key to be written.
+ *                         The value must be within a valid range as defined by
+ *                         implementation-specific constraints.
+ * @return         Std_ReturnType
+ * @retval         E_OK: Write to NVM was successful.
+ * @retval         E_NOT_OK: Write to NVM was not successful.
+ * @reentrant      Reentrant
+ * @synchronous    TRUE
+ * @trace       CPD-85591
+ */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+Std_ReturnType Crypto_62_KeyWriteNvm(uint32 cryptoKeyId);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+#endif
 CRYPTO_62_LOCAL inline uint32 Crypto_Get_Unaligned_Uint32(const void* p)
 {
     uint32 r;
@@ -697,13 +1006,15 @@ CRYPTO_62_LOCAL inline void Crypto_put_unaligned_uint32(void* p, uint32 x)
     (void)IStdLib_MemCpy(p, &x, sizeof(x));
     /* PRQA S 1340 -- */ /* VL_Crypto_62_General */
 }
+
 #if !defined(Crypto_Bswap32)
 CRYPTO_62_LOCAL inline uint32 Crypto_Bswap32(uint32 x)
 {
     return ((x & 0x000000ffU) << 24) | ((x & 0x0000ff00U) << 8) | ((x & 0x00ff0000U) >> 8) | ((x & 0xff000000U) >> 24);
 }
 #define CRYPTO_BSWAP32 Crypto_Bswap32
-#if (CRYPTO_IS_BIG_ENDIAN)
+
+#if (CRYPTO_IS_BIG_ENDIAN == 1)
 /* PRQA S 3412 ++ */ /* VL_Crypto_62_General */
 #define CRYPTO_PUT_UINT32_BE(n, data, offset) Crypto_put_unaligned_uint32((data) + (offset), (uint32)(n));
 /* PRQA S 3412 -- */ /* VL_Crypto_62_General */
@@ -711,13 +1022,13 @@ CRYPTO_62_LOCAL inline uint32 Crypto_Bswap32(uint32 x)
 /* PRQA S 3412 ++ */ /* VL_Crypto_62_General */
 #define CRYPTO_PUT_UINT32_BE(n, data, offset) \
     Crypto_put_unaligned_uint32((data) + (offset), CRYPTO_BSWAP32((uint32)(n)));
-/* PRQA S 3412 -- */ /* VL_Crypto_62_General */
+/* PRQA S 3412 -- */
 #endif
 
 #endif
-/* PRQA S 3412 ++ */ /* VL_Crypto_62_General */
+/* PRQA S 3412,3472 ++ */ /* VL_Crypto_62_General */
 #define CRYPTO_PUT_UINT32_LE(n, data, offset)                                        \
-    if (CRYPTO_IS_BIG_ENDIAN)                                                        \
+    if (CRYPTO_IS_BIG_ENDIAN == 1)                                                   \
     {                                                                                \
         Crypto_put_unaligned_uint32((data) + (offset), CRYPTO_BSWAP32((uint32)(n))); \
     }                                                                                \
@@ -725,13 +1036,13 @@ CRYPTO_62_LOCAL inline uint32 Crypto_Bswap32(uint32 x)
     {                                                                                \
         Crypto_put_unaligned_uint32((data) + (offset), ((uint32)(n)));               \
     }
-/* PRQA S 3412 -- */ /* VL_Crypto_62_General */
-/* PRQA S 3472 ++ */ /* VL_Crypto_62_General */
+
 #define CRYPTO_GET_UINT32_LE(data, offset)                                                   \
     ((CRYPTO_IS_BIG_ENDIAN) ? CRYPTO_BSWAP32(Crypto_Get_Unaligned_Uint32((data) + (offset))) \
                             : Crypto_Get_Unaligned_Uint32((data) + (offset)))
-/* PRQA S 3472 -- */
-#if !defined(Crypto_BSWAP64)
+/* PRQA S 3412,3472 -- */ /* VL_Crypto_62_General */
+
+#if !defined(CRYPTO_BSWAP64)
 CRYPTO_62_LOCAL inline uint64 Crypto_bswap64(uint64 x)
 {
     return ((x & 0x00000000000000ffULL) << 56) | ((x & 0x000000000000ff00ULL) << 40)
@@ -739,22 +1050,22 @@ CRYPTO_62_LOCAL inline uint64 Crypto_bswap64(uint64 x)
            | ((x & 0x000000ff00000000ULL) >> 8) | ((x & 0x0000ff0000000000ULL) >> 24)
            | ((x & 0x00ff000000000000ULL) >> 40) | ((x & 0xff00000000000000ULL) >> 56);
 }
-#define Crypto_BSWAP64 Crypto_bswap64
+#define CRYPTO_BSWAP64 Crypto_bswap64
 
 /* PRQA S 3412 ++ */ /* VL_Crypto_62_General */
 #define CRYPTO_PUT_UINT64_BE(n, data, offset)                                        \
-    if (CRYPTO_IS_BIG_ENDIAN)                                                        \
+    if (CRYPTO_IS_BIG_ENDIAN == 1)                                                   \
     {                                                                                \
         Crypto_put_unaligned_uint64((data) + (offset), (uint64)(n));                 \
     }                                                                                \
     else                                                                             \
     {                                                                                \
-        Crypto_put_unaligned_uint64((data) + (offset), Crypto_BSWAP64((uint64)(n))); \
+        Crypto_put_unaligned_uint64((data) + (offset), CRYPTO_BSWAP64((uint64)(n))); \
     }
 #define CRYPTO_PUT_UINT64_LE(n, data, offset)                                        \
-    if (CRYPTO_IS_BIG_ENDIAN)                                                        \
+    if (CRYPTO_IS_BIG_ENDIAN == 1)                                                   \
     {                                                                                \
-        Crypto_put_unaligned_uint64((data) + (offset), Crypto_BSWAP64((uint64)(n))); \
+        Crypto_put_unaligned_uint64((data) + (offset), CRYPTO_BSWAP64((uint64)(n))); \
     }                                                                                \
     else                                                                             \
     {                                                                                \
@@ -777,7 +1088,8 @@ CRYPTO_62_LOCAL inline uint64 Crypto_get_unaligned_uint64(const void* p)
     return r;
 }
 #endif
-#if (CRYPTO_IS_BIG_ENDIAN)
+
+#if (CRYPTO_IS_BIG_ENDIAN == 1)
 
 /* PRQA S 3410 ++ */ /* VL_Crypto_62_General */
 #define HOST_c2l(c, l)                  \
@@ -793,15 +1105,14 @@ CRYPTO_62_LOCAL inline uint64 Crypto_get_unaligned_uint64(const void* p)
      *((c)++) = (uint8)(((l)) & 0xff),       \
      l)
 /* PRQA S 3410 -- */ /* VL_Crypto_62_General */
-
 #else
-
 /* PRQA S 3410 ++ */ /* VL_Crypto_62_General */
 #define HOST_c2l(c, l)                  \
     (l = (((uint32)(*((c)++)))),        \
      l |= (((uint32)(*((c)++))) << 8),  \
      l |= (((uint32)(*((c)++))) << 16), \
      l |= (((uint32)(*((c)++))) << 24))
+
 #define HOST_l2c(l, c)                       \
     (*((c)++) = (uint8)(((l)) & 0xff),       \
      *((c)++) = (uint8)(((l) >> 8) & 0xff),  \
@@ -809,7 +1120,6 @@ CRYPTO_62_LOCAL inline uint64 Crypto_get_unaligned_uint64(const void* p)
      *((c)++) = (uint8)(((l) >> 24) & 0xff), \
      l)
 /* PRQA S 3410 -- */ /* VL_Crypto_62_General */
-
 #endif
 /******************************************************************************/
 /*
@@ -878,38 +1188,25 @@ CRYPTO_62_LOCAL inline uint64 Crypto_ct_size_if(uint64 condition, uint64 if1, ui
     return (uint64)Crypto_ct_if(condition, (uint64)if1, (uint64)if0);
 }
 
-/* PRQA S 5209 ++ */ /* VL_Crypto_62_5209 */
 CRYPTO_62_LOCAL inline unsigned Crypto_ct_uint_if(uint64 condition, unsigned if1, unsigned if0)
 {
     return (unsigned)Crypto_ct_if(condition, (uint64)if1, (uint64)if0);
 }
-/* PRQA S 5209 -- */
 
 CRYPTO_62_LOCAL inline uint64 Crypto_ct_bool_if(uint64 condition, uint64 if1, uint64 if0)
 {
     return (uint64)Crypto_ct_if(condition, (uint64)if1, (uint64)if0);
 }
 
-#if defined(Crypto_BIGNUM_C)
-
-CRYPTO_62_LOCAL inline Crypto_mpi_uint Crypto_ct_mpi_uint_if(uint64 condition, Crypto_mpi_uint if1, Crypto_mpi_uint if0)
-{
-    return (Crypto_mpi_uint)Crypto_ct_if(condition, (uint64)if1, (uint64)if0);
-}
-
-#endif
-
 CRYPTO_62_LOCAL inline uint64 Crypto_ct_size_if_else_0(uint64 condition, uint64 if1)
 {
     return (uint64)(condition & if1);
 }
 
-/* PRQA S 5209 ++ */ /* VL_Crypto_62_5209 */
-CRYPTO_62_LOCAL inline unsigned Crypto_ct_uint_if_else_0(uint64 condition, unsigned if1)
+CRYPTO_62_LOCAL inline uint64 Crypto_ct_uint_if_else_0(uint64 condition, uint64 if1)
 {
-    return (unsigned)(condition & if1);
+    return (uint64)(condition & if1);
 }
-/* PRQA S 5209 -- */
 
 CRYPTO_62_LOCAL inline uint64 Crypto_ct_bool_if_else_0(uint64 condition, uint64 if1)
 {
@@ -938,25 +1235,25 @@ CRYPTO_62_LOCAL inline void Crypto_Ctr_Increment_Counter(uint8 n[CRYPTO_CONST_16
 {
     // The 32-bit version seems to perform about the same as a 64-bit version
     // on 64-bit architectures, so no need to define a 64-bit version.
-    /* PRQA S 2471 ++ */ /* VL_Crypto_62_General */
-    for (sint32 i = CRYPTO_CONST_3;; i--)
-    /* PRQA S 2471 -- */ /* VL_Crypto_62_General */
+    /* PRQA S 2471,4393 ++ */ /* VL_Crypto_62_General */
+    for (int i = CRYPTO_CONST_3;; i--)
     {
-        /* PRQA S 4533,3494 ++ */ /* VL_Crypto_62_General,VL_Crypto_62_3494 */
-        uint32 x = CRYPTO_GET_UINT32_BE(n, i << CRYPTO_CONST_2);
-        x += 1;
-        CRYPTO_PUT_UINT32_BE(x, n, i << CRYPTO_CONST_2);
-        /* PRQA S 4533,3494 -- */ /* VL_Crypto_62_General */
+        /* PRQA S 4533,3494 ++ */ /* VL_Crypto_62_General */
+        uint32 x = CRYPTO_GET_UINT32_BE(n, (uint32)(i << CRYPTO_CONST_2));
+        x += CRYPTO_CONST_1;
+        CRYPTO_PUT_UINT32_BE(x, n, (uint32)(i << CRYPTO_CONST_2));
+        /* PRQA S 4533,3494 -- */
 
-        /* PRQA S 1843 ++ */ /* VL_Crypto_62_General */
-        if ((x != 0) || (i == 0))
-        /* PRQA S 1843 -- */ /* VL_Crypto_62_General */
+        /* PRQA S 1843,1823 ++ */ /* VL_Crypto_62_General */
+        if ((x != CRYPTO_CONST_0) || (i == CRYPTO_CONST_0))
+        /* PRQA S 1843,1823 -- */
         {
             break;
         }
     }
+    /* PRQA S 2471,4393 -- */
 }
-CRYPTO_62_LOCAL inline sint32 Crypto_ct_error_if(uint64 condition, sint32 if1, sint32 if0)
+CRYPTO_62_LOCAL inline Std_ReturnType Crypto_ct_error_if(uint64 condition, uint64 if1, uint64 if0)
 {
     /* Coverting int -> uint -> int here is safe, because we require if1 and if0 to be
      * in the range -32767..0, and we require 32-bit int and uint types.
@@ -964,14 +1261,16 @@ CRYPTO_62_LOCAL inline sint32 Crypto_ct_error_if(uint64 condition, sint32 if1, s
      * This means that (0 <= -if0 < INT_MAX), so negating if0 is safe, and similarly for
      * converting back to int.
      */
-    return -((sint32)Crypto_ct_if(condition, (uint64)(-if1), (uint64)(-if0)));
+    /* PRQA S 3101,3102 ++ */ /* VL_Crypto_62_General */
+    return -((Std_ReturnType)Crypto_ct_if(condition, (uint64)(-if1), (uint64)(-if0)));
+    /* PRQA S 3101,3102 -- */
 }
 
-CRYPTO_62_LOCAL inline sint32 Crypto_ct_error_if_else_0(uint64 condition, sint32 if1)
+CRYPTO_62_LOCAL inline Std_ReturnType Crypto_ct_error_if_else_0(uint64 condition, uint64 if1)
 {
-    /* PRQA S 1821,4532,4394 ++ */ /* VL_Crypto_62_General */
-    return -((sint32)(condition & (-if1)));
-    /* PRQA S 1821,4532,4394 -- */ /* VL_Crypto_62_General */
+    /* PRQA S 1821,4532,4394,3101,3102 ++ */ /* VL_Crypto_62_General */
+    return -((Std_ReturnType)(condition & (-if1)));
+    /* PRQA S 1821,4532,4394,3101,3102 -- */ /* VL_Crypto_62_General */
 }
 CRYPTO_62_LOCAL inline uint64 Crypto_ct_uint_lt(uint64 x, uint64 y)
 {

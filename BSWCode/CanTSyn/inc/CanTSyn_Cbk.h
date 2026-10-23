@@ -28,6 +28,9 @@
 /* =================================================== inclusions =================================================== */
 #include "ComStack_Types.h"
 #include "CanTSyn_Cfg.h"
+#if (CANTSYN_SECURE_TIME_SYNCHRONIZATION_ENABLE == STD_ON)
+#include "Csm.h"
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -44,6 +47,8 @@ extern "C" {
 /* =========================================== external data declarations =========================================== */
 
 /* ========================================= external function declarations ========================================= */
+#define CANTSYN_START_SEC_CODE_FAST
+#include "CanTSyn_MemMap.h"
 /**
  * @brief        Indication of a received PDU from a lower layer communication interface module.
  * @param[in]    RxPduId    ID of the received PDU.
@@ -51,10 +56,14 @@ extern "C" {
  *               containing the PDU, and the MetaData related to this PDU.
  * @reentrant    TRUE(Reentrant for different PduIds. Non reentrant for the same PduId.)
  * @synchronous  TRUE
- * @trace        CPD-75629
+ * @trace        CPD-85826
  */
 void CanTSyn_RxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr);
+#define CANTSYN_STOP_SEC_CODE_FAST
+#include "CanTSyn_MemMap.h"
 
+#define CANTSYN_START_SEC_CODE_FAST
+#include "CanTSyn_MemMap.h"
 /**
  * @brief        The lower layer communication interface module confirms the transmission of a PDU,
  *               or the failure to transmit a PDU.
@@ -63,10 +72,41 @@ void CanTSyn_RxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr);
  *                       E_NOT_OK: Transmission of the PDU failed.
  * @reentrant    TRUE(Reentrant for different PduIds. Non reentrant for the same PduId.)
  * @synchronous  TRUE
- * @trace        CPD-75628
+ * @trace        CPD-85811
  */
 void CanTSyn_TxConfirmation(PduIdType TxPduId, Std_ReturnType result);
+#define CANTSYN_STOP_SEC_CODE_FAST
+#include "CanTSyn_MemMap.h"
 
+#if (CANTSYN_SECURE_TIME_SYNCHRONIZATION_ENABLE == STD_ON)
+#define CANTSYN_START_SEC_CODE_FAST
+#include "CanTSyn_MemMap.h"
+/**
+ * @brief         By this API service the CanTSyn gets an indication and the result of ICV generation.
+ * @param[in]     jobId: JobID of the operation that caused the callback.
+ * @param[in]     result: Contains the result of the cryptographic operation.
+ * @synchronous   TRUE
+ * @reentrant     TRUE
+ * @trace         CPD-84311
+ */
+void CanTSyn_IcvGenerationIndication(uint32 jobId, Crypto_ResultType result);
+#define CANTSYN_STOP_SEC_CODE_FAST
+#include "CanTSyn_MemMap.h"
+
+#define CANTSYN_START_SEC_CODE_FAST
+#include "CanTSyn_MemMap.h"
+/**
+ * @brief         By this API service the CanTSyn gets an indication and the result of ICV verification.
+ * @param[in]     jobId: JobID of the operation that caused the callback.
+ * @param[in]     result: Contains the result of the cryptographic operation.
+ * @synchronous   TRUE
+ * @reentrant     TRUE
+ * @trace         CPD-84312
+ */
+void CanTSyn_IcvVerificationIndication(uint32 jobId, Crypto_ResultType result);
+#define CANTSYN_STOP_SEC_CODE_FAST
+#include "CanTSyn_MemMap.h"
+#endif
 #ifdef __cplusplus
 }
 #endif

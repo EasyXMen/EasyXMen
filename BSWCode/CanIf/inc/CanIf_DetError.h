@@ -62,6 +62,11 @@ extern "C" {
 #define CANIF_GETCONTROLLERERRORSTATE_ID     (0x4Bu)
 #define CANIF_GETCONTROLLERRXERRORCOUNTER_ID (0x4Du)
 #define CANIF_GETCONTROLLERTXERRORCOUNTER_ID (0x4EU)
+#define CANIF_ENABLEBUSMIRRORING_ID          (0x4Cu)
+#define CANIF_GETCURRENTTIME_ID              (0x51u)
+#define CANIF_ENABLEEGRESSTIMESTAMP_ID       (0x52u)
+#define CANIF_GETEGRESSTIMESTAMP_ID          (0x53u)
+#define CANIF_GETINGRESSTIMESTAMP_ID         (0x54u)
 #define CANIF_TRIGGERTRANSMIT_ID             (0x41u)
 #define CANIF_TXCONFIRMATION_ID              (0x13u)
 #define CANIF_RXINDICATION_ID                (0x14u)
@@ -114,6 +119,8 @@ extern "C" {
 /* ========================================= external function declarations ========================================= */
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
 
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              Development error validation
  * @param[in]          ConfigPtr: Pointer to post-build configuration
@@ -125,7 +132,11 @@ extern "C" {
  * @trace              CPD-68970
  */
 extern Std_ReturnType CanIf_ValidateInit(const CanIf_ConfigType* ConfigPtr);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              Development error validation
  * @return             Std_ReturnType
@@ -136,7 +147,11 @@ extern Std_ReturnType CanIf_ValidateInit(const CanIf_ConfigType* ConfigPtr);
  * @trace              CPD-68972
  */
 extern Std_ReturnType CanIf_ValidateDeInit(void);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              Development error validation
  * @param[in]          ControllerId: Controller ID
@@ -149,7 +164,11 @@ extern Std_ReturnType CanIf_ValidateDeInit(void);
  * @trace              CPD-68973
  */
 extern Std_ReturnType CanIf_ValidateSetControllerMode(uint8 ControllerId, Can_ControllerStateType ControllerMode);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              Development error validation
  * @param[in]          ControllerId: Controller ID
@@ -163,7 +182,11 @@ extern Std_ReturnType CanIf_ValidateSetControllerMode(uint8 ControllerId, Can_Co
  */
 extern Std_ReturnType
     CanIf_ValidateGetControllerMode(uint8 ControllerId, const Can_ControllerStateType* ControllerModePtr);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              Development error validation
  * @synchronous        TRUE
@@ -176,8 +199,12 @@ extern Std_ReturnType
  * @trace              CPD-68977
  */
 extern Std_ReturnType CanIf_ValidateTransmit(PduIdType CanIfTxSduId, const PduInfoType* PduInfoPtr);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
 #if (STD_ON == CANIF_PUBLIC_READ_RX_PDU_DATA_API)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              Development error validation
  * @synchronous        TRUE
@@ -190,9 +217,13 @@ extern Std_ReturnType CanIf_ValidateTransmit(PduIdType CanIfTxSduId, const PduIn
  * @trace              CPD-68978
  */
 extern Std_ReturnType CanIf_ValidateReadRxPduData(PduIdType CanIfRxSduId, const PduInfoType* CanIfRxInfoPtr);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if (STD_ON == CANIF_PUBLIC_READ_TX_PDU_NOTIFY_STATUS_API)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              Development error validation
  * @param[in]          CanIfTxSduId: TxPdu ID
@@ -204,9 +235,13 @@ extern Std_ReturnType CanIf_ValidateReadRxPduData(PduIdType CanIfRxSduId, const 
  * @trace              CPD-68979
  */
 extern Std_ReturnType CanIf_ValidateReadTxNotifStatus(PduIdType CanIfTxSduId);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if (STD_ON == CANIF_PUBLIC_READ_RX_PDU_NOTIFY_STATUS_API)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              Development error validation
  * @param[in]          CanIfRxSduId: RxPdu ID
@@ -218,8 +253,12 @@ extern Std_ReturnType CanIf_ValidateReadTxNotifStatus(PduIdType CanIfTxSduId);
  * @trace              CPD-68980
  */
 extern Std_ReturnType CanIf_ValidateReadRxNotifStatus(PduIdType CanIfRxSduId);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              Development error validation
  * @param[in]          ControllerId: Controller ID
@@ -232,7 +271,11 @@ extern Std_ReturnType CanIf_ValidateReadRxNotifStatus(PduIdType CanIfRxSduId);
  * @trace              CPD-68982
  */
 extern Std_ReturnType CanIf_ValidateSetPduMode(uint8 ControllerId, CanIf_PduModeType PduModeRequest);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              Development error validation
  * @param[in]          ControllerId: Controller ID
@@ -245,8 +288,12 @@ extern Std_ReturnType CanIf_ValidateSetPduMode(uint8 ControllerId, CanIf_PduMode
  * @trace              CPD-68983
  */
 extern Std_ReturnType CanIf_ValidateGetPduMode(uint8 ControllerId, const CanIf_PduModeType* PduModePtr);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
 #if (STD_ON == CANIF_PUBLIC_SET_DYNAMIC_TX_ID_API)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              Development error validation
  * @param[in]          CanIfTxSduId: TxPdu ID
@@ -259,9 +306,13 @@ extern Std_ReturnType CanIf_ValidateGetPduMode(uint8 ControllerId, const CanIf_P
  * @trace              CPD-68984
  */
 extern Std_ReturnType CanIf_ValidateSetDynamicTxId(PduIdType CanIfTxSduId, Can_IdType CanId);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if (CANIF_TRCV_NUMBER > 0u)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              Development error validation
  * @param[in]          TransceiverId: Transceiver ID
@@ -274,7 +325,11 @@ extern Std_ReturnType CanIf_ValidateSetDynamicTxId(PduIdType CanIfTxSduId, Can_I
  * @trace              CPD-68985
  */
 extern Std_ReturnType CanIf_ValidateSetTrcvMode(uint8 TransceiverId, CanTrcv_TrcvModeType TransceiverMode);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              Development error validation
  * @param[in]          TransceiverId: Transceiver ID
@@ -287,7 +342,11 @@ extern Std_ReturnType CanIf_ValidateSetTrcvMode(uint8 TransceiverId, CanTrcv_Trc
  * @trace              CPD-68986
  */
 extern Std_ReturnType CanIf_ValidateGetTrcvMode(uint8 TransceiverId, const CanTrcv_TrcvModeType* TransceiverModePtr);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              Development error validation
  * @param[in]          TransceiverId: Transceiver ID
@@ -301,7 +360,11 @@ extern Std_ReturnType CanIf_ValidateGetTrcvMode(uint8 TransceiverId, const CanTr
  */
 extern Std_ReturnType
     CanIf_ValidateGetTrcvWakeupReason(uint8 TransceiverId, const CanTrcv_TrcvWakeupReasonType* TrcvWuReasonPtr);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              Development error validation
  * @param[in]          TransceiverId: Transceiver ID
@@ -314,9 +377,13 @@ extern Std_ReturnType
  * @trace              CPD-68989
  */
 extern Std_ReturnType CanIf_ValidateSetTrcvWakeupMode(uint8 TransceiverId, CanTrcv_TrcvWakeupModeType TrcvWakeupMode);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if (STD_ON == CANIF_WAKEUP_SUPPORT)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              Development error validation
  * @param[in]          WakeupSource: Wakeup source
@@ -328,9 +395,13 @@ extern Std_ReturnType CanIf_ValidateSetTrcvWakeupMode(uint8 TransceiverId, CanTr
  * @trace              CPD-68990
  */
 extern Std_ReturnType CanIf_ValidateCheckWakeup(EcuM_WakeupSourceType WakeupSource);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if (STD_ON == CANIF_PUBLIC_WAKEUP_CHECK_VALID_SUPPORT)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              Development error validation
  * @param[in]          WakeupSource: Wakeup source
@@ -342,9 +413,13 @@ extern Std_ReturnType CanIf_ValidateCheckWakeup(EcuM_WakeupSourceType WakeupSour
  * @trace              CPD-68991
  */
 extern Std_ReturnType CanIf_ValidateCheckValidation(EcuM_WakeupSourceType WakeupSource);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if (STD_ON == CANIF_PUBLIC_TX_CONFIRM_POLLING_SUPPORT)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              Development error validation
  * @param[in]          ControllerId: Controller ID
@@ -356,9 +431,13 @@ extern Std_ReturnType CanIf_ValidateCheckValidation(EcuM_WakeupSourceType Wakeup
  * @trace              CPD-68993
  */
 extern Std_ReturnType CanIf_ValidateGetTxConfirmationState(uint8 ControllerId);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if ((STD_ON == CANIF_PUBLIC_PN_SUPPORT) && (STD_ON == CANIF_PUBLIC_TRCV_PN_SUPPORT))
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              Development error validation
  * @param[in]          TransceiverId: Transceiver ID
@@ -370,7 +449,11 @@ extern Std_ReturnType CanIf_ValidateGetTxConfirmationState(uint8 ControllerId);
  * @trace              CPD-68994
  */
 extern Std_ReturnType CanIf_ValidateClearTrcvWufFlag(uint8 TransceiverId);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              Development error validation
  * @param[in]          TransceiverId: Transceiver ID
@@ -382,9 +465,13 @@ extern Std_ReturnType CanIf_ValidateClearTrcvWufFlag(uint8 TransceiverId);
  * @trace              CPD-68995
  */
 extern Std_ReturnType CanIf_ValidateCheckTrcvWakeFlag(uint8 TransceiverId);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if (STD_ON == CANIF_SET_BAUDRATE_API)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              Development error validation
  * @param[in]          ControllerId: Controller ID
@@ -397,9 +484,13 @@ extern Std_ReturnType CanIf_ValidateCheckTrcvWakeFlag(uint8 TransceiverId);
  * @trace              CPD-68996
  */
 extern Std_ReturnType CanIf_ValidateSetBaudrate(uint8 ControllerId, uint16 BaudRateConfigID);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if (CANIF_CAN_AUTOSAR_VERSION >= CANIF_CAN_AUTOSAR_R431)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              Development error validation
  * @param[in]          ControllerId: Controller Id
@@ -412,9 +503,13 @@ extern Std_ReturnType CanIf_ValidateSetBaudrate(uint8 ControllerId, uint16 BaudR
  * @trace              CPD-85799
  */
 extern Std_ReturnType CanIf_ValidateGetControllerErrorState(uint8 ControllerId, Can_ErrorStateType* ErrorStatePtr);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if (CANIF_CAN_AUTOSAR_VERSION >= CANIF_CAN_AUTOSAR_R440)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              Development error validation
  * @param[in]          ControllerId: Controller Id
@@ -427,7 +522,11 @@ extern Std_ReturnType CanIf_ValidateGetControllerErrorState(uint8 ControllerId, 
  * @trace              CPD-85800
  */
 extern Std_ReturnType CanIf_ValidateGetControllerRxErrorCounter(uint8 ControllerId, uint8* RxErrorCounterPtr);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              Development error validation
  * @param[in]          ControllerId: Controller Id
@@ -440,9 +539,101 @@ extern Std_ReturnType CanIf_ValidateGetControllerRxErrorCounter(uint8 Controller
  * @trace              CPD-85801
  */
 extern Std_ReturnType CanIf_ValidateGetControllerTxErrorCounter(uint8 ControllerId, uint8* TxErrorCounterPtr);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+#endif
+
+#if (STD_ON == CANIF_PUBLIC_BUS_MIRRORING_SUPPORT)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+/**
+ * @brief              Development error validation
+ * @param[in]          ControllerId: Controller ID
+ * @param[in]          MirroringActive: Bus mirroring enabled.
+ * @return             Std_ReturnType
+ * @retval             E_OK: pass validation
+ * @retval             E_NOT_OK: fail validation
+ * @synchronous        TRUE
+ * @reentrant          FALSE
+ * @trace              CPD-81755
+ */
+extern Std_ReturnType CanIf_ValidateEnableBusMirroring(uint8 ControllerId, boolean MirroringActive);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+#endif
+
+#if (STD_ON == CANIF_GLOBAL_TIME_SUPPORT)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+/**
+ * @brief              Development error validation
+ * @param[in]          Controller: Controller ID
+ * @param[in]          timeStampPtr: pointer to timestamp
+ * @return             Std_ReturnType
+ * @retval             E_OK: pass validation
+ * @retval             E_NOT_OK: fail validation
+ * @synchronous        TRUE
+ * @reentrant          FALSE
+ * @trace              CPD-85802
+ */
+extern Std_ReturnType CanIf_ValidateGetCurrentTime(uint8 Controller, Can_TimeStampType* timeStampPtr);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+/**
+ * @brief              Development error validation
+ * @param[in]          TxPduId: TxPdu ID
+ * @return             Std_ReturnType
+ * @retval             E_OK: pass validation
+ * @retval             E_NOT_OK: fail validation
+ * @synchronous        TRUE
+ * @reentrant          FALSE
+ * @trace              CPD-85803
+ */
+extern Std_ReturnType CanIf_ValidateEnableEgressTimeStamp(PduIdType TxPduId);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+/**
+ * @brief              Development error validation
+ * @param[in]          TxPduId: TxPdu ID
+ * @param[in]          timeStampPtr: pointer to timestamp
+ * @return             Std_ReturnType
+ * @retval             E_OK: pass validation
+ * @retval             E_NOT_OK: fail validation
+ * @synchronous        TRUE
+ * @reentrant          FALSE
+ * @trace              CPD-85804
+ */
+extern Std_ReturnType CanIf_ValidateGetEgressTimeStamp(PduIdType TxPduId, Can_TimeStampType* timeStampPtr);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+/**
+ * @brief              Development error validation
+ * @param[in]          RxPduId: RxPdu ID
+ * @param[in]          timeStampPtr: pointer to timestamp
+ * @return             Std_ReturnType
+ * @retval             E_OK: pass validation
+ * @retval             E_NOT_OK: fail validation
+ * @synchronous        TRUE
+ * @reentrant          FALSE
+ * @trace              CPD-85805
+ */
+extern Std_ReturnType CanIf_ValidateGetIngressTimeStamp(PduIdType RxPduId, Can_TimeStampType* timeStampPtr);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if (STD_ON == CANIF_TRIGGER_TRANSMIT_SUPPORT)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              Development error validation
  * @param[in]          TxPduId: TxPdu ID
@@ -455,8 +646,12 @@ extern Std_ReturnType CanIf_ValidateGetControllerTxErrorCounter(uint8 Controller
  * @trace              CPD-68998
  */
 extern Std_ReturnType CanIf_ValidateTriggerTransmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              Development error validation
  * @param[in]          CanTxPduId: TxPdu ID
@@ -468,9 +663,13 @@ extern Std_ReturnType CanIf_ValidateTriggerTransmit(PduIdType TxPduId, const Pdu
  * @trace              CPD-69000
  */
 extern Std_ReturnType CanIf_ValidateTxConfirmation(PduIdType CanTxPduId);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if ((STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT) || (CANIF_VARIANT_NUMBER > 1u))
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              Development error validation
  * @param[in]          Mailbox: Pointer to mailbox
@@ -483,9 +682,13 @@ extern Std_ReturnType CanIf_ValidateTxConfirmation(PduIdType CanTxPduId);
  * @trace              CPD-69001
  */
 extern Std_ReturnType CanIf_ValidateRxIndication(const Can_HwType* Mailbox, const PduInfoType* PduInfoPtr);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              Development error validation
  * @param[in]          ControllerId: Controller ID
@@ -497,8 +700,12 @@ extern Std_ReturnType CanIf_ValidateRxIndication(const Can_HwType* Mailbox, cons
  * @trace              CPD-69003
  */
 extern Std_ReturnType CanIf_ValidateControllerBusOff(uint8 ControllerId);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
 #if ((STD_ON == CANIF_PUBLIC_PN_SUPPORT) && (STD_ON == CANIF_PUBLIC_TRCV_PN_SUPPORT))
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              Development error validation
  * @param[in]          TransceiverId: Transceiver ID
@@ -510,7 +717,11 @@ extern Std_ReturnType CanIf_ValidateControllerBusOff(uint8 ControllerId);
  * @trace              CPD-69004
  */
 extern Std_ReturnType CanIf_ValidateConfirmPnAvailability(uint8 TransceiverId);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              Development error validation
  * @param[in]          TransceiverId: Transceiver ID
@@ -522,7 +733,11 @@ extern Std_ReturnType CanIf_ValidateConfirmPnAvailability(uint8 TransceiverId);
  * @trace              CPD-69005
  */
 extern Std_ReturnType CanIf_ValidateClearTrcvWufFlagIndication(uint8 TransceiverId);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              Development error validation
  * @param[in]          TransceiverId: Transceiver ID
@@ -534,8 +749,12 @@ extern Std_ReturnType CanIf_ValidateClearTrcvWufFlagIndication(uint8 Transceiver
  * @trace              CPD-69006
  */
 extern Std_ReturnType CanIf_ValidateCheckTrcvWakeFlagIndication(uint8 TransceiverId);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              Development error validation
  * @param[in]          ControllerId: Controller ID
@@ -549,8 +768,12 @@ extern Std_ReturnType CanIf_ValidateCheckTrcvWakeFlagIndication(uint8 Transceive
  */
 extern Std_ReturnType
     CanIf_ValidateControllerModeIndication(uint8 ControllerId, Can_ControllerStateType ControllerMode);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
 #if (CANIF_TRCV_NUMBER > 0u)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              Development error validation
  * @param[in]          TransceiverId: Transceiver ID
@@ -563,6 +786,8 @@ extern Std_ReturnType
  * @trace              CPD-69008
  */
 extern Std_ReturnType CanIf_ValidateTrcvModeIndication(uint8 TransceiverId, CanTrcv_TrcvModeType TransceiverMode);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #endif

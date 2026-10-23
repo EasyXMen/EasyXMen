@@ -50,6 +50,8 @@ const Dcm_ConfigType* Dcm_CfgPtr;
 #define DCM_STOP_SEC_VAR_CLEARED_PTR
 #include "Dcm_MemMap.h"
 /* ========================================== internal function declarations ======================================== */
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         called to check P2Timer
  * @return        void
@@ -58,7 +60,11 @@ const Dcm_ConfigType* Dcm_CfgPtr;
  * @trace         CPD-PLACEHOLDE
  */
 DCM_LOCAL void DcmInternal_CheckP2Timer(void);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if (STD_ON == DCM_P4_SERVER)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         called to check P4Timer
  * @return        void
@@ -67,7 +73,11 @@ DCM_LOCAL void DcmInternal_CheckP2Timer(void);
  * @trace         CPD-PLACEHOLDE
  */
 DCM_LOCAL void DcmInternal_CheckP4Timer(void);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         This function process protocol preemption
  * @param[in]     curProtocolId    : the current running protocol Id
@@ -80,8 +90,12 @@ DCM_LOCAL void DcmInternal_CheckP4Timer(void);
  * @trace         CPD-PLACEHOLDE
  */
 DCM_LOCAL Std_ReturnType DslInternal_ProcessPreemption(uint8 curProtocolId, uint8 targetProtocolId);
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if (STD_ON == DCM_REQUEST_QUEUED_ENABLED)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
+
 /**
  * @brief         This function process queueud request
  * @param[in]     protocolId : the input protocol Id
@@ -91,7 +105,11 @@ DCM_LOCAL Std_ReturnType DslInternal_ProcessPreemption(uint8 curProtocolId, uint
  * @trace         CPD-PLACEHOLDE
  */
 DCM_LOCAL void DcmInternal_ProcessQueuedRequest(uint8 protocolId);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         This function calls service interpreter
@@ -102,6 +120,10 @@ DCM_LOCAL void DcmInternal_ProcessQueuedRequest(uint8 protocolId);
  * @trace         CPD-PLACEHOLDE
  */
 DCM_LOCAL void DcmInternal_DispatchService(uint8 protocolId);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         This function handles preemption
@@ -114,8 +136,12 @@ DCM_LOCAL void DcmInternal_DispatchService(uint8 protocolId);
  * @trace         CPD-PLACEHOLDE
  */
 DCM_LOCAL Std_ReturnType DcmInternal_HandlePreemption(uint8 protocolId);
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if (DCM_CALLBACK_DCM_REQUEST_SERVICE > 0u)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
+
 /**
  * @brief         This function handles request callbacks
  * @param[in]     protocolId : the input protocol Id
@@ -127,9 +153,13 @@ DCM_LOCAL Std_ReturnType DcmInternal_HandlePreemption(uint8 protocolId);
  * @trace         CPD-PLACEHOLDE
  */
 DCM_LOCAL Std_ReturnType DcmInternal_HandleRequestCallback(uint8 protocolId);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #if ((DCM_MANUFACTURER_NOTIFICATION_NUM > 0) || (DCM_SUPPLIER_NOTIFICATION_NUM > 0))
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         This function handles manufacturer/supplier notification confirmation
  * @param[in]     protocolId      : the input protocol Id
@@ -144,7 +174,11 @@ DCM_LOCAL void DcmInternal_HandleConfirmation(
     uint8                                        protocolId,
     const Dcm_DsdServiceRequestNotificationType* notification,
     uint8                                        notificationNum);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         This function deal with service function return value
@@ -158,6 +192,10 @@ DCM_LOCAL void DcmInternal_HandleConfirmation(
  */
 DCM_LOCAL void
     DcmInternal_HandleServiceReturn(Std_ReturnType result, uint8 protocolId, Dcm_NegativeResponseCodeType errorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         This function setup pre-conditions for rxIndication
@@ -168,10 +206,12 @@ DCM_LOCAL void
  * @trace         CPD-PLACEHOLDE
  */
 DCM_LOCAL Std_ReturnType DcmInternal_PrepareRxIndication(uint8 protocolId);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 /* ========================================== external function definitions ========================================= */
+#ifndef DCM_MEMCOPY_USED_ILIB
 #define DCM_START_SEC_CODE
 #include "Dcm_MemMap.h"
-#ifndef DCM_MEMCOPY_USED_ILIB
 /**
  * Dcm memory copy implementation
  */
@@ -182,6 +222,10 @@ void DcmInternal_Memcpy(uint8* dest, const uint8* src, uint32 size)
         dest[index] = src[index];
     }
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * Dcm memory set implementation
@@ -193,6 +237,10 @@ void DcmInternal_Memset(uint8* dest, uint8 data, uint32 size)
         dest[index] = data;
     }
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * Dcm  Compares two blocks of memory byte by byte
  */
@@ -212,6 +260,8 @@ int DcmInternal_MemCmp(const void* ptr1, const void* ptr2, int num)
     }
     return ret;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 /* PRQA S 5209 -- */
 #else
 /* API mapping for memcpy/memset */
@@ -220,6 +270,8 @@ int DcmInternal_MemCmp(const void* ptr1, const void* ptr2, int num)
 #define DcmInternal_MemCmp(dest, data, size) IStdLib_MemCmp(dest, data, size)
 #endif
 
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * get metadata source and target address
  */
@@ -273,7 +325,10 @@ void DcmInternal_GetMetaDataSATA(uint8 protocolId, uint16* sourceAddress, uint16
         }
     }
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * decrease timer, if timeout, set to 0
  */
@@ -296,7 +351,10 @@ boolean DcmInternal_DecreaseTimer(uint32* timer)
 
     return timeout;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * check timer for 0x10/0x27/0x86, P2 and P4
  */
@@ -314,7 +372,10 @@ void DcmInternal_CheckTimer(void)
 #endif
     DcmInternal_CheckP2Timer();
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * cancel running jobs of target protocol, cancel transmit/receive if in the process
  */
@@ -356,7 +417,10 @@ Std_ReturnType DcmInternal_CancelJobs(uint8 ProtocolId)
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * asynchronously calls service process function
  */
@@ -382,7 +446,10 @@ void DcmInternal_ProcessRequest(void)
         }
     }
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * find session index based on session level
  */
@@ -402,8 +469,11 @@ Std_ReturnType DcmInternal_FindSessionIndex(Dcm_SesCtrlType session, uint8* sess
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if (STD_ON == DCM_UDS_0X27)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * find security index based on security level
  */
@@ -418,8 +488,11 @@ void DcmInternal_FindSecurityIndex(Dcm_SecLevelType security, uint8* securityInd
         }
     }
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
-
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * calls Dcm_SetProgConditions to prepare for reset
  */
@@ -464,7 +537,10 @@ Std_ReturnType DcmInternal_SetProgConditions(Dcm_OpStatusType OpStatus)
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * calls Dcm_GetProgConditions during intiailization to check app update status
  */
@@ -482,7 +558,10 @@ void DcmInternal_ProgCtrlInit(void)
 #endif
     }
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * transform uint16 data to uint8 array
  */
@@ -503,7 +582,10 @@ void DcmInternal_TransformArray_u16(uint8* dest, uint16 src, Dcm_EndiannessType 
         }
     }
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * transform uint24 data to uint8 array
  */
@@ -524,7 +606,10 @@ void DcmInternal_TransformArray_u24(uint8* dest, uint32 src, Dcm_EndiannessType 
         }
     }
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * transform uint32 data to uint8 array
  */
@@ -545,7 +630,10 @@ void DcmInternal_TransformArray_u32(uint8* dest, uint32 src, Dcm_EndiannessType 
         }
     }
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * transform uint64 data to uint8 array
  */
@@ -566,7 +654,10 @@ void DcmInternal_TransformArray_u64(uint8* dest, uint64 src, Dcm_EndiannessType 
         }
     }
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * asynchronously process rxindication to avoid callout in ISR context
  */
@@ -605,7 +696,10 @@ void DcmInternal_ProcessRxIndication(void)
         }
     }
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * asynchronously process txconfirmation to avoid callout in ISR context
  */
@@ -633,7 +727,10 @@ void DcmInternal_ProcessTxConfirmation(void)
         }
     }
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * set diagnostic state for all mainConnection
  */
@@ -666,8 +763,11 @@ DCM_LOCAL void DcmInternal_CheckP2Timer(void)
         }
     }
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if (STD_ON == DCM_P4_SERVER)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * check P4 timer, reset protocol state if timeout
  */
@@ -682,8 +782,11 @@ DCM_LOCAL void DcmInternal_CheckP4Timer(void)
         }
     }
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
-
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * deal with protocol preemption, call stopProtocol if needed
  */
@@ -708,8 +811,11 @@ DCM_LOCAL Std_ReturnType DslInternal_ProcessPreemption(uint8 curProtocolId, uint
     }
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if (STD_ON == DCM_REQUEST_QUEUED_ENABLED)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL void DcmInternal_ProcessQueuedRequest(uint8 protocolId)
 {
     Dcm_ProtocolCtrlType*      protocolCtrlPtr = &Dcm_ProtocolCtrl[protocolId];
@@ -745,8 +851,11 @@ DCM_LOCAL void DcmInternal_ProcessQueuedRequest(uint8 protocolId)
         DsdInternal_RxIndication(protocolId);
     }
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
-
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* get service function and process */
 DCM_LOCAL void DcmInternal_DispatchService(uint8 protocolId)
 {
@@ -786,7 +895,10 @@ DCM_LOCAL void DcmInternal_DispatchService(uint8 protocolId)
         DcmInternal_HandleServiceReturn(result, protocolId, errorCode);
     }
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* handle preemption for non-default session process */
 DCM_LOCAL Std_ReturnType DcmInternal_HandlePreemption(uint8 protocolId)
 {
@@ -814,8 +926,11 @@ DCM_LOCAL Std_ReturnType DcmInternal_HandlePreemption(uint8 protocolId)
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if (DCM_CALLBACK_DCM_REQUEST_SERVICE > 0u)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* iterate over request callbacks for protocol start */
 DCM_LOCAL Std_ReturnType DcmInternal_HandleRequestCallback(uint8 protocolId)
 {
@@ -856,9 +971,12 @@ DCM_LOCAL Std_ReturnType DcmInternal_HandleRequestCallback(uint8 protocolId)
 
     return result;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
-
 #if ((DCM_MANUFACTURER_NOTIFICATION_NUM > 0) || (DCM_SUPPLIER_NOTIFICATION_NUM > 0))
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* iterate over input nofication container and call callouts */
 DCM_LOCAL void DcmInternal_HandleConfirmation(
     uint8                                        protocolId,
@@ -887,8 +1005,11 @@ DCM_LOCAL void DcmInternal_HandleConfirmation(
 #endif
     }
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
-
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL void
     DcmInternal_HandleServiceReturn(Std_ReturnType result, uint8 protocolId, Dcm_NegativeResponseCodeType errorCode)
 {
@@ -935,7 +1056,10 @@ DCM_LOCAL void
         Dcm_ProtocolCtrl[protocolId].OpStatus = DCM_PENDING;
     }
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL Std_ReturnType DcmInternal_PrepareRxIndication(uint8 protocolId)
 {
     Std_ReturnType result = E_OK;

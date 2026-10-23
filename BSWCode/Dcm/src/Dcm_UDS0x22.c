@@ -30,54 +30,54 @@
 /**
  * @brief The minimum request length of UDS 0x22
  */
-#define DCM_UDS22_MINREQLEN 2uL
+#define DCM_UDS22_MINREQLEN         2uL
 /**
  * @brief The assigned did for reading current session
  */
 #define DCM_ACTIVE_DIAG_SESSION_DID 0xF186u
-/**
- * @brief did read status type
- */
-/* not being read */
-#define DCM_DID_NOT_READ 0u
-/* successfully read */
-#define DCM_DID_READ_OK 1u
-/* failed read */
-#define DCM_DID_READ_FAILED 2u
-/* read is pending */
-#define DCM_DID_READ_PENDING 3u
+
 /* ============================================ internal data definitions =========================================== */
 /**
  * @brief did read status
  */
+#ifdef DCM_MAX_DID_TO_READ
 #define DCM_START_SEC_VAR_CLEARED_8
 #include "Dcm_MemMap.h"
-#ifdef DCM_MAX_DID_TO_READ
 /**
  * @brief An array to store the status of Diagnostic Identification (DID) read operations @range 0..255.
  */
-DCM_LOCAL uint8 Dcm_ReadDidStatus[DCM_MAX_DID_TO_READ];
-#else
-/**
- * @brief An array to store the status of Diagnostic Identification (DID) read operations @range 0..255.
- */
-DCM_LOCAL uint8 Dcm_ReadDidStatus[DCM_DID_NUM];
-#endif
+DCM_LOCAL uint8 Dcm_ReadCheckStatus[DCM_MAX_DID_TO_READ]; /* PRQA S 3218 */ /* VL_Dcm_3218 */
 #define DCM_STOP_SEC_VAR_CLEARED_8
 #include "Dcm_MemMap.h"
+#else
+#define DCM_START_SEC_VAR_CLEARED_8
+#include "Dcm_MemMap.h"
+/**
+ * @brief An array to store the status of Diagnostic Identification (DID) read operations @range 0..255.
+ */
+DCM_LOCAL uint8 Dcm_ReadCheckStatus[DCM_DID_NUM]; /* PRQA S 3218 */ /* VL_Dcm_3218 */
+#define DCM_STOP_SEC_VAR_CLEARED_8
+#include "Dcm_MemMap.h"
+#endif
+
 #define DCM_START_SEC_VAR_CLEARED_32
 #include "Dcm_MemMap.h"
-#ifdef DCM_MAX_DID_TO_READ
-/**
- * @brief Stores the data size for each DID read operation in DCM @range NA.
- */
-DCM_LOCAL uint32 Dcm_ReadDidSize[DCM_MAX_DID_TO_READ];
-#else
-DCM_LOCAL uint32 Dcm_ReadDidSize[DCM_DID_NUM];
-#endif
+DCM_LOCAL uint32 Dcm_0x22ReadOffset; /* PRQA S 3218 */ /* VL_Dcm_3218 */
 #define DCM_STOP_SEC_VAR_CLEARED_32
 #include "Dcm_MemMap.h"
+#define DCM_START_SEC_VAR_CLEARED_16
+#include "Dcm_MemMap.h"
+DCM_LOCAL uint16 Dcm_0x22ReadDidIndex; /* PRQA S 3218 */ /* VL_Dcm_3218 */
+#define DCM_STOP_SEC_VAR_CLEARED_16
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_VAR_CLEARED_8
+#include "Dcm_MemMap.h"
+DCM_LOCAL Dcm_ExtendedOpStatusType Dcm_0x22ReadOpStatus; /* PRQA S 3218 */ /* VL_Dcm_3218 */
+#define DCM_STOP_SEC_VAR_CLEARED_8
+#include "Dcm_MemMap.h"
 /* ========================================== internal function declarations ======================================== */
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         This function sets did status
  * @param[in]     result      : the previous result
@@ -92,14 +92,13 @@ DCM_LOCAL uint32 Dcm_ReadDidSize[DCM_DID_NUM];
  * @synchronous   Synchronous
  * @trace         CPD-PLACEHOLDE
  */
-DCM_LOCAL void Dcm_UDS0x22_HandleDidStatus(
-    Std_ReturnType      result,
-    uint16              did,
-    uint16              index,
-    Dcm_MsgContextType* pMsgContext,
-    uint32*             offset,
-    Dcm_MsgLenType*     bufSize);
+DCM_LOCAL void
+    Dcm_UDS0x22_HandleDidStatus(uint16 did, Dcm_MsgContextType* pMsgContext, uint32* offset, Dcm_MsgLenType* bufSize);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if (STD_ON == DCM_DID_RANGE_ENABLED)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         This function gets the configured did index, also applying to rangeDid and OBDDid.
  * @param[in]     OpStatus      : Indicates the current operation status
@@ -129,6 +128,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x22_RangeDidHandle(
     uint8*                        DestBuffer,
     Dcm_MsgLenType*               BufSize,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         This function reads data of range did
@@ -157,8 +160,12 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x22_RangeDidReadData(
     uint8*                        DestBuffer,
     Dcm_MsgLenType*               BufSize,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 #if (STD_ON == DCM_OBD_DID_MIRROR)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         This function deals with obd did to get data
  * @param[in]     OpStatus   : Indicates the current operation status
@@ -185,8 +192,12 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x22_OBDDidHandle(
     uint8*                        DestBuffer,
     Dcm_MsgLenType*               BufSize,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 #if (STD_ON == DCM_PAGEDBUFFER_ENABLED)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         This function gets the did length to read for pagedBuffer functionality
  * @param[in]     Did          : the input did
@@ -209,6 +220,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x22_GetDidLength(
     uint16                        ConnectionId,
     Dcm_MsgLenType*               DataLength,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         This function handles the result of read Did and deal with pagedBuffer initialization
@@ -235,7 +250,11 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x22_ReadDidPostProcess(
     uint16                        index,
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         This function setup the initial read status and iterate over requested did
@@ -262,6 +281,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x22_ReadDidPrepare(
 #endif
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         This function reads the data of a did
@@ -288,6 +311,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x22_ReadDid(
     Dcm_MsgContextType*           pMsgContext,
     uint32*                       offset,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         This function reads a did based on is type (regular/range/OBD)
@@ -320,6 +347,8 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x22_ReadDidProcess(
     uint8*                        DestBuffer,
     Dcm_MsgLenType*               bufSize,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 /* ========================================== external function definitions ========================================= */
 #define DCM_START_SEC_CODE
 #include "Dcm_MemMap.h"
@@ -376,7 +405,7 @@ Std_ReturnType Dcm_UDS0x22(
 #define DCM_START_SEC_CODE
 #include "Dcm_MemMap.h"
 /* setup read did status and iterate over did to read */
-/* PRQA S 6030++ */ /* VL_MTR_Dcm_STMIF */
+/* PRQA S 6030,6010,6080 ++ */ /* VL_MTR_Dcm_STMIF,VL_MTR_Dcm_STCYC,VL_MTR_Dcm_STPTH */
 DCM_LOCAL Std_ReturnType Dcm_UDS0x22_ReadDidPrepare(
     Dcm_ExtendedOpStatusType OpStatus,
 #if (STD_ON == DCM_PAGEDBUFFER_ENABLED)
@@ -384,49 +413,89 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x22_ReadDidPrepare(
 #endif
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode)
-/* PRQA S 6030-- */
+/* PRQA S 6030,6010,6080 -- */
 {
     Std_ReturnType finalResult = E_NOT_OK;
-    uint32         offset      = 0u;
     uint16         didNum      = (uint16)(pMsgContext->reqDataLen / DCM_DID_LENGTH);
+
+#if (STD_ON == DCM_PAGEDBUFFER_ENABLED)
+    if (TRUE == Dcm_ProtocolCtrl[protocolId].PagedBufferStarted && OpStatus != DCM_PENDING)
+    {
+        Dcm_0x22ReadOffset = 0u;
+        finalResult        = E_OK;
+    }
+#endif
     if ((DCM_INITIAL == OpStatus)
 #if (STD_ON == DCM_PAGEDBUFFER_ENABLED)
         && (FALSE == Dcm_ProtocolCtrl[protocolId].PagedBufferStarted)
 #endif
     )
     {
-        DcmInternal_Memset((uint8*)Dcm_ReadDidStatus, DCM_DID_NOT_READ, (uint32)didNum);
-        DcmInternal_Memset((uint8*)Dcm_ReadDidSize, 0u, (uint32)didNum);
+        DcmInternal_Memset((uint8*)Dcm_ReadCheckStatus, 0u, (uint32)didNum);
         pMsgContext->resDataLen = 0u;
+        Dcm_0x22ReadOffset      = 0u;
+        Dcm_0x22ReadDidIndex    = 0u;
+        Dcm_0x22ReadOpStatus    = DCM_INITIAL;
+        for (uint16 index = 0u; index < didNum; index++)
+        {
+            uint16      connectionId;
+            uint16      didIndex;
+            Dcm_DidType didType;
+            uint16      did = DCM_U8N_TO_U16(&pMsgContext->reqData[index * DCM_DID_LENGTH]);
+            (void)DslInternal_FindProtocolRowByRxPduId(pMsgContext->dcmRxPduId, NULL_PTR, &connectionId);
+            Std_ReturnType result = Dcm_UDS_FindDid(did, &didType, &didIndex, NULL_PTR);
+            if (result == E_OK)
+            {
+                if (DCM_REGULAR_DID == didType)
+                {
+                    result = Dcm_UDS_CheckReadWriteDid(connectionId, did, DCM_DID_INFO(didIndex).DidRead, ErrorCode);
+                }
+            }
+
+            if ((result == E_NOT_OK) && (DCM_POS_RESP != *ErrorCode)) /* PRQA S 2995 */ /* VL_Dcm_2995 */
+            {
+                finalResult = E_NOT_OK;
+                break;
+            }
+            else if ((result == E_NOT_OK) && (DCM_POS_RESP == *ErrorCode)) /* PRQA S 2995 */ /* VL_Dcm_2995 */
+            {
+                Dcm_ReadCheckStatus[index] = 1u;
+            }
+            else
+            {
+                finalResult = E_OK;
+            }
+        }
     }
-    for (uint16 index = 0u; index < didNum; index++)
+    else
     {
-        Std_ReturnType result = Dcm_UDS0x22_ReadDid(OpStatus, index, pMsgContext, &offset, ErrorCode);
+        finalResult = E_OK;
+    }
 
-        if ((result == E_OK) && (finalResult != DCM_E_FORCE_RCRRP) && (finalResult != DCM_E_PENDING))
+    for (uint16 index = 0u; (index < didNum) && (finalResult == E_OK); index++)
+    {
+        if ((Dcm_ReadCheckStatus[index] != 1u) && (Dcm_0x22ReadDidIndex <= index))
         {
-            finalResult = E_OK;
-        }
-        else if ((*ErrorCode == DCM_E_RESPONSETOOLONG) || (*ErrorCode == DCM_E_SECURITYACCESSDENIED))
-        {
-            finalResult = E_NOT_OK;
-            break;
-        }
-        else if (result == DCM_E_FORCE_RCRRP)
-        {
-            finalResult = DCM_E_FORCE_RCRRP;
-        }
-        else if ((result == DCM_E_PENDING) && (finalResult != DCM_E_FORCE_RCRRP))
-        {
-            finalResult = DCM_E_PENDING;
-        }
-        else
-        {
-            // for qac
+            uint32         Dcm_0x22ReadOffsetTemp = Dcm_0x22ReadOffset;
+            Std_ReturnType result =
+                Dcm_UDS0x22_ReadDid(Dcm_0x22ReadOpStatus, index, pMsgContext, &Dcm_0x22ReadOffset, ErrorCode);
+
+            if ((result == DCM_E_PENDING) || (result == DCM_E_FORCE_RCRRP) || (result == E_NOT_OK))
+            {
+                finalResult          = result;
+                Dcm_0x22ReadOpStatus = DCM_PENDING;
+                break;
+            }
+            if ((result == E_OK) && (Dcm_0x22ReadOffset != Dcm_0x22ReadOffsetTemp))
+            {
+                Dcm_0x22ReadDidIndex++;
+                Dcm_0x22ReadOpStatus = DCM_INITIAL;
+            }
         }
     }
 
-    if (((0uL == offset) && (E_OK == finalResult)) || ((E_NOT_OK == finalResult) && (DCM_POS_RESP == *ErrorCode)))
+    if (((0uL == Dcm_0x22ReadOffset) && (E_OK == finalResult))
+        || ((E_NOT_OK == finalResult) && (DCM_POS_RESP == *ErrorCode)))
     {
         *ErrorCode  = DCM_E_REQUESTOUTOFRANGE;
         finalResult = E_NOT_OK;
@@ -434,7 +503,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x22_ReadDidPrepare(
 
     return finalResult;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* find and check did, then call readDidProcess to read */
 DCM_LOCAL Std_ReturnType Dcm_UDS0x22_ReadDid(
     Dcm_ExtendedOpStatusType      OpStatus,
@@ -454,7 +526,6 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x22_ReadDid(
 #if (STD_ON == DCM_PAGEDBUFFER_ENABLED)
     uint8 protocolId;
     (void)DslInternal_FindProtocolRowByRxPduId(pMsgContext->dcmRxPduId, &protocolId, &connectionId);
-    Dcm_ProtocolCtrlType* protocolCtrlPtr = &Dcm_ProtocolCtrl[protocolId];
 #else
     (void)DslInternal_FindProtocolRowByRxPduId(pMsgContext->dcmRxPduId, NULL_PTR, &connectionId);
 #endif
@@ -462,103 +533,56 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x22_ReadDid(
 
     if (E_OK == result)
     {
-        const uint8* readDidStatus = &Dcm_ReadDidStatus[index];
-        if ((DCM_DID_NOT_READ == *readDidStatus) || (DCM_DID_READ_PENDING == *readDidStatus))
+        result = Dcm_UDS0x22_ReadDidProcess(
+            OpStatus,
+            connectionId,
+            did,
+            didType,
+            didIndex,
+            &resData[*offset + DCM_DID_LENGTH],
+            &bufSize,
+            ErrorCode);
+#if (STD_ON == DCM_PAGEDBUFFER_ENABLED)
+        if (DCM_E_RESPONSETOOLONG == *ErrorCode)
         {
-            if (DCM_REGULAR_DID == didType)
-            {
-                result = Dcm_UDS_CheckReadWriteDid(connectionId, did, DCM_DID_INFO(didIndex).DidRead, ErrorCode);
-            }
-
-            if (E_OK == result)
-            {
-                result = Dcm_UDS0x22_ReadDidProcess(
-                    OpStatus,
-                    connectionId,
-                    did,
-                    didType,
-                    didIndex,
-                    &resData[*offset + DCM_DID_LENGTH],
-                    &bufSize,
-                    ErrorCode);
-            }
-#if (STD_ON == DCM_PAGEDBUFFER_ENABLED)
-            if (DCM_E_RESPONSETOOLONG == *ErrorCode)
-            {
-                result = Dcm_UDS0x22_ReadDidPostProcess(protocolId, result, index, pMsgContext, ErrorCode);
-            }
-            else
-#endif
-                if (E_NOT_OK != result)
-            {
-                Dcm_UDS0x22_HandleDidStatus(result, did, index, pMsgContext, offset, &bufSize);
-            }
-#if (STD_ON == DCM_PAGEDBUFFER_ENABLED)
-            else
-            {
-                /* idle */
-            }
-
-            if (E_NOT_OK == result)
-#else
-            else
-#endif
-            {
-                Dcm_ReadDidStatus[index] = DCM_DID_READ_FAILED;
-            }
-        }
-        else if (DCM_DID_READ_OK == *readDidStatus)
-        {
-#if (STD_ON == DCM_PAGEDBUFFER_ENABLED)
-            if (FALSE == protocolCtrlPtr->PagedBufferStarted)
-#endif
-            {
-                (*offset) += Dcm_ReadDidSize[index] + DCM_DID_LENGTH;
-            }
+            result = Dcm_UDS0x22_ReadDidPostProcess(protocolId, result, index, pMsgContext, ErrorCode);
         }
         else
+#endif
+            if (E_OK == result)
         {
-            /* Readfailed, skip */
+            Dcm_UDS0x22_HandleDidStatus(did, pMsgContext, offset, &bufSize);
         }
     }
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* PRQA S 6040++ */ /* VL_MTR_Dcm_STPAR */
-DCM_LOCAL void Dcm_UDS0x22_HandleDidStatus(
-    Std_ReturnType      result,
-    uint16              did,
-    uint16              index,
-    Dcm_MsgContextType* pMsgContext,
-    uint32*             offset,
-    Dcm_MsgLenType*     bufSize)
+DCM_LOCAL void
+    Dcm_UDS0x22_HandleDidStatus(uint16 did, Dcm_MsgContextType* pMsgContext, uint32* offset, Dcm_MsgLenType* bufSize)
 /* PRQA S 6040-- */ /* VL_MTR_Dcm_STPAR */
 {
     uint8* resData = pMsgContext->resData;
-
     DcmInternal_TransformArray_u16(&resData[*offset], did, DCM_OPAQUE);
     (*offset) += *bufSize + DCM_DID_LENGTH;
-    if ((DCM_E_FORCE_RCRRP == result) || (DCM_E_PENDING == result))
-    {
-        Dcm_ReadDidStatus[index] = DCM_DID_READ_PENDING;
-    }
-    else
-    {
 #if (STD_ON == DCM_PAGEDBUFFER_ENABLED)
-        uint8                 protocolId;
-        Dcm_ProtocolCtrlType* protocolCtrlPtr;
-        (void)DslInternal_FindProtocolRowByRxPduId(pMsgContext->dcmRxPduId, &protocolId, NULL_PTR);
-        protocolCtrlPtr = &Dcm_ProtocolCtrl[protocolId];
-        protocolCtrlPtr->RemainPageLength += *bufSize + DCM_DID_LENGTH;
+    uint8                 protocolId;
+    Dcm_ProtocolCtrlType* protocolCtrlPtr;
+    (void)DslInternal_FindProtocolRowByRxPduId(pMsgContext->dcmRxPduId, &protocolId, NULL_PTR);
+    protocolCtrlPtr = &Dcm_ProtocolCtrl[protocolId];
+    protocolCtrlPtr->RemainPageLength += *bufSize + DCM_DID_LENGTH;
 #endif
-        Dcm_ReadDidStatus[index] = DCM_DID_READ_OK;
-        Dcm_ReadDidSize[index]   = *bufSize;
-        pMsgContext->resDataLen += *bufSize + DCM_DID_LENGTH;
-    }
+    pMsgContext->resDataLen += *bufSize + DCM_DID_LENGTH;
     *bufSize = pMsgContext->resMaxDataLen - *offset;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* actually read the did based on its type */
 /* PRQA S 6040++ */ /* VL_MTR_Dcm_STPAR */
 DCM_LOCAL Std_ReturnType Dcm_UDS0x22_ReadDidProcess(
@@ -643,8 +667,11 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x22_ReadDidProcess(
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if (STD_ON == DCM_PAGEDBUFFER_ENABLED)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL Std_ReturnType Dcm_UDS0x22_ReadDidPostProcess(
     uint8                         protocolId,
     Std_ReturnType                readResult,
@@ -662,11 +689,14 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x22_ReadDidPostProcess(
         did                       = DCM_U8N_TO_U16(&pMsgContext->reqData[remainIndex * DCM_DID_LENGTH]);
         Dcm_MsgLenType dataLength = 0u;
         result = Dcm_UDS0x22_GetDidLength(did, protocolCtrlPtr->ConnectionId, &dataLength, ErrorCode);
-        totalSize += dataLength + DCM_DID_LENGTH;
-        if ((dataLength + DCM_DID_LENGTH) > pMsgContext->resMaxDataLen)
+        if (Dcm_ReadCheckStatus[remainIndex] != 1u)
         {
-            result = E_NOT_OK;
-            break;
+            totalSize += dataLength + DCM_DID_LENGTH;
+            if ((dataLength + DCM_DID_LENGTH) > pMsgContext->resMaxDataLen)
+            {
+                result = E_NOT_OK;
+                break;
+            }
         }
     }
     if ((E_OK == result) && (totalSize < Dcm_DslProtocolRow[protocolId].MaximumResponseSize))
@@ -684,7 +714,11 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x22_ReadDidPostProcess(
 
     return result;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * only for pagedBuffer, retrive did total dataLength without reading
  */
@@ -763,9 +797,12 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x22_GetDidLength(
     }
     return result;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
-
 #if (STD_ON == DCM_DID_RANGE_ENABLED)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * deal with rangeDid reading
  */
@@ -814,7 +851,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x22_RangeDidHandle(
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL Std_ReturnType Dcm_UDS0x22_RangeDidReadData(
     Dcm_ExtendedOpStatusType      OpStatus,
     uint16                        Did,
@@ -889,9 +929,12 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x22_RangeDidReadData(
 
     return result;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
-
 #if (STD_ON == DCM_OBD_DID_MIRROR)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * deals with obd did to get data, treat as different type for different range
  */
@@ -928,7 +971,7 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x22_OBDDidHandle(
 
     return result;
 }
-#endif
 #define DCM_STOP_SEC_CODE
 #include "Dcm_MemMap.h"
+#endif
 #endif

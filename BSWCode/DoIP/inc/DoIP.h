@@ -34,6 +34,12 @@
  *             2025-11-07    li.feng         CPT-16292 The vehicle announcement fails to be sent correctly.
  *  V2.1.1     2025-11-11    li.feng         CPT-16309 fix successful Diagnostic Request on Unactivated TCP
  *             2025-12-25    li.feng         CPT-16170,CPT-17004 fix Invalid Payload type Handling
+ *             2026-03-09    li.feng         CPD-86879 qac for DoIP RunnableEntity fix
+ *             2026-04-08    li.feng         CPT-18434 Upon receiving an invalid SA during routing activation, respond
+ *                                                     with NACK, then close the connection instead of resetting it.
+ *  V02.01.02  2026-06-04    tao.yu          add arti.
+ *             2026-06-12    li.feng         CPT-19103 fix doip can not nottifies dcm rx indication
+ *             2026-07-21    li.feng         CPT-19505 functional-addressing diagnostic request not responded
 ==================================================================================================================== */
 
 /* ================================================ misar justifications ============================================ */
@@ -126,6 +132,16 @@
       Reason:Need const var init static var.
       Risk: None.
       Prevention:None.
+
+    \li VL_DoIP_3451
+      Reason: multiple declaration is necessary for RTE
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_DoIP_3449
+      Reason: multiple declaration is necessary for RTE
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_DoIP_3414
       Reason: specific keyword macro is necessary for unit testing
@@ -260,6 +276,10 @@
       Risk: No risk.
       Prevention: Ensure that the project is working properly through unit testing.
 
+    \li VL_DoIP_1513
+      Reason: Identifier '${name}' with external linkage has separate non-defining declarations in more than one
+  location. Risk: No risk. Prevention: Functional reliability guaranteed by design.
+
     \li VL_DoIP_0624
       Reason: function parameter can be considered as the same via typedef
       Risk: No risk.
@@ -311,7 +331,7 @@ extern "C" {
 #define DOIP_AR_RELEASE_REVISION_VERSION (0u)   /**< Value of Autosar patch version */
 #define DOIP_SW_MAJOR_VERSION            (2u)   /**< Value of module major version */
 #define DOIP_SW_MINOR_VERSION            (1u)   /**< Value of module minor version */
-#define DOIP_SW_PATCH_VERSION            (0u)   /**< Value of module patch version */
+#define DOIP_SW_PATCH_VERSION            (2u)   /**< Value of module patch version */
 
 /* ===================================================== macros ===================================================== */
 
@@ -347,6 +367,8 @@ extern "C" {
 
 /* ========================================= external function declarations ========================================= */
 
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief       This service initializes all global variables of the DoIP module. After return of
  *              this service the DoIP module is operational.
@@ -357,6 +379,10 @@ extern "C" {
  * @trace       CPD-PLACEHOLDER
  */
 void DoIP_Init(const DoIP_ConfigType* doipConfigPtr);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Returns the version information of this module.
@@ -369,6 +395,10 @@ void DoIP_Init(const DoIP_ConfigType* doipConfigPtr);
 /* PRQA S 1501,1753 ++ */ /* VL_DoIP_1501,VL_DoIP_1753 */
 void DoIP_GetVersionInfo(Std_VersionInfoType* versionInfo);
 /* PRQA S 1501,1753 -- */
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       This function is used to notify the DoIP on a switch of the DoIPActivationLine
@@ -378,10 +408,14 @@ void DoIP_GetVersionInfo(Std_VersionInfoType* versionInfo);
  * @synchronous TRUE
  * @trace       CPD-PLACEHOLDER
  */
-/* PRQA S 1512,1513 ++ */           /* VL_DoIP_1512,VL_QAC_MultiDeclaration */
-/* PRQA S 3449,3451,0624,1707 ++ */ /* VL_QAC_MultiDeclaration,VL_QAC_MultiDeclaration,VL_DoIP_0624,VL_DoIP_1707 */
-void DoIP_ActivationLineSwitch(boolean* active);
+/* PRQA S 1512,1513 ++ */           /* VL_DoIP_1512,VL_DoIP_1513 */
+/* PRQA S 3449,3451,0624,1707 ++ */ /* VL_DoIP_3449,VL_DoIP_3451,VL_DoIP_0624,VL_DoIP_1707 */
+void DoIP_ActivationLineSwitch(boolean* Active);
 /* PRQA S 3449,3451,0624,1707 -- */
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       This service is called to request the transfer data from the PduRouter to the SoAd.
@@ -397,6 +431,10 @@ void DoIP_ActivationLineSwitch(boolean* active);
  */
 /* PRQA S 1709 ++ */ /* VL_DoIP_1709 */
 Std_ReturnType DoIP_TpTransmit(PduIdType DoIPPduRTxId, const PduInfoType* DoIPPduRTxInfoPtr);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       This service primitive is used to cancel the transfer of pending DoIPPduRTxIds. The connection is
@@ -411,6 +449,10 @@ Std_ReturnType DoIP_TpTransmit(PduIdType DoIPPduRTxId, const PduInfoType* DoIPPd
  * @trace       CPD-PLACEHOLDER
  */
 Std_ReturnType DoIP_TpCancelTransmit(PduIdType DoIPPduRTxId);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       By calling this API with the corresponding DoIPPduRRxId the currently ongoing data reception
@@ -425,6 +467,10 @@ Std_ReturnType DoIP_TpCancelTransmit(PduIdType DoIPPduRTxId);
  * @trace       CPD-PLACEHOLDER
  */
 Std_ReturnType DoIP_TpCancelReceive(PduIdType DoIPPduRRxId);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Requests transmission of an I-PDU.
@@ -439,6 +485,10 @@ Std_ReturnType DoIP_TpCancelReceive(PduIdType DoIPPduRRxId);
  * @trace       CPD-PLACEHOLDER
  */
 Std_ReturnType DoIP_IfTransmit(PduIdType id, const PduInfoType* info);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Requests cancellation of an ongoing transmission of an I-PDU in a lower layer communication interface
@@ -453,6 +503,10 @@ Std_ReturnType DoIP_IfTransmit(PduIdType id, const PduInfoType* info);
  */
 Std_ReturnType DoIP_IfCancelTransmit(PduIdType id);
 /* PRQA S 1709 -- */
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Schedules the Diagnostic over IP module. (Entry point for scheduling)
@@ -461,10 +515,15 @@ Std_ReturnType DoIP_IfCancelTransmit(PduIdType id);
  * @synchronous TRUE
  * @trace       CPD-PLACEHOLDER
  */
-/* PRQA S 3449,3451 ++ */ /* VL_QAC_MultiDeclaration,VL_QAC_MultiDeclaration */
+/* PRQA S 3449,3451 ++ */ /* VL_DoIP_3449,VL_DoIP_3451 */
 void DoIP_MainFunction(void);
 /* PRQA S 3449,3451 -- */
 /* PRQA S 1512,1513 -- */
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#if (DOIP_HIGH_FREQ_TASK_SUPPORT == TRUE)
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief       Schedules the Diagnostic over IP module. (Entry point for scheduling) for hight frequency tasks.
  * @return      void
@@ -472,8 +531,9 @@ void DoIP_MainFunction(void);
  * @synchronous TRUE
  * @trace       CPD-PLACEHOLDER
  */
-#if (DOIP_HIGH_FREQ_TASK_SUPPORT == TRUE)
 extern void DoIP_MainFunction_HighFrequency(void);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
 #endif
 
 #ifdef __cplusplus

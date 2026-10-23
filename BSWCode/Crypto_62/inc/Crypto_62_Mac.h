@@ -35,7 +35,7 @@ extern "C" {
 #if (CRYPTO_SERVICE_MAC == STD_ON)
 
 /* ===================================================== macros ===================================================== */
-
+#define CRYPTO_MAC_MAX_SIZE (200u)
 /* ================================================ type definitions ================================================ */
 
 /* ========================================== internal function definitions ========================================= */
@@ -52,7 +52,11 @@ extern "C" {
  *
  * @return  None.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_Leftshift(uint32 len, uint8* add, uint8* des);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 #if (CRYPTO_ALGORITHMMODE_CMAC == STD_ON)
 /**
  * @brief   Verifies a CMAC (Cipher-based Message Authentication Code) for a given object ID and algorithm family.
@@ -64,7 +68,11 @@ void Crypto_Leftshift(uint32 len, uint8* add, uint8* des);
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_VerifyCmac(uint32 objectId, Crypto_AlgorithmFamilyType algorithmfamily);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Generates a CMAC for a given object ID and algorithm family.
@@ -76,9 +84,13 @@ Std_ReturnType Crypto_VerifyCmac(uint32 objectId, Crypto_AlgorithmFamilyType alg
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_GenerateCmac_Process(uint32 objectId, Crypto_AlgorithmFamilyType algorithmfamily);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 #endif
-#if (CRYPTO_ALGORITHMMODE_HMAC == STD_ON)
+
 /**
  * @brief   Initializes the HMAC (Hash-based Message Authentication Code) generation process.
  *
@@ -90,7 +102,11 @@ Std_ReturnType Crypto_GenerateCmac_Process(uint32 objectId, Crypto_AlgorithmFami
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
-Std_ReturnType Crypto_GenerateHmac_Start(Crypto_Md_Context_t* ctx, uint8* key, uint32 keylen);
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+Std_ReturnType Crypto_GenerateHmac_Start(Crypto_Md_Context_t* ctx, const uint8* key, uint32 keylen);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Updates the HMAC context with new input data.
@@ -103,7 +119,11 @@ Std_ReturnType Crypto_GenerateHmac_Start(Crypto_Md_Context_t* ctx, uint8* key, u
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_GenerateHmac_Update(Crypto_Md_Context_t* ctx, const uint8* input, uint32 ilen);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Finalizes the HMAC generation process and produces the HMAC output.
@@ -115,7 +135,11 @@ Std_ReturnType Crypto_GenerateHmac_Update(Crypto_Md_Context_t* ctx, const uint8*
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_GenerateHmac_Finish(Crypto_Md_Context_t* ctx, uint8* output);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Resets the HMAC context.
@@ -126,7 +150,11 @@ Std_ReturnType Crypto_GenerateHmac_Finish(Crypto_Md_Context_t* ctx, uint8* outpu
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_md_hmac_reset(Crypto_Md_Context_t* ctx);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Generates an HMAC for a given object ID and algorithm family.
@@ -138,7 +166,11 @@ Std_ReturnType Crypto_md_hmac_reset(Crypto_Md_Context_t* ctx);
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_GenerateHmac(uint32 objectId, Crypto_AlgorithmFamilyType algorithmfamily);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Verifies an HMAC for a given object ID, algorithm family, and operation mode.
@@ -151,11 +183,15 @@ Std_ReturnType Crypto_GenerateHmac(uint32 objectId, Crypto_AlgorithmFamilyType a
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_VerifyHmac(
     uint32                     objectId,
     Crypto_AlgorithmFamilyType algorithmfamily,
     Crypto_OperationModeType   operateMode);
-#endif
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+
 /**
  * @brief   Processes the MAC generation for a given object ID, algorithm family, mode, and operation mode.
  *
@@ -168,11 +204,15 @@ Std_ReturnType Crypto_VerifyHmac(
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_62_MacGenerate_Process(
     uint32                     objectId,
     Crypto_AlgorithmFamilyType algorithmfamily,
     Crypto_AlgorithmModeType   mode,
     Crypto_OperationModeType   operateMode);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Processes the MAC verification for a given object ID, algorithm family, mode, and operation mode.
@@ -186,11 +226,15 @@ Std_ReturnType Crypto_62_MacGenerate_Process(
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_62_MacVerify_Process(
     uint32                     objectId,
     Crypto_AlgorithmFamilyType algorithmfamily,
     Crypto_AlgorithmModeType   mode,
     Crypto_OperationModeType   operateMode);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 #endif /* CRYPTO_SERVICE_MAC == STD_ON */
 

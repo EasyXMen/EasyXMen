@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
@@ -47,6 +47,11 @@
  */
 ECUM_LOCAL uint8 EcuM_FindAlarmIdByUser(EcuM_UserType user);
 
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
+
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 /**
  * @brief Finds the next earliest alarm time for a given runtime context.
  * @details This function iterates through the user alarms in the runtime context to find the earliest non-zero alarm
@@ -61,6 +66,7 @@ ECUM_LOCAL uint8 EcuM_FindAlarmIdByUser(EcuM_UserType user);
 ECUM_LOCAL EcuM_TimeType EcuM_FindNextEarliestAlarm(const EcuM_RunTimeLcType* pRt);
 #define ECUM_STOP_SEC_CODE
 #include "EcuM_MemMap.h"
+
 /* ============================================ internal data definitions =========================================== */
 
 /* ============================================ external data definitions =========================================== */
@@ -68,7 +74,6 @@ ECUM_LOCAL EcuM_TimeType EcuM_FindNextEarliestAlarm(const EcuM_RunTimeLcType* pR
 /* ========================================== external function definitions ========================================= */
 #define ECUM_START_SEC_CODE
 #include "EcuM_MemMap.h"
-
 /* PRQA S 1503,2814,4603,2844 ++ */ /* VL_QAC_NoUsedApi,VL_QAC_MultiReturn,VL_EcuM_4603,VL_EcuM_DerefInvalidPtr */
 /**
  * Sets a relative wakeup alarm for a specified user. This function checks if the ECU Manager
@@ -78,6 +83,8 @@ ECUM_LOCAL EcuM_TimeType EcuM_FindNextEarliestAlarm(const EcuM_RunTimeLcType* pR
  */
 Std_ReturnType EcuM_SetRelWakeupAlarm(EcuM_UserType user, EcuM_TimeType time)
 {
+    EcuM_ArtiApiStart(3, ECUM_SID_SETRELWAKEUPALARM, user, time);
+
     EcuM_RunTimeLcType* pRt;
     uint8               detErrorId = ECUM_E_OK;
     EcuM_TimeType       setWkTime;
@@ -124,10 +131,17 @@ Std_ReturnType EcuM_SetRelWakeupAlarm(EcuM_UserType user, EcuM_TimeType time)
 #else
     (void)detErrorId;
 #endif /*ECUM_DEV_ERROR_DETECT == STD_ON */
+
+    EcuM_ArtiApiStop(2, ECUM_SID_SETRELWAKEUPALARM, ret);
+
     return ret;
 }
 /* PRQA S 1503,2814,4603,2844 -- */
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 /* PRQA S 1503,2814,4603,2844 ++ */ /* VL_QAC_NoUsedApi,VL_QAC_MultiReturn,VL_EcuM_4603,VL_EcuM_DerefInvalidPtr */
 /**
  * Sets an absolute wakeup alarm for a specified user. This function checks if the ECU Manager
@@ -137,6 +151,8 @@ Std_ReturnType EcuM_SetRelWakeupAlarm(EcuM_UserType user, EcuM_TimeType time)
  */
 Std_ReturnType EcuM_SetAbsWakeupAlarm(EcuM_UserType user, EcuM_TimeType time)
 {
+    EcuM_ArtiApiStart(3, ECUM_SID_SETABSWAKEUPALARM, user, time);
+
     EcuM_RunTimeLcType* pRt;
     uint8               detErrorId = ECUM_E_OK;
     uint8               alarmId;
@@ -189,10 +205,17 @@ Std_ReturnType EcuM_SetAbsWakeupAlarm(EcuM_UserType user, EcuM_TimeType time)
 #else
     (void)detErrorId;
 #endif /*ECUM_DEV_ERROR_DETECT == STD_ON */
+
+    EcuM_ArtiApiStop(2, ECUM_SID_SETABSWAKEUPALARM, ret);
+
     return ret;
 }
 /* PRQA S 1503,2814,4603,2844 -- */
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 /* PRQA S 1503,2814,4603,2844 ++ */ /* VL_QAC_NoUsedApi,VL_QAC_MultiReturn,VL_EcuM_4603,VL_EcuM_DerefInvalidPtr */
 /**
  * Aborts a wakeup alarm for a specified user. This function checks if the ECU Manager
@@ -202,6 +225,8 @@ Std_ReturnType EcuM_SetAbsWakeupAlarm(EcuM_UserType user, EcuM_TimeType time)
  */
 Std_ReturnType EcuM_AbortWakeupAlarm(EcuM_UserType user)
 {
+    EcuM_ArtiApiStart(2, ECUM_SID_ABORTWAKEUPALARM, user);
+
     EcuM_RunTimeLcType* pRt;
     uint8               detErrorId = ECUM_E_OK;
     Std_ReturnType      ret        = E_NOT_OK;
@@ -227,11 +252,16 @@ Std_ReturnType EcuM_AbortWakeupAlarm(EcuM_UserType user)
                 pRt->UserAlarm[alarmId] = 0u;
                 ret                     = E_OK;
             }
+            else
+            {
+                /* Alarm already aborted */
+                ret = ECUM_E_NOT_ACTIVE;
+            }
             SchM_Exit_EcuM_GlobalClock();
         }
         else
         {
-            ret        = ECUM_E_NOT_ACTIVE;
+            ret        = E_NOT_OK;
             detErrorId = ECUM_E_INVALID_PAR;
         }
     }
@@ -243,10 +273,17 @@ Std_ReturnType EcuM_AbortWakeupAlarm(EcuM_UserType user)
 #else
     (void)detErrorId;
 #endif /*ECUM_DEV_ERROR_DETECT == STD_ON */
+
+    EcuM_ArtiApiStop(2, ECUM_SID_ABORTWAKEUPALARM, ret);
+
     return ret;
 }
 /* PRQA S 1503,2814,4603,2844 -- */
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 /* PRQA S 1503,2814,4603,2844 ++ */ /* VL_QAC_NoUsedApi,VL_QAC_MultiReturn,VL_EcuM_4603,VL_EcuM_DerefInvalidPtr */
 /**
  * Retrieves the current global clock time. This function checks if the ECU Manager
@@ -256,6 +293,8 @@ Std_ReturnType EcuM_AbortWakeupAlarm(EcuM_UserType user)
  */
 Std_ReturnType EcuM_GetCurrentTime(EcuM_TimeType* time)
 {
+    EcuM_ArtiApiStart(2, ECUM_SID_GETCURRENTTIME, time);
+
     Std_ReturnType      ret = E_NOT_OK;
     EcuM_RunTimeLcType* pRt;
 #if (ECUM_DEV_ERROR_DETECT == STD_ON)
@@ -266,7 +305,7 @@ Std_ReturnType EcuM_GetCurrentTime(EcuM_TimeType* time)
     }
     else if (NULL_PTR == time)
     {
-        detErrorId = ECUM_E_NULL_POINTER;
+        detErrorId = ECUM_E_PARAM_POINTER;
     }
     else
 #else
@@ -284,10 +323,17 @@ Std_ReturnType EcuM_GetCurrentTime(EcuM_TimeType* time)
         (void)Det_ReportError(ECUM_MODULE_ID, ECUM_INSTANCE_ID, ECUM_SID_GETCURRENTTIME, detErrorId);
     }
 #endif /*ECUM_DEV_ERROR_DETECT == STD_ON */
+
+    EcuM_ArtiApiStop(2, ECUM_SID_GETCURRENTTIME, ret);
+
     return ret;
 }
 /* PRQA S 1503,2814,4603,2844 -- */
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 /* PRQA S 1503,2814,4603,2844 ++ */ /* VL_QAC_NoUsedApi,VL_QAC_MultiReturn,VL_EcuM_4603,VL_EcuM_DerefInvalidPtr */
 /**
  * Retrieves the current wakeup time. This function checks if the ECU Manager
@@ -297,6 +343,8 @@ Std_ReturnType EcuM_GetCurrentTime(EcuM_TimeType* time)
  */
 Std_ReturnType EcuM_GetWakeupTime(EcuM_TimeType* time)
 {
+    EcuM_ArtiApiStart(2, ECUM_SID_GETWAKEUPTIME, time);
+
     Std_ReturnType      ret = E_NOT_OK;
     EcuM_RunTimeLcType* pRt;
 #if (ECUM_DEV_ERROR_DETECT == STD_ON)
@@ -307,7 +355,7 @@ Std_ReturnType EcuM_GetWakeupTime(EcuM_TimeType* time)
     }
     else if (NULL_PTR == time)
     {
-        detErrorId = ECUM_E_NULL_POINTER;
+        detErrorId = ECUM_E_PARAM_POINTER;
     }
     else
 #else
@@ -325,10 +373,17 @@ Std_ReturnType EcuM_GetWakeupTime(EcuM_TimeType* time)
         (void)Det_ReportError(ECUM_MODULE_ID, ECUM_INSTANCE_ID, ECUM_SID_GETWAKEUPTIME, detErrorId);
     }
 #endif /*ECUM_DEV_ERROR_DETECT == STD_ON */
+
+    EcuM_ArtiApiStop(2, ECUM_SID_GETWAKEUPTIME, ret);
+
     return ret;
 }
 /* PRQA S 1503,2814,4603,2844 -- */
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 /* PRQA S 1503,2814,4603,2844 ++ */ /* VL_QAC_NoUsedApi,VL_QAC_MultiReturn,VL_EcuM_4603,VL_EcuM_DerefInvalidPtr */
 /**
  * Sets the global clock for the specified user.
@@ -338,6 +393,8 @@ Std_ReturnType EcuM_GetWakeupTime(EcuM_TimeType* time)
  */
 Std_ReturnType EcuM_SetClock(EcuM_UserType user, EcuM_TimeType time)
 {
+    EcuM_ArtiApiStart(3, ECUM_SID_SETCLOCK, user, time);
+
     EcuM_RunTimeLcType* pRt;
     uint8               detErrorId = ECUM_E_OK;
     Std_ReturnType      ret        = E_NOT_OK;
@@ -363,10 +420,17 @@ Std_ReturnType EcuM_SetClock(EcuM_UserType user, EcuM_TimeType time)
 #else
     (void)detErrorId;
 #endif /*ECUM_DEV_ERROR_DETECT == STD_ON */
+
+    EcuM_ArtiApiStop(2, ECUM_SID_SETCLOCK, ret);
+
     return ret;
 }
 /* PRQA S 1503,2814,4603,2844 -- */
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 /* PRQA S 2814,1532 ++ */ /* VL_QAC_MultiReturn,VL_QAC_OneFunRef */
 /**
  * Update the ECU-M clock by adding the main function period.
@@ -389,14 +453,22 @@ void EcuM_UpdateEcuMClock(EcuM_RunTimeLcType* pRt)
     }
 }
 /* PRQA S 2814,1532 -- */
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 /* PRQA S 2814 ++ */ /* VL_QAC_MultiReturn */
 /**
  * Cancel all alarms by resetting the user alarms and setting the master alarm to the maximum alarm value.
  */
 void EcuM_CancellAlarms(void)
 {
+#if (ECUM_CLONE_VARIABLE_SUPPORT_ENABLED == STD_ON)
+    EcuM_RunTimeLcType* pRt = &EcuMRunData;
+#else  /* ECUM_CLONE_VARIABLE_SUPPORT_ENABLED == STD_OFF */
     EcuM_RunTimeLcType* pRt = EcuM_GetLcRunDataPtr();
+#endif /* ECUM_CLONE_VARIABLE_SUPPORT_ENABLED == STD_ON */
 
     uint8 alarmIdx;
 
@@ -411,6 +483,7 @@ void EcuM_CancellAlarms(void)
 /* PRQA S 2814 -- */
 #define ECUM_STOP_SEC_CODE
 #include "EcuM_MemMap.h"
+
 /* ========================================== internal function definitions ========================================= */
 #define ECUM_START_SEC_CODE
 #include "EcuM_MemMap.h"
@@ -432,7 +505,11 @@ ECUM_LOCAL uint8 EcuM_FindAlarmIdByUser(EcuM_UserType user)
     }
     return alarmId;
 }
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 /*Find the next earliest user alarm clock value*/
 /* PRQA S 2814 ++ */ /* VL_QAC_MultiReturn */
 /**

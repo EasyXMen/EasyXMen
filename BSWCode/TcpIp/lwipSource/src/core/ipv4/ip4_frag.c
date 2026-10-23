@@ -108,18 +108,40 @@ PACK_STRUCT_END
 #define IP_ADDRESSES_AND_ID_MATCH(iphdrA, iphdrB)  \
   (ip4_addr_eq(&(iphdrA)->src, &(iphdrB)->src) && \
    ip4_addr_eq(&(iphdrA)->dest, &(iphdrB)->dest) && \
-   IPH_ID(iphdrA) == IPH_ID(iphdrB)) ? 1 : 0
+   IPH_ID(iphdrA) == IPH_ID(iphdrB) && \
+   IPH_PROTO(iphdrA) == IPH_PROTO(iphdrB) \
+  ) ? 1 : 0
 
 /* global variables */
 #define TCPIP_VAR_REASSDATAGRAMS(coreIndex)       reassdatagrams[(coreIndex)]
 #define TCPIP_VAR_IP_REASS_PBUFCOUNT(coreIndex)   ip_reass_pbufcount[(coreIndex)]
+
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 static struct ip_reassdata *reassdatagrams[TCPIP_MULTICORE_NUMBER];
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
+
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 static u16_t ip_reass_pbufcount[TCPIP_MULTICORE_NUMBER];
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 
 /* function prototypes */
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 static void ip_reass_dequeue_datagram(struct ip_reassdata *ipr, struct ip_reassdata *prev);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 static int ip_reass_free_complete_datagram(struct ip_reassdata *ipr, struct ip_reassdata *prev);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Reassembly timer base function
  * for both NO_SYS == 0 and 1 (!).
@@ -152,7 +174,11 @@ ip_reass_tmr(void)
     }
   }
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Free a datagram (struct ip_reassdata) and all its pbufs.
  * Updates the total count of enqueued pbufs (ip_reass_pbufcount),
@@ -214,8 +240,12 @@ ip_reass_free_complete_datagram(struct ip_reassdata *ipr, struct ip_reassdata *p
 
   return pbufs_freed;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if IP_REASS_FREE_OLDEST
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Free the oldest datagram to make room for enqueueing new fragments.
  * The datagram 'fraghdr' belongs to is not freed!
@@ -268,8 +298,12 @@ ip_reass_remove_oldest_datagram(struct ip_hdr *fraghdr, int pbufs_needed)
   } while ((pbufs_freed < pbufs_needed) && (other_datagrams > 1));
   return pbufs_freed;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif /* IP_REASS_FREE_OLDEST */
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Enqueues a new fragment into the fragment queue
  * @param fraghdr points to the new fragments IP hdr
@@ -310,7 +344,11 @@ ip_reass_enqueue_new_datagram(struct ip_hdr *fraghdr, int clen)
   SMEMCPY(&(ipr->iphdr), fraghdr, IP_HLEN);
   return ipr;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Dequeues a datagram from the datagram queue. Doesn't deallocate the pbufs.
  * @param ipr points to the queue entry to dequeue
@@ -331,7 +369,11 @@ ip_reass_dequeue_datagram(struct ip_reassdata *ipr, struct ip_reassdata *prev)
   /* now we can free the ip_reassdata struct */
   memp_free(MEMP_REASSDATA, ipr);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Chain a new pbuf into the pbuf list that composes the datagram.  The pbuf list
  * will grow over time as  new pbufs are rx.
@@ -494,7 +536,11 @@ ip_reass_chain_frag_into_datagram_and_validate(struct ip_reassdata *ipr, struct 
   /* If we come here, not all fragments were received, yet! */
   return IP_REASS_VALIDATE_PBUF_QUEUED; /* not yet valid! */
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Reassembles incoming IP fragments into an IP datagram.
  *
@@ -692,17 +738,25 @@ nullreturn:
   pbuf_free(p);
   return NULL;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif /* IP_REASSEMBLY */
 
 #if IP_FRAG
 #if !LWIP_NETIF_TX_SINGLE_PBUF
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /** Allocate a new struct pbuf_custom_ref */
 static struct pbuf_custom_ref *
 ip_frag_alloc_pbuf_custom_ref(void)
 {
   return (struct pbuf_custom_ref *)memp_malloc(MEMP_FRAG_PBUF);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /** Free a struct pbuf_custom_ref */
 static void
 ip_frag_free_pbuf_custom_ref(struct pbuf_custom_ref *p)
@@ -710,7 +764,11 @@ ip_frag_free_pbuf_custom_ref(struct pbuf_custom_ref *p)
   LWIP_ASSERT("p != NULL", p != NULL);
   memp_free(MEMP_FRAG_PBUF, p);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /** Free-callback function to free a 'struct pbuf_custom_ref', called by
  * pbuf_free. */
 static void
@@ -724,8 +782,12 @@ ipfrag_free_pbuf_custom(struct pbuf *p)
   }
   ip_frag_free_pbuf_custom_ref(pcr);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif /* !LWIP_NETIF_TX_SINGLE_PBUF */
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Fragment an IP datagram if too large for the netif.
  *
@@ -891,6 +953,8 @@ memerr:
   MIB2_STATS_INC(mib2.ipfragfails);
   return ERR_MEM;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif /* IP_FRAG */
 
 #endif /* LWIP_IPV4 */

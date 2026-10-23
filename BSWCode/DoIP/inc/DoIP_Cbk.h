@@ -36,6 +36,8 @@ extern "C" {
 
 /* ========================================= external function declarations ========================================= */
 /* PRQA S 1512 ++ */ /* VL_DoIP_1512 */
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief       This function is called to acquire the transmit data of an I-PDU segment (N-PDU).
  *              Each call to this function provides the next part of the I-PDU data unless retry->TpDataState is
@@ -61,6 +63,10 @@ BufReq_ReturnType DoIP_SoAdTpCopyTxData(
     const PduInfoType*   pduInfoPtr,
     const RetryInfoType* retry,
     PduLengthType*       availableDataPtr);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Returns the version information of this module.
@@ -73,6 +79,10 @@ BufReq_ReturnType DoIP_SoAdTpCopyTxData(
  * @trace       CPD-PLACEHOLDER
  */
 void DoIP_SoAdTpTxConfirmation(PduIdType soadTxPduId, Std_ReturnType result);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       This function is called to provide the received data of an I-PDU segment (N-PDU) to the upper layer.
@@ -88,6 +98,10 @@ void DoIP_SoAdTpTxConfirmation(PduIdType soadTxPduId, Std_ReturnType result);
  */
 BufReq_ReturnType
     DoIP_SoAdTpCopyRxData(PduIdType soadRxPduId, const PduInfoType* pduInfoPtr, PduLengthType* bufferSizePtr);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       This function is called at the start of receiving an N-SDU.
@@ -114,6 +128,10 @@ BufReq_ReturnType DoIP_SoAdTpStartOfReception(
     const PduInfoType* pduInfoPtr,
     PduLengthType      sduLen,
     PduLengthType*     bufferSizePtr);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Called after an I-PDU has been received via the TP API, the result indicates whether the transmission
@@ -127,6 +145,10 @@ BufReq_ReturnType DoIP_SoAdTpStartOfReception(
  * @trace       CPD-PLACEHOLDER
  */
 void DoIP_SoAdTpRxIndication(PduIdType soadRxPduId, Std_ReturnType result);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Indication of a received I-PDU from a lower layer communication interface module.
@@ -140,6 +162,10 @@ void DoIP_SoAdTpRxIndication(PduIdType soadRxPduId, Std_ReturnType result);
  * @trace       CPD-PLACEHOLDER
  */
 void DoIP_SoAdIfRxIndication(PduIdType soadRxPduId, const PduInfoType* pduInfoPtr);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       The lower layer communication interface module confirms the transmission of an I-PDU.
@@ -152,6 +178,10 @@ void DoIP_SoAdIfRxIndication(PduIdType soadRxPduId, const PduInfoType* pduInfoPt
  * @trace       CPD-PLACEHOLDER
  */
 void DoIP_SoAdIfTxConfirmation(PduIdType soadTxPduId, Std_ReturnType result);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Notification about a SoAd socket connection state change,
@@ -165,6 +195,10 @@ void DoIP_SoAdIfTxConfirmation(PduIdType soadTxPduId, Std_ReturnType result);
  * @trace       CPD-PLACEHOLDER
  */
 void DoIP_SoConModeChg(SoAd_SoConIdType soConId, SoAd_SoConModeType mode);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       This function gets called by the SoAd if an IP address assignment related to a socket connection
@@ -179,6 +213,8 @@ void DoIP_SoConModeChg(SoAd_SoConIdType soConId, SoAd_SoConModeType mode);
  * @trace       CPD-PLACEHOLDER
  */
 void DoIP_LocalIpAddrAssignmentChg(SoAd_SoConIdType soConId, TcpIp_IpAddrStateType state);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
 /* PRQA S 1512 -- */
 
 #ifdef __cplusplus

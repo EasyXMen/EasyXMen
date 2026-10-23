@@ -51,11 +51,23 @@
  *  V03.00.09 2026-01-07  chao.sun     CPT-17540,Dem_GetMonitorStatus adds an initialization check
  *            2026-01-08  chao.sun     In the Dem_SatellitePreInit interface, the partition ID is changed
  *                                     to be obtained via parameters.
- *  V03.00.10 2026-03-25  chao.sun     CPTASK-611,Fix compilation issues caused by incorrect modifications.
- *  V03.00.11 2026-04-04  tao.yu       CPT-18413, Fix the problem of excessive stack exception occupation.
+ *  V03.00.10 2026-03-27  chao.sun     CPTASK-801,Remove the initialization Det detection in Dem_mainfunction as
+ *                                     required.
+ *  V03.00.11 2026-04-01  tao.yu       CPT-18362, Add boundary protection and Det errors in Dem_MemoryUpdateIndex and
+ *                                     Dem_MemoryFreeIndex
+ *            2026-04-04  tao.yu       CPT-18413, Fix the problem of excessive stack exception occupation.
  *            2026-04-10  chao.sun     CPT-18500, Set the value of DEM_FAILED_CYCLES to 0xFF.
- ====================================================================================================================*/
-
+ *  V03.00.12 2026-06-04  tao.yu       add arti
+ *            2026-06-15  chao.sun     CPTASK-1206, Sync Dem feature branch changes.
+ *            2026-06-15  chao.sun     CPTASK-1206, Sync Dem feature branch changes.
+ *            2026-06-18  chao.sun     CPT-19263,Dealing with frozen frame issues.
+ *            2026-06-30  chao.sun     CPT-19330,OK should be returned when the frozen frame number 0xFF is not stored.
+ *  V03.00.13 2026-07-07  chao.sun     CPT-19393,Fix the issue of getting freeze frame number out of bounds.
+ *            2026-07-13  chao.sun     CPT-19426,Update the generation logic for the template engine data type
+ *                                     Dem_ECGRefNumType.
+ *            2026-07-24  tao.yu       CPT-19579, support the low res timer of DebounceTimeBased
+ *            2026-07-30  tao.yu       CPT-19620, Fix incorrect data type usage when acquiring the MIL lamp in J1939.
+====================================================================================================================*/
 /* ================================================ misar justifications ============================================ */
 /**
   \page ISOFT_MISRA_Exceptions  MISRA-C:2012 Compliance Exceptions
@@ -300,35 +312,41 @@
 
     \li VL_MTR_Dem_STCAL
       Reason: The software structure of Dem is defined according to the AUTOSAR standard,resulting in its metric
-  being above the threshold
+              being above the threshold
       Risk: Understandability and testability become overly complex
       Prevention: Design and code review, and have a clear structure and annotated code.
 
     \li VL_MTR_Dem_STMIF
       Reason: Functions have different scenarios that need to be covered, which depends on the configuration of
-  different DTCs, events, pids, dids and other configuration conditions, as well as some precompiled macros
+              different DTCs, events, pids, dids and other configuration conditions, as well as some precompiled
+              macros
       Risk: The code is difficult to maintain.
       Prevention: Design and code review, and have a clear structure and annotated code.
 
     \li VL_MTR_Dem_STPAR
       Reason: The external API of Dem is defined by the AUTOSAR standard, resulting in its metric being above the
-  threshold
+              threshold
       Risk: For the target uC, the stack usage and runtime are too high
       Prevention: When testing the result code on the target uC, the user must check the stack usage in the project
   context
 
     \li VL_MTR_Dem_STECT
       Reason: This is violated under extreme conditions due to the total number of variables such as different user
-  configuration
+              configuration
       Risk: The code is difficult to maintain and the data flow is complex
       Prevention: Design and code review, and have a clear structure and annotated code.
+
+    \li VL_Dem_1536
+      Reason: The tag '%1s' is declared but not used within this project.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_Dem_3415
       Reason: Right hand operand of '&&' or '||' is an expression with persistent side effects.
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
 
-    \li VL_MTR_Dem_6510
+    \li VL_MTR_Dem_COMF
       Reason: Some special files have less code or no code at all.
       Risk: The code is difficult to maintain.
       Prevention: Design and code review + clear structure and well-commented code.
@@ -343,13 +361,19 @@
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
 
+    \li VL_Dem_1513
+      Reason: Identifier '${name}' with external linkage has separate non-defining declarations in more than one
+              location.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
     \li VL_Dem_1707
       Reason: Function '${name}' is not using the same aliases.
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
 
     \li VL_Dem_2053
-      Reason: Special code design of the Dem.
+      Reason: Special code design of the Os.
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
 
@@ -376,7 +400,9 @@
 
     \li VL_Dem_4404
       Reason: An expression of 'essentially Boolean' type (%1s) is being converted to unsigned type, '%2s' on
-  assignment. Risk: No risk. Prevention: Ensure that the project is working properly through unit testing.
+              assignment.
+      Risk: No risk.
+      Prevention: Ensure that the project is working properly through unit testing.
 
     \li VL_Dem_3120
       Reason: In the generated code, there are a lot of devil numbers, don't have to define a macro.
@@ -392,6 +418,35 @@
       Reason: This 'if' controlling expression is a constant expression and its value is 'false'.
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
+
+    \li VL_Dem_1709
+      Reason: Function '${name}' is not using the same parameter names.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+
+    \li VL_Dem_0791
+    Reason:The macro identifiers such as DEM_ENABLECONDITIONGROUP_QUEUE_DISABLE and
+            DEM_ENABLECONDITIONGROUP_QUEUE_ENABLE share the same prefix and differ only in the suffix (DISABLE vs
+            ENABLE). This naming pattern follows the AUTOSAR DEM module naming convention to clearly indicate
+            they represent opposite s tates (queued disable and queued enable) for the same enable condition group
+            feature. Although QAC flags these as insufficiently distinct within the significant character limit, the
+            identifiers are intentionally descriptive and maintain consistency with the module's architectural design.
+            The names clearly convey their purpose and relationship, improving code readability and maintainability.
+    Risk: No risk.
+    Prevention: None.
+
+    \li VL_Dem_1863
+    Reason:The expression compares lFFEntryIter.GlobalFFReport (boolean/FALSE) with DEM_GLOBAL_FREEZE_FRAME_NUM
+            (unsigned integer constant) using equality operator. The operands are of different essential signedness
+            categories - boolean type (essentially Boolean) and unsigned integer constant (essentially unsigned).
+            Both operands are promoted to signed int for the comparison. This pattern is intentional to check whether
+            the global freeze frame has not been reported yet, where lFFEntryIter.GlobalFFReport is a boolean flag and
+            DEM_GLOBAL_FREEZE_FRAME_NUM is a constant used to indicate invalid/not applicable. The comparison logic is
+            correct and safe as boolean FALSE equals 0, which is the value of the constant. The code structure follows
+            AUTOSAR DEM module patterns for freeze frame iteration.
+    Risk: No risk.
+    Prevention: None.
  */
 
 /* =================================================== inclusions =================================================== */
@@ -415,10 +470,12 @@ extern "C" {
 #define DEM_AR_RELEASE_REVISION_VERSION (0U)  /**< Value of Autosar patch version */
 #define DEM_SW_MAJOR_VERSION            (3U)  /**< Value of module major version */
 #define DEM_SW_MINOR_VERSION            (0U)  /**< Value of module minor version */
-#define DEM_SW_PATCH_VERSION            (11U) /**< Value of module patch version */
+#define DEM_SW_PATCH_VERSION            (13U) /**< Value of module patch version */
 
 /* ========================================= external function declarations ========================================= */
 #if (DEM_VERSION_INFO_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Returns the version information of this module. API Availability: This API will be available only if
  * ({ecuc(Dem/DemGeneral.DemVersionInfoApi)} == true)
@@ -428,7 +485,11 @@ extern "C" {
  * @trace         CPD-61159
  */
 extern void Dem_GetVersionInfo(Std_VersionInfoType* versionInfo);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Initializes the internal states necessary to process events reported by BSW-modules.
@@ -438,6 +499,10 @@ extern void Dem_GetVersionInfo(Std_VersionInfoType* versionInfo);
  * @trace         CPD-64411
  */
 extern void Dem_PreInit(const Dem_ConfigType* ConfigPtr);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Initializes or reinitializes this module.
@@ -447,6 +512,10 @@ extern void Dem_PreInit(const Dem_ConfigType* ConfigPtr);
  * @trace         CPD-61158
  */
 extern void Dem_Init(const Dem_ConfigType* ConfigPtr);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Shuts down this module.
@@ -455,8 +524,12 @@ extern void Dem_Init(const Dem_ConfigType* ConfigPtr);
  * @trace         CPD-61157
  */
 extern void Dem_Shutdown(void);
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_SUPPORT_CLEARDTC_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
+
 /**
  * @brief         Clears single DTCs, as well as groups of DTCs.
  * @param[in]     ClientId: Unique client id, assigned to the instance of the calling module.
@@ -481,10 +554,14 @@ extern void Dem_Shutdown(void);
  * @trace         CPD-61156
  */
 extern Std_ReturnType Dem_ClearDTC(uint8 ClientId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-/* PRQA S 3449, 3451 ++ */ /* VL_QAC_MultiDeclaration, VL_QAC_MultiDeclaration */
-/* PRQA S 1512, 1513 ++ */ /* VL_Dcm_1512,VL_QAC_MultiDeclaration */
+/* PRQA S 3449, 3451 ++ */ /* VL_Dem_3449, VL_Dem_3451 */
+/* PRQA S 1512, 1513 ++ */ /* VL_Dem_1512,VL_Dem_1513 */
 #if (DEM_MAX_NUMBER_PRESTORED_FF > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Clears a prestored freeze frame of a specific event. This API can only be used through the RTE
  *                and therefore no declaration is exported via Dem.h. API Availability: This API will be available
@@ -498,9 +575,13 @@ extern Std_ReturnType Dem_ClearDTC(uint8 ClientId);
  * @trace         CPD-61155
  */
 extern Std_ReturnType Dem_ClearPrestoredFreezeFrame(Dem_EventIdType EventId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_COMPONENT_NUMBER > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Gets the failed status of a DemComponent.
  * @param[in]     ComponentId: Identification of a DemComponent
@@ -513,9 +594,13 @@ extern Std_ReturnType Dem_ClearPrestoredFreezeFrame(Dem_EventIdType EventId);
  * @trace         CPD-61154
  */
 extern Std_ReturnType Dem_GetComponentFailed(Dem_ComponentIdType ComponentId, boolean* ComponentFailed);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (STD_ON == DCM_UDS_0X14)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Provides information if the last call to Dem_SelectDTC has selected a valid DTC or group of DTCs.
  * @param[in]     ClientId: Unique client id, assigned to the instance of the calling module.
@@ -534,6 +619,10 @@ extern Std_ReturnType Dem_GetComponentFailed(Dem_ComponentIdType ComponentId, bo
  * @trace         CPD-61151
  */
 extern Std_ReturnType Dem_GetDTCSelectionResult(uint8 ClientId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Provides information if the last call to Dem_SelectDTC has selected a valid DTC or group of
@@ -554,7 +643,11 @@ extern Std_ReturnType Dem_GetDTCSelectionResult(uint8 ClientId);
  * @trace         CPD-61152
  */
 extern Std_ReturnType Dem_GetDTCSelectionResultForClearDTC(uint8 ClientId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Gets the current UDS status byte assigned to the DTC for the event
@@ -570,10 +663,14 @@ extern Std_ReturnType Dem_GetDTCSelectionResultForClearDTC(uint8 ClientId);
  * @trace         CPD-61153
  */
 extern Std_ReturnType Dem_GetEventUdsStatus(Dem_EventIdType EventId, Dem_UdsStatusByteType* UDSStatusByte);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Gets the current monitor status for an event.
- * @param[in]     EventID: Identification of an event by assigned EventId.
+ * @param[in]     EventId: Identification of an event by assigned EventId.
  * @param[out]    MonitorStatus: Monitor status byte of the requested event. If the return value of the function
  *                               call is E_NOT_OK, this parameter does not contain valid data.
  * @return        Std_ReturnType
@@ -583,7 +680,11 @@ extern Std_ReturnType Dem_GetEventUdsStatus(Dem_EventIdType EventId, Dem_UdsStat
  * @synchronous   TRUE
  * @trace         CPD-61148
  */
-extern Std_ReturnType Dem_GetMonitorStatus(Dem_EventIdType EventID, Dem_MonitorStatusType* MonitorStatus);
+extern Std_ReturnType Dem_GetMonitorStatus(Dem_EventIdType EventId, Dem_MonitorStatusType* MonitorStatus);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Gets the debouncing status of an event. This function shall not be used for EventId with native
@@ -602,6 +703,10 @@ extern Std_ReturnType Dem_GetMonitorStatus(Dem_EventIdType EventID, Dem_MonitorS
  * @trace         CPD-61149
  */
 extern Std_ReturnType Dem_GetDebouncingOfEvent(Dem_EventIdType EventId, Dem_DebouncingStateType* DebouncingState);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /* PRQA S 1707 ++ */ /* VL_Dem_1707 */
 /**
@@ -619,8 +724,12 @@ extern Std_ReturnType Dem_GetDebouncingOfEvent(Dem_EventIdType EventId, Dem_Debo
  * @trace         CPD-61150
  */
 extern Std_ReturnType Dem_GetDTCOfEvent(Dem_EventIdType EventId, Dem_DTCFormatType DTCFormat, uint32* DTCOfEvent);
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_SUPPRESSION_SUPPORT == DEM_DTC_SUPPRESSION)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
+
 /**
  * @brief         Returns the suppression status of a specific DTC. API Availability: This API will be available
  *                only if ({ecuc(Dem/DemGeneral.DemSuppressionSupport)} == DEM_DTC_SUPPRESSION)
@@ -640,9 +749,13 @@ extern Std_ReturnType Dem_GetDTCOfEvent(Dem_EventIdType EventId, Dem_DTCFormatTy
  * @trace         CPD-61146
  */
 extern Std_ReturnType Dem_GetDTCSuppression(uint8 ClientId, boolean* SuppressionStatus);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_AVAILABILITY_SUPPORT == DEM_EVENT_AVAILABILITY)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Get the Event availability.
  * @param[in]     EventId: Identification of an event by assigned EventId.
@@ -655,7 +768,11 @@ extern Std_ReturnType Dem_GetDTCSuppression(uint8 ClientId, boolean* Suppression
  * @trace         CPD-61147
  */
 extern Std_ReturnType Dem_GetEventAvailable(Dem_EventIdType EventId, boolean* AvailableStatus);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Gets the fault detection counter of an event. This API can only be used through the RTE, and
@@ -674,8 +791,12 @@ extern Std_ReturnType Dem_GetEventAvailable(Dem_EventIdType EventId, boolean* Av
  * @trace         CPD-61145
  */
 extern Std_ReturnType Dem_GetFaultDetectionCounter(Dem_EventIdType EventId, sint8* FaultDetectionCounter);
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_INDICATOR_NUMBER > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
+
 /**
  * @brief         Gets the indicator status derived from the UDS status. API Availability: This API will be
  *                available only if ({ecuc(Dem/DemGeneral/DemEventMemorySet/DemIndicator)} != NULL)
@@ -689,9 +810,13 @@ extern Std_ReturnType Dem_GetFaultDetectionCounter(Dem_EventIdType EventId, sint
  * @trace         CPD-61144
  */
 extern Std_ReturnType Dem_GetIndicatorStatus(uint8 IndicatorId, Dem_IndicatorStatusType* IndicatorStatus);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_FEATURE_SWC_GET_FF_ED == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Gets the data of a freeze frame by event.
  * @param[in]     EventId: Identification of an event by assigned EventId.
@@ -722,6 +847,10 @@ extern Std_ReturnType Dem_GetEventFreezeFrameDataEx(
     uint16          DataId,
     uint8*          DestBuffer,
     uint16*         BufSize);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Gets the data of an extended data record by event.
@@ -746,9 +875,13 @@ extern Std_ReturnType Dem_GetEventFreezeFrameDataEx(
  */
 extern Std_ReturnType
     Dem_GetEventExtendedDataRecordEx(Dem_EventIdType EventId, uint8 RecordNumber, uint8* DestBuffer, uint16* BufSize);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_USER_SUPPORT_OVFLIND_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Gets the event memory overflow indication status.
  * @param[in]     ClientId: DemClientID identifying the DemEventMemorySet indicating in which event memory the
@@ -766,6 +899,10 @@ extern Std_ReturnType
  */
 extern Std_ReturnType
     Dem_GetEventMemoryOverflow(uint8 ClientId, Dem_DTCOriginType DTCOrigin, boolean* OverflowIndication);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Returns the number of entries currently stored in the requested event memory.
  * @param[in]     ClientId: DemClientID identifying the DemEventMemorySet to which the requested event memory
@@ -782,7 +919,11 @@ extern Std_ReturnType
  */
 extern Std_ReturnType
     Dem_GetNumberOfEventMemoryEntries(uint8 ClientId, Dem_DTCOriginType DTCOrigin, uint8* NumberOfEventMemoryEntries);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Control the internal debounce counter/timer by BSW modules and SW-Cs. The event qualification
  *                will not be affected by these debounce state changes. This API is available for BSW modules as
@@ -798,6 +939,10 @@ extern Std_ReturnType
  */
 extern Std_ReturnType
     Dem_ResetEventDebounceStatus(Dem_EventIdType EventId, Dem_DebounceResetStatusType DebounceResetStatus);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Resets the event failed status. This API can only be used through the RTE and therefore no
@@ -812,6 +957,10 @@ extern Std_ReturnType
  * @trace         CPD-61138
  */
 extern Std_ReturnType Dem_ResetEventStatus(Dem_EventIdType EventId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Resets the monitor failed status.
@@ -824,6 +973,10 @@ extern Std_ReturnType Dem_ResetEventStatus(Dem_EventIdType EventId);
  * @trace         CPD-64414
  */
 extern Std_ReturnType Dem_ResetMonitorStatus(Dem_EventIdType EventId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Sets an operation cycle state. This API can only be used through the RTE and therefore no
@@ -840,8 +993,12 @@ extern Std_ReturnType Dem_ResetMonitorStatus(Dem_EventIdType EventId);
  * @trace         CPD-61137
  */
 extern Std_ReturnType Dem_RestartOperationCycle(uint8 OperationCycleId);
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_MAX_NUMBER_PRESTORED_FF > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
+
 /**
  * @brief         Captures the freeze frame data for a specific event. This API can only be used through the RTE
  *                and therefore no declaration is exported via Dem.h. API Availability: This API will be available
@@ -855,10 +1012,14 @@ extern Std_ReturnType Dem_RestartOperationCycle(uint8 OperationCycleId);
  * @trace         CPD-61136
  */
 extern Std_ReturnType Dem_PrestoreFreezeFrame(Dem_EventIdType EventId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 /* PRQA S 3449, 3451 -- */
 
 #if (DEM_SUPPORT_SELECTDTC_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Selects a DTC or DTC group as target for further operations.
  * @param[in]     ClientId: Unique client id, assigned to the instance of the calling module.
@@ -876,9 +1037,13 @@ extern Std_ReturnType Dem_PrestoreFreezeFrame(Dem_EventIdType EventId);
  */
 extern Std_ReturnType
     Dem_SelectDTC(uint8 ClientId, uint32 DTC, Dem_DTCFormatType DTCFormat, Dem_DTCOriginType DTCOrigin);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_COMPONENT_NUMBER > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Set the availability of a specific DemComponent.
  * @param[in]     ComponentId: Identification of a DemComponent.
@@ -892,9 +1057,13 @@ extern Std_ReturnType
  * @trace         CPD-61134
  */
 extern Std_ReturnType Dem_SetComponentAvailable(Dem_ComponentIdType ComponentId, boolean AvailableStatus);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_SUPPRESSION_SUPPORT == DEM_DTC_SUPPRESSION)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Set the suppression status of a specific DTC. API Availability: This API will be available only
  *                if ({ecuc(Dem/DemGeneral.DemSuppressionSupport)} == DEM_DTC_SUPPRESSION)
@@ -915,9 +1084,13 @@ extern Std_ReturnType Dem_SetComponentAvailable(Dem_ComponentIdType ComponentId,
  * @trace         CPD-61133
  */
 extern Std_ReturnType Dem_SetDTCSuppression(uint8 ClientId, boolean SuppressionStatus);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_ENABLE_CONDITION_GROUP_NUMBER > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Sets an enable condition. API Availability: This API will be available only if
  *                ({ecuc(Dem/DemGeneral/DemEnableCondition)} != NULL)
@@ -932,9 +1105,13 @@ extern Std_ReturnType Dem_SetDTCSuppression(uint8 ClientId, boolean SuppressionS
  * @trace         CPD-61132
  */
 extern Std_ReturnType Dem_SetEnableCondition(uint8 EnableConditionID, boolean ConditionFulfilled);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_AVAILABILITY_SUPPORT == DEM_EVENT_AVAILABILITY)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Set the available status of a specific Event.
  * @param[in]     EventId: Identification of an event by assigned EventId.
@@ -948,9 +1125,13 @@ extern Std_ReturnType Dem_SetEnableCondition(uint8 EnableConditionID, boolean Co
  * @trace         CPD-61131
  */
 extern Std_ReturnType Dem_SetEventAvailable(Dem_EventIdType EventId, boolean AvailableStatus);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_EVENT_CONFIRMATION_THRESHOLD_ADAPTABLE == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Set the failure confirmation threshold of an event.
  * @param[in]     EventId: Identification of an event by assigned EventId.
@@ -965,9 +1146,13 @@ extern Std_ReturnType Dem_SetEventAvailable(Dem_EventIdType EventId, boolean Ava
  */
 extern Std_ReturnType
     Dem_SetEventConfirmationThresholdCounter(Dem_EventIdType EventId, uint8 FailureCycleCounterThreshold);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_EVENT_REPORTING_STANDARD == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Called by SW-Cs or BSW modules to report monitor status information to the Dem. BSW modules
  *                calling Dem_SetEventStatus can safely ignore the return value. This API will be available only
@@ -982,9 +1167,13 @@ extern Std_ReturnType
  * @trace         CPD-61128
  */
 extern Std_ReturnType Dem_SetEventStatus(Dem_EventIdType EventId, Dem_EventStatusType EventStatus);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_EVENT_REPORTING_WITH_MONITOR == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         This API will be available only if ({Dem/DemConfigSet/DemEventParameter/DemEventReportingType}
  *                == STANDARD_REPORTING_WITH_MONITOR_DATA)
@@ -1004,9 +1193,13 @@ extern Std_ReturnType Dem_SetEventStatusWithMonitorData(
     Dem_EventStatusType EventStatus,
     Dem_MonitorDataType monitorData0,
     Dem_MonitorDataType monitorData1);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_STORAGE_CONDITION_GROUP_NUMBER > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Sets a storage condition.API Availability: This API will be available only if
  *                ({ecuc(Dem/DemGeneral/DemStorageCondition)} != NULL)
@@ -1021,9 +1214,13 @@ extern Std_ReturnType Dem_SetEventStatusWithMonitorData(
  * @trace         CPD-61123
  */
 extern Std_ReturnType Dem_SetStorageCondition(uint8 StorageConditionID, boolean ConditionFulfilled);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_USER_CONTROLLED_WIR == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Sets the WIR status bit via failsafe SW-Cs. This API can only be used through the RTE and
  *                therefore no declaration is exported via Dem.h.
@@ -1042,9 +1239,13 @@ extern Std_ReturnType Dem_SetStorageCondition(uint8 StorageConditionID, boolean 
  * @trace         CPD-61125
  */
 extern Std_ReturnType Dem_SetWIRStatus(Dem_EventIdType EventId, boolean WIRStatus);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_SUPPORT_GETTRANSLATIONTYPE_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Gets the supported DTC formats of the ECU.The supported formats are configured via Dem
  *                TypeOfDTCSupported.
@@ -1061,9 +1262,13 @@ extern Std_ReturnType Dem_SetWIRStatus(Dem_EventIdType EventId, boolean WIRStatu
  * @trace         CPD-61122
  */
 extern Dem_DTCTranslationFormatType Dem_GetTranslationType(uint8 ClientId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_SUPPORT_GETDTCSTATUSAVAILABILITYMASK_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Gets the DTC Status availability mask of the selected fault memory.
  * @param[in]     ClientId: Unique client id, assigned to the instance of the calling module.
@@ -1082,9 +1287,13 @@ extern Dem_DTCTranslationFormatType Dem_GetTranslationType(uint8 ClientId);
  */
 extern Std_ReturnType
     Dem_GetDTCStatusAvailabilityMask(uint8 ClientId, Dem_UdsStatusByteType* DTCStatusMask, Dem_DTCOriginType DTCOrigin);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_SUPPORT_GETSTATUSOFDTC_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Gets the status of a DTC. For large configurations and DTC-calibration, the interface behavior
  *                can be asynchronous (splitting the DTC-search into segments). The DTCs of OBD Events Suppression
@@ -1108,9 +1317,13 @@ extern Std_ReturnType
  * @trace         CPD-61127
  */
 extern Std_ReturnType Dem_GetStatusOfDTC(uint8 ClientId, uint8* DTCStatus);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_SUPPORT_GETSEVERITYOFDTC_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Gets the severity of the requested DTC. For large configurations and DTC-calibration, the
  *                interface behavior can be asynchronous (splitting the DTC-search into segments).
@@ -1131,6 +1344,10 @@ extern Std_ReturnType Dem_GetStatusOfDTC(uint8 ClientId, uint8* DTCStatus);
  * @trace         CPD-61126
  */
 extern Std_ReturnType Dem_GetSeverityOfDTC(Dem_DTCSeverityType* DTCSeverity, uint8 ClientId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Gets the functional unit of the requested DTC.
@@ -1151,9 +1368,13 @@ extern Std_ReturnType Dem_GetSeverityOfDTC(Dem_DTCSeverityType* DTCSeverity, uin
  * @trace         CPD-61124
  */
 extern Std_ReturnType Dem_GetFunctionalUnitOfDTC(uint8 ClientId, uint8* DTCFunctionalUnit);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_SUPPORT_SETDTCFILTER_AND_GETNUMBER_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Sets the DTC Filter. The server shall perform a bit-wise logical AND-ing operation between the
  *                parameter DTCStatusMask and the current UDS status in the server. In addition to the DTCStatus
@@ -1208,6 +1429,10 @@ extern Std_ReturnType Dem_SetDTCFilter(
     boolean             FilterWithSeverity,
     Dem_DTCSeverityType DTCSeverityMask,
     boolean             FilterForFaultDetectionCounter);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Gets the number of a filtered DTC.
@@ -1223,9 +1448,13 @@ extern Std_ReturnType Dem_SetDTCFilter(
  * @trace         CPD-61117
  */
 extern Std_ReturnType Dem_GetNumberOfFilteredDTC(uint8 ClientId, uint16* NumberOfFilteredDTC);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_SUPPORT_GETNEXT_FILTEREDDTC_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Gets the next filtered DTC matching the filter criteria. For UDS services, the interface has an
  *                asynchronous behavior, because a large number of DTCs has to be processed.
@@ -1248,9 +1477,13 @@ extern Std_ReturnType Dem_GetNumberOfFilteredDTC(uint8 ClientId, uint16* NumberO
  * @trace         CPD-61119
  */
 extern Std_ReturnType Dem_GetNextFilteredDTC(uint8 ClientId, uint32* DTC, uint8* DTCStatus);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_SUPPORT_GETNEXT_FILTEREDDTCANDFDC_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Gets the next filtered DTC and its associated Fault Detection Counter (FDC) matching the filter
  *                criteria. The interface has an asynchronous behavior, because a large number of DTCs has to be
@@ -1274,9 +1507,13 @@ extern Std_ReturnType Dem_GetNextFilteredDTC(uint8 ClientId, uint32* DTC, uint8*
  * @trace         CPD-61120
  */
 extern Std_ReturnType Dem_GetNextFilteredDTCAndFDC(uint8 ClientId, uint32* DTC, sint8* DTCFaultDetectionCounter);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_SUPPORT_GETNEXT_FILTEREDDTCANDSEVERITY_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Gets the next filtered DTC and its associated Severity matching the filter criteria. The
  *                interface has an asynchronous behavior, because a large number of DTCs has to be processed.
@@ -1305,9 +1542,13 @@ extern Std_ReturnType Dem_GetNextFilteredDTCAndSeverity(
     uint8*               DTCStatus,
     Dem_DTCSeverityType* DTCSeverity,
     uint8*               DTCFunctionalUnit);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_SUPPORT_SETFREEZEFRAMERECORD_AND_GET_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Sets a freeze frame record filter.
  * @param[in]     ClientId: Unique client id, assigned to the instance of the calling module.
@@ -1320,6 +1561,10 @@ extern Std_ReturnType Dem_GetNextFilteredDTCAndSeverity(
  * @trace         CPD-61116
  */
 extern Std_ReturnType Dem_SetFreezeFrameRecordFilter(uint8 ClientId, Dem_DTCFormatType DTCFormat);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Gets the next freeze frame record number and its associated DTC stored in the event memory. The
@@ -1341,9 +1586,13 @@ extern Std_ReturnType Dem_SetFreezeFrameRecordFilter(uint8 ClientId, Dem_DTCForm
  * @trace         CPD-61114
  */
 extern Std_ReturnType Dem_GetNextFilteredRecord(uint8 ClientId, uint32* DTC, uint8* RecordNumber);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_SUPPORT_GETDTCOCCURRENCETIME_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Gets the DTC by occurrence time. There is no explicit parameter for the DTC-origin as the origin
  *                always is DEM_DTC_ORIGIN_PRIMARY_MEMORY.
@@ -1361,9 +1610,13 @@ extern Std_ReturnType Dem_GetNextFilteredRecord(uint8 ClientId, uint32* DTC, uin
  * @trace         CPD-61113
  */
 extern Std_ReturnType Dem_GetDTCByOccurrenceTime(uint8 ClientId, Dem_DTCRequestType DTCRequest, uint32* DTC);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_SUPPORT_DISABLE_ENABLE_DTCRECORD_UPDATE_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Disables the event memory update of a specific DTC (only one at one time).
  * @param[in]     ClientId: Unique client id, assigned to the instance of the calling module.
@@ -1381,6 +1634,10 @@ extern Std_ReturnType Dem_GetDTCByOccurrenceTime(uint8 ClientId, Dem_DTCRequestT
  * @trace         CPD-61109
  */
 extern Std_ReturnType Dem_DisableDTCRecordUpdate(uint8 ClientId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Enables the event memory update of the DTC disabled by Dem_DisableDTCRecordUpdate() before.
@@ -1396,9 +1653,13 @@ extern Std_ReturnType Dem_DisableDTCRecordUpdate(uint8 ClientId);
  * @trace         CPD-61110
  */
 extern Std_ReturnType Dem_EnableDTCRecordUpdate(uint8 ClientId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_SUPPORT_SELECT_GETSIZE_GETNEXT_EXTENDEDDATARECORD_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Gets the size of Extended Data Record by DTC selected by the call of Dem_SelectExtended DataRecord.
  * @param[in]     ClientId: Unique client id, assigned to the instance of the calling module.
@@ -1418,9 +1679,13 @@ extern Std_ReturnType Dem_EnableDTCRecordUpdate(uint8 ClientId);
  * @trace         CPD-61108
  */
 extern Std_ReturnType Dem_GetSizeOfExtendedDataRecordSelection(uint8 ClientId, uint32* SizeOfExtendedDataRecord);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_SUPPORT_SELECT_GETSIZE_GETNEXT_FREEZEFRAMEDATA_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Gets the size of Extended Data Record by DTC selected by the call of Dem_SelectExtended DataRecord.
  * @param[in]     ClientId: Unique client id, assigned to the instance of the calling module.
@@ -1438,9 +1703,13 @@ extern Std_ReturnType Dem_GetSizeOfExtendedDataRecordSelection(uint8 ClientId, u
  * @trace         CPD-61107
  */
 extern Std_ReturnType Dem_GetSizeOfFreezeFrameSelection(uint8 ClientId, uint32* SizeOfFreezeFrame);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_SUPPORT_SELECT_GETSIZE_GETNEXT_EXTENDEDDATARECORD_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Gets extended data record for the DTC selected by Dem_SelectExtendedDataRecord. The function
  *                stores the data in the provided DestBuffer.
@@ -1465,9 +1734,13 @@ extern Std_ReturnType Dem_GetSizeOfFreezeFrameSelection(uint8 ClientId, uint32* 
  * @trace         CPD-61106
  */
 extern Std_ReturnType Dem_GetNextExtendedDataRecord(uint8 ClientId, uint8* DestBuffer, uint16* BufSize);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_SUPPORT_SELECT_GETSIZE_GETNEXT_FREEZEFRAMEDATA_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Gets extended data record for the DTC selected by Dem_SelectExtendedDataRecord. The function
  *                stores the data in the provided DestBuffer.
@@ -1492,9 +1765,13 @@ extern Std_ReturnType Dem_GetNextExtendedDataRecord(uint8 ClientId, uint8* DestB
  * @trace         CPD-61102
  */
 extern Std_ReturnType Dem_GetNextFreezeFrameData(uint8 ClientId, uint8* DestBuffer, uint16* BufSize);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_SUPPORT_SELECT_GETSIZE_GETNEXT_EXTENDEDDATARECORD_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Sets the filter to be used by Dem_GetNextExtendedDataRecord and
  *                Dem_GetSizeOfExtendedDataRecordSelection.
@@ -1517,9 +1794,13 @@ extern Std_ReturnType Dem_GetNextFreezeFrameData(uint8 ClientId, uint8* DestBuff
  * @trace         CPD-61106
  */
 extern Std_ReturnType Dem_SelectExtendedDataRecord(uint8 ClientId, uint8 ExtendedDataNumber);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_SUPPORT_SELECT_GETSIZE_GETNEXT_FREEZEFRAMEDATA_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Sets the filter to be used by Dem_GetNextFreezeFrameData and Dem_GetSizeOfFreezeFrame Selection.
  * @param[in]     ClientId: Unique client id, assigned to the instance of the calling module.
@@ -1539,9 +1820,13 @@ extern Std_ReturnType Dem_SelectExtendedDataRecord(uint8 ClientId, uint8 Extende
  * @trace         CPD-61101
  */
 extern Std_ReturnType Dem_SelectFreezeFrameData(uint8 ClientId, uint8 RecordNumber);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_SUPPORT_SETFREEZEFRAMERECORD_AND_GET_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         This function returns the number of all freeze frame records currently stored in the primary
  *                event memory
@@ -1557,9 +1842,13 @@ extern Std_ReturnType Dem_SelectFreezeFrameData(uint8 ClientId, uint8 RecordNumb
  * @trace         CPD-61103
  */
 extern Std_ReturnType Dem_GetNumberOfFreezeFrameRecords(uint8 ClientId, uint16* NumberOfFilteredRecords);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (STD_ON == DCM_UDS_0X85)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Disables the DTC setting for all DTCs assigned to the DemEventMemorySet of the addressed client.
  * @param[in]     ClientId: Unique client id, assigned to the instance of the calling module.
@@ -1572,6 +1861,10 @@ extern Std_ReturnType Dem_GetNumberOfFreezeFrameRecords(uint8 ClientId, uint16* 
  * @trace         CPD-61100
  */
 extern Std_ReturnType Dem_DisableDTCSetting(uint8 ClientId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         (Re)-Enables the DTC setting for all DTCs assigned to the DemEventMemorySet of the addressed client.
@@ -1585,10 +1878,14 @@ extern Std_ReturnType Dem_DisableDTCSetting(uint8 ClientId);
  * @trace         CPD-61105
  */
 extern Std_ReturnType Dem_EnableDTCSetting(uint8 ClientId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_OBD_SUPPORT != DEM_OBD_NO_OBD_SUPPORT)
 #if (DEM_OBD_READINESS_GROUP_HANDING == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Service for reporting the event as disabled to the Dem for the PID $41 computation. API is
  *                needed in OBD-relevant ECUs only. API Availability: This API will be available only if
@@ -1602,9 +1899,13 @@ extern Std_ReturnType Dem_EnableDTCSetting(uint8 ClientId);
  * @trace         CPD-61066
  */
 extern Std_ReturnType Dem_SetEventDisabled(Dem_EventIdType EventId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_RATIO_NUMBER > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Service for reporting that faults are possibly found because all conditions are fullfilled. API
  *                is needed in OBD-relevant ECUs only API Availability: This API will be available only if
@@ -1618,6 +1919,10 @@ extern Std_ReturnType Dem_SetEventDisabled(Dem_EventIdType EventId);
  * @trace         CPD-61064
  */
 extern Std_ReturnType Dem_RepIUMPRFaultDetect(Dem_RatioIdType RatioID);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         In order to communicate the status of the (additional) denominator conditions among the OBD
@@ -1637,6 +1942,10 @@ extern Std_ReturnType Dem_RepIUMPRFaultDetect(Dem_RatioIdType RatioID);
  */
 extern Std_ReturnType
     Dem_SetIUMPRDenCondition(Dem_IumprDenomCondIdType ConditionId, Dem_IumprDenomCondStatusType ConditionStatus);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         In order to communicate the status of the (additional) denominator conditions among the OBD
@@ -1656,6 +1965,10 @@ extern Std_ReturnType
  */
 extern Std_ReturnType
     Dem_GetIUMPRDenCondition(Dem_IumprDenomCondIdType ConditionId, Dem_IumprDenomCondStatusType* ConditionStatus);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Service is used to release a denominator of a specific monitor. API is needed in OBD-relevant
@@ -1671,9 +1984,13 @@ extern Std_ReturnType
  * @trace         CPD-61062
  */
 extern Std_ReturnType Dem_RepIUMPRDenRelease(Dem_RatioIdType RatioID);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_USER_SUPPORT_SET_PTO_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         API is needed in OBD-relevant ECUs only API Availability: This API will be available only if
  *                ({ecuc(Dem/DemGeneral.DemOBDSupport)} != DEM_OBD_NO_OBD_SUPPORT)
@@ -1686,7 +2003,11 @@ extern Std_ReturnType Dem_RepIUMPRDenRelease(Dem_RatioIdType RatioID);
  * @trace         CPD-61063
  */
 extern Std_ReturnType Dem_SetPtoStatus(boolean PtoStatus);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Service to report the value of PID $01 computed by the Dem. API is needed in OBD relevant ECUs only
@@ -1699,8 +2020,12 @@ extern Std_ReturnType Dem_SetPtoStatus(boolean PtoStatus);
  * @trace         CPD-61061
  */
 extern Std_ReturnType Dem_ReadDataOfPID01(uint8* PID01value);
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if ((DEM_OBD_SUPPORT == DEM_OBD_MASTER_ECU) && (DEM_OBD_CENTRALIZED_PID21_HANDING == STD_ON))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
+
 /**
  * @brief         Service to get the value of PID $21 from the Dem by a software component. API is needed in
  *                OBD-relevant ECUs only. API Availability: This API will be available only if
@@ -1714,9 +2039,13 @@ extern Std_ReturnType Dem_ReadDataOfPID01(uint8* PID01value);
  * @trace         CPD-61060
  */
 extern Std_ReturnType Dem_GetDataOfPID21(uint8* PID21value);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_USER_SUPPORT_SET_PID_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Service to set the value of PID $21 in the Dem by a software component. API is needed in
  *                OBD-relevant ECUs only. API Availability: This API will be available only if
@@ -1731,6 +2060,10 @@ extern Std_ReturnType Dem_GetDataOfPID21(uint8* PID21value);
  * @trace         CPD-61059
  */
 extern Std_ReturnType Dem_SetDataOfPID21(const uint8* PID21value);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Service to set the value of PID $31 in the Dem by a software component. API is needed in
@@ -1746,6 +2079,10 @@ extern Std_ReturnType Dem_SetDataOfPID21(const uint8* PID21value);
  * @trace         CPD-61058
  */
 extern Std_ReturnType Dem_SetDataOfPID31(const uint8* PID31value);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Service to set the value of PID $4D in the Dem by a software component. API is needed in
@@ -1761,6 +2098,10 @@ extern Std_ReturnType Dem_SetDataOfPID31(const uint8* PID31value);
  * @trace         CPD-61057
  */
 extern Std_ReturnType Dem_SetDataOfPID4D(const uint8* PID4Dvalue);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Service to set the value of PID $4E in the Dem by a software component. API is needed in
@@ -1776,8 +2117,12 @@ extern Std_ReturnType Dem_SetDataOfPID4D(const uint8* PID4Dvalue);
  * @trace         CPD-61056
  */
 extern Std_ReturnType Dem_SetDataOfPID4E(const uint8* PID4Evalue);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 #endif
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Returns the qualification state of the dependent operation cycle. API Availability: This API
@@ -1793,6 +2138,10 @@ extern Std_ReturnType Dem_SetDataOfPID4E(const uint8* PID4Evalue);
  * @trace         CPD-61055
  */
 extern Std_ReturnType Dem_GetCycleQualified(uint8 OperationCycleId, boolean* isQualified);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Sets a dependent operation cycle as qualified, so it may be processed along with its leading cycle.
@@ -1804,10 +2153,14 @@ extern Std_ReturnType Dem_GetCycleQualified(uint8 OperationCycleId, boolean* isQ
  * @trace         CPD-61054
  */
 extern Std_ReturnType Dem_SetCycleQualified(uint8 OperationCycleId);
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 1707 -- */
 /* PRQA S 1512, 1513 -- */
 #if (DEM_SUPPORT_GETDTCSERVERITYAVAILABILITYMASK_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
+
 /**
  * @brief         Gets the DTC Severity availability mask.
  * @param[in]     ClientId: Unique client id, assigned to the instance of the calling module.
@@ -1822,10 +2175,14 @@ extern Std_ReturnType Dem_SetCycleQualified(uint8 OperationCycleId);
  * @trace         CPD-61052
  */
 extern Std_ReturnType Dem_GetDTCSeverityAvailabilityMask(uint8 ClientId, Dem_DTCSeverityType* DTCSeverityMask);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_OBDII_SUPPORT == STD_ON)
 #if (DEM_DTR_NUMBER > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Service to report the value of the B1 counter computed by the Dem. API is needed in WWH-OBD
  *                relevant ECUs only
@@ -1838,10 +2195,14 @@ extern Std_ReturnType Dem_GetDTCSeverityAvailabilityMask(uint8 ClientId, Dem_DTC
  * @trace         CPD-61051
  */
 extern Std_ReturnType Dem_GetB1Counter(uint16* B1Counter);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 #endif
 
 #if (DEM_OBD_SUPPORT != DEM_OBD_NO_OBD_SUPPORT)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Reports a DTR result with lower and upper limit. The internal eventstatus serves as master
  *                whether the DTR values are forwarded or ignored, also taking the DTRUpdateKind into account.
@@ -1863,7 +2224,11 @@ extern Std_ReturnType Dem_GetB1Counter(uint16* B1Counter);
  */
 extern Std_ReturnType
     Dem_SetDTR(uint16 DTRId, sint32 TestResult, sint32 LowerLimit, sint32 UpperLimit, Dem_DTRControlType Ctrlval);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Processes all not event based Dem internal functions.
@@ -1871,12 +2236,16 @@ extern Std_ReturnType
  * @synchronous   TRUE
  * @trace         CPD-61037
  */
-/* PRQA S 3449,3451 ++ */ /* VL_QAC_MultiDeclaration,VL_QAC_MultiDeclaration */
+/* PRQA S 3449,3451 ++ */ /* VL_Dem_3449,VL_Dem_3451 */
 extern void Dem_MainFunction(void);
 /* PRQA S 3449,3451 -- */
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 
 /* --------------------------------------- Multi-partition custom Global Functions ---------------------------------- */
 #if (DEM_EVENT_PARTITION_NUMBER > 1u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Dem_SatellitePreInit is called directly for pre-initialization in case of single partition, or
  *                executed by the corresponding partition in case of multiple partitions.
@@ -1885,6 +2254,10 @@ extern void Dem_MainFunction(void);
  * @trace         CPD-68116
  */
 extern void Dem_SatellitePreInit(void);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Dem_SatelliteInit is called directly for initialization in case of single partition, or
@@ -1894,6 +2267,10 @@ extern void Dem_SatellitePreInit(void);
  * @trace         CPD-68118
  */
 extern void Dem_SatelliteInit(void);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Cyclic DemSatellite timer task.
@@ -1903,6 +2280,8 @@ extern void Dem_SatelliteInit(void);
  * @trace         CPD-68120
  */
 extern void Dem_SatelliteMainFunction(void);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #define Dem_ReportErrorStatus \

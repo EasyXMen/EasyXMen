@@ -22,26 +22,34 @@
  **
  ***********************************************************************************************************************/
 
-/* PRQA S 0311,1252,1253,0488,3446,4549,4559,0553 EOF */ /* VL_Crypto_62_General */
+/* PRQA S 0311,1252,1253,0488,3446,4549,4559,0553,1843,2742,3494,1505,2880 EOF */ /* VL_QAC_Crypto */
+/* PRQA S 6040 EOF */                                                             /* VL_MTR_Crypto_62_STPAR */
 /* =================================================== inclusions =================================================== */
 #include "Crypto_62_Internal.h"
 #if (CRYPTO_ALGORITHMFAM_CHACHA == STD_ON)
 #include "Crypto_62_ChaCha.h"
-#define CRYPTO_62_START_SEC_CODE
-#include "Crypto_62_MemMap.h"
 
 /* ===================================================== macros ===================================================== */
-/* PRQA S 3472 ++ */ /* VL_Crypto_62_General */
+/* PRQA S 3472 ++ */ /* VL_QAC_Crypto */
 #define ROTL32(value, amount) ((uint32)((value) << (amount)) | ((value) >> (32 - (amount))))
 /* PRQA S 3472 -- */
-#define CHACHA20_CTR_INDEX (12U)
+#define CHACHA20_CTR_INDEX    (12U)
 
 #define CHACHA20_BLOCK_SIZE_BYTES (4U * 16U)
 /* ================================================ type definitions ================================================ */
 
 /* ========================================== internal function declarations ======================================== */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL void chacha20_inner_block(uint32 state[CRYPTO_CONST_16]);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL void chacha20_block(const uint32 initial_state[CRYPTO_CONST_16], uint8 keystream[CRYPTO_CONST_64]);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /* ============================================ internal data definitions =========================================== */
 
@@ -68,7 +76,7 @@ CRYPTO_62_LOCAL void chacha20_block(const uint32 initial_state[CRYPTO_CONST_16],
 CRYPTO_62_LOCAL inline void
     chacha20_quarter_round(uint32 state[CRYPTO_CONST_16], uint32 a, uint32 b, uint32 c, uint32 d)
 {
-    /* PRQA S 1840 ++ */ /* VL_Crypto_62_General */
+    /* PRQA S 1840 ++ */ /* VL_QAC_Crypto */
     /* a += b; d ^= a; d <<<= 16; */
     state[a] += state[b];
     state[d] ^= state[a];
@@ -102,6 +110,8 @@ CRYPTO_62_LOCAL inline void
  * Return              None
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL void chacha20_inner_block(uint32 state[CRYPTO_CONST_16])
 {
     chacha20_quarter_round(state, CRYPTO_CONST_0, CRYPTO_CONST_4, CRYPTO_CONST_8, CRYPTO_CONST_12);
@@ -114,6 +124,8 @@ CRYPTO_62_LOCAL void chacha20_inner_block(uint32 state[CRYPTO_CONST_16])
     chacha20_quarter_round(state, CRYPTO_CONST_2, CRYPTO_CONST_7, CRYPTO_CONST_8, CRYPTO_CONST_13);
     chacha20_quarter_round(state, CRYPTO_CONST_3, CRYPTO_CONST_4, CRYPTO_CONST_9, CRYPTO_CONST_14);
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -125,6 +137,8 @@ CRYPTO_62_LOCAL void chacha20_inner_block(uint32 state[CRYPTO_CONST_16])
  * Return              None
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL void chacha20_block(const uint32 initial_state[CRYPTO_CONST_16], uint8 keystream[CRYPTO_CONST_64])
 {
     uint32 working_state[CRYPTO_CONST_16];
@@ -157,11 +171,13 @@ CRYPTO_62_LOCAL void chacha20_block(const uint32 initial_state[CRYPTO_CONST_16],
     for (i = 0U; i < CRYPTO_CONST_16; i++)
     {
         uint32 offset = i * CRYPTO_CONST_4;
-        /* PRQA S 2741,3138 ++ */ /* VL_Crypto_62_General */
+        /* PRQA S 2741,3138 ++ */ /* VL_QAC_Crypto */
         CRYPTO_PUT_UINT32_LE(working_state[i], keystream, offset);
         /* PRQA S 2741,3138 -- */
     }
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -174,11 +190,15 @@ CRYPTO_62_LOCAL void chacha20_block(const uint32 initial_state[CRYPTO_CONST_16],
  * Return              None
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_chacha20_init(Crypto_Chacha20_Context* ctx)
 {
     /* Initially, there's no keystream bytes available */
     ctx->keystream_bytes_used = CHACHA20_BLOCK_SIZE_BYTES;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -192,10 +212,12 @@ void Crypto_chacha20_init(Crypto_Chacha20_Context* ctx)
  * Return              None
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_chacha20_setkey(Crypto_Chacha20_Context* ctx, const uint8 key[CRYPTO_CONST_32])
 {
     /* ChaCha20 constants - the string "expand 32-byte k" */
-    /* PRQA S 3120 ++ */ /* VL_Crypto_62_General */
+    /* PRQA S 3120 ++ */ /* VL_QAC_Crypto */
     ctx->state[0]              = 0x61707865U;
     ctx->state[1]              = 0x3320646eU;
     ctx->state[CRYPTO_CONST_2] = 0x79622d32U;
@@ -203,7 +225,7 @@ void Crypto_chacha20_setkey(Crypto_Chacha20_Context* ctx, const uint8 key[CRYPTO
     /* PRQA S 3120 -- */
 
     /* Set key */
-    /* PRQA S 3493 ++ */ /* VL_Crypto_62_General */
+    /* PRQA S 3493 ++ */ /* VL_QAC_Crypto */
     ctx->state[CRYPTO_CONST_4]  = CRYPTO_GET_UINT32_LE(key, CRYPTO_CONST_0);
     ctx->state[CRYPTO_CONST_5]  = CRYPTO_GET_UINT32_LE(key, CRYPTO_CONST_4);
     ctx->state[CRYPTO_CONST_6]  = CRYPTO_GET_UINT32_LE(key, CRYPTO_CONST_8);
@@ -214,6 +236,8 @@ void Crypto_chacha20_setkey(Crypto_Chacha20_Context* ctx, const uint8 key[CRYPTO
     ctx->state[CRYPTO_CONST_11] = CRYPTO_GET_UINT32_LE(key, CRYPTO_CONST_28);
     /* PRQA S 3493 -- */
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -227,13 +251,15 @@ void Crypto_chacha20_setkey(Crypto_Chacha20_Context* ctx, const uint8 key[CRYPTO
  * Return              None
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_chacha20_starts(Crypto_Chacha20_Context* ctx, const uint8 nonce[CRYPTO_CONST_12], uint32 counter)
 {
     /* Counter */
     ctx->state[CRYPTO_CONST_12] = counter;
 
     /* Nonce */
-    /* PRQA S 3493 ++ */ /* VL_Crypto_62_General */
+    /* PRQA S 3493 ++ */ /* VL_QAC_Crypto */
     ctx->state[CRYPTO_CONST_13] = CRYPTO_GET_UINT32_LE(nonce, CRYPTO_CONST_0);
     ctx->state[CRYPTO_CONST_14] = CRYPTO_GET_UINT32_LE(nonce, CRYPTO_CONST_4);
     ctx->state[CRYPTO_CONST_15] = CRYPTO_GET_UINT32_LE(nonce, CRYPTO_CONST_8);
@@ -242,6 +268,8 @@ void Crypto_chacha20_starts(Crypto_Chacha20_Context* ctx, const uint8 nonce[CRYP
     /* Initially, there's no keystream bytes available */
     ctx->keystream_bytes_used = CHACHA20_BLOCK_SIZE_BYTES;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -259,6 +287,8 @@ void Crypto_chacha20_starts(Crypto_Chacha20_Context* ctx, const uint8 nonce[CRYP
  * Return              None
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_chacha20_update(Crypto_Chacha20_Context* ctx, uint32 size, const uint8* input, uint8* output)
 {
     uint32 offset   = 0U;
@@ -298,6 +328,8 @@ void Crypto_chacha20_update(Crypto_Chacha20_Context* ctx, uint32 size, const uin
         ctx->keystream_bytes_used = tmp_size;
     }
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -320,6 +352,8 @@ void Crypto_chacha20_update(Crypto_Chacha20_Context* ctx, uint32 size, const uin
  *                                     E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_chacha20_crypt(
     const uint8  key[CRYPTO_CONST_32],
     const uint8  nonce[CRYPTO_CONST_12],
@@ -341,7 +375,6 @@ Std_ReturnType Crypto_chacha20_crypt(
 
     return ret;
 }
-
 #define CRYPTO_62_STOP_SEC_CODE
 #include "Crypto_62_MemMap.h"
 #endif

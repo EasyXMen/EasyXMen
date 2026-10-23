@@ -25,22 +25,7 @@
 /* =================================================== inclusions =================================================== */
 
 #include "Csm_Internal.h"
-
 /* ===================================================== macros ===================================================== */
-#define CSM_C_AR_MAJOR_VERSION 4U
-#define CSM_C_AR_MINOR_VERSION 9U
-#define CSM_C_AR_PATCH_VERSION 0U
-#define CSM_C_SW_MAJOR_VERSION 2U
-#define CSM_C_SW_MINOR_VERSION 1U
-#define CSM_C_SW_PATCH_VERSION 3U
-
-#if (                                                                                                           \
-    (CSM_C_AR_MAJOR_VERSION != CSM_H_AR_MAJOR_VERSION) || (CSM_C_AR_MINOR_VERSION != CSM_H_AR_MINOR_VERSION)    \
-    || (CSM_C_AR_PATCH_VERSION != CSM_H_AR_PATCH_VERSION) || (CSM_C_SW_MAJOR_VERSION != CSM_H_SW_MAJOR_VERSION) \
-    || (CSM_C_SW_MINOR_VERSION != CSM_H_SW_MINOR_VERSION) || (CSM_C_SW_PATCH_VERSION != CSM_H_SW_PATCH_VERSION))
-
-#error "Csm.c version mismatching with Csm.h"
-#endif
 
 /* ================================================ type definitions ================================================ */
 
@@ -63,7 +48,11 @@
  * @trace       CPD-71229
  */
 static Std_ReturnType Csm_ProcessJobToCryIf(Crypto_JobPrimitiveInputOutputType* jobPrimInOut, uint32 jobId);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /**
  * @brief          Enqueues a job into the specified queue.
  * @param[in]      jobId : Identifier of the job to be enqueued.
@@ -78,7 +67,11 @@ static Std_ReturnType Csm_ProcessJobToCryIf(Crypto_JobPrimitiveInputOutputType* 
  */
 static Std_ReturnType
     Csm_EnqueueJobToQue(uint32 jobId, uint32 queId, Crypto_JobPrimitiveInputOutputType jobPriInOutInfo);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /**
  * @brief          Dequeues a job from the specified queue.
  * @param[in]      jobId : Identifier of the job to be dequeued.
@@ -91,7 +84,11 @@ static Std_ReturnType
  * @trace       CPD-71231
  */
 static Std_ReturnType Csm_DequeueJobInQue(uint32 jobId, uint32 queId);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /* PRQA S 5016 ++ */ /* VL_Csm_5016 */
 /**
  * @brief          Finds an idle queue buffer and marks it as used.
@@ -104,7 +101,11 @@ static Std_ReturnType Csm_DequeueJobInQue(uint32 jobId, uint32 queId);
  */
 static Csm_JobInQueuePtrType Csm_FindIdleQueue(uint32* bufPos);
 /* PRQA S 5016 -- */
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /**
  * @brief          Checks if the given operation mode is valid.
  * @param[in]      mode : Operation mode to be checked.
@@ -127,18 +128,21 @@ static Std_ReturnType Csm_CheckOperaMode(Crypto_OperationModeType mode);
  * @range CSM_QUEUE_TOTAL_SIZE
  */
 static Csm_JobInQueueType Csm_JobQueBuf[CSM_QUEUE_TOTAL_SIZE]; /* PRQA S 3218 */ /* VL_Csm_3218 */
+#define CSM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Csm_MemMap.h"
+
+#define CSM_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Csm_MemMap.h"
 /**
  * @brief Status array for queue channels
  * @range CSM_QUEUE_NUM
  */
 static Csm_QueueChStatusType Csm_QueueChRunStatus[CSM_QUEUE_NUM];
-
 #define CSM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
 #include "Csm_MemMap.h"
 
 #define CSM_START_SEC_VAR_CLEARED_BOOLEAN
 #include "Csm_MemMap.h"
-
 /**
  * @brief Array to record the usage status of Csm_JobQueBuf
  * @range CSM_QUEUE_TOTAL_SIZE
@@ -156,7 +160,11 @@ static boolean Csm_JobQueBufUsed[CSM_QUEUE_TOTAL_SIZE]; /* PRQA S 1514 */ /* VL_
  * @range 0-1
  */
 boolean Csm_InitStatus; /* PRQA S 1514 */ /* VL_Csm_1514 */
+#define CSM_STOP_SEC_VAR_CLEARED_BOOLEAN
+#include "Csm_MemMap.h"
 
+#define CSM_START_SEC_VAR_CLEARED_BOOLEAN
+#include "Csm_MemMap.h"
 /**
  * @brief Flags to indicate whether a job can be postponed.
  *        Each element corresponds to a job, and is used to manage job postponement.
@@ -164,18 +172,6 @@ boolean Csm_InitStatus; /* PRQA S 1514 */ /* VL_Csm_1514 */
  */
 boolean Csm_JobPostponeFlag[CSM_JOB_NUM];
 #define CSM_STOP_SEC_VAR_CLEARED_BOOLEAN
-#include "Csm_MemMap.h"
-
-#define CSM_START_SEC_VAR_CLEARED_UNSPECIFIED
-#include "Csm_MemMap.h"
-/**
- * @brief Array to store the states of jobs.
- *        Each element represents the state of a corresponding job,
- *        used for managing and tracking job execution.
- * @range 0-1
- */
-Crypto_JobStateType Csm_JobStates[CSM_JOB_NUM];
-#define CSM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
 #include "Csm_MemMap.h"
 
 /* ========================================== external function definitions ========================================= */
@@ -188,6 +184,8 @@ Crypto_JobStateType Csm_JobStates[CSM_JOB_NUM];
 /*************************************************************************/
 void Csm_Init(const Csm_ConfigType* configPtr)
 {
+    Csm_ArtiApiStart(2, CSM_SID_INIT, configPtr);
+
     uint32 jobIdx;
     uint32 queIdx;
 #if (CSM_DEV_ERROR_DETECT == STD_ON)
@@ -202,7 +200,6 @@ void Csm_Init(const Csm_ConfigType* configPtr)
         /*Initial job states*/
         for (jobIdx = 0u; jobIdx < CSM_JOB_NUM; jobIdx++)
         {
-            Csm_JobStates[jobIdx]       = CRYPTO_JOBSTATE_IDLE;
             Csm_JobPostponeFlag[jobIdx] = (boolean)FALSE;
         }
         /*Init job-queue*/
@@ -211,7 +208,6 @@ void Csm_Init(const Csm_ConfigType* configPtr)
             Csm_QueueChRunStatus[queIdx].pendingJobQue = NULL_PTR;
             Csm_QueueChRunStatus[queIdx].jobCnt        = 0u;
             Csm_QueueChRunStatus[queIdx].maxPriority   = CSM_INVALID_PRIORITY;
-            Csm_QueueChRunStatus[queIdx].dealSynJobIng = (boolean)FALSE;
         }
         SchM_Enter_Csm_Area_Csm();
         for (queIdx = 0u; queIdx < CSM_QUEUE_TOTAL_SIZE; queIdx++)
@@ -221,9 +217,15 @@ void Csm_Init(const Csm_ConfigType* configPtr)
         SchM_Exit_Csm_Area_Csm();
         Csm_InitStatus = (boolean)TRUE;
     }
+
+    Csm_ArtiApiStop(1, CSM_SID_INIT);
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 
 #if (CSM_GET_VERSION_INFO == STD_ON)
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*************************************************************************/
 /**
  * @brief Returns the version information of this module.
@@ -231,6 +233,8 @@ void Csm_Init(const Csm_ConfigType* configPtr)
 /*************************************************************************/
 void Csm_GetVersionInfo(Std_VersionInfoType* versioninfo)
 {
+    Csm_ArtiApiStart(2, CSM_SID_GETVERSIONINFO, versioninfo);
+
     Std_ReturnType ret = E_OK;
 
 #if (CSM_DEV_ERROR_DETECT == STD_ON)
@@ -240,14 +244,20 @@ void Csm_GetVersionInfo(Std_VersionInfoType* versioninfo)
     {
         versioninfo->moduleID         = CSM_MODULE_ID;
         versioninfo->vendorID         = CSM_VENDOR_ID;
-        versioninfo->sw_major_version = CSM_H_SW_MAJOR_VERSION;
-        versioninfo->sw_minor_version = CSM_H_SW_MINOR_VERSION;
-        versioninfo->sw_patch_version = CSM_H_SW_PATCH_VERSION;
+        versioninfo->sw_major_version = CSM_SW_MAJOR_VERSION;
+        versioninfo->sw_minor_version = CSM_SW_MINOR_VERSION;
+        versioninfo->sw_patch_version = CSM_SW_PATCH_VERSION;
     }
+
+    Csm_ArtiApiStop(1, CSM_SID_GETVERSIONINFO);
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 #endif /*CSM_GET_VERSION_INFO == STD_ON*/
 
 #if (CSM_HASH_SUPPORT == STD_ON)
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*************************************************************************/
 /**
  * @brief  Uses the given data to perform the hash calculation and stores the hash.
@@ -263,6 +273,8 @@ Std_ReturnType Csm_Hash(
     uint32*                  resultLengthPtr)
 /* PRQA S 1503, 6040 -- */
 {
+    Csm_ArtiApiStart(7, CSM_SID_HASH, jobId, mode, dataPtr, dataLength, resultPtr, resultLengthPtr);
+
     Crypto_JobPrimitiveInputOutputType hashInfo;
     Std_ReturnType                     ret;
 
@@ -282,11 +294,18 @@ Std_ReturnType Csm_Hash(
             ret                      = Csm_ProcessJobToCryIf(&hashInfo, jobId);
         }
     }
+
+    Csm_ArtiApiStop(2, CSM_SID_HASH, ret);
+
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 #endif /*CSM_HASH_SUPPORT == STD_ON*/
 
 #if (CSM_MAC_SUPPORT == STD_ON)
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*************************************************************************/
 /**
  * @brief  Uses the given data to perform a MAC generation and stores the MAC in the memory
@@ -302,6 +321,8 @@ Std_ReturnType Csm_MacGenerate(
     uint32*                  macLengthPtr)
 /* PRQA S 1503, 6040 -- */
 {
+    Csm_ArtiApiStart(7, CSM_SID_MAC_GEN, jobId, mode, dataPtr, dataLength, macPtr, macLengthPtr);
+
     Crypto_JobPrimitiveInputOutputType macInfo;
     Std_ReturnType                     ret;
 
@@ -321,8 +342,16 @@ Std_ReturnType Csm_MacGenerate(
             ret                     = Csm_ProcessJobToCryIf(&macInfo, jobId);
         }
     }
+
+    Csm_ArtiApiStop(2, CSM_SID_MAC_GEN, ret);
+
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
+
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*************************************************************************/
 /**
  * @brief Verifies the given MAC by comparing if the MAC is generated with the given data.
@@ -339,6 +368,8 @@ Std_ReturnType Csm_MacVerify(
     Crypto_VerifyResultType* verifyPtr)
 /* PRQA S 1503, 6040 -- */
 {
+    Csm_ArtiApiStart(8, CSM_SID_MAC_VERIFY, jobId, mode, dataPtr, dataLength, macPtr, macLength, verifyPtr);
+
     Crypto_JobPrimitiveInputOutputType macInfo;
     Std_ReturnType                     ret;
 
@@ -359,11 +390,18 @@ Std_ReturnType Csm_MacVerify(
             ret                          = Csm_ProcessJobToCryIf(&macInfo, jobId);
         }
     }
+
+    Csm_ArtiApiStop(2, CSM_SID_MAC_VERIFY, ret);
+
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 #endif /*CSM_MAC_SUPPORT == STD_ON*/
 
 #if (CSM_ENCRYPT_SUPPORT == STD_ON)
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*************************************************************************/
 /**
  * @brief the given data and store the ciphertext in the memory location pointed by
@@ -380,6 +418,8 @@ Std_ReturnType Csm_Encrypt(
     uint32*                  resultLengthPtr)
 /* PRQA S 1503, 6040 -- */
 {
+    Csm_ArtiApiStart(7, CSM_SID_ENCRYPT, jobId, mode, dataPtr, dataLength, resultPtr, resultLengthPtr);
+
     Crypto_JobPrimitiveInputOutputType encryptInfo;
     Std_ReturnType                     ret;
 
@@ -400,8 +440,15 @@ Std_ReturnType Csm_Encrypt(
         }
     }
 
+    Csm_ArtiApiStop(2, CSM_SID_ENCRYPT, ret);
+
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
+
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*************************************************************************/
 /**
  * @brief the given encrypted data and store the decrypted plaintext in the memory
@@ -418,6 +465,8 @@ Std_ReturnType Csm_Decrypt(
     uint32*                  resultLengthPtr)
 /* PRQA S 1503, 6040 -- */
 {
+    Csm_ArtiApiStart(7, CSM_SID_DECRYPT, jobId, mode, dataPtr, dataLength, resultPtr, resultLengthPtr);
+
     Crypto_JobPrimitiveInputOutputType decryptInfo;
     Std_ReturnType                     ret;
 
@@ -438,10 +487,17 @@ Std_ReturnType Csm_Decrypt(
         }
     }
 
+    Csm_ArtiApiStop(2, CSM_SID_DECRYPT, ret);
+
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 #endif /*CSM_ENCRYPT_SUPPORT == STD_ON*/
+
 #if (CSM_AEADENCRYPT_SUPPORT == STD_ON)
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*************************************************************************/
 /**
  * @brief the given input data to perform a AEAD encryption and stores the ciphertext and the MAC
@@ -461,6 +517,20 @@ Std_ReturnType Csm_AEADEncrypt(
     uint32*                  tagLengthPtr)
 /* PRQA S 1503, 6040 -- */
 {
+    Csm_ArtiApiStart(
+        11,
+        CSM_SID_AEADENCRYPT,
+        jobId,
+        mode,
+        plaintextPtr,
+        plaintextLength,
+        associatedDataPtr,
+        associatedDataLength,
+        ciphertextPtr,
+        ciphertextLengthPtr,
+        tagPtr,
+        tagLengthPtr);
+
     Crypto_JobPrimitiveInputOutputType AEADEncryptInfo;
     Std_ReturnType                     ret;
 
@@ -484,8 +554,16 @@ Std_ReturnType Csm_AEADEncrypt(
             ret                                      = Csm_ProcessJobToCryIf(&AEADEncryptInfo, jobId);
         }
     }
+
+    Csm_ArtiApiStop(2, CSM_SID_AEADENCRYPT, ret);
+
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
+
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*************************************************************************/
 /**
  * @brief Uses the given data to perform an AEAD Decryption and stores the ciphertext
@@ -508,6 +586,21 @@ Std_ReturnType Csm_AEADDecrypt(
     Crypto_VerifyResultType* verifyPtr)
 /* PRQA S 1503, 6040 -- */
 {
+    Csm_ArtiApiStart(
+        12,
+        CSM_SID_AEADDECRYPT,
+        jobId,
+        mode,
+        ciphertextPtr,
+        ciphertextLength,
+        associatedDataPtr,
+        associatedDataLength,
+        tagPtr,
+        tagLength,
+        plaintextPtr,
+        plaintextLengthPtr,
+        verifyPtr);
+
     Crypto_JobPrimitiveInputOutputType AEADDecryptInfo;
     Std_ReturnType                     ret;
 
@@ -532,10 +625,17 @@ Std_ReturnType Csm_AEADDecrypt(
             ret                                  = Csm_ProcessJobToCryIf(&AEADDecryptInfo, jobId);
         }
     }
+
+    Csm_ArtiApiStop(2, CSM_SID_AEADDECRYPT, ret);
+
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 #endif
 #if (CSM_SIGNATURE_SUPPORT == STD_ON)
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*************************************************************************/
 /**
  * @brief Uses the given data to perform the signature calculation and stores the
@@ -551,6 +651,8 @@ Std_ReturnType Csm_SignatureGenerate(
     uint32*                  resultLengthPtr)
 /* PRQA S 1503, 6040 -- */
 {
+    Csm_ArtiApiStart(7, CSM_SID_SIG_GEN, jobId, mode, dataPtr, dataLength, resultPtr, resultLengthPtr);
+
     Crypto_JobPrimitiveInputOutputType signatureInfo;
     Std_ReturnType                     ret;
 
@@ -570,8 +672,16 @@ Std_ReturnType Csm_SignatureGenerate(
             ret                           = Csm_ProcessJobToCryIf(&signatureInfo, jobId);
         }
     }
+
+    Csm_ArtiApiStop(2, CSM_SID_SIG_GEN, ret);
+
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
+
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*************************************************************************/
 /**
  * @brief  Verifies the given MAC by comparing if the signature is generated with the given data.
@@ -589,6 +699,8 @@ Std_ReturnType Csm_SignatureVerify(
     Crypto_VerifyResultType* verifyPtr)
 /* PRQA S 1503, 6040 -- */
 {
+    Csm_ArtiApiStart(8, CSM_SID_SIG_VERIFY, jobId, mode, dataPtr, dataLength, signaturePtr, signatureLength, verifyPtr);
+
     Crypto_JobPrimitiveInputOutputType signatureInfo;
     Std_ReturnType                     ret;
 
@@ -609,11 +721,18 @@ Std_ReturnType Csm_SignatureVerify(
             ret                                = Csm_ProcessJobToCryIf(&signatureInfo, jobId);
         }
     }
+
+    Csm_ArtiApiStop(2, CSM_SID_SIG_VERIFY, ret);
+
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 #endif /*CSM_SIGNATURE_SUPPORT == STD_ON*/
 
 #if (CSM_RANDOM_SUPPORT == STD_ON)
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*************************************************************************/
 /**
  * @brief  Generate a random number and stores it in the memory location pointed by the result pointer
@@ -624,6 +743,8 @@ Std_ReturnType
     Csm_RandomGenerate(uint32 jobId, Crypto_OperationModeType mode, uint8* resultPtr, uint32* resultLengthPtr)
 /* PRQA S 1503 -- */
 {
+    Csm_ArtiApiStart(5, CSM_SID_RANDOM_GEN, jobId, mode, resultPtr, resultLengthPtr);
+
     Crypto_JobPrimitiveInputOutputType randomInfo;
     Std_ReturnType                     ret;
 
@@ -639,9 +760,16 @@ Std_ReturnType
         randomInfo.mode = CRYPTO_OPERATIONMODE_SINGLECALL;
         ret             = Csm_ProcessJobToCryIf(&randomInfo, jobId);
     }
+
+    Csm_ArtiApiStop(2, CSM_SID_RANDOM_GEN, ret);
+
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 #endif /*CSM_RANDOM_SUPPORT == STD_ON*/
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*************************************************************************/
 /**
  * @brief  Sets the given key element bytes to the key identified by keyId.
@@ -651,6 +779,8 @@ Std_ReturnType
 Std_ReturnType Csm_KeyElementSet(uint32 keyId, uint32 keyElementId, const uint8* keyPtr, uint32 keyLength)
 /* PRQA S 1503 -- */
 {
+    Csm_ArtiApiStart(5, CSM_SID_KEYELEMENTSET, keyId, keyElementId, keyPtr, keyLength);
+
     uint32         cryIfKeyId;
     Std_ReturnType ret;
 
@@ -662,8 +792,16 @@ Std_ReturnType Csm_KeyElementSet(uint32 keyId, uint32 keyElementId, const uint8*
         cryIfKeyId = Csm_KeyCfg[keyId].cryIfKey;
         ret        = CryIf_KeyElementSet(cryIfKeyId, keyElementId, keyPtr, keyLength);
     }
+
+    Csm_ArtiApiStop(2, CSM_SID_KEYELEMENTSET, ret);
+
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
+
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*************************************************************************/
 /**
  * @brief the key state of the key identified by keyId to valid.
@@ -673,6 +811,8 @@ Std_ReturnType Csm_KeyElementSet(uint32 keyId, uint32 keyElementId, const uint8*
 Std_ReturnType Csm_KeySetValid(uint32 keyId)
 /* PRQA S 1503 -- */
 {
+    Csm_ArtiApiStart(2, CSM_SID_KEYSET_VALID, keyId);
+
     uint32         cryIfKeyId;
     Std_ReturnType ret;
 
@@ -684,8 +824,16 @@ Std_ReturnType Csm_KeySetValid(uint32 keyId)
         cryIfKeyId = Csm_KeyCfg[keyId].cryIfKey;
         ret        = CryIf_KeySetValid(cryIfKeyId);
     }
+
+    Csm_ArtiApiStop(2, CSM_SID_KEYSET_VALID, ret);
+
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
+
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*************************************************************************/
 /**
  * @brief the key state of the key identified by keyId to invalid.
@@ -695,6 +843,8 @@ Std_ReturnType Csm_KeySetValid(uint32 keyId)
 Std_ReturnType Csm_KeySetInvalid(uint32 keyId)
 /* PRQA S 1503 -- */
 {
+    Csm_ArtiApiStart(2, CSM_SID_KEYSET_INVALID, keyId);
+
     uint32         cryIfKeyId;
     Std_ReturnType ret;
 
@@ -706,8 +856,16 @@ Std_ReturnType Csm_KeySetInvalid(uint32 keyId)
         cryIfKeyId = Csm_KeyCfg[keyId].cryIfKey;
         ret        = CryIf_KeySetInValid(cryIfKeyId);
     }
+
+    Csm_ArtiApiStop(2, CSM_SID_KEYSET_INVALID, ret);
+
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
+
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*************************************************************************/
 /**
  * @brief Retrieves the key element bytes from a specific key element of the key
@@ -717,6 +875,8 @@ Std_ReturnType Csm_KeySetInvalid(uint32 keyId)
 Std_ReturnType Csm_KeyElementGet(uint32 keyId, uint32 keyElementId, uint8* keyPtr, uint32* keyLengthPtr)
 /* PRQA S 1503 -- */
 {
+    Csm_ArtiApiStart(5, CSM_SID_KEYELEMENTGET, keyId, keyElementId, keyPtr, keyLengthPtr);
+
     uint32         cryIfKeyId;
     Std_ReturnType ret;
 
@@ -728,8 +888,16 @@ Std_ReturnType Csm_KeyElementGet(uint32 keyId, uint32 keyElementId, uint8* keyPt
         cryIfKeyId = Csm_KeyCfg[keyId].cryIfKey;
         ret        = CryIf_KeyElementGet(cryIfKeyId, keyElementId, keyPtr, keyLengthPtr);
     }
+
+    Csm_ArtiApiStop(2, CSM_SID_KEYELEMENTGET, ret);
+
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
+
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*************************************************************************/
 /**
  * @brief  function shall copy a key elements from one key to a target key.
@@ -743,6 +911,8 @@ Std_ReturnType Csm_KeyElementCopy(
     const uint32 targetKeyElementId)
 /* PRQA S 1503 -- */
 {
+    Csm_ArtiApiStart(5, CSM_SID_KEYELEMENTCPY, keyId, keyElementId, targetKeyId, targetKeyElementId);
+
     uint32         cryIfSrcKeyId;
     uint32         cryIfDestKeyId;
     Std_ReturnType ret;
@@ -756,8 +926,16 @@ Std_ReturnType Csm_KeyElementCopy(
         cryIfDestKeyId = Csm_KeyCfg[targetKeyId].cryIfKey;
         ret            = CryIf_KeyElementCopy(cryIfSrcKeyId, keyElementId, cryIfDestKeyId, targetKeyElementId);
     }
+
+    Csm_ArtiApiStop(2, CSM_SID_KEYELEMENTCPY, ret);
+
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
+
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*************************************************************************/
 /**
  * @brief This function shall copy all key elements from the source key to a target key.
@@ -767,6 +945,8 @@ Std_ReturnType Csm_KeyElementCopy(
 Std_ReturnType Csm_KeyCopy(const uint32 keyId, const uint32 targetKeyId)
 /* PRQA S 1503 -- */
 {
+    Csm_ArtiApiStart(3, CSM_SID_KEYCPY, keyId, targetKeyId);
+
     uint32         cryIfSrcKeyId;
     uint32         cryIfDestKeyId;
     Std_ReturnType ret;
@@ -780,8 +960,16 @@ Std_ReturnType Csm_KeyCopy(const uint32 keyId, const uint32 targetKeyId)
         cryIfDestKeyId = Csm_KeyCfg[targetKeyId].cryIfKey;
         ret            = CryIf_KeyCopy(cryIfSrcKeyId, cryIfDestKeyId);
     }
+
+    Csm_ArtiApiStop(2, CSM_SID_KEYCPY, ret);
+
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
+
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*************************************************************************/
 /**
  * @brief Copies a key element to another key element in the same crypto driver. The keyElementSourceOffset
@@ -798,6 +986,17 @@ Std_ReturnType Csm_KeyElementCopyPartial(
     uint32 targetKeyElementId)
 /* PRQA S 1503, 6040 -- */
 {
+    Csm_ArtiApiStart(
+        8,
+        CSM_SID_KEYELEMENTCPYPARTIAL,
+        keyId,
+        keyElementId,
+        keyElementSourceOffset,
+        keyElementTargetOffset,
+        keyElementCopyLength,
+        targetKeyId,
+        targetKeyElementId);
+
     uint32         cryIfSrcKeyId;
     uint32         cryIfDestKeyId;
     Std_ReturnType ret;
@@ -818,8 +1017,16 @@ Std_ReturnType Csm_KeyElementCopyPartial(
             cryIfDestKeyId,
             targetKeyElementId);
     }
+
+    Csm_ArtiApiStop(2, CSM_SID_KEYELEMENTCPYPARTIAL, ret);
+
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
+
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*************************************************************************/
 /**
  * @brief Feeds the key element CRYPTO_KE_RANDOM_SEED with a random seed.
@@ -829,6 +1036,8 @@ Std_ReturnType Csm_KeyElementCopyPartial(
 Std_ReturnType Csm_RandomSeed(uint32 keyId, const uint8* seedPtr, uint32 seedLength)
 /* PRQA S 1503 -- */
 {
+    Csm_ArtiApiStart(4, CSM_SID_RANDOMSEED, keyId, seedPtr, seedLength);
+
     uint32         cryIfKeyId;
     Std_ReturnType ret;
 
@@ -840,8 +1049,16 @@ Std_ReturnType Csm_RandomSeed(uint32 keyId, const uint8* seedPtr, uint32 seedLen
         cryIfKeyId = Csm_KeyCfg[keyId].cryIfKey;
         ret        = CryIf_RandomSeed(cryIfKeyId, seedPtr, seedLength);
     }
+
+    Csm_ArtiApiStop(2, CSM_SID_RANDOMSEED, ret);
+
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
+
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*************************************************************************/
 /**
  * @brief  Generates new key material and store it in the key identified by keyId.
@@ -850,6 +1067,8 @@ Std_ReturnType Csm_RandomSeed(uint32 keyId, const uint8* seedPtr, uint32 seedLen
 /* PRQA S 1503 ++ */ /* VL_QAC_NoUsedApi */
 Std_ReturnType Csm_KeyGenerate(uint32 keyId)
 {
+    Csm_ArtiApiStart(2, CSM_SID_KEY_GENERATE, keyId);
+
     uint32         cryIfKeyId;
     Std_ReturnType ret;
 
@@ -861,8 +1080,16 @@ Std_ReturnType Csm_KeyGenerate(uint32 keyId)
         cryIfKeyId = Csm_KeyCfg[keyId].cryIfKey;
         ret        = CryIf_KeyGenerate(cryIfKeyId);
     }
+
+    Csm_ArtiApiStop(2, CSM_SID_KEY_GENERATE, ret);
+
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
+
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /* PRQA S 1503 -- */
 /*************************************************************************/
 /**
@@ -876,6 +1103,8 @@ Std_ReturnType Csm_KeyGenerate(uint32 keyId)
 Std_ReturnType Csm_KeyDerive(uint32 keyId, uint32 targetKeyId)
 /* PRQA S 1503 -- */
 {
+    Csm_ArtiApiStart(3, CSM_SID_KEY_DERIVE, keyId, targetKeyId);
+
     uint32         cryIfSrcKeyId;
     uint32         cryIfDestKeyId;
     Std_ReturnType ret;
@@ -889,8 +1118,16 @@ Std_ReturnType Csm_KeyDerive(uint32 keyId, uint32 targetKeyId)
         cryIfDestKeyId = Csm_KeyCfg[targetKeyId].cryIfKey;
         ret            = CryIf_KeyDerive(cryIfSrcKeyId, cryIfDestKeyId);
     }
+
+    Csm_ArtiApiStop(2, CSM_SID_KEY_DERIVE, ret);
+
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
+
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*************************************************************************/
 /**
  * @brief  Calculates the public value of the current user for the key exchange and stores
@@ -901,6 +1138,8 @@ Std_ReturnType Csm_KeyDerive(uint32 keyId, uint32 targetKeyId)
 Std_ReturnType Csm_KeyExchangeCalcPubVal(uint32 keyId, uint8* publicValuePtr, uint32* publicValueLengthPtr)
 /* PRQA S 1503 -- */
 {
+    Csm_ArtiApiStart(4, CSM_SID_KEY_EX_PUB, keyId, publicValuePtr, publicValueLengthPtr);
+
     uint32         cryIfKeyId;
     Std_ReturnType ret;
 
@@ -921,8 +1160,16 @@ Std_ReturnType Csm_KeyExchangeCalcPubVal(uint32 keyId, uint8* publicValuePtr, ui
         cryIfKeyId = Csm_KeyCfg[keyId].cryIfKey;
         ret        = CryIf_KeyExchangeCalcPubVal(cryIfKeyId, publicValuePtr, publicValueLengthPtr);
     }
+
+    Csm_ArtiApiStop(2, CSM_SID_KEY_EX_PUB, ret);
+
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
+
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*************************************************************************/
 /**
  * @brief  Calculates the shared secret key for the key exchange with the key material of
@@ -935,6 +1182,8 @@ Std_ReturnType
     Csm_KeyExchangeCalcSecret(uint32 keyId, const uint8* partnerPublicValuePtr, uint32 partnerPublicValueLength)
 /* PRQA S 1503 -- */
 {
+    Csm_ArtiApiStart(4, CSM_SID_KEY_EX_SEC, keyId, partnerPublicValuePtr, partnerPublicValueLength);
+
     uint32         cryIfKeyId;
     Std_ReturnType ret;
 
@@ -954,8 +1203,16 @@ Std_ReturnType
         cryIfKeyId = Csm_KeyCfg[keyId].cryIfKey;
         ret        = CryIf_KeyExchangeCalcSecret(cryIfKeyId, partnerPublicValuePtr, partnerPublicValueLength);
     }
+
+    Csm_ArtiApiStop(2, CSM_SID_KEY_EX_SEC, ret);
+
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
+
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*************************************************************************/
 /**
  * @brief  Stores the key if necessary and sets the key state of the key identified by keyId to valid.
@@ -965,6 +1222,8 @@ Std_ReturnType
 Std_ReturnType Csm_JobKeySetValid(uint32 jobId)
 /* PRQA S 1503 -- */
 {
+    Csm_ArtiApiStart(2, CSM_SID_JOBKEYSETVALID, jobId);
+
     Crypto_JobPrimitiveInputOutputType jobInfo;
     Std_ReturnType                     ret;
 
@@ -973,11 +1232,19 @@ Std_ReturnType Csm_JobKeySetValid(uint32 jobId)
     if (E_OK == ret)
 #endif /*CSM_DEV_ERROR_DETECT == STD_ON*/
     {
-        jobInfo.cryIfKeyId = Csm_JobCfg[jobId].jobPrimitiveInfo->cryIfKeyId;
+        jobInfo.cryIfKeyId = Csm_JobCfg[jobId].jobPtr->jobPrimitiveInfo->cryIfKeyId;
         ret                = Csm_ProcessJobToCryIf(&jobInfo, jobId);
     }
+
+    Csm_ArtiApiStop(2, CSM_SID_JOBKEYSETVALID, ret);
+
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
+
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*************************************************************************/
 /**
  * @brief  Stores the key if necessary and sets the key state of the key identified by keyId to valid.
@@ -987,6 +1254,8 @@ Std_ReturnType Csm_JobKeySetValid(uint32 jobId)
 Std_ReturnType Csm_JobKeySetInValid(uint32 jobId)
 /* PRQA S 1503 -- */
 {
+    Csm_ArtiApiStart(2, CSM_SID_JOBKEYSETINVALID, jobId);
+
     Crypto_JobPrimitiveInputOutputType jobInfo;
     Std_ReturnType                     ret;
 
@@ -995,11 +1264,19 @@ Std_ReturnType Csm_JobKeySetInValid(uint32 jobId)
     if (E_OK == ret)
 #endif /*CSM_DEV_ERROR_DETECT == STD_ON*/
     {
-        jobInfo.cryIfKeyId = Csm_JobCfg[jobId].jobPrimitiveInfo->cryIfKeyId;
+        jobInfo.cryIfKeyId = Csm_JobCfg[jobId].jobPtr->jobPrimitiveInfo->cryIfKeyId;
         ret                = Csm_ProcessJobToCryIf(&jobInfo, jobId);
     }
+
+    Csm_ArtiApiStop(2, CSM_SID_JOBKEYSETINVALID, ret);
+
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
+
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*************************************************************************/
 /**
  * @brief  This function shall dispatch the random seed function to the configured crypto driver object.
@@ -1009,6 +1286,8 @@ Std_ReturnType Csm_JobKeySetInValid(uint32 jobId)
 Std_ReturnType Csm_JobRandomSeed(uint32 jobId, uint32 keyId, const uint8* seedPtr, uint32 seedLength)
 /* PRQA S 1503 -- */
 {
+    Csm_ArtiApiStart(5, CSM_SID_JOBRANDOMSEED, jobId, keyId, seedPtr, seedLength);
+
     Crypto_JobPrimitiveInputOutputType jobInfo;
     Std_ReturnType                     ret;
 
@@ -1022,8 +1301,16 @@ Std_ReturnType Csm_JobRandomSeed(uint32 jobId, uint32 keyId, const uint8* seedPt
         jobInfo.inputLength = seedLength;
         ret                 = Csm_ProcessJobToCryIf(&jobInfo, jobId);
     }
+
+    Csm_ArtiApiStop(2, CSM_SID_JOBRANDOMSEED, ret);
+
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
+
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*************************************************************************/
 /**
  * @brief  Generates new key material and stores it in the key identified by keyId.
@@ -1033,6 +1320,8 @@ Std_ReturnType Csm_JobRandomSeed(uint32 jobId, uint32 keyId, const uint8* seedPt
 Std_ReturnType Csm_JobKeyGenerate(uint32 jobId, uint32 keyId)
 /* PRQA S 1503 -- */
 {
+    Csm_ArtiApiStart(3, CSM_SID_JOBKEYGENERATE, jobId, keyId);
+
     Crypto_JobPrimitiveInputOutputType jobInfo;
     Std_ReturnType                     ret;
 
@@ -1044,8 +1333,16 @@ Std_ReturnType Csm_JobKeyGenerate(uint32 jobId, uint32 keyId)
         jobInfo.cryIfKeyId = Csm_KeyCfg[keyId].cryIfKey;
         ret                = Csm_ProcessJobToCryIf(&jobInfo, jobId);
     }
+
+    Csm_ArtiApiStop(2, CSM_SID_JOBKEYGENERATE, ret);
+
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
+
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*************************************************************************/
 /**
  * @brief  Derives a new key by using the key elements in the given key identified by the keyId.
@@ -1057,6 +1354,8 @@ Std_ReturnType Csm_JobKeyGenerate(uint32 jobId, uint32 keyId)
 Std_ReturnType Csm_JobKeyDerive(uint32 jobId, uint32 keyId, uint32 targetKeyId)
 /* PRQA S 1503 -- */
 {
+    Csm_ArtiApiStart(4, CSM_SID_JOBKEYDERIVE, jobId, keyId, targetKeyId);
+
     Crypto_JobPrimitiveInputOutputType jobInfo;
     Std_ReturnType                     ret;
 
@@ -1069,8 +1368,16 @@ Std_ReturnType Csm_JobKeyDerive(uint32 jobId, uint32 keyId, uint32 targetKeyId)
         jobInfo.targetCryIfKeyId = targetKeyId;
         ret                      = Csm_ProcessJobToCryIf(&jobInfo, jobId);
     }
+
+    Csm_ArtiApiStop(2, CSM_SID_JOBKEYDERIVE, ret);
+
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
+
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*************************************************************************/
 /**
  * @brief  Calculates the public value of the current user for the key exchange and stores the public key
@@ -1086,6 +1393,8 @@ Std_ReturnType Csm_JobKeyExchangeCalcPubVal(
     uint32* publicValueLengthPtr)
 /* PRQA S 1503 -- */
 {
+    Csm_ArtiApiStart(4, CSM_SID_JOBKEY_EX_PUB, jobId, publicValuePtr, publicValueLengthPtr);
+
     Crypto_JobPrimitiveInputOutputType jobInfo;
     Std_ReturnType                     ret;
 
@@ -1094,14 +1403,22 @@ Std_ReturnType Csm_JobKeyExchangeCalcPubVal(
     if (E_OK == ret)
 #endif /*CSM_DEV_ERROR_DETECT == STD_ON*/
     {
-        jobInfo.cryIfKeyId               = Csm_JobCfg[jobId].jobPrimitiveInfo->cryIfKeyId;
+        jobInfo.cryIfKeyId               = Csm_JobCfg[jobId].jobPtr->jobPrimitiveInfo->cryIfKeyId;
         jobInfo.secondaryInputPtr        = publicValuePtr;
         jobInfo.secondaryInputLength     = *publicValuePtr;
         jobInfo.secondaryOutputLengthPtr = publicValueLengthPtr;
         ret                              = Csm_ProcessJobToCryIf(&jobInfo, jobId);
     }
+
+    Csm_ArtiApiStop(2, CSM_SID_JOBKEY_EX_PUB, ret);
+
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
+
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*************************************************************************/
 /**
  * @brief  Calculates the shared secret key for the key exchange with the key material of the key
@@ -1114,6 +1431,8 @@ Std_ReturnType
     Csm_JobKeyExchangeCalcSecret(uint32 jobId, const uint8* partnerPublicValuePtr, uint32 partnerPublicValueLength)
 /* PRQA S 1503 -- */
 {
+    Csm_ArtiApiStart(4, CSM_SID_JOBKEY_EX_SEC, jobId, partnerPublicValuePtr, partnerPublicValueLength);
+
     Crypto_JobPrimitiveInputOutputType jobInfo;
     Std_ReturnType                     ret;
 
@@ -1122,13 +1441,21 @@ Std_ReturnType
     if (E_OK == ret)
 #endif /*CSM_DEV_ERROR_DETECT == STD_ON*/
     {
-        jobInfo.cryIfKeyId  = Csm_JobCfg[jobId].jobPrimitiveInfo->cryIfKeyId;
+        jobInfo.cryIfKeyId  = Csm_JobCfg[jobId].jobPtr->jobPrimitiveInfo->cryIfKeyId;
         jobInfo.inputPtr    = partnerPublicValuePtr;
         jobInfo.inputLength = partnerPublicValueLength;
         ret                 = Csm_ProcessJobToCryIf(&jobInfo, jobId);
     }
+
+    Csm_ArtiApiStop(2, CSM_SID_JOBKEY_EX_SEC, ret);
+
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
+
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*************************************************************************/
 /**
  * @brief  Cancels the job processing from asynchronous or streaming jobs.
@@ -1138,8 +1465,10 @@ Std_ReturnType
 Std_ReturnType Csm_CancelJob(uint32 job, Crypto_OperationModeType mode)
 /* PRQA S 1503 -- */
 {
+    Csm_ArtiApiStart(3, CSM_SID_CANCELJOB, job, mode);
+
     const Csm_JobsCfgType* jobCfgPtr;
-    Crypto_JobType         jobInfo;
+    Crypto_JobType*        jobInfoPtr;
     Std_ReturnType         ret;
     uint32                 cryIfChId;
     uint32                 jobQueId;
@@ -1159,21 +1488,20 @@ Std_ReturnType Csm_CancelJob(uint32 job, Crypto_OperationModeType mode)
          */
         (void)(mode);
         SchM_Enter_Csm_Area_Csm();
-        jobCfgPtr           = &(Csm_JobCfg[job]);
-        jobQueId            = jobCfgPtr->queRef;
-        cryIfChId           = Csm_QueCfg[jobQueId].cryIfChRef;
-        cbkId               = jobCfgPtr->jobPrimitiveInfo->callbackId;
-        jobInfo.jobId       = jobCfgPtr->jobId;
-        jobInfo.jobPriority = jobCfgPtr->jobPriority;
+        jobCfgPtr  = &(Csm_JobCfg[job]);
+        jobQueId   = jobCfgPtr->queRef;
+        cryIfChId  = Csm_QueCfg[jobQueId].cryIfChRef;
+        jobInfoPtr = jobCfgPtr->jobPtr;
+        cbkId      = jobInfoPtr->jobPrimitiveInfo->callbackId;
         /*[SWS_Csm_01021]*/
-        ret = CryIf_CancelJob(cryIfChId, &jobInfo);
+        ret = CryIf_CancelJob(cryIfChId, jobInfoPtr);
         if (E_OK == ret)
         {
 #if (CSM_CBKFUNCS_NUM > 0u)
             if (Csm_CbkCfg[cbkId].cbkFnc != NULL_PTR)
             {
                 /*[SWS_Csm_01030]*/
-                Csm_CbkCfg[cbkId].cbkFnc(&jobInfo, CRYPTO_E_JOB_CANCELED);
+                Csm_CbkCfg[cbkId].cbkFnc(jobInfoPtr->jobId, CRYPTO_E_JOB_CANCELED);
             }
 #else
             (void)(cbkId);
@@ -1192,8 +1520,16 @@ Std_ReturnType Csm_CancelJob(uint32 job, Crypto_OperationModeType mode)
         (void)Csm_DequeueJobInQue(job, jobQueId);
         SchM_Exit_Csm_Area_Csm();
     }
+
+    Csm_ArtiApiStop(2, CSM_SID_CANCELJOB, ret);
+
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
+
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*************************************************************************/
 /**
  * @brief Retrieves the status of a key in the CSM module.
@@ -1203,6 +1539,8 @@ Std_ReturnType Csm_CancelJob(uint32 job, Crypto_OperationModeType mode)
 Std_ReturnType Csm_KeyGetStatus(uint32 keyId, Crypto_KeyStatusType* keyStatusPtr)
 /* PRQA S 1503 -- */
 {
+    Csm_ArtiApiStart(3, CSM_SID_KEY_GETSTATUS, keyId, keyStatusPtr);
+
     Std_ReturnType ret = E_OK;
 #if (CSM_DEV_ERROR_DETECT == STD_ON)
     if (keyId >= CSM_KEY_NUM)
@@ -1221,8 +1559,15 @@ Std_ReturnType Csm_KeyGetStatus(uint32 keyId, Crypto_KeyStatusType* keyStatusPtr
         ret = CryIf_KeyGetStatus(keyId, keyStatusPtr);
     }
 
+    Csm_ArtiApiStop(2, CSM_SID_KEY_GETSTATUS, ret);
+
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
+
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*************************************************************************/
 /**
  * @brief Custom service operation for the CSM module.
@@ -1246,22 +1591,57 @@ Std_ReturnType Csm_CustomService(
     Crypto_VerifyResultType* verifyPtr)
 /* PRQA S 1503,6040,3673 -- */
 {
-    (void)jobId;
-    (void)mode;
-    (void)targetKeyId;
-    (void)inputPtr;
-    (void)inputLength;
-    (void)secondaryInputPtr;
-    (void)secondaryInputLength;
-    (void)tertiaryInputPtr;
-    (void)tertiaryInputLength;
-    (void)outputPtr;
-    (void)outputLengthPtr;
-    (void)secondaryOutputPtr;
-    (void)secondaryOutputLengthPtr;
-    (void)verifyPtr;
-    return E_OK;
+    Csm_ArtiApiStart(
+        15,
+        CSM_SID_CUSTOM_SEV,
+        jobId,
+        mode,
+        targetKeyId,
+        inputPtr,
+        inputLength,
+        secondaryInputPtr,
+        secondaryInputLength,
+        tertiaryInputPtr,
+        tertiaryInputLength,
+        outputPtr,
+        outputLengthPtr,
+        secondaryOutputPtr,
+        secondaryOutputLengthPtr,
+        verifyPtr);
+
+    Crypto_JobPrimitiveInputOutputType customInfo;
+    Std_ReturnType                     ret;
+
+#if (CSM_DEV_ERROR_DETECT == STD_ON)
+    ret = Csm_ChkServiceParam(jobId, CSM_SID_CUSTOM_SEV);
+    if (E_OK == ret)
+#endif /*CSM_DEV_ERROR_DETECT == STD_ON*/
+    {
+        customInfo.mode                     = mode;
+        customInfo.targetCryIfKeyId         = targetKeyId;
+        customInfo.inputPtr                 = inputPtr;
+        customInfo.inputLength              = inputLength;
+        customInfo.secondaryInputPtr        = secondaryInputPtr;
+        customInfo.secondaryInputLength     = secondaryInputLength;
+        customInfo.tertiaryInputPtr         = tertiaryInputPtr;
+        customInfo.tertiaryInputLength      = tertiaryInputLength;
+        customInfo.outputPtr                = outputPtr;
+        customInfo.outputLengthPtr          = outputLengthPtr;
+        customInfo.secondaryOutputPtr       = secondaryOutputPtr;
+        customInfo.secondaryOutputLengthPtr = secondaryOutputLengthPtr;
+        customInfo.verifyPtr                = verifyPtr;
+        ret                                 = Csm_ProcessJobToCryIf(&customInfo, jobId);
+    }
+
+    Csm_ArtiApiStop(2, CSM_SID_CUSTOM_SEV, ret);
+
+    return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
+
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*************************************************************************/
 /**
  * @brief Custom synchronous operation for the CSM module.
@@ -1297,6 +1677,11 @@ Std_ReturnType Csm_CustomSync(
         secondaryOutputLengthPtr);
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
+
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*************************************************************************/
 /**
  * @brief  API to be called cyclically to process the requested jobs. The Csm_MainFunction
@@ -1307,49 +1692,44 @@ Std_ReturnType Csm_CustomSync(
 void Csm_MainFunction(void)
 /* PRQA S 3408 -- */
 {
+    Csm_ArtiApiStart(1, CSM_SID_MAINFUNCTION);
+
     /* PRQA S 3678 ++ */ /* VL_Csm_3678 */
     Csm_QueueChStatusType* queChRunPtr;
     /* PRQA S 3678 -- */
-    const Csm_JobsCfgType* jobCfgPtr;
-    Crypto_JobType         jobInfo;
-    uint32                 queIdx;
-    uint32                 cryIfChId;
-    uint32                 jobInQueId;
-    Std_ReturnType         ret;
+    uint32         queIdx;
+    uint32         cryIfChId;
+    uint32         jobInQueId;
+    Std_ReturnType ret;
 
     /*Deal asynchronous job in queue*/
     for (queIdx = 0u; queIdx < CSM_QUEUE_NUM; queIdx++) /* PRQA S 2877 */ /* VL_Csm_2877 */
     {
         queChRunPtr = &(Csm_QueueChRunStatus[queIdx]);
-        if ((queChRunPtr->dealSynJobIng) || (0uL == queChRunPtr->jobCnt))
+        if (0uL == queChRunPtr->jobCnt)
         {
             /*There is a job being executed in queue, the CSM shall disable
              * processing new jobs
              * Ref:[SWS_Csm_00037]*/
             continue; /* PRQA S 0770 */ /* VL_Csm_0770 */
         }
-        cryIfChId                     = Csm_QueCfg[queIdx].cryIfChRef;
-        jobInQueId                    = queChRunPtr->pendingJobQue->jobId;
-        jobCfgPtr                     = &(Csm_JobCfg[jobInQueId]);
-        jobInfo.jobRedirectionInfoRef = jobCfgPtr->inOutRedirtRef;
-        jobInfo.jobPriority           = jobCfgPtr->jobPriority;
-        jobInfo.jobPrimitiveInfo      = jobCfgPtr->jobPrimitiveInfo;
-        jobInfo.jobId                 = jobInQueId;
-        SchM_Enter_Csm_Area_Csm();
-        jobInfo.jobState = Csm_JobStates[jobInQueId];
-        SchM_Exit_Csm_Area_Csm();
-        jobInfo.jobPrimitiveInputOutput = queChRunPtr->pendingJobQue->jobPriInOut;
-        ret                             = CryIf_ProcessJob(cryIfChId, &jobInfo);
+        cryIfChId  = Csm_QueCfg[queIdx].cryIfChRef;
+        jobInQueId = queChRunPtr->pendingJobQue->jobId;
+        ret        = CryIf_ProcessJob(cryIfChId, Csm_JobCfg[jobInQueId].jobPtr);
         if (E_OK == ret)
         {
-            SchM_Enter_Csm_Area_Csm();
-            Csm_JobStates[jobInQueId] = CRYPTO_JOBSTATE_ACTIVE;
-            SchM_Exit_Csm_Area_Csm();
             /*Delete the job from queue*/
             (void)Csm_DequeueJobInQue(jobInQueId, queIdx);
         }
     }
+
+    Csm_ArtiApiStop(1, CSM_SID_MAINFUNCTION);
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
+
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*************************************************************************/
 /**
  * @brief Saves the context of a job in the CSM module.
@@ -1359,13 +1739,39 @@ void Csm_MainFunction(void)
 Std_ReturnType Csm_SaveContextJob(uint32 jobId, uint8* contextBufferPtr, uint32* contextBufferLengthPtr)
 /* PRQA S 1503 -- */
 {
-    Std_ReturnType retVal = E_OK;
-    (void)jobId;
-    *contextBufferPtr       = 0u;
-    *contextBufferLengthPtr = 0u;
+    Csm_ArtiApiStart(4, CSM_SID_SAVE_CONTEXT, jobId, contextBufferPtr, contextBufferLengthPtr);
 
-    return retVal;
+    Std_ReturnType ret;
+
+#if (CSM_DEV_ERROR_DETECT == STD_ON)
+    ret = Csm_ChkServiceParam(jobId, CSM_SID_SAVE_CONTEXT);
+    if (E_OK == ret)
+#endif /*CSM_DEV_ERROR_DETECT == STD_ON*/
+    {
+        if (Csm_JobCfg[jobId].jobPtr->jobState == CRYPTO_JOBSTATE_IDLE)
+        {
+            ret = E_NOT_OK;
+        }
+        else
+        {
+            /*Job is in the state "active".*/
+            Crypto_JobPrimitiveInputOutputType contextInfo;
+            contextInfo.mode            = CRYPTO_OPERATIONMODE_SAVE_CONTEXT;
+            contextInfo.outputPtr       = contextBufferPtr;
+            contextInfo.outputLengthPtr = contextBufferLengthPtr;
+            ret                         = Csm_ProcessJobToCryIf(&contextInfo, jobId);
+        }
+    }
+
+    Csm_ArtiApiStop(2, CSM_SID_SAVE_CONTEXT, ret);
+
+    return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
+
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*************************************************************************/
 /**
  * @brief Restores the context of a job in the CSM module.
@@ -1375,11 +1781,33 @@ Std_ReturnType Csm_SaveContextJob(uint32 jobId, uint8* contextBufferPtr, uint32*
 Std_ReturnType Csm_RestoreContextJob(uint32 jobId, const uint8* contextBufferPtr, uint32 contextBufferLength)
 /* PRQA S 1503 -- */
 {
-    Std_ReturnType retVal = E_OK;
-    (void)jobId;
-    (void)contextBufferPtr;
-    (void)contextBufferLength;
-    return retVal;
+    Csm_ArtiApiStart(4, CSM_SID_RESTORE_CONTEXT, jobId, contextBufferPtr, contextBufferLength);
+
+    Std_ReturnType ret;
+
+#if (CSM_DEV_ERROR_DETECT == STD_ON)
+    ret = Csm_ChkServiceParam(jobId, CSM_SID_RESTORE_CONTEXT);
+    if (E_OK == ret)
+#endif /*CSM_DEV_ERROR_DETECT == STD_ON*/
+    {
+        if (Csm_JobCfg[jobId].jobPtr->jobState == CRYPTO_JOBSTATE_IDLE)
+        {
+            ret = E_NOT_OK;
+        }
+        else
+        {
+            /*Job is in the state "active".*/
+            Crypto_JobPrimitiveInputOutputType contextInfo;
+            contextInfo.mode        = CRYPTO_OPERATIONMODE_RESTORE_CONTEXT;
+            contextInfo.inputPtr    = contextBufferPtr;
+            contextInfo.inputLength = contextBufferLength;
+            ret                     = Csm_ProcessJobToCryIf(&contextInfo, jobId);
+        }
+    }
+
+    Csm_ArtiApiStop(2, CSM_SID_RESTORE_CONTEXT, ret);
+
+    return ret;
 }
 #define CSM_STOP_SEC_CODE
 #include "Csm_MemMap.h"
@@ -1399,20 +1827,15 @@ static Std_ReturnType Csm_ProcessJobToCryIf(Crypto_JobPrimitiveInputOutputType* 
 /* PRQA S 3673 -- */
 /* PRQA S 1503, 6010, 6030, 5017 -- */
 {
-    const Csm_JobsCfgType* jobCfgPtr;
-    Csm_QueueChStatusType* queChRunPtr;
-    uint32                 queueRef;
-    uint32                 channelId;
-    Crypto_JobStateType    jobState;
-    Crypto_ProcessingType  processMode;
-    Std_ReturnType         ret = E_OK;
-    Crypto_JobType         job;
+    const Csm_JobsCfgType*       jobCfgPtr;
+    const Csm_QueueChStatusType* queChRunPtr;
+    uint32                       queueRef;
+    uint32                       channelId;
+    Crypto_ProcessingType        processMode;
+    Std_ReturnType               ret = E_OK;
 
     jobCfgPtr = &(Csm_JobCfg[jobId]);
-    SchM_Enter_Csm_Area_Csm();
-    jobState = Csm_JobStates[jobId];
-    SchM_Exit_Csm_Area_Csm();
-    if ((jobCfgPtr->inOutRedirtRef != NULL_PTR)
+    if ((jobCfgPtr->jobPtr->jobRedirectionInfoRef != NULL_PTR)
         && ((jobPrimInOut->inputLength != 0uL) || (*(jobPrimInOut->outputLengthPtr) != 0uL)))
     {
         /*[SWS_Csm_91014]*/
@@ -1420,61 +1843,32 @@ static Std_ReturnType Csm_ProcessJobToCryIf(Crypto_JobPrimitiveInputOutputType* 
     }
     else
     {
-        job.jobRedirectionInfoRef   = jobCfgPtr->inOutRedirtRef;
-        job.jobPriority             = jobCfgPtr->jobPriority;
-        job.jobPrimitiveInfo        = jobCfgPtr->jobPrimitiveInfo;
-        job.jobId                   = jobId;
-        job.jobState                = jobState;
-        job.jobPrimitiveInputOutput = *jobPrimInOut;
+        Crypto_OperationModeType preMode = jobCfgPtr->jobPtr->jobPrimitiveInputOutput.mode;
+        SchM_Enter_Csm_Area_Csm();
+        jobCfgPtr->jobPtr->jobPrimitiveInputOutput = *jobPrimInOut;
+        jobCfgPtr->jobPtr->jobPrimitiveInputOutput.mode |= preMode;
+        SchM_Exit_Csm_Area_Csm();
         /*Job belong to queue*/
         queueRef    = jobCfgPtr->queRef;
         channelId   = Csm_QueCfg[queueRef].cryIfChRef;
-        processMode = jobCfgPtr->jobPrimitiveInfo->processingType;
-        if (CRYPTO_JOBSTATE_ACTIVE == jobState)
+        processMode = jobCfgPtr->jobPtr->jobPrimitiveInfo->processingType;
+
+        /*Job in CRYPTO_JOBSTATE_ACTIVE state*/
+        if (CRYPTO_JOBSTATE_ACTIVE == jobCfgPtr->jobPtr->jobState)
         {
-            ret = CryIf_ProcessJob(channelId, &job);
-            if (CRYPTO_PROCESSING_SYNC == processMode)
-            {
-                /*1.CryIf_ProcessJob return negative response*/
-                SchM_Enter_Csm_Area_Csm();
-                if (ret != E_OK)
-                {
-                    Csm_JobStates[jobId] = CRYPTO_JOBSTATE_IDLE;
-                }
-                /*2.Streaming approach:Start->Update->Finish or single call finish*/
-                /* PRQA S 1317,4522,1823 ++ */ /* VL_Csm_1317,VL_Csm_4522,VL_Csm_1823 */
-                else if ((jobPrimInOut->mode & CRYPTO_OPERATIONMODE_FINISH) != 0u)
-                /* PRQA S 1317,4522,1823 -- */
-                {
-                    Csm_JobStates[jobId] = CRYPTO_JOBSTATE_IDLE;
-                }
-                else
-                {
-                    /*Do nothing*/
-                }
-                SchM_Exit_Csm_Area_Csm();
-            }
+            ret = CryIf_ProcessJob(channelId, jobCfgPtr->jobPtr);
         }
-        else /*Job in CRYPTO_JOBSTATE_IDLE state*/
+
+        /*Job in CRYPTO_JOBSTATE_IDLE state*/
+        else
         {
             queChRunPtr = &(Csm_QueueChRunStatus[queueRef]);
             if (CRYPTO_PROCESSING_SYNC == processMode)
             {
                 /*Is the job priority higher than the highest in the queue?*/
-                if (((jobCfgPtr->jobPriority > queChRunPtr->maxPriority)) || (0uL == queChRunPtr->jobCnt))
+                if (((jobCfgPtr->jobPtr->jobPriority > queChRunPtr->maxPriority)) || (0uL == queChRunPtr->jobCnt))
                 {
-                    queChRunPtr->dealSynJobIng = (boolean)TRUE;
-                    ret                        = CryIf_ProcessJob(channelId, &job);
-                    /* PRQA S 1317,4522,1823 ++ */ /* VL_Csm_1317,VL_Csm_4522,VL_Csm_1823 */
-                    if ((E_OK == ret) && (0u == (jobPrimInOut->mode & CRYPTO_OPERATIONMODE_FINISH)))
-                    /* PRQA S 1317,4522,1823 -- */
-                    {
-                        /*The job has not been completed yet*/
-                        SchM_Enter_Csm_Area_Csm();
-                        Csm_JobStates[jobId] = CRYPTO_JOBSTATE_ACTIVE;
-                        SchM_Exit_Csm_Area_Csm();
-                    }
-                    queChRunPtr->dealSynJobIng = (boolean)FALSE;
+                    ret = CryIf_ProcessJob(channelId, jobCfgPtr->jobPtr);
                 }
                 else
                 {
@@ -1488,21 +1882,11 @@ static Std_ReturnType Csm_ProcessJobToCryIf(Crypto_JobPrimitiveInputOutputType* 
                 if (0uL == queChRunPtr->jobCnt)
                 {
                     /*process job immediately*/
-                    ret = CryIf_ProcessJob(channelId, &job);
-                    if (E_OK == ret)
-                    {
-                        SchM_Enter_Csm_Area_Csm();
-                        Csm_JobStates[jobId] = CRYPTO_JOBSTATE_ACTIVE;
-                        SchM_Exit_Csm_Area_Csm();
-                    }
-                    else if (CRYPTO_E_BUSY == ret)
+                    ret = CryIf_ProcessJob(channelId, jobCfgPtr->jobPtr);
+                    if (CRYPTO_E_BUSY == ret)
                     {
                         /*Enqueue job in CSM queue*/
                         (void)Csm_EnqueueJobToQue(jobId, queueRef, *jobPrimInOut);
-                    }
-                    else
-                    {
-                        /*Do nothing*/
                     }
                 }
                 else
@@ -1526,12 +1910,16 @@ static Std_ReturnType Csm_ProcessJobToCryIf(Crypto_JobPrimitiveInputOutputType* 
     }
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 /*************************************************************************/
 /**
  * @brief Enqueue job to CSM queue
  */
 /*************************************************************************/
 /* PRQA S 1503, 6010, 6030, 5017 ++ */ /* VL_QAC_NoUsedApi, VL_MTR_Csm_STCYC, VL_MTR_Csm_STMIF, VL_Csm_5017 */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 static Std_ReturnType
     Csm_EnqueueJobToQue(uint32 jobId, uint32 queId, Crypto_JobPrimitiveInputOutputType jobPriInOutInfo)
 /* PRQA S 1503, 6010, 6030, 5017 -- */
@@ -1551,7 +1939,7 @@ static Std_ReturnType
 
     queChRunPtr  = &(Csm_QueueChRunStatus[queId]);
     jobCfgPtr    = &(Csm_JobCfg[jobId]);
-    itemPriority = jobCfgPtr->jobPriority;
+    itemPriority = jobCfgPtr->jobPtr->jobPriority;
     curNode      = &(queChRunPtr->pendingJobQue);
     pendingNode  = queChRunPtr->pendingJobQue;
     /*Update the max priority in queue*/
@@ -1634,6 +2022,11 @@ static Std_ReturnType
     }
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
+
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*************************************************************************/
 /**
  * @brief Dequeue job to CSM queue
@@ -1651,46 +2044,54 @@ static Std_ReturnType Csm_DequeueJobInQue(uint32 jobId, uint32 queId)
     Std_ReturnType ret = E_NOT_OK;
 
     queChRunPtr = &(Csm_QueueChRunStatus[queId]);
-    curNode     = &(queChRunPtr->pendingJobQue);
-    if ((*curNode)->jobId == jobId)
+    if (queChRunPtr->pendingJobQue != NULL_PTR)
     {
-        /*Update the max priority in queue*/
-        if ((*curNode)->next != NULL_PTR)
+        curNode = &(queChRunPtr->pendingJobQue);
+        if ((*curNode)->jobId == jobId)
         {
-            queChRunPtr->maxPriority = (*curNode)->next->jobPriority;
+            /*Update the max priority in queue*/
+            if ((*curNode)->next != NULL_PTR)
+            {
+                queChRunPtr->maxPriority = (*curNode)->next->jobPriority;
+            }
+            else
+            {
+                queChRunPtr->maxPriority = CSM_INVALID_PRIORITY;
+            }
+            SchM_Enter_Csm_Area_Csm();
+            Csm_JobQueBufUsed[(*curNode)->bufPos] = (boolean)FALSE;
+            SchM_Exit_Csm_Area_Csm();
+            (*curNode) = (*curNode)->next;
+            queChRunPtr->jobCnt--;
+            ret = E_OK;
         }
         else
         {
-            queChRunPtr->maxPriority = CSM_INVALID_PRIORITY;
-        }
-        SchM_Enter_Csm_Area_Csm();
-        Csm_JobQueBufUsed[(*curNode)->bufPos] = (boolean)FALSE;
-        SchM_Exit_Csm_Area_Csm();
-        (*curNode) = (*curNode)->next;
-        queChRunPtr->jobCnt--;
-        ret = E_OK;
-    }
-    else
-    {
-        for (idx = CSM_CONST_1; idx < queChRunPtr->jobCnt; idx++)
-        {
-            preNode = curNode;
-            temNode = (*curNode)->next;
-            /*Delete node from link list*/
-            if (temNode->jobId == jobId)
+            for (idx = CSM_CONST_1; idx < queChRunPtr->jobCnt; idx++)
             {
-                SchM_Enter_Csm_Area_Csm();
-                Csm_JobQueBufUsed[temNode->bufPos] = (boolean)FALSE;
-                SchM_Exit_Csm_Area_Csm();
-                (*preNode)->next = temNode->next;
-                queChRunPtr->jobCnt--;
-                ret = E_OK;
-                break;
+                preNode = curNode;
+                temNode = (*curNode)->next;
+                /*Delete node from link list*/
+                if (temNode->jobId == jobId)
+                {
+                    SchM_Enter_Csm_Area_Csm();
+                    Csm_JobQueBufUsed[temNode->bufPos] = (boolean)FALSE;
+                    SchM_Exit_Csm_Area_Csm();
+                    (*preNode)->next = temNode->next;
+                    queChRunPtr->jobCnt--;
+                    ret = E_OK;
+                    break;
+                }
             }
         }
     }
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
+
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*************************************************************************/
 /**
  * @brief Find idle buffer in CSM queue
@@ -1721,6 +2122,11 @@ static Csm_JobInQueuePtrType Csm_FindIdleQueue(uint32* bufPos)
     }
     return queBuf;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
+
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 /*************************************************************************/
 /**
  * @brief Check Crypto_OperationModeType
@@ -1738,8 +2144,8 @@ static Std_ReturnType Csm_CheckOperaMode(Crypto_OperationModeType mode)
     }
     return ret;
 }
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 /* PRQA S 3432 -- */
 /* PRQA S 1503 -- */
 /* PRQA S 1532 -- */
-#define CSM_STOP_SEC_CODE
-#include "Csm_MemMap.h"

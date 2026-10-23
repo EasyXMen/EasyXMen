@@ -134,6 +134,8 @@ DOIP_LOCAL_INLINE boolean DOIP_ANC_PCCON_CFG(uint8 id);
  */
 DOIP_LOCAL_INLINE const DoIP_PBConnectionCfgType* DOIP_ANC_PBCON_CFG(uint8 id); /* PRQA S 5016 */ /* VL_DoIP_5016 */
 
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief       Get EID.
  * @param[in]   soConId: Used for call SoAd_GetPhysAddr.
@@ -144,8 +146,12 @@ DOIP_LOCAL_INLINE const DoIP_PBConnectionCfgType* DOIP_ANC_PBCON_CFG(uint8 id); 
  * @trace       CPD-PLACEHOLDER
  */
 DOIP_LOCAL void DoIP_GetEid(SoAd_SoConIdType soConId, uint8 buf[]);
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
 #if (TRUE != DOIP_USE_EID_AS_GID)
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
+
 /**
  * @brief       Get GID.
  * @param[out]  buf: Used for save GID.
@@ -155,7 +161,11 @@ DOIP_LOCAL void DoIP_GetEid(SoAd_SoConIdType soConId, uint8 buf[]);
  * @trace       CPD-PLACEHOLDER
  */
 DOIP_LOCAL void DoIP_GetGid(uint8 buf[]);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
 #endif
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Get further action byte from configuration.
@@ -166,6 +176,10 @@ DOIP_LOCAL void DoIP_GetGid(uint8 buf[]);
  * @trace       CPD-PLACEHOLDER
  */
 DOIP_LOCAL void DoIP_GetFurtherActionByteFromCfg(uint8 buf[]);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Get further action byte.
@@ -176,6 +190,8 @@ DOIP_LOCAL void DoIP_GetFurtherActionByteFromCfg(uint8 buf[]);
  * @trace       CPD-PLACEHOLDER
  */
 DOIP_LOCAL void DoIP_GetFurtherActionByte(uint8 buf[]);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Get index of PC configuration.
@@ -219,6 +235,8 @@ DOIP_LOCAL_INLINE Std_ReturnType DoIP_GetUdpConnStatusIndex(SoAd_SoConIdType id,
  */
 DOIP_LOCAL_INLINE uint8 DoIP_CompareData(const uint8* first, const uint8* second, uint32 len);
 
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief       Check vehicle identification request message has valid payload len.
  * @param[in]   payloadLen: Paylod len field of vehicle identification request message.
@@ -231,6 +249,10 @@ DOIP_LOCAL_INLINE uint8 DoIP_CompareData(const uint8* first, const uint8* second
  * @trace       CPD-PLACEHOLDER
  */
 DOIP_LOCAL boolean DoIP_IsVehicleIdReqHasValidPayloadLen(uint32 payloadLen, uint16 type);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Check whether should send vehicle identification response message.
@@ -245,6 +267,10 @@ DOIP_LOCAL boolean DoIP_IsVehicleIdReqHasValidPayloadLen(uint32 payloadLen, uint
  * @trace       CPD-PLACEHOLDER
  */
 DOIP_LOCAL boolean DoIP_IsShouldSendVehicleIdentificationRsp(SoAd_SoConIdType soConId, const uint8* buf, uint16 type);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Handle vehicle identication request.
@@ -264,6 +290,10 @@ DOIP_LOCAL void DoIP_HandleVehicleIdReq(
     uint32           payloadLen,
     const uint8*     buf,
     uint16           type);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Send vehicle identification response message.
@@ -274,6 +304,10 @@ DOIP_LOCAL void DoIP_HandleVehicleIdReq(
  * @trace       CPD-PLACEHOLDER
  */
 DOIP_LOCAL void DoIP_SendVehicleIdentificationRsp(uint16 soadTxPduRef);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Handle entity status request.
@@ -286,6 +320,10 @@ DOIP_LOCAL void DoIP_SendVehicleIdentificationRsp(uint16 soadTxPduRef);
  * @trace       CPD-PLACEHOLDER
  */
 DOIP_LOCAL void DoIP_HandleEntityStatusReq(PduIdType soadTxPduRef, SoAd_SoConIdType soConId, uint32 payloadLen);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Send entity status response message.
@@ -296,6 +334,10 @@ DOIP_LOCAL void DoIP_HandleEntityStatusReq(PduIdType soadTxPduRef, SoAd_SoConIdT
  * @trace       CPD-PLACEHOLDER
  */
 DOIP_LOCAL void DoIP_SendEntityStatusRsp(PduIdType soadTxPduRef);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Handle power mode request.
@@ -308,6 +350,10 @@ DOIP_LOCAL void DoIP_SendEntityStatusRsp(PduIdType soadTxPduRef);
  * @trace       CPD-PLACEHOLDER
  */
 DOIP_LOCAL void DoIP_HandlePowerModeReq(PduIdType soadTxPduRef, SoAd_SoConIdType soConId, uint32 payloadLen);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Send power mode response message.
@@ -318,6 +364,10 @@ DOIP_LOCAL void DoIP_HandlePowerModeReq(PduIdType soadTxPduRef, SoAd_SoConIdType
  * @trace       CPD-PLACEHOLDER
  */
 DOIP_LOCAL void DoIP_SendPowerModeInfoRsp(PduIdType soadTxPduRef);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /**
  * @brief       Check whether should send vehicle announcement message.
@@ -330,6 +380,8 @@ DOIP_LOCAL void DoIP_SendPowerModeInfoRsp(PduIdType soadTxPduRef);
  * @trace       CPD-PLACEHOLDER
  */
 DOIP_LOCAL boolean DoIP_IsSendAncMsg(DoIP_VehicleAncConnStatusType* ancConnStatus);
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
 
 /* ============================================ internal data definitions =========================================== */
 
@@ -353,11 +405,10 @@ DoIP_VehicleAncConnStatusType DoIP_AncConnStatus[DOIP_ANNOUNCEMENT_MAX_CONNECTIO
 
 /* ========================================== external function definitions ========================================= */
 
-#define DOIP_START_SEC_CODE
-#include "DoIP_MemMap.h"
-
 /* ----------------------------------------- UDP connect & connect's status ----------------------------------------- */
 
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Open or close Udp connection.
  */
@@ -379,7 +430,10 @@ boolean DoIP_SwitchUdp(const boolean* active) /* PRQA S 1532 */ /* VL_DoIP_RefeO
 
     return ret;
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Open or close announcement connection.
  */
@@ -401,7 +455,10 @@ boolean DoIP_SwitchAnc(const boolean* active) /* PRQA S 1532 */ /* VL_DoIP_RefeO
 
     return ret;
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Notify status of UDP.
  */
@@ -437,7 +494,10 @@ void DoIP_SoConModeChgUdp(SoAd_SoConIdType soConId, SoAd_SoConModeType mode)
         }
     }
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Notify status of announcement connection.
  */
@@ -475,7 +535,10 @@ void DoIP_SoConModeChgAnc(SoAd_SoConIdType soConId, SoAd_SoConModeType mode)
         }
     }
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Reset of DoIP_UdpConnStatus.
  */
@@ -486,9 +549,12 @@ void DoIP_ResetUdpConnStatus(uint8 index)
     DoIP_UdpConnStatus[index].SoConState = SOAD_SOCON_OFFLINE;
     /* PRQA S 2844 -- */
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
 /* -----------------------------------------  send & rcv ----------------------------------------- */
 
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Send UDP NACK.
  */
@@ -515,7 +581,10 @@ void DoIP_SendUdpNack(PduIdType soadTxPduRef, uint8 nack)
 
     (void)SoAd_IfTransmit(soadTxPduRef, &pduInfo);
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Get SoadTxPduRef and SoConId.
  */
@@ -545,7 +614,10 @@ Std_ReturnType DoIP_GetSoAdTxPduRefAndSoConId(PduIdType soadRxPduId, uint16* soa
 
     return ret;
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Get SoadTxPduRef and SoConId.
  */
@@ -580,6 +652,10 @@ Std_ReturnType DoIP_CheckUdpMsgPayload(const PduInfoType* pduInfoPtr, uint16 soa
 
     return ret;
 }
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /* PRQA S 4461 -- */
 /**
  * @brief Handle received IF message.
@@ -634,9 +710,12 @@ void DoIP_HandleIfMsg(
         break;
     }
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
 /* -----------------------------------------  timer ----------------------------------------- */
 
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Handle timers.
  */
@@ -657,7 +736,8 @@ void DoIP_HandleVehicleAncTimeout(void) /* PRQA S 1532 */ /* VL_DoIP_RefeOneFile
         }
     }
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
 /* ========================================== internal function definitions ========================================= */
 
 /* ----------------------------------------- cfg ----------------------------------------- */
@@ -709,7 +789,8 @@ DOIP_LOCAL_INLINE const DoIP_PBConnectionCfgType* DOIP_ANC_PBCON_CFG(uint8 id)
     return &(DoIP_PBCfgPtr->ConnsCfg->AncConnCfgArray[id]);
     /* PRQA S 2814,2824 -- */
 }
-
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief       Get EID.
  */
@@ -731,8 +812,11 @@ DOIP_LOCAL void DoIP_GetEid(SoAd_SoConIdType soConId, uint8 buf[]) /* PRQA S 320
 
 #endif
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
 #if (TRUE != DOIP_USE_EID_AS_GID)
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Get GID.
  */
@@ -778,8 +862,11 @@ DOIP_LOCAL void DoIP_GetGid(uint8 buf[])
     }
 #endif
 }
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
 #endif
-
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Get further action byte from configuration.
  */
@@ -824,7 +911,10 @@ DOIP_LOCAL void DoIP_GetFurtherActionByteFromCfg(uint8 buf[]) /* PRQA S 3450 */ 
         }
     }
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Get further action byte.
  */
@@ -847,7 +937,8 @@ DOIP_LOCAL void DoIP_GetFurtherActionByte(uint8 buf[])
         }
     }
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Get index of PC configuration.
  */
@@ -874,9 +965,7 @@ DOIP_LOCAL_INLINE Std_ReturnType DoIP_GetUdpConnIndex(PduIdType soadRxPduId, uin
 
     return ret;
 }
-
 /* ----------------------------------------- connect status ----------------------------------------- */
-
 /**
  * @brief Get index of DoIP_UdpConnStatus.
  */
@@ -898,9 +987,7 @@ DOIP_LOCAL_INLINE Std_ReturnType DoIP_GetUdpConnStatusIndex(SoAd_SoConIdType id,
 
     return ret;
 }
-
 /* ----------------------------------------- communication ----------------------------------------- */
-
 /**
  * @brief Compare data.
  */
@@ -921,7 +1008,8 @@ DOIP_LOCAL_INLINE uint8 DoIP_CompareData(const uint8* first, const uint8* second
 
     return ret;
 }
-
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Check vehicle identification request message has valid payload len.
  */
@@ -958,7 +1046,10 @@ DOIP_LOCAL boolean DoIP_IsVehicleIdReqHasValidPayloadLen(uint32 payloadLen, uint
 
     return ret;
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Check whether should send vehicle identification response message.
  */
@@ -1005,7 +1096,10 @@ DOIP_LOCAL boolean DoIP_IsShouldSendVehicleIdentificationRsp(SoAd_SoConIdType so
 
     return ret;
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Handle vehicle identication request.
  */
@@ -1029,7 +1123,10 @@ DOIP_LOCAL void DoIP_HandleVehicleIdReq(
         DoIP_CloseSoCon(soConId, TRUE);
     }
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Send vehicle identification response message.
  */
@@ -1122,8 +1219,12 @@ DOIP_LOCAL void DoIP_SendVehicleIdentificationRsp(uint16 soadTxPduRef)
 
     (void)SoAd_IfTransmit(soadTxPduRef, &pduInfo); /* PRQA S 4461 */ /* VL_DoIP_4461 */
 }
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
 /* PRQA S 6070 -- */
 
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Handle entity status request.
  */
@@ -1139,7 +1240,10 @@ DOIP_LOCAL void DoIP_HandleEntityStatusReq(PduIdType soadTxPduRef, SoAd_SoConIdT
         DoIP_CloseSoCon(soConId, TRUE);
     }
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Send entity status response message.
  */
@@ -1186,7 +1290,10 @@ DOIP_LOCAL void DoIP_SendEntityStatusRsp(PduIdType soadTxPduRef)
 
     (void)SoAd_IfTransmit(soadTxPduRef, &pduInfo);
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Handle power mode request.
  */
@@ -1202,7 +1309,10 @@ DOIP_LOCAL void DoIP_HandlePowerModeReq(PduIdType soadTxPduRef, SoAd_SoConIdType
         DoIP_CloseSoCon(soConId, TRUE);
     }
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Send power mode response message.
  */
@@ -1235,7 +1345,10 @@ DOIP_LOCAL void DoIP_SendPowerModeInfoRsp(PduIdType soadTxPduRef)
 
     (void)SoAd_IfTransmit(soadTxPduRef, &pduInfo);
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Check whether should send vehicle announcement message.
  */

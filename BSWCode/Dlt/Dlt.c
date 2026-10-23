@@ -1,4 +1,3 @@
-/* PRQA S 3108++ */
 /**
  * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
@@ -98,6 +97,7 @@
 #if (DLT_NVM_RAM_SUPPORT == STD_ON)
 #include "Nvm.h"
 #endif
+#include "Dlt_Arti.h"
 
 /*******************************************************************************
 **                       Version  Check                                       **
@@ -119,104 +119,50 @@
 **                      Private Variable Definitions                          **
 *******************************************************************************/
 
-#define DLT_START_SEC_VAR_NO_INIT_UNSPECIFIED
+#define DLT_START_SEC_VAR_CLEARED_UNSPECIFIED
 #include "Dlt_MemMap.h"
 VAR(Dlt_RunTimeType, AUTOMATIC) Dlt_RunTime;
-#define DLT_STOP_SEC_VAR_NO_INIT_UNSPECIFIED
+#define DLT_STOP_SEC_VAR_CLEARED_UNSPECIFIED
 #include "Dlt_MemMap.h"
 
-#define DLT_START_SEC_VAR_NO_INIT_16BIT
+#define DLT_START_SEC_VAR_CLEARED_16
 #include "Dlt_MemMap.h"
 static VAR(uint16, AUTOMATIC) Dlt_StartUpDelayTimer;
-#define DLT_STOP_SEC_VAR_NO_INIT_16BIT
+#define DLT_STOP_SEC_VAR_CLEARED_16
 #include "Dlt_MemMap.h"
 
-#define DLT_START_SEC_VAR_POWER_ON_INIT_8BIT
+#define DLT_START_SEC_VAR_INIT_8
 #include "Dlt_MemMap.h"
 #if (STD_OFF == DLT_DEV_ERROR_DETECT)
 static
 #endif
     VAR(Dlt_ModeStateType, AUTOMATIC) Dlt_ModeState = DLT_STATE_UNINIT;
-#define DLT_STOP_SEC_VAR_POWER_ON_INIT_8BIT
+#define DLT_STOP_SEC_VAR_INIT_8
 #include "Dlt_MemMap.h"
 
 #if ((DLT_GPT_SUPPORT == STD_OFF) && ((DLT_TIME_STAMP_SUPPORT == STD_ON)))
-#define DLT_START_SEC_VAR_NO_INIT_UNSPECIFIED
+#define DLT_START_SEC_VAR_CLEARED_UNSPECIFIED
 #include "Dlt_MemMap.h"
 static StbM_TimeTupleType Dlt_TimeStamp;
-#define DLT_STOP_SEC_VAR_NO_INIT_UNSPECIFIED
+#define DLT_STOP_SEC_VAR_CLEARED_UNSPECIFIED
 #include "Dlt_MemMap.h"
 #endif
 
 /* PRQA S 0791++ */ /* MISRA Rule 5.4 */
-#define DLT_START_SEC_VAR_POWER_ON_INIT_UNSPECIFIED
+#define DLT_START_SEC_VAR_CLEARED_UNSPECIFIED
 #include "Dlt_MemMap.h"
-P2CONST(Dlt_ConfigType, AUTOMATIC, DLT_APPL_CONST) Dlt_ConfigPtr = NULL_PTR;
-#define DLT_STOP_SEC_VAR_POWER_ON_INIT_UNSPECIFIED
+P2CONST(Dlt_ConfigType, AUTOMATIC, DLT_APPL_CONST) Dlt_ConfigPtr;
+#define DLT_STOP_SEC_VAR_CLEARED_UNSPECIFIED
 #include "Dlt_MemMap.h"
 /* PRQA S 0791-- */ /* MISRA Rule 5.4 */
 
 #if (DLT_CHANNEL_NUM > 0)
-#define DLT_START_SEC_VAR_NO_INIT_UNSPECIFIED
+#define DLT_START_SEC_VAR_CLEARED_UNSPECIFIED
 #include "Dlt_MemMap.h"
 VAR(Dlt_ChannelType, AUTOMATIC) Dlt_Channel[DLT_CHANNEL_NUM];
-#define DLT_STOP_SEC_VAR_NO_INIT_UNSPECIFIED
+#define DLT_STOP_SEC_VAR_CLEARED_UNSPECIFIED
 #include "Dlt_MemMap.h"
 #endif
-
-#if ((DLT_DET_FORWARD_TO_DET_SUPPORT == STD_ON) && (DLT_SWC_MAX_CONTEXT_NUM > 0))
-
-/* PRQA S 3218++ */ /* MISRA Rule 8.9 */
-#define DLT_START_SEC_CONST_32BIT
-#include "Dlt_MemMap.h"
-/* DET application ID */
-static CONST(uint32, DLT_CONST) Dlt_Det_ApplId = 0x44455400; /* DET  */ /* PRQA S 3218 */ /* MISRA Rule 8.9 */
-#define DLT_STOP_SEC_CONST_32BIT
-#include "Dlt_MemMap.h"
-
-#define DLT_START_SEC_CONST_32BIT
-#include "Dlt_MemMap.h"
-/* DET context ID */
-static CONST(uint32, DLT_CONST) Dlt_Det_ContextId = 0x53544400; /* STD  */ /* PRQA S 3218 */ /* MISRA Rule 8.9 */
-#define DLT_STOP_SEC_CONST_32BIT
-#include "Dlt_MemMap.h"
-/* PRQA S 3218-- */ /* MISRA Rule 8.9 */
-
-/* PRQA S 3218++ */ /* MISRA Rule 8.9 */
-#define DLT_START_SEC_CONST_8BIT
-#include "Dlt_MemMap.h"
-#if (DLT_DET_APPLID_DESC_LENGTH > 0)
-/* DET application ID description */
-static const uint8 Dlt_Det_ApplId_Desc[DLT_DET_APPLID_DESC_LENGTH] = {
-    /* D,    E,    T,     ,    E,    v,    e,    n,    t, NULL */
-    0x44,
-    0x45,
-    0x54,
-    0x20,
-    0x45,
-    0x76,
-    0x65,
-    0x6E,
-    0x74,
-    0x00 /* DET Event */
-};
-#endif
-
-#if (DLT_DET_CONTEXTID_DESC_LENGTH > 0)
-/* DET context ID description */
-static const uint8 Dlt_Det_ContextId_Desc[DLT_DET_CONTEXTID_DESC_LENGTH] = {
-    /* S,    T,    D, NULL */
-    0x53,
-    0x54,
-    0x44,
-    0x00 /* STD */
-};
-#endif
-#define DLT_STOP_SEC_CONST_8BIT
-#include "Dlt_MemMap.h"
-/* PRQA S 3218-- */ /* MISRA Rule 8.9 */
-
-#endif /* DLT_DET_FORWARD_TO_DET_SUPPORT == STD_ON && DLT_SWC_MAX_CONTEXT_NUM > 0 */
 
 /*******************************************************************************
 **                      Private Function Definitions                          **
@@ -225,31 +171,91 @@ static const uint8 Dlt_Det_ContextId_Desc[DLT_DET_CONTEXTID_DESC_LENGTH] = {
 #include "Dlt_MemMap.h"
 static FUNC(boolean, DLT_CODE)
     Dlt_GetSwcTraceStatus(uint16 SwcIndex, P2CONST(Dlt_MessageTraceInfoType, AUTOMATIC, DLT_APPL_CONST) traceInfo);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 static FUNC(Dlt_MessageLogLevelType, DLT_CODE)
     Dlt_GetSwcLogLevel(uint16 SwcIndex, P2CONST(Dlt_MessageLogInfoType, AUTOMATIC, DLT_APPL_CONST) logInfo);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 static FUNC(boolean, DLT_CODE) Dlt_GetChannelTraceStatus(uint16 ChannelIndex);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 static FUNC(Dlt_MessageLogLevelType, DLT_CODE) Dlt_GetChannelLogLevel(uint16 ChannelIndex);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 static FUNC(void, DLT_CODE) Dlt_MoveWriteIndexCopy(uint16 ChannelIndex, uint8 value);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 static FUNC(boolean, DLT_CODE)
     Dlt_CompareLogLevel(Dlt_MessageLogLevelType CurrentLogLevel, Dlt_MessageLogLevelType MessageLogLevel);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 static FUNC(boolean, DLT_CODE) Dlt_CompareTraceStatus(boolean CurrentLogLevel);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 static FUNC(void, DLT_CODE) Dlt_Tx_Channel(uint16 ChannelIndex);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 static FUNC(void, DLT_CODE) Dlt_SendOverFlow(uint16 ChannelIndex);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 static FUNC(void, DLT_APPL_CODE) Dlt_MoveChannelRef(uint16* DltLogChannelRef, uint16 Length);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_InterSendTraceMessage(
     Dlt_SessionIDType sessionId,
     P2CONST(Dlt_MessageTraceInfoType, AUTOMATIC, DLT_APPL_CONST) traceInfo,
     P2CONST(uint8, AUTOMATIC, DLT_APPL_CONST) traceData,
     uint16 traceDataLength);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_InterSendLogMessage(
     Dlt_SessionIDType sessionId,
     P2CONST(Dlt_MessageLogInfoType, AUTOMATIC, DLT_APPL_CONST) logInfo,
     P2CONST(uint8, AUTOMATIC, DLT_APPL_CONST) logData,
     uint16 logDataLength);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 static FUNC(void, DLT_CODE) Dlt_Tx_RemoveBuffer(uint16 ChannelIndex, uint32 RemoveOffset, uint32 Length);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 static FUNC(void, DLT_CODE) Dlt_MemSet(uint8* Dest, uint8 Value, uint32 Size);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 static FUNC(void, DLT_CODE)
     Dlt_CreateStandardHeader(const Dlt_CreateStandardHeaderInfoTypes* CreateStandardHeader, uint16* CorrectionLength);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 static FUNC(void, DLT_CODE) Dlt_CreateExtendedHeader(const Dlt_CreateExtendedHeaderInfoTypes* CreateExtendedHeader);
 #define DLT_STOP_SEC_CODE
 #include "Dlt_MemMap.h"
@@ -270,6 +276,7 @@ static FUNC(void, DLT_CODE) Dlt_CreateExtendedHeader(const Dlt_CreateExtendedHea
  */
 FUNC(void, DLT_APPL_CODE) Dlt_Init(P2CONST(Dlt_ConfigType, AUTOMATIC, DLT_APPL_CONST) config)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Start, 2, 0x01, config);
 #if (DLT_NVM_RAM_SUPPORT == STD_ON)
     NvM_RequestResultType RequestResult;
     Std_ReturnType        ret;
@@ -308,39 +315,50 @@ FUNC(void, DLT_APPL_CODE) Dlt_Init(P2CONST(Dlt_ConfigType, AUTOMATIC, DLT_APPL_C
 #endif
 #endif
 #if (DLT_NVM_RAM_SUPPORT == STD_ON)
-        ret = NvM_GetErrorStatus(DLT_NVM_RAM_REF, &RequestResult);
-        /* Check if the storage stack is ready */
-        if ((ret == E_OK) && (RequestResult == NVM_REQ_OK))
+        if (Dlt_CheckNvmActivated() == FALSE)
         {
-            /* Gets initialization parameters from the NvM storage stack */
-            Dlt_MemCopy(
-                (uint8*)&Dlt_RunTime,
-                (const uint8*)NvM_BlockDescriptor[DLT_NVM_RAM_REF - 1u].NvmRamBlockDataAddress,
-                sizeof(Dlt_RunTimeType));
-            uint16 index = 0;
-#if (1u < DLT_CHANNEL_NUM)
-            for (; index < DLT_CHANNEL_NUM; index++)
-#endif /* 1u < DLT_CHANNEL_NUM */
-            {
-                Dlt_ChannelType* ChannelPtr           = &(Dlt_Channel[index]);
-                uint32           logChannelBufferSize = config->LogOutput->LogChannel[index].DltLogChannelBufferSize;
-                SchM_Enter_Dlt_MsgChannel();
-                ChannelPtr->UnusedLength   = logChannelBufferSize;
-                ChannelPtr->LastSendStatus = DLT_WAIT_SEND;
-                SchM_Exit_Dlt_MsgChannel();
-            }
+            Dlt_Init_From_Cfg(config);
         }
         else
 #endif
         {
-            /* Get the initialization parameters from the configuration information structure */
-            Dlt_Init_From_Cfg(config);
+#if (DLT_NVM_RAM_SUPPORT == STD_ON)
+            ret = NvM_GetErrorStatus(DLT_NVM_RAM_REF, &RequestResult);
+            /* Check if the storage stack is ready */
+            if ((ret == E_OK) && (RequestResult == NVM_REQ_OK))
+            {
+                const NvM_BlockDescriptorType* BlockDescriptorPtr = &(NvM_BlockDescriptor[DLT_NVM_RAM_REF - 1u]);
+                /* Gets initialization parameters from the NvM storage stack */
+                Dlt_MemCopy(
+                    (uint8*)&Dlt_RunTime,
+                    (const uint8*)BlockDescriptorPtr->NvmRamBlockDataAddress,
+                    sizeof(Dlt_RunTimeType));
+                uint16 index = 0;
+#if (1u < DLT_CHANNEL_NUM)
+                for (; index < DLT_CHANNEL_NUM; index++)
+#endif /* 1u < DLT_CHANNEL_NUM */
+                {
+                    Dlt_ChannelType* ChannelPtr = &(Dlt_Channel[index]);
+                    uint32 logChannelBufferSize = config->LogOutput->LogChannel[index].DltLogChannelBufferSize;
+                    SchM_Enter_Dlt_MsgChannel();
+                    ChannelPtr->UnusedLength   = logChannelBufferSize;
+                    ChannelPtr->LastSendStatus = DLT_WAIT_SEND;
+                    SchM_Exit_Dlt_MsgChannel();
+                }
+            }
+            else
+#endif
+            {
+                /* Get the initialization parameters from the configuration information structure */
+                Dlt_Init_From_Cfg(config);
+            }
         }
         /* This parameter is used to set the startup delay of the DLT module */
         Dlt_StartUpDelayTimer = DLT_START_UP_DELAY_TIMER;
         /* Set the status of the DLT module to initialized */
         Dlt_ModeState = DLT_STATE_INIT;
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Return, 1, 0x01);
 }
 #define DLT_STOP_SEC_CODE
 #include "Dlt_MemMap.h"
@@ -362,6 +380,7 @@ FUNC(void, DLT_APPL_CODE) Dlt_Init(P2CONST(Dlt_ConfigType, AUTOMATIC, DLT_APPL_C
 FUNC(void, DLT_APPL_CODE) Dlt_GetVersionInfo(P2VAR(Std_VersionInfoType, AUTOMATIC, DLT_APPL_DATA) versioninfo)
 /* PRQA S 3432-- */ /* MISRA Rule 20.7 */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Start, 2, 0x02, versioninfo);
 #if (STD_ON == DLT_DEV_ERROR_DETECT)
     if (NULL_PTR == versioninfo)
     {
@@ -376,6 +395,7 @@ FUNC(void, DLT_APPL_CODE) Dlt_GetVersionInfo(P2VAR(Std_VersionInfoType, AUTOMATI
         versioninfo->sw_minor_version = DLT_SW_MINOR_VERSION;
         versioninfo->sw_patch_version = DLT_SW_PATCH_VERSION;
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Return, 1, 0x02);
 }
 #define DLT_STOP_SEC_CODE
 #include "Dlt_MemMap.h"
@@ -409,6 +429,7 @@ Dlt_SendTraceMessage(
     P2CONST(uint8, AUTOMATIC, DLT_APPL_CONST) traceData,
     uint16 traceDataLength)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Start, 5, 0x04, sessionId, traceInfo, traceData, traceDataLength);
     Std_ReturnType ret;
 #if (STD_ON == DLT_DEV_ERROR_DETECT)
     ret = E_NOT_OK;
@@ -425,6 +446,7 @@ Dlt_SendTraceMessage(
     {
         ret = Dlt_InterSendTraceMessage(sessionId, traceInfo, traceData, traceDataLength);
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Return, 2, 0x04, ret);
     return ret;
 }
 #define DLT_STOP_SEC_CODE
@@ -450,6 +472,7 @@ Dlt_SendLogMessage(
     P2CONST(uint8, AUTOMATIC, DLT_APPL_CONST) logData,
     uint16 logDataLength)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Start, 5, 0x03, sessionId, logInfo, logData, logDataLength);
     Std_ReturnType ret;
 #if (STD_ON == DLT_DEV_ERROR_DETECT)
     ret = E_NOT_OK;
@@ -466,6 +489,7 @@ Dlt_SendLogMessage(
     {
         ret = Dlt_InterSendLogMessage(sessionId, logInfo, logData, logDataLength);
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Return, 2, 0x03, ret);
     return ret;
 }
 #define DLT_STOP_SEC_CODE
@@ -497,6 +521,21 @@ Dlt_RegisterContext(
     P2CONST(uint8, AUTOMATIC, DLT_APPL_CONST) contextDescription,
     uint8 lenContextDescription)
 {
+    ARTI_TRACE_N(
+        USER,
+        AR_CP_BSW_API,
+        Dlt,
+        0,
+        Bsw_Start,
+        8,
+        0x05,
+        sessionId,
+        appId,
+        contextId,
+        appDescription,
+        lenAppDescription,
+        contextDescription,
+        lenContextDescription);
     Std_ReturnType ret = E_NOT_OK;
 #if (DLT_REGISTER_CONTEXT_NOTIFICATION_SUPPORT == STD_ON)
     uint8 options;
@@ -587,6 +626,7 @@ Dlt_RegisterContext(
 #endif /* DLT_SWC_NUM > 0 && DLT_SWC_MAX_CONTEXT_NUM > 0 */
         }
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Return, 2, 0x05, ret);
     return ret;
 }
 #define DLT_STOP_SEC_CODE
@@ -611,6 +651,7 @@ Dlt_RegisterContext(
 FUNC(Std_ReturnType, DLT_APPL_CODE)
 Dlt_UnregisterContext(Dlt_SessionIDType sessionId, Dlt_ApplicationIDType appId, Dlt_ContextIDType contextId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Start, 4, 0x16, sessionId, appId, contextId);
     Std_ReturnType ret = E_NOT_OK;
 #if (DLT_REGISTER_CONTEXT_NOTIFICATION_SUPPORT == STD_ON)
     uint8 options = 5;
@@ -675,6 +716,7 @@ Dlt_UnregisterContext(Dlt_SessionIDType sessionId, Dlt_ApplicationIDType appId, 
 #endif /* DLT_SWC_NUM > 0 && DLT_SWC_MAX_CONTEXT_NUM > 0 */
         }
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Return, 2, 0x16, ret);
     return ret;
 }
 #define DLT_STOP_SEC_CODE
@@ -705,6 +747,7 @@ Dlt_UnregisterContext(Dlt_SessionIDType sessionId, Dlt_ApplicationIDType appId, 
  * MessageId(4),MuduleId(2),ExInstanceId(4),InstanceId(1),ExAppId(4),AppId(1),ExErrorId(4),ErrorId(1) */
 FUNC(void, DLT_APPL_CODE) Dlt_DetForwardErrorTrace(uint16 moduleId, uint8 instanceId, uint8 apiId, uint8 errorId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Start, 5, 0x07, moduleId, instanceId, apiId, errorId);
 #if (STD_ON == DLT_DEV_ERROR_DETECT)
     if (DLT_STATE_UNINIT == Dlt_ModeState)
     {
@@ -717,26 +760,43 @@ FUNC(void, DLT_APPL_CODE) Dlt_DetForwardErrorTrace(uint16 moduleId, uint8 instan
         uint32                 timestamp = 0U;
         Dlt_MessageLogInfoType logInfo;
 
-        logInfo.logLevel  = DLT_LOG_ERROR;
+        const Dlt_SwcContextType* SwcContextPtr;
+
+        Dlt_DetContextInofType* DetContextInfoPtr = &(Dlt_RunTime.DetInfo.DetContextInfo);
+
+        logInfo.logLevel  = DetContextInfoPtr->DltThreshold;
         logInfo.argCount  = 4;
-        logInfo.appId     = Dlt_Det_ApplId;
-        logInfo.contextId = Dlt_Det_ContextId;
+        logInfo.appId     = DetContextInfoPtr->DetApplicationId;
+        logInfo.contextId = DetContextInfoPtr->DetContextId;
         logInfo.options &= DLT_OPTIONS_MESSAGE_TYPE_RESET_MASK;
         /*Generating the timestamp*/
         if (Dlt_ConfigPtr->Protocol->DltHeaderUseTimestamp == TRUE)
         {
             timestamp = Dlt_GetTimeElapsed();
         }
-        /* The Swc index number is extracted by the session identifier */
-        uint16 SwcIndex = Dlt_GetSwcSessionIdIndex(DLT_DET_SESSIONID);
         /* Check if the Swc index number is valid */
-        if (SwcIndex != DLT_SWC_NUM)
+        if (Dlt_RunTime.DetInfo.DltSwcSessionId == DLT_DET_SESSIONID)
         {
             boolean                 Filter;
             Dlt_MessageLogLevelType CurrentLogLevel;
-            uint16                  ChannelIndexList[DLT_CHANNEL_NUM];
-
-            Dlt_MemSet((uint8*)ChannelIndexList, 0xFF, (DLT_CHANNEL_NUM + DLT_CHANNEL_NUM));
+            uint16                  SwcIndex   = 0u;
+            boolean                 toContinue = FALSE;
+            const Dlt_SwcTypes*     SwcPtr;
+            for (uint16 iloop = 0; (iloop < Dlt_Swc.DltSwcNum) && (toContinue == FALSE); ++iloop)
+            {
+                SwcPtr = &(Dlt_Swc.DltSwc[iloop]);
+                for (uint16 jloop = 0; jloop < (SwcPtr->DltSwcContextNum) && (toContinue == FALSE); ++jloop)
+                {
+                    SwcContextPtr = &(SwcPtr->DltSwcContext[jloop]);
+                    if ((SwcContextPtr->SwcApplicationId == logInfo.appId)
+                        && (SwcContextPtr->SwcContextId == logInfo.contextId))
+                    {
+                        SwcIndex   = jloop;
+                        toContinue = TRUE;
+                        break;
+                    }
+                }
+            }
             /* The Swc index and log information are used to extract the current log level */
             CurrentLogLevel = Dlt_GetSwcLogLevel(SwcIndex, &logInfo);
             /* Message filtering */
@@ -744,167 +804,154 @@ FUNC(void, DLT_APPL_CODE) Dlt_DetForwardErrorTrace(uint16 moduleId, uint8 instan
             /* Check if the message filtering status is passed */
             if (Filter == TRUE)
             {
-                /*Select target LogChannel*/
-                Dlt_GetChannelIndex(SwcIndex, logInfo.appId, logInfo.contextId, ChannelIndexList);
-                uint16 iloop = 0;
-                /* Traverse the list of all log channel index */
-#if (1u < DLT_CHANNEL_NUM)
-                while ((ChannelIndexList[iloop] != 0xFFFFu) && (iloop < DLT_CHANNEL_NUM))
-#else  /* 1u < DLT_CHANNEL_NUM */
-                if (ChannelIndexList[iloop] != 0xFFFFu)
-#endif /* 1u < DLT_CHANNEL_NUM */
+                uint16 logDataLength;
+                /* Set the index number of the log channel */
+                uint16 ChannelIndex = DetContextInfoPtr->DltLogChannelRef;
+                /* Check if the DLT message extension header is support verbose mode */
+                boolean ExtHeaderInNonVerbMode = (Dlt_ConfigPtr->Protocol != NULL_PTR)
+                                                     ? Dlt_ConfigPtr->Protocol->DltUseExtHeaderInNonVerbMode
+                                                     : FALSE;
+                boolean UseVerboseMode =
+                    (Dlt_ConfigPtr->Protocol != NULL_PTR) ? Dlt_ConfigPtr->Protocol->DltUseVerboseMode : FALSE;
+                boolean VerboseModeFlag =
+                    (UseVerboseMode == TRUE) ? TRUE : ((ExtHeaderInNonVerbMode == TRUE) ? TRUE : FALSE);
+                /* Check if the DLT log data is support verbose mode */
+                if (Dlt_ConfigPtr->Protocol->DltUseVerboseMode == FALSE)
                 {
-                    uint16 logDataLength;
-                    /* Set the index number of the log channel */
-                    uint16 ChannelIndex = ChannelIndexList[iloop];
-                    /* Check if the DLT message extension header is support verbose mode */
-                    boolean ExtHeaderInNonVerbMode = (Dlt_ConfigPtr->Protocol != NULL_PTR)
-                                                         ? Dlt_ConfigPtr->Protocol->DltUseExtHeaderInNonVerbMode
-                                                         : FALSE;
-                    boolean UseVerboseMode =
-                        (Dlt_ConfigPtr->Protocol != NULL_PTR) ? Dlt_ConfigPtr->Protocol->DltUseVerboseMode : FALSE;
-                    boolean VerboseModeFlag =
-                        (UseVerboseMode == TRUE) ? TRUE : ((ExtHeaderInNonVerbMode == TRUE) ? TRUE : FALSE);
-                    /* Check if the DLT log data is support verbose mode */
-                    if (Dlt_ConfigPtr->Protocol->DltUseVerboseMode == FALSE)
+                    /* Calculate the byte length of the DLT log data */
+                    logDataLength = 9;
+                }
+                else
+                {
+                    /* Calculate the byte length of the DLT log data */
+                    logDataLength = 21;
+                }
+                Dlt_OptionalFlagType OptionFlag;
+                OptionFlag.AllBits = 0u;
+                Dlt_GetOptionFlag(&OptionFlag);
+                uint16 logChannelMaxMessageLength =
+                    Dlt_ConfigPtr->LogOutput->LogChannel[ChannelIndex].DltLogChannelMaxMessageLength;
+                uint16 Messagelength = Dlt_GetMessageLength(VerboseModeFlag, logDataLength, OptionFlag);
+                /* Check if the message length is within valid range */
+                if (logChannelMaxMessageLength >= Messagelength)
+                {
+                    /* The current log level is extracted by the log channel index */
+                    CurrentLogLevel = Dlt_GetChannelLogLevel(ChannelIndex);
+                    /* Message filtering */
+                    Filter = Dlt_CompareLogLevel(CurrentLogLevel, logInfo.logLevel);
+                    /* Check if the message filtering status is passed */
+                    if (Filter == TRUE)
                     {
-                        /* Calculate the byte length of the DLT log data */
-                        logDataLength = 9;
-                    }
-                    else
-                    {
-                        /* Calculate the byte length of the DLT log data */
-                        logDataLength = 21;
-                    }
-                    Dlt_OptionalFlagType OptionFlag;
-                    OptionFlag.AllBits = 0u;
-                    Dlt_GetOptionFlag(&OptionFlag);
-                    uint16 logChannelMaxMessageLength =
-                        Dlt_ConfigPtr->LogOutput->LogChannel[ChannelIndex].DltLogChannelMaxMessageLength;
-                    uint16 Messagelength = Dlt_GetMessageLength(VerboseModeFlag, logDataLength, OptionFlag);
-                    /* Check if the message length is within valid range */
-                    if (logChannelMaxMessageLength >= Messagelength)
-                    {
-                        /* The current log level is extracted by the log channel index */
-                        CurrentLogLevel = Dlt_GetChannelLogLevel(ChannelIndex);
-                        /* Message filtering */
-                        Filter = Dlt_CompareLogLevel(CurrentLogLevel, logInfo.logLevel);
-                        /* Check if the message filtering status is passed */
-                        if (Filter == TRUE)
+                        Dlt_ChannelType* ChannelPtr = &(Dlt_Channel[ChannelIndex]);
+                        /* Copying Dlt message to the LogChannel buffer */
+                        /* Check if the length of the DLT message buffer is overflow */
+                        if (ChannelPtr->UnusedLength < (uint32)Messagelength)
                         {
-                            Dlt_ChannelType* ChannelPtr = &(Dlt_Channel[ChannelIndex]);
-                            /* Copying Dlt message to the LogChannel buffer */
-                            /* Check if the length of the DLT message buffer is overflow */
-                            if (ChannelPtr->UnusedLength < (uint32)Messagelength)
+                            Dlt_OverFlowInfoTypes* OverFlowInfoPtr = &(ChannelPtr->OverFlowInfo);
+                            SchM_Enter_Dlt_MsgChannel();
+                            /* Set the message buffer overflow flag to "TRUE" for given log channel */
+                            OverFlowInfoPtr->OverFlow = TRUE;
+                            /* Set the message buffer overflow send flag to "TRUE" for given log channel */
+                            OverFlowInfoPtr->OverFlowSend = FALSE;
+                            /* clear the message buffer overflow timer for given log channel */
+                            OverFlowInfoPtr->BufferOverflowTimer = 0U;
+                            /* Set the message buffer overflow counter for given log channel */
+                            OverFlowInfoPtr->overflowCounter = (uint32)Messagelength;
+                            /* Set the message buffer data type to "DLT_CONTROL_DATA" for given log channel */
+                            OverFlowInfoPtr->BufferDataType = DLT_CONTROL_DATA;
+                            /* Set the message buffer SessionId to "DLT_DET_SESSIONID" for given log channel */
+                            OverFlowInfoPtr->SessionId = DLT_DET_SESSIONID;
+                            /* Set the message buffer timestamp for given log channel */
+                            OverFlowInfoPtr->timestamp = timestamp;
+                            /* Set the message buffer SwcApplicationId for given log channel */
+                            OverFlowInfoPtr->SwcContext.SwcApplicationId = logInfo.appId;
+                            /* Set the message buffer SwcContextId for given log channel */
+                            OverFlowInfoPtr->SwcContext.SwcContextId = logInfo.contextId;
+                            SchM_Exit_Dlt_MsgChannel();
+                        }
+                        else
+                        {
+                            uint8                             logData[21];
+                            uint16                            CorrectionLength = 0u;
+                            Dlt_CreateExtendedHeaderInfoTypes CreateExtendedHeaderInfo;
+                            Dlt_CreateStandardHeaderInfoTypes CreateStandardHeaderInfo;
+
+                            SchM_Enter_Dlt_MsgChannel();
+                            /* Create standard header for the message of the DLT given log channel */
+                            CreateStandardHeaderInfo.ChannelIndex  = ChannelIndex;
+                            CreateStandardHeaderInfo.Messagelength = Messagelength;
+                            CreateStandardHeaderInfo.SessionId     = DLT_DET_SESSIONID;
+                            CreateStandardHeaderInfo.timestamp     = timestamp;
+                            Dlt_CreateStandardHeader(&CreateStandardHeaderInfo, &CorrectionLength);
+                            /* Check if the DLT message extension header is support verbose mode */
+                            if (VerboseModeFlag == TRUE)
                             {
-                                Dlt_OverFlowInfoTypes* OverFlowInfoPtr = &(ChannelPtr->OverFlowInfo);
-                                SchM_Enter_Dlt_MsgChannel();
-                                /* Set the message buffer overflow flag to "TRUE" for given log channel */
-                                OverFlowInfoPtr->OverFlow = TRUE;
-                                /* Set the message buffer overflow send flag to "TRUE" for given log channel */
-                                OverFlowInfoPtr->OverFlowSend = FALSE;
-                                /* clear the message buffer overflow timer for given log channel */
-                                OverFlowInfoPtr->BufferOverflowTimer = 0U;
-                                /* Set the message buffer overflow counter for given log channel */
-                                OverFlowInfoPtr->overflowCounter = (uint32)Messagelength;
-                                /* Set the message buffer data type to "DLT_CONTROL_DATA" for given log channel */
-                                OverFlowInfoPtr->BufferDataType = DLT_CONTROL_DATA;
-                                /* Set the message buffer SessionId to "DLT_DET_SESSIONID" for given log channel */
-                                OverFlowInfoPtr->SessionId = DLT_DET_SESSIONID;
-                                /* Set the message buffer timestamp for given log channel */
-                                OverFlowInfoPtr->timestamp = timestamp;
-                                /* Set the message buffer SwcApplicationId for given log channel */
-                                OverFlowInfoPtr->SwcContext.SwcApplicationId = logInfo.appId;
-                                /* Set the message buffer SwcContextId for given log channel */
-                                OverFlowInfoPtr->SwcContext.SwcContextId = logInfo.contextId;
-                                SchM_Exit_Dlt_MsgChannel();
+                                /* Create extended header for the message of the DLT given log channel */
+                                CreateExtendedHeaderInfo.ChannelIndex   = ChannelIndex;
+                                CreateExtendedHeaderInfo.BufferDataType = DLT_LOG_DATA;
+                                CreateExtendedHeaderInfo.logInfo        = (Dlt_MessageLogInfoType*)&logInfo;
+                                CreateExtendedHeaderInfo.traceInfo      = NULL_PTR;
+                                CreateExtendedHeaderInfo.SwcContext.SwcApplicationId = logInfo.appId;
+                                CreateExtendedHeaderInfo.SwcContext.SwcContextId     = logInfo.contextId;
+                                Dlt_CreateExtendedHeader(&CreateExtendedHeaderInfo);
+                            }
+                            /* Check if the DLT log data is support verbose mode */
+                            if (Dlt_ConfigPtr->Protocol->DltUseVerboseMode == FALSE)
+                            {
+                                /* Specify field fill "MessageId" to the DLT message buffer */
+                                Dlt_CopyLongToArrayBigEndian((uint32)0x00000002, logData);
+                                /* Specify field fill "moduleId" to the DLT message buffer */
+                                Dlt_CopyIntToArrayBigEndian(moduleId, &(logData[4]));
+                                /* Specify field fill "instanceId" to the DLT message buffer */
+                                logData[6] = instanceId;
+                                /* Specify field fill "apiId" to the DLT message buffer */
+                                logData[7] = apiId;
+                                /* Specify field fill "errorId" to the DLT message buffer */
+                                logData[8] = errorId;
                             }
                             else
                             {
-                                uint8                             logData[21];
-                                uint16                            CorrectionLength = 0u;
-                                Dlt_CreateExtendedHeaderInfoTypes CreateExtendedHeaderInfo;
-                                Dlt_CreateStandardHeaderInfoTypes CreateStandardHeaderInfo;
-
-                                SchM_Enter_Dlt_MsgChannel();
-                                /* Create standard header for the message of the DLT given log channel */
-                                CreateStandardHeaderInfo.ChannelIndex  = ChannelIndex;
-                                CreateStandardHeaderInfo.Messagelength = Messagelength;
-                                CreateStandardHeaderInfo.SessionId     = DLT_DET_SESSIONID;
-                                CreateStandardHeaderInfo.timestamp     = timestamp;
-                                Dlt_CreateStandardHeader(&CreateStandardHeaderInfo, &CorrectionLength);
-                                /* Check if the DLT message extension header is support verbose mode */
-                                if (VerboseModeFlag == TRUE)
-                                {
-                                    /* Create extended header for the message of the DLT given log channel */
-                                    CreateExtendedHeaderInfo.ChannelIndex   = ChannelIndex;
-                                    CreateExtendedHeaderInfo.BufferDataType = DLT_LOG_DATA;
-                                    CreateExtendedHeaderInfo.logInfo        = (Dlt_MessageLogInfoType*)&logInfo;
-                                    CreateExtendedHeaderInfo.traceInfo      = NULL_PTR;
-                                    CreateExtendedHeaderInfo.SwcContext.SwcApplicationId = logInfo.appId;
-                                    CreateExtendedHeaderInfo.SwcContext.SwcContextId     = logInfo.contextId;
-                                    Dlt_CreateExtendedHeader(&CreateExtendedHeaderInfo);
-                                }
-                                /* Check if the DLT log data is support verbose mode */
-                                if (Dlt_ConfigPtr->Protocol->DltUseVerboseMode == FALSE)
-                                {
-                                    /* Specify field fill "MessageId" to the DLT message buffer */
-                                    Dlt_CopyLongToArrayBigEndian((uint32)0x00000002, logData);
-                                    /* Specify field fill "moduleId" to the DLT message buffer */
-                                    Dlt_CopyIntToArrayBigEndian(moduleId, &(logData[4]));
-                                    /* Specify field fill "instanceId" to the DLT message buffer */
-                                    logData[6] = instanceId;
-                                    /* Specify field fill "apiId" to the DLT message buffer */
-                                    logData[7] = apiId;
-                                    /* Specify field fill "errorId" to the DLT message buffer */
-                                    logData[8] = errorId;
-                                }
-                                else
-                                {
-                                    /* Type Info - MessageId - Unsigned int, 32 bit */
-                                    /* Specify field fill "MessageId" to the DLT message buffer */
-                                    Dlt_CopyLongToArrayBigEndian((uint32)0x00000042, logData);
-                                    /* Type Info - ModuleId - Unsigned int, 16 bit */
-                                    /* Specify field fill "MuduleId" to the DLT message buffer */
-                                    Dlt_CopyIntToArrayBigEndian(moduleId, &(logData[4]));
-                                    /* Type Info - Extend InstanceId - Unsigned int, 32 bit */
-                                    /* Specify field fill "Extend InstanceId" to the DLT message buffer */
-                                    Dlt_CopyLongToArrayBigEndian((uint32)0x00000041, &(logData[6]));
-                                    /* Type Info - InstanceId - Unsigned int, 8 bit */
-                                    /* Specify field fill "InstanceId" to the DLT message buffer */
-                                    logData[10] = instanceId;
-                                    /* Type Info - Extend AppId - Unsigned int, 32 bit */
-                                    /* Specify field fill "Extend AppId" to the DLT message buffer */
-                                    Dlt_CopyLongToArrayBigEndian((uint32)0x00000041, &(logData[11]));
-                                    /* Type Info - AppId - Unsigned int, 8 bit */
-                                    /* Specify field fill "AppId" to the DLT message buffer */
-                                    logData[15] = apiId;
-                                    /* Type Info - Extend ErrorId - Unsigned int, 32 bit */
-                                    /* Specify field fill "Extend ErrorId" to the DLT message buffer */
-                                    Dlt_CopyLongToArrayBigEndian((uint32)0x00000041, &(logData[16]));
-                                    /* Specify field fill "ErrorId" to the DLT message buffer */
-                                    logData[20] = errorId;
-                                }
-                                /* Copies the user's trace data into the buffer of the given log channel */
-                                for (uint16 jloop = 0; jloop < logDataLength; jloop++)
-                                {
-                                    Dlt_MoveWriteIndexCopy(ChannelIndex, logData[jloop]);
-                                }
-                                ChannelPtr->UnusedLength -= (uint32)Messagelength;
-                                ChannelPtr->MessageCounter++;
-
-                                SchM_Exit_Dlt_MsgChannel();
+                                /* Type Info - MessageId - Unsigned int, 32 bit */
+                                /* Specify field fill "MessageId" to the DLT message buffer */
+                                Dlt_CopyLongToArrayBigEndian((uint32)0x00000042, logData);
+                                /* Type Info - ModuleId - Unsigned int, 16 bit */
+                                /* Specify field fill "MuduleId" to the DLT message buffer */
+                                Dlt_CopyIntToArrayBigEndian(moduleId, &(logData[4]));
+                                /* Type Info - Extend InstanceId - Unsigned int, 32 bit */
+                                /* Specify field fill "Extend InstanceId" to the DLT message buffer */
+                                Dlt_CopyLongToArrayBigEndian((uint32)0x00000041, &(logData[6]));
+                                /* Type Info - InstanceId - Unsigned int, 8 bit */
+                                /* Specify field fill "InstanceId" to the DLT message buffer */
+                                logData[10] = instanceId;
+                                /* Type Info - Extend AppId - Unsigned int, 32 bit */
+                                /* Specify field fill "Extend AppId" to the DLT message buffer */
+                                Dlt_CopyLongToArrayBigEndian((uint32)0x00000041, &(logData[11]));
+                                /* Type Info - AppId - Unsigned int, 8 bit */
+                                /* Specify field fill "AppId" to the DLT message buffer */
+                                logData[15] = apiId;
+                                /* Type Info - Extend ErrorId - Unsigned int, 32 bit */
+                                /* Specify field fill "Extend ErrorId" to the DLT message buffer */
+                                Dlt_CopyLongToArrayBigEndian((uint32)0x00000041, &(logData[16]));
+                                /* Specify field fill "ErrorId" to the DLT message buffer */
+                                logData[20] = errorId;
                             }
+                            /* Copies the user's trace data into the buffer of the given log channel */
+                            for (uint16 jloop = 0; jloop < logDataLength; jloop++)
+                            {
+                                Dlt_MoveWriteIndexCopy(ChannelIndex, logData[jloop]);
+                            }
+                            ChannelPtr->UnusedLength -= (uint32)Messagelength;
+                            ChannelPtr->MessageCounter++;
+
+                            SchM_Exit_Dlt_MsgChannel();
                         }
                     }
-#if (1u < DLT_CHANNEL_NUM)
-                    iloop++;
-#endif /* 1u < DLT_CHANNEL_NUM */
                 }
             }
         }
 #endif
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Return, 1, 0x07);
 }
 #define DLT_STOP_SEC_CODE
 #include "Dlt_MemMap.h"
@@ -928,6 +975,7 @@ FUNC(void, DLT_APPL_CODE) Dlt_DetForwardErrorTrace(uint16 moduleId, uint8 instan
 FUNC(Std_ReturnType, DLT_APPL_CODE)
 Dlt_SetLogLevel(Dlt_ApplicationIDType appId, Dlt_ContextIDType contextId, Dlt_MessageLogLevelType newLogLevel)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Start, 4, 0x08, appId, contextId, newLogLevel);
     Std_ReturnType ret = E_NOT_OK;
 #if (STD_ON == DLT_DEV_ERROR_DETECT)
     if (DLT_STATE_UNINIT == Dlt_ModeState)
@@ -958,6 +1006,7 @@ Dlt_SetLogLevel(Dlt_ApplicationIDType appId, Dlt_ContextIDType contextId, Dlt_Me
         }
 #endif
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Return, 2, 0x08, ret);
     return ret;
 }
 #define DLT_STOP_SEC_CODE
@@ -976,6 +1025,7 @@ Dlt_SetLogLevel(Dlt_ApplicationIDType appId, Dlt_ContextIDType contextId, Dlt_Me
 FUNC(Std_ReturnType, DLT_APPL_CODE)
 Dlt_SetTraceStatus(Dlt_ApplicationIDType appId, Dlt_ContextIDType contextId, boolean newTraceStatus)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Start, 4, 0x09, appId, contextId, newTraceStatus);
     Std_ReturnType ret = E_NOT_OK;
 #if (STD_ON == DLT_DEV_ERROR_DETECT)
     if (DLT_STATE_UNINIT == Dlt_ModeState)
@@ -1006,6 +1056,7 @@ Dlt_SetTraceStatus(Dlt_ApplicationIDType appId, Dlt_ContextIDType contextId, boo
         }
 #endif
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Return, 2, 0x09, ret);
     return ret;
 }
 #define DLT_STOP_SEC_CODE
@@ -1031,6 +1082,7 @@ Dlt_GetLogInfo(
     /* PRQA S 3432-- */ /* MISRA Rule 20.7 */
     Dlt_LogInfoType* logInfo)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Start, 6, 0x0A, options, appId, contextId, status, logInfo);
     Std_ReturnType ret = E_NOT_OK;
     DLT_UNUSED(options);
 #if (STD_ON == DLT_DEV_ERROR_DETECT)
@@ -1062,13 +1114,10 @@ Dlt_GetLogInfo(
                 /* Checks if the ApplicationId/ContextId of the Swc information structure is match */
                 if ((appId == SwcApplicationId) && (contextId == SwcContextId))
                 {
-                    boolean           useVerboseMode        = Dlt_ConfigPtr->Protocol->DltUseVerboseMode;
-                    uint8             lenAppDescription     = SwcContextInfoPtr->lenAppDescription;
-                    uint8             lenContextDescription = SwcContextInfoPtr->lenContextDescription;
-                    Dlt_SessionIDType SwcSessionId          = Dlt_RunTime.SwcInfo[SwcIndex].DltSwcSessionId;
-
-                    Dlt_ApplicationIdInfoType* appIdInfo       = logInfo->appIdInfo;
-                    Dlt_ContextIdInfoType*     contextInfoList = appIdInfo->contextInfoList;
+                    uint8                      lenAppDescription     = SwcContextInfoPtr->lenAppDescription;
+                    uint8                      lenContextDescription = SwcContextInfoPtr->lenContextDescription;
+                    Dlt_ApplicationIdInfoType* appIdInfo             = logInfo->appIdInfo;
+                    Dlt_ContextIdInfoType*     contextInfoList       = appIdInfo->contextInfoList;
 
                     /* Copy the "contextId" described by the Swc context to the log information */
                     contextInfoList->contextId = contextId;
@@ -1103,6 +1152,7 @@ Dlt_GetLogInfo(
 #endif /* DLT_SWC_NUM > 0 && DLT_SWC_MAX_CONTEXT_NUM > 0 */
         }
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Return, 2, 0x0A, ret);
     return ret;
 }
 #define DLT_STOP_SEC_CODE
@@ -1124,6 +1174,7 @@ Dlt_GetLogInfo(
  */
 FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_GetDefaultLogLevel(Dlt_MessageLogLevelType* defaultLogLevel)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Start, 2, 0x18, defaultLogLevel);
     Std_ReturnType ret;
 #if (STD_ON == DLT_DEV_ERROR_DETECT)
     ret = E_NOT_OK;
@@ -1141,6 +1192,7 @@ FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_GetDefaultLogLevel(Dlt_MessageLogLevelTy
         *defaultLogLevel = Dlt_RunTime.DefaultLogLevel;
         ret              = E_OK;
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Return, 2, 0x18, ret);
     return ret;
 }
 #define DLT_STOP_SEC_CODE
@@ -1162,6 +1214,7 @@ FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_GetDefaultLogLevel(Dlt_MessageLogLevelTy
  */
 FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_StoreConfiguration(void)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Start, 1, 0x1A);
 #if (DLT_NVM_RAM_SUPPORT == STD_ON)
     Std_ReturnType ret = E_NOT_OK;
 #else
@@ -1185,6 +1238,7 @@ FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_StoreConfiguration(void)
         /*idle*/
 #endif
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Return, 2, 0x1A, ret);
     return ret;
 }
 #define DLT_STOP_SEC_CODE
@@ -1207,6 +1261,7 @@ FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_StoreConfiguration(void)
  */
 FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ResetToFactoryDefault(void)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Start, 1, 0x06);
     Std_ReturnType ret;
 #if (STD_ON == DLT_DEV_ERROR_DETECT)
     ret = E_NOT_OK;
@@ -1223,6 +1278,7 @@ FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ResetToFactoryDefault(void)
 #endif
         ret = E_OK;
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Return, 2, 0x06, ret);
     return ret;
 }
 #define DLT_STOP_SEC_CODE
@@ -1244,6 +1300,7 @@ FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ResetToFactoryDefault(void)
  */
 FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_SetMessageFiltering(boolean status)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Start, 2, 0x1B, status);
     Std_ReturnType ret;
 #if (STD_ON == DLT_DEV_ERROR_DETECT)
     ret = E_NOT_OK;
@@ -1259,6 +1316,7 @@ FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_SetMessageFiltering(boolean status)
         SchM_Exit_Dlt_SwcContext();
         ret = E_OK;
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Return, 2, 0x1B, ret);
     return ret;
 }
 #define DLT_STOP_SEC_CODE
@@ -1279,6 +1337,7 @@ FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_SetMessageFiltering(boolean status)
  */
 FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_SetDefaultLogLevel(Dlt_MessageLogLevelType newLogLevel)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Start, 2, 0x11, newLogLevel);
     Std_ReturnType ret;
 #if (STD_ON == DLT_DEV_ERROR_DETECT)
     ret = E_NOT_OK;
@@ -1294,6 +1353,7 @@ FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_SetDefaultLogLevel(Dlt_MessageLogLevelTy
         SchM_Exit_Dlt_SwcContext();
         ret = E_OK;
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Return, 2, 0x11, ret);
     return ret;
 }
 #define DLT_STOP_SEC_CODE
@@ -1316,6 +1376,7 @@ FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_SetDefaultLogLevel(Dlt_MessageLogLevelTy
 FUNC(Std_ReturnType, DLT_APPL_CODE)
 Dlt_SetDefaultTraceStatus(boolean newTraceStatus, const Dlt_LogChannelNameType logChannelName)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Start, 3, 0x12, newTraceStatus, logChannelName);
     Std_ReturnType ret;
     DLT_UNUSED(logChannelName);
 #if (STD_ON == DLT_DEV_ERROR_DETECT)
@@ -1332,6 +1393,7 @@ Dlt_SetDefaultTraceStatus(boolean newTraceStatus, const Dlt_LogChannelNameType l
         SchM_Exit_Dlt_SwcContext();
         ret = E_OK;
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Return, 2, 0x12, ret);
     return ret;
 }
 #define DLT_STOP_SEC_CODE
@@ -1357,6 +1419,7 @@ Dlt_GetDefaultTraceStatus(
     P2VAR(boolean, AUTOMATIC, DLT_APPL_DATA) traceStatus)
 /* PRQA S 3432-- */ /* MISRA Rule 20.7 */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Start, 3, 0x19, logChannelName, traceStatus);
     Std_ReturnType ret;
     DLT_UNUSED(logChannelName);
 #if (STD_ON == DLT_DEV_ERROR_DETECT)
@@ -1375,6 +1438,7 @@ Dlt_GetDefaultTraceStatus(
         *traceStatus = Dlt_RunTime.DefaultTraceStatus;
         ret          = E_OK;
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Return, 2, 0x19, ret);
     return ret;
 }
 #define DLT_STOP_SEC_CODE
@@ -1402,6 +1466,7 @@ Dlt_GetLogChannelNames(
     Dlt_LogChannelNameType* logChannelNames)
 /* PRQA S 3432-- */ /* MISRA Rule 20.7 */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Start, 3, 0x17, numberOfLogChannels, logChannelNames);
     Std_ReturnType ret;
 #if (STD_ON == DLT_DEV_ERROR_DETECT)
     ret = E_NOT_OK;
@@ -1436,6 +1501,7 @@ Dlt_GetLogChannelNames(
 #endif
         ret = E_OK;
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Return, 2, 0x17, ret);
     return ret;
 }
 #define DLT_STOP_SEC_CODE
@@ -1463,6 +1529,7 @@ Dlt_GetTraceStatus(
     P2VAR(boolean, AUTOMATIC, DLT_APPL_DATA) traceStatus)
 /* PRQA S 3432-- */ /* MISRA Rule 20.7 */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Start, 4, 0x1F, appId, contextId, traceStatus);
     Std_ReturnType ret = E_NOT_OK;
 #if (STD_ON == DLT_DEV_ERROR_DETECT)
     if (DLT_STATE_UNINIT == Dlt_ModeState)
@@ -1499,6 +1566,7 @@ Dlt_GetTraceStatus(
 #endif /* DLT_SWC_NUM > 0 && DLT_SWC_MAX_CONTEXT_NUM > 0 */
         }
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Return, 2, 0x1F, ret);
     return ret;
 }
 #define DLT_STOP_SEC_CODE
@@ -1525,6 +1593,7 @@ Dlt_SetLogChannelAssignment(
     const Dlt_LogChannelNameType logChannelName,
     Dlt_AssignmentOperation      addRemoveOp)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Start, 5, 0x20, appId, contextId, logChannelName, addRemoveOp);
     Std_ReturnType ret;
 #if (STD_ON == DLT_DEV_ERROR_DETECT)
     ret = E_NOT_OK;
@@ -1543,6 +1612,7 @@ Dlt_SetLogChannelAssignment(
 #endif
         ret = Dlt_InterSetLogChannelAssignment(appId, contextId, channelId, addRemoveOp);
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Return, 2, 0x20, ret);
     return ret;
 }
 #define DLT_STOP_SEC_CODE
@@ -1568,6 +1638,7 @@ Dlt_SetLogChannelThreshold(
     Dlt_MessageLogLevelType      newThreshold,
     boolean                      newTraceStatus)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Start, 4, 0x21, logChannelName, newThreshold, newTraceStatus);
     Std_ReturnType ret;
 #if (STD_ON == DLT_DEV_ERROR_DETECT)
     ret = E_NOT_OK;
@@ -1603,6 +1674,7 @@ Dlt_SetLogChannelThreshold(
             ret = E_OK;
         }
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Return, 2, 0x21, ret);
     return ret;
 }
 #define DLT_STOP_SEC_CODE
@@ -1631,6 +1703,7 @@ Dlt_GetLogChannelThreshold(
     P2VAR(boolean, AUTOMATIC, DLT_APPL_DATA) traceStatus)
 /* PRQA S 3432-- */ /* MISRA Rule 20.7 */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Start, 4, 0x22, logChannelName, logChannelThreshold, traceStatus);
     Std_ReturnType ret = E_NOT_OK;
 #if (STD_ON == DLT_DEV_ERROR_DETECT)
     if (DLT_STATE_UNINIT == Dlt_ModeState)
@@ -1662,6 +1735,7 @@ Dlt_GetLogChannelThreshold(
             ret = E_OK;
         }
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Return, 2, 0x22, ret);
     return ret;
 }
 #define DLT_STOP_SEC_CODE
@@ -1681,6 +1755,7 @@ Dlt_GetLogChannelThreshold(
  */
 FUNC(void, DLT_APPL_CODE) Dlt_TxFunction(void)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Start, 1, 0x80);
     uint16 index = 0;
     /* Check if the DLT module has been initialized */
     if (DLT_STATE_INIT == Dlt_ModeState)
@@ -1735,6 +1810,7 @@ FUNC(void, DLT_APPL_CODE) Dlt_TxFunction(void)
             }
         }
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Return, 1, 0x80);
 }
 #define DLT_STOP_SEC_CODE
 #include "Dlt_MemMap.h"
@@ -1768,7 +1844,10 @@ FUNC(void, DLT_CODE) Dlt_Tx_CopyTxDataToSendBuffer(uint16 ChannelIndex, uint8* D
     }
 #endif
 }
-
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 static FUNC(void, DLT_CODE) Dlt_Tx_Channel(uint16 ChannelIndex)
 {
     uint32      SendOffset;
@@ -1891,7 +1970,10 @@ static FUNC(void, DLT_CODE) Dlt_Tx_Channel(uint16 ChannelIndex)
     }
 #endif
 }
-
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 FUNC(void, DLT_CODE) Dlt_Init_From_Cfg(const Dlt_ConfigType* config)
 {
     Dlt_RunTimeType* RunTimePtr = &Dlt_RunTime;
@@ -1943,35 +2025,6 @@ FUNC(void, DLT_CODE) Dlt_Init_From_Cfg(const Dlt_ConfigType* config)
             SwcContextInfoPtr->SwcContext.SwcApplicationId = SwcContextPtr->SwcApplicationId;
             SwcContextInfoPtr->SwcContext.SwcContextId     = SwcContextPtr->SwcContextId;
             SwcContextInfoPtr->Register                    = FALSE;
-#if (DLT_DET_FORWARD_TO_DET_SUPPORT == STD_ON)
-            if ((SwcContextPtr->SwcApplicationId == Dlt_Det_ApplId)
-                && (SwcContextPtr->SwcContextId == Dlt_Det_ContextId))
-            {
-                /* PRQA S 0311++ */ /* MISRA Rule 11.8 */
-#if (DLT_DET_APPLID_DESC_LENGTH > 0)
-                SwcContextInfoPtr->lenAppDescription = DLT_DET_APPLID_DESC_LENGTH;
-                SwcContextInfoPtr->appDescription    = (uint8*)Dlt_Det_ApplId_Desc;
-#else
-                SwcContextInfoPtr->lenAppDescription = 0u;
-                SwcContextInfoPtr->appDescription    = NULL_PTR;
-#endif
-#if (DLT_DET_CONTEXTID_DESC_LENGTH > 0)
-                SwcContextInfoPtr->lenContextDescription = DLT_DET_CONTEXTID_DESC_LENGTH;
-                SwcContextInfoPtr->contextDescription    = (uint8*)Dlt_Det_ContextId_Desc;
-#else
-                SwcContextInfoPtr->lenContextDescription = 0u;
-                SwcContextInfoPtr->contextDescription    = NULL_PTR;
-#endif
-                /* PRQA S 0311-- */ /* MISRA Rule 11.8 */
-            }
-            else
-            {
-                SwcContextInfoPtr->lenAppDescription     = 0;
-                SwcContextInfoPtr->lenContextDescription = 0;
-                SwcContextInfoPtr->appDescription        = NULL_PTR;
-                SwcContextInfoPtr->contextDescription    = NULL_PTR;
-            }
-#endif
             SchM_Exit_Dlt_SwcContext();
             uint16 cnt = 0;
 #if (1u < DLT_TRACE_STATUS_ASSIGNMENT_NUM)
@@ -2050,8 +2103,23 @@ FUNC(void, DLT_CODE) Dlt_Init_From_Cfg(const Dlt_ConfigType* config)
         }
 #endif /* DLT_SWC_NUM > 0 && DLT_SWC_MAX_CONTEXT_NUM > 0 */
     }
+#if (DLT_DET_FORWARD_TO_DET_SUPPORT == STD_ON)
+    uint16                  DltDefaultLogChannelRef = Dlt_ConfigPtr->LogOutput->DltDefaultLogChannelRef;
+    Dlt_DetInfoType*        DetInfoPtr              = &RunTimePtr->DetInfo;
+    Dlt_DetContextInofType* DetContextInfoPtr       = &DetInfoPtr->DetContextInfo;
+    DetInfoPtr->DltSwcSessionId                     = DLT_DET_SESSIONID;
+    DetContextInfoPtr->DltThreshold                 = DLT_LOG_ERROR;
+    DetContextInfoPtr->DltLogChannelRef             = Dlt_ConfigPtr->LogOutput->DltDefaultLogChannelRef;
+    const Dlt_SwcContextType* LogChannelAssignmentSwcContextRef =
+        Dlt_ConfigPtr->LogOutput->LogChannelAssignment[DltDefaultLogChannelRef].DltLogChannelAssignmentSwcContextRef;
+    DetContextInfoPtr->DetApplicationId = LogChannelAssignmentSwcContextRef->SwcApplicationId;
+    DetContextInfoPtr->DetContextId     = LogChannelAssignmentSwcContextRef->SwcContextId;
+#endif
 }
-
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 FUNC(void, DLT_CODE) Dlt_MemCopy(uint8* Dest, const uint8* Src, uint32 Size)
 {
     uint32 cnt = Size;
@@ -2061,27 +2129,75 @@ FUNC(void, DLT_CODE) Dlt_MemCopy(uint8* Dest, const uint8* Src, uint32 Size)
         Dest[cnt] = Src[cnt];
     }
 }
-
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
 #if (DLT_NVM_RAM_SUPPORT == STD_ON)
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
+FUNC(boolean, DLT_CODE) Dlt_CheckNvmActivated(void)
+{
+    boolean                        retVal             = (boolean)FALSE;
+    const NvM_BlockDescriptorType* BlockDescriptorPtr = &(NvM_BlockDescriptor[DLT_NVM_RAM_REF - 1u]);
+    if (NULL_PTR != BlockDescriptorPtr->NvmRamBlockDataAddress)
+    {
+        uint32 ActivatedCode;
+        ActivatedCode = (uint32)((uint32)(BlockDescriptorPtr->NvmRamBlockDataAddress[0]) << 24u);
+        ActivatedCode |= (uint32)((uint32)(BlockDescriptorPtr->NvmRamBlockDataAddress[1]) << 16u);
+        ActivatedCode |= (uint32)((uint32)(BlockDescriptorPtr->NvmRamBlockDataAddress[2]) << 8u);
+        ActivatedCode |= (uint32)((uint32)(BlockDescriptorPtr->NvmRamBlockDataAddress[3]));
+        if (ActivatedCode == DLT_NVM_ACTIVATED_CODE)
+        {
+            retVal = (boolean)TRUE;
+        }
+    }
+    return retVal;
+}
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 FUNC(Std_ReturnType, DLT_CODE) Dlt_Store(void)
 {
-    Dlt_MemCopy(
-        NvM_BlockDescriptor[DLT_NVM_RAM_REF - 1u].NvmRamBlockDataAddress,
-        (const uint8*)&Dlt_RunTime,
-        sizeof(Dlt_RunTimeType));
-    return NvM_WriteBlock(DLT_NVM_RAM_REF, NULL_PTR);
+    Std_ReturnType                 retVal;
+    const NvM_BlockDescriptorType* BlockDescriptorPtr = &(NvM_BlockDescriptor[DLT_NVM_RAM_REF - 1u]);
+    if (NULL_PTR != BlockDescriptorPtr->NvmRamBlockDataAddress)
+    {
+        NvM_RequestResultType RequestResult;
+        NvM_GetErrorStatus(DLT_NVM_RAM_REF - 1u, &RequestResult);
+        if ((RequestResult == NVM_REQ_OK) || (RequestResult == NVM_REQ_BLOCK_SKIPPED))
+        {
+            Dlt_RunTime.ActivatedCode = DLT_NVM_ACTIVATED_CODE;
+            Dlt_MemCopy(
+                BlockDescriptorPtr->NvmRamBlockDataAddress,
+                (const uint8*)&Dlt_RunTime,
+                sizeof(Dlt_RunTimeType));
+            retVal = NvM_WriteBlock(DLT_NVM_RAM_REF, NULL_PTR);
+        }
+        else
+        {
+            retVal = E_NOT_OK;
+        }
+    }
+    else
+    {
+        retVal = E_NOT_OK;
+    }
+    return retVal;
 }
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
 #endif
-
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /*this return value is in 0.1 MS*/
 FUNC(uint32, DLT_CODE) Dlt_GetTimeElapsed(void)
 {
     uint32 Timer;
-    uint64 tempTimer;
 #if (DLT_TIME_STAMP_SUPPORT == STD_ON)
 #if (DLT_GPT_SUPPORT == STD_ON)
-    Timer = (uint32)(Gpt_GetTimeElapsed(DLT_TIME_REF) / DLT_GPT_TICK_TIME);
+    Timer = (uint32)(((uint64)Gpt_GetTimeElapsed(DLT_TIME_REF) * DLT_GPT_TIME_RESOLUTION_MS) / DLT_GPT_TICK_TIME);
 #else
+    uint64             tempTimer;
     StbM_UserDataType  userData;
     StbM_TimeTupleType TimeStamp;
     if (E_OK == StbM_GetCurrentTime(DLT_TIME_REF, &TimeStamp, &userData))
@@ -2102,7 +2218,10 @@ FUNC(uint32, DLT_CODE) Dlt_GetTimeElapsed(void)
 #endif
     return Timer;
 }
-
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 FUNC(void, DLT_CODE)
 Dlt_GetChannelIndex(
     uint16                SwcIndex,
@@ -2160,7 +2279,10 @@ Dlt_GetChannelIndex(
         ChannelIndexList[0] = Dlt_ConfigPtr->LogOutput->DltDefaultLogChannelRef;
     }
 }
-
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 FUNC(uint16, DLT_CODE) Dlt_GetChannelIndexByChannelName(uint32 DltLogChannelId)
 {
     uint16 retVal = DLT_CHANNEL_NUM;
@@ -2186,7 +2308,10 @@ FUNC(uint16, DLT_CODE) Dlt_GetChannelIndexByChannelName(uint32 DltLogChannelId)
     }
     return retVal;
 }
-
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 FUNC(uint16, DLT_CODE) Dlt_GetChannelIndexByTxPduId(PduIdType id) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
 {
     uint16 retVal = DLT_CHANNEL_NUM;
@@ -2210,7 +2335,10 @@ FUNC(uint16, DLT_CODE) Dlt_GetChannelIndexByTxPduId(PduIdType id) /* PRQA S 1532
     }
     return retVal;
 }
-
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 static FUNC(Dlt_MessageLogLevelType, DLT_CODE)
     Dlt_GetSwcLogLevel(uint16 SwcIndex, P2CONST(Dlt_MessageLogInfoType, AUTOMATIC, DLT_APPL_CONST) logInfo)
 {
@@ -2256,7 +2384,10 @@ static FUNC(Dlt_MessageLogLevelType, DLT_CODE)
 #endif /* DLT_SWC_NUM > 0 && DLT_SWC_MAX_CONTEXT_NUM > 0 */
     return ret;
 }
-
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 static FUNC(boolean, DLT_CODE)
     Dlt_GetSwcTraceStatus(uint16 SwcIndex, P2CONST(Dlt_MessageTraceInfoType, AUTOMATIC, DLT_APPL_CONST) traceInfo)
 {
@@ -2302,7 +2433,10 @@ static FUNC(boolean, DLT_CODE)
 #endif /* DLT_SWC_NUM > 0 && DLT_SWC_MAX_CONTEXT_NUM > 0 */
     return ret;
 }
-
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 static FUNC(boolean, DLT_CODE) Dlt_GetChannelTraceStatus(uint16 ChannelIndex)
 {
     boolean retVal = FALSE;
@@ -2311,7 +2445,10 @@ static FUNC(boolean, DLT_CODE) Dlt_GetChannelTraceStatus(uint16 ChannelIndex)
 #endif
     return retVal;
 }
-
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 static FUNC(Dlt_MessageLogLevelType, DLT_CODE) Dlt_GetChannelLogLevel(uint16 ChannelIndex)
 {
     Dlt_MessageLogLevelType retVal = DLT_LOG_OFF;
@@ -2320,7 +2457,10 @@ static FUNC(Dlt_MessageLogLevelType, DLT_CODE) Dlt_GetChannelLogLevel(uint16 Cha
 #endif
     return retVal;
 }
-
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 FUNC(uint16, DLT_CODE) Dlt_GetSwcSessionIdIndex(Dlt_SessionIDType sessionId)
 {
     uint16 retval = DLT_SWC_NUM;
@@ -2341,7 +2481,10 @@ FUNC(uint16, DLT_CODE) Dlt_GetSwcSessionIdIndex(Dlt_SessionIDType sessionId)
     }
     return retval;
 }
-
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 static FUNC(void, DLT_CODE) Dlt_MoveWriteIndexCopy(uint16 ChannelIndex, uint8 value)
 {
 #if ((DLT_CHANNEL_NUM > 0) && (DLT_CHANNEL_MAX_BUFFER_LENGTH > 0))
@@ -2358,7 +2501,10 @@ static FUNC(void, DLT_CODE) Dlt_MoveWriteIndexCopy(uint16 ChannelIndex, uint8 va
     }
 #endif
 }
-
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 FUNC(void, DLT_CODE) Dlt_MoveReadIndex(uint16 ChannelIndex, uint32 length) /* PRQA S 1532 */ /* MISRA Rule 8.7 */
 {
 #if (DLT_CHANNEL_NUM > 0)
@@ -2377,7 +2523,10 @@ FUNC(void, DLT_CODE) Dlt_MoveReadIndex(uint16 ChannelIndex, uint32 length) /* PR
     }
 #endif
 }
-
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 static FUNC(boolean, DLT_CODE) Dlt_CompareTraceStatus(boolean CurrentLogLevel)
 {
     boolean ret = CurrentLogLevel;
@@ -2387,7 +2536,10 @@ static FUNC(boolean, DLT_CODE) Dlt_CompareTraceStatus(boolean CurrentLogLevel)
     }
     return ret;
 }
-
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 static FUNC(boolean, DLT_CODE)
     Dlt_CompareLogLevel(Dlt_MessageLogLevelType CurrentLogLevel, Dlt_MessageLogLevelType MessageLogLevel)
 {
@@ -2402,7 +2554,10 @@ static FUNC(boolean, DLT_CODE)
     }
     return ret;
 }
-
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 FUNC(uint32, DLT_CODE) Dlt_GetEcuId(void)
 {
     uint32 EcuId = 0;
@@ -2420,7 +2575,10 @@ FUNC(uint32, DLT_CODE) Dlt_GetEcuId(void)
     }
     return EcuId;
 }
-
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 uint16 Dlt_GetMessageLength(boolean VerboseMode, uint16 PayloadLength, Dlt_OptionalFlagType OptionFlag)
 {
     uint16 Headerlength;
@@ -2452,7 +2610,10 @@ uint16 Dlt_GetMessageLength(boolean VerboseMode, uint16 PayloadLength, Dlt_Optio
     messageLength = Headerlength + PayloadLength;
     return messageLength;
 }
-
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /* PRQA S 1532,3432++ */ /* MISRA Rule 8.7,Rule 20.7 */
 FUNC(void, DLT_CODE)
 Dlt_CopyArrayToLongLittleEndian(
@@ -2465,8 +2626,11 @@ Dlt_CopyArrayToLongLittleEndian(
     (*DestData) |= (uint32)((uint32)(SourceData[1]) << 8u);
     (*DestData) |= (uint32)((uint32)(SourceData[0]));
 }
-
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
 #if (CPU_BYTE_ORDER == LOW_BYTE_FIRST)
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /* PRQA S 3432++ */ /* MISRA Rule 20.7 */
 FUNC(void, DLT_CODE) Dlt_CopyLongToArrayLittleEndian(uint32 SourceData, P2VAR(uint8, AUTOMATIC, DLT_APPL_VAR) DestData)
 /* PRQA S 3432-- */ /* MISRA Rule 20.7 */
@@ -2476,7 +2640,10 @@ FUNC(void, DLT_CODE) Dlt_CopyLongToArrayLittleEndian(uint32 SourceData, P2VAR(ui
     DestData[2] = (uint8)(SourceData >> 16u);
     DestData[3] = (uint8)(SourceData >> 24u);
 }
-
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /* PRQA S 3432++ */ /* MISRA Rule 20.7 */
 FUNC(void, DLT_CODE) Dlt_CopyIntToArrayLittleEndian(uint16 SourceData, P2VAR(uint8, AUTOMATIC, DLT_APPL_VAR) DestData)
 /* PRQA S 3432-- */ /* MISRA Rule 20.7 */
@@ -2484,8 +2651,11 @@ FUNC(void, DLT_CODE) Dlt_CopyIntToArrayLittleEndian(uint16 SourceData, P2VAR(uin
     DestData[0] = (uint8)(SourceData);
     DestData[1] = (uint8)(SourceData >> 8u);
 }
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
 #endif
-
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /* PRQA S 1532,3432++ */ /* MISRA Rule 8.7,Rule 20.7 */
 FUNC(void, DLT_CODE) Dlt_CopyLongToArrayBigEndian(uint32 SourceData, P2VAR(uint8, AUTOMATIC, DLT_APPL_VAR) DestData)
 /* PRQA S 1532,3432-- */ /* MISRA Rule 8.7,Rule 20.7 */
@@ -2495,7 +2665,10 @@ FUNC(void, DLT_CODE) Dlt_CopyLongToArrayBigEndian(uint32 SourceData, P2VAR(uint8
     DestData[2] = (uint8)(SourceData >> 8u);
     DestData[3] = (uint8)(SourceData);
 }
-
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /* PRQA S 1532,3432++ */ /* MISRA Rule 8.7,Rule 20.7 */
 FUNC(void, DLT_CODE) Dlt_CopyIntToArrayBigEndian(uint16 SourceData, P2VAR(uint8, AUTOMATIC, DLT_APPL_VAR) DestData)
 /* PRQA S 1532,3432-- */ /* MISRA Rule 8.7,Rule 20.7 */
@@ -2503,7 +2676,10 @@ FUNC(void, DLT_CODE) Dlt_CopyIntToArrayBigEndian(uint16 SourceData, P2VAR(uint8,
     DestData[0] = (uint8)(SourceData >> 8u);
     DestData[1] = (uint8)(SourceData);
 }
-
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /* PRQA S 1532,3432++ */ /* MISRA Rule 8.7,Rule 20.7 */
 FUNC(void, DLT_CODE)
 Dlt_CopyArrayToLongBigEndian(
@@ -2516,7 +2692,10 @@ Dlt_CopyArrayToLongBigEndian(
     (*DestData) |= (uint32)((uint32)(SourceData[2]) << 8u);
     (*DestData) |= (uint32)((uint32)(SourceData[3]));
 }
-
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /* PRQA S 1532,3432++ */ /* MISRA Rule 8.7,Rule 20.7 */
 FUNC(void, DLT_CODE)
 Dlt_CopyArrayToIntBigEndian(
@@ -2527,7 +2706,10 @@ Dlt_CopyArrayToIntBigEndian(
     (*DestData) = (uint16)((uint16)(SourceData[0]) << 8u);
     (*DestData) |= (uint16)((uint16)(SourceData[1]));
 }
-
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 static FUNC(void, DLT_CODE) Dlt_SendOverFlow(uint16 ChannelIndex)
 {
     /* "BufferOverflowNotification" Request message format: StandardHeader(16), ExternHeader(10), Payload(4) */
@@ -2626,7 +2808,11 @@ static FUNC(void, DLT_CODE) Dlt_SendOverFlow(uint16 ChannelIndex)
     }
 #endif
 }
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
 
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /*======================================================================================================
   Response is build like this:
   1. Number of Application IDs
@@ -2887,7 +3073,10 @@ FUNC(Std_ReturnType, DLT_CODE) Dlt_SendGetLogInfo(uint8 options, uint16 SwcIndex
 #endif /* DLT_SWC_NUM > 0 && DLT_SWC_MAX_CONTEXT_NUM > 0 */
     return ret;
 }
-
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 FUNC(Std_ReturnType, DLT_APPL_CODE)
 Dlt_InterSetLogLevel(
     uint16                  ChannelIndex,
@@ -2935,7 +3124,10 @@ Dlt_InterSetLogLevel(
     }
     return ret;
 }
-
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 FUNC(Std_ReturnType, DLT_APPL_CODE)
 Dlt_InterSetTraceStatus(
     uint16                ChannelIndex,
@@ -2983,7 +3175,10 @@ Dlt_InterSetTraceStatus(
     }
     return ret;
 }
-
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 FUNC(Std_ReturnType, DLT_APPL_CODE)
 Dlt_InterSetLogChannelAssignment(
     Dlt_ApplicationIDType   appId,
@@ -3063,7 +3258,10 @@ Dlt_InterSetLogChannelAssignment(
     }
     return ret;
 }
-
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 static FUNC(void, DLT_APPL_CODE) Dlt_MoveChannelRef(uint16* DltLogChannelRef, uint16 Length)
 {
     for (uint16 Cnt = 0; Cnt < Length; Cnt++)
@@ -3071,7 +3269,10 @@ static FUNC(void, DLT_APPL_CODE) Dlt_MoveChannelRef(uint16* DltLogChannelRef, ui
         DltLogChannelRef[Cnt] = DltLogChannelRef[Cnt + 1u];
     }
 }
-
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /* "SendTraceMessage" Send trace message format: StandardHeader(16), ExternHeader(10), Payload((4+n)*m) */
 /* Header format: {HTYP(1),MCNT(1),LEN(2),ECUID(4),SEID(4),TMSP(4)}, {MSIN(1),NOAR(1),APID(4),CTID(4)} */
 /* Payload format: {PayloadType(4),PayloadData(n)},{PayloadType(4),PayloadData(n)}, .... } */
@@ -3227,7 +3428,10 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_InterSendTraceMessage(
 #endif
     return ret;
 }
-
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /* "SendLogMessage" Send log message format: StandardHeader(16), ExternHeader(10), Payload((4+n)*m) */
 /* Header format: {HTYP(1),MCNT(1),LEN(2),ECUID(4),SEID(4),TMSP(4)}, {MSIN(1),NOAR(1),APID(4),CTID(4)} */
 /* Payload format: {PayloadType(4),PayloadData(n)},{PayloadType(4),PayloadData(n)}, .... } */
@@ -3384,7 +3588,10 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_InterSendLogMessage(
     }
     return ret;
 }
-
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 static FUNC(void, DLT_CODE) Dlt_Tx_RemoveBuffer(uint16 ChannelIndex, uint32 RemoveOffset, uint32 Length)
 {
 #if ((DLT_CHANNEL_NUM > 0) && (DLT_CHANNEL_MAX_BUFFER_LENGTH > 0))
@@ -3428,7 +3635,10 @@ static FUNC(void, DLT_CODE) Dlt_Tx_RemoveBuffer(uint16 ChannelIndex, uint32 Remo
     }
 #endif
 }
-
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 static FUNC(void, DLT_CODE) Dlt_MemSet(uint8* Dest, uint8 Value, uint32 Size)
 {
     uint32 cnt = Size;
@@ -3438,7 +3648,10 @@ static FUNC(void, DLT_CODE) Dlt_MemSet(uint8* Dest, uint8 Value, uint32 Size)
         Dest[cnt] = Value;
     }
 }
-
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /* Header Type format: UEH(0),MSBF(1),WEID(2),WSID(3),WTMS(4),VERS(5-7) */
 /* Standard Header format: HTYP(1),MCNT(1),LEN(2),ECUID(4),SEID(4),TMSP(4) */
 static FUNC(void, DLT_CODE)
@@ -3534,7 +3747,10 @@ static FUNC(void, DLT_CODE)
     }
 #endif
 }
-
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /* Data Type format: DLT_TYPE_LOG(0),DLT_TYPE_APP_TRACE(1),DLT_TYPE_NW_TRACE(2),DLT_TYPE_CONTROL(3) */
 /* Message Type format: DLT_CONTROL_REQUEST(0),DLT_CONTROL_RESPONSE(1) */
 /* Log Message Type format:
@@ -3621,6 +3837,5 @@ static FUNC(void, DLT_CODE) Dlt_CreateExtendedHeader(const Dlt_CreateExtendedHea
     Dlt_MoveWriteIndexCopy(ChannelIndex, (uint8)(SwcContextId));
 #endif
 }
-
 #define DLT_STOP_SEC_CODE
 #include "Dlt_MemMap.h"

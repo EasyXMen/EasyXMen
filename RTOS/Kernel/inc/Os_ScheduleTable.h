@@ -1,0 +1,77 @@
+/**
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
+ * SPDX-License-Identifier: LGPL-2.1-only-with-exception
+ *
+ * This library is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU Lesser General Public License as published by the Free Software Foundation; version 2.1.
+ * This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU Lesser General Public License for more details.
+ * You should have received a copy of the GNU Lesser General Public License along with this library;
+ * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ * or see <https://www.gnu.org/licenses/>.
+ */
+/*
+ ************************************************************************************************************************
+ **
+ **  @file               : Os_ScheduleTable.h
+ **  @author             : i-soft-os
+ **  @date               : 2024/02/10
+ **  @vendor             : isoft
+ **  @description        : Os header file for ScheduleTable api declarations
+ **
+ ***********************************************************************************************************************/
+
+#ifndef OS_SCHEDULETABLE_H
+#define OS_SCHEDULETABLE_H
+
+/* =================================================== inclusions =================================================== */
+#include "Os_ScheduleTable_CfgData.h"
+
+/* ===================================================== macros ===================================================== */
+
+/* ========================================== external function definitions ========================================= */
+#if (CFG_SCHEDTBL_MAX > 0U)
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * @brief              Init ScheduleTable during os_startup.
+ * @synchronous        TRUE
+ * @reentrant          FALSE
+ * @trace              -
+ */
+extern void Os_InitScheduleTable(void);
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * @brief              Os_WorkSchedTbl.
+ * @param[in]          counterId: The counter that drives the scheduling table.
+ * @synchronous        TRUE
+ * @reentrant          FALSE
+ * @trace              -
+ */
+extern void Os_WorkSchedTbl(Os_CounterType counterId);
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/**
+ * @brief              Internal implementation of OS service:StopScheduleTable.
+ * @param[in]          schedTblId: ScheduleTable Id.
+ * @return             StatusType
+ * @synchronous        TRUE
+ * @reentrant          FALSE
+ * @trace              -
+ */
+extern StatusType Os_StopScheduleTable(ScheduleTableType schedTblId);
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+#endif
+
+#endif
+
+/*=======[E N D   O F   F I L E]==============================================*/

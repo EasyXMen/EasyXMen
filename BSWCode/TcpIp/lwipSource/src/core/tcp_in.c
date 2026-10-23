@@ -85,31 +85,123 @@
 /* These variables are global to all functions involved in the input
    processing of TCP segments. They are set by the tcp_input()
    function. */
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 static struct tcp_seg g_inseg[TCPIP_MULTICORE_NUMBER];
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
+
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 static struct tcp_hdr *g_tcphdr[TCPIP_MULTICORE_NUMBER];
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
+
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 static u16_t g_tcphdr_optlen[TCPIP_MULTICORE_NUMBER];
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
+
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 static u16_t g_tcphdr_opt1len[TCPIP_MULTICORE_NUMBER];
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
+
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 static u8_t *g_tcphdr_opt2[TCPIP_MULTICORE_NUMBER];
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
+
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 static u16_t g_tcp_optidx[TCPIP_MULTICORE_NUMBER];
-static u32_t g_seqno[TCPIP_MULTICORE_NUMBER], g_ackno[TCPIP_MULTICORE_NUMBER];
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
+
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
+static u32_t g_seqno[TCPIP_MULTICORE_NUMBER];
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
+
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
+static u32_t g_ackno[TCPIP_MULTICORE_NUMBER];
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
+
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 static tcpwnd_size_t g_recv_acked[TCPIP_MULTICORE_NUMBER];
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
+
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 static u16_t g_tcplen[TCPIP_MULTICORE_NUMBER];
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
+
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 static u8_t g_flags[TCPIP_MULTICORE_NUMBER];
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 static u8_t g_recv_flags[TCPIP_MULTICORE_NUMBER];
-static struct pbuf *g_recv_data[TCPIP_MULTICORE_NUMBER];
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
+static struct pbuf *g_recv_data[TCPIP_MULTICORE_NUMBER];
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
+
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 struct tcp_pcb *g_tcp_input_pcb[TCPIP_MULTICORE_NUMBER];
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 
 /* Forward declarations. */
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 static err_t tcp_process(struct tcp_pcb *pcb);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 static void tcp_receive(struct tcp_pcb *pcb);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 static void tcp_parseopt(struct tcp_pcb *pcb);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 static void tcp_listen_input(struct tcp_pcb_listen *pcb);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 static void tcp_timewait_input(struct tcp_pcb *pcb);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 static int tcp_input_delayed_close(struct tcp_pcb *pcb);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if LWIP_TCP_SACK_OUT
 static void tcp_add_sack(struct tcp_pcb *pcb, u32_t left, u32_t right);
@@ -119,6 +211,8 @@ static void tcp_remove_sacks_gt(struct tcp_pcb *pcb, u32_t seq);
 #endif /* TCP_OOSEQ_BYTES_LIMIT || TCP_OOSEQ_PBUFS_LIMIT */
 #endif /* LWIP_TCP_SACK_OUT */
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * The initial input processing of TCP. It verifies the TCP header, demultiplexes
  * the segment between the PCBs and passes it on to tcp_process(), which implements
@@ -623,7 +717,11 @@ dropped:
   MIB2_STATS_INC(mib2.tcpinerrs);
   pbuf_free(p);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /** Called from tcp_input to check for TF_CLOSED flag. This results in closing
  * and deallocating a pcb at the correct place to ensure no one references it
  * any more.
@@ -653,7 +751,11 @@ tcp_input_delayed_close(struct tcp_pcb *pcb)
   }
   return 0;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Called by tcp_input() when a segment arrives for a listening
  * connection (from tcp_input()).
@@ -777,7 +879,11 @@ tcp_listen_input(struct tcp_pcb_listen *pcb)
   }
   return;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Called by tcp_input() when a segment arrives for a connection in
  * TIME_WAIT.
@@ -831,7 +937,11 @@ tcp_timewait_input(struct tcp_pcb *pcb)
   }
   return;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Implements the TCP state machine. Called by tcp_input. In some
  * states tcp_receive() is called to receive data. The tcp_seg
@@ -857,6 +967,8 @@ tcp_process(struct tcp_pcb *pcb)
   const u8_t flags = TCPIP_VAR_FLAGS(coreIndex);
   u8_t *const recv_flags = &TCPIP_VAR_RECV_FLAGS(coreIndex);
 
+  LWIP_UNUSED_ARG(inseg);
+
   struct tcp_seg *rseg;
   u8_t acceptable = 0;
   err_t err;
@@ -871,7 +983,13 @@ tcp_process(struct tcp_pcb *pcb)
     if (pcb->state == SYN_SENT) {
       /* "In the SYN-SENT state (a RST received in response to an initial SYN),
           the RST is acceptable if the ACK field acknowledges the SYN." */
-      if (ackno == pcb->snd_nxt) {
+#if LWIP_SUPPORT_TC8_TEST
+      /* @ref RFC 793 and RFC 9293 3.10.7.3 */
+      if ((flags & TCP_ACK) && ((ackno > pcb->snd_wl2) && (ackno <= pcb->snd_nxt)))
+#else
+      if (ackno == pcb->snd_nxt)
+#endif
+      {
         acceptable = 1;
       }
     } else {
@@ -945,6 +1063,12 @@ tcp_process(struct tcp_pcb *pcb)
       LWIP_DEBUGF(TCP_INPUT_DEBUG, ("SYN-SENT: ackno %"U32_F" pcb->snd_nxt %"U32_F" unacked %s %"U32_F"\n",
                                     ackno, pcb->snd_nxt, pcb->unacked ? "" : " empty:",
                                     pcb->unacked ? lwip_ntohl(pcb->unacked->tcphdr->seqno) : 0));
+#if LWIP_SUPPORT_TC8_TEST
+      /* @ref RFC793 page 75 */
+      if (flags & TCP_FIN) {
+        return ERR_OK;
+      }
+#endif
       /* received SYN ACK with expected sequence number? */
       if ((flags & TCP_ACK) && (flags & TCP_SYN)
           && (ackno == pcb->lastack + 1)) {
@@ -1014,6 +1138,55 @@ tcp_process(struct tcp_pcb *pcb)
           tcp_rexmit_rto(pcb);
         }
       }
+#if TCP_SAMETIME_OPEN
+      /* RFC 793 3.4/ page 76 and RFC 9293 3.10.7.3.  (Simultaneous Open)
+         If the SYN is acceptable in state SYN_SENT, the connection should be entered into SYN_RCVD state,
+         and an ACK+SYN should be sent in reply.
+         at the same time open
+       */
+      else if(flags & TCP_SYN) {
+        /* same time open meas syn retry,sequence is repeate */
+        pcb->snd_lbb--;
+        /* response ackno shall is add one by recevier sequence number */
+        pcb->rcv_nxt = seqno + 1;
+        pcb->rcv_ann_right_edge = pcb->rcv_nxt;
+        pcb->lastack = pcb->snd_lbb;
+        pcb->snd_wnd = tcphdr->wnd;
+        pcb->snd_wnd_max = pcb->snd_wnd;
+        pcb->snd_wl1 = seqno - 1;/* initialise to seqno-1 to force window update */
+        pcb->state = SYN_RCVD;
+        LWIP_ASSERT("pcb->snd_queuelen > 0", (pcb->snd_queuelen > 0));
+        --pcb->snd_queuelen;
+        rseg = pcb->unacked;
+        if (rseg == NULL) {
+          /* might happen if tcp_output fails in tcp_rexmit_rto()
+             in which case the segment is on the unsent list */
+          rseg = pcb->unsent;
+          LWIP_ASSERT("no segment to free", rseg != NULL);
+          pcb->unsent = rseg->next;
+        } else {
+          pcb->unacked = rseg->next;
+        }
+        tcp_seg_free(rseg);
+
+        /* If there's nothing left to acknowledge, stop the retransmit
+           timer, otherwise reset it to start again */
+        if (pcb->unacked == NULL) {
+          pcb->rtime = -1;
+        } else {
+          pcb->rtime = 0;
+          pcb->nrtx = 0;
+        }
+        err = tcp_enqueue_flags(pcb, TCP_SYN | TCP_ACK);
+        if (ERR_OK != err)
+        {
+          /* create Seg error shall be send RST */
+          tcp_rst(pcb, pcb->snd_nxt, seqno, &pcb->local_ip, &pcb->remote_ip, pcb->local_port, pcb->remote_port);
+          return ERR_ABRT;
+        }
+        tcp_ack_now(pcb);
+      }
+#endif/* TCP_SAMETIME_OPEN */
       break;
     case SYN_RCVD:
 #if LWIP_TCP_TC8_RETURN_LISTTEN
@@ -1040,15 +1213,24 @@ tcp_process(struct tcp_pcb *pcb)
           return ERR_RST;
         }
 #endif/* LWIP_TCP_TC8_RETURN_LISTTEN */
-      } else if (flags & TCP_ACK) {
+      }
+#if !LWIP_TCP_TC8_RETURN_LISTTEN
+      else
+#endif
+      if (flags & TCP_ACK) {
         /* expected ACK number? */
         if (TCP_SEQ_BETWEEN(ackno, pcb->lastack + 1, pcb->snd_nxt)) {
           pcb->state = ESTABLISHED;
           LWIP_DEBUGF(TCP_DEBUG, ("TCP connection established %"U16_F" -> %"U16_F".\n", inseg->tcphdr->src, inseg->tcphdr->dest));
 #if LWIP_CALLBACK_API || TCP_LISTEN_BACKLOG
           if (pcb->listener == NULL) {
+#if TCP_SAMETIME_OPEN
+            /* same time open, socket as client module,shall notify event connect */
+            TCP_EVENT_CONNECTED(pcb, ERR_OK, err);
+#else
             /* listen pcb might be closed by now */
             err = ERR_VAL;
+#endif
           } else
 #endif /* LWIP_CALLBACK_API || TCP_LISTEN_BACKLOG */
           {
@@ -1162,8 +1344,12 @@ tcp_process(struct tcp_pcb *pcb)
   }
   return ERR_OK;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if TCP_QUEUE_OOSEQ
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Insert segment into the list (segments covered with new one will be deleted)
  *
@@ -1206,8 +1392,12 @@ tcp_oos_insert_segment(struct tcp_seg *cseg, struct tcp_seg *next)
   }
   cseg->next = next;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif /* TCP_QUEUE_OOSEQ */
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /** Remove segments from a list if the incoming ACK acknowledges them */
 static struct tcp_seg *
 tcp_free_acked_segments(struct tcp_pcb *pcb, struct tcp_seg *seg_list, const char *dbg_list_name,
@@ -1253,7 +1443,11 @@ tcp_free_acked_segments(struct tcp_pcb *pcb, struct tcp_seg *seg_list, const cha
   }
   return seg_list;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Called by tcp_process. Checks if the given segment is an ACK for outstanding
  * data, and if so frees the memory of the buffered data. Next, it places the
@@ -2024,7 +2218,11 @@ tcp_receive(struct tcp_pcb *pcb)
     }
   }
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 static u8_t
 tcp_get_next_optbyte(void)
 {
@@ -2044,7 +2242,11 @@ tcp_get_next_optbyte(void)
     return tcphdr_opt2[idx];
   }
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Parses the options contained in the incoming segment.
  *
@@ -2061,6 +2263,10 @@ tcp_parseopt(struct tcp_pcb *pcb)
   const u32_t seqno = TCPIP_VAR_SEQNO(coreIndex);
   const u16_t tcplen = TCPIP_VAR_TCPLEN(coreIndex);
   const u8_t flags = TCPIP_VAR_FLAGS(coreIndex);
+
+  LWIP_UNUSED_ARG(seqno);
+  LWIP_UNUSED_ARG(tcplen);
+  LWIP_UNUSED_ARG(flags);
 
   u8_t data;
   u16_t mss;
@@ -2179,7 +2385,11 @@ tcp_parseopt(struct tcp_pcb *pcb)
     }
   }
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void
 tcp_trigger_input_pcb_close(void)
 {
@@ -2188,6 +2398,8 @@ tcp_trigger_input_pcb_close(void)
 
   *recv_flags |= TF_CLOSED;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if LWIP_TCP_SACK_OUT
 /**

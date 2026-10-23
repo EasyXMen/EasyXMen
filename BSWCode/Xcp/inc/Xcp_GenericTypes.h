@@ -43,9 +43,9 @@
 #define XCP_TS_TWO_BYTE      2u
 #define XCP_TS_FOUR_BYTE     4u
 
-#define XCP_AG_BYTE  0u
-#define XCP_AG_WORD  1u
-#define XCP_AG_DWORD 2u
+#define XCP_AG_BYTE          0u
+#define XCP_AG_WORD          1u
+#define XCP_AG_DWORD         2u
 /* OVERLOAD */
 #define XCP_DAQ_OVL_NO_INDIC 0u
 #define XCP_DAQ_OVL_PID      1u

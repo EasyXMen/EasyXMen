@@ -35,7 +35,7 @@ extern "C" {
 /* ===================================================== macros ===================================================== */
 
 /* ================================================ type definitions ================================================ */
-typedef struct ComM_UserConfigTypeTag /* PRQA S 1536 */ /* VL_ComM_NotUsed */
+typedef struct ComM_UserConfigType_Tag /* PRQA S 1536 */ /* VL_ComM_1536 */
 {
     const NetworkHandleType* Channels;
     uint8                    NumberOfChannels;
@@ -44,7 +44,8 @@ typedef struct ComM_UserConfigTypeTag /* PRQA S 1536 */ /* VL_ComM_NotUsed */
     ApplicationType Application;
 #endif
 #if COMM_CURRENT_MODE_NOTIFICATION_ENABLED == STD_ON
-    void (*SwitchCurrentMode)(ComM_ModeType currentMode);
+    Std_ReturnType (*SwitchCurrentMode)(ComM_UserHandleType, ComM_ModeType);
+    Std_ReturnType (*PortSwitchCurrentMode)(ComM_ModeType);
 #endif
 } ComM_UserConfigType;
 
@@ -53,6 +54,8 @@ typedef struct ComM_UserConfigTypeTag /* PRQA S 1536 */ /* VL_ComM_NotUsed */
 /* =========================================== external data declarations =========================================== */
 
 /* ========================================= external function declarations ========================================= */
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief Initializes the global variables for all users that are used across multiple partitions.
  * @param[in]     UserConfigs  Pointer to post-build configuration data for all users
@@ -61,7 +64,11 @@ typedef struct ComM_UserConfigTypeTag /* PRQA S 1536 */ /* VL_ComM_NotUsed */
  * @trace         CPD-64934
  */
 void ComM_UserInit(const ComM_UserConfigType* UserConfigs);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief Requesting of a Communication Mode by a user.
  * @param[in]    User     Handle of the user who requests a mode
@@ -73,7 +80,11 @@ void ComM_UserInit(const ComM_UserConfigType* UserConfigs);
  * @trace        CPD-64935
  */
 Std_ReturnType ComM_UserRequestComMode(ComM_UserHandleType User, ComM_ModeType ComMode);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief Function to query the maximum allowed Communication Mode of the corresponding user.
  * @param[in]    User      Handle of the user who requests a mode
@@ -83,7 +94,11 @@ Std_ReturnType ComM_UserRequestComMode(ComM_UserHandleType User, ComM_ModeType C
  * @trace       CPD-64936
  */
 ComM_ModeType ComM_UserGetMaxComMode(ComM_UserHandleType User);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief Function to query the currently requested Communication Mode of the corresponding user.
  * @param[in]    User      Handle of the user who requests a mode
@@ -93,7 +108,11 @@ ComM_ModeType ComM_UserGetMaxComMode(ComM_UserHandleType User);
  * @trace        CPD-64937
  */
 ComM_ModeType ComM_UserGetRequestedComMode(ComM_UserHandleType User);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief Function to query the current Communication Mode.
  * @param[in]    User      Handle of the user who requests a mode
@@ -103,8 +122,12 @@ ComM_ModeType ComM_UserGetRequestedComMode(ComM_UserHandleType User);
  * @trace        CPD-65025
  */
 ComM_ModeType ComM_UserGetCurrentComMode(ComM_UserHandleType User);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
 #if COMM_PNC_SUPPORT == STD_ON
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief The function returns the current Communication Mode of the corresponding PNC the affected user is assigned to.
  * @param[in]    User      Handle of the user who requests a mode
@@ -120,33 +143,43 @@ ComM_ModeType ComM_UserGetCurrentComMode(ComM_UserHandleType User);
  * @trace        CPD-64947
  */
 Std_ReturnType ComM_UserGetCurrentPNCComMode(ComM_UserHandleType User, ComM_ModeType* ComMode);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 #endif
 
 #if COMM_CURRENT_MODE_NOTIFICATION_ENABLED == STD_ON
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
- * @brief The function returns the lowest current Communication Mode of the corresponding PNC or channel the affected
- * user is assigned to.
- * @param[in]    User      Handle of the user who requests a mode
- * @retval       ComMode   See ComM_ModeType
- * @reentrant    TRUE
+ * @brief This function shall process AUTOSAR ComM activities for users current mode notification.
+ * @reentrant    FALSE
  * @synchronous  TRUE
- * @trace        CPD-64958
+ * @trace        CPD-85932
  */
-ComM_ModeType ComM_UserGetCurrentMode(ComM_UserHandleType User);
+void ComM_UserCurrentModeNotification(void);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief A SW-C that wants to get informed about its current Communication Manager Module Mode requires the
  * ModeSwitchInterface ComM_CurrentMode.
  * @param[in]    User      Handle of the user who requests a mode
  * @param[in]    ComMode   See ComM_ModeType
+ * @return       E_OK if data passed to service successfully, failed otherwise
  * @reentrant    FALSE
  * @synchronous  TRUE
  * @trace        CPD-64964
  */
-void ComM_UserSwitchCurrentMode(ComM_UserHandleType User, ComM_ModeType ComMode);
+Std_ReturnType ComM_UserSwitchCurrentMode(ComM_UserHandleType User, ComM_ModeType ComMode);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 #endif
 
 #if COMM_MULTIPLE_PARTITION_ENABLED == STD_ON
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief Function to query the application of the corresponding user.
  * @param[in]    User  See ComM_UserHandleType
@@ -155,6 +188,8 @@ void ComM_UserSwitchCurrentMode(ComM_UserHandleType User, ComM_ModeType ComMode)
  * @synchronous  TRUE
  */
 ApplicationType ComM_UserGetApplication(ComM_UserHandleType User);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 #endif
 #ifdef __cplusplus
 }

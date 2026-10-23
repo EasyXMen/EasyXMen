@@ -37,15 +37,15 @@
 /**
  * @brief subfunction stopROE
  */
-#define DCM_UDS86_STOPROE 0u
+#define DCM_UDS86_STOPROE               0u
 /**
  * @brief subfunction startROE
  */
-#define DCM_UDS86_STARTROE 5u
+#define DCM_UDS86_STARTROE              5u
 /**
  * @brief subfunction clearROE
  */
-#define DCM_UDS86_CLEARROE 6u
+#define DCM_UDS86_CLEARROE              6u
 /**
  * @brief subfunction reportActivatedEvents
  */
@@ -76,7 +76,7 @@
 /**
  * @brief service id of UDS service Read DTC Information
  */
-#define DCM_UDS_READDTCINFO_SID 0x19u
+#define DCM_UDS_READDTCINFO_SID    0x19u
 /* ============================================ internal data definitions =========================================== */
 #define DCM_START_SEC_VAR_CLEARED_8
 #include "Dcm_MemMap.h"
@@ -84,6 +84,10 @@
  * @brief total requested number of trigger on DTC roe @range 0..255
  */
 DCM_LOCAL uint8 Dcm_RoeCtrlDtcNum;
+#define DCM_STOP_SEC_VAR_CLEARED_8
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_VAR_CLEARED_8
+#include "Dcm_MemMap.h"
 /**
  * @brief total requested number of trigger on Did roe @range 0..255
  */
@@ -117,6 +121,8 @@ Dcm_RoeCtrlType Dcm_RoeCtrl[DCM_MAX_ROE_DID + DCM_MAX_ROE_DTC];
 #include "Dcm_MemMap.h"
 /* ========================================== internal function declarations ======================================== */
 #if ((defined(DCM_UDS_0X86_0X1)) || ((defined(DCM_UDS_0X86_0X3)) && (DCM_DID_NUM > 0)) || (defined(DCM_UDS_0X86_0X8)))
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         called to set the roeEvent to Dcm_RoeCtrl
  * @param[in]     protocolType    : current protocolType
@@ -137,7 +143,11 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x86_SetEvent(
     Dcm_RoeEventType              roeEvent,
     Dcm_RoeEventWindowTimeType    eventWindowTime,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         called by Dcm_UDS0x86_CheckTimer to act as the roe scheduler
@@ -147,6 +157,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x86_SetEvent(
  * @trace         CPD-PLACEHOLDE
  */
 DCM_LOCAL void Dcm_UDS0x86_MainFunction(void);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         general condition check for UDS 0x86
@@ -167,6 +181,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x86_ConditionCheck(
     Dcm_MsgContextType*           pMsgContext,
     Dcm_RoeEventWindowTimeType*   eventWindowTime,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         general checks for subfunction
@@ -184,8 +202,12 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x86_ConditionCheck(
  */
 DCM_LOCAL Std_ReturnType
     Dcm_UDS0x86_SubFunctionCheck(Dcm_MsgLenType reqDataLen, uint8 subFunction, Dcm_NegativeResponseCodeType* ErrorCode);
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #ifdef DCM_UDS_0X86_0X1
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
+
 /**
  * @brief         service interpreter for subFunction 0x1
  * @param[in]     protocolId      : the current protocolId
@@ -209,9 +231,13 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x86_01(
     Dcm_MsgContextType*           pMsgContext,
     Dcm_RoeEventWindowTimeType    eventWindowTime,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #ifdef DCM_UDS_0X86_0X3
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         service interpreter for subFunction 0x3
  * @param[in]     protocolId      : the current protocolId
@@ -235,9 +261,13 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x86_03(
     Dcm_MsgContextType*           pMsgContext,
     Dcm_RoeEventWindowTimeType    eventWindowTime,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #ifdef DCM_UDS_0X86_0X4
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         service interpreter for subFunction 0x4
  * @param[inout]  pMsgContext     : Message-related information for one diagnostic protocol identifier. The pointers in
@@ -250,9 +280,13 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x86_03(
  * @trace         CPD-PLACEHOLDE
  */
 DCM_LOCAL void Dcm_UDS0x86_04(Dcm_MsgContextType* pMsgContext);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #ifdef DCM_UDS_0X86_0X6
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         service interpreter for subFunction 0x6
  * @return        void
@@ -261,9 +295,13 @@ DCM_LOCAL void Dcm_UDS0x86_04(Dcm_MsgContextType* pMsgContext);
  * @trace         CPD-PLACEHOLDE
  */
 DCM_LOCAL void Dcm_UDS0x86_06(void);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #ifdef DCM_UDS_0X86_0X8
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         service interpreter for subFunction 0x8
  * @param[in]     protocolId      : the current protocolId
@@ -287,7 +325,11 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x86_08(
     Dcm_MsgContextType*           pMsgContext,
     Dcm_RoeEventWindowTimeType    eventWindowTime,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         store roe info to NvM
@@ -304,6 +346,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x86_08(
  */
 DCM_LOCAL void
     Dcm_UDS0x86_Store(uint8 subFunction, Dcm_RoeEventWindowTimeType eventWindowTime, Dcm_MsgContextType* pMsgContext);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         handle different subFunctions
@@ -328,8 +374,12 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x86_HandleSubFunction(
     Dcm_MsgContextType*           pMsgContext,
     Dcm_RoeEventWindowTimeType    eventWindowTime,
     Dcm_NegativeResponseCodeType* ErrorCode);
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if ((defined DCM_UDS_0X86_0X5) || (defined DCM_UDS_0X86_0X0))
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
+
 /**
  * @brief         set all roeStatus
  * @param[in]     RoeStatus : the current roeStatus
@@ -339,9 +389,13 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x86_HandleSubFunction(
  * @trace         CPD-PLACEHOLDE
  */
 DCM_LOCAL void Dcm_UDS0x86_SetRoeStatus(Dcm_RoeStatusType RoeStatus);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #if ((defined(DCM_UDS_0X86_0X1)) || ((defined(DCM_UDS_0X86_0X3)) && (DCM_DID_NUM > 0)) || (defined(DCM_UDS_0X86_0X8)))
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         get roe PduId and protocolId based on requested protocolType
  * @param[in]     protocolType : the requested protocolType
@@ -354,6 +408,10 @@ DCM_LOCAL void Dcm_UDS0x86_SetRoeStatus(Dcm_RoeStatusType RoeStatus);
  */
 DCM_LOCAL void
     Dcm_UDS0x86_getRoePduIdAndProtocolId(Dcm_ProtocolType protocolType, PduIdType* roePduId, uint8* protocolId);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         check Service and subService for requested response service
@@ -375,9 +433,13 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x86_CheckService(
     uint8*                        reqData,
     Dcm_MsgLenType                reqDataLen,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #if ((STD_ON == DCM_UDS_0X22) && (STD_ON == DCM_UDS_0X86_0X3))
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief            Check if the DID has changed.
  * @param[in]        did : data identifier
@@ -391,8 +453,12 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x86_CheckService(
  * @trace            CPD-PLACEHOLDE
  */
 Std_ReturnType Dcm_UDS0x86_DIDChangeCheck(uint16 did, boolean* change, uint8* oldDidBuffer, uint16 conId);
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if (STD_ON == DCM_DID_RANGE_ENABLED)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
+
 /**
  * @brief         This function reads data of range did
  * @param[in]     OpStatus          : Indicates the current operation status
@@ -420,9 +486,13 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x86_RangeDidReadData(
     uint8*                        DestBuffer,
     Dcm_MsgLenType*               BufSize,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #if (STD_ON == DCM_DID_RANGE_ENABLED)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         This function gets the configured did index, also applying to rangeDid and OBDDid.
  * @param[in]     OpStatus      : Indicates the current operation status
@@ -452,9 +522,13 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x86_RangeDidHandle(
     uint8*                        DestBuffer,
     Dcm_MsgLenType*               BufSize,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #if (STD_ON == DCM_OBD_DID_MIRROR)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         This function deals with obd did to get data
  * @param[in]     OpStatus   : Indicates the current operation status
@@ -481,6 +555,8 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x86_OBDDidHandle(
     uint8*                        DestBuffer,
     Dcm_MsgLenType*               BufSize,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 /* ========================================== external function definitions ========================================= */
 
@@ -733,10 +809,8 @@ Std_ReturnType Dcm_UDS0x86_DIDChangeCheck(uint16 did, boolean* change, uint8* ol
 
     return result;
 }
-
 #define DCM_STOP_SEC_CODE
 #include "Dcm_MemMap.h"
-
 #endif
 
 #define DCM_START_SEC_CODE
@@ -897,9 +971,9 @@ void Dcm_UDS0x86_CheckTimer(void)
 #define DCM_STOP_SEC_CODE
 #include "Dcm_MemMap.h"
 /* ========================================== internal function definitions ========================================= */
+#if ((defined(DCM_UDS_0X86_0X1)) || ((defined(DCM_UDS_0X86_0X3)) && (DCM_DID_NUM > 0)) || (defined(DCM_UDS_0X86_0X8)))
 #define DCM_START_SEC_CODE
 #include "Dcm_MemMap.h"
-#if ((defined(DCM_UDS_0X86_0X1)) || ((defined(DCM_UDS_0X86_0X3)) && (DCM_DID_NUM > 0)) || (defined(DCM_UDS_0X86_0X8)))
 /**
  * called to set the roeEvent to Dcm_RoeCtrl
  */
@@ -960,7 +1034,11 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x86_SetEvent(
 
     return result;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL void
     Dcm_UDS0x86_getRoePduIdAndProtocolId(Dcm_ProtocolType protocolType, PduIdType* roePduId, uint8* protocolId)
 {
@@ -999,8 +1077,11 @@ DCM_LOCAL void
         *protocolId = Dcm_DslMainConnection[Dcm_DslProtocolRx[*roePduId].ParentMainConnectionId].ParentProtocolId;
     }
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
-
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * periodically check for pending roe service request
  */
@@ -1032,7 +1113,10 @@ DCM_LOCAL void Dcm_UDS0x86_MainFunction(void)
         }
     }
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL Std_ReturnType Dcm_UDS0x86_ConditionCheck(
     Dcm_MsgContextType*           pMsgContext,
     Dcm_RoeEventWindowTimeType*   eventWindowTime,
@@ -1096,7 +1180,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x86_ConditionCheck(
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL Std_ReturnType
     Dcm_UDS0x86_SubFunctionCheck(Dcm_MsgLenType reqDataLen, uint8 subFunction, Dcm_NegativeResponseCodeType* ErrorCode)
 {
@@ -1156,8 +1243,11 @@ DCM_LOCAL Std_ReturnType
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #ifdef DCM_UDS_0X86_0X1
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL Std_ReturnType Dcm_UDS0x86_01(
     uint8                         protocolId,
     Dcm_RoeCtrlType*              roeCtrlPtr,
@@ -1198,9 +1288,12 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x86_01(
 
     return result;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
-
 #ifdef DCM_UDS_0X86_0X3
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL Std_ReturnType Dcm_UDS0x86_03(
     uint8                         protocolId,
     Dcm_RoeCtrlType*              roeCtrlPtr,
@@ -1258,9 +1351,12 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x86_03(
 
     return result;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
-
 #ifdef DCM_UDS_0X86_0X8
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL Std_ReturnType Dcm_UDS0x86_08(
     uint8                         protocolId,
     Dcm_RoeCtrlType*              roeCtrlPtr,
@@ -1292,14 +1388,17 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x86_08(
 
     return result;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
-
 #ifdef DCM_UDS_0X86_0X4
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL void Dcm_UDS0x86_04(Dcm_MsgContextType* pMsgContext)
 {
     uint8* resData = pMsgContext->resData;
-
-    resData[1u] = 0u;
+    uint16 offset  = 2u;
+    resData[1u]    = 0u;
     for (uint8 index = 0u; index < Dcm_RoeCtrlNum; index++)
     {
         const Dcm_RoeCtrlType* roeCtrlPtr = &Dcm_RoeCtrl[index];
@@ -1307,7 +1406,6 @@ DCM_LOCAL void Dcm_UDS0x86_04(Dcm_MsgContextType* pMsgContext)
         {
             resData[1u]++;
             Dcm_RoeEventType roeEvent = roeCtrlPtr->RoeEvent;
-            uint16           offset   = 2u;
             resData[offset]           = (uint8)roeEvent;
             resData[offset + 1u]      = (uint8)roeCtrlPtr->RoeEventWindowTime;
             offset += 2u;
@@ -1350,12 +1448,15 @@ DCM_LOCAL void Dcm_UDS0x86_04(Dcm_MsgContextType* pMsgContext)
                 roeCtrlPtr->RoeServiceResponseRecord,
                 roeCtrlPtr->RoeServiceResponseRecordSize);
             offset += (uint16)roeCtrlPtr->RoeServiceResponseRecordSize;
-            pMsgContext->resDataLen = (Dcm_MsgLenType)offset - 1u;
         }
     }
+    pMsgContext->resDataLen = (Dcm_MsgLenType)offset - 1u;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
-
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL void
     Dcm_UDS0x86_Store(uint8 subFunction, Dcm_RoeEventWindowTimeType eventWindowTime, Dcm_MsgContextType* pMsgContext)
 {
@@ -1383,7 +1484,10 @@ DCM_LOCAL void
     }
 #endif
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL Std_ReturnType Dcm_UDS0x86_HandleSubFunction(
     uint8                         protocolId,
     Dcm_RoeCtrlType*              roeCtrlPtr,
@@ -1453,8 +1557,11 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x86_HandleSubFunction(
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if ((defined DCM_UDS_0X86_0X5) || (defined DCM_UDS_0X86_0X0))
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL void Dcm_UDS0x86_SetRoeStatus(Dcm_RoeStatusType RoeStatus)
 {
     for (uint8 index = 0u; index < Dcm_RoeCtrlNum; index++)
@@ -1462,9 +1569,12 @@ DCM_LOCAL void Dcm_UDS0x86_SetRoeStatus(Dcm_RoeStatusType RoeStatus)
         Dcm_RoeCtrl[index].RoeStatus = RoeStatus;
     }
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
-
 #ifdef DCM_UDS_0X86_0X6
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL void Dcm_UDS0x86_06(void)
 {
     for (uint8 index = 0u; index < Dcm_RoeCtrlNum; index++)
@@ -1477,9 +1587,12 @@ DCM_LOCAL void Dcm_UDS0x86_06(void)
     Dcm_RoeCtrlDtcNum = 0u;
     Dcm_RoeCtrlDidNum = 0u;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
-
 #if ((defined(DCM_UDS_0X86_0X1)) || ((defined(DCM_UDS_0X86_0X3)) && (DCM_DID_NUM > 0)) || (defined(DCM_UDS_0X86_0X8)))
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL Std_ReturnType Dcm_UDS0x86_CheckService(
     Dcm_ProtocolType              protocolType,
     Dcm_RoeCtrlType*              roeCtrl,
@@ -1519,8 +1632,7 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x86_CheckService(
 
     return result;
 }
-#endif
-
 #define DCM_STOP_SEC_CODE
 #include "Dcm_MemMap.h"
+#endif
 #endif

@@ -54,7 +54,11 @@ extern "C" {
  * @synchronous TRUE
  * @trace       CPD-66301
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 void BswM_EthSM_CurrentState(NetworkHandleType Network, EthSM_NetworkModeStateType CurrentState);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 #endif /*BSWM_ETHSM_ENABLED == STD_ON*/
 

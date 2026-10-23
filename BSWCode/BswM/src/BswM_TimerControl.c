@@ -50,6 +50,8 @@
 void BswM_InitBswMTimer(void)
 /* PRQA S 1503,1505,1532 --*/
 {
+    BswM_ArtiApiStart(1, BSWM_API_ID_INITBSWMTIMER);
+
     const BswM_PartitionPCCfgType*      bswmPartPCCfgPtr;
     const BswM_ModeRqstPortPCCfgType*   modeRqstPCfgPtr;
     const BswM_ModeRqstPortRuntimeType* modeRqstPtr;
@@ -73,11 +75,17 @@ void BswM_InitBswMTimer(void)
 #if (BSWM_DEV_ERROR_DETECT == STD_ON)
     else
     {
-        (void)Det_ReportError(BSWM_MODULE_ID, BSWM_INSTANCE_ID, BSWM_API_ID_INIT, BSWM_E_INIT_FAILED);
+        (void)Det_ReportError(BSWM_MODULE_ID, BSWM_INSTANCE_ID, BSWM_API_ID_INITBSWMTIMER, BSWM_E_INIT_FAILED);
     }
 #endif /*BSWM_DEV_ERROR_DETECT == STD_ON*/
-}
 
+    BswM_ArtiApiStop(1, BSWM_API_ID_INITBSWMTIMER);
+}
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
+
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Retrieves the status of a specified BswM timer.
  * This function checks the configuration and runtime data to find the timer status for the given timer index.

@@ -30,15 +30,15 @@
 /**
  * @brief The minimum request length of UDS 0x38
  */
-#define DCM_UDS38_MINREQLEN 4u
+#define DCM_UDS38_MINREQLEN   4u
 /**
  * @brief The modeOfOperation addFile
  */
-#define DCM_UDS38_ADDFILE 1u
+#define DCM_UDS38_ADDFILE     1u
 /**
  * @brief The modeOfOperation deleteFile
  */
-#define DCM_UDS38_DELETEFILE 2u
+#define DCM_UDS38_DELETEFILE  2u
 /**
  * @brief The modeOfOperation replaceFile
  */
@@ -46,12 +46,14 @@
 /**
  * @brief The modeOfOperation readFile
  */
-#define DCM_UDS38_READFILE 4u
+#define DCM_UDS38_READFILE    4u
 /**
  * @brief The modeOfOperation readDirectory
  */
-#define DCM_UDS38_READDIR 5u
+#define DCM_UDS38_READDIR     5u
 /* ========================================== internal function declarations ======================================== */
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         This function coverts data to uint64
  * @param[in]     data : the input uint8_N data
@@ -63,6 +65,10 @@
  * @trace         CPD-PLACEHOLDE
  */
 DCM_LOCAL uint64 Dcm_UDS0x38_ConvertToU64(uint8* data, uint8 size);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         check general conditions for UDS 0x38
@@ -87,6 +93,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x38_CheckCondition(
     uint64*                       fileSizeUncompressed,
     uint64*                       fileSizeCompressed,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         check general conditions for UDS 0x38
@@ -121,8 +131,12 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x38_HandleModeOfOperation(
     uint64*                       maxNumberOfBlockLength,
     uint64*                       dirInfoLength,
     Dcm_NegativeResponseCodeType* ErrorCode);
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if (STD_ON == DCM_UDS_0X36)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
+
 /**
  * @brief         handle modeOfOperation that is not DeleteFile
  * @param[in]     modeOfOperation        : requested modeOfOperation
@@ -146,6 +160,8 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x38_NonDeleteFileMode(
     uint64*                       maxNumberOfBlockLength,
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 /* ========================================== external function definitions ========================================= */
 #define DCM_START_SEC_CODE
@@ -260,7 +276,10 @@ DCM_LOCAL uint64 Dcm_UDS0x38_ConvertToU64(uint8* data, uint8 size)
     }
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL Std_ReturnType Dcm_UDS0x38_CheckCondition(
     Dcm_MsgContextType*           pMsgContext,
     uint8*                        dataFormatIdentifier,
@@ -350,7 +369,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x38_CheckCondition(
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* PRQA S 6040 ++ */ /* VL_MTR_Dcm_STPAR */
 DCM_LOCAL Std_ReturnType Dcm_UDS0x38_HandleModeOfOperation(
     Dcm_ExtendedOpStatusType      OpStatus,
@@ -454,9 +476,13 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x38_HandleModeOfOperation(
 
     return result;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#if (STD_ON == DCM_UDS_0X36)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* PRQA S 6040 -- */
 
-#if (STD_ON == DCM_UDS_0X36)
 DCM_LOCAL Std_ReturnType Dcm_UDS0x38_NonDeleteFileMode(
     uint8                         modeOfOperation,
     uint64                        fileSizeUncompressed,
@@ -503,8 +529,8 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x38_NonDeleteFileMode(
 
     return result;
 }
-#endif
-/* PRQA S 3120,3673 -- */
 #define DCM_STOP_SEC_CODE
 #include "Dcm_MemMap.h"
+#endif
+/* PRQA S 3120,3673 -- */
 #endif

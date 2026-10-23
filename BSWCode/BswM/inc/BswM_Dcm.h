@@ -50,7 +50,11 @@ extern "C" {
  * @synchronous TRUE
  * @trace       CPD-66245
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 void BswM_Dcm_ApplicationUpdated(void);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 /**
  * @brief       Function called by DCM to inform the BswM about the current state of the communication mode.
@@ -61,7 +65,11 @@ void BswM_Dcm_ApplicationUpdated(void);
  * @synchronous TRUE
  * @trace       CPD-66247
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 void BswM_Dcm_CommunicationMode_CurrentState(NetworkHandleType Network, Dcm_CommunicationModeType RequestedMode);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 #endif /*BSWM_DCM_ENABLED == STD_ON*/
 

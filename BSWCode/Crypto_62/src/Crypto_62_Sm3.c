@@ -22,10 +22,10 @@
  **
  ***********************************************************************************************************************/
 
-/* PRQA S 0317,0488,0551,1252,1253,1255,1277,1281,1290,1330 EOF */ /* VL_Crypto_62_General */
-/* PRQA S 1338,1840,3387,3397,3400,3410,3417,3426,3430,3432 EOF */ /* VL_Crypto_62_General */
-/* PRQA S 3440,3472,3473,3673,4150,4542,4544,1841,1842,1843 EOF */ /* VL_Crypto_62_General */
-/* PRQA S 2011,2741,3120,3132,3344,0553 EOF */                     /* VL_Crypto_62_General */
+/* PRQA S 0317,0488,0551,1252,1253,1255,1277,1281,1290,1330 EOF */ /* VL_QAC_Crypto */
+/* PRQA S 1338,1840,3387,3397,3400,3410,3417,3426,3430,3432 EOF */ /* VL_QAC_Crypto */
+/* PRQA S 3440,3472,3473,3673,4150,4542,4544,1841,1842,1843 EOF */ /* VL_QAC_Crypto */
+/* PRQA S 2011,2741,3120,3132,3344,0553 EOF */                     /* VL_QAC_Crypto */
 /* =================================================== inclusions =================================================== */
 #include "Crypto_62_Internal.h"
 
@@ -33,35 +33,47 @@
 
 #include "Crypto_62_Sm3.h"
 
-#define CRYPTO_62_START_SEC_CODE
-#include "Crypto_62_MemMap.h"
-
 /* ===================================================== macros ===================================================== */
 #define SM3_CBLOCK 64
 
 #define SM3_DIGEST_LENGTH 32
 
-#define HASH_MAKE_STRING(c, s)   \
-    do                           \
-    {                            \
-        unsigned long ll;        \
-        ll = (c)->A;             \
-        (void)HOST_l2c(ll, (s)); \
-        ll = (c)->B;             \
-        (void)HOST_l2c(ll, (s)); \
-        ll = (c)->C;             \
-        (void)HOST_l2c(ll, (s)); \
-        ll = (c)->D;             \
-        (void)HOST_l2c(ll, (s)); \
-        ll = (c)->E;             \
-        (void)HOST_l2c(ll, (s)); \
-        ll = (c)->F;             \
-        (void)HOST_l2c(ll, (s)); \
-        ll = (c)->G;             \
-        (void)HOST_l2c(ll, (s)); \
-        ll = (c)->H;             \
-        (void)HOST_l2c(ll, (s)); \
+/* SM3 message words and digest are always big-endian by specification. */
+#define SM3_STREAM_c2l(c, l)            \
+    (l = (((uint32)(*((c)++))) << 24),  \
+     l |= (((uint32)(*((c)++))) << 16), \
+     l |= (((uint32)(*((c)++))) << 8),  \
+     l |= (((uint32)(*((c)++)))))
+
+#define SM3_STREAM_l2c(l, c)                  \
+    (*((c)++) = (uint8)(((l) >> 24) & 0xFFu), \
+     *((c)++) = (uint8)(((l) >> 16) & 0xFFu), \
+     *((c)++) = (uint8)(((l) >> 8) & 0xFFu),  \
+     *((c)++) = (uint8)(((l)) & 0xFFu),       \
+     (l))
+
+#define HASH_MAKE_STRING(c, s)         \
+    do                                 \
+    {                                  \
+        uint32 ll;                     \
+        ll = (c)->A;                   \
+        (void)SM3_STREAM_l2c(ll, (s)); \
+        ll = (c)->B;                   \
+        (void)SM3_STREAM_l2c(ll, (s)); \
+        ll = (c)->C;                   \
+        (void)SM3_STREAM_l2c(ll, (s)); \
+        ll = (c)->D;                   \
+        (void)SM3_STREAM_l2c(ll, (s)); \
+        ll = (c)->E;                   \
+        (void)SM3_STREAM_l2c(ll, (s)); \
+        ll = (c)->F;                   \
+        (void)SM3_STREAM_l2c(ll, (s)); \
+        ll = (c)->G;                   \
+        (void)SM3_STREAM_l2c(ll, (s)); \
+        ll = (c)->H;                   \
+        (void)SM3_STREAM_l2c(ll, (s)); \
     } while (0)
+
 #define ROTATE(a, n) (((a) << (n)) | (((a) & 0xffffffff) >> (32 - (n))))
 #ifndef P0
 #define P0(X) (X ^ ROTATE(X, 9) ^ ROTATE(X, 17))
@@ -107,7 +119,11 @@
 /* ================================================ type definitions ================================================ */
 
 /* ========================================== internal function declarations ======================================== */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL void Crypto_Sm3_Block_Data_Order(Crypto_SM3_Context* c, const void* p, uint32 num);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /* ============================================ internal data definitions =========================================== */
 
@@ -126,6 +142,8 @@ CRYPTO_62_LOCAL void Crypto_Sm3_Block_Data_Order(Crypto_SM3_Context* c, const vo
  * Return              None
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_Sm3_Start(Crypto_SM3_Context* ctx)
 {
     (void)IStdLib_MemSet(ctx, 0, sizeof(Crypto_SM3_Context));
@@ -138,6 +156,8 @@ void Crypto_Sm3_Start(Crypto_SM3_Context* ctx)
     ctx->G = SM3_G;
     ctx->H = SM3_H;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -151,6 +171,8 @@ void Crypto_Sm3_Start(Crypto_SM3_Context* ctx)
  * Return              None
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL void Crypto_Sm3_Block_Data_Order(Crypto_SM3_Context* ctx, const void* p, uint32 num)
 {
     const uint8*    data = p;
@@ -173,22 +195,22 @@ CRYPTO_62_LOCAL void Crypto_Sm3_Block_Data_Order(Crypto_SM3_Context* ctx, const 
          * We have to load all message bytes immediately since SM3 reads
          * them slightly out of order.
          */
-        (void)HOST_c2l(data, W00);
-        (void)HOST_c2l(data, W01);
-        (void)HOST_c2l(data, W02);
-        (void)HOST_c2l(data, W03);
-        (void)HOST_c2l(data, W04);
-        (void)HOST_c2l(data, W05);
-        (void)HOST_c2l(data, W06);
-        (void)HOST_c2l(data, W07);
-        (void)HOST_c2l(data, W08);
-        (void)HOST_c2l(data, W09);
-        (void)HOST_c2l(data, W10);
-        (void)HOST_c2l(data, W11);
-        (void)HOST_c2l(data, W12);
-        (void)HOST_c2l(data, W13);
-        (void)HOST_c2l(data, W14);
-        (void)HOST_c2l(data, W15);
+        (void)SM3_STREAM_c2l(data, W00);
+        (void)SM3_STREAM_c2l(data, W01);
+        (void)SM3_STREAM_c2l(data, W02);
+        (void)SM3_STREAM_c2l(data, W03);
+        (void)SM3_STREAM_c2l(data, W04);
+        (void)SM3_STREAM_c2l(data, W05);
+        (void)SM3_STREAM_c2l(data, W06);
+        (void)SM3_STREAM_c2l(data, W07);
+        (void)SM3_STREAM_c2l(data, W08);
+        (void)SM3_STREAM_c2l(data, W09);
+        (void)SM3_STREAM_c2l(data, W10);
+        (void)SM3_STREAM_c2l(data, W11);
+        (void)SM3_STREAM_c2l(data, W12);
+        (void)SM3_STREAM_c2l(data, W13);
+        (void)SM3_STREAM_c2l(data, W14);
+        (void)SM3_STREAM_c2l(data, W15);
 
         R1(A, B, C, D, E, F, G, H, 0x79CC4519, W00, W00 ^ W04);
         W00 = EXPAND(W00, W07, W13, W03, W10);
@@ -317,6 +339,8 @@ CRYPTO_62_LOCAL void Crypto_Sm3_Block_Data_Order(Crypto_SM3_Context* ctx, const 
         ctx->H ^= H;
     }
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -331,6 +355,8 @@ CRYPTO_62_LOCAL void Crypto_Sm3_Block_Data_Order(Crypto_SM3_Context* ctx, const 
  *                                      E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Sm3_Update(Crypto_SM3_Context* c, const void* data_, uint32 len)
 {
     const uint8*   data = data_;
@@ -394,6 +420,8 @@ Std_ReturnType Crypto_Sm3_Update(Crypto_SM3_Context* c, const void* data_, uint3
     }
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -410,6 +438,8 @@ Std_ReturnType Crypto_Sm3_Update(Crypto_SM3_Context* c, const void* data_, uint3
  *                                      E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_Sm3_Finish(Crypto_SM3_Context* c, uint8* md)
 {
     uint8* p = (uint8*)c->data;
@@ -427,22 +457,16 @@ void Crypto_Sm3_Finish(Crypto_SM3_Context* c, uint8* md)
     (void)IStdLib_MemSet(p + n, 0, SM3_CBLOCK - 8 - n);
 
     p += SM3_CBLOCK - 8;
-    if (CRYPTO_IS_BIG_ENDIAN == 1)
-    {
-        (void)HOST_l2c(c->Nh, p);
-        (void)HOST_l2c(c->Nl, p);
-    }
-    else
-    {
-        (void)HOST_l2c(c->Nl, p);
-        (void)HOST_l2c(c->Nh, p);
-    }
+    (void)SM3_STREAM_l2c(c->Nh, p);
+    (void)SM3_STREAM_l2c(c->Nl, p);
 
     p -= SM3_CBLOCK;
     Crypto_Sm3_Block_Data_Order(c, p, 1);
     c->num = 0;
     HASH_MAKE_STRING(c, md);
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -458,7 +482,9 @@ void Crypto_Sm3_Finish(Crypto_SM3_Context* c, uint8* md)
  *                                      E_NOT_OK: State not accepted
  */
 /******************************************************************************/
-Std_ReturnType Crypto_Sm3(uint8* input, uint32 ilen, uint8* output)
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+Std_ReturnType Crypto_Sm3(const uint8* input, uint32 ilen, uint8* output)
 {
     Std_ReturnType     ret;
     Crypto_SM3_Context ctx;
@@ -469,10 +495,12 @@ Std_ReturnType Crypto_Sm3(uint8* input, uint32 ilen, uint8* output)
     ret = Crypto_Sm3_Update(&ctx, input, ilen);
     if (E_OK == ret)
     {
-        Crypto_Sm3_Finish(&ctx, output); /* PRQA S 2784 */ /* VL_Crypto_62_General */
+        Crypto_Sm3_Finish(&ctx, output); /* PRQA S 2784 */ /* VL_QAC_Crypto */
     }
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 /******************************************************************************/
 /*
  * Brief               This function process process the sm3.
@@ -487,13 +515,16 @@ Std_ReturnType Crypto_Sm3(uint8* input, uint32 ilen, uint8* output)
  *                            E_NOT_OK: Request failed
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Sm3_Process(uint32 objectId)
 {
     Std_ReturnType ret = E_NOT_OK;
     uint8          output[CRYPTO_CONST_32];
 
     uint32 ilen = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputLength;
-    /* PRQA S 0311 ++ */ /*VL_Crypto_62_General */
+
+    /* PRQA S 0311 ++ */ /*VL_QAC_0311 */
     uint8* input = (uint8*)(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputPtr);
     /* PRQA S 0311 -- */
 
@@ -510,7 +541,6 @@ Std_ReturnType Crypto_Sm3_Process(uint32 objectId)
             output,
             *(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr));
     }
-
     return ret;
 }
 #define CRYPTO_62_STOP_SEC_CODE

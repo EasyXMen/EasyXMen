@@ -57,12 +57,23 @@
 #include LWIP_HOOK_FILENAME
 #endif
 
+#define TCPIP_START_SEC_CONST_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 const struct eth_addr ethbroadcast = {{0xff, 0xff, 0xff, 0xff, 0xff, 0xff}};
+#define TCPIP_STOP_SEC_CONST_UNSPECIFIED
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CONST_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 const struct eth_addr ethzero = {{0, 0, 0, 0, 0, 0}};
+#define TCPIP_STOP_SEC_CONST_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 
 #if !defined(ETHERNET_CHECK)
 #define ETHERNET_CHECK 1
 #endif/* !defined(ETHERNET_CHECK) */
+
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup ethernet
  * Send an ethernet packet on the network using netif->linkoutput().
@@ -163,8 +174,12 @@ ethernet_output(struct netif* netif, struct pbuf* p,
 
     return lwRet;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup lwip_nosys
  * Process received ethernet frames. Using this function instead of directly
@@ -396,5 +411,7 @@ free_and_return:
     pbuf_free(p);
     return ERR_OK;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #endif /* LWIP_ARP || LWIP_ETHERNET */

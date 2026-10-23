@@ -22,18 +22,11 @@
  **
  ***********************************************************************************************************************/
 
-/* PRQA S 6010 EOF */ /* VL_MTR_Crypto_62_STCYC */
-/* PRQA S 6020 EOF */ /* VL_MTR_Crypto_62_STLIN */
-/* PRQA S 6030 EOF */ /* VL_MTR_Crypto_62_STMIF */
-/* PRQA S 6040 EOF */ /* VL_MTR_Crypto_62_STPAR */
-/* PRQA S 6050 EOF */ /* VL_MTR_Crypto_62_STST3 */
-/* PRQA S 6060 EOF */ /* VL_MTR_Crypto_62_STM19 */
-/* PRQA S 6070 EOF */ /* VL_MTR_Crypto_62_STCAL */
-/* PRQA S 6080 EOF */ /* VL_MTR_Crypto_62_STPTH */
-
-/* PRQA S 0311,0316,0772,0780,1252,1253,1290,1842,1863,2001,2015,3120 ++ */ /* VL_Crypto_62_General */
-/* PRQA S 3326,3440,3672,3673,4116,4434,4461,4558,1843,1505,5022,5045 ++ */ /* VL_Crypto_62_General */
-/* PRQA S 5014,5143,3332,2985,2889,5031,1532 ++ */                          /* VL_Crypto_62_General */
+/* PRQA S 0311,0316,0772,0780,1252,1253,1290,1842,1863,3120,2001,1532 ++ */ /* VL_QAC_Crypto */
+/* PRQA S 3326,3440,3672,3673,4116,4434,4461,4558,1843,1505,5022,5045 ++ */ /* VL_QAC_Crypto */
+/* PRQA S 6050,6060,6070,6080,6010,6030,6040,5143,3332,2985,2889,5031 ++ */ /* VL_QAC_Crypto */
+/* PRQA S 5014 ++ */                                                        /* VL_QAC_Crypto */
+/* PRQA S 0432 EOF*/                                                        /* VL_Crypto_62_0432 */
 /* =================================================== inclusions =================================================== */
 #include "Crypto_62_Internal.h"
 
@@ -55,16 +48,27 @@
 /* ========================================== internal function declarations ======================================== */
 #define CRYPTO_62_START_SEC_CODE
 #include "Crypto_62_MemMap.h"
-
 CRYPTO_62_LOCAL Std_ReturnType Crypto_entropy_add_source(
     Crypto_entropy_context*     ctx,
     crypto_entropy_f_source_ptr f_source,
     void*                       p_source,
     uint32                      threshold,
     uint32                      strong);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL Std_ReturnType Crypto_Entropy_Gather_Internal(Crypto_entropy_context* ctx);
-CRYPTO_62_LOCAL Std_ReturnType
-    Crypto_Entropy_Update(Crypto_entropy_context* ctx, uint8 source_id, const uint8* data, uint32 len);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+CRYPTO_62_LOCAL
+Std_ReturnType Crypto_Entropy_Update(Crypto_entropy_context* ctx, uint8 source_id, const uint8* data, uint32 len);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /* ============================================ internal data definitions =========================================== */
 
@@ -85,8 +89,10 @@ CRYPTO_62_LOCAL Std_ReturnType
  *                           E_NOT_OK: State not accepted
  */
 /******************************************************************************/
-CRYPTO_62_LOCAL Std_ReturnType
-    Crypto_Entropy_Update(Crypto_entropy_context* ctx, uint8 source_id, const uint8* data, uint32 len)
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+CRYPTO_62_LOCAL
+Std_ReturnType Crypto_Entropy_Update(Crypto_entropy_context* ctx, uint8 source_id, const uint8* data, uint32 len)
 {
     uint8          header[CRYPTO_CONST_2];
     uint8          tmp[CRYPTO_ENTROPY_BLOCK_SIZE];
@@ -135,10 +141,12 @@ CRYPTO_62_LOCAL Std_ReturnType
     }
     ret = Crypto_Sha512_Update(&ctx->accumulator, p, use_len);
 
-cleanup:
+cleanup: /* PRQA S 2015 */ /* VL_QAC_Crypto */
 #endif
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -151,6 +159,8 @@ cleanup:
  *                           E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL Std_ReturnType Crypto_Entropy_Gather_Internal(Crypto_entropy_context* ctx)
 {
     Std_ReturnType ret = E_NOT_OK;
@@ -196,10 +206,12 @@ CRYPTO_62_LOCAL Std_ReturnType Crypto_Entropy_Gather_Internal(Crypto_entropy_con
         ret = E_NOT_OK;
     }
 
-cleanup:
+cleanup: /* PRQA S 2015 */ /* VL_QAC_Crypto */
 
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -213,6 +225,8 @@ cleanup:
  *                                      E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_entropy_func(void* data, uint8* output, uint32 len)
 {
     Std_ReturnType          ret   = E_NOT_OK;
@@ -231,12 +245,12 @@ Std_ReturnType Crypto_entropy_func(void* data, uint8* output, uint32 len)
         if (count++ > CRYPTO_ENTROPY_MAX_LOOP)
         {
             ret = E_NOT_OK;
-            goto exit;
+            goto exit; /* PRQA S 2001 */ /* VL_QAC_Crypto */
         }
 
         if ((ret = Crypto_Entropy_Gather_Internal(ctx)) != 0)
         {
-            goto exit;
+            goto exit; /* PRQA S 2001 */ /* VL_QAC_Crypto */
         }
 
         thresholds_reached = 1;
@@ -263,7 +277,7 @@ Std_ReturnType Crypto_entropy_func(void* data, uint8* output, uint32 len)
      */
     if ((ret = Crypto_Sha512_Finish(&ctx->accumulator, buf)) != 0)
     {
-        goto exit;
+        goto exit; /* PRQA S 2001 */ /* VL_QAC_Crypto */
     }
 
     /* Reset accumulator and counters and recycle existing entropy */
@@ -274,7 +288,7 @@ Std_ReturnType Crypto_entropy_func(void* data, uint8* output, uint32 len)
 
     if ((ret = Crypto_Sha512_Update(&ctx->accumulator, buf, len)) != 0)
     {
-        goto exit;
+        goto exit; /* PRQA S 2001 */ /* VL_QAC_Crypto */
     }
 
     /* Perform second hashing on entropy */
@@ -284,12 +298,12 @@ Std_ReturnType Crypto_entropy_func(void* data, uint8* output, uint32 len)
 
     if ((ret = Crypto_Sha512_Update(&ctx->accumulator, buf, len)) != 0)
     {
-        goto exit;
+        goto exit; /* PRQA S 2001 */ /* VL_QAC_Crypto */
     }
 
     if ((ret = Crypto_Sha512_Finish(&ctx->accumulator, buf)) != 0)
     {
-        goto exit;
+        goto exit; /* PRQA S 2001 */ /* VL_QAC_Crypto */
     }
 
     for (i = 0; i < ctx->source_count; i++)
@@ -301,10 +315,12 @@ Std_ReturnType Crypto_entropy_func(void* data, uint8* output, uint32 len)
 
     ret = 0;
 
-exit:
+exit: /* PRQA S 2015 */ /* VL_QAC_Crypto */
 #endif
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 /******************************************************************************/
 /*
  * Brief               This function initializes the entropy .
@@ -315,6 +331,8 @@ exit:
  * Return              None
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_entropy_init(Crypto_entropy_context* ctx)
 {
 #if (CRYPTO_ALGORITHMFAM_SHA2_512 == STD_ON)
@@ -330,6 +348,8 @@ void Crypto_entropy_init(Crypto_entropy_context* ctx)
     (void)Crypto_entropy_add_source(ctx, Crypto_platform_entropy_poll, NULL_PTR, 32u, 1u);
 #endif
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 /******************************************************************************/
 /*
  * Brief               This function initializes the entropy poll .
@@ -342,13 +362,17 @@ void Crypto_entropy_init(Crypto_entropy_context* ctx)
  * Return              None
  */
 /******************************************************************************/
-int Crypto_platform_entropy_poll(void* data, unsigned char* output, uint32 len, uint32* olen)
+/* PRQA S 5209 ++ */ /* VL_QAC_Crypto */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+int Crypto_platform_entropy_poll(void* data, uint8* output, uint32 len, uint32* olen)
+/* PRQA S 5209 -- */
 {
     ((void)data);
     uint8 i;
 
     /*
-     * BCryptGenRandom takes ULONG for size, which is smaller than size_t on
+     * BCryptGenRandom takes ULONG for size, which is smaller than uint32 on
      * 64-bit Windows platforms. Extract entropy in chunks of len (dependent
      * on ULONG_MAX) size.
      */
@@ -360,13 +384,41 @@ int Crypto_platform_entropy_poll(void* data, unsigned char* output, uint32 len, 
 
     return 0;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+void Crypto_entropy_free(Crypto_entropy_context* ctx)
+{
+    if (ctx == NULL)
+    {
+        return;
+    }
+
+    /* If the context was already free, don't call free() again.
+     * This is important for mutexes which don't allow double-free. */
+    if (ctx->accumulator_started == -1)
+    {
+        return;
+    }
+
+    Crypto_sha512_free(&ctx->accumulator);
+
+    ctx->source_count = 0;
+    (void)IStdLib_MemSet(ctx->source, 0, sizeof(ctx->source));
+    ctx->accumulator_started = -1;
+}
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+
 /******************************************************************************/
 /*
  * Brief               This function add the entropy source .
  *
  * Param-Name[in]      f_source :Entropy function.
  *                      threshold: Minimum required from source before entropy is released
- *                       ( with entropy_func() ) (in bytes)
+ *                       ( with Crypto_entropy_func() ) (in bytes)
  *                     strong:   At least one strong source needs to be added.
  *                            Weaker sources (such as the cycle counter) can be used as
  *                             a complement.
@@ -378,6 +430,8 @@ int Crypto_platform_entropy_poll(void* data, unsigned char* output, uint32 len, 
  * Return              None
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL Std_ReturnType Crypto_entropy_add_source(
     Crypto_entropy_context*     ctx,
     crypto_entropy_f_source_ptr f_source,
@@ -391,7 +445,7 @@ CRYPTO_62_LOCAL Std_ReturnType Crypto_entropy_add_source(
     if (idx >= 20U)
     {
         ret = E_NOT_OK;
-        goto exit;
+        goto exit; /* PRQA S 2001 */ /* VL_QAC_Crypto */
     }
 
     ctx->source[idx].f_source  = f_source;
@@ -401,10 +455,13 @@ CRYPTO_62_LOCAL Std_ReturnType Crypto_entropy_add_source(
 
     ctx->source_count++;
 
-exit:
+exit: /* PRQA S 2015 */ /* VL_QAC_Crypto */
 
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+
 /******************************************************************************/
 /*
  * Brief               This function process randomgenerate service with supported modes.
@@ -420,6 +477,8 @@ exit:
  *                            E_NOT_OK: Request failed
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_62_RandomGenerate_Process(
     uint32                     objectId,
     Crypto_AlgorithmFamilyType algorithmfamily,
@@ -446,7 +505,7 @@ Std_ReturnType Crypto_62_RandomGenerate_Process(
         case CRYPTO_ALGOMODE_HMAC:
 #if (CRYPTO_ALGORITHMMODE_HMAC == STD_ON)
             result = Crypto_HmacDrbgProcess(objectId, algorithmfamily);
-#endif
+#endif /* CRYPTO_ALGORITHMMODE_HMAC == STD_ON */
             break;
         case CRYPTO_ALGOMODE_SIPHASH_2_4:
             result = CRYPTO_ERROR_ALGO_NOT_SUPPORTED;
@@ -465,11 +524,11 @@ Std_ReturnType Crypto_62_RandomGenerate_Process(
     }
     return result;
 }
-
 #define CRYPTO_62_STOP_SEC_CODE
 #include "Crypto_62_MemMap.h"
 #endif
 
-/* PRQA S 0311,0316,0772,0780,1252,1253,1290,1842,1863,2001,2015,3120 -- */
+/* PRQA S 0311,0316,0772,0780,1252,1253,1290,1842,1863,3120,2001,1532 -- */
 /* PRQA S 3326,3440,3672,3673,4116,4434,4461,4558,1843,1505,5022,5045 -- */
-/* PRQA S 5014,5143,3332,2985,2889,5031,1532 -- */
+/* PRQA S 6050,6060,6070,6080,6010,6030,6040,5143,3332,2985,2889,5031 -- */
+/* PRQA S 5014 -- */

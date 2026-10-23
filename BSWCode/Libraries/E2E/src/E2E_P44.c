@@ -43,6 +43,11 @@
  */
 E2E_LOCAL void
     E2E_P44Check_Seqence(const E2E_P44ConfigType* ConfigPtr, E2E_P44CheckStateType* StatePtr, uint16 ReceivedCounter);
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
+
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * @brief        verify inputs of check()
  * @param[in]    ConfigPtr : Pointer to static configuration.
@@ -128,6 +133,11 @@ Std_ReturnType
 
     return Ret;
 }
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
+
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /*PRQA S 3120 -- */
 /**
  * Initializes the protection state.
@@ -148,6 +158,11 @@ Std_ReturnType E2E_P44ProtectInit(E2E_P44ProtectStateType* StatePtr)
     }
     return Ret;
 }
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
+
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * Checks the Data received using the E2E profile 44.
  */
@@ -219,6 +234,11 @@ Std_ReturnType E2E_P44Check(
 
     return Ret;
 }
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
+
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /*PRQA S 3120 -- */
 /**
  * Initializes the check state.
@@ -240,6 +260,11 @@ Std_ReturnType E2E_P44CheckInit(E2E_P44CheckStateType* StatePtr)
     }
     return Ret;
 }
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
+
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * The function maps the check status of profile 44 to a generic check status.
  */
@@ -280,8 +305,12 @@ E2E_PCheckStatusType E2E_P44MapStatusToSM(Std_ReturnType CheckReturn, E2E_P44Che
     }
     return Ret;
 }
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
 /*PRQA S 1532 -- */ /*PRQA S 1503 -- */
 /* ========================================== internal function definitions ========================================= */
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 E2E_LOCAL Std_ReturnType E2E_P44CheckVerifyInputs(
     const E2E_P44ConfigType*     ConfigPtr,
     const E2E_P44CheckStateType* StatePtr,
@@ -321,7 +350,11 @@ E2E_LOCAL Std_ReturnType E2E_P44CheckVerifyInputs(
     }
     return Ret;
 }
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
 
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 E2E_LOCAL void
     E2E_P44Check_Seqence(const E2E_P44ConfigType* ConfigPtr, E2E_P44CheckStateType* StatePtr, uint16 ReceivedCounter)
 {

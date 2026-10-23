@@ -111,45 +111,107 @@ struct udp_pcb {
   /** user-supplied argument for the recv callback */
   void *recv_arg;
 };
-/* udp_pcbs export for external reference (e.g. SNMP agent) */
-extern struct udp_pcb *udp_pcbs[TCPIP_MULTICORE_NUMBER];
 
 /* The following functions is the application layer interface to the
    UDP code. */
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 struct udp_pcb * udp_new        (void);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 struct udp_pcb * udp_new_ip_type(u8_t type);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void             udp_remove     (struct udp_pcb *pcb);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t            udp_bind       (struct udp_pcb *pcb, const ip_addr_t *ipaddr,
                                  u16_t port);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void             udp_bind_netif (struct udp_pcb *pcb, const struct netif* netif);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t            udp_connect    (struct udp_pcb *pcb, const ip_addr_t *ipaddr,
                                  u16_t port);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void             udp_disconnect (struct udp_pcb *pcb);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void             udp_recv       (struct udp_pcb *pcb, udp_recv_fn recv,
                                  void *recv_arg);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t            udp_sendto_if  (struct udp_pcb *pcb, struct pbuf *p,
                                  const ip_addr_t *dst_ip, u16_t dst_port,
                                  struct netif *netif);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t            udp_sendto_if_src(struct udp_pcb *pcb, struct pbuf *p,
                                  const ip_addr_t *dst_ip, u16_t dst_port,
                                  struct netif *netif, const ip_addr_t *src_ip);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t            udp_sendto     (struct udp_pcb *pcb, struct pbuf *p,
                                  const ip_addr_t *dst_ip, u16_t dst_port);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t            udp_send       (struct udp_pcb *pcb, struct pbuf *p);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if LWIP_CHECKSUM_ON_COPY && CHECKSUM_GEN_UDP
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t            udp_sendto_if_chksum(struct udp_pcb *pcb, struct pbuf *p,
                                  const ip_addr_t *dst_ip, u16_t dst_port,
                                  struct netif *netif, u8_t have_chksum,
                                  u16_t chksum);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t            udp_sendto_chksum(struct udp_pcb *pcb, struct pbuf *p,
                                  const ip_addr_t *dst_ip, u16_t dst_port,
                                  u8_t have_chksum, u16_t chksum);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t            udp_send_chksum(struct udp_pcb *pcb, struct pbuf *p,
                                  u8_t have_chksum, u16_t chksum);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t            udp_sendto_if_src_chksum(struct udp_pcb *pcb, struct pbuf *p,
                                  const ip_addr_t *dst_ip, u16_t dst_port, struct netif *netif,
                                  u8_t have_chksum, u16_t chksum, const ip_addr_t *src_ip);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif /* LWIP_CHECKSUM_ON_COPY && CHECKSUM_GEN_UDP */
 
 #define          udp_flags(pcb) ((pcb)->flags)
@@ -160,9 +222,17 @@ err_t            udp_sendto_if_src_chksum(struct udp_pcb *pcb, struct pbuf *p,
 #define          udp_is_flag_set(pcb, flag)        (((pcb)->flags & (flag)) != 0)
 
 /* The following functions are the lower layer interface to UDP. */
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void             udp_input      (struct pbuf *p, struct netif *inp);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void             udp_init       (void);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 /* for compatibility with older implementation */
 #define udp_new_ip6() udp_new_ip_type(IPADDR_TYPE_V6)
@@ -179,12 +249,20 @@ void             udp_init       (void);
 #endif /* LWIP_MULTICAST_TX_OPTIONS */
 
 #if UDP_DEBUG
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void udp_debug_print(struct udp_hdr *udphdr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #else
 #define udp_debug_print(udphdr)
 #endif
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void udp_netif_ip_addr_changed(const ip_addr_t* old_addr, const ip_addr_t* new_addr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #ifdef __cplusplus
 }

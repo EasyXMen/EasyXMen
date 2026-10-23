@@ -38,10 +38,10 @@
 /* ============================================ external data definitions =========================================== */
 
 /* ========================================== external function definitions ========================================= */
-#define BSWM_START_SEC_CODE
-#include "BswM_MemMap.h"
 
 #if (BSWM_SOADSOCONMODECHG_ENABLED == STD_ON)
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Initializes the SoAd request ports by setting the initial states of the SoAd SoCon modes.
  * This function retrieves the partition configuration and initializes the SoAd SoCon mode states based on the provided
@@ -51,6 +51,8 @@
 void BswM_InitSoAdRequestPorts(void)
 /* PRQA S 1503,1505,1532 --*/
 {
+    BswM_ArtiApiStart(1, BSWM_API_ID_INITSOADREQUESTPORTS);
+
     const BswM_PartitionPCCfgType*      bswmPartPCCfgPtr;
     const BswM_ModeRqstPortPCCfgType*   modeRqstPCfgPtr;
     const BswM_ModeRqstPortRuntimeType* modeRqstPtr;
@@ -80,11 +82,17 @@ void BswM_InitSoAdRequestPorts(void)
 #if (BSWM_DEV_ERROR_DETECT == STD_ON)
     else
     {
-        (void)Det_ReportError(BSWM_MODULE_ID, BSWM_INSTANCE_ID, BSWM_API_ID_INIT, BSWM_E_INIT_FAILED);
+        (void)Det_ReportError(BSWM_MODULE_ID, BSWM_INSTANCE_ID, BSWM_API_ID_INITSOADREQUESTPORTS, BSWM_E_INIT_FAILED);
     }
 #endif /*BSWM_DEV_ERROR_DETECT == STD_ON*/
-}
 
+    BswM_ArtiApiStop(1, BSWM_API_ID_INITSOADREQUESTPORTS);
+}
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
+
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Retrieves the current state of a specified SoAd SoCon mode.
  * This function fetches the partition configuration and returns the current state of the SoAd SoCon mode.
@@ -105,8 +113,12 @@ SoAd_SoConModeType BswM_GetSoComModeCurState(uint16 SoConIdx)
     }
     return SoConModeCurState;
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_SOADSOCONMODECHG_ENABLED == STD_ON*/
 
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Changes the state of a specified SoAd SoCon mode.
  * This function updates the state of the specified SoAd SoCon mode and processes any associated rules if required.
@@ -117,6 +129,8 @@ SoAd_SoConModeType BswM_GetSoComModeCurState(uint16 SoConIdx)
 void BswM_SoAd_SoConModeChg(SoAd_SoConIdType SoConId, SoAd_SoConModeType State)
 /* PRQA S 1503,1505,1532 --*/
 {
+    BswM_ArtiApiStart(3, BSWM_API_ID_SOAD_SOCONMODECHG, SoConId, State);
+
 #if (BSWM_SOADSOCONMODECHG_ENABLED == STD_ON)
     const BswM_PartitionPCCfgType* bswmPartPCCfgPtr;
 #if (BSWM_PB_CONFIG_ENABLED == STD_ON)
@@ -178,10 +192,12 @@ void BswM_SoAd_SoConModeChg(SoAd_SoConIdType SoConId, SoAd_SoConModeType State)
         }
     }
 #endif /*BSWM_SOADSOCONMODECHG_ENABLED == STD_ON*/
-}
 
+    BswM_ArtiApiStop(1, BSWM_API_ID_SOAD_SOCONMODECHG);
+}
 #define BSWM_STOP_SEC_CODE
 #include "BswM_MemMap.h"
+
 /* ========================================== internal function definitions ========================================= */
 
 #endif /*BSWM_SOAD_ENABLED == STD_ON*/

@@ -27,6 +27,7 @@
 
 /* =================================================== inclusions =================================================== */
 #include "WdgM.h"
+#include "WdgM_Arti.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -37,6 +38,7 @@ extern "C" {
 #if !defined(WDGM_LOCAL)
 #define WDGM_LOCAL static
 #endif
+
 /* PRQA S 3414 -- */
 
 /* ================================================ type definitions ================================================ */
@@ -44,89 +46,62 @@ extern "C" {
 /* ========================================== internal function definitions ========================================= */
 
 /* =========================================== external data declarations =========================================== */
-extern const WdgM_ConfigType* WdgM_SelectConfigs[WDGM_MAX_CORES_USED];
-/* PRQA S 1500,1752 ++ */ /* VL_WdgM_1500,VL_WdgM_1752 */
-extern WdgM_RuntimeType* WdgM_ConfigRuntimeData[WDGM_MAX_CORES_USED];
-/* PRQA S 1500,1752 -- */
-extern const WdgM_SECfgPCType WdgM_SupervisedEntityPcCfg[WDGM_SE_NUM];
-
-#if (WDGM_INT_LOGICAL_SUPERVISION_ENABLE == STD_ON)
-extern WdgM_IntLogSupInfoType WdgM_IntLogSupTab[WDGM_MAX_INTERNAL_LOGICAL_SUPERVISION_NUM];
-#endif /* WDGM_INT_LOGICAL_SUPERVISION_ENABLE == STD_ON */
 
 /* ========================================= external function declarations ========================================= */
 
-/**
- * @brief  Gets the global info tab pointer of current WdgM.
- * @param[out]  globalInfoTab: Pointer to pointer of global status data.
- * @retval      E_OK: success
- * @retval      E_NOT_OK: failure
- * @reentrant   TRUE
- * @synchronous TRUE
- * @trace       CPD-68316
- */
-/* PRQA S 1501 ++ */ /* VL_WdgM_1501 */
-Std_ReturnType WdgM_GetGlobalInfoTab(WdgM_GlobalStatusType** globalInfoTab);
-/* PRQA S 1501 -- */
+#define WDGM_START_SEC_VAR_POWER_ON_CLEARED_16
+#include "WdgM_MemMap.h"
+extern WdgM_SupervisedEntityIdType WdgM_FirstExpiredSEID;
+#define WDGM_STOP_SEC_VAR_POWER_ON_CLEARED_16
+#include "WdgM_MemMap.h"
 
-/**
- * @brief  Gets the config pointer of current WdgM.
- * @param[out]  ConfigPtr: Pointer to pointer of WdgM post build config data.
- * @retval      E_OK: success
- * @retval      E_NOT_OK: failure
- * @reentrant   TRUE
- * @synchronous TRUE
- * @trace       CPD-68325
- */
-Std_ReturnType WdgM_GetConfigPtr(const WdgM_ConfigType** ConfigPtr);
+#define WDGM_START_SEC_VAR_POWER_ON_CLEARED_16
+#include "WdgM_MemMap.h"
+extern WdgM_SupervisedEntityIdType WdgM_FirstExpiredSEIDInverse;
+#define WDGM_STOP_SEC_VAR_POWER_ON_CLEARED_16
+#include "WdgM_MemMap.h"
 
-/**
- * @brief  Gets the first expired seid pointer of current WdgM.
- * @param[out]  firstExpiredSEID: Pointer to the pointer of first expired seid.
- * @param[out]  firstExpiredSEIDInv: Pointer to the pointer of first expired inverse seid.
- * @retval      E_OK: success
- * @retval      E_NOT_OK: failure
- * @reentrant   TRUE
- * @synchronous TRUE
- * @trace       CPD-68328
- */
-Std_ReturnType WdgM_GetFirstExpiredSEIDPtr(
-    WdgM_SupervisedEntityIdType** firstExpiredSEID,
-    WdgM_SupervisedEntityIdType** firstExpiredSEIDInv);
+#define WDGM_START_SEC_VAR_POWER_ON_CLEARED_8
+#include "WdgM_MemMap.h"
+extern Std_ReturnType WdgM_FirstExpiredSEIDSavedFlag;
+#define WDGM_STOP_SEC_VAR_POWER_ON_CLEARED_8
+#include "WdgM_MemMap.h"
 
-/**
- * @brief  Gets the first expired seid saved flag pointer of current WdgM.
- * @param[out]  firstExpiredSEIDSaved: Pointer to pointer of current WdgM first expired seid saved flag.
- * @retval      E_OK: success
- * @retval      E_NOT_OK: failure
- * @reentrant   TRUE
- * @synchronous TRUE
- * @trace       CPD-68331
- */
-Std_ReturnType WdgM_GetFirstExpiredSEIDSaved(uint8** firstExpiredSEIDSaved);
+#if (WDGM_MAINFUNCTION_NUM > 1)
+#define WDGM_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "WdgM_MemMap.h"
+extern WdgM_MainFunctionStateType WdgM_MainFunctionStateVar[WDGM_MAINFUNCTION_NUM];
+#define WDGM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "WdgM_MemMap.h"
 
-/**
- * @brief  Gets the core index in config.
- * @param[out]  outPutIndex: Pointer to passout core index.
- * @retval      E_OK: success
- * @retval      E_NOT_OK: failed and can not find core id.
- * @reentrant   TRUE
- * @synchronous TRUE
- * @trace       CPD-72755
- */
-Std_ReturnType WdgM_GetCoreIndex(uint8* outPutIndex);
+#define WDGM_START_SEC_CODE
+#include "WdgM_MemMap.h"
+extern void WdgM_MainFunctionGlobalAliveSupervisionErrorNotification(WdgM_GlobalStatusType globalStatus);
+#define WDGM_STOP_SEC_CODE
+#include "WdgM_MemMap.h"
 
-/* PRQA S 5016 ++ */ /* VL_WdgM_5016 */
-/**
- * @brief  Returns the run-time config pointer.
- * @retval      WdgM_RuntimeType*
- * @reentrant   TRUE
- * @synchronous TRUE
- * @trace       CPD-72756
- */
-WdgM_RuntimeType* WdgM_GetRunDataPtr(void);
-/* PRQA S 5016 -- */
+#define WDGM_START_SEC_CODE
+#include "WdgM_MemMap.h"
+extern void WdgM_MainFunctionLocalAliveSupervisionErrorNotification(
+    WdgM_ApplicationType appl,
+    WdgM_LocalStatusType localStatus);
+#define WDGM_STOP_SEC_CODE
+#include "WdgM_MemMap.h"
+#else
+#define WDGM_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "WdgM_MemMap.h"
+extern WdgM_MainFunctionStateTickType WdgM_MainFunctionStateVarTick;
+#define WDGM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "WdgM_MemMap.h"
+#endif
 
+#if (WDGM_E_SUPERVISION_ENABLE == STD_ON)
+#define WDGM_START_SEC_VAR_POWER_ON_CLEARED_8
+#include "WdgM_MemMap.h"
+extern WdgM_DemReportStatusType WdgM_DemSetFlag;
+#define WDGM_STOP_SEC_VAR_POWER_ON_CLEARED_8
+#include "WdgM_MemMap.h"
+#endif
 #ifdef __cplusplus
 }
 #endif

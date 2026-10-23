@@ -43,6 +43,8 @@
 
 /* ========================================== internal function declarations ======================================== */
 #if (DEM_AGING_ENABLE == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Starts aging of an event.In case the event already ages (or does not support aging), this function has
  * no effect.
@@ -52,10 +54,14 @@
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_DTCAgingStart(Dem_EventIdType EventId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_AGING_ENABLE == STD_ON)
 #if (DEM_STATUS_BIT_HANDLING_TEST_FAILED_SINCE_LAST_CLEAR == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         DemAgingCycleCounterThreshold or DemAgingCycleCounterThresholdForTFSLC (depending on which value is
  * higher) defines the number of completed aging cycles, after which the event memory entry shall be deleted(aged) from
@@ -69,10 +75,14 @@ DEM_LOCAL void Dem_DTCAgingStart(Dem_EventIdType EventId);
  */
 DEM_LOCAL void
     Dem_DTCCheckAgingCycleThreshold(Dem_EventIdType EventId, uint16 CycleCounter, Dem_NvBlockNumType MemoryIndex);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 #endif
 
 #if (DEM_RESET_CONFIRMED_BIT_ON_OVERFLOW == STD_OFF)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         If configuration parameter DemResetConfirmedBitOnOverflow is set to false and an event memory entry
  * aging occurs the Dem module shall check for other events having UDS status bit 3 set to 1 and UDS status bit 0 set to
@@ -83,9 +93,13 @@ DEM_LOCAL void
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_DTCAgedTryAgingOther(Dem_MemoryNumType MemIndex);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_AGING_ENABLE == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Completes aging of a DTC.
  * @param[in]     EventId: The event ID
@@ -95,11 +109,15 @@ DEM_LOCAL void Dem_DTCAgedTryAgingOther(Dem_MemoryNumType MemIndex);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_DTCAged(Dem_EventIdType EventId, Dem_NvBlockNumType MemoryIndex);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_AVAILABILITY_SUPPORT == DEM_EVENT_AVAILABILITY)
 #if (DEM_EVENT_COMBINATION_SUPPORT != DEM_EVCOMB_DISABLED)
 #if (DEM_COMBINATION_NUMBER > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Marks a combined event unavailable
  * @param[in]     EventId: The event ID
@@ -108,6 +126,10 @@ DEM_LOCAL void Dem_DTCAged(Dem_EventIdType EventId, Dem_NvBlockNumType MemoryInd
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_DTCDisableCombined(Dem_EventIdType EventId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief Marks a combined event available
@@ -117,9 +139,13 @@ DEM_LOCAL void Dem_DTCDisableCombined(Dem_EventIdType EventId);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_DTCEnableCombined(Dem_EventIdType EventId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 #endif
 #endif
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Read the DTC number for the given EventId
@@ -135,8 +161,12 @@ DEM_LOCAL void Dem_DTCEnableCombined(Dem_EventIdType EventId);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL Std_ReturnType Dem_GetDTCByEvent(Dem_EventIdType EventId, Dem_DTCFormatType DTCFormat, uint32* DTCOfEvent);
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_USER_CONTROLLED_WIR == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
+
 /**
  * @brief         Set DTC WIRS tatus
  * @param[in]     EventId: The event ID
@@ -151,11 +181,11 @@ DEM_LOCAL Std_ReturnType Dem_GetDTCByEvent(Dem_EventIdType EventId, Dem_DTCForma
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL Std_ReturnType Dem_DTCSetWIRStatus(Dem_EventIdType EventId, boolean WIRStatus);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 /* ========================================== internal function definitions ========================================= */
-#define DEM_START_SEC_CODE
-#include "Dem_MemMap.h"
 /**
  * @brief         Get DemDTCAttributesRef by event
  */
@@ -201,7 +231,6 @@ DEM_LOCAL_INLINE boolean Dem_GetEventDTCNvImmediate(Dem_EventIdType EventId)
 #endif
     return Immediate;
 }
-
 #if (DEM_DTC_GROUP_NUMBER > 0u)
 /**
  * @brief         Get Dem Group Of DTC
@@ -216,7 +245,6 @@ DEM_LOCAL_INLINE uint32 Dem_GetDTCOfGroupDTCs(Dem_GroupOfDTCNumType GroupId)
     return Dem_GlobalConfigPtr->GroupOfDTC[GroupId];
 }
 #endif
-
 /**
  * @brief         Get Event DTC value
  */
@@ -229,7 +257,6 @@ DEM_LOCAL_INLINE uint32 Dem_GetEventDTC(Dem_EventIdType EventId)
     }
     return lDtcValue;
 }
-
 #if (DEM_OBDII_SUPPORT == STD_ON)
 /**
  * @brief         Get Event Obd DTC value
@@ -246,7 +273,6 @@ DEM_LOCAL_INLINE uint32 Dem_GetEventObdDTC(Dem_EventIdType EventId)
     return lOBDDtcValue;
 }
 #endif
-
 #if (DEM_J1939_SUPPORT == STD_ON)
 /**
  * @brief         Get Event J1939 DTC value
@@ -271,7 +297,6 @@ DEM_LOCAL_INLINE boolean Dem_CheckEventJ1939Related(Dem_EventIdType EventId)
     /* PRQA S 4404, 1252 -- */
 }
 #endif
-
 /**
  * @brief         Check whether a memory entry exists for the DTC
  */
@@ -297,7 +322,6 @@ DEM_LOCAL_INLINE void Dem_InitDTCContext(Dem_EventIdType EventId, Dem_DTCContext
 #endif
     DTCContext->Dtctriggers = DEM_TRIGGER_NONE;
 }
-
 #if (DEM_EVENT_COMBINATION_SUPPORT != DEM_EVCOMB_DISABLED)
 #if (DEM_COMBINATION_NUMBER > 0u)
 /**
@@ -319,7 +343,8 @@ DEM_LOCAL_INLINE Dem_UdsStatusByteType Dem_CalculateCombineUdsStatus(Dem_Combina
     }
     return udsStatus;
 }
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Calculates the fault detection counter of a combined event
  * @param[in]     GroupId: Identification of DTC Group.
@@ -364,9 +389,10 @@ DEM_LOCAL Std_ReturnType Dem_DTCCombinedGroupGetFDC(Dem_CombinationNumType Group
     }
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 #endif
-
 /**
  * @brief         Calculate DTC Status
  * @param[in]     DTCContext: The DTC context
@@ -593,7 +619,6 @@ DEM_LOCAL_INLINE Dem_UdsStatusByteType Dem_GetDTCUDSStatus(Dem_EventIdType Event
     }
     return dtcStatus;
 }
-
 #if (DEM_SUPPRESSION_SUPPORT == DEM_DTC_SUPPRESSION)
 /**
  * @brief         Tests if an event or combined event group is suppressed for reporting API. Any event of a combined
@@ -700,9 +725,7 @@ DEM_LOCAL_INLINE void Dem_ChangeDTCSuppression(Dem_EventIdType EventId, boolean 
         Dem_DTCResetSuppression(EventId);
     }
 }
-
 #endif
-
 /**
  * @brief         For normal events, this function simply looks up the event configuration. A combined event group is
  * available only if at least one sub-event is available in the active variant. Any event of a combined group can be
@@ -774,9 +797,10 @@ DEM_LOCAL_INLINE Std_ReturnType Dem_DTCGetFaultDetectionCounter(Dem_EventIdType 
     }
     return ret;
 }
-
 #if (DEM_EVENT_COMBINATION_SUPPORT != DEM_EVCOMB_DISABLED)
 #if (DEM_COMBINATION_NUMBER > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Calculates the maximum fault detection counter this cycle of a combined event
  */
@@ -805,9 +829,10 @@ DEM_LOCAL sint8 Dem_GetFDCMaxOfDTCCombined(Dem_CombinationNumType GroupId)
 #endif
     return maxFdc;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 #endif
-
 /**
  * @brief         Tests all options due to which an event or combined event group has to be has to be excluded from
  * reporting API, based on the combined event group for combined events. Any event of a combined group can be passed to
@@ -929,7 +954,6 @@ DEM_LOCAL_INLINE void Dem_CombinedEvent(
         ArgPtr->NewDtcStatus = Dem_GetEventUDSStatus(EventId);
     }
 }
-
 #if (DEM_GENERAL_DISPLACEMENT_NONE == STD_OFF)
 /**
  * @brief         Updates the status of a displaced DTC
@@ -965,10 +989,11 @@ DEM_LOCAL_INLINE void Dem_DTCDisplaced(Dem_EventIdType EventId)
     Dem_NotiDtcStatusChanged(EventId, oldDtcStatus, Dem_DTCApplyExternalStatus(EventId, args.NewDtcStatus));
 }
 #endif
-
 #if (                                                                                                     \
     (DEM_ENTRY_TRIGGER_ON_FDC_THRESHOLD == STD_ON) || (DEM_GENERAL_ED_TRIGGER_ON_FDC_THRESHOLD == STD_ON) \
     || (DEM_GENERAL_FF_TRIGGER_ON_FDC_THRESHOLD == STD_ON))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Updates event data due to exceeding a FDC threshold
  */
@@ -1014,9 +1039,12 @@ DEM_LOCAL void Dem_DTCFdcTrip(Dem_EventIdType EventId, boolean FirstThisCycle)
     Dem_SetPrestoreStateDiscard();
 #endif
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (defined(DEM_MAX_FDC_SINCE_LAST_CLEAR))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief  Update event data 'maximum FDC since last clear'
  */
@@ -1067,8 +1095,9 @@ DEM_LOCAL void Dem_DTCUpdateFdcMax(Dem_EventIdType EventId)
         }
     }
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 /**
  * @brief         Tests whether an event or combined event may age
  * @param[in]     EventId: The event ID
@@ -1083,8 +1112,9 @@ DEM_LOCAL_INLINE boolean Dem_CheckDtcMayAge(Dem_EventIdType EventId)
 {
     return Dem_CheckEventMayAge(Dem_GetDTCUDSStatus(EventId));
 }
-
 #if (DEM_AGING_ENABLE == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Starts aging of an event.In case the event already ages (or does not support aging), this function has no
  * effect.
@@ -1101,8 +1131,8 @@ DEM_LOCAL void Dem_DTCAgingStart(Dem_EventIdType EventId)
 
 #if (DEM_RESET_CONFIRMED_BIT_ON_OVERFLOW == STD_OFF)
         /** If configuration parameter DemResetConfirmedBitOnOverflow is set to false and in case an event has UDS
-         * status bit 3 set and gets qualified as passed and is not stored in an event memory entry the Dem module shall
-         * try to allocate an event memory entry to get an aging counter. */
+         * status bit 3 set and gets qualified as passed and is not stored in an event memory entry the Dem module
+         * shall try to allocate an event memory entry to get an aging counter. */
         if (Dem_GetEventstoreStatus(internalStatus) == Dem_InternalStoredStatus_None)
         {
             Dem_UdsStatusByteType dtcStatus = Dem_GetDTCUDSStatus(EventId);
@@ -1139,8 +1169,8 @@ DEM_LOCAL void Dem_DTCAgingStart(Dem_EventIdType EventId)
                 agingCounter = Dem_AddCycleCount(agingCounter, Dem_GetEventMaxAgingThreshold(EventId));
                 if (Dem_GetEventAgingCycle(EventId) == Dem_GetOCRefOfEvent(EventId))
                 {
-                    /** The current operation cycle meets the aging condition. When aging begins, the ISO diagramming
-                     * method should be used to count the additional items required. */
+                    /** The current operation cycle meets the aging condition. When aging begins, the ISO
+                     * diagramming method should be used to count the additional items required. */
                     agingCounter--;
                 }
                 Dem_SetAgingCounterOfMemEntry(memoryIndex, agingCounter);
@@ -1160,16 +1190,18 @@ DEM_LOCAL void Dem_DTCAgingStart(Dem_EventIdType EventId)
         }
     }
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 6070 -- */
 #endif
-
 #if (DEM_AGING_ENABLE == STD_ON)
 #if (DEM_STATUS_BIT_HANDLING_TEST_FAILED_SINCE_LAST_CLEAR == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
- * @brief DemAgingCycleCounterThreshold or DemAgingCycleCounterThresholdForTFSLC (depending on which value is higher)
- * defines the number of completed aging cycles, after which the event memory entry shall be deleted(aged) from the
- * event memory.
+ * @brief DemAgingCycleCounterThreshold or DemAgingCycleCounterThresholdForTFSLC (depending on which value is
+ * higher) defines the number of completed aging cycles, after which the event memory entry shall be deleted(aged)
+ * from the event memory.
  */
 DEM_LOCAL void
     Dem_DTCCheckAgingCycleThreshold(Dem_EventIdType EventId, uint16 CycleCounter, Dem_NvBlockNumType MemoryIndex)
@@ -1181,8 +1213,8 @@ DEM_LOCAL void
      * DEM_STATUS_BIT_AGING_AND_DISPLACEMENT */
     if (ageThr > ageThrTFSLC)
     {
-        /** In case parameter DemAgingCycleCounterThresholdForTFSLC is not configured, TestFailedSinceLastClear will not
-         * be aged. */
+        /** In case parameter DemAgingCycleCounterThresholdForTFSLC is not configured, TestFailedSinceLastClear will
+         * not be aged. */
         if (ageThrTFSLC != 0u)
         {
             if ((uint16)((uint16)ageThr - (uint16)ageThrTFSLC)
@@ -1194,8 +1226,8 @@ DEM_LOCAL void
     }
     else if (ageThr < ageThrTFSLC)
     {
-        /** Upon event aging counter reach threshold DemAgingCycleCounterThreshold, the UDS status bit 3 shall be set to
-         * 0. */
+        /** Upon event aging counter reach threshold DemAgingCycleCounterThreshold, the UDS status bit 3 shall be
+         * set to 0. */
         if ((uint16)((uint16)ageThrTFSLC - (uint16)ageThr)
             == (Dem_GetAgingCounterOfMemEntry(MemoryIndex) - CycleCounter))
         {
@@ -1207,9 +1239,10 @@ DEM_LOCAL void
         /** Still counting */
     }
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 #endif
-
 #if ((DEM_AGING_REQUIRES_TESTED_CYCLE == STD_ON) || (DEM_AGING_REQUIRES_NOT_FAILED_CYCLE == STD_ON))
 /**
  * @brief         Tests whether the current cycle fulfills the conditions for aging
@@ -1244,8 +1277,9 @@ DEM_LOCAL_INLINE boolean Dem_DTCheckStatusForAgingCycle(Dem_UdsStatusByteType Ud
     return ret;
 }
 #endif
-
 #if (DEM_RESET_CONFIRMED_BIT_ON_OVERFLOW == STD_OFF)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief If configuration parameter DemResetConfirmedBitOnOverflow is set to false and an event memory entry aging
  * occurs the Dem module shall check for other events having UDS status bit 3 set to 1 and UDS status bit 0
@@ -1289,9 +1323,12 @@ DEM_LOCAL void Dem_DTCAgedTryAgingOther(Dem_MemoryNumType MemIndex)
         }
     }
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_AGING_ENABLE == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Completes aging of a DTC.
  */
@@ -1344,10 +1381,13 @@ DEM_LOCAL void Dem_DTCAged(Dem_EventIdType EventId, Dem_NvBlockNumType MemoryInd
 #endif
     }
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 6070 -- */
 #endif
-
 #if (DEM_AGING_ENABLE == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Processes the aging cycle for a DTC
  */
@@ -1395,14 +1435,15 @@ DEM_LOCAL void Dem_DTCAgingCycle(Dem_EventIdType EventId, uint16 CycleCounter, D
 #endif
     }
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 6070 -- */
 #endif
-
 #if (defined(DEM_OCC2))
 /**
- * @brief         In each operation cycle the counter shall be incremented after completing an operation cycle in which
- * the FDC10 reaches the value -128, unless FDC10 has already reached a value that is equal to or greater than its
- * unconfirmedDTCLimit in the current operation cycle.
+ * @brief         In each operation cycle the counter shall be incremented after completing an operation cycle in
+ * which the FDC10 reaches the value -128, unless FDC10 has already reached a value that is equal to or greater than
+ * its unconfirmedDTCLimit in the current operation cycle.
  * @param[in]     DTCContext: The DTC context
  * @return        boolean
  * @retval        TRUE: Valid
@@ -1422,7 +1463,8 @@ DEM_LOCAL_INLINE boolean Dem_DTCcheckPassedThisOperationAndNoFailed(const Dem_DT
     return ret;
 }
 #endif
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Process DTC triggers on 'Passed' status report.
  */
@@ -1460,7 +1502,8 @@ DEM_LOCAL void Dem_DTCPassedProcessDTCEffects(const Dem_DTCContextType* DTCConte
     DEM_PARAM_UNUSED(DTCContext);
 #endif
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_AGING_ENABLE == STD_ON)
 /**
  * @brief         Processes aging at the end of the DTC's operation cycle
@@ -1476,7 +1519,6 @@ DEM_LOCAL_INLINE void Dem_DTCOperationCyclEndAging(Dem_EventIdType EventId)
     }
 }
 #endif
-
 /**
  * @brief         Process Dtc storage into event memory
  * @param[in]     EventId: The event ID
@@ -1494,6 +1536,9 @@ DEM_LOCAL_INLINE boolean Dem_DTCStorageTriggerCheck(Dem_EventIdType EventId, uin
 #if ((DEM_ENTRY_TRIGGER_ON_CONFIRMED == STD_ON) || (DEM_ENTRY_TRIGGER_ON_TEST_FAILED == STD_ON))
     Dem_MemoryNumType memRef   = Dem_GetMemRef(Dem_GetDTCAttr(EventId));
     uint8             lTrigger = Dem_GetStorageTriggerOfMemory(memRef);
+#else
+    DEM_PARAM_UNUSED(EventId);
+    DEM_PARAM_UNUSED(Trigger);
 #endif
 #if (DEM_ENTRY_TRIGGER_ON_CONFIRMED == STD_ON)
     if ((DEM_FLAG_ISSET(Trigger, DEM_TRIGGER_CONFIRMED)) && (lTrigger == DEM_TRIGGER_CONFIRMED))
@@ -1509,7 +1554,6 @@ DEM_LOCAL_INLINE boolean Dem_DTCStorageTriggerCheck(Dem_EventIdType EventId, uin
 #endif
     return ret;
 }
-
 #if (defined(DEM_OCC6))
 /**
  * @brief         The counter may also be cleared when the confirmedDTCLimit is reached.
@@ -1533,7 +1577,6 @@ DEM_LOCAL_INLINE uint8
     return blockModification;
 }
 #endif
-
 #if (defined(DEM_OCCCTR))
 /**
  * @brief         Check to increment the occurrence counter
@@ -1602,7 +1645,8 @@ DEM_LOCAL_INLINE uint8 Dem_CheckIncrementOCCCTR(const Dem_DTCContextType* DTCCon
     return blockModification;
 }
 #endif
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Process Dtc storage into event memory
  */
@@ -1668,11 +1712,15 @@ DEM_LOCAL void Dem_DTCProcessStorage(Dem_EventContextType* EventContext, Dem_DTC
 #endif
     EventContext->DataModified = (boolean)DEM_FLAG_ISSET(blockModification, DEM_DATA_USERDATA_CHANGED);
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 6070 -- */
 
 #if (DEM_AVAILABILITY_SUPPORT == DEM_EVENT_AVAILABILITY)
 #if (DEM_EVENT_COMBINATION_SUPPORT != DEM_EVCOMB_DISABLED)
 #if (DEM_COMBINATION_NUMBER > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Marks a combined event unavailable
  */
@@ -1716,7 +1764,10 @@ DEM_LOCAL void Dem_DTCDisableCombined(Dem_EventIdType EventId)
         Dem_SetCombinedEventUDSStatus(groupId, combinedGroupStatus);
     }
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Marks a combined event available
  */
@@ -1757,9 +1808,10 @@ DEM_LOCAL void Dem_DTCEnableCombined(Dem_EventIdType EventId)
         Dem_SetCombinedEventUDSStatus(groupId, Dem_CalculateCombineUdsStatus(groupId));
     }
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 #endif
-
 /**
  * @brief         Unavailable the DTC's event. If the DTC has a combined group, disconnect all its subevents.
  */
@@ -1798,7 +1850,6 @@ DEM_LOCAL_INLINE void Dem_DTCEnable(Dem_EventIdType EventId)
     }
 }
 #endif
-
 /**
  * @brief         Update the UDS status of DTC due to operation cycle state change
  */
@@ -1810,7 +1861,8 @@ DEM_LOCAL_INLINE void Dem_DTCOperationCycle(Dem_EventIdType EventId)
     Dem_ResetSI30Bit1OfMemEntry(EventId);
 #endif
 }
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Read the DTC number for the given EventId
  */
@@ -1887,8 +1939,11 @@ DEM_LOCAL Std_ReturnType Dem_GetDTCByEvent(Dem_EventIdType EventId, Dem_DTCForma
     }
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_USER_CONTROLLED_WIR == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Set DTC WIRS tatus
  */
@@ -1931,10 +1986,9 @@ DEM_LOCAL Std_ReturnType Dem_DTCSetWIRStatus(Dem_EventIdType EventId, boolean WI
     }
     return ret;
 }
-/* PRQA S 6070 -- */
-#endif
-
 #define DEM_STOP_SEC_CODE
 #include "Dem_MemMap.h"
+/* PRQA S 6070 -- */
+#endif
 
 #endif

@@ -52,7 +52,11 @@ extern "C" {
  * @synchronous TRUE
  * @trace       CPD-66288
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 void BswM_EcuM_CurrentWakeup(EcuM_WakeupSourceType source, EcuM_WakeupStatusType state);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 /**
  * @brief       Function called by EcuM to notify about the current status of the Run Request Protocol.
@@ -63,7 +67,11 @@ void BswM_EcuM_CurrentWakeup(EcuM_WakeupSourceType source, EcuM_WakeupStatusType
  * @synchronous TRUE
  * @trace       CPD-66290
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 void BswM_EcuM_RequestedState(EcuM_StateType State, EcuM_RunStatusType CurrentState);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 /**
  * @brief       Function called by EcuM to indicate the current ECU Operation Mode.
@@ -73,7 +81,11 @@ void BswM_EcuM_RequestedState(EcuM_StateType State, EcuM_RunStatusType CurrentSt
  * @synchronous TRUE
  * @trace       CPD-66292
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 void BswM_EcuM_CurrentState(EcuM_StateType CurrentState);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 #endif /*BSWM_ECUM_ENABLED == STD_ON*/
 

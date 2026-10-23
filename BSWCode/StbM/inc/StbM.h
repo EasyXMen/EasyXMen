@@ -30,7 +30,10 @@
  *  V2.2.0    2024-12-26 xiongfei.shi   1.Refactor and update to R23-11
  *                                      2.Removed offset Time base
  *                                      3.support multi-partition distribution
- *  V2.2.1    2025-10-22 caihong.liu    Fixed CPT-9350,correct the logic of rate correction
+ *  V3.0.0    2025-10-16 xiaojian.liang 1.Support for CAN HW timestamping added
+ *                                      2.Fallback Virtual Local Time added
+ *                                      3.Add freshness value interface between the <Bus>TSyn modules and the FVM
+ *  V3.0.1    2026-06-03 xiaojian.liang CPTASK-1133: Add ARTI stub functions and ARTI_TRACE_N instrumentation.
  *
  ==================================================================================================================== */
 
@@ -101,6 +104,10 @@
       Risk: Due to the fan distribution to many functions, understandability and testability can become overly complex.
       Prevention: Design and code review, and have a clear structure and annotated code.
 
+    \li VL_MTR_StbM_STPAR
+      Reason: Functions specified by AUTOSAR (and implementation-related helpers) are exempt from parameter-count
+  limits. Risk: No risk. Prevention: Design and code review, and have a clear structure and annotated code.
+
     \li VL_StbM_0533
       Reason: Contains no object or function definitions with external linkage.
       Risk: No risk.
@@ -110,11 +117,27 @@
       Reason: Some special files have little or no code, allowing unnecessary comments to be reduced.
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
+
+    \li VL_StbM_1512
+      Reason: Identifier '${name}' with external linkage has separate declarations in multiple translation units.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_StbM_0553
+      Reason: The usage of this file depends on the config
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_StbM_Redeclaration
+      Reason: Rte.c need function declaration to use and Xfrm module need either.
+      Risk: Code redundancy and may difficult to maintain.
+      Prevention: None.
+
  */
 
 #ifndef STBM_H
 #define STBM_H
-
+/* PRQA S 1512,1510,1513 EOF */ /* VL_StbM_Redeclaration */
 /* =================================================== inclusions =================================================== */
 #include "StbM_Types.h"
 #include "SchM_StbM.h"
@@ -126,61 +149,96 @@ extern "C" {
 #endif
 
 /* =============================================== version information ============================================== */
-/* Published Information */
-#define STBM_VENDOR_ID                   (62u)
-#define STBM_MODULE_ID                   (160u)
-#define STBM_INSTANCE_ID                 (0u)
-#define STBM_AR_RELEASE_MAJOR_VERSION    (4u)
-#define STBM_AR_RELEASE_MINOR_VERSION    (9u)
-#define STBM_AR_RELEASE_REVISION_VERSION (0u)
-#define STBM_SW_MAJOR_VERSION            (2u)
-#define STBM_SW_MINOR_VERSION            (2u)
-#define STBM_SW_PATCH_VERSION            (1u)
+/**
+ * @name Published Information of StbM
+ * @{
+ * @brief Published Information
+ */
+#define STBM_VENDOR_ID                   (62u)  /**< Vendor ID for StbM module according to AUTOSAR vendor list */
+#define STBM_MODULE_ID                   (160u) /**< Module ID for StbM module according to AUTOSAR module ID list */
+#define STBM_INSTANCE_ID                 (0u)   /**< Instance ID for StbM module, identifies specific instance */
+#define STBM_AR_RELEASE_MAJOR_VERSION    (4u)   /**< AUTOSAR specification major version */
+#define STBM_AR_RELEASE_MINOR_VERSION    (9u)   /**< AUTOSAR specification minor version */
+#define STBM_AR_RELEASE_REVISION_VERSION (0u)   /**< AUTOSAR specification revision version */
+#define STBM_SW_MAJOR_VERSION            (2u)   /**< StbM module software major version */
+#define STBM_SW_MINOR_VERSION            (2u)   /**< StbM module software minor version */
+#define STBM_SW_PATCH_VERSION            (0u)   /**< StbM module software patch version */
+/** @} */
 
 /* ===================================================== macros ===================================================== */
-/*Development errors*/
-#define STBM_E_PARAM                 ((uint8)0x0AU)
-#define STBM_E_UNINIT                ((uint8)0x0BU)
-#define STBM_E_PARAM_POINTER         ((uint8)0x10U)
-#define STBM_E_INIT_FAILED           ((uint8)0x11U)
-#define STBM_E_SERVICE_NOT_SUPPORTED ((uint8)0x12U)
-#define STBM_E_PARAM_TIMESTAMP       ((uint8)0x25U)
-#define STBM_E_PARAM_USERDATA        ((uint8)0x26U)
-#define STBM_E_INVALID_PARTITION     ((uint8)0xF0U)
-#define STBM_E_ALREADY_INITIALIZED   ((uint8)0xF1U)
+/** Extension to Std_ReturnType */
+#define STBM_E_BUSY ((uint8)0x02u) /**< The function call failed because the service is still busy */
 
-/*Service ID*/
-#define STBM_SID_INIT                       ((uint8)0x00U)
-#define STBM_SID_GETVERSIONINFO             ((uint8)0x05U)
-#define STBM_SID_GETCURRENTTIME             ((uint8)0x07U)
-#define STBM_SID_GETCURRENTVIRTUALLOCALTIME ((uint8)0x1EU)
-#define STBM_SID_SETGLOBALTIME              ((uint8)0x0BU)
-#define STBM_SID_UPDATEGLOBALTIME           ((uint8)0x10U)
-#define STBM_SID_SETUSERDATA                ((uint8)0x0CU)
-#define STBM_SID_SETOFFSET                  ((uint8)0x0DU)
-#define STBM_SID_GETOFFSET                  ((uint8)0x0EU)
-#define STBM_SID_BUSGETCURRENTTIME          ((uint8)0x1FU)
-#define STBM_SID_BUSSETGLOBALTIME           ((uint8)0x0FU)
-#define STBM_SID_GETRATEDEVIATION           ((uint8)0x11U)
-#define STBM_SID_SETRATECORRECTION          ((uint8)0x12U)
-#define STBM_SID_GETTIMELEAP                ((uint8)0x13U)
-#define STBM_SID_GETTIMEBASESTATUS          ((uint8)0x14U)
-#define STBM_SID_STARTTIMER                 ((uint8)0x15U)
-#define STBM_SID_GETSYNCTIMERECORDHEAD      ((uint8)0x16U)
-#define STBM_SID_GETOFFSETTIMERECORDHEAD    ((uint8)0x17U)
-#define STBM_SID_TRIGGERTIMETRANSMISSION    ((uint8)0x1CU)
-#define STBM_SID_GETTIMEBASEUPDATECOUNTER   ((uint8)0x1BU)
-#define STBM_SID_GETMASTERCONFIG            ((uint8)0x1DU)
-#define STBM_SID_MAINFUNCTION               ((uint8)0x04U)
+/**
+ * @name Development Errors of StbMs
+ * @{
+ * @brief Development Errors
+ */
+#define STBM_E_PARAM                 ((uint8)0x0AU) /**< Parameter error */
+#define STBM_E_UNINIT                ((uint8)0x0BU) /**< Module not initialized */
+#define STBM_E_PARAM_POINTER         ((uint8)0x10U) /**< Parameter pointer error */
+#define STBM_E_INIT_FAILED           ((uint8)0x11U) /**< Initialization failed */
+#define STBM_E_SERVICE_NOT_SUPPORTED ((uint8)0x12U) /**< Service not supported */
+#define STBM_E_PARAM_TIMESTAMP       ((uint8)0x25U) /**< Timestamp parameter error */
+#define STBM_E_PARAM_USERDATA        ((uint8)0x26U) /**< User data parameter error */
+#define STBM_E_INVALID_PARTITION     ((uint8)0xF0U) /**< Invalid partition error */
+#define STBM_E_ALREADY_INITIALIZED   ((uint8)0xF1U) /**< Module already initialized */
+/** @} */
+
+/**
+ * @name Service ID of StbM
+ * @{
+ * @brief Service ID
+ */
+#define STBM_SID_INIT                        0x00u /**< Service ID for StbM_Init function */
+#define STBM_SID_GETVERSIONINFO              0x05u /**< Service ID for StbM_GetVersionInfo function */
+#define STBM_SID_GETCURRENTTIME              0x07u /**< Service ID for StbM_GetCurrentTime function */
+#define STBM_SID_GETCURRENTSAFETIME          0x30u /**< Service ID for StbM_GetCurrentSafeTime function */
+#define STBM_SID_GETCURRENTVIRTUALLOCALTIME  0x1eu /**< Service ID for StbM_GetCurrentVirtualLocalTime function */
+#define STBM_SID_SETGLOBALTIME               0x0bu /**< Service ID for StbM_SetGlobalTime function */
+#define STBM_SID_UPDATEGLOBALTIME            0x10u /**< Service ID for StbM_UpdateGlobalTime function */
+#define STBM_SID_SETUSERDATA                 0x0cu /**< Service ID for StbM_SetUserData function */
+#define STBM_SID_SETOFFSET                   0x0du /**< Service ID for StbM_SetOffset function */
+#define STBM_SID_GETOFFSET                   0x0eu /**< Service ID for StbM_GetOffset function */
+#define STBM_SID_BUSGETCURRENTTIME           0x1fu /**< Service ID for StbM_BusGetCurrentTime function */
+#define STBM_SID_BUSSETGLOBALTIME            0x0fu /**< Service ID for StbM_BusSetGlobalTime function */
+#define STBM_SID_GETRATEDEVIATION            0x11u /**< Service ID for StbM_GetRateDeviation function */
+#define STBM_SID_SETRATECORRECTION           0x12u /**< Service ID for StbM_SetRateCorrection function */
+#define STBM_SID_GETTIMELEAP                 0x13u /**< Service ID for StbM_GetTimeLeap function */
+#define STBM_SID_GETTIMEBASESTATUS           0x14u /**< Service ID for StbM_GetTimeBaseStatus function */
+#define STBM_SID_STARTTIMER                  0x15u /**< Service ID for StbM_StartTimer function */
+#define STBM_SID_GETSYNCTIMERECORDHEAD       0x16u /**< Service ID for StbM_GetSyncTimeRecordHead function */
+#define STBM_SID_GETOFFSETTIMERECORDHEAD     0x17u /**< Service ID for StbM_GetOffsetTimeRecordHead function */
+#define STBM_SID_TRIGGERTIMETRANSMISSION     0x1cu /**< Service ID for StbM_TriggerTimeTransmission function */
+#define STBM_SID_GETTIMEBASEUPDATECOUNTER    0x1bu /**< Service ID for StbM_GetTimeBaseUpdateCounter function */
+#define STBM_SID_GETMASTERCONFIG             0x1du /**< Service ID for StbM_GetMasterConfig function */
+#define STBM_SID_MAINFUNCTION                0x04u /**< Service ID for StbM_MainFunction function */
+#define STBM_SID_GETFALLBACKVIRTUALLOCALTIME 0x31u /**< Service ID for StbM_GetFallbackVirtualLocalTime function */
+#define STBM_SID_GETPROTOCOLPARAM            0x29u /**< Service ID for StbM_GetBusProtocolParam function */
+#define STBM_SID_SETPROTOCOLPARAM            0x2au /**< Service ID for StbM_SetBusProtocolParam function */
+#define STBM_SID_GETTXFRESHNESS              0x2cu /**< Service ID for StbM_GetTxFreshness function */
+#define STBM_SID_GETTXFRESHNESSTRUNCDATA     0x2du /**< Service ID for StbM_GetTxFreshnessTruncData function */
+#define STBM_SID_SPDUTXCONFIRMATION          0x2eu /**< Service ID for StbM_SPduTxConfirmation function */
+#define STBM_SID_GETRXFRESHNESS              0x2fu /**< Service ID for StbM_GetRxFreshness function */
+#define STBM_SID_CANSETSLAVETIMINGDATA       0x26u /**< Service ID for CAN slave timing data setting */
+#define STBM_SID_ETHSETSLAVETIMINGDATA       0x28u /**< Service ID for ETH slave timing data setting */
+#define STBM_SID_CANSETMASTERTIMINGDATA      0x20u /**< Service ID for CAN master timing data setting */
+#define STBM_SID_ETHTSETMASTERTIMINGDATA     0x22u /**< Service ID for ETH master timing data setting */
+#define STBM_SID_ETHTSETPDELAYINITIATORDATA  0x23u /**< Service ID for ETH T pDelay initiator data setting */
+#define STBM_SID_ETHTSETPDELAYRESPONDERDATA  0x24u /**< Service ID for ETH T pDelay responder data setting */
+#define STBM_SID_CLONETIMEBASE               0x2bu /**< Service ID for StbM_CloneTimeBase function */
+#define STBM_SID_SETCLONINGOFFSET            0x32u /**< Service ID for StbM_SetCloningOffset function */
+/** @} */
 
 /* ================================================ type definitions ================================================ */
 /* Structure which contains additional measurement data */
+/**
+ * @brief Structure for measurement data
+ */
 typedef struct
 {
-    uint32 pathDelay;
-#if (STBM_ETHTSYN_ENABLE == STD_ON)
-    RateDeviationWithStatusType rateDeviation;
-#endif
+    uint32                      pathDelay;     /**< Path delay value @range 0...0xFFFFFFFF */
+    RateDeviationWithStatusType rateDeviation; /**< Rate deviation value @range NA */
 } StbM_MeasurementType;
 
 /* ========================================== internal function definitions ========================================= */
@@ -188,6 +246,8 @@ typedef struct
 /* =========================================== external data declarations =========================================== */
 
 /* ========================================= external function declarations ========================================= */
+#define STBM_START_SEC_CODE
+#include "StbM_MemMap.h"
 /**
  * @brief        Initializes the Synchronized Timebase Manager.
  * @param[in]    configPtr  Pointer to post-build configuration data
@@ -196,20 +256,28 @@ typedef struct
  * @trace        CPD-71873
  */
 void StbM_Init(const StbM_ConfigType* configPtr);
+#define STBM_STOP_SEC_CODE
+#include "StbM_MemMap.h"
 
 #if (STBM_VERSIONINFO_API == STD_ON)
+#define STBM_START_SEC_CODE
+#include "StbM_MemMap.h"
 /**
  * @brief        This function returns the version information of this module.
  * @param[out]   versioninfo  Pointer to the memory location holding the version information.
  * @reentrant    TRUE
  * @synchronous  TRUE
- * @trace        CPD-71852
+ * @trace   CPD-71852
  */
 void StbM_GetVersionInfo(Std_VersionInfoType* versioninfo);
+#define STBM_STOP_SEC_CODE
+#include "StbM_MemMap.h"
 #endif
 
+#define STBM_START_SEC_CODE
+#include "StbM_MemMap.h"
 /**
- * @brief        Returns a time value(Local Time Base derived from Global Time Base) in standard format.
+ * @brief        Returns a time value(Local Time Base derived from Global TimeBase) in standard format.
  * @param[in]    timeBaseId Identification of a Time Base
  * @param[out]   timeTuple  Current time stamp that is valid at this time
  * @param[out]   userData   User data of the Time Base
@@ -218,13 +286,41 @@ void StbM_GetVersionInfo(Std_VersionInfoType* versioninfo);
  * @retval       E_NOT_OK   Getting the Current time failed
  * @reentrant    FALSE
  * @synchronous  TRUE
- * @trace        CPD-71853
+ * @trace   CPD-71853
  */
 Std_ReturnType StbM_GetCurrentTime(
     StbM_SynchronizedTimeBaseType timeBaseId,
     StbM_TimeTupleType*           timeTuple,
     StbM_UserDataType*            userData);
+#define STBM_STOP_SEC_CODE
+#include "StbM_MemMap.h"
 
+#if STBM_TIME_VALIDATION_USED == STD_ON
+#define STBM_START_SEC_CODE
+#include "StbM_MemMap.h"
+/**
+ * @brief        Returns a time triple (Local Time, Fallback Local Time, Global time and timebase status) and user data
+ *               details. Note: This API shall be called with locked interrupts / within an Exclusive Area to prevent
+ *               interruption (i.e., the risk that the time stamp is outdated on return of the function call).
+ * @param[in]    timeBaseId   time base reference
+ * @param[out]   timeTriple   Current time triple values (Current time , Current fallback time, and global time)
+ * @param[out]   userData     User data of the Time Base
+ * @retval       E_OK         successful
+ * @retval       E_NOT_OK     failed
+ * @reentrant    FALSE
+ * @synchronous  TRUE
+ * @trace   CPD-85942
+ */
+Std_ReturnType StbM_GetCurrentSafeTime(
+    StbM_SynchronizedTimeBaseType timeBaseId,
+    StbM_TimeTripleType*          timeTriple,
+    StbM_UserDataType*            userData);
+#define STBM_STOP_SEC_CODE
+#include "StbM_MemMap.h"
+#endif
+
+#define STBM_START_SEC_CODE
+#include "StbM_MemMap.h"
 /**
  * @brief        Returns the Virtual Local Time of the referenced Time Base.
  * @param[in]    timeBaseId   Identification of a Time Base
@@ -234,11 +330,34 @@ Std_ReturnType StbM_GetCurrentTime(
  * @retval       E_NOT_OK     Getting the Virtual Local Time failed
  * @reentrant    FALSE
  * @synchronous  TRUE
- * @trace        CPD-71854
+ * @trace   CPD-71854
  */
 Std_ReturnType
     StbM_GetCurrentVirtualLocalTime(StbM_SynchronizedTimeBaseType timeBaseId, StbM_VirtualLocalTimeType* localTimePtr);
+#define STBM_STOP_SEC_CODE
+#include "StbM_MemMap.h"
 
+#if STBM_FALLBACK_VIRTUAL_LOCAL_TIME_USED == STD_ON
+#define STBM_START_SEC_CODE
+#include "StbM_MemMap.h"
+/**
+ * @brief        Returns the fallback Virtual Local Time of the referenced Time Base.
+ * @param[in]    timeBaseId   Time Base reference
+ * @param[out]   localTimePtr Current Fallback Virtual Local Time value
+ * @retval       E_OK         successful
+ * @retval       E_NOT_OK     failed
+ * @reentrant    FALSE
+ * @synchronous  TRUE
+ * @trace   CPD-84844
+ */
+Std_ReturnType
+    StbM_GetFallbackVirtualLocalTime(StbM_SynchronizedTimeBaseType timeBaseId, StbM_VirtualLocalTimeType* localTimePtr);
+#define STBM_STOP_SEC_CODE
+#include "StbM_MemMap.h"
+#endif
+
+#define STBM_START_SEC_CODE
+#include "StbM_MemMap.h"
 /**
  * @brief        Allows the Customers to set the new global time that has to be valid for the system,
  *               which will be sent to the busses. This function will be used if a Time Master is
@@ -251,13 +370,17 @@ Std_ReturnType
  * @retval       E_NOT_OK   Setting the global Time failed
  * @reentrant    FALSE
  * @synchronous  TRUE
- * @trace        CPD-71856
+ * @trace   CPD-71856
  */
 Std_ReturnType StbM_SetGlobalTime(
     StbM_SynchronizedTimeBaseType timeBaseId,
     const StbM_TimeStampType*     timeStamp,
     const StbM_UserDataType*      userData);
+#define STBM_STOP_SEC_CODE
+#include "StbM_MemMap.h"
 
+#define STBM_START_SEC_CODE
+#include "StbM_MemMap.h"
 /**
  * @brief        Allows the Customers to set the Global Time that will be sent to the buses. This
  *               function will be used if a Time Master is present in this ECU. Using UpdateGlobal
@@ -270,13 +393,17 @@ Std_ReturnType StbM_SetGlobalTime(
  * @retval       E_NOT_OK   updating the global Time failed
  * @reentrant    FALSE
  * @synchronous  TRUE
- * @trace        CPD-71857
+ * @trace   CPD-71857
  */
 Std_ReturnType StbM_UpdateGlobalTime(
     StbM_SynchronizedTimeBaseType timeBaseId,
     const StbM_TimeStampType*     timeStamp,
     const StbM_UserDataType*      userData);
+#define STBM_STOP_SEC_CODE
+#include "StbM_MemMap.h"
 
+#define STBM_START_SEC_CODE
+#include "StbM_MemMap.h"
 /**
  * @brief        Allows the customers to set the new user data that has to be valid for the
  *               system, which will be sent to the busses.
@@ -287,10 +414,14 @@ Std_ReturnType StbM_UpdateGlobalTime(
  * @retval       E_NOT_OK   setting the user data failed
  * @reentrant    FALSE
  * @synchronous  TRUE
- * @trace        CPD-71858
+ * @trace   CPD-71858
  */
 Std_ReturnType StbM_SetUserData(StbM_SynchronizedTimeBaseType timeBaseId, const StbM_UserDataType* userData);
+#define STBM_STOP_SEC_CODE
+#include "StbM_MemMap.h"
 
+#define STBM_START_SEC_CODE
+#include "StbM_MemMap.h"
 /**
  * @brief        Allows the Time Base Provider Modules to forward a new Global Time tuple(i.e.,
  *               the Received Time Tuple) to the StbM.
@@ -303,14 +434,18 @@ Std_ReturnType StbM_SetUserData(StbM_SynchronizedTimeBaseType timeBaseId, const 
  * @retval       E_NOT_OK       Setting the Global Time tuple failed
  * @reentrant    FALSE
  * @synchronous  TRUE
- * @trace        CPD-71859
+ * @trace   CPD-71859
  */
 Std_ReturnType StbM_BusSetGlobalTime(
     StbM_SynchronizedTimeBaseType timeBaseId,
     const StbM_TimeTupleType*     timeTuplePtr,
     const StbM_UserDataType*      userDataPtr,
     const StbM_MeasurementType*   measureDataPtr);
+#define STBM_STOP_SEC_CODE
+#include "StbM_MemMap.h"
 
+#define STBM_START_SEC_CODE
+#include "StbM_MemMap.h"
 /**
  * @brief        Returns value of the current rate deviation of a Time Base
  * @param[in]    timeBaseId     Identification of a Time Base
@@ -320,10 +455,14 @@ Std_ReturnType StbM_BusSetGlobalTime(
  * @retval       E_NOT_OK       Getting the rate deviation failed
  * @reentrant    TRUE
  * @synchronous  TRUE
- * @trace        CPD-71860
+ * @trace   CPD-71860
  */
 Std_ReturnType StbM_GetRateDeviation(StbM_SynchronizedTimeBaseType timeBaseId, StbM_RateDeviationType* rateDeviation);
+#define STBM_STOP_SEC_CODE
+#include "StbM_MemMap.h"
 
+#define STBM_START_SEC_CODE
+#include "StbM_MemMap.h"
 /**
  * @brief        Allows to set the rate of a Synchronized Time Base(being either a Pure Local Time Base or not)
  * @param[in]    timeBaseId     Identification of a Time Base
@@ -333,10 +472,14 @@ Std_ReturnType StbM_GetRateDeviation(StbM_SynchronizedTimeBaseType timeBaseId, S
  * @retval       E_NOT_OK       Setting the rate deviation failed
  * @reentrant    TRUE
  * @synchronous  TRUE
- * @trace        CPD-71861
+ * @trace   CPD-71861
  */
 Std_ReturnType StbM_SetRateCorrection(StbM_SynchronizedTimeBaseType timeBaseId, StbM_RateDeviationType rateDeviation);
+#define STBM_STOP_SEC_CODE
+#include "StbM_MemMap.h"
 
+#define STBM_START_SEC_CODE
+#include "StbM_MemMap.h"
 /**
  * @brief        Returns value of Time Leap.
  * @param[in]    timeBaseId Identification of a Time Base
@@ -346,10 +489,14 @@ Std_ReturnType StbM_SetRateCorrection(StbM_SynchronizedTimeBaseType timeBaseId, 
  * @retval       E_NOT_OK   Getting Time leap value failed
  * @reentrant    FALSE
  * @synchronous  TRUE
- * @trace        CPD-71862
+ * @trace   CPD-71862
  */
 Std_ReturnType StbM_GetTimeLeap(StbM_SynchronizedTimeBaseType timeBaseId, StbM_TimeDiffType* timeJump);
+#define STBM_STOP_SEC_CODE
+#include "StbM_MemMap.h"
 
+#define STBM_START_SEC_CODE
+#include "StbM_MemMap.h"
 /**
  * @brief        Returns detailed status information for a Synchronized(or Pure Local) Time Base
  * @param[in]    timeBaseId     Identification of a Time Base
@@ -359,12 +506,16 @@ Std_ReturnType StbM_GetTimeLeap(StbM_SynchronizedTimeBaseType timeBaseId, StbM_T
  * @retval       E_NOT_OK       Getting status of the Time Base failed
  * @reentrant    FALSE
  * @synchronous  TRUE
- * @trace        CPD-71863
+ * @trace   CPD-71863
  */
 Std_ReturnType
     StbM_GetTimeBaseStatus(StbM_SynchronizedTimeBaseType timeBaseId, StbM_TimeBaseStatusType* timeBaseStatus);
+#define STBM_STOP_SEC_CODE
+#include "StbM_MemMap.h"
 
 #if (STBM_NOTIFICATION_CUSTOMER_NUM > 0)
+#define STBM_START_SEC_CODE
+#include "StbM_MemMap.h"
 /**
  * @brief        Sets a time value, which the Time Base value is compared against
  * @param[in]    timeBaseId   Identification of a Time Base
@@ -375,15 +526,19 @@ Std_ReturnType
  * @retval       E_NOT_OK       Starting the timer failed
  * @reentrant    FALSE
  * @synchronous  TRUE
- * @trace        CPD-71864
+ * @trace   CPD-71864
  */
 Std_ReturnType StbM_StartTimer(
     StbM_SynchronizedTimeBaseType timeBaseId,
     StbM_CustomerIdType           customerId,
     const StbM_TimeStampType*     expireTime);
+#define STBM_STOP_SEC_CODE
+#include "StbM_MemMap.h"
 #endif
 
 #if (STBM_TIME_RECORDING_SUPPORT == STD_ON)
+#define STBM_START_SEC_CODE
+#include "StbM_MemMap.h"
 /**
  * @brief        Accesses to the recorded snapshot data Header of the table belonging to the Synchronized Time Base.
  * @param[in]    timeBaseId            Identification of a Time Base
@@ -393,13 +548,17 @@ Std_ReturnType StbM_StartTimer(
  * @retval       E_NOT_OK              Failed
  * @reentrant    TRUE
  * @synchronous  TRUE
- * @trace        CPD-71865
+ * @trace   CPD-71865
  */
 Std_ReturnType StbM_GetSyncTimeRecordHead(
     StbM_SynchronizedTimeBaseType timeBaseId,
     StbM_SyncRecordTableHeadType* syncRecordTableHead);
+#define STBM_STOP_SEC_CODE
+#include "StbM_MemMap.h"
 #endif
 
+#define STBM_START_SEC_CODE
+#include "StbM_MemMap.h"
 /**
  * @brief        Called by the <Upper Layer> to force the Timesync Modules to transmit the current
  *               Time Base again due to an incremented timeBaseUpdateCounter[timeBaseId]
@@ -409,10 +568,14 @@ Std_ReturnType StbM_GetSyncTimeRecordHead(
  * @retval       E_NOT_OK      Failed
  * @reentrant    FALSE
  * @synchronous  TRUE
- * @trace        CPD-71866
+ * @trace   CPD-71866
  */
 Std_ReturnType StbM_TriggerTimeTransmission(StbM_SynchronizedTimeBaseType timeBaseId);
+#define STBM_STOP_SEC_CODE
+#include "StbM_MemMap.h"
 
+#define STBM_START_SEC_CODE
+#include "StbM_MemMap.h"
 /**
  * @brief        Allows the Timesync Modules to detect, whether a Time Base should be
  *               transmitted immediately in the subsequent <Bus>TSyn_MainFunction() cycle.
@@ -422,11 +585,15 @@ Std_ReturnType StbM_TriggerTimeTransmission(StbM_SynchronizedTimeBaseType timeBa
  *               update to the Timesync Modules
  * @reentrant    FALSE
  * @synchronous  TRUE
- * @trace        CPD-71867
+ * @trace   CPD-71867
  */
 uint8 StbM_GetTimeBaseUpdateCounter(StbM_SynchronizedTimeBaseType timeBaseId);
+#define STBM_STOP_SEC_CODE
+#include "StbM_MemMap.h"
 
 #if (STBM_ALLOW_SYSTEM_WIDE_GLOBAL_TIME_MASTER == STD_ON)
+#define STBM_START_SEC_CODE
+#include "StbM_MemMap.h"
 /**
  * @brief        Indicates if the functionality for a system wide master(e.g. StbM_SetGlobalTime)
  *               for a given Time Base is available or not.
@@ -437,9 +604,189 @@ uint8 StbM_GetTimeBaseUpdateCounter(StbM_SynchronizedTimeBaseType timeBaseId);
  * @retval       E_NOT_OK      Failed
  * @reentrant    TRUE
  * @synchronous  TRUE
- * @trace        CPD-71868
+ * @trace   CPD-71868
  */
 Std_ReturnType StbM_GetMasterConfig(StbM_SynchronizedTimeBaseType timeBaseId, StbM_MasterConfigType* masterConfig);
+#define STBM_STOP_SEC_CODE
+#include "StbM_MemMap.h"
+#endif
+
+#if STBM_ETHTSYN_ENABLE == STD_ON
+#define STBM_START_SEC_CODE
+#include "StbM_MemMap.h"
+/**
+ * @brief        Returns the protocol parameters for the Time Base
+ * @param[in]    timeBaseId     Identification of a Time Base
+ * @param[out]   protocolParams Protocol parameters
+ * @return       Std_ReturnType
+ * @retval       E_OK           Successfully get protocol parameters
+ * @retval       E_NOT_OK       Getting protocol parameters failed
+ * @reentrant    FALSE
+ * @synchronous  TRUE
+ * @trace   CPD-85943
+ */
+Std_ReturnType
+    StbM_GetBusProtocolParam(StbM_SynchronizedTimeBaseType timeBaseId, StbM_ProtocolParamType* protocolParams);
+#define STBM_STOP_SEC_CODE
+#include "StbM_MemMap.h"
+
+#define STBM_START_SEC_CODE
+#include "StbM_MemMap.h"
+/**
+ * @brief        Sets the protocol parameters for the Time Base
+ * @param[in]    timeBaseId     Identification of a Time Base
+ * @param[in]    protocolParams Protocol parameters
+ * @return       Std_ReturnType
+ * @retval       E_OK           Successfully set protocol parameters
+ * @retval       E_NOT_OK       Setting protocol parameters failed
+ * @reentrant    FALSE
+ * @synchronous  TRUE
+ * @trace   CPD-85944
+ */
+Std_ReturnType
+    StbM_SetBusProtocolParam(StbM_SynchronizedTimeBaseType timeBaseId, const StbM_ProtocolParamType* protocolParams);
+#define STBM_STOP_SEC_CODE
+#include "StbM_MemMap.h"
+#endif
+
+#if STBM_QUERY_FRESHNESS_VALUE != STBM_QUERY_FRESHNESS_VALUE_NONE
+#define STBM_START_SEC_CODE
+#include "StbM_MemMap.h"
+/**
+ * @brief        This API returns the freshness value from the Most Significant Bits in the first byte, of the Freshness
+ * array, in big endian format.
+ * @param[in]    StbMFreshnessValueId      Holds the identifier of the freshness value
+ * @param[inout] StbMFreshnessValueLength  Holds the length of the provided freshness in bits
+ * @param[out]   StbMFreshnessValue        Holds the current freshness value
+ * @retval       E_OK         request successful
+ * @retval       E_NOT_OK     request failed, a Freshness Value cannot be provided due to general issues for Freshness
+ *                            for this FreshnessValueId
+ * @retval       STBM_E_BUSY  The Freshness information can temporarily not be provided
+ * @reentrant    TRUE
+ * @synchronous  TRUE
+ * @trace   CPD-84857
+ */
+Std_ReturnType
+    StbM_GetTxFreshness(uint16 StbMFreshnessValueId, uint8* StbMFreshnessValue, uint32* StbMFreshnessValueLength);
+#define STBM_STOP_SEC_CODE
+#include "StbM_MemMap.h"
+
+#define STBM_START_SEC_CODE
+#include "StbM_MemMap.h"
+/**
+ * @brief        This interface is used by the StbM to obtain the current freshness value. The interface function
+ * provides also the runcated freshness transmitted in the secured time sync message
+ * @param[in]    StbMFreshnessValueId               Holds the identifier of the freshness value
+ * @param[out]   StbMFreshnessValue                 Holds the current freshness value
+ * @param[inout] StbMFreshnessValueLength           Holds the length of the provided freshness in bits
+ * @param[out]   StbMTruncatedFreshnessValue        Holds the truncated freshness to be included into the Secured time
+ *                                                  sync message. The parameter is optional.
+ * @param[inout] StbMTruncatedFreshnessValueLength  Provides the truncated freshness length configured for this
+ *                                                  freshness. The caller may adapt the value if needed or can leave it
+ *                                                  unchanged if the configured length and provided length is the same.
+ * @retval       E_OK         request successful
+ * @retval       E_NOT_OK     request failed, a Freshness Value cannot be provided due to general issues for Freshness
+ *                            for this FreshnessValueId
+ * @retval       STBM_E_BUSY  The Freshness information can temporarily not be provided.
+ * @reentrant    TRUE
+ * @synchronous  TRUE
+ * @trace   CPD-84858
+ */
+Std_ReturnType StbM_GetTxFreshnessTruncData(
+    uint16  StbMFreshnessValueId,
+    uint8*  StbMFreshnessValue,
+    uint32* StbMFreshnessValueLength,
+    uint8*  StbMTruncatedFreshnessValue,
+    uint32* StbMTruncatedFreshnessValueLength);
+#define STBM_STOP_SEC_CODE
+#include "StbM_MemMap.h"
+
+#define STBM_START_SEC_CODE
+#include "StbM_MemMap.h"
+/**
+ * @brief        This interface is used by the StbM to indicate that the Secured Time Synchronization Message has been
+ * initiated for transmission.
+ * @param[in]    StbMFreshnessValueId  Holds the identifier of the freshness value
+ * @reentrant    TRUE
+ * @synchronous  TRUE
+ * @trace   CPD-84859
+ */
+void StbM_SPduTxConfirmation(uint16 StbMFreshnessValueId);
+#define STBM_STOP_SEC_CODE
+#include "StbM_MemMap.h"
+
+#define STBM_START_SEC_CODE
+#include "StbM_MemMap.h"
+/**
+ * @brief        This interface is used by the StbM to query the current freshness value.
+ * @param[in]    StbMFreshnessValueId              Holds the identifier of the freshness value.
+ * @param[in]    StbMTruncatedFreshnessValue       Holds the truncated freshness value that was contained in the Secured
+ *                                                 time sync message
+ * @param[in]    StbMTruncatedFreshnessValueLength Holds the length in bits of the truncated freshness value.
+ * @param[in]    StbMAuthVerifyAttempts            Holds the number of authentication verify attempts of this time sync
+ *                                                 message since the last reception. The value is 0 for the first
+ *                                                 attempt and incremented on every unsuccessful verification attempt.
+ * @param[inout] StbMFreshnessValueLength          Holds the length in bits of the freshness value
+ * @param[out]   StbMFreshnessValue                Holds the current freshness value
+ * @retval       E_OK         request successful
+ * @retval       E_NOT_OK     request failed, a Freshness Value cannot be provided due to general issues for Freshness
+ *                            for this FreshnessValueId
+ * @retval       STBM_E_BUSY  The Freshness information can temporarily not be provided.
+ * @reentrant    TRUE
+ * @synchronous  TRUE
+ * @trace   CPD-84860
+ */
+Std_ReturnType StbM_GetRxFreshness(
+    uint16       StbMFreshnessValueId,
+    const uint8* StbMTruncatedFreshnessValue,
+    uint32       StbMTruncatedFreshnessValueLength,
+    uint16       StbMAuthVerifyAttempts,
+    uint8*       StbMFreshnessValue,
+    uint32*      StbMFreshnessValueLength);
+#define STBM_STOP_SEC_CODE
+#include "StbM_MemMap.h"
+#endif
+
+#if STBM_CLONE_TIMEBASE_USED == STD_ON
+#define STBM_START_SEC_CODE
+#include "StbM_MemMap.h"
+/**
+ * @brief         This interface is used by the StbM to set the time offset for the Time Base
+ * @param[in]     timeBaseId     Identification of a Time Base
+ * @param[in]     timeOffset     Time offset
+ * @return        Std_ReturnType
+ * @retval        E_OK           Successfully set time offset
+ * @retval        E_NOT_OK       Setting time offset failed
+ * @reentrant     FALSE
+ * @synchronous   TRUE
+ * @trace   CPD-85484
+ */
+Std_ReturnType StbM_SetCloningOffset(StbM_SynchronizedTimeBaseType timeBaseId, const StbM_TimeStampType* timeOffset);
+#define STBM_STOP_SEC_CODE
+#include "StbM_MemMap.h"
+
+#define STBM_START_SEC_CODE
+#include "StbM_MemMap.h"
+/**
+ * @brief         This interface is used by the StbM to clone the Time Base
+ * @param[in]     timeBaseId     Identification of a Time Base
+ * @param[in]     cloneCfg       Clone configuration
+ * @param[in]     statusMask     Status mask
+ * @param[in]     statusValue    Status value
+ * @return        Std_ReturnType
+ * @retval        E_OK           Successfully cloned Time Base
+ * @retval        E_NOT_OK       Cloning Time Base failed
+ * @reentrant     FALSE
+ * @synchronous   TRUE
+ * @trace   CPD-85485
+ */
+Std_ReturnType StbM_CloneTimeBase(
+    StbM_SynchronizedTimeBaseType timeBaseId,
+    StbM_CloneConfigType          cloneCfg,
+    StbM_TimeBaseStatusType       statusMask,
+    StbM_TimeBaseStatusType       statusValue);
+#define STBM_STOP_SEC_CODE
+#include "StbM_MemMap.h"
 #endif
 
 #ifdef __cplusplus

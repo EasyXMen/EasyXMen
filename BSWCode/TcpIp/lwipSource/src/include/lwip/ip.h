@@ -137,7 +137,11 @@ struct ip_globals
   ip_addr_t current_iphdr_dest;
 };
 #define TCPIP_VAR_IP_DATA(coreIndex)            ip_data[(coreIndex)]
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 extern struct ip_globals ip_data[TCPIP_MULTICORE_NUMBER];
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 
 
 /** Get the interface that accepted the current packet.

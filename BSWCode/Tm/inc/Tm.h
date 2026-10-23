@@ -76,14 +76,32 @@ RuleSorce:puhua_rules-2024.12.rcf
     Risk: No risk.
     Prevention: Functional reliability guaranteed by design.
 
+  \li VL_MTR_Tm_STMIF
+      Reason: Functions handle specific tasks in the behavior of the entire component.
+    Task has different scenarios that need to be covered, which depends on local conditions - this
+    leads to deep nesting of the control structure.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+  \li VL_MTR_Tm_STCYC
+      Reason: Because there are higher requirements for minimizing the stack and runtime usage of the applied code.
+      Risk: Understandability and testability become overly complex
+      Prevention: Design and code review, and have a clear structure and annotated code.
+
+  \li VL_Tm_1502
+      Reason: Configuration variables design needs
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
 */
 
-#ifndef TM_H_
-#define TM_H_
+#ifndef TM_
+#define TM_
 
 /* =================================================== inclusions =================================================== */
 #include "Std_Types.h"
 #include "Tm_Cfg.h"
+#include "Gpt.h" /* PRQA S 0380 */ /* VL_Tm_0380 */
 
 /* =============================================== version information ============================================== */
 /**
@@ -91,15 +109,15 @@ RuleSorce:puhua_rules-2024.12.rcf
  * @{
  * @brief Tm module version infomation macros in Tm header file.
  */
-#define TM_VENDOR_ID          62u /**< Tm vendor id*/
-#define TM_MODULE_ID          14u /**< Tm module id*/
-#define TM_INSTANCE_ID        0u  /**< Tm instance id*/
-#define TM_H_AR_MAJOR_VERSION 4u  /**< Tm header ar major version*/
-#define TM_H_AR_MINOR_VERSION 9u  /**< Tm header ar minor version*/
-#define TM_H_AR_PATCH_VERSION 0u  /**< Tm header ar patch version*/
-#define TM_H_SW_MAJOR_VERSION 2u  /**< Tm header sw major version*/
-#define TM_H_SW_MINOR_VERSION 2u  /**< Tm header sw minor version*/
-#define TM_H_SW_PATCH_VERSION 0u  /**< Tm header sw patch version*/
+#define TM_VENDOR_ID                62u /**< Tm vendor id*/
+#define TM_MODULE_ID                14u /**< Tm module id*/
+#define TM_INSTANCE_ID              0u  /**< Tm instance id*/
+#define TM_AR_RELEASE_MAJOR_VERSION 4u  /**< Tm header ar major version*/
+#define TM_AR_RELEASE_MINOR_VERSION 9u  /**< Tm header ar minor version*/
+#define TM_AR_RELEASE_PATCH_VERSION 0u  /**< Tm header ar patch version*/
+#define TM_SW_MAJOR_VERSION         2u  /**< Tm header sw major version*/
+#define TM_SW_MINOR_VERSION         2u  /**< Tm header sw minor version*/
+#define TM_SW_PATCH_VERSION         0u  /**< Tm header sw patch version*/
 /** @} */
 
 /* ===================================================== macros ===================================================== */
@@ -109,76 +127,67 @@ RuleSorce:puhua_rules-2024.12.rcf
  * @{
  * @brief Tm error param macros in Tm header file.
  */
-#define TM_E_PARAM_POINTER  0x01u /**< API parameter checking: invalid pointer*/
-#define TM_E_PARAM_VALUE    0x02u /**< API parameter checking: invalid value*/
-#define TM_E_HARDWARE_TIMER 0x03u /**< Access to underlying hardware timer failed*/
-/** @} */
+#define TM_E_PARAM_POINTER 0x01u /**< API parameter checking: invalid pointer*/
+#define TM_E_PARAM_VALUE   0x02u /**< API parameter checking: invalid value*/
+#define TM_E_PARAM_SYNC    0x03u /**< API parameter checking: incompatible timer instances for Tm_SyncTimer*/
+#define TM_E_STATE         0x04u /**< A provided timer instance was not initialized via Tm_ResetTimer*/
+#define TM_E_UNINIT        0x05u /**< Timer instance was not initialized*/
 #endif
+/** @} */
 
-#define TM_1US24BIT_MAX_MASK 0x00FFFFFFuL /**< Max value of 1us24bit timer*/
+#define TM_E_HARDWARE_TIMER 0x03u /**< Access to underlying hardware timer failed*/
 
 /**
  * @name TM_ERROR_API_ID_GROUP
  * @{
  * @brief Tm api id macros in Tm header file.
  */
-#define TM_GETVERSIONINFO_ID        0x01u /**< Api Tm_GetVersionInfo id*/
-#define TM_RESETTIMER1US16BIT_ID    0x02u /**< Api Tm_ResetTimer1us16bit id*/
-#define TM_GETTIMESPAN1US16BIT_ID   0x03u /**< Api Tm_GetTimeSpan1us16bit id*/
-#define TM_SHIFTTIMER1US16BIT_ID    0x04u /**< Api Tm_ShiftTimer1us16bit id*/
-#define TM_SYNCTIMER1US16BIT_ID     0x05u /**< Api Tm_SyncTimer1us16bit id*/
-#define TM_BUSYWAIT1US16BIT_ID      0x06u /**< Api Tm_BusyWait1us16bit id*/
-#define TM_RESETTIMER1US24BIT_ID    0x07u /**< Api Tm_ResetTimer1us24bit id */
-#define TM_GETTIMESPAN1US24BIT_ID   0x08u /**< Api Tm_GetTimeSpan1us24bit id*/
-#define TM_SHIFTTIMER1US24BIT_ID    0x09u /**< Api Tm_ShiftTimer1us24bit id*/
-#define TM_SYNCTIMER1US24BIT_ID     0x0au /**< Api Tm_SyncTimer1us24bit id*/
-#define TM_BUSYWAIT1US24BIT_ID      0x0bu /**< Api Tm_BusyWait1us24bit id*/
-#define TM_RESETTIMER1US32BIT_ID    0x0cu /**< Api Tm_ResetTimer1us32bit id*/
-#define TM_GETTIMESPAN1US32BIT_ID   0x0du /**< Api Tm_GetTimeSpan1us32bit id*/
-#define TM_SHIFTTIMER1US32BIT_ID    0x0eu /**< Api Tm_ShiftTimer1us32bit id*/
-#define TM_SYNCTIMER1US32BIT_ID     0x0fu /**< Api Tm_SyncTimer1us32bit id*/
-#define TM_BUSYWAIT1US32BIT_ID      0x10u /**< Api Tm_BusyWait1us32bit id*/
-#define TM_RESETTIMER100US32BIT_ID  0x11u /**< Api Tm_ResetTimer100us32bit id*/
-#define TM_GETTIMESPAN100US32BIT_ID 0x12u /**< Api Tm_GetTimeSpan100us32bit id*/
-#define TM_SHIFTTIMER100US32BIT_ID  0x13u /**< Api Tm_ShiftTimer100us32bit id*/
-#define TM_SYNCTIMER100US32BIT_ID   0x14u /**< Api Tm_SyncTimer100us32bit id*/
+#define TM_INIT_ID           0x01u /**< Api Tm_Init id*/
+#define TM_GETVERSIONINFO_ID 0x02u /**< Api Tm_GetVersionInfo id*/
+#define TM_RESETTIMER_ID     0x03u /**< Api Tm_ResetTimer id*/
+#define TM_GETTIMESPAN_ID    0x04u /**< Api Tm_GetTimeSpan id*/
+#define TM_SHIFTTIMER_ID     0x05u /**< Api Tm_ShiftTimer id*/
+#define TM_SYNCTIMER_ID      0x06u /**< Api Tm_SyncTimer id*/
+#define TM_BUSYWAIT1US_ID    0x07u /**< Api Tm_BusyWait1us id*/
 /** @} */
 
+/**
+ * @name TM_PREDEF_TIMER
+ * @{
+ * @brief Tm predef timer macros in Tm header file.
+ */
+#define TM_PREDEF_TIMER_1US_16BIT   GPT_PREDEF_TIMER_1US_16BIT   /**< Predefined timer 1us 16bit */
+#define TM_PREDEF_TIMER_1US_24BIT   GPT_PREDEF_TIMER_1US_24BIT   /**< Predefined timer 1us 24bit */
+#define TM_PREDEF_TIMER_1US_32BIT   GPT_PREDEF_TIMER_1US_32BIT   /**< Predefined timer 1us 32bit */
+#define TM_PREDEF_TIMER_100US_32BIT GPT_PREDEF_TIMER_100US_32BIT /**< Predefined timer 100us 32bit */
+/** @} */
+
+#define TM_1US16BIT_MAX_VALUE   0xFFFFu
+#define TM_1US24BIT_MAX_VALUE   0xFFFFFFuL
+#define TM_1US32BIT_MAX_VALUE   0xFFFFFFFFuL
+#define TM_100US32BIT_MAX_VALUE 0xFFFFFFFFuL
+
+#define TM_INVALID_TIMER_VALUE 0xFFFFFFFFuL
+
 /* ================================================ type definitions ================================================ */
-/**
- * @brief 1us16bit timer type.
- */
+
 typedef struct
 {
-    uint16 ui16RefTime; /**< Type definition for 1us16bit type clock @range 0..65535 */
-} Tm_PredefTimer1us16bitType;
+    uint32              timerId;
+    Gpt_PredefTimerType timerType;
+} Tm_PreDefTimerType;
 
-/**
- * @brief 1us24bit timer type.
- */
 typedef struct
 {
-    uint32 ui24RefTime; /**< Type definition for 1us24bit type clock @range 0..16777215 */
+    const Tm_PreDefTimerType* preDefTimer;
+} Tm_ConfigType;
 
-} Tm_PredefTimer1us24bitType;
-
-/**
- * @brief 1us32bit timer type.
- */
-typedef struct
-{
-    uint32 ui32RefTime; /**< Type definition for 1us32bit type clock @range 0..4294967295 */
-
-} Tm_PredefTimer1us32bitType;
-
-/**
- * @brief 100us32bit timer type.
- */
-typedef struct
-{
-    uint32 ui32RefTime; /**< Type definition for 100us32bit type clock @range 0..4294967295*/
-
-} Tm_PredefTimer100us32bitType;
+/* Tm initialization configuration data */
+#define TM_START_SEC_CONFIG_DATA_UNSPECIFIED
+#include "Tm_MemMap.h"
+extern const Tm_ConfigType Tm_Config;
+#define TM_STOP_SEC_CONFIG_DATA_UNSPECIFIED
+#include "Tm_MemMap.h"
 
 /* ========================================== internal function definitions ========================================= */
 
@@ -188,6 +197,20 @@ typedef struct
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/**
+ * @brief This service initializes the Time Service module.
+ * @param[in]   config: Pointer to Tm  configuration data.
+ * @reentrant   FALSE
+ * @synchronous TRUE
+ * @trace       CPD-PlaceHolder
+ */
+#define TM_START_SEC_CODE
+#include "Tm_MemMap.h"
+void Tm_Init(const Tm_ConfigType* config);
+#define TM_STOP_SEC_CODE
+#include "Tm_MemMap.h"
+
 #if (STD_ON == TM_VERSIONINFO_API)
 /**
  * @brief Returns the version information of this module.
@@ -196,58 +219,73 @@ extern "C" {
  * @synchronous TRUE
  * @trace       CPD-69874
  */
+#define TM_START_SEC_CODE
+#include "Tm_MemMap.h"
 void Tm_GetVersionInfo(Std_VersionInfoType* versioninfo);
+#define TM_STOP_SEC_CODE
+#include "Tm_MemMap.h"
 #endif /* STD_ON == TM_VERSIONINFO_API */
 
-#if (STD_ON == TM_1US16BIT)
 /**
  * @brief Resets a timer instance (user point of view).
- * @param[out]  TimerPtr: Pointer to a timer instance defined by the user.
- * @reentrant   Reentrant but not for the same timer instance
+ * @param[out]  timerId: A timer instance handle.
+ * @reentrant   Reentrant but not for the same timerId.
  * @synchronous TRUE
  * @return      Std_ReturnType
- * @retval      E_OK: The underlying GPT driver service has returned E_OK and
-                no development error has been detected
- * @retval      E_NOT_OK: The underlying GPT driver service has returned
-                E_NOT_OK, or a development error has been detected
- * @trace       CPD-69875
+ * @retval      E_OK: The underlying GPT driver service has returned E_OK.
+ * @retval      E_NOT_OK: The underlying GPT driver service has not returned E_NOT_OK.
+ * @trace       CPD-PlaceHolder
  */
-Std_ReturnType Tm_ResetTimer1us16bit(Tm_PredefTimer1us16bitType* TimerPtr);
+#define TM_START_SEC_CODE
+#include "Tm_MemMap.h"
+Std_ReturnType Tm_ResetTimer(uint32 timerId);
+#define TM_STOP_SEC_CODE
+#include "Tm_MemMap.h"
 
 /**
  * @brief Delivers the time difference (current time - reference time).
- * @param[in]   TimerPtr: Pointer to a timer instance defined by the user.
- * @param[out]  TimeSpanPtr: Pointer to time span destination data in RAM.
- * @reentrant   Reentrant but not for the same timer instance
+ * @param[in]   timerId: A timer instance handle.
+ * @param[out]  timeSpan: Pointer to location where the time will be stored.
+ * @reentrant   Reentrant
  * @synchronous TRUE
  * @return      Std_ReturnType
- * @retval      E_OK: The underlying GPT driver service has returned E_OK and
-                no development error has been detected
- * @retval      E_NOT_OK: The underlying GPT driver service has returned
-                E_NOT_OK, or a development error has been detected
- * @trace       CPD-69876
+ * @retval      E_OK: The underlying GPT driver service has returned E_OK.
+ * @retval      E_NOT_OK: The underlying GPT driver service has returned E_NOT_OK.
+ * @trace       CPD-PlaceHolder
  */
-Std_ReturnType Tm_GetTimeSpan1us16bit(const Tm_PredefTimer1us16bitType* TimerPtr, uint16* TimeSpanPtr);
+#define TM_START_SEC_CODE
+#include "Tm_MemMap.h"
+Std_ReturnType Tm_GetTimeSpan(uint32 timerId, uint32* timeSpan);
+#define TM_STOP_SEC_CODE
+#include "Tm_MemMap.h"
 
 /**
  * @brief Shifts the reference time of the timer instance.
- * @param[in]   TimerPtr: Pointer to a timer instance defined by the user.
- * @param[out]  TimeValue: Time value in us, the reference time has to be shifted.
+ * @param[in]   timerId: A timer instance handle.
+ * @param[out]  timeValue: Time value in in units (e.g. us), the reference time has to be shifted.
  * @reentrant   Reentrant but not for the same timer instance
  * @synchronous TRUE
- * @trace       CPD-69877
+ * @trace       CPD-PlaceHolder
  */
-void Tm_ShiftTimer1us16bit(Tm_PredefTimer1us16bitType* TimerPtr, uint16 TimeValue);
+#define TM_START_SEC_CODE
+#include "Tm_MemMap.h"
+void Tm_ShiftTimer(uint32 timerId, uint32 timeValue);
+#define TM_STOP_SEC_CODE
+#include "Tm_MemMap.h"
 
 /**
  * @brief Synchronizes two timer instances.
- * @param[in]   TimerSrcPtr: Pointer to the source timer instance defined by the user.
- * @param[out]  TimerDstPtr: Pointer to the destination timer instance defined by the user.
+ * @param[in]   timerIdSrc: Source timer instance defined by the user.
+ * @param[out]  timerIdDst: Destination timer instance defined by the user.
  * @reentrant   Reentrant but not for the same timer instance
  * @synchronous TRUE
- * @trace       CPD-69878
+ * @trace       CPD-PlaceHolder
  */
-void Tm_SyncTimer1us16bit(Tm_PredefTimer1us16bitType* TimerDstPtr, const Tm_PredefTimer1us16bitType* TimerSrcPtr);
+#define TM_START_SEC_CODE
+#include "Tm_MemMap.h"
+void Tm_SyncTimer(uint32 timerIdSrc, uint32 timerIdDst);
+#define TM_STOP_SEC_CODE
+#include "Tm_MemMap.h"
 
 /**
  * @brief Performs busy waiting by polling with a guaranteed minimum waiting time.
@@ -255,197 +293,17 @@ void Tm_SyncTimer1us16bit(Tm_PredefTimer1us16bitType* TimerDstPtr, const Tm_Pred
  * @reentrant   TRUE
  * @synchronous TRUE
  * @return      Std_ReturnType
- * @retval      E_OK: The underlying GPT driver service has returned E_OK and
-                no development error has been detected
- * @retval      E_NOT_OK: The underlying GPT driver service has returned
-                E_NOT_OK, or a development error has been detected
- * @trace       CPD-69879
+ * @retval      E_OK: The underlying GPT driver service has returned E_OK.
+ * @retval      E_NOT_OK: The underlying GPT driver service has returned E_NOT_OK.
+ * @trace       CPD-PlaceHolder
  */
-Std_ReturnType Tm_BusyWait1us16bit(uint8 WaitingTimeMin);
-#endif /* STD_ON == TM_1US16BIT */
-
-#if (STD_ON == TM_1US24BIT)
-/**
- * @brief Resets a timer instance (user point of view).
- * @param[out]  TimerPtr: Pointer to a timer instance defined by the user.
- * @reentrant   Reentrant but not for the same timer instance
- * @synchronous TRUE
- * @return      Std_ReturnType
- * @retval      E_OK: The underlying GPT driver service has returned E_OK and
-                no development error has been detected
- * @retval      E_NOT_OK: The underlying GPT driver service has returned
-                E_NOT_OK, or a development error has been detected
- * @trace       CPD-69880
- */
-Std_ReturnType Tm_ResetTimer1us24bit(Tm_PredefTimer1us24bitType* TimerPtr);
-
-/**
- * @brief Delivers the time difference (current time - reference time).
- * @param[in]   TimerPtr: Pointer to a timer instance defined by the user.
- * @param[out]  TimeSpanPtr: Pointer to time span destination data in RAM.
- * @reentrant   Reentrant but not for the same timer instance
- * @synchronous TRUE
- * @return      Std_ReturnType
- * @retval      E_OK: The underlying GPT driver service has returned E_OK and
-                no development error has been detected
- * @retval      E_NOT_OK: The underlying GPT driver service has returned
-                E_NOT_OK, or a development error has been detected
- * @trace       CPD-69881
- */
-Std_ReturnType Tm_GetTimeSpan1us24bit(const Tm_PredefTimer1us24bitType* TimerPtr, uint32* TimeSpanPtr);
-
-/**
- * @brief Shifts the reference time of the timer instance.
- * @param[in]   TimerPtr: Pointer to a timer instance defined by the user.
- * @param[out]  TimeValue: Time value in us, the reference time has to be shifted.
- * @reentrant   Reentrant but not for the same timer instance
- * @synchronous TRUE
- * @trace       CPD-69882
- */
-void Tm_ShiftTimer1us24bit(Tm_PredefTimer1us24bitType* TimerPtr, uint32 TimeValue);
-
-/**
- * @brief Synchronizes two timer instances.
- * @param[in]   TimerSrcPtr: Pointer to the source timer instance defined by the user.
- * @param[out]  TimerDstPtr: Pointer to the destination timer instance defined by the user.
- * @reentrant   Reentrant but not for the same timer instance
- * @synchronous TRUE
- * @trace       CPD-6988333
- */
-void Tm_SyncTimer1us24bit(Tm_PredefTimer1us24bitType* TimerDstPtr, const Tm_PredefTimer1us24bitType* TimerSrcPtr);
-
-/**
- * @brief Performs busy waiting by polling with a guaranteed minimum waiting time.
- * @param[in]   WaitingTimeMin: Minimum waiting time in microseconds.
- * @reentrant   TRUE
- * @synchronous TRUE
- * @return      Std_ReturnType
- * @retval      E_OK: The underlying GPT driver service has returned E_OK and
-                no development error has been detected
- * @retval      E_NOT_OK: The underlying GPT driver service has returned
-                E_NOT_OK, or a development error has been detected
- * @trace       CPD-69884
- */
-Std_ReturnType Tm_BusyWait1us24bit(uint8 WaitingTimeMin);
-#endif /* STD_ON == TM_1US24BIT */
-
-#if (STD_ON == TM_1US32BIT)
-/**
- * @brief Resets a timer instance (user point of view).
- * @param[out]  TimerPtr: Pointer to a timer instance defined by the user.
- * @reentrant   Reentrant but not for the same timer instance
- * @synchronous TRUE
- * @return      Std_ReturnType
- * @retval      E_OK: The underlying GPT driver service has returned E_OK and
-                no development error has been detected
- * @retval      E_NOT_OK: The underlying GPT driver service has returned
-                E_NOT_OK, or a development error has been detected
- * @trace       CPD-69885
- */
-Std_ReturnType Tm_ResetTimer1us32bit(Tm_PredefTimer1us32bitType* TimerPtr);
-
-/**
- * @brief Delivers the time difference (current time - reference time).
- * @param[in]   TimerPtr: Pointer to a timer instance defined by the user.
- * @param[out]  TimeSpanPtr: Pointer to time span destination data in RAM.
- * @reentrant   Reentrant but not for the same timer instance
- * @synchronous TRUE
- * @return      Std_ReturnType
- * @retval      E_OK: The underlying GPT driver service has returned E_OK and
-                no development error has been detected
- * @retval      E_NOT_OK: The underlying GPT driver service has returned
-                E_NOT_OK, or a development error has been detected
- * @trace       CPD-69886
- */
-Std_ReturnType Tm_GetTimeSpan1us32bit(const Tm_PredefTimer1us32bitType* TimerPtr, uint32* TimeSpanPtr);
-
-/**
- * @brief Shifts the reference time of the timer instance.
- * @param[in]   TimerPtr: Pointer to a timer instance defined by the user.
- * @param[out]  TimeValue: Time value in us, the reference time has to be shifted.
- * @reentrant   Reentrant but not for the same timer instance
- * @synchronous TRUE
- * @trace       CPD-69887
- */
-void Tm_ShiftTimer1us32bit(Tm_PredefTimer1us32bitType* TimerPtr, uint32 TimeValue);
-
-/**
- * @brief Synchronizes two timer instances.
- * @param[in]   TimerSrcPtr: Pointer to the source timer instance defined by the user.
- * @param[out]  TimerDstPtr: Pointer to the destination timer instance defined by the user.
- * @reentrant   Reentrant but not for the same timer instance
- * @synchronous TRUE
- * @trace       CPD-69888
- */
-void Tm_SyncTimer1us32bit(Tm_PredefTimer1us32bitType* TimerDstPtr, const Tm_PredefTimer1us32bitType* TimerSrcPtr);
-
-/**
- * @brief Performs busy waiting by polling with a guaranteed minimum waiting time.
- * @param[in]   WaitingTimeMin: Minimum waiting time in microseconds.
- * @reentrant   TRUE
- * @synchronous TRUE
- * @return      Std_ReturnType
- * @retval      E_OK: The underlying GPT driver service has returned E_OK and
-                no development error has been detected
- * @retval      E_NOT_OK: The underlying GPT driver service has returned
-                E_NOT_OK, or a development error has been detected
- * @trace       CPD-69889
- */
-Std_ReturnType Tm_BusyWait1us32bit(uint8 WaitingTimeMin);
-#endif /* STD_ON == TM_1US32BIT */
-
-#if (STD_ON == TM_100US32BIT)
-/**
- * @brief Resets a timer instance (user point of view).
- * @param[out]  TimerPtr: Pointer to a timer instance defined by the user.
- * @reentrant   Reentrant but not for the same timer instance
- * @synchronous TRUE
- * @return      Std_ReturnType
- * @retval      E_OK: The underlying GPT driver service has returned E_OK and
-                no development error has been detected
- * @retval      E_NOT_OK: The underlying GPT driver service has returned
-                E_NOT_OK, or a development error has been detected
- * @trace       CPD-69890
- */
-Std_ReturnType Tm_ResetTimer100us32bit(Tm_PredefTimer100us32bitType* TimerPtr);
-
-/**
- * @brief Delivers the time difference (current time - reference time).
- * @param[in]   TimerPtr: Pointer to a timer instance defined by the user.
- * @param[out]  TimeSpanPtr: Pointer to time span destination data in RAM.
- * @reentrant   Reentrant but not for the same timer instance
- * @synchronous TRUE
- * @return      Std_ReturnType
- * @retval      E_OK: The underlying GPT driver service has returned E_OK and
-                no development error has been detected
- * @retval      E_NOT_OK: The underlying GPT driver service has returned
-                E_NOT_OK, or a development error has been detected
- * @trace       CPD-69891
- */
-Std_ReturnType Tm_GetTimeSpan100us32bit(const Tm_PredefTimer100us32bitType* TimerPtr, uint32* TimeSpanPtr);
-
-/**
- * @brief Shifts the reference time of the timer instance.
- * @param[in]   TimerPtr: Pointer to a timer instance defined by the user.
- * @param[out]  TimeValue: Time value in us, the reference time has to be shifted.
- * @reentrant   Reentrant but not for the same timer instance
- * @synchronous TRUE
- * @trace       CPD-69892
- */
-void Tm_ShiftTimer100us32bit(Tm_PredefTimer100us32bitType* TimerPtr, uint32 TimeValue);
-
-/**
- * @brief Synchronizes two timer instances.
- * @param[in]   TimerSrcPtr: Pointer to the source timer instance defined by the user.
- * @param[out]  TimerDstPtr: Pointer to the destination timer instance defined by the user.
- * @reentrant   Reentrant but not for the same timer instance
- * @synchronous TRUE
- * @trace       CPD-69893
- */
-void Tm_SyncTimer100us32bit(Tm_PredefTimer100us32bitType* TimerDstPtr, const Tm_PredefTimer100us32bitType* TimerSrcPtr);
-#endif /* STD_ON == TM_100US32BIT */
+#define TM_START_SEC_CODE
+#include "Tm_MemMap.h"
+Std_ReturnType Tm_BusyWait1us(uint8 WaitingTimeMin);
+#define TM_STOP_SEC_CODE
+#include "Tm_MemMap.h"
 
 #ifdef __cplusplus
 }
 #endif
-#endif /* TM_H_ */
+#endif /* TM_ */

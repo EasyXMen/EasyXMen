@@ -59,7 +59,11 @@ typedef struct
  * @param[out] ctx    Pointer to the SHA-256 context structure to be initialized.
  * @param[in]  is224  Boolean flag indicating whether to compute SHA-224 (true) or SHA-256 (false).
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_Sha256_Starts(Crypto_Sha256_Context* ctx, boolean is224);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Updates the SHA-256 context with a new block of data.
@@ -75,7 +79,11 @@ void Crypto_Sha256_Starts(Crypto_Sha256_Context* ctx, boolean is224);
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Sha256_Update(Crypto_Sha256_Context* ctx, const uint8* input, uint32 ilen);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Finalizes the SHA-256 hash computation.
@@ -89,8 +97,17 @@ Std_ReturnType Crypto_Sha256_Update(Crypto_Sha256_Context* ctx, const uint8* inp
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Sha256_Finish(Crypto_Sha256_Context* ctx, uint8 output[CRYPTO_CONST_32]);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+void Crypto_sha256_free(Crypto_Sha256_Context* ctx);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 /**
  * @brief   Computes the SHA-256 or SHA-224 hash of a given input data.
  *
@@ -106,7 +123,11 @@ Std_ReturnType Crypto_Sha256_Finish(Crypto_Sha256_Context* ctx, uint8 output[CRY
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Sha256(const uint8* input, uint32 ilen, uint8* output, boolean is224);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Processes the SHA-256 or SHA-224 hash computation for a given object ID.
@@ -121,7 +142,11 @@ Std_ReturnType Crypto_Sha256(const uint8* input, uint32 ilen, uint8* output, boo
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Sha256_Process(uint32 objectId, boolean is224);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 #ifdef __cplusplus
 }

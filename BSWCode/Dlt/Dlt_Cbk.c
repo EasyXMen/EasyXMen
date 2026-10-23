@@ -1,4 +1,3 @@
-/* PRQA S 3108++ */
 /**
  * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
@@ -31,6 +30,7 @@
 #include "Dlt_internal.h"
 #include "Dlt.h"
 #include "SchM_Dlt.h"
+#include "Dlt_Arti.h"
 
 typedef struct
 {
@@ -53,22 +53,29 @@ typedef P2FUNC(Std_ReturnType, DCM_APPL_CODE, Dlt_ServiceDeal)(
 /* PRQA S 3432-- */ /* MISRA Rule 20.7 */
 
 #if ((DLT_RX_DATA_PATH_SUPPORT == STD_ON) && (DLT_RXPDU_NUM > 0))
-#define DLT_START_SEC_VAR_NO_INIT_UNSPECIFIED
+#define DLT_START_SEC_VAR_CLEARED_UNSPECIFIED
 #include "Dlt_MemMap.h"
 VAR(Dlt_RxStatusTypes, AUTOMATIC) Dlt_RxStatus[DLT_RXPDU_NUM];
-#define DLT_STOP_SEC_VAR_NO_INIT_UNSPECIFIED
+#define DLT_STOP_SEC_VAR_CLEARED_UNSPECIFIED
 #include "Dlt_MemMap.h"
 
 #define DLT_START_SEC_CODE
 #include "Dlt_MemMap.h"
-
 static FUNC(uint16, DLT_APPL_CODE) Dlt_GetRxIndexByRxPduId(PduIdType id);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_SubDealRxData(
     uint16               offset,
     const uint8*         Data,
     uint16               Length,
     Dlt_DealRxDataTypes  DealRxData,
     Dlt_OptionalFlagType OptionFlag);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 static FUNC(void, DLT_APPL_CODE) Dlt_ServicePrepareResponseHeaderData(
     uint16*              SendOffset,
     uint16               ChannelIndex,
@@ -76,141 +83,228 @@ static FUNC(void, DLT_APPL_CODE) Dlt_ServicePrepareResponseHeaderData(
     Dlt_DealRxDataTypes  DealRxData,
     uint16*              CorrectionLength,
     Dlt_OptionalFlagType OptionFlag);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceSendResponseData(uint16 ChannelIndex, uint16 Messagelength);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceGetLogInfoSub(
     uint32               applicationId,
     uint32               contextId,
     Dlt_DealRxDataTypes  DealRxData,
     Dlt_OptionalFlagType OptionFlag,
     uint8                status);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceError(
     uint16               offset,
     const uint8*         Data,
     uint16               Length,
     Dlt_DealRxDataTypes  DealRxData,
     Dlt_OptionalFlagType OptionFlag);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceNotSupport(
     uint16               offset,
     const uint8*         Data,
     uint16               Length,
     Dlt_DealRxDataTypes  DealRxData,
     Dlt_OptionalFlagType OptionFlag);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceSetLogLevel(
     uint16               offset,
     const uint8*         Data,
     uint16               Length,
     Dlt_DealRxDataTypes  DealRxData,
     Dlt_OptionalFlagType OptionFlag);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceSetTraceStatus(
     uint16               offset,
     const uint8*         Data,
     uint16               Length,
     Dlt_DealRxDataTypes  DealRxData,
     Dlt_OptionalFlagType OptionFlag);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceGetLogInfo(
     uint16               offset,
     const uint8*         Data,
     uint16               Length,
     Dlt_DealRxDataTypes  DealRxData,
     Dlt_OptionalFlagType OptionFlag);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceGetDefaultLogLevel(
     uint16               offset,
     const uint8*         Data,
     uint16               Length,
     Dlt_DealRxDataTypes  DealRxData,
     Dlt_OptionalFlagType OptionFlag);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceStoreConfiguration(
     uint16               offset,
     const uint8*         Data,
     uint16               Length,
     Dlt_DealRxDataTypes  DealRxData,
     Dlt_OptionalFlagType OptionFlag);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceResetToFactoryDefault(
     uint16               offset,
     const uint8*         Data,
     uint16               Length,
     Dlt_DealRxDataTypes  DealRxData,
     Dlt_OptionalFlagType OptionFlag);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceSetMessageFiltering(
     uint16               offset,
     const uint8*         Data,
     uint16               Length,
     Dlt_DealRxDataTypes  DealRxData,
     Dlt_OptionalFlagType OptionFlag);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceSetDefaultLogLevel(
     uint16               offset,
     const uint8*         Data,
     uint16               Length,
     Dlt_DealRxDataTypes  DealRxData,
     Dlt_OptionalFlagType OptionFlag);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceSetDefaultTraceStatus(
     uint16               offset,
     const uint8*         Data,
     uint16               Length,
     Dlt_DealRxDataTypes  DealRxData,
     Dlt_OptionalFlagType OptionFlag);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceGetSoftwareVersion(
     uint16               offset,
     const uint8*         Data,
     uint16               Length,
     Dlt_DealRxDataTypes  DealRxData,
     Dlt_OptionalFlagType OptionFlag);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceGetDefaultTraceStatus(
     uint16               offset,
     const uint8*         Data,
     uint16               Length,
     Dlt_DealRxDataTypes  DealRxData,
     Dlt_OptionalFlagType OptionFlag);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceGetLogChannelNames(
     uint16               offset,
     const uint8*         Data,
     uint16               Length,
     Dlt_DealRxDataTypes  DealRxData,
     Dlt_OptionalFlagType OptionFlag);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceGetTraceStatus(
     uint16               offset,
     const uint8*         Data,
     uint16               Length,
     Dlt_DealRxDataTypes  DealRxData,
     Dlt_OptionalFlagType OptionFlag);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceSetLogChannelAssignment(
     uint16               offset,
     const uint8*         Data,
     uint16               Length,
     Dlt_DealRxDataTypes  DealRxData,
     Dlt_OptionalFlagType OptionFlag);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceSetLogChannelThreshold(
     uint16               offset,
     const uint8*         Data,
     uint16               Length,
     Dlt_DealRxDataTypes  DealRxData,
     Dlt_OptionalFlagType OptionFlag);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceGetLogChannelThreshold(
     uint16               offset,
     const uint8*         Data,
     uint16               Length,
     Dlt_DealRxDataTypes  DealRxData,
     Dlt_OptionalFlagType OptionFlag);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceSyncTimeStamp(
     uint16               offset,
     const uint8*         Data,
     uint16               Length,
     Dlt_DealRxDataTypes  DealRxData,
     Dlt_OptionalFlagType OptionFlag);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
 #if (DLT_INJECTION_SUPPORT == STD_ON)
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceDealWithInjection(
     uint16               offset,
     const uint8*         Data,
     uint16               Length,
     Dlt_DealRxDataTypes  DealRxData,
     Dlt_OptionalFlagType OptionFlag);
-#endif
-
 #define DLT_STOP_SEC_CODE
 #include "Dlt_MemMap.h"
 #endif
+#endif
 
-#define DLT_START_SEC_DLTRXINDICATION_CALLBACK_CODE
+#define DLT_START_SEC_CODE_FAST
 #include "Dlt_MemMap.h"
 /*
  * Brief               Indication of a received PDU from a lower layer communication interface module.
@@ -227,8 +321,8 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceDealWithInjection(
 FUNC(void, DLT_APPL_CODE)
 Dlt_RxIndication(PduIdType RxPduId, P2CONST(PduInfoType, AUTOMATIC, DLT_APPL_CONST) PduInfoPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Start, 3, 0x42, RxPduId, PduInfoPtr);
 #if ((DLT_RX_DATA_PATH_SUPPORT == STD_ON) && (DLT_BUFFER_MAX_LENGTH > 0) && (DLT_RXPDU_NUM > 0))
-    Std_ReturnType ret;
 #if (STD_ON == DLT_DEV_ERROR_DETECT)
     /* Check if the DLT module has been initialized */
     if (DLT_STATE_UNINIT == Dlt_ModeState)
@@ -263,7 +357,7 @@ Dlt_RxIndication(PduIdType RxPduId, P2CONST(PduInfoType, AUTOMATIC, DLT_APPL_CON
                 /* Stores the received message to the specified buffer queue */
                 Dlt_MemCopy(RxStatusPtr->RxBuffer, PduInfoPtr->SduDataPtr, PduInfoPtr->SduLength);
                 /* Parse the received message and reply the response message by receiving the index number */
-                ret = Dlt_DealRxData(RxIndex, RxStatusPtr->RxBuffer, RxStatusPtr->RxLength);
+                (void)Dlt_DealRxData(RxIndex, RxStatusPtr->RxBuffer, RxStatusPtr->RxLength);
                 /* Set the status of the given receive index number to used */
                 RxStatusPtr->Used = FALSE;
                 SchM_Exit_Dlt_RxStatus();
@@ -274,11 +368,12 @@ Dlt_RxIndication(PduIdType RxPduId, P2CONST(PduInfoType, AUTOMATIC, DLT_APPL_CON
     DLT_UNUSED(RxPduId);
     DLT_UNUSED(PduInfoPtr);
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Return, 1, 0x42);
 }
-#define DLT_STOP_SEC_DLTRXINDICATION_CALLBACK_CODE
+#define DLT_STOP_SEC_CODE_FAST
 #include "Dlt_MemMap.h"
 
-#define DLT_START_SEC_DLTTRIGGERTRANSMIT_CALLBACK_CODE
+#define DLT_START_SEC_CODE_FAST
 #include "Dlt_MemMap.h"
 /*
  * Brief               Within this API, the upper layer module (called module) shall check whether the available data
@@ -299,8 +394,9 @@ Dlt_RxIndication(PduIdType RxPduId, P2CONST(PduInfoType, AUTOMATIC, DLT_APPL_CON
  *                     NULL pointer or point to invalid data.
  */
 FUNC(Std_ReturnType, DLT_APPL_CODE)
-Dlt_TriggerTransmit(PduIdType TxPduId, P2CONST(PduInfoType, AUTOMATIC, DLT_APPL_CONST) PduInfoPtr)
+Dlt_TriggerTransmit(PduIdType TxPduId, P2VAR(PduInfoType, AUTOMATIC, DLT_APPL_DATA) PduInfoPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Start, 3, 0x41, TxPduId, PduInfoPtr);
     Std_ReturnType ret = E_NOT_OK;
 #if (STD_ON == DLT_DEV_ERROR_DETECT)
     /* Check if the DLT module has been initialized */
@@ -336,12 +432,13 @@ Dlt_TriggerTransmit(PduIdType TxPduId, P2CONST(PduInfoType, AUTOMATIC, DLT_APPL_
 #endif
         }
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Return, 1, 0x41);
     return ret;
 }
-#define DLT_STOP_SEC_DLTTRIGGERTRANSMIT_CALLBACK_CODE
+#define DLT_STOP_SEC_CODE_FAST
 #include "Dlt_MemMap.h"
 
-#define DLT_START_SEC_DLTTXCONFIRMATION_CALLBACK_CODE
+#define DLT_START_SEC_CODE_FAST
 #include "Dlt_MemMap.h"
 /*
  * Brief               The lower layer communication interface module confirms the transmission of a PDU, or the failure
@@ -353,6 +450,7 @@ Dlt_TriggerTransmit(PduIdType TxPduId, P2CONST(PduInfoType, AUTOMATIC, DLT_APPL_
  */
 FUNC(void, DLT_APPL_CODE) Dlt_TxConfirmation(PduIdType TxPduId, Std_ReturnType result)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Start, 3, 0x40, TxPduId, result);
 #if (STD_ON == DLT_DEV_ERROR_DETECT)
     /* Check if the DLT module has been initialized */
     if (DLT_STATE_UNINIT == Dlt_ModeState)
@@ -403,11 +501,12 @@ FUNC(void, DLT_APPL_CODE) Dlt_TxConfirmation(PduIdType TxPduId, Std_ReturnType r
 #endif
         }
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Return, 1, 0x40);
 }
-#define DLT_STOP_SEC_DLTTXCONFIRMATION_CALLBACK_CODE
+#define DLT_STOP_SEC_CODE_FAST
 #include "Dlt_MemMap.h"
 
-#define DLT_START_SEC_DLTTPTXCONFIRMATION_CALLBACK_CODE
+#define DLT_START_SEC_CODE_FAST
 #include "Dlt_MemMap.h"
 /*
  * Brief               This function is called after the I-PDU has been transmitted on its network,
@@ -424,6 +523,7 @@ FUNC(void, DLT_APPL_CODE) Dlt_TxConfirmation(PduIdType TxPduId, Std_ReturnType r
  */
 FUNC(void, DLT_APPL_CODE) Dlt_TpTxConfirmation(PduIdType id, Std_ReturnType result)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Start, 3, 0x48, id, result);
 #if (STD_ON == DLT_DEV_ERROR_DETECT)
     /* Check if the DLT module has been initialized */
     if (DLT_STATE_UNINIT == Dlt_ModeState)
@@ -474,11 +574,12 @@ FUNC(void, DLT_APPL_CODE) Dlt_TpTxConfirmation(PduIdType id, Std_ReturnType resu
 #endif
         }
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Return, 1, 0x48);
 }
-#define DLT_STOP_SEC_DLTTPTXCONFIRMATION_CALLBACK_CODE
+#define DLT_STOP_SEC_CODE_FAST
 #include "Dlt_MemMap.h"
 
-#define DLT_START_SEC_DLTCOPYTXDATA_CALLBACK_CODE
+#define DLT_START_SEC_CODE_FAST
 #include "Dlt_MemMap.h"
 /*
  * Brief               This function is called to acquire the transmit data of an I-PDU segment (N-PDU).
@@ -518,6 +619,7 @@ Dlt_CopyTxData(
     P2VAR(PduLengthType, AUTOMATIC, DLT_APPL_DATA) availableDataPtr)
 /* PRQA S 3432-- */ /* MISRA Rule 20.7 */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Start, 5, 0x43, id, info, retry, availableDataPtr);
     BufReq_ReturnType ret = BUFREQ_E_NOT_OK;
 #if (STD_ON == DLT_DEV_ERROR_DETECT)
     /* Check if the DLT module has been initialized */
@@ -526,7 +628,7 @@ Dlt_CopyTxData(
         /* Note: If DLT is not initialized, there is no need to report error to DET */
     }
     /* Check if the passed parameter is null pointer */
-    else if ((availableDataPtr == NULL_PTR) || (retry != NULL_PTR) || (info == NULL_PTR))
+    else if ((availableDataPtr == NULL_PTR) || (info == NULL_PTR))
     {
         /* Report null pointer development error to the DET module */
         DLT_DETREPORT(DLT_API_ID_COPYTXDATA, DLT_E_PARAM_POINTER);
@@ -611,12 +713,13 @@ Dlt_CopyTxData(
         }
     }
     DLT_UNUSED(retry);
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Return, 2, 0x43, ret);
     return ret;
 }
-#define DLT_STOP_SEC_DLTCOPYTXDATA_CALLBACK_CODE
+#define DLT_STOP_SEC_CODE_FAST
 #include "Dlt_MemMap.h"
 
-#define DLT_START_SEC_DLTSTARTOFRECEPTION_CALLBACK_CODE
+#define DLT_START_SEC_CODE_FAST
 #include "Dlt_MemMap.h"
 /*
  * Brief               This function is called at the start of receiving an N-SDU. The N-SDU might be fragmented into
@@ -644,6 +747,7 @@ Dlt_StartOfReception(
     P2VAR(PduLengthType, AUTOMATIC, DLT_APPL_DATA) bufferSizePtr)
 /* PRQA S 3432-- */ /* MISRA Rule 20.7 */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Start, 5, 0x46, id, info, TpSduLength, bufferSizePtr);
 #if ((DLT_RX_DATA_PATH_SUPPORT == STD_ON) && (DLT_BUFFER_MAX_LENGTH > 0) && (DLT_RXPDU_NUM > 0))
     BufReq_ReturnType ret;
 #if (STD_ON == DLT_DEV_ERROR_DETECT)
@@ -698,19 +802,21 @@ Dlt_StartOfReception(
             }
         }
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Return, 2, 0x46, ret);
     return ret;
 #else
     DLT_UNUSED(id);
     DLT_UNUSED(info);
     DLT_UNUSED(TpSduLength);
     DLT_UNUSED(bufferSizePtr);
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Return, 2, 0x46, BUFREQ_OK);
     return BUFREQ_OK;
 #endif
 }
-#define DLT_STOP_SEC_DLTSTARTOFRECEPTION_CALLBACK_CODE
+#define DLT_STOP_SEC_CODE_FAST
 #include "Dlt_MemMap.h"
 
-#define DLT_START_SEC_DLTTPRXINDICATION_CALLBACK_CODE
+#define DLT_START_SEC_CODE_FAST
 #include "Dlt_MemMap.h"
 /*
  * Brief               Called after an I-PDU has been received via the TP API, the result indicates whether the
@@ -723,6 +829,7 @@ Dlt_StartOfReception(
  */
 FUNC(void, DLT_APPL_CODE) Dlt_TpRxIndication(PduIdType id, Std_ReturnType result)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Start, 3, 0x45, id, result);
 #if ((DLT_RX_DATA_PATH_SUPPORT == STD_ON) && (DLT_BUFFER_MAX_LENGTH > 0) && (DLT_RXPDU_NUM > 0))
 #if (STD_ON == DLT_DEV_ERROR_DETECT)
     /* Check if the DLT module has been initialized */
@@ -756,11 +863,12 @@ FUNC(void, DLT_APPL_CODE) Dlt_TpRxIndication(PduIdType id, Std_ReturnType result
     DLT_UNUSED(id);
     DLT_UNUSED(result);
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Return, 1, 0x45);
 }
-#define DLT_STOP_SEC_DLTTPRXINDICATION_CALLBACK_CODE
+#define DLT_STOP_SEC_CODE_FAST
 #include "Dlt_MemMap.h"
 
-#define DLT_START_SEC_DLTCOPYRXDATA_CALLBACK_CODE
+#define DLT_START_SEC_CODE_FAST
 #include "Dlt_MemMap.h"
 /*
  * Brief               This function is called to provide the received data of an I-PDU segment (N-PDU) to the upper
@@ -782,6 +890,7 @@ Dlt_CopyRxData(
     P2VAR(PduLengthType, AUTOMATIC, DLT_APPL_DATA) bufferSizePtr)
 /* PRQA S 3432-- */ /* MISRA Rule 20.7 */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Start, 4, 0x44, id, info, bufferSizePtr);
 #if ((DLT_RX_DATA_PATH_SUPPORT == STD_ON) && (DLT_BUFFER_MAX_LENGTH > 0) && (DLT_RXPDU_NUM > 0))
     BufReq_ReturnType ret = BUFREQ_E_NOT_OK;
 #if (STD_ON == DLT_DEV_ERROR_DETECT)
@@ -826,15 +935,17 @@ Dlt_CopyRxData(
             SchM_Exit_Dlt_RxStatus();
         }
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Return, 2, 0x44, ret);
     return ret;
 #else
     DLT_UNUSED(id);
     DLT_UNUSED(info);
     DLT_UNUSED(bufferSizePtr);
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dlt, 0, Bsw_Return, 2, 0x44, BUFREQ_OK);
     return BUFREQ_OK;
 #endif
 }
-#define DLT_STOP_SEC_DLTCOPYRXDATA_CALLBACK_CODE
+#define DLT_STOP_SEC_CODE_FAST
 #include "Dlt_MemMap.h"
 
 #if (DLT_RX_DATA_PATH_SUPPORT == STD_ON)
@@ -859,7 +970,10 @@ static FUNC(uint16, DLT_APPL_CODE) Dlt_GetRxIndexByRxPduId(PduIdType id)
     }
     return RxIndex;
 }
-
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_DealRxData(uint16 RxIndex, const uint8* Data, uint16 Length)
 {
     Std_ReturnType       ret    = E_OK;
@@ -1007,7 +1121,10 @@ FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_DealRxData(uint16 RxIndex, const uint8* 
     }
     return ret;
 }
-
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /* Create standard header for control command to send messages for given channel in DLT module */
 FUNC(void, DLT_CODE)
 Dlt_CreateControlStandardHeader(
@@ -1072,7 +1189,10 @@ Dlt_CreateControlStandardHeader(
     /* Specify field fill "LEN" to the DLT message buffer */
     Dlt_CopyIntToArrayBigEndian(CreateStandardHeader->Messagelength, &(Dest[2]));
 }
-
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /* Create extended header for control command to send messages for given channel in DLT module */
 FUNC(void, DLT_CODE)
 Dlt_CreateControlExtendedHeader(const Dlt_CreateExtendedHeaderInfoTypes* CreateExtendedHeader, uint8* Dest)
@@ -1127,7 +1247,10 @@ Dlt_CreateControlExtendedHeader(const Dlt_CreateExtendedHeaderInfoTypes* CreateE
     /* Specify field fill "CTID" to the DLT message buffer */
     Dlt_CopyLongToArrayBigEndian(CreateExtendedHeader->SwcContext.SwcContextId, &(Dest[6]));
 }
-
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /* Load the prepare header information for the given channel service response message */
 static FUNC(void, DLT_APPL_CODE) Dlt_ServicePrepareResponseHeaderData(
     uint16*              SendOffset,
@@ -1180,7 +1303,10 @@ static FUNC(void, DLT_APPL_CODE) Dlt_ServicePrepareResponseHeaderData(
     (*SendOffset) = tx_offset;
 #endif
 }
-
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceSendResponseData(uint16 ChannelIndex, uint16 Messagelength)
 {
     Std_ReturnType ret = E_NOT_OK;
@@ -1220,7 +1346,10 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceSendResponseData(uint16 Ch
 #endif
     return ret;
 }
-
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /*
  * Brief               Service error response for Get Log Info
  * ServiceId           N/A
@@ -1301,7 +1430,10 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceGetLogInfoSub(
     }
     return ret;
 }
-
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /*
  * Brief               ServiceID > 0x24u and ServiceID < 0xFFFu Service Error
  * ServiceId           N/A
@@ -1375,6 +1507,10 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceError(
 #endif
     return ret;
 }
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 
 /*
  * Brief               ServiceID == 0u and ServiceID > 0x24u Service Not Support
@@ -1448,7 +1584,10 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceNotSupport(
 #endif
     return ret;
 }
-
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /*
  * Brief               ServiceID == 1u Service Set Log Level
  * ServiceId           N/A
@@ -1601,6 +1740,10 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceSetLogLevel(
     return ret;
 }
 
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /*
  * Brief               Service Set Trace Status
  * ServiceId           N/A
@@ -1753,6 +1896,10 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceSetTraceStatus(
     return ret;
 }
 
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /*
  * Brief               Service Get Log Info
  * ServiceId           N/A
@@ -1861,6 +2008,10 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceGetLogInfo(
 #endif
     return ret;
 }
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /*
  * Brief               Service Get Default Log Level
  * ServiceId           N/A
@@ -1943,6 +2094,10 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceGetDefaultLogLevel(
     return ret;
 }
 
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /*
  * Brief               Service Store Configuration
  * ServiceId           N/A
@@ -2027,6 +2182,10 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceStoreConfiguration(
     return ret;
 }
 
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /*
  * Brief               Service Reset To Factory Default
  * ServiceId           N/A
@@ -2111,6 +2270,10 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceResetToFactoryDefault(
     return ret;
 }
 
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /*
  * Brief               Service Set Message Filtering
  * ServiceId           N/A
@@ -2196,6 +2359,10 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceSetMessageFiltering(
     return ret;
 }
 
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /*
  * Brief               Service Set Default Log Level
  * ServiceId           N/A
@@ -2305,6 +2472,10 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceSetDefaultLogLevel(
     return ret;
 }
 
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /*
  * Brief               Service Set Default Trace Status
  * ServiceId           N/A
@@ -2390,6 +2561,10 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceSetDefaultTraceStatus(
     return ret;
 }
 
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /*
  * Brief               Service Get Soft ware Version
  * ServiceId           N/A
@@ -2492,6 +2667,10 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceGetSoftwareVersion(
 #endif
     return ret;
 }
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /*
  * Brief               Service Get Default Trace Status
  * ServiceId           N/A
@@ -2576,6 +2755,10 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceGetDefaultTraceStatus(
     return ret;
 }
 
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /*
  * Brief               Service Get Log Channel Names
  * ServiceId           N/A
@@ -2681,6 +2864,10 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceGetLogChannelNames(
     return ret;
 }
 
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /*
  * Brief               Service Get Trace Status
  * ServiceId           N/A
@@ -2868,6 +3055,10 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceGetTraceStatus(
     return ret;
 }
 
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /*
  * Brief               Service SetLog Channel Assignment
  * ServiceId           N/A
@@ -3005,6 +3196,10 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceSetLogChannelAssignment(
     return ret;
 }
 
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /*
  * Brief               Service Set Log Channel Threshold
  * ServiceId           N/A
@@ -3143,6 +3338,10 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceSetLogChannelThreshold(
     return ret;
 }
 
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /*
  * Brief               Service Get Log Channel Threshold
  * ServiceId           N/A
@@ -3258,6 +3457,10 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceGetLogChannelThreshold(
     return ret;
 }
 
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /*
  * Brief               Service Sync Time Stamp
  * ServiceId           N/A
@@ -3366,7 +3569,11 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceSyncTimeStamp(
     return ret;
 }
 
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
 #if (DLT_INJECTION_SUPPORT == STD_ON)
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /*
  * Brief               Service Deal With Injection
  * ServiceId           N/A
@@ -3490,8 +3697,11 @@ static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_ServiceDealWithInjection(
 #endif
     return ret;
 }
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
 #endif
-
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 static FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_SubDealRxData(
     uint16               offset,
     const uint8*         Data,

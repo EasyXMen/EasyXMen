@@ -32,9 +32,6 @@
 #define DEM_COM_BITS_PER_WORD (sizeof(Dem_ComProcessorWordType) * 8u) /**< Number of bits per word */
 
 /* ========================================== internal function definitions ========================================= */
-#define DEM_START_SEC_CODE
-#include "Dem_MemMap.h"
-
 #if (DEM_USER_DEFINED_SYNC_API == STD_OFF)
 /**
  * @brief         Default function to synchronize variable information between partitions
@@ -66,7 +63,6 @@ DEM_LOCAL_INLINE boolean Dem_DefaultSyncCompareAndSwap(
     return ret;
 }
 #endif
-
 /**
  * @brief         Inter-partition variable information synchronization
  * @param[in]     AddressPtr: Satellite id
@@ -90,7 +86,4 @@ DEM_LOCAL_INLINE boolean Dem_ComSyncCompareAndSwap(
     return Dem_DefaultSyncCompareAndSwap(AddressPtr, OldValue, NewValue);
 #endif
 }
-
-#define DEM_STOP_SEC_CODE
-#include "Dem_MemMap.h"
 #endif

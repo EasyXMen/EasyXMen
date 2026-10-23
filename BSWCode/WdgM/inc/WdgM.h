@@ -53,22 +53,22 @@
     \li VL_WdgM_1505
       Reason: External interface.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_WdgM_0686
       Reason: Array has fewer initializers than its declared size.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_WdgM_EndLessLoop
       Reason: Necessary logical design for while(1) and have "break" to stop.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_WdgM_5016
       Reason: Parameter passing requires
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_WdgM_5017
       Reason: High cyclomatic complexity indicates inadequate modularization or too much logic in one function.
@@ -83,95 +83,82 @@
     \li VL_WdgM_0380
       Reason: Macro definitions are necessary
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_MTR_WdgM_STVAR
       Reason: The total number of variables is related to the user configuration, allowing
     dynamic code to violate this under extreme conditions
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_MTR_WdgM_STMIF
       Reason: Functions handle specific tasks in the behavior of the entire component.
     Task has different scenarios that need to be covered, which depends on local conditions - this
     leads to deep nesting of the control structure.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_WdgM_2987
       Reason: Code design requirements.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_WdgM_3219
       Reason: The static function has been called in other functions.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_WdgM_2962
       Reason: This value is configured in the configuration file.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_MTR_WdgM_STCYC
       Reason: Functionality is not separated into subfunctions because there are higher requirements for minimizing the
     stack and applying it to runtime use of the code.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_MTR_WdgM_STPTH
       Reason: The functions were not separated into sub-functions because there were higher requirements for
     minimizing the stack and applying them to the runtime usage of the code.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_WdgM_3207
       Reason: Depend on the configuration file.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_WdgM_NameLength
       Reason: Depend on the configuration, The configuration determines the length of the final generated array name.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_WdgM_1502
       Reason: Configuration variables design needs.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_WdgM_3218
       Reason: file scoped variables only used in one function are necessary for functional usage.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
-    \li VL_WdgM_3415
-      Reason: Complex logical expressions may have short circuits. Logical short circuits are designed to
-        account for operational efficiency and expected behavior.
+    \li VL_WdgM_4397
+      Reason: Macro Conveniently determining authenticity.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
-    \li VL_WdgM_2983
-      Reason: Whether this value is used or not is determined by the generated macro.
+    \li VL_WdgM_3408
+      Reason:Configuration parameter, design needs.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
-    \li VL_WdgM_1500
-      Reason: Whether the feature is used or not depends on the generated configuration.
+    \li VL_WdgM_1712
+      Reason: External identifiers have the same first '${n}' characters '${name}'.
       Risk: No risk.
-      Prevention: None.
-
-    \li VL_WdgM_1501
-      Reason: Whether the feature is used or not depends on the generated configuration.
-      Risk: No risk.
-      Prevention: None.
-
-    \li VL_WdgM_1752
-      Reason: The array is declared in the header file of the module, but the definition is generated in the
-        configuration file, and since the generation condition of the array definition cannot be defined in the
-        header file, the declaration of the array is saved in the header file.
-      Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
 
 */
 #ifndef WDGM_H_
@@ -180,43 +167,42 @@
 /* =================================================== inclusions =================================================== */
 #include "WdgM_Cfg.h"
 #include "WdgM_PBcfg.h"
-
 /* =============================================== version information ============================================== */
 /**
  * @name WDGM_H_VERSION_MACROS
  * @{
  * @brief group contains all version info macros in WdgM.h
  */
-#define WDGM_VENDOR_ID          62u /**< vendor ID */
-#define WDGM_MODULE_ID          13u /**< module ID */
-#define WDGM_INSTANCE_ID        0u  /**< instance ID */
-#define WDGM_H_SW_MAJOR_VERSION 2u  /**< WdgM header software ma  jor Version */
-#define WDGM_H_SW_MINOR_VERSION 2u  /**< WdgM header software minor Version */
-#define WDGM_H_SW_PATCH_VERSION 7u  /**< WdgM header software patch Version */
-#define WDGM_H_AR_MAJOR_VERSION 4u  /**< WdgM header autosar major Version */
-#define WDGM_H_AR_MINOR_VERSION 9u  /**< WdgM header autosar minor Version */
-#define WDGM_H_AR_PATCH_VERSION 0u  /**< WdgM header autosar patch Version */
+#define WDGM_VENDOR_ID                62u /**< vendor ID */
+#define WDGM_MODULE_ID                13u /**< module ID */
+#define WDGM_AR_RELEASE_MAJOR_VERSION 4u  /**< WdgM autosar major Version */
+#define WDGM_AR_RELEASE_MINOR_VERSION 9u  /**< WdgM autosar minor Version */
+#define WDGM_AR_RELEASE_PATCH_VERSION 0u  /**< WdgM autosar patch Version */
+#define WDGM_SW_MAJOR_VERSION         3u  /**< WdgM software major Version */
+#define WDGM_SW_MINOR_VERSION         0u  /**< WdgM software minor Version */
+#define WDGM_SW_PATCH_VERSION         0u  /**< WdgM software patch Version */
 /** @} */
 
+#define WDGM_INSTANCE_ID               0u /**< instance ID */
 /* ===================================================== macros ===================================================== */
-#define WDGM_INIT_ID                   (0x00u) /**< WdgM_Init API ID */
-#define WDGM_DEINIT_ID                 (0x01u) /**< WdgM_DeInit API ID */
-#define WDGM_GET_VERSION_INFO_ID       (0x02u) /**< WdgM_GetVersionInfo API ID*/
-#define WDGM_SET_MODE_ID               (0x03u) /**< WdgM_SetMode API ID*/
-#define WDGM_MAINFUNCTION_ID           (0x08u) /**< WdgM_MainFunction API ID*/
-#define WDGM_GET_MODE_ID               (0x0Bu) /**< WdgM_GetMode API ID*/
-#define WDGM_GET_LOCAL_STATUS_ID       (0x0Cu) /**< WdgM_GetLocalStatus API ID*/
-#define WDGM_GET_GLOBAL_STATUS_ID      (0x0Du) /**< WdgM_GetGlobalStatus API ID*/
-#define WDGM_CHECKPOINT_REACHED_ID     (0x0Eu) /**< WdgM_CheckpointReached API ID*/
-#define WDGM_PERFORM_RESET_ID          (0x0Fu) /**< WdgM_PerformReset API ID*/
-#define WDGM_GET_FIRST_EXPIRED_SEID_ID (0x10u) /**< WdgM_GetFirstExpiredSEID API ID*/
+#define WDGM_INIT_ID                   0x00u /**< WdgM_Init API ID */
+#define WDGM_DEINIT_ID                 0x01u /**< WdgM_DeInit API ID */
+#define WDGM_GET_VERSION_INFO_ID       0x02u /**< WdgM_GetVersionInfo API ID*/
+#define WDGM_SET_MODE_ID               0x03u /**< WdgM_SetMode API ID*/
+#define WDGM_MAINFUNCTION_ID           0x08u /**< WdgM_MainFunction API ID*/
+#define WDGM_GET_MODE_ID               0x0Bu /**< WdgM_GetMode API ID*/
+#define WDGM_GET_LOCAL_STATUS_ID       0x0Cu /**< WdgM_GetLocalStatus API ID*/
+#define WDGM_GET_GLOBAL_STATUS_ID      0x0Du /**< WdgM_GetGlobalStatus API ID*/
+#define WDGM_CHECKPOINT_REACHED_ID     0x0Eu /**< WdgM_CheckpointReached API ID*/
+#define WDGM_PERFORM_RESET_ID          0x0Fu /**< WdgM_PerformReset API ID*/
+#define WDGM_GET_FIRST_EXPIRED_SEID_ID 0x10u /**< WdgM_GetFirstExpiredSEID API ID*/
 
-#define WDGM_E_UNINIT       (0x10u) /**< without module initialization*/
-#define WDGM_E_PARAM_CONFIG (0x11u) /**< API service Wdg_Init was called with an erroneous configuration set*/
-#define WDGM_E_PARAM_SEID   (0x13u) /**< API service called with wrong mode paramete*/
-#define WDGM_E_PARAM_MODE   (0x12u) /**< API service called with wrong supervised entity identifier parameter*/
-#define WDGM_E_INV_POINTER  (0x14u) /**< API service called with invalid pointer*/
-#define WDGM_E_CPID         (0x16u) /**< API service used with an invalid CheckpointId*/
+#define WDGM_E_UNINIT        (0x10u) /**< without module initialization*/
+#define WDGM_E_PARAM_CONFIG  (0x11u) /**< API service Wdg_Init was called with an erroneous configuration set*/
+#define WDGM_E_PARAM_SEID    (0x13u) /**< API service called with wrong mode paramete*/
+#define WDGM_E_PARAM_MODE    (0x12u) /**< API service called with wrong supervised entity identifier parameter*/
+#define WDGM_E_INV_POINTER   (0x14u) /**< API service called with invalid pointer*/
+#define WDGM_E_CPID          (0x16u) /**< API service used with an invalid CheckpointId*/
 /** API service used in wrong context - WdgM_Init called when module is not deinitialized global status is not
  * WDGM_GLOBAL_STATUS_DEACTIVATED */
 #define WDGM_E_NO_DEINIT     (0x1Au)
@@ -226,15 +212,12 @@
 #define WDGM_E_DISABLE_NOT_ALLOWED (0x15u) /**< Disabling of watchdog not allowed (e.g. in safety relevant systems)*/
 /** API service used with a checkpoint of a Supervised Entity that is deactivated in the current Watchdog Manager
  * mode.*/
-#define WDGM_E_SEDEACTIVATED (0x19u)
-#define WDGM_E_SET_MODE      (0x1Du) /**< Watchdog drivers' mode switch has failed*/
+#define WDGM_E_SEDEACTIVATED       (0x19u)
+#define WDGM_E_SET_MODE            (0x1Du) /**< Watchdog drivers' mode switch has failed*/
 
-#if (WDGM_COMBINATION_USED == STD_ON)
-#define WDGM_COMBINATITON_INVALIED_ID 0xFFu /**< Invalid combination id */
-#endif
+typedef WdgM_PBConfigType WdgM_ConfigType;
 
 /* ================================================ type definitions ================================================ */
-typedef WdgM_PBConfigType WdgM_ConfigType;
 
 /* ========================================== internal function definitions ========================================= */
 
@@ -253,7 +236,11 @@ extern "C" {
  * @synchronous TRUE
  * @trace       CPD-63721
  */
+#define WDGM_START_SEC_CODE
+#include "WdgM_MemMap.h"
 void WdgM_Init(const WdgM_ConfigType* ConfigPtr);
+#define WDGM_STOP_SEC_CODE
+#include "WdgM_MemMap.h"
 
 /**
  * @brief Returns the current mode of the Watchdog Manager.
@@ -264,7 +251,11 @@ void WdgM_Init(const WdgM_ConfigType* ConfigPtr);
  * @synchronous TRUE
  * @trace       CPD-63726
  */
+#define WDGM_START_SEC_CODE
+#include "WdgM_MemMap.h"
 Std_ReturnType WdgM_GetMode(WdgM_ModeType* Mode);
+#define WDGM_STOP_SEC_CODE
+#include "WdgM_MemMap.h"
 
 /**
  * @brief Sets the current mode of Watchdog Manager.
@@ -275,7 +266,11 @@ Std_ReturnType WdgM_GetMode(WdgM_ModeType* Mode);
  * @synchronous TRUE
  * @trace       CPD-63725
  */
+#define WDGM_START_SEC_CODE
+#include "WdgM_MemMap.h"
 Std_ReturnType WdgM_SetMode(WdgM_ModeType Mode);
+#define WDGM_STOP_SEC_CODE
+#include "WdgM_MemMap.h"
 
 /**
  * @brief  Indicates to the Watchdog Manager that a Checkpoint within a Supervised Entity has been reached.
@@ -287,7 +282,11 @@ Std_ReturnType WdgM_SetMode(WdgM_ModeType Mode);
  * @synchronous TRUE
  * @trace       CPD-63727
  */
+#define WDGM_START_SEC_CODE
+#include "WdgM_MemMap.h"
 Std_ReturnType WdgM_CheckpointReached(WdgM_SupervisedEntityIdType SEID, WdgM_CheckpointIdType CheckpointID);
+#define WDGM_STOP_SEC_CODE
+#include "WdgM_MemMap.h"
 
 /**
  * @brief  Returns the global supervision status of the Watchdog Manager.
@@ -298,7 +297,11 @@ Std_ReturnType WdgM_CheckpointReached(WdgM_SupervisedEntityIdType SEID, WdgM_Che
  * @synchronous TRUE
  * @trace       CPD-63729
  */
+#define WDGM_START_SEC_CODE
+#include "WdgM_MemMap.h"
 Std_ReturnType WdgM_GetGlobalStatus(WdgM_GlobalStatusType* Status);
+#define WDGM_STOP_SEC_CODE
+#include "WdgM_MemMap.h"
 
 /**
  * @brief  Instructs the Watchdog Manager to cause a watchdog reset.
@@ -306,7 +309,11 @@ Std_ReturnType WdgM_GetGlobalStatus(WdgM_GlobalStatusType* Status);
  * @synchronous TRUE
  * @trace       CPD-63730
  */
+#define WDGM_START_SEC_CODE
+#include "WdgM_MemMap.h"
 void WdgM_PerformReset(void);
+#define WDGM_STOP_SEC_CODE
+#include "WdgM_MemMap.h"
 
 /**
  * @brief  Returns SEID that first reached the state WDGM_LOCAL_STATUS_EXPIRED
@@ -317,7 +324,11 @@ void WdgM_PerformReset(void);
  * @synchronous TRUE
  * @trace       CPD-63731
  */
+#define WDGM_START_SEC_CODE
+#include "WdgM_MemMap.h"
 Std_ReturnType WdgM_GetFirstExpiredSEID(WdgM_SupervisedEntityIdType* SEID);
+#define WDGM_STOP_SEC_CODE
+#include "WdgM_MemMap.h"
 
 /**
  * @brief  Returns the supervision status of an individual Supervised Entity.
@@ -329,7 +340,11 @@ Std_ReturnType WdgM_GetFirstExpiredSEID(WdgM_SupervisedEntityIdType* SEID);
  * @synchronous TRUE
  * @trace       CPD-63728
  */
+#define WDGM_START_SEC_CODE
+#include "WdgM_MemMap.h"
 Std_ReturnType WdgM_GetLocalStatus(WdgM_SupervisedEntityIdType SEID, WdgM_LocalStatusType* Status);
+#define WDGM_STOP_SEC_CODE
+#include "WdgM_MemMap.h"
 
 #if (STD_ON == WDGM_OFF_MODE_ENABLED)
 /**
@@ -338,7 +353,11 @@ Std_ReturnType WdgM_GetLocalStatus(WdgM_SupervisedEntityIdType SEID, WdgM_LocalS
  * @synchronous TRUE
  * @trace       CPD-63723
  */
+#define WDGM_START_SEC_CODE
+#include "WdgM_MemMap.h"
 void WdgM_DeInit(void);
+#define WDGM_STOP_SEC_CODE
+#include "WdgM_MemMap.h"
 #endif /*STD_ON == WDGM_OFF_MODE_ENABLED*/
 
 #if (STD_ON == WDGM_VERSION_INFO_API)
@@ -349,7 +368,11 @@ void WdgM_DeInit(void);
  * @synchronous TRUE
  * @trace       CPD-63724
  */
+#define WDGM_START_SEC_CODE
+#include "WdgM_MemMap.h"
 void WdgM_GetVersionInfo(Std_VersionInfoType* VersionInfo);
+#define WDGM_STOP_SEC_CODE
+#include "WdgM_MemMap.h"
 #endif /**STD_ON == WDGM_VERSION_INFO_API*/
 
 #ifdef __cplusplus

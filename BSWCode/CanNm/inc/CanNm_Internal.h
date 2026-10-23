@@ -73,16 +73,25 @@ typedef void (*CanNm_TimerTimoutHandleType)(CanNm_ChannelIndexType chIndex);
 
 /* =========================================== external data declarations =========================================== */
 #if CANNM_MULTIPLE_PARTITION_USED == STD_ON
+#define CANNM_START_SEC_CONFIG_DATA_32
+#include "CanNm_MemMap.h"
 /**
  * @brief An array of partitions involved by the CanNm module.
  */
 extern const ApplicationType CanNm_OsApplicationList[CANNM_NUMBER_OF_PARTITION]; /**< @range NA */
+#define CANNM_STOP_SEC_CONFIG_DATA_32
+#include "CanNm_MemMap.h"
 #endif
 
+#define CANNM_START_SEC_CONFIG_DATA_UNSPECIFIED
+#include "CanNm_MemMap.h"
 /**
  * @brief The channel configuration structure of the CanNm module.
  */
 extern const CanNm_ChannelLConfigType CanNm_ChannelLCfgData[CANNM_NUMBER_OF_CHANNEL]; /**< @range NA */
+#define CANNM_STOP_SEC_CONFIG_DATA_UNSPECIFIED
+#include "CanNm_MemMap.h"
+
 /* ========================================= external function declarations ========================================= */
 
 #ifdef __cplusplus

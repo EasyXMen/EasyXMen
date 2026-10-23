@@ -51,6 +51,8 @@
 void BswM_InitSDRequestPorts(void)
 /* PRQA S 1503,1505,1532 --*/
 {
+    BswM_ArtiApiStart(1, BSWM_API_ID_INITSDREQUESTPORTS);
+
 #if (                                                                                                                 \
     (BSWM_SDCLIENTSERVICECURRENTSTATE_ENABLED == STD_ON) || (BSWM_SDCONSUMEDEVENTGROUPCURRENTSTATE_ENABLED == STD_ON) \
     || (BSWM_SDEVENTHANDLERCURRENTSTATE_ENABLED == STD_ON))
@@ -58,10 +60,6 @@ void BswM_InitSDRequestPorts(void)
     const BswM_ModeRqstPortPCCfgType*   modeRqstPCfgPtr;
     const BswM_ModeRqstPortRuntimeType* modeRqstPtr;
     boolean                             result;
-    uint16                              numOfSdCliSrvCurState;
-    uint16                              numOfSdConsumedEvGrpCurrState;
-    uint16                              numOfSdEvHdlerCurrState;
-    uint16                              idx;
 
     result = BswM_GetPartitionPCCfgPtr(&bswmPartPCCfgPtr);
     if (result)
@@ -70,8 +68,8 @@ void BswM_InitSDRequestPorts(void)
         modeRqstPtr     = bswmPartPCCfgPtr->modeRqstPortRunPtr;
 
 #if (BSWM_SDCLIENTSERVICECURRENTSTATE_ENABLED == STD_ON)
-        numOfSdCliSrvCurState = modeRqstPCfgPtr->numOfSdCliSrvCurState;
-        for (idx = 0u; idx < numOfSdCliSrvCurState; idx++)
+        uint16 numOfSdCliSrvCurState = modeRqstPCfgPtr->numOfSdCliSrvCurState;
+        for (uint16 idx = 0u; idx < numOfSdCliSrvCurState; idx++)
         {
             if (NULL_PTR != modeRqstPCfgPtr->curClientInitState)
             {
@@ -84,8 +82,8 @@ void BswM_InitSDRequestPorts(void)
         }
 #endif /*BSWM_SDCLIENTSERVICECURRENTSTATE_ENABLED == STD_ON*/
 #if (BSWM_SDCONSUMEDEVENTGROUPCURRENTSTATE_ENABLED == STD_ON)
-        numOfSdConsumedEvGrpCurrState = modeRqstPCfgPtr->numOfSdConsumedEvGrpCurrState;
-        for (idx = 0u; idx < numOfSdConsumedEvGrpCurrState; idx++)
+        uint16 numOfSdConsumedEvGrpCurrState = modeRqstPCfgPtr->numOfSdConsumedEvGrpCurrState;
+        for (uint16 idx = 0u; idx < numOfSdConsumedEvGrpCurrState; idx++)
         {
             if (NULL_PTR != modeRqstPCfgPtr->consEvGroupInitState)
             {
@@ -98,8 +96,8 @@ void BswM_InitSDRequestPorts(void)
         }
 #endif /*BSWM_SDCONSUMEDEVENTGROUPCURRENTSTATE_ENABLED == STD_ON*/
 #if (BSWM_SDEVENTHANDLERCURRENTSTATE_ENABLED == STD_ON)
-        numOfSdEvHdlerCurrState = modeRqstPCfgPtr->numOfSdEvHdlerCurrState;
-        for (idx = 0u; idx < numOfSdEvHdlerCurrState; idx++)
+        uint16 numOfSdEvHdlerCurrState = modeRqstPCfgPtr->numOfSdEvHdlerCurrState;
+        for (uint16 idx = 0u; idx < numOfSdEvHdlerCurrState; idx++)
         {
             if (NULL_PTR != modeRqstPCfgPtr->evHandlerInitStatus)
             {
@@ -116,12 +114,18 @@ void BswM_InitSDRequestPorts(void)
 #if (BSWM_DEV_ERROR_DETECT == STD_ON)
     else
     {
-        (void)Det_ReportError(BSWM_MODULE_ID, BSWM_INSTANCE_ID, BSWM_API_ID_INIT, BSWM_E_INIT_FAILED);
+        (void)Det_ReportError(BSWM_MODULE_ID, BSWM_INSTANCE_ID, BSWM_API_ID_INITSDREQUESTPORTS, BSWM_E_INIT_FAILED);
     }
 #endif /*BSWM_DEV_ERROR_DETECT == STD_ON*/
 #endif
-}
 
+    BswM_ArtiApiStop(1, BSWM_API_ID_INITSDREQUESTPORTS);
+}
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
+
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Updates the current state of a specified client service.
  * This function retrieves the partition configuration and updates the runtime status of the client service.
@@ -134,6 +138,8 @@ void BswM_Sd_ClientServiceCurrentState(
     Sd_ClientServiceCurrentStateType CurrentClientState)
 /* PRQA S 1503,1505,1532 --*/
 {
+    BswM_ArtiApiStart(3, BSWM_API_ID_SD_CLIENT_SERVICE_CURRENT_STATE, SdClientServiceHandleId, CurrentClientState);
+
 #if (BSWM_SDCLIENTSERVICECURRENTSTATE_ENABLED == STD_ON)
     const BswM_PartitionPCCfgType* bswmPartPCCfgPtr;
 #if (BSWM_PB_CONFIG_ENABLED == STD_ON)
@@ -199,9 +205,15 @@ void BswM_Sd_ClientServiceCurrentState(
     (void)SdClientServiceHandleId;
     (void)CurrentClientState;
 #endif /*BSWM_SDCLIENTSERVICECURRENTSTATE_ENABLED == STD_ON*/
+
+    BswM_ArtiApiStop(1, BSWM_API_ID_SD_CLIENT_SERVICE_CURRENT_STATE);
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 #if (BSWM_SDCLIENTSERVICECURRENTSTATE_ENABLED == STD_ON)
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Retrieves the current state of a specified client service.
  * This function fetches the partition configuration and returns the current state of the client service.
@@ -222,8 +234,12 @@ Sd_ClientServiceCurrentStateType BswM_GetClientServiceCurState(uint16 cliIdx)
     }
     return cliCurState;
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_SDCLIENTSERVICECURRENTSTATE_ENABLED == STD_ON*/
 
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Updates the current state of a consumed event group.
  * This function checks the validity of the consumed event group state and updates the internal state.
@@ -235,6 +251,12 @@ void BswM_Sd_ConsumedEventGroupCurrentState(
     Sd_ConsumedEventGroupCurrentStateType ConsumedEventGroupState)
 /* PRQA S 1503,1505,1532 --*/
 {
+    BswM_ArtiApiStart(
+        3,
+        BSWM_API_ID_SD_CONSUMED_EVENT_GROUP_CURRENT_STATE,
+        SdConsumedEventGroupHandleId,
+        ConsumedEventGroupState);
+
 #if (BSWM_SDCONSUMEDEVENTGROUPCURRENTSTATE_ENABLED == STD_ON)
     const BswM_PartitionPCCfgType* bswmPartPCCfgPtr;
 #if (BSWM_PB_CONFIG_ENABLED == STD_ON)
@@ -299,9 +321,15 @@ void BswM_Sd_ConsumedEventGroupCurrentState(
     (void)SdConsumedEventGroupHandleId;
     (void)ConsumedEventGroupState;
 #endif /*BSWM_SDCONSUMEDEVENTGROUPCURRENTSTATE_ENABLED == STD_ON*/
+
+    BswM_ArtiApiStop(1, BSWM_API_ID_SD_CONSUMED_EVENT_GROUP_CURRENT_STATE);
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 #if (BSWM_SDCONSUMEDEVENTGROUPCURRENTSTATE_ENABLED == STD_ON)
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Retrieves the current state of a specified consumed event group.
  * This function fetches the partition configuration and returns the current state of the event group.
@@ -322,8 +350,12 @@ Sd_ConsumedEventGroupCurrentStateType BswM_GetEvGruCurState(uint16 evIdx)
     }
     return evGruCurState;
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_SDCONSUMEDEVENTGROUPCURRENTSTATE_ENABLED == STD_ON*/
 
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Handles the current state of an event handler.
  * This function updates the current state of the specified event handler and processes any immediate rules associated
@@ -335,6 +367,8 @@ Sd_ConsumedEventGroupCurrentStateType BswM_GetEvGruCurState(uint16 evIdx)
 void BswM_Sd_EventHandlerCurrentState(uint16 SdEventHandlerHandleId, Sd_EventHandlerCurrentStateType EventHandlerStatus)
 /* PRQA S 1503,1505,1532 --*/
 {
+    BswM_ArtiApiStart(3, BSWM_API_ID_SD_EVENT_HANDLER_CURRENT_STATE, SdEventHandlerHandleId, EventHandlerStatus);
+
 #if (BSWM_SDEVENTHANDLERCURRENTSTATE_ENABLED == STD_ON)
     const BswM_PartitionPCCfgType* bswmPartPCCfgPtr;
 #if (BSWM_PB_CONFIG_ENABLED == STD_ON)
@@ -399,9 +433,15 @@ void BswM_Sd_EventHandlerCurrentState(uint16 SdEventHandlerHandleId, Sd_EventHan
     (void)SdEventHandlerHandleId;
     (void)EventHandlerStatus;
 #endif /*BSWM_SDEVENTHANDLERCURRENTSTATE_ENABLED == STD_ON*/
+
+    BswM_ArtiApiStop(1, BSWM_API_ID_SD_EVENT_HANDLER_CURRENT_STATE);
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 #if (BSWM_SDEVENTHANDLERCURRENTSTATE_ENABLED == STD_ON)
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Retrieves the current state of a specified event handler.
  * This function fetches the partition configuration and returns the current state of the event handler.
@@ -422,10 +462,10 @@ Sd_EventHandlerCurrentStateType BswM_GetEvHandlerCurState(uint16 handlerIdx)
     }
     return evHandlerCurState;
 }
-#endif /*BSWM_SDEVENTHANDLERCURRENTSTATE_ENABLED == STD_ON*/
-
 #define BSWM_STOP_SEC_CODE
 #include "BswM_MemMap.h"
+#endif /*BSWM_SDEVENTHANDLERCURRENTSTATE_ENABLED == STD_ON*/
+
 /* ========================================== internal function definitions ========================================= */
 
 #endif /*BSWM_SD_ENABLED == STD_ON*/

@@ -29,8 +29,7 @@
  *  -------------------------------------------------------------------------------------------------------------------
  *  V2.2.1    2024-08-21 xiaojian.liang
  *      1. Support multi-partition distribution and post-build variant
- *  V2.2.2    2025-10-22 caihong.liu
- *      1. CPT-14266 - Redundant passive wake-up event flags lead to repeated wake-up actions.
+ *  V2.2.2    2026-06-03 xiaojian.liang CPTASK-1133: Add ARTI stub functions and ARTI_TRACE_N instrumentation.
  *
  ==================================================================================================================== */
 
@@ -44,20 +43,12 @@
       Reason: QAC false positives
       Risk: No risk
       Prevention: No action required.
-
     \li VL_ComM_DevelopmentError
       Reason: API parameter checking is enabled if ComMDevErrorDetect is TRUE.
       Risk: No risk
       Prevention: No action required.
-
     \li VL_ComM_UseStructTagPtr
       Reason: It is permissible to define or declare a pointer to an incomplete struct or union type.
-      Risk: No risk
-      Prevention: No action required.
-
-    \li VL_ComM_NotUsed
-      Reason: Identifier is locally declared to avoid unnecessary header inclusion and prevent
-  circular dependencies.
       Risk: No risk
       Prevention: No action required.
 
@@ -72,20 +63,32 @@
       Risk: Understandability and testability become overly complex.
       Prevention: Design and code review, and have a clear structure and annotated code.
 
-    \li VL_ComM_AlwaysFalse
-      Reason: Generation because of the configurations.
-      Risk: No risk.
-      Prevention: None.
+    \li VL_MTR_ComM_STMIF
+      Reason: Functions have different scenarios that need to be covered, which depends on the configuration of
+  different channels, sdu and other configuration conditions, as well as some precompiled macros
+      Risk: The code is difficult to maintain.
+      Prevention: Design and code review, and have a clear structure and annotated code.
 
-    \li VL_ComM_AlwaysTrue
-      Reason: Generation because of the configurations.
+    \li VL_ComM_1536
+      Reason: The tag '%1s' is declared but not used within this project.
       Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_ComM_1039
+      Reason: Configure the length of the generated array, it depends on the configuration, may be configured as 1
+              length.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_ComM_Redeclaration
+      Reason: Rte.c need function declaration to use and Xfrm module need either.
+      Risk: Code redundancy and may difficult to maintain.
       Prevention: None.
  */
 
 #ifndef COMM_H_
 #define COMM_H_
-
+/* PRQA S 1512, 1513, 1707 EOF */ /* VL_ComM_Redeclaration */
 /* =================================================== inclusions =================================================== */
 #include "ComM_Cfg.h"
 #include "ComStack_Types.h"
@@ -104,7 +107,7 @@ extern "C" {
 #define COMM_AR_RELEASE_REVISION_VERSION (0u)
 #define COMM_SW_MAJOR_VERSION            (2u)
 #define COMM_SW_MINOR_VERSION            (2u)
-#define COMM_SW_PATCH_VERSION            (2u)
+#define COMM_SW_PATCH_VERSION            (0u)
 
 /* ===================================================== macros ===================================================== */
 /* Development Errors */
@@ -190,11 +193,22 @@ typedef struct
 
 /* =========================================== external data declarations =========================================== */
 #if (COMM_MODE_LIMITATION_ENABLED == STD_ON) || (COMM_WAKEUP_INHIBITION_ENABLED == STD_ON)
+#define COMM_START_SEC_CONFIG_DATA_UNSPECIFIED
+#include "ComM_MemMap.h"
 extern const ComM_InhibitionType ComM_InhibitionDefault;
-extern ComM_InhibitionType       ComM_InhibitionData;
+#define COMM_STOP_SEC_CONFIG_DATA_UNSPECIFIED
+#include "ComM_MemMap.h"
+
+#define COMM_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "ComM_MemMap.h"
+extern ComM_InhibitionType ComM_InhibitionData;
+#define COMM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "ComM_MemMap.h"
 #endif
 
 /* ========================================= external function declarations ========================================= */
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief Initializes the AUTOSAR Communication Manager and restarts the internal state machines.
  * @param[in]    ConfigPtr  Pointer to post-build configuration data
@@ -203,7 +217,11 @@ extern ComM_InhibitionType       ComM_InhibitionData;
  * @trace        CPD-59608
  */
 void ComM_Init(const ComM_ConfigType* ConfigPtr);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief This API de-initializes the AUTOSAR Communication Manager.
  * @reentrant    TRUE (Reentrant for different partitions. Non reentrant for the same partition.)
@@ -211,7 +229,11 @@ void ComM_Init(const ComM_ConfigType* ConfigPtr);
  * @trace        CPD-59609
  */
 void ComM_DeInit(void);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /* clang-format off */
 /**
  * @brief Returns the initialization status of the AUTOSAR Communication Manager. After a call to ComM_DeInit() ComM
@@ -227,8 +249,12 @@ void ComM_DeInit(void);
  */
 /* clang-format on */
 Std_ReturnType ComM_GetStatus(ComM_InitStatusType* Status);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
 #if COMM_VERSION_INFO_API == STD_ON
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief This function returns the version information of this module.
  * @param[out]   Versioninfo  See Std_VersionInfoType
@@ -237,8 +263,12 @@ Std_ReturnType ComM_GetStatus(ComM_InitStatusType* Status);
  * @trace        CPD-59614
  */
 void ComM_GetVersionInfo(Std_VersionInfoType* Versioninfo);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 #endif
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief Requesting of a Communication Mode by a user.
  * @param[in]    User     Handle of the user who requests a mode
@@ -251,7 +281,11 @@ void ComM_GetVersionInfo(Std_VersionInfoType* Versioninfo);
  * @trace        CPD-59616
  */
 Std_ReturnType ComM_RequestComMode(ComM_UserHandleType User, ComM_ModeType ComMode);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief Function to query the maximum allowed Communication Mode of the corresponding user.
  * @param[in]    User      Handle of the user who requests a mode
@@ -263,7 +297,11 @@ Std_ReturnType ComM_RequestComMode(ComM_UserHandleType User, ComM_ModeType ComMo
  * @trace        CPD-59618
  */
 Std_ReturnType ComM_GetMaxComMode(ComM_UserHandleType User, ComM_ModeType* ComMode);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief Function to query the currently requested Communication Mode of the corresponding user.
  * @param[in]    User      Handle of the user who requests a mode
@@ -275,7 +313,11 @@ Std_ReturnType ComM_GetMaxComMode(ComM_UserHandleType User, ComM_ModeType* ComMo
  * @trace        CPD-59619
  */
 Std_ReturnType ComM_GetRequestedComMode(ComM_UserHandleType User, ComM_ModeType* ComMode);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief Function to query the current Communication Mode. ComM shall use the corresponding interfaces of the Bus State
  * Managers to get the current Communication Mode of the network. (Call to Bus State Manager API:
@@ -289,8 +331,12 @@ Std_ReturnType ComM_GetRequestedComMode(ComM_UserHandleType User, ComM_ModeType*
  * @trace        CPD-59621
  */
 Std_ReturnType ComM_GetCurrentComMode(ComM_UserHandleType User, ComM_ModeType* ComMode);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
 #if COMM_PNC_SUPPORT == STD_ON
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief The function returns the current Communication Mode of the corresponding PNC the affected user is assigned to.
  * @param[in]    User      Handle of the user who requests a mode
@@ -306,9 +352,13 @@ Std_ReturnType ComM_GetCurrentComMode(ComM_UserHandleType User, ComM_ModeType* C
  * @trace        CPD-59622
  */
 Std_ReturnType ComM_GetCurrentPNCComMode(ComM_UserHandleType User, ComM_ModeType* ComMode);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 #endif
 
 #if COMM_WAKEUP_INHIBITION_ENABLED == STD_ON
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief Changes the inhibition status COMM_NO_WAKEUP for the corresponding channel.
  * @param[in]    Channel   See NetworkHandleType
@@ -321,9 +371,13 @@ Std_ReturnType ComM_GetCurrentPNCComMode(ComM_UserHandleType User, ComM_ModeType
  * @trace        CPD-59624
  */
 Std_ReturnType ComM_PreventWakeUp(NetworkHandleType Channel, boolean Status);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 #endif
 
 #if COMM_MODE_LIMITATION_ENABLED == STD_ON
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief Changes the inhibition status for the channel for changing from COMM_NO_COMMUNICATION to a higher
  * Communication Mode. (See also ComM_LimitECUToNoComMode, same functionality but for all channels)
@@ -338,7 +392,11 @@ Std_ReturnType ComM_PreventWakeUp(NetworkHandleType Channel, boolean Status);
  * @trace        CPD-59625
  */
 Std_ReturnType ComM_LimitChannelToNoComMode(NetworkHandleType Channel, boolean Status);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief Changes the inhibition status for the ECU (=all channels) for changing from COMM_NO_COMMUNICATION to a higher
  * Communication Mode. (See also ComM_LimitChannelToNo ComMode, same functionality but for a specific channels)
@@ -352,9 +410,13 @@ Std_ReturnType ComM_LimitChannelToNoComMode(NetworkHandleType Channel, boolean S
  * @trace        CPD-59627
  */
 Std_ReturnType ComM_LimitECUToNoComMode(boolean Status);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 #endif
 
 #if (COMM_MODE_LIMITATION_ENABLED == STD_ON) || (COMM_WAKEUP_INHIBITION_ENABLED == STD_ON)
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief Returns the inhibition status of a ComM channel.
  * @param[in]     Channel   See NetworkHandleType
@@ -366,7 +428,11 @@ Std_ReturnType ComM_LimitECUToNoComMode(boolean Status);
  * @trace         CPD-59628
  */
 Std_ReturnType ComM_GetInhibitionStatus(NetworkHandleType Channel, ComM_InhibitionStatusType* Status);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief This function returns the amount of rejected COMM_FULL_COMMUNICATION user requests.
  * @param[out]   CounterValue  Amount of rejected COMM_FULL_COMMUNICATION user requests
@@ -377,7 +443,11 @@ Std_ReturnType ComM_GetInhibitionStatus(NetworkHandleType Channel, ComM_Inhibiti
  * @trace        CPD-59629
  */
 Std_ReturnType ComM_ReadInhibitCounter(uint16* CounterValue);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief This function resets the Inhibited COMM_FULL_COMMUNICATION request Counter.
  * @retval       E_OK       Successfully reset of Inhibit COMM_FULL_COMMUNICATION Counter
@@ -387,7 +457,11 @@ Std_ReturnType ComM_ReadInhibitCounter(uint16* CounterValue);
  * @trace        CPD-59630
  */
 Std_ReturnType ComM_ResetInhibitCounter(void);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief Changes the ECU Group Classification status.
  * @param[in]     Status    See ComM_InhibitionStatusType
@@ -398,8 +472,12 @@ Std_ReturnType ComM_ResetInhibitCounter(void);
  * @trace         CPD-59631
  */
 Std_ReturnType ComM_SetECUGroupClassification(ComM_InhibitionStatusType Status);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 #endif
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief Indication of the actual bus mode by the corresponding Bus State Manager. ComM shall propagate the indicated
  * state to the users with means of the RTE and BswM.
@@ -410,19 +488,8 @@ Std_ReturnType ComM_SetECUGroupClassification(ComM_InhibitionStatusType Status);
  * @trace        CPD-59645
  */
 void ComM_BusSM_ModeIndication(NetworkHandleType Channel, ComM_ModeType ComMode);
-
-#if COMM_MULTIPLE_PARTITION_ENABLED == STD_ON
-#include "Os.h"
-/**
- * @brief Get Channel Application ID
- * @deprecated Will be remove.
- * @param[in]    Channel  See NetworkHandleType
- * @reentrant    TRUE
- * @synchronous  TRUE
- * @return ApplicationType
- */
-ApplicationType ComM_GetChannelApplicationID(NetworkHandleType Channel);
-#endif
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
 #ifdef __cplusplus
 }

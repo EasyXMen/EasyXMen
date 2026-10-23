@@ -67,9 +67,21 @@ struct ip_reassdata {
   u8_t timer;
 };
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void ip_reass_init(void);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void ip_reass_tmr(void);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 struct pbuf * ip4_reass(struct pbuf *p);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif /* IP_REASSEMBLY */
 
 #if IP_FRAG
@@ -88,7 +100,11 @@ struct pbuf_custom_ref {
 #endif /* LWIP_PBUF_CUSTOM_REF_DEFINED */
 #endif /* !LWIP_NETIF_TX_SINGLE_PBUF */
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t ip4_frag(struct pbuf *p, struct netif *netif, const ip4_addr_t *dest);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif /* IP_FRAG */
 
 #ifdef __cplusplus

@@ -35,7 +35,7 @@
 /* ===================================================== macros ===================================================== */
 #if (STD_ON == CRC8_ALGORITHM)
 /* CRC8 J1850 Standard XOR value*/
-#define CRC_XORVALUE8 0xFFu
+#define CRC_XORVALUE8  0xFFu
 /* CRC8 J1850 Standard Init value*/
 #define CRC_INITVALUE8 0xFFu
 #if (CRC_RUNTIME == CRC8_MODE)
@@ -46,7 +46,7 @@
 
 #if (STD_ON == CRC8H2F_ALGORITHM)
 /* CRC8 0x2F polynomial XOR value*/
-#define CRC_XORVALUE8H2F 0xFFu
+#define CRC_XORVALUE8H2F  0xFFu
 /* CRC8 0x2F polynomial Init value*/
 #define CRC_INITVALUE8H2F 0xFFu
 #if (CRC_RUNTIME == CRC8H2F_MODE)
@@ -59,7 +59,7 @@
 /* CRC16 CCITT-FALSE Standard Init value*/
 #define CRC_INITVALUE16 0xFFFFu
 /* CRC16 CCITT-FALSE Standard value*/
-#define CRC_XORVALUE16 0x0u
+#define CRC_XORVALUE16  0x0u
 #if (CRC_RUNTIME == CRC16_MODE)
 /*CRC16 CCITT-FALSE Standard Generator Polynomial*/
 #define CRC_POLY16 0x1021u
@@ -70,7 +70,7 @@
 /* CRC16/ARC Standard Init value*/
 #define CRC_INITVALUE16ARC 0x0000u
 /* CRC16/ARC Standard value*/
-#define CRC_XORVALUE16ARC 0x0u
+#define CRC_XORVALUE16ARC  0x0u
 #if (CRC_RUNTIME == CRC16ARC_MODE)
 /*CRC16/ARC Standard Generator Polynomial*/
 #define CRC_POLY16ARC 0x8005u
@@ -81,7 +81,7 @@
 /* CRC32 Ethernet Standard Init value*/
 #define CRC_INITVALUE32 0xFFFFFFFFu
 /* CRC32 Ethernet Standard XOR value*/
-#define CRC_XORVALUE32 0xFFFFFFFFuL
+#define CRC_XORVALUE32  0xFFFFFFFFuL
 #if (CRC_RUNTIME == CRC32_MODE)
 /* CRC32 Ethernet Standard Generator Polynomial*/
 #define CRC_POLY32 0x04C11DB7u
@@ -92,7 +92,7 @@
 /* CRC32 Init value*/
 #define CRC_INITVALUE32P4 0xFFFFFFFFu
 /* CRC32 xor value*/
-#define CRC_XORVALUE32P4 0xFFFFFFFFuL
+#define CRC_XORVALUE32P4  0xFFFFFFFFuL
 #if (CRC_RUNTIME == CRC32P4_MODE)
 /* CRC32 Generator Polynomial*/
 #define CRC_POLY32P4 0xF4ACFB13u
@@ -103,7 +103,7 @@
 /* CRC64 Init value*/
 #define CRC_INITVALUE64 0xFFFFFFFFFFFFFFFFuLL
 /* CRC64 xor value*/
-#define CRC_XORVALUE64 0xFFFFFFFFFFFFFFFFuLL
+#define CRC_XORVALUE64  0xFFFFFFFFFFFFFFFFuLL
 #if (CRC_RUNTIME == CRC64_MODE)
 /* CRC64 Generator Polynomial*/
 #define CRC_POLY64 0x42F0E1EBA9EA3693uLL
@@ -116,10 +116,14 @@
 #define CRC_MSB_ULL                 0x8000000000000000uLL
 #define CRC_BIT_LENGTH              0x1u
 #define CRC_BIT_LENGTH8             0x8u
+#define CRC_BIT_LENGTH4             0x4u
+#define CRC_BIT_LENGTH12            0xCu
 #define CRC_BIT_LENGTH24            0x18u
 #define CRC_BIT_LENGTH56            0x38u
 #define CRC_MASK_CPU_32_WITH_16_ADR 0xffu
+#define CRC_MASK_LOW_NIBBLE         0x0fu
 #define CRC_TABLE_NUM               0x0100u
+#define CRC_TABLE_NUM_16            0x0010u
 /* ================================================ type definitions ================================================ */
 
 /* ========================================== internal function declarations ======================================== */
@@ -138,8 +142,12 @@
  * @trace         -
  */
 CRC_LOCAL uint8 Crc_GetReflectionOfChar(uint8 input);
+#define CRC_STOP_SEC_CODE
+#include "Crc_MemMap.h"
 #endif
 #if ((STD_ON == CRC16ARC_ALGORITHM) && (CRC_RUNTIME == CRC16ARC_MODE))
+#define CRC_START_SEC_CODE
+#include "Crc_MemMap.h"
 /**
  * @brief         get the reflection of short type data
  * @param[in]     input : input data of short
@@ -149,10 +157,14 @@ CRC_LOCAL uint8 Crc_GetReflectionOfChar(uint8 input);
  * @trace         -
  */
 CRC_LOCAL uint16 Crc_GetReflectionOfShort(uint16 input);
+#define CRC_STOP_SEC_CODE
+#include "Crc_MemMap.h"
 #endif
 #if (                                                            \
     ((STD_ON == CRC32_ALGORITHM) && (CRC_RUNTIME == CRC32_MODE)) \
     || ((STD_ON == CRC32P4_ALGORITHM) && (CRC_RUNTIME == CRC32P4_MODE)))
+#define CRC_START_SEC_CODE
+#include "Crc_MemMap.h"
 /**
  * @brief         get the reflection of uint32 type data
  * @param[in]     input : input data of uint32
@@ -162,8 +174,12 @@ CRC_LOCAL uint16 Crc_GetReflectionOfShort(uint16 input);
  * @trace         -
  */
 CRC_LOCAL uint32 Crc_GetReflectionOfInt(uint32 input);
+#define CRC_STOP_SEC_CODE
+#include "Crc_MemMap.h"
 #endif
 #if ((STD_ON == CRC64_ALGORITHM) && (CRC_RUNTIME == CRC64_MODE))
+#define CRC_START_SEC_CODE
+#include "Crc_MemMap.h"
 /**
  * @brief         get the reflection of uint64 type data
  * @param[in]     input : input data of uint64
@@ -180,6 +196,7 @@ CRC_LOCAL uint64 Crc_GetReflectionOfLonglong(uint64 input);
 #if ((STD_ON == CRC32_ALGORITHM) && (CRC_TABLE == CRC32_MODE))
 #define CRC_START_SEC_CONST_32
 #include "Crc_MemMap.h"
+#if (CRC32_TABLE_SIZE == CRC_TABLE_SIZE_256)
 /* clang-format off */
 /**
  * Look-up table in Crc_CalculateCRC32
@@ -217,6 +234,16 @@ CRC_LOCAL const uint32 Crc_CalCrc32Tab[CRC_TABLE_NUM] = { /*PRQA S 3218*/ /*VL_C
     0xaed16a4auL, 0xd9d65adcuL, 0x40df0b66uL, 0x37d83bf0uL, 0xa9bcae53uL, 0xdebb9ec5uL, 0x47b2cf7fuL, 0x30b5ffe9uL,
     0xbdbdf21cuL, 0xcabac28auL, 0x53b39330uL, 0x24b4a3a6uL, 0xbad03605uL, 0xcdd70693uL, 0x54de5729uL, 0x23d967bfuL,
     0xb3667a2euL, 0xc4614ab8uL, 0x5d681b02uL, 0x2a6f2b94uL, 0xb40bbe37uL, 0xc30c8ea1uL, 0x5a05df1buL, 0x2d02ef8duL};
+#elif (CRC32_TABLE_SIZE == CRC_TABLE_SIZE_16)
+/* clang-format off */
+/**
+ * Look-up Nibbletable in Crc_CalculateCRC32
+ */
+CRC_LOCAL const uint32 Crc_CalCrc32NibbleTab[CRC_TABLE_NUM_16] = { /*PRQA S 3218*/ /*VL_Crc_Scope*/
+    0x00000000u, 0x1DB71064u, 0x3B6E20C8u, 0x26D930ACu, 0x76DC4190u, 0x6B6B51F4u, 0x4DB26158u, 0x5005713Cu,
+    0xEDB88320u, 0xF00F9344u, 0xD6D6A3E8u, 0xCB61B38Cu, 0x9B64C2B0u, 0x86D3D2D4u, 0xA00AE278u, 0xBDBDF21Cu
+};
+#endif
 #define CRC_STOP_SEC_CONST_32
 #include "Crc_MemMap.h"
 #endif
@@ -224,6 +251,7 @@ CRC_LOCAL const uint32 Crc_CalCrc32Tab[CRC_TABLE_NUM] = { /*PRQA S 3218*/ /*VL_C
 #if ((STD_ON == CRC32P4_ALGORITHM) && (CRC_TABLE == CRC32P4_MODE))
 #define CRC_START_SEC_CONST_32
 #include "Crc_MemMap.h"
+#if (CRC32P4_TABLE_SIZE == CRC_TABLE_SIZE_256)
 /**
  * Look-up table in Crc_CalculateCRC32P4
  */
@@ -261,6 +289,16 @@ CRC_LOCAL const uint32 Crc_CalCrc32p4Tab[CRC_TABLE_NUM] = { /*PRQA S 3218*/ /*VL
     0x191be6a5uL, 0x299ee950uL, 0x7811f94fuL, 0x4894f6bauL, 0xdb0fd971uL, 0xeb8ad684uL, 0xba05c69buL, 0x8a80c96euL,
     0x0c8df352uL, 0x3c08fca7uL, 0x6d87ecb8uL, 0x5d02e34duL, 0xce99cc86uL, 0xfe1cc373uL, 0xaf93d36cuL, 0x9f16dc99uL,
 };
+#elif (CRC32P4_TABLE_SIZE == CRC_TABLE_SIZE_16)
+/* clang-format off */
+/**
+ * Look-up Nibbletable in Crc_CalculateCRC32
+ */
+CRC_LOCAL const uint32 Crc_CalCrc32p4NibbleTab[CRC_TABLE_NUM_16] = { /*PRQA S 3218*/ /*VL_Crc_Scope*/
+    0x00000000u, 0x2B2C2BEEu, 0x565857DCu, 0x7D747C32u, 0xACB0AFB8u, 0x879C8456u, 0xFAE8F864u, 0xD1C4D38Au,
+    0xC8DF352Fu, 0xE3F31EC1u, 0x9E8762F3u, 0xB5AB491Du, 0x646F9A97u, 0x4F43B179u, 0x3237CD4Bu, 0x191BE6A5u
+};
+#endif
 #define CRC_STOP_SEC_CONST_32
 #include "Crc_MemMap.h"
 #endif
@@ -268,6 +306,7 @@ CRC_LOCAL const uint32 Crc_CalCrc32p4Tab[CRC_TABLE_NUM] = { /*PRQA S 3218*/ /*VL
 #if ((STD_ON == CRC16_ALGORITHM) && (CRC_TABLE == CRC16_MODE))
 #define CRC_START_SEC_CONST_16
 #include "Crc_MemMap.h"
+#if (CRC16_TABLE_SIZE == CRC_TABLE_SIZE_256)
 /**
  * Look-up table in Crc_CalculateCRC16
  */
@@ -292,6 +331,16 @@ CRC_LOCAL const uint16 Crc_CalCrc16Tab[CRC_TABLE_NUM] = { /*PRQA S 3218*/ /*VL_C
     0x1ad0u, 0x2ab3u, 0x3a92u, 0xfd2eu, 0xed0fu, 0xdd6cu, 0xcd4du, 0xbdaau, 0xad8bu, 0x9de8u, 0x8dc9u, 0x7c26u, 0x6c07u,
     0x5c64u, 0x4c45u, 0x3ca2u, 0x2c83u, 0x1ce0u, 0x0cc1u, 0xef1fu, 0xff3eu, 0xcf5du, 0xdf7cu, 0xaf9bu, 0xbfbau, 0x8fd9u,
     0x9ff8u, 0x6e17u, 0x7e36u, 0x4e55u, 0x5e74u, 0x2e93u, 0x3eb2u, 0x0ed1u, 0x1ef0u};
+#elif (CRC16_TABLE_SIZE == CRC_TABLE_SIZE_16)
+/* clang-format off */
+/**
+ * Look-up Nibbletable in Crc_CalculateCRC16
+ */
+CRC_LOCAL const uint16 Crc_CalCrc16NibbleTab[CRC_TABLE_NUM_16] = { /*PRQA S 3218*/ /*VL_Crc_Scope*/
+    0x0000u, 0x1021u, 0x2042u, 0x3063u, 0x4084u, 0x50a5u, 0x60c6u, 0x70e7u,
+    0x8108u, 0x9129u, 0xa14au, 0xb16bu, 0xc18cu, 0xd1adu, 0xe1ceu, 0xf1efu
+};
+#endif
 #define CRC_STOP_SEC_CONST_16
 #include "Crc_MemMap.h"
 #endif
@@ -299,6 +348,7 @@ CRC_LOCAL const uint16 Crc_CalCrc16Tab[CRC_TABLE_NUM] = { /*PRQA S 3218*/ /*VL_C
 #if ((STD_ON == CRC16ARC_ALGORITHM) && (CRC_TABLE == CRC16ARC_MODE))
 #define CRC_START_SEC_CONST_16
 #include "Crc_MemMap.h"
+#if (CRC16ARC_TABLE_SIZE == CRC_TABLE_SIZE_256)
 /**
  * Look-up table in Crc_CalculateCRC16ARC
  */
@@ -323,6 +373,16 @@ CRC_LOCAL const uint16 Crc_CalCrc16arcTab[CRC_TABLE_NUM] = { /*PRQA S 3218*/ /*V
     0x59c0u, 0x5880u, 0x9841u, 0x8801u, 0x48c0u, 0x4980u, 0x8941u, 0x4b00u, 0x8bc1u, 0x8a81u, 0x4a40u, 0x4e00u, 0x8ec1u,
     0x8f81u, 0x4f40u, 0x8d01u, 0x4dc0u, 0x4c80u, 0x8c41u, 0x4400u, 0x84c1u, 0x8581u, 0x4540u, 0x8701u, 0x47c0u, 0x4680u,
     0x8641u, 0x8201u, 0x42c0u, 0x4380u, 0x8341u, 0x4100u, 0x81c1u, 0x8081u, 0x4040u};
+#elif (CRC16ARC_TABLE_SIZE == CRC_TABLE_SIZE_16)
+/* clang-format off */
+/**
+ * Look-up Nibbletable in Crc_CalculateCRC16ARC
+ */
+CRC_LOCAL const uint16 Crc_CalCrc16arcNibbleTab[CRC_TABLE_NUM_16] = { /*PRQA S 3218*/ /*VL_Crc_Scope*/
+    0x0000u, 0xCC01u, 0xD801u, 0x1400u, 0xF001u, 0x3C00u, 0x2800u, 0xE401u,
+    0xA001u, 0x6C00u, 0x7800u, 0xB401u, 0x5000u, 0x9C01u, 0x8801u, 0x4400u
+};
+#endif
 #define CRC_STOP_SEC_CONST_16
 #include "Crc_MemMap.h"
 #endif
@@ -330,6 +390,7 @@ CRC_LOCAL const uint16 Crc_CalCrc16arcTab[CRC_TABLE_NUM] = { /*PRQA S 3218*/ /*V
 #if ((STD_ON == CRC8_ALGORITHM) && (CRC_TABLE == CRC8_MODE))
 #define CRC_START_SEC_CONST_8
 #include "Crc_MemMap.h"
+#if (CRC8_TABLE_SIZE == CRC_TABLE_SIZE_256)
 /**
  * Look-up table in Crc_CalculateCRC8
  */
@@ -350,6 +411,16 @@ CRC_LOCAL const uint8 Crc_CalCrc8Tab[CRC_TABLE_NUM] = { /*PRQA S 3218*/ /*VL_Crc
     0xf8u, 0xe5u, 0xc2u, 0xdfu, 0x8cu, 0x91u, 0xb6u, 0xabu, 0x10u, 0x0du, 0x2au, 0x37u, 0x64u, 0x79u, 0x5eu, 0x43u,
     0xb2u, 0xafu, 0x88u, 0x95u, 0xc6u, 0xdbu, 0xfcu, 0xe1u, 0x5au, 0x47u, 0x60u, 0x7du, 0x2eu, 0x33u, 0x14u, 0x09u,
     0x7fu, 0x62u, 0x45u, 0x58u, 0x0bu, 0x16u, 0x31u, 0x2cu, 0x97u, 0x8au, 0xadu, 0xb0u, 0xe3u, 0xfeu, 0xd9u, 0xc4u};
+#elif (CRC8_TABLE_SIZE == CRC_TABLE_SIZE_16)
+/* clang-format off */
+/**
+ * Look-up Nibbletable in Crc_CalculateCRC8
+ */
+CRC_LOCAL const uint8 Crc_CalCrc8NibbleTab[CRC_TABLE_NUM_16] = { /*PRQA S 3218*/ /*VL_Crc_Scope*/
+    0x00u, 0x1Du, 0x3Au, 0x27u, 0x74u, 0x69u, 0x4Eu, 0x53u,
+    0xE8u, 0xF5u, 0xD2u, 0xCFu, 0x9Cu, 0x81u, 0xA6u, 0xBBu
+};
+#endif
 #define CRC_STOP_SEC_CONST_8
 #include "Crc_MemMap.h"
 #endif
@@ -357,6 +428,7 @@ CRC_LOCAL const uint8 Crc_CalCrc8Tab[CRC_TABLE_NUM] = { /*PRQA S 3218*/ /*VL_Crc
 #if ((STD_ON == CRC8H2F_ALGORITHM) && (CRC_TABLE == CRC8H2F_MODE))
 #define CRC_START_SEC_CONST_8
 #include "Crc_MemMap.h"
+#if (CRC8H2F_TABLE_SIZE == CRC_TABLE_SIZE_256)
 /**
  * Look-up table in Crc_CalculateCRC8H2F
  */
@@ -378,6 +450,16 @@ CRC_LOCAL const uint8 Crc_CalCrc8h2fTab[CRC_TABLE_NUM] = { /*PRQA S 3218*/ /*VL_
     0x76u, 0x59u, 0x28u, 0x7u,  0xcau, 0xe5u, 0x94u, 0xbbu, 0x21u, 0xeu,  0x7fu, 0x50u, 0x9du, 0xb2u, 0xc3u, 0xecu,
     0xd8u, 0xf7u, 0x86u, 0xa9u, 0x64u, 0x4bu, 0x3au, 0x15u, 0x8fu, 0xa0u, 0xd1u, 0xfeu, 0x33u, 0x1cu, 0x6du, 0x42u,
 };
+#elif (CRC8H2F_TABLE_SIZE == CRC_TABLE_SIZE_16)
+/* clang-format off */
+/**
+ * Look-up Nibbletable in Crc_CalculateCRC8H2F
+ */
+CRC_LOCAL const uint8 Crc_CalCrc8h2fNibbleTab[CRC_TABLE_NUM_16] = { /*PRQA S 3218*/ /*VL_Crc_Scope*/
+    0x00u, 0x2Fu, 0x5Eu, 0x71u, 0xBCu, 0x93u, 0xE2u, 0xCDu,
+    0x57u, 0x78u, 0x09u, 0x26u, 0xEBu, 0xC4u, 0xB5u, 0x9Au
+};
+#endif
 #define CRC_STOP_SEC_CONST_8
 #include "Crc_MemMap.h"
 #endif
@@ -385,6 +467,7 @@ CRC_LOCAL const uint8 Crc_CalCrc8h2fTab[CRC_TABLE_NUM] = { /*PRQA S 3218*/ /*VL_
 #if ((STD_ON == CRC64_ALGORITHM) && (CRC_TABLE == CRC64_MODE))
 #define CRC_START_SEC_CONST_64
 #include "Crc_MemMap.h"
+#if (CRC64_TABLE_SIZE == CRC_TABLE_SIZE_256)
 /**
  * Look-up table in Crc_CalculateCRC64
  */
@@ -443,10 +526,22 @@ CRC_LOCAL const uint64 Crc_CalCrc64Tab[CRC_TABLE_NUM] = { /*PRQA S 3218*/ /*VL_C
     0xE0ADA17364673F59ULL,
 
 };
-/* clang-format on */
+#elif (CRC64_TABLE_SIZE == CRC_TABLE_SIZE_16)
+/* clang-format off */
+/**
+ * Look-up Nibbletable in Crc_CalculateCRC64
+ */
+CRC_LOCAL const uint64 Crc_CalCrc64NibbleTab[CRC_TABLE_NUM_16] = { /*PRQA S 3218*/ /*VL_Crc_Scope*/
+    0x0000000000000000ULL, 0x7D9BA13851336649ULL, 0xFB374270A266CC92ULL, 0x86ACE348F355AADBULL,
+    0x64B62BCAEBC387A1ULL, 0x192D8AF2BAF0E1E8ULL, 0x9F8169BA49A54B33ULL, 0xE21AC88218962D7AULL,
+    0xC96C5795D7870F42ULL, 0xB4F7F6AD86B4690BULL, 0x325B15E575E1C3D0ULL, 0x4FC0B4DD24D2A599ULL,
+    0xADDA7C5F3C4488E3ULL, 0xD041DD676D77EEAAULL, 0x56ED3E2F9E224471ULL, 0x2B769F17CF112238ULL
+};
+#endif
 #define CRC_STOP_SEC_CONST_64
 #include "Crc_MemMap.h"
 #endif
+/* clang-format on */
 /* ============================================ external data definitions =========================================== */
 
 /* ========================================== external function definitions ========================================= */
@@ -461,10 +556,10 @@ CRC_LOCAL const uint64 Crc_CalCrc64Tab[CRC_TABLE_NUM] = { /*PRQA S 3218*/ /*VL_C
 |      CRC32P4       |     0xF4ACFB13h     |         YES          |          YES          |
 |       CRC64        | 0x42F0E1EBA9EA3693h |         YES          |          YES          |
 */
-#define CRC_START_SEC_CODE
-#include "Crc_MemMap.h"
 /* PRQA S 1710 ++ */ /* VL_Crc_Name */
 #if (STD_ON == CRC8_ALGORITHM)
+#define CRC_START_SEC_CODE
+#include "Crc_MemMap.h"
 /**
  * This service makes a CRC8 calculation on Crc_Length data bytes, with SAE J1850 parameters
  */
@@ -514,7 +609,18 @@ uint8 Crc_CalculateCRC8(const uint8* Crc_DataPtr, uint32 Crc_Length, uint8 Crc_S
 #elif (CRC_TABLE == CRC8_MODE)
     for (i = 0u; i < Crc_Length; i++)
     {
+#if (CRC8_TABLE_SIZE == CRC_TABLE_SIZE_256)
         crc_value = (uint8)Crc_CalCrc8Tab[(crc_value ^ (uint8)Crc_DataPtr[i])];
+#elif (CRC8_TABLE_SIZE == CRC_TABLE_SIZE_16)
+        /* half-byte (nibble) lookup: process high nibble then low nibble */
+        crc_value = (uint8)(Crc_CalCrc8NibbleTab[(
+                                (uint8)(crc_value >> CRC_BIT_LENGTH4) ^ (uint8)(Crc_DataPtr[i] >> CRC_BIT_LENGTH4))]
+                            ^ (uint8)(crc_value << CRC_BIT_LENGTH4));
+        /* PRQA S 2908 */ /* VL_Crc_LeftShift */
+        crc_value = (uint8)(Crc_CalCrc8NibbleTab[(
+                                (uint8)(crc_value >> CRC_BIT_LENGTH4) ^ (uint8)(Crc_DataPtr[i] & CRC_MASK_LOW_NIBBLE))]
+                            ^ (uint8)(crc_value << CRC_BIT_LENGTH4));
+#endif
     }
 
 /* check if it is hardware method to calculate */
@@ -526,9 +632,13 @@ uint8 Crc_CalculateCRC8(const uint8* Crc_DataPtr, uint32 Crc_Length, uint8 Crc_S
 
     return crc_value & CRC_MASK_CPU_32_WITH_16_ADR; /* PRQA S 2985 */ /* VL_Crc_Redudant */
 }
+#define CRC_STOP_SEC_CODE
+#include "Crc_MemMap.h"
 #endif
 
 #if (STD_ON == CRC8H2F_ALGORITHM)
+#define CRC_START_SEC_CODE
+#include "Crc_MemMap.h"
 /**
  * This service makes a CRC8 calculation with the Polynomial 0x2F on Crc_Length
  */
@@ -581,7 +691,17 @@ uint8 Crc_CalculateCRC8H2F(
 #elif (CRC_TABLE == CRC8H2F_MODE)
     for (i = 0u; i < Crc_Length; i++)
     {
+#if (CRC8H2F_TABLE_SIZE == CRC_TABLE_SIZE_256)
         crc_value = (uint8)Crc_CalCrc8h2fTab[(crc_value ^ (uint8)Crc_DataPtr[i])];
+#elif (CRC8H2F_TABLE_SIZE == CRC_TABLE_SIZE_16)
+        crc_value = (uint8)(Crc_CalCrc8h2fNibbleTab[(
+                                (uint8)(crc_value >> CRC_BIT_LENGTH4) ^ (uint8)(Crc_DataPtr[i] >> CRC_BIT_LENGTH4))]
+                            ^ (uint8)(crc_value << CRC_BIT_LENGTH4));
+        /* PRQA S 2908 */ /* VL_Crc_LeftShift */
+        crc_value = (uint8)(Crc_CalCrc8h2fNibbleTab[(
+                                (uint8)(crc_value >> CRC_BIT_LENGTH4) ^ (uint8)(Crc_DataPtr[i] & CRC_MASK_LOW_NIBBLE))]
+                            ^ (uint8)(crc_value << CRC_BIT_LENGTH4));
+#endif
     }
 
 /* check if it is hardware method to calculate */
@@ -593,9 +713,13 @@ uint8 Crc_CalculateCRC8H2F(
 
     return crc_value & CRC_MASK_CPU_32_WITH_16_ADR; /* PRQA S 2985 */ /* VL_Crc_Redudant */
 }
+#define CRC_STOP_SEC_CODE
+#include "Crc_MemMap.h"
 #endif
 
 #if (STD_ON == CRC16_ALGORITHM)
+#define CRC_START_SEC_CODE
+#include "Crc_MemMap.h"
 /**
  * This service makes a CRC16 calculation on Crc_Length data bytes.
  */
@@ -644,10 +768,21 @@ uint16 Crc_CalculateCRC16(const uint8* Crc_DataPtr, uint32 Crc_Length, uint16 Cr
 #elif (CRC_TABLE == CRC16_MODE)
         for (i = 0u; i < Crc_Length; i++)
         {
+#if (CRC16_TABLE_SIZE == CRC_TABLE_SIZE_256)
             /*PRQA S 3120 ++ */ /*VL_QAC_MagicNum*/ /* PRQA S 2985,2986 ++ */ /* VL_Crc_Redudant */
             crc_value = Crc_CalCrc16Tab[(((crc_value & 0xFF00u) >> 8u) ^ ((uint16)Crc_DataPtr[i])) & 0xFFu]
                         ^ ((uint16)((crc_value & 0x00FFu) << 8u));
             /*PRQA S 3120 -- */ /* PRQA S 2985,2986 -- */
+#elif (CRC16_TABLE_SIZE == CRC_TABLE_SIZE_16)
+            crc_value = Crc_CalCrc16NibbleTab[(
+                            (uint8)(crc_value >> CRC_BIT_LENGTH12) ^ ((uint8)(Crc_DataPtr[i] >> CRC_BIT_LENGTH4)))]
+                        ^ ((uint16)(crc_value << CRC_BIT_LENGTH4));
+            /* PRQA S 2908 */ /* VL_Crc_LeftShift */
+
+            crc_value = Crc_CalCrc16NibbleTab[(
+                            (uint8)(crc_value >> CRC_BIT_LENGTH12) ^ ((uint8)(Crc_DataPtr[i] & CRC_MASK_LOW_NIBBLE)))]
+                        ^ ((uint16)(crc_value << CRC_BIT_LENGTH4));
+#endif
         }
 
 /* check if it is hardware method to calculate */
@@ -659,9 +794,13 @@ uint16 Crc_CalculateCRC16(const uint8* Crc_DataPtr, uint32 Crc_Length, uint16 Cr
     }
     return crc_value;
 }
+#define CRC_STOP_SEC_CODE
+#include "Crc_MemMap.h"
 #endif
 
 #if (STD_ON == CRC16ARC_ALGORITHM)
+#define CRC_START_SEC_CODE
+#include "Crc_MemMap.h"
 /**
  * This service makes a CRC16 calculation on Crc_Length data bytes, using the polynomial 0x8005.
  */
@@ -717,9 +856,17 @@ uint16
 #elif (CRC_TABLE == CRC16ARC_MODE)
     for (i = 0u; i < Crc_Length; i++)
     {
+#if (CRC16ARC_TABLE_SIZE == CRC_TABLE_SIZE_256)
         /*PRQA S 3120 ++ */ /*VL_QAC_MagicNum*/
         crc_value = Crc_CalCrc16arcTab[(((crc_value) ^ ((uint16)Crc_DataPtr[i]))) & 0xffu] ^ (crc_value >> 0x8u);
         /*PRQA S 3120 -- */
+#elif (CRC16ARC_TABLE_SIZE == CRC_TABLE_SIZE_16)
+        crc_value ^= (uint16)Crc_DataPtr[i];
+        crc_value = (uint16)(((uint16)crc_value >> CRC_BIT_LENGTH4)
+                             ^ Crc_CalCrc16arcNibbleTab[(uint8)(crc_value & CRC_MASK_LOW_NIBBLE)]);
+        crc_value = (uint16)(((uint16)crc_value >> CRC_BIT_LENGTH4)
+                             ^ Crc_CalCrc16arcNibbleTab[(uint8)(crc_value & CRC_MASK_LOW_NIBBLE)]);
+#endif
     }
     /* check if it is hardware method to calculate */
 #elif (CRC_HARDWARE == CRC16ARC_MODE)
@@ -730,9 +877,13 @@ uint16
 
     return crc_value;
 }
+#define CRC_STOP_SEC_CODE
+#include "Crc_MemMap.h"
 #endif
 
 #if (STD_ON == CRC32_ALGORITHM)
+#define CRC_START_SEC_CODE
+#include "Crc_MemMap.h"
 /**
  * This service makes a CRC32 calculation on Crc_Length data bytes.
  */
@@ -787,9 +938,15 @@ uint32 Crc_CalculateCRC32(const uint8* Crc_DataPtr, uint32 Crc_Length, uint32 Cr
 #elif (CRC_TABLE == CRC32_MODE)
     for (i = 0u; i < Crc_Length; i++)
     {
+#if (CRC32_TABLE_SIZE == CRC_TABLE_SIZE_256)
         /*PRQA S 3120 ++ */ /*VL_QAC_MagicNum*/
         crc_value = Crc_CalCrc32Tab[(crc_value ^ (uint32)Crc_DataPtr[i]) & 0xffuL] ^ (crc_value >> 0x8u);
         /*PRQA S 3120 -- */
+#elif (CRC32_TABLE_SIZE == CRC_TABLE_SIZE_16)
+        crc_value ^= (uint32)Crc_DataPtr[i];
+        crc_value = ((crc_value >> CRC_BIT_LENGTH4) ^ Crc_CalCrc32NibbleTab[(uint8)(crc_value & CRC_MASK_LOW_NIBBLE)]);
+        crc_value = ((crc_value >> CRC_BIT_LENGTH4) ^ Crc_CalCrc32NibbleTab[(uint8)(crc_value & CRC_MASK_LOW_NIBBLE)]);
+#endif
     }
     /* check if it is hardware method to calculate */
 #elif (CRC_HARDWARE == CRC32_MODE)
@@ -800,9 +957,13 @@ uint32 Crc_CalculateCRC32(const uint8* Crc_DataPtr, uint32 Crc_Length, uint32 Cr
 
     return crc_value;
 }
+#define CRC_STOP_SEC_CODE
+#include "Crc_MemMap.h"
 #endif
 
 #if (STD_ON == CRC32P4_ALGORITHM)
+#define CRC_START_SEC_CODE
+#include "Crc_MemMap.h"
 /**
  * This service makes a CRC32 calculation on Crc_Length data bytes.
  */
@@ -858,9 +1019,17 @@ uint32
 #elif (CRC_TABLE == CRC32P4_MODE)
     for (i = 0u; i < Crc_Length; i++)
     {
+#if (CRC32P4_TABLE_SIZE == CRC_TABLE_SIZE_256)
         /*PRQA S 3120 ++ */ /*VL_QAC_MagicNum*/
         crc_value = Crc_CalCrc32p4Tab[(crc_value ^ (uint32)Crc_DataPtr[i]) & 0xffuL] ^ (crc_value >> 0x8u);
         /*PRQA S 3120 -- */
+#elif (CRC32P4_TABLE_SIZE == CRC_TABLE_SIZE_16)
+        crc_value ^= (uint32)Crc_DataPtr[i];
+        crc_value =
+            ((crc_value >> CRC_BIT_LENGTH4) ^ Crc_CalCrc32p4NibbleTab[(uint8)(crc_value & CRC_MASK_LOW_NIBBLE)]);
+        crc_value =
+            ((crc_value >> CRC_BIT_LENGTH4) ^ Crc_CalCrc32p4NibbleTab[(uint8)(crc_value & CRC_MASK_LOW_NIBBLE)]);
+#endif
     }
     /* check if it is hardware method to calculate */
 #elif (CRC_HARDWARE == CRC32P4_MODE)
@@ -871,9 +1040,13 @@ uint32
 
     return crc_value;
 }
+#define CRC_STOP_SEC_CODE
+#include "Crc_MemMap.h"
 #endif
 
 #if (STD_ON == CRC64_ALGORITHM)
+#define CRC_START_SEC_CODE
+#include "Crc_MemMap.h"
 /**
  * This service makes a CRC64 calculation on Crc_Length data bytes.
  */
@@ -927,9 +1100,15 @@ uint64 Crc_CalculateCRC64(const uint8* Crc_DataPtr, uint64 Crc_Length, uint64 Cr
 #elif (CRC_TABLE == CRC64_MODE)
     for (i = 0u; i < Crc_Length; i++)
     {
+#if (CRC64_TABLE_SIZE == CRC_TABLE_SIZE_256)
         /*PRQA S 3120 ++ */ /*VL_QAC_MagicNum*/
         crc_value = Crc_CalCrc64Tab[(crc_value ^ (uint64)Crc_DataPtr[i]) & 0xffuLL] ^ (crc_value >> 0x8u);
         /*PRQA S 3120 -- */
+#elif (CRC64_TABLE_SIZE == CRC_TABLE_SIZE_16)
+        crc_value ^= (uint64)Crc_DataPtr[i];
+        crc_value = ((crc_value >> CRC_BIT_LENGTH4) ^ Crc_CalCrc64NibbleTab[(uint8)(crc_value & CRC_MASK_LOW_NIBBLE)]);
+        crc_value = ((crc_value >> CRC_BIT_LENGTH4) ^ Crc_CalCrc64NibbleTab[(uint8)(crc_value & CRC_MASK_LOW_NIBBLE)]);
+#endif
     }
     /* check if it is hardware method to calculate */
 #elif (CRC_HARDWARE == CRC64_MODE)
@@ -940,8 +1119,11 @@ uint64 Crc_CalculateCRC64(const uint8* Crc_DataPtr, uint64 Crc_Length, uint64 Cr
 
     return crc_value;
 }
+#define CRC_STOP_SEC_CODE
+#include "Crc_MemMap.h"
 #endif
-
+#define CRC_START_SEC_CODE
+#include "Crc_MemMap.h"
 /**
  * retrive version info from macros
  */
@@ -956,11 +1138,16 @@ void Crc_GetVersionInfo(Std_VersionInfoType* versionInfo) /*PRQA S 1503*/ /*VL_Q
         versionInfo->sw_patch_version = CRC_SW_PATCH_VERSION;
     }
 }
+#define CRC_STOP_SEC_CODE
+#include "Crc_MemMap.h"
+
 /* ========================================== internal function definitions ========================================= */
 #if (                                                                   \
     ((STD_ON == CRC32_ALGORITHM) && (CRC_RUNTIME == CRC32_MODE))        \
     || ((STD_ON == CRC32P4_ALGORITHM) && (CRC_RUNTIME == CRC32P4_MODE)) \
     || ((STD_ON == CRC64_ALGORITHM)) && (CRC_RUNTIME == CRC64_MODE))
+#define CRC_START_SEC_CODE
+#include "Crc_MemMap.h"
 CRC_LOCAL uint8 Crc_GetReflectionOfChar(uint8 input)
 {
     uint8 i;
@@ -973,9 +1160,13 @@ CRC_LOCAL uint8 Crc_GetReflectionOfChar(uint8 input)
 
     return result;
 }
+#define CRC_STOP_SEC_CODE
+#include "Crc_MemMap.h"
 #endif
 
 #if ((STD_ON == CRC16ARC_ALGORITHM) && (CRC_RUNTIME == CRC16ARC_MODE))
+#define CRC_START_SEC_CODE
+#include "Crc_MemMap.h"
 CRC_LOCAL uint16 Crc_GetReflectionOfShort(uint16 input)
 {
     uint16 i;
@@ -988,11 +1179,15 @@ CRC_LOCAL uint16 Crc_GetReflectionOfShort(uint16 input)
 
     return result;
 }
+#define CRC_STOP_SEC_CODE
+#include "Crc_MemMap.h"
 #endif
 
 #if (                                                            \
     ((STD_ON == CRC32_ALGORITHM) && (CRC_RUNTIME == CRC32_MODE)) \
     || ((STD_ON == CRC32P4_ALGORITHM) && (CRC_RUNTIME == CRC32P4_MODE)))
+#define CRC_START_SEC_CODE
+#include "Crc_MemMap.h"
 CRC_LOCAL uint32 Crc_GetReflectionOfInt(uint32 input)
 {
     uint32 i;
@@ -1005,9 +1200,13 @@ CRC_LOCAL uint32 Crc_GetReflectionOfInt(uint32 input)
 
     return result;
 }
+#define CRC_STOP_SEC_CODE
+#include "Crc_MemMap.h"
 #endif
 
 #if ((STD_ON == CRC64_ALGORITHM) && (CRC_RUNTIME == CRC64_MODE))
+#define CRC_START_SEC_CODE
+#include "Crc_MemMap.h"
 /* PRQA S 3120 ++ */ /* VL_QAC_MagicNum */
 CRC_LOCAL uint64 Crc_GetReflectionOfLonglong(uint64 input)
 {
@@ -1021,8 +1220,9 @@ CRC_LOCAL uint64 Crc_GetReflectionOfLonglong(uint64 input)
 
     return result;
 }
+#define CRC_STOP_SEC_CODE
+#include "Crc_MemMap.h"
+
 /* PRQA S 3120 -- */
 #endif
 /* PRQA S 1710 -- */
-#define CRC_STOP_SEC_CODE
-#include "Crc_MemMap.h"

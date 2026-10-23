@@ -88,7 +88,11 @@ struct in6_addr {
     to the IPv6 loopback address. */
 #define IN6ADDR_LOOPBACK_INIT {{{0,0,0,PP_HTONL(1)}}}
 /** This variable is initialized by the system to contain the wildcard IPv6 address. */
+#define TCPIP_START_SEC_CONST_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 extern const struct in6_addr in6addr_any;
+#define TCPIP_STOP_SEC_CONST_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 
 /* Definitions of the bits in an (IPv4) Internet address integer.
 

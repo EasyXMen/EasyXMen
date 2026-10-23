@@ -33,6 +33,8 @@ extern "C" {
 #endif
 
 /* ========================================= external function declarations ========================================= */
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Initializes the NvBlock for administrative data
  *                supposed to be called by the NvM in order to (re)initialize the data in case the non-volatile
@@ -50,6 +52,10 @@ extern "C" {
  */
 /* PRQA S 1512 EOF */ /* VL_Dem_1512 */
 extern Std_ReturnType Dem_NvMInitAdminData(NvM_InitBlockRequestType InitBlockRequest);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Initializes the NvBlock for event status data
@@ -67,8 +73,12 @@ extern Std_ReturnType Dem_NvMInitAdminData(NvM_InitBlockRequestType InitBlockReq
  * @trace         CPD-67519
  */
 extern Std_ReturnType Dem_NvMInitStatusData(NvM_InitBlockRequestType InitBlockRequest);
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_DEBOUNCE_COUNTER_STORAGE_NUM > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
+
 /**
  * @brief         Initializes the NvBlock for persisted debounce values
  *                supposed to be called by the NvM in order to (re)initialize the data in case the non-volatile
@@ -85,7 +95,11 @@ extern Std_ReturnType Dem_NvMInitStatusData(NvM_InitBlockRequestType InitBlockRe
  * @trace         CPD-67522
  */
 extern Std_ReturnType Dem_NvMInitDebounceData(NvM_InitBlockRequestType InitBlockRequest);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Notifies the Dem module about a completed NV operation
@@ -101,6 +115,8 @@ extern Std_ReturnType Dem_NvMInitDebounceData(NvM_InitBlockRequestType InitBlock
  * @trace         CPD-67541
  */
 extern Std_ReturnType Dem_NvMJobFinished(NvM_BlockRequestType ServiceId, NvM_RequestResultType JobResult);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 
 #ifdef __cplusplus
 }

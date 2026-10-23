@@ -61,8 +61,7 @@ typedef enum
 } ComM_NmModeEventType;
 #endif
 
-/** @ingroup ComMChannelTypes */
-typedef struct ComM_ChannelConfigTypeTag /* PRQA S 1536 */ /* VL_ComM_NotUsed */
+typedef struct ComM_ChannelConfigType_Tag /* PRQA S 1536 */ /* VL_ComM_1536 */
 {
     Std_ReturnType (*BusSMRequestComMode)(NetworkHandleType Channel, ComM_ModeType ComMode);
     uint32             NmLightTimeout;
@@ -70,7 +69,7 @@ typedef struct ComM_ChannelConfigTypeTag /* PRQA S 1536 */ /* VL_ComM_NotUsed */
     NetworkHandleType  ManagingChannel;
 #if COMM_USER_NUMBER > 0u
 #if COMM_CURRENT_CHANNEL_REQUEST_NOTIFICATION_ENABLED == STD_ON
-    Std_ReturnType (*CurrentChannelRequest)(uint8 numberOfRequesters, ComM_UserHandleType* handleArray);
+    void (*CurrentChannelRequest)(uint8 numberOfRequesters, ComM_UserHandleType* handleArray);
     ComM_UserHandleType* const UserRequesters;
 #endif
     const ComM_UserHandleType* Users;
@@ -111,9 +110,15 @@ typedef struct
 /* ========================================== internal function definitions ========================================= */
 
 /* =========================================== external data declarations =========================================== */
+#define COMM_START_SEC_CONFIG_DATA_PTR
+#include "ComM_MemMap.h"
 extern ComM_ChannelLocalVarType* const ComM_ChannelLocalVarPtrs[COMM_CHANNEL_NUMBER];
+#define COMM_STOP_SEC_CONFIG_DATA_PTR
+#include "ComM_MemMap.h"
 
 /* ========================================= external function declarations ========================================= */
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief Initializes the global variables for all channels that are used across multiple partitions.
  * @param[in]     ChannelConfigs  Pointer to post-build configuration data for all channels
@@ -122,7 +127,11 @@ extern ComM_ChannelLocalVarType* const ComM_ChannelLocalVarPtrs[COMM_CHANNEL_NUM
  * @trace         CPD-61604
  */
 void ComM_ChannelGlobalInit(const ComM_ChannelConfigType* ChannelConfigs);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief Initializes the local variables for all channels assigned to the current partition.
  * @reentrant     TRUE (Reentrant for different partitions. Non reentrant for the same partition.)
@@ -130,8 +139,12 @@ void ComM_ChannelGlobalInit(const ComM_ChannelConfigType* ChannelConfigs);
  * @trace         CPD-61605
  */
 void ComM_ChannelLocalInit(void);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
 #ifdef COMM_TEST
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief The function returns the current state of the corresponding channel.
  * @param[in]    Channel  See NetworkHandleType
@@ -141,8 +154,12 @@ void ComM_ChannelLocalInit(void);
  * @trace        -
  */
 ComM_StateType ComM_ChannelGetState(NetworkHandleType Channel);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 #endif
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief Function to query the maximum allowed Communication Mode of the corresponding channel.
  * @param[in]    Channel  See NetworkHandleType
@@ -152,11 +169,15 @@ ComM_StateType ComM_ChannelGetState(NetworkHandleType Channel);
  * @trace        CPD-61606
  */
 ComM_ModeType ComM_ChannelGetMaxComMode(NetworkHandleType Channel);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
 #ifdef QAC_ANALYZE
 #pragma PRQA_NO_SIDE_EFFECTS ComM_ChannelGetCurrentComMode
 #endif
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief Function to query the current Communication Mode of the corresponding channel.
  * @param[in]    Channel  See NetworkHandleType
@@ -166,7 +187,11 @@ ComM_ModeType ComM_ChannelGetMaxComMode(NetworkHandleType Channel);
  * @trace        CPD-61607
  */
 ComM_ModeType ComM_ChannelGetCurrentComMode(NetworkHandleType Channel);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief Change the communication allowed status for the corresponding channel.
  * @param[in]    Channel  See NetworkHandleType
@@ -176,7 +201,11 @@ ComM_ModeType ComM_ChannelGetCurrentComMode(NetworkHandleType Channel);
  * @trace        CPD-61608
  */
 void ComM_ChannelCommunicationAllowed(NetworkHandleType Channel, boolean Allowed);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief Indication of the actual bus mode by the corresponding Bus State Manager.
  * @param[in]    Channel  See NetworkHandleType
@@ -186,8 +215,12 @@ void ComM_ChannelCommunicationAllowed(NetworkHandleType Channel, boolean Allowed
  * @trace        CPD-61609
  */
 void ComM_ChannelBusSMModeIndication(NetworkHandleType Channel, ComM_ModeType ComMode);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
 #if COMM_NM_ENABLED == STD_ON
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief Indication of the nm mode event for the corresponding channel.
  * @param[in]    Channel      See NetworkHandleType
@@ -197,8 +230,12 @@ void ComM_ChannelBusSMModeIndication(NetworkHandleType Channel, ComM_ModeType Co
  * @trace        CPD-61610
  */
 void ComM_ChannelNmModeIndication(NetworkHandleType Channel, ComM_NmModeEventType NmModeEvent);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 #endif
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief Notification of a wake up on the corresponding channel
  * @param[in]    Channel            See NetworkHandleType
@@ -208,8 +245,12 @@ void ComM_ChannelNmModeIndication(NetworkHandleType Channel, ComM_NmModeEventTyp
  * @trace        CPD-61612
  */
 void ComM_ChannelWakeUpIndication(NetworkHandleType Channel, boolean SynchronousWakeUp);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
 #if COMM_PNC_SUPPORT == STD_ON
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief Notification of a pnc nm request on the corresponding channel.
  * @param[in]    Channel  See NetworkHandleType
@@ -218,7 +259,11 @@ void ComM_ChannelWakeUpIndication(NetworkHandleType Channel, boolean Synchronous
  * @trace        CPD-61633
  */
 void ComM_ChannelSetPncNmRequest(NetworkHandleType Channel);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief Notification of a wake up sleep request on the corresponding channel.
  * @param[in]    Channel  See NetworkHandleType
@@ -229,8 +274,12 @@ void ComM_ChannelSetPncNmRequest(NetworkHandleType Channel);
  * @trace        CPD-61634
  */
 boolean ComM_ChannelSetWakeupSleepRequest(NetworkHandleType Channel);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 #endif
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief Indication of active or inactive diagnostic by the DCM.
  * @param[in]    channel  See NetworkHandleType
@@ -240,9 +289,13 @@ boolean ComM_ChannelSetWakeupSleepRequest(NetworkHandleType Channel);
  * @trace        CPD-61635
  */
 void ComM_ChannelActiveDiagnostic(NetworkHandleType channel, boolean active);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
 #if COMM_PNC_SUPPORT == STD_ON
 #if COMM_PNC_GATEWAY_ENABLED == STD_ON
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief Indicate the current external PNC request for the corresponding channel.
  * @param[in]    Channel          See NetworkHandleType
@@ -252,9 +305,13 @@ void ComM_ChannelActiveDiagnostic(NetworkHandleType channel, boolean active);
  * @trace        CPD-61636
  */
 void ComM_ChannelUpdateERA(NetworkHandleType Channel, const uint8* PncBitVectorPtr);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 #endif
 #endif
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief This function shall perform the processing of the ComM channel state activities.
  * @param[in]    Channel  See NetworkHandleType
@@ -263,8 +320,12 @@ void ComM_ChannelUpdateERA(NetworkHandleType Channel, const uint8* PncBitVectorP
  * @trace        CPD-61637
  */
 void ComM_ChannelMainFunction(NetworkHandleType Channel);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
 #if COMM_MULTIPLE_PARTITION_ENABLED == STD_ON
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief Function to query the application of the corresponding channel.
  * @param[in]    Channel  See NetworkHandleType
@@ -273,6 +334,8 @@ void ComM_ChannelMainFunction(NetworkHandleType Channel);
  * @synchronous  TRUE
  */
 ApplicationType ComM_ChannelGetApplication(NetworkHandleType Channel);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 #endif
 #ifdef __cplusplus
 }

@@ -35,6 +35,7 @@
 #include "LinIf_Internal.h"
 #include "PduR_LinTp.h"
 #include "BswM_LinTp.h"
+
 /* PRQA S 0553 EOF */ /* VL_QAC_UnUsedFiles */
 /* ===================================================== macros ===================================================== */
 
@@ -53,62 +54,137 @@ LINTP_LOCAL void LinTp_MasterRxHandler(
     const LinTp_ChannelConfigType* chCfgPtr,
     const LinTp_RxNSduType*        rx);
 
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL void LinTp_MasterCancelRxHandler(
     LinTp_MasterRuntimeType*       tpChPtr,
     const LinTp_ChannelConfigType* chCfgPtr,
     const LinTp_RxNSduType*        rx);
 
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL void LinTp_HandleCopyTxDataFailure(LinTp_MasterRuntimeType* tpChPtr);
 
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL boolean LinTp_CopyTxDataFromPduR(LinTp_MasterRuntimeType* tpChPtr);
 
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL boolean LinTp_TxEventRequest(LinTp_MasterRuntimeType* tpChPtr);
 
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL void LinTp_TxEventHandler(LinTp_MasterRuntimeType* tpChPtr);
 
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL void LinTp_TxEventConfirmation(LinTp_MasterRuntimeType* tpChPtr);
 
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL boolean LinTp_IsRxSF(
     LinTp_MasterRuntimeType* tpChPtr,
     const LinTp_RxNSduType*  rx,
     const uint8*             sdu,
     boolean*                 isIgnoreFramePtr);
 
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL boolean LinTp_IsRxFF(
     LinTp_MasterRuntimeType* tpChPtr,
     const LinTp_RxNSduType*  rx,
     const uint8*             sdu,
     boolean*                 isIgnoreFramePtr);
 
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL boolean LinTp_IsRxCF(LinTp_MasterRuntimeType* tpChPtr, const uint8* sdu);
 
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL const LinTp_ChannelConfigType* LinTp_GetChannelRefConfig(uint8 ch);
 
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL void LinTp_RxBufferRequestStart(LinTp_MasterRuntimeType* tpChPtr);
 
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL void LinTp_RxBufferRequest(LinTp_MasterRuntimeType* tpChPtr);
 
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL void LinTp_RxEventRequest(LinTp_MasterRuntimeType* tpChPtr);
 
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL void LinTp_RxEventHandler(LinTp_MasterRuntimeType* tpChPtr);
 
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL void LinTp_RxEventIndication(LinTp_MasterRuntimeType* tpChPtr);
 
 #define LINIF_STOP_SEC_CODE
 #include "LinIf_MemMap.h"
+
 /* ============================================ internal data definition ============================================ */
 
 /* ========================================== external function definition ========================================== */
 
 /* PRQA S 2814,2824,2889 ++ */ /* VL_QAC_DerefNullPtr */
 
-#define LINIF_START_SEC_CODE
-#include "LinIf_MemMap.h"
-
 /* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
 /**
  * LinTp master node runtime data init
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 void LinTp_MasterInit(void)
 {
     uint8                    idx     = LinTp_ConfigPtr->NumOfMasterChannel;
@@ -127,21 +203,29 @@ void LinTp_MasterInit(void)
         idx--;
     }
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * LinTp master node channel runtime data init
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 void LinTp_MasterChannelInit(NetworkHandleType LinIfChannelId)
 {
     NetworkHandleType        linTpChId = LinTp_GetLinTpChannel(LinIfChannelId);
-    LinTp_MasterRuntimeType* tpChPtr   = LinTp_MasterRtDataPtr(0u);
+    LinTp_MasterRuntimeType* tpChPtr   = LinTp_MasterRtDataPtr(linTpChId);
 
     LinTp_MasterChReset(tpChPtr);
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * Requests the transfer of segmented data.
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 Std_ReturnType LinTp_MasterTransmit(const LinTp_TxNSduType* txNSdu, const PduInfoType* LinTpTxInfoPtr)
 {
     NetworkHandleType        linIfChId = txNSdu->LinIfChannelRef;
@@ -173,6 +257,11 @@ Std_ReturnType LinTp_MasterTransmit(const LinTp_TxNSduType* txNSdu, const PduInf
     /* Handle Physic Request*/
     else
     {
+        if (LinTp_IsTrsEvent(tpChPtr, LINTP_TRS_EVT_PHY_TX_REQ))
+        {
+            PduR_LinTpTxConfirmation(tpChPtr->PhyReqNSduPtr->TxNSduPduRef, E_NOT_OK);
+        }
+
         /*@req <SWS_LinIf_00413>*/
         /* Set the status of channel */
         tpChPtr->ChannelState = LINTP_CHANNEL_BUSY;
@@ -187,10 +276,14 @@ Std_ReturnType LinTp_MasterTransmit(const LinTp_TxNSduType* txNSdu, const PduInf
 
     return ret;
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * Shutdowns the LINTP master node
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 void LinTp_MasterShutdown(void)
 {
     uint8                    idx     = LinTp_ConfigPtr->NumOfMasterChannel;
@@ -210,10 +303,14 @@ void LinTp_MasterShutdown(void)
         idx--;
     }
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * Tx success process in master node.
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 void LinTp_MasterTxSuccessHandle(NetworkHandleType LinIfChannelId)
 {
     NetworkHandleType        linTpChId = LinTp_GetLinTpChannel(LinIfChannelId);
@@ -239,10 +336,14 @@ void LinTp_MasterTxSuccessHandle(NetworkHandleType LinIfChannelId)
         LinTp_ClrEvent(tpChPtr, LINTP_EVENT_WAIT);
     }
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * Tx error process in master node.
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 void LinTp_MasterTxErrorHandle(NetworkHandleType LinIfChannelId, Lin_StatusType st)
 {
     NetworkHandleType        linTpChId = LinTp_GetLinTpChannel(LinIfChannelId);
@@ -273,10 +374,14 @@ void LinTp_MasterTxErrorHandle(NetworkHandleType LinIfChannelId, Lin_StatusType 
         LinTp_SetEvent(tpChPtr, LINTP_EVENT_WAIT);
     }
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * Parses a event of the receiving
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 void LinTp_RxEventParse(uint8 LinIfChannelId, const uint8* sdu)
 {
     NetworkHandleType              linTpChId = LinTp_GetLinTpChannel(LinIfChannelId);
@@ -312,8 +417,8 @@ void LinTp_RxEventParse(uint8 LinIfChannelId, const uint8* sdu)
             /* Reload P2 timer with the time P2*max */
             tpChPtr->TpP2Timer.EnabledTimer = LINTP_TIMER_P2MAX;
             tpChPtr->TpP2Timer.Timer        = chCfgPtr->P2MaxCnt;
+            LinTp_SetEvent(tpChPtr, LINTP_EVENT_UDS_PENDING);
         }
-        return;
     }
 
     /*@req <SWS_LinIf_00612>,<SWS_LinIf_00613>*/
@@ -326,10 +431,14 @@ void LinTp_RxEventParse(uint8 LinIfChannelId, const uint8* sdu)
         LinTp_MasterRxHandler(pciType, sdu, tpChPtr, chCfgPtr, rx);
     }
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * LinIf get MRF response from LinTp
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 Std_ReturnType LinTp_MasterGetMRFResponse(NetworkHandleType LinIfChannelId, uint8* sduBufPtr)
 {
     NetworkHandleType        linTpChId = LinTp_GetLinTpChannel(LinIfChannelId);
@@ -400,10 +509,14 @@ Std_ReturnType LinTp_MasterGetMRFResponse(NetworkHandleType LinIfChannelId, uint
 
     return ret;
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * Get whether LINTP_EVENT_WAIT flag is set
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 boolean LinTp_IsWaitEventSet(NetworkHandleType LinIfChannelId)
 {
     NetworkHandleType              linTpChId = LinTp_GetLinTpChannel(LinIfChannelId);
@@ -411,10 +524,14 @@ boolean LinTp_IsWaitEventSet(NetworkHandleType LinIfChannelId)
 
     return LinTp_IsEvent(tpChPtr, LINTP_EVENT_WAIT);
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * Get whether LINTP_EVENT_TX or LINTP_EVENT_STOP_SRF flag is set
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 boolean LinTp_IsStopSRFSendEventSet(uint8 LinIfChannelId)
 {
     NetworkHandleType              linTpChId = LinTp_GetLinTpChannel(LinIfChannelId);
@@ -422,10 +539,14 @@ boolean LinTp_IsStopSRFSendEventSet(uint8 LinIfChannelId)
 
     return LinTp_IsEvent(tpChPtr, LINTP_EVENT_TX | LINTP_EVENT_STOP_SRF);
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * Get if LINTP_EVENT_STOP_SRF or LINTP_EVENT_STOP_MRF_SRF flag is set
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 boolean LinTp_IsStopMRFOrSRFSendEventSet(NetworkHandleType LinIfChannelId)
 {
     NetworkHandleType              linTpChId = LinTp_GetLinTpChannel(LinIfChannelId);
@@ -433,12 +554,16 @@ boolean LinTp_IsStopMRFOrSRFSendEventSet(NetworkHandleType LinIfChannelId)
 
     return LinTp_IsEvent(tpChPtr, LINTP_EVENT_STOP_SRF | LINTP_EVENT_STOP_MRF);
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 #if (STD_ON == LINTP_SCHEDULE_CHANGE_DIAG_SUPPORT)
 
 /**
  * Get LinTpScheduleChangeDiag parameter
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 boolean LinTp_GetScheduleChangeDiag(NetworkHandleType LinIfChannelId)
 {
     NetworkHandleType              linTpChId  = LinTp_GetLinTpChannel(LinIfChannelId);
@@ -446,11 +571,15 @@ boolean LinTp_GetScheduleChangeDiag(NetworkHandleType LinIfChannelId)
 
     return (tpChCfgPtr->ScheduleChangeDiag);
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 #endif
 
 /**
  * Transmitting process
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 void LinTp_TxProcess(LinTp_MasterRuntimeType* LinTpMasterRtDataPtr)
 {
     LinTp_MasterRuntimeType* tpChPtr = LinTpMasterRtDataPtr;
@@ -458,10 +587,14 @@ void LinTp_TxProcess(LinTp_MasterRuntimeType* LinTpMasterRtDataPtr)
     /* Transmit confirmation */
     LinTp_TxEventConfirmation(tpChPtr);
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * Receiving process
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 void LinTp_RxProcess(LinTp_MasterRuntimeType* masterChRtDataPtr)
 {
     LinTp_MasterRuntimeType* tpChPtr = masterChRtDataPtr;
@@ -475,10 +608,14 @@ void LinTp_RxProcess(LinTp_MasterRuntimeType* masterChRtDataPtr)
     /* Receive indication */
     LinTp_RxEventIndication(tpChPtr);
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * Load transmit request information
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 void LinTp_LoadTxRequest(NetworkHandleType ch, LinTp_MasterRuntimeType* tpChPtr)
 {
     /* If tx or rx is ongoing,shall not to load transmit request */
@@ -542,7 +679,6 @@ void LinTp_LoadTxRequest(NetworkHandleType ch, LinTp_MasterRuntimeType* tpChPtr)
                     tpChPtr->RecoverMode = LINTP_DIAG_REQUEST;
                 }
 #endif
-
                 /* Set physic request ongoing flag */
                 LinTp_ClrTrsEvent(tpChPtr, LINTP_TRS_EVT_PHY_TX_REQ);
                 LinTp_SetTrsEvent(tpChPtr, LINTP_TRS_EVT_PHY_TX);
@@ -575,10 +711,14 @@ void LinTp_LoadTxRequest(NetworkHandleType ch, LinTp_MasterRuntimeType* tpChPtr)
         }
     }
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * Get the LinIf channel corresponding LinTp channel
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 NetworkHandleType LinTp_GetLinTpChannel(NetworkHandleType LinIfChannelId)
 {
     const LinTp_ChannelConfigType* tpChCfgPtr        = LinTp_GetChannelConfig(0u);
@@ -595,10 +735,14 @@ NetworkHandleType LinTp_GetLinTpChannel(NetworkHandleType LinIfChannelId)
     }
     return retLinTpChannelId;
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * Handle the timer for specific channel.
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 void LinTp_HandleTimers(LinTp_MasterRuntimeType* masterChRtDataPtr, NetworkHandleType LinIfChannelId)
 {
     LinTp_MasterRuntimeType* tpChPtr = masterChRtDataPtr;
@@ -693,11 +837,15 @@ void LinTp_HandleTimers(LinTp_MasterRuntimeType* masterChRtDataPtr, NetworkHandl
         }
     }
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /* PRQA S 1532 -- */
 
 /* ========================================== internal function definition ========================================== */
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL void LinTp_MasterRxHandler(
     uint8                          pciType,
     const uint8*                   sdu,
@@ -767,7 +915,8 @@ LINTP_LOCAL void LinTp_MasterRxHandler(
 
     /*@req <SWS_LinIf_00617>,<SWS_LinIf_00618>*/
     /* Stop P2/P2*max timer */
-    if ((LINTP_PDU_PCI_FF == pciType) || (LINTP_PDU_PCI_SF == pciType))
+    if (((LINTP_PDU_PCI_FF == pciType) || (LINTP_PDU_PCI_SF == pciType))
+        && !(LinTp_IsEvent(tpChPtr, LINTP_EVENT_UDS_PENDING)))
     {
         tpChPtr->TpP2Timer.EnabledTimer = LINTP_TIMER_NONE;
     }
@@ -789,7 +938,11 @@ LINTP_LOCAL void LinTp_MasterRxHandler(
         LinTp_MasterCancelRxHandler(tpChPtr, chCfgPtr, rx);
     }
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL void LinTp_MasterCancelRxHandler(
     LinTp_MasterRuntimeType*       tpChPtr,
     const LinTp_ChannelConfigType* chCfgPtr,
@@ -813,6 +966,8 @@ LINTP_LOCAL void LinTp_MasterCancelRxHandler(
     }
 #endif
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief               Copy transfer data failure process
@@ -821,6 +976,8 @@ LINTP_LOCAL void LinTp_MasterCancelRxHandler(
  * @synchronous         TRUE
  * @trace               -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL void LinTp_HandleCopyTxDataFailure(LinTp_MasterRuntimeType* tpChPtr)
 {
     /*@req <SWS_LinIf_00073>*/
@@ -867,6 +1024,8 @@ LINTP_LOCAL void LinTp_HandleCopyTxDataFailure(LinTp_MasterRuntimeType* tpChPtr)
         LinTp_MasterChReset(tpChPtr);
     }
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief               Copy transfer data from the 'PduR'
@@ -875,6 +1034,8 @@ LINTP_LOCAL void LinTp_HandleCopyTxDataFailure(LinTp_MasterRuntimeType* tpChPtr)
  * @synchronous         TRUE
  * @trace               -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL boolean LinTp_CopyTxDataFromPduR(LinTp_MasterRuntimeType* tpChPtr)
 {
     boolean result = FALSE;
@@ -933,6 +1094,8 @@ LINTP_LOCAL boolean LinTp_CopyTxDataFromPduR(LinTp_MasterRuntimeType* tpChPtr)
 
     return result;
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief               Requests a event of the transmitting
@@ -941,6 +1104,8 @@ LINTP_LOCAL boolean LinTp_CopyTxDataFromPduR(LinTp_MasterRuntimeType* tpChPtr)
  * @synchronous         TRUE
  * @trace               -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL boolean LinTp_TxEventRequest(LinTp_MasterRuntimeType* tpChPtr)
 {
     if (!(LinTp_IsEvent(tpChPtr, LINTP_EVENT_TX)))
@@ -984,6 +1149,8 @@ LINTP_LOCAL boolean LinTp_TxEventRequest(LinTp_MasterRuntimeType* tpChPtr)
     }
     return result;
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief               Handles a event of the transmitting
@@ -992,6 +1159,8 @@ LINTP_LOCAL boolean LinTp_TxEventRequest(LinTp_MasterRuntimeType* tpChPtr)
  * @synchronous         TRUE
  * @trace               -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL void LinTp_TxEventHandler(LinTp_MasterRuntimeType* tpChPtr)
 {
     if (!(LinTp_IsEvent(tpChPtr, LINTP_EVENT_TX)))
@@ -1024,6 +1193,8 @@ LINTP_LOCAL void LinTp_TxEventHandler(LinTp_MasterRuntimeType* tpChPtr)
         }
     }
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief               Confirmations a event of the transmitting
@@ -1032,6 +1203,8 @@ LINTP_LOCAL void LinTp_TxEventHandler(LinTp_MasterRuntimeType* tpChPtr)
  * @synchronous         TRUE
  * @trace               -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL void LinTp_TxEventConfirmation(LinTp_MasterRuntimeType* tpChPtr)
 {
     if ((LinTp_IsEvent(tpChPtr, LINTP_EVENT_OK)) && (LinTp_IsEvent(tpChPtr, LINTP_EVENT_TX)))
@@ -1089,6 +1262,8 @@ LINTP_LOCAL void LinTp_TxEventConfirmation(LinTp_MasterRuntimeType* tpChPtr)
         }
     }
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief               Receiving a signal frame
@@ -1102,6 +1277,8 @@ LINTP_LOCAL void LinTp_TxEventConfirmation(LinTp_MasterRuntimeType* tpChPtr)
  * @synchronous         TRUE
  * @trace               -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL boolean LinTp_IsRxSF(
     LinTp_MasterRuntimeType* tpChPtr,
     const LinTp_RxNSduType*  rx,
@@ -1137,6 +1314,8 @@ LINTP_LOCAL boolean LinTp_IsRxSF(
 
     return isCopy;
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief               Receiving a first frame
@@ -1150,6 +1329,8 @@ LINTP_LOCAL boolean LinTp_IsRxSF(
  * @synchronous         TRUE
  * @trace               -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL boolean LinTp_IsRxFF(
     LinTp_MasterRuntimeType* tpChPtr,
     const LinTp_RxNSduType*  rx,
@@ -1186,6 +1367,8 @@ LINTP_LOCAL boolean LinTp_IsRxFF(
 
     return isCopy;
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief               Receiving a consecutive frame
@@ -1197,6 +1380,8 @@ LINTP_LOCAL boolean LinTp_IsRxFF(
  * @synchronous         TRUE
  * @trace               -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL boolean LinTp_IsRxCF(LinTp_MasterRuntimeType* tpChPtr, const uint8* sdu)
 {
     boolean isCopy = FALSE;
@@ -1227,6 +1412,8 @@ LINTP_LOCAL boolean LinTp_IsRxCF(LinTp_MasterRuntimeType* tpChPtr, const uint8* 
 
     return isCopy;
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief               Gets the LinTp channel corresponding to LinIf channel
@@ -1236,6 +1423,8 @@ LINTP_LOCAL boolean LinTp_IsRxCF(LinTp_MasterRuntimeType* tpChPtr, const uint8* 
  * @synchronous         TRUE
  * @trace               -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL const LinTp_ChannelConfigType* LinTp_GetChannelRefConfig(uint8 ch)
 {
     const LinTp_ChannelConfigType* chCfgPtr = LinTp_GetChannelConfig(0u);
@@ -1254,6 +1443,8 @@ LINTP_LOCAL const LinTp_ChannelConfigType* LinTp_GetChannelRefConfig(uint8 ch)
 
     return NULL_PTR;
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief               Requests a receive buffer from the 'PduR'
@@ -1262,6 +1453,8 @@ LINTP_LOCAL const LinTp_ChannelConfigType* LinTp_GetChannelRefConfig(uint8 ch)
  * @synchronous         TRUE
  * @trace               -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL void LinTp_RxBufferRequestStart(LinTp_MasterRuntimeType* tpChPtr)
 {
     PduLengthType len                             = (LINTP_FRAME_LEN_MAX - tpChPtr->SduIdx);
@@ -1313,6 +1506,8 @@ LINTP_LOCAL void LinTp_RxBufferRequestStart(LinTp_MasterRuntimeType* tpChPtr)
         LinTp_MasterChReset(tpChPtr);
     }
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief               Requests a receive buffer from the 'PduR'
@@ -1321,6 +1516,8 @@ LINTP_LOCAL void LinTp_RxBufferRequestStart(LinTp_MasterRuntimeType* tpChPtr)
  * @synchronous         TRUE
  * @trace               -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL void LinTp_RxBufferRequest(LinTp_MasterRuntimeType* tpChPtr)
 {
     PduInfoType   infoData;
@@ -1413,6 +1610,8 @@ LINTP_LOCAL void LinTp_RxBufferRequest(LinTp_MasterRuntimeType* tpChPtr)
         }
     }
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief               Requests a event of the receiving
@@ -1421,6 +1620,8 @@ LINTP_LOCAL void LinTp_RxBufferRequest(LinTp_MasterRuntimeType* tpChPtr)
  * @synchronous         TRUE
  * @trace               -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL void LinTp_RxEventRequest(LinTp_MasterRuntimeType* tpChPtr)
 {
     boolean firstRequestBufFlag = FALSE;
@@ -1460,6 +1661,8 @@ LINTP_LOCAL void LinTp_RxEventRequest(LinTp_MasterRuntimeType* tpChPtr)
         }
     }
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief               Handles a event of the receiving
@@ -1468,6 +1671,8 @@ LINTP_LOCAL void LinTp_RxEventRequest(LinTp_MasterRuntimeType* tpChPtr)
  * @synchronous         TRUE
  * @trace               -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL void LinTp_RxEventHandler(LinTp_MasterRuntimeType* tpChPtr)
 {
     if ((LinTp_IsEvent(tpChPtr, LINTP_EVENT_RX_REQ)) && (LinTp_IsEvent(tpChPtr, LINTP_EVENT_COPY_REQ)))
@@ -1476,6 +1681,8 @@ LINTP_LOCAL void LinTp_RxEventHandler(LinTp_MasterRuntimeType* tpChPtr)
         LinTp_RxBufferRequest(tpChPtr);
     }
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief               Indicates a event of the receiving
@@ -1484,6 +1691,8 @@ LINTP_LOCAL void LinTp_RxEventHandler(LinTp_MasterRuntimeType* tpChPtr)
  * @synchronous         TRUE
  * @trace               -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL void LinTp_RxEventIndication(LinTp_MasterRuntimeType* tpChPtr)
 {
     if ((LinTp_IsEvent(tpChPtr, LINTP_EVENT_OK)) && (LinTp_IsEvent(tpChPtr, LINTP_EVENT_RX)))
@@ -1491,6 +1700,13 @@ LINTP_LOCAL void LinTp_RxEventIndication(LinTp_MasterRuntimeType* tpChPtr)
         /*@req <SWS_LinIf_00078>*/
         /* Notify upper */
         PduR_LinTpRxIndication(tpChPtr->RxNSduPtr->RxNSduPduRef, E_OK);
+
+        if (LinTp_IsEvent(tpChPtr, LINTP_EVENT_UDS_PENDING))
+        {
+            tpChPtr->SubEvent = LINTP_EVENT_NONE;
+            return;
+        }
+
 #if (STD_ON == LINTP_SCHEDULE_CHANGE_DIAG_SUPPORT)
         /*@req <SWS_LinIf_00646>*/
         if (tpChPtr->ChCfgPtr->ScheduleChangeDiag)

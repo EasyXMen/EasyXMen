@@ -23,55 +23,70 @@
  **
  ***********************************************************************************************************************/
 
-#define BSWM_C_AR_MAJOR_VERSION 4u
-#define BSWM_C_AR_MINOR_VERSION 9u
-#define BSWM_C_AR_PATCH_VERSION 0u
-#define BSWM_C_SW_MAJOR_VERSION 2u
-#define BSWM_C_SW_MINOR_VERSION 2u
-#define BSWM_C_SW_PATCH_VERSION 3u
-
 /* =================================================== inclusions =================================================== */
 #include "BswM_Internal.h"
-
-/* ===================================================== macros ===================================================== */
-
-#if (BSWM_C_AR_MAJOR_VERSION != BSWM_AR_MAJOR_VERSION)
-#error "BswM.c : Mismatch in Specification Major Version"
-#endif
-#if (BSWM_C_AR_MINOR_VERSION != BSWM_AR_MINOR_VERSION)
-#error "BswM.c : Mismatch in Specification Major Version"
-#endif
-#if (BSWM_C_AR_PATCH_VERSION != BSWM_AR_PATCH_VERSION)
-#error "BswM.c : Mismatch in Specification Major Version"
-#endif
-#if (BSWM_C_SW_MAJOR_VERSION != BSWM_SW_MAJOR_VERSION)
-#error "BswM.c : Mismatch in Specification Major Version"
-#endif
-#if (BSWM_C_SW_MINOR_VERSION != BSWM_SW_MINOR_VERSION)
-#error "BswM.c : Mismatch in Specification Major Version"
-#endif
-#if (BSWM_C_SW_PATCH_VERSION != BSWM_SW_PATCH_VERSION)
-#error "BswM.c : Mismatch in Specification Major Version"
-#endif
 
 /* ================================================ type definitions ================================================ */
 
 /* ========================================== internal function declarations ======================================== */
+
+#if (BSWM_EVENT_RQSTPORT_ENABLE == STD_ON)
+/**
+ * @brief This function initializes the event request ports by setting their initial status based on configuration.
+ * @return None
+ * @reentrant FALSE
+ * @synchronous TRUE
+ * @trace       CPD-XXXX
+ */
 #define BSWM_START_SEC_CODE
 #include "BswM_MemMap.h"
-#if (BSWM_EVENT_RQSTPORT_ENABLE == STD_ON)
-/*Initialize event request port*/
 BSWM_LOCAL void BswM_InitEventRequestPort(void);
-#endif /* BSWM_EVENT_RQSTPORT_ENABLE == STD_ON */
-
-/*Initialize event request port*/
-BSWM_LOCAL void BswM_InitModeRequestPort(void);
-
-/*Initialize rules*/
-BSWM_LOCAL void BswM_InitRules(void);
-
 #define BSWM_STOP_SEC_CODE
 #include "BswM_MemMap.h"
+
+#endif /* BSWM_EVENT_RQSTPORT_ENABLE == STD_ON */
+
+/**
+ * @brief This function initializes the mode request ports by setting their initial modes based on configuration.
+ * @return None
+ * @reentrant FALSE
+ * @synchronous TRUE
+ * @trace       CPD-85641
+ */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
+BSWM_LOCAL void BswM_InitModeRequestPort(void);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
+
+/**
+ * @brief This function initializes the rules by setting their initial states based on configuration.
+ * @return None
+ * @reentrant FALSE
+ * @synchronous TRUE
+ * @trace       CPD-85637
+ */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
+BSWM_LOCAL void BswM_InitRules(void);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
+
+#if (BSWM_GENERIC_REQUEST_ENABLED == STD_ON)
+/**
+ * @brief This function initializes the generic request ports by setting their initial status based on configuration.
+ * @return None
+ * @reentrant FALSE
+ * @synchronous TRUE
+ * @trace       CPD-66221
+ */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
+BSWM_LOCAL void BswM_InitGenericRequestPorts(void);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
+#endif /*BSWM_GENERIC_REQUEST_ENABLED == STD_ON*/
+
 /* ============================================ internal data definitions =========================================== */
 
 /* ============================================ external data definitions =========================================== */
@@ -83,6 +98,15 @@ const BswM_ConfigType* BswM_ConfigPtr;
 #define BSWM_STOP_SEC_VAR_FAST_CLEARED_UNSPECIFIED
 #include "BswM_MemMap.h"
 #endif /* BSWM_PB_CONFIG_ENABLED == STD_ON */
+
+#if (BSWM_CLONE_VARIABLE_SUPPORT_ENABLE == STD_ON)
+#define BSWM_START_SEC_VAR_CLONE_UNSPECIFIED
+#include "BswM_MemMap.h"
+/** @brief Runtime status of BswM module. */
+BswM_RuntimeStatusType BswM_RuntimeStatus;
+#define BSWM_STOP_SEC_VAR_CLONE_UNSPECIFIED
+#include "BswM_MemMap.h"
+#endif /* BSWM_CLONE_VARIABLE_SUPPORT_ENABLE == STD_ON */
 /* ========================================== external function definitions ========================================= */
 #define BSWM_START_SEC_CODE
 #include "BswM_MemMap.h"
@@ -95,9 +119,12 @@ const BswM_ConfigType* BswM_ConfigPtr;
 void BswM_Init(const BswM_ConfigType* ConfigPtr)
 /* PRQA S 1503,1505,1532 --*/
 {
-    const BswM_PCCfgType* runPCCfgPtr;
+    BswM_ArtiApiStart(2, BSWM_API_ID_INIT, ConfigPtr);
 
+#if (BSWM_CLONE_VARIABLE_SUPPORT_ENABLE == STD_OFF)
+    const BswM_PCCfgType* runPCCfgPtr = NULL_PTR;
     if (BswM_GetCorePCCfgPtr(&runPCCfgPtr))
+#endif /* BSWM_CLONE_VARIABLE_SUPPORT_ENABLE == STD_OFF */
     {
 #if (BSWM_PB_CONFIG_ENABLED == STD_ON)
         if (NULL_PTR == BswM_ConfigPtr)
@@ -112,18 +139,27 @@ void BswM_Init(const BswM_ConfigType* ConfigPtr)
         BswM_InitEventRequestPort();
 #endif /* BSWM_EVENT_RQSTPORT_ENABLE == STD_ON */
         BswM_InitModeRequestPort();
-
+#if (BSWM_CLONE_VARIABLE_SUPPORT_ENABLE == STD_ON)
+        BswM_RuntimeStatus.bswmInitState = BSWM_INITED;
+#else
         runPCCfgPtr->runtimeStatusPtr->bswmInitState = BSWM_INITED;
+#endif /* BSWM_CLONE_VARIABLE_SUPPORT_ENABLE == STD_ON */
     }
-#if (BSWM_DEV_ERROR_DETECT == STD_ON)
+#if ((BSWM_DEV_ERROR_DETECT == STD_ON) && (BSWM_CLONE_VARIABLE_SUPPORT_ENABLE == STD_OFF))
     else
     {
         /*no configure for this core, configure data error*/
         (void)Det_ReportError(BSWM_MODULE_ID, BSWM_INSTANCE_ID, BSWM_API_ID_INIT, BSWM_E_INIT_FAILED);
     }
-#endif /*BSWM_DEV_ERROR_DETECT == STD_ON*/
-}
+#endif /*BSWM_DEV_ERROR_DETECT == STD_ON && BSWM_CLONE_VARIABLE_SUPPORT_ENABLE == STD_OFF*/
 
+    BswM_ArtiApiStop(1, BSWM_API_ID_INIT);
+}
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
+
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Main function of the BswM module that handles periodic tasks.
  * This function evaluates deferred rules, manages timers, and handles notifications and requests for BSW and SWC modes.
@@ -134,6 +170,8 @@ void BswM_Init(const BswM_ConfigType* ConfigPtr)
 void BswM_MainFunction(void)
 /* PRQA S 1503,1505,1532,6030 --*/
 {
+    BswM_ArtiApiStart(1, BSWM_API_ID_MAINFUNCTION);
+
 #if (BSWM_TIMER_ENABLED == STD_ON)
     const BswM_ModeRqstPortRuntimeType* modeRunRqstPtr;
     BswM_TimerIdxType                   timerNum;
@@ -209,8 +247,14 @@ void BswM_MainFunction(void)
 #endif /* BSWM_BSW_MODE_DEF_REQUEST == STD_ON */
         }
     }
-}
 
+    BswM_ArtiApiStop(1, BSWM_API_ID_MAINFUNCTION);
+}
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
+
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Deinitializes the BswM module by resetting the initialization state.
  * This function sets the BswM module's runtime status to uninitialized.
@@ -219,15 +263,23 @@ void BswM_MainFunction(void)
 void BswM_Deinit(void)
 /* PRQA S 1503,1505,1532 --*/
 {
-    const BswM_PCCfgType* runPCCfgPtr;
+#if (BSWM_CLONE_VARIABLE_SUPPORT_ENABLE == STD_ON)
+    BswM_RuntimeStatus.bswmInitState = BSWM_UNINITED;
+#else
+    const BswM_PCCfgType* runPCCfgPtr = NULL_PTR;
     if (BswM_GetCorePCCfgPtr(&runPCCfgPtr))
     {
         runPCCfgPtr->runtimeStatusPtr->bswmInitState = BSWM_UNINITED;
     }
+#endif /* BSWM_CLONE_VARIABLE_SUPPORT_ENABLE == STD_ON */
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 #if (BSWM_GENERIC_REQUEST_ENABLED == STD_ON)
 #if (BSWM_GENERICREQUEST_ENABLED == STD_ON)
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Handles a mode request from a specified user.
  * This function processes the requested mode and updates the internal state accordingly.
@@ -237,6 +289,8 @@ void BswM_Deinit(void)
 void BswM_RequestMode(BswM_UserType requesting_user, BswM_ModeType requested_mode)
 /* PRQA S 1503,1505,1532,6030 --*/
 {
+    BswM_ArtiApiStart(3, BSWM_API_ID_REQUEST_MODE, requesting_user, requested_mode);
+
     const BswM_PartitionPCCfgType* bswmPartPCCfgPtr;
 #if (BSWM_PB_CONFIG_ENABLED == STD_ON)
     const BswM_PartitionPbConfigType* bswmPartPbConfigPtr;
@@ -297,15 +351,21 @@ void BswM_RequestMode(BswM_UserType requesting_user, BswM_ModeType requested_mod
             }
         }
     }
-}
 
+    BswM_ArtiApiStop(1, BSWM_API_ID_REQUEST_MODE);
+}
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
+
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Initializes the generic request ports with their initial modes.
  * This function sets the initial status of generic request ports based on the configuration.
  * If initialization fails, an error is reported.
  */
 /* PRQA S 1503,1505,1532 ++*/ /* VL_QAC_NoUsedApi, VL_BswM_1505, VL_QAC_OneFunRef */
-void BswM_InitGenericRequestPorts(void)
+BSWM_LOCAL void BswM_InitGenericRequestPorts(void)
 /* PRQA S 1503,1505,1532 --*/
 {
     const BswM_PartitionPCCfgType* bswmPartPCCfgPtr;
@@ -349,7 +409,11 @@ void BswM_InitGenericRequestPorts(void)
     }
 #endif /*BSWM_DEV_ERROR_DETECT == STD_ON*/
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Retrieves the status of a generic request port.
  * This function returns the current status of the specified generic request port.
@@ -377,10 +441,14 @@ uint16 BswM_GetGeneRqstStatus(BswM_UserType userIdx)
     }
     return retStatus;
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_GENERICREQUEST_ENABLED == STD_ON*/
 #endif /*BSWM_GENERIC_REQUEST_ENABLED == STD_ON*/
 
 #if (BSWM_VERSION_INFO_API == STD_ON)
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * This function retrieves the version information of the BswM module and stores it in the provided VersionInfo
  * structure. If the development error detection is enabled and the provided pointer is NULL, an error is reported using
@@ -391,6 +459,8 @@ uint16 BswM_GetGeneRqstStatus(BswM_UserType userIdx)
 void BswM_GetVersionInfo(Std_VersionInfoType* VersionInfo)
 /* PRQA S 1503,1505,1532 --*/
 {
+    BswM_ArtiApiStart(2, BSWM_API_ID_GET_VERSION_INFO, VersionInfo);
+
 #if (BSWM_DEV_ERROR_DETECT == STD_ON)
     if (NULL_PTR == VersionInfo)
     {
@@ -405,10 +475,16 @@ void BswM_GetVersionInfo(Std_VersionInfoType* VersionInfo)
         VersionInfo->sw_minor_version = BSWM_SW_MINOR_VERSION;
         VersionInfo->sw_patch_version = BSWM_SW_PATCH_VERSION;
     }
+
+    BswM_ArtiApiStop(1, BSWM_API_ID_GET_VERSION_INFO);
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_VERSION_INFO_API == STD_ON*/
 
 #if ((BSWM_MULTI_PARTITION_ENABLED == STD_ON) && (BSWM_EVENT_PARTITION_RESTARTED_ENABLE == STD_ON))
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * This function handles the restart of a BswM partition.
  * It first checks for any development errors if error detection is enabled.
@@ -420,6 +496,8 @@ void BswM_GetVersionInfo(Std_VersionInfoType* VersionInfo)
 void BswM_BswMPartitionRestarted(void)
 /* PRQA S 1503,1505,1532 --*/
 {
+    BswM_ArtiApiStart(1, BSWM_API_ID_BSWM_PARTITION_RESTARTED);
+
     const BswM_EventRqstPortLCfgType* evRqstLCfgPtr;
     BswM_EventRquestPortRuntimeType*  evRqstPtr;
     BswM_RuleIndexType                numOfRules;
@@ -433,7 +511,7 @@ void BswM_BswMPartitionRestarted(void)
     const BswM_PartitionLCfgType* bswmPartLCfgPtr;
     boolean                       result;
 
-#if (BSWM_DEV_ERROR_DETECT == STD_ON)
+#if ((BSWM_DEV_ERROR_DETECT == STD_ON) && (BSWM_MULTI_PARTITION_ENABLED == STD_ON))
     if (E_OK == BswM_DetChkParRestart())
 #endif /*BSWM_DEV_ERROR_DETECT == STD_ON*/
     {
@@ -468,8 +546,14 @@ void BswM_BswMPartitionRestarted(void)
             }
         }
     }
-}
 
+    BswM_ArtiApiStop(1, BSWM_API_ID_BSWM_PARTITION_RESTARTED);
+}
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
+
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * This function retrieves the status of the partition restart event.
  * It first checks if the partition configuration pointers can be successfully retrieved.
@@ -502,8 +586,12 @@ BswM_EventRquestPortRuntimeType BswM_GetParRestartStatus(void)
     }
     return parRstStatus;
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_MULTI_PARTITION_ENABLED == STD_ON) && (BSWM_EVENT_PARTITION_RESTARTED_ENABLE == STD_ON*/
 
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * This function arbitrates the execution of a specified rule for a given partition.
  * It retrieves the rule configuration and checks if the rule is not nested.
@@ -531,7 +619,11 @@ void BswM_ArbitrateRule(const BswM_PartitionLCfgType* bswmPartLCfgPtr, BswM_Rule
         }
     }
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * This function checks the initialization status of the core.
  * It retrieves the core configuration pointer and checks if the runtime status indicates that the core has been
@@ -539,9 +631,14 @@ void BswM_ArbitrateRule(const BswM_PartitionLCfgType* bswmPartLCfgPtr, BswM_Rule
  */
 boolean BswM_GetCoreInitStatus(void)
 {
-    boolean               status = FALSE;
-    const BswM_PCCfgType* runPCCfgPtr;
-
+    boolean status = FALSE;
+#if (BSWM_CLONE_VARIABLE_SUPPORT_ENABLE == STD_ON)
+    if (BSWM_INITED == BswM_RuntimeStatus.bswmInitState)
+    {
+        status = TRUE;
+    }
+#else  /* BSWM_CLONE_VARIABLE_SUPPORT_ENABLE == STD_OFF */
+    const BswM_PCCfgType* runPCCfgPtr = NULL_PTR;
     if (BswM_GetCorePCCfgPtr(&runPCCfgPtr))
     {
         if (BSWM_INITED == runPCCfgPtr->runtimeStatusPtr->bswmInitState)
@@ -549,10 +646,15 @@ boolean BswM_GetCoreInitStatus(void)
             status = TRUE;
         }
     }
+#endif /* BSWM_CLONE_VARIABLE_SUPPORT_ENABLE == STD_ON */
     return status;
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 #if (BSWM_PB_CONFIG_ENABLED == STD_ON)
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * This function retrieves the PB configuration tags from the BswM configuration.
  * It returns the value of the PB configuration tag stored in the configuration pointer.
@@ -561,19 +663,19 @@ uint8 BswM_GetPBConfigTags(void)
 {
     return BswM_ConfigPtr->BswM_PbCfgTag;
 }
-#endif /* BSWM_PB_CONFIG_ENABLED == STD_ON */
-
 #define BSWM_STOP_SEC_CODE
 #include "BswM_MemMap.h"
+#endif /* BSWM_PB_CONFIG_ENABLED == STD_ON */
+
 /* ========================================== internal function definitions ========================================= */
-#define BSWM_START_SEC_CODE
-#include "BswM_MemMap.h"
 /**
  * Initializes the BswM event request ports by setting them to a cleared state.
  * This function retrieves the configuration and runtime data, iterates through each event request port, and sets their
  * status to cleared. If the configuration retrieval fails, an error is reported using the Det_ReportError function.
  */
 #if (BSWM_EVENT_RQSTPORT_ENABLE == STD_ON)
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 BSWM_LOCAL void BswM_InitEventRequestPort(void)
 {
     const BswM_PartitionPCCfgType* bswmPartPCCfgPtr;
@@ -609,8 +711,64 @@ BSWM_LOCAL void BswM_InitEventRequestPort(void)
     }
 #endif /*BSWM_DEV_ERROR_DETECT == STD_ON*/
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
+
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
+void BswM_ClearEventRequestPort(const BswM_RqstPortLcCfgType* evRqstLcCfgPtr, BswM_EventRqstPortIdxType evIdx)
+{
+    BswM_EventRquestPortRuntimeType* evRqstPtr;
+    BswM_RuleIndexType               numOfRules;
+    BswM_RuleIndexType               idx;
+    BswM_RuleIndexType               ruleIdx;
+    const BswM_PartitionPCCfgType*   bswmPartPCCfgPtr;
+#if (BSWM_PB_CONFIG_ENABLED == STD_ON)
+    const BswM_PartitionPbConfigType* bswmPartPbConfigPtr;
+#endif /* BSWM_PB_CONFIG_ENABLED */
+    const BswM_PartitionLCfgType* bswmPartLCfgPtr;
+    boolean                       result;
+
+#if ((BSWM_DEV_ERROR_DETECT == STD_ON) && (BSWM_MULTI_PARTITION_ENABLED == STD_ON))
+    if (E_OK == BswM_DetChkParRestart())
+#endif /*BSWM_DEV_ERROR_DETECT == STD_ON*/
+    {
+        result = BswM_GetPartitionLcPCCfgPtr(
+#if (BSWM_PB_CONFIG_ENABLED == STD_ON)
+            &bswmPartPbConfigPtr,
+#endif /* BSWM_PB_CONFIG_ENABLED == STD_ON */
+            &bswmPartPCCfgPtr,
+            &bswmPartLCfgPtr);
+        if (result)
+        {
+            if ((evIdx < bswmPartPCCfgPtr->evRqstSrcNum) && (evRqstLcCfgPtr != NULL_PTR))
+            {
+                evRqstPtr        = bswmPartPCCfgPtr->eventRqstPortRunPtr;
+                evRqstPtr[evIdx] = BSWM_EVENT_IS_CLEARED;
+                numOfRules       = evRqstLcCfgPtr->belongToRlueNum;
+                for (idx = 0u; idx < numOfRules; idx++)
+                {
+#if (BSWM_PB_CONFIG_ENABLED == STD_ON)
+                    if ((evRqstLcCfgPtr->belongToRlue[idx].pbConfigTag == BswM_GetPBConfigTags())
+                        || (BSWM_PB_CONFIG_IN_ALL_VARIANTS == evRqstLcCfgPtr->belongToRlue[idx].pbConfigTag))
+#endif /* BSWM_PB_CONFIG_ENABLED == STD_ON */
+                    {
+                        ruleIdx = evRqstLcCfgPtr->belongToRlue[idx].ruleIndex;
+                        /* An Independent rule,to be evaluated each time applicable*/
+                        BswM_ArbitrateRule(bswmPartLCfgPtr, ruleIdx, FALSE);
+                    }
+                }
+            }
+        }
+    }
+}
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
+
 #endif /*BSWM_EVENT_RQSTPORT_ENABLE == STD_ON*/
 
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Initializes the mode request ports for various BswM modules based on the enabled configurations.
  * This function checks multiple configuration macros and calls the corresponding initialization functions
@@ -651,12 +809,6 @@ BSWM_LOCAL void BswM_InitModeRequestPort(void)
     BswM_InitEthSMRequestPorts();
 #endif /*BSWM_ETHSMINDICATION_ENABLED == STD_ON*/
 #endif /*BSWM_ETHSM_ENABLED == STD_ON*/
-
-#if (BSWM_FRSM_ENABLED == STD_ON)
-#if (BSWM_FRSMINDICATION_ENABLED == STD_ON)
-    BswM_InitFrSMRequestPorts();
-#endif /*BSWM_FRSMINDICATION_ENABLED == STD_ON*/
-#endif /*BSWM_FRSM_ENABLED == STD_ON*/
 
 #if (BSWM_GENERIC_REQUEST_ENABLED == STD_ON)
 #if (BSWM_GENERICREQUEST_ENABLED == STD_ON)
@@ -710,7 +862,11 @@ BSWM_LOCAL void BswM_InitModeRequestPort(void)
     BswM_InitBswMTimer();
 #endif /*BSWM_TIMER_ENABLED == STD_ON*/
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Initializes the rules for the BswM module by setting up the rule statuses and deferred rule flags.
  * This function retrieves partition configuration pointers, initializes the rule statuses to their initial states,
@@ -756,6 +912,5 @@ BSWM_LOCAL void BswM_InitRules(void)
         }
     }
 }
-
 #define BSWM_STOP_SEC_CODE
 #include "BswM_MemMap.h"

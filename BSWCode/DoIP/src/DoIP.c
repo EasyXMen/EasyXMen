@@ -30,6 +30,7 @@
 #include "DoIP_Internal_UDP.h"
 #include "DoIP_Internal_DET.h"
 #include "SchM_DoIP.h"
+#include "DoIP_Arti.h"
 /* ============================================ external data definitions =========================================== */
 
 #define DOIP_START_SEC_VAR_INIT_UNSPECIFIED
@@ -64,6 +65,7 @@ const DoIP_PBConfigType* DoIP_PBCfgPtr;
  */
 void DoIP_Init(const DoIP_ConfigType* doipConfigPtr) /* PRQA S 1503 */ /* VL_QAC_NoUsedApi */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, DoIP, 0, Bsw_Start, 2, 0x01, doipConfigPtr);
     if (TRUE == DOIP_INIT_DET(doipConfigPtr))
     {
         DoIP_PBCfgPtr          = doipConfigPtr;
@@ -90,14 +92,19 @@ void DoIP_Init(const DoIP_ConfigType* doipConfigPtr) /* PRQA S 1503 */ /* VL_QAC
     }
 
     DoIP_InitStatus = DOIP_STATUS_INITED;
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, DoIP, 0, Bsw_Return, 1, 0x01);
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
 #if (TRUE == DOIP_VERSION_INFO_API)
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief       Returns the version information of this module.
  */
 void DoIP_GetVersionInfo(Std_VersionInfoType* versionInfo) /* PRQA S 1503 */ /* VL_QAC_NoUsedApi */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, DoIP, 0, Bsw_Start, 2, 0x00, versionInfo);
     if (TRUE == DOIP_GETVERSIONINFO_DET(versionInfo))
     {
         versionInfo->moduleID         = DOIP_MODULE_ID; /* PRQA S 2814 */ /* VL_QAC_DerefNullPtr */
@@ -106,38 +113,47 @@ void DoIP_GetVersionInfo(Std_VersionInfoType* versionInfo) /* PRQA S 1503 */ /* 
         versionInfo->sw_minor_version = DOIP_SW_MINOR_VERSION;
         versionInfo->sw_patch_version = DOIP_SW_PATCH_VERSION;
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, DoIP, 0, Bsw_Return, 1, 0x00);
 }
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
 #endif
-
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief This function is used to notify the DoIP on a switch of the DoIPActivationLine
  */
 /* PRQA S 1532 ++ */                                              /* VL_QAC_OneFunRef */
-void DoIP_ActivationLineSwitch(boolean* active) /* PRQA S 1503 */ /* VL_QAC_NoUsedApi */
+void DoIP_ActivationLineSwitch(boolean* Active) /* PRQA S 1503 */ /* VL_QAC_NoUsedApi */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, DoIP, 0, Bsw_Start, 2, 0x0E, Active);
     if (TRUE == DOIP_ACTIVATIONLINESWITCH_DET())
     {
         /* PRQA S 4558,4404,4115 ++ */ /* VL_DoIP_4558 */
-        boolean ret = DoIP_SwitchUdp(active);
-        ret         = ret && DoIP_SwitchTcp(active);
-        ret         = ret && DoIP_SwitchAnc(active);
+        boolean ret = DoIP_SwitchUdp(Active);
+        ret         = ret && DoIP_SwitchTcp(Active);
+        ret         = ret && DoIP_SwitchAnc(Active);
         /* PRQA S 4558,4404,4115 -- */
 
-        if ((TRUE == *active) && (ret != TRUE)) /* PRQA S 2814 */ /* VL_QAC_DerefNullPtr */
+        if ((TRUE == *Active) && (ret != TRUE)) /* PRQA S 2814 */ /* VL_QAC_DerefNullPtr */
         {
-            *active = FALSE;
+            *Active = FALSE;
         }
-        else if ((FALSE == *active) && (ret != TRUE))
+        else if ((FALSE == *Active) && (ret != TRUE))
         {
-            *active = TRUE;
+            *Active = TRUE;
         }
         else
         {
             /* for qac idle */
         }
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, DoIP, 0, Bsw_Return, 1, 0x0E);
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief This function is called to acquire the transmit data of an I-PDU segment (N-PDU).
  *        Each call to this function provides the next part of the I-PDU data unless retry->TpDataState is TP_DATARETRY.
@@ -150,6 +166,7 @@ BufReq_ReturnType DoIP_SoAdTpCopyTxData(
     const RetryInfoType* retry,
     PduLengthType*       availableDataPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, DoIP, 0, Bsw_Start, 5, 0x43, soadTxPduId, pduInfoPtr, retry, availableDataPtr);
     BufReq_ReturnType ret = DOIP_SOADTPCOPYTXDATA_DET(soadTxPduId, pduInfoPtr, retry, availableDataPtr);
 
     if (BUFREQ_OK == ret)
@@ -192,9 +209,13 @@ BufReq_ReturnType DoIP_SoAdTpCopyTxData(
         }
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, DoIP, 0, Bsw_Return, 2, 0x43, ret);
     return ret;
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Returns the version information of this module.
  */
@@ -202,6 +223,7 @@ BufReq_ReturnType DoIP_SoAdTpCopyTxData(
 void DoIP_SoAdTpTxConfirmation(PduIdType soadTxPduId, Std_ReturnType result)
 /* PRQA S 3408,1503 -- */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, DoIP, 0, Bsw_Start, 3, 0x48, soadTxPduId, result);
     if (TRUE == DOIP_SOADTPTXCONFIRMATION_DET(soadTxPduId, result))
     {
         uint8 index;
@@ -230,7 +252,7 @@ void DoIP_SoAdTpTxConfirmation(PduIdType soadTxPduId, Std_ReturnType result)
 
             if (DoIP_TcpConnStatus[index].WaitCloseSocket == TRUE) /* PRQA S 2844 */ /* VL_DoIP_DerefInvalidPtr */
             {
-                DoIP_CloseSoCon(DoIP_TcpConnStatus[index].SoConId, TRUE);
+                DoIP_CloseSoCon(DoIP_TcpConnStatus[index].SoConId, FALSE);
             }
 
             /* reset txbuffer including reset the processStatus to IDLE,except the pending tx buffer */
@@ -240,8 +262,12 @@ void DoIP_SoAdTpTxConfirmation(PduIdType soadTxPduId, Std_ReturnType result)
             }
         }
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, DoIP, 0, Bsw_Return, 1, 0x48);
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief This function is called to provide the received data of an I-PDU segment (N-PDU) to the upper layer.
  */
@@ -250,6 +276,7 @@ BufReq_ReturnType
     DoIP_SoAdTpCopyRxData(PduIdType soadRxPduId, const PduInfoType* pduInfoPtr, PduLengthType* bufferSizePtr)
 /* PRQA S 3408,1503 -- */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, DoIP, 0, Bsw_Start, 4, 0x44, soadRxPduId, pduInfoPtr, bufferSizePtr);
     uint8                      txRxCtxIdx   = 0u;
     uint16                     soadTxPduRef = 0u;
     DoIP_HandleDiagContextType handleDiagCtx;
@@ -326,9 +353,13 @@ BufReq_ReturnType
         }
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, DoIP, 0, Bsw_Return, 2, 0x44, ret);
     return ret;
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief This function is called at the start of receiving an N-SDU.
  *        The N-SDU might be fragmented into multiple N-PDUs (FF with one or more following CFs) or might consist of a
@@ -342,6 +373,7 @@ BufReq_ReturnType DoIP_SoAdTpStartOfReception(
     PduLengthType*     bufferSizePtr)
 /* PRQA S 3408,1503,6030 -- */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, DoIP, 0, Bsw_Start, 5, 0x46, soadRxPduId, pduInfoPtr, sduLen, bufferSizePtr);
     uint8               txRxCtxIdx    = 0u;
     uint8               connStatusIdx = 0u;
     DoIP_TcpRxCtrlType* rxCtrl        = NULL_PTR;
@@ -402,9 +434,13 @@ BufReq_ReturnType DoIP_SoAdTpStartOfReception(
 
     (void)pduInfoPtr;
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, DoIP, 0, Bsw_Return, 2, 0x46, ret);
     return ret;
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Called after an I-PDU has been received via the TP API, the result indicates whether the transmission was
  * successful or not.
@@ -413,13 +449,14 @@ BufReq_ReturnType DoIP_SoAdTpStartOfReception(
 void DoIP_SoAdTpRxIndication(PduIdType soadRxPduId, Std_ReturnType result)
 /* PRQA S 3408,1503 -- */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, DoIP, 0, Bsw_Start, 3, 0x45, soadRxPduId, result);
     if (TRUE == DOIP_SOADTPRXINDICATION_DET(soadRxPduId, result)) /*SWS_DoIP_00200*/
     {
         uint8 idx;
         if (E_OK == DoIP_GetTcpTxRxCtxIdxBySoAdRxPduId(soadRxPduId, &idx))
         {
             /* PRQA S 2844 ++ */ /* VL_DoIP_DerefInvalidPtr */
-            const DoIP_TcpRxCtrlType* rxCtrl = &(DoIP_TcpTxRxContext[idx].RxCtrl);
+            DoIP_TcpRxCtrlType* rxCtrl = &(DoIP_TcpTxRxContext[idx].RxCtrl);
             /* PRQA S 2844 -- */
 
             /* PRQA S 2814 ++ */ /* VL_QAC_DerefNullPtr */
@@ -430,6 +467,7 @@ void DoIP_SoAdTpRxIndication(PduIdType soadRxPduId, Std_ReturnType result)
                 if (E_OK == DoIP_GetPduRRxPduRef(rxCtrl->Sa, rxCtrl->Ta, &pdurRxPduId))
                 {
                     PduR_DoIPTpRxIndication(pdurRxPduId, result);
+                    rxCtrl->PdurRxPduRef = (PduIdType)COMSTACK_PDUID_INVALID;
                 }
             }
         }
@@ -440,8 +478,12 @@ void DoIP_SoAdTpRxIndication(PduIdType soadRxPduId, Std_ReturnType result)
             DoIP_CloseTcpConnection(DoIP_TcpConnStatus[idx].SoConId); /* PRQA S 2844 */ /* VL_DoIP_DerefInvalidPtr */
         }
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, DoIP, 0, Bsw_Return, 1, 0x45);
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Indication of a received I-PDU from a lower layer communication interface module.
  */
@@ -449,6 +491,7 @@ void DoIP_SoAdTpRxIndication(PduIdType soadRxPduId, Std_ReturnType result)
 void DoIP_SoAdIfRxIndication(PduIdType soadRxPduId, const PduInfoType* pduInfoPtr)
 /* PRQA S 3408,1503,6070 -- */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, DoIP, 0, Bsw_Start, 3, 0x42, soadRxPduId, pduInfoPtr);
     uint16           soadTxPduRef;
     SoAd_SoConIdType soConId;
 
@@ -474,14 +517,19 @@ void DoIP_SoAdIfRxIndication(PduIdType soadRxPduId, const PduInfoType* pduInfoPt
             DoIP_CloseSoCon(soConId, TRUE);
         }
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, DoIP, 0, Bsw_Return, 1, 0x42);
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /* PRQA S 3408 ++ */ /* VL_DoIP_3408 */
 /**
  * @brief The lower layer communication interface module confirms the transmission of an I-PDU.
  */
 void DoIP_SoAdIfTxConfirmation(PduIdType soadTxPduId, Std_ReturnType result)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, DoIP, 0, Bsw_Start, 3, 0x40, soadTxPduId, result);
     if (TRUE == DOIP_SOADIFTXCONFIRMATION_DET(soadTxPduId))
     {
         for (uint8 i = 0u; i < DOIP_UDP_MAX_CONNECTION; i++)
@@ -502,9 +550,14 @@ void DoIP_SoAdIfTxConfirmation(PduIdType soadTxPduId, Std_ReturnType result)
             DoIP_AncConnStatus[i].AncTimer = 0u;
         }
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, DoIP, 0, Bsw_Return, 1, 0x40);
 }
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
 /* PRQA S 3408 -- */
 
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Notification about a SoAd socket connection state change,
  *        e.g. socket connection gets online
@@ -512,6 +565,7 @@ void DoIP_SoAdIfTxConfirmation(PduIdType soadTxPduId, Std_ReturnType result)
 /* PRQA S 3408,1503 ++ */ /* VL_DoIP_WithoutPreDeclaration,VL_QAC_NoUsedApi */
 void DoIP_SoConModeChg(SoAd_SoConIdType soConId, SoAd_SoConModeType mode)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, DoIP, 0, Bsw_Start, 3, 0x0b, soConId, mode);
     if (TRUE == DOIP_SOCONMODECFG_DET(soConId, mode))
     {
         DoIP_SoConModeChgTcp(soConId, mode);
@@ -520,14 +574,19 @@ void DoIP_SoConModeChg(SoAd_SoConIdType soConId, SoAd_SoConModeType mode)
 
         DoIP_SoConModeChgAnc(soConId, mode);
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, DoIP, 0, Bsw_Return, 1, 0x0b);
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief This function gets called by the SoAd if an IP address assignment related to a socket connection changes.
  */
 void DoIP_LocalIpAddrAssignmentChg(SoAd_SoConIdType soConId, TcpIp_IpAddrStateType state)
 /* PRQA S 3408,1503 -- */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, DoIP, 0, Bsw_Start, 3, 0x0c, soConId, state);
     if (TRUE == DOIP_LOCALIPADDRASSIGNMENTCHG_DET(soConId, state))
     {
         /*SWS_DoIP_00154*/
@@ -550,8 +609,12 @@ void DoIP_LocalIpAddrAssignmentChg(SoAd_SoConIdType soConId, TcpIp_IpAddrStateTy
             DoIP_GidSynStatus = FALSE;
         }
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, DoIP, 0, Bsw_Return, 1, 0x0c);
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief This service is called to request the transfer data from the PduRouter to the SoAd.
  *        It is used to indicate the transmission which will be performed in the DoIP_Mainfunction.
@@ -562,6 +625,7 @@ Std_ReturnType DoIP_TpTransmit(PduIdType DoIPPduRTxId, const PduInfoType* DoIPPd
 /* PRQA S 1503 -- */
 /* PRQA S 6070 -- */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, DoIP, 0, Bsw_Start, 3, 0x53, DoIPPduRTxId, DoIPPduRTxInfoPtr);
     Std_ReturnType ret = DOIP_TPTRANSMIT_DET(DoIPPduRTxId, DoIPPduRTxInfoPtr);
 
     if (E_OK == ret) /*SWS_DoIP_00284*/
@@ -609,15 +673,20 @@ Std_ReturnType DoIP_TpTransmit(PduIdType DoIPPduRTxId, const PduInfoType* DoIPPd
         }
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, DoIP, 0, Bsw_Return, 2, 0x53, ret);
     return ret;
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief This service primitive is used to cancel the transfer of pending DoIPPduRTxIds. The connection is
  *        identified by DoIPPduRTxId. When the function returns, no transmission is in progress anymore
  */
 Std_ReturnType DoIP_TpCancelTransmit(PduIdType DoIPPduRTxId) /* PRQA S 1503 */ /* VL_QAC_NoUsedApi */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, DoIP, 0, Bsw_Start, 2, 0x54, DoIPPduRTxId);
     /*SWS_DoIP_00166*/
     Std_ReturnType ret = DOIP_TPCANCELTRANSMIT_DET(DoIPPduRTxId);
 
@@ -652,9 +721,13 @@ Std_ReturnType DoIP_TpCancelTransmit(PduIdType DoIPPduRTxId) /* PRQA S 1503 */ /
         }
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, DoIP, 0, Bsw_Return, 2, 0x54, ret);
     return ret;
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief By calling this API with the corresponding DoIPPduRRxId the currently ongoing data reception
  *        is terminated immediately. When the function returns, no reception is in progress anymore with
@@ -662,6 +735,7 @@ Std_ReturnType DoIP_TpCancelTransmit(PduIdType DoIPPduRTxId) /* PRQA S 1503 */ /
  */
 Std_ReturnType DoIP_TpCancelReceive(PduIdType DoIPPduRRxId) /* PRQA S 1503 */ /* VL_QAC_NoUsedApi */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, DoIP, 0, Bsw_Start, 2, 0x4C, DoIPPduRRxId);
     /*SWS_DoIP_00169*/
     Std_ReturnType ret = DOIP_TPCANCELRECEIVE_DET(DoIPPduRRxId);
 
@@ -708,9 +782,13 @@ Std_ReturnType DoIP_TpCancelReceive(PduIdType DoIPPduRRxId) /* PRQA S 1503 */ /*
             }
         }
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, DoIP, 0, Bsw_Return, 2, 0x4C, ret);
     return ret;
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Requests transmission of an I-PDU.
  */
@@ -718,6 +796,7 @@ Std_ReturnType DoIP_TpCancelReceive(PduIdType DoIPPduRRxId) /* PRQA S 1503 */ /*
 Std_ReturnType DoIP_IfTransmit(PduIdType id, const PduInfoType* info)
 /* PRQA S 1503, 6070 -- */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, DoIP, 0, Bsw_Start, 3, 0x49, id, info);
     Std_ReturnType ret = DOIP_IFTRANSMIT_DET(id, info);
 
     if (E_OK == ret)
@@ -753,14 +832,19 @@ Std_ReturnType DoIP_IfTransmit(PduIdType id, const PduInfoType* info)
         }
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, DoIP, 0, Bsw_Return, 2, 0x49, ret);
     return ret;
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Requests cancellation of an ongoing transmission of an I-PDU in a lower layer communication interface module.
  */
 Std_ReturnType DoIP_IfCancelTransmit(PduIdType id) /* PRQA S 1503 */ /* VL_QAC_NoUsedApi */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, DoIP, 0, Bsw_Start, 2, 0x4A, id);
     Std_ReturnType ret = DOIP_IFCANCELTRANSMIT_DET(id);
 
     if (E_OK == ret)
@@ -800,14 +884,20 @@ Std_ReturnType DoIP_IfCancelTransmit(PduIdType id) /* PRQA S 1503 */ /* VL_QAC_N
         }
     }
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, DoIP, 0, Bsw_Return, 2, 0x4A, ret);
     return ret;
 }
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /* PRQA S 4461 -- */
 /**
  * @brief Schedules the Diagnostic over IP module. (Entry point for scheduling)
  */
 void DoIP_MainFunction(void) /* PRQA S 1503 */ /* VL_QAC_NoUsedApi */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, DoIP, 0, Bsw_Start, 1, 0x02);
     if (DOIP_STATUS_UNINITED != DoIP_InitStatus)
     {
         DoIP_HandleTcpTimeout();
@@ -818,21 +908,27 @@ void DoIP_MainFunction(void) /* PRQA S 1503 */ /* VL_QAC_NoUsedApi */
 
         DoIP_HandleVehicleAncTimeout();
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, DoIP, 0, Bsw_Return, 1, 0x02);
 }
-
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
 #if (DOIP_HIGH_FREQ_TASK_SUPPORT == TRUE)
+#define DOIP_START_SEC_CODE
+#include "DoIP_MemMap.h"
 /**
  * @brief Schedules the Diagnostic over IP module. (Entry point for scheduling) for hight frequency tasks.
  */
 void DoIP_MainFunction_HighFrequency(void) /* PRQA S 1503 */ /* VL_QAC_NoUsedApi */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, DoIP, 0, Bsw_Start, 1, 0xFF);
     if (DOIP_STATUS_UNINITED != DoIP_InitStatus)
     {
         DoIP_HandlePendingMsg(); /*pending message transmit handle*/
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, DoIP, 0, Bsw_Return, 1, 0xFF);
 }
+#define DOIP_STOP_SEC_CODE
+#include "DoIP_MemMap.h"
 #endif
 /* PRQA S 1532 -- */
 /* PRQA S 3415 -- */
-#define DOIP_STOP_SEC_CODE
-#include "DoIP_MemMap.h"

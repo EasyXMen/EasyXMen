@@ -37,6 +37,7 @@
 #if (STD_ON == IPDUM_ECUC_MULTIPLE_PARTITION_USED)
 #include "Os.h"
 #endif
+#include "IpduM_Arti.h"
 
 /* ===================================================== macros ===================================================== */
 
@@ -83,62 +84,105 @@ notify PDUR router to upper layer */
 
 #if (IPDUM_TX_REQUEST_NUMBER_MAX > 0u)
 /* transmit part of multiplexed pdu */
+#define IPDUM_START_SEC_CODE
+#include "IpduM_MemMap.h"
 IPDUM_LOCAL Std_ReturnType IpduM_TransmitPartOfMultiplex(PduIdType PduIndex, const PduInfoType* PduInfoPtr);
+#define IPDUM_STOP_SEC_CODE
+#include "IpduM_MemMap.h"
 
 /* Multiplexer pdu data info handle by segment */
+#define IPDUM_START_SEC_CODE
+#include "IpduM_MemMap.h"
 IPDUM_LOCAL Std_ReturnType IpduM_SegmentCopy(const IpduM_PduTranslateType* pduTransPtr);
+#define IPDUM_STOP_SEC_CODE
+#include "IpduM_MemMap.h"
 
 #if (IPDUM_MULTIPLEX_JIT_PART_PDU_LENGTH_MAX > 0)
 /* Multiplexer tx check Jit part to assemble pdu */
+#define IPDUM_START_SEC_CODE
+#include "IpduM_MemMap.h"
 IPDUM_LOCAL Std_ReturnType IpduM_MultiplexTxCheckJitUpdate(
     const IpduM_TxRequestCfgType*   txRequestPtr,
     const IpduM_InnerTxRequtstType* innerTxReqPtr,
     uint8                           triggerPartType);
+#define IPDUM_STOP_SEC_CODE
+#include "IpduM_MemMap.h"
 #endif
 
 /* Multiplexer tx request transmit */
+#define IPDUM_START_SEC_CODE
+#include "IpduM_MemMap.h"
 IPDUM_LOCAL Std_ReturnType
     IpduM_MultiplexTxSendPdu(const IpduM_TxRequestCfgType* txRequestPtr, IpduM_InnerTxRequtstType* innerTxReqPtr);
+#define IPDUM_STOP_SEC_CODE
+#include "IpduM_MemMap.h"
 
 /* handle trigger tansmit request of a multiplexed pdu */
+#define IPDUM_START_SEC_CODE
+#include "IpduM_MemMap.h"
 IPDUM_LOCAL Std_ReturnType IpduM_MultiplexedPduTriggerTransmit(
     const IpduM_TxRequestCfgType* txRequestPtr,
     const PduIdType               txRequestIndex,
     PduInfoType*                  PduInfoPtr);
+#define IPDUM_STOP_SEC_CODE
+#include "IpduM_MemMap.h"
 
 /* Multiplexer handle tx confirmation */
+#define IPDUM_START_SEC_CODE
+#include "IpduM_MemMap.h"
 IPDUM_LOCAL void IpduM_TxConfirmOfMultiplex(PduIdType txRequestIndex, Std_ReturnType result);
+#define IPDUM_STOP_SEC_CODE
+#include "IpduM_MemMap.h"
 
 /* MultiplexedTx Init */
+#define IPDUM_START_SEC_CODE
+#include "IpduM_MemMap.h"
 IPDUM_LOCAL void IpduM_MultiplexedTxInit(IpduM_PartitionIDType ipduMPartition);
+#define IPDUM_STOP_SEC_CODE
+#include "IpduM_MemMap.h"
 #endif
 
 #if (IPDUM_RX_INDICA_NUMBER_MAX > 0u)
 /* Multiplexer rx indiation handle */
+#define IPDUM_START_SEC_CODE
+#include "IpduM_MemMap.h"
 IPDUM_LOCAL void IpduM_MultiplexRxIndication(PduIdType rxIndIndex, const PduInfoType* pduInfoPtr);
+#define IPDUM_STOP_SEC_CODE
+#include "IpduM_MemMap.h"
 
 /* Multiplexer RX indiation pdu find select value */
+#define IPDUM_START_SEC_CODE
+#include "IpduM_MemMap.h"
 IPDUM_LOCAL Std_ReturnType IpduM_MultiplexFindSelectVal(
     IpduM_ByteOrderType byteOrder,
     const PduInfoType*  pduInfoPtr,
     uint16              SelectorFieldPosition,
     uint8               SelectorFieldLength,
     uint16*             selcetValPtr);
-
+#define IPDUM_STOP_SEC_CODE
+#include "IpduM_MemMap.h"
 #endif
 
 #if (IPDUM_CONTAINER_TX_NUMBER_MAX > 0u)
 
 /* this function handle in api IpduM_Transmit,shall handle contained for
 upper layer data */
+#define IPDUM_START_SEC_CODE
+#include "IpduM_MemMap.h"
 IPDUM_LOCAL Std_ReturnType IpduM_TransmitContained(PduIdType containedIndex, const PduInfoType* PduInfoPtr);
+#define IPDUM_STOP_SEC_CODE
+#include "IpduM_MemMap.h"
 
 /* handle txRequest of a LAST IS BEST containedTxPdu */
+#define IPDUM_START_SEC_CODE
+#include "IpduM_MemMap.h"
 IPDUM_LOCAL Std_ReturnType IpduM_ContainedTxLastIsBestInsertToList(
     PduIdType                          containedIndex,
     const IpduM_ContainerTxPduCfgType* containerTxCfgPtr,
     IpduM_InnerContainerTxType*        innerContainerPtr,
     const PduInfoType*                 PduInfoPtr);
+#define IPDUM_STOP_SEC_CODE
+#include "IpduM_MemMap.h"
 
 /* convert relative postion in a instance to a global position of a buffer where the instance is located in */
 IPDUM_LOCAL_INLINE PduLengthType IpduM_ConverIndexInQueueToLocalPosition(
@@ -146,6 +190,8 @@ IPDUM_LOCAL_INLINE PduLengthType IpduM_ConverIndexInQueueToLocalPosition(
     PduLengthType                      indexInQueue);
 
 /* insert index of LAST IS BEST containedTxPdu to instance of its containerTxPdu */
+#define IPDUM_START_SEC_CODE
+#include "IpduM_MemMap.h"
 IPDUM_LOCAL Std_ReturnType IpduM_InsertContainedToInstanceInOrder(
     const IpduM_ContainerTxPduCfgType*  containerTxCfgPtr,
     IpduM_InnerContainerTxType*         innerContainerPtr,
@@ -153,6 +199,8 @@ IPDUM_LOCAL Std_ReturnType IpduM_InsertContainedToInstanceInOrder(
     PduIdType                           containedIndex,
     const IpduM_PartitionIDType         ipduMPartition,
     const PduLengthType                 pduLength);
+#define IPDUM_STOP_SEC_CODE
+#include "IpduM_MemMap.h"
 
 #if (IPDUM_CONTAINEDTXPDU_PRIORITY_ENABLE == STD_ON)
 /* try to get priority of a containedTxPdu */
@@ -160,31 +208,49 @@ IPDUM_LOCAL_INLINE uint8 IpduM_GetContainedPduPriority(PduIdType containedIndex)
 #endif
 
 /* trigger a contaienrTxPdu */
+#define IPDUM_START_SEC_CODE
+#include "IpduM_MemMap.h"
 IPDUM_LOCAL Std_ReturnType IpduM_ContainerTxTriggeredOrQueued(
     const IpduM_ContainerTxPduCfgType*  containerTxCfgPtr,
     IpduM_InnerContainerTxType*         innerContainerPtr,
     IpduM_InnerContainerTxInstanceType* txInputInstancePtr,
     uint8                               transmissionMethod,
     boolean                             parentLockThisInstance);
+#define IPDUM_STOP_SEC_CODE
+#include "IpduM_MemMap.h"
 
 /* judge whether a send call need to be called rigthnow when container is triggered */
+#define IPDUM_START_SEC_CODE
+#include "IpduM_MemMap.h"
 IPDUM_LOCAL boolean IpduM_ContainerTxTriggeredRequestSendNow(
     const IpduM_ContainerTxPduCfgType* containerTxCfgPtr,
     IpduM_InnerContainerTxType*        innerContainerPtr,
     uint8                              transmissionMethod);
+#define IPDUM_STOP_SEC_CODE
+#include "IpduM_MemMap.h"
 
 /* request send a containerTxPdu in context of container is triggered */
+#define IPDUM_START_SEC_CODE
+#include "IpduM_MemMap.h"
 IPDUM_LOCAL Std_ReturnType IpduM_ContainerTxTriggerSendContainer(
     const IpduM_ContainerTxPduCfgType*  containerTxCfgPtr,
     IpduM_InnerContainerTxType*         innerContainerPtr,
     IpduM_InnerContainerTxInstanceType* txInstancePtr);
+#define IPDUM_STOP_SEC_CODE
+#include "IpduM_MemMap.h"
 
 /*Assemble static or dynamic containerTxPdu */
+#define IPDUM_START_SEC_CODE
+#include "IpduM_MemMap.h"
 IPDUM_LOCAL Std_ReturnType IpduM_ContainerTxAssemble(
     const IpduM_ContainerTxPduCfgType*  containerTxCfgPtr,
     IpduM_InnerContainerTxInstanceType* txInstancePtr);
+#define IPDUM_STOP_SEC_CODE
+#include "IpduM_MemMap.h"
 
 /* assemble containedTxPdu which collectSemantic is last is best */
+#define IPDUM_START_SEC_CODE
+#include "IpduM_MemMap.h"
 IPDUM_LOCAL Std_ReturnType IpduM_ContainerTxLastIsBestContainedAssemble(
     const IpduM_ContainerTxPduCfgType*  containerTxCfgPtr,
     const IpduM_ContainedTxPduCfgType*  containedTxCfgPtr,
@@ -192,92 +258,158 @@ IPDUM_LOCAL Std_ReturnType IpduM_ContainerTxLastIsBestContainedAssemble(
     uint8                               headerSize,
     PduIdType                           indexInInstance,
     PduIdType*                          containdIndexBufPtr);
+#define IPDUM_STOP_SEC_CODE
+#include "IpduM_MemMap.h"
 
 /* put a header in front of a containedTxPdu when it is put into a containerTxPdu */
+#define IPDUM_START_SEC_CODE
+#include "IpduM_MemMap.h"
 IPDUM_LOCAL void IpduM_FillContainedHeaderInContainer(uint8 headerSizeCfg, uint8* dataBuf, uint32 idVal, uint32 dlcVal);
+#define IPDUM_STOP_SEC_CODE
+#include "IpduM_MemMap.h"
 
 /* update instance information of a static containerTxPdu */
+#define IPDUM_START_SEC_CODE
+#include "IpduM_MemMap.h"
 IPDUM_LOCAL void IpduM_UpdateStaticContainerTxInstance(
     const IpduM_ContainedTxPduCfgType*  containedTxCfgPtr,
     IpduM_InnerContainerTxInstanceType* txInstancePtr,
     const PduLengthType                 pduLength);
+#define IPDUM_STOP_SEC_CODE
+#include "IpduM_MemMap.h"
 
 /* this function is try to send a container instance */
+#define IPDUM_START_SEC_CODE
+#include "IpduM_MemMap.h"
 IPDUM_LOCAL Std_ReturnType IpduM_TransmitContainerInstance(
     const IpduM_ContainerTxPduCfgType*  containerTxCfgPtr,
     IpduM_InnerContainerTxType*         innerContainerPtr,
     PduInfoType*                        triggPduInfoPtr,
     IpduM_InnerContainerTxInstanceType* txInputInstancePtr,
     boolean                             parentLockThisInstance);
+#define IPDUM_STOP_SEC_CODE
+#include "IpduM_MemMap.h"
 
 /* handle ContainerTx transmission request */
+#define IPDUM_START_SEC_CODE
+#include "IpduM_MemMap.h"
 IPDUM_LOCAL Std_ReturnType IpduM_ContainerTxHandleSendPdu(
     IpduM_PartitionIDType               ipduMPartition,
     const IpduM_ContainerTxPduCfgType*  containerTxCfgPtr,
     IpduM_InnerContainerTxType*         innerContainerPtr,
     PduInfoType*                        triggPduInfoPtr,
     IpduM_InnerContainerTxInstanceType* txInstancePtr);
+#define IPDUM_STOP_SEC_CODE
+#include "IpduM_MemMap.h"
 
 /* this function is try to send  data of a instance to PduR or fill a requested buffer */
+#define IPDUM_START_SEC_CODE
+#include "IpduM_MemMap.h"
 IPDUM_LOCAL Std_ReturnType IpduM_ContainerTxSendPdu(
     const IpduM_ContainerTxPduCfgType*  containerTxCfgPtr,
     IpduM_InnerContainerTxType*         innerContainerPtr,
     PduInfoType*                        triggPduInfoPtr,
     IpduM_InnerContainerTxInstanceType* txInstancePtr,
     boolean*                            ReqDropInstancePtr);
+#define IPDUM_STOP_SEC_CODE
+#include "IpduM_MemMap.h"
 
 /* handle txRequest of a queue collected containedTxPdu */
+#define IPDUM_START_SEC_CODE
+#include "IpduM_MemMap.h"
 IPDUM_LOCAL Std_ReturnType IpduM_ContainedTxCollectQueuedAdd(
     PduIdType                          containedIndex,
     const IpduM_ContainerTxPduCfgType* containerTxCfgPtr,
     IpduM_InnerContainerTxType*        innerContainerPtr,
     const PduInfoType*                 PduInfoPtr);
+#define IPDUM_STOP_SEC_CODE
+#include "IpduM_MemMap.h"
 
 /* try to get a new write instance for a containerTxPdu and lock it */
+#define IPDUM_START_SEC_CODE
+#include "IpduM_MemMap.h"
 IPDUM_LOCAL boolean IpduM_ContainerTxGetNewWriteInstance(
     const IpduM_PartitionIDType        ipduMPartition,
     const IpduM_ContainerTxPduCfgType* containerTxCfgPtr,
     IpduM_InnerContainerTxType*        innerContainerPtr);
+#define IPDUM_STOP_SEC_CODE
+#include "IpduM_MemMap.h"
 
 /* whether a containerTxPdu is triggered by send request of a containedTxPdu */
+#define IPDUM_START_SEC_CODE
+#include "IpduM_MemMap.h"
 IPDUM_LOCAL uint8 IpduM_ContainerTxIsTriggerByContained(
     const IpduM_ContainedTxPduCfgType* containedTxCfgPtr,
     const IpduM_ContainerTxPduCfgType* containerTxCfgPtr,
     const IpduM_InnerContainerTxType*  innerContainerPtr);
+#define IPDUM_STOP_SEC_CODE
+#include "IpduM_MemMap.h"
 
 /* container tx confirmation handle */
+#define IPDUM_START_SEC_CODE
+#include "IpduM_MemMap.h"
 IPDUM_LOCAL void IpduM_TxConfirmOfContainer(PduIdType containerIndex, Std_ReturnType result);
+#define IPDUM_STOP_SEC_CODE
+#include "IpduM_MemMap.h"
 
 /* container tx i-pdu handle */
+#define IPDUM_START_SEC_CODE
+#include "IpduM_MemMap.h"
 IPDUM_LOCAL void IpduM_ContainerTxHandle(PduIdType containerIndex);
+#define IPDUM_STOP_SEC_CODE
+#include "IpduM_MemMap.h"
 
 /* release instance of containerTxPdu */
+#define IPDUM_START_SEC_CODE
+#include "IpduM_MemMap.h"
 IPDUM_LOCAL void IpduM_ContainerTxReleaseTxInstance(
     IpduM_PartitionIDType               ipduMPartition,
     const IpduM_ContainerTxPduCfgType*  containerTxCfgPtr,
     IpduM_InnerContainerTxInstanceType* txInstancePtr);
+#define IPDUM_STOP_SEC_CODE
+#include "IpduM_MemMap.h"
 
 /* whether instance is triggered before  */
+#define IPDUM_START_SEC_CODE
+#include "IpduM_MemMap.h"
 IPDUM_LOCAL void IpduM_ContainerCheckTxInstanceIsOverwrite(
     IpduM_PartitionIDType               ipduMPartition,
     const IpduM_ContainerTxPduCfgType*  containerTxCfgPtr,
     IpduM_InnerContainerTxType*         innerContainerTxPtr,
     IpduM_InnerContainerTxInstanceType* txInstancePtr);
+#define IPDUM_STOP_SEC_CODE
+#include "IpduM_MemMap.h"
 
 /* Init containerTxPud */
+#define IPDUM_START_SEC_CODE
+#include "IpduM_MemMap.h"
 IPDUM_LOCAL void IpduM_ContainerTxPduInit(IpduM_PartitionIDType ipduMPartition);
+#define IPDUM_STOP_SEC_CODE
+#include "IpduM_MemMap.h"
 #endif
 
 #if (IPDUM_CONTAINER_RX_NUMBER_MAX > 0u)
 
 /* in rx indiation handle container */
+#define IPDUM_START_SEC_CODE
+#include "IpduM_MemMap.h"
 IPDUM_LOCAL void IpduM_ContainerRxIndication(PduIdType containerIndex, const PduInfoType* PduInfoPtr);
+#define IPDUM_STOP_SEC_CODE
+#include "IpduM_MemMap.h"
 
 /* get ID field size in header */
+#define IPDUM_START_SEC_CODE
+#include "IpduM_MemMap.h"
 IPDUM_LOCAL uint8 IpduM_GetContaiedIDSize(uint8 headerSize);
+#define IPDUM_STOP_SEC_CODE
+#include "IpduM_MemMap.h"
 
 /* get DLC field size in header */
+#define IPDUM_START_SEC_CODE
+#include "IpduM_MemMap.h"
 IPDUM_LOCAL uint8 IpduM_GetContaiedDLCSize(uint8 headerSize);
+#define IPDUM_STOP_SEC_CODE
+#include "IpduM_MemMap.h"
 
 /* check Queue of a ContainerRxPdu is full or not*/
 IPDUM_LOCAL_INLINE void IpduM_ContainerCheckRxInstanceIsOverwrite(
@@ -286,29 +418,49 @@ IPDUM_LOCAL_INLINE void IpduM_ContainerCheckRxInstanceIsOverwrite(
     IpduM_InnerContainerRxInstanceType* rxInstancePtr);
 
 /* container rx i-pdu handle */
+#define IPDUM_START_SEC_CODE
+#include "IpduM_MemMap.h"
 IPDUM_LOCAL void IpduM_ContainerRxExtractInstance(
     const IpduM_ContainerRxPduCfgType*  containerRxCfgPtr,
     IpduM_InnerContainerRxInstanceType* rxContainerInstancePtr);
+#define IPDUM_STOP_SEC_CODE
+#include "IpduM_MemMap.h"
 
 /* extract containedRxPdu in a static containerRxPdu */
+#define IPDUM_START_SEC_CODE
+#include "IpduM_MemMap.h"
 IPDUM_LOCAL void IpduM_ContainerRxExtractStatic(
     const IpduM_ContainerRxPduCfgType*        containerRxCfgPtr,
     const IpduM_InnerContainerRxInstanceType* rxInstancePtr);
+#define IPDUM_STOP_SEC_CODE
+#include "IpduM_MemMap.h"
 
 /* extract containedRxPdu in a dynamic containerRxPdu */
+#define IPDUM_START_SEC_CODE
+#include "IpduM_MemMap.h"
 IPDUM_LOCAL void IpduM_ContainerRxExtractDynamic(
     const IpduM_ContainerRxPduCfgType*        containerRxCfgPtr,
     const IpduM_InnerContainerRxInstanceType* rxInstancePtr);
+#define IPDUM_STOP_SEC_CODE
+#include "IpduM_MemMap.h"
 
 /* get header information of containedRxPdu */
+#define IPDUM_START_SEC_CODE
+#include "IpduM_MemMap.h"
 IPDUM_LOCAL void IpduM_ContainerRxGetHeadInfomation(
     const uint8* dataBuffer,
     uint32*      headerIdPtr,
     uint32*      headerDlcPtr,
     uint8        headerSize);
+#define IPDUM_STOP_SEC_CODE
+#include "IpduM_MemMap.h"
 
 /* Init containerRxPdu */
+#define IPDUM_START_SEC_CODE
+#include "IpduM_MemMap.h"
 IPDUM_LOCAL void IpduM_ContainerRxPduInit(IpduM_PartitionIDType ipduMPartition);
+#define IPDUM_STOP_SEC_CODE
+#include "IpduM_MemMap.h"
 #endif
 
 /* convert partition index in EcuC to index of IpduM */
@@ -373,6 +525,8 @@ IPDUM_LOCAL const IpduM_ConfigType* IpduM_CfgPtr;
 #include "IpduM_MemMap.h"
 void IpduM_Init(const IpduM_ConfigType* config)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, IpduM, 0, Bsw_Start, 2, 0x00, config);
+
 #if (STD_ON == IPDUM_ECUC_MULTIPLE_PARTITION_USED)
     IpduM_PartitionIDType ecuCPartition  = (IpduM_PartitionIDType)GetApplicationID();
     IpduM_PartitionIDType ipduMPartition = IpduM_GetIpduMPartionByECUCParttion(ecuCPartition);
@@ -422,7 +576,8 @@ void IpduM_Init(const IpduM_ConfigType* config)
 #if (STD_ON == IPDUM_DEV_ERROR_DETECT)
     }
 #endif
-    return;
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, IpduM, 0, Bsw_Return, 1, 0x00);
 }
 #define IPDUM_STOP_SEC_CODE
 #include "IpduM_MemMap.h"
@@ -439,6 +594,8 @@ void IpduM_Init(const IpduM_ConfigType* config)
 #include "IpduM_MemMap.h"
 void IpduM_GetVersionInfo(Std_VersionInfoType* versioninfo)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, IpduM, 0, Bsw_Start, 2, 0x01, versioninfo);
+
 #if (STD_ON == IPDUM_DEV_ERROR_DETECT)
     if (NULL_PTR == versioninfo)
     {
@@ -453,6 +610,8 @@ void IpduM_GetVersionInfo(Std_VersionInfoType* versioninfo)
         versioninfo->sw_patch_version = IPDUM_C_SW_PATCH_VERSION;
         versioninfo->vendorID         = IPDUM_VENDOR_ID;
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, IpduM, 0, Bsw_Return, 1, 0x01);
 }
 #define IPDUM_STOP_SEC_CODE
 #include "IpduM_MemMap.h"
@@ -471,6 +630,8 @@ void IpduM_GetVersionInfo(Std_VersionInfoType* versioninfo)
 #include "IpduM_MemMap.h"
 Std_ReturnType IpduM_Transmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, IpduM, 0, Bsw_Start, 3, 0x03, TxPduId, PduInfoPtr);
+
     Std_ReturnType ret        = E_NOT_OK;
     PduIdType      cfgTxPduId = TxPduId;
 #if (IPDUM_CONFIG_NUM_OF_VARIANTS_USED > 1)
@@ -544,6 +705,9 @@ Std_ReturnType IpduM_Transmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr)
         }
 #endif
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, IpduM, 0, Bsw_Return, 2, 0x03, ret);
+
     return ret;
 }
 #define IPDUM_STOP_SEC_CODE
@@ -564,6 +728,8 @@ Std_ReturnType IpduM_Transmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr)
 #include "IpduM_MemMap.h"
 void IpduM_RxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, IpduM, 0, Bsw_Start, 3, 0x42, RxPduId, PduInfoPtr);
+
     PduIdType cfgRxPduId = RxPduId;
 #if (IPDUM_CONFIG_NUM_OF_VARIANTS_USED > 1)
     if (RxPduId < IPDUM_MAX_FOR_ALL_VARIANTS_RX_LOWER_LAYER_PDU_NUM)
@@ -612,7 +778,8 @@ void IpduM_RxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr)
         }
 #endif
     }
-    return;
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, IpduM, 0, Bsw_Return, 1, 0x42);
 }
 #define IPDUM_STOP_SEC_CODE_FAST
 #include "IpduM_MemMap.h"
@@ -628,6 +795,8 @@ void IpduM_RxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr)
 #include "IpduM_MemMap.h"
 void IpduM_TxConfirmation(PduIdType TxPduId, Std_ReturnType result)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, IpduM, 0, Bsw_Start, 3, 0x40, TxPduId, result);
+
     PduIdType cfgTxPduId = TxPduId;
 #if (IPDUM_CONFIG_NUM_OF_VARIANTS_USED > 1)
     if (TxPduId < IPDUM_MAX_FOR_ALL_VARIANTS_TX_PDU_TO_LOWER_LAYER_NUM)
@@ -672,7 +841,8 @@ void IpduM_TxConfirmation(PduIdType TxPduId, Std_ReturnType result)
         }
 #endif
     }
-    return;
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, IpduM, 0, Bsw_Return, 1, 0x40);
 }
 #define IPDUM_STOP_SEC_CODE_FAST
 #include "IpduM_MemMap.h"
@@ -692,6 +862,8 @@ void IpduM_TxConfirmation(PduIdType TxPduId, Std_ReturnType result)
 #include "IpduM_MemMap.h"
 Std_ReturnType IpduM_TriggerTransmit(PduIdType TxPduId, PduInfoType* PduInfoPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, IpduM, 0, Bsw_Start, 3, 0x41, TxPduId, PduInfoPtr);
+
     Std_ReturnType        ret            = E_NOT_OK;
     IpduM_PartitionIDType ipduMPartition = 0u;
 #if (STD_ON == IPDUM_DEV_ERROR_DETECT)
@@ -773,6 +945,9 @@ Std_ReturnType IpduM_TriggerTransmit(PduIdType TxPduId, PduInfoType* PduInfoPtr)
         }
 #endif
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, IpduM, 0, Bsw_Return, 2, 0x41, ret);
+
     return ret;
 }
 #define IPDUM_STOP_SEC_CODE_FAST
@@ -794,6 +969,8 @@ Scheduled functions
 #include "IpduM_MemMap.h"
 void IpduM_MainFunctionTx(IpduM_PartitionIDType ipduMPartitionId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, IpduM, 0, Bsw_Start, 2, 0x12, ipduMPartitionId);
+
 #if (IPDUM_CONTAINER_TX_NUMBER_MAX > 0u)
     if (1u == IpduM_InitStatus[ipduMPartitionId])
     {
@@ -820,7 +997,8 @@ void IpduM_MainFunctionTx(IpduM_PartitionIDType ipduMPartitionId)
         }
     }
 #endif
-    return;
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, IpduM, 0, Bsw_Return, 1, 0x12);
 }
 #define IPDUM_STOP_SEC_CODE
 #include "IpduM_MemMap.h"
@@ -841,6 +1019,8 @@ Scheduled functions
 #include "IpduM_MemMap.h"
 void IpduM_MainFunctionRx(IpduM_PartitionIDType ipduMPartitionId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, IpduM, 0, Bsw_Start, 2, 0x11, ipduMPartitionId);
+
 #if (IPDUM_CONTAINER_RX_NUMBER_MAX > 0u)
     if (1u == IpduM_InitStatus[ipduMPartitionId])
     {
@@ -908,7 +1088,8 @@ void IpduM_MainFunctionRx(IpduM_PartitionIDType ipduMPartitionId)
         }
     }
 #endif
-    return;
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, IpduM, 0, Bsw_Return, 1, 0x11);
 }
 #define IPDUM_STOP_SEC_CODE
 #include "IpduM_MemMap.h"
@@ -1736,6 +1917,8 @@ IPDUM_LOCAL_INLINE PduLengthType IpduM_ConverIndexInQueueToLocalPosition(
     return localPosition;
 }
 
+#define IPDUM_START_SEC_CODE
+#include "IpduM_MemMap.h"
 IPDUM_LOCAL Std_ReturnType IpduM_InsertContainedToInstanceInOrder(
     const IpduM_ContainerTxPduCfgType*  containerTxCfgPtr,
     IpduM_InnerContainerTxType*         innerContainerPtr,
@@ -1824,6 +2007,8 @@ IPDUM_LOCAL Std_ReturnType IpduM_InsertContainedToInstanceInOrder(
     }
     return ret;
 }
+#define IPDUM_STOP_SEC_CODE
+#include "IpduM_MemMap.h"
 
 #if (IPDUM_CONTAINEDTXPDU_PRIORITY_ENABLE == STD_ON)
 IPDUM_LOCAL_INLINE uint8 IpduM_GetContainedPduPriority(

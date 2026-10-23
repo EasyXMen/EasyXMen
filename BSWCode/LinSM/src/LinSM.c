@@ -33,11 +33,11 @@
 #if LINSM_DEV_ERROR_DETECT == STD_ON
 #include "Det.h"
 #endif
+#include "LinSM_Arti.h"
 
 /* ===================================================== macros ===================================================== */
 #define LINSM_NETWORK_HANDLE(ch)             LinSM_CfgPtr->ChannelPtr[ch].ComMNetworkHandleRef
 #define LINSM_CONFIRMATION_TIMEOUT(ch)       LinSM_CfgPtr->ChannelPtr[ch].ConfirmationTimeout
-#define LINSM_MODE_REQUEST_REPETITION_MAX()  LinSM_CfgPtr->ModeRequestRepetitionMax
 #define LINSM_NODE_TYPE(ch)                  LinSM_CfgPtr->ChannelPtr[ch].NodeType
 #define LINSM_SILENCEAFTERWAKEUP_TIMEOUT(ch) LinSM_CfgPtr->ChannelPtr[ch].SilenceAfterWakeupTimeout
 #define LINSM_RUNTIME_PTR(ch)                LinSM_CfgPtr->ChannelPtr[ch].RuntimePtr
@@ -52,8 +52,8 @@
 #endif
 
 #if LINSM_DEV_ERROR_DETECT == STD_ON
-#define LINSM_CHANNEL_SCHEDULE_INDEX(ch) LinSM_CfgPtr->ChannelPtr[ch].ScheduleIndex
-#define LINSM_CHANNEL_SCHEDULE_NUM(ch)   LinSM_CfgPtr->ChannelPtr[ch].ScheduleNum
+#define LINSM_CHANNEL_SCHEDULE_INDEX(ch) LinSM_CfgPtr->ScheduleIndexPtr[ch].LinSMScheduleIndex
+#define LINSM_CHANNEL_SCHEDULE_NUM(ch)   LinSM_CfgPtr->ScheduleIndexPtr[ch].LinSMScheduleNum
 #endif
 
 #define LINSM_UNUSED(x) (void)(x)
@@ -83,7 +83,6 @@ typedef enum
 /* ========================================== internal function declarations ======================================== */
 #define LINSM_START_SEC_CODE
 #include "LinSM_MemMap.h"
-
 /**
  * @brief       Function to handle the wake-up timer periodically
  * @param[in]   chlIdx : Index of the LIN channel.
@@ -92,6 +91,11 @@ typedef enum
  * @trace       CPD-59551
  */
 LINSM_LOCAL void LinSM_HandleWakeupPeriod(LinSM_ChannelIndexType chlIdx);
+#define LINSM_STOP_SEC_CODE
+#include "LinSM_MemMap.h"
+
+#define LINSM_START_SEC_CODE
+#include "LinSM_MemMap.h"
 /**
  * @brief       Function to handle the silent timers periodically
  * @param[in]   chlIdx : Index of the LIN channel.
@@ -100,7 +104,11 @@ LINSM_LOCAL void LinSM_HandleWakeupPeriod(LinSM_ChannelIndexType chlIdx);
  * @trace       CPD-66106
  */
 LINSM_LOCAL void LinSM_HandleSilencePeriod(LinSM_ChannelIndexType chlIdx);
+#define LINSM_STOP_SEC_CODE
+#include "LinSM_MemMap.h"
 
+#define LINSM_START_SEC_CODE
+#include "LinSM_MemMap.h"
 /**
  * @brief       The trigger channel starts the wake-up process.
  * @param[in]   chlIdx   : Index of the LIN channel.
@@ -113,6 +121,11 @@ LINSM_LOCAL void LinSM_HandleSilencePeriod(LinSM_ChannelIndexType chlIdx);
  * @trace       CPD-66104
  */
 LINSM_LOCAL Std_ReturnType LinSM_TriggerFullCom(LinSM_ChannelIndexType chlIdx, boolean oneShot);
+#define LINSM_STOP_SEC_CODE
+#include "LinSM_MemMap.h"
+
+#define LINSM_START_SEC_CODE
+#include "LinSM_MemMap.h"
 /**
  * @brief       The trigger channel starts the go-to-sleep process.
  * @param[in]   chlIdx   : Index of the LIN channel.
@@ -124,7 +137,11 @@ LINSM_LOCAL Std_ReturnType LinSM_TriggerFullCom(LinSM_ChannelIndexType chlIdx, b
  * @trace       CPD-66105
  */
 LINSM_LOCAL Std_ReturnType LinSM_TriggerGotoSleep(LinSM_ChannelIndexType chlIdx);
+#define LINSM_STOP_SEC_CODE
+#include "LinSM_MemMap.h"
 
+#define LINSM_START_SEC_CODE
+#include "LinSM_MemMap.h"
 /**
  * @brief       Find the index of the channel in the LinSM according to ComMNetwork.
  * @param[in]   network   : Index of the ComM network.
@@ -135,6 +152,11 @@ LINSM_LOCAL Std_ReturnType LinSM_TriggerGotoSleep(LinSM_ChannelIndexType chlIdx)
  * @trace       CPD-59657
  */
 LINSM_LOCAL LinSM_ChannelIndexType LinSM_GetChannelByNetworkHandle(NetworkHandleType network);
+#define LINSM_STOP_SEC_CODE
+#include "LinSM_MemMap.h"
+
+#define LINSM_START_SEC_CODE
+#include "LinSM_MemMap.h"
 /**
  * @brief       Find the index of the partition in the Linsm involved partition according to ApplicationID.
  * @return      uint16
@@ -144,17 +166,29 @@ LINSM_LOCAL LinSM_ChannelIndexType LinSM_GetChannelByNetworkHandle(NetworkHandle
  * @trace       CPD-66107
  */
 LINSM_LOCAL uint16 LinSM_GetPartitionIndex(void);
+#define LINSM_STOP_SEC_CODE
+#include "LinSM_MemMap.h"
+
+/**
+ * @brief       get the maximum number of repetitions for mode request in wakeup process
+ * @return      uint8
+ * @retval      The maximum number of repetitions for mode request in wakeup process, 0 means no repetition
+ * @reentrant   TRUE
+ * @synchronous TRUE
+ * @trace
+ */
+LINSM_LOCAL_INLINE uint8 LinSM_GetModeRequestRepetitionMax(void);
 
 #if LINSM_DEV_ERROR_DETECT == STD_ON
 #ifdef QAC_ANALYZE
-#pragma PRQA_NO_SIDE_EFFECTS LinSM_ValidatePartitionContext
 #pragma PRQA_NO_SIDE_EFFECTS LinSM_ValidateInitStatus
-#pragma PRQA_NO_SIDE_EFFECTS LinSM_ValidateNetworkHandle
 #pragma PRQA_NO_SIDE_EFFECTS LinSM_ValidatePointer
-#if LINSM_MASTER_NODE_SUPPORT == STD_ON
+#pragma PRQA_NO_SIDE_EFFECTS LinSM_ValidateNetworkHandle
 #pragma PRQA_NO_SIDE_EFFECTS LinSM_ValidateSchedule
+#pragma PRQA_NO_SIDE_EFFECTS LinSM_ValidatePartitionContext
 #endif
-#endif
+#define LINSM_START_SEC_CODE
+#include "LinSM_MemMap.h"
 /**
  * @brief       Check that the current running partition is valid.
  * @param[in]   apiId   : The ID of the API to use when calling this function.
@@ -165,6 +199,11 @@ LINSM_LOCAL uint16 LinSM_GetPartitionIndex(void);
  * @trace       CPD-66108
  */
 LINSM_LOCAL boolean LinSM_ValidatePartitionContext(uint8 apiId);
+#define LINSM_STOP_SEC_CODE
+#include "LinSM_MemMap.h"
+
+#define LINSM_START_SEC_CODE
+#include "LinSM_MemMap.h"
 /**
  * @brief       Checks if the current initialization state is valid
  * @param[in]   apiId   : The ID of the API to use when calling this function.
@@ -175,6 +214,11 @@ LINSM_LOCAL boolean LinSM_ValidatePartitionContext(uint8 apiId);
  * @trace       CPD-66109
  */
 LINSM_LOCAL boolean LinSM_ValidateInitStatus(uint8 apiId);
+#define LINSM_STOP_SEC_CODE
+#include "LinSM_MemMap.h"
+
+#define LINSM_START_SEC_CODE
+#include "LinSM_MemMap.h"
 /**
  * @brief       Check that the current channel of ComMNetwork is valid
  * @param[in]   apiId   : The ID of the API to use when calling this function.
@@ -186,6 +230,11 @@ LINSM_LOCAL boolean LinSM_ValidateInitStatus(uint8 apiId);
  * @trace       CPD-66111
  */
 LINSM_LOCAL boolean LinSM_ValidateNetworkHandle(uint8 apiId, NetworkHandleType network);
+#define LINSM_STOP_SEC_CODE
+#include "LinSM_MemMap.h"
+
+#define LINSM_START_SEC_CODE
+#include "LinSM_MemMap.h"
 /**
  * @brief       Check that the function parameter pointer is valid.
  * @param[in]   apiId   : The ID of the API to use when calling this function.
@@ -197,7 +246,11 @@ LINSM_LOCAL boolean LinSM_ValidateNetworkHandle(uint8 apiId, NetworkHandleType n
  * @trace       CPD-66110
  */
 LINSM_LOCAL boolean LinSM_ValidatePointer(uint8 apiId, const void* pointer);
+#define LINSM_STOP_SEC_CODE
+#include "LinSM_MemMap.h"
 #if LINSM_MASTER_NODE_SUPPORT == STD_ON
+#define LINSM_START_SEC_CODE
+#include "LinSM_MemMap.h"
 /**
  * @brief       Check that the schedule table is valid.
  * @param[in]   apiId   : The ID of the API to use when calling this function.
@@ -210,8 +263,12 @@ LINSM_LOCAL boolean LinSM_ValidatePointer(uint8 apiId, const void* pointer);
  * @trace       CPD-59658
  */
 LINSM_LOCAL boolean LinSM_ValidateSchedule(uint8 apiId, NetworkHandleType network, LinIf_SchHandleType schedule);
+#define LINSM_STOP_SEC_CODE
+#include "LinSM_MemMap.h"
 #endif
 #endif
+#define LINSM_START_SEC_CODE
+#include "LinSM_MemMap.h"
 /**
  * @brief       Check if the request for communication mode is valid.
  * @param[in]   apiId   : The ID of the API to use when calling this function.
@@ -223,7 +280,6 @@ LINSM_LOCAL boolean LinSM_ValidateSchedule(uint8 apiId, NetworkHandleType networ
  * @trace       CPD-66113
  */
 LINSM_LOCAL boolean LinSM_ValidateRequestComMode(uint8 apiId, ComM_ModeType mode);
-
 #define LINSM_STOP_SEC_CODE
 #include "LinSM_MemMap.h"
 
@@ -251,6 +307,7 @@ LINSM_LOCAL const LinSM_ConfigType* LinSM_CfgPtr;
  */
 void LinSM_Init(const LinSM_ConfigType* ConfigPtr)
 {
+    LinSM_ArtiApiStart(2, LINSM_SERVICE_ID_INIT, ConfigPtr);
 #if LINSM_DEV_ERROR_DETECT == STD_ON
     if (LinSM_ValidatePartitionContext(LINSM_SERVICE_ID_INIT) && LinSM_ValidateInitStatus(LINSM_SERVICE_ID_INIT)
         && LinSM_ValidatePointer(LINSM_SERVICE_ID_INIT, ConfigPtr))
@@ -268,7 +325,7 @@ void LinSM_Init(const LinSM_ConfigType* ConfigPtr)
         {
             LinSM_RunTimeType* LinSM_RTPtr = LINSM_RUNTIME_PTR(loop);
 #if LINSM_MULTIPLE_PARTITION_USED == STD_ON
-            if (LINSM_PARTITION_ID(loop) != applicationID)
+            if (LINSM_PARTITION_ID(loop) == applicationID)
 #endif
             {
                 /** SWS_LinSM_00152 SWS_LinSM_00160 */
@@ -296,15 +353,21 @@ void LinSM_Init(const LinSM_ConfigType* ConfigPtr)
         LinSM_ModuleStatus[partitionIndex] = LINSM_INIT;
         SchM_Exit_LinSM_Context();
     }
+    LinSM_ArtiApiReturn(1, LINSM_SERVICE_ID_INIT);
 }
+#define LINSM_STOP_SEC_CODE
+#include "LinSM_MemMap.h"
 
 #if LINSM_MASTER_NODE_SUPPORT == STD_ON
+#define LINSM_START_SEC_CODE
+#include "LinSM_MemMap.h"
 /**
  * The upper layer requests a schedule table to be changed on one LIN network.
  */
 Std_ReturnType LinSM_ScheduleRequest(NetworkHandleType network, LinIf_SchHandleType schedule)
 {
     Std_ReturnType ret = E_NOT_OK;
+    LinSM_ArtiApiStart(3, LINSM_SERVICE_ID_SCHEDULE_REQUEST, network, schedule);
 #if LINSM_DEV_ERROR_DETECT == STD_ON
     if (LinSM_ValidatePartitionContext(LINSM_SERVICE_ID_SCHEDULE_REQUEST)
         && LinSM_ValidateInitStatus(LINSM_SERVICE_ID_SCHEDULE_REQUEST)
@@ -319,7 +382,7 @@ Std_ReturnType LinSM_ScheduleRequest(NetworkHandleType network, LinIf_SchHandleT
         if (LinSM_RTPtr->ChannelComMode == LINSM_FULL_COM)
         {
             /** SWS_LinSM_00079 SWS_LinSM_00168 */
-            ret = LinIf_ScheduleRequest(network, LinSM_CfgPtr->SchedulePtr[schedule]);
+            ret = LinIf_ScheduleRequest(network, schedule);
 
             if (ret == E_NOT_OK)
             {
@@ -327,16 +390,22 @@ Std_ReturnType LinSM_ScheduleRequest(NetworkHandleType network, LinIf_SchHandleT
             }
         }
     }
+    LinSM_ArtiApiReturn(2, LINSM_SERVICE_ID_SCHEDULE_REQUEST, ret);
     return ret;
 }
+#define LINSM_STOP_SEC_CODE
+#include "LinSM_MemMap.h"
 #endif
 
+#if LINSM_VERSION_INFO_API == STD_ON
+#define LINSM_START_SEC_CODE
+#include "LinSM_MemMap.h"
 /**
  * Function to get the version information of LinSM
  */
-#if LINSM_VERSION_INFO_API == STD_ON
 void LinSM_GetVersionInfo(Std_VersionInfoType* versioninfo)
 {
+    LinSM_ArtiApiStart(2, LINSM_SERVICE_ID_GET_VERSIONINFO, versioninfo);
 #if LINSM_DEV_ERROR_DETECT == STD_ON
     if (LinSM_ValidatePointer(LINSM_SERVICE_ID_GET_VERSIONINFO, versioninfo))
 #endif
@@ -347,15 +416,21 @@ void LinSM_GetVersionInfo(Std_VersionInfoType* versioninfo)
         (versioninfo)->sw_minor_version = LINSM_SW_MINOR_VERSION;
         (versioninfo)->sw_patch_version = LINSM_SW_PATCH_VERSION;
     }
+    LinSM_ArtiApiReturn(1, LINSM_SERVICE_ID_GET_VERSIONINFO);
 }
+#define LINSM_STOP_SEC_CODE
+#include "LinSM_MemMap.h"
 #endif
 
+#define LINSM_START_SEC_CODE
+#include "LinSM_MemMap.h"
 /**
  * Function to query the current communication mode.
  */
 Std_ReturnType LinSM_GetCurrentComMode(NetworkHandleType network, ComM_ModeType* mode)
 {
     Std_ReturnType ret = E_NOT_OK;
+    LinSM_ArtiApiStart(3, LINSM_SERVICE_ID_GET_CURRENTCOMMODE, network, mode);
 #if LINSM_DEV_ERROR_DETECT == STD_ON
     if (LinSM_ValidatePartitionContext(LINSM_SERVICE_ID_GET_CURRENTCOMMODE)
         && LinSM_ValidateInitStatus(LINSM_SERVICE_ID_GET_CURRENTCOMMODE)
@@ -379,18 +454,24 @@ Std_ReturnType LinSM_GetCurrentComMode(NetworkHandleType network, ComM_ModeType*
 
         ret = E_OK;
     }
+    LinSM_ArtiApiReturn(2, LINSM_SERVICE_ID_GET_CURRENTCOMMODE, ret);
     return ret;
 }
+#define LINSM_STOP_SEC_CODE
+#include "LinSM_MemMap.h"
 
+/* PRQA S 6070 ++ */ /* VL_MTR_LinSM_STCAL */
+#define LINSM_START_SEC_CODE
+#include "LinSM_MemMap.h"
 /**
  * Requesting of a communication mode.
  * The mode switch will not be made instant. The LinSM will notify the caller when mode transition is made.
  */
-/* PRQA S 6070 ++ */ /* VL_MTR_LinSM_STCAL */
 Std_ReturnType LinSM_RequestComMode(NetworkHandleType network, ComM_ModeType mode)
 /* PRQA S 6070 -- */ /* VL_MTR_LinSM_STCAL */
 {
     Std_ReturnType ret = E_NOT_OK;
+    LinSM_ArtiApiStart(3, LINSM_SERVICE_ID_REQUEST_COMMODE, network, mode);
 
     if (LinSM_ValidateRequestComMode(LINSM_SERVICE_ID_REQUEST_COMMODE, mode)
 #if LINSM_DEV_ERROR_DETECT == STD_ON
@@ -413,7 +494,11 @@ Std_ReturnType LinSM_RequestComMode(NetworkHandleType network, ComM_ModeType mod
 
         /** SWS_LinSM_00035 */
         if ((mode == COMM_NO_COMMUNICATION) && (LinSM_RTPtr->ChannelComMode == LINSM_FULL_COM)
-            && (LinSM_RTPtr->FullComSubStatus == LINSM_RUN_COMMUNICATION))
+            && ((LinSM_RTPtr->FullComSubStatus == LINSM_RUN_COMMUNICATION)
+#if LINSM_SLAVE_NODE_SUPPORT == STD_ON
+                || (LinSM_RTPtr->GotoSleepIndicated && (LinSM_RTPtr->RunningReq != LINSM_EXE_GOTO_SLEEP))
+#endif
+                    ))
         {
             /** SWS_LinSM_10208 SWS_LinSM_10209 */
             if ((LINSM_NODE_TYPE(chl) == LINSM_MASTER)
@@ -442,14 +527,20 @@ Std_ReturnType LinSM_RequestComMode(NetworkHandleType network, ComM_ModeType mod
         LinSM_RTPtr->ReqComMode     = mode;
         LinSM_RTPtr->ReqComModeFlag = TRUE;
     }
+    LinSM_ArtiApiReturn(2, LINSM_SERVICE_ID_REQUEST_COMMODE, ret);
     return ret;
 }
+#define LINSM_STOP_SEC_CODE
+#include "LinSM_MemMap.h"
 
+#define LINSM_START_SEC_CODE
+#include "LinSM_MemMap.h"
 /**
  * Periodic function that runs the timers of different request timeouts
  */
 void LinSM_MainFunction(LinSM_ChannelIndexType chlIndex)
 {
+    LinSM_ArtiApiStart(2, LINSM_SERVICE_ID_MAIN_FUNCTION, chlIndex);
     if (LinSM_ModuleStatus[LinSM_GetPartitionIndex()] == LINSM_INIT)
     {
         LinSM_RunTimeType* LinSM_RTPtr = LINSM_RUNTIME_PTR(chlIndex);
@@ -460,6 +551,7 @@ void LinSM_MainFunction(LinSM_ChannelIndexType chlIndex)
             LinSM_RTPtr->TimerCnt--;
         }
 
+        SchM_Enter_LinSM_Context();
         if ((LinSM_RTPtr->RunningReq == LINSM_EXE_WAKE_UP) && (LinSM_RTPtr->TimerCnt == 0u))
         {
             if (LinSM_RTPtr->TimerType == LINSM_WAKEUP_TIMER)
@@ -472,9 +564,10 @@ void LinSM_MainFunction(LinSM_ChannelIndexType chlIndex)
             }
             else
             {
-                /* do nothing */
+                /*do nothing*/
             }
         }
+        SchM_Exit_LinSM_Context();
 
 #if LINSM_MASTER_NODE_SUPPORT == STD_ON
         /** SWS_LinSM_00206 SWS_LinSM_00207 */
@@ -485,19 +578,24 @@ void LinSM_MainFunction(LinSM_ChannelIndexType chlIndex)
         }
 #endif
     }
+    LinSM_ArtiApiReturn(1, LINSM_SERVICE_ID_MAIN_FUNCTION);
 }
+#define LINSM_STOP_SEC_CODE
+#include "LinSM_MemMap.h"
 
 #if LINSM_MASTER_NODE_SUPPORT == STD_ON
+#define LINSM_START_SEC_CODE
+#include "LinSM_MemMap.h"
 /**
  * The LinIf module will call this callback when the new requested schedule table is active.
  */
 void LinSM_ScheduleRequestConfirmation(NetworkHandleType network, LinIf_SchHandleType schedule)
 {
+    LinSM_ArtiApiStart(3, LINSM_SERVICE_ID_SCHEDULEREQUEST_CONFIRMATION, network, schedule);
 #if LINSM_DEV_ERROR_DETECT == STD_ON
     if (LinSM_ValidatePartitionContext(LINSM_SERVICE_ID_SCHEDULEREQUEST_CONFIRMATION)
         && LinSM_ValidateInitStatus(LINSM_SERVICE_ID_SCHEDULEREQUEST_CONFIRMATION)
-        && LinSM_ValidateNetworkHandle(LINSM_SERVICE_ID_SCHEDULEREQUEST_CONFIRMATION, network)
-        && LinSM_ValidateSchedule(LINSM_SERVICE_ID_SCHEDULEREQUEST_CONFIRMATION, network, schedule))
+        && LinSM_ValidateNetworkHandle(LINSM_SERVICE_ID_SCHEDULEREQUEST_CONFIRMATION, network))
 #endif
     {
         LinSM_ChannelIndexType chl         = LinSM_GetChannelByNetworkHandle(network);
@@ -506,15 +604,21 @@ void LinSM_ScheduleRequestConfirmation(NetworkHandleType network, LinIf_SchHandl
         LinSM_RTPtr->CurSchedule    = schedule;
         LinSM_RTPtr->ReportSchedule = TRUE;
     }
+    LinSM_ArtiApiReturn(1, LINSM_SERVICE_ID_SCHEDULEREQUEST_CONFIRMATION);
 }
+#define LINSM_STOP_SEC_CODE
+#include "LinSM_MemMap.h"
 #endif
 
 #if LINSM_SLAVE_NODE_SUPPORT == STD_ON
+#define LINSM_START_SEC_CODE
+#include "LinSM_MemMap.h"
 /**
  * The LinIf will call this callback when the go to sleep command is received on the network or a bus idle timeout
  */
 void LinSM_GotoSleepIndication(NetworkHandleType network)
 {
+    LinSM_ArtiApiStart(2, LINSM_SERVICE_ID_GOTOSLEEP_INDICATION, network);
 #if LINSM_DEV_ERROR_DETECT == STD_ON
     if (LinSM_ValidatePartitionContext(LINSM_SERVICE_ID_GOTOSLEEP_INDICATION)
         && LinSM_ValidateInitStatus(LINSM_SERVICE_ID_GOTOSLEEP_INDICATION)
@@ -532,17 +636,23 @@ void LinSM_GotoSleepIndication(NetworkHandleType network)
             }
         }
     }
+    LinSM_ArtiApiReturn(1, LINSM_SERVICE_ID_GOTOSLEEP_INDICATION);
 }
+#define LINSM_STOP_SEC_CODE
+#include "LinSM_MemMap.h"
 #endif
 
+/* PRQA S 6070 ++ */ /* VL_MTR_LinSM_STCAL */
+#define LINSM_START_SEC_CODE
+#include "LinSM_MemMap.h"
 /**
  * The LinIf will call this callback when the go to sleep command is sent successfully
  * or not sent successfully on the network.
  */
-/* PRQA S 6070 ++ */ /* VL_MTR_LinSM_STCAL */
 void LinSM_GotoSleepConfirmation(NetworkHandleType network, boolean success)
 /* PRQA S 6070 -- */ /* VL_MTR_LinSM_STCAL */
 {
+    LinSM_ArtiApiStart(3, LINSM_SERVICE_ID_GOTOSLEEP_CONFIRMATION, network, success);
 #if LINSM_DEV_ERROR_DETECT == STD_ON
     if (LinSM_ValidatePartitionContext(LINSM_SERVICE_ID_GOTOSLEEP_CONFIRMATION)
         && LinSM_ValidateInitStatus(LINSM_SERVICE_ID_GOTOSLEEP_CONFIRMATION)
@@ -592,16 +702,22 @@ void LinSM_GotoSleepConfirmation(NetworkHandleType network, boolean success)
     }
 
     LINSM_UNUSED(success);
+    LinSM_ArtiApiReturn(1, LINSM_SERVICE_ID_GOTOSLEEP_CONFIRMATION);
 }
+#define LINSM_STOP_SEC_CODE
+#include "LinSM_MemMap.h"
 
+/* PRQA S 6070 ++ */ /* VL_MTR_LinSM_STCAL */
+#define LINSM_START_SEC_CODE
+#include "LinSM_MemMap.h"
 /**
  * The LinIf will call this callback when the wake up signal command is sent not successfully/successfully on the
  * network.
  */
-/* PRQA S 6070 ++ */ /* VL_MTR_LinSM_STCAL */
 void LinSM_WakeupConfirmation(NetworkHandleType network, boolean success)
 /* PRQA S 6070 -- */ /* VL_MTR_LinSM_STCAL */
 {
+    LinSM_ArtiApiStart(3, LINSM_SERVICE_ID_WAKEUP_CONFIRMATION, network, success);
 #if LINSM_DEV_ERROR_DETECT == STD_ON
     if (LinSM_ValidatePartitionContext(LINSM_SERVICE_ID_WAKEUP_CONFIRMATION)
         && LinSM_ValidateInitStatus(LINSM_SERVICE_ID_WAKEUP_CONFIRMATION)
@@ -654,9 +770,20 @@ void LinSM_WakeupConfirmation(NetworkHandleType network, boolean success)
             }
         }
     }
+    LinSM_ArtiApiReturn(1, LINSM_SERVICE_ID_WAKEUP_CONFIRMATION);
 }
+#define LINSM_STOP_SEC_CODE
+#include "LinSM_MemMap.h"
 
 /* ========================================== internal function definitions ========================================= */
+LINSM_LOCAL_INLINE uint8 LinSM_GetModeRequestRepetitionMax(void)
+{
+    uint8 repMax = LinSM_CfgPtr->ModeRequestRepetitionMax;
+    return ((repMax > 0u) ? (uint8)(repMax - 1u) : 0u);
+}
+
+#define LINSM_START_SEC_CODE
+#include "LinSM_MemMap.h"
 LINSM_LOCAL Std_ReturnType LinSM_TriggerFullCom(LinSM_ChannelIndexType chlIdx, boolean oneShot)
 {
     LinSM_RunTimeType* LinSM_RTPtr = LINSM_RUNTIME_PTR(chlIdx);
@@ -673,7 +800,7 @@ LINSM_LOCAL Std_ReturnType LinSM_TriggerFullCom(LinSM_ChannelIndexType chlIdx, b
         if (oneShot)
         {
             /** The number of WakeupRetryCnt is loaded when the wake-up process is triggered only once. */
-            LinSM_RTPtr->WakeupRetryCnt = LINSM_MODE_REQUEST_REPETITION_MAX();
+            LinSM_RTPtr->WakeupRetryCnt = LinSM_GetModeRequestRepetitionMax();
         }
     }
 
@@ -684,7 +811,11 @@ LINSM_LOCAL Std_ReturnType LinSM_TriggerFullCom(LinSM_ChannelIndexType chlIdx, b
     SchM_Exit_LinSM_Context();
     return ret;
 }
+#define LINSM_STOP_SEC_CODE
+#include "LinSM_MemMap.h"
 
+#define LINSM_START_SEC_CODE
+#include "LinSM_MemMap.h"
 LINSM_LOCAL Std_ReturnType LinSM_TriggerGotoSleep(LinSM_ChannelIndexType chlIdx)
 {
     LinSM_RunTimeType* LinSM_RTPtr = LINSM_RUNTIME_PTR(chlIdx);
@@ -702,7 +833,11 @@ LINSM_LOCAL Std_ReturnType LinSM_TriggerGotoSleep(LinSM_ChannelIndexType chlIdx)
     }
     return ret;
 }
+#define LINSM_STOP_SEC_CODE
+#include "LinSM_MemMap.h"
 
+#define LINSM_START_SEC_CODE
+#include "LinSM_MemMap.h"
 /**
  * SlienceAfterWakeupTimer timeout
  */
@@ -715,7 +850,8 @@ LINSM_LOCAL void LinSM_HandleSilencePeriod(LinSM_ChannelIndexType chlIdx)
     {
         LinSM_RTPtr->TimerType      = LINSM_WAKEUP_TIMER;
         LinSM_RTPtr->TimerCnt       = LINSM_CONFIRMATION_TIMEOUT(chlIdx);
-        LinSM_RTPtr->WakeupRetryCnt = LINSM_MODE_REQUEST_REPETITION_MAX();
+        LinSM_RTPtr->WakeupRetryCnt = LinSM_GetModeRequestRepetitionMax();
+        (void)LinSM_TriggerGotoSleep(chlIdx);
     }
     else
     {
@@ -724,17 +860,20 @@ LINSM_LOCAL void LinSM_HandleSilencePeriod(LinSM_ChannelIndexType chlIdx)
     }
     SchM_Exit_LinSM_Context();
 }
+#define LINSM_STOP_SEC_CODE
+#include "LinSM_MemMap.h"
 
+#define LINSM_START_SEC_CODE
+#include "LinSM_MemMap.h"
 /**
  * WakeupTimer timeout
  */
 LINSM_LOCAL void LinSM_HandleWakeupPeriod(LinSM_ChannelIndexType chlIdx)
 {
-    SchM_Enter_LinSM_Context();
     LinSM_RunTimeType* LinSM_RTPtr = LINSM_RUNTIME_PTR(chlIdx);
 
     /** SWS_LinSM_00102 */
-    if (LINSM_MODE_REQUEST_REPETITION_MAX() > 0u)
+    if (LinSM_CfgPtr->ModeRequestRepetitionMax > 0u)
     {
         if (LinSM_RTPtr->WakeupRetryCnt == 0u)
         {
@@ -750,7 +889,7 @@ LINSM_LOCAL void LinSM_HandleWakeupPeriod(LinSM_ChannelIndexType chlIdx)
             }
             else
             {
-                LinSM_RTPtr->WakeupRetryCnt = LINSM_MODE_REQUEST_REPETITION_MAX();
+                LinSM_RTPtr->WakeupRetryCnt = LinSM_GetModeRequestRepetitionMax();
             }
         }
         else
@@ -758,18 +897,35 @@ LINSM_LOCAL void LinSM_HandleWakeupPeriod(LinSM_ChannelIndexType chlIdx)
             LinSM_RTPtr->WakeupRetryCnt--;
         }
     }
-    SchM_Exit_LinSM_Context();
 
     if (LinSM_RTPtr->ReqComModeFlag && (LinSM_RTPtr->ReqComMode == COMM_FULL_COMMUNICATION))
     {
-        if (LinSM_RTPtr->TimerType != LINSM_SILENCEWAKEUP_TIMER)
+        /** SWS_LinSM_00304 SWS_LinSM_00235 */
+        if (LINSM_NODE_TYPE(chlIdx) == LINSM_MASTER)
         {
-            /** SWS_LinSM_00304 SWS_LinSM_00235 */
+            /** Master node: directly trigger full communication */
             (void)LinSM_TriggerFullCom(chlIdx, FALSE);
+        }
+        else if (LinSM_RTPtr->TimerType != LINSM_SILENCEWAKEUP_TIMER)
+        {
+            /*
+             * Slave node: Due to conflict with issue SWS_Lin_00140, the wakeup flow is modified:
+             * call LinSM_TriggerGotoSleep() first, wait until LinSM_GotoSleepConfirmation confirms
+             * sleep completion, then call LinSM_TriggerFullCom().
+             */
+            (void)LinSM_TriggerGotoSleep(chlIdx);
+        }
+        else
+        {
+            /** Slave node in SilenceAfterWakeup: wait for timer expiry before proceeding */
         }
     }
 }
+#define LINSM_STOP_SEC_CODE
+#include "LinSM_MemMap.h"
 
+#define LINSM_START_SEC_CODE
+#include "LinSM_MemMap.h"
 /**
  * Get LinSM channel id coresponding to input network
  */
@@ -787,7 +943,11 @@ LINSM_LOCAL LinSM_ChannelIndexType LinSM_GetChannelByNetworkHandle(NetworkHandle
 
     return loop;
 }
+#define LINSM_STOP_SEC_CODE
+#include "LinSM_MemMap.h"
 
+#define LINSM_START_SEC_CODE
+#include "LinSM_MemMap.h"
 /**
  * Get the PartitionStatus structure address according to the applicationID
  */
@@ -806,19 +966,31 @@ LINSM_LOCAL uint16 LinSM_GetPartitionIndex(void)
 #endif
     return index;
 }
+#define LINSM_STOP_SEC_CODE
+#include "LinSM_MemMap.h"
 
 #if LINSM_DEV_ERROR_DETECT == STD_ON
+#define LINSM_START_SEC_CODE
+#include "LinSM_MemMap.h"
 LINSM_LOCAL boolean LinSM_ValidatePartitionContext(uint8 apiId)
 {
     boolean ret = TRUE;
-    if (LinSM_GetPartitionIndex() >= LINSM_PARTITION_NUM) /* PRQA S 2992, 2996 */ /* VL_LinSM_AlwaysFalse */
+#if (LINSM_MULTIPLE_PARTITION_USED == STD_ON)
+    if (LinSM_GetPartitionIndex() >= LINSM_PARTITION_NUM)
     {
         (void)Det_ReportError(LINSM_MODULE_ID, LINSM_INSTANCE_ID, apiId, LINSM_E_PARTITION);
         ret = FALSE;
     }
+#else
+    LINSM_UNUSED(apiId);
+#endif
     return ret;
 }
+#define LINSM_STOP_SEC_CODE
+#include "LinSM_MemMap.h"
 
+#define LINSM_START_SEC_CODE
+#include "LinSM_MemMap.h"
 LINSM_LOCAL boolean LinSM_ValidateInitStatus(uint8 apiId)
 {
     boolean                ret     = TRUE;
@@ -843,7 +1015,11 @@ LINSM_LOCAL boolean LinSM_ValidateInitStatus(uint8 apiId)
 
     return ret;
 }
+#define LINSM_STOP_SEC_CODE
+#include "LinSM_MemMap.h"
 
+#define LINSM_START_SEC_CODE
+#include "LinSM_MemMap.h"
 LINSM_LOCAL boolean LinSM_ValidatePointer(uint8 apiId, const void* pointer)
 {
     boolean ret = TRUE;
@@ -854,7 +1030,11 @@ LINSM_LOCAL boolean LinSM_ValidatePointer(uint8 apiId, const void* pointer)
     }
     return ret;
 }
+#define LINSM_STOP_SEC_CODE
+#include "LinSM_MemMap.h"
 
+#define LINSM_START_SEC_CODE
+#include "LinSM_MemMap.h"
 LINSM_LOCAL boolean LinSM_ValidateNetworkHandle(uint8 apiId, NetworkHandleType network)
 {
     boolean                ret     = TRUE;
@@ -871,7 +1051,7 @@ LINSM_LOCAL boolean LinSM_ValidateNetworkHandle(uint8 apiId, NetworkHandleType n
     }
     else
     {
-        /* do nothing */
+        /*do nothing*/
     }
 #endif
 
@@ -883,30 +1063,50 @@ LINSM_LOCAL boolean LinSM_ValidateNetworkHandle(uint8 apiId, NetworkHandleType n
 
     return ret;
 }
+#define LINSM_STOP_SEC_CODE
+#include "LinSM_MemMap.h"
 
 #if LINSM_MASTER_NODE_SUPPORT == STD_ON
+#define LINSM_START_SEC_CODE
+#include "LinSM_MemMap.h"
 /**
  * Check input 'schedule' id is valid
  */
 LINSM_LOCAL boolean LinSM_ValidateSchedule(uint8 apiId, NetworkHandleType network, LinIf_SchHandleType schedule)
 {
-    boolean ret = TRUE;
+    boolean ret = FALSE;
     /* search corresponding schedule */
-    LinSM_ChannelIndexType chlIdx = LinSM_GetChannelByNetworkHandle(network);
+    LinSM_ChannelIndexType    chlIdx       = LinSM_GetChannelByNetworkHandle(network);
+    const LinSM_ScheduleType* scheduleList = LinSM_CfgPtr->SchedulePtr;
 
-    if (schedule >= LINSM_CHANNEL_SCHEDULE_NUM(chlIdx))
+    for (uint8 loop = LINSM_CHANNEL_SCHEDULE_INDEX(chlIdx);
+         loop < (LINSM_CHANNEL_SCHEDULE_INDEX(chlIdx) + LINSM_CHANNEL_SCHEDULE_NUM(chlIdx));
+         loop++)
+    {
+        if (scheduleList[loop] == schedule)
+        {
+            ret = TRUE;
+            break;
+        }
+    }
+
+    if (!ret)
     {
         (void)Det_ReportError(LINSM_MODULE_ID, LINSM_INSTANCE_ID, apiId, LINSM_E_PARAMETER);
-        ret = FALSE;
     }
     return ret;
 }
+#define LINSM_STOP_SEC_CODE
+#include "LinSM_MemMap.h"
 #endif
 #endif
 
+#define LINSM_START_SEC_CODE
+#include "LinSM_MemMap.h"
 LINSM_LOCAL boolean LinSM_ValidateRequestComMode(uint8 apiId, ComM_ModeType mode)
 {
     boolean ret = TRUE;
+    (void)apiId; /* avoid unused-parameter warning when Macro disabled */
     if ((mode != COMM_FULL_COMMUNICATION) && (mode != COMM_NO_COMMUNICATION))
     {
 #if LINSM_DEV_ERROR_DETECT == STD_ON
@@ -917,7 +1117,6 @@ LINSM_LOCAL boolean LinSM_ValidateRequestComMode(uint8 apiId, ComM_ModeType mode
 
     return ret;
 }
-
 #define LINSM_STOP_SEC_CODE
 #include "LinSM_MemMap.h"
 

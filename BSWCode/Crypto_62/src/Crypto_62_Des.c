@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
@@ -25,15 +25,13 @@
 /* =================================================== inclusions =================================================== */
 #include "Crypto_62_Internal.h"
 
-/* PRQA S 4549,4544,4542,0488,1252,1253,3387,1841,3473,3440,1338 ++ */ /* VL_Crypto_62_General */
+/* PRQA S 4549,4544,4542,0488,1252,1253,3387,1841,3473,3440,1338 ++ */ /* VL_QAC_Crypto */
 #if (CRYPTO_ALGORITHMFAM_3DES == STD_ON)
-#define CRYPTO_62_START_SEC_CODE
-#include "Crypto_62_MemMap.h"
 
 #include "Crypto_62_Des.h"
 
 /* ===================================================== macros ===================================================== */
-/* PRQA S 3472++ */ /* VL_Crypto_62_General */
+/* PRQA S 3472++ */ /* VL_QAC_Crypto */
 
 /*
  * Initial Permutation macro
@@ -115,7 +113,9 @@
 
 /* ============================================ internal data definitions =========================================== */
 
-/* PRQA S 3218 ++ */ /* VL_Crypto_62_General */
+/* PRQA S 3218 ++ */ /* VL_QAC_Crypto */
+#define CRYPTO_62_START_SEC_CONST_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL const uint32 SB1[CRYPTO_CONST_64] = {
     0x01010400U, 0x00000000U, 0x00010000U, 0x01010404U, 0x01010004U, 0x00010404U, 0x00000004U, 0x00010000U,
     0x00000400U, 0x01010400U, 0x01010404U, 0x00000400U, 0x01000404U, 0x01010004U, 0x01000000U, 0x00000004U,
@@ -125,6 +125,11 @@ CRYPTO_62_LOCAL const uint32 SB1[CRYPTO_CONST_64] = {
     0x01010004U, 0x00010000U, 0x00010400U, 0x01000004U, 0x00000400U, 0x00000004U, 0x01000404U, 0x00010404U,
     0x01010404U, 0x00010004U, 0x01010000U, 0x01000404U, 0x01000004U, 0x00000404U, 0x00010404U, 0x01010400U,
     0x00000404U, 0x01000400U, 0x01000400U, 0x00000000U, 0x00010004U, 0x00010400U, 0x00000000U, 0x01010004U};
+#define CRYPTO_62_STOP_SEC_CONST_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
+
+#define CRYPTO_62_START_SEC_CONST_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL const uint32 SB2[CRYPTO_CONST_64] = {
     0x80108020U, 0x80008000U, 0x00008000U, 0x00108020U, 0x00100000U, 0x00000020U, 0x80100020U, 0x80008020U,
     0x80000020U, 0x80108020U, 0x80108000U, 0x80000000U, 0x80008000U, 0x00100000U, 0x00000020U, 0x80100020U,
@@ -134,7 +139,11 @@ CRYPTO_62_LOCAL const uint32 SB2[CRYPTO_CONST_64] = {
     0x80100000U, 0x80008000U, 0x00000020U, 0x80108020U, 0x00108020U, 0x00000020U, 0x00008000U, 0x80000000U,
     0x00008020U, 0x80108000U, 0x00100000U, 0x80000020U, 0x00100020U, 0x80008020U, 0x80000020U, 0x00100020U,
     0x00108000U, 0x00000000U, 0x80008000U, 0x00008020U, 0x80000000U, 0x80100020U, 0x80108020U, 0x00108000U};
+#define CRYPTO_62_STOP_SEC_CONST_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
 
+#define CRYPTO_62_START_SEC_CONST_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL const uint32 SB3[CRYPTO_CONST_64] = {
     0x00000208U, 0x08020200U, 0x00000000U, 0x08020008U, 0x08000200U, 0x00000000U, 0x00020208U, 0x08000200U,
     0x00020008U, 0x08000008U, 0x08000008U, 0x00020000U, 0x08020208U, 0x00020008U, 0x08020000U, 0x00000208U,
@@ -144,7 +153,11 @@ CRYPTO_62_LOCAL const uint32 SB3[CRYPTO_CONST_64] = {
     0x00000200U, 0x00020008U, 0x08020208U, 0x08000200U, 0x08000008U, 0x00000200U, 0x00000000U, 0x08020008U,
     0x08000208U, 0x00020000U, 0x08000000U, 0x08020208U, 0x00000008U, 0x00020208U, 0x00020200U, 0x08000008U,
     0x08020000U, 0x08000208U, 0x00000208U, 0x08020000U, 0x00020208U, 0x00000008U, 0x08020008U, 0x00020200U};
+#define CRYPTO_62_STOP_SEC_CONST_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
 
+#define CRYPTO_62_START_SEC_CONST_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL const uint32 SB4[CRYPTO_CONST_64] = {
     0x00802001U, 0x00002081U, 0x00002081U, 0x00000080U, 0x00802080U, 0x00800081U, 0x00800001U, 0x00002001U,
     0x00000000U, 0x00802000U, 0x00802000U, 0x00802081U, 0x00000081U, 0x00000000U, 0x00800080U, 0x00800001U,
@@ -154,6 +167,11 @@ CRYPTO_62_LOCAL const uint32 SB4[CRYPTO_CONST_64] = {
     0x00002080U, 0x00800080U, 0x00800081U, 0x00000001U, 0x00802001U, 0x00002081U, 0x00002081U, 0x00000080U,
     0x00802081U, 0x00000081U, 0x00000001U, 0x00002000U, 0x00800001U, 0x00002001U, 0x00802080U, 0x00800081U,
     0x00002001U, 0x00002080U, 0x00800000U, 0x00802001U, 0x00000080U, 0x00800000U, 0x00002000U, 0x00802080U};
+#define CRYPTO_62_STOP_SEC_CONST_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
+
+#define CRYPTO_62_START_SEC_CONST_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL const uint32 SB5[CRYPTO_CONST_64] = {
     0x00000100U, 0x02080100U, 0x02080000U, 0x42000100U, 0x00080000U, 0x00000100U, 0x40000000U, 0x02080000U,
     0x40080100U, 0x00080000U, 0x02000100U, 0x40080100U, 0x42000100U, 0x42080000U, 0x00080100U, 0x40000000U,
@@ -163,6 +181,11 @@ CRYPTO_62_LOCAL const uint32 SB5[CRYPTO_CONST_64] = {
     0x02000100U, 0x40000000U, 0x42080000U, 0x02080100U, 0x40080100U, 0x00000100U, 0x02000000U, 0x42080000U,
     0x42080100U, 0x00080100U, 0x42000000U, 0x42080100U, 0x02080000U, 0x00000000U, 0x40080000U, 0x42000000U,
     0x00080100U, 0x02000100U, 0x40000100U, 0x00080000U, 0x00000000U, 0x40080000U, 0x02080100U, 0x40000100U};
+#define CRYPTO_62_STOP_SEC_CONST_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
+
+#define CRYPTO_62_START_SEC_CONST_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL const uint32 SB6[CRYPTO_CONST_64] = {
     0x20000010U, 0x20400000U, 0x00004000U, 0x20404010U, 0x20400000U, 0x00000010U, 0x20404010U, 0x00400000U,
     0x20004000U, 0x00404010U, 0x00400000U, 0x20000010U, 0x00400010U, 0x20004000U, 0x20000000U, 0x00004010U,
@@ -172,7 +195,11 @@ CRYPTO_62_LOCAL const uint32 SB6[CRYPTO_CONST_64] = {
     0x00400000U, 0x20004000U, 0x20000000U, 0x00004010U, 0x20000010U, 0x20404010U, 0x00404000U, 0x20400000U,
     0x00404010U, 0x20404000U, 0x00000000U, 0x20400010U, 0x00000010U, 0x00004000U, 0x20400000U, 0x00404010U,
     0x00004000U, 0x00400010U, 0x20004010U, 0x00000000U, 0x20404000U, 0x20000000U, 0x00400010U, 0x20004010U};
+#define CRYPTO_62_STOP_SEC_CONST_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
 
+#define CRYPTO_62_START_SEC_CONST_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL const uint32 SB7[CRYPTO_CONST_64] = {
     0x00200000U, 0x04200002U, 0x04000802U, 0x00000000U, 0x00000800U, 0x04000802U, 0x00200802U, 0x04200800U,
     0x04200802U, 0x00200000U, 0x00000000U, 0x04000002U, 0x00000002U, 0x04000000U, 0x04200002U, 0x00000802U,
@@ -182,7 +209,11 @@ CRYPTO_62_LOCAL const uint32 SB7[CRYPTO_CONST_64] = {
     0x00200002U, 0x04000000U, 0x04000800U, 0x00200000U, 0x04200800U, 0x00000802U, 0x00200802U, 0x04200800U,
     0x00000802U, 0x04000002U, 0x04200802U, 0x04200000U, 0x00200800U, 0x00000000U, 0x00000002U, 0x04200802U,
     0x00000000U, 0x00200802U, 0x04200000U, 0x00000800U, 0x04000002U, 0x04000800U, 0x00000800U, 0x00200002U};
+#define CRYPTO_62_STOP_SEC_CONST_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
 
+#define CRYPTO_62_START_SEC_CONST_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL const uint32 SB8[CRYPTO_CONST_64] = {
     0x10001040U, 0x00001000U, 0x00040000U, 0x10041040U, 0x10000000U, 0x10001040U, 0x00000040U, 0x10000000U,
     0x00040040U, 0x10040000U, 0x10041040U, 0x00041000U, 0x10041000U, 0x00041040U, 0x00001000U, 0x00000040U,
@@ -192,9 +223,14 @@ CRYPTO_62_LOCAL const uint32 SB8[CRYPTO_CONST_64] = {
     0x10001000U, 0x00000040U, 0x10000040U, 0x10040000U, 0x10040040U, 0x10000000U, 0x00040000U, 0x10001040U,
     0x00000000U, 0x10041040U, 0x00040040U, 0x10000040U, 0x10040000U, 0x10001000U, 0x10001040U, 0x00000000U,
     0x10041040U, 0x00041000U, 0x00041000U, 0x00001040U, 0x00001040U, 0x00040040U, 0x10000000U, 0x10041000U};
+#define CRYPTO_62_STOP_SEC_CONST_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
+
 /*
  * PC1: left and right halves bit-swap
  */
+#define CRYPTO_62_START_SEC_CONST_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL const uint32 LHs[CRYPTO_CONST_16] = {
     0x00000000U,
     0x00000001U,
@@ -212,7 +248,11 @@ CRYPTO_62_LOCAL const uint32 LHs[CRYPTO_CONST_16] = {
     0x01010001U,
     0x01010100U,
     0x01010101U};
+#define CRYPTO_62_STOP_SEC_CONST_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
 
+#define CRYPTO_62_START_SEC_CONST_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL const uint32 RHs[CRYPTO_CONST_16] = {
     0x00000000U,
     0x01000000U,
@@ -230,6 +270,9 @@ CRYPTO_62_LOCAL const uint32 RHs[CRYPTO_CONST_16] = {
     0x01000101U,
     0x00010101U,
     0x01010101U};
+#define CRYPTO_62_STOP_SEC_CONST_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
+
 /* PRQA S 3218 -- */
 /* ============================================ external data definitions =========================================== */
 
@@ -246,15 +289,17 @@ CRYPTO_62_LOCAL const uint32 RHs[CRYPTO_CONST_16] = {
  * Return              None
  */
 /******************************************************************************/
-/* PRQA S 3673++ */ /* VL_Crypto_62_General */
-void Crypto_3Des_Crypt_Ecb(Crypto_Des3Data* ctx, const uint8 input[CRYPTO_CONST_8], uint8 output[CRYPTO_CONST_8])
+/* PRQA S 3673++ */ /* VL_QAC_Crypto */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+void Crypto_3Des_Crypt_Internal(Crypto_Des3Data* ctx, const uint8 input[CRYPTO_CONST_8], uint8 output[CRYPTO_CONST_8])
 /* PRQA S 3673-- */
 {
     Std_ReturnType i;
-    uint32         X, Y, T, *SK; /* PRQA S 3678 */ /* VL_Crypto_62_General */
+    uint32         X, Y, T, *SK; /* PRQA S 3678 */ /* VL_QAC_Crypto */
 
     SK = ctx->sk;
-    /* PRQA S 3493,3446,4559 ++ */ /* VL_Crypto_62_General */
+    /* PRQA S 3493,3446,4559 ++ */ /* VL_QAC_Crypto */
     X = CRYPTO_GET_UINT32_BE(input, CRYPTO_CONST_0);
     Y = CRYPTO_GET_UINT32_BE(input, CRYPTO_CONST_4);
     /* PRQA S 3493,3446,4559 -- */
@@ -280,11 +325,13 @@ void Crypto_3Des_Crypt_Ecb(Crypto_Des3Data* ctx, const uint8 input[CRYPTO_CONST_
     }
 
     DES_FP(Y, X);
-    /* PRQA S 3138 ++ */ /* VL_Crypto_62_General */
+    /* PRQA S 3138 ++ */ /* VL_QAC_Crypto */
     CRYPTO_PUT_UINT32_BE(Y, output, CRYPTO_CONST_0);
     CRYPTO_PUT_UINT32_BE(X, output, CRYPTO_CONST_4);
     /* PRQA S 3138 -- */
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -296,11 +343,13 @@ void Crypto_3Des_Crypt_Ecb(Crypto_Des3Data* ctx, const uint8 input[CRYPTO_CONST_
  * Return              None
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_Des_Setkey(uint32 SK[CRYPTO_CONST_32], const uint8 key[CRYPTO_DES_KEY_SIZE])
 {
     uint32 i;
     uint32 X, Y, T;
-    /* PRQA S 3493,3446,4559++ */ /* VL_Crypto_62_General */
+    /* PRQA S 3493,3446,4559++ */ /* VL_QAC_Crypto */
     X = CRYPTO_GET_UINT32_BE(key, 0);
     Y = CRYPTO_GET_UINT32_BE(key, CRYPTO_CONST_4);
     /* PRQA S 3493,3446,4559-- */
@@ -308,7 +357,7 @@ void Crypto_Des_Setkey(uint32 SK[CRYPTO_CONST_32], const uint8 key[CRYPTO_DES_KE
     /*
      * Permuted Choice 1
      */
-    /* PRQA S 3120++ */ /* VL_Crypto_62_General */
+    /* PRQA S 3120++ */ /* VL_QAC_Crypto */
     T = ((Y >> CRYPTO_CONST_4) ^ X) & 0x0F0F0F0FU;
     X ^= T;
     Y ^= (T << CRYPTO_CONST_4);
@@ -370,6 +419,9 @@ void Crypto_Des_Setkey(uint32 SK[CRYPTO_CONST_32], const uint8 key[CRYPTO_DES_KE
                 | ((Y >> 3) & 0x00000011U) | ((Y << 2) & 0x00000004U) | ((Y >> 21) & 0x00000002U);
     }
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+
 /* PRQA S 3120-- */
 /******************************************************************************/
 /*
@@ -382,11 +434,15 @@ void Crypto_Des_Setkey(uint32 SK[CRYPTO_CONST_32], const uint8 key[CRYPTO_DES_KE
  *                           Not 0: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Des_Setkey_Enc(Crypto_DesData* ctx, const unsigned char key[CRYPTO_DES_KEY_SIZE])
 {
     Crypto_Des_Setkey(ctx->sk, key);
     return E_OK;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -399,6 +455,8 @@ Std_ReturnType Crypto_Des_Setkey_Enc(Crypto_DesData* ctx, const unsigned char ke
  *                           Not 0: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Des_Setkey_Dec(Crypto_DesData* ctx, const unsigned char key[CRYPTO_DES_KEY_SIZE])
 {
     uint32 i;
@@ -407,7 +465,7 @@ Std_ReturnType Crypto_Des_Setkey_Dec(Crypto_DesData* ctx, const unsigned char ke
 
     for (i = CRYPTO_CONST_0; i < CRYPTO_CONST_16; i += CRYPTO_CONST_2)
     {
-        /* PRQA S 1290,1840++ */ /* VL_Crypto_62_General */
+        /* PRQA S 1290,1840++ */ /* VL_QAC_Crypto */
         SWAP(ctx->sk[i], ctx->sk[CRYPTO_CONST_30 - i]);
         SWAP(ctx->sk[i + 1], ctx->sk[CRYPTO_CONST_31 - i]);
         /* PRQA S 1290,1840-- */
@@ -415,7 +473,11 @@ Std_ReturnType Crypto_Des_Setkey_Dec(Crypto_DesData* ctx, const unsigned char ke
 
     return E_OK;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_Des3_Set2key(
     uint32              esk[CRYPTO_CONST_96],
     uint32              dsk[CRYPTO_CONST_96],
@@ -441,11 +503,15 @@ void Crypto_Des3_Set2key(
         dsk[i + 65] = dsk[i + 1];
     }
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /*
  * Triple-DES key schedule (112-bit, encryption)
  */
-Std_ReturnType Crypto_Des3_Set2key_Enc(Crypto_Des3Data* ctx, const unsigned char key[CRYPTO_CONST_16])
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+Std_ReturnType Crypto_Des3_Set2key_Enc(Crypto_Des3Data* ctx, const uint8 key[CRYPTO_CONST_16])
 {
     uint32 sk[96];
 
@@ -453,11 +519,15 @@ Std_ReturnType Crypto_Des3_Set2key_Enc(Crypto_Des3Data* ctx, const unsigned char
 
     return 0;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /*
  * Triple-DES key schedule (112-bit, decryption)
  */
-Std_ReturnType Crypto_Des3_Set2key_Dec(Crypto_Des3Data* ctx, const unsigned char key[CRYPTO_CONST_16])
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+Std_ReturnType Crypto_Des3_Set2key_Dec(Crypto_Des3Data* ctx, const uint8 key[CRYPTO_CONST_16])
 {
     uint32 sk[96];
 
@@ -465,6 +535,8 @@ Std_ReturnType Crypto_Des3_Set2key_Dec(Crypto_Des3Data* ctx, const unsigned char
 
     return 0;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -478,6 +550,8 @@ Std_ReturnType Crypto_Des3_Set2key_Dec(Crypto_Des3Data* ctx, const unsigned char
  * Return              None
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_Des3_Set3key(
     uint32              esk[CRYPTO_CONST_96],
     uint32              dsk[CRYPTO_CONST_96],
@@ -492,7 +566,7 @@ void Crypto_Des3_Set3key(
     for (i = CRYPTO_CONST_0; i < CRYPTO_CONST_32; i += CRYPTO_CONST_2)
     {
         dsk[i]     = esk[CRYPTO_CONST_94 - i];
-        dsk[i + 1] = esk[CRYPTO_CONST_95 - i]; /* PRQA S 1840 */ /* VL_Crypto_62_General */
+        dsk[i + 1] = esk[CRYPTO_CONST_95 - i]; /* PRQA S 1840 */ /* VL_QAC_Crypto */
 
         esk[i + CRYPTO_CONST_32] = dsk[CRYPTO_CONST_62 - i];
         esk[i + CRYPTO_CONST_33] = dsk[CRYPTO_CONST_63 - i];
@@ -501,6 +575,8 @@ void Crypto_Des3_Set3key(
         dsk[i + CRYPTO_CONST_65] = esk[CRYPTO_CONST_31 - i];
     }
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -512,12 +588,16 @@ void Crypto_Des3_Set3key(
  * Return              void:
  */
 /******************************************************************************/
-void Crypto_Des3_Set3key_Enc(Crypto_Des3Data* ctx, const unsigned char key[CRYPTO_DES_KEY_SIZE * CRYPTO_CONST_3])
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+void Crypto_Des3_Set3key_Enc(Crypto_Des3Data* ctx, const uint8 key[CRYPTO_DES_KEY_SIZE * CRYPTO_CONST_3])
 {
     uint32 sk[CRYPTO_CONST_96];
 
     Crypto_Des3_Set3key(ctx->sk, sk, key);
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -530,14 +610,70 @@ void Crypto_Des3_Set3key_Enc(Crypto_Des3Data* ctx, const unsigned char key[CRYPT
  *                           Not 0: State not accepted
  */
 /******************************************************************************/
-Std_ReturnType
-    Crypto_Des3_Set3key_Dec(Crypto_Des3Data* ctx, const unsigned char key[CRYPTO_DES_KEY_SIZE * CRYPTO_CONST_3])
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+Std_ReturnType Crypto_Des3_Set3key_Dec(Crypto_Des3Data* ctx, const uint8 key[CRYPTO_DES_KEY_SIZE * CRYPTO_CONST_3])
 {
     uint32 sk[CRYPTO_CONST_96];
 
     Crypto_Des3_Set3key(sk, ctx->sk, key);
     return E_OK;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+
+/******************************************************************************/
+/*
+ * Brief               This function is used to perform 3DES with ECB group mode
+ *                     on input.
+ *
+ * Param-Name[in]      ctx: The context of 3DES.
+ *                     mode: The AES operation: CRYPTO_MODE_DECRYPT or
+ *                           CRYPTO_MODE_ENCRYPT.
+ *                     length: The length of input, calculated in byte.
+ *                     iv: The Initialization vector. It must be a readable and
+ *                         writeable buffer of 8 Bytes.
+ *                     input: The plaintext needed to be encrypted, or the ciphertext
+ *                            needed to be decrypted, depending on the mode.
+ * Param-Name[in/out]  None
+ * Param-Name[out]     output: The ciphertext or the plaintext corresponded with
+ *                             input.
+ * Return              Std_ReturnType:  E_OK: State accepted
+ *                                      E_NOT_OK: State not accepted
+ */
+/******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+Std_ReturnType Crypto_3Des_Crypt_Ecb(Crypto_Des3Data* ctx, uint8 mode, uint32 length, const uint8* input, uint8* output)
+{
+    uint8 temp[CRYPTO_CONST_8];
+
+    if (mode == CRYPTO_MODE_DECRYPT)
+    {
+        while (length > 0)
+        {
+            (void)IStdLib_MemCpy(temp, input, CRYPTO_CONST_8);
+            Crypto_3Des_Crypt_Internal(ctx, temp, output);
+            input += CRYPTO_CONST_8;
+            output += CRYPTO_CONST_8;
+            length = (length >= CRYPTO_CONST_8) ? (length - CRYPTO_CONST_8) : 0;
+        }
+    }
+    else
+    {
+        while (length > 0)
+        {
+            (void)IStdLib_MemCpy(temp, input, CRYPTO_CONST_8);
+            Crypto_3Des_Crypt_Internal(ctx, temp, output);
+            input += CRYPTO_CONST_8;
+            output += CRYPTO_CONST_8;
+            length = (length >= CRYPTO_CONST_8) ? (length - CRYPTO_CONST_8) : 0;
+        }
+    }
+    return E_OK;
+}
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -554,19 +690,20 @@ Std_ReturnType
  *                                      E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_3Des_Crypt_Cbc(
     Crypto_Des3Data* ctx,
     uint8            mode,
     uint32           length,
     uint8            iv[CRYPTO_CONST_8],
     const uint8*     input,
-    uint8*           output,
-    uint32*          outputLength)
+    uint8*           output)
 {
     Std_ReturnType ret = E_OK;
     uint8          temp[CRYPTO_CONST_8];
     uint8          i;
-    if (length % CRYPTO_CONST_8) /* PRQA S 3344*/ /* VL_Crypto_62_General */
+    if (length % CRYPTO_CONST_8) /* PRQA S 3344*/ /* VL_QAC_Crypto */
     {
         return E_NOT_OK;
     }
@@ -580,22 +717,21 @@ Std_ReturnType Crypto_3Des_Crypt_Cbc(
                 output[i] = (uint8)(input[i] ^ iv[i]);
             }
 
-            Crypto_3Des_Crypt_Ecb(ctx, output, output);
+            Crypto_3Des_Crypt_Internal(ctx, output, output);
 
             (void)IStdLib_MemCpy(iv, output, CRYPTO_CONST_8);
 
             input += CRYPTO_CONST_8;
             output += CRYPTO_CONST_8;
             length -= CRYPTO_CONST_8;
-            *outputLength += CRYPTO_CONST_8;
         }
     }
     else
-    { /* DES_DECRYPT */
+    { /* CRYPTO_DES_DECRYPT */
         while (length > CRYPTO_CONST_0)
         {
             (void)IStdLib_MemCpy(temp, input, CRYPTO_CONST_8);
-            Crypto_3Des_Crypt_Ecb(ctx, input, output);
+            Crypto_3Des_Crypt_Internal(ctx, input, output);
 
             for (i = CRYPTO_CONST_0; i < CRYPTO_CONST_8; i++)
             {
@@ -607,12 +743,13 @@ Std_ReturnType Crypto_3Des_Crypt_Cbc(
             input += CRYPTO_CONST_8;
             output += CRYPTO_CONST_8;
             length -= CRYPTO_CONST_8;
-            *outputLength += CRYPTO_CONST_8;
         }
     }
 
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -628,13 +765,15 @@ Std_ReturnType Crypto_3Des_Crypt_Cbc(
  *                                      E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType
     Crypto_3Des_Crypt_Cmac(Crypto_Des3Data* ctx, uint8 mode, uint32 length, const uint8* input, uint8* output)
 {
     Std_ReturnType ret = E_OK;
     uint8          temp[CRYPTO_CONST_8];
     uint8          i;
-    if (length % CRYPTO_CONST_8) /* PRQA S 3344*/ /* VL_Crypto_62_General */
+    if (length % CRYPTO_CONST_8) /* PRQA S 3344*/ /* VL_QAC_Crypto */
     {
         return E_NOT_OK;
     }
@@ -648,7 +787,7 @@ Std_ReturnType
                 output[i] = input[i];
             }
 
-            Crypto_3Des_Crypt_Ecb(ctx, output, output);
+            Crypto_3Des_Crypt_Internal(ctx, output, output);
 
             input += CRYPTO_CONST_8;
             output += CRYPTO_CONST_8;
@@ -656,11 +795,11 @@ Std_ReturnType
         }
     }
     else
-    { /* DES_DECRYPT */
+    { /* CRYPTO_DES_DECRYPT */
         while (length > CRYPTO_CONST_0)
         {
             (void)IStdLib_MemCpy(temp, input, CRYPTO_CONST_8);
-            Crypto_3Des_Crypt_Ecb(ctx, input, output);
+            Crypto_3Des_Crypt_Internal(ctx, input, output);
 
             for (i = CRYPTO_CONST_0; i < CRYPTO_CONST_8; i++)
             {

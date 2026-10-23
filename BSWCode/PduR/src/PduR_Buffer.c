@@ -24,6 +24,9 @@
 
 /* =================================================== inclusions =================================================== */
 #include "PduR_Internal.h"
+#if (PDUR_DEM_EVENTID_BUFFER_OVERFLOW_ENABLE == STD_ON)
+#include "Dem.h"
+#endif
 
 #if ((STD_OFF == PDUR_ZERO_COST_OPERATION) && (PDUR_NUMBER_OF_QUEUES_MAX > 0u))
 /* ===================================================== macros ===================================================== */
@@ -46,7 +49,7 @@
 #include "PduR_MemMap.h"
 /* PRQA S 1514,3218 ++ */ /* VL_PduR_IndirectUse,VL_PduR_IndirectUse */
 PDUR_LOCAL PduR_BufferType* PduR_BufferPtrsOfQueue[PDUR_NUM_OF_QUEUES_DEPTH_SUM_MAX];
-/* PRQA S 1514,3218 -- */
+/* PRQA S 1514,3218 -- */ /* VL_PduR_IndirectUse,VL_PduR_IndirectUse */
 #define PDUR_STOP_SEC_VAR_CLEARED_PTR
 #include "PduR_MemMap.h"
 #endif
@@ -55,20 +58,31 @@ PDUR_LOCAL PduR_BufferType* PduR_BufferPtrsOfQueue[PDUR_NUM_OF_QUEUES_DEPTH_SUM_
 /* ========================================= internal function declarations ========================================= */
 static inline void    PduR_BufferRelease(PduR_BufferType* bufferPtr);
 static inline boolean PduR_QueueIsFull(const PduR_QueueRuntimeType* queuePtr);
-static void           PduR_QueueEnqueue(const PduR_QueueRuntimeType* queuePtr, PduR_BufferType* bufferPtr);
-static void           PduR_QueueFlush(PduR_QueueRuntimeType* queuePtr);
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
+static void PduR_QueueEnqueue(const PduR_QueueRuntimeType* queuePtr, PduR_BufferType* bufferPtr);
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
+static void PduR_QueueFlush(PduR_QueueRuntimeType* queuePtr);
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 /* ========================================== external function definition ========================================== */
 #define PDUR_START_SEC_CODE
 #include "PduR_MemMap.h"
 /**
  * Get queue tail buffer pointer
  */
-PduR_BufferType* PduR_QueueGetTail(const PduR_QueueRuntimeType* queuePtr) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
+PduR_BufferType* PduR_QueueGetTail(
+    PduIdType                    srcPduId,
+    const PduR_QueueRuntimeType* queuePtr) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
 {
     PduR_BufferType* bufferPtr = NULL_PTR;
     for (PduR_QueueDepthType bufferIndex = queuePtr->Depth; bufferIndex > 0u; --bufferIndex)
     {
-        if (queuePtr->BufferPtrs[bufferIndex - 1u] != NULL_PTR)
+        if ((queuePtr->BufferPtrs[bufferIndex - 1u] != NULL_PTR)
+            && ((PDUR_PDU_ID_INVALID == srcPduId) || (queuePtr->BufferPtrs[bufferIndex - 1u]->SrcPduId == srcPduId)))
         {
             bufferPtr = queuePtr->BufferPtrs[bufferIndex - 1u];
             break;
@@ -76,8 +90,25 @@ PduR_BufferType* PduR_QueueGetTail(const PduR_QueueRuntimeType* queuePtr) /* PRQ
     }
     return bufferPtr;
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
+
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 /**
- * push a buffer pointer into queue
+ * Determine whether the queue is empty
+ */
+boolean PduR_QueueIsEmpty(const PduR_QueueRuntimeType* queuePtr)
+{
+    return (queuePtr->BufferPtrs[0u] != NULL_PTR) ? TRUE : FALSE;
+}
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
+
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
+/**
+ * Push a buffer pointer into queue
  */
 static void PduR_QueueEnqueue(const PduR_QueueRuntimeType* queuePtr, PduR_BufferType* bufferPtr)
 {
@@ -90,8 +121,13 @@ static void PduR_QueueEnqueue(const PduR_QueueRuntimeType* queuePtr, PduR_Buffer
         }
     }
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
+
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 /**
- * pop a front buffer in the queue
+ * Pop a front buffer in the queue
  */
 void PduR_QueuePopFront(PduR_QueueRuntimeType* queuePtr)
 {
@@ -113,21 +149,44 @@ void PduR_QueuePopFront(PduR_QueueRuntimeType* queuePtr)
         }
     }
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
+
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 /**
  * pop a back buffer in the queue
  */
-void PduR_QueuePopBack(const PduR_QueueRuntimeType* queuePtr) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
+void PduR_QueuePopBack(PduIdType srcPduId, const PduR_QueueRuntimeType* queuePtr)
 {
     for (PduR_QueueDepthType bufferIndex = queuePtr->Depth; bufferIndex > 0u; --bufferIndex)
     {
-        if (queuePtr->BufferPtrs[bufferIndex - 1u] != NULL_PTR)
+        if ((queuePtr->BufferPtrs[bufferIndex - 1u] != NULL_PTR)
+            && ((PDUR_PDU_ID_INVALID == srcPduId) || (queuePtr->BufferPtrs[bufferIndex - 1u]->SrcPduId == srcPduId)))
         {
             PduR_BufferRelease(queuePtr->BufferPtrs[bufferIndex - 1u]);
             queuePtr->BufferPtrs[bufferIndex - 1u] = NULL_PTR;
+            for (PduR_QueueDepthType bufIndex = bufferIndex; bufIndex < queuePtr->Depth; ++bufIndex)
+            {
+                if (queuePtr->BufferPtrs[bufIndex] == NULL_PTR)
+                {
+                    break;
+                }
+                else
+                {
+                    queuePtr->BufferPtrs[bufIndex - 1u] = queuePtr->BufferPtrs[bufIndex];
+                    queuePtr->BufferPtrs[bufIndex]      = NULL_PTR;
+                }
+            }
             break;
         }
     }
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
+
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 /**
  * flush all buffer in the queue
  */
@@ -142,16 +201,19 @@ static void PduR_QueueFlush(PduR_QueueRuntimeType* queuePtr)
         PduR_QueuePopFront(queuePtr);
     }
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
+
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 /**
  * request a available buffer for the queue
  */
-/* PRQA S 1505 ++ */ /* VL_PduR_1505 */
-PduR_BufferType* PduR_QueueProvideBuffer(
-    PduR_QueueRuntimeType* queuePtr,
-    PduLengthType          requiredSize,
-    uint8                  apiId,
-    boolean*               flushFlag)
-/* PRQA S 1505 -- */
+PduR_BufferType* PduR_QueueProvideBuffer(/* PRQA S 1505 */ /* VL_PduR_1505 */
+                                         PduR_QueueRuntimeType* queuePtr,
+                                         PduLengthType          requiredSize,
+                                         uint8                  apiId,
+                                         boolean*               flushFlag)
 {
     if (PduR_QueueIsFull(queuePtr))
     {
@@ -201,6 +263,11 @@ PduR_BufferType* PduR_QueueProvideBuffer(
     }
     return bufferPtr;
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
+
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 /**
  * request a available buffer and save a Pdu Info into the queue
  */
@@ -224,6 +291,11 @@ PduR_QueueStoreType PduR_QueueStorePduInfo(
     }
     return retval;
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
+
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 /**
  * all data that has been copied and confirmed, be removed from the TP buffer
  */
@@ -237,7 +309,11 @@ void PduR_QueueDataConf(PduR_QueueRuntimeType* queuePtr, uint8 metaDataLength) /
         (PduLengthType)(bufferPtr->PduCurLength - (PduLengthType)metaDataLength));
     queuePtr->CurPosition = 0u;
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 /**
  * Queue handle for disable a routing path group.
  */
@@ -251,7 +327,7 @@ void PduR_DisableRoutingQueueHandle(PduIdType destPduId, boolean initialize)
     {
         /* PRQA S 3678 ++ */ /* VL_QAC_NoUsedApi */
         PduR_BufferType* bufferPtr = PduR_QueueGetHead(queuePtr);
-        /* PRQA S 3678 -- */ /* VL_QAC_NoUsedApi */
+        /* PRQA S 3678 -- */
         if (bufferPtr != NULL_PTR)
         {
             if (queuePtr->Depth == 1u)
@@ -288,7 +364,11 @@ void PduR_DisableRoutingQueueHandle(PduIdType destPduId, boolean initialize)
     }
     PDUR_NOUSED(initialize);
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 /**
  * Release all buffers (SWS_PduR_00645) and set to default value (SWS_PduR_00308)
  */
@@ -324,6 +404,7 @@ void PduR_BufferInit(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
         (void)IStdLib_MemSet(bufferIterPtr->Data, 0u, bufferIterPtr->PduMaxLength);
         bufferIterPtr->LockState  = PDUR_BUFFER_UNLOCK;
         bufferIterPtr->WriteState = PDUR_BUFFER_WRITE_NOT_OK;
+        bufferIterPtr->SrcPduId   = PDUR_PDU_ID_INVALID;
         bufferIterPtr++;
     }
 #if (PDUR_DEFAULT_VALUE_PDU_ENABLE == STD_ON)
@@ -345,6 +426,8 @@ void PduR_BufferInit(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
     }
 #endif
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 /* ========================================== internal function definition ========================================== */
 static inline void PduR_BufferRelease(PduR_BufferType* bufferPtr)
 {
@@ -352,13 +435,11 @@ static inline void PduR_BufferRelease(PduR_BufferType* bufferPtr)
     bufferPtr->SduLength    = 0u;
     bufferPtr->PduCurLength = 0u;
     bufferPtr->WriteState   = PDUR_BUFFER_WRITE_NOT_OK;
+    bufferPtr->SrcPduId     = PDUR_PDU_ID_INVALID;
 }
 
 static inline boolean PduR_QueueIsFull(const PduR_QueueRuntimeType* queuePtr)
 {
     return (queuePtr->BufferPtrs[queuePtr->Depth - 1u] != NULL_PTR) ? TRUE : FALSE;
 }
-
-#define PDUR_STOP_SEC_CODE
-#include "PduR_MemMap.h"
 #endif /* end of PDUR_NUMBER_OF_QUEUES_MAX and PDUR_ZERO_COST_OPERATION */

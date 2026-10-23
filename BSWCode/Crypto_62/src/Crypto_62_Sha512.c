@@ -21,45 +21,47 @@
  **  @description        : Rebuid for Crypto
  **
  ***********************************************************************************************************************/
-
-/* PRQA S 6010 EOF */ /* VL_MTR_Crypto_62_STCYC */
-/* PRQA S 6020 EOF */ /* VL_MTR_Crypto_62_STLIN */
-/* PRQA S 6030 EOF */ /* VL_MTR_Crypto_62_STMIF */
-/* PRQA S 6040 EOF */ /* VL_MTR_Crypto_62_STPAR */
-/* PRQA S 6050 EOF */ /* VL_MTR_Crypto_62_STST3 */
-/* PRQA S 6060 EOF */ /* VL_MTR_Crypto_62_STM19 */
-/* PRQA S 6070 EOF */ /* VL_MTR_Crypto_62_STCAL */
-/* PRQA S 6080 EOF */ /* VL_MTR_Crypto_62_STPTH */
-
-/* PRQA S 0488,0842,1252,1253,1290,1840,1842,1860,1862,2741 ++ */ /* VL_Crypto_62_General */
-/* PRQA S 0314,0684,1338,1863,1881,2001,2015,2109,2216,3120 ++ */ /* VL_Crypto_62_General */
-/* PRQA S 3138,3218,3326,3387,3397,3400,3440,3446,3472,3473 ++ */ /* VL_Crypto_62_General */
-/* PRQA S 3493,3678,4115,4116,4393,4397,4461,4544,4558,4559 ++ */ /* VL_Crypto_62_General */
-/* PRQA S 0342,1505,2743,2880,2889,2784,2995,2991,1532 ++ */      /* VL_Crypto_62_General */
+/* PRQA S 0488,0842,1252,1253,1290,1840,1842,1860,1862,2741 ++ */ /* VL_QAC_Crypto */
+/* PRQA S 0314,0684,1338,1863,1881,2001,2015,2109,2216,3120 ++ */ /* VL_QAC_Crypto */
+/* PRQA S 3138,3218,3326,3387,3397,3400,3440,3446,3472,3473 ++ */ /* VL_QAC_Crypto */
+/* PRQA S 3493,3678,4115,4116,4393,4397,4461,4544,4558,4559 ++ */ /* VL_QAC_Crypto */
+/* PRQA S 0342,1505,2743,2880,2889,2784,2995,2991,1532,6040 ++ */ /* VL_QAC_Crypto */
+/* PRQA S 6050,6060,6070,6080,6030   ++ */                        /* VL_QAC_Crypto */
+/* PRQA S 6010 EOF */                                             /* VL_MTR_Crypto_62_STCYC */
 /* =================================================== inclusions =================================================== */
 #include "Crypto_62_Internal.h"
 #if (CRYPTO_ALGORITHMFAM_SHA2_512 == STD_ON)
 
 #include "Crypto_62_Sha512.h"
-#define CRYPTO_62_START_SEC_CODE
-#include "Crypto_62_MemMap.h"
 
 /* ===================================================== macros ===================================================== */
 #define SHA512_BLOCK_SIZE 128
 #define UL64(x)           x##ULL
 #if defined(CRYPTO_SHA512_SMALLER)
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL void CRYPTO_PUT_UINT64_BE(uint64 n, unsigned char* b, uint8_t i)
 {
     CRYPTO_PUT_UINT64_BE(n, b, i);
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 #else
 #endif
 
 /* ========================================== internal function declarations ======================================== */
-CRYPTO_62_LOCAL Std_ReturnType
-                       Crypto_Internal_Sha512_Process(Crypto_Sha512_Context* ctx, const uint8 data[SHA512_BLOCK_SIZE]);
-CRYPTO_62_LOCAL uint32 Crypto_Internal_Sha512_Process_Many(Crypto_Sha512_Context* ctx, const uint8* data, uint32 len);
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+CRYPTO_62_LOCAL
+Std_ReturnType Crypto_Internal_Sha512_Process(Crypto_Sha512_Context* ctx, const uint8 data[SHA512_BLOCK_SIZE]);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+CRYPTO_62_LOCAL uint32 Crypto_Internal_Sha512_Process_Many(Crypto_Sha512_Context* ctx, const uint8* data, uint32 len);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 /* ============================================ internal data definitions =========================================== */
 
 /* ============================================ external data definitions =========================================== */
@@ -76,6 +78,8 @@ CRYPTO_62_LOCAL uint32 Crypto_Internal_Sha512_Process_Many(Crypto_Sha512_Context
  * Return              None
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_Sha512_224_Starts(Crypto_Sha512_Context* ctx)
 {
     ctx->total[0] = 0;
@@ -90,6 +94,8 @@ void Crypto_Sha512_224_Starts(Crypto_Sha512_Context* ctx)
     ctx->state[6] = UL64(0x3f9d85a86a1d36c8);
     ctx->state[7] = UL64(0x1112e6ad91d692a1);
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -101,6 +107,8 @@ void Crypto_Sha512_224_Starts(Crypto_Sha512_Context* ctx)
  * Return              None
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_Sha512_256_Starts(Crypto_Sha512_Context* ctx)
 {
     ctx->total[0] = 0;
@@ -115,6 +123,8 @@ void Crypto_Sha512_256_Starts(Crypto_Sha512_Context* ctx)
     ctx->state[6] = UL64(0x2b0199fc2c85b8aa);
     ctx->state[7] = UL64(0x0eb72ddc81c52ca2);
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -127,6 +137,8 @@ void Crypto_Sha512_256_Starts(Crypto_Sha512_Context* ctx)
  * Return              None
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_Sha512_Starts(Crypto_Sha512_Context* ctx, boolean is384)
 {
     ctx->total[0] = 0;
@@ -155,6 +167,8 @@ void Crypto_Sha512_Starts(Crypto_Sha512_Context* ctx, boolean is384)
         ctx->state[7] = UL64(0x5BE0CD19137E2179);
     }
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -170,8 +184,10 @@ void Crypto_Sha512_Starts(Crypto_Sha512_Context* ctx, boolean is384)
  *                                      E_NOT_OK: State not accepted
  */
 /******************************************************************************/
-CRYPTO_62_LOCAL Std_ReturnType
-    Crypto_Internal_Sha512_Process(Crypto_Sha512_Context* ctx, const uint8 data[SHA512_BLOCK_SIZE])
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+CRYPTO_62_LOCAL
+Std_ReturnType Crypto_Internal_Sha512_Process(Crypto_Sha512_Context* ctx, const uint8 data[SHA512_BLOCK_SIZE])
 {
     uint8 i;
     struct
@@ -316,6 +332,8 @@ CRYPTO_62_LOCAL Std_ReturnType
 
     return E_OK;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -331,15 +349,17 @@ CRYPTO_62_LOCAL Std_ReturnType
  *                                      E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Sha512_Update(Crypto_Sha512_Context* ctx, const unsigned char* input, uint32 ilen)
 {
-    Std_ReturnType ret = E_NOT_OK;
+    Std_ReturnType ret = E_OK;
     uint32         fill;
     Std_ReturnType left;
 
     if (ilen == 0U)
     {
-        return 0;
+        goto exit;
     }
 
     left = (Std_ReturnType)(ctx->total[0] & 0x7FU);
@@ -358,7 +378,7 @@ Std_ReturnType Crypto_Sha512_Update(Crypto_Sha512_Context* ctx, const unsigned c
 
         if ((ret = Crypto_Internal_Sha512_Process(ctx, ctx->buffer)) != E_OK)
         {
-            return ret;
+            goto exit;
         }
 
         input += fill;
@@ -371,7 +391,8 @@ Std_ReturnType Crypto_Sha512_Update(Crypto_Sha512_Context* ctx, const unsigned c
         uint32 processed = Crypto_Internal_Sha512_Process_Many(ctx, input, ilen);
         if (processed < SHA512_BLOCK_SIZE)
         {
-            return E_NOT_OK;
+            ret = E_NOT_OK;
+            goto exit;
         }
 
         input += processed;
@@ -383,8 +404,11 @@ Std_ReturnType Crypto_Sha512_Update(Crypto_Sha512_Context* ctx, const unsigned c
         (void)IStdLib_MemCpy((void*)(ctx->buffer + left), input, ilen);
     }
 
-    return E_OK;
+exit:
+    return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -401,6 +425,8 @@ Std_ReturnType Crypto_Sha512_Update(Crypto_Sha512_Context* ctx, const unsigned c
  *                                      E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Sha512_Finish(Crypto_Sha512_Context* ctx, unsigned char* output)
 {
     Std_ReturnType ret = E_NOT_OK;
@@ -460,6 +486,8 @@ Std_ReturnType Crypto_Sha512_Finish(Crypto_Sha512_Context* ctx, unsigned char* o
 exit:
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -473,6 +501,8 @@ exit:
  * Return              uint32
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL uint32 Crypto_Internal_Sha512_Process_Many(Crypto_Sha512_Context* ctx, const uint8* data, uint32 len)
 {
     uint32 processed = 0;
@@ -492,6 +522,8 @@ CRYPTO_62_LOCAL uint32 Crypto_Internal_Sha512_Process_Many(Crypto_Sha512_Context
 
     return processed;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -511,6 +543,8 @@ CRYPTO_62_LOCAL uint32 Crypto_Internal_Sha512_Process_Many(Crypto_Sha512_Context
  *                                      E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Sha512(const unsigned char* input, uint32 ilen, unsigned char* output, boolean is384)
 {
     Std_ReturnType        ret = E_NOT_OK;
@@ -526,6 +560,8 @@ Std_ReturnType Crypto_Sha512(const unsigned char* input, uint32 ilen, unsigned c
 
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 /******************************************************************************/
 /*
  * Brief               This function calculates the SHA-3 checksum and output result.
@@ -538,13 +574,16 @@ Std_ReturnType Crypto_Sha512(const unsigned char* input, uint32 ilen, unsigned c
  *                                     E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Sha512_Process(uint32 objectId, boolean is384)
 {
     Std_ReturnType ret = E_NOT_OK;
     uint8          output[CRYPTO_CONST_64];
 
     uint32 ilen = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputLength;
-    /* PRQA S 0311 ++ */ /*VL_Crypto_62_General */
+
+    /* PRQA S 0311 ++ */ /*VL_QAC_0311 */
     uint8* input = (uint8*)(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputPtr);
     /* PRQA S 0311 -- */
 
@@ -578,9 +617,10 @@ Std_ReturnType Crypto_Sha512_Process(uint32 objectId, boolean is384)
                 *(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr));
         }
     }
-
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -595,6 +635,8 @@ Std_ReturnType Crypto_Sha512_Process(uint32 objectId, boolean is384)
  *                                      E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_sha512_224(const unsigned char* input, uint32 ilen, unsigned char* output)
 {
     Std_ReturnType        ret = E_NOT_OK;
@@ -610,6 +652,8 @@ Std_ReturnType Crypto_sha512_224(const unsigned char* input, uint32 ilen, unsign
 
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 /******************************************************************************/
 /*
  * Brief               This function calculates the SHA-512_224.
@@ -622,13 +666,16 @@ Std_ReturnType Crypto_sha512_224(const unsigned char* input, uint32 ilen, unsign
  *                                     E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Sha512_224_Process(uint32 objectId)
 {
     Std_ReturnType ret = E_NOT_OK;
-    uint8          output[CRYPTO_CONST_28];
+    uint8          output[CRYPTO_CONST_64];
 
     uint32 ilen = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputLength;
-    /* PRQA S 0311 ++ */ /*VL_Crypto_62_General */
+
+    /* PRQA S 0311 ++ */ /*VL_QAC_0311 */
     uint8* input = (uint8*)(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputPtr);
     /* PRQA S 0311 -- */
 
@@ -645,9 +692,10 @@ Std_ReturnType Crypto_Sha512_224_Process(uint32 objectId)
             output,
             *(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr));
     }
-
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -662,6 +710,8 @@ Std_ReturnType Crypto_Sha512_224_Process(uint32 objectId)
  *                                      E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_sha512_256(const unsigned char* input, uint32 ilen, unsigned char* output)
 {
     Std_ReturnType        ret = E_NOT_OK;
@@ -677,6 +727,8 @@ Std_ReturnType Crypto_sha512_256(const unsigned char* input, uint32 ilen, unsign
 
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 /******************************************************************************/
 /*
  * Brief               This function calculates the SHA512-256 checksum and output result.
@@ -689,6 +741,8 @@ Std_ReturnType Crypto_sha512_256(const unsigned char* input, uint32 ilen, unsign
  *                                     E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Sha512_256_Process(uint32 objectId)
 {
     Std_ReturnType ret = E_NOT_OK;
@@ -697,7 +751,7 @@ Std_ReturnType Crypto_Sha512_256_Process(uint32 objectId)
     uint32  ilen = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputLength;
     uint32* olen = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr;
 
-    /* PRQA S 0311 ++ */ /*VL_Crypto_62_General */
+    /* PRQA S 0311 ++ */ /*VL_QAC_0311 */
     uint8* input = (uint8*)(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputPtr);
     /* PRQA S 0311 -- */
 
@@ -711,8 +765,21 @@ Std_ReturnType Crypto_Sha512_256_Process(uint32 objectId)
     {
         (void)IStdLib_MemCpy(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputPtr, output, *olen);
     }
-
     return ret;
+}
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+void Crypto_sha512_free(Crypto_Sha512_Context* ctx)
+{
+    if (ctx == NULL_PTR)
+    {
+        return;
+    }
+
+    (void)IStdLib_MemSet(ctx, 0, sizeof(Crypto_Sha512_Context));
 }
 #define CRYPTO_62_STOP_SEC_CODE
 #include "Crypto_62_MemMap.h"
@@ -723,4 +790,5 @@ Std_ReturnType Crypto_Sha512_256_Process(uint32 objectId)
 /* PRQA S 0314,0684,1338,1863,1881,2001,2015,2109,2216,3120 -- */
 /* PRQA S 3138,3218,3326,3387,3397,3400,3440,3446,3472,3473 -- */
 /* PRQA S 3493,3678,4115,4116,4393,4397,4461,4544,4558,4559 -- */
-/* PRQA S 0342,1505,2743,2880,2889,2784,2995,2991,1532 -- */
+/* PRQA S 0342,1505,2743,2880,2889,2784,2995,2991,1532,6040 -- */
+/* PRQA S 6050,6060,6070,6080,6030   -- */

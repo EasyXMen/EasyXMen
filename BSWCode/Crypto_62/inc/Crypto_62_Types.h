@@ -116,7 +116,7 @@ typedef enum
 /**
  * @brief key element config type
  */
-typedef struct
+typedef struct Crypto_62_KeyElementCfgTag /* PRQA S 1536 */ /* VL_Crypto_62_TypeUnused */
 {
     /*  Enable or disable writing and reading the key element with data smaller than the size of the element */
     boolean CryptoKeyElementAllowPartialAccess;
@@ -135,18 +135,16 @@ typedef struct
     /*  Define the writing access rights of the key element  */
     Crypto_62_KeyElemWriteAccessType CryptoKeyElementWriteAccess;
     /*  Define the actual Size size of a CRYPTO key element in bytes  */
-    /* PRQA S 1759 ++ */ /* VL_Crypto_62_1759 */
     uint32* CryptoKeyElementLength;
-    /* PRQA S 1759 -- */
 } Crypto_62_KeyElementCfgType;
 
 /**
  *@brief  Structure of a key type.
  */
-typedef struct
+typedef struct Crypto_62_KeyTypeCfgTag /* PRQA S 1536 */ /* VL_Crypto_62_TypeUnused */
 {
     /* the Number of KeyElement  */
-    uint8 KeyElementNum;
+    const uint8 KeyElementNum;
     /*  Refers to a pointer in the CRYPTOCrypto Key Element  */
     const Crypto_62_KeyElementCfgType* CryptoKeyElementRef;
 } Crypto_62_KeyTypeCfgType;
@@ -155,7 +153,7 @@ typedef struct
 /**
  * @brief Structure of a non-volatile block.
  */
-typedef struct
+typedef struct Crypto_62_NvStorageCfgTag /* PRQA S 1536 */ /* VL_Crypto_62_TypeUnused */
 {
     uint16                          Crypto_62_NvmBlockId;
     uint16                          CryptoNvBlockFailedRetries;
@@ -165,13 +163,15 @@ typedef struct
 /**
  * @brief Structure of a CRYPTO Key.
  */
-typedef struct
+typedef struct Crypto_62_KeyCfgTag /* PRQA S 1536 */ /* VL_Crypto_62_TypeUnused */
 {
     /*  Holds the Identifier of the CRYPTO Key  */
     uint32 CryptoKeyId;
 #if (CRYPTO_MAXNVBLOCK_CONFIGURED > 0)
     /*  Holds the nvblock which will be used to fill the key */
+    uint16                            CryptoNvBlock;
     const Crypto_62_NvStorageCfgType* CryptoKeyNvBlockRef;
+    uint8*                            CryptoKeyRamBuffer;
 #endif
     /*  Refers to a pointer in the CRYPTOCrypto Key Element  */
     const Crypto_62_KeyTypeCfgType* CryptoKeyTypeRef;
@@ -182,7 +182,7 @@ typedef struct
 /**
  *@brief  structure of a driver object
  */
-typedef struct
+typedef struct Crypto_62_DriverObjectCfgTag /* PRQA S 1536 */ /* VL_Crypto_62_TypeUnused */
 {
     uint32 CryptoDriverObjectId;
     uint32 CryptoQueueSize;
@@ -200,7 +200,7 @@ typedef struct
 /**
  * @brief structure of a primitive
  */
-typedef struct
+typedef struct Crypto_62_PrimitiveCfgTag /* PRQA S 1536 */ /* VL_Crypto_62_TypeUnused */
 {
     Crypto_ServiceInfoType     CryptoPrimitiveService;
     Crypto_AlgorithmFamilyType CryptoPrimitiveAlgorithmFamily;

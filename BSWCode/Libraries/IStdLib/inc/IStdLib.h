@@ -43,6 +43,8 @@
  * V02.00.00 2024-09-11   qinmei.chen   fix compile error when macro ISTDLIB_BSW_NOT_USED_STDLIB is 0,
  *                                      Refactor and update to R23-11
  * V02.00.01 2025-04-28   darren        Resolve QAC
+ * V02.00.02 2026-08-10   darren        Refine macro naming and fix memcpy out-of-bounds access under unit-test
+ *                                      scenarios
  *
 ===================================================================================================================== */
 /* ================================================ misar justifications ============================================ */
@@ -131,11 +133,11 @@ extern "C" {
 #define ISTDLIB_SW_PATCH_VERSION            (1u)
 /* ===================================================== macros ===================================================== */
 /* MemHeap Error Code */
-#define ISTDLIB_MEMHEAP_OK            0U
-#define ISTDLIB_MEMHEAP_INVALID_PTR   1U
-#define ISTDLIB_MEMHEAP_INVALID_ALIGN 2U
-#define ISTDLIB_MEMHEAP_INVALID_SIZE  3U
-#define ISTDLIB_MEMHEAP_INVALID_INIT  4U
+#define ISTDLIB_MEMHEAP_OK                  0U
+#define ISTDLIB_MEMHEAP_INVALID_PTR         1U
+#define ISTDLIB_MEMHEAP_INVALID_ALIGN       2U
+#define ISTDLIB_MEMHEAP_INVALID_SIZE        3U
+#define ISTDLIB_MEMHEAP_INVALID_INIT        4U
 
 #if !defined(ISTDLIB_BSW_NOT_USED_STDLIB)
 #define ISTDLIB_BSW_NOT_USED_STDLIB STD_ON
@@ -171,6 +173,8 @@ extern "C" {
 /* =========================================== external data declarations =========================================== */
 
 /* ========================================= external function declarations ========================================= */
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 /**
  * @brief       copy from srcptr to dstptr
  * @param[out]  dstptr : Points to the target array used to store the copied content
@@ -183,6 +187,11 @@ extern "C" {
 /*PRQA S 3209 ++ */ /* VL_IStdLib_3209 */
 void* IStdLib_MemCpy(void* ISTDLIB_RESTRICT dstptr, const void* ISTDLIB_RESTRICT srcptr, uint32 length);
 /*PRQA S 3209 -- */
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
+
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 /**
  * @brief       Fill the destination address with val, which is n bytes in length
  * @param[out]  dstptr : Points to the target array used to store the copied content
@@ -193,7 +202,11 @@ void* IStdLib_MemCpy(void* ISTDLIB_RESTRICT dstptr, const void* ISTDLIB_RESTRICT
  * @trace       -
  */
 void* IStdLib_MemSet(void* ISTDLIB_RESTRICT dstptr, uint8 val, uint32 n);
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
 
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 /**
  * @brief     compare str1ptr and strptr2, which is n bytes in length
  * @param[in] str1ptr : Points to the array str1
@@ -207,7 +220,8 @@ void* IStdLib_MemSet(void* ISTDLIB_RESTRICT dstptr, uint8 val, uint32 n);
  * @trace       -
  */
 StatusType IStdLib_MemCmp(const void* ISTDLIB_RESTRICT str1ptr, const void* ISTDLIB_RESTRICT str2ptr, uint32 n);
-
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
 #else
 #include <string.h>
 
@@ -222,7 +236,8 @@ StatusType IStdLib_MemCmp(const void* ISTDLIB_RESTRICT str1ptr, const void* ISTD
 #endif
 
 #endif
-
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 /**
  * @brief        init heap
  * @param[in]    size : the size of ram
@@ -239,7 +254,11 @@ StatusType IStdLib_MemCmp(const void* ISTDLIB_RESTRICT str1ptr, const void* ISTD
  * @trace        -
  */
 uint8 IStdLib_MemHeapInit(void* ramHeap, uint32 size);
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
 
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 /**
  * @brief        malloc block depending on size
  * @param[inout] ram : the whole of memory space
@@ -249,7 +268,11 @@ uint8 IStdLib_MemHeapInit(void* ramHeap, uint32 size);
  * @trace        -
  */
 void* IStdLib_MemHeapMalloc(void* ramHeap, uint32 size);
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
 
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 /**
  * @brief        malloc block depending on size, and fill 0
  * @param[inout] ramHeap   : the whole of memory space
@@ -260,7 +283,11 @@ void* IStdLib_MemHeapMalloc(void* ramHeap, uint32 size);
  * @trace        -
  */
 void* IStdLib_MemHeapCalloc(void* ramHeap, uint32 count, uint32 size);
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
 
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 /**
  * @brief        free block to heap
  * @param[inout] ramHeap : the whole of memory space
@@ -276,7 +303,8 @@ void* IStdLib_MemHeapCalloc(void* ramHeap, uint32 count, uint32 size);
  * @trace        -
  */
 uint8 IStdLib_MemHeapFree(void* ramHeap, const void* ptr);
-
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
 #if ISTDLIB_MEMHEAP_STATISTIC == STD_ON
 /**
  * @brief       get the heap size
@@ -287,8 +315,11 @@ uint8 IStdLib_MemHeapFree(void* ramHeap, const void* ptr);
  * @synchronous TRUE
  * @trace       -
  */
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 uint8 IStdLib_MemHeapGetManageSize(const void* ramHeap, uint32* size);
-
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
 /**
  * @brief       get the total assignable size
  * @param[in]   ramHeap  : the whole of memory space
@@ -298,8 +329,11 @@ uint8 IStdLib_MemHeapGetManageSize(const void* ramHeap, uint32* size);
  * @synchronous TRUE
  * @trace       -
  */
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 uint8 IStdLib_MemHeapGetRealMaxSize(const void* ramHeap, uint32* size);
-
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
 /**
  * @brief       get the assigned size
  * @param[in]   ram  : the whole of memory space
@@ -309,8 +343,11 @@ uint8 IStdLib_MemHeapGetRealMaxSize(const void* ramHeap, uint32* size);
  * @synchronous TRUE
  * @trace       -
  */
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 uint8 IStdLib_MemHeapGetUsedSize(const void* ramHeap, uint32* size);
-
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
 /**
  * @brief       get the max free block size
  * @param[in]   ramHeap : the whole of memory space
@@ -320,8 +357,11 @@ uint8 IStdLib_MemHeapGetUsedSize(const void* ramHeap, uint32* size);
  * @synchronous TRUE
  * @trace       -
  */
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 uint8 IStdLib_MemHeapGetCurFreeMaxBlockSize(const void* ramHeap, uint32* size);
-
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
 /**
  * @brief       get the max assigned size
  * @param[in]   ramHeap  : the whole of memory space
@@ -331,8 +371,11 @@ uint8 IStdLib_MemHeapGetCurFreeMaxBlockSize(const void* ramHeap, uint32* size);
  * @synchronous TRUE
  * @trace       -
  */
+#define ISTDLIB_START_SEC_CODE
+#include "IStdLib_MemMap.h"
 uint8 IStdLib_MemHeapGetMaxMallocSize(const void* ramHeap, uint32* size);
-
+#define ISTDLIB_STOP_SEC_CODE
+#include "IStdLib_MemMap.h"
 #endif
 
 #ifdef __cplusplus

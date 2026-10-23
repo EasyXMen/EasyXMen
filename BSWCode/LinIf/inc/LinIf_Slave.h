@@ -36,6 +36,8 @@
 /* ========================================= external function declarations ========================================= */
 
 #if (STD_ON == LINIF_SLAVE_SUPPORT)
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief               Initializes the LinIf slave channel.
  * @param[in]           applicationId: The partition id of LinIf module
@@ -44,7 +46,11 @@
  * @trace               -
  */
 void LinIf_SlaveInit(ApplicationType applicationId);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief               Transmit request process in slave node.
  * @param[in]           applicationId: The partition id of LinIf module
@@ -54,7 +60,11 @@ void LinIf_SlaveInit(ApplicationType applicationId);
  * @trace               -
  */
 Std_ReturnType LinIf_SlaveTransmit(uint16 frameIdx);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief               Process slave node wakeup request.
  * @param[in]           ch: The channel id of linif
@@ -65,7 +75,11 @@ Std_ReturnType LinIf_SlaveTransmit(uint16 frameIdx);
  * @trace               -
  */
 Std_ReturnType LinIf_SlaveWakeUp(NetworkHandleType ch);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief               Wakeup confirmation process in slave node
  * @param[in]           WakeupSource: LinIf channel wakeup source
@@ -75,7 +89,11 @@ Std_ReturnType LinIf_SlaveWakeUp(NetworkHandleType ch);
  * @trace               -
  */
 void LinIf_SlaveWakeupConfirmation(EcuM_WakeupSourceType WakeupSource, ApplicationType applicationId);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief               Copy PID table to provide 'PdiBuffer'
  * @param[in]           ch: The channel id of linif
@@ -86,7 +104,11 @@ void LinIf_SlaveWakeupConfirmation(EcuM_WakeupSourceType WakeupSource, Applicati
  * @trace               -
  */
 void LinIf_SlaveGetPIDTable(NetworkHandleType ch, Lin_FramePidType* PidBuffer, uint8* PidBufferLength);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief               Set 'PdiBuffer' pointed PID table to internal PID table.
  * @param[in]           ch: The channel id of linif
@@ -96,7 +118,11 @@ void LinIf_SlaveGetPIDTable(NetworkHandleType ch, Lin_FramePidType* PidBuffer, u
  * @trace               -
  */
 void LinIf_SlaveSetPIDTable(NetworkHandleType ch, const Lin_FramePidType* PidBuffer);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief               Get the current configured NAD.
  * @param[in]           ch: The channel id of linif
@@ -108,7 +134,11 @@ void LinIf_SlaveSetPIDTable(NetworkHandleType ch, const Lin_FramePidType* PidBuf
  * @trace               -
  */
 Std_ReturnType LinIf_SlaveGetConfiguredNAD(NetworkHandleType ch, uint8* Nad);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief               Sets the current configured NAD.
  * @param[in]           ch: The channel id of linif
@@ -118,7 +148,11 @@ Std_ReturnType LinIf_SlaveGetConfiguredNAD(NetworkHandleType ch, uint8* Nad);
  * @trace               -
  */
 void LinIf_SlaveSetConfiguredNAD(NetworkHandleType ch, uint8 Nad);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief               Header receive process in slave node.
  * @param[in]           ch: The channel id of linif
@@ -131,7 +165,11 @@ void LinIf_SlaveSetConfiguredNAD(NetworkHandleType ch, uint8 Nad);
  * @trace               -
  */
 Std_ReturnType LinIf_SlaveHeaderIndication(NetworkHandleType ch, Lin_PduType* PduPtr);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief               Receive indication process in slave node.
  * @param[in]           ch: The channel id of linif
@@ -142,7 +180,11 @@ Std_ReturnType LinIf_SlaveHeaderIndication(NetworkHandleType ch, Lin_PduType* Pd
  * @trace               -
  */
 void LinIf_SlaveRxIndication(NetworkHandleType ch, uint8* Lin_SduPtr);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief               Tx confirmation process in slave node.
  * @param[in]           ch: Identification of the LIN channel
@@ -151,7 +193,11 @@ void LinIf_SlaveRxIndication(NetworkHandleType ch, uint8* Lin_SduPtr);
  * @trace               -
  */
 void LinIf_SlaveTxConfirmation(NetworkHandleType ch);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief               Lin error indication process in slave node.
  * @param[in]           ch: Identification of the LIN channel
@@ -161,7 +207,11 @@ void LinIf_SlaveTxConfirmation(NetworkHandleType ch);
  * @trace               -
  */
 void LinIf_SlaveLinErrorIndication(NetworkHandleType ch, Lin_SlaveErrorType ErrorStatus);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief               Go-to-sleep process in slave node.
  * @param[in]           ch: Identification of the LIN channel
@@ -170,15 +220,37 @@ void LinIf_SlaveLinErrorIndication(NetworkHandleType ch, Lin_SlaveErrorType Erro
  * @trace               -
  */
 void LinIf_SlaveGotoSleep(NetworkHandleType ch);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief           LinIf slave main function
- * @param[in]       channel: Identification of the LinIf channel
+ * @param[in]       ch: Identification of the LinIf channel
  * @reentrant       TRUE
  * @synchronous     TRUE
- * @trace        -
+ * @trace           -
  */
 void LinIf_SlaveMainHandle(NetworkHandleType ch);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+
+#if (STD_ON == LINIF_BUS_MIRROR_SUPPORT)
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
+/**
+ * @brief               Enable slave bus mirror function.
+ * @param[in]           ch: LinIf channel id
+ * @param[in]           enable: TRUE: enable bus mirror function; FALSE: disable bus mirror function
+ * @reentrant           TRUE
+ * @synchronous         TRUE
+ * @trace               -
+ */
+void LinIf_SlaveEnableBusMirror(NetworkHandleType ch, boolean enbale);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+#endif
 
 #endif
 

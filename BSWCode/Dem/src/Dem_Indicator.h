@@ -30,6 +30,8 @@
 #if (DEM_INDICATOR_NUMBER > 0u)
 
 /* ========================================== internal function declarations ======================================== */
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Update user-defined indicator counters in enable
  * @param[in]     IndicatorId: Indicator Id
@@ -39,6 +41,10 @@
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_EableIndicator(Dem_IndicatorNumType IndicatorId, Dem_IndicatorStatusType IndicatorBehaviour);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Update user-defined indicator counters in disable
@@ -49,6 +55,10 @@ DEM_LOCAL void Dem_EableIndicator(Dem_IndicatorNumType IndicatorId, Dem_Indicato
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_DisableIndicator(Dem_IndicatorNumType IndicatorId, Dem_IndicatorStatusType IndicatorBehaviour);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Updates all global user indicators for an event
@@ -58,8 +68,12 @@ DEM_LOCAL void Dem_DisableIndicator(Dem_IndicatorNumType IndicatorId, Dem_Indica
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_UpdateNormalIndicator(Dem_IndicatorNumType IndicatorId);
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if ((DEM_EVENT_FAILURE_COUNTER == STD_ON) && (DEM_INDICATOR_MIL_ENABLE == STD_ON))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
+
 /**
  * @brief         A DemIndicatorAttribute with a configured DemMILIndicatorRef, shall use the
  * DemEventConfirmationThreshold instead of the DemIndicatorFailureCycleCounterThreshold to calculate the indicator On
@@ -73,7 +87,11 @@ DEM_LOCAL void Dem_UpdateNormalIndicator(Dem_IndicatorNumType IndicatorId);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL boolean Dem_EventCheckIndicatorIsMil(Dem_EventIdType EventId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Calculate event has Warning Indicator On Criteria Fulfilled
@@ -86,6 +104,10 @@ DEM_LOCAL boolean Dem_EventCheckIndicatorIsMil(Dem_EventIdType EventId);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL boolean Dem_EventCheckWIROnFulfilled(Dem_EventIdType EventId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         If indicators are configured, initialize all indicator state counters.
@@ -94,10 +116,10 @@ DEM_LOCAL boolean Dem_EventCheckWIROnFulfilled(Dem_EventIdType EventId);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_IndicatorInit(void);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 
 /* ========================================== internal function definitions ========================================= */
-#define DEM_START_SEC_CODE
-#include "Dem_MemMap.h"
 /**
  * @brief         Get DemIndicatorBehaviour information based on IndicatorAttributeRef
  * @param[in]     IndicatorAttributeRef: Reference indicator attribute
@@ -125,7 +147,6 @@ DEM_LOCAL_INLINE boolean Dem_CheckHaveIndicator(Dem_EventIdType EventId)
 {
     return (Dem_GetIAStartOfEvent(EventId) < Dem_GetIAEndRefEndOfEvent(EventId)); /* PRQA S 4404 */ /* VL_Dem_4404 */
 }
-
 #if (DEM_INDICATOR_BLINKING_ENABLE == STD_ON)
 /**
  * @brief         Get Indicator Blinking Counter
@@ -156,7 +177,6 @@ DEM_LOCAL_INLINE void
     Dem_GetIndicatorStatusInfo()[IndicatorId].BlinkingCounter = Counter;
 }
 #endif
-
 #if (DEM_INDICATOR_CONTINUOUS_ENABLE == STD_ON)
 /**
  * @brief         Get Indicator Continuous Counter
@@ -185,7 +205,6 @@ DEM_LOCAL_INLINE void
     Dem_GetIndicatorStatusInfo()[IndicatorId].ContinuousCounter = Counter;
 }
 #endif
-
 #if (DEM_J1939_SUPPORT == STD_ON)
 #if (DEM_INDICATOR_FAST_FLASH_ENABLE == STD_ON)
 /**
@@ -245,7 +264,6 @@ DEM_LOCAL_INLINE void
 }
 #endif
 #endif
-
 /**
  * @brief         Get Indicator Status
  * @param[in]     IndicatorId: Indicator Id
@@ -272,7 +290,8 @@ DEM_LOCAL_INLINE void
 {
     Dem_GetIndicatorStatusInfo()[IndicatorId].IndicatorStatus = IndicatorStatus;
 }
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Update user-defined indicator counters in enable
  */
@@ -313,7 +332,10 @@ DEM_LOCAL void Dem_EableIndicator(Dem_IndicatorNumType IndicatorId, Dem_Indicato
         break;
     }
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Update user-defined indicator counters in disable
  */
@@ -354,7 +376,8 @@ DEM_LOCAL void Dem_DisableIndicator(Dem_IndicatorNumType IndicatorId, Dem_Indica
         break;
     }
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Update user-defined indicator counters
  * Removes the event's contribution to the indicator states. Basically this subtracts 1 from each indicators continuous
@@ -372,7 +395,8 @@ DEM_LOCAL_INLINE void Dem_DisableNormalIndicatorByEvent(Dem_EventIdType EventId)
         Dem_DisableIndicator(Dem_GetRefOfInd(start), Dem_GetIndicatorBehaviour(start));
     }
 }
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Updates all global user indicators for an event
  */
@@ -421,7 +445,8 @@ DEM_LOCAL void Dem_UpdateNormalIndicator(Dem_IndicatorNumType IndicatorId)
     }
     Dem_SetStatusOfIndicator(IndicatorId, indicatorState);
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Updates all global user indicators for an event
  * @param[in]     EventId: Event ID
@@ -451,8 +476,9 @@ DEM_LOCAL_INLINE void Dem_IndicatorDisable(Dem_EventIdType EventId)
     Dem_DisableNormalIndicatorByEvent(EventId);
     Dem_UpdateNormalIndicatorByEvent(EventId);
 }
-
 #if ((DEM_EVENT_FAILURE_COUNTER == STD_ON) && (DEM_INDICATOR_MIL_ENABLE == STD_ON))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief A DemIndicatorAttribute with a configured DemMILIndicatorRef, shall use the DemEventConfirmationThreshold
  * instead of the DemIndicatorFailureCycleCounterThreshold to calculate the indicator On Criteria
@@ -464,9 +490,10 @@ DEM_LOCAL boolean Dem_EventCheckIndicatorIsMil(Dem_EventIdType EventId)
     for (Dem_IndicatorAttrNumType start = Dem_GetIAStartOfEvent(EventId); start < Dem_GetIAEndRefEndOfEvent(EventId);
          ++start)
     {
-        Dem_IndicatorNumType indicatorId = Dem_GetRefOfInd(start);
-        for (uint8 client = Dem_GetClientStartRefOfEvent(EventId); client < Dem_GetClientEndRefOfEvent(EventId);
-             ++client)
+        Dem_IndicatorNumType   indicatorId = Dem_GetRefOfInd(start);
+        Dem_EventClientRefType client      = Dem_GetClientStartRefOfEvent(EventId);
+        Dem_EventClientRefType clientEnd   = Dem_GetClientEndRefOfEvent(EventId);
+        for (; client < clientEnd; ++client)
         {
             if (indicatorId == Dem_GetMILIndOfMemSet(Dem_GetMemorySetRefOfClient(Dem_GetClientOfEventRef(client))))
             {
@@ -477,8 +504,11 @@ DEM_LOCAL boolean Dem_EventCheckIndicatorIsMil(Dem_EventIdType EventId)
     }
     return isMil;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Calculate event has Warning Indicator On Criteria Fulfilled
  */
@@ -519,7 +549,10 @@ DEM_LOCAL boolean Dem_EventCheckWIROnFulfilled(Dem_EventIdType EventId)
     }
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief If indicators are configured, initialize all indicator state counters.
  */
@@ -544,7 +577,8 @@ DEM_LOCAL void Dem_IndicatorInit(void)
 #endif
     }
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Initializes indicators States
  * @reentrant     FALSE
@@ -559,14 +593,9 @@ DEM_LOCAL_INLINE void Dem_InitIndicatorStates(void)
         Dem_UpdateNormalIndicator(indicatorId);
     }
 }
-
-#define DEM_STOP_SEC_CODE
-#include "Dem_MemMap.h"
 #endif
 
 #if ((DEM_OBDII_SUPPORT == STD_ON) || (DEM_J1939_READING_DTC_SUPPORT == STD_ON) || (DEM_J1939_DM31_SUPPORT == STD_ON))
-#define DEM_START_SEC_CODE
-#include "Dem_MemMap.h"
 /**
  * @brief         Returns if the event supports the Special indicator.
  * @param[in]     EventId: Event ID
@@ -594,8 +623,6 @@ DEM_LOCAL_INLINE boolean Dem_EventCheckHaveSpecialIndicator(Dem_EventIdType Even
 #endif
     return ret;
 }
-#define DEM_STOP_SEC_CODE
-#include "Dem_MemMap.h"
 #endif
 
 #endif

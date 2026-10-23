@@ -32,6 +32,8 @@
  */
 #define DCM_UDS3D_MINREQLEN 4u
 /* ========================================== internal function declarations ======================================== */
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         check general conditions for UDS 0x3D
  * @param[inout]  pMsgContext      : Message-related information for one diagnostic protocol identifier. The
@@ -55,6 +57,8 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x3D_CheckCondition(
     uint32*                       memoryAddress,
     uint32*                       memorySize,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 /* ========================================== external function definitions ========================================= */
 #define DCM_START_SEC_CODE
 #include "Dcm_MemMap.h"

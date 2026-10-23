@@ -30,7 +30,7 @@
 /**
  * @brief The minimum request length of UDS 0x36
  */
-#define DCM_UDS36_MINREQLEN 1u
+#define DCM_UDS36_MINREQLEN     1u
 /**
  * @brief The header length of UDS 0x36 (serviceId and blockSequenceCounter)
  */
@@ -45,6 +45,8 @@ Dcm_TransferDataType Dcm_TransferData;
 #define DCM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
 #include "Dcm_MemMap.h"
 /* ========================================== internal function declarations ======================================== */
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         check general conditions for UDS 0x36
  * @param[inout]  pMsgContext : Message-related information for one diagnostic protocol identifier. The
@@ -64,6 +66,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x36_ConditionCheck(
     Dcm_MsgContextType*           pMsgContext,
     uint64*                       dataLength,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         handle actual data transfer
@@ -88,6 +94,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x36_HandleTransfer(
     uint64*                       dataLength,
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         check the transfer sequence such as previous service request and block sequence counter
@@ -107,6 +117,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x36_CheckSequence(
     Dcm_MsgLenType                reqDataLen,
     uint8                         blockSequenceCounter,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         process data transfer of read
@@ -131,6 +145,10 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x36_ProcessRead(
     uint64                        dataLength,
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         process data transfer of write
@@ -155,6 +173,8 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x36_ProcessWrite(
     uint64                        dataLength,
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 /* ========================================== external function definitions ========================================= */
 #define DCM_START_SEC_CODE
 #include "Dcm_MemMap.h"
@@ -200,6 +220,8 @@ Std_ReturnType Dcm_UDS0x36(
 #define DCM_STOP_SEC_CODE
 #include "Dcm_MemMap.h"
 
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* PRQA S 3673 ++ */ /* VL_QAC_3673 */
 DCM_LOCAL Std_ReturnType Dcm_UDS0x36_ConditionCheck(
     Dcm_MsgContextType*           pMsgContext,
@@ -243,7 +265,11 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x36_ConditionCheck(
 
     return result;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL Std_ReturnType Dcm_UDS0x36_CheckSequence(
     Dcm_MsgLenType                reqDataLen,
     uint8                         blockSequenceCounter,
@@ -268,12 +294,8 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x36_CheckSequence(
     }
     /* PRQA S 1252 ++ */ /* VL_QAC_1252 */
     else if (
-        ((IsSameBlockId == FALSE) && (DCM_REQUEST_DOWNLOAD == Dcm_TransferData.TransferStatus)
-         && (Dcm_TransferData.MemorySizeRemain < (reqDataLen - 1uL)))
-        || ((IsSameBlockId == TRUE) && ((reqDataLen - 1uL) != Dcm_TransferData.LastSize))
-        || (((DCM_REQUEST_DOWNLOAD == Dcm_TransferData.TransferStatus)
-             || (DCM_REQUEST_WRITEFILE == Dcm_TransferData.TransferStatus))
-            && (reqDataLen > (Dcm_TransferData.BlockLength - DCM_UDS36_HEADER_LENGTH))))
+        (IsSameBlockId == FALSE) && (DCM_REQUEST_DOWNLOAD == Dcm_TransferData.TransferStatus)
+        && (Dcm_TransferData.MemorySizeRemain < (reqDataLen - 1uL)))
     /* PRQA S 1252 -- */
     {
         /* Downloaded Data Size goes over Required Length, send NRC 0x71 */
@@ -286,6 +308,15 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x36_CheckSequence(
         *ErrorCode = DCM_E_WRONGBLOCKSEQUENCECOUNTER;
         result     = E_NOT_OK;
     }
+    else if (
+        ((DCM_REQUEST_DOWNLOAD == Dcm_TransferData.TransferStatus)
+         || (DCM_REQUEST_WRITEFILE == Dcm_TransferData.TransferStatus))
+        && (((reqDataLen - 1uL) > (Dcm_TransferData.BlockLength - DCM_UDS36_HEADER_LENGTH))
+            || ((IsSameBlockId == TRUE) && ((reqDataLen - 1uL) != Dcm_TransferData.LastSize))))
+    {
+        *ErrorCode = DCM_E_REQUESTOUTOFRANGE;
+        result     = E_NOT_OK;
+    }
     else
     {
         /*idle*/
@@ -293,7 +324,11 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x36_CheckSequence(
 
     return result;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL Std_ReturnType Dcm_UDS0x36_HandleTransfer(
     Dcm_ExtendedOpStatusType      OpStatus,
     uint64*                       dataLength,
@@ -367,7 +402,11 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x36_HandleTransfer(
 
     return result;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL Std_ReturnType Dcm_UDS0x36_ProcessRead(
     Dcm_ExtendedOpStatusType      OpStatus,
     uint64                        dataLength,
@@ -422,7 +461,11 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x36_ProcessRead(
 
     return result;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL Std_ReturnType Dcm_UDS0x36_ProcessWrite(
     Dcm_ExtendedOpStatusType      OpStatus,
     uint64                        dataLength,
@@ -439,7 +482,7 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x36_ProcessWrite(
         Dcm_TransferData.MemoryIdentifier,
         memoryAddress,
         (uint32)dataLength,
-        &pMsgContext->reqData[2u],
+        &pMsgContext->reqData[1u],
         ErrorCode);
     /* PRQA S 2784,3120 -- */
 
@@ -478,5 +521,7 @@ DCM_LOCAL Std_ReturnType Dcm_UDS0x36_ProcessWrite(
 
     return result;
 }
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 /* PRQA S 3673 -- */
 #endif

@@ -157,10 +157,18 @@ struct netif;
 #define ip4_addr_isany(addr1) ((addr1) == NULL || ip4_addr_isany_val(*(addr1)))
 
 #define ip4_addr_isbroadcast(addr1, netif) ip4_addr_isbroadcast_u32((addr1)->addr, netif)
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 u8_t ip4_addr_isbroadcast_u32(u32_t addr, const struct netif *netif);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #define ip_addr_netmask_valid(netmask) ip4_addr_netmask_valid((netmask)->addr)
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 u8_t ip4_addr_netmask_valid(u32_t netmask);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #define ip4_addr_ismulticast(addr1) (((addr1)->addr & PP_HTONL(0xf0000000UL)) == PP_HTONL(0xe0000000UL))
 
@@ -210,11 +218,27 @@ u8_t ip4_addr_netmask_valid(u32_t netmask);
 /** For backwards compatibility */
 #define ip_ntoa(ipaddr)  ipaddr_ntoa(ipaddr)
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 u32_t ipaddr_addr(const char *cp);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 int ip4addr_aton(const char *cp, ip4_addr_t *addr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 /** returns ptr to static buffer; not reentrant! */
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 char *ip4addr_ntoa(const ip4_addr_t *addr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 char *ip4addr_ntoa_r(const ip4_addr_t *addr, char *buf, int buflen);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #ifdef __cplusplus
 }

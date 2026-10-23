@@ -44,6 +44,11 @@
 
 E2E_LOCAL void
     E2E_P04Check_Seqence(const E2E_P04ConfigType* ConfigPtr, E2E_P04CheckStateType* StatePtr, uint16 ReceivedCounter);
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
+
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * @brief        verify inputs of check()
  * @param[in]    ConfigPtr : Pointer to static configuration.
@@ -133,6 +138,11 @@ Std_ReturnType
 
     return Ret;
 }
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
+
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /*PRQA S 3120 -- */
 /**
  * Initializes the protection state.
@@ -153,6 +163,11 @@ Std_ReturnType E2E_P04ProtectInit(E2E_P04ProtectStateType* StatePtr)
     }
     return Ret;
 }
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
+
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * Checks the Data received using the E2E profile 4.
  */
@@ -226,6 +241,11 @@ Std_ReturnType E2E_P04Check(
 
     return Ret;
 }
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
+
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /*PRQA S 3120 -- */
 /**
  * Initializes the check state.
@@ -247,6 +267,11 @@ Std_ReturnType E2E_P04CheckInit(E2E_P04CheckStateType* StatePtr)
     }
     return Ret;
 }
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
+
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * The function maps the check status of profile 4 to a generic check status.
  */
@@ -287,8 +312,12 @@ E2E_PCheckStatusType E2E_P04MapStatusToSM(Std_ReturnType CheckReturn, E2E_P04Che
     }
     return Ret;
 }
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
 /*PRQA S 1532 -- */ /*PRQA S 1503 -- */
 /* ========================================== internal function definitions ========================================= */
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 E2E_LOCAL void
     E2E_P04Check_Seqence(const E2E_P04ConfigType* ConfigPtr, E2E_P04CheckStateType* StatePtr, uint16 ReceivedCounter)
 {
@@ -325,7 +354,11 @@ E2E_LOCAL void
     }
     StatePtr->Counter = ReceivedCounter;
 }
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
 
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 E2E_LOCAL Std_ReturnType E2E_P04CheckVerifyInputs(
     const E2E_P04ConfigType*     ConfigPtr,
     const E2E_P04CheckStateType* StatePtr,

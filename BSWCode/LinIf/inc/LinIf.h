@@ -147,13 +147,33 @@
     Risk: No risk.
     Prevention: Functional reliability guaranteed by design.
 
-    \li VL_LinIf_1756
-      Reason: The issue shall be avoided in actual running environment and configs.
+    \li PRQA S 0686 VL_LinIf_0686
+     Reason: Array has fewer initializers than its declared size.
+     Risk: No risk.
+     Prevention: Functional reliability guaranteed by design.
+
+    \li PRQA S 6510 VL_MTR_LinIf_CONF .<br>
+      Reason: Some special files have less code or no code at all.
+      Risk: The code is difficult to maintain.
+      Prevention: Design and code review + clear structure and well-commented code.
+
+    \li PRQA S 0553 VL_LinIf_0553
+      Reason: The usage of this file depends on the config
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_LinIf_1512
+      Reason: Identifier '${name}' with external linkage has separate declarations in multiple translation units.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_LinIf_1513
+      Reason: Identifier '${name}' with external linkage has separate non-defining declarations in more than one
+              location.
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
 */
-
-/* PRQA S 1756 EOF */ /* VL_LinIf_1756 */
+/* PRQA S 1512,1513 EOF */ /* VL_LinIf_1512,VL_LinIf_1513 */
 #ifndef LINIF_H_
 #define LINIF_H_
 
@@ -166,7 +186,7 @@
 #if (LINIF_TP_SUPPORTED == STD_ON)
 #include "LinTp_PBcfg.h"
 #endif
-
+#include "LinIf_Cbk.h"
 /* ===================================================== macros ===================================================== */
 /*Published information elements*/
 #define LINIF_MODULE_ID                   62U
@@ -223,7 +243,7 @@
 #define LINIF_RXINDICATION_ID        (uint8)0x79u
 #define LINIF_TXCONFIRMATION_ID      (uint8)0x7au
 #define LINIF_LINERRORINDICATION_ID  (uint8)0x7bu
-#define LINIF_NOUSED(paramter)       (void)(paramter)
+#define LINIF_ENABLEBUSMIRRORING     (uint8)0x7fu
 /* ================================================ type definitions ================================================ */
 
 /* =========================================== external data declarations =========================================== */
@@ -236,7 +256,11 @@
  * @reentrant          FALSE
  * @synchronous        TRUE
  * @trace              CPD-56870 */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 extern void LinIf_Init(const LinIf_ConfigType* ConfigPtr);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief              Returns the version information of this module.
@@ -247,7 +271,11 @@ extern void LinIf_Init(const LinIf_ConfigType* ConfigPtr);
  * @trace              CPD-56872
  */
 #if (STD_ON == LINIF_VERSION_INFO_API)
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 extern void LinIf_GetVersionInfo(Std_VersionInfoType* versionInfo);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 #endif
 
 /**
@@ -261,12 +289,16 @@ extern void LinIf_GetVersionInfo(Std_VersionInfoType* versionInfo);
  * @synchronous         TRUE
  * @trace               CPD-56873
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 extern Std_ReturnType LinIf_Transmit(PduIdType LinTxPduId, const PduInfoType* PduInfoPtr);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief               Requests a schedule table to be executed.
  * @param[in]           Channel:  Channel index.
- * @param[in]           Schedule: Identification of the new schedule to be set.
+ * @param[in]           ScheduleTableIdx: Identification of the new schedule to be set.
  * @return              E_OK:     Schedule table request has been accepted.
  * @return              E_NOT_OK: Schedule table switch request has not been accepted.
  * @reentrant           FALSE
@@ -274,7 +306,11 @@ extern Std_ReturnType LinIf_Transmit(PduIdType LinTxPduId, const PduInfoType* Pd
  * @trace               CPD-56874
  */
 /* PRQA S 3334 ++ */ /* VL_LinIf_3334 */
-extern Std_ReturnType LinIf_ScheduleRequest(NetworkHandleType Channel, LinIf_SchHandleType Schedule);
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
+extern Std_ReturnType LinIf_ScheduleRequest(NetworkHandleType Channel, LinIf_SchHandleType ScheduleTableIdx);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 /* PRQA S 3334 -- */
 
 /**
@@ -289,7 +325,30 @@ extern Std_ReturnType LinIf_ScheduleRequest(NetworkHandleType Channel, LinIf_Sch
  * @synchronous         TRUE
  * @trace               CPD-56875
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 extern Std_ReturnType LinIf_GotoSleep(NetworkHandleType Channel);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+
+/**
+ * @brief               Enables or disables mirroring for a LIN channel.
+ * @param[in]           Channel: Identification of the LIN channel.
+ * @param[in]           MirroringActive: TRUE: Mirror_ReportLinFrame will be called for each frame received or
+ * transmitted on the given channel. FALSE: Mirror_ReportLinFrame will not be called for the given channel.
+ * @return              E_OK: Mirroring mode was changed
+ * @return              E_NOT_OK: Wrong Channel, or mirroring globally disabled (see LinIfBusMirroringSupport).
+ * @reentrant           TRUE
+ * @synchronous         TRUE
+ * @trace               -
+ */
+#if (STD_ON == LINIF_BUS_MIRROR_SUPPORT)
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
+extern Std_ReturnType LinIf_EnableBusMirroring(NetworkHandleType Channel, boolean MirroringActive);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+#endif
 
 /**
  * @brief               Initiates the wake up process.
@@ -301,7 +360,11 @@ extern Std_ReturnType LinIf_GotoSleep(NetworkHandleType Channel);
  * @synchronous         TRUE
  * @trace               CPD-56876
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 extern Std_ReturnType LinIf_Wakeup(NetworkHandleType Channel);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 #if (LINIF_TRCV_DRIVER_SUPPORTED == STD_ON)
 /**
@@ -316,7 +379,11 @@ extern Std_ReturnType LinIf_Wakeup(NetworkHandleType Channel);
  * @synchronous         TRUE
  * @trace               CPD-56877
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 extern Std_ReturnType LinIf_SetTrcvMode(NetworkHandleType Channel, LinTrcv_TrcvModeType TransceiverMode);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief               Returns the actual state of a LIN Transceiver Driver.
@@ -332,7 +399,11 @@ extern Std_ReturnType LinIf_SetTrcvMode(NetworkHandleType Channel, LinTrcv_TrcvM
  * @synchronous         TRUE
  * @trace               CPD-56878
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 extern Std_ReturnType LinIf_GetTrcvMode(NetworkHandleType Channel, LinTrcv_TrcvModeType* TransceiverModePtr);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief              Returns the reason for the wake up that has been detected
@@ -349,8 +420,12 @@ extern Std_ReturnType LinIf_GetTrcvMode(NetworkHandleType Channel, LinTrcv_TrcvM
  * @synchronous         TRUE
  * @trace               CPD-56879
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 extern Std_ReturnType
     LinIf_GetTrcvWakeupReason(NetworkHandleType Channel, LinTrcv_TrcvWakeupReasonType* TrcvWuReasonPtr);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief               This API enables, disables and clears the notification
@@ -366,7 +441,11 @@ extern Std_ReturnType
  * @synchronous         TRUE
  * @trace               CPD-56880
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 extern Std_ReturnType LinIf_SetTrcvWakeupMode(NetworkHandleType Channel, LinTrcv_TrcvWakeupModeType LinTrcvWakeupMode);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 #endif
 
 /**
@@ -376,7 +455,11 @@ extern Std_ReturnType LinIf_SetTrcvWakeupMode(NetworkHandleType Channel, LinTrcv
  * @synchronous         TRUE
  * @trace               -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 extern void LinIf_ChannelMainFunction(NetworkHandleType ch);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 #if (LINIF_WAKEUP_SUPPORT == STD_ON)
 /**
@@ -391,7 +474,11 @@ extern void LinIf_ChannelMainFunction(NetworkHandleType ch);
  * @synchronous         TRUE
  * @trace               CPD-56885
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 extern Std_ReturnType LinIf_CheckWakeup(EcuM_WakeupSourceType WakeupSource);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 #endif
 
 #if (STD_ON == LINIF_SLAVE_SUPPORT)
@@ -412,7 +499,11 @@ extern Std_ReturnType LinIf_CheckWakeup(EcuM_WakeupSourceType WakeupSource);
  * @synchronous         TRUE
  * @trace               CPD-56881
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 Std_ReturnType LinIf_GetPIDTable(NetworkHandleType Channel, Lin_FramePidType* PidBuffer, uint8* PidBufferLength);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief               Sets all assigned PID values. The order is congruent to
@@ -429,7 +520,12 @@ Std_ReturnType LinIf_GetPIDTable(NetworkHandleType Channel, Lin_FramePidType* Pi
  * @synchronous         TRUE
  * @trace               CPD-56882
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 Std_ReturnType LinIf_SetPIDTable(NetworkHandleType Channel, Lin_FramePidType* PidBuffer, uint8 PidBufferLength);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+
 /**
  * @brief                Reports the current configured NAD.
  *                      Only applicable for LIN slave nodes.
@@ -442,7 +538,11 @@ Std_ReturnType LinIf_SetPIDTable(NetworkHandleType Channel, Lin_FramePidType* Pi
  * @synchronous         TRUE
  * @trace               CPD-56883
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 Std_ReturnType LinIf_GetConfiguredNAD(NetworkHandleType Channel, uint8* Nad);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * Brief                Sets the current configured NAD.
@@ -456,7 +556,11 @@ Std_ReturnType LinIf_GetConfiguredNAD(NetworkHandleType Channel, uint8* Nad);
  * @synchronous         TRUE
  * @trace               CPD-56884
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 Std_ReturnType LinIf_SetConfiguredNAD(NetworkHandleType Channel, uint8 Nad);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 #endif
 

@@ -31,14 +31,14 @@ https://atomgit.com/easyxmen/docs
 
 ```
 ├── BSWCode                 # 模块静态代码(Module static code)
+│   ├── Arti
+│   ├── BndM
 │   ├── BswM
-│   ├── CDD_FVM
 │   ├── CanIf
 │   ├── CanNm
 │   ├── CanSM
 │   ├── CanTSyn
 │   ├── CanTp
-│   ├── CanTrcv
 │   ├── Com
 │   ├── ComM
 │   ├── CommonInclude       # 共用的头文件(Common header files)
@@ -55,12 +55,9 @@ https://atomgit.com/easyxmen/docs
 │   ├── Eep_62
 │   ├── EthIf
 │   ├── EthSM
-│   ├── EthSwt
 │   ├── EthTSyn
-│   ├── EthTrcv_62
-│   ├── Fee
+│   ├── Fee_62
 │   ├── FiM
-│   ├── FlsTst
 │   ├── IpduM
 │   ├── KeyM
 │   ├── LdCom
@@ -71,15 +68,15 @@ https://atomgit.com/easyxmen/docs
 │   │   └── IStdLib
 │   ├── LinIf
 │   ├── LinSM
+│   ├── MemAcc_62
 │   ├── MemIf
 │   ├── Nm
 │   ├── NvM
 │   ├── PduR
-│   ├── RamTst
-│   ├── SOMEIPTP
 │   ├── Sd
 │   ├── SecOC
 │   ├── SoAd
+│   ├── SomeIpTp
 │   ├── StbM
 │   ├── TcpIp
 │   ├── Tm

@@ -58,7 +58,7 @@
 #include <string.h>
 
 /* Currently, only TCP is implemented */
-#if LWIP_TCP && LWIP_CALLBACK_API
+#if LWIP_TCP_IPERF && LWIP_TCP && LWIP_CALLBACK_API
 
 #ifdef LWIP_HOOK_FILENAME
 #include LWIP_HOOK_FILENAME

@@ -37,6 +37,7 @@
 #include "Dem_ClearDTC.h"
 #endif
 #include "Dem_Error.h"
+#include "Dem_Arti.h"
 
 /* ===================================================== macros ===================================================== */
 #if (defined(DEM_MAX_FDC_SINCE_LAST_CLEAR))
@@ -45,6 +46,8 @@
 
 /* ========================================== internal function declarations ======================================== */
 /* PRQA S 1512 EOF */ /* VL_Dem_1512 */
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Check if candidate has an event priority, that qualifies it or disqualifies it for the displacement.
  * Otherwise it needs further tests.
@@ -61,8 +64,12 @@
 DEM_LOCAL Dem_MemDisplaceCheckResultType Dem_MemDisplaceCheckPriority(
     Dem_MemDisplacementInfoType* const       BestMatchInfo,
     const Dem_MemDisplacementInfoType* const CandidateInfo);
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_GENERAL_DISPLACEMENT_FULL == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
+
 /**
  * @brief         Check if candidate is passive, and this qualifies it for the displacement. Otherwise it needs further
  * tests.
@@ -79,6 +86,10 @@ DEM_LOCAL Dem_MemDisplaceCheckResultType Dem_MemDisplaceCheckPriority(
 DEM_LOCAL Dem_MemDisplaceCheckResultType Dem_MemDisplaceCheckPassiveState(
     Dem_MemDisplacementInfoType* const       BestMatchInfo,
     const Dem_MemDisplacementInfoType* const CandidateInfo);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Check if candidate is passive, and this qualifies it for the displacement. Otherwise it needs further
@@ -96,7 +107,11 @@ DEM_LOCAL Dem_MemDisplaceCheckResultType Dem_MemDisplaceCheckPassiveState(
 DEM_LOCAL Dem_MemDisplaceCheckResultType Dem_MemDisplaceCheckReadinessState(
     Dem_MemDisplacementInfoType* const       BestMatchInfo,
     const Dem_MemDisplacementInfoType* const CandidateInfo);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Selects an event to displace in a filled memory
@@ -112,6 +127,10 @@ DEM_LOCAL Dem_NvBlockNumType Dem_MemSelectDisplacedIndex(
     Dem_MemStateInfoConstPtrType      MemoryInfo,
     Dem_EventIdType                   DisplacingEventId,
     Dem_EventDisplacementStrategyType displacementStrategy);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         This function manages the event memory storage. If a free slot is available, it is returned directly.
@@ -124,6 +143,10 @@ DEM_LOCAL Dem_NvBlockNumType Dem_MemSelectDisplacedIndex(
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL Dem_NvBlockNumType Dem_MemoryAllocateIndex(Dem_MemStateInfoConstPtrType MemoryInfo, Dem_EventIdType EventId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         This function will look for every snapshot record of the event that needs updating due to the status
@@ -137,8 +160,12 @@ DEM_LOCAL Dem_NvBlockNumType Dem_MemoryAllocateIndex(Dem_MemStateInfoConstPtrTyp
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL uint8 Dem_MemUpdateEventFreezeFrame(Dem_EventIdType EventId, Dem_NvBlockNumType MemoryIndex, uint8 Trigger);
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_MAX_SIZE_J1939EXFREEZEFRAME > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
+
 /**
  * @brief         Collect J1939 Freeze Frame data stored for an event.
  * @param[in]     MemoryIndex: Memory index
@@ -149,9 +176,13 @@ DEM_LOCAL uint8 Dem_MemUpdateEventFreezeFrame(Dem_EventIdType EventId, Dem_NvBlo
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL uint8 Dem_MemUpdateEventJ1939FF(Dem_EventIdType EventId, Dem_NvBlockNumType MemoryIndex);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if ((DEM_OBDII_SUPPORT == STD_ON) && (DEM_MAX_SIZE_OBDFREEZEFRAME > 0u))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Collect OBD Freeze Frame data stored for an event.
  * @param[in]     MemoryIndex: Memory index
@@ -162,7 +193,11 @@ DEM_LOCAL uint8 Dem_MemUpdateEventJ1939FF(Dem_EventIdType EventId, Dem_NvBlockNu
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL uint8 Dem_MemUpdateEventOBDFF(Dem_EventIdType EventId, Dem_NvBlockNumType MemoryIndex);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Update the chronology of one entry in the event memory.
@@ -173,6 +208,10 @@ DEM_LOCAL uint8 Dem_MemUpdateEventOBDFF(Dem_EventIdType EventId, Dem_NvBlockNumT
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_MemoryUpdateIndex(Dem_MemStateInfoConstPtrType MemoryInfo, Dem_NvBlockNumType MemoryIndex);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Initializes Event memory
@@ -181,8 +220,12 @@ DEM_LOCAL void Dem_MemoryUpdateIndex(Dem_MemStateInfoConstPtrType MemoryInfo, De
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_MemoryEventInit(void);
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_COMBINATION_NUMBER > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
+
 /**
  * @brief         Initializes Combined Event memory
  * @reentrant     FALSE
@@ -190,7 +233,11 @@ DEM_LOCAL void Dem_MemoryEventInit(void);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_MemoryCombinedEventInit(void);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Check for corrupt memory entry.
@@ -204,6 +251,10 @@ DEM_LOCAL void Dem_MemoryCombinedEventInit(void);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL boolean Dem_MemFixCorruptMemoryEntry(Dem_MemStateInfoConstPtrType MemoryInfo, Dem_NvBlockNumType MemoryIndex);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Check for duplicate memory entry.
@@ -217,8 +268,12 @@ DEM_LOCAL boolean Dem_MemFixCorruptMemoryEntry(Dem_MemStateInfoConstPtrType Memo
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL boolean Dem_MemFixDoubleAllocation(Dem_MemStateInfoConstPtrType MemoryInfo, Dem_NvBlockNumType MemoryIndex);
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_ENTRY_TRIGGER_ON_CONFIRMED == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
+
 /**
  * @brief         Restore parts of the UDS status, using redundant data, when storage happens on confirmed.
  * @param[in]     EventId: Event Id
@@ -227,9 +282,13 @@ DEM_LOCAL boolean Dem_MemFixDoubleAllocation(Dem_MemStateInfoConstPtrType Memory
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_MemRestoreStatusBitsOnConfirmed(Dem_EventIdType EventId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_ENTRY_TRIGGER_ON_TEST_FAILED == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Restore parts of the UDS status, using redundant data, when storage happens on failed.
  * @param[in]     EventId: Event Id
@@ -238,9 +297,13 @@ DEM_LOCAL void Dem_MemRestoreStatusBitsOnConfirmed(Dem_EventIdType EventId);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_MemRestoreStatusBitsOnFailed(Dem_EventIdType EventId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if ((DEM_ENTRY_TRIGGER_ON_FDC_THRESHOLD == STD_ON) && (defined(DEM_OCCCTR)))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Restore parts of the UDS status, using redundant data, when storage happens at a FDC threshold.
  * @param[in]     EventId: Event Id
@@ -250,7 +313,11 @@ DEM_LOCAL void Dem_MemRestoreStatusBitsOnFailed(Dem_EventIdType EventId);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_MemRestoreStatusBitsOnFdc(Dem_NvBlockNumType MemoryIndex, Dem_EventIdType EventId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Update the aging status of an event in it's internal status.
@@ -263,6 +330,10 @@ DEM_LOCAL void Dem_MemRestoreStatusBitsOnFdc(Dem_NvBlockNumType MemoryIndex, Dem
  */
 DEM_LOCAL Dem_EventInternalStatusType
     Dem_MemRestoreStoredStatusFromEntry(Dem_NvBlockNumType MemoryIndex, Dem_EventInternalStatusType InternalStatus);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Restores the event status and internal status based on the configured storage trigger.
@@ -273,6 +344,10 @@ DEM_LOCAL Dem_EventInternalStatusType
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_MemRestoreEventStatus(Dem_NvBlockNumType MemoryIndex, Dem_EventIdType EventId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Sort the memory entry into the chronological list.
@@ -287,6 +362,10 @@ DEM_LOCAL void Dem_MemSortEntryIntoChronologicalList(
     Dem_MemStateInfoConstPtrType MemoryInfo,
     Dem_NvBlockNumType           MemoryIndex,
     uint32                       Timestamp);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         verifies the integrity of memory entries and links them up into the runtime control structures.
@@ -296,6 +375,10 @@ DEM_LOCAL void Dem_MemSortEntryIntoChronologicalList(
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_MemoryInitRestoreMemory(Dem_MemoryNumType MemIndex);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Initializes NvM Memory use in dem
@@ -304,6 +387,10 @@ DEM_LOCAL void Dem_MemoryInitRestoreMemory(Dem_MemoryNumType MemIndex);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_NvMMemoryInit(void);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
 
@@ -316,9 +403,13 @@ DEM_LOCAL void Dem_NvMMemoryInit(void);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL uint8 Dem_MemUpdateEntryOnTFTOC(Dem_EventIdType EventId, Dem_NvBlockNumType MemoryIndex);
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_FEATURE_NVM_IMMEDIATE == STD_ON)
 #if (DEM_FEATURE_SUPPORT_NVM_POLLING == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
+
 /**
  * @brief         Poll the result of an ongoing write job
  * @reentrant     FALSE
@@ -326,7 +417,11 @@ DEM_LOCAL uint8 Dem_MemUpdateEntryOnTFTOC(Dem_EventIdType EventId, Dem_NvBlockNu
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_NvmGetNvMResult(void);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Find Next Block To Commit
@@ -335,6 +430,10 @@ DEM_LOCAL void Dem_NvmGetNvMResult(void);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL boolean Dem_NvmFindNextBlockToCommit(void);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         writes the memory block marked for immediate synchronization into the NV storage.
@@ -343,6 +442,8 @@ DEM_LOCAL boolean Dem_NvmFindNextBlockToCommit(void);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_NvmCommitBlock(void);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 /* ============================================ internal data definitions =========================================== */
@@ -357,8 +458,6 @@ DEM_LOCAL uint32 Dem_MemCurrentTimestamp;
 #include "Dem_MemMap.h"
 
 /* ========================================== internal function definitions ========================================= */
-#define DEM_START_SEC_CODE
-#include "Dem_MemMap.h"
 /**
  * @brief         set Block Status
  * @param[in]     MemoryIndex: Memory index
@@ -418,7 +517,6 @@ DEM_LOCAL_INLINE void Dem_ResetMemoryOverflow(Dem_MemoryNumType MemIndex)
 {
     DEM_BITS_RESET(Dem_GetAdminData().MemoryOverflow, MemIndex);
 }
-
 #if (DEM_NV_RAM_BLOCK_NUMBER > 0u)
 #if (DEM_FEATURE_NVM_IMMEDIATE == STD_ON)
 /**
@@ -546,7 +644,6 @@ DEM_LOCAL_INLINE void Dem_NvmSetCurrentCommitState(uint8 CommitState)
 {
     Dem_GetNvmCommitData().CommitState = CommitState;
 }
-
 #if (DEM_CLEAR_DTC_BEHAVIOR == DEM_CLRRESP_NONVOLATILE_FINISH)
 /**
  * @brief         Increment Pending Clear Commits
@@ -602,6 +699,7 @@ DEM_LOCAL_INLINE boolean Dem_NvmCheckCurrentBlockIsCleared(void)
 {
     return Dem_GetNvmCommitData().BlockIsCleared;
 }
+
 /**
  * @brief         Sets the value of the 'BlockIsCleared' flag for the currently  processed block
  * @param[in]     BlockIsCleared: Flag of cleared
@@ -615,7 +713,8 @@ DEM_LOCAL_INLINE void Dem_NvmSetCurrentBlockIsCleared(boolean BlockIsCleared)
 }
 #endif
 #endif
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief set Single Block Status
  */
@@ -644,7 +743,8 @@ DEM_LOCAL void Dem_NvmSetSingleBlockState(Dem_NvBlockNumType MemoryIndex, uint8 
         Dem_NvmSetBlockState(MemoryIndex, Status);
     }
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         set Event Status Block need to store
  * @reentrant     FALSE
@@ -674,7 +774,6 @@ DEM_LOCAL_INLINE void
         Dem_NvmSetStatusBlockChanged();
     }
 }
-
 #if (DEM_FEATURE_NVM_IMMEDIATE == STD_ON)
 /**
  * @brief         Restore internal state for block marked as 'dirty'
@@ -702,7 +801,6 @@ DEM_LOCAL_INLINE void Dem_NvmRestoreBlockStateImmediate(Dem_NvBlockNumType Block
 #endif
 }
 #endif
-
 /**
  * @brief         Initializes the NvM management on wake up
  * @reentrant     FALSE
@@ -766,13 +864,8 @@ DEM_LOCAL_INLINE void Dem_NvmInit(void)
     Dem_EnableTask(Dem_Task_NvM);
 #endif
 }
-
-#define DEM_STOP_SEC_CODE
-#include "Dem_MemMap.h"
 #endif
 
-#define DEM_START_SEC_CODE
-#include "Dem_MemMap.h"
 /**
  * @brief         Mark update started for the memory block.
  * @param[in]     MemoryIndex: Memory index
@@ -1050,7 +1143,6 @@ DEM_LOCAL_INLINE void Dem_SetOCCOfMemEntry(Dem_NvBlockNumType MemoryIndex, uint8
     Dem_GetMemoryEntry()[MemoryIndex].OccurrenceCounter = OccurrenceCounter;
 }
 #endif
-
 /**
  * @brief         get AgingCounter of MemEntry by MemoryIndex
  */
@@ -1066,7 +1158,6 @@ DEM_LOCAL_INLINE void Dem_SetAgingCounterOfMemEntry(Dem_NvBlockNumType MemoryInd
 {
     Dem_GetMemoryEntry()[MemoryIndex].AgingCounter = AgingCounter;
 }
-
 #if (defined(DEM_MAX_FDC_SINCE_LAST_CLEAR))
 /**
  * @brief         get MaxDebounceValue of MemEntry by MemoryIndex
@@ -1084,7 +1175,6 @@ DEM_LOCAL_INLINE void Dem_SetMaxDebounceValueOfMemEntry(Dem_NvBlockNumType Memor
     Dem_GetMemoryEntry()[MemoryIndex].MaxDebounceValue = MaxDebounceValue;
 }
 #endif
-
 #if (defined(DEM_FAILED_CYCLES))
 /**
  * @brief         get FailedCycleCounter of MemEntry by MemoryIndex
@@ -1107,7 +1197,6 @@ DEM_LOCAL_INLINE void Dem_SetFailedCycleCounterOfMemEntry(Dem_NvBlockNumType Mem
     Dem_GetMemoryEntry()[MemoryIndex].FailedCycleCounter = FailedCycleCounter;
 }
 #endif
-
 #if ((defined(DEM_CYCLES_SINCE_FIRST_FAILED)) || (defined(DEM_OCC3)))
 /**
  * @brief         get CyclesSinceFirstFailed of MemEntry by MemoryIndex
@@ -1126,7 +1215,6 @@ DEM_LOCAL_INLINE void
     Dem_GetMemoryEntry()[MemoryIndex].CyclesSinceFirstFailed = CyclesSinceFirstFailed;
 }
 #endif
-
 #if ((defined(DEM_CYCLES_SINCE_LAST_FAILED)) || (defined(DEM_OCC1)))
 /**
  * @brief         get CyclesSinceLastFailed of MemEntry by MemoryIndex
@@ -1145,7 +1233,6 @@ DEM_LOCAL_INLINE void
     Dem_GetMemoryEntry()[MemoryIndex].CyclesSinceLastFailed = CyclesSinceLastFailed;
 }
 #endif
-
 #if (defined(DEM_OCC2))
 /**
  * @brief         get OCC2 of MemEntry by MemoryIndex
@@ -1168,7 +1255,6 @@ DEM_LOCAL_INLINE void Dem_SetOCC2OfMemEntry(Dem_NvBlockNumType MemoryIndex, uint
     Dem_GetMemoryEntry()[MemoryIndex].OCC2 = OCC2;
 }
 #endif
-
 #if (defined(DEM_OCC4))
 /**
  * @brief         get OCC4 of MemEntry by MemoryIndex
@@ -1191,7 +1277,6 @@ DEM_LOCAL_INLINE void Dem_SetOCC4OfMemEntry(Dem_NvBlockNumType MemoryIndex, uint
     Dem_GetMemoryEntry()[MemoryIndex].OCC4 = OCC4;
 }
 #endif
-
 #if (defined(DEM_OCC5))
 /**
  * @brief         get OCC5 of MemEntry by MemoryIndex
@@ -1214,7 +1299,6 @@ DEM_LOCAL_INLINE void Dem_SetOCC5OfMemEntry(Dem_NvBlockNumType MemoryIndex, uint
     Dem_GetMemoryEntry()[MemoryIndex].OCC5 = OCC5;
 }
 #endif
-
 #if (defined(DEM_OCC6))
 /**
  * @brief         get OCC6 of MemEntry by MemoryIndex
@@ -1232,7 +1316,6 @@ DEM_LOCAL_INLINE void Dem_SetOCC6OfMemEntry(Dem_NvBlockNumType MemoryIndex, uint
     Dem_GetMemoryEntry()[MemoryIndex].OCC6 = OCC6;
 }
 #endif
-
 #if (defined(DEM_SI30))
 /**
  * @brief         get SI30 of MemEntry by MemoryIndex
@@ -1328,7 +1411,6 @@ DEM_LOCAL_INLINE void Dem_UpdateSI30BitOfMemEntry(Dem_NvBlockNumType MemoryIndex
 }
 #endif
 #endif
-
 /* PRQA S 5016 ++ */ /* VL_Dem_5016 */
 #if (DEM_EXTENDED_DATA_CLASS_NUMBER > 0u)
 /**
@@ -1345,17 +1427,6 @@ DEM_LOCAL_INLINE uint8* Dem_GetExtendedDataPtrOfMemEntry(Dem_NvBlockNumType Memo
 #endif
 }
 
-#if (DEM_MAX_SIZE_EXTENDED_DATA > 0u)
-/**
- * @brief         get Extended Data Ptr of MemEntry by MemoryIndex and EntryIndex
- */
-DEM_LOCAL_INLINE uint8*
-    Dem_GetExtendedDataPtrOfMemEntryByEntryIndex(Dem_NvBlockNumType MemoryIndex, uint8 EDEntryIndex, uint8 EntryIndex)
-{
-    return &(Dem_GetMemoryEntry()[MemoryIndex].ExtendedData[EDEntryIndex][EntryIndex]);
-}
-#endif
-
 /**
  * @brief         get Extended Data Record Ptr of MemEntry by MemoryIndex
  * @param[in]     MemoryIndex: Memory index
@@ -1369,7 +1440,6 @@ DEM_LOCAL_INLINE uint8* Dem_GetExtendedDataRecordPtrOfMemEntry(Dem_NvBlockNumTyp
     return Dem_GetMemoryEntry()[MemoryIndex].EDRecord;
 }
 #endif
-
 #if (DEM_MAX_SIZE_FREEZEFRAME > 0u)
 /**
  * @brief         get Freeze Frame Ptr of MemEntry by MemoryIndex
@@ -1387,7 +1457,6 @@ DEM_LOCAL_INLINE uint8* Dem_GetFreezeFrameRecordPtrOfMemEntry(Dem_NvBlockNumType
     return Dem_GetMemoryEntry()[MemoryIndex].FFRecord;
 }
 #endif
-
 #if (DEM_MAX_SIZE_OBDFREEZEFRAME > 0u)
 /**
  * @brief         get OBD Freeze Frame Ptr of MemEntry by MemoryIndex
@@ -1397,7 +1466,6 @@ DEM_LOCAL_INLINE uint8* Dem_GetOBDFreezeFramePtrOfMemEntry(Dem_NvBlockNumType Me
     return Dem_GetMemoryEntry()[MemoryIndex].OBDFreezeFrame;
 }
 #endif
-
 #if (DEM_MAX_SIZE_J1939FREEZEFRAME > 0u)
 /**
  * @brief         get J1939 Freeze Frame Ptr of MemEntry by MemoryIndex
@@ -1407,7 +1475,6 @@ DEM_LOCAL_INLINE uint8* Dem_GetJ1939FreezeFramePtrOfMemEntry(Dem_NvBlockNumType 
     return Dem_GetMemoryEntry()[MemoryIndex].J1939FreezeFrame;
 }
 #endif
-
 #if (DEM_MAX_SIZE_J1939EXFREEZEFRAME > 0u)
 /**
  * @brief         get J1939Ex Freeze Frame Ptr of MemEntry by MemoryIndex
@@ -1417,7 +1484,6 @@ DEM_LOCAL_INLINE uint8* Dem_GetJ1939ExFreezeFramePtrOfMemEntry(Dem_NvBlockNumTyp
     return Dem_GetMemoryEntry()[MemoryIndex].J1939ExFreezeFrame;
 }
 #endif
-
 #if (                                                                            \
     (DEM_MAX_SIZE_J1939EXFREEZEFRAME > 0u) || (DEM_MAX_SIZE_OBDFREEZEFRAME > 0u) \
     || (DEM_MAX_SIZE_J1939FREEZEFRAME > 0u))
@@ -1445,7 +1511,6 @@ DEM_LOCAL_INLINE uint8 Dem_GetstateOfMemEntry(Dem_NvBlockNumType MemoryIndex)
     return Dem_GetMemoryEntry()[MemoryIndex].State;
 }
 #endif
-
 #if (DEM_OBDII_SUPPORT == STD_ON)
 /**
  * @brief         Set state of MemEntry by MemoryIndex
@@ -1460,7 +1525,6 @@ DEM_LOCAL_INLINE void Dem_SetstateOfMemEntry(Dem_NvBlockNumType MemoryIndex, uin
     Dem_GetMemoryEntry()[MemoryIndex].State = State;
 }
 #endif
-
 #if (DEM_RESET_CONFIRMED_BIT_ON_OVERFLOW == STD_OFF)
 /**
  * @brief         get aging only state of MemEntry by MemoryIndex
@@ -1489,7 +1553,6 @@ DEM_LOCAL_INLINE void Dem_SetAgingOnlyOfMemEntry(Dem_NvBlockNumType MemoryIndex)
     DEM_FLAG_SET(Dem_GetMemoryEntry()[MemoryIndex].State, DEM_MEM_STATE_AGING_ONLY);
 }
 #endif
-
 /**
  * @brief         Initializes an event memory entry.
  * @param[in]     MemoryIndex: Memory index
@@ -1542,7 +1605,8 @@ DEM_LOCAL_INLINE void Dem_MemInitializeEntry(Dem_NvBlockNumType MemoryIndex)
     Dem_MemSet(Dem_GetFreezeFrameRecordExtPtrOfMemEntry(MemoryIndex), 0u, 1u);
 #endif
 }
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Find Index in Memory by EventId
  */
@@ -1572,7 +1636,10 @@ DEM_LOCAL Dem_NvBlockNumType Dem_MemoryFindIndex(Dem_MemStateInfoConstPtrType Me
     }
     return memoryIndex;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Frees an event memory entry
  */
@@ -1580,10 +1647,12 @@ DEM_LOCAL void Dem_MemoryFreeIndex(Dem_MemStateInfoConstPtrType MemoryInfo, Dem_
 {
     uint8              chronoIterator;
     Dem_NvBlockNumType tempChronoIndex;
+#if (DEM_DEV_ERROR_DETECT == STD_ON)
+    uint8 errorId = DEM_E_NO_ERROR;
+#endif
 
     /** reduce count of used elements in the chrono stack */
-    chronoIterator = Dem_GetCurSizeOfMemoryInfo(MemoryInfo);
-    --chronoIterator;
+    chronoIterator = Dem_GetCurSizeOfMemoryInfo(MemoryInfo) - 1u;
     Dem_SetCurSizeOfMemoryInfo(MemoryInfo, chronoIterator);
 
     /** free the primary element */
@@ -1598,14 +1667,30 @@ DEM_LOCAL void Dem_MemoryFreeIndex(Dem_MemStateInfoConstPtrType MemoryInfo, Dem_
     {
         Dem_NvBlockNumType swap;
         swap = tempChronoIndex;
+        if (chronoIterator == 0u)
+        {
+#if (DEM_DEV_ERROR_DETECT == STD_ON)
+            errorId = DEM_E_WRONG_CONFIGURATION;
+#endif
+            break;
+        }
         --chronoIterator;
         tempChronoIndex = Dem_GetChronologyOfMemoryInfo(MemoryInfo, chronoIterator);
         Dem_SetChronologyOfMemoryInfo(MemoryInfo, chronoIterator, swap);
     }
+#if (DEM_DEV_ERROR_DETECT == STD_ON)
+    /** ***** Development Error Report ***** */
+    if (errorId != DEM_E_NO_ERROR)
+    {
+        /** The Dem module has an abnormal data storage issue. The data may have been overwritten. Please refer to the
+         * manual to check if the initialization sequence of the module is normal. */
+        Dem_DetReportError(DEM_SID_INTERNALAPIID, errorId);
+    }
+#endif
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_GENERAL_DISPLACEMENT_NONE == STD_OFF)
-
 /**
  * @brief         Update the best match info by the candidate info.
  * @param[in]     BestMatchInfo: Pointer to match information
@@ -1648,7 +1733,8 @@ DEM_LOCAL_INLINE Dem_MemDisplaceCheckResultType Dem_MemDisplaceCheckInvalidEntry
 
     return checkResult;
 }
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Check if candidate has an event priority, that qualifies it or disqualifies it for the displacement. Otherwise
  * it needs further tests.
@@ -1677,8 +1763,11 @@ DEM_LOCAL Dem_MemDisplaceCheckResultType Dem_MemDisplaceCheckPriority(
     }
     return checkResult;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_GENERAL_DISPLACEMENT_FULL == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Check if candidate is passive, and this qualifies it for the displacement. Otherwise it needs further tests.
  */
@@ -1700,7 +1789,10 @@ DEM_LOCAL Dem_MemDisplaceCheckResultType Dem_MemDisplaceCheckPassiveState(
     }
     return checkResult;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Check if candidate is passive, and this qualifies it for the displacement. Otherwise it needs further tests.
  */
@@ -1724,8 +1816,11 @@ DEM_LOCAL Dem_MemDisplaceCheckResultType Dem_MemDisplaceCheckReadinessState(
 
     return checkResult;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Selects an event to displace in a filled memory
  */
@@ -1805,8 +1900,11 @@ DEM_LOCAL Dem_NvBlockNumType Dem_MemSelectDisplacedIndex(
     }
     return bestMatchInfo.MemoryIndex;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief This function manages the event memory storage. If a free slot is available, it is returned directly. In case
  * no free slot is available, the configured displacement algorithm is applied to free a slot.
@@ -1878,7 +1976,10 @@ DEM_LOCAL Dem_NvBlockNumType Dem_MemoryAllocateIndex(Dem_MemStateInfoConstPtrTyp
     }
     return memoryIndex;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Selects a memory entry for an event
  */
@@ -1886,8 +1987,8 @@ DEM_LOCAL Dem_NvBlockNumType Dem_MemoryAllocateIndex(Dem_MemStateInfoConstPtrTyp
 DEM_LOCAL Dem_NvBlockNumType Dem_AllocateMemory(Dem_EventIdType EventId)
 /* PRQA S 6070 -- */
 {
-    Dem_NvBlockNumType   memoryIndex;
-    Dem_DTCAttRefNumType lDTCAttr = Dem_GetDTCAttr(EventId);
+    Dem_NvBlockNumType   memoryIndex = DEM_MEM_INVALID_MEMORY_INDEX;
+    Dem_DTCAttRefNumType lDTCAttr    = Dem_GetDTCAttr(EventId);
     if (Dem_CheckDTCAttr(lDTCAttr) == TRUE)
     {
         Dem_MemStateInfoConstPtrType memoryInfo = Dem_MemStateInfoInit(Dem_GetMemRef(lDTCAttr));
@@ -1919,8 +2020,11 @@ DEM_LOCAL Dem_NvBlockNumType Dem_AllocateMemory(Dem_EventIdType EventId)
     }
     return memoryIndex;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_RESET_CONFIRMED_BIT_ON_OVERFLOW == STD_OFF)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Selects a memory entry for an event's aging counter
  */
@@ -1960,8 +2064,9 @@ DEM_LOCAL Dem_NvBlockNumType Dem_MemoryAllocateAging(Dem_MemStateInfoConstPtrTyp
     }
     return memoryIndex;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (defined(DEM_OCCCTR))
 /**
  * @brief         Increment the occurrence counter in the memory entry, if it is lower than the maximum value (latch at
@@ -1981,7 +2086,6 @@ DEM_LOCAL_INLINE boolean Dem_MemIncrementOCC(Dem_NvBlockNumType MemoryIndex)
     return successfulIncrement;
 }
 #endif
-
 #if (defined(DEM_OCC2))
 /**
  * @brief         Increment the occurrence counter # 2 in the memory entry, if it is lower than the maximum value (latch
@@ -2001,7 +2105,6 @@ DEM_LOCAL_INLINE boolean Dem_MemIncrementOCC2(Dem_NvBlockNumType MemoryIndex)
     return successfulIncrement;
 }
 #endif
-
 #if (defined(DEM_OCC4))
 /**
  * @brief         Increment the occurrence counter # 4 in the memory entry, if it is lower than the maximum value (latch
@@ -2028,7 +2131,6 @@ DEM_LOCAL_INLINE boolean Dem_MemIncrementOCC4(Dem_NvBlockNumType MemoryIndex)
     return successfulIncrement;
 }
 #endif
-
 #if (defined(DEM_OCC6))
 /**
  * @brief         Increment the occurrence counter # 6 in the memory entry, if it is lower than the maximum value (latch
@@ -2055,7 +2157,6 @@ DEM_LOCAL_INLINE boolean Dem_MemIncrementOCC6(Dem_NvBlockNumType MemoryIndex)
     return successfulIncrement;
 }
 #endif
-
 #if (defined(DEM_FAILED_CYCLES))
 /**
  * @brief         Increment the 'Failed Cycle Counter' in the memory entry, if it is lower than the maximum value (latch
@@ -2075,7 +2176,6 @@ DEM_LOCAL_INLINE boolean Dem_MemIncrementFailedCycleCounter(Dem_NvBlockNumType M
     return successfulIncrement;
 }
 #endif
-
 /**
 
  * @brief         Function updates environmental data of an event on a Test Failed trigger.
@@ -2109,7 +2209,8 @@ DEM_LOCAL_INLINE uint8 Dem_MemUpdateEntryOnTF(Dem_EventIdType EventId, Dem_NvBlo
 #endif
     return blockModification;
 }
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Function updates environmental data of an event on a Test Failed this cycle trigger.
  */
@@ -2125,7 +2226,8 @@ DEM_LOCAL uint8 Dem_MemUpdateEntryOnTFTOC(Dem_EventIdType EventId, Dem_NvBlockNu
 #endif
     return blockModification;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_FREEZE_FRAME_CLASS_NUMBER > 0u)
 /**
  * @brief         Check if freeze frame is Stored
@@ -2153,7 +2255,8 @@ DEM_LOCAL_INLINE void Dem_SetFFStored(uint8 FFEntryIndex, Dem_NvBlockNumType Mem
     uint8* ptr = Dem_GetFreezeFrameRecordPtrOfMemEntry(MemoryIndex);
     DEM_BITS_SET(ptr, FFEntryIndex);
 }
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief This function will look for every snapshot record of the event that needs updating due to the status changes
  * encoded by the trigger flags.
@@ -2242,10 +2345,10 @@ DEM_LOCAL uint8 Dem_MemUpdateEventFreezeFrame(Dem_EventIdType EventId, Dem_NvBlo
 #endif
     return blockModification;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_EXTENDED_DATA_CLASS_NUMBER > 0u)
-
 /**
  * @brief         Check if extended data is Stored
  */
@@ -2269,7 +2372,8 @@ DEM_LOCAL_INLINE void Dem_SetEDStored(uint8 EDEntryIndex, Dem_NvBlockNumType Mem
     uint8* ptr = Dem_GetExtendedDataRecordPtrOfMemEntry(MemoryIndex);
     DEM_BITS_SET(ptr, EDEntryIndex);
 }
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Collects the user provided extended data records stored for an event entry.
  */
@@ -2318,9 +2422,10 @@ DEM_LOCAL uint8 Dem_MemUpdateEventExtendData(Dem_EventIdType EventId, Dem_NvBloc
 
     return blockModification;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 3415 -- */
 #endif
-
 #if ((DEM_J1939_SUPPORT == STD_ON) && ((DEM_MAX_SIZE_J1939FREEZEFRAME > 0u) || (DEM_MAX_SIZE_J1939EXFREEZEFRAME > 0u)))
 #if (DEM_MAX_SIZE_J1939FREEZEFRAME > 0u)
 /**
@@ -2388,7 +2493,8 @@ DEM_LOCAL_INLINE void Dem_SetJ1939ExFFStored(Dem_NvBlockNumType MemoryIndex)
     DEM_BITS_SET(ptr, DEM_J1939EXFREEZEFRAME_RECORD_INDEX);
 }
 #endif
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Collect J1939 Freeze Frame data stored for an event.
  */
@@ -2440,8 +2546,9 @@ DEM_LOCAL uint8 Dem_MemUpdateEventJ1939FF(Dem_EventIdType EventId, Dem_NvBlockNu
 #endif
     return blockModification;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if ((DEM_OBDII_SUPPORT == STD_ON) && (DEM_MAX_SIZE_OBDFREEZEFRAME > 0u))
 /**
  * @brief         Check if OBD freeze frame is Stored
@@ -2465,7 +2572,8 @@ DEM_LOCAL_INLINE void Dem_SetOBDFFStored(Dem_NvBlockNumType MemoryIndex)
 {
     DEM_BITS_SET(Dem_GetFreezeFrameRecordExtPtrOfMemEntry(MemoryIndex), DEM_OBDFREEZEFRAME_RECORD_INDEX);
 }
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Collect OBD Freeze Frame data stored for an event.
  */
@@ -2490,8 +2598,11 @@ DEM_LOCAL uint8 Dem_MemUpdateEventOBDFF(Dem_EventIdType EventId, Dem_NvBlockNumT
     }
     return blockModification;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Updates all data stored for an event.
  * Depending on configuration of the event data, collect the data to be updated due to the update trigger(s) in
@@ -2577,7 +2688,10 @@ DEM_LOCAL uint8 Dem_MemUpdateEventEntry(Dem_EventIdType EventId, uint8 Trigger, 
     Dem_MemoryUpdateFinish(MemoryIndex);
     return blockModification;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief  Update the chronology of one entry in the event memory.
  */
@@ -2585,6 +2699,9 @@ DEM_LOCAL void Dem_MemoryUpdateIndex(Dem_MemStateInfoConstPtrType MemoryInfo, De
 {
     uint8 chronoIterator;
     uint8 tempIndex;
+#if (DEM_DEV_ERROR_DETECT == STD_ON)
+    uint8 errorId = DEM_E_NO_ERROR;
+#endif
     /** Store the global timestamp to the entry, and update it */
     Dem_SetTimestampOfMemEntry(MemoryIndex, Dem_MemGetCurrentTimestamp());
     Dem_MemSetCurrentTimestamp(Dem_MemGetCurrentTimestamp() + 1u); /* PRQA S 1252 */ /* VL_Dem_1252 */
@@ -2594,15 +2711,33 @@ DEM_LOCAL void Dem_MemoryUpdateIndex(Dem_MemStateInfoConstPtrType MemoryInfo, De
     while (tempIndex != MemoryIndex)
     {
         uint8 swap;
-
         swap = tempIndex;
+        if (chronoIterator == 0u)
+        {
+#if (DEM_DEV_ERROR_DETECT == STD_ON)
+            errorId = DEM_E_WRONG_CONFIGURATION;
+#endif
+            break;
+        }
         --chronoIterator;
         tempIndex = Dem_GetChronologyOfMemoryInfo(MemoryInfo, chronoIterator);
         Dem_SetChronologyOfMemoryInfo(MemoryInfo, chronoIterator, swap);
     }
     Dem_SetChronologyOfMemoryInfo(MemoryInfo, (Dem_GetCurSizeOfMemoryInfo(MemoryInfo) - 1u), MemoryIndex);
+#if (DEM_DEV_ERROR_DETECT == STD_ON)
+    /** ***** Development Error Report ***** */
+    if (errorId != DEM_E_NO_ERROR)
+    {
+        /** The Dem module has an abnormal data storage issue. The data may have been overwritten. Please refer to the
+         * manual to check if the initialization sequence of the module is normal. */
+        Dem_DetReportError(DEM_SID_INTERNALAPIID, errorId);
+    }
+#endif
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Update the statistics of an an event entry.
  */
@@ -2639,7 +2774,10 @@ DEM_LOCAL uint8
     }
     return blockModification;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief updates Memory failure statistics like first and most recently failed event, first and most recently confirmed
  * event.
@@ -2669,8 +2807,11 @@ DEM_LOCAL void Dem_UpdateMemoryFailureStatistics(Dem_EventIdType EventId, uint8 
         }
     }
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_DEBOUNCE_COUNTER_STORAGE_NUM > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Copies debounce values from debounce array to NVRAM mirror
  */
@@ -2693,8 +2834,11 @@ DEM_LOCAL void Dem_MemStorageDataDebounce(void)
     Dem_NvmSetSingleBlockState(DEM_NV_DEBOUNCEBLOCKINDEX, DEM_NVM_BLOCKSTATE_DIRTYIMMEDIATE);
 #endif
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Initializes Event memory
  */
@@ -2730,8 +2874,11 @@ DEM_LOCAL void Dem_MemoryEventInit(void)
 #endif
     }
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_COMBINATION_NUMBER > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Initializes Combined Event memory
  */
@@ -2759,8 +2906,11 @@ DEM_LOCAL void Dem_MemoryCombinedEventInit(void)
         Dem_SetCombinedEventUDSStatus(groupId, InternalStatus);
     }
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 3406, 1505 ++ */ /* VL_Dem_3406, VL_Dem_1505 */
 /**
  * @brief Initializes the NvBlock for administrative data
@@ -2771,6 +2921,7 @@ DEM_LOCAL void Dem_MemoryCombinedEventInit(void)
  */
 Std_ReturnType Dem_NvMInitAdminData(NvM_InitBlockRequestType InitBlockRequest)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 2, 0xF3, InitBlockRequest);
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
     /** ***** Development Error Checks ***** */
@@ -2801,9 +2952,13 @@ Std_ReturnType Dem_NvMInitAdminData(NvM_InitBlockRequestType InitBlockRequest)
 #endif
     DEM_PARAM_UNUSED(InitBlockRequest);
     /** The DEM expects that the NVM by itself marks the NVRAM block as dirty */
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0xF3, E_OK);
     return E_OK;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Initializes the NvBlock for event status data
  * supposed to be called by the NvM in order to (re)initialize the data in case the non-volatile memory has never
@@ -2815,6 +2970,7 @@ Std_ReturnType Dem_NvMInitAdminData(NvM_InitBlockRequestType InitBlockRequest)
 Std_ReturnType Dem_NvMInitStatusData(NvM_InitBlockRequestType InitBlockRequest)
 /* PRQA S 6070 -- */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 2, 0xF4, InitBlockRequest);
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
     /** ***** Development Error Checks ***** */
@@ -2847,10 +3003,14 @@ Std_ReturnType Dem_NvMInitStatusData(NvM_InitBlockRequestType InitBlockRequest)
 #endif
     DEM_PARAM_UNUSED(InitBlockRequest);
     /** The DEM expects that the NVM by itself marks the NVRAM block as dirty */
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0xF4, E_OK);
     return E_OK;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_DEBOUNCE_COUNTER_STORAGE_NUM > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Initializes the NvBlock for persisted debounce values
  * supposed to be called by the NvM in order to (re)initialize the data in case the non-volatile memory has never
@@ -2860,6 +3020,7 @@ Std_ReturnType Dem_NvMInitStatusData(NvM_InitBlockRequestType InitBlockRequest)
  */
 Std_ReturnType Dem_NvMInitDebounceData(NvM_InitBlockRequestType InitBlockRequest)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 2, 0xF5, InitBlockRequest);
 #if (DEM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = DEM_E_NO_ERROR;
     /** ***** Development Error Checks ***** */
@@ -2881,8 +3042,11 @@ Std_ReturnType Dem_NvMInitDebounceData(NvM_InitBlockRequestType InitBlockRequest
 #endif
     DEM_PARAM_UNUSED(InitBlockRequest);
     /** The DEM expects that the NVM by itself marks the NVRAM block as dirty */
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0xF5, E_OK);
     return E_OK;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 /* PRQA S 3406, 1505 -- */
 
@@ -2897,7 +3061,8 @@ DEM_LOCAL_INLINE void Dem_MemoryEntryInit(Dem_NvBlockNumType MemoryIndex)
 {
     Dem_MemSet((uint8*)&Dem_GetMemoryEntry()[MemoryIndex], 0u, sizeof(Dem_EntryType));
 }
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Check for corrupt memory entry.
  */
@@ -2931,7 +3096,10 @@ DEM_LOCAL boolean Dem_MemFixCorruptMemoryEntry(Dem_MemStateInfoConstPtrType Memo
     }
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Check for duplicate memory entry.
  */
@@ -2969,8 +3137,11 @@ DEM_LOCAL boolean Dem_MemFixDoubleAllocation(Dem_MemStateInfoConstPtrType Memory
     }
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_ENTRY_TRIGGER_ON_CONFIRMED == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Restore parts of the UDS status, using redundant data, when storage happens on confirmed.
  */
@@ -2990,9 +3161,12 @@ DEM_LOCAL void Dem_MemRestoreStatusBitsOnConfirmed(Dem_EventIdType EventId)
         Dem_SetEventUDSStatus(EventId, eventStatus);
     }
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_ENTRY_TRIGGER_ON_TEST_FAILED == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Restore parts of the UDS status, using redundant data, when storage happens on failed.
  */
@@ -3016,9 +3190,12 @@ DEM_LOCAL void Dem_MemRestoreStatusBitsOnFailed(Dem_EventIdType EventId)
         Dem_SetEventUDSStatus(EventId, eventStatus);
     }
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if ((DEM_ENTRY_TRIGGER_ON_FDC_THRESHOLD == STD_ON) && (defined(DEM_OCCCTR)))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Restore parts of the UDS status, using redundant data, when storage happens at a FDC threshold.
  */
@@ -3042,8 +3219,11 @@ DEM_LOCAL void Dem_MemRestoreStatusBitsOnFdc(Dem_NvBlockNumType MemoryIndex, Dem
         Dem_SetEventUDSStatus(EventId, eventStatus);
     }
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Update the aging status of an event in it's internal status.
  */
@@ -3064,7 +3244,10 @@ DEM_LOCAL Dem_EventInternalStatusType
     }
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Restores the event status and internal status based on the configured storage trigger.
  */
@@ -3103,7 +3286,10 @@ DEM_LOCAL void Dem_MemRestoreEventStatus(Dem_NvBlockNumType MemoryIndex, Dem_Eve
     /*Store the modified internal status for the event*/
     Dem_SetDtcInterStatus(EventId, internalStatus);
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Sort the memory entry into the chronological list.
  */
@@ -3125,7 +3311,10 @@ DEM_LOCAL void Dem_MemSortEntryIntoChronologicalList(
     }
     Dem_SetChronologyOfMemoryInfo(MemoryInfo, sortedIndex, MemoryIndex);
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief verifies the integrity of memory entries and links them up into the runtime control structures.
  */
@@ -3177,7 +3366,10 @@ DEM_LOCAL void Dem_MemoryInitRestoreMemory(Dem_MemoryNumType MemIndex)
     /** Update the global timestamp */
     Dem_MemSetCurrentTimestamp(Dem_MemGetCurrentTimestamp() + 1u); /* PRQA S 1252 */ /* VL_Dem_1252 */
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Initializes NvM Memory use in dem
  */
@@ -3227,7 +3419,8 @@ DEM_LOCAL void Dem_NvMMemoryInit(void)
         }
     }
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Initializes backing memory
  * This function controls initialization of the memory. After the function completes, event memories are available.
@@ -3253,9 +3446,10 @@ DEM_LOCAL_INLINE void Dem_MemoryInit(void)
     Dem_PrestoreInit();
 #endif
 }
-
 #if (DEM_FEATURE_NVM_IMMEDIATE == STD_ON)
 #if (DEM_FEATURE_SUPPORT_NVM_POLLING == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Poll the result of an ongoing write job
  */
@@ -3288,9 +3482,12 @@ DEM_LOCAL void Dem_NvmGetNvMResult(void)
         }
     }
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 #endif
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 3406, 1503,1532 ++ */ /* VL_Dem_3406, VL_QAC_NoUsedApi,VL_QAC_OneFunRef */
 
 /**
@@ -3299,6 +3496,7 @@ DEM_LOCAL void Dem_NvmGetNvMResult(void)
 Std_ReturnType Dem_NvMJobFinished(NvM_BlockRequestType ServiceId, NvM_RequestResultType JobResult)
 /* PRQA S 3406, 1503,1532 -- */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 3, 0xF6, ServiceId, JobResult);
 #if ((DEM_FEATURE_SUPPORT_NVM_POLLING == STD_OFF) && (DEM_FEATURE_NVM_IMMEDIATE == STD_ON))
     if (Dem_NvmGetCurrentCommitState() == DEM_NVM_COMMIT_WRITING)
     {
@@ -3319,10 +3517,14 @@ Std_ReturnType Dem_NvMJobFinished(NvM_BlockRequestType ServiceId, NvM_RequestRes
     DEM_PARAM_UNUSED(JobResult);
 #endif
     DEM_PARAM_UNUSED(ServiceId);
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0xF6, E_OK);
     return E_OK;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_FEATURE_NVM_IMMEDIATE == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Find Next Block To Commit
  */
@@ -3362,7 +3564,10 @@ DEM_LOCAL boolean Dem_NvmFindNextBlockToCommit(void)
     }
     return foundBlock;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief writes the memory block marked for immediate synchronization into the NV storage.
  */
@@ -3395,7 +3600,10 @@ DEM_LOCAL void Dem_NvmCommitBlock(void)
         Dem_NvmSetCurrentCommitState(DEM_NVM_COMMIT_FAILED);
     }
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Processes NvM Task
  * The function controls NvM commits. Modified blocks are passed to the NvM to write back, and once the write
@@ -3465,8 +3673,9 @@ DEM_LOCAL void Dem_NvMTask(void)
         }
     }
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_NV_RAM_BLOCK_NUMBER > 0u)
 /**
  * @brief         All pending Nv updates are reported as modified block for the NvM. (NvM_SetRamBlockStatus). The Dem
@@ -3500,8 +3709,5 @@ DEM_LOCAL_INLINE void Dem_NvmShutdown(void)
 #endif
 }
 #endif
-
-#define DEM_STOP_SEC_CODE
-#include "Dem_MemMap.h"
 
 #endif

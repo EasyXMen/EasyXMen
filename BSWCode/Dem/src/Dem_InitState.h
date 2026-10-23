@@ -62,8 +62,6 @@ const Dem_ConfigType* Dem_GlobalConfigPtr; /* PRQA S 3406, 1504 */ /* VL_Dem_340
 #include "Dem_MemMap.h"
 
 /* ========================================== internal function definitions ========================================= */
-#define DEM_START_SEC_CODE
-#include "Dem_MemMap.h"
 /****************Master*******************/
 /**
  * @brief         Set Master Init Status
@@ -109,6 +107,4 @@ DEM_LOCAL_INLINE boolean Dem_CheckLeastMasterInitStatus(uint8 InitStatus)
 }
 /* PRQA S 4304 -- */
 
-#define DEM_STOP_SEC_CODE
-#include "Dem_MemMap.h"
 #endif

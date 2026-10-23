@@ -33,7 +33,7 @@
  */
 /*============================================================================*/
 
-/* PRQA S 0883 ++ */ /* VL_MemMap_0883 */
+/* PRQA S 0883,0791,0793,3116 ++ */ /* VL_QAC_include,VL_QAC_identifier,VL_QAC_MacroLength,VL_MemMap_3116 */
 #define MEMMAP_ERROR
 
 /* Total section items: 1 */
@@ -73,4 +73,4 @@
 
 #include "MemMap.h"
 
-/* PRQA S 0883-- */
+/* PRQA S 0883,0791,0793,3116 -- */

@@ -32,6 +32,8 @@
  */
 #define DCM_UDS23_MINREQLEN 3u
 /* ========================================= internal function declarations ========================================= */
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         This function handles the result of read memory
  * @param[in]     readMemoryResult : the result of read memory
@@ -49,6 +51,8 @@
  */
 DCM_LOCAL Std_ReturnType
     Dcm_UDS0x23_PostReadMemory(Dcm_ReturnReadMemoryType readMemoryResult, Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 /* ========================================== external function definitions ========================================= */
 #define DCM_START_SEC_CODE
 #include "Dcm_MemMap.h"

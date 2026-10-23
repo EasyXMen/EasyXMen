@@ -37,6 +37,7 @@
 #if COMM_DEV_ERROR_DETECT == STD_ON
 #include "Det.h"
 #endif
+#include "ComM_Arti.h"
 
 /* ===================================================== macros ===================================================== */
 #if (COMM_MODE_LIMITATION_ENABLED == STD_ON) || (COMM_WAKEUP_INHIBITION_ENABLED == STD_ON)
@@ -76,7 +77,11 @@ boolean ComM_PncEnabled;
 #endif
 
 /* ========================================= internal function declarations ========================================= */
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 COMM_LOCAL uint8 ComM_GetPartitionIndex(void);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
 #if COMM_DEV_ERROR_DETECT == STD_ON
 #ifdef QAC_ANALYZE
@@ -89,22 +94,61 @@ COMM_LOCAL uint8 ComM_GetPartitionIndex(void);
 #pragma PRQA_NO_SIDE_EFFECTS ComM_ValidatePnc
 #endif
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 COMM_LOCAL boolean ComM_ValidatePartitionContext(uint8 apiId);
-COMM_LOCAL boolean ComM_ValidateInitStatus(uint8 apiId);
-COMM_LOCAL boolean ComM_ValidatePointer(uint8 apiId, const void* pointer);
-COMM_LOCAL boolean ComM_ValidateUser(uint8 apiId, ComM_UserHandleType user);
-COMM_LOCAL boolean ComM_ValidateComMode(uint8 apiId, ComM_ModeType comMode);
-COMM_LOCAL boolean ComM_ValidateChannel(uint8 apiId, NetworkHandleType channel);
-COMM_LOCAL boolean ComM_ValidateAlreadyInitialized(void);
-#if COMM_PNC_SUPPORT == STD_ON
-COMM_LOCAL boolean ComM_ValidatePnc(PNCHandleType Pnc);
-#endif
-#endif
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
 #define COMM_START_SEC_CODE
 #include "ComM_MemMap.h"
+COMM_LOCAL boolean ComM_ValidateInitStatus(uint8 apiId);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
+
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
+COMM_LOCAL boolean ComM_ValidatePointer(uint8 apiId, const void* pointer);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
+
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
+COMM_LOCAL boolean ComM_ValidateUser(uint8 apiId, ComM_UserHandleType user);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
+
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
+COMM_LOCAL boolean ComM_ValidateComMode(uint8 apiId, ComM_ModeType comMode);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
+
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
+COMM_LOCAL boolean ComM_ValidateChannel(uint8 apiId, NetworkHandleType channel);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
+
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
+COMM_LOCAL boolean ComM_ValidateAlreadyInitialized(void);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
+
+#if COMM_PNC_SUPPORT == STD_ON
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
+COMM_LOCAL boolean ComM_ValidatePnc(PNCHandleType Pnc);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
+#endif
+#endif
+
 /* ========================================== external function definitions ========================================= */
 /* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * The implementation of ComM_Init.
  */
@@ -112,6 +156,7 @@ COMM_LOCAL boolean ComM_ValidatePnc(PNCHandleType Pnc);
 void ComM_Init(const ComM_ConfigType* ConfigPtr)
 /* PRQA S 6070 -- */ /* VL_MTR_ComM_STCAL */
 {
+    ComM_ArtiApiStart(2, COMM_SID_INIT, ConfigPtr);
 #if COMM_DEV_ERROR_DETECT == STD_ON
     if (ComM_ValidatePartitionContext(COMM_SID_INIT) && ComM_ValidatePointer(COMM_SID_INIT, ConfigPtr)
         && ComM_ValidateAlreadyInitialized())
@@ -145,13 +190,19 @@ void ComM_Init(const ComM_ConfigType* ConfigPtr)
 
         ComM_InitStatus[ComM_GetPartitionIndex()] = COMM_INIT;
     }
+    ComM_ArtiApiReturn(1, COMM_SID_INIT);
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * The implementation of ComM_DeInit.
  */
 void ComM_DeInit(void)
 {
+    ComM_ArtiApiStart(1, COMM_SID_DEINIT);
 #if COMM_DEV_ERROR_DETECT == STD_ON
     if (ComM_ValidatePartitionContext(COMM_SID_DEINIT) && ComM_ValidateInitStatus(COMM_SID_DEINIT))
 #endif
@@ -175,14 +226,20 @@ void ComM_DeInit(void)
         }
         SchM_Exit_ComM_Global();
     }
+    ComM_ArtiApiReturn(1, COMM_SID_DEINIT);
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * The implementation of ComM_GetStatus.
  */
 Std_ReturnType ComM_GetStatus(ComM_InitStatusType* Status)
 {
     Std_ReturnType stdReturn = E_NOT_OK;
+    ComM_ArtiApiStart(2, COMM_SID_GETSTATUS, Status);
 #if COMM_DEV_ERROR_DETECT == STD_ON
     if (ComM_ValidatePartitionContext(COMM_SID_GETSTATUS) && ComM_ValidatePointer(COMM_SID_GETSTATUS, Status))
 #endif
@@ -190,15 +247,21 @@ Std_ReturnType ComM_GetStatus(ComM_InitStatusType* Status)
         *Status   = ComM_InitStatus[ComM_GetPartitionIndex()];
         stdReturn = E_OK;
     }
+    ComM_ArtiApiReturn(2, COMM_SID_GETSTATUS, stdReturn);
     return stdReturn;
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
 #if COMM_VERSION_INFO_API == STD_ON
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * The implementation of ComM_GetVersionInfo.
  */
 void ComM_GetVersionInfo(Std_VersionInfoType* Versioninfo)
 {
+    ComM_ArtiApiStart(2, COMM_SID_GETVERSIONINFO, Versioninfo);
 #if COMM_DEV_ERROR_DETECT == STD_ON
     if (ComM_ValidatePointer(COMM_SID_GETVERSIONINFO, Versioninfo))
 #endif
@@ -209,15 +272,21 @@ void ComM_GetVersionInfo(Std_VersionInfoType* Versioninfo)
         Versioninfo->sw_minor_version = COMM_SW_MINOR_VERSION;
         Versioninfo->sw_patch_version = COMM_SW_PATCH_VERSION;
     }
+    ComM_ArtiApiReturn(1, COMM_SID_GETVERSIONINFO);
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 #endif
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * The implementation of ComM_RequestComMode.
  */
 Std_ReturnType ComM_RequestComMode(ComM_UserHandleType User, ComM_ModeType ComMode)
 {
     Std_ReturnType stdReturn = E_NOT_OK;
+    ComM_ArtiApiStart(3, COMM_SID_REQUESTCOMMODE, User, ComMode);
 #if COMM_DEV_ERROR_DETECT == STD_ON
     if (ComM_ValidatePartitionContext(COMM_SID_REQUESTCOMMODE) && ComM_ValidateInitStatus(COMM_SID_REQUESTCOMMODE)
         && ComM_ValidateUser(COMM_SID_REQUESTCOMMODE, User) && ComM_ValidateComMode(COMM_SID_REQUESTCOMMODE, ComMode))
@@ -236,15 +305,21 @@ Std_ReturnType ComM_RequestComMode(ComM_UserHandleType User, ComM_ModeType ComMo
         }
 #endif
     }
+    ComM_ArtiApiReturn(2, COMM_SID_REQUESTCOMMODE, stdReturn);
     return stdReturn;
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * The implementation of ComM_GetMaxComMode.
  */
 Std_ReturnType ComM_GetMaxComMode(ComM_UserHandleType User, ComM_ModeType* ComMode)
 {
     Std_ReturnType stdReturn = E_NOT_OK;
+    ComM_ArtiApiStart(3, COMM_SID_GETMAXCOMMODE, User, ComMode);
 #if COMM_DEV_ERROR_DETECT == STD_ON
     if (ComM_ValidatePartitionContext(COMM_SID_GETMAXCOMMODE) && ComM_ValidateInitStatus(COMM_SID_GETMAXCOMMODE)
         && ComM_ValidateUser(COMM_SID_GETMAXCOMMODE, User) && ComM_ValidatePointer(COMM_SID_GETMAXCOMMODE, ComMode))
@@ -253,15 +328,21 @@ Std_ReturnType ComM_GetMaxComMode(ComM_UserHandleType User, ComM_ModeType* ComMo
         *ComMode  = ComM_UserGetMaxComMode(User);
         stdReturn = E_OK;
     }
+    ComM_ArtiApiReturn(2, COMM_SID_GETMAXCOMMODE, stdReturn);
     return stdReturn;
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * The implementation of ComM_GetRequestedComMode.
  */
 Std_ReturnType ComM_GetRequestedComMode(ComM_UserHandleType User, ComM_ModeType* ComMode)
 {
     Std_ReturnType stdReturn = E_NOT_OK;
+    ComM_ArtiApiStart(3, COMM_SID_GETREQUESTEDCOMMODE, User, ComMode);
 #if COMM_DEV_ERROR_DETECT == STD_ON
     if (ComM_ValidatePartitionContext(COMM_SID_GETREQUESTEDCOMMODE)
         && ComM_ValidateInitStatus(COMM_SID_GETREQUESTEDCOMMODE)
@@ -272,15 +353,21 @@ Std_ReturnType ComM_GetRequestedComMode(ComM_UserHandleType User, ComM_ModeType*
         *ComMode  = ComM_UserGetRequestedComMode(User);
         stdReturn = E_OK;
     }
+    ComM_ArtiApiReturn(2, COMM_SID_GETREQUESTEDCOMMODE, stdReturn);
     return stdReturn;
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * The implementation of ComM_GetCurrentComMode.
  */
 Std_ReturnType ComM_GetCurrentComMode(ComM_UserHandleType User, ComM_ModeType* ComMode)
 {
     Std_ReturnType stdReturn = E_NOT_OK;
+    ComM_ArtiApiStart(3, COMM_SID_GETCURRENTCOMMODE, User, ComMode);
 #if COMM_DEV_ERROR_DETECT == STD_ON
     if (ComM_ValidatePartitionContext(COMM_SID_GETCURRENTCOMMODE) && ComM_ValidateInitStatus(COMM_SID_GETCURRENTCOMMODE)
         && ComM_ValidateUser(COMM_SID_GETCURRENTCOMMODE, User)
@@ -290,16 +377,22 @@ Std_ReturnType ComM_GetCurrentComMode(ComM_UserHandleType User, ComM_ModeType* C
         *ComMode  = ComM_UserGetCurrentComMode(User);
         stdReturn = E_OK;
     }
+    ComM_ArtiApiReturn(2, COMM_SID_GETCURRENTCOMMODE, stdReturn);
     return stdReturn;
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
 #if COMM_PNC_SUPPORT == STD_ON
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * The implementation of ComM_GetCurrentPNCComMode.
  */
 Std_ReturnType ComM_GetCurrentPNCComMode(ComM_UserHandleType User, ComM_ModeType* ComMode)
 {
     Std_ReturnType stdReturn = E_NOT_OK;
+    ComM_ArtiApiStart(3, COMM_SID_GETCURRENTPNCCOMMODE, User, ComMode);
 #if COMM_DEV_ERROR_DETECT == STD_ON
     if (ComM_ValidatePartitionContext(COMM_SID_GETCURRENTPNCCOMMODE)
         && ComM_ValidateInitStatus(COMM_SID_GETCURRENTPNCCOMMODE)
@@ -309,17 +402,23 @@ Std_ReturnType ComM_GetCurrentPNCComMode(ComM_UserHandleType User, ComM_ModeType
     {
         stdReturn = ComM_UserGetCurrentPNCComMode(User, ComMode);
     }
+    ComM_ArtiApiReturn(2, COMM_SID_GETCURRENTPNCCOMMODE, stdReturn);
     return stdReturn;
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 #endif
 
 #if COMM_WAKEUP_INHIBITION_ENABLED == STD_ON
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * The implementation of ComM_PreventWakeUp.
  */
 Std_ReturnType ComM_PreventWakeUp(NetworkHandleType Channel, boolean Status)
 {
     Std_ReturnType stdReturn = E_NOT_OK;
+    ComM_ArtiApiStart(3, COMM_SID_PREVENTWAKEUP, Channel, Status);
 #if COMM_DEV_ERROR_DETECT == STD_ON
     if (ComM_ValidatePartitionContext(COMM_SID_PREVENTWAKEUP) && ComM_ValidateInitStatus(COMM_SID_PREVENTWAKEUP)
         && ComM_ValidateChannel(COMM_SID_PREVENTWAKEUP, Channel))
@@ -345,17 +444,23 @@ Std_ReturnType ComM_PreventWakeUp(NetworkHandleType Channel, boolean Status)
         }
     }
 
+    ComM_ArtiApiReturn(2, COMM_SID_PREVENTWAKEUP, stdReturn);
     return stdReturn;
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 #endif
 
 #if COMM_MODE_LIMITATION_ENABLED == STD_ON
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * The implementation of ComM_LimitChannelToNoComMode.
  */
 Std_ReturnType ComM_LimitChannelToNoComMode(NetworkHandleType Channel, boolean Status)
 {
     Std_ReturnType stdReturn = E_NOT_OK;
+    ComM_ArtiApiStart(3, COMM_SID_LIMITCHANNELTONOCOMMODE, Channel, Status);
 #if COMM_DEV_ERROR_DETECT == STD_ON
     if (ComM_ValidatePartitionContext(COMM_SID_LIMITCHANNELTONOCOMMODE)
         && ComM_ValidateInitStatus(COMM_SID_LIMITCHANNELTONOCOMMODE)
@@ -379,15 +484,21 @@ Std_ReturnType ComM_LimitChannelToNoComMode(NetworkHandleType Channel, boolean S
             stdReturn = E_OK;
         }
     }
+    ComM_ArtiApiReturn(2, COMM_SID_LIMITCHANNELTONOCOMMODE, stdReturn);
     return stdReturn;
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * The implementation of ComM_LimitECUToNoComMode.
  */
 Std_ReturnType ComM_LimitECUToNoComMode(boolean Status)
 {
     Std_ReturnType stdReturn = E_NOT_OK;
+    ComM_ArtiApiStart(2, COMM_SID_LIMITECUTONOCOMMODE, Status);
 #if COMM_DEV_ERROR_DETECT == STD_ON
     if (ComM_ValidatePartitionContext(COMM_SID_LIMITECUTONOCOMMODE)
         && ComM_ValidateInitStatus(COMM_SID_LIMITECUTONOCOMMODE))
@@ -414,17 +525,23 @@ Std_ReturnType ComM_LimitECUToNoComMode(boolean Status)
             stdReturn = E_OK;
         }
     }
+    ComM_ArtiApiReturn(2, COMM_SID_LIMITECUTONOCOMMODE, stdReturn);
     return stdReturn;
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 #endif
 
 #if (COMM_MODE_LIMITATION_ENABLED == STD_ON) || (COMM_WAKEUP_INHIBITION_ENABLED == STD_ON)
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * The implementation of ComM_GetInhibitionStatus.
  */
 Std_ReturnType ComM_GetInhibitionStatus(NetworkHandleType Channel, ComM_InhibitionStatusType* Status)
 {
     Std_ReturnType stdReturn = E_NOT_OK;
+    ComM_ArtiApiStart(3, COMM_SID_GETINHIBITIONSTATUS, Channel, Status);
 #if COMM_DEV_ERROR_DETECT == STD_ON
     if (ComM_ValidatePartitionContext(COMM_SID_GETINHIBITIONSTATUS)
         && ComM_ValidateInitStatus(COMM_SID_GETINHIBITIONSTATUS)
@@ -436,15 +553,21 @@ Std_ReturnType ComM_GetInhibitionStatus(NetworkHandleType Channel, ComM_Inhibiti
         stdReturn = E_OK;
     }
 
+    ComM_ArtiApiReturn(2, COMM_SID_GETINHIBITIONSTATUS, stdReturn);
     return stdReturn;
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * The implementation of ComM_ReadInhibitCounter.
  */
 Std_ReturnType ComM_ReadInhibitCounter(uint16* CounterValue)
 {
     Std_ReturnType stdReturn = E_NOT_OK;
+    ComM_ArtiApiStart(2, COMM_SID_READINHIBITCOUNTER, CounterValue);
 #if COMM_DEV_ERROR_DETECT == STD_ON
     if (ComM_ValidatePartitionContext(COMM_SID_READINHIBITCOUNTER)
         && ComM_ValidateInitStatus(COMM_SID_READINHIBITCOUNTER)
@@ -456,15 +579,21 @@ Std_ReturnType ComM_ReadInhibitCounter(uint16* CounterValue)
         SchM_Exit_ComM_CommunicationInhibition();
         stdReturn = E_OK;
     }
+    ComM_ArtiApiReturn(2, COMM_SID_READINHIBITCOUNTER, stdReturn);
     return stdReturn;
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * The implementation of ComM_ResetInhibitCounter.
  */
 Std_ReturnType ComM_ResetInhibitCounter(void)
 {
     Std_ReturnType stdReturn = E_NOT_OK;
+    ComM_ArtiApiStart(1, COMM_SID_RESETINHIBITCOUNTER);
 #if COMM_DEV_ERROR_DETECT == STD_ON
     if (ComM_ValidatePartitionContext(COMM_SID_RESETINHIBITCOUNTER)
         && ComM_ValidateInitStatus(COMM_SID_RESETINHIBITCOUNTER))
@@ -475,15 +604,21 @@ Std_ReturnType ComM_ResetInhibitCounter(void)
         SchM_Exit_ComM_CommunicationInhibition();
         stdReturn = E_OK;
     }
+    ComM_ArtiApiReturn(2, COMM_SID_RESETINHIBITCOUNTER, stdReturn);
     return stdReturn;
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * The implementation of ComM_SetECUGroupClassification.
  */
 Std_ReturnType ComM_SetECUGroupClassification(ComM_InhibitionStatusType Status)
 {
     Std_ReturnType stdReturn = E_NOT_OK;
+    ComM_ArtiApiStart(2, COMM_SID_SETECUGROUPCLASSIFICATION, Status);
 #if COMM_DEV_ERROR_DETECT == STD_ON
     if (ComM_ValidatePartitionContext(COMM_SID_SETECUGROUPCLASSIFICATION)
         && ComM_ValidateInitStatus(COMM_SID_SETECUGROUPCLASSIFICATION))
@@ -492,16 +627,22 @@ Std_ReturnType ComM_SetECUGroupClassification(ComM_InhibitionStatusType Status)
         ComM_InhibitionData.EcuGroupClassification = Status;
         stdReturn                                  = E_OK;
     }
+    ComM_ArtiApiReturn(2, COMM_SID_SETECUGROUPCLASSIFICATION, stdReturn);
     return stdReturn;
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 #endif
 
 #if COMM_NM_ENABLED == STD_ON
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * The implementation of ComM_Nm_NetworkStartIndication.
  */
 void ComM_Nm_NetworkStartIndication(NetworkHandleType Channel)
 {
+    ComM_ArtiApiStart(2, COMM_SID_NM_NETWORKSTARTINDICATION, Channel);
 #if COMM_DEV_ERROR_DETECT == STD_ON
     if (ComM_ValidatePartitionContext(COMM_SID_NM_NETWORKSTARTINDICATION)
         && ComM_ValidateInitStatus(COMM_SID_NM_NETWORKSTARTINDICATION)
@@ -510,13 +651,19 @@ void ComM_Nm_NetworkStartIndication(NetworkHandleType Channel)
     {
         ComM_ChannelWakeUpIndication(Channel, FALSE);
     }
+    ComM_ArtiApiReturn(1, COMM_SID_NM_NETWORKSTARTINDICATION);
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * The implementation of ComM_Nm_NetworkMode.
  */
 void ComM_Nm_NetworkMode(NetworkHandleType Channel)
 {
+    ComM_ArtiApiStart(2, COMM_SID_NM_NETWORKMODE, Channel);
 #if COMM_DEV_ERROR_DETECT == STD_ON
     if (ComM_ValidatePartitionContext(COMM_SID_NM_NETWORKMODE) && ComM_ValidateInitStatus(COMM_SID_NM_NETWORKMODE)
         && ComM_ValidateChannel(COMM_SID_NM_NETWORKMODE, Channel))
@@ -524,13 +671,19 @@ void ComM_Nm_NetworkMode(NetworkHandleType Channel)
     {
         ComM_ChannelNmModeIndication(Channel, COMM_NM_MODE_EVENT_NETWORK);
     }
+    ComM_ArtiApiReturn(1, COMM_SID_NM_NETWORKMODE);
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * The implementation of ComM_Nm_PrepareBusSleepMode.
  */
 void ComM_Nm_PrepareBusSleepMode(NetworkHandleType Channel)
 {
+    ComM_ArtiApiStart(2, COMM_SID_NM_PREPAREBUSSLEEPMODE, Channel);
 #if COMM_DEV_ERROR_DETECT == STD_ON
     if (ComM_ValidatePartitionContext(COMM_SID_NM_PREPAREBUSSLEEPMODE)
         && ComM_ValidateInitStatus(COMM_SID_NM_PREPAREBUSSLEEPMODE)
@@ -539,13 +692,19 @@ void ComM_Nm_PrepareBusSleepMode(NetworkHandleType Channel)
     {
         ComM_ChannelNmModeIndication(Channel, COMM_NM_MODE_EVENT_PREPARE_BUS_SLEEP);
     }
+    ComM_ArtiApiReturn(1, COMM_SID_NM_PREPAREBUSSLEEPMODE);
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * The implementation of ComM_Nm_BusSleepMode.
  */
 void ComM_Nm_BusSleepMode(NetworkHandleType Channel)
 {
+    ComM_ArtiApiStart(2, COMM_SID_NM_BUSSLEEPMODE, Channel);
 #if COMM_DEV_ERROR_DETECT == STD_ON
     if (ComM_ValidatePartitionContext(COMM_SID_NM_BUSSLEEPMODE) && ComM_ValidateInitStatus(COMM_SID_NM_BUSSLEEPMODE)
         && ComM_ValidateChannel(COMM_SID_NM_BUSSLEEPMODE, Channel))
@@ -553,13 +712,19 @@ void ComM_Nm_BusSleepMode(NetworkHandleType Channel)
     {
         ComM_ChannelNmModeIndication(Channel, COMM_NM_MODE_EVENT_BUS_SLEEP);
     }
+    ComM_ArtiApiReturn(1, COMM_SID_NM_BUSSLEEPMODE);
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * The implementation of ComM_Nm_RestartIndication.
  */
 void ComM_Nm_RestartIndication(NetworkHandleType Channel)
 {
+    ComM_ArtiApiStart(2, COMM_SID_NM_RESTARTINDICATION, Channel);
 #if COMM_DEV_ERROR_DETECT == STD_ON
     if (ComM_ValidatePartitionContext(COMM_SID_NM_RESTARTINDICATION)
         && ComM_ValidateInitStatus(COMM_SID_NM_RESTARTINDICATION)
@@ -568,14 +733,20 @@ void ComM_Nm_RestartIndication(NetworkHandleType Channel)
     {
         ComM_ChannelWakeUpIndication(Channel, FALSE);
     }
+    ComM_ArtiApiReturn(1, COMM_SID_NM_RESTARTINDICATION);
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
 #if COMM_PNC_SUPPORT == STD_ON
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * The implementation of ComM_Nm_UpdateEIRA.
  */
 void ComM_Nm_UpdateEIRA(const uint8* PncBitVectorPtr)
 {
+    ComM_ArtiApiStart(2, COMM_SID_NMUPDATEEIRA, PncBitVectorPtr);
 #if COMM_DEV_ERROR_DETECT == STD_ON
     if (ComM_ValidatePartitionContext(COMM_SID_NMUPDATEEIRA) && ComM_ValidateInitStatus(COMM_SID_NMUPDATEEIRA)
         && ComM_ValidatePointer(COMM_SID_NMUPDATEEIRA, PncBitVectorPtr))
@@ -586,14 +757,20 @@ void ComM_Nm_UpdateEIRA(const uint8* PncBitVectorPtr)
             ComM_PncUpdateEIRA(PncBitVectorPtr);
         }
     }
+    ComM_ArtiApiReturn(1, COMM_SID_NMUPDATEEIRA);
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
 #if COMM_PNC_GATEWAY_ENABLED == STD_ON
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * The implementation of ComM_Nm_UpdateERA.
  */
 void ComM_Nm_UpdateERA(NetworkHandleType Channel, const uint8* PncBitVectorPtr)
 {
+    ComM_ArtiApiStart(3, COMM_SID_NMUPDATEERA, Channel, PncBitVectorPtr);
 #if COMM_DEV_ERROR_DETECT == STD_ON
     if (ComM_ValidatePartitionContext(COMM_SID_NMUPDATEERA) && ComM_ValidateInitStatus(COMM_SID_NMUPDATEERA)
         && ComM_ValidateChannel(COMM_SID_NMUPDATEERA, Channel)
@@ -602,16 +779,22 @@ void ComM_Nm_UpdateERA(NetworkHandleType Channel, const uint8* PncBitVectorPtr)
     {
         ComM_ChannelUpdateERA(Channel, PncBitVectorPtr);
     }
+    ComM_ArtiApiReturn(1, COMM_SID_NMUPDATEERA);
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 #endif
 #endif
 #endif
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * The implementation of ComM_DCM_ActiveDiagnostic.
  */
 void ComM_DCM_ActiveDiagnostic(NetworkHandleType Channel)
 {
+    ComM_ArtiApiStart(2, COMM_SID_DCM_ACTIVEDIAGNOSTIC, Channel);
 #if COMM_DEV_ERROR_DETECT == STD_ON
     if (ComM_ValidatePartitionContext(COMM_SID_DCM_ACTIVEDIAGNOSTIC)
         && ComM_ValidateInitStatus(COMM_SID_DCM_ACTIVEDIAGNOSTIC))
@@ -619,13 +802,19 @@ void ComM_DCM_ActiveDiagnostic(NetworkHandleType Channel)
     {
         ComM_ChannelActiveDiagnostic(Channel, TRUE);
     }
+    ComM_ArtiApiReturn(1, COMM_SID_DCM_ACTIVEDIAGNOSTIC);
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * The implementation of ComM_DCM_ActiveDiagnostic.
  */
 void ComM_DCM_InactiveDiagnostic(NetworkHandleType Channel)
 {
+    ComM_ArtiApiStart(2, COMM_SID_DCM_INACTIVEDIAGNOSTIC, Channel);
 #if COMM_DEV_ERROR_DETECT == STD_ON
     if (ComM_ValidatePartitionContext(COMM_SID_DCM_INACTIVEDIAGNOSTIC)
         && ComM_ValidateInitStatus(COMM_SID_DCM_INACTIVEDIAGNOSTIC))
@@ -633,13 +822,19 @@ void ComM_DCM_InactiveDiagnostic(NetworkHandleType Channel)
     {
         ComM_ChannelActiveDiagnostic(Channel, FALSE);
     }
+    ComM_ArtiApiReturn(1, COMM_SID_DCM_INACTIVEDIAGNOSTIC);
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * The implementation of ComM_EcuM_WakeUpIndication.
  */
 void ComM_EcuM_WakeUpIndication(NetworkHandleType Channel)
 {
+    ComM_ArtiApiStart(2, COMM_SID_ECUM_WAKEUPINDICATION, Channel);
 #if COMM_DEV_ERROR_DETECT == STD_ON
     if (ComM_ValidatePartitionContext(COMM_SID_ECUM_WAKEUPINDICATION)
         && ComM_ValidateInitStatus(COMM_SID_ECUM_WAKEUPINDICATION)
@@ -652,14 +847,20 @@ void ComM_EcuM_WakeUpIndication(NetworkHandleType Channel)
         ComM_ChannelWakeUpIndication(Channel, FALSE);
 #endif
     }
+    ComM_ArtiApiReturn(1, COMM_SID_ECUM_WAKEUPINDICATION);
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
 #if COMM_PNC_SUPPORT == STD_ON
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * The implementation of ComM_EcuM_PNCWakeUpIndication.
  */
 void ComM_EcuM_PNCWakeUpIndication(PNCHandleType Pnc)
 {
+    ComM_ArtiApiStart(2, COMM_SID_ECUM_PNCWAKEUPINDICATION, Pnc);
 #if COMM_DEV_ERROR_DETECT == STD_ON
     if (ComM_ValidatePartitionContext(COMM_SID_ECUM_PNCWAKEUPINDICATION)
         && ComM_ValidateInitStatus(COMM_SID_ECUM_PNCWAKEUPINDICATION) && ComM_ValidatePnc(Pnc))
@@ -674,14 +875,20 @@ void ComM_EcuM_PNCWakeUpIndication(PNCHandleType Pnc)
 #endif
         }
     }
+    ComM_ArtiApiReturn(1, COMM_SID_ECUM_PNCWAKEUPINDICATION);
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 #endif
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * The implementation of ComM_CommunicationAllowed.
  */
 void ComM_CommunicationAllowed(NetworkHandleType Channel, boolean Allowed)
 {
+    ComM_ArtiApiStart(3, COMM_SID_COMMUNICATIONALLOWED, Channel, Allowed);
 #if COMM_DEV_ERROR_DETECT == STD_ON
     if (ComM_ValidatePartitionContext(COMM_SID_COMMUNICATIONALLOWED)
         && ComM_ValidateInitStatus(COMM_SID_COMMUNICATIONALLOWED)
@@ -690,13 +897,19 @@ void ComM_CommunicationAllowed(NetworkHandleType Channel, boolean Allowed)
     {
         ComM_ChannelCommunicationAllowed(Channel, Allowed);
     }
+    ComM_ArtiApiReturn(1, COMM_SID_COMMUNICATIONALLOWED);
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * The implementation of ComM_BusSM_ModeIndication.
  */
 void ComM_BusSM_ModeIndication(NetworkHandleType Channel, ComM_ModeType ComMode)
 {
+    ComM_ArtiApiStart(3, COMM_SID_BUSSM_MODEINDICATION, Channel, ComMode);
 #if COMM_DEV_ERROR_DETECT == STD_ON
     if (ComM_ValidatePartitionContext(COMM_SID_BUSSM_MODEINDICATION)
         && ComM_ValidateInitStatus(COMM_SID_BUSSM_MODEINDICATION)
@@ -705,27 +918,46 @@ void ComM_BusSM_ModeIndication(NetworkHandleType Channel, ComM_ModeType ComMode)
     {
         ComM_ChannelBusSMModeIndication(Channel, ComMode);
     }
+    ComM_ArtiApiReturn(1, COMM_SID_BUSSM_MODEINDICATION);
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * The implementation of ComM_MainFunction.
  */
 void ComM_MainFunction(NetworkHandleType Channel)
 {
-#if COMM_DEV_ERROR_DETECT == STD_ON
-    if (ComM_ValidatePartitionContext(COMM_SID_MAINFUNCATION)) /* PRQA S 2991 */ /* VL_ComM_AlwaysTrue */
+    ComM_ArtiApiStart(2, COMM_SID_MAINFUNCATION, Channel);
+#if COMM_DEV_ERROR_DETECT == STD_ON && COMM_MULTIPLE_PARTITION_ENABLED == STD_ON
+    if (ComM_ValidatePartitionContext(COMM_SID_MAINFUNCATION))
 #endif
     {
         if (ComM_InitStatus[ComM_GetPartitionIndex()] == COMM_INIT)
         {
             ComM_ChannelMainFunction(Channel);
         }
+
+#if COMM_CURRENT_MODE_NOTIFICATION_ENABLED == STD_ON
+        if (Channel == 0u)
+        {
+            ComM_UserCurrentModeNotification();
+        }
+#endif
     }
+    ComM_ArtiApiReturn(1, COMM_SID_MAINFUNCATION);
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
+
 /* PRQA S 1532 -- */ /* VL_QAC_OneFunRef */
 
 /* ========================================== internal function definitions ========================================= */
 /* PRQA S 2889 ++ */ /* VL_QAC_MultiReturn */
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief Returns the index of current partition in the ComM configuration.
  * @return       The index of current partition in the ComM configuration
@@ -748,8 +980,12 @@ COMM_LOCAL uint8 ComM_GetPartitionIndex(void)
 #endif
     return partitionIndex;
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
 #if COMM_DEV_ERROR_DETECT == STD_ON
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief Development error validation of invalid partition context
  * @param[in]    apiId  ID of API service in which error is detected
@@ -761,14 +997,22 @@ COMM_LOCAL uint8 ComM_GetPartitionIndex(void)
  */
 COMM_LOCAL boolean ComM_ValidatePartitionContext(uint8 apiId)
 {
-    if (ComM_GetPartitionIndex() >= COMM_PARTITION_NUMBER) /* PRQA S 2992, 2996 */ /* VL_ComM_AlwaysFalse */
+#if COMM_MULTIPLE_PARTITION_ENABLED == STD_ON
+    if (ComM_GetPartitionIndex() >= COMM_PARTITION_NUMBER)
     {
         (void)Det_ReportError(COMM_MODULE_ID, COMM_INSTANCE_ID, apiId, COMM_E_INVALID_PARTITION_CONTEXT);
         return FALSE;
     }
+#else
+    COMM_UNUSED_PARAM(apiId);
+#endif
     return TRUE;
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief Development error validation of uninit
  * @param[in]    apiId  ID of API service in which error is detected
@@ -787,7 +1031,11 @@ COMM_LOCAL boolean ComM_ValidateInitStatus(uint8 apiId)
     }
     return TRUE;
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief Development error validation of null pointer
  * @param[in]    apiId   ID of API service in which error is detected
@@ -807,7 +1055,11 @@ COMM_LOCAL boolean ComM_ValidatePointer(uint8 apiId, const void* pointer)
     }
     return TRUE;
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief Development error validation of invalid user
  * @param[in]    apiId  ID of API service in which error is detected
@@ -835,7 +1087,11 @@ COMM_LOCAL boolean ComM_ValidateUser(uint8 apiId, ComM_UserHandleType user)
 #endif
     return TRUE;
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief Development error validation of invalid ComMode input
  * @param[in]    apiId    ID of API service in which error is detected
@@ -865,7 +1121,11 @@ COMM_LOCAL boolean ComM_ValidateComMode(uint8 apiId, ComM_ModeType comMode)
     }
     return TRUE;
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief Development error validation of invalid channel
  * @param[in]    apiId   ID of API service in which error is detected
@@ -894,7 +1154,11 @@ COMM_LOCAL boolean ComM_ValidateChannel(uint8 apiId, NetworkHandleType channel)
 
     return TRUE;
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief Development error validation of already initialized
  * @retval       TRUE   Development error not occurred
@@ -912,8 +1176,12 @@ COMM_LOCAL boolean ComM_ValidateAlreadyInitialized(void)
     }
     return TRUE;
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
 #if COMM_PNC_SUPPORT == STD_ON
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief Development error validation of invalid pnc
  * @param[in]    Pnc    Pnc
@@ -936,9 +1204,9 @@ COMM_LOCAL boolean ComM_ValidatePnc(PNCHandleType Pnc)
     }
     return TRUE;
 }
-#endif
-#endif
-/* PRQA S 2889 -- */ /* VL_QAC_MultiReturn */
 #define COMM_STOP_SEC_CODE
 #include "ComM_MemMap.h"
+#endif
+#endif
+/* PRQA S 2889 -- */       /* VL_QAC_MultiReturn */
 /* PRQA S 1503, 6060 -- */ /* VL_QAC_NoUsedApi, VL_MTR_ComM_STM19 */

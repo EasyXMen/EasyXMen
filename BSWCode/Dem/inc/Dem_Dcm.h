@@ -35,6 +35,8 @@ extern "C" {
 
 /* ========================================= external function declarations ========================================= */
 #if (DEM_SUPPORT_SETDTCFILTERBYEXTENDEDDATARECORDNUMBER_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Sets the DTC Filter based on a given extended data record on the primary fault memory. The
  *                server selects all DTCs that have a matching extended data record.
@@ -54,9 +56,13 @@ extern Std_ReturnType Dem_SetDTCFilterByExtendedDataRecordNumber(
     uint8             ClientId,
     Dem_DTCFormatType DTCFormat,
     uint8             ExtendedDataRecordNumber);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_SUPPORT_SETDTCFILTERBYREADINESSGROUP_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Sets the DTC Filter based on a given DTC readiness group on the primary fault memory. The server
  *                selects all DTCs that have this DTC readiness group configured.
@@ -75,10 +81,14 @@ extern Std_ReturnType Dem_SetDTCFilterByReadinessGroup(
     uint8                          ClientID,
     Dem_DTCFormatType              DTCFormat,
     Dem_EventOBDReadinessGroupType ReadinessGroupNumber);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_OBD_SUPPORT != DEM_OBD_NO_OBD_SUPPORT)
 #if (DEM_OBD_ENGINE_TYPE == DEM_IGNITION_SPARK)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Service is used for requesting IUMPR data according to InfoType $08. This interface is derived
  *                from the prototype <Module>_GetInfotypeValueData() defined by the Dcm. Therefore
@@ -99,9 +109,13 @@ extern Std_ReturnType Dem_SetDTCFilterByReadinessGroup(
  */
 extern Std_ReturnType
     Dem_DcmGetInfoTypeValue08(Dcm_OpStatusType OpStatus, uint8* Iumprdata08, uint8* Iumprdata08BufferSize);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_OBD_ENGINE_TYPE == DEM_IGNITION_COMPRESSION)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Service is used for requesting IUMPR data according to InfoType $0B. This interface is derived
  *                from the prototype <Module>_GetInfotypeValueData() defined by the Dcm. Therefore
@@ -122,7 +136,11 @@ extern Std_ReturnType
  */
 extern Std_ReturnType
     Dem_DcmGetInfoTypeValue0B(Dcm_OpStatusType OpStatus, uint8* Iumprdata0B, uint8* Iumprdata0BBufferSize);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Service to report the value of PID $01 computed by the Dem. API is needed in OBD-relevant ECUs
@@ -138,6 +156,10 @@ extern Std_ReturnType
  * @trace         CPD-61092
  */
 extern Std_ReturnType Dem_DcmReadDataOfPID01(uint8* PID01value);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Service to report the value of PID $1C computed by the Dem. API is needed in OBD-relevant ECUs
@@ -154,6 +176,10 @@ extern Std_ReturnType Dem_DcmReadDataOfPID01(uint8* PID01value);
  * @trace         CPD-61093
  */
 extern Std_ReturnType Dem_DcmReadDataOfPID1C(uint8* PID1Cvalue);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Service to report the value of PID $21 computed by the Dem. API is needed in OBD-relevant ECUs
@@ -170,6 +196,10 @@ extern Std_ReturnType Dem_DcmReadDataOfPID1C(uint8* PID1Cvalue);
  * @trace         CPD-61094
  */
 extern Std_ReturnType Dem_DcmReadDataOfPID21(uint8* PID21value);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Service to report the value of PID $30 computed by the Dem. API is needed in OBD-relevant ECUs
@@ -186,8 +216,12 @@ extern Std_ReturnType Dem_DcmReadDataOfPID21(uint8* PID21value);
  * @trace         CPD-61096
  */
 extern Std_ReturnType Dem_DcmReadDataOfPID30(uint8* PID30value);
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_OBD_SUPPORT == DEM_OBD_MASTER_ECU)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
+
 /**
  * @brief         Service to report the value of PID $31 computed by the Dem. API is needed in OBD-relevant ECUs
  *                only. API Availability: This API will be available only if
@@ -203,7 +237,11 @@ extern Std_ReturnType Dem_DcmReadDataOfPID30(uint8* PID30value);
  * @trace         CPD-61097
  */
 extern Std_ReturnType Dem_DcmReadDataOfPID31(uint8* PID31value);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Service to report the value of PID $41 computed by the Dem. API is needed in OBD-relevant ECUs
@@ -220,8 +258,12 @@ extern Std_ReturnType Dem_DcmReadDataOfPID31(uint8* PID31value);
  * @trace         CPD-61095
  */
 extern Std_ReturnType Dem_DcmReadDataOfPID41(uint8* PID41value);
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_OBD_SUPPORT == DEM_OBD_MASTER_ECU)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
+
 /**
  * @brief         Service to report the value of PID $4D computed by the Dem. API is needed in OBD-relevant ECUs
  *                only. API Availability: This API will be available only if
@@ -237,9 +279,13 @@ extern Std_ReturnType Dem_DcmReadDataOfPID41(uint8* PID41value);
  * @trace         CPD-61098
  */
 extern Std_ReturnType Dem_DcmReadDataOfPID4D(uint8* PID4Dvalue);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_OBD_SUPPORT == DEM_OBD_MASTER_ECU)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Service to report the value of PID $4E computed by the Dem. API is needed in OBD-relevant ECUs
  *                only. API Availability: This API will be available only if
@@ -255,7 +301,11 @@ extern Std_ReturnType Dem_DcmReadDataOfPID4D(uint8* PID4Dvalue);
  * @trace         CPD-61089
  */
 extern Std_ReturnType Dem_DcmReadDataOfPID4E(uint8* PID4Evalue);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Service to report the value of PID $91 computed by the Dem. API is needed in OBD-relevant ECUs
@@ -272,6 +322,10 @@ extern Std_ReturnType Dem_DcmReadDataOfPID4E(uint8* PID4Evalue);
  * @trace         CPD-61090
  */
 extern Std_ReturnType Dem_DcmReadDataOfPID91(uint8* PID91value);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Gets data element per PID and index of the most important freeze frame being selected for the
@@ -297,6 +351,10 @@ extern Std_ReturnType Dem_DcmReadDataOfPID91(uint8* PID91value);
  */
 extern Std_ReturnType
     Dem_DcmReadDataOfOBDFreezeFrame(uint8 PID, uint8 DataElementIndexOfPID, uint8* DestBuffer, uint16* BufSize);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Gets DTC by freeze frame record number. API is needed in OBD-relevant ECUs only. API
@@ -316,6 +374,10 @@ extern Std_ReturnType
  * @trace         CPD-61085
  */
 extern Std_ReturnType Dem_DcmGetDTCOfOBDFreezeFrame(uint8 FrameNumber, uint32* DTC, Dem_DTCFormatType DTCFormat);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Reports the value of a requested "availability-OBDMID" to the DCM upon a Service $06 request.
@@ -331,6 +393,10 @@ extern Std_ReturnType Dem_DcmGetDTCOfOBDFreezeFrame(uint8 FrameNumber, uint32* D
  * @trace         CPD-61084
  */
 extern Std_ReturnType Dem_DcmGetAvailableOBDMIDs(uint8 Obdmid, uint32* Obdmidvalue);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Gets the number of TIDs per (functional) OBDMID. This can be used by the DCM to iteratively
@@ -348,6 +414,10 @@ extern Std_ReturnType Dem_DcmGetAvailableOBDMIDs(uint8 Obdmid, uint32* Obdmidval
  * @trace         CPD-61086
  */
 extern Std_ReturnType Dem_DcmGetNumTIDsOfOBDMID(uint8 Obdmid, uint8* numberOfTIDs);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Reports a DTR data along with TID-value, UaSID, test result with lower and upper limit. API is
@@ -376,6 +446,10 @@ extern Std_ReturnType Dem_DcmGetDTRData(
     uint16* Testvalue,
     uint16* Lowlimvalue,
     uint16* Upplimvalue);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Service to report the value of monitor activity denominator PID computed by the Dem. API is
@@ -395,6 +469,10 @@ extern Std_ReturnType Dem_DcmGetDTRData(
  */
 extern Std_ReturnType
     Dem_DcmGetInfoTypeValue79(Dcm_OpStatusType OpStatus, uint8* DataValueBuffer, uint8* DataValueBufferSize);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Function to report the value of PID 0xF501 computed by the Dem. API is needed in OBD-relevant
@@ -409,6 +487,8 @@ extern Std_ReturnType
  * @trace         CPD-61082
  */
 extern Std_ReturnType Dem_DcmReadDataOfPIDF501(uint8* PIDF501value);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 
 #endif
 

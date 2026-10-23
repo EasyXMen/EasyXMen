@@ -22,17 +22,15 @@
  **
  ***********************************************************************************************************************/
 
-/* PRQA S 0311,0488,1253,1259,1277,1280,1290,1338,1821,1840,1841,1842,1843 EOF*/ /*VL_Crypto_62_General */
-/* PRQA S 1852,1860,1862,1863,2001,2015,3120,3132,3218,3226,3332,3344,3397 EOF*/ /*VL_Crypto_62_General */
-/* PRQA S 3410,3432,3440,3446,3450,3454,3472,3473,3493,4434,4436,4461,4532 EOF*/ /*VL_Crypto_62_General */
-/* PRQA S 4533,4534,4542,4543,4544,4559,4603,1861,2016,3326,3387,0553 EOF*/      /*VL_Crypto_62_General */
+/* PRQA S 0311,0488,1253,1259,1277,1280,1290,1338,1821,1840,1841,1842,1843 EOF*/ /*VL_QAC_0311 */
+/* PRQA S 1852,1860,1862,1863,2001,2015,3120,3132,3218,3226,3332,3344,3397 EOF*/ /*VL_QAC_0311 */
+/* PRQA S 3410,3432,3440,3446,3450,3454,3472,3473,3493,4434,4436,4461,4532 EOF*/ /*VL_QAC_0311 */
+/* PRQA S 4533,4534,4542,4543,4544,4559,4603,1861,2016,3326,3387,0553 EOF*/      /*VL_QAC_0311 */
 /* =================================================== inclusions =================================================== */
 #include "Crypto_62_Internal.h"
 
 #if (CRYPTO_ALGORITHMFAM_SHA3 == STD_ON)
 #include "Crypto_62_Sha3.h"
-#define CRYPTO_62_START_SEC_CODE
-#include "Crypto_62_MemMap.h"
 /* ===================================================== macros ===================================================== */
 
 /* ================================================ type definitions ================================================ */
@@ -44,7 +42,11 @@
 /* ============================================ external data definitions =========================================== */
 
 /* ========================================== internal function definitions ========================================= */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL void keccak_f1600(Crypto_Sha3_Context* ctx);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 /* ========================================== external function definitions ========================================= */
 
 /******************************************************************************/
@@ -64,6 +66,8 @@ CRYPTO_62_LOCAL void keccak_f1600(Crypto_Sha3_Context* ctx);
  *                                     E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Sha3_Finish(Crypto_Sha3_Context* ctx, uint8* output, uint32 olen)
 {
     Std_ReturnType ret = E_OK;
@@ -94,6 +98,8 @@ Std_ReturnType Crypto_Sha3_Finish(Crypto_Sha3_Context* ctx, uint8* output, uint3
 
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -110,6 +116,8 @@ Std_ReturnType Crypto_Sha3_Finish(Crypto_Sha3_Context* ctx, uint8* output, uint3
  *                                     E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Sha3_Update(Crypto_Sha3_Context* ctx, const uint8* input, uint32 ilen)
 {
     Std_ReturnType align_bytes;
@@ -156,6 +164,8 @@ Std_ReturnType Crypto_Sha3_Update(Crypto_Sha3_Context* ctx, const uint8* input, 
 
     return 0;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -166,6 +176,8 @@ Std_ReturnType Crypto_Sha3_Update(Crypto_Sha3_Context* ctx, const uint8* input, 
  * Return              None
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_Sha3_Starts(Crypto_Sha3_Context* ctx, Crypto_Sha3_Id Sha3_Alg_id)
 {
     switch (Sha3_Alg_id)
@@ -195,6 +207,8 @@ void Crypto_Sha3_Starts(Crypto_Sha3_Context* ctx, Crypto_Sha3_Id Sha3_Alg_id)
     (void)IStdLib_MemSet(ctx->state, 0, sizeof(ctx->state));
     ctx->index = 0;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -205,6 +219,8 @@ void Crypto_Sha3_Starts(Crypto_Sha3_Context* ctx, Crypto_Sha3_Id Sha3_Alg_id)
  * Return              None
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL void keccak_f1600(Crypto_Sha3_Context* ctx)
 {
     uint64         lane[5];
@@ -418,6 +434,8 @@ CRYPTO_62_LOCAL void keccak_f1600(Crypto_Sha3_Context* ctx)
              | (iota_r_packed[round] & 0x10ull) << 11 | (iota_r_packed[round] & 0x8f));
     }
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -440,6 +458,8 @@ CRYPTO_62_LOCAL void keccak_f1600(Crypto_Sha3_Context* ctx)
  *                                     E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Sha3(Crypto_Sha3_Id id, const uint8* input, uint32 ilen, uint8* output, uint32* olen)
 {
     Std_ReturnType      ret = E_NOT_OK;
@@ -462,7 +482,22 @@ Std_ReturnType Crypto_Sha3(Crypto_Sha3_Id id, const uint8* input, uint32 ilen, u
     }
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+void Crypto_sha3_free(Crypto_Sha3_Context* ctx)
+{
+    if (ctx == NULL_PTR)
+    {
+        return;
+    }
+
+    (void)IStdLib_MemSet(ctx, 0, sizeof(Crypto_Sha3_Context));
+}
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 /******************************************************************************/
 /*
  * Brief               This function calculates the SHA-3 checksum and output result.
@@ -475,6 +510,8 @@ Std_ReturnType Crypto_Sha3(Crypto_Sha3_Id id, const uint8* input, uint32 ilen, u
  *                                     E_NOT_OK: State not accepted
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Sha3_Process(uint32 objectId, Crypto_Sha3_Id Id)
 {
     Std_ReturnType ret            = E_NOT_OK;
@@ -485,7 +522,7 @@ Std_ReturnType Crypto_Sha3_Process(uint32 objectId, Crypto_Sha3_Id Id)
     uint32         computedOutLen = CRYPTO_CONST_64;
     uint8          computedOutput[CRYPTO_CONST_64] = {0x00};
 
-    ret = Crypto_Sha3(Id, input, ilen, computedOutput, &computedOutLen);
+    ret = Crypto_Sha3(Id, input, ilen, (uint8*)&computedOutput, &computedOutLen);
     if (ret == E_OK && *olen > computedOutLen)
     {
         *olen = computedOutLen;
@@ -498,7 +535,6 @@ Std_ReturnType Crypto_Sha3_Process(uint32 objectId, Crypto_Sha3_Id Id)
 
     return ret;
 }
-
 #define CRYPTO_62_STOP_SEC_CODE
 #include "Crypto_62_MemMap.h"
 

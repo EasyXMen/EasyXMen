@@ -14,7 +14,7 @@
 /*
  ************************************************************************************************************************
  **
- **  @file               : Crypto_CtrDrbg.h
+ **  @file               : Crypto_62_CtrDrbg.h
  **  @author             : Jie.gU
  **  @date               : 2024/01/01
  **  @vendor             : isoft
@@ -133,7 +133,11 @@ typedef struct
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_CtrDrbgProcess(uint32 objectId, Crypto_AlgorithmFamilyType algorithmfamily);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Seeds the CTR_DRBG context with entropy and an optional custom value.
@@ -149,12 +153,16 @@ Std_ReturnType Crypto_CtrDrbgProcess(uint32 objectId, Crypto_AlgorithmFamilyType
  *          - E_NOT_OK: Operation failed.
  */
 /* PRQA S 3672,1336 ++ */ /* VL_Crypto_62_3672,VL_Crypto_62_1336 */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_ctr_drbg_seed(
     Crypto_Ctr_Drbg_Context* ctx,
     Std_ReturnType (*f_entropy)(void*, uint8*, uint32),
     void*        p_entropy,
     const uint8* custom,
     uint32       len);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 /* PRQA S 3672,1336 -- */
 
 /**
@@ -168,7 +176,11 @@ Std_ReturnType Crypto_ctr_drbg_seed(
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_ctr_drbg_random(void* p_rng, uint8* output, uint32 output_len);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Initializes the CTR_DRBG context.
@@ -178,7 +190,11 @@ Std_ReturnType Crypto_ctr_drbg_random(void* p_rng, uint8* output, uint32 output_
  *
  * @return  None.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_Ctr_Drbg_Init(Crypto_Ctr_Drbg_Context* ctx, Crypto_AlgorithmFamilyType algorithmfamily);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Generates random data with additional input using the CTR_DRBG context.
@@ -193,12 +209,16 @@ void Crypto_Ctr_Drbg_Init(Crypto_Ctr_Drbg_Context* ctx, Crypto_AlgorithmFamilyTy
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_ctr_drbg_random_with_add(
     void*        p_rng,
     uint8*       output,
     uint32       output_len,
     const uint8* additional,
     uint32       add_len);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Reseeds the CTR_DRBG context with additional input.
@@ -211,7 +231,11 @@ Std_ReturnType Crypto_ctr_drbg_random_with_add(
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_ctr_drbg_reseed(Crypto_Ctr_Drbg_Context* ctx, const uint8* additional, uint32 len);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Updates the CTR_DRBG context with additional input.
@@ -225,11 +249,15 @@ Std_ReturnType Crypto_ctr_drbg_reseed(Crypto_Ctr_Drbg_Context* ctx, const uint8*
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_ctr_drbg_update(
     Crypto_Ctr_Drbg_Context*   ctx,
     const uint8*               additional,
     uint32                     add_len,
     Crypto_AlgorithmFamilyType algorithmfamily);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Sets the reseed interval for the CTR_DRBG context.
@@ -239,7 +267,11 @@ Std_ReturnType Crypto_ctr_drbg_update(
  *
  * @return  None.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_Ctr_Drbg_Set_reseed_interval(Crypto_Ctr_Drbg_Context* ctx, uint32 interval);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Sets the nonce length for the CTR_DRBG context.
@@ -251,7 +283,11 @@ void Crypto_Ctr_Drbg_Set_reseed_interval(Crypto_Ctr_Drbg_Context* ctx, uint32 in
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Ctr_Drbg_Set_Nonce_Len(Crypto_Ctr_Drbg_Context* ctx, uint32 len);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Sets the entropy length for the CTR_DRBG context.
@@ -261,7 +297,11 @@ Std_ReturnType Crypto_Ctr_Drbg_Set_Nonce_Len(Crypto_Ctr_Drbg_Context* ctx, uint3
  *
  * @return  None.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_Ctr_Drbg_Set_Entropy_Len(Crypto_Ctr_Drbg_Context* ctx, uint32 len);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Sets the prediction resistance flag for the CTR_DRBG context.
@@ -271,7 +311,22 @@ void Crypto_Ctr_Drbg_Set_Entropy_Len(Crypto_Ctr_Drbg_Context* ctx, uint32 len);
  *
  * @return  None.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_Ctr_Drbg_Set_Prediction_Resistance(Crypto_Ctr_Drbg_Context* ctx, uint32 resistance);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+
+/*
+ *  This function resets CTR_DRBG context to the state immediately
+ *  after initial call of Crypto_ctr_drbg_init().
+ */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+void Crypto_ctr_drbg_free(Crypto_Ctr_Drbg_Context* ctx);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+
 #ifdef __cplusplus
 }
 #endif

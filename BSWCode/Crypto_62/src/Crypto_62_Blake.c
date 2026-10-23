@@ -22,21 +22,22 @@
  **
  ***********************************************************************************************************************/
 
-/* PRQA S 4544,1252,1253,1290,3432,0553 EOF */ /* VL_Crypto_62_General */
+/* PRQA S 4544,1252,1253,1290,3432,0553,5209,3397,3400,2889 EOF */ /* VL_QAC_Crypto */
+/* PRQA S 6060 EOF */                                              /* VL_MTR_Crypto_62_STM19 */
+/* PRQA S 6050 EOF */                                              /* VL_MTR_Crypto_62_STST3 */
+/* PRQA S 6040 EOF */                                              /* VL_MTR_Crypto_62_STPAR */
 /* =================================================== inclusions =================================================== */
 #include "Crypto_62_Internal.h"
 
 #if (CRYPTO_ALGORITHMFAM_BLAKE_2s_256 == STD_ON)
 
 #include "Crypto_62_Hash.h"
-#define CRYPTO_62_START_SEC_CODE
-#include "Crypto_62_MemMap.h"
 /* ===================================================== macros ===================================================== */
 #ifndef ROTR32
 #define ROTR32(x, y) (((x) >> (y)) ^ ((x) << (32 - (y))))
 #endif
 
-/* PRQA S 3472,3410,3458 ++ */ /* VL_Crypto_62_General */
+/* PRQA S 3472,3410,3458 ++ */ /* VL_QAC_Crypto */
 
 #define B2S_GET32(p)                                                                                     \
     (((uint32)((uint8*)(p))[0]) ^ (((uint32)((uint8*)(p))[1]) << 8) ^ (((uint32)((uint8*)(p))[2]) << 16) \
@@ -65,20 +66,33 @@
  *      Secret key (also <= 32 bytes) is optional (keylen = 0).
  *      Returns 0 on success, -1 on parameter error.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL Std_ReturnType
     Crypto_Blake2s_Start(Crypto_Blake2s_Context* ctx, uint32 outlen, const void* key, uint32 keylen); /*secret key */
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 /*Add "inlen" bytes from "in" into the hash. */
 CRYPTO_62_LOCAL void Crypto_Blake2s_Update(
     Crypto_Blake2s_Context* ctx, /* context*/
     const void*             in,
     uint32                  inlen); /*data to be hashed */
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /* Generate the message digest (size given in init).Result placed in "out".*/
-
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL void Crypto_Blake2s_Final(Crypto_Blake2s_Context* ctx, void* out);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /* All-in-one convenience function.*/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL Std_ReturnType Crypto_Blake2s(
     void*       out,
     uint32      outlen, /* return buffer for digest */
@@ -86,15 +100,25 @@ CRYPTO_62_LOCAL Std_ReturnType Crypto_Blake2s(
     uint32      keylen, /* optional secret key */
     const void* in,
     uint32      inlen); /* data to be hashed*/
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+
 /* Compression function. */
-CRYPTO_62_LOCAL void Crypto_Blake2s_Compress(Crypto_Blake2s_Context* ctx, sint32 last);
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+CRYPTO_62_LOCAL void Crypto_Blake2s_Compress(Crypto_Blake2s_Context* ctx, int last);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 /* Little-endian byte access. */
 /* =========================================== Internal data Definitions =========================================== */
 
 /* Initialization Vector.*/
+#define CRYPTO_62_START_SEC_CONST_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL const uint32 blake2s_iv[CRYPTO_CONST_8] =
     {0x6A09E667U, 0xBB67AE85U, 0x3C6EF372U, 0xA54FF53AU, 0x510E527FU, 0x9B05688CU, 0x1F83D9ABU, 0x5BE0CD19U};
-
+#define CRYPTO_62_STOP_SEC_CONST_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
 /* ========================================== external data definition ============================================= */
 
 /* =================================================== Global Function Definitions ================================== */
@@ -109,7 +133,9 @@ CRYPTO_62_LOCAL const uint32 blake2s_iv[CRYPTO_CONST_8] =
  * Return              None
  */
 /******************************************************************************/
-CRYPTO_62_LOCAL void Crypto_Blake2s_Compress(Crypto_Blake2s_Context* ctx, sint32 last)
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+CRYPTO_62_LOCAL void Crypto_Blake2s_Compress(Crypto_Blake2s_Context* ctx, int last)
 {
     const uint8 sigma[CRYPTO_CONST_10][CRYPTO_CONST_16] = {
         {0U, 1U, 2U, 3U, 4U, 5U, 6U, 7U, 8U, 9U, 10U, 11U, 12U, 13U, 14U, 15U},
@@ -142,7 +168,7 @@ CRYPTO_62_LOCAL void Crypto_Blake2s_Compress(Crypto_Blake2s_Context* ctx, sint32
     {
         m[i] = B2S_GET32(&ctx->b[CRYPTO_CONST_4 * i]);
     }
-    /* PRQA S 3422,3138,3141 ++ */ /* VL_Crypto_62_General */
+    /* PRQA S 3422,3138,3141 ++ */ /* VL_QAC_Crypto */
     for (i = 0; i < CRYPTO_CONST_10; i++)
     { // ten rounds
         B2S_G(
@@ -208,6 +234,8 @@ CRYPTO_62_LOCAL void Crypto_Blake2s_Compress(Crypto_Blake2s_Context* ctx, sint32
         ctx->h[i] ^= v[i] ^ v[i + CRYPTO_CONST_8];
     }
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -224,6 +252,8 @@ CRYPTO_62_LOCAL void Crypto_Blake2s_Compress(Crypto_Blake2s_Context* ctx, sint32
  *                           not 0: Failure
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL Std_ReturnType Crypto_Blake2s_Start(
     Crypto_Blake2s_Context* ctx,
     uint32                  outlen,
@@ -241,7 +271,7 @@ CRYPTO_62_LOCAL Std_ReturnType Crypto_Blake2s_Start(
     {
         ctx->h[i] = blake2s_iv[i];
     }
-    /* PRQA S 3120 ++ */ /* VL_Crypto_62_General */
+    /* PRQA S 3120 ++ */ /* VL_QAC_Crypto */
     ctx->h[0] ^= 0x01010000U ^ (keylen << 8) ^ outlen;
     /* PRQA S 3120 -- */
 
@@ -262,6 +292,8 @@ CRYPTO_62_LOCAL Std_ReturnType Crypto_Blake2s_Start(
 
     return E_OK;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -275,6 +307,8 @@ CRYPTO_62_LOCAL Std_ReturnType Crypto_Blake2s_Start(
  * Return              None
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL void Crypto_Blake2s_Update(Crypto_Blake2s_Context* ctx, const void* in, uint32 inlen) // data bytes
 {
     uint32 i;
@@ -291,11 +325,13 @@ CRYPTO_62_LOCAL void Crypto_Blake2s_Update(Crypto_Blake2s_Context* ctx, const vo
             Crypto_Blake2s_Compress(ctx, 0); // compress (not last)
             ctx->c = 0;                      // counter to zero
         }
-        /* PRQA S 0316,3440,3387 ++ */ /* VL_Crypto_62_General */
+        /* PRQA S 0316,3440,3387 ++ */ /* VL_QAC_Crypto */
         ctx->b[ctx->c++] = ((const uint8*)in)[i];
         /* PRQA S 0316,3440,3387 -- */
     }
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -309,6 +345,8 @@ CRYPTO_62_LOCAL void Crypto_Blake2s_Update(Crypto_Blake2s_Context* ctx, const vo
  * Return              None
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL void Crypto_Blake2s_Final(Crypto_Blake2s_Context* ctx, void* out)
 {
     uint32 i;
@@ -321,18 +359,20 @@ CRYPTO_62_LOCAL void Crypto_Blake2s_Final(Crypto_Blake2s_Context* ctx, void* out
 
     while (ctx->c < CRYPTO_CONST_64) // fill up with zeros
     {
-        ctx->b[ctx->c++] = 0; /* PRQA S 3387,3440*/ /* VL_Crypto_62_General */
+        ctx->b[ctx->c++] = 0; /* PRQA S 3387,3440*/ /* VL_QAC_Crypto */
     }
     Crypto_Blake2s_Compress(ctx, 1); // final block flag = 1
 
     // little endian convert and store
     for (i = 0; i < ctx->outlen; i++)
     {
-        /* PRQA S 0316,4461 ++ */ /* VL_Crypto_62_General */
+        /* PRQA S 0316,4461 ++ */ /* VL_QAC_Crypto */
         ((uint8*)out)[i] = (ctx->h[i >> CRYPTO_CONST_2] >> (CRYPTO_CONST_8 * (i & CRYPTO_CONST_3))) & CRYPTO_CONST_0xFF;
         /* PRQA S 0316,4461 -- */
     }
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /******************************************************************************/
 /*
@@ -349,6 +389,8 @@ CRYPTO_62_LOCAL void Crypto_Blake2s_Final(Crypto_Blake2s_Context* ctx, void* out
  *                           not 0: Failure.
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL Std_ReturnType
     Crypto_Blake2s(void* out, uint32 outlen, const void* key, uint32 keylen, const void* in, uint32 inlen)
 {
@@ -365,6 +407,8 @@ CRYPTO_62_LOCAL Std_ReturnType
 
     return ret;
 }
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 /******************************************************************************/
 /*
  * Brief               This function do the blake2s process .
@@ -377,6 +421,8 @@ CRYPTO_62_LOCAL Std_ReturnType
  *                     E_NOT_OK
  */
 /******************************************************************************/
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Blake2s_Process(uint32 objectId)
 {
     Std_ReturnType ret = E_NOT_OK;
@@ -385,7 +431,7 @@ Std_ReturnType Crypto_Blake2s_Process(uint32 objectId)
     uint32  ilen   = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputLength;
     uint32* outlen = Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.outputLengthPtr;
 
-    /* PRQA S 0311,3678 ++ */ /*VL_Crypto_62_General */
+    /* PRQA S 0311,3678 ++ */ /*VL_QAC_0311 */
     uint8* input = (uint8*)(Crypto_62_StoredJob[objectId].jobPrimitiveInputOutput.inputPtr);
     /* PRQA S 0311,3678 -- */
 

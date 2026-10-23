@@ -205,10 +205,10 @@ typedef struct LinTp_RtDataVariantMapTypeTag
 
 typedef struct LinTp_PbsMapTypeTag
 {
-    const uint16* RxNSduHandlerIdMap;
-    const uint16* TxNSduHandlerIdMap;
-    const uint16  RxNSduMapLen;
-    const uint16  TxNSduMapLen;
+    const PduIdType* RxNSduHandlerIdMap;
+    const PduIdType* TxNSduHandlerIdMap;
+    const uint16     RxNSduMapLen;
+    const uint16     TxNSduMapLen;
 } LinTp_PbsMapType;
 
 typedef struct LinTp_ConfigTag

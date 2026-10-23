@@ -31,6 +31,7 @@
 #if (STD_ON == FIM_DEV_ERROR_DETECT)
 #include "Det.h"
 #endif
+#include "FiM_Arti.h"
 
 /* ===================================================== macros ===================================================== */
 #if (STD_ON == FIM_DEV_ERROR_DETECT)
@@ -97,6 +98,8 @@ typedef struct
 /* ========================================== internal function declarations ======================================== */
 #if (FIM_EVENT_UPDATE_TRIGGERED_BY_DEM == STD_ON)
 #if (FIM_EVENT_INHBITION == STD_ON)
+#define FIM_START_SEC_CODE
+#include "FiM_MemMap.h"
 
 /**
  * @brief         Calculate the corresponding FID state based on the inhIndex
@@ -106,6 +109,10 @@ typedef struct
  * @trace       CPD-71132
  */
 FIM_LOCAL void FiM_DoFidCalculateByInhIndex(FiM_FidContextType FidContext);
+#define FIM_STOP_SEC_CODE
+#include "FiM_MemMap.h"
+#define FIM_START_SEC_CODE
+#include "FiM_MemMap.h"
 
 /**
  * @brief         Calculate the corresponding FID state based on the EventTableRef
@@ -115,6 +122,10 @@ FIM_LOCAL void FiM_DoFidCalculateByInhIndex(FiM_FidContextType FidContext);
  * @trace       CPD-71133
  */
 FIM_LOCAL void FiM_CalculateByEvent(FiM_EventNumType EventTableRef);
+#define FIM_STOP_SEC_CODE
+#include "FiM_MemMap.h"
+#define FIM_START_SEC_CODE
+#include "FiM_MemMap.h"
 
 /**
  * @brief         get the EventTableRef by Event Id.
@@ -128,9 +139,13 @@ FIM_LOCAL void FiM_CalculateByEvent(FiM_EventNumType EventTableRef);
  * @trace       CPD-71134
  */
 FIM_LOCAL boolean FiM_SearchEventTable(Dem_EventIdType EventId, FiM_EventNumType* EventTableRef);
+#define FIM_STOP_SEC_CODE
+#include "FiM_MemMap.h"
 #endif
 
 #if (FIM_COMPONENT_INHBITION == STD_ON)
+#define FIM_START_SEC_CODE
+#include "FiM_MemMap.h"
 /**
  * @brief         Dem_GetComponentFailed returns E_OK, the FIM shall consider this event in its inhibition mask
  *                calculation
@@ -143,6 +158,10 @@ FIM_LOCAL boolean FiM_SearchEventTable(Dem_EventIdType EventId, FiM_EventNumType
  */
 FIM_LOCAL void
     FiM_ComponentResultCalculate(FiM_FunctionIdType FID, boolean ComponentStatusStart, boolean OldComponentStatus);
+#define FIM_STOP_SEC_CODE
+#include "FiM_MemMap.h"
+#define FIM_START_SEC_CODE
+#include "FiM_MemMap.h"
 
 /**
  * @brief         Calculate the corresponding FID state based on the ComponentRef
@@ -152,6 +171,10 @@ FIM_LOCAL void
  * @trace       CPD-71136
  */
 FIM_LOCAL void FiM_CalculateByComponent(FiM_ComponentNumType ComponentRef);
+#define FIM_STOP_SEC_CODE
+#include "FiM_MemMap.h"
+#define FIM_START_SEC_CODE
+#include "FiM_MemMap.h"
 
 /**
  * @brief         get the ComponentRef by Component Id.
@@ -165,7 +188,11 @@ FIM_LOCAL void FiM_CalculateByComponent(FiM_ComponentNumType ComponentRef);
  * @trace       CPD-71137
  */
 FIM_LOCAL boolean FiM_SearchComponentTable(Dem_ComponentIdType ComponentId, FiM_ComponentNumType* ComponentRef);
+#define FIM_STOP_SEC_CODE
+#include "FiM_MemMap.h"
 #endif
+#define FIM_START_SEC_CODE
+#include "FiM_MemMap.h"
 
 /**
  * @brief         get the permission state by Fid Counter.
@@ -178,10 +205,14 @@ FIM_LOCAL boolean FiM_SearchComponentTable(Dem_ComponentIdType ComponentId, FiM_
  * @trace       CPD-71138
  */
 FIM_LOCAL boolean FiM_GetFidPermission(FiM_FunctionIdType FID);
+#define FIM_STOP_SEC_CODE
+#include "FiM_MemMap.h"
 #endif
 
 #if (FIM_EVENT_UPDATE_TRIGGERED_BY_DEM == STD_OFF)
 #if (FIM_EVENT_INHBITION == STD_ON)
+#define FIM_START_SEC_CODE
+#include "FiM_MemMap.h"
 /**
  * @brief         calculates the permission of a FID by looping through all associated events
  * @param[in]     FidInhTable: This container includes a InhibitionConfiguration all information
@@ -193,9 +224,13 @@ FIM_LOCAL boolean FiM_GetFidPermission(FiM_FunctionIdType FID);
  * @trace       CPD-71139
  */
 FIM_LOCAL boolean FiM_CalculateFIDEventInhibition(const FiM_FidInhTableType* FidInhTable);
+#define FIM_STOP_SEC_CODE
+#include "FiM_MemMap.h"
 #endif
 
 #if (FIM_COMPONENT_INHBITION == STD_ON)
+#define FIM_START_SEC_CODE
+#include "FiM_MemMap.h"
 /**
  * @brief         calculates the permission of a FID by looping through all associated Component
  * @param[in]     FidInhTable: This container includes a InhibitionConfiguration all information
@@ -207,7 +242,11 @@ FIM_LOCAL boolean FiM_CalculateFIDEventInhibition(const FiM_FidInhTableType* Fid
  * @trace       CPD-71140
  */
 FIM_LOCAL boolean FiM_CalculateFIDComponentInhibition(const FiM_FidInhTableType* FidInhTable);
+#define FIM_STOP_SEC_CODE
+#include "FiM_MemMap.h"
 #endif
+#define FIM_START_SEC_CODE
+#include "FiM_MemMap.h"
 
 /**
  * @brief         calculates the permission of a FID by InhibitionConfiguration
@@ -220,6 +259,10 @@ FIM_LOCAL boolean FiM_CalculateFIDComponentInhibition(const FiM_FidInhTableType*
  * @trace       CPD-71141
  */
 FIM_LOCAL boolean FiM_CalculateFIDInhibition(const FiM_FidInhTableType* FidInhTable);
+#define FIM_STOP_SEC_CODE
+#include "FiM_MemMap.h"
+#define FIM_START_SEC_CODE
+#include "FiM_MemMap.h"
 
 /**
  * @brief         calculates the permission of a FID
@@ -232,8 +275,12 @@ FIM_LOCAL boolean FiM_CalculateFIDInhibition(const FiM_FidInhTableType* FidInhTa
  * @trace       CPD-71142
  */
 FIM_LOCAL boolean FiM_CalculateFIDPermission(FiM_FunctionIdType Fid);
+#define FIM_STOP_SEC_CODE
+#include "FiM_MemMap.h"
 
 #if (FIM_FEATURE_POLLING_MODE_ASY == STD_ON)
+#define FIM_START_SEC_CODE
+#include "FiM_MemMap.h"
 /**
  * @brief         Handles FID permission
  * @param[in]     FID: Identification of a functionality by assigned FID.
@@ -242,6 +289,8 @@ FIM_LOCAL boolean FiM_CalculateFIDPermission(FiM_FunctionIdType Fid);
  * @trace       CPD-71143
  */
 FIM_LOCAL void FiM_HandleFid(FiM_FunctionIdType FID);
+#define FIM_STOP_SEC_CODE
+#include "FiM_MemMap.h"
 #endif
 #endif
 
@@ -290,9 +339,6 @@ FIM_LOCAL const FiM_InhMaskInfoType FiM_InhMaskInfo[FIM_INHCODE_NUMBER] = {
 /* ========================================== internal function declarations ======================================== */
 
 /* ========================================== internal function definitions ========================================= */
-#define FIM_START_SEC_CODE
-#include "FiM_MemMap.h"
-
 #if (FIM_USER_DEFINED_SYNC_API == STD_OFF)
 /**
  * @brief         Default function to synchronize variable information between partitions
@@ -324,7 +370,6 @@ FIM_LOCAL_INLINE boolean FiM_DefaultSyncCompareAndSwap(
     return ret;
 }
 #endif
-
 /**
  * @brief         Inter-partition variable information synchronization
  * @param[in]     AddressPtr: Satellite id
@@ -407,7 +452,6 @@ FIM_LOCAL_INLINE FiM_SatelliteIdType FiM_GetFidCurrentSatelliteId(ApplicationTyp
 #endif
     return satelliteId;
 }
-
 #if (FIM_EVENT_UPDATE_TRIGGERED_BY_DEM == STD_ON)
 /**
  * @brief         get Satellite Fid Counter By Fid
@@ -513,7 +557,6 @@ FIM_LOCAL_INLINE FiM_EventSatelliteIdType FiM_GetEventCurrentSatelliteId(Applica
     }
     return satelliteId;
 }
-
 #if (FIM_EVENT_INHBITION == STD_ON)
 /**
  * @brief         save MonitorStatus by EventTableRef, used for next trigger to compare
@@ -528,7 +571,8 @@ FIM_LOCAL_INLINE void
 {
     *(FiM_PBcfgPtr->EventTable[EventTableRef].MonitorStatus) = MonitorStatus;
 }
-
+#define FIM_START_SEC_CODE
+#include "FiM_MemMap.h"
 /**
  * @brief         Calculate the corresponding FID state based on the inhIndex
  * @param[in]     FidContext: Fid processing data information
@@ -540,13 +584,13 @@ FIM_LOCAL void FiM_DoFidCalculateByInhIndex(FiM_FidContextType FidContext)
 {
     boolean                                newInhibStat;
     boolean                                oldInhibStat;
-    FiM_InhCfgNumType                      inhStart         = FidContext.InhStart;
-    FiM_InhCfgNumType                      inhEnd           = FidContext.InhEnd;
+    FiM_InhRefNumType                      inhStart         = FidContext.InhStart;
+    FiM_InhRefNumType                      inhEnd           = FidContext.InhEnd;
     Dem_MonitorStatusType                  neWMonitorStatus = FidContext.NeWMonitorStatus;
     Dem_MonitorStatusType                  oldMonitorStatus = FidContext.OldMonitorStatus;
     const FiM_InhibitionConfigurationType* inhCfgPtr        = FiM_PBcfgPtr->InhibitionConfiguration;
     const FiM_InhRefNumType*               InhRef           = FiM_PBcfgPtr->InhRefTable;
-    for (FiM_InhCfgNumType inhIndex = inhStart; inhIndex < inhEnd; ++inhIndex)
+    for (FiM_InhRefNumType inhIndex = inhStart; inhIndex < inhEnd; ++inhIndex)
     {
         const FiM_InhibitionConfigurationType inhCfg    = inhCfgPtr[InhRef[inhIndex]];
         FiMInhInhibitionMaskType              maskIndex = inhCfg.InhInhibitionMask;
@@ -575,7 +619,10 @@ FIM_LOCAL void FiM_DoFidCalculateByInhIndex(FiM_FidContextType FidContext)
         }
     }
 }
-
+#define FIM_STOP_SEC_CODE
+#include "FiM_MemMap.h"
+#define FIM_START_SEC_CODE
+#include "FiM_MemMap.h"
 /**
  * @brief         Calculate the corresponding FID state based on the EventTableRef
  * @param[in]     satelliteId: satellite Id
@@ -629,7 +676,10 @@ FIM_LOCAL void FiM_CalculateByEvent(FiM_EventNumType EventTableRef)
         FiM_SetMonitorStatusByEventTableRef(EventTableRef, monitorStatusEnd);
     }
 }
-
+#define FIM_STOP_SEC_CODE
+#include "FiM_MemMap.h"
+#define FIM_START_SEC_CODE
+#include "FiM_MemMap.h"
 /**
  * @brief         get the EventTableRef by Event Id.
  * @param[in]     EventId: Event Id
@@ -659,8 +709,9 @@ FIM_LOCAL boolean FiM_SearchEventTable(Dem_EventIdType EventId, FiM_EventNumType
 
     return eventFound;
 }
+#define FIM_STOP_SEC_CODE
+#include "FiM_MemMap.h"
 #endif
-
 #if (FIM_COMPONENT_INHBITION == STD_ON)
 /**
  * @brief         save Component Status by ComponentRef, used for next trigger to compare
@@ -696,7 +747,8 @@ FIM_LOCAL_INLINE boolean FiM_GetComponentStatus(FiM_ComponentNumType ComponentRe
 {
     return FIM_BITS_ISSET(FiM_PBcfgPtr->ComponentStatus, ComponentRef);
 }
-
+#define FIM_START_SEC_CODE
+#include "FiM_MemMap.h"
 /**
  * @brief         Dem_GetComponentFailed returns E_OK, the FIM shall consider this event in its inhibition mask
  *                calculation
@@ -728,7 +780,10 @@ FIM_LOCAL void
         }
     }
 }
-
+#define FIM_STOP_SEC_CODE
+#include "FiM_MemMap.h"
+#define FIM_START_SEC_CODE
+#include "FiM_MemMap.h"
 /**
  * @brief         Calculate the corresponding FID state based on the ComponentRef
  * @param[in]     ComponentRef: Component Ref value
@@ -778,7 +833,10 @@ FIM_LOCAL void FiM_CalculateByComponent(FiM_ComponentNumType ComponentRef)
         FiM_SetComponentStatus(ComponentRef, componentStatusEnd);
     }
 }
-
+#define FIM_STOP_SEC_CODE
+#include "FiM_MemMap.h"
+#define FIM_START_SEC_CODE
+#include "FiM_MemMap.h"
 /**
  * @brief         get the ComponentRef by Component Id.
  * @param[in]     ComponentId: Component Id
@@ -808,8 +866,11 @@ FIM_LOCAL boolean FiM_SearchComponentTable(Dem_ComponentIdType ComponentId, FiM_
 
     return componentFound;
 }
+#define FIM_STOP_SEC_CODE
+#include "FiM_MemMap.h"
 #endif
-
+#define FIM_START_SEC_CODE
+#include "FiM_MemMap.h"
 /**
  * @brief         get the permission state by Fid Counter.
  * @param[in]     FID: Identification of a functionality by assigned FID.
@@ -835,10 +896,13 @@ FIM_LOCAL boolean FiM_GetFidPermission(FiM_FunctionIdType FID)
     }
     return fidPermission;
 }
+#define FIM_STOP_SEC_CODE
+#include "FiM_MemMap.h"
 #endif
-
 #if (FIM_EVENT_UPDATE_TRIGGERED_BY_DEM == STD_OFF)
 #if (FIM_EVENT_INHBITION == STD_ON)
+#define FIM_START_SEC_CODE
+#include "FiM_MemMap.h"
 /**
  * @brief         calculates the permission of a FID by looping through all associated events
  * @param[in]     FidInhTable: This container includes a InhibitionConfiguration all information
@@ -874,9 +938,13 @@ FIM_LOCAL boolean FiM_CalculateFIDEventInhibition(const FiM_FidInhTableType* Fid
     }
     return permission;
 }
+#define FIM_STOP_SEC_CODE
+#include "FiM_MemMap.h"
 #endif
 
 #if (FIM_COMPONENT_INHBITION == STD_ON)
+#define FIM_START_SEC_CODE
+#include "FiM_MemMap.h"
 /**
  * @brief         calculates the permission of a FID by looping through all associated Component
  * @param[in]     FidInhTable: This container includes a InhibitionConfiguration all information
@@ -909,8 +977,11 @@ FIM_LOCAL boolean FiM_CalculateFIDComponentInhibition(const FiM_FidInhTableType*
     }
     return permission;
 }
+#define FIM_STOP_SEC_CODE
+#include "FiM_MemMap.h"
 #endif
-
+#define FIM_START_SEC_CODE
+#include "FiM_MemMap.h"
 /**
  * @brief         calculates the permission of a FID by InhibitionConfiguration
  * @param[in]     FidInhTable: This container includes a InhibitionConfiguration all information
@@ -937,7 +1008,10 @@ FIM_LOCAL boolean FiM_CalculateFIDInhibition(const FiM_FidInhTableType* FidInhTa
 #endif
     return permission;
 }
-
+#define FIM_STOP_SEC_CODE
+#include "FiM_MemMap.h"
+#define FIM_START_SEC_CODE
+#include "FiM_MemMap.h"
 /**
  * @brief         calculates the permission of a FID
  * @param[in]     FID: Identification of a functionality by assigned FID.
@@ -963,7 +1037,8 @@ FIM_LOCAL boolean FiM_CalculateFIDPermission(FiM_FunctionIdType Fid)
     }
     return permission;
 }
-
+#define FIM_STOP_SEC_CODE
+#include "FiM_MemMap.h"
 #if (FIM_FEATURE_POLLING_MODE_ASY == STD_ON)
 /**
  * @brief         get the permission of an inhibition for a Fid.
@@ -1004,7 +1079,8 @@ FIM_LOCAL_INLINE void FiM_SetFidPermissionFlag(FiM_FunctionIdType Fid, boolean P
         FIM_BITS_RESET((uint8*)FiM_GetInhStatusOfSatellite(satelliteId), FidIndex);
     }
 }
-
+#define FIM_START_SEC_CODE
+#include "FiM_MemMap.h"
 /**
  * @brief         Handles FID permission
  * @param[in]     FID: Identification of a functionality by assigned FID.
@@ -1024,9 +1100,10 @@ FIM_LOCAL void FiM_HandleFid(FiM_FunctionIdType FID)
         FiM_SetFidPermissionFlag(FID, permission);
     }
 }
+#define FIM_STOP_SEC_CODE
+#include "FiM_MemMap.h"
 #endif
 #endif
-
 #if (STD_ON == FIM_AVAILABILITY_SUPPORT)
 /**
  * @brief         get the Availability of a Fid.
@@ -1069,9 +1146,6 @@ FIM_LOCAL_INLINE void FiM_SetFidAvailabilityFlag(FiM_FunctionIdType Fid, boolean
 }
 #endif
 
-#define FIM_STOP_SEC_CODE
-#include "FiM_MemMap.h"
-
 /* PRQA S 1503 ++ */ /* VL_QAC_NoUsedApi */
 /* ========================================== external function definitions ========================================= */
 #define FIM_START_SEC_CODE
@@ -1085,6 +1159,7 @@ FIM_LOCAL_INLINE void FiM_SetFidAvailabilityFlag(FiM_FunctionIdType Fid, boolean
  */
 void FiM_Init(const FiM_ConfigType* FiMConfigPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, FiM, 0, Bsw_Start, 2, 0x00, FiMConfigPtr);
 #if (FIM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = FIM_E_NO_ERROR;
     /** ***** Development Error Checks ***** */
@@ -1155,9 +1230,13 @@ void FiM_Init(const FiM_ConfigType* FiMConfigPtr)
         FIM_DET_REPORT(FIM_SID_INIT, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, FiM, 0, Bsw_Return, 1, 0x00);
 }
-
+#define FIM_STOP_SEC_CODE
+#include "FiM_MemMap.h"
 #if (FIM_EVENT_UPDATE_TRIGGERED_BY_DEM == STD_ON)
+#define FIM_START_SEC_CODE
+#include "FiM_MemMap.h"
 /**
  * @brief         This service re-initializes the FIM Satellite.
  * @param[in]     ApplicationId: Partition (OsApplication identifier) of the satellite.
@@ -1169,6 +1248,7 @@ void FiM_Init(const FiM_ConfigType* FiMConfigPtr)
 void FiM_DemInitSatellite(ApplicationType ApplicationId)
 /* PRQA S 1505 -- */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, FiM, 0, Bsw_Start, 2, 0x53, ApplicationId);
     FiM_SatelliteIdType satelliteId = FiM_GetFidCurrentSatelliteId(ApplicationId);
 #if (FIM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = FIM_E_NO_ERROR;
@@ -1225,8 +1305,12 @@ void FiM_DemInitSatellite(ApplicationType ApplicationId)
         FIM_DET_REPORT(FIM_SID_DEMINIT, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, FiM, 0, Bsw_Return, 1, 0x53);
 }
-
+#define FIM_STOP_SEC_CODE
+#include "FiM_MemMap.h"
+#define FIM_START_SEC_CODE
+#include "FiM_MemMap.h"
 /**
  * @brief         This service re-initializes the FIM.
  * @reentrant     Non Reentrant
@@ -1235,14 +1319,19 @@ void FiM_DemInitSatellite(ApplicationType ApplicationId)
  */
 void FiM_DemInit(void)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, FiM, 0, Bsw_Start, 1, 0x03);
 #if (FIM_SATELLITE_NUMBER <= 1u)
     ApplicationType currentApplication = FIM_DEM_MASTER_APPLICATION;
 #else
     ApplicationType currentApplication = GetApplicationID();
 #endif
     FiM_DemInitSatellite(currentApplication);
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, FiM, 0, Bsw_Return, 1, 0x03);
 }
-
+#define FIM_STOP_SEC_CODE
+#include "FiM_MemMap.h"
+#define FIM_START_SEC_CODE
+#include "FiM_MemMap.h"
 /**
  * @brief         This service is provided to be called by the Dem in order to inform the Fim about monitor status
  *                changes.
@@ -1255,6 +1344,7 @@ void FiM_DemInit(void)
  */
 void FiM_DemTriggerOnMonitorStatus(Dem_EventIdType EventId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, FiM, 0, Bsw_Start, 2, 0x02, EventId);
 #if (FIM_SATELLITE_NUMBER <= 1u)
     ApplicationType applicationId = FIM_DEM_MASTER_APPLICATION;
 #else
@@ -1295,8 +1385,12 @@ void FiM_DemTriggerOnMonitorStatus(Dem_EventIdType EventId)
         FIM_DET_REPORT(FIM_SID_DEMTRIGGERONMONITORSTATUS, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, FiM, 0, Bsw_Return, 1, 0x02);
 }
-
+#define FIM_STOP_SEC_CODE
+#include "FiM_MemMap.h"
+#define FIM_START_SEC_CODE
+#include "FiM_MemMap.h"
 /**
  * @brief         Triggers on changes of the component failed status.
  * @param[in]     ComponentId: Identification of a DemComponent.
@@ -1307,6 +1401,7 @@ void FiM_DemTriggerOnMonitorStatus(Dem_EventIdType EventId)
  */
 void FiM_DemTriggerOnComponentStatus(Dem_ComponentIdType ComponentId, boolean ComponentFailedStatus)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, FiM, 0, Bsw_Start, 3, 0x06, ComponentId, ComponentFailedStatus);
 #if (FIM_SATELLITE_NUMBER <= 1u)
     ApplicationType applicationId = FIM_DEM_MASTER_APPLICATION;
 #else
@@ -1352,9 +1447,13 @@ void FiM_DemTriggerOnComponentStatus(Dem_ComponentIdType ComponentId, boolean Co
         FIM_DET_REPORT(FIM_SID_DEMTRIGGERONCOMPONENTSTATUS, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, FiM, 0, Bsw_Return, 1, 0x06);
 }
+#define FIM_STOP_SEC_CODE
+#include "FiM_MemMap.h"
 #endif
-
+#define FIM_START_SEC_CODE
+#include "FiM_MemMap.h"
 /**
  * @brief         This service reports the permission state to the functionality.
  * @param[in]     FID: Identification of a functionality by assigned FID. The FunctionId is configured in the FIM.
@@ -1372,6 +1471,7 @@ void FiM_DemTriggerOnComponentStatus(Dem_ComponentIdType ComponentId, boolean Co
 /* PRQA S 6030 ++ */ /* VL_MTR_FiM_STMIF */
 Std_ReturnType FiM_GetFunctionPermission(FiM_FunctionIdType FID, boolean* Permission)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, FiM, 0, Bsw_Start, 3, 0x01, FID, Permission);
     Std_ReturnType ret;
 #if (FIM_SATELLITE_NUMBER <= 1u)
     ApplicationType applicationId = FIM_DEM_MASTER_APPLICATION;
@@ -1433,11 +1533,15 @@ Std_ReturnType FiM_GetFunctionPermission(FiM_FunctionIdType FID, boolean* Permis
         FIM_DET_REPORT(FIM_SID_GETFUNCTIONPERMISSION, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, FiM, 0, Bsw_Return, 2, 0x01, ret);
     return ret;
 }
-/* PRQA S 6030 -- */
-
+#define FIM_STOP_SEC_CODE
+#include "FiM_MemMap.h"
 #if (STD_ON == FIM_AVAILABILITY_SUPPORT)
+#define FIM_START_SEC_CODE
+#include "FiM_MemMap.h"
+/* PRQA S 6030 -- */
 /**
  * @brief         This service sets the availability of a function. The function is only available if FiMAvailability
  *                Support is configured as True.
@@ -1453,6 +1557,7 @@ Std_ReturnType FiM_GetFunctionPermission(FiM_FunctionIdType FID, boolean* Permis
  */
 Std_ReturnType FiM_SetFunctionAvailable(FiM_FunctionIdType FID, boolean Availability)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, FiM, 0, Bsw_Start, 3, 0x07, FID, Availability);
     Std_ReturnType ret;
 #if (FIM_DEV_ERROR_DETECT == STD_ON)
     uint8 errorId = FIM_E_NO_ERROR;
@@ -1465,14 +1570,13 @@ Std_ReturnType FiM_SetFunctionAvailable(FiM_FunctionIdType FID, boolean Availabi
     ret                             = E_NOT_OK;
     /** ***** Development Error Checks ***** */
     /* PRQA S 2992,2996 ++ */ /* VL_FiM_2992,VL_FiM_2996 */
-    if ((satelliteId >= FIM_SATELLITE_NUMBER) || (satelliteId != FiM_GetSatelliteIdOfFID(FID)))
-    /* PRQA S 2992,2996 -- */
-    {
-        errorId = FIM_E_PARTITION_ERROR;
-    }
-    else if ((FIM_FID_NUM < FID) || (FIM_FUNCTION_ID_INVALID == FID))
+    if ((FIM_FID_NUM < FID) || (FIM_FUNCTION_ID_INVALID == FID))
     {
         errorId = FIM_E_FID_OUT_OF_RANGE;
+    }
+    else if ((satelliteId >= FIM_SATELLITE_NUMBER) || (satelliteId != FiM_GetSatelliteIdOfFID(FID)))
+    {
+        errorId = FIM_E_PARTITION_ERROR;
     }
     else if (FIM_INITIALIZED != FiM_GetSatelliteInitStatus(satelliteId)) /* PRQA S 1252 */ /* VL_QAC_1252 */
     {
@@ -1484,7 +1588,7 @@ Std_ReturnType FiM_SetFunctionAvailable(FiM_FunctionIdType FID, boolean Availabi
         FiM_SetFidAvailabilityFlag(FID, Availability);
         ret = E_OK;
     }
-
+    /* PRQA S 2992,2996 -- */
 #if (FIM_DEV_ERROR_DETECT == STD_ON)
     /** ***** Development Error Report ***** */
     if (errorId != FIM_E_NO_ERROR)
@@ -1492,11 +1596,15 @@ Std_ReturnType FiM_SetFunctionAvailable(FiM_FunctionIdType FID, boolean Availabi
         FIM_DET_REPORT(FIM_SID_SETFUNCTIONAVAILABLE, errorId);
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, FiM, 0, Bsw_Return, 2, 0x07, ret);
     return ret;
 }
+#define FIM_STOP_SEC_CODE
+#include "FiM_MemMap.h"
 #endif /* STD_ON == FIM_AVAILABILITY_SUPPORT */
-
 #if (FIM_VERSION_INFO_API == STD_ON)
+#define FIM_START_SEC_CODE
+#include "FiM_MemMap.h"
 /**
  * @brief         This service returns the version information of this module.
  * @param[out]    versioninfo: Pointer to where to store the version information of this module.
@@ -1506,6 +1614,7 @@ Std_ReturnType FiM_SetFunctionAvailable(FiM_FunctionIdType FID, boolean Availabi
  */
 void FiM_GetVersionInfo(Std_VersionInfoType* versionInfo) /* PRQA S 1330 */ /* VL_FiM_1330 */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, FiM, 0, Bsw_Start, 2, 0x04, versionInfo);
 #if (FIM_DEV_ERROR_DETECT == STD_ON)
     /** ***** Development Error Checks ***** */
     if (NULL_PTR == versionInfo)
@@ -1521,10 +1630,14 @@ void FiM_GetVersionInfo(Std_VersionInfoType* versionInfo) /* PRQA S 1330 */ /* V
         versionInfo->sw_minor_version = FIM_SW_MINOR_VERSION;
         versionInfo->sw_patch_version = FIM_SW_PATCH_VERSION;
     }
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, FiM, 0, Bsw_Return, 1, 0x04);
 }
+#define FIM_STOP_SEC_CODE
+#include "FiM_MemMap.h"
 #endif
-
 #if (STD_OFF == FIM_EVENT_UPDATE_TRIGGERED_BY_DEM)
+#define FIM_START_SEC_CODE
+#include "FiM_MemMap.h"
 /**
  * @brief         This function is used to evaluate permission states cyclically.
  * @reentrant     Non Reentrant
@@ -1533,6 +1646,7 @@ void FiM_GetVersionInfo(Std_VersionInfoType* versionInfo) /* PRQA S 1330 */ /* V
  */
 void FiM_MainFunction(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, FiM, 0, Bsw_Start, 1, 0x05);
 #if (FIM_FEATURE_POLLING_MODE_ASY == STD_ON)
 #if (FIM_SATELLITE_NUMBER <= 1u)
     ApplicationType applicationId = FIM_DEM_MASTER_APPLICATION;
@@ -1559,9 +1673,9 @@ void FiM_MainFunction(void) /* PRQA S 1532 */ /* VL_QAC_OneFunRef */
         }
     }
 #endif
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, FiM, 0, Bsw_Return, 1, 0x05);
 }
-#endif
-/* PRQA S 1503 -- */
-
 #define FIM_STOP_SEC_CODE
 #include "FiM_MemMap.h"
+#endif
+/* PRQA S 1503 -- */

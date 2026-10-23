@@ -1,0 +1,268 @@
+/**
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
+ * SPDX-License-Identifier: LGPL-2.1-only-with-exception
+ *
+ * This library is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU Lesser General Public License as published by the Free Software Foundation; version 2.1.
+ * This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU Lesser General Public License for more details.
+ * You should have received a copy of the GNU Lesser General Public License along with this library;
+ * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ * or see <https://www.gnu.org/licenses/>.
+ */
+/*
+ ************************************************************************************************************************
+ **
+ **  @file               : Os_Mcu_Timer.h
+ **  @author             : i-soft-os
+ **  @date               : 2024/02/10
+ **  @vendor             : isoft
+ **  @description        : Mcu header file for Timer api declarations
+ **
+ ***********************************************************************************************************************/
+
+#ifndef OS_MCU_TIMER_H
+#define OS_MCU_TIMER_H
+
+/*=======[I N C L U D E S]=================================================*/
+#include "Os_Arch_Define.h"
+#include "Std_Types.h"
+#include "Os_Types.h"
+#include "Os_Osm_CfgData.h"
+
+/*=======[M A C R O S]=====================================================*/
+#define OS_SCU_CCUCON0 OS_REG32(0xF0036030u)
+#define OS_SCU_CCUCON1 OS_REG32(0xF0036034u)
+
+/*
+ * STM register
+ */
+#define OS_MODULE_BASE_STM0 (0xF0001000u)
+#define OS_MODULE_BASE_STM1 (0xF0001100u)
+#define OS_MODULE_BASE_STM2 (0xF0001200u)
+#define OS_MODULE_BASE_STM3 (0xF0001300u)
+#define OS_MODULE_BASE_STM4 (0xF0001400u)
+#define OS_MODULE_BASE_STM5 (0xF0001500u)
+
+/* Compare Match Control Register */
+#define OS_STM0_CMCON (0xF0001038u)
+#define OS_STM1_CMCON (0xF0001138u)
+#define OS_STM2_CMCON (0xF0001238u)
+#define OS_STM3_CMCON (0xF0001338u)
+#define OS_STM4_CMCON (0xF0001438u)
+#define OS_STM5_CMCON (0xF0001538u)
+
+/* Compare Register */
+#define OS_STM0_CMP0 (0xF0001030u)
+#define OS_STM0_CMP1 (0xF0001034u)
+#define OS_STM1_CMP0 (0xF0001130u)
+#define OS_STM1_CMP1 (0xF0001134u)
+#define OS_STM2_CMP0 (0xF0001230u)
+#define OS_STM2_CMP1 (0xF0001234u)
+#define OS_STM3_CMP0 (0xF0001330u)
+#define OS_STM3_CMP1 (0xF0001334u)
+#define OS_STM4_CMP0 (0xF0001430u)
+#define OS_STM4_CMP1 (0xF0001434u)
+#define OS_STM5_CMP0 (0xF0001530u)
+#define OS_STM5_CMP1 (0xF0001534u)
+
+/* Interrupt Control Register */
+#define OS_STM0_ICR (0xF000103Cu)
+#define OS_STM1_ICR (0xF000113Cu)
+#define OS_STM2_ICR (0xF000123Cu)
+#define OS_STM3_ICR (0xF000133Cu)
+#define OS_STM4_ICR (0xF000143Cu)
+#define OS_STM5_ICR (0xF000153Cu)
+
+#define OS_STM0_TIM0 (0xF0001010u)
+#define OS_STM1_TIM0 (0xF0001110u)
+#define OS_STM2_TIM0 (0xF0001210u)
+#define OS_STM3_TIM0 (0xF0001310u)
+#define OS_STM4_TIM0 (0xF0001410u)
+#define OS_STM5_TIM0 (0xF0001510u)
+
+/* Timer Capture Register: reading any TIMx freezes the current high 32 bits into CAP. */
+#define OS_STM0_CAP (0xF000102Cu)
+#define OS_STM1_CAP (0xF000112Cu)
+#define OS_STM2_CAP (0xF000122Cu)
+#define OS_STM3_CAP (0xF000132Cu)
+#define OS_STM4_CAP (0xF000142Cu)
+#define OS_STM5_CAP (0xF000152Cu)
+
+/* Interrupt Set/Clear Register */
+#define OS_STM0_ISCR (0xF0001040u)
+#define OS_STM1_ISCR (0xF0001140u)
+#define OS_STM2_ISCR (0xF0001240u)
+#define OS_STM3_ISCR (0xF0001340u)
+#define OS_STM4_ISCR (0xF0001440u)
+#define OS_STM5_ISCR (0xF0001540u)
+
+#if (TRUE == CFG_TIMING_PROTECTION_ENABLE)
+#define Os_TmProtFaultProc()
+#endif
+
+#define OS_SYSTEM_TIMER_MAX_TICK_VALUE (0xFFFFFFFFU)
+
+/* PRQA S 3332 ++ */ /* VL_Os_3332 */
+#if (TRUE == CFG_TIMING_PROTECTION_ENABLE)
+/* PRQA S 3332 -- */
+/* Set max increment value = (OS_SYSTEM_TIMER_MAX_TICK_VALUE + 1)/ 2 */
+#define OS_HAL_TP_MAX_INCREMENT_VALUE (0x80000000U)
+#endif
+
+/* Monitor timer ticks per millisecond.
+ * The monitor timer reuses the system STM TIM0 counter, so its ticks per
+ * millisecond equal the system timer configuration value (1 ms = xxx ticks). */
+#define OS_HAL_HWTIMER_MS_TO_TICKS CFG_REG_OSTIMER_VALUE_CORE0
+
+/*=======[T Y P E   D E F I N I T I O N S]==================================*/
+typedef uint32 Os_Hal_TpType;
+/*=======[E X T E R N A L   D A T A]========================================*/
+
+/*=======[E X T E R N A L   F U N C T I O N   D E C L A R A T I O N S]======*/
+#if (TRUE == CFG_SYSTEM_TIMER_ENABLE)
+/******************************************************************************/
+/*
+ * Brief                <Set System Clock>
+ * ServiceId            <None>
+ * Sync/Async           <Synchronous>
+ * Reentrancy           <Non Reentrant>
+ * Param-Name[in]       <None>
+ * Param-Name[out]      <None>
+ * Param-Name[in/out]   <None>
+ * Return               <None>
+ * PreCondition         <None>
+ * CallByAPI            <Os_Hal_MultiCoreInit>
+ * REQ ID               <None>
+ */
+/******************************************************************************/
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+extern void Os_McuSetSystemClock(void);
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+/******************************************************************************/
+/*
+ * Brief                <Initialize the system clock for each CPU running OS.>
+ * ServiceId            <None>
+ * Sync/Async           <Synchronous>
+ * Reentrancy           <Non Reentrant>
+ * Param-Name[in]       <None>
+ * Param-Name[out]      <None>
+ * Param-Name[in/out]   <None>
+ * Return               <None>
+ * PreCondition         <None>
+ * CallByAPI            <Os_Hal_InitCPU>
+ * REQ ID               <None>
+ */
+/******************************************************************************/
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+extern void Os_McuInitSystemTimer(Os_CoreIdType coreId);
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+extern void Os_Hal_ClearSysTimer(Os_CoreIdType coreId);
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+#endif /* #if (TRUE == CFG_SYSTEM_TIMER_ENABLE) */ /* PRQA S 2053 */ /* VL_Os_2053 */
+
+#if (TRUE == CFG_TIMING_PROTECTION_ENABLE)
+/******************************************************************************/
+/*
+ * Brief                <Initialize a time-protected clock for each CPU running OS>
+ * Service ID   :       <None>
+ * Sync/Async   :       <Synchronous>
+ * Reentrancy           <Non Reentrant>
+ * param[in]            <None>
+ * param[out]           <None>
+ * param[in/out]        <None>
+ * return               <None>
+ * CallByAPI            <Os_Hal_InitCPU>
+ * REQ ID               <None>
+ */
+/******************************************************************************/
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+extern void Os_McuInitTimingProtTimer(Os_CoreIdType coreId);
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+extern void Os_Hal_ClearTmProtTimer(Os_CoreIdType coreId);
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+/******************************************************************************/
+/*
+ * Brief                <Time protection get time pass, since last read>
+ * Service ID   :       <None>
+ * Sync/Async   :       <Synchronous>
+ * Reentrancy           <Non Reentrant>
+ * param[in]            <None>
+ * param[out]           <None>
+ * param[in/out]        <None>
+ * return               <None>
+ * CallByAPI            <Os_Hal_InitCPU>
+ * REQ ID               <None>
+ */
+/******************************************************************************/
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+extern uint64 Os_Hal_TpGetTimePass(Os_CoreIdType coreId);
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+/******************************************************************************/
+/*
+ * Brief                <Time protection set compare register>
+ * Service ID   :       <None>
+ * Sync/Async   :       <Synchronous>
+ * Reentrancy           <Non Reentrant>
+ * param[in]            <None>
+ * param[out]           <None>
+ * param[in/out]        <None>
+ * return               <None>
+ * CallByAPI            <Os_Hal_InitCPU>
+ * REQ ID               <None>
+ */
+/******************************************************************************/
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+extern void Os_Hal_TpSetCompare(Os_CoreIdType coreId, uint32 Increment);
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+#endif /* TRUE == CFG_SYSTEM_TIMER_ENABLE */
+
+/******************************************************************************/
+/*
+ * Brief                <Get the native 64-bit hardware timer ticks>
+ * ServiceId            <None>
+ * Sync/Async           <Synchronous>
+ * Reentrancy           <Non Reentrant>
+ * Param-Name[in]       <None>
+ * Param-Name[out]      <None>
+ * Param-Name[in/out]   <None>
+ * Return               <Os_TimerTickType> Native 64-bit hardware ticks (TIM0 low 32 bits | CAP frozen high 32 bits)
+ * PreCondition         <None>
+ * CallByAPI            <OSM monitor modules (Os_Osm_*)>
+ * REQ ID               <None>
+ */
+/******************************************************************************/
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+extern Os_TimerTickType Os_Hal_GetHwTimerTicks(Os_CoreIdType coreId);
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+/*=======[I N T E R N A L   D A T A]========================================*/
+
+/*=======[I N T E R N A L   F U N C T I O N   D E C L A R A T I O N S]======*/
+
+#endif /* OS_MCU_TIMER_H */
+/*=======[E N D   O F   F I L E]==============================================*/

@@ -77,25 +77,28 @@
 #include "lwip/ip6_frag.h"
 #include "lwip/mld6.h"
 
-#if AUTOSAR_MEMMAP_SUPPORT
-#define LWIP_MEMP_START_SEC_VAR_INIT_UNSPECIFIED
-#include "arch/Lwip_MemMap.h"
-#endif/* AUTOSAR_MEMMAP_SUPPORT */
-#define LWIP_MEMPOOL(name,num,size,desc) LWIP_MEMPOOL_DECLARE(name,num,size,desc)
+#define TCPIP_LWIP_MEMMAP_ENABLED 1
+#define LWIP_MEMPOOL_0(name,num,size,desc) LWIP_MEMPOOL_DECLARE_0(name,num,size,desc)
+#define LWIP_MEMPOOL_1(name,num,size,desc) LWIP_MEMPOOL_DECLARE_1(name,num,size,desc)
+#define LWIP_MEMPOOL_2(name,num,size,desc) LWIP_MEMPOOL_DECLARE_2(name,num,size,desc)
+#define LWIP_MEMPOOL_3(name,num,size,desc) LWIP_MEMPOOL_DECLARE_3(name,num,size,desc)
 #include "lwip/priv/memp_std.h"
-#if AUTOSAR_MEMMAP_SUPPORT
-#define LWIP_MEMP_STOP_SEC_VAR_INIT_UNSPECIFIED
-#include "arch/Lwip_MemMap.h"
-#endif/* AUTOSAR_MEMMAP_SUPPORT */
 
 #define TCPIP_VAR_MEMP_DESC_STATS(desc, coreIndex)      (desc)->stats[(coreIndex)]
 #define TCPIP_VAR_MEMP_DESC_BASE(desc, coreIndex)       &((desc)->base[(coreIndex)])
 #define TCPIP_VAR_MEMP_DESC_TAB(desc, coreIndex)        (desc)->tab[(coreIndex)]
 
+#define TCPIP_START_SEC_CONST_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 const struct memp_desc *const memp_pools[MEMP_MAX] = {
-#define LWIP_MEMPOOL(name,num,size,desc) &memp_ ## name,
+#define LWIP_MEMPOOL_0(name,num,size,desc) &memp_ ## name,
+#define LWIP_MEMPOOL_1(name,num,size,desc)
+#define LWIP_MEMPOOL_2(name,num,size,desc)
+#define LWIP_MEMPOOL_3(name,num,size,desc)
 #include "lwip/priv/memp_std.h"
 };
+#define TCPIP_STOP_SEC_CONST_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 
 #ifdef LWIP_HOOK_FILENAME
 #include LWIP_HOOK_FILENAME
@@ -179,6 +182,8 @@ memp_overflow_check_all(void)
 #endif /* MEMP_OVERFLOW_CHECK >= 2 */
 #endif /* MEMP_OVERFLOW_CHECK */
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Initialize custom memory pool.
  * Related functions: memp_malloc_pool, memp_free_pool
@@ -229,7 +234,11 @@ memp_init_pool(const struct memp_desc *desc)
   TCPIP_VAR_MEMP_DESC_STATS(desc, TcpIp_MulticoreIndex).name  = desc->desc;
 #endif /* MEMP_STATS && (defined(LWIP_DEBUG) || LWIP_STATS_DISPLAY) */
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Initializes lwIP built-in pools.
  * Related functions: memp_malloc, memp_free
@@ -255,7 +264,11 @@ memp_init(void)
   memp_overflow_check_all();
 #endif /* MEMP_OVERFLOW_CHECK >= 2 */
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 static void *
 #if !MEMP_OVERFLOW_CHECK
 do_memp_malloc_pool(const struct memp_desc *desc)
@@ -316,7 +329,11 @@ do_memp_malloc_pool_fn(const struct memp_desc *desc, const char *file, const int
 
   return NULL;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Get an element from a custom pool.
  *
@@ -342,7 +359,11 @@ memp_malloc_pool_fn(const struct memp_desc *desc, const char *file, const int li
   return do_memp_malloc_pool_fn(desc, file, line);
 #endif
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Get an element from a specific pool.
  *
@@ -372,7 +393,11 @@ memp_malloc_fn(memp_t type, const char *file, const int line)
 
   return memp;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 static void
 do_memp_free_pool(const struct memp_desc *desc, void *mem)
 {
@@ -412,7 +437,11 @@ do_memp_free_pool(const struct memp_desc *desc, void *mem)
   SYS_ARCH_UNPROTECT(old_level);
 #endif /* !MEMP_MEM_MALLOC */
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Put a custom pool element back into its pool.
  *
@@ -429,7 +458,11 @@ memp_free_pool(const struct memp_desc *desc, void *mem)
 
   do_memp_free_pool(desc, mem);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Put an element back into its pool.
  *
@@ -465,3 +498,5 @@ memp_free(memp_t type, void *mem)
   }
 #endif
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"

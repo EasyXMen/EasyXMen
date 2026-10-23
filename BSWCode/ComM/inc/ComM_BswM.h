@@ -42,6 +42,8 @@ extern "C" {
 /* =========================================== external data declarations =========================================== */
 
 /* ========================================= external function declarations ========================================= */
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * @brief EcuM or BswM shall indicate to ComM when communication is allowed. If EcuM/Flex is used: BswM
  * @param[in]    Channel   Channel
@@ -51,6 +53,8 @@ extern "C" {
  * @trace        CPD-59644
  */
 void ComM_CommunicationAllowed(NetworkHandleType Channel, boolean Allowed);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
 #ifdef __cplusplus
 }

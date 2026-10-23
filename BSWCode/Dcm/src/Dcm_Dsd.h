@@ -32,6 +32,8 @@ extern "C" {
 #endif
 
 /* ========================================= external function declarations ========================================= */
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         Called by Dcm_TpRxIndication to check service request validity
  * @param[in]     protocolId : current protocol Id
@@ -41,6 +43,10 @@ extern "C" {
  * @trace         CPD-PLACEHOLDE
  */
 void DsdInternal_RxIndication(uint8 protocolId);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         Called by DslInternal_SetStateIdle do serviceRequest notification confirmation
@@ -52,6 +58,10 @@ void DsdInternal_RxIndication(uint8 protocolId);
  * @trace         CPD-PLACEHOLDE
  */
 void DsdInternal_HandleConfirmation(uint8 protocolId, Dcm_ConfirmationStatusType confirmationStatus);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         This function sends diagnostic response
@@ -63,6 +73,10 @@ void DsdInternal_HandleConfirmation(uint8 protocolId, Dcm_ConfirmationStatusType
  * @trace         CPD-PLACEHOLDE
  */
 void DsdInternal_SendResponse(uint8 ProtocolId, Dcm_NegativeResponseCodeType errorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         Called by DsdInternal_RxIndication to check service validity and output configuration index
@@ -78,6 +92,10 @@ void DsdInternal_SendResponse(uint8 ProtocolId, Dcm_NegativeResponseCodeType err
  */
 
 Std_ReturnType DsdInternal_CheckService(uint8 protocolId, uint16* servIndex, const uint8* Sid);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         Called by DsdInternal_RxIndication to check subService validity and output configuration index
@@ -99,6 +117,8 @@ Std_ReturnType DsdInternal_CheckSubService(
     uint16*                       subServIndex,
     const uint8*                  SubServiceId,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 
 #ifdef __cplusplus
 }

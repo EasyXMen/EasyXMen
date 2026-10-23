@@ -53,7 +53,11 @@ extern "C" {
  * @synchronous TRUE
  * @trace       CPD-66324
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 void BswM_LinTp_RequestMode(NetworkHandleType Network, LinTp_Mode LinTpRequestedMode);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 #endif /*BSWM_LINTP_ENABLED == STD_ON*/
 

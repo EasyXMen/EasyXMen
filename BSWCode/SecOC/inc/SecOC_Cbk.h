@@ -21,7 +21,7 @@
  **  @description        : API declaration  of SecOC
  **
  ***********************************************************************************************************************/
-
+/* PRQA S 1513 EOF */ /* VL_SecOC_1513 */
 /* ================================================ misar justifications ============================================ */
 
 #ifndef SECOC_CBK_H
@@ -30,11 +30,13 @@
 /* =================================================== inclusions =================================================== */
 #include "ComStack_Types.h"
 #include "Crypto_GeneralTypes.h"
+#include "SecOC_Cfg.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+/*PRQA S 1512 EOF*/ /*VL_SecOC_1512*/
 /* ===================================================== macros ===================================================== */
 
 /* ================================================ type definitions ================================================ */
@@ -56,7 +58,11 @@ extern "C" {
  * @synchronous    TRUE
  * @trace       CPD-70344
  */
+#define SECOC_START_SEC_CODE_FAST
+#include "SecOC_MemMap.h"
 void SecOC_RxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr);
+#define SECOC_STOP_SEC_CODE_FAST
+#include "SecOC_MemMap.h"
 
 /**
  * @brief          Indication of a received PDU from a lower layer
@@ -67,7 +73,11 @@ void SecOC_RxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr);
  * @synchronous    TRUE
  * @trace       CPD-70345
  */
+#define SECOC_START_SEC_CODE_FAST
+#include "SecOC_MemMap.h"
 void SecOC_TpRxIndication(PduIdType id, Std_ReturnType result);
+#define SECOC_STOP_SEC_CODE_FAST
+#include "SecOC_MemMap.h"
 
 /**
  * @brief          The lower layer communication interface module confirms
@@ -78,7 +88,11 @@ void SecOC_TpRxIndication(PduIdType id, Std_ReturnType result);
  * @synchronous    TRUE
  * @trace       CPD-70346
  */
+#define SECOC_START_SEC_CODE_FAST
+#include "SecOC_MemMap.h"
 void SecOC_TxConfirmation(PduIdType TxPduId, Std_ReturnType result);
+#define SECOC_STOP_SEC_CODE_FAST
+#include "SecOC_MemMap.h"
 
 /**
  * @brief          This function is called after the I-PDU has been
@@ -90,7 +104,11 @@ void SecOC_TxConfirmation(PduIdType TxPduId, Std_ReturnType result);
  * @synchronous    TRUE
  * @trace       CPD-70347
  */
+#define SECOC_START_SEC_CODE_FAST
+#include "SecOC_MemMap.h"
 void SecOC_TpTxConfirmation(PduIdType id, Std_ReturnType result);
+#define SECOC_STOP_SEC_CODE_FAST
+#include "SecOC_MemMap.h"
 
 /**
  * @brief          Within this API, the upper layer module (called module)
@@ -114,7 +132,11 @@ void SecOC_TpTxConfirmation(PduIdType id, Std_ReturnType result);
  * @synchronous    TRUE
  * @trace       CPD-70348
  */
+#define SECOC_START_SEC_CODE_FAST
+#include "SecOC_MemMap.h"
 Std_ReturnType SecOC_TriggerTransmit(PduIdType TxPduId, PduInfoType* PduInfoPtr);
+#define SECOC_STOP_SEC_CODE_FAST
+#include "SecOC_MemMap.h"
 
 /**
  * @brief          This function is called to provide the received data of an
@@ -137,7 +159,11 @@ Std_ReturnType SecOC_TriggerTransmit(PduIdType TxPduId, PduInfoType* PduInfoPtr)
  * @synchronous    TRUE
  * @trace       CPD-70349
  */
+#define SECOC_START_SEC_CODE_FAST
+#include "SecOC_MemMap.h"
 BufReq_ReturnType SecOC_CopyRxData(PduIdType id, const PduInfoType* info, PduLengthType* bufferSizePtr);
+#define SECOC_STOP_SEC_CODE_FAST
+#include "SecOC_MemMap.h"
 
 /**
  * @brief          This function is called to acquire the transmit data of an
@@ -165,11 +191,15 @@ BufReq_ReturnType SecOC_CopyRxData(PduIdType id, const PduInfoType* info, PduLen
  * @synchronous    TRUE
  * @trace       CPD-70350
  */
+#define SECOC_START_SEC_CODE_FAST
+#include "SecOC_MemMap.h"
 BufReq_ReturnType SecOC_CopyTxData(
     PduIdType            id,
     const PduInfoType*   info,
     const RetryInfoType* retry,
     PduLengthType*       availableDataPtr);
+#define SECOC_STOP_SEC_CODE_FAST
+#include "SecOC_MemMap.h"
 
 /**
  * @brief          This function is called at the start of receiving an N-SDU.
@@ -200,33 +230,49 @@ BufReq_ReturnType SecOC_CopyTxData(
  * @synchronous    TRUE
  * @trace       CPD-70351
  */
+#define SECOC_START_SEC_CODE_FAST
+#include "SecOC_MemMap.h"
 BufReq_ReturnType SecOC_StartOfReception(
     PduIdType          id,
     const PduInfoType* info,
     PduLengthType      TpSduLength,
     PduLengthType*     bufferSizePtr);
+#define SECOC_STOP_SEC_CODE_FAST
+#include "SecOC_MemMap.h"
 
+#if (SECOC_TX_PDU_PRO_NUM > 0)
 /**
  * @brief          CSM notifies SecOC that a Authenticator generate job has
  *                 finished.
- * @param[in]      job: JobID of the operation that caused the callback.
+ * @param[in]      jobId: JobID of the operation that caused the callback.
  * @param[in]      result: Contains the result of cryptographic operation.
  * @reentrant      TRUE
  * @synchronous    TRUE
  * @trace       CPD-70352
  */
-void SecOC_CsmGenerateJobFinishedIndication(const Crypto_JobType* job, Crypto_ResultType result);
+#define SECOC_START_SEC_CODE_FAST
+#include "SecOC_MemMap.h"
+void SecOC_CsmGenerateJobFinishedIndication(uint32 jobId, Crypto_ResultType result);
+#define SECOC_STOP_SEC_CODE_FAST
+#include "SecOC_MemMap.h"
+#endif /* SECOC_TX_PDU_PRO_NUM > 0 */
 
+#if (SECOC_RX_PDU_PRO_NUM > 0)
 /**
  * @brief          CSM notifies SecOC that a Authenticator verify job has
  *                 finished.
- * @param[in]      job: JobID of the operation that caused the callback.
+ * @param[in]      jobId: JobID of the operation that caused the callback.
  * @param[in]      result: Contains the result of cryptographic operation.
  * @reentrant      TRUE
  * @synchronous    TRUE
  * @trace       CPD-70353
  */
-void SecOC_CsmVerifyJobFinishedIndication(const Crypto_JobType* job, Crypto_ResultType result);
+#define SECOC_START_SEC_CODE_FAST
+#include "SecOC_MemMap.h"
+void SecOC_CsmVerifyJobFinishedIndication(uint32 jobId, Crypto_ResultType result);
+#define SECOC_STOP_SEC_CODE_FAST
+#include "SecOC_MemMap.h"
+#endif /* SECOC_RX_PDU_PRO_NUM > 0 */
 
 #ifdef __cplusplus
 }

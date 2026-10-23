@@ -50,24 +50,21 @@
 void BswM_InitComMRequestPorts(void)
 /* PRQA S 1503,1505,1532 --*/
 {
+    BswM_ArtiApiStart(1, BSWM_API_ID_INITCOMMREQUESTPORTS);
+#if ((BSWM_COMMINDICATION_ENABLED == STD_ON) || (BSWM_COMMPNCREQUEST_ENABLED == STD_ON))
     const BswM_ModeRqstPortPCCfgType*   modeRqstPCfgPtr;
     const BswM_ModeRqstPortRuntimeType* modeRqstPtr;
     const BswM_PartitionPCCfgType*      bswmPartPCCfgPtr;
-    NetworkHandleType                   numOfComMCh;
-    NetworkHandleType                   idx;
-#if (BSWM_COMM_PNC_ENABLED == STD_ON)
-    PNCHandleType numOfPnc;
-    PNCHandleType pncIdx;
-#endif /*BSWM_COMM_PNC_ENABLED == STD_ON*/
+
     boolean result;
     result = BswM_GetPartitionPCCfgPtr(&bswmPartPCCfgPtr);
     if (result)
     {
-#if (BSWM_COMMINDICATION_ENABLED == STD_ON)
         modeRqstPCfgPtr = bswmPartPCCfgPtr->modeRqstPCCfg;
         modeRqstPtr     = bswmPartPCCfgPtr->modeRqstPortRunPtr;
-        numOfComMCh     = modeRqstPCfgPtr->numOfComMInd;
-        for (idx = 0u; idx < numOfComMCh; idx++)
+#if (BSWM_COMMINDICATION_ENABLED == STD_ON)
+        NetworkHandleType numOfComMCh = modeRqstPCfgPtr->numOfComMInd;
+        for (NetworkHandleType idx = 0u; idx < numOfComMCh; idx++)
         {
             if (NULL_PTR != modeRqstPCfgPtr->comMInitMode)
             {
@@ -80,8 +77,8 @@ void BswM_InitComMRequestPorts(void)
         }
 #endif /*BSWM_COMMINDICATION_ENABLED == STD_ON*/
 #if (BSWM_COMMPNCREQUEST_ENABLED == STD_ON)
-        numOfPnc = modeRqstPCfgPtr->numOfComMPncInd;
-        for (pncIdx = 0u; pncIdx < numOfPnc; pncIdx++)
+        PNCHandleType numOfPnc = modeRqstPCfgPtr->numOfComMPncInd;
+        for (PNCHandleType pncIdx = 0u; pncIdx < numOfPnc; pncIdx++)
         {
             if (NULL_PTR != modeRqstPCfgPtr->comMPncInitMode)
             {
@@ -97,11 +94,17 @@ void BswM_InitComMRequestPorts(void)
 #if (BSWM_DEV_ERROR_DETECT == STD_ON)
     else
     {
-        (void)Det_ReportError(BSWM_MODULE_ID, BSWM_INSTANCE_ID, BSWM_API_ID_INIT, BSWM_E_INIT_FAILED);
+        (void)Det_ReportError(BSWM_MODULE_ID, BSWM_INSTANCE_ID, BSWM_API_ID_INITCOMMREQUESTPORTS, BSWM_E_INIT_FAILED);
     }
 #endif /*BSWM_DEV_ERROR_DETECT == STD_ON*/
+#endif
+    BswM_ArtiApiStop(1, BSWM_API_ID_INITCOMMREQUESTPORTS);
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Function called by ComM to signal a shutdown.
  * Service ID: 0x22
@@ -116,6 +119,8 @@ void BswM_InitComMRequestPorts(void)
 void BswM_ComM_InitiateReset(void)
 /* PRQA S 1503,1505,1532 --*/
 {
+    BswM_ArtiApiStart(1, BSWM_API_ID_COMM_INITIATE_RESET);
+
 #if (BSWM_EVENT_COMM_INITIATE_RESET_LIST_ENABLE == STD_ON)
     const BswM_PartitionPCCfgType* bswmPartPCCfgPtr;
     const BswM_PartitionLCfgType*  bswmPartLCfgPtr;
@@ -167,8 +172,14 @@ void BswM_ComM_InitiateReset(void)
         }
     }
 #endif /*BSWM_EVENT_COMM_INITIATE_RESET_LIST_ENABLE == STD_ON*/
-}
 
+    BswM_ArtiApiStop(1, BSWM_API_ID_COMM_INITIATE_RESET);
+}
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
+
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Function called by ComM to indicate the current communication mode of a ComM
  * channel.
@@ -186,6 +197,8 @@ void BswM_ComM_InitiateReset(void)
 void BswM_ComM_CurrentMode(NetworkHandleType Network, ComM_ModeType RequestedMode)
 /* PRQA S 1503,1505,1532,6030 -- */
 {
+    BswM_ArtiApiStart(3, BSWM_API_ID_COMM_CURRENT_MODE, Network, RequestedMode);
+
 #if (BSWM_COMMINDICATION_ENABLED == STD_ON)
     const BswM_PartitionPCCfgType* bswmPartPCCfgPtr;
 #if (BSWM_PB_CONFIG_ENABLED == STD_ON)
@@ -251,8 +264,13 @@ void BswM_ComM_CurrentMode(NetworkHandleType Network, ComM_ModeType RequestedMod
     (void)Network;
     (void)RequestedMode;
 #endif /* BSWM_COMMINDICATION_ENABLED == STD_ON */
+    BswM_ArtiApiStop(1, BSWM_API_ID_COMM_CURRENT_MODE);
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Function called by ComM to indicate the current mode of the PNC.
  * Service ID: 0x15
@@ -268,6 +286,8 @@ void BswM_ComM_CurrentMode(NetworkHandleType Network, ComM_ModeType RequestedMod
 void BswM_ComM_CurrentPNCMode(PNCHandleType PNC, ComM_PncModeType CurrentPncMode)
 /* PRQA S 1503,1505,1532 --*/
 {
+    BswM_ArtiApiStart(3, BSWM_API_ID_COMM_CURRENT_PNC_MODE, PNC, CurrentPncMode);
+
 #if (BSWM_COMMPNCREQUEST_ENABLED == STD_ON)
     const BswM_PartitionPCCfgType* bswmPartPCCfgPtr;
 #if (BSWM_PB_CONFIG_ENABLED == STD_ON)
@@ -333,9 +353,15 @@ void BswM_ComM_CurrentPNCMode(PNCHandleType PNC, ComM_PncModeType CurrentPncMode
     (void)PNC;
     (void)CurrentPncMode;
 #endif /*BSWM_COMMPNCREQUEST_ENABLED == STD_ON*/
+
+    BswM_ArtiApiStop(1, BSWM_API_ID_COMM_CURRENT_PNC_MODE);
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 #if (BSWM_COMMPNCREQUEST_ENABLED == STD_ON)
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /*Get ComM Pnc status*/
 /* PRQA S 1503,1505,1532 ++*/ /* VL_QAC_NoUsedApi, VL_BswM_1505, VL_QAC_OneFunRef */
 ComM_PncModeType BswM_GetComMPncStatus(PNCHandleType pncIdx)
@@ -353,10 +379,14 @@ ComM_PncModeType BswM_GetComMPncStatus(PNCHandleType pncIdx)
 
     return pncStatus;
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_COMMPNCREQUEST_ENABLED == STD_ON*/
 
 #if (BSWM_EVENT_COMM_INITIATE_RESET_LIST_ENABLE == STD_ON)
 /*Get comM initiateReset status*/
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /* PRQA S 1503,1505,1532 ++*/ /* VL_QAC_NoUsedApi, VL_BswM_1505, VL_QAC_OneFunRef */
 BswM_EventRquestPortRuntimeType BswM_GetComMResetInitStatus(void)
 /* PRQA S 1503,1505,1532 --*/
@@ -374,9 +404,13 @@ BswM_EventRquestPortRuntimeType BswM_GetComMResetInitStatus(void)
     }
     return comMInitStatus;
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /* BSWM_EVENT_COMM_INITIATE_RESET_LIST_ENABLE == STD_ON */
 
 #if (BSWM_COMMINDICATION_ENABLED == STD_ON)
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /*Get ComM mode status*/
 /* PRQA S 1503,1505,1532 ++*/ /* VL_QAC_NoUsedApi, VL_BswM_1505, VL_QAC_OneFunRef */
 ComM_ModeType BswM_GetComMIndStatus(NetworkHandleType comChIdx)
@@ -393,10 +427,9 @@ ComM_ModeType BswM_GetComMIndStatus(NetworkHandleType comChIdx)
     }
     return comMode;
 }
-#endif /*BSWM_COMMINDICATION_ENABLED == STD_ON*/
-
 #define BSWM_STOP_SEC_CODE
 #include "BswM_MemMap.h"
+#endif /*BSWM_COMMINDICATION_ENABLED == STD_ON*/
 
 /* ========================================== internal function definitions ========================================= */
 

@@ -1,4 +1,18 @@
 /**
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
+ * SPDX-License-Identifier: LGPL-2.1-only-with-exception
+ *
+ * This library is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU Lesser General Public License as published by the Free Software Foundation; version 2.1.
+ * This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU Lesser General Public License for more details.
+ * You should have received a copy of the GNU Lesser General Public License along with this library;
+ * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ * or see <https://www.gnu.org/licenses/>.
+ */
+
+/**
  * @file
  * Transmission Control Protocol, outgoing traffic
  *
@@ -125,12 +139,22 @@
 #endif
 
 /* Forward declarations.*/
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 static err_t tcp_output_segment(struct tcp_seg *seg, struct tcp_pcb *pcb, struct netif *netif);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 static err_t tcp_output_control_segment_netif(const struct tcp_pcb *pcb, struct pbuf *p,
                                               const ip_addr_t *src, const ip_addr_t *dst,
                                               struct netif *netif);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 /* tcp_route: common code that returns a fixed bound netif or calls ip_route */
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 static struct netif *
 tcp_route(const struct tcp_pcb *pcb, const ip_addr_t *src, const ip_addr_t *dst)
 {
@@ -142,7 +166,11 @@ tcp_route(const struct tcp_pcb *pcb, const ip_addr_t *src, const ip_addr_t *dst)
     return ip_route(src, dst);
   }
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Create a TCP segment with prefilled header.
  *
@@ -206,6 +234,8 @@ tcp_create_segment(const struct tcp_pcb *pcb, struct pbuf *p, u8_t hdrflags, u32
   seg->tcphdr->urgp = 0;
   return seg;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 /**
  * Allocate a PBUF_RAM pbuf, perhaps with extra space at the end.
@@ -224,6 +254,8 @@ tcp_create_segment(const struct tcp_pcb *pcb, struct pbuf *p, u8_t hdrflags, u32
  * @param first_seg true when this pbuf will be used in the first enqueued segment.
  */
 #if TCP_OVERSIZE
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 static struct pbuf *
 tcp_pbuf_prealloc(pbuf_layer layer, u16_t length, u16_t max_length,
                   u16_t *oversize, const struct tcp_pcb *pcb, u8_t apiflags,
@@ -273,11 +305,15 @@ tcp_pbuf_prealloc(pbuf_layer layer, u16_t length, u16_t max_length,
   p->len = p->tot_len = length;
   return p;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #else /* TCP_OVERSIZE */
 #define tcp_pbuf_prealloc(layer, length, mx, os, pcb, api, fst) pbuf_alloc((layer), (length), PBUF_RAM)
 #endif /* TCP_OVERSIZE */
 
 #if TCP_CHECKSUM_ON_COPY
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /** Add a checksum of newly added data to the segment.
  *
  * Called by tcp_write and tcp_split_unsent_seg.
@@ -296,8 +332,12 @@ tcp_seg_add_chksum(u16_t chksum, u16_t len, u16_t *seg_chksum,
   }
   *seg_chksum = chksum;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif /* TCP_CHECKSUM_ON_COPY */
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /** Checks if tcp_write is allowed or not (checks state, snd_buf and snd_queuelen).
  *
  * @param pcb the tcp pcb to check for
@@ -349,7 +389,11 @@ tcp_write_checks(struct tcp_pcb *pcb, u16_t len)
   }
   return ERR_OK;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup tcp_raw
  * Write data for sending (but does not send it immediately).
@@ -813,7 +857,11 @@ memerr:
   LWIP_DEBUGF(TCP_QLEN_DEBUG | LWIP_DBG_STATE, ("tcp_write: %"S16_F" (with mem err)\n", pcb->snd_queuelen));
   return ERR_MEM;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Split segment on the head of the unsent queue.  If return is not
  * ERR_OK, existing head remains intact
@@ -992,7 +1040,11 @@ memerr:
 
   return ERR_MEM;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Called by tcp_close() to send a segment including FIN flag but not data.
  * This FIN may be added to an existing segment or a new, otherwise empty
@@ -1022,7 +1074,11 @@ tcp_send_fin(struct tcp_pcb *pcb)
   /* no data, no length, flags, copy=1, no optdata */
   return tcp_enqueue_flags(pcb, TCP_FIN);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Enqueue SYN or FIN for transmission.
  *
@@ -1132,8 +1188,12 @@ tcp_enqueue_flags(struct tcp_pcb *pcb, u8_t flags)
 
   return ERR_OK;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if LWIP_TCP_TIMESTAMPS
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /* Build a timestamp option (12 bytes long) at the specified options pointer)
  *
  * @param pcb tcp_pcb
@@ -1149,6 +1209,8 @@ tcp_build_timestamp_option(const struct tcp_pcb *pcb, u32_t *opts)
   opts[1] = lwip_htonl(sys_now());
   opts[2] = lwip_htonl(pcb->ts_recent);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
 #if LWIP_TCP_SACK_OUT
@@ -1215,6 +1277,8 @@ tcp_build_sack_option(const struct tcp_pcb *pcb, u32_t *opts, u8_t num_sacks)
 #endif
 
 #if LWIP_WND_SCALE
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /** Build a window scale option (3 bytes long) at the specified options pointer)
  *
  * @param opts option pointer where to store the window scale option
@@ -1227,8 +1291,12 @@ tcp_build_wnd_scale_option(u32_t *opts)
   /* Pad with one NOP option to make everything nicely aligned */
   opts[0] = PP_HTONL(0x01030300 | TCP_RCV_SCALE);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @ingroup tcp_raw
  * Find out what we can send and send it
@@ -1424,7 +1492,11 @@ output_done:
   tcp_clear_flags(pcb, TF_NAGLEMEMERR);
   return ERR_OK;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /** Check if a segment's pbufs are used by someone else than TCP.
  * This can happen on retransmission if the pbuf of this segment is still
  * referenced by the netif driver due to deferred transmission.
@@ -1449,7 +1521,11 @@ tcp_output_segment_busy(const struct tcp_seg *seg)
   /* no other references found */
   return 0;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Called by tcp_output() to actually send a TCP segment over IP.
  *
@@ -1625,7 +1701,11 @@ tcp_output_segment(struct tcp_seg *seg, struct tcp_pcb *pcb, struct netif *netif
 
   return err;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Requeue all unacked segments for retransmission
  *
@@ -1680,7 +1760,11 @@ tcp_rexmit_rto_prepare(struct tcp_pcb *pcb)
 
   return ERR_OK;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Requeue all unacked segments for retransmission
  *
@@ -1700,7 +1784,11 @@ tcp_rexmit_rto_commit(struct tcp_pcb *pcb)
   /* Do the actual retransmission */
   tcp_output(pcb);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Requeue all unacked segments for retransmission
  *
@@ -1718,7 +1806,11 @@ tcp_rexmit_rto(struct tcp_pcb *pcb)
     tcp_rexmit_rto_commit(pcb);
   }
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Requeue the first unacked segment for retransmission
  *
@@ -1778,8 +1870,12 @@ tcp_rexmit(struct tcp_pcb *pcb)
      and thus tcp_output directly returns. */
   return ERR_OK;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Handle retransmission after three dupacks received
  *
@@ -1819,7 +1915,11 @@ tcp_rexmit_fast(struct tcp_pcb *pcb)
     }
   }
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 static struct pbuf *
 tcp_output_alloc_header_common(u32_t ackno, u16_t optlen, u16_t datalen,
                         u32_t seqno_be /* already in network byte order */,
@@ -1844,7 +1944,11 @@ tcp_output_alloc_header_common(u32_t ackno, u16_t optlen, u16_t datalen,
   }
   return p;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /** Allocate a pbuf and create a tcphdr at p->payload, used for output
  * functions other than the default tcp_output -> tcp_output_segment
  * (e.g. tcp_send_empty_ack, etc.)
@@ -1872,8 +1976,12 @@ tcp_output_alloc_header(struct tcp_pcb *pcb, u16_t optlen, u16_t datalen,
   }
   return p;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 /* Fill in options for control segments */
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 static void
 tcp_output_fill_options(const struct tcp_pcb *pcb, struct pbuf *p, u8_t optflags, u8_t num_sacks)
 {
@@ -1916,7 +2024,11 @@ tcp_output_fill_options(const struct tcp_pcb *pcb, struct pbuf *p, u8_t optflags
   LWIP_UNUSED_ARG(optflags); /* for LWIP_NOASSERT */
   LWIP_UNUSED_ARG(opts); /* for LWIP_NOASSERT */
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /** Output a control segment pbuf to IP.
  *
  * Called from tcp_rst, tcp_send_empty_ack, tcp_keepalive and tcp_zero_window_probe,
@@ -1938,7 +2050,11 @@ tcp_output_control_segment(const struct tcp_pcb *pcb, struct pbuf *p,
   }
   return tcp_output_control_segment_netif(pcb, p, src, dst, netif);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /** Output a control segment pbuf to IP.
  *
  * Called instead of tcp_output_control_segment when we don't have a pcb but we
@@ -1977,8 +2093,12 @@ tcp_output_control_segment_netif(const struct tcp_pcb *pcb, struct pbuf *p,
   pbuf_free(p);
   return err;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if LWIP_TCP_TC8_RST_NACK
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Send a TCP RESET packet (empty segment with RST flag set not ack) either to
  * abort a connection or to show that there is no matching local connection
@@ -2033,8 +2153,12 @@ tcp_rst_no_ack(const struct tcp_pcb *pcb, u32_t seqno, u32_t ackno,
   tcp_output_control_segment(pcb, p, local_ip, remote_ip);
   LWIP_DEBUGF(TCP_RST_DEBUG, ("tcp_rst: seqno %"U32_F" ackno %"U32_F".\n", seqno, ackno));
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif/* LWIP_TCP_TC8_RST_NACK */
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 static struct pbuf *
 tcp_rst_common(const struct tcp_pcb *pcb, u32_t seqno, u32_t ackno,
                const ip_addr_t *local_ip, const ip_addr_t *remote_ip,
@@ -2068,7 +2192,11 @@ tcp_rst_common(const struct tcp_pcb *pcb, u32_t seqno, u32_t ackno,
   LWIP_DEBUGF(TCP_RST_DEBUG, ("tcp_rst: seqno %"U32_F" ackno %"U32_F".\n", seqno, ackno));
   return p;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Send a TCP RESET packet (empty segment with RST flag set) to abort a
  * connection.
@@ -2101,7 +2229,11 @@ tcp_rst(const struct tcp_pcb *pcb, u32_t seqno, u32_t ackno,
     tcp_output_control_segment(pcb, p, local_ip, remote_ip);
   }
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Send a TCP RESET packet (empty segment with RST flag set) to show that there
  * is no matching local connection for a received segment.
@@ -2135,7 +2267,11 @@ tcp_rst_netif(struct netif *netif, u32_t seqno, u32_t ackno,
     LWIP_DEBUGF(TCP_OUTPUT_DEBUG, ("tcp_rst_netif: no netif given\n"));
   }
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Send an ACK without data.
  *
@@ -2191,8 +2327,12 @@ tcp_send_empty_ack(struct tcp_pcb *pcb)
 
   return err;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if LWIP_TCP_TC8_EMPTY_ACK
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Send an ACK without data used last seq
  * for scenarios where the ack or seq is not in the window.
@@ -2256,7 +2396,11 @@ tcp_send_empty_ack_used_last_seq(struct tcp_pcb *pcb)
 
   return err;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif /* LWIP_TCP_TC8_EMPTY_ACK */
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Send keepalive packets to keep a connection active although
  * no data is sent over it.
@@ -2294,7 +2438,11 @@ tcp_keepalive(struct tcp_pcb *pcb)
                           pcb->snd_nxt - 1, pcb->rcv_nxt, (int)err));
   return err;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Send persist timer zero-window probes to keep a connection active
  * when a window update is lost.
@@ -2378,4 +2526,6 @@ tcp_zero_window_probe(struct tcp_pcb *pcb)
                           pcb->snd_nxt - 1, pcb->rcv_nxt, (int)err));
   return err;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif /* LWIP_TCP */

@@ -26,31 +26,6 @@
 #include "KeyM_Internal.h"
 
 /* ===================================================== macros ===================================================== */
-#define KEYM_C_AR_MAJOR_VERSION 4u
-#define KEYM_C_AR_MINOR_VERSION 9u
-#define KEYM_C_AR_PATCH_VERSION 0u
-#define KEYM_C_SW_MAJOR_VERSION 2u
-#define KEYM_C_SW_MINOR_VERSION 2u
-#define KEYM_C_SW_PATCH_VERSION 0u
-
-#if (KEYM_C_AR_MAJOR_VERSION != KEYM_AR_MAJOR_VERSION)
-#error "KeyM.c : Mismatch in Specification Major Version"
-#endif
-#if (KEYM_C_AR_MINOR_VERSION != KEYM_AR_MINOR_VERSION)
-#error "KeyM.c : Mismatch in Specification Major Version"
-#endif
-#if (KEYM_C_AR_PATCH_VERSION != KEYM_AR_PATCH_VERSION)
-#error "KeyM.c : Mismatch in Specification Major Version"
-#endif
-#if (KEYM_C_SW_MAJOR_VERSION != KEYM_SW_MAJOR_VERSION)
-#error "KeyM.c : Mismatch in Specification Major Version"
-#endif
-#if (KEYM_C_SW_MINOR_VERSION != KEYM_SW_MINOR_VERSION)
-#error "KeyM.c : Mismatch in Specification Major Version"
-#endif
-#if (KEYM_C_SW_PATCH_VERSION != KEYM_SW_PATCH_VERSION)
-#error "KeyM.c : Mismatch in Specification Major Version"
-#endif
 
 /* ================================================ type definitions ================================================ */
 
@@ -82,6 +57,8 @@ boolean KeyM_InitStatus;
 void KeyM_Init(const KeyM_ConfigType* ConfigPtr)
 /* PRQA S 1532,1503 -- */
 {
+    KeyM_ArtiApiStart(2, KEYM_INIT_ID, ConfigPtr);
+
 #if (STD_ON == KEYM_CERTIFICATE_MANAGER_ENABLED)
     const KeyM_CertPCfgType* certCfgPtr;
     uint16                   certId;
@@ -105,13 +82,7 @@ void KeyM_Init(const KeyM_ConfigType* ConfigPtr)
             (void)KeyM_CertSetStatus(certId, KEYM_CERTIFICATE_NOT_AVAILABLE);
             if (certCfgPtr->certStorage == KEYM_STORAGE_IN_CSM)
             {
-                /* PRQA S 2109 ++ */ /* VL_KeyM_2109 */
-                if ((!certCfgPtr->selfSignedCert) && (certCfgPtr->certKeyTarRef != NULL_PTR))
-                /* PRQA S 2109 -- */
-                {
-                    KeyM_HandleCsmKeyStorage(*(certCfgPtr->certKeyTarRef), certId, FALSE);
-                    (void)KeyM_CertSetStatus(certId, KEYM_CERTIFICATE_PARSED_NOT_VALIDATED);
-                }
+                /*Do nothing.*/
             }
 #if (KEYM_NVM_BLOCK_NUM > 0u)
             else if (certCfgPtr->certStorage == KEYM_STORAGE_IN_NVM)
@@ -130,8 +101,14 @@ void KeyM_Init(const KeyM_ConfigType* ConfigPtr)
 #endif /*STD_ON == KEYM_CERTIFICATE_MANAGER_ENABLED*/
         KeyM_InitStatus = TRUE;
     }
-}
 
+    KeyM_ArtiApiStop(1, KEYM_INIT_ID);
+}
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
+
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 /*************************************************************************/
 /*
  * Brief  This function resets the key management module to
@@ -141,6 +118,8 @@ void KeyM_Init(const KeyM_ConfigType* ConfigPtr)
 void KeyM_Deinit(void)
 /* PRQA S 1503 -- */
 {
+    KeyM_ArtiApiStart(1, KEYM_DEINIT_ID);
+
 #if (STD_ON == KEYM_DEVERROR_DETECT)
     if (!KeyM_InitStatus)
     {
@@ -151,8 +130,14 @@ void KeyM_Deinit(void)
     {
         KeyM_InitStatus = (boolean)FALSE;
     }
-}
 
+    KeyM_ArtiApiStop(1, KEYM_DEINIT_ID);
+}
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
+
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 /*************************************************************************/
 /*
  * Brief  This function provides the version of this module.
@@ -162,6 +147,8 @@ void KeyM_Deinit(void)
 void KeyM_GetVersionInfo(Std_VersionInfoType* VersionInfo)
 /* PRQA S 3432,1503 -- */
 {
+    KeyM_ArtiApiStart(2, KEYM_GETVERSIONINFO_ID, VersionInfo);
+
 #if (KEYM_DEVERROR_DETECT == STD_ON)
     if (NULL_PTR == VersionInfo)
     {
@@ -171,14 +158,20 @@ void KeyM_GetVersionInfo(Std_VersionInfoType* VersionInfo)
 #endif /*ECUM_DEV_ERROR_DETECT == STD_ON*/
     {
         VersionInfo->moduleID = KEYM_MODULE_ID;
-        VersionInfo->vendorID = KEYM_H_VENDOR_ID;
+        VersionInfo->vendorID = KEYM_VENDOR_ID;
 
         VersionInfo->sw_major_version = KEYM_SW_MAJOR_VERSION;
         VersionInfo->sw_minor_version = KEYM_SW_MINOR_VERSION;
         VersionInfo->sw_patch_version = KEYM_SW_PATCH_VERSION;
     }
-}
 
+    KeyM_ArtiApiStop(1, KEYM_GETVERSIONINFO_ID);
+}
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
+
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 /*************************************************************************/
 /*
  * Brief  Function is called periodically according the specified time interval.
@@ -188,10 +181,22 @@ void KeyM_GetVersionInfo(Std_VersionInfoType* VersionInfo)
 void KeyM_MainFunction(void)
 /* PRQA S 3408,1503,1532 -- */
 {
+    KeyM_ArtiApiStart(1, KEYM_MAINFUNCTION_ID);
+
+    if (KeyM_InitStatus)
+    {
 #if (STD_ON == KEYM_CERTIFICATE_MANAGER_ENABLED)
-    KeyM_CertStoreNvmHandle();
+        KeyM_CertStoreNvmHandle();
 #endif /*STD_ON == KEYM_CERTIFICATE_MANAGER_ENABLED*/
+    }
+
+    KeyM_ArtiApiStop(1, KEYM_MAINFUNCTION_ID);
 }
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
+
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 /*************************************************************************/
 /*
  * Brief  Function is called from a pre-emptive operating system
@@ -201,32 +206,35 @@ void KeyM_MainFunction(void)
 void KeyM_MainBackgroundFunction(void)
 /* PRQA S 3408,1503,1532 -- */
 {
-#if (STD_ON == KEYM_CERTIFICATE_MANAGER_ENABLED)
-    const KeyM_CertPCfgType*   certCfgPtr;
-    const KeyM_CertPCfgType*   certUpperHierRef;
-    uint16                     certId;
-    KeyM_CertificateStatusType certStatu;
-#endif /*STD_ON == KEYM_CERTIFICATE_MANAGER_ENABLED*/
-
-#if (STD_ON == KEYM_CERTIFICATE_MANAGER_ENABLED)
-    /* PRQA S 2877 ++ */ /* VL_KeyM_2877 */
-    for (certId = 0u; certId < KEYM_CERT_NUM; certId++)
-    /* PRQA S 2877 -- */
+    if (KeyM_InitStatus)
     {
-        certCfgPtr = &KeyM_CertPCfg[certId];
-        (void)KeyM_CertGetStatus(certId, &certStatu);
-        if ((certCfgPtr->certStorage == KEYM_STORAGE_IN_NVM) && (certStatu == KEYM_CERTIFICATE_NOT_PARSED))
+#if ((STD_ON == KEYM_CERTIFICATE_MANAGER_ENABLED) && (KEYM_CUSTOM_SERV_ENABLE == STD_OFF))
+        const KeyM_CertPCfgType*   certCfgPtr;
+        const KeyM_CertPCfgType*   certUpperHierRef;
+        uint16                     certId;
+        KeyM_CertificateStatusType certStatu;
+        for (certId = 0u; certId < KEYM_CERT_NUM; certId++) /* PRQA S 2877 */ /* VL_KeyM_2877 */ /* MISRA Dir 4.1 */
         {
-            (void)KeyM_HandleParseCert(certId, certCfgPtr->CertData->dataEle, certCfgPtr->CertData->len);
+            certCfgPtr = &KeyM_CertPCfg[certId];
+            (void)KeyM_CertGetStatus(certId, &certStatu);
+            if ((certCfgPtr->certStorage == KEYM_STORAGE_IN_NVM) && (certStatu == KEYM_CERTIFICATE_NOT_PARSED))
+            {
+                (void)KeyM_HandleParseCert(certId, certCfgPtr->CertData->dataEle, certCfgPtr->CertData->len);
+            }
+            if (certStatu == KEYM_CERTIFICATE_PARSED_NOT_VALIDATED)
+            {
+                certUpperHierRef = certCfgPtr->certUpperHierRef;
+                (void)KeyM_HandleCertcVerify(certCfgPtr, certUpperHierRef);
+            }
         }
-        if (certStatu == KEYM_CERTIFICATE_PARSED_NOT_VALIDATED)
-        {
-            certUpperHierRef = certCfgPtr->certUpperHierRef;
-            (void)KeyM_HandleCertcVerify(certCfgPtr, certUpperHierRef);
-        }
-    }
 #endif /*STD_ON == KEYM_CERTIFICATE_MANAGER_ENABLED*/
+    }
 }
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
+
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 /* PRQA S 1532,3673,2889 ++ */ /* VL_QAC_OneFunRef,VL_QAC_3673,VL_QAC_MultiReturn */
 void KeyM_CopyData(void* dest, const void* src, uint32 size)
 /* PRQA S 1532,3673,2889 -- */
@@ -250,6 +258,11 @@ void KeyM_CopyData(void* dest, const void* src, uint32 size)
         }
     }
 }
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
+
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 /* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
 Std_ReturnType KeyM_strcmp(const uint8* str1, const uint8* str2, uint16 size)
 /* PRQA S 1532 -- */

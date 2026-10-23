@@ -54,11 +54,8 @@ typedef struct
 /* ============================================ external data definition ============================================ */
 
 /* ========================================= internal function declarations ========================================= */
-
-#ifdef QAC_ANALYZE
-#pragma PRQA_NO_SIDE_EFFECTS ComM_GetBit
-#endif
-
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * Store current pnc mode and notify to SW-C if current mode of user changed.
  * @param[in]    pnc      See PNCHandleType
@@ -68,7 +65,11 @@ typedef struct
  * @trace        CPD-65017
  */
 COMM_LOCAL void ComM_PncSetMode(PNCHandleType pnc, ComM_PncModeType pncMode);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * On entry of PNC sub state COMM_PNC_READY_SLEEP.
  * @param[in]    pnc   See PNCHandleType
@@ -77,7 +78,11 @@ COMM_LOCAL void ComM_PncSetMode(PNCHandleType pnc, ComM_PncModeType pncMode);
  * @trace        CPD-65018
  */
 COMM_LOCAL void ComM_PncBeh_EntryReadySleep(PNCHandleType pnc);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * On entry of PNC main state COMM_PNC_NO_COMMUNICATION.
  * @param[in]    pnc   See PNCHandleType
@@ -86,7 +91,11 @@ COMM_LOCAL void ComM_PncBeh_EntryReadySleep(PNCHandleType pnc);
  * @trace        CPD-65020
  */
 COMM_LOCAL void ComM_PncBeh_EntryNoCom(PNCHandleType pnc);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * On entry of PNC sub state COMM_PNC_PREPARE_SLEEP.
  * @param[in]    pnc   See PNCHandleType
@@ -95,7 +104,11 @@ COMM_LOCAL void ComM_PncBeh_EntryNoCom(PNCHandleType pnc);
  * @trace        CPD-65021
  */
 COMM_LOCAL void ComM_PncBeh_EntryPrepareSleep(PNCHandleType pnc);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * On entry of PNC sub state COMM_PNC_REQUESTED.
  * @param[in]    pnc   See PNCHandleType
@@ -104,7 +117,11 @@ COMM_LOCAL void ComM_PncBeh_EntryPrepareSleep(PNCHandleType pnc);
  * @trace        CPD-65023
  */
 COMM_LOCAL void ComM_PncBeh_EntryRequst(PNCHandleType pnc);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * Evaluate target PNC Mode.
  * @param[in]    pnc   See PNCHandleType
@@ -113,11 +130,13 @@ COMM_LOCAL void ComM_PncBeh_EntryRequst(PNCHandleType pnc);
  * @trace        CPD-65024
  */
 COMM_LOCAL ComM_PncModeType ComM_PncEvaluateTargetPncMode(PNCHandleType pnc);
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
 /* ============================================ internal data definitions =========================================== */
 #define COMM_START_SEC_VAR_CLEARED_PTR
 #include "ComM_MemMap.h"
-COMM_LOCAL const ComM_PncConfigType* ComM_PncConfigs;
+COMM_LOCAL const ComM_PncConfigType* ComM_PncConfigsPtr;
 #define COMM_STOP_SEC_VAR_CLEARED_PTR
 #include "ComM_MemMap.h"
 
@@ -133,10 +152,10 @@ COMM_LOCAL uint8 ComM_PncBitVectorEIRA[COMM_MAX_PNC_BIT_VECTOR_LENGTH];
 #define COMM_STOP_SEC_VAR_CLEARED_8
 #include "ComM_MemMap.h"
 
-#define COMM_START_SEC_CODE
-#include "ComM_MemMap.h"
 /* PRQA S 1532, 2889 ++ */ /* VL_QAC_OneFunRef, VL_QAC_MultiReturn */
 /* ========================================== external function definitions ========================================= */
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * The implementation of ComM_PncInit.
  */
@@ -153,23 +172,31 @@ void ComM_PncInit(const ComM_PncConfigType* pncConfigs)
 #if COMM_PNC_GATEWAY_ENABLED == STD_ON
         const ComM_PncConfigType* pncConfigPtr = &pncConfigs[i];
         pncVarPtr->ChannelBitVectorERA         = pncConfigPtr->ChannelBitVectorERA;
-        (void)IStdLib_MemSet(pncVarPtr->ChannelBitVectorERA, 0, pncConfigPtr->ChannelBitVectorERALength);
+        (void)IStdLib_MemSet(pncVarPtr->ChannelBitVectorERA, 0u, pncConfigPtr->ChannelBitVectorERALength);
 #endif
     }
 
-    (void)IStdLib_MemSet(ComM_PncBitVectorEIRA, 0, COMM_MAX_PNC_BIT_VECTOR_LENGTH);
+    (void)IStdLib_MemSet(ComM_PncBitVectorEIRA, 0u, COMM_MAX_PNC_BIT_VECTOR_LENGTH);
 
-    ComM_PncConfigs = pncConfigs;
+    ComM_PncConfigsPtr = pncConfigs;
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 ComM_PncModeType ComM_PncGetMode(PNCHandleType pnc)
 {
     return ComM_PncVar[pnc].PncMode;
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 ComM_ModeType ComM_PncGetMaxComMode(PNCHandleType pnc)
 {
-    const ComM_PncConfigType* pncConfigPtr = &ComM_PncConfigs[pnc];
+    const ComM_PncConfigType* pncConfigPtr = &ComM_PncConfigsPtr[pnc];
     ComM_ModeType             maxComMode   = COMM_FULL_COMMUNICATION;
 
     for (NetworkHandleType channel = 0u; channel < COMM_CHANNEL_NUMBER; ++channel)
@@ -185,22 +212,34 @@ ComM_ModeType ComM_PncGetMaxComMode(PNCHandleType pnc)
     }
     return maxComMode;
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 uint16 ComM_PncGetBitIndex(PNCHandleType pnc)
 {
-    const ComM_PncConfigType* pncConfigPtr = &ComM_PncConfigs[pnc];
+    const ComM_PncConfigType* pncConfigPtr = &ComM_PncConfigsPtr[pnc];
     return pncConfigPtr->BitIndex;
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 void ComM_PncUpdateEIRA(const uint8* pncBitVectorPtr)
 {
     (void)IStdLib_MemCpy(ComM_PncBitVectorEIRA, pncBitVectorPtr, COMM_MAX_PNC_BIT_VECTOR_LENGTH);
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
 #if COMM_PNC_GATEWAY_ENABLED == STD_ON
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 void ComM_PncUpdateChannelBitVectorERA(PNCHandleType pnc, NetworkHandleType channel, const uint8* pncBitVectorPtr)
 {
-    const ComM_PncConfigType* pncConfigPtr = &ComM_PncConfigs[pnc];
+    const ComM_PncConfigType* pncConfigPtr = &ComM_PncConfigsPtr[pnc];
 
     if (ComM_GetBit(pncConfigPtr->TxOnlyChannelMappingBitVector, channel))
     {
@@ -220,21 +259,30 @@ void ComM_PncUpdateChannelBitVectorERA(PNCHandleType pnc, NetworkHandleType chan
     }
     SchM_Exit_ComM_Pnc();
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 boolean ComM_PncPassiveChannelRequested(PNCHandleType pnc)
 {
-    const ComM_PncConfigType* configPtr = &ComM_PncConfigs[pnc];
-    if (configPtr->PassiveChannel == COMM_NOT_USED_CHANNEL_ID)
+    const ComM_PncConfigType* configPtr = &ComM_PncConfigsPtr[pnc];
+    boolean                   ret       = (configPtr->PassiveChannel != COMM_NOT_USED_CHANNEL_ID);
+    if (ret)
     {
-        return FALSE;
+        ret = ComM_GetBit(configPtr->ChannelBitVectorERA, configPtr->PassiveChannel);
     }
-    return ComM_GetBit(configPtr->ChannelBitVectorERA, configPtr->PassiveChannel);
+    return ret;
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 #endif
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 void ComM_PncWakeUpIndication(PNCHandleType pnc)
 {
-    const ComM_PncConfigType* pncConfigPtr = &ComM_PncConfigs[pnc];
+    const ComM_PncConfigType* pncConfigPtr = &ComM_PncConfigsPtr[pnc];
 
     ComM_PncVar[pnc].WakeUpIndication = TRUE;
 
@@ -246,10 +294,16 @@ void ComM_PncWakeUpIndication(PNCHandleType pnc)
         }
     }
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
+/* PRQA S 6060 ++ */ /* VL_MTR_ComM_STM19 */
 boolean ComM_PncUserOrActiveChannelRequested(PNCHandleType pnc)
+/* PRQA S 6060 -- */
 {
-    const ComM_PncConfigType* pncConfigPtr = &ComM_PncConfigs[pnc];
+    const ComM_PncConfigType* pncConfigPtr = &ComM_PncConfigsPtr[pnc];
 
 #if COMM_USER_NUMBER > 0u
     for (ComM_UserHandleType user = 0u; user < COMM_USER_NUMBER; ++user)
@@ -284,11 +338,15 @@ boolean ComM_PncUserOrActiveChannelRequested(PNCHandleType pnc)
 
     return FALSE;
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 void ComM_PncMainFunction(PNCHandleType pnc, NetworkHandleType channel)
 {
     /* clang-format off */
-    void (*const pncBehaviors[][4])(PNCHandleType pnc) = {
+    void (*const pncBehaviors[][COMM_NUM_OF_STATEMACHINES_PNC])(PNCHandleType pnc) = {
                                     /* COMM_PNC_REQUESTED       COMM_PNC_READY_SLEEP         COMM_PNC_PREPARE_SLEEP         COMM_PNC_NO_COMMUNICATION */
         /* COMM_PNC_REQUESTED */        { NULL_PTR,                ComM_PncBeh_EntryReadySleep, ComM_PncBeh_EntryPrepareSleep, ComM_PncBeh_EntryReadySleep, },
         /* COMM_PNC_READY_SLEEP */      { ComM_PncBeh_EntryRequst, NULL_PTR,                    ComM_PncBeh_EntryPrepareSleep, ComM_PncBeh_EntryPrepareSleep, },
@@ -297,7 +355,7 @@ void ComM_PncMainFunction(PNCHandleType pnc, NetworkHandleType channel)
     };
     /* clang-format on */
 
-    const ComM_PncConfigType* pncConfigPtr = &ComM_PncConfigs[pnc];
+    const ComM_PncConfigType* pncConfigPtr = &ComM_PncConfigsPtr[pnc];
     if (channel != pncConfigPtr->MainChannel)
     {
         return;
@@ -322,65 +380,50 @@ void ComM_PncMainFunction(PNCHandleType pnc, NetworkHandleType channel)
         }
     } while (pncVarPtr->PncMode != previousPncMode);
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
 #if COMM_USER_NUMBER > 0u
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * The implementation of ComM_PncIsUserAssigned.
  */
 boolean ComM_PncIsUserAssigned(PNCHandleType pnc, ComM_UserHandleType user)
 {
-    const ComM_PncConfigType* pncConfigPtr = &ComM_PncConfigs[pnc];
+    const ComM_PncConfigType* pncConfigPtr = &ComM_PncConfigsPtr[pnc];
     return ComM_GetBit(pncConfigPtr->UserMappingBitVector, user);
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 #endif
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 /**
  * The implementation of ComM_PncIsChannelAssigned.
  */
 boolean ComM_PncIsChannelAssigned(PNCHandleType pnc, NetworkHandleType channel)
 {
-    const ComM_PncConfigType* pncConfigPtr = &ComM_PncConfigs[pnc];
+    const ComM_PncConfigType* pncConfigPtr = &ComM_PncConfigsPtr[pnc];
     return ComM_GetBit(pncConfigPtr->ChannelMappingBitVector, channel);
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
 /* ========================================== internal function definitions ========================================= */
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 COMM_LOCAL void ComM_PncSetMode(PNCHandleType pnc, ComM_PncModeType pncMode)
 {
     ComM_PncVarType* pncVarPtr = &ComM_PncVar[pnc];
-
-#if COMM_CURRENT_MODE_NOTIFICATION_ENABLED == STD_ON
-    const ComM_PncConfigType* pncConfigPtr                              = &ComM_PncConfigs[pnc];
-    ComM_ModeType             previousUserCurrentMode[COMM_USER_NUMBER] = {0};
-
-    SchM_Enter_ComM_UM();
-    for (ComM_UserHandleType user = 0u; user < COMM_USER_NUMBER; ++user)
-    {
-        if (ComM_GetBit(pncConfigPtr->UserMappingBitVector, user))
-        {
-            previousUserCurrentMode[user] = ComM_UserGetCurrentMode(user);
-        }
-    }
-
-    pncVarPtr->PncMode = pncMode;
-
-    for (ComM_UserHandleType user = 0u; user < COMM_USER_NUMBER; ++user)
-    {
-        if (ComM_GetBit(pncConfigPtr->UserMappingBitVector, user))
-        {
-            ComM_ModeType nextUserCurrentMode = ComM_UserGetCurrentMode(user);
-
-            if (previousUserCurrentMode[user] != nextUserCurrentMode)
-            {
-                ComM_UserSwitchCurrentMode(user, nextUserCurrentMode);
-            }
-        }
-    }
-    SchM_Exit_ComM_UM();
-#else
-    pncVarPtr->PncMode = pncMode;
-#endif
+    pncVarPtr->PncMode         = pncMode;
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 COMM_LOCAL void ComM_PncBeh_EntryReadySleep(PNCHandleType pnc)
 {
     ComM_PncSetMode(pnc, COMM_PNC_READY_SLEEP);
@@ -388,7 +431,11 @@ COMM_LOCAL void ComM_PncBeh_EntryReadySleep(PNCHandleType pnc)
     /* SWS_ComM_00908 notified by the API call BswM_ComM_CurrentPncMode() with the entered PNC state */
     BswM_ComM_CurrentPNCMode(pnc, COMM_PNC_READY_SLEEP);
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 COMM_LOCAL void ComM_PncBeh_EntryNoCom(PNCHandleType pnc)
 {
     const ComM_PncVarType* pncVarPtr = &ComM_PncVar[pnc];
@@ -400,10 +447,14 @@ COMM_LOCAL void ComM_PncBeh_EntryNoCom(PNCHandleType pnc)
         BswM_ComM_CurrentPNCMode(pnc, COMM_PNC_NO_COMMUNICATION);
     }
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 COMM_LOCAL void ComM_PncBeh_EntryPrepareSleep(PNCHandleType pnc)
 {
-    const ComM_PncConfigType* pncConfigPtr = &ComM_PncConfigs[pnc];
+    const ComM_PncConfigType* pncConfigPtr = &ComM_PncConfigsPtr[pnc];
     ComM_PncVarType*          pncVarPtr    = &ComM_PncVar[pnc];
 
     ComM_PncSetMode(pnc, COMM_PNC_PREPARE_SLEEP);
@@ -413,12 +464,16 @@ COMM_LOCAL void ComM_PncBeh_EntryPrepareSleep(PNCHandleType pnc)
     /* SWS_ComM_00908 notified by the API call BswM_ComM_CurrentPncMode() with the entered PNC state */
     BswM_ComM_CurrentPNCMode(pnc, COMM_PNC_PREPARE_SLEEP);
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
 COMM_LOCAL void ComM_PncBeh_EntryRequst(PNCHandleType pnc)
 {
     ComM_PncSetMode(pnc, COMM_PNC_REQUESTED);
 
-    const ComM_PncConfigType* pncConfigPtr              = &ComM_PncConfigs[pnc];
+    const ComM_PncConfigType* pncConfigPtr              = &ComM_PncConfigsPtr[pnc];
     boolean                   wakeupSleepRequestEnabled = FALSE;
 
     for (NetworkHandleType channel = 0u; channel < COMM_CHANNEL_NUMBER; ++channel)
@@ -440,8 +495,14 @@ COMM_LOCAL void ComM_PncBeh_EntryRequst(PNCHandleType pnc)
         pnc,
         wakeupSleepRequestEnabled ? COMM_PNC_REQUESTED_WITH_WAKEUP_REQUEST : COMM_PNC_REQUESTED);
 }
+#define COMM_STOP_SEC_CODE
+#include "ComM_MemMap.h"
 
+#define COMM_START_SEC_CODE
+#include "ComM_MemMap.h"
+/* PRQA S 6060 ++ */ /* VL_MTR_ComM_STM19 */
 COMM_LOCAL ComM_PncModeType ComM_PncEvaluateTargetPncMode(PNCHandleType pnc)
+/* PRQA S 6060 -- */
 {
     ComM_PncVarType* pncVarPtr        = &ComM_PncVar[pnc];
     boolean          wakeUpIndication = pncVarPtr->WakeUpIndication;
@@ -459,7 +520,7 @@ COMM_LOCAL ComM_PncModeType ComM_PncEvaluateTargetPncMode(PNCHandleType pnc)
     }
 #endif
 
-    const ComM_PncConfigType* pncConfigPtr = &ComM_PncConfigs[pnc];
+    const ComM_PncConfigType* pncConfigPtr = &ComM_PncConfigsPtr[pnc];
     if (ComM_GetBit(ComM_PncBitVectorEIRA, pncConfigPtr->BitIndex))
     {
         return COMM_PNC_READY_SLEEP;
@@ -472,9 +533,9 @@ COMM_LOCAL ComM_PncModeType ComM_PncEvaluateTargetPncMode(PNCHandleType pnc)
 
     return COMM_PNC_NO_COMMUNICATION;
 }
-
 #define COMM_STOP_SEC_CODE
 #include "ComM_MemMap.h"
+
 /* PRQA S 1532, 2889 -- */ /* VL_QAC_OneFunRef, VL_QAC_MultiReturn */
 
 #endif /* COMM_PNC_SUPPORT == STD_ON */

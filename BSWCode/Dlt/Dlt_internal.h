@@ -1,5 +1,4 @@
-/* PRQA S 3108++ */
-/**
+﻿/**
  * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
@@ -185,13 +184,16 @@
 
 #define DLT_MESSAGE_NO_OTHER_INFO_LENGTH 4u /*Service ID:4byte */
 
-#define DLT_DET_APPLID_DESC_LENGTH    0x0Au
-#define DLT_DET_CONTEXTID_DESC_LENGTH 0x04u
-
 #define DLT_OPTIONS_MESSAGE_TYPE_MASK       0x0Eu
 #define DLT_OPTIONS_MESSAGE_TYPE_RESET_MASK 0xF1u
 #define DLT_OPTIONS_VERBOSE_MODE_MASK       0x01u
 #define DLT_OPTIONS_VERBOSE_MODE_RESET_MASK 0xFEu
+
+#define DLT_NVM_ACTIVATED_CODE 0xA5A5A5A5u
+
+#if (DLT_GPT_SUPPORT == STD_ON)
+#define DLT_GPT_TIME_RESOLUTION_MS 0x2710u
+#endif
 
 typedef enum
 {
@@ -211,6 +213,22 @@ typedef enum
 
 #if (STD_ON == DLT_DEV_ERROR_DETECT)
 #define DLT_DETREPORT(ApiId, ErrorId) (Det_ReportError(DLT_MODULE_ID, DLT_INSTANCE_ID, (ApiId), (ErrorId)))
+#endif
+
+#if (DLT_DET_FORWARD_TO_DET_SUPPORT == STD_ON)
+typedef struct
+{
+    Dlt_MessageLogLevelType DltThreshold;
+    uint16                  DltLogChannelRef;
+    Dlt_ApplicationIDType   DetApplicationId;
+    Dlt_ContextIDType       DetContextId;
+} Dlt_DetContextInofType;
+
+typedef struct
+{
+    Dlt_SessionIDType      DltSwcSessionId;
+    Dlt_DetContextInofType DetContextInfo;
+} Dlt_DetInfoType;
 #endif
 
 typedef struct
@@ -253,6 +271,7 @@ typedef enum
 
 typedef struct
 {
+    uint32                    ActivatedCode;
     boolean                   MessageFilterEnable;
     Dlt_MessageFilterPassType MessageFilterPass;
     Dlt_MessageLogLevelType   DefaultLogLevel;
@@ -263,12 +282,15 @@ typedef struct
 #if (DLT_CHANNEL_NUM > 0)
     Dlt_ChannelInfoType ChannelInfo[DLT_CHANNEL_NUM];
 #endif
+#if (DLT_DET_FORWARD_TO_DET_SUPPORT == STD_ON)
+    Dlt_DetInfoType DetInfo;
+#endif
 } Dlt_RunTimeType;
 
 typedef enum
 {
-    DLT_STATE_UNINIT = 0u,
-    DLT_STATE_INIT   = 1u,
+    DLT_STATE_UNINIT = 1u,
+    DLT_STATE_INIT   = 2u,
 } Dlt_ModeStateType;
 
 typedef enum
@@ -368,18 +390,38 @@ typedef union
 } Dlt_OptionalFlagType;
 
 #if ((DLT_RX_DATA_PATH_SUPPORT == STD_ON) && (DLT_RXPDU_NUM > 0))
+#define DLT_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Dlt_MemMap.h"
 extern VAR(Dlt_RxStatusTypes, AUTOMATIC) Dlt_RxStatus[DLT_RXPDU_NUM];
+#define DLT_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Dlt_MemMap.h"
 #endif
 
+#define DLT_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Dlt_MemMap.h"
 extern VAR(Dlt_RunTimeType, AUTOMATIC) Dlt_RunTime;
+#define DLT_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Dlt_MemMap.h"
 #if (STD_ON == DLT_DEV_ERROR_DETECT)
+#define DLT_START_SEC_VAR_INIT_8
+#include "Dlt_MemMap.h"
 extern VAR(Dlt_ModeStateType, AUTOMATIC) Dlt_ModeState;
+#define DLT_STOP_SEC_VAR_INIT_8
+#include "Dlt_MemMap.h"
 #endif
 
+#define DLT_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Dlt_MemMap.h"
 extern P2CONST(Dlt_ConfigType, AUTOMATIC, DLT_APPL_CONST) Dlt_ConfigPtr;
+#define DLT_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Dlt_MemMap.h"
 
 #if (DLT_CHANNEL_NUM > 0)
+#define DLT_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Dlt_MemMap.h"
 extern VAR(Dlt_ChannelType, AUTOMATIC) Dlt_Channel[DLT_CHANNEL_NUM];
+#define DLT_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Dlt_MemMap.h"
 #endif
 
 static inline void Dlt_GetOptionFlag(Dlt_OptionalFlagType* OptionFlagPtr)
@@ -393,17 +435,33 @@ static inline void Dlt_GetOptionFlag(Dlt_OptionalFlagType* OptionFlagPtr)
     OptionFlagPtr->Bits.ErrFlag = 0u;
 }
 
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 extern FUNC(void, DLT_CODE) Dlt_GetChannelIndex(
     uint16                SwcIndex,
     Dlt_ApplicationIDType app_id,
     Dlt_ContextIDType     context_id,
     /* PRQA S 3432++ */ /* MISRA Rule 20.7 */
     P2VAR(uint16, AUTOMATIC, DLT_APPL_DATA) ChannelIndexList);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 /* PRQA S 3432-- */ /* MISRA Rule 20.7 */
 extern FUNC(void, DLT_CODE) Dlt_MemCopy(uint8* Dest, const uint8* Src, uint32 Size);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 extern FUNC(uint16, DLT_CODE) Dlt_GetSwcSessionIdIndex(Dlt_SessionIDType sessionId);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 extern FUNC(void, DLT_CODE)
     Dlt_Tx_CopyTxDataToSendBuffer(uint16 ChannelIndex, uint8* Dest, uint32 SendOffset, uint32 Length);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
 #if (CPU_BYTE_ORDER == LOW_BYTE_FIRST)
 #define Dlt_CopyLongToArray Dlt_CopyLongToArrayLittleEndian
 #define Dlt_CopyIntToArray  Dlt_CopyIntToArrayLittleEndian
@@ -413,61 +471,153 @@ extern FUNC(void, DLT_CODE)
 #endif
 
 /* PRQA S 3432++ */ /* MISRA Rule 20.7 */
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 extern FUNC(void, DLT_CODE) Dlt_CopyArrayToLongLittleEndian(
     P2VAR(uint32, AUTOMATIC, DLT_APPL_VAR) DestData,
     P2CONST(uint8, AUTOMATIC, DLT_CONST) SourceData);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 extern FUNC(void, DLT_CODE)
     Dlt_CopyLongToArrayLittleEndian(uint32 SourceData, P2VAR(uint8, AUTOMATIC, DLT_APPL_VAR) DestData);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
 #if (CPU_BYTE_ORDER == LOW_BYTE_FIRST)
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 extern FUNC(void, DLT_CODE)
     Dlt_CopyIntToArrayLittleEndian(uint16 SourceData, P2VAR(uint8, AUTOMATIC, DLT_APPL_VAR) DestData);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
 #endif
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 extern FUNC(void, DLT_CODE) Dlt_CopyArrayToLongBigEndian(
     P2VAR(uint32, AUTOMATIC, DLT_APPL_VAR) DestData,
     P2CONST(uint8, AUTOMATIC, DLT_CONST) SourceData);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 extern FUNC(void, DLT_CODE)
     Dlt_CopyLongToArrayBigEndian(uint32 SourceData, P2VAR(uint8, AUTOMATIC, DLT_APPL_VAR) DestData);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 extern FUNC(void, DLT_CODE)
     Dlt_CopyIntToArrayBigEndian(uint16 SourceData, P2VAR(uint8, AUTOMATIC, DLT_APPL_VAR) DestData);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 extern FUNC(void, DLT_CODE) Dlt_CopyArrayToIntBigEndian(
     P2VAR(uint16, AUTOMATIC, DLT_APPL_VAR) DestData,
     P2CONST(uint8, AUTOMATIC, DLT_CONST) SourceData);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
 /* PRQA S 3432-- */ /* MISRA Rule 20.7 */
-
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 extern FUNC(uint32, DLT_CODE) Dlt_GetEcuId(void);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 extern FUNC(uint16, DLT_CODE)
     Dlt_GetMessageLength(boolean VerboseMode, uint16 PayloadLength, Dlt_OptionalFlagType OptionFlag);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 extern FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_InterSetLogLevel(
     uint16                  ChannelIndex,
     Dlt_ApplicationIDType   appId,
     Dlt_ContextIDType       contextId,
     Dlt_MessageLogLevelType newLogLevel);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 extern FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_InterSetTraceStatus(
     uint16                ChannelIndex,
     Dlt_ApplicationIDType appId,
     Dlt_ContextIDType     contextId,
     boolean               newTraceStatus);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 extern FUNC(Std_ReturnType, DLT_CODE) Dlt_SendGetLogInfo(uint8 options, uint16 SwcIndex, uint16 SwcContextIndex);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 extern FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_InterSetLogChannelAssignment(
     Dlt_ApplicationIDType   appId,
     Dlt_ContextIDType       contextId,
     uint32                  channelId,
     Dlt_AssignmentOperation addRemoveOp);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
 #if (DLT_NVM_RAM_SUPPORT == STD_ON)
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
+extern FUNC(boolean, DLT_CODE) Dlt_CheckNvmActivated(void);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 extern FUNC(Std_ReturnType, DLT_CODE) Dlt_Store(void);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
 #endif
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 extern FUNC(uint16, DLT_CODE) Dlt_GetChannelIndexByChannelName(uint32 DltLogChannelId);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 extern FUNC(uint16, DLT_CODE) Dlt_GetChannelIndexByTxPduId(PduIdType id);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 extern FUNC(Std_ReturnType, DLT_APPL_CODE) Dlt_DealRxData(uint16 RxIndex, const uint8* Data, uint16 Length);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 extern FUNC(uint32, DLT_CODE) Dlt_GetTimeElapsed(void);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 extern FUNC(void, DLT_CODE) Dlt_Init_From_Cfg(const Dlt_ConfigType* config);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 extern FUNC(void, DLT_CODE) Dlt_CreateControlStandardHeader(
     Dlt_CreateStandardHeaderInfoTypes* CreateStandardHeader,
     uint8*                             Dest,
     uint16*                            CorrectionLength,
     Dlt_OptionalFlagType               OptionFlag);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 extern FUNC(void, DLT_CODE)
     Dlt_CreateControlExtendedHeader(const Dlt_CreateExtendedHeaderInfoTypes* CreateExtendedHeader, uint8* Dest);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
+#define DLT_START_SEC_CODE
+#include "Dlt_MemMap.h"
 extern FUNC(void, DLT_CODE) Dlt_MoveReadIndex(uint16 ChannelIndex, uint32 length);
+#define DLT_STOP_SEC_CODE
+#include "Dlt_MemMap.h"
 
 #endif /* DLT_INTERNAL_H_ */

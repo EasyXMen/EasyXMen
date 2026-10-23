@@ -52,7 +52,11 @@ extern "C" {
  * @synchronous TRUE
  * @trace       CPD-66344
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 void BswM_SoAd_SoConModeChg(SoAd_SoConIdType SoConId, SoAd_SoConModeType State);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 #endif /*BSWM_SOAD_ENABLED == STD_ON*/
 

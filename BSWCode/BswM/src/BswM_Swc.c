@@ -40,8 +40,6 @@
 /* ============================================ external data definitions =========================================== */
 
 /* ========================================== external function definitions ========================================= */
-#define BSWM_START_SEC_CODE
-#include "BswM_MemMap.h"
 
 /**
  * Notifies the system of a mode switch error for a specified port.
@@ -50,10 +48,14 @@
  * port ID, and sets the event status. If the process is immediate, it also evaluates the associated rules.
  */
 /* PRQA S 1503,1505,1532 ++*/ /* VL_QAC_NoUsedApi, VL_BswM_1505, VL_QAC_OneFunRef */
+#if (BSWM_EVENT_MODE_SWITCH_ERROR_EVENT_ENABLE == STD_ON)
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 void BswM_SwcModeSwitchErrorNotification(uint16 portId)
 /* PRQA S 1503,1505,1532 --*/
 {
-#if (BSWM_EVENT_MODE_SWITCH_ERROR_EVENT_ENABLE == STD_ON)
+    BswM_ArtiApiStart(2, BSWM_API_ID_MODE_SWITCH_ERROR_NOTIFICATION, portId);
+
     const BswM_PartitionPCCfgType* bswmPartPCCfgPtr;
 #if (BSWM_PB_CONFIG_ENABLED == STD_ON)
     const BswM_PartitionPbConfigType* bswmPartPbConfigPtr;
@@ -112,11 +114,44 @@ void BswM_SwcModeSwitchErrorNotification(uint16 portId)
             }
         }
     }
-#else
-    (void)(portId);
-#endif /*BSWM_EVENT_MODE_SWITCH_ERROR_EVENT_ENABLE == STD_ON*/
-}
 
+    BswM_ArtiApiStop(1, BSWM_API_ID_MODE_SWITCH_ERROR_NOTIFICATION);
+}
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
+
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
+/**
+ * Retrieves the event request port runtime type for a given port ID related to mode switch error notification.
+ * This function checks the configuration and runtime data to find the corresponding event index and returns the event
+ * request port runtime type.
+ */
+/* PRQA S 1503,1505,1532 ++*/ /* VL_QAC_NoUsedApi, VL_BswM_1505, VL_QAC_OneFunRef */
+BswM_EventRquestPortRuntimeType BswM_GetModeSwiErrNoti(uint16 portId)
+/* PRQA S 1503,1505,1532 --*/
+{
+    const BswM_PartitionPCCfgType*  bswmPartPCCfgPtr;
+    BswM_EventRquestPortRuntimeType ret = BSWM_INVALID_U8;
+    boolean                         result;
+    BswM_EventRquestPortRuntimeType evIdx;
+
+    result = BswM_GetPartitionPCCfgPtr(&bswmPartPCCfgPtr);
+    if (result)
+    {
+        evIdx = bswmPartPCCfgPtr->evRqstPCCfg->modeSwiErrEvPtr[portId];
+        ret   = bswmPartPCCfgPtr->eventRqstPortRunPtr[evIdx];
+    }
+    return ret;
+}
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
+
+#endif
+
+#if (BSWM_EVENT_SWITCH_ACK_NOTIFICATION_ENABLE == STD_ON)
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Notifies the system of a mode switch acknowledgment for a specified port.
  * This function updates the event request port runtime data to indicate a mode switch acknowledgment and processes any
@@ -127,7 +162,6 @@ void BswM_SwcModeSwitchErrorNotification(uint16 portId)
 void BswM_SwcModeSwitchAckNotification(uint16 portId)
 /* PRQA S 1503,1505,1532 --*/
 {
-#if (BSWM_EVENT_MODE_SWITCH_ERROR_EVENT_ENABLE == STD_ON)
     const BswM_PartitionPCCfgType* bswmPartPCCfgPtr;
 #if (BSWM_PB_CONFIG_ENABLED == STD_ON)
     const BswM_PartitionPbConfigType* bswmPartPbConfigPtr;
@@ -185,12 +219,42 @@ void BswM_SwcModeSwitchAckNotification(uint16 portId)
             }
         }
     }
-#else
-    (void)(portId);
-#endif /*BSWM_EVENT_MODE_SWITCH_ERROR_EVENT_ENABLE == STD_ON*/
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
+
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
+/**
+ * Retrieves the event request port runtime type for a given port ID related to mode switch acknowledgment notification.
+ * This function checks the configuration and runtime data to find the corresponding event index and returns the event
+ * request port runtime type.
+ */
+/* PRQA S 1503,1505,1532 ++*/ /* VL_QAC_NoUsedApi, VL_BswM_1505, VL_QAC_OneFunRef */
+BswM_EventRquestPortRuntimeType BswM_GetModeSwiAckNoti(uint16 portId)
+/* PRQA S 1503,1505,1532 --*/
+{
+    const BswM_PartitionPCCfgType*  bswmPartPCCfgPtr;
+    BswM_EventRquestPortRuntimeType ret = BSWM_INVALID_U8;
+    boolean                         result;
+    BswM_EventRquestPortRuntimeType evIdx;
+
+    result = BswM_GetPartitionPCCfgPtr(&bswmPartPCCfgPtr);
+    if (result)
+    {
+        evIdx = bswmPartPCCfgPtr->evRqstPCCfg->modeSwiAckNotiPtr[portId];
+        ret   = bswmPartPCCfgPtr->eventRqstPortRunPtr[evIdx];
+    }
+    return ret;
+}
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
+
+#endif
 
 #if (BSWM_SWCMODENOTIFICATION_ENABLED == STD_ON)
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Notifies the system of a mode change for a specified mode group.
  * This function updates the mode request port runtime data to indicate a mode change and processes any associated rules
@@ -201,6 +265,8 @@ void BswM_SwcModeSwitchAckNotification(uint16 portId)
 void BswM_SwcModeNotification(BswM_ModeGroupType modeGroup)
 /* PRQA S 1503,1505,1532,6030 --*/
 {
+    BswM_ArtiApiStart(2, BSWM_API_ID_MODE_NOTIFICATION_PORT, modeGroup);
+
     const BswM_PartitionPCCfgType* bswmPartPCCfgPtr;
 #if (BSWM_PB_CONFIG_ENABLED == STD_ON)
     const BswM_PartitionPbConfigType* bswmPartPbConfigPtr;
@@ -255,20 +321,28 @@ void BswM_SwcModeNotification(BswM_ModeGroupType modeGroup)
             }
         }
     }
+
+    BswM_ArtiApiStop(1, BSWM_API_ID_MODE_NOTIFICATION_PORT);
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_SWCMODENOTIFICATION_ENABLED == STD_ON*/
 
 #if (BSWM_SWCMODEREQUEST_ENABLED == STD_ON)
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Processes a mode request for a specified mode group.
  * This function retrieves the necessary configuration and runtime data, checks for the specified mode group, and
  * processes any associated rules. It iterates through the mode requests, evaluates the rules if applicable, and updates
  * the mode request port runtime data accordingly.
  */
-/* PRQA S 1503,1505,1532,1501 ++ */ /* VL_QAC_NoUsedApi, VL_BswM_1505, VL_QAC_OneFunRef, VL_BswM_1501 */
+/* PRQA S 1503,1505,1532 ++*/ /* VL_QAC_NoUsedApi, VL_BswM_1505, VL_QAC_OneFunRef */
 void BswM_SwcModeRequest(BswM_ModeGroupType modeGroup)
-/* PRQA S 1503,1505,1532,1501 --*/
+/* PRQA S 1503,1505,1532 --*/
 {
+    BswM_ArtiApiStart(2, BSWM_API_ID_MODE_REQUEST_PORT, modeGroup);
+
     const BswM_PartitionPCCfgType* bswmPartPCCfgPtr;
 #if (BSWM_PB_CONFIG_ENABLED == STD_ON)
     const BswM_PartitionPbConfigType* bswmPartPbConfigPtr;
@@ -319,61 +393,12 @@ void BswM_SwcModeRequest(BswM_ModeGroupType modeGroup)
             }
         }
     }
+
+    BswM_ArtiApiStop(1, BSWM_API_ID_MODE_REQUEST_PORT);
 }
-
-#endif /*BSWM_EVENT_MODE_SWITCH_ERROR_EVENT_ENABLE == STD_ON*/
-
-#if (BSWM_EVENT_MODE_SWITCH_ERROR_EVENT_ENABLE == STD_ON)
-/**
- * Retrieves the event request port runtime type for a given port ID related to mode switch error notification.
- * This function checks the configuration and runtime data to find the corresponding event index and returns the event
- * request port runtime type.
- */
-/* PRQA S 1503,1505,1532 ++*/ /* VL_QAC_NoUsedApi, VL_BswM_1505, VL_QAC_OneFunRef */
-BswM_EventRquestPortRuntimeType BswM_GetModeSwiErrNoti(uint16 portId)
-/* PRQA S 1503,1505,1532 --*/
-{
-    const BswM_PartitionPCCfgType*  bswmPartPCCfgPtr;
-    BswM_EventRquestPortRuntimeType ret = BSWM_INVALID_U8;
-    boolean                         result;
-    BswM_EventRquestPortRuntimeType evIdx;
-
-    result = BswM_GetPartitionPCCfgPtr(&bswmPartPCCfgPtr);
-    if (result)
-    {
-        evIdx = bswmPartPCCfgPtr->evRqstPCCfg->modeSwiErrEvPtr[portId];
-        ret   = bswmPartPCCfgPtr->eventRqstPortRunPtr[evIdx];
-    }
-    return ret;
-}
-#endif /*BSWM_EVENT_MODE_SWITCH_ERROR_EVENT_ENABLE == STD_ON*/
-
-#if (BSWM_EVENT_SWITCH_ACK_NOTIFICATION_ENABLE == STD_ON)
-/**
- * Retrieves the event request port runtime type for a given port ID related to mode switch acknowledgment notification.
- * This function checks the configuration and runtime data to find the corresponding event index and returns the event
- * request port runtime type.
- */
-/* PRQA S 1503,1505,1532 ++*/ /* VL_QAC_NoUsedApi, VL_BswM_1505, VL_QAC_OneFunRef */
-BswM_EventRquestPortRuntimeType BswM_GetModeSwiAckNoti(uint16 portId)
-/* PRQA S 1503,1505,1532 --*/
-{
-    const BswM_PartitionPCCfgType*  bswmPartPCCfgPtr;
-    BswM_EventRquestPortRuntimeType ret = BSWM_INVALID_U8;
-    boolean                         result;
-    BswM_EventRquestPortRuntimeType evIdx;
-
-    result = BswM_GetPartitionPCCfgPtr(&bswmPartPCCfgPtr);
-    if (result)
-    {
-        evIdx = bswmPartPCCfgPtr->evRqstPCCfg->modeSwiAckNotiPtr[portId];
-        ret   = bswmPartPCCfgPtr->eventRqstPortRunPtr[evIdx];
-    }
-    return ret;
-}
-#endif /*BSWM_EVENT_SWITCH_ACK_NOTIFICATION_ENABLE == STD_ON*/
-
-/* ========================================== internal function definitions ========================================= */
 #define BSWM_STOP_SEC_CODE
 #include "BswM_MemMap.h"
+#endif /*BSWM_SWCMODEREQUEST_ENABLED == STD_ON*/
+
+/* ========================================== internal function definitions ========================================= */
 #endif /*BSWM_RTE_ENABLED == STD_ON*/

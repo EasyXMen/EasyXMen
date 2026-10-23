@@ -111,16 +111,26 @@ extern "C" {
 #define DCM_DET_REPORTRUNTIME(ApiId, ErrorId) \
     ((void)Det_ReportRuntimeError(DCM_MODULE_ID, DCM_INSTANCE_ID, (ApiId), (ErrorId)))
 /* =========================================== external data declarations =========================================== */
+#define DCM_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Dcm_MemMap.h"
 /**
  * @brief the programing condition (communicating with bootloader) @range NA
  */
 extern Dcm_ProgConditionsType Dcm_ProgConditions;
+#define DCM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_VAR_CLEARED_PTR
+#include "Dcm_MemMap.h"
 /**
  * @brief the config pointer @range NA
  */
 extern const Dcm_ConfigType* Dcm_CfgPtr;
+#define DCM_STOP_SEC_VAR_CLEARED_PTR
+#include "Dcm_MemMap.h"
 /* ========================================= external function declarations ========================================= */
 #ifndef DCM_MEMCOPY_USED_ILIB
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         Dcm internal memory copy function
  * @param[out]    dest : the output data
@@ -132,6 +142,10 @@ extern const Dcm_ConfigType* Dcm_CfgPtr;
  * @trace         CPD-PLACEHOLDE
  */
 void DcmInternal_Memcpy(uint8* dest, const uint8* src, uint32 size);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         Dcm internal memory set function
@@ -145,6 +159,10 @@ void DcmInternal_Memcpy(uint8* dest, const uint8* src, uint32 size);
  */
 /* PRQA S 5209 ++ */ /* VL_Dcm_5209 */
 int DcmInternal_MemCmp(const void* ptr1, const void* ptr2, int num);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* PRQA S 5209 -- */
 /**
  * @brief         Dcm internal memory set function
@@ -157,6 +175,8 @@ int DcmInternal_MemCmp(const void* ptr1, const void* ptr2, int num);
  * @trace         CPD-PLACEHOLDE
  */
 void DcmInternal_Memset(uint8* dest, uint8 data, uint32 size);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #else
 /* API mapping for memcpy/memset */
 #define DcmInternal_Memcpy(dest, src, size)  IStdLib_MemCpy(dest, src, size)
@@ -164,6 +184,8 @@ void DcmInternal_Memset(uint8* dest, uint8 data, uint32 size);
 #define DcmInternal_MemCmp(dest, data, size) IStdLib_MemCmp(dest, data, size)
 #endif
 
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         called by Dcm_MainFunction to process pending requests
  * @return        void
@@ -172,6 +194,10 @@ void DcmInternal_Memset(uint8* dest, uint8 data, uint32 size);
  * @trace         CPD-PLACEHOLDE
  */
 void DcmInternal_ProcessRequest(void);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         called to initialize programing condition
@@ -181,6 +207,10 @@ void DcmInternal_ProcessRequest(void);
  * @trace         CPD-PLACEHOLDE
  */
 void DcmInternal_ProgCtrlInit(void);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         get the SATA accorgding to protocolId
@@ -193,6 +223,10 @@ void DcmInternal_ProgCtrlInit(void);
  * @trace         CPD-PLACEHOLDE
  */
 void DcmInternal_GetMetaDataSATA(uint8 protocolId, uint16* sourceAddress, uint16* targetAddress);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         deals with timer to decrease counter
@@ -206,6 +240,10 @@ void DcmInternal_GetMetaDataSATA(uint8 protocolId, uint16* sourceAddress, uint16
  */
 /* PRQA S 3208 ++ */ /* VL_Dcm_3208 */
 boolean DcmInternal_DecreaseTimer(uint32* timer);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /* PRQA S 3208 -- */
 
 /**
@@ -216,6 +254,10 @@ boolean DcmInternal_DecreaseTimer(uint32* timer);
  * @trace         CPD-PLACEHOLDE
  */
 void DcmInternal_CheckTimer(void);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         called to cancel jobs for the input protocol
@@ -228,6 +270,10 @@ void DcmInternal_CheckTimer(void);
  * @trace         CPD-PLACEHOLDE
  */
 Std_ReturnType DcmInternal_CancelJobs(uint8 ProtocolId);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         called to find configured session Index
@@ -240,8 +286,12 @@ Std_ReturnType DcmInternal_CancelJobs(uint8 ProtocolId);
  * @trace         CPD-PLACEHOLDE
  */
 Std_ReturnType DcmInternal_FindSessionIndex(Dcm_SesCtrlType session, uint8* sessionIndex);
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if (STD_ON == DCM_UDS_0X27)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
+
 /**
  * @brief         called to find configured security Index
  * @param[in]     security      : input security level
@@ -252,7 +302,11 @@ Std_ReturnType DcmInternal_FindSessionIndex(Dcm_SesCtrlType session, uint8* sess
  * @trace         CPD-PLACEHOLDE
  */
 void DcmInternal_FindSecurityIndex(Dcm_SecLevelType security, uint8* securityIndex);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         called to set the programing condition
@@ -265,6 +319,10 @@ void DcmInternal_FindSecurityIndex(Dcm_SecLevelType security, uint8* securityInd
  * @trace         CPD-PLACEHOLDE
  */
 Std_ReturnType DcmInternal_SetProgConditions(Dcm_OpStatusType OpStatus);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         called to transform uint16 data to uint8_N
@@ -277,6 +335,10 @@ Std_ReturnType DcmInternal_SetProgConditions(Dcm_OpStatusType OpStatus);
  * @trace         CPD-PLACEHOLDE
  */
 void DcmInternal_TransformArray_u16(uint8* dest, uint16 src, Dcm_EndiannessType endianness);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         called to transform uint24 data to uint8_N
@@ -289,6 +351,10 @@ void DcmInternal_TransformArray_u16(uint8* dest, uint16 src, Dcm_EndiannessType 
  * @trace         CPD-PLACEHOLDE
  */
 void DcmInternal_TransformArray_u24(uint8* dest, uint32 src, Dcm_EndiannessType endianness);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         called to transform uint32 data to uint8_N
@@ -301,6 +367,10 @@ void DcmInternal_TransformArray_u24(uint8* dest, uint32 src, Dcm_EndiannessType 
  * @trace         CPD-PLACEHOLDE
  */
 void DcmInternal_TransformArray_u32(uint8* dest, uint32 src, Dcm_EndiannessType endianness);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         called to transform uint64 data to uint8_N
@@ -313,6 +383,10 @@ void DcmInternal_TransformArray_u32(uint8* dest, uint32 src, Dcm_EndiannessType 
  * @trace         CPD-PLACEHOLDE
  */
 void DcmInternal_TransformArray_u64(uint8* dest, uint64 src, Dcm_EndiannessType endianness);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         called to asynchronously deal with rxIndication
@@ -322,6 +396,10 @@ void DcmInternal_TransformArray_u64(uint8* dest, uint64 src, Dcm_EndiannessType 
  * @trace         CPD-PLACEHOLDE
  */
 void DcmInternal_ProcessRxIndication(void);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         called to asynchronously deal with txConfirmation
@@ -331,6 +409,10 @@ void DcmInternal_ProcessRxIndication(void);
  * @trace         CPD-PLACEHOLDE
  */
 void DcmInternal_ProcessTxConfirmation(void);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         Allows to notify ComM the current DiagnosticState for all connections
@@ -341,6 +423,8 @@ void DcmInternal_ProcessTxConfirmation(void);
  * @trace         CPD-PLACEHOLDE
  */
 void DcmInternal_SetActiveDiagnostic(boolean active);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 
 #ifdef __cplusplus
 }

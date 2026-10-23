@@ -61,6 +61,8 @@
 /** @} */
 
 /* ========================================== internal function declarations ======================================== */
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Attempt to allocate an unused pre-stored freeze frame space
  * @param[in]     EventId: Event Id
@@ -70,6 +72,10 @@
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL Dem_PrestorageIndexType Dem_AllocatePrestorageEntry(Dem_EventIdType EventId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Get freeze frame data into pre-stored freeze frame space
@@ -80,6 +86,10 @@ DEM_LOCAL Dem_PrestorageIndexType Dem_AllocatePrestorageEntry(Dem_EventIdType Ev
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_PrestorageEntryUpdate(Dem_EventIdType EventId, Dem_PrestorageIndexType PrestorEntryIndex);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Execute event pre-storage requests to update data
@@ -92,6 +102,10 @@ DEM_LOCAL void Dem_PrestorageEntryUpdate(Dem_EventIdType EventId, Dem_Prestorage
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL Std_ReturnType Dem_PrestorageUpdate(Dem_EventIdType EventId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Execute event pre-storage requests to clear data
@@ -104,6 +118,10 @@ DEM_LOCAL Std_ReturnType Dem_PrestorageUpdate(Dem_EventIdType EventId);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL Std_ReturnType Dem_PrestorageClear(Dem_EventIdType EventId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Locks pre-stored freeze frames to prevent them from being deleted on request during processing
@@ -113,6 +131,10 @@ DEM_LOCAL Std_ReturnType Dem_PrestorageClear(Dem_EventIdType EventId);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_EventPrestorageLock(Dem_EventIdType EventId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Release locked pre-stored entries
@@ -121,8 +143,12 @@ DEM_LOCAL void Dem_EventPrestorageLock(Dem_EventIdType EventId);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_EventPrestorageRelease(void);
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if ((DEM_MAX_NUMBER_PRESTORED_FF > 0u) && (DEM_EVENT_PARTITION_NUMBER > 1u))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
+
 /**
  * @brief         update current monitor prestore FF flag
  * @param[in]     EventId: Event Id
@@ -132,6 +158,10 @@ DEM_LOCAL void Dem_EventPrestorageRelease(void);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_UpdatePrestoreStatus(Dem_EventIdType EventId, uint32 NewPrestoreFlag);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         prestore process
@@ -141,6 +171,10 @@ DEM_LOCAL void Dem_UpdatePrestoreStatus(Dem_EventIdType EventId, uint32 NewPrest
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_PrestoreProcess(Dem_SatelliteIdType SatelliteId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Prestorage Task process
@@ -149,7 +183,11 @@ DEM_LOCAL void Dem_PrestoreProcess(Dem_SatelliteIdType SatelliteId);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_PrestorageTask(void);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Processing event pre-storage requests
@@ -162,6 +200,10 @@ DEM_LOCAL void Dem_PrestorageTask(void);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL Std_ReturnType Dem_EventPrestoreFF(Dem_EventIdType EventId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         clear Processed event pre-storage Freeze frame
@@ -174,8 +216,12 @@ DEM_LOCAL Std_ReturnType Dem_EventPrestoreFF(Dem_EventIdType EventId);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL Std_ReturnType Dem_EventClearPrestoreFF(Dem_EventIdType EventId);
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_FREEZE_FRAME_CLASS_NUMBER > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
+
 /**
  * @brief         Copy a prestored snapshot for an event
  * @param[in]     DestinationBuffer: Pointer to destination buffer
@@ -188,9 +234,13 @@ DEM_LOCAL Std_ReturnType Dem_EventClearPrestoreFF(Dem_EventIdType EventId);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL boolean Dem_PrestoreApplyFreezeFrame(uint8* DestinationBuffer, uint16 BufferSize);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_MAX_SIZE_J1939FREEZEFRAME > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Copy a prestored J1939 snapshot for an event
  * @param[in]     DestinationBuffer: Pointer to destination buffer
@@ -203,9 +253,13 @@ DEM_LOCAL boolean Dem_PrestoreApplyFreezeFrame(uint8* DestinationBuffer, uint16 
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL boolean Dem_PrestoreApplyJ1939FreezeFrame(uint8* DestinationBuffer, uint16 BufferSize);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_MAX_SIZE_J1939EXFREEZEFRAME > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Copy a prestored J1939Ex snapshot for an event
  * @param[in]     DestinationBuffer: Pointer to destination buffer
@@ -218,9 +272,13 @@ DEM_LOCAL boolean Dem_PrestoreApplyJ1939FreezeFrame(uint8* DestinationBuffer, ui
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL boolean Dem_PrestoreApplyJ1939ExFreezeFrame(uint8* DestinationBuffer, uint16 BufferSize);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if ((DEM_OBDII_SUPPORT == STD_ON) && (DEM_MAX_SIZE_OBDFREEZEFRAME > 0u))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Copy a prestored OBD snapshot for an event
  * @param[in]     DestinationBuffer: Pointer to destination buffer
@@ -233,6 +291,8 @@ DEM_LOCAL boolean Dem_PrestoreApplyJ1939ExFreezeFrame(uint8* DestinationBuffer, 
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL boolean Dem_PrestoreApplyOBDFreezeFrame(uint8* DestinationBuffer, uint16 BufferSize);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 /* ============================================ internal data definitions =========================================== */
@@ -243,7 +303,11 @@ DEM_LOCAL boolean Dem_PrestoreApplyOBDFreezeFrame(uint8* DestinationBuffer, uint
  * @range 0..255
  */
 DEM_LOCAL Dem_PrestorageIndexType Dem_PrestoreFreeListHead;
+#define DEM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Dem_MemMap.h"
 
+#define DEM_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Dem_MemMap.h"
 /**
  * @brief        Pre store Locked List Head
  * @range 0..255
@@ -253,8 +317,6 @@ DEM_LOCAL Dem_PrestorageIndexType Dem_PrestoreLockedList;
 #include "Dem_MemMap.h"
 
 /* ========================================== internal function definitions ========================================= */
-#define DEM_START_SEC_CODE
-#include "Dem_MemMap.h"
 /**
  * @brief         get the maximum number for prestored freeze frames
  * @return        uint8
@@ -278,7 +340,6 @@ DEM_LOCAL_INLINE Dem_EventIdType Dem_PreFFEventSize(void)
 {
     return DEM_PRESTORED_EVENT_NUM;
 }
-
 /* PRQA S 5016 ++ */ /* VL_Dem_5016 */
 #if (DEM_MAX_SIZE_FREEZEFRAME > 0u)
 /**
@@ -294,7 +355,6 @@ DEM_LOCAL_INLINE uint8* Dem_GetPrestorageFFPtr(Dem_PrestorageIndexType Prestorag
     return Dem_GetPrestorage()[PrestorageIndex].FreezeFrame;
 }
 #endif
-
 #if (DEM_MAX_SIZE_OBDFREEZEFRAME > 0u)
 /**
  * @brief         Get Prestorage Entry Freeze frame buffer pointer
@@ -309,7 +369,6 @@ DEM_LOCAL_INLINE uint8* Dem_GetPrestorageOBDFFPtr(Dem_PrestorageIndexType Presto
     return Dem_GetPrestorage()[PrestorageIndex].OBDFreezeFrame;
 }
 #endif
-
 #if (DEM_MAX_SIZE_J1939FREEZEFRAME > 0u)
 /**
  * @brief         Get Prestorage Entry Freeze frame buffer pointer
@@ -324,7 +383,6 @@ DEM_LOCAL_INLINE uint8* Dem_GetPrestorageJ1939FFPtr(Dem_PrestorageIndexType Pres
     return Dem_GetPrestorage()[PrestorageIndex].J1939FreezeFrame;
 }
 #endif
-
 #if (DEM_MAX_SIZE_J1939EXFREEZEFRAME > 0u)
 /**
  * @brief         Get Prestorage Entry Freeze frame buffer pointer
@@ -478,7 +536,8 @@ DEM_LOCAL_INLINE void Dem_PrestoreInit(void)
     Dem_EnableTask(Dem_Task_Prestorage);
 #endif
 }
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Attempt to allocate an unused pre-stored freeze frame space
  */
@@ -496,7 +555,8 @@ DEM_LOCAL Dem_PrestorageIndexType Dem_AllocatePrestorageEntry(Dem_EventIdType Ev
     }
     return firstUnusedIndex;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Attempt to free an used pre-stored freeze frame space
  * @param[in]     PrestorEntryIndex: Prestor entry index
@@ -513,7 +573,8 @@ DEM_LOCAL_INLINE void Dem_FreePrestorageEntry(Dem_PrestorageIndexType PrestorEnt
     Dem_FreePrestorageListSetNext(PrestorEntryIndex, Dem_PrestoreFreeListHead);
     Dem_PrestoreFreeListHead = PrestorEntryIndex;
 }
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Get freeze frame data into pre-stored freeze frame space
  */
@@ -548,7 +609,10 @@ DEM_LOCAL void Dem_PrestorageEntryUpdate(Dem_EventIdType EventId, Dem_Prestorage
     }
 #endif
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Execute event pre-storage requests to update data
  */
@@ -585,7 +649,10 @@ DEM_LOCAL Std_ReturnType Dem_PrestorageUpdate(Dem_EventIdType EventId)
     }
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Execute event pre-storage requests to clear data
  */
@@ -610,7 +677,10 @@ DEM_LOCAL Std_ReturnType Dem_PrestorageClear(Dem_EventIdType EventId)
     }
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Locks pre-stored freeze frames to prevent them from being deleted on request during processing
  */
@@ -634,7 +704,8 @@ DEM_LOCAL void Dem_EventPrestorageLock(Dem_EventIdType EventId)
         }
     }
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Prestored data (if available) is valid throughout the whole event processing step. This function marks
  * the current data to be discarded after event processing completes.
@@ -649,7 +720,8 @@ DEM_LOCAL_INLINE void Dem_SetPrestoreStateDiscard(void)
         Dem_SetPrestorageEntryState(Dem_PrestoreLockedList, DEM_PRESTORE_STATUS_DISCARDED);
     }
 }
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Release locked pre-stored entries
  */
@@ -695,7 +767,8 @@ DEM_LOCAL void Dem_EventPrestorageRelease(void)
         Dem_PrestoreLockedList = Dem_PreFFSize();
     }
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if ((DEM_MAX_NUMBER_PRESTORED_FF > 0u) && (DEM_EVENT_PARTITION_NUMBER > 1u))
 /* PRQA S 1258 ++ */ /* VL_Dem_1258 */
 /* PRQA S 0759 ++ */ /* VL_Dem_0759 */
@@ -767,6 +840,8 @@ DEM_LOCAL_INLINE Dem_SatelliteExtendedDataType Dem_SetPrestoreClear(Dem_Satellit
     ret.Data.SharedData = sharedData;
     return ret;
 }
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 1258 -- */
 /* PRQA S 3473 -- */
 /**
@@ -802,7 +877,8 @@ DEM_LOCAL void Dem_UpdatePrestoreStatus(Dem_EventIdType EventId, uint32 NewPrest
         }
     } while (ProcessingDone == FALSE);
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         get and clear current monitor prestore FF flag
  * @param[in]     SatelliteId: satellite Id
@@ -863,7 +939,8 @@ DEM_LOCAL_INLINE boolean Dem_CheckAndClearPrestoreQueueUpdated(Dem_SatelliteIdTy
     } while (Dem_SyncSetSatelliteInfo(SatelliteId, oldSatelliteInfo, newSatelliteInfo) == FALSE);
     return Dem_CheckSatelliteInfoPrestoreQueue(oldSatelliteInfo);
 }
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief prestore process
  */
@@ -888,8 +965,12 @@ DEM_LOCAL void Dem_PrestoreProcess(Dem_SatelliteIdType SatelliteId)
         }
     }
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 0759 -- */
 
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Prestorage Task process
  */
@@ -903,8 +984,11 @@ DEM_LOCAL void Dem_PrestorageTask(void)
         }
     }
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Processing event pre-storage requests
  */
@@ -932,7 +1016,10 @@ DEM_LOCAL Std_ReturnType Dem_EventPrestoreFF(Dem_EventIdType EventId)
     }
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief clear Processed event pre-storage Freeze frame
  */
@@ -960,8 +1047,11 @@ DEM_LOCAL Std_ReturnType Dem_EventClearPrestoreFF(Dem_EventIdType EventId)
     }
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_FREEZE_FRAME_CLASS_NUMBER > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Copy a prestored snapshot for an event
  */
@@ -977,9 +1067,12 @@ DEM_LOCAL boolean Dem_PrestoreApplyFreezeFrame(uint8* DestinationBuffer, uint16 
     }
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_MAX_SIZE_J1939FREEZEFRAME > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Copy a prestored J1939 snapshot for an event
  */
@@ -995,9 +1088,12 @@ DEM_LOCAL boolean Dem_PrestoreApplyJ1939FreezeFrame(uint8* DestinationBuffer, ui
     }
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_MAX_SIZE_J1939EXFREEZEFRAME > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Copy a prestored J1939Ex snapshot for an event
  */
@@ -1013,9 +1109,12 @@ DEM_LOCAL boolean Dem_PrestoreApplyJ1939ExFreezeFrame(uint8* DestinationBuffer, 
     }
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if ((DEM_OBDII_SUPPORT == STD_ON) && (DEM_MAX_SIZE_OBDFREEZEFRAME > 0u))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Copy a prestored OBD snapshot for an event
  */
@@ -1031,10 +1130,9 @@ DEM_LOCAL boolean Dem_PrestoreApplyOBDFreezeFrame(uint8* DestinationBuffer, uint
     }
     return ret;
 }
-#endif
-
 #define DEM_STOP_SEC_CODE
 #include "Dem_MemMap.h"
+#endif
 #endif
 
 #endif

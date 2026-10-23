@@ -52,7 +52,11 @@ extern "C" {
  * @synchronous TRUE
  * @trace       CPD-66320
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 void BswM_LinSM_CurrentSchedule(NetworkHandleType Network, LinIf_SchHandleType CurrentSchedule);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 /**
  * @brief       Function called by LinSM to indicate its current state.
@@ -63,7 +67,11 @@ void BswM_LinSM_CurrentSchedule(NetworkHandleType Network, LinIf_SchHandleType C
  * @synchronous TRUE
  * @trace       CPD-66319
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 void BswM_LinSM_CurrentState(NetworkHandleType Network, LinSM_ModeType CurrentState);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 #endif /*BSWM_LINSM_ENABLED == STD_ON*/
 

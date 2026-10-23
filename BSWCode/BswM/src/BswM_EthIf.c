@@ -38,9 +38,9 @@
 /* ============================================ external data definitions =========================================== */
 
 /* ========================================== external function definitions ========================================= */
+#if (BSWM_ETHIFPORTGROUPLINKSTATECHG_ENABLED == STD_ON)
 #define BSWM_START_SEC_CODE
 #include "BswM_MemMap.h"
-#if (BSWM_ETHIFPORTGROUPLINKSTATECHG_ENABLED == STD_ON)
 /**
  * Initializes the Ethernet Interface request ports by setting their initial states.
  * The function retrieves partition configuration pointers, iterates through the Ethernet Interface port groups,
@@ -51,6 +51,8 @@
 void BswM_InitEthIfRequestPorts(void)
 /* PRQA S 1503,1505,1532 --*/
 {
+    BswM_ArtiApiStart(1, BSWM_API_ID_INITETHIFREQUESTPORTS);
+
     const BswM_PartitionPCCfgType*    bswmPartPCCfgPtr;
     const BswM_PartitionLCfgType*     bswmPartLCfgPtr;
     const BswM_ModeRqstPortPCCfgType* modeRqstPCfgPtr;
@@ -88,11 +90,17 @@ void BswM_InitEthIfRequestPorts(void)
 #if (BSWM_DEV_ERROR_DETECT == STD_ON)
     else
     {
-        (void)Det_ReportError(BSWM_MODULE_ID, BSWM_INSTANCE_ID, BSWM_API_ID_INIT, BSWM_E_INIT_FAILED);
+        (void)Det_ReportError(BSWM_MODULE_ID, BSWM_INSTANCE_ID, BSWM_API_ID_INITETHIFREQUESTPORTS, BSWM_E_INIT_FAILED);
     }
 #endif /*BSWM_DEV_ERROR_DETECT == STD_ON*/
-}
 
+    BswM_ArtiApiStop(1, BSWM_API_ID_INITETHIFREQUESTPORTS);
+}
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
+
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Retrieves the link state of a specific Ethernet Interface port group.
  * The function fetches the partition configuration pointer and returns the link state of the specified port group.
@@ -112,8 +120,12 @@ EthTrcv_LinkStateType BswM_GetEthIfGruStateStatus(EthIf_SwitchPortGroupIdxType e
     }
     return ethState;
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_ETHIFPORTGROUPLINKSTATECHG_ENABLED == STD_ON*/
 
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Handles the change in the link state of an Ethernet Interface port group.
  * This function updates the internal state of the specified port group and evaluates relevant rules if necessary.
@@ -122,6 +134,8 @@ EthTrcv_LinkStateType BswM_GetEthIfGruStateStatus(EthIf_SwitchPortGroupIdxType e
 void BswM_EthIf_PortGroupLinkStateChg(EthIf_SwitchPortGroupIdxType PortGroupIdx, EthTrcv_LinkStateType PortGroupState)
 /* PRQA S 1503,1505,1532 --*/
 {
+    BswM_ArtiApiStart(3, BSWM_API_ID_ETHIF_PORT_GRU_LINK_STATE, PortGroupIdx, PortGroupState);
+
 #if (BSWM_ETHIFPORTGROUPLINKSTATECHG_ENABLED == STD_ON)
     const BswM_PartitionPCCfgType*    bswmPartPCCfgPtr;
     const BswM_PartitionLCfgType*     bswmPartLCfgPtr;
@@ -192,8 +206,9 @@ void BswM_EthIf_PortGroupLinkStateChg(EthIf_SwitchPortGroupIdxType PortGroupIdx,
     (void)PortGroupIdx;
     (void)PortGroupState;
 #endif /*BSWM_ETHIFPORTGROUPLINKSTATECHG_ENABLED == STD_ON*/
-}
 
+    BswM_ArtiApiStop(1, BSWM_API_ID_ETHIF_PORT_GRU_LINK_STATE);
+}
 #define BSWM_STOP_SEC_CODE
 #include "BswM_MemMap.h"
 

@@ -75,6 +75,8 @@ typedef struct
 } Dem_ClearRequestType;
 
 /* ========================================== internal function declarations ======================================== */
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Notification after clear has finished.
  * @param[in]     ClearState: the state of the current clear operation
@@ -83,6 +85,10 @@ typedef struct
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_NotiClearResult(uint8 ClearState);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Set the status of the current clear operation.
@@ -92,8 +98,12 @@ DEM_LOCAL void Dem_NotiClearResult(uint8 ClearState);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_SetClearState(uint8 State);
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_CLEAR_DTC_BEHAVIOR == DEM_CLRRESP_NONVOLATILE_FINISH)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
+
 /**
  * @brief         Notify all cleared blocks are persisted in NV
  * @reentrant     FALSE
@@ -101,7 +111,11 @@ DEM_LOCAL void Dem_SetClearState(uint8 State);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_NotifyClearCompleted(void);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Try to start a clear DTC operation
@@ -114,6 +128,10 @@ DEM_LOCAL void Dem_NotifyClearCompleted(void);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL boolean Dem_TryNewClear(const Dem_ClearRequestType* ClearRequest);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Try to start a clear DTC operation
@@ -127,8 +145,12 @@ DEM_LOCAL boolean Dem_TryNewClear(const Dem_ClearRequestType* ClearRequest);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL Std_ReturnType Dem_StartClearOperation(const Dem_ClearRequestType* ClearRequest, uint8 ClientId);
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_J1939_CLEAR_DTC_SUPPORT == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
+
 /**
  * @brief         Start clear J1939 DTCs
  * @param[in]     ClientId: Unique client id, assigned to the instance of the calling module.
@@ -141,7 +163,11 @@ DEM_LOCAL Std_ReturnType Dem_StartClearOperation(const Dem_ClearRequestType* Cle
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL Std_ReturnType Dem_ClientStartClearJ1939(uint8 ClientId, Dem_J1939DcmSetClearFilterType DTCTypeFilter);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Start clear DTC for a single event
@@ -157,6 +183,10 @@ DEM_LOCAL Std_ReturnType Dem_ClientStartClearJ1939(uint8 ClientId, Dem_J1939DcmS
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL Std_ReturnType Dem_ClientStartClearDTC(uint8 ClientId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Clear the selected DTC/DTC Group/All DTCs
@@ -174,6 +204,10 @@ DEM_LOCAL Std_ReturnType Dem_ClientStartClearDTC(uint8 ClientId);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL Std_ReturnType Dem_ClientClearDTC(uint8 ClientId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Clears a DTC
@@ -183,6 +217,10 @@ DEM_LOCAL Std_ReturnType Dem_ClientClearDTC(uint8 ClientId);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_DTCInternalCleared(Dem_EventIdType EventId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Clears an event from the given origin memory, if allowed
@@ -195,6 +233,10 @@ DEM_LOCAL void Dem_DTCInternalCleared(Dem_EventIdType EventId);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL boolean Dem_DTCCleared(Dem_EventIdType EventId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Process UDS clear group dtc requests
@@ -208,8 +250,12 @@ DEM_LOCAL boolean Dem_DTCCleared(Dem_EventIdType EventId);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL boolean Dem_ProcessClearGroupDtc(Dem_EventIdType FirstEvent, Dem_EventIdType LastEvent);
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_J1939_CLEAR_DTC_SUPPORT == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
+
 /**
  * @brief         Process J1939 clear dtc requests
  * @param[in]     FirstEvent: Numerically smallest eventid belonging to the range
@@ -222,7 +268,11 @@ DEM_LOCAL boolean Dem_ProcessClearGroupDtc(Dem_EventIdType FirstEvent, Dem_Event
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL boolean Dem_ProcessClearJ1939Dtc(Dem_EventIdType FirstEvent, Dem_EventIdType LastEvent);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Process UDS clear all dtc requests
@@ -231,6 +281,10 @@ DEM_LOCAL boolean Dem_ProcessClearJ1939Dtc(Dem_EventIdType FirstEvent, Dem_Event
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_ProcessClearAllDtc(void);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Processes clear dtc requests
@@ -239,6 +293,10 @@ DEM_LOCAL void Dem_ProcessClearAllDtc(void);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_ProcessClearDtc(void);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Process the current clear requests
@@ -247,6 +305,8 @@ DEM_LOCAL void Dem_ProcessClearDtc(void);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_ClearTaskTask(void);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 
 /* ============================================ internal data definitions =========================================== */
 #define DEM_START_SEC_VAR_CLEARED_8
@@ -293,9 +353,6 @@ DEM_LOCAL uint16 Dem_ClearTaskIterator;
 #include "Dem_MemMap.h"
 #endif
 /* ========================================== internal function definitions ========================================= */
-#define DEM_START_SEC_CODE
-#include "Dem_MemMap.h"
-
 #if (DEM_CLEAR_DTC_BEHAVIOR == DEM_CLRRESP_NONVOLATILE_FINISH)
 /**
  * @brief         Check the write errors flag of the current clear operation.
@@ -333,7 +390,6 @@ DEM_LOCAL_INLINE void Dem_ResetClearWriteErrors(void)
     Dem_ClearWriteErrors = FALSE;
 }
 #endif
-
 /**
  * @brief         Get the mem Index of the current clear operation.
  * @return        Dem_MemoryNumType: Memory Index to clear
@@ -381,7 +437,6 @@ DEM_LOCAL_INLINE Dem_UdsStatusByteType Dem_GetClearRequestClearMask(void)
 {
     return Dem_CurrentProcessClearRequest.ClearMask;
 }
-
 #if (DEM_CLEAR_DTC_START_NOTIFICATION_NUMBER > 0u)
 /**
  * @brief         Call all clear start notification callbacks.
@@ -424,7 +479,6 @@ DEM_LOCAL_INLINE void Dem_ClearDTCStartNotifications(uint8 ClientId)
     Dem_NotiClearDTCStart(ClientId, clientIdRequest.DTC, clientIdRequest.DTCFormat, clientIdRequest.DTCOrigin);
 }
 #endif
-
 #if (DEM_CLEAR_DTC_END_NOTIFICATION_NUMBER > 0u)
 /**
  * @brief         Call all clear end notification callbacks.
@@ -453,7 +507,6 @@ DEM_LOCAL_INLINE void
     }
 }
 #endif
-
 /**
  * @brief         Call all clear end notification callbacks.
  * @param[in]     ClientId: Unique client id, assigned to the instance of the calling module.
@@ -471,6 +524,8 @@ DEM_LOCAL_INLINE void Dem_ClearDTCEndNotifications(uint8 ClientId)
     Dem_ReleaseClient(ClientId);
 }
 
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Notification after clear has finished.
  */
@@ -514,7 +569,10 @@ DEM_LOCAL void Dem_NotiClearResult(uint8 ClearState)
         }
     }
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Set the status of the current clear operation.
  */
@@ -539,8 +597,11 @@ DEM_LOCAL void Dem_SetClearState(uint8 State)
     Dem_NotiClearResult(State);
     Dem_ClearTaskState = State;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_CLEAR_DTC_BEHAVIOR == DEM_CLRRESP_NONVOLATILE_FINISH)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Notify all cleared blocks are persisted in NV
  */
@@ -558,8 +619,9 @@ DEM_LOCAL void Dem_NotifyClearCompleted(void)
         }
     }
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 /**
  * @brief         Initialize the Clear Task
  * @reentrant     FALSE
@@ -570,7 +632,8 @@ DEM_LOCAL_INLINE void Dem_ClearTaskInit(void)
 {
     Dem_SetClearState(DEM_CLEARTASK_IDLE);
 }
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Try to start a clear DTC operation
  */
@@ -593,7 +656,10 @@ DEM_LOCAL boolean Dem_TryNewClear(const Dem_ClearRequestType* ClearRequest)
     }
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Try to start a clear DTC operation
  */
@@ -614,7 +680,8 @@ DEM_LOCAL Std_ReturnType Dem_StartClearOperation(const Dem_ClearRequestType* Cle
     }
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_CLEAR_DTC_LIMITATION == DEM_ALL_SUPPORTED_DTCS)
 /**
  * @brief         Start clear single DTC
@@ -651,7 +718,6 @@ DEM_LOCAL_INLINE Std_ReturnType Dem_ClientStartClearEvent(uint8 ClientId)
     return ret;
 }
 #endif
-
 #if ((DEM_DTC_GROUP_NUMBER > 0u) && (DEM_CLEAR_DTC_LIMITATION == DEM_ALL_SUPPORTED_DTCS))
 /**
  * @brief         Start clear group DTC
@@ -675,7 +741,6 @@ DEM_LOCAL_INLINE Std_ReturnType Dem_ClientStartClearGroup(uint8 ClientId)
     clearRequest.ClearGroupDTCIndex = Dem_ClientInfo[ClientId].Selection.GroupDTCIndex;
     return Dem_StartClearOperation(&clearRequest, ClientId);
 }
-
 /**
  * @brief         Get if a DTC number encodes a specific DTC group (not ALLDTCs).
  * @param[in]     EventId: Identification of an event by assigned EventId.
@@ -705,7 +770,6 @@ DEM_LOCAL_INLINE boolean Dem_CheckDtcGroupMatch(Dem_EventIdType EventId, Dem_Gro
     return match;
 }
 #endif
-
 /**
  * @brief         Start clear all DTC
  * @param[in]     ClientId: Unique client id, assigned to the instance of the calling module.
@@ -730,8 +794,9 @@ DEM_LOCAL_INLINE Std_ReturnType Dem_ClientStartClearAllDTCs(uint8 ClientId)
 #endif
     return Dem_StartClearOperation(&clearRequest, ClientId);
 }
-
 #if (DEM_J1939_CLEAR_DTC_SUPPORT == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Start clear J1939 DTCs
  */
@@ -766,8 +831,11 @@ DEM_LOCAL Std_ReturnType Dem_ClientStartClearJ1939(uint8 ClientId, Dem_J1939DcmS
     }
     return Dem_StartClearOperation(&clearRequest, ClientId);
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Start clear DTC for a single event
  */
@@ -801,7 +869,10 @@ DEM_LOCAL Std_ReturnType Dem_ClientStartClearDTC(uint8 ClientId)
     }
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Clear the selected DTC/DTC Group/All DTCs
  */
@@ -834,7 +905,8 @@ DEM_LOCAL Std_ReturnType Dem_ClientClearDTC(uint8 ClientId)
     }
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Calls user defined clear allowed callback
  * @param[in]     EventId: Identification of an event by assigned EventId.
@@ -867,7 +939,8 @@ DEM_LOCAL_INLINE boolean Dem_ClearEventAllowed(Dem_EventIdType EventId)
 #endif
     return clearAllowed;
 }
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Clears a DTC
  */
@@ -910,8 +983,12 @@ DEM_LOCAL void Dem_DTCInternalCleared(Dem_EventIdType EventId)
 
     Dem_NotiDtcStatusChanged(EventId, oldDtcStatus, DEM_UDS_STATUS_INITIALIZE);
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 6070 -- */
 
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Clears an event from the given origin memory, if allowed
  */
@@ -1022,7 +1099,8 @@ DEM_LOCAL boolean Dem_DTCCleared(Dem_EventIdType EventId)
 #endif
     return doClear;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Process UDS clear single dtc requests
  * @return        boolean
@@ -1036,7 +1114,8 @@ DEM_LOCAL_INLINE boolean Dem_ProcessClearSingleDtc(void)
 {
     return Dem_DTCCleared(Dem_CurrentProcessClearRequest.ClearEventId);
 }
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Process UDS clear group dtc requests
  */
@@ -1083,8 +1162,11 @@ DEM_LOCAL boolean Dem_ProcessClearGroupDtc(Dem_EventIdType FirstEvent, Dem_Event
     }
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_J1939_CLEAR_DTC_SUPPORT == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Process J1939 clear dtc requests
  */
@@ -1119,8 +1201,11 @@ DEM_LOCAL boolean Dem_ProcessClearJ1939Dtc(Dem_EventIdType FirstEvent, Dem_Event
     }
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Process UDS clear all dtc requests
  */
@@ -1142,7 +1227,10 @@ DEM_LOCAL void Dem_ProcessClearAllDtc(void)
     Dem_NvmSetSingleBlockState(DEM_NV_ADMINBLOCKINDEX, DEM_NVM_BLOCKSTATE_DIRTYCLEAREDIMMEDIATE);
 #endif
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Processes clear dtc requests
  */
@@ -1226,6 +1314,10 @@ DEM_LOCAL void Dem_ProcessClearDtc(void)
 #endif
     }
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 6070 -- */
 
 /**
@@ -1255,7 +1347,6 @@ DEM_LOCAL void Dem_ClearTaskTask(void)
         break;
     }
 }
-
 #define DEM_STOP_SEC_CODE
 #include "Dem_MemMap.h"
 #endif

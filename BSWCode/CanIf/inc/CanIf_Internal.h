@@ -100,6 +100,8 @@ extern const CanIf_ConfigType* CanIf_ConfigStd;
 
 /* ========================================== external function definitions ========================================= */
 #if ((STD_ON == CANIF_PUBLIC_READ_RX_PDU_NOTIFY_STATUS_API) || (STD_ON == CANIF_PUBLIC_READ_TX_PDU_NOTIFY_STATUS_API))
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              Re-init rxNotifyStatus and txNotifyStatus of one controller
  * @param[in]          ctrlPbConfigPtr: pointer to PB config of CAN controller
@@ -108,7 +110,11 @@ extern const CanIf_ConfigType* CanIf_ConfigStd;
  * @trace              -
  */
 extern void CanIf_FreeRxTxNotifyStatus(const CanIf_CtrlPbConfigType* ctrlPbConfigPtr);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              init all rxNotifyStatus and txNotifyStatus
  * @param[in]          partitionIndex: index of partition
@@ -117,9 +123,13 @@ extern void CanIf_FreeRxTxNotifyStatus(const CanIf_CtrlPbConfigType* ctrlPbConfi
  * @trace              -
  */
 extern void CanIf_InitRxTxNotifyStatus(ApplicationType partitionIndex);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if (STD_ON == CANIF_PUBLIC_TX_BUFFERING)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              init TxBuffer
  * @param[in]          partitionIndex: index of partition
@@ -128,7 +138,11 @@ extern void CanIf_InitRxTxNotifyStatus(ApplicationType partitionIndex);
  * @trace              -
  */
 extern void CanIf_InitTxBuffer(ApplicationType partitionIndex);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              tx busy handle
  * @param[in]          txPduConfigPtr: pointer to PB config of TxPdu
@@ -138,7 +152,11 @@ extern void CanIf_InitTxBuffer(ApplicationType partitionIndex);
  * @trace              -
  */
 extern Std_ReturnType CanIf_TxBusyHandle(const CanIf_TxPduConfigType* txPduConfigPtr, const Can_PduType* canPduPtr);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              free TxBuffer
  * @param[in]          ctrlPbConfigPtr: pointer to PB config of CAN controller
@@ -147,7 +165,11 @@ extern Std_ReturnType CanIf_TxBusyHandle(const CanIf_TxPduConfigType* txPduConfi
  * @trace              -
  */
 extern void CanIf_FreeControllerTxBuffer(const CanIf_CtrlPbConfigType* ctrlPbConfigPtr);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              transmit pdu in TxBuffer
  * @param[in]          txPduConfigPtr: pointer to config of TxPdu
@@ -156,8 +178,12 @@ extern void CanIf_FreeControllerTxBuffer(const CanIf_CtrlPbConfigType* ctrlPbCon
  * @trace              -
  */
 extern void CanIf_TransmitBufferedPdu(const CanIf_TxPduConfigType* txPduConfigPtr);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              notify negative tx confirmation
  * @param[in]          ctrlPbConfigPtr: pointer to PB config of CAN controller
@@ -166,8 +192,12 @@ extern void CanIf_TransmitBufferedPdu(const CanIf_TxPduConfigType* txPduConfigPt
  * @trace              -
  */
 extern void CanIf_NotifyNegativeTxConfirmation(const CanIf_CtrlPbConfigType* ctrlPbConfigPtr);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
 #if (STD_ON == CANIF_PUBLIC_READ_RX_PDU_DATA_API)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              init RxBuffer
  * @param[in]          partitionIndex: index of partition
@@ -176,7 +206,11 @@ extern void CanIf_NotifyNegativeTxConfirmation(const CanIf_CtrlPbConfigType* ctr
  * @trace              -
  */
 extern void CanIf_InitRxBuffer(ApplicationType partitionIndex);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              init the Receive Buffer
  * @param[in]          ctrlPbConfigPtr: pointer to PB config of CAN controller
@@ -185,9 +219,13 @@ extern void CanIf_InitRxBuffer(ApplicationType partitionIndex);
  * @trace              -
  */
 extern void CanIf_FreeControllerRxBuffer(const CanIf_CtrlPbConfigType* ctrlPbConfigPtr);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if (STD_ON == CANIF_META_DATA_SUPPORT)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              Get the base Pdu CanId
  * @param[in]          txPduConfigPtr: pointer to config of TxPdu
@@ -201,10 +239,18 @@ extern void CanIf_GetBaseCanIdHandle(
     const CanIf_TxPduConfigType* txPduConfigPtr,
     const PduInfoType*           pduInfoPtr,
     CanIf_IdType*                canIdPtr);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #else
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 extern void CanIf_GetBaseCanIdHandle(const CanIf_TxPduConfigType* txPduConfigPtr, CanIf_IdType* canIdPtr);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              init the Dynamic Transmit CanId of one controller
  * @param[in]          ctrlPbConfigPtr: pointer to PB config of CAN controller
@@ -213,7 +259,11 @@ extern void CanIf_GetBaseCanIdHandle(const CanIf_TxPduConfigType* txPduConfigPtr
  * @trace              -
  */
 extern void CanIf_FreeDynamicTxPduCanIds(const CanIf_CtrlPbConfigType* ctrlPbConfigPtr);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              init all Dynamic Transmit CanId
  * @param[in]          partitionIndex: index of partition
@@ -222,7 +272,11 @@ extern void CanIf_FreeDynamicTxPduCanIds(const CanIf_CtrlPbConfigType* ctrlPbCon
  * @trace              -
  */
 extern void CanIf_InitDynamicTxPduCanId(ApplicationType partitionIndex);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              init all tx confirmation status
  * @param[in]          partitionIndex: index of partition
@@ -231,7 +285,11 @@ extern void CanIf_InitDynamicTxPduCanId(ApplicationType partitionIndex);
  * @trace              -
  */
 extern void CanIf_InitUpConfirmTxPduStatus(ApplicationType partitionIndex);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              init all controller runtime status
  * @param[in]          partitionIndex: index of partition
@@ -240,9 +298,79 @@ extern void CanIf_InitUpConfirmTxPduStatus(ApplicationType partitionIndex);
  * @trace              -
  */
 extern void CanIf_InitCtrlRuntime(ApplicationType partitionIndex);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+
+#if (STD_ON == CANIF_PUBLIC_BUS_MIRRORING_SUPPORT)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+/**
+ * @brief              init all HTH buffers on a partition
+ * @param[in]          partitionIndex: index of partition
+ * @synchronous        TRUE
+ * @reentrant          FALSE
+ * @trace              -
+ */
+extern void CanIf_MirrorInitBuffer(ApplicationType partitionIndex);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+/**
+ * @brief              free all HTH buffers for a controller
+ * @param[in]          ctrlPbConfigPtr: pointer to PB config of CAN controller
+ * @synchronous        TRUE
+ * @reentrant          FALSE
+ * @trace              -
+ */
+extern void CanIf_MirrorFreeTxFrame(const CanIf_CtrlPbConfigType* ctrlPbConfigPtr);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+/**
+ * @brief              store a TX frame in HTH buffer
+ * @param[in]          ctrlPbConfigPtr: pointer to PB config of CAN controller
+ * @param[in]          hthConfigPtr: pointer to config of HTH
+ * @param[in]          txPduIndex: index of TxPdu
+ * @param[in]          canPduPtr: pointer to the CAN PDU struct
+ * @synchronous        TRUE
+ * @reentrant          FALSE
+ * @trace              -
+ */
+extern void CanIf_MirrorStoreTxFrame(
+    const CanIf_CtrlPbConfigType* ctrlPbConfigPtr,
+    const CanIf_HthConfigType*    hthConfigPtr,
+    PduIdType                     txPduIndex,
+    const Can_PduType*            canPduPtr);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+/**
+ * @brief              report a confirmed TX frame in HTH bufffer
+ * @param[in]          ctrlPbConfigPtr: pointer to PB config of CAN controller
+ * @param[in]          hthConfigPtr: pointer to HTH config
+ * @param[in]          txPduIndex: index of TxPdu
+ * @synchronous        TRUE
+ * @reentrant          FALSE
+ * @trace              -
+ */
+extern void CanIf_MirrorReportTxFrame(
+    const CanIf_CtrlPbConfigType* ctrlPbConfigPtr,
+    const CanIf_HthConfigType*    hthConfigPtr,
+    PduIdType                     txPduIndex);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+#endif
 
 #if (STD_ON == CANIF_PARTITION_USED)
 #if (CANIF_PARTITION_ID2INDEX_NUMBER > 0u)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              find the partition index of the current partition ID
  * @return             ApplicationType
@@ -251,34 +379,26 @@ extern void CanIf_InitCtrlRuntime(ApplicationType partitionIndex);
  * @trace              -
  */
 extern ApplicationType CanIf_GetCurrentPartition(void);
-#else
-#define CANIF_START_SEC_CODE
+#define CANIF_STOP_SEC_CODE
 #include "CanIf_MemMap.h"
+#else
 CANIF_LOCAL_INLINE ApplicationType CanIf_GetCurrentPartition(void)
 {
     ApplicationType partitionIndex = GetApplicationID();
 
     return partitionIndex;
 }
-#define CANIF_STOP_SEC_CODE
-#include "CanIf_MemMap.h"
 #endif
 #else
-#define CANIF_START_SEC_CODE
-#include "CanIf_MemMap.h"
 CANIF_LOCAL_INLINE ApplicationType CanIf_GetCurrentPartition(void)
 {
     ApplicationType partitionIndex = 0u;
 
     return partitionIndex;
 }
-#define CANIF_STOP_SEC_CODE
-#include "CanIf_MemMap.h"
 #endif
 
 /* ========================================== internal function definitions ========================================= */
-#define CANIF_START_SEC_CODE
-#include "CanIf_MemMap.h"
 
 #if (STD_ON == CANIF_PUBLIC_READ_RX_PDU_NOTIFY_STATUS_API)
 /**
@@ -465,9 +585,6 @@ CANIF_LOCAL_INLINE PduIdType CanIf_RxPduId2VarIndex(PduIdType rxPduId)
 
     return rxPduIndex;
 }
-
-#define CANIF_STOP_SEC_CODE
-#include "CanIf_MemMap.h"
 
 #ifdef __cplusplus
 }

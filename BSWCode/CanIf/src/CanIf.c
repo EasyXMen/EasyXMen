@@ -34,6 +34,10 @@
 #include "CanIf_Internal.h"
 #include "CanIf_Cbk.h"
 #include "CanIf_DetError.h"
+#include "CanIf_Arti.h"
+#if (STD_ON == CANIF_PUBLIC_BUS_MIRRORING_SUPPORT)
+#include "Mirror.h"
+#endif
 #if (STD_ON == CANIF_CDD_CANIDS_MODULE_ENABLE)
 #include "CDD_CanIds.h"
 #endif
@@ -43,6 +47,9 @@
 /* ================================================ type definitions ================================================ */
 
 /* ========================================== internal function declarations ======================================== */
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+
 /**
  * @brief              Initialize all used buffers
  * @synchronous        TRUE
@@ -50,6 +57,11 @@
  * @param[in]          partitionIndex: Index of partition
  */
 CANIF_LOCAL void CanIf_InitAllBuffer(ApplicationType partitionIndex);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 
 /**
  * @brief              Set controller mode to started
@@ -62,7 +74,11 @@ CANIF_LOCAL void CanIf_InitAllBuffer(ApplicationType partitionIndex);
  * @retval             E_NOT_OK: Request has not been accepted
  */
 CANIF_LOCAL Std_ReturnType CanIf_SetControllStarted(uint8 canDrvId, uint8 canCtrlId);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              Set controller mode to sleep
  * @synchronous        TRUE
@@ -82,7 +98,11 @@ CANIF_LOCAL Std_ReturnType CanIf_SetControllSleep(
     CanIf_CtrlRuntimeType*        ctrlRuntimePtr,
     uint8                         canDrvId,
     uint8                         canCtrlId);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              Set controller mode to stopped
  * @synchronous        TRUE
@@ -100,7 +120,11 @@ CANIF_LOCAL Std_ReturnType CanIf_SetControllStopped(
     CanIf_CtrlRuntimeType*        ctrlRuntimePtr,
     uint8                         canDrvId,
     uint8                         canCtrlId);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              Check CAN ID is in range
  * @synchronous        TRUE
@@ -114,7 +138,11 @@ CANIF_LOCAL Std_ReturnType CanIf_SetControllStopped(
  */
 CANIF_LOCAL Std_ReturnType
     CanIf_CanIdRangCheck(Can_HwHandleType hrhIndex, CanIf_IdType canId, PduIdType* rxPduIndexPtr);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              HRH filter by linear search
  * @synchronous        TRUE
@@ -128,8 +156,12 @@ CANIF_LOCAL Std_ReturnType
  */
 CANIF_LOCAL Std_ReturnType
     CanIf_RxPduHrhSearchByLinear(const CanIf_HrhConfigType* hrhConfigPtr, CanIf_IdType canId, PduIdType* rxPduIndexPtr);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
 #if (CANIF_SOFTWARE_FILTER_TYPE == CANIF_SOFTWARE_FILTER_BINARY)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              HRH filter by binary search
  * @synchronous        TRUE
@@ -143,8 +175,12 @@ CANIF_LOCAL Std_ReturnType
  */
 CANIF_LOCAL Std_ReturnType
     CanIf_RxPduHrhSearchByBinary(const CanIf_HrhConfigType* hrhConfigPtr, CanIf_IdType canId, PduIdType* rxPduIndexPtr);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              Get index of HRH which accepts the specified CanId
  * @synchronous        TRUE
@@ -156,7 +192,11 @@ CANIF_LOCAL Std_ReturnType
  * @retval             E_NOT_OK: Request has not been accepted
  */
 CANIF_LOCAL Std_ReturnType CanIf_GetPduHrh(const CanIf_RxPduConfigType* rxPduConfigPtr, CanIf_IdType canId);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              Handle the indication of RxPdu from CAN driver
  * @synchronous        TRUE
@@ -173,9 +213,13 @@ CANIF_LOCAL void CanIf_RxIndicationHandle(
     CanIf_IdType canId,
 #endif
     const PduInfoType* pduInfoPtr);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
 #if (STD_ON == CANIF_WAKEUP_SUPPORT)
 #if (STD_ON == CANIF_CANDRV_WAKE_UP_SUPPORT)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              Handle the wakeup check for a specified controller
  * @synchronous        TRUE
@@ -191,9 +235,13 @@ CANIF_LOCAL Std_ReturnType CanIf_CheckCtrlWakeupHandle(
     const CanIf_CtrlPbConfigType* ctrlPbConfigPtr,
     const CanIf_CtrlConfigType*   ctrlConfigPtr,
     boolean*                      controllerNotSleep);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if (STD_ON == CANIF_CANTRCV_WAKE_UP_SUPPORT)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              Handle the wakeup check for transceivers
  * @synchronous        TRUE
@@ -205,10 +253,14 @@ CANIF_LOCAL Std_ReturnType CanIf_CheckCtrlWakeupHandle(
  * @retval             E_NOT_OK: Request has not been accepted
  */
 CANIF_LOCAL Std_ReturnType CanIf_CheckTrcvWakeup(ApplicationType partitionIndex, EcuM_WakeupSourceType wakeupSource);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 #endif
 
 #if (STD_ON == CANIF_PUBLIC_WAKEUP_CHECK_VALID_SUPPORT)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief              Handle the wakeup validation for a specified controller
  * @synchronous        TRUE
@@ -221,6 +273,8 @@ CANIF_LOCAL Std_ReturnType CanIf_CheckTrcvWakeup(ApplicationType partitionIndex,
  */
 CANIF_LOCAL Std_ReturnType
     CanIf_CheckValidationHandle(const CanIf_CtrlPbConfigType* ctrlPbConfigPtr, EcuM_WakeupSourceType wakeupSource);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 /* ============================================ internal data definitions =========================================== */
@@ -242,6 +296,8 @@ const CanIf_ConfigType* CanIf_ConfigStd;
  */
 void CanIf_Init(const CanIf_ConfigType* ConfigPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Start, 2, 0x01, ConfigPtr);
+
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
     if (E_OK == CanIf_ValidateInit(ConfigPtr))
 #endif
@@ -259,13 +315,21 @@ void CanIf_Init(const CanIf_ConfigType* ConfigPtr)
             CanIf_InitAllBuffer(partitionIndex);
         }
     }
-}
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Return, 1, 0x01);
+}
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * De-initializes the CanIf module.
  */
 void CanIf_DeInit(void)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Start, 1, 0x02);
+
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
     if (E_OK == CanIf_ValidateDeInit())
 #endif
@@ -292,14 +356,22 @@ void CanIf_DeInit(void)
         }
         SchM_Exit_CanIf_ExclusiveArea_Channel();
     }
-}
 
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Return, 1, 0x02);
+}
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * This service calls the corresponding CAN Driver service
  * for changing of the CAN controller mode.
  */
 Std_ReturnType CanIf_SetControllerMode(uint8 ControllerId, Can_ControllerStateType ControllerMode)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Start, 3, 0x03, ControllerId, ControllerMode);
+
     Std_ReturnType result = E_NOT_OK;
 
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
@@ -329,14 +401,23 @@ Std_ReturnType CanIf_SetControllerMode(uint8 ControllerId, Can_ControllerStateTy
             break;
         }
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Return, 2, 0x03, result);
+
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * This service reports about the current status of the requested CAN controller.
  */
 Std_ReturnType CanIf_GetControllerMode(uint8 ControllerId, Can_ControllerStateType* ControllerModePtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Start, 3, 0x04, ControllerId, ControllerModePtr);
+
     Std_ReturnType result = E_NOT_OK;
 
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
@@ -350,16 +431,25 @@ Std_ReturnType CanIf_GetControllerMode(uint8 ControllerId, Can_ControllerStateTy
         *ControllerModePtr = ctrlRuntimePtr->ControllerMode;
         result             = E_OK;
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Return, 2, 0x04, result);
+
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
-/* PRQA S 6030 ++ */ /* VL_MTR_CanIf_STMIF */
+/* PRQA S 6030, 6020 ++ */ /* VL_MTR_CanIf_STMIF, VL_MTR_CanIf_STLIN */
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * This service initiates a request for transmission of the CAN L-PDU
  * specified by the CanTxSduId and CAN related data in the L-SDU structure.
  */
 Std_ReturnType CanIf_Transmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Start, 3, 0x05, TxPduId, PduInfoPtr);
+
     Std_ReturnType result = E_NOT_OK;
 
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
@@ -440,6 +530,12 @@ Std_ReturnType CanIf_Transmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr)
 
                 if (CAN_OK == retVal)
                 {
+#if (STD_ON == CANIF_PUBLIC_BUS_MIRRORING_SUPPORT)
+                    if (ctrlRuntimePtr->MirroringActive)
+                    {
+                        CanIf_MirrorStoreTxFrame(ctrlPbConfigPtr, hthConfigPtr, txPduIndex, &canPdu);
+                    }
+#endif
                     result = E_OK;
                 }
 #if (STD_ON == CANIF_PUBLIC_TX_BUFFERING)
@@ -500,17 +596,26 @@ Std_ReturnType CanIf_Transmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr)
             CanIf_DetReportRuntimeError(CANIF_TRANSMIT_ID, CANIF_E_STOPPED);
         }
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Return, 2, 0x05, result);
+
     return result;
 }
-/* PRQA S 6030 -- */
+/* PRQA S 6030, 6020 -- */
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
 #if (STD_ON == CANIF_PUBLIC_READ_RX_PDU_DATA_API)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * This service provides the CAN DLC and the received data of the requested CanIfRxSduId to the
  * calling upper layer.
  */
 Std_ReturnType CanIf_ReadRxPduData(PduIdType CanIfRxSduId, PduInfoType* CanIfRxInfoPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Start, 3, 0x06, CanIfRxSduId, CanIfRxInfoPtr);
+
     Std_ReturnType result = E_NOT_OK;
 
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
@@ -551,17 +656,26 @@ Std_ReturnType CanIf_ReadRxPduData(PduIdType CanIfRxSduId, PduInfoType* CanIfRxI
         }
     }
 #endif
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Return, 2, 0x06, result);
+
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if (STD_ON == CANIF_PUBLIC_READ_TX_PDU_NOTIFY_STATUS_API)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * This service returns the confirmation status (confirmation occurred or not)
  * of a specific static or dynamic CAN Tx L-PDU, requested by the CanIfTxSduId.
  */
 CanIf_NotifStatusType CanIf_ReadTxNotifStatus(PduIdType CanIfTxSduId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Start, 2, 0x07, CanIfTxSduId);
+
     CanIf_NotifStatusType result = CANIF_NO_NOTIFICATION;
 
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
@@ -582,17 +696,26 @@ CanIf_NotifStatusType CanIf_ReadTxNotifStatus(PduIdType CanIfTxSduId)
         }
 #endif
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Return, 2, 0x07, result);
+
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if (STD_ON == CANIF_PUBLIC_READ_RX_PDU_NOTIFY_STATUS_API)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * This service returns the indication status (indication occurred or not) of a
  * specific CAN Rx L-PDU, requested by the CanIfRxSduId.
  */
 CanIf_NotifStatusType CanIf_ReadRxNotifStatus(PduIdType CanIfRxSduId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Start, 2, 0x08, CanIfRxSduId);
+
     CanIf_NotifStatusType result = CANIF_NO_NOTIFICATION;
 
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
@@ -613,15 +736,24 @@ CanIf_NotifStatusType CanIf_ReadRxNotifStatus(PduIdType CanIfRxSduId)
         }
 #endif
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Return, 2, 0x08, result);
+
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * This service sets the requested mode at the L-PDUs of a predefined logical PDU channel.
  */
 Std_ReturnType CanIf_SetPduMode(uint8 ControllerId, CanIf_PduModeType PduModeRequest)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Start, 3, 0x09, ControllerId, PduModeRequest);
+
     Std_ReturnType result = E_NOT_OK;
 
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
@@ -682,14 +814,23 @@ Std_ReturnType CanIf_SetPduMode(uint8 ControllerId, CanIf_PduModeType PduModeReq
             CanIf_NotifyNegativeTxConfirmation(ctrlPbConfigPtr);
         }
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Return, 2, 0x09, result);
+
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * This service reports the current mode of a requested PDU channel.
  */
 Std_ReturnType CanIf_GetPduMode(uint8 ControllerId, CanIf_PduModeType* PduModePtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Start, 3, 0x0A, ControllerId, PduModePtr);
+
     Std_ReturnType result = E_NOT_OK;
 
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
@@ -703,15 +844,24 @@ Std_ReturnType CanIf_GetPduMode(uint8 ControllerId, CanIf_PduModeType* PduModePt
         *PduModePtr = ctrlRuntimePtr->PduMode;
         result      = E_OK;
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Return, 2, 0x0A, result);
+
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
 #if (STD_ON == CANIF_PUBLIC_VERSION_INFO_API)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * This service returns the version information of the called CAN Interface module.
  */
 void CanIf_GetVersionInfo(Std_VersionInfoType* VersionInfo)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Start, 2, 0x0B, VersionInfo);
+
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
     if (NULL_PTR == VersionInfo)
     {
@@ -726,15 +876,23 @@ void CanIf_GetVersionInfo(Std_VersionInfoType* VersionInfo)
         VersionInfo->sw_minor_version = CANIF_SW_MINOR_VERSION;
         VersionInfo->sw_patch_version = CANIF_SW_PATCH_VERSION;
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Return, 1, 0x0B);
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if (STD_ON == CANIF_PUBLIC_SET_DYNAMIC_TX_ID_API)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * This service reconfigures the corresponding CAN identifier of the requested CAN L-PDU.
  */
 void CanIf_SetDynamicTxId(PduIdType CanIfTxSduId, Can_IdType CanId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Start, 3, 0x0C, CanIfTxSduId, CanId);
+
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
     if (E_OK == CanIf_ValidateSetDynamicTxId(CanIfTxSduId, CanId))
 #endif
@@ -749,16 +907,24 @@ void CanIf_SetDynamicTxId(PduIdType CanIfTxSduId, Can_IdType CanId)
         }
 #endif
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Return, 1, 0x0C);
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if (CANIF_TRCV_NUMBER > 0u)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * This service changes the operation mode of the tansceiver TransceiverId,
  * via calling the corresponding CAN Transceiver Driver service.
  */
 Std_ReturnType CanIf_SetTrcvMode(uint8 TransceiverId, CanTrcv_TrcvModeType TransceiverMode)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Start, 3, 0x0D, TransceiverId, TransceiverMode);
+
     Std_ReturnType result = E_NOT_OK;
 
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
@@ -771,15 +937,24 @@ Std_ReturnType CanIf_SetTrcvMode(uint8 TransceiverId, CanTrcv_TrcvModeType Trans
 
         result = Can_TrcvApi[canTrcvDrvId].CanTrcvSetOpModeApi(canTrcvId, TransceiverMode);
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Return, 2, 0x0D, result);
+
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * This function invokes CanTrcv_GetOpMode and updates the parameter
  * TransceiverModePtr with the value OpMode provided by CanTrcv.
  */
 Std_ReturnType CanIf_GetTrcvMode(uint8 TransceiverId, CanTrcv_TrcvModeType* TransceiverModePtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Start, 3, 0x0E, TransceiverId, TransceiverModePtr);
+
     Std_ReturnType result = E_NOT_OK;
 
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
@@ -792,15 +967,24 @@ Std_ReturnType CanIf_GetTrcvMode(uint8 TransceiverId, CanTrcv_TrcvModeType* Tran
 
         result = Can_TrcvApi[canTrcvDrvId].CanTrcvGetOpModeApi(canTrcvId, TransceiverModePtr);
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Return, 2, 0x0E, result);
+
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * This service returns the reason for the wake up of the transceiver
  * TransceiverId, via calling the corresponding CAN Transceiver Driver service.
  */
 Std_ReturnType CanIf_GetTrcvWakeupReason(uint8 TransceiverId, CanTrcv_TrcvWakeupReasonType* TrcvWuReasonPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Start, 3, 0x0F, TransceiverId, TrcvWuReasonPtr);
+
     Std_ReturnType result = E_NOT_OK;
 
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
@@ -813,14 +997,23 @@ Std_ReturnType CanIf_GetTrcvWakeupReason(uint8 TransceiverId, CanTrcv_TrcvWakeup
 
         result = Can_TrcvApi[canTrcvDrvId].CanTrcvGetBusWuReasonApi(canTrcvId, TrcvWuReasonPtr);
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Return, 2, 0x0F, result);
+
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * This function shall call CanTrcv_SetTrcvWakeupMode.
  */
 Std_ReturnType CanIf_SetTrcvWakeupMode(uint8 TransceiverId, CanTrcv_TrcvWakeupModeType TrcvWakeupMode)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Start, 3, 0x10, TransceiverId, TrcvWakeupMode);
+
     Std_ReturnType result = E_NOT_OK;
 
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
@@ -833,12 +1026,19 @@ Std_ReturnType CanIf_SetTrcvWakeupMode(uint8 TransceiverId, CanTrcv_TrcvWakeupMo
 
         result = Can_TrcvApi[canTrcvDrvId].CanTrcvSetWakeupModeApi(canTrcvId, TrcvWakeupMode);
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Return, 2, 0x10, result);
+
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if (STD_ON == CANIF_WAKEUP_SUPPORT)
 #if (STD_ON == CANIF_CANDRV_WAKE_UP_SUPPORT)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 CANIF_LOCAL Std_ReturnType CanIf_CheckCtrlWakeupHandle(
     const CanIf_CtrlPbConfigType* ctrlPbConfigPtr,
     const CanIf_CtrlConfigType*   ctrlConfigPtr,
@@ -869,9 +1069,13 @@ CANIF_LOCAL Std_ReturnType CanIf_CheckCtrlWakeupHandle(
     }
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if (STD_ON == CANIF_CANTRCV_WAKE_UP_SUPPORT)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 CANIF_LOCAL Std_ReturnType CanIf_CheckTrcvWakeup(ApplicationType partitionIndex, EcuM_WakeupSourceType wakeupSource)
 {
     Std_ReturnType                result          = E_NOT_OK;
@@ -903,14 +1107,20 @@ CANIF_LOCAL Std_ReturnType CanIf_CheckTrcvWakeup(ApplicationType partitionIndex,
     }
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * This service checks, whether an underlying CAN driver or a CAN
  * transceiver driver already signals a wakeup event.
  */
 Std_ReturnType CanIf_CheckWakeup(EcuM_WakeupSourceType WakeupSource)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Start, 2, 0x11, WakeupSource);
+
     Std_ReturnType result = E_NOT_OK;
 
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
@@ -951,11 +1161,19 @@ Std_ReturnType CanIf_CheckWakeup(EcuM_WakeupSourceType WakeupSource)
 #endif
 #endif
     }
+
+    CANIF_NOUSED(WakeupSource);
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Return, 2, 0x11, result);
+
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if (STD_ON == CANIF_PUBLIC_WAKEUP_CHECK_VALID_SUPPORT)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 CANIF_LOCAL Std_ReturnType
     CanIf_CheckValidationHandle(const CanIf_CtrlPbConfigType* ctrlPbConfigPtr, EcuM_WakeupSourceType wakeupSource)
 {
@@ -972,12 +1190,18 @@ CANIF_LOCAL Std_ReturnType
     }
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * This service is performed to validate a previous wakeup event.
  */
 Std_ReturnType CanIf_CheckValidation(EcuM_WakeupSourceType WakeupSource)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Start, 2, 0x12, WakeupSource);
+
     Std_ReturnType result = E_NOT_OK;
 
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
@@ -1005,17 +1229,27 @@ Std_ReturnType CanIf_CheckValidation(EcuM_WakeupSourceType WakeupSource)
             ++ctrlConfigPtr;
         }
     }
+
+    CANIF_NOUSED(WakeupSource);
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Return, 2, 0x12, result);
+
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if (STD_ON == CANIF_PUBLIC_TX_CONFIRM_POLLING_SUPPORT)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * This service reports, if any TX confirmation has been done for the whole
  * CAN controller since the last CAN controller start.
  */
 CanIf_NotifStatusType CanIf_GetTxConfirmationState(uint8 ControllerId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Start, 2, 0x19, ControllerId);
+
     CanIf_NotifStatusType result = CANIF_NO_NOTIFICATION;
 
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
@@ -1032,16 +1266,25 @@ CanIf_NotifStatusType CanIf_GetTxConfirmationState(uint8 ControllerId)
         ctrlRuntimePtr->TxConfirmationState = CANIF_NO_NOTIFICATION;
         SchM_Exit_CanIf_ExclusiveArea_Channel();
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Return, 2, 0x19, result);
+
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if ((STD_ON == CANIF_PUBLIC_PN_SUPPORT) && (STD_ON == CANIF_PUBLIC_TRCV_PN_SUPPORT))
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * Requests the CanIf module to clear the WUF flag of the designated CAN transceiver.
  */
 Std_ReturnType CanIf_ClearTrcvWufFlag(uint8 TransceiverId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Start, 2, 0x1E, TransceiverId);
+
     Std_ReturnType result = E_NOT_OK;
 
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
@@ -1054,14 +1297,23 @@ Std_ReturnType CanIf_ClearTrcvWufFlag(uint8 TransceiverId)
 
         result = Can_TrcvApi[canTrcvDrvId].CanTrcvClearTrcvWufFlagApi(canTrcvId);
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Return, 2, 0x1E, result);
+
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * Requests the CanIf module to check the Wake flag of the designated CAN transceiver.
  */
 Std_ReturnType CanIf_CheckTrcvWakeFlag(uint8 TransceiverId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Start, 2, 0x1F, TransceiverId);
+
     Std_ReturnType result = E_NOT_OK;
 
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
@@ -1074,17 +1326,26 @@ Std_ReturnType CanIf_CheckTrcvWakeFlag(uint8 TransceiverId)
 
         result = Can_TrcvApi[canTrcvDrvId].CanTrcvCheckWakeFlagApi(canTrcvId);
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Return, 2, 0x1F, result);
+
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if (STD_ON == CANIF_SET_BAUDRATE_API)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * This service shall set the baud rate configuration of the CAN controller.
  * Depending on necessary baud rate modifications the controller might have to reset.
  */
 Std_ReturnType CanIf_SetBaudrate(uint8 ControllerId, uint16 BaudRateConfigID)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Start, 3, 0x27, ControllerId, BaudRateConfigID);
+
     Std_ReturnType result = E_NOT_OK;
 
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
@@ -1097,13 +1358,22 @@ Std_ReturnType CanIf_SetBaudrate(uint8 ControllerId, uint16 BaudRateConfigID)
 
         result = Can_DriverApi[canDrvId].CanSetBaudrateApi(canCtrlId, BaudRateConfigID);
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Return, 2, 0x27, result);
+
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if (CANIF_CAN_AUTOSAR_VERSION >= CANIF_CAN_AUTOSAR_R431)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 Std_ReturnType CanIf_GetControllerErrorState(uint8 ControllerId, Can_ErrorStateType* ErrorStatePtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Start, 3, 0x4B, ControllerId, ErrorStatePtr);
+
     Std_ReturnType result = E_NOT_OK;
 
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
@@ -1116,13 +1386,22 @@ Std_ReturnType CanIf_GetControllerErrorState(uint8 ControllerId, Can_ErrorStateT
 
         result = Can_DriverApi[canDrvId].CanGetControllerErrorStateApi(canCtrlId, ErrorStatePtr);
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Return, 2, 0x4B, result);
+
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if (CANIF_CAN_AUTOSAR_VERSION >= CANIF_CAN_AUTOSAR_R440)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 Std_ReturnType CanIf_GetControllerRxErrorCounter(uint8 ControllerId, uint8* RxErrorCounterPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Start, 3, 0x4D, ControllerId, RxErrorCounterPtr);
+
     Std_ReturnType result = E_NOT_OK;
 
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
@@ -1135,11 +1414,20 @@ Std_ReturnType CanIf_GetControllerRxErrorCounter(uint8 ControllerId, uint8* RxEr
 
         result = Can_DriverApi[canDrvId].CanGetControllerRxErrorCounterApi(canCtrlId, RxErrorCounterPtr);
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Return, 2, 0x4D, result);
+
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 Std_ReturnType CanIf_GetControllerTxErrorCounter(uint8 ControllerId, uint8* TxErrorCounterPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Start, 3, 0x4E, ControllerId, TxErrorCounterPtr);
+
     Std_ReturnType result = E_NOT_OK;
 
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
@@ -1152,11 +1440,176 @@ Std_ReturnType CanIf_GetControllerTxErrorCounter(uint8 ControllerId, uint8* TxEr
 
         result = Can_DriverApi[canDrvId].CanGetControllerTxErrorCounterApi(canCtrlId, TxErrorCounterPtr);
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Return, 2, 0x4E, result);
+
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+#endif
+
+#if (STD_ON == CANIF_PUBLIC_BUS_MIRRORING_SUPPORT)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+
+Std_ReturnType CanIf_EnableBusMirroring(uint8 ControllerId, boolean MirroringActive)
+{
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Start, 3, 0x4C, ControllerId, MirroringActive);
+
+    Std_ReturnType result = E_NOT_OK;
+
+#if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
+    if (E_OK == CanIf_ValidateEnableBusMirroring(ControllerId, MirroringActive))
+#endif
+    {
+        const CanIf_CtrlPbConfigType* ctrlPbConfigPtr = &CANIF_CTRL_PBCFG(ControllerId);
+        CanIf_CtrlRuntimeType*        ctrlRuntimePtr  = ctrlPbConfigPtr->RuntimePtr;
+
+        SchM_Enter_CanIf_ExclusiveArea_Channel();
+        if (ctrlRuntimePtr->MirroringActive && !MirroringActive)
+        {
+            CanIf_MirrorFreeTxFrame(ctrlPbConfigPtr);
+        }
+        ctrlRuntimePtr->MirroringActive = MirroringActive;
+        SchM_Exit_CanIf_ExclusiveArea_Channel();
+
+        result = E_OK;
+    }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Return, 2, 0x4C, result);
+
+    return result;
+}
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+#endif
+
+#if (STD_ON == CANIF_GLOBAL_TIME_SUPPORT)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+
+Std_ReturnType CanIf_GetCurrentTime(uint8 Controller, Can_TimeStampType* timeStampPtr)
+{
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Start, 3, 0x51, Controller, timeStampPtr);
+
+    Std_ReturnType result = E_NOT_OK;
+
+#if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
+    if (E_OK == CanIf_ValidateGetCurrentTime(Controller, timeStampPtr))
+#endif
+    {
+        const CanIf_CtrlConfigType* ctrlConfigPtr = &CanIf_CtrlCfgData[Controller];
+        uint8                       canDrvId      = ctrlConfigPtr->CanDriverId;
+        uint8                       canCtrlId     = ctrlConfigPtr->CanCtrlId;
+
+        result = Can_DriverApi[canDrvId].CanGetCurrentTimeApi(canCtrlId, timeStampPtr);
+    }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Return, 2, 0x51, result);
+
+    return result;
+}
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+
+void CanIf_EnableEgressTimeStamp(PduIdType TxPduId)
+{
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Start, 2, 0x52, TxPduId);
+
+#if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
+    if (E_OK == CanIf_ValidateEnableEgressTimeStamp(TxPduId))
+#endif
+    {
+        PduIdType                    txPduIndex     = CanIf_TxPduId2VarIndex(TxPduId);
+        const CanIf_TxPduConfigType* txPduConfigPtr = &CANIF_TXPDU(txPduIndex);
+        Can_HwHandleType             hthIndex       = txPduConfigPtr->CanIfTxPduHthId;
+        const CanIf_HthConfigType*   hthConfigPtr   = &CANIF_HTH(hthIndex);
+        uint8                        ctrlIndex      = hthConfigPtr->CanIfHthCanCtrlId;
+        const CanIf_CtrlConfigType*  ctrlConfigPtr  = &CanIf_CtrlCfgData[ctrlIndex];
+        uint8                        canDrvId       = ctrlConfigPtr->CanDriverId;
+        Can_HwHandleType             canHthId       = hthConfigPtr->CanObjectId;
+
+        Can_DriverApi[canDrvId].CanEnableEgressTimeStampApi(canHthId);
+    }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Return, 1, 0x52);
+}
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+
+Std_ReturnType CanIf_GetEgressTimeStamp(PduIdType TxPduId, Can_TimeStampType* timeStampPtr)
+{
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Start, 3, 0x53, TxPduId, timeStampPtr);
+
+    Std_ReturnType result = E_NOT_OK;
+
+#if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
+    if (E_OK == CanIf_ValidateGetEgressTimeStamp(Controller, timeStampPtr))
+#endif
+    {
+        PduIdType                    txPduIndex     = CanIf_TxPduId2VarIndex(TxPduId);
+        const CanIf_TxPduConfigType* txPduConfigPtr = &CANIF_TXPDU(txPduIndex);
+        Can_HwHandleType             hthIndex       = txPduConfigPtr->CanIfTxPduHthId;
+        const CanIf_HthConfigType*   hthConfigPtr   = &CANIF_HTH(hthIndex);
+        uint8                        ctrlIndex      = hthConfigPtr->CanIfHthCanCtrlId;
+        const CanIf_CtrlConfigType*  ctrlConfigPtr  = &CanIf_CtrlCfgData[ctrlIndex];
+        uint8                        canDrvId       = ctrlConfigPtr->CanDriverId;
+        Can_HwHandleType             canHthId       = hthConfigPtr->CanObjectId;
+
+        result = Can_DriverApi[canDrvId].CanGetEgressTimeStampApi(TxPduId, canHthId, timeStampPtr);
+    }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Return, 2, 0x53, result);
+
+    return result;
+}
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+
+Std_ReturnType CanIf_GetIngressTimeStamp(PduIdType RxPduId, Can_TimeStampType* timeStampPtr)
+{
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Start, 3, 0x54, RxPduId, timeStampPtr);
+
+    Std_ReturnType result = E_NOT_OK;
+
+#if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
+    if (E_OK == CanIf_ValidateGetIngressTimeStamp(Controller, timeStampPtr))
+#endif
+    {
+        PduIdType                    rxPduIndex     = CanIf_RxPduId2VarIndex(RxPduId);
+        const CanIf_RxPduConfigType* rxPduConfigPtr = &CANIF_RXPDU(rxPduIndex);
+        Can_HwHandleType             hrhIndex       = rxPduConfigPtr->CanIfRxPduHrhId;
+        const CanIf_HrhConfigType*   hrhConfigPtr   = &CANIF_HRH(hrhIndex);
+        uint8                        ctrlIndex      = hrhConfigPtr->CanIfHrhCanCtrlId;
+        const CanIf_CtrlConfigType*  ctrlConfigPtr  = &CanIf_CtrlCfgData[ctrlIndex];
+        uint8                        canDrvId       = ctrlConfigPtr->CanDriverId;
+        Can_HwHandleType             canHrhId       = hrhConfigPtr->CanObjectId;
+
+        result = Can_DriverApi[canDrvId].CanGetIngressTimeStampApi(canHrhId, timeStampPtr);
+    }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Return, 2, 0x54, result);
+
+    return result;
+}
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if (STD_ON == CANIF_TRIGGER_TRANSMIT_SUPPORT)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+
 /**
  * Within this API, the upper layer module (called module) shall check
  * whether the available data fits into the buffer size reported by PduInfoPtr-
@@ -1166,6 +1619,8 @@ Std_ReturnType CanIf_GetControllerTxErrorCounter(uint8 ControllerId, uint8* TxEr
  */
 Std_ReturnType CanIf_TriggerTransmit(PduIdType TxPduId, PduInfoType* PduInfoPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Start, 3, 0x41, TxPduId, PduInfoPtr);
+
     Std_ReturnType result = E_NOT_OK;
 
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
@@ -1184,15 +1639,25 @@ Std_ReturnType CanIf_TriggerTransmit(PduIdType TxPduId, PduInfoType* PduInfoPtr)
         }
 #endif
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Return, 2, 0x41, result);
+
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 
 /**
  * This service confirms a previously successfully processed transmission of a CAN TxPDU.
  */
 void CanIf_TxConfirmation(PduIdType CanTxPduId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Start, 2, 0x13, CanTxPduId);
+
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
     if (E_OK == CanIf_ValidateTxConfirmation(CanTxPduId))
 #endif
@@ -1225,6 +1690,13 @@ void CanIf_TxConfirmation(PduIdType CanTxPduId)
         {
             unconfirmedTxPdu = CanIf_ClearUpConfirmTxPduStatus(txPduConfigPtr);
         }
+
+#if (STD_ON == CANIF_PUBLIC_BUS_MIRRORING_SUPPORT)
+        if (ctrlRuntimePtr->MirroringActive)
+        {
+            CanIf_MirrorReportTxFrame(ctrlPbConfigPtr, hthConfigPtr, txPduIndex);
+        }
+#endif
         SchM_Exit_CanIf_ExclusiveArea_Channel();
 
         if (unconfirmedTxPdu)
@@ -1241,7 +1713,14 @@ void CanIf_TxConfirmation(PduIdType CanTxPduId)
         }
 #endif
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Return, 1, 0x13);
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 
 /**
  * This service indicates a successful reception of a received CAN Rx LPDU
@@ -1249,6 +1728,8 @@ void CanIf_TxConfirmation(PduIdType CanTxPduId)
  */
 void CanIf_RxIndication(const Can_HwType* Mailbox, const PduInfoType* PduInfoPtr)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Start, 3, 0x14, Mailbox, PduInfoPtr);
+
 #if ((STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT) || (CANIF_VARIANT_NUMBER > 1u))
     if (E_OK == CanIf_ValidateRxIndication(Mailbox, PduInfoPtr))
 #endif
@@ -1313,6 +1794,13 @@ void CanIf_RxIndication(const Can_HwType* Mailbox, const PduInfoType* PduInfoPtr
             }
 #endif
         }
+
+#if (STD_ON == CANIF_PUBLIC_BUS_MIRRORING_SUPPORT)
+        if (ctrlRuntimePtr->MirroringActive)
+        {
+            Mirror_ReportCanFrame(ctrlIndex, canId, (uint8)PduInfoPtr->SduLength, PduInfoPtr->SduDataPtr);
+        }
+#endif
     }
 
 #if (STD_ON == CANIF_CDD_CANIDS_MODULE_ENABLE)
@@ -1322,7 +1810,14 @@ void CanIf_RxIndication(const Can_HwType* Mailbox, const PduInfoType* PduInfoPtr
         (uint8)PduInfoPtr->SduLength,
         Mailbox->ControllerId);
 #endif
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Return, 1, 0x14);
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 
 /**
  * This service indicates a Controller BusOff event referring to
@@ -1330,6 +1825,8 @@ void CanIf_RxIndication(const Can_HwType* Mailbox, const PduInfoType* PduInfoPtr
  */
 void CanIf_ControllerBusOff(uint8 ControllerId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Start, 2, 0x16, ControllerId);
+
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
     if (E_OK == CanIf_ValidateControllerBusOff(ControllerId))
 #endif
@@ -1358,9 +1855,16 @@ void CanIf_ControllerBusOff(uint8 ControllerId)
             CanIf_DispatchConfigData.CanIfDispatchUserCtrlBusOffName(ctrlIndex);
         }
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Return, 1, 0x16);
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
 #if ((STD_ON == CANIF_PUBLIC_PN_SUPPORT) && (STD_ON == CANIF_PUBLIC_TRCV_PN_SUPPORT))
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+
 /**
  * This service indicates that the transceiver is running in PN
  * communication mode referring to the corresponding CAN transceiver
@@ -1368,6 +1872,8 @@ void CanIf_ControllerBusOff(uint8 ControllerId)
  */
 void CanIf_ConfirmPnAvailability(uint8 TransceiverId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Start, 2, 0x1A, TransceiverId);
+
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
     if (E_OK == CanIf_ValidateConfirmPnAvailability(TransceiverId))
 #endif
@@ -1379,7 +1885,14 @@ void CanIf_ConfirmPnAvailability(uint8 TransceiverId)
             CanIf_DispatchConfigData.CanIfDispatchUserConfirmPnAvailabilityName(trcvIndex);
         }
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Return, 1, 0x1A);
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 
 /**
  * This service indicates that the transceiver has cleared the WufFlag
@@ -1387,6 +1900,8 @@ void CanIf_ConfirmPnAvailability(uint8 TransceiverId)
  */
 void CanIf_ClearTrcvWufFlagIndication(uint8 TransceiverId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Start, 2, 0x20, TransceiverId);
+
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
     if (E_OK == CanIf_ValidateClearTrcvWufFlagIndication(TransceiverId))
 #endif
@@ -1398,7 +1913,14 @@ void CanIf_ClearTrcvWufFlagIndication(uint8 TransceiverId)
             CanIf_DispatchConfigData.CanIfDispatchUserClearTrcvWufFlagIndicationName(trcvIndex);
         }
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Return, 1, 0x20);
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 
 /**
  * This service indicates that the check of the transceiver!/s wake-up flag
@@ -1408,6 +1930,8 @@ void CanIf_ClearTrcvWufFlagIndication(uint8 TransceiverId)
  */
 void CanIf_CheckTrcvWakeFlagIndication(uint8 TransceiverId)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Start, 2, 0x21, TransceiverId);
+
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
     if (E_OK == CanIf_ValidateCheckTrcvWakeFlagIndication(TransceiverId))
 #endif
@@ -1419,8 +1943,15 @@ void CanIf_CheckTrcvWakeFlagIndication(uint8 TransceiverId)
             CanIf_DispatchConfigData.CanIfDispatchUserCheckTrcvWakeFlagIndicationName(trcvIndex);
         }
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Return, 1, 0x21);
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 
 /**
  * This service indicates a controller state transition referring
@@ -1428,6 +1959,8 @@ void CanIf_CheckTrcvWakeFlagIndication(uint8 TransceiverId)
  */
 void CanIf_ControllerModeIndication(uint8 ControllerId, Can_ControllerStateType ControllerMode)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Start, 3, 0x17, ControllerId, ControllerMode);
+
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
     if (E_OK == CanIf_ValidateControllerModeIndication(ControllerId, ControllerMode))
 #endif
@@ -1442,15 +1975,24 @@ void CanIf_ControllerModeIndication(uint8 ControllerId, Can_ControllerStateType 
             CanIf_DispatchConfigData.CanIfDispatchUserCtrlModeIndicationName(ctrlIndex, ControllerMode);
         }
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Return, 1, 0x17);
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
 #if (CANIF_TRCV_NUMBER > 0u)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+
 /**
  * This service indicates a transceiver state transition referring
  * to the corresponding CAN transceiver with the abstract CanIf TransceiverId.
  */
 void CanIf_TrcvModeIndication(uint8 TransceiverId, CanTrcv_TrcvModeType TransceiverMode)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Start, 3, 0x22, TransceiverId, TransceiverMode);
+
 #if (STD_ON == CANIF_PUBLIC_DEV_ERROR_DETECT)
     if (E_OK == CanIf_ValidateTrcvModeIndication(TransceiverId, TransceiverMode))
 #endif
@@ -1462,10 +2004,17 @@ void CanIf_TrcvModeIndication(uint8 TransceiverId, CanTrcv_TrcvModeType Transcei
             CanIf_DispatchConfigData.CanIfDispatchUserTrcvModeIndicationName(trcvIndex, TransceiverMode);
         }
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, CanIf, 0, Bsw_Return, 1, 0x22);
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 /* ========================================== internal function definitions ========================================= */
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+
 /**
  * Set controller state to started
  */
@@ -1483,6 +2032,11 @@ CANIF_LOCAL Std_ReturnType CanIf_SetControllStarted(uint8 canDrvId, uint8 canCtr
     }
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 
 /**
  * Set controller state to sleep
@@ -1528,6 +2082,11 @@ CANIF_LOCAL Std_ReturnType CanIf_SetControllSleep(
     }
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 
 /**
  * Set controller state to stopped
@@ -1589,6 +2148,11 @@ CANIF_LOCAL Std_ReturnType CanIf_SetControllStopped(
 
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 
 /**
  * Check (Basic Can) CanId and find the rxpduId
@@ -1669,6 +2233,11 @@ CANIF_LOCAL Std_ReturnType CanIf_CanIdRangCheck(Can_HwHandleType hrhIndex, CanIf
     }
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 
 /**
  * init all buffer
@@ -1691,7 +2260,15 @@ CANIF_LOCAL void CanIf_InitAllBuffer(ApplicationType partitionIndex)
     /* init the DynamicTxPduCanId with the configured canId */
     CanIf_InitDynamicTxPduCanId(partitionIndex);
     CanIf_InitUpConfirmTxPduStatus(partitionIndex);
+#if (STD_ON == CANIF_PUBLIC_BUS_MIRRORING_SUPPORT)
+    CanIf_MirrorInitBuffer(partitionIndex);
+#endif
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 
 /**
  * Linear search the index of RxPdu Config based on the Hrh and CanId
@@ -1724,8 +2301,13 @@ CANIF_LOCAL Std_ReturnType
 
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
 #if (CANIF_SOFTWARE_FILTER_TYPE == CANIF_SOFTWARE_FILTER_BINARY)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+
 /**
  * Binary search the index of RxPdu Config based on the Hrh and CanId
  */
@@ -1772,9 +2354,14 @@ CANIF_LOCAL Std_ReturnType
 
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 /* PRQA S 5017, 3120, 6030 ++ */ /* VL_CanIf_5017, VL_QAC_MagicNum, VL_MTR_CanIf_STMIF */
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+
 /**
  * Get the index of RxPdu Config based on the RxPdu Config and CAN ID
  */
@@ -1845,7 +2432,12 @@ CANIF_LOCAL Std_ReturnType CanIf_GetPduHrh(const CanIf_RxPduConfigType* rxPduCon
     }
     return result;
 }
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 /* PRQA S 5017, 3120, 6030 -- */
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 
 /**
  * do RxIndication Handle with the correct rxPuIndex

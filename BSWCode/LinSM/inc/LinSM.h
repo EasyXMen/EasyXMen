@@ -41,6 +41,7 @@
  *                                      2. LinSM is UNINIT, NetworkHandle is NULL_PTR.
  *  V02.00.08 2024-03-09  shengnan.sun  Support multiple partition feature.
  *  V02.00.09 2024-07-10  caihong.liu   Remove the LINSM_GOTOSLEEP_TIMER requirement
+ *  V02.00.10 2026-06-03  xiaojian.liang CPTASK-1133: Add ARTI stub functions and ARTI_TRACE_N instrumentation.
  ==================================================================================================================== */
 
 /* ================================================ misar justifications ============================================ */
@@ -65,10 +66,10 @@
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
 
-    \li VL_LinSM_AlwaysFalse
-      Reason: Generation because of the configurations.
+    \li VL_LinSM_1512
+      Reason: Identifier '${name}' with external linkage has separate declarations in multiple translation units.
       Risk: No risk.
-      Prevention: None.
+      Prevention: Functional reliability guaranteed by design.
  */
 
 #ifndef LINSM_H_
@@ -95,7 +96,7 @@ extern "C" {
 #define LINSM_SW_PATCH_VERSION            (0u)
 /* ===================================================== macros ===================================================== */
 /** instance id */
-#define LINSM_INSTANCE_ID (uint8)0x00u
+#define LINSM_INSTANCE_ID                 (uint8)0x00u
 
 /** Development errors used by the LinSM module */
 #define LINSM_E_UNINIT              (uint8)0x00u
@@ -108,16 +109,16 @@ extern "C" {
 #define LINSM_E_INVALID_ID          (uint8)0xFFu
 
 /** service id */
-#define LINSM_SERVICE_ID_INIT                         (uint8)0x01u
-#define LINSM_SERVICE_ID_GET_VERSIONINFO              (uint8)0x02u
-#define LINSM_SERVICE_ID_SCHEDULE_REQUEST             (uint8)0x10u
-#define LINSM_SERVICE_ID_GET_CURRENTCOMMODE           (uint8)0x11u
-#define LINSM_SERVICE_ID_REQUEST_COMMODE              (uint8)0x12u
-#define LINSM_SERVICE_ID_SCHEDULEREQUEST_CONFIRMATION (uint8)0x20u
-#define LINSM_SERVICE_ID_GOTOSLEEP_INDICATION         (uint8)0x03u
-#define LINSM_SERVICE_ID_WAKEUP_CONFIRMATION          (uint8)0x21u
-#define LINSM_SERVICE_ID_GOTOSLEEP_CONFIRMATION       (uint8)0x22u
-#define LINSM_SERVICE_ID_MAIN_FUNCTION                (uint8)0x30u
+#define LINSM_SERVICE_ID_INIT                         0x01u
+#define LINSM_SERVICE_ID_GET_VERSIONINFO              0x02u
+#define LINSM_SERVICE_ID_SCHEDULE_REQUEST             0x10u
+#define LINSM_SERVICE_ID_GET_CURRENTCOMMODE           0x11u
+#define LINSM_SERVICE_ID_REQUEST_COMMODE              0x12u
+#define LINSM_SERVICE_ID_SCHEDULEREQUEST_CONFIRMATION 0x20u
+#define LINSM_SERVICE_ID_GOTOSLEEP_INDICATION         0x03u
+#define LINSM_SERVICE_ID_WAKEUP_CONFIRMATION          0x21u
+#define LINSM_SERVICE_ID_GOTOSLEEP_CONFIRMATION       0x22u
+#define LINSM_SERVICE_ID_MAIN_FUNCTION                0x30u
 
 /** Runtime error */
 #define LINSM_E_CONFIRMATION_TIMEOUT (uint8)0x00u
@@ -134,6 +135,8 @@ typedef uint8 LinSM_ModeType;
 /* =========================================== external data declarations =========================================== */
 
 /* ========================================= external function declarations ========================================= */
+#define LINSM_START_SEC_CODE
+#include "LinSM_MemMap.h"
 /**
  * @brief       This function initializes the LinSM.
  * @param[in]   ConfigPtr   : Pointer to the LinSM post-build configuration data.
@@ -142,8 +145,12 @@ typedef uint8 LinSM_ModeType;
  * @trace       CPD-56716
  */
 void LinSM_Init(const LinSM_ConfigType* ConfigPtr);
+#define LINSM_STOP_SEC_CODE
+#include "LinSM_MemMap.h"
 
 #if LINSM_MASTER_NODE_SUPPORT == STD_ON
+#define LINSM_START_SEC_CODE
+#include "LinSM_MemMap.h"
 /**
  * @brief       The upper layer requests a schedule table to be changed on one LIN network
  * @param[in]   network   : Identification of the LIN channel.
@@ -160,8 +167,13 @@ void LinSM_Init(const LinSM_ConfigType* ConfigPtr);
  * @trace       CPD-56717
  */
 Std_ReturnType LinSM_ScheduleRequest(NetworkHandleType network, LinIf_SchHandleType schedule);
+#define LINSM_STOP_SEC_CODE
+#include "LinSM_MemMap.h"
 #endif
 
+#if LINSM_VERSION_INFO_API == STD_ON
+#define LINSM_START_SEC_CODE
+#include "LinSM_MemMap.h"
 /**
  * @brief       Function to get the version information of LinSM.
  * @param[in]   versioninfo  : Pointer to where to store the version information of this module.
@@ -169,10 +181,13 @@ Std_ReturnType LinSM_ScheduleRequest(NetworkHandleType network, LinIf_SchHandleT
  * @synchronous TRUE
  * @trace       CPD-56718
  */
-#if LINSM_VERSION_INFO_API == STD_ON
 void LinSM_GetVersionInfo(Std_VersionInfoType* versioninfo);
+#define LINSM_STOP_SEC_CODE
+#include "LinSM_MemMap.h"
 #endif
 
+#define LINSM_START_SEC_CODE
+#include "LinSM_MemMap.h"
 /**
  * @brief       Function to query the current communication mode.
  * @param[in]   network   : Identification of the LIN channel.
@@ -185,7 +200,11 @@ void LinSM_GetVersionInfo(Std_VersionInfoType* versioninfo);
  * @trace       CPD-56719
  */
 Std_ReturnType LinSM_GetCurrentComMode(NetworkHandleType network, ComM_ModeType* mode);
+#define LINSM_STOP_SEC_CODE
+#include "LinSM_MemMap.h"
 
+#define LINSM_START_SEC_CODE
+#include "LinSM_MemMap.h"
 /**
  * @brief       Requesting of a communication mode.
  *              The mode switch will not be made instant. The LinSM will notify the caller when mode transition is made.
@@ -199,8 +218,12 @@ Std_ReturnType LinSM_GetCurrentComMode(NetworkHandleType network, ComM_ModeType*
  * @trace       CPD-56721
  */
 Std_ReturnType LinSM_RequestComMode(NetworkHandleType network, ComM_ModeType mode);
+#define LINSM_STOP_SEC_CODE
+#include "LinSM_MemMap.h"
 
 #if LINSM_MASTER_NODE_SUPPORT == STD_ON
+#define LINSM_START_SEC_CODE
+#include "LinSM_MemMap.h"
 /**
  * @brief       The LinIf module will call this callback when the new requested schedule table is active.
  * @param[in]   network   : Identification of the LIN channel.
@@ -210,9 +233,13 @@ Std_ReturnType LinSM_RequestComMode(NetworkHandleType network, ComM_ModeType mod
  * @trace       CPD-56723
  */
 void LinSM_ScheduleRequestConfirmation(NetworkHandleType network, LinIf_SchHandleType schedule);
+#define LINSM_STOP_SEC_CODE
+#include "LinSM_MemMap.h"
 #endif
 
 #if LINSM_SLAVE_NODE_SUPPORT == STD_ON
+#define LINSM_START_SEC_CODE
+#include "LinSM_MemMap.h"
 /**
  * @brief       The LinIf will call this callback when the go to sleep command is received
  *              on the network or a bus idle timeout occurs.
@@ -222,8 +249,12 @@ void LinSM_ScheduleRequestConfirmation(NetworkHandleType network, LinIf_SchHandl
  * @trace       CPD-56724
  */
 void LinSM_GotoSleepIndication(NetworkHandleType network);
+#define LINSM_STOP_SEC_CODE
+#include "LinSM_MemMap.h"
 #endif
 
+#define LINSM_START_SEC_CODE
+#include "LinSM_MemMap.h"
 /**
  * @brief       The LinIf will call this callback when the go to sleep command
  *              is sent successfully or not sent successfully on the network.
@@ -235,7 +266,11 @@ void LinSM_GotoSleepIndication(NetworkHandleType network);
  * @trace       CPD-56726
  */
 void LinSM_GotoSleepConfirmation(NetworkHandleType network, boolean success);
+#define LINSM_STOP_SEC_CODE
+#include "LinSM_MemMap.h"
 
+#define LINSM_START_SEC_CODE
+#include "LinSM_MemMap.h"
 /**
  * @brief       The LinIf will call this callback when the wake up signal command is sent not successfully/successfully
  * on the network.
@@ -247,7 +282,11 @@ void LinSM_GotoSleepConfirmation(NetworkHandleType network, boolean success);
  * @trace       CPD-56727
  */
 void LinSM_WakeupConfirmation(NetworkHandleType network, boolean success);
+#define LINSM_STOP_SEC_CODE
+#include "LinSM_MemMap.h"
 
+#define LINSM_START_SEC_CODE
+#include "LinSM_MemMap.h"
 /**
  * @brief       Periodic function that runs the timers of different request timeouts.
  * @param[in]   chlIndex  : Index of the LinSM channel
@@ -256,6 +295,8 @@ void LinSM_WakeupConfirmation(NetworkHandleType network, boolean success);
  * @trace       CPD-56722
  */
 void LinSM_MainFunction(LinSM_ChannelIndexType chlIndex);
+#define LINSM_STOP_SEC_CODE
+#include "LinSM_MemMap.h"
 
 #ifdef __cplusplus
 }

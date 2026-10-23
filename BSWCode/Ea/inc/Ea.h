@@ -36,6 +36,8 @@
  *  V03.00.01 2025-03-03  peng.wu         CPT-12915, Fix runtime error report
  *  V03.00.02 2025-11-25  peng.wu         CPT-16556, report fail if lower layer driver is not initialized
  *                                        CPT-15419, Update the result before notify upper layer
+ *  V03.00.03 2026-04-20  peng.wu         Optimize the code
+*   V03.00.04 2026-06-04  tao.yu          add arti
  *
  ==================================================================================================================== */
 
@@ -76,8 +78,8 @@
       Risk: The code is difficult to maintain.
       Prevention: Design and code review, and have a clear structure and annotated code.
 
-    \li VL_Ea_1536
-      Reason: The tag '%1s' is declared but not used within this project.
+    \li VL_Ea_3412
+      Reason: Macro defines an unrecognized code-fragment
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
 
@@ -86,8 +88,8 @@
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
 
-    \li VL_Ea_5004
-      Reason: Parameter passing requires
+    \li VL_Ea_1512
+      Reason: Identifier '${name}' with external linkage has separate declarations in multiple translation units.
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
 
@@ -96,25 +98,15 @@
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
 
-    \li VL_Ea_1512
-      Reason: Identifier '${name}' with external linkage has separate declarations in multiple translation units.
-      Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
-
     \li VL_Ea_2983
-      Reason: the issue shall be avoided in actual running environment and configs.
+      Reason: The issue shall be avoided in actual running environment and configs.
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
 
     \li VL_Ea_2906
-      Reason: Definite: Positive integer value truncated by cast to a smaller unsigned type.
-      Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
-
-    \li VL_Ea_1531
-      Reason: The object '%1s' is referenced in only one translation unit - but not the one in which it is defined.
-      Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
+      Reason:Necessary left shift operation.
+      Risk:High order bits will be lost.
+      Prevention:Code inspection and test of the different configurations in the component test.
 
 */
 
@@ -146,10 +138,10 @@ extern "C" {
 #define EA_AR_RELEASE_REVISION_VERSION 0U  /**< Value of Autosar patch version */
 #define EA_SW_MAJOR_VERSION            3U  /**< Value of module major version */
 #define EA_SW_MINOR_VERSION            0U  /**< Value of module minor version */
-#define EA_SW_PATCH_VERSION            2U  /**< Value of module patch version */
+#define EA_SW_PATCH_VERSION            4U  /**< Value of module patch version */
 
 /* ===================================================== macros ===================================================== */
-/* PRQA S 3414 ++*/ /* VL_Ea_3414 */
+/* PRQA S 3414 ++*/ /* VL_QAC_FctLikeMacro */
 #if !defined(EA_LOCAL)
 #define EA_LOCAL static /**< Defines used as the local keyword for variables or functions */
 #endif
@@ -196,10 +188,16 @@ EA_LOCAL_INLINE void Ea_Det_ReportRunTimeError(uint8 ApiId, uint8 ErrorId)
 
 /* =========================================== external data declarations =========================================== */
 /** Configuration information of this module @range NA*/ /* PRQA S 1512 ++ */ /* VL_Ea_1512 */
+#define EA_START_SEC_CONFIG_DATA_UNSPECIFIED
+#include "Ea_MemMap.h"
 extern const Ea_ConfigType Ea_Config;
+#define EA_STOP_SEC_CONFIG_DATA_UNSPECIFIED
+#include "Ea_MemMap.h"
 /* PRQA S 1512 -- */
 
 /* ========================================= external function declarations ========================================= */
+#define EA_START_SEC_CODE
+#include "Ea_MemMap.h"
 /**
  * @brief       Initializes the EEPROM abstraction module.
  * @param[in]   ConfigPtr: Pointer to the selected configuration set
@@ -208,6 +206,10 @@ extern const Ea_ConfigType Ea_Config;
  * @trace       CPD-77901
  */
 extern void Ea_Init(const Ea_ConfigType* ConfigPtr);
+#define EA_STOP_SEC_CODE
+#include "Ea_MemMap.h"
+#define EA_START_SEC_CODE
+#include "Ea_MemMap.h"
 
 /**
  * @brief       Reads Length bytes of block BlockNumber at offset BlockOffset into the buffer DataBufferPtr.
@@ -223,6 +225,10 @@ extern void Ea_Init(const Ea_ConfigType* ConfigPtr);
  * @trace       CPD-77937
  */
 extern Std_ReturnType Ea_Read(uint16 BlockNumber, uint16 BlockOffset, uint8* DataBufferPtr, uint16 Length);
+#define EA_STOP_SEC_CODE
+#include "Ea_MemMap.h"
+#define EA_START_SEC_CODE
+#include "Ea_MemMap.h"
 
 /**
  * @brief       Writes the contents of the DataBufferPtr to the block BlockNumber.
@@ -236,6 +242,10 @@ extern Std_ReturnType Ea_Read(uint16 BlockNumber, uint16 BlockOffset, uint8* Dat
  * @trace       CPD-77941
  */
 extern Std_ReturnType Ea_Write(uint16 BlockNumber, const uint8* DataBufferPtr);
+#define EA_STOP_SEC_CODE
+#include "Ea_MemMap.h"
+#define EA_START_SEC_CODE
+#include "Ea_MemMap.h"
 
 /**
  * @brief       Cancels the ongoing asynchronous operation.
@@ -244,6 +254,10 @@ extern Std_ReturnType Ea_Write(uint16 BlockNumber, const uint8* DataBufferPtr);
  * @trace       CPD-77938
  */
 extern void Ea_Cancel(void);
+#define EA_STOP_SEC_CODE
+#include "Ea_MemMap.h"
+#define EA_START_SEC_CODE
+#include "Ea_MemMap.h"
 
 /**
  * @brief       Service to return the status
@@ -257,6 +271,10 @@ extern void Ea_Cancel(void);
  * @trace       CPD-77939
  */
 extern MemIf_StatusType Ea_GetStatus(void);
+#define EA_STOP_SEC_CODE
+#include "Ea_MemMap.h"
+#define EA_START_SEC_CODE
+#include "Ea_MemMap.h"
 
 /**
  * @brief       Service to return the job result.
@@ -273,6 +291,10 @@ extern MemIf_StatusType Ea_GetStatus(void);
  * @trace       CPD-77940
  */
 extern MemIf_JobResultType Ea_GetJobResult(void);
+#define EA_STOP_SEC_CODE
+#include "Ea_MemMap.h"
+#define EA_START_SEC_CODE
+#include "Ea_MemMap.h"
 
 /**
  * @brief       Invalidates the block BlockNumber.
@@ -285,8 +307,12 @@ extern MemIf_JobResultType Ea_GetJobResult(void);
  * @trace       CPD-77942
  */
 extern Std_ReturnType Ea_InvalidateBlock(uint16 BlockNumber);
-
+#define EA_STOP_SEC_CODE
+#include "Ea_MemMap.h"
 #if (EA_VERSION_INFO_API == STD_ON)
+#define EA_START_SEC_CODE
+#include "Ea_MemMap.h"
+
 /**
  * @brief       Service to get the version information of EA module.
  * @param[out]  VersionInfoPtr   : Pointer to standard version information structure
@@ -295,7 +321,11 @@ extern Std_ReturnType Ea_InvalidateBlock(uint16 BlockNumber);
  * @trace       CPD-77943
  */
 extern void Ea_GetVersionInfo(Std_VersionInfoType* VersionInfoPtr);
+#define EA_STOP_SEC_CODE
+#include "Ea_MemMap.h"
 #endif
+#define EA_START_SEC_CODE
+#include "Ea_MemMap.h"
 
 /**
  * @brief       Erases the block BlockNumber.
@@ -308,6 +338,10 @@ extern void Ea_GetVersionInfo(Std_VersionInfoType* VersionInfoPtr);
  * @trace       CPD-77944
  */
 extern Std_ReturnType Ea_EraseImmediateBlock(uint16 BlockNumber);
+#define EA_STOP_SEC_CODE
+#include "Ea_MemMap.h"
+#define EA_START_SEC_CODE
+#include "Ea_MemMap.h"
 
 /**
  * @brief       Service to report to this module the successful end of an asynchronous operation.
@@ -316,6 +350,8 @@ extern Std_ReturnType Ea_EraseImmediateBlock(uint16 BlockNumber);
  * @trace       CPD-77936
  */
 extern void Ea_JobEndNotification(void);
+#define EA_STOP_SEC_CODE
+#include "Ea_MemMap.h"
 
 #ifdef __cplusplus
 }

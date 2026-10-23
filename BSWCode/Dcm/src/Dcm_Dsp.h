@@ -38,6 +38,8 @@ extern "C" {
 #endif
 
 /* ========================================= external function declarations ========================================= */
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         Called by DslInternal_SetStateIdle to notify Dsp for confirmation
  * @param[in]     protocolId   : current protocol Id
@@ -48,8 +50,12 @@ extern "C" {
  * @trace         CPD-PLACEHOLDE
  */
 void DspInternal_DcmConfirmation(uint8 protocolId, uint16 connectionId);
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #if (STD_ON == DCM_UDS_0X86)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
+
 /**
  * @brief         Called by Dcm_DemTriggerOnDTCStatus to process roeEvent related to DTC
  * @param[in]     DTCStatusOld : DTC status before change
@@ -60,6 +66,8 @@ void DspInternal_DcmConfirmation(uint8 protocolId, uint16 connectionId);
  * @trace         CPD-PLACEHOLDE
  */
 void DspInternal_handleDTCRoe(Dem_UdsStatusByteType DTCStatusOld, Dem_UdsStatusByteType DTCStatusNew);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 #ifdef __cplusplus
 }

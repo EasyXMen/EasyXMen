@@ -37,12 +37,9 @@ extern "C" {
 /** @brief Jobs PC-config type*/
 typedef struct
 {
-    const Crypto_JobPrimitiveInfoType* jobPrimitiveInfo;
-    uint32                             jobId;
-    uint32                             jobPriority;
-    Crypto_JobRedirectionInfoType*     inOutRedirtRef; /* PRQA S 3432 */ /* VL_Csm_3432 */
-    uint32                             queRef;
-    boolean                            usePort;
+    uint32          queRef;
+    boolean         usePort;
+    Crypto_JobType* jobPtr;
 } Csm_JobsCfgType;
 
 /** @brief configuration of a CSM key*/

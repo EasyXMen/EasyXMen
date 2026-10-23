@@ -36,13 +36,13 @@
 #define DEM_MONITOR_STATUS_INITIAL ((Dem_MonitorStatusType)DEM_MONITOR_STATUS_TNCTOC) /**< Initial value */
 /** Bit mapping within SharedStatus in SatelliteData */
 /** The first debounce status bit within SharedStatus in SatelliteData  */
-#define DEM_DEBOUNCE_STATUS_POS 4u
+#define DEM_DEBOUNCE_STATUS_POS    4u
 /** Bit mask for monitor status bit(s) */
-#define DEM_MONITOR_STATUS (0x3u)
+#define DEM_MONITOR_STATUS         (0x3u)
 /** Bit mask for debounce status bit(s) */
-#define DEM_DEBOUNCE_STATUS (0xF0u)
+#define DEM_DEBOUNCE_STATUS        (0xF0u)
 /** Bit mask for prestore freeze frame status bit */
-#define DEM_PRESTOREFF_STATUS (0x3u)
+#define DEM_PRESTOREFF_STATUS      (0x3u)
 
 /* ========================================== internal function declarations ======================================== */
 /**
@@ -307,6 +307,8 @@ DEM_LOCAL_INLINE Dem_MonitorIdType Dem_GetMonitorIdByEventId(Dem_EventIdType Eve
  */
 DEM_LOCAL_INLINE Dem_EventIdType Dem_SatelliteGetEventId(Dem_SatelliteIdType SatelliteId, Dem_MonitorIdType MonitorId);
 
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Resets the debouncing of an event.
  * @param[in]     EventId: Event Id
@@ -315,6 +317,10 @@ DEM_LOCAL_INLINE Dem_EventIdType Dem_SatelliteGetEventId(Dem_SatelliteIdType Sat
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_SatelliteResetDebounceStatus(Dem_EventIdType EventId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Freeze the debouncing of an event.
@@ -324,6 +330,8 @@ DEM_LOCAL void Dem_SatelliteResetDebounceStatus(Dem_EventIdType EventId);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_SatelliteFreezeDebounceStatus(Dem_EventIdType EventId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 
 #if ((defined(DEM_MAX_FDC_SINCE_LAST_CLEAR)) || (defined(DEM_MAX_FDC_DURING_CURRENT_CYCLE)))
 /**
@@ -383,6 +391,8 @@ DEM_LOCAL_INLINE boolean Dem_SyncSetSatelliteInfo(
     Dem_SatelliteInfoType NewSatelliteInfo);
 
 #if ((defined(DEM_J1939LAMP_STATUS)) && (DEM_INDICATOR_NUMBER > 0u))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         calculate a 'DTC with lamp status' filter for the given client
  * Declaration for Dem_J1939.h
@@ -396,9 +406,13 @@ DEM_LOCAL_INLINE boolean Dem_SyncSetSatelliteInfo(
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL Dem_J1939DcmLampStatusType Dem_CalculateEventJ1939LampStatus(uint8 ClientId, Dem_EventIdType EventId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_DEBOUNCE_COUNTER_STORAGE_NUM > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Restores the given debouncing value of an event.
  * Value is restored, if
@@ -412,6 +426,8 @@ DEM_LOCAL Dem_J1939DcmLampStatusType Dem_CalculateEventJ1939LampStatus(uint8 Cli
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_SatelliteRestoreDebounceValue(Dem_EventIdType EventId, sint16 Value, boolean ExpectedThreshold);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_EVENT_PARTITION_NUMBER > 1u)

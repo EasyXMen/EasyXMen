@@ -25,8 +25,6 @@
 #ifndef BSWM_SWC_H
 #define BSWM_SWC_H
 
-/* PRQA S 1753 EOF */ /* VL_BswM_1753 */
-
 /* =================================================== inclusions =================================================== */
 #include "BswM_Cfg.h"
 
@@ -36,7 +34,7 @@ extern "C" {
 
 #if (                                                                                       \
     (BSWM_SWCMODEREQUEST_ENABLED == STD_ON) || (BSWM_SWCMODENOTIFICATION_ENABLED == STD_ON) \
-    || (BSWM_EVENT_MODE_SWITCH_ERROR_EVENT_ENABLE == STD_ON) || (BSWM_EVENT_MODE_SWITCH_ERROR_EVENT_ENABLE == STD_ON))
+    || (BSWM_EVENT_MODE_SWITCH_ERROR_EVENT_ENABLE == STD_ON) || (BSWM_EVENT_SWITCH_ACK_NOTIFICATION_ENABLE == STD_ON))
 
 /* =============================================== version information ============================================== */
 
@@ -50,6 +48,7 @@ extern "C" {
 
 /* ========================================= external function declarations ========================================= */
 
+#if (BSWM_EVENT_MODE_SWITCH_ERROR_EVENT_ENABLE == STD_ON)
 /**
  * @brief       This is a notification that an error occurred because the partition containing
  *              the mode users of the Mode Declaration Group Prototype was restarted by the RTE.
@@ -61,8 +60,14 @@ extern "C" {
  * @synchronous TRUE
  * @trace       CPD-66345
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 void BswM_SwcModeSwitchErrorNotification(uint16 portId);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
+#endif /*BSWM_EVENT_MODE_SWITCH_ERROR_EVENT_ENABLE == STD_ON*/
 
+#if (BSWM_EVENT_SWITCH_ACK_NOTIFICATION_ENABLE == STD_ON)
 /**
  * @brief       Notifies the system of a mode switch acknowledgment for a specified port
  * @param[in]   portId : The ID of the switch port.
@@ -71,8 +76,14 @@ void BswM_SwcModeSwitchErrorNotification(uint16 portId);
  * @synchronous TRUE
  * @trace       CPD-66346
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 void BswM_SwcModeSwitchAckNotification(uint16 portId);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
+#endif /*BSWM_EVENT_SWITCH_ACK_NOTIFICATION_ENABLE == STD_ON*/
 
+#if (BSWM_SWCMODENOTIFICATION_ENABLED == STD_ON)
 /**
  * @brief       Function called when a SWC has switched a mode.
  * @param[in]   modeGroup : The mode group in which the mode was switched.
@@ -81,8 +92,14 @@ void BswM_SwcModeSwitchAckNotification(uint16 portId);
  * @synchronous TRUE
  * @trace       CPD-66347
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 void BswM_SwcModeNotification(BswM_ModeGroupType modeGroup);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
+#endif /*BSWM_SWCMODENOTIFICATION_ENABLED == STD_ON*/
 
+#if (BSWM_SWCMODEREQUEST_ENABLED == STD_ON)
 /**
  * @brief       Function called when a SWC requests a mode.
  * @param[in]   modeGroup : The mode group in which the mode was requested.
@@ -91,9 +108,12 @@ void BswM_SwcModeNotification(BswM_ModeGroupType modeGroup);
  * @synchronous TRUE
  * @trace       CPD-66348
  */
-/* PRQA S 1501 ++ */ /* VL_BswM_1501 */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 void BswM_SwcModeRequest(BswM_ModeGroupType modeGroup);
-/* PRQA S 1501 -- */
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
+#endif /*BSWM_SWCMODEREQUEST_ENABLED == STD_ON*/
 
 #endif /*BSWM_RTE_ENABLED == STD_ON*/
 

@@ -35,7 +35,7 @@ extern "C" {
 
 /* ===================================================== macros ===================================================== */
 #define S(x, n) (((x) << (n)) | ((x) >> (32 - (n))))
-/* PRQA S 3410 ++ */ /* VL_Crypto_62_General */
+/* PRQA S 3410 ++ */ /* VL_QAC_Crypto */
 #define P(a, b, c, d, e, r, s, f, k)                \
     do                                              \
     {                                               \
@@ -77,7 +77,11 @@ typedef struct
  *
  * @return  None.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_Ripemd160_Starts(Crypto_Ripemd160_Context* ctx);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Updates the RIPEMD-160 context with new input data.
@@ -88,7 +92,11 @@ void Crypto_Ripemd160_Starts(Crypto_Ripemd160_Context* ctx);
  *
  * @return  None.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_Ripemd160_Update(Crypto_Ripemd160_Context* ctx, const uint8* input, uint32 ilen);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Finalizes the RIPEMD-160 context and produces the hash output.
@@ -98,8 +106,22 @@ void Crypto_Ripemd160_Update(Crypto_Ripemd160_Context* ctx, const uint8* input, 
  *
  * @return  None.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_Ripemd160_Finish(Crypto_Ripemd160_Context* ctx, uint8 output[CRYPTO_CONST_20]);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
+/**
+ * \brief          Clear RIPEMD-160 context
+ *
+ * \param ctx      RIPEMD-160 context to be cleared
+ */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+void Crypto_ripemd160_free(Crypto_Ripemd160_Context* ctx);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 /**
  * @brief   Computes the RIPEMD-160 hash of the input data.
  *
@@ -111,7 +133,11 @@ void Crypto_Ripemd160_Finish(Crypto_Ripemd160_Context* ctx, uint8 output[CRYPTO_
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Ripemd160(const uint8* input, uint32 ilen, uint8 output[CRYPTO_CONST_20]);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Processes the RIPEMD-160 hash operation for a given object ID.
@@ -122,7 +148,11 @@ Std_ReturnType Crypto_Ripemd160(const uint8* input, uint32 ilen, uint8 output[CR
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Ripemd160_Process(uint32 objectId);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 #ifdef __cplusplus
 }

@@ -256,8 +256,18 @@ struct pbuf_custom {
 #endif /* PBUF_POOL_FREE_OOSEQ */
 #if LWIP_TCP && TCP_QUEUE_OOSEQ && NO_SYS && PBUF_POOL_FREE_OOSEQ
 #define TCIIP_VAR_PBUF_FREE_OOSEQ_PENDING(coreIndex)    pbuf_free_ooseq_pending[(coreIndex)]
+
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 extern volatile u8_t pbuf_free_ooseq_pending[TCPIP_MULTICORE_NUMBER];
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
+
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void pbuf_free_ooseq(void);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 /** When not using sys_check_timeouts(), call PBUF_CHECK_FREE_OOSEQ()
     at regular intervals from main level to check if ooseq pbufs need to be
     freed! */
@@ -273,52 +283,184 @@ void pbuf_free_ooseq(void);
 /* Initializes the pbuf module. This call is empty for now, but may not be in future. */
 #define pbuf_init()
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 struct pbuf *pbuf_alloc(pbuf_layer l, u16_t length, pbuf_type type);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 struct pbuf *pbuf_alloc_reference(void *payload, u16_t length, pbuf_type type);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #if LWIP_SUPPORT_CUSTOM_PBUF
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 struct pbuf *pbuf_alloced_custom(pbuf_layer l, u16_t length, pbuf_type type,
                                  struct pbuf_custom *p, void *payload_mem,
                                  u16_t payload_mem_len);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif /* LWIP_SUPPORT_CUSTOM_PBUF */
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void pbuf_realloc(struct pbuf *p, u16_t size);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #define pbuf_get_allocsrc(p)          ((p)->type_internal & PBUF_TYPE_ALLOC_SRC_MASK)
 #define pbuf_match_allocsrc(p, type)  (pbuf_get_allocsrc(p) == ((type) & PBUF_TYPE_ALLOC_SRC_MASK))
 #define pbuf_match_type(p, type)      pbuf_match_allocsrc(p, type)
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 u8_t pbuf_header(struct pbuf *p, s16_t header_size);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 u8_t pbuf_header_force(struct pbuf *p, s16_t header_size);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 u8_t pbuf_add_header(struct pbuf *p, size_t header_size_increment);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 u8_t pbuf_add_header_force(struct pbuf *p, size_t header_size_increment);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 u8_t pbuf_remove_header(struct pbuf *p, size_t header_size);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 struct pbuf *pbuf_free_header(struct pbuf *q, u16_t size);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void pbuf_ref(struct pbuf *p);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 u8_t pbuf_free(struct pbuf *p);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 u16_t pbuf_clen(const struct pbuf *p);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void pbuf_cat(struct pbuf *head, struct pbuf *tail);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void pbuf_chain(struct pbuf *head, struct pbuf *tail);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 struct pbuf *pbuf_dechain(struct pbuf *p);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t pbuf_copy(struct pbuf *p_to, const struct pbuf *p_from);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t pbuf_copy_partial_pbuf(struct pbuf *p_to, const struct pbuf *p_from, u16_t copy_len, u16_t offset);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 u16_t pbuf_copy_partial(const struct pbuf *p, void *dataptr, u16_t len, u16_t offset);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void *pbuf_get_contiguous(const struct pbuf *p, void *buffer, size_t bufsize, u16_t len, u16_t offset);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t pbuf_take(struct pbuf *buf, const void *dataptr, u16_t len);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t pbuf_take_at(struct pbuf *buf, const void *dataptr, u16_t len, u16_t offset);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 struct pbuf *pbuf_skip(struct pbuf* in, u16_t in_offset, u16_t* out_offset);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 struct pbuf *pbuf_coalesce(struct pbuf *p, pbuf_layer layer);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 struct pbuf *pbuf_clone(pbuf_layer l, pbuf_type type, struct pbuf *p);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #if LWIP_CHECKSUM_ON_COPY
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t pbuf_fill_chksum(struct pbuf *p, u16_t start_offset, const void *dataptr,
                        u16_t len, u16_t *chksum);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif /* LWIP_CHECKSUM_ON_COPY */
 #if LWIP_TCP && TCP_QUEUE_OOSEQ && LWIP_WND_SCALE
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void pbuf_split_64k(struct pbuf *p, struct pbuf **rest);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif /* LWIP_TCP && TCP_QUEUE_OOSEQ && LWIP_WND_SCALE */
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 u8_t pbuf_get_at(const struct pbuf* p, u16_t offset);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 int pbuf_try_get_at(const struct pbuf* p, u16_t offset);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void pbuf_put_at(struct pbuf* p, u16_t offset, u8_t data);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 u16_t pbuf_memcmp(const struct pbuf* p, u16_t offset, const void* s2, u16_t n);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 u16_t pbuf_memfind(const struct pbuf* p, const void* mem, u16_t mem_len, u16_t start_offset);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 u16_t pbuf_strstr(const struct pbuf* p, const char* substr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #ifdef __cplusplus
 }

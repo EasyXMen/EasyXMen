@@ -56,9 +56,17 @@ typedef enum raw_input_state
 } raw_input_state_t;
 
 /* The following functions are the lower layer interface to RAW. */
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 raw_input_state_t raw_input(struct pbuf *p, struct netif *inp);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void raw_netif_ip_addr_changed(const ip_addr_t* old_addr, const ip_addr_t* new_addr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #ifdef __cplusplus
 }

@@ -50,11 +50,11 @@
  *                                       2. Replace the std library with the istd library
  *                                       3. CPD-33700 Multiple partition support
  *  V02.01.00 2024-12-30  caihong.liu  R23-11 development first release.
- *  V02.01.01 2025-10-22  caihong.liu
- *      1. Fixed CPT-14266, Redundant passive wake-up event flags lead to repeated wake-up actions.
- *      2. Fixed CPT-14866, Fixed race condition in ReadySleepState causing unhandled CanNm_RepeatMessageRequest due to
- *         immediate transition to PrepareBusSleepMode.
- *      3. Fixed CPT-14491, state machine stuck in ReadySleepState due to nmTimeoutTimer is 0 but nmToutFlg is FALSE.
+ *  V02.01.01 2026-06-03  zerui.jiang    1. CanNm_Transmit: Replaced the delayed transmission using SendNmMsgFlg with
+ *                                       an immediate transmission by directly calling CanIf_Transmit.
+ *                                       2. User Manual: Added a description of the configuration constraints regarding
+ *                                       the conflict between Nm_StateChangeNotification and CanNmMsgCycleOffset.
+ *  V02.01.02 2026-06-03  xiaojian.liang CPTASK-1133: Add ARTI stub functions and ARTI_TRACE_N instrumentation.
  ==================================================================================================================== */
 
 /* ================================================ misar justifications ============================================ */
@@ -65,6 +65,22 @@
 
     \li VL_CanNm_3408
       Reason:Configuration parameter, design needs.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_CanNm_1512
+      Reason: Identifier '${name}' with external linkage has separate declarations in multiple translation units.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_CanNm_3673
+      Reason: Parameter passing requires
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_MTR_CanNm_STCAL
+      Reason: The standard compliance vote was higher than the measurement threshold. In addition, a typical way to
+    reduce STCAL is to deepen function nesting, which increases call stack usage and runtime.
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
  */
@@ -88,14 +104,14 @@ extern "C" {
  * @brief Published Information
  */
 #define CANNM_VENDOR_ID                   (62u)
-#define CANNM_MODULE_ID                   (31u)
+#define CANNM_MODULE_ID                   (33u)
 #define CANNM_INSTANCE_ID                 (0u)
 #define CANNM_AR_RELEASE_MAJOR_VERSION    (4u)
 #define CANNM_AR_RELEASE_MINOR_VERSION    (9u)
 #define CANNM_AR_RELEASE_REVISION_VERSION (0u)
 #define CANNM_SW_MAJOR_VERSION            (2u)
 #define CANNM_SW_MINOR_VERSION            (1u)
-#define CANNM_SW_PATCH_VERSION            (1u)
+#define CANNM_SW_PATCH_VERSION            (0u)
 /** @} */
 
 /* ===================================================== macros ===================================================== */
@@ -122,30 +138,30 @@ extern "C" {
  * @{
  * @brief Service ID
  */
-#define CANNM_SERVICE_ID_INIT                       ((uint8)(0x00u))
-#define CANNM_SERVICE_ID_DEINIT                     ((uint8)(0x10u))
-#define CANNM_SERVICE_ID_PASSIVESTARUP              ((uint8)(0x01u))
-#define CANNM_SERVICE_ID_NETWORKREQUEST             ((uint8)(0x02u))
-#define CANNM_SERVICE_ID_NETWORKRELEASE             ((uint8)(0x03u))
-#define CANNM_SERVICE_ID_DISABLECOMMUNICATION       ((uint8)(0x0cu))
-#define CANNM_SERVICE_ID_ENABLECOMMUNICATION        ((uint8)(0x0du))
-#define CANNM_SERVICE_ID_SETUSERDATA                ((uint8)(0x04u))
-#define CANNM_SERVICE_ID_GETUSERDATA                ((uint8)(0x05u))
-#define CANNM_SERVICE_ID_TRANSMIT                   ((uint8)(0x14u))
-#define CANNM_SERVICE_ID_GETNODEIDENTIFIER          ((uint8)(0x06u))
-#define CANNM_SERVICE_ID_GETLOCALNODEIDENTIFIER     ((uint8)(0x07u))
-#define CANNM_SERVICE_ID_REPEATMESSAGEREQUEST       ((uint8)(0x08u))
-#define CANNM_SERVICE_ID_GETPDUDATA                 ((uint8)(0x0au))
-#define CANNM_SERVICE_ID_GETSTATE                   ((uint8)(0x0bu))
-#define CANNM_SERVICE_ID_GETVERSIONINFO             ((uint8)(0xf1u))
-#define CANNM_SERVICE_ID_REQUESTBUSSYNCHRONIZATION  ((uint8)(0xc0u))
-#define CANNM_SERVICE_ID_CHECKREMOTESLEEPINDICATION ((uint8)(0xd0u))
-#define CANNM_SERVICE_ID_SETSLEEPREADYBIT           ((uint8)(0x17u))
-#define CANNM_SERVICE_ID_TXCONFIRMATION             ((uint8)(0x40u))
-#define CANNM_SERVICE_ID_RXINDICATION               ((uint8)(0x42u))
-#define CANNM_SERVICE_ID_CONFIRMPNAVAILABILITY      ((uint8)(0x16u))
-#define CANNM_SERVICE_ID_TRIGGERTRANSMIT            ((uint8)(0x41u))
-#define CANNM_SERVICE_ID_MAINFUNCTION               ((uint8)(0x13u))
+#define CANNM_SERVICE_ID_INIT                       0x00u
+#define CANNM_SERVICE_ID_DEINIT                     0x10u
+#define CANNM_SERVICE_ID_PASSIVESTARUP              0x01u
+#define CANNM_SERVICE_ID_NETWORKREQUEST             0x02u
+#define CANNM_SERVICE_ID_NETWORKRELEASE             0x03u
+#define CANNM_SERVICE_ID_DISABLECOMMUNICATION       0x0cu
+#define CANNM_SERVICE_ID_ENABLECOMMUNICATION        0x0du
+#define CANNM_SERVICE_ID_SETUSERDATA                0x04u
+#define CANNM_SERVICE_ID_GETUSERDATA                0x05u
+#define CANNM_SERVICE_ID_GETNODEIDENTIFIER          0x06u
+#define CANNM_SERVICE_ID_GETLOCALNODEIDENTIFIER     0x07u
+#define CANNM_SERVICE_ID_REPEATMESSAGEREQUEST       0x08u
+#define CANNM_SERVICE_ID_GETPDUDATA                 0x0au
+#define CANNM_SERVICE_ID_GETSTATE                   0x0bu
+#define CANNM_SERVICE_ID_GETVERSIONINFO             0xf1u
+#define CANNM_SERVICE_ID_REQUESTBUSSYNCHRONIZATION  0xc0u
+#define CANNM_SERVICE_ID_CHECKREMOTESLEEPINDICATION 0xd0u
+#define CANNM_SERVICE_ID_SETSLEEPREADYBIT           0x17u
+#define CANNM_SERVICE_ID_TRANSMIT                   0x14u
+#define CANNM_SERVICE_ID_TXCONFIRMATION             0x40u
+#define CANNM_SERVICE_ID_RXINDICATION               0x42u
+#define CANNM_SERVICE_ID_CONFIRMPNAVAILABILITY      0x16u
+#define CANNM_SERVICE_ID_TRIGGERTRANSMIT            0x41u
+#define CANNM_SERVICE_ID_MAINFUNCTION               0x13u
 /** @} */
 
 /* ================================================ type definitions ================================================ */
@@ -153,6 +169,8 @@ extern "C" {
 /* ========================================== internal function definitions ========================================= */
 
 /******************************************************************************/
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       Initialize the CanNm module.
  * @param[in]   CanNmConfigPtr : Pointer to a selected configuration structure.
@@ -161,7 +179,11 @@ extern "C" {
  * @trace       CPD-70050
  */
 void CanNm_Init(const CanNm_ConfigType* CanNmConfigPtr);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       De-initializes the CanNm module.
  * @reentrant   FALSE
@@ -169,7 +191,11 @@ void CanNm_Init(const CanNm_ConfigType* CanNmConfigPtr);
  * @trace       CPD-70051
  */
 void CanNm_DeInit(void);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       Passive startup of the AUTOSAR CAN NM. It triggers the transition from Bus-Sleep Mode or Prepare Bus
  * Sleep Mode to the Network Mode in Repeat Message State.
@@ -182,8 +208,12 @@ void CanNm_DeInit(void);
  * @trace       CPD-70052
  */
 Std_ReturnType CanNm_PassiveStartUp(NetworkHandleType nmChannelHandle);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 
 #if CANNM_PASSIVE_MODE_ENABLED == STD_OFF
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       Request the network, since ECU needs to communicate on the bus.
  * @param[in]   nmChannelHandle : Identification of the NM-channel.
@@ -195,7 +225,11 @@ Std_ReturnType CanNm_PassiveStartUp(NetworkHandleType nmChannelHandle);
  * @trace       CPD-70053
  */
 Std_ReturnType CanNm_NetworkRequest(NetworkHandleType nmChannelHandle);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       Release the network, since ECU doesn't have to communicate on the bus.
  * @param[in]   nmChannelHandle : Identification of the NM-channel
@@ -207,9 +241,13 @@ Std_ReturnType CanNm_NetworkRequest(NetworkHandleType nmChannelHandle);
  * @trace       CPD-70054
  */
 Std_ReturnType CanNm_NetworkRelease(NetworkHandleType nmChannelHandle);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 #endif
 
 #if CANNM_COM_CONTROL_ENABLED == STD_ON
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       Disable the NM PDU transmission ability due to a ISO14229 Communication Control (28hex) service.
  * @param[in]   nmChannelHandle : Identification of the NM-channel
@@ -221,7 +259,11 @@ Std_ReturnType CanNm_NetworkRelease(NetworkHandleType nmChannelHandle);
  * @trace       CPD-70055
  */
 Std_ReturnType CanNm_DisableCommunication(NetworkHandleType nmChannelHandle);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       Enable the NM PDU transmission ability due to a ISO14229 Communication Control (28hex) service.
  * @param[in]   nmChannelHandle : Identification of the NM-channel
@@ -233,10 +275,14 @@ Std_ReturnType CanNm_DisableCommunication(NetworkHandleType nmChannelHandle);
  * @trace       CPD-70056
  */
 Std_ReturnType CanNm_EnableCommunication(NetworkHandleType nmChannelHandle);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 #endif
 
 #if (CANNM_USER_DATA_ENABLED == STD_ON) && (CANNM_COM_USERDATA_SUPPORT == STD_OFF) \
     && (CANNM_PASSIVE_MODE_ENABLED == STD_OFF)
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       Set user data for NM PDUs transmitted next on the bus.
  * @param[in]   nmChannelHandle : Identification of the NM-channel
@@ -249,9 +295,13 @@ Std_ReturnType CanNm_EnableCommunication(NetworkHandleType nmChannelHandle);
  * @trace       CPD-70057
  */
 Std_ReturnType CanNm_SetUserData(NetworkHandleType nmChannelHandle, const uint8* nmUserDataPtr);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 #endif
 
 #if CANNM_USER_DATA_ENABLED == STD_ON
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       Get user data out of the most recently received NM PDU.
  * @param[in]   nmChannelHandle : Identification of the NM-channel
@@ -264,23 +314,12 @@ Std_ReturnType CanNm_SetUserData(NetworkHandleType nmChannelHandle, const uint8*
  * @trace       CPD-70058
  */
 Std_ReturnType CanNm_GetUserData(NetworkHandleType nmChannelHandle, uint8* nmUserDataPtr);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 #endif
 
-#if CANNM_COM_USERDATA_SUPPORT == STD_ON
-/**
- * @brief       Requests transmission of a PDU.
- * @param[in]   TxPduId    : Identifier of the PDU to be transmitted
- * @param[in]   PduInfoPtr : Length of and pointer to the PDU data and pointer to MetaData.
- * @return      Std_ReturnType
- * @retval      E_OK     : Transmit request has been accepted.
- * @retval      E_NOT_OK : Transmit request has not been accepted.
- * @reentrant   TRUE(but not for the same PduIds)
- * @synchronous TRUE
- * @trace       CPD-70059
- */
-Std_ReturnType CanNm_Transmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr);
-#endif
-
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       Get node identifier out of the most recently received NM PDU.
  * @param[in]   nmChannelHandle : Identification of the NM-channel
@@ -295,7 +334,11 @@ Std_ReturnType CanNm_Transmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr);
  * @trace       CPD-70060
  */
 Std_ReturnType CanNm_GetNodeIdentifier(NetworkHandleType nmChannelHandle, uint8* nmNodeIdPtr);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       Get node identifier configured for the local node.
  * @param[in]   nmChannelHandle : Identification of the NM-channel
@@ -309,7 +352,11 @@ Std_ReturnType CanNm_GetNodeIdentifier(NetworkHandleType nmChannelHandle, uint8*
  * @trace       CPD-70061
  */
 Std_ReturnType CanNm_GetLocalNodeIdentifier(NetworkHandleType nmChannelHandle, uint8* nmNodeIdPtr);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       Set Repeat Message Request Bit for NM PDUs transmitted next on the bus.
  * @param[in]   nmChannelHandle : Identification of the NM-channel
@@ -322,7 +369,11 @@ Std_ReturnType CanNm_GetLocalNodeIdentifier(NetworkHandleType nmChannelHandle, u
  * @trace       CPD-70062
  */
 Std_ReturnType CanNm_RepeatMessageRequest(NetworkHandleType nmChannelHandle);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       Get the whole PDU data out of the most recently received NM PDU.
  * @param[in]   nmChannelHandle : Identification of the NM-channel
@@ -335,7 +386,11 @@ Std_ReturnType CanNm_RepeatMessageRequest(NetworkHandleType nmChannelHandle);
  * @trace       CPD-70063
  */
 Std_ReturnType CanNm_GetPduData(NetworkHandleType nmChannelHandle, uint8* nmPduDataPtr);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       Returns the state and the mode of the network management.
  * @param[in]   nmChannelHandle : Identification of the NM-channel
@@ -349,8 +404,12 @@ Std_ReturnType CanNm_GetPduData(NetworkHandleType nmChannelHandle, uint8* nmPduD
  * @trace       CPD-70064
  */
 Std_ReturnType CanNm_GetState(NetworkHandleType nmChannelHandle, Nm_StateType* nmStatePtr, Nm_ModeType* nmModePtr);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 
 #if CANNM_VERSION_INFO_API == STD_ON
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       This service returns the version information of this module.
  * @param[out]   versioninfo : Pointer to where to store the version information of this module.
@@ -359,9 +418,13 @@ Std_ReturnType CanNm_GetState(NetworkHandleType nmChannelHandle, Nm_StateType* n
  * @trace       CPD-70065
  */
 void CanNm_GetVersionInfo(Std_VersionInfoType* versioninfo);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 #endif
 
 #if (CANNM_BUS_SYNCHRONIZATION_ENABLED == STD_ON) && (CANNM_PASSIVE_MODE_ENABLED == STD_OFF)
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       Request bus synchronization.
  * @param[in]   nmChannelHandle   : Identification of the NM-channel
@@ -373,9 +436,13 @@ void CanNm_GetVersionInfo(Std_VersionInfoType* versioninfo);
  * @trace       CPD-70066
  */
 Std_ReturnType CanNm_RequestBusSynchronization(NetworkHandleType nmChannelHandle);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 #endif
 
 #if CANNM_REMOTE_SLEEP_IND_ENABLED == STD_ON
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       Check if remote sleep indication takes place or not.
  * @param[in]   nmChannelHandle   : Identification of the NM-channel
@@ -388,9 +455,13 @@ Std_ReturnType CanNm_RequestBusSynchronization(NetworkHandleType nmChannelHandle
  * @trace       CPD-70067
  */
 Std_ReturnType CanNm_CheckRemoteSleepIndication(NetworkHandleType nmChannelHandle, boolean* nmRemoteSleepIndPtr);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 #endif
 
 #if CANNM_COORDINATOR_SYNC_SUPPORT == STD_ON
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       Set the NM Coordinator Sleep Ready bit in the Control Bit Vector.
  * @param[in]   nmChannelHandle   : Identification of the NM-channel
@@ -403,8 +474,31 @@ Std_ReturnType CanNm_CheckRemoteSleepIndication(NetworkHandleType nmChannelHandl
  * @trace       CPD-70068
  */
 Std_ReturnType CanNm_SetSleepReadyBit(NetworkHandleType nmChannelHandle, boolean nmSleepReadyBit);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 #endif
 
+#if CANNM_COM_USERDATA_SUPPORT == STD_ON
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
+/**
+ * @brief       Requests transmission of a PDU.
+ * @param[in]   TxPduId    : Identifier of the PDU to be transmitted
+ * @param[in]   PduInfoPtr : Length of and pointer to the PDU data and pointer to MetaData.
+ * @return      Std_ReturnType
+ * @retval      E_OK     : Transmit request has been accepted.
+ * @retval      E_NOT_OK : Transmit request has not been accepted.
+ * @reentrant   TRUE(but not for the same PduIds)
+ * @synchronous TRUE
+ * @trace       CPD-70059
+ */
+Std_ReturnType CanNm_Transmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
+#endif
+
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       Indication of a received PDU from a lower layer communication interface module.
  * @param[in]   RxPduId    : ID of the received PDU.
@@ -415,8 +509,12 @@ Std_ReturnType CanNm_SetSleepReadyBit(NetworkHandleType nmChannelHandle, boolean
  * @trace       CPD-70070
  */
 void CanNm_RxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 
 #if (CANNM_IMMEDIATE_TXCONF_ENABLED == STD_OFF) && (CANNM_PASSIVE_MODE_ENABLED == STD_OFF)
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       The lower layer communication interface module confirms the transmission of a PDU, or the failure to
  *              transmit a PDU.
@@ -428,9 +526,13 @@ void CanNm_RxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr);
  * @trace       CPD-70069
  */
 void CanNm_TxConfirmation(PduIdType TxPduId, Std_ReturnType result);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 #endif
 
 #if CANNM_GLOBAL_PN_SUPPORT == STD_ON
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       Enables the PN filter functionality on the indicated NM channel.
  * @param[in]   nmChannelHandle   : Identification of the NM-channel.
@@ -439,9 +541,13 @@ void CanNm_TxConfirmation(PduIdType TxPduId, Std_ReturnType result);
  * @trace       CPD-70071
  */
 void CanNm_ConfirmPnAvailability(NetworkHandleType nmChannelHandle);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 #endif
 
 #if CANNM_TRIGGER_TRANSMIT_API == STD_ON
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief        Within this API, the upper layer module (called module) shall check whether the available data fits
  *               into the buffer size reported by PduInfoPtr->SduLength.
@@ -458,8 +564,12 @@ void CanNm_ConfirmPnAvailability(NetworkHandleType nmChannelHandle);
  * @trace       CPD-70072
  */
 Std_ReturnType CanNm_TriggerTransmit(PduIdType TxPduId, PduInfoType* PduInfoPtr);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 #endif
 
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief        Main function of the CanNm which processes the algorithm describes in that document.
  * @param[in]    chIndex    : Identification of the NM-channel
@@ -468,6 +578,9 @@ Std_ReturnType CanNm_TriggerTransmit(PduIdType TxPduId, PduInfoType* PduInfoPtr)
  * @trace       CPD-70073
  */
 void CanNm_MainFunction(CanNm_ChannelIndexType chIndex);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
+
 /* =========================================== external data declarations =========================================== */
 
 /* ========================================= external function declarations ========================================= */

@@ -22,14 +22,15 @@
  **
  ***********************************************************************************************************************/
 /* PRQA S 1532 EOF */ /* VL_QAC_OneFunRef */
+/* PRQA S 3120 EOF */ /* VL_QAC_MagicNum */
 /* PRQA S 3673 EOF */ /* VL_QAC_3673 */
+/* PRQA S 1505 EOF */ /* VL_TcpIp_1505 */
 /* PRQA S 6030 EOF */ /* VL_MTR_TcpIp_STMIF */
 /* PRQA S 6040 EOF */ /* VL_MTR_TcpIp_STPAR */
-/* PRQA S 1501 EOF */ /* VL_TcpIp_1501 */
-/* PRQA S 1753 EOF */ /* VL_TcpIp_1753 */
 /* =================================================== inclusions =================================================== */
 #include "Os_Types.h"
 #include "ComStack_Types.h"
+
 #include "TcpIp_Cfg.h"
 #include "TcpIp_PBcfg.h"
 #include "TcpIp_Types.h"
@@ -51,30 +52,8 @@
 /* ================================================ type definitions ================================================ */
 
 /* ========================================== internal function declarations ======================================== */
-/**
- * @brief              Development error validation for partition.
- * @param[in]          apiId: service ID of API
- * @param[in]          partitionIndex: index of partition
- * @return             Std_ReturnType
- * @synchronous        TRUE
- * @reentrant          FALSE
- * @trace              CPD-PLACEHOLDER
- */
-TCPIP_LOCAL Std_ReturnType TcpIp_ValidatePartition(uint8 apiId, ApplicationType partitionIndex);
-
-/**
- * @brief              Development error validation for socket.
- * @param[in]          apiId: service ID of API
- * @param[in]          partitionIndex: index of partition
- * @param[in]          socketId: ID of socket
- * @return             Std_ReturnType
- * @synchronous        TRUE
- * @reentrant          FALSE
- * @trace              CPD-PLACEHOLDER
- */
-TCPIP_LOCAL Std_ReturnType
-    TcpIp_ValidateSocket(uint8 apiId, ApplicationType partitionIndex, TcpIp_SocketIdType socketId);
-
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief              Development error validation for local address.
  * @param[in]          apiId: service ID of API
@@ -87,15 +66,17 @@ TCPIP_LOCAL Std_ReturnType
  */
 TCPIP_LOCAL Std_ReturnType
     TcpIp_ValidateLocalAddr(uint8 apiId, ApplicationType partitionIndex, TcpIp_LocalAddrIdType localAddrId);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 /* ============================================ internal data definitions =========================================== */
 
 /* ============================================ external data definitions =========================================== */
 
 /* ========================================== external function definitions ========================================= */
+
 #define TCPIP_START_SEC_CODE
 #include "TcpIp_MemMap.h"
-
 Std_ReturnType TcpIp_ValidateInit(const TcpIp_ConfigType* ConfigPtr)
 {
     Std_ReturnType ret     = E_NOT_OK;
@@ -126,8 +107,12 @@ Std_ReturnType TcpIp_ValidateInit(const TcpIp_ConfigType* ConfigPtr)
     }
     return ret;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if (STD_ON == TCPIP_VERSION_INFO_API)
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 Std_ReturnType TcpIp_ValidateGetVersionInfo(Std_VersionInfoType* versioninfo)
 {
     Std_ReturnType ret   = E_NOT_OK;
@@ -144,8 +129,12 @@ Std_ReturnType TcpIp_ValidateGetVersionInfo(Std_VersionInfoType* versioninfo)
 
     return ret;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 Std_ReturnType TcpIp_ValidateClose(TcpIp_SocketIdType SocketId, boolean Abort)
 {
     Std_ReturnType  ret            = E_NOT_OK;
@@ -158,7 +147,7 @@ Std_ReturnType TcpIp_ValidateClose(TcpIp_SocketIdType SocketId, boolean Abort)
     {
         /* do nothing */
     }
-    else if (E_OK != TcpIp_ValidateSocket(apiId, partitionIndex, SocketId))
+    else if (E_OK != TcpIp_ValidateSocket(apiId, partitionIndex, SocketId, TCPIP_UNUSED_UINT8))
     {
         /* do nothing */
     }
@@ -169,7 +158,11 @@ Std_ReturnType TcpIp_ValidateClose(TcpIp_SocketIdType SocketId, boolean Abort)
 
     return ret;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 Std_ReturnType TcpIp_ValidateBind(TcpIp_SocketIdType SocketId, TcpIp_LocalAddrIdType LocalAddrId, uint16* PortPtr)
 {
     Std_ReturnType  ret            = E_NOT_OK;
@@ -181,7 +174,7 @@ Std_ReturnType TcpIp_ValidateBind(TcpIp_SocketIdType SocketId, TcpIp_LocalAddrId
     {
         /* do nothing */
     }
-    else if (E_OK != TcpIp_ValidateSocket(apiId, partitionIndex, SocketId))
+    else if (E_OK != TcpIp_ValidateSocket(apiId, partitionIndex, SocketId, TCPIP_UNUSED_UINT8))
     {
         /* do nothing */
     }
@@ -204,8 +197,12 @@ Std_ReturnType TcpIp_ValidateBind(TcpIp_SocketIdType SocketId, TcpIp_LocalAddrId
     }
     return ret;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if (STD_ON == TCPIP_TCP_ENABLED)
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 Std_ReturnType TcpIp_ValidateTcpConnect(TcpIp_SocketIdType SocketId, const TcpIp_SockAddrType* RemoteAddrPtr)
 {
     Std_ReturnType  ret            = E_NOT_OK;
@@ -217,7 +214,7 @@ Std_ReturnType TcpIp_ValidateTcpConnect(TcpIp_SocketIdType SocketId, const TcpIp
     {
         /* do nothing */
     }
-    else if (E_OK != TcpIp_ValidateSocket(apiId, partitionIndex, SocketId))
+    else if (E_OK != TcpIp_ValidateSocket(apiId, partitionIndex, SocketId, TCPIP_IPPROTO_TCP))
     {
         /* do nothing */
     }
@@ -236,7 +233,11 @@ Std_ReturnType TcpIp_ValidateTcpConnect(TcpIp_SocketIdType SocketId, const TcpIp
     }
     return ret;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 Std_ReturnType TcpIp_ValidateTcpListen(TcpIp_SocketIdType SocketId, uint16 MaxChannels)
 {
     Std_ReturnType  ret            = E_NOT_OK;
@@ -249,7 +250,7 @@ Std_ReturnType TcpIp_ValidateTcpListen(TcpIp_SocketIdType SocketId, uint16 MaxCh
     {
         /* do nothing */
     }
-    else if (E_OK != TcpIp_ValidateSocket(apiId, partitionIndex, SocketId))
+    else if (E_OK != TcpIp_ValidateSocket(apiId, partitionIndex, SocketId, TCPIP_IPPROTO_TCP))
     {
         /* do nothing */
     }
@@ -260,7 +261,11 @@ Std_ReturnType TcpIp_ValidateTcpListen(TcpIp_SocketIdType SocketId, uint16 MaxCh
 
     return ret;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 Std_ReturnType TcpIp_ValidateTcpReceived(TcpIp_SocketIdType SocketId, uint32 Length)
 {
     Std_ReturnType  ret            = E_NOT_OK;
@@ -273,7 +278,7 @@ Std_ReturnType TcpIp_ValidateTcpReceived(TcpIp_SocketIdType SocketId, uint32 Len
     {
         /* do nothing */
     }
-    else if (E_OK != TcpIp_ValidateSocket(apiId, partitionIndex, SocketId))
+    else if (E_OK != TcpIp_ValidateSocket(apiId, partitionIndex, SocketId, TCPIP_IPPROTO_TCP))
     {
         /* do nothing */
     }
@@ -284,8 +289,12 @@ Std_ReturnType TcpIp_ValidateTcpReceived(TcpIp_SocketIdType SocketId, uint32 Len
 
     return ret;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 Std_ReturnType TcpIp_ValidateRequestComMode(uint8 CtrlIdx, TcpIp_StateType State)
 {
     Std_ReturnType  ret            = E_NOT_OK;
@@ -316,7 +325,11 @@ Std_ReturnType TcpIp_ValidateRequestComMode(uint8 CtrlIdx, TcpIp_StateType State
     }
     return ret;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 Std_ReturnType TcpIp_ValidateRequestIpAddrAssignment(
     TcpIp_LocalAddrIdType      LocalAddrId,
     TcpIp_IpAddrAssignmentType Type,
@@ -326,29 +339,65 @@ Std_ReturnType TcpIp_ValidateRequestIpAddrAssignment(
 {
     Std_ReturnType  ret            = E_NOT_OK;
     uint8           apiId          = TCPIP_SID_REQUESTIPADDRASSIGNMENT;
+    uint8           errorId        = TCPIP_E_NO_ERROR;
     ApplicationType partitionIndex = TcpIp_MulticoreIndex;
 
     TCPIP_UNUSED_ARG(Type);
-    TCPIP_UNUSED_ARG(LocalIpAddrPtr);
-    TCPIP_UNUSED_ARG(Netmask);
-    TCPIP_UNUSED_ARG(DefaultRouterPtr);
 
-    if (E_OK != TcpIp_ValidatePartition(apiId, partitionIndex))
+    if (TcpIp_ValidatePartition(apiId, partitionIndex) != E_OK)
     {
         /* do nothing */
     }
-    else if (E_OK != TcpIp_ValidateLocalAddr(apiId, partitionIndex, LocalAddrId))
+    else if (TcpIp_ValidateLocalAddr(apiId, partitionIndex, LocalAddrId) != E_OK)
     {
         /* do nothing */
+    }
+    else if (LocalIpAddrPtr != NULL_PTR)
+    {
+        TcpIp_LocalAddrIdType      localAddrId     = TcpIp_LocalAddrId2Var(LocalAddrId);
+        const TcpIp_LocalAddrType* localAddrCfgPtr = &TCPIP_LOCALADDR_CONFIG(localAddrId);
+        TcpIp_DomainType           domain          = LocalIpAddrPtr->domain;
+        ip_addr_t                  localIp;
+
+        ip_addr_set_ip4_u32_val(localIp, LocalIpAddrPtr->addr[0U]);
+
+        if ((domain != localAddrCfgPtr->DomainType) || ip_addr_isany_val(localIp))
+        {
+            errorId = TCPIP_E_INV_ARG;
+        }
+        else if (((domain == TCPIP_AF_INET) && (Netmask > 32U)) || (domain == TCPIP_AF_INET6))
+        {
+            errorId = TCPIP_E_INV_ARG;
+        }
+        else if ((DefaultRouterPtr != NULL_PTR) && (DefaultRouterPtr->domain != domain))
+        {
+            errorId = TCPIP_E_INV_ARG;
+        }
+        else
+        {
+            ret = E_OK;
+        }
+    }
+    else if ((Netmask != 0U) || (DefaultRouterPtr != NULL_PTR))
+    {
+        errorId = TCPIP_E_INV_ARG;
     }
     else
     {
         ret = E_OK;
     }
 
+    if (errorId != TCPIP_E_NO_ERROR)
+    {
+        TcpIp_DetReportError(apiId, errorId);
+    }
     return ret;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 Std_ReturnType TcpIp_ValidateReleaseIpAddrAssignment(TcpIp_LocalAddrIdType LocalAddrId)
 {
     Std_ReturnType  ret            = E_NOT_OK;
@@ -370,8 +419,12 @@ Std_ReturnType TcpIp_ValidateReleaseIpAddrAssignment(TcpIp_LocalAddrIdType Local
 
     return ret;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if ((STD_ON == TCPIP_DHCP_CLIENT_ENABLED) && (STD_ON == TCPIP_RESET_IP_ASSIGNMENT_API))
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 Std_ReturnType TcpIp_ValidateResetIpAssignment(void)
 {
     Std_ReturnType  ret            = E_NOT_OK;
@@ -389,10 +442,13 @@ Std_ReturnType TcpIp_ValidateResetIpAssignment(void)
 
     return ret;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
-#if (STD_ON == TCPIP_ICMP_ENABLED)
-#if ((TCPIP_SC1 == TCPIP_SCALABILITY_CLASS) || (TCPIP_SC3 == TCPIP_SCALABILITY_CLASS))
+#if (TCPIP_ICMP_ENABLED == STD_ON)
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 Std_ReturnType TcpIp_ValidateIcmpTransmit(
     TcpIp_LocalAddrIdType     LocalIpAddrId,
     const TcpIp_SockAddrType* RemoteAddrPtr,
@@ -407,213 +463,57 @@ Std_ReturnType TcpIp_ValidateIcmpTransmit(
     uint8           errorId        = TCPIP_E_NO_ERROR;
     ApplicationType partitionIndex = TcpIp_MulticoreIndex;
 
-    TCPIP_UNUSED_ARG(RemoteAddrPtr);
     TCPIP_UNUSED_ARG(Ttl);
     TCPIP_UNUSED_ARG(Type);
     TCPIP_UNUSED_ARG(Code);
 
-    if (E_OK != TcpIp_ValidatePartition(apiId, partitionIndex))
+    if (TcpIp_ValidatePartition(apiId, partitionIndex) != E_OK)
     {
         /* do nothing */
     }
-    else if (E_OK != TcpIp_ValidateLocalAddr(apiId, partitionIndex, LocalIpAddrId))
+    else if (TcpIp_ValidateLocalAddr(apiId, partitionIndex, LocalIpAddrId) != E_OK)
     {
         /* do nothing */
     }
-    else if (0u == DataLength)
+    else if ((RemoteAddrPtr == NULL_PTR) || (RemoteAddrPtr->domain != TCPIP_AF_INET))
     {
         errorId = TCPIP_E_INV_ARG;
     }
-    else if (NULL_PTR == DataPtr)
-    {
-        errorId = TCPIP_E_PARAM_POINTER;
-    }
-    else
-    {
-        ret = E_OK;
-    }
-
-    if (TCPIP_E_NO_ERROR != errorId)
-    {
-        TcpIp_DetReportError(apiId, errorId);
-    }
-    return ret;
-}
-#endif
-
-#if ((TCPIP_SC2 == TCPIP_SCALABILITY_CLASS) || (TCPIP_SC3 == TCPIP_SCALABILITY_CLASS))
-Std_ReturnType TcpIp_ValidateIcmpV6Transmit(
-    TcpIp_LocalAddrIdType     LocalIpAddrId,
-    const TcpIp_SockAddrType* RemoteAddrPtr,
-    uint8                     HopLimit,
-    uint8                     Type,
-    uint8                     Code,
-    uint16                    DataLength,
-    const uint8*              DataPtr)
-{
-    Std_ReturnType  ret            = E_NOT_OK;
-    uint8           apiId          = TCPIP_SID_ICMPV6TRANSMIT;
-    ApplicationType partitionIndex = TcpIp_MulticoreIndex;
-
-    if (E_OK != TcpIp_ValidatePartition(apiId, partitionIndex))
-    {
-        /* do nothing */
-    }
-    else
-    {
-        ret = E_OK;
-    }
-
-    return ret;
-}
-#endif
-#endif
-
-#if ((TCPIP_SC1 == TCPIP_SCALABILITY_CLASS) || (TCPIP_SC3 == TCPIP_SCALABILITY_CLASS))
-Std_ReturnType
-    TcpIp_ValidateDhcpReadOption(TcpIp_LocalAddrIdType LocalIpAddrId, uint8 Option, uint8* DataLength, uint8* DataPtr)
-{
-    Std_ReturnType  ret            = E_NOT_OK;
-    uint8           apiId          = TCPIP_SID_DHCPREADOPTION;
-    uint8           errorId        = TCPIP_E_NO_ERROR;
-    ApplicationType partitionIndex = TcpIp_MulticoreIndex;
-
-    TCPIP_UNUSED_ARG(Option);
-
-    if (E_OK != TcpIp_ValidatePartition(apiId, partitionIndex))
-    {
-        /* do nothing */
-    }
-    else if (E_OK != TcpIp_ValidateLocalAddr(apiId, partitionIndex, LocalIpAddrId))
-    {
-        /* do nothing */
-    }
-    else if (NULL_PTR == DataLength)
+    else if (((DataLength == 0U) && (DataPtr != NULL_PTR)) || ((DataLength > 0U) && (DataPtr == NULL_PTR)))
     {
         errorId = TCPIP_E_INV_ARG;
     }
-    else if (NULL_PTR == DataPtr)
-    {
-        errorId = TCPIP_E_PARAM_POINTER;
-    }
-    /* TODO check if the parameter LocalIpAddrId is valid
-       check if the parameter Option is valid
-       check if the parameter DataLength is valid
-       TCPIP_E_INV_ARG */
     else
     {
-        ret = E_OK;
+        TcpIp_LocalAddrIdType      localAddrId     = TcpIp_LocalAddrId2Var(LocalIpAddrId);
+        const TcpIp_LocalAddrType* localAddrCfgPtr = &TCPIP_LOCALADDR_CONFIG(localAddrId);
+
+        if (localAddrCfgPtr->DomainType != TCPIP_AF_INET)
+        {
+            errorId = TCPIP_E_INV_ARG;
+        }
+        else if (localAddrCfgPtr->AddrType != TCPIP_ADDRESS_UNICAST)
+        {
+            errorId = TCPIP_E_INV_ARG;
+        }
+        else
+        {
+            ret = E_OK;
+        }
     }
 
-    if (TCPIP_E_NO_ERROR != errorId)
+    if (errorId != TCPIP_E_NO_ERROR)
     {
         TcpIp_DetReportError(apiId, errorId);
     }
     return ret;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
-#if TCPIP_UNUSED_FUNCTION
-#if ((TCPIP_SC2 == TCPIP_SCALABILITY_CLASS) || (TCPIP_SC3 == TCPIP_SCALABILITY_CLASS))
-Std_ReturnType TcpIp_ValidateDhcpV6ReadOption(
-    TcpIp_LocalAddrIdType LocalIpAddrId,
-    uint16                Option,
-    uint16*               DataLength,
-    uint8*                DataPtr)
-{
-    Std_ReturnType  ret            = E_NOT_OK;
-    uint8           apiId          = TCPIP_SID_DHCPV6READOPTION;
-    uint8           errorId        = TCPIP_E_NO_ERROR;
-    ApplicationType partitionIndex = TcpIp_MulticoreIndex;
-
-    if (E_OK != TcpIp_ValidatePartition(apiId, partitionIndex))
-    {
-        /* do nothing */
-    }
-    else if (E_OK != TcpIp_ValidateLocalAddr(apiId, partitionIndex, LocalAddrId))
-    {
-        /* do nothing */
-    }
-    else if ((NULL_PTR == DataLength) || (NULL_PTR == DataPtr))
-    {
-        errorId = TCPIP_E_PARAM_POINTER;
-    }
-    else
-    {
-        ret = E_OK;
-    }
-
-    if (TCPIP_E_NO_ERROR != errorId)
-    {
-        TcpIp_DetReportError(apiId, errorId);
-    }
-    return ret;
-}
-#endif
-#endif
-
-#if ((TCPIP_SC1 == TCPIP_SCALABILITY_CLASS) || (TCPIP_SC3 == TCPIP_SCALABILITY_CLASS))
-Std_ReturnType TcpIp_ValidateDhcpWriteOption(
-    TcpIp_LocalAddrIdType LocalIpAddrId,
-    uint8                 Option,
-    uint8                 DataLength,
-    const uint8*          DataPtr)
-{
-    Std_ReturnType  ret            = E_NOT_OK;
-    uint8           apiId          = TCPIP_SID_DHCPWRITEOPTION;
-    ApplicationType partitionIndex = TcpIp_MulticoreIndex;
-
-    TCPIP_UNUSED_ARG(Option);
-    TCPIP_UNUSED_ARG(DataLength);
-    TCPIP_UNUSED_ARG(DataPtr);
-
-    if (E_OK != TcpIp_ValidatePartition(apiId, partitionIndex))
-    {
-        /* do nothing */
-    }
-    else if (E_OK != TcpIp_ValidateLocalAddr(apiId, partitionIndex, LocalIpAddrId))
-    {
-        /* do nothing */
-    }
-    else
-    {
-        ret = E_OK;
-    }
-
-    return ret;
-}
-#endif
-
-#if TCPIP_UNUSED_FUNCTION
-#if ((TCPIP_SC2 == TCPIP_SCALABILITY_CLASS) || (TCPIP_SC3 == TCPIP_SCALABILITY_CLASS))
-Std_ReturnType TcpIp_ValidateDhcpV6WriteOption(
-    TcpIp_LocalAddrIdType LocalIpAddrId,
-    uint16                Option,
-    uint16                DataLength,
-    const uint8*          DataPtr)
-{
-    Std_ReturnType  ret            = E_NOT_OK;
-    uint8           apiId          = TCPIP_SID_DHCPV6WRITEOPTION;
-    ApplicationType partitionIndex = TcpIp_MulticoreIndex;
-
-    if (E_OK != TcpIp_ValidatePartition(apiId, partitionIndex))
-    {
-        /* do nothing */
-    }
-    else if (E_OK != TcpIp_ValidateLocalAddr(apiId, partitionIndex, LocalAddrId))
-    {
-        /* do nothing */
-    }
-    else
-    {
-        ret = E_OK;
-    }
-
-    return ret;
-}
-#endif
-#endif
-
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 Std_ReturnType TcpIp_ValidateChangeParameter(
     TcpIp_SocketIdType SocketId,
     TcpIp_ParamIdType  ParameterId,
@@ -630,7 +530,7 @@ Std_ReturnType TcpIp_ValidateChangeParameter(
     {
         /* do nothing */
     }
-    else if (E_OK != TcpIp_ValidateSocket(apiId, partitionIndex, SocketId))
+    else if (E_OK != TcpIp_ValidateSocket(apiId, partitionIndex, SocketId, TCPIP_UNUSED_UINT8))
     {
         /* do nothing */
     }
@@ -649,7 +549,11 @@ Std_ReturnType TcpIp_ValidateChangeParameter(
     }
     return ret;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 Std_ReturnType TcpIp_ValidateGetIpAddr(
     TcpIp_LocalAddrIdType LocalAddrId,
     TcpIp_SockAddrType*   IpAddrPtr,
@@ -692,7 +596,11 @@ Std_ReturnType TcpIp_ValidateGetIpAddr(
     }
     return ret;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 Std_ReturnType TcpIp_ValidateGetPhysAddr(TcpIp_LocalAddrIdType LocalAddrId, uint8* PhysAddrPtr)
 {
     Std_ReturnType  ret            = E_NOT_OK;
@@ -723,7 +631,11 @@ Std_ReturnType TcpIp_ValidateGetPhysAddr(TcpIp_LocalAddrIdType LocalAddrId, uint
     }
     return ret;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 Std_ReturnType TcpIp_ValidateGetRemotePhysAddr(
     uint8                     CtrlIdx,
     const TcpIp_SockAddrType* IpAddrPtr,
@@ -760,8 +672,12 @@ Std_ReturnType TcpIp_ValidateGetRemotePhysAddr(
     }
     return ret;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if TCPIP_UNUSED_FUNCTION
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 Std_ReturnType TcpIp_ValidateGetCtrlIdx(TcpIp_LocalAddrIdType LocalAddrId, uint8* CtrlIdxPtr)
 {
     TCPIP_UNUSED_ARG(LocalAddrId);
@@ -769,7 +685,11 @@ Std_ReturnType TcpIp_ValidateGetCtrlIdx(TcpIp_LocalAddrIdType LocalAddrId, uint8
 
     return E_OK;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 Std_ReturnType
     TcpIp_ValidateGetArpCacheEntries(uint8 ctrlIdx, uint32* numberOfElements, TcpIp_ArpCacheEntryType* entryListPtr)
 {
@@ -779,7 +699,11 @@ Std_ReturnType
 
     return E_OK;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 Std_ReturnType
     TcpIp_ValidateGetNdpCacheEntries(uint8 ctrlIdx, uint32* numberOfElements, TcpIp_NdpCacheEntryType* entryListPtr)
 {
@@ -789,7 +713,11 @@ Std_ReturnType
 
     return E_OK;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 Std_ReturnType TcpIp_ValidateGetAndResetMeasurementData(
     TcpIp_MeasurementIdxType MeasurementIdx,
     boolean                  MeasurementResetNeeded,
@@ -801,8 +729,12 @@ Std_ReturnType TcpIp_ValidateGetAndResetMeasurementData(
 
     return E_OK;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 Std_ReturnType TcpIp_ValidateIsConnectionReady(TcpIp_SocketIdType SocketId, const TcpIp_SockAddrType* RemoteAddrPtr)
 {
     Std_ReturnType  ret            = E_NOT_OK;
@@ -838,8 +770,12 @@ Std_ReturnType TcpIp_ValidateIsConnectionReady(TcpIp_SocketIdType SocketId, cons
     }
     return ret;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if (STD_ON == TCPIP_UDP_ENABLED)
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 Std_ReturnType TcpIp_ValidateUdpTransmit(
     TcpIp_SocketIdType        SocketId,
     const uint8*              DataPtr,
@@ -858,7 +794,7 @@ Std_ReturnType TcpIp_ValidateUdpTransmit(
     {
         /* do nothing */
     }
-    else if (E_OK != TcpIp_ValidateSocket(apiId, partitionIndex, SocketId))
+    else if (E_OK != TcpIp_ValidateSocket(apiId, partitionIndex, SocketId, TCPIP_IPPROTO_UDP))
     {
         /* do nothing */
     }
@@ -877,9 +813,13 @@ Std_ReturnType TcpIp_ValidateUdpTransmit(
     }
     return ret;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
 #if (STD_ON == TCPIP_TCP_ENABLED)
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 Std_ReturnType TcpIp_ValidateTcpTransmit(
     TcpIp_SocketIdType SocketId,
     const uint8*       DataPtr,
@@ -898,7 +838,7 @@ Std_ReturnType TcpIp_ValidateTcpTransmit(
     {
         /* do nothing */
     }
-    else if (E_OK != TcpIp_ValidateSocket(apiId, partitionIndex, SocketId))
+    else if (E_OK != TcpIp_ValidateSocket(apiId, partitionIndex, SocketId, TCPIP_IPPROTO_TCP))
     {
         /* do nothing */
     }
@@ -917,8 +857,12 @@ Std_ReturnType TcpIp_ValidateTcpTransmit(
     }
     return ret;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 Std_ReturnType TcpIp_ValidateRxIndication(
     uint8         CtrlIdx,
     Eth_FrameType FrameType,
@@ -957,13 +901,15 @@ Std_ReturnType TcpIp_ValidateRxIndication(
     }
     return ret;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 Std_ReturnType TcpIp_ValidateGetSocket(
-    TcpIp_DomainType   Domain,
-    TcpIp_ProtocolType Protocol,
-#if (1u < TCPIP_SOCKETOWNER_NUMBER)
-    uint8 socketOwnerId,
-#endif
+    TcpIp_DomainType    Domain,
+    TcpIp_ProtocolType  Protocol,
+    uint8               SocketOwnerId,
     TcpIp_SocketIdType* SocketIdPtr)
 {
     Std_ReturnType  ret            = E_NOT_OK;
@@ -981,12 +927,10 @@ Std_ReturnType TcpIp_ValidateGetSocket(
     {
         errorId = TCPIP_E_AFNOSUPPORT;
     }
-#if (1u < TCPIP_SOCKETOWNER_NUMBER)
-    else if (TCPIP_SOCKETOWNER_NUMBER <= socketOwnerId)
+    else if (TCPIP_SOCKETOWNER_NUMBER <= SocketOwnerId)
     {
         errorId = TCPIP_E_INV_ARG;
     }
-#endif
     else if (NULL_PTR == SocketIdPtr)
     {
         errorId = TCPIP_E_PARAM_POINTER;
@@ -1002,46 +946,60 @@ Std_ReturnType TcpIp_ValidateGetSocket(
     }
     return ret;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
-/* ========================================== internal function definitions ========================================= */
-TCPIP_LOCAL Std_ReturnType TcpIp_ValidatePartition(uint8 apiId, ApplicationType partitionIndex)
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
+Std_ReturnType TcpIp_ValidatePartition(uint8 apiId, ApplicationType partitionIndex)
 {
     Std_ReturnType ret     = E_NOT_OK;
     uint8          errorId = TCPIP_E_NO_ERROR;
 
-    if (NULL_PTR == TcpIp_PbCfgPtr)
+    if (TcpIp_PbCfgPtr == NULL_PTR)
     {
         errorId = TCPIP_E_UNINIT;
     }
-    else if (TCPIP_PARTITION_NUMBER <= partitionIndex)
+    else if (partitionIndex >= TCPIP_PARTITION_NUMBER)
     {
         errorId = TCPIP_E_INV_PARTITION;
     }
-    else if (
-        (NULL_PTR == TCPIP_RUNTIME(partitionIndex)) || (TCPIP_STATE_INIT != TCPIP_RUNTIME(partitionIndex)->InitedState))
-    {
-        errorId = TCPIP_E_UNINIT;
-    }
     else
     {
-        ret = E_OK;
+        const TcpIp_RuntimeType* runtimePtr = TCPIP_RUNTIME(partitionIndex);
+
+        if ((runtimePtr == NULL_PTR) || (runtimePtr->InitedState != TCPIP_STATE_INIT))
+        {
+            errorId = TCPIP_E_UNINIT;
+        }
+        else
+        {
+            ret = E_OK;
+        }
     }
 
-    if (TCPIP_E_NO_ERROR != errorId)
+    if (errorId != TCPIP_E_NO_ERROR)
     {
         TcpIp_DetReportError(apiId, errorId);
     }
     return ret;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
-TCPIP_LOCAL Std_ReturnType
-    TcpIp_ValidateSocket(uint8 apiId, ApplicationType partitionIndex, TcpIp_SocketIdType socketId)
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
+Std_ReturnType TcpIp_ValidateSocket(
+    uint8              apiId,
+    ApplicationType    partitionIndex,
+    TcpIp_SocketIdType socketId,
+    TcpIp_ProtocolType protocol)
 {
     Std_ReturnType     ret         = E_NOT_OK;
     uint8              errorId     = TCPIP_E_NO_ERROR;
     TcpIp_SocketIdType socketIndex = TCPIP_SOCKET_INDEX(partitionIndex, socketId);
 
-    if (TCPIP_SOCKET_NUM <= socketIndex)
+    if (socketIndex >= TCPIP_SOCKET_NUM)
     {
         errorId = TCPIP_E_INV_ARG;
     }
@@ -1049,11 +1007,18 @@ TCPIP_LOCAL Std_ReturnType
     {
         const TcpIp_SocketRuntimeType* socketRtPtr = &TCPIP_SOCKET(partitionIndex, socketIndex);
 
-        if (NULL_PTR == socketRtPtr->PcbPtr)
+        if (socketRtPtr->PcbPtr == NULL_PTR)
         {
             errorId = TCPIP_E_INV_ARG;
         }
-        else if ((TCPIP_IPPROTO_TCP != socketRtPtr->Protocol) && (TCPIP_IPPROTO_UDP != socketRtPtr->Protocol))
+        else if (
+            ((protocol != TCPIP_UNUSED_UINT8) && (socketRtPtr->Protocol != protocol))
+            || ((protocol == TCPIP_UNUSED_UINT8) && (socketRtPtr->Protocol != TCPIP_IPPROTO_TCP)
+                && (socketRtPtr->Protocol != TCPIP_IPPROTO_UDP)))
+        {
+            errorId = TCPIP_E_INV_ARG;
+        }
+        else if ((socketRtPtr->NextFreeIndex != TCPIP_SOCKET_NUM) || (socketRtPtr->OwnerCfgPtr == NULL_PTR))
         {
             errorId = TCPIP_E_INV_ARG;
         }
@@ -1063,13 +1028,18 @@ TCPIP_LOCAL Std_ReturnType
         }
     }
 
-    if (TCPIP_E_NO_ERROR != errorId)
+    if (errorId != TCPIP_E_NO_ERROR)
     {
         TcpIp_DetReportError(apiId, errorId);
     }
     return ret;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+/* ========================================== internal function definitions ========================================= */
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 TCPIP_LOCAL Std_ReturnType
     TcpIp_ValidateLocalAddr(uint8 apiId, ApplicationType partitionIndex, TcpIp_LocalAddrIdType localAddrId)
 {
@@ -1093,7 +1063,6 @@ TCPIP_LOCAL Std_ReturnType
     }
     return ret;
 }
-
 #define TCPIP_STOP_SEC_CODE
 #include "TcpIp_MemMap.h"
 

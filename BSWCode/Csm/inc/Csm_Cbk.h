@@ -52,7 +52,11 @@ extern "C" {
  * @implements CPD-49641
  */
 /* PRQA S 3432 ++ */ /* VL_Csm_3432 */
+#define CSM_START_SEC_CODE
+#include "Csm_MemMap.h"
 void Csm_CallbackNotification(Crypto_JobType* job, Crypto_ResultType result);
+#define CSM_STOP_SEC_CODE
+#include "Csm_MemMap.h"
 /* PRQA S 3432 -- */
 
 #ifdef __cplusplus

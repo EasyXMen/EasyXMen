@@ -47,6 +47,8 @@ extern "C" {
 #define DCM_OBDID_AVAILDATALEN 4u /**<the length of available data */
 /* ========================================= external function declarations ========================================= */
 #if (STD_ON == DCM_OBD_0X1)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief        The service interpreter for OBD 0x01
  * @param[in]    OpStatus    : Indicates the current operation status
@@ -68,9 +70,13 @@ Std_ReturnType Dcm_OBD0x01(
     Dcm_ExtendedOpStatusType      OpStatus,
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #if ((STD_ON == DCM_OBD_0X1) || ((STD_ON == DCM_UDS_0X22) && (STD_ON == DCM_OBD_DID_MIRROR)))
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         Called by OBD 0x01 and UDS 0x22 to read the PidData
  * @param[in]     OpStatus   : Indicates the current operation status
@@ -95,9 +101,13 @@ Std_ReturnType Dcm_OBD0x01_ReadPid(
     uint8*                   DestBuffer,
     Dcm_MsgLenType*          BufSize,
     uint8*                   mixPid);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #if (STD_ON == DCM_OBD_0X2)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         The service interpreter for OBD 0x02
  * @param[in]     OpStatus    : Indicates the current operation status
@@ -117,9 +127,13 @@ Std_ReturnType Dcm_OBD0x02(
     Dcm_ExtendedOpStatusType      OpStatus,
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #if (STD_ON == DCM_OBD_0X3)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         The service interpreter for OBD 0x02
  * @param[in]     OpStatus    : Indicates the current operation status
@@ -139,9 +153,13 @@ Std_ReturnType Dcm_OBD0x03(
     Dcm_ExtendedOpStatusType      OpStatus,
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #if (STD_ON == DCM_OBD_0X4)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         The service interpreter for OBD 0x04
  * @param[in]     OpStatus    : Indicates the current operation status
@@ -162,9 +180,13 @@ Std_ReturnType Dcm_OBD0x04(
     Dcm_ExtendedOpStatusType      OpStatus,
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #if (STD_ON == DCM_OBD_0X6)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         The service interpreter for OBD 0x06
  * @param[in]     OpStatus    : Indicates the current operation status
@@ -184,9 +206,13 @@ Std_ReturnType Dcm_OBD0x06(
     Dcm_ExtendedOpStatusType      OpStatus,
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #if ((STD_ON == DCM_OBD_0X6) || ((STD_ON == DCM_UDS_0X22) && (STD_ON == DCM_OBD_DID_MIRROR)))
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         Called by OBD 0x06 and UDS 0x22 to read the midData
  * @param[in]     mid        : Target MID
@@ -204,9 +230,13 @@ Std_ReturnType Dcm_OBD0x06(
  * @trace         CPD-PLACEHOLDE
  */
 Std_ReturnType Dcm_OBD0x06_ReadMid(uint8 mid, uint8* DestBuffer, Dcm_MsgLenType* BufSize, uint8* mixMid);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #if (STD_ON == DCM_OBD_0X7)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         The service interpreter for OBD 0x07
  * @param[in]     OpStatus    : Indicates the current operation status
@@ -227,9 +257,13 @@ Std_ReturnType Dcm_OBD0x07(
     Dcm_ExtendedOpStatusType      OpStatus,
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #if (STD_ON == DCM_OBD_0X8)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         The service interpreter for OBD 0x08
  * @param[in]     OpStatus    : Indicates the current operation status
@@ -249,9 +283,13 @@ Std_ReturnType Dcm_OBD0x08(
     Dcm_ExtendedOpStatusType      OpStatus,
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #if ((STD_ON == DCM_OBD_0X8) || ((STD_ON == DCM_UDS_0X31) && (STD_ON == DCM_OBD_RID_MIRROR)))
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         Called by OBD 0x08 and UDS 0x31 to read the tidData
  * @param[in]     OpStatus     : Indicates the current operation status
@@ -279,6 +317,10 @@ Std_ReturnType Dcm_OBD0x08_ReadTid(
     uint8*                        DestBuffer,
     Dcm_MsgLenType*               BufSize,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         Called by OBD 0x08 and UDS 0x31 to find the configured tid index
@@ -292,9 +334,13 @@ Std_ReturnType Dcm_OBD0x08_ReadTid(
  * @trace         CPD-PLACEHOLDE
  */
 Std_ReturnType Dcm_OBD0x08_FindTid(uint8 tid, uint8* tidIndex);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #if (STD_ON == DCM_OBD_0X9)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         The service interpreter for OBD 0x09
  * @param[in]     OpStatus    : Indicates the current operation status
@@ -315,9 +361,13 @@ Std_ReturnType Dcm_OBD0x09(
     Dcm_ExtendedOpStatusType      OpStatus,
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #if ((STD_ON == DCM_OBD_0X9) || ((STD_ON == DCM_UDS_0X22) && (STD_ON == DCM_OBD_DID_MIRROR)))
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         Called by OBD 0x09 and UDS 0x22 to read the vehInfo data
  * @param[in]     OpStatus    : Indicates the current operation status
@@ -346,9 +396,13 @@ Std_ReturnType Dcm_OBD0x09_ReadVehInfo(
     Dcm_MsgLenType*               BufSize,
     uint8*                        MixInfoType,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #if (STD_ON == DCM_OBD_0XA)
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         The service interpreter for OBD 0x0A
  * @param[in]     OpStatus    : Indicates the current operation status
@@ -369,9 +423,13 @@ Std_ReturnType Dcm_OBD0x0A(
     Dcm_ExtendedOpStatusType      OpStatus,
     Dcm_MsgContextType*           pMsgContext,
     Dcm_NegativeResponseCodeType* ErrorCode);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #if ((STD_ON == DCM_OBD_0X3) || (STD_ON == DCM_OBD_0X7) || (STD_ON == DCM_OBD_0XA))
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         Called by OBD 0x03, 0x07, 0x0A to get filtered DTC
  * @param[in]     ClientId            : Dem ClientId
@@ -393,9 +451,13 @@ Std_ReturnType Dcm_OBD_GetFilteredDTC(
     Dem_DTCOriginType DTCOrigin,
     uint8*            DestBuffer,
     uint16*           NumberOfFilteredDTC);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
 
 #if ((STD_ON == DCM_OBD_0X1) || (STD_ON == DCM_OBD_0X2))
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         Called by OBD 0x01, 0x02 to find the pid in the configuration
  * @param[in]     Pid       : Target Pid
@@ -409,7 +471,11 @@ Std_ReturnType Dcm_OBD_GetFilteredDTC(
  * @trace         CPD-PLACEHOLDE
  */
 Std_ReturnType Dcm_OBD_FindPid(uint8 Pid, uint8 ServiceId, uint8* PidIndex);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 #endif
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         Called by OBD 0x01, 0x02, 0x06, 0x08, 0x09 to check is this Id an availabilityId and find which
@@ -424,6 +490,8 @@ Std_ReturnType Dcm_OBD_FindPid(uint8 Pid, uint8 ServiceId, uint8* PidIndex);
  * @trace         CPD-PLACEHOLDE
  */
 boolean Dcm_OBD_isAvailability(uint8 Id, uint8* AvailIdIndex);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 
 #ifdef __cplusplus
 }

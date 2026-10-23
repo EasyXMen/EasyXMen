@@ -27,12 +27,13 @@
 
 /* =================================================== inclusions =================================================== */
 #include "Dem_Dcm.h"
+#include "Dem_Arti.h"
 
 /* PRQA S 3406, 1503 ++ */ /* VL_Dem_3406, VL_QAC_NoUsedApi */
 /* ========================================== external function definitions ========================================= */
+#if (DEM_SUPPORT_SETDTCFILTERBYEXTENDEDDATARECORDNUMBER_API == STD_ON)
 #define DEM_START_SEC_CODE
 #include "Dem_MemMap.h"
-#if (DEM_SUPPORT_SETDTCFILTERBYEXTENDEDDATARECORDNUMBER_API == STD_ON)
 /**
  * @brief Sets the DTC Filter based on a given extended data record on the primary fault memory. The
  * server selects all DTCs that have a matching extended data record.
@@ -42,15 +43,20 @@ Std_ReturnType Dem_SetDTCFilterByExtendedDataRecordNumber(
     Dem_DTCFormatType DTCFormat,
     uint8             ExtendedDataRecordNumber)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 4, 0xC1, ClientId, DTCFormat, ExtendedDataRecordNumber);
     /** for 19 1A, API not yet implemented */
     DEM_PARAM_UNUSED(ClientId);
     DEM_PARAM_UNUSED(DTCFormat);
     DEM_PARAM_UNUSED(ExtendedDataRecordNumber);
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0xC1, E_NOT_OK);
     return E_NOT_OK;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_SUPPORT_SETDTCFILTERBYREADINESSGROUP_API == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Sets the DTC Filter based on a given DTC readiness group on the primary fault memory. The server
  * selects all DTCs that have this DTC readiness group configured.
@@ -60,16 +66,21 @@ Std_ReturnType Dem_SetDTCFilterByReadinessGroup(
     Dem_DTCFormatType              DTCFormat,
     Dem_EventOBDReadinessGroupType ReadinessGroupNumber)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 4, 0xC2, ClientID, DTCFormat, ReadinessGroupNumber);
     /** for 19 56, API not yet implemented */
     DEM_PARAM_UNUSED(ClientID);
     DEM_PARAM_UNUSED(DTCFormat);
     DEM_PARAM_UNUSED(ReadinessGroupNumber);
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0xC2, E_NOT_OK);
     return E_NOT_OK;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_OBD_SUPPORT != DEM_OBD_NO_OBD_SUPPORT)
 #if (DEM_OBD_ENGINE_TYPE == DEM_IGNITION_SPARK)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 3673 ++ */ /* VL_QAC_3673 */
 /**
  * @brief Service is used for requesting IUMPR data according to InfoType $08. This interface is derived
@@ -80,15 +91,21 @@ Std_ReturnType Dem_SetDTCFilterByReadinessGroup(
  */
 Std_ReturnType Dem_DcmGetInfoTypeValue08(Dcm_OpStatusType OpStatus, uint8* Iumprdata08, uint8* Iumprdata08BufferSize)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 4, 0x6B, OpStatus, Iumprdata08, Iumprdata08BufferSize);
     /** API not yet implemented */
     DEM_PARAM_UNUSED(OpStatus);
     DEM_PARAM_UNUSED(Iumprdata08);
     DEM_PARAM_UNUSED(Iumprdata08BufferSize);
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x6B, E_NOT_OK);
     return E_NOT_OK;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_OBD_ENGINE_TYPE == DEM_IGNITION_COMPRESSION)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Service is used for requesting IUMPR data according to InfoType $0B. This interface is derived
  * from the prototype <Module>_GetInfotypeValueData() defined by the Dcm. Therefore
@@ -98,14 +115,19 @@ Std_ReturnType Dem_DcmGetInfoTypeValue08(Dcm_OpStatusType OpStatus, uint8* Iumpr
  */
 Std_ReturnType Dem_DcmGetInfoTypeValue0B(Dcm_OpStatusType OpStatus, uint8* Iumprdata0B, uint8* Iumprdata0BBufferSize)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 4, 0x6C, OpStatus, Iumprdata0B, Iumprdata0BBufferSize);
     /** API not yet implemented */
     DEM_PARAM_UNUSED(OpStatus);
     DEM_PARAM_UNUSED(Iumprdata0B);
     DEM_PARAM_UNUSED(Iumprdata0BBufferSize);
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x6C, E_NOT_OK);
     return E_NOT_OK;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Service to report the value of PID $01 computed by the Dem. API is needed in OBD-relevant ECUs
  * only. API Availability: This API will be available only if
@@ -113,11 +135,16 @@ Std_ReturnType Dem_DcmGetInfoTypeValue0B(Dcm_OpStatusType OpStatus, uint8* Iumpr
  */
 Std_ReturnType Dem_DcmReadDataOfPID01(uint8* PID01value)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 2, 0x61, PID01value);
     /** API not yet implemented */
     DEM_PARAM_UNUSED(PID01value);
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x61, E_NOT_OK);
     return E_NOT_OK;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Service to report the value of PID $1C computed by the Dem. API is needed in OBD-relevant ECUs
  * only. API Availability: This API will be available only if
@@ -125,11 +152,16 @@ Std_ReturnType Dem_DcmReadDataOfPID01(uint8* PID01value)
  */
 Std_ReturnType Dem_DcmReadDataOfPID1C(uint8* PID1Cvalue)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 2, 0x63, PID1Cvalue);
     /** API not yet implemented */
     DEM_PARAM_UNUSED(PID1Cvalue);
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x63, E_NOT_OK);
     return E_NOT_OK;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Service to report the value of PID $21 computed by the Dem. API is needed in OBD-relevant ECUs
  * only. API Availability: This API will be available only if
@@ -137,11 +169,16 @@ Std_ReturnType Dem_DcmReadDataOfPID1C(uint8* PID1Cvalue)
  */
 Std_ReturnType Dem_DcmReadDataOfPID21(uint8* PID21value)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 2, 0x64, PID21value);
     /** API not yet implemented */
     DEM_PARAM_UNUSED(PID21value);
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x64, E_NOT_OK);
     return E_NOT_OK;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Service to report the value of PID $30 computed by the Dem. API is needed in OBD-relevant ECUs
  * only. API Availability: This API will be available only if
@@ -149,12 +186,17 @@ Std_ReturnType Dem_DcmReadDataOfPID21(uint8* PID21value)
  */
 Std_ReturnType Dem_DcmReadDataOfPID30(uint8* PID30value)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 2, 0x65, PID30value);
     /** API not yet implemented */
     DEM_PARAM_UNUSED(PID30value);
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x65, E_NOT_OK);
     return E_NOT_OK;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_OBD_SUPPORT == DEM_OBD_MASTER_ECU)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Service to report the value of PID $31 computed by the Dem. API is needed in OBD-relevant ECUs
  * only. API Availability: This API will be available only if
@@ -162,12 +204,17 @@ Std_ReturnType Dem_DcmReadDataOfPID30(uint8* PID30value)
  */
 Std_ReturnType Dem_DcmReadDataOfPID31(uint8* PID31value)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 2, 0x66, PID31value);
     /** API not yet implemented */
     DEM_PARAM_UNUSED(PID31value);
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x66, E_NOT_OK);
     return E_NOT_OK;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Service to report the value of PID $41 computed by the Dem. API is needed in OBD-relevant ECUs
  * only. API Availability: This API will be available only if
@@ -175,12 +222,17 @@ Std_ReturnType Dem_DcmReadDataOfPID31(uint8* PID31value)
  */
 Std_ReturnType Dem_DcmReadDataOfPID41(uint8* PID41value)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 2, 0x67, PID41value);
     /** API not yet implemented */
     DEM_PARAM_UNUSED(PID41value);
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x67, E_NOT_OK);
     return E_NOT_OK;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_OBD_SUPPORT == DEM_OBD_MASTER_ECU)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Service to report the value of PID $4D computed by the Dem. API is needed in OBD-relevant ECUs
  * only. API Availability: This API will be available only if
@@ -188,13 +240,19 @@ Std_ReturnType Dem_DcmReadDataOfPID41(uint8* PID41value)
  */
 Std_ReturnType Dem_DcmReadDataOfPID4D(uint8* PID4Dvalue)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 2, 0x68, PID4Dvalue);
     /** API not yet implemented */
     DEM_PARAM_UNUSED(PID4Dvalue);
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x68, E_NOT_OK);
     return E_NOT_OK;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_OBD_SUPPORT == DEM_OBD_MASTER_ECU)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Service to report the value of PID $4E computed by the Dem. API is needed in OBD-relevant ECUs
  * only. API Availability: This API will be available only if
@@ -202,12 +260,17 @@ Std_ReturnType Dem_DcmReadDataOfPID4D(uint8* PID4Dvalue)
  */
 Std_ReturnType Dem_DcmReadDataOfPID4E(uint8* PID4Evalue)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 2, 0x69, PID4Evalue);
     /** API not yet implemented */
     DEM_PARAM_UNUSED(PID4Evalue);
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x69, E_NOT_OK);
     return E_NOT_OK;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Service to report the value of PID $91 computed by the Dem. API is needed in OBD-relevant ECUs
  * only. API Availability: This API will be available only if
@@ -215,11 +278,16 @@ Std_ReturnType Dem_DcmReadDataOfPID4E(uint8* PID4Evalue)
  */
 Std_ReturnType Dem_DcmReadDataOfPID91(uint8* PID91value)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 2, 0x6A, PID91value);
     /** API not yet implemented */
     DEM_PARAM_UNUSED(PID91value);
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x6A, E_NOT_OK);
     return E_NOT_OK;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Gets data element per PID and index of the most important freeze frame being selected for the
  * output of service $02. The function stores the data in the provided DestBuffer. API is needed in
@@ -229,27 +297,37 @@ Std_ReturnType Dem_DcmReadDataOfPID91(uint8* PID91value)
 Std_ReturnType
     Dem_DcmReadDataOfOBDFreezeFrame(uint8 PID, uint8 DataElementIndexOfPID, uint8* DestBuffer, uint16* BufSize)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 5, 0x52, PID, DataElementIndexOfPID, DestBuffer, BufSize);
     /** API not yet implemented */
     DEM_PARAM_UNUSED(PID);
     DEM_PARAM_UNUSED(DataElementIndexOfPID);
     DEM_PARAM_UNUSED(DestBuffer);
     DEM_PARAM_UNUSED(BufSize);
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x52, E_NOT_OK);
     return E_NOT_OK;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Gets DTC by freeze frame record number. API is needed in OBD-relevant ECUs only. API Availability: This API
  * will be available only if ({ecuc(Dem/DemGeneral.DemOBDSupport)} != DEM_OBD_NO_OBD_SUPPORT)
  */
 Std_ReturnType Dem_DcmGetDTCOfOBDFreezeFrame(uint8 FrameNumber, uint32* DTC, Dem_DTCFormatType DTCFormat)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 4, 0x53, FrameNumber, DTC, DTCFormat);
     /** API not yet implemented */
     DEM_PARAM_UNUSED(FrameNumber);
     DEM_PARAM_UNUSED(DTC);
     DEM_PARAM_UNUSED(DTCFormat);
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0x53, E_NOT_OK);
     return E_NOT_OK;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Reports the value of a requested "availability-OBDMID" to the DCM upon a Service $06 request.
  * Derived from that the tester displays the supported tests a mechanic can select from. API is
@@ -258,12 +336,17 @@ Std_ReturnType Dem_DcmGetDTCOfOBDFreezeFrame(uint8 FrameNumber, uint32* DTC, Dem
  */
 Std_ReturnType Dem_DcmGetAvailableOBDMIDs(uint8 Obdmid, uint32* Obdmidvalue)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 3, 0xA3, Obdmid, Obdmidvalue);
     /** API not yet implemented */
     DEM_PARAM_UNUSED(Obdmid);
     DEM_PARAM_UNUSED(Obdmidvalue);
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0xA3, E_NOT_OK);
     return E_NOT_OK;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Gets the number of TIDs per (functional) OBDMID. This can be used by the DCM to iteratively
  * request for OBD/TID result data within a loop from 0....numberOfTIDs-1 API is needed in
@@ -272,12 +355,17 @@ Std_ReturnType Dem_DcmGetAvailableOBDMIDs(uint8 Obdmid, uint32* Obdmidvalue)
  */
 Std_ReturnType Dem_DcmGetNumTIDsOfOBDMID(uint8 Obdmid, uint8* numberOfTIDs)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 3, 0xA4, Obdmid, numberOfTIDs);
     /** API not yet implemented */
     DEM_PARAM_UNUSED(Obdmid);
     DEM_PARAM_UNUSED(numberOfTIDs);
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0xA4, E_NOT_OK);
     return E_NOT_OK;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Reports a DTR data along with TID-value, UaSID, test result with lower and upper limit. API is
  * needed in OBD-relevant ECUs only. API Availability: This API will be available only if
@@ -292,6 +380,21 @@ Std_ReturnType Dem_DcmGetDTRData(
     uint16* Lowlimvalue,
     uint16* Upplimvalue)
 {
+    ARTI_TRACE_N(
+        USER,
+        AR_CP_BSW_API,
+        Dem,
+        0,
+        Bsw_Start,
+        8,
+        0xA5,
+        Obdmid,
+        TIDindex,
+        TIDvalue,
+        UaSID,
+        Testvalue,
+        Lowlimvalue,
+        Upplimvalue);
     /** API not yet implemented */
     DEM_PARAM_UNUSED(Obdmid);
     DEM_PARAM_UNUSED(TIDindex);
@@ -300,9 +403,13 @@ Std_ReturnType Dem_DcmGetDTRData(
     DEM_PARAM_UNUSED(Testvalue);
     DEM_PARAM_UNUSED(Lowlimvalue);
     DEM_PARAM_UNUSED(Upplimvalue);
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0xA5, E_NOT_OK);
     return E_NOT_OK;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Service to report the value of monitor activity denominator PID computed by the Dem. API is
  * needed in OBD-relevant ECUs only. API Availability: This API will be available only if:
@@ -310,29 +417,39 @@ Std_ReturnType Dem_DcmGetDTRData(
  */
 Std_ReturnType Dem_DcmGetInfoTypeValue79(Dcm_OpStatusType OpStatus, uint8* DataValueBuffer, uint8* DataValueBufferSize)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 4, 0xC3, OpStatus, DataValueBuffer, DataValueBufferSize);
     /** API not yet implemented */
     DEM_PARAM_UNUSED(OpStatus);
     DEM_PARAM_UNUSED(DataValueBuffer);
     DEM_PARAM_UNUSED(DataValueBufferSize);
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0xC3, E_NOT_OK);
     return E_NOT_OK;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Function to report the value of PID 0xF501 computed by the Dem. API is needed in OBD-relevant
  * ECUs only. API Availability: This API will be available only if:
  * ({ecucDem/DemGeneral.DemOBDSupport)} != DEM_OBD_NO_OBD_SUPPORT)
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
  */
 Std_ReturnType Dem_DcmReadDataOfPIDF501(uint8* PIDF501value)
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Start, 2, 0xC4, PIDF501value);
     /** API not yet implemented */
     DEM_PARAM_UNUSED(PIDF501value);
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, Dem, 0, Bsw_Return, 2, 0xC4, E_NOT_OK);
     return E_NOT_OK;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 3673 -- */
 #endif
 /* PRQA S 3406, 1503 -- */
-
-#define DEM_STOP_SEC_CODE
-#include "Dem_MemMap.h"
 
 #endif

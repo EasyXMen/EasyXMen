@@ -44,6 +44,18 @@
  *  V02.04.00 20241031    tong.zhao      Upgrade according to the R23_11 standards
  *  V02.04.01 20251011    tong.zhao      In Tp Gateway, the Dest state has not been successfully set yet, while the
  *                                       lower layer starts copy tx data, which leads to data loss in the gateway.
+ *  V02.04.02 20241101    tong.zhao      Add feature Tp Gw N:1,If Gw N:1,If Rx N:1
+ *  V02.04.03 20251211    tong.zhao      Add feature Tp Tx 1:N. Add CancelTx or CancelRx in 1:N or N:1 mode.
+ *  V02.04.04 20260423    tong.zhao
+ *  1.Add case PDUR_ROUTE_TP_TX_NOBUFFERED_UNICAST and PDUR_ROUTE_TP_TX_NOBUFFERED_MULTICAST in PduR_RouteType.
+ *  2.Fix bug that 1:N Tp Gw can not route normal when one of the destination is in disable state.
+ *  V02.04.05 20260528    tong.zhao      (jira:CPT-18994)
+ *   During IF transmission, the TxConfirmation interrupt occasionally occurs before the call stack of the Transmit
+ * function exits, resulting in the PduR state not being updated in time.
+ *  V02.04.06 20260711    tong.zhao      Add feature Runtime Errors PDUR_E_TP_GW_TX_REQ_REJECTED.
+ *                                       Fix bug about cancel tx or rx.
+ *  V02.04.07 20260721    tong.zhao      Refactoring of MemMap.
+ *
  *
  ==================================================================================================================== */
 
@@ -103,6 +115,14 @@
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
 
+    \li VL_PduR_2992,VL_PduR_2996,VL_PduR_2880
+      Reason: QAC static analysis considers the if condition ((bufQeqReturn == BUFREQ_OK) && ((cnt + 1u) == destPduNum))
+  always false because bufQeqReturn may not be set to BUFREQ_OK in the last iteration, or the last iteration may be
+  unreachable. However, the logic is correct: the condition can be true when bufQeqReturn is BUFREQ_OK and it is the
+  last iteration.
+      Risk: No risk.
+      Prevention: None
+
     \li VL_PduR_1334
       Reason: Only parameter name is different.
       Risk: No risk.
@@ -119,15 +139,24 @@
       Prevention: Functional reliability guaranteed by design.
 
     \li VL_PduR_0770
-      Reason: Loop back retry logic requires early continuation to simplify error
-              handling and avoid deep nesting.
-      Risk: None control flow is well-defined and reviewed.
-      Prevention: Verified by code review and unit tests; behaviour unchanged.
+      Reason: design needs
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_PduR_2487
+      Reason: Control variables that are pointers will self-increment in the pass function.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_PduR_1505
       Reason: In order to make the module code structure clear, the functions are classified.
       Risk: No risk.
       Prevention: Ensure that the project is working properly through unit testing.
+
+    \li VL_PduR_2983
+      Reason: the issue shall be avoided in actual running environment and configs
+      Risk: No risk.
+      Prevention: None.
 
     \li VL_MTR_PduR_STCAL
       Reason: The software structure is defined by the AUTOSAR standard. The standard compliance vote is above the
@@ -182,10 +211,12 @@ extern "C" {
 #define PDUR_AR_RELEASE_REVISION_VERSION (0u)
 #define PDUR_SW_MAJOR_VERSION            (2u)
 #define PDUR_SW_MINOR_VERSION            (4u)
-#define PDUR_SW_PATCH_VERSION            (1u)
+#define PDUR_SW_PATCH_VERSION            (7u)
 
 /* ===================================================== macros ===================================================== */
 #if (STD_OFF == PDUR_ZERO_COST_OPERATION)
+/** Instance Id */
+#define PDUR_INSTANCE_ID 0u
 
 /** General function id */
 #define PDUR_TPCOPYTXDATA_ID       ((uint8)0x43u)
@@ -236,7 +267,11 @@ extern "C" {
 /**
  * @brief PduR PB Configuration Run Time point parameter
  */
+#define PDUR_START_SEC_VAR_CLEARED_PTR
+#include "PduR_MemMap.h"
 extern const PduR_PBConfigType* PduR_ConfigStd;
+#define PDUR_STOP_SEC_VAR_CLEARED_PTR
+#include "PduR_MemMap.h"
 
 /* ========================================= external function declarations ========================================= */
 /* General functions provided by the PDU Router */
@@ -248,7 +283,11 @@ extern const PduR_PBConfigType* PduR_ConfigStd;
  *  @synchronous   TRUE
  *  @trace         CPD-56794
  */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 void PduR_Init(const PduR_PBConfigType* ConfigPtr);
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 
 #if (STD_ON == PDUR_VERSION_INFO_API)
 /**
@@ -258,7 +297,11 @@ void PduR_Init(const PduR_PBConfigType* ConfigPtr);
  *  @synchronous   TRUE
  *  @trace         CPD-56795
  */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 void PduR_GetVersionInfo(Std_VersionInfoType* versionInfo);
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 #endif
 
 /**
@@ -269,7 +312,11 @@ void PduR_GetVersionInfo(Std_VersionInfoType* versionInfo);
  *  @return        PduR_PBConfigIdType
  *  @trace         CPD-56796
  */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 PduR_PBConfigIdType PduR_GetConfigurationId(void);
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 
 /**
  *  @brief         Enables a routing path group.
@@ -279,7 +326,11 @@ PduR_PBConfigIdType PduR_GetConfigurationId(void);
  *  @synchronous   TRUE
  *  @trace         CPD-56797
  */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 void PduR_EnableRouting(PduR_RoutingPathGroupIdType id);
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 
 /**
  *  @brief         Disables a routing path group.
@@ -291,7 +342,11 @@ void PduR_EnableRouting(PduR_RoutingPathGroupIdType id);
  *  @synchronous   TRUE
  *  @trace         CPD-56798
  */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 void PduR_DisableRouting(PduR_RoutingPathGroupIdType id, boolean initialize);
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 
 /* Configurable interfaces definitions for interaction with upper layer module */
 
@@ -307,7 +362,11 @@ void PduR_DisableRouting(PduR_RoutingPathGroupIdType id, boolean initialize);
  *  @synchronous   TRUE
  *  @trace         CPD-56799
  */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 Std_ReturnType PduR_Transmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr);
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 #endif
 
 #if (PDUR_CANCEL_TRANSMIT == STD_ON)
@@ -321,7 +380,11 @@ Std_ReturnType PduR_Transmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr);
  *  @synchronous   TRUE
  *  @trace         CPD-56800
  */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 Std_ReturnType PduR_CancelTransmit(PduIdType TxPduId);
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 #endif
 
 #if (PDUR_CANCEL_RECEIVE == STD_ON)
@@ -335,7 +398,11 @@ Std_ReturnType PduR_CancelTransmit(PduIdType TxPduId);
  *  @synchronous   TRUE
  *  @trace         CPD-56801
  */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 Std_ReturnType PduR_CancelReceive(PduIdType RxPduId);
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 #endif
 
 /* Configurable interfaces definitions for lower layer communication interface module interaction */
@@ -350,7 +417,11 @@ Std_ReturnType PduR_CancelReceive(PduIdType RxPduId);
  *  @synchronous   TRUE
  *  @trace         CPD-56802
  */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 void PduR_IfRxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr);
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 #endif
 
 #if (PDUR_TX_CONFIRMATION == STD_ON)
@@ -364,7 +435,11 @@ void PduR_IfRxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr);
  *  @synchronous   TRUE
  *  @trace         CPD-56803
  */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 void PduR_IfTxConfirmation(PduIdType TxPduId, Std_ReturnType result);
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 #endif
 
 #if (PDUR_TRIGGER_TRANSMIT == STD_ON)
@@ -385,7 +460,11 @@ void PduR_IfTxConfirmation(PduIdType TxPduId, Std_ReturnType result);
  *  @synchronous   TRUE
  *  @trace         CPD-56804
  */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 Std_ReturnType PduR_IfTriggerTransmit(PduIdType TxPduId, PduInfoType* PduInfoPtr);
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 #endif
 
 /* Configurable interfaces definitions for lower layer transport protocol module interaction */
@@ -407,7 +486,11 @@ Std_ReturnType PduR_IfTriggerTransmit(PduIdType TxPduId, PduInfoType* PduInfoPtr
  *  @synchronous   TRUE
  *  @trace         CPD-56805
  */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 BufReq_ReturnType PduR_TpCopyRxData(PduIdType id, const PduInfoType* info, PduLengthType* bufferSizePtr);
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 #endif
 
 #if (PDUR_TP_RXINDICATION == STD_ON)
@@ -421,7 +504,11 @@ BufReq_ReturnType PduR_TpCopyRxData(PduIdType id, const PduInfoType* info, PduLe
  *  @synchronous   TRUE
  *  @trace         CPD-56806
  */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 void PduR_TpRxIndication(PduIdType id, Std_ReturnType result);
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 #endif
 
 #if (PDUR_TP_STARTOFRECEPTION_TRANSMIT == STD_ON)
@@ -451,11 +538,15 @@ void PduR_TpRxIndication(PduIdType id, Std_ReturnType result);
  *  @synchronous   TRUE
  *  @trace         CPD-56807
  */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 BufReq_ReturnType PduR_TpStartOfReception(
     PduIdType          id,
     const PduInfoType* info,
     PduLengthType      TpSduLength,
     PduLengthType*     bufferSizePtr);
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 #endif
 
 #if (PDUR_TP_COPYTXDATA == STD_ON)
@@ -497,11 +588,15 @@ BufReq_ReturnType PduR_TpStartOfReception(
  *  @synchronous   TRUE
  *  @trace         CPD-56808
  */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 BufReq_ReturnType PduR_TpCopyTxData(
     PduIdType            id,
     const PduInfoType*   info,
     const RetryInfoType* retry,
     PduLengthType*       availableDataPtr);
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 #endif
 
 #if (PDUR_TP_TXCONFIRMATION == STD_ON)
@@ -515,7 +610,11 @@ BufReq_ReturnType PduR_TpCopyTxData(
  *  @synchronous   TRUE
  *  @trace         CPD-56809
  */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 void PduR_TpTxConfirmation(PduIdType id, Std_ReturnType result);
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 #endif
 
 #endif /* end of PDUR_ZERO_COST_OPERATION*/

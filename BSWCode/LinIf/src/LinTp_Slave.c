@@ -40,37 +40,86 @@
 /* ============================================ internal data definition ============================================ */
 
 /* ========================================= internal function declarations ========================================= */
-#define LINIF_START_SEC_CODE
-#include "LinIf_MemMap.h"
-
 LINTP_LOCAL_INLINE LinTp_SlaveRuntimeType* LinTp_GetSlaveRtDataPtr(uint8 ch)
 {
     return LinTp_ConfigPtr->RtDataVariantMapPtr->SlaveRtDataPtr[ch - LinTp_ConfigPtr->NumOfMasterChannel];
 }
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL void LinTp_SlaveSFRxHandle(NetworkHandleType tpCh, const uint8* Lin_SduPtr, const LinTp_RxNSduType* rxNSdu);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL void LinTp_SlaveFFRxHandle(NetworkHandleType tpCh, const uint8* Lin_SduPtr, const LinTp_RxNSduType* rxNSdu);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL void LinTp_SlaveCFRxHandle(NetworkHandleType tpCh, const uint8* Lin_SduPtr);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL void LinTp_SlaveSFRxMainHandle(LinTp_SlaveRuntimeType* tpSlaveRTPtr);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL void LinTp_SlaveFFRxMainHandle(LinTp_SlaveRuntimeType* tpSlaveRTPtr);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL void LinTp_SlaveCFRxMainHandle(LinTp_SlaveRuntimeType* tpSlaveRTPtr);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL void LinTp_SlaveSFTxHandle(NetworkHandleType ch, Lin_PduType* PduPtr, LinTp_SlaveRuntimeType* tpSlaveRTPtr);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL void LinTp_SlaveFFTxHandle(NetworkHandleType ch, Lin_PduType* PduPtr, LinTp_SlaveRuntimeType* tpSlaveRTPtr);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL void LinTp_SlaveCFTxHandle(NetworkHandleType ch, Lin_PduType* PduPtr, LinTp_SlaveRuntimeType* tpSlaveRTPtr);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
-LINTP_LOCAL void              LinTp_SlaveAbortTxRxAndNotifyFailToUpper(LinTp_SlaveRuntimeType* tpSlaveRTPtr);
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
+LINTP_LOCAL void LinTp_SlaveAbortTxRxAndNotifyFailToUpper(LinTp_SlaveRuntimeType* tpSlaveRTPtr);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL NetworkHandleType LinTp_SlaveGetLinTpChannel(NetworkHandleType ComMChannel);
-LINTP_LOCAL void              LinTp_SlaveTimerHandle(LinTp_SlaveRuntimeType* tpSlaveRTPtr);
-LINTP_LOCAL void              LinTp_SlaveResetRtData(LinTp_SlaveRuntimeType* tpSlaveRTPtr);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
+LINTP_LOCAL void LinTp_SlaveTimerHandle(LinTp_SlaveRuntimeType* tpSlaveRTPtr);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
+LINTP_LOCAL void LinTp_SlaveResetRtData(LinTp_SlaveRuntimeType* tpSlaveRTPtr);
 #define LINIF_STOP_SEC_CODE
 #include "LinIf_MemMap.h"
 
@@ -83,12 +132,11 @@ LINTP_LOCAL void              LinTp_SlaveResetRtData(LinTp_SlaveRuntimeType* tpS
 /* PRQA S 2814,2824,2812 ++ */ /* VL_QAC_DerefNullPtr */
 /* PRQA S 1532 ++ */           /* VL_QAC_OneFunRef */
 
-#define LINIF_START_SEC_CODE
-#include "LinIf_MemMap.h"
-
 /**
  * LinTp slave node runtime data init
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 void LinTp_SlaveInit(void)
 {
     LinTp_SlaveRuntimeType* tpSlaveRTPtr = LinTp_ConfigPtr->RtDataVariantMapPtr->SlaveRtDataPtr[0u];
@@ -103,10 +151,14 @@ void LinTp_SlaveInit(void)
         idx--;
     }
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * LinTp slave node runtime data init and cancel TP process on going
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 void LinTp_SlavePreInit(NetworkHandleType ch)
 {
     NetworkHandleType       tpCh         = LinTp_SlaveGetLinTpChannel(LinIf_GetComMNetwork(ch));
@@ -117,11 +169,15 @@ void LinTp_SlavePreInit(NetworkHandleType ch)
         LinTp_SlaveResetRtData(tpSlaveRTPtr);
     }
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * TP message receive indication process in slave channel.
  */
 /* PRQA S 6070 ++ */ /* VL_MTR_LinTp_STCAL*/
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 void LinTp_SlaveMRFIndication(NetworkHandleType ch, const uint8* Lin_SduPtr)
 /* PRQA S 6070 -- */
 {
@@ -172,10 +228,14 @@ void LinTp_SlaveMRFIndication(NetworkHandleType ch, const uint8* Lin_SduPtr)
         }
     }
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * Get ComMChannel corresponding LinTp channel
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 Std_ReturnType LinTp_SlaveTransmit(const LinTp_TxNSduType* txNSdu, const PduInfoType* LinTpTxInfoPtr)
 {
     NetworkHandleType       tpCh         = LinTp_SlaveGetLinTpChannel(txNSdu->TxNSduChannelRef);
@@ -205,39 +265,56 @@ Std_ReturnType LinTp_SlaveTransmit(const LinTp_TxNSduType* txNSdu, const PduInfo
 
     return ret;
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * Check slave node function address flag.
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 boolean LinTp_SlaveCheckFunctionAddressFlag(NetworkHandleType ch)
 {
     NetworkHandleType             tpCh         = LinTp_SlaveGetLinTpChannel(LinIf_GetComMNetwork(ch));
     const LinTp_SlaveRuntimeType* tpSlaveRTPtr = LinTp_GetSlaveRtDataPtr(tpCh);
     return tpSlaveRTPtr->FunctionAddressFlag;
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * Set slave node function address flag.
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 void LinTp_SlaveSetFunctionAddressFlag(NetworkHandleType ch, boolean functionAddressFlag)
 {
     NetworkHandleType       tpCh         = LinTp_SlaveGetLinTpChannel(LinIf_GetComMNetwork(ch));
     LinTp_SlaveRuntimeType* tpSlaveRTPtr = LinTp_GetSlaveRtDataPtr(tpCh);
     tpSlaveRTPtr->FunctionAddressFlag    = functionAddressFlag;
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 void LinTp_SlaveShutdown(ApplicationType applicationId)
 {
     LinIf_SlaveInit(applicationId);
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * SRF process(Response transmit) in slave channel.
  */
-void LinTp_SlaveSRFIndication(NetworkHandleType ch, Lin_PduType* PduPtr)
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
+boolean LinTp_SlaveSRFIndication(NetworkHandleType ch, Lin_PduType* PduPtr)
 {
     NetworkHandleType       tpCh         = LinTp_SlaveGetLinTpChannel(LinIf_GetComMNetwork(ch));
     LinTp_SlaveRuntimeType* tpSlaveRTPtr = LinTp_GetSlaveRtDataPtr(tpCh);
+    boolean                 result       = TRUE;
 
     /*@req <SWS_LinIf_00803>*/
     /* Stop N_Cs timer */
@@ -264,13 +341,20 @@ void LinTp_SlaveSRFIndication(NetworkHandleType ch, Lin_PduType* PduPtr)
 #else /* The default version of lin driver is 4.2.2 / 4.3.1 */
         PduPtr->Drc = LIN_SLAVE_TO_SLAVE;
 #endif
+        result = FALSE;
         break;
     }
+
+    return result;
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * TP tx confirmation process in slave channel.
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 void LinTp_SlaveTxConfirmation(NetworkHandleType ch, boolean* isTpTxFinish)
 {
     NetworkHandleType       tpCh         = LinTp_SlaveGetLinTpChannel(LinIf_GetComMNetwork(ch));
@@ -302,23 +386,31 @@ void LinTp_SlaveTxConfirmation(NetworkHandleType ch, boolean* isTpTxFinish)
         *isTpTxFinish = FALSE;
     }
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 #if (LINIF_SUPPORT_RESPONSE_ERROR_SIGNAL == STD_ON)
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 void LinTp_SlaveTxErrorSignalHandler(NetworkHandleType LinIfChannelId)
 {
     NetworkHandleType             linTpChId = LinTp_SlaveGetLinTpChannel(LinIf_GetComMNetwork(LinIfChannelId));
     const LinTp_SlaveRuntimeType* tpChPtr   = LinTp_GetSlaveRtDataPtr(linTpChId);
 
-    if (tpChPtr != NULL_PTR && tpChPtr->TxNSduPtr != NULL_PTR)
+    if (tpChPtr->TxNSduPtr != NULL_PTR)
     {
         PduR_LinTpTxConfirmation(tpChPtr->TxNSduPtr->TxNSduPduRef, E_NOT_OK);
     }
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 #endif
 
 /**
  * LinTp slave main function
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 void LinTp_SlaveMainFunction(NetworkHandleType ch)
 {
     NetworkHandleType tpCh = LinTp_SlaveGetLinTpChannel(LinIf_GetComMNetwork(ch));
@@ -353,6 +445,8 @@ void LinTp_SlaveMainFunction(NetworkHandleType ch)
         }
     }
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 /* PRQA S 1532 -- */
 
 /* ========================================== internal function definition ========================================== */
@@ -367,6 +461,8 @@ void LinTp_SlaveMainFunction(NetworkHandleType ch)
  * @synchronous         TRUE
  * @trace               -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL void LinTp_SlaveSFRxHandle(NetworkHandleType tpCh, const uint8* Lin_SduPtr, const LinTp_RxNSduType* rxNSdu)
 {
     LinTp_SlaveRuntimeType* tpSlaveRTPtr = LinTp_GetSlaveRtDataPtr(tpCh);
@@ -422,6 +518,8 @@ LINTP_LOCAL void LinTp_SlaveSFRxHandle(NetworkHandleType tpCh, const uint8* Lin_
         SchM_Exit_LinTp_ExclusiveArea_Channel();
     }
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief               LinTp slave node receive First Frame handle
@@ -432,6 +530,8 @@ LINTP_LOCAL void LinTp_SlaveSFRxHandle(NetworkHandleType tpCh, const uint8* Lin_
  * @synchronous         TRUE
  * @trace               -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL void LinTp_SlaveFFRxHandle(NetworkHandleType tpCh, const uint8* Lin_SduPtr, const LinTp_RxNSduType* rxNSdu)
 {
     LinTp_SlaveRuntimeType* tpSlaveRTPtr = LinTp_GetSlaveRtDataPtr(tpCh);
@@ -483,6 +583,8 @@ LINTP_LOCAL void LinTp_SlaveFFRxHandle(NetworkHandleType tpCh, const uint8* Lin_
         SchM_Exit_LinTp_ExclusiveArea_Channel();
     }
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief               LinTp slave node receive Continue Frame handle
@@ -494,6 +596,8 @@ LINTP_LOCAL void LinTp_SlaveFFRxHandle(NetworkHandleType tpCh, const uint8* Lin_
  * @trace               -
  */
 /* PRQA S 6030 ++ */ /* VL_MTR_LinTp_STMIF */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL void LinTp_SlaveCFRxHandle(NetworkHandleType tpCh, const uint8* Lin_SduPtr)
 /* PRQA S 6030 -- */
 {
@@ -542,6 +646,8 @@ LINTP_LOCAL void LinTp_SlaveCFRxHandle(NetworkHandleType tpCh, const uint8* Lin_
         /* CF is received instead of a FF or a SF,Ignore this LIN frame. */
     }
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief               Single Frame receive process in mainfunction
@@ -550,6 +656,8 @@ LINTP_LOCAL void LinTp_SlaveCFRxHandle(NetworkHandleType tpCh, const uint8* Lin_
  * @synchronous         TRUE
  * @trace               -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL void LinTp_SlaveSFRxMainHandle(LinTp_SlaveRuntimeType* tpSlaveRTPtr)
 {
     uint8       data[LINTP_METADATA_BUFFER_LEN] = {0};
@@ -608,6 +716,8 @@ LINTP_LOCAL void LinTp_SlaveSFRxMainHandle(LinTp_SlaveRuntimeType* tpSlaveRTPtr)
         LinTp_SlaveResetRtData(tpSlaveRTPtr);
     }
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief               First Frame receive process in mainfunction
@@ -616,6 +726,8 @@ LINTP_LOCAL void LinTp_SlaveSFRxMainHandle(LinTp_SlaveRuntimeType* tpSlaveRTPtr)
  * @synchronous         TRUE
  * @trace               -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL void LinTp_SlaveFFRxMainHandle(LinTp_SlaveRuntimeType* tpSlaveRTPtr)
 {
     uint8       data[LINTP_METADATA_BUFFER_LEN] = {0};
@@ -676,6 +788,8 @@ LINTP_LOCAL void LinTp_SlaveFFRxMainHandle(LinTp_SlaveRuntimeType* tpSlaveRTPtr)
         LinTp_SlaveResetRtData(tpSlaveRTPtr);
     }
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief               Consecutive Frame receive process in mainfunction
@@ -684,6 +798,8 @@ LINTP_LOCAL void LinTp_SlaveFFRxMainHandle(LinTp_SlaveRuntimeType* tpSlaveRTPtr)
  * @synchronous         TRUE
  * @trace               -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL void LinTp_SlaveCFRxMainHandle(LinTp_SlaveRuntimeType* tpSlaveRTPtr)
 {
     PduInfoType pduInfo;
@@ -737,6 +853,8 @@ LINTP_LOCAL void LinTp_SlaveCFRxMainHandle(LinTp_SlaveRuntimeType* tpSlaveRTPtr)
         LinTp_SlaveAbortTxRxAndNotifyFailToUpper(tpSlaveRTPtr);
     }
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief               Single frame transmit process.
@@ -745,6 +863,8 @@ LINTP_LOCAL void LinTp_SlaveCFRxMainHandle(LinTp_SlaveRuntimeType* tpSlaveRTPtr)
  * @synchronous         TRUE
  * @trace               -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL void LinTp_SlaveSFTxHandle(NetworkHandleType ch, Lin_PduType* PduPtr, LinTp_SlaveRuntimeType* tpSlaveRTPtr)
 {
     if (tpSlaveRTPtr->RetryCopyCnt <= tpSlaveRTPtr->TxNSduPtr->MaxBufReq)
@@ -824,6 +944,8 @@ LINTP_LOCAL void LinTp_SlaveSFTxHandle(NetworkHandleType ch, Lin_PduType* PduPtr
 #endif
     }
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
 * @brief               First frame transmit process.
@@ -835,6 +957,8 @@ LINTP_LOCAL void LinTp_SlaveSFTxHandle(NetworkHandleType ch, Lin_PduType* PduPtr
 * @synchronous         TRUE
 * @trace               -
 */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL void LinTp_SlaveFFTxHandle(NetworkHandleType ch, Lin_PduType* PduPtr, LinTp_SlaveRuntimeType* tpSlaveRTPtr)
 {
     if (tpSlaveRTPtr->RetryCopyCnt <= tpSlaveRTPtr->TxNSduPtr->MaxBufReq)
@@ -908,6 +1032,8 @@ LINTP_LOCAL void LinTp_SlaveFFTxHandle(NetworkHandleType ch, Lin_PduType* PduPtr
 #endif
     }
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief               Consecutive Frame transmit process.
@@ -919,6 +1045,8 @@ LINTP_LOCAL void LinTp_SlaveFFTxHandle(NetworkHandleType ch, Lin_PduType* PduPtr
  * @synchronous         TRUE
  * @trace               -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL void LinTp_SlaveCFTxHandle(NetworkHandleType ch, Lin_PduType* PduPtr, LinTp_SlaveRuntimeType* tpSlaveRTPtr)
 {
     if (NULL_PTR != tpSlaveRTPtr->TxNSduPtr)
@@ -1007,6 +1135,8 @@ LINTP_LOCAL void LinTp_SlaveCFTxHandle(NetworkHandleType ch, Lin_PduType* PduPtr
         }
     }
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief               Notify upper with E_NOT_OK and abort transmition and receive (reset runtime data)
@@ -1015,6 +1145,8 @@ LINTP_LOCAL void LinTp_SlaveCFTxHandle(NetworkHandleType ch, Lin_PduType* PduPtr
  * @synchronous         TRUE
  * @trace               -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL void LinTp_SlaveAbortTxRxAndNotifyFailToUpper(LinTp_SlaveRuntimeType* tpSlaveRTPtr)
 {
     if (NULL_PTR != tpSlaveRTPtr->TxNSduPtr)
@@ -1040,6 +1172,8 @@ LINTP_LOCAL void LinTp_SlaveAbortTxRxAndNotifyFailToUpper(LinTp_SlaveRuntimeType
     /* Abort transmit */
     LinTp_SlaveResetRtData(tpSlaveRTPtr);
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief               Get ComMChannel corresponding LinTp channel
@@ -1049,6 +1183,8 @@ LINTP_LOCAL void LinTp_SlaveAbortTxRxAndNotifyFailToUpper(LinTp_SlaveRuntimeType
  * @synchronous         TRUE
  * @trace               -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL NetworkHandleType LinTp_SlaveGetLinTpChannel(NetworkHandleType ComMChannel)
 {
     const LinTp_ChannelConfigType* tpChCfgPtr = LinTp_GetChannelConfig(0u);
@@ -1065,6 +1201,8 @@ LINTP_LOCAL NetworkHandleType LinTp_SlaveGetLinTpChannel(NetworkHandleType ComMC
 
     return tpCh;
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief               LinTp slave channel timer handler
@@ -1073,6 +1211,8 @@ LINTP_LOCAL NetworkHandleType LinTp_SlaveGetLinTpChannel(NetworkHandleType ComMC
  * @synchronous         TRUE
  * @trace               -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL void LinTp_SlaveTimerHandle(LinTp_SlaveRuntimeType* tpSlaveRTPtr)
 {
     if (tpSlaveRTPtr->NcrTimer > 0u)
@@ -1108,6 +1248,8 @@ LINTP_LOCAL void LinTp_SlaveTimerHandle(LinTp_SlaveRuntimeType* tpSlaveRTPtr)
         }
     }
 }
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief               Reset the channel runtime data to default value
@@ -1116,26 +1258,27 @@ LINTP_LOCAL void LinTp_SlaveTimerHandle(LinTp_SlaveRuntimeType* tpSlaveRTPtr)
  * @synchronous         TRUE
  * @trace               -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 LINTP_LOCAL void LinTp_SlaveResetRtData(LinTp_SlaveRuntimeType* tpSlaveRTPtr)
 {
-    tpSlaveRTPtr->ChCfgPtr            = NULL_PTR;
-    tpSlaveRTPtr->TxNSduPtr           = NULL_PTR;
-    tpSlaveRTPtr->RxNSduPtr           = NULL_PTR;
-    tpSlaveRTPtr->SduSize             = 0u;
-    tpSlaveRTPtr->SduIdx              = 0u;
-    tpSlaveRTPtr->SduRemaining        = 0u;
-    tpSlaveRTPtr->UpperBufRemaining   = 0u;
-    tpSlaveRTPtr->channelState        = LINTP_CHANNEL_IDLE;
-    tpSlaveRTPtr->NcrTimer            = 0u;
-    tpSlaveRTPtr->NasTimer            = 0u;
-    tpSlaveRTPtr->NcsTimer            = 0u;
-    tpSlaveRTPtr->LastFrameType       = LINTP_FRAMETYPE_NONE;
-    tpSlaveRTPtr->RxStage             = LINTP_SLAVE_RX_IDLE;
-    tpSlaveRTPtr->TxStage             = LINTP_SLAVE_TX_IDLE;
-    tpSlaveRTPtr->SduSN               = 0u;
-    tpSlaveRTPtr->RetryCopyCnt        = 0u;
-    tpSlaveRTPtr->FunctionAddressFlag = FALSE;
-    tpSlaveRTPtr->MRFRequestedNad     = 0x0u;
+    tpSlaveRTPtr->ChCfgPtr          = NULL_PTR;
+    tpSlaveRTPtr->TxNSduPtr         = NULL_PTR;
+    tpSlaveRTPtr->RxNSduPtr         = NULL_PTR;
+    tpSlaveRTPtr->SduSize           = 0u;
+    tpSlaveRTPtr->SduIdx            = 0u;
+    tpSlaveRTPtr->SduRemaining      = 0u;
+    tpSlaveRTPtr->UpperBufRemaining = 0u;
+    tpSlaveRTPtr->channelState      = LINTP_CHANNEL_IDLE;
+    tpSlaveRTPtr->NcrTimer          = 0u;
+    tpSlaveRTPtr->NasTimer          = 0u;
+    tpSlaveRTPtr->NcsTimer          = 0u;
+    tpSlaveRTPtr->LastFrameType     = LINTP_FRAMETYPE_NONE;
+    tpSlaveRTPtr->RxStage           = LINTP_SLAVE_RX_IDLE;
+    tpSlaveRTPtr->TxStage           = LINTP_SLAVE_TX_IDLE;
+    tpSlaveRTPtr->SduSN             = 0u;
+    tpSlaveRTPtr->RetryCopyCnt      = 0u;
+    tpSlaveRTPtr->MRFRequestedNad   = 0x0u;
     (void)IStdLib_MemSet(tpSlaveRTPtr->SduBuf, 0u, LINTP_FRAME_LEN_MAX);
 }
 

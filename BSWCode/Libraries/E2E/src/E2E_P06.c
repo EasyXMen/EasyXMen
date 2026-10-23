@@ -128,6 +128,11 @@ Std_ReturnType
 
     return Ret;
 }
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
+
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /*PRQA S 3120 -- */
 /**
  * Initializes the protection state.
@@ -148,6 +153,11 @@ Std_ReturnType E2E_P06ProtectInit(E2E_P06ProtectStateType* StatePtr)
     }
     return Ret;
 }
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
+
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * Checks the Data received using the E2E profile 6.
  */
@@ -239,6 +249,11 @@ Std_ReturnType E2E_P06Check(
 
     return Ret;
 }
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
+
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /*PRQA S 3120 -- */
 /**
  * Initializes the check state.
@@ -260,6 +275,11 @@ Std_ReturnType E2E_P06CheckInit(E2E_P06CheckStateType* StatePtr)
     }
     return Ret;
 }
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
+
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 /**
  * The function maps the check status of profile 6 to a generic check status.
  */
@@ -300,8 +320,12 @@ E2E_PCheckStatusType E2E_P06MapStatusToSM(Std_ReturnType CheckReturn, E2E_P06Che
     }
     return Ret;
 }
+#define E2E_STOP_SEC_CODE
+#include "E2E_MemMap.h"
 /*PRQA S 1532 -- */ /*PRQA S 1503 -- */
 /* ========================================== internal function definitions ========================================= */
+#define E2E_START_SEC_CODE
+#include "E2E_MemMap.h"
 E2E_LOCAL Std_ReturnType E2E_P06CheckVerifyInputs(
     const E2E_P06ConfigType*     ConfigPtr,
     const E2E_P06CheckStateType* StatePtr,

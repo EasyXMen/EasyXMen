@@ -61,7 +61,11 @@
 #include "lwip/ip.h"
 
 /** Global data for both IPv4 and IPv6 */
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 struct ip_globals ip_data[TCPIP_MULTICORE_NUMBER];
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 
 #if LWIP_IPV4 && LWIP_IPV6
 

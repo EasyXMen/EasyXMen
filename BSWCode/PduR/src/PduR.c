@@ -23,9 +23,11 @@
  ***********************************************************************************************************************/
 
 /* PRQA S 3415 EOF */ /* VL_PduR_3415 */
+/* PRQA S 2983 EOF */ /* VL_PduR_2983 */
 
 /* =================================================== inclusions =================================================== */
 #include "PduR_Internal.h"
+#include "PduR_Arti.h"
 
 #if (STD_OFF == PDUR_ZERO_COST_OPERATION)
 /* ===================================================== macros ===================================================== */
@@ -34,38 +36,64 @@
 
 /* ============================================ internal data definition ============================================ */
 /* PduR Module status */
-#define PDUR_START_SEC_VAR_INIT_8
+#define PDUR_START_SEC_VAR_CLEARED_8
 #include "PduR_MemMap.h"
-PDUR_LOCAL PduR_StateType PduR_Status = PDUR_UNINIT;
-#define PDUR_STOP_SEC_VAR_INIT_8
+PDUR_LOCAL PduR_StateType PduR_Status;
+#define PDUR_STOP_SEC_VAR_CLEARED_8
 #include "PduR_MemMap.h"
 /* ============================================ external data definition ============================================ */
 /*PduR PB Configuration Run Time point parameter*/
-#define PDUR_START_SEC_VAR_INIT_PTR
+#define PDUR_START_SEC_VAR_CLEARED_PTR
 #include "PduR_MemMap.h"
-const PduR_PBConfigType* PduR_ConfigStd = NULL_PTR;
-#define PDUR_STOP_SEC_VAR_INIT_PTR
+const PduR_PBConfigType* PduR_ConfigStd;
+#define PDUR_STOP_SEC_VAR_CLEARED_PTR
 #include "PduR_MemMap.h"
 /* ========================================= internal function declarations ========================================= */
 #if (STD_ON == PDUR_DEV_ERROR_DETECT)
-static boolean PduR_ValidateInitStatus(uint8 apiId);
-static boolean PduR_ValidatePointer(uint8 apiId, uint8 ErrorId, const void* pointer);
-static boolean
-    PduR_ValidateMaxValue(uint8 apiId, uint8 ErrorId, uint16 targetValue, uint16 referenceValue, boolean isContain);
-#if (PDUR_MULITIPARTITION_SUPPORT == STD_ON)
-static boolean PduR_ValidatePartitionContext(uint8 apiId, uint8 targetPartition);
-#endif
-static boolean PduR_ValidateMetaData(uint8 apiId, uint8 metaDataLen, const uint8* metaDataPtr);
-static boolean PduR_ValidateIsTpRoute(uint8 apiId, boolean flag);
-#endif
-/* ========================================== external function definition ========================================== */
 #define PDUR_START_SEC_CODE
 #include "PduR_MemMap.h"
+static boolean PduR_ValidateInitStatus(uint8 apiId);
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
+static boolean PduR_ValidatePointer(uint8 apiId, uint8 ErrorId, const void* pointer);
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
+static boolean
+    PduR_ValidateMaxValue(uint8 apiId, uint8 ErrorId, uint16 targetValue, uint16 referenceValue, boolean isContain);
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
+#if (PDUR_MULITIPARTITION_SUPPORT == STD_ON)
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
+static boolean PduR_ValidatePartitionContext(uint8 apiId, uint8 targetPartition);
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
+#endif
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
+static boolean PduR_ValidateMetaData(uint8 apiId, uint8 metaDataLen, const uint8* metaDataPtr);
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
+static boolean PduR_ValidateIsTpRoute(uint8 apiId, boolean flag);
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
+#endif
+/* ========================================== external function definition ========================================== */
 /**
  * Initializes the PDU Router
  */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 void PduR_Init(const PduR_PBConfigType* ConfigPtr) /* PRQA S 1503,1532 */ /* VL_QAC_NoUsedApi,VL_QAC_OneFunRef */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, PduR, 0, Bsw_Start, 2, 0xF0, ConfigPtr);
+
 #if (STD_ON == PDUR_DEV_ERROR_DETECT)
     if (PduR_ValidatePointer(PDUR_INIT_ID, PDUR_E_INIT_FAILED, ConfigPtr)
         && PduR_ValidateMaxValue(
@@ -100,13 +128,21 @@ void PduR_Init(const PduR_PBConfigType* ConfigPtr) /* PRQA S 1503,1532 */ /* VL_
         }
         SchM_Exit_PduR_ExclusiveArea_Init();
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, PduR, 0, Bsw_Return, 1, 0xF0);
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 #if (STD_ON == PDUR_VERSION_INFO_API)
 /**
  * Returns the version information of this module.
  */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 void PduR_GetVersionInfo(Std_VersionInfoType* versionInfo) /* PRQA S 1503 */ /* VL_QAC_NoUsedApi */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, PduR, 0, Bsw_Start, 2, 0xF1, versionInfo);
+
 #if (STD_ON == PDUR_DEV_ERROR_DETECT)
     if (PduR_ValidatePointer(PDUR_GETVERSIONINFO_ID, PDUR_E_PARAM_POINTER, (const Std_VersionInfoType*)versionInfo))
 #endif
@@ -117,11 +153,17 @@ void PduR_GetVersionInfo(Std_VersionInfoType* versionInfo) /* PRQA S 1503 */ /* 
         (versionInfo)->sw_minor_version = PDUR_SW_MINOR_VERSION;
         (versionInfo)->sw_patch_version = PDUR_SW_PATCH_VERSION;
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, PduR, 0, Bsw_Return, 1, 0xF1);
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 #endif
 /**
  * Returns the unique identifier of the post-build time configuration of the PDU Router
  */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 PduR_PBConfigIdType PduR_GetConfigurationId(void) /* PRQA S 1503 */ /* VL_QAC_NoUsedApi */
 {
     PduR_PBConfigIdType configId = 0u;
@@ -133,11 +175,17 @@ PduR_PBConfigIdType PduR_GetConfigurationId(void) /* PRQA S 1503 */ /* VL_QAC_No
 #endif
     return configId;
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 /**
  * Enables a routing path group.
  */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 void PduR_EnableRouting(PduR_RoutingPathGroupIdType id) /* PRQA S 1503 */ /* VL_QAC_NoUsedApi */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, PduR, 0, Bsw_Start, 2, 0xF3, id);
+
 #if (STD_ON == PDUR_DEV_ERROR_DETECT)
     if (PduR_ValidateInitStatus(PDUR_ENABLEROUTING_ID))
 #endif
@@ -180,14 +228,22 @@ void PduR_EnableRouting(PduR_RoutingPathGroupIdType id) /* PRQA S 1503 */ /* VL_
 #endif
     }
     PDUR_NOUSED(id);
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, PduR, 0, Bsw_Return, 1, 0xF3);
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 /**
  * Disables a routing path group.
  */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 /* PRQA S 1503 ++ */ /* VL_QAC_NoUsedApi */
 void PduR_DisableRouting(PduR_RoutingPathGroupIdType id, boolean initialize)
-/* PRQA S 1503 -- */ /* VL_QAC_NoUsedApi */
+/* PRQA S 1503 -- */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, PduR, 0, Bsw_Start, 3, 0xF4, id, initialize);
+
 #if (STD_ON == PDUR_DEV_ERROR_DETECT)
     if (PduR_ValidateInitStatus(PDUR_DISABLEROUTING_ID))
 #endif
@@ -234,16 +290,24 @@ void PduR_DisableRouting(PduR_RoutingPathGroupIdType id, boolean initialize)
     }
     PDUR_NOUSED(id);
     PDUR_NOUSED(initialize);
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, PduR, 0, Bsw_Return, 1, 0xF4);
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 
 #if (PDUR_TRANSMIT_SUPPORT == STD_ON)
 /**
  * Requests transmission of a PDU.
  */
-/* PRQA S 1503,6070, 6030 ++ */ /* VL_QAC_NoUsedApi,VL_MTR_PduR_STCAL, VL_MTR_PduR_STMIF */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
+/* PRQA S 1503, 6070, 6030 ++ */ /* VL_QAC_NoUsedApi,VL_MTR_PduR_STCAL, VL_MTR_PduR_STMIF */
 Std_ReturnType PduR_Transmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr)
-/* PRQA S 1503,6070, 6030 -- */
+/* PRQA S 1503, 6070, 6030 -- */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, PduR, 0, Bsw_Start, 3, 0x49, TxPduId, PduInfoPtr);
+
     Std_ReturnType result = E_NOT_OK;
 #if (STD_ON == PDUR_DEV_ERROR_DETECT)
     if (PduR_ValidateInitStatus(PDUR_TRANSMIT_ID))
@@ -281,19 +345,28 @@ Std_ReturnType PduR_Transmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr)
             }
 #endif
             /* Tp route 1:1, If route 1:n, Dependent configuration tool */
-            for (uint8 cnt = 0u; cnt < PduR_GetDestPduNumOfRoutingPath(internalTxPduId); cnt++)
+            uint8 destPduNum = PduR_GetDestPduNumOfSrcPdu(internalTxPduId);
+            for (uint8 cnt = 0u; cnt < destPduNum; cnt++)
             {
                 PduIdType destPduId = PduR_GetDestPduOfRoutingPath(internalTxPduId, cnt);
                 /* If a routing path group is disabled the PduR shall directly return (SWS_PduR_00805) */
                 if (PduR_IsRoutingPathEnable(destPduId))
                 {
                     Std_ReturnType tmpResult = E_NOT_OK;
+
+                    /* Pre-set source route status to PENDING before attempting this destination.
+                     * the status write is atomic w.r.t. TxConfirmation handlers. If this
+                     * destination does not accept the transmit and no other destination
+                     * succeeded, the source status will be reset to INITIAL. */
+                    PduR_SourceRouteStatus[internalTxPduId] = PDUR_RES_PENDING;
+
                     switch (PduR_GetRouteTypeOfDestPdu(destPduId))
                     {
                     case PDUR_ROUTE_IF_TX_NOBUFFERED:
                         tmpResult = PduR_PduRIfTransmit(internalTxPduId, destPduId, infoPtrPtr);
                         break;
-                    case PDUR_ROUTE_TP_TX_NOBUFFERED:
+                    case PDUR_ROUTE_TP_TX_NOBUFFERED_UNICAST:
+                    case PDUR_ROUTE_TP_TX_NOBUFFERED_MULTICAST:
                         tmpResult = PduR_PduRTpTransmit(internalTxPduId, destPduId, infoPtrPtr);
                         break;
                     default:
@@ -301,29 +374,54 @@ Std_ReturnType PduR_Transmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr)
                         break;
                     }
 
-                    /* The PDU Router reports E_OK if at least one destination lower layer reports E_OK.
-                     * (SWS_PduR_xxxxx 4.1.1) */
+                    /* If this destination accepted the request, mark overall result E_OK. */
+                    SchM_Enter_PduR_ExclusiveArea_Route();
                     if (tmpResult == E_OK)
                     {
-                        result                                  = E_OK;
-                        PduR_SourceRouteStatus[internalTxPduId] = PDUR_RES_PENDING;
+                        result = E_OK;
+#if STD_ON == PDUR_MULTICAST_TP_TRANSMIT_SUPPORT
+                        if (destPduNum > 1u && PduR_IsTpRouteOfSrcPdu(internalTxPduId))
+                        {
+                            PduR_DestinationMultiCastTpTransmittedCnt[destPduId] = 0u;
+                            if (cnt == 0u)
+                            {
+                                PduR_SourceMultiCastTpTransmittedCnt[internalTxPduId] = 0u;
+                            }
+                        }
+#endif
                     }
+                    SchM_Exit_PduR_ExclusiveArea_Route();
                 }
+            }
+            /* If no destination accepted the transmit request, ensure source route is not left pending.
+             * This preserves the 1:n semantics: success if at least one dest returned E_OK; otherwise E_NOT_OK. */
+            if (result != E_OK)
+            {
+                PduR_SourceRouteStatus[internalTxPduId] = PDUR_RES_INITIAL;
             }
         }
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, PduR, 0, Bsw_Return, 2, 0x49, result);
+
     return result;
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 #endif
 
 #if (PDUR_CANCEL_TRANSMIT == STD_ON)
 /**
  * Requests cancellation of an ongoing transmission of a PDU in a lower layer communication module.
  */
-/* PRQA S 1503,1532 ++ */ /* VL_QAC_NoUsedApi, VL_QAC_OneFunRef */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
+/* PRQA S 1503,1532,6030 ++ */ /* VL_QAC_NoUsedApi, VL_QAC_OneFunRef, VL_MTR_PduR_STMIF */
 Std_ReturnType PduR_CancelTransmit(PduIdType TxPduId)
-/* PRQA S 1503,1532 -- */
+/* PRQA S 1503,1532,6030 -- */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, PduR, 0, Bsw_Start, 2, 0x4A, TxPduId);
+
     Std_ReturnType result = E_NOT_OK;
 #if (STD_ON == PDUR_DEV_ERROR_DETECT)
     if (PduR_ValidateInitStatus(PDUR_CANCELTRANSMIT_ID))
@@ -348,34 +446,64 @@ Std_ReturnType PduR_CancelTransmit(PduIdType TxPduId)
 #endif
         {
             /* Only all dest pdu cancel transmit OK,then return OK. */
-            uint8 destPduNum = PduR_GetDestPduNumOfRoutingPath(internalTxPduId);
+            uint8   destPduNum = PduR_GetDestPduNumOfSrcPdu(internalTxPduId);
+            boolean allDestOk  = TRUE;
             for (uint8 cnt = 0u; cnt < destPduNum; cnt++)
             {
                 PduIdType destPduId = PduR_GetDestPduOfRoutingPath(internalTxPduId, cnt);
-                if (PduR_IsRoutingPathEnable(destPduId))
+                if (!PduR_IsRoutingPathEnable(destPduId))
                 {
-                    result = PduR_PduRCanceTransmit(internalTxPduId, destPduId);
+                    allDestOk = FALSE;
+                    continue; /* PRQA S 0770 */ /* VL_PduR_0770 */
                 }
-
-                if (result != E_OK)
+                /* Cross-core call must be outside critical section */
+                if (PduR_PduRCancelTransmit(internalTxPduId, destPduId) == E_OK)
                 {
-                    break;
+                    /* Protect DestinationRouteStatus write (multi-core safe).
+                     * Writing PDUR_RES_INITIAL is idempotent with DisableRouting,
+                     * so no need to re-check enable state here. */
+                    SchM_Enter_PduR_ExclusiveArea_Route();
+                    PduR_DestinationRouteStatus[destPduId] = PDUR_RES_INITIAL;
+                    SchM_Exit_PduR_ExclusiveArea_Route();
                 }
+                else
+                {
+                    allDestOk = FALSE;
+                }
+            }
+            if (allDestOk)
+            {
+                /* Protect SourceRouteStatus write (multi-core safe) */
+                SchM_Enter_PduR_ExclusiveArea_Route();
+                PduR_SourceRouteStatus[internalTxPduId] = PDUR_RES_INITIAL;
+                SchM_Exit_PduR_ExclusiveArea_Route();
+                result = E_OK;
             }
         }
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, PduR, 0, Bsw_Return, 2, 0x4A, result);
+
     return result;
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 #endif
 
 #if (PDUR_CANCEL_RECEIVE == STD_ON)
 /**
  * Requests cancellation of an ongoing reception of a PDU in a lower layer transport protocol module.
  */
-/* PRQA S 1503,1532 ++ */ /* VL_QAC_NoUsedApi,VL_QAC_OneFunRef */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
+/* PRQA S 1503,1532 ++ */      /* VL_QAC_NoUsedApi,VL_QAC_OneFunRef */
+/* PRQA S 6030,6070,6010 ++ */ /* VL_MTR_PduR_STMIF,VL_MTR_PduR_STCAL,VL_MTR_PduR_STCYC */
 Std_ReturnType PduR_CancelReceive(PduIdType RxPduId)
+/* PRQA S 6030,6070,6010 -- */
 /* PRQA S 1503,1532 -- */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, PduR, 0, Bsw_Start, 2, 0x4C, RxPduId);
+
     Std_ReturnType result = E_NOT_OK;
 #if (STD_ON == PDUR_DEV_ERROR_DETECT)
     if (PduR_ValidateInitStatus(PDUR_CANCELRECEIVE_ID))
@@ -398,28 +526,88 @@ Std_ReturnType PduR_CancelReceive(PduIdType RxPduId)
 #endif
             && PduR_ValidateIsTpRoute(
                 PDUR_CANCELRECEIVE_ID,
-                PduR_IsTpRouteOfSrcPdu(PduR_GetSrcPduOfDestPdu(internalRxPduId))))
+                PduR_IsTpRouteOfSrcPdu(PduR_GetSrcPduOfDestPdu(internalRxPduId, 0u))))
 #endif
         {
-            PduIdType srcPduId = PduR_GetSrcPduOfDestPdu(internalRxPduId);
+            PduIdType srcPduId = PduR_GetSrcPduOfDestPdu(internalRxPduId, 0u);
             if (PduR_IsRoutingPathEnable(internalRxPduId))
             {
-                result = PduR_PduRCancelReceive(srcPduId, internalRxPduId);
+                uint8   destPduNum = PduR_GetDestPduNumOfSrcPdu(srcPduId);
+                boolean callLower  = FALSE;
+                if (destPduNum == 1u)
+                {
+                    /* Single destination: directly forward the cancel to the lower TP module. */
+                    callLower = TRUE;
+                    result    = PduR_PduRCancelReceive(srcPduId, internalRxPduId);
+                }
+                else
+                {
+                    SchM_Enter_PduR_ExclusiveArea_Route();
+                    boolean allOtherCancelled = TRUE;
+                    for (uint8 cnt = 0u; cnt < destPduNum; cnt++)
+                    {
+                        PduIdType destPduId = PduR_GetDestPduOfRoutingPath(srcPduId, cnt);
+                        if (PduR_IsRoutingPathEnable(destPduId))
+                        {
+                            if (destPduId == internalRxPduId)
+                            {
+                                continue; /* PRQA S 0770 */ /* VL_PduR_0770 */
+                            }
+                            if (PduR_DestinationRouteStatus[destPduId] != PDUR_RES_INITIAL)
+                            {
+                                allOtherCancelled = FALSE;
+                                break;
+                            }
+                        }
+                    }
+                    SchM_Exit_PduR_ExclusiveArea_Route();
+                    if (allOtherCancelled)
+                    {
+                        /* Last upper destination cancelling -> call lower TP CancelReceive once. */
+                        callLower = TRUE;
+                        result    = PduR_PduRCancelReceive(srcPduId, internalRxPduId);
+                    }
+                    else
+                    {
+                        /* Other upper destinations are still receiving; accept this cancel locally. */
+                        result = E_OK;
+                    }
+                }
+
+                if (result == E_OK)
+                {
+                    SchM_Enter_PduR_ExclusiveArea_Route();
+                    PduR_DestinationRouteStatus[internalRxPduId] = PDUR_RES_INITIAL;
+                    if (callLower)
+                    {
+                        PduR_SourceRouteStatus[srcPduId] = PDUR_RES_INITIAL;
+                    }
+                    SchM_Exit_PduR_ExclusiveArea_Route();
+                }
             }
         }
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, PduR, 0, Bsw_Return, 2, 0x4C, result);
+
     return result;
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 #endif
 
 #if (PDUR_RX_INDICATION == STD_ON)
 /**
  * Indication of a received PDU from a lower layer communication interface module.
  */
-/* PRQA S 1503,6070 ++ */ /* VL_MTR_PduR_STCAL, VL_QAC_NoUsedApi */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
+/* PRQA S 1503,6070 ++ */ /* VL_QAC_NoUsedApi, VL_MTR_PduR_STCAL */
 void PduR_IfRxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr)
 /* PRQA S 1503,6070 -- */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, PduR, 0, Bsw_Start, 3, 0x42, RxPduId, PduInfoPtr);
+
 #if (STD_ON == PDUR_DEV_ERROR_DETECT)
     if (PduR_ValidateInitStatus(PDUR_IFRXINDICATION_ID))
 #endif
@@ -448,7 +636,7 @@ void PduR_IfRxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr)
                 (const uint8*)PduInfoPtr->MetaDataPtr))
 #endif
         {
-            uint8              destPduNum = PduR_GetDestPduNumOfRoutingPath(internalRxPduId);
+            uint8              destPduNum = PduR_GetDestPduNumOfSrcPdu(internalRxPduId);
             const PduInfoType* infoPtrPtr = PduInfoPtr;
 #if (PDUR_MULITIPARTITION_SUPPORT == STD_ON)
             PduInfoType pduInfo;
@@ -468,15 +656,23 @@ void PduR_IfRxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr)
             }
         }
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, PduR, 0, Bsw_Return, 1, 0x42);
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 #endif
 
 #if (PDUR_TX_CONFIRMATION == STD_ON)
 /**
  * The lower layer communication interface module confirms the transmission of a PDU, or the failure to transmit a PDU.
  */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 void PduR_IfTxConfirmation(PduIdType TxPduId, Std_ReturnType result) /* PRQA S 1503 */ /* VL_QAC_NoUsedApi */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, PduR, 0, Bsw_Start, 3, 0x40, TxPduId, result);
+
 #if (STD_ON == PDUR_DEV_ERROR_DETECT)
     if (PduR_ValidateInitStatus(PDUR_IFTXCONFIRMATION_ID))
 #endif
@@ -500,21 +696,29 @@ void PduR_IfTxConfirmation(PduIdType TxPduId, Std_ReturnType result) /* PRQA S 1
 #endif
         {
             /* Only the first confirmation is accepted (SWS_PDUR_xxxxx AR 4.2.2) */
-            PduIdType srcPduId = PduR_GetSrcPduOfDestPdu(internalTxPduId);
+            PduIdType srcPduId = PduR_GetSrcPduOfDestPdu(internalTxPduId, 0u);
             PduR_PduRIfTxConfirmation(srcPduId, internalTxPduId, result);
         }
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, PduR, 0, Bsw_Return, 1, 0x40);
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 #endif
 
 #if (PDUR_TRIGGER_TRANSMIT == STD_ON)
 /**
  * The function called by TriggerTransmit function of the respective communication interface module.
  */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 /* PRQA S 1503,3673,6070 ++ */ /* VL_QAC_NoUsedApi, VL_QAC_3673, VL_MTR_PduR_STCAL */
 Std_ReturnType PduR_IfTriggerTransmit(PduIdType TxPduId, PduInfoType* PduInfoPtr)
 /* PRQA S 1503,3673,6070 -- */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, PduR, 0, Bsw_Start, 3, 0x41, TxPduId, PduInfoPtr);
+
     Std_ReturnType result = E_NOT_OK;
 #if (STD_ON == PDUR_DEV_ERROR_DETECT)
     if (PduR_ValidateInitStatus(PDUR_IFTRIGGERTRANSMIT_ID))
@@ -544,7 +748,7 @@ Std_ReturnType PduR_IfTriggerTransmit(PduIdType TxPduId, PduInfoType* PduInfoPtr
                 (const uint8*)PduInfoPtr->SduDataPtr))
 #endif
         {
-            PduIdType    srcPduId   = PDUR_DESTPDU_CFG(internalTxPduId).PduRSrcPduRef;
+            PduIdType    srcPduId   = PduR_GetSrcPduOfDestPdu(internalTxPduId, 0u);
             PduInfoType* infoPtrPtr = PduInfoPtr;
 #if (PDUR_MULITIPARTITION_SUPPORT == STD_ON)
             PduInfoType pduInfo;
@@ -573,21 +777,33 @@ Std_ReturnType PduR_IfTriggerTransmit(PduIdType TxPduId, PduInfoType* PduInfoPtr
 #endif
         }
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, PduR, 0, Bsw_Return, 2, 0x41, result);
+
     return result;
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 #endif
 
 #if (PDUR_TP_COPYRXDATA == STD_ON)
 /**
  * The function called by TpCopyRxData function of transport protocol module.
  */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 /* PRQA S 1503, 5017, 6070, 6030 ++ */ /* VL_QAC_NoUsedApi, VL_PduR_5017, VL_MTR_PduR_STCAL, VL_MTR_PduR_STMIF */
 /* PRQA S 6010 ++ */                   /* VL_MTR_PduR_STCYC */
 BufReq_ReturnType PduR_TpCopyRxData(PduIdType id, const PduInfoType* info, PduLengthType* bufferSizePtr)
-/* PRQA S 1503, 5017, 6070, 6030 -- */
 /* PRQA S 6010 -- */
+/* PRQA S 1503, 5017, 6070, 6030 -- */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, PduR, 0, Bsw_Start, 4, 0x44, id, info, bufferSizePtr);
+
     BufReq_ReturnType bufQeqReturn = BUFREQ_E_NOT_OK;
+#if PDUR_TRANSPORT_PROTOCOL_FORWARDING_NOBUFFERED_ENABLED == STD_ON \
+    || PDUR_TRANSPORT_PROTOCOL_GATEWAYING_ENABLED == STD_ON         \
+    || PDUR_TRANSPORT_PROTOCOL_FORWARDING_BUFFERED_ENABLED == STD_ON
 #if (STD_ON == PDUR_DEV_ERROR_DETECT)
     if (PduR_ValidateInitStatus(PDUR_TPCOPYRXDATA_ID))
 #endif
@@ -612,7 +828,7 @@ BufReq_ReturnType PduR_TpCopyRxData(PduIdType id, const PduInfoType* info, PduLe
             && PduR_ValidatePointer(PDUR_TPCOPYRXDATA_ID, PDUR_E_PARAM_POINTER, (const PduLengthType*)bufferSizePtr))
 #endif
         {
-            uint8              destPduNum = PduR_GetDestPduNumOfRoutingPath(internalId);
+            uint8              destPduNum = PduR_GetDestPduNumOfSrcPdu(internalId);
             const PduInfoType* infoPtrPtr = info;
 #if (PDUR_MULITIPARTITION_SUPPORT == STD_ON)
             PduInfoType pduInfo;
@@ -622,10 +838,7 @@ BufReq_ReturnType PduR_TpCopyRxData(PduIdType id, const PduInfoType* info, PduLe
                 infoPtrPtr = PduR_PduDeepCopy(internalId, info, &pduInfo);
             }
 #endif
-#if PDUR_TRANSPORT_PROTOCOL_GATEWAYING_ENABLED == STD_ON \
-    || PDUR_TRANSPORT_PROTOCOL_FORWARDING_BUFFERED_ENABLED == STD_ON
             PduLengthType bufferSizeMin = PDUR_PDU_LENGTH_INVALID;
-#endif
             for (uint8 cnt = 0u; cnt < destPduNum; cnt++) /* PRQA S 0771 */ /* VL_PduR_Logical */
             {
                 PduIdType destPduId = PduR_GetDestPduOfRoutingPath(internalId, cnt);
@@ -656,29 +869,47 @@ BufReq_ReturnType PduR_TpCopyRxData(PduIdType id, const PduInfoType* info, PduLe
                             bufQeqReturn  = BUFREQ_OK;
                             bufferSizeMin = (bufferSizeMin > bufferSize) ? bufferSize : bufferSizeMin;
                         }
-
-                        if ((bufQeqReturn == BUFREQ_OK) && ((cnt + 1u) == destPduNum))
-                        {
-                            *bufferSizePtr = bufferSizeMin;
-                        }
                     }
 #endif
                 }
+                /* PRQA S 2992,2996,2880 ++ */ /* VL_PduR_2992,VL_PduR_2996,VL_PduR_2880 */
+                if ((bufQeqReturn == BUFREQ_OK) && ((cnt + 1u) == destPduNum))
+                {
+                    *bufferSizePtr = bufferSizeMin;
+                }
+                /*  PRQA S 2992,2996,2880 -- */
             }
         }
     }
+#else
+    PDUR_NOUSED(id);
+    PDUR_NOUSED(info);
+    PDUR_NOUSED(bufferSizePtr);
+#endif
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, PduR, 0, Bsw_Return, 2, 0x44, bufQeqReturn);
+
     return bufQeqReturn;
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 #endif
 
 #if (PDUR_TP_RXINDICATION == STD_ON)
 /**
  * The function called by TpRxIndication function of transport protocol module.
  */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 /* PRQA S 1503, 6030 ++ */ /* VL_QAC_NoUsedApi, VL_MTR_PduR_STMIF */
 void PduR_TpRxIndication(PduIdType id, Std_ReturnType result)
 /* PRQA S 1503, 6030 -- */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, PduR, 0, Bsw_Start, 3, 0x45, id, result);
+
+#if PDUR_TRANSPORT_PROTOCOL_FORWARDING_NOBUFFERED_ENABLED == STD_ON \
+    || PDUR_TRANSPORT_PROTOCOL_GATEWAYING_ENABLED == STD_ON         \
+    || PDUR_TRANSPORT_PROTOCOL_FORWARDING_BUFFERED_ENABLED == STD_ON
 #if (STD_ON == PDUR_DEV_ERROR_DETECT)
     if (PduR_ValidateInitStatus(PDUR_TPRXINDICATION_ID))
 #endif
@@ -702,7 +933,7 @@ void PduR_TpRxIndication(PduIdType id, Std_ReturnType result)
         )
 #endif
         {
-            uint8 destPduNum = PduR_GetDestPduNumOfRoutingPath(internalId);
+            uint8 destPduNum = PduR_GetDestPduNumOfSrcPdu(internalId);
             for (uint8 cnt = 0u; cnt < destPduNum; cnt++) /* PRQA S 0771 */ /* VL_PduR_Logical */
             {
                 PduIdType      destPduId = PduR_GetDestPduOfRoutingPath(internalId, cnt);
@@ -711,7 +942,7 @@ void PduR_TpRxIndication(PduIdType id, Std_ReturnType result)
 #if PDUR_TRANSPORT_PROTOCOL_FORWARDING_NOBUFFERED_ENABLED == STD_ON
                 if (routeType == PDUR_ROUTE_TP_RX_NOBUFFERED)
                 {
-                    PduR_TpRxIndicationForward(destPduId, result);
+                    PduR_TpRxIndicationForward(internalId, destPduId, result);
                     break;
                 }
 #endif
@@ -735,13 +966,23 @@ void PduR_TpRxIndication(PduIdType id, Std_ReturnType result)
             }
         }
     }
+#else
+    PDUR_NOUSED(id);
+    PDUR_NOUSED(result);
+#endif
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, PduR, 0, Bsw_Return, 1, 0x45);
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 #endif
 
 #if (PDUR_TP_STARTOFRECEPTION_TRANSMIT == STD_ON)
 /**
  * The function called by TpStartOfReception function of transport protocol module.
  */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 /* PRQA S 1503, 5017, 6070, 6030 ++ */ /* VL_QAC_NoUsedApi, VL_PduR_5017, VL_MTR_PduR_STCAL, VL_MTR_PduR_STMIF */
 /* PRQA S 6010 ++ */                   /* VL_MTR_PduR_STCYC */
 BufReq_ReturnType PduR_TpStartOfReception(
@@ -749,10 +990,15 @@ BufReq_ReturnType PduR_TpStartOfReception(
     const PduInfoType* info,
     PduLengthType      TpSduLength,
     PduLengthType*     bufferSizePtr)
-/* PRQA S 1503, 5017, 6070, 6030 -- */
 /* PRQA S 6010 -- */
+/* PRQA S 1503, 5017, 6070, 6030 -- */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, PduR, 0, Bsw_Start, 5, 0x46, id, info, TpSduLength, bufferSizePtr);
+
     BufReq_ReturnType bufQeqReturn = BUFREQ_E_NOT_OK;
+#if PDUR_TRANSPORT_PROTOCOL_FORWARDING_NOBUFFERED_ENABLED == STD_ON \
+    || PDUR_TRANSPORT_PROTOCOL_GATEWAYING_ENABLED == STD_ON         \
+    || PDUR_TRANSPORT_PROTOCOL_FORWARDING_BUFFERED_ENABLED == STD_ON
 #if (STD_ON == PDUR_DEV_ERROR_DETECT)
     if (PduR_ValidateInitStatus(PDUR_TPSTARTOFRECEPTION_ID))
 #endif
@@ -777,15 +1023,14 @@ BufReq_ReturnType PduR_TpStartOfReception(
                 PDUR_TPSTARTOFRECEPTION_ID,
                 PDUR_E_PARAM_POINTER,
                 (const PduLengthType*)bufferSizePtr)
-            && (((info != NULL_PTR)
-                 && PduR_ValidateMetaData(
-                     PDUR_TPSTARTOFRECEPTION_ID,
-                     PduR_GetMetaDataLengthOfSrcPdu(internalId),
-                     (const uint8*)info->MetaDataPtr))
-                || (info == NULL_PTR)))
+            && ((info == NULL_PTR)
+                || PduR_ValidateMetaData(
+                    PDUR_TPSTARTOFRECEPTION_ID,
+                    PduR_GetMetaDataLengthOfSrcPdu(internalId),
+                    (const uint8*)info->MetaDataPtr)))
 #endif
         {
-            uint8              destPduNum = PduR_GetDestPduNumOfRoutingPath(internalId);
+            uint8              destPduNum = PduR_GetDestPduNumOfSrcPdu(internalId);
             const PduInfoType* infoPtrPtr = info;
 #if (PDUR_MULITIPARTITION_SUPPORT == STD_ON)
             PduInfoType pduInfo;
@@ -795,10 +1040,7 @@ BufReq_ReturnType PduR_TpStartOfReception(
                 infoPtrPtr = PduR_PduDeepCopy(internalId, info, &pduInfo);
             }
 #endif
-#if PDUR_TRANSPORT_PROTOCOL_GATEWAYING_ENABLED == STD_ON \
-    || PDUR_TRANSPORT_PROTOCOL_FORWARDING_BUFFERED_ENABLED == STD_ON
             PduLengthType bufferSizeMin = PDUR_PDU_LENGTH_INVALID;
-#endif
             for (uint8 cnt = 0u; cnt < destPduNum; cnt++) /* PRQA S 0771 */ /* VL_PduR_Logical */
             {
                 PduIdType destPduId = PduR_GetDestPduOfRoutingPath(internalId, cnt);
@@ -809,7 +1051,8 @@ BufReq_ReturnType PduR_TpStartOfReception(
                     /* Only support 1:1 routing for transport protocol I-PDU forwarding */
                     if (routeType == PDUR_ROUTE_TP_RX_NOBUFFERED)
                     {
-                        bufQeqReturn = PduR_StartOfReceptionForward(destPduId, infoPtrPtr, TpSduLength, bufferSizePtr);
+                        bufQeqReturn =
+                            PduR_StartOfReceptionForward(internalId, destPduId, infoPtrPtr, TpSduLength, bufferSizePtr);
                         break;
                     }
 #endif
@@ -835,33 +1078,47 @@ BufReq_ReturnType PduR_TpStartOfReception(
                             bufQeqReturn  = BUFREQ_OK;
                             bufferSizeMin = (bufferSizeMin > bufferSize) ? bufferSize : bufferSizeMin;
                         }
-
-                        if ((cnt + 1u) == destPduNum)
-                        {
-                            if (bufQeqReturn == BUFREQ_OK)
-                            {
-                                *bufferSizePtr                     = bufferSizeMin;
-                                PduR_SourceRouteStatus[internalId] = PDUR_RES_PENDING;
-                            }
-                            else
-                            {
-                                bufQeqReturn = BUFREQ_E_OVFL;
-                            }
-                        }
                     }
 #endif
                 }
+                /* PRQA S 2992,2996 ++ */ /* VL_PduR_2992,VL_PduR_2996 */
+                if ((cnt + 1u) == destPduNum)
+                {
+                    if (bufQeqReturn == BUFREQ_OK)
+                    {
+                        *bufferSizePtr                     = bufferSizeMin;
+                        PduR_SourceRouteStatus[internalId] = PDUR_RES_PENDING;
+                    }
+                    else
+                    {
+                        bufQeqReturn = BUFREQ_E_OVFL;
+                    }
+                }
+                /* PRQA S 2992,2996 -- */
             }
         }
     }
+#else
+    PDUR_NOUSED(id);
+    PDUR_NOUSED(info);
+    PDUR_NOUSED(TpSduLength);
+    PDUR_NOUSED(bufferSizePtr);
+#endif
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, PduR, 0, Bsw_Return, 2, 0x46, bufQeqReturn);
+
     return bufQeqReturn;
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 #endif
 
 #if (PDUR_TP_COPYTXDATA == STD_ON)
 /**
  * The function called by TpCopyTxData function of transport protocol module.
  */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 /* PRQA S 1503, 6070 ++ */ /* VL_QAC_NoUsedApi, VL_MTR_PduR_STCAL */
 BufReq_ReturnType PduR_TpCopyTxData(
     PduIdType            id,
@@ -870,6 +1127,8 @@ BufReq_ReturnType PduR_TpCopyTxData(
     PduLengthType*       availableDataPtr)
 /* PRQA S 1503, 6070 -- */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, PduR, 0, Bsw_Start, 5, 0x43, id, info, retry, availableDataPtr);
+
     BufReq_ReturnType bufQeqReturn = BUFREQ_E_NOT_OK;
 #if (STD_ON == PDUR_DEV_ERROR_DETECT)
     if (PduR_ValidateInitStatus(PDUR_TPCOPYTXDATA_ID))
@@ -894,7 +1153,7 @@ BufReq_ReturnType PduR_TpCopyTxData(
         )
 #endif
         {
-            PduIdType          srcPdu     = PduR_GetSrcPduOfDestPdu(internalId);
+            PduIdType          srcPdu     = PduR_GetSrcPduOfDestPdu(internalId, 0u);
             const PduInfoType* infoPtrPtr = info;
 #if (PDUR_MULITIPARTITION_SUPPORT == STD_ON)
             PduInfoType pduInfo;
@@ -925,16 +1184,25 @@ BufReq_ReturnType PduR_TpCopyTxData(
 #endif
         }
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, PduR, 0, Bsw_Return, 2, 0x43, bufQeqReturn);
+
     return bufQeqReturn;
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 #endif
 
 #if (PDUR_TP_TXCONFIRMATION == STD_ON)
 /**
  * The function called by TpTxConfirmation function of transport protocol module.
  */
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 void PduR_TpTxConfirmation(PduIdType id, Std_ReturnType result) /* PRQA S 1503 */ /* VL_QAC_NoUsedApi */
 {
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, PduR, 0, Bsw_Start, 3, 0x48, id, result);
+
 #if (STD_ON == PDUR_DEV_ERROR_DETECT)
     if (PduR_ValidateInitStatus(PDUR_TPTXCONFIRMATION_ID))
 #endif
@@ -957,7 +1225,7 @@ void PduR_TpTxConfirmation(PduIdType id, Std_ReturnType result) /* PRQA S 1503 *
         )
 #endif
         {
-            PduIdType srcPdu = PDUR_DESTPDU_CFG(internalId).PduRSrcPduRef;
+            PduIdType srcPdu = PduR_GetSrcPduOfDestPdu(internalId, 0u);
 #if (STD_ON == PDUR_DEV_ERROR_DETECT)
             if (PduR_ValidateIsTpRoute(PDUR_TPTXCONFIRMATION_ID, PDUR_ROUTINGPATH_CFG(srcPdu).TpRoute))
 #endif
@@ -966,10 +1234,16 @@ void PduR_TpTxConfirmation(PduIdType id, Std_ReturnType result) /* PRQA S 1503 *
             }
         }
     }
+
+    ARTI_TRACE_N(USER, AR_CP_BSW_API, PduR, 0, Bsw_Return, 1, 0x48);
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 #endif
 /* ========================================== internal function definition ========================================== */
 #if (STD_ON == PDUR_DEV_ERROR_DETECT)
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 /* PRQA S 2889, 6060 ++ */ /* VL_QAC_MultiReturn, VL_MTR_PduR_STM19 */
 static boolean PduR_ValidateInitStatus(uint8 apiId)
 {
@@ -980,6 +1254,10 @@ static boolean PduR_ValidateInitStatus(uint8 apiId)
     }
     return TRUE;
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 static boolean PduR_ValidatePointer(uint8 apiId, uint8 ErrorId, const void* pointer)
 {
     if (pointer == NULL_PTR)
@@ -989,6 +1267,10 @@ static boolean PduR_ValidatePointer(uint8 apiId, uint8 ErrorId, const void* poin
     }
     return TRUE;
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 static boolean
     PduR_ValidateMaxValue(uint8 apiId, uint8 ErrorId, uint16 targetValue, uint16 referenceValue, boolean isContain)
 {
@@ -999,7 +1281,11 @@ static boolean
     }
     return TRUE;
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 #if (PDUR_MULITIPARTITION_SUPPORT == STD_ON)
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 static boolean PduR_ValidatePartitionContext(uint8 apiId, uint8 targetPartition)
 {
     ApplicationType curAppId = GetApplicationID();
@@ -1010,7 +1296,11 @@ static boolean PduR_ValidatePartitionContext(uint8 apiId, uint8 targetPartition)
     }
     return TRUE;
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
 #endif
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 static boolean PduR_ValidateMetaData(uint8 apiId, uint8 metaDataLen, const uint8* metaDataPtr)
 {
     if ((metaDataLen > 0u) && (metaDataPtr == NULL_PTR))
@@ -1020,6 +1310,10 @@ static boolean PduR_ValidateMetaData(uint8 apiId, uint8 metaDataLen, const uint8
     }
     return TRUE;
 }
+#define PDUR_STOP_SEC_CODE
+#include "PduR_MemMap.h"
+#define PDUR_START_SEC_CODE
+#include "PduR_MemMap.h"
 static boolean PduR_ValidateIsTpRoute(uint8 apiId, boolean flag)
 {
     if (!flag)
@@ -1029,8 +1323,8 @@ static boolean PduR_ValidateIsTpRoute(uint8 apiId, boolean flag)
     }
     return TRUE;
 }
-/* PRQA S 2889, 6060 -- */
-#endif
 #define PDUR_STOP_SEC_CODE
 #include "PduR_MemMap.h"
+/* PRQA S 2889, 6060 -- */
+#endif
 #endif /* end of PDUR_ZERO_COST_OPERATION */

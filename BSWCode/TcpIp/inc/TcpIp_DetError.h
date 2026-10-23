@@ -25,6 +25,8 @@
 #ifndef TCPIP_DETERROR_H_
 #define TCPIP_DETERROR_H_
 
+/* PRQA S 1501,1753 EOF */ /* VL_TcpIp_1501,VL_TcpIp_1753 */
+
 /* =================================================== inclusions =================================================== */
 #include "Os_Types.h"
 #include "ComStack_Types.h"
@@ -133,8 +135,6 @@ extern "C" {
 /* ========================================= external function declarations ========================================= */
 #if (STD_ON == TCPIP_DEV_ERROR_DETECT)
 
-#define TCPIP_START_SEC_CODE
-#include "TcpIp_MemMap.h"
 /**
  * @brief              DET development error report.
  * @param[in]          api: service ID of API
@@ -160,9 +160,9 @@ TCPIP_LOCAL_INLINE void TcpIp_DetReportRuntimeError(uint8 api, uint8 error)
 {
     (void)Det_ReportRuntimeError((uint16)TCPIP_MODULE_ID, (uint8)TCPIP_INSTANCE, api, error);
 }
-#define TCPIP_STOP_SEC_CODE
-#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief              Development error validation.
  * @param[in]          ConfigPtr: parameter of TcpIp_Init
@@ -172,8 +172,12 @@ TCPIP_LOCAL_INLINE void TcpIp_DetReportRuntimeError(uint8 api, uint8 error)
  * @trace              CPD-PLACEHOLDER
  */
 extern Std_ReturnType TcpIp_ValidateInit(const TcpIp_ConfigType* ConfigPtr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if (STD_ON == TCPIP_VERSION_INFO_API)
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief              Development error validation.
  * @param[in]          versioninfo: parameter of TcpIp_GetVersionInfo
@@ -183,8 +187,12 @@ extern Std_ReturnType TcpIp_ValidateInit(const TcpIp_ConfigType* ConfigPtr);
  * @trace              CPD-PLACEHOLDER
  */
 extern Std_ReturnType TcpIp_ValidateGetVersionInfo(Std_VersionInfoType* versioninfo);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief              Development error validation.
  * @param[in]          SocketId: parameter of TcpIp_Close
@@ -195,7 +203,11 @@ extern Std_ReturnType TcpIp_ValidateGetVersionInfo(Std_VersionInfoType* versioni
  * @trace              CPD-PLACEHOLDER
  */
 extern Std_ReturnType TcpIp_ValidateClose(TcpIp_SocketIdType SocketId, boolean Abort);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief              Development error validation.
  * @param[in]          SocketId: parameter of TcpIp_Bind
@@ -208,8 +220,12 @@ extern Std_ReturnType TcpIp_ValidateClose(TcpIp_SocketIdType SocketId, boolean A
  */
 extern Std_ReturnType
     TcpIp_ValidateBind(TcpIp_SocketIdType SocketId, TcpIp_LocalAddrIdType LocalAddrId, uint16* PortPtr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if (STD_ON == TCPIP_TCP_ENABLED)
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief              Development error validation.
  * @param[in]          SocketId: parameter of TcpIp_TcpConnect
@@ -220,7 +236,11 @@ extern Std_ReturnType
  * @trace              CPD-PLACEHOLDER
  */
 extern Std_ReturnType TcpIp_ValidateTcpConnect(TcpIp_SocketIdType SocketId, const TcpIp_SockAddrType* RemoteAddrPtr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief              Development error validation.
  * @param[in]          SocketId: parameter of TcpIp_TcpListen
@@ -231,7 +251,11 @@ extern Std_ReturnType TcpIp_ValidateTcpConnect(TcpIp_SocketIdType SocketId, cons
  * @trace              CPD-PLACEHOLDER
  */
 extern Std_ReturnType TcpIp_ValidateTcpListen(TcpIp_SocketIdType SocketId, uint16 MaxChannels);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief              Development error validation.
  * @param[in]          SocketId: parameter of TcpIp_TcpReceived
@@ -242,8 +266,12 @@ extern Std_ReturnType TcpIp_ValidateTcpListen(TcpIp_SocketIdType SocketId, uint1
  * @trace              CPD-PLACEHOLDER
  */
 extern Std_ReturnType TcpIp_ValidateTcpReceived(TcpIp_SocketIdType SocketId, uint32 Length);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief              Development error validation.
  * @param[in]          CtrlIdx: parameter of TcpIp_RequestComMode
@@ -254,7 +282,11 @@ extern Std_ReturnType TcpIp_ValidateTcpReceived(TcpIp_SocketIdType SocketId, uin
  * @trace              CPD-PLACEHOLDER
  */
 extern Std_ReturnType TcpIp_ValidateRequestComMode(uint8 CtrlIdx, TcpIp_StateType State);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief              Development error validation.
  * @param[in]          LocalAddrId: parameter of TcpIp_RequestIpAddrAssignment
@@ -273,7 +305,11 @@ extern Std_ReturnType TcpIp_ValidateRequestIpAddrAssignment(
     const TcpIp_SockAddrType*  LocalIpAddrPtr,
     uint8                      Netmask,
     const TcpIp_SockAddrType*  DefaultRouterPtr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief              Development error validation.
  * @param[in]          LocalAddrId: parameter of TcpIp_ReleaseIpAddrAssignment
@@ -283,8 +319,12 @@ extern Std_ReturnType TcpIp_ValidateRequestIpAddrAssignment(
  * @trace              CPD-PLACEHOLDER
  */
 extern Std_ReturnType TcpIp_ValidateReleaseIpAddrAssignment(TcpIp_LocalAddrIdType LocalAddrId);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if ((STD_ON == TCPIP_DHCP_CLIENT_ENABLED) && (STD_ON == TCPIP_RESET_IP_ASSIGNMENT_API))
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief              Development error validation.
  * @return             Std_ReturnType
@@ -293,10 +333,13 @@ extern Std_ReturnType TcpIp_ValidateReleaseIpAddrAssignment(TcpIp_LocalAddrIdTyp
  * @trace              CPD-PLACEHOLDER
  */
 extern Std_ReturnType TcpIp_ValidateResetIpAssignment(void);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
-#if (STD_ON == TCPIP_ICMP_ENABLED)
-#if ((TCPIP_SC1 == TCPIP_SCALABILITY_CLASS) || (TCPIP_SC3 == TCPIP_SCALABILITY_CLASS))
+#if (TCPIP_ICMP_ENABLED == STD_ON)
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief              Development error validation.
  * @param[in]          LocalIpAddrId: parameter of TcpIp_IcmpTransmit
@@ -319,107 +362,12 @@ extern Std_ReturnType TcpIp_ValidateIcmpTransmit(
     uint8                     Code,
     uint16                    DataLength,
     const uint8*              DataPtr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
-#if ((TCPIP_SC2 == TCPIP_SCALABILITY_CLASS) || (TCPIP_SC3 == TCPIP_SCALABILITY_CLASS))
-/**
- * @brief              Development error validation.
- * @param[in]          LocalIpAddrId: parameter of TcpIp_IcmpV6Transmit
- * @param[in]          RemoteAddrPtr: parameter of TcpIp_IcmpV6Transmit
- * @param[in]          HopLimit: parameter of TcpIp_IcmpV6Transmit
- * @param[in]          Type: parameter of TcpIp_IcmpV6Transmit
- * @param[in]          Code: parameter of TcpIp_IcmpV6Transmit
- * @param[in]          DataLength: parameter of TcpIp_IcmpV6Transmit
- * @param[in]          DataPtr: parameter of TcpIp_IcmpV6Transmit
- * @return             Std_ReturnType
- * @synchronous        TRUE
- * @reentrant          FALSE
- * @trace              CPD-PLACEHOLDER
- */
-extern Std_ReturnType TcpIp_ValidateIcmpV6Transmit(
-    TcpIp_LocalAddrIdType     LocalIpAddrId,
-    const TcpIp_SockAddrType* RemoteAddrPtr,
-    uint8                     HopLimit,
-    uint8                     Type,
-    uint8                     Code,
-    uint16                    DataLength,
-    const uint8*              DataPtr);
-#endif
-#endif
-
-#if ((TCPIP_SC1 == TCPIP_SCALABILITY_CLASS) || (TCPIP_SC3 == TCPIP_SCALABILITY_CLASS))
-/**
- * @brief              Development error validation.
- * @param[in]          LocalIpAddrId: parameter of TcpIp_DhcpReadOption
- * @param[in]          Option: parameter of TcpIp_DhcpReadOption
- * @param[in]          DataLength: parameter of TcpIp_DhcpReadOption
- * @param[in]          DataPtr: parameter of TcpIp_DhcpReadOption
- * @return             Std_ReturnType
- * @synchronous        TRUE
- * @reentrant          FALSE
- * @trace              CPD-PLACEHOLDER
- */
-extern Std_ReturnType
-    TcpIp_ValidateDhcpReadOption(TcpIp_LocalAddrIdType LocalIpAddrId, uint8 Option, uint8* DataLength, uint8* DataPtr);
-#endif
-
-#if ((TCPIP_SC2 == TCPIP_SCALABILITY_CLASS) || (TCPIP_SC3 == TCPIP_SCALABILITY_CLASS))
-/**
- * @brief              Development error validation.
- * @param[in]          LocalIpAddrId: parameter of TcpIp_DhcpV6ReadOption
- * @param[in]          Option: parameter of TcpIp_DhcpV6ReadOption
- * @param[in]          DataLength: parameter of TcpIp_DhcpV6ReadOption
- * @param[in]          DataPtr: parameter of TcpIp_DhcpV6ReadOption
- * @return             Std_ReturnType
- * @synchronous        TRUE
- * @reentrant          FALSE
- * @trace              CPD-PLACEHOLDER
- */
-extern Std_ReturnType TcpIp_ValidateDhcpV6ReadOption(
-    TcpIp_LocalAddrIdType LocalIpAddrId,
-    uint16                Option,
-    uint16*               DataLength,
-    uint8*                DataPtr);
-#endif
-
-#if ((TCPIP_SC1 == TCPIP_SCALABILITY_CLASS) || (TCPIP_SC3 == TCPIP_SCALABILITY_CLASS))
-/**
- * @brief              Development error validation.
- * @param[in]          LocalIpAddrId: parameter of TcpIp_DhcpWriteOption
- * @param[in]          Option: parameter of TcpIp_DhcpWriteOption
- * @param[in]          DataLength: parameter of TcpIp_DhcpWriteOption
- * @param[in]          DataPtr: parameter of TcpIp_DhcpWriteOption
- * @return             Std_ReturnType
- * @synchronous        TRUE
- * @reentrant          FALSE
- * @trace              CPD-PLACEHOLDER
- */
-extern Std_ReturnType TcpIp_ValidateDhcpWriteOption(
-    TcpIp_LocalAddrIdType LocalIpAddrId,
-    uint8                 Option,
-    uint8                 DataLength,
-    const uint8*          DataPtr);
-#endif
-
-#if ((TCPIP_SC2 == TCPIP_SCALABILITY_CLASS) || (TCPIP_SC3 == TCPIP_SCALABILITY_CLASS))
-/**
- * @brief              Development error validation.
- * @param[in]          LocalIpAddrId: parameter of TcpIp_DhcpV6WriteOption
- * @param[in]          Option: parameter of TcpIp_DhcpV6WriteOption
- * @param[in]          DataLength: parameter of TcpIp_DhcpV6WriteOption
- * @param[in]          DataPtr: parameter of TcpIp_DhcpV6WriteOption
- * @return             Std_ReturnType
- * @synchronous        TRUE
- * @reentrant          FALSE
- * @trace              CPD-PLACEHOLDER
- */
-extern Std_ReturnType TcpIp_ValidateDhcpV6WriteOption(
-    TcpIp_LocalAddrIdType LocalIpAddrId,
-    uint16                Option,
-    uint16                DataLength,
-    const uint8*          DataPtr);
-#endif
-
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief              Development error validation.
  * @param[in]          SocketId: parameter of TcpIp_ChangeParameter
@@ -434,7 +382,11 @@ extern Std_ReturnType TcpIp_ValidateChangeParameter(
     TcpIp_SocketIdType SocketId,
     TcpIp_ParamIdType  ParameterId,
     const uint8*       ParameterValue);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief              Development error validation.
  * @param[in]          LocalAddrId: parameter of TcpIp_GetIpAddr
@@ -451,7 +403,11 @@ extern Std_ReturnType TcpIp_ValidateGetIpAddr(
     TcpIp_SockAddrType*   IpAddrPtr,
     uint8*                NetmaskPtr,
     TcpIp_SockAddrType*   DefaultRouterPtr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief              Development error validation.
  * @param[in]          LocalAddrId: parameter of TcpIp_GetPhysAddr
@@ -462,7 +418,11 @@ extern Std_ReturnType TcpIp_ValidateGetIpAddr(
  * @trace              CPD-PLACEHOLDER
  */
 extern Std_ReturnType TcpIp_ValidateGetPhysAddr(TcpIp_LocalAddrIdType LocalAddrId, uint8* PhysAddrPtr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief              Development error validation.
  * @param[in]          CtrlIdx: parameter of TcpIp_GetRemotePhysAddr
@@ -479,7 +439,11 @@ extern Std_ReturnType TcpIp_ValidateGetRemotePhysAddr(
     const TcpIp_SockAddrType* IpAddrPtr,
     uint8*                    PhysAddrPtr,
     boolean                   initRes);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief              Development error validation.
  * @param[in]          LocalAddrId: parameter of TcpIp_GetCtrlIdx
@@ -490,7 +454,11 @@ extern Std_ReturnType TcpIp_ValidateGetRemotePhysAddr(
  * @trace              CPD-PLACEHOLDER
  */
 extern Std_ReturnType TcpIp_ValidateGetCtrlIdx(TcpIp_LocalAddrIdType LocalAddrId, uint8* CtrlIdxPtr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief              Development error validation.
  * @param[in]          ctrlIdx: parameter of TcpIp_Bind
@@ -503,7 +471,11 @@ extern Std_ReturnType TcpIp_ValidateGetCtrlIdx(TcpIp_LocalAddrIdType LocalAddrId
  */
 extern Std_ReturnType
     TcpIp_ValidateGetArpCacheEntries(uint8 ctrlIdx, uint32* numberOfElements, TcpIp_ArpCacheEntryType* entryListPtr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief              Development error validation.
  * @param[in]          ctrlIdx: parameter of TcpIp_GetNdpCacheEntries
@@ -516,7 +488,11 @@ extern Std_ReturnType
  */
 extern Std_ReturnType
     TcpIp_ValidateGetNdpCacheEntries(uint8 ctrlIdx, uint32* numberOfElements, TcpIp_NdpCacheEntryType* entryListPtr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief              Development error validation.
  * @param[in]          MeasurementIdx: parameter of TcpIp_GetAndResetMeasurementData
@@ -531,7 +507,11 @@ extern Std_ReturnType TcpIp_ValidateGetAndResetMeasurementData(
     TcpIp_MeasurementIdxType MeasurementIdx,
     boolean                  MeasurementResetNeeded,
     uint32*                  MeasurementDataPtr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief              Development error validation.
  * @param[in]          SocketId: parameter of TcpIp_IsConnectionReady
@@ -543,8 +523,12 @@ extern Std_ReturnType TcpIp_ValidateGetAndResetMeasurementData(
  */
 extern Std_ReturnType
     TcpIp_ValidateIsConnectionReady(TcpIp_SocketIdType SocketId, const TcpIp_SockAddrType* RemoteAddrPtr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if (STD_ON == TCPIP_UDP_ENABLED)
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief              Development error validation.
  * @param[in]          SocketId: parameter of TcpIp_UdpTransmit
@@ -561,9 +545,13 @@ extern Std_ReturnType TcpIp_ValidateUdpTransmit(
     const uint8*              DataPtr,
     const TcpIp_SockAddrType* RemoteAddrPtr,
     uint16                    TotalLength);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
 #if (STD_ON == TCPIP_TCP_ENABLED)
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief              Development error validation.
  * @param[in]          SocketId: parameter of TcpIp_TcpTransmit
@@ -580,8 +568,12 @@ extern Std_ReturnType TcpIp_ValidateTcpTransmit(
     const uint8*       DataPtr,
     uint32             AvailableLength,
     boolean            ForceRetrieve);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief              Development error validation.
  * @param[in]          CtrlIdx: parameter of TcpIp_RxIndication
@@ -602,12 +594,16 @@ extern Std_ReturnType TcpIp_ValidateRxIndication(
     const uint8*  PhysAddrPtr,
     const uint8*  DataPtr,
     uint16        LenByte);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief              Development error validation.
  * @param[in]          Domain: parameter of TcpIp_GetSocket
  * @param[in]          Protocol: parameter of TcpIp_GetSocket
- * @param[in]          socketOwnerId: parameter of TcpIp_GetSocket
+ * @param[in]          SocketOwnerId: parameter of TcpIp_GetSocket
  * @param[in]          SocketIdPtr: parameter of TcpIp_GetSocket
  * @return             Std_ReturnType
  * @synchronous        TRUE
@@ -615,13 +611,48 @@ extern Std_ReturnType TcpIp_ValidateRxIndication(
  * @trace              CPD-PLACEHOLDER
  */
 extern Std_ReturnType TcpIp_ValidateGetSocket(
-    TcpIp_DomainType   Domain,
-    TcpIp_ProtocolType Protocol,
-#if (1u < TCPIP_SOCKETOWNER_NUMBER)
-    uint8 socketOwnerId,
-#endif
+    TcpIp_DomainType    Domain,
+    TcpIp_ProtocolType  Protocol,
+    uint8               SocketOwnerId,
     TcpIp_SocketIdType* SocketIdPtr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
+/**
+ * @brief              Development error validation for partition.
+ * @param[in]          apiId: service ID of API
+ * @param[in]          partitionIndex: index of partition
+ * @return             Std_ReturnType
+ * @synchronous        TRUE
+ * @reentrant          FALSE
+ * @trace              CPD-PLACEHOLDER
+ */
+extern Std_ReturnType TcpIp_ValidatePartition(uint8 apiId, ApplicationType partitionIndex);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
+/**
+ * @brief              Development error validation for socket.
+ * @param[in]          apiId: service ID of API
+ * @param[in]          partitionIndex: index of partition
+ * @param[in]          socketId: ID of socket
+ * @param[in]          protocol: protocol type
+ * @return             Std_ReturnType
+ * @synchronous        TRUE
+ * @reentrant          FALSE
+ * @trace              CPD-PLACEHOLDER
+ */
+extern Std_ReturnType TcpIp_ValidateSocket(
+    uint8              apiId,
+    ApplicationType    partitionIndex,
+    TcpIp_SocketIdType socketId,
+    TcpIp_ProtocolType protocol);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
 #ifdef __cplusplus

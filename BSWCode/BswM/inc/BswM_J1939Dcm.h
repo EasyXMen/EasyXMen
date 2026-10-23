@@ -56,7 +56,11 @@ extern "C" {
  * @synchronous TRUE
  * @trace       CPD-66312
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 void BswM_J1939DcmBroadcastStatus(uint16 NetworkMask);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 #endif /*BSWM_J1939DCM_ENABLED == STD_ON*/
 

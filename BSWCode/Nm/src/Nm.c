@@ -44,6 +44,8 @@
 #include "BswM_Nm.h"
 #endif
 
+#include "Nm_Arti.h"
+
 /* ===================================================== macros ===================================================== */
 #if NM_MULTIPLE_PARTITION_USED == STD_ON
 #define NM_GET_PARTITION_OF_CHANNEL(chIdx) Nm_ChLConfig[chIdx].ChannelReferencedPartitionId
@@ -51,29 +53,86 @@
 
 /* ================================================ type definitions ================================================ */
 /* ========================================== internal function declarations ======================================== */
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 NM_LOCAL uint8 Nm_GetPartitionIndex(void);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
+
 #if ((NM_COORDINATOR_SUPPORT_ENABLED == STD_ON) || (NM_PARTIAL_NETWORK_SUPPORT_ENABLED == STD_ON))
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 NM_LOCAL void Nm_InitChannelRuntimeVariables(void);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 #endif
 #if ((NM_COORDINATOR_SUPPORT_ENABLED == STD_ON) && (0u < NM_NUMBER_OF_CLUSTERS))
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 NM_LOCAL void Nm_Coordinator_MainHandle(uint8 chIdx);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
+
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 NM_LOCAL void Nm_ShutdownStatusStartHandle(uint8 chIdx, uint8 clusterIndex);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
+
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 NM_LOCAL void Nm_ShutdownStatusRunHandle(uint8 chIdx, uint8 clusterIndex);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
+
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 NM_LOCAL void Nm_ShutdownStatusAbortHandle(uint8 chIdx, uint8 clusterIndex);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 #endif
 
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 NM_LOCAL Nm_ChannelIndexType Nm_FindChannelIndex(NetworkHandleType networkHandle);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 
 #if (STD_ON == NM_COORDINATOR_SUPPORT_ENABLED)
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 NM_LOCAL Std_ReturnType Nm_FindClusterIndex(uint8 chIndex, uint8* clusterIndexPtr);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 
 #if (STD_ON == NM_COORDINATOR_SYNC_SUPPORT)
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 NM_LOCAL void Nm_CoorReadySleepBitHandle(boolean* topMostCoor, uint8 chIdx, boolean* cluserRsb, boolean reqCSRBitFlag);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
+
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 NM_LOCAL void Nm_PassivelyCoordinatedChannelHandle(uint8 chIdx);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
+
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 NM_LOCAL void Nm_PassivelyCoordinatedChannelRelease(uint8 clusterIndex, uint8 chIdx);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 #endif
 
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 NM_LOCAL void Nm_CoorShutdownReady(boolean* topMostCoor, uint8 chIdx, uint8* clusterReadySleepInChMask);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
+
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * coordinator shutdown timer load default value.
  */
@@ -81,7 +140,15 @@ NM_LOCAL void Nm_CoorShutdownTimerLoader(
     const Nm_PerClusterConfigType* perClusPtr,
     uint8                          chIdx,
     uint8*                         shutdownTimerLoadOkInChMask);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
+
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 NM_LOCAL Std_ReturnType Nm_CheckChannelMaskInCluster(uint8* channelMask, uint8 clusterIndex);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
+
 /**
  * clear a specific bit in a bit mask
  */
@@ -96,69 +163,138 @@ NM_LOCAL_INLINE void Nm_SetBit(uint8* channelMask, uint8 chIdx);
  * get the state of a specific bit
  */
 NM_LOCAL_INLINE boolean Nm_GetBit(const uint8* channelMask, uint8 chIdx);
+
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * coordinator shutdown timer handle function.
  */
 NM_LOCAL Std_ReturnType Nm_CoorShutDownTimerHandle(uint8 chIdx, uint8* sleepAllowedInChMask);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * coordinator shutdown abort handle function.
  */
 NM_LOCAL void Nm_CoorShutdownAbortHandle(uint8 chIdx, uint8* shutdownAbortFinishedInChMask);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 #endif
 
 #if NM_IF_ALL_CHANNEL_PASSIVE_MODE_ENABLED == STD_OFF
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * special bus nm network request.
  */
 NM_LOCAL Std_ReturnType Nm_BusNmNetworkRequest(uint8 chIndex);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * special bus network release.
  */
 NM_LOCAL Std_ReturnType Nm_BusNmNetworkRelease(uint8 chIndex);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 #endif
 
 #if ((STD_ON == NM_COORDINATOR_SUPPORT_ENABLED) && (STD_ON == NM_BUS_SYNCHRONIZATION_ENABLED))
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * special bus nm request sync.
  */
 NM_LOCAL Std_ReturnType Nm_BusNmRequestBusSynchronization(uint8 chIndex);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 #endif
 
 #if (NM_COORDINATOR_SYNC_SUPPORT == STD_ON)
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * special bus nm set coordinator ready sleep bit.
  */
 NM_LOCAL Std_ReturnType Nm_BusNmSetSleepReadyBit(uint8 chIndex, boolean nmSleepReadyBit);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 #endif
 
 #if NM_DEV_ERROR_DETECT == STD_ON
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 NM_LOCAL boolean Nm_ValidateInitStatus(uint8 apiId);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
+
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 NM_LOCAL boolean Nm_ValidatePartitionContext(uint8 apiId);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
+
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 NM_LOCAL boolean Nm_ValidateAlreadyInitialized(void);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
+
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 NM_LOCAL boolean Nm_ValidateNetworkHandle(uint8 apiId, NetworkHandleType networkHandle);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
+
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 NM_LOCAL boolean Nm_ValidatePointer(uint8 apiId, const void* pointer);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
+
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 NM_LOCAL boolean Nm_ValidateNetworkHandleAndPointer(uint8 apiId, NetworkHandleType networkHandle, const void* pointer);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
+
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 NM_LOCAL boolean Nm_ValidateNetworkHandlePointerAndPointer(
     uint8             apiId,
     NetworkHandleType networkHandle,
     const void*       pointer1,
     const void*       pointer2);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 #endif
 
 #if (NM_PN_ERA_CALC_ENABLED == STD_ON) || (NM_PN_EIRA_CALC_ENABLED == STD_ON)
-
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 NM_LOCAL boolean Nm_PncAggregateAndTimerHandle(Nm_ChannelIndexType chIndex, boolean eraFlg, const uint8* rawData);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 
 #if (NM_PN_EIRA_CALC_ENABLED == STD_ON)
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 NM_LOCAL void Nm_PnEiraResetTimerHandle(void);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 #endif
 
 #if (NM_PN_ERA_CALC_ENABLED == STD_ON)
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 NM_LOCAL void Nm_PnEraResetTimerHandle(uint8 chIndex);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 #endif
-
 #endif
 /* ============================================ internal data definitions =========================================== */
 #define NM_START_SEC_VAR_CLEARED_8
@@ -185,27 +321,28 @@ NM_LOCAL Nm_InnerGlobalType Nm_InnerGlobal;
 
 #if (STD_ON == NM_COORDINATOR_SUPPORT_ENABLED)
 #if (NM_NUMBER_OF_CLUSTERS > 0u)
+#define NM_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Nm_MemMap.h"
 /**
  * per nm cluster have a struct verial ro management status .
  */
-#define NM_START_SEC_VAR_CLEARED_UNSPECIFIED
-#include "Nm_MemMap.h"
 NM_LOCAL Nm_InnerClusterType Nm_InnerCluster[NM_NUMBER_OF_CLUSTERS];
 #define NM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
 #include "Nm_MemMap.h"
 #endif
 #endif
+
 /* ============================================ external data definitions =========================================== */
 
 /* ========================================== external function definitions ========================================= */
-
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * Initializes the NM Interface.
  */
-#define NM_START_SEC_CODE
-#include "Nm_MemMap.h"
 void Nm_Init(const Nm_ConfigType* configPtr)
 {
+    Nm_ArtiApiStart(2, NM_SERVICE_ID_INIT, configPtr);
     NM_UNUSED(configPtr);
 #if NM_DEV_ERROR_DETECT == STD_ON
     if (Nm_ValidatePartitionContext(NM_SERVICE_ID_INIT) && Nm_ValidateAlreadyInitialized())
@@ -259,14 +396,20 @@ void Nm_Init(const Nm_ConfigType* configPtr)
 
         Nm_InitStatus[Nm_GetPartitionIndex()] = NM_INIT;
     }
+    Nm_ArtiApiReturn(1, NM_SERVICE_ID_INIT);
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * This function calls the BusNm PassiveStartUp function
  */
 Std_ReturnType Nm_PassiveStartUp(NetworkHandleType networkHandle)
 {
     Std_ReturnType ret = E_NOT_OK;
+    Nm_ArtiApiStart(2, NM_SERVICE_ID_PASSIVESTARTUP, networkHandle);
 #if NM_DEV_ERROR_DETECT == STD_ON
     if (Nm_ValidatePartitionContext(NM_SERVICE_ID_PASSIVESTARTUP) && Nm_ValidateInitStatus(NM_SERVICE_ID_PASSIVESTARTUP)
         && Nm_ValidateNetworkHandle(NM_SERVICE_ID_PASSIVESTARTUP, networkHandle))
@@ -293,15 +436,21 @@ Std_ReturnType Nm_PassiveStartUp(NetworkHandleType networkHandle)
             }
         }
     }
+    Nm_ArtiApiReturn(2, NM_SERVICE_ID_PASSIVESTARTUP, ret);
     return ret;
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * This function calls the <BusNm>_NetworkRequest function
  */
 Std_ReturnType Nm_NetworkRequest(NetworkHandleType networkHandle)
 {
     Std_ReturnType ret = E_NOT_OK;
+    Nm_ArtiApiStart(2, NM_SERVICE_ID_NETWORKREQUEST, networkHandle);
 
 #if NM_DEV_ERROR_DETECT == STD_ON
     if (Nm_ValidatePartitionContext(NM_SERVICE_ID_NETWORKREQUEST) && Nm_ValidateInitStatus(NM_SERVICE_ID_NETWORKREQUEST)
@@ -357,15 +506,21 @@ Std_ReturnType Nm_NetworkRequest(NetworkHandleType networkHandle)
         }
 #endif
     }
+    Nm_ArtiApiReturn(2, NM_SERVICE_ID_NETWORKREQUEST, ret);
     return ret;
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * This function calls the BusNm NetworkRelease function
  */
 Std_ReturnType Nm_NetworkRelease(NetworkHandleType networkHandle)
 {
     Std_ReturnType ret = E_NOT_OK;
+    Nm_ArtiApiStart(2, NM_SERVICE_ID_NETWORKRELEASE, networkHandle);
 
 #if NM_DEV_ERROR_DETECT == STD_ON
     if (Nm_ValidatePartitionContext(NM_SERVICE_ID_NETWORKRELEASE) && Nm_ValidateInitStatus(NM_SERVICE_ID_NETWORKRELEASE)
@@ -391,16 +546,22 @@ Std_ReturnType Nm_NetworkRelease(NetworkHandleType networkHandle)
 #endif
 #endif
     }
+    Nm_ArtiApiReturn(2, NM_SERVICE_ID_NETWORKRELEASE, ret);
     return ret;
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 
 #if (NM_COM_CONTROL_ENABLED == STD_ON)
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * disables the NM PDU transmission ability.
  */
 Std_ReturnType Nm_DisableCommunication(NetworkHandleType networkHandle)
 {
     Std_ReturnType ret = E_NOT_OK;
+    Nm_ArtiApiStart(2, NM_SERVICE_ID_DISABLECOMMUNICATION, networkHandle);
 #if NM_DEV_ERROR_DETECT == STD_ON
     if (Nm_ValidatePartitionContext(NM_SERVICE_ID_DISABLECOMMUNICATION)
         && Nm_ValidateInitStatus(NM_SERVICE_ID_DISABLECOMMUNICATION)
@@ -421,17 +582,23 @@ Std_ReturnType Nm_DisableCommunication(NetworkHandleType networkHandle)
         }
 #endif
     }
+    Nm_ArtiApiReturn(2, NM_SERVICE_ID_DISABLECOMMUNICATION, ret);
     return ret;
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 #endif
 
 #if (NM_COM_CONTROL_ENABLED == STD_ON)
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * Enables the NM PDU transmission ability.
  */
 Std_ReturnType Nm_EnableCommunication(NetworkHandleType networkHandle)
 {
     Std_ReturnType ret = E_NOT_OK;
+    Nm_ArtiApiStart(2, NM_SERVICE_ID_ENABLECOMMUNICATION, networkHandle);
 
 #if NM_DEV_ERROR_DETECT == STD_ON
     if (Nm_ValidatePartitionContext(NM_SERVICE_ID_ENABLECOMMUNICATION)
@@ -452,17 +619,23 @@ Std_ReturnType Nm_EnableCommunication(NetworkHandleType networkHandle)
         }
 #endif
     }
+    Nm_ArtiApiReturn(2, NM_SERVICE_ID_ENABLECOMMUNICATION, ret);
     return ret;
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 #endif
 
 #if ((NM_COM_USER_DATA_SUPPORT == STD_OFF) && (NM_USER_DATA_ENABLED == STD_ON))
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * Set user data for NM messages transmitted next on the bus.
  */
 Std_ReturnType Nm_SetUserData(NetworkHandleType networkHandle, const uint8* nmUserDataPtr)
 {
     Std_ReturnType ret = E_NOT_OK;
+    Nm_ArtiApiStart(3, NM_SERVICE_ID_SETUSERDATA, networkHandle, nmUserDataPtr);
 
 #if NM_DEV_ERROR_DETECT == STD_ON
     if (Nm_ValidateNetworkHandleAndPointer(NM_SERVICE_ID_SETUSERDATA, networkHandle, nmUserDataPtr))
@@ -481,17 +654,23 @@ Std_ReturnType Nm_SetUserData(NetworkHandleType networkHandle, const uint8* nmUs
         }
 #endif
     }
+    Nm_ArtiApiReturn(2, NM_SERVICE_ID_SETUSERDATA, ret);
     return ret;
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 #endif
 
 #if (NM_USER_DATA_ENABLED == STD_ON)
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * Get user data out of the last successfully received NM message
  */
 Std_ReturnType Nm_GetUserData(NetworkHandleType networkHandle, uint8* nmUserDataPtr)
 {
     Std_ReturnType ret = E_NOT_OK;
+    Nm_ArtiApiStart(2, NM_SERVICE_ID_GETUSERDATA, networkHandle);
 
 #if NM_DEV_ERROR_DETECT == STD_ON
     if (Nm_ValidateNetworkHandleAndPointer(NM_SERVICE_ID_GETUSERDATA, networkHandle, nmUserDataPtr))
@@ -508,9 +687,15 @@ Std_ReturnType Nm_GetUserData(NetworkHandleType networkHandle, uint8* nmUserData
             }
         }
     }
+    Nm_ArtiApiReturn(2, NM_SERVICE_ID_GETUSERDATA, ret);
     return ret;
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 #endif
+
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  *  Get the whole PDU data out of the most recently received NM message. For that purpose
  *  <BusNm>_GetPduData shall be called in case NmBusType is not set to NM_BUSNM_LOCALNM.
@@ -519,6 +704,7 @@ Std_ReturnType Nm_GetUserData(NetworkHandleType networkHandle, uint8* nmUserData
 Std_ReturnType Nm_GetPduData(NetworkHandleType networkHandle, uint8* nmPduData)
 {
     Std_ReturnType ret = E_NOT_OK;
+    Nm_ArtiApiStart(2, NM_SERVICE_ID_GETPDUDATA, networkHandle);
 #if NM_DEV_ERROR_DETECT == STD_ON
     if (Nm_ValidateNetworkHandleAndPointer(NM_SERVICE_ID_GETPDUDATA, networkHandle, nmPduData))
 #endif
@@ -534,8 +720,14 @@ Std_ReturnType Nm_GetPduData(NetworkHandleType networkHandle, uint8* nmPduData)
             }
         }
     }
+    Nm_ArtiApiReturn(2, NM_SERVICE_ID_GETPDUDATA, ret);
     return ret;
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
+
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * Set Repeat Message Request Bit for NM messages transmitted next on the bus. For that purpose
  * Bus Nm_RepeatMessageRequest shall be called in case NmBusType is not set to NM_BUSNM_LOCALNM.
@@ -544,6 +736,7 @@ Std_ReturnType Nm_GetPduData(NetworkHandleType networkHandle, uint8* nmPduData)
 Std_ReturnType Nm_RepeatMessageRequest(NetworkHandleType networkHandle)
 {
     Std_ReturnType ret = E_NOT_OK;
+    Nm_ArtiApiStart(2, NM_SERVICE_ID_REPEATMESSAGEREQUEST, networkHandle);
 #if NM_DEV_ERROR_DETECT == STD_ON
     if (Nm_ValidatePartitionContext(NM_SERVICE_ID_REPEATMESSAGEREQUEST)
         && Nm_ValidateInitStatus(NM_SERVICE_ID_REPEATMESSAGEREQUEST)
@@ -564,8 +757,14 @@ Std_ReturnType Nm_RepeatMessageRequest(NetworkHandleType networkHandle)
         }
 #endif
     }
+    Nm_ArtiApiReturn(2, NM_SERVICE_ID_REPEATMESSAGEREQUEST, ret);
     return ret;
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
+
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * Get node identifier out of the last successfully received NM-message. The function
  * <Bus>Nm_GetNodeIdentifier shall be called in case NmBusType is not set to NM_BUSNM_LOCALNM.
@@ -574,6 +773,7 @@ Std_ReturnType Nm_RepeatMessageRequest(NetworkHandleType networkHandle)
 Std_ReturnType Nm_GetNodeIdentifier(NetworkHandleType networkHandle, uint8* nmNodeIdPtr)
 {
     Std_ReturnType ret = E_NOT_OK;
+    Nm_ArtiApiStart(2, NM_SERVICE_ID_GETNODEIDENTIFIER, networkHandle);
 
 #if NM_DEV_ERROR_DETECT == STD_ON
     if (Nm_ValidateNetworkHandleAndPointer(NM_SERVICE_ID_GETNODEIDENTIFIER, networkHandle, nmNodeIdPtr))
@@ -590,8 +790,14 @@ Std_ReturnType Nm_GetNodeIdentifier(NetworkHandleType networkHandle, uint8* nmNo
             }
         }
     }
+    Nm_ArtiApiReturn(2, NM_SERVICE_ID_GETNODEIDENTIFIER, ret);
     return ret;
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
+
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * Get node identifier configured for the local node. For that purpose
  * <Bus>Nm_GetLocalNodeIdentifier shall be called in case NmBusType is not set to NM_BUSNM_LOCALNM. (e.g.
@@ -600,6 +806,7 @@ Std_ReturnType Nm_GetNodeIdentifier(NetworkHandleType networkHandle, uint8* nmNo
 Std_ReturnType Nm_GetLocalNodeIdentifier(NetworkHandleType networkHandle, uint8* nmNodeIdPtr)
 {
     Std_ReturnType ret = E_NOT_OK;
+    Nm_ArtiApiStart(2, NM_SERVICE_ID_GETLOCALNODEIDENTIFIER, networkHandle);
 
 #if NM_DEV_ERROR_DETECT == STD_ON
     if (Nm_ValidateNetworkHandleAndPointer(NM_SERVICE_ID_GETLOCALNODEIDENTIFIER, networkHandle, nmNodeIdPtr))
@@ -617,16 +824,22 @@ Std_ReturnType Nm_GetLocalNodeIdentifier(NetworkHandleType networkHandle, uint8*
             }
         }
     }
+    Nm_ArtiApiReturn(2, NM_SERVICE_ID_GETLOCALNODEIDENTIFIER, ret);
     return ret;
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 
 #if (NM_REMOTE_SLEEP_IND_ENABLED == STD_ON)
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * Check if remote sleep indication takes place or not
  */
 Std_ReturnType Nm_CheckRemoteSleepIndication(NetworkHandleType networkHandle, boolean* remoteSleepIndPtr)
 {
     Std_ReturnType ret = E_NOT_OK;
+    Nm_ArtiApiStart(2, NM_SERVICE_ID_CHECKREMOTESLEEPINDICATION, networkHandle);
 
 #if NM_DEV_ERROR_DETECT == STD_ON
     if (Nm_ValidateNetworkHandleAndPointer(NM_SERVICE_ID_CHECKREMOTESLEEPINDICATION, networkHandle, remoteSleepIndPtr))
@@ -645,10 +858,15 @@ Std_ReturnType Nm_CheckRemoteSleepIndication(NetworkHandleType networkHandle, bo
         }
 #endif
     }
+    Nm_ArtiApiReturn(2, NM_SERVICE_ID_CHECKREMOTESLEEPINDICATION, ret);
     return ret;
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 #endif
 
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * Returns the state of the network management. The function <Bus>Nm_GetState shall be called in case NmBusType is not
  * set to NM_BUSNM_LOCALNM. (e.g. CanNm_GetState
@@ -656,6 +874,7 @@ Std_ReturnType Nm_CheckRemoteSleepIndication(NetworkHandleType networkHandle, bo
 Std_ReturnType Nm_GetState(NetworkHandleType nmNetworkHandle, Nm_StateType* nmStatePtr, Nm_ModeType* nmModePtr)
 {
     Std_ReturnType ret = E_NOT_OK;
+    Nm_ArtiApiStart(2, NM_SERVICE_ID_GETSTATE, nmNetworkHandle);
 
 #if NM_DEV_ERROR_DETECT == STD_ON
     if (Nm_ValidateNetworkHandlePointerAndPointer(NM_SERVICE_ID_GETSTATE, nmNetworkHandle, nmStatePtr, nmModePtr))
@@ -672,15 +891,21 @@ Std_ReturnType Nm_GetState(NetworkHandleType nmNetworkHandle, Nm_StateType* nmSt
             }
         }
     }
+    Nm_ArtiApiReturn(2, NM_SERVICE_ID_GETSTATE, ret);
     return ret;
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 
 #if (NM_VERSION_INFO_API == STD_ON)
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * This service returns the version information of this module.
  */
 void Nm_GetVersionInfo(Std_VersionInfoType* nmVerInfoPtr)
 {
+    Nm_ArtiApiStart(1, NM_SERVICE_ID_GETVERSIONINFO);
 #if (NM_DEV_ERROR_DETECT == STD_ON)
     if (Nm_ValidatePointer(NM_SERVICE_ID_GETVERSIONINFO, nmVerInfoPtr))
 #endif
@@ -691,15 +916,21 @@ void Nm_GetVersionInfo(Std_VersionInfoType* nmVerInfoPtr)
         nmVerInfoPtr->sw_minor_version = NM_SW_MINOR_VERSION;
         nmVerInfoPtr->sw_patch_version = NM_SW_PATCH_VERSION;
     }
+    Nm_ArtiApiReturn(1, NM_SERVICE_ID_GETVERSIONINFO);
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 #endif
 
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * Notification that a NM-message has been received in the Bus-Sleep Mode, what indicates that some nodes in the
  * network have already entered the Network Mode.
  */
 void Nm_NetworkStartIndication(NetworkHandleType nmNetworkHandle)
 {
+    Nm_ArtiApiStart(2, NM_SERVICE_ID_NETWORKSTARTINDICATION, nmNetworkHandle);
 #if NM_DEV_ERROR_DETECT == STD_ON
     if (Nm_ValidatePartitionContext(NM_SERVICE_ID_NETWORKSTARTINDICATION)
         && Nm_ValidateInitStatus(NM_SERVICE_ID_NETWORKSTARTINDICATION)
@@ -713,13 +944,19 @@ void Nm_NetworkStartIndication(NetworkHandleType nmNetworkHandle)
          */
         ComM_Nm_NetworkStartIndication(Nm_ChLConfig[chIndex].ComMChannelRef);
     }
+    Nm_ArtiApiReturn(1, NM_SERVICE_ID_NETWORKSTARTINDICATION);
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * Notification that the network management has entered Network Mode.
  */
 void Nm_NetworkMode(NetworkHandleType nmNetworkHandle)
 {
+    Nm_ArtiApiStart(2, NM_SERVICE_ID_NETWORKMODE, nmNetworkHandle);
 #if NM_DEV_ERROR_DETECT == STD_ON
     if (Nm_ValidatePartitionContext(NM_SERVICE_ID_NETWORKMODE) && Nm_ValidateInitStatus(NM_SERVICE_ID_NETWORKMODE)
         && Nm_ValidateNetworkHandle(NM_SERVICE_ID_NETWORKMODE, nmNetworkHandle))
@@ -757,13 +994,20 @@ void Nm_NetworkMode(NetworkHandleType nmNetworkHandle)
          */
         ComM_Nm_NetworkMode(Nm_ChLConfig[chIndex].ComMChannelRef);
     }
+    Nm_ArtiApiReturn(1, NM_SERVICE_ID_NETWORKMODE);
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
+
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * Notification that the network management has entered Bus-Sleep Mode.
  *
  */
 void Nm_BusSleepMode(NetworkHandleType nmNetworkHandle)
 {
+    Nm_ArtiApiStart(2, NM_SERVICE_ID_BUSSLEEPMODE, nmNetworkHandle);
 #if NM_DEV_ERROR_DETECT == STD_ON
     if (Nm_ValidatePartitionContext(NM_SERVICE_ID_BUSSLEEPMODE) && Nm_ValidateInitStatus(NM_SERVICE_ID_BUSSLEEPMODE)
         && Nm_ValidateNetworkHandle(NM_SERVICE_ID_BUSSLEEPMODE, nmNetworkHandle))
@@ -807,13 +1051,19 @@ void Nm_BusSleepMode(NetworkHandleType nmNetworkHandle)
          */
         ComM_Nm_BusSleepMode(Nm_ChLConfig[chIndex].ComMChannelRef);
     }
+    Nm_ArtiApiReturn(1, NM_SERVICE_ID_BUSSLEEPMODE);
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * Notification that the network management has entered Prepare Bus-Sleep Mode.
  */
 void Nm_PrepareBusSleepMode(NetworkHandleType nmNetworkHandle)
 {
+    Nm_ArtiApiStart(2, NM_SERVICE_ID_PREPAREBUSSLEEPMODE, nmNetworkHandle);
 #if NM_DEV_ERROR_DETECT == STD_ON
     if (Nm_ValidatePartitionContext(NM_SERVICE_ID_PREPAREBUSSLEEPMODE)
         && Nm_ValidateInitStatus(NM_SERVICE_ID_PREPAREBUSSLEEPMODE)
@@ -846,9 +1096,14 @@ void Nm_PrepareBusSleepMode(NetworkHandleType nmNetworkHandle)
          * calling ComM_Nm_PrepareBusSleepMode. */
         ComM_Nm_PrepareBusSleepMode(Nm_ChLConfig[chIndex].ComMChannelRef);
     }
+    Nm_ArtiApiReturn(1, NM_SERVICE_ID_PREPAREBUSSLEEPMODE);
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 
 #if (NM_REMOTE_SLEEP_IND_ENABLED == STD_ON)
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * Notification that the network management has detected that
  * all other nodes on the network are ready to enter Bus-Sleep Mode.
@@ -856,6 +1111,7 @@ void Nm_PrepareBusSleepMode(NetworkHandleType nmNetworkHandle)
  */
 void Nm_RemoteSleepIndication(NetworkHandleType nmNetworkHandle)
 {
+    Nm_ArtiApiStart(2, NM_SERVICE_ID_REMOTESLEEPINDICATION, nmNetworkHandle);
 #if NM_DEV_ERROR_DETECT == STD_ON
     if (Nm_ValidatePartitionContext(NM_SERVICE_ID_REMOTESLEEPINDICATION)
         && Nm_ValidateInitStatus(NM_SERVICE_ID_REMOTESLEEPINDICATION)
@@ -867,16 +1123,22 @@ void Nm_RemoteSleepIndication(NetworkHandleType nmNetworkHandle)
         Nm_InnerChannel[chIndex]->RemoteSleepIndFlg = TRUE;
 #endif
     }
+    Nm_ArtiApiReturn(1, NM_SERVICE_ID_REMOTESLEEPINDICATION);
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 #endif
 
 #if (NM_REMOTE_SLEEP_IND_ENABLED == STD_ON)
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * Notification that the network management has detected that not all other nodes on the network are longer ready to
  * enter Bus-Sleep Mode
  */
 void Nm_RemoteSleepCancellation(NetworkHandleType nmNetworkHandle)
 {
+    Nm_ArtiApiStart(2, NM_SERVICE_ID_REMOTESLEEPCANCELLATION, nmNetworkHandle);
 #if NM_DEV_ERROR_DETECT == STD_ON
     if (Nm_ValidatePartitionContext(NM_SERVICE_ID_REMOTESLEEPCANCELLATION)
         && Nm_ValidateInitStatus(NM_SERVICE_ID_REMOTESLEEPCANCELLATION)
@@ -908,13 +1170,20 @@ void Nm_RemoteSleepCancellation(NetworkHandleType nmNetworkHandle)
 #endif
 #endif
     }
+    Nm_ArtiApiReturn(1, NM_SERVICE_ID_REMOTESLEEPCANCELLATION);
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
+
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * Notification to the NM Coordinator functionality that this is a suitable point in time to initiate the coordinated
  * shutdown on.
  */
 void Nm_SynchronizationPoint(NetworkHandleType nmNetworkHandle)
 {
+    Nm_ArtiApiStart(2, NM_SERVICE_ID_SYNCHRONIZATIONPOINT, nmNetworkHandle);
 #if NM_DEV_ERROR_DETECT == STD_ON
     if (Nm_ValidatePartitionContext(NM_SERVICE_ID_SYNCHRONIZATIONPOINT)
         && Nm_ValidateInitStatus(NM_SERVICE_ID_SYNCHRONIZATIONPOINT)
@@ -945,14 +1214,21 @@ void Nm_SynchronizationPoint(NetworkHandleType nmNetworkHandle)
         }
 #endif
     }
+    Nm_ArtiApiReturn(1, NM_SERVICE_ID_SYNCHRONIZATIONPOINT);
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 #endif
+
 #if (NM_COORDINATOR_SYNC_SUPPORT == STD_ON)
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * Sets an indication, when the NM Coordinator Sleep Ready bit in the Control Bit Vector is set
  */
 void Nm_CoordReadyToSleepIndication(NetworkHandleType nmChannelHandle)
 {
+    Nm_ArtiApiStart(2, NM_SERVICE_ID_COORDREADYTOSLEEPINDICATION, nmChannelHandle);
 #if NM_DEV_ERROR_DETECT == STD_ON
     if (Nm_ValidatePartitionContext(NM_SERVICE_ID_COORDREADYTOSLEEPINDICATION)
         && Nm_ValidateInitStatus(NM_SERVICE_ID_COORDREADYTOSLEEPINDICATION)
@@ -968,15 +1244,21 @@ void Nm_CoordReadyToSleepIndication(NetworkHandleType nmChannelHandle)
             Nm_InnerChannel[chIndex]->CoorRsb = TRUE;
         }
     }
+    Nm_ArtiApiReturn(1, NM_SERVICE_ID_COORDREADYTOSLEEPINDICATION);
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 #endif
 
 #if (NM_COORDINATOR_SYNC_SUPPORT == STD_ON)
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * Cancels an indication, when the NM Coordinator Sleep Ready bit in the Control Bit Vector is set back to 0
  */
 void Nm_CoordReadyToSleepCancellation(NetworkHandleType nmChannelHandle)
 {
+    Nm_ArtiApiStart(2, NM_SERVICE_ID_COORDREADYTOSLEEPCANCELLATION, nmChannelHandle);
 #if NM_DEV_ERROR_DETECT == STD_ON
     if (Nm_ValidatePartitionContext(NM_SERVICE_ID_COORDREADYTOSLEEPCANCELLATION)
         && Nm_ValidateInitStatus(NM_SERVICE_ID_COORDREADYTOSLEEPCANCELLATION)
@@ -1006,14 +1288,21 @@ void Nm_CoordReadyToSleepCancellation(NetworkHandleType nmChannelHandle)
 #endif
         }
     }
+    Nm_ArtiApiReturn(1, NM_SERVICE_ID_COORDREADYTOSLEEPCANCELLATION);
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 #endif
+
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  *   Notification that the network management has entered
  *   Synchronize Mode.
  */
 void Nm_SynchronizeMode(NetworkHandleType nmNetworkHandle)
 {
+    Nm_ArtiApiStart(2, NM_SERVICE_ID_SYNCHRONIZEMODE, nmNetworkHandle);
 #if NM_DEV_ERROR_DETECT == STD_ON
     if (Nm_ValidatePartitionContext(NM_SERVICE_ID_SYNCHRONIZEMODE)
         && Nm_ValidateInitStatus(NM_SERVICE_ID_SYNCHRONIZEMODE)
@@ -1053,9 +1342,14 @@ void Nm_SynchronizeMode(NetworkHandleType nmNetworkHandle)
         NM_UNUSED(nmNetworkHandle);
 #endif
     }
+    Nm_ArtiApiReturn(1, NM_SERVICE_ID_SYNCHRONIZEMODE);
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 
 #if (NM_STATE_CHANGE_IND_ENABLED == STD_ON)
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  *   notification that the state of the lower layer <Bus>Nm has changed.
  */
@@ -1064,6 +1358,7 @@ void Nm_StateChangeNotification(
     Nm_StateType      nmPreviousState,
     Nm_StateType      nmCurrentState)
 {
+    Nm_ArtiApiStart(4, NM_SERVICE_ID_STATECHANGENOTIFICATION, nmNetworkHandle, nmPreviousState, nmCurrentState);
 #if NM_DEV_ERROR_DETECT == STD_ON
     if (Nm_ValidatePartitionContext(NM_SERVICE_ID_STATECHANGENOTIFICATION)
         && Nm_ValidateInitStatus(NM_SERVICE_ID_STATECHANGENOTIFICATION)
@@ -1078,49 +1373,51 @@ void Nm_StateChangeNotification(
             /**
              *   NMS shall to set to signal value according to the followling table
              */
-            const Nm_StateReportKindType Nm_StateReportKind[NM_STATE_CHANGE_TYPE_NUM] = {
-                {NM_STATE_BUS_SLEEP, NM_STATE_REPEAT_MESSAGE, 0x01u},
-                {NM_STATE_PREPARE_BUS_SLEEP, NM_STATE_REPEAT_MESSAGE, 0x02u},
-                {NM_STATE_REPEAT_MESSAGE, NM_STATE_NORMAL_OPERATION, 0x04u},
-                {NM_STATE_READY_SLEEP, NM_STATE_NORMAL_OPERATION, 0x08u},
-                {NM_STATE_READY_SLEEP, NM_STATE_REPEAT_MESSAGE, 0x10u},
-                {NM_STATE_NORMAL_OPERATION, NM_STATE_REPEAT_MESSAGE, 0x20u},
-            };
-            uintx   index;
-            boolean findFlag = FALSE;
-            for (index = 0u; (index < NM_UBOND(Nm_StateReportKind)) && (!findFlag); index++)
+            Com_SignalIdType signalId = Nm_ChLConfig[chIndex].ComHandleId;
+            if (signalId != NM_INVALID_COM_SIGNELID)
             {
-                if ((nmCurrentState == Nm_StateReportKind[index].CurrentState)
-                    && (nmPreviousState == Nm_StateReportKind[index].PreState))
+                const Nm_StateReportKindType Nm_StateReportKind[NM_STATE_CHANGE_TYPE_NUM] = {
+                    {NM_STATE_BUS_SLEEP, NM_STATE_REPEAT_MESSAGE, 0x01u},
+                    {NM_STATE_PREPARE_BUS_SLEEP, NM_STATE_REPEAT_MESSAGE, 0x02u},
+                    {NM_STATE_REPEAT_MESSAGE, NM_STATE_NORMAL_OPERATION, 0x04u},
+                    {NM_STATE_READY_SLEEP, NM_STATE_NORMAL_OPERATION, 0x08u},
+                    {NM_STATE_READY_SLEEP, NM_STATE_REPEAT_MESSAGE, 0x10u},
+                    {NM_STATE_NORMAL_OPERATION, NM_STATE_REPEAT_MESSAGE, 0x20u},
+                };
+
+                for (uintx index = 0u; index < NM_UBOND(Nm_StateReportKind); index++)
                 {
-                    findFlag = TRUE;
+                    if ((nmCurrentState == Nm_StateReportKind[index].CurrentState)
+                        && (nmPreviousState == Nm_StateReportKind[index].PreState))
+                    {
+                        (void)Com_SendSignal(signalId, &Nm_StateReportKind[index].SignalValue);
+                        break;
+                    }
                 }
-            }
-            if (findFlag)
-            {
-                Com_SignalIdType signalId = Nm_ChLConfig[chIndex].ComHandleId;
-                if (signalId != NM_INVALID_COM_SIGNELID)
-                {
-                    (void)Com_SendSignal(signalId, &Nm_StateReportKind[index - 1u].SignalValue);
-                }
-                BswM_Nm_StateChangeNotification(nmNetworkHandle, nmCurrentState);
             }
 #else
             (void)nmPreviousState;
-            (void)nmCurrentState;
 #endif
         }
+        /** SWS_Nm_00487 */
+        BswM_Nm_StateChangeNotification(nmNetworkHandle, nmCurrentState);
     }
+    Nm_ArtiApiReturn(1, NM_SERVICE_ID_STATECHANGENOTIFICATION);
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 #endif
 
 #if (NM_CAR_WAKE_UP_RX_ENABLED == STD_ON)
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  *   This function is called by a <Bus>Nm to indicate reception
  *   of a CWU request
  */
 void Nm_CarWakeUpIndication(NetworkHandleType nmChannelHandle)
 {
+    Nm_ArtiApiStart(2, NM_SERVICE_ID_CARWAKEUPINDICATION, nmChannelHandle);
 #if NM_DEV_ERROR_DETECT == STD_ON
     if (Nm_ValidatePartitionContext(NM_SERVICE_ID_CARWAKEUPINDICATION)
         && Nm_ValidateInitStatus(NM_SERVICE_ID_CARWAKEUPINDICATION)
@@ -1138,14 +1435,21 @@ void Nm_CarWakeUpIndication(NetworkHandleType nmChannelHandle)
             BswM_Nm_CarWakeUpIndication(nmChannelHandle);
         }
     }
+    Nm_ArtiApiReturn(1, NM_SERVICE_ID_CARWAKEUPINDICATION);
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 #endif
+
 #if (NM_COORDINATOR_SUPPORT_ENABLED == STD_ON || NM_PARTIAL_NETWORK_SUPPORT_ENABLED == STD_ON)
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  *  implements the processes of the NM Interface which need a fix cyclic scheduling.
  */
 void Nm_MainFunction(uint8 chIdx)
 {
+    Nm_ArtiApiStart(2, NM_SERVICE_ID_MAINFUNCTION, chIdx);
 #if NM_DEV_ERROR_DETECT == STD_ON
     if (Nm_ValidatePartitionContext(NM_SERVICE_ID_MAINFUNCTION)) /* PRQA S 2991  */ /* VL_QAC_2991 */
 #endif
@@ -1190,14 +1494,21 @@ void Nm_MainFunction(uint8 chIdx)
 #endif
         }
     }
+    Nm_ArtiApiReturn(1, NM_SERVICE_ID_MAINFUNCTION);
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 #endif
+
+#if NM_PARTIAL_NETWORK_SUPPORT_ENABLED == STD_ON
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * Indication by ComM of internal PNC requests.
  */
-#if NM_PARTIAL_NETWORK_SUPPORT_ENABLED == STD_ON
 void Nm_UpdateIRA(NetworkHandleType networkHandle, const uint8* pncBitVectorPtr)
 {
+    Nm_ArtiApiStart(3, NM_SERVICE_ID_UPDATEIRA, networkHandle, pncBitVectorPtr);
 #if NM_DEV_ERROR_DETECT == STD_ON
     if (Nm_ValidateNetworkHandleAndPointer(NM_SERVICE_ID_UPDATEIRA, networkHandle, pncBitVectorPtr))
 #endif
@@ -1212,13 +1523,19 @@ void Nm_UpdateIRA(NetworkHandleType networkHandle, const uint8* pncBitVectorPtr)
             SchM_Exit_Nm_IRA();
         }
     }
+    Nm_ArtiApiReturn(1, NM_SERVICE_ID_UPDATEIRA);
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * Function called by BusNms to request the aggregated internal PNC requests for transmission within the Nm message.
  */
 void Nm_PncBitVectorTxIndication(NetworkHandleType networkHandle, uint8* pncBitVectorPtr)
 {
+    Nm_ArtiApiStart(2, NM_SERVICE_ID_PNCBITVECTORTXINDICATION, networkHandle);
 #if NM_DEV_ERROR_DETECT == STD_ON
     if (Nm_ValidateNetworkHandleAndPointer(NM_SERVICE_ID_PNCBITVECTORTXINDICATION, networkHandle, pncBitVectorPtr))
 #endif
@@ -1238,7 +1555,13 @@ void Nm_PncBitVectorTxIndication(NetworkHandleType networkHandle, uint8* pncBitV
             SchM_Exit_Nm_IRA();
         }
     }
+    Nm_ArtiApiReturn(1, NM_SERVICE_ID_PNCBITVECTORTXINDICATION);
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
+
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  *  Process received ERA requests and update EIRA. If there are any changes in ERA or EIRA, ComM will be notified
  */
@@ -1247,6 +1570,7 @@ void Nm_PncBitVectorRxIndication(
     const uint8*      pncBitVectorPtr,
     boolean*          relevantPncRequestDetectedPtr)
 {
+    Nm_ArtiApiStart(3, NM_SERVICE_ID_PNCBITVECTORRXINDICATION, networkHandle, pncBitVectorPtr);
 #if NM_DEV_ERROR_DETECT == STD_ON
     if (Nm_ValidateNetworkHandlePointerAndPointer(
             NM_SERVICE_ID_PNCBITVECTORRXINDICATION,
@@ -1269,15 +1593,21 @@ void Nm_PncBitVectorRxIndication(
         }
 #endif
     }
+    Nm_ArtiApiReturn(2, NM_SERVICE_ID_PNCBITVECTORRXINDICATION, *relevantPncRequestDetectedPtr);
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
+
 /* ========================================== internal function definitions ========================================= */
+#if (NM_PN_EIRA_CALC_ENABLED == STD_ON)
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief  Timer of Eira handle,if timeout occurs,the timer will be reset to 0.
  * @reentrant    TRUE
  * @synchronous  TRUE
  * @trace        CPD-66719
  */
-#if (NM_PN_EIRA_CALC_ENABLED == STD_ON)
 NM_LOCAL void Nm_PnEiraResetTimerHandle(void)
 {
     for (uint16 index = 0u; index < (sizeof(Nm_InnerGlobal.PnEiraResetTimer) / sizeof(uint16)); index++)
@@ -1296,7 +1626,13 @@ NM_LOCAL void Nm_PnEiraResetTimerHandle(void)
         }
     }
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 #endif
+
+#if (NM_PN_ERA_CALC_ENABLED == STD_ON)
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief  Timer of Eira handle,if timeout occurs,the timer will be reset to 0.
  * @param[in]    chIndex   Identification of the NM-channel
@@ -1304,7 +1640,6 @@ NM_LOCAL void Nm_PnEiraResetTimerHandle(void)
  * @synchronous  TRUE
  * @trace        CPD-66720
  */
-#if (NM_PN_ERA_CALC_ENABLED == STD_ON)
 NM_LOCAL void Nm_PnEraResetTimerHandle(uint8 chIndex)
 {
     const Nm_ChannelLConfigType*    chCfgPtr = &Nm_ChLConfig[chIndex];
@@ -1333,10 +1668,13 @@ NM_LOCAL void Nm_PnEraResetTimerHandle(uint8 chIndex)
         }
     }
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
+#endif
 #endif
 
-#endif
-
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief  find nm local map to channel index.
  * @param[in]    networkHandle   Identification of the NM-channel
@@ -1357,8 +1695,12 @@ NM_LOCAL Nm_ChannelIndexType Nm_FindChannelIndex(NetworkHandleType networkHandle
     }
     return chIndex;
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 
 #if (NM_COORDINATOR_SUPPORT_ENABLED == STD_ON)
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief  find cluster index the channel belongs to
  * @param[in]    chIndex   index of channel
@@ -1386,10 +1728,14 @@ NM_LOCAL Std_ReturnType Nm_FindClusterIndex(uint8 chIndex, uint8* clusterIndexPt
     }
     return findFlg;
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 #endif
 
 #if (NM_COORDINATOR_SYNC_SUPPORT == STD_ON)
 #if (NM_NUMBER_OF_CLUSTERS > 0u)
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief check if all channels in cluster meet the requirements
  * @param[in]    channelMask   bit mask of channel in cluster
@@ -1416,7 +1762,12 @@ NM_LOCAL Std_ReturnType Nm_CheckChannelMaskInCluster(uint8* channelMask, uint8 c
     }
     return ret;
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 #endif
+
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief  topmost shutdown ready CSRBit set,and not topmost CSRBit
  *         change handler
@@ -1475,6 +1826,11 @@ NM_LOCAL void Nm_CoorReadySleepBitHandle(boolean* topMostCoor, uint8 chIdx, bool
         }
     }
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
+
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief        the behavior of passively coordinated channel in nested cluster
  * @param[in]    chIdx  the configured channel index
@@ -1502,6 +1858,11 @@ NM_LOCAL void Nm_PassivelyCoordinatedChannelHandle(uint8 chIdx)
         }
     }
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
+
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief        check if passive coordinated channel should be released
  * @param[in]    clusterIndex  the index of cluster
@@ -1531,9 +1892,13 @@ NM_LOCAL void Nm_PassivelyCoordinatedChannelRelease(uint8 clusterIndex, uint8 ch
         SchM_Exit_Nm_Coordinator();
     }
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 #endif
 
 #if (NM_COORDINATOR_SUPPORT_ENABLED == STD_ON)
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief        check alive channel in coordinator cluster,judge cluster
  *               is ready to coor shutdown or not
@@ -1570,15 +1935,15 @@ NM_LOCAL void Nm_CoorShutdownReady(boolean* topMostCoor, uint8 chIdx, uint8* clu
             but passive channel is not need remote ind
             next : coor rsb,
             */
-            if ((!chCfgPtr->ChannelSleepMaster &&
+            boolean noRemoteIndFlg     = (!chCfgPtr->ChannelSleepMaster) && (!chRTPtr->RemoteSleepIndFlg);
+            boolean notReadyToSleepFlg = FALSE;
 #if (STD_ON == NM_COORDINATOR_SYNC_SUPPORT)
-                 chCfgPtr->ActiveCoordinator &&
+            boolean nestedCoorNoRsbFlg = (!(*topMostCoor)) && (!chRTPtr->CoorRsb);
+            notReadyToSleepFlg         = chCfgPtr->ActiveCoordinator && (noRemoteIndFlg || nestedCoorNoRsbFlg);
+#else
+            notReadyToSleepFlg = noRemoteIndFlg;
 #endif
-                 !chRTPtr->RemoteSleepIndFlg)
-#if (STD_ON == NM_COORDINATOR_SYNC_SUPPORT)
-                || (!(*topMostCoor) && chCfgPtr->ActiveCoordinator && !chRTPtr->CoorRsb)
-#endif
-            )
+            if (notReadyToSleepFlg)
             {
                 SchM_Enter_Nm_Coordinator();
                 Nm_ClrBit(clusterReadySleepInChMask, chIdx);
@@ -1612,9 +1977,13 @@ NM_LOCAL void Nm_CoorShutdownReady(boolean* topMostCoor, uint8 chIdx, uint8* clu
         }
     }
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 #endif
 
 #if (NM_COORDINATOR_SUPPORT_ENABLED == STD_ON)
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief        coordinator shutdown timer load default value.
  * @param[in]    perClusPtr   Pointer to the current cluster
@@ -1676,6 +2045,8 @@ NM_LOCAL void Nm_CoorShutdownTimerLoader(
         }
     }
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 #endif
 
 #if (NM_COORDINATOR_SUPPORT_ENABLED == STD_ON)
@@ -1725,6 +2096,8 @@ NM_LOCAL_INLINE void Nm_SetBit(uint8* channelMask, uint8 chIdx)
 #endif
 
 #if (NM_COORDINATOR_SUPPORT_ENABLED == STD_ON)
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief        coordinator shutdown timer handle function
  * @param[in]    chIdx  the configured channel index
@@ -1782,9 +2155,13 @@ NM_LOCAL Std_ReturnType Nm_CoorShutDownTimerHandle(uint8 chIdx, uint8* sleepAllo
     }
     return ret;
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 #endif
 
 #if (NM_COORDINATOR_SUPPORT_ENABLED == STD_ON)
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief        coordinator shutdown abort handle function
  * @param[in]    chIdx  the index of channel
@@ -1835,9 +2212,13 @@ NM_LOCAL void Nm_CoorShutdownAbortHandle(uint8 chIdx, uint8* shutdownAbortFinish
 #endif
     Nm_SetBit(shutdownAbortFinishedInChMask, chIdx);
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 #endif
 
 #if (NM_IF_ALL_CHANNEL_PASSIVE_MODE_ENABLED == STD_OFF)
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief        special bus nm network request
  * @param[in]    chIdx  the index of channel
@@ -1872,9 +2253,13 @@ NM_LOCAL Std_ReturnType Nm_BusNmNetworkRequest(uint8 chIndex)
     }
     return ret;
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 #endif
 
 #if (NM_IF_ALL_CHANNEL_PASSIVE_MODE_ENABLED == STD_OFF)
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief        special bus network release
  * @param[in]    chIdx  Configured channel index
@@ -1902,9 +2287,13 @@ NM_LOCAL Std_ReturnType Nm_BusNmNetworkRelease(uint8 chIndex)
     }
     return ret;
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 #endif
 
 #if ((NM_COORDINATOR_SUPPORT_ENABLED == STD_ON) && (NM_BUS_SYNCHRONIZATION_ENABLED == STD_ON))
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief        special bus nm request sync
  * @param[in]    chIdx  Configured channel index
@@ -1930,9 +2319,13 @@ NM_LOCAL Std_ReturnType Nm_BusNmRequestBusSynchronization(uint8 chIndex)
     }
     return ret;
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 #endif
 
 #if (NM_COORDINATOR_SYNC_SUPPORT == STD_ON)
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief        special bus nm set coordinator ready sleep bit
  * @param[in]    chIdx   Configured channel index
@@ -1963,10 +2356,13 @@ NM_LOCAL Std_ReturnType Nm_BusNmSetSleepReadyBit(uint8 chIndex, boolean nmSleepR
     }
     return ret;
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 #endif
 
 #if NM_DEV_ERROR_DETECT == STD_ON
-
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief Development error validation of invalid partition context
  * @param[in]    apiId  ID of API service in which error is detected
@@ -1986,7 +2382,11 @@ NM_LOCAL boolean Nm_ValidatePartitionContext(uint8 apiId)
     }
     return TRUE;
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief Development error validation of uninit
  * @param[in]    apiId  ID of API service in which error is detected
@@ -2007,7 +2407,11 @@ NM_LOCAL boolean Nm_ValidateInitStatus(uint8 apiId)
     }
     return ret;
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief Development error validation of already initialized
  * @retval       TRUE   Development error not occurred
@@ -2026,6 +2430,11 @@ NM_LOCAL boolean Nm_ValidateAlreadyInitialized(void)
     }
     return ret;
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
+
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief   validate if the channel belongs to configuration.And check if passive channel calls Nm API.
  * @param[in]           apiId          the id of API
@@ -2037,10 +2446,11 @@ NM_LOCAL boolean Nm_ValidateAlreadyInitialized(void)
 /******************************************************************************/
 NM_LOCAL boolean Nm_ValidateNetworkHandle(uint8 apiId, NetworkHandleType networkHandle)
 {
-    uint8                        error    = NM_E_NO_ERROR;
-    Nm_ChannelIndexType          chIndex  = Nm_FindChannelIndex(networkHandle);
+    uint8               error   = NM_E_NO_ERROR;
+    Nm_ChannelIndexType chIndex = Nm_FindChannelIndex(networkHandle);
+#if (NM_PASSIVE_MODE_ENABLED == STD_ON)
     const Nm_ChannelLConfigType* chCfgPtr = &Nm_ChLConfig[chIndex];
-
+#endif
     if (chIndex >= NM_NUMBER_OF_CHANNELS)
     {
         error = NM_E_INVALID_CHANNEL;
@@ -2070,6 +2480,11 @@ NM_LOCAL boolean Nm_ValidateNetworkHandle(uint8 apiId, NetworkHandleType network
 
     return error == NM_E_NO_ERROR;
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
+
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief   validate if the pointer is NULL.
  * @param[in]           apiId          the id of API
@@ -2090,6 +2505,11 @@ NM_LOCAL boolean Nm_ValidatePointer(uint8 apiId, const void* pointer)
     }
     return valid;
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
+
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief               validate the networkHandle and if the pointer is NULL.
  * @param[in]           apiId          the id of API
@@ -2104,6 +2524,11 @@ NM_LOCAL boolean Nm_ValidateNetworkHandleAndPointer(uint8 apiId, NetworkHandleTy
     return Nm_ValidatePartitionContext(apiId) && Nm_ValidateInitStatus(apiId)
            && Nm_ValidateNetworkHandle(apiId, networkHandle) && Nm_ValidatePointer(apiId, pointer);
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
+
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief               validate the networkHandle and if the two pointers is NULL.
  * @param[in]           apiId          the id of API
@@ -2122,8 +2547,12 @@ NM_LOCAL boolean Nm_ValidateNetworkHandlePointerAndPointer(
 {
     return Nm_ValidateNetworkHandleAndPointer(apiId, networkHandle, pointer1) && Nm_ValidatePointer(apiId, pointer2);
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 #endif
 
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief        Returns the index of current partition in the Nm configuration.
  * @retval       the index of partition
@@ -2146,8 +2575,12 @@ NM_LOCAL uint8 Nm_GetPartitionIndex(void)
 #endif
     return partitionIndex;
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 
 #if (NM_PN_ERA_CALC_ENABLED == STD_ON) || (NM_PN_EIRA_CALC_ENABLED == STD_ON)
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief  reset the timer of EIRA and ERA,and aggreagate the ERA and EIRA.
  * @param[in]    chIndex  index of channel
@@ -2162,9 +2595,11 @@ NM_LOCAL uint8 Nm_GetPartitionIndex(void)
  */
 NM_LOCAL boolean Nm_PncAggregateAndTimerHandle(Nm_ChannelIndexType chIndex, boolean eraFlg, const uint8* rawData)
 {
+    (void)eraFlg; /* avoid unused-parameter warning when Macro disabled */
     const Nm_ChannelLConfigType*    chCfgPtr    = &Nm_ChLConfig[chIndex];
     const Nm_PncRelatedRunTimeType* chGRTPtr    = &Nm_ChannelPncRelatedRuntimeRef[chIndex];
     boolean                         relevantPnc = FALSE;
+    (void)chGRTPtr; /* avoid unused-variable warning when Macro disabled */
 
 #if (NM_PN_ERA_CALC_ENABLED == STD_ON)
     uint16 pnIdx = 0u;
@@ -2214,8 +2649,13 @@ NM_LOCAL boolean Nm_PncAggregateAndTimerHandle(Nm_ChannelIndexType chIndex, bool
     }
     return relevantPnc;
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 #endif
+
 #if (NM_COORDINATOR_SUPPORT_ENABLED == STD_ON) || (NM_PARTIAL_NETWORK_SUPPORT_ENABLED == STD_ON)
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief        initialization of runtime variables related to channels.
  * @reentrant    TRUE
@@ -2256,6 +2696,7 @@ NM_LOCAL void Nm_InitChannelRuntimeVariables(void)
         if (chCfgPtr->PnEnabled)
         {
             chRTPtr->UpDateEraFlg = FALSE;
+            (void)chGRTPtr; /* avoid unused-variable warning when Macro disabled */
 
 #if (NM_PN_ERA_CALC_ENABLED == STD_ON)
             if (chCfgPtr->PnEraCalcEnabled)
@@ -2278,7 +2719,13 @@ NM_LOCAL void Nm_InitChannelRuntimeVariables(void)
 #endif
     }
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 #endif
+
+#if ((NM_COORDINATOR_SUPPORT_ENABLED == STD_ON) && (0u < NM_NUMBER_OF_CLUSTERS))
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief        The coordinator processing function when the shutdown status is NM_SHUTDOWN_STU_START.
  * @param[in]    chIdx          the index of channel
@@ -2287,8 +2734,6 @@ NM_LOCAL void Nm_InitChannelRuntimeVariables(void)
  * @synchronous  FALSE
  * @trace        CPD-69584
  */
-#if ((NM_COORDINATOR_SUPPORT_ENABLED == STD_ON) && (0u < NM_NUMBER_OF_CLUSTERS))
-
 NM_LOCAL void Nm_ShutdownStatusStartHandle(uint8 chIdx, uint8 clusterIndex)
 {
     const Nm_PerClusterConfigType* perClusPtr         = &Nm_Config.PerCluPtr[clusterIndex];
@@ -2319,6 +2764,11 @@ NM_LOCAL void Nm_ShutdownStatusStartHandle(uint8 chIdx, uint8 clusterIndex)
         }
     }
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
+
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief        The coordinator processing function when the shutdown status is NM_SHUTDOWN_STU_RUN.
  * @param[in]    chIdx          the index of channel
@@ -2347,6 +2797,11 @@ NM_LOCAL void Nm_ShutdownStatusRunHandle(uint8 chIdx, uint8 clusterIndex)
         }
     }
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
+
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief        The coordinator processing function when the shutdown status is NM_SHUTDOWN_STU_ABORT.
  * @param[in]    chIdx          the index of channel
@@ -2371,6 +2826,11 @@ NM_LOCAL void Nm_ShutdownStatusAbortHandle(uint8 chIdx, uint8 clusterIndex)
             IStdLib_MemSet(Nm_InnerCluster[clusterIndex].PassiveChannelReadySleepInChMask, 0u, ClusterChannelMaxcount);
     }
 }
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
+
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief        The coordinator processing Main function.
  * @param[in]    chIdx          the index of channel
@@ -2398,8 +2858,7 @@ NM_LOCAL void Nm_Coordinator_MainHandle(uint8 chIdx)
         }
     }
 }
-#endif
-
 #define NM_STOP_SEC_CODE
 #include "Nm_MemMap.h"
+#endif
 /* PRQA S 1503, 1532 -- */

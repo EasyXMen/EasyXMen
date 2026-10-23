@@ -40,6 +40,8 @@
 #include "ComM.h"
 #endif
 
+#include "CanNm_Arti.h"
+
 /* ===================================================== macros ===================================================== */
 #define CANNM_UNUSED(v) (void)(v)
 
@@ -51,114 +53,319 @@ typedef enum
 } CanNm_InitStatusType;
 
 /* ========================================== internal function declarations ======================================== */
+CANNM_LOCAL_INLINE boolean CanNm_TestAndClear(boolean* flagPtr);
+
 #define CANNM_START_SEC_CODE
 #include "CanNm_MemMap.h"
-#ifdef QAC_ANALYZE
-#pragma PRQA_NO_SIDE_EFFECTS CanNm_TestAndClear
-#endif
+CANNM_LOCAL void CanNm_SetTxPduCbvBit(CanNm_ChannelIndexType chIndex, uint8 mask, boolean flag);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 
-CANNM_LOCAL_INLINE boolean         CanNm_TestAndClear(boolean* flagPtr);
-CANNM_LOCAL void                   CanNm_SetTxPduCbvBit(CanNm_ChannelIndexType chIndex, uint8 mask, boolean flag);
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 CANNM_LOCAL CanNm_ChannelIndexType CanNm_FindChannelIndex(NetworkHandleType nmChannelHandle);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 
 #if CANNM_PASSIVE_MODE_ENABLED == STD_OFF
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 CANNM_LOCAL void CanNm_InnerTxConfHandle(CanNm_ChannelIndexType chIndex, Std_ReturnType result);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 #endif
 
+#if CANNM_NODE_DETECTION_ENABLED == STD_ON
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  *  Function used to process the received data.
  *  */
-#if CANNM_NODE_DETECTION_ENABLED == STD_ON
 CANNM_LOCAL void CanNm_RxNodeDetectHandle(CanNm_ChannelIndexType chIndex, const uint8* pduDataPtr);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 #endif
 
 #if CANNM_CAR_WAKEUP_RX_ENABLED == STD_ON
 #if CANNM_CAR_WAKEUP_FILTER_ENABLED == STD_ON
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 CANNM_LOCAL boolean CanNm_RxCarWakeUpFilter(CanNm_ChannelIndexType chIndex, const uint8* pduDataPtr);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 #endif
+
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 CANNM_LOCAL void CanNm_RxCarWakeUpHandle(CanNm_ChannelIndexType chIndex, const uint8* pduDataPtr);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 #endif
 
 #if CANNM_COORDINATOR_SYNC_SUPPORT == STD_ON
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 CANNM_LOCAL void CanNm_CoordReadyToSleepIndHandle(CanNm_ChannelIndexType chIndex, const uint8* pduDataPtr);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 #endif
 
 #if CANNM_GLOBAL_PN_SUPPORT == STD_ON
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 CANNM_LOCAL boolean CanNm_RxPnFilter(CanNm_ChannelIndexType chIndex, const uint8* pduDataPtr);
-#endif
-#if (CANNM_REMOTE_SLEEP_IND_ENABLED == STD_ON) || (CANNM_NODE_DETECTION_ENABLED == STD_ON) \
-    || (CANNM_CAR_WAKEUP_RX_ENABLED == STD_ON) || (CANNM_COORDINATOR_SYNC_SUPPORT == STD_ON)
-CANNM_LOCAL void CanNm_RxDataMainHandle(CanNm_ChannelIndexType chIndex, const uint8* pduDataPtr);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 #endif
 
+#if (CANNM_REMOTE_SLEEP_IND_ENABLED == STD_ON) || (CANNM_NODE_DETECTION_ENABLED == STD_ON) \
+    || (CANNM_CAR_WAKEUP_RX_ENABLED == STD_ON) || (CANNM_COORDINATOR_SYNC_SUPPORT == STD_ON)
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
+CANNM_LOCAL void CanNm_RxDataMainHandle(CanNm_ChannelIndexType chIndex, const uint8* pduDataPtr);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
+#endif
+
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  *  Functions for all timers, including timing, reload, and timeout handling.
  *  */
 CANNM_LOCAL void CanNm_StateHoldTimeoutHandle(CanNm_ChannelIndexType chIndex);
-CANNM_LOCAL void CanNm_NmTimeoutHandle(CanNm_ChannelIndexType chIndex);
-#if CANNM_PASSIVE_MODE_ENABLED == STD_OFF
-CANNM_LOCAL void CanNm_MsgCycleTimeHandle(CanNm_ChannelIndexType chIndex);
-#endif
-#if CANNM_GLOBAL_PN_SUPPORT == STD_ON
-CANNM_LOCAL void CanNm_MsgTxTimeoutHandle(CanNm_ChannelIndexType chIndex);
-#endif
-#if CANNM_REMOTE_SLEEP_IND_ENABLED == STD_ON
-CANNM_LOCAL void CanNm_RemoteSleepCancellHandle(CanNm_ChannelIndexType chIndex);
-CANNM_LOCAL void CanNm_RemoteSleepTimeoutHandle(CanNm_ChannelIndexType chIndex);
-#endif
-CANNM_LOCAL void CanNm_TimerManagement(CanNm_ChannelIndexType chIndex);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
+CANNM_LOCAL void CanNm_NmTimeoutHandle(CanNm_ChannelIndexType chIndex);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
+
+#if CANNM_PASSIVE_MODE_ENABLED == STD_OFF
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
+CANNM_LOCAL void CanNm_MsgCycleTimeHandle(CanNm_ChannelIndexType chIndex);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
+#endif
+
+#if CANNM_GLOBAL_PN_SUPPORT == STD_ON
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
+CANNM_LOCAL void CanNm_MsgTxTimeoutHandle(CanNm_ChannelIndexType chIndex);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
+#endif
+
+#if CANNM_REMOTE_SLEEP_IND_ENABLED == STD_ON
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
+CANNM_LOCAL void CanNm_RemoteSleepCancellHandle(CanNm_ChannelIndexType chIndex);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
+
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
+CANNM_LOCAL void CanNm_RemoteSleepTimeoutHandle(CanNm_ChannelIndexType chIndex);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
+#endif
+
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
+CANNM_LOCAL void CanNm_TimerManagement(CanNm_ChannelIndexType chIndex);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
+
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  *  Function to handle state machine switching.
  *  */
-CANNM_LOCAL void CanNm_StateChange(CanNm_ChannelIndexType chIndex, Nm_StateType nmOldState, Nm_StateType nmNewState);
+CANNM_LOCAL void CanNm_StateChange(CanNm_ChannelIndexType chIndex, Nm_StateType nmNewState);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
+
 #if CANNM_PASSIVE_MODE_ENABLED == STD_OFF
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 CANNM_LOCAL void CanNm_StartTransmissionNmPdu(CanNm_ChannelIndexType chIndex, boolean isNetWorkRequest);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 #endif
-CANNM_LOCAL void
-    CanNm_EnterRepeatMessageState(CanNm_ChannelIndexType chIndex, Nm_StateType nmOldState, boolean isNetWorkRequest);
+
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
+CANNM_LOCAL void CanNm_EnterRepeatMessageState(CanNm_ChannelIndexType chIndex, boolean isNetWorkRequest);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
+
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
+CANNM_LOCAL void CanNm_EnterNormalOperationState(CanNm_ChannelIndexType chIndex);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
+
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
+CANNM_LOCAL void CanNm_EnterReadySleepState(CanNm_ChannelIndexType chIndex);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
+
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 CANNM_LOCAL void CanNm_EnterPrepareBusSleepModeHandle(CanNm_ChannelIndexType chIndex);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 
 #if CANNM_NODE_DETECTION_ENABLED == STD_ON
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 CANNM_LOCAL boolean CanNm_NodeDetectStateHandle(CanNm_ChannelIndexType chIndex);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 #endif
-CANNM_LOCAL boolean CanNm_NetworkStateHandle(CanNm_ChannelIndexType chIndex);
-CANNM_LOCAL void    CanNm_RepeatMessageStateHandle(CanNm_ChannelIndexType chIndex);
-CANNM_LOCAL void    CanNm_NormalOperationStateHandle(CanNm_ChannelIndexType chIndex);
-CANNM_LOCAL void    CanNm_ReadySleepStateHandle(CanNm_ChannelIndexType chIndex);
-CANNM_LOCAL boolean CanNm_WakeUpSignalHandle(CanNm_ChannelIndexType chIndex);
-CANNM_LOCAL void    CanNm_PrepareBusSleepStateHandle(CanNm_ChannelIndexType chIndex);
-CANNM_LOCAL void    CanNm_BusSleepStateHandle(CanNm_ChannelIndexType chIndex);
-CANNM_LOCAL void    CanNm_StateManagement(CanNm_ChannelIndexType chIndex);
 
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
+CANNM_LOCAL void CanNm_RepeatMessageStateHandle(CanNm_ChannelIndexType chIndex, Nm_StateType* nextStatePtr);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
+
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
+CANNM_LOCAL void CanNm_NormalOperationStateHandle(CanNm_ChannelIndexType chIndex, Nm_StateType* nextStatePtr);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
+
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
+CANNM_LOCAL void CanNm_ReadySleepStateHandle(CanNm_ChannelIndexType chIndex, Nm_StateType* nextStatePtr);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
+
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
+CANNM_LOCAL void CanNm_NetworkModeHandle(CanNm_ChannelIndexType chIndex);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
+
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
+CANNM_LOCAL boolean CanNm_WakeUpSignalHandle(CanNm_ChannelIndexType chIndex);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
+
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
+CANNM_LOCAL void CanNm_PrepareBusSleepStateHandle(CanNm_ChannelIndexType chIndex);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
+
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
+CANNM_LOCAL void CanNm_BusSleepStateHandle(CanNm_ChannelIndexType chIndex);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
+
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
+CANNM_LOCAL void CanNm_StateManagement(CanNm_ChannelIndexType chIndex);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
+
+#if CANNM_COM_USERDATA_SUPPORT == STD_ON
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  *  Function for sending periodic packets.
  *  */
-#if CANNM_COM_USERDATA_SUPPORT == STD_ON
 CANNM_LOCAL void CanNm_WriteUserDataBytes(CanNm_ChannelIndexType chIndex);
-#endif
-#if CANNM_PASSIVE_MODE_ENABLED == STD_OFF
-CANNM_LOCAL Std_ReturnType CanNm_SendNmPdu(CanNm_ChannelIndexType chIndex);
-CANNM_LOCAL void           CanNm_SendMsgMainHandle(CanNm_ChannelIndexType chIndex);
-#endif
-
-CANNM_LOCAL uint16 CanNm_GetPartitionIndex(void);
-#if CANNM_DEV_ERROR_DETECT == STD_ON
-CANNM_LOCAL boolean CanNm_ValidatePartitionContext(uint8 apiId);
-CANNM_LOCAL boolean CanNm_ValidateInitStatus(uint8 apiId);
-CANNM_LOCAL boolean CanNm_ValidateNetworkHandle(uint8 apiId, NetworkHandleType nmChannelHandle);
-CANNM_LOCAL boolean CanNm_ValidatePointer(uint8 apiId, const void* pointer);
-CANNM_LOCAL boolean CanNm_ValidateTxPduId(uint8 apiId, PduIdType txPduId);
-#if CANNM_TRIGGER_TRANSMIT_API == STD_ON
-CANNM_LOCAL boolean CanNm_ValidateTxPdu(uint8 apiId, PduIdType txPduId, const PduInfoType* pduInfoPtr);
-#endif
-CANNM_LOCAL boolean CanNm_ValidateRxPdu(uint8 apiId, PduIdType rxPduId, const PduInfoType* pduInfoPtr);
-CANNM_LOCAL boolean CanNm_ValidateUserDataPdu(uint8 apiId, PduIdType rxPduId, const PduInfoType* pduInfoPtr);
-CANNM_LOCAL boolean CanNm_ValidateDeInit(void);
-#endif
-
 #define CANNM_STOP_SEC_CODE
 #include "CanNm_MemMap.h"
+#endif
+
+#if CANNM_PASSIVE_MODE_ENABLED == STD_OFF
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
+CANNM_LOCAL Std_ReturnType CanNm_SendNmPdu(CanNm_ChannelIndexType chIndex);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
+
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
+CANNM_LOCAL void CanNm_SendMsgMainHandle(CanNm_ChannelIndexType chIndex);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
+#endif
+
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
+CANNM_LOCAL uint16 CanNm_GetPartitionIndex(void);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
+
+#if CANNM_DEV_ERROR_DETECT == STD_ON
+
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
+CANNM_LOCAL boolean CanNm_ValidatePartitionContext(uint8 apiId);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
+
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
+CANNM_LOCAL boolean CanNm_ValidateInitStatus(uint8 apiId);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
+
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
+CANNM_LOCAL boolean CanNm_ValidateNetworkHandle(uint8 apiId, NetworkHandleType nmChannelHandle);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
+
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
+CANNM_LOCAL boolean CanNm_ValidatePointer(uint8 apiId, const void* pointer);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
+
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
+CANNM_LOCAL boolean CanNm_ValidateTxPduId(uint8 apiId, PduIdType txPduId);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
+
+#if CANNM_TRIGGER_TRANSMIT_API == STD_ON
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
+CANNM_LOCAL boolean CanNm_ValidateTxPdu(uint8 apiId, PduIdType txPduId, const PduInfoType* pduInfoPtr);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
+#endif
+
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
+CANNM_LOCAL boolean CanNm_ValidateRxPdu(uint8 apiId, PduIdType rxPduId, const PduInfoType* pduInfoPtr);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
+
+#if CANNM_COM_USERDATA_SUPPORT == STD_ON
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
+CANNM_LOCAL boolean CanNm_ValidateUserDataPdu(uint8 apiId, PduIdType txPduId, const PduInfoType* pduInfoPtr);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
+#endif
+
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
+CANNM_LOCAL boolean CanNm_ValidateDeInit(void);
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
+#endif
 
 /* ============================================ internal data definitions =========================================== */
 #define CANNM_START_SEC_VAR_CLEARED_8
@@ -182,15 +389,15 @@ CANNM_LOCAL const CanNm_ChannelPBConfigType* CanNm_ChlPBCfgPtr; /**< @range NA *
 /* ============================================ external data definitions =========================================== */
 
 /* ========================================== external function definitions ========================================= */
-
+/* PRQA S 1503 ++ */ /* VL_QAC_NoUsedApi */
 #define CANNM_START_SEC_CODE
 #include "CanNm_MemMap.h"
 /**
  * Initialize the CanNm module.
  */
-/* PRQA S 1503 ++ */ /* VL_QAC_NoUsedApi */
 void CanNm_Init(const CanNm_ConfigType* CanNmConfigPtr)
 {
+    CanNm_ArtiApiStart(2, CANNM_SERVICE_ID_INIT, CanNmConfigPtr);
 #if CANNM_DEV_ERROR_DETECT == STD_ON
     if (CanNm_ValidatePartitionContext(CANNM_SERVICE_ID_INIT) && CanNm_ValidateInitStatus(CANNM_SERVICE_ID_INIT)
         && CanNm_ValidatePointer(CANNM_SERVICE_ID_INIT, CanNmConfigPtr))
@@ -302,13 +509,19 @@ void CanNm_Init(const CanNm_ConfigType* CanNmConfigPtr)
         }
         CanNm_InitStatus[CanNm_GetPartitionIndex()] = CANNM_INIT;
     }
+    CanNm_ArtiApiReturn(1, CANNM_SERVICE_ID_INIT);
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * De-initializes the CanNm module.
  */
 void CanNm_DeInit(void)
 {
+    CanNm_ArtiApiStart(1, CANNM_SERVICE_ID_DEINIT);
 #if CANNM_DEV_ERROR_DETECT == STD_ON
     if (CanNm_ValidatePartitionContext(CANNM_SERVICE_ID_DEINIT) && CanNm_ValidateInitStatus(CANNM_SERVICE_ID_DEINIT)
         && CanNm_ValidateDeInit())
@@ -316,14 +529,20 @@ void CanNm_DeInit(void)
     {
         CanNm_InitStatus[CanNm_GetPartitionIndex()] = CANNM_UNINIT;
     }
+    CanNm_ArtiApiReturn(1, CANNM_SERVICE_ID_DEINIT);
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 /* PRQA S 1503 -- */
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * Passive startup of the AUTOSAR CanNm.
  */
 Std_ReturnType CanNm_PassiveStartUp(NetworkHandleType nmChannelHandle)
 {
     Std_ReturnType ret = E_NOT_OK;
+    CanNm_ArtiApiStart(2, CANNM_SERVICE_ID_PASSIVESTARUP, nmChannelHandle);
 #if CANNM_DEV_ERROR_DETECT == STD_ON
     if (CanNm_ValidatePartitionContext(CANNM_SERVICE_ID_PASSIVESTARUP)
         && CanNm_ValidateInitStatus(CANNM_SERVICE_ID_PASSIVESTARUP)
@@ -342,16 +561,22 @@ Std_ReturnType CanNm_PassiveStartUp(NetworkHandleType nmChannelHandle)
         }
         SchM_Exit_CanNm_Context();
     }
+    CanNm_ArtiApiReturn(2, CANNM_SERVICE_ID_PASSIVESTARUP, ret);
     return ret;
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 
 #if CANNM_PASSIVE_MODE_ENABLED == STD_OFF
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * Request the network, since ECU needs to communicate on the bus.
  */
 Std_ReturnType CanNm_NetworkRequest(NetworkHandleType nmChannelHandle)
 {
     Std_ReturnType ret = E_NOT_OK;
+    CanNm_ArtiApiStart(2, CANNM_SERVICE_ID_NETWORKREQUEST, nmChannelHandle);
 #if CANNM_DEV_ERROR_DETECT == STD_ON
     if (CanNm_ValidatePartitionContext(CANNM_SERVICE_ID_NETWORKREQUEST)
         && CanNm_ValidateInitStatus(CANNM_SERVICE_ID_NETWORKREQUEST)
@@ -372,17 +597,23 @@ Std_ReturnType CanNm_NetworkRequest(NetworkHandleType nmChannelHandle)
         ret = E_OK;
     }
 
+    CanNm_ArtiApiReturn(2, CANNM_SERVICE_ID_NETWORKREQUEST, ret);
     return ret;
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 #endif
 
 #if CANNM_PASSIVE_MODE_ENABLED == STD_OFF
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * Release the network, since ECU doesn't have to communicate on the bus.
  */
 Std_ReturnType CanNm_NetworkRelease(NetworkHandleType nmChannelHandle)
 {
     Std_ReturnType ret = E_NOT_OK;
+    CanNm_ArtiApiStart(2, CANNM_SERVICE_ID_NETWORKRELEASE, nmChannelHandle);
 
 #if CANNM_DEV_ERROR_DETECT == STD_ON
     if (CanNm_ValidatePartitionContext(CANNM_SERVICE_ID_NETWORKRELEASE)
@@ -400,17 +631,23 @@ Std_ReturnType CanNm_NetworkRelease(NetworkHandleType nmChannelHandle)
         ret = E_OK;
     }
 
+    CanNm_ArtiApiReturn(2, CANNM_SERVICE_ID_NETWORKRELEASE, ret);
     return ret;
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 #endif
 
 #if CANNM_COM_CONTROL_ENABLED == STD_ON
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * Disable the NM PDU transmission ability due to a ISO14229 Communication Control (28hex) service.
  */
 Std_ReturnType CanNm_DisableCommunication(NetworkHandleType nmChannelHandle)
 {
     Std_ReturnType ret = E_NOT_OK;
+    CanNm_ArtiApiStart(2, CANNM_SERVICE_ID_DISABLECOMMUNICATION, nmChannelHandle);
 /** SWS_UdpNm_00307 */
 #if CANNM_PASSIVE_MODE_ENABLED == STD_OFF
 #if CANNM_DEV_ERROR_DETECT == STD_ON
@@ -447,17 +684,23 @@ Std_ReturnType CanNm_DisableCommunication(NetworkHandleType nmChannelHandle)
     CANNM_UNUSED(nmChannelHandle);
 #endif
 
+    CanNm_ArtiApiReturn(2, CANNM_SERVICE_ID_DISABLECOMMUNICATION, ret);
     return ret;
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 #endif
 
 #if CANNM_COM_CONTROL_ENABLED == STD_ON
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * Enable the NM PDU transmission ability due to a ISO14229 Communication Control (28hex) service.
  */
 Std_ReturnType CanNm_EnableCommunication(NetworkHandleType nmChannelHandle)
 {
     Std_ReturnType ret = E_NOT_OK;
+    CanNm_ArtiApiStart(2, CANNM_SERVICE_ID_ENABLECOMMUNICATION, nmChannelHandle);
 /** SWS_UdpNm_00306 */
 #if CANNM_PASSIVE_MODE_ENABLED == STD_OFF
 #if CANNM_DEV_ERROR_DETECT == STD_ON
@@ -496,18 +739,24 @@ Std_ReturnType CanNm_EnableCommunication(NetworkHandleType nmChannelHandle)
     CANNM_UNUSED(nmChannelHandle);
 #endif
 
+    CanNm_ArtiApiReturn(2, CANNM_SERVICE_ID_ENABLECOMMUNICATION, ret);
     return ret;
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 #endif
 
 #if (CANNM_USER_DATA_ENABLED == STD_ON) && (CANNM_COM_USERDATA_SUPPORT == STD_OFF) \
     && (CANNM_PASSIVE_MODE_ENABLED == STD_OFF)
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * Set user data for NM PDUs transmitted next on the bus.
  */
 Std_ReturnType CanNm_SetUserData(NetworkHandleType nmChannelHandle, const uint8* nmUserDataPtr)
 {
     Std_ReturnType ret = E_NOT_OK;
+    CanNm_ArtiApiStart(3, CANNM_SERVICE_ID_SETUSERDATA, nmChannelHandle, nmUserDataPtr);
 #if CANNM_DEV_ERROR_DETECT == STD_ON
     if (CanNm_ValidatePartitionContext(CANNM_SERVICE_ID_SETUSERDATA)
         && CanNm_ValidateInitStatus(CANNM_SERVICE_ID_SETUSERDATA)
@@ -530,17 +779,23 @@ Std_ReturnType CanNm_SetUserData(NetworkHandleType nmChannelHandle, const uint8*
         ret = E_OK;
     }
 
+    CanNm_ArtiApiReturn(2, CANNM_SERVICE_ID_SETUSERDATA, ret);
     return ret;
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 #endif
 
 #if CANNM_USER_DATA_ENABLED == STD_ON
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * Get user data out of the most recently received NM PDU.
  */
 Std_ReturnType CanNm_GetUserData(NetworkHandleType nmChannelHandle, uint8* nmUserDataPtr)
 {
     Std_ReturnType ret = E_NOT_OK;
+    CanNm_ArtiApiStart(3, CANNM_SERVICE_ID_GETUSERDATA, nmChannelHandle, nmUserDataPtr);
 #if CANNM_DEV_ERROR_DETECT == STD_ON
     if (CanNm_ValidatePartitionContext(CANNM_SERVICE_ID_GETUSERDATA)
         && CanNm_ValidateInitStatus(CANNM_SERVICE_ID_GETUSERDATA)
@@ -563,17 +818,23 @@ Std_ReturnType CanNm_GetUserData(NetworkHandleType nmChannelHandle, uint8* nmUse
 
         ret = E_OK;
     }
+    CanNm_ArtiApiReturn(2, CANNM_SERVICE_ID_GETUSERDATA, ret);
     return ret;
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 #endif
 
 #if CANNM_COM_USERDATA_SUPPORT == STD_ON
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * Requests transmission of a PDU.
  */
 Std_ReturnType CanNm_Transmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr)
 {
     Std_ReturnType ret = E_NOT_OK;
+    CanNm_ArtiApiStart(3, CANNM_SERVICE_ID_TRANSMIT, TxPduId, PduInfoPtr);
 #if CANNM_DEV_ERROR_DETECT == STD_ON
     if (CanNm_ValidatePartitionContext(CANNM_SERVICE_ID_TRANSMIT) && CanNm_ValidateInitStatus(CANNM_SERVICE_ID_TRANSMIT)
         && CanNm_ValidateUserDataPdu(CANNM_SERVICE_ID_TRANSMIT, TxPduId, PduInfoPtr))
@@ -592,24 +853,49 @@ Std_ReturnType CanNm_Transmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr)
                      || (chRTPtr->CanNmState == NM_STATE_REPEAT_MESSAGE))
                     && (PduInfoPtr->SduLength >= chPBCfgPtr->UserDataLength))
                 {
-                    chRTPtr->SendNmMsgFlg = TRUE;
-                    ret                   = E_OK;
+                    SchM_Enter_CanNm_Context();
+                    (void)IStdLib_MemCpy(
+                        &(chRTPtr->TxPduData[chPBCfgPtr->UserDataOffset]),
+                        PduInfoPtr->SduDataPtr,
+                        PduInfoPtr->SduLength);
+                    PduInfoType pduInfo      = {0};
+                    PduIdType   canIfTxSduId = chPBCfgPtr->TxPdu->LowerLayerPduId;
+                    pduInfo.SduDataPtr       = chRTPtr->TxPduData;
+                    pduInfo.SduLength        = chPBCfgPtr->ChannelPduLength;
+
+                    /** SWS_CanNm_00512 */
+                    ret = CanIf_Transmit(canIfTxSduId, &pduInfo);
+                    if (ret == E_OK)
+                    {
+#if (CANNM_IMMEDIATE_TXCONF_ENABLED == STD_OFF) && (CANNM_GLOBAL_PN_SUPPORT == STD_ON)
+                        /** SWS_CanNm_00064 */
+                        chRTPtr->TickTimers[CANNM_TXMSG_TIMEOUT_TIMER]  = chPBCfgPtr->MsgTimeoutTime;
+                        chRTPtr->TimeoutFlag[CANNM_TXMSG_TIMEOUT_TIMER] = FALSE;
+#endif
+                    }
+                    SchM_Exit_CanNm_Context();
                 }
                 break;
             }
         }
     }
     CANNM_UNUSED(PduInfoPtr);
+    CanNm_ArtiApiReturn(2, CANNM_SERVICE_ID_TRANSMIT, ret);
     return ret;
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 #endif
 
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * Get node identifier out of the most recently received NM PDU.
  */
 Std_ReturnType CanNm_GetNodeIdentifier(NetworkHandleType nmChannelHandle, uint8* nmNodeIdPtr)
 {
     Std_ReturnType ret = E_NOT_OK;
+    CanNm_ArtiApiStart(3, CANNM_SERVICE_ID_GETNODEIDENTIFIER, nmChannelHandle, nmNodeIdPtr);
 #if CANNM_NODE_ID_ENABLED == STD_ON
 #if CANNM_DEV_ERROR_DETECT == STD_ON
     if (CanNm_ValidatePartitionContext(CANNM_SERVICE_ID_GETNODEIDENTIFIER)
@@ -637,15 +923,21 @@ Std_ReturnType CanNm_GetNodeIdentifier(NetworkHandleType nmChannelHandle, uint8*
     CANNM_UNUSED(nmChannelHandle);
     CANNM_UNUSED(nmNodeIdPtr);
 #endif
+    CanNm_ArtiApiReturn(2, CANNM_SERVICE_ID_GETNODEIDENTIFIER, ret);
     return ret;
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * Get node identifier configured for the local node.
  */
 Std_ReturnType CanNm_GetLocalNodeIdentifier(NetworkHandleType nmChannelHandle, uint8* nmNodeIdPtr)
 {
     Std_ReturnType ret = E_NOT_OK;
+    CanNm_ArtiApiStart(3, CANNM_SERVICE_ID_GETLOCALNODEIDENTIFIER, nmChannelHandle, nmNodeIdPtr);
 #if CANNM_NODE_ID_ENABLED == STD_ON
 #if CANNM_DEV_ERROR_DETECT == STD_ON
     if (CanNm_ValidatePartitionContext(CANNM_SERVICE_ID_GETLOCALNODEIDENTIFIER)
@@ -667,15 +959,21 @@ Std_ReturnType CanNm_GetLocalNodeIdentifier(NetworkHandleType nmChannelHandle, u
     CANNM_UNUSED(nmChannelHandle);
     CANNM_UNUSED(nmNodeIdPtr);
 #endif
+    CanNm_ArtiApiReturn(2, CANNM_SERVICE_ID_GETLOCALNODEIDENTIFIER, ret);
     return ret;
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * Set Repeat Message Request Bit for NM PDUs transmitted next on the bus.
  */
 Std_ReturnType CanNm_RepeatMessageRequest(NetworkHandleType nmChannelHandle)
 {
     Std_ReturnType ret = E_NOT_OK;
+    CanNm_ArtiApiStart(2, CANNM_SERVICE_ID_REPEATMESSAGEREQUEST, nmChannelHandle);
 #if CANNM_NODE_DETECTION_ENABLED == STD_ON
 #if CANNM_DEV_ERROR_DETECT == STD_ON
     if (CanNm_ValidatePartitionContext(CANNM_SERVICE_ID_REPEATMESSAGEREQUEST)
@@ -703,15 +1001,21 @@ Std_ReturnType CanNm_RepeatMessageRequest(NetworkHandleType nmChannelHandle)
 #else
     CANNM_UNUSED(nmChannelHandle);
 #endif
+    CanNm_ArtiApiReturn(2, CANNM_SERVICE_ID_REPEATMESSAGEREQUEST, ret);
     return ret;
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * Get the whole PDU data out of the most recently received NM PDU.
  */
 Std_ReturnType CanNm_GetPduData(NetworkHandleType nmChannelHandle, uint8* nmPduDataPtr)
 {
     Std_ReturnType ret = E_NOT_OK;
+    CanNm_ArtiApiStart(3, CANNM_SERVICE_ID_GETPDUDATA, nmChannelHandle, nmPduDataPtr);
 #if (CANNM_USER_DATA_ENABLED == STD_ON) || (CANNM_NODE_ID_ENABLED == STD_ON) || (CANNM_NODE_DETECTION_ENABLED == STD_ON)
 #if CANNM_DEV_ERROR_DETECT == STD_ON
     if (CanNm_ValidatePartitionContext(CANNM_SERVICE_ID_GETPDUDATA)
@@ -749,15 +1053,21 @@ Std_ReturnType CanNm_GetPduData(NetworkHandleType nmChannelHandle, uint8* nmPduD
     CANNM_UNUSED(nmChannelHandle);
     CANNM_UNUSED(nmPduDataPtr);
 #endif
+    CanNm_ArtiApiReturn(2, CANNM_SERVICE_ID_GETPDUDATA, ret);
     return ret;
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * Returns the state and the mode of the network management.
  */
 Std_ReturnType CanNm_GetState(NetworkHandleType nmChannelHandle, Nm_StateType* nmStatePtr, Nm_ModeType* nmModePtr)
 {
     Std_ReturnType ret = E_NOT_OK;
+    CanNm_ArtiApiStart(4, CANNM_SERVICE_ID_GETSTATE, nmChannelHandle, nmStatePtr, nmModePtr);
 #if CANNM_DEV_ERROR_DETECT == STD_ON
     if (CanNm_ValidatePartitionContext(CANNM_SERVICE_ID_GETSTATE) && CanNm_ValidateInitStatus(CANNM_SERVICE_ID_GETSTATE)
         && CanNm_ValidateNetworkHandle(CANNM_SERVICE_ID_GETSTATE, nmChannelHandle)
@@ -775,15 +1085,21 @@ Std_ReturnType CanNm_GetState(NetworkHandleType nmChannelHandle, Nm_StateType* n
         ret = E_OK;
     }
 
+    CanNm_ArtiApiReturn(2, CANNM_SERVICE_ID_GETSTATE, ret);
     return ret;
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 
 #if CANNM_VERSION_INFO_API == STD_ON
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * This service returns the version information of this module.
  */
 void CanNm_GetVersionInfo(Std_VersionInfoType* versioninfo)
 {
+    CanNm_ArtiApiStart(2, CANNM_SERVICE_ID_GETVERSIONINFO, versioninfo);
 #if CANNM_DEV_ERROR_DETECT == STD_ON
     if (CanNm_ValidatePointer(CANNM_SERVICE_ID_GETVERSIONINFO, versioninfo))
 #endif
@@ -794,16 +1110,22 @@ void CanNm_GetVersionInfo(Std_VersionInfoType* versioninfo)
         versioninfo->sw_minor_version = CANNM_SW_MINOR_VERSION;
         versioninfo->sw_patch_version = CANNM_SW_PATCH_VERSION;
     }
+    CanNm_ArtiApiReturn(1, CANNM_SERVICE_ID_GETVERSIONINFO);
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 #endif
 
 #if (CANNM_BUS_SYNCHRONIZATION_ENABLED == STD_ON) && (CANNM_PASSIVE_MODE_ENABLED == STD_OFF)
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * Request bus synchronization.
  */
 Std_ReturnType CanNm_RequestBusSynchronization(NetworkHandleType nmChannelHandle)
 {
     Std_ReturnType ret = E_NOT_OK;
+    CanNm_ArtiApiStart(2, CANNM_SERVICE_ID_REQUESTBUSSYNCHRONIZATION, nmChannelHandle);
 #if CANNM_DEV_ERROR_DETECT == STD_ON
     if (CanNm_ValidatePartitionContext(CANNM_SERVICE_ID_REQUESTBUSSYNCHRONIZATION)
         && CanNm_ValidateInitStatus(CANNM_SERVICE_ID_REQUESTBUSSYNCHRONIZATION)
@@ -828,17 +1150,23 @@ Std_ReturnType CanNm_RequestBusSynchronization(NetworkHandleType nmChannelHandle
         SchM_Exit_CanNm_Context();
     }
 
+    CanNm_ArtiApiReturn(2, CANNM_SERVICE_ID_REQUESTBUSSYNCHRONIZATION, ret);
     return ret;
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 #endif
 
 #if CANNM_REMOTE_SLEEP_IND_ENABLED == STD_ON
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * Check if remote sleep indication takes place or not.
  */
 Std_ReturnType CanNm_CheckRemoteSleepIndication(NetworkHandleType nmChannelHandle, boolean* nmRemoteSleepIndPtr)
 {
     Std_ReturnType ret = E_NOT_OK;
+    CanNm_ArtiApiStart(3, CANNM_SERVICE_ID_CHECKREMOTESLEEPINDICATION, nmChannelHandle, nmRemoteSleepIndPtr);
 #if CANNM_DEV_ERROR_DETECT == STD_ON
     if (CanNm_ValidatePartitionContext(CANNM_SERVICE_ID_CHECKREMOTESLEEPINDICATION)
         && CanNm_ValidateInitStatus(CANNM_SERVICE_ID_CHECKREMOTESLEEPINDICATION)
@@ -859,17 +1187,23 @@ Std_ReturnType CanNm_CheckRemoteSleepIndication(NetworkHandleType nmChannelHandl
         SchM_Exit_CanNm_Context();
     }
 
+    CanNm_ArtiApiReturn(2, CANNM_SERVICE_ID_CHECKREMOTESLEEPINDICATION, ret);
     return ret;
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 #endif
 
 #if CANNM_COORDINATOR_SYNC_SUPPORT == STD_ON
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * Set the NM Coordinator Sleep Ready bit in the Control Bit Vector.
  */
 Std_ReturnType CanNm_SetSleepReadyBit(NetworkHandleType nmChannelHandle, boolean nmSleepReadyBit)
 {
     Std_ReturnType ret = E_NOT_OK;
+    CanNm_ArtiApiStart(3, CANNM_SERVICE_ID_SETSLEEPREADYBIT, nmChannelHandle, nmSleepReadyBit);
 #if CANNM_DEV_ERROR_DETECT == STD_ON
     if (CanNm_ValidatePartitionContext(CANNM_SERVICE_ID_SETSLEEPREADYBIT)
         && CanNm_ValidateInitStatus(CANNM_SERVICE_ID_SETSLEEPREADYBIT)
@@ -890,16 +1224,22 @@ Std_ReturnType CanNm_SetSleepReadyBit(NetworkHandleType nmChannelHandle, boolean
         ret                                                     = E_OK;
     }
 
+    CanNm_ArtiApiReturn(2, CANNM_SERVICE_ID_SETSLEEPREADYBIT, ret);
     return ret;
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 #endif
 
 #if (CANNM_IMMEDIATE_TXCONF_ENABLED == STD_OFF) && (CANNM_PASSIVE_MODE_ENABLED == STD_OFF)
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * The lower layer communication interface module confirms the transmission of a PDU, or the failure to transmit a PDU.
  */
 void CanNm_TxConfirmation(PduIdType TxPduId, Std_ReturnType result)
 {
+    CanNm_ArtiApiStart(3, CANNM_SERVICE_ID_TXCONFIRMATION, TxPduId, result);
 #if CANNM_DEV_ERROR_DETECT == STD_ON
     if (CanNm_ValidatePartitionContext(CANNM_SERVICE_ID_TXCONFIRMATION)
         && CanNm_ValidateInitStatus(CANNM_SERVICE_ID_TXCONFIRMATION)
@@ -916,16 +1256,22 @@ void CanNm_TxConfirmation(PduIdType TxPduId, Std_ReturnType result)
             }
         }
     }
+    CanNm_ArtiApiReturn(1, CANNM_SERVICE_ID_TXCONFIRMATION);
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 #endif
 
+/* PRQA S 2889 ++ */ /* VL_QAC_MultiReturn */
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * Indication of a received PDU from a lower layer communication interface module.
  */
-/* PRQA S 2889 ++ */ /* VL_QAC_MultiReturn */
 void CanNm_RxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr)
 /* PRQA S 2889 -- */
 {
+    CanNm_ArtiApiStart(3, CANNM_SERVICE_ID_RXINDICATION, RxPduId, PduInfoPtr);
 #if CANNM_DEV_ERROR_DETECT == STD_ON
     if (CanNm_ValidatePartitionContext(CANNM_SERVICE_ID_RXINDICATION)
         && CanNm_ValidateInitStatus(CANNM_SERVICE_ID_RXINDICATION)
@@ -964,19 +1310,26 @@ void CanNm_RxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr)
                         Nm_PduRxIndication(CanNm_ChannelLCfgData[chIndex].ComMNetworkHandleRef);
 #endif
                     }
+                    CanNm_ArtiApiReturn(1, CANNM_SERVICE_ID_RXINDICATION);
                     return;
                 }
             }
         }
     }
+    CanNm_ArtiApiReturn(1, CANNM_SERVICE_ID_RXINDICATION);
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 
 #if CANNM_GLOBAL_PN_SUPPORT == STD_ON
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * Enables the PN filter functionality on the indicated NM channel.
  */
 void CanNm_ConfirmPnAvailability(NetworkHandleType nmChannelHandle)
 {
+    CanNm_ArtiApiStart(2, CANNM_SERVICE_ID_CONFIRMPNAVAILABILITY, nmChannelHandle);
 #if CANNM_DEV_ERROR_DETECT == STD_ON
     if (CanNm_ValidatePartitionContext(CANNM_SERVICE_ID_CONFIRMPNAVAILABILITY)
         && CanNm_ValidateInitStatus(CANNM_SERVICE_ID_CONFIRMPNAVAILABILITY)
@@ -992,21 +1345,27 @@ void CanNm_ConfirmPnAvailability(NetworkHandleType nmChannelHandle)
             chRTPtr->PnFilterEnable = TRUE;
         }
     }
+    CanNm_ArtiApiReturn(1, CANNM_SERVICE_ID_CONFIRMPNAVAILABILITY);
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 #endif
 
 #if CANNM_TRIGGER_TRANSMIT_API == STD_ON
+/* PRQA S 1503 ++ */ /* VL_QAC_NoUsedApi */
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * Within this API, the upper layer module (called module) shall check whether the available data
  * fits into the buffer size reported by PduInfoPtr->SduLength. If it fits, it shall copy its data into the
  * buffer provided by PduInfoPtr->SduDataPtr and update the length of the actual copied data in
  * PduInfoPtr->SduLength. If not, it returns E_NOT_OK without changing PduInfoPtr.
  */
-/* PRQA S 1503 ++ */ /* VL_QAC_NoUsedApi */
 Std_ReturnType CanNm_TriggerTransmit(PduIdType TxPduId, PduInfoType* PduInfoPtr)
 /* PRQA S 1503 -- */
 {
     Std_ReturnType ret = E_NOT_OK;
+    CanNm_ArtiApiStart(3, CANNM_SERVICE_ID_TRIGGERTRANSMIT, TxPduId, PduInfoPtr);
 #if CANNM_DEV_ERROR_DETECT == STD_ON
     if (CanNm_ValidatePartitionContext(CANNM_SERVICE_ID_TRIGGERTRANSMIT)
         && CanNm_ValidateInitStatus(CANNM_SERVICE_ID_TRIGGERTRANSMIT)
@@ -1039,28 +1398,39 @@ Std_ReturnType CanNm_TriggerTransmit(PduIdType TxPduId, PduInfoType* PduInfoPtr)
         }
     }
 
+    CanNm_ArtiApiReturn(2, CANNM_SERVICE_ID_TRIGGERTRANSMIT, ret);
     return ret;
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 #endif
 
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * Main function of the CanNm which processes the algorithm describes in that document.
  */
 void CanNm_MainFunction(CanNm_ChannelIndexType chIndex)
 {
+    CanNm_ArtiApiStart(2, CANNM_SERVICE_ID_MAINFUNCTION, chIndex);
     if (CanNm_InitStatus[CanNm_GetPartitionIndex()] == CANNM_INIT)
     {
         CanNm_TimerManagement(chIndex);
-        CanNm_StateManagement(chIndex);
 #if CANNM_PASSIVE_MODE_ENABLED == STD_OFF
         CanNm_MsgCycleTimeHandle(chIndex);
+#endif
+        CanNm_StateManagement(chIndex);
+#if CANNM_PASSIVE_MODE_ENABLED == STD_OFF
         CanNm_SendMsgMainHandle(chIndex);
 #endif
         CanNm_InnerChannelType* chRTPtr              = CanNm_ChannelLCfgData[chIndex].RuntimePrt;
         chRTPtr->RxPduExtFlg                         = FALSE;
         chRTPtr->TimeoutFlag[CANNM_NM_TIMEOUT_TIMER] = FALSE;
     }
+    CanNm_ArtiApiReturn(1, CANNM_SERVICE_ID_MAINFUNCTION);
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 
 /* ========================================== internal function definitions ========================================= */
 /**
@@ -1083,6 +1453,8 @@ CANNM_LOCAL_INLINE boolean CanNm_TestAndClear(boolean* flagPtr)
     return flag;
 }
 
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       Set the CBV bit to 1.
  * @param[in]   chIndex : Index value of the NM-channel.
@@ -1111,7 +1483,11 @@ CANNM_LOCAL void CanNm_SetTxPduCbvBit(CanNm_ChannelIndexType chIndex, uint8 mask
         SchM_Exit_CanNm_Context();
     }
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       Check the index number of the channel identifier in the CanNm.
  * @param[in]   nmChannelHandle : Identification of the NM-channel.
@@ -1132,8 +1508,12 @@ CANNM_LOCAL CanNm_ChannelIndexType CanNm_FindChannelIndex(NetworkHandleType nmCh
     }
     return index;
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 
 #if CANNM_GLOBAL_PN_SUPPORT == STD_ON
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       Determine whether have relevant PN information to this channel according CBV data and channel config
  * data.
@@ -1184,9 +1564,13 @@ CANNM_LOCAL boolean CanNm_RxPnFilter(CanNm_ChannelIndexType chIndex, const uint8
     }
     return ret;
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 #endif
 
 #if CANNM_PASSIVE_MODE_ENABLED == STD_OFF
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       Process the NM-Pdu sending result
  * @param[in]   chIndex   : Index value of the NM-channel.
@@ -1229,9 +1613,13 @@ CANNM_LOCAL void CanNm_InnerTxConfHandle(CanNm_ChannelIndexType chIndex, Std_Ret
     }
 #endif
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 #endif
 
 #if CANNM_NODE_DETECTION_ENABLED == STD_ON
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       Detects if a node detection request has been received, and if so, processes the request.
  * @param[in]   chIndex    : Index value of the NM-channel.
@@ -1257,10 +1645,14 @@ CANNM_LOCAL void CanNm_RxNodeDetectHandle(CanNm_ChannelIndexType chIndex, const 
 #endif
     }
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 #endif
 
 #if CANNM_CAR_WAKEUP_RX_ENABLED == STD_ON
 #if CANNM_CAR_WAKEUP_FILTER_ENABLED == STD_ON
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       Handle of Car Wakeup filter.
  * @param[in]   chIndex    : Index value of the NM-channel.
@@ -1282,8 +1674,12 @@ CANNM_LOCAL boolean CanNm_RxCarWakeUpFilter(CanNm_ChannelIndexType chIndex, cons
     }
     return filterRet;
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 #endif
 
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       Handle of Car Wakeup function.
  * @param[in]   chIndex    : Index value of the NM-channel.
@@ -1310,9 +1706,13 @@ CANNM_LOCAL void CanNm_RxCarWakeUpHandle(CanNm_ChannelIndexType chIndex, const u
         }
     }
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 #endif
 
 #if CANNM_COORDINATOR_SYNC_SUPPORT == STD_ON
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       NM Coordinator synchronization support handle.
  * @param[in]   chIndex    : Index value of the NM-channel.
@@ -1347,10 +1747,14 @@ CANNM_LOCAL void CanNm_CoordReadyToSleepIndHandle(CanNm_ChannelIndexType chIndex
         }
     }
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 #endif
 
 #if (CANNM_REMOTE_SLEEP_IND_ENABLED == STD_ON) || (CANNM_NODE_DETECTION_ENABLED == STD_ON) \
     || (CANNM_CAR_WAKEUP_RX_ENABLED == STD_ON) || (CANNM_COORDINATOR_SYNC_SUPPORT == STD_ON)
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       Synchronous process received data in MainFunction.
  * @param[in]   chIndex    : Index value of the NM-channel.
@@ -1393,8 +1797,12 @@ CANNM_LOCAL void CanNm_RxDataMainHandle(CanNm_ChannelIndexType chIndex, const ui
     }
 #endif
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 #endif
 
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       The state maintenance timer timeout handler function.
  * @param[in]   chIndex    : Index value of the NM-channel.
@@ -1406,7 +1814,11 @@ CANNM_LOCAL void CanNm_StateHoldTimeoutHandle(CanNm_ChannelIndexType chIndex)
 {
     CanNm_ChannelLCfgData[chIndex].RuntimePrt->TimeoutFlag[CANNM_STATE_HOLE_TIMER] = TRUE;
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       The NM-Timeout timer timeout handler function.
  * @param[in]   chIndex    : Index value of the NM-channel.
@@ -1432,8 +1844,12 @@ CANNM_LOCAL void CanNm_NmTimeoutHandle(CanNm_ChannelIndexType chIndex)
             CANNM_E_NETWORK_TIMEOUT);
     }
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 
 #if CANNM_PASSIVE_MODE_ENABLED == STD_OFF
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       The periodically send NM-Pdu timer timeout handling function.
  * @param[in]   chIndex    : Index value of the NM-channel.
@@ -1455,9 +1871,13 @@ CANNM_LOCAL void CanNm_MsgCycleTimeHandle(CanNm_ChannelIndexType chIndex)
         }
     }
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 #endif
 
 #if CANNM_GLOBAL_PN_SUPPORT == STD_ON
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       The NM-Pdu transmision timer timeout handler function.
  * @param[in]   chIndex    : Index value of the NM-channel.
@@ -1483,9 +1903,13 @@ CANNM_LOCAL void CanNm_MsgTxTimeoutHandle(CanNm_ChannelIndexType chIndex)
     }
 #endif
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 #endif
 
 #if CANNM_REMOTE_SLEEP_IND_ENABLED == STD_ON
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       Remote node sleep cancell handler function.
  * @param[in]   chIndex    : Index value of the NM-channel.
@@ -1504,7 +1928,11 @@ CANNM_LOCAL void CanNm_RemoteSleepCancellHandle(CanNm_ChannelIndexType chIndex)
         Nm_RemoteSleepCancellation(CanNm_ChannelLCfgData[chIndex].ComMNetworkHandleRef);
     }
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       The remote node sleep status timer timeout handler function.
  * @param[in]   chIndex    : Index value of the NM-channel.
@@ -1520,8 +1948,12 @@ CANNM_LOCAL void CanNm_RemoteSleepTimeoutHandle(CanNm_ChannelIndexType chIndex)
     chRTPtr->TimeoutFlag[CANNM_REMOTE_SLEEP_TIMER] = TRUE;
     Nm_RemoteSleepIndication(CanNm_ChannelLCfgData[chIndex].ComMNetworkHandleRef);
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 #endif
 
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       Process used timers in mainfunction.
  * @param[in]   chIndex    : Index value of the NM-channel.
@@ -1576,7 +2008,11 @@ CANNM_LOCAL void CanNm_TimerManagement(CanNm_ChannelIndexType chIndex)
         }
     }
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       Store new state and notify new state to NM module.
  * @param[in]   chIndex    : Index value of the NM-channel.
@@ -1585,21 +2021,25 @@ CANNM_LOCAL void CanNm_TimerManagement(CanNm_ChannelIndexType chIndex)
  * @synchronous TRUE
  * @trace       CPD-70094
  */
-CANNM_LOCAL void CanNm_StateChange(CanNm_ChannelIndexType chIndex, Nm_StateType nmOldState, Nm_StateType nmNewState)
+CANNM_LOCAL void CanNm_StateChange(CanNm_ChannelIndexType chIndex, Nm_StateType nmNewState)
 {
+    CanNm_InnerChannelType* chRTPtr = CanNm_ChannelLCfgData[chIndex].RuntimePrt;
+
 /** SWS_CanNm_00166 */
 #if CANNM_STATE_CHANGE_IND_ENABLED == STD_ON
-    Nm_StateChangeNotification(CanNm_ChannelLCfgData[chIndex].ComMNetworkHandleRef, nmOldState, nmNewState);
-#else
-    CANNM_UNUSED(nmOldState);
+    Nm_StateChangeNotification(CanNm_ChannelLCfgData[chIndex].ComMNetworkHandleRef, chRTPtr->CanNmState, nmNewState);
 #endif
 
     SchM_Enter_CanNm_Context();
-    CanNm_ChannelLCfgData[chIndex].RuntimePrt->CanNmState = nmNewState;
+    chRTPtr->CanNmState = nmNewState;
     SchM_Exit_CanNm_Context();
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 
 #if CANNM_PASSIVE_MODE_ENABLED == STD_OFF
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       When entering repeate message state, the NM-Pdu sending capability is started
  *              by setting the NM-Pdu sending timer and flag.
@@ -1664,8 +2104,12 @@ CANNM_LOCAL void CanNm_StartTransmissionNmPdu(CanNm_ChannelIndexType chIndex, bo
     }
 #endif
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 #endif
 
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       Process when enter from other state to repeat msg state.
  * @param[in]   chIndex          : Index value of the NM-channel.
@@ -1674,14 +2118,14 @@ CANNM_LOCAL void CanNm_StartTransmissionNmPdu(CanNm_ChannelIndexType chIndex, bo
  * @synchronous TRUE
  * @trace       CPD-70096
  */
-CANNM_LOCAL void
-    CanNm_EnterRepeatMessageState(CanNm_ChannelIndexType chIndex, Nm_StateType nmOldState, boolean isNetWorkRequest)
+CANNM_LOCAL void CanNm_EnterRepeatMessageState(CanNm_ChannelIndexType chIndex, boolean isNetWorkRequest)
 {
     const CanNm_ChannelLConfigType* chCfgPtr = &CanNm_ChannelLCfgData[chIndex];
     CanNm_InnerChannelType*         chRTPtr  = chCfgPtr->RuntimePrt;
 
     /** SWS_CanNm_00102 */
-    chRTPtr->TickTimers[CANNM_STATE_HOLE_TIMER]  = chCfgPtr->RepeatMessageTime;
+    chRTPtr->TickTimers[CANNM_STATE_HOLE_TIMER] =
+        (chCfgPtr->RepeatMessageTime == 0u) ? 1u : chCfgPtr->RepeatMessageTime;
     chRTPtr->TimeoutFlag[CANNM_STATE_HOLE_TIMER] = FALSE;
 
 /** SWS_CanNm_00100 */
@@ -1711,9 +2155,75 @@ CANNM_LOCAL void
         Nm_NetworkMode(chCfgPtr->ComMNetworkHandleRef);
     }
 
-    CanNm_StateChange(chIndex, nmOldState, NM_STATE_REPEAT_MESSAGE);
+    CanNm_StateChange(chIndex, NM_STATE_REPEAT_MESSAGE);
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
+/**
+ * @brief       Process when enter from other state to normal operation state.
+ * @param[in]   chIndex          : Index value of the NM-channel.
+ * @reentrant   TRUE
+ * @synchronous TRUE
+ * @trace
+ */
+CANNM_LOCAL void CanNm_EnterNormalOperationState(CanNm_ChannelIndexType chIndex)
+{
+    const CanNm_ChannelLConfigType* chCfgPtr = &CanNm_ChannelLCfgData[chIndex];
+    CanNm_InnerChannelType*         chRTPtr  = chCfgPtr->RuntimePrt;
+
+#if CANNM_REMOTE_SLEEP_IND_ENABLED == STD_ON
+    chRTPtr->TickTimers[CANNM_REMOTE_SLEEP_TIMER] = chCfgPtr->RemoteSleepIndTime;
+#endif
+
+#if CANNM_PASSIVE_MODE_ENABLED == STD_OFF
+    /** SWS_CanNm_00110
+     *  Ready Sleep State shall enter Normal Operation State
+     *  */
+    if ((chRTPtr->TickTimers[CANNM_TXMSG_CYCLE_TIMER] == 0u)
+#if CANNM_COM_CONTROL_ENABLED == STD_ON
+        && chRTPtr->CanNmTxEnable
+#endif
+    )
+    {
+        /** SWS_CanNm_00116 */
+        chRTPtr->TickTimers[CANNM_TXMSG_CYCLE_TIMER] = chCfgPtr->MsgCycleTime;
+        /** SWS_CanNm_00006 */
+        chRTPtr->SendNmMsgFlg = TRUE;
+    }
+#endif
+    CanNm_StateChange(chIndex, NM_STATE_NORMAL_OPERATION);
+}
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
+
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
+/**
+ * @brief       Process when enter from other state to ready sleep state.
+ * @param[in]   chIndex          : Index value of the NM-channel.
+ * @reentrant   TRUE
+ * @synchronous TRUE
+ * @trace
+ */
+CANNM_LOCAL void CanNm_EnterReadySleepState(CanNm_ChannelIndexType chIndex)
+{
+#if CANNM_PASSIVE_MODE_ENABLED == STD_OFF
+    CanNm_InnerChannelType* chRTPtr              = CanNm_ChannelLCfgData[chIndex].RuntimePrt;
+    chRTPtr->TickTimers[CANNM_TXMSG_CYCLE_TIMER] = 0u;
+#if CANNM_RETRY_FIRST_MESSAGE_REQUEST == STD_ON
+    chRTPtr->RetrySendMsgFlag = FALSE;
+#endif
+#endif
+    CanNm_StateChange(chIndex, NM_STATE_READY_SLEEP);
+}
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
+
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       Processes when enter Bus-Sleep Mode from other state.
  * @param[in]   chIndex          : Index value of the NM-channel.
@@ -1726,7 +2236,7 @@ CANNM_LOCAL void CanNm_EnterPrepareBusSleepModeHandle(CanNm_ChannelIndexType chI
     const CanNm_ChannelLConfigType* chCfgPtr = &CanNm_ChannelLCfgData[chIndex];
     CanNm_InnerChannelType*         chRTPtr  = chCfgPtr->RuntimePrt;
 
-    CanNm_StateChange(chIndex, NM_STATE_READY_SLEEP, NM_STATE_PREPARE_BUS_SLEEP);
+    CanNm_StateChange(chIndex, NM_STATE_PREPARE_BUS_SLEEP);
     chRTPtr->CanNmMode = NM_MODE_PREPARE_BUS_SLEEP;
 
     /** SWS_CanNm_00114 */
@@ -1746,11 +2256,17 @@ CANNM_LOCAL void CanNm_EnterPrepareBusSleepModeHandle(CanNm_ChannelIndexType chI
     }
 #endif
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 
 #if CANNM_NODE_DETECTION_ENABLED == STD_ON
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
- * @brief       According to the current state and active or passive node detect flag to state change.
+ * @brief       According to active or passive node detect flag to enter Repeat Message State.
+ *              Note: This function shall only be called from Normal Operation State or Ready Sleep State.
  * @param[in]   chIndex          : Index value of the NM-channel.
+ * @param[in]   pduDataPtr       : The address of SduDataPtr in received PDU.
  * @reentrant   TRUE
  * @synchronous TRUE
  * @trace       CPD-70098
@@ -1760,14 +2276,9 @@ CANNM_LOCAL boolean CanNm_NodeDetectStateHandle(CanNm_ChannelIndexType chIndex)
     boolean                         stateChanged = FALSE;
     const CanNm_ChannelLConfigType* chCfgPtr     = &CanNm_ChannelLCfgData[chIndex];
 
-    CanNm_InnerChannelType* chRTPtr   = chCfgPtr->RuntimePrt;
-    Nm_StateType            currState = chRTPtr->CanNmState;
-    if (currState == NM_STATE_REPEAT_MESSAGE)
-    {
-        CanNm_SetTxPduCbvBit(chIndex, CANNM_CBV_BIT_RMP_MASK, FALSE);
-    }
-    if ((chRTPtr->RepeatMessageRequest || chRTPtr->RepeatMessageDetected)
-        && ((currState == NM_STATE_NORMAL_OPERATION) || (currState == NM_STATE_READY_SLEEP)))
+    CanNm_InnerChannelType* chRTPtr = chCfgPtr->RuntimePrt;
+
+    if (chCfgPtr->NodeDetectionEnabled && (chRTPtr->RepeatMessageRequest || chRTPtr->RepeatMessageDetected))
     {
         if (chRTPtr->RepeatMessageRequest)
         {
@@ -1781,72 +2292,21 @@ CANNM_LOCAL boolean CanNm_NodeDetectStateHandle(CanNm_ChannelIndexType chIndex)
 
     return stateChanged;
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 #endif
 
-/**
- * @brief       Processing network requests for network mode.
- * @param[in]   chIndex          : Index value of the NM-channel.
- * @reentrant   TRUE
- * @synchronous TRUE
- * @trace       CPD-70099
- */
-CANNM_LOCAL boolean CanNm_NetworkStateHandle(CanNm_ChannelIndexType chIndex)
-{
-    const CanNm_ChannelLConfigType* chCfgPtr     = &CanNm_ChannelLCfgData[chIndex];
-    CanNm_InnerChannelType*         chRTPtr      = chCfgPtr->RuntimePrt;
-    boolean                         stateChanged = FALSE;
-    Nm_StateType                    currState    = chRTPtr->CanNmState;
-
-#if CANNM_PASSIVE_MODE_ENABLED == STD_OFF
-    if (CanNm_TestAndClear(&chRTPtr->NetRequestFlg))
-    {
-#if CANNM_GLOBAL_PN_SUPPORT == STD_ON
-        if (chCfgPtr->PnHandleMultipleNetworkRequests)
-        {
-            CanNm_EnterRepeatMessageState(chIndex, currState, TRUE);
-            stateChanged = TRUE;
-        }
-#endif
-    }
-#endif
-
-#if CANNM_GLOBAL_PN_SUPPORT == STD_ON
-    if (!stateChanged)
-#endif
-    {
-        if ((chRTPtr->NetRequestStatus == CANNM_NETWORK_REQUESTED) && (currState != NM_STATE_NORMAL_OPERATION))
-        {
-            CanNm_StateChange(chIndex, currState, NM_STATE_NORMAL_OPERATION);
-#if CANNM_REMOTE_SLEEP_IND_ENABLED == STD_ON
-            chRTPtr->TickTimers[CANNM_REMOTE_SLEEP_TIMER] = chCfgPtr->RemoteSleepIndTime;
-#endif
-            stateChanged = TRUE;
-        }
-
-        if ((chRTPtr->NetRequestStatus == CANNM_NETWORK_RELEASED) && (currState != NM_STATE_READY_SLEEP))
-        {
-            CanNm_StateChange(chIndex, currState, NM_STATE_READY_SLEEP);
-#if CANNM_PASSIVE_MODE_ENABLED == STD_OFF
-            chRTPtr->TickTimers[CANNM_TXMSG_CYCLE_TIMER] = 0u;
-#if CANNM_RETRY_FIRST_MESSAGE_REQUEST == STD_ON
-            chRTPtr->RetrySendMsgFlag = FALSE;
-#endif
-#endif
-            stateChanged = TRUE;
-        }
-    }
-
-    return stateChanged;
-}
-
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       Handle state transition in Repeat Message State.
  * @param[in]   chIndex          : Index value of the NM-channel.
+ * @param[in]   nextStatePtr     : The pointer to store the next state of this channel.
  * @reentrant   TRUE
  * @synchronous TRUE
  * @trace       CPD-70100
  */
-CANNM_LOCAL void CanNm_RepeatMessageStateHandle(CanNm_ChannelIndexType chIndex)
+CANNM_LOCAL void CanNm_RepeatMessageStateHandle(CanNm_ChannelIndexType chIndex, Nm_StateType* nextStatePtr)
 {
     CanNm_InnerChannelType* chRTPtr = CanNm_ChannelLCfgData[chIndex].RuntimePrt;
 
@@ -1860,56 +2320,47 @@ CANNM_LOCAL void CanNm_RepeatMessageStateHandle(CanNm_ChannelIndexType chIndex)
 #if CANNM_NODE_DETECTION_ENABLED == STD_ON
         if (CanNm_ChannelLCfgData[chIndex].NodeDetectionEnabled)
         {
-            (void)CanNm_NodeDetectStateHandle(chIndex);
-        }
-#endif
-
-        boolean stateChanged = CanNm_NetworkStateHandle(chIndex);
-#if CANNM_NODE_DETECTION_ENABLED == STD_ON
-        if (stateChanged)
-        {
+            CanNm_SetTxPduCbvBit(chIndex, CANNM_CBV_BIT_RMP_MASK, FALSE);
             chRTPtr->RepeatMessageRequest  = FALSE;
             chRTPtr->RepeatMessageDetected = FALSE;
         }
-#else
-        (void)stateChanged;
 #endif
     }
+    else
+    {
+        *nextStatePtr = NM_STATE_REPEAT_MESSAGE;
+    }
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 
+/* PRQA S 3673 ++ */ /* VL_CanNm_3673 */
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       Handle state transition in Normal Operation State.
  * @param[in]   chIndex          : Index value of the NM-channel.
+ * @param[in]   nextStatePtr     : The pointer to store the next state of this channel.
  * @reentrant   TRUE
  * @synchronous TRUE
  * @trace       CPD-70101
  */
-CANNM_LOCAL void CanNm_NormalOperationStateHandle(CanNm_ChannelIndexType chIndex)
+CANNM_LOCAL void CanNm_NormalOperationStateHandle(CanNm_ChannelIndexType chIndex, Nm_StateType* nextStatePtr)
 {
-#if CANNM_PASSIVE_MODE_ENABLED == STD_OFF
-#if (CANNM_NODE_DETECTION_ENABLED == STD_ON) || (CANNM_BUSLOAD_REDUCTION_ENABLED == STD_ON)
-    const CanNm_ChannelLConfigType* chCfgPtr     = &CanNm_ChannelLCfgData[chIndex];
-    CanNm_InnerChannelType*         chRTPtr      = chCfgPtr->RuntimePrt;
-    boolean                         stateChanged = FALSE;
-    stateChanged                                 = CanNm_NetworkStateHandle(chIndex);
-#else
-    (void)CanNm_NetworkStateHandle(chIndex);
-#endif
-
 #if CANNM_NODE_DETECTION_ENABLED == STD_ON
-    if (!stateChanged && chCfgPtr->NodeDetectionEnabled)
+    if (CanNm_NodeDetectStateHandle(chIndex))
     {
-        if (CanNm_NodeDetectStateHandle(chIndex))
-        {
-            stateChanged = TRUE;
-            CanNm_EnterRepeatMessageState(chIndex, chRTPtr->CanNmState, FALSE);
-        }
+        *nextStatePtr = NM_STATE_REPEAT_MESSAGE;
     }
+#else
+    CANNM_UNUSED(nextStatePtr);
 #endif
 
 /** SWS_CanNm_00157 */
 #if CANNM_BUSLOAD_REDUCTION_ENABLED == STD_ON
-    if (!stateChanged && chRTPtr->RxPduExtFlg)
+    const CanNm_ChannelLConfigType* chCfgPtr = &CanNm_ChannelLCfgData[chIndex];
+    CanNm_InnerChannelType*         chRTPtr  = chCfgPtr->RuntimePrt;
+    if (chRTPtr->RxPduExtFlg)
     {
         if (chCfgPtr->BusLoadReductionActive)
         {
@@ -1917,9 +2368,17 @@ CANNM_LOCAL void CanNm_NormalOperationStateHandle(CanNm_ChannelIndexType chIndex
         }
     }
 #endif
+
+#if (CANNM_NODE_DETECTION_ENABLED == STD_OFF) || (CANNM_BUSLOAD_REDUCTION_ENABLED == STD_OFF)
+    CANNM_UNUSED(chIndex);
 #endif
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
+/* PRQA S 3673 -- */
 
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       Handle state transition in Ready Sleep State.
  * @param[in]   chIndex          : Index value of the NM-channel.
@@ -1927,57 +2386,98 @@ CANNM_LOCAL void CanNm_NormalOperationStateHandle(CanNm_ChannelIndexType chIndex
  * @synchronous TRUE
  * @trace       CPD-70102
  */
-CANNM_LOCAL void CanNm_ReadySleepStateHandle(CanNm_ChannelIndexType chIndex)
+CANNM_LOCAL void CanNm_ReadySleepStateHandle(CanNm_ChannelIndexType chIndex, Nm_StateType* nextStatePtr)
 {
-    const CanNm_ChannelLConfigType* chCfgPtr = &CanNm_ChannelLCfgData[chIndex];
-    CanNm_InnerChannelType*         chRTPtr  = chCfgPtr->RuntimePrt;
-
-/** SWS_CanNm_00110
- *  Ready Sleep State shall enter Normal Operation State
- *  */
-#if CANNM_PASSIVE_MODE_ENABLED == STD_OFF
-    if (chRTPtr->NetRequestFlg
-#if CANNM_GLOBAL_PN_SUPPORT == STD_ON
-        && !chCfgPtr->PnHandleMultipleNetworkRequests
-#endif
-#if CANNM_COM_CONTROL_ENABLED == STD_ON
-        && chRTPtr->CanNmTxEnable
-#endif
-    )
-    {
-        /** SWS_CanNm_00116 */
-        chRTPtr->TickTimers[CANNM_TXMSG_CYCLE_TIMER] = chCfgPtr->MsgCycleTime;
-        /** SWS_CanNm_00006 */
-        chRTPtr->SendNmMsgFlg = TRUE;
-    }
-#endif
-
-    if (!CanNm_NetworkStateHandle(chIndex))
-    {
-        SchM_Enter_CanNm_Context();
 #if CANNM_NODE_DETECTION_ENABLED == STD_ON
-        if (chCfgPtr->NodeDetectionEnabled && CanNm_NodeDetectStateHandle(chIndex))
-        {
-            chRTPtr->CanNmState = NM_STATE_REPEAT_MESSAGE;
-        }
+    if (CanNm_NodeDetectStateHandle(chIndex))
+    {
+        *nextStatePtr = NM_STATE_REPEAT_MESSAGE;
+    }
+    else
 #endif
+    {
         /**
          *  Depends on the Network Management PDU transmission ability is enabled,
          *  because NM-Timeout will stop if function CanNm_DisableCommunication has bean called.
          *  */
-        if ((chRTPtr->CanNmState == NM_STATE_READY_SLEEP)
-            && (CanNm_TestAndClear(&chRTPtr->TimeoutFlag[CANNM_NM_TIMEOUT_TIMER])
-                || (chRTPtr->TickTimers[CANNM_NM_TIMEOUT_TIMER] == 0u)))
+        CanNm_InnerChannelType* chRTPtr = CanNm_ChannelLCfgData[chIndex].RuntimePrt;
+        if (CanNm_TestAndClear(&chRTPtr->TimeoutFlag[CANNM_NM_TIMEOUT_TIMER]))
         {
             /** SWS_CanNm_00109 */
-            chRTPtr->CanNmState = NM_STATE_PREPARE_BUS_SLEEP;
+            *nextStatePtr = NM_STATE_PREPARE_BUS_SLEEP;
         }
-        SchM_Exit_CanNm_Context();
+    }
+}
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 
-        switch (chRTPtr->CanNmState)
+/* PRQA S 6070 ++ */ /* VL_MTR_CanNm_STCAL */
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
+/**
+ * @brief       Handle state transition in Network Mode.
+ * @param[in]   chIndex          : Index value of the NM-channel.
+ * @reentrant   TRUE
+ * @synchronous TRUE
+ * @trace
+ */
+CANNM_LOCAL void CanNm_NetworkModeHandle(CanNm_ChannelIndexType chIndex)
+{
+    const CanNm_ChannelLConfigType* chCfgPtr = &CanNm_ChannelLCfgData[chIndex];
+    CanNm_InnerChannelType*         chRTPtr  = chCfgPtr->RuntimePrt;
+
+#if CANNM_PASSIVE_MODE_ENABLED == STD_OFF
+    if (CanNm_TestAndClear(&chRTPtr->NetRequestFlg))
+    {
+#if CANNM_GLOBAL_PN_SUPPORT == STD_ON
+        if (chCfgPtr->PnHandleMultipleNetworkRequests)
+        {
+            CanNm_EnterRepeatMessageState(chIndex, TRUE);
+            return;
+        }
+#endif
+    }
+#endif
+
+    Nm_StateType currState = chRTPtr->CanNmState;
+    Nm_StateType nextState =
+        (chRTPtr->NetRequestStatus == CANNM_NETWORK_REQUESTED) ? NM_STATE_NORMAL_OPERATION : NM_STATE_READY_SLEEP;
+
+    switch (currState)
+    {
+    case NM_STATE_REPEAT_MESSAGE:
+        CanNm_RepeatMessageStateHandle(chIndex, &nextState);
+        break;
+
+    case NM_STATE_NORMAL_OPERATION:
+        CanNm_NormalOperationStateHandle(chIndex, &nextState);
+        break;
+
+    case NM_STATE_READY_SLEEP:
+        CanNm_ReadySleepStateHandle(chIndex, &nextState);
+        break;
+
+    default:
+        /**
+         *  nothing
+         *  */
+        break;
+    }
+
+    if (nextState != currState)
+    {
+        switch (nextState)
         {
         case NM_STATE_REPEAT_MESSAGE:
-            CanNm_EnterRepeatMessageState(chIndex, NM_STATE_READY_SLEEP, FALSE);
+            CanNm_EnterRepeatMessageState(chIndex, FALSE);
+            break;
+
+        case NM_STATE_NORMAL_OPERATION:
+            CanNm_EnterNormalOperationState(chIndex);
+            break;
+
+        case NM_STATE_READY_SLEEP:
+            CanNm_EnterReadySleepState(chIndex);
             break;
 
         case NM_STATE_PREPARE_BUS_SLEEP:
@@ -1985,12 +2485,19 @@ CANNM_LOCAL void CanNm_ReadySleepStateHandle(CanNm_ChannelIndexType chIndex)
             break;
 
         default:
-            /*nothing*/
+            /**
+             *  nothing
+             *  */
             break;
         }
     }
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
+/* PRQA S 6070 -- */
 
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       Network wake up signal processing for Non-network mode.
  * @param[in]   chIndex          : Index value of the NM-channel.
@@ -2006,9 +2513,12 @@ CANNM_LOCAL boolean CanNm_WakeUpSignalHandle(CanNm_ChannelIndexType chIndex)
     boolean rxWakeup = (chRTPtr->RxPduExtFlg && (chRTPtr->CanNmState == NM_STATE_PREPARE_BUS_SLEEP)) ? TRUE : FALSE;
 
     boolean isNetWorkRequest = FALSE;
-    boolean isPassiveStartUp = CanNm_TestAndClear(&chRTPtr->PassiveStartUp) || rxWakeup;
 #if CANNM_PASSIVE_MODE_ENABLED == STD_OFF
     isNetWorkRequest = CanNm_TestAndClear(&chRTPtr->NetRequestFlg);
+    /**
+     *  TRUE only if network request and not passive startup.
+     *  */
+    boolean activeWakeUpBit = (isNetWorkRequest && !chRTPtr->PassiveStartUp) ? TRUE : FALSE;
 #endif
 
     /** SWS_CanNm_00128 SWS_CanNm_00123 SWS_CanNm_00124
@@ -2016,15 +2526,16 @@ CANNM_LOCAL boolean CanNm_WakeUpSignalHandle(CanNm_ChannelIndexType chIndex)
      *  2. if the network is requested in the Prepare Bus-Sleep Mode
      *  3. At successful reception of a Network Management PDU in the Prepare Bus-Sleep Mode
      *  */
-    if (isNetWorkRequest || isPassiveStartUp)
+    if (CanNm_TestAndClear(&chRTPtr->PassiveStartUp) || rxWakeup
+#if CANNM_PASSIVE_MODE_ENABLED == STD_OFF
+        || isNetWorkRequest
+#endif
+    )
     {
-        CanNm_EnterRepeatMessageState(chIndex, chRTPtr->CanNmState, isNetWorkRequest);
+        CanNm_EnterRepeatMessageState(chIndex, isNetWorkRequest);
 
 #if CANNM_PASSIVE_MODE_ENABLED == STD_OFF
-        /**
-         *  Only if network request and not passive startup.
-         *  */
-        if (CanNm_ChannelLCfgData[chIndex].ActiveWakeupBitEnabled && (isNetWorkRequest && !isPassiveStartUp))
+        if (CanNm_ChannelLCfgData[chIndex].ActiveWakeupBitEnabled && activeWakeUpBit)
         {
             /** SWS_CanNm_00401 */
             CanNm_SetTxPduCbvBit(chIndex, CANNM_CBV_BIT_AW_MASK, TRUE);
@@ -2035,7 +2546,11 @@ CANNM_LOCAL boolean CanNm_WakeUpSignalHandle(CanNm_ChannelIndexType chIndex)
 
     return stateChanged;
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       Handle state transition in Prepare Bus Sleep State.
  * @param[in]   chIndex          : Index value of the NM-channel.
@@ -2049,17 +2564,21 @@ CANNM_LOCAL void CanNm_PrepareBusSleepStateHandle(CanNm_ChannelIndexType chIndex
     CanNm_InnerChannelType*         chRTPtr  = chCfgPtr->RuntimePrt;
 
     boolean stateChanged = CanNm_WakeUpSignalHandle(chIndex);
-
-    if (!stateChanged && CanNm_TestAndClear(&chRTPtr->TimeoutFlag[CANNM_STATE_HOLE_TIMER]))
+    boolean timeoutFlag  = CanNm_TestAndClear(&chRTPtr->TimeoutFlag[CANNM_STATE_HOLE_TIMER]);
+    if (!stateChanged && timeoutFlag)
     {
-        CanNm_StateChange(chIndex, chRTPtr->CanNmState, NM_STATE_BUS_SLEEP);
+        CanNm_StateChange(chIndex, NM_STATE_BUS_SLEEP);
         chRTPtr->CanNmMode = NM_MODE_BUS_SLEEP;
 
         /** SWS_CanNm_00126 */
         Nm_BusSleepMode(chCfgPtr->ComMNetworkHandleRef);
     }
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       Handle state transition in Bus Sleep State.
  * @param[in]   chIndex          : Index value of the NM-channel.
@@ -2069,7 +2588,9 @@ CANNM_LOCAL void CanNm_PrepareBusSleepStateHandle(CanNm_ChannelIndexType chIndex
  */
 CANNM_LOCAL void CanNm_BusSleepStateHandle(CanNm_ChannelIndexType chIndex)
 {
-    const CanNm_InnerChannelType* chRTPtr = CanNm_ChannelLCfgData[chIndex].RuntimePrt;
+    const CanNm_ChannelLConfigType* chCfgPtr = &CanNm_ChannelLCfgData[chIndex];
+    const CanNm_InnerChannelType*   chRTPtr  = chCfgPtr->RuntimePrt;
+
     SchM_Enter_CanNm_Context();
     if (!chRTPtr->PassiveStartUp
 #if CANNM_PASSIVE_MODE_ENABLED == STD_OFF
@@ -2078,9 +2599,7 @@ CANNM_LOCAL void CanNm_BusSleepStateHandle(CanNm_ChannelIndexType chIndex)
         && chRTPtr->RxPduExtFlg)
     {
         /** SWS_CanNm_00127 */
-        /** To prevent duplicate reporting of Nm_NetworkStartIndication, this function shall be executed exclusively
-         * with Nm_PassiveStartUp */
-        Nm_NetworkStartIndication(CanNm_ChannelLCfgData[chIndex].ComMNetworkHandleRef);
+        Nm_NetworkStartIndication(chCfgPtr->ComMNetworkHandleRef);
         /** SWS_CanNm_00336 */
         (void)Det_ReportRuntimeError(
             CANNM_MODULE_ID,
@@ -2092,7 +2611,11 @@ CANNM_LOCAL void CanNm_BusSleepStateHandle(CanNm_ChannelIndexType chIndex)
 
     (void)CanNm_WakeUpSignalHandle(chIndex);
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       Handle state transition of CanNm.
  * @param[in]   chIndex          : Index value of the NM-channel.
@@ -2102,26 +2625,18 @@ CANNM_LOCAL void CanNm_BusSleepStateHandle(CanNm_ChannelIndexType chIndex)
  */
 CANNM_LOCAL void CanNm_StateManagement(CanNm_ChannelIndexType chIndex)
 {
-    switch (CanNm_ChannelLCfgData[chIndex].RuntimePrt->CanNmState)
+    switch (CanNm_ChannelLCfgData[chIndex].RuntimePrt->CanNmMode)
     {
-    case NM_STATE_BUS_SLEEP:
+    case NM_MODE_BUS_SLEEP:
         CanNm_BusSleepStateHandle(chIndex);
         break;
 
-    case NM_STATE_PREPARE_BUS_SLEEP:
+    case NM_MODE_PREPARE_BUS_SLEEP:
         CanNm_PrepareBusSleepStateHandle(chIndex);
         break;
 
-    case NM_STATE_REPEAT_MESSAGE:
-        CanNm_RepeatMessageStateHandle(chIndex);
-        break;
-
-    case NM_STATE_NORMAL_OPERATION:
-        CanNm_NormalOperationStateHandle(chIndex);
-        break;
-
-    case NM_STATE_READY_SLEEP:
-        CanNm_ReadySleepStateHandle(chIndex);
+    case NM_MODE_NETWORK:
+        CanNm_NetworkModeHandle(chIndex);
         break;
 
     default:
@@ -2131,8 +2646,12 @@ CANNM_LOCAL void CanNm_StateManagement(CanNm_ChannelIndexType chIndex)
         break;
     }
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 
 #if CANNM_COM_USERDATA_SUPPORT == STD_ON
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       Get the UserData and fill it into the UserData field of Tx buffer.
  * @param[in]   chIndex          : Index value of the NM-channel.
@@ -2166,9 +2685,13 @@ CANNM_LOCAL void CanNm_WriteUserDataBytes(CanNm_ChannelIndexType chIndex)
         }
     }
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 #endif
 
 #if CANNM_PASSIVE_MODE_ENABLED == STD_OFF
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       Assemble NM packets and send them.
  * @param[in]   chIndex          : Index value of the NM-channel.
@@ -2213,7 +2736,9 @@ CANNM_LOCAL Std_ReturnType CanNm_SendNmPdu(CanNm_ChannelIndexType chIndex)
         pduInfo.SduLength        = chPBCfgPtr->ChannelPduLength;
 
         /** SWS_CanNm_00512 */
+        SchM_Enter_CanNm_Context();
         ret = CanIf_Transmit(canIfTxSduId, &pduInfo);
+        SchM_Exit_CanNm_Context();
         if (ret == E_OK)
         {
 /** SWS_CanNm_00064 */
@@ -2230,9 +2755,13 @@ CANNM_LOCAL Std_ReturnType CanNm_SendNmPdu(CanNm_ChannelIndexType chIndex)
     }
     return ret;
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 #endif
 
 #if CANNM_PASSIVE_MODE_ENABLED == STD_OFF
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       Send message in MainFunction.The purpose of this function is to aggregate multiple send requests,Only
  *              one frame will be sent out when there are multiple send requests in a MainFunction.
@@ -2300,8 +2829,12 @@ CANNM_LOCAL void CanNm_SendMsgMainHandle(CanNm_ChannelIndexType chIndex)
         }
     }
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 #endif
 
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       Returns the index of current partition in the ComM configuration.
  * @return      The index of current partition in the ComM configuration.
@@ -2324,8 +2857,12 @@ CANNM_LOCAL uint16 CanNm_GetPartitionIndex(void)
 #endif
     return index;
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 
 #if CANNM_DEV_ERROR_DETECT == STD_ON
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       Development error validation of invalid partition context.
  * @param[in]   apiId : ID of API service in which error is detected
@@ -2338,14 +2875,22 @@ CANNM_LOCAL uint16 CanNm_GetPartitionIndex(void)
 CANNM_LOCAL boolean CanNm_ValidatePartitionContext(uint8 apiId)
 {
     boolean ret = TRUE;
+#if CANNM_MULTIPLE_PARTITION_USED == STD_ON
     if (CanNm_GetPartitionIndex() >= CANNM_NUMBER_OF_PARTITION)
     {
         (void)Det_ReportError(CANNM_MODULE_ID, CANNM_INSTANCE_ID, apiId, CANNM_E_PARTITION);
         ret = FALSE;
     }
+#else
+    CANNM_UNUSED(apiId);
+#endif
     return ret;
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       Development error validation of uninit.
  * @param[in]   apiId : ID of API service in which error is detected
@@ -2379,7 +2924,11 @@ CANNM_LOCAL boolean CanNm_ValidateInitStatus(uint8 apiId)
 
     return ret;
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       Development error validation of networkhandle.
  * @param[in]   apiId : ID of API service in which error is detected
@@ -2413,7 +2962,11 @@ CANNM_LOCAL boolean CanNm_ValidateNetworkHandle(uint8 apiId, NetworkHandleType n
     }
     return ret;
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       Development error validation of null pointer.
  * @param[in]   apiId   : ID of API service in which error is detected
@@ -2434,7 +2987,11 @@ CANNM_LOCAL boolean CanNm_ValidatePointer(uint8 apiId, const void* pointer)
     }
     return ret;
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       Development error validation of tx PduId.
  * @param[in]   apiId : ID of API service in which error is detected
@@ -2455,8 +3012,12 @@ boolean CanNm_ValidateTxPduId(uint8 apiId, PduIdType txPduId)
     }
     return ret;
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 
 #if CANNM_TRIGGER_TRANSMIT_API == STD_ON
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       Development error validation of Tx-Pdu.
  * @param[in]   apiId : ID of API service in which error is detected
@@ -2473,8 +3034,12 @@ CANNM_LOCAL boolean CanNm_ValidateTxPdu(uint8 apiId, PduIdType txPduId, const Pd
     return CanNm_ValidateTxPduId(apiId, txPduId) && CanNm_ValidatePointer(apiId, pduInfoPtr)
            && CanNm_ValidatePointer(apiId, pduInfoPtr->SduDataPtr);
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 #endif
 
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       Development error validation of Rx-Pdu.
  * @param[in]   apiId : ID of API service in which error is detected
@@ -2498,11 +3063,16 @@ CANNM_LOCAL boolean CanNm_ValidateRxPdu(uint8 apiId, PduIdType rxPduId, const Pd
     ret = ret && CanNm_ValidatePointer(apiId, pduInfoPtr) && CanNm_ValidatePointer(apiId, pduInfoPtr->SduDataPtr);
     return ret;
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
 
+#if CANNM_COM_USERDATA_SUPPORT == STD_ON
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       Development error validation of UserDataTxPdu.
  * @param[in]   apiId : ID of API service in which error is detected
- * @param[in]   rxPduId : Identifier of the PDU to be transmitted
+ * @param[in]   txPduId : Identifier of the PDU to be transmitted
  * @param[in]   pduInfoPtr : Contains a pointer to a buffer about pduInfo
  * @retval      TRUE  : Development error not occurred
  * @retval      FALSE : Development error occurred
@@ -2510,10 +3080,10 @@ CANNM_LOCAL boolean CanNm_ValidateRxPdu(uint8 apiId, PduIdType rxPduId, const Pd
  * @synchronous TRUE
  * @trace       CPD-70118
  */
-CANNM_LOCAL boolean CanNm_ValidateUserDataPdu(uint8 apiId, PduIdType rxPduId, const PduInfoType* pduInfoPtr)
+CANNM_LOCAL boolean CanNm_ValidateUserDataPdu(uint8 apiId, PduIdType txPduId, const PduInfoType* pduInfoPtr)
 {
     boolean ret = TRUE;
-    if (rxPduId >= CANNM_USERDATA_TX_PDU_NUM)
+    if (txPduId >= CANNM_USERDATA_TX_PDU_NUM)
     {
         (void)Det_ReportError(CANNM_MODULE_ID, CANNM_INSTANCE_ID, apiId, CANNM_E_INVALID_PDUID);
         ret = FALSE;
@@ -2522,7 +3092,12 @@ CANNM_LOCAL boolean CanNm_ValidateUserDataPdu(uint8 apiId, PduIdType rxPduId, co
     ret = ret && CanNm_ValidatePointer(apiId, pduInfoPtr) && CanNm_ValidatePointer(apiId, pduInfoPtr->SduDataPtr);
     return ret;
 }
+#define CANNM_STOP_SEC_CODE
+#include "CanNm_MemMap.h"
+#endif
 
+#define CANNM_START_SEC_CODE
+#include "CanNm_MemMap.h"
 /**
  * @brief       Development error validation of deinit condition.
  * @retval      TRUE  : Development error not occurred
@@ -2557,7 +3132,7 @@ CANNM_LOCAL boolean CanNm_ValidateDeInit(void)
     }
     return ret;
 }
-#endif
 #define CANNM_STOP_SEC_CODE
 #include "CanNm_MemMap.h"
+#endif
 /* PRQA S 1532 -- */

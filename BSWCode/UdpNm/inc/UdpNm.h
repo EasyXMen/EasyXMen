@@ -30,12 +30,8 @@
  *  V02.00.00 2020-06-09  rongbo.hu     1. Update code according AUTOSAR R19-11 Specification
  *                                      2. Modify code with the new coding rule
  *                                      3. Fix bugs find in V1.0.4
- *  V02.01.00 2024-12-30  caihong.liu   R23-11 development first release.
- *  V02.01.01 2025-10-22  caihong.liu
- *      1. Fixed CPT-14266, Redundant passive wake-up event flags lead to repeated wake-up actions.
- *      2. Fixed CPT-14866, Fixed race condition in ReadySleepState causing unhandled UdpNm_RepeatMessageRequest due to
- *         immediate transition to PrepareBusSleepMode.
- *      3. Fixed CPT-14491, state machine stuck in ReadySleepState due to nmTimeoutTimer is 0 but nmToutFlg is FALSE.
+ *  V02.00.01 2026-06-03  xiaojian.liang CPTASK-1133: Add ARTI stub functions and ARTI_TRACE_N instrumentation.
+ *
  ==================================================================================================================== */
 
 /* ================================================ misar justifications ============================================ */
@@ -68,14 +64,14 @@ extern "C" {
  * @brief Published Information
  */
 #define UDPNM_VENDOR_ID                   (62u)
-#define UDPNM_MODULE_ID                   (33u)
+#define UDPNM_MODULE_ID                   (34u)
 #define UDPNM_INSTANCE_ID                 (1u)
 #define UDPNM_AR_RELEASE_MAJOR_VERSION    (4u)
 #define UDPNM_AR_RELEASE_MINOR_VERSION    (9u)
 #define UDPNM_AR_RELEASE_REVISION_VERSION (0u)
 #define UDPNM_SW_MAJOR_VERSION            (2u)
 #define UDPNM_SW_MINOR_VERSION            (1u)
-#define UDPNM_SW_PATCH_VERSION            (1u)
+#define UDPNM_SW_PATCH_VERSION            (0u)
 /** @} */
 
 /* ===================================================== macros ===================================================== */
@@ -100,34 +96,35 @@ extern "C" {
  * @{
  * @brief Service ID
  */
-#define UDPNM_SERVICE_ID_INIT                       ((uint8)(0x01u))
-#define UDPNM_SERVICE_ID_PASSIVESTARUP              ((uint8)(0x0eu))
-#define UDPNM_SERVICE_ID_NETWORKREQUEST             ((uint8)(0x02u))
-#define UDPNM_SERVICE_ID_NETWORKRELEASE             ((uint8)(0x03u))
-#define UDPNM_SERVICE_ID_DISABLECOMMUNICATION       ((uint8)(0x0cu))
-#define UDPNM_SERVICE_ID_ENABLECOMMUNICATION        ((uint8)(0x0du))
-#define UDPNM_SERVICE_ID_SETUSERDATA                ((uint8)(0x04u))
-#define UDPNM_SERVICE_ID_GETUSERDATA                ((uint8)(0x05u))
-#define UDPNM_SERVICE_ID_GETNODEIDENTIFIER          ((uint8)(0x06u))
-#define UDPNM_SERVICE_ID_GETLOCALNODEIDENTIFIER     ((uint8)(0x07u))
-#define UDPNM_SERVICE_ID_REPEATMESSAGEREQUEST       ((uint8)(0x08u))
-#define UDPNM_SERVICE_ID_GETPDUDATA                 ((uint8)(0x0au))
-#define UDPNM_SERVICE_ID_GETSTATE                   ((uint8)(0x0bu))
-#define UDPNM_SERVICE_ID_GETVERSIONINFO             ((uint8)(0x09u))
-#define UDPNM_SERVICE_ID_REQUESTBUSSYNCHRONIZATION  ((uint8)(0x14u))
-#define UDPNM_SERVICE_ID_CHECKREMOTESLEEPINDICATION ((uint8)(0x11u))
-#define UDPNM_SERVICE_ID_SETCOORDBITS               ((uint8)(0x12u))
-#define UDPNM_SERVICE_ID_SETSLEEPREADYBIT           ((uint8)(0x16u))
-#define UDPNM_SERVICE_ID_TRANSMIT                   ((uint8)(0x49u))
-#define UDPNM_SERVICE_ID_IFTXCONFIRMATION           ((uint8)(0x40u))
-#define UDPNM_SERVICE_ID_RXINDICATION               ((uint8)(0x42u))
-#define UDPNM_SERVICE_ID_IFTRIGGERTRANSMIT          ((uint8)(0x41u))
-#define UDPNM_SERVICE_ID_MAINFUNCTION               ((uint8)(0x13u))
+#define UDPNM_SERVICE_ID_INIT                       0x01u
+#define UDPNM_SERVICE_ID_PASSIVESTARUP              0x0eu
+#define UDPNM_SERVICE_ID_NETWORKREQUEST             0x02u
+#define UDPNM_SERVICE_ID_NETWORKRELEASE             0x03u
+#define UDPNM_SERVICE_ID_DISABLECOMMUNICATION       0x0cu
+#define UDPNM_SERVICE_ID_ENABLECOMMUNICATION        0x0du
+#define UDPNM_SERVICE_ID_SETUSERDATA                0x04u
+#define UDPNM_SERVICE_ID_GETUSERDATA                0x05u
+#define UDPNM_SERVICE_ID_GETNODEIDENTIFIER          0x06u
+#define UDPNM_SERVICE_ID_GETLOCALNODEIDENTIFIER     0x07u
+#define UDPNM_SERVICE_ID_REPEATMESSAGEREQUEST       0x08u
+#define UDPNM_SERVICE_ID_GETPDUDATA                 0x0au
+#define UDPNM_SERVICE_ID_GETSTATE                   0x0bu
+#define UDPNM_SERVICE_ID_GETVERSIONINFO             0x09u
+#define UDPNM_SERVICE_ID_REQUESTBUSSYNCHRONIZATION  0x14u
+#define UDPNM_SERVICE_ID_CHECKREMOTESLEEPINDICATION 0x11u
+#define UDPNM_SERVICE_ID_SETSLEEPREADYBIT           0x16u
+#define UDPNM_SERVICE_ID_TRANSMIT                   0x49u
+#define UDPNM_SERVICE_ID_IFTXCONFIRMATION           0x40u
+#define UDPNM_SERVICE_ID_RXINDICATION               0x42u
+#define UDPNM_SERVICE_ID_IFTRIGGERTRANSMIT          0x41u
+#define UDPNM_SERVICE_ID_MAINFUNCTION               0x13u
 /** @} */
 
 /* ================================================ type definitions ================================================ */
 
 /* ========================================== internal function definitions ========================================= */
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       Initialize the complete UdpNm module.
  * @param[in]   UdpNmConfigPtr   : Pointer to a selected configuration
@@ -136,7 +133,11 @@ extern "C" {
  * @trace       CPD-71891
  */
 void UdpNm_Init(const UdpNm_ConfigType* UdpNmConfigPtr);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       Passive startup of the AUTOSAR UdpNm.
  * @param[in]   nmChannelHandle   : Identification of the NM-channel
@@ -148,8 +149,12 @@ void UdpNm_Init(const UdpNm_ConfigType* UdpNmConfigPtr);
  * @trace       CPD-71892
  */
 Std_ReturnType UdpNm_PassiveStartUp(NetworkHandleType nmChannelHandle);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 
 #if UDPNM_PASSIVE_MODE_ENABLED == STD_OFF
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       Request the network, since ECU needs to communicate on the bus.
  * @param[in]   nmChannelHandle   : Identification of the NM-channel
@@ -161,7 +166,11 @@ Std_ReturnType UdpNm_PassiveStartUp(NetworkHandleType nmChannelHandle);
  * @trace       CPD-71893
  */
 Std_ReturnType UdpNm_NetworkRequest(NetworkHandleType nmChannelHandle);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       Release the network,since ECU doesn't have to communicate on the bus.
  * @param[in]   nmChannelHandle   : Identification of the NM-channel
@@ -173,9 +182,13 @@ Std_ReturnType UdpNm_NetworkRequest(NetworkHandleType nmChannelHandle);
  * @trace       CPD-71894
  */
 Std_ReturnType UdpNm_NetworkRelease(NetworkHandleType nmChannelHandle);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 #endif
 
 #if UDPNM_COM_CONTROL_ENABLED == STD_ON
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       Disable the NM PDU transmission ability due to a ISO14229 Communication Control (0x28) service.
  * @param[in]   nmChannelHandle   : Identification of the NM-channel
@@ -187,6 +200,11 @@ Std_ReturnType UdpNm_NetworkRelease(NetworkHandleType nmChannelHandle);
  * @trace       CPD-71895
  */
 Std_ReturnType UdpNm_DisableCommunication(NetworkHandleType nmChannelHandle);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
+
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       Enable the NM PDU transmission ability due to a ISO14229 Communication Control (0x28) service.
  * @param[in]   nmChannelHandle   : Identification of the NM-channel
@@ -198,10 +216,14 @@ Std_ReturnType UdpNm_DisableCommunication(NetworkHandleType nmChannelHandle);
  * @trace       CPD-71896
  */
 Std_ReturnType UdpNm_EnableCommunication(NetworkHandleType nmChannelHandle);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 #endif
 
 #if (UDPNM_USER_DATA_ENABLED == STD_ON) && (UDPNM_COM_USERDATA_SUPPORT == STD_OFF) \
     && (UDPNM_PASSIVE_MODE_ENABLED == STD_OFF)
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       Set user data for all NM messages transmitted on the bus after this function has returned without error.
  * @param[in]   nmChannelHandle : Identification of the NM-channel
@@ -214,9 +236,13 @@ Std_ReturnType UdpNm_EnableCommunication(NetworkHandleType nmChannelHandle);
  * @trace       CPD-71897
  */
 Std_ReturnType UdpNm_SetUserData(NetworkHandleType nmChannelHandle, const uint8* nmUserDataPtr);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 #endif
 
 #if UDPNM_USER_DATA_ENABLED == STD_ON
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       Get user data from the most recently received NM message.
  * @param[in]   nmChannelHandle : Identification of the NM-channel
@@ -229,8 +255,12 @@ Std_ReturnType UdpNm_SetUserData(NetworkHandleType nmChannelHandle, const uint8*
  * @trace       CPD-71898
  */
 Std_ReturnType UdpNm_GetUserData(NetworkHandleType nmChannelHandle, uint8* nmUserDataPtr);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 #endif
 
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       Get node identifier from the most recently received NM PDU.
  * @param[in]   nmChannelHandle : Identification of the NM-channel
@@ -245,7 +275,11 @@ Std_ReturnType UdpNm_GetUserData(NetworkHandleType nmChannelHandle, uint8* nmUse
  * @trace       CPD-71899
  */
 Std_ReturnType UdpNm_GetNodeIdentifier(NetworkHandleType nmChannelHandle, uint8* nmNodeIdPtr);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       Get node identifier configured for the local node.
  * @param[in]   nmChannelHandle : Identification of the NM-channel
@@ -259,7 +293,11 @@ Std_ReturnType UdpNm_GetNodeIdentifier(NetworkHandleType nmChannelHandle, uint8*
  * @trace       CPD-71900
  */
 Std_ReturnType UdpNm_GetLocalNodeIdentifier(NetworkHandleType nmChannelHandle, uint8* nmNodeIdPtr);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       Set Repeat Message Request Bit for all NM messages transmitted on the bus after this function has
  *              returned without error.
@@ -273,12 +311,13 @@ Std_ReturnType UdpNm_GetLocalNodeIdentifier(NetworkHandleType nmChannelHandle, u
  * @trace       CPD-71901
  */
 Std_ReturnType UdpNm_RepeatMessageRequest(NetworkHandleType nmChannelHandle);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       Get the whole PDU data out of the most recently received NM message.
- * @id          0x0a
- * @synchronous Synchronous
- * @reentrancy  Reentrant
  * @param[in]   nmChannelHandle : Identification of the NM-channel
  * @param[out]  nmPduDataPtr    : Pointer where NM PDU shall be copied to.
  * @return      Std_ReturnType
@@ -289,7 +328,11 @@ Std_ReturnType UdpNm_RepeatMessageRequest(NetworkHandleType nmChannelHandle);
  * @trace       CPD-71902
  */
 Std_ReturnType UdpNm_GetPduData(NetworkHandleType nmChannelHandle, uint8* nmPduDataPtr);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       Returns the state and the mode of the network management.
  * @param[in]   nmChannelHandle : Identification of the NM-channel
@@ -303,8 +346,12 @@ Std_ReturnType UdpNm_GetPduData(NetworkHandleType nmChannelHandle, uint8* nmPduD
  * @trace       CPD-71903
  */
 Std_ReturnType UdpNm_GetState(NetworkHandleType nmChannelHandle, Nm_StateType* nmStatePtr, Nm_ModeType* nmModePtr);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 
 #if UDPNM_VERSION_INFO_API == STD_ON
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       Returns the version information of this module.
  * @param[in]   versioninfo   : Pointer to where to store the version information of this module
@@ -313,9 +360,13 @@ Std_ReturnType UdpNm_GetState(NetworkHandleType nmChannelHandle, Nm_StateType* n
  * @trace       CPD-71904
  */
 void UdpNm_GetVersionInfo(Std_VersionInfoType* versioninfo);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 #endif
 
 #if (UDPNM_BUS_SYNCHRONIZATION_ENABLED == STD_ON) && (UDPNM_PASSIVE_MODE_ENABLED == STD_OFF)
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       Request bus synchronization.
  * @param[in]   nmChannelHandle   : Identification of the NM-channel
@@ -327,9 +378,13 @@ void UdpNm_GetVersionInfo(Std_VersionInfoType* versioninfo);
  * @trace       CPD-71905
  */
 Std_ReturnType UdpNm_RequestBusSynchronization(NetworkHandleType nmChannelHandle);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 #endif
 
 #if UDPNM_REMOTE_SLEEP_IND_ENABLED == STD_ON
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       Check if remote sleep indication takes place or not.
  * @param[in]   nmChannelHandle   : Identification of the NM-channel
@@ -342,9 +397,13 @@ Std_ReturnType UdpNm_RequestBusSynchronization(NetworkHandleType nmChannelHandle
  * @trace       CPD-71906
  */
 Std_ReturnType UdpNm_CheckRemoteSleepIndication(NetworkHandleType nmChannelHandle, boolean* nmRemoteSleepIndPtr);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 #endif
 
 #if UDPNM_COORDINATOR_SYNC_SUPPORT == STD_ON
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       Set the NM Coordinator Sleep Ready bit in the Control Bit Vector.
  * @param[in]   nmChannelHandle : Identification of the NM-channel
@@ -357,9 +416,13 @@ Std_ReturnType UdpNm_CheckRemoteSleepIndication(NetworkHandleType nmChannelHandl
  * @trace       CPD-71907
  */
 Std_ReturnType UdpNm_SetSleepReadyBit(NetworkHandleType nmChannelHandle, boolean nmSleepReadyBit);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 #endif
 
 #if UDPNM_COM_USERDATA_SUPPORT == STD_ON
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       Requests transmission of a PDU.
  * @param[in]   TxPduId    : Identifier of the PDU to be transmitted
@@ -372,8 +435,12 @@ Std_ReturnType UdpNm_SetSleepReadyBit(NetworkHandleType nmChannelHandle, boolean
  * @trace       CPD-71908
  */
 Std_ReturnType UdpNm_Transmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 #endif
 
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       The lower layer communication interface module confirms the transmission of an IPDU,
  *              or the failure to transmit a PDU.
@@ -384,7 +451,11 @@ Std_ReturnType UdpNm_Transmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr);
  * @trace       CPD-71909
  */
 void UdpNm_SoAdIfTxConfirmation(PduIdType TxPduId, Std_ReturnType result);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       Indication of a received PDU from a lower layer communication interface module.
  * @param[in]   RxPduId    : ID of the received PDU.
@@ -395,8 +466,12 @@ void UdpNm_SoAdIfTxConfirmation(PduIdType TxPduId, Std_ReturnType result);
  * @trace       CPD-71910
  */
 void UdpNm_SoAdIfRxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 
 #if UDPNM_TRIGGER_TRANSMIT_API == STD_ON
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       Within this API, the upper layer module (called module) shall check whether the available data
                 fits into the buffer size reported by PduInfoPtr->SduLength. If it fits, it shall copy its data into the
@@ -412,8 +487,12 @@ void UdpNm_SoAdIfRxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr);
  * @trace       CPD-71911
  */
 Std_ReturnType UdpNm_SoAdIfTriggerTransmit(PduIdType TxPduId, PduInfoType* PduInfoPtr);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 #endif
 
+#define UDPNM_START_SEC_CODE
+#include "UdpNm_MemMap.h"
 /**
  * @brief       Main function of the UdpNm which processes the algorithm describes in that document.
  * @param[in]   chIndex    : Index value of the NM-channel.
@@ -422,6 +501,8 @@ Std_ReturnType UdpNm_SoAdIfTriggerTransmit(PduIdType TxPduId, PduInfoType* PduIn
  * @trace       CPD-71912
  */
 void UdpNm_MainFunction(UdpNm_ChannelIndexType chIndex);
+#define UDPNM_STOP_SEC_CODE
+#include "UdpNm_MemMap.h"
 /* =========================================== external data declarations =========================================== */
 
 /* ========================================= external function declarations ========================================= */

@@ -24,32 +24,6 @@
 
 /* =================================================== inclusions =================================================== */
 #include "EcuM_Internal.h"
-
-#define ECUM_C_AR_MAJOR_VERSION 4u
-#define ECUM_C_AR_MINOR_VERSION 9u
-#define ECUM_C_AR_PATCH_VERSION 0u
-#define ECUM_C_SW_MAJOR_VERSION 2u
-#define ECUM_C_SW_MINOR_VERSION 2u
-#define ECUM_C_SW_PATCH_VERSION 3u
-
-#if (ECUM_C_AR_MAJOR_VERSION != ECUM_AR_RELEASE_MAJOR_VERSION)
-#error "EcuM.c : Mismatch in Specification Major Version"
-#endif
-#if (ECUM_C_AR_MINOR_VERSION != ECUM_AR_RELEASE_MINOR_VERSION)
-#error "EcuM.c : Mismatch in Specification Major Version"
-#endif
-#if (ECUM_C_AR_PATCH_VERSION != ECUM_AR_RELEASE_PATCH_VERSION)
-#error "EcuM.c : Mismatch in Specification Major Version"
-#endif
-#if (ECUM_C_SW_MAJOR_VERSION != ECUM_SW_MAJOR_VERSION)
-#error "EcuM.c : Mismatch in Specification Major Version"
-#endif
-#if (ECUM_C_SW_MINOR_VERSION != ECUM_SW_MINOR_VERSION)
-#error "EcuM.c : Mismatch in Specification Major Version"
-#endif
-#if (ECUM_C_SW_PATCH_VERSION != ECUM_SW_PATCH_VERSION)
-#error "EcuM.c : Mismatch in Specification Major Version"
-#endif
 /* ===================================================== macros ===================================================== */
 
 /* ================================================ type definitions ================================================ */
@@ -65,12 +39,20 @@ Rte_ModeType_EcuM_Mode EcuM_RteState;
 #define ECUM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
 #include "EcuM_MemMap.h"
 #endif
+#if (ECUM_CLONE_VARIABLE_SUPPORT_ENABLED == STD_ON)
+#define ECUM_START_SEC_VAR_CLONE_UNSPECIFIED
+#include "EcuM_MemMap.h"
+EcuM_RunTimeLcType EcuMRunData;
+#define ECUM_STOP_SEC_VAR_CLONE_UNSPECIFIED
+#include "EcuM_MemMap.h"
+#endif /* ECUM_CLONE_VARIABLE_SUPPORT_ENABLED == STD_ON */
+
 /* ============================================ external data definitions =========================================== */
 
 /* ========================================== external function definitions ========================================= */
+#if (ECUM_VERSION_INFO_API == STD_ON)
 #define ECUM_START_SEC_CODE
 #include "EcuM_MemMap.h"
-#if (ECUM_VERSION_INFO_API == STD_ON)
 /**
  * Retrieves version information for the ECU Manager.
  *
@@ -79,10 +61,12 @@ Rte_ModeType_EcuM_Mode EcuM_RteState;
  */
 void EcuM_GetVersionInfo(Std_VersionInfoType* versioninfo) /* PRQA S 1503 */ /* VL_QAC_NoUsedApi */
 {
+    EcuM_ArtiApiStart(2, ECUM_SID_GETVERSION, versioninfo);
+
 #if (ECUM_DEV_ERROR_DETECT == STD_ON)
     if (NULL_PTR == versioninfo)
     {
-        (void)Det_ReportError(ECUM_MODULE_ID, ECUM_INSTANCE_ID, ECUM_SID_GETVERSION, ECUM_E_NULL_POINTER);
+        (void)Det_ReportError(ECUM_MODULE_ID, ECUM_INSTANCE_ID, ECUM_SID_GETVERSION, ECUM_E_PARAM_POINTER);
     }
     else
 #endif /*ECUM_DEV_ERROR_DETECT == STD_ON*/
@@ -93,9 +77,15 @@ void EcuM_GetVersionInfo(Std_VersionInfoType* versioninfo) /* PRQA S 1503 */ /* 
         versioninfo->sw_minor_version = ECUM_SW_MINOR_VERSION;
         versioninfo->sw_patch_version = ECUM_SW_PATCH_VERSION;
     }
+
+    EcuM_ArtiApiStop(1, ECUM_SID_GETVERSION);
 }
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 #endif /*ECUM_VERSION_INFO_API == STD_ON*/
 
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 /**
  * Sets the state of the ECU Manager.
  *
@@ -106,6 +96,8 @@ void EcuM_GetVersionInfo(Std_VersionInfoType* versioninfo) /* PRQA S 1503 */ /* 
  */
 void EcuM_SetState(EcuM_StateType state) /* PRQA S 1503 */ /* VL_QAC_NoUsedApi */
 {
+    EcuM_ArtiApiStart(2, ECUM_SID_SETSTATE, state);
+
 #if (ECUM_MODE_HANDING == STD_ON)
     Rte_ModeType_EcuM_Mode mode;
     boolean                errFlag = FALSE; /*PRQA S 2995*/ /* VL_EcuM_2995 */
@@ -133,7 +125,7 @@ void EcuM_SetState(EcuM_StateType state) /* PRQA S 1503 */ /* VL_QAC_NoUsedApi *
         case ECUM_STATE_SHUTDOWN:
             /*Same with sleep.*/
         case ECUM_STATE_SLEEP:
-            if (pRt->SdtgNext.Target == ECUM_SHUTDOWN_TARGET_SLEEP)
+            if (pRt->SdtgNext->Target == ECUM_SHUTDOWN_TARGET_SLEEP)
             {
                 mode = RTE_MODE_EcuM_Mode_SLEEP;
             }
@@ -193,10 +185,15 @@ void EcuM_SetState(EcuM_StateType state) /* PRQA S 1503 */ /* VL_QAC_NoUsedApi *
 #else
     (void)detErrorId;
 #endif /*ECUM_DEV_ERROR_DETECT == STD_ON */
+
+    EcuM_ArtiApiStop(1, ECUM_SID_SETSTATE);
 }
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
 #if (STD_ON == ECUM_MODE_HANDING)
-
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 /* PRQA S 1503, 2844 ++ */ /* VL_QAC_NoUsedApi, VL_EcuM_DerefInvalidPtr */
 /**
  * Requests the ECU Manager to enter the RUN state.
@@ -209,6 +206,8 @@ void EcuM_SetState(EcuM_StateType state) /* PRQA S 1503 */ /* VL_QAC_NoUsedApi *
  */
 Std_ReturnType EcuM_RequestRUN(EcuM_UserType user)
 {
+    EcuM_ArtiApiStart(2, ECUM_SID_REQUESTRUN, user);
+
     uint8               uid;
     Std_ReturnType      ret = E_OK;
     EcuM_RunTimeLcType* pRt;
@@ -260,10 +259,16 @@ Std_ReturnType EcuM_RequestRUN(EcuM_UserType user)
     (void)detErrorId;
 #endif /*ECUM_DEV_ERROR_DETECT == STD_ON */
 
+    EcuM_ArtiApiStop(2, ECUM_SID_REQUESTRUN, ret);
+
     return ret;
 }
 /* PRQA S 1503, 2844 -- */
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 /* PRQA S 1503, 2844 ++ */ /* VL_QAC_NoUsedApi, VL_EcuM_DerefInvalidPtr */
 /**
  * Releases the RUN state for the specified user in the ECU Manager.
@@ -276,6 +281,8 @@ Std_ReturnType EcuM_RequestRUN(EcuM_UserType user)
  */
 Std_ReturnType EcuM_ReleaseRUN(EcuM_UserType user)
 {
+    EcuM_ArtiApiStart(2, ECUM_SID_RELEASERUN, user);
+
     uint8               uid;
     Std_ReturnType      ret = E_OK;
     EcuM_RunTimeLcType* pRt;
@@ -326,10 +333,17 @@ Std_ReturnType EcuM_ReleaseRUN(EcuM_UserType user)
 #else
     (void)detErrorId;
 #endif /*ECUM_DEV_ERROR_DETECT == STD_ON */
+
+    EcuM_ArtiApiStop(2, ECUM_SID_RELEASERUN, ret);
+
     return ret;
 }
 /* PRQA S 1503, 2844 -- */
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 /* PRQA S 1503, 2844 ++ */ /* VL_QAC_NoUsedApi, VL_EcuM_DerefInvalidPtr */
 /**
  * Requests the ECU Manager to enter the POST_RUN state for the specified user.
@@ -342,6 +356,8 @@ Std_ReturnType EcuM_ReleaseRUN(EcuM_UserType user)
  */
 Std_ReturnType EcuM_RequestPOST_RUN(EcuM_UserType user)
 {
+    EcuM_ArtiApiStart(2, ECUM_SID_REQUESTPOST_RUN, user);
+
     uint8               uid;
     Std_ReturnType      ret = E_OK;
     EcuM_RunTimeLcType* pRt;
@@ -392,10 +408,17 @@ Std_ReturnType EcuM_RequestPOST_RUN(EcuM_UserType user)
 #else
     (void)detErrorId;
 #endif /*ECUM_DEV_ERROR_DETECT == STD_ON */
+
+    EcuM_ArtiApiStop(2, ECUM_SID_REQUESTPOST_RUN, ret);
+
     return ret;
 }
 /* PRQA S 1503, 2844 -- */
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 /* PRQA S 1503, 2844 ++ */ /* VL_QAC_NoUsedApi, VL_EcuM_DerefInvalidPtr */
 /**
  * Releases the POST_RUN state for the specified user in the ECU Manager.
@@ -408,6 +431,8 @@ Std_ReturnType EcuM_RequestPOST_RUN(EcuM_UserType user)
  */
 Std_ReturnType EcuM_ReleasePOST_RUN(EcuM_UserType user)
 {
+    EcuM_ArtiApiStart(2, ECUM_SID_RELEASEPOST_RUN, user);
+
     uint8               uid;
     Std_ReturnType      ret = E_OK;
     EcuM_RunTimeLcType* pRt;
@@ -459,11 +484,18 @@ Std_ReturnType EcuM_ReleasePOST_RUN(EcuM_UserType user)
 #else
     (void)detErrorId;
 #endif /*ECUM_DEV_ERROR_DETECT == STD_ON */
+
+    EcuM_ArtiApiStop(2, ECUM_SID_RELEASEPOST_RUN, ret);
+
     return ret;
 }
 /* PRQA S 1503, 2844 -- */
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 #endif /*STD_ON == ECUM_MODE_HANDING*/
 
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 /**
  * Selects the boot target for the ECU Manager.
  *
@@ -473,6 +505,8 @@ Std_ReturnType EcuM_ReleasePOST_RUN(EcuM_UserType user)
  */
 Std_ReturnType EcuM_SelectBootTarget(EcuM_BootTargetType target) /* PRQA S 1503 */ /* VL_QAC_NoUsedApi */
 {
+    EcuM_ArtiApiStart(2, ECUM_SID_SELECTBOOTTARGET, target);
+
     Std_ReturnType      ret = E_OK;
     EcuM_RunTimeLcType* tempRunData;
     uint8               detErrorId = ECUM_E_OK;
@@ -483,7 +517,16 @@ Std_ReturnType EcuM_SelectBootTarget(EcuM_BootTargetType target) /* PRQA S 1503 
         /*EcuM2247 EcuM2835 */
         /*The implementer must ensure that the boot target information is placed at a safe location
           which then can be evaluated by the boot manager after a reset. */
-        tempRunData->BootTarget = target;
+        /* Check if target is within valid range */
+        if (target <= ECUM_BOOT_TARGET_SYS_BOOTLOADER) /* Valid values are 0, 1, 2 */
+        {
+            tempRunData->BootTarget = target;
+        }
+        else
+        {
+            detErrorId = ECUM_E_INVALID_PAR;
+            ret        = E_NOT_OK;
+        }
     }
 #if (ECUM_DEV_ERROR_DETECT == STD_ON)
     else
@@ -500,9 +543,15 @@ Std_ReturnType EcuM_SelectBootTarget(EcuM_BootTargetType target) /* PRQA S 1503 
     (void)detErrorId;
 #endif /*ECUM_DEV_ERROR_DETECT == STD_ON */
 
+    EcuM_ArtiApiStop(2, ECUM_SID_SELECTBOOTTARGET, ret);
+
     return ret;
 }
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 /**
  * Retrieves the current boot target set in the ECU Manager.
  *
@@ -512,6 +561,8 @@ Std_ReturnType EcuM_SelectBootTarget(EcuM_BootTargetType target) /* PRQA S 1503 
  */
 Std_ReturnType EcuM_GetBootTarget(EcuM_BootTargetType* target) /* PRQA S 1503 */ /* VL_QAC_NoUsedApi */
 {
+    EcuM_ArtiApiStart(2, ECUM_SID_GETBOOTTARGET, target);
+
     Std_ReturnType      ret = E_NOT_OK;
     EcuM_RunTimeLcType* tempRunData;
     uint8               detErrorId = ECUM_E_OK;
@@ -525,7 +576,7 @@ Std_ReturnType EcuM_GetBootTarget(EcuM_BootTargetType* target) /* PRQA S 1503 */
 #if (ECUM_DEV_ERROR_DETECT == STD_ON)
     else if (NULL_PTR == target)
     {
-        detErrorId = ECUM_E_NULL_POINTER;
+        detErrorId = ECUM_E_PARAM_POINTER;
     }
 #endif /*ECUM_DEV_ERROR_DETECT == STD_ON */
     else
@@ -543,10 +594,16 @@ Std_ReturnType EcuM_GetBootTarget(EcuM_BootTargetType* target) /* PRQA S 1503 */
     (void)detErrorId;
 #endif /*ECUM_DEV_ERROR_DETECT == STD_ON */
 
+    EcuM_ArtiApiStop(2, ECUM_SID_GETBOOTTARGET, ret);
+
     return ret;
 }
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
 #if (ECUM_MAX_MCU_CORE_NUM > 1)
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 /**
  * Retrieves the index of the specified slave core ID.
  *
@@ -569,8 +626,12 @@ uint8 EcuM_GetSlaveCoreIndex(CoreIdType coreId)
 
     return coreIdx;
 }
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 #endif /*ECUM_MAX_MCU_CORE_NUM > 1*/
 
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 /* PRQA S 2814, 1532 ++ */ /* VL_QAC_MultiReturn, VL_QAC_OneFunRef */
 /**
  * Searches for the user index based on the caller ID.
@@ -605,7 +666,11 @@ Std_ReturnType EcuM_SearchUserByCaller(EcuM_UserType caller, uint8* userIndex)
     return ret;
 }
 /* PRQA S 2814, 1532 -- */
+#define ECUM_STOP_SEC_CODE
+#include "EcuM_MemMap.h"
 
+#define ECUM_START_SEC_CODE
+#include "EcuM_MemMap.h"
 /* PRQA S 2814 ++ */ /* VL_QAC_MultiReturn */
 /**
  * Checks if the ECU Manager is in the initialized state.
@@ -618,16 +683,21 @@ boolean EcuM_isInitState(EcuM_RunTimeLcType** EcuMRunDataPtr)
 {
     boolean             status = FALSE;
     EcuM_RunTimeLcType* tempRunDataPtr;
+#if (ECUM_CLONE_VARIABLE_SUPPORT_ENABLED == STD_ON)
+    status          = EcuMRunData.EcuM_IsInit;
+    *EcuMRunDataPtr = &EcuMRunData;
+#else  /* ECUM_CLONE_VARIABLE_SUPPORT_ENABLED == STD_OFF */
     tempRunDataPtr = EcuM_GetLcRunDataPtr();
+
     if (NULL_PTR != tempRunDataPtr)
     {
         *EcuMRunDataPtr = tempRunDataPtr;
         status          = tempRunDataPtr->EcuM_IsInit;
     }
+#endif /* ECUM_CLONE_VARIABLE_SUPPORT_ENABLED == STD_ON */
     return status;
 }
 /* PRQA S 2814 -- */
-
 #define ECUM_STOP_SEC_CODE
 #include "EcuM_MemMap.h"
 

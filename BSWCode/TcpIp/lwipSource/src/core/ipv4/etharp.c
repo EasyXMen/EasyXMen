@@ -115,11 +115,19 @@ struct etharp_entry {
 };
 
 #define TCPIP_VAR_ARP_TABLE(coreIndex)    g_arp_table[(coreIndex)]
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 static struct etharp_entry g_arp_table[TCPIP_MULTICORE_NUMBER][ARP_TABLE_SIZE];
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 
 #if !LWIP_NETIF_HWADDRHINT
 #define TCPIP_VAR_ETHARP_CACHED_ENTRY(coreIndex)    g_etharp_cached_entry[(coreIndex)]
+#define TCPIP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 static netif_addr_idx_t g_etharp_cached_entry[TCPIP_MULTICORE_NUMBER];
+#define TCPIP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 #endif /* !LWIP_NETIF_HWADDRHINT */
 
 /** Try hard to create a new entry - we want the IP address to appear in
@@ -144,15 +152,26 @@ static netif_addr_idx_t g_etharp_cached_entry[TCPIP_MULTICORE_NUMBER];
 #endif
 
 #if !TCPIP_LWIP_ARP_STATIC_ONLY
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 static err_t etharp_request_dst(struct netif *netif, const ip4_addr_t *ipaddr, const struct eth_addr *hw_dst_addr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t etharp_raw(struct netif *netif,
                         const struct eth_addr *ethsrc_addr, const struct eth_addr *ethdst_addr,
                         const struct eth_addr *hwsrc_addr, const ip4_addr_t *ipsrc_addr,
                         const struct eth_addr *hwdst_addr, const ip4_addr_t *ipdst_addr,
                         const u16_t opcode);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
 #if ARP_QUEUEING
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Free a complete queue of etharp entries
  *
@@ -171,6 +190,8 @@ free_etharp_q(struct etharp_q_entry *q)
     memp_free(MEMP_ARP_QUEUE, r);
   }
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #else /* ARP_QUEUEING */
 
 /** Compatibility define: free the queued pbuf */
@@ -178,6 +199,8 @@ free_etharp_q(struct etharp_q_entry *q)
 
 #endif /* ARP_QUEUEING */
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /** Clean up ARP table entries */
 static void
 etharp_free_entry(int i)
@@ -206,7 +229,11 @@ etharp_free_entry(int i)
   arp_table[i].ethaddr = ethzero;
 #endif /* LWIP_DEBUG */
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Clears expired entries in the ARP table.
  *
@@ -223,7 +250,7 @@ etharp_tmr(void)
 
   LWIP_DEBUGF(ETHARP_DEBUG, ("etharp_timer\n"));
   /* remove expired entries from the ARP table */
-  for (i = 0; i < ARP_TABLE_SIZE; ++i) {
+  for (i = 0; i < (int)ARP_TABLE_SIZE; ++i) {
     u8_t state = arp_table[i].state;
     if (state != ETHARP_STATE_EMPTY
 #if ETHARP_SUPPORT_STATIC_ENTRIES
@@ -260,7 +287,11 @@ etharp_tmr(void)
 #endif
 
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Search the ARP table for a matching or new entry.
  *
@@ -287,11 +318,11 @@ etharp_find_entry(const ip4_addr_t *ipaddr, u8_t flags, struct netif *netif)
 {
   struct etharp_entry *const arp_table = TCPIP_VAR_ARP_TABLE(TcpIp_MulticoreIndex);
 
-  s16_t old_pending = ARP_TABLE_SIZE, old_stable = ARP_TABLE_SIZE;
-  s16_t empty = ARP_TABLE_SIZE;
+  s16_t old_pending = (s16_t)ARP_TABLE_SIZE, old_stable = (s16_t)ARP_TABLE_SIZE;
+  s16_t empty = (s16_t)ARP_TABLE_SIZE;
   s16_t i = 0;
   /* oldest entry with packets on queue */
-  s16_t old_queue = ARP_TABLE_SIZE;
+  s16_t old_queue = (s16_t)ARP_TABLE_SIZE;
   /* its age */
   u16_t age_queue = 0, age_pending = 0, age_stable = 0;
 
@@ -312,10 +343,10 @@ etharp_find_entry(const ip4_addr_t *ipaddr, u8_t flags, struct netif *netif)
    *    until 5 matches, or all entries are searched for.
    */
 
-  for (i = 0; i < ARP_TABLE_SIZE; ++i) {
+  for (i = 0; i < (s16_t)ARP_TABLE_SIZE; ++i) {
     u8_t state = arp_table[i].state;
     /* no empty entry found yet and now we do find one? */
-    if ((empty == ARP_TABLE_SIZE) && (state == ETHARP_STATE_EMPTY)) {
+    if ((empty == (s16_t)ARP_TABLE_SIZE) && (state == ETHARP_STATE_EMPTY)) {
       LWIP_DEBUGF(ETHARP_DEBUG, ("etharp_find_entry: found empty entry %d\n", (int)i));
       /* remember first empty entry */
       empty = i;
@@ -386,7 +417,7 @@ etharp_find_entry(const ip4_addr_t *ipaddr, u8_t flags, struct netif *netif)
   /* don't create new entry, only search? */
   if (((flags & ETHARP_FLAG_FIND_ONLY) != 0) ||
       /* or no empty entry found and not allowed to recycle? */
-      ((empty == ARP_TABLE_SIZE) && ((flags & ETHARP_FLAG_TRY_HARD) == 0))) {
+      ((empty == (s16_t)ARP_TABLE_SIZE) && ((flags & ETHARP_FLAG_TRY_HARD) == 0))) {
     LWIP_DEBUGF(ETHARP_DEBUG | LWIP_DBG_TRACE, ("etharp_find_entry: no empty entry found and not allowed to recycle\n"));
     return (s16_t)ERR_MEM;
   }
@@ -402,24 +433,24 @@ etharp_find_entry(const ip4_addr_t *ipaddr, u8_t flags, struct netif *netif)
    */
 
   /* 1) empty entry available? */
-  if (empty < ARP_TABLE_SIZE) {
+  if (empty < (s16_t)ARP_TABLE_SIZE) {
     i = empty;
     LWIP_DEBUGF(ETHARP_DEBUG | LWIP_DBG_TRACE, ("etharp_find_entry: selecting empty entry %d\n", (int)i));
   } else {
     /* 2) found recyclable stable entry? */
-    if (old_stable < ARP_TABLE_SIZE) {
+    if (old_stable < (s16_t)ARP_TABLE_SIZE) {
       /* recycle oldest stable*/
       i = old_stable;
       LWIP_DEBUGF(ETHARP_DEBUG | LWIP_DBG_TRACE, ("etharp_find_entry: selecting oldest stable entry %d\n", (int)i));
       /* no queued packets should exist on stable entries */
       LWIP_ASSERT("arp_table[i].q == NULL", arp_table[i].q == NULL);
       /* 3) found recyclable pending entry without queued packets? */
-    } else if (old_pending < ARP_TABLE_SIZE) {
+    } else if (old_pending < (s16_t)ARP_TABLE_SIZE) {
       /* recycle oldest pending */
       i = old_pending;
       LWIP_DEBUGF(ETHARP_DEBUG | LWIP_DBG_TRACE, ("etharp_find_entry: selecting oldest pending entry %d (without queue)\n", (int)i));
       /* 4) found recyclable pending entry with queued packets? */
-    } else if (old_queue < ARP_TABLE_SIZE) {
+    } else if (old_queue < (s16_t)ARP_TABLE_SIZE) {
       /* recycle oldest pending (queued packets are free in etharp_free_entry) */
       i = old_queue;
       LWIP_DEBUGF(ETHARP_DEBUG | LWIP_DBG_TRACE, ("etharp_find_entry: selecting oldest pending entry %d, freeing packet queue %p\n", (int)i, (void *)(arp_table[i].q)));
@@ -430,15 +461,15 @@ etharp_find_entry(const ip4_addr_t *ipaddr, u8_t flags, struct netif *netif)
     }
 
     /* { empty or recyclable entry found } */
-    LWIP_ASSERT("i < ARP_TABLE_SIZE", i < ARP_TABLE_SIZE);
+    LWIP_ASSERT("i < ARP_TABLE_SIZE", i < (s16_t)ARP_TABLE_SIZE);
     etharp_free_entry(i);
   }
 
-  LWIP_ASSERT("i < ARP_TABLE_SIZE", i < ARP_TABLE_SIZE);
+  LWIP_ASSERT("i < ARP_TABLE_SIZE", i < (s16_t)ARP_TABLE_SIZE);
   LWIP_ASSERT("arp_table[i].state == ETHARP_STATE_EMPTY",
               arp_table[i].state == ETHARP_STATE_EMPTY);
 #else
-  if (empty < ARP_TABLE_SIZE) {
+  if (empty < (s16_t)ARP_TABLE_SIZE) {
     i = empty;
   }
   else {
@@ -461,7 +492,11 @@ etharp_find_entry(const ip4_addr_t *ipaddr, u8_t flags, struct netif *netif)
 #endif /* ETHARP_TABLE_MATCH_NETIF */
   return (s16_t)i;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Update (or insert) a IP/MAC address pair in the ARP cache.
  *
@@ -559,8 +594,12 @@ etharp_update_arp_entry(struct netif *netif, const ip4_addr_t *ipaddr, struct et
   }
   return ERR_OK;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if ETHARP_SUPPORT_STATIC_ENTRIES
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /** Add a new static entry to the ARP table. If an entry exists for the
  * specified IP address, this entry is overwritten.
  * If packets are queued for the specified IP address, they are sent out.
@@ -587,7 +626,11 @@ etharp_add_static_entry(const ip4_addr_t *ipaddr, struct eth_addr *ethaddr, stru
 
   return etharp_update_arp_entry(local_netif, ipaddr, ethaddr, ETHARP_FLAG_TRY_HARD | ETHARP_FLAG_STATIC_ENTRY);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /** Remove a static entry from the ARP table previously added with a call to
  * etharp_add_static_entry.
  *
@@ -622,8 +665,12 @@ etharp_remove_static_entry(const ip4_addr_t *ipaddr, struct netif *netif)
   etharp_free_entry(i);
   return ERR_OK;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif /* ETHARP_SUPPORT_STATIC_ENTRIES */
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Remove all ARP table entries of the specified netif.
  *
@@ -637,7 +684,7 @@ etharp_cleanup_netif(struct netif *netif)
 
   int i;
 
-  for (i = 0; i < ARP_TABLE_SIZE; ++i) {
+  for (i = 0; i < (int)ARP_TABLE_SIZE; ++i) {
     u8_t state = arp_table[i].state;
     if ((state != ETHARP_STATE_EMPTY)
 #if ETHARP_SUPPORT_STATIC_ENTRIES
@@ -649,7 +696,11 @@ etharp_cleanup_netif(struct netif *netif)
   }
 #endif
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Finds (stable) ethernet/IP address pair from ARP table
  * using interface and IP address index.
@@ -661,7 +712,7 @@ etharp_cleanup_netif(struct netif *netif)
  * @param ip_ret points to return pointer
  * @return table index if found, -1 otherwise
  */
-ssize_t
+int
 etharp_find_addr(struct netif *netif, const ip4_addr_t *ipaddr,
                  struct eth_addr **eth_ret, const ip4_addr_t **ip_ret)
 {
@@ -684,11 +735,15 @@ etharp_find_addr(struct netif *netif, const ip4_addr_t *ipaddr,
   ) {
     *eth_ret = &arp_table[i].ethaddr;
     *ip_ret = &arp_table[i].ipaddr;
-    return i;
+    return (int)i;
   }
   return -1;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Possibility to iterate over stable ARP table entries
  *
@@ -722,7 +777,11 @@ etharp_get_entry(size_t i, ip4_addr_t **ipaddr, struct netif **netif, struct eth
     return 0;
   }
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Responds to ARP requests to us. Upon ARP replies to us, add entry to cache
  * send out queued IP packets. Updates cache with snooped address pairs.
@@ -848,7 +907,11 @@ etharp_input(struct pbuf *p, struct netif *netif)
   /* free ARP packet */
   pbuf_free(p);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /** Just a small helper function that sends a pbuf to an ethernet address
  * in the arp_table specified by the index 'arp_idx'.
  */
@@ -883,7 +946,11 @@ etharp_output_to_arp_index(struct netif *netif, struct pbuf *q, netif_addr_idx_t
 
   return ethernet_output(netif, q, (struct eth_addr *)(netif->hwaddr), &arp_table[arp_idx].ethaddr, ETHTYPE_IP);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Resolve and fill-in Ethernet address header for outgoing IP packet.
  *
@@ -1029,7 +1096,11 @@ etharp_output(struct netif *netif, struct pbuf *q, const ip4_addr_t *ipaddr)
   /* send packet directly on the link */
   return ethernet_output(netif, q, (struct eth_addr *)(netif->hwaddr), dest, ETHTYPE_IP);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Send an ARP request for the given IP address and/or queue a packet.
  *
@@ -1233,7 +1304,11 @@ etharp_query(struct netif *netif, const ip4_addr_t *ipaddr, struct pbuf *q)
   return ERR_MEM;
 #endif
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Send a raw ARP packet (opcode and all addresses can be modified)
  *
@@ -1330,7 +1405,11 @@ etharp_raw(struct netif *netif, const struct eth_addr *ethsrc_addr,
 #endif
 
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Send an ARP request packet asking for ipaddr to a specific eth address.
  * Used to send unicast request to refresh the ARP table just before an entry
@@ -1350,7 +1429,11 @@ etharp_request_dst(struct netif *netif, const ip4_addr_t *ipaddr, const struct e
                     (struct eth_addr *)netif->hwaddr, netif_ip4_addr(netif), &ethzero,
                     ipaddr, ARP_REQUEST);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Send an ARP request packet asking for ipaddr.
  *
@@ -1366,6 +1449,8 @@ etharp_request(struct netif *netif, const ip4_addr_t *ipaddr)
   LWIP_DEBUGF(ETHARP_DEBUG | LWIP_DBG_TRACE, ("etharp_request: sending ARP request.\n"));
   return etharp_request_dst(netif, ipaddr, &ethbroadcast);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if LWIP_ACD
 /**
@@ -1406,6 +1491,8 @@ etharp_acd_announce(struct netif *netif, const ip4_addr_t *ipaddr)
 #endif /* LWIP_ACD */
 
 #if TCPIP_LWIP_ARP_DYNAMIC_TIMEOUT
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Remove all dynamic ARP table entries of the specified netif.
  *
@@ -1417,7 +1504,7 @@ void etharp_clear_dynamic_entry(struct netif *netif)
 
   int i;
 
-  for (i = 0; i < ARP_TABLE_SIZE; ++i) {
+  for (i = 0; i < (int)ARP_TABLE_SIZE; ++i) {
     u8_t state = arp_table[i].state;
     if ((state != ETHARP_STATE_EMPTY) && (arp_table[i].netif == netif)
 #if ETHARP_SUPPORT_STATIC_ENTRIES
@@ -1428,18 +1515,28 @@ void etharp_clear_dynamic_entry(struct netif *netif)
     }
   }
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void etharp_set_dynamic_timeout(u16_t time_vlu)
 {
   if(time_vlu >= 60u) {
     arp_dynamic_timeout = time_vlu;
   }
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void etharp_clear_dynamic_timeout(void)
 {
   arp_dynamic_timeout = ARP_MAXAGE;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #endif
 

@@ -144,15 +144,31 @@ struct memp_desc {
 #define LWIP_MEMPOOL_DECLARE_STATS_REFERENCE(name)
 #endif
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void memp_init_pool(const struct memp_desc *desc);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if MEMP_OVERFLOW_CHECK
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void *memp_malloc_pool_fn(const struct memp_desc* desc, const char* file, const int line);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #define memp_malloc_pool(d) memp_malloc_pool_fn((d), __FILE__, __LINE__)
 #else
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void *memp_malloc_pool(const struct memp_desc *desc);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 void  memp_free_pool(const struct memp_desc* desc, void *mem);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #ifdef __cplusplus
 }

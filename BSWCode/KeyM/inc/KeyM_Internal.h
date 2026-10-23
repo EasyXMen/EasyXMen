@@ -30,7 +30,6 @@
 #include "KeyM.h"
 #include "NvM.h"
 #include "Csm.h"
-#include "KeyM_Cfg.h"
 #include "KeyM_Externals.h"
 #include "SchM_KeyM.h"
 #if (STD_ON == KEYM_DEVERROR_DETECT)
@@ -39,13 +38,13 @@
 #if (STD_ON == KEYM_SECURITY_ENENT_REPORT_ENABLED)
 #include "IdsM.h"
 #endif
+#include "KeyM_Arti.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /* ================================================ macros  ================================================ */
-
 #define KEYM_SHEKEY_INPUT_LEN (64U) /**< Length of the SHE key input. */
 
 #define KEYM_SHEKEY_SLOTID_OFFSET (15U) /**< Offset for the SHE key slot ID. */
@@ -75,6 +74,14 @@ extern "C" {
 #define KEYM_NVM_TIMER_STOP (0U) /**< Value to stop the NVM timer. */
 
 #define KEYM_NVM_TIMER_START (1U) /**< Value to start the NVM timer. */
+
+/*Mapping dispatch id for Csm_CustomSync*/
+#define KEYM_CERT_ELE_GET_DSPID      (0x1580000Fu) /**< Dispatch index for API:KeyM_CertElementGet. */
+#define KEYM_CERT_GET_STATUS_DSPID   (0x15800012u) /**< Dispatch index for API:KeyM_CertGetStatus. */
+#define KEYM_CERT_ELE_GETBYIDX_DSPID (0x1580001Bu) /**< Dispatch index for API:KeyM_CertificateElementGetByIndex. */
+#define KEYM_CERT_ELE_GETCNT_DSPID   (0x1580001Cu) /**< Dispatch index for API:KeyM_CertificateElementGetCount. */
+#define KEYM_SET_CERT_DSPID          (0x1580000Au) /**< Dispatch index for API:KeyM_SetCertificate. */
+#define KEYM_GET_CERT_DSPID          (0x1580000Bu) /**< Dispatch index for API:KeyM_GetCertificate. */
 
 #if !defined(KEYM_LOCAL)
 #define KEYM_LOCAL static /**< Local storage class specifier. */ /* PRQA S 3414 */ /* VL_QAC_FctLikeMacro */
@@ -326,6 +333,9 @@ typedef struct
 
     /** This field holds a pointer to the buffer containing the data of the certificate element.*/
     KeyM_Asn1DesType* certEleBuf;
+#if (KEYM_CUSTOM_SERV_ENABLE == STD_ON)
+    uint32 mapCertEle2KeyEleId;
+#endif /*KEYM_CUSTOM_SERV_ENABLE == STD_ON*/
 } KeyM_CertEleType;
 
 /**
@@ -399,6 +409,11 @@ typedef struct KeyM_CertType
 
     /** This field is a boolean flag that indicates whether the certificate is self-signed.*/
     boolean selfSignedCert;
+
+#if (KEYM_CUSTOM_SERV_ENABLE == STD_ON)
+    /** This field is is used to record the csmJob referenced by the custom service.*/
+    uint32 customJobRef;
+#endif /*KEYM_CUSTOM_SERV_ENABLE == STD_ON*/
 } KeyM_CertPCfgType;
 
 /**
@@ -446,29 +461,62 @@ typedef struct
 /**
  * @brief Initialization status of the KeyM module.
  */
+#define KEYM_START_SEC_VAR_CLEARED_BOOLEAN
+#include "KeyM_MemMap.h"
 extern boolean KeyM_InitStatus;
+#define KEYM_STOP_SEC_VAR_CLEARED_BOOLEAN
+#include "KeyM_MemMap.h"
 
 /**
  * @brief Session open status of the KeyM module.
  */
+#define KEYM_START_SEC_VAR_CLEARED_BOOLEAN
+#include "KeyM_MemMap.h"
 extern boolean KeyM_SessionOpen;
+#define KEYM_STOP_SEC_VAR_CLEARED_BOOLEAN
+#include "KeyM_MemMap.h"
 
 /**
  * @brief Array of crypto key configuration data.
  */
+#define KEYM_START_SEC_CONST_UNSPECIFIED
+#include "KeyM_MemMap.h"
 extern const KeyM_CryptoKeyPCfgType KeyM_CryptoKeyCfg[KEYM_KEY_NUM];
+#define KEYM_STOP_SEC_CONST_UNSPECIFIED
+#include "KeyM_MemMap.h"
 
 #if (KEYM_NVM_BLOCK_NUM > 0)
+#define KEYM_START_SEC_CONST_UNSPECIFIED
+#include "KeyM_MemMap.h"
 extern const KeyM_NvmBlockPCfgType KeyM_NvmBlockPCfg[KEYM_NVM_BLOCK_NUM];
+#define KEYM_STOP_SEC_CONST_UNSPECIFIED
+#include "KeyM_MemMap.h"
 #endif
 #if (KEYM_CERT_NUM > 0)
+#define KEYM_START_SEC_CONST_UNSPECIFIED
+#include "KeyM_MemMap.h"
 extern const KeyM_CertPCfgType KeyM_CertPCfg[KEYM_CERT_NUM];
+#define KEYM_STOP_SEC_CONST_UNSPECIFIED
+#include "KeyM_MemMap.h"
 
+#define KEYM_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "KeyM_MemMap.h"
 extern KeyM_CertTimeType KeyM_CertStartTime[KEYM_CERT_NUM];
+#define KEYM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "KeyM_MemMap.h"
 
+#define KEYM_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "KeyM_MemMap.h"
 extern KeyM_CertTimeType KeyM_CertEndTime[KEYM_CERT_NUM];
+#define KEYM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "KeyM_MemMap.h"
 
+#define KEYM_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "KeyM_MemMap.h"
 extern uint32 KeyM_CertVersion[KEYM_CERT_NUM];
+#define KEYM_STOP_SEC_VAR_CLEARED_UNSPECIFIED
+#include "KeyM_MemMap.h"
+
 #endif
 /* ========================================= external function declarations ========================================= */
 /**
@@ -483,7 +531,11 @@ extern uint32 KeyM_CertVersion[KEYM_CERT_NUM];
  * @synchronous    TRUE
  * @trace       CPD-71423
  */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 void KeyM_CopyData(void* dest, const void* src, uint32 size);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
 /**
  * @brief          Compares two strings of a specified length.
@@ -500,7 +552,11 @@ void KeyM_CopyData(void* dest, const void* src, uint32 size);
  * @synchronous    TRUE
  * @trace       CPD-71424
  */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 Std_ReturnType KeyM_strcmp(const uint8* str1, const uint8* str2, uint16 size);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
 /**
  * @brief          Handles the update of a cryptographic key.
@@ -522,7 +578,11 @@ Std_ReturnType KeyM_strcmp(const uint8* str1, const uint8* str2, uint16 size);
  * @synchronous    TRUE
  * @trace       CPD-71425
  */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 Std_ReturnType KeyM_HandleUpdate(const uint8* ResultDataPtr, uint16 ResultDataLength, uint16 KeyIdx, boolean sheKey);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
 #if (STD_OFF == KEYM_CRYPTO_KEYHANDLER_UPDATE_ENABLED)
 
@@ -543,7 +603,11 @@ Std_ReturnType KeyM_HandleUpdate(const uint8* ResultDataPtr, uint16 ResultDataLe
  * @synchronous    TRUE
  * @trace       CPD-71426
  */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 Std_ReturnType KeyM_GetSHEKey_M4M5(uint32 keyId, uint8* ResponseDataPtr, uint16* ResponseMaxDataLength);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 #endif
 
 /**
@@ -565,7 +629,11 @@ Std_ReturnType KeyM_GetSHEKey_M4M5(uint32 keyId, uint8* ResponseDataPtr, uint16*
  * @synchronous    TRUE
  * @trace       CPD-71427
  */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 Std_ReturnType KeyM_HandleParseCert(KeyM_CertificateIdType CertId, const uint8* certDataPtr, uint32 certDataLength);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
 /**
  * @brief          Handles the storage of certificate elements in the CSM.
@@ -580,7 +648,11 @@ Std_ReturnType KeyM_HandleParseCert(KeyM_CertificateIdType CertId, const uint8* 
  * @synchronous    TRUE
  * @trace       CPD-71428
  */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 void KeyM_HandleCsmKeyStorage(uint32 keyId, uint16 certId, boolean keySet);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
 /**
  * @brief          Verifies a certificate against a higher-level certificate in the chain.
@@ -604,7 +676,11 @@ void KeyM_HandleCsmKeyStorage(uint32 keyId, uint16 certId, boolean keySet);
  * @synchronous    TRUE
  * @trace       CPD-71429
  */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 Std_ReturnType KeyM_HandleCertcVerify(const KeyM_CertPCfgType* certCfgPtr, const KeyM_CertPCfgType* certUpperHierRef);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
 /**
  * @brief          Sets the status of a certificate.
@@ -619,7 +695,11 @@ Std_ReturnType KeyM_HandleCertcVerify(const KeyM_CertPCfgType* certCfgPtr, const
  * @synchronous    TRUE
  * @trace       CPD-71430
  */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 Std_ReturnType KeyM_CertSetStatus(KeyM_CertificateIdType CertId, KeyM_CertificateStatusType Status);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
 /**
  * @brief          Handles the storage of certificates in NVM with delayed write.
@@ -633,7 +713,11 @@ Std_ReturnType KeyM_CertSetStatus(KeyM_CertificateIdType CertId, KeyM_Certificat
  * @synchronous    TRUE
  * @trace       CPD-71431
  */
+#define KEYM_START_SEC_CODE
+#include "KeyM_MemMap.h"
 void KeyM_CertStoreNvmHandle(void);
+#define KEYM_STOP_SEC_CODE
+#include "KeyM_MemMap.h"
 
 #ifdef __cplusplus
 }

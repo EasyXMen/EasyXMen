@@ -59,7 +59,11 @@ typedef struct
  *
  * @param[out] ctx  Pointer to the SM3 context structure to be initialized.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_Sm3_Start(Crypto_SM3_Context* ctx);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Updates the SM3 context with a new block of data.
@@ -75,7 +79,11 @@ void Crypto_Sm3_Start(Crypto_SM3_Context* ctx);
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Sm3_Update(Crypto_SM3_Context* c, const void* data_, uint32 len);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Finalizes the SM3 hash computation.
@@ -85,7 +93,11 @@ Std_ReturnType Crypto_Sm3_Update(Crypto_SM3_Context* c, const void* data_, uint3
  * @param[in,out] c  Pointer to the SM3 context structure.
  * @param[out]    md Pointer to the buffer where the resulting hash will be stored.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_Sm3_Finish(Crypto_SM3_Context* c, uint8* md);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Computes the SM3 hash of a given input data.
@@ -100,7 +112,11 @@ void Crypto_Sm3_Finish(Crypto_SM3_Context* c, uint8* md);
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
-Std_ReturnType Crypto_Sm3(uint8* input, uint32 ilen, uint8* output);
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+Std_ReturnType Crypto_Sm3(const uint8* input, uint32 ilen, uint8* output);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Processes the SM3 hash computation for a given object ID.
@@ -113,7 +129,11 @@ Std_ReturnType Crypto_Sm3(uint8* input, uint32 ilen, uint8* output);
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Sm3_Process(uint32 objectId);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 #ifdef __cplusplus
 }

@@ -31,6 +31,8 @@
  *      1. Support multi-partition distribution.
  *  V2.1.1    2025-04-30 caihong.liu
  *      CPT-11890: Add the scenario where the upstream gateway of the relay coordination gateway goes offline.
+ *  V2.1.2    2026-06-03 xiaojian.liang
+ *      CPTASK-1133: Add ARTI stub functions and ARTI_TRACE_N instrumentation.
  *
  ==================================================================================================================== */
 
@@ -65,6 +67,7 @@
 #if NM_STATE_CHANGE_IND_ENABLED == STD_ON
 #include "Com.h"
 #endif
+
 /* =============================================== version information ============================================== */
 /** Published Information */
 #define NM_VENDOR_ID                   ((uint16)(62u))
@@ -86,40 +89,40 @@
 #define NM_E_NO_ERROR                  ((uint8)(0xffu))
 
 /** Service ID */
-#define NM_SERVICE_ID_INIT                          ((uint8)0x00u)
-#define NM_SERVICE_ID_PASSIVESTARTUP                ((uint8)0x01u)
-#define NM_SERVICE_ID_NETWORKREQUEST                ((uint8)0x02u)
-#define NM_SERVICE_ID_NETWORKRELEASE                ((uint8)0x03u)
-#define NM_SERVICE_ID_DISABLECOMMUNICATION          ((uint8)0x04u)
-#define NM_SERVICE_ID_ENABLECOMMUNICATION           ((uint8)0x05u)
-#define NM_SERVICE_ID_SETUSERDATA                   ((uint8)0x06u)
-#define NM_SERVICE_ID_GETUSERDATA                   ((uint8)0x07u)
-#define NM_SERVICE_ID_GETPDUDATA                    ((uint8)0x08u)
-#define NM_SERVICE_ID_REPEATMESSAGEREQUEST          ((uint8)0x09u)
-#define NM_SERVICE_ID_GETNODEIDENTIFIER             ((uint8)0x0au)
-#define NM_SERVICE_ID_GETLOCALNODEIDENTIFIER        ((uint8)0x0bu)
-#define NM_SERVICE_ID_CHECKREMOTESLEEPINDICATION    ((uint8)0x0du)
-#define NM_SERVICE_ID_GETSTATE                      ((uint8)0x0eu)
-#define NM_SERVICE_ID_GETVERSIONINFO                ((uint8)0x0fu)
-#define NM_SERVICE_ID_NETWORKSTARTINDICATION        ((uint8)0x11u)
-#define NM_SERVICE_ID_NETWORKMODE                   ((uint8)0x12u)
-#define NM_SERVICE_ID_BUSSLEEPMODE                  ((uint8)0x14u)
-#define NM_SERVICE_ID_PREPAREBUSSLEEPMODE           ((uint8)0x13u)
-#define NM_SERVICE_ID_REMOTESLEEPINDICATION         ((uint8)0x17u)
-#define NM_SERVICE_ID_REMOTESLEEPCANCELLATION       ((uint8)0x18u)
-#define NM_SERVICE_ID_SYNCHRONIZATIONPOINT          ((uint8)0x19u)
-#define NM_SERVICE_ID_COORDREADYTOSLEEPINDICATION   ((uint8)0x1eu)
-#define NM_SERVICE_ID_COORDREADYTOSLEEPCANCELLATION ((uint8)0x1fu)
-#define NM_SERVICE_ID_PDURXINDICATION               ((uint8)0x15u)
-#define NM_SERVICE_ID_STATECHANGENOTIFICATION       ((uint8)0x16u)
-#define NM_SERVICE_ID_REPEATMESSAGEINDICATION       ((uint8)0x1au)
-#define NM_SERVICE_ID_TXTIMEOUTEXCEPTION            ((uint8)0x1bu)
-#define NM_SERVICE_ID_CARWAKEUPINDICATION           ((uint8)0x1du)
-#define NM_SERVICE_ID_MAINFUNCTION                  ((uint8)0x10u)
-#define NM_SERVICE_ID_SYNCHRONIZEMODE               ((uint8)0x21u)
-#define NM_SERVICE_ID_UPDATEIRA                     ((uint8)0x26u)
-#define NM_SERVICE_ID_PNCBITVECTORTXINDICATION      ((uint8)0x27u)
-#define NM_SERVICE_ID_PNCBITVECTORRXINDICATION      ((uint8)0x28u)
+#define NM_SERVICE_ID_INIT                          0x00u
+#define NM_SERVICE_ID_PASSIVESTARTUP                0x01u
+#define NM_SERVICE_ID_NETWORKREQUEST                0x02u
+#define NM_SERVICE_ID_NETWORKRELEASE                0x03u
+#define NM_SERVICE_ID_DISABLECOMMUNICATION          0x04u
+#define NM_SERVICE_ID_ENABLECOMMUNICATION           0x05u
+#define NM_SERVICE_ID_SETUSERDATA                   0x06u
+#define NM_SERVICE_ID_GETUSERDATA                   0x07u
+#define NM_SERVICE_ID_GETPDUDATA                    0x08u
+#define NM_SERVICE_ID_REPEATMESSAGEREQUEST          0x09u
+#define NM_SERVICE_ID_GETNODEIDENTIFIER             0x0au
+#define NM_SERVICE_ID_GETLOCALNODEIDENTIFIER        0x0bu
+#define NM_SERVICE_ID_CHECKREMOTESLEEPINDICATION    0x0du
+#define NM_SERVICE_ID_GETSTATE                      0x0eu
+#define NM_SERVICE_ID_GETVERSIONINFO                0x0fu
+#define NM_SERVICE_ID_NETWORKSTARTINDICATION        0x11u
+#define NM_SERVICE_ID_NETWORKMODE                   0x12u
+#define NM_SERVICE_ID_BUSSLEEPMODE                  0x14u
+#define NM_SERVICE_ID_PREPAREBUSSLEEPMODE           0x13u
+#define NM_SERVICE_ID_REMOTESLEEPINDICATION         0x17u
+#define NM_SERVICE_ID_REMOTESLEEPCANCELLATION       0x18u
+#define NM_SERVICE_ID_SYNCHRONIZATIONPOINT          0x19u
+#define NM_SERVICE_ID_COORDREADYTOSLEEPINDICATION   0x1eu
+#define NM_SERVICE_ID_COORDREADYTOSLEEPCANCELLATION 0x1fu
+#define NM_SERVICE_ID_PDURXINDICATION               0x15u
+#define NM_SERVICE_ID_STATECHANGENOTIFICATION       0x16u
+#define NM_SERVICE_ID_REPEATMESSAGEINDICATION       0x1au
+#define NM_SERVICE_ID_TXTIMEOUTEXCEPTION            0x1bu
+#define NM_SERVICE_ID_CARWAKEUPINDICATION           0x1du
+#define NM_SERVICE_ID_MAINFUNCTION                  0x10u
+#define NM_SERVICE_ID_SYNCHRONIZEMODE               0x21u
+#define NM_SERVICE_ID_UPDATEIRA                     0x26u
+#define NM_SERVICE_ID_PNCBITVECTORTXINDICATION      0x27u
+#define NM_SERVICE_ID_PNCBITVECTORRXINDICATION      0x28u
 
 /* ================================================ type definitions ================================================ */
 typedef uint8 Nm_ChannelIndexType;
@@ -414,29 +417,49 @@ typedef struct
 #if (                                                                                \
     (NM_CAR_WAKE_UP_RX_ENABLED == STD_ON) || (NM_COORDINATOR_SYNC_SUPPORT == STD_ON) \
     || (NM_PARTIAL_NETWORK_SUPPORT_ENABLED == STD_ON))
-
+#define NM_START_SEC_CONFIG_DATA_UNSPECIFIED
+#include "Nm_MemMap.h"
 extern const Nm_GlobalLConfigType Nm_GlobalLConfig;
-
+#define NM_STOP_SEC_CONFIG_DATA_UNSPECIFIED
+#include "Nm_MemMap.h"
 #endif
 
+#define NM_START_SEC_CONFIG_DATA_UNSPECIFIED
+#include "Nm_MemMap.h"
 extern const Nm_ChannelLConfigType Nm_ChLConfig[NM_NUMBER_OF_CHANNELS];
+#define NM_STOP_SEC_CONFIG_DATA_UNSPECIFIED
+#include "Nm_MemMap.h"
 
 #if NM_PARTIAL_NETWORK_SUPPORT_ENABLED == STD_ON
+#define NM_START_SEC_CONFIG_DATA_PTR
+#include "Nm_MemMap.h"
 extern const Nm_PncRelatedRunTimeType Nm_ChannelPncRelatedRuntimeRef[NM_NUMBER_OF_CHANNELS];
+#define NM_STOP_SEC_CONFIG_DATA_PTR
+#include "Nm_MemMap.h"
 #endif
 
 #if NM_COORDINATOR_SUPPORT_ENABLED == STD_ON || NM_PARTIAL_NETWORK_SUPPORT_ENABLED == STD_ON
+#define NM_START_SEC_CONFIG_DATA_PTR
+#include "Nm_MemMap.h"
 extern Nm_InnerChannelType* const Nm_InnerChannel[NM_NUMBER_OF_CHANNELS];
+#define NM_STOP_SEC_CONFIG_DATA_PTR
+#include "Nm_MemMap.h"
 #endif
 
 /**********End of link time configuration parameter declarations*******/
 
 /**********Post-Build configuration parameter declarations*************/
 
+#define NM_START_SEC_CONFIG_DATA_UNSPECIFIED
+#include "Nm_MemMap.h"
 extern const Nm_ConfigType Nm_Config;
+#define NM_STOP_SEC_CONFIG_DATA_UNSPECIFIED
+#include "Nm_MemMap.h"
 
 /* ========================================= external function declarations ========================================= */
 
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief               This function initializes the NM
  * @param[in]           configPtr  Identification of the NM-channel
@@ -446,9 +469,12 @@ extern const Nm_ConfigType Nm_Config;
  * @synchronous         FALSE
  * @trace               CPD-59667
  */
-
 void Nm_Init(const Nm_ConfigType* configPtr);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief               This function calls the BusNm PassiveStartUp function
  * @param[in]           networkHandle  Identification of the NM channel
@@ -458,10 +484,13 @@ void Nm_Init(const Nm_ConfigType* configPtr);
  * @synchronous         FALSE
  * @trace               CPD-59674
  */
-
 Std_ReturnType Nm_PassiveStartUp(NetworkHandleType networkHandle);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 
 #if (NM_IF_ALL_CHANNEL_PASSIVE_MODE_ENABLED == STD_OFF)
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief               This function calls the <BusNm>_NetworkRequest function
  * @param[in]           networkHandle  Identification of the NM-channel
@@ -472,7 +501,11 @@ Std_ReturnType Nm_PassiveStartUp(NetworkHandleType networkHandle);
  * @trace               CPD-66650
  */
 Std_ReturnType Nm_NetworkRequest(NetworkHandleType networkHandle);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief               This function calls the <BusNm>_NetworkRelease function
  * @param[in]           networkHandle  Identification of the NM-channel
@@ -483,9 +516,13 @@ Std_ReturnType Nm_NetworkRequest(NetworkHandleType networkHandle);
  * @trace               CPD-59678
  */
 Std_ReturnType Nm_NetworkRelease(NetworkHandleType networkHandle);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 #endif
 
 #if (NM_COM_CONTROL_ENABLED == STD_ON)
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief               disables the NM PDU transmission ability.
  * @param[in]           networkHandle  Identification of the NM-channel
@@ -496,7 +533,11 @@ Std_ReturnType Nm_NetworkRelease(NetworkHandleType networkHandle);
  * @trace               CPD-59668
  */
 Std_ReturnType Nm_DisableCommunication(NetworkHandleType networkHandle);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief               Enables the NM PDU transmission ability.
  * @param[in]           networkHandle  Identification of the NM-channel
@@ -507,11 +548,15 @@ Std_ReturnType Nm_DisableCommunication(NetworkHandleType networkHandle);
  * @trace               CPD-59679
  */
 Std_ReturnType Nm_EnableCommunication(NetworkHandleType networkHandle);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 #endif
 
 #if (                                                                         \
     (NM_COM_USER_DATA_SUPPORT == STD_OFF) && (NM_USER_DATA_ENABLED == STD_ON) \
     && (NM_IF_ALL_CHANNEL_PASSIVE_MODE_ENABLED == STD_OFF))
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief               Set user data for NM messages transmitted next on the bus.
  * @param[in]           networkHandle  Identification of the NM-channel
@@ -523,9 +568,13 @@ Std_ReturnType Nm_EnableCommunication(NetworkHandleType networkHandle);
  * @trace               CPD-59670
  */
 Std_ReturnType Nm_SetUserData(NetworkHandleType networkHandle, const uint8* nmUserDataPtr);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 #endif
 
 #if (NM_USER_DATA_ENABLED == STD_ON)
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief               Get user data out of the last successfully received NM message.
  * @param[in]           networkHandle  Identification of the NM-channel
@@ -537,8 +586,12 @@ Std_ReturnType Nm_SetUserData(NetworkHandleType networkHandle, const uint8* nmUs
  * @trace               CPD-59681
  */
 Std_ReturnType Nm_GetUserData(NetworkHandleType networkHandle, uint8* nmUserDataPtr);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 #endif
 
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief               Get the whole PDU data out of the most recently received NM message. For that purpose
  *                      <BusNm>_GetPduData shall be called in case NmBusType is not set to NM_BUSNM_LOCALNM.
@@ -554,7 +607,11 @@ Std_ReturnType Nm_GetUserData(NetworkHandleType networkHandle, uint8* nmUserData
  * @trace               CPD-59682
  */
 extern Std_ReturnType Nm_GetPduData(NetworkHandleType networkHandle, uint8* nmPduData);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief               Set Repeat Message Request Bit for NM messages transmitted next on the bus. For that purpose
  *                      <Bus>Nm_RepeatMessageRequest shall be called in case NmBusType is not set to NM_BUSNM_LOCALNM.
@@ -570,7 +627,11 @@ extern Std_ReturnType Nm_GetPduData(NetworkHandleType networkHandle, uint8* nmPd
  * @trace               CPD-59683
  */
 extern Std_ReturnType Nm_RepeatMessageRequest(NetworkHandleType networkHandle);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief               Get node identifier out of the last successfully received NM-message. The function
  *                      <Bus>Nm_GetNodeIdentifier shall be called in case NmBusType is not set to NM_BUSNM_LOCALNM.
@@ -587,7 +648,11 @@ extern Std_ReturnType Nm_RepeatMessageRequest(NetworkHandleType networkHandle);
  * @trace               CPD-59684
  */
 extern Std_ReturnType Nm_GetNodeIdentifier(NetworkHandleType networkHandle, uint8* nmNodeIdPtr);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief               Get node identifier configured for the local node. For that purpose
  *                      <Bus>Nm_GetLocalNodeIdentifier shall be called in case NmBusType is not set to NM_BUSNM_LOCALNM.
@@ -604,8 +669,12 @@ extern Std_ReturnType Nm_GetNodeIdentifier(NetworkHandleType networkHandle, uint
  * @trace               CPD-59685
  */
 extern Std_ReturnType Nm_GetLocalNodeIdentifier(NetworkHandleType networkHandle, uint8* nmNodeIdPtr);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 
 #if (NM_REMOTE_SLEEP_IND_ENABLED == STD_ON)
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief               Check if remote sleep indication takes place or not
  * @param[in]           networkHandle Identification of the NM-channel
@@ -618,7 +687,12 @@ extern Std_ReturnType Nm_GetLocalNodeIdentifier(NetworkHandleType networkHandle,
  * @trace               CPD-59686
  */
 Std_ReturnType Nm_CheckRemoteSleepIndication(NetworkHandleType networkHandle, boolean* remoteSleepIndPtr);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 #endif
+
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief               Returns the state of the network management. The function <Bus>Nm_GetState shall be
  *                      called in case NmBusType is not set to NM_BUSNM_LOCALNM. (e.g. CanNm_GetState
@@ -636,8 +710,12 @@ Std_ReturnType Nm_CheckRemoteSleepIndication(NetworkHandleType networkHandle, bo
  * @trace               CPD-59687
  */
 Std_ReturnType Nm_GetState(NetworkHandleType nmNetworkHandle, Nm_StateType* nmStatePtr, Nm_ModeType* nmModePtr);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 
 #if (NM_VERSION_INFO_API == STD_ON)
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief               This service returns the version information of this module.
  * @param[out]          nmVerInfoPtr  Pointer to where to store the version information
@@ -646,8 +724,12 @@ Std_ReturnType Nm_GetState(NetworkHandleType nmNetworkHandle, Nm_StateType* nmSt
  * @trace               CPD-59688
  */
 void Nm_GetVersionInfo(Std_VersionInfoType* nmVerInfoPtr);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 #endif
 
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief               Notification that a NM-message has been received in the
  *                      Bus-Sleep Mode, what indicates that some nodes in the
@@ -658,7 +740,11 @@ void Nm_GetVersionInfo(Std_VersionInfoType* nmVerInfoPtr);
  * @trace               CPD-66675
  */
 void Nm_NetworkStartIndication(NetworkHandleType nmNetworkHandle);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief               Notification that the network management has entered Network Mode.
  * @param[in]           nmNetworkHandle   Identification of the NM-channel
@@ -667,7 +753,11 @@ void Nm_NetworkStartIndication(NetworkHandleType nmNetworkHandle);
  * @trace               CPD-66679
  */
 void Nm_NetworkMode(NetworkHandleType nmNetworkHandle);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief               Notification that the network management has entered Bus-Sleep
  *                      Mode.
@@ -677,7 +767,11 @@ void Nm_NetworkMode(NetworkHandleType nmNetworkHandle);
  * @trace               CPD-66680
  */
 void Nm_BusSleepMode(NetworkHandleType nmNetworkHandle);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief               Notification that the network management has entered Prepare
  *                      Bus-Sleep Mode.
@@ -687,8 +781,12 @@ void Nm_BusSleepMode(NetworkHandleType nmNetworkHandle);
  * @trace               CPD-66681
  */
 void Nm_PrepareBusSleepMode(NetworkHandleType nmNetworkHandle);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 
 #if (NM_REMOTE_SLEEP_IND_ENABLED == STD_ON)
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief               Notification that the network management has detected that
  *                      all other nodes on the network are ready to enter Bus-Sleep
@@ -700,7 +798,11 @@ void Nm_PrepareBusSleepMode(NetworkHandleType nmNetworkHandle);
  */
 
 void Nm_RemoteSleepIndication(NetworkHandleType nmNetworkHandle);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief               Notification that the network management has detected that
  *                      not all other nodes on the network are longer ready to enter
@@ -711,7 +813,11 @@ void Nm_RemoteSleepIndication(NetworkHandleType nmNetworkHandle);
  * @trace               CPD-66683
  */
 void Nm_RemoteSleepCancellation(NetworkHandleType nmNetworkHandle);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief               Notification to the NM Coordinator functionality that this
  *                      is a suitable point in time to initiate the coordinated
@@ -722,11 +828,15 @@ void Nm_RemoteSleepCancellation(NetworkHandleType nmNetworkHandle);
  * @trace               CPD-66684
  */
 void Nm_SynchronizationPoint(NetworkHandleType nmNetworkHandle);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 
 #endif
 
 #if (NM_COORDINATOR_SYNC_SUPPORT == STD_ON)
 
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief               Sets an indication, when the NM Coordinator Sleep Ready
  *                      bit in the Control Bit Vector is set
@@ -736,7 +846,11 @@ void Nm_SynchronizationPoint(NetworkHandleType nmNetworkHandle);
  * @trace               CPD-66687
  */
 void Nm_CoordReadyToSleepIndication(NetworkHandleType nmChannelHandle);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief               Cancels an indication, when the NM Coordinator Sleep Ready
  *                      bit in the Control Bit Vector is set back to 0
@@ -746,10 +860,14 @@ void Nm_CoordReadyToSleepIndication(NetworkHandleType nmChannelHandle);
  * @trace               CPD-66689
  */
 void Nm_CoordReadyToSleepCancellation(NetworkHandleType nmChannelHandle);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 
 #endif
 
 #if (NM_PDU_RX_INDICATION_ENABLED == STD_ON)
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief               Notification that a NM message has been received.
  * @param[in]           nmNetworkHandle   Identification of the NM-channel
@@ -759,10 +877,14 @@ void Nm_CoordReadyToSleepCancellation(NetworkHandleType nmChannelHandle);
  */
 
 void Nm_PduRxIndication(NetworkHandleType nmNetworkHandle);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 
 #endif
 
 #if (NM_STATE_CHANGE_IND_ENABLED == STD_ON)
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief               Notification that the state of the lower layer <Bus>Nm has changed.
  * @param[in]           nmNetworkHandle   Identification of the NM-channel
@@ -777,9 +899,13 @@ void Nm_StateChangeNotification(
     NetworkHandleType nmNetworkHandle,
     Nm_StateType      nmPreviousState,
     Nm_StateType      nmCurrentState);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 
 #endif
 
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief               Service to indicate that an NM message with set Repeat
  *                      Message Request Bit has been received
@@ -790,7 +916,11 @@ void Nm_StateChangeNotification(
  */
 
 void Nm_RepeatMessageIndication(NetworkHandleType nmNetworkHandle);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief               Service to indicate that an attempt to send an NM message
  *                      failed.
@@ -799,10 +929,13 @@ void Nm_RepeatMessageIndication(NetworkHandleType nmNetworkHandle);
  * @synchronous         TRUE
  * @trace               CPD-66694
  */
-
 void Nm_TxTimeoutException(NetworkHandleType nmNetworkHandle);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 
 #if (NM_CAR_WAKE_UP_RX_ENABLED == STD_ON)
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief               This function is called by a <Bus>Nm to indicate reception
  *                      of a CWU request
@@ -811,12 +944,15 @@ void Nm_TxTimeoutException(NetworkHandleType nmNetworkHandle);
  * @synchronous         TRUE
  * @trace               CPD-66695
  */
-
 void Nm_CarWakeUpIndication(NetworkHandleType nmChannelHandle);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 
 #endif
 
 #if (NM_COORDINATOR_SUPPORT_ENABLED == STD_ON || NM_PARTIAL_NETWORK_SUPPORT_ENABLED == STD_ON)
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief               implements the processes of the NM Interface which need a fix cyclic scheduling.
  * @param[in]           chIdx    the configured channel index
@@ -825,8 +961,12 @@ void Nm_CarWakeUpIndication(NetworkHandleType nmChannelHandle);
  * @trace               CPD-59673
  */
 void Nm_MainFunction(uint8 chIdx);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 #endif
 
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief               Notification that the network management has entered
  *                      Synchronize Mode.
@@ -835,10 +975,13 @@ void Nm_MainFunction(uint8 chIdx);
  * @synchronous         TRUE
  * @trace               CPD-59693
  */
-
 void Nm_SynchronizeMode(NetworkHandleType nmNetworkHandle);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 
 #if NM_PARTIAL_NETWORK_SUPPORT_ENABLED == STD_ON
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief               Indication by ComM of internal PNC requests. This is used to aggregate the internal PNC
  *                      requests.
@@ -850,6 +993,11 @@ void Nm_SynchronizeMode(NetworkHandleType nmNetworkHandle);
  * @trace               CPD-59680
  */
 void Nm_UpdateIRA(NetworkHandleType networkHandle, const uint8* pncBitVectorPtr);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
+
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief               Function called by <Bus>Nms to request the aggregated internal PNC requests for transmission
  *                      within the Nm message.
@@ -861,6 +1009,11 @@ void Nm_UpdateIRA(NetworkHandleType networkHandle, const uint8* pncBitVectorPtr)
  * @trace               CPD-59701
  */
 void Nm_PncBitVectorTxIndication(NetworkHandleType networkHandle, uint8* pncBitVectorPtr);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
+
+#define NM_START_SEC_CODE
+#include "Nm_MemMap.h"
 /**
  * @brief               The function evaluate if a relevant PNC request eg. PNC bit set to 1, is available in the
  * given PNC bit vector
@@ -877,5 +1030,7 @@ void Nm_PncBitVectorRxIndication(
     NetworkHandleType networkHandle,
     const uint8*      pncBitVectorPtr,
     boolean*          relevantPncRequestDetectedPtr);
+#define NM_STOP_SEC_CODE
+#include "Nm_MemMap.h"
 #endif
 #endif

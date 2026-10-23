@@ -25,7 +25,7 @@
 #ifndef LDCOM_TYPES_H_
 #define LDCOM_TYPES_H_
 
-/* PRQA S 1536 EOF */ /* VL_LdCom_1536 */
+/* PRQA S 1536 EOF */ /* VL_IpduM_1536 */
 
 /* =================================================== inclusions =================================================== */
 #include "ComStack_Types.h"

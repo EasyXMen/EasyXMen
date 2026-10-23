@@ -63,10 +63,28 @@ extern "C" {
 #define LWIP_ARP_FILTER_NETIF 0
 #endif
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t ethernet_input(struct pbuf *p, struct netif *netif);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 err_t ethernet_output(struct netif* netif, struct pbuf* p, const struct eth_addr* src, const struct eth_addr* dst, u16_t eth_type);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
-extern const struct eth_addr ethbroadcast, ethzero;
+#define TCPIP_START_SEC_CONST_UNSPECIFIED
+#include "TcpIp_MemMap.h"
+extern const struct eth_addr ethbroadcast;
+#define TCPIP_STOP_SEC_CONST_UNSPECIFIED
+#include "TcpIp_MemMap.h"
+
+#define TCPIP_START_SEC_CONST_UNSPECIFIED
+#include "TcpIp_MemMap.h"
+extern const struct eth_addr ethzero;
+#define TCPIP_STOP_SEC_CONST_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 
 #endif /* LWIP_ARP || LWIP_ETHERNET */
 

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
@@ -93,48 +93,111 @@ typedef uint16 Xcp_PgmBufferIndexType;
 #define XCP_START_SEC_CODE
 #include "Xcp_MemMap.h"
 XCP_LOCAL Std_ReturnType Xcp_CheckPgmStatus(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 XCP_LOCAL Std_ReturnType
     Xcp_FlsReq(uint8 Mode, Xcp_FlsAddressType u4Address, Xcp_FlsLengthType u4Size, const uint8* pu1DataPtr);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 XCP_LOCAL uint8 Xcp_FlsGetStatus(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 XCP_LOCAL Std_ReturnType Xcp_Program_ZeroHandle(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 XCP_LOCAL Std_ReturnType Xcp_Program_NonZero(uint8 dataCount, uint8 pgmSize);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 XCP_LOCAL Xcp_SeqCheckType
 
     Xcp_GetPgmStartAddr(uint32* startAddr, uint8 noOfBytes);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 XCP_LOCAL Xcp_SeqCheckType Xcp_GetPgm_Functional_StartAddr(uint32* startAddr, uint8 noOfBytes, uint32 rangType);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 XCP_LOCAL Xcp_SeqCheckType Xcp_GetPgmClearStartAddr(uint32 clearRange, uint32* startAddr, uint32* clearSize);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /* the next six functions used for pending handle */
 XCP_LOCAL void Xcp_FlsClearPending(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 XCP_LOCAL void Xcp_FlsClearTask(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 XCP_LOCAL void Xcp_FlsProgramPending(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 XCP_LOCAL void Xcp_FlsProgramTask(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
 #if (XCP_MASTER_BLOCK_MODE == STD_ON)
-XCP_LOCAL void Xcp_FlsBlockProgramPending(void);
 
+
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
+XCP_LOCAL void Xcp_FlsBlockProgramPending(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
+
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 XCP_LOCAL void Xcp_FlsBlockProgramTask(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif /*XCP_MASTER_BLOCK_MODE == STD_ON*/
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /*
  * Complex Command Handler
  */
 XCP_LOCAL void Xcp_ProgramHal(void);
-#if (XCP_PROGRAM_MAX == STD_ON)
-XCP_LOCAL void Xcp_ProgramMaxHal(void);
-#endif
 #define XCP_STOP_SEC_CODE
 #include "Xcp_MemMap.h"
+#if (XCP_PROGRAM_MAX == STD_ON)
+
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
+XCP_LOCAL void Xcp_ProgramMaxHal(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
+#endif
 
 /* ============================================ internal data definitions =========================================== */
 #define XCP_START_SEC_VAR_CLEARED_8
@@ -144,13 +207,15 @@ XCP_LOCAL uint8 Xcp_FlsBuffer[XCP_FLS_DATA_BUFFER_SIZE]; /* PRQA S 3218 */ /* VL
 #include "Xcp_MemMap.h"
 
 /* ============================================ external data definitions =========================================== */
+#define XCP_START_SEC_VAR_CLEARED_UNSPECIFIED
+#include "Xcp_MemMap.h"
 Xcp_ChannelPgmType Xcp_ChannelPtgmData;
-
-/* ========================================== external function definitions ========================================= */
-
-#define XCP_START_SEC_CODE
+#define XCP_STOP_SEC_VAR_CLEARED_UNSPECIFIED
 #include "Xcp_MemMap.h"
 
+/* ========================================== external function definitions ========================================= */
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Checks the PGM (Programming) status. This function verifies the protection status
  * and the current programming status. If the protection is locked or the programming
@@ -177,16 +242,18 @@ XCP_LOCAL Std_ReturnType Xcp_CheckPgmStatus(void)
     }
     return ret;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Checks the validity of the memory range for programming. This function iterates
  * through the defined sectors and checks if the given address and size fall within
  * any valid sector's range. If a valid sector is found, it returns true; otherwise,
  * it returns false. This function is intended for internal use.
  */
-/* PRQA S 1505 ++ */ /* VL_Xcp_1505 */
 boolean Xcp_CheckPgmMem(uint32 addr, uint32 size)
-/* PRQA S 1505 -- */
 {
     boolean result = FALSE;
     uint8   secNum;
@@ -205,7 +272,11 @@ boolean Xcp_CheckPgmMem(uint32 addr, uint32 size)
     }
     return result;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Handles flash requests. This function adjusts the provided address relative to
  * the base address and then calls the appropriate flash operation (write or erase)
@@ -217,16 +288,26 @@ XCP_LOCAL Std_ReturnType
 {
     Std_ReturnType ret = E_NOT_OK;
     /* PRQA S 1338 ++ */ /* VL_Xcp_1338 */
+#if (XCP_MEMDRIVER_SUPPORT != XCP_MEMDRIVER_SUPPORT_MEM)
     u4Address = u4Address - XCP_FLS_BASEADDR;
+#endif
     /* PRQA S 1338 -- */
     switch (Mode)
     {
     case XCP_FLS_WRITE:
+#if (XCP_MEMDRIVER_SUPPORT == XCP_MEMDRIVER_SUPPORT_MEM)
+        ret = Xcp_FlsFuncPtr.flsWrite(XCP_PGM_MEM_INSTANCE_ID, u4Address, pu1DataPtr, u4Size);
+#else
         ret = Xcp_FlsFuncPtr.flsWrite(u4Address, pu1DataPtr, u4Size);
+#endif
         break;
 
     case XCP_FLS_ERASE:
+#if (XCP_MEMDRIVER_SUPPORT == XCP_MEMDRIVER_SUPPORT_MEM)
+        ret = Xcp_FlsFuncPtr.flsErase(XCP_PGM_MEM_INSTANCE_ID, u4Address, u4Size);
+#else
         ret = Xcp_FlsFuncPtr.flsErase(u4Address, u4Size);
+#endif
         break;
 
     default:
@@ -235,7 +316,11 @@ XCP_LOCAL Std_ReturnType
     }
     return ret;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Gets the status of the flash operation. This function queries the job result
  * from the flash interface and converts it into a status code indicating whether
@@ -244,24 +329,39 @@ XCP_LOCAL Std_ReturnType
  */
 XCP_LOCAL uint8 Xcp_FlsGetStatus(void)
 {
+#if (XCP_MEMDRIVER_SUPPORT == XCP_MEMDRIVER_SUPPORT_MEM)
+    Mem_17_Nvm_JobResultType flsRet;
+    flsRet = Xcp_FlsFuncPtr.flsGetJobResult(XCP_PGM_MEM_INSTANCE_ID);
+#else
     MemIf_JobResultType flsRet;
-    uint8               result;
-
     flsRet = Xcp_FlsFuncPtr.flsGetJobResult();
+#endif
+    uint8 result;
     switch (flsRet)
     {
+#if (XCP_MEMDRIVER_SUPPORT == XCP_MEMDRIVER_SUPPORT_MEM)
+    case MEM_17_NVM_JOB_PENDING:
+        result = XCP_IF_BUSY;
+        break;
+    case MEM_17_NVM_JOB_OK:
+        result = XCP_IF_OK;
+        break;
+#else
     case MEMIF_JOB_PENDING:
         result = XCP_IF_BUSY;
         break;
     case MEMIF_JOB_OK:
         result = XCP_IF_OK;
         break;
+#endif
     default:
         result = XCP_IF_NOT_OK;
         break;
     }
     return result;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
 /**
  * Handles the finalization of a programming sequence. This function pads the
@@ -271,7 +371,8 @@ XCP_LOCAL uint8 Xcp_FlsGetStatus(void)
  * empty, it marks the programming as finished. This function is intended for
  * internal use.
  */
-
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 XCP_LOCAL Std_ReturnType Xcp_Program_ZeroHandle(void)
 {
     Xcp_PgmBufferIndexType cnt;
@@ -335,6 +436,8 @@ XCP_LOCAL Std_ReturnType Xcp_Program_ZeroHandle(void)
     }
     return programRet;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
 /**
  * Retrieves the starting address for programming. This function determines the
@@ -344,6 +447,8 @@ XCP_LOCAL Std_ReturnType Xcp_Program_ZeroHandle(void)
  * This function is intended for internal use.
  */
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 XCP_LOCAL Xcp_SeqCheckType Xcp_GetPgmStartAddr(uint32* startAddr, uint8 noOfBytes)
 {
     Xcp_SeqCheckType programSeqcheckRet   = SEQ_OK;
@@ -403,7 +508,11 @@ XCP_LOCAL Xcp_SeqCheckType Xcp_GetPgmStartAddr(uint32* startAddr, uint8 noOfByte
     }
     return programSeqcheckRet;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Retrieves the starting address for functional programming. This function
  * searches through the configured sectors to find the correct one based on
@@ -459,7 +568,11 @@ XCP_LOCAL Xcp_SeqCheckType Xcp_GetPgm_Functional_StartAddr(uint32* startAddr, ui
 
     return ret;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Programs non-zero data into the target memory. This function copies the data
  * from the command buffer to the programming buffer, updates the buffer size,
@@ -534,6 +647,8 @@ XCP_LOCAL Std_ReturnType Xcp_Program_NonZero(uint8 dataCount, uint8 pgmSize)
     }
     return result;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
 /**
  * Retrieves the starting address and size for clearing memory. This function
@@ -546,6 +661,8 @@ XCP_LOCAL Std_ReturnType Xcp_Program_NonZero(uint8 dataCount, uint8 pgmSize)
  * intended for internal use.
  */
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 XCP_LOCAL Xcp_SeqCheckType Xcp_GetPgmClearStartAddr(uint32 clearRange, uint32* startAddr, uint32* clearSize)
 {
     uint8            sectorNum;
@@ -596,7 +713,11 @@ XCP_LOCAL Xcp_SeqCheckType Xcp_GetPgmClearStartAddr(uint32 clearRange, uint32* s
     }
     return result;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Handles the completion of a flash clear operation. This function checks the
  * status of the flash operation. If the operation is successful, it updates the
@@ -634,7 +755,11 @@ XCP_LOCAL void Xcp_FlsClearPending(void)
     }
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Initiates a flash clear operation. This function sends an erase request to
  * the flash interface. If the request is successful, it resets the retry count,
@@ -669,7 +794,11 @@ XCP_LOCAL void Xcp_FlsClearTask(void)
     }
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Handles the completion of a pending flash programming operation. This function
  * checks the status of the flash operation. If the operation is successful, it
@@ -736,7 +865,11 @@ XCP_LOCAL void Xcp_FlsProgramPending(void)
     }
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Initiates a flash programming task. This function sends a write request to
  * the flash interface. If the request is successful, it resets the retry count,
@@ -777,8 +910,12 @@ XCP_LOCAL void Xcp_FlsProgramTask(void)
     }
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
 #if (XCP_MASTER_BLOCK_MODE == STD_ON)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Handles the completion of a block programming operation. This function checks
  * the status of the flash operation. If the operation is successful, it updates
@@ -820,7 +957,7 @@ XCP_LOCAL void Xcp_FlsBlockProgramPending(void)
             Xcp_ChannelPtgmData.PgmPendingFlag |= XCP_BLOCK_PROGRAM_TASK;
             /* PRQA S 1258 ++ */ /* VL_Xcp_1258 */
             Xcp_UpdateMTA((uint32)XCP_FLS_MIN_WRITE_SIZE);
-            /* PRQA S 1258 -- */ /* VL_Xcp_1258 */
+            /* PRQA S 1258 -- */
         }
         else
         {
@@ -855,7 +992,11 @@ XCP_LOCAL void Xcp_FlsBlockProgramPending(void)
     }
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Initiates a block programming task. This function sends a write request to
  * the flash interface. If the request is successful, it resets the retry count,
@@ -901,6 +1042,8 @@ XCP_LOCAL void Xcp_FlsBlockProgramTask(void)
     }
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif /*XCP_MASTER_BLOCK_MODE == STD_ON*/
 
 /**
@@ -910,6 +1053,8 @@ XCP_LOCAL void Xcp_FlsBlockProgramTask(void)
  * flag, and programming status. This function is intended for internal use.
  */
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 void Xcp_ProgramInit(void)
 
 {
@@ -942,6 +1087,8 @@ void Xcp_ProgramInit(void)
     Xcp_ChannelPtgmData.PgmStauts = XCP_PGM_IDLE;
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
 /**
  * Handles pending tasks for programming operations. This function checks the
@@ -950,6 +1097,8 @@ void Xcp_ProgramInit(void)
  * for internal use.
  */
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 void Xcp_PgmPendingTask(void)
 {
     switch (Xcp_ChannelPtgmData.PgmPendingFlag)
@@ -992,7 +1141,11 @@ void Xcp_PgmPendingTask(void)
     }
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Starts the programming process. This function checks the command length, DAQ
  * running status, and protection status. If all checks pass, it sets the response
@@ -1050,7 +1203,11 @@ void Xcp_ProgramStart(void)
     Xcp_SendResp();
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Clears a specified range of the target memory. This function checks the command
  * syntax, programming status, and access mode. It calculates the start address
@@ -1127,7 +1284,11 @@ void Xcp_ProgramClear(void)
     }
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Programs data into the target memory. This function checks the current programming
  * status and performs the necessary sequence checks to determine the start address.
@@ -1228,7 +1389,11 @@ XCP_LOCAL void Xcp_ProgramHal(void)
     }
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Handles the programming of data into the target memory. This function checks
  * the command length, protection status, programming status, and data size.
@@ -1300,7 +1465,11 @@ void Xcp_Program(void)
     }
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Resets the programming process. This function checks the command length, protection
  * status, and flash status. If all checks pass, it sets the programming status
@@ -1354,9 +1523,13 @@ void Xcp_ProgramReset(void)
 #endif /*XCP_ON_ETHERNET_ENABLE == STD_ON*/
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
 /* optional */
 #if (XCP_GET_PGM_PROCESSOR_INFO == STD_ON)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Retrieves the programming processor information. This function checks the command
  * length and protection status. If all checks pass, it sets the response buffer
@@ -1390,9 +1563,13 @@ void Xcp_GetPgmProcessorInfo(void)
     Xcp_SendResp();
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif
 
 #if (XCP_GET_SECTOR_INFO == STD_ON)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Retrieves information about a specific sector. This function checks the command
  * length, protection status, and sector number. It then retrieves the requested
@@ -1484,9 +1661,13 @@ void Xcp_GetSectorInfo(void)
     Xcp_SendResp();
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif
 
 #if (XCP_PROGRAM_PREPARE == STD_ON)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Prepares the system for programming. This function checks the command length.
  * Currently, this function does not perform any actions but sends a response.
@@ -1508,9 +1689,13 @@ void Xcp_ProgramPrepare(void)
     Xcp_SendResp();
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif
 
 #if (XCP_PROGRAM_FORMAT == STD_ON)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Sets the programming format. This function checks the command length, protection
  * status, and programming status. It also validates the compression, encryption,
@@ -1582,9 +1767,13 @@ void Xcp_ProgramFormat(void)
     Xcp_SendResp();
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif
 
 #if (XCP_PROGRAM_NEXT == STD_ON)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Programs the next block of data into the target memory. This function checks
  * the programming status and sequence, aligns the data buffer, and writes the
@@ -1618,9 +1807,8 @@ void Xcp_ProgramNext(void)
                 {
                     (Xcp_ChannelPtgmData.PgmBufAlignPtr)[Xcp_ChannelPtgmData.PgmBufSize + cnt] = Xcp_BlockBuffer[cnt];
                 }
-                /* PRQA S 2986 ++ */ /* VL_QAC_2985_2986 */
-                Xcp_ChannelCommonData.BlockBufPos += cnt;
-                /* PRQA S 2986 -- */
+
+                Xcp_ChannelCommonData.BlockBufPos = cnt;
                 /* set fls buffer size to min write size */
                 Xcp_ChannelPtgmData.PgmBufSize = XCP_FLS_MIN_WRITE_SIZE;
 
@@ -1669,10 +1857,13 @@ void Xcp_ProgramNext(void)
     }
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif
 
 #if (XCP_PROGRAM_MAX == STD_ON)
-
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Programs the maximum block of data into the target memory. This function checks
  * the programming status and sequence, retrieves the start address, and programs
@@ -1760,6 +1951,11 @@ XCP_LOCAL void Xcp_ProgramMaxHal(void)
     }
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
+
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Programs the maximum block of data into the target memory. This function checks
  * the command length, protection status, and programming status. If all checks
@@ -1794,9 +1990,13 @@ void Xcp_ProgramMax(void)
     }
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif
 
 #if (XCP_PROGRAM_VERIFY == STD_ON)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Verifies the programmed data in the target memory. This function checks the
  * command length, programming status, and verification mode. It retrieves the
@@ -1845,10 +2045,10 @@ void Xcp_ProgramVerify(void)
     Xcp_SendResp();
     return;
 }
-#endif
-/* PRQA S 1532 -- */
 #define XCP_STOP_SEC_CODE
 #include "Xcp_MemMap.h"
+#endif
+/* PRQA S 1532 -- */
 
 #endif /*XCP_PL_PGM == XCP_PL_PGM&XCP_RESOURCE*/
 

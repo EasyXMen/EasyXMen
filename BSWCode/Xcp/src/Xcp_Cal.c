@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
  * SPDX-License-Identifier: LGPL-2.1-only-with-exception
  *
@@ -36,17 +36,32 @@
 #define XCP_GET_PAG_MODE_ECU 0x01u
 #define XCP_GET_PAG_MODE_XCP 0x02u
 
-/* ========================================== internal function declarations ======================================== */
 #define XCP_START_SEC_CODE
 #include "Xcp_MemMap.h"
+/* ========================================== internal function declarations ======================================== */
 XCP_LOCAL void Xcp_DownloadHal(void);
-#if (STD_ON == XCP_PAG_SUPPORT)
-XCP_LOCAL void Xcp_SwitchToWP(void);
-XCP_LOCAL void Xcp_SwitchToRP(void);
-XCP_LOCAL void Xcp_SetCalPageHal(void);
-#endif /*STD_ON == XCP_PAG_SUPPORT*/
 #define XCP_STOP_SEC_CODE
 #include "Xcp_MemMap.h"
+
+#if (STD_ON == XCP_PAG_SUPPORT)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
+XCP_LOCAL void Xcp_SwitchToWP(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
+
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
+XCP_LOCAL void Xcp_SwitchToRP(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
+
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
+XCP_LOCAL void Xcp_SetCalPageHal(void);
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
+#endif /*STD_ON == XCP_PAG_SUPPORT*/
 
 /* ============================================ internal data definitions =========================================== */
 #if (STD_OFF == XCP_SWITCH_PAG_BY_USER)
@@ -101,7 +116,11 @@ void Xcp_CALInit(void)
 #endif /*STD_OFF == XCP_SWITCH_PAG_BY_USER*/
 #endif /*STD_ON == XCP_PAG_SUPPORT*/
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Validates the memory address and size for calibration. This function checks if
  * the provided address and size fall within the valid ROM or RAM segments based
@@ -145,7 +164,11 @@ boolean Xcp_CheckCalMem(uint32 addr, uint32 size, Xcp_MemAddrType type)
 
     return result;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Handles the XCP `DOWNLOAD` command. This function validates the frame length,
  * checks the program active status, and ensures the memory is not protected.
@@ -197,7 +220,11 @@ void Xcp_Download(void)
     Xcp_SendResp();
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Performs the actual data download in XCP. This function checks if the destination
  * address is valid and writable. If the address is valid, it copies the data from
@@ -242,8 +269,12 @@ XCP_LOCAL void Xcp_DownloadHal(void)
     }
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
 #if (XCP_MAX_CTO > 8u)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Handles the XCP `SHORT_DOWNLOAD` command. This function checks the protection
  * status and ensures the data length is within the allowed range. It verifies
@@ -289,11 +320,15 @@ void Xcp_ShortDownload(void)
     Xcp_SendResp();
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif /*XCP_MAX_CTO > 8u*/
 /*
  * CAL/PAG Optional Function
  */
 #if (XCP_DOWNLOAD_NEXT == STD_ON)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Handles the XCP `DOWNLOAD_NEXT` command. This function checks the program active
  * status and protection status, and verifies that the destination address is valid
@@ -324,13 +359,13 @@ void Xcp_DownloadNext(void)
         {
             Xcp_SetErrorCode(XCP_ERR_ACCESS_LOCKED);
         }
-        /* PRQA S 2985 ++ */ /* VL_QAC_2985_2986 */
+        /* PRQA S 2985 ++ */ /* VL_Xcp_2985 */
         else if (
             (boolean)FALSE
             == Xcp_CheckAddress(u4DestAddr, ((uint32)Xcp_ChannelCommonData.BlockBuflen * XCP_AG), XCP_MEM_CAL_RAM))
         /* PRQA S 2985 -- */
         {
-            /* PRQA S 2985 ++ */ /* VL_QAC_2985_2986 */
+            /* PRQA S 2985 ++ */ /* VL_Xcp_2985 */
             if ((boolean)TRUE
                 == Xcp_CheckAddress(u4DestAddr, ((uint32)Xcp_ChannelCommonData.BlockBuflen * XCP_AG), XCP_MEM_CAL_ROM))
             /* PRQA S 2985 -- */
@@ -352,15 +387,20 @@ void Xcp_DownloadNext(void)
                 destPtr[pos] = sourPtr[pos];
             }
             /*updata the MTA*/
-            /* PRQA S 2985 ++ */ /* VL_QAC_2985_2986 */
+            /* PRQA S 2985 ++ */ /* VL_Xcp_2985 */
             Xcp_UpdateMTA((uint32)Xcp_ChannelCommonData.BlockBuflen * XCP_AG);
             /* PRQA S 2985 -- */
         }
     Xcp_SendResp();
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif
+
 #if (XCP_DOWNLOAD_MAX == STD_ON)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Handles the XCP `DOWNLOAD_MAX` command. This function checks the frame length,
  * program active status, and protection status. It verifies that the destination
@@ -369,7 +409,7 @@ void Xcp_DownloadNext(void)
  * Memory Transfer Address (MTA). If any check fails, it sets an appropriate error
  * code and sends a response.
  */
-/* PRQA S 1532,6030 ++ */ /* VL_QAC_OneFunRef,VL_MTR_Xcp_STMIF */
+/* PRQA S 1532,6030 ++ */ /* VL_QAC_OneFunRef */ /* VL_MTR_Xcp_STMIF */
 void Xcp_DownloadMax(void)
 /* PRQA S 1532,6030 -- */
 {
@@ -424,6 +464,8 @@ void Xcp_DownloadMax(void)
     Xcp_SendResp();
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif
 
 /*
@@ -431,6 +473,8 @@ void Xcp_DownloadMax(void)
  * */
 
 #if (XCP_MODIFY_BITS == STD_ON)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Handles the XCP `MODIFY_BITS` command. This function checks the frame length,
  * program active status, and protection status. It verifies that the source
@@ -497,6 +541,8 @@ void Xcp_ModifyBits(void)
     Xcp_SendResp();
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif
 
 /*
@@ -504,6 +550,8 @@ void Xcp_ModifyBits(void)
  */
 #if (STD_ON == XCP_PAG_SUPPORT)
 #if (STD_OFF == XCP_SWITCH_PAG_BY_USER)
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Switches the active page to the writeable page (WP) for all segments. This
  * function iterates through each segment, copies the data from the buffer to
@@ -526,7 +574,11 @@ XCP_LOCAL void Xcp_SwitchToWP(void)
     }
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Switches the active page to the read-only page (RP) for all segments. This
  * function iterates through each segment, copies the data from the WP to the
@@ -556,8 +608,12 @@ XCP_LOCAL void Xcp_SwitchToRP(void)
     }
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 #endif /*STD_OFF == XCP_SWITCH_PAG_BY_USER*/
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Handles the XCP `SET_CAL_PAGE` command. This function checks the frame length,
  * program active status, and protection status. If all checks pass, it calls
@@ -599,7 +655,11 @@ void Xcp_SetCalPage(void)
     Xcp_SendResp();
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Sets the calibration page for a specific segment. This function checks the
  * mode, segment number, and page number. If the mode and segment are valid,
@@ -653,7 +713,11 @@ XCP_LOCAL void Xcp_SetCalPageHal(void)
     }
     return;
 }
+#define XCP_STOP_SEC_CODE
+#include "Xcp_MemMap.h"
 
+#define XCP_START_SEC_CODE
+#include "Xcp_MemMap.h"
 /**
  * Handles the XCP `GET_CAL_PAGE` command. This function checks the frame length,
  * program active status, and protection status. It verifies the segment number
@@ -662,9 +726,11 @@ XCP_LOCAL void Xcp_SetCalPageHal(void)
  * is enabled, it calls the application-specific function to get the calibration
  * page. If any check fails, it sets an appropriate error code and sends a response.
  */
-/* PRQA S 1532,6030 ++ */ /* VL_QAC_OneFunRef,VL_MTR_Xcp_STMIF */
+/* PRQA S 6030 ++ */ /* VL_MTR_Xcp_STMIF */
+/* PRQA S 1532 ++ */ /* VL_QAC_OneFunRef */
 void Xcp_GetCalPage(void)
-/* PRQA S 1532,6030 -- */
+/* PRQA S 6030 -- */
+/* PRQA S 1532 -- */
 {
     uint8 accessMode = Xcp_CmdBuffer[XCP_CONST_1];
     uint8 segNum     = Xcp_CmdBuffer[XCP_CONST_2];
@@ -719,10 +785,9 @@ void Xcp_GetCalPage(void)
     Xcp_SendResp();
     return;
 }
-#endif /*STD_ON == XCP_PAG_SUPPORT*/
-
 #define XCP_STOP_SEC_CODE
 #include "Xcp_MemMap.h"
+#endif /*STD_ON == XCP_PAG_SUPPORT*/
 
 #endif /*XCP_PL_CAL == XCP_PL_CAL & XCP_RESOURCE*/
 

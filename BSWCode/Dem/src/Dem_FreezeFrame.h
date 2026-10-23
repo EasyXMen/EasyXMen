@@ -88,6 +88,8 @@ typedef struct
 
 /* ========================================== internal function declarations ======================================== */
 #if (DEM_MAX_SIZE_FREEZEFRAME > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Sample a UDS snapshot into the prestorage buffer
  * @param[in]     EventId: Event ID
@@ -98,7 +100,11 @@ typedef struct
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_GetFFFromEnv(Dem_EventIdType EventId, uint8* DestBuffer, uint16 BufferSize);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Init FF Iterator.
@@ -111,8 +117,12 @@ DEM_LOCAL void Dem_GetFFFromEnv(Dem_EventIdType EventId, uint8* DestBuffer, uint
  */
 DEM_LOCAL void
     Dem_InitFFIterator(Dem_FFEntryIterType* FFEntryIter, Dem_FFRNRefNumType FFRNStart, Dem_FFRNRefNumType FFRNEnd);
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if ((DEM_OBDII_SUPPORT == STD_ON) && (DEM_MAX_SIZE_OBDFREEZEFRAME > 0u))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
+
 /**
  * @brief         Sample a OBD snapshot into the prestorage buffer
  * @param[in]     EventId: Event ID
@@ -123,9 +133,13 @@ DEM_LOCAL void
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_GetOBDFFFromEnv(Dem_EventIdType EventId, uint8* DestBuffer, uint16 BufferSize);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_MAX_SIZE_J1939FREEZEFRAME > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Sample a j1939 snapshot into the prestorage buffer
  * @param[in]     EventId: Event ID
@@ -136,9 +150,13 @@ DEM_LOCAL void Dem_GetOBDFFFromEnv(Dem_EventIdType EventId, uint8* DestBuffer, u
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_GetJ1939FFFromEnv(Dem_EventIdType EventId, uint8* DestBuffer, uint16 BufferSize);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_MAX_SIZE_J1939EXFREEZEFRAME > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Sample a j1939 expanded snapshot into the prestorage buffer
  * @param[in]     EventId: Event ID
@@ -149,9 +167,13 @@ DEM_LOCAL void Dem_GetJ1939FFFromEnv(Dem_EventIdType EventId, uint8* DestBuffer,
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL void Dem_GetJ1939ExFFFromEnv(Dem_EventIdType EventId, uint8* DestBuffer, uint16 BufferSize);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_MAX_SIZE_FREEZEFRAME > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Initializes the snapshot entry iterator
  * @param[in]     EventId: Event ID
@@ -163,9 +185,13 @@ DEM_LOCAL void Dem_GetJ1939ExFFFromEnv(Dem_EventIdType EventId, uint8* DestBuffe
  */
 DEM_LOCAL void
     Dem_FFEntryIteratorInit(Dem_EventIdType EventId, Dem_NvBlockNumType MemoryIndex, Dem_FFEntryIterType* FFEntryIter);
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_FEATURE_SWC_GET_FF_ED == STD_ON)
 #if (DEM_GENERAL_FF_RECNUM_CALCULATED == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
+
 /**
  * @brief         Move the snapshot entry iterator to the index of the last stored snapshot entry.
  * @param[in]     EventId: Event ID
@@ -179,8 +205,12 @@ DEM_LOCAL void Dem_FFEntryIteratorFindLastStoredEntry(
     Dem_EventIdType      EventId,
     Dem_NvBlockNumType   MemoryIndex,
     Dem_FFEntryIterType* FFEntryIter);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 #endif
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Move the snapshot entry iterator to the index of the snapshot entry with requested record number.
@@ -199,8 +229,12 @@ DEM_LOCAL void Dem_FFEntryIteratorFindEntryWithRecordNumber(
     uint8                RecordNumber,
     Dem_NvBlockNumType   MemoryIndex,
     Dem_FFEntryIterType* FFEntryIter);
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_FEATURE_SWC_GET_FF_ED == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
+
 /**
  * @brief         Extracts a snapshot record, or a single DID from it.
  * @param[in]     DataId: This parameter specifies the DID (ISO14229-1) that shall be copied to the destination buffer.
@@ -219,6 +253,10 @@ DEM_LOCAL Std_ReturnType Dem_DataReportCopyDidFF(
     Dem_NvBlockNumType           MemoryIndex,
     const uint8*                 SourceBuffer,
     Dem_DestinationBufferPtrType DestinationBuffer);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Extracts a snapshot record, or a single DID from it
@@ -240,10 +278,14 @@ DEM_LOCAL Std_ReturnType Dem_EnvDataCopyDidFromFF(
     uint8                        RecordNumber,
     uint16                       DataId,
     Dem_DestinationBufferPtrType DestinationBuffer);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 #endif
 
 #if (DEM_FEATURE_SWC_GET_FF_ED == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Implementation of SWC API Dem_GetEventFreezeFrameDataEx().
  * @param[in]     EventId: Event ID
@@ -266,10 +308,14 @@ DEM_LOCAL Std_ReturnType Dem_EnvDataSwcApiGetEventFreezeFrameDataEx(
     uint16          DataId,
     uint8*          DestBuffer,
     uint16*         BufSize);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_DCM_CLIENT_NUMBER > 0u)
 #if (DEM_MAX_SIZE_FREEZEFRAME > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Counts the number of snapshot records stored in a memory entry
  * @param[in]     MemoryIndex: Memory index
@@ -279,10 +325,14 @@ DEM_LOCAL Std_ReturnType Dem_EnvDataSwcApiGetEventFreezeFrameDataEx(
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL uint8 Dem_FFEntryGetNumberOfFFRecords(Dem_NvBlockNumType MemoryIndex);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 #endif
 
 #if ((DEM_DCM_CLIENT_NUMBER > 0u) || (DEM_J1939DCM_CLIENT_NUMBER > 0u))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Move the snapshot entry iterator to the index of the next stored snapshot entry.
  * @param[in]     TypeOfFFRecordNumeration: Type of FF record index
@@ -297,6 +347,10 @@ DEM_LOCAL uint8 Dem_FFEntryGetNumberOfFFRecords(Dem_NvBlockNumType MemoryIndex);
 DEM_LOCAL boolean Dem_FFEntryIteratorSetNextStoredEntry(
     Dem_TypeOfFreezeFrameRecordNumerationType TypeOfFFRecordNumeration,
     Dem_FFEntryIterType*                      FFEntryIter);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Gets the number of stored snapshot records
@@ -307,6 +361,10 @@ DEM_LOCAL boolean Dem_FFEntryIteratorSetNextStoredEntry(
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL uint16 Dem_FFIteratorGetNumberOfFF(uint8 ClientId);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Filters the snapshot records of events stored in primary memory.
@@ -325,10 +383,14 @@ DEM_LOCAL uint16 Dem_FFIteratorGetNumberOfFF(uint8 ClientId);
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL Std_ReturnType Dem_FFIteratorGetNext(uint8 ClientId, uint32* DTC, uint8* RecordNumber);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_DCM_CLIENT_NUMBER > 0u)
 #if (DEM_OBDII_SUPPORT == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Calculates the total size of the OBD II freeze frame, when formatted as UDS snapshot record (19 04)
  * @param[in]     EventId: Event ID
@@ -345,9 +407,13 @@ DEM_LOCAL Std_ReturnType Dem_GetSizeOfFFSelectionCalculateSizeObd(
     Dem_EventIdType    EventId,
     Dem_NvBlockNumType MemoryIndex,
     uint32*            SizeOfFreezeFrame);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if ((DEM_MAX_SIZE_FREEZEFRAME > 0u) || (DEM_OBDII_SUPPORT == STD_ON))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Calculates the size of all snapshot records
  * @param[in]     ReadoutBuffer: The buffer to store readout data
@@ -362,6 +428,10 @@ DEM_LOCAL Std_ReturnType Dem_GetSizeOfFFSelectionCalculateSizeObd(
 DEM_LOCAL Std_ReturnType Dem_GetSizeOfFFSelectionCalculateSizeAll(
     const Dem_ReadoutBufferEntryType* ReadoutBuffer,
     uint32*                           SizeOfFreezeFrame);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Test whether filter for snapshot record(s) matches
@@ -377,9 +447,13 @@ DEM_LOCAL Std_ReturnType Dem_GetSizeOfFFSelectionCalculateSizeAll(
  * @trace         CPD-PLACEHOLDER
  */
 DEM_LOCAL boolean Dem_GetNextFFDataCheckRecordMatch(uint8 RecordNumberFilter, uint8 RecordNumber);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_MAX_SIZE_FREEZEFRAME > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Calculates the size of a standard snapshot record
  * @param[in]     ReadoutBuffer: The buffer to store readout data
@@ -398,6 +472,10 @@ DEM_LOCAL Std_ReturnType Dem_GetSizeOfFFSelectionCalculateSizeStd(
     const Dem_ReadoutBufferEntryType* ReadoutBuffer,
     uint8                             RecordNumber,
     uint32*                           SizeOfFreezeFrame);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Copies the contents of a stored snapshot record
@@ -414,9 +492,13 @@ DEM_LOCAL void Dem_DataReportFFCopyData(
     const uint8*                 SourceBuffer,
     Dem_EventIdType              EventId,
     Dem_NvBlockNumType           MemoryIndex);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_OBDII_SUPPORT == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief         Copies the contents of an OBD freeze frame.
  * @param[in]     EventId: Event ID
@@ -430,6 +512,10 @@ DEM_LOCAL void Dem_DataReportObdFreezeFrameCopyUdsData(
     Dem_NvBlockNumType           MemoryIndex,
     Dem_EventIdType              EventId,
     Dem_DestinationBufferPtrType DestinationBuffer);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 
 /**
  * @brief         Validates the request to get the OBD FreezeFrame in UDS Format, and copies the data.
@@ -445,6 +531,8 @@ DEM_LOCAL void Dem_DataReportObdFreezeFrameCopyUdsData(
 DEM_LOCAL Std_ReturnType Dem_GetNextFFDataCopyNextRecordObd(
     const Dem_ReadoutBufferEntryType* ReadoutBuffer,
     Dem_DestinationBufferPtrType      DestinationBuffer);
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 #endif
 
@@ -462,9 +550,6 @@ DEM_LOCAL Dem_FFIteratorFilterType Dem_FFIteratorTable[DEM_DCM_CLIENT_NUMBER + D
 #endif
 
 /* ========================================== internal function definitions ========================================= */
-#define DEM_START_SEC_CODE
-#include "Dem_MemMap.h"
-
 #if (DEM_MAX_SIZE_FREEZEFRAME > 0u)
 /**
  * @brief get freeze frame reference
@@ -493,7 +578,8 @@ DEM_LOCAL_INLINE boolean Dem_CheckFFRef(Dem_DTCAttRefNumType DTCAttr)
 {
     return (Dem_GetFFRef(DTCAttr) != DEM_ATTRI_INVALID_FREEZEFRAME); /* PRQA S 4404 */ /* VL_Dem_4404 */
 }
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Sample a UDS snapshot into the prestorage buffer
  */
@@ -515,9 +601,11 @@ DEM_LOCAL void Dem_GetFFFromEnv(Dem_EventIdType EventId, uint8* DestBuffer, uint
         }
     }
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Init FF Iterator.
  */
@@ -527,7 +615,8 @@ DEM_LOCAL void
     FFEntryIter->FFRNStart = FFRNStart;
     FFEntryIter->FFRNEnd   = FFRNEnd;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if ((DEM_OBDII_SUPPORT == STD_ON) && (DEM_MAX_SIZE_OBDFREEZEFRAME > 0u))
 /**
  * @brief get UDS OBD freeze frame reference
@@ -556,7 +645,8 @@ DEM_LOCAL_INLINE boolean Dem_CheckOBDRef(Dem_DTCAttRefNumType DTCAttr)
 {
     return ((Dem_GetUDSOBDRef(DTCAttr) != DEM_ATTRI_INVALID_OBDFREEZEFRAME) || (DEM_PID_CLASS_NUMBER > 0u));
 }
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Sample a OBD snapshot into the prestorage buffer
  */
@@ -592,8 +682,9 @@ DEM_LOCAL void Dem_GetOBDFFFromEnv(Dem_EventIdType EventId, uint8* DestBuffer, u
 #endif
     }
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_MAX_SIZE_J1939FREEZEFRAME > 0u)
 /**
  * @brief get J1939 freeze frame reference
@@ -622,7 +713,8 @@ DEM_LOCAL_INLINE boolean Dem_CheckJ1939FFRef(Dem_DTCAttRefNumType DTCAttr)
 {
     return (Dem_GetJ1939FFRef(DTCAttr) != DEM_ATTRI_INVALID_J1939FREEZEFRAME); /* PRQA S 4404 */ /* VL_Dem_4404 */
 }
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Sample a j1939 snapshot into the prestorage buffer
  */
@@ -645,8 +737,9 @@ DEM_LOCAL void Dem_GetJ1939FFFromEnv(Dem_EventIdType EventId, uint8* DestBuffer,
         }
     }
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_MAX_SIZE_J1939EXFREEZEFRAME > 0u)
 /**
  * @brief get J1939 Expanded freeze frame reference
@@ -675,7 +768,8 @@ DEM_LOCAL_INLINE boolean Dem_CheckJ1939ExFFRef(Dem_DTCAttRefNumType DTCAttr)
 {
     return (Dem_GetJ1939ExFFRef(DTCAttr) != DEM_ATTRI_INVALID_J1939EXFREEZEFRAME); /* PRQA S 4404 */ /* VL_Dem_4404 */
 }
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Sample a j1939 expanded snapshot into the prestorage buffer
  */
@@ -698,8 +792,9 @@ DEM_LOCAL void Dem_GetJ1939ExFFFromEnv(Dem_EventIdType EventId, uint8* DestBuffe
         }
     }
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_FEATURE_SWC_GET_FF_ED == STD_ON)
 #if (DEM_PID_CLASS_NUMBER > 0u)
 /**
@@ -730,8 +825,9 @@ DEM_LOCAL_INLINE Std_ReturnType Dem_EnvDataCopyPidFromObdFreezeFrame(
 }
 #endif
 #endif
-
 #if (DEM_MAX_SIZE_FREEZEFRAME > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Initializes the snapshot entry iterator
  */
@@ -769,7 +865,8 @@ DEM_LOCAL void
     FFEntryIter->MemoryIndex  = MemoryIndex;
     FFEntryIter->FFEntryIndex = 0u;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_FEATURE_SWC_GET_FF_ED == STD_ON)
 #if (DEM_MAX_SIZE_FREEZEFRAME > 0u)
 /* PRQA S 5016 ++ */ /* VL_Dem_5016 */
@@ -801,7 +898,6 @@ DEM_LOCAL_INLINE Dem_NvBlockNumType Dem_FFEntryIteratorGetMemoryEntryHandle(cons
 {
     return FFEntryIter->MemoryIndex;
 }
-
 /**
  * @brief Test if the snapshot entry iterator points to a valid element
  * @param[in]     FFEntryIter: Pointer to Iterator for the snapshot entries
@@ -840,6 +936,8 @@ DEM_LOCAL_INLINE void Dem_FFEntryIteratorNext(Dem_FFEntryIterType* FFEntryIter)
 
 #if (DEM_FEATURE_SWC_GET_FF_ED == STD_ON)
 #if (DEM_GENERAL_FF_RECNUM_CALCULATED == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Move the snapshot entry iterator to the index of the last stored snapshot entry.
  */
@@ -863,9 +961,12 @@ DEM_LOCAL void Dem_FFEntryIteratorFindLastStoredEntry(
         Dem_FFEntryIteratorNext(FFEntryIter);
     }
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 #endif
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Move the snapshot entry iterator to the index of the snapshot entry with requested record number.
  */
@@ -911,8 +1012,11 @@ DEM_LOCAL void Dem_FFEntryIteratorFindEntryWithRecordNumber(
         FFEntryIter->FFEntryIndex++;
     }
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #if (DEM_FEATURE_SWC_GET_FF_ED == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Extracts a snapshot record, or a single DID from it.
  */
@@ -960,7 +1064,10 @@ DEM_LOCAL Std_ReturnType Dem_DataReportCopyDidFF(
     }
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Extracts a snapshot record, or a single DID from it
  */
@@ -971,7 +1078,7 @@ DEM_LOCAL Std_ReturnType Dem_EnvDataCopyDidFromFF(
     uint16                       DataId,
     Dem_DestinationBufferPtrType DestinationBuffer)
 {
-    Std_ReturnType       ret;
+    Std_ReturnType       ret      = DEM_NO_SUCH_ELEMENT;
     Dem_DTCAttRefNumType lDTCAttr = Dem_GetDTCAttr(EventId);
 
     if (lDTCAttr != DEM_DTC_ATTRIBUTES_NUMBER)
@@ -1057,11 +1164,14 @@ DEM_LOCAL Std_ReturnType Dem_EnvDataCopyDidFromFF(
     }
     return ret;
 }
-#endif
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 6030,6070 -- */
 #endif
-
+#endif
 #if (DEM_FEATURE_SWC_GET_FF_ED == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Implementation of SWC API Dem_GetEventFreezeFrameDataEx().
  */
@@ -1105,10 +1215,13 @@ DEM_LOCAL Std_ReturnType Dem_EnvDataSwcApiGetEventFreezeFrameDataEx(
     }
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
-
 #if (DEM_DCM_CLIENT_NUMBER > 0u)
 #if (DEM_MAX_SIZE_FREEZEFRAME > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Counts the number of snapshot records stored in a memory entry
  */
@@ -1127,9 +1240,10 @@ DEM_LOCAL uint8 Dem_FFEntryGetNumberOfFFRecords(Dem_NvBlockNumType MemoryIndex)
     }
     return numberOfRecords;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 #endif
-
 #if ((DEM_DCM_CLIENT_NUMBER > 0u) || (DEM_J1939DCM_CLIENT_NUMBER > 0u))
 /**
  * @brief Get the filter data of a freeze frame iterator.
@@ -1169,7 +1283,6 @@ DEM_LOCAL_INLINE Dem_FFIteratorDTCFormatType Dem_FFIteratorGetDTCFormat(uint8 Dc
 {
     return Dem_FFIteratorTable[DcmClientId].FilterDTCFormat;
 }
-
 #if (DEM_MAX_SIZE_FREEZEFRAME > 0u)
 /**
  * @brief Initialize FreezeFrameIterator
@@ -1223,7 +1336,8 @@ DEM_LOCAL_INLINE void Dem_FFIteratorStartIterator(
 #endif
     Dem_FFIteratorSetFreezeFrameFilterData(DcmClientId, lFFFilterData);
 }
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief  Move the snapshot entry iterator to the index of the next stored snapshot entry.
  */
@@ -1271,7 +1385,10 @@ DEM_LOCAL boolean Dem_FFEntryIteratorSetNextStoredEntry(
     }
     return foundEntry;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Gets the number of stored snapshot records
  */
@@ -1297,7 +1414,10 @@ DEM_LOCAL uint16 Dem_FFIteratorGetNumberOfFF(uint8 ClientId)
     }
     return recordCount;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Filters the snapshot records of events stored in primary memory.
  */
@@ -1361,7 +1481,8 @@ DEM_LOCAL Std_ReturnType Dem_FFIteratorGetNext(uint8 ClientId, uint32* DTC, uint
 #endif
                     {
 #if (DEM_GENERAL_FF_RECNUM_CONFIGURED == STD_ON)
-                        *RecordNumber = Dem_GetFFRNumberOfFFRC(lFFEntryIter->FFEntryIndex + lFFEntryIter->FFRNStart);
+                        Dem_FFRRefNumType lFFRecordRef = Dem_GetValueOfDFFRRef(lFFEntryIter->FFRNStart);
+                        *RecordNumber                  = Dem_GetFFRNumberOfFFRC(lFFRecordRef);
 #endif
                     }
 
@@ -1373,21 +1494,21 @@ DEM_LOCAL Std_ReturnType Dem_FFIteratorGetNext(uint8 ClientId, uint32* DTC, uint
                 }
             }
         }
-        if (ret == DEM_NO_SUCH_ELEMENT)
-        {
-            ++freezeFrameFilterData.MemoryIndex;
-            Dem_FFEntryIteratorInit(eventId, DEM_MEM_INVALID_MEMORY_INDEX, lFFEntryIter);
-        }
+        ++freezeFrameFilterData.MemoryIndex;
+        Dem_FFEntryIteratorInit(eventId, DEM_MEM_INVALID_MEMORY_INDEX, lFFEntryIter);
     }
     Dem_FFIteratorSetFreezeFrameFilterData(dcmClientId, freezeFrameFilterData);
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 /* PRQA S 6070 -- */
 #endif
 #endif
-
 #if (DEM_DCM_CLIENT_NUMBER > 0u)
 #if (DEM_OBDII_SUPPORT == STD_ON)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Calculates the total size of the OBD II freeze frame, when formatted as UDS snapshot record (19 04)
  */
@@ -1422,35 +1543,42 @@ DEM_LOCAL Std_ReturnType Dem_GetSizeOfFFSelectionCalculateSizeObd(
     }
     return ret;
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if ((DEM_MAX_SIZE_FREEZEFRAME > 0u) || (DEM_OBDII_SUPPORT == STD_ON))
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Calculates the size of all snapshot records
  */
 DEM_LOCAL Std_ReturnType
     Dem_GetSizeOfFFSelectionCalculateSizeAll(const Dem_ReadoutBufferEntryType* ReadoutBuffer, uint32* SizeOfFreezeFrame)
 {
-    Std_ReturnType     ret;
+    Std_ReturnType     ret         = DEM_NO_SUCH_ELEMENT;
     Dem_NvBlockNumType memoryIndex = ReadoutBuffer->FFIterator.FFEntryIter.MemoryIndex;
     Dem_EventIdType    eventId     = ReadoutBuffer->EventId;
+    *SizeOfFreezeFrame             = 0u;
 
     /** No data is a positive result for 0xff */
 #if (DEM_MAX_SIZE_FREEZEFRAME > 0u)
     Dem_FFRefNumType ref = Dem_GetFFRef(Dem_GetDTCAttr(eventId));
-
-    ret = E_OK;
-    /* PRQA S 4391 ++ */ /* VL_Dem_4391 */
-    *SizeOfFreezeFrame =
-        (uint32)((uint32)Dem_FFEntryGetNumberOfFFRecords(memoryIndex) * (uint32)(Dem_GetFFSizeOfFF(ref) + 1u));
-    /* PRQA S 4391 -- */
-#else
-    ret = DEM_NO_SUCH_ELEMENT;
-    /** SizeOfFreezeFrame intentionally not modified due to invalid request */
+    if (DEM_ATTRI_INVALID_FREEZEFRAME != ref)
+    {
+        if (memoryIndex != DEM_MEM_INVALID_MEMORY_INDEX)
+        {
+            /* PRQA S 4391 ++ */ /* VL_Dem_4391 */
+            *SizeOfFreezeFrame =
+                (uint32)((uint32)Dem_FFEntryGetNumberOfFFRecords(memoryIndex) * (uint32)(Dem_GetFFSizeOfFF(ref) + 1u));
+            /* PRQA S 4391 -- */
+        }
+        ret = E_OK;
+    }
 #endif
 
     /** Add the size of the OBD freeze frame */
-#if (DEM_OBDII_SUPPORT == STD_ON)
+#if ((DEM_OBDII_SUPPORT == STD_ON) && (DEM_MAX_SIZE_OBDFREEZEFRAME > 0u))
     {
         Dem_EventIdType lEventId;
         uint32          lSizeOfFreezeFrame;
@@ -1462,12 +1590,16 @@ DEM_LOCAL Std_ReturnType
 #else
             *SizeOfFreezeFrame = lSizeOfFreezeFrame;
 #endif
+            ret = E_OK;
         }
     }
 #endif
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Test whether filter for snapshot record(s) matches
  */
@@ -1501,10 +1633,13 @@ DEM_LOCAL boolean Dem_GetNextFFDataCheckRecordMatch(uint8 RecordNumberFilter, ui
     }
     return match;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_MAX_SIZE_FREEZEFRAME > 0u)
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Calculates the size of a standard snapshot record
  */
@@ -1542,7 +1677,10 @@ DEM_LOCAL Std_ReturnType Dem_GetSizeOfFFSelectionCalculateSizeStd(
     }
     return ret;
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Copies the contents of a stored snapshot record
  */
@@ -1580,10 +1718,13 @@ DEM_LOCAL void Dem_DataReportFFCopyData(
         Dem_WriteDestinationBufferAtIndex(DestinationBuffer, writeIndex, Dem_GetLoByte(didCount));
     }
 }
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
 #endif
 
 #if (DEM_OBDII_SUPPORT == STD_ON)
-
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Copies the contents of an OBD freeze frame.
  */
@@ -1646,7 +1787,10 @@ DEM_LOCAL void Dem_DataReportObdFreezeFrameCopyUdsData(
         Dem_WriteDestinationBufferAtIndex(DestinationBuffer, writeIndex, Dem_GetLoByte(didCount));
     }
 }
-
+#define DEM_STOP_SEC_CODE
+#include "Dem_MemMap.h"
+#define DEM_START_SEC_CODE
+#include "Dem_MemMap.h"
 /**
  * @brief Validates the request to get the OBD FreezeFrame in UDS Format, and copies the data.
  */
@@ -1701,10 +1845,8 @@ DEM_LOCAL Std_ReturnType Dem_GetNextFFDataCopyNextRecordObd(
     }
     return ret;
 }
-#endif
-
-#endif
-
 #define DEM_STOP_SEC_CODE
 #include "Dem_MemMap.h"
+#endif
+#endif
 #endif

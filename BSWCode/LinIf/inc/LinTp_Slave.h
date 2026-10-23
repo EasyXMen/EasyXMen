@@ -44,7 +44,11 @@
  * @synchronous         TRUE
  * @trace               -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 void LinTp_SlaveInit(void);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * Brief                LinTp slave node runtime data init and cancel TP process on going
@@ -52,7 +56,11 @@ void LinTp_SlaveInit(void);
  * @synchronous         TRUE
  * @trace               -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 void LinTp_SlavePreInit(NetworkHandleType ch);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  *  @brief         TP message receive indication process in slave channel.
@@ -62,7 +70,11 @@ void LinTp_SlavePreInit(NetworkHandleType ch);
  *  @synchronous   FALSE
  *  @trace        -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 void LinTp_SlaveMRFIndication(NetworkHandleType ch, const uint8* Lin_SduPtr);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief               Get ComMChannel corresponding LinTp channel
@@ -74,7 +86,11 @@ void LinTp_SlaveMRFIndication(NetworkHandleType ch, const uint8* Lin_SduPtr);
  * @synchronous         TRUE
  * @trace               -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 Std_ReturnType LinTp_SlaveTransmit(const LinTp_TxNSduType* txNSdu, const PduInfoType* LinTpTxInfoPtr);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief               Shutdowns the LINTP slave node
@@ -83,7 +99,11 @@ Std_ReturnType LinTp_SlaveTransmit(const LinTp_TxNSduType* txNSdu, const PduInfo
  * @synchronous         TRUE
  * @trace               -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 void LinTp_SlaveShutdown(ApplicationType applicationId);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief               Check slave node function address flag.
@@ -92,7 +112,11 @@ void LinTp_SlaveShutdown(ApplicationType applicationId);
  * @synchronous         TRUE
  * @trace               -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 boolean LinTp_SlaveCheckFunctionAddressFlag(NetworkHandleType ch);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief               Set slave node function address flag.
@@ -102,7 +126,11 @@ boolean LinTp_SlaveCheckFunctionAddressFlag(NetworkHandleType ch);
  * @synchronous         TRUE
  * @trace               -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 void LinTp_SlaveSetFunctionAddressFlag(NetworkHandleType ch, boolean functionAddressFlag);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief               SRF process(Response transmit) in slave channel.
@@ -111,7 +139,11 @@ void LinTp_SlaveSetFunctionAddressFlag(NetworkHandleType ch, boolean functionAdd
  * @reentrant           TRUE
  * @synchronous         TRUE
  * @trace               - */
-void LinTp_SlaveSRFIndication(NetworkHandleType ch, Lin_PduType* PduPtr);
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
+boolean LinTp_SlaveSRFIndication(NetworkHandleType ch, Lin_PduType* PduPtr);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 /**
  * @brief               TP tx confirmation process in slave channel.
@@ -121,7 +153,11 @@ void LinTp_SlaveSRFIndication(NetworkHandleType ch, Lin_PduType* PduPtr);
  * @synchronous         TRUE
  * @trace               -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 void LinTp_SlaveTxConfirmation(NetworkHandleType ch, boolean* isTpTxFinish);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 #if (LINIF_SUPPORT_RESPONSE_ERROR_SIGNAL == STD_ON)
 /**
@@ -131,7 +167,11 @@ void LinTp_SlaveTxConfirmation(NetworkHandleType ch, boolean* isTpTxFinish);
  * @synchronous         TRUE
  * @trace               -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 void LinTp_SlaveTxErrorSignalHandler(NetworkHandleType LinIfChannelId);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 #endif
 
 /**
@@ -141,7 +181,11 @@ void LinTp_SlaveTxErrorSignalHandler(NetworkHandleType LinIfChannelId);
  * @synchronous         TRUE
  * @trace               -
  */
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 void LinTp_SlaveMainFunction(NetworkHandleType ch);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 #endif
 #endif

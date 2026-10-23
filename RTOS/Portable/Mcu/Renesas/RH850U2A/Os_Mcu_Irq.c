@@ -1,0 +1,191 @@
+/**
+ * Copyright (C) 2008-2026 isoft Infrastructure Software Co., Ltd.
+ * SPDX-License-Identifier: LGPL-2.1-only-with-exception
+ *
+ * This library is free software; you can redistribute it and/or modify it under the terms of the
+ * GNU Lesser General Public License as published by the Free Software Foundation; version 2.1.
+ * This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU Lesser General Public License for more details.
+ * You should have received a copy of the GNU Lesser General Public License along with this library;
+ * if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ * or see <https://www.gnu.org/licenses/>.
+ */
+/*
+ ********************************************************************************
+ **                                                                            **
+ **  FILENAME    : Os_Mcu_Irq.c                                                **
+ **                                                                            **
+ **  Created on  :                                                             **
+ **  Author      : i-soft-os                                                   **
+ **  Vendor      :                                                             **
+ **  DESCRIPTION : Interrupt driver                                            **
+ **                                                                            **
+ **  SPECIFICATION(S) :   AUTOSAR classic Platform r19                         **
+ **  Version :   AUTOSAR classic Platform R19--Function Safety                 **
+ **                                                                            **
+ *******************************************************************************/
+
+/*=======[I N C L U D E S]====================================================*/
+#include "Os_Cfg.h"
+#include "Os_Tprot_Cfg.h"
+#include "Os_Types.h"
+#include "Os_Mcu_Irq.h"
+#include "Os_Arch_Irq.h"
+#include "Os_Interrupt_CfgData.h"
+/*=======[E X T E R N A L   D A T A]==========================================*/
+
+/*=======[I N T E R N A L   D A T A]==========================================*/
+#if (TRUE == CFG_TIMING_PROTECTION_ENABLE)
+#define OS_START_SEC_CONST_UNSPECIFIED
+#include "Os_MemMap.h"
+static const uint32 Os_TPTimer_ISR[OS_AUTOSAR_CORES] = {
+    OS_ISR_OSTM4TINT,
+#if (TRUE == CFG_CORE1_AUTOSAROS_ENABLE)
+    OS_ISR_OSTM5TINT,
+#endif
+#if (TRUE == CFG_CORE2_AUTOSAROS_ENABLE)
+    OS_ISR_OSTM6TINT,
+#endif
+#if (TRUE == CFG_CORE3_AUTOSAROS_ENABLE)
+    OS_ISR_OSTM7TINT
+#endif
+};
+#define OS_STOP_SEC_CONST_UNSPECIFIED
+#include "Os_MemMap.h"
+#endif
+
+/*=======[E X T E R N A L   F U N C T I O N   D E C L A R A T I O N S]========*/
+
+/*=======[F U N C T I O N   I M P L E M E N T A T I O N S]====================*/
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/******************************************************************************/
+/*
+ * Brief                <Interrupt installation.>
+ *
+ * Service ID   :       <None>
+ * Sync/Async   :       <Synchronous>
+ * Reentrancy           <Reentrant>
+ * param[in]            <irq,srcAddr,prio,isrProc,intc2SelectionBit>
+ * param[out]           <None>
+ * param[in/out]        <None>
+ * return               <None>
+ * CallByAPI            <None>
+ * REQ ID               <DD_1_0762>
+ */
+/******************************************************************************/
+/* PRQA S 1532, 0303, 3442, 3345, 4397, 4461, 2998, 2996 ++ */ /* VL_QAC_OneFunRef */ /* VL_Os_0303 */ /* VL_Os_3345 */
+/* VL_Os_3442 */ /* VL_Os_4397 */ /* VL_Os_4461 */ /* VL_Os_2998 */                                    /* VL_Os_2996 */
+void Os_McuInterruptInstall(const Os_IsrCfgType* IsrCfg, const Os_IntInstallType* IntInstall)
+{
+    uint32              isrNum;
+    uint32              coreId     = IsrCfg->IsrSrcType;
+    uint32              isrSrc     = IsrCfg->IsrSrc;
+    uint16              isrPrio    = IntInstall->IntPrio;
+    const Os_ArchIsrhnd isrHandler = IntInstall->IntHandler;
+
+    if (0U != (isrSrc & OS_ARCH_EIINT_TYPE))
+    {
+        isrNum                    = OS_ARCH_EIINTSRC_2_NUM(isrSrc);
+        OS_ARCH_INTC_EICn(isrNum) = (uint16)(OS_ARCH_INTC_EICn(isrNum) & ((uint16)~OS_ARCH_EIC_P_FEILD_MASK))
+                                    | (OS_ARCH_INT_PRIORITY_LOG_TO_PHY(isrPrio) & OS_ARCH_EIC_P_FEILD_MASK);
+        OS_ARCH_INTC_EICn(isrNum) &= ~((uint16)1U << OS_ARCH_EIC_TB_BIT);
+        OS_ARCH_INTC_EICn(isrNum) &= ~((uint16)1U << OS_ARCH_EIC_MK_BIT);
+
+        if (isrNum >= 32UL) /* PRQA S 3120 */ /* VL_QAC_MagicNum */
+        {
+            OS_MCU_INTC_EIBDn(isrNum) |= coreId;
+        }
+        Os_Vector_Handler[isrNum] = isrHandler;
+    }
+    else
+    {
+        isrNum = OS_ARCH_FEINTSRC_2_NUM(isrSrc);
+        OS_MCU_FEINTMSK(coreId) &= ~(uint32)(1UL << isrNum);
+        Os_FE_Handler[isrNum] = isrHandler;
+    }
+}
+/* PRQA S 1532, 0303, 3442, 3345, 4397, 4461, 2998, 2996 -- */
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#if (TRUE == CFG_TIMING_PROTECTION_ENABLE)
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/******************************************************************************/
+/*
+ * Brief                <Disable All interrupt But Timing Protect interrupt>
+ * Service ID           <None>
+ * Sync/Async           <Synchronous>
+ * Reentrancy           <None Reentrant>
+ * param-Name[in]       <None>
+ * param-Name[out]      <None>
+ * param-Name[in/out]   <None>
+ * return               <None>
+ * PreCondition         <None>
+ * CallByAPI            <None>
+ * REQ ID               <None>
+ */
+/******************************************************************************/
+void Os_Hal_DisableAllInt_ButTimingProtInt(Os_CoreIdType CoreId)
+{
+    uint16               i;
+    const Os_IsrCfgType* pIsrCfg;
+    uint32               isrSrc;
+    uint16               idStartRange = (uint16)Os_IsrIdRange[CoreId].AllIsr.IsrStart;
+    uint16               idEndRange   = (uint16)Os_IsrIdRange[CoreId].AllIsr.IsrEnd;
+
+    for (i = idStartRange; i < idEndRange; i++)
+    {
+        pIsrCfg = &Os_IsrCfg[i];
+        isrSrc  = pIsrCfg->IsrSrc;
+
+        if (Os_TPTimer_ISR[CoreId] != isrSrc)
+        {
+            Os_Hal_DisableInterruptSource(isrSrc, CoreId);
+        }
+    }
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+
+#define OS_START_SEC_CODE
+#include "Os_MemMap.h"
+/******************************************************************************/
+/*
+ * Brief                <Enable All interrupt But Timing Protect interrupt>
+ * Service ID           <None>
+ * Sync/Async           <Synchronous>
+ * Reentrancy           <None Reentrant>
+ * param-Name[in]       <None>
+ * param-Name[out]      <None>
+ * param-Name[in/out]   <None>
+ * return               <None>
+ * PreCondition         <None>
+ * CallByAPI            <None>
+ * REQ ID               <None>
+ */
+/******************************************************************************/
+void Os_Hal_EnableAllInt_ButTimingProtInt(Os_CoreIdType CoreId)
+{
+    uint16               i;
+    const Os_IsrCfgType* pIsrCfg;
+    uint32               isrSrc;
+    uint16               idStartRange = (uint16)Os_IsrIdRange[CoreId].AllIsr.IsrStart;
+    uint16               idEndRange   = (uint16)Os_IsrIdRange[CoreId].AllIsr.IsrEnd;
+
+    for (i = idStartRange; i < idEndRange; i++)
+    {
+        pIsrCfg = &Os_IsrCfg[i];
+        isrSrc  = pIsrCfg->IsrSrc;
+        if (Os_TPTimer_ISR[CoreId] != isrSrc)
+        {
+            Os_Hal_EnableInterruptSource(isrSrc, CoreId);
+        }
+    }
+}
+#define OS_STOP_SEC_CODE
+#include "Os_MemMap.h"
+#endif /* TRUE == CFG_TIMING_PROTECTION_ENABLE */
+/*=======[E N D   O F   F I L E]==============================================*/

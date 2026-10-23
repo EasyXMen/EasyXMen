@@ -46,7 +46,7 @@ extern "C" {
 /**
  * Unused uint8 value
  */
-#define SOAD_UNUSED_UINT8 (0xFFu)
+#define SOAD_UNUSED_UINT8  (0xFFu)
 /**
  * Unused uint32 value
  */
@@ -99,33 +99,56 @@ extern "C" {
 
 /* =========================================== external data declarations =========================================== */
 #if (SOAD_SUPPORT_UPPERLAYMODULE_MAX > 0u)
+#define SOAD_START_SEC_CONFIG_DATA_UNSPECIFIED
+#include "SoAd_MemMap.h"
 /**
  * @brief Array of pointers to the initialization status of each partition.
  */
 extern const SoAd_PcCfgType SoAd_PcCfg;
+#define SOAD_STOP_SEC_CONFIG_DATA_UNSPECIFIED
+#include "SoAd_MemMap.h"
 #endif
 
 #if (STD_ON == SOAD_SUPPORT_MULTIPLE_PARTITION)
+#define SOAD_START_SEC_CONFIG_DATA_UNSPECIFIED
+#include "SoAd_MemMap.h"
 /**
  * @brief Array of pointers to the initialization status of each partition.
  */
 extern SoAd_Init_StateType* const SoAd_MultiPartitionInitStatusPtr[SOAD_PARTITION_NUM];
+#define SOAD_STOP_SEC_CONFIG_DATA_UNSPECIFIED
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CONFIG_DATA_UNSPECIFIED
+#include "SoAd_MemMap.h"
 /**
  * @brief Array of partition information structures.
  */
 extern const SoAd_PartitionInfoType SoAd_Partition[SOAD_PARTITION_MAX];
+#define SOAD_STOP_SEC_CONFIG_DATA_UNSPECIFIED
+#include "SoAd_MemMap.h"
 #endif
 
+#define SOAD_START_SEC_CONFIG_DATA_UNSPECIFIED
+#include "SoAd_MemMap.h"
 /**
  * @brief Array of multi-partition information structures.
  */
 extern const SoAd_MultiPartitionInfoType SoAd_MultiPartitionInfo[SOAD_PARTITION_NUM];
+#define SOAD_STOP_SEC_CONFIG_DATA_UNSPECIFIED
+#include "SoAd_MemMap.h"
 
 /* ========================================= external function declarations ========================================= */
 #if (STD_ON == SOAD_SUPPORT_MULTIPLE_PARTITION)
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 extern void SoAd_MainFunction(uint16 PartitionId);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 #endif
+
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         dummy function for IfRxIndication
  * @param[in]     RxPduId: received PduId
@@ -136,7 +159,11 @@ extern void SoAd_MainFunction(uint16 PartitionId);
  * @trace         CPD-78712
  */
 void SoAd_DummyIfRxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         dummy function for IfTriggerTransmit
  * @param[in]     TxPduId: transmit PduId
@@ -147,7 +174,11 @@ void SoAd_DummyIfRxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr);
  * @trace         CPD-78713
  */
 Std_ReturnType SoAd_DummyIfTriggerTransmit(PduIdType TxPduId, PduInfoType* PduInfoPtr);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         dummy function for IfTxConfirmation
  * @param[in]     TxPduId: transmit PduId
@@ -157,7 +188,11 @@ Std_ReturnType SoAd_DummyIfTriggerTransmit(PduIdType TxPduId, PduInfoType* PduIn
  * @trace         CPD-78714
  */
 void SoAd_DummyIfTxConfirmation(PduIdType TxPduId, Std_ReturnType result);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         dummy function for TpStartOfReception
  * @param[in]     RxPduId: received PduId
@@ -174,7 +209,11 @@ BufReq_ReturnType SoAd_DummyTpStartOfReception(
     const PduInfoType* info,
     PduLengthType      TpSduLength,
     PduLengthType*     bufferSizePtr);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         dummy function for TpCopyRxData
  * @param[in]     id: received PduId
@@ -186,7 +225,11 @@ BufReq_ReturnType SoAd_DummyTpStartOfReception(
  * @trace         CPD-78716
  */
 BufReq_ReturnType SoAd_DummyTpCopyRxData(PduIdType id, const PduInfoType* info, PduLengthType* bufferSizePtr);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         dummy function for TpRxIndication
  * @param[in]     RxPduId: received PduId
@@ -196,7 +239,11 @@ BufReq_ReturnType SoAd_DummyTpCopyRxData(PduIdType id, const PduInfoType* info, 
  * @trace         CPD-78717
  */
 void SoAd_DummyTpRxIndication(PduIdType RxPduId, Std_ReturnType result);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         dummy function for TpCopyTxData
  * @param[in]     id: received PduId
@@ -213,7 +260,11 @@ BufReq_ReturnType SoAd_DummyTpCopyTxData(
     const PduInfoType*   info,
     const RetryInfoType* retry,
     PduLengthType*       availableDataPtr);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         dummy function for TpTxConfirmation
  * @param[in]     TxPduId: transmission PduId
@@ -223,7 +274,11 @@ BufReq_ReturnType SoAd_DummyTpCopyTxData(
  * @trace         CPD-78719
  */
 void SoAd_DummyTpTxConfirmation(PduIdType TxPduId, Std_ReturnType result);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         dummy function for SoConModeChg
  * @param[in]     SoConId: socket connection id
@@ -234,7 +289,11 @@ void SoAd_DummyTpTxConfirmation(PduIdType TxPduId, Std_ReturnType result);
  * @trace         CPD-78720
  */
 void SoAd_DummySoConModeChg(SoAd_SoConIdType SoConId, SoAd_SoConModeType Mode);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
+#define SOAD_START_SEC_CODE
+#include "SoAd_MemMap.h"
 /**
  * @brief         dummy function for LocalIpAddrAssignmentChg
  * @param[in]     SoConId: socket connection id
@@ -245,6 +304,8 @@ void SoAd_DummySoConModeChg(SoAd_SoConIdType SoConId, SoAd_SoConModeType Mode);
  * @trace         CPD-78721
  */
 void SoAd_DummyLocalIpAddrAssignmentChg(SoAd_SoConIdType SoConId, TcpIp_IpAddrStateType State);
+#define SOAD_STOP_SEC_CODE
+#include "SoAd_MemMap.h"
 
 #ifdef __cplusplus
 }

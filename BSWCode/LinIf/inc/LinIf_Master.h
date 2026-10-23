@@ -36,6 +36,8 @@
 /* ========================================= external function declarations ========================================= */
 
 #if (STD_ON == LINIF_MASTER_SUPPORT)
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief               Initializes the LinIf master channel.
  * @param[in]           applicationId: The partition ID of LinIf.
@@ -44,8 +46,12 @@
  * @trace               -
  */
 void LinIf_MasterInit(ApplicationType applicationId);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 #if (LINIF_MASTER_SPORADIC_FRAME_SUPPORT == STD_ON)
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief               Transmit request process in master node.
  * @param[in]           ch: LinIf channel id
@@ -57,8 +63,12 @@ void LinIf_MasterInit(ApplicationType applicationId);
  * @trace               -
  */
 Std_ReturnType LinIf_MasterTransmit(NetworkHandleType ch, uint16 frameIdx);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 #endif
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief               Schedule change request process in master node.
  * @param[in]           ch: LinIf channel id
@@ -69,8 +79,12 @@ Std_ReturnType LinIf_MasterTransmit(NetworkHandleType ch, uint16 frameIdx);
  * @synchronous         TRUE
  * @trace               -
  */
-Std_ReturnType LinIf_MasterScheduleRequest(NetworkHandleType ch, LinIf_SchHandleType LinIfSchedule);
+Std_ReturnType LinIf_MasterScheduleRequest(NetworkHandleType ch, LinIf_SchHandleType schedule);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief               Go-to-sleep process in master node.
  * @param[in]           ch: LinIf channel id
@@ -79,7 +93,11 @@ Std_ReturnType LinIf_MasterScheduleRequest(NetworkHandleType ch, LinIf_SchHandle
  * @trace               -
  */
 void LinIf_MasterGotoSleep(NetworkHandleType ch);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief               Process sleep state transmit
  * @param[inout]        masterChRtDataPtr: LinIf master channel runtime data
@@ -89,7 +107,11 @@ void LinIf_MasterGotoSleep(NetworkHandleType ch);
  * @trace               -
  */
 void LinIf_SleepProcess(LinIf_MasterRuntimeType* masterChRtDataPtr, uint8 ch);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief               Process wake-up state transmit
  * @param[in]           ch: LinIf channel id
@@ -100,7 +122,11 @@ void LinIf_SleepProcess(LinIf_MasterRuntimeType* masterChRtDataPtr, uint8 ch);
  * @trace               -
  */
 Std_ReturnType LinIf_MasterWakeUp(NetworkHandleType ch);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief               Wakeup confirmation process in master node
  * @param[in]           WakeupSource: LinIf master channel wakeup source
@@ -110,7 +136,11 @@ Std_ReturnType LinIf_MasterWakeUp(NetworkHandleType ch);
  * @trace               -
  */
 void LinIf_MasterWakeupConfirmation(EcuM_WakeupSourceType WakeupSource, ApplicationType applicationId);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief               Process wake-up state transmit
  * @param[inout]        masterChRtDataPtr: LinIf master channel runtime data
@@ -120,7 +150,11 @@ void LinIf_MasterWakeupConfirmation(EcuM_WakeupSourceType WakeupSource, Applicat
  * @trace               -
  */
 void LinIf_WakeUpProcess(LinIf_MasterRuntimeType* masterChRtDataPtr, uint8 ch);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief               Process the preview frame transmission
  * @param[inout]        masterChRtDataPtr: LinIf master channel runtime data
@@ -130,7 +164,11 @@ void LinIf_WakeUpProcess(LinIf_MasterRuntimeType* masterChRtDataPtr, uint8 ch);
  * @trace               -
  */
 void LinIf_PrevTransmit(LinIf_MasterRuntimeType* masterChRtDataPtr, uint8 ch);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief               Process the next frame transmission
  * @param[inout]        masterChRtDataPtr: LinIf master channel runtime data
@@ -140,7 +178,11 @@ void LinIf_PrevTransmit(LinIf_MasterRuntimeType* masterChRtDataPtr, uint8 ch);
  * @trace               -
  */
 void LinIf_NextTransmit(LinIf_MasterRuntimeType* masterChRtDataPtr, uint8 ch);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief               Updates the schedule strategy
  * @param[inout]        masterChRtDataPtr: LinIf master channel runtime data
@@ -150,7 +192,27 @@ void LinIf_NextTransmit(LinIf_MasterRuntimeType* masterChRtDataPtr, uint8 ch);
  * @trace               -
  */
 void LinIf_UpdateSchedule(LinIf_MasterRuntimeType* masterChRtDataPtr, uint8 ch);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#if (STD_ON == LINIF_BUS_MIRROR_SUPPORT)
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
+/**
+ * @brief               Enable master bus mirror function.
+ * @param[in]           ch: LinIf channel id
+ * @param[in]           enable: TRUE: enable bus mirror function; FALSE: disable bus mirror function
+ * @reentrant           TRUE
+ * @synchronous         TRUE
+ * @trace               -
+ */
+void LinIf_MasterEnableBusMirror(NetworkHandleType ch, boolean enable);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
+#endif
+
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief               Get current frame type
  * @param[in]           ch: LinIf channel id
@@ -160,7 +222,11 @@ void LinIf_UpdateSchedule(LinIf_MasterRuntimeType* masterChRtDataPtr, uint8 ch);
  * @trace               -
  */
 Std_ReturnType LinIf_GetCurFrameType(NetworkHandleType ch, LinIf_FrameTypeType* frameType);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
+#define LINIF_START_SEC_CODE
+#include "LinIf_MemMap.h"
 /**
  * @brief           The main processing function of the LinIf master node. This function process
                     master node wakeup and sleep, message transmit and update schedule table.
@@ -170,6 +236,8 @@ Std_ReturnType LinIf_GetCurFrameType(NetworkHandleType ch, LinIf_FrameTypeType* 
  * @trace        -
  */
 void LinIf_MasterMainHandle(NetworkHandleType ch);
+#define LINIF_STOP_SEC_CODE
+#include "LinIf_MemMap.h"
 
 #endif
 

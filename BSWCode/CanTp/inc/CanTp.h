@@ -48,6 +48,12 @@
  *                        xue.han      CPT-16401,fix FF_DL overflow risk by checking CANTP_PDU_LENGTH_TYPE_MAX
  *                                     CPT-16371:exchanged SA and TA processes; CPT-17197: added const qualifiers.
  *  v3.0.4  2026-01-28    chao.sun     CPTASK-129,update CanTp_GetRxNSduCfg()
+ *  v3.0.5  2026-04-13    xue.han      CPT-18460,CPT-18496,fix Extended or Mixed11 addressing check for N_AE and N_TA
+ *          2026-04-21    xue.han      CPT-18769,fix CanTpChangeRxParameter array assignment on initialization.
+ *  V3.0.6  2026-06-03    tao.yu       add arti
+ *          2026-06-15    xue.han      CPT-19187, Fix insufficient number of CF transmissions.
+ *  V3.0.7  2026-07-22    xue.han      CPT-19264,fix txstate switch before triggering transmission.
+ *          2026-07-29    xue.han      CPT-19601,STMin is compensated by one period cycle.
  ==================================================================================================================== */
 /*===================================================================================================================*/
 /* ================================================ misar justifications ============================================ */
@@ -240,6 +246,10 @@
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
 
+    \li VL_CanTp_1513
+      Reason: Identifier '${name}' with external linkage has separate non-defining declarations in more than one
+  location. Risk: No risk. Prevention: Functional reliability guaranteed by design.
+
     \li VL_CanTp_0499
       Reason: The arithmetic is safe.
       Risk: No risk.
@@ -269,9 +279,9 @@ extern "C" {
  * @{
  * @brief Published information elements
  */
-#define CANTP_MODULE_ID   35u /**< Vendor Id */
-#define CANTP_VENDOR_ID   62u /**< Module Id */
-#define CANTP_INSTANCE_ID 0u  /**< InStance Id */
+#define CANTP_MODULE_ID                   35u /**< Vendor Id */
+#define CANTP_VENDOR_ID                   62u /**< Module Id */
+#define CANTP_INSTANCE_ID                 0u  /**< InStance Id */
 /** @} */
 /**
  * @name CanTpAUTOSARSWSpecificationMacro
@@ -290,7 +300,7 @@ extern "C" {
  */
 #define CANTP_SW_MAJOR_VERSION 3U /**< Software Major version */
 #define CANTP_SW_MINOR_VERSION 0U /**< Software Minor version */
-#define CANTP_SW_PATCH_VERSION 4U /**< Software Patch version */
+#define CANTP_SW_PATCH_VERSION 7U /**< Software Patch version */
 /** @} */
 /* ===================================================== macros ===================================================== */
 /** This macro definition indicates the data copy, setup, and comparison of whether or not the library functions
@@ -308,12 +318,18 @@ extern "C" {
 #define CANTP_STMIN_IMMEDIATE_TX_CONFIRMATION STD_ON /**< Whether transmitted immediately during the confirmation  */
 #endif
 /* ================================================= global variable ================================================*/
+#define CANTP_START_SEC_VAR_CLEARED_PTR
+#include "CanTp_MemMap.h"
 /**
  * @brief Pointer variable to store the determined PB configuration data
  */
 extern const CanTp_ConfigType* CanTp_ConfigPtr;
+#define CANTP_STOP_SEC_VAR_CLEARED_PTR
+#include "CanTp_MemMap.h"
 /* ========================================= external function declarations ========================================= */
 
+#define CANTP_START_SEC_CODE_FAST
+#include "CanTp_MemMap.h"
 /**
  * @brief         Notify CanTp to receive CAN N-PDU frame.
  * @param[in]     RxPduId     : Identification of the received N-PDU.
@@ -324,7 +340,11 @@ extern const CanTp_ConfigType* CanTp_ConfigPtr;
  */
 
 extern void CanTp_RxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr);
+#define CANTP_STOP_SEC_CODE_FAST
+#include "CanTp_MemMap.h"
 
+#define CANTP_START_SEC_CODE_FAST
+#include "CanTp_MemMap.h"
 /**
  * @brief         Notify CanTp to Confirm the transmission of CAN N-PDU frame.
  * @param[in]     TxPduId    : Identification of the transmitted N-PDU.
@@ -334,7 +354,11 @@ extern void CanTp_RxIndication(PduIdType RxPduId, const PduInfoType* PduInfoPtr)
  * @trace       CPD-73224
  */
 extern void CanTp_TxConfirmation(PduIdType TxPduId, Std_ReturnType result);
+#define CANTP_STOP_SEC_CODE_FAST
+#include "CanTp_MemMap.h"
 
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief         Service for basic initialization of CanTp module.
  * @param[in]     CfgPtr      : Pointer to configuration set in Variant Post-Build.
@@ -343,8 +367,11 @@ extern void CanTp_TxConfirmation(PduIdType TxPduId, Std_ReturnType result);
  * @trace       CPD-73225
  */
 extern void CanTp_Init(const CanTp_ConfigType* CfgPtr);
-
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
 #if (CANTP_VERSION_INFO_API == STD_ON)
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief         Returns the version information of this module.
  * @param[inout]    versioninfo : Pointer to where to store the version information of this module.
@@ -353,8 +380,11 @@ extern void CanTp_Init(const CanTp_ConfigType* CfgPtr);
  * @trace       CPD-73226
  */
 extern void CanTp_GetVersionInfo(Std_VersionInfoType* versioninfo);
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
 #endif
-
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief         This function to shutdown the CanTp module.
  * @reentrant     Non Reentrant.
@@ -362,8 +392,11 @@ extern void CanTp_GetVersionInfo(Std_VersionInfoType* versioninfo);
  * @trace       CPD-73227
  */
 extern void CanTp_Shutdown(void);
-
-/* PRQA S 1512,1513 ++ */ /* VL_CanTp_1512,VL_QAC_MultiDeclaration */
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
+#define CANTP_START_SEC_CODE_FAST
+#include "CanTp_MemMap.h"
+/* PRQA S 1512,1513 ++ */ /* VL_CanTp_1512,VL_CanTp_1513 */
 /**
  * @brief         The transmission of segmented or unsegmented message is requested.
  * @param[in]     TxPduId      : Identification of the transmitted N-PDU.
@@ -376,8 +409,11 @@ extern void CanTp_Shutdown(void);
  * @trace       CPD-73228
  */
 extern Std_ReturnType CanTp_Transmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr);
-
+#define CANTP_STOP_SEC_CODE_FAST
+#include "CanTp_MemMap.h"
 #if (CANTP_TC == STD_ON)
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief         Requests cancellation of an ongoing transmission of a PDU in a lower layer communication module.
  * @param[in]     TxPduId       : Identification of the PDU to be cancelled.
@@ -389,9 +425,12 @@ extern Std_ReturnType CanTp_Transmit(PduIdType TxPduId, const PduInfoType* PduIn
  * @trace       CPD-73229
  */
 extern Std_ReturnType CanTp_CancelTransmit(PduIdType TxPduId);
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
 #endif
-
 #if (CANTP_RC == STD_ON)
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief         Requests cancellation of an ongoing reception of a PDU in a lower layer transport protocol module.
  * @param[in]     RxPduId        : Identification of the PDU to be cancelled.
@@ -403,10 +442,13 @@ extern Std_ReturnType CanTp_CancelTransmit(PduIdType TxPduId);
  * @trace       CPD-73230
  */
 extern Std_ReturnType CanTp_CancelReceive(PduIdType RxPduId);
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
 #endif
 /* PRQA S 1512,1513 -- */
-
 #if (CANTP_CHANGE_PARAMETER == STD_ON)
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief         Request to change a specific transport protocol parameter (e.g. block size).
  * @param[in]     id             :Identification of the PDU which the parameter change shall affect.
@@ -420,9 +462,12 @@ extern Std_ReturnType CanTp_CancelReceive(PduIdType RxPduId);
  * @trace       CPD-73231
  */
 extern Std_ReturnType CanTp_ChangeParameter(PduIdType id, TPParameterType parameter, uint16 value);
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
 #endif
-
 #if (CANTP_READ_PARAMETER == STD_ON)
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief         This service is used to read the current value of reception parameters BS and STmin for a specified
  * N-SDU.
@@ -437,6 +482,8 @@ extern Std_ReturnType CanTp_ChangeParameter(PduIdType id, TPParameterType parame
  * @trace       CPD-73232
  */
 extern Std_ReturnType CanTp_ReadParameter(PduIdType id, TPParameterType parameter, uint16* value);
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
 #endif
 
 #ifdef __cplusplus

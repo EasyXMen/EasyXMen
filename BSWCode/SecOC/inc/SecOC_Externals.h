@@ -54,9 +54,14 @@ extern "C" {
  * @synchronous    TRUE
  * @trace       CPD-70354
  */
-/* PRQA S 1753,1501 ++ */ /* VL_SecOC_1753,VL_SecOC_1501 */
+/*PRQA S 1753, 1501 ++ */ /*VL_SecOC_1753, VL_SecOC_1501*/
+#define SECOC_START_SEC_CODE
+#include "SecOC_MemMap.h"
 void SecOC_VerifyStatus(SecOC_VerificationStatusType verificationStatus);
-/* PRQA S 1753,1501 -- */
+#define SECOC_STOP_SEC_CODE
+#include "SecOC_MemMap.h"
+/*PRQA S 1753, 1501 -- */
+
 #ifdef __cplusplus
 }
 #endif

@@ -38,9 +38,9 @@
 /* ============================================ external data definitions =========================================== */
 
 /* ========================================== external function definitions ========================================= */
+
 #define BSWM_START_SEC_CODE
 #include "BswM_MemMap.h"
-
 /**
  * Processes the car wake-up indication for the specified network.
  * This function updates the event request status and evaluates the associated rules if immediate processing is
@@ -50,6 +50,8 @@
 void BswM_Nm_CarWakeUpIndication(NetworkHandleType Network)
 /* PRQA S 1503,1505,1532,6030 --*/
 {
+    BswM_ArtiApiStart(2, BSWM_API_ID_NMIF_CAR_WAKEUP_INDICATION, Network);
+
 #if (BSWM_EVENT_NM_CAR_WAKEUP_INDICATION_ENABLE == STD_ON)
     const BswM_PartitionPCCfgType* bswmPartPCCfgPtr;
 #if (BSWM_PB_CONFIG_ENABLED == STD_ON)
@@ -111,10 +113,18 @@ void BswM_Nm_CarWakeUpIndication(NetworkHandleType Network)
             }
         }
     }
+#else
+    (void)Network;
 #endif /*BSWM_EVENT_NM_CAR_WAKEUP_INDICATION_ENABLE == STD_ON*/
+
+    BswM_ArtiApiStop(1, BSWM_API_ID_NMIF_CAR_WAKEUP_INDICATION);
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 #if (BSWM_NMSTATECHANGENOTIFICATION_ENABLED == STD_ON)
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Initializes the network management request ports by setting their initial status.
  * This function retrieves configuration data and sets the initial status of each network channel.
@@ -123,6 +133,8 @@ void BswM_Nm_CarWakeUpIndication(NetworkHandleType Network)
 void BswM_InitNmRequestPorts(void)
 /* PRQA S 1503,1505,1532 --*/
 {
+    BswM_ArtiApiStart(1, BSWM_API_ID_INITNMREQUESTPORTS);
+
     const BswM_PartitionPCCfgType*      bswmPartPCCfgPtr;
     const BswM_ModeRqstPortPCCfgType*   modeRqstPCfgPtr;
     const BswM_ModeRqstPortRuntimeType* modeRqstPtr;
@@ -151,11 +163,17 @@ void BswM_InitNmRequestPorts(void)
 #if (BSWM_DEV_ERROR_DETECT == STD_ON)
     else
     {
-        (void)Det_ReportError(BSWM_MODULE_ID, BSWM_INSTANCE_ID, BSWM_API_ID_INIT, BSWM_E_INIT_FAILED);
+        (void)Det_ReportError(BSWM_MODULE_ID, BSWM_INSTANCE_ID, BSWM_API_ID_INITNMREQUESTPORTS, BSWM_E_INIT_FAILED);
     }
 #endif /*BSWM_DEV_ERROR_DETECT == STD_ON*/
-}
 
+    BswM_ArtiApiStop(1, BSWM_API_ID_INITNMREQUESTPORTS);
+}
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
+
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Retrieves the current network management state for a specified network channel.
  * This function gets the configuration data and returns the current state of the specified network channel.
@@ -175,8 +193,12 @@ Nm_StateType BswM_GetCurNmState(uint8 nmChIdx)
     }
     return NmState;
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_NMSTATECHANGENOTIFICATION_ENABLED == STD_ON*/
 
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Notifies the system about a change in the network management state for a specified network.
  * This function updates the internal state and triggers any necessary actions based on the new state.
@@ -186,6 +208,8 @@ Nm_StateType BswM_GetCurNmState(uint8 nmChIdx)
 void BswM_Nm_StateChangeNotification(NetworkHandleType Network, Nm_StateType currentState)
 /* PRQA S 1503,1505,1532 --*/
 {
+    BswM_ArtiApiStart(3, BSWM_API_ID_NM_STATECHANGENOTIFICATION, Network, currentState);
+
 #if (BSWM_NMSTATECHANGENOTIFICATION_ENABLED == STD_ON)
     const BswM_PartitionPCCfgType* bswmPartPCCfgPtr;
 #if (BSWM_PB_CONFIG_ENABLED == STD_ON)
@@ -203,7 +227,7 @@ void BswM_Nm_StateChangeNotification(NetworkHandleType Network, Nm_StateType cur
     NetworkHandleType                   chIdx;
 
 #if (BSWM_DEV_ERROR_DETECT == STD_ON)
-    if ((Std_ReturnType)E_OK == BswM_DetChkNmStateChange())
+    if ((Std_ReturnType)E_OK == BswM_DetChkNmStateChange(currentState))
 #endif /*BSWM_DEV_ERROR_DETECT == STD_ON*/
     {
         result = BswM_GetPartitionLcPCCfgPtr(
@@ -250,8 +274,14 @@ void BswM_Nm_StateChangeNotification(NetworkHandleType Network, Nm_StateType cur
     (void)Network;
     (void)currentState;
 #endif /*BSWM_NMSTATECHANGENOTIFICATION_ENABLED == STD_ON*/
-}
 
+    BswM_ArtiApiStop(1, BSWM_API_ID_NM_STATECHANGENOTIFICATION);
+}
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
+
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Retrieves the event request port runtime type for a specified network index.
  * This function checks the configuration data and returns the corresponding event request port runtime type.
@@ -277,9 +307,9 @@ BswM_EventRquestPortRuntimeType BswM_GetNmWkInd(NetworkHandleType nmIdx)
 #endif /*BSWM_EVENT_NM_CAR_WAKEUP_INDICATION_ENABLE == STD_ON*/
     return ret;
 }
-
 #define BSWM_STOP_SEC_CODE
 #include "BswM_MemMap.h"
+
 /* ========================================== internal function definitions ========================================= */
 
 #endif /*BSWM_NM_ENABLED == STD_ON*/

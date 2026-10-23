@@ -38,9 +38,9 @@
 /* ============================================ external data definitions =========================================== */
 
 /* ========================================== external function definitions ========================================= */
+#if (BSWM_J1939NMINDICATION_ENABLED == STD_ON)
 #define BSWM_START_SEC_CODE
 #include "BswM_MemMap.h"
-#if (BSWM_J1939NMINDICATION_ENABLED == STD_ON)
 /**
  * Initializes the J1939 network management request ports by setting the initial status.
  * This function retrieves the configuration, sets the initial status for each channel,
@@ -50,6 +50,8 @@
 void BswM_InitJ1939NmRequestPorts(void)
 /* PRQA S 1503,1505,1532 --*/
 {
+    BswM_ArtiApiStart(1, BSWM_API_ID_INITJ1939NMREQUESTPORTS);
+
     const BswM_PartitionPCCfgType*      bswmPartPCCfgPtr;
     const BswM_ModeRqstPortPCCfgType*   modeRqstPCfgPtr;
     const BswM_ModeRqstPortRuntimeType* modeRqstPtr;
@@ -78,11 +80,18 @@ void BswM_InitJ1939NmRequestPorts(void)
 #if (BSWM_DEV_ERROR_DETECT == STD_ON)
     else
     {
-        (void)Det_ReportError(BSWM_MODULE_ID, BSWM_INSTANCE_ID, BSWM_API_ID_INIT, BSWM_E_INIT_FAILED);
+        (void)
+            Det_ReportError(BSWM_MODULE_ID, BSWM_INSTANCE_ID, BSWM_API_ID_INITJ1939NMREQUESTPORTS, BSWM_E_INIT_FAILED);
     }
 #endif /*BSWM_DEV_ERROR_DETECT == STD_ON*/
-}
 
+    BswM_ArtiApiStop(1, BSWM_API_ID_INITJ1939NMREQUESTPORTS);
+}
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
+
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Retrieves the current status of the J1939 network management for a specific channel.
  * This function fetches the configuration and returns the status of the specified channel.
@@ -102,8 +111,12 @@ Nm_StateType BswM_GetJ1939NmStatus(NetworkHandleType j1939ChIdx)
     }
     return retStatus;
 }
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 #endif /*BSWM_J1939NMINDICATION_ENABLED == STD_ON*/
 
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 /**
  * Handles the state change notification for the J1939 network management.
  * This function updates the internal state of the specified network and node,
@@ -113,6 +126,8 @@ Nm_StateType BswM_GetJ1939NmStatus(NetworkHandleType j1939ChIdx)
 void BswM_J1939Nm_StateChangeNotification(NetworkHandleType Network, uint8 Node, Nm_StateType NmState)
 /* PRQA S 1503,1505,1532 --*/
 {
+    BswM_ArtiApiStart(4, BSWM_API_ID_J1939NM_STATE_CHANGE_NOTIFY, Network, Node, NmState);
+
 #if (BSWM_J1939NMINDICATION_ENABLED == STD_ON)
     const BswM_PartitionPCCfgType*    bswmPartPCCfgPtr;
     const BswM_PartitionLCfgType*     bswmPartLCfgPtr;
@@ -130,7 +145,7 @@ void BswM_J1939Nm_StateChangeNotification(NetworkHandleType Network, uint8 Node,
     NetworkHandleType                   chIdx;
 
 #if (BSWM_DEV_ERROR_DETECT == STD_ON)
-    if ((Std_ReturnType)E_OK == BswM_DetChkJ1939NmInd())
+    if ((Std_ReturnType)E_OK == BswM_DetChkJ1939NmInd(NmState))
 #endif /*BSWM_DEV_ERROR_DETECT == STD_ON*/
     {
         result = BswM_GetPartitionLcPCCfgPtr(
@@ -179,9 +194,11 @@ void BswM_J1939Nm_StateChangeNotification(NetworkHandleType Network, uint8 Node,
     (void)Node;
     (void)NmState;
 #endif /*BSWM_J1939NMINDICATION_ENABLED == STD_ON*/
-}
 
+    BswM_ArtiApiStop(1, BSWM_API_ID_J1939NM_STATE_CHANGE_NOTIFY);
+}
 #define BSWM_STOP_SEC_CODE
 #include "BswM_MemMap.h"
+
 /* ========================================== internal function definitions ========================================= */
 #endif /*BSWM_J1939NM_ENABLED == STD_ON*/

@@ -53,7 +53,11 @@ extern "C" {
  * @synchronous TRUE
  * @trace       CPD-66325
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 void BswM_Nm_CarWakeUpIndication(NetworkHandleType Network);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 /**
  * @brief       Notification of current Nm state after state changes.
@@ -64,7 +68,11 @@ void BswM_Nm_CarWakeUpIndication(NetworkHandleType Network);
  * @synchronous TRUE
  * @trace       CPD-66328
  */
+#define BSWM_START_SEC_CODE
+#include "BswM_MemMap.h"
 void BswM_Nm_StateChangeNotification(NetworkHandleType Network, Nm_StateType currentState);
+#define BSWM_STOP_SEC_CODE
+#include "BswM_MemMap.h"
 
 #endif /*BSWM_NM_ENABLED == STD_ON*/
 

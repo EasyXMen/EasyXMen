@@ -58,7 +58,11 @@ typedef struct
  *
  * @param[out] ctx  Pointer to the SHA-1 context structure to be initialized.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_Sha1_Starts(Crypto_Sha1_Context* ctx);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Processes a single 512-bit block of data.
@@ -72,7 +76,11 @@ void Crypto_Sha1_Starts(Crypto_Sha1_Context* ctx);
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Internal_Sha1_Process(Crypto_Sha1_Context* ctx, const unsigned char data[64]);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Updates the SHA-1 context with a new block of data.
@@ -88,7 +96,11 @@ Std_ReturnType Crypto_Internal_Sha1_Process(Crypto_Sha1_Context* ctx, const unsi
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Sha1_Update(Crypto_Sha1_Context* ctx, const unsigned char* input, uint32 ilen);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Finalizes the SHA-1 hash computation.
@@ -102,7 +114,17 @@ Std_ReturnType Crypto_Sha1_Update(Crypto_Sha1_Context* ctx, const unsigned char*
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Sha1_Finish(Crypto_Sha1_Context* ctx, unsigned char output[20]);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
+
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+void Crypto_sha1_free(Crypto_Sha1_Context* ctx);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Computes the SHA-1 hash of a given input data.
@@ -117,7 +139,11 @@ Std_ReturnType Crypto_Sha1_Finish(Crypto_Sha1_Context* ctx, unsigned char output
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Sha1(const unsigned char* input, uint32 ilen, unsigned char output[20]);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Processes the SHA-1 hash computation for a given object ID.
@@ -130,7 +156,11 @@ Std_ReturnType Crypto_Sha1(const unsigned char* input, uint32 ilen, unsigned cha
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Sha1_Process(uint32 objectId);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 #ifdef __cplusplus
 }

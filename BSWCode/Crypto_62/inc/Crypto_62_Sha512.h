@@ -51,6 +51,8 @@ typedef struct
 /*
  * Round constants
  */
+#define CRYPTO_62_START_SEC_CONST_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
 CRYPTO_62_LOCAL const uint64 K[CRYPTO_CONST_80] = {
     UL64(0x428A2F98D728AE22), UL64(0x7137449123EF65CD), UL64(0xB5C0FBCFEC4D3B2F), UL64(0xE9B5DBA58189DBBC),
     UL64(0x3956C25BF348B538), UL64(0x59F111F1B605D019), UL64(0x923F82A4AF194F9B), UL64(0xAB1C5ED5DA6D8118),
@@ -72,6 +74,8 @@ CRYPTO_62_LOCAL const uint64 K[CRYPTO_CONST_80] = {
     UL64(0x06F067AA72176FBA), UL64(0x0A637DC5A2C898A6), UL64(0x113F9804BEF90DAE), UL64(0x1B710B35131C471B),
     UL64(0x28DB77F523047D84), UL64(0x32CAAB7B40C72493), UL64(0x3C9EBE0A15C9BEBC), UL64(0x431D67C49C100D4C),
     UL64(0x4CC5D4BECB3E42B6), UL64(0x597F299CFC657E2A), UL64(0x5FCB6FAB3AD6FAEC), UL64(0x6C44198C4A475817)};
+#define CRYPTO_62_STOP_SEC_CONST_UNSPECIFIED
+#include "Crypto_62_MemMap.h"
 /* =========================================== external data declarations =========================================== */
 
 /* ========================================= external function declarations ========================================= */
@@ -83,7 +87,11 @@ CRYPTO_62_LOCAL const uint64 K[CRYPTO_CONST_80] = {
  * @param[out] ctx    Pointer to the SHA-512 context structure to be initialized.
  * @param[in]  is384  Boolean flag indicating whether to compute SHA-384 (true) or SHA-512 (false).
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_Sha512_Starts(Crypto_Sha512_Context* ctx, boolean is384);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Initializes the SHA-512/224 context.
@@ -92,7 +100,11 @@ void Crypto_Sha512_Starts(Crypto_Sha512_Context* ctx, boolean is384);
  *
  * @param[out] ctx  Pointer to the SHA-512 context structure to be initialized.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_Sha512_224_Starts(Crypto_Sha512_Context* ctx);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Initializes the SHA-512/256 context.
@@ -101,7 +113,11 @@ void Crypto_Sha512_224_Starts(Crypto_Sha512_Context* ctx);
  *
  * @param[out] ctx  Pointer to the SHA-512 context structure to be initialized.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_Sha512_256_Starts(Crypto_Sha512_Context* ctx);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Updates the SHA-512 context with a new block of data.
@@ -117,7 +133,11 @@ void Crypto_Sha512_256_Starts(Crypto_Sha512_Context* ctx);
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Sha512_Update(Crypto_Sha512_Context* ctx, const unsigned char* input, uint32 ilen);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Finalizes the SHA-512 hash computation.
@@ -131,7 +151,11 @@ Std_ReturnType Crypto_Sha512_Update(Crypto_Sha512_Context* ctx, const unsigned c
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Sha512_Finish(Crypto_Sha512_Context* ctx, unsigned char* output);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Computes the SHA-512 or SHA-384 hash of a given input data.
@@ -148,7 +172,11 @@ Std_ReturnType Crypto_Sha512_Finish(Crypto_Sha512_Context* ctx, unsigned char* o
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Sha512(const unsigned char* input, uint32 ilen, unsigned char* output, boolean is384);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Processes the SHA-512 or SHA-384 hash computation for a given object ID.
@@ -163,7 +191,11 @@ Std_ReturnType Crypto_Sha512(const unsigned char* input, uint32 ilen, unsigned c
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Sha512_Process(uint32 objectId, boolean is384);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Computes the SHA-512/224 hash of a given input data.
@@ -178,7 +210,11 @@ Std_ReturnType Crypto_Sha512_Process(uint32 objectId, boolean is384);
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_sha512_224(const unsigned char* input, uint32 ilen, unsigned char* output);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Processes the SHA-512/224 hash computation for a given object ID.
@@ -191,7 +227,11 @@ Std_ReturnType Crypto_sha512_224(const unsigned char* input, uint32 ilen, unsign
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Sha512_224_Process(uint32 objectId);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Computes the SHA-512/256 hash of a given input data.
@@ -206,7 +246,11 @@ Std_ReturnType Crypto_Sha512_224_Process(uint32 objectId);
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_sha512_256(const unsigned char* input, uint32 ilen, unsigned char* output);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Processes the SHA-512/256 hash computation for a given object ID.
@@ -219,8 +263,25 @@ Std_ReturnType Crypto_sha512_256(const unsigned char* input, uint32 ilen, unsign
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_Sha512_256_Process(uint32 objectId);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
+/**
+ * \brief          This function clears a SHA-512 context.
+ *
+ * \param ctx      The SHA-512 context to clear. This may be \c NULL,
+ *                 in which case this function does nothing. If it
+ *                 is not \c NULL, it must point to an initialized
+ *                 SHA-512 context.
+ */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
+void Crypto_sha512_free(Crypto_Sha512_Context* ctx);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 #ifdef __cplusplus
 }
 #endif

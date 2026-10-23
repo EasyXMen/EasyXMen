@@ -31,6 +31,8 @@
  *  V02.00.00 2024-02-02  xue.han         QAC
  *  V02.00.01 2024-08-13  haibin.shao     Append QAC remarks and remove main function declarations from header files
  *  V03.00.00 2024-12-23  peng.wu         Update to R23-11
+ *  V03.00.01 2026-04-20  peng.wu         Optimize the code
+*   V03.00.02 2026-06-04  tao.yu          add arti
  *
  ==================================================================================================================== */
 
@@ -55,33 +57,8 @@
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
 
-    \li VL_Eep_62_1536
-      Reason: The tag '%1s' is declared but not used within this project.
-      Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
-
-    \li VL_Eep_62_1504
-      Reason: Multi-partition variable design requires
-      Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
-
-    \li VL_Eep_62_1502
-      Reason: Configuration variables design needs
-      Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
-
-    \li VL_Eep_62_3408
-      Reason:Configuration parameter, design needs.
-      Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
-
     \li VL_Eep_62_1531
-      Reason: The object '%1s' is referenced in only one translation unit - but not the one in which it is defined.
-      Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
-
-    \li VL_Eep_62_5004
-      Reason: Parameter passing requires
+      Reason: The tag '%1s' is declared but not used within this project.
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
 
@@ -90,6 +67,20 @@
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
 
+    \li VL_Eep_62_1502
+      Reason: Configuration variables design needs
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_Eep_62_1504
+      Reason:In order to make the module code structure clear, the functions are classified.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_Eep_62_3408
+      Reason: There is no declaration before the definition.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
  */
 
 #ifndef EEP_62_H
@@ -122,10 +113,10 @@ extern "C" {
 #define EEP_62_AR_RELEASE_REVISION_VERSION 0U   /**< Value of Autosar patch version */
 #define EEP_62_SW_MAJOR_VERSION            3U   /**< Value of module major version */
 #define EEP_62_SW_MINOR_VERSION            0U   /**< Value of module minor version */
-#define EEP_62_SW_PATCH_VERSION            0U   /**< Value of module patch version */
+#define EEP_62_SW_PATCH_VERSION            2U   /**< Value of module patch version */
 
 /* ===================================================== macros ===================================================== */
-/* PRQA S 3414 ++ */ /* VL_Eep_62_3414 */
+/* PRQA S 3414 ++ */ /* VL_QAC_FctLikeMacro */
 #if !defined(EEP_62_LOCAL)
 #define EEP_62_LOCAL static /**< Defines used as the local keyword for variables or functions */
 #endif
@@ -231,6 +222,8 @@ EEP_62_LOCAL_INLINE boolean Eep_62_CheckPartition(void)
 /* =========================================== external data declarations =========================================== */
 
 /* ========================================= external function declarations ========================================= */
+#define EEP_62_START_SEC_CODE
+#include "Eep_62_MemMap.h"
 /**
  * @brief       Service for EEPROM initialization.
  * @param[in]   ConfigPtr: Pointer to configuration set
@@ -239,6 +232,10 @@ EEP_62_LOCAL_INLINE boolean Eep_62_CheckPartition(void)
  * @trace       CPD-76981
  */
 extern void Eep_62_Init(const Eep_62_ConfigType* ConfigPtr);
+#define EEP_62_STOP_SEC_CODE
+#include "Eep_62_MemMap.h"
+#define EEP_62_START_SEC_CODE
+#include "Eep_62_MemMap.h"
 
 /**
  * @brief       Sets the mode.
@@ -250,6 +247,10 @@ extern void Eep_62_Init(const Eep_62_ConfigType* ConfigPtr);
  * @trace       CPD-76982
  */
 extern void Eep_62_SetMode(uint8 deviceIndex, MemIf_ModeType Mode);
+#define EEP_62_STOP_SEC_CODE
+#include "Eep_62_MemMap.h"
+#define EEP_62_START_SEC_CODE
+#include "Eep_62_MemMap.h"
 
 /**
  * @brief       Reads from EEPROM.
@@ -267,6 +268,10 @@ extern void Eep_62_SetMode(uint8 deviceIndex, MemIf_ModeType Mode);
  */
 extern Std_ReturnType
     Eep_62_Read(uint8 deviceIndex, Eep_62_AddressType EepromAddress, uint8* DataBufferPtr, Eep_62_LengthType Length);
+#define EEP_62_STOP_SEC_CODE
+#include "Eep_62_MemMap.h"
+#define EEP_62_START_SEC_CODE
+#include "Eep_62_MemMap.h"
 
 /**
  * @brief       Writes from EEPROM.
@@ -287,6 +292,10 @@ extern Std_ReturnType Eep_62_Write(
     Eep_62_AddressType EepromAddress,
     const uint8*       DataBufferPtr,
     Eep_62_LengthType  Length);
+#define EEP_62_STOP_SEC_CODE
+#include "Eep_62_MemMap.h"
+#define EEP_62_START_SEC_CODE
+#include "Eep_62_MemMap.h"
 
 /**
  * @brief       Service for erasing EEPROM sections
@@ -301,6 +310,10 @@ extern Std_ReturnType Eep_62_Write(
  * @trace       CPD-76934
  */
 extern Std_ReturnType Eep_62_Erase(uint8 deviceIndex, Eep_62_AddressType EepromAddress, Eep_62_LengthType Length);
+#define EEP_62_STOP_SEC_CODE
+#include "Eep_62_MemMap.h"
+#define EEP_62_START_SEC_CODE
+#include "Eep_62_MemMap.h"
 
 /**
  * @brief       Compares a data block in EEPROM with an EEPROM block in the memory
@@ -321,6 +334,10 @@ extern Std_ReturnType Eep_62_Compare(
     Eep_62_AddressType EepromAddress,
     const uint8*       DataBufferPtr,
     Eep_62_LengthType  Length);
+#define EEP_62_STOP_SEC_CODE
+#include "Eep_62_MemMap.h"
+#define EEP_62_START_SEC_CODE
+#include "Eep_62_MemMap.h"
 
 /**
  * @brief       Cancels a running job.
@@ -329,6 +346,10 @@ extern Std_ReturnType Eep_62_Compare(
  * @trace       CPD-76983
  */
 extern void Eep_62_Cancel(uint8 deviceIndex);
+#define EEP_62_STOP_SEC_CODE
+#include "Eep_62_MemMap.h"
+#define EEP_62_START_SEC_CODE
+#include "Eep_62_MemMap.h"
 
 /**
  * @brief       Returns the EEPROM status.
@@ -342,6 +363,10 @@ extern void Eep_62_Cancel(uint8 deviceIndex);
  * @trace       CPD-76984
  */
 extern MemIf_StatusType Eep_62_GetStatus(uint8 deviceIndex);
+#define EEP_62_STOP_SEC_CODE
+#include "Eep_62_MemMap.h"
+#define EEP_62_START_SEC_CODE
+#include "Eep_62_MemMap.h"
 
 /**
  * @brief       This service returns the result of the last job.
@@ -357,8 +382,12 @@ extern MemIf_StatusType Eep_62_GetStatus(uint8 deviceIndex);
  * @trace       CPD-76985
  */
 extern MemIf_JobResultType Eep_62_GetJobResult(uint8 deviceIndex);
-
+#define EEP_62_STOP_SEC_CODE
+#include "Eep_62_MemMap.h"
 #if (EEP_62_VERSION_INFO_API == STD_ON)
+#define EEP_62_START_SEC_CODE
+#include "Eep_62_MemMap.h"
+
 /**
  * @brief       Service to get the version information of this module.
  * @param[out]  versioninfo: Pointer to where to store the version information of this module.
@@ -367,6 +396,8 @@ extern MemIf_JobResultType Eep_62_GetJobResult(uint8 deviceIndex);
  * @trace       CPD-76986
  */
 extern void Eep_62_GetVersionInfo(Std_VersionInfoType* versioninfo);
+#define EEP_62_STOP_SEC_CODE
+#include "Eep_62_MemMap.h"
 #endif
 
 #ifdef __cplusplus

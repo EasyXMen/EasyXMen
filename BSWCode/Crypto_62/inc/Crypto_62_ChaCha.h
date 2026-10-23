@@ -56,7 +56,11 @@ typedef struct
  *
  * @return  None.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_chacha20_init(Crypto_Chacha20_Context* ctx);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Encrypts or decrypts data using the ChaCha20 algorithm.
@@ -72,6 +76,8 @@ void Crypto_chacha20_init(Crypto_Chacha20_Context* ctx);
  *          - E_OK: Operation successful.
  *          - E_NOT_OK: Operation failed.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 Std_ReturnType Crypto_chacha20_crypt(
     const uint8  key[CRYPTO_CONST_32],
     const uint8  nonce[CRYPTO_CONST_12],
@@ -79,6 +85,8 @@ Std_ReturnType Crypto_chacha20_crypt(
     uint32       data_len,
     const uint8* input,
     uint8*       output);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Updates the ChaCha20 context with new data.
@@ -90,7 +98,11 @@ Std_ReturnType Crypto_chacha20_crypt(
  *
  * @return  None.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_chacha20_update(Crypto_Chacha20_Context* ctx, uint32 size, const uint8* input, uint8* output);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Starts the ChaCha20 encryption/decryption process.
@@ -101,7 +113,11 @@ void Crypto_chacha20_update(Crypto_Chacha20_Context* ctx, uint32 size, const uin
  *
  * @return  None.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_chacha20_starts(Crypto_Chacha20_Context* ctx, const uint8 nonce[CRYPTO_CONST_12], uint32 counter);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 /**
  * @brief   Sets the encryption/decryption key for ChaCha20.
@@ -111,7 +127,11 @@ void Crypto_chacha20_starts(Crypto_Chacha20_Context* ctx, const uint8 nonce[CRYP
  *
  * @return  None.
  */
+#define CRYPTO_62_START_SEC_CODE
+#include "Crypto_62_MemMap.h"
 void Crypto_chacha20_setkey(Crypto_Chacha20_Context* ctx, const uint8 key[CRYPTO_CONST_32]);
+#define CRYPTO_62_STOP_SEC_CODE
+#include "Crypto_62_MemMap.h"
 
 #ifdef __cplusplus
 }

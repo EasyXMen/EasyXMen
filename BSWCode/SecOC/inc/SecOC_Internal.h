@@ -28,15 +28,17 @@
 
 /* =================================================== inclusions =================================================== */
 #include "SecOC.h"
+#include "SecOC_Arti.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+/*PRQA S 1512 EOF*/ /*VL_SecOC_1512*/
 /* ===================================================== macros ===================================================== */
 
 /** Maximum length of the authenticator */
-#define SECOC_MAX_AUTHENTICATOR_LEN (16u + 1u)
+#define SECOC_MAX_AUTHENTICATOR_LEN     (16u + 1u)
 /** Maximum length of the received secured message */
 #define SECOC_MAX_RX_SECURED_MSG_LENGTH 100u
 
@@ -44,44 +46,44 @@ extern "C" {
 #define SECOC_DATAID_LEN 2uL
 
 /** Event definitions for transmission */
-#define SECOC_EVENT_TX_ALL 0x00FFu
+#define SECOC_EVENT_TX_ALL                     0x00FFu
 /** Transmission request event */
-#define SECOC_TX_REQUEST 0x0001u
+#define SECOC_TX_REQUEST                       0x0001u
 /** Data acquired for transmission event */
-#define SECOC_TX_DATA_ACQUIRED 0x0002u
+#define SECOC_TX_DATA_ACQUIRED                 0x0002u
 /** Authentic PDU confirmed event */
-#define SECOC_TX_AUTHENTIC_PDU_CONFIRMED 0x0004u
+#define SECOC_TX_AUTHENTIC_PDU_CONFIRMED       0x0004u
 /** Cryptographic PDU confirmed event */
-#define SECOC_TX_CRYPTOGRAPHIC_PDU_CONFIRMED 0x0008u
+#define SECOC_TX_CRYPTOGRAPHIC_PDU_CONFIRMED   0x0008u
 /** Generate finish indication waiting event */
-#define SECOC_TX_GENERATE_FINISH_IND_WAITING 0x0010u
+#define SECOC_TX_GENERATE_FINISH_IND_WAITING   0x0010u
 /** Generate finish indication confirmed event */
 #define SECOC_TX_GENERATE_FINISH_IND_CONFIRMED 0x0020u
 /** Transmit retry event */
-#define SECOC_TX_TRANSMIT_RETRY 0x0040u
+#define SECOC_TX_TRANSMIT_RETRY                0x0040u
 
 /** Event definitions for reception */
-#define SECOC_EVENT_RX_ALL 0x03FFu
+#define SECOC_EVENT_RX_ALL                   0x03FFu
 /** Reception indication event */
-#define SECOC_RX_INDICATION 0x0001u
+#define SECOC_RX_INDICATION                  0x0001u
 /** Secured PDU received event */
-#define SECOC_RX_SECURED_PDU 0x0002u
+#define SECOC_RX_SECURED_PDU                 0x0002u
 /** Authentic PDU received event */
-#define SECOC_RX_AUTHENTIC_PDU 0x0004u
+#define SECOC_RX_AUTHENTIC_PDU               0x0004u
 /** Cryptographic PDU received event */
-#define SECOC_RX_CRYPTOGRAPHIC_PDU 0x0008u
+#define SECOC_RX_CRYPTOGRAPHIC_PDU           0x0008u
 /** Parsed message received event */
-#define SECOC_RX_PARSED_MESSAGE 0x0010u
+#define SECOC_RX_PARSED_MESSAGE              0x0010u
 /** Verify finish indication waiting event */
-#define SECOC_RX_VERIFY_FINISH_IND_WAITING 0x0020u
+#define SECOC_RX_VERIFY_FINISH_IND_WAITING   0x0020u
 /** Verify finish indication confirmed event */
 #define SECOC_RX_VERIFY_FINISH_IND_CONFIRMED 0x0040u
 /** TP data received from lower layer event */
-#define SECOC_RX_TP_DATA_FROM_LOWER 0x0080u
+#define SECOC_RX_TP_DATA_FROM_LOWER          0x0080u
 /** TP data transferred to upper layer event */
-#define SECOC_RX_TRANS_TP_DATA_TO_UPPER 0x0100u
+#define SECOC_RX_TRANS_TP_DATA_TO_UPPER      0x0100u
 /** TP data received from lower layer event */
-#define SECOC_RX_TP_CRYPTO_DATA_FROM_LOWER 0x0200u
+#define SECOC_RX_TP_CRYPTO_DATA_FROM_LOWER   0x0200u
 /* PRQA S 3472,3469 ++ */ /* VL_SecOC_3472,VL_SecOC_3469 */
 
 /**

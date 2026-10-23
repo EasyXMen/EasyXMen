@@ -122,15 +122,21 @@
       Risk: No risk.
       Prevention: Functional reliability guaranteed by design.
 
-    \li VL_CanIf_1512
-      Reason: The issue shall be avoided in actual running environment and configs.
-      Risk: No risk.
-      Prevention: Functional reliability guaranteed by design.
-
     \li VL_CanIf_5004
       Reason: Function Pointers are not used for data copying.
       Risk: No risk.
       Prevention: The reliability of the function is guaranteed by the design.
+
+    \li VL_CanIf_1512
+      Reason: Identifier '${name}' with external linkage has separate declarations in multiple translation units.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
+
+    \li VL_CanIf_1513
+      Reason: Identifier '${name}' with external linkage has separate non-defining declarations in more than one
+              location.
+      Risk: No risk.
+      Prevention: Functional reliability guaranteed by design.
 
     \li VL_MTR_CanIf_STVAR
       Reason: The function prototype is defined in AUTOSAR standard.
@@ -142,10 +148,14 @@
               different channels, sdu and other configuration conditions, as well as some precompiled macros.
       Risk: The code is difficult to maintain.
       Prevention: Design and code review, and have a clear structure and annotated code.
- */
 
-/* PRQA S 1513 EOF */ /* VL_QAC_MultiDeclaration */
-/* PRQA S 1512 EOF */ /* VL_CanIf_1512 */
+    \li VL_MTR_CanIf_STLIN
+      Reason: Functions have different scenarios that need to be covered, which depends on the configuration of
+              different channels, sdu and other configuration conditions, as well as some precompiled macros.
+      Risk: The code is difficult to maintain.
+      Prevention: Design and code review, and have a clear structure and annotated code.
+ */
+/* PRQA S 1512,1513 EOF */ /* VL_CanIf_1512,VL_CanIf_1513 */
 #ifndef CANIF_H_
 #define CANIF_H_
 
@@ -177,6 +187,8 @@ extern "C" {
 /* =========================================== external data declarations =========================================== */
 
 /* ========================================= external function declarations ========================================= */
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief           This service Initializes internal and external interfaces of the CAN Interface
  *                  for the further processing.
@@ -186,7 +198,11 @@ extern "C" {
  * @trace           CPD-61392
  */
 extern void CanIf_Init(const CanIf_ConfigType* ConfigPtr);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief           De-initializes the CanIf module.
  * @synchronous     TRUE
@@ -194,7 +210,11 @@ extern void CanIf_Init(const CanIf_ConfigType* ConfigPtr);
  * @trace           CPD-61393
  */
 extern void CanIf_DeInit(void);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief           This service calls the corresponding CAN Driver service for changing of
  *                  the CAN controller mode.
@@ -209,7 +229,11 @@ extern void CanIf_DeInit(void);
  * @trace           CPD-61394
  */
 extern Std_ReturnType CanIf_SetControllerMode(uint8 ControllerId, Can_ControllerStateType ControllerMode);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief           This service calls the corresponding CAN Driver service for obtaining the current
  *                  status of the CAN controller.
@@ -225,7 +249,11 @@ extern Std_ReturnType CanIf_SetControllerMode(uint8 ControllerId, Can_Controller
  * @trace           CPD-61395
  */
 extern Std_ReturnType CanIf_GetControllerMode(uint8 ControllerId, Can_ControllerStateType* ControllerModePtr);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief           Requests transmission of a PDU.
  * @param[in]       TxPduId: Identifier of the PDU to be transmitted.
@@ -238,8 +266,12 @@ extern Std_ReturnType CanIf_GetControllerMode(uint8 ControllerId, Can_Controller
  * @trace           CPD-61396
  */
 extern Std_ReturnType CanIf_Transmit(PduIdType TxPduId, const PduInfoType* PduInfoPtr);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
 #if (STD_ON == CANIF_PUBLIC_READ_RX_PDU_DATA_API)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief           This service provides the Data Length and the received data of the requested
  *                  CanIfRxSduId to the calling upper layer.
@@ -255,9 +287,13 @@ extern Std_ReturnType CanIf_Transmit(PduIdType TxPduId, const PduInfoType* PduIn
  * @trace           CPD-61397
  */
 extern Std_ReturnType CanIf_ReadRxPduData(PduIdType CanIfRxSduId, PduInfoType* CanIfRxInfoPtr);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if (STD_ON == CANIF_PUBLIC_READ_TX_PDU_NOTIFY_STATUS_API)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief           This service returns the confirmation status (confirmation occurred or not) of a
  *                  specific static or dynamic CAN Tx L-PDU, requested by the CanIfTxSduId.
@@ -270,9 +306,13 @@ extern Std_ReturnType CanIf_ReadRxPduData(PduIdType CanIfRxSduId, PduInfoType* C
  * @trace           CPD-61398
  */
 extern CanIf_NotifStatusType CanIf_ReadTxNotifStatus(PduIdType CanIfTxSduId);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if (STD_ON == CANIF_PUBLIC_READ_RX_PDU_NOTIFY_STATUS_API)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief           This service returns the indication status (indication occurred or not) of
  *                  a specific CAN Rx L-PDU, requested by the CanIfRxSduId.
@@ -284,8 +324,12 @@ extern CanIf_NotifStatusType CanIf_ReadTxNotifStatus(PduIdType CanIfTxSduId);
  * @trace           CPD-61399
  */
 extern CanIf_NotifStatusType CanIf_ReadRxNotifStatus(PduIdType CanIfRxSduId);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief           This service sets the requested mode at the L-PDUs of a predefined logical PDU channel.
  * @param[in]       ControllerId: All PDUs of the own ECU connected to the corresponding CanIf ControllerId,
@@ -299,7 +343,11 @@ extern CanIf_NotifStatusType CanIf_ReadRxNotifStatus(PduIdType CanIfRxSduId);
  * @trace           CPD-61400
  */
 extern Std_ReturnType CanIf_SetPduMode(uint8 ControllerId, CanIf_PduModeType PduModeRequest);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief           This service reports the current mode of a requested PDU channel.
  * @param[in]       ControllerId: All PDUs of the own ECU connected to the corresponding CanIf
@@ -314,8 +362,12 @@ extern Std_ReturnType CanIf_SetPduMode(uint8 ControllerId, CanIf_PduModeType Pdu
  * @trace           CPD-61401
  */
 extern Std_ReturnType CanIf_GetPduMode(uint8 ControllerId, CanIf_PduModeType* PduModePtr);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
 #if (STD_ON == CANIF_PUBLIC_VERSION_INFO_API)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief           This service returns the version information of the called CAN Interface module.
  * @param[out]      VersionInfo: Pointer to where to store the version information of this module.
@@ -324,9 +376,13 @@ extern Std_ReturnType CanIf_GetPduMode(uint8 ControllerId, CanIf_PduModeType* Pd
  * @trace           CPD-61402
  */
 extern void CanIf_GetVersionInfo(Std_VersionInfoType* VersionInfo);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if (STD_ON == CANIF_PUBLIC_SET_DYNAMIC_TX_ID_API)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief           This service reconfigures the corresponding CAN identifier of the requested CAN L-PDU.
  * @param[in]       CanIfTxSduId: L-SDU handle to be transmitted. This handle specifies the corresponding
@@ -339,9 +395,13 @@ extern void CanIf_GetVersionInfo(Std_VersionInfoType* VersionInfo);
  * @trace           CPD-61403
  */
 extern void CanIf_SetDynamicTxId(PduIdType CanIfTxSduId, Can_IdType CanId);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if (CANIF_TRCV_NUMBER > 0u)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief           This service changes the operation mode of the tansceiver TransceiverId,
  *                  via calling the corresponding CAN Transceiver Driver service.
@@ -356,7 +416,11 @@ extern void CanIf_SetDynamicTxId(PduIdType CanIfTxSduId, Can_IdType CanId);
  * @trace           CPD-61404
  */
 extern Std_ReturnType CanIf_SetTrcvMode(uint8 TransceiverId, CanTrcv_TrcvModeType TransceiverMode);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief           This function invokes CanTrcv_GetOpMode and updates the parameter TransceiverModePtr
  *                  with the value OpMode provided by CanTrcv.
@@ -371,7 +435,11 @@ extern Std_ReturnType CanIf_SetTrcvMode(uint8 TransceiverId, CanTrcv_TrcvModeTyp
  * @trace           CPD-61405
  */
 extern Std_ReturnType CanIf_GetTrcvMode(uint8 TransceiverId, CanTrcv_TrcvModeType* TransceiverModePtr);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief           This service returns the reason for the wake up of the transceiver TransceiverId,
  *                  via calling the corresponding CAN Transceiver Driver service.
@@ -387,7 +455,11 @@ extern Std_ReturnType CanIf_GetTrcvMode(uint8 TransceiverId, CanTrcv_TrcvModeTyp
  * @trace           CPD-61406
  */
 extern Std_ReturnType CanIf_GetTrcvWakeupReason(uint8 TransceiverId, CanTrcv_TrcvWakeupReasonType* TrcvWuReasonPtr);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief           This function shall call CanTrcv_SetTrcvWakeupMode.
  * @param[in]       TransceiverId: Abstracted CanIf TransceiverId, which is assigned to a CAN transceiver,
@@ -403,9 +475,13 @@ extern Std_ReturnType CanIf_GetTrcvWakeupReason(uint8 TransceiverId, CanTrcv_Trc
  * @trace           CPD-61407
  */
 extern Std_ReturnType CanIf_SetTrcvWakeupMode(uint8 TransceiverId, CanTrcv_TrcvWakeupModeType TrcvWakeupMode);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if (STD_ON == CANIF_WAKEUP_SUPPORT)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief           This service checks, whether an underlying CAN driver or a CAN transceiver driver
  *                  already signals a wakeup event.
@@ -419,9 +495,13 @@ extern Std_ReturnType CanIf_SetTrcvWakeupMode(uint8 TransceiverId, CanTrcv_TrcvW
  * @trace           CPD-61408
  */
 extern Std_ReturnType CanIf_CheckWakeup(EcuM_WakeupSourceType WakeupSource);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if (STD_ON == CANIF_PUBLIC_WAKEUP_CHECK_VALID_SUPPORT)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief           This service is performed to validate a previous wakeup event.
  * @param[in]       WakeupSource: Source device which initiated the wake-up event and which has to
@@ -434,9 +514,13 @@ extern Std_ReturnType CanIf_CheckWakeup(EcuM_WakeupSourceType WakeupSource);
  * @trace           CPD-61409
  */
 extern Std_ReturnType CanIf_CheckValidation(EcuM_WakeupSourceType WakeupSource);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if (STD_ON == CANIF_PUBLIC_TX_CONFIRM_POLLING_SUPPORT)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief           This service reports, if any TX confirmation has been done for the whole CAN
  *                  controller since the last CAN controller start.
@@ -448,9 +532,13 @@ extern Std_ReturnType CanIf_CheckValidation(EcuM_WakeupSourceType WakeupSource);
  * @trace           CPD-61410
  */
 extern CanIf_NotifStatusType CanIf_GetTxConfirmationState(uint8 ControllerId);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if ((STD_ON == CANIF_PUBLIC_PN_SUPPORT) && (STD_ON == CANIF_PUBLIC_TRCV_PN_SUPPORT))
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief           Requests the CanIf module to clear the WUF flag of the designated CAN transceiver.
  * @param[in]       TransceiverId: Abstract CanIf TransceiverId, which is assigned to the designated
@@ -463,7 +551,11 @@ extern CanIf_NotifStatusType CanIf_GetTxConfirmationState(uint8 ControllerId);
  * @trace           CPD-61411
  */
 extern Std_ReturnType CanIf_ClearTrcvWufFlag(uint8 TransceiverId);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief           Requests the CanIf module to check the Wake flag of the designated CAN transceiver.
  * @param[in]       TransceiverId: Abstract CanIf TransceiverId, which is assigned to the designated
@@ -476,9 +568,13 @@ extern Std_ReturnType CanIf_ClearTrcvWufFlag(uint8 TransceiverId);
  * @trace           CPD-61412
  */
 extern Std_ReturnType CanIf_CheckTrcvWakeFlag(uint8 TransceiverId);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if (STD_ON == CANIF_SET_BAUDRATE_API)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief           This service shall set the baud rate configuration of the CAN controller.
  *                  Depending on necessary baud rate modifications the controller might have to reset.
@@ -493,9 +589,13 @@ extern Std_ReturnType CanIf_CheckTrcvWakeFlag(uint8 TransceiverId);
  * @trace           CPD-61413
  */
 extern Std_ReturnType CanIf_SetBaudrate(uint8 ControllerId, uint16 BaudRateConfigID);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if (CANIF_CAN_AUTOSAR_VERSION >= CANIF_CAN_AUTOSAR_R431)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief           This service calls the corresponding CAN Driver service for obtaining the error
  *                  state of the CAN controller.
@@ -511,15 +611,19 @@ extern Std_ReturnType CanIf_SetBaudrate(uint8 ControllerId, uint16 BaudRateConfi
  * @trace           CPD-85798
  */
 extern Std_ReturnType CanIf_GetControllerErrorState(uint8 ControllerId, Can_ErrorStateType* ErrorStatePtr);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #if (CANIF_CAN_AUTOSAR_VERSION >= CANIF_CAN_AUTOSAR_R440)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief           This service calls the corresponding CAN Driver service for obtaining the Rx error
-                    counter of the CAN controller.
+ *                    counter of the CAN controller.
  * @param[in]       ControllerId: Abstracted CanIf ControllerId which is assigned to a CAN controller.
  * @param[out]      RxErrorCounterPtr: Pointer to a memory location, where the current Rx error counter
-                    of the CAN controller will be stored.
+ *                    of the CAN controller will be stored.
  * @return          Std_ReturnType
  * @retval          E_OK: Rx error counter available.
  * @retval          E_NOT_OK: Wrong ControllerId, or Rx error counter not available.
@@ -528,7 +632,11 @@ extern Std_ReturnType CanIf_GetControllerErrorState(uint8 ControllerId, Can_Erro
  * @trace           CPD-85460
  */
 extern Std_ReturnType CanIf_GetControllerRxErrorCounter(uint8 ControllerId, uint8* RxErrorCounterPtr);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
 /**
  * @brief           This service calls the corresponding CAN Driver service for obtaining the Tx error
                     counter of the CAN controller.
@@ -543,6 +651,100 @@ extern Std_ReturnType CanIf_GetControllerRxErrorCounter(uint8 ControllerId, uint
  * @trace           CPD-85461
  */
 extern Std_ReturnType CanIf_GetControllerTxErrorCounter(uint8 ControllerId, uint8* TxErrorCounterPtr);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+#endif
+
+#if (STD_ON == CANIF_PUBLIC_BUS_MIRRORING_SUPPORT)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+/**
+ * @brief           Enables or disables mirroring for a CAN controller.
+ * @param[in]       ControllerId: Abstracted CanIf ControllerId which is assigned to a CAN controller.
+ * @param[in]       MirroringActive: TRUE: Mirror_ReportCanFrame will be called for each frame
+                    received or transmitted on the given controller. FALSE: Mirror_ReportCanFrame
+                    will not be called for the given controller.
+ * @return          Std_ReturnType
+ * @retval          E_OK: Mirroring mode was changed.
+ * @retval          E_NOT_OK: Wrong ControllerId, or mirroring globally disabled.
+ * @synchronous     TRUE
+ * @reentrant       Reentrant
+ * @trace           CPD-81754
+ */
+extern Std_ReturnType CanIf_EnableBusMirroring(uint8 ControllerId, boolean MirroringActive);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+#endif
+
+#if (STD_ON == CANIF_GLOBAL_TIME_SUPPORT)
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+/**
+ * @brief           This service calls the corresponding CAN Driver service to retrieve the current
+ *                  time value out of the HW registers.
+ * @param[in]       Controller: Index of the addresses CAN controller.
+ * @param[out]      timeStampPtr: current time stamp
+ * @return          Std_ReturnType
+ * @retval          E_OK: successful
+ * @retval          E_NOT_OK: failed
+ * @synchronous     TRUE
+ * @reentrant       Non Reentrant
+ * @trace           CPD-85462
+ */
+extern Std_ReturnType CanIf_GetCurrentTime(uint8 Controller, Can_TimeStampType* timeStampPtr);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+/**
+ * @brief           This service calls the corresponding CAN Driver service to activate egress time
+ *                  stamping on a dedicated message object.
+ * @param[in]       TxPduId: L-PDU handle of CAN L-PDU for which the time stamping shall be enabled.
+ * @synchronous     TRUE
+ * @reentrant       Non Reentrant
+ * @trace           CPD-85463
+ */
+extern void CanIf_EnableEgressTimeStamp(PduIdType TxPduId);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+/**
+ * @brief           This service calls the corresponding CAN Driver service to read back the egress time stamp
+ *                  on a dedicated message object. It needs to be called within the TxConfirmation() function.
+ * @param[in]       TxPduId: L-PDU handle of CAN L-PDU for which the time stamp shall be returned.
+ * @param[out]      timeStampPtr: current time stamp
+ * @return          Std_ReturnType
+ * @retval          E_OK: successful
+ * @retval          E_NOT_OK: failed
+ * @synchronous     TRUE
+ * @reentrant       Non Reentrant for the same TxPduId, Reentrant for different TxPduId
+ * @trace           CPD-85464
+ */
+extern Std_ReturnType CanIf_GetEgressTimeStamp(PduIdType TxPduId, Can_TimeStampType* timeStampPtr);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
+
+#define CANIF_START_SEC_CODE
+#include "CanIf_MemMap.h"
+/**
+ * @brief           This service calls the corresponding CAN Driver service to reads back the ingress time stamp
+ *                  on a dedicated message object. It needs to be called within the RxIndication() function.
+
+ * @param[in]       RxPduId: ID of the received I-PDU for which the time stamp shall be returned.
+ * @param[out]      timeStampPtr: current time stamp
+ * @return          Std_ReturnType
+ * @retval          E_OK: successful
+ * @retval          E_NOT_OK: failed
+ * @synchronous     TRUE
+ * @reentrant       Non Reentrant for the same RxPduId, Reentrant for different RxPduIds
+ * @trace           CPD-85465
+ */
+extern Std_ReturnType CanIf_GetIngressTimeStamp(PduIdType RxPduId, Can_TimeStampType* timeStampPtr);
+#define CANIF_STOP_SEC_CODE
+#include "CanIf_MemMap.h"
 #endif
 
 #ifdef __cplusplus

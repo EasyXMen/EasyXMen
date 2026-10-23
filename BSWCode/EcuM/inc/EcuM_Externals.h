@@ -24,9 +24,6 @@
 
 #ifndef ECUM_EXTERNAL_H
 #define ECUM_EXTERNAL_H
-
-/* PRQA S 1753 EOF */ /* VL_EcuM_1753 */
-
 /* =================================================== inclusions =================================================== */
 #include "Std_Types.h"
 #include "EcuM.h"
@@ -46,7 +43,7 @@ extern "C" {
 /* =========================================== external data declarations =========================================== */
 
 /* ========================================= external function declarations ========================================= */
-
+/* PRQA S 1753 EOF */ /* VL_EcuM_1753 */
 /**
  * @brief       The ECU State Manager will call the error hook if the error codes
  *              "ECUM_E_RAM_CHECK_FAILED" or "ECUM_E_CONFIGURATION_DATA_INCONSISTENT" occur.
@@ -60,7 +57,11 @@ extern "C" {
  * @synchronous TRUE
  * @trace       CPD-68944
  */
+#define ECUM_START_SEC_CALLOUT_CODE
+#include "EcuM_MemMap.h"
 void EcuM_ErrorHook(uint16 reason);
+#define ECUM_STOP_SEC_CALLOUT_CODE
+#include "EcuM_MemMap.h"
 
 #if (ECUM_SET_PROGRAMMABLE_INTERRUPTS == STD_ON)
 /**
@@ -72,7 +73,11 @@ void EcuM_ErrorHook(uint16 reason);
  * @synchronous TRUE
  * @trace       CPD-68945
  */
+#define ECUM_START_SEC_CALLOUT_CODE
+#include "EcuM_MemMap.h"
 void EcuM_AL_SetProgrammableInterrupts(void);
+#define ECUM_STOP_SEC_CALLOUT_CODE
+#include "EcuM_MemMap.h"
 #endif /*ECUM_SET_PROGRAMMABLE_INTERRUPTS == STD_ON*/
 
 #if (ECUM_DRIVER_INIT_LIST_ZERO == STD_ON)
@@ -85,7 +90,11 @@ void EcuM_AL_SetProgrammableInterrupts(void);
  * @synchronous TRUE
  * @trace       CPD-68946
  */
+#define ECUM_START_SEC_CALLOUT_CODE
+#include "EcuM_MemMap.h"
 void EcuM_AL_DriverInitZero(void);
+#define ECUM_STOP_SEC_CALLOUT_CODE
+#include "EcuM_MemMap.h"
 #endif /*ECUM_DRIVER_INIT_LIST_ZERO == STD_ON*/
 
 /**
@@ -102,7 +111,11 @@ void EcuM_AL_DriverInitZero(void);
  * @trace       CPD-68948
  */
 /* PRQA S 5016 ++ */ /* VL_EcuM_5016 */
+#define ECUM_START_SEC_CALLOUT_CODE
+#include "EcuM_MemMap.h"
 const EcuM_ConfigType* EcuM_DeterminePbConfiguration(void);
+#define ECUM_STOP_SEC_CALLOUT_CODE
+#include "EcuM_MemMap.h"
 /* PRQA S 5016 -- */
 
 /**
@@ -115,7 +128,11 @@ const EcuM_ConfigType* EcuM_DeterminePbConfiguration(void);
  * @synchronous TRUE
  * @trace       CPD-68950
  */
+#define ECUM_START_SEC_CALLOUT_CODE
+#include "EcuM_MemMap.h"
 void EcuM_AL_DriverInitOne(void);
+#define ECUM_STOP_SEC_CALLOUT_CODE
+#include "EcuM_MemMap.h"
 
 #if (ECUM_RESET_LOOP_DETECTION == STD_ON)
 /**
@@ -128,7 +145,11 @@ void EcuM_AL_DriverInitOne(void);
  * @synchronous TRUE
  * @trace       CPD-68952
  */
+#define ECUM_START_SEC_CALLOUT_CODE
+#include "EcuM_MemMap.h"
 boolean EcuM_LoopDetection(void);
+#define ECUM_STOP_SEC_CALLOUT_CODE
+#include "EcuM_MemMap.h"
 #endif /*ECUM_RESET_LOOP_DETECTION == STD_ON*/
 
 /**
@@ -139,7 +160,11 @@ boolean EcuM_LoopDetection(void);
  * @synchronous TRUE
  * @trace       CPD-68953
  */
+#define ECUM_START_SEC_CALLOUT_CODE
+#include "EcuM_MemMap.h"
 void EcuM_OnGoOffOne(void);
+#define ECUM_STOP_SEC_CALLOUT_CODE
+#include "EcuM_MemMap.h"
 
 /**
  * @brief       This call allows the system designer to notify that the GO OFF II state is
@@ -149,9 +174,11 @@ void EcuM_OnGoOffOne(void);
  * @synchronous TRUE
  * @trace       CPD-68954
  */
-/* PRQA S 1753 ++ */ /* VL_EcuM_1753 */
+#define ECUM_START_SEC_CALLOUT_CODE
+#include "EcuM_MemMap.h"
 void EcuM_OnGoOffTwo(void);
-/* PRQA S 1753 -- */
+#define ECUM_STOP_SEC_CALLOUT_CODE
+#include "EcuM_MemMap.h"
 
 /**
  * @brief       This callout shall take the code for shutting off the power supply of the ECU.
@@ -161,7 +188,11 @@ void EcuM_OnGoOffTwo(void);
  * @synchronous TRUE
  * @trace       CPD-68955
  */
+#define ECUM_START_SEC_CALLOUT_CODE
+#include "EcuM_MemMap.h"
 void EcuM_AL_SwitchOff(void);
+#define ECUM_STOP_SEC_CALLOUT_CODE
+#include "EcuM_MemMap.h"
 
 /**
  * @brief       This callout shall take the code for resetting the ECU.
@@ -171,7 +202,11 @@ void EcuM_AL_SwitchOff(void);
  * @synchronous TRUE
  * @trace       CPD-68956
  */
+#define ECUM_START_SEC_CALLOUT_CODE
+#include "EcuM_MemMap.h"
 void EcuM_AL_Reset(EcuM_ResetType reset);
+#define ECUM_STOP_SEC_CALLOUT_CODE
+#include "EcuM_MemMap.h"
 
 /**
  * @brief       The ECU Manager Module calls EcuM_EnableWakeupSource to allow the system
@@ -183,7 +218,11 @@ void EcuM_AL_Reset(EcuM_ResetType reset);
  * @synchronous TRUE
  * @trace       CPD-68957
  */
+#define ECUM_START_SEC_CALLOUT_CODE
+#include "EcuM_MemMap.h"
 void EcuM_EnableWakeupSources(EcuM_WakeupSourceType wakeupSource);
+#define ECUM_STOP_SEC_CALLOUT_CODE
+#include "EcuM_MemMap.h"
 
 /**
  * @brief       Generate code for RAM integrity test.
@@ -192,7 +231,11 @@ void EcuM_EnableWakeupSources(EcuM_WakeupSourceType wakeupSource);
  * @synchronous TRUE
  * @trace       CPD-68958
  */
+#define ECUM_START_SEC_CALLOUT_CODE
+#include "EcuM_MemMap.h"
 void EcuM_GenerateRamHash(void);
+#define ECUM_STOP_SEC_CALLOUT_CODE
+#include "EcuM_MemMap.h"
 
 /**
  * @brief       This callout is invoked periodically in all reduced clock sleep modes.
@@ -201,7 +244,11 @@ void EcuM_GenerateRamHash(void);
  * @synchronous TRUE
  * @trace       CPD-68960
  */
+#define ECUM_START_SEC_CALLOUT_CODE
+#include "EcuM_MemMap.h"
 void EcuM_SleepActivity(void);
+#define ECUM_STOP_SEC_CALLOUT_CODE
+#include "EcuM_MemMap.h"
 
 /**
  * @brief       This API is called by the ECU Firmware to start the CheckWakeupTimer for the
@@ -214,7 +261,11 @@ void EcuM_SleepActivity(void);
  * @synchronous TRUE
  * @trace       CPD-68961
  */
-void EcuM_StartCheckWakeup(EcuM_WakeupSourceType WakeupSource);
+#define ECUM_START_SEC_CALLOUT_CODE
+#include "EcuM_MemMap.h"
+void EcuM_StartCheckWakeup(EcuM_WakeupSourceType WakeupSource); /*PRQA S 1501*/ /*VL_EcuM_1501*/
+#define ECUM_STOP_SEC_CALLOUT_CODE
+#include "EcuM_MemMap.h"
 
 /**
  * @brief       This callout is intended to provide a RAM integrity test. The goal of this
@@ -237,7 +288,11 @@ void EcuM_StartCheckWakeup(EcuM_WakeupSourceType WakeupSource);
  * @synchronous TRUE
  * @trace       CPD-68963
  */
+#define ECUM_START_SEC_CALLOUT_CODE
+#include "EcuM_MemMap.h"
 uint8 EcuM_CheckRamHash(void);
+#define ECUM_STOP_SEC_CALLOUT_CODE
+#include "EcuM_MemMap.h"
 
 /**
  * @brief       The ECU Manager Module calls EcuM_DisableWakeupSources to set the wakeup
@@ -249,8 +304,13 @@ uint8 EcuM_CheckRamHash(void);
  * @synchronous TRUE
  * @trace       CPD-68966
  */
+#define ECUM_START_SEC_CALLOUT_CODE
+#include "EcuM_MemMap.h"
 void EcuM_DisableWakeupSources(EcuM_WakeupSourceType wakeupSource);
+#define ECUM_STOP_SEC_CALLOUT_CODE
+#include "EcuM_MemMap.h"
 
+#if (ECUM_DRIVER_RESTART_LIST == STD_ON)
 /**
  * @brief       This callout shall provide driver initialization and other hardware-related
  *              startup activities in the wakeup case.
@@ -259,7 +319,12 @@ void EcuM_DisableWakeupSources(EcuM_WakeupSourceType wakeupSource);
  * @synchronous TRUE
  * @trace       CPD-68968
  */
+#define ECUM_START_SEC_CALLOUT_CODE
+#include "EcuM_MemMap.h"
 void EcuM_AL_DriverRestart(void);
+#define ECUM_STOP_SEC_CALLOUT_CODE
+#include "EcuM_MemMap.h"
+#endif
 
 /**
  * @brief       The callout shall start the given wakeup source(s) so that they are ready to
@@ -270,7 +335,11 @@ void EcuM_AL_DriverRestart(void);
  * @synchronous TRUE
  * @trace       CPD-68971
  */
+#define ECUM_START_SEC_CALLOUT_CODE
+#include "EcuM_MemMap.h"
 void EcuM_StartWakeupSources(EcuM_WakeupSourceType wakeupSource);
+#define ECUM_STOP_SEC_CALLOUT_CODE
+#include "EcuM_MemMap.h"
 
 /**
  * @brief       This callout is called by the EcuM to validate a wakeup source. If a valid
@@ -281,7 +350,11 @@ void EcuM_StartWakeupSources(EcuM_WakeupSourceType wakeupSource);
  * @synchronous TRUE
  * @trace       CPD-68976
  */
+#define ECUM_START_SEC_CALLOUT_CODE
+#include "EcuM_MemMap.h"
 void EcuM_CheckValidation(EcuM_WakeupSourceType wakeupSource);
+#define ECUM_STOP_SEC_CALLOUT_CODE
+#include "EcuM_MemMap.h"
 
 /**
  * @brief       The callout shall stop the given wakeup source(s) after unsuccessful wakeup validation.
@@ -291,7 +364,11 @@ void EcuM_CheckValidation(EcuM_WakeupSourceType wakeupSource);
  * @synchronous TRUE
  * @trace       CPD-68981
  */
+#define ECUM_START_SEC_CALLOUT_CODE
+#include "EcuM_MemMap.h"
 void EcuM_StopWakeupSources(EcuM_WakeupSourceType wakeupSource);
+#define ECUM_STOP_SEC_CALLOUT_CODE
+#include "EcuM_MemMap.h"
 
 /**
  * @brief       This callout is called by the EcuM to poll a wakeup source. It shall also be
@@ -303,7 +380,11 @@ void EcuM_StopWakeupSources(EcuM_WakeupSourceType wakeupSource);
  * @synchronous TRUE
  * @trace       CPD-68987
  */
+#define ECUM_START_SEC_CODE_FAST
+#include "EcuM_MemMap.h"
 void EcuM_CheckWakeupHook(EcuM_WakeupSourceType wakeupSource);
+#define ECUM_STOP_SEC_CODE_FAST
+#include "EcuM_MemMap.h"
 
 /**
  * @brief       This function calls Mcu_SetMode as a callback validation.
@@ -313,7 +394,11 @@ void EcuM_CheckWakeupHook(EcuM_WakeupSourceType wakeupSource);
  * @synchronous TRUE
  * @trace       CPD-68992
  */
+#define ECUM_START_SEC_CALLOUT_CODE
+#include "EcuM_MemMap.h"
 void EcuM_McuSetMode(Mcu_ModeType mode);
+#define ECUM_STOP_SEC_CALLOUT_CODE
+#include "EcuM_MemMap.h"
 
 /**
  * @brief       This function retrieves the current timestamp in milliseconds.
@@ -322,7 +407,11 @@ void EcuM_McuSetMode(Mcu_ModeType mode);
  * @synchronous TRUE
  * @trace       CPD-68999
  */
+#define ECUM_START_SEC_CALLOUT_CODE
+#include "EcuM_MemMap.h"
 uint32 EcuM_CurrentTimestampMS(void);
+#define ECUM_STOP_SEC_CALLOUT_CODE
+#include "EcuM_MemMap.h"
 
 /**
  * @brief       This function calculates the elapsed time in milliseconds based on the provided old timestamp.
@@ -332,7 +421,11 @@ uint32 EcuM_CurrentTimestampMS(void);
  * @synchronous TRUE
  * @trace       CPD-69002
  */
+#define ECUM_START_SEC_CALLOUT_CODE
+#include "EcuM_MemMap.h"
 uint32 EcuM_CalculateElapsedMS(uint32 OldCurMs);
+#define ECUM_STOP_SEC_CALLOUT_CODE
+#include "EcuM_MemMap.h"
 
 #ifdef __cplusplus
 }

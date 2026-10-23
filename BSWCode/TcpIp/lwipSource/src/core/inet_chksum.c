@@ -58,7 +58,11 @@
 # ifndef LWIP_CHKSUM_ALGORITHM
 #  define LWIP_CHKSUM_ALGORITHM 2
 # endif
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 u16_t lwip_standard_chksum(const void *dataptr, int len);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 /* If none set: */
 #ifndef LWIP_CHKSUM_ALGORITHM
@@ -129,6 +133,8 @@ lwip_standard_chksum(const void *dataptr, int len)
  * @param len length of data to be summed
  * @return host order (!) lwip checksum (non-inverted Internet sum)
  */
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 u16_t
 lwip_standard_chksum(const void *dataptr, int len)
 {
@@ -171,6 +177,8 @@ lwip_standard_chksum(const void *dataptr, int len)
 
   return (u16_t)sum;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
 #if (LWIP_CHKSUM_ALGORITHM == 3) /* Alternative version #3 */
@@ -185,6 +193,8 @@ lwip_standard_chksum(const void *dataptr, int len)
  *
  * by Curt McDowell, Broadcom Corp. December 8th, 2005
  */
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 u16_t
 lwip_standard_chksum(const void *dataptr, int len)
 {
@@ -253,8 +263,12 @@ lwip_standard_chksum(const void *dataptr, int len)
 
   return (u16_t)sum;
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /** Parts of the pseudo checksum which are common to IPv4 and IPv6 */
 static u16_t
 inet_cksum_pseudo_base(struct pbuf *p, u8_t proto, u16_t proto_len, u32_t acc)
@@ -292,6 +306,8 @@ inet_cksum_pseudo_base(struct pbuf *p, u8_t proto, u16_t proto_len, u32_t acc)
   LWIP_DEBUGF(INET_DEBUG, ("inet_chksum_pseudo(): pbuf chain lwip_chksum()=%"X32_F"\n", acc));
   return (u16_t)~(acc & 0xffffUL);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if LWIP_IPV4
 /* inet_chksum_pseudo:
@@ -306,6 +322,8 @@ inet_cksum_pseudo_base(struct pbuf *p, u8_t proto, u16_t proto_len, u32_t acc)
  * @param proto_len length of the ip data part (used for checksum of pseudo header)
  * @return checksum (as u16_t) to be saved directly in the protocol header
  */
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 u16_t
 inet_chksum_pseudo(struct pbuf *p, u8_t proto, u16_t proto_len,
                    const ip4_addr_t *src, const ip4_addr_t *dest)
@@ -325,6 +343,8 @@ inet_chksum_pseudo(struct pbuf *p, u8_t proto, u16_t proto_len,
 
   return inet_cksum_pseudo_base(p, proto, proto_len, acc);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif /* LWIP_IPV4 */
 
 #if LWIP_IPV6
@@ -339,6 +359,8 @@ inet_chksum_pseudo(struct pbuf *p, u8_t proto, u16_t proto_len,
  * @param dest destination ipv6 address (used for checksum of pseudo header)
  * @return checksum (as u16_t) to be saved directly in the protocol header
  */
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 u16_t
 ip6_chksum_pseudo(struct pbuf *p, u8_t proto, u16_t proto_len,
                   const ip6_addr_t *src, const ip6_addr_t *dest)
@@ -361,6 +383,8 @@ ip6_chksum_pseudo(struct pbuf *p, u8_t proto, u16_t proto_len,
 
   return inet_cksum_pseudo_base(p, proto, proto_len, acc);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif /* LWIP_IPV6 */
 
 /* ip_chksum_pseudo:
@@ -375,6 +399,8 @@ ip6_chksum_pseudo(struct pbuf *p, u8_t proto, u16_t proto_len,
  * @param proto_len length of the ip data part (used for checksum of pseudo header)
  * @return checksum (as u16_t) to be saved directly in the protocol header
  */
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 u16_t
 ip_chksum_pseudo(struct pbuf *p, u8_t proto, u16_t proto_len,
                  const ip_addr_t *src, const ip_addr_t *dest)
@@ -393,7 +419,11 @@ ip_chksum_pseudo(struct pbuf *p, u8_t proto, u16_t proto_len,
   }
 #endif /* LWIP_IPV4 */
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /** Parts of the pseudo checksum which are common to IPv4 and IPv6 */
 static u16_t
 inet_cksum_pseudo_partial_base(struct pbuf *p, u8_t proto, u16_t proto_len,
@@ -438,6 +468,8 @@ inet_cksum_pseudo_partial_base(struct pbuf *p, u8_t proto, u16_t proto_len,
   LWIP_DEBUGF(INET_DEBUG, ("inet_chksum_pseudo(): pbuf chain lwip_chksum()=%"X32_F"\n", acc));
   return (u16_t)~(acc & 0xffffUL);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if LWIP_IPV4
 /* inet_chksum_pseudo_partial:
@@ -452,6 +484,8 @@ inet_cksum_pseudo_partial_base(struct pbuf *p, u8_t proto, u16_t proto_len,
  * @param proto_len length of the ip data part (used for checksum of pseudo header)
  * @return checksum (as u16_t) to be saved directly in the protocol header
  */
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 u16_t
 inet_chksum_pseudo_partial(struct pbuf *p, u8_t proto, u16_t proto_len,
                            u16_t chksum_len, const ip4_addr_t *src, const ip4_addr_t *dest)
@@ -471,6 +505,8 @@ inet_chksum_pseudo_partial(struct pbuf *p, u8_t proto, u16_t proto_len,
 
   return inet_cksum_pseudo_partial_base(p, proto, proto_len, chksum_len, acc);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif /* LWIP_IPV4 */
 
 #if LWIP_IPV6
@@ -487,6 +523,8 @@ inet_chksum_pseudo_partial(struct pbuf *p, u8_t proto, u16_t proto_len,
  * @param dest destination ipv6 address (used for checksum of pseudo header)
  * @return checksum (as u16_t) to be saved directly in the protocol header
  */
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 u16_t
 ip6_chksum_pseudo_partial(struct pbuf *p, u8_t proto, u16_t proto_len,
                           u16_t chksum_len, const ip6_addr_t *src, const ip6_addr_t *dest)
@@ -509,6 +547,8 @@ ip6_chksum_pseudo_partial(struct pbuf *p, u8_t proto, u16_t proto_len,
 
   return inet_cksum_pseudo_partial_base(p, proto, proto_len, chksum_len, acc);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif /* LWIP_IPV6 */
 
 /* ip_chksum_pseudo_partial:
@@ -522,6 +562,8 @@ ip6_chksum_pseudo_partial(struct pbuf *p, u8_t proto, u16_t proto_len,
  * @param proto_len length of the ip data part (used for checksum of pseudo header)
  * @return checksum (as u16_t) to be saved directly in the protocol header
  */
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 u16_t
 ip_chksum_pseudo_partial(struct pbuf *p, u8_t proto, u16_t proto_len,
                          u16_t chksum_len, const ip_addr_t *src, const ip_addr_t *dest)
@@ -540,6 +582,8 @@ ip_chksum_pseudo_partial(struct pbuf *p, u8_t proto, u16_t proto_len,
   }
 #endif /* LWIP_IPV4 */
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 /* inet_chksum:
  *
@@ -551,12 +595,18 @@ ip_chksum_pseudo_partial(struct pbuf *p, u8_t proto, u16_t proto_len,
  * @return checksum (as u16_t) to be saved directly in the protocol header
  */
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 u16_t
 inet_chksum(const void *dataptr, u16_t len)
 {
   return (u16_t)~(unsigned int)LWIP_CHKSUM(dataptr, len);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * Calculate a checksum over a chain of pbufs (without pseudo-header, much like
  * inet_chksum only pbufs are used).
@@ -586,6 +636,8 @@ inet_chksum_pbuf(struct pbuf *p)
   }
   return (u16_t)~(acc & 0xffffUL);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 /* These are some implementations for LWIP_CHKSUM_COPY, which copies data
  * like MEMCPY but generates a checksum at the same time. Since this is a
@@ -599,10 +651,14 @@ inet_chksum_pbuf(struct pbuf *p)
  * For architectures with big caches, data might still be in cache when
  * generating the checksum after copying.
  */
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 u16_t
 lwip_chksum_copy(void *dst, const void *src, u16_t len)
 {
   MEMCPY(dst, src, len);
   return LWIP_CHKSUM(dst, len);
 }
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif /* (LWIP_CHKSUM_COPY_ALGORITHM == 1) */

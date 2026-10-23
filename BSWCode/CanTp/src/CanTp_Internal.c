@@ -33,9 +33,6 @@
 #endif
 /* ======================================== internal function declarations ========================================*/
 
-#if (CANTP_DYN_ID_SUPPORT == STD_ON)
-
-#endif
 /* ========================================== internal function definitions ========================================= */
 #define CANTP_START_SEC_CODE
 #include "CanTp_MemMap.h"
@@ -79,7 +76,10 @@ CanTp_FramePCIType CanTp_GetFramePCIType(const PduIdType rxpduId, const PduInfoT
     }
     return framePCIType;
 }
-
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /* PRQA S 3120 ++ */ /* VL_QAC_MagicNum */
 /**
  * @brief  Match frame length
@@ -103,6 +103,10 @@ PduLengthType CanTp_MatchDLC(PduLengthType frameDL)
     }
     return len;
 }
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /* PRQA S 3120 -- */
 
 /**
@@ -187,7 +191,10 @@ boolean CanTp_CheckReceivedSFDL(
 #endif
     return checkResult;
 }
-
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief Check FF datalength
  */
@@ -254,6 +261,10 @@ CanTp_CheckResultType CanTp_CheckReceivedFFDL(
 #endif
     return result;
 }
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief get Current Bs
  */
@@ -287,7 +298,10 @@ uint8 CanTp_GetRxCurrentBs(PduIdType rxNSduId, const CanTp_GPartInfoType* global
     }
     return bs_cfg;
 }
-
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief Get Current STmin
  */
@@ -313,6 +327,10 @@ uint8 CanTp_GetRxCurrentSTmin(
 #endif
     return stmin;
 }
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief Compare remaining buffer with Bs
  */
@@ -335,7 +353,10 @@ Std_ReturnType CanTp_CompareRxBufferWithBs(const CanTp_RxStatusType* rxStatus, P
     }
     return ret;
 }
-
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief Assemble PCI information of the Nsdu
  */
@@ -404,7 +425,10 @@ void CanTp_TxConstructPCI(CanTp_TxStatusType* txStatus, uint8* dataOffset)
         break;
     }
 }
-
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief Assemble Padding data information of the NSdu
  */
@@ -456,8 +480,11 @@ void CanTp_AssemblePaddingData(CanTp_TxStatusType* txStatus, PduInfoType* txpduI
     }
 #endif
 }
-
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
 #if ((CANTP_DYN_ID_SUPPORT == STD_ON))
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief Save MetaData information when receiving FF,SF
  */
@@ -478,20 +505,17 @@ Std_ReturnType CanTp_SaveRxMetaDataInfo(
 #if (CANTP_EXTENDED_ADDRESSING_SUPPORT == STD_ON)
     case CANTP_EXTENDED:
         rxStatus->MetaDataNTa = pduInfoPtr->SduDataPtr[CANTP_TA_OFFSET_META_EX];
-        if (rxNSduCfgPtr->RxTaType == CANTP_PHYSICAL)
+        if ((rxNSduCfgPtr->RxTaType == CANTP_PHYSICAL) && (rxNSduCfgPtr->NSa == CANTP_INVALID_U8))
         {
-            if (rxNSduCfgPtr->NSa == CANTP_INVALID_U8)
-            {
-                ret = E_NOT_OK;
-            }
-            else if (rxStatus->MetaDataNTa != rxNSduCfgPtr->NTa)
-            {
-                ret = E_NOT_OK;
-            }
-            else
-            {
-                /* idle */
-            }
+            ret = E_NOT_OK;
+        }
+        else if ((rxNSduCfgPtr->NTa == CANTP_INVALID_U8) || (rxStatus->MetaDataNTa != rxNSduCfgPtr->NTa))
+        {
+            ret = E_NOT_OK;
+        }
+        else
+        {
+            /* idle */
         }
         break;
 #endif
@@ -575,6 +599,10 @@ Std_ReturnType CanTp_SaveRxMetaDataInfo(
     SchM_Exit_CanTp_ExclusiveArea();
     return ret;
 }
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief Save MetaData information when setup tx session
  */
@@ -636,7 +664,10 @@ void CanTp_SaveTxMetaDataInfo(
         break;
     }
 }
-
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief Check the addressing information contained in the MetaData of the N-PDU when receiving CF
  */
@@ -701,7 +732,10 @@ Std_ReturnType CanTp_CheckRxCFMetaData(
     }
     return result;
 }
-
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief Check the addressing information contained in the MetaData of the N-PDU when receiving FC
  */
@@ -778,7 +812,10 @@ Std_ReturnType CanTp_CheckRxFCMetaData(
     }
     return result;
 }
-
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief Construct the addressing information contained in the MetaData of the N-PDU when transmit
  */
@@ -851,7 +888,10 @@ void CanTp_ConstructTxMetaDataInfo(
     }
 #endif
 }
-
+#define CANTP_STOP_SEC_CODE
+#include "CanTp_MemMap.h"
+#define CANTP_START_SEC_CODE
+#include "CanTp_MemMap.h"
 /**
  * @brief Fill the addressing information contained in the MetaData of the N-PDU when transmitS Fc.
  */
@@ -928,8 +968,7 @@ void CanTp_ConstructTxFcMetaDataInfo(
     }
 #endif
 }
-
-#endif
 #define CANTP_STOP_SEC_CODE
 #include "CanTp_MemMap.h"
+#endif
 /* PRQA S 1503,1532,1505,3120 -- */

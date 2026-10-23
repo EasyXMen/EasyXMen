@@ -35,16 +35,18 @@
 /**
  * @brief the length of responsed availability pid
  */
-#define DCM_OBD_PIDAVAIL_RSPLEN 6u
+#define DCM_OBD_PIDAVAIL_RSPLEN  6u
 /**
  * @brief the length of responsed pid
  */
-#define DCM_OBD_PID_RSPLEN 2u
+#define DCM_OBD_PID_RSPLEN       2u
 /**
  * @brief the length of responsed pid and DTC
  */
-#define DCM_OBD_PIDDTC_RSPLEN 4u
+#define DCM_OBD_PIDDTC_RSPLEN    4u
 /* ========================================== internal function declarations ======================================== */
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 /**
  * @brief         Called by Dcm_OBD0x02 to read pid
  * @param[inout]  pMsgContext : Message-related information for one diagnostic protocol identifier. The pointers in
@@ -57,6 +59,10 @@
  * @trace         CPD-PLACEHOLDE
  */
 DCM_LOCAL Std_ReturnType Dcm_OBD0x02_ReadPid(Dcm_MsgContextType* pMsgContext);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 
 /**
  * @brief         read pid data
@@ -72,6 +78,8 @@ DCM_LOCAL Std_ReturnType Dcm_OBD0x02_ReadPid(Dcm_MsgContextType* pMsgContext);
  * @trace         CPD-PLACEHOLDE
  */
 DCM_LOCAL Std_ReturnType Dcm_OBD0x02_ReadPidData(Dcm_MsgContextType* pMsgContext, uint8 pid, uint8* offset);
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
 /* ========================================== external function definitions ========================================= */
 #define DCM_START_SEC_CODE
 #include "Dcm_MemMap.h"
@@ -169,7 +177,10 @@ DCM_LOCAL Std_ReturnType Dcm_OBD0x02_ReadPid(Dcm_MsgContextType* pMsgContext)
 
     return result;
 }
-
+#define DCM_STOP_SEC_CODE
+#include "Dcm_MemMap.h"
+#define DCM_START_SEC_CODE
+#include "Dcm_MemMap.h"
 DCM_LOCAL Std_ReturnType Dcm_OBD0x02_ReadPidData(Dcm_MsgContextType* pMsgContext, uint8 pid, uint8* offset)
 {
     Std_ReturnType result = E_OK;

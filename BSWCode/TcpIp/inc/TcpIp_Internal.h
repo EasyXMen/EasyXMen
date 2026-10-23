@@ -74,7 +74,7 @@
 #include "TcpIp.h"
 
 #if (STD_ON == TCPIP_TCP_TLS_ENABLED)
-#include "TcpIp_TlsBase.h"
+#include "TcpIp_TlsTypes.h"
 #endif
 #include "Eth_GeneralTypes.h"
 
@@ -97,6 +97,10 @@ extern "C" {
 /** Represents an unused parameter */
 #define TCPIP_UNUSED_ARG(x) (void)(x)
 #endif
+
+#define TCPIP_CHANGEPARAMETER_DECODE_U16(value) (uint16)((((value)[0]) << 8u) | ((value)[1]))
+#define TCPIP_CHANGEPARAMETER_DECODE_U32(value) \
+    (uint32)((((value)[0]) << 24u) | (((value)[1]) << 16u) | (((value)[2]) << 8u) | ((value)[3]))
 
 /** Represents maximum value of uint8 */
 #define TCPIP_UNUSED_UINT8 ((uint8)0xFFu)
@@ -143,7 +147,7 @@ extern "C" {
 #define TCPIP_LOCALADDR_FLAG_REQUEST_IP  TCPIP_LOCALADDR_FLAG(0x01u)
 #define TCPIP_LOCALADDR_FLAG_IP_IS_VALID TCPIP_LOCALADDR_FLAG(0x02u)
 
-#define TCPIP_SOCKET_FLAG(pos) TCPIP_FLAG_MASK(uint8, pos)
+#define TCPIP_SOCKET_FLAG(pos)              TCPIP_FLAG_MASK(uint8, pos)
 /* retrieve and store all AvailableLength data as a single pbuf node, i.e. pbuf->next == NULL_PTR */
 #define TCPIP_SOCKET_FLAG_TCP_FORCERETRIEVE TCPIP_SOCKET_FLAG(0x01u)
 #define TCPIP_SOCKET_FLAG_TCP_SERVERSOCKET  TCPIP_SOCKET_FLAG(0x02u)
@@ -154,7 +158,6 @@ extern "C" {
  * normal used eth_drv is asynchronous initialization mac addr
  */
 #if !defined(TCPIP_REPEAT_GET_NETIF_MAC)
-/** unused macro */
 #define TCPIP_REPEAT_GET_NETIF_MAC 1
 #endif
 
@@ -193,14 +196,14 @@ extern "C" {
 #define TCPIP_TCP_IPERF_PORT_DEFAULT LWIPERF_TCP_PORT_DEFAULT
 #endif
 
-#if defined(TCPIP_SPPORT_TC8_TEST)
+#if (TCPIP_SUPPORT_TC8_TEST == STD_ON)
 #if !defined(TCPIP_ARP_SUPPORT_DYNAMIC_TIMEOUT_CHANGE)
 /** unused macro */
 #define TCPIP_ARP_SUPPORT_DYNAMIC_TIMEOUT_CHANGE TCPIP_LWIP_ARP_DYNAMIC_TIMEOUT
 #endif
 #endif
 
-#if defined(TCPIP_SPPORT_TC8_TEST)
+#if (TCPIP_SUPPORT_TC8_TEST == STD_ON)
 #if !defined(TCPIP_ARP_SUPPORT_STATIC_ENTRIES)
 /** unused macro */
 #define TCPIP_ARP_SUPPORT_STATIC_ENTRIES ETHARP_SUPPORT_STATIC_ENTRIES
@@ -216,7 +219,7 @@ extern "C" {
 #define TCPIP_CHECK_OUTPUT(...)
 #endif
 
-#if !defined(TCPIP_INNER_CHECK_TAG)
+#ifndef TCPIP_INNER_CHECK_TAG
 #define TCPIP_INNER_CHECK
 /** unused macro */
 #define TCPIP_INNER_CHECK_OUTPUT(...) TCPIP_CHECK_OUTPUT(__VA_ARGS__)
@@ -325,12 +328,12 @@ extern "C" {
 /** controller configuration */
 #define TCPIP_CTRL_CONFIG(ctrlIndex) TcpIp_PbCfgPtr->CtrlPtr[(ctrlIndex)]
 /** controller ID to index */
-#define TCPIP_CTRL_INDEX(ctrlId) TcpIp_PbCfgPtr->EthIfCtrlId2IndexPtr[(ctrlId)]
+#define TCPIP_CTRL_INDEX(ctrlId)     TcpIp_PbCfgPtr->EthIfCtrlId2IndexPtr[(ctrlId)]
 
 /** local address configuration */
-#define TCPIP_LOCALADDR_CONFIG(localAddrId) TcpIp_PbCfgPtr->LocalAddrPtr[(localAddrId)]
+#define TCPIP_LOCALADDR_CONFIG(localAddrId)   TcpIp_PbCfgPtr->LocalAddrPtr[(localAddrId)]
 /** pointer to local address ID to index */
-#define TCPIP_LOCALADDR_VARINDEX_REF TcpIp_PbCfgPtr->LocalAddrIdVariantIndexRef
+#define TCPIP_LOCALADDR_VARINDEX_REF          TcpIp_PbCfgPtr->LocalAddrIdVariantIndexRef
 /** local address ID to index */
 #define TCPIP_LOCALADDR_VARINDEX(localAddrId) TCPIP_LOCALADDR_VARINDEX_REF[(localAddrId)]
 
@@ -357,6 +360,9 @@ extern "C" {
 
 #define TcpIp_EnterExclusiveArea SchM_Enter_TcpIp_ExclusiveArea
 #define TcpIp_ExitExclusiveArea  SchM_Exit_TcpIp_ExclusiveArea
+
+#define TcpIp_EnterExclusiveAreaRxInd SchM_Enter_TcpIp_ExclusiveArea
+#define TcpIp_ExitExclusiveAreaRxInd  SchM_Exit_TcpIp_ExclusiveArea
 
 /* ================================================ type definitions ================================================ */
 /**
@@ -438,7 +444,8 @@ typedef struct TcpIp_SocketRuntimeTag
     /** listening socket id @range NA */
     TcpIp_SocketIdType listenSocketId;
     /** pointer to TLS socket variable @range NA */
-    TcpIp_TlsSocketDataType* tlsPtr;
+    TcpIp_TlsSocketDataType*       tlsPtr;
+    struct TcpIp_SocketRuntimeTag* NextSocketRuntimePtr;
 #endif
 } TcpIp_SocketRuntimeType;
 
@@ -448,10 +455,8 @@ typedef struct TcpIp_SocketRuntimeTag
  */
 typedef struct TcpIp_IcmpTransDataTag
 {
-    /** TTL @range NA */
+    /** TTL or hop limit @range NA */
     uint8 Ttl;
-    /** hop limit @range NA */
-    uint8 HopLimit;
     /** type @range NA */
     uint8 Type;
     /** code @range NA */
@@ -491,43 +496,105 @@ typedef struct TcpIP_PeriodTimerTag
 } TcpIP_PeriodTimerType;
 
 /* ========================================== internal function definitions ========================================= */
+#if (STD_ON != TCPIP_TCP_TLS_ENABLED)
+#define TcpIp_TlsDynamicConnect NULL_PTR
+#else
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
+Std_ReturnType
+    TcpIp_TlsDynamicConnect(TcpIp_SocketRuntimeType* socketRtPtr, TcpIp_ParamIdType paramId, const uint8* paramValue);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#endif
+
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
+void TcpIp_SocketFlagSet(TcpIp_SocketRuntimeType* socketRtPtr, uint8 mask);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
+void TcpIp_EventNotifyUpLayer(TcpIp_SocketRuntimeType* sockeRuntimePtr, TcpIp_EventType event);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
+/**
+ * @brief           Notify TCP connected event to upper layer.
+ * @param[in]       socketRtPtr: pointer to connected socket runtime
+ * @synchronous     TRUE
+ * @reentrant       Non reentrant
+ * @trace           CPD-PLACEHOLDER
+ */
+void TcpIp_NotifyUpTcpConnected(const TcpIp_SocketRuntimeType* socketRtPtr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
+/**
+ * @brief           Notify TCP accepted event to upper layer.
+ * @param[in]       listenSocketId: listening socket id
+ * @param[in]       socketRtPtr: pointer to accepted socket runtime
+ * @return          Std_ReturnType
+ * @synchronous     TRUE
+ * @reentrant       Non reentrant
+ * @trace           CPD-PLACEHOLDER
+ */
+Std_ReturnType TcpIp_NotifyUpTcpAccepted(TcpIp_SocketIdType listenSocketId, const TcpIp_SocketRuntimeType* socketRtPtr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
+
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
+/**
+ * @brief           Notify TCP RX indication event to upper layer.
+ * @param[in]       socketRtPtr: pointer to socket runtime
+ * @param[in]       pbufPtrPtr: pointer to pbuf of received data
+ * @return          Std_ReturnType
+ * @synchronous     TRUE
+ * @reentrant       Non reentrant
+ * @trace           CPD-PLACEHOLDER
+ */
+Std_ReturnType TcpIp_TcpNotifyUpRxIndication(const TcpIp_SocketRuntimeType* socketRtPtr, struct pbuf** pbufPtrPtr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 /* =========================================== external data declarations =========================================== */
+#define TCPIP_START_SEC_VAR_CLEARED_PTR
+#include "TcpIp_MemMap.h"
 /**
  * @brief Pointer to current PB configuration.
  * @range NA
  */
 extern const TcpIp_ConfigType* TcpIp_PbCfgPtr;
+#define TCPIP_STOP_SEC_VAR_CLEARED_PTR
+#include "TcpIp_MemMap.h"
 
-#if (0u < TCPIP_PARTITION_ID2INDEX_NUMBER)
-/**
- * @brief Partition ID to index table.
- * @range NA
- */
-extern const ApplicationType TcpIp_PartitionId2Index[TCPIP_PARTITION_ID2INDEX_NUMBER];
-#endif
-
-/**
- * @brief Module runtime variables.
- * @range NA
- */
+#define TCPIP_START_SEC_CONFIG_DATA_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 extern TcpIp_RuntimeType* const TcpIp_Runtime[TCPIP_PARTITION_NUMBER];
+#define TCPIP_STOP_SEC_CONFIG_DATA_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 
-/**
- * @brief Socket runtime variables
- * @range NA
- */
+#define TCPIP_START_SEC_CONFIG_DATA_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 extern TcpIp_SocketRuntimeType* const TcpIp_SocketRuntime[TCPIP_PARTITION_NUMBER];
+#define TCPIP_STOP_SEC_CONFIG_DATA_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 
-/**
- * @brief Period timer runtime variables.
- * @range NA
- */
+#define TCPIP_START_SEC_CONFIG_DATA_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 extern TcpIP_PeriodTimerType* const TcpIp_PeriodTimer[TCPIP_PARTITION_NUMBER];
+#define TCPIP_STOP_SEC_CONFIG_DATA_UNSPECIFIED
+#include "TcpIp_MemMap.h"
 
 /* ========================================= external function declarations ========================================= */
 #if (STD_ON == TCPIP_PARTITION_USED)
 #if (0u < TCPIP_PARTITION_ID2INDEX_NUMBER)
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           Get current partition index.
  * @return          ApplicationType
@@ -536,33 +603,25 @@ extern TcpIP_PeriodTimerType* const TcpIp_PeriodTimer[TCPIP_PARTITION_NUMBER];
  * @trace           CPD-PLACEHOLDER
  */
 extern ApplicationType TcpIp_GetCurrentPartition(void);
-#else
-#define TCPIP_START_SEC_CODE
+#define TCPIP_STOP_SEC_CODE
 #include "TcpIp_MemMap.h"
+#else
 TCPIP_LOCAL_INLINE ApplicationType TcpIp_GetCurrentPartition(void)
 {
     ApplicationType partitionIndex = GetApplicationID();
 
     return partitionIndex;
 }
-#define TCPIP_STOP_SEC_CODE
-#include "TcpIp_MemMap.h"
 #endif
 #else
-#define TCPIP_START_SEC_CODE
-#include "TcpIp_MemMap.h"
 TCPIP_LOCAL_INLINE ApplicationType TcpIp_GetCurrentPartition(void)
 {
     ApplicationType partitionIndex = 0u;
 
     return partitionIndex;
 }
-#define TCPIP_STOP_SEC_CODE
-#include "TcpIp_MemMap.h"
 #endif
 
-#define TCPIP_START_SEC_CODE
-#include "TcpIp_MemMap.h"
 /**
  * @brief              Local address ID to index conversion.
  * @param[in]          localAddrId: local address ID
@@ -584,9 +643,55 @@ TCPIP_LOCAL_INLINE TcpIp_LocalAddrIdType TcpIp_LocalAddrId2Var(TcpIp_LocalAddrId
 
     return localAddrIdVar;
 }
-#define TCPIP_STOP_SEC_CODE
-#include "TcpIp_MemMap.h"
 
+/**
+ * @brief           Check controller index of NetIf.
+ * @param[in]       netifPtr: pointer to NetIf
+ * @return          boolean
+ * @synchronous     TRUE
+ * @reentrant       Non reentrant
+ * @trace           CPD-PLACEHOLDER
+ */
+TCPIP_LOCAL_INLINE boolean TcpIp_NetifIsSetCtrlIndex(const struct netif* netifPtr)
+{
+    return (
+        ((char)'I' == netifPtr->name[0]) /* PRQA S 2106, 2140 */ /* VL_TcpIp_2106, VL_TcpIp_2140 */
+        && (TCPIP_CTRL_INDEX_INVALID > (uint8)(netifPtr->name[1]))
+#if defined(TCPIP_INNER_CHECK)
+        && (NULL_PTR != TcpIp_PbCfgPtr) && (TcpIp_PbCfgPtr->CtrlNum > (uint8)(netifPtr->name[1]))
+#endif
+    );
+}
+
+/**
+ * @brief           Get controller index of NetIf.
+ * @param[in]       netifPtr: pointer to NetIf
+ * @return          uint8
+ * @synchronous     TRUE
+ * @reentrant       Non reentrant
+ * @trace           CPD-PLACEHOLDER
+ */
+TCPIP_LOCAL_INLINE uint8 TcpIp_NetifGetCtrlIndex(const struct netif* netifPtr)
+{
+    return (uint8)(netifPtr->name[1]);
+}
+
+/**
+ * @brief           Set controller index of NetIf.
+ * @param[in]       netifPtr: pointer to NetIf
+ * @param[in]       ctrlIndex: index of controller
+ * @synchronous     TRUE
+ * @reentrant       Non reentrant
+ * @trace           CPD-PLACEHOLDER
+ */
+TCPIP_LOCAL_INLINE void TcpIp_NetifSetCtrlIndex(struct netif* netifPtr, uint8 ctrlIndex)
+{
+    netifPtr->name[0] = (char)'I';
+    netifPtr->name[1] = (char)ctrlIndex;
+}
+
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           Netmask ext to inner.
  * @param[in]       netmaskNum: number of netmask
@@ -597,7 +702,11 @@ TCPIP_LOCAL_INLINE TcpIp_LocalAddrIdType TcpIp_LocalAddrId2Var(TcpIp_LocalAddrId
  * @trace           CPD-PLACEHOLDER
  */
 extern void TcpIp_NetMaskExtToInner(uint8 netmaskNum, TcpIp_DomainType domainType, uint32* netmaskPtr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           Netmask inner to ext.
  * @param[in]       domainType: type of domain
@@ -608,7 +717,11 @@ extern void TcpIp_NetMaskExtToInner(uint8 netmaskNum, TcpIp_DomainType domainTyp
  * @trace           CPD-PLACEHOLDER
  */
 extern void TcpIp_NetMaskInnerToExt(TcpIp_DomainType domainType, const uint32* netmaskPtr, uint8* netmaskNumPtr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           Initialize runtime variables of controllers.
  * @param[in]       partitionIndex: index of partition
@@ -617,7 +730,11 @@ extern void TcpIp_NetMaskInnerToExt(TcpIp_DomainType domainType, const uint32* n
  * @trace           CPD-PLACEHOLDER
  */
 extern void TcpIp_InitCtrlRuntime(ApplicationType partitionIndex);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           Initialize runtime variables of sockets.
  * @param[in]       partitionIndex: index of partition
@@ -626,7 +743,11 @@ extern void TcpIp_InitCtrlRuntime(ApplicationType partitionIndex);
  * @trace           CPD-PLACEHOLDER
  */
 extern void TcpIp_InitSocketRuntime(ApplicationType partitionIndex);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           Initialize runtime variables of period timers.
  * @param[in]       partitionIndex: index of partition
@@ -635,7 +756,11 @@ extern void TcpIp_InitSocketRuntime(ApplicationType partitionIndex);
  * @trace           CPD-PLACEHOLDER
  */
 extern void TcpIp_InitPeriodTimer(ApplicationType partitionIndex);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           Close socket.
  * @param[in]       socketRtPtr: pointer to socket runtime
@@ -646,7 +771,11 @@ extern void TcpIp_InitPeriodTimer(ApplicationType partitionIndex);
  * @trace           CPD-PLACEHOLDER
  */
 extern Std_ReturnType TcpIp_InnerClose(TcpIp_SocketRuntimeType* socketRtPtr, boolean isAbort);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           Bind socket.
  * @param[in]       socketRtPtr: pointer to socket runtime
@@ -659,8 +788,12 @@ extern Std_ReturnType TcpIp_InnerClose(TcpIp_SocketRuntimeType* socketRtPtr, boo
  */
 extern Std_ReturnType
     TcpIp_InnerBind(TcpIp_SocketRuntimeType* socketRtPtr, TcpIp_LocalAddrIdType localAddrId, uint16* portPtr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if (STD_ON == TCPIP_TCP_ENABLED)
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           Connect TCP socket.
  * @param[in]       socketRtPtr: pointer to socket runtime
@@ -671,8 +804,12 @@ extern Std_ReturnType
  * @trace           CPD-PLACEHOLDER
  */
 extern Std_ReturnType
-    TcpIp_InnerTcpConnect(const TcpIp_SocketRuntimeType* socketRtPtr, const TcpIp_SockAddrType* remoteAddrPtr);
+    TcpIp_InnerTcpConnect(TcpIp_SocketRuntimeType* socketRtPtr, const TcpIp_SockAddrType* remoteAddrPtr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           Listen TCP socket.
  * @param[in]       socketRtPtr: pointer to socket runtime
@@ -683,7 +820,11 @@ extern Std_ReturnType
  * @trace           CPD-PLACEHOLDER
  */
 extern Std_ReturnType TcpIp_InnerTcpListen(TcpIp_SocketRuntimeType* socketRtPtr, uint8 maxChannNum);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           Accept TCP data.
  * @param[in]       socketRtPtr: pointer to socket runtime
@@ -694,8 +835,12 @@ extern Std_ReturnType TcpIp_InnerTcpListen(TcpIp_SocketRuntimeType* socketRtPtr,
  * @trace           CPD-PLACEHOLDER
  */
 extern Std_ReturnType TcpIp_InnerTcpReceived(const TcpIp_SocketRuntimeType* socketRtPtr, uint16 recvLen);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           Request state change in online state.
  * @param[in]       ctrlCfgPtr: pointer to controller configuration
@@ -710,7 +855,11 @@ extern Std_ReturnType TcpIp_InnerRequestComModeOnline(
     const TcpIp_CtrlType*  ctrlCfgPtr,
     TcpIp_CtrlRuntimeType* ctrlRtPtr,
     TcpIp_StateType        reqState);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           Request state change in onhold state.
  * @param[in]       ctrlCfgPtr: pointer to controller configuration
@@ -725,7 +874,11 @@ extern Std_ReturnType TcpIp_InnerRequestComModeOnhold(
     const TcpIp_CtrlType*  ctrlCfgPtr,
     TcpIp_CtrlRuntimeType* ctrlRtPtr,
     TcpIp_StateType        reqState);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           Request state change in offline state.
  * @param[in]       ctrlCfgPtr: pointer to controller configuration
@@ -740,7 +893,11 @@ extern Std_ReturnType TcpIp_InnerRequestComModeOffline(
     const TcpIp_CtrlType*  ctrlCfgPtr,
     TcpIp_CtrlRuntimeType* ctrlRtPtr,
     TcpIp_StateType        reqState);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           Request state change in startup state.
  * @param[in]       ctrlCfgPtr: pointer to controller configuration
@@ -755,7 +912,11 @@ extern Std_ReturnType TcpIp_InnerRequestComModeStartup(
     const TcpIp_CtrlType*  ctrlCfgPtr,
     TcpIp_CtrlRuntimeType* ctrlRtPtr,
     TcpIp_StateType        reqState);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           Request ip assignment.
  * @param[in]       ctrlCfgPtr: pointer to controller configuration
@@ -778,7 +939,11 @@ extern Std_ReturnType TcpIp_InnerRequestIpAddrAssignment(
     const TcpIp_SockAddrType*  LocalIpAddrPtr,
     uint8                      Netmask,
     const TcpIp_SockAddrType*  DefaultRouterPtr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           Release ip assignment.
  * @param[in]       ctrlCfgPtr: pointer to controller configuration
@@ -793,9 +958,13 @@ extern Std_ReturnType TcpIp_InnerReleaseIpAddrAssignment(
     const TcpIp_CtrlType*      ctrlCfgPtr,
     TcpIp_CtrlRuntimeType*     ctrlRtPtr,
     const TcpIp_LocalAddrType* localAddrCfgPtr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if (STD_ON == TCPIP_ICMP_ENABLED)
 #if ((TCPIP_SC1 == TCPIP_SCALABILITY_CLASS) || (TCPIP_SC3 == TCPIP_SCALABILITY_CLASS))
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           Transmit ICMP message.
  * @param[in]       localAddrId: local address ID
@@ -807,9 +976,13 @@ extern Std_ReturnType TcpIp_InnerReleaseIpAddrAssignment(
  */
 extern Std_ReturnType
     TcpIp_InnerIcmpTransmit(TcpIp_LocalAddrIdType localAddrId, const TcpIp_IcmpTransDataType* icmpParamPtr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
 #if ((TCPIP_SC2 == TCPIP_SCALABILITY_CLASS) || (TCPIP_SC3 == TCPIP_SCALABILITY_CLASS))
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           Transmit ICMPv6 message.
  * @return          Std_ReturnType
@@ -818,9 +991,13 @@ extern Std_ReturnType
  * @trace           CPD-PLACEHOLDER
  */
 extern Std_ReturnType TcpIp_InnerIcmpV6Transmit(void);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 #endif
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           Change parameter of frame priority.
  * @param[in]       socketRtPtr: pointer to socket runtime
@@ -835,8 +1012,12 @@ extern Std_ReturnType TcpIp_InnerChangeParameterFramePrio(
     TcpIp_SocketRuntimeType* socketRtPtr,
     TcpIp_ParamIdType        paramId,
     const uint8*             paramValue);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if (STD_ON == TCPIP_TCP_ENABLED)
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           Change parameter of TCP nagle algorithm.
  * @param[in]       socketRtPtr: pointer to socket runtime
@@ -851,7 +1032,11 @@ extern Std_ReturnType TcpIp_InnerChangeParameterTcpNagle(
     TcpIp_SocketRuntimeType* socketRtPtr,
     TcpIp_ParamIdType        paramId,
     const uint8*             paramValue);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           Change parameter of TCP keep alive.
  * @param[in]       socketRtPtr: pointer to socket runtime
@@ -866,8 +1051,12 @@ extern Std_ReturnType TcpIp_InnerChangeParameterTcpKeepAlive(
     TcpIp_SocketRuntimeType* socketRtPtr,
     TcpIp_ParamIdType        paramId,
     const uint8*             paramValue);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           Change parameter of TTL.
  * @param[in]       socketRtPtr: pointer to socket runtime
@@ -882,8 +1071,12 @@ extern Std_ReturnType TcpIp_InnerChangeParameterTtl(
     TcpIp_SocketRuntimeType* socketRtPtr,
     TcpIp_ParamIdType        paramId,
     const uint8*             paramValue);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if (STD_ON == TCPIP_SOCKET_VLAN)
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           Change parameter of VLAN.
  * @param[in]       socketRtPtr: pointer to socket runtime
@@ -898,8 +1091,12 @@ extern Std_ReturnType TcpIp_InnerChangeParameterSocketVlan(
     TcpIp_SocketRuntimeType* socketRtPtr,
     TcpIp_ParamIdType        paramId,
     const uint8*             paramValue);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           Get remote physical address.
  * @param[in]       ctrlRtPtr: pointer to controller runtime
@@ -916,7 +1113,11 @@ extern TcpIp_ReturnType TcpIp_InnerGetRemotePhysAddrByArp(
     const TcpIp_SockAddrType* IpAddrPtr,
     uint8*                    PhysAddrPtr,
     boolean                   initRes);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           Check if connection is ready.
  * @param[in]       socketRtPtr: pointer to socket runtime
@@ -928,8 +1129,12 @@ extern TcpIp_ReturnType TcpIp_InnerGetRemotePhysAddrByArp(
  */
 extern TcpIp_ReturnType
     TcpIp_InnerIsConnectionReady(const TcpIp_SocketRuntimeType* socketRtPtr, const TcpIp_SockAddrType* RemoteAddrPtr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if (STD_ON == TCPIP_UDP_ENABLED)
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           Transmit UDP data which is obtained as argument.
  * @param[in]       socketRtPtr: pointer to socket runtime
@@ -946,7 +1151,11 @@ extern Std_ReturnType TcpIp_InnerUdpTransmitDirect(
     const uint8*                   dataPtr,
     const TcpIp_SockAddrType*      remoteAddrPtr,
     uint16                         totalLength);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           Transmit UDP data which is obtained via <Up>_CopyTxData().
  * @param[in]       socketRtPtr: pointer to socket runtime
@@ -961,9 +1170,13 @@ extern Std_ReturnType TcpIp_InnerUdpTransmitCopy(
     const TcpIp_SocketRuntimeType* socketRtPtr,
     const TcpIp_SockAddrType*      remoteAddrPtr,
     uint16                         totalLength);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
 #if (STD_ON == TCPIP_TCP_ENABLED)
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           Transmit TCP data which is obtained as argument.
  * @param[in]       socketRtPtr: pointer to socket runtime
@@ -976,7 +1189,11 @@ extern Std_ReturnType TcpIp_InnerUdpTransmitCopy(
  */
 extern Std_ReturnType
     TcpIp_InnerTcpTransmitDirect(const TcpIp_SocketRuntimeType* socketRtPtr, const uint8* dataPtr, uint16 totalLength);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           Transmit TCP data which is obtained via <Up>_CopyTxData().
  * @param[in]       socketRtPtr: pointer to socket runtime
@@ -989,8 +1206,12 @@ extern Std_ReturnType
  */
 extern Std_ReturnType
     TcpIp_InnerTcpTransmitCopy(TcpIp_SocketRuntimeType* socketRtPtr, uint16 totalLength, boolean forceRetrieve);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           Indication of received data.
  * @param[in]       ctrlCfgPtr: pointer to controller configuration
@@ -1008,8 +1229,12 @@ extern void TcpIp_InnerRxIndication(
     uint8                 flag,
     const uint8*          dataPtr,
     uint16                lenByte);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if defined(TCPIP_SUUPORT_CTRL_MAINHANDLE)
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           Main function to handle controllers.
  * @param[in]       partitionIndex: index of partition
@@ -1018,8 +1243,12 @@ extern void TcpIp_InnerRxIndication(
  * @trace           CPD-PLACEHOLDER
  */
 extern void TcpIp_ControlPollMainHandle(ApplicationType partitionIndex);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           Main function to handle sockets.
  * @param[in]       partitionIndex: index of partition
@@ -1028,7 +1257,11 @@ extern void TcpIp_ControlPollMainHandle(ApplicationType partitionIndex);
  * @trace           CPD-PLACEHOLDER
  */
 extern void TcpIp_SocketPollMainHandle(ApplicationType partitionIndex);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           Main function to handle period timers.
  * @param[in]       partitionIndex: index of partition
@@ -1037,8 +1270,12 @@ extern void TcpIp_SocketPollMainHandle(ApplicationType partitionIndex);
  * @trace           CPD-PLACEHOLDER
  */
 extern void TcpIp_PeriodTimerMainHandle(ApplicationType partitionIndex);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #if (STD_ON == TCPIP_TCP_ENABLED)
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           Malloc TCP socket.
  * @param[in]       domain: type of domain
@@ -1053,9 +1290,13 @@ extern Std_ReturnType TcpIp_MallocTcpSocket(
     TcpIp_DomainType             domain,
     const TcpIp_SocketOwnerType* socketOwnerCfgPtr,
     TcpIp_SocketIdType*          socketIdPtr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
 #if (STD_ON == TCPIP_UDP_ENABLED)
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           Malloc UDP socket.
  * @param[in]       domain: type of domain
@@ -1070,9 +1311,13 @@ extern Std_ReturnType TcpIp_MallocUdpSocket(
     TcpIp_DomainType             domain,
     const TcpIp_SocketOwnerType* socketOwnerCfgPtr,
     TcpIp_SocketIdType*          socketIdPtr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
 #if ((STD_ON == TCPIP_ARP_ENABLED) && (STD_ON == TCPIP_ARP_STATIC_ENABLED))
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           Add static entry into ARP table.
  * @param[in]       ctrlIndex: index of controller
@@ -1084,8 +1329,12 @@ extern Std_ReturnType TcpIp_MallocUdpSocket(
  * @trace           CPD-PLACEHOLDER
  */
 extern Std_ReturnType
-    TcpIp_ArpAddStaticEntry(uint32 ctrlIndex, const TcpIp_SockAddrType* remoteAddrPtr, const uint8* physAddrPtr);
+    TcpIp_ArpAddStaticEntry(uint8 ctrlIndex, const TcpIp_SockAddrType* remoteAddrPtr, const uint8* physAddrPtr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           Remove static entry from ARP table.
  * @param[in]       ctrlIndex: index of controller
@@ -1095,9 +1344,13 @@ extern Std_ReturnType
  * @reentrant       Non reentrant
  * @trace           CPD-PLACEHOLDER
  */
-extern Std_ReturnType TcpIp_ArpRemoveStaticEntry(uint32 ctrlIndex, const TcpIp_SockAddrType* remoteAddrPtr);
+extern Std_ReturnType TcpIp_ArpRemoveStaticEntry(uint8 ctrlIndex, const TcpIp_SockAddrType* remoteAddrPtr);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 #endif
 
+#define TCPIP_START_SEC_CODE
+#include "TcpIp_MemMap.h"
 /**
  * @brief           Get IP frame priority of controller.
  * @param[in]       ctrlIndex: index of controller
@@ -1107,6 +1360,8 @@ extern Std_ReturnType TcpIp_ArpRemoveStaticEntry(uint32 ctrlIndex, const TcpIp_S
  * @trace           CPD-PLACEHOLDER
  */
 extern uint8 TcpIp_GetCtrlIpFramePriority(uint8 ctrlIndex);
+#define TCPIP_STOP_SEC_CODE
+#include "TcpIp_MemMap.h"
 
 #ifdef __cplusplus
 }
