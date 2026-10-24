@@ -17,15 +17,15 @@ Provide functional safety mechanisms to detect and prevent software failures, en
 - 采用架构模块化设计思路，便于软件的升级和维护  
 Adopt a modular architectural design approach, facilitating software upgrades and maintenance
 
-# 代码仓地址 Code Repository Address
+# 代码仓地址 Source Code Repository
 
 https://atomgit.com/easyxmen/XMen
 
-# 文档仓地址 Documentation Repository Address
-
+# 文档仓地址 Documentation Repository
 https://atomgit.com/easyxmen/docs
 
-* 快速预览（Instant view the page at）：https://easyxmen.atomgit.com/
+- 快速预览（Quick Preview）：https://easyxmen.atomgit.com/
+
 
 # 目录结构 Directory Structure
 
@@ -128,7 +128,7 @@ https://atomgit.com/easyxmen/docs
    ├── Asw                     # 应用代码(Application code)
    |   ├── src                 # 应用源码(Application source code)
    |   └── gen                 # 应用配置生成(Application configuration generation)
-   ├── PaltformFils            # 编译器等平台相关 # Compiler and other platform related
+   ├── PaltformFils            # 编译器等平台相关(Compiler and other) platform related
    └── ConfigProj              # 配置工程(Configuration project)
        ├── BswCfgProj          # bsw 配置工程(bsw configuration project)
        ├── SwcCfgProj          # swc 配置工程(swc configuration project)
@@ -139,12 +139,6 @@ https://atomgit.com/easyxmen/docs
 
 协议栈静态代码需要结合开发工具进行使用，可通过[官方入口](https://register.easyxmen.com/welcome.html?channel=3)进行开发工具免费申请。 各模块配置、工具使用方法，可参考模块用户手册（详见工具链界面-Help-Open Reference Manual Folder）； 基于特定芯片平台Demo工程，可通过配置工具获取使用。  
 The static code of protocol stack needs to be used in combination with the development tools, which can be applied for the development tools for free through the [Official Portal](https://register.easyxmen.com/welcome.html?channel=3). For the configuration of each module and how to use the tools, refer to the module user manual (see Toolchains Interface-Help-Open Reference Manual Folder for details). Based on a specific chip platform Demo project, it can be obtained through configuration tools.
-
-## 项目状态 Project Status
-
-EasyXMen目前支持NXP S32K148，英飞凌TC397，瑞萨RH850 U2A16这三个平台  
-EasyXMen now supports three platforms, i.e. NXP S32K148, Infineon TC397, Renesas RH850 U2A16.
-
 
 # 开发贡献与指导 Development Contributions and Guidance
 

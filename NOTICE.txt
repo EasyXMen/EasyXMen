@@ -1,38 +1,132 @@
 This project incorporates components from the Open Source Software below. 
 The original copyright notices and the licenses under which we received such components are set forth below for informational purposes. 
-By using EasyXmen, all users agree to respect the intellectual property rights of others and comply with the requirements of all relevant third-party licenses, including but not limited to the AUTOSAR license. It is the user's responsibility to ensure that their usage, modification, or distribution of the project does not infringe upon the intellectual property rights of others or violate any applicable licenses.
+By using EasyXMen, all users agree to respect the intellectual property rights of others and comply with the requirements of all relevant third-party licenses, including but not limited to the AUTOSAR license. It is the user's responsibility to ensure that their usage, modification, or distribution of the project does not infringe upon the intellectual property rights of others or violate any applicable licenses.
 
-lwip STABLE-2.2.0_RELEASE
+**Component:**
+
+github:lwip-tcpip/lwip:STABLE-2_2_0_RELEASE
+
+**Copyright:**
+            (c)           ((c) ==
+            (c)        IP_CLASSC(c)
+            Copyright 2014 Ludwig Kn
+            Copyright (c) 2007-2009 Fr
+            (c)          (lwip_isdigit(c)
+            (c)           (lwip_islower(c)
+            (c)           (lwip_isupper(c)
+            Copyright (c) 2002 Google, Inc.
+            Copyright (c) 2016 Elias Oenal.
+            (c)           lwip_in_range((c),
+            Copyright (c) 2016 Erik Andersson
+            Copyright (c) 2015 Nest Labs, Inc.
+            Copyright (c) 2017 Benjamin Aigner
+            Copyright (c) 2015 Dirk Ziegelmeier
+            Copyright (c) 2014 Simon Goldschmidt
+            Copyright (c) 2017 Dirk Ziegelmeier.
+            Copyright (c) 2017 Simon Goldschmidt
+            Copyright (c) 2018 Simon Goldschmidt
+            Copyright (C) The IETF Trust (2007).
+            (c) before isdigit(c) or isxdigit(c).
+            Copyright (c) 2002-2003, Adam Dunkels.
+            Copyright (c) 2016 The MINIX 3 Project.
+            Copyright (c) 2017 The MINIX 3 Project.
+            Copyright (c) 2001,2002 Florian Schulze.
+            Copyright (c) 2001 by Cognizant Pty Ltd.
+            (c)           isdigit((unsigned char)(c))
+            (c)           islower((unsigned char)(c))
+            (c)           isspace((unsigned char)(c))
+            (c)           isupper((unsigned char)(c))
+            (c)          isxdigit((unsigned char)(c))
+            Copyright (c) 2002,2003,2004 Google, Inc.
+            Copyright (c) 2013-2019, tinydir authors:
+            Copyright (c) 2015 Verisure Innovation AB
+            Copyright (c) 2017-2019 Simon Goldschmidt
+            (c)           tolower((unsigned char)(c))
+            (c)           toupper((unsigned char)(c))
+            Copyright (c) 2002 CITEL Technologies Ltd.
+            Copyright (C) 2006-2008  Christophe Devine
+            Copyright (c) 2010 Inico Technologies Ltd.
+            Copyright (c) 2015 Inico Technologies Ltd.
+            Copyright (c) 2001 by Sun Microsystems, Inc.
+            Copyright (c) Deltatee Enterprises Ltd. 2013
+            Copyright (c) 1989 Carnegie Mellon University.
+            Copyright (c) 2002 The NetBSD Foundation, Inc.
+            Copyright (C) The Internet Society (2004). The
+            Copyright (c) 1997 Global Election Systems Inc.
+            Copyright (c) 1998 Global Election Systems Inc.
+            Copyright (C) The Internet Society (2002). This
+            Copyright (C) The Internet Society (2005).  This
+            Copyright (c) Espressif Systems (Shanghai) CO LTD
+            Copyright (c) 1997 by Global Election Systems Inc.
+            Copyright (c) 1998 by Global Election Systems Inc.
+            Copyright 2020 Jonathan Demeyer <jona.dem@gmail.com>
+            Copyright (c) 2003 NBS Card Technology, Paramus, NJ.
+            Copyright (c) 2007 Dominik Spies <kontakt@dspies.de>
+            Copyright (c) 2016 Elias Oenal and Dirk Ziegelmeier.
+            Copyright 2017 Kaspar Schleiser <kaspar@schleiser.de>
+            Copyright (c) 1994 The Australian National University.
+            Copyright (C) 1991, 1999 Free Software Foundation, Inc.
+            Copyright (c) 2003 Paul Mackerras. All rights reserved.
+            Copyright (c) 2008 Paul Mackerras. All rights reserved.
+            Copyright (c) 1995 Eric Rosenquist.  All rights reserved.
+            Copyright (c) 2018 Swedish Institute of Computer Science.
+            Copyright (c) 1999 Tommi Komulainen.  All rights reserved.
+            Copyright (c) 2001, Swedish Institute of Computer Science.
+            Copyright 2019 Alexandre Abadie <alexandre.abadie@inria.fr>
+            Copyright (c) 1989 Regents of the University of California.
+            Copyright (C) The Internet Society (2006).  This version of
+            Copyright (c) 1993-2002 Paul Mackerras. All rights reserved.
+            Copyright (c) 1994-2002 Paul Mackerras. All rights reserved.
+            Copyright (c) 1996-2002 Paul Mackerras. All rights reserved.
+            Copyright (c) 1998, 1999 Francis.Dupont@inria.fr, GIE DYADE,
+            Copyright (c) 1999-2002 Paul Mackerras. All rights reserved.
+            Copyright (c) 2000-2002 Paul Mackerras. All rights reserved.
+            Copyright (c) 2006 Axon Digital Design B.V., The Netherlands.
+            Copyright (c) 2016 Stephan Linz <linz@li-pro.net>, Li-Pro.Net
+            Copyright (c) 2001-2003 Swedish Institute of Computer Science.
+            Copyright (c) 2001-2004 Swedish Institute of Computer Science.
+            Copyright (c) 2001, 2002 Swedish Institute of Computer Science.
+            (c) Copyright 2001, Swedish Institute of Computer Science."NEWLINE
+            Copyright (c) 2001-2004 Axon Digital Design B.V., The Netherlands.
+            Copyright (c) 2003-2004 Axon Digital Design B.V., The Netherlands.
+            Copyright 2014 Hinnerk van Bruinehsen <h.v.bruinehsen@fu-berlin.de>
+            Copyright (c) 2001, 2002 Axon Digital Design B.V., The Netherlands.
+            Copyright (c) 2001-2004 Leon Woestenberg <leon.woestenberg@gmx.net>
+            Copyright (c) 2003-2004 Leon Woestenberg <leon.woestenberg@axon.tv>
+            Copyright (c) 2001, 2002 Leon Woestenberg <leon.woestenberg@axon.tv>
+            Copyright (c) 2003 by Marc Boucher, Services Informatiques (MBSI) inc.
+            Copyright (c) 2006 by Marc Boucher, Services Informatiques (MBSI) inc.
+            Copyright (C) 2008-2010 Malcolm Crowe, Lex Li, and other contributors.
+            Copyright (c) 1984-2000 Carnegie Mellon University. All rights reserved.
+            Copyright (C) 2009  Paul Bakker <polarssl_maintainer at polarssl dot org>
+            Copyright (c) 2018 Jasper Verschueren <jasper.verschueren@apart-audio.com>
+            Copyright (c) 1995, 1996, 1997 Francis.Dupont@inria.fr, INRIA Rocquencourt,
+            (C) 2008-2010 Malcolm Crowe, Lex Li, Steve Santacroce, and other contributors.")
+            Copyright (c) 2017 Joel Cunningham, Garmin International, Inc. <joel.cunningham@garmin.com>
+            copyright company="Lex Y. Li" file="AssemblyInfo.cs">Copyright (C) 2008  Lex Y. Li</copyright>
+
+
+**license:**
 
 BSD-3-Clause
 
+**License name:**
 
-  Copyright (c) 2001, 2002 Swedish Institute of Computer Science.
-  All rights reserved. 
-  
-  Redistribution and use in source and binary forms, with or without modification, 
-  are permitted provided that the following conditions are met:
- 
-  1. Redistributions of source code must retain the above copyright notice,
-     this list of conditions and the following disclaimer.
-  2. Redistributions in binary form must reproduce the above copyright notice,
-     this list of conditions and the following disclaimer in the documentation
-     and/or other materials provided with the distribution.
-  3. The name of the author may not be used to endorse or promote products
-     derived from this software without specific prior written permission. 
- 
-  THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED 
-  WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
-  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT 
-  SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, 
-  EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT 
-  OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING 
-  IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY 
-  OF SUCH DAMAGE.
+BSD 3-clause "New" or "Revised" License
 
-  
-  Author: Adam Dunkels <adam@sics.se>
- 
- 
+
+**License text**
+
+Copyright (c) <year> <owner>. 
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+
+3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
