@@ -137,8 +137,17 @@ https://atomgit.com/easyxmen/docs
 
 # 运行条件 Operational Conditions
 
-协议栈静态代码需要结合开发工具进行使用，可通过[官方入口](https://register.easyxmen.com/welcome.html?channel=3)进行开发工具免费申请。 各模块配置、工具使用方法，可参考模块用户手册（详见工具链界面-Help-Open Reference Manual Folder）； 基于特定芯片平台Demo工程，可通过配置工具获取使用。  
-The static code of protocol stack needs to be used in combination with the development tools, which can be applied for the development tools for free through the [Official Portal](https://register.easyxmen.com/welcome.html?channel=3). For the configuration of each module and how to use the tools, refer to the module user manual (see Toolchains Interface-Help-Open Reference Manual Folder for details). Based on a specific chip platform Demo project, it can be obtained through configuration tools.
+- 参考[快速上手指南](https://easyxmen.atomgit.com/)  
+  Refer to [Quick Start Guide](https://easyxmen.atomgit.com/)
+
+- 工具及工程申请地址  
+  Tool and Project Application Links
+  
+  - [开源小满开发平台](https://easyxmen.com/welcome.html?channel=3)：面向全球 OEM、Tier1 及行业伙伴，提供专业工程化支撑，助力缩短开发周期、降低开发成本，加速向量产平滑过渡。（内含BSW及SWC工具、代码及配置工程等）  
+   [EasyXMen Development Platform](https://easyxmen.com/welcome.html?channel=3): Designed for OEMs, Tier 1 suppliers, and industry partners worldwide, the platform provides professional engineering support to help shorten development cycles, reduce development costs, and accelerate a smooth transition to mass production. (Includes BSW and SWC tools, source code projects, configuration projects, and other resources.)
+
+  - [开源小满学习版](https://easyxmen.com/welcome_rm.html?channel=3)：推荐场景为个人学习、院校/机构教学、初步功能评估。如需用于实际项目，建议申请[开源小满开发平台](https://easyxmen.com/welcome.html?channel=3)。（内含BSW工具、代码及配置工程等）  
+   [EasyXMen Learning Edition](https://easyxmen.com/welcome_rm.html?channel=3): Recommended for individual learning, teaching at educational institutions and training organizations, and preliminary functional evaluation. For use in actual development projects, users are advised to apply for access to the [EasyXMen Development Platform](https://easyxmen.com/welcome.html?channel=3). (Includes BSW tools, source code projects, configuration projects, and other resources.)
 
 # 开发贡献与指导 Development Contributions and Guidance
 
